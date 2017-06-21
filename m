@@ -1,12 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:36881 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:36918 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752501AbdFUV6M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:58:12 -0400
-Subject: [PATCH 6/8] xfs: test that we can SEEK_HOLE/DATA data and holes
- that are in the CoW fork only
+        with ESMTP id S1752026AbdFUV6U (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:58:20 -0400
+Subject: [PATCH 7/8] xfs: test freeze/rmap repair race
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 21 Jun 2017 14:57:57 -0700
-Message-ID: <149808227783.8924.10804862952463567410.stgit@birch.djwong.org>
+Date: Wed, 21 Jun 2017 14:58:11 -0700
+Message-ID: <149808229180.8924.4409973593099506918.stgit@birch.djwong.org>
 In-Reply-To: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -19,59 +18,36 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Create a file with a hole in the data fork and CoW reservations in the
-same region in the CoW fork.  Ensure that SEEK_HOLE/DATA find the data.
+The rmapbt repair code plays some dirty tricks with the fs freezer to
+avoid running afoul of regular xfs locking requirements.  Add a test to
+check that filesystem write activities do not deadlock with the repair
+program.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/901     |  160 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/901.out |   52 +++++++++++++++++
- tests/xfs/902     |  160 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/902.out |   52 +++++++++++++++++
- tests/xfs/group   |    2 +
- 5 files changed, 426 insertions(+)
- create mode 100755 tests/xfs/901
- create mode 100644 tests/xfs/901.out
- create mode 100755 tests/xfs/902
- create mode 100644 tests/xfs/902.out
+ tests/xfs/1378     |  109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1378.out |    4 ++
+ tests/xfs/group    |    1 
+ 3 files changed, 114 insertions(+)
+ create mode 100755 tests/xfs/1378
+ create mode 100644 tests/xfs/1378.out
 
 
-diff --git a/tests/xfs/901 b/tests/xfs/901
+diff --git a/tests/xfs/1378 b/tests/xfs/1378
 new file mode 100755
-index 0000000..7ac618e
+index 0000000..79ba6bc
 --- /dev/null
-+++ b/tests/xfs/901
-@@ -0,0 +1,160 @@
++++ b/tests/xfs/1378
+@@ -0,0 +1,109 @@
 +#! /bin/bash
-+# FS QA Test No. 901
++# FS QA Test No. 1378
 +#
-+# Test SEEK_HOLE/SEEK_DATA into a region that is marked CoW'd for
-+# speculative preallocation in the CoW fork and isn't backed by
-+# data fork extents.
-+#
-+# - Set a huge cowextsize hint.
-+# - Create a file "DD      " (two data blocks, six hole blocks)
-+# - Reflink copy this file to a second file.
-+# - Write to the first block of the second file to create a single
-+#   large CoW reservation covering the whole file.
-+# - Write to block 3, which should be a hole in the data fork.
-+# - Display the SEEK_HOLE/SEEK_DATA info for the second file to confirm
-+#   that we see the data in blocks 0-1, the hole at block 2, the data
-+#   at block 3, and the hole for the rest of the file.
-+#
-+# Basically we want to create a file with the following data/CoW forks:
-+#
-+# data: DD------
-+#  cow: dddddddd
-+#       ^--^---------- these blocks are dirty
-+#
-+# And then check that SEEK_HOLE and SEEK_DATA actually find that second
-+# dirty block even though we've never had a data fork extent mapping the
-+# second dirty block.  We need the huge cowextsize so that the hole
-+# area receives preallocation in the CoW fork.
++# Race freeze and rmapbt repair for a while to see if we crash or livelock.
++# rmapbt repair requires us to freeze the filesystem to stop all filesystem
++# activity, so we can't have userspace wandering in and thawing it.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
++# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -84,8 +60,9 @@ index 0000000..7ac618e
 +#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
 +#-----------------------------------------------------------------------
++#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -93,8 +70,8 @@ index 0000000..7ac618e
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
 +
 +_cleanup()
 +{
@@ -105,393 +82,89 @@ index 0000000..7ac618e
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/reflink
++. ./common/fuzzy
++. ./common/inject
++. ./common/xfs
 +
 +# real QA test starts here
 +_supported_os Linux
 +_supported_fs xfs
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "cowextsize"
-+_require_xfs_io_command "fpunch"
++_require_xfs_scratch_rmapbt
++_require_xfs_io_command "scrub"
++_require_xfs_io_error_injection "force_repair"
 +
-+rm -f $seqres.full
++echo "Format and populate"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount
 +
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
++STRESS_DIR="$SCRATCH_MNT/testdir"
++mkdir -p $STRESS_DIR
 +
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
++for i in $(seq 0 9); do
++	mkdir -p $STRESS_DIR/$i
++	for j in $(seq 0 9); do
++		mkdir -p $STRESS_DIR/$i/$j
++		for k in $(seq 0 9); do
++			echo x > $STRESS_DIR/$i/$j/$k
++		done
++	done
++done
 +
-+blksz=65536
-+nr=8
-+filesize=$((blksz * nr))
++cpus=$(( $(src/feature -o) * 4 * LOAD_FACTOR))
 +
-+echo "Create the original files"
-+$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize $filesize" $testdir >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 0 $((blksz * 2))" -c "truncate $filesize" -c "fpunch $((blksz * 2)) $((blksz * (nr - 2) ))" $testdir/file1 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0 0 $filesize" -c "pwrite -S 0x61 0 $((blksz * 2))" $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres.full
-+
-+$XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "sync filesystem" | tee -a $seqres.full
-+sync
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "Remount" | tee -a $seqres.full
-+_scratch_cycle_mount
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/901.out b/tests/xfs/901.out
-new file mode 100644
-index 0000000..4a829e3
---- /dev/null
-+++ b/tests/xfs/901.out
-@@ -0,0 +1,52 @@
-+QA output created by 901
-+Format and mount
-+Create the original files
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file2
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file3
-+CoW the shared part then write into the empty part
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
-+sync filesystem
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
-+Remount
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-901/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-901/file3
-diff --git a/tests/xfs/902 b/tests/xfs/902
-new file mode 100755
-index 0000000..c2933ab
---- /dev/null
-+++ b/tests/xfs/902
-@@ -0,0 +1,160 @@
-+#! /bin/bash
-+# FS QA Test No. 902
-+#
-+# Test SEEK_HOLE/SEEK_DATA into a region that is marked CoW'd for
-+# speculative preallocation in the CoW fork and isn't backed by
-+# data fork extents.
-+#
-+# - Set a huge cowextsize hint.
-+# - Create a file "DD      " (two data blocks, six hole blocks)
-+# - Reflink copy this file to a second file.
-+# - dio write to the first block of the second file to create a single
-+#   large CoW reservation covering the whole file.
-+# - dio write to block 3, which should be a hole in the data fork.
-+# - Display the SEEK_HOLE/SEEK_DATA info for the second file to confirm
-+#   that we see the data in blocks 0-1, the hole at block 2, the data
-+#   at block 3, and the hole for the rest of the file.
-+#
-+# Basically we want to create a file with the following data/CoW forks:
-+#
-+# data: DD------
-+#  cow: dddddddd
-+#       ^--^---------- these blocks are dirty
-+#
-+# And then check that SEEK_HOLE and SEEK_DATA actually find that second
-+# dirty block even though we've never had a data fork extent mapping the
-+# second dirty block.  We need the huge cowextsize so that the hole
-+# area receives preallocation in the CoW fork.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
++echo "Concurrent repair"
++filter_output() {
++	egrep -v '(Device or resource busy|Invalid argument)'
 +}
++freeze_loop() {
++	end="$1"
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
++	while [ "$(date +%s)" -lt $end ]; do
++		$XFS_IO_PROG -x -c 'freeze' -c 'thaw' $SCRATCH_MNT 2>&1 | filter_output
++	done
++}
++repair_loop() {
++	end="$1"
 +
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "cowextsize"
-+_require_xfs_io_command "fpunch"
++	while [ "$(date +%s)" -lt $end ]; do
++		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
++	done
++}
++$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
 +
-+rm -f $seqres.full
++start=$(date +%s)
++end=$((start + (30 * TIME_FACTOR) ))
 +
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
++echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
++freeze_loop $end &
++repair_loop $end &
 +
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+blksz=65536
-+nr=8
-+filesize=$((blksz * nr))
-+
-+echo "Create the original files"
-+$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize $filesize" $testdir >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 0 $((blksz * 2))" -c "truncate $filesize" -c "fpunch $((blksz * 2)) $((blksz * (nr - 2) ))" $testdir/file1 >> $seqres.full
-+_cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0 0 $filesize" -c "pwrite -S 0x61 0 $((blksz * 2))" $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-+$XFS_IO_PROG -c "cowextsize" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -d -c "pwrite -S 0x63 0 $blksz" $testdir/file2 >> $seqres.full
-+$XFS_IO_PROG -d -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres.full
-+
-+$XFS_IO_PROG -d -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -d -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "sync filesystem" | tee -a $seqres.full
-+sync
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+
-+echo "Remount" | tee -a $seqres.full
-+_scratch_cycle_mount
-+
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-+$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-+
-+echo "Seek holes and data in file1"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-+echo "Seek holes and data in file2"
-+$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
++while [ "$(date +%s)" -lt $end ]; do
++	sleep 1
++done
++echo "Loop finished at $(date)" >> $seqres.full
++echo "Test done"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/902.out b/tests/xfs/902.out
+diff --git a/tests/xfs/1378.out b/tests/xfs/1378.out
 new file mode 100644
-index 0000000..d5b8eae
+index 0000000..030e250
 --- /dev/null
-+++ b/tests/xfs/902.out
-@@ -0,0 +1,52 @@
-+QA output created by 902
-+Format and mount
-+Create the original files
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file2
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file3
-+CoW the shared part then write into the empty part
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
-+sync filesystem
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
-+Remount
-+Seek holes and data in file1
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+Seek holes and data in file2
-+Whence	Result
-+DATA	0
-+HOLE	131072
-+DATA	196608
-+HOLE	262144
-+Compare files
-+c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-902/file1
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file2
-+017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-902/file3
++++ b/tests/xfs/1378.out
+@@ -0,0 +1,4 @@
++QA output created by 1378
++Format and populate
++Concurrent repair
++Test done
 diff --git a/tests/xfs/group b/tests/xfs/group
-index 5f37c5a..faf0095 100644
+index faf0095..d0a6831 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -417,3 +417,5 @@
- 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 418 dangerous_fuzzers dangerous_scrub dangerous_repair
+@@ -419,3 +419,4 @@
  701 auto quick
-+901 auto quick clone dedupe
-+902 auto quick clone dedupe
+ 901 auto quick clone dedupe
+ 902 auto quick clone dedupe
++1378 dangerous_scrub dangerous_online_repair
 
