@@ -1,11 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:36918 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752026AbdFUV6U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:58:20 -0400
-Subject: [PATCH 7/8] xfs: test freeze/rmap repair race
+Received: from aserp1040.oracle.com ([141.146.126.69]:44307 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752026AbdFUV6b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Jun 2017 17:58:31 -0400
+Subject: [PATCH 8/8] xfs: scrub while appending to a file
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 21 Jun 2017 14:58:11 -0700
-Message-ID: <149808229180.8924.4409973593099506918.stgit@birch.djwong.org>
+Date: Wed, 21 Jun 2017 14:58:22 -0700
+Message-ID: <149808230214.8924.10706838164588131554.stgit@birch.djwong.org>
 In-Reply-To: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 MIME-Version: 1.0
@@ -18,33 +18,35 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-The rmapbt repair code plays some dirty tricks with the fs freezer to
-avoid running afoul of regular xfs locking requirements.  Add a test to
-check that filesystem write activities do not deadlock with the repair
-program.
+It turns out that there was a bug in xfs_bmap_count_blocks wherein the
+block count returned would count or not count delalloc blocks depending
+on the fork format.  This is a bug that is easily exposed via scrub, so
+check the output of that function here -- the buggy version of the
+function produces online fsck errors.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/1378     |  109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1378.out |    4 ++
- tests/xfs/group    |    1 
- 3 files changed, 114 insertions(+)
- create mode 100755 tests/xfs/1378
- create mode 100644 tests/xfs/1378.out
+ tests/xfs/1379     |   82 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/1379.out |    6 ++++
+ tests/xfs/group    |    1 +
+ 3 files changed, 89 insertions(+)
+ create mode 100755 tests/xfs/1379
+ create mode 100644 tests/xfs/1379.out
 
 
-diff --git a/tests/xfs/1378 b/tests/xfs/1378
+diff --git a/tests/xfs/1379 b/tests/xfs/1379
 new file mode 100755
-index 0000000..79ba6bc
+index 0000000..acb797e
 --- /dev/null
-+++ b/tests/xfs/1378
-@@ -0,0 +1,109 @@
++++ b/tests/xfs/1379
+@@ -0,0 +1,82 @@
 +#! /bin/bash
-+# FS QA Test No. 1378
++# FS QA Test No. 1379
 +#
-+# Race freeze and rmapbt repair for a while to see if we crash or livelock.
-+# rmapbt repair requires us to freeze the filesystem to stop all filesystem
-+# activity, so we can't have userspace wandering in and thawing it.
++# Race scrubbing the inode record while appending to a file.
++# This exposes a bug in xfs_bmap_count_blocks where we count delalloc
++# extents for di_nblocks if the fork is in extents format, but we don't
++# count them if the fork is in btree format.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
@@ -89,82 +91,56 @@ index 0000000..79ba6bc
 +# real QA test starts here
 +_supported_os Linux
 +_supported_fs xfs
-+_require_xfs_scratch_rmapbt
++_require_test_program "punch-alternating"
 +_require_xfs_io_command "scrub"
-+_require_xfs_io_error_injection "force_repair"
++_require_scratch
 +
 +echo "Format and populate"
 +_scratch_mkfs > "$seqres.full" 2>&1
 +_scratch_mount
 +
-+STRESS_DIR="$SCRATCH_MNT/testdir"
-+mkdir -p $STRESS_DIR
++$XFS_IO_PROG -f -c 'falloc 0 10m' $SCRATCH_MNT/a >> $seqres.full
++$XFS_IO_PROG -f -c 'falloc 0 10m' $SCRATCH_MNT/b >> $seqres.full
++./src/punch-alternating $SCRATCH_MNT/b
++sync
 +
-+for i in $(seq 0 9); do
-+	mkdir -p $STRESS_DIR/$i
-+	for j in $(seq 0 9); do
-+		mkdir -p $STRESS_DIR/$i/$j
-+		for k in $(seq 0 9); do
-+			echo x > $STRESS_DIR/$i/$j/$k
-+		done
-+	done
-+done
++echo "Set up delalloc extents"
++$XFS_IO_PROG -c 'pwrite -S 0x66 10m 128k' $SCRATCH_MNT/a >> $seqres.full
++$XFS_IO_PROG -c 'pwrite -S 0x66 10m 128k' $SCRATCH_MNT/b >> $seqres.full
++$XFS_IO_PROG -c 'bmap -ev' $SCRATCH_MNT/a $SCRATCH_MNT/b > $SCRATCH_MNT/before
++cat $SCRATCH_MNT/before >> $seqres.full
 +
-+cpus=$(( $(src/feature -o) * 4 * LOAD_FACTOR))
++echo "Scrub a and b"
++$XFS_IO_PROG -x -c 'scrub inode' $SCRATCH_MNT/a >> $seqres.full
++$XFS_IO_PROG -x -c 'scrub inode' $SCRATCH_MNT/b >> $seqres.full
++$XFS_IO_PROG -c 'bmap -ev' $SCRATCH_MNT/a $SCRATCH_MNT/b > $SCRATCH_MNT/after
++cat $SCRATCH_MNT/after >> $seqres.full
 +
-+echo "Concurrent repair"
-+filter_output() {
-+	egrep -v '(Device or resource busy|Invalid argument)'
-+}
-+freeze_loop() {
-+	end="$1"
++echo "Compare extent maps"
++diff -u $SCRATCH_MNT/before $SCRATCH_MNT/after
 +
-+	while [ "$(date +%s)" -lt $end ]; do
-+		$XFS_IO_PROG -x -c 'freeze' -c 'thaw' $SCRATCH_MNT 2>&1 | filter_output
-+	done
-+}
-+repair_loop() {
-+	end="$1"
-+
-+	while [ "$(date +%s)" -lt $end ]; do
-+		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
-+	done
-+}
-+$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
-+
-+start=$(date +%s)
-+end=$((start + (30 * TIME_FACTOR) ))
-+
-+echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-+freeze_loop $end &
-+repair_loop $end &
-+
-+while [ "$(date +%s)" -lt $end ]; do
-+	sleep 1
-+done
-+echo "Loop finished at $(date)" >> $seqres.full
 +echo "Test done"
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/1378.out b/tests/xfs/1378.out
+diff --git a/tests/xfs/1379.out b/tests/xfs/1379.out
 new file mode 100644
-index 0000000..030e250
+index 0000000..67ad05f
 --- /dev/null
-+++ b/tests/xfs/1378.out
-@@ -0,0 +1,4 @@
-+QA output created by 1378
++++ b/tests/xfs/1379.out
+@@ -0,0 +1,6 @@
++QA output created by 1379
 +Format and populate
-+Concurrent repair
++Set up delalloc extents
++Scrub a and b
++Compare extent maps
 +Test done
 diff --git a/tests/xfs/group b/tests/xfs/group
-index faf0095..d0a6831 100644
+index d0a6831..dd10df3 100644
 --- a/tests/xfs/group
 +++ b/tests/xfs/group
-@@ -419,3 +419,4 @@
- 701 auto quick
+@@ -420,3 +420,4 @@
  901 auto quick clone dedupe
  902 auto quick clone dedupe
-+1378 dangerous_scrub dangerous_online_repair
+ 1378 dangerous_scrub dangerous_online_repair
++1379 dangerous_scrub
 
