@@ -1,47 +1,123 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:36777 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751064AbdFVG1A (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Jun 2017 02:27:00 -0400
-Date: Wed, 21 Jun 2017 23:26:53 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH 9/8] common/populate: remember multi-device configurations
-Message-ID: <20170622062653.GF3787@birch.djwong.org>
-References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
+Received: from mx2.suse.de ([195.135.220.15]:56343 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752918AbdFVN2n (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Jun 2017 09:28:43 -0400
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] generic/441: Test SGID inheritance with default ACLs
+Date: Thu, 22 Jun 2017 15:28:28 +0200
+Message-Id: <20170622132828.16847-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-Record the external log and realtime device configurations when we
-create a sample filesystem.
+Test that subdirectory properly inherits SGID bit even if parent
+directory has default ACLs.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- common/populate |   10 +++++++++-
- 1 file changed, 9 insertions(+), 1 deletion(-)
+ tests/generic/441     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/441.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 75 insertions(+)
+ create mode 100755 tests/generic/441
+ create mode 100644 tests/generic/441.out
 
-diff --git a/common/populate b/common/populate
-index e99ce68..b59ed02 100644
---- a/common/populate
-+++ b/common/populate
-@@ -713,7 +713,15 @@ _scratch_populate_cached() {
- 	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
- 
- 	# Throw away cached image if it doesn't match our spec.
--	meta_descr="FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE $(blockdev --getsz "${SCRATCH_DEV}") ARGS $@"
-+	case "${FSTYP}" in
-+	"ext4")
-+		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL}";;
-+	"xfs")
-+		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}";;
-+	*)
-+		extra_descr="";;
-+	esac
-+	meta_descr="FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE $(blockdev --getsz "${SCRATCH_DEV}") ${extra_descr} ARGS $@"
- 	cmp -s "${POPULATE_METADUMP_DESCR}" <(echo "${meta_descr}") || rm -rf "${POPULATE_METADUMP}"
- 
- 	# Do we have a cached image?
+diff --git a/tests/generic/441 b/tests/generic/441
+new file mode 100755
+index 000000000000..df382f7b1036
+--- /dev/null
++++ b/tests/generic/441
+@@ -0,0 +1,71 @@
++#! /bin/bash
++# FS QA Test 441
++#
++# Check if SGID is inherited when creating a subdirectory when the owner is not
++# in the owning group and directory has default ACLs.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 SUSE Linux.  All Rights Reserved.
++#
++# Author: Jan Kara <jack@suse.cz>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_runas
++_require_acls
++
++cd $TEST_DIR
++
++TDIR=testdir.$seq
++
++# Create SGID directory with default ACLs
++rm -rf $TDIR
++mkdir $TDIR
++setfacl -d -m u:101:rwx $TDIR
++chown 100:100 $TDIR
++chmod 2755 $TDIR
++
++_runas -u 100 -g 100 -- mkdir $TDIR/testsub1
++stat -c %A $TDIR/testsub1
++_runas -u 100 -g 101 -- mkdir $TDIR/testsub2
++stat -c %A $TDIR/testsub2
++
++status=0
++exit
+diff --git a/tests/generic/441.out b/tests/generic/441.out
+new file mode 100644
+index 000000000000..c821318a4cc0
+--- /dev/null
++++ b/tests/generic/441.out
+@@ -0,0 +1,3 @@
++QA output created by 441
++drwxrwsr-x
++drwxrwsr-x
+diff --git a/tests/generic/group b/tests/generic/group
+index ab1e9d33a846..0d21fe867ab1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -443,3 +443,4 @@
+ 438 auto
+ 439 auto quick punch
+ 440 auto quick encrypt
++441 auto quick acl
+-- 
+2.12.3
+
