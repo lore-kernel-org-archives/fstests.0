@@ -1,25 +1,19 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57799 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:53564 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752776AbdFWP6J (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Jun 2017 11:58:09 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 20C7DC04D31B
-        for <fstests@vger.kernel.org>; Fri, 23 Jun 2017 15:58:09 +0000 (UTC)
-Received: from Liberator-5.local (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id DA88A5DD65
-        for <fstests@vger.kernel.org>; Fri, 23 Jun 2017 15:58:08 +0000 (UTC)
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: generic/401: Test mountpoint not subdir for filetype support
-Message-ID: <8b64d345-4dbd-cf14-bf57-58b67c8115cd@redhat.com>
-Date: Fri, 23 Jun 2017 10:58:06 -0500
+        id S1753862AbdFWQMp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Jun 2017 12:12:45 -0400
+Subject: [PATCH] generic/401: Test mountpoint not subdir for filetype support
+References: <8b64d345-4dbd-cf14-bf57-58b67c8115cd@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <63bb7dca-e407-abea-e432-2e946a8fd435@sandeen.net>
+Date: Fri, 23 Jun 2017 11:12:41 -0500
 MIME-Version: 1.0
+In-Reply-To: <8b64d345-4dbd-cf14-bf57-58b67c8115cd@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 With pending changes for xfs_info/xfs_growfs, the tool
@@ -31,6 +25,7 @@ beneath it.
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
+Sorry, forgot [PATCH], adding to make sure Eryu sees it.
 
 diff --git a/tests/generic/401 b/tests/generic/401
 index 04bd1a5..74f2bea 100755
