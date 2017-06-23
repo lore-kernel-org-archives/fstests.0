@@ -1,137 +1,219 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44724 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59508 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753772AbdFWALT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Jun 2017 20:11:19 -0400
+        id S1753772AbdFWALU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Jun 2017 20:11:20 -0400
 From: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] seek_sanity_test: Report the actual allocation size
-Date: Fri, 23 Jun 2017 02:11:15 +0200
-Message-Id: <1498176676-30021-1-git-send-email-agruenba@redhat.com>
+Subject: [PATCH] generic/441: Another SEEK_HOLE/SEEK_DATA sanity test
+Date: Fri, 23 Jun 2017 02:11:16 +0200
+Message-Id: <1498176676-30021-2-git-send-email-agruenba@redhat.com>
+In-Reply-To: <1498176676-30021-1-git-send-email-agruenba@redhat.com>
+References: <1498176676-30021-1-git-send-email-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Andreas Gruenbacher <agruenba@redhat.com>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-Instead of reporting the preferred block size for I/O as returned by
-stat(2) as the allocation size, report the actual allocation size.
-Clean things up a little in the process.
+Both ext4 and xfs have a bug in the page cache scanning code for
+SEEK_HOLE / SEEK_DATA in unwritten extents: the start offset isn't taken
+into account when scanning a page, so seeking can fail on filesystems
+with a block size less than half of the page size.  For example, the
+following command fails on a filesystem with a block size of 1k:
+
+  xfs_io -f -c "falloc 0 4k" \
+            -c "pwrite 1k 1k" \
+            -c "pwrite 3k 1k" \
+            -c "seek -a -r 0" foo
+
+Like with generic/436, the actual tests are added to seek_sanity_test.
 
 Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 ---
- src/seek_sanity_test.c | 84 ++++++++++++++++++++++++++------------------------
- 1 file changed, 44 insertions(+), 40 deletions(-)
+ src/seek_sanity_test.c | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/441      | 64 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/441.out  |  2 ++
+ tests/generic/group    |  1 +
+ 4 files changed, 140 insertions(+)
+ create mode 100755 tests/generic/441
+ create mode 100644 tests/generic/441.out
 
 diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index 064a8fa..c9e9366 100644
+index c9e9366..bf323f2 100644
 --- a/src/seek_sanity_test.c
 +++ b/src/seek_sanity_test.c
-@@ -51,19 +51,51 @@ static void get_file_system(int fd)
- 
- static int get_io_sizes(int fd)
- {
--       struct stat buf;
--       int ret;
-+	off_t pos = 0, offset = 1;
-+	struct stat buf;
-+	int shift, ret;
- 
--       ret = fstat(fd, &buf);
--       if (ret)
--               fprintf(stderr, "  ERROR %d: Failed to find io blocksize\n",
--                       errno);
-+	ret = fstat(fd, &buf);
-+	if (ret) {
-+		fprintf(stderr, "  ERROR %d: Failed to find io blocksize\n",
-+			errno);
-+		return ret;
-+	}
- 
--       /* st_blksize is typically also the allocation size */
--       alloc_size = buf.st_blksize;
--       fprintf(stdout, "Allocation size: %ld\n", alloc_size);
-+	/* st_blksize is typically also the allocation size */
-+	alloc_size = buf.st_blksize;
- 
--       return ret;
-+	/* try to discover the actual alloc size */
-+	while (pos == 0 && offset < alloc_size) {
-+		offset <<= 1;
-+		ftruncate(fd, 0);
-+		pwrite(fd, "a", 1, offset);
-+		pos = lseek(fd, 0, SEEK_DATA);
-+		if (pos == -1)
-+			goto fail;
-+	}
-+
-+	/* bisect */
-+	shift = offset >> 2;
-+	while (shift && offset < alloc_size) {
-+		ftruncate(fd, 0);
-+		pwrite(fd, "a", 1, offset);
-+		pos = lseek(fd, 0, SEEK_DATA);
-+		if (pos == -1)
-+			goto fail;
-+		offset += pos ? -shift : shift;
-+		shift >>= 1;
-+	}
-+	if (!shift)
-+		offset += pos ? 0 : 1;
-+	alloc_size = offset;
-+	fprintf(stdout, "Allocation size: %ld\n", alloc_size);
-+	return 0;
-+
-+fail:
-+	fprintf(stderr, "Kernel does not support llseek(2) extension "
-+		"SEEK_DATA. Aborting.\n");
-+	return -1;
+@@ -277,6 +277,78 @@ out:
+ 	return ret;
  }
  
- #define do_free(x)     do { if(x) free(x); } while(0);
-@@ -902,8 +934,8 @@ static int run_test(struct testrec *tr)
++static int test17(int fd, int testnum)
++{
++	char *buf = NULL;
++	int pagesz = sysconf(_SC_PAGE_SIZE);
++	int bufsz, filsz;
++	int ret = 0;
++
++	if (!unwritten_extents) {
++		fprintf(stdout, "Test skipped\n");
++		goto out;
++	}
++
++	if (pagesz < 4 * alloc_size) {
++		fprintf(stdout, "Test skipped as page size (%d) is less than "
++			"four times allocation size (%d).\n",
++			pagesz, (int)alloc_size);
++		goto out;
++	}
++	bufsz = alloc_size;
++	filsz = 3 * bufsz;
++
++	buf = do_malloc(bufsz);
++	if (!buf) {
++		ret = -1;
++		goto out;
++	}
++	memset(buf, 'a', bufsz);
++
++	ret = do_fallocate(fd, 0, filsz, 0);
++	if (ret < 0) {
++		/* Report success if fs doesn't support fallocate */
++		if (errno == EOPNOTSUPP) {
++			fprintf(stdout, "Test skipped as fs doesn't support fallocate.\n");
++			ret = 0;
++		}
++		goto out;
++	}
++
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	ret = do_pwrite(fd, buf, bufsz, 2 * bufsz);
++	if (ret)
++		goto out;
++
++	ret += do_lseek(testnum,  1, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum,  2, fd, filsz, SEEK_HOLE, 0, bufsz);
++	ret += do_lseek(testnum,  3, fd, filsz, SEEK_DATA, 1, 1);
++	ret += do_lseek(testnum,  4, fd, filsz, SEEK_HOLE, 1, bufsz);
++	ret += do_lseek(testnum,  5, fd, filsz, SEEK_DATA, bufsz, 2 * bufsz);
++	ret += do_lseek(testnum,  6, fd, filsz, SEEK_HOLE, bufsz, bufsz);
++	ret += do_lseek(testnum,  7, fd, filsz, SEEK_DATA, bufsz + 1, 2 * bufsz);
++	ret += do_lseek(testnum,  8, fd, filsz, SEEK_HOLE, bufsz + 1, bufsz + 1);
++	ret += do_lseek(testnum,  9, fd, filsz, SEEK_DATA, 2 * bufsz, 2 * bufsz);
++	ret += do_lseek(testnum, 10, fd, filsz, SEEK_HOLE, 2 * bufsz, 3 * bufsz);
++	ret += do_lseek(testnum, 11, fd, filsz, SEEK_DATA, 2 * bufsz + 1, 2 * bufsz + 1);
++	ret += do_lseek(testnum, 12, fd, filsz, SEEK_HOLE, 2 * bufsz + 1, 3 * bufsz);
++
++	filsz += bufsz;
++	ret += do_fallocate(fd, 0, filsz, 0);
++
++	ret += do_lseek(testnum, 13, fd, filsz, SEEK_DATA, 3 * bufsz, -1);
++	ret += do_lseek(testnum, 14, fd, filsz, SEEK_HOLE, 3 * bufsz, 3 * bufsz);
++	ret += do_lseek(testnum, 15, fd, filsz, SEEK_DATA, 3 * bufsz + 1, -1);
++	ret += do_lseek(testnum, 16, fd, filsz, SEEK_HOLE, 3 * bufsz + 1, 3 * bufsz + 1);
++
++out:
++	do_free(buf);
++	return ret;
++}
++
+ /*
+  * test file with unwritten extents, having non-contiguous dirty pages in
+  * the unwritten extent.
+@@ -912,6 +984,7 @@ struct testrec seek_tests[] = {
+        { 14, test14, "Test file with unwritten extents, small hole after pagevec dirty pages" },
+        { 15, test15, "Test file with unwritten extents, page after unwritten extent" },
+        { 16, test16, "Test file with unwritten extents, non-contiguous dirty pages" },
++       { 17, test17, "Test file with unwritten extents, data-hole-data inside page" },
+ };
  
- static int test_basic_support(void)
- {
--	int ret = -1, fd, shift;
--	off_t pos = 0, offset = 1;
-+	int ret = -1, fd;
-+	off_t pos;
- 	char *buf = NULL;
- 	int bufsz, filsz;
- 
-@@ -917,34 +949,6 @@ static int test_basic_support(void)
- 	if (ret)
- 		goto out;
- 
--	/* try to discover the actual alloc size */
--	while (pos == 0 && offset < alloc_size) {
--		offset <<= 1;
--		ftruncate(fd, 0);
--		pwrite(fd, "a", 1, offset);
--		pos = lseek(fd, 0, SEEK_DATA);
--	}
--
--	/* bisect */
--	shift = offset >> 2;
--	while (shift && offset < alloc_size) {
--		ftruncate(fd, 0);
--		pwrite(fd, "a", 1, offset);
--		pos = lseek(fd, 0, SEEK_DATA);
--		offset += pos ? -shift : shift;
--		shift >>= 1;
--	}
--	if (!shift)
--		offset += pos ? 0 : 1;
--	alloc_size = offset;
--
--	if (pos == -1) {
--		fprintf(stderr, "Kernel does not support llseek(2) extension "
--			"SEEK_DATA. Aborting.\n");
--		ret = -1;
--		goto out;
--	}
--
- 	ftruncate(fd, 0);
- 	bufsz = alloc_size * 2;
- 	filsz = bufsz * 2;
+ static int run_test(struct testrec *tr)
+diff --git a/tests/generic/441 b/tests/generic/441
+new file mode 100755
+index 0000000..295ccf4
+--- /dev/null
++++ b/tests/generic/441
+@@ -0,0 +1,64 @@
++#! /bin/bash
++# FS QA Test 441
++#
++# Another SEEK_DATA/SEEK_HOLE sanity test.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_supported_fs generic
++_supported_os Linux
++
++_require_test
++_require_seek_data_hole
++
++BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
++
++_require_test_program "seek_sanity_test"
++
++# Disable extent zeroing for ext4 as that change where holes are created
++if [ "$FSTYP" = "ext4" ]; then
++	DEV=`_short_dev $TEST_DEV`
++	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
++fi
++
++_cleanup()
++{
++	rm -f $tmp.* $BASE_TEST_FILE.*
++}
++
++$here/src/seek_sanity_test -s 17 -e 17 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++	_fail "seek sanity check failed!"
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/441.out b/tests/generic/441.out
+new file mode 100644
+index 0000000..842f9c4
+--- /dev/null
++++ b/tests/generic/441.out
+@@ -0,0 +1,2 @@
++QA output created by 441
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index ab1e9d3..5046c97 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -443,3 +443,4 @@
+ 438 auto
+ 439 auto quick punch
+ 440 auto quick encrypt
++441 auto quick rw
 -- 
 2.7.5
 
