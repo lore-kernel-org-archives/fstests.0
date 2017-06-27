@@ -1,134 +1,73 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50414 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59482 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751043AbdF0Edk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Jun 2017 00:33:40 -0400
+        id S1751501AbdF0FZd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Jun 2017 01:25:33 -0400
+Date: Tue, 27 Jun 2017 13:25:29 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] fstests: remove tmp files properly
-Date: Tue, 27 Jun 2017 12:33:25 +0800
-Message-Id: <20170627043325.15527-1-eguan@redhat.com>
+Subject: Re: [PATCH 2/2] common/rc: handle xfs_io copy_range when
+ copy_file_range syscall isn't available
+Message-ID: <20170627052529.GX23360@eguan.usersys.redhat.com>
+References: <20170626164053.7634-1-lhenriques@suse.com>
+ <20170626164053.7634-2-lhenriques@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170626164053.7634-2-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: ddiss@suse.de, Eryu Guan <eguan@redhat.com>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: fstests@vger.kernel.org, Anna Schumaker <Anna.Schumaker@Netapp.com>
 List-ID: <fstests@vger.kernel.org>
 
-Some tests and common helpers don't properly clean up tmp files and
-leave them behind in /tmp dir, and these tmp files are accumulating
-over time.
+On Mon, Jun 26, 2017 at 05:40:53PM +0100, Luis Henriques wrote:
+> _require_xfs_io_command() isn't handling the case where the copy_file_range
+> syscall isn't available.  Unfortunately, old versions of xfs_io don't
+> handle it correctly either and the test will succeed with an empty file.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/rc         | 10 +++++++---
- common/xfs        |  4 ++--
- tests/generic/100 |  2 +-
- tests/generic/260 |  2 +-
- 4 files changed, 11 insertions(+), 7 deletions(-)
+If copy_file_range syscall isn't available on the system, xfs_io should
+have no "copy_range" built either, or if you're using a pre-built xfs_io
+binary shipped by a distro, it should have no copy_range either to match
+the kernel space. Anyway, I don't think it would cause any problem if
+there's no copy_file_range syscall support. I'm curious what's your
+environment setup.
 
-diff --git a/common/rc b/common/rc
-index 2972f89..1fbe9d0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -567,7 +567,7 @@ _scratch_do_mkfs()
- 	shift 2
- 	local extra_mkfs_options=$*
- 	local mkfs_status
--	local tmp=`mktemp`
-+	local tmp=/tmp/$$._mkfs
- 
- 	# save mkfs output in case conflict means we need to run again.
- 	# only the output for the mkfs that applies should be shown
-@@ -595,7 +595,7 @@ _scratch_do_mkfs()
- 	cat $tmp.mkfsstd
- 	eval "cat $tmp.mkfserr | $mkfs_filter" >&2
- 
--	rm -f $tmp*
-+	rm -f $tmp.mkfserr $tmp.mkfsstd
- 	return $mkfs_status
- }
- 
-@@ -676,7 +676,7 @@ _scratch_mkfs_ext4()
- {
- 	local mkfs_cmd="$MKFS_EXT4_PROG -F"
- 	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
--	local tmp=`mktemp`
-+	local tmp=/tmp/$$._mkfs
- 	local mkfs_status
- 
- 	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
-@@ -701,6 +701,7 @@ _scratch_mkfs_ext4()
- 	# output mkfs stdout and stderr
- 	cat $tmp.mkfsstd
- 	cat $tmp.mkfserr >&2
-+	rm -f $tmp.mkfserr $tmp.mkfsstd
- 
- 	return $mkfs_status
- }
-@@ -1429,6 +1430,7 @@ _do()
-     (eval "echo '---' \"$_cmd\"") >>$seqres.full
-     (eval "$_cmd") >$tmp._out 2>&1; ret=$?
-     cat $tmp._out | _fix_malloc >>$seqres.full
-+    rm -f $tmp._out
-     if [ $# -eq 2 ]; then
- 	if [ $ret -eq 0 ]; then
- 	    echo "done"
-@@ -3542,8 +3544,10 @@ run_fsx()
- 	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
- 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
- 		cat $tmp.fsx
-+		rm -f $tmp.fsx
- 		exit 1
- 	fi
-+	rm -f $tmp.fsx
- }
- 
- # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
-diff --git a/common/xfs b/common/xfs
-index 0f0825b..42f3f57 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -82,7 +82,7 @@ _scratch_mkfs_xfs()
- 	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
- 	local mkfs_filter="sed -e '/less than device physical sector/d' \
- 			       -e '/switching to logical sector/d'"
--	local tmp=`mktemp`
-+	local tmp=/tmp/$$._mkfs
- 	local mkfs_status
- 
- 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
-@@ -104,7 +104,7 @@ _scratch_mkfs_xfs()
- 	# output mkfs stdout and stderr
- 	cat $tmp.mkfsstd
- 	cat $tmp.mkfserr >&2
--	rm -f $tmp*
-+	rm -f $tmp.mkfserr $tmp.mkfsstd
- 
- 	return $mkfs_status
- }
-diff --git a/tests/generic/100 b/tests/generic/100
-index e5e819d..161982f 100755
---- a/tests/generic/100
-+++ b/tests/generic/100
-@@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- 
- _cleanup()
- {
--     rm -f $tmp.* $testfile
-+     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
- }
-  
- # real QA test starts here
-diff --git a/tests/generic/260 b/tests/generic/260
-index 312e6d2..4c15292 100755
---- a/tests/generic/260
-+++ b/tests/generic/260
-@@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
- 
- here=`pwd`
--tmp=`mktemp -d`
-+tmp=/tmp/$$
- status=0
- trap "exit \$status" 0 1 2 3 15
- chpid=0
--- 
-2.9.4
+> 
+> To fix this function, we need to add two checks:
+> 
+> 1) for old xfs_io versions, fail if the test seems to succeed (no output)
+>    but the file created is empty,
+> 2) for newer versions, use the error returned.
+> 
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  common/rc | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/common/rc b/common/rc
+> index 2972f89e9527..aad065cb2ade 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2146,6 +2146,10 @@ _require_xfs_io_command()
+>  		$XFS_IO_PROG -F -f -c "pwrite 0 4k" $testfile > /dev/null 2>&1
+>  		testio=`$XFS_IO_PROG -F -f -c "copy_range $testfile" $testcopy 2>&1`
+>  		rm -f $testcopy > /dev/null 2>&1
 
+$testcopy is removed here...
+
+> +		[ -z "$testio" -a ! -s "$testcopy" ] && \
+
+then on hosts with copy_file_range support, this check always returns
+true, and test _notrun when it should run.
+
+Thanks,
+Eryu
+
+> +			_notrun "xfs_io $command support is missing"
+> +		echo $testio | egrep -q "Function not implemented" && \
+> +			_notrun "xfs_io $command support is missing"
+>  		;;
+>  	"falloc" )
+>  		testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
