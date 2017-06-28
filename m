@@ -1,121 +1,204 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60656 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751084AbdF1HuK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Jun 2017 03:50:10 -0400
-Date: Wed, 28 Jun 2017 15:50:08 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] common/rc: handle xfs_io copy_range when
- copy_file_range syscall isn't available
-Message-ID: <20170628075008.GE23360@eguan.usersys.redhat.com>
-References: <20170626164053.7634-1-lhenriques@suse.com>
- <20170626164053.7634-2-lhenriques@suse.com>
- <20170627052529.GX23360@eguan.usersys.redhat.com>
- <20170627085013.h5uxomucqonrf7cj@hermes.olymp>
+Received: from szxga01-in.huawei.com ([45.249.212.187]:9242 "EHLO
+        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751491AbdF1IBR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Jun 2017 04:01:17 -0400
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstest PATCH v2] overlay: test whiteout check in origin dir
+Date: Wed, 28 Jun 2017 16:04:05 +0800
+Message-ID: <1498637045-19185-1-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20170627085013.h5uxomucqonrf7cj@hermes.olymp>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Luis Henriques <lhenriques@suse.com>
-Cc: fstests@vger.kernel.org, Anna Schumaker <Anna.Schumaker@Netapp.com>
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 27, 2017 at 09:50:13AM +0100, Luis Henriques wrote:
-> On Tue, Jun 27, 2017 at 01:25:29PM +0800, Eryu Guan wrote:
-> > On Mon, Jun 26, 2017 at 05:40:53PM +0100, Luis Henriques wrote:
-> > > _require_xfs_io_command() isn't handling the case where the copy_fi=
-le_range
-> > > syscall isn't available.  Unfortunately, old versions of xfs_io don=
-'t
-> > > handle it correctly either and the test will succeed with an empty =
-file.
-> >=20
-> > If copy_file_range syscall isn't available on the system, xfs_io shou=
-ld
-> > have no "copy_range" built either, or if you're using a pre-built xfs=
-_io
-> > binary shipped by a distro, it should have no copy_range either to ma=
-tch
-> > the kernel space. Anyway, I don't think it would cause any problem if
-> > there's no copy_file_range syscall support. I'm curious what's your
-> > environment setup.
->=20
-> I am building an initramfs that contains the testing tools from a recen=
-t
-> distro, and running the tests against an old kernel (which does not
-> include this syscall).  I'm not sure how usual this sort of setup is.
->=20
-> Would you rather have the test ignoring these sort of setups, and just
-> include the 2nd check (i.e., always assume the tools (xfs_io) are in sy=
-nc
-> with the kernel)?
+The unmerged and origined directories may contain invalid
+whiteouts when we umount && modify dir(e.g. clean up dir) and
+remount overlay. This may lead to whiteouts exposure and rmdir
+failure.
 
-I'm fine with having this "Function not implemented" check, it'd be
-better to add more background information in the commit log. And perhaps
-we should do it after the case switch so it not only applies to
-copy_file_range syscall, but also to all other syscalls/commands.
+This case test origin dir's whiteouts check in ovl_iterate() and
+ovl_remove_xxx().
 
-But I don't think we should workaround a xfsprogs bug in test, it
-revealed a real bug and that's what should be really fixed, i.e. build
-the initramfs with a newer version of xfsprogs with that bug fixed?
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+v2:
+ - add test of lower origin dir have whiteouts
+ - add test of both upper and lower origin dirs have whiteouts
+   (although this case is pass now, still add this to cover all
+   three kinds of situations)
+ - add to whiteout group
+---
+ tests/overlay/031     | 139 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/031.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 142 insertions(+)
+ create mode 100755 tests/overlay/031
+ create mode 100644 tests/overlay/031.out
 
-Thanks,
-Eryu
+diff --git a/tests/overlay/031 b/tests/overlay/031
+new file mode 100755
+index 0000000..7dd5f5f
+--- /dev/null
++++ b/tests/overlay/031
+@@ -0,0 +1,139 @@
++#! /bin/bash
++# FS QA Test 031
++#
++# The unmerged and origined directories may contain invalid
++# whiteouts when we change dir(e.g. clean up lowerdir) and remount
++# overlay. This may lead to whiteouts exposure and rmdir failure.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Huawei.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# create test directory and test file, mount overlayfs and remove
++# testfile to create a whiteout.
++_create_whiteout()
++{
++	mkdir -p $1/testdir
++	touch $1/testdir/$4
++
++	_overlay_mount_dirs $1 $2 $3 $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++	rm -f $SCRATCH_MNT/testdir/$4
++
++	$UMOUNT_PROG $SCRATCH_MNT
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# remove all files from previous runs
++_scratch_mkfs
++
++# create test directorys and whiteout
++lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++testfile1=a
++testfile2=b
++mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
++
++_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
++
++# clean up the lower directory and mount overlay again,
++# whiteout will expose.
++rm -rf $lowerdir1/testdir
++
++_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++ls $SCRATCH_MNT/testdir
++
++# try to remove test dir from overlay dir, trigger ovl_remove_upper,
++# it will not clean up the dir and lead to rmdir failure.
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
++# umount overlay again, create a new file with the same name and
++# mount overlay again.
++$UMOUNT_PROG $SCRATCH_MNT
++touch $lowerdir1/testdir
++
++_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++# try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
++# it will not clean up the dir and lead to residue.
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++ls $workdir/work
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# exchange lower dir and upper dir, repeat ls and rmidr test again,
++# the lower dir will have invalid whiteout this time.
++rm -rf $lowerdir1/testdir
++rm -rf $upperdir/testdir
++
++_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
++
++rm -rf $lowerdir1/testdir
++
++_overlay_mount_dirs $upperdir $lowerdir1 $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++ls $SCRATCH_MNT/testdir
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
++rm -rf $lowerdir1/testdir
++rm -rf $upperdir/testdir
++
++_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
++
++rm -rf $lowerdir1/testdir
++_create_whiteout $lowerdir1 $lowerdir2 $workdir $testfile2
++
++_overlay_mount_dirs $lowerdir2 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++ls $SCRATCH_MNT/testdir
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/031.out b/tests/overlay/031.out
+new file mode 100644
+index 0000000..b3d0bb0
+--- /dev/null
++++ b/tests/overlay/031.out
+@@ -0,0 +1,2 @@
++QA output created by 031
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index c5048c4..64d200c 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -33,3 +33,4 @@
+ 028 auto copyup quick
+ 029 auto quick
+ 030 auto quick perms
++031 auto quick whiteout
+-- 
+1.8.3.1
 
->=20
-> > >=20
-> > > To fix this function, we need to add two checks:
-> > >=20
-> > > 1) for old xfs_io versions, fail if the test seems to succeed (no o=
-utput)
-> > >    but the file created is empty,
-> > > 2) for newer versions, use the error returned.
-> > >=20
-> > > Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> > > ---
-> > >  common/rc | 4 ++++
-> > >  1 file changed, 4 insertions(+)
-> > >=20
-> > > diff --git a/common/rc b/common/rc
-> > > index 2972f89e9527..aad065cb2ade 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -2146,6 +2146,10 @@ _require_xfs_io_command()
-> > >  		$XFS_IO_PROG -F -f -c "pwrite 0 4k" $testfile > /dev/null 2>&1
-> > >  		testio=3D`$XFS_IO_PROG -F -f -c "copy_range $testfile" $testcopy=
- 2>&1`
-> > >  		rm -f $testcopy > /dev/null 2>&1
-> >=20
-> > $testcopy is removed here...
-> >=20
-> > > +		[ -z "$testio" -a ! -s "$testcopy" ] && \
-> >=20
-> > then on hosts with copy_file_range support, this check always returns
-> > true, and test _notrun when it should run.
->=20
-> /me blushes and hides
->=20
-> I'll send v2 once you let me know if you want me to keep these 2 checks.
->=20
-> Cheers,
-> --
-> Lu=C3=ADs
->=20
-> >=20
-> > Thanks,
-> > Eryu
-> >=20
-> > > +			_notrun "xfs_io $command support is missing"
-> > > +		echo $testio | egrep -q "Function not implemented" && \
-> > > +			_notrun "xfs_io $command support is missing"
-> > >  		;;
-> > >  	"falloc" )
-> > >  		testio=3D`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2=
->&1`
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" =
-in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> >=20
