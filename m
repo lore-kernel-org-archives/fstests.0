@@ -1,36 +1,43 @@
-Received: from mx2.suse.de ([195.135.220.15]:51476 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751513AbdF0Jz3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 27 Jun 2017 05:55:29 -0400
-Date: Tue, 27 Jun 2017 11:55:22 +0200
-From: David Disseldorp <ddiss@suse.de>
-Subject: Re: [PATCH 2/2] common: remove tmp.mkfs[err/std] files by name
-Message-ID: <20170627115522.0259323d@suse.de>
-In-Reply-To: <20170627043304.GW23360@eguan.usersys.redhat.com>
-References: <20170626134017.2741-1-ddiss@suse.de>
-        <20170626134017.2741-2-ddiss@suse.de>
-        <20170627043304.GW23360@eguan.usersys.redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:51838 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750934AbdF1Fpk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Jun 2017 01:45:40 -0400
+From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: reorder the arguments of btrfs replace in btrfs/027
+Date: Wed, 28 Jun 2017 13:45:31 +0800
+Message-ID: <20170628054531.17882-1-lufq.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, 27 Jun 2017 12:33:04 +0800, Eryu Guan wrote:
+The option parser only accept options before non-option argument.
+Although David Sterba has submitted commit df8c7225ba00 ("btrfs: reorder
+arguments so that options come first"), but this case seems to be left out.
 
-> I posted a patch back in Jan. to cleanup tmp files and other leftover
-> files after test, I switched from mktemp to a normal "tmp=/tmp/$$._mkfs"
-> assignment so it could avoid this problem you want to fix too. But my
-> patch got no review.
-> 
-> I'm going to send new version of my patch and will fix _scratch_do_mkfs
-> too, I really appreciate if you could help review and provide
-> Reviewed-by tag.
+Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+---
+ tests/btrfs/027 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Thanks for the feedback, Eryu. My preference would be to continue to use
-mktemp. I know it's test code, but I'd still like to avoid any potential
-symlink races.
+diff --git a/tests/btrfs/027 b/tests/btrfs/027
+index 2c8b458e..625a27f5 100755
+--- a/tests/btrfs/027
++++ b/tests/btrfs/027
+@@ -91,8 +91,8 @@ run_test()
+ 	_scratch_mount -o degraded >>$seqres.full 2>&1
+ 
+ 	# replace $missing_dev with $replace_dev and scrub it to double-check
+-	$BTRFS_UTIL_PROG replace start -B -r $missing_dev_id $SPARE_DEV \
+-		$SCRATCH_MNT -f >>$seqres.full 2>&1
++	$BTRFS_UTIL_PROG replace start -B -f -r $missing_dev_id $SPARE_DEV \
++		$SCRATCH_MNT >>$seqres.full 2>&1
+ 	if [ $? -ne 0 ]; then
+ 		echo "btrfs replace failed"
+ 		_spare_dev_put
+-- 
+2.13.2
 
-Cheers, David
+
+
