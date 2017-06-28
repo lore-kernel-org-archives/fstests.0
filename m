@@ -1,180 +1,164 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:34791 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751489AbdF1Kti (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Jun 2017 06:49:38 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:36286 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751656AbdF1KNm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Jun 2017 06:13:42 -0400
+Date: Wed, 28 Jun 2017 18:13:29 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfs: test a race between dio reads and mapped writes
+Message-ID: <20170628101329.GH23360@eguan.usersys.redhat.com>
+References: <1498554232-20777-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <1498644722-43912-1-git-send-email-yi.zhang@huawei.com>
-References: <1498644722-43912-1-git-send-email-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 28 Jun 2017 13:49:36 +0300
-Message-ID: <CAOQ4uxipk=T_+mCzpkDS8xGnhnYkO1jqbbG5Mho8bk4He2nL8w@mail.gmail.com>
-Subject: Re: [xfstest PATCH] overlay/031: add tests of whiteouts in lowerdir
- and both dirs
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1498554232-20777-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, miaoxie@huawei.com
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 28, 2017 at 1:12 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> In overlay/031, it only cover the test case of whiteouts in
-> origined upper dir. This patch add two cases cover the other
-> two situations:
->
-> 1) Lower origined dir have whiteouts;
-> 2) Both upper and lower origined dirs have whiteouts (although
-> this case is pass now, still add this to cover all three kinds
-> of situations).
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-
-Great work.
-Some minor comments...
-
+On Tue, Jun 27, 2017 at 05:03:52PM +0800, Xiao Yang wrote:
+> This regression test reproduces a race between a direct
+> I/O read and a mapped write to a hole in a file.  If the
+> race occurs, it will trigger a BUG_ON().  This XFS bug
+> has been fixed by:
+> 
+> 04197b3 (xfs: don't BUG() on mixed direct and mapped I/O)
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 > ---
->  tests/overlay/031 | 83 +++++++++++++++++++++++++++++++++++++++++--------------
->  1 file changed, 63 insertions(+), 20 deletions(-)
->
-> diff --git a/tests/overlay/031 b/tests/overlay/031
-> index 674c11f..0835ddf 100755
-> --- a/tests/overlay/031
-> +++ b/tests/overlay/031
-> @@ -1,9 +1,10 @@
->  #! /bin/bash
->  # FS QA Test 031
->  #
-> -# The unmerged and impure upper directories may contain invalid
-> -# whiteouts when we change lowerdir(e.g. clean up dir) and remount
-> -# overlay. This may lead to whiteouts exposure and rmdir failure.
-> +# The unmerged and origined directories may contain invalid
-> +# whiteouts when we change underlaying dir(e.g. clean up lowerdir)
-> +# and remount overlay. This may lead to whiteouts exposure and
-> +# rmdir failure.
->  #
->  #-----------------------------------------------------------------------
->  # Copyright (c) 2017 Huawei.  All Rights Reserved.
-> @@ -38,6 +39,20 @@ _cleanup()
->         rm -f $tmp.*
->  }
->
-> +# create test directory and test file, mount overlayfs and remove
-> +# testfile to create a whiteout.
-> +_create_whiteout()
+>  tests/xfs/422     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/422.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 89 insertions(+)
+>  create mode 100755 tests/xfs/422
+>  create mode 100644 tests/xfs/422.out
+> 
+> diff --git a/tests/xfs/422 b/tests/xfs/422
+> new file mode 100755
+> index 0000000..a57ffab
+> --- /dev/null
+> +++ b/tests/xfs/422
+> @@ -0,0 +1,86 @@
+> +#! /bin/bash
+> +# FS QA Test No. 422
+> +#
+> +# Regression test for commit:
+> +# 04197b3 ("xfs: don't BUG() on mixed direct and mapped I/O)
+             ^^ missing ending " :)
+> +#
+> +# This case tests a race between a direct I/O read and a
+> +# mapped write to a hole in a file.  If the race occurs,
+> +# it will trigger a BUG_ON().
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Fujitsu.  All Rights Reserved.
+> +# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +       mkdir -p $1/testdir
-> +       touch $1/testdir/$4
-> +
-> +       _overlay_mount_dirs $1 $2 $3 $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +
-> +       rm -f $SCRATCH_MNT/testdir/$4
-> +
-> +       $UMOUNT_PROG $SCRATCH_MNT
+> +	rm -rf $tmp.*
 > +}
 > +
-
-Please introduce the helper in a separate patch.
-
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> @@ -52,26 +67,22 @@ _require_scratch
->  # remove all files from previous runs
->  _scratch_mkfs
->
-> -# create test directory and test file
-> -lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> -upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> -workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-> -mkdir -p $lowerdir/testdir
-> -touch $lowerdir/testdir/a
-> -
-> -# mount overlayfs and remove testfile to create a whiteout
-> -_scratch_mount
-> +# create test directorys and whiteout
-> +lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +testfile1=a
-> +testfile2=b
-> +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
->
-> -rm -f $SCRATCH_MNT/testdir/a
-> -
-> -# unmount overlayfs but not base fs
-> -$UMOUNT_PROG $SCRATCH_MNT
-> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
->
->  # clean up the lower directory and mount overlay again,
->  # whiteout will expose.
-> -rm -rf $lowerdir/testdir
-> +rm -rf $lowerdir1/testdir
->
-> -_scratch_mount
-> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->
->  ls $SCRATCH_MNT/testdir
->
-> @@ -82,15 +93,47 @@ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->  # umount overlay again, create a new file with the same name and
->  # mount overlay again.
->  $UMOUNT_PROG $SCRATCH_MNT
-> -touch $lowerdir/testdir
-> +touch $lowerdir1/testdir
->
-> -_scratch_mount
-> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->
->  # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
->  # it will not clean up the dir and lead to residue.
->  rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->  ls $workdir/work
->
-> +$UMOUNT_PROG $SCRATCH_MNT
+> +# get standard environment and checks
+> +. ./common/rc
 > +
-> +# exchange lower dir and upper dir, repeat ls and rmidr test again,
-> +# the lower dir will have invalid whiteout this time.
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
 
-typo (rmidr)
+I see nothing xfs specific in this test, I think it can be made generic
+easily.
 
-> +rm -rf $lowerdir1/testdir
-> +rm -rf $upperdir/testdir
-> +
-> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
-> +
-> +rm -rf $lowerdir1/testdir
-> +
-> +_overlay_mount_dirs $upperdir $lowerdir1 $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+> +_require_scratch
+> +_disable_dmesg_check
 
-May I suggest something different that the exchange trick
-although exchange trick is perfectly fine too, but the proposed
-alternative is a real world use case (rotating upper to lower stack).
-Also, with the proposed mount, you also get coverage for whiteouts
-in middle layer, which are not tested by the tests you proposed.
-
-+_create_whiteout $lowerdir1 $lowerdir2 $workdir $testfile1
-+ _overlay_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir \
-                    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-
-> +
-> +ls $SCRATCH_MNT/testdir
-> +rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
-> +
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
-> +rm -rf $lowerdir1/testdir
-> +rm -rf $upperdir/testdir
-> +
-> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
-
-Please use:
-+_create_whiteout $lowerdir2 $upperdir $workdir $testfile1
-
-Because with inodes index feature same upper cannot be
-mounted again with a different lower. the proposed
-alternative is a real world use case (rotating upper to lower stack)
-
+Better to add comments on ignoring dmesg check result.
 
 Thanks,
-Amir.
+Eryu
+
+> +_require_xfs_io_command "truncate"
+> +_require_xfs_io_command "fpunch"
+> +
+> +rm -f $seqres.full
+> +
+> +# format and mount
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +filesz=$((65536 * 2))
+> +
+> +# create a test file with a hole
+> +$XFS_IO_PROG -f -c "truncate $((filesz * 2))" $SCRATCH_MNT/file >> $seqres.full
+> +
+> +# run a background dio read to a hole in a loop
+> +while true; do
+> +	$XFS_IO_PROG -d -c "pread 0 $filesz" $SCRATCH_MNT/file > /dev/null 2>&1
+> +done &
+> +
+> +dread_pid=$!
+> +
+> +# run mapped write to the same hole as dio read
+> +for i in `seq 0 999`; do
+> +	$XFS_IO_PROG -c "mmap 0 $filesz" -c "mwrite 0 $filesz" $SCRATCH_MNT/file \
+> +		> /dev/null
+> +	$XFS_IO_PROG -c "fpunch 0 $filesz" $SCRATCH_MNT/file > /dev/null
+> +done
+> +
+> +kill -9 $dread_pid > /dev/null 2>&1
+> +wait $dread_pid > /dev/null 2>&1
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/422.out b/tests/xfs/422.out
+> new file mode 100644
+> index 0000000..f70693f
+> --- /dev/null
+> +++ b/tests/xfs/422.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 422
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 2a3b950..f43ffcf 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -419,3 +419,4 @@
+>  419 auto quick
+>  420 auto quick clone dedupe
+>  421 auto quick clone dedupe
+> +422 auto quick dangerous
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
