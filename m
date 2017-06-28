@@ -1,40 +1,84 @@
-Received: from mx2.suse.de ([195.135.220.15]:44959 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751498AbdF1LU4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Jun 2017 07:20:56 -0400
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH 2/2 v2] common/rc: handle xfs_io copy_range when copy_file_range syscall isn't available
-Date: Wed, 28 Jun 2017 12:20:51 +0100
-Message-Id: <20170628112051.9164-1-lhenriques@suse.com>
-In-Reply-To: <20170628075008.GE23360@eguan.usersys.redhat.com>
-References: <20170628075008.GE23360@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52704 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751580AbdF1Low (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Jun 2017 07:44:52 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] xfs/141: use new errortag knob for crc error injection
+Date: Wed, 28 Jun 2017 07:44:50 -0400
+Message-Id: <20170628114450.9670-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, Anna Schumaker <Anna.Schumaker@Netapp.com>, Luis Henriques <lhenriques@suse.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_require_xfs_io_command() isn't handling the case where the copy_file_range
-syscall isn't available.  To fix this simply check the error returned by
-xfs_io.
+Update the test to use the newly available sysfs errortag injection
+knobs. The errortag knob has replaced the previous custom knob in
+the kernel. Create a local helper to support the old knob for
+backwards compatibility.
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
 ---
-Changes since v1:
-- dropped check that worked around an xfs_io bug.
 
-common/rc | 2 ++
- 1 file changed, 2 insertions(+)
+This updates xfs/141 to use the new error injection tag sysfs knob that
+has replaced log_badcrc_factor in the latest XFS for-next tree.
 
-diff --git a/common/rc b/common/rc
-index 2972f89e9527..57d596cd4f2e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2195,6 +2195,8 @@ _require_xfs_io_command()
- 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
- 	echo $testio | grep -q "foreign file active" && \
- 		_notrun "xfs_io $command not supported on $FSTYP"
-+	echo $testio | egrep -q "Function not implemented" && \
-+		_notrun "xfs_io $command support is missing (missing syscall?)"
+Brian
+
+ tests/xfs/141 | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/tests/xfs/141 b/tests/xfs/141
+index 56ff14e..ea4f558 100755
+--- a/tests/xfs/141
++++ b/tests/xfs/141
+@@ -43,6 +43,21 @@ _cleanup()
+ 	wait > /dev/null 2>&1
+ }
  
- 	if [ -n "$param" -a $param_checked -eq 0 ]; then
- 		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
++# require either the current error tag or the old custom log record crc error
++# injection knob
++_setup_bad_crc()
++{
++	if [ -e /sys/fs/xfs/$1/errortag/log_bad_crc ]; then
++		badcrc_attr=/sys/fs/xfs/$1/errortag/log_bad_crc
++		return
++	fi
++	if [ -e /sys/fs/xfs/$1/log/log_badcrc_factor ]; then
++		badcrc_attr=/sys/fs/xfs/$1/log/log_badcrc_factor
++		return
++	fi
++	_notrun "bad crc sysfs attribute not supported"
++}
++
+ rm -f $seqres.full
+ 
+ # get standard environment, filters and checks
+@@ -53,7 +68,6 @@ rm -f $seqres.full
+ # Modify as appropriate.
+ _supported_fs xfs
+ _supported_os Linux
+-_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
+ _require_scratch
+ _require_command "$KILLALL_PROG" killall
+ 
+@@ -62,14 +76,14 @@ echo "Silence is golden."
+ _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+ _scratch_mount
+ 
+-sdev=$(_short_dev $SCRATCH_DEV)
++_setup_bad_crc $(_short_dev $SCRATCH_DEV)
+ 
+ for i in $(seq 1 5); do
+ 	# Enable error injection. Use a random bad crc factor up to 100
+ 	# (increase this value to run fsstress longer).
+ 	factor=$((RANDOM % 100 + 1))
+-	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
+-	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
++	echo iteration $i bad crc factor: $factor >> $seqres.full 2>&1
++	echo $factor > $badcrc_attr
+ 
+ 	# Run fsstress until the filesystem shuts down. It will shut down
+ 	# automatically when error injection triggers.
+-- 
+2.9.4
+
