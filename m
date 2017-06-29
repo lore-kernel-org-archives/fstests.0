@@ -1,89 +1,57 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:17532 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751685AbdF2QHw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2017 12:07:52 -0400
-Date: Thu, 29 Jun 2017 09:07:46 -0700
+Received: from aserp1040.oracle.com ([141.146.126.69]:45946 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753476AbdF2RRW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2017 13:17:22 -0400
+Date: Thu, 29 Jun 2017 10:17:16 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 5/8] reflink: test unlinking a huge extent with a lot of
- refcount adjustments
-Message-ID: <20170629160746.GB5871@birch.djwong.org>
+Subject: Re: [PATCH 7/8] xfs: test freeze/rmap repair race
+Message-ID: <20170629171716.GC5871@birch.djwong.org>
 References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
- <149808226863.8924.5799576767468365376.stgit@birch.djwong.org>
- <20170629093614.GO23360@eguan.usersys.redhat.com>
+ <149808229180.8924.4409973593099506918.stgit@birch.djwong.org>
+ <20170629094716.GP23360@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170629093614.GO23360@eguan.usersys.redhat.com>
+In-Reply-To: <20170629094716.GP23360@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 29, 2017 at 05:36:14PM +0800, Eryu Guan wrote:
-> On Wed, Jun 21, 2017 at 02:57:48PM -0700, Darrick J. Wong wrote:
+On Thu, Jun 29, 2017 at 05:47:16PM +0800, Eryu Guan wrote:
+> On Wed, Jun 21, 2017 at 02:58:11PM -0700, Darrick J. Wong wrote:
 > > From: Darrick J. Wong <darrick.wong@oracle.com>
 > > 
-> > Test a regression in XFS where we blow out a transaction reservation if
-> > we create a big file, share every other block, and delete the first
-> > file.  There's nothing particularly fs-specific about this stress test,
-> > so put it in generic.
+> > The rmapbt repair code plays some dirty tricks with the fs freezer to
+> > avoid running afoul of regular xfs locking requirements.  Add a test to
+> > check that filesystem write activities do not deadlock with the repair
+> > program.
 > > 
 > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> This test took me 3019s to finish with v4.12-rc7 kernel, and another
-> host "hung" at "Delete file1" (it had been more than 1 hour, and I lost
-> my patience and hard-reboot the host). Are they expected results?
-
-No.  The take-forever-or-crash behavior should be fixed by "xfs: try to
-avoid blowing out the transaction reservation when bunmaping a shared
-extent" in 4.13.  Feel free to hang on to this one until -rc1. :)
-
-> If the bug is still existed in latest upstream kernel, I tend to merge
-> it after the fix landing in linus tree. If v4.12-rc7 doesn't suffer from
-> this bug, the test time should be reduced.
-
-<shrug> This is what I saw just now:
-
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 birch-mtr0 4.12.0-rc6-dgc
-MKFS_OPTIONS  -- -f -m reflink=1,rmapbt=1, -i sparse=1, /dev/pmem1
-MOUNT_OPTIONS -- /dev/pmem1 /opt
-
-generic/931      21s
-Ran: generic/931
-Passed all 1 tests
-
-Though if it takes forever for everyone else, please kick this one out
-of auto/quick.  At least in theory, before the patch the test will
-either blow out a transaction reservation and hang the system, or if it
-does succeed it'll have done so by scraping long and hard for log space.
-That is probably why it takes 3000+ seconds on your test box, unless
-you were also testing xfs for-next.
-
-> And another minor nit below.
-> 
 > > ---
-> >  tests/generic/931     |   94 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/931.out |    6 +++
-> >  tests/generic/group   |    1 +
-> >  3 files changed, 101 insertions(+)
-> >  create mode 100755 tests/generic/931
-> >  create mode 100644 tests/generic/931.out
+> >  tests/xfs/1378     |  109 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/1378.out |    4 ++
+> >  tests/xfs/group    |    1 
+> >  3 files changed, 114 insertions(+)
+> >  create mode 100755 tests/xfs/1378
+> >  create mode 100644 tests/xfs/1378.out
 > > 
 > > 
-> > diff --git a/tests/generic/931 b/tests/generic/931
+> > diff --git a/tests/xfs/1378 b/tests/xfs/1378
 > > new file mode 100755
-> > index 0000000..afadf81
+> > index 0000000..79ba6bc
 > > --- /dev/null
-> > +++ b/tests/generic/931
-> > @@ -0,0 +1,94 @@
+> > +++ b/tests/xfs/1378
+> > @@ -0,0 +1,109 @@
 > > +#! /bin/bash
-> > +# FS QA Test No. 931
+> > +# FS QA Test No. 1378
 > > +#
-> > +# See how well we handle deleting a file with a million refcount extents.
+> > +# Race freeze and rmapbt repair for a while to see if we crash or livelock.
+> > +# rmapbt repair requires us to freeze the filesystem to stop all filesystem
+> > +# activity, so we can't have userspace wandering in and thawing it.
 > > +#
 > > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
+> > +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
 > > +#
 > > +# This program is free software; you can redistribute it and/or
 > > +# modify it under the terms of the GNU General Public License as
@@ -96,113 +64,135 @@ you were also testing xfs for-next.
 > > +#
 > > +# You should have received a copy of the GNU General Public License
 > > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1335  USA
 > > +#-----------------------------------------------------------------------
+> > +#
 > > +
-> > +seq=`basename "$0"`
-> > +seqres="$RESULT_DIR/$seq"
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
 > > +echo "QA output created by $seq"
 > > +
 > > +here=`pwd`
 > > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 7 15
 > > +
 > > +_cleanup()
 > > +{
-> > +    cd /
-> > +    rm -rf "$tmp".* $testdir/file1
-> 
-> 'rm -rf' looks a bit scary, and we're only deleting regular files not
-> directories, 'rm -f' should be sufficient.
-
-Yes.  Will you fix it on the way in or should I resend?
-
---D
-
-> Thanks,
-> Eryu
-> 
+> > +	cd /
+> > +	rm -rf $tmp.*
 > > +}
 > > +
 > > +# get standard environment, filters and checks
 > > +. ./common/rc
 > > +. ./common/filter
-> > +. ./common/attr
-> > +. ./common/reflink
+> > +. ./common/fuzzy
+> > +. ./common/inject
+> > +. ./common/xfs
 > > +
 > > +# real QA test starts here
 > > +_supported_os Linux
-> > +_require_scratch_reflink
-> > +_require_cp_reflink
-> > +_require_test_program "punch-alternating"
+> > +_supported_fs xfs
+> > +_require_xfs_scratch_rmapbt
+> > +_require_xfs_io_command "scrub"
+> 
+> I just noticed that _require_xfs_io_command doesn't actually run 'scrub'
+> command, it only checks userspace support status not the kernel space.
+> So I see "+scrub: Inappropriate ioctl for device" when testing with
+> xfs_io from djwong-devel branch and 4.12-rc7 kernel.
+
+Uhoh.  I'll fix that.
+
+> > +_require_xfs_io_error_injection "force_repair"
+> 
+> This error injection check has similar problem.
+
+Yes, I'm about to send a patch to fix this up w.r.t. the new xfs errortag
+configuration mechanism.
+
+--D
+
+> 
+> But I think this can be fixed later, 1378 and 1379 are not in auto group
+> so won't affect normal '-g auto' run :)
+> 
+> Thanks,
+> Eryu
 > > +
-> > +rm -f "$seqres.full"
-> > +
-> > +echo "Format and mount"
+> > +echo "Format and populate"
 > > +_scratch_mkfs > "$seqres.full" 2>&1
-> > +_scratch_mount >> "$seqres.full" 2>&1
+> > +_scratch_mount
 > > +
-> > +testdir="$SCRATCH_MNT/test-$seq"
-> > +mkdir "$testdir"
+> > +STRESS_DIR="$SCRATCH_MNT/testdir"
+> > +mkdir -p $STRESS_DIR
 > > +
-> > +# Setup for one million blocks, but we'll accept stress testing down to
-> > +# 2^17 blocks... that should be plenty for anyone.
-> > +fnr=20
-> > +free_blocks=$(stat -f -c '%a' "$testdir")
-> > +blksz=$(_get_block_size "$testdir")
-> > +space_avail=$((free_blocks * blksz))
-> > +calc_space() {
-> > +	blocks_needed=$(( 2 ** (fnr + 1) ))
-> > +	space_needed=$((blocks_needed * blksz * 5 / 4))
-> > +}
-> > +calc_space
-> > +while test $space_needed -gt $space_avail; do
-> > +	fnr=$((fnr - 1))
-> > +	calc_space
+> > +for i in $(seq 0 9); do
+> > +	mkdir -p $STRESS_DIR/$i
+> > +	for j in $(seq 0 9); do
+> > +		mkdir -p $STRESS_DIR/$i/$j
+> > +		for k in $(seq 0 9); do
+> > +			echo x > $STRESS_DIR/$i/$j/$k
+> > +		done
+> > +	done
 > > +done
-> > +test $fnr -lt 17 && _notrun "Insufficient space for stress test; would only create $blocks_needed extents ($space_needed/$space_avail blocks)."
 > > +
-> > +echo "Create a many-block file"
-> > +echo "creating $blocks_needed blocks..." >> "$seqres.full"
-> > +$XFS_IO_PROG -f -c "pwrite -S 0x61 -b 4194304 0 $((2 ** (fnr + 1) * blksz))" "$testdir/file1" >> "$seqres.full"
+> > +cpus=$(( $(src/feature -o) * 4 * LOAD_FACTOR))
 > > +
-> > +echo "Reflinking file"
-> > +_cp_reflink $testdir/file1 $testdir/file2
+> > +echo "Concurrent repair"
+> > +filter_output() {
+> > +	egrep -v '(Device or resource busy|Invalid argument)'
+> > +}
+> > +freeze_loop() {
+> > +	end="$1"
 > > +
-> > +echo "Punch file2"
-> > +echo "Punching file2..." >> "$seqres.full"
-> > +"$here/src/punch-alternating" "$testdir/file2" >> "$seqres.full"
-> > +echo "...done" >> "$seqres.full"
-> > +_scratch_cycle_mount
+> > +	while [ "$(date +%s)" -lt $end ]; do
+> > +		$XFS_IO_PROG -x -c 'freeze' -c 'thaw' $SCRATCH_MNT 2>&1 | filter_output
+> > +	done
+> > +}
+> > +repair_loop() {
+> > +	end="$1"
 > > +
-> > +echo "Delete file1"
-> > +rm -rf $testdir/file1
+> > +	while [ "$(date +%s)" -lt $end ]; do
+> > +		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
+> > +	done
+> > +}
+> > +$XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
+> > +
+> > +start=$(date +%s)
+> > +end=$((start + (30 * TIME_FACTOR) ))
+> > +
+> > +echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
+> > +freeze_loop $end &
+> > +repair_loop $end &
+> > +
+> > +while [ "$(date +%s)" -lt $end ]; do
+> > +	sleep 1
+> > +done
+> > +echo "Loop finished at $(date)" >> $seqres.full
+> > +echo "Test done"
 > > +
 > > +# success, all done
 > > +status=0
 > > +exit
-> > diff --git a/tests/generic/931.out b/tests/generic/931.out
+> > diff --git a/tests/xfs/1378.out b/tests/xfs/1378.out
 > > new file mode 100644
-> > index 0000000..c7b724e
+> > index 0000000..030e250
 > > --- /dev/null
-> > +++ b/tests/generic/931.out
-> > @@ -0,0 +1,6 @@
-> > +QA output created by 931
-> > +Format and mount
-> > +Create a many-block file
-> > +Reflinking file
-> > +Punch file2
-> > +Delete file1
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index ab1e9d3..b0d1844 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -443,3 +443,4 @@
-> >  438 auto
-> >  439 auto quick punch
-> >  440 auto quick encrypt
-> > +931 auto quick clone
+> > +++ b/tests/xfs/1378.out
+> > @@ -0,0 +1,4 @@
+> > +QA output created by 1378
+> > +Format and populate
+> > +Concurrent repair
+> > +Test done
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index faf0095..d0a6831 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -419,3 +419,4 @@
+> >  701 auto quick
+> >  901 auto quick clone dedupe
+> >  902 auto quick clone dedupe
+> > +1378 dangerous_scrub dangerous_online_repair
 > > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
