@@ -1,201 +1,212 @@
-Received: from mail.kernel.org ([198.145.29.99]:33190 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752748AbdF2N3t (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Jun 2017 09:29:49 -0400
-From: jlayton@kernel.org
-Subject: [PATCH] generic: add a less thorough testing mode for fsync-err program
-Date: Thu, 29 Jun 2017 09:29:47 -0400
-Message-Id: <20170629132947.29939-1-jlayton@kernel.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:21574 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753399AbdF2PWI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2017 11:22:08 -0400
+Date: Thu, 29 Jun 2017 08:22:01 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/141: use new errortag knob for crc error injection
+Message-ID: <20170629152201.GB5874@birch.djwong.org>
+References: <20170628114450.9670-1-bfoster@redhat.com>
+ <20170629044000.GA5871@birch.djwong.org>
+ <20170629115409.GA3291@bfoster.bfoster>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170629115409.GA3291@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: dhowells@redhat.com, eguan@redhat.com
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Layton <jlayton@redhat.com>
+On Thu, Jun 29, 2017 at 07:54:09AM -0400, Brian Foster wrote:
+> On Wed, Jun 28, 2017 at 09:40:00PM -0700, Darrick J. Wong wrote:
+> > On Wed, Jun 28, 2017 at 07:44:50AM -0400, Brian Foster wrote:
+> > > Update the test to use the newly available sysfs errortag injection
+> > > knobs. The errortag knob has replaced the previous custom knob in
+> > > the kernel. Create a local helper to support the old knob for
+> > > backwards compatibility.
+> > > 
+> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > > ---
+> > > 
+> > > This updates xfs/141 to use the new error injection tag sysfs knob that
+> > > has replaced log_badcrc_factor in the latest XFS for-next tree.
+> > 
+> > Hmmm... for xfstests, I was thinking of rewriting the common/inject helpers:
+> > 
+> > # Requires that xfs_io inject command knows about this error type
+> > _require_xfs_io_error_injection()
+> > {
+> > 	type="$1"
+> > 
+> > 	shortdev=$(_short_dev $TEST_DEV)
+> > 	tagfile=/sys/fs/xfs/$shortdev/errortag/$type
+> > 	test -w $tagfile && return
+> > 
+> > 	_require_error_injection
+> > 
+> > 	if [ "$type" = "log_bad_crc" ]; then
+> > 		tagfile=/sys/fs/xfs/$shortdev/log/log_badcrc_factor
+> > 		test -w $tagfile && return
+> > 		_notrun "Cannot find log_badcrc_factor"
+> > 	fi
+> > 
+> > 	# NOTE: We can't actually test error injection here because xfs
+> > 	# hasn't always range checked the argument to xfs_errortag_add.
+> > 	# We also don't want to trip an error before we're ready to deal
+> > 	# with it.
+> > 
+> > 	$XFS_IO_PROG -x -c 'inject' $TEST_DIR | grep -q "$type" || \
+> > 		_notrun "XFS error injection $type unknown."
+> > }
+> > 
+> > # Inject an error into the scratch fs
+> > _scratch_inject_error()
+> > {
+> > 	type="$1"
+> > 	value="$2"
+> > 
+> > 	shortdev=$(_short_dev $SCRATCH_DEV)
+> > 	tagfile=/sys/fs/xfs/$shortdev/errortag/$type
+> > 	if [ -w $tagfile ]; then
+> > 		echo "$value" > $tagfile
+> > 		return
+> > 	fi
+> > 
+> > 	if [ "$type" = "log_bad_crc" ]; then
+> > 		tagfile=/sys/fs/xfs/$shortdev/log/log_badcrc_factor
+> > 		if [ -w $tagfile ]; then
+> > 			echo "$value" > $tagfile
+> > 			return
+> > 		fi
+> > 		_notrun "cannot inject error $type value $value"
+> > 	elif [ -z "$value" ] || [ "$value" = "default" ]; then
+> > 		$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
+> > 	else
+> > 		_notrun "cannot inject error $type value $value"
+> > 	fi
+> > }
+> > 
+> > ...that way we can just change xfs/141 to do:
+> > 
+> > _require_xfs_io_error_injection "log_bad_crc"
+> > ...
+> > for i in $(seq 1 5); do
+> >  	# Enable error injection. Use a random bad crc factor up to 100
+> >  	# (increase this value to run fsstress longer).
+> >  	factor=$((RANDOM % 100 + 1))
+> > 	...
+> > 	_scratch_inject_error "log_bad_crc" "$factor"
+> > 	...
+> > done
+> > 
+> > Therefore we can move all the other error injection knob tests (looking
+> > at you, drop_writes) to a standard helper function that will cover all
+> > the errortag knobs we're moving to sysfs.  Unfortunately we pay for that
+> > uniformity by uglifying the helper functions to handle the old knobs,
+> > but oh well.
+> > 
+> 
+> That all looks pretty good to me. There's only a couple or so old knobs
+> being killed off, so it doesn't seem like that big of a deal.
+> 
+> Are you planning to send a patch for the above? If so, we can just drop
+> this one (and I'll update the tail overwrite test as well).
 
-Currently we just have this test run on a whitelist of filesystems, but
-it would be best to be able to run it on all of them. The problem is
-that a lot of filesystems basically shut down once they hit metadata
-errors.
+Yes, I'll clean that up a little more and send it out.
 
-Allow the fsync-err testcase to operate in two different modes. One
-mode just does basic testing to ensure that we get an error back on
-all fd's when we fsync. The other does a more thorough test to ensure
-that we get back 0 on subsequent fsyncs when there hasn't been any
-write activity.
+> > I do wonder about the old xfs_io command, though -- while it's tempting
+> > to rewrite it to do all the parsing required to get to sysfs, I'm not so
+> > enthused about doing in C what can be done much more easily in bash.
+> > 
+> 
+> Not sure I follow... are you contemplating rewriting 'xfs_io -c inject
+> ...' to actually use sysfs rather than the ioctl()? That seems like it
+> would get kind of ugly, at first thought. If we really wanted the
+> ability to set the frequency through xfs_io, I think the right approach
+> is probably to define a new ioctl() that takes a frequency param (but
+> I'm not really convinced there is a need).
 
-For now, we just opt-in to the more thorough testing on certain
-filesystems: xfs, ext3 and ext4 on the generic test. All other
-filesystems will run in simple mode.
+Just musing a little about refitting the xfs_io command, and convincing
+myself not to do it. :)
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- common/rc         |  9 +++++++++
- src/fsync-err.c   | 51 +++++++++++++++++++++++++++++++++------------------
- tests/generic/441 | 22 +++++++++++++++-------
- 3 files changed, 57 insertions(+), 25 deletions(-)
+--D
 
-diff --git a/common/rc b/common/rc
-index 2972f89e9527..83675364cf24 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1738,6 +1738,15 @@ _require_test()
-     touch ${RESULT_DIR}/require_test
- }
- 
-+_has_logdev()
-+{
-+	ret=0
-+	[ -z "$SCRATCH_LOGDEV" -o ! -b "$SCRATCH_LOGDEV" ] &&
-+	[ "$USE_EXTERNAL" != yes ] && ret=1
-+
-+	return $ret
-+}
-+
- # this test needs a logdev
- #
- _require_logdev()
-diff --git a/src/fsync-err.c b/src/fsync-err.c
-index 5b3bdd3ada07..4b0205cf2fd4 100644
---- a/src/fsync-err.c
-+++ b/src/fsync-err.c
-@@ -13,6 +13,7 @@
- #include <string.h>
- #include <unistd.h>
- #include <getopt.h>
-+#include <stdbool.h>
- 
- /*
-  * btrfs has a fixed stripewidth of 64k, so we need to write enough data to
-@@ -25,7 +26,7 @@
- 
- static void usage()
- {
--	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] -d dmerror path <filename>\n");
-+	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] [ -s ] -d dmerror path <filename>\n");
- }
- 
- int main(int argc, char **argv)
-@@ -35,8 +36,9 @@ int main(int argc, char **argv)
- 	char *dmerror_path = NULL;
- 	char *cmdbuf;
- 	size_t cmdsize, bufsize = DEFAULT_BUFSIZE;
-+	bool simple_mode = false;
- 
--	while ((i = getopt(argc, argv, "b:d:n:")) != -1) {
-+	while ((i = getopt(argc, argv, "b:d:n:s")) != -1) {
- 		switch (i) {
- 		case 'b':
- 			bufsize = strtol(optarg, &buf, 0);
-@@ -55,6 +57,15 @@ int main(int argc, char **argv)
- 				return 1;
- 			}
- 			break;
-+		case 's':
-+			/*
-+			 * Many filesystems will continue to throw errors after
-+			 * fsync has already advanced to the current error,
-+			 * due to metadata writeback failures or other
-+			 * issues. Allow those fs' to opt out of more thorough
-+			 * testing.
-+			 */
-+			simple_mode = true;
- 		}
- 	}
- 
-@@ -154,16 +165,18 @@ int main(int argc, char **argv)
- 		}
- 	}
- 
--	for (i = 0; i < numfds; ++i) {
--		ret = fsync(fd[i]);
--		if (ret < 0) {
--			/*
--			 * We did a failed write and fsync on each fd before.
--			 * Now the error should be clear since we've not done
--			 * any writes since then.
--			 */
--			printf("Third fsync on fd[%d] failed: %m\n", i);
--			return 1;
-+	if (!simple_mode) {
-+		for (i = 0; i < numfds; ++i) {
-+			ret = fsync(fd[i]);
-+			if (ret < 0) {
-+				/*
-+				 * We did a failed write and fsync on each fd before.
-+				 * Now the error should be clear since we've not done
-+				 * any writes since then.
-+				 */
-+				printf("Third fsync on fd[%d] failed: %m\n", i);
-+				return 1;
-+			}
- 		}
- 	}
- 
-@@ -185,12 +198,14 @@ int main(int argc, char **argv)
- 		return 1;
- 	}
- 
--	for (i = 0; i < numfds; ++i) {
--		ret = fsync(fd[i]);
--		if (ret < 0) {
--			/* The error should still be clear */
--			printf("fsync after healing device on fd[%d] failed: %m\n", i);
--			return 1;
-+	if (!simple_mode) {
-+		for (i = 0; i < numfds; ++i) {
-+			ret = fsync(fd[i]);
-+			if (ret < 0) {
-+				/* The error should still be clear */
-+				printf("fsync after healing device on fd[%d] failed: %m\n", i);
-+				return 1;
-+			}
- 		}
- 	}
- 
-diff --git a/tests/generic/441 b/tests/generic/441
-index 2215b64db9a7..e8244224e097 100755
---- a/tests/generic/441
-+++ b/tests/generic/441
-@@ -45,15 +45,23 @@ _cleanup()
- . ./common/dmerror
- 
- # real QA test starts here
--_supported_fs ext2 ext3 ext4 xfs
- _supported_os Linux
- _require_scratch
- 
--# Generally, we want to avoid journal errors in this test. Ensure that
--# journalled fs' have a logdev.
--if [ "$FSTYP" != "ext2" ]; then
--	_require_logdev
--fi
-+# Generally, we want to avoid journal errors on the extended testcase. Only
-+# set the -r flag if we have a logdev
-+sflag='-s'
-+case $FSTYP in
-+	btrfs)
-+		_notrun "btrfs has a specialized test for this"
-+		;;
-+	ext3|ext4|xfs)
-+		# Do the more thorough test if we have a logdev
-+		_has_logdev && sflag=''
-+		;;
-+	*)
-+		;;
-+esac
- 
- _require_dm_target error
- _require_test_program fsync-err
-@@ -70,7 +78,7 @@ _require_fs_space $SCRATCH_MNT 65536
- 
- testfile=$SCRATCH_MNT/fsync-err-test
- 
--$here/src/fsync-err -d $here/src/dmerror $testfile
-+$here/src/fsync-err $sflag -d $here/src/dmerror $testfile
- 
- # success, all done
- _dmerror_load_working_table
--- 
-2.13.0
-
+> 
+> Brian
+> 
+> > --D
+> > 
+> > > 
+> > > Brian
+> > > 
+> > >  tests/xfs/141 | 22 ++++++++++++++++++----
+> > >  1 file changed, 18 insertions(+), 4 deletions(-)
+> > > 
+> > > diff --git a/tests/xfs/141 b/tests/xfs/141
+> > > index 56ff14e..ea4f558 100755
+> > > --- a/tests/xfs/141
+> > > +++ b/tests/xfs/141
+> > > @@ -43,6 +43,21 @@ _cleanup()
+> > >  	wait > /dev/null 2>&1
+> > >  }
+> > >  
+> > > +# require either the current error tag or the old custom log record crc error
+> > > +# injection knob
+> > > +_setup_bad_crc()
+> > > +{
+> > > +	if [ -e /sys/fs/xfs/$1/errortag/log_bad_crc ]; then
+> > > +		badcrc_attr=/sys/fs/xfs/$1/errortag/log_bad_crc
+> > > +		return
+> > > +	fi
+> > > +	if [ -e /sys/fs/xfs/$1/log/log_badcrc_factor ]; then
+> > > +		badcrc_attr=/sys/fs/xfs/$1/log/log_badcrc_factor
+> > > +		return
+> > > +	fi
+> > > +	_notrun "bad crc sysfs attribute not supported"
+> > > +}
+> > > +
+> > >  rm -f $seqres.full
+> > >  
+> > >  # get standard environment, filters and checks
+> > > @@ -53,7 +68,6 @@ rm -f $seqres.full
+> > >  # Modify as appropriate.
+> > >  _supported_fs xfs
+> > >  _supported_os Linux
+> > > -_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
+> > >  _require_scratch
+> > >  _require_command "$KILLALL_PROG" killall
+> > >  
+> > > @@ -62,14 +76,14 @@ echo "Silence is golden."
+> > >  _scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> > >  _scratch_mount
+> > >  
+> > > -sdev=$(_short_dev $SCRATCH_DEV)
+> > > +_setup_bad_crc $(_short_dev $SCRATCH_DEV)
+> > >  
+> > >  for i in $(seq 1 5); do
+> > >  	# Enable error injection. Use a random bad crc factor up to 100
+> > >  	# (increase this value to run fsstress longer).
+> > >  	factor=$((RANDOM % 100 + 1))
+> > > -	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
+> > > -	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
+> > > +	echo iteration $i bad crc factor: $factor >> $seqres.full 2>&1
+> > > +	echo $factor > $badcrc_attr
+> > >  
+> > >  	# Run fsstress until the filesystem shuts down. It will shut down
+> > >  	# automatically when error injection triggers.
+> > > -- 
+> > > 2.9.4
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
