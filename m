@@ -1,41 +1,95 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52970 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:8709 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751545AbdF3M0n (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 30 Jun 2017 08:26:43 -0400
-Date: Fri, 30 Jun 2017 20:26:41 +0800
+        id S1751810AbdF3Mci (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 30 Jun 2017 08:32:38 -0400
+Date: Fri, 30 Jun 2017 20:32:35 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: Some tests not run: not suitable for this OS: Linux
-Message-ID: <20170630122641.GF23360@eguan.usersys.redhat.com>
-References: <20170630121212.GS2866@twin.jikos.cz>
+Subject: Re: [PATCH v2 12/8] ext4: don't online scrub ever
+Message-ID: <20170630123235.GG23360@eguan.usersys.redhat.com>
+References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
+ <20170630041331.GG5871@birch.djwong.org>
+ <20170630045812.GI5871@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170630121212.GS2866@twin.jikos.cz>
+In-Reply-To: <20170630045812.GI5871@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: David Sterba <dsterba@suse.cz>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 30, 2017 at 02:12:12PM +0200, David Sterba wrote:
-> Hi,
+On Thu, Jun 29, 2017 at 09:58:12PM -0700, Darrick J. Wong wrote:
+> The ext4 online scrub program is no longer under active development,
+> so remove all the test code that tried to use it.
 > 
-> I've noticed in the log:
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+> v2: Fix the description to match what it does now
+> ---
+>  common/fuzzy       |    2 +-
+>  tests/ext4/023     |    7 ++++---
+>  tests/ext4/023.out |    2 +-
+>  3 files changed, 6 insertions(+), 5 deletions(-)
 > 
-> generic/093 -- not suitable for this OS: Linux
-> generic/097 -- not suitable for this OS: Linux
-> generic/099 -- not suitable for this OS: Linux
-> 
-> all with "_supported_os IRIX", so I wonder if the tests should be
-> removed or at least reviewed if they make sense to enable for linux.
-> They test xattrs, acl or capabilities.
+> diff --git a/common/fuzzy b/common/fuzzy
+> index 304268e..686cf77 100644
+> --- a/common/fuzzy
+> +++ b/common/fuzzy
+> @@ -70,7 +70,7 @@ _require_scrub() {
+>  # Scrub the scratch filesystem metadata (online)
+>  _scratch_scrub() {
+>  	case "${FSTYP}" in
+> -	"xfs"|"ext4"|"ext3"|"ext2")
+> +	"xfs")
+>  		$XFS_SCRUB_PROG -d -T -v "$@" $SCRATCH_MNT
+>  		;;
+>  	*)
 
-Yes, there's a plan to remove IRIX support and associated tests & files
-& code. Eric Biggers is kind enough that he has sent out such a
-patchset[1] to do so. And Darrick asked to make the xattr and acl
-tests compatible with Linux instead of simply removing them. v2 is not
-out yet, but it's not a high priority task, I think we can wait :)
+The _require_scrub part is still missed, but it's easy enough for me to
+fix at commit time :)
+
+I'll give these patches  more exposure time in the list and leave them
+to next week's update.
 
 Thanks,
 Eryu
 
-[1] https://www.spinics.net/lists/fstests/msg06385.html
+> diff --git a/tests/ext4/023 b/tests/ext4/023
+> index 4f5cf3e..7ca3d7d 100755
+> --- a/tests/ext4/023
+> +++ b/tests/ext4/023
+> @@ -1,7 +1,9 @@
+>  #! /bin/bash
+>  # FS QA Test No. 023
+>  #
+> -# Populate a ext4 filesystem and ensure that scrub and repair are happy.
+> +# Ensure that the populate helpers actually /can/ populate a ext4
+> +# filesystem with all types of metadata and create an image of the
+> +# metadata.  Check that fsck is happy with the resulting fs.
+>  #
+>  #-----------------------------------------------------------------------
+>  # Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
+> @@ -51,9 +53,8 @@ _require_scrub
+>  echo "Format and populate"
+>  _scratch_populate_cached > $seqres.full 2>&1
+>  
+> -echo "Scrub"
+> +echo "Mount"
+>  _scratch_mount >> $seqres.full 2>&1
+> -_scratch_scrub >> $seqres.full
+>  
+>  # success, all done
+>  status=0
+> diff --git a/tests/ext4/023.out b/tests/ext4/023.out
+> index da2bd60..8a7659b 100644
+> --- a/tests/ext4/023.out
+> +++ b/tests/ext4/023.out
+> @@ -1,3 +1,3 @@
+>  QA output created by 023
+>  Format and populate
+> -Scrub
+> +Mount
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
