@@ -1,133 +1,131 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41394 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751893AbdF2RT2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Jun 2017 13:19:28 -0400
-Date: Fri, 30 Jun 2017 01:19:25 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 5/8] reflink: test unlinking a huge extent with a lot of
- refcount adjustments
-Message-ID: <20170629171925.GW23360@eguan.usersys.redhat.com>
-References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
- <149808226863.8924.5799576767468365376.stgit@birch.djwong.org>
- <20170629093614.GO23360@eguan.usersys.redhat.com>
- <20170629160746.GB5871@birch.djwong.org>
+Received: from szxga03-in.huawei.com ([45.249.212.189]:8408 "EHLO
+        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752085AbdF3DRP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Jun 2017 23:17:15 -0400
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstest PATCH V2 2/2] overlay/031: add tests of whiteouts in lowerdir and both dirs
+Date: Fri, 30 Jun 2017 11:20:11 +0800
+Message-ID: <1498792811-17311-3-git-send-email-yi.zhang@huawei.com>
+In-Reply-To: <1498792811-17311-1-git-send-email-yi.zhang@huawei.com>
+References: <1498792811-17311-1-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170629160746.GB5871@birch.djwong.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 29, 2017 at 09:07:46AM -0700, Darrick J. Wong wrote:
-> On Thu, Jun 29, 2017 at 05:36:14PM +0800, Eryu Guan wrote:
-> > On Wed, Jun 21, 2017 at 02:57:48PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > Test a regression in XFS where we blow out a transaction reservation if
-> > > we create a big file, share every other block, and delete the first
-> > > file.  There's nothing particularly fs-specific about this stress test,
-> > > so put it in generic.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > This test took me 3019s to finish with v4.12-rc7 kernel, and another
-> > host "hung" at "Delete file1" (it had been more than 1 hour, and I lost
-> > my patience and hard-reboot the host). Are they expected results?
-> 
-> No.  The take-forever-or-crash behavior should be fixed by "xfs: try to
-> avoid blowing out the transaction reservation when bunmaping a shared
-> extent" in 4.13.  Feel free to hang on to this one until -rc1. :)
+In overlay/031, it only cover the test case of whiteouts in
+origined upper dir. This patch add two cases cover the other
+two situations:
 
-Thanks! I'll take it in after 4.13-rc1 then :)
+1) Lower origined dir have whiteouts;
+2) Both upper and lower origined dirs have whiteouts (although
+this case is pass now, still add this to cover all three kinds
+of situations).
 
-> 
-> > If the bug is still existed in latest upstream kernel, I tend to merge
-> > it after the fix landing in linus tree. If v4.12-rc7 doesn't suffer from
-> > this bug, the test time should be reduced.
-> 
-> <shrug> This is what I saw just now:
-> 
-> FSTYP         -- xfs (debug)
-> PLATFORM      -- Linux/x86_64 birch-mtr0 4.12.0-rc6-dgc
-> MKFS_OPTIONS  -- -f -m reflink=1,rmapbt=1, -i sparse=1, /dev/pmem1
-> MOUNT_OPTIONS -- /dev/pmem1 /opt
-> 
-> generic/931      21s
-> Ran: generic/931
-> Passed all 1 tests
-> 
-> Though if it takes forever for everyone else, please kick this one out
-> of auto/quick.  At least in theory, before the patch the test will
-> either blow out a transaction reservation and hang the system, or if it
-> does succeed it'll have done so by scraping long and hard for log space.
-> That is probably why it takes 3000+ seconds on your test box, unless
-> you were also testing xfs for-next.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+ tests/overlay/031 | 58 ++++++++++++++++++++++++++++++++++++++++++++-----------
+ 1 file changed, 47 insertions(+), 11 deletions(-)
 
-I'm actually testing for-next branch now, will confirm the test time on
-for-next kernel.
+diff --git a/tests/overlay/031 b/tests/overlay/031
+index cb29ee5..b7bad3a 100755
+--- a/tests/overlay/031
++++ b/tests/overlay/031
+@@ -1,9 +1,10 @@
+ #! /bin/bash
+ # FS QA Test 031
+ #
+-# The unmerged and impure upper directories may contain invalid
+-# whiteouts when we change lowerdir(e.g. clean up dir) and remount
+-# overlay. This may lead to whiteouts exposure and rmdir failure.
++# The unmerged and origined directories may contain invalid
++# whiteouts when we change underlaying dir (e.g. clean up lowerdir)
++# and remount overlay. This may lead to whiteouts exposure and
++# rmdir failure.
+ #
+ #-----------------------------------------------------------------------
+ # Copyright (c) 2017 Huawei.  All Rights Reserved.
+@@ -67,19 +68,21 @@ _require_scratch
+ _scratch_mkfs
+ 
+ # create test directorys and whiteout
+-lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
+ upperdir=$OVL_BASE_SCRATCH_MNT/upper
+ workdir=$OVL_BASE_SCRATCH_MNT/workdir
+-testfile=a
+-mkdir -p $lowerdir $upperdir $workdir
++testfile1=a
++testfile2=b
++mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+ 
+-_create_whiteout $lowerdir $upperdir $workdir $testfile
++_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
+ 
+ # clean up the lower directory and mount overlay again,
+ # whiteout will expose.
+-rm -rf $lowerdir/testdir
++rm -rf $lowerdir1/testdir
+ 
+-_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+ 
+ ls $SCRATCH_MNT/testdir
+ 
+@@ -90,15 +93,48 @@ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
+ # umount overlay again, create a new file with the same name and
+ # mount overlay again.
+ $UMOUNT_PROG $SCRATCH_MNT
+-touch $lowerdir/testdir
++touch $lowerdir1/testdir
+ 
+-_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+ 
+ # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
+ # it will not clean up the dir and lead to residue.
+ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
+ ls $workdir/work
+ 
++$UMOUNT_PROG $SCRATCH_MNT
++
++# let lower dir have invalid whiteouts, repeat ls and rmdir test again.
++rm -rf $lowerdir1/testdir
++rm -rf $upperdir/testdir
++
++_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile1
++
++rm -rf $lowerdir2/testdir
++
++_overlay_mount_dirs "$lowerdir1:$lowerdir2" $upperdir $workdir \
++		     $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++ls $SCRATCH_MNT/testdir
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
++rm -rf $lowerdir1/testdir
++rm -rf $upperdir/testdir
++
++_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
++
++rm -rf $lowerdir1/testdir
++
++_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile2
++
++_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
++
++ls $SCRATCH_MNT/testdir
++rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
++
+ # success, all done
+ echo "Silence is golden"
+ status=0
+-- 
+2.5.0
 
-> 
-> > And another minor nit below.
-> > 
-> > > ---
-> > >  tests/generic/931     |   94 +++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/931.out |    6 +++
-> > >  tests/generic/group   |    1 +
-> > >  3 files changed, 101 insertions(+)
-> > >  create mode 100755 tests/generic/931
-> > >  create mode 100644 tests/generic/931.out
-> > > 
-> > > 
-> > > diff --git a/tests/generic/931 b/tests/generic/931
-> > > new file mode 100755
-> > > index 0000000..afadf81
-> > > --- /dev/null
-> > > +++ b/tests/generic/931
-> > > @@ -0,0 +1,94 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test No. 931
-> > > +#
-> > > +# See how well we handle deleting a file with a million refcount extents.
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +
-> > > +seq=`basename "$0"`
-> > > +seqres="$RESULT_DIR/$seq"
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1    # failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +    cd /
-> > > +    rm -rf "$tmp".* $testdir/file1
-> > 
-> > 'rm -rf' looks a bit scary, and we're only deleting regular files not
-> > directories, 'rm -f' should be sufficient.
-> 
-> Yes.  Will you fix it on the way in or should I resend?
-
-I can fix it.
-
-Thanks,
-Eryu
