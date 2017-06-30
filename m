@@ -1,52 +1,44 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:39099 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:39359 "EHLO
         aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751026AbdF3EMI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Jun 2017 00:12:08 -0400
-Date: Thu, 29 Jun 2017 21:12:04 -0700
+        with ESMTP id S1750730AbdF3EMn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Jun 2017 00:12:43 -0400
+Date: Thu, 29 Jun 2017 21:12:39 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 9/8] common/populate: remember multi-device configurations
-Message-ID: <20170630041204.GD5871@birch.djwong.org>
+Subject: [PATCH 10/8] common/rc: test that the xfs_io scrub/repair commands
+ actually work
+Message-ID: <20170630041239.GE5871@birch.djwong.org>
 References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
- <20170622062653.GF3787@birch.djwong.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170622062653.GF3787@birch.djwong.org>
+In-Reply-To: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
 To: eguan@redhat.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Record the external log and realtime device configurations when we
-create a sample filesystem.  ext4 tightly binds to external logs,
-so we have to preserve that too.
+When we call _require_xfs_io_command for the scrub ioctl, we have to
+actually try calling the ioctl to make sure that the ioctl is present on
+the running kernel.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/populate |   13 ++++++++++++-
- 1 file changed, 12 insertions(+), 1 deletion(-)
+ common/rc |    5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/common/populate b/common/populate
-index e99ce68..498151f 100644
---- a/common/populate
-+++ b/common/populate
-@@ -713,7 +713,18 @@ _scratch_populate_cached() {
- 	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
- 
- 	# Throw away cached image if it doesn't match our spec.
--	meta_descr="FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE $(blockdev --getsz "${SCRATCH_DEV}") ARGS $@"
-+	case "${FSTYP}" in
-+	"ext4")
-+		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL}"
-+		# ext4 cannot e2image external logs, so we cannot restore
-+		test -n "${SCRATCH_LOGDEV}" && rm -f "${POPULATE_METADUMP}"
+diff --git a/common/rc b/common/rc
+index 0062f6f..a3addad 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2186,6 +2186,11 @@ _require_xfs_io_command()
+ 		echo $testio | egrep -q "invalid option" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
++	"scrub"|"repair")
++		testio=`$XFS_IO_PROG -x -c "$command dummy 0" $TEST_DIR 2>&1`
++		echo $testio | egrep -q "Inappropriate ioctl" && \
++			_notrun "xfs_io $command support is missing"
 +		;;
-+	"xfs")
-+		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}";;
-+	*)
-+		extra_descr="";;
-+	esac
-+	meta_descr="FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE $(blockdev --getsz "${SCRATCH_DEV}") ${extra_descr} ARGS $@"
- 	cmp -s "${POPULATE_METADUMP_DESCR}" <(echo "${meta_descr}") || rm -rf "${POPULATE_METADUMP}"
- 
- 	# Do we have a cached image?
+ 	"utimes" )
+ 		testio=`$XFS_IO_PROG -f -c "utimes" 0 0 0 0 $testfile 2>&1`
+ 		;;
