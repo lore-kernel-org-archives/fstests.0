@@ -1,135 +1,175 @@
-Received: from mail-oi0-f65.google.com ([209.85.218.65]:34792 "EHLO
-        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752374AbdGCLj7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Jul 2017 07:39:59 -0400
-MIME-Version: 1.0
-In-Reply-To: <1499078611-18755-3-git-send-email-yi.zhang@huawei.com>
-References: <1499078611-18755-1-git-send-email-yi.zhang@huawei.com> <1499078611-18755-3-git-send-email-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 3 Jul 2017 14:39:58 +0300
-Message-ID: <CAOQ4uxjWxzcGEm18kFbvs-KoWYq+nwkicot1Mz6ksftSjc-qnA@mail.gmail.com>
-Subject: Re: [xfstest PATCH V3 2/2] overlay/031: add tests of whiteouts in
- lowerdir and both dirs
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx1.redhat.com ([209.132.183.28]:54968 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752233AbdGCPcH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Jul 2017 11:32:07 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 9849986647
+        for <fstests@vger.kernel.org>; Mon,  3 Jul 2017 15:32:06 +0000 (UTC)
+Received: from eorzea.usersys.redhat.com (unknown [10.43.17.52])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id E51086E524
+        for <fstests@vger.kernel.org>; Mon,  3 Jul 2017 15:32:05 +0000 (UTC)
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: [PATCH] xfs test: Buffer resubmittion test
+Date: Mon,  3 Jul 2017 17:32:00 +0200
+Message-Id: <20170703153200.14423-1-cmaiolino@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, miaoxie@huawei.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 3, 2017 at 1:43 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> In overlay/031, it only cover the test case of whiteouts in
-> origined upper dir. This patch add two cases cover the other
-> two situations:
->
-> 1) Lower origined dir have whiteouts;
-> 2) Both upper and lower origined dirs have whiteouts (although
-> this case is pass now, still add this to cover all three kinds
-> of situations).
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Hi folks,
 
-> ---
->  tests/overlay/031 | 58 ++++++++++++++++++++++++++++++++++++++++++++-----------
->  1 file changed, 47 insertions(+), 11 deletions(-)
->
-> diff --git a/tests/overlay/031 b/tests/overlay/031
-> index cb29ee5..b7bad3a 100755
-> --- a/tests/overlay/031
-> +++ b/tests/overlay/031
-> @@ -1,9 +1,10 @@
->  #! /bin/bash
->  # FS QA Test 031
->  #
-> -# The unmerged and impure upper directories may contain invalid
-> -# whiteouts when we change lowerdir(e.g. clean up dir) and remount
-> -# overlay. This may lead to whiteouts exposure and rmdir failure.
-> +# The unmerged and origined directories may contain invalid
-> +# whiteouts when we change underlaying dir (e.g. clean up lowerdir)
-> +# and remount overlay. This may lead to whiteouts exposure and
-> +# rmdir failure.
->  #
->  #-----------------------------------------------------------------------
->  # Copyright (c) 2017 Huawei.  All Rights Reserved.
-> @@ -67,19 +68,21 @@ _require_scratch
->  _scratch_mkfs
->
->  # create test directorys and whiteout
-> -lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
->  upperdir=$OVL_BASE_SCRATCH_MNT/upper
->  workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> -testfile=a
-> -mkdir -p $lowerdir $upperdir $workdir
-> +testfile1=a
-> +testfile2=b
-> +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
->
-> -_create_whiteout $lowerdir $upperdir $workdir $testfile
-> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
->
->  # clean up the lower directory and mount overlay again,
->  # whiteout will expose.
-> -rm -rf $lowerdir/testdir
-> +rm -rf $lowerdir1/testdir
->
-> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->
->  ls $SCRATCH_MNT/testdir
->
-> @@ -90,15 +93,48 @@ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->  # umount overlay again, create a new file with the same name and
->  # mount overlay again.
->  $UMOUNT_PROG $SCRATCH_MNT
-> -touch $lowerdir/testdir
-> +touch $lowerdir1/testdir
->
-> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->
->  # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
->  # it will not clean up the dir and lead to residue.
->  rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->  ls $workdir/work
->
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +# let lower dir have invalid whiteouts, repeat ls and rmdir test again.
-> +rm -rf $lowerdir1/testdir
-> +rm -rf $upperdir/testdir
-> +
-> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile1
-> +
-> +rm -rf $lowerdir2/testdir
-> +
-> +_overlay_mount_dirs "$lowerdir1:$lowerdir2" $upperdir $workdir \
-> +                    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +
-> +ls $SCRATCH_MNT/testdir
-> +rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
-> +
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
-> +rm -rf $lowerdir1/testdir
-> +rm -rf $upperdir/testdir
-> +
-> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
-> +
-> +rm -rf $lowerdir1/testdir/$testfile1
-> +
-> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile2
-> +
-> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +
-> +ls $SCRATCH_MNT/testdir
-> +rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
-> +
->  # success, all done
->  echo "Silence is golden"
->  status=0
-> --
-> 2.5.0
->
+this is the xfstests case for the buffer resubmition failures with
+dm-thin I'm working on.
+
+I used test 999 to avoid the need of changing the test number between
+revisions. I don't write a xfstest for a while, so I am not sure if the
+test is ok as it is.
+
+It is doing its job though :) Passing with a kernel using my last
+patches for the problem (although they still need revision), and hanging
+up when the test is executed with a kernel without my patches, so be
+careful to try it.
+
+Thoughts?
+
+Cheers
+
+Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+---
+ tests/xfs/999     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 ++
+ tests/xfs/group   |   1 +
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 0000000..5ae8b74
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,102 @@
++#! /bin/bash
++# FS QA Test 999
++#
++# Test buffer resubmission after a failed writeback with to a full overcommited
++# dm-thin device. 
++#
++# This test will hang the filesystem when ran on an unpatched kernel
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$UMOUNT_PROG $mnt >/dev/null 2>&1
++	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
++	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++_require_dm_target thin-pool
++_require_command $LVM_PROG lvm
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++vgname=vg_$seq
++lvname=lv_$seq
++poolname=pool_$seq
++snapname=snap_$seq
++origpsize=100
++virtsize=200
++newpsize=200
++mnt=$SCRATCH_DIR/mnt_$seq
++mkdir -p $mnt
++
++#Ensure we have enough disk space
++_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
++
++$LVM_PROG pvcreate -f $SCRATCH_DEV >/dev/null 2>&1
++$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >/dev/null 2>&1
++
++$LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y --zero n \
++-L $origpsize --poolmetadatasize 4M $vgname >/dev/null 2>&1
++
++$LVM_PROG lvcreate  --virtualsize $virtsize -T $vgname/$poolname \
++-n $lvname >/dev/null 2>&1
++
++_mkfs_dev /dev/mapper/$vgname-$lvname >/dev/null 2>&1
++
++$LVM_PROG lvcreate  -k n -s $vgname/$lvname -n $snapname >/dev/null 2>&1
++
++_mount /dev/mapper/$vgname-$snapname $mnt
++
++xfs_io -f -d -c 'pwrite -b 1m 0 120m' $mnt/f1 >/dev/null 2>&1
++
++fsfreeze -f $mnt &
++
++#Wait fsfreeze to its job
++sleep 10
++
++lvextend -L $newpsize $vgname/$poolname >/dev/null 2>&1
++
++fsfreeze -u $mnt
++echo "Test OK"
++
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 0000000..8c3c938
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Test OK
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 792161a..2bde916 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -416,3 +416,4 @@
+ 416 dangerous_fuzzers dangerous_scrub dangerous_repair
+ 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 418 dangerous_fuzzers dangerous_scrub dangerous_repair
++999 dangerous
+-- 
+2.9.4
+
