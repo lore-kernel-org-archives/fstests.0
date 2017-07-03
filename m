@@ -1,135 +1,143 @@
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:36807 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750771AbdGBIP3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jul 2017 04:15:29 -0400
-Received: by mail-pg0-f42.google.com with SMTP id u62so81405191pgb.3
-        for <fstests@vger.kernel.org>; Sun, 02 Jul 2017 01:15:29 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id u9sm29992590pfg.127.2017.07.02.01.15.26
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 02 Jul 2017 01:15:27 -0700 (PDT)
-Message-ID: <5958ab9f.09df620a.13922.076c@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 02 Jul 2017 16:15:24 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to f3a5cbbb34b7
+Received: from szxga01-in.huawei.com ([45.249.212.187]:9261 "EHLO
+        szxga01-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752124AbdGCBmt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jul 2017 21:42:49 -0400
+Subject: Re: [xfstest PATCH V2 2/2] overlay/031: add tests of whiteouts in
+ lowerdir and both dirs
+References: <1498792811-17311-1-git-send-email-yi.zhang@huawei.com>
+ <1498792811-17311-3-git-send-email-yi.zhang@huawei.com>
+ <CAOQ4uxgnY5tk1Bt7p=MC0GCFgXcSngXuCPQYCkFSovEDCmn5yg@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <f398ce46-3a40-b0cc-6520-5d1f0ecb3a03@huawei.com>
+Date: Mon, 3 Jul 2017 09:42:33 +0800
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="sxjkRfhOHIQw"
-Content-Disposition: inline
+In-Reply-To: <CAOQ4uxgnY5tk1Bt7p=MC0GCFgXcSngXuCPQYCkFSovEDCmn5yg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
+On 2017/6/30 22:28, Amir Goldstein wrote:
+> On Fri, Jun 30, 2017 at 6:20 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> In overlay/031, it only cover the test case of whiteouts in
+>> origined upper dir. This patch add two cases cover the other
+>> two situations:
+>>
+>> 1) Lower origined dir have whiteouts;
+>> 2) Both upper and lower origined dirs have whiteouts (although
+>> this case is pass now, still add this to cover all three kinds
+>> of situations).
+>>
+>> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> 
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> 
+> Except one issue below.
+> 
+>> ---
+>>  tests/overlay/031 | 58 ++++++++++++++++++++++++++++++++++++++++++++-----------
+>>  1 file changed, 47 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/tests/overlay/031 b/tests/overlay/031
+>> index cb29ee5..b7bad3a 100755
+>> --- a/tests/overlay/031
+>> +++ b/tests/overlay/031
+>> @@ -1,9 +1,10 @@
+>>  #! /bin/bash
+>>  # FS QA Test 031
+>>  #
+>> -# The unmerged and impure upper directories may contain invalid
+>> -# whiteouts when we change lowerdir(e.g. clean up dir) and remount
+>> -# overlay. This may lead to whiteouts exposure and rmdir failure.
+>> +# The unmerged and origined directories may contain invalid
+>> +# whiteouts when we change underlaying dir (e.g. clean up lowerdir)
+>> +# and remount overlay. This may lead to whiteouts exposure and
+>> +# rmdir failure.
+>>  #
+>>  #-----------------------------------------------------------------------
+>>  # Copyright (c) 2017 Huawei.  All Rights Reserved.
+>> @@ -67,19 +68,21 @@ _require_scratch
+>>  _scratch_mkfs
+>>
+>>  # create test directorys and whiteout
+>> -lowerdir=$OVL_BASE_SCRATCH_MNT/lower
+>> +lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
+>> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
+>>  upperdir=$OVL_BASE_SCRATCH_MNT/upper
+>>  workdir=$OVL_BASE_SCRATCH_MNT/workdir
+>> -testfile=a
+>> -mkdir -p $lowerdir $upperdir $workdir
+>> +testfile1=a
+>> +testfile2=b
+>> +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+>>
+>> -_create_whiteout $lowerdir $upperdir $workdir $testfile
+>> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
+>>
+>>  # clean up the lower directory and mount overlay again,
+>>  # whiteout will expose.
+>> -rm -rf $lowerdir/testdir
+>> +rm -rf $lowerdir1/testdir
+>>
+>> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>>
+>>  ls $SCRATCH_MNT/testdir
+>>
+>> @@ -90,15 +93,48 @@ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
+>>  # umount overlay again, create a new file with the same name and
+>>  # mount overlay again.
+>>  $UMOUNT_PROG $SCRATCH_MNT
+>> -touch $lowerdir/testdir
+>> +touch $lowerdir1/testdir
+>>
+>> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>>
+>>  # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
+>>  # it will not clean up the dir and lead to residue.
+>>  rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
+>>  ls $workdir/work
+>>
+>> +$UMOUNT_PROG $SCRATCH_MNT
+>> +
+>> +# let lower dir have invalid whiteouts, repeat ls and rmdir test again.
+>> +rm -rf $lowerdir1/testdir
+>> +rm -rf $upperdir/testdir
+>> +
+>> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile1
+>> +
+>> +rm -rf $lowerdir2/testdir
+>> +
+>> +_overlay_mount_dirs "$lowerdir1:$lowerdir2" $upperdir $workdir \
+>> +                    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>> +
+>> +ls $SCRATCH_MNT/testdir
+>> +rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
+>> +
+>> +$UMOUNT_PROG $SCRATCH_MNT
+>> +
+>> +# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
+>> +rm -rf $lowerdir1/testdir
+>> +rm -rf $upperdir/testdir
+>> +
+>> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
+>> +
+>> +rm -rf $lowerdir1/testdir
+>> +
+>> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile2
+>> +
+>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+>> +
+> 
+> Forgot to rm -rf $lowerdir2/testdir ?
+> 
 
---sxjkRfhOHIQw
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is a normal "new tests and bug fixes" update. It's
-a bit larger than previous updates, 9 contributors contributed 13 commits, many
-thanks to all of them, and to those who have helped review patches!
-
-New failures I've noticed in this update:
-- generic/445 is a new SEEK_DATA/SEEK_HOLE test, it fails if page size is less
-  than four times allocation size on ext4 and XFS
-- generic/446 triggers warnings on XFS and fails _dmesg_check, still not 100%
-  sure it's an expected result, if so we can fix it later
-- btrfs/147 is a new regression test and it fails on latest 4.12-rc7 kernel
+Lowerdir2 is no longer used for the final test, so I think there is no difference
+whether we removed lowerdir2/testdir or not.(I miss something?)
 
 Thanks,
-Eryu
+ZhangYi.
 
-The new head of the master branch is commit:
-
-f3a5cbbb34b7 xfs: test freeze/rmap repair race
-
-New commits:
-
-Andreas Gruenbacher (3):
-      [c56905614d9d] seek_sanity_test: Report the actual allocation size
-      [d8e5df11f2b6] generic: Another SEEK_HOLE/SEEK_DATA sanity test
-      [d1df9deaaba3] src/seek_sanity_test: Fix for filesystems without unwritten extent support
-
-Brian Foster (1):
-      [d55123c080cb] generic/247: filter out expected XFS warnings for mixed mmap/direct I/O
-
-Darrick J. Wong (2):
-      [95cf534f03e2] xfs/274: flip shared bits to reflect xfsprogs usage
-      [f3a5cbbb34b7] xfs: test freeze/rmap repair race
-
-David Disseldorp (1):
-      [0f87c87f0c1b] README: remove incorrect check -udf usage
-
-Eric Sandeen (1):
-      [3ce66a229ddb] generic/401: Test mountpoint not subdir for filetype support
-
-Filipe Manana (1):
-      [97843b0910f5] btrfs: test incremental send after replacing directory with a file
-
-Lu Fengqi (1):
-      [591b5d75b834] btrfs/027: reorder the arguments of btrfs replace
-
-Luis Henriques (2):
-      [9f03a9a9ae66] generic/430: Fix filename in "copy beyond end" test
-      [82012736f79d] common/rc: handle the case when syscall isn't available
-
-Xiao Yang (1):
-      [ff5eca9b68e6] generic: test a race between dio reads and mapped writes
-
-
-Code Diffstat:
-
- README                 |   4 +-
- common/rc              |   2 +
- common/xfs             |  17 ++++
- src/seek_sanity_test.c | 268 ++++++++++++++++++++++++++++++++-----------------
- tests/btrfs/027        |   4 +-
- tests/btrfs/147        | 130 ++++++++++++++++++++++++
- tests/btrfs/147.out    |   6 ++
- tests/btrfs/group      |   1 +
- tests/generic/095      |  19 +---
- tests/generic/247      |  11 +-
- tests/generic/401      |   2 +-
- tests/generic/430      |   2 +-
- tests/generic/445      |  64 ++++++++++++
- tests/generic/445.out  |   2 +
- tests/generic/446      |  91 +++++++++++++++++
- tests/generic/446.out  |   2 +
- tests/generic/group    |   2 +
- tests/xfs/274          |   4 +-
- tests/xfs/422          | 109 ++++++++++++++++++++
- tests/xfs/422.out      |   4 +
- tests/xfs/group        |   1 +
- 21 files changed, 622 insertions(+), 123 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---sxjkRfhOHIQw
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZWKmkAAoJECZSqilcj+djaRcQAKBOnnueGzDn3G3mZYM/K8sE
-NvUHsfWPZ7+7SPZOoNaU8AtmJGFotUBYYHF6r+JsZTy6j1attK/461q7TfzooQBj
-xqoTXXFWFOHNCA+E6X1PB1LBOjyWSgv7YPGTlxy1uEMM02zhc9+zJtm1zOleZm3N
-2gui8K9Y5zZcGBmARd+GysqWNj3vvWVz4tYiccss8qrwb9f/0KHoKlDuuRBczMFR
-ed04kGASeDOJgsQYjqek4N5Acy66HC+6sJGEQLHT28O4mVuyMsubq8PqCglhbDHM
-gCucaCU5RCknNwOev4BdEpdkgJFbcytIueG0ICpK8AjDS4Y5KOqAfw7FlvnQfzM/
-KAvqbQoqZmzsoGNvsSHcwuLgaDusm+a6Xx4Oquv7CxNgKAMXVSL1CLhr92Yj95kr
-g/J7SSUQxRUPT+bE/2eagktJfWKJSM/kCWoLHKpar+MsHmp+7djmbQtrHFnkvI1r
-pLFZ/Njv9tBAX+2SnlRsR7yf2k/54Awu5ErheqBRZkzpobjgtQqmu9zrZPstGBu6
-FiZYm4ViFUFgXL0IhWn0KUIvSRXqwFXozxrnCNveBoHBX/A5+czgHJHl7eeXlXiX
-xzKRpe7FkX+BRPHV/13W8IcYyibRqanF7Sk9jx3deeM/HjIUSqenL/whXJNNjfHe
-asQrBIoOm0koxMsXONI7
-=GUPR
------END PGP SIGNATURE-----
-
---sxjkRfhOHIQw--
