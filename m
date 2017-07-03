@@ -1,228 +1,41 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38114 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752675AbdGCI6e (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 3 Jul 2017 04:58:34 -0400
-Date: Mon, 3 Jul 2017 16:58:27 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: add a less thorough testing mode for fsync-err
- program
-Message-ID: <20170703085827.GJ23360@eguan.usersys.redhat.com>
-References: <20170629132947.29939-1-jlayton@kernel.org>
+Received: from szxga02-in.huawei.com ([45.249.212.188]:9339 "EHLO
+        szxga02-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754105AbdGCKjj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Jul 2017 06:39:39 -0400
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstest PATCH V3 0/2] overlay/031: add two tests of whiteout check in origin dir
+Date: Mon, 3 Jul 2017 18:43:29 +0800
+Message-ID: <1499078611-18755-1-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170629132947.29939-1-jlayton@kernel.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: jlayton@kernel.org
-Cc: fstests@vger.kernel.org, dhowells@redhat.com
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 29, 2017 at 09:29:47AM -0400, jlayton@kernel.org wrote:
-> From: Jeff Layton <jlayton@redhat.com>
-> 
-> Currently we just have this test run on a whitelist of filesystems, but
-> it would be best to be able to run it on all of them. The problem is
-> that a lot of filesystems basically shut down once they hit metadata
-> errors.
-> 
-> Allow the fsync-err testcase to operate in two different modes. One
-> mode just does basic testing to ensure that we get an error back on
-> all fd's when we fsync. The other does a more thorough test to ensure
-> that we get back 0 on subsequent fsyncs when there hasn't been any
-> write activity.
-> 
-> For now, we just opt-in to the more thorough testing on certain
-> filesystems: xfs, ext3 and ext4 on the generic test. All other
-> filesystems will run in simple mode.
-> 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  common/rc         |  9 +++++++++
->  src/fsync-err.c   | 51 +++++++++++++++++++++++++++++++++------------------
->  tests/generic/441 | 22 +++++++++++++++-------
->  3 files changed, 57 insertions(+), 25 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 2972f89e9527..83675364cf24 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1738,6 +1738,15 @@ _require_test()
->      touch ${RESULT_DIR}/require_test
->  }
->  
-> +_has_logdev()
-> +{
-> +	ret=0
-> +	[ -z "$SCRATCH_LOGDEV" -o ! -b "$SCRATCH_LOGDEV" ] &&
-> +	[ "$USE_EXTERNAL" != yes ] && ret=1
+Add two tests of whiteout check in origin dir, cover other
+two situations:
 
-This doesn't seem right. _has_logdev = ($SCRATCH_LOGDEV is block
-device) && ($USE_EXTERNAL set to yes), so we should set ret=1 if any of
-these conditions is not met. But this code returns 0 (true) if I only
-have SCRATCH_LOGDEV set but not USE_EXTERNAL.
+1) Lower origined dir have whiteouts;
+2) Both upper and lower origined dirs have whiteouts (although
+this case is pass now, still add this to cover all three kinds
+of situations).
 
-And once we have _has_logdev, I think we can refactor _require_logdev to
-use _has_logdev too.
+V3:
+fix testdir verify origin failure with inodes index feature.
 
-> +
-> +	return $ret
-> +}
-> +
->  # this test needs a logdev
->  #
->  _require_logdev()
-> diff --git a/src/fsync-err.c b/src/fsync-err.c
-> index 5b3bdd3ada07..4b0205cf2fd4 100644
-> --- a/src/fsync-err.c
-> +++ b/src/fsync-err.c
-> @@ -13,6 +13,7 @@
->  #include <string.h>
->  #include <unistd.h>
->  #include <getopt.h>
-> +#include <stdbool.h>
->  
->  /*
->   * btrfs has a fixed stripewidth of 64k, so we need to write enough data to
-> @@ -25,7 +26,7 @@
->  
->  static void usage()
->  {
-> -	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] -d dmerror path <filename>\n");
-> +	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] [ -s ] -d dmerror path <filename>\n");
->  }
->  
->  int main(int argc, char **argv)
-> @@ -35,8 +36,9 @@ int main(int argc, char **argv)
->  	char *dmerror_path = NULL;
->  	char *cmdbuf;
->  	size_t cmdsize, bufsize = DEFAULT_BUFSIZE;
-> +	bool simple_mode = false;
->  
-> -	while ((i = getopt(argc, argv, "b:d:n:")) != -1) {
-> +	while ((i = getopt(argc, argv, "b:d:n:s")) != -1) {
->  		switch (i) {
->  		case 'b':
->  			bufsize = strtol(optarg, &buf, 0);
-> @@ -55,6 +57,15 @@ int main(int argc, char **argv)
->  				return 1;
->  			}
->  			break;
-> +		case 's':
-> +			/*
-> +			 * Many filesystems will continue to throw errors after
-> +			 * fsync has already advanced to the current error,
-> +			 * due to metadata writeback failures or other
-> +			 * issues. Allow those fs' to opt out of more thorough
-> +			 * testing.
-> +			 */
-> +			simple_mode = true;
->  		}
->  	}
->  
-> @@ -154,16 +165,18 @@ int main(int argc, char **argv)
->  		}
->  	}
->  
-> -	for (i = 0; i < numfds; ++i) {
-> -		ret = fsync(fd[i]);
-> -		if (ret < 0) {
-> -			/*
-> -			 * We did a failed write and fsync on each fd before.
-> -			 * Now the error should be clear since we've not done
-> -			 * any writes since then.
-> -			 */
-> -			printf("Third fsync on fd[%d] failed: %m\n", i);
-> -			return 1;
-> +	if (!simple_mode) {
-> +		for (i = 0; i < numfds; ++i) {
-> +			ret = fsync(fd[i]);
-> +			if (ret < 0) {
-> +				/*
-> +				 * We did a failed write and fsync on each fd before.
-> +				 * Now the error should be clear since we've not done
-> +				 * any writes since then.
-> +				 */
-> +				printf("Third fsync on fd[%d] failed: %m\n", i);
-> +				return 1;
-> +			}
->  		}
->  	}
->  
-> @@ -185,12 +198,14 @@ int main(int argc, char **argv)
->  		return 1;
->  	}
->  
-> -	for (i = 0; i < numfds; ++i) {
-> -		ret = fsync(fd[i]);
-> -		if (ret < 0) {
-> -			/* The error should still be clear */
-> -			printf("fsync after healing device on fd[%d] failed: %m\n", i);
-> -			return 1;
-> +	if (!simple_mode) {
-> +		for (i = 0; i < numfds; ++i) {
-> +			ret = fsync(fd[i]);
-> +			if (ret < 0) {
-> +				/* The error should still be clear */
-> +				printf("fsync after healing device on fd[%d] failed: %m\n", i);
-> +				return 1;
-> +			}
->  		}
->  	}
->  
-> diff --git a/tests/generic/441 b/tests/generic/441
-> index 2215b64db9a7..e8244224e097 100755
-> --- a/tests/generic/441
-> +++ b/tests/generic/441
-> @@ -45,15 +45,23 @@ _cleanup()
->  . ./common/dmerror
->  
->  # real QA test starts here
-> -_supported_fs ext2 ext3 ext4 xfs
->  _supported_os Linux
->  _require_scratch
->  
-> -# Generally, we want to avoid journal errors in this test. Ensure that
-> -# journalled fs' have a logdev.
-> -if [ "$FSTYP" != "ext2" ]; then
-> -	_require_logdev
-> -fi
-> +# Generally, we want to avoid journal errors on the extended testcase. Only
-> +# set the -r flag if we have a logdev
-> +sflag='-s'
+V2:
+factor out _create_whiteout() helper,
+test whiteout in the middle layer,
+fix test failure with inodes index feature.
 
-This part seems confusing, comments said "set the -r flag" but '-s' is
-actually used.
+zhangyi (F) (2):
+  overlay/031: factor out _create_whiteout() helper
+  overlay/031: add tests of whiteouts in lowerdir and both dirs
 
-> +case $FSTYP in
-> +	btrfs)
-> +		_notrun "btrfs has a specialized test for this"
-> +		;;
-> +	ext3|ext4|xfs)
-> +		# Do the more thorough test if we have a logdev
-> +		_has_logdev && sflag=''
-> +		;;
-> +	*)
-> +		;;
-> +esac
->  
->  _require_dm_target error
->  _require_test_program fsync-err
-> @@ -70,7 +78,7 @@ _require_fs_space $SCRATCH_MNT 65536
->  
->  testfile=$SCRATCH_MNT/fsync-err-test
->  
-> -$here/src/fsync-err -d $here/src/dmerror $testfile
-> +$here/src/fsync-err $sflag -d $here/src/dmerror $testfile
+ tests/overlay/031 | 84 ++++++++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 64 insertions(+), 20 deletions(-)
 
-Better to append this command to $seqres.full too for debug purpose, so
-we know if we're running with or without '-s' option.
+-- 
+2.5.0
 
-Thanks,
-Eryu
-
->  
->  # success, all done
->  _dmerror_load_working_table
-> -- 
-> 2.13.0
-> 
