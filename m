@@ -1,165 +1,228 @@
-Received: from szxga03-in.huawei.com ([45.249.212.189]:8418 "EHLO
-        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752223AbdGCIKh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Jul 2017 04:10:37 -0400
-Subject: Re: [xfstest PATCH V2 2/2] overlay/031: add tests of whiteouts in
- lowerdir and both dirs
-References: <1498792811-17311-1-git-send-email-yi.zhang@huawei.com>
- <1498792811-17311-3-git-send-email-yi.zhang@huawei.com>
- <CAOQ4uxgnY5tk1Bt7p=MC0GCFgXcSngXuCPQYCkFSovEDCmn5yg@mail.gmail.com>
- <f398ce46-3a40-b0cc-6520-5d1f0ecb3a03@huawei.com>
- <CAOQ4uxgDXdL+RPpH_gTzk6n9ZjqYn25wdVBoHLWEDj1KJ9-trw@mail.gmail.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <efe9a552-cf25-9f67-5763-f254f56773ce@huawei.com>
-Date: Mon, 3 Jul 2017 16:10:13 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:38114 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752675AbdGCI6e (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Jul 2017 04:58:34 -0400
+Date: Mon, 3 Jul 2017 16:58:27 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic: add a less thorough testing mode for fsync-err
+ program
+Message-ID: <20170703085827.GJ23360@eguan.usersys.redhat.com>
+References: <20170629132947.29939-1-jlayton@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgDXdL+RPpH_gTzk6n9ZjqYn25wdVBoHLWEDj1KJ9-trw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170629132947.29939-1-jlayton@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, miaoxie@huawei.com
+To: jlayton@kernel.org
+Cc: fstests@vger.kernel.org, dhowells@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/7/3 14:41, Amir Goldstein wrote:
-> On Mon, Jul 3, 2017 at 4:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
->> On 2017/6/30 22:28, Amir Goldstein wrote:
->>> On Fri, Jun 30, 2017 at 6:20 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
->>>> In overlay/031, it only cover the test case of whiteouts in
->>>> origined upper dir. This patch add two cases cover the other
->>>> two situations:
->>>>
->>>> 1) Lower origined dir have whiteouts;
->>>> 2) Both upper and lower origined dirs have whiteouts (although
->>>> this case is pass now, still add this to cover all three kinds
->>>> of situations).
->>>>
->>>> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
->>>
->>> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
->>>
->>> Except one issue below.
->>>
->>>> ---
->>>>  tests/overlay/031 | 58 ++++++++++++++++++++++++++++++++++++++++++++-----------
->>>>  1 file changed, 47 insertions(+), 11 deletions(-)
->>>>
->>>> diff --git a/tests/overlay/031 b/tests/overlay/031
->>>> index cb29ee5..b7bad3a 100755
->>>> --- a/tests/overlay/031
->>>> +++ b/tests/overlay/031
->>>> @@ -1,9 +1,10 @@
->>>>  #! /bin/bash
->>>>  # FS QA Test 031
->>>>  #
->>>> -# The unmerged and impure upper directories may contain invalid
->>>> -# whiteouts when we change lowerdir(e.g. clean up dir) and remount
->>>> -# overlay. This may lead to whiteouts exposure and rmdir failure.
->>>> +# The unmerged and origined directories may contain invalid
->>>> +# whiteouts when we change underlaying dir (e.g. clean up lowerdir)
->>>> +# and remount overlay. This may lead to whiteouts exposure and
->>>> +# rmdir failure.
->>>>  #
->>>>  #-----------------------------------------------------------------------
->>>>  # Copyright (c) 2017 Huawei.  All Rights Reserved.
->>>> @@ -67,19 +68,21 @@ _require_scratch
->>>>  _scratch_mkfs
->>>>
->>>>  # create test directorys and whiteout
->>>> -lowerdir=$OVL_BASE_SCRATCH_MNT/lower
->>>> +lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
->>>> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
->>>>  upperdir=$OVL_BASE_SCRATCH_MNT/upper
->>>>  workdir=$OVL_BASE_SCRATCH_MNT/workdir
->>>> -testfile=a
->>>> -mkdir -p $lowerdir $upperdir $workdir
->>>> +testfile1=a
->>>> +testfile2=b
->>>> +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
->>>>
->>>> -_create_whiteout $lowerdir $upperdir $workdir $testfile
->>>> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
->>>>
->>>>  # clean up the lower directory and mount overlay again,
->>>>  # whiteout will expose.
->>>> -rm -rf $lowerdir/testdir
->>>> +rm -rf $lowerdir1/testdir
->>>>
->>>> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>>
->>>>  ls $SCRATCH_MNT/testdir
->>>>
->>>> @@ -90,15 +93,48 @@ rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->>>>  # umount overlay again, create a new file with the same name and
->>>>  # mount overlay again.
->>>>  $UMOUNT_PROG $SCRATCH_MNT
->>>> -touch $lowerdir/testdir
->>>> +touch $lowerdir1/testdir
->>>>
->>>> -_overlay_mount_dirs $lowerdir $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>>
->>>>  # try to remove test dir from overlay dir, trigger ovl_remove_and_whiteout,
->>>>  # it will not clean up the dir and lead to residue.
->>>>  rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->>>>  ls $workdir/work
->>>>
->>>> +$UMOUNT_PROG $SCRATCH_MNT
->>>> +
->>>> +# let lower dir have invalid whiteouts, repeat ls and rmdir test again.
->>>> +rm -rf $lowerdir1/testdir
->>>> +rm -rf $upperdir/testdir
->>>> +
->>>> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile1
->>>> +
->>>> +rm -rf $lowerdir2/testdir
->>>> +
->>>> +_overlay_mount_dirs "$lowerdir1:$lowerdir2" $upperdir $workdir \
->>>> +                    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>> +
->>>> +ls $SCRATCH_MNT/testdir
->>>> +rm -rf $SCRATCH_MNT/testdir 2>&1 | _filter_scratch
->>>> +
->>>> +$UMOUNT_PROG $SCRATCH_MNT
->>>> +
->>>> +# let lower dir and upper dir both have invalid whiteouts, repeat ls and rmdir again.
->>>> +rm -rf $lowerdir1/testdir
->>>> +rm -rf $upperdir/testdir
->>>> +
->>>> +_create_whiteout $lowerdir1 $upperdir $workdir $testfile1
->>>> +
->>>> +rm -rf $lowerdir1/testdir
->>>> +
->>>> +_create_whiteout $lowerdir2 $lowerdir1 $workdir $testfile2
->>>> +
->>>> +_overlay_mount_dirs $lowerdir1 $upperdir $workdir $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->>>> +
->>>
->>> Forgot to rm -rf $lowerdir2/testdir ?
->>>
->>
->> Lowerdir2 is no longer used for the final test, so I think there is no difference
->> whether we removed lowerdir2/testdir or not.(I miss something?)
->>
+On Thu, Jun 29, 2017 at 09:29:47AM -0400, jlayton@kernel.org wrote:
+> From: Jeff Layton <jlayton@redhat.com>
 > 
-> Right. I tested with my overlayfs-devel branch and found a different issue
-> with the 'whiteouts in both upper and lower' test case.
-> When you run the test you see the warning:
-> overlayfs: failed to verify origin (lower1/testdir, ino=16777474, err=-116)
+> Currently we just have this test run on a whitelist of filesystems, but
+> it would be best to be able to run it on all of them. The problem is
+> that a lot of filesystems basically shut down once they hit metadata
+> errors.
 > 
-> This warning is generated by commit ("ovl: verify origin of merge dir lower")
-> and means that the test does not follow the lower dir at all.
+> Allow the fsync-err testcase to operate in two different modes. One
+> mode just does basic testing to ensure that we get an error back on
+> all fd's when we fsync. The other does a more thorough test to ensure
+> that we get back 0 on subsequent fsyncs when there hasn't been any
+> write activity.
 > 
-> The solution is simple:
+> For now, we just opt-in to the more thorough testing on certain
+> filesystems: xfs, ext3 and ext4 on the generic test. All other
+> filesystems will run in simple mode.
 > 
-> rm -f $lowerdir1/testdir/$testfile1 instead of rm -rf $lowerdir1/testdir
-> to keep the original lower testdir dir intact, instead of recreating the
-> dir with the second _create_whiteout call.
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> ---
+>  common/rc         |  9 +++++++++
+>  src/fsync-err.c   | 51 +++++++++++++++++++++++++++++++++------------------
+>  tests/generic/441 | 22 +++++++++++++++-------
+>  3 files changed, 57 insertions(+), 25 deletions(-)
 > 
+> diff --git a/common/rc b/common/rc
+> index 2972f89e9527..83675364cf24 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1738,6 +1738,15 @@ _require_test()
+>      touch ${RESULT_DIR}/require_test
+>  }
+>  
+> +_has_logdev()
+> +{
+> +	ret=0
+> +	[ -z "$SCRATCH_LOGDEV" -o ! -b "$SCRATCH_LOGDEV" ] &&
+> +	[ "$USE_EXTERNAL" != yes ] && ret=1
 
-Yes, indeed, will fix it, thanks a lot.
+This doesn't seem right. _has_logdev = ($SCRATCH_LOGDEV is block
+device) && ($USE_EXTERNAL set to yes), so we should set ret=1 if any of
+these conditions is not met. But this code returns 0 (true) if I only
+have SCRATCH_LOGDEV set but not USE_EXTERNAL.
+
+And once we have _has_logdev, I think we can refactor _require_logdev to
+use _has_logdev too.
+
+> +
+> +	return $ret
+> +}
+> +
+>  # this test needs a logdev
+>  #
+>  _require_logdev()
+> diff --git a/src/fsync-err.c b/src/fsync-err.c
+> index 5b3bdd3ada07..4b0205cf2fd4 100644
+> --- a/src/fsync-err.c
+> +++ b/src/fsync-err.c
+> @@ -13,6 +13,7 @@
+>  #include <string.h>
+>  #include <unistd.h>
+>  #include <getopt.h>
+> +#include <stdbool.h>
+>  
+>  /*
+>   * btrfs has a fixed stripewidth of 64k, so we need to write enough data to
+> @@ -25,7 +26,7 @@
+>  
+>  static void usage()
+>  {
+> -	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] -d dmerror path <filename>\n");
+> +	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] [ -s ] -d dmerror path <filename>\n");
+>  }
+>  
+>  int main(int argc, char **argv)
+> @@ -35,8 +36,9 @@ int main(int argc, char **argv)
+>  	char *dmerror_path = NULL;
+>  	char *cmdbuf;
+>  	size_t cmdsize, bufsize = DEFAULT_BUFSIZE;
+> +	bool simple_mode = false;
+>  
+> -	while ((i = getopt(argc, argv, "b:d:n:")) != -1) {
+> +	while ((i = getopt(argc, argv, "b:d:n:s")) != -1) {
+>  		switch (i) {
+>  		case 'b':
+>  			bufsize = strtol(optarg, &buf, 0);
+> @@ -55,6 +57,15 @@ int main(int argc, char **argv)
+>  				return 1;
+>  			}
+>  			break;
+> +		case 's':
+> +			/*
+> +			 * Many filesystems will continue to throw errors after
+> +			 * fsync has already advanced to the current error,
+> +			 * due to metadata writeback failures or other
+> +			 * issues. Allow those fs' to opt out of more thorough
+> +			 * testing.
+> +			 */
+> +			simple_mode = true;
+>  		}
+>  	}
+>  
+> @@ -154,16 +165,18 @@ int main(int argc, char **argv)
+>  		}
+>  	}
+>  
+> -	for (i = 0; i < numfds; ++i) {
+> -		ret = fsync(fd[i]);
+> -		if (ret < 0) {
+> -			/*
+> -			 * We did a failed write and fsync on each fd before.
+> -			 * Now the error should be clear since we've not done
+> -			 * any writes since then.
+> -			 */
+> -			printf("Third fsync on fd[%d] failed: %m\n", i);
+> -			return 1;
+> +	if (!simple_mode) {
+> +		for (i = 0; i < numfds; ++i) {
+> +			ret = fsync(fd[i]);
+> +			if (ret < 0) {
+> +				/*
+> +				 * We did a failed write and fsync on each fd before.
+> +				 * Now the error should be clear since we've not done
+> +				 * any writes since then.
+> +				 */
+> +				printf("Third fsync on fd[%d] failed: %m\n", i);
+> +				return 1;
+> +			}
+>  		}
+>  	}
+>  
+> @@ -185,12 +198,14 @@ int main(int argc, char **argv)
+>  		return 1;
+>  	}
+>  
+> -	for (i = 0; i < numfds; ++i) {
+> -		ret = fsync(fd[i]);
+> -		if (ret < 0) {
+> -			/* The error should still be clear */
+> -			printf("fsync after healing device on fd[%d] failed: %m\n", i);
+> -			return 1;
+> +	if (!simple_mode) {
+> +		for (i = 0; i < numfds; ++i) {
+> +			ret = fsync(fd[i]);
+> +			if (ret < 0) {
+> +				/* The error should still be clear */
+> +				printf("fsync after healing device on fd[%d] failed: %m\n", i);
+> +				return 1;
+> +			}
+>  		}
+>  	}
+>  
+> diff --git a/tests/generic/441 b/tests/generic/441
+> index 2215b64db9a7..e8244224e097 100755
+> --- a/tests/generic/441
+> +++ b/tests/generic/441
+> @@ -45,15 +45,23 @@ _cleanup()
+>  . ./common/dmerror
+>  
+>  # real QA test starts here
+> -_supported_fs ext2 ext3 ext4 xfs
+>  _supported_os Linux
+>  _require_scratch
+>  
+> -# Generally, we want to avoid journal errors in this test. Ensure that
+> -# journalled fs' have a logdev.
+> -if [ "$FSTYP" != "ext2" ]; then
+> -	_require_logdev
+> -fi
+> +# Generally, we want to avoid journal errors on the extended testcase. Only
+> +# set the -r flag if we have a logdev
+> +sflag='-s'
+
+This part seems confusing, comments said "set the -r flag" but '-s' is
+actually used.
+
+> +case $FSTYP in
+> +	btrfs)
+> +		_notrun "btrfs has a specialized test for this"
+> +		;;
+> +	ext3|ext4|xfs)
+> +		# Do the more thorough test if we have a logdev
+> +		_has_logdev && sflag=''
+> +		;;
+> +	*)
+> +		;;
+> +esac
+>  
+>  _require_dm_target error
+>  _require_test_program fsync-err
+> @@ -70,7 +78,7 @@ _require_fs_space $SCRATCH_MNT 65536
+>  
+>  testfile=$SCRATCH_MNT/fsync-err-test
+>  
+> -$here/src/fsync-err -d $here/src/dmerror $testfile
+> +$here/src/fsync-err $sflag -d $here/src/dmerror $testfile
+
+Better to append this command to $seqres.full too for debug purpose, so
+we know if we're running with or without '-s' option.
 
 Thanks,
-ZhangYi.
+Eryu
 
+>  
+>  # success, all done
+>  _dmerror_load_working_table
+> -- 
+> 2.13.0
+> 
