@@ -1,55 +1,68 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35065 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752278AbdGDLUT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2017 07:20:19 -0400
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:33705 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752284AbdGDLUX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Jul 2017 07:20:23 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 0/6] overlay hardlink tests
-Date: Tue,  4 Jul 2017 14:20:28 +0300
-Message-Id: <1499167234-22779-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 3/6] overlay/018: test broken hardlinks after mount cycle
+Date: Tue,  4 Jul 2017 14:20:31 +0300
+Message-Id: <1499167234-22779-4-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1499167234-22779-1-git-send-email-amir73il@gmail.com>
+References: <1499167234-22779-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+This test checks if overlayfs hardlinks are preserved across
+copy up.  Check if they are preserved also after copy up and
+mount cycle.
 
-overlay/018 was written to track the non-standard behavior of
-overlayfs, where lower hardlinks are broken on copy up.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/018     | 13 +++++++++++--
+ tests/overlay/018.out |  5 +++++
+ 2 files changed, 16 insertions(+), 2 deletions(-)
 
-While working on fixing the hardlinks breakage issue, I found
-several false positives and uncovered cases in the test.
-
-This series addresses the shortcomings of the original overlay/018
-test and introduces two more tests to overlay/hardlink group.
-
-Thanks,
-Amir.
-
-Amir Goldstein (6):
-  overlay/018: re-factor and add to hardlink group
-  overlay/018: print hardlink content to golden output
-  overlay/018: test broken hardlinks after mount cycle
-  overlay/018: test lower hardlinks re-unite on copy up
-  overlay: test concurrent copy up of lower hardlinks
-  overlay: test dropping nlink below zero
-
- tests/overlay/018     |  60 ++++++++++++++++----
- tests/overlay/018.out |  21 ++++++-
- tests/overlay/032     | 102 ++++++++++++++++++++++++++++++++++
- tests/overlay/032.out |   4 ++
- tests/overlay/033     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/033.out |  69 +++++++++++++++++++++++
- tests/overlay/034     |  91 ++++++++++++++++++++++++++++++
- tests/overlay/034.out |   2 +
- tests/overlay/group   |   5 +-
- 9 files changed, 489 insertions(+), 14 deletions(-)
- create mode 100755 tests/overlay/032
- create mode 100644 tests/overlay/032.out
- create mode 100755 tests/overlay/033
- create mode 100644 tests/overlay/033.out
- create mode 100755 tests/overlay/034
- create mode 100644 tests/overlay/034.out
-
+diff --git a/tests/overlay/018 b/tests/overlay/018
+index 7570a16..46097a9 100755
+--- a/tests/overlay/018
++++ b/tests/overlay/018
+@@ -96,11 +96,20 @@ cat $FILES
+ record_ino_nlink $tmp.before
+ 
+ # Modify content of one of the hardlinks
+-echo "one" >> $foo
++# Intentionally modify the last hardlink in $FILES, so after mount cycle
++# when reading the first file in $FILES, last file won't be in inode/dcache
++echo "one" >> $bar
+ 
+ echo "== After write one =="
+ cat $FILES
+-check_ino_nlink $tmp.before $tmp.after
++check_ino_nlink $tmp.before $tmp.after_one
++
++# Verify that the hardlinks survive a mount cycle
++_scratch_cycle_mount
++
++echo "== After mount cycle =="
++cat $FILES
++check_ino_nlink $tmp.after_one $tmp.after_cycle
+ 
+ status=0
+ exit
+diff --git a/tests/overlay/018.out b/tests/overlay/018.out
+index 784e8bc..5b74ee1 100644
+--- a/tests/overlay/018.out
++++ b/tests/overlay/018.out
+@@ -7,3 +7,8 @@ zero
+ one
+ zero
+ one
++== After mount cycle ==
++zero
++one
++zero
++one
 -- 
 2.7.4
 
