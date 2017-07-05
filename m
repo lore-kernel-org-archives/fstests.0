@@ -1,156 +1,232 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50000 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:36560 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750909AbdGEMQN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Jul 2017 08:16:13 -0400
-Date: Wed, 5 Jul 2017 08:16:11 -0400
+        id S1752018AbdGEMuZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Jul 2017 08:50:25 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 82A0E80F6B
+        for <fstests@vger.kernel.org>; Wed,  5 Jul 2017 12:50:24 +0000 (UTC)
+Date: Wed, 5 Jul 2017 08:50:16 -0400
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 11/8] common/inject: refactor helpers to use new errortag
- interface
-Message-ID: <20170705121610.GA51285@bfoster.bfoster>
-References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
- <20170630041308.GF5871@birch.djwong.org>
+Subject: Re: [PATCH] xfs test: Buffer resubmittion test
+Message-ID: <20170705125016.GB51285@bfoster.bfoster>
+References: <20170703153200.14423-1-cmaiolino@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170630041308.GF5871@birch.djwong.org>
+In-Reply-To: <20170703153200.14423-1-cmaiolino@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Carlos Maiolino <cmaiolino@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 29, 2017 at 09:13:08PM -0700, Darrick J. Wong wrote:
-> Refactor the XFS error injection helpers to use the new errortag
-> interface to configure error injection.  If that isn't present, fall
-> back either to the xfs_io/ioctl based injection or the older sysfs
-> knobs.  Refactor existing testcases to use the new helpers.
+On Mon, Jul 03, 2017 at 05:32:00PM +0200, Carlos Maiolino wrote:
+> Hi folks,
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> this is the xfstests case for the buffer resubmition failures with
+> dm-thin I'm working on.
+> 
+> I used test 999 to avoid the need of changing the test number between
+> revisions. I don't write a xfstest for a while, so I am not sure if the
+> test is ok as it is.
+> 
+> It is doing its job though :) Passing with a kernel using my last
+> patches for the problem (although they still need revision), and hanging
+> up when the test is executed with a kernel without my patches, so be
+> careful to try it.
+> 
+> Thoughts?
+> 
+> Cheers
+> 
+> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
 > ---
->  common/inject |   62 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
->  tests/xfs/051 |    7 ++++--
->  tests/xfs/141 |    5 +++--
->  tests/xfs/196 |   17 ++++++----------
->  4 files changed, 73 insertions(+), 18 deletions(-)
+>  tests/xfs/999     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out |   2 ++
+>  tests/xfs/group   |   1 +
+>  3 files changed, 105 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
 > 
-> diff --git a/common/inject b/common/inject
-> index 8ecc290..1f12a2b 100644
-> --- a/common/inject
-> +++ b/common/inject
-> @@ -35,10 +35,50 @@ _require_error_injection()
->  	esac
->  }
->  
-> +# Find a given xfs mount's errortag injection knob in sysfs
-> +_find_xfs_errortag_knob()
+> diff --git a/tests/xfs/999 b/tests/xfs/999
+> new file mode 100755
+> index 0000000..5ae8b74
+> --- /dev/null
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,102 @@
+> +#! /bin/bash
+> +# FS QA Test 999
+> +#
+> +# Test buffer resubmission after a failed writeback with to a full overcommited
+> +# dm-thin device. 
+
+FYI: trailing space on the line above. A bit more information about the
+problem this is testing for would be useful as well.
+
+> +#
+> +# This test will hang the filesystem when ran on an unpatched kernel
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
+> +#
+
+Needs a copyright. :)
+
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +	dev="$1"
-> +	knob="$2"
-> +	shortdev="$(_short_dev "${dev}")"
-> +	tagfile="/sys/fs/xfs/${shortdev}/errortag/${knob}"
-> +
-> +	# Some of the new sysfs errortag knobs were previously available via
-> +	# another sysfs path.
-> +	case "${knob}" in
-> +	"log_bad_crc")
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/log/log_badcrc_factor"
-> +		fi
-> +		;;
-> +	"drop_writes")
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/drop_writes"
-> +		fi
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/fail_writes"
-> +		fi
-> +		;;
-> +	"log_recovery_delay"|"bug_on_assert")
-
-What's the purpose for having these here? I'm not sure that either is
-really related to error injection (which I find a little confusing
-despite that this code can be reused to generically send a value to a
-sysfs knob).
-
-> +		# These apply to all xfs filesystems
-> +		tagfile="/sys/fs/xfs/debug/${knob}"
-> +		;;
-> +	*)
-> +		;;
-> +	esac
-> +
-> +	echo "${tagfile}"
+> +	cd /
+> +	rm -f $tmp.*
+> +	$UMOUNT_PROG $mnt >/dev/null 2>&1
+> +	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
+> +	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
 > +}
 > +
->  # Requires that xfs_io inject command knows about this error type
->  _require_xfs_io_error_injection()
->  {
->  	type="$1"
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
 > +
-> +	# Can we find the error injection knobs via the new errortag
-> +	# configuration mechanism?
-> +	test -w "$(_find_xfs_errortag_knob "${TEST_DEV}" "${type}")" && return
+> +# real QA test starts here
 > +
->  	_require_error_injection
->  
->  	# NOTE: We can't actually test error injection here because xfs
-...
-> diff --git a/tests/xfs/196 b/tests/xfs/196
-> index e9b0649..5afc343 100755
-> --- a/tests/xfs/196
-> +++ b/tests/xfs/196
-...
-> @@ -53,13 +54,7 @@ rm -f $seqres.full
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> -
-> -DROP_WRITES="drop_writes"
-> -# replace "drop_writes" with "fail_writes" for old kernel
-> -if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
-> -	DROP_WRITES="fail_writes"
-> -fi
-> -_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
-> +_require_xfs_io_error_injection "drop_writes"
->  
->  _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount
-> @@ -72,7 +67,7 @@ bytes=$((64 * 1024))
->  $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
->  
->  # Enable write drops. All buffered writes are dropped from this point on.
-> -echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +_scratch_inject_error "drop_writes"
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +_require_dm_target thin-pool
+> +_require_command $LVM_PROG lvm
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +vgname=vg_$seq
+> +lvname=lv_$seq
+> +poolname=pool_$seq
+> +snapname=snap_$seq
+> +origpsize=100
+> +virtsize=200
+> +newpsize=200
+> +mnt=$SCRATCH_DIR/mnt_$seq
 
-I'd prefer to keep the parameter in this case (and below) just as a
-defense against future changes in the default value. Otherwise the rest
-looks pretty good.
+I think this should be $SCRATCH_MNT.
+
+> +mkdir -p $mnt
+> +
+
+We haven't mounted scratch at this point so it looks like this creates a
+directory on the local rootfs..? Looking ahead.. if we're not really
+going to mount the scratch dev directly, could we just use $SCRATCH_MNT
+as the mountpoint?
+
+> +#Ensure we have enough disk space
+> +_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
+> +
+> +$LVM_PROG pvcreate -f $SCRATCH_DEV >/dev/null 2>&1
+> +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >/dev/null 2>&1
+> +
+> +$LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y --zero n \
+> +-L $origpsize --poolmetadatasize 4M $vgname >/dev/null 2>&1
+> +
+> +$LVM_PROG lvcreate  --virtualsize $virtsize -T $vgname/$poolname \
+> +-n $lvname >/dev/null 2>&1
+
+The above multi-line commands could use some indentation and perhaps
+some one-liner comments to explain what's going on. E.g., "create an
+overprovisioned thin volume."
+
+Also, perhaps some of the /dev/null redirection should go to
+$seqres.full..?
+
+> +
+> +_mkfs_dev /dev/mapper/$vgname-$lvname >/dev/null 2>&1
+> +
+> +$LVM_PROG lvcreate  -k n -s $vgname/$lvname -n $snapname >/dev/null 2>&1
+> +
+> +_mount /dev/mapper/$vgname-$snapname $mnt
+> +
+
+"Consume all of the space in the volume and freeze to ensure everything
+required to make the fs consistent is flushed to disk. Note that this
+may hang on affected XFS filesystems."
+
+> +xfs_io -f -d -c 'pwrite -b 1m 0 120m' $mnt/f1 >/dev/null 2>&1
+> +
+> +fsfreeze -f $mnt &
+> +
+> +#Wait fsfreeze to its job
+> +sleep 10
+
+I think you could use 'wait' here rather than a sleep. But is there a
+reason we need to put the freeze in the background in the first place?
+It seems to me this test will either complete or hang regardless. ;P
+
+> +
+
+"extend the volume with sufficient space and unfreeze ..."
+
+> +lvextend -L $newpsize $vgname/$poolname >/dev/null 2>&1
+> +
+> +fsfreeze -u $mnt
+> +echo "Test OK"
+> +
+> +status=0
+> +exit
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> new file mode 100644
+> index 0000000..8c3c938
+> --- /dev/null
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Test OK
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 792161a..2bde916 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -416,3 +416,4 @@
+>  416 dangerous_fuzzers dangerous_scrub dangerous_repair
+>  417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+>  418 dangerous_fuzzers dangerous_scrub dangerous_repair
+> +999 dangerous
+
+I think the auto group makes sense too.
+
+Also, since the discussion around having a couple tests here (one using
+error injection and this one using dm-thin) it seems like this test
+could be more suited to a generic test.  Nothing in the test really
+depends on a particular filesystem. The header comment could simply be
+updated to explain the specific XFS issue as the inspiration and that
+the test generically exercises the ability to recover/continue after a
+dm-thin ENOPSPC and subsequent volume extend. Thoughts?
 
 Brian
 
->  
->  # Write every other 4k range to split the larger delalloc extent into many more
->  # smaller extents. Use pwrite because with write failures enabled, all
-> @@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
->  	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
->  done
->  
-> -echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +_scratch_inject_error "drop_writes" 0
->  
->  _scratch_cycle_mount
->  $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
-> @@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
->  	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
->  
->  	punchoffset=$((offset + 75))
-> -	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +	_scratch_inject_error "drop_writes"
->  	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
-> -	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +	_scratch_inject_error "drop_writes" 0
->  done
->  
->  echo "Silence is golden."
+> -- 
+> 2.9.4
+> 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
