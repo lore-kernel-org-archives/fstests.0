@@ -1,65 +1,62 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36432 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752663AbdGEMBy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2017 08:01:54 -0400
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33529 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752663AbdGEMBs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2017 08:01:48 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 4/7] overlay/018: test lower hardlinks re-unite on copy up
-Date: Wed,  5 Jul 2017 15:02:03 +0300
-Message-Id: <1499256126-21866-5-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
-References: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 0/7] overlay hardlink tests
+Date: Wed,  5 Jul 2017 15:01:59 +0300
+Message-Id: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test that when two lower hardlinks are copied up, they end up
-as two upper hardlinks of the same upper inode.
+Eryu,
 
-Drop caches before copy up so there is no knowledge of the
-copied up hardlink in inode/dcache.
+overlay/018 and the three new tests added to overlay/hardlink
+group, pass with the current overlayfs-next branch.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/018     | 10 ++++++++++
- tests/overlay/018.out |  7 +++++++
- 2 files changed, 17 insertions(+)
+overlay/033-034 were added to test a new mechanism of persistent
+overlay nlink accounting, that was added along with the fix to
+breaking hardlinks on copy up.
 
-diff --git a/tests/overlay/018 b/tests/overlay/018
-index 46097a9..41855dc 100755
---- a/tests/overlay/018
-+++ b/tests/overlay/018
-@@ -111,5 +111,15 @@ echo "== After mount cycle =="
- cat $FILES
- check_ino_nlink $tmp.after_one $tmp.after_cycle
- 
-+# Drop caches to get the copied up hardlink out of cache
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+# Modify content of the other hardlink
-+echo "two" >> $foo
-+
-+echo "== After write two =="
-+cat $FILES
-+check_ino_nlink $tmp.after_one $tmp.after_two
-+
- status=0
- exit
-diff --git a/tests/overlay/018.out b/tests/overlay/018.out
-index 5b74ee1..adc7f72 100644
---- a/tests/overlay/018.out
-+++ b/tests/overlay/018.out
-@@ -12,3 +12,10 @@ zero
- one
- zero
- one
-+== After write two ==
-+zero
-+one
-+two
-+zero
-+one
-+two
+overlay/034 passes on current upstream kernel, because the
+behavior of breaking hardlinks on copy up cancels the nlink
+accounting effects.
+
+Changes from v2:
+- Better commentary for overlay/034 and overlay/032
+- Increase copy up file size of overlay/032 to 1g
+
+Thanks,
+Amir.
+
+Amir Goldstein (7):
+  overlay/018: re-factor and add to hardlink group
+  overlay/018: print hardlink content to golden output
+  overlay/018: test broken hardlinks after mount cycle
+  overlay/018: test lower hardlinks re-unite on copy up
+  overlay: test concurrent copy up of lower hardlinks
+  overlay: test nlink accounting of overlay hardlinks
+  overlay: test dropping nlink below zero
+
+ tests/overlay/018     |  60 ++++++++++++++++----
+ tests/overlay/018.out |  21 ++++++-
+ tests/overlay/032     | 109 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/032.out |   4 ++
+ tests/overlay/033     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/033.out |  69 +++++++++++++++++++++++
+ tests/overlay/034     | 107 ++++++++++++++++++++++++++++++++++++
+ tests/overlay/034.out |   2 +
+ tests/overlay/group   |   5 +-
+ 9 files changed, 512 insertions(+), 14 deletions(-)
+ create mode 100755 tests/overlay/032
+ create mode 100644 tests/overlay/032.out
+ create mode 100755 tests/overlay/033
+ create mode 100644 tests/overlay/033.out
+ create mode 100755 tests/overlay/034
+ create mode 100644 tests/overlay/034.out
+
 -- 
 2.7.4
 
