@@ -1,174 +1,157 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:33674 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752547AbdGEMCE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2017 08:02:04 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 7/7] overlay: test dropping nlink below zero
-Date: Wed,  5 Jul 2017 15:02:06 +0300
-Message-Id: <1499256126-21866-8-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
-References: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50000 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750909AbdGEMQN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 5 Jul 2017 08:16:13 -0400
+Date: Wed, 5 Jul 2017 08:16:11 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH 11/8] common/inject: refactor helpers to use new errortag
+ interface
+Message-ID: <20170705121610.GA51285@bfoster.bfoster>
+References: <149808222258.8924.1682057078986741098.stgit@birch.djwong.org>
+ <20170630041308.GF5871@birch.djwong.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170630041308.GF5871@birch.djwong.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-nlink of overlay inode could be dropped indefinitely by adding
-un-accounted lower hardlinks underneath a mounted overlay and
-trying to remove them.
+On Thu, Jun 29, 2017 at 09:13:08PM -0700, Darrick J. Wong wrote:
+> Refactor the XFS error injection helpers to use the new errortag
+> interface to configure error injection.  If that isn't present, fall
+> back either to the xfs_io/ioctl based injection or the older sysfs
+> knobs.  Refactor existing testcases to use the new helpers.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/inject |   62 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+>  tests/xfs/051 |    7 ++++--
+>  tests/xfs/141 |    5 +++--
+>  tests/xfs/196 |   17 ++++++----------
+>  4 files changed, 73 insertions(+), 18 deletions(-)
+> 
+> diff --git a/common/inject b/common/inject
+> index 8ecc290..1f12a2b 100644
+> --- a/common/inject
+> +++ b/common/inject
+> @@ -35,10 +35,50 @@ _require_error_injection()
+>  	esac
+>  }
+>  
+> +# Find a given xfs mount's errortag injection knob in sysfs
+> +_find_xfs_errortag_knob()
+> +{
+> +	dev="$1"
+> +	knob="$2"
+> +	shortdev="$(_short_dev "${dev}")"
+> +	tagfile="/sys/fs/xfs/${shortdev}/errortag/${knob}"
+> +
+> +	# Some of the new sysfs errortag knobs were previously available via
+> +	# another sysfs path.
+> +	case "${knob}" in
+> +	"log_bad_crc")
+> +		if [ ! -w "${tagfile}" ]; then
+> +			tagfile="/sys/fs/xfs/${shortdev}/log/log_badcrc_factor"
+> +		fi
+> +		;;
+> +	"drop_writes")
+> +		if [ ! -w "${tagfile}" ]; then
+> +			tagfile="/sys/fs/xfs/${shortdev}/drop_writes"
+> +		fi
+> +		if [ ! -w "${tagfile}" ]; then
+> +			tagfile="/sys/fs/xfs/${shortdev}/fail_writes"
+> +		fi
+> +		;;
+> +	"log_recovery_delay"|"bug_on_assert")
 
-The simplest way to understand this test is this:
-Imagine that you have a tool (e.g. xfs_db) with which you can add
-hardlinks, without changing the value of nlink stored on-disk for the
-inode. This is exactly what this test does when it adds lower hardlinks
-underneath a mounted overlay.
+What's the purpose for having these here? I'm not sure that either is
+really related to error injection (which I find a little confusing
+despite that this code can be reused to generically send a value to a
+sysfs knob).
 
-Commit 5f8415d6b87e ("ovl: persistent overlay inode nlink for indexed
-inodes") fixes this issue, although the issue was never exposed in any
-released kernel.
+> +		# These apply to all xfs filesystems
+> +		tagfile="/sys/fs/xfs/debug/${knob}"
+> +		;;
+> +	*)
+> +		;;
+> +	esac
+> +
+> +	echo "${tagfile}"
+> +}
+> +
+>  # Requires that xfs_io inject command knows about this error type
+>  _require_xfs_io_error_injection()
+>  {
+>  	type="$1"
+> +
+> +	# Can we find the error injection knobs via the new errortag
+> +	# configuration mechanism?
+> +	test -w "$(_find_xfs_errortag_knob "${TEST_DEV}" "${type}")" && return
+> +
+>  	_require_error_injection
+>  
+>  	# NOTE: We can't actually test error injection here because xfs
+...
+> diff --git a/tests/xfs/196 b/tests/xfs/196
+> index e9b0649..5afc343 100755
+> --- a/tests/xfs/196
+> +++ b/tests/xfs/196
+...
+> @@ -53,13 +54,7 @@ rm -f $seqres.full
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_scratch
+> -
+> -DROP_WRITES="drop_writes"
+> -# replace "drop_writes" with "fail_writes" for old kernel
+> -if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
+> -	DROP_WRITES="fail_writes"
+> -fi
+> -_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
+> +_require_xfs_io_error_injection "drop_writes"
+>  
+>  _scratch_mkfs >/dev/null 2>&1
+>  _scratch_mount
+> @@ -72,7 +67,7 @@ bytes=$((64 * 1024))
+>  $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
+>  
+>  # Enable write drops. All buffered writes are dropped from this point on.
+> -echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
+> +_scratch_inject_error "drop_writes"
 
-With overlayfs indexed copy up and without the fix, the test triggers
-WARN_ON(inode->i_nlink == 0) in drop_link().
+I'd prefer to keep the parameter in this case (and below) just as a
+defense against future changes in the default value. Otherwise the rest
+looks pretty good.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/034     | 107 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/034.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 110 insertions(+)
- create mode 100755 tests/overlay/034
- create mode 100644 tests/overlay/034.out
+Brian
 
-diff --git a/tests/overlay/034 b/tests/overlay/034
-new file mode 100755
-index 0000000..2b4ca73
---- /dev/null
-+++ b/tests/overlay/034
-@@ -0,0 +1,107 @@
-+#! /bin/bash
-+# FS QA Test 034
-+#
-+# Test overlay nlink when adding lower hardlinks.
-+#
-+# nlink of overlay inode could be dropped indefinitely by adding
-+# unaccounted lower hardlinks underneath a mounted overlay and
-+# trying to remove them.
-+#
-+# The simplest way to understand this test is this:
-+# Imagine that you have a tool (e.g. xfs_db) with which you can add
-+# hardlinks, without changing the value of nlink stored on-disk for the
-+# inode. This is exactly what this test does when it adds lower hardlinks
-+# underneath a mounted overlay.
-+#
-+# Commit 5f8415d6b87e ("ovl: persistent overlay inode nlink for indexed
-+# inodes") fixes this issue, although the issue was never exposed in any
-+# released kernel.
-+#
-+# With overlayfs indexed copy up and without the fix, the test triggers
-+# WARN_ON(inode->i_nlink == 0) in drop_link().
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create lower hardlink
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+mkdir -p $lowerdir
-+touch $lowerdir/0
-+ln $lowerdir/0 $lowerdir/1
-+
-+_scratch_mount
-+
-+# Copy up lower hardlink - overlay inode nlink 2 is copied from lower
-+touch $SCRATCH_MNT/0
-+
-+# Add lower hardlinks while overlay is mounted - overlay inode nlink
-+# is not being updated
-+ln $lowerdir/0 $lowerdir/2
-+ln $lowerdir/0 $lowerdir/3
-+
-+# Unlink the 2 un-accounted lower hardlinks - overlay inode nlinks
-+# drops 2 and may reach 0 if the situation is not detected
-+rm $SCRATCH_MNT/2
-+rm $SCRATCH_MNT/3
-+
-+# Check if getting ENOENT when trying to link !I_LINKABLE with nlink 0
-+ln $SCRATCH_MNT/0 $SCRATCH_MNT/4
-+
-+# Unlink all hardlinks - if overlay inode nlink is 0, this will trigger
-+# WARN_ON() in drop_nlink()
-+rm $SCRATCH_MNT/0
-+rm $SCRATCH_MNT/1
-+rm $SCRATCH_MNT/4
-+
-+# Verify that orphan index is cleaned on mount
-+_scratch_cycle_mount
-+ls $OVL_BASE_SCRATCH_MNT/$OVL_WORK/index 2>/dev/null
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/034.out b/tests/overlay/034.out
-new file mode 100644
-index 0000000..4c8873c
---- /dev/null
-+++ b/tests/overlay/034.out
-@@ -0,0 +1,2 @@
-+QA output created by 034
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 35cd5a5..b55ed0c 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -36,3 +36,4 @@
- 031 auto quick whiteout
- 032 auto quick copyup hardlink
- 033 auto quick copyup hardlink
-+034 auto quick copyup hardlink
--- 
-2.7.4
-
+>  
+>  # Write every other 4k range to split the larger delalloc extent into many more
+>  # smaller extents. Use pwrite because with write failures enabled, all
+> @@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
+>  	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
+>  done
+>  
+> -echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
+> +_scratch_inject_error "drop_writes" 0
+>  
+>  _scratch_cycle_mount
+>  $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
+> @@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
+>  	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
+>  
+>  	punchoffset=$((offset + 75))
+> -	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
+> +	_scratch_inject_error "drop_writes"
+>  	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
+> -	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
+> +	_scratch_inject_error "drop_writes" 0
+>  done
+>  
+>  echo "Silence is golden."
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
