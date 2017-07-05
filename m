@@ -1,62 +1,95 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33529 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752663AbdGEMBs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2017 08:01:48 -0400
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:36360 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752820AbdGEMBz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 5 Jul 2017 08:01:55 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 0/7] overlay hardlink tests
-Date: Wed,  5 Jul 2017 15:01:59 +0300
-Message-Id: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 1/7] overlay/018: re-factor and add to hardlink group
+Date: Wed,  5 Jul 2017 15:02:00 +0300
+Message-Id: <1499256126-21866-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
+References: <1499256126-21866-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+Use helpers to records and check inode numbers so we can repeat
+the same test after each hardlink copy up and mount cycle.
 
-overlay/018 and the three new tests added to overlay/hardlink
-group, pass with the current overlayfs-next branch.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/018   | 33 +++++++++++++++++++++++++--------
+ tests/overlay/group |  2 +-
+ 2 files changed, 26 insertions(+), 9 deletions(-)
 
-overlay/033-034 were added to test a new mechanism of persistent
-overlay nlink accounting, that was added along with the fix to
-breaking hardlinks on copy up.
-
-overlay/034 passes on current upstream kernel, because the
-behavior of breaking hardlinks on copy up cancels the nlink
-accounting effects.
-
-Changes from v2:
-- Better commentary for overlay/034 and overlay/032
-- Increase copy up file size of overlay/032 to 1g
-
-Thanks,
-Amir.
-
-Amir Goldstein (7):
-  overlay/018: re-factor and add to hardlink group
-  overlay/018: print hardlink content to golden output
-  overlay/018: test broken hardlinks after mount cycle
-  overlay/018: test lower hardlinks re-unite on copy up
-  overlay: test concurrent copy up of lower hardlinks
-  overlay: test nlink accounting of overlay hardlinks
-  overlay: test dropping nlink below zero
-
- tests/overlay/018     |  60 ++++++++++++++++----
- tests/overlay/018.out |  21 ++++++-
- tests/overlay/032     | 109 ++++++++++++++++++++++++++++++++++++
- tests/overlay/032.out |   4 ++
- tests/overlay/033     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/033.out |  69 +++++++++++++++++++++++
- tests/overlay/034     | 107 ++++++++++++++++++++++++++++++++++++
- tests/overlay/034.out |   2 +
- tests/overlay/group   |   5 +-
- 9 files changed, 512 insertions(+), 14 deletions(-)
- create mode 100755 tests/overlay/032
- create mode 100644 tests/overlay/032.out
- create mode 100755 tests/overlay/033
- create mode 100644 tests/overlay/033.out
- create mode 100755 tests/overlay/034
- create mode 100644 tests/overlay/034.out
-
+diff --git a/tests/overlay/018 b/tests/overlay/018
+index 7e47732..527b9d1 100755
+--- a/tests/overlay/018
++++ b/tests/overlay/018
+@@ -61,25 +61,42 @@ echo "patient zero" >> $lowerdir/foo
+ ln $lowerdir/foo $lowerdir/bar
+ 
+ 
++# Record inode numbers in format <ino> <nlink>
++function record_ino_nlink()
++{
++	ls -li $FILES | awk '{ print $1, $3 }' > $1
++}
++
++# Check inode numbers match recorded inode numbers
++function check_ino_nlink()
++{
++	before=$1
++	after=$2
++
++	record_ino_nlink $after
++
++	# Test constant stat(2) st_ino/st_nlink -
++	#   Compare before..after - expect silence
++	# We use diff -u so out.bad will tell us which stage failed
++	diff -u $before $after
++}
++
+ _scratch_mount
+ 
+ 
+-rm -f $tmp.before $tmp.after
++rm -f $tmp.*
+ 
+ foo=$SCRATCH_MNT/foo
+ bar=$SCRATCH_MNT/bar
+ 
+-# Record inode number and nlink before copy up
+-ls -li $foo $bar | awk '{ print $1, $3 }' > $tmp.before
++FILES="$foo $bar"
++
++record_ino_nlink $tmp.before
+ 
+ # Modify content of one of the hardlinks
+ echo "mutated" >> $foo
+ 
+-# Record inode number and nlink after copy up
+-ls -li $foo $bar | awk '{ print $1, $3 }' > $tmp.after
+-
+-# Compare ino/nlink before..after - expect silence
+-diff $tmp.before $tmp.after
++check_ino_nlink $tmp.before $tmp.after
+ 
+ # Compare content of files - expect silence
+ diff $foo $bar
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 64d200c..28df5b6 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -20,7 +20,7 @@
+ 015 auto quick whiteout
+ 016 auto quick copyup
+ 017 auto quick copyup
+-018 auto quick copyup
++018 auto quick copyup hardlink
+ 019 auto stress
+ 020 auto quick copyup perms
+ 021 auto quick copyup
 -- 
 2.7.4
 
