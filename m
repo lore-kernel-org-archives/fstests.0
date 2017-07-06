@@ -1,48 +1,61 @@
-Received: from mx1.redhat.com ([209.132.183.28]:32904 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752315AbdGFDLH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 5 Jul 2017 23:11:07 -0400
-Date: Thu, 6 Jul 2017 11:10:55 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/247: unmount test device, not scratch device
-Message-ID: <20170706031055.GX23360@eguan.usersys.redhat.com>
-References: <20170705203754.92140-1-ebiggers3@gmail.com>
- <20170706025059.GW23360@eguan.usersys.redhat.com>
- <20170706025428.GA595@zzz.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170706025428.GA595@zzz.localdomain>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:35759 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752886AbdGFFdG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jul 2017 01:33:06 -0400
+Received: by mail-pg0-f66.google.com with SMTP id d193so1421407pgc.2
+        for <fstests@vger.kernel.org>; Wed, 05 Jul 2017 22:33:06 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v2] generic/095, generic/247: unmount correct devices
+Date: Wed,  5 Jul 2017 22:31:36 -0700
+Message-Id: <20170706053136.6825-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Brian Foster <bfoster@redhat.com>, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: Brian Foster <bfoster@redhat.com>, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 05, 2017 at 07:54:28PM -0700, Eric Biggers wrote:
-> On Thu, Jul 06, 2017 at 10:50:59AM +0800, Eryu Guan wrote:
-> > On Wed, Jul 05, 2017 at 01:37:54PM -0700, Eric Biggers wrote:
-> > > From: Eric Biggers <ebiggers@google.com>
-> > > 
-> > > Commit d55123c080cb ("generic/247: filter out expected XFS warnings for
-> > > mixed mmap/direct I/O") made generic/247 start explicitly unmounting the
-> > > scratch device.  However, the test doesn't actually use the scratch
-> > > device, so it will fail if SCRATCH_DEV is undefined.  Fix it by
-> > > unmounting the test device instead.
-> > > 
-> > > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > 
-> > Thanks for the fix! I found this in my review and I remembered I removed
-> > the _scratch_unmount and updated the comments accordingly at commit
-> > time, but clearly I didn't.
-> > 
-> 
-> It was removed from generic/095 (maybe by accident?) but not generic/247.
-> Perhaps it needs to be added back to generic/095?
+From: Eric Biggers <ebiggers@google.com>
 
-You're right, I updated the wrong test.. Yeah, it should be added back
-to generic/095. Would you mind sending a v2 patch to do these edits all
-together? i.e. add _scratch_unmount (and comments) back to generic/095
-and remove them from generic/247?
+In commit d55123c080cb ("generic/247: filter out expected XFS warnings
+for mixed mmap/direct I/O"), _scratch_unmount was removed from
+generic/095 and added to generic/247.  But actually generic/095 *should*
+be unmounting SCRATCH_DEV; and generic/247 should be unmounting
+TEST_DEV, not SCRATCH_DEV, since it doesn't use a scratch device (it was
+failing if SCRATCH_DEV was not defined).  Fix it.
 
-Thanks,
-Eryu
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ tests/generic/095 | 4 ++++
+ tests/generic/247 | 2 +-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/tests/generic/095 b/tests/generic/095
+index 9dff1bc1..050215d4 100755
+--- a/tests/generic/095
++++ b/tests/generic/095
+@@ -122,6 +122,10 @@ $FIO_PROG $fio_config >>$seqres.full 2>&1
+ # to be potent, we don't want to simply _disable_dmesg_check which could miss
+ # other potential bugs. So filter out the intentional WARNINGs, make sure test
+ # doesn't fail because of this warning and fails on other WARNINGs.
++
++# umount before checking dmesg in case umount triggers any WARNING or Oops
++_scratch_unmount
++
+ if [ "$FSTYP" == "xfs" ]; then
+ 	_check_dmesg _filter_xfs_dmesg
+ else
+diff --git a/tests/generic/247 b/tests/generic/247
+index 509e8808..aac70780 100755
+--- a/tests/generic/247
++++ b/tests/generic/247
+@@ -82,7 +82,7 @@ echo "Silence is golden."
+ 
+ # unmount and check dmesg, filtering out expected XFS warnings about mixed
+ # mmap/dio
+-_scratch_unmount
++_test_unmount
+ if [ "$FSTYP" == "xfs" ]; then
+ 	_check_dmesg _filter_xfs_dmesg
+ else
+-- 
+2.13.2
+
