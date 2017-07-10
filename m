@@ -1,131 +1,200 @@
-Received: from mail-pg0-f48.google.com ([74.125.83.48]:34082 "EHLO
-        mail-pg0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751786AbdGIKJq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jul 2017 06:09:46 -0400
-Received: by mail-pg0-f48.google.com with SMTP id t186so36104770pgb.1
-        for <fstests@vger.kernel.org>; Sun, 09 Jul 2017 03:09:46 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id r69sm16982278pfg.28.2017.07.09.03.09.39
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 09 Jul 2017 03:09:39 -0700 (PDT)
-Message-ID: <596200e3.48d6620a.a568d.41c1@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 09 Jul 2017 18:09:34 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to ab803945aec1
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="D05eRCjJ2VFS"
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:49075 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753943AbdGJNe0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 10 Jul 2017 09:34:26 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id CCB947DCC1
+        for <fstests@vger.kernel.org>; Mon, 10 Jul 2017 13:34:25 +0000 (UTC)
+Received: from eorzea.usersys.redhat.com (unknown [10.43.17.196])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4FB6D7D4F7
+        for <fstests@vger.kernel.org>; Mon, 10 Jul 2017 13:34:25 +0000 (UTC)
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: [WIP PATCH V2] Buffer resubmittion test
+Date: Mon, 10 Jul 2017 15:34:18 +0200
+Message-Id: <20170710133418.7083-1-cmaiolino@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Hi folks,
 
---D05eRCjJ2VFS
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+this is the 2nd version of this test case. I still keep the number as
+999 to avoid conflicts while it's still WIP, next version should be ok
+to make it into a real patch with the right number.
 
-Hi all,
+Reason of this patch is still to check if AIL items are being properly
+resubmitted after an error during writeback from buffers containing AIL
+items.
 
-The master branch of the xfstests repository at:
+This V2 includes:
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+	- Better indentation
+	- More comments
+	- Add copyright
+	- use $SCRATCH_MNT instead of local created mount point
+	- redirect outputs to $seqres.full instead of dev/null
 
-have just been updated. There're many overlayfs test updates in this release,
-Amir enhanced overlay hardlink tests and zhangyi improved whiteout tests. Other
-than that, there's also a new scrub test for XFS from Darrick and some random
-bug fixes.
+- It doesn't change sleep by wait, because AFAIK, wait requires the process
+being waited to return. Fsfreeze here is expected to hang until the
+underlying device is extended.
 
-New failures I've noticed in this update:
-- overlay/032 and overlay/033 are new tests to test copyups of hardlinks, which
-  is broken at this moment
+Let me know your thoughts.
 
-Thanks,
-Eryu
+cheers.
 
-The new head of the master branch is commit:
+Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+---
+ tests/xfs/999     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 122 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
 
-ab803945aec1 xfs/297: fail test if _scratch_mount fails
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 0000000..b46f1cc
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,119 @@
++#! /bin/bash
++# FS QA Test 999
++#
++# Test buffer resubmission after a failed writeback with to a full overcommited
++# dm-thin device.
++#
++# When a dm-thin device reaches its full capacity, but the virtual device still
++# shows available space, XFS loops indefinitely in xfsaild due items still in
++# AIL. The buffers containing such items couldn't be resubmitted because the
++# items were flush locked. Test the kernel fix and ensure the buffers are
++# properly resubmitted.
++#
++# This test will hang the filesystem when ran on an unpatched kernel
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
++	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
++	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++_require_dm_target thin-pool
++_require_command $LVM_PROG lvm
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++vgname=vg_$seq
++lvname=lv_$seq
++poolname=pool_$seq
++snapname=snap_$seq
++origpsize=100
++virtsize=200
++newpsize=200
++
++# Ensure we have enough disk space
++_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
++
++# Create a 100MB dm-thin POOL
++$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
++$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
++
++$LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y \
++		    --zero n -L $origpsize \
++		    --poolmetadatasize 4M $vgname >>$seqres.full 2>&1
++
++# Create a overprovisioned 200MB dm-thin virt. device
++$LVM_PROG lvcreate  --virtualsize $virtsize \
++		    -T $vgname/$poolname \
++		    -n $lvname >>$seqres.full 2>&1
++
++_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
++
++
++$LVM_PROG lvcreate  -k n -s $vgname/$lvname \
++		    -n $snapname >>$seqres.full 2>&1
++
++_mount /dev/mapper/$vgname-$snapname $SCRATCH_MNT
++
++# Consume all space available in the volume and freeze to ensure everything
++# required to make the fs consistent is flushed to disk.
++xfs_io -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
++
++# This freeze will never complete until the dm-thin POOL device is extended.
++# This is expected, it is only used so xfsaild is triggered to flush AIL items.
++fsfreeze -f $SCRATCH_MNT &
++
++# Wait enough so xfsaild can run
++sleep 10
++
++# Make some extra space available so the freeze above can proceed
++lvextend -L $newpsize $vgname/$poolname >>$seqres.full 2>&1
++
++# Try to thaw the filesystem, and complete test if if succeed.
++# NOTE: This will hang on affected XFS filesystems.
++fsfreeze -u $SCRATCH_MNT
++echo "Test OK"
++
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 0000000..8c3c938
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Test OK
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 792161a..2bde916 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -416,3 +416,4 @@
+ 416 dangerous_fuzzers dangerous_scrub dangerous_repair
+ 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 418 dangerous_fuzzers dangerous_scrub dangerous_repair
++999 dangerous
+-- 
+2.9.4
 
-New commits:
-
-Amir Goldstein (7):
-      [a76feb07aa9f] overlay/018: re-factor and add to hardlink group
-      [35965a3dfdb0] overlay/018: print hardlink content to golden output
-      [a48fc5d3e9c1] overlay/018: test broken hardlinks after mount cycle
-      [004a78036ece] overlay/018: test lower hardlinks re-unite on copy up
-      [7b4d655bb815] overlay: test concurrent copy up of lower hardlinks
-      [af55e91fd2ea] overlay: test nlink accounting of overlay hardlinks
-      [c7169fada68c] overlay: test dropping nlink below zero
-
-Brian Foster (1):
-      [ab803945aec1] xfs/297: fail test if _scratch_mount fails
-
-Darrick J. Wong (4):
-      [ea39bbf3dea2] common/populate: remember multi-device configurations
-      [7c0af043221a] common/rc: test that the xfs_io scrub/repair commands actually work
-      [c28b406918d4] ext4: don't online scrub ever
-      [1b6d979780d3] xfs: scrub while appending to a file
-
-Eric Biggers (1):
-      [eeea532122f8] generic/095, generic/247: unmount correct devices
-
-Xiao Yang (1):
-      [65fd511691ac] generic/446: add __xfs_get_blocks() into _filter_xfs_dmesg
-
-zhangyi (F) (2):
-      [537d954b7db7] overlay/031: factor out _create_whiteout() helper
-      [bbe93c0e7546] overlay/031: add tests of whiteouts in lowerdir and both dirs
-
-
-Code Diffstat:
-
- common/fuzzy          |   4 +-
- common/populate       |  13 ++++-
- common/rc             |   5 ++
- common/xfs            |   4 +-
- tests/ext4/023        |   7 ++-
- tests/ext4/023.out    |   2 +-
- tests/generic/095     |   4 ++
- tests/generic/247     |   2 +-
- tests/overlay/018     |  60 ++++++++++++++++----
- tests/overlay/018.out |  21 ++++++-
- tests/overlay/031     |  84 +++++++++++++++++++++-------
- tests/overlay/032     | 109 ++++++++++++++++++++++++++++++++++++
- tests/overlay/032.out |   4 ++
- tests/overlay/033     | 150 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/033.out |  69 +++++++++++++++++++++++
- tests/overlay/034     | 107 +++++++++++++++++++++++++++++++++++
- tests/overlay/034.out |   2 +
- tests/overlay/group   |   5 +-
- tests/xfs/297         |   2 +-
- tests/xfs/423         |  82 +++++++++++++++++++++++++++
- tests/xfs/423.out     |   6 ++
- tests/xfs/group       |   1 +
- 22 files changed, 699 insertions(+), 44 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---D05eRCjJ2VFS
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZYa2dAAoJECZSqilcj+dj6fUQAIloooz4xBjynQ1oE5yQ2cia
-80D7CB+/7jxPp5EnSYdsSxstW8kueKJW8mKFObQLJpZLZfiMSNF8Y7mZTUIeFZBJ
-RKDa2HJEelUBo2T+Daxs2qY12O8VZQ0Z33sGOOzEMMhFA8aDIipt3UWb9qvoM5Ou
-N68oP7DkP2ucrpMeeAiggVQ/45iok9OWSIm7w9WBwXZwNYWI66/WTPyqZusWyMNB
-QiJv35eMK8hmW+yHEHCeHuqnSvxQyMl3ipHz/YNUQQUyhJ0fbbe8pNly8mEw1Yws
-PUGceKlMnZeVkOEBeFnZ4urWPfsf35kPcIzkV8AFwcMz6LygCjF1W6msCBQIfyQO
-mjoDOmr60LMPIuYauamlrw2Jg2N2wKlnNOC0XKlbBKwo+qK6A/xpYWRjpx64R1xN
-4iQh7uXnCZpG7XMRkqxTpYLE+1Q77gXnw73jxKkcCGopj32a2rP945BCvorSaSa9
-gDKgP9ySurrj0ecygYHAoPczeK26zD58dhduqSc21q8vGx/if/5dieLWDJCjcDJa
-QX1/YMiHopTOk9c8Nijyeu+gG1LfbRAXuiu1HYlTjXfFbe1fYg3illiBIGkSXwZe
-jefLUCX+UhKPcw04xBQ/0jl+3sDkGQloy5PFFMpoSbiF6MKfxFDIOjPBWR6lfi7l
-Nbz2DXO3obh1GGkq2622
-=U3Xk
------END PGP SIGNATURE-----
-
---D05eRCjJ2VFS--
