@@ -1,137 +1,61 @@
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:34835 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934209AbdGKTwC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jul 2017 15:52:02 -0400
+Received: from mail-yw0-f196.google.com ([209.85.161.196]:36653 "EHLO
+        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932671AbdGKUXv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jul 2017 16:23:51 -0400
+MIME-Version: 1.0
+In-Reply-To: <CAOQ4uxjLCGZ3hHfkZzgZiHctC1x6s_EF7J1g0-zjXYCOzqoHwQ@mail.gmail.com>
+References: <1499168434-23859-1-git-send-email-amir73il@gmail.com>
+ <1499168434-23859-6-git-send-email-amir73il@gmail.com> <20170705095902.GR23360@eguan.usersys.redhat.com>
+ <CAOQ4uxjLCGZ3hHfkZzgZiHctC1x6s_EF7J1g0-zjXYCOzqoHwQ@mail.gmail.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 5/5] overlay: test mount error cases with exclusive directories
-Date: Tue, 11 Jul 2017 22:52:06 +0300
-Message-Id: <1499802726-11045-6-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1499802726-11045-1-git-send-email-amir73il@gmail.com>
-References: <1499802726-11045-1-git-send-email-amir73il@gmail.com>
+Date: Tue, 11 Jul 2017 23:23:50 +0300
+Message-ID: <CAOQ4uxjYVevw=bTsONHT=FHMkoapqOcmwL+nj4R6Y3T6Dhmneg@mail.gmail.com>
+Subject: Re: [PATCH v2 5/7] overlay: test concurrent copy up of lower hardlinks
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Expect EBUSY when trying to mount overlay when:
-- Upper dir is in-use by another overlay mount
-- Work dir is in-use by another overlay mount
+On Wed, Jul 5, 2017 at 1:46 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Wed, Jul 5, 2017 at 12:59 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> On Tue, Jul 04, 2017 at 02:40:32PM +0300, Amir Goldstein wrote:
+>>> Two tasks make a modification concurrently on two hardlinks of a large
+>>> lower inode.  The copy up should be triggered by one of the tasks and the
+>>> other should be waiting for copy up to complete.  Both copy up targets
+>>> should end up being upper hardlinks and both metadata changes should be
+>>> visible in both hardlinks.
+>>>
+>>> With kernel <= v4.12, hardlinks are broken on copy up, meaning that copy up
+>>
+>> So this will be fixed in 4.13-rc1 kernel?
+>
+> It is fixed on current overlayfs-next branch. Yes.
+>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/036     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/036.out |  3 ++
- tests/overlay/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/overlay/036
- create mode 100644 tests/overlay/036.out
+Eryu,
 
-diff --git a/tests/overlay/036 b/tests/overlay/036
-new file mode 100755
-index 0000000..4100b80
---- /dev/null
-+++ b/tests/overlay/036
-@@ -0,0 +1,82 @@
-+#! /bin/bash
-+# FS QA Test 036
-+#
-+# Test mount error cases with exclusive directories
-+#
-+# - Upper dir is in-use by another overlay mount
-+# - Work dir is in-use by another overlay mount
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	# unmount the two extra mounts in case they did not fail
-+	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
-+	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create multiple lowerdirs, upperdirs and workdirs
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+upperdir2=$OVL_BASE_SCRATCH_MNT/upper2
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+mkdir -p $lowerdir $lowerdir2 $upperdir $upperdir2 $workdir $workdir2
-+
-+# Mount overlay with lowerdir, upperdir, workdir
-+_overlay_mount_dirs $lowerdir $upperdir $workdir \
-+		    overlay1 $SCRATCH_MNT
-+# Try to mount another overlay with the same upperdir - expect EBUSY
-+_overlay_mount_dirs $lowerdir2 $upperdir $workdir2 \
-+		    overlay2 $SCRATCH_MNT 2>&1 | _filter_scratch
-+# Try to mount another overlay with the same workdir - expect EBUSY
-+_overlay_mount_dirs $lowerdir2 $upperdir2 $workdir \
-+		    overlay3 $SCRATCH_MNT 2>&1 | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/036.out b/tests/overlay/036.out
-new file mode 100644
-index 0000000..5174611
---- /dev/null
-+++ b/tests/overlay/036.out
-@@ -0,0 +1,3 @@
-+QA output created by 036
-+mount: overlay2 is already mounted or SCRATCH_MNT busy
-+mount: overlay3 is already mounted or SCRATCH_MNT busy
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 87e3aaf..4cc1d74 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -38,3 +38,4 @@
- 033 auto quick copyup hardlink
- 034 auto quick copyup hardlink
- 035 auto quick mount
-+036 auto quick mount
--- 
-2.7.4
+I realize that my answer was not accurate.
+These tests do pass with current overlayfs-next branch, but
+only with non default kernel config CONFIG_OVERLAY_FS_INDEX=y.
 
+This may be the right way to test, meaning that default kernel
+config reports failed tests related to hardlinks which are really broken
+on copy up with default kernel config.
+
+Another way to go at it is having these tests
+"_require_fs_module_param index" (CONFIG_OVERLAY_FS_INDEX
+sets the default of this parameter) and then opt-in to indexing in the test
+using the index=on mount option.
+
+This way, those test will notrun on old kernels and pass
+on new kernels regardless of the kernel config option.
+Then they will be testing that "hardlinks are not broken IF
+admin opts-in for indexing".
+
+I wonder which of the test methodologies you prefer.
+If you like the second one better I can send a patch to make those
+tests depend on and opt-in for indexing.
+
+Thanks,
+Amir.
