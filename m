@@ -1,346 +1,268 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40632 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:9905 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750902AbdGKEKg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 11 Jul 2017 00:10:36 -0400
+        id S1755624AbdGKIj7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 11 Jul 2017 04:39:59 -0400
 Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2695385A05
-        for <fstests@vger.kernel.org>; Tue, 11 Jul 2017 04:10:36 +0000 (UTC)
-Date: Tue, 11 Jul 2017 12:10:33 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/4] fsstress: add AIO read/write and fsync test
-Message-ID: <20170711041033.GM29475@eguan.usersys.redhat.com>
-References: <1497629466-22647-1-git-send-email-zlang@redhat.com>
- <1497629466-22647-2-git-send-email-zlang@redhat.com>
+        by mx1.redhat.com (Postfix) with ESMTPS id 91C378046E
+        for <fstests@vger.kernel.org>; Tue, 11 Jul 2017 08:39:58 +0000 (UTC)
+Date: Tue, 11 Jul 2017 10:39:55 +0200
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [WIP PATCH V2] Buffer resubmittion test
+Message-ID: <20170711083955.zw6ksal76mh2fozl@eorzea.usersys.redhat.com>
+References: <20170710133418.7083-1-cmaiolino@redhat.com>
+ <20170710145522.GA17652@bfoster.bfoster>
+ <20170710150612.ofjodvipik7wvpnu@eorzea.usersys.redhat.com>
+ <20170710151343.GB17652@bfoster.bfoster>
+ <20170710155223.xmco3qgecbffug56@eorzea.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1497629466-22647-2-git-send-email-zlang@redhat.com>
+In-Reply-To: <20170710155223.xmco3qgecbffug56@eorzea.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Jun 17, 2017 at 12:11:04AM +0800, Zorro Lang wrote:
-> We found some bugs by aio read/write test, but there's not related
-> operations in fsstress. So add AIO test into fsstress to increase
-> AIO stress test.
+Hi Brian,
+
+> > > > 
+> > > > The test is still under xfs (rather than generic).
+> > > > 
+
+I'm still not really convinced this test should be added to generic, this tests
+a very specific behavior of XFS journal, the journal behavior on XFS and ext4
+for example, are very different,
+
+either ext4 or btrfs for example, will remount the filesystem as RO during the
+xfs_io process to fill the filesystem, so, even though the filesystem can keep
+consistency, the test shows it as a failure.
+
+What do you think? I honestly believe it would be better to keep this test as a
+XFS test, the behavior here is XFS specific.
+
+cheers
+
+> > > 
+> > > yup, didn't move it to generic yet. I have a question about it. How do we
+> > > specify which filesystem to run the test on without needing to mkfs the device
+> > > for the filesystem in question?
+> > > 
+> > 
+> > $FSTYP should contain the target fs, if I understand the question..?
 > 
-> Due to most kernels don't support aio fsync, so set its test
-> frequency to zero as default.
+> Pretty much,
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  ltp/fsstress.c | 214 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 214 insertions(+)
+> I'll update the patch and send it properly formatted with an updated test
+> number.
 > 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 67cdb2f..4ff90d5 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -36,6 +36,10 @@
->  #ifdef HAVE_SYS_PRCTL_H
->  #include <sys/prctl.h>
->  #endif
-> +#ifdef AIO
-> +#include <libaio.h>
-> +io_context_t	io_ctx;
-> +#endif
->  
->  #ifndef FS_IOC_GETFLAGS
->  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-> @@ -55,9 +59,12 @@
->  #define FILELEN_MAX		(32*4096)
->  
->  typedef enum {
-> +	OP_AFSYNC,
->  	OP_ALLOCSP,
-> +	OP_AREAD,
->  	OP_ATTR_REMOVE,
->  	OP_ATTR_SET,
-> +	OP_AWRITE,
->  	OP_BULKSTAT,
->  	OP_BULKSTAT1,
->  	OP_CHOWN,
-> @@ -158,9 +165,12 @@ struct print_string {
->  #define	MAXFSIZE	((1ULL << 63) - 1ULL)
->  #define	MAXFSIZE32	((1ULL << 40) - 1ULL)
->  
-> +void	afsync_f(int, long);
->  void	allocsp_f(int, long);
-> +void	aread_f(int, long);
->  void	attr_remove_f(int, long);
->  void	attr_set_f(int, long);
-> +void	awrite_f(int, long);
->  void	bulkstat_f(int, long);
->  void	bulkstat1_f(int, long);
->  void	chown_f(int, long);
-> @@ -202,9 +212,12 @@ void	writev_f(int, long);
->  
->  opdesc_t	ops[] = {
->       /* { OP_ENUM, "name", function, freq, iswrite }, */
-> +	{ OP_AFSYNC, "afsync", afsync_f, 0, 1 },
->  	{ OP_ALLOCSP, "allocsp", allocsp_f, 1, 1 },
-> +	{ OP_AREAD, "aread", aread_f, 1, 0 },
->  	{ OP_ATTR_REMOVE, "attr_remove", attr_remove_f, /* 1 */ 0, 1 },
->  	{ OP_ATTR_SET, "attr_set", attr_set_f, /* 2 */ 0, 1 },
-> +	{ OP_AWRITE, "awrite", awrite_f, 1, 1 },
->  	{ OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
->  	{ OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
->  	{ OP_CHOWN, "chown", chown_f, 3, 1 },
-> @@ -587,8 +600,20 @@ int main(int argc, char **argv)
->  				}
->  			}
->  			procid = i;
-> +#ifdef AIO
-> +			if (io_setup(128, &io_ctx) != 0) {
-> +				perror("io_setup failed");
-
-It seems that libaio wrapper doesn't set errno on failure, it just
-returns the negative errno value, so perror doesn't work as expected
-here.
-
-> +				exit(1);
-> +			}
-> +#endif
->  			for (i = 0; !loops || (i < loops); i++)
->  				doproc();
-> +#ifdef AIO
-> +			if(io_destroy(io_ctx) != 0) {
-> +				perror("io_destroy failed");
-
-Same here.
-
-> +				return 1;
-> +			}
-> +#endif
->  			return 0;
->  		}
->  	}
-> @@ -1708,6 +1733,62 @@ void inode_info(char *str, size_t sz, struct stat64 *s, int verbose)
->  }
->  
->  void
-> +afsync_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	int		e;
-> +	pathname_t	f;
-> +	int		fd;
-> +	int		v;
-> +	struct iocb	iocb;
-> +	struct iocb	*iocbs[] = { &iocb };
-> +	struct io_event	event;
-> +
-> +	init_pathname(&f);
-> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> +		if (v)
-> +			printf("%d/%d: afsync - no filename\n", procid, opno);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	fd = open_path(&f, O_WRONLY | O_DIRECT);
-> +	e = fd < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd < 0) {
-> +		if (v)
-> +			printf("%d/%d: afsync - open %s failed %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +
-> +	io_prep_fsync(&iocb, fd);
-> +	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: afsync - io_submit %s %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: afsync - io_getevents failed %d\n",
-> +			       procid, opno, e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +
-> +	e = event.res2;
-> +	if (v)
-> +		printf("%d/%d: afsync %s %d\n", procid, opno, f.path, e);
-> +	free_pathname(&f);
-> +	close(fd);
-> +#endif
-> +}
-> +
-> +void
->  allocsp_f(int opno, long r)
->  {
->  	int		e;
-> @@ -1761,6 +1842,131 @@ allocsp_f(int opno, long r)
->  	close(fd);
->  }
->  
-> +#ifdef AIO
-> +void
-> +do_aio_rw(int opno, long r, int flags)
-> +{
-> +	__int64_t	align;
-> +	char		*buf;
-> +	struct dioattr	diob;
-> +	int		e;
-> +	pathname_t	f;
-> +	int		fd;
-> +	size_t		len;
-> +	__int64_t	lr;
-> +	off64_t		off;
-> +	struct stat64	stb;
-> +	int		v;
-> +	char		st[1024];
-> +	char		*dio_env;
-> +	struct iocb	iocb;
-> +	struct io_event	event;
-> +	struct iocb	*iocbs[] = { &iocb };
-> +	int		iswrite = (flags & (O_WRONLY | O_RDWR)) ? 1 : 0;
-> +
-> +	init_pathname(&f);
-> +	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - no filename\n", procid, opno);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	fd = open_path(&f, flags|O_DIRECT);
-> +	e = fd < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd < 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - open %s failed %d\n",
-> +			       procid, opno, f.path, e);
-> +		free_pathname(&f);
-> +		return;
-> +	}
-> +	if (fstat64(fd, &stb) < 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - fstat64 %s failed %d\n",
-> +			       procid, opno, f.path, errno);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	inode_info(st, sizeof(st), &stb, v);
-> +	if (!iswrite && stb.st_size == 0) {
-> +		if (v)
-> +			printf("%d/%d: do_aio_rw - %s%s zero size\n", procid, opno,
-> +			       f.path, st);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if (xfsctl(f.path, fd, XFS_IOC_DIOINFO, &diob) < 0) {
-> +		if (v)
-> +			printf(
-> +			"%d/%d: do_aio_rw - xfsctl(XFS_IOC_DIOINFO) %s%s failed %d\n",
-> +				procid, opno, f.path, st, errno);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-
-This means that only XFS has O_DIRECT coverage in fsstress, and
-dread_f/dwrite_f have the same issue.. I think we can fall back to use
-stb.st_blksize as the dio alignment size (maybe factor out a common
-helper to do this). But that can be done in a separate patch.
-
-Thanks,
-Eryu
-
-> +	dio_env = getenv("XFS_DIO_MIN");
-> +	if (dio_env)
-> +		diob.d_mem = diob.d_miniosz = atoi(dio_env);
-> +	align = (__int64_t)diob.d_miniosz;
-> +	lr = ((__int64_t)random() << 32) + random();
-> +	len = (random() % FILELEN_MAX) + 1;
-> +	len -= (len % align);
-> +	if (len <= 0)
-> +		len = align;
-> +	else if (len > diob.d_maxiosz)
-> +		len = diob.d_maxiosz;
-> +	buf = memalign(diob.d_mem, len);
-> +
-> +	if (iswrite) {
-> +		off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
-> +		off -= (off % align);
-> +		off %= maxfsize;
-> +		memset(buf, nameseq & 0xff, len);
-> +		io_prep_pwrite(&iocb, fd, buf, len, off);
-> +	} else {
-> +		off = (off64_t)(lr % stb.st_size);
-> +		off -= (off % align);
-> +		io_prep_pread(&iocb, fd, buf, len, off);
-> +	}
-> +	if ((e = io_submit(io_ctx, 1, iocbs)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: %s - io_submit failed %d\n",
-> +			       procid, opno, iswrite ? "awrite" : "aread", e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +	if ((e = io_getevents(io_ctx, 1, 1, &event, NULL)) != 1) {
-> +		if (v)
-> +			printf("%d/%d: %s - io_getevents failed %d\n",
-> +			       procid, opno, iswrite ? "awrite" : "aread", e);
-> +		free_pathname(&f);
-> +		close(fd);
-> +		return;
-> +	}
-> +
-> +	e = event.res != len ? event.res2 : 0;
-> +	free(buf);
-> +	if (v)
-> +		printf("%d/%d: %s %s%s [%lld,%d] %d\n",
-> +		       procid, opno, iswrite ? "awrite" : "aread",
-> +		       f.path, st, (long long)off, (int)len, e);
-> +	free_pathname(&f);
-> +	close(fd);
-> +}
-> +#endif
-> +
-> +void
-> +aread_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	do_aio_rw(opno, r, O_RDONLY);
-> +#endif
-> +}
-> +
->  void
->  attr_remove_f(int opno, long r)
->  {
-> @@ -1865,6 +2071,14 @@ attr_set_f(int opno, long r)
->  }
->  
->  void
-> +awrite_f(int opno, long r)
-> +{
-> +#ifdef AIO
-> +	do_aio_rw(opno, r, O_WRONLY);
-> +#endif
-> +}
-> +
-> +void
->  bulkstat_f(int opno, long r)
->  {
->  	int		count;
+> thanks for the review
+> 
+> > 
+> > Brian
+> > 
+> > > 
+> > > > >  3 files changed, 122 insertions(+)
+> > > > >  create mode 100755 tests/xfs/999
+> > > > >  create mode 100644 tests/xfs/999.out
+> > > > > 
+> > > > > diff --git a/tests/xfs/999 b/tests/xfs/999
+> > > > > new file mode 100755
+> > > > > index 0000000..b46f1cc
+> > > > > --- /dev/null
+> > > > > +++ b/tests/xfs/999
+> > > > > @@ -0,0 +1,119 @@
+> > > > > +#! /bin/bash
+> > > > > +# FS QA Test 999
+> > > > > +#
+> > > > > +# Test buffer resubmission after a failed writeback with to a full overcommited
+> > > > > +# dm-thin device.
+> > > > > +#
+> > > > > +# When a dm-thin device reaches its full capacity, but the virtual device still
+> > > > > +# shows available space, XFS loops indefinitely in xfsaild due items still in
+> > > > > +# AIL. The buffers containing such items couldn't be resubmitted because the
+> > > > > +# items were flush locked. Test the kernel fix and ensure the buffers are
+> > > > > +# properly resubmitted.
+> > > > > +#
+> > > > > +# This test will hang the filesystem when ran on an unpatched kernel
+> > > > > +#
+> > > > > +#-----------------------------------------------------------------------
+> > > > > +# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
+> > > > > +#
+> > > > > +# This program is free software; you can redistribute it and/or
+> > > > > +# modify it under the terms of the GNU General Public License as
+> > > > > +# published by the Free Software Foundation.
+> > > > > +#
+> > > > > +# This program is distributed in the hope that it would be useful,
+> > > > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > > > +# GNU General Public License for more details.
+> > > > > +#
+> > > > > +# You should have received a copy of the GNU General Public License
+> > > > > +# along with this program; if not, write the Free Software Foundation,
+> > > > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > > > +#-----------------------------------------------------------------------
+> > > > > +#
+> > > > > +
+> > > > > +seq=`basename $0`
+> > > > > +seqres=$RESULT_DIR/$seq
+> > > > > +echo "QA output created by $seq"
+> > > > > +
+> > > > > +here=`pwd`
+> > > > > +tmp=/tmp/$$
+> > > > > +status=1	# failure is the default!
+> > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > > +
+> > > > > +_cleanup()
+> > > > > +{
+> > > > > +	cd /
+> > > > > +	rm -f $tmp.*
+> > > > > +	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
+> > > > > +	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
+> > > > > +	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
+> > > > > +}
+> > > > > +
+> > > > > +# get standard environment, filters and checks
+> > > > > +. ./common/rc
+> > > > > +. ./common/filter
+> > > > 
+> > > > Is filter used anywhere?
+> > > 
+> > > Nope, the first thing I was doing was filtering dmesg for the IO errors before
+> > > extending the dm-thin device, and I forgot to remove the filter from here, I'll
+> > > remove it.
+> > > 
+> > > > 
+> > > > > +
+> > > > > +# real QA test starts here
+> > > > > +
+> > > > > +# Modify as appropriate.
+> > > > > +_supported_fs xfs
+> > > > > +_supported_os Linux
+> > > > > +_require_scratch_nocheck
+> > > > > +_require_dm_target thin-pool
+> > > > > +_require_command $LVM_PROG lvm
+> > > > > +
+> > > > > +# remove previous $seqres.full before test
+> > > > > +rm -f $seqres.full
+> > > > > +
+> > > > > +vgname=vg_$seq
+> > > > > +lvname=lv_$seq
+> > > > > +poolname=pool_$seq
+> > > > > +snapname=snap_$seq
+> > > > > +origpsize=100
+> > > > > +virtsize=200
+> > > > > +newpsize=200
+> > > > > +
+> > > > > +# Ensure we have enough disk space
+> > > > > +_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
+> > > > > +
+> > > > > +# Create a 100MB dm-thin POOL
+> > > > > +$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
+> > > > > +$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+> > > > > +
+> > > > > +$LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y \
+> > > > > +		    --zero n -L $origpsize \
+> > > > > +		    --poolmetadatasize 4M $vgname >>$seqres.full 2>&1
+> > > > > +
+> > > > > +# Create a overprovisioned 200MB dm-thin virt. device
+> > > > > +$LVM_PROG lvcreate  --virtualsize $virtsize \
+> > > > > +		    -T $vgname/$poolname \
+> > > > > +		    -n $lvname >>$seqres.full 2>&1
+> > > > > +
+> > > > > +_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
+> > > > > +
+> > > > > +
+> > > > > +$LVM_PROG lvcreate  -k n -s $vgname/$lvname \
+> > > > > +		    -n $snapname >>$seqres.full 2>&1
+> > > > 
+> > > > What's the reason for using a snapshot? Is the original thin vol not
+> > > > sufficient?
+> > > 
+> > > No, it's not, honestly I don't remember now, exactly why not, I've been using
+> > > the snapshot in my internal test case since I started to work on this problem,
+> > > but without the snapshot I can't trigger the bug, at least not at a 100% rate.
+> > > 
+> > > > 
+> > > > > +
+> > > > > +_mount /dev/mapper/$vgname-$snapname $SCRATCH_MNT
+> > > > > +
+> > > > > +# Consume all space available in the volume and freeze to ensure everything
+> > > > > +# required to make the fs consistent is flushed to disk.
+> > > > > +xfs_io -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
+> > > > 
+> > > > $XFS_IO_PROG
+> > > 
+> > > True, will change it
+> > > 
+> > > > 
+> > > > > +
+> > > > > +# This freeze will never complete until the dm-thin POOL device is extended.
+> > > > > +# This is expected, it is only used so xfsaild is triggered to flush AIL items.
+> > > > > +fsfreeze -f $SCRATCH_MNT &
+> > > > > +
+> > > > > +# Wait enough so xfsaild can run
+> > > > > +sleep 10
+> > > > > +
+> > > > > +# Make some extra space available so the freeze above can proceed
+> > > > > +lvextend -L $newpsize $vgname/$poolname >>$seqres.full 2>&1
+> > > > 
+> > > > $LVM_PROG lvmextend ?
+> > > > 
+> > > Indeed, missed it, will fix.
+> > > 
+> > > > Brian
+> > > > 
+> > > > > +
+> > > > > +# Try to thaw the filesystem, and complete test if if succeed.
+> > > > > +# NOTE: This will hang on affected XFS filesystems.
+> > > > > +fsfreeze -u $SCRATCH_MNT
+> > > > > +echo "Test OK"
+> > > > > +
+> > > > > +status=0
+> > > > > +exit
+> > > > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> > > > > new file mode 100644
+> > > > > index 0000000..8c3c938
+> > > > > --- /dev/null
+> > > > > +++ b/tests/xfs/999.out
+> > > > > @@ -0,0 +1,2 @@
+> > > > > +QA output created by 999
+> > > > > +Test OK
+> > > > > diff --git a/tests/xfs/group b/tests/xfs/group
+> > > > > index 792161a..2bde916 100644
+> > > > > --- a/tests/xfs/group
+> > > > > +++ b/tests/xfs/group
+> > > > > @@ -416,3 +416,4 @@
+> > > > >  416 dangerous_fuzzers dangerous_scrub dangerous_repair
+> > > > >  417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+> > > > >  418 dangerous_fuzzers dangerous_scrub dangerous_repair
+> > > > > +999 dangerous
+> > > > > -- 
+> > > > > 2.9.4
+> > > > > 
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > > -- 
+> > > Carlos
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
 > -- 
-> 2.7.4
-> 
+> Carlos
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Carlos
