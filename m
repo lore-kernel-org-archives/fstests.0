@@ -1,92 +1,164 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:34523 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751378AbdGLJnO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jul 2017 05:43:14 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 1/2] fstest: add helper _require_fs_feature
-Date: Wed, 12 Jul 2017 12:43:24 +0300
-Message-Id: <1499852605-27759-2-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1499852605-27759-1-git-send-email-amir73il@gmail.com>
-References: <1499852605-27759-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48882 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750959AbdGLKcD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Jul 2017 06:32:03 -0400
+Date: Wed, 12 Jul 2017 18:31:58 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 4/5] overlay: test cases that force read-only mount
+Message-ID: <20170712103158.GB7015@eguan.usersys.redhat.com>
+References: <1499802726-11045-1-git-send-email-amir73il@gmail.com>
+ <1499802726-11045-5-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1499802726-11045-5-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The helper is used to test if a specific filesystem feature can
-be enabled. Currently only implemented testing overlayfs features.
+On Tue, Jul 11, 2017 at 10:52:05PM +0300, Amir Goldstein wrote:
+> - Mount with no upper dir
+> - Failure to create work dir
+> 
+> Verify that overlay is mounted read-only and that it cannot
+> be remounted rw.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/overlay/035     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/035.out |  5 +++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 93 insertions(+)
+>  create mode 100755 tests/overlay/035
+>  create mode 100644 tests/overlay/035.out
+> 
+> diff --git a/tests/overlay/035 b/tests/overlay/035
+> new file mode 100755
+> index 0000000..e3fbed7
+> --- /dev/null
+> +++ b/tests/overlay/035
+> @@ -0,0 +1,87 @@
+> +#! /bin/bash
+> +# FS QA Test 035
+> +#
+> +# Test cases that force read-only mount
+> +#
+> +# - No upper dir
+> +# - Failure to create work dir
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
+> +# Author: Amir Goldstein <amir73il@gmail.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	$CHATTR_PROG -i $workdir
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +_require_chattr i
+> +
+> +# Remove all files from previous tests
+> +_scratch_mkfs
+> +
+> +# Create multiple lowerdirs and upperdir, workdir
+> +lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
+> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
+> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
+> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
+> +mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+> +
+> +# Mount overlay with lower layers only.
+> +# Verify that overlay is mounted read-only and that it cannot be remounted rw.
+> +$MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
+> +			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+> +touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+> +$MOUNT_PROG $SCRATCH_MNT -o"remount,rw" 2>&1 | _filter_scratch
 
-Overalyfs features (e.g. redirect_dir, index) are configurable from
-Kconfig (the build default), by module parameter (the system default)
-and per mount using the mount option ${feature}=[on|off].
+_scratch_remount rw 2>&1 | _filter_scratch ?
 
-The helper is going to be used by overlay tests, which depend
-on the inodes index feature.
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# Make workdir immutable to prevent workdir re-create on mount
+> +$CHATTR_PROG +i $workdir
+> +
+> +# Mount overlay with upper and wordir and expect failure to re-create workdir.
+                                  ^^^^^^ workdir
+> +# Verify that overlay is mounted read-only and that it cannot be remounted rw.
+> +_overlay_mount_dirs $lowerdir2 $upperdir $workdir \
+> +		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+> +touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
+> +$MOUNT_PROG $SCRATCH_MNT -o"remount,rw" 2>&1 | _filter_scratch
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/rc | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 48 insertions(+)
+Same here.
 
-diff --git a/common/rc b/common/rc
-index b505365..260b48d 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3626,6 +3626,54 @@ _get_fs_sysfs_attr()
- 	cat /sys/fs/${FSTYP}/${dname}/${attr}
- }
- 
-+# Print the value of a filesystem module parameter
-+# at /sys/module/$FSTYP/parameters/$PARAM
-+#
-+# Usage example (FSTYP=overlay):
-+#   _get_fs_module_param index
-+_get_fs_module_param()
-+{
-+	cat /sys/module/${FSTYP}/parameters/${1} 2>/dev/null
-+}
-+
-+# Generic test for specific filesystem feature.
-+# Currently only implemented to test overlayfs features.
-+_require_fs_feature()
-+{
-+	local feature=$1
-+
-+	case "$FSTYP" in
-+	    overlay)
-+		# overalyfs features (e.g. redirect_dir, index) are
-+		# configurable from Kconfig (the build default), by module
-+		# parameter (the system default) and per mount by mount
-+		# option ${feature}=[on|off].
-+		#
-+		# If the module parameter does not exist then there is no
-+		# point in checking the mount option.
-+		local default=`_get_fs_module_param ${feature}`
-+		[ "$default" = Y ] || [ "$default" = N ] || \
-+			_notrun "feature '${feature}' not supported by ${FSTYP}"
-+
-+	        _scratch_mkfs > /dev/null 2>&1
-+	        _scratch_mount -o ${feature}=on || \
-+	                _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
-+		# Check options to be sure. For example, Overlayfs will fallback to
-+		# index=off if underlying fs does not support file handles.
-+		# Overlayfs only displays mount option if it differs from the default.
-+		# Overlayfs may enable the feature, but fallback to read-only mount.
-+		((( [ "$default" = N ] && _fs_options $SCRATCH_DEV | grep -q "${feature}=on" ) || \
-+		  ( [ "$default" = Y ] && ! _fs_options $SCRATCH_DEV | grep -q "${feature}=off" )) && \
-+		    touch $SCRATCH_MNT/foo 2>/dev/null ) || \
-+	                _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
-+		_scratch_unmount
-+		;;
-+	    *)
-+		_fail "Test for feature '${feature}' of ${FSTYP} is not implemented"
-+		;;
-+	esac
-+}
-+
- 
- init_rc
- 
--- 
-2.7.4
+Otherwise test looks good to me. I can fix them at commit time if you
+think _scratch_remount is OK (it works for me in my test).
 
+Thanks,
+Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/overlay/035.out b/tests/overlay/035.out
+> new file mode 100644
+> index 0000000..5a5f677
+> --- /dev/null
+> +++ b/tests/overlay/035.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 035
+> +touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
+> +mount: cannot remount SCRATCH_DEV read-write, is write-protected
+> +touch: cannot touch 'SCRATCH_MNT/bar': Read-only file system
+> +mount: cannot remount SCRATCH_DEV read-write, is write-protected
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 356a322..87e3aaf 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -37,3 +37,4 @@
+>  032 auto quick copyup hardlink
+>  033 auto quick copyup hardlink
+>  034 auto quick copyup hardlink
+> +035 auto quick mount
+> -- 
+> 2.7.4
+> 
