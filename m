@@ -1,34 +1,63 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:38143 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756510AbdGLLrY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jul 2017 07:47:24 -0400
-Date: Wed, 12 Jul 2017 04:47:19 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 0/5] Failure to set acl may alter group permissions
-Message-ID: <20170712114719.GA14398@infradead.org>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:36646 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756235AbdGLLxW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jul 2017 07:53:22 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-In-Reply-To: <cover.1499805484.git.ernesto.mnd.fernandez@gmail.com>
+In-Reply-To: <20170712114607.GF7015@eguan.usersys.redhat.com>
+References: <1499802726-11045-1-git-send-email-amir73il@gmail.com>
+ <1499802726-11045-6-git-send-email-amir73il@gmail.com> <20170712104741.GD7015@eguan.usersys.redhat.com>
+ <CAOQ4uxhVQf+dP1_p6tqxbcMe__EsNMC_Wd16Vkh4LAmCJbRVNA@mail.gmail.com> <20170712114607.GF7015@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 12 Jul 2017 14:53:21 +0300
+Message-ID: <CAOQ4uxjiQeO3oaCyCHT7xnHjXiCdejse0FLOh2F0ZOvgbSDtWw@mail.gmail.com>
+Subject: Re: [PATCH 5/5] overlay: test mount error cases with exclusive directories
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Ernesto =?iso-8859-1?Q?A=2E_Fern=E1ndez?= <ernesto.mnd.fernandez@gmail.com>
-Cc: Jan Kara <jack@suse.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Dave Kleikamp <shaggy@kernel.org>, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 12, 2017 at 06:53:22AM -0300, Ernesto A. Fern=E1ndez wrote:
-> If your working directory is on a filesystem mounted with extended user
-> attributes (and acl of course), this script will trigger the issue by
-> filling the drive:
->=20
->=20
-> touch test.file
-> chmod go-rwx test.file
-> yes xxxxxxxxxx > test.file
-> i=3D1
-> while setfattr -n user.$i test.file; do
->   ((++i))
-> done
-> setfacl -m m:r test.file
-
-Can you please wire this up for xfstests?
+On Wed, Jul 12, 2017 at 2:46 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Jul 12, 2017 at 02:08:56PM +0300, Amir Goldstein wrote:
+>> On Wed, Jul 12, 2017 at 1:47 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Tue, Jul 11, 2017 at 10:52:06PM +0300, Amir Goldstein wrote:
+>> >> Expect EBUSY when trying to mount overlay when:
+>> >> - Upper dir is in-use by another overlay mount
+>> >> - Work dir is in-use by another overlay mount
+>> >>
+>> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> >
+>> > From patch 2/5, seems this behavior requires inode index feature to be
+>> > enabled, and now test fails on old kernels for me. Is this expected?
+>> >
+>>
+>> From my cover letter:
+>> "The new test overlay/036 checks for new overlay mount behaviors related
+>> to exclusivity of upper and work dirs among overlay mounts. This test
+>> is expected to fail on upstream kernel, but for a good reason, because
+>> the mount configurations that it tests (sharing upper dir among two
+>> overlay mounts) are not wise at all."
+>>
+>> So the answer is yes, this is expected and also does not depend
+>> on index feature.
+>
+> I usually read the cover letter (I saved it in my 'review' mailbox along
+> with patches to review), but somehow I forgot about it this time..
+>
+>>
+>> I know this is a bit confusing, but inode index enforces that 2
+>> *subsequent* overlay
+>> mount don't reuse the same upper/work dir with different lower/upper.
+>> The test that checks this behavior is overlay/037, still on my
+>> overlayfs-devel branch.
+>>
+>> overlay/036 verifies that 2 *concurrent* overlay mount don't reuse the same
+>> upper/work dir. The is enforced by overlayfs-next regardless on index feature.
+>> A setup like this will cause troubles in old kernel as well, but mount
+>> will not detect it.
+>
+> Thanks for the explanation! The commit log and test description don't
+> provide enough background information. If you could resend with detailed
+> explanation on the test, that'd be great!
+>
+No problem.
