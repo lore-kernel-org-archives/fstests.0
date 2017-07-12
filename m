@@ -1,87 +1,51 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:50334 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751215AbdGLRj0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jul 2017 13:39:26 -0400
-Date: Wed, 12 Jul 2017 10:39:23 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] generic: test negative SEEK_HOLE/SEEK_DATA offsets
-Message-ID: <20170712173923.GD4212@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:41244 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752757AbdGLSbN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Jul 2017 14:31:13 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 1BF2C4DD49
+        for <fstests@vger.kernel.org>; Wed, 12 Jul 2017 18:31:13 +0000 (UTC)
+From: "Bill O'Donnell" <billodo@redhat.com>
+Subject: [PATCH] xfs/424: test xfs_db to ensure sector size taken into account with new type
+Date: Wed, 12 Jul 2017 13:31:12 -0500
+Message-Id: <20170712183112.5255-1-billodo@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-fsdevel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Check that we get -ENXIO if the user calls SEEK_HOLE/SEEK_DATA with
-a negative file offset.
+xfs_db should take sector size into account when setting type.
+If sector size ignored, a false crc error can occur due to
+the new size not being picked up when type gets set. This test
+checks for that false crc error.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Bill O'Donnell <billodo@redhat.com>
 ---
- src/seek_sanity_test.c |   25 +++++++++++++++++
- tests/generic/702      |   70 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/702.out  |    2 +
- tests/generic/group    |    1 +
- 4 files changed, 98 insertions(+)
- create mode 100755 tests/generic/702
- create mode 100644 tests/generic/702.out
+ tests/xfs/424     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/424.out |  5 ++++
+ tests/xfs/group   |  1 +
+ 3 files changed, 78 insertions(+)
+ create mode 100755 tests/xfs/424
+ create mode 100644 tests/xfs/424.out
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index a58ec36..547f0a4 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -274,6 +274,30 @@ static int huge_file_test(int fd, int testnum, off_t filsz)
- 	return ret;
- }
- 
-+/* Make sure we get ENXIO if we pass in a negative offset. */
-+static int test18(int fd, int testnum)
-+{
-+	int ret = 0;
-+	off_t pos;
-+
-+	errno = 0;
-+	pos = lseek(fd, -1, SEEK_HOLE);
-+	if (pos != -1 || errno != ENXIO) {
-+		printf("%02d.1 SEEK_HOLE expected -1 with errno %d, got %jd and %d.\n",
-+		       testnum, -ENXIO, pos, -errno);
-+		ret++;
-+	}
-+
-+	errno = 0;
-+	pos = lseek(fd, -1, SEEK_DATA);
-+	if (pos != -1 || errno != ENXIO) {
-+		printf("%02d.1 SEEK_DATA expected -1 with errno %d, got %jd and %d.\n",
-+		       testnum, -ENXIO, pos, -errno);
-+		ret++;
-+	}
-+	return ret;
-+}
-+
- static int test17(int fd, int testnum)
- {
- 	char *buf = NULL;
-@@ -969,6 +993,7 @@ struct testrec seek_tests[] = {
-        { 15, test15, "Test file with unwritten extents, page after unwritten extent" },
-        { 16, test16, "Test file with unwritten extents, non-contiguous dirty pages" },
-        { 17, test17, "Test file with unwritten extents, data-hole-data inside page" },
-+       { 18, test18, "Test file with negative SEEK_{HOLE,DATA} offsets" },
- };
- 
- static int run_test(struct testrec *tr)
-diff --git a/tests/generic/702 b/tests/generic/702
+diff --git a/tests/xfs/424 b/tests/xfs/424
 new file mode 100755
-index 0000000..d251c39
+index 00000000..12945678
 --- /dev/null
-+++ b/tests/generic/702
-@@ -0,0 +1,70 @@
++++ b/tests/xfs/424
+@@ -0,0 +1,72 @@
 +#! /bin/bash
-+# FS QA Test No. 702
++# FS QA Test 424
 +#
-+# Check what happens when SEEK_HOLE/SEEK_DATA are fed negative offsets.
++# xfs_db should take sector size into account when setting type.
++# If sector size ignored, a false crc error can occur due to
++# the new size not being picked up when type is set. This test
++# checks for that false crc error.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -96,70 +60,74 @@ index 0000000..d251c39
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
++#
 +
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1    # failure is the default!
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+    cd /
-+    rm -rf "$tmp".* $testdir/file1
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_scratch_unmount >> $seqres.full 2>&1
++
++# for different sector sizes, ensure no CRC errors are falsely reported
++$MKFS_PROG -t xfs -f -s size=512 $SCRATCH_DEV > /dev/null
++$XFS_DB_PROG -c "agi 0" -c "daddr" -c "daddr 42" -c "daddr 2" -c "type agi" $SCRATCH_DEV
++
++$MKFS_PROG -t xfs -f -s size=1024 $SCRATCH_DEV > /dev/null
++$XFS_DB_PROG -c "agi 0" -c "daddr" -c "daddr 42" -c "daddr 4" -c "type agi" $SCRATCH_DEV
++
++$MKFS_PROG -t xfs -f -s size=2048 $SCRATCH_DEV > /dev/null
++$XFS_DB_PROG -c "agi 0" -c "daddr" -c "daddr 42" -c "daddr 8" -c "type agi" $SCRATCH_DEV
++
++$MKFS_PROG -t xfs -f -s size=4096 $SCRATCH_DEV > /dev/null
++$XFS_DB_PROG -c "agi 0" -c "daddr" -c "daddr 42" -c "daddr 16" -c "type agi" $SCRATCH_DEV
++
++# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+
 +_require_test
-+_require_seek_data_hole
 +
-+BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
-+
-+_require_test_program "seek_sanity_test"
-+
-+# Disable extent zeroing for ext4 as that change where holes are created
-+if [ "$FSTYP" = "ext4" ]; then
-+	DEV=`_short_dev $TEST_DEV`
-+	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
-+fi
-+
-+_cleanup()
-+{
-+	rm -f $tmp.* $BASE_TEST_FILE.*
-+}
-+
-+$here/src/seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-+	_fail "seek sanity check failed!"
-+
-+_check_dmesg
 +# success, all done
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/702.out b/tests/generic/702.out
+diff --git a/tests/xfs/424.out b/tests/xfs/424.out
 new file mode 100644
-index 0000000..608d593
+index 00000000..ff12d9d0
 --- /dev/null
-+++ b/tests/generic/702.out
-@@ -0,0 +1,2 @@
-+QA output created by 702
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 3c5a19c..6afd402 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -449,4 +449,5 @@
- 444 auto quick acl
- 445 auto quick rw
- 446 auto quick rw dangerous
-+702 auto quick rw
- 931 auto quick clone
++++ b/tests/xfs/424.out
+@@ -0,0 +1,5 @@
++QA output created by 424
++current daddr is 2
++current daddr is 4
++current daddr is 8
++current daddr is 16
+diff --git a/tests/xfs/group b/tests/xfs/group
+index ffdb0615..75c8280c 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -421,3 +421,4 @@
+ 421 auto quick clone dedupe
+ 422 dangerous_scrub dangerous_online_repair
+ 423 dangerous_scrub
++424 auto quick db
+-- 
+2.13.0
+
