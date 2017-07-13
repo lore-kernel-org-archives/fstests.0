@@ -1,79 +1,118 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58406 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50160 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751157AbdGMMM6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 13 Jul 2017 08:12:58 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2682E7A176
-        for <fstests@vger.kernel.org>; Thu, 13 Jul 2017 12:12:58 +0000 (UTC)
-Date: Thu, 13 Jul 2017 14:12:54 +0200
-From: Carlos Maiolino <cmaiolino@redhat.com>
-Subject: Re: [PATCH] xfstests: Test filesystem lockup on full overprovisioned
- dm-thin
-Message-ID: <20170713121254.pftijci5aflidil2@eorzea.usersys.redhat.com>
-References: <20170712080527.826-1-cmaiolino@redhat.com>
- <20170712091438.GA7015@eguan.usersys.redhat.com>
- <20170712121338.gtkhowgny2syjdvu@eorzea.usersys.redhat.com>
- <20170713104210.GF2478@eguan.usersys.redhat.com>
+        id S1751157AbdGMMla (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Jul 2017 08:41:30 -0400
+Date: Thu, 13 Jul 2017 20:41:27 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/2] fstest: add helper _require_fs_feature
+Message-ID: <20170713124127.GG2478@eguan.usersys.redhat.com>
+References: <1499852605-27759-1-git-send-email-amir73il@gmail.com>
+ <1499852605-27759-2-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170713104210.GF2478@eguan.usersys.redhat.com>
+In-Reply-To: <1499852605-27759-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 13, 2017 at 06:42:10PM +0800, Eryu Guan wrote:
-> On Wed, Jul 12, 2017 at 02:13:38PM +0200, Carlos Maiolino wrote:
-> > Ugh, sorry, I missed these comments during my past reply
-> > 
-> > > > +
-> > > > +_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
-> > > 
-> > > Sorry, I should've asked earlier in your RFC patch.. can all these setup
-> > > work be done with helpers in common/dmthin? e.g. _dmthin_init,
-> > > _dmthin_grow, the backing dev size, virtual size etc. are handled
-> > > properly in dmthin helpers. You could take generic/347 as an example.
-> > > 
-> > 
-> > I could do that if strictly required, but I'll also need to add a new dmthin
-> > helper to create snapshots, once this tests requires a snapshot. IIRC, LVM uses
-> > some 'tricks' to create snapshots (see device-mapper doc in kernel source), so
-> > this might add unneeded complexity to the test.
-> > 
-> > I can use the helpers in common/dmthin for sure, but if this is not strictly
-> > required, I'd just stay with LVM instead of using device-mapper directly.
+On Wed, Jul 12, 2017 at 12:43:24PM +0300, Amir Goldstein wrote:
+> The helper is used to test if a specific filesystem feature can
+> be enabled. Currently only implemented testing overlayfs features.
 > 
-> I don't think it's strictly required, if there're some good reasons. But
-> I really like to see the reasons are explained in the test as comments.
-> Otherwise it just makes me wondering why snapshot is needed, because
-> it's not mentioned in the commit log nor in the test description.
+> Overalyfs features (e.g. redirect_dir, index) are configurable from
+> Kconfig (the build default), by module parameter (the system default)
+> and per mount using the mount option ${feature}=[on|off].
 > 
-> Thanks,
-> Eryu
+> The helper is going to be used by overlay tests, which depend
+> on the inodes index feature.
 > 
-> P.S.
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  common/rc | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 48 insertions(+)
 > 
-> I played with this test a bit today and tried to get rid of snapshot but
-> failed. The difference I can see between using snapshot or not is that,
-> snapshot somehow makes metadata I/O error happens on block 0x0, while
-> without it the error happens on other blocks, e.g. block 0xc100.
-> 
+> diff --git a/common/rc b/common/rc
+> index b505365..260b48d 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3626,6 +3626,54 @@ _get_fs_sysfs_attr()
+>  	cat /sys/fs/${FSTYP}/${dname}/${attr}
+>  }
+>  
+> +# Print the value of a filesystem module parameter
+> +# at /sys/module/$FSTYP/parameters/$PARAM
+> +#
+> +# Usage example (FSTYP=overlay):
+> +#   _get_fs_module_param index
+> +_get_fs_module_param()
+> +{
+> +	cat /sys/module/${FSTYP}/parameters/${1} 2>/dev/null
+> +}
+> +
+> +# Generic test for specific filesystem feature.
+> +# Currently only implemented to test overlayfs features.
+> +_require_fs_feature()
 
-Yup, the problem isn't easily reproducible without the snapshot here, but the
-difference on the block being written 0x0 vs 0xc100 isn't the only difference, but
-really don't remember now. Triggering the situation where we don't have space to
-writeback the AIL items being flushed isn't quite trivial.
+I'd think if it should be renamed to _require_scratch_feature, because
+it assumes $SCRATCH_DEV is present, and it reminds people it's using
+SCRATCH_DEV with "scratch" in the name.
 
-But I can certainly for sure add the snapshot requirement in the test
-description here.
+Otherwise looks good to me, it has detailed explanations, thanks a lot!
 
-> XFS (dm-4): metadata I/O error: block 0x0 ("xfs_buf_iodone_callback_error") error 28 numblks 1
-> vs
-> XFS (dm-4): metadata I/O error: block 0xc100 ("xfs_buf_iodone_callback_error") error 28 numblks 32
-> --
+> +{
+> +	local feature=$1
+> +
+> +	case "$FSTYP" in
+> +	    overlay)
+> +		# overalyfs features (e.g. redirect_dir, index) are
+> +		# configurable from Kconfig (the build default), by module
+> +		# parameter (the system default) and per mount by mount
+> +		# option ${feature}=[on|off].
 
--- 
-Carlos
+I'll fix the indention here, like
+
+	case "$FSTYP" in
+	overlay)
+		...
+		;;
+	*)
+		;;
+	esac
+
+Thanks,
+Eryu
+
+> +		#
+> +		# If the module parameter does not exist then there is no
+> +		# point in checking the mount option.
+> +		local default=`_get_fs_module_param ${feature}`
+> +		[ "$default" = Y ] || [ "$default" = N ] || \
+> +			_notrun "feature '${feature}' not supported by ${FSTYP}"
+> +
+> +	        _scratch_mkfs > /dev/null 2>&1
+> +	        _scratch_mount -o ${feature}=on || \
+> +	                _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
+> +		# Check options to be sure. For example, Overlayfs will fallback to
+> +		# index=off if underlying fs does not support file handles.
+> +		# Overlayfs only displays mount option if it differs from the default.
+> +		# Overlayfs may enable the feature, but fallback to read-only mount.
+> +		((( [ "$default" = N ] && _fs_options $SCRATCH_DEV | grep -q "${feature}=on" ) || \
+> +		  ( [ "$default" = Y ] && ! _fs_options $SCRATCH_DEV | grep -q "${feature}=off" )) && \
+> +		    touch $SCRATCH_MNT/foo 2>/dev/null ) || \
+> +	                _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
+> +		_scratch_unmount
+> +		;;
+> +	    *)
+> +		_fail "Test for feature '${feature}' of ${FSTYP} is not implemented"
+> +		;;
+> +	esac
+> +}
+> +
+>  
+>  init_rc
+>  
+> -- 
+> 2.7.4
+> 
