@@ -1,121 +1,228 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:35085 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751244AbdGMNKq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2017 09:10:46 -0400
-MIME-Version: 1.0
-In-Reply-To: <20170713124127.GG2478@eguan.usersys.redhat.com>
-References: <1499852605-27759-1-git-send-email-amir73il@gmail.com>
- <1499852605-27759-2-git-send-email-amir73il@gmail.com> <20170713124127.GG2478@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 13 Jul 2017 16:10:44 +0300
-Message-ID: <CAOQ4uxhGEExv1XqCsA47AbZN4JZESDTEn0yuat_S0ZaRhnWZpg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] fstest: add helper _require_fs_feature
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx1.redhat.com ([209.132.183.28]:26238 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751201AbdGMNMO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Jul 2017 09:12:14 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id D8B7C31A11D
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2017 13:12:13 +0000 (UTC)
+Received: from eorzea.usersys.redhat.com (unknown [10.40.205.35])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 473CA67CCC
+        for <fstests@vger.kernel.org>; Thu, 13 Jul 2017 13:12:13 +0000 (UTC)
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: [PATCH V2] xfstests: Test filesystem lockup on full overprovisioned dm-thin
+Date: Thu, 13 Jul 2017 15:12:08 +0200
+Message-Id: <20170713131208.28671-1-cmaiolino@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 13, 2017 at 3:41 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jul 12, 2017 at 12:43:24PM +0300, Amir Goldstein wrote:
->> The helper is used to test if a specific filesystem feature can
->> be enabled. Currently only implemented testing overlayfs features.
->>
->> Overalyfs features (e.g. redirect_dir, index) are configurable from
->> Kconfig (the build default), by module parameter (the system default)
->> and per mount using the mount option ${feature}=[on|off].
->>
->> The helper is going to be used by overlay tests, which depend
->> on the inodes index feature.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  common/rc | 48 ++++++++++++++++++++++++++++++++++++++++++++++++
->>  1 file changed, 48 insertions(+)
->>
->> diff --git a/common/rc b/common/rc
->> index b505365..260b48d 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3626,6 +3626,54 @@ _get_fs_sysfs_attr()
->>       cat /sys/fs/${FSTYP}/${dname}/${attr}
->>  }
->>
->> +# Print the value of a filesystem module parameter
->> +# at /sys/module/$FSTYP/parameters/$PARAM
->> +#
->> +# Usage example (FSTYP=overlay):
->> +#   _get_fs_module_param index
->> +_get_fs_module_param()
->> +{
->> +     cat /sys/module/${FSTYP}/parameters/${1} 2>/dev/null
->> +}
->> +
->> +# Generic test for specific filesystem feature.
->> +# Currently only implemented to test overlayfs features.
->> +_require_fs_feature()
->
-> I'd think if it should be renamed to _require_scratch_feature, because
-> it assumes $SCRATCH_DEV is present, and it reminds people it's using
-> SCRATCH_DEV with "scratch" in the name.
+With thin devices, it's possible to have a virtual device larger than
+the physical device itself, and such situation can cause problems to
+filesystems, once the filesystem 'believe' to have more space than it
+actually has.
 
-Right. makes sense. Do you need me to re-post or will you fix on commit?
+This can lead the filesystem to several weird behaviors. The one tested
+here is filesystem lockup.
 
->
-> Otherwise looks good to me, it has detailed explanations, thanks a lot!
->
->> +{
->> +     local feature=$1
->> +
->> +     case "$FSTYP" in
->> +         overlay)
->> +             # overalyfs features (e.g. redirect_dir, index) are
->> +             # configurable from Kconfig (the build default), by module
->> +             # parameter (the system default) and per mount by mount
->> +             # option ${feature}=[on|off].
->
-> I'll fix the indention here, like
->
->         case "$FSTYP" in
->         overlay)
->                 ...
->                 ;;
->         *)
->                 ;;
->         esac
->
-> Thanks,
-> Eryu
->
->> +             #
->> +             # If the module parameter does not exist then there is no
->> +             # point in checking the mount option.
->> +             local default=`_get_fs_module_param ${feature}`
->> +             [ "$default" = Y ] || [ "$default" = N ] || \
->> +                     _notrun "feature '${feature}' not supported by ${FSTYP}"
->> +
->> +             _scratch_mkfs > /dev/null 2>&1
->> +             _scratch_mount -o ${feature}=on || \
->> +                     _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
->> +             # Check options to be sure. For example, Overlayfs will fallback to
->> +             # index=off if underlying fs does not support file handles.
->> +             # Overlayfs only displays mount option if it differs from the default.
->> +             # Overlayfs may enable the feature, but fallback to read-only mount.
->> +             ((( [ "$default" = N ] && _fs_options $SCRATCH_DEV | grep -q "${feature}=on" ) || \
->> +               ( [ "$default" = Y ] && ! _fs_options $SCRATCH_DEV | grep -q "${feature}=off" )) && \
->> +                 touch $SCRATCH_MNT/foo 2>/dev/null ) || \
->> +                     _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
->> +             _scratch_unmount
->> +             ;;
->> +         *)
->> +             _fail "Test for feature '${feature}' of ${FSTYP} is not implemented"
->> +             ;;
->> +     esac
->> +}
->> +
->>
->>  init_rc
->>
->> --
->> 2.7.4
->>
+In case of XFS, it locks up when trying to writeback AIL metadata back
+to the filesystem, but, once there is no physical space available, XFS
+locks up and do not gracefuly handle this case.
+
+Other filesystems usually are remounted as read-only, so they already
+have this situation covered.
+
+Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+---
+Changelog:
+
+	V2: - Add extra comments regarding the usage of snapshots
+	    - more extra comments regarding why consistency check isn't
+	      required
+	    - Remove -n argument from `wait`
+
+ tests/generic/447     | 151 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/447.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 154 insertions(+)
+ create mode 100755 tests/generic/447
+ create mode 100644 tests/generic/447.out
+
+diff --git a/tests/generic/447 b/tests/generic/447
+new file mode 100755
+index 0000000..45c4af8
+--- /dev/null
++++ b/tests/generic/447
+@@ -0,0 +1,151 @@
++#! /bin/bash
++# FS QA Test 424
++#
++# Test buffer filesystem error recovery during a full overcommited dm-thin device.
++#
++# When a dm-thin device reaches its full capacity, but the virtual device still
++# shows available space, the filesystem should be able to handle such cases
++# failing its operation without locking up.
++#
++# This test has been created first to cover a XFS problem where it loops
++# indefinitely in xfsaild due items still in AIL. The buffers containing such
++# items couldn't be resubmitted because the items were flush locked.
++# But, once this doesn't require any special filesystem feature to be executed,
++# this has been integrated as a generic test.
++#
++# This test might hang the filesystem when ran on an unpatched kernel
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$UMOUNT_PROG $SCRATCH_MNT >>$seqres.full 2>&1
++	$LVM_PROG vgremove -ff $vgname >>$seqres.full 2>&1
++	$LVM_PROG pvremove -ff $SCRATCH_DEV >>$seqres.full 2>&1
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++
++# This tests for filesystem lockup not consistency, so don't check for fs
++# consistency after test
++_supported_fs generic
++_supported_os Linux
++_require_scratch_nocheck
++_require_dm_target thin-pool
++_require_command $LVM_PROG lvm
++_require_freeze
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++vgname=vg_$seq
++lvname=lv_$seq
++poolname=pool_$seq
++snapname=snap_$seq
++origpsize=100
++virtsize=200
++newpsize=200
++
++# Ensure we have enough disk space
++_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
++
++# Create a 100MB dm-thin POOL
++$LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
++$LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
++
++$LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y \
++		    --zero n -L $origpsize \
++		    --poolmetadatasize 4M $vgname >>$seqres.full 2>&1
++
++# Create a overprovisioned 200MB dm-thin virt. device
++$LVM_PROG lvcreate  --virtualsize $virtsize \
++		    -T $vgname/$poolname \
++		    -n $lvname >>$seqres.full 2>&1
++
++_mkfs_dev /dev/mapper/$vgname-$lvname >>$seqres.full 2>&1
++
++
++# Running the test over the original volume doesn't reproduce the problem
++# reliably, while, running it over a snapshot, makes the problem 100%
++# reproducible, so, create a snapshot and run the test over it.
++$LVM_PROG lvcreate  -k n -s $vgname/$lvname \
++		    -n $snapname >>$seqres.full 2>&1
++
++_mount /dev/mapper/$vgname-$snapname $SCRATCH_MNT
++
++# Consume all space available in the volume and freeze to ensure everything
++# required to make the fs consistent is flushed to disk.
++$XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
++
++# In XFS, this freeze will never complete until the dm-thin POOL device is
++# extended. It is expected, and is only used so xfsaild is triggered to
++# flush AIL items, other filesystems usually get remounted as read-only during
++# the above write process.
++fsfreeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
++freezeid=$!
++
++# Wait enough so xfsaild can run
++sleep 10
++
++# Make some extra space available so the freeze above can proceed
++$LVM_PROG lvextend -L $newpsize $vgname/$poolname >>$seqres.full 2>&1
++
++wait $freezeid
++ret=$?
++
++
++# Different filesystems will handle the lack of real space in different ways,
++# some will remount the filesystem in read-only mode, some will not. These tests
++# will check if:
++#	- The filesystem turns into Read-Only and reject further writes
++#	- The filesystem stays in Read-Write mode, but can be frozen/thawed
++#	  without getting stuck.
++ISRO=$(_fs_options /dev/mapper/$vgname-$snapname | grep -w "ro")
++
++if [ $ret -ne 0 ]; then
++	if [ -n "$ISRO" ]; then
++		echo "Test OK"
++	else
++		echo "Freeze failed and FS isn't Read-Only. Test Failed"
++		status=1
++		exit
++	fi
++else
++	# Try to thaw the filesystem, and complete test if if succeed.
++	# NOTE: This will hang on affected XFS filesystems.
++	fsfreeze -u $SCRATCH_MNT >>$seqres.full 2>&1
++	echo "Test OK"
++fi
++
++status=0
++exit
+diff --git a/tests/generic/447.out b/tests/generic/447.out
+new file mode 100644
+index 0000000..3531fb9
+--- /dev/null
++++ b/tests/generic/447.out
+@@ -0,0 +1,2 @@
++QA output created by 447
++Test OK
+diff --git a/tests/generic/group b/tests/generic/group
+index 8c1e21a..6a360fa 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -449,3 +449,4 @@
+ 444 auto quick acl
+ 445 auto quick rw
+ 446 auto quick rw dangerous
++447 auto dangerous
+-- 
+2.9.4
+
