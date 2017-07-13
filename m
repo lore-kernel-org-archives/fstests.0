@@ -1,183 +1,99 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:19885 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751280AbdGMQsK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2017 12:48:10 -0400
-Date: Thu, 13 Jul 2017 09:45:28 -0700
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: Re: [PATCH] btrfs: test direct IO write against raid5/6 filesystems
-Message-ID: <20170713164527.GF12913@lim.localdomain>
-Reply-To: bo.li.liu@oracle.com
-References: <20170713141040.2341-1-fdmanana@kernel.org>
+Received: from userp1040.oracle.com ([156.151.31.81]:39408 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752902AbdGMTE5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jul 2017 15:04:57 -0400
+Date: Thu, 13 Jul 2017 12:04:50 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] generic: test negative SEEK_HOLE/SEEK_DATA offsets
+Message-ID: <20170713190450.GC4151@magnolia>
+References: <20170712173923.GD4212@magnolia>
+ <20170713081458.GE2478@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170713141040.2341-1-fdmanana@kernel.org>
+In-Reply-To: <20170713081458.GE2478@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-fsdevel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 13, 2017 at 03:10:40PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Thu, Jul 13, 2017 at 04:14:58PM +0800, Eryu Guan wrote:
+> On Wed, Jul 12, 2017 at 10:39:23AM -0700, Darrick J. Wong wrote:
+> > Check that we get -ENXIO if the user calls SEEK_HOLE/SEEK_DATA with
+> > a negative file offset.
 > 
-> Test that a direct IO write works against raid5/6 filesystems and that
-> after the write operation we are able to read back the correct data
-> and scrub operations don't find any errors.
+> A minor nit, this might be confusing, lseek returns -1 on error, and set
+> errno to ENXIO, no one actually returns -ENXIO.
 > 
-> This test is motivated by a regression introduced in the merge window
-> for the 4.13 linux kernel, which was undetected by the current set of
-> test cases. The issue is fixed by the following patch:
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  src/seek_sanity_test.c |   25 +++++++++++++++++
+> >  tests/generic/702      |   70 ++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/702.out  |    2 +
+> >  tests/generic/group    |    1 +
+> >  4 files changed, 98 insertions(+)
+> >  create mode 100755 tests/generic/702
+> >  create mode 100644 tests/generic/702.out
+> > 
+> > diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+> > index a58ec36..547f0a4 100644
+> > --- a/src/seek_sanity_test.c
+> > +++ b/src/seek_sanity_test.c
+> > @@ -274,6 +274,30 @@ static int huge_file_test(int fd, int testnum, off_t filsz)
+> >  	return ret;
+> >  }
+> >  
+> > +/* Make sure we get ENXIO if we pass in a negative offset. */
+> > +static int test18(int fd, int testnum)
+> > +{
+> > +	int ret = 0;
+> > +	off_t pos;
+> > +
+> > +	errno = 0;
+> > +	pos = lseek(fd, -1, SEEK_HOLE);
+> > +	if (pos != -1 || errno != ENXIO) {
+> > +		printf("%02d.1 SEEK_HOLE expected -1 with errno %d, got %jd and %d.\n",
+> > +		       testnum, -ENXIO, pos, -errno);
+> > +		ret++;
+> > +	}
+> > +
+> > +	errno = 0;
+> > +	pos = lseek(fd, -1, SEEK_DATA);
+> > +	if (pos != -1 || errno != ENXIO) {
+> > +		printf("%02d.1 SEEK_DATA expected -1 with errno %d, got %jd and %d.\n",
+> > +		       testnum, -ENXIO, pos, -errno);
+> > +		ret++;
+> > +	}
+> > +	return ret;
 > 
->   "Btrfs: fix write corruption due to bio cloning on raid5/6"
+> Seems cleaner to use do_lseek() helper, e.g.
 > 
+> static int test18(int fd, int testnum)
+> {
+> 	int ret = 0;
+> 
+> 	/* file size doesn't matter in this test, set to 0 */
+> 	ret += do_lseek(testnum, 1, fd, 0, SEEK_HOLE, -1, -1);
+> 	ret += do_lseek(testnum, 2, fd, 0, SEEK_DATA, -1, -1);
+> 	
+> 	return ret;
+> }
+> 
+> And test reports "succ" or "FAIL" as what other subtests do
+> 
+> 18. Test file with negative SEEK_{HOLE,DATA} offsets  
+> 18.01 SEEK_HOLE expected -1 or -1, got 0.                         FAIL
+> 18.02 SEEK_DATA expected -1 with errno -6, got -1.                FAIL
 
-Thanks for the testcase.
+Sure, will change and resend.
 
-Reviewed-by: Liu Bo <bo.li.liu@oracle.com>
+--D
 
--liubo
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/btrfs/148     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/148.out | 23 +++++++++++++++
->  tests/btrfs/group   |  1 +
->  3 files changed, 109 insertions(+)
->  create mode 100755 tests/btrfs/148
->  create mode 100644 tests/btrfs/148.out
 > 
-> diff --git a/tests/btrfs/148 b/tests/btrfs/148
-> new file mode 100755
-> index 00000000..45aa577a
-> --- /dev/null
-> +++ b/tests/btrfs/148
-> @@ -0,0 +1,85 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/148
-> +#
-> +# Test that direct IO writes work on RAID5 and RAID6 filesystems.
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-> +# Author: Filipe Manana <fdmanana@suse.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_scratch_dev_pool 4
-> +
-> +_scratch_dev_pool_get 4
-> +
-> +rm -f $seqres.full
-> +
-> +test_direct_io_write()
-> +{
-> +	local mkfs_options=$1
-> +
-> +	_scratch_pool_mkfs $mkfs_options >>$seqres.full 2>&1
-> +	_scratch_mount
-> +
-> +	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 1M" $SCRATCH_MNT/foo \
-> +		| _filter_xfs_io
-> +
-> +	# Now read back the same data, we expect to get what we wrote before.
-> +	echo "File data after direct IO write:"
-> +	od -t x1 $SCRATCH_MNT/foo | _filter_scratch
-> +	_scratch_cycle_mount
-> +	echo "File data after umounting and mounting again the filesystem:"
-> +	od -t x1 $SCRATCH_MNT/foo | _filter_scratch
-> +
-> +	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
-> +	if [ $? -ne 0 ]; then
-> +		echo "Scrub found errors" | tee -a $seqres.full
-> +	fi
-> +
-> +	_scratch_unmount
-> +}
-> +
-> +echo "Testing RAID5..."
-> +test_direct_io_write "-m raid5 -d raid5"
-> +echo "Testing RAID6..."
-> +test_direct_io_write "-m raid6 -d raid6"
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/148.out b/tests/btrfs/148.out
-> new file mode 100644
-> index 00000000..c4178f66
-> --- /dev/null
-> +++ b/tests/btrfs/148.out
-> @@ -0,0 +1,23 @@
-> +QA output created by 148
-> +Testing RAID5...
-> +wrote 1048576/1048576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File data after direct IO write:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +4000000
-> +File data after umounting and mounting again the filesystem:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +4000000
-> +Testing RAID6...
-> +wrote 1048576/1048576 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +File data after direct IO write:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +4000000
-> +File data after umounting and mounting again the filesystem:
-> +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> +*
-> +4000000
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 2eb540e7..eb4cb653 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -150,3 +150,4 @@
->  145 auto quick send
->  146 auto quick
->  147 auto quick send
-> +148 auto quick
-> -- 
-> 2.11.0
-> 
+> Thanks,
+> Eryu
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
