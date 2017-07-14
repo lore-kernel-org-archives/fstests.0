@@ -1,60 +1,171 @@
-Received: from mail-qk0-f195.google.com ([209.85.220.195]:35599 "EHLO
-        mail-qk0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751049AbdGNWGY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2017 18:06:24 -0400
-Received: by mail-qk0-f195.google.com with SMTP id c18so3671303qkb.2
-        for <fstests@vger.kernel.org>; Fri, 14 Jul 2017 15:06:24 -0700 (PDT)
-Date: Fri, 14 Jul 2017 19:06:19 -0300
+Received: from mail-qk0-f180.google.com ([209.85.220.180]:34564 "EHLO
+        mail-qk0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751035AbdGNWzP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2017 18:55:15 -0400
+Date: Fri, 14 Jul 2017 19:55:09 -0300
 From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
         <ernesto.mnd.fernandez@gmail.com>
-Subject: [xfstests PATCH] common/rc: support jfs in _scratch_mkfs_sized
-Message-ID: <20170714220616.GA3975@debian.home>
+Subject: [xfstests PATCH v3] generic: add test of file mode when setfacl fails
+Message-ID: <20170714225506.GA4414@debian.home>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, jfs-discussion@lists.sourceforge.net, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Eryu Guan <eguan@redhat.com>, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add support for jfs in _scratch_mkfs_sized. Fix the block size in 4096,
-which seems to be the only option in jfs_mkfs.
+Check that the group permission bits of a file are not altered when setfa=
+cl
+fails. At the time of this patch the test fails for at least ext2, ext4 a=
+nd
+jfs.
+
+Note that this test is not meaningful for all filesystems, because some
+will still succeed in setting the acls. This does not mean they don't hav=
+e
+a bug in how they would handle an error.
 
 Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
 >
 ---
-This change in common/rc is different from the one sent as part of
-generic/447, which was not working as intended. I will soon send a revisi=
-on
-of that patch as well.
+Changes in v3:
+  - Several fixes requested by Eryu Guan (thank you for your review), mos=
+t
+    importantly:
+    - Place the jfs support in a separate patch, already sent.
+    - Make the test fail when the scratch device does not mount, so rootf=
+s
+      won't be filled.
+    - Add the test to auto and quick groups.
+Changes in v2:
+  - Use the scratch dev instead of the test dev so we can make a small fs=
+ and
+    fill it faster. As suggested by Christoph Hellwig.
+  - Make jfs work with _scratch_mkfs_sized, needed for the above.
+  - Remove the mention to an issue with reiserfs, since I now believe the
+    problem is on their side.
 
- common/rc | 5 +++++
- 1 file changed, 5 insertions(+)
+ tests/generic/447     | 88 +++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+ tests/generic/447.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/generic/447
+ create mode 100644 tests/generic/447.out
 
-diff --git a/common/rc b/common/rc
-index b505365..5cb6b0c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1023,6 +1023,8 @@ _scratch_mkfs_sized()
-     ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2)
- 	def_blksz=3D`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 	;;
-+    jfs)
-+	def_blksz=3D4096
-     esac
-=20
-     [ -n "$def_blksz" ] && blocksize=3D$def_blksz
-@@ -1068,6 +1070,9 @@ _scratch_mkfs_sized()
- 	(( fssize <=3D 100 * 1024 * 1024 )) && mixed_opt=3D'--mixed'
- 	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
- 	;;
-+    jfs)
-+	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
-+	;;
-     reiser4)
- 	# mkfs.resier4 requires size in KB as input for creating filesystem
- 	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
+diff --git a/tests/generic/447 b/tests/generic/447
+new file mode 100755
+index 0000000..c3062c8
+--- /dev/null
++++ b/tests/generic/447
+@@ -0,0 +1,88 @@
++#! /bin/bash
++# FS QA Test 447
++#
++# Fill the device and set as many extended attributes to a file as
++# possible. Then call setfacl on it and, if this fails for lack of
++# space, test that the permissions remain the same.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Ernesto A. Fernandez.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_test
++_require_acls
++_require_attrs
++
++_scratch_mkfs_sized $((50 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount || _fail "mount failed"
++
++TFILE=3D$SCRATCH_MNT/testfile.$seq
++
++# Create the test file and choose its permissions
++touch $TFILE
++chmod u+rwx $TFILE
++chmod go-rwx $TFILE
++
++# Try to run out of space so setfacl will fail
++$XFS_IO_PROG -c "pwrite 0 50m" $TFILE >>$seqres.full 2>&1
++i=3D1
++while setfattr -n user.$i $TFILE &>/dev/null; do
++	((++i))
++done
++
++if setfacl -m m:r $TFILE &>/dev/null; then
++	# setfacl succeeded, so the test was meaningless
++	# The filesystem might still have an issue
++	status=3D0
++	echo "-rwx------"
++	exit
++fi
++
++# Since setfacl failed, the permissions should not have changed
++stat -c %A $TFILE
++
++status=3D0
++exit
+diff --git a/tests/generic/447.out b/tests/generic/447.out
+new file mode 100644
+index 0000000..adec877
+--- /dev/null
++++ b/tests/generic/447.out
+@@ -0,0 +1,2 @@
++QA output created by 447
++-rwx------
+diff --git a/tests/generic/group b/tests/generic/group
+index 8c1e21a..a3ec390 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -449,3 +449,4 @@
+ 444 auto quick acl
+ 445 auto quick rw
+ 446 auto quick rw dangerous
++447 auto quick acl
 --=20
 2.1.4
 
