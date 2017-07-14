@@ -1,108 +1,194 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:47473 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753536AbdGNQ6D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2017 12:58:03 -0400
-Date: Fri, 14 Jul 2017 09:57:57 -0700
+Received: from userp1040.oracle.com ([156.151.31.81]:45340 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753486AbdGNRju (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2017 13:39:50 -0400
+Date: Fri, 14 Jul 2017 10:39:43 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] generic: test negative SEEK_HOLE/SEEK_DATA offsets
-Message-ID: <20170714165757.GA4211@magnolia>
-References: <20170713190641.GA4150@magnolia>
- <20170714034119.GI2478@eguan.usersys.redhat.com>
+Subject: Re: [PATCH] xfs/424: test xfs_db to ensure type size taken into
+ account with new type
+Message-ID: <20170714173943.GA4217@magnolia>
+References: <20170712183112.5255-1-billodo@redhat.com>
+ <20170714142733.7386-1-billodo@redhat.com>
+ <75d5ddb1-dca8-c96c-f395-e4c213cd5cf0@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170714034119.GI2478@eguan.usersys.redhat.com>
+In-Reply-To: <75d5ddb1-dca8-c96c-f395-e4c213cd5cf0@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-fsdevel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Bill O'Donnell <billodo@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 14, 2017 at 11:41:19AM +0800, Eryu Guan wrote:
-> On Thu, Jul 13, 2017 at 12:06:41PM -0700, Darrick J. Wong wrote:
-> > Check that we get -ENXIO if the user calls SEEK_HOLE/SEEK_DATA with
-> > a negative file offset.
+On Fri, Jul 14, 2017 at 10:42:57AM -0500, Eric Sandeen wrote:
+> 
+> 
+> On 07/14/2017 09:27 AM, Bill O'Donnell wrote:
+> > xfs_db should take type size into account when setting type.
+> > If type size isn't updated whenever type is set, a false crc
+> > error can occur due to the stale size. This test checks for
+> > that false crc error.
 > > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > Signed-off-by: Bill O'Donnell <billodo@redhat.com>
 > > ---
-> > v2: use helpers as suggested by Eryu.
-> > ---
-> [snip]
+> > v2: Clarify commit message and test comments. Add a few more test cases.
+> > 
+> >  tests/xfs/424     | 77 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/424.out |  1 +
+> >  tests/xfs/group   |  1 +
+> >  3 files changed, 79 insertions(+)
+> >  create mode 100755 tests/xfs/424
+> >  create mode 100644 tests/xfs/424.out
+> > 
+> > diff --git a/tests/xfs/424 b/tests/xfs/424
+> > new file mode 100755
+> > index 00000000..3b67cdf2
+> > --- /dev/null
+> > +++ b/tests/xfs/424
+> > @@ -0,0 +1,77 @@
+> > +#! /bin/bash
+> > +# FS QA Test 424
+> > +#
+> > +# xfs_db should take type size into account when setting type.
+> > +# If type size isn't updated whenever type is set, a false crc
+> > +# error can occur due to the stale size. This test checks for
+> > +# that false crc error.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
 > > +
-> > +seq=`basename "$0"`
-> > +seqres="$RESULT_DIR/$seq"
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
 > > +echo "QA output created by $seq"
 > > +
 > > +here=`pwd`
 > > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
+> > +status=1	# failure is the default!
 > > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > > +
 > > +_cleanup()
 > > +{
-> > +    cd /
-> > +    rm -rf "$tmp".* $testdir/file1
+> > +	cd /
+> > +	rm -f $tmp.*
 > > +}
-> 
-> Just noticed there're two _cleanup()s, I'll remove this one and move the
-> one below here.
-
-Oops.  Thanks for catching that!
-
---D
-
-> 
-> Thanks,
-> Eryu
-> 
+> > +
+> > +_filter_dbval()
+> > +{
+> > +    awk '{ print $4 }'
+> > +}
 > > +
 > > +# get standard environment, filters and checks
 > > +. ./common/rc
 > > +. ./common/filter
 > > +
-> > +_supported_fs generic
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# Modify as appropriate
 > > +_supported_os Linux
+> 
+> _supported_fs xfs
+> 
+> > +_require_scratch
 > > +
-> > +_require_test
-> > +_require_seek_data_hole
+> > +# real QA test starts here
+> > +_scratch_unmount >> $seqres.full 2>&1
 > > +
-> > +BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
+> > +# for different sector sizes, ensure no CRC errors are falsely reported
 > > +
-> > +_require_test_program "seek_sanity_test"
+> > +# Supported types include: agf, agfl, agi, attr3, bmapbta,
+> > +# bmapbtd, bnobt, cntbt, data, dir3, dqblk, inobt, inodata,
+> > +# inode, log, rtbitmap, rtsummary, sb, symlink, text, finobt.
+> 
+> This leaves me wondering why we don't test most of the above ;)
+
+Same here.
+
+> > +# For various sector sizes, test some types that involve type size.
+> > +for SECTOR_SIZE in 512 1024 2048 4096; do
+> > +    $MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
+> > +    for TYPE in agf agi agfl sb; do
+> > +	DADDR=`$XFS_DB_PROG -c "$TYPE" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+> > +	$XFS_DB_PROG -c "$TYPE" -c "daddr 42" -c "daddr $DADDR" -c "type $TYPE" $SCRATCH_DEV
+> 
+> Hm is there a reason for the first "-c $TYPE" or even the "daddr 42" in the line just above?
+> 
+> Interesting, I didn't know that a bare "agf" works, but it does (and is documented
+> as such).  fair enough.
+> 
+> It'd be very easy to add just a few more types to this, i.e.:  (leaving the extra
+>  type & daddr setting in place for now)
+> 
+> DADDR=`$XFS_DB_PROG -c "sb" -c "addr rootino" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+
+/me wonders if this ought to be wrapped up into a helper ala
+_scratch_xfs_get_metadata_field in common/fuzzy?
+
+> $XFS_DB_PROG -c "type inode" -c "daddr 42" -c "daddr $DADDR" -c "type inode" $SCRATCH_DEV
+
+_scratch_xfs_db, not $XFS_DB_PROG...$SCRATCH_DEV, or else this won't
+work with fses with external logs.
+
+> DADDR=`$XFS_DB_PROG -c "agf" -c "addr bnoroot" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+> $XFS_DB_PROG -c "type bnobt" -c "daddr 42" -c "daddr $DADDR" -c "type bnobt" $SCRATCH_DEV
+> 
+> DADDR=`$XFS_DB_PROG -c "agf" -c "addr cntroot" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+> $XFS_DB_PROG -c "type cntbt" -c "daddr 42" -c "daddr $DADDR" -c "type cntbt" $SCRATCH_DEV
+> 
+> DADDR=`$XFS_DB_PROG -c "agi" -c "addr root" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+> $XFS_DB_PROG -c "type inobt" -c "daddr 42" -c "daddr $DADDR" -c "type inobt" $SCRATCH_DEV
+> 
+> DADDR=`$XFS_DB_PROG -c "agi" -c "addr free_root" -c "daddr" $SCRATCH_DEV | _filter_dbval`
+> $XFS_DB_PROG -c "type finobt" -c "daddr 42" -c "daddr $DADDR" -c "type finobt" $SCRATCH_DEV
+> 
+> others such as attr, dir, symlink would require more filesystem preparation I guess.
+
+_scratch_populate_cached?
+
+--D
+
+> 
+> Thanks,
+> -Eric
+> 
+> > +    done
+> > +done
 > > +
-> > +# Disable extent zeroing for ext4 as that change where holes are created
-> > +if [ "$FSTYP" = "ext4" ]; then
-> > +	DEV=`_short_dev $TEST_DEV`
-> > +	echo 0 >/sys/fs/ext4/$DEV/extent_max_zeroout_kb
-> > +fi
-> > +
-> > +_cleanup()
-> > +{
-> > +	rm -f $tmp.* $BASE_TEST_FILE.*
-> > +}
-> > +
-> > +$here/src/seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> > +	_fail "seek sanity check failed!"
-> > +
-> > +_check_dmesg
 > > +# success, all done
-> > +echo "Silence is golden"
 > > +status=0
 > > +exit
-> > diff --git a/tests/generic/702.out b/tests/generic/702.out
+> > diff --git a/tests/xfs/424.out b/tests/xfs/424.out
 > > new file mode 100644
-> > index 0000000..608d593
+> > index 00000000..d879a949
 > > --- /dev/null
-> > +++ b/tests/generic/702.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 702
-> > +Silence is golden
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 3c5a19c..6afd402 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -449,4 +449,5 @@
-> >  444 auto quick acl
-> >  445 auto quick rw
-> >  446 auto quick rw dangerous
-> > +702 auto quick rw
-> >  931 auto quick clone
+> > +++ b/tests/xfs/424.out
+> > @@ -0,0 +1 @@
+> > +QA output created by 424
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index ffdb0615..75c8280c 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -421,3 +421,4 @@
+> >  421 auto quick clone dedupe
+> >  422 dangerous_scrub dangerous_online_repair
+> >  423 dangerous_scrub
+> > +424 auto quick db
+> > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
