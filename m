@@ -1,40 +1,59 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38876 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751101AbdGNEGV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 14 Jul 2017 00:06:21 -0400
-Date: Fri, 14 Jul 2017 12:06:18 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] btrfs: test direct IO write against raid5/6 filesystems
-Message-ID: <20170714040618.GL2478@eguan.usersys.redhat.com>
-References: <20170713141040.2341-1-fdmanana@kernel.org>
+Received: from mail-qk0-f194.google.com ([209.85.220.194]:36236 "EHLO
+        mail-qk0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750788AbdGNFkU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Jul 2017 01:40:20 -0400
+Date: Fri, 14 Jul 2017 02:40:12 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: Re: [xfstests PATCH] generic: add test of file mode when setfacl
+ fails
+Message-ID: <20170714054011.GA4973@debian.home>
+References: <cover.1499805484.git.ernesto.mnd.fernandez@gmail.com>
+ <20170712114719.GA14398@infradead.org>
+ <20170713094003.GA4959@debian.home>
+ <20170713115507.GA10435@infradead.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20170713141040.2341-1-fdmanana@kernel.org>
+In-Reply-To: <20170713115507.GA10435@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Content-Transfer-Encoding: quoted-printable
+To: Christoph Hellwig <hch@infradead.org>
+Cc: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>, Jan Kara <jack@suse.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger.kernel@dilger.ca>, Dave Kleikamp <shaggy@kernel.org>, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, reiserfs-devel@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 13, 2017 at 03:10:40PM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> Test that a direct IO write works against raid5/6 filesystems and that
-> after the write operation we are able to read back the correct data
-> and scrub operations don't find any errors.
-> 
-> This test is motivated by a regression introduced in the merge window
-> for the 4.13 linux kernel, which was undetected by the current set of
-> test cases. The issue is fixed by the following patch:
-> 
->   "Btrfs: fix write corruption due to bio cloning on raid5/6"
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+On Thu, Jul 13, 2017 at 04:55:07AM -0700, Christoph Hellwig wrote:
+> On Thu, Jul 13, 2017 at 06:40:04AM -0300, Ernesto A. Fern=C3=A1ndez wro=
+te:
+> > Check that the group permission bits of a file are not altered when s=
+etfacl
+> > fails. At the time of this patch the test fails for at least ext2, ex=
+t4 and
+> > jfs. It is not run against reiserfs, since xfstests claims that "attr=
+s are
+> > not supported by this filesystem type".
+>=20
+> That's odd, as common/config explicitly turns on user xattrs:
+>=20
 
-Thanks for the test! I did minor updates and committed:
+xfstests decides if a filesystem supports attributes by trying to set the=
+m on
+the root inode, but reiserfs does not allow this. If this is actually the
+intended behaviour of reiserfs then xfstests should use a different check=
+, but
+I'm guessing it's a bug, perhaps in mkfs.reiserfs.
 
-- add _require_odirect in the test
-- add rw group
+>=20
+> >=20
+> > The failure to set acls is induced by filling the device, so to save =
+time
+> > this should probably be run with a small TEST_DEV.
+>=20
+> If you run it on the scratch fs instead of the test fs you can use
+> _scratch_mkfs_sized to hand craft a small fs, which would be nice
+> to get a decent runtime.
 
-Thanks,
-Eryu
+That's much better, thank you. I will send a revision soon. For some reas=
+on
+_scratch_mkfs_sized did not have support for jfs, but it was trivial to a=
+dd.
