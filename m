@@ -1,166 +1,196 @@
-Received: from mx1.redhat.com ([209.132.183.28]:40490 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751414AbdGQWJu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 17 Jul 2017 18:09:50 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 4E0D97CE13
-        for <fstests@vger.kernel.org>; Mon, 17 Jul 2017 22:09:50 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-120-87.rdu2.redhat.com [10.10.120.87])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0891A5DD6A
-        for <fstests@vger.kernel.org>; Mon, 17 Jul 2017 22:09:49 +0000 (UTC)
-From: "Bill O'Donnell" <billodo@redhat.com>
-Subject: [PATCH v4] xfs/424: test xfs_db to ensure type size taken into account with new type
-Date: Mon, 17 Jul 2017 17:09:49 -0500
-Message-Id: <20170717220949.4253-1-billodo@redhat.com>
-In-Reply-To: <20170712183112.5255-1-billodo@redhat.com>
-References: <20170712183112.5255-1-billodo@redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:26530 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751455AbdGQXpQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jul 2017 19:45:16 -0400
+Date: Mon, 17 Jul 2017 16:45:08 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
+ corrupted
+Message-ID: <20170717234508.GB4217@magnolia>
+References: <20170302232050.31125-1-tytso@mit.edu>
+ <20170303090332.GP14226@eguan.usersys.redhat.com>
+ <20170303172157.GA5070@birch.djwong.org>
+ <20170303230129.apzqe77r4d5jtf63@thunk.org>
+ <20170327014802.wc5as2tdgecy3rzu@thunk.org>
+ <20170327085103.GQ14226@eguan.usersys.redhat.com>
+ <20170716013058.r46jceccqmoedkde@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170716013058.r46jceccqmoedkde@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_db should take type size into account when setting type.
-If type size isn't updated whenever type is set, a false crc
-error can occur due to the stale size. This test checks for
-that false crc error.
+On Sat, Jul 15, 2017 at 09:30:58PM -0400, Theodore Ts'o wrote:
+> On Mon, Mar 27, 2017 at 04:51:03PM +0800, Eryu Guan wrote:
+> > 
+> > Sorry I lost this thread, I thought I've replied but apparently I didn't..
+> > 
+> > I agreed with both of you and Darrick, I think we can try to repair the
+> > corrupted test fs, and if repair succeeds we can continue the test, and
+> > stop running the whole test if repair fails.
+> 
+> Sorry for the delay in getting back to this.  Things got busy and this
+> got dropped on my end.
+> 
+> I've fixed the whitespace nits that you pointed out and am using _log_err.
+> 
+> > I think we should try to fix other filesystems too?
+> 
+> Hmm...  yeah.  The main reason why I hadn't was because xfs has
+> _scratch_xfs_repair and _scratch_xfs_check, which are very similar.
+> But _check_xfs_test_fs looks *very* different from _scratch_xfs_check,
+> and I'm not sure why.
 
-Signed-off-by: Bill O'Donnell <billodo@redhat.com>
----
-v2: Clarify commit message and test comments. Add a few more test cases.
-v3: Add more test cases. Use _scratch_xfs_db instead of $XFS_DB_PROG to
-    accomodate fses with external logs. Remove superfluous daddr and type
-    commands.
-v4: Skip select tests and make a corresponding note in the comments. Add
-    test for type inode (note: depends on pending xfsprogs patch
-    xfs_db: properly set inode type).
+_check_xfs_filesystem is a helper that does all the checking that we can
+do to an xfs filesystem (online fsck, the old xfs_check, and the newer
+xfs_repair).  AFAICT that's what all new xfstest code should be calling.
+xfs_check is obsolete.
 
- tests/xfs/424     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/424.out |  1 +
- tests/xfs/group   |  1 +
- 3 files changed, 99 insertions(+)
- create mode 100755 tests/xfs/424
- create mode 100644 tests/xfs/424.out
+_check_xfs_test_fs calls _check_xfs_filesystem and then, weirdly, calls
+a nonexistent tool calld xfs_repair_ipaths to .... I assume fix all the
+problems that can crop with the Irix XFS parent pointer implementation.
+None of that exists on Linux and Irix is long dead, so I assume the
+"check for ipath consistency" can go away entirely.
 
-diff --git a/tests/xfs/424 b/tests/xfs/424
-new file mode 100755
-index 00000000..cfce18e1
---- /dev/null
-+++ b/tests/xfs/424
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# FS QA Test 424
-+#
-+# xfs_db should take type size into account when setting type.
-+# If type size isn't updated whenever type is set, a false crc
-+# error can occur due to the stale size. This test checks for
-+# that false crc error.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+_filter_dbval()
-+{
-+    awk '{ print $4 }'
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
-+
-+# real QA test starts here
-+_scratch_unmount >> $seqres.full 2>&1
-+
-+# for different sector sizes, ensure no CRC errors are falsely reported.
-+
-+# Supported types include: agf, agfl, agi, attr3, bmapbta,
-+# bmapbtd, bnobt, cntbt, data, dir3, dqblk, inobt, inodata,
-+# inode, log, rtbitmap, rtsummary, sb, symlink, text, finobt.
-+# For various sector sizes, test some types that involve type size.
-+#
-+# NOTE: skip attr3, bmapbta, bmapbtd, dir3, dqblk, inodata, symlink
-+# rtbitmap, rtsummary, log
-+#
-+for SECTOR_SIZE in 512 1024 2048 4096; do
-+    $MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
-+
-+    for TYPE in agf agi agfl sb; do
-+	DADDR=`_scratch_xfs_db -c "$TYPE" -c "daddr" | _filter_dbval`
-+	_scratch_xfs_db -c "daddr $DADDR" -c "type $TYPE"
-+    done
-+
-+    DADDR=`_scratch_xfs_db -c "sb" -c "addr rootino" -c "daddr" | _filter_dbval`
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type inode"
-+    DADDR=`_scratch_xfs_db -c "agf" -c "addr bnoroot" -c "daddr" | _filter_dbval`
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type bnobt"
-+    DADDR=`_scratch_xfs_db -c "agf" -c "addr cntroot" -c "daddr" | _filter_dbval`
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type cntbt"
-+    DADDR=`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" | _filter_dbval`
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
-+    DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" | _filter_dbval`
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
-+
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type text"
-+    _scratch_xfs_db -c "daddr $DADDR" -c "type data"
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/424.out b/tests/xfs/424.out
-new file mode 100644
-index 00000000..d879a949
---- /dev/null
-+++ b/tests/xfs/424.out
-@@ -0,0 +1 @@
-+QA output created by 424
-diff --git a/tests/xfs/group b/tests/xfs/group
-index ffdb0615..75c8280c 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -421,3 +421,4 @@
- 421 auto quick clone dedupe
- 422 dangerous_scrub dangerous_online_repair
- 423 dangerous_scrub
-+424 auto quick db
--- 
-2.13.3
+_scratch_xfs_check calls xfs_check directly, so I think it should get
+replaced with _check_scratch_fs, which calls _check_xfs_filesystem.
 
+<keep scrolling>
+
+> 
+> So I've created a _repair_xfs_test_fs which is modelled after the
+> simpler _scratch_xfs_repair function, but I'm not 100% sure that is
+> correct.
+> 
+> Anyways, WDYT?
+> 
+> 						- Ted
+> 
+> From 96a13cc22878ee5c016a606d76f8e9a6bd84eb20 Mon Sep 17 00:00:00 2001
+> From: Theodore Ts'o <tytso@mit.edu>
+> Date: Wed, 1 Mar 2017 19:54:08 -0500
+> Subject: [PATCH] check: try to fix the test device if it gets corrupted
+> 
+> If the test device gets corrupted all subsequent tests will fail.  To
+> prevent this from causing all subsequent tests to be useless, try
+> repair the file system on TEST_DEV if possible.  We don't need to do
+> this with the scratch device since that file system gets recreated
+> each time anyway.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  check      |  7 ++++++-
+>  common/rc  | 41 +++++++++++++++++++++++++++++++++++++++++
+>  common/xfs | 12 ++++++++++++
+>  3 files changed, 59 insertions(+), 1 deletion(-)
+> 
+> diff --git a/check b/check
+> index f8db3cd6..d89d2e91 100755
+> --- a/check
+> +++ b/check
+> @@ -476,7 +476,12 @@ _summary()
+>  _check_filesystems()
+>  {
+>  	if [ -f ${RESULT_DIR}/require_test ]; then
+> -		_check_test_fs || err=true
+> +		if ! _check_test_fs ; then
+> +			err=true
+> +			echo "Trying to repair broken TEST_DEV file system"
+> +			_repair_test_fs
+> +			_test_mount
+> +		fi
+>  		rm -f ${RESULT_DIR}/require_test*
+>  	fi
+>  	if [ -f ${RESULT_DIR}/require_scratch ]; then
+> diff --git a/common/rc b/common/rc
+> index 328b6b07..d37a1611 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1201,6 +1201,47 @@ _repair_scratch_fs()
+>      esac
+>  }
+>  
+> +_repair_test_fs()
+> +{
+> +	case $FSTYP in
+> +	xfs)
+> +		_repair_xfs_test_fs "$@" >$tmp.repair 2>&1
+> +		res=$?
+> +		if [ "$res" -ne 0 ]; then
+> +			echo "xfs_repair returns $res; replay log?" >>$tmp.repair
+> +			_test_mount
+> +			res=$?
+> +			if [ $res -gt 0 ]; then
+> +				echo "mount returns $res; zap log?" >>$tmp.repair
+> +				_xfs_repair_test_fs -L >>$tmp.repair 2>&1
+> +				echo "log zap returns $?" >> $tmp.repair
+> +			else
+> +				umount "$TEST_DEV"
+> +			fi
+> +			_xfs_repair_test_fs "$@" >>$tmp.repair 2>&1
+> +			res=$?
+> +		fi
+
+Structurally this all looks ok, but it's a little weird that we have
+_scratch_xfs_repair for the scratch device (object-verb) but
+_repair_test_fs (verb-object) for the test device.
+
+--D
+
+> +		;;
+> +	*)
+> +		# Let's hope fsck -y suffices...
+> +		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
+> +		res=$?
+> +		if test "$res" -lt 4 ; then
+> +			res=0
+> +		fi
+> +		;;
+> +	esac
+> +	if [ $res -ne 0 ]; then
+> +		_log_err "_repair_test_fs: failed, err=$res"
+> +		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+> +		cat $tmp.repair				>>$seqres.full
+> +		echo "*** end fsck.$FSTYP output"	>>$seqres.full
+> +
+> +	fi
+> +	rm -f $tmp.repair
+> +	return $res
+> +}
+> +
+>  _get_pids_by_name()
+>  {
+>      if [ $# -ne 1 ]
+> diff --git a/common/xfs b/common/xfs
+> index a1ee3847..c8f4e46b 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -443,6 +443,18 @@ _check_xfs_test_fs()
+>  	fi
+>  }
+>  
+> +# modeled after _scratch_xfs_repair
+> +_repair_xfs_test_fs()
+> +{
+> +	TEST_OPTIONS=""
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
+> +		TEST_OPTIONS="-l$TEST_LOGDEV"
+> +	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
+> +		TEST_OPTIONS=$TEST_OPTIONS" -r$TEST_RTDEV"
+> +	[ "$LARGE_TEST_DEV" = yes ] && TEST_OPTIONS=$TEST_OPTIONS" -t"
+> +	$XFS_REPAIR_PROG $TEST_OPTIONS $* $TEST_DEV
+> +}
+> +
+>  _require_xfs_test_rmapbt()
+>  {
+>  	_require_test
+> -- 
+> 2.11.0.rc0.7.gbe5a750
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
