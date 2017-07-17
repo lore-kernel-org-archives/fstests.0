@@ -1,206 +1,159 @@
-Received: from mail.kernel.org ([198.145.29.99]:40824 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:57592 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751402AbdGQSKQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 17 Jul 2017 14:10:16 -0400
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v2] generic: add a less thorough testing mode for fsync-err program
-Date: Mon, 17 Jul 2017 14:10:13 -0400
-Message-Id: <20170717181013.19382-1-jlayton@kernel.org>
-In-Reply-To: <20170629132947.29939-1-jlayton@kernel.org>
-References: <20170629132947.29939-1-jlayton@kernel.org>
+        id S1751311AbdGQSyA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 17 Jul 2017 14:54:00 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id AAD58C0587E2
+        for <fstests@vger.kernel.org>; Mon, 17 Jul 2017 18:54:00 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-120-87.rdu2.redhat.com [10.10.120.87])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 607CA5D6A2
+        for <fstests@vger.kernel.org>; Mon, 17 Jul 2017 18:54:00 +0000 (UTC)
+From: "Bill O'Donnell" <billodo@redhat.com>
+Subject: [PATCH v3] xfs/424: test xfs_db to ensure type size taken into account with new type
+Date: Mon, 17 Jul 2017 13:53:59 -0500
+Message-Id: <20170717185359.18958-1-billodo@redhat.com>
+In-Reply-To: <20170712183112.5255-1-billodo@redhat.com>
+References: <20170712183112.5255-1-billodo@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: dhowells@redhat.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Layton <jlayton@redhat.com>
+xfs_db should take type size into account when setting type.
+If type size isn't updated whenever type is set, a false crc
+error can occur due to the stale size. This test checks for
+that false crc error.
 
-Currently we just have this test run on a whitelist of filesystems, but
-it would be best to be able to run it on all of them. The problem is
-that a lot of filesystems basically shut down once they hit metadata
-errors.
-
-Allow the fsync-err testcase to operate in two different modes. One
-mode just does basic testing to ensure that we get an error back on
-all fd's when we fsync. The other does a more thorough test to ensure
-that we get back 0 on subsequent fsyncs when there hasn't been any
-write activity.
-
-For now, we just opt-in to the more thorough testing on certain
-filesystems: xfs, ext3 and ext4 on the generic test. All other
-filesystems will run in simple mode.
-
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
+Signed-off-by: Bill O'Donnell <billodo@redhat.com>
 ---
- common/rc         |  9 +++++++++
- src/fsync-err.c   | 51 +++++++++++++++++++++++++++++++++------------------
- tests/generic/441 | 23 ++++++++++++++++-------
- 3 files changed, 58 insertions(+), 25 deletions(-)
+v2: Clarify commit message and test comments. Add a few more test cases.
+v3: Add more test cases. Use _scratch_xfs_db instead of $XFS_DB_PROG to
+    accomodate fses with external logs. Remove superfluous daddr and type
+    commands.
 
-v2: fix _has_logdev test, append command to seqres.full, fix comments
+ tests/xfs/424     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/424.out |  1 +
+ tests/xfs/group   |  1 +
+ 3 files changed, 95 insertions(+)
+ create mode 100755 tests/xfs/424
+ create mode 100644 tests/xfs/424.out
 
-diff --git a/common/rc b/common/rc
-index fa1314c649cf..737b773ec28c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1738,6 +1738,15 @@ _require_test()
-     touch ${RESULT_DIR}/require_test
- }
- 
-+_has_logdev()
-+{
-+	ret=0
-+	[ -z "$SCRATCH_LOGDEV" -o ! -b "$SCRATCH_LOGDEV" ] && ret=1
-+	[ "$USE_EXTERNAL" != yes ] && ret=1
+diff --git a/tests/xfs/424 b/tests/xfs/424
+new file mode 100755
+index 00000000..8415ecd1
+--- /dev/null
++++ b/tests/xfs/424
+@@ -0,0 +1,93 @@
++#! /bin/bash
++# FS QA Test 424
++#
++# xfs_db should take type size into account when setting type.
++# If type size isn't updated whenever type is set, a false crc
++# error can occur due to the stale size. This test checks for
++# that false crc error.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	return $ret
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
 +}
 +
- # this test needs a logdev
- #
- _require_logdev()
-diff --git a/src/fsync-err.c b/src/fsync-err.c
-index 5b3bdd3ada07..4b0205cf2fd4 100644
---- a/src/fsync-err.c
-+++ b/src/fsync-err.c
-@@ -13,6 +13,7 @@
- #include <string.h>
- #include <unistd.h>
- #include <getopt.h>
-+#include <stdbool.h>
- 
- /*
-  * btrfs has a fixed stripewidth of 64k, so we need to write enough data to
-@@ -25,7 +26,7 @@
- 
- static void usage()
- {
--	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] -d dmerror path <filename>\n");
-+	printf("Usage: fsync-err [ -b bufsize ] [ -n num_fds ] [ -s ] -d dmerror path <filename>\n");
- }
- 
- int main(int argc, char **argv)
-@@ -35,8 +36,9 @@ int main(int argc, char **argv)
- 	char *dmerror_path = NULL;
- 	char *cmdbuf;
- 	size_t cmdsize, bufsize = DEFAULT_BUFSIZE;
-+	bool simple_mode = false;
- 
--	while ((i = getopt(argc, argv, "b:d:n:")) != -1) {
-+	while ((i = getopt(argc, argv, "b:d:n:s")) != -1) {
- 		switch (i) {
- 		case 'b':
- 			bufsize = strtol(optarg, &buf, 0);
-@@ -55,6 +57,15 @@ int main(int argc, char **argv)
- 				return 1;
- 			}
- 			break;
-+		case 's':
-+			/*
-+			 * Many filesystems will continue to throw errors after
-+			 * fsync has already advanced to the current error,
-+			 * due to metadata writeback failures or other
-+			 * issues. Allow those fs' to opt out of more thorough
-+			 * testing.
-+			 */
-+			simple_mode = true;
- 		}
- 	}
- 
-@@ -154,16 +165,18 @@ int main(int argc, char **argv)
- 		}
- 	}
- 
--	for (i = 0; i < numfds; ++i) {
--		ret = fsync(fd[i]);
--		if (ret < 0) {
--			/*
--			 * We did a failed write and fsync on each fd before.
--			 * Now the error should be clear since we've not done
--			 * any writes since then.
--			 */
--			printf("Third fsync on fd[%d] failed: %m\n", i);
--			return 1;
-+	if (!simple_mode) {
-+		for (i = 0; i < numfds; ++i) {
-+			ret = fsync(fd[i]);
-+			if (ret < 0) {
-+				/*
-+				 * We did a failed write and fsync on each fd before.
-+				 * Now the error should be clear since we've not done
-+				 * any writes since then.
-+				 */
-+				printf("Third fsync on fd[%d] failed: %m\n", i);
-+				return 1;
-+			}
- 		}
- 	}
- 
-@@ -185,12 +198,14 @@ int main(int argc, char **argv)
- 		return 1;
- 	}
- 
--	for (i = 0; i < numfds; ++i) {
--		ret = fsync(fd[i]);
--		if (ret < 0) {
--			/* The error should still be clear */
--			printf("fsync after healing device on fd[%d] failed: %m\n", i);
--			return 1;
-+	if (!simple_mode) {
-+		for (i = 0; i < numfds; ++i) {
-+			ret = fsync(fd[i]);
-+			if (ret < 0) {
-+				/* The error should still be clear */
-+				printf("fsync after healing device on fd[%d] failed: %m\n", i);
-+				return 1;
-+			}
- 		}
- 	}
- 
-diff --git a/tests/generic/441 b/tests/generic/441
-index 2215b64db9a7..075d87723ca1 100755
---- a/tests/generic/441
-+++ b/tests/generic/441
-@@ -45,15 +45,23 @@ _cleanup()
- . ./common/dmerror
- 
- # real QA test starts here
--_supported_fs ext2 ext3 ext4 xfs
- _supported_os Linux
- _require_scratch
- 
--# Generally, we want to avoid journal errors in this test. Ensure that
--# journalled fs' have a logdev.
--if [ "$FSTYP" != "ext2" ]; then
--	_require_logdev
--fi
-+# Generally, we want to avoid journal errors on the extended testcase. Only
-+# unset the -s flag if we have a logdev
-+sflag='-s'
-+case $FSTYP in
-+	btrfs)
-+		_notrun "btrfs has a specialized test for this"
-+		;;
-+	ext3|ext4|xfs)
-+		# Do the more thorough test if we have a logdev
-+		_has_logdev && sflag=''
-+		;;
-+	*)
-+		;;
-+esac
- 
- _require_dm_target error
- _require_test_program fsync-err
-@@ -70,7 +78,8 @@ _require_fs_space $SCRATCH_MNT 65536
- 
- testfile=$SCRATCH_MNT/fsync-err-test
- 
--$here/src/fsync-err -d $here/src/dmerror $testfile
-+echo "$here/src/fsync-err $sflag -d $here/src/dmerror $testfile" >> $seqres.full
-+$here/src/fsync-err $sflag -d $here/src/dmerror $testfile
- 
- # success, all done
- _dmerror_load_working_table
++_filter_dbval()
++{
++    awk '{ print $4 }'
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate
++_supported_os Linux
++_supported_fs xfs
++_require_scratch
++
++# real QA test starts here
++_scratch_unmount >> $seqres.full 2>&1
++
++# for different sector sizes, ensure no CRC errors are falsely reported.
++
++# Supported types include: agf, agfl, agi, attr3, bmapbta,
++# bmapbtd, bnobt, cntbt, data, dir3, dqblk, inobt, inodata,
++# inode, log, rtbitmap, rtsummary, sb, symlink, text, finobt.
++# For various sector sizes, test some types that involve type size.
++for SECTOR_SIZE in 512 1024 2048 4096; do
++    $MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
++
++    for TYPE in agf agi agfl sb; do
++	DADDR=`_scratch_xfs_db -c "$TYPE" -c "daddr" | _filter_dbval`
++	_scratch_xfs_db -c "daddr $DADDR" -c "type $TYPE"
++    done
++
++    for TYPE in inodata data log text rtbitmap rtsummary; do
++	DADDR=`_scratch_xfs_db -c "sb" -c "addr rootino" -c "daddr" | _filter_dbval`
++	_scratch_xfs_db -c "daddr $DADDR" -c "type $TYPE"
++    done
++
++    DADDR=`_scratch_xfs_db -c "agf" -c "addr bnoroot" -c "daddr" | _filter_dbval`
++    _scratch_xfs_db -c "daddr $DADDR" -c "type bnobt"
++    DADDR=`_scratch_xfs_db -c "agf" -c "addr cntroot" -c "daddr" | _filter_dbval`
++    _scratch_xfs_db -c "daddr $DADDR" -c "type cntbt"
++    DADDR=`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" | _filter_dbval`
++    _scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
++    DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" | _filter_dbval`
++    _scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/424.out b/tests/xfs/424.out
+new file mode 100644
+index 00000000..d879a949
+--- /dev/null
++++ b/tests/xfs/424.out
+@@ -0,0 +1 @@
++QA output created by 424
+diff --git a/tests/xfs/group b/tests/xfs/group
+index ffdb0615..75c8280c 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -421,3 +421,4 @@
+ 421 auto quick clone dedupe
+ 422 dangerous_scrub dangerous_online_repair
+ 423 dangerous_scrub
++424 auto quick db
 -- 
-2.13.0
+2.13.3
 
