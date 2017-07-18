@@ -1,198 +1,241 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46328 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:54217 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750931AbdGREOk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Jul 2017 00:14:40 -0400
-Date: Tue, 18 Jul 2017 12:14:38 +0800
+        id S1750730AbdGRFFJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 18 Jul 2017 01:05:09 -0400
+Date: Tue, 18 Jul 2017 13:05:07 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [xfstests PATCH v3] generic: add test of file mode when setfacl
- fails
-Message-ID: <20170718041438.GT2478@eguan.usersys.redhat.com>
-References: <20170714225506.GA4414@debian.home>
+Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
+ corrupted
+Message-ID: <20170718050507.GU2478@eguan.usersys.redhat.com>
+References: <20170302232050.31125-1-tytso@mit.edu>
+ <20170303090332.GP14226@eguan.usersys.redhat.com>
+ <20170303172157.GA5070@birch.djwong.org>
+ <20170303230129.apzqe77r4d5jtf63@thunk.org>
+ <20170327014802.wc5as2tdgecy3rzu@thunk.org>
+ <20170327085103.GQ14226@eguan.usersys.redhat.com>
+ <20170716013058.r46jceccqmoedkde@thunk.org>
+ <20170717234508.GB4217@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170714225506.GA4414@debian.home>
+In-Reply-To: <20170717234508.GB4217@magnolia>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
-Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@infradead.org>, linux-ext4@vger.kernel.org, jfs-discussion@lists.sourceforge.net, reiserfs-devel@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 14, 2017 at 07:55:09PM -0300, Ernesto A. Fern=C3=A1ndez wrote=
-:
-> Check that the group permission bits of a file are not altered when set=
-facl
-> fails. At the time of this patch the test fails for at least ext2, ext4=
- and
-> jfs.
->=20
-> Note that this test is not meaningful for all filesystems, because some
-> will still succeed in setting the acls. This does not mean they don't h=
-ave
-> a bug in how they would handle an error.
->=20
-> Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.c=
-om>
-> ---
-> Changes in v3:
->   - Several fixes requested by Eryu Guan (thank you for your review), m=
-ost
->     importantly:
->     - Place the jfs support in a separate patch, already sent.
->     - Make the test fail when the scratch device does not mount, so roo=
-tfs
->       won't be filled.
->     - Add the test to auto and quick groups.
-> Changes in v2:
->   - Use the scratch dev instead of the test dev so we can make a small =
-fs and
->     fill it faster. As suggested by Christoph Hellwig.
->   - Make jfs work with _scratch_mkfs_sized, needed for the above.
->   - Remove the mention to an issue with reiserfs, since I now believe t=
-he
->     problem is on their side.
+On Mon, Jul 17, 2017 at 04:45:08PM -0700, Darrick J. Wong wrote:
+> On Sat, Jul 15, 2017 at 09:30:58PM -0400, Theodore Ts'o wrote:
+> > On Mon, Mar 27, 2017 at 04:51:03PM +0800, Eryu Guan wrote:
+> > > 
+> > > Sorry I lost this thread, I thought I've replied but apparently I didn't..
+> > > 
+> > > I agreed with both of you and Darrick, I think we can try to repair the
+> > > corrupted test fs, and if repair succeeds we can continue the test, and
+> > > stop running the whole test if repair fails.
+> > 
+> > Sorry for the delay in getting back to this.  Things got busy and this
+> > got dropped on my end.
+> > 
+> > I've fixed the whitespace nits that you pointed out and am using _log_err.
+> > 
+> > > I think we should try to fix other filesystems too?
+> > 
+> > Hmm...  yeah.  The main reason why I hadn't was because xfs has
+> > _scratch_xfs_repair and _scratch_xfs_check, which are very similar.
+> > But _check_xfs_test_fs looks *very* different from _scratch_xfs_check,
+> > and I'm not sure why.
+> 
+> _check_xfs_filesystem is a helper that does all the checking that we can
+> do to an xfs filesystem (online fsck, the old xfs_check, and the newer
+> xfs_repair).  AFAICT that's what all new xfstest code should be calling.
+> xfs_check is obsolete.
 
-Thanks for the update! But I had a second thought about what to do when
-setfacl succeeded, please see below.
+Agreed.
 
->=20
->  tests/generic/447     | 88 +++++++++++++++++++++++++++++++++++++++++++=
-++++++++
->  tests/generic/447.out |  2 ++
->  tests/generic/group   |  1 +
->  3 files changed, 91 insertions(+)
->  create mode 100755 tests/generic/447
->  create mode 100644 tests/generic/447.out
->=20
-> diff --git a/tests/generic/447 b/tests/generic/447
-> new file mode 100755
-> index 0000000..c3062c8
-> --- /dev/null
-> +++ b/tests/generic/447
-> @@ -0,0 +1,88 @@
-> +#! /bin/bash
-> +# FS QA Test 447
-> +#
-> +# Fill the device and set as many extended attributes to a file as
-> +# possible. Then call setfacl on it and, if this fails for lack of
-> +# space, test that the permissions remain the same.
-> +#
-> +#---------------------------------------------------------------------=
---
-> +# Copyright (c) 2017 Ernesto A. Fernandez.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#---------------------------------------------------------------------=
---
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_test
-> +_require_acls
-> +_require_attrs
-> +
-> +_scratch_mkfs_sized $((50 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mount || _fail "mount failed"
-> +
-> +TFILE=3D$SCRATCH_MNT/testfile.$seq
-> +
-> +# Create the test file and choose its permissions
-> +touch $TFILE
-> +chmod u+rwx $TFILE
-> +chmod go-rwx $TFILE
-> +
-> +# Try to run out of space so setfacl will fail
-> +$XFS_IO_PROG -c "pwrite 0 50m" $TFILE >>$seqres.full 2>&1
-> +i=3D1
-> +while setfattr -n user.$i $TFILE &>/dev/null; do
-> +	((++i))
-> +done
-> +
-> +if setfacl -m m:r $TFILE &>/dev/null; then
-> +	# setfacl succeeded, so the test was meaningless
-> +	# The filesystem might still have an issue
-> +	status=3D0
-> +	echo "-rwx------"
-> +	exit
+> 
+> _check_xfs_test_fs calls _check_xfs_filesystem and then, weirdly, calls
+> a nonexistent tool calld xfs_repair_ipaths to .... I assume fix all the
+> problems that can crop with the Irix XFS parent pointer implementation.
+> None of that exists on Linux and Irix is long dead, so I assume the
+> "check for ipath consistency" can go away entirely.
 
-I think we should call _notrun here instead of making up the correct
-output. If the test is meaningless, don't run it makes more sense to me.
-e.g.
+Agreed.
 
-if setfacl -m m:r $TFILE &>/dev/null; then
-	# setfacl succeeded, so the test was meaningless
-	# The filesystem might still have an issue
-	_notrun "<notrun reason here>"=09
-fi
+> 
+> _scratch_xfs_check calls xfs_check directly, so I think it should get
+> replaced with _check_scratch_fs, which calls _check_xfs_filesystem.
 
-Sorry, I didn't bring this up in my first review..
+Agreed again :)
+
+> 
+> <keep scrolling>
+> 
+> > 
+> > So I've created a _repair_xfs_test_fs which is modelled after the
+> > simpler _scratch_xfs_repair function, but I'm not 100% sure that is
+> > correct.
+> > 
+> > Anyways, WDYT?
+> > 
+> > 						- Ted
+> > 
+> > From 96a13cc22878ee5c016a606d76f8e9a6bd84eb20 Mon Sep 17 00:00:00 2001
+> > From: Theodore Ts'o <tytso@mit.edu>
+> > Date: Wed, 1 Mar 2017 19:54:08 -0500
+> > Subject: [PATCH] check: try to fix the test device if it gets corrupted
+> > 
+> > If the test device gets corrupted all subsequent tests will fail.  To
+> > prevent this from causing all subsequent tests to be useless, try
+> > repair the file system on TEST_DEV if possible.  We don't need to do
+> > this with the scratch device since that file system gets recreated
+> > each time anyway.
+> > 
+> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> > ---
+> >  check      |  7 ++++++-
+> >  common/rc  | 41 +++++++++++++++++++++++++++++++++++++++++
+> >  common/xfs | 12 ++++++++++++
+> >  3 files changed, 59 insertions(+), 1 deletion(-)
+> > 
+> > diff --git a/check b/check
+> > index f8db3cd6..d89d2e91 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -476,7 +476,12 @@ _summary()
+> >  _check_filesystems()
+> >  {
+> >  	if [ -f ${RESULT_DIR}/require_test ]; then
+> > -		_check_test_fs || err=true
+> > +		if ! _check_test_fs ; then
+> > +			err=true
+> > +			echo "Trying to repair broken TEST_DEV file system"
+> > +			_repair_test_fs
+
+Should we stop running if _repair_test_fs failed to fix TEST_DEV? I
+think that was what Darrick first suggested. And I think unfixable
+errors will cause subsequent tests to fail too.
+
+> > +			_test_mount
+> > +		fi
+> >  		rm -f ${RESULT_DIR}/require_test*
+> >  	fi
+> >  	if [ -f ${RESULT_DIR}/require_scratch ]; then
+> > diff --git a/common/rc b/common/rc
+> > index 328b6b07..d37a1611 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -1201,6 +1201,47 @@ _repair_scratch_fs()
+> >      esac
+> >  }
+> >  
+> > +_repair_test_fs()
+> > +{
+> > +	case $FSTYP in
+> > +	xfs)
+> > +		_repair_xfs_test_fs "$@" >$tmp.repair 2>&1
+> > +		res=$?
+
+Better to declare res as a local variable. I know this was copied from
+_repair_scratch_fs, but better to get it improved in new code :)
+
+> > +		if [ "$res" -ne 0 ]; then
+> > +			echo "xfs_repair returns $res; replay log?" >>$tmp.repair
+> > +			_test_mount
+> > +			res=$?
+> > +			if [ $res -gt 0 ]; then
+> > +				echo "mount returns $res; zap log?" >>$tmp.repair
+> > +				_xfs_repair_test_fs -L >>$tmp.repair 2>&1
+
+                                meant _repair_xfs_test_fs here?
+
+> > +				echo "log zap returns $?" >> $tmp.repair
+> > +			else
+> > +				umount "$TEST_DEV"
+> > +			fi
+> > +			_xfs_repair_test_fs "$@" >>$tmp.repair 2>&1
+
+same here, _repair_xfs_test_fs is what really being added in common/xfs.
+(Though I'd like to rename it, see below.)
+
+> > +			res=$?
+> > +		fi
+> 
+> Structurally this all looks ok, but it's a little weird that we have
+> _scratch_xfs_repair for the scratch device (object-verb) but
+> _repair_test_fs (verb-object) for the test device.
+
+My best guess is that _repair_scratch_fs and _repair_test_fs are helpers
+in a higher level, and are defined in common/rc, they deal with all
+filesystem types.
+
+_scratch_xfs_repair is xfs specific, and defined in common/xfs, it only
+deals with xfs. So the naming schema is different but they are also in
+different "namespace"s, which looks fine to me :)
+
+> 
+> --D
+> 
+> > +		;;
+> > +	*)
+> > +		# Let's hope fsck -y suffices...
+> > +		fsck -t $FSTYP -fy $TEST_DEV >$tmp.repair 2>&1
+> > +		res=$?
+> > +		if test "$res" -lt 4 ; then
+> > +			res=0
+> > +		fi
+> > +		;;
+> > +	esac
+> > +	if [ $res -ne 0 ]; then
+> > +		_log_err "_repair_test_fs: failed, err=$res"
+> > +		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
+> > +		cat $tmp.repair				>>$seqres.full
+> > +		echo "*** end fsck.$FSTYP output"	>>$seqres.full
+> > +
+> > +	fi
+> > +	rm -f $tmp.repair
+> > +	return $res
+> > +}
+> > +
+> >  _get_pids_by_name()
+> >  {
+> >      if [ $# -ne 1 ]
+> > diff --git a/common/xfs b/common/xfs
+> > index a1ee3847..c8f4e46b 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -443,6 +443,18 @@ _check_xfs_test_fs()
+> >  	fi
+> >  }
+> >  
+> > +# modeled after _scratch_xfs_repair
+> > +_repair_xfs_test_fs()
+
+Like I mentioned above, this helper is meant to pair with
+_scratch_xfs_repair, so following the same naming schema, rename it to
+_test_xfs_repair? Like the _test_xfs_logprint and _scratch_xfs_logprint
+pair.
 
 Thanks,
 Eryu
 
-> +fi
-> +
-> +# Since setfacl failed, the permissions should not have changed
-> +stat -c %A $TFILE
-> +
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/447.out b/tests/generic/447.out
-> new file mode 100644
-> index 0000000..adec877
-> --- /dev/null
-> +++ b/tests/generic/447.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 447
-> +-rwx------
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 8c1e21a..a3ec390 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -449,3 +449,4 @@
->  444 auto quick acl
->  445 auto quick rw
->  446 auto quick rw dangerous
-> +447 auto quick acl
-> --=20
-> 2.1.4
->=20
+> > +{
+> > +	TEST_OPTIONS=""
+> > +	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_LOGDEV" ] && \
+> > +		TEST_OPTIONS="-l$TEST_LOGDEV"
+> > +	[ "$USE_EXTERNAL" = yes -a ! -z "$TEST_RTDEV" ] && \
+> > +		TEST_OPTIONS=$TEST_OPTIONS" -r$TEST_RTDEV"
+> > +	[ "$LARGE_TEST_DEV" = yes ] && TEST_OPTIONS=$TEST_OPTIONS" -t"
+> > +	$XFS_REPAIR_PROG $TEST_OPTIONS $* $TEST_DEV
+> > +}
+> > +
+> >  _require_xfs_test_rmapbt()
+> >  {
+> >  	_require_test
+> > -- 
+> > 2.11.0.rc0.7.gbe5a750
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
