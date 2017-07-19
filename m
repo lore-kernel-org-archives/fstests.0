@@ -1,63 +1,145 @@
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:33481 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751560AbdGSBhP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jul 2017 21:37:15 -0400
-Received: by mail-qt0-f194.google.com with SMTP id 50so3436565qtz.0
-        for <fstests@vger.kernel.org>; Tue, 18 Jul 2017 18:37:14 -0700 (PDT)
-Date: Tue, 18 Jul 2017 22:37:10 -0300
-From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
-        <ernesto.mnd.fernandez@gmail.com>
-Subject: [xfstests PATCH v2] common/rc: support jfs in _scratch_mkfs_sized
-Message-ID: <20170719013708.GA6047@debian.home>
-References: <20170714220616.GA3975@debian.home>
+Received: from cn.fujitsu.com ([59.151.112.132]:49304 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752070AbdGSCfG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jul 2017 22:35:06 -0400
+Message-ID: <596EC555.7020404@cn.fujitsu.com>
+Date: Wed, 19 Jul 2017 10:35:01 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20170714220616.GA3975@debian.home>
+Subject: Re: [PATCH] generic/448: don't disable extent zeroing if extent_max_zeroout_kb
+ isn't supported
+References: <1500366470-10647-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170718131852.GX2478@eguan.usersys.redhat.com>
+In-Reply-To: <20170718131852.GX2478@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>, jfs-discussion@lists.sourceforge.net, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add support for jfs in _scratch_mkfs_sized. Fix the block size in 4096,
-which seems to be the only option in jfs_mkfs.
-
-Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
+On 2017/07/18 21:18, Eryu Guan wrote:
+> On Tue, Jul 18, 2017 at 04:27:50PM +0800, Xiao Yang wrote:
+>> On some old kernel(e.g. v3.5), this case fails because it can not create
+>> extent_max_zeroout_kb file, as below:
+>>    Silence is golden
+>>   +./tests/generic/448: line 54: /sys/fs/ext4/sda5/extent_max_zeroout_kb: No such file or directory
+>>    seek sanity check failed!
+>>
+>> The extent_max_zeroout_kb file is introduced by:
+>>    67a5da564f97('ext4: make the zero-out chunk size tunable')
+> This is available since v3.7-rc1 kernel
+> $ git describe --contains 67a5da564f97
+> v3.7-rc1~91^2~63
 >
----
-I'm sorry, it seems I dropped a double semicolon. It worked the same of c=
-ourse,
-but better to fix it.
+> But ext4 SEEK_DATA/SEEK_HOLE support was added in v3.8-rc1
+> $ git describe --contains c8c0df241cc2
+> v3.8-rc1~89^2~40
+>
+> IMO, you shouldn't hit this error at all, because test won't pass
+> _require_seek_data_hole rule. (Unless you're testing some customized
+> kernel with seek_data/hole backported but not that ext4 sysfs entry.)
+Hi Eryu
 
- common/rc | 6 ++++++
- 1 file changed, 6 insertions(+)
+Thanks for your explanation.
 
-diff --git a/common/rc b/common/rc
-index fa1314c..c537ab4 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1023,6 +1023,9 @@ _scratch_mkfs_sized()
-     ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2)
- 	def_blksz=3D`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 	;;
-+    jfs)
-+	def_blksz=3D4096
-+	;;
-     esac
-=20
-     [ -n "$def_blksz" ] && blocksize=3D$def_blksz
-@@ -1068,6 +1071,9 @@ _scratch_mkfs_sized()
- 	(( fssize <=3D 100 * 1024 * 1024 )) && mixed_opt=3D'--mixed'
- 	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
- 	;;
-+    jfs)
-+	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
-+	;;
-     reiser4)
- 	# mkfs.resier4 requires size in KB as input for creating filesystem
- 	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
---=20
-2.1.4
+I test it in v3.5 kernel without seek_data/hole backported, please see 
+the following message:
+[root@localhost xfstests]# uname -r
+3.5.0
+[root@localhost xfstests]# src/seek_sanity_test -t 
+/mnt/xfstests/test/testfile 2>&1
+File system magic#: 0xef53
+Allocation size: 4096
+File system supports the default behavior.
+File system does not support unwritten extents.
+
+_require_seek_data_hole could not catch "File system does not support" 
+if ext4 SEEK_DATA/SEEK_HOLE
+support was not added.
+
+I think we should update  _require_seek_data_hole to catch both "Kernel 
+does not support" and
+"File system does not support".   This case could be skipped when 
+meetting either of them.
+
+Thanks,
+Xiao Yang
+>> We should only disable extent zeroing when extent_max_zeroout_kb is supported.
+>>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   tests/generic/448 | 3 ++-
+>>   1 file changed, 2 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/tests/generic/448 b/tests/generic/448
+>> index 87b99d7..3e92742 100755
+>> --- a/tests/generic/448
+>> +++ b/tests/generic/448
+>> @@ -51,7 +51,8 @@ _require_test_program "seek_sanity_test"
+>>   # Disable extent zeroing for ext4 as that change where holes are created
+>>   if [ "$FSTYP" = "ext4" ]; then
+>>   	DEV=`_short_dev $TEST_DEV`
+>> -	echo 0>/sys/fs/ext4/$DEV/extent_max_zeroout_kb
+>> +	[ -f /sys/fs/ext4/$DEV/extent_max_zeroout_kb ] \
+>> +	&&  echo 0>/sys/fs/ext4/$DEV/extent_max_zeroout_kb
+> But I'm OK with adding this check, but not in this test only, this
+> pattern is repeated in several seek_data/hole tests, e.g.
+> generic/285, generic/436, generic/445 generic/448, and generic/009
+> (which is not a seek_data/hole test).
+>
+> So I'm wondering if this hunk of code can be made into a helper and
+> embed it into _require_seek_data_hole. e.g. (completely untested)
+>
+> # Disable extent zeroing for ext4 on the given device
+> _ext4_disable_extent_zeroout()
+> {
+> 	local dev=${1:-$TEST_DEV}
+> 	local sdev=`_short_dev $dev`
+>
+> 	[ -f /sys/fs/ext4/$sdev/extent_max_zeroout_kb ] \
+> 	&&  echo 0>/sys/fs/ext4/$sdev/extent_max_zeroout_kb
+> }
+>
+> And _require_seek_data_hole
+>
+> _require_seek_data_hole()
+> {
+> 	local dev=${1:-$TEST_DEV}
+> 	local testfile=$TEST_DIR/$$.seek
+>
+> 	testseek=`$here/src/seek_sanity_test -t $testfile 2>&1`
+> 	rm -f $testfile&>/dev/null
+> 	echo $testseek | grep -q "Kernel does not support"&&  \
+> 	    _notrun "File system does not support llseek(2) SEEK_DATA/HOLE"
+> 	# Disable extent zeroing for ext4 as that change where holes are
+> 	# created
+> 	if [ "$FSTYP" == "ext4" ]; then
+> 		_ext4_disable_extent_zeroout $dev
+> 	fi
+> }
+>
+> And update generic/009 accordingly to use this new helper.
+>
+> What do you and/or other people think?
+>
+> Thanks,
+> Eryu
+>
+>>   fi
+>>
+>>   $here/src/seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE>  $seqres.full 2>&1 ||
+>> -- 
+>> 1.8.3.1
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+> .
+>
+
 
 
