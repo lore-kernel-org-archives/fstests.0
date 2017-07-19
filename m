@@ -1,72 +1,55 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34998 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752020AbdGSDPx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 18 Jul 2017 23:15:53 -0400
-Date: Wed, 19 Jul 2017 11:15:51 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [xfstests PATCH v2] common/rc: support jfs in _scratch_mkfs_sized
-Message-ID: <20170719031551.GZ2478@eguan.usersys.redhat.com>
-References: <20170714220616.GA3975@debian.home>
- <20170719013708.GA6047@debian.home>
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:33343 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751749AbdGSEGk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2017 00:06:40 -0400
+Received: by mail-qt0-f194.google.com with SMTP id 50so3716637qtz.0
+        for <fstests@vger.kernel.org>; Tue, 18 Jul 2017 21:06:40 -0700 (PDT)
+Date: Wed, 19 Jul 2017 01:06:35 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: [xfstests PATCH] common/attr: fix check for _require_attrs()
+Message-ID: <20170719040632.GA6712@debian.home>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20170719013708.GA6047@debian.home>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
-Cc: fstests@vger.kernel.org, jfs-discussion@lists.sourceforge.net
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 18, 2017 at 10:37:10PM -0300, Ernesto A. Fern=C3=A1ndez wrote=
-:
-> Add support for jfs in _scratch_mkfs_sized. Fix the block size in 4096,
-> which seems to be the only option in jfs_mkfs.
->=20
-> Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.c=
-om>
-> ---
-> I'm sorry, it seems I dropped a double semicolon. It worked the same of=
- course,
-> but better to fix it.
+As of now xfstests decides if a filesystem supports attributes by trying
+to write one to the mount point. For some reason this fails on reiserfs,
+making it impossible to run tests that _require_attrs.
 
-Thanks for the update! I didn't catch it in my review either..
+Fix this by checking against $TEST_DIR/syscalltest instead of $TEST_DIR.
 
-Eryu
+This is probably what was intended, since the syscalltest file is touched
+right before running attr. It is also consistent with how the check for
+acl support is done.
 
->=20
->  common/rc | 6 ++++++
->  1 file changed, 6 insertions(+)
->=20
-> diff --git a/common/rc b/common/rc
-> index fa1314c..c537ab4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1023,6 +1023,9 @@ _scratch_mkfs_sized()
->      ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2)
->  	def_blksz=3D`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
->  	;;
-> +    jfs)
-> +	def_blksz=3D4096
-> +	;;
->      esac
-> =20
->      [ -n "$def_blksz" ] && blocksize=3D$def_blksz
-> @@ -1068,6 +1071,9 @@ _scratch_mkfs_sized()
->  	(( fssize <=3D 100 * 1024 * 1024 )) && mixed_opt=3D'--mixed'
->  	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
->  	;;
-> +    jfs)
-> +	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
-> +	;;
->      reiser4)
->  	# mkfs.resier4 requires size in KB as input for creating filesystem
->  	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
-> --=20
-> 2.1.4
->=20
->=20
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
+>
+---
+ common/attr | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/attr b/common/attr
+index c840ce4..21ebbcd 100644
+--- a/common/attr
++++ b/common/attr
+@@ -217,7 +217,7 @@ _require_attrs()
+     # stored on disk.
+     #
+     touch $TEST_DIR/syscalltest
+-    attr -s "user.xfstests" -V "attr" $TEST_DIR > $TEST_DIR/syscalltest.=
+out 2>&1
++    attr -s "user.xfstests" -V "attr" $TEST_DIR/syscalltest > $TEST_DIR/=
+syscalltest.out 2>&1
+     cat $TEST_DIR/syscalltest.out >> $seqres.full
+=20
+     if grep -q 'Function not implemented' $TEST_DIR/syscalltest.out; the=
+n
+--=20
+2.1.4
+
