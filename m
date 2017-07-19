@@ -1,87 +1,83 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59956 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53928 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751911AbdGSJku (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Jul 2017 05:40:50 -0400
-Date: Wed, 19 Jul 2017 17:40:47 +0800
+        id S1754149AbdGSJ4h (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Jul 2017 05:56:37 -0400
+Date: Wed, 19 Jul 2017 17:56:34 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
- corrupted
-Message-ID: <20170719094047.GC2478@eguan.usersys.redhat.com>
-References: <20170302232050.31125-1-tytso@mit.edu>
- <20170303090332.GP14226@eguan.usersys.redhat.com>
- <20170303172157.GA5070@birch.djwong.org>
- <20170303230129.apzqe77r4d5jtf63@thunk.org>
- <20170327014802.wc5as2tdgecy3rzu@thunk.org>
- <20170327085103.GQ14226@eguan.usersys.redhat.com>
- <20170716013058.r46jceccqmoedkde@thunk.org>
- <20170717234508.GB4217@magnolia>
- <20170718050507.GU2478@eguan.usersys.redhat.com>
- <20170718173009.r5i73dztecop5tfr@thunk.org>
+Subject: Re: [PATCH] generic/448: don't disable extent zeroing if
+ extent_max_zeroout_kb isn't supported
+Message-ID: <20170719095634.GD2478@eguan.usersys.redhat.com>
+References: <1500366470-10647-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20170718131852.GX2478@eguan.usersys.redhat.com>
+ <596EC555.7020404@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170718173009.r5i73dztecop5tfr@thunk.org>
+In-Reply-To: <596EC555.7020404@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 18, 2017 at 01:30:09PM -0400, Theodore Ts'o wrote:
-> On Tue, Jul 18, 2017 at 01:05:07PM +0800, Eryu Guan wrote:
-> > > >  	if [ -f ${RESULT_DIR}/require_test ]; then
-> > > > -		_check_test_fs || err=true
-> > > > +		if ! _check_test_fs ; then
-> > > > +			err=true
-> > > > +			echo "Trying to repair broken TEST_DEV file system"
-> > > > +			_repair_test_fs
+On Wed, Jul 19, 2017 at 10:35:01AM +0800, Xiao Yang wrote:
+> On 2017/07/18 21:18, Eryu Guan wrote:
+> > On Tue, Jul 18, 2017 at 04:27:50PM +0800, Xiao Yang wrote:
+> > > On some old kernel(e.g. v3.5), this case fails because it can not create
+> > > extent_max_zeroout_kb file, as below:
+> > >    Silence is golden
+> > >   +./tests/generic/448: line 54: /sys/fs/ext4/sda5/extent_max_zeroout_kb: No such file or directory
+> > >    seek sanity check failed!
+> > > 
+> > > The extent_max_zeroout_kb file is introduced by:
+> > >    67a5da564f97('ext4: make the zero-out chunk size tunable')
+> > This is available since v3.7-rc1 kernel
+> > $ git describe --contains 67a5da564f97
+> > v3.7-rc1~91^2~63
 > > 
-> > Should we stop running if _repair_test_fs failed to fix TEST_DEV? I
-> > think that was what Darrick first suggested. And I think unfixable
-> > errors will cause subsequent tests to fail too.
-> 
-> Seems reasonable to me.  I'll take a look at it.
-> 
-> > > > +_repair_test_fs()
-> > > > +{
-> > > > +	case $FSTYP in
-> > > > +	xfs)
-> > > > +		_repair_xfs_test_fs "$@" >$tmp.repair 2>&1
-> > > > +		res=$?
+> > But ext4 SEEK_DATA/SEEK_HOLE support was added in v3.8-rc1
+> > $ git describe --contains c8c0df241cc2
+> > v3.8-rc1~89^2~40
 > > 
-> > Better to declare res as a local variable. I know this was copied from
-> > _repair_scratch_fs, but better to get it improved in new code :)
+> > IMO, you shouldn't hit this error at all, because test won't pass
+> > _require_seek_data_hole rule. (Unless you're testing some customized
+> > kernel with seek_data/hole backported but not that ext4 sysfs entry.)
+> Hi Eryu
 > 
-> Ack.
+> Thanks for your explanation.
 > 
-> > > Structurally this all looks ok, but it's a little weird that we have
-> > > _scratch_xfs_repair for the scratch device (object-verb) but
-> > > _repair_test_fs (verb-object) for the test device.
-> > 
-> > My best guess is that _repair_scratch_fs and _repair_test_fs are helpers
-> > in a higher level, and are defined in common/rc, they deal with all
-> > filesystem types.
-> > 
-> > _scratch_xfs_repair is xfs specific, and defined in common/xfs, it only
-> > deals with xfs. So the naming schema is different but they are also in
-> > different "namespace"s, which looks fine to me :)
+> I test it in v3.5 kernel without seek_data/hole backported, please see the
+> following message:
+> [root@localhost xfstests]# uname -r
+> 3.5.0
+> [root@localhost xfstests]# src/seek_sanity_test -t
+> /mnt/xfstests/test/testfile 2>&1
+> File system magic#: 0xef53
+> Allocation size: 4096
+> File system supports the default behavior.
+
+OK, I see why the test was *not* _notrun on 3.5 kernel now (without
+seek_data/hole support added to ext4, but with SEEK_DATA/SEEK_HOLE flags
+recognized by vfs, which was introduced by 982d81658 in v3.1-rc1),
+because ext4 had the "default behavior" support, and that means "just
+return i_size for SEEK_HOLE and will return the same offset for
+SEEK_DATA".
+
+> File system does not support unwritten extents.
+
+This means the file system doesn't treat unwritten extents as a hole,
+but data, which has nothing to do with SEEK_DATA/HOLE support status.
+
 > 
-> I also didn't like _test_repair_fs because it's not clear whether
-> "test" is a verb or a noun.
+> _require_seek_data_hole could not catch "File system does not support" if
+> ext4 SEEK_DATA/SEEK_HOLE
+> support was not added.
 > 
-> So one thing we could do is _xfs_scratch_repair and _xfs_test_repair?
+> I think we should update  _require_seek_data_hole to catch both "Kernel does
+> not support" and
+> "File system does not support".   This case could be skipped when meetting
+> either of them.
 
-Then all existing _scratch_xfs_repair calls need a rename, but I'm fine
-with the rename.
+So this is wrong, IMO.
 
-> 
-> The other thing is how much of the cleanup in common/xfs should be
-> segregated into a separate commit (and I'm not sure how competent I'm
-> going to be ate doing that cleanup, but I'm willing to give it a go).
-
-I think we can do minimal cleanup in this patch (like the rename of
-_scratch_xfs_repair to _xfs_scratch_repair) and do other cleanups in
-separate commits (if there's still any).
-
-Thanks!
-
+Thanks,
 Eryu
