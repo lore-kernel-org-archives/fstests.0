@@ -1,92 +1,54 @@
-Received: from cn.fujitsu.com ([59.151.112.132]:29176 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
-        with ESMTP id S932177AbdGSKiK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2017 06:38:10 -0400
-Message-ID: <596F3689.7020304@cn.fujitsu.com>
-Date: Wed, 19 Jul 2017 18:38:01 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from imap.thunk.org ([74.207.234.97]:40426 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755031AbdGSOxG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Jul 2017 10:53:06 -0400
+Date: Wed, 19 Jul 2017 10:53:01 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [RFC PATCH] check: try to fix the test device if it gets
+ corrupted
+Message-ID: <20170719145301.6ico5wwhwmamuu3k@thunk.org>
+References: <20170303090332.GP14226@eguan.usersys.redhat.com>
+ <20170303172157.GA5070@birch.djwong.org>
+ <20170303230129.apzqe77r4d5jtf63@thunk.org>
+ <20170327014802.wc5as2tdgecy3rzu@thunk.org>
+ <20170327085103.GQ14226@eguan.usersys.redhat.com>
+ <20170716013058.r46jceccqmoedkde@thunk.org>
+ <20170717234508.GB4217@magnolia>
+ <20170718050507.GU2478@eguan.usersys.redhat.com>
+ <20170718173009.r5i73dztecop5tfr@thunk.org>
+ <20170719094047.GC2478@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] generic/448: don't disable extent zeroing if extent_max_zeroout_kb
- isn't supported
-References: <1500366470-10647-1-git-send-email-yangx.jy@cn.fujitsu.com> <20170718131852.GX2478@eguan.usersys.redhat.com> <596EC555.7020404@cn.fujitsu.com> <20170719095634.GD2478@eguan.usersys.redhat.com>
-In-Reply-To: <20170719095634.GD2478@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170719094047.GC2478@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/07/19 17:56, Eryu Guan wrote:
-> On Wed, Jul 19, 2017 at 10:35:01AM +0800, Xiao Yang wrote:
->> On 2017/07/18 21:18, Eryu Guan wrote:
->>> On Tue, Jul 18, 2017 at 04:27:50PM +0800, Xiao Yang wrote:
->>>> On some old kernel(e.g. v3.5), this case fails because it can not create
->>>> extent_max_zeroout_kb file, as below:
->>>>     Silence is golden
->>>>    +./tests/generic/448: line 54: /sys/fs/ext4/sda5/extent_max_zeroout_kb: No such file or directory
->>>>     seek sanity check failed!
->>>>
->>>> The extent_max_zeroout_kb file is introduced by:
->>>>     67a5da564f97('ext4: make the zero-out chunk size tunable')
->>> This is available since v3.7-rc1 kernel
->>> $ git describe --contains 67a5da564f97
->>> v3.7-rc1~91^2~63
->>>
->>> But ext4 SEEK_DATA/SEEK_HOLE support was added in v3.8-rc1
->>> $ git describe --contains c8c0df241cc2
->>> v3.8-rc1~89^2~40
->>>
->>> IMO, you shouldn't hit this error at all, because test won't pass
->>> _require_seek_data_hole rule. (Unless you're testing some customized
->>> kernel with seek_data/hole backported but not that ext4 sysfs entry.)
->> Hi Eryu
->>
->> Thanks for your explanation.
->>
->> I test it in v3.5 kernel without seek_data/hole backported, please see the
->> following message:
->> [root@localhost xfstests]# uname -r
->> 3.5.0
->> [root@localhost xfstests]# src/seek_sanity_test -t
->> /mnt/xfstests/test/testfile 2>&1
->> File system magic#: 0xef53
->> Allocation size: 4096
->> File system supports the default behavior.
-> OK, I see why the test was *not* _notrun on 3.5 kernel now (without
-> seek_data/hole support added to ext4, but with SEEK_DATA/SEEK_HOLE flags
-> recognized by vfs, which was introduced by 982d81658 in v3.1-rc1),
-> because ext4 had the "default behavior" support, and that means "just
-> return i_size for SEEK_HOLE and will return the same offset for
-> SEEK_DATA".
->
->> File system does not support unwritten extents.
-> This means the file system doesn't treat unwritten extents as a hole,
-> but data, which has nothing to do with SEEK_DATA/HOLE support status.
-Hi Eryu,
+On Wed, Jul 19, 2017 at 05:40:47PM +0800, Eryu Guan wrote:
+> > 
+> > So one thing we could do is _xfs_scratch_repair and _xfs_test_repair?
 
-Thanks for your detailed explanation, i got it.
+Hmm, or maybe _xfs_repair_scratch and _xfs_repair_test; since at least
+for English speakers verb-object is probably more natural.  But if you
+or Darrick have a strong preference I'm don't care that much.
 
-Could you tell me whether generic/448 should be fixed or not?
+> Then all existing _scratch_xfs_repair calls need a rename, but I'm fine
+> with the rename.
+> 
+> > 
+> > The other thing is how much of the cleanup in common/xfs should be
+> > segregated into a separate commit (and I'm not sure how competent I'm
+> > going to be ate doing that cleanup, but I'm willing to give it a go).
+> 
+> I think we can do minimal cleanup in this patch (like the rename of
+> _scratch_xfs_repair to _xfs_scratch_repair) and do other cleanups in
+> separate commits (if there's still any).
 
-Thanks,
-Xiao Yang
->> _require_seek_data_hole could not catch "File system does not support" if
->> ext4 SEEK_DATA/SEEK_HOLE
->> support was not added.
->>
->> I think we should update  _require_seek_data_hole to catch both "Kernel does
->> not support" and
->> "File system does not support".   This case could be skipped when meetting
->> either of them.
-> So this is wrong, IMO.
->
-> Thanks,
-> Eryu
->
->
-> .
->
+If you don't mind I'll do the renames as a separate commit since
+that's much easier to verify/review.
 
+Cheers,
 
-
+						- Ted
