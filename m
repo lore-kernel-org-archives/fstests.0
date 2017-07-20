@@ -1,83 +1,224 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:37629 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932416AbdGSWZr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2017 18:25:47 -0400
-Received: by mail-pf0-f194.google.com with SMTP id d18so937732pfe.4
-        for <fstests@vger.kernel.org>; Wed, 19 Jul 2017 15:25:47 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH] generic/192: use shorter sleep and tolerate 2s delay
-Date: Wed, 19 Jul 2017 15:25:08 -0700
-Message-Id: <20170719222508.145781-1-ebiggers3@gmail.com>
+Received: from mail-pg0-f44.google.com ([74.125.83.44]:33097 "EHLO
+        mail-pg0-f44.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751995AbdGTBgp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jul 2017 21:36:45 -0400
+Received: by mail-pg0-f44.google.com with SMTP id k14so7665305pgr.0
+        for <fstests@vger.kernel.org>; Wed, 19 Jul 2017 18:36:45 -0700 (PDT)
+From: Tahsin Erdogan <tahsin@google.com>
+Subject: [PATCH] ext4: add a test for ea_inode feature
+Date: Wed, 19 Jul 2017 18:36:36 -0700
+Message-Id: <20170720013636.7620-1-tahsin@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eric Biggers <ebiggers@google.com>
+To: Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger@dilger.ca>, fstests@vger.kernel.org
+Cc: Tahsin Erdogan <tahsin@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+ea_inode feature supports creating extended attributes with values
+greater than the fs block size. This test exercises some common
+scenarios:
 
-generic/192 would sleep 40 seconds, update a file's atime, and then fail
-if the atime was not exactly 40 seconds later.  This is unreliable since
-things may be slow enough to cause an extra second to elapse.  "Fix"
-this by allowing for 2 seconds of delay.  Also, while we're at it
-shorten the sleep to a much more reasonable 5 seconds.
+ - Extended attibute being placed in inode vs xattr block
+ - Removing extended attribute
+ - Removing a file that has an extended attribute
+ - Multiple files having identical large attribute values
+ - Repeatedly setting an extended attribute with various sizes
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Tahsin Erdogan <tahsin@google.com>
 ---
- tests/generic/192     | 13 +++++--------
- tests/generic/192.out |  6 +++---
- 2 files changed, 8 insertions(+), 11 deletions(-)
+ tests/ext4/026     | 134 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/026.out |  29 ++++++++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 164 insertions(+)
+ create mode 100755 tests/ext4/026
+ create mode 100644 tests/ext4/026.out
 
-diff --git a/tests/generic/192 b/tests/generic/192
-index d3ed0ec0..2cee2e60 100755
---- a/tests/generic/192
-+++ b/tests/generic/192
-@@ -48,11 +48,7 @@ _supported_fs generic
- _supported_os Linux
- _require_test
- _require_atime
--#delay=150
--#delay=75
--#delay=60
--#delay=45
--delay=40
-+delay=5
- 
- testfile=$TEST_DIR/testfile
- rm -f $testfile
-@@ -61,7 +57,7 @@ rm -f $seqres.full
- echo test >$testfile
- time1=`_access_time $testfile | tee -a $seqres.full`
- 
--echo "sleep for $delay"
-+echo "sleep for $delay seconds"
- sleep $delay # sleep to allow time to move on for access
- cat $testfile
- time2=`_access_time $testfile | tee -a $seqres.full`
-@@ -73,8 +69,9 @@ time3=`_access_time $testfile | tee -a $seqres.full`
- delta1=`expr $time2 - $time1`
- delta2=`expr $time3 - $time1`
- 
--echo "delta1 - access time after sleep in-core: $delta1"
--echo "delta2 - access time after sleep on-disk: $delta2"
-+# tolerate an atime up to 2s later than the ideal case
-+_within_tolerance "delta1" $delta1 $delay  0 2 -v
-+_within_tolerance "delta2" $delta2 $delta1 0 0 -v
- 
- # success, all done
- status=0
-diff --git a/tests/generic/192.out b/tests/generic/192.out
-index 7e1f6996..f3b41141 100644
---- a/tests/generic/192.out
-+++ b/tests/generic/192.out
-@@ -1,5 +1,5 @@
- QA output created by 192
--sleep for 40
-+sleep for 5 seconds
- test
--delta1 - access time after sleep in-core: 40
--delta2 - access time after sleep on-disk: 40
-+delta1 is in range
-+delta2 is in range
+diff --git a/tests/ext4/026 b/tests/ext4/026
+new file mode 100755
+index 000000000000..297232ba7092
+--- /dev/null
++++ b/tests/ext4/026
+@@ -0,0 +1,134 @@
++#! /bin/bash
++# FS QA Test 026
++#
++# Test ea_inode feature.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_attrs
++_require_ext4_mkfs_feature ea_inode
++
++_scratch_mkfs_ext4 -O ea_inode -I 256 -b 4096 >/dev/null 2>&1
++_scratch_mount
++
++# Sets an extended attribute on a file.
++attr_set()
++{
++	local file=$1 name=$2 value=$3 tmp
++
++	if [[ "$value" != "" ]]; then
++		setfattr -n $name -v "$value" $file
++	else
++		setfattr -n $name $file
++	fi
++
++	tmp=$(getfattr --absolute-names --only-values -n $name $file)
++	[[ $tmp == $value ]] || echo "unexpected value returned: $tmp"
++}
++
++# List attributes on a file.
++attr_list()
++{
++	getfattr --absolute-names $1 | grep -v '^#'
++}
++
++# Removes an extended attribute from a file.
++attr_remove()
++{
++	local file=$1 name=$2
++
++	setfattr -x $name $file
++}
++
++# Test files.
++x=$SCRATCH_MNT/x
++y=$SCRATCH_MNT/y
++z=$SCRATCH_MNT/z
++
++# Attribute with short name that goes into inode body.
++name_in_ibody=user.i
++
++# Attribute with long name that goes into xattr block.
++name_in_block=user.$(perl -e 'print "b" x 100;')
++
++# Set large xattr values on multiple files.
++touch $x $y $z
++for file in $x $y $z; do
++	for name in $name_in_ibody $name_in_block; do
++		for size in 4096 8000 $((64*1024)); do
++			attr_set $file $name-$size \
++				$(perl -e "print 'v' x $size;")
++		done
++	done
++	attr_list $file
++done
++rm $x $y $z
++
++# Set/remove.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 25000;")
++attr_set $x $name_in_block $(perl -e "print 'b' x 25000;")
++attr_list $x
++attr_remove $x $name_in_ibody
++attr_remove $x $name_in_block
++rm $x
++
++# Set with same value twice.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_list $x
++rm $x
++
++# Repeatedly set an extended attribute with various value sizes.
++touch $x
++for size in 0 10 40 80 3000 9000 60 10000 9000 0 8000 3000 10 0 20 10000 5; do
++	attr_set $x user.1 $(perl -e "print 'v' x $size;")
++done
++attr_list $x
++rm $x
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/026.out b/tests/ext4/026.out
+new file mode 100644
+index 000000000000..5b94f3e2e4ea
+--- /dev/null
++++ b/tests/ext4/026.out
+@@ -0,0 +1,29 @@
++QA output created by 026
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
++user.i
++
++user.i
++
++user.1
++
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 664c0591e345..9aed07e271fe 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -28,6 +28,7 @@
+ 023 auto quick scrub
+ 024 auto quick encrypt dangerous
+ 025 auto quick fuzzers dangerous 
++026 auto quick attr
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
 -- 
 2.14.0.rc0.284.gd933b75aa4-goog
 
