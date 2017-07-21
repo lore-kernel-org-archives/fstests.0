@@ -1,193 +1,89 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41180 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33092 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752085AbdGUGwp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 21 Jul 2017 02:52:45 -0400
-Date: Fri, 21 Jul 2017 14:52:42 +0800
+        id S1752270AbdGUHHz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 21 Jul 2017 03:07:55 -0400
+Date: Fri, 21 Jul 2017 15:07:52 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] btrfs: test if receive with qgroups corrupts metadata
-Message-ID: <20170721065242.GG2478@eguan.usersys.redhat.com>
-References: <20170720230333.15930-1-jmaggard@netgear.com>
+Subject: Re: [PATCH] generic/448: don't disable extent zeroing if
+ extent_max_zeroout_kb isn't supported
+Message-ID: <20170721070752.GH2478@eguan.usersys.redhat.com>
+References: <1500366470-10647-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20170718131852.GX2478@eguan.usersys.redhat.com>
+ <596EC555.7020404@cn.fujitsu.com>
+ <20170719095634.GD2478@eguan.usersys.redhat.com>
+ <596F3689.7020304@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170720230333.15930-1-jmaggard@netgear.com>
+In-Reply-To: <596F3689.7020304@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Justin Maggard <jmaggard10@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Justin Maggard <jmaggard@netgear.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 20, 2017 at 04:03:33PM -0700, Justin Maggard wrote:
-> This test case does some concurrent send/receives with qgroups enabled.
-> Currently (4.13-rc1) this usually results in btrfs check errors, and
-> often also results in a WARN_ON in record_root_in_trans().
+On Wed, Jul 19, 2017 at 06:38:01PM +0800, Xiao Yang wrote:
+> On 2017/07/19 17:56, Eryu Guan wrote:
+> > On Wed, Jul 19, 2017 at 10:35:01AM +0800, Xiao Yang wrote:
+> > > On 2017/07/18 21:18, Eryu Guan wrote:
+> > > > On Tue, Jul 18, 2017 at 04:27:50PM +0800, Xiao Yang wrote:
+> > > > > On some old kernel(e.g. v3.5), this case fails because it can not create
+> > > > > extent_max_zeroout_kb file, as below:
+> > > > >     Silence is golden
+> > > > >    +./tests/generic/448: line 54: /sys/fs/ext4/sda5/extent_max_zeroout_kb: No such file or directory
+> > > > >     seek sanity check failed!
+> > > > > 
+> > > > > The extent_max_zeroout_kb file is introduced by:
+> > > > >     67a5da564f97('ext4: make the zero-out chunk size tunable')
+> > > > This is available since v3.7-rc1 kernel
+> > > > $ git describe --contains 67a5da564f97
+> > > > v3.7-rc1~91^2~63
+> > > > 
+> > > > But ext4 SEEK_DATA/SEEK_HOLE support was added in v3.8-rc1
+> > > > $ git describe --contains c8c0df241cc2
+> > > > v3.8-rc1~89^2~40
+> > > > 
+> > > > IMO, you shouldn't hit this error at all, because test won't pass
+> > > > _require_seek_data_hole rule. (Unless you're testing some customized
+> > > > kernel with seek_data/hole backported but not that ext4 sysfs entry.)
+> > > Hi Eryu
+> > > 
+> > > Thanks for your explanation.
+> > > 
+> > > I test it in v3.5 kernel without seek_data/hole backported, please see the
+> > > following message:
+> > > [root@localhost xfstests]# uname -r
+> > > 3.5.0
+> > > [root@localhost xfstests]# src/seek_sanity_test -t
+> > > /mnt/xfstests/test/testfile 2>&1
+> > > File system magic#: 0xef53
+> > > Allocation size: 4096
+> > > File system supports the default behavior.
+> > OK, I see why the test was *not* _notrun on 3.5 kernel now (without
+> > seek_data/hole support added to ext4, but with SEEK_DATA/SEEK_HOLE flags
+> > recognized by vfs, which was introduced by 982d81658 in v3.1-rc1),
+> > because ext4 had the "default behavior" support, and that means "just
+> > return i_size for SEEK_HOLE and will return the same offset for
+> > SEEK_DATA".
+> > 
+> > > File system does not support unwritten extents.
+> > This means the file system doesn't treat unwritten extents as a hole,
+> > but data, which has nothing to do with SEEK_DATA/HOLE support status.
+> Hi Eryu,
 > 
-> Bisecting points to 6426c7ad697d (btrfs: qgroup: Fix qgroup accounting
-> when creating snapshot) as the culprit.
-
-Thanks for the new test! But I'd need some help from btrfs-list to
-review if this is a sane test for btrfs.
-
-BTW, you're missing a S-O-B line here :)
-
-> ---
->  tests/btrfs/149     | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/149.out |  17 +++++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 119 insertions(+)
->  create mode 100755 tests/btrfs/149
->  create mode 100644 tests/btrfs/149.out
+> Thanks for your detailed explanation, i got it.
 > 
-> diff --git a/tests/btrfs/149 b/tests/btrfs/149
-> new file mode 100755
-> index 0000000..5c1912d
-> --- /dev/null
-> +++ b/tests/btrfs/149
-> @@ -0,0 +1,101 @@
-> +#! /bin/bash
-> +# FS QA Test No. btrfs/149
-> +#
-> +# Test that incremental send/receive operations don't corrupt metadata when
-> +# qgroups are enabled.
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (c) 2017 NETGEAR, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# Enable quotas
-> +$BTRFS_UTIL_PROG quota enable $SCRATCH_MNT
-> +
-> +# Create 2 source and 4 destination subvolumes
-> +for subvol in subvol1 subvol2 recv1_1 recv1_2 recv2_1 recv2_2; do
-> +	$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/$subvol
+> Could you tell me whether generic/448 should be fixed or not?
 
-The only thing I've noticed is that you need to _filter_scratch here and
-some other places, so in .out file you don't assume and hardcode
-/mnt/scratch as SCRATCH_MNT.
+IMHO, as the pure "sysfs entry not found" issue, it's really a low
+priority bug to fix, as the bug only exists when vfs recognizes
+SEEK_DATA/HOLE flag && ext4 has no extent zeroout tunable in sysfs, so
+only 3.1-3.6 kernels suffer from this issue, but they're really old
+kernels.
+
+OTOH, factoring out a helper like what I suggested in my first reply
+seems reasonable to me, so we don't repeat the same pattern in multiple
+tests and we also get the bug fixed. If you send a patch to do this I'm
+happy to review it :)
 
 Thanks,
 Eryu
-
-> +done
-> +mkdir $SCRATCH_MNT/subvol{1,2}/.snapshots
-> +
-> +# Create base snapshots and send them
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol1 \
-> +	$SCRATCH_MNT/subvol1/.snapshots/1
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol2 \
-> +	$SCRATCH_MNT/subvol2/.snapshots/1
-> +for recv in recv1_1 recv1_2 recv2_1 recv2_2; do
-> +	$BTRFS_UTIL_PROG send $SCRATCH_MNT/subvol1/.snapshots/1 | \
-> +		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/${recv}
-> +done
-> +
-> +# Now do 10 loops of concurrent incremental send/receives
-> +for i in `seq 1 10`; do
-> +	prev=$i
-> +	curr=$((i+1))
-> +
-> +	$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol1 \
-> +		$SCRATCH_MNT/subvol1/.snapshots/${curr} > /dev/null
-> +	($BTRFS_UTIL_PROG send -p $SCRATCH_MNT/subvol1/.snapshots/${prev} \
-> +		$SCRATCH_MNT/subvol1/.snapshots/${curr} 2> /dev/null | \
-> +		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/recv1_1) > /dev/null &
-> +	($BTRFS_UTIL_PROG send -p $SCRATCH_MNT/subvol1/.snapshots/${prev} \
-> +		$SCRATCH_MNT/subvol1/.snapshots/${curr} 2> /dev/null | \
-> +		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/recv1_2) > /dev/null &
-> +
-> +	$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/subvol2 \
-> +		$SCRATCH_MNT/subvol2/.snapshots/${curr} > /dev/null
-> +	($BTRFS_UTIL_PROG send -p $SCRATCH_MNT/subvol2/.snapshots/${prev} \
-> +		$SCRATCH_MNT/subvol2/.snapshots/${curr} 2> /dev/null | \
-> +		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/recv2_1) > /dev/null &
-> +	($BTRFS_UTIL_PROG send -p $SCRATCH_MNT/subvol2/.snapshots/${prev} \
-> +		$SCRATCH_MNT/subvol2/.snapshots/${curr} 2> /dev/null | \
-> +		$BTRFS_UTIL_PROG receive $SCRATCH_MNT/recv2_2) > /dev/null &
-> +	wait
-> +done
-> +
-> +_scratch_unmount
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/149.out b/tests/btrfs/149.out
-> new file mode 100644
-> index 0000000..3ea9101
-> --- /dev/null
-> +++ b/tests/btrfs/149.out
-> @@ -0,0 +1,17 @@
-> +QA output created by 149
-> +Create subvolume '/mnt/scratch/subvol1'
-> +Create subvolume '/mnt/scratch/subvol2'
-> +Create subvolume '/mnt/scratch/recv1_1'
-> +Create subvolume '/mnt/scratch/recv1_2'
-> +Create subvolume '/mnt/scratch/recv2_1'
-> +Create subvolume '/mnt/scratch/recv2_2'
-> +Create a readonly snapshot of '/mnt/scratch/subvol1' in '/mnt/scratch/subvol1/.snapshots/1'
-> +Create a readonly snapshot of '/mnt/scratch/subvol2' in '/mnt/scratch/subvol2/.snapshots/1'
-> +At subvol /mnt/scratch/subvol1/.snapshots/1
-> +At subvol 1
-> +At subvol /mnt/scratch/subvol1/.snapshots/1
-> +At subvol 1
-> +At subvol /mnt/scratch/subvol1/.snapshots/1
-> +At subvol 1
-> +At subvol /mnt/scratch/subvol1/.snapshots/1
-> +At subvol 1
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 8240b53..a84a2bd 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -151,3 +151,4 @@
->  146 auto quick
->  147 auto quick send
->  148 auto quick rw
-> +149 auto quick metadata qgroup send
-> -- 
-> 2.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
