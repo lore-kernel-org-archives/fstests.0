@@ -1,367 +1,601 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:37091 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750980AbdGUEkF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:05 -0400
+Received: from mail-pg0-f51.google.com ([74.125.83.51]:37266 "EHLO
+        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750972AbdGUEkK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:10 -0400
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2 00/15] xfstests: remove IRIX support
-Date: Thu, 20 Jul 2017 21:38:38 -0700
-Message-Id: <20170721043853.364-1-ebiggers3@gmail.com>
+Subject: [PATCH v2 02/15] tests: port generic/097 to Linux
+Date: Thu, 20 Jul 2017 21:38:40 -0700
+Message-Id: <20170721043853.364-3-ebiggers3@gmail.com>
+In-Reply-To: <20170721043853.364-1-ebiggers3@gmail.com>
+References: <20170721043853.364-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, Eric Biggers <ebiggers3@gmail.com>
+Cc: linux-xfs@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hello,
+From: Eric Biggers <ebiggers@google.com>
 
-This is v2 of the patchset to remove IRIX support from xfstests.  For
-some time xfstests has de facto not supported IRIX anymore.  The final
-release of IRIX was over 10 years ago and it seems no one has been
-running the latest xfstests releases on any IRIX system, as at the very
-least xfstests now assumes the existence of some util-linux binaries.
-There are very likely other examples of this bitrot as well.  Also,
-xfsprogs has already dropped IRIX support.
+This IRIX-specific test did some basic testing of extended attributes.
+Port it to Linux; this mainly involved updating it to use the 'getfattr'
+and 'setfattr' programs instead 'attr'.  Note that although 'attr' is
+available on Linux, it's mainly for IRIX compatibility, the man page
+recommends against using it on non-XFS filesystems, and it doesn't
+support listing user xattrs only.  (In the last point it actually
+differs from IRIX 'attr', but probably no one cares anymore.)  getfattr
+also sorts its output by xattr name, so its output will be the same on
+all filesystems unlike 'attr -l'.
 
-Therefore, this patchset simplifies things by removing IRIX support from
-the xfstests tests, build system, and documentation.  It also ports the
-useful IRIX-specific tests to Linux.  Of course, people will still find
-more cruft later to remove, but this should be a good start.
-
-To get around the mailing list message size limit, the series is
-formatted with --irreversible-delete.  Therefore it can't be applied
-directly.  It can be retrieved from git here:
-https://github.com/ebiggers/xfstests.git, branch remove_irix_support_v2.
-
-Eric Biggers (15):
-  tests: port generic/093 to Linux
-  tests: port generic/097 to Linux
-  tests: port xfs/095 to Linux
-  tests: remove udf/098
-  tests: remove udf/101
-  tests: remove xfs/114 and xfs/115
-  tests: remove xfs/057 and xfs/058
-  tests: remove generic/099
-  tests: make shared/051 a generic test
-  README: remove IRIX-specific documentation
-  tests: remove IRIX support from tests also supported on Linux
-  tests: clean up per-OS output files
-  common: remove IRIX-specific code
-  build: remove IRIX-specific build logic
-  include: remove some unused headers
-
- .gitignore                                   |   14 -
- README                                       |   51 +-
- common/attr                                  |   12 -
- common/config                                |   12 -
- common/dump                                  |   39 +-
- common/filestreams                           |   43 +-
- common/log                                   |    1 -
- common/rc                                    |   23 +-
- configure.ac                                 |   59 +-
- include/builddefs.in                         |    3 -
- include/test.h                               |  192 -
- include/usctest.h                            |  303 --
- lib/str_to_bytes.c                           |    2 +-
- ltp/Makefile                                 |    4 -
- ltp/rwtest.sh                                |    1 -
- m4/package_globals.m4                        |    2 +-
- m4/package_libcdev.m4                        |    2 +-
- m4/package_utilies.m4                        |   14 +-
- m4/package_xfslibs.m4                        |   13 -
- make_irix                                    |  114 -
- src/Makefile                                 |    4 -
- src/acl_get.c                                |  148 -
- src/acl_test.c                               |  264 --
- src/fill2fs                                  |    5 +-
- src/writemod.c                               |    4 +-
- tests/generic/001                            |    2 +-
- tests/generic/002                            |    2 +-
- tests/generic/005                            |    9 +-
- tests/generic/006                            |    2 +-
- tests/generic/007                            |    2 +-
- tests/generic/010                            |    2 +-
- tests/generic/011                            |    2 +-
- tests/generic/013                            |    8 +-
- tests/generic/014                            |    2 +-
- tests/generic/015                            |    2 +-
- tests/generic/029                            |    2 +-
- tests/generic/030                            |    2 +-
- tests/generic/031                            |    2 +-
- tests/generic/043                            |    2 +-
- tests/generic/044                            |    2 +-
- tests/generic/045                            |    2 +-
- tests/generic/046                            |    2 +-
- tests/generic/047                            |    2 +-
- tests/generic/048                            |    2 +-
- tests/generic/049                            |    2 +-
- tests/generic/052                            |    2 +-
- tests/generic/054                            |    2 +-
- tests/generic/055                            |    2 +-
- tests/generic/068                            |    2 +-
- tests/generic/069                            |    2 +-
- tests/generic/070                            |    2 +-
- tests/generic/074                            |   37 +-
- tests/generic/075                            |    2 +-
- tests/generic/076                            |    2 +-
- tests/generic/080                            |    2 +-
- tests/generic/083                            |    2 +-
- tests/generic/086                            |    2 +-
- tests/generic/088                            |    5 +-
- tests/generic/088.cfg                        |    2 -
- tests/generic/{088.out.linux => 088.out}     |    0
- tests/generic/088.out.irix                   |    9 -
- tests/generic/093                            |  113 +-
- tests/generic/093.out                        |  Bin 917 -> 372 bytes
- tests/generic/096                            |    2 +-
- tests/generic/097                            |  253 +-
- tests/generic/097.out                        |  177 +
- tests/generic/097.out.udf                    |  132 -
- tests/generic/097.out.xfs                    |  132 -
- tests/generic/099                            |  136 +-
- tests/generic/099.out                        |  235 +-
- tests/generic/100                            |    2 +-
- tests/generic/105                            |   11 +-
- tests/generic/117                            |    2 +-
- tests/generic/120                            |    2 +-
- tests/generic/123                            |    2 +-
- tests/generic/130                            |    2 +-
- tests/generic/132                            |    2 +-
- tests/generic/133                            |    2 +-
- tests/generic/135                            |    2 +-
- tests/generic/184                            |    2 +-
- tests/generic/219                            |    2 +-
- tests/generic/226                            |    2 +-
- tests/generic/230                            |    2 +-
- tests/generic/234                            |    2 +-
- tests/generic/235                            |    2 +-
- tests/generic/273                            |    2 +-
- tests/generic/274                            |    2 +-
- tests/generic/275                            |    2 +-
- tests/generic/309                            |    2 +-
- tests/generic/313                            |    2 +-
- tests/generic/320                            |    2 +-
- tests/generic/378                            |    2 +-
- tests/generic/379                            |    2 +-
- tests/generic/380                            |    2 +-
- tests/generic/384                            |    8 +-
- tests/generic/403                            |    2 +-
- tests/generic/416                            |    2 +-
- tests/generic/424                            |    2 +-
- tests/generic/group                          |    6 +-
- tests/shared/051                             |  321 --
- tests/shared/051.out                         |  220 -
- tests/shared/group                           |    1 -
- tests/udf/098                                |  274 --
- tests/udf/098.out                            | 1594 --------
- tests/udf/101                                |   62 -
- tests/udf/101.out                            |   19 -
- tests/udf/102                                |    2 +-
- tests/udf/group                              |    2 -
- tests/xfs/003                                |   12 +-
- tests/xfs/004                                |    6 +-
- tests/xfs/007                                |    2 +-
- tests/xfs/008                                |    2 +-
- tests/xfs/009                                |    2 +-
- tests/xfs/012                                |    2 +-
- tests/xfs/018                                |   11 +-
- tests/xfs/018.cfg                            |    2 -
- tests/xfs/{018.op.linux => 018.op}           |    0
- tests/xfs/018.op.irix                        | 5628 --------------------------
- tests/xfs/019                                |    2 +-
- tests/xfs/022                                |    8 +-
- tests/xfs/022.cfg                            |    2 -
- tests/xfs/{022.out.linux => 022.out}         |    0
- tests/xfs/022.out.irix                       |   55 -
- tests/xfs/023                                |    5 +-
- tests/xfs/023.cfg                            |    2 -
- tests/xfs/{023.out.linux => 023.out}         |    0
- tests/xfs/023.out.irix                       |   89 -
- tests/xfs/026                                |    2 +-
- tests/xfs/027                                |    2 +-
- tests/xfs/028                                |    2 +-
- tests/xfs/030                                |    5 +-
- tests/xfs/030.cfg                            |    2 -
- tests/xfs/{030.out.linux => 030.out}         |    0
- tests/xfs/030.out.irix                       |  288 --
- tests/xfs/031                                |    5 +-
- tests/xfs/031.cfg                            |    2 -
- tests/xfs/{031.out.linux => 031.out}         |    0
- tests/xfs/031.out.irix                       |  123 -
- tests/xfs/032                                |    2 +-
- tests/xfs/033                                |    6 +-
- tests/xfs/033.cfg                            |    4 +-
- tests/xfs/{033.out.crc.linux => 033.out.crc} |    0
- tests/xfs/{033.out.linux => 033.out.default} |    0
- tests/xfs/033.out.irix                       |  217 -
- tests/xfs/035                                |    5 +-
- tests/xfs/035.cfg                            |    2 -
- tests/xfs/{035.out.linux => 035.out}         |    0
- tests/xfs/035.out.irix                       |   94 -
- tests/xfs/036                                |    5 +-
- tests/xfs/036.cfg                            |    2 -
- tests/xfs/{036.out.linux => 036.out}         |    0
- tests/xfs/036.out.irix                       |   86 -
- tests/xfs/039                                |    5 +-
- tests/xfs/039.cfg                            |    2 -
- tests/xfs/{039.out.linux => 039.out}         |    0
- tests/xfs/039.out.irix                       |   89 -
- tests/xfs/041                                |    2 +-
- tests/xfs/042                                |    2 +-
- tests/xfs/043                                |    5 +-
- tests/xfs/043.cfg                            |    2 -
- tests/xfs/{043.out.linux => 043.out}         |    0
- tests/xfs/043.out.irix                       |  104 -
- tests/xfs/046                                |    2 +-
- tests/xfs/047                                |    2 +-
- tests/xfs/048                                |    2 +-
- tests/xfs/050                                |   16 +-
- tests/xfs/052                                |    2 +-
- tests/xfs/053                                |    2 +-
- tests/xfs/055                                |    5 +-
- tests/xfs/{055.out.linux => 055.out}         |    0
- tests/xfs/055.out.irix                       |   89 -
- tests/xfs/056                                |    2 +-
- tests/xfs/057                                |   47 -
- tests/xfs/057.out                            |   34 -
- tests/xfs/058                                |   46 -
- tests/xfs/058.out                            |  243 --
- tests/xfs/061                                |    2 +-
- tests/xfs/064                                |    2 +-
- tests/xfs/065                                |    2 +-
- tests/xfs/066                                |    2 +-
- tests/xfs/071                                |    2 +-
- tests/xfs/072                                |    2 +-
- tests/xfs/080                                |    6 -
- tests/xfs/081                                |   10 +-
- tests/xfs/082                                |   11 +-
- tests/xfs/082.cfg                            |    2 -
- tests/xfs/{082.op.linux => 082.op}           |    0
- tests/xfs/082.op.irix                        | 5628 --------------------------
- tests/xfs/084                                |   10 +-
- tests/xfs/092                                |    2 +-
- tests/xfs/094                                |    2 +-
- tests/xfs/095                                |   11 +-
- tests/xfs/095.out                            |    3 +-
- tests/xfs/096                                |    2 +-
- tests/xfs/103                                |    2 +-
- tests/xfs/107                                |    2 +-
- tests/xfs/108                                |    2 +-
- tests/xfs/114                                |  340 --
- tests/xfs/114.out                            |  365 --
- tests/xfs/115                                |  257 --
- tests/xfs/115.out                            |  118 -
- tests/xfs/116                                |    2 +-
- tests/xfs/118                                |    2 +-
- tests/xfs/119                                |    2 +-
- tests/xfs/121                                |    2 +-
- tests/xfs/136                                |    2 +-
- tests/xfs/142                                |    2 +-
- tests/xfs/143                                |    2 +-
- tests/xfs/144                                |    2 +-
- tests/xfs/145                                |    2 +-
- tests/xfs/146                                |    5 +-
- tests/xfs/146.cfg                            |    2 -
- tests/xfs/{146.out.linux => 146.out}         |    0
- tests/xfs/146.out.irix                       |  324 --
- tests/xfs/147                                |    2 +-
- tests/xfs/148                                |    2 +-
- tests/xfs/149                                |    2 +-
- tests/xfs/150                                |    2 +-
- tests/xfs/151                                |    2 +-
- tests/xfs/152                                |    2 +-
- tests/xfs/153                                |    2 +-
- tests/xfs/154                                |    2 +-
- tests/xfs/155                                |    2 +-
- tests/xfs/156                                |    2 +-
- tests/xfs/157                                |    2 +-
- tests/xfs/158                                |    2 +-
- tests/xfs/159                                |    2 +-
- tests/xfs/160                                |    2 +-
- tests/xfs/161                                |    2 +-
- tests/xfs/162                                |    2 +-
- tests/xfs/163                                |    2 +-
- tests/xfs/164                                |    2 +-
- tests/xfs/165                                |    2 +-
- tests/xfs/170                                |    2 +-
- tests/xfs/172                                |    2 +-
- tests/xfs/173                                |    2 +-
- tests/xfs/174                                |    2 +-
- tests/xfs/181                                |    2 +-
- tests/xfs/185                                |    2 +-
- tests/xfs/188                                |    2 +-
- tests/xfs/194                                |    2 +-
- tests/xfs/206                                |    2 +-
- tests/xfs/291                                |    2 +-
- tests/xfs/292                                |    2 +-
- tests/xfs/293                                |    2 +-
- tests/xfs/295                                |    2 +-
- tests/xfs/297                                |    2 +-
- tests/xfs/303                                |    2 +-
- tests/xfs/group                              |    4 -
- 249 files changed, 747 insertions(+), 19055 deletions(-)
- delete mode 100644 include/test.h
- delete mode 100644 include/usctest.h
- delete mode 100755 make_irix
- delete mode 100644 src/acl_get.c
- delete mode 100644 src/acl_test.c
- delete mode 100644 tests/generic/088.cfg
- rename tests/generic/{088.out.linux => 088.out} (100%)
- delete mode 100644 tests/generic/088.out.irix
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ .gitignore                |   1 -
+ tests/generic/097         | 253 ++++++++++++++++++++--------------------------
+ tests/generic/097.out     | 177 ++++++++++++++++++++++++++++++++
+ tests/generic/097.out.udf | 132 ------------------------
+ tests/generic/097.out.xfs | 132 ------------------------
+ tests/generic/group       |   2 +-
+ 6 files changed, 287 insertions(+), 410 deletions(-)
  create mode 100644 tests/generic/097.out
  delete mode 100644 tests/generic/097.out.udf
  delete mode 100644 tests/generic/097.out.xfs
- delete mode 100755 tests/shared/051
- delete mode 100644 tests/shared/051.out
- delete mode 100755 tests/udf/098
- delete mode 100644 tests/udf/098.out
- delete mode 100755 tests/udf/101
- delete mode 100644 tests/udf/101.out
- delete mode 100644 tests/xfs/018.cfg
- rename tests/xfs/{018.op.linux => 018.op} (100%)
- delete mode 100644 tests/xfs/018.op.irix
- delete mode 100644 tests/xfs/022.cfg
- rename tests/xfs/{022.out.linux => 022.out} (100%)
- delete mode 100644 tests/xfs/022.out.irix
- delete mode 100644 tests/xfs/023.cfg
- rename tests/xfs/{023.out.linux => 023.out} (100%)
- delete mode 100644 tests/xfs/023.out.irix
- delete mode 100644 tests/xfs/030.cfg
- rename tests/xfs/{030.out.linux => 030.out} (100%)
- delete mode 100644 tests/xfs/030.out.irix
- delete mode 100644 tests/xfs/031.cfg
- rename tests/xfs/{031.out.linux => 031.out} (100%)
- delete mode 100644 tests/xfs/031.out.irix
- rename tests/xfs/{033.out.crc.linux => 033.out.crc} (100%)
- rename tests/xfs/{033.out.linux => 033.out.default} (100%)
- delete mode 100644 tests/xfs/033.out.irix
- delete mode 100644 tests/xfs/035.cfg
- rename tests/xfs/{035.out.linux => 035.out} (100%)
- delete mode 100644 tests/xfs/035.out.irix
- delete mode 100644 tests/xfs/036.cfg
- rename tests/xfs/{036.out.linux => 036.out} (100%)
- delete mode 100644 tests/xfs/036.out.irix
- delete mode 100644 tests/xfs/039.cfg
- rename tests/xfs/{039.out.linux => 039.out} (100%)
- delete mode 100644 tests/xfs/039.out.irix
- delete mode 100644 tests/xfs/043.cfg
- rename tests/xfs/{043.out.linux => 043.out} (100%)
- delete mode 100644 tests/xfs/043.out.irix
- rename tests/xfs/{055.out.linux => 055.out} (100%)
- delete mode 100644 tests/xfs/055.out.irix
- delete mode 100755 tests/xfs/057
- delete mode 100644 tests/xfs/057.out
- delete mode 100755 tests/xfs/058
- delete mode 100644 tests/xfs/058.out
- delete mode 100644 tests/xfs/082.cfg
- rename tests/xfs/{082.op.linux => 082.op} (100%)
- delete mode 100644 tests/xfs/082.op.irix
- delete mode 100755 tests/xfs/114
- delete mode 100644 tests/xfs/114.out
- delete mode 100755 tests/xfs/115
- delete mode 100644 tests/xfs/115.out
- delete mode 100644 tests/xfs/146.cfg
- rename tests/xfs/{146.out.linux => 146.out} (100%)
- delete mode 100644 tests/xfs/146.out.irix
 
+diff --git a/.gitignore b/.gitignore
+index 1e994889..c0736486 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -235,7 +235,6 @@
+ 
+ # Symlinked files
+ /tests/generic/088.out
+-/tests/generic/097.out
+ /tests/xfs/018.op
+ /tests/xfs/022.out
+ /tests/xfs/023.out
+diff --git a/tests/generic/097 b/tests/generic/097
+index 637c73b7..13abe9e3 100755
+--- a/tests/generic/097
++++ b/tests/generic/097
+@@ -10,6 +10,7 @@
+ #
+ #-----------------------------------------------------------------------
+ # Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
+ #
+ # This program is free software; you can redistribute it and/or
+ # modify it under the terms of the GNU General Public License as
+@@ -27,7 +28,6 @@
+ #-----------------------------------------------------------------------
+ #
+ 
+-seqfull=$0
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+@@ -35,215 +35,180 @@ echo "QA output created by $seq"
+ here=`pwd`
+ tmp=/tmp/$$
+ status=1	# failure is the default!
+-TARGET_DIR=
+ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
++file=$TEST_DIR/foo
++
+ _cleanup()
+ {
+-    rm -f $tmp.*
+-    cd $TARGET_DIR
+-    rm -f foo
++	rm -f $tmp.* $file
++}
++
++getfattr()
++{
++	$GETFATTR_PROG --absolute-names "$@" |& _filter_test_dir
+ }
+ 
+-_umount_and_mount()
++setfattr()
+ {
+-    cd /
+-    umount $TARGET_DIR
+-    if [ "$FSTYP" == "xfs" ]; then
+-	_test_mount
+-    else
+-	_scratch_mount
+-    fi
+-    
+-    cd $TARGET_DIR
++	$SETFATTR_PROG "$@" |& _filter_test_dir
+ }
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/attr
+ . ./common/filter
+ 
+-# link correct .out file
+-# This is done bacause udf and xfs print attrs in different orders.
+-rm -rf $seqfull.out
+-if [ "$FSTYP" == "xfs" ]; then
+-    ln -s $seq.out.xfs $seqfull.out
+-else
+-    ln -s $seq.out.udf $seqfull.out
+-fi
+-
+ # real QA test starts here
+ _supported_fs generic
+-_supported_os IRIX
++_supported_os Linux
+ 
+ _require_test
+-_require_scratch
+ _require_attrs
+ 
+-TARGET_DIR=$SCRATCH_MNT
+-[ "$FSTYP" == "xfs" ] && TARGET_DIR=$TEST_DIR
+-cd $TARGET_DIR
+-
+-echo "create file foo"
+-rm -f foo 
+-touch foo
+-
+-echo "should be no EAs for foo:"
+-${ATTR_PROG} -l foo
+-
+-echo "set EA <noise,woof>:"
+-${ATTR_PROG} -s noise -V woof foo
+-
+-echo "set EA <colour,blue>:"
+-${ATTR_PROG} -s colour -V blue foo
+-
+-echo "set EA <size,small>:"
+-${ATTR_PROG} -s size -V small foo
+-
+-echo "list the EAs for foo: noise, colour, size" 
+-${ATTR_PROG} -l foo
++echo -e "\ncreate file foo"
++rm -f $file
++touch $file
+ 
+-echo "check the list again for foo"
+-${ATTR_PROG} -l foo
++echo -e "\nshould be no EAs for foo:"
++getfattr -d $file
+ 
+-echo "unmount the FS and see if EAs are persistent"
+-_umount_and_mount
++echo -e "\nset EA <noise,woof>:"
++setfattr -n user.noise -v woof $file
+ 
+-echo "check the list again for foo after umount/mount"
+-${ATTR_PROG} -l foo
++echo -e "\nset EA <colour,blue>:"
++setfattr -n user.colour -v blue $file
+ 
+-echo "get the value of the noise EA"
+-${ATTR_PROG} -g noise foo
++echo -e "\nset EA <size,small>:"
++setfattr -n user.size -v small $file
+ 
+-echo "get the value of the colour EA which was removed earlier"
+-${ATTR_PROG} -g colour foo
++echo -e "\nlist the EAs for foo: noise, colour, size"
++getfattr -d $file
+ 
+-echo "get the value of the size EA"
+-${ATTR_PROG} -g size foo
++echo -e "\ncheck the list again for foo"
++getfattr -d $file
+ 
+-echo "remove the colour EA on foo"
+-${ATTR_PROG} -r colour foo
++echo -e "\nunmount the FS and see if EAs are persistent"
++_test_cycle_mount
+ 
+-echo "list EAs for foo: noise, size"
+-${ATTR_PROG} -l foo
++echo -e "\ncheck the list again for foo after umount/mount"
++getfattr -d $file
+ 
+-echo "get the value of the noise EA"
+-${ATTR_PROG} -g noise foo
++echo -e "\nremove the colour EA on foo"
++setfattr -x user.colour $file
+ 
+-echo "get the value of the colour EA which was removed earlier"
+-${ATTR_PROG} -g colour foo
++echo -e "\nlist EAs for foo: noise, size"
++getfattr -d $file
+ 
+-echo "get the value of the size EA"
+-${ATTR_PROG} -g size foo
++echo -e "\nget the value of the noise EA"
++getfattr -n user.noise $file
+ 
+-echo "list all the EAs again: noise, size"
+-${ATTR_PROG} -l foo
++echo -e "\nget the value of the colour EA which was removed earlier"
++getfattr -n user.colour $file
+ 
+-echo "change the value of the size EA from small to huge"
+-${ATTR_PROG} -s size -V huge foo
++echo -e "\nget the value of the size EA"
++getfattr -n user.size $file
+ 
+-echo "get the size EA which should now have value huge"
+-${ATTR_PROG} -g size foo
++echo -e "\nlist all the EAs again: noise, size"
++getfattr -d $file
+ 
+-echo "list EAs: noise, size"
+-${ATTR_PROG} -l foo
++echo -e "\nchange the value of the size EA from small to huge"
++setfattr -n user.size -v huge $file
+ 
+-echo "remove the size EA from foo"
+-${ATTR_PROG} -r size foo
++echo -e "\nget the size EA which should now have value huge"
++getfattr -n user.size $file
+ 
+-echo "list EAs: noise (size EA has been removed)"
+-${ATTR_PROG} -l foo
++echo -e "\nlist EAs: noise, size"
++getfattr -d $file
+ 
+-echo "get the noise EA: woof"
+-${ATTR_PROG} -g noise foo
++echo -e "\nremove the size EA from foo"
++setfattr -x user.size $file
+ 
+-echo "try removing non-existent EA named woof"
+-${ATTR_PROG} -r woof foo
++echo -e "\nlist EAs: noise (size EA has been removed)"
++getfattr -d $file
+ 
+-echo "try removing already removed EA size"
+-${ATTR_PROG} -r size foo
++echo -e "\ntry removing non-existent EA named woof"
++setfattr -x user.woof $file
+ 
+-echo "list EAs: noise"
+-${ATTR_PROG} -l foo
++echo -e "\ntry removing already removed EA size"
++setfattr -x user.size $file
+ 
+-echo "try removing already removed EA colour"
+-${ATTR_PROG} -r colour foo
++echo -e "\nlist EAs: noise"
++getfattr -d $file
+ 
+-echo "list EAs: noise"
+-${ATTR_PROG} -l foo
++echo -e "\ntry removing already removed EA colour"
++setfattr -x user.colour $file
+ 
+-echo "remove remaining EA noise"
+-${ATTR_PROG} -r noise foo
++echo -e "\nlist EAs: noise"
++getfattr -d $file
+ 
+-echo "list EAs: should be no EAs left now"
+-${ATTR_PROG} -l foo
++echo -e "\nremove remaining EA noise"
++setfattr -x user.noise $file
+ 
+-echo "unmount the FS and see if EAs are persistent"
+-_umount_and_mount
++echo -e "\nlist EAs: should be no EAs left now"
++getfattr -d $file
+ 
+-echo "list EAs: should still be no EAs left"
+-${ATTR_PROG} -l foo
++echo -e "\nunmount the FS and see if EAs are persistent"
++_test_cycle_mount
+ 
+-echo ""
+-echo "*** Test out the root namespace ***"
+-echo ""
++echo -e "\nlist EAs: should still be no EAs left"
++getfattr -d $file
+ 
+-echo "set EA <root:colour,marone>:"
+-${ATTR_PROG} -R -s colour -V marone foo
++echo -e "\n*** Test out the trusted namespace ***"
+ 
+-echo "set EA <user:colour,beige>:"
+-${ATTR_PROG} -s colour -V beige foo
++echo -e "\nset EA <trusted:colour,marone>:"
++setfattr -n trusted.colour -v marone $file
+ 
+-echo "set EA <user:vomit,pizza>:"
+-${ATTR_PROG} -s vomit -V pizza foo
++echo -e "\nset EA <user:colour,beige>:"
++setfattr -n user.colour -v beige $file
+ 
+-echo "set EA <root:noise,whack>:"
+-${ATTR_PROG} -R -s noise -V whack foo
++echo -e "\nset EA <user:vomit,pizza>:"
++setfattr -n user.vomit -v pizza $file
+ 
+-echo "list root EAs: <root:colour,noise>:"
+-${ATTR_PROG} -R -l foo
++echo -e "\nset EA <trusted:noise,whack>:"
++setfattr -n trusted.noise -v whack $file
+ 
+-echo "list user EAs: <user:colour,vomit>:"
+-${ATTR_PROG} -l foo
++echo -e "\nlist trusted EAs: <trusted:colour,noise>:"
++getfattr -d -m '^trusted\.' $file
+ 
+-echo "get root EA colour: marone"
+-${ATTR_PROG} -R -g colour foo
++echo -e "\nlist user EAs: <user:colour,vomit>:"
++getfattr -d $file
+ 
+-echo "get root EA noise: whack"
+-${ATTR_PROG} -R -g noise foo
++echo -e "\nget trusted EA colour: marone"
++getfattr -n trusted.colour $file
+ 
+-echo "get root EA vomit which is a user EA => find nothing"
+-${ATTR_PROG} -R -g vomit foo
++echo -e "\nget trusted EA noise: whack"
++getfattr -n trusted.noise $file
+ 
+-echo ""
+-echo "unmount the FS and see if EAs are persistent"
+-echo ""
+-_umount_and_mount
++echo -e "\nget trusted EA vomit which is a user EA => find nothing"
++getfattr -n trusted.vomit $file
+ 
+-echo "get root EA colour: marone"
+-${ATTR_PROG} -R -g colour foo
++echo -e "\nunmount the FS and see if EAs are persistent"
++_test_cycle_mount
+ 
+-echo "get root EA noise: whack"
+-${ATTR_PROG} -R -g noise foo
++echo -e "\nget trusted EA colour: marone"
++getfattr -n trusted.colour $file
+ 
+-echo "get user EA vomit: pizza" 
+-${ATTR_PROG} -g vomit foo
++echo -e "\nget trusted EA noise: whack"
++getfattr -n trusted.noise $file
+ 
+-echo "remove the root colour EA"
+-${ATTR_PROG} -R -r colour foo
++echo -e "\nget user EA vomit: pizza"
++getfattr -n user.vomit $file
+ 
+-echo "list root EAs: <root:noise>:"
+-${ATTR_PROG} -R -l foo
++echo -e "\nremove the trusted colour EA"
++setfattr -x trusted.colour $file
+ 
+-echo "list user EAs: <user:colour,vomit>:"
+-${ATTR_PROG} -l foo
++echo -e "\nlist trusted EAs: <trusted:noise>:"
++getfattr -d -m '^trusted\.' $file
+ 
+-echo "remove the final root EA noise"
+-${ATTR_PROG} -R -r noise foo
++echo -e "\nlist user EAs: <user:colour,vomit>:"
++getfattr -d $file
+ 
+-echo "list root EAs: none"
+-${ATTR_PROG} -R -l foo
++echo -e "\nremove the final trusted EA noise"
++setfattr -x trusted.noise $file
+ 
+-cd /
++echo -e "\nlist trusted EAs: none"
++getfattr -d -m '^trusted\.' $file
+ 
+ # success, all done
+ status=0
+diff --git a/tests/generic/097.out b/tests/generic/097.out
+new file mode 100644
+index 00000000..948d57b6
+--- /dev/null
++++ b/tests/generic/097.out
+@@ -0,0 +1,177 @@
++QA output created by 097
++
++create file foo
++
++should be no EAs for foo:
++
++set EA <noise,woof>:
++
++set EA <colour,blue>:
++
++set EA <size,small>:
++
++list the EAs for foo: noise, colour, size
++# file: TEST_DIR/foo
++user.colour="blue"
++user.noise="woof"
++user.size="small"
++
++
++check the list again for foo
++# file: TEST_DIR/foo
++user.colour="blue"
++user.noise="woof"
++user.size="small"
++
++
++unmount the FS and see if EAs are persistent
++
++check the list again for foo after umount/mount
++# file: TEST_DIR/foo
++user.colour="blue"
++user.noise="woof"
++user.size="small"
++
++
++remove the colour EA on foo
++
++list EAs for foo: noise, size
++# file: TEST_DIR/foo
++user.noise="woof"
++user.size="small"
++
++
++get the value of the noise EA
++# file: TEST_DIR/foo
++user.noise="woof"
++
++
++get the value of the colour EA which was removed earlier
++TEST_DIR/foo: user.colour: No such attribute
++
++get the value of the size EA
++# file: TEST_DIR/foo
++user.size="small"
++
++
++list all the EAs again: noise, size
++# file: TEST_DIR/foo
++user.noise="woof"
++user.size="small"
++
++
++change the value of the size EA from small to huge
++
++get the size EA which should now have value huge
++# file: TEST_DIR/foo
++user.size="huge"
++
++
++list EAs: noise, size
++# file: TEST_DIR/foo
++user.noise="woof"
++user.size="huge"
++
++
++remove the size EA from foo
++
++list EAs: noise (size EA has been removed)
++# file: TEST_DIR/foo
++user.noise="woof"
++
++
++try removing non-existent EA named woof
++setfattr: TEST_DIR/foo: No such attribute
++
++try removing already removed EA size
++setfattr: TEST_DIR/foo: No such attribute
++
++list EAs: noise
++# file: TEST_DIR/foo
++user.noise="woof"
++
++
++try removing already removed EA colour
++setfattr: TEST_DIR/foo: No such attribute
++
++list EAs: noise
++# file: TEST_DIR/foo
++user.noise="woof"
++
++
++remove remaining EA noise
++
++list EAs: should be no EAs left now
++
++unmount the FS and see if EAs are persistent
++
++list EAs: should still be no EAs left
++
++*** Test out the trusted namespace ***
++
++set EA <trusted:colour,marone>:
++
++set EA <user:colour,beige>:
++
++set EA <user:vomit,pizza>:
++
++set EA <trusted:noise,whack>:
++
++list trusted EAs: <trusted:colour,noise>:
++# file: TEST_DIR/foo
++trusted.colour="marone"
++trusted.noise="whack"
++
++
++list user EAs: <user:colour,vomit>:
++# file: TEST_DIR/foo
++user.colour="beige"
++user.vomit="pizza"
++
++
++get trusted EA colour: marone
++# file: TEST_DIR/foo
++trusted.colour="marone"
++
++
++get trusted EA noise: whack
++# file: TEST_DIR/foo
++trusted.noise="whack"
++
++
++get trusted EA vomit which is a user EA => find nothing
++TEST_DIR/foo: trusted.vomit: No such attribute
++
++unmount the FS and see if EAs are persistent
++
++get trusted EA colour: marone
++# file: TEST_DIR/foo
++trusted.colour="marone"
++
++
++get trusted EA noise: whack
++# file: TEST_DIR/foo
++trusted.noise="whack"
++
++
++get user EA vomit: pizza
++# file: TEST_DIR/foo
++user.vomit="pizza"
++
++
++remove the trusted colour EA
++
++list trusted EAs: <trusted:noise>:
++# file: TEST_DIR/foo
++trusted.noise="whack"
++
++
++list user EAs: <user:colour,vomit>:
++# file: TEST_DIR/foo
++user.colour="beige"
++user.vomit="pizza"
++
++
++remove the final trusted EA noise
++
++list trusted EAs: none
+diff --git a/tests/generic/097.out.udf b/tests/generic/097.out.udf
+deleted file mode 100644
+index 1d36ff76..00000000
+diff --git a/tests/generic/097.out.xfs b/tests/generic/097.out.xfs
+deleted file mode 100644
+index 0024bf23..00000000
+diff --git a/tests/generic/group b/tests/generic/group
+index d93aa06d..20c278cc 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -99,7 +99,7 @@
+ 094 auto quick prealloc
+ 095 auto rw stress
+ 096 auto prealloc quick zero
+-097 udf auto
++097 attr auto quick
+ 098 auto quick metadata
+ 099 udf auto
+ 100 udf auto
 -- 
 2.13.3
 
