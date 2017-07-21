@@ -1,11 +1,11 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:33180 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751460AbdGUEkM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:12 -0400
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:37897 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751611AbdGUEkN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:13 -0400
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2 04/15] tests: remove udf/098
-Date: Thu, 20 Jul 2017 21:38:42 -0700
-Message-Id: <20170721043853.364-5-ebiggers3@gmail.com>
+Subject: [PATCH v2 05/15] tests: remove udf/101
+Date: Thu, 20 Jul 2017 21:38:43 -0700
+Message-Id: <20170721043853.364-6-ebiggers3@gmail.com>
 In-Reply-To: <20170721043853.364-1-ebiggers3@gmail.com>
 References: <20170721043853.364-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,36 +15,35 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-udf/098 was an IRIX and UDF-specific test which tested xattrs.  But the
-Linux UDF driver doesn't support xattrs, and even if it did there are
-already generic xattr tests --- including now generic/097 which is
-basically the same test.  So just delete udf/098.
+This IRIX and UDF-specific test essentially just created a UDF
+filesystem with a specific size.  This isn't really useful because there
+already are many generic tests that do _scratch_mkfs_sized.  So just
+delete the test rather than trying to port it to Linux.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/udf/098     |  274 ---------
- tests/udf/098.out | 1594 -----------------------------------------------------
- tests/udf/group   |    1 -
- 3 files changed, 1869 deletions(-)
- delete mode 100755 tests/udf/098
- delete mode 100644 tests/udf/098.out
+ tests/udf/101     | 62 -------------------------------------------------------
+ tests/udf/101.out | 19 -----------------
+ tests/udf/group   |  1 -
+ 3 files changed, 82 deletions(-)
+ delete mode 100755 tests/udf/101
+ delete mode 100644 tests/udf/101.out
 
-diff --git a/tests/udf/098 b/tests/udf/098
+diff --git a/tests/udf/101 b/tests/udf/101
 deleted file mode 100755
-index 09792a76..00000000
-diff --git a/tests/udf/098.out b/tests/udf/098.out
+index 9609c072..00000000
+diff --git a/tests/udf/101.out b/tests/udf/101.out
 deleted file mode 100644
-index 63772a0a..00000000
+index 1ca59a8c..00000000
 diff --git a/tests/udf/group b/tests/udf/group
-index 24f682cc..f4372e09 100644
+index f4372e09..6680da44 100644
 --- a/tests/udf/group
 +++ b/tests/udf/group
-@@ -3,6 +3,5 @@
+@@ -3,5 +3,4 @@
  # - do not start group names with a digit
  # - comment line before each group is "new" description
  #
--098 udf auto
- 101 udf
+-101 udf
  102 udf
 -- 
 2.13.3
