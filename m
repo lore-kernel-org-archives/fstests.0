@@ -1,11 +1,11 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:35624 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751806AbdGUEkW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:22 -0400
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:36369 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751764AbdGUEkY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jul 2017 00:40:24 -0400
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH v2 13/15] common: remove IRIX-specific code
-Date: Thu, 20 Jul 2017 21:38:51 -0700
-Message-Id: <20170721043853.364-14-ebiggers3@gmail.com>
+Subject: [PATCH v2 14/15] build: remove IRIX-specific build logic
+Date: Thu, 20 Jul 2017 21:38:52 -0700
+Message-Id: <20170721043853.364-15-ebiggers3@gmail.com>
 In-Reply-To: <20170721043853.364-1-ebiggers3@gmail.com>
 References: <20170721043853.364-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,296 +15,255 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-As xfstests is no longer supported on IRIX, remove IRIX-specific code
-from the common helper scripts.
+As xfstests is no longer supported on IRIX, remove the ability to build
+xfstests for IRIX.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- common/config      | 12 ------------
- common/dump        | 39 +++------------------------------------
- common/filestreams | 43 ++++++-------------------------------------
- common/log         |  1 -
- common/rc          | 23 +++--------------------
- 5 files changed, 12 insertions(+), 106 deletions(-)
+ configure.ac          |  59 ++++++++++----------------
+ include/builddefs.in  |   3 --
+ ltp/Makefile          |   4 --
+ m4/package_globals.m4 |   2 +-
+ m4/package_libcdev.m4 |   2 +-
+ m4/package_utilies.m4 |  14 +++----
+ m4/package_xfslibs.m4 |  13 ------
+ make_irix             | 114 --------------------------------------------------
+ src/Makefile          |   4 --
+ 9 files changed, 32 insertions(+), 183 deletions(-)
+ delete mode 100755 make_irix
 
-diff --git a/common/config b/common/config
-index 5091db9d..80598d06 100644
---- a/common/config
-+++ b/common/config
-@@ -52,15 +52,10 @@
- export LANG=C
- export LC_ALL=C
+diff --git a/configure.ac b/configure.ac
+index 843ff6b6..57092f1c 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -42,45 +42,32 @@ AC_CHECK_HEADERS([xfs/xfs_log_format.h],,,[
  
--# Warning: don't put freeware before /usr/bsd on IRIX coz you'll
--#  get the wrong hostname and set your system name to -s  :)
--[ -d /usr/bsd ] && PATH=$PATH:/usr/bsd
--[ -d /usr/freeware/bin ] && PATH=$PATH:/usr/freeware/bin
- PATH=".:$PATH"
+ AC_PACKAGE_NEED_UUIDCOMPARE
  
- export HOST=`hostname -s`
- export HOSTOS=`uname -s`
--[ "$HOSTOS" = "IRIX64" ] && export HOSTOS="IRIX"
+-case $pkg_platform
+-in
+-	irix)
+-		AC_PACKAGE_NEED_SYS_ACL_H
+-		AC_PACKAGE_NEED_ATTRIBUTES_H
+-		AC_PACKAGE_WANT_NDBM
+-		AC_PACKAGE_NEED_IRIX_LIBHANDLE
+-		have_attr_list=true
+-		AC_SUBST(have_attr_list)
+-		;;
+-	*)
+-		AC_MULTILIB($enable_lib64)
+-		AC_PACKAGE_NEED_XFS_XFS_H
+-		AC_PACKAGE_WANT_LIBXFS_H
+-		AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
+-		AC_PACKAGE_NEED_XFS_XQM_H
+-		AC_PACKAGE_NEED_XFSCTL_MACRO
+-		AC_PACKAGE_NEED_XFS_HANDLE_H
++AC_MULTILIB($enable_lib64)
++AC_PACKAGE_NEED_XFS_XFS_H
++AC_PACKAGE_WANT_LIBXFS_H
++AC_PACKAGE_WANT_XLOG_ASSIGN_LSN
++AC_PACKAGE_NEED_XFS_XQM_H
++AC_PACKAGE_NEED_XFSCTL_MACRO
++AC_PACKAGE_NEED_XFS_HANDLE_H
  
- export MODULAR=0               # using XFS as a module or not
- export BOOT="/boot"            # install target for kernels
-@@ -220,13 +215,6 @@ fi
- export UDEV_SETTLE_PROG
+-		AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
+-		AC_PACKAGE_NEED_ATTR_XATTR_H
+-		AC_PACKAGE_NEED_ATTRIBUTES_H
+-		AC_PACKAGE_WANT_ATTRLIST_LIBATTR
+-		AC_PACKAGE_NEED_GETXATTR_LIBATTR
++AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
++AC_PACKAGE_NEED_ATTR_XATTR_H
++AC_PACKAGE_NEED_ATTRIBUTES_H
++AC_PACKAGE_WANT_ATTRLIST_LIBATTR
++AC_PACKAGE_NEED_GETXATTR_LIBATTR
  
- case "$HOSTOS" in
--    IRIX*)
--        export MKFS_XFS_PROG="`set_prog_path mkfs_xfs`"
--        export MKFS_UDF_PROG="`set_prog_path mkfs_udf`"
--        export XFS_FSR_PROG="`set_prog_path /usr/etc/fsr_xfs`"
--        export MKFS_NFS_PROG="false"
--        export MKFS_CIFS_PROG="false"
--        ;;
-     Linux)
-         export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
-         export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
-diff --git a/common/dump b/common/dump
-index d6663e0c..b0e4a12f 100644
---- a/common/dump
-+++ b/common/dump
-@@ -395,8 +395,6 @@ End-of-File
+-		AC_PACKAGE_NEED_SYS_ACL_H
+-		AC_PACKAGE_NEED_ACL_LIBACL_H
+-		AC_PACKAGE_NEED_ACLINIT_LIBACL
++AC_PACKAGE_NEED_SYS_ACL_H
++AC_PACKAGE_NEED_ACL_LIBACL_H
++AC_PACKAGE_NEED_ACLINIT_LIBACL
  
- _mk_fillconfig_perm()
- {
--    # dir_guid: ugo=rwx,g+s on dir is for IRIX chmod(1)
--
-     cat <<End-of-File >$tmp.config
- # pathname	size/dir  user group mode
+-		AC_PACKAGE_WANT_GDBM
+-		AC_PACKAGE_WANT_AIO
+-		AC_PACKAGE_WANT_DMAPI
+-		AC_PACKAGE_WANT_LINUX_FIEMAP_H
+-		AC_PACKAGE_WANT_FALLOCATE
+-		AC_PACKAGE_WANT_OPEN_BY_HANDLE_AT
+-		AC_PACKAGE_WANT_LINUX_PRCTL_H
+-		AC_PACKAGE_WANT_LINUX_FS_H
+-		;;
+-esac
++AC_PACKAGE_WANT_GDBM
++AC_PACKAGE_WANT_AIO
++AC_PACKAGE_WANT_DMAPI
++AC_PACKAGE_WANT_LINUX_FIEMAP_H
++AC_PACKAGE_WANT_FALLOCATE
++AC_PACKAGE_WANT_OPEN_BY_HANDLE_AT
++AC_PACKAGE_WANT_LINUX_PRCTL_H
++AC_PACKAGE_WANT_LINUX_FS_H
+ 
+ AC_CHECK_FUNCS([renameat2])
+ 
+diff --git a/include/builddefs.in b/include/builddefs.in
+index 38fb9c60..cb52b99a 100644
+--- a/include/builddefs.in
++++ b/include/builddefs.in
+@@ -76,9 +76,6 @@ endif
+ ifeq ($(PKG_PLATFORM),darwin)
+ PCFLAGS = -traditional-cpp $(GCCFLAGS)
+ endif
+-ifeq ($(PKG_PLATFORM),irix)
+-PCFLAGS = -nostdinc -I$(ROOT)/usr/include -I$(TOPDIR)/../irix/include
+-endif
+ ifeq ($(PKG_PLATFORM),freebsd)
+ endif
+ 
+diff --git a/ltp/Makefile b/ltp/Makefile
+index 5bea4927..eed83f48 100644
+--- a/ltp/Makefile
++++ b/ltp/Makefile
+@@ -17,10 +17,6 @@ ifeq ($(HAVE_ATTR_LIST), true)
+ LCFLAGS += -DHAVE_ATTR_LIST
+ LLDLIBS += $(LIBATTR)
+ endif
+-ifeq ($(PKG_PLATFORM),irix)
+-LCFLAGS += -DHAVE_ATTR_LIST
+-LLDLIBS += $(LIBATTR)
+-endif
+ 
+ ifeq ($(HAVE_AIO), true)
+ TARGETS += aio-stress
+diff --git a/m4/package_globals.m4 b/m4/package_globals.m4
+index 72fbbb78..ce7a8c51 100644
+--- a/m4/package_globals.m4
++++ b/m4/package_globals.m4
+@@ -39,7 +39,7 @@ AC_DEFUN([AC_PACKAGE_GLOBALS],
+     test -z "$DISTRIBUTION" || pkg_distribution="$DISTRIBUTION"
+     AC_SUBST(pkg_distribution)
+ 
+-    pkg_platform=`uname -s | tr 'A-Z' 'a-z' | sed -e 's/irix64/irix/'`
++    pkg_platform=`uname -s | tr 'A-Z' 'a-z'`
+     test -z "$PLATFORM" || pkg_platform="$PLATFORM"
+     AC_SUBST(pkg_platform)
+   ])
+diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+index 5156ced6..fb123f33 100644
+--- a/m4/package_libcdev.m4
++++ b/m4/package_libcdev.m4
+@@ -67,7 +67,7 @@ AC_DEFUN([AC_HAVE_SENDFILE],
+   ])
+ 
  #
-@@ -406,7 +404,7 @@ file_sticky	10	$nobody	$nobody	01777
- file_mix1	10	$nobody	$nobody	761
- file_mix2	10	$nobody	$nobody	642
- dir_suid	d	$nobody	$nobody	04777
--dir_guid	d	$nobody	$nobody	ugo=rwx,g+s
-+dir_guid	d	$nobody	$nobody	02777
- dir_sticky	d	$nobody	$nobody	01777
- dir_mix1	d	$nobody	$nobody	761
- dir_mix2	d	$nobody	$nobody	642
-@@ -798,25 +796,6 @@ _ls_filter()
-   | sed -e 's/total [0-9][0-9]*/total TOTAL/'
- }
+-# Check if we have a getmntent libc call (IRIX, Linux)
++# Check if we have a getmntent libc call (Linux)
+ #
+ AC_DEFUN([AC_HAVE_GETMNTENT],
+   [ AC_MSG_CHECKING([for getmntent ])
+diff --git a/m4/package_utilies.m4 b/m4/package_utilies.m4
+index 726406c8..108ef455 100644
+--- a/m4/package_utilies.m4
++++ b/m4/package_utilies.m4
+@@ -41,7 +41,7 @@ AC_DEFUN([AC_PACKAGE_UTILITIES],
+     AC_PACKAGE_NEED_UTILITY($1, "$cc", cc, [C compiler])
  
--#
--# Filtering of Irix character hwgraph device names
--# e.g.
--# chardev: /hw/node/xtalk/15/pci/0/scsi_ctlr/0/target/1/lun/0/disk/partition/4/char
--# blkdev:  /dev/dsk/dks0d1s4
--#
--_filter_devchar()
--{
--    $AWK_PROG '
--	/\/hw\/node/ {
--	    sub(/\/hw.*scsi_ctlr\//,"/dev/dsk/dks")  # blah blah /dev/dsk/dks0/target/1/....
--	    sub(/\/target\//,"d")                    # blah blah /dev/dsk/dks0d1/lun/0/disk.....
--	    sub(/\/lun.*partition\//,"s")            # blah blah /dev/dsk/dks0d1s4/char
--	    sub(/\/char/,"")			     # blah blah /dev/dsk/dks0d1s4
--	}
--	{ print }
--    '
--}
--
+     if test -z "$MAKE"; then
+-        AC_PATH_PROG(MAKE, gmake,, /usr/bin:/usr/local/bin:/usr/freeware/bin)
++        AC_PATH_PROG(MAKE, gmake,, /usr/bin:/usr/local/bin)
+     fi
+     if test -z "$MAKE"; then
+         AC_PATH_PROG(MAKE, make,, /usr/bin)
+@@ -54,19 +54,19 @@ AC_DEFUN([AC_PACKAGE_UTILITIES],
+ 	AC_PATH_PROG(LIBTOOL, glibtool,, /usr/bin)
+     fi
+     if test -z "$LIBTOOL"; then
+-	AC_PATH_PROG(LIBTOOL, libtool,, /usr/bin:/usr/local/bin:/usr/freeware/bin)
++	AC_PATH_PROG(LIBTOOL, libtool,, /usr/bin:/usr/local/bin)
+     fi
+     libtool=$LIBTOOL
+     AC_SUBST(libtool)
+     AC_PACKAGE_NEED_UTILITY($1, "$libtool", libtool, [GNU libtool])
  
- #
- # Filter out the non-deterministic dump msgs from
-@@ -824,7 +803,6 @@ _filter_devchar()
- #
- _dump_filter_main()
- {
--  _filter_devchar |\
-   sed \
-       -e "s#$__XFSDUMP_PROG#xfsdump#"			\
-       -e "s#$XFSRESTORE_PROG#xfsrestore#"		\
-@@ -1191,7 +1169,7 @@ _do_restore_toc()
-     echo "Contents of dump ..."
-     opts="$_restore_debug$restore_args -f $dump_file -t"
-     echo "xfsrestore $opts" | _dir_filter
--    cd $SCRATCH_MNT # for IRIX which needs xfs cwd
-+    cd $SCRATCH_MNT
-     $XFSRESTORE_PROG $opts 2>&1 | tee -a $seqres.full | _dump_filter_main |\
-     _check_quota_file |\
-     _check_quota_entries |\
-@@ -1484,25 +1462,14 @@ _check_quota_entries()
- # xfsrestore: user quota information written to ...'
- # xfsrestore: group quota information written to ...'
- # xfsrestore: project quota information written to ...'
--#
--# If on IRIX then look for:
--# xfsrestore: use 'edquota' to restore quotas
--# Else look for:
- # xfsrestore: use 'xfs_quota' to restore quotas
- #
- _check_quota_dumprestore()
- {
--    if [ "$HOSTOS" == "IRIX" ]; then
- 	_check_quota 'user quota information' \
- 		     'group quota information' \
- 		     'project quota information' | \
--	sed "/xfsrestore:.*use 'edquota' to restore quotas/d"
--    else
--	_check_quota 'user quota information' \
--		     'group quota information' \
--		     'project quota information' | \
--	sed "/xfsrestore:.*use 'xfs_quota' to restore quotas/d"
+     if test -z "$TAR"; then
+-        AC_PATH_PROG(TAR, tar,, /usr/freeware/bin:/bin:/usr/local/bin:/usr/bin)
++        AC_PATH_PROG(TAR, tar,, /bin:/usr/local/bin:/usr/bin)
+     fi
+     tar=$TAR
+     AC_SUBST(tar)
+     if test -z "$ZIP"; then
+-        AC_PATH_PROG(ZIP, gzip,, /bin:/usr/bin:/usr/local/bin:/usr/freeware/bin)
++        AC_PATH_PROG(ZIP, gzip,, /bin:/usr/bin:/usr/local/bin)
+     fi
+ 
+     zip=$ZIP
+@@ -108,14 +108,14 @@ AC_DEFUN([AC_PACKAGE_UTILITIES],
+ 
+     if test "$enable_gettext" = yes; then
+         if test -z "$MSGFMT"; then
+-                AC_PATH_PROG(MSGFMT, msgfmt,, /usr/bin:/usr/local/bin:/usr/freeware/bin)
++                AC_PATH_PROG(MSGFMT, msgfmt,, /usr/bin:/usr/local/bin)
+         fi
+         msgfmt=$MSGFMT
+         AC_SUBST(msgfmt)
+         AC_PACKAGE_NEED_UTILITY($1, "$msgfmt", msgfmt, gettext)
+ 
+         if test -z "$MSGMERGE"; then
+-                AC_PATH_PROG(MSGMERGE, msgmerge,, /usr/bin:/usr/local/bin:/usr/freeware/bin)
++                AC_PATH_PROG(MSGMERGE, msgmerge,, /usr/bin:/usr/local/bin)
+         fi
+         msgmerge=$MSGMERGE
+         AC_SUBST(msgmerge)
+@@ -123,7 +123,7 @@ AC_DEFUN([AC_PACKAGE_UTILITIES],
+     fi
+ 
+     if test -z "$RPM"; then
+-        AC_PATH_PROG(RPM, rpm,, /bin:/usr/bin:/usr/freeware/bin)
++        AC_PATH_PROG(RPM, rpm,, /bin:/usr/bin)
+     fi
+     rpm=$RPM
+     AC_SUBST(rpm)
+diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
+index 5588e9ed..9be56e11 100644
+--- a/m4/package_xfslibs.m4
++++ b/m4/package_xfslibs.m4
+@@ -92,19 +92,6 @@ AC_DEFUN([AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE],
+     AC_SUBST(libhdl)
+   ])
+ 
+-AC_DEFUN([AC_PACKAGE_NEED_IRIX_LIBHANDLE],
+-  [ 
+-    AC_MSG_CHECKING([libhandle.a for IRIX])
+-    libhdl="`pwd`/../irix/libhandle/libhandle.a"
+-    if ! test -f $libhdl; then
+-	echo 'no'
+-        echo 'FATAL ERROR: could not find IRIX XFS handle library.'
+-        exit 1
 -    fi
-+		sed "/xfsrestore:.*use 'xfs_quota' to restore quotas/d"
- }
- 
- #
-diff --git a/common/filestreams b/common/filestreams
-index 4d146648..f5441f5a 100644
---- a/common/filestreams
-+++ b/common/filestreams
-@@ -21,35 +21,12 @@
- 
- _check_filestreams_support()
- {
--	local irix_timeout_sysvar="xfs_mfstream_timeout"
--	local linux_timeout_procvar="/proc/sys/fs/xfs/filestream_centisecs"
--	local streams_avail=""
--	if [ "$HOSTOS" == "IRIX" ]; then
--		# check for the filestreams timeout systune variable in irix
--		streams_avail=`systune $irix_timeout_sysvar 2>&1 |
--			perl -ne 'if (/'$irix_timeout_sysvar'\s+=\s+\d+/) {print "true"}'`
--	else
--		# check for the filestreams timeout proc entry in linux
--		[ -f $linux_timeout_procvar ] && streams_avail="true"
--	fi
+-    echo 'yes'
+-    AC_SUBST(libhdl)
+-  ])
 -
--	if [ "$streams_avail" == "true" ]; then
--		return 0
--	else
--		return 1
--	fi
-+	[ -f /proc/sys/fs/xfs/filestream_centisecs ]
- }
+ AC_DEFUN([AC_PACKAGE_NEED_XFSCTL_MACRO],
+   [ AC_MSG_CHECKING([xfsctl from xfs/xfs.h])
+     AC_TRY_LINK([
+diff --git a/make_irix b/make_irix
+deleted file mode 100755
+index d1782785..00000000
+diff --git a/src/Makefile b/src/Makefile
+index cb608ad4..b8aff49e 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -49,10 +49,6 @@ ifeq ($(PKG_PLATFORM),linux)
+ TARGETS += $(LINUX_TARGETS)
+ endif
  
- _set_stream_timeout_centisecs()
- {
--	local new_timeout_csecs=$1
--	local irix_timeout_sysvar="xfs_mfstream_timeout"
--	local linux_timeout_procvar="/proc/sys/fs/xfs/filestream_centisecs"
--	if [ "$HOSTOS" == "IRIX" ]; then
--		echo y | systune -r $irix_timeout_sysvar $new_timeout_csecs >/dev/null
--	else
--		echo $new_timeout_csecs > $linux_timeout_procvar
--	fi
-+	echo $1 > /proc/sys/fs/xfs/filestream_centisecs
- }
- 
- _do_stream()
-@@ -63,22 +40,14 @@ _do_stream()
- 	local blocks_in_file=`expr $file_size / $bsize`
- 
- 	mkdir $directory_name
--	if [ "$iflag" = "1" -a "$HOSTOS" != "IRIX" ]; then
-+	if [ "$iflag" = "1" ]; then
- 		$XFS_IO_PROG -x -c "chattr +S" $directory_name \
- 			|| _fail "chattr of filestream flag"
- 	fi
- 	cd $directory_name
- 
--	local dd_cmd=""
--	if [ "$HOSTOS" == "IRIX" ]; then
--		# for irix use lmdd
--		dd_cmd="lmdd"
--		[ "$dio" = "1" ] && dd_cmd="$dd_cmd odirect=1"
--	else
--		# for linux use dd
--		dd_cmd="dd"
--		[ "$dio" = "1" ] && dd_cmd="$dd_cmd oflag=direct"
--	fi
-+	local dd_cmd="dd"
-+	[ "$dio" = "1" ] && dd_cmd="$dd_cmd oflag=direct"
- 	dd_cmd="$dd_cmd if=/dev/zero bs=${bsize} count=${blocks_in_file}"
- 
- 	local i=1
-@@ -140,7 +109,7 @@ _test_streams() {
- 	_scratch_mkfs_xfs -dsize=$size,agcount=$agcount >/dev/null 2>&1 \
- 		|| _fail "mkfs failed"
- 
--	if [ "$use_iflag" = "0" -o "$HOSTOS" == "IRIX" ]; then
-+	if [ "$use_iflag" = "0" ]; then
- 		# mount using filestreams mount option
- 		_scratch_mount "-o filestreams" \
- 			|| _fail "filestreams mount failed"
-diff --git a/common/log b/common/log
-index d1c19ff5..bdb4ed68 100644
---- a/common/log
-+++ b/common/log
-@@ -314,7 +314,6 @@ _print_operation()
- # and may not match with the FS mounted at a different LR size 
- # => xlog_do_recovery_pass() can not handle the different hdr sizes
- #    it assumes them all to be the same between the start..finish
--# NB: On IRIX there is no UMOUNT record and so we could start from -s 0.
- 
- _print_transaction_inode()
- {
-diff --git a/common/rc b/common/rc
-index fa1314c6..d3bf8339 100644
---- a/common/rc
-+++ b/common/rc
-@@ -238,7 +238,7 @@ _scratch_options()
- 
-     case $type in
-     mkfs)
--	[ "$HOSTOS" != "IRIX" ] && SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
-+	SCRATCH_OPTIONS="$SCRATCH_OPTIONS -f"
- 	rt_opt="-r"
-         log_opt="-l"
- 	;;
-@@ -287,14 +287,7 @@ _mount_ops_filter()
-     [ $last_index -gt 0 ] && shift $last_index
-     FS_ESCAPED=$1
-     
--    # irix is fussy about how it is fed its mount options
--    # - multiple -o's are not allowed
--    # - no spaces between comma delimitered options
--    # the sed script replaces all -o's (except the first) with a comma
--    # not required for linux, but won't hurt
--    
--    echo $params | sed -e 's/[[:space:]]\+-o[[:space:]]*/UnIqUe/1; s/[[:space:]]\+-o[[:space:]]*/,/g; s/UnIqUe/ -o /1' \
--        | sed -e 's/dmapi/dmi/' \
-+    echo $params | sed -e 's/dmapi/dmi/' \
-         | $PERL_PROG -ne "s#mtpt=[^,|^\n|^\s]*#mtpt=$FS_ESCAPED\1\2#; print;"
- 
- }
-@@ -2116,12 +2109,7 @@ s,^\s*$,,;
- 
- _user_do()
- {
--    if [ "$HOSTOS" == "IRIX" ]
--	then
--	echo $1 | /bin/bash "su $qa_user 2>&1" | _filter_user_do
--    else
- 	echo $1 | su -s /bin/bash $qa_user 2>&1 | _filter_user_do
--    fi
- }
- 
- _require_xfs_io_command()
-@@ -2693,9 +2681,7 @@ _full_platform_details()
- 
- _get_os_name()
- {
--	if [ "`uname`" == "IRIX64" ] || [ "`uname`" == "IRIX" ]; then
--		echo 'irix'
--	elif [ "`uname`" == "Linux" ]; then
-+	if [ "`uname`" == "Linux" ]; then
- 		echo 'linux'
- 	else
- 		echo Unknown operating system: `uname`
-@@ -3259,9 +3245,6 @@ run_check()
- 
- _require_test_symlinks()
- {
--	# IRIX UDF does not support symlinks
--	[ "$HOSTOS" = "IRIX" -a "$FSTYP" = 'udf' ] && \
--		_notrun "Require symlinks support"
- 	target=`mktemp -p $TEST_DIR`
- 	link=`mktemp -p $TEST_DIR -u`
- 	ln -s `basename $target` $link
+-ifeq ($(PKG_PLATFORM),irix)
+-LLDLIBS += -lgen
+-endif
+-
+ ifeq ($(HAVE_DB), true)
+ TARGETS += dbtest
+ LLDLIBS += $(LIBGDBM)
 -- 
 2.13.3
 
