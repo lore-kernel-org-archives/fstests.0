@@ -1,53 +1,49 @@
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:33116 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750779AbdGXECk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2017 00:02:40 -0400
-Received: by mail-qt0-f194.google.com with SMTP id n42so1472525qtn.0
-        for <fstests@vger.kernel.org>; Sun, 23 Jul 2017 21:02:39 -0700 (PDT)
-Date: Mon, 24 Jul 2017 01:02:35 -0300
-From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
-        <ernesto.mnd.fernandez@gmail.com>
-Subject: [xfstests PATCH] common/rc: support reiserfs in _scratch_mkfs_sized
-Message-ID: <20170724040232.GA7309@debian.home>
+Received: from mx1.redhat.com ([209.132.183.28]:49690 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750824AbdGXEnM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 24 Jul 2017 00:43:12 -0400
+Date: Mon, 24 Jul 2017 12:43:08 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 00/15] xfstests: remove IRIX support
+Message-ID: <20170724044308.GB9167@eguan.usersys.redhat.com>
+References: <20170721043853.364-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20170721043853.364-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
->
----
- common/rc | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+On Thu, Jul 20, 2017 at 09:38:38PM -0700, Eric Biggers wrote:
+> Hello,
+> 
+> This is v2 of the patchset to remove IRIX support from xfstests.  For
+> some time xfstests has de facto not supported IRIX anymore.  The final
+> release of IRIX was over 10 years ago and it seems no one has been
+> running the latest xfstests releases on any IRIX system, as at the very
+> least xfstests now assumes the existence of some util-linux binaries.
+> There are very likely other examples of this bitrot as well.  Also,
+> xfsprogs has already dropped IRIX support.
+> 
+> Therefore, this patchset simplifies things by removing IRIX support from
+> the xfstests tests, build system, and documentation.  It also ports the
+> useful IRIX-specific tests to Linux.  Of course, people will still find
+> more cruft later to remove, but this should be a good start.
+> 
+> To get around the mailing list message size limit, the series is
+> formatted with --irreversible-delete.  Therefore it can't be applied
+> directly.  It can be retrieved from git here:
+> https://github.com/ebiggers/xfstests.git, branch remove_irix_support_v2.
 
-diff --git a/common/rc b/common/rc
-index c537ab4..d3c2286 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1020,7 +1020,7 @@ _scratch_mkfs_sized()
-     xfs)
- 	def_blksz=3D`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size=3D ?+([0-9]+).*/\=
-1/p'`
- 	;;
--    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2)
-+    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2|reiserfs)
- 	def_blksz=3D`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
- 	;;
-     jfs)
-@@ -1074,6 +1074,9 @@ _scratch_mkfs_sized()
-     jfs)
- 	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS $SCRATCH_DEV $blocks
- 	;;
-+    reiserfs)
-+	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
-+	;;
-     reiser4)
- 	# mkfs.resier4 requires size in KB as input for creating filesystem
- 	$MKFS_REISER4_PROG $MKFS_OPTIONS -y -b $blocksize $SCRATCH_DEV \
---=20
-2.1.4
+Great work! Thank you so much for doing this! I pulled & merged your
+branch into a test branch and am running some tests now, overall it
+looks good to me.
 
+Though, as you mentioned, there're some places that could do further
+cleanups (e.g. I'm wondering if we can kill _supported_os completely and
+remove it from 'new' template, and some $HOSTOS and $PKG_PLATFORM checks
+could be cleaned up too), I agree this is a great start. Thanks again!
+
+Eryu
