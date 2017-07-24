@@ -1,49 +1,40 @@
-Received: from mx1.redhat.com ([209.132.183.28]:49690 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750824AbdGXEnM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 24 Jul 2017 00:43:12 -0400
-Date: Mon, 24 Jul 2017 12:43:08 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 00/15] xfstests: remove IRIX support
-Message-ID: <20170724044308.GB9167@eguan.usersys.redhat.com>
-References: <20170721043853.364-1-ebiggers3@gmail.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:16700 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751951AbdGXG5t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2017 02:57:49 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 0090946B5DF4
+        for <fstests@vger.kernel.org>; Mon, 24 Jul 2017 14:57:42 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] generic/449: remove unused _require_test
+Date: Mon, 24 Jul 2017 14:57:38 +0800
+Message-ID: <1500879458-3673-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170721043853.364-1-ebiggers3@gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 20, 2017 at 09:38:38PM -0700, Eric Biggers wrote:
-> Hello,
-> 
-> This is v2 of the patchset to remove IRIX support from xfstests.  For
-> some time xfstests has de facto not supported IRIX anymore.  The final
-> release of IRIX was over 10 years ago and it seems no one has been
-> running the latest xfstests releases on any IRIX system, as at the very
-> least xfstests now assumes the existence of some util-linux binaries.
-> There are very likely other examples of this bitrot as well.  Also,
-> xfsprogs has already dropped IRIX support.
-> 
-> Therefore, this patchset simplifies things by removing IRIX support from
-> the xfstests tests, build system, and documentation.  It also ports the
-> useful IRIX-specific tests to Linux.  Of course, people will still find
-> more cruft later to remove, but this should be a good start.
-> 
-> To get around the mailing list message size limit, the series is
-> formatted with --irreversible-delete.  Therefore it can't be applied
-> directly.  It can be retrieved from git here:
-> https://github.com/ebiggers/xfstests.git, branch remove_irix_support_v2.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/generic/449 | 1 -
+ 1 file changed, 1 deletion(-)
 
-Great work! Thank you so much for doing this! I pulled & merged your
-branch into a test branch and am running some tests now, overall it
-looks good to me.
+diff --git a/tests/generic/449 b/tests/generic/449
+index fb776b3..755a84a 100755
+--- a/tests/generic/449
++++ b/tests/generic/449
+@@ -52,7 +52,6 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+-_require_test
+ _require_acls
+ _require_attrs
+ 
+-- 
+1.8.3.1
 
-Though, as you mentioned, there're some places that could do further
-cleanups (e.g. I'm wondering if we can kill _supported_os completely and
-remove it from 'new' template, and some $HOSTOS and $PKG_PLATFORM checks
-could be cleaned up too), I agree this is a great start. Thanks again!
 
-Eryu
+
