@@ -1,58 +1,78 @@
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:33595 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755065AbdGXRiT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2017 13:38:19 -0400
-Date: Mon, 24 Jul 2017 10:38:15 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH v2 00/15] xfstests: remove IRIX support
-Message-ID: <20170724173815.GB143373@gmail.com>
-References: <20170721043853.364-1-ebiggers3@gmail.com>
- <20170724044308.GB9167@eguan.usersys.redhat.com>
+Received: from cn.fujitsu.com ([59.151.112.132]:14226 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751482AbdGYBjd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jul 2017 21:39:33 -0400
+Message-ID: <5976A150.1090904@cn.fujitsu.com>
+Date: Tue, 25 Jul 2017 09:39:28 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170724044308.GB9167@eguan.usersys.redhat.com>
+Subject: Re: [PATCH] generic/446: make sure all background processes are dead
+ before umount
+References: <20170724101125.13309-1-eguan@redhat.com>
+In-Reply-To: <20170724101125.13309-1-eguan@redhat.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 24, 2017 at 12:43:08PM +0800, Eryu Guan wrote:
-> On Thu, Jul 20, 2017 at 09:38:38PM -0700, Eric Biggers wrote:
-> > Hello,
-> > 
-> > This is v2 of the patchset to remove IRIX support from xfstests.  For
-> > some time xfstests has de facto not supported IRIX anymore.  The final
-> > release of IRIX was over 10 years ago and it seems no one has been
-> > running the latest xfstests releases on any IRIX system, as at the very
-> > least xfstests now assumes the existence of some util-linux binaries.
-> > There are very likely other examples of this bitrot as well.  Also,
-> > xfsprogs has already dropped IRIX support.
-> > 
-> > Therefore, this patchset simplifies things by removing IRIX support from
-> > the xfstests tests, build system, and documentation.  It also ports the
-> > useful IRIX-specific tests to Linux.  Of course, people will still find
-> > more cruft later to remove, but this should be a good start.
-> > 
-> > To get around the mailing list message size limit, the series is
-> > formatted with --irreversible-delete.  Therefore it can't be applied
-> > directly.  It can be retrieved from git here:
-> > https://github.com/ebiggers/xfstests.git, branch remove_irix_support_v2.
-> 
-> Great work! Thank you so much for doing this! I pulled & merged your
-> branch into a test branch and am running some tests now, overall it
-> looks good to me.
-> 
-> Though, as you mentioned, there're some places that could do further
-> cleanups (e.g. I'm wondering if we can kill _supported_os completely and
-> remove it from 'new' template, and some $HOSTOS and $PKG_PLATFORM checks
-> could be cleaned up too), I agree this is a great start. Thanks again!
-> 
+On 2017/07/24 18:11, Eryu Guan wrote:
+> The $dread_pid refers to the while-true-do loop, wait for $dread_pid
+> doesn't mean the xfs_io direct read process is already dead,
+> sometimes xfs_io process is still running and blocking
+> _scratch_unmount.
+Hi Eryu,
 
-We shouldn't make it too hard to port xfstests to other platforms in the future,
-but yes I think at least _supported_os and $HOSTOS should probably go, since
-they're subject to bitrot and checking the OS isn't usually what is really
-wanted anyway.  Really we should check for the presence of some feature,
-program, quirk, etc. instead, instead of being lazy and checking for "Linux".
+Could you tell me what can i do to trigger this block?
+> Fix it by making the direct read does a fixed number of loop and
+> break out the second mmap-fpunch loop if the first loop exits. At
 
-Eric
+Does it break out the second mmap-fpunch loop if the first loop doesn't
+exit?
+
+> this point we're sure that there's no unfinished background process
+> blocking the umount.
+
+The others look fine.
+
+Thanks,
+Xiao Yang.
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  tests/generic/446 | 8 +++++---
+>  1 file changed, 5 insertions(+), 3 deletions(-)
+>
+> diff --git a/tests/generic/446 b/tests/generic/446
+> index 62ae449de6b1..83ff4ac9edd3 100755
+> --- a/tests/generic/446
+> +++ b/tests/generic/446
+> @@ -61,20 +61,22 @@ filesz=$((65536 * 2))
+>  $XFS_IO_PROG -f -c "truncate $((filesz * 2))" $SCRATCH_MNT/file >> $seqres.full
+>  
+>  # run a background dio read to a hole in a loop
+> -while true; do
+> +for i in `seq 0 999`; do
+>  	$XFS_IO_PROG -d -c "pread 0 $filesz" $SCRATCH_MNT/file > /dev/null 2>&1
+>  done &
+>  
+>  dread_pid=$!
+>  
+>  # run mapped write to the same hole as dio read
+> -for i in `seq 0 999`; do
+> +while true; do
+>  	$XFS_IO_PROG -c "mmap 0 $filesz" -c "mwrite 0 $filesz" $SCRATCH_MNT/file \
+>  		> /dev/null
+>  	$XFS_IO_PROG -c "fpunch 0 $filesz" $SCRATCH_MNT/file > /dev/null
+> +	if ! kill -s 0 $dread_pid >/dev/null 2>&1; then
+> +		break
+> +	fi
+>  done
+>  
+> -kill -9 $dread_pid > /dev/null 2>&1
+>  wait $dread_pid > /dev/null 2>&1
+>  
+>  echo "Silence is golden"
+
+
+
