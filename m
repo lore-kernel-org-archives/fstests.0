@@ -1,15 +1,15 @@
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:36413 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751632AbdGYSFc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2017 14:05:32 -0400
-Received: by mail-pg0-f53.google.com with SMTP id 125so73282527pgi.3
-        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 11:05:32 -0700 (PDT)
+Received: from mail-pf0-f175.google.com ([209.85.192.175]:33254 "EHLO
+        mail-pf0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751682AbdGYSGU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2017 14:06:20 -0400
+Received: by mail-pf0-f175.google.com with SMTP id s70so61271808pfs.0
+        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 11:06:19 -0700 (PDT)
 From: Tahsin Erdogan <tahsin@google.com>
-Subject: [PATCH] ext4: add a test for ea_inode feature
-Date: Tue, 25 Jul 2017 11:05:28 -0700
-Message-Id: <20170725180528.7829-1-tahsin@google.com>
-In-Reply-To: <20170725081942.GP9167@eguan.usersys.redhat.com>
-References: <20170725081942.GP9167@eguan.usersys.redhat.com>
+Subject: [PATCH v2] ext4: add a test for ea_inode feature
+Date: Tue, 25 Jul 2017 11:06:15 -0700
+Message-Id: <20170725180615.8091-1-tahsin@google.com>
+In-Reply-To: <20170725180528.7829-1-tahsin@google.com>
+References: <20170725180528.7829-1-tahsin@google.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger@dilger.ca>, fstests@vger.kernel.org
 Cc: Tahsin Erdogan <tahsin@google.com>
@@ -27,23 +27,32 @@ scenarios:
 
 Signed-off-by: Tahsin Erdogan <tahsin@google.com>
 ---
- tests/ext4/026     | 134 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/026.out |  29 ++++++++++++
+v2:
+ - Expanded test description in the script
+ - Added comments for inode and block size selection
+ - replaced getfattr/setfattr with GETFATTR_PROG/SETFATTR_PROG
+ - fixed unquoted variable comparison
+
+ tests/ext4/026     | 142 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/026.out |  29 +++++++++++
  tests/ext4/group   |   1 +
- 3 files changed, 164 insertions(+)
+ 3 files changed, 172 insertions(+)
  create mode 100755 tests/ext4/026
  create mode 100644 tests/ext4/026.out
 
 diff --git a/tests/ext4/026 b/tests/ext4/026
 new file mode 100755
-index 000000000000..297232ba7092
+index 000000000000..c41bb6fa6b88
 --- /dev/null
 +++ b/tests/ext4/026
-@@ -0,0 +1,134 @@
+@@ -0,0 +1,142 @@
 +#! /bin/bash
 +# FS QA Test 026
 +#
-+# Test ea_inode feature.
++# Test for ea_inode feature in ext4. Without ea_inode feature, an extended
++# attribute in ext4 cannot be larger than the fs block size. ea_inode feature
++# allows storing xattr values in external inodes and so raises xattr value
++# size limit to 64k.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
@@ -91,6 +100,11 @@ index 000000000000..297232ba7092
 +_require_attrs
 +_require_ext4_mkfs_feature ea_inode
 +
++# Set inode size to 256 so that there is room for storing some extended
++# attributes in the inode body.
++# The block size is explicitly set 4k so that xattr value sizes can be hardcoded
++# throughout the test. Otherwise, the selection of block size is not that
++# important for the purposes of this test.
 +_scratch_mkfs_ext4 -O ea_inode -I 256 -b 4096 >/dev/null 2>&1
 +_scratch_mount
 +
@@ -100,19 +114,19 @@ index 000000000000..297232ba7092
 +	local file=$1 name=$2 value=$3 tmp
 +
 +	if [[ "$value" != "" ]]; then
-+		setfattr -n $name -v "$value" $file
++		$SETFATTR_PROG -n $name -v "$value" $file
 +	else
-+		setfattr -n $name $file
++		$SETFATTR_PROG -n $name $file
 +	fi
 +
-+	tmp=$(getfattr --absolute-names --only-values -n $name $file)
-+	[[ $tmp == $value ]] || echo "unexpected value returned: $tmp"
++	tmp=$($GETFATTR_PROG --absolute-names --only-values -n $name $file)
++	[[ "$tmp" == "$value" ]] || echo "unexpected value returned: $tmp"
 +}
 +
 +# List attributes on a file.
 +attr_list()
 +{
-+	getfattr --absolute-names $1 | grep -v '^#'
++	$GETFATTR_PROG --absolute-names $1 | grep -v '^#'
 +}
 +
 +# Removes an extended attribute from a file.
@@ -120,7 +134,7 @@ index 000000000000..297232ba7092
 +{
 +	local file=$1 name=$2
 +
-+	setfattr -x $name $file
++	$SETFATTR_PROG -x $name $file
 +}
 +
 +# Test files.
