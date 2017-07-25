@@ -1,113 +1,226 @@
-Received: from mx2.suse.de ([195.135.220.15]:33334 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751843AbdGYOda (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 25 Jul 2017 10:33:30 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 2D38CAE6E
-        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 14:33:29 +0000 (UTC)
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH] Ignore "yes: standard output: Broken pipe" errors
-Date: Tue, 25 Jul 2017 16:33:20 +0200
-Message-Id: <20170725143320.10882-1-jack@suse.cz>
+Received: from mail-pg0-f53.google.com ([74.125.83.53]:36413 "EHLO
+        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751632AbdGYSFc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2017 14:05:32 -0400
+Received: by mail-pg0-f53.google.com with SMTP id 125so73282527pgi.3
+        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 11:05:32 -0700 (PDT)
+From: Tahsin Erdogan <tahsin@google.com>
+Subject: [PATCH] ext4: add a test for ea_inode feature
+Date: Tue, 25 Jul 2017 11:05:28 -0700
+Message-Id: <20170725180528.7829-1-tahsin@google.com>
+In-Reply-To: <20170725081942.GP9167@eguan.usersys.redhat.com>
+References: <20170725081942.GP9167@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: Eryu Guan <eguan@redhat.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger@dilger.ca>, fstests@vger.kernel.org
+Cc: Tahsin Erdogan <tahsin@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Recently, some tests started failing because they had
+ea_inode feature supports creating extended attributes with values
+greater than the fs block size. This test exercises some common
+scenarios:
 
-yes: standard output: Broken pipe
+ - Extended attibute being placed in inode vs xattr block
+ - Removing extended attribute
+ - Removing a file that has an extended attribute
+ - Multiple files having identical large attribute values
+ - Repeatedly setting an extended attribute with various sizes
 
-in their output. Fix the problem by discarding errors from yes(1)
-program.
-
-Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Tahsin Erdogan <tahsin@google.com>
 ---
- common/rc         | 12 ++++++------
- tests/generic/081 |  2 +-
- tests/generic/108 |  2 +-
- 3 files changed, 8 insertions(+), 8 deletions(-)
+ tests/ext4/026     | 134 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/026.out |  29 ++++++++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 164 insertions(+)
+ create mode 100755 tests/ext4/026
+ create mode 100644 tests/ext4/026.out
 
-diff --git a/common/rc b/common/rc
-index bd989bb5f4dd..d3a0b5ea9023 100644
---- a/common/rc
-+++ b/common/rc
-@@ -736,7 +736,7 @@ _test_mkfs()
- 	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-     *)
--	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
-+	yes 2>/dev/null | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* $TEST_DEV
- 	;;
-     esac
- }
-@@ -765,7 +765,7 @@ _mkfs_dev()
- 	;;
- 
-     *)
--	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
-+	yes 2>/dev/null | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
- 		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
- 	;;
-     esac
-@@ -858,11 +858,11 @@ _scratch_mkfs()
- 		mkfs_filter="cat"
- 		;;
- 	ocfs2)
--		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
-+		mkfs_cmd="yes 2>/dev/null | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
- 		;;
- 	*)
--		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
-+		mkfs_cmd="yes 2>/dev/null | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter="cat"
- 		;;
- 	esac
-@@ -1061,7 +1061,7 @@ _scratch_mkfs_sized()
- 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
- 	;;
-     ocfs2)
--	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
-+	yes 2>/dev/null | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
- 	;;
-     udf)
- 	$MKFS_UDF_PROG $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
-@@ -1142,7 +1142,7 @@ _scratch_mkfs_blocksized()
- 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
- 	;;
-     ocfs2)
--	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize -C $blocksize $SCRATCH_DEV
-+	yes 2>/dev/null | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize -C $blocksize $SCRATCH_DEV
- 	;;
-     *)
- 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_blocksized"
-diff --git a/tests/generic/081 b/tests/generic/081
-index 426766d9bddb..56b41e2875e3 100755
---- a/tests/generic/081
-+++ b/tests/generic/081
-@@ -69,7 +69,7 @@ _scratch_mkfs_sized $((300 * 1024 * 1024)) >>$seqres.full 2>&1
- $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
- # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
- # (like 2.02.95 in RHEL6) don't support --yes option
--yes | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
-+yes 2>/dev/null | $LVM_PROG lvcreate -L 256M -n $lvname $vgname >>$seqres.full 2>&1
- # wait for lvcreation to fully complete
- $UDEV_SETTLE_PROG >>$seqres.full 2>&1
- 
-diff --git a/tests/generic/108 b/tests/generic/108
-index 1525dfb64a47..1de16c2cf3c9 100755
---- a/tests/generic/108
-+++ b/tests/generic/108
-@@ -74,7 +74,7 @@ $LVM_PROG pvcreate -f $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
- $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
- # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
- # (like 2.02.95 in RHEL6) don't support --yes option
--yes | $LVM_PROG lvcreate -i 2 -I 4m -l 100%FREE -n $lvname $vgname \
-+yes 2>/dev/null | $LVM_PROG lvcreate -i 2 -I 4m -l 100%FREE -n $lvname $vgname \
- 	>>$seqres.full 2>&1
- # wait for lv creation to fully complete
- $UDEV_SETTLE_PROG >>$seqres.full 2>&1
+diff --git a/tests/ext4/026 b/tests/ext4/026
+new file mode 100755
+index 000000000000..297232ba7092
+--- /dev/null
++++ b/tests/ext4/026
+@@ -0,0 +1,134 @@
++#! /bin/bash
++# FS QA Test 026
++#
++# Test ea_inode feature.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_attrs
++_require_ext4_mkfs_feature ea_inode
++
++_scratch_mkfs_ext4 -O ea_inode -I 256 -b 4096 >/dev/null 2>&1
++_scratch_mount
++
++# Sets an extended attribute on a file.
++attr_set()
++{
++	local file=$1 name=$2 value=$3 tmp
++
++	if [[ "$value" != "" ]]; then
++		setfattr -n $name -v "$value" $file
++	else
++		setfattr -n $name $file
++	fi
++
++	tmp=$(getfattr --absolute-names --only-values -n $name $file)
++	[[ $tmp == $value ]] || echo "unexpected value returned: $tmp"
++}
++
++# List attributes on a file.
++attr_list()
++{
++	getfattr --absolute-names $1 | grep -v '^#'
++}
++
++# Removes an extended attribute from a file.
++attr_remove()
++{
++	local file=$1 name=$2
++
++	setfattr -x $name $file
++}
++
++# Test files.
++x=$SCRATCH_MNT/x
++y=$SCRATCH_MNT/y
++z=$SCRATCH_MNT/z
++
++# Attribute with short name that goes into inode body.
++name_in_ibody=user.i
++
++# Attribute with long name that goes into xattr block.
++name_in_block=user.$(perl -e 'print "b" x 100;')
++
++# Set large xattr values on multiple files.
++touch $x $y $z
++for file in $x $y $z; do
++	for name in $name_in_ibody $name_in_block; do
++		for size in 4096 8000 $((64*1024)); do
++			attr_set $file $name-$size \
++				$(perl -e "print 'v' x $size;")
++		done
++	done
++	attr_list $file
++done
++rm $x $y $z
++
++# Set/remove.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 25000;")
++attr_set $x $name_in_block $(perl -e "print 'b' x 25000;")
++attr_list $x
++attr_remove $x $name_in_ibody
++attr_remove $x $name_in_block
++rm $x
++
++# Set with same value twice.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_list $x
++rm $x
++
++# Repeatedly set an extended attribute with various value sizes.
++touch $x
++for size in 0 10 40 80 3000 9000 60 10000 9000 0 8000 3000 10 0 20 10000 5; do
++	attr_set $x user.1 $(perl -e "print 'v' x $size;")
++done
++attr_list $x
++rm $x
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/026.out b/tests/ext4/026.out
+new file mode 100644
+index 000000000000..5b94f3e2e4ea
+--- /dev/null
++++ b/tests/ext4/026.out
+@@ -0,0 +1,29 @@
++QA output created by 026
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
++user.i
++
++user.i
++
++user.1
++
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 664c0591e345..9aed07e271fe 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -28,6 +28,7 @@
+ 023 auto quick scrub
+ 024 auto quick encrypt dangerous
+ 025 auto quick fuzzers dangerous 
++026 auto quick attr
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
 -- 
-2.12.3
+2.14.0.rc0.284.gd933b75aa4-goog
 
