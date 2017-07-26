@@ -1,15 +1,13 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:35060 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751080AbdGZATp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2017 20:19:45 -0400
-Received: by mail-pg0-f67.google.com with SMTP id d193so15735940pgc.2
-        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 17:19:45 -0700 (PDT)
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:33685 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750983AbdGZATm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jul 2017 20:19:42 -0400
+Received: by mail-pf0-f196.google.com with SMTP id k72so10659745pfj.0
+        for <fstests@vger.kernel.org>; Tue, 25 Jul 2017 17:19:41 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [PATCH 2/2] android-xfstests: update documentation
-Date: Tue, 25 Jul 2017 17:18:38 -0700
-Message-Id: <20170726001838.80452-2-ebiggers3@gmail.com>
-In-Reply-To: <20170726001838.80452-1-ebiggers3@gmail.com>
-References: <20170726001838.80452-1-ebiggers3@gmail.com>
+Subject: [PATCH 1/2] android-xfstests: support specifying a kernel to boot
+Date: Tue, 25 Jul 2017 17:18:37 -0700
+Message-Id: <20170726001838.80452-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
 Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
@@ -17,219 +15,344 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-Update the list of known issues, document that specifying a kernel works
-now, and make a few other small improvements.
+Update android-xfstests to support specifying a kernel with KERNEL in
+~/.config/android-xfstests or --kernel on the command line, similar to
+kvm-xfstests and gce-xfstests.  If it's not already running, the kernel
+is booted using the 'fastboot boot' command.  This unfortunately doesn't
+work on all devices, but it should still be useful to have.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- Documentation/android-xfstests.md | 142 +++++++++++++++++++++-----------------
- 1 file changed, 79 insertions(+), 63 deletions(-)
+ kvm-xfstests/android-xfstests | 223 +++++++++++++++++++++++++++++++++++++-----
+ kvm-xfstests/config.android   |   5 +
+ kvm-xfstests/util/parse_cli   |   5 +-
+ 3 files changed, 204 insertions(+), 29 deletions(-)
 
-diff --git a/Documentation/android-xfstests.md b/Documentation/android-xfstests.md
-index a93b35c..772356e 100644
---- a/Documentation/android-xfstests.md
-+++ b/Documentation/android-xfstests.md
-@@ -18,8 +18,8 @@ devices.  If you encounter a problem, please submit a fix!
+diff --git a/kvm-xfstests/android-xfstests b/kvm-xfstests/android-xfstests
+index 6d41540..8e5b77c 100755
+--- a/kvm-xfstests/android-xfstests
++++ b/kvm-xfstests/android-xfstests
+@@ -50,27 +50,56 @@ die()
+ ask_yesno()
+ {
+     local response
+-    echo -n -e "$@ (y/n) "
++    echo -n -e "$@ (y/N) "
+     read response
+     if [ "$response" != y ]; then
+ 	exit 1
+     fi
+ }
  
- - The android-xfstests script installed:
-   run `make android-xfstests.sh` in the top-level directory of
--  xfstests-bld, then move android-xfstests.sh to
--  ~/bin/android-xfstests or another location on your $PATH.
-+  xfstests-bld, then move `android-xfstests.sh` to
-+  `~/bin/android-xfstests` or another location on your `$PATH`.
- 
- - A rooted Android device with sufficient internal storage.  For most
-   test configurations, about 24 GiB of internal storage should be
-@@ -33,24 +33,25 @@ devices.  If you encounter a problem, please submit a fix!
- 
- - An armhf Debian root filesystem set up with xfstests and the
-   xfstests-bld scripts.  Either fetch the prebuilt
--  armhf_root_fs.tar.gz from
-+  `armhf_root_fs.tar.gz` from
-   [kernel.org](http://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests),
-   or build one yourself on a Debian ARM build server as described in
-   [building-xfstests](building-xfstests.md).  Then, either put the
-   chroot tarball in the default location of
--  kvm-xfstests/test-appliance/armhf_root_fs.tar.gz, or specify it with
--  ROOT_FS in your ~/.config/android-xfstests or the -I option to
--  android-xfstests.
-+  `kvm-xfstests/test-appliance/armhf_root_fs.tar.gz`, or specify it
-+  with `ROOT_FS` in your `~/.config/android-xfstests` or the `-I`
-+  option to android-xfstests.
- 
- ## Procedure
- 
- ### (Optional) Build a custom kernel
- 
--You may be able to run xfstests with the kernel already installed on
--your device, but you may wish to build your own kernel instead.  The
--exact procedure for building the kernel is device-dependent, but here
--are example commands for building a kernel using the public source
--code for the Google Pixel phone (2016 edition), code name "marlin":
-+You should be able to run xfstests with the kernel already installed
-+on your device, but you may wish to build your own kernel instead.
-+The exact procedure for building the kernel is device-dependent, but
-+here are example commands for building a kernel using the public
-+source code for the Google Pixel phone (2016 edition), code name
-+"marlin":
- 
-     git clone https://android.googlesource.com/kernel/msm msm-linux
-     cd msm-linux
-@@ -60,36 +61,43 @@ code for the Google Pixel phone (2016 edition), code name "marlin":
-     make marlin_defconfig
-     make -j$(grep -c processor /proc/cpuinfo)
- 
--This will produce a kernel image arch/arm64/boot/Image.gz-dtb.
-+This will produce a kernel image `arch/arm64/boot/Image.gz-dtb`.
- 
- Also consider the following config options:
- 
--    CONFIG_SYSV_IPC=y
--        Makes some tests using dm-setup stop failing.
-+* `CONFIG_SYSV_IPC=y`:  Makes several tests stop failing / being
-+  skipped (see [Known issues](#known-issues))
- 
--    CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=n
--        Include crypto self-tests.  This may be useful if you are
--        using xfstests to test file-based encryption.
-+* `CONFIG_CRYPTO_MANAGER_DISABLE_TESTS=n`: Include crypto self-tests.
-+  This may be useful if you are using xfstests to test file-based
-+  encryption.
- 
- ### (Optional) Boot into your custom kernel
- 
--To boot into your new kernel, you'll first need to reboot your device
--into fastboot mode by running 'adb reboot-bootloader' or by holding a
--device-dependent key combination (e.g. Power + Vol-Down on the Pixel).
--Then do *one* of the following:
--
--- Run 'fastboot boot arch/arm64/boot/Image.gz-dtb' to boot the kernel
--  directly.  Careful: this is good for one boot only (it's not
--  persistent), and it doesn't work on all devices.
--
--- Build and flash a boot.img to your device's boot partition.  This is
--  device-dependent, but for "marlin" devices one would copy
--  arch/arm64/boot/Image.gz-dtb into device/google/marlin-kernel/ in
--  the Android source tree, then run the following commands from the
--  root of the Android source tree:
-+By default, android-xfstests uses the kernel running on the device.
-+However, it also supports booting a kernel automatically.  To do this,
-+specify `KERNEL` in your `~/.config/android-xfstests` or use the
-+`--kernel` command line option.  If a kernel is specified,
-+android-xfstests will boot it on the device using `fastboot boot`.  As
-+an optimization, this is skipped if the kernel is already running on
-+the device (as detected by checking `uname -r -v`; this usually
-+identifies the commit and build timestamp).
++adb_ready()
++{
++    adb devices | grep -q 'device$'
++}
 +
-+Note that `fastboot boot` just boots the kernel once; it doesn't
-+install it persistently.  Also, on some devices it doesn't bring up
-+the full functionality or even doesn't work at all, since it doesn't
-+install kernel modules or device-tree overlays.  If it doesn't work,
-+you'll need to install and boot the kernel yourself instead.  See your
-+device's documentation for details, but you'll at least need to build
-+the kernel into a boot.img and flash it to the "boot" partition.  On
-+some devices additional partitions must be flashed as well, e.g.
-+vendor and vbmeta.  As an example, for "marlin" devices running
-+Android N, one must copy `arch/arm64/boot/Image.gz-dtb` into
-+`device/google/marlin-kernel/` in the Android source tree, then run
-+the following commands from the root of the Android source tree:
- 
-     . build/envsetup.sh
--    lunch marlin-userdebug
-+    lunch marlin-eng
-     make -j16 bootimage
-     fastboot flash boot out/target/product/marlin/boot.img
-     fastboot continue
-@@ -112,41 +120,49 @@ by rebooting into fastboot mode and reformatting the userdata
- filesystem.  Since this causes all user data to be wiped,
- android-xfstests will ask for confirmation before doing this.
- 
--## Known issues
--
--android-xfstests doesn't yet do kernel installation; you have to do
--that yourself.
-+Note that Android devices usually run an older version of the Linux
-+kernel.  At the same time, xfstests is constantly being updated to add
-+new tests.  Therefore, it's often the case that some of the more
-+recently added tests will fail.  Some tests may even cause a kernel
-+crash or deadlock and will need to be excluded with `-X` in order for
-+the test run to complete, as a temporary workaround until you can
-+backport the needed bug fixes.  It's recommended to keep your device's
-+kernel up-to-date with the corresponding LTS kernel to help minimize
-+the number of test failures that need to be triaged.  (Of course,
-+there are obviously many other benefits of doing that as well...)
++fastboot_ready()
++{
++    fastboot devices | grep -q 'fastboot$'
++}
 +
-+## Monitoring and debugging
+ wait_for_device()
+ {
++    local want_adb=false
++    local want_fastboot=false
++    local waiting_for=""
+     local unauthorized=false
+     local waiting=false
 +
-+To get a shell in the chroot, use `android-xfstests shell`.  You can
-+do this at any time, regardless of whether tests are currently
-+running.  Note that this is a real shell on the device, and it doesn't
-+use a snapshot of the root filesystem like `kvm-xfstests shell` does.
-+Thus, any changes you make in the shell session are persistent.
++    if [[ ,$1, == *,adb,* ]]; then
++	want_adb=true
++	waiting_for="adb to be ready"
++    fi
++    if [[ ,$1, == *,fastboot,* ]]; then
++	want_fastboot=true
++	waiting_for+="${waiting_for:+ or for }device to enter fastboot mode"
++    fi
++    : "${waiting_for:=device}"
++
+     while true; do
+-	if adb devices | grep -q 'device$'; then
+-	    break
++	if $want_adb; then
++	    if adb_ready; then
++		break
++	    fi
++	    if ! $unauthorized && adb devices | grep -q 'unauthorized$'; then
++		echo "adb is not authorized.  Authorize it using the dialog on the device to continue."
++		unauthorized=true
++	    fi
+ 	fi
+-	if adb devices | grep -q 'unauthorized$' && ! $unauthorized; then
+-	    echo "adb is not authorized.  Authorize it using the dialog on the device to continue."
+-	    unauthorized=true
++	if $want_fastboot && fastboot_ready; then
++	    return
+ 	fi
+ 	if ! $waiting && ! $unauthorized; then
+-	    echo "Waiting for device..."
++	    echo "Waiting for $waiting_for..."
+ 	    waiting=true
+ 	fi
+ 	sleep 0.5
+@@ -83,6 +112,115 @@ wait_for_device()
+     adb shell "setenforce 0"
+ }
  
--Terminating android-xfstests with Ctrl-C doesn't stop the test process
--on the device.
++wait_for_adb()
++{
++    wait_for_device adb
++}
++
++wait_for_fastboot()
++{
++    wait_for_device fastboot
++}
++
++wait_for_adb_or_fastboot()
++{
++    wait_for_device adb,fastboot
++}
++
++reboot_into_fastboot_mode()
++{
++    adb reboot bootloader
++    wait_for_fastboot
++}
++
++# Query the version of the kernel running on the device
++query_kernel_version()
++{
++    adb shell "uname -r -v"
++}
++
++# Try to extract the version information from the $KERNEL image by grepping for
++# the linux_banner[] string.  It's a hack, but there doesn't seem to be a better
++# way, and scripts elsewhere supposedly have been doing this for a long time...
++extract_kernel_version()
++{
++    local decompress
++
++    # Note: we use the filename extension rather than the 'file' program to get
++    # the compression format because old versions of 'file' don't recognize
++    # LZ4-compressed files.
++    case "$(basename "$KERNEL")" in
++    Image.gz*)
++	decompress="gzip -d -c"
++	;;
++    Image.bz2*)
++	decompress="bzip2 -d -c"
++	;;
++    Image.xz*)
++	decompress="xz -d -c"
++	;;
++    Image.lz4*)
++	decompress="lz4 -d" # no -c option; stdout is assumed when not a tty
++	;;
++    *)
++	decompress="cat"
++	;;
++    esac
++    local banner="$($decompress "$KERNEL" \
++	| grep -a -m1 'Linux version [0-9]\+\.[0-9]\+.*#.*$')"
++
++    if [ -n "$banner" ]; then
++	local krelease="$(echo "$banner" | awk '{print $3}')"
++	local kver="#${banner##*#}"
++	echo "$krelease $kver"
++    fi
++}
++
++# If the specified $KERNEL isn't already running on the device, try to boot it
++# using 'fastboot boot'.
++boot_kernel()
++{
++    local version actual_version
++    local have_version=true
++
++    if [ ! -f "$KERNEL" ]; then
++	die "The specified kernel image does not exist: $KERNEL"
++    fi
++
++    version="$(extract_kernel_version "$KERNEL")"
++    if [ -z "$version" ]; then
++	cat 1>&2 <<EOF
++Warning: unable to extract version information from $KERNEL.
++We won't be able to verify that the device has successfully booted the kernel!
++EOF
++	version="(unknown version)"
++	have_version=false
++    fi
++
++    wait_for_adb_or_fastboot
++    if adb_ready; then
++	actual_version="$(query_kernel_version)"
++	if $have_version && [ "$version" = "$actual_version" ]; then
++	    # Kernel is already running.
++	    return
++	fi
++	echo "Rebooting to start new kernel: $version"
++	stop_existing_tests
++	reboot_into_fastboot_mode
++    else
++	echo "Starting kernel: $version"
++    fi
++    fastboot boot "$KERNEL"
++    wait_for_adb
++
++    actual_version="$(query_kernel_version)"
++    if $have_version && [ "$version" != "$actual_version" ]; then
++	 die "Kernel did not successfully boot!\n" \
++	     "Expected: $version\n" \
++	     "Actual: $actual_version\n"
++    fi
++}
++
+ chroot_prepare()
+ {
+     cat <<EOF | adb shell
+@@ -203,10 +341,9 @@ a smaller size?  WARNING: THIS WILL DELETE ALL USER DATA!
+ 
+ EOF
+     ask_yesno "    Erase and reformat userdata with smaller size?"
+-    adb reboot bootloader
++    echo
++    reboot_into_fastboot_mode
+     fastboot format::0x100000000 userdata # 4 GiB
+-    fastboot continue
+-    wait_for_device
+ }
+ 
+ setup_partitions()
+@@ -222,12 +359,7 @@ setup_partitions()
+     ready)
+ 	;;
+     shrink_userdata)
+-	if [ "$1" = second_try ]; then
+-	    die "An unexpected problem occurred when shrinking userdata."
+-	fi
+-	try_shrink_userdata
+-	setup_chroot
+-	setup_partitions second_try
++	return 1
+ 	;;
+     insufficient_space)
+ 	die "This device doesn't have enough space on its internal storage to run android-xfstests."
+@@ -236,6 +368,7 @@ setup_partitions()
+ 	die "An unexpected problem occurred while setting up the xfstests partitions."
+ 	;;
+     esac
++    return 0
+ }
+ 
+ xfstests_running()
+@@ -273,20 +406,60 @@ if ! type -P fastboot > /dev/null ; then
+     die "fastboot is not installed"
+ fi
+ 
+-wait_for_device
+-setup_chroot
+-if ! xfstests_running; then
+-    setup_partitions first_try
+-fi
 -
--'android-xfstests shell' gives you a shell in the chroot, but it's not
--a snapshot like it is for kvm-xfstests; that is, any changes you make
--in the shell session are persistent.
--
--Android devices usually run an older version of the Linux kernel.  At
--the same time, xfstests is constantly being updated to add new tests.
--Therefore, you can expect there to be a significant number of failing
--tests due to bugs.  Some tests may even cause a kernel crash or
--deadlock and will need to be excluded with -X in order for the test
--run to complete.  Note, however, that bugs reproduced by xfstests are
--not necessarily reachable by unprivileged users (though they can be!).
-+## Known issues
+ case "$ARG" in
+     cmd=shell*|cmd=maint*)
+-	chroot_interactive_shell
+-	exit 0
++	want_shell=true
++	;;
++    *)
++	want_shell=false
++	if adb_ready; then
++	    stop_existing_tests
++	fi
+ 	;;
+ esac
  
--Tests which create loopback or device-mapper devices currently fail
--because the corresponding device nodes do not get automatically
--created on Android.
-+If using the armhf (32-bit) tarball on an aarch64 kernel, the
-+encryption tests may fail due to a kernel bug that caused the keyctl
-+system call to be unavailable to 32-bit programs.  This can be fixed
-+by cherry-picking commit 5c2a625937ba ("arm64: support keyctl() system
-+call in 32-bit mode") into your kernel from Linux v4.11.
+-stop_existing_tests
++# Set up the kernel, the chroot, and the xfstests partitions.
++
++tried_to_shrink_userdata=false
++while true; do
++
++    # Start by booting into the correct kernel.
++    if [ -n "$KERNEL" ]; then
++	boot_kernel
++    elif fastboot_ready; then
++	fastboot continue
++    fi
++
++    wait_for_adb
++
++    # Set up the chroot and xfstests partitions.  Note: if an interactive shell
++    # is requested and tests are currently running, we won't mess around with
++    # the partitions.  However, we'll still try to set up the chroot just in
++    # case a different ROOT_FS was specified (in which case the existing tests
++    # will need to be stopped).
++    setup_chroot
++    if $want_shell && xfstests_running; then
++	break
++    fi
++    if setup_partitions; then
++	break
++    fi
++
++    # Need to shrink userdata to make space for the xfstests partitions!
++    if $tried_to_shrink_userdata; then
++	die "An unexpected problem occurred when shrinking userdata."
++    fi
++    try_shrink_userdata
++    tried_to_shrink_userdata=true
++
++    # 'userdata' has just been formatted and the device is now in fastboot mode.
++    # Start the configuration over again.
++done
++
++if $want_shell; then
++    chroot_interactive_shell
++    exit 0
++fi
  
--Any test that requires non-root users currently fails because xfstests
--incorrectly thinks that YP/NIS is enabled.
-+Tests that create device-mapper devices (e.g. generic/250,
-+generic/252, generic/338) fail because the Android equivalent of udev
-+does not create the dm device nodes in the location expected by
-+xfstests (`/dev/mapper/`).
- 
--On recent versions of Android, all new files inherit SELinux xattrs.
--This confuses generic/062 and generic/377 and causes them to fail.
-+Android kernels are sometimes configured without SysV IPC support ---
-+i.e., `CONFIG_SYSVIPC` isn't set.  This can cause several problems:
- 
--generic/240 and tests using dmsetup fail on kernels configured without
--SysV IPC support, which includes most Android kernels.
-+- Tests that use the `dbench` program (generic/241) fail.
-+- Tests that use the `dmsetup` program fail (if they didn't already
-+  fail because of the device node issue noted above)
-+- Tests that use the `fio` program (e.g. ext4/301, ext4/302, ext4/303,
-+  generic/095, generic/299, generic/300) are skipped.
- 
--generic/004 fails because of glibc bug
--https://sourceware.org/bugzilla/show_bug.cgi?id=17912.
-+generic/004 should work, but in fact it's skipped because of a [glibc
-+bug](https://sourceware.org/bugzilla/show_bug.cgi?id=17912).
- 
- ## Resetting userdata
- 
-@@ -155,8 +171,8 @@ not show up in the device's on-disk partition table or fstab, and they
- will go away after reboot.  However, the reformatting of the userdata
- filesystem with a smaller size to free up space is persistent.  If you
- are done running xfstests and wish to expand userdata to take up its
--full partition again, then reboot into fastboot mode and run 'fastboot
---w' to wipe and reformat userdata again, this time with the full size.
-+full partition again, then reboot into fastboot mode and run `fastboot
-+-w` to wipe and reformat userdata again, this time with the full size.
- 
- ## Other notes
- 
+ cat > "$tmpfile" <<EOF
+ #!/bin/bash
+diff --git a/kvm-xfstests/config.android b/kvm-xfstests/config.android
+index ed7098c..1db38a5 100644
+--- a/kvm-xfstests/config.android
++++ b/kvm-xfstests/config.android
+@@ -10,3 +10,8 @@ ROOT_FS="$DIR/test-appliance/armhf_root_fs.tar.gz"
+ # Where to download the tarball from (at user's request) if we don't have it.
+ # If you want to disable this functionality, set this to an empty string.
+ ROOT_FS_URL="https://www.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/armhf_root_fs.tar.gz"
++
++# Path to the kernel which android-xfstests will boot on the device using
++# 'fastboot boot', if it's not already running.  This can also be set by the
++# --kernel option.  If unset or empty, the existing kernel will be used.
++#KERNEL=$HOME/linux/arch/arm64/boot/Image.lz4-dtb
+diff --git a/kvm-xfstests/util/parse_cli b/kvm-xfstests/util/parse_cli
+index 874916a..2d6717a 100644
+--- a/kvm-xfstests/util/parse_cli
++++ b/kvm-xfstests/util/parse_cli
+@@ -51,9 +51,7 @@ print_help ()
+     fi
+     echo "	-x group	- Exclude group of tests from running"
+     echo "	-X test		- Exclude test from running"
+-    if flavor_in kvm gce ; then
+-	echo "	--kernel file	- Boot the specified kernel"
+-    fi
++    echo "	--kernel file	- Boot the specified kernel"
+     if flavor_in kvm ; then
+ 	echo "	--initrd initrd	- Boot with the specified initrd"
+     elif flavor_in gce ; then
+@@ -282,7 +280,6 @@ while [ "$1" != "" ]; do
+ 	    SKIP_LOG=no
+ 	    ;;
+ 	--kernel) shift
+-	    supported_flavors kvm gce
+ 	    KERNEL="$1"
+ 	    if test -d "$KERNEL" ; then
+ 		KERNEL="$KERNEL/arch/x86/boot/bzImage"
 -- 
 2.14.0.rc0.400.g1c36432dff-goog
 
