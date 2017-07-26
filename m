@@ -1,329 +1,238 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60518 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751441AbdGZOs7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Jul 2017 10:48:59 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 00645DCA12
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2017 14:48:59 +0000 (UTC)
-Date: Wed, 26 Jul 2017 10:48:43 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v2] generic: test read around EOF
-Message-ID: <20170726144843.GA60481@bfoster.bfoster>
-References: <20170726104804.25903-1-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170726104804.25903-1-zlang@redhat.com>
+Received: from mail-pg0-f46.google.com ([74.125.83.46]:36570 "EHLO
+        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750893AbdGZSCX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jul 2017 14:02:23 -0400
+Received: by mail-pg0-f46.google.com with SMTP id 125so87368381pgi.3
+        for <fstests@vger.kernel.org>; Wed, 26 Jul 2017 11:02:23 -0700 (PDT)
+From: Tahsin Erdogan <tahsin@google.com>
+Subject: [PATCH v3] ext4: add a test for ea_inode feature
+Date: Wed, 26 Jul 2017 11:02:16 -0700
+Message-Id: <20170726180216.7359-1-tahsin@google.com>
+In-Reply-To: <20170726085500.GX9167@eguan.usersys.redhat.com>
+References: <20170726085500.GX9167@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, Theodore Ts'o <tytso@mit.edu>, Andreas Dilger <adilger@dilger.ca>, fstests@vger.kernel.org
+Cc: Tahsin Erdogan <tahsin@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 26, 2017 at 06:48:04PM +0800, Zorro Lang wrote:
-> As posix standard, if the file offset is at or past the end of file,
-> no bytes are read, and read() returns zero. But there was a bug,
-> when DIO read offset is just past the EOF a little, but in the same
-> block with EOF, read returns different negative values.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> V2 did below changes:
-> 1) move falloc, resvsp, allocsp related test to be special test,
->    no standard output
-> 2) pick up pread related test into read_test() function
-> 
+ea_inode feature supports creating extended attributes with values
+greater than the fs block size. This test exercises some common
+scenarios:
 
-I think Eric eventually narrowed down this problem to something
-that could be reproduced by the following:
+ - Extended attibute being placed in inode vs xattr block
+ - Removing extended attribute
+ - Removing a file that has an extended attribute
+ - Multiple files having identical large attribute values
+ - Repeatedly setting an extended attribute with various sizes
 
-xfs_io -fc "pwrite 0 1024" /mnt/file
-xfs_io -d -c "pread 1536 512" /mnt/file
+Signed-off-by: Tahsin Erdogan <tahsin@google.com>
+---
+v3:
+ - Removed hardcoded inode and block size
 
-The problem only occurred when a block was allocated at the offset of
-the post-eof DIO read. I suppose it couldn't hurt to test buffered read
-along with DIO, as well as the other cases of an unwritten block or
-hole. But given all that, I'm still wondering if this test could be
-simplified quite a bit to something that effectively does this:
+v2:
+ - Expanded test description in the script
+ - Added comments for inode and block size selection
+ - replaced getfattr/setfattr with GETFATTR_PROG/SETFATTR_PROG
+ - fixed unquoted variable comparison
 
-BSIZE=4096
-SSIZE=512
-FILE=/mnt/file
+ tests/ext4/026     | 137 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/026.out |  29 ++++++++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 167 insertions(+)
+ create mode 100755 tests/ext4/026
+ create mode 100644 tests/ext4/026.out
 
-rm -f $FILE
-xfs_io -fc "pwrite 0 $SSIZE" $FILE
-xfs_io -d -c "pread $(($BSIZE - $SSIZE)) $SSIZE" $FILE || echo "fail"
-xfs_io -c "pread $(($BSIZE - $SSIZE)) $SSIZE" $FILE || echo "fail"
+diff --git a/tests/ext4/026 b/tests/ext4/026
+new file mode 100755
+index 000000000000..94a737ce0a5f
+--- /dev/null
++++ b/tests/ext4/026
+@@ -0,0 +1,137 @@
++#! /bin/bash
++# FS QA Test 026
++#
++# Test for ea_inode feature in ext4. Without ea_inode feature, an extended
++# attribute in ext4 cannot be larger than the fs block size. ea_inode feature
++# allows storing xattr values in external inodes and so raises xattr value
++# size limit to 64k.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_attrs
++_require_ext4_mkfs_feature ea_inode
++
++_scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
++_scratch_mount
++
++# Sets an extended attribute on a file.
++attr_set()
++{
++	local file=$1 name=$2 value=$3 tmp
++
++	if [[ "$value" != "" ]]; then
++		$SETFATTR_PROG -n $name -v "$value" $file
++	else
++		$SETFATTR_PROG -n $name $file
++	fi
++
++	tmp=$($GETFATTR_PROG --absolute-names --only-values -n $name $file)
++	[[ "$tmp" == "$value" ]] || echo "unexpected value returned: $tmp"
++}
++
++# List attributes on a file.
++attr_list()
++{
++	$GETFATTR_PROG --absolute-names $1 | grep -v '^#'
++}
++
++# Removes an extended attribute from a file.
++attr_remove()
++{
++	local file=$1 name=$2
++
++	$SETFATTR_PROG -x $name $file
++}
++
++# Test files.
++x=$SCRATCH_MNT/x
++y=$SCRATCH_MNT/y
++z=$SCRATCH_MNT/z
++
++# Attribute with short name that goes into inode body.
++name_in_ibody=user.i
++
++# Attribute with long name that goes into xattr block.
++name_in_block=user.$(perl -e 'print "b" x 100;')
++
++# Set large xattr values on multiple files.
++touch $x $y $z
++for file in $x $y $z; do
++	for name in $name_in_ibody $name_in_block; do
++		for size in 4096 8000 $((64*1024)); do
++			attr_set $file $name-$size \
++				$(perl -e "print 'v' x $size;")
++		done
++	done
++	attr_list $file
++done
++rm $x $y $z
++
++# Set/remove.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 25000;")
++attr_set $x $name_in_block $(perl -e "print 'b' x 25000;")
++attr_list $x
++attr_remove $x $name_in_ibody
++attr_remove $x $name_in_block
++rm $x
++
++# Set with same value twice.
++touch $x
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_set $x $name_in_ibody $(perl -e "print 'i' x 60000;")
++attr_list $x
++rm $x
++
++# Repeatedly set an extended attribute with various value sizes.
++touch $x
++for size in 0 10 80 900 1900 3000 9000 60 10000 0 8000 3000 10 0 20 10000 5; do
++	attr_set $x user.1 $(perl -e "print 'v' x $size;")
++done
++attr_list $x
++rm $x
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/026.out b/tests/ext4/026.out
+new file mode 100644
+index 000000000000..5b94f3e2e4ea
+--- /dev/null
++++ b/tests/ext4/026.out
+@@ -0,0 +1,29 @@
++QA output created by 026
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-4096
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-65536
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb-8000
++user.i-4096
++user.i-65536
++user.i-8000
++
++user.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
++user.i
++
++user.i
++
++user.1
++
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 664c0591e345..9aed07e271fe 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -28,6 +28,7 @@
+ 023 auto quick scrub
+ 024 auto quick encrypt dangerous
+ 025 auto quick fuzzers dangerous 
++026 auto quick attr
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
+-- 
+2.14.0.rc0.400.g1c36432dff-goog
 
-... and then maybe repeat the above stanza 2 more times using a
-"truncate" and "falloc" to create the file. I don't think the
-XFS-specific preallocation commands are necessary. They result in the
-same layout and we have other tests for those commands. Otherwise, this
-could be cleaned up a bit, perhaps detect the BSIZE==SSIZE case and
-_notrun, etc. Thoughts in general?
-
-Brian
-
-> Thanks,
-> Zorro
-> 
->  tests/generic/450     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/450.out |  50 +++++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 222 insertions(+)
->  create mode 100755 tests/generic/450
->  create mode 100644 tests/generic/450.out
-> 
-> diff --git a/tests/generic/450 b/tests/generic/450
-> new file mode 100755
-> index 00000000..5fbe7f0c
-> --- /dev/null
-> +++ b/tests/generic/450
-> @@ -0,0 +1,171 @@
-> +#! /bin/bash
-> +# FS QA Test 450
-> +#
-> +# Test read around EOF. If the file offset is at or past the end of file,
-> +# no bytes are read, and read() returns zero. But there was a bug, when
-> +# DIO read offset is just past the EOF a little, but in the same block
-> +# with EOF, read returns different negative values.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	rm -f $tfile
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +
-> +tfile=$TEST_DIR/testfile_${seq}
-> +ssize=`blockdev --getss $TEST_DEV`
-> +bsize=`_get_block_size $TEST_DIR`
-> +
-> +rm -f $tfile 2>/dev/null
-> +
-> +# check xfs_io pread result, especially for
-> +# Param1: expected pread return
-> +# Param2: expected pread count
-> +# Param3: expected pread offset
-> +#
-> +# If any of above values are not as expected, the output keeps
-> +# using the real value
-> +check_xfs_io_read()
-> +{
-> +	RETURN=$1
-> +	COUNT=$2
-> +	OFFSET=$3
-> +
-> +	$AWK_PROG -v ret="$RETURN" -v cnt="$COUNT" -v off="$OFFSET" '
-> +		/read/{
-> +			split($2, bytes, "/")
-> +
-> +			retval=bytes[1]
-> +			count=bytes[2]
-> +			offset=$NF
-> +
-> +			if(retval == ret) retval="X"
-> +			if(count == cnt) count="XX"
-> +			if(offset == off) offset="XXX"
-> +
-> +			printf("read [%s/%s %s]\n", retval, count, offset)
-> +
-> +			next
-> +		}
-> +	'
-> +}
-> +
-> +
-> +# +-----------------------------------------+
-> +# |    block    |    block    |    block    |
-> +# +------------------------------------------
-> +# | sect | sect | sect | sect | sect | sect |
-> +#                                  |
-> +#                                 EOF
-> +# |<----------- move EOF --------->| xxxxxx |
-> +# [pread1]
-> +#               [           pread2          ]
-> +#                                    [pread3]     ...   [pread4]
-> +#
-> +# Run below steps with differnt $operation and $openflag
-> +#
-> +# 1) use $operation (alloc/reserve/truncate ...) to move EOF
-> +# 2) read (pread1) the first sector doesn't contain EOF
-> +# 3) read (pread2) the 2nd and 3rd blocks contain EOF
-> +# 4) read (pread3) the last sector which just out of EOF
-> +# 5) read (pread4) at far far away from EOF
-> +#
-> +# NOTE: This case generally test on sector size < block size, but equal is fine
-> +#
-> +asize=$((bsize * 3))
-> +tsize=$((asize - ssize - 100))
-> +
-> +read_test()
-> +{
-> +	$XFS_IO_PROG $oflag -c "pread 0 $ssize" $tfile | \
-> +		check_xfs_io_read "$ssize" "$ssize" "0"
-> +
-> +	$XFS_IO_PROG $oflag -c "pread $bsize $((bsize * 2))" $tfile | \
-> +		check_xfs_io_read "$((tsize - bsize))" "$((bsize * 2))" "$bsize"
-> +
-> +	$XFS_IO_PROG $oflag -c "pread $((bsize * 3 - ssize)) $ssize" $tfile | \
-> +		check_xfs_io_read "0" "$ssize" "$((bsize * 3 - ssize))"
-> +
-> +	$XFS_IO_PROG $oflag -c "pread $((bsize * 100)) $ssize" $tfile | \
-> +		check_xfs_io_read "0" "$ssize" "$((bsize * 100))"
-> +}
-> +
-> +# Generic test
-> +for oflag in "" "-d" "-s" "-sd"; do
-> +	for oper in "pwrite 0 ${tsize}" "truncate ${tsize}"; do
-> +		echo "## Test ${oper%% *} and read with open ${oflag} ##" | \
-> +			tee -a $seqres.full
-> +
-> +		$XFS_IO_PROG -ft -c "$oper" $tfile >>$seqres.full
-> +
-> +		read_test
-> +
-> +		echo | tee -a $seqres.full
-> +	done
-> +done
-> +
-> +# XFS test
-> +echo "## Extra testing, no output is expected below ##"
-> +for oflag in "" "-d" "-s" "-sd"; do
-> +	for oper in "falloc 0 ${tsize}" \
-> +		    "resvsp 0 ${asize}" \
-> +		    "allocsp ${tsize} 0"; do
-> +		echo "## Test ${oper%% *} and read with open ${oflag} ##" >> $seqres.full
-> +
-> +		# Drop all output, for some filesystems don't support these
-> +		# test operations
-> +		$XFS_IO_PROG -ft -c "truncate ${tsize}" -c "$oper" $tfile >>$seqres.full 2>&1
-> +
-> +		# For keeping golden image consistency in different filesystems,
-> +		# drop the output, but not error output
-> +		read_test >>$seqres.full
-> +
-> +		echo >> $seqres.full
-> +	done
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/450.out b/tests/generic/450.out
-> new file mode 100644
-> index 00000000..ad2570e8
-> --- /dev/null
-> +++ b/tests/generic/450.out
-> @@ -0,0 +1,50 @@
-> +QA output created by 450
-> +## Test pwrite and read with open  ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test truncate and read with open  ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test pwrite and read with open -d ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test truncate and read with open -d ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test pwrite and read with open -s ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test truncate and read with open -s ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test pwrite and read with open -sd ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Test truncate and read with open -sd ##
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +read [X/XX XXX]
-> +
-> +## Extra testing, no output is expected below ##
-> diff --git a/tests/generic/group b/tests/generic/group
-> index a04cc900..0b29be0a 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -452,3 +452,4 @@
->  447 auto quick clone
->  448 auto quick rw
->  449 auto quick acl enospc
-> +450 auto quick rw
-> -- 
-> 2.13.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
