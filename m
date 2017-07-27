@@ -1,103 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:7024 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44410 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750936AbdG0FSe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 27 Jul 2017 01:18:34 -0400
-Date: Thu, 27 Jul 2017 13:18:30 +0800
+        id S1750994AbdG0FWM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 27 Jul 2017 01:22:12 -0400
+Date: Thu, 27 Jul 2017 13:22:10 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [xfstests PATCH] gfs2: allow testing with gfs2
-Message-ID: <20170727051830.GA9167@eguan.usersys.redhat.com>
-References: <20170726184331.27953-1-jlayton@kernel.org>
+Subject: Re: [PATCH v2] generic/446: make sure all background processes are
+ dead before umount
+Message-ID: <20170727052210.GB9167@eguan.usersys.redhat.com>
+References: <20170724101125.13309-1-eguan@redhat.com>
+ <20170725080421.15306-1-eguan@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170726184331.27953-1-jlayton@kernel.org>
+In-Reply-To: <20170725080421.15306-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, cluster-devel@redhat.com
+To: yangx.jy@cn.fujitsu.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 26, 2017 at 02:43:31PM -0400, Jeff Layton wrote:
-> From: Jeff Layton <jlayton@redhat.com>
+Hi Xiao Yang,
+
+On Tue, Jul 25, 2017 at 04:04:21PM +0800, Eryu Guan wrote:
+> The $dread_pid refers to the while-true-do loop, wait for $dread_pid
+> doesn't mean the xfs_io direct read process is already dead,
+> sometimes xfs_io process is still running and blocking
+> _scratch_unmount.
 > 
-> For now, just have it avoid locking. With a fixed kernel,
-> generic/441 now passes.
+> Fix it by making the direct read does a fixed number of loop and
+> break out the second mmap-fpunch loop if the first loop exits. At
+> this point we're sure that there's no unfinished background process
+> blocking the umount.
 > 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  common/config     | 1 +
->  common/rc         | 7 +++++++
->  tests/generic/441 | 2 +-
->  3 files changed, 9 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/config b/common/config
-> index 5091db9d5099..eb32efc105db 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -244,6 +244,7 @@ case "$HOSTOS" in
->          export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
->  	export E2FSCK_PROG="`set_prog_path e2fsck`"
->  	export TUNE2FS_PROG="`set_prog_path tune2fs`"
-> +        export MKFS_GFS2_PROG="`set_prog_path mkfs.gfs2`"
->          ;;
->  esac
->  
-> diff --git a/common/rc b/common/rc
-> index bd989bb5f4dd..70bb39225368 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -158,6 +158,9 @@ case "$FSTYP" in
->      ext4)
->  	 [ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
->  	 ;;
-> +    gfs2)
-> +	 [ "$MKFS_GFS2_PROG" = "" ] && _fatal "mkfs.gfs2 not found"
-> +	 ;;
+> v2:
+> - move 'kill' to while loop condition to simplify the second loop
+> - add more comments about when to exit the loop
 
-The above two changes seem fine.
+Would you please help test & review and provide reviewed-by tag if you
+think it's OK? Thanks a lot!
 
->      f2fs)
->  	 [ "$MKFS_F2FS_PROG" = "" ] && _fatal "mkfs.f2fs not found"
->  	 ;;
-> @@ -861,6 +864,10 @@ _scratch_mkfs()
->  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
->  		mkfs_filter="grep -v -e ^mkfs\.ocfs2"
->  		;;
-> +	gfs2)
-> +		mkfs_cmd="$MKFS_GFS2_PROG -p lock_nolock -O"
-> +		mkfs_filter="cat"
-> +		;;
-
-This seems unnecessary, we already have gfs2 support and the
-"-p lock_nolock -O" part is already added to MKFS_OPTIONS in
-_mkfs_opts() in common/config (when MKFS_OPTIONS is empty).
-
-generic/411 runs and fails (fails due to kernel bug, not test config
-issue) now on gfs2 even without this change.
-
->  	*)
->  		mkfs_cmd="yes | $MKFS_PROG -t $FSTYP --"
->  		mkfs_filter="cat"
-> diff --git a/tests/generic/441 b/tests/generic/441
-> index 075d87723ca1..b98f709cb6eb 100755
-> --- a/tests/generic/441
-> +++ b/tests/generic/441
-> @@ -55,7 +55,7 @@ case $FSTYP in
->  	btrfs)
->  		_notrun "btrfs has a specialized test for this"
->  		;;
-> -	ext3|ext4|xfs)
-> +	ext3|ext4|gfs2|xfs)
-
-Without external log device support in _scratch_mkfs for gfs2, this
-doesn't seem right to me. Perhaps we should add external log support for
-gfs2 then update this test, in different patches?
-
-Thanks,
 Eryu
 
->  		# Do the more thorough test if we have a logdev
->  		_has_logdev && sflag=''
->  		;;
+> 
+>  tests/generic/446 | 6 +++---
+>  1 file changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/tests/generic/446 b/tests/generic/446
+> index 62ae449de6b1..6a1b69aa2edc 100755
+> --- a/tests/generic/446
+> +++ b/tests/generic/446
+> @@ -61,20 +61,20 @@ filesz=$((65536 * 2))
+>  $XFS_IO_PROG -f -c "truncate $((filesz * 2))" $SCRATCH_MNT/file >> $seqres.full
+>  
+>  # run a background dio read to a hole in a loop
+> -while true; do
+> +for i in `seq 0 999`; do
+>  	$XFS_IO_PROG -d -c "pread 0 $filesz" $SCRATCH_MNT/file > /dev/null 2>&1
+>  done &
+>  
+>  dread_pid=$!
+>  
+>  # run mapped write to the same hole as dio read
+> -for i in `seq 0 999`; do
+> +# loop until background dio read exits
+> +while kill -s 0 $dread_pid >/dev/null 2>&1; do
+>  	$XFS_IO_PROG -c "mmap 0 $filesz" -c "mwrite 0 $filesz" $SCRATCH_MNT/file \
+>  		> /dev/null
+>  	$XFS_IO_PROG -c "fpunch 0 $filesz" $SCRATCH_MNT/file > /dev/null
+>  done
+>  
+> -kill -9 $dread_pid > /dev/null 2>&1
+>  wait $dread_pid > /dev/null 2>&1
+>  
+>  echo "Silence is golden"
 > -- 
 > 2.13.3
 > 
