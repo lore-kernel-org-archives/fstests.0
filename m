@@ -1,179 +1,367 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48332 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:41260 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751034AbdGZUdV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 26 Jul 2017 16:33:21 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        id S1751465AbdG0DqO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 26 Jul 2017 23:46:14 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2F8938F4E5
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2017 20:33:21 +0000 (UTC)
-Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
-        by smtp.corp.redhat.com (Postfix) with ESMTPS id 05C0851B69
-        for <fstests@vger.kernel.org>; Wed, 26 Jul 2017 20:33:20 +0000 (UTC)
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] xfs: test xfs_metadump for leaked strings
-Message-ID: <f96cbce4-faf0-6a30-508b-39e5d2c17f8b@redhat.com>
-Date: Wed, 26 Jul 2017 15:33:20 -0500
+        by mx1.redhat.com (Postfix) with ESMTPS id 3B952BDEA
+        for <fstests@vger.kernel.org>; Thu, 27 Jul 2017 03:46:11 +0000 (UTC)
+Date: Thu, 27 Jul 2017 11:46:09 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v2] generic: test read around EOF
+Message-ID: <20170727034609.GQ4858@dhcp12-143.nay.redhat.com>
+References: <20170726104804.25903-1-zlang@redhat.com>
+ <20170726144843.GA60481@bfoster.bfoster>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170726144843.GA60481@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_metadump by default sanitizes the image so that all strings
-longer than 5 chars are obfusccated, and all stale data in metadata
-blocks (i.e. unused/unwritten data) is zeroed out.  We didn't have
-a test for this, though, so this does it.
+On Wed, Jul 26, 2017 at 10:48:43AM -0400, Brian Foster wrote:
+> On Wed, Jul 26, 2017 at 06:48:04PM +0800, Zorro Lang wrote:
+> > As posix standard, if the file offset is at or past the end of file,
+> > no bytes are read, and read() returns zero. But there was a bug,
+> > when DIO read offset is just past the EOF a little, but in the same
+> > block with EOF, read returns different negative values.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> > 
+> > Hi,
+> > 
+> > V2 did below changes:
+> > 1) move falloc, resvsp, allocsp related test to be special test,
+> >    no standard output
+> > 2) pick up pread related test into read_test() function
+> > 
+> 
+> I think Eric eventually narrowed down this problem to something
+> that could be reproduced by the following:
+> 
+> xfs_io -fc "pwrite 0 1024" /mnt/file
+> xfs_io -d -c "pread 1536 512" /mnt/file
+> 
+> The problem only occurred when a block was allocated at the offset of
+> the post-eof DIO read. I suppose it couldn't hurt to test buffered read
+> along with DIO, as well as the other cases of an unwritten block or
+> hole. But given all that, I'm still wondering if this test could be
+> simplified quite a bit to something that effectively does this:
+> 
+> BSIZE=4096
+> SSIZE=512
+> FILE=/mnt/file
+> 
+> rm -f $FILE
+> xfs_io -fc "pwrite 0 $SSIZE" $FILE
+> xfs_io -d -c "pread $(($BSIZE - $SSIZE)) $SSIZE" $FILE || echo "fail"
+> xfs_io -c "pread $(($BSIZE - $SSIZE)) $SSIZE" $FILE || echo "fail"
+> 
+> ... and then maybe repeat the above stanza 2 more times using a
+> "truncate" and "falloc" to create the file. I don't think the
+> XFS-specific preallocation commands are necessary. They result in the
+> same layout and we have other tests for those commands. Otherwise, this
+> could be cleaned up a bit, perhaps detect the BSIZE==SSIZE case and
+> _notrun, etc. Thoughts in general?
 
-It patterns 256M of the scratch device, then uses djwong's
-populate infrastructure to write all types of metadata,
-metadumps & mdrestores it, then looks for either the leaked
-pre-pattern or any leaked strings or filenames.
+Thanks Brian, I just try to cover more test conditions 
 
-The strings we look for are, unfortunately, a bit ad-hoc based on
-what is currently used in the populate routines.
+I. different read range around EOF
+1) read from a range < EOF
+2) read from a range contains EOF
+3) read from a range > EOF, but in same block.
+4) read from a range far far away > EOF
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+II. different read mode:
+1) buffer read
+2) DIO read
+3) sync buffer read
+4) sync DIO read
 
-this exposes a bug in xfs_metadump, sending a fix for that soon
+III. different extents
+1) no extents before and after EOF
+2) written extents before EOF
+3) unwritten extents before and after EOF
+4) unwritten extents before EOF
 
+And "I.3 + II.2/4 + III.2" is the reproducer for "74cedf9b6c60
+direct-io: Fix negative return from dio read beyond eof". Others
+are only extend testing, they'll all pass, except hit some bugs.
 
-diff --git a/tests/xfs/425 b/tests/xfs/425
-new file mode 100755
-index 0000000..02cb60f
---- /dev/null
-+++ b/tests/xfs/425
-@@ -0,0 +1,121 @@
-+#! /bin/bash
-+# FS QA Test 425
-+#
-+# Look for stale data leaks in an xfs_metadump
-+#
-+# If this fails, get the byte offsets of the leaked strings
-+# which are found, then on the restored image in $SCRATCH_MNT,
-+# do:
-+#
-+# xfs_db> blockget -n
-+# xfs_db> convert byte $BYTE daddr
-+# $RESULT
-+# xfs_db> daddr $RESULT
-+# xfs_db> blockuse -n
-+#
-+# to see information about the metadata block which contains the
-+# leaked string in question
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_populate_commands
-+
-+METADUMP_FILE="${TEST_DIR}/${seq}_metadump"
-+MDRESTORE_FILE="${TEST_DIR}/${seq}_mdrestore"
-+
-+echo "Silence is golden"
-+
-+# Pattern the scratch disk, mkfs, and restore.
-+$XFS_IO_PROG -d -c "pwrite 0 256M" $SCRATCH_DEV > $seqres.full 2>&1
-+_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
-+_scratch_populate nofill >> $seqres.full 2>&1
-+
-+# populate unmounts the fs for us
-+
-+_scratch_metadump $METADUMP_FILE 
-+xfs_mdrestore $METADUMP_FILE $MDRESTORE_FILE
-+
-+# Grep for stale data (leaked cd cd pattern) or strings
-+# from populate routine
-+
-+hexdump -C $MDRESTORE_FILE | grep \
-+"cd cd cd cd\| \
-+41 41 41 41\|\
-+42 42 42 42\|\
-+43 43 43 43\|\
-+44 44 44 44\|\
-+61 61 61 61\|\
-+62 62 62 62\|\
-+63 63 63 63\|\
-+64 64 64 64\|\
-+dummy\|\
-+S_IF\|\
-+FMT_\|\
-+INLINE\|\
-+BLOCK\|\
-+LEAF\|\
-+NODE\|\
-+BTREE\|\
-+LOCAL\|\
-+EXTENTS\|\
-+REMOTE\|\
-+ATTR\|\
-+SYSTEM\|\
-+TRUSTED\|\
-+SECURITY\|\
-+attrvalfile\|\
-+unused\|\
-+BNOBT\|\
-+RMAPBT\|\
-+RTRMAPBT\|\
-+REFCOUNTBT" && echo "Leaked data found; see comments in test to debug"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 185487d..d550224 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -422,3 +422,4 @@
- 422 dangerous_scrub dangerous_online_repair
- 423 dangerous_scrub
- 424 auto quick dump
-+425 auto,metadata
+I was wondering _notrun when BSIZE==SSIZE, but for the current
+code, the case won't fail if BSIZE==SSIZE, so I keep it for it
+no hurt.
+
+Thanks,
+Zorro
+
+> 
+> Brian
+> 
+> > Thanks,
+> > Zorro
+> > 
+> >  tests/generic/450     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/450.out |  50 +++++++++++++++
+> >  tests/generic/group   |   1 +
+> >  3 files changed, 222 insertions(+)
+> >  create mode 100755 tests/generic/450
+> >  create mode 100644 tests/generic/450.out
+> > 
+> > diff --git a/tests/generic/450 b/tests/generic/450
+> > new file mode 100755
+> > index 00000000..5fbe7f0c
+> > --- /dev/null
+> > +++ b/tests/generic/450
+> > @@ -0,0 +1,171 @@
+> > +#! /bin/bash
+> > +# FS QA Test 450
+> > +#
+> > +# Test read around EOF. If the file offset is at or past the end of file,
+> > +# no bytes are read, and read() returns zero. But there was a bug, when
+> > +# DIO read offset is just past the EOF a little, but in the same block
+> > +# with EOF, read returns different negative values.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +	rm -f $tfile
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +
+> > +tfile=$TEST_DIR/testfile_${seq}
+> > +ssize=`blockdev --getss $TEST_DEV`
+> > +bsize=`_get_block_size $TEST_DIR`
+> > +
+> > +rm -f $tfile 2>/dev/null
+> > +
+> > +# check xfs_io pread result, especially for
+> > +# Param1: expected pread return
+> > +# Param2: expected pread count
+> > +# Param3: expected pread offset
+> > +#
+> > +# If any of above values are not as expected, the output keeps
+> > +# using the real value
+> > +check_xfs_io_read()
+> > +{
+> > +	RETURN=$1
+> > +	COUNT=$2
+> > +	OFFSET=$3
+> > +
+> > +	$AWK_PROG -v ret="$RETURN" -v cnt="$COUNT" -v off="$OFFSET" '
+> > +		/read/{
+> > +			split($2, bytes, "/")
+> > +
+> > +			retval=bytes[1]
+> > +			count=bytes[2]
+> > +			offset=$NF
+> > +
+> > +			if(retval == ret) retval="X"
+> > +			if(count == cnt) count="XX"
+> > +			if(offset == off) offset="XXX"
+> > +
+> > +			printf("read [%s/%s %s]\n", retval, count, offset)
+> > +
+> > +			next
+> > +		}
+> > +	'
+> > +}
+> > +
+> > +
+> > +# +-----------------------------------------+
+> > +# |    block    |    block    |    block    |
+> > +# +------------------------------------------
+> > +# | sect | sect | sect | sect | sect | sect |
+> > +#                                  |
+> > +#                                 EOF
+> > +# |<----------- move EOF --------->| xxxxxx |
+> > +# [pread1]
+> > +#               [           pread2          ]
+> > +#                                    [pread3]     ...   [pread4]
+> > +#
+> > +# Run below steps with differnt $operation and $openflag
+> > +#
+> > +# 1) use $operation (alloc/reserve/truncate ...) to move EOF
+> > +# 2) read (pread1) the first sector doesn't contain EOF
+> > +# 3) read (pread2) the 2nd and 3rd blocks contain EOF
+> > +# 4) read (pread3) the last sector which just out of EOF
+> > +# 5) read (pread4) at far far away from EOF
+> > +#
+> > +# NOTE: This case generally test on sector size < block size, but equal is fine
+> > +#
+> > +asize=$((bsize * 3))
+> > +tsize=$((asize - ssize - 100))
+> > +
+> > +read_test()
+> > +{
+> > +	$XFS_IO_PROG $oflag -c "pread 0 $ssize" $tfile | \
+> > +		check_xfs_io_read "$ssize" "$ssize" "0"
+> > +
+> > +	$XFS_IO_PROG $oflag -c "pread $bsize $((bsize * 2))" $tfile | \
+> > +		check_xfs_io_read "$((tsize - bsize))" "$((bsize * 2))" "$bsize"
+> > +
+> > +	$XFS_IO_PROG $oflag -c "pread $((bsize * 3 - ssize)) $ssize" $tfile | \
+> > +		check_xfs_io_read "0" "$ssize" "$((bsize * 3 - ssize))"
+> > +
+> > +	$XFS_IO_PROG $oflag -c "pread $((bsize * 100)) $ssize" $tfile | \
+> > +		check_xfs_io_read "0" "$ssize" "$((bsize * 100))"
+> > +}
+> > +
+> > +# Generic test
+> > +for oflag in "" "-d" "-s" "-sd"; do
+> > +	for oper in "pwrite 0 ${tsize}" "truncate ${tsize}"; do
+> > +		echo "## Test ${oper%% *} and read with open ${oflag} ##" | \
+> > +			tee -a $seqres.full
+> > +
+> > +		$XFS_IO_PROG -ft -c "$oper" $tfile >>$seqres.full
+> > +
+> > +		read_test
+> > +
+> > +		echo | tee -a $seqres.full
+> > +	done
+> > +done
+> > +
+> > +# XFS test
+> > +echo "## Extra testing, no output is expected below ##"
+> > +for oflag in "" "-d" "-s" "-sd"; do
+> > +	for oper in "falloc 0 ${tsize}" \
+> > +		    "resvsp 0 ${asize}" \
+> > +		    "allocsp ${tsize} 0"; do
+> > +		echo "## Test ${oper%% *} and read with open ${oflag} ##" >> $seqres.full
+> > +
+> > +		# Drop all output, for some filesystems don't support these
+> > +		# test operations
+> > +		$XFS_IO_PROG -ft -c "truncate ${tsize}" -c "$oper" $tfile >>$seqres.full 2>&1
+> > +
+> > +		# For keeping golden image consistency in different filesystems,
+> > +		# drop the output, but not error output
+> > +		read_test >>$seqres.full
+> > +
+> > +		echo >> $seqres.full
+> > +	done
+> > +done
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/450.out b/tests/generic/450.out
+> > new file mode 100644
+> > index 00000000..ad2570e8
+> > --- /dev/null
+> > +++ b/tests/generic/450.out
+> > @@ -0,0 +1,50 @@
+> > +QA output created by 450
+> > +## Test pwrite and read with open  ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test truncate and read with open  ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test pwrite and read with open -d ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test truncate and read with open -d ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test pwrite and read with open -s ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test truncate and read with open -s ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test pwrite and read with open -sd ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Test truncate and read with open -sd ##
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +read [X/XX XXX]
+> > +
+> > +## Extra testing, no output is expected below ##
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index a04cc900..0b29be0a 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -452,3 +452,4 @@
+> >  447 auto quick clone
+> >  448 auto quick rw
+> >  449 auto quick acl enospc
+> > +450 auto quick rw
+> > -- 
+> > 2.13.3
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
