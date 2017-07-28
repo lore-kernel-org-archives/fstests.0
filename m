@@ -1,47 +1,57 @@
-Received: from sandeen.net ([63.231.237.45]:41584 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:46158 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751454AbdG0NhI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 27 Jul 2017 09:37:08 -0400
-Subject: Re: [PATCH] xfs: test xfs_metadump for leaked strings
-References: <f96cbce4-faf0-6a30-508b-39e5d2c17f8b@redhat.com>
- <20170727105205.GD9167@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <430e5852-bf79-cf8f-0f12-28cce1a32965@sandeen.net>
-Date: Thu, 27 Jul 2017 08:37:07 -0500
-MIME-Version: 1.0
-In-Reply-To: <20170727105205.GD9167@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S1751045AbdG1GZz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 28 Jul 2017 02:25:55 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] new: validate groups when creating new test
+Date: Fri, 28 Jul 2017 14:25:22 +0800
+Message-Id: <20170728062522.16916-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: sandeen@sandeen.net, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 7/27/17 5:52 AM, Eryu Guan wrote:
-> On Wed, Jul 26, 2017 at 03:33:20PM -0500, Eric Sandeen wrote:
->> xfs_metadump by default sanitizes the image so that all strings
->> longer than 5 chars are obfusccated, and all stale data in metadata
->> blocks (i.e. unused/unwritten data) is zeroed out.  We didn't have
->> a test for this, though, so this does it.
->>
->> It patterns 256M of the scratch device, then uses djwong's
->> populate infrastructure to write all types of metadata,
->> metadumps & mdrestores it, then looks for either the leaked
->> pre-pattern or any leaked strings or filenames.
->>
->> The strings we look for are, unfortunately, a bit ad-hoc based on
->> what is currently used in the populate routines.
-> 
-> I don't have a better idea to avoid this either..
-> 
-> Some minor issues below.
+Allow only lower case letters, digits, spaces and underscore when
+adding groups, give prompt if there's any not-allowed characters.
+Also remove redundant spaces between groups.
 
-comment typo: will fix
-whitespace: sigh, will fix ;)
-groups: a patch to new script to check for this might be nice ;) will fix.
-out file: Argh, always forget to add that to git
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ new | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
 
-will resend, thanks.
+diff --git a/new b/new
+index eb7da0ff463b..4eacccd3bf8b 100755
+--- a/new
++++ b/new
+@@ -239,7 +239,7 @@ then
+ 
+     while true
+     do
+-	echo -n "Add to group(s) [other] (? for list): "
++	echo -n "Add to group(s) [other] (separate by space, ? for list): "
+ 	read ans
+ 	[ -z "$ans" ] && ans=other
+ 	if [ "X$ans" = "X?" ]
+@@ -254,7 +254,17 @@ then
+ 	    lst=`for word in $grpl; do echo $word; done | sort| uniq `
+ 	    echo $lst
+ 	else
+-	    break
++	    # only allow lower cases, spaces, digits and underscore in group
++	    inval=`echo $ans | tr -d '[:lower:][:space:][:digit:]_'`
++	    if [ "$inval" != "" ]; then
++		echo "Invalid characters in group(s): $inval"
++		echo "Only lower cases, digits and underscore are allowed in groups, separated by space"
++		continue
++	    else
++		# remove redundant spaces/tabs
++		ans=`echo "$ans" | sed 's/\s\+/ /g'`
++		break
++	    fi
+ 	fi
+     done
+ else
+-- 
+2.13.3
 
--Eric
