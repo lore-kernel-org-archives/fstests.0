@@ -1,61 +1,63 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:36975 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751960AbdG1QuW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jul 2017 12:50:22 -0400
-Date: Fri, 28 Jul 2017 09:50:19 -0700
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:34780 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750795AbdG2EPU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 29 Jul 2017 00:15:20 -0400
+Received: by mail-pf0-f196.google.com with SMTP id u17so3545634pfa.1
+        for <fstests@vger.kernel.org>; Fri, 28 Jul 2017 21:15:20 -0700 (PDT)
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [PATCH v2 13/15] common: remove IRIX-specific code
-Message-ID: <20170728165019.GA144538@gmail.com>
-References: <20170721043853.364-1-ebiggers3@gmail.com>
- <20170721043853.364-14-ebiggers3@gmail.com>
- <20170728111926.GE9167@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170728111926.GE9167@eguan.usersys.redhat.com>
+Subject: [PATCH] xfstests: include <sys/sysmacros.h> for major() and minor()
+Date: Fri, 28 Jul 2017 21:13:41 -0700
+Message-Id: <20170729041341.2564-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 28, 2017 at 07:19:26PM +0800, Eryu Guan wrote:
-> > -#
-> > -# Filtering of Irix character hwgraph device names
-> > -# e.g.
-> > -# chardev: /hw/node/xtalk/15/pci/0/scsi_ctlr/0/target/1/lun/0/disk/partition/4/char
-> > -# blkdev:  /dev/dsk/dks0d1s4
-> > -#
-> > -_filter_devchar()
-> > -{
-> > -    $AWK_PROG '
-> > -	/\/hw\/node/ {
-> > -	    sub(/\/hw.*scsi_ctlr\//,"/dev/dsk/dks")  # blah blah /dev/dsk/dks0/target/1/....
-> > -	    sub(/\/target\//,"d")                    # blah blah /dev/dsk/dks0d1/lun/0/disk.....
-> > -	    sub(/\/lun.*partition\//,"s")            # blah blah /dev/dsk/dks0d1s4/char
-> > -	    sub(/\/char/,"")			     # blah blah /dev/dsk/dks0d1s4
-> > -	}
-> > -	{ print }
-> > -    '
-> > -}
-> > -
-> >  
-> >  #
-> >  # Filter out the non-deterministic dump msgs from
-> > @@ -824,7 +803,6 @@ _filter_devchar()
-> >  #
-> >  _dump_filter_main()
-> >  {
-> > -  _filter_devchar |\
-> 
-> I added this _filter_devchar function back as xfs/061 needs it,
-> otherwise it fails like:
-> 
->  -xfsrestore: volume: /dev/dsk/dks0d2s1
->  +xfsrestore: volume: /hw/node/io/gio/hpc/scsi_ctlr/0/target/2/lun/0/disk/partition/1/char
-> 
-> I think this is the safest and easiest thing to do at this moment.
-> 
+From: Eric Biggers <ebiggers@google.com>
 
-Okay, that's fine for now.  Thanks for testing!
+This resolves the following deprecation warning (and other instances of
+the same warning) when compiling with glibc 2.25 or later:
 
-Eric
+stat_test.c: In function 'cmp_statx':
+stat_test.c:251:13: warning: In the GNU C Library, "major" is defined
+ by <sys/sysmacros.h>. For historical compatibility, it is
+ currently defined by <sys/types.h> as well, but we plan to
+ remove this soon. To use "major", include <sys/sysmacros.h>
+ directly. If you did not intend to use a system-defined macro
+ "major", you should undefine it after including <sys/types.h>.
+  devcmp(dev);
+             ^
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ src/fssum.c     | 1 +
+ src/stat_test.c | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/src/fssum.c b/src/fssum.c
+index 88e75621..04052cdc 100644
+--- a/src/fssum.c
++++ b/src/fssum.c
+@@ -31,6 +31,7 @@
+ #include <errno.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <sys/sysmacros.h>
+ #ifdef __SOLARIS__
+ #include <sys/mkdev.h>
+ #endif
+diff --git a/src/stat_test.c b/src/stat_test.c
+index fc87ed5c..198c1332 100644
+--- a/src/stat_test.c
++++ b/src/stat_test.c
+@@ -19,6 +19,7 @@
+ #include <fcntl.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
++#include <sys/sysmacros.h>
+ #include "statx.h"
+ 
+ static bool failed = false;
+-- 
+2.13.3
+
