@@ -1,57 +1,67 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57204 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:53162 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750979AbdGaItL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 31 Jul 2017 04:49:11 -0400
-Date: Mon, 31 Jul 2017 16:49:07 +0800
+        id S1751091AbdGaIzU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 31 Jul 2017 04:55:20 -0400
+Date: Mon, 31 Jul 2017 16:55:18 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/441: whitelist gfs2 for full test
-Message-ID: <20170731084907.GH9167@eguan.usersys.redhat.com>
-References: <20170728104827.7260-1-jlayton@kernel.org>
+Subject: Re: [PATCH] common/rc: add variable MOUNT_OPTIONS into _test_mount
+Message-ID: <20170731085518.GI9167@eguan.usersys.redhat.com>
+References: <1501488393-25924-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170728104827.7260-1-jlayton@kernel.org>
+In-Reply-To: <1501488393-25924-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, cluster-devel@redhat.com
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 28, 2017 at 06:48:27AM -0400, Jeff Layton wrote:
-> From: Jeff Layton <jlayton@redhat.com>
+On Mon, Jul 31, 2017 at 04:06:33PM +0800, Xiao Yang wrote:
+> On RHEL6.9GA, generic/097 fails for ext4 because _test_cycle_mount()
+> remount ext4 without the user_xattr option, so extended attributes
+> are not supported by ext4.
 > 
-> gfs2 passes the full-scale generic/441 test with the patch that
-> converts it to use errseq_t reporting for fsync.
+> On some old kernels, ext4 filesystem can not be mounted with acl and
+> user_xattr options by default.  The following patch has enabled these
+> options by default:
+> 'ea6633369458("ext4: enable acls and user_xattr by default")'
 > 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> ---
->  tests/generic/441 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> We add variable MOUNT_OPTIONS into _test_mount, and it works normally
+> on all kernels.
 > 
-> diff --git a/tests/generic/441 b/tests/generic/441
-> index 075d87723ca1..b98f709cb6eb 100755
-> --- a/tests/generic/441
-> +++ b/tests/generic/441
-> @@ -55,7 +55,7 @@ case $FSTYP in
->  	btrfs)
->  		_notrun "btrfs has a specialized test for this"
->  		;;
-> -	ext3|ext4|xfs)
-> +	ext3|ext4|gfs2|xfs)
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-gfs2 has no external log device support yet in _scratch_mkfs, so if test
-still passes with patched gfs2 in this case, I think we can test gfs2 in
-full-scale mode unconditionally? e.g.
-
-	ext3|ext4|xfs)
- 		# Do the more thorough test if we have a logdev
- 		_has_logdev && sflag=''
- 		;;
-	gfs2)
-		# <comments here>
-		sflag=''
-		;;
-	*)
-		;;
+MOUNT_OPTIONS is for SCRATCH_DEV, TEST_FS_MOUNT_OPTS is for TEST_DEV, I
+think what you should update is _test_mount_opts in common/config, add
+something similar to _test_opts for ext series, to add acl and
+user_xattr support. Could you please verify if that works?
 
 Thanks,
 Eryu
+
+> ---
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index c752979..c478eeb 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -519,7 +519,7 @@ _test_mount()
+>          return $?
+>      fi
+>      _test_options mount
+> -    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> +    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS `_common_dev_mount_options $*` $TEST_DEV $TEST_DIR
+>  }
+>  
+>  _test_unmount()
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
