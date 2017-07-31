@@ -1,46 +1,46 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51814 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:49484 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750709AbdGaE2p (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 31 Jul 2017 00:28:45 -0400
+        id S1750709AbdGaE2r (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 31 Jul 2017 00:28:47 -0400
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/2] generic/224: filter out expected XFS warnings for mixed direct/buffer I/O
-Date: Mon, 31 Jul 2017 12:28:24 +0800
-Message-Id: <20170731042825.6250-1-eguan@redhat.com>
+Subject: [PATCH 2/2] common/xfs: add iomap_dio_actor() to the dmesg filter
+Date: Mon, 31 Jul 2017 12:28:25 +0800
+Message-Id: <20170731042825.6250-2-eguan@redhat.com>
+In-Reply-To: <20170731042825.6250-1-eguan@redhat.com>
+References: <20170731042825.6250-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-generic/224 is doing concurrent direct and buffered I/O to the same
-set of files, and this triggers some expected warnings on XFS. So
-filter out these warnings just like what we did in generic/095 and
-generic/247.
+The warning in fs/iomap.c::iomap_dio_actor() could be triggered when
+mixing dio and mmap I/O on the same sparse file. Several tests could
+hit this warning now, like generic/095 generic/224 and generic/446.
+So add this expected warning to whitelist too.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- tests/generic/224 | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ common/xfs | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/224 b/tests/generic/224
-index 2c30a75258f3..29b1c05d06df 100755
---- a/tests/generic/224
-+++ b/tests/generic/224
-@@ -82,5 +82,14 @@ for i in `seq 0 1 $FILES`; do
- done
- wait
- echo "*** Silence is golden ***"
--status=0
-+
-+# unmount and check dmesg, filtering out expected XFS warnings about mixed
-+# direct and buffered I/O
-+_scratch_unmount
-+if [ "$FSTYP" == "xfs" ]; then
-+	_check_dmesg _filter_xfs_dmesg
-+else
-+	_check_dmesg
-+fi
-+status=$?
- exit
+diff --git a/common/xfs b/common/xfs
+index 47b4e1ba4b7f..4995f8ba8dd8 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -596,10 +596,12 @@ _filter_xfs_dmesg()
+ 	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
+ 	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
+ 	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
++	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+ 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+ 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+ 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+ 	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
+ 	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
+-	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#"
++	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
++	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#"
+ }
 -- 
 2.13.3
 
