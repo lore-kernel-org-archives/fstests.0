@@ -1,44 +1,285 @@
-Received: from szxga03-in.huawei.com ([45.249.212.189]:9891 "EHLO
-        szxga03-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751012AbdHAMQB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 Aug 2017 08:16:01 -0400
-From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH] xfs/073: don't follow symbolic link when comparing the directories
-Date: Tue, 1 Aug 2017 20:20:18 +0800
-Message-ID: <1501590018-19013-1-git-send-email-houtao1@huawei.com>
+Received: from mx1.redhat.com ([209.132.183.28]:35424 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751923AbdHAMwj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Aug 2017 08:52:39 -0400
+Date: Tue, 1 Aug 2017 08:52:36 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH v3] generic: test read around EOF
+Message-ID: <20170801125236.GA30198@bfoster.bfoster>
+References: <20170731130956.30494-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170731130956.30494-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When there is a broken symbolic link file under $here directory,
-the diff between the source directory and the target directory will
-output something like: "diff: /path/xxx/yyy: No such file or directory",
-and the test case will fail.
+On Mon, Jul 31, 2017 at 09:09:56PM +0800, Zorro Lang wrote:
+> As posix standard, if the file offset is at or past the end of file,
+> no bytes are read, and read() returns zero.
+> 
+> This case reads from range within EOF, past EOF and at EOF, to make
+> sure the return value as expected, especially read from past/at EOF
+> returns 0.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> V3 did below changes:
+> 1) Remove truncate/fallocate/resvsp/alloc operations, only leave pwrite.
+> 2) Only test on sector size <= (block size / 4), generally that means
+>    512b sector size and 4k block size.
+> 3) remove all unaligned test, due to ext4 and xfs got different results
+>    when read past EOF with unaligned offset/length. And I can get a pretty
+>    sure expected result for this situation.
+> 
+> For the 3rd situation (*unaligned* read from past EOF):
+>  - RHEL-7.3 ext4 return 0, xfs return error (known bug).
+>  - Upstream 4.13-rc1 ext4 return EINVAL, xfs return 0.
+> 
+> I can't find any standard explain how a unaligned read from past EOF should
+> be. So I decide to skip this gray area for now.
+> 
 
-To fix it, we should use "--no-dereference" option of diff command to
-only compare the values of the symbolic links.
+This looks mostly good to me. Thanks for the rework. Just some nits...
 
-Signed-off-by: Hou Tao <houtao1@huawei.com>
----
- tests/xfs/073 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+> Thanks,
+> Zorro
+> 
+>  tests/generic/450     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/450.out |  11 ++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 161 insertions(+)
+>  create mode 100755 tests/generic/450
+>  create mode 100644 tests/generic/450.out
+> 
+> diff --git a/tests/generic/450 b/tests/generic/450
+> new file mode 100755
+> index 00000000..0aa2e81c
+> --- /dev/null
+> +++ b/tests/generic/450
+> @@ -0,0 +1,149 @@
+> +#! /bin/bash
+> +# FS QA Test 450
+> +#
+> +# Test read around EOF. If the file offset is at or past the end of file,
+> +# no bytes are read, and read() returns zero.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	rm -f $tfile
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
 
-diff --git a/tests/xfs/073 b/tests/xfs/073
-index 7228dd9..ddd462b 100755
---- a/tests/xfs/073
-+++ b/tests/xfs/073
-@@ -98,7 +98,7 @@ _verify_copy()
- 	fi
- 
- 	echo comparing new image files to old
--	diff -Naur $source_dir $target_dir
-+	diff -Naur --no-dereference $source_dir $target_dir
- 
- 	echo comparing new image directories to old
- 	find $source_dir | _filter_path $source_dir > $tmp.manifest1
--- 
-2.5.0
+Is ./common/filter used in this test?
 
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +
+> +tfile=$TEST_DIR/testfile_${seq}
+> +ssize=`_min_dio_alignment $TEST_DEV`
+> +bsize=`_get_block_size $TEST_DIR`
+> +
+> +if [ $ssize -gt $((bsize/4)) ]; then
+> +	_notrun "Only test on sector size < half of block size"
+> +fi
+> +
+> +rm -f $tfile 2>/dev/null
+> +
+> +# check xfs_io pread result, especially for
+> +# Param1: expected pread return
+> +# Param2: expected pread count
+> +# Param3: expected pread offset
+> +#
+> +# If any of above values are not as expected, the output keeps
+> +# using the real value
+> +check_xfs_io_read()
+> +{
+> +	RETURN=$1
+> +	COUNT=$2
+> +	OFFSET=$3
+> +
+> +	$AWK_PROG -v ret="$RETURN" -v cnt="$COUNT" -v off="$OFFSET" '
+> +		/read/{
+> +			split($2, bytes, "/")
+> +
+> +			retval=bytes[1]
+> +			count=bytes[2]
+> +			offset=$NF
+> +
+> +			if(retval != ret || count != cnt || offset != off)
+> +				printf("expect [%s, %s, %s], but get [%s, %s, %s]\n", ret, cnt, off, retval, count, offset)
+
+I'm not terribly familiar with the syntax here, but can we split this
+long line up without breaking it? We could also shorten it up a bit with
+an output format that looks like:
+
+	expect [...], got [...]
+
+> +
+> +			next
+> +		}
+> +	'
+> +}
+> +
+> +# +-------------------------------------------------------+
+> +# |           block           |           block           |
+> +# +-------------------------------------------------------+
+> +# | sect | sect | sect | sect | sect | sect | sect | sect |
+> +#                                           |
+> +#                                          EOF
+> +# |<--------------- move EOF -------------->| xxxxxxxxxxx |
+> +# [pread1]
+> +#                             [           pread2          ]
+> +#                                           [pread3]
+> +#                                                  [pread4]  ...  [pread5]
+> +#
+> +# Run below steps with differnt $operation and $openflag
+
+			  different
+
+> +#
+> +# 1) write 2 blocks (6 sectors) data to move EOF to the penultimate sector
+> +# 2) read (pread1) the first sector within EOF
+> +# 3) read (pread2) the second block contain EOF
+> +# 4) read (pread3) a sector at (after) EOF
+> +# 6) read (pread4) the last sector past EOF
+> +# 7) read (pread5) at far away from EOF
+> +#
+> +# NOTE: This case generally test on sector size < block size, but equal is fine
+
+Is this still valid..?
+
+> +#
+> +asize=$((bsize * 2))
+> +tsize=$((asize - ssize * 2))
+> +
+> +read_test()
+> +{
+> +	echo "## pread1 $oflag ##"
+> +	$XFS_IO_PROG $oflag -c "pread 0 $ssize" $tfile | \
+> +		check_xfs_io_read "$ssize" "$ssize" "0"
+> +
+> +	echo "## pread2 $oflag ##"
+> +	$XFS_IO_PROG $oflag -c "pread $bsize $bsize" $tfile | \
+> +		check_xfs_io_read "$((bsize - ssize * 2))" "$bsize" "$bsize"
+
+An expected return value of $((tsize - bsize)) seems a bit more clear to
+me (i.e., file size - offset).
+
+> +
+> +	echo "## pread3 $oflag ##"
+> +	$XFS_IO_PROG $oflag -c "pread $tsize $ssize" $tfile | \
+> +		check_xfs_io_read "0" "$ssize" "$tsize"
+> +
+> +	echo "## pread4 $oflag ##"
+> +	$XFS_IO_PROG $oflag -c "pread $((asize - ssize)) $ssize" $tfile | \
+
+$((tsize + ssize)) ?
+
+> +		check_xfs_io_read "0" "$ssize" "$((asize - ssize))"
+> +
+> +	echo "## pread5 $oflag ##"
+> +	$XFS_IO_PROG $oflag -c "pread $((bsize * 100)) $ssize" $tfile | \
+> +		check_xfs_io_read "0" "$ssize" "$((bsize * 100))"
+> +}
+> +
+> +# Test buffer/direct I/O read
+> +for oflag in "" "-d"; do
+> +	$XFS_IO_PROG -ft -c "pwrite 0 ${tsize}" $tfile >>$seqres.full
+> +	read_test
+> +done
+
+I don't see why we need to write the file for each iteration of the
+loop. As it is, any writes beyond the initial iteration look like
+overwrites that otherwise won't modify the state of the file. Also, I
+think we should -c fsync the file to ensure consistent test behavior and
+it's slightly cleaner to pass oflag to read_test() so it's obvious how
+it's used.  E.g.:
+
+$XFS_IO_PROG -ft -c "pwrite ..." -c fsync ...
+for oflag in "" "-d"; do
+	read_test $oflag
+done
+
+Brian
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/450.out b/tests/generic/450.out
+> new file mode 100644
+> index 00000000..ce3571bc
+> --- /dev/null
+> +++ b/tests/generic/450.out
+> @@ -0,0 +1,11 @@
+> +QA output created by 450
+> +## pread1  ##
+> +## pread2  ##
+> +## pread3  ##
+> +## pread4  ##
+> +## pread5  ##
+> +## pread1 -d ##
+> +## pread2 -d ##
+> +## pread3 -d ##
+> +## pread4 -d ##
+> +## pread5 -d ##
+> diff --git a/tests/generic/group b/tests/generic/group
+> index a04cc900..0b29be0a 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -452,3 +452,4 @@
+>  447 auto quick clone
+>  448 auto quick rw
+>  449 auto quick acl enospc
+> +450 auto quick rw
+> -- 
+> 2.13.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
