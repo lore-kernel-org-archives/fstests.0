@@ -1,60 +1,76 @@
-Received: from mga01.intel.com ([192.55.52.88]:17443 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751859AbdGaW7h (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 31 Jul 2017 18:59:37 -0400
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH] xfs_io: allow lsattr & lsproj on foreign filesystems
-Date: Mon, 31 Jul 2017 16:58:33 -0600
-Message-Id: <20170731225833.11104-1-ross.zwisler@linux.intel.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:38440 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751012AbdHAEzg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 Aug 2017 00:55:36 -0400
+Received: by mail-qk0-f193.google.com with SMTP id m84so541920qki.5
+        for <fstests@vger.kernel.org>; Mon, 31 Jul 2017 21:55:35 -0700 (PDT)
+Date: Tue, 1 Aug 2017 01:55:31 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: [PATCH] generic/449: make the test effective against xfs
+Message-ID: <20170801045528.GA4696@debian.home>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Eric Sandeen <sandeen@redhat.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
+Cc: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-The following commit:
+Setting acls on an xfs filesystem will succeed even after running out
+of space for user attributes. Use trusted attributes instead.
 
-commit 73b54bb6a2fb ("xfs_io: allow chattr & chproj on foreign filesystems")
-
-allowed chattr and chproj to be run on non-xfs filesystems now that
-FS_IOC_FSSETXATTR is a generic vfs call.  It failed to enable the
-corresponding lsattr and lsproj commands for those filesystems, though.
-
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-Fixes: 73b54bb6a2fb ("xfs_io: allow chattr & chproj on foreign filesystems")
-Cc: Eric Sandeen <sandeen@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>
-Cc: Jan Kara <jack@suse.cz>
+Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
+>
 ---
- io/attr.c | 2 +-
- io/open.c | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ tests/generic/449 | 18 +++++++++++++++++-
+ 1 file changed, 17 insertions(+), 1 deletion(-)
 
-diff --git a/io/attr.c b/io/attr.c
-index b8eec1b..728560e 100644
---- a/io/attr.c
-+++ b/io/attr.c
-@@ -353,7 +353,7 @@ attr_init(void)
- 	lsattr_cmd.args = _("[-R|-D|-a|-v]");
- 	lsattr_cmd.argmin = 0;
- 	lsattr_cmd.argmax = 1;
--	lsattr_cmd.flags = CMD_NOMAP_OK;
-+	lsattr_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
- 	lsattr_cmd.oneline =
- 		_("list extended inode flags set on the currently open file");
- 	lsattr_cmd.help = lsattr_help;
-diff --git a/io/open.c b/io/open.c
-index b50f068..f2ea7c3 100644
---- a/io/open.c
-+++ b/io/open.c
-@@ -812,7 +812,7 @@ open_init(void)
- 	lsproj_cmd.args = _("[-D | -R]");
- 	lsproj_cmd.argmin = 0;
- 	lsproj_cmd.argmax = -1;
--	lsproj_cmd.flags = CMD_NOMAP_OK;
-+	lsproj_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
- 	lsproj_cmd.oneline =
- 		_("list project identifier set on the currently open file");
- 	lsproj_cmd.help = lsproj_help;
--- 
-2.9.4
+diff --git a/tests/generic/449 b/tests/generic/449
+index fb776b3..6fbc634 100755
+--- a/tests/generic/449
++++ b/tests/generic/449
+@@ -59,6 +59,15 @@ _require_attrs
+ _scratch_mkfs_sized $((50 * 1024 * 1024)) >> $seqres.full 2>&1
+ _scratch_mount || _fail "mount failed"
+=20
++if [ "$FSTYP" =3D=3D "xfs" ]; then
++	# xfs takes too long to run out of space if setting only the names
++	# of the attributes. Create a 5k file filled with dots to be used
++	# as their value.
++	VFILE=3D$SCRATCH_MNT/valuefile
++	touch $VFILE
++	$XFS_IO_PROG -c "pwrite -S 0x2E 0 5k" $VFILE >>$seqres.full 2>&1
++fi
++
+ TFILE=3D$SCRATCH_MNT/testfile.$seq
+=20
+ # Create the test file and choose its permissions
+@@ -70,6 +79,13 @@ chmod go-rwx $TFILE
+ $XFS_IO_PROG -c "pwrite 0 50m" $TFILE >>$seqres.full 2>&1
+ i=3D1
+ j=3D1
++ATTR_TYPE=3Duser
++if [ "$FSTYP" =3D=3D "xfs" ]; then
++	ATTR_TYPE=3Dtrusted
++	while $SETFATTR_PROG -n $ATTR_TYPE.$i -v $(cat $VFILE) $TFILE &>/dev/nu=
+ll; do
++		((++i))
++	done
++fi
+ ret=3D0
+ while [ $ret -eq 0 ]; do
+ 	ret=3D1
+@@ -77,7 +93,7 @@ while [ $ret -eq 0 ]; do
+ 		# On btrfs, setfattr will sometimes fail when free space is
+ 		# low, long before it's actually exhausted. Insist until it
+ 		# fails consistently.
+-		$SETFATTR_PROG -n user.$i"x"$j $TFILE &>/dev/null
++		$SETFATTR_PROG -n $ATTR_TYPE.$i"x"$j $TFILE &>/dev/null
+ 		ret=3D$(( $ret && $? ))
+ 		((++j))
+ 	done
+--=20
+2.1.4
 
