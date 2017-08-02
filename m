@@ -1,239 +1,74 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39439 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38578 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752154AbdHBIho (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Aug 2017 04:37:44 -0400
-Date: Wed, 2 Aug 2017 16:37:42 +0800
+        id S1752139AbdHBJEJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Aug 2017 05:04:09 -0400
+Date: Wed, 2 Aug 2017 17:04:07 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/5] common/inject: refactor helpers to use new errortag
- interface
-Message-ID: <20170802083742.GU9167@eguan.usersys.redhat.com>
-References: <150067465981.30639.14801416171688538711.stgit@magnolia>
- <150067468569.30639.11717903404151243816.stgit@magnolia>
+Subject: Re: [PATCH v2] common/config: add acl and user_xattr support for
+ TEST_DEV
+Message-ID: <20170802090407.GV9167@eguan.usersys.redhat.com>
+References: <20170731085518.GI9167@eguan.usersys.redhat.com>
+ <1501493816-29678-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150067468569.30639.11717903404151243816.stgit@magnolia>
+In-Reply-To: <1501493816-29678-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 21, 2017 at 03:04:45PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Jul 31, 2017 at 05:36:56PM +0800, Xiao Yang wrote:
+> On RHEL6.9GA, generic/097 fails for ext4 because _test_cycle_mount()
+> remount ext4 without the user_xattr option, so extended attributes
+> are not supported by ext4.
 > 
-> Refactor the XFS error injection helpers to use the new errortag
-> interface to configure error injection.  If that isn't present, fall
-> back either to the xfs_io/ioctl based injection or the older sysfs
-> knobs.  Refactor existing testcases to use the new helpers.
+> On some old kernels, ext4 filesystem can not be mounted with acl and
+> user_xattr options by default.  The following patch has enabled these
+> options by default:
+> 'ea6633369458("ext4: enable acls and user_xattr by default")'
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-This looks good to me overall, but I still perfer let other people
-who're more familar with XFS errortag and error injection to review too.
-While I do have some questions/comments :)
-
-> ---
->  common/inject |   58 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
->  tests/xfs/141 |    5 +++--
->  tests/xfs/196 |   17 ++++++-----------
->  3 files changed, 65 insertions(+), 15 deletions(-)
+> We add acl and user_xattr support in _test_mount_opts(), and it works
+> normally on all kernels.
 > 
-> 
-> diff --git a/common/inject b/common/inject
-> index 8ecc290..9aa24de 100644
-> --- a/common/inject
-> +++ b/common/inject
-> @@ -35,10 +35,46 @@ _require_error_injection()
->  	esac
->  }
->  
-> +# Find a given xfs mount's errortag injection knob in sysfs
-> +_find_xfs_mount_errortag_knob()
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
-While The function name and comment both indicate it needs a mounted
-XFS, it seems weird that the first argument is expected to be a block
-device. And do we need to check if the given device is really mounted?
+Thanks for the patch! But it exposes some bugs in config section
+handling, a section for xfs test could inherit TEST_FS_MOUNT_OPTS (and
+other variables like MOUNT_OPTIONS) from previous ext4 section, and xfs
+doesn't support acl mount option which results in a mount failure for
+TEST_DEV.
 
-> +{
-> +	dev="$1"
-> +	knob="$2"
-> +	shortdev="$(_short_dev "${dev}")"
-> +	tagfile="/sys/fs/xfs/${shortdev}/errortag/${knob}"
-> +
-> +	# Some of the new sysfs errortag knobs were previously available via
-> +	# another sysfs path.
-> +	case "${knob}" in
-> +	"log_bad_crc")
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/log/log_badcrc_factor"
-> +		fi
-> +		;;
-> +	"drop_writes")
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/drop_writes"
-> +		fi
-> +		if [ ! -w "${tagfile}" ]; then
-> +			tagfile="/sys/fs/xfs/${shortdev}/fail_writes"
-> +		fi
-> +		;;
-> +	*)
-> +		;;
-> +	esac
-> +
-> +	echo "${tagfile}"
-> +}
-> +
->  # Requires that xfs_io inject command knows about this error type
->  _require_xfs_io_error_injection()
->  {
->  	type="$1"
-> +
-> +	# Can we find the error injection knobs via the new errortag
-> +	# configuration mechanism?
-> +	test -w "$(_find_xfs_mount_errortag_knob "${TEST_DEV}" "${type}")" && return
-> +
-
-As this check goes prior to the _require_error_injection check, so I
-assume this new errortag framework doesn't depend on a debug built XFS,
-can I?
-
->  	_require_error_injection
->  
->  	# NOTE: We can't actually test error injection here because xfs
-> @@ -54,16 +90,34 @@ _require_xfs_io_error_injection()
->  _test_inject_error()
->  {
->  	type="$1"
-> +	value="$2"
->  
-> -	$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-> +	knob="$(_find_xfs_mount_errortag_knob "${TEST_DEV}" "${type}")"
-> +	if [ -w "${knob}" ]; then
-> +		test -z "${value}" && value="default"
-> +		echo -n "${value}" > "${knob}"
-> +	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-> +		$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-> +	else
-> +		_notrun "Cannot inject error ${type} value ${value}."
-
-_require_xfs_io_error_injection already made sure we can do error
-jection, it looks like a bug somewhere to me if we can't inject error
-here, either wanted to inject error without checking the support status
-first or an implementation bug in the error injection framework in
-xfstests. So "_fail" might be the right choice.
-
-> +	fi
->  }
->  
->  # Inject an error into the scratch fs
->  _scratch_inject_error()
->  {
->  	type="$1"
-> +	value="$2"
->  
-> -	$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-> +	knob="$(_find_xfs_mount_errortag_knob "${SCRATCH_DEV}" "${type}")"
-> +	if [ -w "${knob}" ]; then
-> +		test -z "${value}" && value="default"
-> +		echo -n "${value}" > "${knob}"
-> +	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-> +		$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-> +	else
-> +		_notrun "Cannot inject error ${type} value ${value}."
-
-Same here.
+I'll look into the config section bug first, and apply this patch after
+fixing that bug. This patch fixes a minor bug that only shows up on
+older kernels and only affects one test, so I think it's not urgent to
+fix. OTOH, I think config section is more widely used and affects more
+people.
 
 Thanks,
 Eryu
 
-> +	fi
->  }
->  
->  # Unmount and remount the scratch device, dumping the log
-> diff --git a/tests/xfs/141 b/tests/xfs/141
-> index 56ff14e..f61e524 100755
-> --- a/tests/xfs/141
-> +++ b/tests/xfs/141
-> @@ -47,13 +47,14 @@ rm -f $seqres.full
->  
->  # get standard environment, filters and checks
->  . ./common/rc
-> +. ./common/inject
->  
->  # real QA test starts here
->  
->  # Modify as appropriate.
->  _supported_fs xfs
->  _supported_os Linux
-> -_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
-> +_require_xfs_io_error_injection "log_bad_crc"
->  _require_scratch
->  _require_command "$KILLALL_PROG" killall
->  
-> @@ -69,7 +70,7 @@ for i in $(seq 1 5); do
->  	# (increase this value to run fsstress longer).
->  	factor=$((RANDOM % 100 + 1))
->  	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
-> -	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
-> +	_scratch_inject_error "log_bad_crc" "$factor"
->  
->  	# Run fsstress until the filesystem shuts down. It will shut down
->  	# automatically when error injection triggers.
-> diff --git a/tests/xfs/196 b/tests/xfs/196
-> index e9b0649..fe3f570 100755
-> --- a/tests/xfs/196
-> +++ b/tests/xfs/196
-> @@ -45,6 +45,7 @@ _cleanup()
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/punch
-> +. ./common/inject
->  
->  # real QA test starts here
->  rm -f $seqres.full
-> @@ -53,13 +54,7 @@ rm -f $seqres.full
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> -
-> -DROP_WRITES="drop_writes"
-> -# replace "drop_writes" with "fail_writes" for old kernel
-> -if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
-> -	DROP_WRITES="fail_writes"
-> -fi
-> -_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
-> +_require_xfs_io_error_injection "drop_writes"
->  
->  _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount
-> @@ -72,7 +67,7 @@ bytes=$((64 * 1024))
->  $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
->  
->  # Enable write drops. All buffered writes are dropped from this point on.
-> -echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +_scratch_inject_error "drop_writes" 1
->  
->  # Write every other 4k range to split the larger delalloc extent into many more
->  # smaller extents. Use pwrite because with write failures enabled, all
-> @@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
->  	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
->  done
->  
-> -echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +_scratch_inject_error "drop_writes" 0
->  
->  _scratch_cycle_mount
->  $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
-> @@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
->  	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
->  
->  	punchoffset=$((offset + 75))
-> -	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +	_scratch_inject_error "drop_writes"
->  	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
-> -	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> +	_scratch_inject_error "drop_writes" 0
->  done
->  
->  echo "Silence is golden."
+> ---
+>  common/config | 4 ++++
+>  1 file changed, 4 insertions(+)
+> 
+> diff --git a/common/config b/common/config
+> index 80598d0..4f7fba8 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -335,6 +335,10 @@ _test_mount_opts()
+>  	glusterfs)
+>  		export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
+>  		;;
+> +	ext2|ext3|ext4|ext4dev)
+> +		# acls & xattrs aren't turned on by default on older ext$FOO
+> +		export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+> +		;;
+>  	*)
+>  		;;
+>  	esac
+> -- 
+> 1.8.3.1
+> 
+> 
 > 
