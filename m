@@ -1,71 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36054 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752443AbdHBOkE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Aug 2017 10:40:04 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id DF0BF4DD7C
-        for <fstests@vger.kernel.org>; Wed,  2 Aug 2017 14:40:03 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 2/2] check: source common/rc again if TEST_DEV was recreated
-Date: Wed,  2 Aug 2017 22:39:15 +0800
-Message-Id: <20170802143915.19585-2-eguan@redhat.com>
-In-Reply-To: <20170802143915.19585-1-eguan@redhat.com>
-References: <20170802143915.19585-1-eguan@redhat.com>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:36067 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751154AbdHBPsP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2017 11:48:15 -0400
+Received: by mail-qt0-f173.google.com with SMTP id v29so29322890qtv.3
+        for <fstests@vger.kernel.org>; Wed, 02 Aug 2017 08:48:14 -0700 (PDT)
+Date: Wed, 2 Aug 2017 12:48:09 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: Re: [PATCH v2] generic/449: make the test effective against xfs
+Message-ID: <20170802154808.GA1239@debian.home>
+References: <20170801045528.GA4696@debian.home>
+ <20170802041933.GB7310@debian.home>
+ <20170802070030.GT9167@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20170802070030.GT9167@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Content-Transfer-Encoding: quoted-printable
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-If TEST_DEV is recreated by check, FSTYP derived from TEST_DEV
-previously could be changed too and might not reflect the reality.
-So source common/rc again with correct FSTYP to get fs-specific
-configs, e.g. common/xfs.
+On Wed, Aug 02, 2017 at 03:00:30PM +0800, Eryu Guan wrote:
+> On Wed, Aug 02, 2017 at 01:19:34AM -0300, Ernesto A. Fern=C3=A1ndez wro=
+te:
+> > =20
+> > +# The content of this file will be used as the value of the attribut=
+es
+> > +VFILE=3D$SCRATCH_MNT/valuefile
+> > +touch $VFILE
+> > +$XFS_IO_PROG -c "pwrite -S 0x2E 0 1k" $VFILE >>$seqres.full 2>&1
+> > +
+>=20
+> I think this VFILE is not needed, because ..
+>=20
+> >  # Try to run out of space so setfacl will fail
+> >  $XFS_IO_PROG -c "pwrite 0 50m" $TFILE >>$seqres.full 2>&1
+> >  i=3D1
+> > +while $SETFATTR_PROG -n trusted.$i -v $(cat $VFILE) $TFILE &>/dev/nu=
+ll; do
+>=20
+> we can use something like $(perl -e 'print "a"x1024') to generate 1k
+> attr value.
 
-For example, using this config-section config file, and run section
-ext4 first then xfs, you can see:
+All right.
 
-our local _scratch_mkfs routine ...
-./common/rc: line 825: _scratch_mkfs_xfs: command not found
-check: failed to mkfs $SCRATCH_DEV using specified options
+> I can fix it at commit time if this looks OK to you.
 
-local.config:
-[default]
-RECREATE_TEST_DEV=true
-TEST_DEV=/dev/sda5
-SCRATCH_DEV=/dev/sda6
-TEST_DIR=/mnt/test
-SCRATCH_MNT=/mnt/scratch
-
-[ext4]
-MKFS_OPTIONS="-b 4096"
-FSTYP=ext4
-
-[xfs]
-FSTYP=xfs
-MKFS_OPTIONS="-f -b size=4k"
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- check | 4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/check b/check
-index f8db3cd6dfab..07586ce463c4 100755
---- a/check
-+++ b/check
-@@ -555,6 +555,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			status=1
- 			exit
- 		fi
-+		# TEST_DEV has been recreated, previous FSTYP derived from
-+		# TEST_DEV could be changed, source common/rc again with
-+		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
-+		. common/rc
- 		_prepare_test_list
- 	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
- 		_test_unmount 2> /dev/null
--- 
-2.13.3
-
+That's great, thanks.
