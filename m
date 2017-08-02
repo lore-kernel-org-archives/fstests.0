@@ -1,292 +1,198 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46026 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35912 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752404AbdHBQ3g (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Aug 2017 12:29:36 -0400
-Date: Wed, 2 Aug 2017 12:29:34 -0400
+        id S1751162AbdHBQgP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 2 Aug 2017 12:36:15 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 8BA1CC0587C8
+        for <fstests@vger.kernel.org>; Wed,  2 Aug 2017 16:36:15 +0000 (UTC)
+Received: from bfoster.bfoster (dhcp-41-20.bos.redhat.com [10.18.41.20])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 56CA87F551
+        for <fstests@vger.kernel.org>; Wed,  2 Aug 2017 16:36:15 +0000 (UTC)
 From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 3/5] common/inject: refactor helpers to use new errortag
- interface
-Message-ID: <20170802162934.GC38674@bfoster.bfoster>
-References: <150067465981.30639.14801416171688538711.stgit@magnolia>
- <150067468569.30639.11717903404151243816.stgit@magnolia>
- <20170802083742.GU9167@eguan.usersys.redhat.com>
- <20170802143010.GB38674@bfoster.bfoster>
- <20170802155257.GL4477@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170802155257.GL4477@magnolia>
+Subject: [PATCH v2] tests/xfs: test for log recovery failure after tail overwrite
+Date: Wed,  2 Aug 2017 12:36:13 -0400
+Message-Id: <20170802163613.54987-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 02, 2017 at 08:52:57AM -0700, Darrick J. Wong wrote:
-> On Wed, Aug 02, 2017 at 10:30:10AM -0400, Brian Foster wrote:
-> > On Wed, Aug 02, 2017 at 04:37:42PM +0800, Eryu Guan wrote:
-> > > On Fri, Jul 21, 2017 at 03:04:45PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > Refactor the XFS error injection helpers to use the new errortag
-> > > > interface to configure error injection.  If that isn't present, fall
-> > > > back either to the xfs_io/ioctl based injection or the older sysfs
-> > > > knobs.  Refactor existing testcases to use the new helpers.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > This looks good to me overall, but I still perfer let other people
-> > > who're more familar with XFS errortag and error injection to review too.
-> > > While I do have some questions/comments :)
-> > > 
-> > > > ---
-> > > >  common/inject |   58 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
-> > > >  tests/xfs/141 |    5 +++--
-> > > >  tests/xfs/196 |   17 ++++++-----------
-> > > >  3 files changed, 65 insertions(+), 15 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/common/inject b/common/inject
-> > > > index 8ecc290..9aa24de 100644
-> > > > --- a/common/inject
-> > > > +++ b/common/inject
-> > > > @@ -35,10 +35,46 @@ _require_error_injection()
-> > > >  	esac
-> > > >  }
-> > > >  
-> > > > +# Find a given xfs mount's errortag injection knob in sysfs
-> > > > +_find_xfs_mount_errortag_knob()
-> > > 
-> > > While The function name and comment both indicate it needs a mounted
-> > > XFS, it seems weird that the first argument is expected to be a block
-> > > device. And do we need to check if the given device is really mounted?
-> > > 
-> > 
-> > The xfs per-mount sysfs knobs distinguish between mounts via the
-> > block device name.
-> 
-> What if we rename the helper and change its documentation as such?
-> 
-> # Find the errortag injection knob in sysfs for a given xfs mount's
-> # block device.
-> _find_xfs_mountdev_errortag_knob()
-> {
-> 	...
-> }
-> 
-> > ...
-> > > >  # Requires that xfs_io inject command knows about this error type
-> > > >  _require_xfs_io_error_injection()
-> > > >  {
-> > > >  	type="$1"
-> > > > +
-> > > > +	# Can we find the error injection knobs via the new errortag
-> > > > +	# configuration mechanism?
-> > > > +	test -w "$(_find_xfs_mount_errortag_knob "${TEST_DEV}" "${type}")" && return
-> > > > +
-> > > 
-> > > As this check goes prior to the _require_error_injection check, so I
-> > > assume this new errortag framework doesn't depend on a debug built XFS,
-> > > can I?
-> 
-> It depends on the sysfs knobs, and the sysfs knobs in turn depend on
-> XFS_DEBUG=y.
-> 
-> > It does depend on debug mode so it probably makes sense to push this
-> > after the _require_error_injection check. That way the DEBUG=0 message
-> > has precedent over a message regarding lack of support for a particular
-> > knob.
-> 
-> Hm?  This is what _require_xfs_io_error_injection does:
-> 
-> First we compute the path to the knob if it exists
-> (_find_xfs_mount_errortag_knob).
-> 
-> Then we check if that path is writable.  If it is, error injection is
-> enabled (which presumably means XFS_DEBUG=y) and we can continue.
-> 
-> If not, then we use _require_error_injection to bail out if XFS_DEBUG=n.
-> 
+XFS is susceptible to log recovery problems if the fs crashes under
+certain circumstances. If the tail has been pinned for long enough
+to the log to fill and the next batch of log buffer submissions
+happen to fail, the filesystem shuts down having potentially
+overwritten part of the range between the last good tail->head range
+in the log. This causes log recovery to fail with crc mismatch or
+invalid log record errors.
 
-Ah, right. I misinterpreted that the lack of the knob would fall through
-to the subsequent checks, so there's no difference with respect to the
-resulting message if DEBUG=0. It still looks cleaner to me to check
-debug mode first, fwiw, but not a big deal either way.
+Add a test that uses XFS DEBUG mode error injection to force the
+tail overwrite condition with a known bad (crc mismatch) log write
+and tests that log recovery succeeds. Note that this problem is
+currently only reproducible with larger (non-default) log buffer
+sizes (i.e., '-o logbsize=256k') or smaller block sizes (1k).
 
-Brian
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-> If we don't bail out, XFS_DEBUG=y and so we check if the xfs_io inject
-> help page knows about the error type, and bail out if it doesn't.
-> 
-> 
-> In the end it doesn't really matter if we look for XFS_DEBUG=y before or
-> after we look for the new sysfs knob.  I figured it was simple enough to
-> assume that if the knob is present and writable, then our preconditions
-> are satisfied and it's ok to proceed with the injection test.
-> 
-> That said, I also interpreted the "look for evidence of XFS_DEBUG=y" and
-> "see if xfs_io inject knows about the specific error tag" sequence as a
-> best effort work around for the fact that the ioctl-based injection
-> mechanism isn't directly discoverable at all, so instead we assume it's
-> safe to proceed if we can detect a debug kernel and xfs_io is new enough
-> to issue the request.
-> 
-> --D
-> 
-> > Outside of Eryu's further comments, the rest looks good to me. This
-> > reminds me that I still need to post the latest log tail overwrite test
-> > that depends on this, now that the kernel bits have been reviewed...
-> > 
-> > Brian
-> > 
-> > > >  	_require_error_injection
-> > > >  
-> > > >  	# NOTE: We can't actually test error injection here because xfs
-> > > > @@ -54,16 +90,34 @@ _require_xfs_io_error_injection()
-> > > >  _test_inject_error()
-> > > >  {
-> > > >  	type="$1"
-> > > > +	value="$2"
-> > > >  
-> > > > -	$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-> > > > +	knob="$(_find_xfs_mount_errortag_knob "${TEST_DEV}" "${type}")"
-> > > > +	if [ -w "${knob}" ]; then
-> > > > +		test -z "${value}" && value="default"
-> > > > +		echo -n "${value}" > "${knob}"
-> > > > +	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-> > > > +		$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-> > > > +	else
-> > > > +		_notrun "Cannot inject error ${type} value ${value}."
-> > > 
-> > > _require_xfs_io_error_injection already made sure we can do error
-> > > jection, it looks like a bug somewhere to me if we can't inject error
-> > > here, either wanted to inject error without checking the support status
-> > > first or an implementation bug in the error injection framework in
-> > > xfstests. So "_fail" might be the right choice.
-> > > 
-> > > > +	fi
-> > > >  }
-> > > >  
-> > > >  # Inject an error into the scratch fs
-> > > >  _scratch_inject_error()
-> > > >  {
-> > > >  	type="$1"
-> > > > +	value="$2"
-> > > >  
-> > > > -	$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-> > > > +	knob="$(_find_xfs_mount_errortag_knob "${SCRATCH_DEV}" "${type}")"
-> > > > +	if [ -w "${knob}" ]; then
-> > > > +		test -z "${value}" && value="default"
-> > > > +		echo -n "${value}" > "${knob}"
-> > > > +	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-> > > > +		$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-> > > > +	else
-> > > > +		_notrun "Cannot inject error ${type} value ${value}."
-> > > 
-> > > Same here.
-> > > 
-> > > Thanks,
-> > > Eryu
-> > > 
-> > > > +	fi
-> > > >  }
-> > > >  
-> > > >  # Unmount and remount the scratch device, dumping the log
-> > > > diff --git a/tests/xfs/141 b/tests/xfs/141
-> > > > index 56ff14e..f61e524 100755
-> > > > --- a/tests/xfs/141
-> > > > +++ b/tests/xfs/141
-> > > > @@ -47,13 +47,14 @@ rm -f $seqres.full
-> > > >  
-> > > >  # get standard environment, filters and checks
-> > > >  . ./common/rc
-> > > > +. ./common/inject
-> > > >  
-> > > >  # real QA test starts here
-> > > >  
-> > > >  # Modify as appropriate.
-> > > >  _supported_fs xfs
-> > > >  _supported_os Linux
-> > > > -_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
-> > > > +_require_xfs_io_error_injection "log_bad_crc"
-> > > >  _require_scratch
-> > > >  _require_command "$KILLALL_PROG" killall
-> > > >  
-> > > > @@ -69,7 +70,7 @@ for i in $(seq 1 5); do
-> > > >  	# (increase this value to run fsstress longer).
-> > > >  	factor=$((RANDOM % 100 + 1))
-> > > >  	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
-> > > > -	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
-> > > > +	_scratch_inject_error "log_bad_crc" "$factor"
-> > > >  
-> > > >  	# Run fsstress until the filesystem shuts down. It will shut down
-> > > >  	# automatically when error injection triggers.
-> > > > diff --git a/tests/xfs/196 b/tests/xfs/196
-> > > > index e9b0649..fe3f570 100755
-> > > > --- a/tests/xfs/196
-> > > > +++ b/tests/xfs/196
-> > > > @@ -45,6 +45,7 @@ _cleanup()
-> > > >  # get standard environment, filters and checks
-> > > >  . ./common/rc
-> > > >  . ./common/punch
-> > > > +. ./common/inject
-> > > >  
-> > > >  # real QA test starts here
-> > > >  rm -f $seqres.full
-> > > > @@ -53,13 +54,7 @@ rm -f $seqres.full
-> > > >  _supported_fs generic
-> > > >  _supported_os Linux
-> > > >  _require_scratch
-> > > > -
-> > > > -DROP_WRITES="drop_writes"
-> > > > -# replace "drop_writes" with "fail_writes" for old kernel
-> > > > -if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
-> > > > -	DROP_WRITES="fail_writes"
-> > > > -fi
-> > > > -_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
-> > > > +_require_xfs_io_error_injection "drop_writes"
-> > > >  
-> > > >  _scratch_mkfs >/dev/null 2>&1
-> > > >  _scratch_mount
-> > > > @@ -72,7 +67,7 @@ bytes=$((64 * 1024))
-> > > >  $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
-> > > >  
-> > > >  # Enable write drops. All buffered writes are dropped from this point on.
-> > > > -echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> > > > +_scratch_inject_error "drop_writes" 1
-> > > >  
-> > > >  # Write every other 4k range to split the larger delalloc extent into many more
-> > > >  # smaller extents. Use pwrite because with write failures enabled, all
-> > > > @@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
-> > > >  	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
-> > > >  done
-> > > >  
-> > > > -echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> > > > +_scratch_inject_error "drop_writes" 0
-> > > >  
-> > > >  _scratch_cycle_mount
-> > > >  $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
-> > > > @@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
-> > > >  	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
-> > > >  
-> > > >  	punchoffset=$((offset + 75))
-> > > > -	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> > > > +	_scratch_inject_error "drop_writes"
-> > > >  	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
-> > > > -	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-> > > > +	_scratch_inject_error "drop_writes" 0
-> > > >  done
-> > > >  
-> > > >  echo "Silence is golden."
-> > > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Note that this test depends on Darrick's xfstests error injection update
+[1] and kernel support for the log item pinning error injection tag [2]
+(pending merge).
+
+[1] http://marc.info/?l=linux-xfs&m=150067469824365&w=2
+[2] http://marc.info/?l=linux-xfs&m=149969328617344&w=2
+
+v2:
+- Use error injection framework rather than direct sysfs interface.
+- Use fixed size fs for smaller log.
+v1: http://marc.info/?l=fstests&m=149763158322254&w=2
+
+ tests/xfs/999     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 119 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 0000000..1e51e1b
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,116 @@
++#! /bin/bash
++# FS QA Test No. 999
++#
++# Attempt to reproduce log recovery failure by writing corrupt log records over
++# the last good tail in the log. The tail is force pinned while a workload runs
++# the head as close as possible behind the tail. Once the head is pinned,
++# corrupted log records are written to the log and the filesystem shuts down.
++#
++# While log recovery should handle the corrupted log records, it has historical
++# problems dealing with the situation where the corrupted log records may have
++# overwritten the tail of the previous good record in the log. If this occurs,
++# log recovery may fail.
++#
++# This can be reproduced more reliably under non-default conditions such as with
++# the smallest supported FSB sizes and/or largest supported log buffer sizes and
++# counts (logbufs and logbsize mount options).
++#
++# Note that this test requires a DEBUG mode kernel.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++	[ -e /sys/fs/xfs/$sdev/errortag/log_item_pin ] &&
++		echo 0 > /sys/fs/xfs/$sdev/errortag/log_item_pin
++	wait > /dev/null 2>&1
++}
++
++rm -f $seqres.full
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/inject
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_xfs_io_error_injection log_item_pin
++_require_xfs_io_error_injection log_bad_crc
++_require_scratch
++_require_command "$KILLALL_PROG" killall
++
++echo "Silence is golden."
++
++sdev=$(_short_dev $SCRATCH_DEV)
++
++# use a small log fs
++_scratch_mkfs_sized $((1024 * 1024 * 500)) >> $seqres.full 2>&1 ||
++		_fail "mkfs failed"
++_scratch_mount || _fail "mount failed"
++
++# populate the fs with some data and cycle the mount to reset the log head/tail
++$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 > /dev/null 2>&1
++_scratch_cycle_mount || _fail "mount failed"
++
++# Pin the tail and start a file removal workload. File removal tends to
++# reproduce the corruption more reliably.
++_scratch_inject_error log_item_pin 1
++
++rm -rf $SCRATCH_MNT/* > /dev/null 2>&1 &
++workpid=$!
++
++# wait for the head to stop pushing forward
++prevhead=-1
++head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
++while [ "$head" != "$prevhead" ]; do
++	sleep 5
++	prevhead=$head
++	head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
++done
++
++# Once the head is pinned behind the tail, enable log record corruption and
++# unpin the tail. All subsequent log buffer writes end up corrupted on-disk and
++# result in log I/O errors.
++_scratch_inject_error log_bad_crc 1
++_scratch_inject_error log_item_pin 0
++
++# wait for fs shutdown to kill the workload
++wait $workpid
++
++# cycle mount to test log recovery
++_scratch_cycle_mount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 0000000..d254382
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index cf876a2..4e35ec1 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -418,3 +418,4 @@
+ 422 dangerous_scrub dangerous_online_repair
+ 423 dangerous_scrub
+ 424 auto quick db
++999 auto log
+-- 
+2.9.4
+
