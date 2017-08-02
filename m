@@ -1,198 +1,205 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35912 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751162AbdHBQgP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Aug 2017 12:36:15 -0400
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 8BA1CC0587C8
-        for <fstests@vger.kernel.org>; Wed,  2 Aug 2017 16:36:15 +0000 (UTC)
-Received: from bfoster.bfoster (dhcp-41-20.bos.redhat.com [10.18.41.20])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 56CA87F551
-        for <fstests@vger.kernel.org>; Wed,  2 Aug 2017 16:36:15 +0000 (UTC)
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH v2] tests/xfs: test for log recovery failure after tail overwrite
-Date: Wed,  2 Aug 2017 12:36:13 -0400
-Message-Id: <20170802163613.54987-1-bfoster@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:31158 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752642AbdHBR33 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 Aug 2017 13:29:29 -0400
+Date: Wed, 2 Aug 2017 10:29:22 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH Ve] xfs: test xfs_metadump for leaked strings
+Message-ID: <20170802172922.GA4474@magnolia>
+References: <f96cbce4-faf0-6a30-508b-39e5d2c17f8b@redhat.com>
+ <4e801980-9ea5-efaf-f45c-d98df8f1f7e3@sandeen.net>
+ <8c54de65-b80f-1581-6b55-8c8100ca9ffd@sandeen.net>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8c54de65-b80f-1581-6b55-8c8100ca9ffd@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-XFS is susceptible to log recovery problems if the fs crashes under
-certain circumstances. If the tail has been pinned for long enough
-to the log to fill and the next batch of log buffer submissions
-happen to fail, the filesystem shuts down having potentially
-overwritten part of the range between the last good tail->head range
-in the log. This causes log recovery to fail with crc mismatch or
-invalid log record errors.
+On Tue, Aug 01, 2017 at 10:45:06PM -0500, Eric Sandeen wrote:
+> xfs_metadump by default sanitizes the image so that all strings
+> longer than 5 chars are obfusccated, and all stale data in metadata
+> blocks (i.e. unused/unwritten data) is zeroed out.  We didn't have
+> a test for this, though, so this does it.
+> 
+> It patterns 256M of the scratch device, then uses djwong's
+> populate infrastructure to write all types of metadata,
+> metadumps & mdrestores it, then looks for either the leaked
+> pre-pattern or any leaked strings or filenames.
+> 
+> The strings we look for are, unfortunately, a bit ad-hoc based on
+> what is currently used in the populate routines.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> V2: include .out file, minor whitespace & typo edits
+> V3: remove populate debug stuff that snuck in
+> 
+> diff --git a/tests/xfs/425 b/tests/xfs/425
+> new file mode 100755
+> index 0000000..dd11236
+> --- /dev/null
+> +++ b/tests/xfs/425
+> @@ -0,0 +1,121 @@
+> +#! /bin/bash
+> +# FS QA Test 425
+> +#
+> +# Look for stale data leaks in an xfs_metadump
+> +#
+> +# If this fails, get the byte offset of the leaked strings
+> +# which are found, then on the restored image in $TEST_DIR,
+> +# do:
+> +#
+> +# xfs_db> blockget -n
+> +# xfs_db> convert byte $BYTE daddr
+> +# $RESULT
+> +# xfs_db> daddr $RESULT
+> +# xfs_db> blockuse -n
+> +#
+> +# to see information about the metadata block which contains the
+> +# leaked strings
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/populate
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_test
+> +_require_scratch
+> +_require_populate_commands
+> +
+> +METADUMP_FILE="${TEST_DIR}/${seq}_metadump"
+> +MDRESTORE_FILE="${TEST_DIR}/${seq}_mdrestore"
+> +
+> +echo "Silence is golden"
+> +
+> +# Pattern the scratch disk, mkfs, and restore.
+> +$XFS_IO_PROG -d -c "pwrite 0 256M" $SCRATCH_DEV > $seqres.full 2>&1
 
-Add a test that uses XFS DEBUG mode error injection to force the
-tail overwrite condition with a known bad (crc mismatch) log write
-and tests that log recovery succeeds. Note that this problem is
-currently only reproducible with larger (non-default) log buffer
-sizes (i.e., '-o logbsize=256k') or smaller block sizes (1k).
+pwrite -b 1m to speed this up a bit...
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+> +_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_populate nofill >> $seqres.full 2>&1
+> +
+> +# populate unmounts the fs for us
+> +
+> +_scratch_metadump $METADUMP_FILE
+> +xfs_mdrestore $METADUMP_FILE $MDRESTORE_FILE
+> +
+> +# Grep for stale data (leaked cd cd pattern) or strings
+> +# from populate routine
+> +
+> +hexdump -C $MDRESTORE_FILE | grep \
 
-Note that this test depends on Darrick's xfstests error injection update
-[1] and kernel support for the log item pinning error injection tag [2]
-(pending merge).
+_require_command /usr/bin/hexdump "hexdump" ?
 
-[1] http://marc.info/?l=linux-xfs&m=150067469824365&w=2
-[2] http://marc.info/?l=linux-xfs&m=149969328617344&w=2
+> +"cd cd cd cd\| \
+> +41 41 41 41\|\
+> +42 42 42 42\|\
+> +43 43 43 43\|\
+> +44 44 44 44\|\
+> +61 61 61 61\|\
+> +62 62 62 62\|\
+> +63 63 63 63\|\
+> +64 64 64 64\|\
+> +dummy\|\
+> +S_IF\|\
+> +FMT_\|\
+> +INLINE\|\
+> +BLOCK\|\
+> +LEAF\|\
+> +NODE\|\
+> +BTREE\|\
+> +LOCAL\|\
+> +EXTENTS\|\
+> +REMOTE\|\
+> +ATTR\|\
+> +SYSTEM\|\
+> +TRUSTED\|\
+> +SECURITY\|\
+> +attrvalfile\|\
+> +unused\|\
+> +BNOBT\|\
+> +RMAPBT\|\
+> +RTRMAPBT\|\
+> +REFCOUNTBT" && echo "Leaked data found; see comments in test to debug"
 
-v2:
-- Use error injection framework rather than direct sysfs interface.
-- Use fixed size fs for smaller log.
-v1: http://marc.info/?l=fstests&m=149763158322254&w=2
+/me wonders if this grep pattern ought to be some kind of _filter
+function in common/populate?  That way if the xfs populate command adds
+more weird strings, the search pattern is right there in the rc file,
+not buried in tests/xfs/ somewhere.
 
- tests/xfs/999     | 116 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 119 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
+OTOH a good counterargument is that this is the only test that cares
+about that, so why make it common code?  <sigh>
 
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 0000000..1e51e1b
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,116 @@
-+#! /bin/bash
-+# FS QA Test No. 999
-+#
-+# Attempt to reproduce log recovery failure by writing corrupt log records over
-+# the last good tail in the log. The tail is force pinned while a workload runs
-+# the head as close as possible behind the tail. Once the head is pinned,
-+# corrupted log records are written to the log and the filesystem shuts down.
-+#
-+# While log recovery should handle the corrupted log records, it has historical
-+# problems dealing with the situation where the corrupted log records may have
-+# overwritten the tail of the previous good record in the log. If this occurs,
-+# log recovery may fail.
-+#
-+# This can be reproduced more reliably under non-default conditions such as with
-+# the smallest supported FSB sizes and/or largest supported log buffer sizes and
-+# counts (logbufs and logbsize mount options).
-+#
-+# Note that this test requires a DEBUG mode kernel.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat, Inc. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+	[ -e /sys/fs/xfs/$sdev/errortag/log_item_pin ] &&
-+		echo 0 > /sys/fs/xfs/$sdev/errortag/log_item_pin
-+	wait > /dev/null 2>&1
-+}
-+
-+rm -f $seqres.full
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/inject
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_xfs_io_error_injection log_item_pin
-+_require_xfs_io_error_injection log_bad_crc
-+_require_scratch
-+_require_command "$KILLALL_PROG" killall
-+
-+echo "Silence is golden."
-+
-+sdev=$(_short_dev $SCRATCH_DEV)
-+
-+# use a small log fs
-+_scratch_mkfs_sized $((1024 * 1024 * 500)) >> $seqres.full 2>&1 ||
-+		_fail "mkfs failed"
-+_scratch_mount || _fail "mount failed"
-+
-+# populate the fs with some data and cycle the mount to reset the log head/tail
-+$FSSTRESS_PROG -d $SCRATCH_MNT -z -fcreat=1 -p 4 -n 100000 > /dev/null 2>&1
-+_scratch_cycle_mount || _fail "mount failed"
-+
-+# Pin the tail and start a file removal workload. File removal tends to
-+# reproduce the corruption more reliably.
-+_scratch_inject_error log_item_pin 1
-+
-+rm -rf $SCRATCH_MNT/* > /dev/null 2>&1 &
-+workpid=$!
-+
-+# wait for the head to stop pushing forward
-+prevhead=-1
-+head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
-+while [ "$head" != "$prevhead" ]; do
-+	sleep 5
-+	prevhead=$head
-+	head=`cat /sys/fs/xfs/$sdev/log/log_head_lsn`
-+done
-+
-+# Once the head is pinned behind the tail, enable log record corruption and
-+# unpin the tail. All subsequent log buffer writes end up corrupted on-disk and
-+# result in log I/O errors.
-+_scratch_inject_error log_bad_crc 1
-+_scratch_inject_error log_item_pin 0
-+
-+# wait for fs shutdown to kill the workload
-+wait $workpid
-+
-+# cycle mount to test log recovery
-+_scratch_cycle_mount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 0000000..d254382
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index cf876a2..4e35ec1 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -418,3 +418,4 @@
- 422 dangerous_scrub dangerous_online_repair
- 423 dangerous_scrub
- 424 auto quick db
-+999 auto log
--- 
-2.9.4
+--D
 
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/425.out b/tests/xfs/425.out
+> new file mode 100644
+> index 0000000..7a9714b
+> --- /dev/null
+> +++ b/tests/xfs/425.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 425
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 185487d..d0d26ee 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -422,3 +422,4 @@
+>  422 dangerous_scrub dangerous_online_repair
+>  423 dangerous_scrub
+>  424 auto quick dump
+> +425 auto metadata
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
