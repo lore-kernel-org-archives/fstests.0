@@ -1,103 +1,213 @@
-Received: from sandeen.net ([63.231.237.45]:42554 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751133AbdHCO5h (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Aug 2017 10:57:37 -0400
-Subject: Re: [PATCH] xfs/424: add check for crc and finobt
-References: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <829dce2e-162c-4ad7-98e9-1a8a9ecb102b@sandeen.net>
-Date: Thu, 3 Aug 2017 09:57:36 -0500
+Received: from aserp1040.oracle.com ([141.146.126.69]:21823 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751010AbdHCPtJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2017 11:49:09 -0400
+Date: Thu, 3 Aug 2017 08:49:00 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v2 3/5] common/inject: refactor helpers to use new errortag
+ interface
+Message-ID: <20170803154900.GR4477@magnolia>
+References: <150067465981.30639.14801416171688538711.stgit@magnolia>
+ <150067468569.30639.11717903404151243816.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <150067468569.30639.11717903404151243816.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org
+To: eguan@redhat.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, Brian Foster <bfoster@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 8/3/17 7:05 AM, Xiao Yang wrote:
-> 1) When crc is not supported or disabled, this case could not indicate
->    any expected error.  Running all tests without crc makes no sense.
+Refactor the XFS error injection helpers to use the new errortag
+interface to configure error injection.  If that isn't present, fall
+back either to the xfs_io/ioctl based injection or the older sysfs
+knobs.  Refactor existing testcases to use the new helpers.
 
-It's still fine to run the test.  The description indicates
-that errors may be seen on crc filesystems, but there's nothing
-wrong with a test which iterates over "type" commands in xfs_db,
-even without crcs.  It's possible that some other error could
-be found in the future.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+v2: fix name of the 'find knob' function to communicate that it takes a
+mountpoint's device, not the mountpoint itself; check for debug before
+we check for knobs
+---
+ common/inject |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
+ tests/xfs/141 |    5 +++--
+ tests/xfs/196 |   17 ++++++----------
+ 3 files changed, 66 insertions(+), 15 deletions(-)
 
-So perhaps the description should be updated; it does not "check for
-that false crc error," it simply checks that setting types causes
-/no/ error.
+diff --git a/common/inject b/common/inject
+index 8ecc290..c1b7869 100644
+--- a/common/inject
++++ b/common/inject
+@@ -35,12 +35,49 @@ _require_error_injection()
+ 	esac
+ }
  
-> 2) When finobt is disabled, xfs_db fails to get current address of
->    free_root, as below:
->    xfs_db -c "agi" -c "addr free_root" -c "daddr" /dev/sda11
->    Metadata CRC error detected at xfs_inobt block 0x0/0x1000
->    ...
-
-I agree that the test should not be trying to set types that do
-not exist on the filesystem.
-
-But I think the right approach is to let the test run over whatever
-MKFS_OPTIONS have been specified, and be sure that the test can handle
-it properly, rather than forcing the test to run only with a certain
-set of options enabled.
-
-Thanks,
--Eric
-
->    Running related tests without finobt makes no sense.
-> 
-> We add check to fix it.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  tests/xfs/424 | 16 ++++++++++++----
->  1 file changed, 12 insertions(+), 4 deletions(-)
-> 
-> diff --git a/tests/xfs/424 b/tests/xfs/424
-> index 0a1eef9..165c390 100755
-> --- a/tests/xfs/424
-> +++ b/tests/xfs/424
-> @@ -55,9 +55,15 @@ rm -f $seqres.full
->  _supported_os Linux
->  _supported_fs xfs
->  _require_scratch
-> +_require_xfs_mkfs_crc
->  
->  echo "Silence is golden."
->  
-> +crc_finobt_enabled="crc=1,finobt=0"
-> +
-> +[ _scratch_mkfs_xfs_supported -m crc=1,finobt=1 >/dev/null 2>&1 ] && \
-> +	crc_finobt_enabled="crc=1,finobt=1"
-> +
->  # real QA test starts here
->  
->  # for different sector sizes, ensure no CRC errors are falsely reported.
-> @@ -77,7 +83,7 @@ while [ $sec_sz -le 4096 ]; do
->  done
->  
->  for SECTOR_SIZE in $sector_sizes; do
-> -	$MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
-> +	$MKFS_XFS_PROG -f -m "$crc_finobt_enabled" -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
->  
->  	for TYPE in agf agi agfl sb; do
->  		DADDR=`_scratch_xfs_db -c "$TYPE" -c "daddr" | filter_dbval`
-> @@ -96,9 +102,11 @@ for SECTOR_SIZE in $sector_sizes; do
->  	DADDR=`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" |
->  		filter_dbval`
->  	_scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
-> -	DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
-> -		filter_dbval`
-> -	_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
-> +	if [[ "$crc_finobt_enabled" =~ 'finobt=1' ]]; then
-> +		DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
-> +			filter_dbval`
-> +		_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
-> +	fi
->  
->  	_scratch_xfs_db -c "daddr $DADDR" -c "type text"
->  	_scratch_xfs_db -c "daddr $DADDR" -c "type data"
-> 
++# Find the errortag injection knob in sysfs for a given xfs mount's
++# block device.
++_find_xfs_mountdev_errortag_knob()
++{
++	dev="$1"
++	knob="$2"
++	shortdev="$(_short_dev "${dev}")"
++	tagfile="/sys/fs/xfs/${shortdev}/errortag/${knob}"
++
++	# Some of the new sysfs errortag knobs were previously available via
++	# another sysfs path.
++	case "${knob}" in
++	"log_bad_crc")
++		if [ ! -w "${tagfile}" ]; then
++			tagfile="/sys/fs/xfs/${shortdev}/log/log_badcrc_factor"
++		fi
++		;;
++	"drop_writes")
++		if [ ! -w "${tagfile}" ]; then
++			tagfile="/sys/fs/xfs/${shortdev}/drop_writes"
++		fi
++		if [ ! -w "${tagfile}" ]; then
++			tagfile="/sys/fs/xfs/${shortdev}/fail_writes"
++		fi
++		;;
++	*)
++		;;
++	esac
++
++	echo "${tagfile}"
++}
++
+ # Requires that xfs_io inject command knows about this error type
+ _require_xfs_io_error_injection()
+ {
+ 	type="$1"
+ 	_require_error_injection
+ 
++	# Can we find the error injection knobs via the new errortag
++	# configuration mechanism?
++	knob="$(_find_xfs_mountdev_errortag_knob "${TEST_DEV}" "${type}")"
++	test -w "${knob}" && return
++
+ 	# NOTE: We can't actually test error injection here because xfs
+ 	# hasn't always range checked the argument to xfs_errortag_add.
+ 	# We also don't want to trip an error before we're ready to deal
+@@ -54,16 +91,34 @@ _require_xfs_io_error_injection()
+ _test_inject_error()
+ {
+ 	type="$1"
++	value="$2"
+ 
+-	$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
++	knob="$(_find_xfs_mountdev_errortag_knob "${TEST_DEV}" "${type}")"
++	if [ -w "${knob}" ]; then
++		test -z "${value}" && value="default"
++		echo -n "${value}" > "${knob}"
++	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
++		$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
++	else
++		_notrun "Cannot inject error ${type} value ${value}."
++	fi
+ }
+ 
+ # Inject an error into the scratch fs
+ _scratch_inject_error()
+ {
+ 	type="$1"
++	value="$2"
+ 
+-	$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
++	knob="$(_find_xfs_mountdev_errortag_knob "${SCRATCH_DEV}" "${type}")"
++	if [ -w "${knob}" ]; then
++		test -z "${value}" && value="default"
++		echo -n "${value}" > "${knob}"
++	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
++		$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
++	else
++		_notrun "Cannot inject error ${type} value ${value}."
++	fi
+ }
+ 
+ # Unmount and remount the scratch device, dumping the log
+diff --git a/tests/xfs/141 b/tests/xfs/141
+index 56ff14e..f61e524 100755
+--- a/tests/xfs/141
++++ b/tests/xfs/141
+@@ -47,13 +47,14 @@ rm -f $seqres.full
+ 
+ # get standard environment, filters and checks
+ . ./common/rc
++. ./common/inject
+ 
+ # real QA test starts here
+ 
+ # Modify as appropriate.
+ _supported_fs xfs
+ _supported_os Linux
+-_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
++_require_xfs_io_error_injection "log_bad_crc"
+ _require_scratch
+ _require_command "$KILLALL_PROG" killall
+ 
+@@ -69,7 +70,7 @@ for i in $(seq 1 5); do
+ 	# (increase this value to run fsstress longer).
+ 	factor=$((RANDOM % 100 + 1))
+ 	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
+-	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
++	_scratch_inject_error "log_bad_crc" "$factor"
+ 
+ 	# Run fsstress until the filesystem shuts down. It will shut down
+ 	# automatically when error injection triggers.
+diff --git a/tests/xfs/196 b/tests/xfs/196
+index e9b0649..fe3f570 100755
+--- a/tests/xfs/196
++++ b/tests/xfs/196
+@@ -45,6 +45,7 @@ _cleanup()
+ # get standard environment, filters and checks
+ . ./common/rc
+ . ./common/punch
++. ./common/inject
+ 
+ # real QA test starts here
+ rm -f $seqres.full
+@@ -53,13 +54,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+-
+-DROP_WRITES="drop_writes"
+-# replace "drop_writes" with "fail_writes" for old kernel
+-if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
+-	DROP_WRITES="fail_writes"
+-fi
+-_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
++_require_xfs_io_error_injection "drop_writes"
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+@@ -72,7 +67,7 @@ bytes=$((64 * 1024))
+ $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
+ 
+ # Enable write drops. All buffered writes are dropped from this point on.
+-echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
++_scratch_inject_error "drop_writes" 1
+ 
+ # Write every other 4k range to split the larger delalloc extent into many more
+ # smaller extents. Use pwrite because with write failures enabled, all
+@@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
+ 	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
+ done
+ 
+-echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
++_scratch_inject_error "drop_writes" 0
+ 
+ _scratch_cycle_mount
+ $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
+@@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
+ 	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
+ 
+ 	punchoffset=$((offset + 75))
+-	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
++	_scratch_inject_error "drop_writes"
+ 	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
+-	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
++	_scratch_inject_error "drop_writes" 0
+ done
+ 
+ echo "Silence is golden."
