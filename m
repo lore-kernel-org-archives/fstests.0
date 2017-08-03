@@ -1,84 +1,204 @@
-Received: from [183.91.158.132] ([183.91.158.132]:32871 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752370AbdHCMF2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2017 08:05:28 -0400
-Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
-        by cn.fujitsu.com (Postfix) with ESMTP id D43A14724E4F
-        for <fstests@vger.kernel.org>; Thu,  3 Aug 2017 20:05:19 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs/424: add check for crc and finobt
-Date: Thu, 3 Aug 2017 20:05:14 +0800
-Message-ID: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52290 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751084AbdHCMKc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Aug 2017 08:10:32 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 9801580474
+        for <fstests@vger.kernel.org>; Thu,  3 Aug 2017 12:10:32 +0000 (UTC)
+Date: Thu, 3 Aug 2017 08:10:31 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH v2] fstests: remove tmp files properly
+Message-ID: <20170803121030.GF62447@bfoster.bfoster>
+References: <20170803043304.17274-1-eguan@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170803043304.17274-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-1) When crc is not supported or disabled, this case could not indicate
-   any expected error.  Running all tests without crc makes no sense.
+On Thu, Aug 03, 2017 at 12:33:04PM +0800, Eryu Guan wrote:
+> Some tests and common helpers don't properly clean up tmp files and
+> leave them behind in /tmp dir, and these tmp files are accumulating
+> over time.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+> v2:
+> - fix tmp_dir usage in _mkfs_dev as well
+> 
 
-2) When finobt is disabled, xfs_db fails to get current address of
-   free_root, as below:
-   xfs_db -c "agi" -c "addr free_root" -c "daddr" /dev/sda11
-   Metadata CRC error detected at xfs_inobt block 0x0/0x1000
-   ...
-   Running related tests without finobt makes no sense.
+FWIW, there are a couple tests that do 'tmp=$$' instead of 'tmp=/tmp/$$'
+as well. I'm not sure how appropriate that is. That aside:
 
-We add check to fix it.
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/424 | 16 ++++++++++++----
- 1 file changed, 12 insertions(+), 4 deletions(-)
-
-diff --git a/tests/xfs/424 b/tests/xfs/424
-index 0a1eef9..165c390 100755
---- a/tests/xfs/424
-+++ b/tests/xfs/424
-@@ -55,9 +55,15 @@ rm -f $seqres.full
- _supported_os Linux
- _supported_fs xfs
- _require_scratch
-+_require_xfs_mkfs_crc
- 
- echo "Silence is golden."
- 
-+crc_finobt_enabled="crc=1,finobt=0"
-+
-+[ _scratch_mkfs_xfs_supported -m crc=1,finobt=1 >/dev/null 2>&1 ] && \
-+	crc_finobt_enabled="crc=1,finobt=1"
-+
- # real QA test starts here
- 
- # for different sector sizes, ensure no CRC errors are falsely reported.
-@@ -77,7 +83,7 @@ while [ $sec_sz -le 4096 ]; do
- done
- 
- for SECTOR_SIZE in $sector_sizes; do
--	$MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
-+	$MKFS_XFS_PROG -f -m "$crc_finobt_enabled" -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
- 
- 	for TYPE in agf agi agfl sb; do
- 		DADDR=`_scratch_xfs_db -c "$TYPE" -c "daddr" | filter_dbval`
-@@ -96,9 +102,11 @@ for SECTOR_SIZE in $sector_sizes; do
- 	DADDR=`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" |
- 		filter_dbval`
- 	_scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
--	DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
--		filter_dbval`
--	_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
-+	if [[ "$crc_finobt_enabled" =~ 'finobt=1' ]]; then
-+		DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
-+			filter_dbval`
-+		_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
-+	fi
- 
- 	_scratch_xfs_db -c "daddr $DADDR" -c "type text"
- 	_scratch_xfs_db -c "daddr $DADDR" -c "type data"
--- 
-1.8.3.1
-
-
-
+>  common/rc         | 25 +++++++++++++++----------
+>  common/xfs        |  4 ++--
+>  tests/generic/100 |  2 +-
+>  tests/generic/260 |  2 +-
+>  4 files changed, 19 insertions(+), 14 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index c7529796ad55..9c5f54aa6dc9 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -560,7 +560,7 @@ _scratch_do_mkfs()
+>  	shift 2
+>  	local extra_mkfs_options=$*
+>  	local mkfs_status
+> -	local tmp=`mktemp`
+> +	local tmp=`mktemp -u`
+>  
+>  	# save mkfs output in case conflict means we need to run again.
+>  	# only the output for the mkfs that applies should be shown
+> @@ -588,7 +588,7 @@ _scratch_do_mkfs()
+>  	cat $tmp.mkfsstd
+>  	eval "cat $tmp.mkfserr | $mkfs_filter" >&2
+>  
+> -	rm -f $tmp*
+> +	rm -f $tmp.mkfserr $tmp.mkfsstd
+>  	return $mkfs_status
+>  }
+>  
+> @@ -669,7 +669,7 @@ _scratch_mkfs_ext4()
+>  {
+>  	local mkfs_cmd="$MKFS_EXT4_PROG -F"
+>  	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+> -	local tmp=`mktemp`
+> +	local tmp=`mktemp -u`
+>  	local mkfs_status
+>  
+>  	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+> @@ -694,6 +694,7 @@ _scratch_mkfs_ext4()
+>  	# output mkfs stdout and stderr
+>  	cat $tmp.mkfsstd
+>  	cat $tmp.mkfserr >&2
+> +	rm -f $tmp.mkfserr $tmp.mkfsstd
+>  
+>  	return $mkfs_status
+>  }
+> @@ -736,6 +737,7 @@ _test_mkfs()
+>  
+>  _mkfs_dev()
+>  {
+> +    local tmp=`mktemp -u`
+>      case $FSTYP in
+>      nfs*)
+>  	# do nothing for nfs
+> @@ -747,30 +749,30 @@ _mkfs_dev()
+>  	# do nothing for pvfs2
+>  	;;
+>      udf)
+> -        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+> +        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+>  	;;
+>      btrfs)
+> -        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+> +        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+>  	;;
+>      ext2|ext3|ext4)
+>  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
+> -		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+> +		2>$tmp.mkfserr 1>$tmp.mkfsstd
+>  	;;
+>  
+>      *)
+>  	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
+> -		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
+> +		2>$tmp.mkfserr 1>$tmp.mkfsstd
+>  	;;
+>      esac
+>  
+>      if [ $? -ne 0 ]; then
+>  	# output stored mkfs output
+> -	cat $tmp_dir.mkfserr >&2
+> -	cat $tmp_dir.mkfsstd
+> +	cat $tmp.mkfserr >&2
+> +	cat $tmp.mkfsstd
+>  	status=1
+>  	exit 1
+>      fi
+> -    rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
+> +    rm -f $tmp.mkfserr $tmp.mkfsstd
+>  }
+>  
+>  # remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
+> @@ -1431,6 +1433,7 @@ _do()
+>      (eval "echo '---' \"$_cmd\"") >>$seqres.full
+>      (eval "$_cmd") >$tmp._out 2>&1; ret=$?
+>      cat $tmp._out | _fix_malloc >>$seqres.full
+> +    rm -f $tmp._out
+>      if [ $# -eq 2 ]; then
+>  	if [ $ret -eq 0 ]; then
+>  	    echo "done"
+> @@ -3565,8 +3568,10 @@ run_fsx()
+>  	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
+>  	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+>  		cat $tmp.fsx
+> +		rm -f $tmp.fsx
+>  		exit 1
+>  	fi
+> +	rm -f $tmp.fsx
+>  }
+>  
+>  # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
+> diff --git a/common/xfs b/common/xfs
+> index a1ee384786bb..729a6ccf292b 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -82,7 +82,7 @@ _scratch_mkfs_xfs()
+>  	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
+>  	local mkfs_filter="sed -e '/less than device physical sector/d' \
+>  			       -e '/switching to logical sector/d'"
+> -	local tmp=`mktemp`
+> +	local tmp=`mktemp -u`
+>  	local mkfs_status
+>  
+>  	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+> @@ -104,7 +104,7 @@ _scratch_mkfs_xfs()
+>  	# output mkfs stdout and stderr
+>  	cat $tmp.mkfsstd
+>  	cat $tmp.mkfserr >&2
+> -	rm -f $tmp*
+> +	rm -f $tmp.mkfserr $tmp.mkfsstd
+>  
+>  	return $mkfs_status
+>  }
+> diff --git a/tests/generic/100 b/tests/generic/100
+> index 8aff7b445ce6..0e928cecc86a 100755
+> --- a/tests/generic/100
+> +++ b/tests/generic/100
+> @@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  
+>  _cleanup()
+>  {
+> -     rm -f $tmp.* $testfile
+> +     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
+>  }
+>   
+>  # real QA test starts here
+> diff --git a/tests/generic/260 b/tests/generic/260
+> index 312e6d206fb3..4c152929424a 100755
+> --- a/tests/generic/260
+> +++ b/tests/generic/260
+> @@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+>  
+>  here=`pwd`
+> -tmp=`mktemp -d`
+> +tmp=/tmp/$$
+>  status=0
+>  trap "exit \$status" 0 1 2 3 15
+>  chpid=0
+> -- 
+> 2.13.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
