@@ -1,124 +1,188 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60742 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38746 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751174AbdHCA4S (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 2 Aug 2017 20:56:18 -0400
-Date: Thu, 3 Aug 2017 08:56:17 +0800
+        id S1750829AbdHCEdN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Aug 2017 00:33:13 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id DC34F4E4D2
+        for <fstests@vger.kernel.org>; Thu,  3 Aug 2017 04:33:12 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/5] common/inject: refactor helpers to use new errortag
- interface
-Message-ID: <20170803005617.GW9167@eguan.usersys.redhat.com>
-References: <150067465981.30639.14801416171688538711.stgit@magnolia>
- <150067468569.30639.11717903404151243816.stgit@magnolia>
- <20170802083742.GU9167@eguan.usersys.redhat.com>
- <20170802143010.GB38674@bfoster.bfoster>
- <20170802155257.GL4477@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170802155257.GL4477@magnolia>
+Subject: [PATCH v2] fstests: remove tmp files properly
+Date: Thu,  3 Aug 2017 12:33:04 +0800
+Message-Id: <20170803043304.17274-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Brian Foster <bfoster@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 02, 2017 at 08:52:57AM -0700, Darrick J. Wong wrote:
-> On Wed, Aug 02, 2017 at 10:30:10AM -0400, Brian Foster wrote:
-> > On Wed, Aug 02, 2017 at 04:37:42PM +0800, Eryu Guan wrote:
-> > > On Fri, Jul 21, 2017 at 03:04:45PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > Refactor the XFS error injection helpers to use the new errortag
-> > > > interface to configure error injection.  If that isn't present, fall
-> > > > back either to the xfs_io/ioctl based injection or the older sysfs
-> > > > knobs.  Refactor existing testcases to use the new helpers.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > This looks good to me overall, but I still perfer let other people
-> > > who're more familar with XFS errortag and error injection to review too.
-> > > While I do have some questions/comments :)
-> > > 
-> > > > ---
-> > > >  common/inject |   58 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
-> > > >  tests/xfs/141 |    5 +++--
-> > > >  tests/xfs/196 |   17 ++++++-----------
-> > > >  3 files changed, 65 insertions(+), 15 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/common/inject b/common/inject
-> > > > index 8ecc290..9aa24de 100644
-> > > > --- a/common/inject
-> > > > +++ b/common/inject
-> > > > @@ -35,10 +35,46 @@ _require_error_injection()
-> > > >  	esac
-> > > >  }
-> > > >  
-> > > > +# Find a given xfs mount's errortag injection knob in sysfs
-> > > > +_find_xfs_mount_errortag_knob()
-> > > 
-> > > While The function name and comment both indicate it needs a mounted
-> > > XFS, it seems weird that the first argument is expected to be a block
-> > > device. And do we need to check if the given device is really mounted?
-> > > 
-> > 
-> > The xfs per-mount sysfs knobs distinguish between mounts via the
-> > block device name.
-> 
-> What if we rename the helper and change its documentation as such?
-> 
-> # Find the errortag injection knob in sysfs for a given xfs mount's
-> # block device.
-> _find_xfs_mountdev_errortag_knob()
+Some tests and common helpers don't properly clean up tmp files and
+leave them behind in /tmp dir, and these tmp files are accumulating
+over time.
 
-This looks better to me, thanks!
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+v2:
+- fix tmp_dir usage in _mkfs_dev as well
 
-> {
-> 	...
-> }
-> 
-> > ...
-> > > >  # Requires that xfs_io inject command knows about this error type
-> > > >  _require_xfs_io_error_injection()
-> > > >  {
-> > > >  	type="$1"
-> > > > +
-> > > > +	# Can we find the error injection knobs via the new errortag
-> > > > +	# configuration mechanism?
-> > > > +	test -w "$(_find_xfs_mount_errortag_knob "${TEST_DEV}" "${type}")" && return
-> > > > +
-> > > 
-> > > As this check goes prior to the _require_error_injection check, so I
-> > > assume this new errortag framework doesn't depend on a debug built XFS,
-> > > can I?
-> 
-> It depends on the sysfs knobs, and the sysfs knobs in turn depend on
-> XFS_DEBUG=y.
-> 
-> > It does depend on debug mode so it probably makes sense to push this
-> > after the _require_error_injection check. That way the DEBUG=0 message
-> > has precedent over a message regarding lack of support for a particular
-> > knob.
-> 
-> Hm?  This is what _require_xfs_io_error_injection does:
-> 
-> First we compute the path to the knob if it exists
-> (_find_xfs_mount_errortag_knob).
-> 
-> Then we check if that path is writable.  If it is, error injection is
-> enabled (which presumably means XFS_DEBUG=y) and we can continue.
-> 
-> If not, then we use _require_error_injection to bail out if XFS_DEBUG=n.
-> 
-> If we don't bail out, XFS_DEBUG=y and so we check if the xfs_io inject
-> help page knows about the error type, and bail out if it doesn't.
-> 
-> 
-> In the end it doesn't really matter if we look for XFS_DEBUG=y before or
-> after we look for the new sysfs knob.  I figured it was simple enough to
-> assume that if the knob is present and writable, then our preconditions
-> are satisfied and it's ok to proceed with the injection test.
+ common/rc         | 25 +++++++++++++++----------
+ common/xfs        |  4 ++--
+ tests/generic/100 |  2 +-
+ tests/generic/260 |  2 +-
+ 4 files changed, 19 insertions(+), 14 deletions(-)
 
-Agreed, the order doesn't really matter here, I'm fine with either way.
+diff --git a/common/rc b/common/rc
+index c7529796ad55..9c5f54aa6dc9 100644
+--- a/common/rc
++++ b/common/rc
+@@ -560,7 +560,7 @@ _scratch_do_mkfs()
+ 	shift 2
+ 	local extra_mkfs_options=$*
+ 	local mkfs_status
+-	local tmp=`mktemp`
++	local tmp=`mktemp -u`
+ 
+ 	# save mkfs output in case conflict means we need to run again.
+ 	# only the output for the mkfs that applies should be shown
+@@ -588,7 +588,7 @@ _scratch_do_mkfs()
+ 	cat $tmp.mkfsstd
+ 	eval "cat $tmp.mkfserr | $mkfs_filter" >&2
+ 
+-	rm -f $tmp*
++	rm -f $tmp.mkfserr $tmp.mkfsstd
+ 	return $mkfs_status
+ }
+ 
+@@ -669,7 +669,7 @@ _scratch_mkfs_ext4()
+ {
+ 	local mkfs_cmd="$MKFS_EXT4_PROG -F"
+ 	local mkfs_filter="grep -v -e ^Warning: -e \"^mke2fs \""
+-	local tmp=`mktemp`
++	local tmp=`mktemp -u`
+ 	local mkfs_status
+ 
+ 	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_LOGDEV" ] && \
+@@ -694,6 +694,7 @@ _scratch_mkfs_ext4()
+ 	# output mkfs stdout and stderr
+ 	cat $tmp.mkfsstd
+ 	cat $tmp.mkfserr >&2
++	rm -f $tmp.mkfserr $tmp.mkfsstd
+ 
+ 	return $mkfs_status
+ }
+@@ -736,6 +737,7 @@ _test_mkfs()
+ 
+ _mkfs_dev()
+ {
++    local tmp=`mktemp -u`
+     case $FSTYP in
+     nfs*)
+ 	# do nothing for nfs
+@@ -747,30 +749,30 @@ _mkfs_dev()
+ 	# do nothing for pvfs2
+ 	;;
+     udf)
+-        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
++        $MKFS_UDF_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
+     btrfs)
+-        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
++        $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
+     ext2|ext3|ext4)
+ 	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
+-		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
++		2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
+ 
+     *)
+ 	yes | $MKFS_PROG -t $FSTYP -- $MKFS_OPTIONS $* \
+-		2>$tmp_dir.mkfserr 1>$tmp_dir.mkfsstd
++		2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	;;
+     esac
+ 
+     if [ $? -ne 0 ]; then
+ 	# output stored mkfs output
+-	cat $tmp_dir.mkfserr >&2
+-	cat $tmp_dir.mkfsstd
++	cat $tmp.mkfserr >&2
++	cat $tmp.mkfsstd
+ 	status=1
+ 	exit 1
+     fi
+-    rm -f $tmp_dir.mkfserr $tmp_dir.mkfsstd
++    rm -f $tmp.mkfserr $tmp.mkfsstd
+ }
+ 
+ # remove all files in $SCRATCH_MNT, useful when testing on NFS/CIFS
+@@ -1431,6 +1433,7 @@ _do()
+     (eval "echo '---' \"$_cmd\"") >>$seqres.full
+     (eval "$_cmd") >$tmp._out 2>&1; ret=$?
+     cat $tmp._out | _fix_malloc >>$seqres.full
++    rm -f $tmp._out
+     if [ $# -eq 2 ]; then
+ 	if [ $ret -eq 0 ]; then
+ 	    echo "done"
+@@ -3565,8 +3568,10 @@ run_fsx()
+ 	"$@" 2>&1 | tee -a $seqres.full >$tmp.fsx
+ 	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+ 		cat $tmp.fsx
++		rm -f $tmp.fsx
+ 		exit 1
+ 	fi
++	rm -f $tmp.fsx
+ }
+ 
+ # Test for the existence of a sysfs entry at /sys/fs/$FSTYP/DEV/$ATTR
+diff --git a/common/xfs b/common/xfs
+index a1ee384786bb..729a6ccf292b 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -82,7 +82,7 @@ _scratch_mkfs_xfs()
+ 	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
+ 	local mkfs_filter="sed -e '/less than device physical sector/d' \
+ 			       -e '/switching to logical sector/d'"
+-	local tmp=`mktemp`
++	local tmp=`mktemp -u`
+ 	local mkfs_status
+ 
+ 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+@@ -104,7 +104,7 @@ _scratch_mkfs_xfs()
+ 	# output mkfs stdout and stderr
+ 	cat $tmp.mkfsstd
+ 	cat $tmp.mkfserr >&2
+-	rm -f $tmp*
++	rm -f $tmp.mkfserr $tmp.mkfsstd
+ 
+ 	return $mkfs_status
+ }
+diff --git a/tests/generic/100 b/tests/generic/100
+index 8aff7b445ce6..0e928cecc86a 100755
+--- a/tests/generic/100
++++ b/tests/generic/100
+@@ -38,7 +38,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+ _cleanup()
+ {
+-     rm -f $tmp.* $testfile
++     rm -f $tmp.* $TEMP_DIR/$TAR_FILE
+ }
+  
+ # real QA test starts here
+diff --git a/tests/generic/260 b/tests/generic/260
+index 312e6d206fb3..4c152929424a 100755
+--- a/tests/generic/260
++++ b/tests/generic/260
+@@ -26,7 +26,7 @@ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+ 
+ here=`pwd`
+-tmp=`mktemp -d`
++tmp=/tmp/$$
+ status=0
+ trap "exit \$status" 0 1 2 3 15
+ chpid=0
+-- 
+2.13.3
 
-Thanks,
-Eryu
