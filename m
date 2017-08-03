@@ -1,58 +1,84 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41194 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752434AbdHCLyL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Aug 2017 07:54:11 -0400
-Date: Thu, 3 Aug 2017 07:54:09 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH 2/2] common/xfs: add iomap_dio_actor() to the dmesg filter
-Message-ID: <20170803115409.GE62447@bfoster.bfoster>
-References: <20170731042825.6250-1-eguan@redhat.com>
- <20170731042825.6250-2-eguan@redhat.com>
+Received: from [183.91.158.132] ([183.91.158.132]:32871 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1752370AbdHCMF2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 Aug 2017 08:05:28 -0400
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
+        by cn.fujitsu.com (Postfix) with ESMTP id D43A14724E4F
+        for <fstests@vger.kernel.org>; Thu,  3 Aug 2017 20:05:19 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/424: add check for crc and finobt
+Date: Thu, 3 Aug 2017 20:05:14 +0800
+Message-ID: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170731042825.6250-2-eguan@redhat.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 31, 2017 at 12:28:25PM +0800, Eryu Guan wrote:
-> The warning in fs/iomap.c::iomap_dio_actor() could be triggered when
-> mixing dio and mmap I/O on the same sparse file. Several tests could
-> hit this warning now, like generic/095 generic/224 and generic/446.
-> So add this expected warning to whitelist too.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
+1) When crc is not supported or disabled, this case could not indicate
+   any expected error.  Running all tests without crc makes no sense.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+2) When finobt is disabled, xfs_db fails to get current address of
+   free_root, as below:
+   xfs_db -c "agi" -c "addr free_root" -c "daddr" /dev/sda11
+   Metadata CRC error detected at xfs_inobt block 0x0/0x1000
+   ...
+   Running related tests without finobt makes no sense.
 
->  common/xfs | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 47b4e1ba4b7f..4995f8ba8dd8 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -596,10 +596,12 @@ _filter_xfs_dmesg()
->  	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
->  	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
->  	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
-> +	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
->  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
->  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
->  	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
->  	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
->  	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
-> -	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#"
-> +	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
-> +	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#"
->  }
-> -- 
-> 2.13.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+We add check to fix it.
+
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/xfs/424 | 16 ++++++++++++----
+ 1 file changed, 12 insertions(+), 4 deletions(-)
+
+diff --git a/tests/xfs/424 b/tests/xfs/424
+index 0a1eef9..165c390 100755
+--- a/tests/xfs/424
++++ b/tests/xfs/424
+@@ -55,9 +55,15 @@ rm -f $seqres.full
+ _supported_os Linux
+ _supported_fs xfs
+ _require_scratch
++_require_xfs_mkfs_crc
+ 
+ echo "Silence is golden."
+ 
++crc_finobt_enabled="crc=1,finobt=0"
++
++[ _scratch_mkfs_xfs_supported -m crc=1,finobt=1 >/dev/null 2>&1 ] && \
++	crc_finobt_enabled="crc=1,finobt=1"
++
+ # real QA test starts here
+ 
+ # for different sector sizes, ensure no CRC errors are falsely reported.
+@@ -77,7 +83,7 @@ while [ $sec_sz -le 4096 ]; do
+ done
+ 
+ for SECTOR_SIZE in $sector_sizes; do
+-	$MKFS_XFS_PROG -f -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
++	$MKFS_XFS_PROG -f -m "$crc_finobt_enabled" -s size=$SECTOR_SIZE $SCRATCH_DEV > /dev/null
+ 
+ 	for TYPE in agf agi agfl sb; do
+ 		DADDR=`_scratch_xfs_db -c "$TYPE" -c "daddr" | filter_dbval`
+@@ -96,9 +102,11 @@ for SECTOR_SIZE in $sector_sizes; do
+ 	DADDR=`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" |
+ 		filter_dbval`
+ 	_scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
+-	DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
+-		filter_dbval`
+-	_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
++	if [[ "$crc_finobt_enabled" =~ 'finobt=1' ]]; then
++		DADDR=`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
++			filter_dbval`
++		_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
++	fi
+ 
+ 	_scratch_xfs_db -c "daddr $DADDR" -c "type text"
+ 	_scratch_xfs_db -c "daddr $DADDR" -c "type data"
+-- 
+1.8.3.1
+
+
+
