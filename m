@@ -1,130 +1,123 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46944 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751231AbdHDCWC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 Aug 2017 22:22:02 -0400
-Date: Fri, 4 Aug 2017 10:22:00 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/5] common/populate: enable xfs quota accounting
-Message-ID: <20170804022200.GC1991@eguan.usersys.redhat.com>
-References: <150067465981.30639.14801416171688538711.stgit@magnolia>
- <150067469221.30639.16711306489951233808.stgit@magnolia>
+Received: from [183.91.158.132] ([183.91.158.132]:33065 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751282AbdHDGnK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Aug 2017 02:43:10 -0400
+Message-ID: <59841776.4020401@cn.fujitsu.com>
+Date: Fri, 4 Aug 2017 14:43:02 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <150067469221.30639.16711306489951233808.stgit@magnolia>
+Subject: Re: [PATCH] xfs/424: add check for crc and finobt
+References: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com> <829dce2e-162c-4ad7-98e9-1a8a9ecb102b@sandeen.net>
+In-Reply-To: <829dce2e-162c-4ad7-98e9-1a8a9ecb102b@sandeen.net>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 21, 2017 at 03:04:52PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> When we're creating a populated xfs image, turn on quotas so that we can
-> fuzz those fields too.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/populate |   50 +++++++++++++++++++++++++++++++++++++++++++++++++-
->  1 file changed, 49 insertions(+), 1 deletion(-)
-> 
-> 
-> diff --git a/common/populate b/common/populate
-> index 498151f..b77c508 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -21,6 +21,7 @@
->  #  Contact information: Silicon Graphics, Inc., 1500 Crittenden Lane,
->  #  Mountain View, CA 94043, USA, or: http://www.sgi.com
->  #-----------------------------------------------------------------------
-> +. ./common/quota
->  
->  _require_populate_commands() {
->  	_require_xfs_io_command "falloc"
-> @@ -94,6 +95,47 @@ __populate_fill_fs() {
->  	done
->  }
->  
-> +# For XFS, force on all the quota options if quota is enabled
-> +# and the user didn't feed us noquota.
-> +_populate_xfs_qmount_option()
-> +{
-> +	# User explicitly told us not to quota
-> +	if echo "${MOUNT_OPTIONS}" | grep -q 'noquota'; then
-> +		return
-> +	fi
-> +
-> +	# Don't bother if we can't turn on quotas
-> +	if [ ! -f /proc/fs/xfs/xqmstat ]; then
-> +		# No quota support
-> +		return
-> +	elif [ "${USE_EXTERNAL}" = "yes" ] && [ ! -z "${SCRATCH_RTDEV}" ]; then
-> +		# Quotas not supported on rt filesystems
-> +		return
-> +	elif [ -z "${XFS_QUOTA_PROG}" ]; then
-> +		# xfs quota tools not installed
-> +		return
-> +	fi
-> +
-> +	# Turn on all the quotas
-> +	if xfs_info "${TEST_DIR}" | grep -q 'crc=1'; then
-> +		# v5 filesystems can have group & project quotas
-> +		quota="usrquota,grpquota,prjquota"
-> +	else
-> +		# v4 filesystems cannot mix group & project quotas
-> +		quota="usrquota,grpquota"
-> +	fi
-> +
-> +	# Inject our quota mount options
-> +	if echo "${MOUNT_OPTIONS}" | grep -q "${quota}"; then
-> +		return
-> +	elif echo "${MOUNT_OPTIONS}" | egrep -q '(quota|noenforce)'; then
-> +		_qmount_option "${quota}"
-> +	else
-> +		export MOUNT_OPTIONS="$MOUNT_OPTIONS -o ${quota}"
-> +		echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
-> +	fi
-> +}
-> +
->  # Populate an XFS on the scratch device with (we hope) all known
->  # types of metadata block
->  _scratch_xfs_populate() {
-> @@ -106,6 +148,7 @@ _scratch_xfs_populate() {
->  		esac
->  	done
->  
-> +	_populate_xfs_qmount_option
+On 2017/08/03 22:57, Eric Sandeen wrote:
+> On 8/3/17 7:05 AM, Xiao Yang wrote:
+>> 1) When crc is not supported or disabled, this case could not indicate
+>>     any expected error.  Running all tests without crc makes no sense.
+> It's still fine to run the test.  The description indicates
+> that errors may be seen on crc filesystems, but there's nothing
+> wrong with a test which iterates over "type" commands in xfs_db,
+> even without crcs.  It's possible that some other error could
+> be found in the future.
+>
+> So perhaps the description should be updated; it does not "check for
+> that false crc error," it simply checks that setting types causes
+> /no/ error.
+Hi Eric,
 
-Sorry, another question just poped up..
-
-This enables quota and modifies MOUNT_OPTIONS unconditionally and
-implicitly, I suspect users of _scratch_populate_cached() or
-_scratch_xfs_populate() may be bitten by this implicit change.
-
-Would it be better if there's a argument to control this quota
-enablement and default to disable quota? Just like the "nofill"
-argument, introduce a new "quota" argument? So existing callers of
-_scratch_populate_cached() are not affected by this change, and tests
-want quota can enable it explicitly.
+Agreed.  We can just update the description.
+>
+>> 2) When finobt is disabled, xfs_db fails to get current address of
+>>     free_root, as below:
+>>     xfs_db -c "agi" -c "addr free_root" -c "daddr" /dev/sda11
+>>     Metadata CRC error detected at xfs_inobt block 0x0/0x1000
+>>     ...
+> I agree that the test should not be trying to set types that do
+> not exist on the filesystem.
+>
+> But I think the right approach is to let the test run over whatever
+> MKFS_OPTIONS have been specified, and be sure that the test can handle
+> it properly, rather than forcing the test to run only with a certain
+> set of options enabled.
+OK=EF=BC=8C i will change the check for finobt as you suggested.
+Thanks a lot for your comments.
 
 Thanks,
-Eryu
+Xiao Yang.
+> Thanks,
+> -Eric
+>
+>>     Running related tests without finobt makes no sense.
+>>
+>> We add check to fix it.
+>>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   tests/xfs/424 | 16 ++++++++++++----
+>>   1 file changed, 12 insertions(+), 4 deletions(-)
+>>
+>> diff --git a/tests/xfs/424 b/tests/xfs/424
+>> index 0a1eef9..165c390 100755
+>> --- a/tests/xfs/424
+>> +++ b/tests/xfs/424
+>> @@ -55,9 +55,15 @@ rm -f $seqres.full
+>>   _supported_os Linux
+>>   _supported_fs xfs
+>>   _require_scratch
+>> +_require_xfs_mkfs_crc
+>>
+>>   echo "Silence is golden."
+>>
+>> +crc_finobt_enabled=3D"crc=3D1,finobt=3D0"
+>> +
+>> +[ _scratch_mkfs_xfs_supported -m crc=3D1,finobt=3D1>/dev/null 2>&1 ]&=
+&  \
+>> +	crc_finobt_enabled=3D"crc=3D1,finobt=3D1"
+>> +
+>>   # real QA test starts here
+>>
+>>   # for different sector sizes, ensure no CRC errors are falsely repor=
+ted.
+>> @@ -77,7 +83,7 @@ while [ $sec_sz -le 4096 ]; do
+>>   done
+>>
+>>   for SECTOR_SIZE in $sector_sizes; do
+>> -	$MKFS_XFS_PROG -f -s size=3D$SECTOR_SIZE $SCRATCH_DEV>  /dev/null
+>> +	$MKFS_XFS_PROG -f -m "$crc_finobt_enabled" -s size=3D$SECTOR_SIZE $S=
+CRATCH_DEV>  /dev/null
+>>
+>>   	for TYPE in agf agi agfl sb; do
+>>   		DADDR=3D`_scratch_xfs_db -c "$TYPE" -c "daddr" | filter_dbval`
+>> @@ -96,9 +102,11 @@ for SECTOR_SIZE in $sector_sizes; do
+>>   	DADDR=3D`_scratch_xfs_db -c "agi" -c "addr root" -c "daddr" |
+>>   		filter_dbval`
+>>   	_scratch_xfs_db -c "daddr $DADDR" -c "type inobt"
+>> -	DADDR=3D`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
+>> -		filter_dbval`
+>> -	_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
+>> +	if [[ "$crc_finobt_enabled" =3D~ 'finobt=3D1' ]]; then
+>> +		DADDR=3D`_scratch_xfs_db -c "agi" -c "addr free_root" -c "daddr" |
+>> +			filter_dbval`
+>> +		_scratch_xfs_db -c "daddr $DADDR" -c "type finobt"
+>> +	fi
+>>
+>>   	_scratch_xfs_db -c "daddr $DADDR" -c "type text"
+>>   	_scratch_xfs_db -c "daddr $DADDR" -c "type data"
+>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> .
+>
 
->  	_scratch_mount
->  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
->  	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
-> @@ -720,7 +763,12 @@ _scratch_populate_cached() {
->  		test -n "${SCRATCH_LOGDEV}" && rm -f "${POPULATE_METADUMP}"
->  		;;
->  	"xfs")
-> -		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}";;
-> +		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}"
-> +		_populate_xfs_qmount_option
-> +		if echo "${MOUNT_OPTIONS}" | grep -q 'usrquota'; then
-> +			extra_descr="${extra_descr} QUOTAS"
-> +		fi
-> +		;;
->  	*)
->  		extra_descr="";;
->  	esac
-> 
+
+
