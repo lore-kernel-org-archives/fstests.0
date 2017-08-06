@@ -1,214 +1,128 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:42287 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752160AbdHDPhO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 Aug 2017 11:37:14 -0400
-Date: Fri, 4 Aug 2017 08:37:07 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v3 3/5] common/inject: refactor helpers to use new errortag
- interface
-Message-ID: <20170804153707.GA24087@magnolia>
-References: <150067465981.30639.14801416171688538711.stgit@magnolia>
- <150067468569.30639.11717903404151243816.stgit@magnolia>
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:33293 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751326AbdHFIxj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 Aug 2017 04:53:39 -0400
+Received: by mail-pf0-f193.google.com with SMTP id c65so6108726pfl.0
+        for <fstests@vger.kernel.org>; Sun, 06 Aug 2017 01:53:39 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id p62sm3669614pfd.108.2017.08.06.01.53.37
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 06 Aug 2017 01:53:38 -0700 (PDT)
+Message-ID: <5986d912.4195620a.9b08e.85bf@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 06 Aug 2017 16:53:33 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 81aa85deac1f
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Ivm3J2timy5i"
 Content-Disposition: inline
-In-Reply-To: <150067468569.30639.11717903404151243816.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, Brian Foster <bfoster@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Refactor the XFS error injection helpers to use the new errortag
-interface to configure error injection.  If that isn't present, fall
-back either to the xfs_io/ioctl based injection or the older sysfs
-knobs.  Refactor existing testcases to use the new helpers.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v3: fix _notrun to _fail when we can't set a knob to a particular value
-v2: fix name of the 'find knob' function to communicate that it takes a
-mountpoint's device, not the mountpoint itself; check for debug before
-we check for knobs
----
- common/inject |   59 +++++++++++++++++++++++++++++++++++++++++++++++++++++++--
- tests/xfs/141 |    5 +++--
- tests/xfs/196 |   17 ++++++----------
- 3 files changed, 66 insertions(+), 15 deletions(-)
+--Ivm3J2timy5i
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/common/inject b/common/inject
-index 8ecc290..f30d0ba 100644
---- a/common/inject
-+++ b/common/inject
-@@ -35,12 +35,49 @@ _require_error_injection()
- 	esac
- }
- 
-+# Find the errortag injection knob in sysfs for a given xfs mount's
-+# block device.
-+_find_xfs_mountdev_errortag_knob()
-+{
-+	dev="$1"
-+	knob="$2"
-+	shortdev="$(_short_dev "${dev}")"
-+	tagfile="/sys/fs/xfs/${shortdev}/errortag/${knob}"
-+
-+	# Some of the new sysfs errortag knobs were previously available via
-+	# another sysfs path.
-+	case "${knob}" in
-+	"log_bad_crc")
-+		if [ ! -w "${tagfile}" ]; then
-+			tagfile="/sys/fs/xfs/${shortdev}/log/log_badcrc_factor"
-+		fi
-+		;;
-+	"drop_writes")
-+		if [ ! -w "${tagfile}" ]; then
-+			tagfile="/sys/fs/xfs/${shortdev}/drop_writes"
-+		fi
-+		if [ ! -w "${tagfile}" ]; then
-+			tagfile="/sys/fs/xfs/${shortdev}/fail_writes"
-+		fi
-+		;;
-+	*)
-+		;;
-+	esac
-+
-+	echo "${tagfile}"
-+}
-+
- # Requires that xfs_io inject command knows about this error type
- _require_xfs_io_error_injection()
- {
- 	type="$1"
- 	_require_error_injection
- 
-+	# Can we find the error injection knobs via the new errortag
-+	# configuration mechanism?
-+	knob="$(_find_xfs_mountdev_errortag_knob "${TEST_DEV}" "${type}")"
-+	test -w "${knob}" && return
-+
- 	# NOTE: We can't actually test error injection here because xfs
- 	# hasn't always range checked the argument to xfs_errortag_add.
- 	# We also don't want to trip an error before we're ready to deal
-@@ -54,16 +91,34 @@ _require_xfs_io_error_injection()
- _test_inject_error()
- {
- 	type="$1"
-+	value="$2"
- 
--	$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-+	knob="$(_find_xfs_mountdev_errortag_knob "${TEST_DEV}" "${type}")"
-+	if [ -w "${knob}" ]; then
-+		test -z "${value}" && value="default"
-+		echo -n "${value}" > "${knob}"
-+	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-+		$XFS_IO_PROG -x -c "inject $type" $TEST_DIR
-+	else
-+		_fail "Cannot inject error ${type} value ${value}."
-+	fi
- }
- 
- # Inject an error into the scratch fs
- _scratch_inject_error()
- {
- 	type="$1"
-+	value="$2"
- 
--	$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-+	knob="$(_find_xfs_mountdev_errortag_knob "${SCRATCH_DEV}" "${type}")"
-+	if [ -w "${knob}" ]; then
-+		test -z "${value}" && value="default"
-+		echo -n "${value}" > "${knob}"
-+	elif [ -z "${value}" ] || [ "${value}" = "default" ]; then
-+		$XFS_IO_PROG -x -c "inject $type" $SCRATCH_MNT
-+	else
-+		_fail "Cannot inject error ${type} value ${value}."
-+	fi
- }
- 
- # Unmount and remount the scratch device, dumping the log
-diff --git a/tests/xfs/141 b/tests/xfs/141
-index 56ff14e..f61e524 100755
---- a/tests/xfs/141
-+++ b/tests/xfs/141
-@@ -47,13 +47,14 @@ rm -f $seqres.full
- 
- # get standard environment, filters and checks
- . ./common/rc
-+. ./common/inject
- 
- # real QA test starts here
- 
- # Modify as appropriate.
- _supported_fs xfs
- _supported_os Linux
--_require_xfs_sysfs $(_short_dev $TEST_DEV)/log/log_badcrc_factor
-+_require_xfs_io_error_injection "log_bad_crc"
- _require_scratch
- _require_command "$KILLALL_PROG" killall
- 
-@@ -69,7 +70,7 @@ for i in $(seq 1 5); do
- 	# (increase this value to run fsstress longer).
- 	factor=$((RANDOM % 100 + 1))
- 	echo iteration $i log_badcrc_factor: $factor >> $seqres.full 2>&1
--	echo $factor > /sys/fs/xfs/$sdev/log/log_badcrc_factor
-+	_scratch_inject_error "log_bad_crc" "$factor"
- 
- 	# Run fsstress until the filesystem shuts down. It will shut down
- 	# automatically when error injection triggers.
-diff --git a/tests/xfs/196 b/tests/xfs/196
-index e9b0649..fe3f570 100755
---- a/tests/xfs/196
-+++ b/tests/xfs/196
-@@ -45,6 +45,7 @@ _cleanup()
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/punch
-+. ./common/inject
- 
- # real QA test starts here
- rm -f $seqres.full
-@@ -53,13 +54,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch
--
--DROP_WRITES="drop_writes"
--# replace "drop_writes" with "fail_writes" for old kernel
--if [ -f /sys/fs/xfs/$(_short_dev $TEST_DEV)/fail_writes ];then
--	DROP_WRITES="fail_writes"
--fi
--_require_xfs_sysfs $(_short_dev $TEST_DEV)/${DROP_WRITES}
-+_require_xfs_io_error_injection "drop_writes"
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
-@@ -72,7 +67,7 @@ bytes=$((64 * 1024))
- $XFS_IO_PROG -f -c "pwrite 0 $bytes" $file >> $seqres.full 2>&1
- 
- # Enable write drops. All buffered writes are dropped from this point on.
--echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-+_scratch_inject_error "drop_writes" 1
- 
- # Write every other 4k range to split the larger delalloc extent into many more
- # smaller extents. Use pwrite because with write failures enabled, all
-@@ -89,7 +84,7 @@ for i in $(seq 4096 8192 $endoff); do
- 	$XFS_IO_PROG -c "pwrite $i 4k" $file >> $seqres.full 2>&1
- done
- 
--echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-+_scratch_inject_error "drop_writes" 0
- 
- _scratch_cycle_mount
- $XFS_IO_PROG -c 'bmap -vp' $file | _filter_bmap
-@@ -104,9 +99,9 @@ for offset in $(seq 0 100 500); do
- 	$XFS_IO_PROG -fc "pwrite ${offset}m 100m" $file >> $seqres.full 2>&1
- 
- 	punchoffset=$((offset + 75))
--	echo 1 > /sys/fs/xfs/$sdev/$DROP_WRITES
-+	_scratch_inject_error "drop_writes"
- 	$XFS_IO_PROG -c "pwrite ${punchoffset}m 4k" $file >> $seqres.full 2>&1
--	echo 0 > /sys/fs/xfs/$sdev/$DROP_WRITES
-+	_scratch_inject_error "drop_writes" 0
- done
- 
- echo "Silence is golden."
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. Except the new ext4 fsmap tests, this is mainly a
+bugfix update, several minor bugfixes and small improvements are included.
+Many thanks to all the contributors and reviewers, especially Brian Foster, who
+has helped review many new tests and bugfixes!
+
+One note on generic/449, which is a new test from last update, one improvement
+to generic/449 makes it start to fail on XFS (it was _notrun previously).
+Usually we don't introduce such 'regression' to existing tests, but this is a
+pretty new test and has been there for only one week, I think it's fine to
+incorporate the fix to generic/449 instead of making a new test.
+
+New failures I've noticed in this update:
+- generic/449 starts to fail on XFS, which was a _notrun previously, see above
+  for notes on it
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+81aa85deac1f fstests: remove tmp files properly
+
+New commits:
+
+Darrick J. Wong (2):
+      [93d6007671f5] xfs: only run scrub in dry run mode
+      [fed90418a77e] ext4: fsmap tests
+
+Eric Biggers (1):
+      [85e3bf85c67c] src: include <sys/sysmacros.h> for major() and minor()
+
+Ernesto A. Fernández (1):
+      [6cce8575a5d5] generic/449: make the test effective against xfs
+
+Eryu Guan (5):
+      [9c129c6887eb] new: validate groups when creating new test
+      [505cb261e0fb] generic/224: filter out expected XFS warnings for mixed direct/buffer I/O
+      [9b897c805550] common/xfs: add iomap_dio_actor() to the dmesg filter
+      [ce4616c88899] fstests: batch update of test file mode
+      [81aa85deac1f] fstests: remove tmp files properly
+
+
+Code Diffstat:
+
+ common/rc          | 25 +++++++++++-------
+ common/xfs         | 10 ++++---
+ new                | 14 ++++++++--
+ src/fssum.c        |  1 +
+ src/stat_test.c    |  1 +
+ tests/ext4/027     | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/027.out |  7 +++++
+ tests/ext4/028     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/028.out |  3 +++
+ tests/ext4/029     | 66 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/029.out |  4 +++
+ tests/ext4/group   |  5 +++-
+ tests/generic/100  |  2 +-
+ tests/generic/224  | 11 +++++++-
+ tests/generic/260  |  2 +-
+ tests/generic/340  |  0
+ tests/generic/341  |  0
+ tests/generic/342  |  0
+ tests/generic/344  |  0
+ tests/generic/345  |  0
+ tests/generic/346  |  0
+ tests/generic/354  |  0
+ tests/generic/408  |  0
+ tests/generic/449  |  8 +++++-
+ 24 files changed, 279 insertions(+), 21 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--Ivm3J2timy5i
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZhtffAAoJECZSqilcj+djry8P/AnYwR2ZQpk638w6K5++F+q5
+SZzmA685AHtWhw9/hOtFp3EcrIHgRxR90C4zcTfmNQ0F75uW8/KWdSzJzbGJgW0B
+ed+UUM6vNRV5fRJQO7QBCp4gACRyhmL+kdGyh67Xx94h0qeizMg6BNLSYPWbohbF
+pDwtdFIbkCna7osi43ol0KgmRa51YnCd/xG3FK4Ve0UFPnaSQ3GL3XpGDiH6pymX
+aEhai5EMw42qaQslZ7QoveF/hkUjjI6xBZh3cgFj2qP7SygvNblMy6AoZRZElKGN
+3ZZxgWNo4qjpoNEydhisuCpaZ5TQrh7WjhzKd18H/+Y5Wre6dz7L+hBVuWwCB6iY
+UBV2jnnmjgEXKpJqcFScbD8B7pZEvmPaFLFWUnznRR/CW0xiaz+X+AyGvyP3gv15
++Yjvn/EsJwUz2n6hx/DI0xSU/wGHTWuZBFsS/hsG5px76f290Dav9MmV8nT6g076
+g6wvkWfsa9edrzxwUzQ3nXKJyDZL3W9EmRv8/LFSHcAHLqjSAablbkkwXDHP/wdR
+3zapN66rQYJdVBAQXR9NVx8lnRoOfxB2VdZUCb/fZW2ae1Oks6lHseBy//3scfNy
+DcDtgodnBlxtCq7Hue3PeT1fp698cTKi27KkkYMWd8QvHDVovhpIBQiQwckZnzFe
+L+ZSN3oyxxqH7aCdoIPr
+=u1hS
+-----END PGP SIGNATURE-----
+
+--Ivm3J2timy5i--
