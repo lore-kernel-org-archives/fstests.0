@@ -1,88 +1,158 @@
-Received: from [183.91.158.132] ([183.91.158.132]:2878 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751564AbdHGG2c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2017 02:28:32 -0400
-Message-ID: <59880880.2010708@cn.fujitsu.com>
-Date: Mon, 7 Aug 2017 14:28:16 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Subject: Re: [PATCH 2/2] check: source common/rc again if TEST_DEV was recreated
-References: <20170802143915.19585-1-eguan@redhat.com> <20170802143915.19585-2-eguan@redhat.com>
-In-Reply-To: <20170802143915.19585-2-eguan@redhat.com>
-Content-Type: text/plain; charset="GB2312"
-Content-Transfer-Encoding: 7bit
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:38749 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751722AbdHGPbF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2017 11:31:05 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay: test mount error cases with index=on
+Date: Mon,  7 Aug 2017 17:31:32 +0200
+Message-Id: <1502119892-1171-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/08/02 22:39, Eryu Guan wrote:
-> If TEST_DEV is recreated by check, FSTYP derived from TEST_DEV
-> previously could be changed too and might not reflect the reality.
-> So source common/rc again with correct FSTYP to get fs-specific
-> configs, e.g. common/xfs.
->
-> For example, using this config-section config file, and run section
-> ext4 first then xfs, you can see:
->
-> our local _scratch_mkfs routine ...
-> ./common/rc: line 825: _scratch_mkfs_xfs: command not found
-> check: failed to mkfs $SCRATCH_DEV using specified options
->
-> local.config:
-> [default]
-> RECREATE_TEST_DEV=true
-> TEST_DEV=/dev/sda5
-> SCRATCH_DEV=/dev/sda6
-> TEST_DIR=/mnt/test
-> SCRATCH_MNT=/mnt/scratch
->
-> [ext4]
-> MKFS_OPTIONS="-b 4096"
-> FSTYP=ext4
->
-> [xfs]
-> FSTYP=xfs
-> MKFS_OPTIONS="-f -b size=4k"
->
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
->  check | 4 ++++
->  1 file changed, 4 insertions(+)
->
-> diff --git a/check b/check
-> index f8db3cd6dfab..07586ce463c4 100755
-> --- a/check
-> +++ b/check
-> @@ -555,6 +555,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  			status=1
->  			exit
->  		fi
-> +		# TEST_DEV has been recreated, previous FSTYP derived from
-> +		# TEST_DEV could be changed, source common/rc again with
-> +		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
-> +		. common/rc
->  		_prepare_test_list
->  	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
->  		_test_unmount 2> /dev/null
-Hi Eryu,
+- Upper/lower mismatch
+- Index/upper mismatch
 
-Could we replace init_rc with common/rc to get correct FSTYP and call
-init_rc?
-Like this:
+With index=on, lowerdir and upperdir are verified using a file handle
+stored in trusted.overlay.origin xattr in upperdir and indexdir.
 
---------------------------------------------------------------------------------
---- a/check
-+++ b/check
-@@ -566,7 +566,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-fi
-fi
+Failure to verify lowerdir/upperdir on mount results in ESTALE.
 
-- init_rc
-+ . common/rc
----------------------------------------------------------------------------------
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-Thanks,
-Xiao Yang.
+Eryu,
 
+I promised one more test for overlay/mount group to test new behavior of
+mount with -o index=on.
+
+This test depends on a kernel commit 961af647fc9e ("ovl: fix origin
+verification of index dir") that was merged for v4.13-rc2.
+
+Thanks for your cleanup of previous patches,
+Amir.
+
+ tests/overlay/037     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/037.out |  3 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 93 insertions(+)
+ create mode 100755 tests/overlay/037
+ create mode 100644 tests/overlay/037.out
+
+diff --git a/tests/overlay/037 b/tests/overlay/037
+new file mode 100755
+index 0000000..77da351
+--- /dev/null
++++ b/tests/overlay/037
+@@ -0,0 +1,89 @@
++#! /bin/bash
++# FS QA Test 037
++#
++# Test mount error cases with option index=on
++#
++# - Upper/lower mismatch
++# - Index/upper mismatch
++#
++# With index=on, lowerdir and upperdir are verified using a file handle
++# stored in trusted.overlay.origin xattr in upperdir and indexdir.
++#
++# Failure to verify lowerdir/upperdir on mount results in ESTALE.
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_scratch_feature index
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create multiple lowerdirs, upperdirs and workdir
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++upperdir2=$OVL_BASE_SCRATCH_MNT/upper2
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++mkdir -p $lowerdir $lowerdir2 $upperdir $upperdir2 $workdir
++
++# Mount overlay with lowerdir, upperdir, workdir and index=on
++# to store the file handles of lowerdir and upperdir in overlay.origin xattr
++_overlay_mount_dirs $lowerdir $upperdir $workdir \
++		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on
++$UMOUNT_PROG $SCRATCH_MNT
++
++# Try to mount an overlay with the same upperdir and different lowerdir - expect ESTALE
++_overlay_mount_dirs $lowerdir2 $upperdir $workdir \
++		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
++$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
++
++# Try to mount an overlay with the same workdir and different upperdir - expect ESTALE
++_overlay_mount_dirs $lowerdir $upperdir2 $workdir \
++		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/037.out b/tests/overlay/037.out
+new file mode 100644
+index 0000000..786ef85
+--- /dev/null
++++ b/tests/overlay/037.out
+@@ -0,0 +1,3 @@
++QA output created by 037
++mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
++mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 4cc1d74..28f1e63 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -39,3 +39,4 @@
+ 034 auto quick copyup hardlink
+ 035 auto quick mount
+ 036 auto quick mount
++037 auto quick mount
+-- 
+2.7.4
 
