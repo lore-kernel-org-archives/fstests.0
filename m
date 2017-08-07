@@ -1,62 +1,86 @@
-Received: from [183.91.158.132] ([183.91.158.132]:55916 "EHLO
+Received: from [183.91.158.132] ([183.91.158.132]:59712 "EHLO
         heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751374AbdHGAz1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Aug 2017 20:55:27 -0400
-Message-ID: <5987BA77.4090909@cn.fujitsu.com>
-Date: Mon, 7 Aug 2017 08:55:19 +0800
+        by vger.kernel.org with ESMTP id S1751869AbdHGGM2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2017 02:12:28 -0400
+Message-ID: <598804C6.3070508@cn.fujitsu.com>
+Date: Mon, 7 Aug 2017 14:12:22 +0800
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs/424: add check for crc and finobt
-References: <1501761914-16445-1-git-send-email-yangx.jy@cn.fujitsu.com> <829dce2e-162c-4ad7-98e9-1a8a9ecb102b@sandeen.net> <59842020.9070908@cn.fujitsu.com> <f6dd5a90-4179-d4df-cf33-5a62b7c1aa26@sandeen.net>
-In-Reply-To: <f6dd5a90-4179-d4df-cf33-5a62b7c1aa26@sandeen.net>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
+Subject: Re: [PATCH 1/2] common/config: unset TEST_FS_MOUNT_OPTS across config
+ sections
+References: <20170802143915.19585-1-eguan@redhat.com>
+In-Reply-To: <20170802143915.19585-1-eguan@redhat.com>
+Content-Type: text/plain; charset="GB2312"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/08/04 22:37, Eric Sandeen wrote:
-> On 8/4/17 2:20 AM, Xiao Yang wrote:
->> Hi Eric,
->>
->> When finobt is disabled, xfs_db gets double crc errors on upstream xfsporgs-dev.
->> as below(e.g. block size is 4096):
->> ...
->> xfs_db -c "daddr 16" -c "type finobt" /dev/sda11
->> Metadata corruption detected at xfs_inobt block 0x10/0x1000
->> Metadata corruption detected at xfs_inobt block 0x10/0x1000
->>
->> Is this expected behavor?  Because xfs_db gets one crc error on v4.5 xfsprogs-dev.
->> as below(e.g. block size is 4096):
->> ...
->> xfs_db -c "daddr 16" -c "type finobt" /dev/sda11
->> Metadata CRC error detected at xfs_inobt block 0x10/0x200
-> So, errors is expected because you finobt is disabled, and you are asking
-> it to print a not-finobt block as a finobt.
+On 2017/08/02 22:39, Eryu Guan wrote:
+> TEST_FS_MOUNT_OPTS doesn't get reset before parsing next config
+> section, this will cause unexpected TEST_FS_MOUNT_OPTS in test,
+> because it can be assigned some fs-specific mount options in
+> _test_mount_opts, which might not be supported by the filesystem in
+> next config section. And MOUNT_OPTIONS is reset, I don't see why
+> TEST_FS_MOUNT_OPTS shouldn't be.
 >
-> I think the double printing is because upstream the code actually sets
-> the cursor twice after the commit which tried to fix the type-setting,
-> it's on my list to fix.
-Hi Eric,
+> Also update README.config-sections to reflect this change and fix
+> typos (replace MOUNT_OPTIONS with TEST_FS_MOUNT_OPTS).
+>
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  README.config-sections | 10 +++++-----
+>  common/config          |  1 +
+>  2 files changed, 6 insertions(+), 5 deletions(-)
+>
+> diff --git a/README.config-sections b/README.config-sections
+> index 8c319ba97778..4f1a4dc6df7a 100644
+> --- a/README.config-sections
+> +++ b/README.config-sections
+> @@ -40,8 +40,8 @@ Different mount options
+>  -----------------------
+>  
+>  Specifying different mount options in difference config sections is allowed.
+> -When MOUNT_OPTIONS differs in the following section TEST_DEV will be remounted
+> -with new MOUNT_OPTIONS automatically before running the test.
+> +When TEST_FS_MOUNT_OPTS differs in the following section TEST_DEV will be
+> +remounted with new TEST_FS_MOUNT_OPTS automatically before running the test.
+>  
+>  
+>  Multiple file systems
+> @@ -51,9 +51,9 @@ Having different file systems in different config sections is allowed. When
+>  FSTYP differs in the following section the FSTYP file system will be created
+>  automatically before running the test.
+>  
+> -Note that if MOUNT_OPTIONS, MKFS_OPTIONS, or FSCK_OPTIONS are not directly
+> -specified in the section it will be reset to the default for a given file
+> -system.
+> +Note that if TEST_FS_MOUNT_OPTS, MOUNT_OPTIONS, MKFS_OPTIONS, or FSCK_OPTIONS
+> +are not directly specified in the section it will be reset to the default for a
+> +given file system.
+>  
+>  You can also force the file system recreation by specifying RECREATE_TEST_DEV.
+>  
+> diff --git a/common/config b/common/config
+> index 80598d063f6e..d08d14b35c56 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -602,6 +602,7 @@ get_next_config() {
+>  	local OLD_USE_EXTERNAL=$USE_EXTERNAL
+>  
+>  	unset MOUNT_OPTIONS
+> +	unset TEST_FS_MOUNT_OPTS
+>  	unset MKFS_OPTIONS
+>  	unset FSCK_OPTIONS
+>  	unset USE_EXTERNAL
+Hi Eryu,
 
-Thanks for your detailed explanation, and i got it.
-Could you help me review the v2 patch.  Thanks a lot!
+It looks fine to me.
+
+Reviewed-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 
 Thanks,
 Xiao Yang
-> Thanks,
-> -Eric
->
->> Thanks,
->> Xiao Yang.
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
->
-
 
 
