@@ -1,15 +1,14 @@
-Received: from [183.91.158.132] ([183.91.158.132]:59712 "EHLO
+Received: from [183.91.158.132] ([183.91.158.132]:2878 "EHLO
         heian.cn.fujitsu.com" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751869AbdHGGM2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2017 02:12:28 -0400
-Message-ID: <598804C6.3070508@cn.fujitsu.com>
-Date: Mon, 7 Aug 2017 14:12:22 +0800
+        by vger.kernel.org with ESMTP id S1751564AbdHGG2c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Aug 2017 02:28:32 -0400
+Message-ID: <59880880.2010708@cn.fujitsu.com>
+Date: Mon, 7 Aug 2017 14:28:16 +0800
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH 1/2] common/config: unset TEST_FS_MOUNT_OPTS across config
- sections
-References: <20170802143915.19585-1-eguan@redhat.com>
-In-Reply-To: <20170802143915.19585-1-eguan@redhat.com>
+Subject: Re: [PATCH 2/2] check: source common/rc again if TEST_DEV was recreated
+References: <20170802143915.19585-1-eguan@redhat.com> <20170802143915.19585-2-eguan@redhat.com>
+In-Reply-To: <20170802143915.19585-2-eguan@redhat.com>
 Content-Type: text/plain; charset="GB2312"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
@@ -18,69 +17,72 @@ Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On 2017/08/02 22:39, Eryu Guan wrote:
-> TEST_FS_MOUNT_OPTS doesn't get reset before parsing next config
-> section, this will cause unexpected TEST_FS_MOUNT_OPTS in test,
-> because it can be assigned some fs-specific mount options in
-> _test_mount_opts, which might not be supported by the filesystem in
-> next config section. And MOUNT_OPTIONS is reset, I don't see why
-> TEST_FS_MOUNT_OPTS shouldn't be.
+> If TEST_DEV is recreated by check, FSTYP derived from TEST_DEV
+> previously could be changed too and might not reflect the reality.
+> So source common/rc again with correct FSTYP to get fs-specific
+> configs, e.g. common/xfs.
 >
-> Also update README.config-sections to reflect this change and fix
-> typos (replace MOUNT_OPTIONS with TEST_FS_MOUNT_OPTS).
+> For example, using this config-section config file, and run section
+> ext4 first then xfs, you can see:
+>
+> our local _scratch_mkfs routine ...
+> ./common/rc: line 825: _scratch_mkfs_xfs: command not found
+> check: failed to mkfs $SCRATCH_DEV using specified options
+>
+> local.config:
+> [default]
+> RECREATE_TEST_DEV=true
+> TEST_DEV=/dev/sda5
+> SCRATCH_DEV=/dev/sda6
+> TEST_DIR=/mnt/test
+> SCRATCH_MNT=/mnt/scratch
+>
+> [ext4]
+> MKFS_OPTIONS="-b 4096"
+> FSTYP=ext4
+>
+> [xfs]
+> FSTYP=xfs
+> MKFS_OPTIONS="-f -b size=4k"
 >
 > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > ---
->  README.config-sections | 10 +++++-----
->  common/config          |  1 +
->  2 files changed, 6 insertions(+), 5 deletions(-)
+>  check | 4 ++++
+>  1 file changed, 4 insertions(+)
 >
-> diff --git a/README.config-sections b/README.config-sections
-> index 8c319ba97778..4f1a4dc6df7a 100644
-> --- a/README.config-sections
-> +++ b/README.config-sections
-> @@ -40,8 +40,8 @@ Different mount options
->  -----------------------
->  
->  Specifying different mount options in difference config sections is allowed.
-> -When MOUNT_OPTIONS differs in the following section TEST_DEV will be remounted
-> -with new MOUNT_OPTIONS automatically before running the test.
-> +When TEST_FS_MOUNT_OPTS differs in the following section TEST_DEV will be
-> +remounted with new TEST_FS_MOUNT_OPTS automatically before running the test.
->  
->  
->  Multiple file systems
-> @@ -51,9 +51,9 @@ Having different file systems in different config sections is allowed. When
->  FSTYP differs in the following section the FSTYP file system will be created
->  automatically before running the test.
->  
-> -Note that if MOUNT_OPTIONS, MKFS_OPTIONS, or FSCK_OPTIONS are not directly
-> -specified in the section it will be reset to the default for a given file
-> -system.
-> +Note that if TEST_FS_MOUNT_OPTS, MOUNT_OPTIONS, MKFS_OPTIONS, or FSCK_OPTIONS
-> +are not directly specified in the section it will be reset to the default for a
-> +given file system.
->  
->  You can also force the file system recreation by specifying RECREATE_TEST_DEV.
->  
-> diff --git a/common/config b/common/config
-> index 80598d063f6e..d08d14b35c56 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -602,6 +602,7 @@ get_next_config() {
->  	local OLD_USE_EXTERNAL=$USE_EXTERNAL
->  
->  	unset MOUNT_OPTIONS
-> +	unset TEST_FS_MOUNT_OPTS
->  	unset MKFS_OPTIONS
->  	unset FSCK_OPTIONS
->  	unset USE_EXTERNAL
+> diff --git a/check b/check
+> index f8db3cd6dfab..07586ce463c4 100755
+> --- a/check
+> +++ b/check
+> @@ -555,6 +555,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  			status=1
+>  			exit
+>  		fi
+> +		# TEST_DEV has been recreated, previous FSTYP derived from
+> +		# TEST_DEV could be changed, source common/rc again with
+> +		# correct FSTYP to get FSTYP specific configs, e.g. common/xfs
+> +		. common/rc
+>  		_prepare_test_list
+>  	elif [ "$OLD_TEST_FS_MOUNT_OPTS" != "$TEST_FS_MOUNT_OPTS" ]; then
+>  		_test_unmount 2> /dev/null
 Hi Eryu,
 
-It looks fine to me.
+Could we replace init_rc with common/rc to get correct FSTYP and call
+init_rc?
+Like this:
 
-Reviewed-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+--------------------------------------------------------------------------------
+--- a/check
++++ b/check
+@@ -566,7 +566,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+fi
+fi
+
+- init_rc
++ . common/rc
+---------------------------------------------------------------------------------
 
 Thanks,
-Xiao Yang
+Xiao Yang.
 
 
