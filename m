@@ -1,24 +1,24 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:27898 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752439AbdHHVWZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 Aug 2017 17:22:25 -0400
-Date: Tue, 8 Aug 2017 14:22:17 -0700
+Received: from userp1040.oracle.com ([156.151.31.81]:25584 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752154AbdHHVYX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 8 Aug 2017 17:24:23 -0400
+Date: Tue, 8 Aug 2017 14:24:16 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH 4/5] common/populate: enable xfs quota accounting
-Message-ID: <20170808212216.GD4474@magnolia>
+Message-ID: <20170808212416.GQ24087@magnolia>
 References: <150067465981.30639.14801416171688538711.stgit@magnolia>
  <150067469221.30639.16711306489951233808.stgit@magnolia>
- <20170804022200.GC1991@eguan.usersys.redhat.com>
+ <20170804015435.GB1991@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170804022200.GC1991@eguan.usersys.redhat.com>
+In-Reply-To: <20170804015435.GB1991@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 04, 2017 at 10:22:00AM +0800, Eryu Guan wrote:
+On Fri, Aug 04, 2017 at 09:54:35AM +0800, Eryu Guan wrote:
 > On Fri, Jul 21, 2017 at 03:04:52PM -0700, Darrick J. Wong wrote:
 > > From: Darrick J. Wong <darrick.wong@oracle.com>
 > > 
@@ -86,6 +86,12 @@ On Fri, Aug 04, 2017 at 10:22:00AM +0800, Eryu Guan wrote:
 > > +		export MOUNT_OPTIONS="$MOUNT_OPTIONS -o ${quota}"
 > > +		echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
 > > +	fi
+> 
+> It looks like an unconditional '_qmount_option "${quota}"' would be
+> sufficient here. Did I miss anything?
+
+Turning on /all/ the quota types.
+
 > > +}
 > > +
 > >  # Populate an XFS on the scratch device with (we hope) all known
@@ -96,39 +102,12 @@ On Fri, Aug 04, 2017 at 10:22:00AM +0800, Eryu Guan wrote:
 > >  	done
 > >  
 > > +	_populate_xfs_qmount_option
+> >  	_scratch_mount
 > 
-> Sorry, another question just poped up..
-> 
-> This enables quota and modifies MOUNT_OPTIONS unconditionally and
-> implicitly, I suspect users of _scratch_populate_cached() or
-> _scratch_xfs_populate() may be bitten by this implicit change.
+> Then use _qmount? But it's in populate function for xfs, _scratch_mount
+> and _qmount doesn't have much difference, so either way seems fine.
 
-I suppose we could be more explicit about the fact that we
-unconditionally enable all quota types and change MOUNT_OPTIONS, though
-I did go run all the _scratch_xfs_populate tests and they all seemed
-fine.
-
-(Well, as fine as we can get considering that most of them are fuzz
-tests that cause all manners of other crazy behavior.)
-
-> Would it be better if there's a argument to control this quota
-> enablement and default to disable quota? Just like the "nofill"
-> argument, introduce a new "quota" argument? So existing callers of
-> _scratch_populate_cached() are not affected by this change, and tests
-> want quota can enable it explicitly.
-
-Hmm.  The way I look at it, though, _scratch_xfs_populate is supposed to
-create all types of filesystem metadata, which includes quota files, so
-we have to enable the quota options or we're not actually doing what the
-documentation says it's supposed to be doing:
-
-# Populate an XFS on the scratch device with (we hope) all known
-# types of metadata block
-
-The reason there's a 'nofill' option is that, having created an fs with
-all known types of metadata, we can optionally use up any remaining free
-space, but doing so isn't necessary to create all known types of
-metadata block.
+<shrug> fewer changes, then :)
 
 --D
 
@@ -136,7 +115,6 @@ metadata block.
 > Thanks,
 > Eryu
 > 
-> >  	_scratch_mount
 > >  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
 > >  	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
 > > @@ -720,7 +763,12 @@ _scratch_populate_cached() {
@@ -155,6 +133,6 @@ metadata block.
 > >  	esac
 > > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
