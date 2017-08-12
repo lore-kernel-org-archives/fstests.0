@@ -1,13 +1,13 @@
-Received: from mail-pf0-f172.google.com ([209.85.192.172]:34605 "EHLO
-        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752012AbdHLAN6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Aug 2017 20:13:58 -0400
-Received: by mail-pf0-f172.google.com with SMTP id o86so21453213pfj.1
-        for <fstests@vger.kernel.org>; Fri, 11 Aug 2017 17:13:58 -0700 (PDT)
+Received: from mail-pg0-f54.google.com ([74.125.83.54]:36474 "EHLO
+        mail-pg0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751944AbdHLAOX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Aug 2017 20:14:23 -0400
+Received: by mail-pg0-f54.google.com with SMTP id v77so21025678pgb.3
+        for <fstests@vger.kernel.org>; Fri, 11 Aug 2017 17:14:23 -0700 (PDT)
 From: Gwendal Grignou <gwendal@chromium.org>
 Subject: [PATCH] fstests: add sdcardfs support
-Date: Fri, 11 Aug 2017 17:13:45 -0700
-Message-Id: <20170812001345.32850-1-gwendal@chromium.org>
+Date: Fri, 11 Aug 2017 17:14:16 -0700
+Message-Id: <20170812001416.36127-1-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
 To: eguan@redhat.com
 Cc: fstests@vger.kernel.org
