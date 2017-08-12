@@ -1,460 +1,318 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34515 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751387AbdHJMwF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 10 Aug 2017 08:52:05 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 29C6840430C
-        for <fstests@vger.kernel.org>; Thu, 10 Aug 2017 12:52:05 +0000 (UTC)
-Date: Thu, 10 Aug 2017 14:52:01 +0200
-From: Lukas Czerner <lczerner@redhat.com>
-Subject: Re: [PATCH] generic: test data integrity with mixed buffer read and
- aio dio write
-Message-ID: <20170810125201.5qduksaqkvhnb5au@rh_laptop>
-References: <20170810085708.1944-1-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170810085708.1944-1-zlang@redhat.com>
+Received: from mail-pf0-f172.google.com ([209.85.192.172]:34605 "EHLO
+        mail-pf0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752012AbdHLAN6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Aug 2017 20:13:58 -0400
+Received: by mail-pf0-f172.google.com with SMTP id o86so21453213pfj.1
+        for <fstests@vger.kernel.org>; Fri, 11 Aug 2017 17:13:58 -0700 (PDT)
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: [PATCH] fstests: add sdcardfs support
+Date: Fri, 11 Aug 2017 17:13:45 -0700
+Message-Id: <20170812001345.32850-1-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
+To: eguan@redhat.com
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 10, 2017 at 04:57:08PM +0800, Zorro Lang wrote:
-> When mixing buffered reads and asynchronous direct writes, it is
-> possible to end up with the situation where we have stale data in
-> the page cache while the new data is already written to disk.
+Add ability to run generic test on a sdcardfs filesystem.
+sdcardfs replaces fuse daemon to emulate a sdcard on Android.
+It is based on wrapfs, a passthru filesystem.
 
-Hi,
+Add -sdcardfs option to prevent check from doing mkfs, cleanup of
+the underlying device.
 
-thanks for writing the test. Couple of comments below.
+Given sdcardfs does not support links, add _require_test_link to tests
+that use links.
 
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> This case add a new C program into src/aio-dio-regress/. I tried to
-> use some existent program to make some AIO load to trigger this bug,
-> but I found it's very hard.
-> 
-> For trigger this bug ASAP, I had to write a new program. And from
-> the my test results, it really can reproduce this bug quickly.
-> 
-> More details about this bug please check:
-> https://patchwork.kernel.org/patch/9851671/
-> 
-> Thanks,
-> Zorro
-> 
->  .gitignore                                |   1 +
->  src/aio-dio-regress/aio-dio-cycle-write.c | 254 ++++++++++++++++++++++++++++++
->  tests/generic/999                         |  74 +++++++++
->  tests/generic/999.out                     |   2 +
->  tests/generic/group                       |   1 +
->  5 files changed, 332 insertions(+)
->  create mode 100644 src/aio-dio-regress/aio-dio-cycle-write.c
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
-> 
-> diff --git a/.gitignore b/.gitignore
-> index fcbc0cd4..28fe84d5 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -133,6 +133,7 @@
->  /src/writemod
->  /src/writev_on_pagefault
->  /src/xfsctl
-> +/src/aio-dio-regress/aio-dio-cycle-write
->  /src/aio-dio-regress/aio-dio-extend-stat
->  /src/aio-dio-regress/aio-dio-fcntl-race
->  /src/aio-dio-regress/aio-dio-hole-filling-race
-> diff --git a/src/aio-dio-regress/aio-dio-cycle-write.c b/src/aio-dio-regress/aio-dio-cycle-write.c
-> new file mode 100644
-> index 00000000..6c10f9cc
-> --- /dev/null
-> +++ b/src/aio-dio-regress/aio-dio-cycle-write.c
-> @@ -0,0 +1,254 @@
-> +/*
-> + * Directly AIO re-write a file with different content again and again.
-> + * And check the data integrity.
-> + *
-> + * Copyright (C) 2017 Red Hat, Inc. All Rights reserved.
-> + *
-> + * This program is free software; you can redistribute it and/or modify
-> + * it under the terms of the GNU General Public License as published by
-> + * the Free Software Foundation; either version 2 of the License, or
-> + * (at your option) any later version.
-> + *
-> + * This program is distributed in the hope that it will be useful,
-> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
-> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> + * GNU General Public License for more details.
-> + *
-> + * You should have received a copy of the GNU General Public License
-> + * along with this program; if not, write to the Free Software
-> + * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
-> + */
-> +
-> +#include <sys/stat.h>
-> +#include <sys/types.h>
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <unistd.h>
-> +#include <ctype.h>
-> +
-> +#include <libaio.h>
-> +
-> +unsigned long buf_size = 0;
-> +unsigned long loop_count = 0;
-> +void *test_buf[2];
-> +#define IO_PATTERN1	0x55
-> +#define IO_PATTERN2	0xaa
-> +
-> +void usage(char *progname)
-> +{
-> +	fprintf(stderr, "usage: %s [-c loop_count] [-b bufsize] filename\n"
-> +	        "\t-c loopcount: specify how many times to test"
-> +	        "\t-b bufsize: keep writing from offset 0 to this size",
-> +	        progname);
-> +	exit(1);
-> +}
-> +
-> +void dump_buffer(
-> +	void	*buf,
-> +	off64_t	offset,
-> +	ssize_t	len)
-> +{
-> +	int	i, j;
-> +	char	*p;
-> +	int	new;
-> +
-> +	for (i = 0, p = (char *)buf; i < len; i += 16) {
-> +		char    *s = p;
-> +
-> +		if (i && !memcmp(p, p - 16, 16)) {
-> +			new = 0;
-> +		} else {
-> +			if (i)
-> +				printf("*\n");
-> +			new = 1;
-> +		}
-> +
-> +		if (!new) {
-> +			p += 16;
-> +			continue;
-> +		}
-> +
-> +		printf("%08llx  ", (unsigned long long)offset + i);
-> +		for (j = 0; j < 16 && i + j < len; j++, p++)
-> +			printf("%02x ", *p);
-> +		printf(" ");
-> +		for (j = 0; j < 16 && i + j < len; j++, s++) {
-> +			if (isalnum((int)*s))
-> +				printf("%c", *s);
-> +			else
-> +				printf(".");
-> +		}
-> +		printf("\n");
-> +
-> +	}
-> +	printf("%08llx\n", (unsigned long long)offset + i);
-> +}
-> +
-> +int init_test(char *filename)
-> +{
-> +	int fd;
-> +	int err = 0;
-> +
-> +	fd = open(filename, O_DIRECT | O_CREAT | O_RDWR, 0600);
-> +	if (fd == -1) {
-> +		perror("open");
-> +		exit(1);
-> +	}
-> +
-> +	ftruncate(fd, buf_size);
-> +
-> +	/* fill test_buf[0] with IO_PATTERN1 */
-> +	err = posix_memalign(&(test_buf[0]), getpagesize(), buf_size);
-> +	if (err) {
-> +		fprintf(stderr, "error %s during %s\n",
-> +			strerror(err),
-> +			"posix_memalign");
-> +		exit(1);
-> +	}
-> +	memset(test_buf[0], IO_PATTERN1, buf_size);
-> +
-> +	/* fill test_buf[1] with IO_PATTERN2 */
-> +	err = posix_memalign(&(test_buf[1]), getpagesize(), buf_size);
-> +	if (err) {
-> +		fprintf(stderr, "error %s during %s\n",
-> +			strerror(err),
-> +			"posix_memalign");
-> +		exit(1);
-> +	}
-> +	memset(test_buf[1], IO_PATTERN2, buf_size);
-> +
-> +	/* fill test file with IO_PATTERN1 */
-> +	if (pwrite(fd, test_buf[0], buf_size, 0) != buf_size) {
-> +		perror("pwrite");
-> +		exit(1);
-> +	}
-> +
-> +	fsync(fd);
-> +	close(fd);
-> +
-> +	return 0;
-> +}
-> +
-> +/*
-> + * Read file content back, then compare with the 'buf' which
-> + * point to the original buffer was written to file.
-> + */
-> +int fs_check(char *filename, void *buf)
-> +{
-> +	void *cmp_buf;
-> +	int fd;
-> +
-> +	cmp_buf = malloc(buf_size);
-> +	if (!cmp_buf) {
-> +		perror("malloc");
-> +		exit(1);
-> +	}
-> +	memset(cmp_buf, 0, buf_size);
+TEST=Check we don't have any kernel crashes when running:
+export TEST_DEV='/usr/local/autotest/tmp/xfstests_TEST'
+export SCRATCH_DEV='/usr/local/autotest/tmp/xfstests_SCRATCH'
+export SHELL='/bin/bash'
+export SCRATCH_MNT='/usr/local/autotest/tmp/xfstests_sdcarfs_SCRATCH'
+export PWD='/root'
+export PATH='/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/sbin'
+export TEST_DIR='/usr/local/autotest/tmp/xfstests_sdcarfs_TEST'
+export SELINUX_MOUNT_OPTIONS=' '
+export HOME='/root'
+export SDCARDFS_MOUNT_OPTIONS='-o fsuid=4444,fsgid=4444,gid=4445,multiuser,mask=23,noatime'
+mkdir -p "${TEST_DEV}" "${SCRATCH_DEV}" "${SCRATCH_MNT}" "${TEST_DIR}"
+./check -sdcardfs generic/*
 
-Do you have to do the allocation with every iteration ? Seems like a
-waste to me. Also you forgot to free the memory so eventually you'll run
-dry. It would be better to change it so you only allocate it once.
+Using Android AOSP 4.4 sdcardfs code:
+In generic directory, 365 tests excluded, 84 ran and 8 failed:
+generic/087 generic/088 generic/126 generic/184 generic/257 generic/260 generic/306 generic/448
 
-> +
-> +	fd = open(filename, O_RDONLY, 0600);
-> +	if (fd == -1) {
-> +		perror("open");
-> +		exit(1);
-> +	}
-> +
-> +	if (pread(fd, cmp_buf, buf_size, 0) != buf_size) {
-> +		perror("pread");
-> +		exit(1);
-> +	}
-> +	close(fd);
-> +
-> +	if (memcmp(buf, cmp_buf, buf_size)) {
-> +		printf("corruption while extending\n");
+Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
+---
+ check             |  2 ++
+ common/config     |  5 ++++-
+ common/rc         | 38 +++++++++++++++++++++++++-------------
+ tests/generic/002 |  1 +
+ tests/generic/062 |  1 +
+ tests/generic/079 |  1 +
+ tests/generic/089 |  1 +
+ tests/generic/109 |  1 +
+ tests/generic/236 |  1 +
+ tests/generic/294 |  1 +
+ tests/generic/360 |  1 +
+ tests/generic/401 |  1 +
+ 12 files changed, 40 insertions(+), 14 deletions(-)
 
-Not sure why it's "corruption while extending" ?
+diff --git a/check b/check
+index f8db3cd6..0de3d907 100755
+--- a/check
++++ b/check
+@@ -69,6 +69,7 @@ check options
+     -cifs               test CIFS
+     -overlay		test overlay
+     -pvfs2          test PVFS2
++    -sdcardfs		test sdcardfs
+     -tmpfs              test TMPFS
+     -ubifs              test ubifs
+     -l			line mode diff
+@@ -267,6 +268,7 @@ while [ $# -gt 0 ]; do
+ 	-cifs)		FSTYP=cifs ;;
+ 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+ 	-pvfs2)		FSTYP=pvfs2 ;;
++	-sdcardfs)	FSTYP=sdcardfs ;;
+ 	-tmpfs)		FSTYP=tmpfs ;;
+ 	-ubifs)		FSTYP=ubifs ;;
+ 
+diff --git a/common/config b/common/config
+index 80598d06..6ec24e01 100644
+--- a/common/config
++++ b/common/config
+@@ -308,6 +308,9 @@ _mount_opts()
+ 		# acls aren't turned on by default on gfs2
+ 		export MOUNT_OPTIONS="-o acl $GFS2_MOUNT_OPTIONS"
+ 		;;
++	sdcardfs)
++		export MOUNT_OPTIONS=$SDCARDFS_MOUNT_OPTIONS
++		;;
+ 	tmpfs)
+ 		# We need to specify the size at mount, use 1G by default
+ 		export MOUNT_OPTIONS="-o size=1G $TMPFS_MOUNT_OPTIONS"
+@@ -451,7 +454,7 @@ _check_device()
+ 	fi
+ 
+ 	case "$FSTYP" in
+-	overlay)
++	overlay|sdcardfs)
+ 		if [ ! -d "$dev" ]; then
+ 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+ 		fi
+diff --git a/common/rc b/common/rc
+index 9c5f54aa..6ba4e435 100644
+--- a/common/rc
++++ b/common/rc
+@@ -479,7 +479,7 @@ _scratch_unmount()
+ 	overlay)
+ 		_overlay_scratch_unmount
+ 		;;
+-	btrfs)
++	btrfs|sdcardfs)
+ 		$UMOUNT_PROG $SCRATCH_MNT
+ 		;;
+ 	*)
+@@ -524,11 +524,17 @@ _test_mount()
+ 
+ _test_unmount()
+ {
+-	if [ "$FSTYP" == "overlay" ]; then
+-		_overlay_test_unmount
+-	else
+-		$UMOUNT_PROG $TEST_DEV
+-	fi
++    case "$FSTYP" in
++    "overlay")
++        _overlay_test_unmount
++        ;;
++    "sdcardfs")
++        $UMOUNT_PROG $TEST_DIR
++        ;;
++    *)
++        $UMOUNT_PROG $TEST_DEV
++        ;;
++    esac
+ }
+ 
+ _test_cycle_mount()
+@@ -714,8 +720,8 @@ _test_mkfs()
+     glusterfs)
+ 	# do nothing for glusterfs
+ 	;;
+-    overlay)
+-	# do nothing for overlay
++    overlay|sdcardfs)
++	# do nothing for overlay|sdcardfs
+ 	;;
+     pvfs2)
+ 	# do nothing for pvfs2
+@@ -742,8 +748,8 @@ _mkfs_dev()
+     nfs*)
+ 	# do nothing for nfs
+ 	;;
+-    overlay)
+-	# do nothing for overlay
++    overlay|sdcardfs)
++	# do nothing for overlay|sdcardfs
+ 	;;
+     pvfs2)
+ 	# do nothing for pvfs2
+@@ -803,7 +809,7 @@ _scratch_mkfs()
+ 	local mkfs_status
+ 
+ 	case $FSTYP in
+-	nfs*|cifs|ceph|overlay|glusterfs|pvfs2)
++	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|sdcardfs)
+ 		# unable to re-create this fstyp, just remove all files in
+ 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+ 		# created in previous runs
+@@ -1595,7 +1601,7 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
+-	tmpfs)
++	tmpfs|sdcardfs)
+ 		if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
+ 		then
+ 		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
+@@ -1698,7 +1704,7 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
+-	tmpfs)
++	tmpfs|sdcardfs)
+ 		if [ -z "$TEST_DEV" -o ! -d "$TEST_DIR" ];
+ 		then
+ 		    _notrun "this test requires a valid \$TEST_DIR and unique $TEST_DEV"
+@@ -2621,6 +2627,9 @@ _check_test_fs()
+     btrfs)
+ 	_check_btrfs_filesystem $TEST_DEV
+ 	;;
++    sdcardfs)
++	# no way to check consistency for sdcardfs
++	;;
+     tmpfs)
+ 	# no way to check consistency for tmpfs
+ 	;;
+@@ -2673,6 +2682,9 @@ _check_scratch_fs()
+     btrfs)
+ 	_check_btrfs_filesystem $device
+ 	;;
++    sdcardfs)
++	# no way to check consistency for sdcardfs
++	;;
+     tmpfs)
+ 	# no way to check consistency for tmpfs
+ 	;;
+diff --git a/tests/generic/002 b/tests/generic/002
+index d8cffeaa..990d69c2 100755
+--- a/tests/generic/002
++++ b/tests/generic/002
+@@ -44,6 +44,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_test_symlinks
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/062 b/tests/generic/062
+index 643f02c3..8333dbc3 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -75,6 +75,7 @@ _supported_os Linux
+ 
+ _require_scratch
+ _require_attrs
++_require_test_symlinks
+ 
+ rm -f $tmp.backup1 $tmp.backup2 $seqres.full
+ 
+diff --git a/tests/generic/079 b/tests/generic/079
+index c2db6bf1..897a52a6 100755
+--- a/tests/generic/079
++++ b/tests/generic/079
+@@ -50,6 +50,7 @@ _supported_os Linux
+ _require_chattr ia
+ _require_test_program "t_immutable"
+ _require_scratch
++_require_test_symlinks
+ 
+ # real QA test starts here
+ _scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
+diff --git a/tests/generic/089 b/tests/generic/089
+index 4324f83a..2a387198 100755
+--- a/tests/generic/089
++++ b/tests/generic/089
+@@ -52,6 +52,7 @@ addentries()
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_test_symlinks
+ 
+ rm -f $seqres.full
+ [ "X$TEST_DIR" = "X" ] && exit 1
+diff --git a/tests/generic/109 b/tests/generic/109
+index 9fbaf1f4..0bae3097 100755
+--- a/tests/generic/109
++++ b/tests/generic/109
+@@ -45,6 +45,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_test_symlinks
+ 
+ rm -f $seqres.full
+ 
+diff --git a/tests/generic/236 b/tests/generic/236
+index 12ea0bc6..4b5c85e1 100755
+--- a/tests/generic/236
++++ b/tests/generic/236
+@@ -44,6 +44,7 @@ _supported_fs generic
+ # only Linux supports fallocate
+ _supported_os Linux
+ _require_test
++_require_test_symlinks
+ 
+ rm -f $TEST_DIR/ouch*
+ 
+diff --git a/tests/generic/294 b/tests/generic/294
+index fb5d9aa8..25309191 100755
+--- a/tests/generic/294
++++ b/tests/generic/294
+@@ -47,6 +47,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
++_require_test_symlinks
+ 
+ rm -f $seqres.full
+ _scratch_mkfs > $seqres.full 2>&1 || _fail "Could not mkfs scratch device"
+diff --git a/tests/generic/360 b/tests/generic/360
+index cc5623f5..caf8908e 100755
+--- a/tests/generic/360
++++ b/tests/generic/360
+@@ -46,6 +46,7 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
++_require_test_symlinks
+ 
+ linkfile=$TEST_DIR/$seq.symlink
+ rm -f $linkfile
+diff --git a/tests/generic/401 b/tests/generic/401
+index 74f2bea5..6f58389a 100755
+--- a/tests/generic/401
++++ b/tests/generic/401
+@@ -56,6 +56,7 @@ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_test_program "t_dir_type"
++_require_test_symlinks
+ 
+ rm -f $seqres.full
+ 
+-- 
+2.12.2
 
-> +		dump_buffer(buf, 0, buf_size);
-> +		exit(1);
-
-First thing I'd do after the test fails would be to drop the caches and
-see whether the content changes. That would confirm that the problem is
-indeed page cache inconsistency. So maybe it would be nice to confirm it
-right away within the test itself ?
-
-> +	}
-> +
-> +	return 0;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	struct io_context *ctx = NULL;
-> +	struct io_event evs[1];
-> +	struct iocb iocb1;
-> +	struct iocb *iocbs[] = { &iocb1 };
-> +	int fd, err = 0;
-> +	int i;
-> +	int c;
-> +	char *filename = NULL;
-> +
-> +	while ((c = getopt(argc, argv, "c:b:")) != -1) {
-> +		char *endp;
-> +
-> +		switch (c) {
-> +		case 'c':	/* the number of testing cycles */
-> +			loop_count = strtol(optarg, &endp, 0);
-> +			break;
-> +		case 'b':	/* buffer size */
-> +			buf_size = strtol(optarg, &endp, 0);
-> +			break;
-> +		default:
-> +			usage(argv[0]);
-> +		}
-> +	}
-> +
-> +	if (loop_count == 0)
-> +		loop_count = 1600;
-> +	if (buf_size == 0)	/* default minimum buffer size is 65536 bytes */
-> +		buf_size = 65536;
-> +
-> +	if (optind == argc - 1)
-> +		filename = argv[optind];
-> +	else
-> +		usage(argv[0]);
-> +
-> +	init_test(filename);
-> +
-> +	err = io_setup(1, &ctx);
-> +	if (err) {
-> +		fprintf(stderr, "error %s during %s\n",
-> +		        strerror(err),
-> +		        "io_setup");
-> +		return 1;
-> +	}
-> +
-> +	i = 0;
-> +	/*
-> +	 * Keep running until loop_count times, fill the file with IO_PATTERN1
-> +	 * or IO_PATTERN2 one by one, then read the file data back to check if
-> +	 * there's stale data.
-> +	 */
-> +	while (loop_count--) {
-> +		i++;
-> +		i %= 2;
-> +		fd = open(filename, O_DIRECT | O_CREAT | O_RDWR, 0600);
-> +		if (fd == -1) {
-> +			perror("open");
-> +			return 1;
-> +		}
-> +
-> +		io_prep_pwrite(&iocb1, fd, test_buf[i], buf_size, 0);
-> +		err = io_submit(ctx, 1, iocbs);
-> +		if (err != 1) {
-> +			fprintf(stderr, "error %s during %s\n",
-> +				strerror(err),
-> +				"io_submit");
-> +			return 1;
-> +		}
-> +		err = io_getevents(ctx, 1, 1, evs, NULL);
-> +		if (err != 1) {
-> +			fprintf(stderr, "error %s during %s\n",
-> +				strerror(err),
-> +				"io_getevents");
-> +			return 1;
-> +		}
-> +		close(fd);
-> +
-> +		fs_check(filename, test_buf[i]);
-> +	}
-> +
-> +	printf("Success, all done.\n");
-> +	return 0;
-> +}
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 00000000..006a7c92
-> --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# FS QA Test No. 999
-> +#
-> +# Test data integrity when mixing buffered reads and asynchronous
-> +# direct writes a file.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_test_program "feature"
-> +_require_aiodio aio-dio-cycle-write
-> +
-> +TESTFILE=$TEST_DIR/tst-aio-dio-cycle-write.$seq
-> +FSIZE=655360	# bytes
-> +
-> +# buffered reads the file frequently
-> +while true; do
-> +	$XFS_IO_PROG -f -c "pread 0 $FSIZE" $TESTFILE >/dev/null 2>&1
-> +done &
-> +reader_pid=$!
-> +
-> +nr_cpu=`$here/src/feature -o`
-> +LOOPCOUNT=$((nr_cpu * 100))
-> +if [ $LOOPCOUNT -gt 1000 ]; then
-> +	LOOPCOUNT=1000
-> +fi
-
-Unfortunatelly this did not work for me. I had to increase the
-multiplicator to 1000 (with 4 CPUs I had 4000 iterations) otherwise I
-was not able to hit it. Those 4000 iterations in my case took about 16s
-which would be perfectly fine for me. Maybe running the test for
-predetermined length of time might be a better idea ?
-
-Also I am not sure why nr_cpu matters here ?
-
-Thanks!
--Lukas
-
-> +# start a background aio writer, which does several writing loops
-> +# internally and check data integrality
-> +$AIO_TEST -c $LOOPCOUNT -b $FSIZE $TESTFILE
-> +status=$?
-> +
-> +kill $reader_pid
-> +wait $reader_pid
-> +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
-> new file mode 100644
-> index 00000000..6362b866
-> --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 999
-> +Success, all done.
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e13b5683..08462eee 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -452,3 +452,4 @@
->  447 auto quick clone
->  448 auto quick rw
->  449 auto quick acl enospc
-> +999 auto aio rw
-> -- 
-> 2.13.4
-> 
