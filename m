@@ -1,95 +1,109 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:32976 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751097AbdHMMi5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2017 08:38:57 -0400
-Received: by mail-pg0-f68.google.com with SMTP id u185so6633263pgb.0
-        for <fstests@vger.kernel.org>; Sun, 13 Aug 2017 05:38:56 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id s67sm9221528pgb.13.2017.08.13.05.38.54
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 13 Aug 2017 05:38:55 -0700 (PDT)
-Message-ID: <5990485f.465e630a.ba320.362c@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 13 Aug 2017 20:38:49 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 101f0c34ef68
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="TTtZzFmKo2Xf"
-Content-Disposition: inline
+Received: from imap.thunk.org ([74.207.234.97]:38794 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751025AbdHMRcb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 13 Aug 2017 13:32:31 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [xfstests-bld PATCH 2/2] Make the build and creation of xfstests.tar.gz to be reproducible
+Date: Sun, 13 Aug 2017 13:32:24 -0400
+Message-Id: <20170813173224.28900-2-tytso@mit.edu>
+In-Reply-To: <20170813173224.28900-1-tytso@mit.edu>
+References: <20170813173224.28900-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
+Use techniques from https://reproducible-builds.org so the builds will
+be reproducible, assuming a fixed build environment.
 
---TTtZzFmKo2Xf
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ build-all                             |  6 ++++++
+ gen-tarball                           | 10 ++++++++--
+ kvm-xfstests/test-appliance/gen-image | 12 +++++++++---
+ 3 files changed, 23 insertions(+), 5 deletions(-)
 
-Hi all,
+diff --git a/build-all b/build-all
+index 6ff5a48..570006e 100755
+--- a/build-all
++++ b/build-all
+@@ -148,6 +148,12 @@ else
+     LCF="-g -O2"
+ fi
+ 
++# To make the build more reproducible...
++export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
++export BUILD_PATH_PREFIX_MAP="xfstests-bld=$(pwd)"
++# GCC doesn't yet understand BUILD_PATH_PREFIX_MAP
++LCF="$LCF -fdebug-prefix-map=$(pwd)=xfstests-bld -gno-record-gcc-switches"
++
+ if test -z "$SKIP_E2FSLIBS" ; then
+     build_start "e2fslibs"
+     (cd e2fsprogs-libs; \
+diff --git a/gen-tarball b/gen-tarball
+index 5f7230d..5aa0142 100755
+--- a/gen-tarball
++++ b/gen-tarball
+@@ -32,6 +32,10 @@ done
+ 
+ which pigz &>/dev/null && GZIP=pigz || GZIP=gzip
+ 
++if test -z "$SOURCE_DATE_EPOCH" ; then
++    export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
++fi
++
+ echo "GEN xfstests"
+ rm -rf xfstests
+ if test "$fast" = "yes"
+@@ -47,6 +51,7 @@ cat *.ver > xfstests/git-versions
+ mkdir -p xfstests/bin xfstests/lib
+ cp bld/bin/* bld/sbin/* bld/usr/bin/* xfstests/bin
+ cp bld/lib/client.txt xfstests/lib
++rm xfstests/bin/compile_et xfstests/bin/mk_cmds
+ for i in ltp/fsstress ltp/fsx ltp/aio-stress src/godown
+ do
+     ln -s ../$i xfstests/bin
+@@ -54,5 +59,6 @@ done
+ echo "STRIP xfstests/*"
+ find xfstests -mindepth 2 -type f -perm /0111 | xargs $STRIP 2> /dev/null
+ echo "TAR xfstests"
+-tar c --owner=root --group=root --mode=go+u-w xfstests | \
+-	$GZIP -9 > xfstests.tar.gz
++find xfstests -print0 | LC_ALL=C sort -z | \
++    tar c --owner=0 --group=0 --numeric-owner --mtime="@${SOURCE_DATE_EPOCH}" \
++    --mode=go+u-w --null --no-recursion -T - | $GZIP -9n > xfstests.tar.gz
+diff --git a/kvm-xfstests/test-appliance/gen-image b/kvm-xfstests/test-appliance/gen-image
+index e7bdb35..2701353 100755
+--- a/kvm-xfstests/test-appliance/gen-image
++++ b/kvm-xfstests/test-appliance/gen-image
+@@ -66,6 +66,10 @@ while [ "$1" != "" ]; do
+   shift
+ done
+ 
++if test -z "$SOURCE_DATE_EPOCH" ; then
++    export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
++fi
++
+ if test -n "$DO_LOG" ; then
+     if test -z "$GEN_IMAGE_LOG" ; then
+ 	export GEN_IMAGE_LOG="$DO_LOG"
+@@ -312,11 +316,13 @@ if test -n "$OUT_TAR"; then
+     rmdir $ROOTDIR/debs
+     rmdir $ROOTDIR/imgdir
+     case "$OUT_TAR" in
+-	*.gz)	ZFLAG="-z" ;;
+-	*)	ZFLAG="" ;
++	*.gz)	ZCMD="gzip -9n" ;;
++	*)	ZCMD="cat" ;
+     esac
+     fix_symlinks
+-    tar -C $ROOTDIR -c $ZFLAG -f "$OUT_TAR" .
++    (cd "$ROOTDIR" ; find . -print0 | LC_ALL=C sort -z |
++	 tar -c --null --no-recursion -T - --numeric-owner \
++	     --mtime="@${SOURCE_DATE_EPOCH}" -f - | $ZCMD > "$OUT_TAR")
+     cleanup_rootdir
+     exit 0
+ fi
+-- 
+2.11.0.rc0.7.gbe5a750
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is a small update that only contains reviewed
-patches from last two weeks, because I was on vacation in most time of last
-week. There should be no new failures after this update, if you see one please
-report and/or contribute patches.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-101f0c34ef68 generic/307: add test to acl group
-
-New commits:
-
-Darrick J. Wong (1):
-      [4cca8b4ced05] common/inject: refactor helpers to use new errortag interface
-
-Ernesto A. Fernández (1):
-      [101f0c34ef68] generic/307: add test to acl group
-
-Eryu Guan (1):
-      [65e0cd588d7e] common/config: unset TEST_FS_MOUNT_OPTS across config sections
-
-Xiao Yang (1):
-      [adf56068b5c2] common/config: add acl and user_xattr support for TEST_DEV
-
-
-Code Diffstat:
-
- README.config-sections | 10 ++++-----
- common/config          |  5 +++++
- common/inject          | 59 ++++++++++++++++++++++++++++++++++++++++++++++++--
- tests/generic/group    |  2 +-
- tests/xfs/141          |  5 +++--
- tests/xfs/196          | 17 +++++----------
- 6 files changed, 77 insertions(+), 21 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---TTtZzFmKo2Xf
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZkEdsAAoJECZSqilcj+dj1T4P/iuwhvdrfeLZ4T7YZ4FW1D9T
-xKKAK87/gD13L1RnaA8a0cpP9Icr7ZVt/F5WYvlWG8NdkXP2NJYYv5LYbIaDADaw
-kGSEsL9CKiAXc2D65mqRUWJF8/a37cIMIZ+nEeRuVWfxeOXsRM0cp/Mi5dCWKw1+
-lJj9QdAUhxXzMoyxJkNgFp8kwx7YZ7enYHWZhqtkcSOCMaKGas+1qPBnfv2pV/tW
-KtQeyt+myXIqpAEYfI8B90LhPFfaDkegSVTSaU8s7RQeQCAbKAsN2n1iAMhygdm2
-pGcNEVA5j01fmGpgAIXkHtznqsAlqv9CvECUB9M3WjST7HKB2c1bjA1/lUHuxh00
-wp8T1nrTB5TprVNlL/3bKn4mlIZXOYTRf8OYXFmp8FRUM9B+SgDhOEwQeb8eX6SN
-ZWm3qLAl6LZr3xNG4VFYZwmW/A24NxPiLRsvzeBbN0rawW44dR6E333AFECWn9ZH
-lDH6NCavkYMVE7GCe8I7EsCuGzKWTilvtVE1KbCNVZQJc0kscayhVmWe2mY00I7r
-oA04A75Jmbxl0KEgp7EFzzbPndFOhfY1Cdm9+TvcT0NEQ5IxAzyYLxaAow2s3ceS
-qfYG3pi2M5XmHBrDa7lQAuIEUt8zwpvG0gC1hHAV1kcztCQTxkcTvPsKckBKarKx
-RX4uO+BwRB4KpIgWy5R2
-=eVbV
------END PGP SIGNATURE-----
-
---TTtZzFmKo2Xf--
