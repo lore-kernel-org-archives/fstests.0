@@ -1,111 +1,95 @@
-Received: from imap.thunk.org ([74.207.234.97]:37542 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750973AbdHLShj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 12 Aug 2017 14:37:39 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] xfstests-bld: teach setup-buildchroot about /etc/schroot/chroot.d
-Date: Sat, 12 Aug 2017 14:37:31 -0400
-Message-Id: <20170812183731.20272-1-tytso@mit.edu>
-In-Reply-To: <20170812183434.yy7vntirb5p4mcik@thunk.org>
-References: <20170812183434.yy7vntirb5p4mcik@thunk.org>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:32976 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751097AbdHMMi5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Aug 2017 08:38:57 -0400
+Received: by mail-pg0-f68.google.com with SMTP id u185so6633263pgb.0
+        for <fstests@vger.kernel.org>; Sun, 13 Aug 2017 05:38:56 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id s67sm9221528pgb.13.2017.08.13.05.38.54
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 13 Aug 2017 05:38:55 -0700 (PDT)
+Message-ID: <5990485f.465e630a.ba320.362c@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 13 Aug 2017 20:38:49 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 101f0c34ef68
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="TTtZzFmKo2Xf"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: ebiggers3@gmail.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Check for the existence of a chroot definition in the chroot.d
-directory, and if it exists, create the entry in that directory
-instead of appending the entry to /etc/schroot/schroot.conf
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- setup-buildchroot | 38 ++++++++++++++++++++++++++++++++++----
- 1 file changed, 34 insertions(+), 4 deletions(-)
+--TTtZzFmKo2Xf
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/setup-buildchroot b/setup-buildchroot
-index f649ed8..e43cba8 100755
---- a/setup-buildchroot
-+++ b/setup-buildchroot
-@@ -28,6 +28,7 @@ QEMU=
- BINFMT_MISC_MNT=/proc/sys/fs/binfmt_misc
- 
- SCHROOT_CONFFILE=/etc/schroot/schroot.conf
-+SCHROOT_CHROOT_D=/etc/schroot/chroot.d
- SCHROOT_FSTAB=xfstests-bld/fstab
- SCHROOT_FSTAB_FILE=/etc/schroot/$SCHROOT_FSTAB
- 
-@@ -356,10 +357,32 @@ validate_binfmt_misc()
-     log "Detected foreign chroot, using user-mode emulation with $QEMU version $full_version"
- }
- 
-+# Get the schroot configuration from either schroot.conf or entries in
-+# the chroot.d directory
-+get_schroot_config()
-+{
-+    local files
-+
-+    if test ! -f $SCHROOT_CONFFILE
-+    then
-+	die $SCHROOT_CONFFILE does not exist
-+    fi
-+
-+    if test -d $SCHROOT_CHROOT_D
-+    then
-+	(cd $SCHROOT_CHROOT_D ;
-+	 find . -maxdepth 1 -type f |
-+	     egrep '^./[a-ZA-Z0-09_-][a-ZA-Z0-09_.-]*$' |
-+	     xargs cat $SCHROOT_CONFFILE)
-+    else
-+	cat $SCHROOT_CONFFILE
-+    fi
-+}
-+
- # Extract the schroot.conf entry, if any, for $CHROOT_NAME
- extract_schroot_entry()
- {
--    awk '
-+    get_schroot_config | awk '
- {
-     if ($0 ~ /^[[:space:]]*\[.*\][[:space:]]*$/) {
- 	sub(/\][[:space:]]*$/, "")
-@@ -369,7 +392,7 @@ extract_schroot_entry()
- 	print
-     }
- }
--' "$SCHROOT_CONFFILE"
-+'
- }
- 
- generate_schroot_entry()
-@@ -414,19 +437,26 @@ check_for_conflicting_schroot_entry()
- # Add an entry to schroot.conf for the chroot.
- add_schroot_conf_entry()
- {
-+    local f
-     check_for_conflicting_schroot_entry
-     if [ -n "$(extract_schroot_entry)" ]; then
- 	log "$CHROOT_NAME entry already exists in $SCHROOT_CONFFILE"
- 	return
-     fi
- 
--    log "Adding new entry to $SCHROOT_CONFFILE:"
-+    if test -d $SCHROOT_CHROOT_D
-+    then
-+	f="$SCHROOT_CHROOT_D/$CHROOT_NAME"
-+    else
-+	f="$SCHROOT_CONFFILE"
-+    fi
-+    log "Adding new entry to $f:"
-     {
- 	echo
- 	echo "# entry added by $SCRIPTNAME"
- 	echo "[$CHROOT_NAME]"
- 	generate_schroot_entry
--    } | tee -a "$SCHROOT_CONFFILE"
-+    } | tee -a "$f"
-     echo
- }
- 
--- 
-2.11.0.rc0.7.gbe5a750
+Hi all,
 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a small update that only contains reviewed
+patches from last two weeks, because I was on vacation in most time of last
+week. There should be no new failures after this update, if you see one please
+report and/or contribute patches.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+101f0c34ef68 generic/307: add test to acl group
+
+New commits:
+
+Darrick J. Wong (1):
+      [4cca8b4ced05] common/inject: refactor helpers to use new errortag interface
+
+Ernesto A. Fernández (1):
+      [101f0c34ef68] generic/307: add test to acl group
+
+Eryu Guan (1):
+      [65e0cd588d7e] common/config: unset TEST_FS_MOUNT_OPTS across config sections
+
+Xiao Yang (1):
+      [adf56068b5c2] common/config: add acl and user_xattr support for TEST_DEV
+
+
+Code Diffstat:
+
+ README.config-sections | 10 ++++-----
+ common/config          |  5 +++++
+ common/inject          | 59 ++++++++++++++++++++++++++++++++++++++++++++++++--
+ tests/generic/group    |  2 +-
+ tests/xfs/141          |  5 +++--
+ tests/xfs/196          | 17 +++++----------
+ 6 files changed, 77 insertions(+), 21 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--TTtZzFmKo2Xf
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZkEdsAAoJECZSqilcj+dj1T4P/iuwhvdrfeLZ4T7YZ4FW1D9T
+xKKAK87/gD13L1RnaA8a0cpP9Icr7ZVt/F5WYvlWG8NdkXP2NJYYv5LYbIaDADaw
+kGSEsL9CKiAXc2D65mqRUWJF8/a37cIMIZ+nEeRuVWfxeOXsRM0cp/Mi5dCWKw1+
+lJj9QdAUhxXzMoyxJkNgFp8kwx7YZ7enYHWZhqtkcSOCMaKGas+1qPBnfv2pV/tW
+KtQeyt+myXIqpAEYfI8B90LhPFfaDkegSVTSaU8s7RQeQCAbKAsN2n1iAMhygdm2
+pGcNEVA5j01fmGpgAIXkHtznqsAlqv9CvECUB9M3WjST7HKB2c1bjA1/lUHuxh00
+wp8T1nrTB5TprVNlL/3bKn4mlIZXOYTRf8OYXFmp8FRUM9B+SgDhOEwQeb8eX6SN
+ZWm3qLAl6LZr3xNG4VFYZwmW/A24NxPiLRsvzeBbN0rawW44dR6E333AFECWn9ZH
+lDH6NCavkYMVE7GCe8I7EsCuGzKWTilvtVE1KbCNVZQJc0kscayhVmWe2mY00I7r
+oA04A75Jmbxl0KEgp7EFzzbPndFOhfY1Cdm9+TvcT0NEQ5IxAzyYLxaAow2s3ceS
+qfYG3pi2M5XmHBrDa7lQAuIEUt8zwpvG0gC1hHAV1kcztCQTxkcTvPsKckBKarKx
+RX4uO+BwRB4KpIgWy5R2
+=eVbV
+-----END PGP SIGNATURE-----
+
+--TTtZzFmKo2Xf--
