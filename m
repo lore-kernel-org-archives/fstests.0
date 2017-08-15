@@ -1,65 +1,57 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:36067 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753423AbdHOKbB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 Aug 2017 06:31:01 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2] overlay: test mount error cases with index=on
-Date: Tue, 15 Aug 2017 13:31:30 +0300
-Message-Id: <1502793090-19372-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52094 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753057AbdHOMzq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 Aug 2017 08:55:46 -0400
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id D467C2D1EDF
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2017 12:55:45 +0000 (UTC)
+Received: from hades.localdomain.com (unknown [10.43.17.88])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 48EAC505DE
+        for <fstests@vger.kernel.org>; Tue, 15 Aug 2017 12:55:45 +0000 (UTC)
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: [PATCH] xfs: Test infinite loop while searching for a free inode slot
+Date: Tue, 15 Aug 2017 14:55:41 +0200
+Message-Id: <20170815125541.12243-1-cmaiolino@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-- Upper/lower mismatch
-- Index/upper mismatch
+Tests the search algorithm for a free inode slot in a specific AG, done
+in xfs_dialloc_ag_inobt().
 
-With index=on, lowerdir and upperdir are verified using a file handle
-stored in trusted.overlay.origin xattr in upperdir and indexdir.
+When finobt is not used, and agi->freecount is not 0, XFS will scan the AG inode
+tree looking for a free inode slot, but if agi->freecount is corrupted,
+and there is no free slot at all, it will end up in an infinite loop.
 
-Failure to verify lowerdir/upperdir on mount results in ESTALE.
+This test checks for the infinite loop fix.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
 ---
+ tests/xfs/057     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/057.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/xfs/057
+ create mode 100644 tests/xfs/057.out
 
-Eryu,
-
-This test depends on a kernel commit 961af647fc9e ("ovl: fix origin
-verification of index dir") that was merged for v4.13-rc2.
-
-v2:
-- Add verification that mount with original lower and upper
-  dir still succeeds, after the mismatch attempts
-
- tests/overlay/037     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/037.out |  3 ++
- tests/overlay/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/overlay/037
- create mode 100644 tests/overlay/037.out
-
-diff --git a/tests/overlay/037 b/tests/overlay/037
+diff --git a/tests/xfs/057 b/tests/xfs/057
 new file mode 100755
-index 0000000..6be9a26
+index 00000000..446ea1eb
 --- /dev/null
-+++ b/tests/overlay/037
-@@ -0,0 +1,94 @@
++++ b/tests/xfs/057
+@@ -0,0 +1,80 @@
 +#! /bin/bash
-+# FS QA Test 037
++# FS QA Test 057
 +#
-+# Test mount error cases with option index=on
++# Check if the filesystem will lockup when trying to allocate a new inode in
++# an AG with no free inodes but with a corrupted agi->freecount showing free inodes. 
 +#
-+# - Upper/lower mismatch
-+# - Index/upper mismatch
-+#
-+# With index=on, lowerdir and upperdir are verified using a file handle
-+# stored in trusted.overlay.origin xattr in upperdir and indexdir.
-+#
-+# Failure to verify lowerdir/upperdir on mount results in ESTALE.
-+#
++# At the end of the test, the scratch device will purposely be in a corrupted
++# state, so there is no need for checking that.
 +#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
++# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -99,63 +91,57 @@ index 0000000..6be9a26
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs overlay
++
++# Modify as appropriate.
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
-+_require_scratch_feature index
++#_require_scratch
++_require_scratch_nocheck
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
++_scratch_mkfs_xfs -mfinobt=0 >/dev/null 2>&1 \
++	|| _notrun "Failed to initialize filesystem."
++_scratch_mount >/dev/null 2>&1
 +
-+# Create multiple lowerdirs, upperdirs and workdir
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+upperdir2=$OVL_BASE_SCRATCH_MNT/upper2
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+mkdir -p $lowerdir $lowerdir2 $upperdir $upperdir2 $workdir
++# At the end of filesystem's initialization, AG 0 will still have 61 free
++# inodes in the agi->freecount, create 61 extra dummy files to fill it up
++for i in `seq 1 61`; do
++	touch $SCRATCH_MNT/dummy_file$1
++done
 +
-+# Mount overlay with lowerdir, upperdir, workdir and index=on
-+# to store the file handles of lowerdir and upperdir in overlay.origin xattr
-+_overlay_mount_dirs $lowerdir $upperdir $workdir \
-+		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on
-+$UMOUNT_PROG $SCRATCH_MNT
++_scratch_unmount
 +
-+# Try to mount an overlay with the same upperdir and different lowerdir - expect ESTALE
-+_overlay_mount_dirs $lowerdir2 $upperdir $workdir \
-+		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
-+$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
++# agi->freecount is 0 here, corrupt it to show extra free inodes
++$XFS_DB_PROG -x -c "agi 0" -c "write -d freecount 10" $SCRATCH_DEV >/dev/null 2>&1
 +
-+# Try to mount an overlay with the same workdir and different upperdir - expect ESTALE
-+_overlay_mount_dirs $lowerdir $upperdir2 $workdir \
-+		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
-+$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
++_scratch_mount >/dev/null 2>&1
 +
-+# Mount overlay with original lowerdir, upperdir, workdir and index=on - expect success
-+_overlay_mount_dirs $lowerdir $upperdir $workdir \
-+		    $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT -oindex=on
++# Lock up a buggy kernel
++touch $SCRATCH_MNT/lockupfile
 +
-+# success, all done
++# If we reach this point, the filesystem is fixed
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/overlay/037.out b/tests/overlay/037.out
+diff --git a/tests/xfs/057.out b/tests/xfs/057.out
 new file mode 100644
-index 0000000..786ef85
+index 00000000..185023c7
 --- /dev/null
-+++ b/tests/overlay/037.out
-@@ -0,0 +1,3 @@
-+QA output created by 037
-+mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
-+mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 4cc1d74..28f1e63 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -39,3 +39,4 @@
- 034 auto quick copyup hardlink
- 035 auto quick mount
- 036 auto quick mount
-+037 auto quick mount
++++ b/tests/xfs/057.out
+@@ -0,0 +1,2 @@
++QA output created by 057
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index cf876a29..3ca8e75a 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -54,6 +54,7 @@
+ 054 auto quick
+ 055 dump ioctl remote tape
+ 056 dump ioctl auto quick
++057 dangerous
+ 059 dump ioctl auto quick
+ 060 dump ioctl auto quick
+ 061 dump ioctl auto quick
 -- 
-2.7.4
+2.13.5
 
