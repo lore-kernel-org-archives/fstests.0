@@ -1,48 +1,35 @@
-Received: from imap.thunk.org ([74.207.234.97]:50054 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:50266 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751471AbdHPPCi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Aug 2017 11:02:38 -0400
-Date: Wed, 16 Aug 2017 11:02:34 -0400
+        id S1752471AbdHPPnk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 Aug 2017 11:43:40 -0400
+Date: Wed, 16 Aug 2017 11:43:33 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [xfstests-bld PATCH 2/2] Make the build and creation of
- xfstests.tar.gz to be reproducible
-Message-ID: <20170816150234.36iqgbmbtb3wyl3s@thunk.org>
-References: <20170813173224.28900-1-tytso@mit.edu>
- <20170813173224.28900-2-tytso@mit.edu>
- <20170816034543.GC1417@zzz.localdomain>
+Subject: Re: [PATCH 2/2] android-xfstests: update documentation
+Message-ID: <20170816154333.jvxf7za2dfoquf66@thunk.org>
+References: <20170726001838.80452-1-ebiggers3@gmail.com>
+ <20170726001838.80452-2-ebiggers3@gmail.com>
+ <20170816035300.GD1417@zzz.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170816034543.GC1417@zzz.localdomain>
+In-Reply-To: <20170816035300.GD1417@zzz.localdomain>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 15, 2017 at 08:45:43PM -0700, Eric Biggers wrote:
-> On Sun, Aug 13, 2017 at 01:32:24PM -0400, Theodore Ts'o wrote:
-> > +find xfstests -print0 | LC_ALL=C sort -z | \
-> > +    tar c --owner=0 --group=0 --numeric-owner --mtime="@${SOURCE_DATE_EPOCH}" \
-> > +    --mode=go+u-w --null --no-recursion -T - | $GZIP -9n > xfstests.tar.gz
+On Tue, Aug 15, 2017 at 08:53:00PM -0700, Eric Biggers wrote:
+> On Tue, Jul 25, 2017 at 05:18:38PM -0700, Eric Biggers wrote:
+> > From: Eric Biggers <ebiggers@google.com>
+> > 
+> > Update the list of known issues, document that specifying a kernel works
+> > now, and make a few other small improvements.
+> > 
+> > Signed-off-by: Eric Biggers <ebiggers@google.com>
+> > ---
 > 
-> This step isn't reproducible for me because earlier in the script $GZIP can be
-> set to pigz, which differs from gzip.  'gzip -n' omits the filename and
-> timestamp from the gz file, but 'pigz -n' only omits the filename, and the -T
-> option is needed to also omit the timestamp.
+> Hi Ted, are you planning to apply these two patches?  Thanks!
 
-Thanks for pointing this out.  I'll fix this in my tree before I push
-out the commit.
+Thanks for reminding me; I just applied them.
 
-I'll note that the use of pigz vs gzip does make a difference in the
-reproducibility of the tar.gz file:
-
-11904 -rw-r--r-- 1 tytso tytso 12188800 Aug 16 10:55 xfstests-pigz.tar.gz
-11896 -rw-r--r-- 1 tytso tytso 12180273 Aug 16 10:50 xfstests-gzip.tar.gz
-
-So eventually, if we really want to allow someone else to be reproduce
-a binary build, we will need to distribute something like a
-Debian-style "buildinfo" file where the exact version of the compiler,
-and other parts of the build environment (including gzip vs pigz), are
-documented.
-
-					- Ted
+       	   	     	   	- Ted
