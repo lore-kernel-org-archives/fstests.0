@@ -1,35 +1,56 @@
-Received: from imap.thunk.org ([74.207.234.97]:50266 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752471AbdHPPnk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Aug 2017 11:43:40 -0400
-Date: Wed, 16 Aug 2017 11:43:33 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 2/2] android-xfstests: update documentation
-Message-ID: <20170816154333.jvxf7za2dfoquf66@thunk.org>
-References: <20170726001838.80452-1-ebiggers3@gmail.com>
- <20170726001838.80452-2-ebiggers3@gmail.com>
- <20170816035300.GD1417@zzz.localdomain>
+Received: from aserp1040.oracle.com ([141.146.126.69]:38546 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751461AbdHPPxQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Aug 2017 11:53:16 -0400
+Date: Wed, 16 Aug 2017 08:53:07 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs: Test infinite loop while searching for a free inode
+ slot
+Message-ID: <20170816155307.GA4794@magnolia>
+References: <20170815125541.12243-1-cmaiolino@redhat.com>
+ <20170816070214.GJ14807@eguan.usersys.redhat.com>
+ <20170816073159.GL14807@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170816035300.GD1417@zzz.localdomain>
+In-Reply-To: <20170816073159.GL14807@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Carlos Maiolino <cmaiolino@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 15, 2017 at 08:53:00PM -0700, Eric Biggers wrote:
-> On Tue, Jul 25, 2017 at 05:18:38PM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
+On Wed, Aug 16, 2017 at 03:31:59PM +0800, Eryu Guan wrote:
+> On Wed, Aug 16, 2017 at 03:02:14PM +0800, Eryu Guan wrote:
+> > > +
+> > > +_scratch_unmount
+> > > +
+> > > +# agi->freecount is 0 here, corrupt it to show extra free inodes
+> > > +$XFS_DB_PROG -x -c "agi 0" -c "write -d freecount 10" $SCRATCH_DEV >/dev/null 2>&1
 > > 
-> > Update the list of known issues, document that specifying a kernel works
-> > now, and make a few other small improvements.
-> > 
-> > Signed-off-by: Eric Biggers <ebiggers@google.com>
-> > ---
+> > redirect stdout and stderr to $seqres.full for debug purpose
 > 
-> Hi Ted, are you planning to apply these two patches?  Thanks!
+> And you can use _scratch_xfs_db wrapper instead of open coded xfs_db
+> command.
+> 
+> And I found that "write -d" failed on a crc=0 XFS, though "write -c"
+> allows corrupted data and bad CRC, but touch couldn't reproduce the hang
+> in this case, because kernel detected bad crc first and aborted inode
+> creation.
 
-Thanks for reminding me; I just applied them.
+What error did you get, specifically?
 
-       	   	     	   	- Ted
+Sounds more like a bug in write/fuzz -d to me. :)
+
+--D
+
+> 
+> I think we can force a CRC enabled XFS by
+> 
+> _scratch_mkfs -m crc=1,finobt=0 >>$seqres.full 2>&1
+> 
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
