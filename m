@@ -1,73 +1,370 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58640 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55522 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750991AbdHQNjs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 Aug 2017 09:39:48 -0400
+        id S1752320AbdHQPbx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 17 Aug 2017 11:31:53 -0400
 Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2D90DCA375
-        for <fstests@vger.kernel.org>; Thu, 17 Aug 2017 13:39:48 +0000 (UTC)
-Received: from hades.localdomain.com (ovpn-204-167.brq.redhat.com [10.40.204.167])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8220F7F6DD
-        for <fstests@vger.kernel.org>; Thu, 17 Aug 2017 13:39:47 +0000 (UTC)
-From: Carlos Maiolino <cmaiolino@redhat.com>
-Subject: [PATCH V2] xfs: Test infinite loop while searching for a free inode slot
-Date: Thu, 17 Aug 2017 15:39:43 +0200
-Message-Id: <20170817133943.10774-1-cmaiolino@redhat.com>
+        by mx1.redhat.com (Postfix) with ESMTPS id 2B07885545
+        for <fstests@vger.kernel.org>; Thu, 17 Aug 2017 15:31:53 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] generic: test data integrity with mixed buffer read and aio dio write
+Date: Thu, 17 Aug 2017 23:31:45 +0800
+Message-Id: <20170817153145.10699-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Tests the search algorithm for a free inode slot in a specific AG, done
-in xfs_dialloc_ag_inobt().
+When mixing buffered reads and asynchronous direct writes, it is
+possible to end up with the situation where we have stale data in
+the page cache while the new data is already written to disk.
 
-When finobt is not used, and agi->freecount is not 0, XFS will scan the AG inode
-tree looking for a free inode slot, but if agi->freecount is corrupted,
-and there is no free slot at all, it will end up in an infinite loop.
-
-This test checks for the infinite loop fix.
-
-Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
-Changelog:
+Hi,
 
-V2:
-	- Small clean up
-	- use _disable_dmesg_check (the test will generate error
-				    messages which will appear in dmesg)
-	- Get the amount of free inodes from the AGI instead of assuming
-	  61 free inodes
-	- Send a few outputs to $seqres.full
-	- Use xfs_db `write` without -d option once this will create
-	  incompatibility with previous xfsprogs, and is not strictly
-	  required for the test to work.
-	- Check for finobt, and explicitly disable it if it is
-	  supported by the kernel being tested.
+V2 did below changes:
 
- tests/xfs/057     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/057.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/xfs/057
- create mode 100644 tests/xfs/057.out
+On script:
+1) End this case in limited time, not in limited loops.
+2) Start up more reader processes, to reproduce this bug easier.
 
-diff --git a/tests/xfs/057 b/tests/xfs/057
-new file mode 100755
-index 00000000..9833ba25
+On C program
+3) Do DIO read to check on-disk data, if find stale data from buffer reading.
+4) alloc cmp_buf once in init_test() function, doesn't alloc it everytime.
+
+Thanks,
+Zorro
+
+ .gitignore                                |   1 +
+ src/aio-dio-regress/aio-dio-cycle-write.c | 285 ++++++++++++++++++++++++++++++
+ tests/generic/999                         |  86 +++++++++
+ tests/generic/999.out                     |   2 +
+ tests/generic/group                       |   1 +
+ 5 files changed, 375 insertions(+)
+ create mode 100644 src/aio-dio-regress/aio-dio-cycle-write.c
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/.gitignore b/.gitignore
+index fcbc0cd4..28fe84d5 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -133,6 +133,7 @@
+ /src/writemod
+ /src/writev_on_pagefault
+ /src/xfsctl
++/src/aio-dio-regress/aio-dio-cycle-write
+ /src/aio-dio-regress/aio-dio-extend-stat
+ /src/aio-dio-regress/aio-dio-fcntl-race
+ /src/aio-dio-regress/aio-dio-hole-filling-race
+diff --git a/src/aio-dio-regress/aio-dio-cycle-write.c b/src/aio-dio-regress/aio-dio-cycle-write.c
+new file mode 100644
+index 00000000..94768381
 --- /dev/null
-+++ b/tests/xfs/057
++++ b/src/aio-dio-regress/aio-dio-cycle-write.c
+@@ -0,0 +1,285 @@
++/*
++ * Directly AIO re-write a file with different content again and again.
++ * And check the data integrity.
++ *
++ * Copyright (C) 2017 Red Hat, Inc. All Rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
++ */
++
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <ctype.h>
++
++#include <libaio.h>
++
++unsigned long buf_size = 0;
++unsigned long loop_count = 0;
++void *test_buf[2];
++void *cmp_buf;
++#define IO_PATTERN1	0x55
++#define IO_PATTERN2	0xaa
++
++void usage(char *progname)
++{
++	fprintf(stderr, "usage: %s [-c loop_count] [-b bufsize] filename\n"
++	        "\t-c loopcount: specify how many times to test"
++	        "\t-b bufsize: keep writing from offset 0 to this size",
++	        progname);
++	exit(1);
++}
++
++void dump_buffer(
++	void	*buf,
++	off64_t	offset,
++	ssize_t	len)
++{
++	int	i, j;
++	char	*p;
++	int	new;
++
++	for (i = 0, p = (char *)buf; i < len; i += 16) {
++		char    *s = p;
++
++		if (i && !memcmp(p, p - 16, 16)) {
++			new = 0;
++		} else {
++			if (i)
++				fprintf(stderr, "*\n");
++			new = 1;
++		}
++
++		if (!new) {
++			p += 16;
++			continue;
++		}
++
++		fprintf(stderr, "%08llx  ", (unsigned long long)offset + i);
++		for (j = 0; j < 16 && i + j < len; j++, p++)
++			fprintf(stderr, "%02x ", *p);
++		fprintf(stderr, " ");
++		for (j = 0; j < 16 && i + j < len; j++, s++) {
++			if (isalnum((int)*s))
++				fprintf(stderr, "%c", *s);
++			else
++				fprintf(stderr, ".");
++		}
++		fprintf(stderr, "\n");
++
++	}
++	fprintf(stderr, "%08llx\n", (unsigned long long)offset + i);
++}
++
++int init_test(char *filename)
++{
++	int fd;
++	int err = 0;
++
++	fd = open(filename, O_DIRECT | O_CREAT | O_RDWR, 0600);
++	if (fd == -1) {
++		perror("open");
++		exit(1);
++	}
++
++	ftruncate(fd, buf_size);
++
++	/* fill test_buf[0] with IO_PATTERN1 */
++	err = posix_memalign(&(test_buf[0]), getpagesize(), buf_size);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++			strerror(err),
++			"posix_memalign");
++		exit(1);
++	}
++	memset(test_buf[0], IO_PATTERN1, buf_size);
++
++	/* fill test_buf[1] with IO_PATTERN2 */
++	err = posix_memalign(&(test_buf[1]), getpagesize(), buf_size);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++			strerror(err),
++			"posix_memalign");
++		exit(1);
++	}
++	memset(test_buf[1], IO_PATTERN2, buf_size);
++
++	/* fill test file with IO_PATTERN1 */
++	if (pwrite(fd, test_buf[0], buf_size, 0) != buf_size) {
++		perror("pwrite");
++		exit(1);
++	}
++
++	/* cmp_buf is used to compare with test_buf */
++	err = posix_memalign(&cmp_buf, getpagesize(), buf_size);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++			strerror(err),
++			"posix_memalign");
++		exit(1);
++	}
++	memset(cmp_buf, 0, buf_size);
++
++	fsync(fd);
++	close(fd);
++
++	return 0;
++}
++
++/*
++ * Read file content back, then compare with the 'buf' which
++ * point to the original buffer was written to file.
++ */
++int fs_check(char *filename, void *buf)
++{
++
++	int fd;
++	int rc = 0;
++
++	/* check with buffer read */
++	fd = open(filename, O_RDONLY, 0600);
++	if (fd == -1) {
++		perror("open");
++		exit(1);
++	}
++
++	if (pread(fd, cmp_buf, buf_size, 0) != buf_size) {
++		perror("pread");
++		exit(1);
++	}
++
++	if (memcmp(buf, cmp_buf, buf_size)) {
++		fprintf(stderr, "get stale data from buffer read\n");
++		dump_buffer(cmp_buf, 0, buf_size);
++		rc++;
++	}
++
++	/*
++	 * check with direct-IO read, if buffer read find stale data. Make sure
++	 * if the stale data is from caches or disk.
++	 */
++	if (rc != 0) {
++		close(fd);
++		fd = open(filename, O_DIRECT|O_RDONLY, 0600);
++		if (fd < 0) {
++			perror("open with direct-IO");
++			exit(1);
++		}
++
++		if (pread(fd, cmp_buf, buf_size, 0) != buf_size) {
++			perror("pread");
++			exit(1);
++		}
++
++		if (memcmp(buf, cmp_buf, buf_size)) {
++			fprintf(stderr, "get stale data from DIO read\n");
++			dump_buffer(cmp_buf, 0, buf_size);
++			rc++;
++		}
++	}
++
++	close(fd);
++	return rc;
++}
++
++int main(int argc, char *argv[])
++{
++	struct io_context *ctx = NULL;
++	struct io_event evs[1];
++	struct iocb iocb1;
++	struct iocb *iocbs[] = { &iocb1 };
++	int fd, err = 0;
++	int i;
++	int c;
++	char *filename = NULL;
++
++	while ((c = getopt(argc, argv, "c:b:")) != -1) {
++		char *endp;
++
++		switch (c) {
++		case 'c':	/* the number of testing cycles */
++			loop_count = strtol(optarg, &endp, 0);
++			break;
++		case 'b':	/* buffer size */
++			buf_size = strtol(optarg, &endp, 0);
++			break;
++		default:
++			usage(argv[0]);
++		}
++	}
++
++	if (loop_count == 0)
++		loop_count = 1600;
++	if (buf_size == 0)	/* default minimum buffer size is 65536 bytes */
++		buf_size = 65536;
++
++	if (optind == argc - 1)
++		filename = argv[optind];
++	else
++		usage(argv[0]);
++
++	init_test(filename);
++
++	err = io_setup(1, &ctx);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++		        strerror(err),
++		        "io_setup");
++		return 1;
++	}
++
++	i = 0;
++	/*
++	 * Keep running until loop_count times, fill the file with IO_PATTERN1
++	 * or IO_PATTERN2 one by one, then read the file data back to check if
++	 * there's stale data.
++	 */
++	while (loop_count--) {
++		i++;
++		i %= 2;
++		fd = open(filename, O_DIRECT | O_CREAT | O_RDWR, 0600);
++		if (fd == -1) {
++			perror("open");
++			return 1;
++		}
++
++		io_prep_pwrite(&iocb1, fd, test_buf[i], buf_size, 0);
++		err = io_submit(ctx, 1, iocbs);
++		if (err != 1) {
++			fprintf(stderr, "error %s during %s\n",
++				strerror(err),
++				"io_submit");
++			return 1;
++		}
++		err = io_getevents(ctx, 1, 1, evs, NULL);
++		if (err != 1) {
++			fprintf(stderr, "error %s during %s\n",
++				strerror(err),
++				"io_getevents");
++			return 1;
++		}
++		close(fd);
++
++		err = fs_check(filename, test_buf[i]);
++		if (err != 0)
++			break;
++	}
++
++	return 0;
++}
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..edce8885
+--- /dev/null
++++ b/tests/generic/999
 @@ -0,0 +1,86 @@
 +#! /bin/bash
-+# FS QA Test 057
++# FS QA Test No. 999
 +#
-+# Check if the filesystem will lockup when trying to allocate a new inode in
-+# an AG with no free inodes but with a corrupted agi->freecount showing free inodes.
++# Test data integrity when mixing buffered reads and asynchronous
++# direct writes a file.
 +#
-+# At the end of the test, the scratch device will purposely be in a corrupted
-+# state, so there is no need for checking that.
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
++# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -101,69 +398,68 @@ index 00000000..9833ba25
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/filter
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch_nocheck
-+_disable_dmesg_check
++_require_test
++_require_test_program "feature"
++_require_aiodio aio-dio-cycle-write
 +
-+# Make sure we disable finobt if the filesystem supports it, otherwise, just
-+# initialize it with default options.
-+_scratch_mkfs | grep -q "finobt=1" && _scratch_mkfs -m "finobt=0" >/dev/null 2>&1
++TESTFILE=$TEST_DIR/tst-aio-dio-cycle-write.$seq
++FSIZE=655360	# bytes
 +
-+# Get the amount of free inodes from the AGI 0, so we can fill up the freecount
-+# structure.
-+freecount=`_scratch_xfs_db -c "agi 0" -c "p freecount" | cut -d' ' -f 3`
++# More read processes can help to reproduce the bug easier, so run
++# 2 ~ 20 readers according to the number of CPUs
++nr_cpu=`$here/src/feature -o`
++loops=$((nr_cpu / 2))
++if [ $loops -lt 2 ]; then
++	loops=2
++elif [ $loops -gt 20 ]; then
++	loops=20
++fi
 +
-+_scratch_mount
-+
-+# At the end of filesystem's initialization, AG 0 will have $freecount free
-+# inodes in the agi->freecount, create $freecount extra dummy files to fill it.
-+for i in `seq 1 $freecount`; do
-+	touch $SCRATCH_MNT/dummy_file$i
++# buffered reads the file frequently
++for ((i=0; i<loops; i++)); do
++	while true; do
++		$XFS_IO_PROG -f -c "pread 0 $FSIZE" $TESTFILE >/dev/null 2>&1
++	done &
++	reader_pid="$reader_pid $!"
 +done
 +
-+_scratch_unmount >/dev/null 2>&1
++# start an aio writer, which does writing loops internally and check
++# data integrality.
++# For reproduce the original bug, keep testing about 30s will be better,
++# So let the AIO_TEST run as many loops as it can, then kill it in 20s.
++timeout -s TERM 30s $AIO_TEST -c 999999 -b $FSIZE $TESTFILE >/dev/null
 +
-+# agi->freecount is 0 here, corrupt it to show extra free inodes
-+$XFS_DB_PROG -x -c "agi 0" -c "write freecount 10" $SCRATCH_DEV >> $seqres.full 2>&1
++kill $reader_pid
++wait $reader_pid
 +
-+_scratch_mount
-+
-+# Lock up a buggy kernel
-+touch $SCRATCH_MNT/lockupfile >> $seqres.full 2>&1
-+
-+# If we reach this point, the filesystem is fixed
 +echo "Silence is golden"
++
 +status=0
 +exit
-diff --git a/tests/xfs/057.out b/tests/xfs/057.out
+diff --git a/tests/generic/999.out b/tests/generic/999.out
 new file mode 100644
-index 00000000..185023c7
+index 00000000..3b276ca8
 --- /dev/null
-+++ b/tests/xfs/057.out
++++ b/tests/generic/999.out
 @@ -0,0 +1,2 @@
-+QA output created by 057
++QA output created by 999
 +Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index cf876a29..37e4e641 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -54,6 +54,7 @@
- 054 auto quick
- 055 dump ioctl remote tape
- 056 dump ioctl auto quick
-+057 auto quick fuzzers dangerous
- 059 dump ioctl auto quick
- 060 dump ioctl auto quick
- 061 dump ioctl auto quick
+diff --git a/tests/generic/group b/tests/generic/group
+index e13b5683..08462eee 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -452,3 +452,4 @@
+ 447 auto quick clone
+ 448 auto quick rw
+ 449 auto quick acl enospc
++999 auto aio rw
 -- 
 2.13.5
 
