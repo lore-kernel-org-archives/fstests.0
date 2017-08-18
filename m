@@ -1,347 +1,39 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44348 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751965AbdHRUfD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 18 Aug 2017 16:35:03 -0400
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] test race when checking i_size on direct i/o read
-Message-ID: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
-Date: Fri, 18 Aug 2017 15:35:02 -0500
+Received: from userp1040.oracle.com ([156.151.31.81]:39593 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751688AbdHRUwg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 Aug 2017 16:52:36 -0400
+Date: Fri, 18 Aug 2017 13:52:28 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] common/fuzzy: fix fuzz verb scanning
+Message-ID: <20170818205228.GC4794@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: Zheng Liu <wenqing.lz@taobao.com>, Christoph Hellwig <hch@infradead.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Zheng Liu <wenqing.lz@taobao.com>
+As part of upstreaming, the xfs_db fuzz command change the help output
+which breaks the fuzzers' ability to detect fuzz verbs.  Fix that.
 
-In this commit a new test case is added to test that i_size races don't
-occur under dio reads/writes.  We add a program in /src dir, which
-has a writer to issue some append dio writes.  Meanwhile it has a reader
-in this test to do some dio reads.  As we expect, reader should read
-nothing or data with 'a'.  But it might read some data with '0'.
-
-The bug can be reproduced by this test case [1].
-
-1.  http://patchwork.ozlabs.org/patch/311761/
-
-This ostensibly tests commit:
-9fe55eea7 Fix race when checking i_size on direct i/o read
-
-Cc: Christoph Hellwig <hch@infradead.org>
-Cc: Rich Johnston <rjohnston@sgi.com>
-Cc: Dave Chinner <david@fromorbit.com>
-Signed-off-by: Zheng Liu <wenqing.lz@taobao.com>
-[sandeen: update to recent xfstests, update commitlog]
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
+ common/fuzzy |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-This test was originally titled:
-
- xfstests: add a new test case to test i_size updated properly under dio
-
-but I think the issue is more of when and how it's tested, not how
-it's updated.
-
-Note, this passes on xfs on 4.10, but fails on 4.12.
-ext4 on 4.10 passes as well but is very slow.
-
-iomap dio maybe?  Not sure yet.
-
-changelog v3:
- * rebase against latest xfstests/master branch
- * update commit log
-
-changelog v2:
- * add '-lpthread' into LLDLIBS
-
-diff --git a/configure.ac b/configure.ac
-index 57092f1..4663004 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -59,6 +59,7 @@ AC_PACKAGE_NEED_GETXATTR_LIBATTR
- AC_PACKAGE_NEED_SYS_ACL_H
- AC_PACKAGE_NEED_ACL_LIBACL_H
- AC_PACKAGE_NEED_ACLINIT_LIBACL
-+AC_PACKAGE_NEED_PTHREADMUTEXINIT
+diff --git a/common/fuzzy b/common/fuzzy
+index c9f7e90..7a4b03a 100644
+--- a/common/fuzzy
++++ b/common/fuzzy
+@@ -313,8 +313,8 @@ _scratch_xfs_list_fuzz_verbs() {
+ 		echo "${SCRATCH_XFS_LIST_FUZZ_VERBS}" | tr '[ ,]' '[\n\n]'
+ 		return;
+ 	fi
+-	_scratch_xfs_db -x -c 'sb 0' -c 'fuzz' | grep '^Verbs:' | \
+-		sed -e 's/[,.]//g' -e 's/Verbs: //g' -e 's/ /\n/g'
++	_scratch_xfs_db -x -c 'sb 0' -c 'fuzz' | grep '^Fuzz commands:' | \
++		sed -e 's/[,.]//g' -e 's/Fuzz commands: //g' -e 's/ /\n/g'
+ }
  
- AC_PACKAGE_WANT_GDBM
- AC_PACKAGE_WANT_AIO
-diff --git a/include/builddefs.in b/include/builddefs.in
-index cb52b99..fcc8b90 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
-@@ -25,6 +25,7 @@ LIBGDBM = @libgdbm@
- LIBUUID = @libuuid@
- LIBHANDLE = @libhdl@
- LIBDM = @libdm@
-+LIBPTHREAD = @libpthread@
- LIBTEST = $(TOPDIR)/lib/libtest.la
- prefix = @prefix@
- 
-diff --git a/src/Makefile b/src/Makefile
-index b8aff49..e9419bd 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -23,7 +23,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
- 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
- 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
--	dio-invalidate-cache stat_test t_encrypted_d_revalidate
-+	dio-invalidate-cache stat_test t_encrypted_d_revalidate diotest
- 
- SUBDIRS =
- 
-diff --git a/src/diotest.c b/src/diotest.c
-new file mode 100644
-index 0000000..7d2378f
---- /dev/null
-+++ b/src/diotest.c
-@@ -0,0 +1,166 @@
-+/*
-+ * Copyright (c) 2013 Alibaba Group.
-+ * All Rights Reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it would be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write the Free Software Foundation,
-+ * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+ */
-+
-+/*
-+ * This is a normal case that we do some append dio writes and meanwhile
-+ * we do some dio reads.  Currently in vfs we don't ensure that i_size
-+ * is updated properly.  Hence the reader will read some data with '0'.
-+ * But we expect that the reader should read nothing or data with 'a'.
-+ */
-+
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+
-+#include <unistd.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <fcntl.h>
-+#include <errno.h>
-+
-+#include <pthread.h>
-+
-+static char *prog;
-+
-+struct writer_data {
-+	int fd;
-+	size_t blksize;
-+	char *buf;
-+};
-+
-+static void usage(void)
-+{
-+	fprintf(stderr, "usage: %s [FILE]\n", prog);
-+}
-+
-+static void *writer(void *arg)
-+{
-+	struct writer_data *data = (struct writer_data *)arg;
-+	int ret;
-+
-+	ret = write(data->fd, data->buf, data->blksize);
-+	if (ret < 0)
-+		fprintf(stderr, "write file failed: %s\n", strerror(errno));
-+
-+	return NULL;
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	pthread_t tid;
-+	struct writer_data wdata;
-+	size_t max_blocks = 128;		/* 128 */
-+	size_t blksize = 1 * 1024 * 1024;	/* 1M */
-+	char *rbuf = NULL, *wbuf = NULL;
-+	int rfd = 0, wfd = 0;
-+	int i, j;
-+	int ret = 0;
-+
-+	prog = basename(argv[0]);
-+
-+	if (argc != 2) {
-+		usage();
-+		exit(1);
-+	}
-+
-+	wfd = open(argv[1], O_CREAT|O_DIRECT|O_WRONLY|O_APPEND|O_TRUNC, S_IRWXU);
-+	if (wfd < 0) {
-+		fprintf(stderr, "failed to open write file: %s\n",
-+			strerror(errno));
-+		exit(1);
-+	}
-+
-+	rfd = open(argv[1], O_DIRECT|O_RDONLY, S_IRWXU);
-+	if (wfd < 0) {
-+		fprintf(stderr, "failed to open read file: %s\n",
-+			strerror(errno));
-+		ret = 1;
-+		goto err;
-+	}
-+
-+	/*
-+	 * We set 1024 as an alignment size for write buf.  Feel free to change
-+	 * it with 4096.  But the problem is also hitted.
-+	 */
-+	if (posix_memalign((void **)&wbuf, 1024, blksize)) {
-+		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
-+		ret = 1;
-+		goto err;
-+	}
-+
-+	if (posix_memalign((void **)&rbuf, 4096, blksize)) {
-+		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
-+		ret = 1;
-+		goto err;
-+	}
-+
-+	memset(wbuf, 'a', blksize);
-+	wdata.fd = wfd;
-+	wdata.blksize = blksize;
-+	wdata.buf = wbuf;
-+
-+	for (i = 0; i < max_blocks; i++) {
-+		void *retval;
-+
-+		if (pthread_create(&tid, NULL, writer, &wdata)) {
-+			fprintf(stderr, "create thread failed: %s\n",
-+				strerror(errno));
-+			ret = 1;
-+			goto err;
-+		}
-+
-+		memset(rbuf, 'b', blksize);
-+		do {
-+			ret = pread(rfd, rbuf, blksize, i * blksize);
-+			if (ret < 0)
-+				fprintf(stderr, "read file failed: %s\n",
-+					strerror(errno));
-+		} while (ret <= 0);
-+
-+		if (pthread_join(tid, &retval)) {
-+			fprintf(stderr, " pthread join failed: %s\n",
-+				strerror(errno));
-+			ret = 1;
-+			goto err;
-+		}
-+
-+		if (ret >= 0) {
-+			for (j = 0; j < ret; j ++) {
-+				if (rbuf[j] != 'a') {
-+					fprintf(stderr, "encounter an error: "
-+						"offset %d content %c\n",
-+						i, rbuf[j]);
-+					ret = 1;
-+					goto err;
-+				}
-+			}
-+		}
-+	}
-+
-+err:
-+	if (rfd)
-+		close(rfd);
-+	if (wfd)
-+		close(wfd);
-+	if (rbuf)
-+		free(rbuf);
-+	if (wbuf)
-+		free(wbuf);
-+
-+	return ret;
-+}
-diff --git a/tests/generic/450 b/tests/generic/450
-new file mode 100755
-index 0000000..cfb424c
---- /dev/null
-+++ b/tests/generic/450
-@@ -0,0 +1,56 @@
-+#! /bin/bash
-+# FS QA Test No. 450
-+#
-+# Test i_size is updated properly under dio read/write
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2013 Alibaba Group.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -f $tmp.* $testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+testfile=$TEST_DIR/$seq.$$
-+
-+[ -x $here/src/diotest ] || _notrun "diotest not built"
-+
-+$here/src/diotest $testfile # > $seqres.full 2>&1 ||
-+	# _fail "i_size isn't update properly!"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/450.out b/tests/generic/450.out
-new file mode 100644
-index 0000000..734761a
---- /dev/null
-+++ b/tests/generic/450.out
-@@ -0,0 +1 @@
-+QA output created by 450
-diff --git a/tests/generic/group b/tests/generic/group
-index b9cd0e8..a555fa0 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -452,3 +452,4 @@
- 447 auto quick clone
- 448 auto quick rw
- 449 auto quick acl enospc
-+450 auto rw quick
-
+ # Fuzz some of the fields of some piece of metadata
