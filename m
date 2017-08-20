@@ -1,112 +1,139 @@
-Received: from mail-pg0-f41.google.com ([74.125.83.41]:32816 "EHLO
-        mail-pg0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751264AbdHTI0q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Aug 2017 04:26:46 -0400
-Received: by mail-pg0-f41.google.com with SMTP id t3so55663218pgt.0
-        for <fstests@vger.kernel.org>; Sun, 20 Aug 2017 01:26:46 -0700 (PDT)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id 15sm19719536pfo.57.2017.08.20.01.26.44
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 20 Aug 2017 01:26:44 -0700 (PDT)
-Message-ID: <599947c4.8f0e620a.5d257.d2c2@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 20 Aug 2017 16:26:42 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 1cc5517771ed
+Received: from mail-wm0-f49.google.com ([74.125.82.49]:34986 "EHLO
+        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751019AbdHTKCL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 Aug 2017 06:02:11 -0400
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="igzEVgb0uUbd"
-Content-Disposition: inline
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Sun, 20 Aug 2017 13:02:09 +0300
+Message-ID: <CADxRZqykqGycgPh5O9C1F_Eq0J_rP-95zxesDkSDbkLD=04uYA@mail.gmail.com>
+Subject: [xfstests, sparc64] git kernel OOPS 4.13.0-rc5+
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: lvm-devel@redhat.com
+Cc: Sparc kernel list <sparclinux@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
+ Hello!
 
---igzEVgb0uUbd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Running xfstests (git) suite , I'm getting git kernel OOPS :
 
-Hi all,
+Debian GNU/Linux buster/sid ttip console
 
-The master branch of the xfstests repository at:
+ttip login: [   32.181114] loop: module loaded
+[   73.785279] XFS (vdiskb1): Mounting V5 Filesystem
+[   73.800044] XFS (vdiskb1): Starting recovery (logdev: internal)
+[   73.804064] XFS (vdiskb1): Ending recovery (logdev: internal)
+[   77.527548] XFS (loop0): Mounting V5 Filesystem
+[   77.535114] XFS (loop0): Ending clean mount
+[   77.644657] XFS (vdiskb1): Unmounting Filesystem
+[   77.933610] XFS (vdiskb1): Mounting V5 Filesystem
+[   77.948151] XFS (vdiskb1): Ending clean mount
+[   78.040921] run fstests generic/081 at 2017-08-20 12:46:15
+[   78.780493] XFS (loop0): Unmounting Filesystem
+[   80.192977] Unable to handle kernel NULL pointer dereference
+[   80.193072] tsk->{mm,active_mm}->context = 00000000000006ce
+[   80.193116] tsk->{mm,active_mm}->pgd = fff80040964b8000
+[   80.193152]               \|/ ____ \|/
+[   80.193152]               "@'/ .. \`@"
+[   80.193152]               /_| \__/ |_\
+[   80.193152]                  \__U_/
+[   80.193232] lvm(1595): Oops [#1]
+[   80.193259] CPU: 5 PID: 1595 Comm: lvm Not tainted
+4.13.0-rc5-00173-g58d4e450a490 #420
+[   80.193307] task: fff800409f410c40 task.stack: fff8004097e4c000
+[   80.193346] TSTATE: 0000004411001602 TPC: 00000000004d06e4 TNPC:
+00000000004d06e8 Y: 0000016b    Not tainted
+[   80.193412] TPC: <lockdep_trace_alloc+0x4/0x140>
+[   80.193444] g0: 0000000000c61800 g1: 00000000014000c0 g2:
+0000000000000000 g3: 0000000000000000
+[   80.193496] g4: 0000000000000000 g5: 0000000000000000 g6:
+fff8004097e4c000 g7: 0000000000000000
+[   80.193550] o0: 000000010b788020 o1: 0000000000000400 o2:
+fff8004096936898 o3: 00000000105ff260
+[   80.193603] o4: fff8004096936800 o5: 0000000000000001 sp:
+fff8004097e4eae1 ret_pc: 00000000008a1f98
+[   80.193664] RPC: <dm_table_add_target+0x298/0x360>
+[   80.193697] l0: fff800409f410c40 l1: 00000000010d2ea0 l2:
+0000000001555c00 l3: fff800409f4114d0
+[   80.193749] l4: 0000000000c61800 l5: 00000000010aaea0 l6:
+0000000000db3bf0 l7: 0000000000000050
+[   80.193802] i0: 00000000014080c0 i1: 0000000000000100 i2:
+0000000000000100 i3: 0000000000000000
+[   80.193855] i4: 0000000000000001 i5: 0000000000c61800 i6:
+fff8004097e4eb91 i7: 000000000063841c
+[   80.193911] I7: <kmem_cache_alloc_trace+0x1c/0x3e0>
+[   80.193944] Call Trace:
+[   80.193968]  [000000000063841c] kmem_cache_alloc_trace+0x1c/0x3e0
+[   80.194011]  [000000000061b318] __get_vm_area_node.isra.5+0x1b8/0x260
+[   80.194052]  [000000000061bc98] __vmalloc_node_range+0x58/0x2c0
+[   80.194092]  [000000000061c0c0] vzalloc+0x40/0x60
+[   80.194125]  [00000000008a0b28] dm_vcalloc+0x28/0x40
+[   80.194164]  [00000000105fae58] dm_exception_table_init+0x18/0x80
+[dm_snapshot]
+[   80.194214]  [00000000105fba78] snapshot_ctr+0x2b8/0x720 [dm_snapshot]
+[   80.194255]  [00000000008a1f98] dm_table_add_target+0x298/0x360
+[   80.194294]  [00000000008a6448] table_load+0x2c8/0x360
+[   80.194330]  [00000000008a70c8] ctl_ioctl+0x348/0x440
+[   80.194364]  [00000000008a71d4] dm_ctl_ioctl+0x14/0x40
+[   80.194401]  [00000000006754e4] do_vfs_ioctl+0x644/0x6a0
+[   80.194437]  [0000000000675590] SyS_ioctl+0x50/0x80
+[   80.194473]  [0000000000406234] linux_sparc_syscall+0x34/0x44
+[   80.194510] Disabling lock debugging due to kernel taint
+[   80.194533] Caller[000000000063841c]: kmem_cache_alloc_trace+0x1c/0x3e0
+[   80.194557] Caller[000000000061b318]: __get_vm_area_node.isra.5+0x1b8/0x260
+[   80.194581] Caller[000000000061bc98]: __vmalloc_node_range+0x58/0x2c0
+[   80.194605] Caller[000000000061c0c0]: vzalloc+0x40/0x60
+[   80.194625] Caller[00000000008a0b28]: dm_vcalloc+0x28/0x40
+[   80.194647] Caller[00000000105fae58]:
+dm_exception_table_init+0x18/0x80 [dm_snapshot]
+[   80.194677] Caller[00000000105fba78]: snapshot_ctr+0x2b8/0x720 [dm_snapshot]
+[   80.194701] Caller[00000000008a1f98]: dm_table_add_target+0x298/0x360
+[   80.194724] Caller[00000000008a6448]: table_load+0x2c8/0x360
+[   80.194786] Caller[00000000008a70c8]: ctl_ioctl+0x348/0x440
+[   80.194813] Caller[00000000008a71d4]: dm_ctl_ioctl+0x14/0x40
+[   80.194839] Caller[00000000006754e4]: do_vfs_ioctl+0x644/0x6a0
+[   80.194865] Caller[0000000000675590]: SyS_ioctl+0x50/0x80
+[   80.194890] Caller[0000000000406234]: linux_sparc_syscall+0x34/0x44
+[   80.194916] Caller[fff80001005e2484]: 0xfff80001005e2484
+[   80.194938] Instruction DUMP:
+[   80.194942]  01000000
+[   80.194958]  01000000
+[   80.194972]  9de3bf50
+[   80.194986] <c20128b4>
+[   80.195000]  80a06000
+[   80.195014]  12400048
+[   80.195029]  01000000
+[   80.195044]  bb520000
+[   80.195059]  8217600e
+[   80.195073]
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-have just been updated. This is a normal update with mainly new tests added,
-we're having new tests for xfs, btrfs and overlay, also a new generic test.
-Thanks a lot for writing new tests and contributing bug fixes!
+steps to reproduce:
 
-New failures I've noticed in this update:
-- btrfs/149 is a new btrfs send/receive regression test, and it fails with
-  current Linus tree (v4.13-rc5)
+git clone https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+configure && make && make install
 
-Thanks,
-Eryu
+xfstests-dev$ cat local.config
+export TEST_DIR=/testvol
+export TEST_DEV=/dev/vdiskb1
+export SCRATCH_DEV_POOL="/dev/loop0 /dev/loop1 /dev/loop2"
+export SCRATCH_MNT=/1/scratch
 
-The new head of the master branch is commit:
+loop devices are in tmpfs:
 
-1cc5517771ed xfs: test for log recovery failure after tail overwrite
+$ mount tmpfs -t tmpfs -o size=30G /ramdisk
+$ for i in 1 2 3; do  fallocate -l 10G /ramdisk/$i; losetup --find
+/ramdisk/$i; done
 
-New commits:
+vdiskb1 is xfs filesystem.
 
-Amir Goldstein (1):
-      [e4caca53e280] overlay: test mount error cases with index=on
+kernel OOPS test is generic/081 :
 
-Brian Foster (1):
-      [1cc5517771ed] xfs: test for log recovery failure after tail overwrite
+xfstests-dev# ./check generic/081
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/sparc64 ttip 4.13.0-rc5-00173-g58d4e450a490
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop0
+MOUNT_OPTIONS -- /dev/loop0 /1/scratch
 
-Filipe Manana (1):
-      [80bd724d020a] btrfs: test incremental send with compression and extent cloning
-
-Lu Fengqi (1):
-      [4dbba416d98a] btrfs/142: enhance regression test for nocsum dio read's repair
-
-Xiao Yang (1):
-      [70076b939417] xfs/424: add check for finobt && update comments
-
-Zorro Lang (1):
-      [4939477f3fee] generic: test read around EOF
-
-
-Code Diffstat:
-
- tests/btrfs/142       |  19 +++---
- tests/btrfs/149       | 113 ++++++++++++++++++++++++++++++++++
- tests/btrfs/149.out   |  14 +++++
- tests/btrfs/group     |   1 +
- tests/generic/450     | 163 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/450.out |  11 ++++
- tests/generic/group   |   1 +
- tests/overlay/037     |  94 +++++++++++++++++++++++++++++
- tests/overlay/037.out |   3 +
- tests/overlay/group   |   1 +
- tests/xfs/057         | 116 +++++++++++++++++++++++++++++++++++
- tests/xfs/057.out     |   2 +
- tests/xfs/424         |  28 ++++++---
- tests/xfs/group       |   1 +
- 14 files changed, 551 insertions(+), 16 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---igzEVgb0uUbd
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJZmUcVAAoJECZSqilcj+djv7IP/3hjCMELe4rq4Zbk3sX43plH
-EKWVL41Md8QELkdDNXnO6lyIgbaHIqcGRHSyg729sPt050epSoMcelKSlkzfBn93
-rsQCBJlMU2BSMkKz7AWdWMssgxddeI9WTUigsB0COKmAvcf3PExWtvVQi9hVjG+m
-XTt5o/BQ3X2gVnGGuK4zpkI6wNeHu5Oft7dab4DoJeTdKYMT/mND8hSzNbaCLMHl
-t+oM85nAat/EqUatfg2e6ObfJXUPHSUostkB6H8+Gx4oKAOPfDBrx7mNHwgRdN8T
-z1e6jO2cE8hx5iNXkDt8KHwRo4bxuSlB9LVCE2zPUCHXGcLntYJ0k1rDXazCxuid
-si9zRBnthWPQE/RtZNMoYZ8bL3piQFNoC/3nyi0NVkRe190nHRZkkQBFgaphQIK5
-V9vofnesernGhb5itO8BGFCXO9Gg+WHwsqbVoEtmVMgbOu0sjiTTxuRAPVvZwm1N
-6fBCFDtF1KKKghE2VjmXD7h7YWOqzLdXkPB2MJVhFc8MYR0J/FJHagBy/4gXRKh6
-q1kkPIkPJsMtkA5leXd7L3giia0CCjhcUc9prw4UyyLlli0/na4D5g8a1TcHcbKY
-ZW84lQe9kqi1G0QapFPTZeRg1HyZlVkJ7ipN4GQBwnLwFqzahkOGfHw3dL6qMDiC
-T+lmZKOmxYd/kDXZ4P7j
-=2ghX
------END PGP SIGNATURE-----
-
---igzEVgb0uUbd--
+generic/081 7s ...
+(never ends, hangs on kernel OOPS)
