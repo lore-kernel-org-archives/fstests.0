@@ -1,139 +1,195 @@
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:34986 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751019AbdHTKCL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 Aug 2017 06:02:11 -0400
+Received: from mail-wr0-f170.google.com ([209.85.128.170]:33260 "EHLO
+        mail-wr0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751726AbdHUIdI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 Aug 2017 04:33:08 -0400
+Received: by mail-wr0-f170.google.com with SMTP id 30so19811412wrk.0
+        for <fstests@vger.kernel.org>; Mon, 21 Aug 2017 01:33:07 -0700 (PDT)
+Date: Mon, 21 Aug 2017 10:33:03 +0200
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH V3 2/2] xfs: Test infinite loop while searching for a
+ free inode slot
+Message-ID: <20170821083303.37xuq3uzbomnwzqi@hades.localdomain>
+References: <20170818085156.8187-1-cmaiolino@redhat.com>
+ <20170818085156.8187-2-cmaiolino@redhat.com>
+ <20170818154735.GB4794@magnolia>
 MIME-Version: 1.0
-From: Anatoly Pugachev <matorola@gmail.com>
-Date: Sun, 20 Aug 2017 13:02:09 +0300
-Message-ID: <CADxRZqykqGycgPh5O9C1F_Eq0J_rP-95zxesDkSDbkLD=04uYA@mail.gmail.com>
-Subject: [xfstests, sparc64] git kernel OOPS 4.13.0-rc5+
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170818154735.GB4794@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: lvm-devel@redhat.com
-Cc: Sparc kernel list <sparclinux@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
- Hello!
+On Fri, Aug 18, 2017 at 08:47:35AM -0700, Darrick J. Wong wrote:
+> On Fri, Aug 18, 2017 at 10:51:56AM +0200, Carlos Maiolino wrote:
+> > Tests the search algorithm for a free inode slot in a specific AG, done
+> > in xfs_dialloc_ag_inobt().
+> > 
+> > When finobt is not used, and agi->freecount is not 0, XFS will scan the AG inode
+> > tree looking for a free inode slot, but if agi->freecount is corrupted,
+> > and there is no free slot at all, it will end up in an infinite loop.
+> > 
+> > This test checks for the infinite loop fix.
+> > 
+> > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> > ---
+> > 
+> > Changelog:
+> > 
+> > V2:
+> > 	- Small clean up
+> > 	- use _disable_dmesg_check (the test will generate error
+> > 				    messages which will appear in dmesg)
+> > 	- Get the amount of free inodes from the AGI instead of assuming
+> > 	  61 free inodes
+> > 	- Send a few outputs to $seqres.full
+> > 	- Use xfs_db `write` without -d option once this will create
+> > 	  incompatibility with previous xfsprogs, and is not strictly
+> > 	  required for the test to work.
+> > 	- Check for finobt, and explicitly disable it if it is
+> > 	  supported by the kernel being tested.
+> > 
+> > V3:
+> > 	- use _scratch_xfs_db helper
+> > 	- ensure the test is only run on kernel with no XFS_DEBUG
+> 
+> Why does !debug matter?
 
-Running xfstests (git) suite , I'm getting git kernel OOPS :
+XFS_DEBUG enables xfs_check_agi_freecount(), which will detect the corruption of
+agi->freecount.
 
-Debian GNU/Linux buster/sid ttip console
+> 
+> --D
+> 
+> > 
+> >  tests/xfs/057     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/057.out |  2 ++
+> >  tests/xfs/group   |  1 +
+> >  3 files changed, 90 insertions(+)
+> >  create mode 100755 tests/xfs/057
+> >  create mode 100644 tests/xfs/057.out
+> > 
+> > diff --git a/tests/xfs/057 b/tests/xfs/057
+> > new file mode 100755
+> > index 00000000..2c866435
+> > --- /dev/null
+> > +++ b/tests/xfs/057
+> > @@ -0,0 +1,87 @@
+> > +#! /bin/bash
+> > +# FS QA Test 057
+> > +#
+> > +# Check if the filesystem will lockup when trying to allocate a new inode in
+> > +# an AG with no free inodes but with a corrupted agi->freecount showing free inodes.
+> > +#
+> > +# At the end of the test, the scratch device will purposely be in a corrupted
+> > +# state, so there is no need for checking that.
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch_nocheck
+> > +_require_no_xfs_debug
+> > +_disable_dmesg_check
+> > +
+> > +# Make sure we disable finobt if the filesystem supports it, otherwise, just
+> > +# initialize it with default options.
+> > +_scratch_mkfs | grep -q "finobt=1" && _scratch_mkfs -m "finobt=0" >/dev/null 2>&1
+> > +
+> > +# Get the amount of free inodes from the AGI 0, so we can fill up the freecount
+> > +# structure.
+> > +freecount=`_scratch_xfs_db -c "agi 0" -c "p freecount" | cut -d' ' -f 3`
+> > +
+> > +_scratch_mount
+> > +
+> > +# At the end of filesystem's initialization, AG 0 will have $freecount free
+> > +# inodes in the agi->freecount, create $freecount extra dummy files to fill it.
+> > +for i in `seq 1 $freecount`; do
+> > +	touch $SCRATCH_MNT/dummy_file$i
+> > +done
+> > +
+> > +_scratch_unmount >/dev/null 2>&1
+> > +
+> > +# agi->freecount is 0 here, corrupt it to show extra free inodes
+> > +_scratch_xfs_db -x -c "agi 0" -c "write freecount 10" $SCRATCH_DEV >> $seqres.full 2>&1
+> > +
+> > +_scratch_mount
+> > +
+> > +# Lock up a buggy kernel
+> > +touch $SCRATCH_MNT/lockupfile >> $seqres.full 2>&1
+> > +
+> > +# If we reach this point, the filesystem is fixed
+> > +echo "Silence is golden"
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/057.out b/tests/xfs/057.out
+> > new file mode 100644
+> > index 00000000..185023c7
+> > --- /dev/null
+> > +++ b/tests/xfs/057.out
+> > @@ -0,0 +1,2 @@
+> > +QA output created by 057
+> > +Silence is golden
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index cf876a29..37e4e641 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -54,6 +54,7 @@
+> >  054 auto quick
+> >  055 dump ioctl remote tape
+> >  056 dump ioctl auto quick
+> > +057 auto quick fuzzers dangerous
+> >  059 dump ioctl auto quick
+> >  060 dump ioctl auto quick
+> >  061 dump ioctl auto quick
+> > -- 
+> > 2.13.5
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-ttip login: [   32.181114] loop: module loaded
-[   73.785279] XFS (vdiskb1): Mounting V5 Filesystem
-[   73.800044] XFS (vdiskb1): Starting recovery (logdev: internal)
-[   73.804064] XFS (vdiskb1): Ending recovery (logdev: internal)
-[   77.527548] XFS (loop0): Mounting V5 Filesystem
-[   77.535114] XFS (loop0): Ending clean mount
-[   77.644657] XFS (vdiskb1): Unmounting Filesystem
-[   77.933610] XFS (vdiskb1): Mounting V5 Filesystem
-[   77.948151] XFS (vdiskb1): Ending clean mount
-[   78.040921] run fstests generic/081 at 2017-08-20 12:46:15
-[   78.780493] XFS (loop0): Unmounting Filesystem
-[   80.192977] Unable to handle kernel NULL pointer dereference
-[   80.193072] tsk->{mm,active_mm}->context = 00000000000006ce
-[   80.193116] tsk->{mm,active_mm}->pgd = fff80040964b8000
-[   80.193152]               \|/ ____ \|/
-[   80.193152]               "@'/ .. \`@"
-[   80.193152]               /_| \__/ |_\
-[   80.193152]                  \__U_/
-[   80.193232] lvm(1595): Oops [#1]
-[   80.193259] CPU: 5 PID: 1595 Comm: lvm Not tainted
-4.13.0-rc5-00173-g58d4e450a490 #420
-[   80.193307] task: fff800409f410c40 task.stack: fff8004097e4c000
-[   80.193346] TSTATE: 0000004411001602 TPC: 00000000004d06e4 TNPC:
-00000000004d06e8 Y: 0000016b    Not tainted
-[   80.193412] TPC: <lockdep_trace_alloc+0x4/0x140>
-[   80.193444] g0: 0000000000c61800 g1: 00000000014000c0 g2:
-0000000000000000 g3: 0000000000000000
-[   80.193496] g4: 0000000000000000 g5: 0000000000000000 g6:
-fff8004097e4c000 g7: 0000000000000000
-[   80.193550] o0: 000000010b788020 o1: 0000000000000400 o2:
-fff8004096936898 o3: 00000000105ff260
-[   80.193603] o4: fff8004096936800 o5: 0000000000000001 sp:
-fff8004097e4eae1 ret_pc: 00000000008a1f98
-[   80.193664] RPC: <dm_table_add_target+0x298/0x360>
-[   80.193697] l0: fff800409f410c40 l1: 00000000010d2ea0 l2:
-0000000001555c00 l3: fff800409f4114d0
-[   80.193749] l4: 0000000000c61800 l5: 00000000010aaea0 l6:
-0000000000db3bf0 l7: 0000000000000050
-[   80.193802] i0: 00000000014080c0 i1: 0000000000000100 i2:
-0000000000000100 i3: 0000000000000000
-[   80.193855] i4: 0000000000000001 i5: 0000000000c61800 i6:
-fff8004097e4eb91 i7: 000000000063841c
-[   80.193911] I7: <kmem_cache_alloc_trace+0x1c/0x3e0>
-[   80.193944] Call Trace:
-[   80.193968]  [000000000063841c] kmem_cache_alloc_trace+0x1c/0x3e0
-[   80.194011]  [000000000061b318] __get_vm_area_node.isra.5+0x1b8/0x260
-[   80.194052]  [000000000061bc98] __vmalloc_node_range+0x58/0x2c0
-[   80.194092]  [000000000061c0c0] vzalloc+0x40/0x60
-[   80.194125]  [00000000008a0b28] dm_vcalloc+0x28/0x40
-[   80.194164]  [00000000105fae58] dm_exception_table_init+0x18/0x80
-[dm_snapshot]
-[   80.194214]  [00000000105fba78] snapshot_ctr+0x2b8/0x720 [dm_snapshot]
-[   80.194255]  [00000000008a1f98] dm_table_add_target+0x298/0x360
-[   80.194294]  [00000000008a6448] table_load+0x2c8/0x360
-[   80.194330]  [00000000008a70c8] ctl_ioctl+0x348/0x440
-[   80.194364]  [00000000008a71d4] dm_ctl_ioctl+0x14/0x40
-[   80.194401]  [00000000006754e4] do_vfs_ioctl+0x644/0x6a0
-[   80.194437]  [0000000000675590] SyS_ioctl+0x50/0x80
-[   80.194473]  [0000000000406234] linux_sparc_syscall+0x34/0x44
-[   80.194510] Disabling lock debugging due to kernel taint
-[   80.194533] Caller[000000000063841c]: kmem_cache_alloc_trace+0x1c/0x3e0
-[   80.194557] Caller[000000000061b318]: __get_vm_area_node.isra.5+0x1b8/0x260
-[   80.194581] Caller[000000000061bc98]: __vmalloc_node_range+0x58/0x2c0
-[   80.194605] Caller[000000000061c0c0]: vzalloc+0x40/0x60
-[   80.194625] Caller[00000000008a0b28]: dm_vcalloc+0x28/0x40
-[   80.194647] Caller[00000000105fae58]:
-dm_exception_table_init+0x18/0x80 [dm_snapshot]
-[   80.194677] Caller[00000000105fba78]: snapshot_ctr+0x2b8/0x720 [dm_snapshot]
-[   80.194701] Caller[00000000008a1f98]: dm_table_add_target+0x298/0x360
-[   80.194724] Caller[00000000008a6448]: table_load+0x2c8/0x360
-[   80.194786] Caller[00000000008a70c8]: ctl_ioctl+0x348/0x440
-[   80.194813] Caller[00000000008a71d4]: dm_ctl_ioctl+0x14/0x40
-[   80.194839] Caller[00000000006754e4]: do_vfs_ioctl+0x644/0x6a0
-[   80.194865] Caller[0000000000675590]: SyS_ioctl+0x50/0x80
-[   80.194890] Caller[0000000000406234]: linux_sparc_syscall+0x34/0x44
-[   80.194916] Caller[fff80001005e2484]: 0xfff80001005e2484
-[   80.194938] Instruction DUMP:
-[   80.194942]  01000000
-[   80.194958]  01000000
-[   80.194972]  9de3bf50
-[   80.194986] <c20128b4>
-[   80.195000]  80a06000
-[   80.195014]  12400048
-[   80.195029]  01000000
-[   80.195044]  bb520000
-[   80.195059]  8217600e
-[   80.195073]
-
-
-steps to reproduce:
-
-git clone https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-configure && make && make install
-
-xfstests-dev$ cat local.config
-export TEST_DIR=/testvol
-export TEST_DEV=/dev/vdiskb1
-export SCRATCH_DEV_POOL="/dev/loop0 /dev/loop1 /dev/loop2"
-export SCRATCH_MNT=/1/scratch
-
-loop devices are in tmpfs:
-
-$ mount tmpfs -t tmpfs -o size=30G /ramdisk
-$ for i in 1 2 3; do  fallocate -l 10G /ramdisk/$i; losetup --find
-/ramdisk/$i; done
-
-vdiskb1 is xfs filesystem.
-
-kernel OOPS test is generic/081 :
-
-xfstests-dev# ./check generic/081
-FSTYP         -- xfs (non-debug)
-PLATFORM      -- Linux/sparc64 ttip 4.13.0-rc5-00173-g58d4e450a490
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/loop0
-MOUNT_OPTIONS -- /dev/loop0 /1/scratch
-
-generic/081 7s ...
-(never ends, hangs on kernel OOPS)
+-- 
+Carlos
