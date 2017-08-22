@@ -1,80 +1,54 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42520 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754565AbdHVHGQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 22 Aug 2017 03:06:16 -0400
-Date: Tue, 22 Aug 2017 15:06:14 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs: test xfs_db fuzz command verbs
-Message-ID: <20170822070614.GG31418@eguan.usersys.redhat.com>
-References: <20170819154645.GD4794@magnolia>
+Received: from mail-oi0-f52.google.com ([209.85.218.52]:35509 "EHLO
+        mail-oi0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932654AbdHVNrd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Aug 2017 09:47:33 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170819154645.GD4794@magnolia>
+In-Reply-To: <CAOQ4uxiQfL1Apm1KhVvubupSZXYC7T07UeAigzn1Rxy-PSWEHw@mail.gmail.com>
+References: <CAOQ4uxgSkzxqoH0T+WpKdsCLJw0439fEG+C7y+d1eEJ=obkGAQ@mail.gmail.com>
+ <20170821164815.GA23225@destiny> <CAOQ4uxiQfL1Apm1KhVvubupSZXYC7T07UeAigzn1Rxy-PSWEHw@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 22 Aug 2017 16:47:32 +0300
+Message-ID: <CAOQ4uxhj9oBXczhvykzxvAHGFQ2vsTtkm+L1BQHGGvmb28R9Wg@mail.gmail.com>
+Subject: Re: Crash Consistency xfstests
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
+On Mon, Aug 21, 2017 at 9:49 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Mon, Aug 21, 2017 at 6:48 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+...
+>>
+>>> I noticed that if SCRATCH_DEV is a dm target itself (linear), then
+>>> log-writes target creation fails. Is that by design? Can be fixed?
+>>> If not, the test would have to require_scratch_not_dm_target or so.
+>>>
+>>> Please let me know if have any other tip or pointers for me.
+>>
+>> Huh that's weird, I was using it with dm-snapshot and it worked fine.  Maybe I
+>> was doing something else and it's never worked, but it's definitely not by
+>> design.  I'll look into this when I get some time.  Thanks,
+>>
+>
+> Well, if it's not by design, I'll try to figure out the root cause of the error
+> with my logical volume SCRATCH_DEV setup.
+>
 
-On Sat, Aug 19, 2017 at 08:46:45AM -0700, Darrick J. Wong wrote:
-> Ensure that the fuzz command does what it says.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+I could not reproduce the logical volume SCRATCH_DEV issue with upstream
+kernel, so chalking it up to setup error or whatever.
 
-I applied your patch "[PATCH] xfs_db: bit fuzzing should read the right
-bit when flipping" on top of xfsprogs for-next branch (which contains
-commit ef209a960d82 "xfs_db: make write/fuzz -c and -d work on non-crc
-filesystems") and tested this patch. All worked fine on CRC enabled XFS,
-but test failed with non-CRC xfs as it missed lines like:
+BTW, is there a reason I am missing why you needed to compose FSX_OPTS
+on the fly for the test using the new helper _test_falloc_support?
+I see that fsx already detects if any of the falloc ops are not supported
+via test_fallocate() and auto-disabled the unsupported ops.
+I started fixing _test_falloc_support() which was a bit broken before I realized
+it's not needed. Am I missing something?
 
-Allowing fuzz of corrupted data with good CRC
-
-I did the following modifications and test passed with both CRC and
-non-CRC XFS, if you think it's OK then I can fold the changes to your
-patch and no need for a resend :)
+I am still seeing test failures from time to time (checksum errors),
+but they do not always reproduce on same system with same random seed
+and when they reproduce its not always the same checksum that fails,
+so I'm still gathering test results.
 
 Thanks,
-Eryu
-
-diff --git a/tests/xfs/058 b/tests/xfs/058
-index 4a39942..32ceb0d 100755
---- a/tests/xfs/058
-+++ b/tests/xfs/058
-@@ -50,21 +50,31 @@ _require_xfs_db_command "fuzz"
- rm -f "$seqres.full"
- 
- echo "Format"
--_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mkfs | _filter_mkfs 2>$tmp.mkfs >> "$seqres.full"
-+source $tmp.mkfs
-+
-+do_xfs_db()
-+{
-+       local cmd=$1
-+       if [ $_fs_has_crcs -eq 0 ]; then
-+               echo "Allowing $cmd of corrupted data with good CRC"
-+       fi
-+       _scratch_xfs_db -x -c 'sb 0' -c "$*"
-+}
- 
- # Make sure that each fuzz verb works.  For the firstbit/middlebit/lastbit
- # tests, we depend on 'ones' having set the field to all ones.
- field="fdblocks"
--_scratch_xfs_db -x -c 'sb 0' -c "write -d ${field} 0"
-+do_xfs_db write -d ${field} 0
- SCRATCH_XFS_LIST_FUZZ_VERBS= _scratch_xfs_list_fuzz_verbs | while read verb; do
-        test "${verb}" = "random" && continue
-        echo "Test verb ${verb}"
--       _scratch_xfs_db -x -c 'sb 0' -c "fuzz -d ${field} ${verb}"
-+       do_xfs_db fuzz -d ${field} ${verb}
- done
- 
- echo "Test verb random"
- before="$(_scratch_xfs_get_metadata_field "${field}" 'sb 0')"
--_scratch_xfs_db -x -c 'sb 0' -c "fuzz -d ${field} random" >> $seqres.full
-+do_xfs_db fuzz -d ${field} random >> $seqres.full
- after="$(_scratch_xfs_get_metadata_field "${field}" 'sb 0')"
- test "${before}" != "${after}" && echo "${field} changed"
-
+Amir.
