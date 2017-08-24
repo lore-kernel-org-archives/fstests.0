@@ -1,171 +1,31 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:47767 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750715AbdHWWDU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 Aug 2017 18:03:20 -0400
-Date: Wed, 23 Aug 2017 15:03:14 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:36632 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750715AbdHXDXx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 23 Aug 2017 23:23:53 -0400
+Date: Thu, 24 Aug 2017 11:23:49 +0800
+From: Eryu Guan <eguan@redhat.com>
 Subject: Re: [PATCH 4/5] common/populate: enable xfs quota accounting
-Message-ID: <20170823220314.GG4794@magnolia>
+Message-ID: <20170824032349.GJ31418@eguan.usersys.redhat.com>
 References: <150067465981.30639.14801416171688538711.stgit@magnolia>
  <150067469221.30639.16711306489951233808.stgit@magnolia>
  <20170804022200.GC1991@eguan.usersys.redhat.com>
  <20170808212216.GD4474@magnolia>
+ <20170823220314.GG4794@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170808212216.GD4474@magnolia>
+In-Reply-To: <20170823220314.GG4794@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 08, 2017 at 02:22:17PM -0700, Darrick J. Wong wrote:
-> On Fri, Aug 04, 2017 at 10:22:00AM +0800, Eryu Guan wrote:
-> > On Fri, Jul 21, 2017 at 03:04:52PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > When we're creating a populated xfs image, turn on quotas so that we can
-> > > fuzz those fields too.
-> > > 
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > >  common/populate |   50 +++++++++++++++++++++++++++++++++++++++++++++++++-
-> > >  1 file changed, 49 insertions(+), 1 deletion(-)
-> > > 
-> > > 
-> > > diff --git a/common/populate b/common/populate
-> > > index 498151f..b77c508 100644
-> > > --- a/common/populate
-> > > +++ b/common/populate
-> > > @@ -21,6 +21,7 @@
-> > >  #  Contact information: Silicon Graphics, Inc., 1500 Crittenden Lane,
-> > >  #  Mountain View, CA 94043, USA, or: http://www.sgi.com
-> > >  #-----------------------------------------------------------------------
-> > > +. ./common/quota
-> > >  
-> > >  _require_populate_commands() {
-> > >  	_require_xfs_io_command "falloc"
-> > > @@ -94,6 +95,47 @@ __populate_fill_fs() {
-> > >  	done
-> > >  }
-> > >  
-> > > +# For XFS, force on all the quota options if quota is enabled
-> > > +# and the user didn't feed us noquota.
-> > > +_populate_xfs_qmount_option()
-> > > +{
-> > > +	# User explicitly told us not to quota
-> > > +	if echo "${MOUNT_OPTIONS}" | grep -q 'noquota'; then
-> > > +		return
-> > > +	fi
-> > > +
-> > > +	# Don't bother if we can't turn on quotas
-> > > +	if [ ! -f /proc/fs/xfs/xqmstat ]; then
-> > > +		# No quota support
-> > > +		return
-> > > +	elif [ "${USE_EXTERNAL}" = "yes" ] && [ ! -z "${SCRATCH_RTDEV}" ]; then
-> > > +		# Quotas not supported on rt filesystems
-> > > +		return
-> > > +	elif [ -z "${XFS_QUOTA_PROG}" ]; then
-> > > +		# xfs quota tools not installed
-> > > +		return
-> > > +	fi
-> > > +
-> > > +	# Turn on all the quotas
-> > > +	if xfs_info "${TEST_DIR}" | grep -q 'crc=1'; then
-> > > +		# v5 filesystems can have group & project quotas
-> > > +		quota="usrquota,grpquota,prjquota"
-> > > +	else
-> > > +		# v4 filesystems cannot mix group & project quotas
-> > > +		quota="usrquota,grpquota"
-> > > +	fi
-> > > +
-> > > +	# Inject our quota mount options
-> > > +	if echo "${MOUNT_OPTIONS}" | grep -q "${quota}"; then
-> > > +		return
-> > > +	elif echo "${MOUNT_OPTIONS}" | egrep -q '(quota|noenforce)'; then
-> > > +		_qmount_option "${quota}"
-> > > +	else
-> > > +		export MOUNT_OPTIONS="$MOUNT_OPTIONS -o ${quota}"
-> > > +		echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
-> > > +	fi
-> > > +}
-> > > +
-> > >  # Populate an XFS on the scratch device with (we hope) all known
-> > >  # types of metadata block
-> > >  _scratch_xfs_populate() {
-> > > @@ -106,6 +148,7 @@ _scratch_xfs_populate() {
-> > >  		esac
-> > >  	done
-> > >  
-> > > +	_populate_xfs_qmount_option
-> > 
-> > Sorry, another question just poped up..
-> > 
-> > This enables quota and modifies MOUNT_OPTIONS unconditionally and
-> > implicitly, I suspect users of _scratch_populate_cached() or
-> > _scratch_xfs_populate() may be bitten by this implicit change.
+On Wed, Aug 23, 2017 at 03:03:14PM -0700, Darrick J. Wong wrote:
 > 
-> I suppose we could be more explicit about the fact that we
-> unconditionally enable all quota types and change MOUNT_OPTIONS, though
-> I did go run all the _scratch_xfs_populate tests and they all seemed
-> fine.
-> 
-> (Well, as fine as we can get considering that most of them are fuzz
-> tests that cause all manners of other crazy behavior.)
-> 
-> > Would it be better if there's a argument to control this quota
-> > enablement and default to disable quota? Just like the "nofill"
-> > argument, introduce a new "quota" argument? So existing callers of
-> > _scratch_populate_cached() are not affected by this change, and tests
-> > want quota can enable it explicitly.
-> 
-> Hmm.  The way I look at it, though, _scratch_xfs_populate is supposed to
-> create all types of filesystem metadata, which includes quota files, so
-> we have to enable the quota options or we're not actually doing what the
-> documentation says it's supposed to be doing:
-> 
-> # Populate an XFS on the scratch device with (we hope) all known
-> # types of metadata block
+> Ping?
 
-Ping?
+Sorry, somehow I thought there would be a resend or something. I'm
+testing the quota fuzz tests now and will push them out if everything
+goes fine. Thanks for the reminder!
 
---D
-
-> 
-> The reason there's a 'nofill' option is that, having created an fs with
-> all known types of metadata, we can optionally use up any remaining free
-> space, but doing so isn't necessary to create all known types of
-> metadata block.
-> 
-> --D
-> 
-> > 
-> > Thanks,
-> > Eryu
-> > 
-> > >  	_scratch_mount
-> > >  	blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-> > >  	dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
-> > > @@ -720,7 +763,12 @@ _scratch_populate_cached() {
-> > >  		test -n "${SCRATCH_LOGDEV}" && rm -f "${POPULATE_METADUMP}"
-> > >  		;;
-> > >  	"xfs")
-> > > -		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}";;
-> > > +		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}"
-> > > +		_populate_xfs_qmount_option
-> > > +		if echo "${MOUNT_OPTIONS}" | grep -q 'usrquota'; then
-> > > +			extra_descr="${extra_descr} QUOTAS"
-> > > +		fi
-> > > +		;;
-> > >  	*)
-> > >  		extra_descr="";;
-> > >  	esac
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Eryu
