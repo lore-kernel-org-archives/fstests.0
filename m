@@ -1,63 +1,42 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59306 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751453AbdHYFbP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 25 Aug 2017 01:31:15 -0400
-Date: Fri, 25 Aug 2017 13:31:13 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/108: tolerate old lvm utility versions
-Message-ID: <20170825053113.GR31418@eguan.usersys.redhat.com>
-References: <1503578906-11387-1-git-send-email-idryomov@gmail.com>
+Received: from mail-vk0-f67.google.com ([209.85.213.67]:36327 "EHLO
+        mail-vk0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751905AbdHYG3H (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2017 02:29:07 -0400
+Received: by mail-vk0-f67.google.com with SMTP id d124so630747vkf.3
+        for <fstests@vger.kernel.org>; Thu, 24 Aug 2017 23:29:07 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1503578906-11387-1-git-send-email-idryomov@gmail.com>
+In-Reply-To: <20170825053113.GR31418@eguan.usersys.redhat.com>
+References: <1503578906-11387-1-git-send-email-idryomov@gmail.com> <20170825053113.GR31418@eguan.usersys.redhat.com>
+From: Ilya Dryomov <idryomov@gmail.com>
+Date: Fri, 25 Aug 2017 08:29:06 +0200
+Message-ID: <CAOi1vP9F6rmEuZ-EBKGsdmw4-WfS-9ovhHS9tC2oD3Drb0dcAA@mail.gmail.com>
+Subject: Re: [PATCH] generic/108: tolerate old lvm utility versions
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 24, 2017 at 02:48:26PM +0200, Ilya Dryomov wrote:
-> lvm utility in Ubuntu 14.04 LTS treats -l 100%FREE as a hard number and
-> not as an approximate upper limit.  With ~5G scratch partition and ~128M
+On Fri, Aug 25, 2017 at 7:31 AM, Eryu Guan <eguan@redhat.com> wrote:
+> On Thu, Aug 24, 2017 at 02:48:26PM +0200, Ilya Dryomov wrote:
+>> lvm utility in Ubuntu 14.04 LTS treats -l 100%FREE as a hard number and
+>> not as an approximate upper limit.  With ~5G scratch partition and ~128M
+>
+> I just looked for an Ubuntu 14.04 LTS box and confirmed lvcreate does
+> support '-l 100%FREE'. Even on distributions as old as RHEL6 support
+> this usage too. Perpahs there were other things went wrong in your test
+> environment?
 
-I just looked for an Ubuntu 14.04 LTS box and confirmed lvcreate does
-support '-l 100%FREE'. Even on distributions as old as RHEL6 support
-this usage too. Perpahs there were other things went wrong in your test
-environment?
+The syntax is supported, but the semantics are different.  Compare
+lvcreate(8) man pages on Ubuntu 14.04 LTS and something more recent:
+
+"When expressed as a percentage, the number is treated as an
+approximate upper  limit  for the total  number  of  physical  extents
+to be allocated (including extents used by any mirrors, for example)."
+
+In the example I gave, '-l 100%FREE' translates to 1310 PEs on Trusty
+vs ~60 PEs on a recent Fedora.
 
 Thanks,
-Eryu
 
-> scsi_debug device, vg_108 is 1279+31=1310 extents long, but only 31*2=62
-> can be allocated with -i 2:
-> 
->   # lvm lvcreate -i 2 -I 4m -l 100%FREE -n lv_108 vg_108
->   Insufficient suitable allocatable extents for logical volume lv_108: 1248 more required
-> 
-> Set the size to allocate to 100M.
-> 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
-> ---
->  tests/generic/108 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/108 b/tests/generic/108
-> index 1525dfb64a47..0caec7d02d72 100755
-> --- a/tests/generic/108
-> +++ b/tests/generic/108
-> @@ -74,7 +74,7 @@ $LVM_PROG pvcreate -f $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
->  $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
->  # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
->  # (like 2.02.95 in RHEL6) don't support --yes option
-> -yes | $LVM_PROG lvcreate -i 2 -I 4m -l 100%FREE -n $lvname $vgname \
-> +yes | $LVM_PROG lvcreate -i 2 -I 4m -L 100m -n $lvname $vgname \
->  	>>$seqres.full 2>&1
->  # wait for lv creation to fully complete
->  $UDEV_SETTLE_PROG >>$seqres.full 2>&1
-> -- 
-> 2.4.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+                Ilya
