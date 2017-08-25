@@ -1,101 +1,58 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:35261 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754565AbdHYJTI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2017 05:19:08 -0400
-Received: by mail-yw0-f193.google.com with SMTP id x21so1012830ywg.2
-        for <fstests@vger.kernel.org>; Fri, 25 Aug 2017 02:19:08 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <1503503357-26234-4-git-send-email-amir73il@gmail.com>
-References: <1503503357-26234-1-git-send-email-amir73il@gmail.com> <1503503357-26234-4-git-send-email-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 25 Aug 2017 12:19:07 +0300
-Message-ID: <CAOQ4uxid_pV=J4c3GwTKownM=Yk_HMPYoEsE3++wjOYRhB7oTg@mail.gmail.com>
-Subject: Re: [RFC][PATCH 3/8] fsx: fixes to random seed
-Content-Type: text/plain; charset="UTF-8"
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:33975 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754614AbdHYMFO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 Aug 2017 08:05:14 -0400
+Received: by mail-wr0-f193.google.com with SMTP id y14so504150wrd.1
+        for <fstests@vger.kernel.org>; Fri, 25 Aug 2017 05:05:14 -0700 (PDT)
+Received: from orange.brq.redhat.com. (nat-pool-brq-t.redhat.com. [213.175.37.10])
+        by smtp.gmail.com with ESMTPSA id s86sm2025449wma.10.2017.08.25.05.05.12
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-AES128-GCM-SHA256 bits=128/128);
+        Fri, 25 Aug 2017 05:05:12 -0700 (PDT)
+From: Ilya Dryomov <idryomov@gmail.com>
+Subject: [PATCH] generic/420: truncate testfile before executing the test
+Date: Fri, 25 Aug 2017 14:04:41 +0200
+Message-Id: <1503662681-5800-1-git-send-email-idryomov@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 23, 2017 at 6:49 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> Not sure why, but with initstate()/setstate(), sfx generates
-> same events regadless of the input seed argument.
->
-> Change to use srandom() to fix the problem.
->
-> Add pid to auto random seed, so parallel fsx executions with auto
-> seed will use different seed values.
->
-> At this time there are 6 tests that use sfx, out of which:
-> 2 use -S 0 as seed (gettime()) - generic/{075,112}
-> 2 do not specify seed (default = 1) - generic/{091,263}
-> 1 uses explicit constant seed - generic/127
-> 1 uses explicit $RANDOM seed - generic/231
->
-> This change affects all those tests.
-> The tests that intended to randomize the seed will now really
-> randomize the seed.
-> The tests that intended to use a constant seed will still use
-> a constant seed, but resulting event sequence will be different
-> than before this change.
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+If generic/437 is run before generic/420, the latter fails with:
 
-Eryu,
+  4c4
+  < stat.size = 2048
+  ---
+  > stat.size = 2097152
 
-While the rest of the series make take longer time to land,
-I think you should consider applying this patch, or at least test
-how it affects test results on your test systems.
+because both use $TEST_DIR/testfile.  generic/437 leaves it at 2M,
+while generic/420 assumes that it is empty (or at least smaller than
+2048 bytes).
 
-Please let me know if you observe the same behavior as I do
-(you  can use fsx -d to output all events to stdout)
+Use a private test file (testfile.$seq) and truncate it on open just in
+case.
 
-I wonder what is your opinion of randomized seed vs. constant
-seed in xfstest... anyway, the tests 075,112,231 seem to have
-been using effectively constant seed up to now, not as author
-intended.
+Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+---
+ tests/generic/420 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-Cheers,
-Amir.
+diff --git a/tests/generic/420 b/tests/generic/420
+index ccb6cb8e829b..aab2e08855d0 100755
+--- a/tests/generic/420
++++ b/tests/generic/420
+@@ -52,10 +52,10 @@ _supported_os Linux
+ _require_test
+ _require_xfs_io_command fpunch
+ 
+-testfile="${TEST_DIR}/testfile"
++testfile="${TEST_DIR}/testfile.$seq"
+ 
+ echo "Testing fallocate(mode=FALLOC_FL_KEEP_SIZE|FALLOC_FL_PUNCH_HOLE)"
+-$XFS_IO_PROG -fc "pwrite -b 2048 0 2048" $testfile | head -n1
++$XFS_IO_PROG -f -t -c "pwrite -b 2048 0 2048" $testfile | head -n1
+ # fpunch from xfs_io has KEEP_SIZE flag set
+ $XFS_IO_PROG -c "fpunch 2048 2048" $testfile
+ $XFS_IO_PROG -c "stat" $testfile | grep -F 'stat.size'
+-- 
+2.4.3
 
-> ---
->  ltp/fsx.c | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
->
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 3713bbe..572df75 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -116,7 +116,6 @@ int fd;                             /* fd for our test file */
->  blksize_t      block_size = 0;
->  off_t          file_size = 0;
->  off_t          biggest = 0;
-> -char           state[256];
->  unsigned long  testcalls = 0;          /* calls to function "test" */
->
->  unsigned long  simulatedopcount = 0;   /* -b flag */
-> @@ -1909,8 +1908,10 @@ main(int argc, char **argv)
->                          break;
->                 case 'S':
->                          seed = getnum(optarg, &endp);
-> -                       if (seed == 0)
-> +                       if (seed == 0) {
->                                 seed = time(0) % 10000;
-> +                               seed += (int)getpid();
-> +                       }
->                         if (!quiet)
->                                 fprintf(stdout, "Seed set to %d\n", seed);
->                         if (seed < 0)
-> @@ -1948,8 +1949,7 @@ main(int argc, char **argv)
->         signal(SIGUSR1, cleanup);
->         signal(SIGUSR2, cleanup);
->
-> -       initstate(seed, state, 256);
-> -       setstate(state);
-> +       srandom(seed);
->         fd = open(fname,
->                 O_RDWR|(lite ? 0 : O_CREAT|O_TRUNC)|o_direct, 0666);
->         if (fd < 0) {
-> --
-> 2.7.4
->
