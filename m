@@ -1,66 +1,121 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:36574 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751187AbdH1K3d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 Aug 2017 06:29:33 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:19060 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751190AbdH1KfK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 28 Aug 2017 06:35:10 -0400
+Date: Mon, 28 Aug 2017 18:35:04 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] test race when checking i_size on direct i/o read
+Message-ID: <20170828103504.GU31418@eguan.usersys.redhat.com>
+References: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20170828080032.16399-1-chandan@linux.vnet.ibm.com>
-References: <20170828080032.16399-1-chandan@linux.vnet.ibm.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 28 Aug 2017 13:29:32 +0300
-Message-ID: <CAOQ4uxj1d1m7abXEP_5Aj_=kFheGYiK4hfppHpJUQnL39h3Tpw@mail.gmail.com>
-Subject: Re: [PATCH] overlay: Test constant d_ino feature
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, Zheng Liu <wenqing.lz@taobao.com>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Aug 28, 2017 at 11:00 AM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> This commit adds a test to verify constant d_ino feature. To be precise,
-> the following scenarios are checked,
-> - Files on lowerdir will have ino from lowerdir reported (even after
->   copy-up).
-> - For entries in impure directories, we need to recalculate d_ino all
->   the time.
-> - Parent's (i.e. "..") d_ino must always be calculated i.e. Pure upper
->   directory residing in a merged directory.
-> - For "." directory entry, we need to recalculate d_ino all the time.
->
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+On Fri, Aug 18, 2017 at 03:35:02PM -0500, Eric Sandeen wrote:
+> From: Zheng Liu <wenqing.lz@taobao.com>
+> 
+> In this commit a new test case is added to test that i_size races don't
+> occur under dio reads/writes.  We add a program in /src dir, which
+> has a writer to issue some append dio writes.  Meanwhile it has a reader
+> in this test to do some dio reads.  As we expect, reader should read
+> nothing or data with 'a'.  But it might read some data with '0'.
+> 
+> The bug can be reproduced by this test case [1].
+> 
+> 1.  http://patchwork.ozlabs.org/patch/311761/
+> 
+> This ostensibly tests commit:
+> 9fe55eea7 Fix race when checking i_size on direct i/o read
+> 
+> Cc: Christoph Hellwig <hch@infradead.org>
+> Cc: Rich Johnston <rjohnston@sgi.com>
+> Cc: Dave Chinner <david@fromorbit.com>
+> Signed-off-by: Zheng Liu <wenqing.lz@taobao.com>
+> [sandeen: update to recent xfstests, update commitlog]
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
->  src/Makefile          |   2 +-
->  src/t_dir_ino.c       |  78 ++++++++++++++++++++++
->  tests/overlay/037     | 174 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/037.out |   2 +
->  tests/overlay/group   |   1 +
->  5 files changed, 256 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_dir_ino.c
->  create mode 100755 tests/overlay/037
->  create mode 100644 tests/overlay/037.out
->
+> 
+> This test was originally titled:
+> 
+>  xfstests: add a new test case to test i_size updated properly under dio
+> 
+> but I think the issue is more of when and how it's tested, not how
+> it's updated.
+> 
+> Note, this passes on xfs on 4.10, but fails on 4.12.
+> ext4 on 4.10 passes as well but is very slow.
+> 
+> iomap dio maybe?  Not sure yet.
+
+It failed for me with XFS and btrfs, ext4 passed test, kernel is
+4.13-rc5. But I found that the alignment for write buffer matters too
+for reproducing the btrfs failure, see below.
+
+> 
+> changelog v3:
+>  * rebase against latest xfstests/master branch
+>  * update commit log
+
+Thanks for picking up the test again! And sorry that I got to it late..
+
+> 
+> changelog v2:
+>  * add '-lpthread' into LLDLIBS
+> 
+> diff --git a/configure.ac b/configure.ac
+> index 57092f1..4663004 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -59,6 +59,7 @@ AC_PACKAGE_NEED_GETXATTR_LIBATTR
+>  AC_PACKAGE_NEED_SYS_ACL_H
+>  AC_PACKAGE_NEED_ACL_LIBACL_H
+>  AC_PACKAGE_NEED_ACLINIT_LIBACL
+> +AC_PACKAGE_NEED_PTHREADMUTEXINIT
+>  
+>  AC_PACKAGE_WANT_GDBM
+>  AC_PACKAGE_WANT_AIO
+> diff --git a/include/builddefs.in b/include/builddefs.in
+> index cb52b99..fcc8b90 100644
+> --- a/include/builddefs.in
+> +++ b/include/builddefs.in
+> @@ -25,6 +25,7 @@ LIBGDBM = @libgdbm@
+>  LIBUUID = @libuuid@
+>  LIBHANDLE = @libhdl@
+>  LIBDM = @libdm@
+> +LIBPTHREAD = @libpthread@
+>  LIBTEST = $(TOPDIR)/lib/libtest.la
+>  prefix = @prefix@
+>  
 > diff --git a/src/Makefile b/src/Makefile
-> index b8aff49..f509870 100644
+> index b8aff49..e9419bd 100644
 > --- a/src/Makefile
 > +++ b/src/Makefile
 > @@ -23,7 +23,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->         seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
->         renameat2 t_getcwd e4compact test-nextquota punch-alternating \
->         attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
-> -       dio-invalidate-cache stat_test t_encrypted_d_revalidate
-> +       dio-invalidate-cache stat_test t_encrypted_d_revalidate t_dir_ino
->
+>  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+>  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+>  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+> -	dio-invalidate-cache stat_test t_encrypted_d_revalidate
+> +	dio-invalidate-cache stat_test t_encrypted_d_revalidate diotest
+
+I think a more specific name would be better than just "diotest" :)
+
+>  
 >  SUBDIRS =
->
-> diff --git a/src/t_dir_ino.c b/src/t_dir_ino.c
+>  
+> diff --git a/src/diotest.c b/src/diotest.c
 > new file mode 100644
-> index 0000000..0c41d41
+> index 0000000..7d2378f
 > --- /dev/null
-> +++ b/src/t_dir_ino.c
-> @@ -0,0 +1,78 @@
+> +++ b/src/diotest.c
+> @@ -0,0 +1,166 @@
 > +/*
-> + * Copyright (C) 2017 IBM Corporation. All Rights Reserved.
-> + * Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> + * Copyright (c) 2013 Alibaba Group.
+> + * All Rights Reserved.
 > + *
 > + * This program is free software; you can redistribute it and/or
 > + * modify it under the terms of the GNU General Public License as
@@ -77,84 +132,188 @@ On Mon, Aug 28, 2017 at 11:00 AM, Chandan Rajendra
 > + */
 > +
 > +/*
-> + * t_dir_ino
-> + *
-> + * print directory entries and their d_ino numbers
-> + *
-> + * ./t_dir_ino <path>
+> + * This is a normal case that we do some append dio writes and meanwhile
+> + * we do some dio reads.  Currently in vfs we don't ensure that i_size
+> + * is updated properly.  Hence the reader will read some data with '0'.
+> + * But we expect that the reader should read nothing or data with 'a'.
 > + */
 > +
-> +#include <fcntl.h>
 > +#include <stdio.h>
-> +#include <unistd.h>
-> +#include <stdint.h>
 > +#include <stdlib.h>
-> +#include <dirent.h>
-> +#include <sys/stat.h>
-> +#include <sys/syscall.h>
+> +#include <string.h>
 > +
-> +struct linux_dirent64 {
-> +       uint64_t        d_ino;
-> +       int64_t         d_off;
-> +       unsigned short  d_reclen;
-> +       unsigned char   d_type;
-> +       char            d_name[0];
+> +#include <unistd.h>
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +
+> +#include <pthread.h>
+> +
+> +static char *prog;
+> +
+> +struct writer_data {
+> +	int fd;
+> +	size_t blksize;
+> +	char *buf;
 > +};
 > +
-> +#define BUF_SIZE 4096
-> +
-> +int
-> +main(int argc, char *argv[])
+> +static void usage(void)
 > +{
-> +       int fd, nread;
-> +       char buf[BUF_SIZE];
-> +       struct linux_dirent64 *d;
-> +       int bpos;
-> +
-> +       fd = open(argv[1], O_RDONLY | O_DIRECTORY);
-> +       if (fd < 0) {
-> +               perror("open");
-> +               exit(EXIT_FAILURE);
-> +       }
-> +
-> +       for ( ; ; ) {
-> +               nread = syscall(SYS_getdents64, fd, buf, BUF_SIZE);
-> +               if (nread == -1) {
-> +                       perror("getdents");
-> +                       exit(EXIT_FAILURE);
-> +               }
-> +
-> +               if (nread == 0)
-> +                       break;
-> +
-> +               for (bpos = 0; bpos < nread;) {
-> +                       d = (struct linux_dirent64 *) (buf + bpos);
-> +                       printf("%lu %s\n", d->d_ino, d->d_name);
-> +                       bpos += d->d_reclen;
-> +               }
-> +       }
-> +
-> +       exit(EXIT_SUCCESS);
+> +	fprintf(stderr, "usage: %s [FILE]\n", prog);
 > +}
+> +
+> +static void *writer(void *arg)
+> +{
+> +	struct writer_data *data = (struct writer_data *)arg;
+> +	int ret;
+> +
+> +	ret = write(data->fd, data->buf, data->blksize);
+> +	if (ret < 0)
+> +		fprintf(stderr, "write file failed: %s\n", strerror(errno));
+> +
+> +	return NULL;
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	pthread_t tid;
+> +	struct writer_data wdata;
+> +	size_t max_blocks = 128;		/* 128 */
+> +	size_t blksize = 1 * 1024 * 1024;	/* 1M */
+> +	char *rbuf = NULL, *wbuf = NULL;
+> +	int rfd = 0, wfd = 0;
+> +	int i, j;
+> +	int ret = 0;
+> +
+> +	prog = basename(argv[0]);
+> +
+> +	if (argc != 2) {
+> +		usage();
+> +		exit(1);
+> +	}
+> +
+> +	wfd = open(argv[1], O_CREAT|O_DIRECT|O_WRONLY|O_APPEND|O_TRUNC, S_IRWXU);
+> +	if (wfd < 0) {
+> +		fprintf(stderr, "failed to open write file: %s\n",
+> +			strerror(errno));
+> +		exit(1);
+> +	}
+> +
+> +	rfd = open(argv[1], O_DIRECT|O_RDONLY, S_IRWXU);
+> +	if (wfd < 0) {
+> +		fprintf(stderr, "failed to open read file: %s\n",
+> +			strerror(errno));
+> +		ret = 1;
+> +		goto err;
+> +	}
+> +
+> +	/*
+> +	 * We set 1024 as an alignment size for write buf.  Feel free to change
+> +	 * it with 4096.  But the problem is also hitted.
+> +	 */
+> +	if (posix_memalign((void **)&wbuf, 1024, blksize)) {
 
-Sorry, but I don't see any value that t_d_ino brings that's
-not already provided by t_dir_type <dir> <ino> used by test overlay/017
+I suspect that a hardcoded 1024 alignment won't work for 4k sector
+device, but, as I mentioned above, changing it to 4096 made test on
+btrfs pass, even the comment said it didn't matter.
 
-> diff --git a/tests/overlay/037 b/tests/overlay/037
+How about passing the alignment requirement as an argument from the
+shell script? This can be looked up with _min_dio_alignment.
+
+> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
+> +		ret = 1;
+> +		goto err;
+> +	}
+> +
+> +	if (posix_memalign((void **)&rbuf, 4096, blksize)) {
+> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
+> +		ret = 1;
+> +		goto err;
+> +	}
+> +
+> +	memset(wbuf, 'a', blksize);
+> +	wdata.fd = wfd;
+> +	wdata.blksize = blksize;
+> +	wdata.buf = wbuf;
+> +
+> +	for (i = 0; i < max_blocks; i++) {
+> +		void *retval;
+> +
+> +		if (pthread_create(&tid, NULL, writer, &wdata)) {
+> +			fprintf(stderr, "create thread failed: %s\n",
+> +				strerror(errno));
+> +			ret = 1;
+> +			goto err;
+> +		}
+> +
+> +		memset(rbuf, 'b', blksize);
+> +		do {
+> +			ret = pread(rfd, rbuf, blksize, i * blksize);
+> +			if (ret < 0)
+> +				fprintf(stderr, "read file failed: %s\n",
+> +					strerror(errno));
+> +		} while (ret <= 0);
+> +
+> +		if (pthread_join(tid, &retval)) {
+> +			fprintf(stderr, " pthread join failed: %s\n",
+> +				strerror(errno));
+> +			ret = 1;
+> +			goto err;
+> +		}
+> +
+> +		if (ret >= 0) {
+> +			for (j = 0; j < ret; j ++) {
+> +				if (rbuf[j] != 'a') {
+> +					fprintf(stderr, "encounter an error: "
+> +						"offset %d content %c\n",
+> +						i, rbuf[j]);
+
+This prints a binary zero on failure, and makes diff harder to view.
+
+Binary files tests/generic/452.out and /root/workspace/xfstests/results//xfs_4k/generic/452.out.bad differ
+
+I changed it a bit:
+-                                               "offset %d content %c\n",
+-                                               i, rbuf[j]);
++                                               "block %d offset %d, content 0x%x\n",
++                                               i, j, rbuf[j]);
+
+and the result looked fine to me:
++encounter an error: block 15 offset 0, content 0x0
+
+> +					ret = 1;
+> +					goto err;
+> +				}
+> +			}
+> +		}
+> +	}
+> +
+> +err:
+> +	if (rfd)
+> +		close(rfd);
+> +	if (wfd)
+> +		close(wfd);
+> +	if (rbuf)
+> +		free(rbuf);
+> +	if (wbuf)
+> +		free(wbuf);
+> +
+> +	return ret;
+> +}
+> diff --git a/tests/generic/450 b/tests/generic/450
 > new file mode 100755
-> index 0000000..25c345f
+> index 0000000..cfb424c
 > --- /dev/null
-> +++ b/tests/overlay/037
-> @@ -0,0 +1,174 @@
+> +++ b/tests/generic/450
+> @@ -0,0 +1,56 @@
 > +#! /bin/bash
-> +# FSQA Test No. 037
+> +# FS QA Test No. 450
 > +#
-> +# Test constant d_ino numbers
+> +# Test i_size is updated properly under dio read/write
 > +#
 > +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
-> +# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> +# Copyright (c) 2013 Alibaba Group.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -177,13 +336,13 @@ not already provided by t_dir_type <dir> <ino> used by test overlay/017
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1       # failure is the default!
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +       cd /
-> +       rm -f $tmp.*
+> +    cd /
+> +    rm -f $tmp.* $testfile
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -191,165 +350,48 @@ not already provided by t_dir_type <dir> <ino> used by test overlay/017
 > +. ./common/filter
 > +
 > +# real QA test starts here
-> +_supported_fs overlay
+> +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch
-> +_require_test_program "af_unix"
-> +_require_test_program "t_dir_ino"
 > +
-> +rm -f $seqres.full
+> +testfile=$TEST_DIR/$seq.$$
 > +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +
-> +# Create our test files.
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> +mkdir -p $lowerdir
-> +mkdir $lowerdir/dir
-> +touch $lowerdir/file
-> +ln -s $lowerdir/file $lowerdir/symlink
-> +mknod $lowerdir/chrdev c 1 1
-> +mknod $lowerdir/blkdev b 1 1
-> +mknod $lowerdir/fifo p
-> +$here/src/af_unix $lowerdir/socket
-> +touch $lowerdir/hardlink1
-> +ln $lowerdir/hardlink1 $lowerdir/hardlink2
-> +
-> +FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
-> +
-> +# Record inode numbers in format <ino> <basename>
-> +function record_inode_numbers()
-> +{
-> +       dir=$1
-> +       outfile=$2
-> +
-> +       for f in $FILES; do
-> +               ls -id $dir/$f
-> +       done | \
-> +       while read ino file; do
-> +               echo $ino `basename $file` >> $outfile
-> +       done
-> +}
-> +
-> +# Verify that d_ino matches st_ino
-> +function check_d_ino()
-> +{
-> +       dir=$1
-> +       st_list=$2
-> +
-> +       d_ino_list=$($here/src/t_dir_ino $dir)
-> +
-> +       for f in $FILES; do
-> +               d_ino=$(echo "$d_ino_list" | grep $f | cut -d ' ' -f 1)
-> +               st_ino=$(cat $st_list | grep $f | cut -d ' ' -f 1)
-> +               [[ $st_ino != $d_ino ]] && \
-> +                       echo "$f has mismatching st_ino ($st_ino) and d_ino ($d_ino)"
-> +       done
-> +}
+> +[ -x $here/src/diotest ] || _notrun "diotest not built"
 
-Sorry, I don't see what this test adds. check_inode_numbers()
-in test overlay/017 already checks match of d_ino to recorded st_ino
-using $here/src/t_dir_type $dir $ino | grep -q $f
+_require_test_program "diotest" or a new name :)
+
+And need a _require_odirect too.
 
 > +
-> +_scratch_mount
-> +
-> +rm -f $tmp.*
-> +testdir=$SCRATCH_MNT/test
-> +mkdir -p $testdir
-> +
-> +# Record inode numbers before copy up
-> +record_inode_numbers $SCRATCH_MNT $tmp.st_ino
-> +
-> +# Verify that d_ino matches st_ino
-> +check_d_ino $SCRATCH_MNT $tmp.st_ino
-> +
-> +for f in $FILES; do
-> +       # chown -h modifies all those file types
-> +       chown -h 100 $SCRATCH_MNT/$f
-> +done
-> +
-> +# Compare inode numbers before/after copy up.
-> +# For entries in impure directories, we need to recalculate
-> +# d_ino all the time.
-> +check_d_ino $SCRATCH_MNT $tmp.st_ino
-> +
-> +for f in $FILES; do
-> +       # move to another dir
-> +       mv $SCRATCH_MNT/$f $testdir/
-> +done
-> +
-> +echo 3 > /proc/sys/vm/drop_caches
-> +
-> +# Compare inode numbers before/after rename and drop caches
-> +check_d_ino $testdir $tmp.st_ino
-> +
-> +# Verify that the inode numbers survive a mount cycle
-> +_scratch_cycle_mount
-> +
-> +# Compare inode numbers before/after mount cycle
-> +check_d_ino $testdir $tmp.st_ino
-> +
-> +_scratch_unmount
+> +$here/src/diotest $testfile # > $seqres.full 2>&1 ||
+> +	# _fail "i_size isn't update properly!"
 
-So all the test up to here seems completely redundant to overlay/017
-unless I am missing something?
+All the comments can be removed :)
+
+Thanks,
+Eryu
 
 > +
-> +# Parent's (i.e. "..") d_ino must always be calculated because a pure
-> +# dir can be residing inside a merged dir.
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +
-> +mkdir -p $lowerdir
-> +mkdir $lowerdir/merged_dir
-> +
-> +merged_dir_st_ino=$(stat -c '%i' $lowerdir/merged_dir)
-> +
-> +_scratch_mount
-> +
-> +parent_st_ino=$(stat -c '%i' $SCRATCH_MNT/merged_dir)
-
-This is supposed to be equal to $merged_dir_st_ino, but you never
-really verify that explicitly.
-
-> +
-> +pure_upper_dir=$SCRATCH_MNT/merged_dir/pure_upper_dir
-> +mkdir -p $pure_upper_dir
-> +
-> +d_ino_list=$($here/src/t_dir_ino $pure_upper_dir)
-> +parent_d_ino=$(echo "$d_ino_list" | grep -F '..' | cut -d ' ' -f 1)
-> +
-> +[[ $parent_d_ino != $parent_st_ino ]] && \
-> +       echo "Invalid d_ino reported for pure upper directory's merged parent"
-
-Suggesting to lookup parent dir by $merged_dir_st_ino instead:
-
-parent_d=$($here/src/t_dir_type $pure_upper_dir $merged_dir_st_ino)
-[[ "$parent_d" != ".. d" ]] && \
-       echo "Invalid d_ino ...
-
-> +
-> +
-> +# d_ino for "." must always be calculated because the present
-> +# directory can have a copy-up origin.
-> +d_ino_list=$($here/src/t_dir_ino $SCRATCH_MNT/merged_dir)
-> +d_ino=$(echo "$d_ino_list" | grep ' \.$' | cut -d ' ' -f 1)
-> +
-> +[[ $merged_dir_st_ino != $d_ino ]] && \
-> +       echo "Invalid d_ino reported for '.' entry"
-> +
-
-Similarly:
-
-current_d=$($here/src/t_dir_type $SCRATCH_MNT/merged_dir $merged_dir_st_ino)
-[[ "$current_d" != ". d" ]] && \
-       echo "Invalid d_ino ...
-
-The test ends being quite short with just these 2 checks of "." and "..",
-so I suggest that you add the following cases:
-- d_ino of . and .. entries of pure_lower_dir (should pass on upstream kernel)
-- d_ino of .. entry of merged_dir (I think Miklos' patch handles this case)
-- and the case we discussed of multiple lower layers where pure_lower_dir
-  is in lowermost layer and merged_dir's origin is in mid layer
-
-Cheers,
-Amir.
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/450.out b/tests/generic/450.out
+> new file mode 100644
+> index 0000000..734761a
+> --- /dev/null
+> +++ b/tests/generic/450.out
+> @@ -0,0 +1 @@
+> +QA output created by 450
+> diff --git a/tests/generic/group b/tests/generic/group
+> index b9cd0e8..a555fa0 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -452,3 +452,4 @@
+>  447 auto quick clone
+>  448 auto quick rw
+>  449 auto quick acl enospc
+> +450 auto rw quick
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
