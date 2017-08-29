@@ -1,56 +1,158 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:38216 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751664AbdH2O5M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Aug 2017 10:57:12 -0400
-Received: by mail-yw0-f196.google.com with SMTP id e9so2201264ywh.5
-        for <fstests@vger.kernel.org>; Tue, 29 Aug 2017 07:57:12 -0700 (PDT)
-MIME-Version: 1.0
-In-Reply-To: <20170829133715.12275-2-tuomas.tynkkynen@iki.fi>
-References: <20170829133715.12275-1-tuomas.tynkkynen@iki.fi> <20170829133715.12275-2-tuomas.tynkkynen@iki.fi>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 29 Aug 2017 17:57:11 +0300
-Message-ID: <CAOQ4uxgsjkB+47qam5o77ZPf=AVczeG6DYj+f1AfXFZmS0UTfQ@mail.gmail.com>
-Subject: Re: [PATCH 2/3] fsx: Fix -Wformat-security warnings
-Content-Type: text/plain; charset="UTF-8"
+Received: from mga11.intel.com ([192.55.52.93]:34894 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751272AbdH2WhW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Aug 2017 18:37:22 -0400
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH] generic: add test for executables on read-only DAX mounts
+Date: Tue, 29 Aug 2017 16:37:15 -0600
+Message-Id: <20170829223715.26507-1-ross.zwisler@linux.intel.com>
+In-Reply-To: <20170829213721.GA27686@linux.intel.com>
+References: <20170829213721.GA27686@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-fsdevel@vger.kernel.org, Randy Dodgen <rdodgen@gmail.com>, Christoph Hellwig <hch@infradead.org>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 29, 2017 at 4:37 PM, Tuomas Tynkkynen
-<tuomas.tynkkynen@iki.fi> wrote:
-> Some distros (NixOS) have their build environment enable
-> -Werror=format-security by default for security/hardening reasons.
-> Currently fsx fails to build due to this:
->
-> fsx.c: In function 'prt':
-> fsx.c:215:18: error: format not a string literal and no format arguments [-Werror=format-security]
->   fprintf(stdout, buffer);
->                   ^
-> fsx.c:217:20: error: format not a string literal and no format arguments [-Werror=format-security]
->    fprintf(fsxlogf, buffer);
->                     ^
-> Indeed the compiler is correct here, if the message-to-be-printed were
-> to contain a '%', unpredictable things would happen. Fix this.
->
-> Signed-off-by: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
-> ---
->  ltp/fsx.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 3713bbe3..fba2b4d8 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -212,9 +212,9 @@ prt(const char *fmt, ...)
->         va_start(args, fmt);
->         vsnprintf(buffer, BUF_SIZE, fmt, args);
->         va_end(args);
-> -       fprintf(stdout, buffer);
-> +       fprintf(stdout, "%s", buffer);
->         if (fsxlogf)
-> -               fprintf(fsxlogf, buffer);
-> +               fprintf(fsxlogf, "%s", buffer);
->  }
+This adds a regression test for the following kernel patch:
 
-Might as well be fputs, eitherwise looks good to me
+commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
+
+The above patch fixes an issue with ext4 where executables cannot be run on
+read-only filesystems mounted with the DAX option.
+
+This issue does not appear to be present in ext2 or XFS, as they both pass
+the test.  I've also confirmed outside of the test that they are both
+indeed able to execute binaries on read-only DAX mounts.
+
+Thanks to Randy Dodgen for the bug report and reproduction steps.
+
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: Randy Dodgen <rdodgen@gmail.com>
+Cc: Christoph Hellwig <hch@infradead.org>
+Cc: Theodore Ts'o <tytso@mit.edu>
+
+---
+
+Sorry if we collided, Randy, but I was 90% done with the test by the time I
+saw your mail. :)
+---
+ tests/generic/451     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/451.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/generic/451
+ create mode 100644 tests/generic/451.out
+
+diff --git a/tests/generic/451 b/tests/generic/451
+new file mode 100755
+index 0000000..54dda8c
+--- /dev/null
++++ b/tests/generic/451
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# FS QA Test 451
++#
++# This is a regression test for kernel patch:
++#   commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
++# created by Ross Zwisler <ross.zwisler@linux.intel.com>
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++# real QA test starts here
++# format and mount
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++LS=$(which ls --skip-alias --skip-functions) 2>/dev/null
++if [ $? -ne 0 ]; then
++	status=$?
++	echo "Couldn't find 'ls'!?"
++	exit
++fi
++
++cp $LS $SCRATCH_MNT
++SCRATCH_LS=$SCRATCH_MNT/ls
++
++$SCRATCH_LS >/dev/null 2>&1
++if [ $? -ne 0 ]; then
++	status=$?
++	echo "$SCRATCH_LS not working before remount"
++	exit
++fi
++
++_scratch_remount ro
++
++$SCRATCH_LS >/dev/null 2>&1
++if [ $? -ne 0 ]; then
++	status=$?
++	echo "$SCRATCH_LS not working after remount"
++	exit
++fi
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/451.out b/tests/generic/451.out
+new file mode 100644
+index 0000000..db92441
+--- /dev/null
++++ b/tests/generic/451.out
+@@ -0,0 +1,2 @@
++QA output created by 451
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 044ec3f..45f5789 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -453,3 +453,4 @@
+ 448 auto quick rw
+ 449 auto quick acl enospc
+ 450 auto quick rw
++451 auto quick
+-- 
+2.9.5
+
