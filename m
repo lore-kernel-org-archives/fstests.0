@@ -1,66 +1,410 @@
-Received: from mail-lf0-f68.google.com ([209.85.215.68]:33278 "EHLO
-        mail-lf0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753662AbdH2NhX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Aug 2017 09:37:23 -0400
-Received: by mail-lf0-f68.google.com with SMTP id y15so2162328lfd.0
-        for <fstests@vger.kernel.org>; Tue, 29 Aug 2017 06:37:23 -0700 (PDT)
-From: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
-Subject: [PATCH 3/3] stat_test, fssum: Include <sys/sysmacros.h> to avoid glibc warning
-Date: Tue, 29 Aug 2017 16:37:15 +0300
-Message-Id: <20170829133715.12275-3-tuomas.tynkkynen@iki.fi>
-In-Reply-To: <20170829133715.12275-1-tuomas.tynkkynen@iki.fi>
-References: <20170829133715.12275-1-tuomas.tynkkynen@iki.fi>
+Received: from mx2.suse.de ([195.135.220.15]:38059 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751336AbdH2Nqz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Aug 2017 09:46:55 -0400
+Subject: Re: [PATCH] test race when checking i_size on direct i/o read
+References: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
+ <20170828103504.GU31418@eguan.usersys.redhat.com>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <7803abae-b034-90b6-d243-82e69ec62e78@suse.com>
+Date: Tue, 29 Aug 2017 16:46:52 +0300
+MIME-Version: 1.0
+In-Reply-To: <20170828103504.GU31418@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
+To: Eryu Guan <eguan@redhat.com>, Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, Zheng Liu <wenqing.lz@taobao.com>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-Compiling against a recent glibc gives a number of warnings of this
-sort:
 
-stat_test.c: In function 'cmp_statx':
-stat_test.c:251:13: warning: In the GNU C Library, "major" is defined
- by <sys/sysmacros.h>. For historical compatibility, it is
- currently defined by <sys/types.h> as well, but we plan to
- remove this soon. To use "major", include <sys/sysmacros.h>
- directly. If you did not intend to use a system-defined macro
- "major", you should undefine it after including <sys/types.h>.
-  devcmp(dev);
 
-Do as the message says to avoid it. xfstests already includes
-<sys/sysmacros.h> in two other places so it seems safe to assume this
-header generally exists.
+On 28.08.2017 13:35, Eryu Guan wrote:
+> On Fri, Aug 18, 2017 at 03:35:02PM -0500, Eric Sandeen wrote:
+>> From: Zheng Liu <wenqing.lz@taobao.com>
+>>
+>> In this commit a new test case is added to test that i_size races don't
+>> occur under dio reads/writes.  We add a program in /src dir, which
+>> has a writer to issue some append dio writes.  Meanwhile it has a reader
+>> in this test to do some dio reads.  As we expect, reader should read
+>> nothing or data with 'a'.  But it might read some data with '0'.
+>>
+>> The bug can be reproduced by this test case [1].
+>>
+>> 1.  http://patchwork.ozlabs.org/patch/311761/
+>>
+>> This ostensibly tests commit:
+>> 9fe55eea7 Fix race when checking i_size on direct i/o read
+>>
+>> Cc: Christoph Hellwig <hch@infradead.org>
+>> Cc: Rich Johnston <rjohnston@sgi.com>
+>> Cc: Dave Chinner <david@fromorbit.com>
+>> Signed-off-by: Zheng Liu <wenqing.lz@taobao.com>
+>> [sandeen: update to recent xfstests, update commitlog]
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
+>>
+>> This test was originally titled:
+>>
+>>  xfstests: add a new test case to test i_size updated properly under dio
+>>
+>> but I think the issue is more of when and how it's tested, not how
+>> it's updated.
+>>
+>> Note, this passes on xfs on 4.10, but fails on 4.12.
+>> ext4 on 4.10 passes as well but is very slow.
+>>
+>> iomap dio maybe?  Not sure yet.
+> 
+> It failed for me with XFS and btrfs, ext4 passed test, kernel is
+> 4.13-rc5. But I found that the alignment for write buffer matters too
+> for reproducing the btrfs failure, see below.
 
-Signed-off-by: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
----
- src/fssum.c     | 1 +
- src/stat_test.c | 1 +
- 2 files changed, 2 insertions(+)
-
-diff --git a/src/fssum.c b/src/fssum.c
-index 04052cdc..fa763d19 100644
---- a/src/fssum.c
-+++ b/src/fssum.c
-@@ -29,6 +29,7 @@
- #include <fcntl.h>
- #include <dirent.h>
- #include <errno.h>
-+#include <sys/sysmacros.h>
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <sys/sysmacros.h>
-diff --git a/src/stat_test.c b/src/stat_test.c
-index 198c1332..ba1650f2 100644
---- a/src/stat_test.c
-+++ b/src/stat_test.c
-@@ -17,6 +17,7 @@
- #include <unistd.h>
- #include <errno.h>
- #include <fcntl.h>
-+#include <sys/sysmacros.h>
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <sys/sysmacros.h>
--- 
-2.13.0
-
+In btrfs, if the buffers are not aligned to pagesize, then we fall back
+to buffered write, so that's likely why.
+> 
+>>
+>> changelog v3:
+>>  * rebase against latest xfstests/master branch
+>>  * update commit log
+> 
+> Thanks for picking up the test again! And sorry that I got to it late..
+> 
+>>
+>> changelog v2:
+>>  * add '-lpthread' into LLDLIBS
+>>
+>> diff --git a/configure.ac b/configure.ac
+>> index 57092f1..4663004 100644
+>> --- a/configure.ac
+>> +++ b/configure.ac
+>> @@ -59,6 +59,7 @@ AC_PACKAGE_NEED_GETXATTR_LIBATTR
+>>  AC_PACKAGE_NEED_SYS_ACL_H
+>>  AC_PACKAGE_NEED_ACL_LIBACL_H
+>>  AC_PACKAGE_NEED_ACLINIT_LIBACL
+>> +AC_PACKAGE_NEED_PTHREADMUTEXINIT
+>>  
+>>  AC_PACKAGE_WANT_GDBM
+>>  AC_PACKAGE_WANT_AIO
+>> diff --git a/include/builddefs.in b/include/builddefs.in
+>> index cb52b99..fcc8b90 100644
+>> --- a/include/builddefs.in
+>> +++ b/include/builddefs.in
+>> @@ -25,6 +25,7 @@ LIBGDBM = @libgdbm@
+>>  LIBUUID = @libuuid@
+>>  LIBHANDLE = @libhdl@
+>>  LIBDM = @libdm@
+>> +LIBPTHREAD = @libpthread@
+>>  LIBTEST = $(TOPDIR)/lib/libtest.la
+>>  prefix = @prefix@
+>>  
+>> diff --git a/src/Makefile b/src/Makefile
+>> index b8aff49..e9419bd 100644
+>> --- a/src/Makefile
+>> +++ b/src/Makefile
+>> @@ -23,7 +23,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>>  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+>>  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+>>  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+>> -	dio-invalidate-cache stat_test t_encrypted_d_revalidate
+>> +	dio-invalidate-cache stat_test t_encrypted_d_revalidate diotest
+> 
+> I think a more specific name would be better than just "diotest" :)
+> 
+>>  
+>>  SUBDIRS =
+>>  
+>> diff --git a/src/diotest.c b/src/diotest.c
+>> new file mode 100644
+>> index 0000000..7d2378f
+>> --- /dev/null
+>> +++ b/src/diotest.c
+>> @@ -0,0 +1,166 @@
+>> +/*
+>> + * Copyright (c) 2013 Alibaba Group.
+>> + * All Rights Reserved.
+>> + *
+>> + * This program is free software; you can redistribute it and/or
+>> + * modify it under the terms of the GNU General Public License as
+>> + * published by the Free Software Foundation.
+>> + *
+>> + * This program is distributed in the hope that it would be useful,
+>> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> + * GNU General Public License for more details.
+>> + *
+>> + * You should have received a copy of the GNU General Public License
+>> + * along with this program; if not, write the Free Software Foundation,
+>> + * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> + */
+>> +
+>> +/*
+>> + * This is a normal case that we do some append dio writes and meanwhile
+>> + * we do some dio reads.  Currently in vfs we don't ensure that i_size
+>> + * is updated properly.  Hence the reader will read some data with '0'.
+>> + * But we expect that the reader should read nothing or data with 'a'.
+>> + */
+>> +
+>> +#include <stdio.h>
+>> +#include <stdlib.h>
+>> +#include <string.h>
+>> +
+>> +#include <unistd.h>
+>> +#include <sys/types.h>
+>> +#include <sys/stat.h>
+>> +#include <fcntl.h>
+>> +#include <errno.h>
+>> +
+>> +#include <pthread.h>
+>> +
+>> +static char *prog;
+>> +
+>> +struct writer_data {
+>> +	int fd;
+>> +	size_t blksize;
+>> +	char *buf;
+>> +};
+>> +
+>> +static void usage(void)
+>> +{
+>> +	fprintf(stderr, "usage: %s [FILE]\n", prog);
+>> +}
+>> +
+>> +static void *writer(void *arg)
+>> +{
+>> +	struct writer_data *data = (struct writer_data *)arg;
+>> +	int ret;
+>> +
+>> +	ret = write(data->fd, data->buf, data->blksize);
+>> +	if (ret < 0)
+>> +		fprintf(stderr, "write file failed: %s\n", strerror(errno));
+>> +
+>> +	return NULL;
+>> +}
+>> +
+>> +int main(int argc, char *argv[])
+>> +{
+>> +	pthread_t tid;
+>> +	struct writer_data wdata;
+>> +	size_t max_blocks = 128;		/* 128 */
+>> +	size_t blksize = 1 * 1024 * 1024;	/* 1M */
+>> +	char *rbuf = NULL, *wbuf = NULL;
+>> +	int rfd = 0, wfd = 0;
+>> +	int i, j;
+>> +	int ret = 0;
+>> +
+>> +	prog = basename(argv[0]);
+>> +
+>> +	if (argc != 2) {
+>> +		usage();
+>> +		exit(1);
+>> +	}
+>> +
+>> +	wfd = open(argv[1], O_CREAT|O_DIRECT|O_WRONLY|O_APPEND|O_TRUNC, S_IRWXU);
+>> +	if (wfd < 0) {
+>> +		fprintf(stderr, "failed to open write file: %s\n",
+>> +			strerror(errno));
+>> +		exit(1);
+>> +	}
+>> +
+>> +	rfd = open(argv[1], O_DIRECT|O_RDONLY, S_IRWXU);
+>> +	if (wfd < 0) {
+>> +		fprintf(stderr, "failed to open read file: %s\n",
+>> +			strerror(errno));
+>> +		ret = 1;
+>> +		goto err;
+>> +	}
+>> +
+>> +	/*
+>> +	 * We set 1024 as an alignment size for write buf.  Feel free to change
+>> +	 * it with 4096.  But the problem is also hitted.
+>> +	 */
+>> +	if (posix_memalign((void **)&wbuf, 1024, blksize)) {
+> 
+> I suspect that a hardcoded 1024 alignment won't work for 4k sector
+> device, but, as I mentioned above, changing it to 4096 made test on
+> btrfs pass, even the comment said it didn't matter.
+> 
+> How about passing the alignment requirement as an argument from the
+> shell script? This can be looked up with _min_dio_alignment.
+> 
+>> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
+>> +		ret = 1;
+>> +		goto err;
+>> +	}
+>> +
+>> +	if (posix_memalign((void **)&rbuf, 4096, blksize)) {
+>> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(errno));
+>> +		ret = 1;
+>> +		goto err;
+>> +	}
+>> +
+>> +	memset(wbuf, 'a', blksize);
+>> +	wdata.fd = wfd;
+>> +	wdata.blksize = blksize;
+>> +	wdata.buf = wbuf;
+>> +
+>> +	for (i = 0; i < max_blocks; i++) {
+>> +		void *retval;
+>> +
+>> +		if (pthread_create(&tid, NULL, writer, &wdata)) {
+>> +			fprintf(stderr, "create thread failed: %s\n",
+>> +				strerror(errno));
+>> +			ret = 1;
+>> +			goto err;
+>> +		}
+>> +
+>> +		memset(rbuf, 'b', blksize);
+>> +		do {
+>> +			ret = pread(rfd, rbuf, blksize, i * blksize);
+>> +			if (ret < 0)
+>> +				fprintf(stderr, "read file failed: %s\n",
+>> +					strerror(errno));
+>> +		} while (ret <= 0);
+>> +
+>> +		if (pthread_join(tid, &retval)) {
+>> +			fprintf(stderr, " pthread join failed: %s\n",
+>> +				strerror(errno));
+>> +			ret = 1;
+>> +			goto err;
+>> +		}
+>> +
+>> +		if (ret >= 0) {
+>> +			for (j = 0; j < ret; j ++) {
+>> +				if (rbuf[j] != 'a') {
+>> +					fprintf(stderr, "encounter an error: "
+>> +						"offset %d content %c\n",
+>> +						i, rbuf[j]);
+> 
+> This prints a binary zero on failure, and makes diff harder to view.
+> 
+> Binary files tests/generic/452.out and /root/workspace/xfstests/results//xfs_4k/generic/452.out.bad differ
+> 
+> I changed it a bit:
+> -                                               "offset %d content %c\n",
+> -                                               i, rbuf[j]);
+> +                                               "block %d offset %d, content 0x%x\n",
+> +                                               i, j, rbuf[j]);
+> 
+> and the result looked fine to me:
+> +encounter an error: block 15 offset 0, content 0x0
+> 
+>> +					ret = 1;
+>> +					goto err;
+>> +				}
+>> +			}
+>> +		}
+>> +	}
+>> +
+>> +err:
+>> +	if (rfd)
+>> +		close(rfd);
+>> +	if (wfd)
+>> +		close(wfd);
+>> +	if (rbuf)
+>> +		free(rbuf);
+>> +	if (wbuf)
+>> +		free(wbuf);
+>> +
+>> +	return ret;
+>> +}
+>> diff --git a/tests/generic/450 b/tests/generic/450
+>> new file mode 100755
+>> index 0000000..cfb424c
+>> --- /dev/null
+>> +++ b/tests/generic/450
+>> @@ -0,0 +1,56 @@
+>> +#! /bin/bash
+>> +# FS QA Test No. 450
+>> +#
+>> +# Test i_size is updated properly under dio read/write
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2013 Alibaba Group.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +    cd /
+>> +    rm -f $tmp.* $testfile
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +
+>> +testfile=$TEST_DIR/$seq.$$
+>> +
+>> +[ -x $here/src/diotest ] || _notrun "diotest not built"
+> 
+> _require_test_program "diotest" or a new name :)
+> 
+> And need a _require_odirect too.
+> 
+>> +
+>> +$here/src/diotest $testfile # > $seqres.full 2>&1 ||
+>> +	# _fail "i_size isn't update properly!"
+> 
+> All the comments can be removed :)
+> 
+> Thanks,
+> Eryu
+> 
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/generic/450.out b/tests/generic/450.out
+>> new file mode 100644
+>> index 0000000..734761a
+>> --- /dev/null
+>> +++ b/tests/generic/450.out
+>> @@ -0,0 +1 @@
+>> +QA output created by 450
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index b9cd0e8..a555fa0 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -452,3 +452,4 @@
+>>  447 auto quick clone
+>>  448 auto quick rw
+>>  449 auto quick acl enospc
+>> +450 auto rw quick
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
