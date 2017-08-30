@@ -1,11 +1,11 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:34787 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751432AbdH3OvX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:23 -0400
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:35033 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751386AbdH3OvZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:25 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 01/14] common/rc: convert some egrep to grep
-Date: Wed, 30 Aug 2017 17:51:33 +0300
-Message-Id: <1504104706-11965-2-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 03/14] fsx: fixes to random seed
+Date: Wed, 30 Aug 2017 17:51:35 +0300
+Message-Id: <1504104706-11965-4-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
 References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,48 +13,66 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Not sure why, but with initstate()/setstate(), sfx generates
+same events regadless of the input seed argument.
+
+Change to use srandom() to fix the problem.
+
+Add pid to auto random seed, so parallel fsx executions with auto
+seed will use different seed values.
+
+At this time there are 6 tests that use sfx, out of which:
+2 use -S 0 as seed (gettime()) - generic/{075,112}
+2 do not specify seed (default = 1) - generic/{091,263}
+1 uses explicit constant seed - generic/127
+1 uses explicit $RANDOM seed - generic/231
+
+This change affects all those tests.
+The tests that intended to randomize the seed will now really
+randomize the seed.
+The tests that intended to use a constant seed will still use
+a constant seed, but resulting event sequence will be different
+than before this change.
+
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/rc | 8 ++++----
+ ltp/fsx.c | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 9c5f54a..9d7b783 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2177,7 +2177,7 @@ _require_xfs_io_command()
- 		;;
- 	"fsmap" )
- 		testio=`$XFS_IO_PROG -f -c "fsmap" $testfile 2>&1`
--		echo $testio | egrep -q "Inappropriate ioctl" && \
-+		echo $testio | grep -q "Inappropriate ioctl" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
- 	"open")
-@@ -2185,12 +2185,12 @@ _require_xfs_io_command()
- 		# a new -C flag was introduced to execute one shot commands.
- 		# Check for -C flag support as an indication for the bug fix.
- 		testio=`$XFS_IO_PROG -F -f -C "open $testfile" $testfile 2>&1`
--		echo $testio | egrep -q "invalid option" && \
-+		echo $testio | grep -q "invalid option" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
- 	"scrub"|"repair")
- 		testio=`$XFS_IO_PROG -x -c "$command dummy 0" $TEST_DIR 2>&1`
--		echo $testio | egrep -q "Inappropriate ioctl" && \
-+		echo $testio | grep -q "Inappropriate ioctl" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
- 	"utimes" )
-@@ -2209,7 +2209,7 @@ _require_xfs_io_command()
- 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
- 	echo $testio | grep -q "foreign file active" && \
- 		_notrun "xfs_io $command not supported on $FSTYP"
--	echo $testio | egrep -q "Function not implemented" && \
-+	echo $testio | grep -q "Function not implemented" && \
- 		_notrun "xfs_io $command support is missing (missing syscall?)"
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 3713bbe..572df75 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -116,7 +116,6 @@ int	fd;				/* fd for our test file */
+ blksize_t	block_size = 0;
+ off_t		file_size = 0;
+ off_t		biggest = 0;
+-char		state[256];
+ unsigned long	testcalls = 0;		/* calls to function "test" */
  
- 	if [ -n "$param" -a $param_checked -eq 0 ]; then
+ unsigned long	simulatedopcount = 0;	/* -b flag */
+@@ -1909,8 +1908,10 @@ main(int argc, char **argv)
+                         break;
+ 		case 'S':
+                         seed = getnum(optarg, &endp);
+-			if (seed == 0)
++			if (seed == 0) {
+ 				seed = time(0) % 10000;
++				seed += (int)getpid();
++			}
+ 			if (!quiet)
+ 				fprintf(stdout, "Seed set to %d\n", seed);
+ 			if (seed < 0)
+@@ -1948,8 +1949,7 @@ main(int argc, char **argv)
+ 	signal(SIGUSR1,	cleanup);
+ 	signal(SIGUSR2,	cleanup);
+ 
+-	initstate(seed, state, 256);
+-	setstate(state);
++	srandom(seed);
+ 	fd = open(fname,
+ 		O_RDWR|(lite ? 0 : O_CREAT|O_TRUNC)|o_direct, 0666);
+ 	if (fd < 0) {
 -- 
 2.7.4
 
