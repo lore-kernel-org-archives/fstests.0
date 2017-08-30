@@ -1,68 +1,61 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:22137 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:46322 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751375AbdH3PqO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 11:46:14 -0400
-Date: Wed, 30 Aug 2017 08:45:58 -0700
+        with ESMTP id S1751415AbdH3QRr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 12:17:47 -0400
+Date: Wed, 30 Aug 2017 09:17:38 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 01/14] common/rc: convert some egrep to grep
-Message-ID: <20170830154558.GH4757@magnolia>
+Subject: Re: [PATCH v2 02/14] common/rc: fix _require_xfs_io_command params
+ check
+Message-ID: <20170830161738.GN4757@magnolia>
 References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <1504104706-11965-2-git-send-email-amir73il@gmail.com>
+ <1504104706-11965-3-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1504104706-11965-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1504104706-11965-3-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
 Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 05:51:33PM +0300, Amir Goldstein wrote:
+On Wed, Aug 30, 2017 at 05:51:34PM +0300, Amir Goldstein wrote:
+> When _require_xfs_io_command is passed command parameters,
+> the resulting error from invalid parameters may be ignored.
+> 
+> For example, the following bogus params would not abort the test:
+> _require_xfs_io_command "falloc" "-X"
+> _require_xfs_io_command "fiemap" "-X"
+> 
+> Fix this by looking for the relevant error message.
+> 
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
 Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
 > ---
->  common/rc | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
+>  common/rc | 7 ++++++-
+>  1 file changed, 6 insertions(+), 1 deletion(-)
 > 
 > diff --git a/common/rc b/common/rc
-> index 9c5f54a..9d7b783 100644
+> index 9d7b783..44b98f6 100644
 > --- a/common/rc
 > +++ b/common/rc
-> @@ -2177,7 +2177,7 @@ _require_xfs_io_command()
->  		;;
->  	"fsmap" )
->  		testio=`$XFS_IO_PROG -f -c "fsmap" $testfile 2>&1`
-> -		echo $testio | egrep -q "Inappropriate ioctl" && \
-> +		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
->  	"open")
-> @@ -2185,12 +2185,12 @@ _require_xfs_io_command()
->  		# a new -C flag was introduced to execute one shot commands.
->  		# Check for -C flag support as an indication for the bug fix.
->  		testio=`$XFS_IO_PROG -F -f -C "open $testfile" $testfile 2>&1`
-> -		echo $testio | egrep -q "invalid option" && \
-> +		echo $testio | grep -q "invalid option" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
->  	"scrub"|"repair")
->  		testio=`$XFS_IO_PROG -x -c "$command dummy 0" $TEST_DIR 2>&1`
-> -		echo $testio | egrep -q "Inappropriate ioctl" && \
-> +		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
->  	"utimes" )
-> @@ -2209,7 +2209,7 @@ _require_xfs_io_command()
->  		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
->  	echo $testio | grep -q "foreign file active" && \
->  		_notrun "xfs_io $command not supported on $FSTYP"
-> -	echo $testio | egrep -q "Function not implemented" && \
-> +	echo $testio | grep -q "Function not implemented" && \
+> @@ -2212,9 +2212,14 @@ _require_xfs_io_command()
+>  	echo $testio | grep -q "Function not implemented" && \
 >  		_notrun "xfs_io $command support is missing (missing syscall?)"
 >  
->  	if [ -n "$param" -a $param_checked -eq 0 ]; then
+> -	if [ -n "$param" -a $param_checked -eq 0 ]; then
+> +	[ -n "$param" ] || return
+> +
+> +	if [ $param_checked -eq 0 ]; then
+>  		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
+>  			_notrun "xfs_io $command doesn't support $param"
+> +	else
+> +		echo $testio | grep -q "invalid option" && \
+> +			_notrun "xfs_io $command doesn't support $param"
+>  	fi
+>  }
+>  
 > -- 
 > 2.7.4
 > 
