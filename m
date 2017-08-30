@@ -1,77 +1,76 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46116 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750758AbdH3HAu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 30 Aug 2017 03:00:50 -0400
-Date: Wed, 30 Aug 2017 15:00:47 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [RFC][PATCH 3/8] fsx: fixes to random seed
-Message-ID: <20170830070047.GA27835@eguan.usersys.redhat.com>
-References: <1503503357-26234-1-git-send-email-amir73il@gmail.com>
- <1503503357-26234-4-git-send-email-amir73il@gmail.com>
- <CAOQ4uxid_pV=J4c3GwTKownM=Yk_HMPYoEsE3++wjOYRhB7oTg@mail.gmail.com>
+Received: from mgwym01.jp.fujitsu.com ([211.128.242.40]:20445 "EHLO
+        mgwym01.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750824AbdH3HHl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 03:07:41 -0400
+Subject: Re: [PATCH] btrfs/029: fix wrong usage of name filter
+From: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>
+References: <f0fc8c9e-fb9b-fe82-6ebd-29149ef01b8e@jp.fujitsu.com>
+Message-ID: <4b4e2e7d-1c28-da38-4729-a4eb231fcce5@jp.fujitsu.com>
+Date: Wed, 30 Aug 2017 15:56:09 +0900
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxid_pV=J4c3GwTKownM=Yk_HMPYoEsE3++wjOYRhB7oTg@mail.gmail.com>
+In-Reply-To: <f0fc8c9e-fb9b-fe82-6ebd-29149ef01b8e@jp.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 25, 2017 at 12:19:07PM +0300, Amir Goldstein wrote:
-> On Wed, Aug 23, 2017 at 6:49 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > Not sure why, but with initstate()/setstate(), sfx generates
-> > same events regadless of the input seed argument.
-> >
-> > Change to use srandom() to fix the problem.
-> >
-> > Add pid to auto random seed, so parallel fsx executions with auto
-> > seed will use different seed values.
-> >
-> > At this time there are 6 tests that use sfx, out of which:
-> > 2 use -S 0 as seed (gettime()) - generic/{075,112}
-> > 2 do not specify seed (default = 1) - generic/{091,263}
-> > 1 uses explicit constant seed - generic/127
-> > 1 uses explicit $RANDOM seed - generic/231
-> >
-> > This change affects all those tests.
-> > The tests that intended to randomize the seed will now really
-> > randomize the seed.
-> > The tests that intended to use a constant seed will still use
-> > a constant seed, but resulting event sequence will be different
-> > than before this change.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Sorry, this patch contains leading spaces, I will resend this soon.
+
+On 2017/08/30 11:44, Misono, Tomohiro wrote:
+> btrfs/029 uses _filter_testdirs() to filter the name of $TEST_DIR and
+> $SCRATCH_MNT directory.
 > 
-> Eryu,
+> In this function, it calls both _filter_test_dir and _filter_scratch
+> concatenated by pipe. Therefore if $TEST_DIR is a prefix of
+> $SCRATCH_MNT, this filter function gives wrong filtered name for
+> $SCRATCH_MNT and the test fails.
 > 
-> While the rest of the series make take longer time to land,
-> I think you should consider applying this patch, or at least test
-> how it affects test results on your test systems.
-
-Sorry I got to this so late.. and thanks a lot for all the work you've
-done for this log-write test!
-
+> Fix this by calling _filter_test_dir and _filter_scratch directly.
 > 
-> Please let me know if you observe the same behavior as I do
-> (you  can use fsx -d to output all events to stdout)
-
-Yes, I saw the same symptom as you've observed, the operation sequences
-are always the same no matter what seed I fed to fsx, I'm testing on
-both RHEL6 and RHEL7 hosts. It's so weird that seed doesn't have any
-effect on initstate and setstate, I'm not sure why either.. But your
-patch does change fsx to random mode.
-
+> Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujits.com>
+> ---
+>   tests/btrfs/029 | 11 +++--------
+>   1 file changed, 3 insertions(+), 8 deletions(-)
 > 
-> I wonder what is your opinion of randomized seed vs. constant
-> seed in xfstest... anyway, the tests 075,112,231 seem to have
-> been using effectively constant seed up to now, not as author
-> intended.
+> diff --git a/tests/btrfs/029 b/tests/btrfs/029
+> index c390c95..74fded7 100755
+> --- a/tests/btrfs/029
+> +++ b/tests/btrfs/029
+> @@ -66,19 +66,14 @@ _scratch_mkfs > /dev/null 2>&1
+>   _scratch_mount
+>   $XFS_IO_PROG -f -c 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/original >> 
+> $seqres.full
+> 
+> -_filter_testdirs()
+> -{
+> -    _filter_test_dir | _filter_scratch
+> -}
+> -
+>   _create_reflinks()
+>   {
+>       # auto reflink, should fall back to non-reflink
+>       rm -rf $2
+>       echo "reflink=auto:"
+>       cp --reflink=auto $1 $2
+> -    md5sum $1 | _filter_testdirs
+> -    md5sum $2 | _filter_testdirs
+> +    md5sum $1 | _filter_scratch
+> +    md5sum $2 | _filter_test_dir
+> 
+>       # always reflink, should fail outright
+>       rm -rf $2
+> @@ -86,7 +81,7 @@ _create_reflinks()
+>       cp --reflink=always $1 $2 >> $seqres.full 2>&1 || echo "cp reflink 
+> failed"
+> 
+>       # The failed target actually gets created by cp:
+> -    ls $2 | _filter_testdirs
+> +    ls $2 | _filter_test_dir
+>   }
+> 
+>   echo "test reflinks across different devices"
+> 
 
-I agree with Josef here, be as random as possible and print out the seed
-for debug purpose. So I think this patch is fine. I tested the affected
-tests a few times and they went on well.
-
-Thanks!
-
-Eryu
