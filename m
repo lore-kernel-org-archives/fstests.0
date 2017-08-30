@@ -1,65 +1,82 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:46322 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751415AbdH3QRr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 12:17:47 -0400
-Date: Wed, 30 Aug 2017 09:17:38 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 02/14] common/rc: fix _require_xfs_io_command params
- check
-Message-ID: <20170830161738.GN4757@magnolia>
-References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <1504104706-11965-3-git-send-email-amir73il@gmail.com>
+Received: from mail-yw0-f169.google.com ([209.85.161.169]:35445 "EHLO
+        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751978AbdH3Sjl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 14:39:41 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1504104706-11965-3-git-send-email-amir73il@gmail.com>
+In-Reply-To: <20170830152326.vil3fhsrecp2ccql@destiny>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com> <20170830152326.vil3fhsrecp2ccql@destiny>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 30 Aug 2017 21:39:39 +0300
+Message-ID: <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 05:51:34PM +0300, Amir Goldstein wrote:
-> When _require_xfs_io_command is passed command parameters,
-> the resulting error from invalid parameters may be ignored.
-> 
-> For example, the following bogus params would not abort the test:
-> _require_xfs_io_command "falloc" "-X"
-> _require_xfs_io_command "fiemap" "-X"
-> 
-> Fix this by looking for the relevant error message.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+On Wed, Aug 30, 2017 at 6:23 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+> On Wed, Aug 30, 2017 at 06:04:26PM +0300, Amir Goldstein wrote:
+>> Sorry noise xfs list, I meant to CC fsdevel
+>>
+>> On Wed, Aug 30, 2017 at 5:51 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+>> > Hi all,
+>> >
+>> > This is the 2nd revision of crash consistency patch set.
+>> > The main thing that changed since v1 is my confidence in the failures
+>> > reported by the test, along with some more debugging options for
+>> > running the test tools.
+>> >
+>> > I've collected these patches that have been sitting in Josef Bacik's
+>> > tree for a few years and kicked them a bit into shape.
+>> > The dm-log-writes target has been merged to kernel v4.1, see:
+>> > https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
+>> >
+>> > For this posting, I kept the random seeds constant for the test.
+>> > I set these constant seeds after running with random seed for a little
+>> > while and getting failure reports. With the current values in the test
+>> > I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
+>> > The probablity of reproducing the failure is higher on a spinning disk.
+>> >
+>
+> I'd rather we make it as evil as possible.  As long as we're printing out the
+> seed that was used in the output then we can go in and manually change the test
+> to use the same seed over and over again if we need to debug a problem.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Yeh that's what I did, but then I found values that reproduce a problem,
+so maybe its worth clinging on to these values now until the bugs are fixed in
+upstream and then as regression tests.
 
-> ---
->  common/rc | 7 ++++++-
->  1 file changed, 6 insertions(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 9d7b783..44b98f6 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2212,9 +2212,14 @@ _require_xfs_io_command()
->  	echo $testio | grep -q "Function not implemented" && \
->  		_notrun "xfs_io $command support is missing (missing syscall?)"
->  
-> -	if [ -n "$param" -a $param_checked -eq 0 ]; then
-> +	[ -n "$param" ] || return
-> +
-> +	if [ $param_checked -eq 0 ]; then
->  		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
->  			_notrun "xfs_io $command doesn't support $param"
-> +	else
-> +		echo $testio | grep -q "invalid option" && \
-> +			_notrun "xfs_io $command doesn't support $param"
->  	fi
->  }
->  
-> -- 
-> 2.7.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Anyway, I can keep these presets commented out, or run the test twice,
+once with presets and once with random seed, whatever Eryu decides.
+
+
+>
+>> > There is an outstanding problem with the test - when I run it with
+>> > kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
+>> > I suppose its a bug in dm-log-writes with some kernel config or with virtio
+>> > I wasn't able to determine the reason and have little time to debug this.
+>> >
+>> > Since dm-log-writes is anyway in upstream kernel, I don't think a bug
+>> > in dm-log-writes for a certain config is a reason to block this xfstest
+>> > from being merged.
+>> > Anyway, I would be glad if someone could take a look at the soft lockup
+>> > issue. Josef?
+>> >
+>
+> Yeah can you give this a try and see if the soft lockup goes away?
+>
+
+It does go away. Thanks!
+Now something's wrong with the log.
+it get corrupted in most of the test runs, something like this:
+
+replaying 17624@158946: sector 8651296, size 4096, flags 0
+replaying 17625@158955: sector 0, size 0, flags 0
+replaying 17626@158956: sector 72057596591815616, size 103079215104, flags 0
+Error allocating buffer 103079215104 entry 17626
+
+I'll look into it
+
+Amir.
