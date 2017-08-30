@@ -1,94 +1,60 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:38892 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751386AbdH3OvW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:22 -0400
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34787 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751432AbdH3OvX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:23 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Date: Wed, 30 Aug 2017 17:51:32 +0300
-Message-Id: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 01/14] common/rc: convert some egrep to grep
+Date: Wed, 30 Aug 2017 17:51:33 +0300
+Message-Id: <1504104706-11965-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/rc | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-This is the 2nd revision of crash consistency patch set.
-The main thing that changed since v1 is my confidence in the failures
-reported by the test, along with some more debugging options for
-running the test tools.
-
-I've collected these patches that have been sitting in Josef Bacik's
-tree for a few years and kicked them a bit into shape.
-The dm-log-writes target has been merged to kernel v4.1, see:
-https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
-
-For this posting, I kept the random seeds constant for the test.
-I set these constant seeds after running with random seed for a little
-while and getting failure reports. With the current values in the test
-I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
-The probablity of reproducing the failure is higher on a spinning disk.
-
-For xfs, I posted a fix for potential data loss post fsync+crash.
-For ext4, I posted a reliable reproducer using dm-flakey.
-For btrfs, I shared the recorded log with Josef.
-
-There is an outstanding problem with the test - when I run it with
-kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
-I suppose its a bug in dm-log-writes with some kernel config or with virtio
-I wasn't able to determine the reason and have little time to debug this.
-
-Since dm-log-writes is anyway in upstream kernel, I don't think a bug
-in dm-log-writes for a certain config is a reason to block this xfstest
-from being merged.
-Anyway, I would be glad if someone could take a look at the soft lockup
-issue. Josef?
-
-Thanks,
-Amir.
-
-Amir Goldstein (14):
-  common/rc: convert some egrep to grep
-  common/rc: fix _require_xfs_io_command params check
-  fsx: fixes to random seed
-  fsx: fix path of .fsx* files
-  fsx: fix compile warnings
-  fsx: add support for integrity check with dm-log-writes target
-  fsx: add optional logid prefix to log messages
-  fsx: add support for --record-ops
-  fsx: add support for -g filldata
-  log-writes: add replay-log program to replay dm-log-writes target
-  replay-log: output log replay offset in verbose mode
-  replay-log: add support for replaying ops in target device range
-  fstests: add support for working with dm-log-writes target
-  fstests: add crash consistency fsx test using dm-log-writes
-
- .gitignore                   |   1 +
- README                       |   2 +
- common/dmlogwrites           |  84 +++++++++
- common/rc                    |  15 +-
- doc/auxiliary-programs.txt   |   8 +
- doc/requirement-checking.txt |  20 +++
- ltp/fsx.c                    | 220 +++++++++++++++++++----
- src/Makefile                 |   2 +-
- src/log-writes/Makefile      |  23 +++
- src/log-writes/SOURCE        |   6 +
- src/log-writes/log-writes.c  | 410 +++++++++++++++++++++++++++++++++++++++++++
- src/log-writes/log-writes.h  |  72 ++++++++
- src/log-writes/replay-log.c  | 381 ++++++++++++++++++++++++++++++++++++++++
- tests/generic/500            | 138 +++++++++++++++
- tests/generic/500.out        |   2 +
- tests/generic/group          |   1 +
- 16 files changed, 1340 insertions(+), 45 deletions(-)
- create mode 100644 common/dmlogwrites
- create mode 100644 src/log-writes/Makefile
- create mode 100644 src/log-writes/SOURCE
- create mode 100644 src/log-writes/log-writes.c
- create mode 100644 src/log-writes/log-writes.h
- create mode 100644 src/log-writes/replay-log.c
- create mode 100755 tests/generic/500
- create mode 100644 tests/generic/500.out
-
+diff --git a/common/rc b/common/rc
+index 9c5f54a..9d7b783 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2177,7 +2177,7 @@ _require_xfs_io_command()
+ 		;;
+ 	"fsmap" )
+ 		testio=`$XFS_IO_PROG -f -c "fsmap" $testfile 2>&1`
+-		echo $testio | egrep -q "Inappropriate ioctl" && \
++		echo $testio | grep -q "Inappropriate ioctl" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
+ 	"open")
+@@ -2185,12 +2185,12 @@ _require_xfs_io_command()
+ 		# a new -C flag was introduced to execute one shot commands.
+ 		# Check for -C flag support as an indication for the bug fix.
+ 		testio=`$XFS_IO_PROG -F -f -C "open $testfile" $testfile 2>&1`
+-		echo $testio | egrep -q "invalid option" && \
++		echo $testio | grep -q "invalid option" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
+ 	"scrub"|"repair")
+ 		testio=`$XFS_IO_PROG -x -c "$command dummy 0" $TEST_DIR 2>&1`
+-		echo $testio | egrep -q "Inappropriate ioctl" && \
++		echo $testio | grep -q "Inappropriate ioctl" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
+ 	"utimes" )
+@@ -2209,7 +2209,7 @@ _require_xfs_io_command()
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+ 	echo $testio | grep -q "foreign file active" && \
+ 		_notrun "xfs_io $command not supported on $FSTYP"
+-	echo $testio | egrep -q "Function not implemented" && \
++	echo $testio | grep -q "Function not implemented" && \
+ 		_notrun "xfs_io $command support is missing (missing syscall?)"
+ 
+ 	if [ -n "$param" -a $param_checked -eq 0 ]; then
 -- 
 2.7.4
 
