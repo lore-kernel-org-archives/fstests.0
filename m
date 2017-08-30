@@ -1,93 +1,53 @@
-Received: from mail-yw0-f175.google.com ([209.85.161.175]:33356 "EHLO
-        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751264AbdH3Tnb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 15:43:31 -0400
+Received: from aserp1040.oracle.com ([141.146.126.69]:20381 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751110AbdH3WbO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 18:31:14 -0400
+Date: Wed, 30 Aug 2017 15:31:10 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH 5/4] generic/173: don't dump core when mwrite fails
+Message-ID: <20170830223110.GA4754@magnolia>
+References: <150406805060.31349.16766271336969357123.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20170830185512.7q5mnh5ja6o4mpds@destiny>
-References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
- <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
- <20170830185512.7q5mnh5ja6o4mpds@destiny>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 30 Aug 2017 22:43:29 +0300
-Message-ID: <CAOQ4uxipsvjjMF6YRJbN62tBrPNWOFjHztoDJ7CrsFfjNxRQBQ@mail.gmail.com>
-Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <150406805060.31349.16766271336969357123.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <josef@toxicpanda.com>
-Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: eguan@redhat.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 9:55 PM, Josef Bacik <josef@toxicpanda.com> wrote:
-> On Wed, Aug 30, 2017 at 09:39:39PM +0300, Amir Goldstein wrote:
->> On Wed, Aug 30, 2017 at 6:23 PM, Josef Bacik <josef@toxicpanda.com> wrote:
->> > On Wed, Aug 30, 2017 at 06:04:26PM +0300, Amir Goldstein wrote:
->> >> Sorry noise xfs list, I meant to CC fsdevel
->> >>
->> >> On Wed, Aug 30, 2017 at 5:51 PM, Amir Goldstein <amir73il@gmail.com> wrote:
->> >> > Hi all,
->> >> >
->> >> > This is the 2nd revision of crash consistency patch set.
->> >> > The main thing that changed since v1 is my confidence in the failures
->> >> > reported by the test, along with some more debugging options for
->> >> > running the test tools.
->> >> >
->> >> > I've collected these patches that have been sitting in Josef Bacik's
->> >> > tree for a few years and kicked them a bit into shape.
->> >> > The dm-log-writes target has been merged to kernel v4.1, see:
->> >> > https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
->> >> >
->> >> > For this posting, I kept the random seeds constant for the test.
->> >> > I set these constant seeds after running with random seed for a little
->> >> > while and getting failure reports. With the current values in the test
->> >> > I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
->> >> > The probablity of reproducing the failure is higher on a spinning disk.
->> >> >
->> >
->> > I'd rather we make it as evil as possible.  As long as we're printing out the
->> > seed that was used in the output then we can go in and manually change the test
->> > to use the same seed over and over again if we need to debug a problem.
->>
->> Yeh that's what I did, but then I found values that reproduce a problem,
->> so maybe its worth clinging on to these values now until the bugs are fixed in
->> upstream and then as regression tests.
->>
->> Anyway, I can keep these presets commented out, or run the test twice,
->> once with presets and once with random seed, whatever Eryu decides.
->>
->>
->> >
->> >> > There is an outstanding problem with the test - when I run it with
->> >> > kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
->> >> > I suppose its a bug in dm-log-writes with some kernel config or with virtio
->> >> > I wasn't able to determine the reason and have little time to debug this.
->> >> >
->> >> > Since dm-log-writes is anyway in upstream kernel, I don't think a bug
->> >> > in dm-log-writes for a certain config is a reason to block this xfstest
->> >> > from being merged.
->> >> > Anyway, I would be glad if someone could take a look at the soft lockup
->> >> > issue. Josef?
->> >> >
->> >
->> > Yeah can you give this a try and see if the soft lockup goes away?
->> >
->>
->> It does go away. Thanks!
->> Now something's wrong with the log.
->> it get corrupted in most of the test runs, something like this:
->>
->> replaying 17624@158946: sector 8651296, size 4096, flags 0
->> replaying 17625@158955: sector 0, size 0, flags 0
->> replaying 17626@158956: sector 72057596591815616, size 103079215104, flags 0
->> Error allocating buffer 103079215104 entry 17626
->>
->> I'll look into it
->
-> Oh are the devices 4k sectorsize devices?  I fucked up 4k sectorsize support, I
-> sent some patches to fix it but they haven't been integrated yet, I'll poke
-> those again.  They are in my dm-log-writes-fixes branch in my btrfs-next tree on
-> kernel.org.  Thanks,
->
+In generic/173, we try to force a CoW to a mmap'd region to fail if
+there's no space to actually stage the CoW operation.  That failure
+comes in the form of a SIGBUS to xfs_io.  If the tester just happens to
+have a nonzero coresize ulimit set, a core dump is generated and the
+test is marked as having failed, even though the dump generation is
+exactly the correct behavior.
 
-No they are just virtio devices in kvm reflecting my ssd LV, on whom
-the same test works just fine not inside kvm.
+Therefore, set the coresize ulimit to zero while calling _mwrite_byte.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/generic/173 |    3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/tests/generic/173 b/tests/generic/173
+index ad4e5da..526590b 100755
+--- a/tests/generic/173
++++ b/tests/generic/173
+@@ -81,6 +81,8 @@ _fill_fs $((blksz * nr_free)) $testdir/space $blksz 0 >> $seqres.full 2>&1
+ sync
+ 
+ echo "mmap CoW the big file"
++core_ulimit="$(ulimit -c)"
++ulimit -c 0
+ out="$(_mwrite_byte 0x62 0 $((blksz * nr_blks)) $((blksz * nr_blks)) $testdir/bigfile 2>&1)"
+ err="$?"
+ if [ $err -lt 128 ]; then
+@@ -95,6 +97,7 @@ err="$?"
+ if [ $err -lt 128 ]; then
+ 	echo "mmap CoW should have failed with SIGBUS, got SIG$(kill -l $err)"
+ fi
++ulimit -c "${core_ulimit}"
+ 
+ # success, all done
+ status=0
