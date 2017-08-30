@@ -1,82 +1,72 @@
-Received: from mail-qt0-f172.google.com ([209.85.216.172]:34994 "EHLO
-        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751732AbdH3PXb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 11:23:31 -0400
-Received: by mail-qt0-f172.google.com with SMTP id x36so28619157qtx.2
-        for <fstests@vger.kernel.org>; Wed, 30 Aug 2017 08:23:31 -0700 (PDT)
-Date: Wed, 30 Aug 2017 11:23:28 -0400
-From: Josef Bacik <josef@toxicpanda.com>
-Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Message-ID: <20170830152326.vil3fhsrecp2ccql@destiny>
+Received: from userp1040.oracle.com ([156.151.31.81]:22137 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751375AbdH3PqO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 11:46:14 -0400
+Date: Wed, 30 Aug 2017 08:45:58 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2 01/14] common/rc: convert some egrep to grep
+Message-ID: <20170830154558.GH4757@magnolia>
 References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
+ <1504104706-11965-2-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
+In-Reply-To: <1504104706-11965-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+Cc: Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 06:04:26PM +0300, Amir Goldstein wrote:
-> Sorry noise xfs list, I meant to CC fsdevel
+On Wed, Aug 30, 2017 at 05:51:33PM +0300, Amir Goldstein wrote:
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+> ---
+>  common/rc | 8 ++++----
+>  1 file changed, 4 insertions(+), 4 deletions(-)
 > 
-> On Wed, Aug 30, 2017 at 5:51 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > Hi all,
-> >
-> > This is the 2nd revision of crash consistency patch set.
-> > The main thing that changed since v1 is my confidence in the failures
-> > reported by the test, along with some more debugging options for
-> > running the test tools.
-> >
-> > I've collected these patches that have been sitting in Josef Bacik's
-> > tree for a few years and kicked them a bit into shape.
-> > The dm-log-writes target has been merged to kernel v4.1, see:
-> > https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
-> >
-> > For this posting, I kept the random seeds constant for the test.
-> > I set these constant seeds after running with random seed for a little
-> > while and getting failure reports. With the current values in the test
-> > I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
-> > The probablity of reproducing the failure is higher on a spinning disk.
-> >
-
-I'd rather we make it as evil as possible.  As long as we're printing out the
-seed that was used in the output then we can go in and manually change the test
-to use the same seed over and over again if we need to debug a problem.
-
-> > For xfs, I posted a fix for potential data loss post fsync+crash.
-> > For ext4, I posted a reliable reproducer using dm-flakey.
-> > For btrfs, I shared the recorded log with Josef.
-> >
-
-I posted a patch to fix the problem you reported by the way, but my
-git-send-email thing isn't set to cc people in the commit, sorry about that.
-
-> > There is an outstanding problem with the test - when I run it with
-> > kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
-> > I suppose its a bug in dm-log-writes with some kernel config or with virtio
-> > I wasn't able to determine the reason and have little time to debug this.
-> >
-> > Since dm-log-writes is anyway in upstream kernel, I don't think a bug
-> > in dm-log-writes for a certain config is a reason to block this xfstest
-> > from being merged.
-> > Anyway, I would be glad if someone could take a look at the soft lockup
-> > issue. Josef?
-> >
-
-Yeah can you give this a try and see if the soft lockup goes away?
-
-diff --git a/drivers/md/dm-log-writes.c b/drivers/md/dm-log-writes.c
-index a1da0eb..b900758 100644
---- a/drivers/md/dm-log-writes.c
-+++ b/drivers/md/dm-log-writes.c
-@@ -345,6 +345,7 @@ static int log_writes_kthread(void *arg)
- 		struct pending_block *block = NULL;
- 		int ret;
- 
-+		cond_resched();
- 		spin_lock_irq(&lc->blocks_lock);
- 		if (!list_empty(&lc->logging_blocks)) {
- 			block = list_first_entry(&lc->logging_blocks,
+> diff --git a/common/rc b/common/rc
+> index 9c5f54a..9d7b783 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2177,7 +2177,7 @@ _require_xfs_io_command()
+>  		;;
+>  	"fsmap" )
+>  		testio=`$XFS_IO_PROG -f -c "fsmap" $testfile 2>&1`
+> -		echo $testio | egrep -q "Inappropriate ioctl" && \
+> +		echo $testio | grep -q "Inappropriate ioctl" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+>  	"open")
+> @@ -2185,12 +2185,12 @@ _require_xfs_io_command()
+>  		# a new -C flag was introduced to execute one shot commands.
+>  		# Check for -C flag support as an indication for the bug fix.
+>  		testio=`$XFS_IO_PROG -F -f -C "open $testfile" $testfile 2>&1`
+> -		echo $testio | egrep -q "invalid option" && \
+> +		echo $testio | grep -q "invalid option" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+>  	"scrub"|"repair")
+>  		testio=`$XFS_IO_PROG -x -c "$command dummy 0" $TEST_DIR 2>&1`
+> -		echo $testio | egrep -q "Inappropriate ioctl" && \
+> +		echo $testio | grep -q "Inappropriate ioctl" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+>  	"utimes" )
+> @@ -2209,7 +2209,7 @@ _require_xfs_io_command()
+>  		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+>  	echo $testio | grep -q "foreign file active" && \
+>  		_notrun "xfs_io $command not supported on $FSTYP"
+> -	echo $testio | egrep -q "Function not implemented" && \
+> +	echo $testio | grep -q "Function not implemented" && \
+>  		_notrun "xfs_io $command support is missing (missing syscall?)"
+>  
+>  	if [ -n "$param" -a $param_checked -eq 0 ]; then
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
