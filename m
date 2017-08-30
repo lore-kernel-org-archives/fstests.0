@@ -1,44 +1,94 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:41791 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751700AbdH3OvG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:06 -0400
-Date: Wed, 30 Aug 2017 07:51:03 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [fstests PATCH] generic: add test for executables on read-only
- DAX mounts
-Message-ID: <20170830145103.GA10163@infradead.org>
-References: <20170829213721.GA27686@linux.intel.com>
- <20170829223715.26507-1-ross.zwisler@linux.intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170829223715.26507-1-ross.zwisler@linux.intel.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:38892 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751386AbdH3OvW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 10:51:22 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
+Date: Wed, 30 Aug 2017 17:51:32 +0300
+Message-Id: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-fsdevel@vger.kernel.org, Randy Dodgen <rdodgen@gmail.com>, Christoph Hellwig <hch@infradead.org>, Theodore Ts'o <tytso@mit.edu>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-> The above patch fixes an issue with ext4 where executables cannot be run on
-> read-only filesystems mounted with the DAX option.
-> 
-> This issue does not appear to be present in ext2 or XFS, as they both pass
-> the test.  I've also confirmed outside of the test that they are both
-> indeed able to execute binaries on read-only DAX mounts.
+Hi all,
 
-It works for me on XFS.  But I don't really understand why, as the fault
-handler doesn't look very different.
+This is the 2nd revision of crash consistency patch set.
+The main thing that changed since v1 is my confidence in the failures
+reported by the test, along with some more debugging options for
+running the test tools.
 
-Maybe the problem is that in ext4_journal_start_sb will fail on
-a read-only fs?
+I've collected these patches that have been sitting in Josef Bacik's
+tree for a few years and kicked them a bit into shape.
+The dm-log-writes target has been merged to kernel v4.1, see:
+https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
 
-Even for xfs/ext2 it would seem odd that things like sb_start_pagefault
-just work. 
+For this posting, I kept the random seeds constant for the test.
+I set these constant seeds after running with random seed for a little
+while and getting failure reports. With the current values in the test
+I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
+The probablity of reproducing the failure is higher on a spinning disk.
 
-> +LS=$(which ls --skip-alias --skip-functions) 2>/dev/null
-> +if [ $? -ne 0 ]; then
-> +	status=$?
-> +	echo "Couldn't find 'ls'!?"
-> +	exit
-> +fi
+For xfs, I posted a fix for potential data loss post fsync+crash.
+For ext4, I posted a reliable reproducer using dm-flakey.
+For btrfs, I shared the recorded log with Josef.
 
-These checks all fail for me..
+There is an outstanding problem with the test - when I run it with
+kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
+I suppose its a bug in dm-log-writes with some kernel config or with virtio
+I wasn't able to determine the reason and have little time to debug this.
+
+Since dm-log-writes is anyway in upstream kernel, I don't think a bug
+in dm-log-writes for a certain config is a reason to block this xfstest
+from being merged.
+Anyway, I would be glad if someone could take a look at the soft lockup
+issue. Josef?
+
+Thanks,
+Amir.
+
+Amir Goldstein (14):
+  common/rc: convert some egrep to grep
+  common/rc: fix _require_xfs_io_command params check
+  fsx: fixes to random seed
+  fsx: fix path of .fsx* files
+  fsx: fix compile warnings
+  fsx: add support for integrity check with dm-log-writes target
+  fsx: add optional logid prefix to log messages
+  fsx: add support for --record-ops
+  fsx: add support for -g filldata
+  log-writes: add replay-log program to replay dm-log-writes target
+  replay-log: output log replay offset in verbose mode
+  replay-log: add support for replaying ops in target device range
+  fstests: add support for working with dm-log-writes target
+  fstests: add crash consistency fsx test using dm-log-writes
+
+ .gitignore                   |   1 +
+ README                       |   2 +
+ common/dmlogwrites           |  84 +++++++++
+ common/rc                    |  15 +-
+ doc/auxiliary-programs.txt   |   8 +
+ doc/requirement-checking.txt |  20 +++
+ ltp/fsx.c                    | 220 +++++++++++++++++++----
+ src/Makefile                 |   2 +-
+ src/log-writes/Makefile      |  23 +++
+ src/log-writes/SOURCE        |   6 +
+ src/log-writes/log-writes.c  | 410 +++++++++++++++++++++++++++++++++++++++++++
+ src/log-writes/log-writes.h  |  72 ++++++++
+ src/log-writes/replay-log.c  | 381 ++++++++++++++++++++++++++++++++++++++++
+ tests/generic/500            | 138 +++++++++++++++
+ tests/generic/500.out        |   2 +
+ tests/generic/group          |   1 +
+ 16 files changed, 1340 insertions(+), 45 deletions(-)
+ create mode 100644 common/dmlogwrites
+ create mode 100644 src/log-writes/Makefile
+ create mode 100644 src/log-writes/SOURCE
+ create mode 100644 src/log-writes/log-writes.c
+ create mode 100644 src/log-writes/log-writes.h
+ create mode 100644 src/log-writes/replay-log.c
+ create mode 100755 tests/generic/500
+ create mode 100644 tests/generic/500.out
+
+-- 
+2.7.4
+
