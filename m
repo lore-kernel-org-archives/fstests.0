@@ -1,75 +1,43 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:47841 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750895AbdH3W6w (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 18:58:52 -0400
-Date: Wed, 30 Aug 2017 15:58:25 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 3/4] xfs: test rmapbt updates are correct with
- insert/collapse range
-Message-ID: <20170830225825.GD4754@magnolia>
-References: <150406805060.31349.16766271336969357123.stgit@magnolia>
- <150406806291.31349.16354828502139354709.stgit@magnolia>
- <20170830075321.GC4711@infradead.org>
+Received: from mgwym02.jp.fujitsu.com ([211.128.242.41]:56056 "EHLO
+        mgwym02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750761AbdH3XxV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 19:53:21 -0400
+Subject: Re: [PATCH] btrfs/029: fix wrong usage of name filter
+References: <2a13313b-d8f5-b6fd-58cb-72e05f5925c9@jp.fujitsu.com>
+ <20170830110934.GF27835@eguan.usersys.redhat.com>
+From: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>
+Message-ID: <80ddf7d2-043c-6228-e1d8-e6a463668080@jp.fujitsu.com>
+Date: Thu, 31 Aug 2017 08:53:09 +0900
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170830075321.GC4711@infradead.org>
+In-Reply-To: <20170830110934.GF27835@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 12:53:21AM -0700, Christoph Hellwig wrote:
-> On Tue, Aug 29, 2017 at 09:41:02PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Make sure that we update the rmapbt correctly when we collapse-range a
-> > file and the extents on both sides of the hole can be merged.  We can
-> > construct this pretty trivially with insert-range and write, so test
-> > that too.
+On 2017/08/30 20:09, Eryu Guan wrote:
+> On Wed, Aug 30, 2017 at 04:38:16PM +0900, Misono, Tomohiro wrote:
+>> btrfs/029 uses _filter_testdirs() to filter the name of $TEST_DIR and
+>> $SCRATCH_MNT directory.
+>>
+>> In this function, it calls both _filter_test_dir and _filter_scratch
+>> concatenapted by pipe. Therefore if $TEST_DIR is a prefix of
+>> $SCRATCH_MNT, this filter function gives wrong filtered name for
+>> $SCRATCH_MNT and the test fails.
 > 
-> Does this break on the current tree?  From code inspection I suspect
-> the current code is doing the wrong thing there.
+> Sorry, I'm a bit confused, how could $TEST_DIR be a prefix of
+> $SCRATCH_MNT? Won't that fail the test at setup time?
 
-AFAICR the existing rmap code in bmse_shift_one /does/ work, though only
-due to the subtlety that xfs_rmap_{,un}map_extent is smart enough to
-automatically merge and unmerge rmap extents for you.
+I used "/mnt" for $TEST_DIR and "/mnt_scratch" for $SCRATCH_MNT and hit
+this problem because "/mnt_scratch" is filtered to "$TEST_DIR_scrach"
+instead of "$SCRATCH_MNT".
 
-Hence if you have the following:
+I think these are valid directory names and other btrfs tests run correctly
+with these names.
 
-AAAAABBBAAAAAAAA
+Thanks,
+Tomohiro
 
-Where both A's could be merged after BBB goes away:
-
-AAAAAAAAAAAAA---
-
-The deferred rmap code will merge the two A regions into a single rmap
-extent record automatically.
-
-Hmm, so I guess that means that in the patch "xfs: use xfs_iext_*_extent
-helpers in xfs_bmap_shift_extents" you can replace the three xfs_rmap
-calls in xfs_bmse_merge with:
-
-	/* update reverse mapping */
-	error = xfs_rmap_unmap_extent(mp, dfops, ip, whichfork, got);
-	if (error)
-		return error;
-	memcpy(&new, got, sizeof(new));
-	new.br_startoff = left->br_startoff + left->br_blockcount;
-	return xfs_rmap_map_extent(mp, dfops, ip, whichfork, &new);
-
-...which saves us a deferred op.  Ok, will propose that in the actual
-thread.
-
-> > +./src/punch-alternating -o $((16 * blksz / file_blksz)) \
-> 
-> Shouldn't we always use $here/src/progname ?
-
-Ok, I didn't realize that.  There are a lot of programs that still use ./src....
-
---D
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
