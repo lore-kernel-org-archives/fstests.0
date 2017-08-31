@@ -1,102 +1,170 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47174 "EHLO mx1.redhat.com"
+Received: from mga01.intel.com ([192.55.52.88]:28977 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751001AbdHaDiU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 30 Aug 2017 23:38:20 -0400
-Date: Thu, 31 Aug 2017 11:38:18 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Message-ID: <20170831033818.GH27835@eguan.usersys.redhat.com>
-References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
- <20170830152326.vil3fhsrecp2ccql@destiny>
- <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+        id S1750711AbdHaEBr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 31 Aug 2017 00:01:47 -0400
+Date: Wed, 30 Aug 2017 22:01:46 -0600
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH] generic: add test for executables on read-only
+ DAX mounts
+Message-ID: <20170831040146.GA17095@linux.intel.com>
+References: <20170829213721.GA27686@linux.intel.com>
+ <20170829223715.26507-1-ross.zwisler@linux.intel.com>
+ <20170830105930.GE27835@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+In-Reply-To: <20170830105930.GE27835@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Josef Bacik <josef@toxicpanda.com>, Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-fsdevel@vger.kernel.org, Randy Dodgen <rdodgen@gmail.com>, Christoph Hellwig <hch@infradead.org>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 09:39:39PM +0300, Amir Goldstein wrote:
-> On Wed, Aug 30, 2017 at 6:23 PM, Josef Bacik <josef@toxicpanda.com> wrote:
-> > On Wed, Aug 30, 2017 at 06:04:26PM +0300, Amir Goldstein wrote:
-> >> Sorry noise xfs list, I meant to CC fsdevel
-> >>
-> >> On Wed, Aug 30, 2017 at 5:51 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> >> > Hi all,
-> >> >
-> >> > This is the 2nd revision of crash consistency patch set.
-> >> > The main thing that changed since v1 is my confidence in the failures
-> >> > reported by the test, along with some more debugging options for
-> >> > running the test tools.
-> >> >
-> >> > I've collected these patches that have been sitting in Josef Bacik's
-> >> > tree for a few years and kicked them a bit into shape.
-> >> > The dm-log-writes target has been merged to kernel v4.1, see:
-> >> > https://github.com/torvalds/linux/blob/master/Documentation/device-mapper/log-writes.txt
-> >> >
-> >> > For this posting, I kept the random seeds constant for the test.
-> >> > I set these constant seeds after running with random seed for a little
-> >> > while and getting failure reports. With the current values in the test
-> >> > I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
-> >> > The probablity of reproducing the failure is higher on a spinning disk.
-> >> >
-> >
-> > I'd rather we make it as evil as possible.  As long as we're printing out the
-> > seed that was used in the output then we can go in and manually change the test
-> > to use the same seed over and over again if we need to debug a problem.
+On Wed, Aug 30, 2017 at 06:59:30PM +0800, Eryu Guan wrote:
+> On Tue, Aug 29, 2017 at 04:37:15PM -0600, Ross Zwisler wrote:
+> > This adds a regression test for the following kernel patch:
+> > 
+> > commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
+> > 
+> > The above patch fixes an issue with ext4 where executables cannot be run on
+> > read-only filesystems mounted with the DAX option.
+> > 
+> > This issue does not appear to be present in ext2 or XFS, as they both pass
+> > the test.  I've also confirmed outside of the test that they are both
+> > indeed able to execute binaries on read-only DAX mounts.
+> > 
+> > Thanks to Randy Dodgen for the bug report and reproduction steps.
+> > 
+> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> > Cc: Randy Dodgen <rdodgen@gmail.com>
+> > Cc: Christoph Hellwig <hch@infradead.org>
+> > Cc: Theodore Ts'o <tytso@mit.edu>
+> > 
+> > ---
+> > 
+> > Sorry if we collided, Randy, but I was 90% done with the test by the time I
+> > saw your mail. :)
+> > ---
+> >  tests/generic/452     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/452.out |  2 ++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 90 insertions(+)
+> >  create mode 100755 tests/generic/452
+> >  create mode 100644 tests/generic/452.out
+> > 
+> > diff --git a/tests/generic/452 b/tests/generic/452
+> > new file mode 100755
+> > index 0000000..54dda8c
+> > --- /dev/null
+> > +++ b/tests/generic/452
+> > @@ -0,0 +1,87 @@
+> > +#! /bin/bash
+> > +# FS QA Test 452
+> > +#
+> > +# This is a regression test for kernel patch:
+> > +#   commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
+> > +# created by Ross Zwisler <ross.zwisler@linux.intel.com>
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +# real QA test starts here
+> > +# format and mount
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +_scratch_mount >> $seqres.full 2>&1
 > 
-> Yeh that's what I did, but then I found values that reproduce a problem,
-> so maybe its worth clinging on to these values now until the bugs are fixed in
-> upstream and then as regression tests.
+> Need to _notrun if scratch device was mounted with "noexec" option.
 > 
-> Anyway, I can keep these presets commented out, or run the test twice,
-> once with presets and once with random seed, whatever Eryu decides.
+> _exclude_scratch_mount_option "noexec"
+> 
+> > +
+> > +LS=$(which ls --skip-alias --skip-functions) 2>/dev/null
+> > +if [ $? -ne 0 ]; then
+> > +	status=$?
+> > +	echo "Couldn't find 'ls'!?"
+> > +	exit
+> > +fi
+> > +
+> > +cp $LS $SCRATCH_MNT
+> > +SCRATCH_LS=$SCRATCH_MNT/ls
+> > +
+> > +$SCRATCH_LS >/dev/null 2>&1
+> > +if [ $? -ne 0 ]; then
+> > +	status=$?
+> > +	echo "$SCRATCH_LS not working before remount"
+> > +	exit
+> > +fi
+> > +
+> > +_scratch_remount ro
+> > +
+> > +$SCRATCH_LS >/dev/null 2>&1
+> > +if [ $? -ne 0 ]; then
+> > +	status=$?
+> > +	echo "$SCRATCH_LS not working after remount"
+> > +	exit
+> > +fi
+> 
+> Hmm, I don't think all these checks on return value are needed, just
+> print out the error messages on failure and that will break the golden
+> image, as this is not a destructive test, continuing with errors only
+> fail the test :)
+> 
+> I think this can be simplified to something like:
+> 
+> LS=$(which ls ....)
+> SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
+> cp $LS $SCRATCH_LS
+> 
+> $SCRATCH_LS $SCRATCH_LS | _filter_scratch
+> 
+> _scratch_remount ro
+> 
+> $SCRATCH_LS $SCRATCH_LS | _filter_scratch
+> 
+> And update .out file accordingly.
+> 
+> Thanks,
+> Eryu
 
-My thought on this with first glance is using random seed, if a specific
-seed reproduce something, maybe another targeted regression test can be
-added, as what you did for that ext4 corruption?
-
-> 
-> 
-> >
-> >> > There is an outstanding problem with the test - when I run it with
-> >> > kvm-xfstests, the test halts and I get soft lockup of log_writes_kthread.
-> >> > I suppose its a bug in dm-log-writes with some kernel config or with virtio
-> >> > I wasn't able to determine the reason and have little time to debug this.
-> >> >
-> >> > Since dm-log-writes is anyway in upstream kernel, I don't think a bug
-> >> > in dm-log-writes for a certain config is a reason to block this xfstest
-> >> > from being merged.
-> >> > Anyway, I would be glad if someone could take a look at the soft lockup
-> >> > issue. Josef?
-> >> >
-> >
-> > Yeah can you give this a try and see if the soft lockup goes away?
-> >
-> 
-> It does go away. Thanks!
-> Now something's wrong with the log.
-> it get corrupted in most of the test runs, something like this:
-> 
-> replaying 17624@158946: sector 8651296, size 4096, flags 0
-> replaying 17625@158955: sector 0, size 0, flags 0
-> replaying 17626@158956: sector 72057596591815616, size 103079215104, flags 0
-> Error allocating buffer 103079215104 entry 17626
-> 
-> I'll look into it
-> 
-> Amir.
-
-The first 6 patches are all prepare work and seem fine, so I probably
-will push them out this week. But I may need more time to look into all
-these log-writes dm target and fsx changes.
-
-But seems that there're still problems not sorted out (e.g. this
-log-write bug), I'd prefer, when they get merged, removing the auto
-group for now until things settle down a bit.
-
-Thanks,
-Eryu
+Awesome, thanks for the review!  I'll fix all of these in v2.
