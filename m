@@ -1,43 +1,69 @@
-Received: from mgwym02.jp.fujitsu.com ([211.128.242.41]:56056 "EHLO
-        mgwym02.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750761AbdH3XxV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 19:53:21 -0400
-Subject: Re: [PATCH] btrfs/029: fix wrong usage of name filter
-References: <2a13313b-d8f5-b6fd-58cb-72e05f5925c9@jp.fujitsu.com>
- <20170830110934.GF27835@eguan.usersys.redhat.com>
-From: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>
-Message-ID: <80ddf7d2-043c-6228-e1d8-e6a463668080@jp.fujitsu.com>
-Date: Thu, 31 Aug 2017 08:53:09 +0900
+Received: from mail-oi0-f65.google.com ([209.85.218.65]:36148 "EHLO
+        mail-oi0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750802AbdHaB3T (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 Aug 2017 21:29:19 -0400
+Received: by mail-oi0-f65.google.com with SMTP id x184so7054235oia.3
+        for <fstests@vger.kernel.org>; Wed, 30 Aug 2017 18:28:17 -0700 (PDT)
+In-Reply-To: 
+From: Ashlie Martinez <ashmrtn@utexas.edu>
+Subject: [RFC][PATCH] fstest: regression test for ext4 crash consistency bug
+Message-ID: <7f4519d6-9e3f-c036-b72d-8a387bf657d3@utexas.edu>
+Date: Wed, 30 Aug 2017 20:28:16 -0500
 MIME-Version: 1.0
-In-Reply-To: <20170830110934.GF27835@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
+Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: amir73il@gmail.com
+Cc: tytso@mti.edu, eguan@redhat.com, jbacik@fb.com, vvijay03@gmail.com, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/08/30 20:09, Eryu Guan wrote:
-> On Wed, Aug 30, 2017 at 04:38:16PM +0900, Misono, Tomohiro wrote:
->> btrfs/029 uses _filter_testdirs() to filter the name of $TEST_DIR and
->> $SCRATCH_MNT directory.
->>
->> In this function, it calls both _filter_test_dir and _filter_scratch
->> concatenapted by pipe. Therefore if $TEST_DIR is a prefix of
->> $SCRATCH_MNT, this filter function gives wrong filtered name for
->> $SCRATCH_MNT and the test fails.
-> 
-> Sorry, I'm a bit confused, how could $TEST_DIR be a prefix of
-> $SCRATCH_MNT? Won't that fail the test at setup time?
+Amir,
 
-I used "/mnt" for $TEST_DIR and "/mnt_scratch" for $SCRATCH_MNT and hit
-this problem because "/mnt_scratch" is filtered to "$TEST_DIR_scrach"
-instead of "$SCRATCH_MNT".
+I have been working on CrashMonkey more and I have jerry-rigged together 
+a test in CrashMonkey that calls into `fsx` with the minimal test case 
+you made. I am able to reproduce the ext4 error that you found along 
+with a few other potential errors.
 
-I think these are valid directory names and other btrfs tests run correctly
-with these names.
+A quick point, I run fsck with `-yf` instead of `-nf` that xfstests runs 
+with. The reason for this is that CrashMonkey would like to report on 
+fixable and unfixable errors in the future.
 
-Thanks,
-Tomohiro
+Running the ported test case, I find that CrashMonkey encounters the 
+following errors:
+1. Incorrect inode size and incorrect free data block and inode counts 
+(fixable)
+2. incorrect free data block and inode counts (fixable)
+3. `Superblock needs_recovery flag is clear, but journal has data` 
+notice along with errors present in case 1
+4. `Superblock needs_recovery flag is clear, but journal has data` 
+notice with no other errors
 
+For the incorrect i_size errors, I get the output `Inode 12, i_size is 
+147456, should be 163840.` which I can also reproduce with your 501 
+xfstests test case.
+
+When free data blocks and inode errors occur, the message is `Free 
+blocks count wrong (8795, counted=8714).` and `Free inodes count wrong 
+(2549, counted=2546).`
+
+I have not had a chance to look into the above errors to find their root 
+causes.
+
+In total, CrashMonkey ran 1000 different tests. Of those, 344 passed 
+without fsck complaining. The remaining 656 tests saw fsck complain 
+about something. All of these tests consisted of unique sequences of 
+bios, but may contain equivalent crash states.
+
+The larger range of test results is due to the fact that CrashMonkey 
+runs many tests from just the single workload you made. These tests 
+consist of replaying some number of bio write operations, so it tests 
+states different than you 500 xfstest which I believe only replays to 
+sync operations (i.e. it never stops replay before a recorded fsync).
+
+If you're interested, you can find the CrashMonkey code (and branch) at 
+https://github.com/utsaslab/crashmonkey/tree/ext4_regression_bug. If you 
+would like to run it, you should clone and build you xfstest in your 
+home directory so that the jerry-rigged CrashMonkey test case can find 
+it. Directions for running this test case in CrashMonkey should be at 
+the top of the README.
