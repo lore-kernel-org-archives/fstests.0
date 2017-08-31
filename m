@@ -1,170 +1,195 @@
-Received: from mga01.intel.com ([192.55.52.88]:28977 "EHLO mga01.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58876 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750711AbdHaEBr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 31 Aug 2017 00:01:47 -0400
-Date: Wed, 30 Aug 2017 22:01:46 -0600
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: Re: [fstests PATCH] generic: add test for executables on read-only
- DAX mounts
-Message-ID: <20170831040146.GA17095@linux.intel.com>
-References: <20170829213721.GA27686@linux.intel.com>
- <20170829223715.26507-1-ross.zwisler@linux.intel.com>
- <20170830105930.GE27835@eguan.usersys.redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170830105930.GE27835@eguan.usersys.redhat.com>
+        id S1751040AbdHaECq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 31 Aug 2017 00:02:46 -0400
+From: Eryu Guan <eguan@redhat.com>
+Subject: [PATCH] generic: test race between block map change and writeback
+Date: Thu, 31 Aug 2017 12:02:37 +0800
+Message-Id: <20170831040237.16022-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-fsdevel@vger.kernel.org, Randy Dodgen <rdodgen@gmail.com>, Christoph Hellwig <hch@infradead.org>, Theodore Ts'o <tytso@mit.edu>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 30, 2017 at 06:59:30PM +0800, Eryu Guan wrote:
-> On Tue, Aug 29, 2017 at 04:37:15PM -0600, Ross Zwisler wrote:
-> > This adds a regression test for the following kernel patch:
-> > 
-> > commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
-> > 
-> > The above patch fixes an issue with ext4 where executables cannot be run on
-> > read-only filesystems mounted with the DAX option.
-> > 
-> > This issue does not appear to be present in ext2 or XFS, as they both pass
-> > the test.  I've also confirmed outside of the test that they are both
-> > indeed able to execute binaries on read-only DAX mounts.
-> > 
-> > Thanks to Randy Dodgen for the bug report and reproduction steps.
-> > 
-> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> > Cc: Randy Dodgen <rdodgen@gmail.com>
-> > Cc: Christoph Hellwig <hch@infradead.org>
-> > Cc: Theodore Ts'o <tytso@mit.edu>
-> > 
-> > ---
-> > 
-> > Sorry if we collided, Randy, but I was 90% done with the test by the time I
-> > saw your mail. :)
-> > ---
-> >  tests/generic/452     | 87 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/452.out |  2 ++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 90 insertions(+)
-> >  create mode 100755 tests/generic/452
-> >  create mode 100644 tests/generic/452.out
-> > 
-> > diff --git a/tests/generic/452 b/tests/generic/452
-> > new file mode 100755
-> > index 0000000..54dda8c
-> > --- /dev/null
-> > +++ b/tests/generic/452
-> > @@ -0,0 +1,87 @@
-> > +#! /bin/bash
-> > +# FS QA Test 452
-> > +#
-> > +# This is a regression test for kernel patch:
-> > +#   commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
-> > +# created by Ross Zwisler <ross.zwisler@linux.intel.com>
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +
-> > +# real QA test starts here
-> > +# format and mount
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +_scratch_mount >> $seqres.full 2>&1
-> 
-> Need to _notrun if scratch device was mounted with "noexec" option.
-> 
-> _exclude_scratch_mount_option "noexec"
-> 
-> > +
-> > +LS=$(which ls --skip-alias --skip-functions) 2>/dev/null
-> > +if [ $? -ne 0 ]; then
-> > +	status=$?
-> > +	echo "Couldn't find 'ls'!?"
-> > +	exit
-> > +fi
-> > +
-> > +cp $LS $SCRATCH_MNT
-> > +SCRATCH_LS=$SCRATCH_MNT/ls
-> > +
-> > +$SCRATCH_LS >/dev/null 2>&1
-> > +if [ $? -ne 0 ]; then
-> > +	status=$?
-> > +	echo "$SCRATCH_LS not working before remount"
-> > +	exit
-> > +fi
-> > +
-> > +_scratch_remount ro
-> > +
-> > +$SCRATCH_LS >/dev/null 2>&1
-> > +if [ $? -ne 0 ]; then
-> > +	status=$?
-> > +	echo "$SCRATCH_LS not working after remount"
-> > +	exit
-> > +fi
-> 
-> Hmm, I don't think all these checks on return value are needed, just
-> print out the error messages on failure and that will break the golden
-> image, as this is not a destructive test, continuing with errors only
-> fail the test :)
-> 
-> I think this can be simplified to something like:
-> 
-> LS=$(which ls ....)
-> SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
-> cp $LS $SCRATCH_LS
-> 
-> $SCRATCH_LS $SCRATCH_LS | _filter_scratch
-> 
-> _scratch_remount ro
-> 
-> $SCRATCH_LS $SCRATCH_LS | _filter_scratch
-> 
-> And update .out file accordingly.
-> 
-> Thanks,
-> Eryu
+Run delalloc writes & append writes & non-data-integrity syncs
+concurrently to test the race between block map change vs writeback.
 
-Awesome, thanks for the review!  I'll fix all of these in v2.
+This is to cover an XFS bug that data could be written to wrong
+block and delay allocated blocks are leaked because the block map
+was changed due to the removal of speculative allocated eofblocks
+when writeback is in progress.
+
+And this test partially mimics what lustre-racer[1] test does, using
+which this bug was first found.
+
+[1] https://git.hpdd.intel.com/?p=fs/lustre-release.git;a=tree;f=lustre/tests/racer;hb=HEAD
+
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+
+This may not reproduce the bug on all hosts, but it does reproduce the XFS
+corruption issue reliably on my different test hosts.
+
+ tests/generic/451     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/451.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/generic/451
+ create mode 100644 tests/generic/451.out
+
+diff --git a/tests/generic/451 b/tests/generic/451
+new file mode 100755
+index 000000000000..72cdd1c01de2
+--- /dev/null
++++ b/tests/generic/451
+@@ -0,0 +1,130 @@
++#! /bin/bash
++# FS QA Test 451
++#
++# Run delalloc writes & append writes & non-data-integrity syncs concurrently
++# to test the race between block map change vs writeback.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++MAXFILES=200
++BLOCK_SZ=65536
++
++LOOP_CNT=12
++LOOP_TIME=5
++PROC_CNT=16
++
++stop=$tmp.stop
++
++# get a random file to work on
++getfile()
++{
++	echo $SCRATCH_MNT/$((RANDOM % MAXFILES))
++}
++
++# delalloc write a relative big file to get enough dirty pages to be written
++# back, and XFS needs big enough file to trigger speculative preallocations, so
++# freeing these eofblocks could change the extent record
++do_write()
++{
++	local blockcount=$((RANDOM % 100))
++	local filesize=$((blockcount * BLOCK_SZ))
++	$XFS_IO_PROG -ftc "pwrite -b $BLOCK_SZ 0 $filesize" `getfile` >/dev/null 2>&1
++}
++
++# append another dirty page to the file, the writeback might pick it up too if
++# the file is already under writeback
++do_append()
++{
++	echo "test string" >> `getfile`
++}
++
++# issue WB_SYNC_NONE writeback with the '-w' option of sync_range xfs_io
++# command, so that the last dirty page from append write can be picked up in
++# this writeback cycle. This is not mandatory but could help reproduce XFS
++# corruption more easily.
++do_writeback()
++{
++	$XFS_IO_PROG -c "sync_range -w 0 0" `getfile` >/dev/null 2>&1
++}
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++# do fsck after each iteration in test
++_require_scratch_nocheck
++_require_xfs_io_command "sync_range"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# loop for $LOOP_CNT iterations, and each iteration starts $PROC_CNT processes
++# for each operation and runs for $LOOP_TIME seconds, and check filesystem
++# consistency after each iteration
++for i in `seq 1 $LOOP_CNT`; do
++	rm -f $stop
++	for j in `seq 1 $PROC_CNT`; do
++		while [ ! -e $stop ]; do
++			do_write
++		done &
++
++		while [ ! -e $stop ]; do
++			do_append
++		done &
++
++		while [ ! -e $stop ]; do
++			do_writeback
++		done &
++	done
++	sleep $LOOP_TIME
++	touch $stop
++	wait
++
++	_scratch_unmount
++	# test exits here if fs is inconsistent
++	_check_scratch_fs
++	_scratch_mount
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/451.out b/tests/generic/451.out
+new file mode 100644
+index 000000000000..db924411b72f
+--- /dev/null
++++ b/tests/generic/451.out
+@@ -0,0 +1,2 @@
++QA output created by 451
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 044ec3f355ed..b4bd66bc65a9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -453,3 +453,4 @@
+ 448 auto quick rw
+ 449 auto quick acl enospc
+ 450 auto quick rw
++451 auto rw
+-- 
+2.13.5
+
