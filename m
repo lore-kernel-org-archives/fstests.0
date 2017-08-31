@@ -1,144 +1,80 @@
-Received: from mga04.intel.com ([192.55.52.120]:25966 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751053AbdHaEJQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 31 Aug 2017 00:09:16 -0400
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [fstests v2] generic: add test for executables on read-only DAX mounts
-Date: Wed, 30 Aug 2017 22:09:10 -0600
-Message-Id: <20170831040910.25015-1-ross.zwisler@linux.intel.com>
-In-Reply-To: <20170830105930.GE27835@eguan.usersys.redhat.com>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:36066 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750813AbdHaE3J (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Aug 2017 00:29:09 -0400
+MIME-Version: 1.0
+In-Reply-To: <20170831033818.GH27835@eguan.usersys.redhat.com>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
+ <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+ <20170831033818.GH27835@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 31 Aug 2017 07:29:07 +0300
+Message-ID: <CAOQ4uxhUsBMEeEbFA2PCBBZ1md+vSqQvdQ21RW6PuNoGNymBsA@mail.gmail.com>
+Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-fsdevel@vger.kernel.org, Randy Dodgen <rdodgen@gmail.com>, Christoph Hellwig <hch@infradead.org>, Theodore Ts'o <tytso@mit.edu>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Josef Bacik <josef@toxicpanda.com>, Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Theodore Tso <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-This adds a regression test for the following kernel patch:
+On Thu, Aug 31, 2017 at 6:38 AM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Aug 30, 2017 at 09:39:39PM +0300, Amir Goldstein wrote:
+...
+>> >> > For this posting, I kept the random seeds constant for the test.
+>> >> > I set these constant seeds after running with random seed for a little
+>> >> > while and getting failure reports. With the current values in the test
+>> >> > I was able to reproduce at high probablity failures with xfs, ext4 and btrfs.
+>> >> > The probablity of reproducing the failure is higher on a spinning disk.
+>> >> >
+>> >
+>> > I'd rather we make it as evil as possible.  As long as we're printing out the
+>> > seed that was used in the output then we can go in and manually change the test
+>> > to use the same seed over and over again if we need to debug a problem.
+>>
+>> Yeh that's what I did, but then I found values that reproduce a problem,
+>> so maybe its worth clinging on to these values now until the bugs are fixed in
+>> upstream and then as regression tests.
+>>
+>> Anyway, I can keep these presets commented out, or run the test twice,
+>> once with presets and once with random seed, whatever Eryu decides.
+>
+> My thought on this with first glance is using random seed, if a specific
+> seed reproduce something, maybe another targeted regression test can be
+> added, as what you did for that ext4 corruption?
+>
 
-commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
+Sure. Speaking of ext4 corruption, I did not re-post this test with this
+series because its quite an ugly black box test. I figured if ext4 guys
+would take a look and understand the problem they could write a more
+intelligent test. OTOH maybe its better than nothing?
 
-The above patch fixes an issue with ext4 where executables cannot be run on
-read-only filesystems mounted with the DAX option.
+BTW, Josef, did/could you write a more intelligent test to catch the
+extent crc bug that you fixed? if not, was it easy to reproduce with the
+provided seed presets? and without them?
+I am asking to understand if a regression test to that bug is in order
+beyond random seed fsx.
 
-This issue does not appear to be present in ext2 or XFS, as they both pass
-the test.  I've also confirmed outside of the test that they are both
-indeed able to execute binaries on read-only DAX mounts.
+BTW2, the xfs bug I found is reproduced with reasonable likelihood
+with any random seed. By using the provided presets, I was able to
+reduce the test run time and debug cycle considerably. I used
+NUM_FILES=2; NUM_OPS=31 to reproduce at > 50% probability
+within seconds. So this bug doesn't require a specialized regression test.
 
-Thanks to Randy Dodgen for the bug report and reproduction steps.
+...
+>
+> The first 6 patches are all prepare work and seem fine, so I probably
+> will push them out this week. But I may need more time to look into all
+> these log-writes dm target and fsx changes.
+>
+> But seems that there're still problems not sorted out (e.g. this
+> log-write bug), I'd prefer, when they get merged, removing the auto
+> group for now until things settle down a bit.
+>
 
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: Randy Dodgen <rdodgen@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>
-Cc: Theodore Ts'o <tytso@mit.edu>
+Good idea. Anyway, I would be happy to see these tests used by N > 1
+testers for start.
+If some version is merged so people can start pointing this big gun to
+their file systems, I imagine more interesting bug will come surface.
 
----
-
-Changes in v2:
- - A bunch of cleanup and simplifications from Eryu.
----
- tests/generic/451     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/451.out |  3 +++
- tests/generic/group   |  1 +
- 3 files changed, 77 insertions(+)
- create mode 100755 tests/generic/451
- create mode 100644 tests/generic/451.out
-
-diff --git a/tests/generic/451 b/tests/generic/451
-new file mode 100755
-index 0000000..785c52e
---- /dev/null
-+++ b/tests/generic/451
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# FS QA Test 451
-+#
-+# This is a regression test for kernel patch:
-+#   commit 42d4a99b09cb ("ext4: fix fault handling when mounted with -o dax,ro")
-+# created by Ross Zwisler <ross.zwisler@linux.intel.com>
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+# we need to be able to execute binaries on scratch
-+_exclude_scratch_mount_option "noexec"
-+
-+# real QA test starts here
-+# format and mount
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+LS=$(which ls --skip-alias --skip-functions)
-+SCRATCH_LS=$SCRATCH_MNT/ls_on_scratch
-+cp $LS $SCRATCH_LS
-+
-+$SCRATCH_LS $SCRATCH_LS | _filter_scratch
-+
-+_scratch_remount ro
-+
-+$SCRATCH_LS $SCRATCH_LS | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/451.out b/tests/generic/451.out
-new file mode 100644
-index 0000000..70e3126
---- /dev/null
-+++ b/tests/generic/451.out
-@@ -0,0 +1,3 @@
-+QA output created by 451
-+SCRATCH_MNT/ls_on_scratch
-+SCRATCH_MNT/ls_on_scratch
-diff --git a/tests/generic/group b/tests/generic/group
-index 044ec3f..45f5789 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -453,3 +453,4 @@
- 448 auto quick rw
- 449 auto quick acl enospc
- 450 auto quick rw
-+451 auto quick
--- 
-2.9.5
-
+Amir.
