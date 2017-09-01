@@ -1,124 +1,108 @@
-Received: from mgwkm03.jp.fujitsu.com ([202.219.69.170]:48868 "EHLO
-        mgwkm03.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751285AbdIAFlZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2017 01:41:25 -0400
-Subject: [PATCH 2/2] Use common filter function in several tests
-From: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>
-References: <5f6cd84d-6e12-2b23-09fc-c0f744d1d2f2@jp.fujitsu.com>
-Message-ID: <e24c061f-7342-83fd-b08a-767c669a01ef@jp.fujitsu.com>
-Date: Fri, 1 Sep 2017 14:41:14 +0900
+Received: from mail-yw0-f171.google.com ([209.85.161.171]:35586 "EHLO
+        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751000AbdIAGwT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Sep 2017 02:52:19 -0400
+Received: by mail-yw0-f171.google.com with SMTP id s187so8202257ywf.2
+        for <fstests@vger.kernel.org>; Thu, 31 Aug 2017 23:52:19 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <5f6cd84d-6e12-2b23-09fc-c0f744d1d2f2@jp.fujitsu.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20170831205403.2tene34ccvw55yo7@destiny>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
+ <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+ <20170830185512.7q5mnh5ja6o4mpds@destiny> <CAOQ4uxipsvjjMF6YRJbN62tBrPNWOFjHztoDJ7CrsFfjNxRQBQ@mail.gmail.com>
+ <CAOQ4uxjt-zZ7_iE7ZYUcp8qWYUH=aDLSum70Dmbnth-5smFQ+A@mail.gmail.com>
+ <20170831134320.lnyu4jibsm3amuk7@destiny> <CAOQ4uxhgOYDfRxZ74RNd=omOMHxF2MgP+wLe0O6HO7+emnrMfA@mail.gmail.com>
+ <20170831205403.2tene34ccvw55yo7@destiny>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 1 Sep 2017 09:52:18 +0300
+Message-ID: <CAOQ4uxgbyd1FgF9GsjEwhf+KC-CMd=1QK-F=tevBpq5YByW=Zg@mail.gmail.com>
+Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
-Cc: linux-btrfs@vger.kernel.org
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: fstests <fstests@vger.kernel.org>, Theodore Tso <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Use newly introduced common function to filter both $TEST_DIR and
-$SCRATCH_MNT.
+[CC list, Ted]
 
-Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
----
- common/filter     |  2 +-
- tests/btrfs/029   | 11 +++--------
- tests/generic/409 |  3 +--
- tests/generic/410 |  3 +--
- tests/generic/411 |  3 +--
- 5 files changed, 7 insertions(+), 15 deletions(-)
+On Thu, Aug 31, 2017 at 11:54 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+> On Thu, Aug 31, 2017 at 05:02:46PM +0300, Amir Goldstein wrote:
+>> On Thu, Aug 31, 2017 at 4:43 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+>> > On Thu, Aug 31, 2017 at 03:48:44PM +0300, Amir Goldstein wrote:
+>> >>
+>> >> Josef,
+>> >>
+>> >> I am at lost with these log corruptions.
+>> >> I see log entry bios submitted and log_end_io report success,
+>> >> but then in the log I see old data on disk where that entry should be.
+>> >> This happens quite randomly and I assume it also happens on
+>> >> logged data, because tests sometime fail on checksum on ext4.
+>> >>
+>> >> Mean while I added some more log entry sanity checks and debug
+>> >> prints to replay-log to debug the corruption:
+>> >> https://github.com/amir73il/xfstests/commit/bb946deb0dc285867be394613ddb19ce281392cc
+>> >>
+>> >> This only happens to me when running in kvm, so maybe something
+>> >> with the virtio devices is fishy.
+>> >>
+>> >> Anyway, I ran out of time to work on this for now, so if you have
+>> >> any ideas and/or time to test this issue, let me know.
+>> >>
+>> >
+...
+>>
+>
+> Alright I tested it and it's working fine for me.  I'm creating three lv's and
+> then doing
+>
+> -drive file=/dev/mapper/whatever,format=raw,cache=none,if=virtio,aio=native
+>
+> And I get /dev/vd[bcd] which I use for my test/scratch/log dev and it works out
+> fine.  What is your -drive option line and I'll duplicate what you are doing.
+> Thanks,
+>
 
-diff --git a/common/filter b/common/filter
-index 75570f9..5d50f61 100644
---- a/common/filter
-+++ b/common/filter
-@@ -322,7 +322,7 @@ _filter_quota()
- {
- 	# Long dev name might be split onto its own line; last
- 	# seds remove that newline if present
--	_filter_scratch | _filter_test_dir | _filter_spaces | \
-+	_filter_testdir_and_scratch | _filter_spaces | \
- 	sed -e 'N;s/SCRATCH_DEV\n/SCRATCH_DEV/g' | \
- 	sed -e 'N;s/TEST_DEV\n/TEST_DEV/g'
- }
-diff --git a/tests/btrfs/029 b/tests/btrfs/029
-index c390c95..b6e2dbb 100755
---- a/tests/btrfs/029
-+++ b/tests/btrfs/029
-@@ -66,19 +66,14 @@ _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
- $XFS_IO_PROG -f -c 'pwrite -S 0x61 0 9000' $SCRATCH_MNT/original >> $seqres.full
- 
--_filter_testdirs()
--{
--    _filter_test_dir | _filter_scratch
--}
--
- _create_reflinks()
- {
-     # auto reflink, should fall back to non-reflink
-     rm -rf $2
-     echo "reflink=auto:"
-     cp --reflink=auto $1 $2
--    md5sum $1 | _filter_testdirs
--    md5sum $2 | _filter_testdirs
-+    md5sum $1 | _filter_testdir_and_scratch
-+    md5sum $2 | _filter_testdir_and_scratch
- 
-     # always reflink, should fail outright
-     rm -rf $2
-@@ -86,7 +81,7 @@ _create_reflinks()
-     cp --reflink=always $1 $2 >> $seqres.full 2>&1 || echo "cp reflink failed"
- 
-     # The failed target actually gets created by cp:
--    ls $2 | _filter_testdirs
-+    ls $2 | _filter_testdir_and_scratch
- }
- 
- echo "test reflinks across different devices"
-diff --git a/tests/generic/409 b/tests/generic/409
-index 22af44c..3ad65c9 100755
---- a/tests/generic/409
-+++ b/tests/generic/409
-@@ -104,8 +104,7 @@ find_mnt()
- 		    -e "s;$mpB;mpB;g" \
- 		    -e "s;$mpC;mpC;g" \
- 		    -e "s;$mpD;mpD;g" | \
--		_filter_spaces | _filter_scratch | \
--		_filter_test_dir | sort
-+		_filter_spaces | _filter_testdir_and_scratch | sort
- 	echo "======"
- }
- 
-diff --git a/tests/generic/410 b/tests/generic/410
-index 18cb0c1..63ab716 100755
---- a/tests/generic/410
-+++ b/tests/generic/410
-@@ -110,8 +110,7 @@ find_mnt()
- 		sed -e "s;$mpA;mpA;g" \
- 		    -e "s;$mpB;mpB;g" \
- 		    -e "s;$mpC;mpC;g" | \
--		_filter_spaces | _filter_scratch | \
--		_filter_test_dir | sort
-+		_filter_spaces | _filter_testdir_and_scratch | sort
- 	echo "======"
- }
- 
-diff --git a/tests/generic/411 b/tests/generic/411
-index 5db49a4..83f6d26 100755
---- a/tests/generic/411
-+++ b/tests/generic/411
-@@ -93,8 +93,7 @@ find_mnt()
- 		sed -e "s;$mpA;mpA;g" \
- 		    -e "s;$mpB;mpB;g" \
- 		    -e "s;$mpC;mpC;g" | \
--		_filter_spaces | _filter_scratch | \
--		_filter_test_dir | sort
-+		_filter_spaces | _filter_testdir_and_scratch | sort
- 	echo "======"
- }
- 
--- 
-2.9.5
+I am using Ted's kvm-xfstests, so this is the qemu command line:
+https://github.com/tytso/xfstests-bld/blob/master/kvm-xfstests/kvm-xfstests#L104
 
+The only difference in -drive command is no aio=native.
+BINGO! when I add aio-native there are no more log corruptions :)
+Please try to use aio=threads to see if you also get log corruptions.
+
+Thing is we cannot change kvm-xfstests to always use aio=native because
+it is not recommended for sparse images:
+https://access.redhat.com/articles/41313
+I will try to work something out so that kvm-xfstest will use aio=native
+when using the recommended (by not default) LV setup.
+
+However, why would aio=threads cause log corruption?
+Does it indicate a bug in kvm-qemu or in dm-log-writes??
+
+Did you try to use kvm-xfstests? its quite convenient to deploy in masses,
+so I think it would be ideal to integrate crash tests with.
+It also helps unifying the environment between us fs developers
+when a bug can not be reproduced on another system. see:
+https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
+
+Anyway, if you do end up using kvm-xfstests, you'l need this
+small patch to automatically define the log-writes device:
+
+--- a/kvm-xfstests/test-appliance/files/root/runtests.sh
++++ b/kvm-xfstests/test-appliance/files/root/runtests.sh
+@@ -269,9 +269,11 @@ do
+            if test "$SIZE" = "large" ; then
+                export SCRATCH_DEV=$LG_SCR_DEV
+                export SCRATCH_MNT=$LG_SCR_MNT
++               export LOGWRITES_DEV=$SM_SCR_DEV
+            else
+                export SCRATCH_DEV=$SM_SCR_DEV
+                export SCRATCH_MNT=$SM_SCR_MNT
++               export LOGWRITES_DEV=$LG_SCR_DEV
+            fi
+        fi
+
+kvm-xfstests defined 2 sets of test/scratch a small and a large set
+and uses only one of those sets depending on command line,
+so I use the "other" scratch as the log writes device.
+
+Amir.
