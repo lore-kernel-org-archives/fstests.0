@@ -1,164 +1,86 @@
-Received: from verein.lst.de ([213.95.11.211]:39178 "EHLO newverein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752585AbdICMOw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 3 Sep 2017 08:14:52 -0400
-Date: Sun, 3 Sep 2017 14:14:51 +0200
-From: Christoph Hellwig <hch@lst.de>
-Subject: test getbmap on reflinked files
-Message-ID: <20170903121451.GA18274@lst.de>
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:36625 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751617AbdICM51 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 08:57:27 -0400
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v83CsZdP075249
+        for <fstests@vger.kernel.org>; Sun, 3 Sep 2017 08:57:27 -0400
+Received: from e23smtp04.au.ibm.com (e23smtp04.au.ibm.com [202.81.31.146])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2cqrqxswpg-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 08:57:26 -0400
+Received: from localhost
+        by e23smtp04.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Sun, 3 Sep 2017 22:57:24 +1000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: Re: [PATCH V4] overlay: Test constant d_ino feature
+Date: Sun, 03 Sep 2017 18:28:04 +0530
+In-Reply-To: <CAOQ4uxgy7CJeFZkbdqes8+3J0he9mX=BEkG5gFO_gcEWcj8UJQ@mail.gmail.com>
+References: <20170903084002.1900-1-chandan@linux.vnet.ibm.com> <CAOQ4uxgy7CJeFZkbdqes8+3J0he9mX=BEkG5gFO_gcEWcj8UJQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
+Message-Id: <42988594.zmNOMRAluC@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Test that we correctly report shared and unshared regions in a file.
+On Sunday, September 3, 2017 3:32:11 PM IST Amir Goldstein wrote:
+> On Sun, Sep 3, 2017 at 11:40 AM, Chandan Rajendra
+> <chandan@linux.vnet.ibm.com> wrote:
+> > This commit adds a test to verify constant d_ino feature. The following
+> > scenarios are checked,
+> > - Parent's (i.e. "..") d_ino must always be calculated because a pure
+> >   dir can be residing inside a merged dir.
+> > - d_ino for "." must always be calculated because the present directory
+> >   can have a copy-up origin.
+> > - Verify d_ino of '.' and '..' before and after dir becomes
+> >   impure. While at it also verify if trusted.overlay.impure xattr is
+> >   set/reset appropriately and invalidation of readdir cache.
+> > - Verify copied up file's (inside a impure dir) d_ino.
+> > - Verify d_ino values corresponding to "." and ".." entries of a pure
+> >   lower dir.
+> > - Verify d_ino of ".." entry of a merged dir.
+> > - Verify pure lower residing in dir which has another lower layer
+> >
+> > Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> > ---
+> > Changelog:
+> > v3->v4:
+> > 1. Fix error handling as suggested by Amir.
+> > 2. Use sane variable names for "Verify pure lower residing in dir which has
+> >    another lower layer" test.
+> >
+> ...
+> > +# Verify invalidation of readdir cache
+> > +$here/src/t_dir_type $impure_dir $test_file_st_ino
+> > +[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
+> > +
+> > +$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
+> > +              $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
+> > +[[ $? == 0 ]] && echo "Pure directory has impure xattr"
+> > +
+> 
+> Sorry, I overlooked a few things in v3:
+> 1. Why did  I say use && echo here I'm not sure. looking again feels
+>     much better to conform to all other tests
 
-To do so we also update _filter_bmap to include the shared flag.
+Right. I will fix it up.
 
-Based on a test case from Darrick Wong.
+> 2. I wanted to write and forgot that you need _require_attrs and
+> include common/attr
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+I will add these lines.
 
-diff --git a/common/punch b/common/punch
-index c4ed261..3c400c1 100644
---- a/common/punch
-+++ b/common/punch
-@@ -263,6 +263,10 @@ _filter_bmap()
- 			print $1, $2, $3;
- 			next;
- 		}
-+		$7 ~ /1[01][01][01][01][01]/ {
-+			print $1, $2, "shared";
-+			next;
-+		}
- 		$7 ~ /1[01][01][01][01]/ {
- 			print $1, $2, "unwritten";
- 			next;
-diff --git a/tests/xfs/115 b/tests/xfs/115
-new file mode 100755
-index 0000000..eb456dc
---- /dev/null
-+++ b/tests/xfs/115
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test 115
-+#
-+# Check getbmap reporting for reflinked files
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Christoph Hellwig.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+file=$TEST_DIR/${seq}.file
-+clone=$TEST_DIR/${seq}.clone
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f ${file} ${clone}
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+. ./common/punch
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+_require_test_reflink
-+_require_cp_reflink
-+
-+# write file and check extent map
-+touch ${file}
-+xfs_io -c 'pwrite 0 1m' \
-+	-c 'fsync' ${file} >/dev/null
-+echo "initial file layout:"
-+xfs_io -c 'bmap -elpv' ${file} | _filter_test_dir | _filter_bmap
-+echo
-+
-+# reflink file and check for the shared bit in the extent map
-+cp --reflink=always ${file} ${clone} >/dev/null
-+echo "layout after reflink"
-+xfs_io -c 'bmap -elpv' ${file} | _filter_test_dir | _filter_bmap
-+echo
-+
-+# break COW and check the shared split in the extent map
-+xfs_io -c 'pwrite 200k 4k' \
-+	-c 'pwrite 700k 4k' \
-+	-c 'fsync' ${clone} | >/dev/null
-+echo "layout after partial unshare:"
-+xfs_io -c 'bmap -elpv' ${file} | _filter_test_dir | _filter_bmap
-+
-+# optional stuff if your test has verbose output to help resolve problems
-+#echo
-+#echo "If failure, check $seqres.full (this) and $seqres.full.ok (reference)"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/115.out b/tests/xfs/115.out
-new file mode 100644
-index 0000000..45e1d3c
---- /dev/null
-+++ b/tests/xfs/115.out
-@@ -0,0 +1,13 @@
-+QA output created by 115
-+initial file layout:
-+0: [0..2047]: data
-+
-+layout after reflink
-+0: [0..2047]: shared
-+
-+layout after partial unshare:
-+0: [0..399]: shared
-+1: [400..407]: data
-+2: [408..1399]: shared
-+3: [1400..1407]: data
-+4: [1408..2047]: shared
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 5c02498..97d6eee 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -112,6 +112,7 @@
- 112 fuzzers
- 113 fuzzers
- 114 auto rw dangerous
-+115 auto quick ioctl clone
- 116 quota auto quick
- 117 fuzzers
- 118 auto quick fsr dangerous
+> 3. This test is using double brackets [[ == comparison all around,
+> which apparently
+>     saves the need to surround left side in quotes "". This seems to
+> be recommended
+>     so I have no objection. Just pointing out to Eryu in case he has
+> reservations.
+
+-- 
+chandan
+
