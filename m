@@ -1,89 +1,39 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:54076 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751598AbdICIjd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 04:39:33 -0400
-Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v838dToS187866
-        for <fstests@vger.kernel.org>; Sun, 3 Sep 2017 04:39:32 -0400
-Received: from e18.ny.us.ibm.com (e18.ny.us.ibm.com [129.33.205.208])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2cqp95g0yh-1
-        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 04:39:31 -0400
-Received: from localhost
-        by e18.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Sun, 3 Sep 2017 04:39:30 -0400
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V4] overlay: Test constant d_ino feature
-Date: Sun,  3 Sep 2017 14:10:02 +0530
-Message-Id: <20170903084002.1900-1-chandan@linux.vnet.ibm.com>
+Received: from verein.lst.de ([213.95.11.211]:38841 "EHLO newverein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751461AbdICJd0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 3 Sep 2017 05:33:26 -0400
+Date: Sun, 3 Sep 2017 11:33:25 +0200
+From: Christoph Hellwig <hch@lst.de>
+Subject: test the per-inode DAX flag
+Message-ID: <20170903093325.GA16272@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: amir73il@gmail.com, eguan@redhat.com
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, fstests@vger.kernel.org, miklos@szeredi.hu, linux-unionfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit adds a test to verify constant d_ino feature. The following
-scenarios are checked,
-- Parent's (i.e. "..") d_ino must always be calculated because a pure
-  dir can be residing inside a merged dir.
-- d_ino for "." must always be calculated because the present directory
-  can have a copy-up origin.
-- Verify d_ino of '.' and '..' before and after dir becomes
-  impure. While at it also verify if trusted.overlay.impure xattr is
-  set/reset appropriately and invalidation of readdir cache.
-- Verify copied up file's (inside a impure dir) d_ino.
-- Verify d_ino values corresponding to "." and ".." entries of a pure
-  lower dir.
-- Verify d_ino of ".." entry of a merged dir.
-- Verify pure lower residing in dir which has another lower layer
+This tests checks that the per-inode DAX flag is either reject
+or sticks around, and that rapidly setting/clearing it will not
+crash the kernel.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
-Changelog:
-v3->v4:
-1. Fix error handling as suggested by Amir.
-2. Use sane variable names for "Verify pure lower residing in dir which has
-   another lower layer" test.
+Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-v2->v3:
-1. Add the following new test scenarios.
-   - Verify d_ino of '.' and '..' before and after dir becomes impure.
-   - Verify copied up file's (inside a impure dir) d_ino.
-2. For the "Verify pure lower residing in dir which has another lower layer"
-   test, use sane variable names.
-Once again, Thanks to Amir for his suggestions.
-
-v1->v2:
-1. Removed tests copied over from overlay/017.
-2. Removed src/t_dir_ino.c.
-3. Add code for testing,
-  - d_ino of . and .. entries of pure_lower_dir.
-  - d_ino of .. entry of merged_dir.
-  - Verify pure lower residing in dir which has another lower layer.
-Thanks to Amir for suggesting these tests.
-
- tests/overlay/038     | 194 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/038.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 197 insertions(+)
- create mode 100755 tests/overlay/038
- create mode 100644 tests/overlay/038.out
-
-diff --git a/tests/overlay/038 b/tests/overlay/038
+diff --git a/tests/xfs/114 b/tests/xfs/114
 new file mode 100755
-index 0000000..e11539a
+index 0000000..4b6472f
 --- /dev/null
-+++ b/tests/overlay/038
-@@ -0,0 +1,194 @@
++++ b/tests/xfs/114
+@@ -0,0 +1,92 @@
 +#! /bin/bash
-+# FSQA Test No. 038
++# FS QA Test 114
 +#
-+# Test constant d_ino numbers
++# Test that the DAX xflag works, and rapidly setting/clearing it doesn't
++# crash the kernel
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
-+# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
++# Copyright (c) 2017 Christoph Hellwig.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -109,183 +59,84 @@ index 0000000..e11539a
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
++file=$TEST_DIR/test.$seq
++
++_lets_get_pidst()
++{
++	if [ -n "$pid" ]; then
++		kill -TERM $pid 2>/dev/null
++		pid=""
++		wait 2>/dev/null
++	fi
++}
++
 +_cleanup()
 +{
 +	cd /
++	_lets_get_pidst
 +	rm -f $tmp.*
++	rm -f $file*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_test_program "af_unix"
-+_require_test_program "t_dir_type"
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
++# real QA test starts here
 +
-+# Create our test files.
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+mkdir -p $lowerdir
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_test
 +
-+mkdir $lowerdir/test_dir/
-+mkdir $lowerdir/test_dir/pure_lower_dir
-+mkdir $lowerdir/test_dir/merged_dir
++# test that the +x flag sticks if we don't get an error
++touch $file
++xfs_io -c 'chattr +x' $file > $tmp.log 2>&1
++if grep -q "Invalid argument" $tmp.log; then
++    _notrun "file system doesn't support the DAX flag"
++fi
 +
-+touch $lowerdir/test_file
++echo "checking for DAX flag:"
++xfs_io -c 'lsattr' $file | _filter_test_dir
++rm -f $file
 +
-+_scratch_mount
++# run fsx racing with setting/clearing the DAX flag
++$here/ltp/fsx -N 1000 $file > $tmp.log 2>&1 &
++pid=$!
 +
-+test_dir=$SCRATCH_MNT/test_dir/
-+merged_dir=$test_dir/merged_dir
-+pure_upper_dir=$merged_dir/pure_upper_dir
++for i in `seq 1 1000`; do
++    xfs_io -c 'chattr +x' $file
++    xfs_io -c 'chattr -x' $file
++done
 +
-+mkdir -p $pure_upper_dir
++_lets_get_pidst
 +
-+merged_dir_st_ino=$(stat -c '%i' $merged_dir)
-+
-+# Pure dir's parent d_ino must always be calculated because
-+# it can be residing inside a merged dir.
-+parent_d=$($here/src/t_dir_type $pure_upper_dir $merged_dir_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+	echo "Pure dir inside a merged dir: Invalid d_ino reported for .."
-+
-+# d_ino for "." must always be calculated because the present
-+# directory can have a copy-up origin.
-+current_d=$($here/src/t_dir_type $merged_dir $merged_dir_st_ino)
-+[[ $current_d == ". d" ]] || echo "Merged dir: Invalid d_ino reported for ."
-+
-+# Verify d_ino of '.' and '..' before and after dir becomes impure.
-+impure_dir=$test_dir/impure_dir
-+mkdir -p $impure_dir
-+
-+impure_dir_st_ino=$(stat -c '%i' $impure_dir)
-+impure_dir_parent_st_ino=$(stat -c '%i' $test_dir)
-+
-+# Before $impure_dir becomes impure
-+parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+    echo "Before dir becomes impure: Invalid d_ino reported for .."
-+
-+current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-+[[ $current_d == ". d" ]] || \
-+    echo "Before dir becomes impure: Invalid d_ino reported for ."
-+
-+chown -h 100 $SCRATCH_MNT/test_file
-+test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
-+
-+mv $SCRATCH_MNT/test_file $impure_dir
-+
-+$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
-+	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
-+[[ $? == 0 ]] || echo "Impure directory missing impure xattr"
-+
-+# After $impure_dir becomes impure
-+parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+    echo "After dir becomes impure: Invalid d_ino reported for .."
-+
-+current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-+[[ $current_d == ". d" ]] || \
-+    echo "After dir becomes impure: Invalid d_ino reported for ."
-+
-+# Verify copy up file's d_ino
-+file_d=$($here/src/t_dir_type $impure_dir $test_file_st_ino)
-+[[ $file_d == "test_file f" ]] || \
-+	echo "Impure dir: Invalid d_ino reported for entry with copy-up origin"
-+
-+# Make $impure_dir pure
-+rm -rf $impure_dir/test_file
-+
-+# Verify invalidation of readdir cache
-+$here/src/t_dir_type $impure_dir $test_file_st_ino
-+[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
-+
-+$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
-+	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
-+[[ $? == 0 ]] && echo "Pure directory has impure xattr"
-+
-+# Verify d_ino values corresponding to "." and ".." entries of a
-+# pure lower dir.
-+parent_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-+pure_lower_dir=$SCRATCH_MNT/test_dir/pure_lower_dir
-+
-+parent_d=$($here/src/t_dir_type $pure_lower_dir $parent_st_ino)
-+[[ $parent_d == ".. d" ]] || echo "Pure lower dir: Invalid d_ino reported for .."
-+
-+pure_lower_dir_st_ino=$(stat -c '%i' $pure_lower_dir)
-+
-+current_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_dir_st_ino)
-+[[ $current_d == ". d" ]] || echo "Pure lower dir: Invalid d_ino reported for ."
-+
-+# Verify d_ino of ".." entry of a merged dir.
-+merged_dir=$SCRATCH_MNT/test_dir/merged_dir
-+
-+parent_d=$($here/src/t_dir_type $merged_dir $parent_st_ino)
-+[[ $parent_d == ".. d" ]] || echo "Merged dir: Invalid d_ino reported for .."
-+
-+_scratch_unmount
-+
-+# Verify pure lower residing in dir which has another lower layer
-+_scratch_mkfs
-+
-+OVL_LOWER0=${OVL_LOWER}0
-+OVL_LOWER1=${OVL_LOWER}1
-+
-+middir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER0
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER1
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+
-+mkdir -p $middir
-+mkdir -p $lowerdir
-+mkdir -p $upperdir
-+mkdir -p $workdir
-+
-+mkdir -p $middir/test_dir
-+mkdir -p $lowerdir/test_dir/pure_lower_dir
-+
-+$MOUNT_PROG -t overlay overlay -o lowerdir=$middir:$lowerdir \
-+	    -o upperdir=$upperdir -o workdir=$workdir $SCRATCH_MNT
-+
-+# Copy up test_dir
-+touch $SCRATCH_MNT/test_dir/test_file
-+
-+test_dir_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-+
-+parent_d=$($here/src/t_dir_type $SCRATCH_MNT/test_dir/pure_lower_dir $test_dir_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for .."
-+
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+echo "Silence is golden"
++# success, all done
++echo "*** done"
 +status=0
 +exit
-diff --git a/tests/overlay/038.out b/tests/overlay/038.out
+diff --git a/tests/xfs/114.out b/tests/xfs/114.out
 new file mode 100644
-index 0000000..5e0f13e
+index 0000000..652276a
 --- /dev/null
-+++ b/tests/overlay/038.out
-@@ -0,0 +1,2 @@
-+QA output created by 038
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 28f1e63..ac66bc7 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -40,3 +40,4 @@
- 035 auto quick mount
- 036 auto quick mount
- 037 auto quick mount
-+038 auto quick copyup
--- 
-2.9.5
-
++++ b/tests/xfs/114.out
+@@ -0,0 +1,4 @@
++QA output created by 114
++checking for DAX flag:
++--------------x- TEST_DIR/test.114 
++*** done
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 5977330..5c02498 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -111,6 +111,7 @@
+ 111 ioctl
+ 112 fuzzers
+ 113 fuzzers
++114 auto rw dangerous
+ 116 quota auto quick
+ 117 fuzzers
+ 118 auto quick fsr dangerous
