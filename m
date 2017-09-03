@@ -1,112 +1,87 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:33600 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752697AbdIBQ2P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Sep 2017 12:28:15 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:53932 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750827AbdICEZu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 3 Sep 2017 00:25:50 -0400
+Date: Sun, 3 Sep 2017 12:25:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 3/3] stat_test, fssum: Include <sys/sysmacros.h> to avoid
+ glibc warning
+Message-ID: <20170903042547.GV27835@eguan.usersys.redhat.com>
+References: <20170829133715.12275-1-tuomas.tynkkynen@iki.fi>
+ <20170829133715.12275-3-tuomas.tynkkynen@iki.fi>
 MIME-Version: 1.0
-In-Reply-To: <20170901142341.28872-1-chandan@linux.vnet.ibm.com>
-References: <20170901142341.28872-1-chandan@linux.vnet.ibm.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sat, 2 Sep 2017 19:28:14 +0300
-Message-ID: <CAOQ4uxg65KP+pXG5hMCrouae=caMkpcP1=QvCTTNYuGfF6pnqA@mail.gmail.com>
-Subject: Re: [PATCH V3] overlay: Test constant d_ino feature
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170829133715.12275-3-tuomas.tynkkynen@iki.fi>
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>
+To: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 1, 2017 at 5:23 PM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> This commit adds a test to verify constant d_ino feature. The following
-> scenarios are checked,
-> - Parent's (i.e. "..") d_ino must always be calculated because a pure
->   dir can be residing inside a merged dir.
-> - d_ino for "." must always be calculated because the present directory
->   can have a copy-up origin.
-> - Verify d_ino of '.' and '..' before and after dir becomes
->   impure. While at it also verify if trusted.overlay.impure xattr is
->   set/reset appropriately and invalidation of readdir cache.
-> - Verify copied up file's (inside a impure dir) d_ino.
-> - Verify d_ino values corresponding to "." and ".." entries of a pure
->   lower dir.
-> - Verify d_ino of ".." entry of a merged dir.
-> - Verify pure lower residing in dir which has another lower layer
->
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+On Tue, Aug 29, 2017 at 04:37:15PM +0300, Tuomas Tynkkynen wrote:
+> Compiling against a recent glibc gives a number of warnings of this
+> sort:
+> 
+> stat_test.c: In function 'cmp_statx':
+> stat_test.c:251:13: warning: In the GNU C Library, "major" is defined
+>  by <sys/sysmacros.h>. For historical compatibility, it is
+>  currently defined by <sys/types.h> as well, but we plan to
+>  remove this soon. To use "major", include <sys/sysmacros.h>
+>  directly. If you did not intend to use a system-defined macro
+>  "major", you should undefine it after including <sys/types.h>.
+>   devcmp(dev);
+> 
+> Do as the message says to avoid it. xfstests already includes
+> <sys/sysmacros.h> in two other places so it seems safe to assume this
+> header generally exists.
+> 
+> Signed-off-by: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
+> ---
+>  src/fssum.c     | 1 +
+>  src/stat_test.c | 1 +
+>  2 files changed, 2 insertions(+)
+> 
+> diff --git a/src/fssum.c b/src/fssum.c
+> index 04052cdc..fa763d19 100644
+> --- a/src/fssum.c
+> +++ b/src/fssum.c
+> @@ -29,6 +29,7 @@
+>  #include <fcntl.h>
+>  #include <dirent.h>
+>  #include <errno.h>
+> +#include <sys/sysmacros.h>
+>  #include <sys/types.h>
+>  #include <sys/stat.h>
+>  #include <sys/sysmacros.h>
 
-Chandan,
+Sorry, I just found this in my release review/testing, "sys/sysmacros.h>
+has already been included here, and this was from commit 85e3bf85c67c
+("src: include <sys/sysmacros.h> for major() and minor()").
 
-The test looks good, test coverage is very good now and I also tested that
-it passes with overlayfs-next.
-Timing is also good with merge window coming up.
-We are down to petty bash nit picking ;-) (see below)
+I tested with Fedora rawhide (glibc-2.26.90-9, gcc-7.1.1-7) and I didn't
+see this warning when compiling current fstests code. Could you please
+help double check if this works for you too with latest fstests? I'll
+drop this patch for now.
 
-...
+Thanks,
+Eryu
 
-> +[[ $parent_d != ".. d" ]] && \
-> +       echo "Pure dir inside a merged dir: Invalid d_ino reported for .."
-> +
-
-This is not incorrect for an xfstest, but I much prefer the construct
-[ expected condition ] || echo "condition not met"
-
-The difference is purely semantic, but the result of this construct is success
-and the result of the construct you used is failure, so if it the last statement
-in a script of function, the overall result (failure) may be confusing.
-
-So unless you have a strong counter argument, please fix all those
-constructs and be careful, this is the stage where typos sneak in... ;-)
-...
-
-> +$GETFATTR_PROG --absolute-names --dump -m trusted $upperdir/test_dir/impure_dir \
-> +       | grep -q -F 'trusted.overlay.impure'
-> +[[ $? != 0 ]] && echo "Impure directory missing impure xattr"
-> +
-
-
-How about:
-
-$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure'
-$upperdir/test_dir/impure_dir \
-                > /dev/null || echo "Impure directory missing impure xattr"
-
-...
-> +
-> +$GETFATTR_PROG --absolute-names --dump -m trusted $upperdir/test_dir/impure_dir \
-> +       | grep -q -F 'trusted.overlay.impure'
-> +[[ $? == 0 ]] && echo "Pure directory has impure xattr"
-> +
-
-IMO, here its fine to use && echo "Pure directory has impure xattr"
-but grep is also not needed.
-
-...
-
-> +# Verify pure lower residing in dir which has another lower layer
-> +_scratch_mkfs
-> +
-> +OVL_LOWER0=${OVL_LOWER}0
-> +OVL_LOWER1=${OVL_LOWER}1
-> +
-> +middir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER0
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER1
-> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-> +
-> +mkdir -p $middir
-> +mkdir -p $lowerdir
-> +mkdir -p $upperdir
-> +mkdir -p $workdir
-> +
-> +mkdir -p $middir/dir0
-> +mkdir -p $lowerdir/dir0/dir1
-
-instead of dir0/dir1,
-mkdir $lowerdir/test_dir/
-mkdir $lowerdir/test_dir/pure_lower_dir
-
-and then use same variable names use use in first part of the test
-will make this part of the test easier to understand.
-
-Cheers,
-Amir.
+> diff --git a/src/stat_test.c b/src/stat_test.c
+> index 198c1332..ba1650f2 100644
+> --- a/src/stat_test.c
+> +++ b/src/stat_test.c
+> @@ -17,6 +17,7 @@
+>  #include <unistd.h>
+>  #include <errno.h>
+>  #include <fcntl.h>
+> +#include <sys/sysmacros.h>
+>  #include <sys/types.h>
+>  #include <sys/stat.h>
+>  #include <sys/sysmacros.h>
+> -- 
+> 2.13.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
