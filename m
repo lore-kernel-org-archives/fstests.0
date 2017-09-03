@@ -1,299 +1,91 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:60150 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751611AbdICNMf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 09:12:35 -0400
-Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v83D8eOR003039
-        for <fstests@vger.kernel.org>; Sun, 3 Sep 2017 09:12:35 -0400
-Received: from e17.ny.us.ibm.com (e17.ny.us.ibm.com [129.33.205.207])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2crgp5k2re-1
-        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 09:12:34 -0400
-Received: from localhost
-        by e17.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Sun, 3 Sep 2017 09:12:34 -0400
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V5] overlay: Test constant d_ino feature
-Date: Sun,  3 Sep 2017 18:43:09 +0530
-Message-Id: <20170903131309.17699-1-chandan@linux.vnet.ibm.com>
+Received: from mail-yw0-f172.google.com ([209.85.161.172]:34767 "EHLO
+        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752806AbdICNjv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 09:39:51 -0400
+Received: by mail-yw0-f172.google.com with SMTP id t188so16291533ywb.1
+        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 06:39:51 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20170901200658.txwbtntrtqwqdvcq@destiny>
+References: <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
+ <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
+ <20170830185512.7q5mnh5ja6o4mpds@destiny> <CAOQ4uxipsvjjMF6YRJbN62tBrPNWOFjHztoDJ7CrsFfjNxRQBQ@mail.gmail.com>
+ <CAOQ4uxjt-zZ7_iE7ZYUcp8qWYUH=aDLSum70Dmbnth-5smFQ+A@mail.gmail.com>
+ <20170831134320.lnyu4jibsm3amuk7@destiny> <CAOQ4uxhgOYDfRxZ74RNd=omOMHxF2MgP+wLe0O6HO7+emnrMfA@mail.gmail.com>
+ <20170831205403.2tene34ccvw55yo7@destiny> <CAOQ4uxgbyd1FgF9GsjEwhf+KC-CMd=1QK-F=tevBpq5YByW=Zg@mail.gmail.com>
+ <20170901200658.txwbtntrtqwqdvcq@destiny>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 3 Sep 2017 16:39:49 +0300
+Message-ID: <CAOQ4uxhmGxDLvOm_=amaN2GT6C2vD8390XZXzdLQ3JFjkiUT0A@mail.gmail.com>
+Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: amir73il@gmail.com, eguan@redhat.com
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, fstests@vger.kernel.org, miklos@szeredi.hu, linux-unionfs@vger.kernel.org
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: fstests <fstests@vger.kernel.org>, Theodore Tso <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit adds a test to verify constant d_ino feature. The following
-scenarios are checked,
-- Parent's (i.e. "..") d_ino must always be calculated because a pure
-  dir can be residing inside a merged dir.
-- d_ino for "." must always be calculated because the present directory
-  can have a copy-up origin.
-- Verify d_ino of '.' and '..' before and after dir becomes
-  impure. While at it also verify if trusted.overlay.impure xattr is
-  set/reset appropriately and invalidation of readdir cache.
-- Verify copied up file's (inside a impure dir) d_ino.
-- Verify d_ino values corresponding to "." and ".." entries of a pure
-  lower dir.
-- Verify d_ino of ".." entry of a merged dir.
-- Verify pure lower residing in dir which has another lower layer
+On Fri, Sep 1, 2017 at 11:07 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+> On Fri, Sep 01, 2017 at 09:52:18AM +0300, Amir Goldstein wrote:
+>> [CC list, Ted]
+>>
+>> On Thu, Aug 31, 2017 at 11:54 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+>> > On Thu, Aug 31, 2017 at 05:02:46PM +0300, Amir Goldstein wrote:
+>> >> On Thu, Aug 31, 2017 at 4:43 PM, Josef Bacik <josef@toxicpanda.com> wrote:
+>> >> > On Thu, Aug 31, 2017 at 03:48:44PM +0300, Amir Goldstein wrote:
+>> >> >>
+>> >> >> Josef,
+>> >> >>
+>> >> >> I am at lost with these log corruptions.
+>> >> >> I see log entry bios submitted and log_end_io report success,
+>> >> >> but then in the log I see old data on disk where that entry should be.
+>> >> >> This happens quite randomly and I assume it also happens on
+>> >> >> logged data, because tests sometime fail on checksum on ext4.
+>> >> >>
+>> >> >> Mean while I added some more log entry sanity checks and debug
+>> >> >> prints to replay-log to debug the corruption:
+>> >> >> https://github.com/amir73il/xfstests/commit/bb946deb0dc285867be394613ddb19ce281392cc
+>> >> >>
+>> >> >> This only happens to me when running in kvm, so maybe something
+>> >> >> with the virtio devices is fishy.
+>> >> >>
+>> >> >> Anyway, I ran out of time to work on this for now, so if you have
+>> >> >> any ideas and/or time to test this issue, let me know.
+>> >> >>
+>> >> >
+>> ...
+>> >>
+>> >
+>> > Alright I tested it and it's working fine for me.  I'm creating three lv's and
+>> > then doing
+>> >
+>> > -drive file=/dev/mapper/whatever,format=raw,cache=none,if=virtio,aio=native
+>> >
+>> > And I get /dev/vd[bcd] which I use for my test/scratch/log dev and it works out
+>> > fine.  What is your -drive option line and I'll duplicate what you are doing.
+>> > Thanks,
+>> >
+>>
+>> I am using Ted's kvm-xfstests, so this is the qemu command line:
+>> https://github.com/tytso/xfstests-bld/blob/master/kvm-xfstests/kvm-xfstests#L104
+>>
+>> The only difference in -drive command is no aio=native.
+>> BINGO! when I add aio-native there are no more log corruptions :)
+>> Please try to use aio=threads to see if you also get log corruptions.
+>>
+>> Thing is we cannot change kvm-xfstests to always use aio=native because
+>> it is not recommended for sparse images:
+>> https://access.redhat.com/articles/41313
+>> I will try to work something out so that kvm-xfstest will use aio=native
+>> when using the recommended (by not default) LV setup.
+>>
+>> However, why would aio=threads cause log corruption?
+>> Does it indicate a bug in kvm-qemu or in dm-log-writes??
+>
+> So I've been running this in a loop all day with aio=threads and it's not
+> blowing up.  This is my qemu version
+>
+> QEMU emulator version 2.9.0(qemu-2.9.0-1.fb1)
+>
+> Maybe it has to do with the version of qemu?  Thanks,
+>
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
-
-Changelog:
-v4->v5:
-1. Include common/attr & _require_attrs.
-2. Check for success condition when checking for existance of
-   'trusted.overlay.impure' xattr on a pure directory.
-
-v3->v4:
-1. Fix error handling as suggested by Amir.
-2. Use sane variable names for "Verify pure lower residing in dir which has
-   another lower layer" test.
-
-v2->v3:
-1. Add the following new test scenarios.
-   - Verify d_ino of '.' and '..' before and after dir becomes impure.
-   - Verify copied up file's (inside a impure dir) d_ino.
-2. For the "Verify pure lower residing in dir which has another lower layer"
-   test, use sane variable names.
-Once again, Thanks to Amir for his suggestions.
-
-v1->v2:
-1. Removed tests copied over from overlay/017.
-2. Removed src/t_dir_ino.c.
-3. Add code for testing,
-  - d_ino of . and .. entries of pure_lower_dir.
-  - d_ino of .. entry of merged_dir.
-  - Verify pure lower residing in dir which has another lower layer.
-Thanks to Amir for suggesting these tests.
-
- tests/overlay/038     | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/038.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 199 insertions(+)
- create mode 100755 tests/overlay/038
- create mode 100644 tests/overlay/038.out
-
-diff --git a/tests/overlay/038 b/tests/overlay/038
-new file mode 100755
-index 0000000..24cd432
---- /dev/null
-+++ b/tests/overlay/038
-@@ -0,0 +1,196 @@
-+#! /bin/bash
-+# FSQA Test No. 038
-+#
-+# Test constant d_ino numbers
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
-+# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+_require_test_program "af_unix"
-+_require_test_program "t_dir_type"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+
-+# Create our test files.
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+mkdir -p $lowerdir
-+
-+mkdir $lowerdir/test_dir/
-+mkdir $lowerdir/test_dir/pure_lower_dir
-+mkdir $lowerdir/test_dir/merged_dir
-+
-+touch $lowerdir/test_file
-+
-+_scratch_mount
-+
-+test_dir=$SCRATCH_MNT/test_dir/
-+merged_dir=$test_dir/merged_dir
-+pure_upper_dir=$merged_dir/pure_upper_dir
-+
-+mkdir -p $pure_upper_dir
-+
-+merged_dir_st_ino=$(stat -c '%i' $merged_dir)
-+
-+# Pure dir's parent d_ino must always be calculated because
-+# it can be residing inside a merged dir.
-+parent_d=$($here/src/t_dir_type $pure_upper_dir $merged_dir_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+	echo "Pure dir inside a merged dir: Invalid d_ino reported for .."
-+
-+# d_ino for "." must always be calculated because the present
-+# directory can have a copy-up origin.
-+current_d=$($here/src/t_dir_type $merged_dir $merged_dir_st_ino)
-+[[ $current_d == ". d" ]] || echo "Merged dir: Invalid d_ino reported for ."
-+
-+# Verify d_ino of '.' and '..' before and after dir becomes impure.
-+impure_dir=$test_dir/impure_dir
-+mkdir -p $impure_dir
-+
-+impure_dir_st_ino=$(stat -c '%i' $impure_dir)
-+impure_dir_parent_st_ino=$(stat -c '%i' $test_dir)
-+
-+# Before $impure_dir becomes impure
-+parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+    echo "Before dir becomes impure: Invalid d_ino reported for .."
-+
-+current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-+[[ $current_d == ". d" ]] || \
-+    echo "Before dir becomes impure: Invalid d_ino reported for ."
-+
-+chown -h 100 $SCRATCH_MNT/test_file
-+test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
-+
-+mv $SCRATCH_MNT/test_file $impure_dir
-+
-+$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
-+	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
-+[[ $? == 0 ]] || echo "Impure directory missing impure xattr"
-+
-+# After $impure_dir becomes impure
-+parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+    echo "After dir becomes impure: Invalid d_ino reported for .."
-+
-+current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-+[[ $current_d == ". d" ]] || \
-+    echo "After dir becomes impure: Invalid d_ino reported for ."
-+
-+# Verify copy up file's d_ino
-+file_d=$($here/src/t_dir_type $impure_dir $test_file_st_ino)
-+[[ $file_d == "test_file f" ]] || \
-+	echo "Impure dir: Invalid d_ino reported for entry with copy-up origin"
-+
-+# Make $impure_dir pure
-+rm -rf $impure_dir/test_file
-+
-+# Verify invalidation of readdir cache
-+$here/src/t_dir_type $impure_dir $test_file_st_ino
-+[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
-+
-+$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
-+	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
-+[[ $? != 0 ]] || echo "Pure directory has impure xattr"
-+
-+# Verify d_ino values corresponding to "." and ".." entries of a
-+# pure lower dir.
-+parent_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-+pure_lower_dir=$SCRATCH_MNT/test_dir/pure_lower_dir
-+
-+parent_d=$($here/src/t_dir_type $pure_lower_dir $parent_st_ino)
-+[[ $parent_d == ".. d" ]] || echo "Pure lower dir: Invalid d_ino reported for .."
-+
-+pure_lower_dir_st_ino=$(stat -c '%i' $pure_lower_dir)
-+
-+current_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_dir_st_ino)
-+[[ $current_d == ". d" ]] || echo "Pure lower dir: Invalid d_ino reported for ."
-+
-+# Verify d_ino of ".." entry of a merged dir.
-+merged_dir=$SCRATCH_MNT/test_dir/merged_dir
-+
-+parent_d=$($here/src/t_dir_type $merged_dir $parent_st_ino)
-+[[ $parent_d == ".. d" ]] || echo "Merged dir: Invalid d_ino reported for .."
-+
-+_scratch_unmount
-+
-+# Verify pure lower residing in dir which has another lower layer
-+_scratch_mkfs
-+
-+OVL_LOWER0=${OVL_LOWER}0
-+OVL_LOWER1=${OVL_LOWER}1
-+
-+middir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER0
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER1
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+
-+mkdir -p $middir
-+mkdir -p $lowerdir
-+mkdir -p $upperdir
-+mkdir -p $workdir
-+
-+mkdir -p $middir/test_dir
-+mkdir -p $lowerdir/test_dir/pure_lower_dir
-+
-+$MOUNT_PROG -t overlay overlay -o lowerdir=$middir:$lowerdir \
-+	    -o upperdir=$upperdir -o workdir=$workdir $SCRATCH_MNT
-+
-+# Copy up test_dir
-+touch $SCRATCH_MNT/test_dir/test_file
-+
-+test_dir_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-+
-+parent_d=$($here/src/t_dir_type $SCRATCH_MNT/test_dir/pure_lower_dir $test_dir_st_ino)
-+[[ $parent_d == ".. d" ]] || \
-+	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for .."
-+
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/038.out b/tests/overlay/038.out
-new file mode 100644
-index 0000000..5e0f13e
---- /dev/null
-+++ b/tests/overlay/038.out
-@@ -0,0 +1,2 @@
-+QA output created by 038
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 28f1e63..ac66bc7 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -40,3 +40,4 @@
- 035 auto quick mount
- 036 auto quick mount
- 037 auto quick mount
-+038 auto quick copyup
--- 
-2.9.5
-
+Maybe. I am running QEMU 2.5.0
