@@ -1,87 +1,291 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53932 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750827AbdICEZu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 3 Sep 2017 00:25:50 -0400
-Date: Sun, 3 Sep 2017 12:25:47 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] stat_test, fssum: Include <sys/sysmacros.h> to avoid
- glibc warning
-Message-ID: <20170903042547.GV27835@eguan.usersys.redhat.com>
-References: <20170829133715.12275-1-tuomas.tynkkynen@iki.fi>
- <20170829133715.12275-3-tuomas.tynkkynen@iki.fi>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170829133715.12275-3-tuomas.tynkkynen@iki.fi>
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:54076 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751598AbdICIjd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 04:39:33 -0400
+Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v838dToS187866
+        for <fstests@vger.kernel.org>; Sun, 3 Sep 2017 04:39:32 -0400
+Received: from e18.ny.us.ibm.com (e18.ny.us.ibm.com [129.33.205.208])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2cqp95g0yh-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 04:39:31 -0400
+Received: from localhost
+        by e18.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Sun, 3 Sep 2017 04:39:30 -0400
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH V4] overlay: Test constant d_ino feature
+Date: Sun,  3 Sep 2017 14:10:02 +0530
+Message-Id: <20170903084002.1900-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
-Cc: fstests@vger.kernel.org
+To: amir73il@gmail.com, eguan@redhat.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, fstests@vger.kernel.org, miklos@szeredi.hu, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Aug 29, 2017 at 04:37:15PM +0300, Tuomas Tynkkynen wrote:
-> Compiling against a recent glibc gives a number of warnings of this
-> sort:
-> 
-> stat_test.c: In function 'cmp_statx':
-> stat_test.c:251:13: warning: In the GNU C Library, "major" is defined
->  by <sys/sysmacros.h>. For historical compatibility, it is
->  currently defined by <sys/types.h> as well, but we plan to
->  remove this soon. To use "major", include <sys/sysmacros.h>
->  directly. If you did not intend to use a system-defined macro
->  "major", you should undefine it after including <sys/types.h>.
->   devcmp(dev);
-> 
-> Do as the message says to avoid it. xfstests already includes
-> <sys/sysmacros.h> in two other places so it seems safe to assume this
-> header generally exists.
-> 
-> Signed-off-by: Tuomas Tynkkynen <tuomas.tynkkynen@iki.fi>
-> ---
->  src/fssum.c     | 1 +
->  src/stat_test.c | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/src/fssum.c b/src/fssum.c
-> index 04052cdc..fa763d19 100644
-> --- a/src/fssum.c
-> +++ b/src/fssum.c
-> @@ -29,6 +29,7 @@
->  #include <fcntl.h>
->  #include <dirent.h>
->  #include <errno.h>
-> +#include <sys/sysmacros.h>
->  #include <sys/types.h>
->  #include <sys/stat.h>
->  #include <sys/sysmacros.h>
+This commit adds a test to verify constant d_ino feature. The following
+scenarios are checked,
+- Parent's (i.e. "..") d_ino must always be calculated because a pure
+  dir can be residing inside a merged dir.
+- d_ino for "." must always be calculated because the present directory
+  can have a copy-up origin.
+- Verify d_ino of '.' and '..' before and after dir becomes
+  impure. While at it also verify if trusted.overlay.impure xattr is
+  set/reset appropriately and invalidation of readdir cache.
+- Verify copied up file's (inside a impure dir) d_ino.
+- Verify d_ino values corresponding to "." and ".." entries of a pure
+  lower dir.
+- Verify d_ino of ".." entry of a merged dir.
+- Verify pure lower residing in dir which has another lower layer
 
-Sorry, I just found this in my release review/testing, "sys/sysmacros.h>
-has already been included here, and this was from commit 85e3bf85c67c
-("src: include <sys/sysmacros.h> for major() and minor()").
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+Changelog:
+v3->v4:
+1. Fix error handling as suggested by Amir.
+2. Use sane variable names for "Verify pure lower residing in dir which has
+   another lower layer" test.
 
-I tested with Fedora rawhide (glibc-2.26.90-9, gcc-7.1.1-7) and I didn't
-see this warning when compiling current fstests code. Could you please
-help double check if this works for you too with latest fstests? I'll
-drop this patch for now.
+v2->v3:
+1. Add the following new test scenarios.
+   - Verify d_ino of '.' and '..' before and after dir becomes impure.
+   - Verify copied up file's (inside a impure dir) d_ino.
+2. For the "Verify pure lower residing in dir which has another lower layer"
+   test, use sane variable names.
+Once again, Thanks to Amir for his suggestions.
 
-Thanks,
-Eryu
+v1->v2:
+1. Removed tests copied over from overlay/017.
+2. Removed src/t_dir_ino.c.
+3. Add code for testing,
+  - d_ino of . and .. entries of pure_lower_dir.
+  - d_ino of .. entry of merged_dir.
+  - Verify pure lower residing in dir which has another lower layer.
+Thanks to Amir for suggesting these tests.
 
-> diff --git a/src/stat_test.c b/src/stat_test.c
-> index 198c1332..ba1650f2 100644
-> --- a/src/stat_test.c
-> +++ b/src/stat_test.c
-> @@ -17,6 +17,7 @@
->  #include <unistd.h>
->  #include <errno.h>
->  #include <fcntl.h>
-> +#include <sys/sysmacros.h>
->  #include <sys/types.h>
->  #include <sys/stat.h>
->  #include <sys/sysmacros.h>
-> -- 
-> 2.13.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ tests/overlay/038     | 194 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/038.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 197 insertions(+)
+ create mode 100755 tests/overlay/038
+ create mode 100644 tests/overlay/038.out
+
+diff --git a/tests/overlay/038 b/tests/overlay/038
+new file mode 100755
+index 0000000..e11539a
+--- /dev/null
++++ b/tests/overlay/038
+@@ -0,0 +1,194 @@
++#! /bin/bash
++# FSQA Test No. 038
++#
++# Test constant d_ino numbers
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
++# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_test_program "af_unix"
++_require_test_program "t_dir_type"
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++# Create our test files.
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++mkdir -p $lowerdir
++
++mkdir $lowerdir/test_dir/
++mkdir $lowerdir/test_dir/pure_lower_dir
++mkdir $lowerdir/test_dir/merged_dir
++
++touch $lowerdir/test_file
++
++_scratch_mount
++
++test_dir=$SCRATCH_MNT/test_dir/
++merged_dir=$test_dir/merged_dir
++pure_upper_dir=$merged_dir/pure_upper_dir
++
++mkdir -p $pure_upper_dir
++
++merged_dir_st_ino=$(stat -c '%i' $merged_dir)
++
++# Pure dir's parent d_ino must always be calculated because
++# it can be residing inside a merged dir.
++parent_d=$($here/src/t_dir_type $pure_upper_dir $merged_dir_st_ino)
++[[ $parent_d == ".. d" ]] || \
++	echo "Pure dir inside a merged dir: Invalid d_ino reported for .."
++
++# d_ino for "." must always be calculated because the present
++# directory can have a copy-up origin.
++current_d=$($here/src/t_dir_type $merged_dir $merged_dir_st_ino)
++[[ $current_d == ". d" ]] || echo "Merged dir: Invalid d_ino reported for ."
++
++# Verify d_ino of '.' and '..' before and after dir becomes impure.
++impure_dir=$test_dir/impure_dir
++mkdir -p $impure_dir
++
++impure_dir_st_ino=$(stat -c '%i' $impure_dir)
++impure_dir_parent_st_ino=$(stat -c '%i' $test_dir)
++
++# Before $impure_dir becomes impure
++parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
++[[ $parent_d == ".. d" ]] || \
++    echo "Before dir becomes impure: Invalid d_ino reported for .."
++
++current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
++[[ $current_d == ". d" ]] || \
++    echo "Before dir becomes impure: Invalid d_ino reported for ."
++
++chown -h 100 $SCRATCH_MNT/test_file
++test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
++
++mv $SCRATCH_MNT/test_file $impure_dir
++
++$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
++	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
++[[ $? == 0 ]] || echo "Impure directory missing impure xattr"
++
++# After $impure_dir becomes impure
++parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
++[[ $parent_d == ".. d" ]] || \
++    echo "After dir becomes impure: Invalid d_ino reported for .."
++
++current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
++[[ $current_d == ". d" ]] || \
++    echo "After dir becomes impure: Invalid d_ino reported for ."
++
++# Verify copy up file's d_ino
++file_d=$($here/src/t_dir_type $impure_dir $test_file_st_ino)
++[[ $file_d == "test_file f" ]] || \
++	echo "Impure dir: Invalid d_ino reported for entry with copy-up origin"
++
++# Make $impure_dir pure
++rm -rf $impure_dir/test_file
++
++# Verify invalidation of readdir cache
++$here/src/t_dir_type $impure_dir $test_file_st_ino
++[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
++
++$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
++	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
++[[ $? == 0 ]] && echo "Pure directory has impure xattr"
++
++# Verify d_ino values corresponding to "." and ".." entries of a
++# pure lower dir.
++parent_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
++pure_lower_dir=$SCRATCH_MNT/test_dir/pure_lower_dir
++
++parent_d=$($here/src/t_dir_type $pure_lower_dir $parent_st_ino)
++[[ $parent_d == ".. d" ]] || echo "Pure lower dir: Invalid d_ino reported for .."
++
++pure_lower_dir_st_ino=$(stat -c '%i' $pure_lower_dir)
++
++current_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_dir_st_ino)
++[[ $current_d == ". d" ]] || echo "Pure lower dir: Invalid d_ino reported for ."
++
++# Verify d_ino of ".." entry of a merged dir.
++merged_dir=$SCRATCH_MNT/test_dir/merged_dir
++
++parent_d=$($here/src/t_dir_type $merged_dir $parent_st_ino)
++[[ $parent_d == ".. d" ]] || echo "Merged dir: Invalid d_ino reported for .."
++
++_scratch_unmount
++
++# Verify pure lower residing in dir which has another lower layer
++_scratch_mkfs
++
++OVL_LOWER0=${OVL_LOWER}0
++OVL_LOWER1=${OVL_LOWER}1
++
++middir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER0
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER1
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++
++mkdir -p $middir
++mkdir -p $lowerdir
++mkdir -p $upperdir
++mkdir -p $workdir
++
++mkdir -p $middir/test_dir
++mkdir -p $lowerdir/test_dir/pure_lower_dir
++
++$MOUNT_PROG -t overlay overlay -o lowerdir=$middir:$lowerdir \
++	    -o upperdir=$upperdir -o workdir=$workdir $SCRATCH_MNT
++
++# Copy up test_dir
++touch $SCRATCH_MNT/test_dir/test_file
++
++test_dir_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
++
++parent_d=$($here/src/t_dir_type $SCRATCH_MNT/test_dir/pure_lower_dir $test_dir_st_ino)
++[[ $parent_d == ".. d" ]] || \
++	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for .."
++
++$UMOUNT_PROG $SCRATCH_MNT
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/038.out b/tests/overlay/038.out
+new file mode 100644
+index 0000000..5e0f13e
+--- /dev/null
++++ b/tests/overlay/038.out
+@@ -0,0 +1,2 @@
++QA output created by 038
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 28f1e63..ac66bc7 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -40,3 +40,4 @@
+ 035 auto quick mount
+ 036 auto quick mount
+ 037 auto quick mount
++038 auto quick copyup
+-- 
+2.9.5
+
