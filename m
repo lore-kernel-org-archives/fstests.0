@@ -1,142 +1,65 @@
-Received: from verein.lst.de ([213.95.11.211]:38841 "EHLO newverein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751461AbdICJd0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 3 Sep 2017 05:33:26 -0400
-Date: Sun, 3 Sep 2017 11:33:25 +0200
-From: Christoph Hellwig <hch@lst.de>
-Subject: test the per-inode DAX flag
-Message-ID: <20170903093325.GA16272@lst.de>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:33325 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751531AbdICKCM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Sep 2017 06:02:12 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+In-Reply-To: <20170903084002.1900-1-chandan@linux.vnet.ibm.com>
+References: <20170903084002.1900-1-chandan@linux.vnet.ibm.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 3 Sep 2017 13:02:11 +0300
+Message-ID: <CAOQ4uxgy7CJeFZkbdqes8+3J0he9mX=BEkG5gFO_gcEWcj8UJQ@mail.gmail.com>
+Subject: Re: [PATCH V4] overlay: Test constant d_ino feature
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This tests checks that the per-inode DAX flag is either reject
-or sticks around, and that rapidly setting/clearing it will not
-crash the kernel.
+On Sun, Sep 3, 2017 at 11:40 AM, Chandan Rajendra
+<chandan@linux.vnet.ibm.com> wrote:
+> This commit adds a test to verify constant d_ino feature. The following
+> scenarios are checked,
+> - Parent's (i.e. "..") d_ino must always be calculated because a pure
+>   dir can be residing inside a merged dir.
+> - d_ino for "." must always be calculated because the present directory
+>   can have a copy-up origin.
+> - Verify d_ino of '.' and '..' before and after dir becomes
+>   impure. While at it also verify if trusted.overlay.impure xattr is
+>   set/reset appropriately and invalidation of readdir cache.
+> - Verify copied up file's (inside a impure dir) d_ino.
+> - Verify d_ino values corresponding to "." and ".." entries of a pure
+>   lower dir.
+> - Verify d_ino of ".." entry of a merged dir.
+> - Verify pure lower residing in dir which has another lower layer
+>
+> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> ---
+> Changelog:
+> v3->v4:
+> 1. Fix error handling as suggested by Amir.
+> 2. Use sane variable names for "Verify pure lower residing in dir which has
+>    another lower layer" test.
+>
+...
+> +# Verify invalidation of readdir cache
+> +$here/src/t_dir_type $impure_dir $test_file_st_ino
+> +[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
+> +
+> +$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
+> +              $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
+> +[[ $? == 0 ]] && echo "Pure directory has impure xattr"
+> +
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Sorry, I overlooked a few things in v3:
+1. Why did  I say use && echo here I'm not sure. looking again feels
+    much better to conform to all other tests
+2. I wanted to write and forgot that you need _require_attrs and
+include common/attr
+3. This test is using double brackets [[ == comparison all around,
+which apparently
+    saves the need to surround left side in quotes "". This seems to
+be recommended
+    so I have no objection. Just pointing out to Eryu in case he has
+reservations.
 
-diff --git a/tests/xfs/114 b/tests/xfs/114
-new file mode 100755
-index 0000000..4b6472f
---- /dev/null
-+++ b/tests/xfs/114
-@@ -0,0 +1,92 @@
-+#! /bin/bash
-+# FS QA Test 114
-+#
-+# Test that the DAX xflag works, and rapidly setting/clearing it doesn't
-+# crash the kernel
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Christoph Hellwig.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+file=$TEST_DIR/test.$seq
-+
-+_lets_get_pidst()
-+{
-+	if [ -n "$pid" ]; then
-+		kill -TERM $pid 2>/dev/null
-+		pid=""
-+		wait 2>/dev/null
-+	fi
-+}
-+
-+_cleanup()
-+{
-+	cd /
-+	_lets_get_pidst
-+	rm -f $tmp.*
-+	rm -f $file*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_test
-+
-+# test that the +x flag sticks if we don't get an error
-+touch $file
-+xfs_io -c 'chattr +x' $file > $tmp.log 2>&1
-+if grep -q "Invalid argument" $tmp.log; then
-+    _notrun "file system doesn't support the DAX flag"
-+fi
-+
-+echo "checking for DAX flag:"
-+xfs_io -c 'lsattr' $file | _filter_test_dir
-+rm -f $file
-+
-+# run fsx racing with setting/clearing the DAX flag
-+$here/ltp/fsx -N 1000 $file > $tmp.log 2>&1 &
-+pid=$!
-+
-+for i in `seq 1 1000`; do
-+    xfs_io -c 'chattr +x' $file
-+    xfs_io -c 'chattr -x' $file
-+done
-+
-+_lets_get_pidst
-+
-+# success, all done
-+echo "*** done"
-+status=0
-+exit
-diff --git a/tests/xfs/114.out b/tests/xfs/114.out
-new file mode 100644
-index 0000000..652276a
---- /dev/null
-+++ b/tests/xfs/114.out
-@@ -0,0 +1,4 @@
-+QA output created by 114
-+checking for DAX flag:
-+--------------x- TEST_DIR/test.114 
-+*** done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 5977330..5c02498 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -111,6 +111,7 @@
- 111 ioctl
- 112 fuzzers
- 113 fuzzers
-+114 auto rw dangerous
- 116 quota auto quick
- 117 fuzzers
- 118 auto quick fsr dangerous
+Amir.
