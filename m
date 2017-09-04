@@ -1,193 +1,53 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:18461 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753825AbdIDPOq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Sep 2017 11:14:46 -0400
-Date: Mon, 4 Sep 2017 08:14:40 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic: reserve correct indirect blocks for delalloc
- write path
-Message-ID: <20170904151440.GE4671@magnolia>
-References: <20170904093819.28708-1-eguan@redhat.com>
+Received: from verein.lst.de ([213.95.11.211]:43521 "EHLO newverein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753748AbdIDPa1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 4 Sep 2017 11:30:27 -0400
+Date: Mon, 4 Sep 2017 17:30:26 +0200
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: [RFC][PATCH] fstests: regression test for xfs leftover CoW
+        extent error
+Message-ID: <20170904153026.GA6469@lst.de>
+References: <1504451271-29202-1-git-send-email-amir73il@gmail.com> <20170903174513.GI4073@magnolia> <20170903182133.GA1757@lst.de> <20170903210427.GJ4073@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170904093819.28708-1-eguan@redhat.com>
+In-Reply-To: <20170903210427.GJ4073@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Christoph Hellwig <hch@lst.de>, Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 04, 2017 at 05:38:19PM +0800, Eryu Guan wrote:
-> Test that XFS reserves reasonable indirect blocks for delalloc and
-> speculative allocation, and doesn't cause any fdblocks corruption.
+On Sun, Sep 03, 2017 at 02:04:27PM -0700, Darrick J. Wong wrote:
+> On Sun, Sep 03, 2017 at 08:21:33PM +0200, Christoph Hellwig wrote:
+> > > So basically there are two bugs here -- the fcollapse/finsert code needs
+> > > to shift the CoW fork extents down and up;
+> > 
+> > Or make sure that we don't have any extents in the COW fork?
 > 
-> This was inspired by an XFS but that too large 'indlen' was returned by
-> xfs_bmap_worst_indlen() which can't fit in a 17 bits value
-> (STARTBLOCKVALBITS is defined as 17), then leaked 1 << 17 blocks in
-> sb_fdblocks.
+> It's a big hammer approach, but yes that'd work.
 > 
-> This was only seen on XFS with rmapbt feature enabled, but nothing
-> prevents the test from being a generic test.
-> 
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> 
-> This reproduces sb_fdblocks corruption issue for me with 1k block size
-> rmapbt enabled XFS on x86_64 and ppc64 hosts. Other block size XFS pass
-> the test now.
+> We're already forcing all the dirty pages out anyway so I guess it's no
+> big deal.
 
-Looks reasonable; does the revert patch (posted earlier) fix it?
+It might be a big deal for my O_ATOMIC work, but I'll need to need
+to find that work and actually define semantics vs nasty operations
+like insert and swapext for that.
 
---D
+Then again shifting the cow forks seems relatively easy - we'd just
+need to look at the whichfork argument in the low-level helpers
+basically.
 
+> > >         /*
+> > >          * Clear the reflink flag if we truncated everything.
+> > >          */
+> > > -       if (ip->i_d.di_nblocks == 0 && xfs_is_reflink_inode(ip)) {
+> > > +       if (ip->i_d.di_nblocks == 0 && ip->i_cnextents == 0 && xfs_is_reflink_inode(ip)) {
+> > 
+> > Btw, it seems like we should generally clear the reflink flag and
+> > tag if ip->i_cnextents is zero and not even bother looking at di_nblocks.
 > 
->  tests/generic/456     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/456.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 116 insertions(+)
->  create mode 100755 tests/generic/456
->  create mode 100644 tests/generic/456.out
-> 
-> diff --git a/tests/generic/456 b/tests/generic/456
-> new file mode 100755
-> index 000000000000..b878c67c6b0e
-> --- /dev/null
-> +++ b/tests/generic/456
-> @@ -0,0 +1,113 @@
-> +#! /bin/bash
-> +# FS QA Test 456
-> +#
-> +# Test that XFS reserves reasonable indirect blocks for delalloc and
-> +# speculative allocation, and doesn't cause any fdblocks corruption.
-> +#
-> +# This was inspired by an XFS but that too large 'indlen' was returned by
-> +# xfs_bmap_worst_indlen() which can't fit in a 17 bits value (STARTBLOCKVALBITS
-> +# is defined as 17), then leaked 1 << 17 blocks in sb_fdblocks.
-> +#
-> +# This was only seen on XFS with rmapbt feature enabled, but nothing prevents
-> +# the test from being a generic test.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +testfile=$SCRATCH_MNT/1G_file.$seq
-> +file_size=$((1024 * 1024 * 1024))
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +saved_dirty_background_ratio=0
-> +saved_dirty_ratio=0
-> +
-> +save_dirty_ratio()
-> +{
-> +	saved_dirty_background_ratio=`cat /proc/sys/vm/dirty_background_ratio`
-> +	saved_dirty_ratio=`cat /proc/sys/vm/dirty_ratio`
-> +}
-> +
-> +set_dirty_ratio()
-> +{
-> +	echo 100 > /proc/sys/vm/dirty_background_ratio
-> +	echo 100 > /proc/sys/vm/dirty_ratio
-> +}
-> +
-> +restore_dirty_ratio()
-> +{
-> +	if [ $saved_dirty_background_ratio -ne 0 ]; then
-> +		echo $saved_dirty_background_ratio > /proc/sys/vm/dirty_background_ratio
-> +	fi
-> +	if [ $saved_dirty_ratio -ne 0 ]; then
-> +		echo $saved_dirty_ratio > /proc/sys/vm/dirty_ratio
-> +	fi
-> +}
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	restore_dirty_ratio
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +# test with scratch device, because test is known to corrupt fs, we don't want
-> +# the corruption affect subsequent tests
-> +_require_scratch
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +# need at least 1G free space
-> +_require_fs_space $SCRATCH_MNT $((1024 * 1024))
-> +
-> +# To reproduce the bug, we need to keep enough dirty data in memory (1G at
-> +# least), so that a large enough delay allocated extent is kept in memory, then
-> +# speculative preallocation could allocate large number of blocks based on the
-> +# existing extent size.
-> +# So we set dirty_background_ratio and dirty_ratio to 100% uncontitionally,
-> +# even if the total memory is less than 1G, there's no harm to run a test on a
-> +# such host.
-> +save_dirty_ratio
-> +set_dirty_ratio
-> +
-> +# buffer write a 1G file, which is enough to trigger the bug,
-> +# _check_filesystems will complain about fs corruption after test
-> +$XFS_IO_PROG -fc "pwrite -b 1m 0 $file_size" $testfile >/dev/null 2>&1
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/456.out b/tests/generic/456.out
-> new file mode 100644
-> index 000000000000..248dfeb2ad90
-> --- /dev/null
-> +++ b/tests/generic/456.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 456
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 6422d51033af..e9f08ab4ef79 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -458,3 +458,4 @@
->  453 auto quick dir
->  454 auto quick attr
->  455 auto rw
-> +456 auto quick rw
-> -- 
-> 2.13.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> We can't -- imagine shortening to 8k a reflinked 12k file that hasn't been
+> written to.  It has no cow extents, but we cannot drop the reflink flag.
+
+True for the reflink flag.  But we should be able to clear the cowblocks
+tag whenever i_cnextents reaches zero.
