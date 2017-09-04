@@ -1,39 +1,71 @@
-Received: from verein.lst.de ([213.95.11.211]:43587 "EHLO newverein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753789AbdIDPoy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Sep 2017 11:44:54 -0400
-Date: Mon, 4 Sep 2017 17:44:53 +0200
-From: Christoph Hellwig <hch@lst.de>
-Subject: Re: test the per-inode DAX flag
-Message-ID: <20170904154453.GA6771@lst.de>
-References: <20170903093325.GA16272@lst.de> <20170904072431.GW27835@eguan.usersys.redhat.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:20032 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753764AbdIDPqn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 4 Sep 2017 11:46:43 -0400
+Date: Mon, 4 Sep 2017 08:46:35 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [RFC][PATCH] fstests: regression test for xfs leftover CoW
+ extent error
+Message-ID: <20170904154635.GF4671@magnolia>
+References: <1504451271-29202-1-git-send-email-amir73il@gmail.com>
+ <20170903174513.GI4073@magnolia>
+ <20170903182133.GA1757@lst.de>
+ <20170903210427.GJ4073@magnolia>
+ <20170904153026.GA6469@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170904072431.GW27835@eguan.usersys.redhat.com>
+In-Reply-To: <20170904153026.GA6469@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 04, 2017 at 03:24:31PM +0800, Eryu Guan wrote:
-> On Sun, Sep 03, 2017 at 11:33:25AM +0200, Christoph Hellwig wrote:
-> > This tests checks that the per-inode DAX flag is either reject
-> > or sticks around, and that rapidly setting/clearing it will not
-> > crash the kernel.
+On Mon, Sep 04, 2017 at 05:30:26PM +0200, Christoph Hellwig wrote:
+> On Sun, Sep 03, 2017 at 02:04:27PM -0700, Darrick J. Wong wrote:
+> > On Sun, Sep 03, 2017 at 08:21:33PM +0200, Christoph Hellwig wrote:
+> > > > So basically there are two bugs here -- the fcollapse/finsert code needs
+> > > > to shift the CoW fork extents down and up;
+> > > 
+> > > Or make sure that we don't have any extents in the COW fork?
 > > 
-> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > It's a big hammer approach, but yes that'd work.
+> > 
+> > We're already forcing all the dirty pages out anyway so I guess it's no
+> > big deal.
 > 
-> Does this test make sense when filesystem was mounted without dax
-> option? I saw these failures when testing on normal block device without
-> dax mount option.
+> It might be a big deal for my O_ATOMIC work, but I'll need to need
+> to find that work and actually define semantics vs nasty operations
+> like insert and swapext for that.
+> 
+> Then again shifting the cow forks seems relatively easy - we'd just
+> need to look at the whichfork argument in the low-level helpers
+> basically.
 
-I think the first part that tries to set it makes sense everywhere,
-but we should also _notrun for this case and not just for EINVAL.
+Yes, it looks pretty straightforward.  I'll send my dumb version that
+merely evicts everything from the cow fork to the list and see if that
+motivates anyone to try their hand at shifting the cow fork.
 
-That being said: right now I don't understand at all where the
-EIO when setting the flag comes from, let me figure out where it is.
+> > > >         /*
+> > > >          * Clear the reflink flag if we truncated everything.
+> > > >          */
+> > > > -       if (ip->i_d.di_nblocks == 0 && xfs_is_reflink_inode(ip)) {
+> > > > +       if (ip->i_d.di_nblocks == 0 && ip->i_cnextents == 0 && xfs_is_reflink_inode(ip)) {
+> > > 
+> > > Btw, it seems like we should generally clear the reflink flag and
+> > > tag if ip->i_cnextents is zero and not even bother looking at di_nblocks.
+> > 
+> > We can't -- imagine shortening to 8k a reflinked 12k file that hasn't been
+> > written to.  It has no cow extents, but we cannot drop the reflink flag.
+> 
+> True for the reflink flag.  But we should be able to clear the cowblocks
+> tag whenever i_cnextents reaches zero.
 
-And thinking about it - why would we not allow setting the flag,
-especially given that right now it doesn't have a meaning either
-with or without DAX..
+<nod> I was about to send out a cleaner patch.
+
+--D
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
