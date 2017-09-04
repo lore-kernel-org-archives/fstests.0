@@ -1,71 +1,101 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:20032 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753764AbdIDPqn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Sep 2017 11:46:43 -0400
-Date: Mon, 4 Sep 2017 08:46:35 -0700
+Received: from aserp1040.oracle.com ([141.146.126.69]:35072 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753814AbdIDP4A (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 4 Sep 2017 11:56:00 -0400
+Date: Mon, 4 Sep 2017 08:55:50 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [RFC][PATCH] fstests: regression test for xfs leftover CoW
- extent error
-Message-ID: <20170904154635.GF4671@magnolia>
-References: <1504451271-29202-1-git-send-email-amir73il@gmail.com>
- <20170903174513.GI4073@magnolia>
- <20170903182133.GA1757@lst.de>
- <20170903210427.GJ4073@magnolia>
- <20170904153026.GA6469@lst.de>
+Subject: Re: [PATCH] kvm-xfstests: use aio=native for test drives
+Message-ID: <20170904155550.GC4660@magnolia>
+References: <1504527328-24615-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170904153026.GA6469@lst.de>
+In-Reply-To: <1504527328-24615-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 04, 2017 at 05:30:26PM +0200, Christoph Hellwig wrote:
-> On Sun, Sep 03, 2017 at 02:04:27PM -0700, Darrick J. Wong wrote:
-> > On Sun, Sep 03, 2017 at 08:21:33PM +0200, Christoph Hellwig wrote:
-> > > > So basically there are two bugs here -- the fcollapse/finsert code needs
-> > > > to shift the CoW fork extents down and up;
-> > > 
-> > > Or make sure that we don't have any extents in the COW fork?
-> > 
-> > It's a big hammer approach, but yes that'd work.
-> > 
-> > We're already forcing all the dirty pages out anyway so I guess it's no
-> > big deal.
+On Mon, Sep 04, 2017 at 03:15:28PM +0300, Amir Goldstein wrote:
+> Lost IOs have been observed with the default aio=threads with
+> QEMU 2.5.0 when running crash consistency tests.
+> The issue has not been observed with QEMU 2.9.0.
+> Native AIO is probably better for our goal which is test proofing
+> production systems.
 > 
-> It might be a big deal for my O_ATOMIC work, but I'll need to need
-> to find that work and actually define semantics vs nasty operations
-> like insert and swapext for that.
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 > 
-> Then again shifting the cow forks seems relatively easy - we'd just
-> need to look at the whichfork argument in the low-level helpers
-> basically.
-
-Yes, it looks pretty straightforward.  I'll send my dumb version that
-merely evicts everything from the cow fork to the list and see if that
-motivates anyone to try their hand at shifting the cow fork.
-
-> > > >         /*
-> > > >          * Clear the reflink flag if we truncated everything.
-> > > >          */
-> > > > -       if (ip->i_d.di_nblocks == 0 && xfs_is_reflink_inode(ip)) {
-> > > > +       if (ip->i_d.di_nblocks == 0 && ip->i_cnextents == 0 && xfs_is_reflink_inode(ip)) {
-> > > 
-> > > Btw, it seems like we should generally clear the reflink flag and
-> > > tag if ip->i_cnextents is zero and not even bother looking at di_nblocks.
-> > 
-> > We can't -- imagine shortening to 8k a reflinked 12k file that hasn't been
-> > written to.  It has no cow extents, but we cannot drop the reflink flag.
+> Ted,
 > 
-> True for the reflink flag.  But we should be able to clear the cowblocks
-> tag whenever i_cnextents reaches zero.
+> Not sure you have been following the crash consistency tests threads.
+> 
+> Anyway, I ran into an issue of sucessfuly completed bio's that
+> did not make it to storage device when running in kvm-xfstests.
+> 
+> Josef reported that he did not observe the issue with newer QEMU
+> and the issue is gone with aio=native on my version of QEMU.
+> 
+> Crash consistency tests still can't run properly on kvm-xfstests
+> without this fix to kernel:
+> https://git.kernel.org/pub/scm/linux/kernel/git/josef/btrfs-next.git/commit/?h=dm-log-writes-fixes&id=08c7d64773091c7d2e0147da7064aa4dc297629d
+> After the fix is merged I will post a patch to enable running
+> dm-log-write tests in kvm-xfstest.
+> 
+> Mean while, the change to aio=native seems like a good move
+> anyway and if I observed a bio black hole in one test, who's to say
+> they don't exist for other tests as well.
+> 
+> Amir.
+> 
+> 
+>  kvm-xfstests/kvm-xfstests | 19 +++++++++++++------
+>  1 file changed, 13 insertions(+), 6 deletions(-)
+> 
+> diff --git a/kvm-xfstests/kvm-xfstests b/kvm-xfstests/kvm-xfstests
+> index 305e2f5..98bd76a 100755
+> --- a/kvm-xfstests/kvm-xfstests
+> +++ b/kvm-xfstests/kvm-xfstests
+> @@ -101,15 +101,22 @@ chmod 400 "$VDH"
+>  
+>  mkdir -p /tmp/kvm-xfstests-$USER
+>  
+> +# Lost IOs have been observed with the default aio=threads with
+> +# QEMU 2.5.0 when running crash consistency tests.
 
-<nod> I was about to send out a cleaner patch.
+Note however that Ubuntu 16.04 LTS is still on qemu 2.5, so perhaps
+it's worth the trouble to check the qemu version prior to enabling
+native aio support?
 
 --D
 
+> +# The issue has not been observed with QEMU 2.9.0.
+> +# Native AIO is probably better for our goal which is test proofing
+> +# production systems.
+> +AIO=",aio=native"
+> +
+>  $NO_ACTION $IONICE $QEMU -boot order=c $NET \
+>  	-machine type=pc,accel=kvm:tcg \
+>  	-drive file=$ROOT_FS,if=virtio$SNAPSHOT \
+> -	-drive file=$VDB,cache=none,if=virtio,format=raw \
+> -	-drive file=$VDC,cache=none,if=virtio,format=raw \
+> -	-drive file=$VDD,cache=none,if=virtio,format=raw \
+> -	-drive file=$VDE,cache=none,if=virtio,format=raw \
+> -	-drive file=$VDF,cache=none,if=virtio,format=raw \
+> -	-drive file=$VDG,cache=none,if=virtio,format=raw \
+> +	-drive file=$VDB,cache=none,if=virtio,format=raw$AIO \
+> +	-drive file=$VDC,cache=none,if=virtio,format=raw$AIO \
+> +	-drive file=$VDD,cache=none,if=virtio,format=raw$AIO \
+> +	-drive file=$VDE,cache=none,if=virtio,format=raw$AIO \
+> +	-drive file=$VDF,cache=none,if=virtio,format=raw$AIO \
+> +	-drive file=$VDG,cache=none,if=virtio,format=raw$AIO \
+>  	-drive file=$VDH,cache=unsafe,readonly,if=virtio \
+>  	-vga none -nographic -smp $NR_CPU -m $MEM \
+>  	-fsdev local,id=v_tmp,path=/tmp/kvm-xfstests-$USER,security_model=none \
+> -- 
+> 2.7.4
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
