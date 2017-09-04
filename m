@@ -1,46 +1,39 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34086 "EHLO mx1.redhat.com"
+Received: from verein.lst.de ([213.95.11.211]:43587 "EHLO newverein.lst.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753764AbdIDPoH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Sep 2017 11:44:07 -0400
-Date: Mon, 4 Sep 2017 23:44:04 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic: reserve correct indirect blocks for delalloc
- write path
-Message-ID: <20170904154404.GB27835@eguan.usersys.redhat.com>
-References: <20170904093819.28708-1-eguan@redhat.com>
- <20170904151440.GE4671@magnolia>
+        id S1753789AbdIDPoy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 4 Sep 2017 11:44:54 -0400
+Date: Mon, 4 Sep 2017 17:44:53 +0200
+From: Christoph Hellwig <hch@lst.de>
+Subject: Re: test the per-inode DAX flag
+Message-ID: <20170904154453.GA6771@lst.de>
+References: <20170903093325.GA16272@lst.de> <20170904072431.GW27835@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170904151440.GE4671@magnolia>
+In-Reply-To: <20170904072431.GW27835@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 04, 2017 at 08:14:40AM -0700, Darrick J. Wong wrote:
-> On Mon, Sep 04, 2017 at 05:38:19PM +0800, Eryu Guan wrote:
-> > Test that XFS reserves reasonable indirect blocks for delalloc and
-> > speculative allocation, and doesn't cause any fdblocks corruption.
+On Mon, Sep 04, 2017 at 03:24:31PM +0800, Eryu Guan wrote:
+> On Sun, Sep 03, 2017 at 11:33:25AM +0200, Christoph Hellwig wrote:
+> > This tests checks that the per-inode DAX flag is either reject
+> > or sticks around, and that rapidly setting/clearing it will not
+> > crash the kernel.
 > > 
-> > This was inspired by an XFS but that too large 'indlen' was returned by
-> > xfs_bmap_worst_indlen() which can't fit in a 17 bits value
-> > (STARTBLOCKVALBITS is defined as 17), then leaked 1 << 17 blocks in
-> > sb_fdblocks.
-> > 
-> > This was only seen on XFS with rmapbt feature enabled, but nothing
-> > prevents the test from being a generic test.
-> > 
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> > 
-> > This reproduces sb_fdblocks corruption issue for me with 1k block size
-> > rmapbt enabled XFS on x86_64 and ppc64 hosts. Other block size XFS pass
-> > the test now.
+> > Signed-off-by: Christoph Hellwig <hch@lst.de>
 > 
-> Looks reasonable; does the revert patch (posted earlier) fix it?
+> Does this test make sense when filesystem was mounted without dax
+> option? I saw these failures when testing on normal block device without
+> dax mount option.
 
-Yes, I just confirmed that the revert patch did fix the bug for me.
+I think the first part that tries to set it makes sense everywhere,
+but we should also _notrun for this case and not just for EINVAL.
 
-Thanks,
-Eryu
+That being said: right now I don't understand at all where the
+EIO when setting the flag comes from, let me figure out where it is.
+
+And thinking about it - why would we not allow setting the flag,
+especially given that right now it doesn't have a meaning either
+with or without DAX..
