@@ -1,78 +1,188 @@
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:33332 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752064AbdIDGtm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Sep 2017 02:49:42 -0400
-Received: by mail-yw0-f172.google.com with SMTP id c85so15211008ywa.0
-        for <fstests@vger.kernel.org>; Sun, 03 Sep 2017 23:49:42 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:51110 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752624AbdIDHYd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 4 Sep 2017 03:24:33 -0400
+Date: Mon, 4 Sep 2017 15:24:31 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: test the per-inode DAX flag
+Message-ID: <20170904072431.GW27835@eguan.usersys.redhat.com>
+References: <20170903093325.GA16272@lst.de>
 MIME-Version: 1.0
-In-Reply-To: <20170904064214.GI17782@dastard>
-References: <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
- <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
- <20170830185512.7q5mnh5ja6o4mpds@destiny> <CAOQ4uxipsvjjMF6YRJbN62tBrPNWOFjHztoDJ7CrsFfjNxRQBQ@mail.gmail.com>
- <CAOQ4uxjt-zZ7_iE7ZYUcp8qWYUH=aDLSum70Dmbnth-5smFQ+A@mail.gmail.com>
- <20170831134320.lnyu4jibsm3amuk7@destiny> <CAOQ4uxhgOYDfRxZ74RNd=omOMHxF2MgP+wLe0O6HO7+emnrMfA@mail.gmail.com>
- <20170831205403.2tene34ccvw55yo7@destiny> <CAOQ4uxgbyd1FgF9GsjEwhf+KC-CMd=1QK-F=tevBpq5YByW=Zg@mail.gmail.com>
- <20170904064214.GI17782@dastard>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 4 Sep 2017 09:49:41 +0300
-Message-ID: <CAOQ4uxg6cg_L1sxDnUtZQXvyda802rB+dUrQUg3iM5=JEjJMyQ@mail.gmail.com>
-Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170903093325.GA16272@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Josef Bacik <josef@toxicpanda.com>, fstests <fstests@vger.kernel.org>, Theodore Tso <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 4, 2017 at 9:42 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Fri, Sep 01, 2017 at 09:52:18AM +0300, Amir Goldstein wrote:
->> [CC list, Ted]
->>
->> ...
->> >>
->> >
->> > Alright I tested it and it's working fine for me.  I'm creating three lv's and
->> > then doing
->> >
->> > -drive file=/dev/mapper/whatever,format=raw,cache=none,if=virtio,aio=native
->> >
->> > And I get /dev/vd[bcd] which I use for my test/scratch/log dev and it works out
->> > fine.  What is your -drive option line and I'll duplicate what you are doing.
->> > Thanks,
->> >
->>
->> I am using Ted's kvm-xfstests, so this is the qemu command line:
->> https://github.com/tytso/xfstests-bld/blob/master/kvm-xfstests/kvm-xfstests#L104
->>
->> The only difference in -drive command is no aio=native.
->> BINGO! when I add aio-native there are no more log corruptions :)
->> Please try to use aio=threads to see if you also get log corruptions.
->>
->> Thing is we cannot change kvm-xfstests to always use aio=native because
->> it is not recommended for sparse images:
->> https://access.redhat.com/articles/41313
->
-> Hmmmm. I think you're looking at an article that's at least 6 years
-> out of date. It was last updated at:
->
->         Updated September 16 2012 at 2:04 AM
->
-> Looking at the bug it references there was a heap of problems in the
-> DIO code, the AIO code and the filesystem code that we fixed in
-> upstream kernels in late 2010/early 2011. e.g
->
-> http://oss.sgi.com/archives/xfs/2011-01/msg00156.html
->
-> Those took some time to get back into vendor kernels, but the
-> aio=native kvm problems described in that kbase article were fixed
-> in a RHEL 6.1 point release in May 2011.
->
-> IOWs, if qemu w/ aio=native doesn't work these days, the article
-> you've quoted is not the reason.
->
->
+On Sun, Sep 03, 2017 at 11:33:25AM +0200, Christoph Hellwig wrote:
+> This tests checks that the per-inode DAX flag is either reject
+> or sticks around, and that rapidly setting/clearing it will not
+> crash the kernel.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-In that case, I'll post a patch to have kvm-xfstests use aio=native.
-I suppose it is the proper way to run xfstests inside kvm anyway.
+Does this test make sense when filesystem was mounted without dax
+option? I saw these failures when testing on normal block device without
+dax mount option.
+
+    --- tests/xfs/115.out       2017-09-04 11:45:11.628000000 +0800
+    +++ /root/workspace/xfstests/results//xfs_4k_crc/xfs/115.out.bad    2017-09-04 15:05:19.433000000 +0800
+    @@ -1,4 +1,1004 @@
+     QA output created by 115
+     checking for DAX flag:
+     --------------x- TEST_DIR/test.115
+    +xfs_io: cannot set flags on /mnt/testarea/test/test.115: Input/output error
+    +./tests/xfs/115: line 82: 15344 Bus error               $here/ltp/fsx -N 1000 $file > $tmp.log 2>&1
+    +xfs_io: cannot set flags on /mnt/testarea/test/test.115: Input/output error
+    +xfs_io: cannot set flags on /mnt/testarea/test/test.115: Input/output error
+    ...
+
+If not, I think we need a new _require_test_dax rule similar to
+_require_scratch_dax.
+
+> 
+> diff --git a/tests/xfs/115 b/tests/xfs/115
+> new file mode 100755
+> index 0000000..4b6472f
+> --- /dev/null
+> +++ b/tests/xfs/115
+> @@ -0,0 +1,92 @@
+> +#! /bin/bash
+> +# FS QA Test 115
+> +#
+> +# Test that the DAX xflag works, and rapidly setting/clearing it doesn't
+> +# crash the kernel
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Christoph Hellwig.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +file=$TEST_DIR/test.$seq
+> +
+> +_lets_get_pidst()
+
+Better to name local functions without the leading underscore.
+
+> +{
+> +	if [ -n "$pid" ]; then
+> +		kill -TERM $pid 2>/dev/null
+> +		pid=""
+> +		wait 2>/dev/null
+> +	fi
+> +}
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	_lets_get_pidst
+> +	rm -f $tmp.*
+> +	rm -f $file*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_test
+> +
+> +# test that the +x flag sticks if we don't get an error
+> +touch $file
+> +xfs_io -c 'chattr +x' $file > $tmp.log 2>&1
+> +if grep -q "Invalid argument" $tmp.log; then
+> +    _notrun "file system doesn't support the DAX flag"
+> +fi
+
+I think we can add an "chattr" entry in  _require_xfs_io_command, and
+actually run chattr command with the given option (-x in this case) to
+check the xflag support status. (Then the _require_xfs_io_command usage
+in xfs/260 should be fixed.)
+
+> +
+> +echo "checking for DAX flag:"
+> +xfs_io -c 'lsattr' $file | _filter_test_dir
+
+$XFS_IO_PROG
+
+> +rm -f $file
+> +
+> +# run fsx racing with setting/clearing the DAX flag
+> +$here/ltp/fsx -N 1000 $file > $tmp.log 2>&1 &
+> +pid=$!
+> +
+> +for i in `seq 1 1000`; do
+> +    xfs_io -c 'chattr +x' $file
+> +    xfs_io -c 'chattr -x' $file
+> +done
+> +
+> +_lets_get_pidst
+> +
+> +# success, all done
+> +echo "*** done"
+> +status=0
+> +exit
+> diff --git a/tests/xfs/115.out b/tests/xfs/115.out
+> new file mode 100644
+> index 0000000..652276a
+> --- /dev/null
+> +++ b/tests/xfs/115.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 115
+> +checking for DAX flag:
+> +--------------x- TEST_DIR/test.115 
+> +*** done
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 5977330..5c02498 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -111,6 +111,7 @@
+>  112 fuzzers
+>  113 fuzzers
+>  114 auto quick clone rmap
+> +115 auto rw dangerous
+
+Sometimes test passed for me without triggering any crashes, and it
+finished within 10 seconds, can be a 'quick' test too.
 
 Thanks,
-Amir.
+Eryu
+
+>  116 quota auto quick
+>  117 fuzzers
+>  118 auto quick fsr dangerous
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
