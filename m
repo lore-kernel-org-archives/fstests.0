@@ -1,11 +1,11 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:34240 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751959AbdIETK6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:10:58 -0400
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36279 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752459AbdIETLD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:03 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 05/13] fsx: add support for keeping existing file
-Date: Tue,  5 Sep 2017 22:11:12 +0300
-Message-Id: <1504638680-25682-6-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 07/13] replay-log: add validations for corrupt log entries
+Date: Tue,  5 Sep 2017 22:11:14 +0300
+Message-Id: <1504638680-25682-8-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,170 +13,228 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With fsxk -k, do not truncate existing file and use its size as upper
-bound on file size.
+Check for all zeros entry and for non zero padded entry
+and report log offset of corrupted log entry.
 
-This is needed to prevent fsx from truncating the file on start of
-test when testing fsx on cloned files.
+Also report log offsets with -v and -vv debug prints.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- ltp/fsx.c | 49 ++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 36 insertions(+), 13 deletions(-)
+ src/log-writes/log-writes.c | 84 ++++++++++++++++++++++++++++++++++-----------
+ src/log-writes/log-writes.h |  2 ++
+ src/log-writes/replay-log.c |  7 ++--
+ 3 files changed, 70 insertions(+), 23 deletions(-)
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 3510ace..7a34577 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -629,17 +629,18 @@ void
- check_trunc_hack(void)
- {
- 	struct stat statbuf;
-+	off_t offset = file_size + (off_t)100000;
+diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+index a215fef..dbfeef7 100644
+--- a/src/log-writes/log-writes.c
++++ b/src/log-writes/log-writes.c
+@@ -118,6 +118,26 @@ int log_discard(struct log *log, struct log_write_entry *entry)
+ }
  
--	if (ftruncate(fd, (off_t)0))
-+	if (ftruncate(fd, file_size))
- 		goto ftruncate_err;
--	if (ftruncate(fd, (off_t)100000))
-+	if (ftruncate(fd, offset))
- 		goto ftruncate_err;
- 	fstat(fd, &statbuf);
--	if (statbuf.st_size != (off_t)100000) {
-+	if (statbuf.st_size != offset) {
- 		prt("no extend on truncate! not posix!\n");
- 		exit(130);
+ /*
++ * @entry: entry to be replayed.
++ *
++ * @return: 1 if the entry is sane, 0 if it is invalid.
++ *
++ * Check if this is a sane log entry.
++ */
++int log_entry_valid(struct log_write_entry *entry)
++{
++	u64 flags = le64_to_cpu(entry->flags);
++
++	/* Suspect all zeroes entry */
++	if (!flags && !entry->nr_sectors)
++		return 0;
++	/* Suspect non zero padded entry */
++	if (flags != LOG_MARK_FLAG && entry->data[0] != 0)
++		return 0;
++	return 1;
++}
++
++/*
+  * @log: the log we are replaying.
+  * @entry: where we put the entry.
+  * @read_data: read the entry data as well, entry must be log->sectorsize sized
+@@ -146,24 +166,32 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 		fprintf(stderr, "Error reading entry: %d\n", errno);
+ 		return -1;
  	}
--	if (ftruncate(fd, 0)) {
-+	if (ftruncate(fd, file_size)) {
- ftruncate_err:
- 		prterr("check_trunc_hack: ftruncate");
- 		exit(131);
-@@ -1636,7 +1637,7 @@ void
- usage(void)
- {
- 	fprintf(stdout, "usage: %s",
--		"fsx [-dnqxAFLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
-+		"fsx [-dknqxAFLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
- 	-b opnum: beginning operation number (default 1)\n\
- 	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
- 	-d: debug output for all operations\n\
-@@ -1644,6 +1645,7 @@ usage(void)
- 	-g X: write character X instead of random generated data\n\
- 	-i logdev: do integrity testing, logdev is the dm log writes device\n\
- 	-j logid: prefix logs with this id\n\
-+	-k: do not truncate existing file and use its size as upper bound on file size\n\
- 	-l flen: the upper bound on file size (default 262144)\n\
- 	-m startop:endop: monitor (print debug output) specified byte range (default 0:infinity)\n\
- 	-n: no verifications of file size\n\
-@@ -1834,7 +1836,7 @@ __test_fallocate(int mode, const char *mode_str)
- #ifdef HAVE_LINUX_FALLOC_H
- 	int ret = 0;
- 	if (!lite) {
--		if (fallocate(fd, mode, 0, 1) && errno == EOPNOTSUPP) {
-+		if (fallocate(fd, mode, file_size, 1) && errno == EOPNOTSUPP) {
- 			if(!quiet)
- 				fprintf(stderr,
- 					"main: filesystem does not support "
-@@ -1842,7 +1844,7 @@ __test_fallocate(int mode, const char *mode_str)
- 					mode_str);
- 		} else {
- 			ret = 1;
--			if (ftruncate(fd, 0)) {
-+			if (ftruncate(fd, file_size)) {
- 				warn("main: ftruncate");
- 				exit(132);
- 			}
-@@ -1866,6 +1868,7 @@ main(int argc, char **argv)
- 	char goodfile[1024];
- 	char logfile[1024];
- 	struct stat statbuf;
-+	int o_flags = O_RDWR|O_CREAT|O_TRUNC;
- 
- 	goodfile[0] = 0;
- 	logfile[0] = 0;
-@@ -1879,7 +1882,7 @@ main(int argc, char **argv)
- 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
- 
- 	while ((ch = getopt_long(argc, argv,
--				 "b:c:dfg:i:j:l:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ",
-+				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ",
- 				 longopts, NULL)) != EOF)
- 		switch (ch) {
- 		case 'b':
-@@ -1920,6 +1923,9 @@ main(int argc, char **argv)
- 		case 'j':
- 			logid = getnum(optarg, &endp);
- 			break;
-+		case 'k':
-+			o_flags &= ~O_TRUNC;
-+			break;
- 		case 'l':
- 			maxfilelen = getnum(optarg, &endp);
- 			if (maxfilelen <= 0)
-@@ -2007,6 +2013,7 @@ main(int argc, char **argv)
- 			break;
- 		case 'L':
- 		        lite = 1;
-+			o_flags &= ~(O_CREAT|O_TRUNC);
- 			break;
- 		case 'N':
- 			numops = getnum(optarg, &endp);
-@@ -2046,6 +2053,7 @@ main(int argc, char **argv)
- 			break;
- 		case 'Z':
- 			o_direct = O_DIRECT;
-+			o_flags |= O_DIRECT;
- 			break;
- 		case 255:  /* --record-ops */
- 			if (optarg)
-@@ -2089,8 +2097,7 @@ main(int argc, char **argv)
- 	signal(SIGUSR2,	cleanup);
- 
- 	srandom(seed);
--	fd = open(fname,
--		O_RDWR|(lite ? 0 : O_CREAT|O_TRUNC)|o_direct, 0666);
-+	fd = open(fname, o_flags, 0666);
- 	if (fd < 0) {
- 		prterr(fname);
- 		exit(91);
-@@ -2150,9 +2157,10 @@ main(int argc, char **argv)
- 		aio_setup();
- #endif
- 
--	if (lite) {
-+	if (!(o_flags & O_TRUNC)) {
- 		off_t ret;
--		file_size = maxfilelen = lseek(fd, (off_t)0, SEEK_END);
-+		file_size = maxfilelen = biggest = lseek(fd, (off_t)0, SEEK_END);
-+		printf("file_size=%lu\n", file_size);
- 		if (file_size == (off_t)-1) {
- 			prterr(fname);
- 			warn("main: lseek eof");
-@@ -2189,8 +2197,23 @@ main(int argc, char **argv)
- 					maxfilelen);
- 			exit(98);
- 		}
--	} else 
-+	} else {
-+		ssize_t ret, len = file_size;
-+		off_t off = 0;
-+
-+		while (len > 0) {
-+			ret = read(fd, good_buf + off, len);
-+			if (ret == -1) {
-+				prterr(fname);
-+				warn("main: error on read");
-+				exit(98);
-+			}
-+			len -= ret;
-+			off += ret;
-+		}
-+
- 		check_trunc_hack();
++	if (!log_entry_valid(entry)) {
++		fprintf(stderr, "Malformed entry @%llu\n",
++				log->cur_pos / log->sectorsize);
++		return -1;
 +	}
+ 	log->cur_entry++;
  
- 	if (fallocate_calls)
- 		fallocate_calls = test_fallocate(0);
+ 	size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
+ 	if (read_size < log->sectorsize) {
+-		if (lseek(log->logfd,
+-			  log->sectorsize - sizeof(struct log_write_entry),
+-			  SEEK_CUR) == (off_t)-1) {
++		log->cur_pos = lseek(log->logfd,
++			log->sectorsize - sizeof(struct log_write_entry), SEEK_CUR);
++		if (log->cur_pos == (off_t)-1) {
+ 			fprintf(stderr, "Error seeking in log: %d\n", errno);
+ 			return -1;
+ 		}
++	} else {
++		log->cur_pos += read_size;
+ 	}
+ 
+-	if (log_writes_verbose)
+-		printf("replaying %d: sector %llu, size %llu, flags %llu\n",
+-		       (int)log->cur_entry - 1,
++	if (log_writes_verbose) {
++		printf("replaying %d@%llu: sector %llu, size %llu, flags %llu\n",
++		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+ 		       (unsigned long long)le64_to_cpu(entry->sector),
+ 		       (unsigned long long)size,
+ 		       (unsigned long long)le64_to_cpu(entry->flags));
++	}
+ 	if (!size)
+ 		return 0;
+ 
+@@ -183,6 +211,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 		free(buf);
+ 		return -1;
+ 	}
++	log->cur_pos += size;
+ 
+ 	offset = le64_to_cpu(entry->sector) * log->sectorsize;
+ 	ret = pwrite(log->replayfd, buf, size, offset);
+@@ -212,7 +241,8 @@ int log_seek_entry(struct log *log, u64 entry_num)
+ 	}
+ 
+ 	/* Skip the first sector containing the log super block */
+-	if (lseek(log->logfd, log->sectorsize, SEEK_SET) == (off_t)-1) {
++	log->cur_pos = lseek(log->logfd, log->sectorsize, SEEK_SET);
++	if (log->cur_pos == (off_t)-1) {
+ 		fprintf(stderr, "Error seeking in file: %d\n", errno);
+ 		return -1;
+ 	}
+@@ -229,9 +259,14 @@ int log_seek_entry(struct log *log, u64 entry_num)
+ 			fprintf(stderr, "Error reading entry: %d\n", errno);
+ 			return -1;
+ 		}
++		if (!log_entry_valid(&entry)) {
++			fprintf(stderr, "Malformed entry @%llu\n",
++					log->cur_pos / log->sectorsize);
++			return -1;
++		}
+ 		if (log_writes_verbose > 1)
+-			printf("seek entry %d: %llu, size %llu, flags %llu\n",
+-			       (int)i,
++			printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
++			       (int)i, log->cur_pos / log->sectorsize,
+ 			       (unsigned long long)le64_to_cpu(entry.sector),
+ 			       (unsigned long long)le64_to_cpu(entry.nr_sectors),
+ 			       (unsigned long long)le64_to_cpu(entry.flags));
+@@ -240,7 +275,8 @@ int log_seek_entry(struct log *log, u64 entry_num)
+ 		if (!(flags & LOG_DISCARD_FLAG))
+ 			seek_size += le64_to_cpu(entry.nr_sectors) *
+ 				log->sectorsize;
+-		if (lseek(log->logfd, seek_size, SEEK_CUR) == (off_t)-1) {
++		log->cur_pos = lseek(log->logfd, seek_size, SEEK_CUR);
++		if (log->cur_pos == (off_t)-1) {
+ 			fprintf(stderr, "Error seeking in file: %d\n", errno);
+ 			return -1;
+ 		}
+@@ -277,29 +313,37 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
+ 		fprintf(stderr, "Error reading entry: %d\n", errno);
+ 		return -1;
+ 	}
++	if (!log_entry_valid(entry)) {
++		fprintf(stderr, "Malformed entry @%llu\n",
++				log->cur_pos / log->sectorsize);
++		return -1;
++	}
+ 	log->cur_entry++;
+ 
+ 	if (read_size < log->sectorsize) {
+-		if (lseek(log->logfd,
+-			  log->sectorsize - sizeof(struct log_write_entry),
+-			  SEEK_CUR) == (off_t)-1) {
++		log->cur_pos = lseek(log->logfd,
++			log->sectorsize - sizeof(struct log_write_entry), SEEK_CUR);
++		if (log->cur_pos == (off_t)-1) {
+ 			fprintf(stderr, "Error seeking in log: %d\n", errno);
+ 			return -1;
+ 		}
++	} else {
++		log->cur_pos += read_size;
+ 	}
+ 	if (log_writes_verbose > 1)
+-		printf("seek entry %d: %llu, size %llu, flags %llu\n",
+-		       (int)log->cur_entry - 1,
++		printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
++		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+ 		       (unsigned long long)le64_to_cpu(entry->sector),
+ 		       (unsigned long long)le64_to_cpu(entry->nr_sectors),
+ 		       (unsigned long long)le64_to_cpu(entry->flags));
+ 
+-	flags = le32_to_cpu(entry->flags);
+-	read_size = le32_to_cpu(entry->nr_sectors) * log->sectorsize;
++	flags = le64_to_cpu(entry->flags);
++	read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
+ 	if (!read_size || (flags & LOG_DISCARD_FLAG))
+ 		return 0;
+ 
+-	if (lseek(log->logfd, read_size, SEEK_CUR) == (off_t)-1) {
++	log->cur_pos = lseek(log->logfd, read_size, SEEK_CUR);
++	if (log->cur_pos == (off_t)-1) {
+ 		fprintf(stderr, "Error seeking in log: %d\n", errno);
+ 		return -1;
+ 	}
+@@ -369,8 +413,8 @@ struct log *log_open(char *logfile, char *replayfile)
+ 	log->nr_entries = le64_to_cpu(super.nr_entries);
+ 	log->max_zero_size = 128 * 1024 * 1024;
+ 
+-	if (lseek(log->logfd, log->sectorsize - sizeof(super), SEEK_CUR) ==
+-	    (off_t) -1) {
++	log->cur_pos = lseek(log->logfd, log->sectorsize - sizeof(super), SEEK_CUR);
++	if (log->cur_pos == (off_t) -1) {
+ 		fprintf(stderr, "Error seeking to first entry: %d\n", errno);
+ 		log_free(log);
+ 		return NULL;
+diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
+index 6cadb66..c89b119 100644
+--- a/src/log-writes/log-writes.h
++++ b/src/log-writes/log-writes.h
+@@ -50,6 +50,8 @@ struct log_write_entry {
+ 	__le64 nr_sectors;
+ 	__le64 flags;
+ 	__le64 data_len;
++	/* Read extra byte when seeking to verify that header is zero padded */
++	char data[1];
+ };
+ 
+ #define LOG_IGNORE_DISCARD (1 << 0)
+diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+index c3de9c4..cf67931 100644
+--- a/src/log-writes/replay-log.c
++++ b/src/log-writes/replay-log.c
+@@ -75,7 +75,7 @@ static int should_stop(struct log_write_entry *entry, u64 stop_flags,
+ 	u64 flags = le64_to_cpu(entry->flags);
+ 	int check_mark = (stop_flags & LOG_MARK_FLAG);
+ 	/* mark data begins after entry header */
+-	char *buf = (char *)(entry + 1);
++	char *buf = entry->data;
+ 	/* entry buffer is padded with at least 1 zero after data_len */
+ 	u64 buflen = le64_to_cpu(entry->data_len) + 1;
+ 
+@@ -293,8 +293,9 @@ int main(int argc, char **argv)
+ 			num_entries++;
+ 			if ((run_limit && num_entries == run_limit) ||
+ 			    should_stop(entry, stop_flags, end_mark)) {
+-				printf("%llu\n",
+-				       (unsigned long long)log->cur_entry - 1);
++				printf("%llu@%llu\n",
++				       (unsigned long long)log->cur_entry - 1,
++				       log->cur_pos / log->sectorsize);
+ 				log_free(log);
+ 				return 0;
+ 			}
 -- 
 2.7.4
 
