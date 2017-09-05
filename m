@@ -1,67 +1,49 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:33737 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751305AbdIEL3h (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 07:29:37 -0400
-MIME-Version: 1.0
-In-Reply-To: <20170905105025.GB8034@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57130 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750741AbdIELba (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Sep 2017 07:31:30 -0400
+Date: Tue, 5 Sep 2017 19:31:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 07/14] fsx: add optional logid prefix to log messages
+Message-ID: <20170905113128.GG8034@eguan.usersys.redhat.com>
 References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <1504104706-11965-10-git-send-email-amir73il@gmail.com> <20170905105025.GB8034@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 5 Sep 2017 14:29:35 +0300
-Message-ID: <CAOQ4uxhSRn_-_ZHy8MJWOheZnSUuN9DZuJb_ygD5qwnEEV39LQ@mail.gmail.com>
-Subject: Re: [PATCH v2 09/14] fsx: add support for -g filldata
-Content-Type: text/plain; charset="UTF-8"
+ <1504104706-11965-8-git-send-email-amir73il@gmail.com>
+ <20170905104641.GA8034@eguan.usersys.redhat.com>
+ <CAOQ4uxi1mu5QXt3PJuk27WJvm+vS63ct+VQsDJvxvaLiEGzrAA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi1mu5QXt3PJuk27WJvm+vS63ct+VQsDJvxvaLiEGzrAA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
 Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 5, 2017 at 1:50 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Aug 30, 2017 at 05:51:41PM +0300, Amir Goldstein wrote:
->> -g X: write character X instead of random generated data
->>
->> This is useful to compare holes between good and bad buffer.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->
-> This seems useful, but I don't see this option gets used in this
-> patchset. Perhaps introduce it when it gets used in the test?
+On Tue, Sep 05, 2017 at 02:24:20PM +0300, Amir Goldstein wrote:
+> On Tue, Sep 5, 2017 at 1:46 PM, Eryu Guan <eguan@redhat.com> wrote:
+> > On Wed, Aug 30, 2017 at 05:51:39PM +0300, Amir Goldstein wrote:
+> >> When writing the intermixed output of several fsx processes
+> >> to a single log file, it is usefull to prefix logs with a log id.
+> >> Use fsx -j <logid> to define the log messages prefix.
+> >
+> > Would it be better to allow any string as prefix, not limit to id
+> > number?
+> >
+> 
+> Maybe, but I didn't see an immediate need for that beyond
+> the concurrent test runs, for with numeric id is sufficient.
 
-I used it for debugging, to compare hexdump of good and bad files
-when I suspected that checksum errors were due to different zeroed
-ranges.
+I agreed, I don't have strong preference on this.
 
-
->
->> ---
->>  ltp/fsx.c | 11 +++++++++--
->>  1 file changed, 9 insertions(+), 2 deletions(-)
->>
->> diff --git a/ltp/fsx.c b/ltp/fsx.c
->> index dd6b637..a75bc55 100644
->> --- a/ltp/fsx.c
->> +++ b/ltp/fsx.c
->> @@ -132,6 +132,7 @@ unsigned long     simulatedopcount = 0;   /* -b flag */
->>  int  closeprob = 0;                  /* -c flag */
->>  int  debug = 0;                      /* -d flag */
->>  unsigned long        debugstart = 0;         /* -D flag */
->> +char filldata = 0;                   /* -g flag */
->>  int  logid = 0;                      /* -j flag */
->>  int  flush = 0;                      /* -f flag */
->>  int  do_fsync = 0;                   /* -y flag */
->> @@ -817,6 +818,8 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
->>               good_buf[offset] = testcalls % 256;
->>               if (offset % 2)
->>                       good_buf[offset] += original_buf[offset];
->> +             if (filldata)
->> +                     good_buf[offset] = filldata;
->
-> If filldata is not null, we're wasting cycles setting good_buf[offset]
-> and overwriting it with filldata. Use a if-else switch? e.g.
->
-
-considering this is a debugging option that is not meant to optimize
-performance, I don't think that's critical, but I can fix that.
-
-Thanks
-Amir.
+Thanks,
+Eryu
+> 
+> Besides, the function that prepends the prefix, prt()
+> is sometimes uses for continued line, which results with
+> weird looking lines like this one:
+> 
+> 1: 60( 60 mod 256): 1: FALLOC   0x30140 thru 0x30f3c    (0xdfc bytes)
+> 1: EXTENDING1:
+> 
+> So it's not really worth fixing properly, but anything more then a single
+> numeric prefix is going to look quite bad.
