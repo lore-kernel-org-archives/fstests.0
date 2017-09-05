@@ -1,11 +1,11 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:36733 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752556AbdIETLF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:05 -0400
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:35052 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752591AbdIETLI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:08 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 08/13] replay-log: add support for replaying ops in target device sector range
-Date: Tue,  5 Sep 2017 22:11:15 +0300
-Message-Id: <1504638680-25682-9-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 10/13] fstests: crash consistency fsx test using dm-log-writes
+Date: Tue,  5 Sep 2017 22:11:17 +0300
+Message-Id: <1504638680-25682-11-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,179 +13,197 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Using command line options --start-sector and --end-sector, only
-operations acting on the specified target device range will be
-replayed.
+Cherry-picked the test from commit 70d41e17164b
+in Josef Bacik's fstests tree (https://github.com/josefbacik/fstests).
+Quoting from Josef's commit message:
 
-Single vebbose mode (-v) prints out only replayed operations.
-Double verbose mode (-vv) prints out also skipped operations.
+  The test just runs some ops and exits, then finds all of the good buffers
+  in the directory we provided and:
+  - replays up to the mark given
+  - mounts the file system and compares the md5sum
+  - unmounts and fsck's to check for metadata integrity
 
+  dm-log-writes will pretend to do discard and the replay-log tool will
+  replay it properly depending on the underlying device, either by writing
+  0's or actually calling the discard ioctl, so I've enabled discard in the
+  test for maximum fun.
+
+[Amir:]
+- Removed unneeded _test_falloc_support dynamic FSX_OPTS
+- Fold repetitions into for loops
+- Added place holders for using constant random seeds
+- Add pre umount checkpint
+- Add test to new 'replay' group
+- Address review comments by Eryu Guan
+
+Cc: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- src/log-writes/log-writes.c | 37 +++++++++++++++++++++++++++++++++++--
- src/log-writes/log-writes.h |  2 ++
- src/log-writes/replay-log.c | 31 +++++++++++++++++++++++++++++++
- 3 files changed, 68 insertions(+), 2 deletions(-)
+ tests/generic/500     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/500.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 138 insertions(+)
+ create mode 100755 tests/generic/500
+ create mode 100644 tests/generic/500.out
 
-diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-index dbfeef7..fab447a 100644
---- a/src/log-writes/log-writes.c
-+++ b/src/log-writes/log-writes.c
-@@ -118,6 +118,27 @@ int log_discard(struct log *log, struct log_write_entry *entry)
- }
- 
- /*
-+ * @log: the log we are replaying.
-+ * @entry: entry to be replayed.
-+ *
-+ * @return: 0 if we should replay the entry, > 0 if we should skip it.
-+ *
-+ * Should we skip the entry in our log or replay onto the replay device.
-+ */
-+int log_should_skip(struct log *log, struct log_write_entry *entry)
-+{
-+	u64 sector = le64_to_cpu(entry->sector);
-+	u64 nr_sectors = le64_to_cpu(entry->nr_sectors);
+diff --git a/tests/generic/500 b/tests/generic/500
+new file mode 100755
+index 0000000..82f7a93
+--- /dev/null
++++ b/tests/generic/500
+@@ -0,0 +1,135 @@
++#! /bin/bash
++# FS QA Test No. 500
++#
++# Run fsx with log writes to verify power fail safeness.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2015 Facebook. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	if (!nr_sectors)
-+		return 0;
-+	if (sector + nr_sectors <= log->start_sector ||
-+	    sector > log->end_sector)
-+		return 1;
-+	return 0;
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1	# failure is the default!
++
++_cleanup()
++{
++	_log_writes_cleanup
++}
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch_nocheck
++_require_log_writes
++
++rm -f $seqres.full
++
++check_files()
++{
++	local name=$1
++
++	# Now look for our files
++	for i in $(find $SANITY_DIR -type f | grep $name | grep mark)
++	do
++		local filename=$(basename $i)
++		local mark="${filename##*.}"
++		echo "checking $filename" >> $seqres.full
++		_log_writes_replay_log $filename
++		_scratch_mount
++		local expected_md5=$(_md5_checksum $i)
++		local md5=$(_md5_checksum $SCRATCH_MNT/$name)
++		[ "${md5}" != "${expected_md5}" ] && _fail "$filename md5sum mismatched"
++		_scratch_unmount
++		_check_scratch_fs
++	done
 +}
 +
-+/*
-  * @entry: entry to be replayed.
-  *
-  * @return: 1 if the entry is sane, 0 if it is invalid.
-@@ -157,6 +178,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 	char *buf;
- 	ssize_t ret;
- 	off_t offset;
-+	int skip = 0;
- 
- 	if (log->cur_entry >= log->nr_entries)
- 		return 1;
-@@ -185,8 +207,10 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 		log->cur_pos += read_size;
- 	}
- 
--	if (log_writes_verbose) {
--		printf("replaying %d@%llu: sector %llu, size %llu, flags %llu\n",
-+	skip = log_should_skip(log, entry);
-+	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
-+		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
-+		       skip ? "skipping" : "replaying",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)size,
-@@ -199,6 +223,15 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 	if (flags & LOG_DISCARD_FLAG)
- 		return log_discard(log, entry);
- 
-+	if (skip) {
-+		log->cur_pos = lseek(log->logfd, size, SEEK_CUR);
-+		if (log->cur_pos == (off_t)-1) {
-+			fprintf(stderr, "Error seeking in log: %d\n", errno);
-+			return -1;
-+		}
-+		return 0;
-+	}
++SANITY_DIR=$TEST_DIR/fsxtests
++rm -rf $SANITY_DIR
++mkdir $SANITY_DIR
 +
- 	buf = malloc(size);
- 	if (!buf) {
- 		fprintf(stderr, "Error allocating buffer %llu entry %llu\n", (unsigned long long)size, (unsigned long long)log->cur_entry - 1);
-diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
-index c89b119..14242ee 100644
---- a/src/log-writes/log-writes.h
-+++ b/src/log-writes/log-writes.h
-@@ -62,6 +62,8 @@ struct log {
- 	int replayfd;
- 	unsigned long flags;
- 	u64 sectorsize;
-+	u64 start_sector;
-+	u64 end_sector;
- 	u64 nr_entries;
- 	u64 cur_entry;
- 	u64 max_zero_size;
-diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
-index cf67931..8457937 100644
---- a/src/log-writes/replay-log.c
-+++ b/src/log-writes/replay-log.c
-@@ -20,6 +20,8 @@ enum option_indexes {
- 	FSCK,
- 	CHECK,
- 	START_MARK,
-+	START_SECTOR,
-+	END_SECTOR,
- };
- 
- static struct option long_options[] = {
-@@ -37,6 +39,8 @@ static struct option long_options[] = {
- 	{"fsck", required_argument, NULL, 0},
- 	{"check", required_argument, NULL, 0},
- 	{"start-mark", required_argument, NULL, 0},
-+	{"start-sector", required_argument, NULL, 0},
-+	{"end-sector", required_argument, NULL, 0},
- 	{ NULL, 0, NULL, 0 },
- };
- 
-@@ -61,6 +65,12 @@ static void usage(void)
- 		"--check\n");
- 	fprintf(stderr, "\t--check [<number>|flush|fua] when to check the "
- 		"file system, mush specify --fsck\n");
-+	fprintf(stderr, "\t--start-sector <sector> - replay ops on region "
-+		"from <sector> onto <device>\n");
-+	fprintf(stderr, "\t--end-sector <sector> - replay ops on region "
-+		"to <sector> onto <device>\n");
-+	fprintf(stderr, "\t-v or --verbose - print replayed ops\n");
-+	fprintf(stderr, "\t-vv - print also skipped ops\n");
- 	exit(1);
- }
- 
-@@ -129,6 +139,8 @@ int main(int argc, char **argv)
- 	struct log_write_entry *entry;
- 	u64 stop_flags = 0;
- 	u64 start_entry = 0;
-+	u64 start_sector = 0;
-+	u64 end_sector = -1ULL;
- 	u64 run_limit = 0;
- 	u64 num_entries = 0;
- 	u64 check_number = 0;
-@@ -249,6 +261,22 @@ int main(int argc, char **argv)
- 				tmp = NULL;
- 			}
- 			break;
-+		case START_SECTOR:
-+			start_sector = strtoull(optarg, &tmp, 0);
-+			if (tmp && *tmp != '\0') {
-+				fprintf(stderr, "Invalid sector number\n");
-+				exit(1);
-+			}
-+			tmp = NULL;
-+			break;
-+		case END_SECTOR:
-+			end_sector = strtoull(optarg, &tmp, 0);
-+			if (tmp && *tmp != '\0') {
-+				fprintf(stderr, "Invalid sector number\n");
-+				exit(1);
-+			}
-+			tmp = NULL;
-+			break;
- 		default:
- 			usage();
- 		}
-@@ -266,6 +294,9 @@ int main(int argc, char **argv)
- 	if (!discard)
- 		log->flags |= LOG_IGNORE_DISCARD;
- 
-+	log->start_sector = start_sector;
-+	log->end_sector = end_sector;
++# Create the log
++_log_writes_init
 +
- 	entry = malloc(log->sectorsize);
- 	if (!entry) {
- 		fprintf(stderr, "Couldn't allocate buffer\n");
++_log_writes_mkfs >> $seqres.full 2>&1
++
++# Log writes emulates discard support, turn it on for maximum crying.
++_log_writes_mount -o discard
++
++NUM_FILES=4
++NUM_OPS=200
++FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
++# Set random seeds for fsx runs (0 for timestamp + pid)
++seeds=(0 0 0 0)
++# Run fsx for a while
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
++done
++wait
++
++test_md5=()
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	test_md5[$j]=$(_md5_checksum $SCRATCH_MNT/testfile$j)
++done
++
++# Unmount the scratch dir and tear down the log writes target
++_log_writes_mark last
++_log_writes_unmount
++_log_writes_mark end
++_log_writes_remove
++_check_scratch_fs
++
++# check pre umount
++echo "checking pre umount" >> $seqres.full
++_log_writes_replay_log last
++_scratch_mount
++_scratch_unmount
++_check_scratch_fs
++
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	check_files testfile$j
++done
++
++# Check the end
++echo "checking post umount" >> $seqres.full
++_log_writes_replay_log end
++_scratch_mount
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
++	[ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
++done
++_scratch_unmount
++_check_scratch_fs
++
++echo "Silence is golden"
++status=0
++exit
++
+diff --git a/tests/generic/500.out b/tests/generic/500.out
+new file mode 100644
+index 0000000..883b2ca
+--- /dev/null
++++ b/tests/generic/500.out
+@@ -0,0 +1,2 @@
++QA output created by 500
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 1894de0..c857153 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -457,3 +457,4 @@
+ 452 auto quick
+ 453 auto quick dir
+ 454 auto quick attr
++500 auto log replay
 -- 
 2.7.4
 
