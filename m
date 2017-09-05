@@ -1,40 +1,246 @@
-Received: from mail-yw0-f172.google.com ([209.85.161.172]:35930 "EHLO
-        mail-yw0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750766AbdIELYW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 07:24:22 -0400
-MIME-Version: 1.0
-In-Reply-To: <20170905104641.GA8034@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52468 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750731AbdIEL2s (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Sep 2017 07:28:48 -0400
+Date: Tue, 5 Sep 2017 19:28:42 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 14/14] fstests: add crash consistency fsx test using
+ dm-log-writes
+Message-ID: <20170905112842.GF8034@eguan.usersys.redhat.com>
 References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <1504104706-11965-8-git-send-email-amir73il@gmail.com> <20170905104641.GA8034@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 5 Sep 2017 14:24:20 +0300
-Message-ID: <CAOQ4uxi1mu5QXt3PJuk27WJvm+vS63ct+VQsDJvxvaLiEGzrAA@mail.gmail.com>
-Subject: Re: [PATCH v2 07/14] fsx: add optional logid prefix to log messages
-Content-Type: text/plain; charset="UTF-8"
+ <1504104706-11965-15-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1504104706-11965-15-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 5, 2017 at 1:46 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Aug 30, 2017 at 05:51:39PM +0300, Amir Goldstein wrote:
->> When writing the intermixed output of several fsx processes
->> to a single log file, it is usefull to prefix logs with a log id.
->> Use fsx -j <logid> to define the log messages prefix.
->
-> Would it be better to allow any string as prefix, not limit to id
-> number?
->
+On Wed, Aug 30, 2017 at 05:51:46PM +0300, Amir Goldstein wrote:
+> DO NOT MERGE!!! this test fails most likely due to test bug.
+> 
+> The random seed values in this patch fail the test consistently on ext4
+> always with the same fsck error ((end of extent exceeds allowed value).
+> btrfs also fails, but with slightly different fsck errors each run.
+> xfs fails sometimes on file checksum error.
+> 
+> Cherry-picked the test from commit 70d41e17164b
+> in Josef Bacik's fstests tree (https://github.com/josefbacik/fstests).
+> Quoting from Josef's commit message:
+> 
+>   The test just runs some ops and exits, then finds all of the good buffers
+>   in the directory we provided and:
+>   - replays up to the mark given
+>   - mounts the file system and compares the md5sum
+>   - unmounts and fsck's to check for metadata integrity
+> 
+>   dm-log-writes will pretend to do discard and the replay-log tool will
+>   replay it properly depending on the underlying device, either by writing
+>   0's or actually calling the discard ioctl, so I've enabled discard in the
+>   test for maximum fun.
+> 
+> [Amir:]
+> - Removed unneeded _test_falloc_support dynamic FSX_OPTS
+> - Added place holders for using constant random seeds
+> - Add test to new 'replay' group
 
-Maybe, but I didn't see an immediate need for that beyond
-the concurrent test runs, for with numeric id is sufficient.
+Perhaps replace it with 'log' group?
 
-Besides, the function that prepends the prefix, prt()
-is sometimes uses for continued line, which results with
-weird looking lines like this one:
+> 
+> Cc: Josef Bacik <jbacik@fb.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/generic/500     | 138 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/500.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 141 insertions(+)
+>  create mode 100755 tests/generic/500
+>  create mode 100644 tests/generic/500.out
+> 
+> diff --git a/tests/generic/500 b/tests/generic/500
+> new file mode 100755
+> index 0000000..81d45ef
+> --- /dev/null
+> +++ b/tests/generic/500
+> @@ -0,0 +1,138 @@
+> +#! /bin/bash
+> +# FS QA Test No. 500
+> +#
+> +# Run fsx with log writes to verify power fail safeness.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2015 Facebook. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +status=1	# failure is the default!
+> +
+> +_cleanup()
+> +{
+> +	_cleanup_log_writes
+> +}
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmlogwrites
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_scratch_nocheck
+> +_require_log_writes
+> +
+> +rm -f $seqres.full
+> +rm -rf $TEST_DIR/fsxtests
 
-1: 60( 60 mod 256): 1: FALLOC   0x30140 thru 0x30f3c    (0xdfc bytes)
-1: EXTENDING1:
+Remove it after SANITY_DIR is defined?
 
-So it's not really worth fixing properly, but anything more then a single
-numeric prefix is going to look quite bad.
+> +
+> +check_files()
+> +{
+> +	local _name=$1
+
+Don't need underscore for a local var.
+
+> +
+> +	# Now look for our files
+> +	for i in $(find $SANITY_DIR -type f | grep $_name | grep mark)
+> +	do
+> +		local filename=$(basename $i)
+> +		local mark="${filename##*.}"
+> +		local expected_size=$(_ls_l -h $i | awk '{ print $5 }')
+> +		echo "checking $filename ($expected_size)" >> $seqres.full
+> +		_replay_log $filename
+> +		_scratch_mount
+> +		local expected_md5=$(md5sum $i | cut -f 1 -d ' ')
+> +		local md5=$(md5sum $SCRATCH_MNT/$_name | cut -f 1 -d ' ')
+> +		local size=$(_ls_l -h $SCRATCH_MNT/$_name | awk '{ print $5 }')
+
+I see this md5 and size patterns are repeating several times in this
+test, write new helpers?
+
+> +		[ "${md5}" != "${expected_md5}" ] && _fatal "$filename ($size) md5sum mismatched"
+
+Use _fail in this test.
+
+> +		_scratch_unmount
+> +		_check_scratch_fs
+> +	done
+> +}
+> +
+> +SANITY_DIR=$TEST_DIR/fsxtests
+> +mkdir $SANITY_DIR
+> +
+> +# Create the log
+> +_init_log_writes
+> +
+> +_log_writes_mkfs >> $seqres.full 2>&1
+> +
+> +# Log writes emulates discard support, turn it on for maximum crying.
+> +_mount_log_writes -o discard
+> +
+> +NUM_FILES=4
+> +NUM_OPS=200
+> +FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
+> +# Set random seeds for fsx runs (0 for timestamp + pid)
+> +seeds=(- 2885 2886 2887 2888)
+         ^^ meant 0?
+
+> +# Run fsx for a while
+> +for j in `seq 1 $NUM_FILES`
+> +do
+> +	run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
+> +done
+> +wait
+> +
+> +test_md5=()
+> +test_size=()
+> +for j in `seq 1 $NUM_FILES`
+> +do
+> +	test_md5[$j]=$(md5sum $SCRATCH_MNT/testfile$j | cut -f 1 -d ' ')
+> +	test_size[$j]=$(_ls_l -h $SCRATCH_MNT/testfile$j | awk '{ print $5 }')
+> +done
+> +
+> +# Unmount the scratch dir and tear down the log writes target
+> +_log_writes_mark last
+> +_unmount_log_writes
+> +_log_writes_mark end
+> +_log_writes_remove
+> +_check_scratch_fs
+> +
+> +# check pre umount
+> +_replay_log last
+> +_scratch_mount
+> +_scratch_unmount
+> +_check_scratch_fs
+> +
+> +for j in `seq 1 $NUM_FILES`
+> +do
+> +	check_files testfile$j
+> +done
+> +
+> +# Check the end
+> +_replay_log end
+> +_scratch_mount
+> +for j in `seq 1 $NUM_FILES`
+> +do
+> +	md5=$(md5sum $SCRATCH_MNT/testfile$j | cut -f 1 -d ' ')
+> +	size=$(_ls_l -h $SCRATCH_MNT/testfile$j | awk '{ print $5 }')
+> +	[ "${md5}" != "${test_md5[$j]}" ] && _fatal "testfile$j end md5sum mismatched ($size:${test_size[$j]})"
+> +done
+> +_scratch_unmount
+> +_check_scratch_fs
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> +
+> diff --git a/tests/generic/500.out b/tests/generic/500.out
+> new file mode 100644
+> index 0000000..883b2ca
+> --- /dev/null
+> +++ b/tests/generic/500.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 500
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 044ec3f..2396b72 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -453,3 +453,4 @@
+>  448 auto quick rw
+>  449 auto quick acl enospc
+>  450 auto quick rw
+> +500 auto log replay
+
+Adding it to auto group seems fine to me.
+
+Thanks,
+Eryu
+
+> -- 
+> 2.7.4
+> 
