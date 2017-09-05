@@ -1,11 +1,11 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34282 "EHLO
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:36733 "EHLO
         mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752576AbdIETLG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:06 -0400
+        with ESMTP id S1752556AbdIETLF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:05 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 09/13] fstests: add support for working with dm-log-writes target
-Date: Tue,  5 Sep 2017 22:11:16 +0300
-Message-Id: <1504638680-25682-10-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v3 08/13] replay-log: add support for replaying ops in target device sector range
+Date: Tue,  5 Sep 2017 22:11:15 +0300
+Message-Id: <1504638680-25682-9-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,179 +13,179 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Cherry-picked the relevant common bits from commit 70d41e17164b
-in Josef Bacik's fstests tree (https://github.com/josefbacik/fstests).
-Quoting from Josef's commit message:
+Using command line options --start-sector and --end-sector, only
+operations acting on the specified target device range will be
+replayed.
 
-  This patch adds the supporting code for using the dm-log-writes
-  target.  The dmlogwrites code is similar to the dmflakey code, it just
-  gives us functions to build and tear down a dm-log-writes target.  We
-  add a new LOGWRITES_DEV variable to take in the device we will use as
-  the log and add checks for that.
+Single vebbose mode (-v) prints out only replayed operations.
+Double verbose mode (-vv) prints out also skipped operations.
 
-[Amir:]
-- Removed unneeded _test_falloc_support
-- Moved _require_log_writes to dmlogwrites
-- Document _require_log_writes
-- Address review comments by Eryu Guan
-
-Cc: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- README                       |  2 +
- common/dmlogwrites           | 94 ++++++++++++++++++++++++++++++++++++++++++++
- doc/requirement-checking.txt | 20 ++++++++++
- 3 files changed, 116 insertions(+)
- create mode 100644 common/dmlogwrites
+ src/log-writes/log-writes.c | 37 +++++++++++++++++++++++++++++++++++--
+ src/log-writes/log-writes.h |  2 ++
+ src/log-writes/replay-log.c | 31 +++++++++++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 2 deletions(-)
 
-diff --git a/README b/README
-index 9456fa7..4963d28 100644
---- a/README
-+++ b/README
-@@ -91,6 +91,8 @@ Preparing system for tests:
-              - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
-                xfs_scrub -vd to scrub the filesystem metadata online before
-                unmounting to run the offline check.
-+             - setenv LOGWRITES_DEV to a block device to use for power fail
-+               testing.
+diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+index dbfeef7..fab447a 100644
+--- a/src/log-writes/log-writes.c
++++ b/src/log-writes/log-writes.c
+@@ -118,6 +118,27 @@ int log_discard(struct log *log, struct log_write_entry *entry)
+ }
  
-         - or add a case to the switch in common/config assigning
-           these variables based on the hostname of your test
-diff --git a/common/dmlogwrites b/common/dmlogwrites
-new file mode 100644
-index 0000000..592b047
---- /dev/null
-+++ b/common/dmlogwrites
-@@ -0,0 +1,94 @@
-+##/bin/bash
-+#
-+# Copyright (c) 2015 Facebook, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#
-+# common functions for setting up and tearing down a dm log-writes device
-+
-+echo $MOUNT_OPTIONS | grep -q dax
-+if [ $? -eq 0 ]; then
-+	_notrun "Cannot run tests with DAX on dmerror devices"
-+fi
-+
-+_require_log_writes()
+ /*
++ * @log: the log we are replaying.
++ * @entry: entry to be replayed.
++ *
++ * @return: 0 if we should replay the entry, > 0 if we should skip it.
++ *
++ * Should we skip the entry in our log or replay onto the replay device.
++ */
++int log_should_skip(struct log *log, struct log_write_entry *entry)
 +{
-+	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
-+		_notrun "This test requires a valid \$LOGWRITES_DEV"
++	u64 sector = le64_to_cpu(entry->sector);
++	u64 nr_sectors = le64_to_cpu(entry->nr_sectors);
 +
-+	_require_dm_target log-writes
-+	_require_test_program "log-writes/replay-log"
++	if (!nr_sectors)
++		return 0;
++	if (sector + nr_sectors <= log->start_sector ||
++	    sector > log->end_sector)
++		return 1;
++	return 0;
 +}
 +
-+_log_writes_init()
-+{
-+	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-+	LOGWRITES_NAME=logwrites-test
-+	LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
-+	LOGWRITES_TABLE="0 $BLK_DEV_SIZE log-writes $SCRATCH_DEV $LOGWRITES_DEV"
-+	$DMSETUP_PROG create $LOGWRITES_NAME --table "$LOGWRITES_TABLE" || \
-+		_fail "failed to create log-writes device"
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
-+}
-+
-+_log_writes_mark()
-+{
-+	[ $# -ne 1 ] && _fail "_log_writes_mark takes one argument"
-+	$DMSETUP_PROG message $LOGWRITES_NAME 0 mark $1
-+}
-+
-+_log_writes_mkfs()
-+{
-+	_scratch_options mkfs
-+	_mkfs_dev $SCRATCH_OPTIONS $LOGWRITES_DMDEV
-+	_log_writes_mark mkfs
-+}
-+
-+_log_writes_mount()
-+{
-+	_scratch_options mount
-+	$MOUNT_PROG -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-+		$LOGWRITES_DMDEV $SCRATCH_MNT
-+}
-+
-+_log_writes_unmount()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+# _replay_log <mark>
-+#
-+# This replays the log contained on $LOGWRITES_DEV onto $SCRATCH_DEV upto the
-+# mark passed in.
-+_log_writes_replay_log()
-+{
-+	_mark=$1
-+
-+	$here/src/log-writes/replay-log --log $LOGWRITES_DEV --replay $SCRATCH_DEV \
-+		--end-mark $_mark >> $seqres.full 2>&1
-+	[ $? -ne 0 ] && _fail "replay failed"
-+}
-+
-+_log_writes_remove()
-+{
-+	$DMSETUP_PROG remove $LOGWRITES_NAME > /dev/null 2>&1
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
-+}
-+
-+_log_writes_cleanup()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	_log_writes_remove
-+}
-diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
-index 95d10e6..4e01b1f 100644
---- a/doc/requirement-checking.txt
-+++ b/doc/requirement-checking.txt
-@@ -21,6 +21,10 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
++/*
+  * @entry: entry to be replayed.
+  *
+  * @return: 1 if the entry is sane, 0 if it is invalid.
+@@ -157,6 +178,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 	char *buf;
+ 	ssize_t ret;
+ 	off_t offset;
++	int skip = 0;
  
- 	_require_statx
+ 	if (log->cur_entry >= log->nr_entries)
+ 		return 1;
+@@ -185,8 +207,10 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 		log->cur_pos += read_size;
+ 	}
  
-+ (4) Device mapper requirement.
-+
-+	_require_dm_target
-+	_require_log_writes
+-	if (log_writes_verbose) {
+-		printf("replaying %d@%llu: sector %llu, size %llu, flags %llu\n",
++	skip = log_should_skip(log, entry);
++	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
++		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
++		       skip ? "skipping" : "replaying",
+ 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+ 		       (unsigned long long)le64_to_cpu(entry->sector),
+ 		       (unsigned long long)size,
+@@ -199,6 +223,15 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 	if (flags & LOG_DISCARD_FLAG)
+ 		return log_discard(log, entry);
  
- ====================
- GENERAL REQUIREMENTS
-@@ -102,3 +106,19 @@ _require_statx
++	if (skip) {
++		log->cur_pos = lseek(log->logfd, size, SEEK_CUR);
++		if (log->cur_pos == (off_t)-1) {
++			fprintf(stderr, "Error seeking in log: %d\n", errno);
++			return -1;
++		}
++		return 0;
++	}
++
+ 	buf = malloc(size);
+ 	if (!buf) {
+ 		fprintf(stderr, "Error allocating buffer %llu entry %llu\n", (unsigned long long)size, (unsigned long long)log->cur_entry - 1);
+diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
+index c89b119..14242ee 100644
+--- a/src/log-writes/log-writes.h
++++ b/src/log-writes/log-writes.h
+@@ -62,6 +62,8 @@ struct log {
+ 	int replayfd;
+ 	unsigned long flags;
+ 	u64 sectorsize;
++	u64 start_sector;
++	u64 end_sector;
+ 	u64 nr_entries;
+ 	u64 cur_entry;
+ 	u64 max_zero_size;
+diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+index cf67931..8457937 100644
+--- a/src/log-writes/replay-log.c
++++ b/src/log-writes/replay-log.c
+@@ -20,6 +20,8 @@ enum option_indexes {
+ 	FSCK,
+ 	CHECK,
+ 	START_MARK,
++	START_SECTOR,
++	END_SECTOR,
+ };
  
-      The test requires the use of the statx() system call and will be skipped
-      if it isn't available in the kernel.
+ static struct option long_options[] = {
+@@ -37,6 +39,8 @@ static struct option long_options[] = {
+ 	{"fsck", required_argument, NULL, 0},
+ 	{"check", required_argument, NULL, 0},
+ 	{"start-mark", required_argument, NULL, 0},
++	{"start-sector", required_argument, NULL, 0},
++	{"end-sector", required_argument, NULL, 0},
+ 	{ NULL, 0, NULL, 0 },
+ };
+ 
+@@ -61,6 +65,12 @@ static void usage(void)
+ 		"--check\n");
+ 	fprintf(stderr, "\t--check [<number>|flush|fua] when to check the "
+ 		"file system, mush specify --fsck\n");
++	fprintf(stderr, "\t--start-sector <sector> - replay ops on region "
++		"from <sector> onto <device>\n");
++	fprintf(stderr, "\t--end-sector <sector> - replay ops on region "
++		"to <sector> onto <device>\n");
++	fprintf(stderr, "\t-v or --verbose - print replayed ops\n");
++	fprintf(stderr, "\t-vv - print also skipped ops\n");
+ 	exit(1);
+ }
+ 
+@@ -129,6 +139,8 @@ int main(int argc, char **argv)
+ 	struct log_write_entry *entry;
+ 	u64 stop_flags = 0;
+ 	u64 start_entry = 0;
++	u64 start_sector = 0;
++	u64 end_sector = -1ULL;
+ 	u64 run_limit = 0;
+ 	u64 num_entries = 0;
+ 	u64 check_number = 0;
+@@ -249,6 +261,22 @@ int main(int argc, char **argv)
+ 				tmp = NULL;
+ 			}
+ 			break;
++		case START_SECTOR:
++			start_sector = strtoull(optarg, &tmp, 0);
++			if (tmp && *tmp != '\0') {
++				fprintf(stderr, "Invalid sector number\n");
++				exit(1);
++			}
++			tmp = NULL;
++			break;
++		case END_SECTOR:
++			end_sector = strtoull(optarg, &tmp, 0);
++			if (tmp && *tmp != '\0') {
++				fprintf(stderr, "Invalid sector number\n");
++				exit(1);
++			}
++			tmp = NULL;
++			break;
+ 		default:
+ 			usage();
+ 		}
+@@ -266,6 +294,9 @@ int main(int argc, char **argv)
+ 	if (!discard)
+ 		log->flags |= LOG_IGNORE_DISCARD;
+ 
++	log->start_sector = start_sector;
++	log->end_sector = end_sector;
 +
-+
-+==========================
-+DEVICE MAPPER REQUIREMENTS
-+==========================
-+
-+_require_dm_target <name>
-+
-+     The test requires the use of the device mapper target and will be skipped
-+     if it isn't available in the kernel.
-+
-+_require_log_writes
-+
-+     The test requires the use of the device mapper target log-writes.
-+     The test also requires the test program log-writes/replay-log is built
-+     and will be skipped if either isn't available.
+ 	entry = malloc(log->sectorsize);
+ 	if (!entry) {
+ 		fprintf(stderr, "Couldn't allocate buffer\n");
 -- 
 2.7.4
 
