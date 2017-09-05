@@ -1,75 +1,82 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42344 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751238AbdIELdd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 5 Sep 2017 07:33:33 -0400
-Date: Tue, 5 Sep 2017 19:33:31 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 09/14] fsx: add support for -g filldata
-Message-ID: <20170905113331.GH8034@eguan.usersys.redhat.com>
-References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <1504104706-11965-10-git-send-email-amir73il@gmail.com>
- <20170905105025.GB8034@eguan.usersys.redhat.com>
- <CAOQ4uxhSRn_-_ZHy8MJWOheZnSUuN9DZuJb_ygD5qwnEEV39LQ@mail.gmail.com>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:38859 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751082AbdIELln (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 07:41:43 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhSRn_-_ZHy8MJWOheZnSUuN9DZuJb_ygD5qwnEEV39LQ@mail.gmail.com>
+In-Reply-To: <20170905110737.GD8034@eguan.usersys.redhat.com>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+ <1504104706-11965-13-git-send-email-amir73il@gmail.com> <20170905110737.GD8034@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 5 Sep 2017 14:41:42 +0300
+Message-ID: <CAOQ4uxhFC5BM0U9YGyQ9VLAEtiM4wZugtpmv4WtQ-vO4A17HaQ@mail.gmail.com>
+Subject: Re: [PATCH v2 12/14] replay-log: add support for replaying ops in
+ target device sector range
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 05, 2017 at 02:29:35PM +0300, Amir Goldstein wrote:
-> On Tue, Sep 5, 2017 at 1:50 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Wed, Aug 30, 2017 at 05:51:41PM +0300, Amir Goldstein wrote:
-> >> -g X: write character X instead of random generated data
-> >>
-> >> This is useful to compare holes between good and bad buffer.
-> >>
-> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> >
-> > This seems useful, but I don't see this option gets used in this
-> > patchset. Perhaps introduce it when it gets used in the test?
-> 
-> I used it for debugging, to compare hexdump of good and bad files
-> when I suspected that checksum errors were due to different zeroed
-> ranges.
+On Tue, Sep 5, 2017 at 2:07 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Aug 30, 2017 at 05:51:44PM +0300, Amir Goldstein wrote:
+>> Using command line options --start-sector and --end-sector, only
+>> operations acting on the specified target device range will be
+>> replayed.
+>>
+>> Single vebbose mode (-v) prints out only replayed operations.
+>> Double verbose mode (-vv) prints out also skipped operations.
+>>
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+>>  src/log-writes/log-writes.c | 33 +++++++++++++++++++++++++++++++--
+>>  src/log-writes/log-writes.h |  2 ++
+>>  src/log-writes/replay-log.c | 31 +++++++++++++++++++++++++++++++
+>>  3 files changed, 64 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+>> index ba66a5c..d832c2a 100644
+>> --- a/src/log-writes/log-writes.c
+>> +++ b/src/log-writes/log-writes.c
+>> @@ -119,6 +119,24 @@ int log_discard(struct log *log, struct log_write_entry *entry)
+>>
+>>  /*
+>>   * @log: the log we are replaying.
+>> + * @entry: entry to be replayed.
+>> + *
+>> + * @return: 0 if we should replay the entry, > 0 if we should skip it.
+>> + *
+>> + * Should we skip the entry in our log or replay onto the replay device.
+>> + */
+>> +int log_should_skip(struct log *log, struct log_write_entry *entry)
+>> +{
+>> +     if (!entry->nr_sectors)
+>> +             return 0;
+>> +     if (entry->sector + entry->nr_sectors < log->start_sector ||
+>> +         entry->sector > log->end_sector)
+>
+> Seems values from entry can't be used directly, need le64_to_cpu first I
+> think.
+>
+>> +             return 1;
+>> +     return 0;
+>> +}
+>> +
+>> +/*
+>> + * @log: the log we are replaying.
+>>   * @entry: where we put the entry.
+>>   * @read_data: read the entry data as well, entry must be log->sectorsize sized
+>>   * if this is set.
+>> @@ -137,6 +155,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+>>       char *buf;
+>>       ssize_t ret;
+>>       off_t offset;
+>> +     u64 skip = 0;
+>
+> int skip? and log_should_skip returns int too.
+>
 
-That's fine, mentioning the debug purpose in commit log would be good :)
+Right. Thanks
 
-> 
-> 
-> >
-> >> ---
-> >>  ltp/fsx.c | 11 +++++++++--
-> >>  1 file changed, 9 insertions(+), 2 deletions(-)
-> >>
-> >> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> >> index dd6b637..a75bc55 100644
-> >> --- a/ltp/fsx.c
-> >> +++ b/ltp/fsx.c
-> >> @@ -132,6 +132,7 @@ unsigned long     simulatedopcount = 0;   /* -b flag */
-> >>  int  closeprob = 0;                  /* -c flag */
-> >>  int  debug = 0;                      /* -d flag */
-> >>  unsigned long        debugstart = 0;         /* -D flag */
-> >> +char filldata = 0;                   /* -g flag */
-> >>  int  logid = 0;                      /* -j flag */
-> >>  int  flush = 0;                      /* -f flag */
-> >>  int  do_fsync = 0;                   /* -y flag */
-> >> @@ -817,6 +818,8 @@ gendata(char *original_buf, char *good_buf, unsigned offset, unsigned size)
-> >>               good_buf[offset] = testcalls % 256;
-> >>               if (offset % 2)
-> >>                       good_buf[offset] += original_buf[offset];
-> >> +             if (filldata)
-> >> +                     good_buf[offset] = filldata;
-> >
-> > If filldata is not null, we're wasting cycles setting good_buf[offset]
-> > and overwriting it with filldata. Use a if-else switch? e.g.
-> >
-> 
-> considering this is a debugging option that is not meant to optimize
-> performance, I don't think that's critical, but I can fix that.
-
-Thanks!
-
-Eryu
+FYI, this is also a debugging option.
+I used to to replay operations on a given range that was different between
+good and bad buffers to narrow down the suspects.
