@@ -1,119 +1,59 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33631 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752556AbdIETLM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Sep 2017 15:11:12 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 13/13] fstests: regression test for xfs leftover CoW extent error
-Date: Tue,  5 Sep 2017 22:11:20 +0300
-Message-Id: <1504638680-25682-14-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
-References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51046 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751021AbdIFHeV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Sep 2017 03:34:21 -0400
+Date: Wed, 6 Sep 2017 15:34:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: xfs/310: relax extent count check
+Message-ID: <20170906073419.GJ8034@eguan.usersys.redhat.com>
+References: <20170903155101.GA30258@lst.de>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170903155101.GA30258@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/503     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/503.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 72 insertions(+)
- create mode 100755 tests/generic/503
- create mode 100644 tests/generic/503.out
+Hi Darrick,
 
-diff --git a/tests/generic/503 b/tests/generic/503
-new file mode 100755
-index 0000000..ebda756
---- /dev/null
-+++ b/tests/generic/503
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# FS QA Test No. 503
-+#
-+# Regression test for xfs leftover CoW extents error
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_cp_reflink
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+$XFS_IO_PROG -f -c "pwrite 0 0x40000" \
-+	$SCRATCH_MNT/foo > /dev/null 2>&1
-+
-+cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+
-+$XFS_IO_PROG -f -c "fzero -k 0x169f 0x387c" \
-+		-c "fcollapse 0x29000 0xd000" \
-+		-c "finsert 0 0x8000" \
-+		-c "truncate 0x8000" \
-+	$SCRATCH_MNT/foo > /dev/null 2>&1
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/503.out b/tests/generic/503.out
-new file mode 100644
-index 0000000..6c1400a
---- /dev/null
-+++ b/tests/generic/503.out
-@@ -0,0 +1,2 @@
-+QA output created by 503
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 4324775..7a9cd78 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -460,3 +460,4 @@
- 500 auto log replay
- 501 auto quick metadata
- 502 auto log replay clone
-+503 auto quick clone
--- 
-2.7.4
+On Sun, Sep 03, 2017 at 05:51:01PM +0200, Christoph Hellwig wrote:
+> If we got over the bmbt length we'll always allocate two extents,
+> its just that so far getbmap merged them.
+> 
+> Also fix/update some comments.
 
+Could you please help review this patch? Thanks a lot!
+
+Eryu
+
+> 
+> diff --git a/tests/xfs/310 b/tests/xfs/310
+> index c78f6f1..f33a15a 100755
+> --- a/tests/xfs/310
+> +++ b/tests/xfs/310
+> @@ -1,7 +1,7 @@
+>  #! /bin/bash
+>  # FS QA Test No. 310
+>  #
+> -# Create a file with more than 2^21 extents (the max length of a bmbt record).
+> +# Create a file with more than 2^21 blocks (the max length of a bmbt record).
+>  #
+>  #-----------------------------------------------------------------------
+>  # Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> @@ -75,8 +75,9 @@ mkdir $testdir
+>  blksz="$(_get_block_size $testdir)"
+>  $XFS_IO_PROG -f -c "falloc 0 $((nr_blks * blksz))" $testdir/file1 >> $seqres.full
+>  
+> +# make sure the allocator didn't allocate more than the needed two extents
+>  echo "Check extent count"
+> -xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*1:' -q && xfs_bmap -l -p -v $testdir/file1
+> +xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*2:' -q && xfs_bmap -l -p -v $testdir/file1
+>  inum=$(stat -c '%i' $testdir/file1)
+>  umount $SCRATCH_MNT
+>  
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
