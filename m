@@ -1,59 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51046 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:34026 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751021AbdIFHeV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Sep 2017 03:34:21 -0400
-Date: Wed, 6 Sep 2017 15:34:19 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: xfs/310: relax extent count check
-Message-ID: <20170906073419.GJ8034@eguan.usersys.redhat.com>
-References: <20170903155101.GA30258@lst.de>
+        id S932600AbdIFOuI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Sep 2017 10:50:08 -0400
+Date: Wed, 6 Sep 2017 10:50:04 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: test the per-inode DAX flag
+Message-ID: <20170906145004.hlkwta2a4bjlarin@thunk.org>
+References: <20170903093325.GA16272@lst.de>
+ <20170904072431.GW27835@eguan.usersys.redhat.com>
+ <20170904154453.GA6771@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170903155101.GA30258@lst.de>
+In-Reply-To: <20170904154453.GA6771@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: Christoph Hellwig <hch@lst.de>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
-
-On Sun, Sep 03, 2017 at 05:51:01PM +0200, Christoph Hellwig wrote:
-> If we got over the bmbt length we'll always allocate two extents,
-> its just that so far getbmap merged them.
+On Mon, Sep 04, 2017 at 05:44:53PM +0200, Christoph Hellwig wrote:
+> > Does this test make sense when filesystem was mounted without dax
+> > option? I saw these failures when testing on normal block device without
+> > dax mount option.
 > 
-> Also fix/update some comments.
+> And thinking about it - why would we not allow setting the flag,
+> especially given that right now it doesn't have a meaning either
+> with or without DAX..
 
-Could you please help review this patch? Thanks a lot!
+At least for the ext4 patches that have been crossing my screen, the
+claim from the commit description is that with the dax mount option,
+all files are treated as if the DAX flag.  And the point of the DAX
+flag is that if the file system is stored on DAX-capable hardware, and
+you don't want DAX treatment for all files, that you would set the DAX
+flag only for those files where having the file system actually using
+the DAX codepaths would make sense --- as opposed to just using the
+traditional block I/O paths against the /dev/pmem driver.
 
-Eryu
+So I *think* the answer is that the tax makes sense when the file
+system is mounted w/o the dax option, but we do need to check to see
+whether the block device is DAX capable.
 
-> 
-> diff --git a/tests/xfs/310 b/tests/xfs/310
-> index c78f6f1..f33a15a 100755
-> --- a/tests/xfs/310
-> +++ b/tests/xfs/310
-> @@ -1,7 +1,7 @@
->  #! /bin/bash
->  # FS QA Test No. 310
->  #
-> -# Create a file with more than 2^21 extents (the max length of a bmbt record).
-> +# Create a file with more than 2^21 blocks (the max length of a bmbt record).
->  #
->  #-----------------------------------------------------------------------
->  # Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
-> @@ -75,8 +75,9 @@ mkdir $testdir
->  blksz="$(_get_block_size $testdir)"
->  $XFS_IO_PROG -f -c "falloc 0 $((nr_blks * blksz))" $testdir/file1 >> $seqres.full
->  
-> +# make sure the allocator didn't allocate more than the needed two extents
->  echo "Check extent count"
-> -xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*1:' -q && xfs_bmap -l -p -v $testdir/file1
-> +xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*2:' -q && xfs_bmap -l -p -v $testdir/file1
->  inum=$(stat -c '%i' $testdir/file1)
->  umount $SCRATCH_MNT
->  
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+It also makes an interesting question how we should be testing DAX
+capable file systems on /dev/pmem0.  Right now I force the use of
+/dev/pmem0 *and* use the DAX mount options so that all of the other
+tests will cause file I/O to use the DAX path.  But for the per-inode
+DAX flag, we would want to mask out the DAX mount option so we can
+test what happens when we toggle the DAX.
+
+But I'm not a DAX expert, so I may have some of this wrong.
+
+    	      	  	       	   	- Ted
