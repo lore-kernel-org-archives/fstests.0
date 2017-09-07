@@ -1,11 +1,11 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:35351 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754578AbdIGKC7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:59 -0400
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:35342 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754550AbdIGKC5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:57 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 8/8] fstests: regression test for xfs leftover CoW extent error
-Date: Thu,  7 Sep 2017 13:03:13 +0300
-Message-Id: <1504778593-12071-9-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v4 6/8] fstests: regression test for ext4 crash consistency bug
+Date: Thu,  7 Sep 2017 13:03:11 +0300
+Message-Id: <1504778593-12071-7-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 References: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,55 +13,44 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The following error are reported after running this test:
+This test is motivated by this inconsistency found in ext4 during random
+crash consistency tests:
 
-*** xfs_check output ***
-leftover CoW extent (0/2147483736) len 1
-block 0/2147483736 out of range
-blocks 0/2147483736..2147483736 claimed by block 0/6
-leftover CoW extent (0/2147483738) len 2
-blocks 0/2147483738..2147483739 out of range
-blocks 0/2147483738..2147483739 claimed by block 0/6
-leftover CoW extent (0/2147483741) len 3
-blocks 0/2147483741..2147483743 out of range
-blocks 0/2147483741..2147483743 claimed by block 0/6
-block 0/88 type unknown not expected
-block 0/90 type unknown not expected
-block 0/91 type unknown not expected
-block 0/93 type unknown not expected
-block 0/94 type unknown not expected
-block 0/95 type unknown not expected
+ *** fsck.ext4 output ***
+ fsck from util-linux 2.27.1
+ e2fsck 1.42.13 (17-May-2015)
+ Pass 1: Checking inodes, blocks, and sizes
+ Inode 12, end of extent exceeds allowed value
+         (logical block 33, physical block 33817, len 7)
+ Clear? no
 
-*** xfs_repair -n output ***
-Phase 1 - find and verify superblock...
-Phase 2 - using internal log
-        - zero log...
-        - scan filesystem freespace and inode maps...
-leftover CoW extent (0/88) len 1
-leftover CoW extent (0/90) len 2
-leftover CoW extent (0/93) len 3
-        - found root inode chunk
+ Inode 12, i_blocks is 240, should be 184.  Fix? no
+
+This test uses device mapper flakey target to demonstrate the bug
+found using device mapper log-writes target.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/503     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/503.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 77 insertions(+)
- create mode 100755 tests/generic/503
- create mode 100644 tests/generic/503.out
 
-diff --git a/tests/generic/503 b/tests/generic/503
+fix 501
+---
+ tests/generic/501     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/501.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 83 insertions(+)
+ create mode 100755 tests/generic/501
+ create mode 100644 tests/generic/501.out
+
+diff --git a/tests/generic/501 b/tests/generic/501
 new file mode 100755
-index 0000000..5662eb6
+index 0000000..d0ac49d
 --- /dev/null
-+++ b/tests/generic/503
-@@ -0,0 +1,74 @@
++++ b/tests/generic/501
+@@ -0,0 +1,80 @@
 +#! /bin/bash
-+# FS QA Test No. 503
++# FS QA Test No. 501
 +#
-+# Regression test for xfs leftover CoW extents after truncate
-+# and umount
++# This test is motivated by a bug found in ext4 during random crash
++# consistency tests.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
@@ -92,6 +81,7 @@ index 0000000..5662eb6
 +
 +_cleanup()
 +{
++	_cleanup_flakey
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -100,54 +90,59 @@ index 0000000..5662eb6
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/reflink
++. ./common/dmflakey
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_xfs_io_command "fzero"
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "finsert"
-+_require_xfs_io_command "truncate"
++_require_scratch
++_require_dm_target flakey
 +
 +rm -f $seqres.full
 +
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
++_scratch_mkfs >> $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
 +
-+$XFS_IO_PROG -f -c "pwrite 0 0x40000" \
-+	$SCRATCH_MNT/foo > /dev/null 2>&1
++_init_flakey
++_mount_flakey
 +
-+_cp_reflink $SCRATCH_MNT/foo $SCRATCH_MNT/bar
++fsxops=$tmp.fsxops
++cat <<EOF > $fsxops
++write 0x137dd 0xdc69 0x0
++fallocate 0xb531 0xb5ad 0x21446
++collapse_range 0x1c000 0x4000 0x21446
++write 0x3e5ec 0x1a14 0x21446
++zero_range 0x20fac 0x6d9c 0x40000 keep_size
++mapwrite 0x216ad 0x274f 0x40000
++EOF
++run_check $here/ltp/fsx -d --replay-ops $fsxops $SCRATCH_MNT/testfile
 +
-+$XFS_IO_PROG -f -c "fzero -k 0x169f 0x387c" \
-+		-c "fcollapse 0x29000 0xd000" \
-+		-c "finsert 0 0x8000" \
-+		-c "truncate 0x8000" \
-+	$SCRATCH_MNT/foo > /dev/null 2>&1
++_flakey_drop_and_remount
++_unmount_flakey
++_cleanup_flakey
++_check_scratch_fs
 +
 +echo "Silence is golden"
++
 +status=0
 +exit
-diff --git a/tests/generic/503.out b/tests/generic/503.out
+diff --git a/tests/generic/501.out b/tests/generic/501.out
 new file mode 100644
-index 0000000..6c1400a
+index 0000000..00133b6
 --- /dev/null
-+++ b/tests/generic/503.out
++++ b/tests/generic/501.out
 @@ -0,0 +1,2 @@
-+QA output created by 503
++QA output created by 501
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 4324775..7a9cd78 100644
+index c857153..1e1b524 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -460,3 +460,4 @@
+@@ -458,3 +458,4 @@
+ 453 auto quick dir
+ 454 auto quick attr
  500 auto log replay
- 501 auto quick metadata
- 502 auto log replay clone
-+503 auto quick clone
++501 auto quick metadata
 -- 
 2.7.4
 
