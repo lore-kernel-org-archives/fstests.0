@@ -1,11 +1,11 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:35342 "EHLO
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:33715 "EHLO
         mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754550AbdIGKC5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:57 -0400
+        with ESMTP id S1754556AbdIGKC6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:58 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 6/8] fstests: regression test for ext4 crash consistency bug
-Date: Thu,  7 Sep 2017 13:03:11 +0300
-Message-Id: <1504778593-12071-7-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v4 7/8] fstests: crash consistency fsx test for cloned files
+Date: Thu,  7 Sep 2017 13:03:12 +0300
+Message-Id: <1504778593-12071-8-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 References: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,44 +13,25 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test is motivated by this inconsistency found in ext4 during random
-crash consistency tests:
-
- *** fsck.ext4 output ***
- fsck from util-linux 2.27.1
- e2fsck 1.42.13 (17-May-2015)
- Pass 1: Checking inodes, blocks, and sizes
- Inode 12, end of extent exceeds allowed value
-         (logical block 33, physical block 33817, len 7)
- Clear? no
-
- Inode 12, i_blocks is 240, should be 184.  Fix? no
-
-This test uses device mapper flakey target to demonstrate the bug
-found using device mapper log-writes target.
-
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-
-fix 501
 ---
- tests/generic/501     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/501.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/generic/501
- create mode 100644 tests/generic/501.out
+ tests/generic/502     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/502.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 144 insertions(+)
+ create mode 100755 tests/generic/502
+ create mode 100644 tests/generic/502.out
 
-diff --git a/tests/generic/501 b/tests/generic/501
+diff --git a/tests/generic/502 b/tests/generic/502
 new file mode 100755
-index 0000000..d0ac49d
+index 0000000..96908f5
 --- /dev/null
-+++ b/tests/generic/501
-@@ -0,0 +1,80 @@
++++ b/tests/generic/502
+@@ -0,0 +1,141 @@
 +#! /bin/bash
-+# FS QA Test No. 501
++# FS QA Test No. 502
 +#
-+# This test is motivated by a bug found in ext4 during random crash
-+# consistency tests.
++# Run fsx with log writes on cloned files to verify power fail safeness.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
@@ -76,73 +57,135 @@ index 0000000..d0ac49d
 +echo "QA output created by $seq"
 +
 +here=`pwd`
-+tmp=/tmp/$$
 +status=1	# failure is the default!
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
++	_log_writes_cleanup
 +}
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
++. ./common/reflink
++. ./common/dmlogwrites
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
++_require_test
++_require_scratch_reflink
++_require_cp_reflink
++_require_log_writes
 +
 +rm -f $seqres.full
 +
-+_scratch_mkfs >> $seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
++check_files()
++{
++	local name=$1
 +
-+_init_flakey
-+_mount_flakey
++	# Now look for our files
++	for i in $(find $SANITY_DIR -type f | grep $name | grep mark)
++	do
++		local filename=$(basename $i)
++		local mark="${filename##*.}"
++		echo "checking $filename" >> $seqres.full
++		_log_writes_replay_log $filename
++		_scratch_mount
++		local expected_md5=$(_md5_checksum $i)
++		local md5=$(_md5_checksum $SCRATCH_MNT/$name)
++		[ "${md5}" != "${expected_md5}" ] && _fail "$filename md5sum mismatched"
++		_scratch_unmount
++		_check_scratch_fs
++	done
++}
 +
-+fsxops=$tmp.fsxops
-+cat <<EOF > $fsxops
-+write 0x137dd 0xdc69 0x0
-+fallocate 0xb531 0xb5ad 0x21446
-+collapse_range 0x1c000 0x4000 0x21446
-+write 0x3e5ec 0x1a14 0x21446
-+zero_range 0x20fac 0x6d9c 0x40000 keep_size
-+mapwrite 0x216ad 0x274f 0x40000
-+EOF
-+run_check $here/ltp/fsx -d --replay-ops $fsxops $SCRATCH_MNT/testfile
++SANITY_DIR=$TEST_DIR/fsxtests
++rm -rf $SANITY_DIR
++mkdir $SANITY_DIR
 +
-+_flakey_drop_and_remount
-+_unmount_flakey
-+_cleanup_flakey
++# Create the log
++_log_writes_init
++
++_log_writes_mkfs >> $seqres.full 2>&1
++
++# Log writes emulates discard support, turn it on for maximum crying.
++_log_writes_mount -o discard
++
++# write testfile index -1 to be cloned to testfile0
++$XFS_IO_PROG -f -c "pwrite -S 0xff 0 256k" -c "fsync" \
++	$SCRATCH_MNT/testfile-1 > /dev/null 2>&1
++
++NUM_FILES=10
++NUM_OPS=10
++FSX_OPTS="-N $NUM_OPS -d -k -P $SANITY_DIR -i $LOGWRITES_DMDEV"
++# Run fsx for a while
++# Set random seeds for fsx runs (0 for timestamp + pid)
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	# clone the clone from prev iteration which may have already mutated
++	_cp_reflink $SCRATCH_MNT/testfile$((j-1)) $SCRATCH_MNT/testfile$j
++	run_check $here/ltp/fsx $FSX_OPTS -S 0 -j $j $SCRATCH_MNT/testfile$j &
++done
++wait
++
++test_md5=()
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	test_md5[$j]=$(_md5_checksum $SCRATCH_MNT/testfile$j)
++done
++
++# Unmount the scratch dir and tear down the log writes target
++_log_writes_mark last
++_log_writes_unmount
++_log_writes_mark end
++_log_writes_remove
 +_check_scratch_fs
 +
-+echo "Silence is golden"
++# check pre umount
++echo "checking pre umount" >> $seqres.full
++_log_writes_replay_log last
++_scratch_mount
++_scratch_unmount
++_check_scratch_fs
 +
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	check_files testfile$j
++done
++
++# Check the end
++echo "checking post umount" >> $seqres.full
++_log_writes_replay_log end
++_scratch_mount
++for j in `seq 0 $((NUM_FILES-1))`
++do
++	md5=$(_md5_checksum $SCRATCH_MNT/testfile$j)
++	[ "${md5}" != "${test_md5[$j]}" ] && _fail "testfile$j end md5sum mismatched"
++done
++
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/501.out b/tests/generic/501.out
++
+diff --git a/tests/generic/502.out b/tests/generic/502.out
 new file mode 100644
-index 0000000..00133b6
+index 0000000..930f6d4
 --- /dev/null
-+++ b/tests/generic/501.out
++++ b/tests/generic/502.out
 @@ -0,0 +1,2 @@
-+QA output created by 501
++QA output created by 502
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index c857153..1e1b524 100644
+index 1e1b524..4324775 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -458,3 +458,4 @@
- 453 auto quick dir
+@@ -459,3 +459,4 @@
  454 auto quick attr
  500 auto log replay
-+501 auto quick metadata
+ 501 auto quick metadata
++502 auto log replay clone
 -- 
 2.7.4
 
