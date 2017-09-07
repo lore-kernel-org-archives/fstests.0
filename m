@@ -1,11 +1,11 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:37376 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754518AbdIGKCy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:54 -0400
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:35351 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754578AbdIGKC7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:02:59 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 4/8] fstests: add support for working with dm-log-writes target
-Date: Thu,  7 Sep 2017 13:03:09 +0300
-Message-Id: <1504778593-12071-5-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v4 8/8] fstests: regression test for xfs leftover CoW extent error
+Date: Thu,  7 Sep 2017 13:03:13 +0300
+Message-Id: <1504778593-12071-9-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 References: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,53 +13,59 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Cherry-picked the relevant common bits from commit 70d41e17164b
-in Josef Bacik's fstests tree (https://github.com/josefbacik/fstests).
-Quoting from Josef's commit message:
+The following error are reported after running this test:
 
-  This patch adds the supporting code for using the dm-log-writes
-  target.  The dmlogwrites code is similar to the dmflakey code, it just
-  gives us functions to build and tear down a dm-log-writes target.  We
-  add a new LOGWRITES_DEV variable to take in the device we will use as
-  the log and add checks for that.
+*** xfs_check output ***
+leftover CoW extent (0/2147483736) len 1
+block 0/2147483736 out of range
+blocks 0/2147483736..2147483736 claimed by block 0/6
+leftover CoW extent (0/2147483738) len 2
+blocks 0/2147483738..2147483739 out of range
+blocks 0/2147483738..2147483739 claimed by block 0/6
+leftover CoW extent (0/2147483741) len 3
+blocks 0/2147483741..2147483743 out of range
+blocks 0/2147483741..2147483743 claimed by block 0/6
+block 0/88 type unknown not expected
+block 0/90 type unknown not expected
+block 0/91 type unknown not expected
+block 0/93 type unknown not expected
+block 0/94 type unknown not expected
+block 0/95 type unknown not expected
 
-[Amir:]
-- Removed unneeded _test_falloc_support
-- Moved _require_log_writes to dmlogwrites
-- Document _require_log_writes
-- Address review comments by Eryu Guan
+*** xfs_repair -n output ***
+Phase 1 - find and verify superblock...
+Phase 2 - using internal log
+        - zero log...
+        - scan filesystem freespace and inode maps...
+leftover CoW extent (0/88) len 1
+leftover CoW extent (0/90) len 2
+leftover CoW extent (0/93) len 3
+        - found root inode chunk
 
-Cc: Josef Bacik <jbacik@fb.com>
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- README                       |  2 +
- common/dmlogwrites           | 90 ++++++++++++++++++++++++++++++++++++++++++++
- doc/requirement-checking.txt | 20 ++++++++++
- 3 files changed, 112 insertions(+)
- create mode 100644 common/dmlogwrites
+ tests/generic/503     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/503.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/generic/503
+ create mode 100644 tests/generic/503.out
 
-diff --git a/README b/README
-index 9456fa7..4963d28 100644
---- a/README
-+++ b/README
-@@ -91,6 +91,8 @@ Preparing system for tests:
-              - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
-                xfs_scrub -vd to scrub the filesystem metadata online before
-                unmounting to run the offline check.
-+             - setenv LOGWRITES_DEV to a block device to use for power fail
-+               testing.
- 
-         - or add a case to the switch in common/config assigning
-           these variables based on the hostname of your test
-diff --git a/common/dmlogwrites b/common/dmlogwrites
-new file mode 100644
-index 0000000..247c744
+diff --git a/tests/generic/503 b/tests/generic/503
+new file mode 100755
+index 0000000..5662eb6
 --- /dev/null
-+++ b/common/dmlogwrites
-@@ -0,0 +1,90 @@
-+##/bin/bash
++++ b/tests/generic/503
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# FS QA Test No. 503
 +#
-+# Copyright (c) 2015 Facebook, Inc.  All Rights Reserved.
++# Regression test for xfs leftover CoW extents after truncate
++# and umount
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -73,115 +79,75 @@ index 0000000..247c744
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
 +#
-+#
-+# common functions for setting up and tearing down a dm log-writes device
 +
-+_require_log_writes()
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++
++_cleanup()
 +{
-+	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
-+		_notrun "This test requires a valid \$LOGWRITES_DEV"
-+
-+	_exclude_scratch_mount_option dax
-+	_require_dm_target log-writes
-+	_require_test_program "log-writes/replay-log"
++	cd /
++	rm -f $tmp.*
 +}
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+_log_writes_init()
-+{
-+	local BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
-+	LOGWRITES_NAME=logwrites-test
-+	LOGWRITES_DMDEV=/dev/mapper/$LOGWRITES_NAME
-+	LOGWRITES_TABLE="0 $BLK_DEV_SIZE log-writes $SCRATCH_DEV $LOGWRITES_DEV"
-+	$DMSETUP_PROG create $LOGWRITES_NAME --table "$LOGWRITES_TABLE" || \
-+		_fail "failed to create log-writes device"
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
-+}
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
 +
-+_log_writes_mark()
-+{
-+	[ $# -ne 1 ] && _fail "_log_writes_mark takes one argument"
-+	$DMSETUP_PROG message $LOGWRITES_NAME 0 mark $1
-+}
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++_require_xfs_io_command "fzero"
++_require_xfs_io_command "fcollapse"
++_require_xfs_io_command "finsert"
++_require_xfs_io_command "truncate"
 +
-+_log_writes_mkfs()
-+{
-+	_scratch_options mkfs
-+	_mkfs_dev $SCRATCH_OPTIONS $LOGWRITES_DMDEV
-+	_log_writes_mark mkfs
-+}
++rm -f $seqres.full
 +
-+_log_writes_mount()
-+{
-+	_scratch_options mount
-+	$MOUNT_PROG -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
-+		$LOGWRITES_DMDEV $SCRATCH_MNT
-+}
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
 +
-+_log_writes_unmount()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
++$XFS_IO_PROG -f -c "pwrite 0 0x40000" \
++	$SCRATCH_MNT/foo > /dev/null 2>&1
 +
-+# _log_writes_replay_log <mark>
-+#
-+# This replays the log contained on $LOGWRITES_DEV onto $SCRATCH_DEV upto the
-+# mark passed in.
-+_log_writes_replay_log()
-+{
-+	_mark=$1
++_cp_reflink $SCRATCH_MNT/foo $SCRATCH_MNT/bar
 +
-+	$here/src/log-writes/replay-log --log $LOGWRITES_DEV --replay $SCRATCH_DEV \
-+		--end-mark $_mark >> $seqres.full 2>&1
-+	[ $? -ne 0 ] && _fail "replay failed"
-+}
++$XFS_IO_PROG -f -c "fzero -k 0x169f 0x387c" \
++		-c "fcollapse 0x29000 0xd000" \
++		-c "finsert 0 0x8000" \
++		-c "truncate 0x8000" \
++	$SCRATCH_MNT/foo > /dev/null 2>&1
 +
-+_log_writes_remove()
-+{
-+	$DMSETUP_PROG remove $LOGWRITES_NAME > /dev/null 2>&1
-+	$DMSETUP_PROG mknodes > /dev/null 2>&1
-+}
-+
-+_log_writes_cleanup()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT > /dev/null 2>&1
-+	_log_writes_remove
-+}
-diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
-index 95d10e6..4e01b1f 100644
---- a/doc/requirement-checking.txt
-+++ b/doc/requirement-checking.txt
-@@ -21,6 +21,10 @@ they have.  This is done with _require_<xxx> macros, which may take parameters.
- 
- 	_require_statx
- 
-+ (4) Device mapper requirement.
-+
-+	_require_dm_target
-+	_require_log_writes
- 
- ====================
- GENERAL REQUIREMENTS
-@@ -102,3 +106,19 @@ _require_statx
- 
-      The test requires the use of the statx() system call and will be skipped
-      if it isn't available in the kernel.
-+
-+
-+==========================
-+DEVICE MAPPER REQUIREMENTS
-+==========================
-+
-+_require_dm_target <name>
-+
-+     The test requires the use of the device mapper target and will be skipped
-+     if it isn't available in the kernel.
-+
-+_require_log_writes
-+
-+     The test requires the use of the device mapper target log-writes.
-+     The test also requires the test program log-writes/replay-log is built
-+     and will be skipped if either isn't available.
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/503.out b/tests/generic/503.out
+new file mode 100644
+index 0000000..6c1400a
+--- /dev/null
++++ b/tests/generic/503.out
+@@ -0,0 +1,2 @@
++QA output created by 503
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 4324775..7a9cd78 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -460,3 +460,4 @@
+ 500 auto log replay
+ 501 auto quick metadata
+ 502 auto log replay clone
++503 auto quick clone
 -- 
 2.7.4
 
