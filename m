@@ -1,52 +1,43 @@
-Received: from imap.thunk.org ([74.207.234.97]:34026 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932600AbdIFOuI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Sep 2017 10:50:08 -0400
-Date: Wed, 6 Sep 2017 10:50:04 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: test the per-inode DAX flag
-Message-ID: <20170906145004.hlkwta2a4bjlarin@thunk.org>
-References: <20170903093325.GA16272@lst.de>
- <20170904072431.GW27835@eguan.usersys.redhat.com>
- <20170904154453.GA6771@lst.de>
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:35924 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751780AbdIGHKd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 03:10:33 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170904154453.GA6771@lst.de>
+In-Reply-To: <20170905113128.GG8034@eguan.usersys.redhat.com>
+References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
+ <1504104706-11965-8-git-send-email-amir73il@gmail.com> <20170905104641.GA8034@eguan.usersys.redhat.com>
+ <CAOQ4uxi1mu5QXt3PJuk27WJvm+vS63ct+VQsDJvxvaLiEGzrAA@mail.gmail.com> <20170905113128.GG8034@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 7 Sep 2017 10:10:32 +0300
+Message-ID: <CAOQ4uxjG50pRPnLQLT+3b+BVePvfc9QHUaVukRugQzpwptrjjw@mail.gmail.com>
+Subject: Re: [PATCH v2 07/14] fsx: add optional logid prefix to log messages
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Josef Bacik <jbacik@fb.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 04, 2017 at 05:44:53PM +0200, Christoph Hellwig wrote:
-> > Does this test make sense when filesystem was mounted without dax
-> > option? I saw these failures when testing on normal block device without
-> > dax mount option.
-> 
-> And thinking about it - why would we not allow setting the flag,
-> especially given that right now it doesn't have a meaning either
-> with or without DAX..
+On Tue, Sep 5, 2017 at 2:31 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Tue, Sep 05, 2017 at 02:24:20PM +0300, Amir Goldstein wrote:
+>> On Tue, Sep 5, 2017 at 1:46 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Wed, Aug 30, 2017 at 05:51:39PM +0300, Amir Goldstein wrote:
+>> >> When writing the intermixed output of several fsx processes
+>> >> to a single log file, it is usefull to prefix logs with a log id.
+>> >> Use fsx -j <logid> to define the log messages prefix.
+>> >
+>> > Would it be better to allow any string as prefix, not limit to id
+>> > number?
+>> >
+>>
+>> Maybe, but I didn't see an immediate need for that beyond
+>> the concurrent test runs, for with numeric id is sufficient.
+>
+> I agreed, I don't have strong preference on this.
+>
 
-At least for the ext4 patches that have been crossing my screen, the
-claim from the commit description is that with the dax mount option,
-all files are treated as if the DAX flag.  And the point of the DAX
-flag is that if the file system is stored on DAX-capable hardware, and
-you don't want DAX treatment for all files, that you would set the DAX
-flag only for those files where having the file system actually using
-the DAX codepaths would make sense --- as opposed to just using the
-traditional block I/O paths against the /dev/pmem driver.
+Nah, you were right the first time. Using numeric id was just me
+being lazy and then I had a bug where -j 0 (not surprising) does
+not prefix logs with 0:
+I'll fix this and re-post the fsx patches.
 
-So I *think* the answer is that the tax makes sense when the file
-system is mounted w/o the dax option, but we do need to check to see
-whether the block device is DAX capable.
-
-It also makes an interesting question how we should be testing DAX
-capable file systems on /dev/pmem0.  Right now I force the use of
-/dev/pmem0 *and* use the DAX mount options so that all of the other
-tests will cause file I/O to use the DAX path.  But for the per-inode
-DAX flag, we would want to mask out the DAX mount option so we can
-test what happens when we toggle the DAX.
-
-But I'm not a DAX expert, so I may have some of this wrong.
-
-    	      	  	       	   	- Ted
+Amir.
