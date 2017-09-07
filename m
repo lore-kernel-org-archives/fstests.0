@@ -1,50 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46394 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43754 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754350AbdIGHwY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Sep 2017 03:52:24 -0400
-Date: Thu, 7 Sep 2017 15:52:21 +0800
+        id S1754552AbdIGHzN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Sep 2017 03:55:13 -0400
+Date: Thu, 7 Sep 2017 15:55:11 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 11/13] fstests: regression test for ext4 crash
- consistency bug
-Message-ID: <20170907075221.GO8034@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v3 13/13] fstests: regression test for xfs leftover CoW
+ extent error
+Message-ID: <20170907075511.GP8034@eguan.usersys.redhat.com>
 References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
- <1504638680-25682-12-git-send-email-amir73il@gmail.com>
+ <1504638680-25682-14-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1504638680-25682-12-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1504638680-25682-14-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
 Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 05, 2017 at 10:11:18PM +0300, Amir Goldstein wrote:
-> This test is motivated by a bug found in ext4 during random crash
-> consistency tests.
-> 
-> This test uses device mapper flakey target to demonstrate the bug
-> found using device mapper log-writes target.
-> 
+On Tue, Sep 05, 2017 at 10:11:20PM +0300, Amir Goldstein wrote:
 > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+
+Better to have some more descriptions or background information on this
+test, either in commit log or in test description.
+
 > ---
->  tests/generic/501     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/501.out |  2 ++
+>  tests/generic/503     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/503.out |  2 ++
 >  tests/generic/group   |  1 +
->  3 files changed, 83 insertions(+)
->  create mode 100755 tests/generic/501
->  create mode 100644 tests/generic/501.out
+>  3 files changed, 72 insertions(+)
+>  create mode 100755 tests/generic/503
+>  create mode 100644 tests/generic/503.out
 > 
-> diff --git a/tests/generic/501 b/tests/generic/501
+> diff --git a/tests/generic/503 b/tests/generic/503
 > new file mode 100755
-> index 0000000..ccb513d
+> index 0000000..ebda756
 > --- /dev/null
-> +++ b/tests/generic/501
-> @@ -0,0 +1,80 @@
+> +++ b/tests/generic/503
+> @@ -0,0 +1,69 @@
 > +#! /bin/bash
-> +# FS QA Test No. 501
+> +# FS QA Test No. 503
 > +#
-> +# This test is motivated by a bug found in ext4 during random crash
-> +# consistency tests.
+> +# Regression test for xfs leftover CoW extents error
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
@@ -75,7 +72,6 @@ On Tue, Sep 05, 2017 at 10:11:18PM +0300, Amir Goldstein wrote:
 > +
 > +_cleanup()
 > +{
-> +	_cleanup_flakey
 > +	cd /
 > +	rm -f $tmp.*
 > +}
@@ -84,67 +80,61 @@ On Tue, Sep 05, 2017 at 10:11:18PM +0300, Amir Goldstein wrote:
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/dmflakey
+> +. ./common/reflink
 > +
 > +# real QA test starts here
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch
-> +_require_dm_target flakey
-> +_require_metadata_journaling $SCRATCH_DEV
-
-This should be moved after _scratch_mkfs, otherwise it's checking
-scratch device from previous test.
-
+> +_require_scratch_reflink
+> +_require_cp_reflink
 > +
 > +rm -f $seqres.full
 > +
-> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +
+> +$XFS_IO_PROG -f -c "pwrite 0 0x40000" \
+> +	$SCRATCH_MNT/foo > /dev/null 2>&1
+> +
+> +cp --reflink $SCRATCH_MNT/foo $SCRATCH_MNT/bar
+
+_cp_reflink
+
+> +
+> +$XFS_IO_PROG -f -c "fzero -k 0x169f 0x387c" \
+> +		-c "fcollapse 0x29000 0xd000" \
+> +		-c "finsert 0 0x8000" \
+> +		-c "truncate 0x8000" \
+> +	$SCRATCH_MNT/foo > /dev/null 2>&1
+
+_require_xfs_io_command these commands first, fzero, fcollapse, finsert.
+
+Above two nits apply to generic/502 too.
 
 Thanks,
 Eryu
 
 > +
-> +_init_flakey
-> +_mount_flakey
-> +
-> +fsxops=$tmp.fsxops
-> +cat <<EOF > $fsxops
-> +write 0x137dd 0xdc69 0x0
-> +fallocate 0xb531 0xb5ad 0x21446
-> +collapse_range 0x1c000 0x4000 0x21446
-> +write 0x3e5ec 0x1a14 0x21446
-> +zero_range 0x20fac 0x6d9c 0x40000 keep_size
-> +mapwrite 0x216ad 0x274f 0x40000
-> +EOF
-> +run_check $here/ltp/fsx -d --replay-ops $fsxops $SCRATCH_MNT/testfile
-> +
-> +_flakey_drop_and_remount
-> +_unmount_flakey
-> +_cleanup_flakey
-> +_check_scratch_fs
-> +
 > +echo "Silence is golden"
-> +
 > +status=0
 > +exit
-> diff --git a/tests/generic/501.out b/tests/generic/501.out
+> diff --git a/tests/generic/503.out b/tests/generic/503.out
 > new file mode 100644
-> index 0000000..00133b6
+> index 0000000..6c1400a
 > --- /dev/null
-> +++ b/tests/generic/501.out
+> +++ b/tests/generic/503.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 501
+> +QA output created by 503
 > +Silence is golden
 > diff --git a/tests/generic/group b/tests/generic/group
-> index c857153..1e1b524 100644
+> index 4324775..7a9cd78 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -458,3 +458,4 @@
->  453 auto quick dir
->  454 auto quick attr
+> @@ -460,3 +460,4 @@
 >  500 auto log replay
-> +501 auto quick metadata
+>  501 auto quick metadata
+>  502 auto log replay clone
+> +503 auto quick clone
 > -- 
 > 2.7.4
 > 
