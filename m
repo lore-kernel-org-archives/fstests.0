@@ -1,53 +1,42 @@
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:36763 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754885AbdIGKKd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 06:10:33 -0400
+Received: from mail-yw0-f175.google.com ([209.85.161.175]:33365 "EHLO
+        mail-yw0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755282AbdIGMjA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Sep 2017 08:39:00 -0400
+Received: by mail-yw0-f175.google.com with SMTP id s62so14576712ywg.0
+        for <fstests@vger.kernel.org>; Thu, 07 Sep 2017 05:39:00 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20170907085527.GS8034@eguan.usersys.redhat.com>
-References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
- <1504638680-25682-11-git-send-email-amir73il@gmail.com> <20170907075019.GN8034@eguan.usersys.redhat.com>
- <CAOQ4uxgDMHacq1C0SSnV3t3djSWStu=sQ6zOJB7pqGow0cE3eQ@mail.gmail.com> <20170907085527.GS8034@eguan.usersys.redhat.com>
+In-Reply-To: <1504769198-4921-6-git-send-email-amir73il@gmail.com>
+References: <1504769198-4921-1-git-send-email-amir73il@gmail.com> <1504769198-4921-6-git-send-email-amir73il@gmail.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 7 Sep 2017 13:10:31 +0300
-Message-ID: <CAOQ4uxjrE-A1Hp-Hd_MMo5PjmZQte5usR=CMcf1MW90S06HOJg@mail.gmail.com>
-Subject: Re: [PATCH v3 10/13] fstests: crash consistency fsx test using dm-log-writes
+Date: Thu, 7 Sep 2017 15:38:59 +0300
+Message-ID: <CAOQ4uxhFEVc4CCj1eCecVrGYrz4WqH_a0rEdBkTjtnTLd-dUBw@mail.gmail.com>
+Subject: Re: [PATCH v4 5/5] fsx: add support for keeping existing file
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 7, 2017 at 11:55 AM, Eryu Guan <eguan@redhat.com> wrote:
-
->> >> +NUM_FILES=4
->> >> +NUM_OPS=200
->> >> +FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
->> >> +# Set random seeds for fsx runs (0 for timestamp + pid)
->> >> +seeds=(0 0 0 0)
->> >
->> > Hmm, is this array necessary? Why not pass 0 to -S directly in the
->> > commandline? And generic/502 follows the same pattern.
->> >
->>
->> The reason for the array is trying to follow your guidelines for running
->> the test:
->> - Normally test runs with random seed (for which the array is not needed)
->>   and every fsx process prints out the seed to the full log
->> - When test detects a failure, you want to retry the test with same seed
->>   numbers, but those are different seed numbers for every fsx process
->> - So the array is here to make setting those presets possible
+On Thu, Sep 7, 2017 at 10:26 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> With fsx -k, do not truncate existing file and use its size as upper
+> bound on file size.
 >
-> Yeah, an array makes debug easier. Then I think a comment about the
-> debug usage of the array would be sufficient. Thanks!
+> This is needed to prevent fsx from truncating the file on start of
+> test when testing fsx on cloned files.
 >
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
 
-FYI, I removed the array from generic/502, because it was never useful
-during debugging. I guess the randomness stems mostly from timing
-of forking the fsx processes in that test.
+> -       if (lite) {
+> +       if (!(o_flags & O_TRUNC)) {
+>                 off_t ret;
+> -               file_size = maxfilelen = lseek(fd, (off_t)0, SEEK_END);
+> +               file_size = maxfilelen = biggest = lseek(fd, (off_t)0, SEEK_END);
+> +               prt("file_size is %lu\n", file_size);
 
-I reduced NUM_OPS in cloned files test to 10 in v4, because after a few
-holes and writes the clone is no longer a clone anyway.
-I already found a seed value to reproduce a failure of generic/502 on xfs
-failures are still random, but on spinning disk, I get them every 2 test runs.
+Eryu,
+
+Please remove this added debug log before merging.
+It breaks expected output of test generic/127
 
 Amir.
