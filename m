@@ -1,47 +1,79 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:37216 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753166AbdIHX6r (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Sep 2017 19:58:47 -0400
-Received: by mail-pg0-f68.google.com with SMTP id v5so1926266pgn.4
-        for <fstests@vger.kernel.org>; Fri, 08 Sep 2017 16:58:47 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [xfstests-bld PATCH] gen-image: create /etc/mtab symlink
-Date: Fri,  8 Sep 2017 16:58:29 -0700
-Message-Id: <20170908235829.67348-1-ebiggers3@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43356 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757364AbdIIKWF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 9 Sep 2017 06:22:05 -0400
+Date: Sat, 9 Sep 2017 18:22:02 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v4 1/8] log-writes: add replay-log program to replay
+ dm-log-writes target
+Message-ID: <20170909102202.GV8034@eguan.usersys.redhat.com>
+References: <1504778593-12071-1-git-send-email-amir73il@gmail.com>
+ <1504778593-12071-2-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1504778593-12071-2-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Thu, Sep 07, 2017 at 01:03:06PM +0300, Amir Goldstein wrote:
+> Imported Josef Bacik's code from:
+> https://github.com/josefbacik/log-writes.git
+> 
+> Specialized program for replaying a write log that was recorded by
+> device mapper log-writes target.  The tools is used to perform
+> crash consistency tests, allowing to run an arbitrary check tool
+> (fsck) at specified checkpoints in the write log.
+> 
+> [Amir:]
+> - Add project Makefile and SOURCE files
+> - Document the replay-log auxiliary program
+> - Address review comments by Eryu Guan
+> 
+> Cc: Josef Bacik <jbacik@fb.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+...
+> diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
+> new file mode 100644
+> index 0000000..6cadb66
+> --- /dev/null
+> +++ b/src/log-writes/log-writes.h
+> @@ -0,0 +1,77 @@
+> +#ifndef _LOG_WRITES_H_
+> +#define _LOG_WRITES_H_
+> +
+> +#include <linux/types.h>
+> +#include <linux/byteorder/little_endian.h>
 
-Currently the root_fs's are being created with no /etc/mtab file.
-/etc/mtab is supposed to be obsolete, but some programs such as mke2fs
-still expect it to exist.  On Debian systems, systemd will automatically
-symlink /etc/mtab to ../proc/self/mounts as specified by
-/usr/lib/tmpfiles.d/debian.conf.  But if the root_fs is used as a chroot
-(as android-xfstests does), that does not happen, and as of Debian
-Stretch the 'mount' program from util-linux doesn't create /etc/mtab
-either.  So until nothing else needs it, just make an /etc/mtab symlink
-while creating the root_fs.
+This only works on little endian hosts, big endian hosts like ppc64 fail
+the tests with "Magic doesn't match" error, because le64_to_cpu is an
+no-op there.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/test-appliance/gen-image | 1 +
- 1 file changed, 1 insertion(+)
+I did the following changes and it worked for me. If this looks fine to
+you, I can fold the changes into the original patch.
 
-diff --git a/kvm-xfstests/test-appliance/gen-image b/kvm-xfstests/test-appliance/gen-image
-index 48cf624..8343294 100755
---- a/kvm-xfstests/test-appliance/gen-image
-+++ b/kvm-xfstests/test-appliance/gen-image
-@@ -289,6 +289,7 @@ echo "fsgqa:!::" >> $ROOTDIR/etc/gshadow
- mkdir $ROOTDIR/home/fsgqa
- chown 31415:31415 $ROOTDIR/home/fsgqa
- chmod 755 $ROOTDIR/root
-+ln -sf ../proc/self/mounts $ROOTDIR/etc/mtab
- fix_symlinks
- 
- cp $ROOTDIR/lib/systemd/system/serial-getty@.service \
--- 
-2.14.1.581.gf28d330327-goog
+--- 8< ---
+diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
+index 14242ee13c6b..0fb324a57c4d 100644
+--- a/src/log-writes/log-writes.h
++++ b/src/log-writes/log-writes.h
+@@ -2,7 +2,12 @@
+ #define _LOG_WRITES_H_
 
+ #include <linux/types.h>
+-#include <linux/byteorder/little_endian.h>
++#include <endian.h>
++#if __BYTE_ORDER == __LITTLE_ENDIAN
++#include <linux/byteorder/little_endian.h>
++#else
++#include <linux/byteorder/big_endian.h>
++#endif
+
+ extern int log_writes_verbose;
+
+--- >8 ---
+Thanks,
+Eryu
