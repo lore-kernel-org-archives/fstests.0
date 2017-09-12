@@ -1,258 +1,141 @@
-Received: from mga02.intel.com ([134.134.136.20]:31948 "EHLO mga02.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751320AbdILEpd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 12 Sep 2017 00:45:33 -0400
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH 2/3] ext4: test for DAX + journaling corruption
-Date: Mon, 11 Sep 2017 22:45:20 -0600
-Message-Id: <20170912044521.22644-2-ross.zwisler@linux.intel.com>
-In-Reply-To: <20170912044521.22644-1-ross.zwisler@linux.intel.com>
-References: <20170912044521.22644-1-ross.zwisler@linux.intel.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:56694 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751151AbdILEqz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Sep 2017 00:46:55 -0400
+Message-ID: <59B766BB.90801@cn.fujitsu.com>
+Date: Tue, 12 Sep 2017 12:46:51 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Subject: Re: [PATCH] generic/456: add check for fallocate flags
+References: <1505121946-4900-1-git-send-email-yangx.jy@cn.fujitsu.com> <CAOQ4uxgUkcoe3-o7jLzo4mWvuezLy_BV49AtVhMsF=ofH0hgYg@mail.gmail.com> <59B748B9.7040309@cn.fujitsu.com> <20170912041238.GX8034@eguan.usersys.redhat.com>
+In-Reply-To: <20170912041238.GX8034@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>, Theodore Ts'o <tytso@mit.edu>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-xfs@vger.kernel.org, Andreas Dilger <adilger@dilger.ca>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Add a regression test for the following kernel commit:
+Hi Eryu,
 
-  ext4: prevent data corruption with journaling + DAX
+Thanks for your reply.
+Do you know whether this bug has been fixed or not? Could you give me a 
+link about the fix patch?
 
-The test passes if either we successfully compare the data between the mmap
-with journaling turned on and the one with journaling turned off, or if we
-fail the chattr command to turn on or off journaling.  The latter is how we
-prevent this issue in the kernel.
+On 2017/09/12 12:12, Eryu Guan wrote:
+> On Tue, Sep 12, 2017 at 10:38:49AM +0800, Xiao Yang wrote:
+>> Hi Amir,
+>>
+>> Thanks for your comments. :-)
+>> Could you tell me which patch has fixed the ext4 bug?
+>>
+>> On 2017/09/11 19:03, Amir Goldstein wrote:
+>>> On Mon, Sep 11, 2017 at 12:25 PM, Xiao Yang<yangx.jy@cn.fujitsu.com>   wrote:
+>>>> On RHEL6.9GA, this case could not emulate a crash and passed due
+>>>> to unsupported collapse_range and zero_range instead of no bug.
+>>>>
+>>>> We added check for fallocate flags to avoid confusion.
+>>>>
+>>> I am not sure I understand the confusion.
+>>>
+>>> A bug was allegedly introduced to ext4 when introducing
+>>> collapse_range and/or insert_range and this is a regression test
+>>> for this alleged regression.
+>>>
+>>> In what way is it confusing that the test passes on an old kernel?
+>>> There are a lot of tests in xfstests that test for regressions that
+>>> were introduced by commit XYZ. I don't see those tests checking
+>>> that they are running on kernel>   XYZ.
+>>>
+>>> BTW, this test also passes on btrfs and xfs, but it does not include
+>>> _supported_fs ext4 against confusion.
+>> On an old kernel(e.g. RHEL6.9GA), the test passed and got the following
+>> message in ext4.
+>> ----------------------------------------------------------------------
+>> # /var/lib/xfstests/ltp/fsx -d --replay-ops /tmp/733.fsxops
+>> --record-ops=/tmp/733.dupops /mnt/xfstests/scratch/testfile
+>> main: filesystem does not support fallocate mode FALLOC_FL_ZERO_RANGE,
+>> disabling!
+>> main: filesystem does not support fallocate mode FALLOC_FL_COLLAPSE_RANGE,
+>> disabling!
+>> main: filesystem does not support fallocate mode FALLOC_FL_INSERT_RANGE,
+>> disabling!
+>> 1 write 0x137dd thru    0x21445 (0xdc69 bytes)
+>> fallocating to largest ever: 0x16ade
+>> 2 falloc        from 0xb531 to 0x16ade (0xb5ad bytes)
+>> 4 write 0x3e5ec thru    0x3ffff (0x1a14 bytes)
+>> 6 mapwrite      0x216ad thru    0x23dfb (0x274f bytes)
+>> ----------------------------------------------------------------------
+>>
+>> We skip collapse_range and zero_range operations and cannot trigger the
+>> expected bug in ext4.
+>>
+>> I want to distinguish between unsupported flags and no bug.  Do you think it
+>> needs to distinguish?
+> If I understand the bug correctly, it's a bug in
+> {collapse,zero,insert}_range implementation, if the old kernels don't
+> support such operations, it's fair to say the old kernels have no such
+> bugs. And it's no harm to run some more tests even if the underlying
+> filesystem doesn't support such operations, because we replayed and
+> tested write and mapwrite operations too.
+>
+> So I think it's fine to leave the test as it is.
+Agreed. :-)
+>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>>> ---
+>>>>    tests/generic/456 | 7 ++++++-
+>>>>    1 file changed, 6 insertions(+), 1 deletion(-)
+>>>>
+>>>> diff --git a/tests/generic/456 b/tests/generic/456
+>>>> index 8debd3f..b72acea 100755
+>>>> --- a/tests/generic/456
+>>>> +++ b/tests/generic/456
+>>>> @@ -67,11 +67,16 @@ write 0x3e5ec 0x1a14 0x21446
+>>>>    zero_range 0x20fac 0x6d9c 0x40000 keep_size
+>>>>    mapwrite 0x216ad 0x274f 0x40000
+>>>>    EOF
+>>>> -run_check $here/ltp/fsx -d --replay-ops $fsxops $SCRATCH_MNT/testfile
+>>>> +touch $tmp.dupops
+>>>> +run_check $here/ltp/fsx -d --replay-ops $fsxops --record-ops=$tmp.dupops $SCRATCH_MNT/testfile
+>>>>
+>>>>    _flakey_drop_and_remount
+>>>>    _unmount_flakey
+>>>>    _cleanup_flakey
+>>>> +
+>>>> +ops_name=$(awk '/skip/ {printf "%s ", $2}' $tmp.dupops)
+>>>> +[ -n "$ops_name" ]&&   _notrun "fallocate does not support $ops_name"
+>>>> +
+>>> If you must add some check, please add
+>>> _require_xfs_io_command "fcollapse"
+>>> _require_xfs_io_command "fzero"
+>>>
+>>> It is not really a must for this test and its not even really testing if fs
+>>> supports those commands, but that is de-facto standard for not
+>>> running fcollapse/fzero tests.
+>> IMO, _require_xfs_io_command only check if xfs_io command supports
+>> collapse_range or zero_range,
+>> and it does not mean that fallocate(2)  supports collapse_range or
+>> zero_range.
+>>
+>> I am not sure it is necessary to add some check.
+> xfs_io commands fcollapse, fzero, finsert are actually run by
+> _require_xfs_io_command on a file in $TEST_DIR, so it does check if the
+> underlying filesystem support such operations or not, not only the
+> xfs_io command.
+OK, i got it.
 
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
----
- .gitignore                          |  1 +
- src/Makefile                        |  2 +-
- src/t_ext4_dax_journal_corruption.c | 93 +++++++++++++++++++++++++++++++++++++
- tests/ext4/030                      | 68 +++++++++++++++++++++++++++
- tests/ext4/030.out                  |  2 +
- tests/ext4/group                    |  1 +
- 6 files changed, 166 insertions(+), 1 deletion(-)
- create mode 100644 src/t_ext4_dax_journal_corruption.c
- create mode 100755 tests/ext4/030
- create mode 100644 tests/ext4/030.out
+Thanks,
+Xiao Yang.
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+> .
+>
 
-diff --git a/.gitignore b/.gitignore
-index 2accc37..4bdc5bf 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -154,6 +154,7 @@
- /src/t_mmap_stale_pmd
- /src/t_mmap_cow_race
- /src/t_mmap_fallocate
-+/src/t_ext4_dax_journal_corruption
- 
- # dmapi/ binaries
- /dmapi/src/common/cmd/read_invis
-diff --git a/src/Makefile b/src/Makefile
-index b8aff49..e6558e2 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -13,7 +13,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
- 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
- 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
--	t_mmap_cow_race t_mmap_fallocate fsync-err
-+	t_mmap_cow_race t_mmap_fallocate fsync-err t_ext4_dax_journal_corruption
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_ext4_dax_journal_corruption.c b/src/t_ext4_dax_journal_corruption.c
-new file mode 100644
-index 0000000..e0d63f8
---- /dev/null
-+++ b/src/t_ext4_dax_journal_corruption.c
-@@ -0,0 +1,93 @@
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mman.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <time.h>
-+#include <unistd.h>
-+
-+#define PAGE(a) ((a)*0x1000)
-+#define STRLEN 256
-+
-+void err_exit(char *op)
-+{
-+	fprintf(stderr, "%s: %s\n", op, strerror(errno));
-+	exit(1);
-+}
-+
-+void chattr_cmd(char *chattr, char *cmd, char *file)
-+{
-+	int ret;
-+	char command[STRLEN];
-+
-+	ret = snprintf(command, STRLEN, "%s %s %s 2>/dev/null", chattr, cmd, file);
-+	if (ret < 0)
-+		err_exit("snprintf");
-+
-+	ret = system(command);
-+	if (ret) /* Success - the kernel fix is to have this chattr fail */
-+		exit(77);
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	int fd, err, len = PAGE(1);
-+	char *data, *dax_data, *chattr, *file;
-+	char string[STRLEN];
-+
-+	if (argc < 3) {
-+		printf("Usage: %s <chattr program> <file>\n", basename(argv[0]));
-+		exit(0);
-+	}
-+
-+	chattr = argv[1];
-+	file = argv[2];
-+
-+	srand(time(NULL));
-+	snprintf(string, STRLEN, "random number %d\n", rand());
-+
-+	fd = open(file, O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-+	if (fd < 0)
-+		err_exit("fd");
-+
-+	/* begin with journaling off and DAX on */
-+	chattr_cmd(chattr, "-j", file);
-+
-+	ftruncate(fd, 0);
-+	fallocate(fd, 0, 0, len);
-+
-+	dax_data = mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
-+	if (!dax_data)
-+		err_exit("mmap dax_data");
-+
-+	/* turns on journaling, and turns off DAX */
-+	chattr_cmd(chattr, "+j", file);
-+
-+	data = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
-+	if (!data)
-+		err_exit("mmap data");
-+
-+	/*
-+	 * Write the data using the non-DAX mapping, and try and read it back
-+	 * using the DAX mapping.
-+	 */
-+	strcpy(data, string);
-+	if (strcmp(dax_data, string) != 0)
-+		printf("Data miscompare\n");
-+
-+	err = munmap(data, len);
-+	if (err < 0)
-+		err_exit("munmap data");
-+
-+	err = munmap(dax_data, len);
-+	if (err < 0)
-+		err_exit("munmap dax_data");
-+
-+	err = close(fd);
-+	if (err < 0)
-+		err_exit("close");
-+	return 0;
-+}
-diff --git a/tests/ext4/030 b/tests/ext4/030
-new file mode 100755
-index 0000000..3ac4952
---- /dev/null
-+++ b/tests/ext4/030
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# FS QA Test ext4/030
-+#
-+# This is a regression test for kernel patch:
-+#   ext4: prevent data corruption with journaling + DAX
-+# created by Ross Zwisler <ross.zwisler@linux.intel.com>
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_os Linux
-+_supported_fs ext4
-+_require_scratch_dax
-+_require_test_program "t_ext4_dax_journal_corruption"
-+
-+# real QA test starts here
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount "-o dax,nodelalloc" >> $seqres.full 2>&1
-+
-+src/t_ext4_dax_journal_corruption $CHATTR_PROG $SCRATCH_MNT/testfile
-+
-+if [[ $? != 0 && $? != 77 ]]; then
-+	echo "Test failed, status $?"
-+	exit 1
-+fi
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/ext4/030.out b/tests/ext4/030.out
-new file mode 100644
-index 0000000..06a1c8f
---- /dev/null
-+++ b/tests/ext4/030.out
-@@ -0,0 +1,2 @@
-+QA output created by 030
-+Silence is golden
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 257bb64..ef768df 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -32,6 +32,7 @@
- 027 auto quick fsmap
- 028 auto quick fsmap
- 029 auto quick fsmap
-+030 auto quick
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
--- 
-2.9.5
+
 
