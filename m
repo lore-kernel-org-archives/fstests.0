@@ -1,39 +1,41 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36766 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:43286 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751551AbdIMHQj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 13 Sep 2017 03:16:39 -0400
-Date: Wed, 13 Sep 2017 15:16:35 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 3/3] ext4: test for inline data + DAX corruption
-Message-ID: <20170913071635.GB8034@eguan.usersys.redhat.com>
-References: <20170912044521.22644-1-ross.zwisler@linux.intel.com>
- <20170912044521.22644-3-ross.zwisler@linux.intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170912044521.22644-3-ross.zwisler@linux.intel.com>
+        id S1751019AbdIMNED (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 13 Sep 2017 09:04:03 -0400
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [xfstests PATCH][RESEND] generic/441: whitelist gfs2 for full test
+Date: Wed, 13 Sep 2017 09:04:00 -0400
+Message-Id: <20170913130400.23185-1-jlayton@kernel.org>
+In-Reply-To: <20170728104827.7260-1-jlayton@kernel.org>
+References: <20170728104827.7260-1-jlayton@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, Andrew Morton <akpm@linux-foundation.org>, linux-kernel@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>, Theodore Ts'o <tytso@mit.edu>, Christoph Hellwig <hch@lst.de>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, linux-xfs@vger.kernel.org, Andreas Dilger <adilger@dilger.ca>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, cluster-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 11, 2017 at 10:45:21PM -0600, Ross Zwisler wrote:
-> Add a regression test for the following kernel commit:
-> 
->   ext4: prevent data corruption with inline data + DAX
-> 
-> The test passes either if we don't encounter corruption, or if mounting
-> with DAX + inline data fails.  The latter is the way that we prevent this
-> issue in the kernel.
-> 
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+From: Jeff Layton <jlayton@redhat.com>
 
-Besides the gitignore entry order issue and call the test program from
-$here/src/... issue, need another require rule:
+gfs2 passes the full-scale generic/441 test with the patch that
+converts it to use errseq_t reporting for fsync.
 
-_require_ext4_mkfs_feature "inline_data"
+Signed-off-by: Jeff Layton <jlayton@redhat.com>
+---
+ tests/generic/441 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Otherwise this looks fine to me.
+diff --git a/tests/generic/441 b/tests/generic/441
+index 075d87723ca1..b98f709cb6eb 100755
+--- a/tests/generic/441
++++ b/tests/generic/441
+@@ -55,7 +55,7 @@ case $FSTYP in
+ 	btrfs)
+ 		_notrun "btrfs has a specialized test for this"
+ 		;;
+-	ext3|ext4|xfs)
++	ext3|ext4|gfs2|xfs)
+ 		# Do the more thorough test if we have a logdev
+ 		_has_logdev && sflag=''
+ 		;;
+-- 
+2.13.5
 
-Thanks,
-Eryu
