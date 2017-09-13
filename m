@@ -1,53 +1,50 @@
-Received: from mail.kernel.org ([198.145.29.99]:43480 "EHLO mail.kernel.org"
+Received: from mga03.intel.com ([134.134.136.65]:48395 "EHLO mga03.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752065AbdIMNG1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 13 Sep 2017 09:06:27 -0400
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH] fsync-err: write to different offset on each fd
-Date: Wed, 13 Sep 2017 09:06:24 -0400
-Message-Id: <20170913130624.24028-1-jlayton@kernel.org>
+        id S1750999AbdIMOmR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 13 Sep 2017 10:42:17 -0400
+Date: Wed, 13 Sep 2017 08:42:15 -0600
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
+Message-ID: <20170913144215.GA12395@linux.intel.com>
+References: <20170908152805.GA16646@linux.intel.com>
+ <20170908212153.14880-1-ross.zwisler@linux.intel.com>
+ <20170912064411.GR10621@dastard>
+ <20170912153820.GA5000@linux.intel.com>
+ <20170912234729.GW10621@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170912234729.GW10621@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, neilb@suse.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Jan Kara <jack@suse.cz>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-nvdimm@lists.01.org, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Layton <jlayton@redhat.com>
+On Wed, Sep 13, 2017 at 09:47:29AM +1000, Dave Chinner wrote:
 
-NFS currently has slightly different semantics from other fs' and
-fails this test due to the fact that the same range is overwritten
-via each fd.
+<>
 
-Change it so that each fd overwrites a different region, which is
-more representative of a real workload anyway.
+> I think similar concerns exist with using perf, too....
 
-Reported-by: Neil Brown <neilb@suse.com>
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- src/fsync-err.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+I though that using perf addressed both concerns?
 
-diff --git a/src/fsync-err.c b/src/fsync-err.c
-index 4b0205cf2fd4..146688ddb01e 100644
---- a/src/fsync-err.c
-+++ b/src/fsync-err.c
-@@ -106,7 +106,7 @@ int main(int argc, char **argv)
- 	memset(buf, 0x7c, bufsize);
- 
- 	for (i = 0; i < numfds; ++i) {
--		ret = write(fd[i], buf, bufsize);
-+		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
- 		if (ret < 0) {
- 			printf("First write on fd[%d] failed: %m\n", i);
- 			return 1;
-@@ -149,7 +149,7 @@ int main(int argc, char **argv)
- 	}
- 
- 	for (i = 0; i < numfds; ++i) {
--		ret = write(fd[i], buf, bufsize);
-+		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
- 		if (ret < 0) {
- 			printf("Second write on fd[%d] failed: %m\n", i);
- 			return 1;
--- 
-2.13.5
+> > > So what happens when the user is already tracing the test to
+> > > find a bug and the test turns all their tracing off?
 
+By using perf we isolate our tracing from whatever other tracing is happening
+in the system.  So, unlike the case where we were messing with a system-wide
+ftrace knob, we run perf on our executable, and someone else can run perf on
+their executable, and they don't collide.
+
+> > > Regardless of this screwing up developer bug triage, do we really
+> > > want to add a dependency on kernel tracing into the test harness?
+
+Yep, you're right that this adds a dependency on perf.  But unfortunately,
+without using either perf or ftrace, I don't know of a way to detect whether
+or not DAX is actually being used.  Can you think of another way?
+
+I tried to do this correctly and just skip the test with _notrun if perf isn't
+available on the host system.  This is the same thing that happens if you are
+missing other dependencies for a test (some other command (chacl, getfattr,
+setfattr) not present, quota tools not installed, required users not present,
+etc).
