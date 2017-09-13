@@ -1,41 +1,53 @@
-Received: from mail.kernel.org ([198.145.29.99]:43286 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:43480 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751019AbdIMNED (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 13 Sep 2017 09:04:03 -0400
+        id S1752065AbdIMNG1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 13 Sep 2017 09:06:27 -0400
 From: Jeff Layton <jlayton@kernel.org>
-Subject: [xfstests PATCH][RESEND] generic/441: whitelist gfs2 for full test
-Date: Wed, 13 Sep 2017 09:04:00 -0400
-Message-Id: <20170913130400.23185-1-jlayton@kernel.org>
-In-Reply-To: <20170728104827.7260-1-jlayton@kernel.org>
-References: <20170728104827.7260-1-jlayton@kernel.org>
+Subject: [PATCH] fsync-err: write to different offset on each fd
+Date: Wed, 13 Sep 2017 09:06:24 -0400
+Message-Id: <20170913130624.24028-1-jlayton@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, cluster-devel@redhat.com
+Cc: fstests@vger.kernel.org, neilb@suse.com
 List-ID: <fstests@vger.kernel.org>
 
 From: Jeff Layton <jlayton@redhat.com>
 
-gfs2 passes the full-scale generic/441 test with the patch that
-converts it to use errseq_t reporting for fsync.
+NFS currently has slightly different semantics from other fs' and
+fails this test due to the fact that the same range is overwritten
+via each fd.
 
+Change it so that each fd overwrites a different region, which is
+more representative of a real workload anyway.
+
+Reported-by: Neil Brown <neilb@suse.com>
 Signed-off-by: Jeff Layton <jlayton@redhat.com>
 ---
- tests/generic/441 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/fsync-err.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/generic/441 b/tests/generic/441
-index 075d87723ca1..b98f709cb6eb 100755
---- a/tests/generic/441
-+++ b/tests/generic/441
-@@ -55,7 +55,7 @@ case $FSTYP in
- 	btrfs)
- 		_notrun "btrfs has a specialized test for this"
- 		;;
--	ext3|ext4|xfs)
-+	ext3|ext4|gfs2|xfs)
- 		# Do the more thorough test if we have a logdev
- 		_has_logdev && sflag=''
- 		;;
+diff --git a/src/fsync-err.c b/src/fsync-err.c
+index 4b0205cf2fd4..146688ddb01e 100644
+--- a/src/fsync-err.c
++++ b/src/fsync-err.c
+@@ -106,7 +106,7 @@ int main(int argc, char **argv)
+ 	memset(buf, 0x7c, bufsize);
+ 
+ 	for (i = 0; i < numfds; ++i) {
+-		ret = write(fd[i], buf, bufsize);
++		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
+ 		if (ret < 0) {
+ 			printf("First write on fd[%d] failed: %m\n", i);
+ 			return 1;
+@@ -149,7 +149,7 @@ int main(int argc, char **argv)
+ 	}
+ 
+ 	for (i = 0; i < numfds; ++i) {
+-		ret = write(fd[i], buf, bufsize);
++		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
+ 		if (ret < 0) {
+ 			printf("Second write on fd[%d] failed: %m\n", i);
+ 			return 1;
 -- 
 2.13.5
 
