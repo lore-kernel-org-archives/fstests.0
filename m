@@ -1,90 +1,161 @@
-Received: from mx2.suse.de ([195.135.220.15]:33807 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751131AbdINNQl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Sep 2017 09:16:41 -0400
-Date: Thu, 14 Sep 2017 15:16:38 +0200
-From: Johannes Thumshirn <jthumshirn@suse.de>
-Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
-Message-ID: <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
-References: <20170912153820.GA5000@linux.intel.com>
- <20170912234729.GW10621@dastard>
- <20170913144215.GA12395@linux.intel.com>
- <20170913220108.GX10621@dastard>
- <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
- <20170913233438.GY10621@dastard>
- <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
- <20170914004038.GZ10621@dastard>
- <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
- <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34984 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751165AbdINNbi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Sep 2017 09:31:38 -0400
+Date: Thu, 14 Sep 2017 21:31:36 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH xfstests 2/2] overlay: test chattr lower file in overlay
+Message-ID: <20170914133136.GL8034@eguan.usersys.redhat.com>
+References: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
+ <1505390643-6981-2-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
+In-Reply-To: <1505390643-6981-2-git-send-email-yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Jeff Moyer <jmoyer@redhat.com>
-Cc: Dan Williams <dan.j.williams@intel.com>, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 14, 2017 at 08:19:58AM -0400, Jeff Moyer wrote:
-> Dan Williams <dan.j.williams@intel.com> writes:
->=20
-> > On Wed, Sep 13, 2017 at 5:40 PM, Dave Chinner <david@fromorbit.com> w=
-rote:
-> >> On Wed, Sep 13, 2017 at 05:28:39PM -0700, Dan Williams wrote:
-> >>> On Wed, Sep 13, 2017 at 4:34 PM, Dave Chinner <david@fromorbit.com>=
- wrote:
-> >>> > /me shrugs
-> >>> >
-> >>> > I just don't like the concept of using tracepoints to as a
-> >>> > definitive diagnostic test for something working because it'll br=
-eak
-> >>> > when the kernel implementation and tracepoints change. So while w=
-e
-> >>> > can probe for perf being present, we can't probe whether the
-> >>> > tracepoint we need behaves as the test expects it to...
-> >>>
-> >>> That concern makes sense.
-> >>>
-> >>> We handle that it a crude way in the libnvdimm unit tests by hard
-> >>> coding a required minimum kernel version and rolling a test forward=
- to
-> >>> depend on a new kernel when assumptions about the kernel-internals
-> >>> change. The tests also inject out-of-tree kernel modules that let u=
-s
-> >>> go after specific kernel internal behavior. With this approach we
-> >>> don't end up creating userspace ABI since the test explicitly loads
-> >>> out-of-tree modules.
-> >>
-> >> That's horrible. OT, but how are distros or anyone backporting
-> >> libnvdimm fixes and features supposed to test their kernels work
-> >> correctly with such a test harness?
-> >
-> > The upstream kernel version for the test to assume can be overridden
-> > by an environment variable. It has worked well so far for me when I'm
-> > using it it to test backports, but I don't have much in the way of
-> > third-party feedback.
->=20
-> It sucks.  :-)  What we really want is to depend on a feature being
-> available, not on a kernel version.  We did discuss this a while ago.
-> Let me go dig it up...
->   https://lists.01.org/pipermail/linux-nvdimm/2017-March/009253.html
->=20
-> We never came to any real conclusion on a good way forward, though.
+On Thu, Sep 14, 2017 at 08:04:03PM +0800, zhangyi (F) wrote:
+> chattr with [iap..] attributes open file for read-only and
+> invoke ioctl(). If we chattr a lower file in overlay, it
+> will get the lower file but not trigger copy-up, so ioctl()
+> lead to modification of that lower file incorrectly. Add this
+> test for this case.
+> 
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> ---
+>  tests/overlay/040     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/040.out |  2 ++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 92 insertions(+)
+>  create mode 100755 tests/overlay/040
+>  create mode 100644 tests/overlay/040.out
+> 
+> diff --git a/tests/overlay/040 b/tests/overlay/040
+> new file mode 100755
+> index 0000000..4d0c7ef
+> --- /dev/null
+> +++ b/tests/overlay/040
+> @@ -0,0 +1,89 @@
+> +#! /bin/bash
+> +# FS QA Test 040
+> +#
+> +# chattr with [iap..] attributes open file for read-only and
+> +# invoke ioctl(). If we chattr a lower file in overlay, it
+> +# will get the lower file but not trigger copy-up, so ioctl()
+> +# lead to modification of that lower file.
+> +#
+> +# Upstream Commit 7c6893e3c9ab ("ovl: don't allow writing
+> +# ioctl on lower layer") return EPERM for this case to avoid
+> +# this issue.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Huawei.  All Rights Reserved.
+> +# Author: zhangyi (F) <yi.zhang@huawei.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	$CHATTR_PROG -i $lowerdir/foo
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +_require_chattr i
+> +
+> +# remove all files from previous runs
+> +_scratch_mkfs
+> +
+> +# prepare lower test file
+> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+> +mkdir -p $lowerdir
+> +touch $lowerdir/foo
+> +
+> +# mounting overlay
+> +_scratch_mount
+> +
+> +# Try to add immutable attributes in overlay, it will
+> +# open file for read-only and invoke ioctl(), it should not
+> +# modify lower origin file.
+> +$CHATTR_PROG +i $SCRATCH_MNT/foo > /dev/null 2>&1
+> +
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +# touching origin file in lower, should succeed
+> +touch $lowerdir/foo > /dev/null 2>&1
+> +
+> +if [ $? -ne 0 ]; then
+> +        echo "Test Fail, immutable attributes is modified in lower."
+> +fi
 
-I think I already said this before [1], but can't we make a "features"
-sysfs/debugfs attribute with one bit set for each feature implemented? Th=
-is
-definitively would help when running the test-suite on a backport.
+No need to check return value of 'touch', a bare 'touch $lowerdir/foo'
+would work, if touch failed the error message would break the golden
+image. I can fix it at commit time. Thanks for the tests!
 
-[1] https://lists.01.org/pipermail/linux-nvdimm/2016-March/004963.html
+Eryu
 
-Byte,
-	Johannes
---=20
-Johannes Thumshirn                                          Storage
-jthumshirn@suse.de                                +49 911 74053 689
-SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
-GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
-HRB 21284 (AG N=FCrnberg)
-Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/overlay/040.out b/tests/overlay/040.out
+> new file mode 100644
+> index 0000000..9e3d4d9
+> --- /dev/null
+> +++ b/tests/overlay/040.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 040
+> +Silence is golden
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 39177c4..4cd4af1 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -42,3 +42,4 @@
+>  037 auto quick mount
+>  038 auto quick copyup
+>  039 auto quick
+> +040 auto quick
+> -- 
+> 2.5.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
