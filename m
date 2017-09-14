@@ -1,27 +1,90 @@
-Received: from mail-yw0-f177.google.com ([209.85.161.177]:56070 "EHLO
-        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751131AbdINNH6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2017 09:07:58 -0400
+Received: from mx2.suse.de ([195.135.220.15]:33807 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751131AbdINNQl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Sep 2017 09:16:41 -0400
+Date: Thu, 14 Sep 2017 15:16:38 +0200
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
+Message-ID: <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
+References: <20170912153820.GA5000@linux.intel.com>
+ <20170912234729.GW10621@dastard>
+ <20170913144215.GA12395@linux.intel.com>
+ <20170913220108.GX10621@dastard>
+ <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
+ <20170913233438.GY10621@dastard>
+ <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
+ <20170914004038.GZ10621@dastard>
+ <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
+ <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
-References: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 14 Sep 2017 16:07:57 +0300
-Message-ID: <CAOQ4uxjWqLD2J4ReYTihjeA03VOTDpeoBC7c4u4cnzSOZR2k1w@mail.gmail.com>
-Subject: Re: [PATCH xfstests 1/2] overlay: test relatime for directories
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+In-Reply-To: <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, miaoxie@huawei.com
+Content-Transfer-Encoding: quoted-printable
+To: Jeff Moyer <jmoyer@redhat.com>
+Cc: Dan Williams <dan.j.williams@intel.com>, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 14, 2017 at 3:04 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Add test access time update issue for directories in upper layer.
->
-> Upstream commit cd91304e7190 ("ovl: fix relatime for directories")
-> fixed this issue.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+On Thu, Sep 14, 2017 at 08:19:58AM -0400, Jeff Moyer wrote:
+> Dan Williams <dan.j.williams@intel.com> writes:
+>=20
+> > On Wed, Sep 13, 2017 at 5:40 PM, Dave Chinner <david@fromorbit.com> w=
+rote:
+> >> On Wed, Sep 13, 2017 at 05:28:39PM -0700, Dan Williams wrote:
+> >>> On Wed, Sep 13, 2017 at 4:34 PM, Dave Chinner <david@fromorbit.com>=
+ wrote:
+> >>> > /me shrugs
+> >>> >
+> >>> > I just don't like the concept of using tracepoints to as a
+> >>> > definitive diagnostic test for something working because it'll br=
+eak
+> >>> > when the kernel implementation and tracepoints change. So while w=
+e
+> >>> > can probe for perf being present, we can't probe whether the
+> >>> > tracepoint we need behaves as the test expects it to...
+> >>>
+> >>> That concern makes sense.
+> >>>
+> >>> We handle that it a crude way in the libnvdimm unit tests by hard
+> >>> coding a required minimum kernel version and rolling a test forward=
+ to
+> >>> depend on a new kernel when assumptions about the kernel-internals
+> >>> change. The tests also inject out-of-tree kernel modules that let u=
+s
+> >>> go after specific kernel internal behavior. With this approach we
+> >>> don't end up creating userspace ABI since the test explicitly loads
+> >>> out-of-tree modules.
+> >>
+> >> That's horrible. OT, but how are distros or anyone backporting
+> >> libnvdimm fixes and features supposed to test their kernels work
+> >> correctly with such a test harness?
+> >
+> > The upstream kernel version for the test to assume can be overridden
+> > by an environment variable. It has worked well so far for me when I'm
+> > using it it to test backports, but I don't have much in the way of
+> > third-party feedback.
+>=20
+> It sucks.  :-)  What we really want is to depend on a feature being
+> available, not on a kernel version.  We did discuss this a while ago.
+> Let me go dig it up...
+>   https://lists.01.org/pipermail/linux-nvdimm/2017-March/009253.html
+>=20
+> We never came to any real conclusion on a good way forward, though.
 
-Looks good.
-Thanks
+I think I already said this before [1], but can't we make a "features"
+sysfs/debugfs attribute with one bit set for each feature implemented? Th=
+is
+definitively would help when running the test-suite on a backport.
+
+[1] https://lists.01.org/pipermail/linux-nvdimm/2016-March/004963.html
+
+Byte,
+	Johannes
+--=20
+Johannes Thumshirn                                          Storage
+jthumshirn@suse.de                                +49 911 74053 689
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
+GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
+HRB 21284 (AG N=FCrnberg)
+Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
