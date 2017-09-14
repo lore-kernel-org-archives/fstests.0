@@ -1,11 +1,13 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:6056 "EHLO
+Received: from szxga05-in.huawei.com ([45.249.212.191]:6057 "EHLO
         szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751800AbdINL72 (ORCPT
+        with ESMTP id S1751804AbdINL72 (ORCPT
         <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2017 07:59:28 -0400
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH xfstests 1/2] overlay: test relatime for directories
-Date: Thu, 14 Sep 2017 20:04:02 +0800
-Message-ID: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
+Subject: [PATCH xfstests 2/2] overlay: test chattr lower file in overlay
+Date: Thu, 14 Sep 2017 20:04:03 +0800
+Message-ID: <1505390643-6981-2-git-send-email-yi.zhang@huawei.com>
+In-Reply-To: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
+References: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,33 +15,38 @@ To: fstests@vger.kernel.org
 Cc: eguan@redhat.com, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add test access time update issue for directories in upper layer.
-
-Upstream commit cd91304e7190 ("ovl: fix relatime for directories")
-fixed this issue.
+chattr with [iap..] attributes open file for read-only and
+invoke ioctl(). If we chattr a lower file in overlay, it
+will get the lower file but not trigger copy-up, so ioctl()
+lead to modification of that lower file incorrectly. Add this
+test for this case.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- tests/overlay/039     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/039.out |  2 ++
+ tests/overlay/040     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/040.out |  2 ++
  tests/overlay/group   |  1 +
  3 files changed, 92 insertions(+)
- create mode 100755 tests/overlay/039
- create mode 100644 tests/overlay/039.out
+ create mode 100755 tests/overlay/040
+ create mode 100644 tests/overlay/040.out
 
-diff --git a/tests/overlay/039 b/tests/overlay/039
+diff --git a/tests/overlay/040 b/tests/overlay/040
 new file mode 100755
-index 0000000..cd81ce5
+index 0000000..4d0c7ef
 --- /dev/null
-+++ b/tests/overlay/039
++++ b/tests/overlay/040
 @@ -0,0 +1,89 @@
 +#! /bin/bash
-+# FS QA Test 039
++# FS QA Test 040
 +#
-+# Test access time update issue for directories in upper layer.
++# chattr with [iap..] attributes open file for read-only and
++# invoke ioctl(). If we chattr a lower file in overlay, it
++# will get the lower file but not trigger copy-up, so ioctl()
++# lead to modification of that lower file.
 +#
-+# Upstream Commit cd91304e7190 ("ovl: fix relatime for directories")
-+# fixed this issue.
++# Upstream Commit 7c6893e3c9ab ("ovl: don't allow writing
++# ioctl on lower layer") return EPERM for this case to avoid
++# this issue.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Huawei.  All Rights Reserved.
@@ -72,6 +79,7 @@ index 0000000..cd81ce5
 +_cleanup()
 +{
 +	cd /
++	$CHATTR_PROG -i $lowerdir/foo
 +	rm -f $tmp.*
 +}
 +
@@ -86,59 +94,54 @@ index 0000000..cd81ce5
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
-+_require_relatime
++_require_chattr i
 +
 +# remove all files from previous runs
 +_scratch_mkfs
 +
++# prepare lower test file
 +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+mkdir -p $upperdir/test
++mkdir -p $lowerdir
++touch $lowerdir/foo
 +
-+_scratch_mount "-o relatime"
++# mounting overlay
++_scratch_mount
 +
-+# access test dir, it's access time will be updated normally
-+ls $SCRATCH_MNT/test
++# Try to add immutable attributes in overlay, it will
++# open file for read-only and invoke ioctl(), it should not
++# modify lower origin file.
++$CHATTR_PROG +i $SCRATCH_MNT/foo > /dev/null 2>&1
 +
-+pre_access_time=`stat -c "%X" $SCRATCH_MNT/test`
++$UMOUNT_PROG $SCRATCH_MNT
 +
-+# In relatime mode, access time is only updated if the previous
-+# access time was earlier than the current modify or change time,
-+# so trigger modify and change time update.
-+touch $SCRATCH_MNT/test/foo
-+sleep 1
++# touching origin file in lower, should succeed
++touch $lowerdir/foo > /dev/null 2>&1
 +
-+# access test dir again
-+ls $SCRATCH_MNT/test > /dev/null 2>&1
-+
-+cur_access_time=`stat -c "%X" $SCRATCH_MNT/test`
-+
-+# compare the results, current access time should later than the previous one
-+if [ $cur_access_time -le $pre_access_time ] ; then
-+	echo "Access time is not updated correctly."
++if [ $? -ne 0 ]; then
++        echo "Test Fail, immutable attributes is modified in lower."
 +fi
 +
 +# success, all done
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/overlay/039.out b/tests/overlay/039.out
+diff --git a/tests/overlay/040.out b/tests/overlay/040.out
 new file mode 100644
-index 0000000..d4e7ef6
+index 0000000..9e3d4d9
 --- /dev/null
-+++ b/tests/overlay/039.out
++++ b/tests/overlay/040.out
 @@ -0,0 +1,2 @@
-+QA output created by 039
++QA output created by 040
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index ac66bc7..39177c4 100644
+index 39177c4..4cd4af1 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -41,3 +41,4 @@
- 036 auto quick mount
+@@ -42,3 +42,4 @@
  037 auto quick mount
  038 auto quick copyup
-+039 auto quick
+ 039 auto quick
++040 auto quick
 -- 
 2.5.0
 
