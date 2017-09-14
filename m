@@ -1,69 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44422 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50168 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751132AbdINGY5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Sep 2017 02:24:57 -0400
-Date: Thu, 14 Sep 2017 14:24:54 +0800
+        id S1751085AbdING5o (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Sep 2017 02:57:44 -0400
+Date: Thu, 14 Sep 2017 14:57:41 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fsync-err: write to different offset on each fd
-Message-ID: <20170914062454.GG8034@eguan.usersys.redhat.com>
-References: <20170913130624.24028-1-jlayton@kernel.org>
+Subject: Re: [fstests PATCH v2] xfs: add regression test for DAX mount option
+ usage
+Message-ID: <20170914065741.GH8034@eguan.usersys.redhat.com>
+References: <CAPcyv4gGpAW7kUCgqSoNCPkFZVYzTVQi3C4x6AFm2KHvFrZSfw@mail.gmail.com>
+ <20170911200103.28226-1-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170913130624.24028-1-jlayton@kernel.org>
+In-Reply-To: <20170911200103.28226-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, neilb@suse.com
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-nvdimm@lists.01.org, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 13, 2017 at 09:06:24AM -0400, Jeff Layton wrote:
-> From: Jeff Layton <jlayton@redhat.com>
-> 
-> NFS currently has slightly different semantics from other fs' and
-> fails this test due to the fact that the same range is overwritten
-> via each fd.
+Hi Ross,
 
-generic/441 and generic/442 require the SCRATCH_DEV to be a real block
-device, tests should be skipped as _notrun on NFS, and I didn't expect a
-test failure on NFS..
-
+On Mon, Sep 11, 2017 at 02:01:03PM -0600, Ross Zwisler wrote:
+> This adds a regression test for the following kernel patch:
 > 
-> Change it so that each fd overwrites a different region, which is
-> more representative of a real workload anyway.
+>   xfs: always use DAX if mount option is used
 > 
-> Reported-by: Neil Brown <neilb@suse.com>
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> This test will also pass with kernel v4.14-rc1 and beyond because the XFS
+> DAX I/O mount option has been disabled (but not removed), so the
+> "chattr -x" to turn off DAX doesn't actually do anything.
+> 
+> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> Suggested-by: Christoph Hellwig <hch@infradead.org>
+> ---
+> 
+> Changes since v1:
+>  - Use perf instead of tracepoints to detect whether DAX is used. (Dan)
 
-But the change looks fine to me.
+Thanks for the test! But I agreed with Dave here, it doesn't seem like a
+good idea to depend on the kernel tracepoints in a test, but I can't
+think of a better solution either, so I didn't get to this patch
+earlier..
+
+Before XFS disabled the ability to switch on & off per-inode DAX flag,
+the x flag was only shown after an explicit 'chattr +x', even if XFS was
+mounted with dax option, e.g.
+
+# mkfs -t xfs -f /dev/ram0
+# mount -o dax /dev/ram0 /mnt/xfs
+# echo "test" > /mnt/xfs/testfile
+# xfs_io -c "lsattr" /mnt/xfs/testfile
+---------------- /mnt/xfs/testfile
+# xfs_io -c "chattr +x" /mnt/xfs/testfile
+# xfs_io -c "lsattr" /mnt/xfs/testfile
+---------------x /mnt/xfs/testfile
+
+I'm wondering if it makes sense to make lsattr print the x flag by
+default when XFS is mounted with dax option, that way, we have a method
+to know whether dax is used or not on a particular file too.
 
 Thanks,
 Eryu
-> ---
->  src/fsync-err.c | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/src/fsync-err.c b/src/fsync-err.c
-> index 4b0205cf2fd4..146688ddb01e 100644
-> --- a/src/fsync-err.c
-> +++ b/src/fsync-err.c
-> @@ -106,7 +106,7 @@ int main(int argc, char **argv)
->  	memset(buf, 0x7c, bufsize);
->  
->  	for (i = 0; i < numfds; ++i) {
-> -		ret = write(fd[i], buf, bufsize);
-> +		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
->  		if (ret < 0) {
->  			printf("First write on fd[%d] failed: %m\n", i);
->  			return 1;
-> @@ -149,7 +149,7 @@ int main(int argc, char **argv)
->  	}
->  
->  	for (i = 0; i < numfds; ++i) {
-> -		ret = write(fd[i], buf, bufsize);
-> +		ret = pwrite(fd[i], buf, bufsize, i * bufsize);
->  		if (ret < 0) {
->  			printf("Second write on fd[%d] failed: %m\n", i);
->  			return 1;
-> -- 
-> 2.13.5
-> 
