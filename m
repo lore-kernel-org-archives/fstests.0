@@ -1,53 +1,59 @@
-Received: from mail-io0-f174.google.com ([209.85.223.174]:44184 "EHLO
-        mail-io0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751311AbdINBYM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Sep 2017 21:24:12 -0400
-Received: by mail-io0-f174.google.com with SMTP id v36so11416769ioi.1
-        for <fstests@vger.kernel.org>; Wed, 13 Sep 2017 18:24:12 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:46174 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750740AbdINEJo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Sep 2017 00:09:44 -0400
+Date: Thu, 14 Sep 2017 12:09:42 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: xfs/310: relax extent count check
+Message-ID: <20170914040942.GE8034@eguan.usersys.redhat.com>
+References: <20170903155101.GA30258@lst.de>
 MIME-Version: 1.0
-In-Reply-To: <20170914004038.GZ10621@dastard>
-References: <20170908152805.GA16646@linux.intel.com> <20170908212153.14880-1-ross.zwisler@linux.intel.com>
- <20170912064411.GR10621@dastard> <20170912153820.GA5000@linux.intel.com>
- <20170912234729.GW10621@dastard> <20170913144215.GA12395@linux.intel.com>
- <20170913220108.GX10621@dastard> <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
- <20170913233438.GY10621@dastard> <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
- <20170914004038.GZ10621@dastard>
-From: Dan Williams <dan.j.williams@intel.com>
-Date: Wed, 13 Sep 2017 18:24:10 -0700
-Message-ID: <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
-Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170903155101.GA30258@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 13, 2017 at 5:40 PM, Dave Chinner <david@fromorbit.com> wrote:
-> On Wed, Sep 13, 2017 at 05:28:39PM -0700, Dan Williams wrote:
->> On Wed, Sep 13, 2017 at 4:34 PM, Dave Chinner <david@fromorbit.com> wrote:
->> > /me shrugs
->> >
->> > I just don't like the concept of using tracepoints to as a
->> > definitive diagnostic test for something working because it'll break
->> > when the kernel implementation and tracepoints change. So while we
->> > can probe for perf being present, we can't probe whether the
->> > tracepoint we need behaves as the test expects it to...
->>
->> That concern makes sense.
->>
->> We handle that it a crude way in the libnvdimm unit tests by hard
->> coding a required minimum kernel version and rolling a test forward to
->> depend on a new kernel when assumptions about the kernel-internals
->> change. The tests also inject out-of-tree kernel modules that let us
->> go after specific kernel internal behavior. With this approach we
->> don't end up creating userspace ABI since the test explicitly loads
->> out-of-tree modules.
->
-> That's horrible. OT, but how are distros or anyone backporting
-> libnvdimm fixes and features supposed to test their kernels work
-> correctly with such a test harness?
+[adding linux-xfs list]
 
-The upstream kernel version for the test to assume can be overridden
-by an environment variable. It has worked well so far for me when I'm
-using it it to test backports, but I don't have much in the way of
-third-party feedback.
+On Sun, Sep 03, 2017 at 05:51:01PM +0200, Christoph Hellwig wrote:
+> If we got over the bmbt length we'll always allocate two extents,
+> its just that so far getbmap merged them.
+> 
+> Also fix/update some comments.
+> 
+> diff --git a/tests/xfs/310 b/tests/xfs/310
+> index c78f6f1..f33a15a 100755
+> --- a/tests/xfs/310
+> +++ b/tests/xfs/310
+> @@ -1,7 +1,7 @@
+>  #! /bin/bash
+>  # FS QA Test No. 310
+>  #
+> -# Create a file with more than 2^21 extents (the max length of a bmbt record).
+> +# Create a file with more than 2^21 blocks (the max length of a bmbt record).
+>  #
+>  #-----------------------------------------------------------------------
+>  # Copyright (c) 2016, Oracle and/or its affiliates.  All Rights Reserved.
+> @@ -75,8 +75,9 @@ mkdir $testdir
+>  blksz="$(_get_block_size $testdir)"
+>  $XFS_IO_PROG -f -c "falloc 0 $((nr_blks * blksz))" $testdir/file1 >> $seqres.full
+>  
+> +# make sure the allocator didn't allocate more than the needed two extents
+>  echo "Check extent count"
+> -xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*1:' -q && xfs_bmap -l -p -v $testdir/file1
+> +xfs_bmap -l -p -v $testdir/file1 | grep '^[[:space:]]*2:' -q && xfs_bmap -l -p -v $testdir/file1
+
+It'd be great if someone could help to review this change. Thanks a lot!
+
+Eryu
+
+>  inum=$(stat -c '%i' $testdir/file1)
+>  umount $SCRATCH_MNT
+>  
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
