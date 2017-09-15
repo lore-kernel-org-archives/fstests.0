@@ -1,97 +1,80 @@
-Received: from mx2.suse.de ([195.135.220.15]:60602 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751200AbdIOJSw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 15 Sep 2017 05:18:52 -0400
-Date: Fri, 15 Sep 2017 11:18:45 +0200
-From: Johannes Thumshirn <jthumshirn@suse.de>
-Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
-Message-ID: <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
-References: <20170913144215.GA12395@linux.intel.com>
- <20170913220108.GX10621@dastard>
- <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
- <20170913233438.GY10621@dastard>
- <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
- <20170914004038.GZ10621@dastard>
- <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
- <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
- <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
- <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-In-Reply-To: <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:36733 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751157AbdIOKq4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Sep 2017 06:46:56 -0400
+Received: by mail-wm0-f66.google.com with SMTP id r136so2420780wmf.3
+        for <fstests@vger.kernel.org>; Fri, 15 Sep 2017 03:46:56 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay/038: fix impure xattr test
+Date: Fri, 15 Sep 2017 13:47:28 +0300
+Message-Id: <1505472448-588-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Jeff Moyer <jmoyer@redhat.com>, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Andreas Gruenbacher <agruenba@redhat.com>, fstests@vger.kernel.org, Chandan Rajendra <chandan@linux.vnet.ibm.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 14, 2017 at 07:10:02AM -0700, Dan Williams wrote:
-> What discouraged me from going that route in the past is the busy work
-> of tracking / syncing these new debugfs feature gate flags across 2
-> source repositories. If we want to stop depending on kernel version in
-> the test suite over time I think the only sane way to manage that
-> tight integration is to get ndctl into the kernel tree proper.
->=20
-> ...but please say a bit more about the actual pain points with the
-> current environment variable approach.
+On kvm-xfstest, getfattr (2.4.43) does not return failure exit code
+when the requested xattr is not found.
 
-This means the person which executes the test-suite has to know on which
-feature level (upstream kernel version) the downstream kernel is, I can't
-demand such knowledge from QA.
+Change the test to check the returned xattr value instead of exit code.
 
-> You want to be able to have a debugfs directory that has something like=
-:
->=20
-> /featureA
-> /featureB
-> /featureC
-> /fixX
-> /fixY
-> /fixZ
-> /quirkQ
->=20
-> ...where, depending on backport priorities, a subset of those may not
-> exist?=20
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-Yes, I thought of a bitmask in one (or two files but a file per feature i=
-s OK)
-as well. The idea is borrowed from Daniel Vetter's "Bothing up ioctl()s" =
-blog
-entry [1]:
-"Have a clear way for userspace to figure out whether your new ioctl or i=
-octl
-extension is supported on a given kernel. If you can't rely on old kernel=
-s
-rejecting the new flags/modes or ioctls (since doing that was botched in =
-the
-past) then you need a driver feature flag or revision number somewhere."
+Eryu,
 
-> Does having the test suite in the kernel tree help or hurt what
-> you're trying to do?
+This test is supposed to pass on master now and it does pass on my
+Ubuntu 16.04, but fails on kvm-xfstests (Debian stretch).
 
-Having the test suite in the kernel is problematic when you want to distr=
-ibute
-it to somewhere. I can only talk about my workflow here, but I build an r=
-pm on my
-build server and then scp it to my test host. With the current test-suite=
- I
-have to bring the other modules over as well and install them before the
-kernel rpm to have the linker wrapper trick working. That's OKish for
-developer testing, but for QA (or even testing at partners or customers)
-this gets cumbersome and I really want to have even end customers being a=
-ble
-to run the test-suite to verify their kernel is working properly.
+The failure is due to different behavior of getfattr on different
+systems and as a result of me suggesting to Chandan to check getfattr
+exit code. So this patch is for my redemption ;-)
 
-[1] http://blog.ffwll.ch/2013/11/botching-up-ioctls.html
+I surveyed for other places that check exit code of getfattr as
+indication of ENODATA and found only one other instance in
+_require_scratch_richacl_support() (for non xfs/ext4 FSTYP).
+However, this instance is buggy regardless, because it provides no
+file argument to getfattr.
+I would fix it, but I am not sure what's the semantics and have no
+idea how to test this.
 
-Byte,
-	Johannes
+Amir.
 
---=20
-Johannes Thumshirn                                          Storage
-jthumshirn@suse.de                                +49 911 74053 689
-SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
-GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
-HRB 21284 (AG N=FCrnberg)
-Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
+
+ tests/overlay/038 | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/tests/overlay/038 b/tests/overlay/038
+index 24cd432..69fd76a 100755
+--- a/tests/overlay/038
++++ b/tests/overlay/038
+@@ -108,9 +108,9 @@ test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
+ 
+ mv $SCRATCH_MNT/test_file $impure_dir
+ 
+-$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
+-	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
+-[[ $? == 0 ]] || echo "Impure directory missing impure xattr"
++impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
++			$upperdir/test_dir/impure_dir)
++[[ $impure == "y" ]] || echo "Impure directory missing impure xattr"
+ 
+ # After $impure_dir becomes impure
+ parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
+@@ -133,9 +133,9 @@ rm -rf $impure_dir/test_file
+ $here/src/t_dir_type $impure_dir $test_file_st_ino
+ [[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
+ 
+-$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
+-	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
+-[[ $? != 0 ]] || echo "Pure directory has impure xattr"
++impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
++			$upperdir/test_dir/impure_dir 2>/dev/null)
++[[ -z $impure ]] || echo "Pure directory has impure xattr"
+ 
+ # Verify d_ino values corresponding to "." and ".." entries of a
+ # pure lower dir.
+-- 
+2.7.4
+
