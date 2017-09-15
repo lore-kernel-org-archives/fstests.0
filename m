@@ -1,137 +1,97 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:6482 "EHLO
-        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751645AbdIOBHn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Sep 2017 21:07:43 -0400
-Subject: Re: [PATCH xfstests 2/2] overlay: test chattr lower file in overlay
-References: <1505390643-6981-1-git-send-email-yi.zhang@huawei.com>
- <1505390643-6981-2-git-send-email-yi.zhang@huawei.com>
- <20170914133136.GL8034@eguan.usersys.redhat.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <c03c7d9b-51d0-0160-aa3d-ee060640e5f7@huawei.com>
-Date: Fri, 15 Sep 2017 09:06:53 +0800
+Received: from mx2.suse.de ([195.135.220.15]:60602 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751200AbdIOJSw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 15 Sep 2017 05:18:52 -0400
+Date: Fri, 15 Sep 2017 11:18:45 +0200
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
+Message-ID: <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
+References: <20170913144215.GA12395@linux.intel.com>
+ <20170913220108.GX10621@dastard>
+ <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
+ <20170913233438.GY10621@dastard>
+ <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
+ <20170914004038.GZ10621@dastard>
+ <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
+ <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
+ <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
+ <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20170914133136.GL8034@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+In-Reply-To: <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com
+Content-Transfer-Encoding: quoted-printable
+To: Dan Williams <dan.j.williams@intel.com>
+Cc: Jeff Moyer <jmoyer@redhat.com>, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/9/14 21:31, Eryu Guan Wrote:
-> On Thu, Sep 14, 2017 at 08:04:03PM +0800, zhangyi (F) wrote:
->> chattr with [iap..] attributes open file for read-only and
->> invoke ioctl(). If we chattr a lower file in overlay, it
->> will get the lower file but not trigger copy-up, so ioctl()
->> lead to modification of that lower file incorrectly. Add this
->> test for this case.
->>
->> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
->> ---
->>  tests/overlay/040     | 89 +++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/overlay/040.out |  2 ++
->>  tests/overlay/group   |  1 +
->>  3 files changed, 92 insertions(+)
->>  create mode 100755 tests/overlay/040
->>  create mode 100644 tests/overlay/040.out
->>
->> diff --git a/tests/overlay/040 b/tests/overlay/040
->> new file mode 100755
->> index 0000000..4d0c7ef
->> --- /dev/null
->> +++ b/tests/overlay/040
->> @@ -0,0 +1,89 @@
->> +#! /bin/bash
->> +# FS QA Test 040
->> +#
->> +# chattr with [iap..] attributes open file for read-only and
->> +# invoke ioctl(). If we chattr a lower file in overlay, it
->> +# will get the lower file but not trigger copy-up, so ioctl()
->> +# lead to modification of that lower file.
->> +#
->> +# Upstream Commit 7c6893e3c9ab ("ovl: don't allow writing
->> +# ioctl on lower layer") return EPERM for this case to avoid
->> +# this issue.
->> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2017 Huawei.  All Rights Reserved.
->> +# Author: zhangyi (F) <yi.zhang@huawei.com>
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	$CHATTR_PROG -i $lowerdir/foo
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +_supported_fs overlay
->> +_supported_os Linux
->> +_require_scratch
->> +_require_chattr i
->> +
->> +# remove all files from previous runs
->> +_scratch_mkfs
->> +
->> +# prepare lower test file
->> +lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
->> +mkdir -p $lowerdir
->> +touch $lowerdir/foo
->> +
->> +# mounting overlay
->> +_scratch_mount
->> +
->> +# Try to add immutable attributes in overlay, it will
->> +# open file for read-only and invoke ioctl(), it should not
->> +# modify lower origin file.
->> +$CHATTR_PROG +i $SCRATCH_MNT/foo > /dev/null 2>&1
->> +
->> +$UMOUNT_PROG $SCRATCH_MNT
->> +
->> +# touching origin file in lower, should succeed
->> +touch $lowerdir/foo > /dev/null 2>&1
->> +
->> +if [ $? -ne 0 ]; then
->> +        echo "Test Fail, immutable attributes is modified in lower."
->> +fi
-> 
-> No need to check return value of 'touch', a bare 'touch $lowerdir/foo'
-> would work, if touch failed the error message would break the golden
-> image. I can fix it at commit time. Thanks for the tests!
+On Thu, Sep 14, 2017 at 07:10:02AM -0700, Dan Williams wrote:
+> What discouraged me from going that route in the past is the busy work
+> of tracking / syncing these new debugfs feature gate flags across 2
+> source repositories. If we want to stop depending on kernel version in
+> the test suite over time I think the only sane way to manage that
+> tight integration is to get ndctl into the kernel tree proper.
+>=20
+> ...but please say a bit more about the actual pain points with the
+> current environment variable approach.
 
-Yes, you are right, it's more simple, thanks!
+This means the person which executes the test-suite has to know on which
+feature level (upstream kernel version) the downstream kernel is, I can't
+demand such knowledge from QA.
 
-Thanks,
-Yi.
+> You want to be able to have a debugfs directory that has something like=
+:
+>=20
+> /featureA
+> /featureB
+> /featureC
+> /fixX
+> /fixY
+> /fixZ
+> /quirkQ
+>=20
+> ...where, depending on backport priorities, a subset of those may not
+> exist?=20
 
+Yes, I thought of a bitmask in one (or two files but a file per feature i=
+s OK)
+as well. The idea is borrowed from Daniel Vetter's "Bothing up ioctl()s" =
+blog
+entry [1]:
+"Have a clear way for userspace to figure out whether your new ioctl or i=
+octl
+extension is supported on a given kernel. If you can't rely on old kernel=
+s
+rejecting the new flags/modes or ioctls (since doing that was botched in =
+the
+past) then you need a driver feature flag or revision number somewhere."
+
+> Does having the test suite in the kernel tree help or hurt what
+> you're trying to do?
+
+Having the test suite in the kernel is problematic when you want to distr=
+ibute
+it to somewhere. I can only talk about my workflow here, but I build an r=
+pm on my
+build server and then scp it to my test host. With the current test-suite=
+ I
+have to bring the other modules over as well and install them before the
+kernel rpm to have the linker wrapper trick working. That's OKish for
+developer testing, but for QA (or even testing at partners or customers)
+this gets cumbersome and I really want to have even end customers being a=
+ble
+to run the test-suite to verify their kernel is working properly.
+
+[1] http://blog.ffwll.ch/2013/11/botching-up-ioctls.html
+
+Byte,
+	Johannes
+
+--=20
+Johannes Thumshirn                                          Storage
+jthumshirn@suse.de                                +49 911 74053 689
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
+GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
+HRB 21284 (AG N=FCrnberg)
+Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
