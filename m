@@ -1,80 +1,69 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:36733 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbdIOKq4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Sep 2017 06:46:56 -0400
-Received: by mail-wm0-f66.google.com with SMTP id r136so2420780wmf.3
-        for <fstests@vger.kernel.org>; Fri, 15 Sep 2017 03:46:56 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay/038: fix impure xattr test
-Date: Fri, 15 Sep 2017 13:47:28 +0300
-Message-Id: <1505472448-588-1-git-send-email-amir73il@gmail.com>
+Received: from mail-io0-f193.google.com ([209.85.223.193]:34476 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750866AbdIORjH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Sep 2017 13:39:07 -0400
+MIME-Version: 1.0
+In-Reply-To: <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
+References: <20170913144215.GA12395@linux.intel.com> <20170913220108.GX10621@dastard>
+ <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
+ <20170913233438.GY10621@dastard> <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
+ <20170914004038.GZ10621@dastard> <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
+ <x49a81xeakx.fsf@segfault.boston.devel.redhat.com> <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
+ <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com> <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
+From: Dan Williams <dan.j.williams@intel.com>
+Date: Fri, 15 Sep 2017 10:39:05 -0700
+Message-ID: <CAA9_cmdrV13OgnRxpd0W9yYGBm4XP=fdTHDZvCBk4YR7gt8M5g@mail.gmail.com>
+Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Andreas Gruenbacher <agruenba@redhat.com>, fstests@vger.kernel.org, Chandan Rajendra <chandan@linux.vnet.ibm.com>
+To: Johannes Thumshirn <jthumshirn@suse.de>
+Cc: Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On kvm-xfstest, getfattr (2.4.43) does not return failure exit code
-when the requested xattr is not found.
+On Fri, Sep 15, 2017 at 2:18 AM, Johannes Thumshirn <jthumshirn@suse.de> wrote:
+> On Thu, Sep 14, 2017 at 07:10:02AM -0700, Dan Williams wrote:
+>> What discouraged me from going that route in the past is the busy work
+>> of tracking / syncing these new debugfs feature gate flags across 2
+>> source repositories. If we want to stop depending on kernel version in
+>> the test suite over time I think the only sane way to manage that
+>> tight integration is to get ndctl into the kernel tree proper.
+>>
+>> ...but please say a bit more about the actual pain points with the
+>> current environment variable approach.
+>
+> This means the person which executes the test-suite has to know on which
+> feature level (upstream kernel version) the downstream kernel is, I can't
+> demand such knowledge from QA.
 
-Change the test to check the returned xattr value instead of exit code.
+Ok, that makes sense. The libnvdimm unit test suite needs to grow up
+into something QA can run and not require developers with internals
+knowledge.
 
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+>
+>> You want to be able to have a debugfs directory that has something like:
+>>
+>> /featureA
+>> /featureB
+>> /featureC
+>> /fixX
+>> /fixY
+>> /fixZ
+>> /quirkQ
+>>
+>> ...where, depending on backport priorities, a subset of those may not
+>> exist?
+>
+> Yes, I thought of a bitmask in one (or two files but a file per feature is OK)
+> as well. The idea is borrowed from Daniel Vetter's "Bothing up ioctl()s" blog
+> entry [1]:
+> "Have a clear way for userspace to figure out whether your new ioctl or ioctl
+> extension is supported on a given kernel. If you can't rely on old kernels
+> rejecting the new flags/modes or ioctls (since doing that was botched in the
+> past) then you need a driver feature flag or revision number somewhere."
+>
 
-Eryu,
-
-This test is supposed to pass on master now and it does pass on my
-Ubuntu 16.04, but fails on kvm-xfstests (Debian stretch).
-
-The failure is due to different behavior of getfattr on different
-systems and as a result of me suggesting to Chandan to check getfattr
-exit code. So this patch is for my redemption ;-)
-
-I surveyed for other places that check exit code of getfattr as
-indication of ENODATA and found only one other instance in
-_require_scratch_richacl_support() (for non xfs/ext4 FSTYP).
-However, this instance is buggy regardless, because it provides no
-file argument to getfattr.
-I would fix it, but I am not sure what's the semantics and have no
-idea how to test this.
-
-Amir.
-
-
- tests/overlay/038 | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
-
-diff --git a/tests/overlay/038 b/tests/overlay/038
-index 24cd432..69fd76a 100755
---- a/tests/overlay/038
-+++ b/tests/overlay/038
-@@ -108,9 +108,9 @@ test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
- 
- mv $SCRATCH_MNT/test_file $impure_dir
- 
--$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
--	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
--[[ $? == 0 ]] || echo "Impure directory missing impure xattr"
-+impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
-+			$upperdir/test_dir/impure_dir)
-+[[ $impure == "y" ]] || echo "Impure directory missing impure xattr"
- 
- # After $impure_dir becomes impure
- parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-@@ -133,9 +133,9 @@ rm -rf $impure_dir/test_file
- $here/src/t_dir_type $impure_dir $test_file_st_ino
- [[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
- 
--$GETFATTR_PROG --absolute-names -n 'trusted.overlay.impure' \
--	       $upperdir/test_dir/impure_dir >>$seqres.full 2>&1
--[[ $? != 0 ]] || echo "Pure directory has impure xattr"
-+impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
-+			$upperdir/test_dir/impure_dir 2>/dev/null)
-+[[ -z $impure ]] || echo "Pure directory has impure xattr"
- 
- # Verify d_ino values corresponding to "." and ".." entries of a
- # pure lower dir.
--- 
-2.7.4
-
+Yes, but what we're worried about in the libnvdimm/nfit_test case is
+internals behind sysfs interfaces. But point taken, we can at least
+use the presence of certain attributes to gate tests. However, it does
+mean we lose the tests for when an attribute is missing due to an
+incomplete backport.
