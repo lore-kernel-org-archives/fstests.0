@@ -1,37 +1,47 @@
-Received: from mail-pg0-f53.google.com ([74.125.83.53]:56654 "EHLO
-        mail-pg0-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750779AbdIPEAO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Sep 2017 00:00:14 -0400
-Received: by mail-pg0-f53.google.com with SMTP id 7so2505213pgd.13
-        for <fstests@vger.kernel.org>; Fri, 15 Sep 2017 21:00:13 -0700 (PDT)
-Date: Fri, 15 Sep 2017 21:00:08 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [xfstests-bld PATCH] setup-buildchroot: fix finding files in
- chroot.d
-Message-ID: <20170916040008.GD6901@zzz.localdomain>
-References: <20170831201540.32597-1-ebiggers3@gmail.com>
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38589 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751050AbdIPFIX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 16 Sep 2017 01:08:23 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v8G55GLG124351
+        for <fstests@vger.kernel.org>; Sat, 16 Sep 2017 01:08:23 -0400
+Received: from e23smtp07.au.ibm.com (e23smtp07.au.ibm.com [202.81.31.140])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2d0sn8f182-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Sat, 16 Sep 2017 01:08:22 -0400
+Received: from localhost
+        by e23smtp07.au.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Sat, 16 Sep 2017 15:08:20 +1000
+Received: from d23av04.au.ibm.com (d23av04.au.ibm.com [9.190.235.139])
+        by d23relay10.au.ibm.com (8.14.9/8.14.9/NCO v10.0) with ESMTP id v8G58ITY39452796
+        for <fstests@vger.kernel.org>; Sat, 16 Sep 2017 15:08:18 +1000
+Received: from d23av04.au.ibm.com (localhost [127.0.0.1])
+        by d23av04.au.ibm.com (8.14.4/8.14.4/NCO v10.0 AVout) with ESMTP id v8G58KfI015469
+        for <fstests@vger.kernel.org>; Sat, 16 Sep 2017 15:08:21 +1000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: Re: [PATCH] overlay/038: fix impure xattr test
+Date: Sat, 16 Sep 2017 10:39:04 +0530
+In-Reply-To: <1505472448-588-1-git-send-email-amir73il@gmail.com>
+References: <1505472448-588-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170831201540.32597-1-ebiggers3@gmail.com>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
+Message-Id: <2533736.marhI9aPBx@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Andreas Gruenbacher <agruenba@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 31, 2017 at 01:15:40PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On Friday, September 15, 2017 4:17:28 PM IST Amir Goldstein wrote:
+> On kvm-xfstest, getfattr (2.4.43) does not return failure exit code
+> when the requested xattr is not found.
 > 
-> get_schroot_config() sometimes didn't find the files in
-> /etc/schroot/chroot.d/ because there was a typo in the regex: it used
-> [0-09] instead of [0-9].  Fix it, and also cat schroot.conf first so
-> that it doesn't get printed multiple times by the xargs command.
-> 
-> We also don't need to check whether schroot.conf exists, since it was
-> already checked in check_prerequisites(), and the 'cat' command would
-> fail anyway if it didn't exist.
-> 
+> Change the test to check the returned xattr value instead of exit code.
 
-Ted, can you apply this patch?  Thanks!
+Reviewed-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Tested-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 
-Eric
+-- 
+chandan
+
