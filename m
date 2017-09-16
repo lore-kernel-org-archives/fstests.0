@@ -1,39 +1,52 @@
-Received: from imap.thunk.org ([74.207.234.97]:36682 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:37178 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751170AbdIPGeU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 16 Sep 2017 02:34:20 -0400
-Date: Sat, 16 Sep 2017 02:34:18 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [xfstests-bld PATCH] setup-buildchroot: fix finding files in
- chroot.d
-Message-ID: <20170916063418.7unlz2kwunoozu37@thunk.org>
-References: <20170831201540.32597-1-ebiggers3@gmail.com>
- <20170916040008.GD6901@zzz.localdomain>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170916040008.GD6901@zzz.localdomain>
+        id S1751253AbdIPNU5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 16 Sep 2017 09:20:57 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id EB497C0587C7
+        for <fstests@vger.kernel.org>; Sat, 16 Sep 2017 13:20:56 +0000 (UTC)
+From: Andreas Gruenbacher <agruenba@redhat.com>
+Subject: [PATCH] common/rc: Improve gfs2 support
+Date: Sat, 16 Sep 2017 15:20:54 +0200
+Message-Id: <20170916132054.24078-1-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: Andreas Gruenbacher <agruenba@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 15, 2017 at 09:00:08PM -0700, Eric Biggers wrote:
-> On Thu, Aug 31, 2017 at 01:15:40PM -0700, Eric Biggers wrote:
-> > From: Eric Biggers <ebiggers@google.com>
-> > 
-> > get_schroot_config() sometimes didn't find the files in
-> > /etc/schroot/chroot.d/ because there was a typo in the regex: it used
-> > [0-09] instead of [0-9].  Fix it, and also cat schroot.conf first so
-> > that it doesn't get printed multiple times by the xargs command.
-> > 
-> > We also don't need to check whether schroot.conf exists, since it was
-> > already checked in check_prerequisites(), and the 'cat' command would
-> > fail anyway if it didn't exist.
-> > 
-> 
-> Ted, can you apply this patch?  Thanks!
+Support gfs2 in _scratch_mkfs_sized _scratch_mkfs_blocksized.
 
-Applied, thanks.
+Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+---
+ common/rc | 6 ++++++
+ 1 file changed, 6 insertions(+)
 
-					- Ted
+diff --git a/common/rc b/common/rc
+index cd53a37..53bbb11 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1055,6 +1055,9 @@ _scratch_mkfs_sized()
+     ext2|ext3|ext4|ext4dev)
+ 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+ 	;;
++    gfs2)
++	yes | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
++	;;
+     ocfs2)
+ 	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+ 	;;
+@@ -1139,6 +1142,9 @@ _scratch_mkfs_blocksized()
+     ext2|ext3|ext4)
+ 	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
+ 	;;
++    gfs2)
++	yes | ${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
++	;;
+     ocfs2)
+ 	yes | ${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize -C $blocksize $SCRATCH_DEV
+ 	;;
+-- 
+1.8.3.1
+
