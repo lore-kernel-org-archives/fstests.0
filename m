@@ -1,87 +1,116 @@
-Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:1398 "EHLO
-        ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751294AbdIPW0h (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Sep 2017 18:26:37 -0400
-Date: Sun, 17 Sep 2017 08:26:33 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [fstests PATCH v2] xfs: add regression test for DAX mount option
- usage
-Message-ID: <20170916222633.GA17782@dastard>
-References: <CAPcyv4gGpAW7kUCgqSoNCPkFZVYzTVQi3C4x6AFm2KHvFrZSfw@mail.gmail.com>
- <20170911200103.28226-1-ross.zwisler@linux.intel.com>
- <20170914065741.GH8034@eguan.usersys.redhat.com>
- <20170915224227.GA9020@linux.intel.com>
+Received: from mail-pf0-f169.google.com ([209.85.192.169]:43803 "EHLO
+        mail-pf0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750995AbdIQOdj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Sep 2017 10:33:39 -0400
+Received: by mail-pf0-f169.google.com with SMTP id y29so3607302pff.0
+        for <fstests@vger.kernel.org>; Sun, 17 Sep 2017 07:33:39 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id y16sm9133026pge.92.2017.09.17.07.33.36
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 17 Sep 2017 07:33:37 -0700 (PDT)
+Message-ID: <59be87c1.10b5630a.f16f4.5c6d@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 17 Sep 2017 22:33:34 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 11cf6e7a4a23
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Zz6dsFQaWLuU"
 Content-Disposition: inline
-In-Reply-To: <20170915224227.GA9020@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: Eryu Guan <eguan@redhat.com>, Christoph Hellwig <hch@lst.de>, fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-nvdimm@lists.01.org, linux-xfs@vger.kernel.org, Dan Williams <dan.j.williams@intel.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 15, 2017 at 04:42:27PM -0600, Ross Zwisler wrote:
-> On Thu, Sep 14, 2017 at 02:57:41PM +0800, Eryu Guan wrote:
-> > Hi Ross,
-> > 
-> > On Mon, Sep 11, 2017 at 02:01:03PM -0600, Ross Zwisler wrote:
-> > > This adds a regression test for the following kernel patch:
-> > > 
-> > >   xfs: always use DAX if mount option is used
-> > > 
-> > > This test will also pass with kernel v4.14-rc1 and beyond because the XFS
-> > > DAX I/O mount option has been disabled (but not removed), so the
-> > > "chattr -x" to turn off DAX doesn't actually do anything.
-> > > 
-> > > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> > > Suggested-by: Christoph Hellwig <hch@infradead.org>
-> > > ---
-> > > 
-> > > Changes since v1:
-> > >  - Use perf instead of tracepoints to detect whether DAX is used. (Dan)
-> > 
-> > Thanks for the test! But I agreed with Dave here, it doesn't seem like a
-> > good idea to depend on the kernel tracepoints in a test, but I can't
-> > think of a better solution either, so I didn't get to this patch
-> > earlier..
-> > 
-> > Before XFS disabled the ability to switch on & off per-inode DAX flag,
-> > the x flag was only shown after an explicit 'chattr +x', even if XFS was
-> > mounted with dax option, e.g.
 
-Of course. lsattr reports the *on-disk inode flag state*. It does
-not report whether the file is using that feature or not, just
-whether the flag is set on disk.
+--Zz6dsFQaWLuU
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Remember, lsattr does not report a "sum of all config states for a
-feature".  It reports on disk state and on disk state only. It
-follows the same semantics as other flags that have equivalent mount
-options like dirsync, sync, noatime, etc.
+Hi all,
 
-> > # mkfs -t xfs -f /dev/ram0
-> > # mount -o dax /dev/ram0 /mnt/xfs
-> > # echo "test" > /mnt/xfs/testfile
-> > # xfs_io -c "lsattr" /mnt/xfs/testfile
-> > ---------------- /mnt/xfs/testfile
-> > # xfs_io -c "chattr +x" /mnt/xfs/testfile
-> > # xfs_io -c "lsattr" /mnt/xfs/testfile
-> > ---------------x /mnt/xfs/testfile
-> 
-> XFS actually still works this way, you just don't get dax now when you chattr
-> +x. :-/  But the inode flag is actually still there, gets updated by chattr
-> and can be listed with lsattr.
-> 
-> Actually, that feels like a really bad situation to be in - Christoph & Dave,
-> should we do more to remove the flag as long as it's not working?  i.e. remove
-> it from the lsattr output and make "chattr +x" fail with -EINVAL or similar?
+The master branch of the xfstests repository at:
 
-How about we concentrate on fixing the problem that led us to
-disable it temporarily in XFS? Then it can be re-enabled and
-problems like this go away...
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Cheers,
+have just been updated. This update mainly contains new tests, there're 5 new
+tests pushed out to upstream. Two regression tests from Carlos, which were
+posted & reviewed a few weeks ago, are merged late because the fixes are just
+included in upstream kernel, otherwise the two tests would both hang the
+kernel. Besides that, two overlay regression tests from "zhangyi (F)" and one
+generic test from myself are added too.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+New failures I've noticed in this update:
+- generic/460 ensures XFS reserves reasonable indirect blocks in write path,
+  and it currently fails only on XFS with 1k block size and rmapbt enabled
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+11cf6e7a4a23 overlay: test chattr lower file in overlay
+
+New commits:
+
+Carlos Maiolino (3):
+      [461dad511f6b] generic: Test filesystem lockup on full overprovisioned dm-thin
+      [b4d6db82e208] common/xfs: Add helpers for checking CONFIG_XFS_DEBUG availability
+      [642eb97b9f99] xfs: Test infinite loop while searching for a free inode slot
+
+Eryu Guan (1):
+      [71d1ae5b8f5c] generic: reserve correct indirect blocks for delalloc write path
+
+Jeff Layton (1):
+      [39f31eb2838f] src/fsync-err: write to different offset on each fd
+
+Ross Zwisler (1):
+      [37d7344ab692] gitignore: ignore cscope files
+
+zhangyi (F) (2):
+      [d83632b9aaac] overlay: test relatime for directories
+      [11cf6e7a4a23] overlay: test chattr lower file in overlay
+
+
+Code Diffstat:
+
+ .gitignore            |   4 ++
+ common/xfs            |  13 +++++
+ src/fsync-err.c       |   4 +-
+ tests/generic/459     | 151 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/459.out |   2 +
+ tests/generic/460     | 113 +++++++++++++++++++++++++++++++++++++
+ tests/generic/460.out |   2 +
+ tests/generic/group   |   2 +
+ tests/overlay/039     |  89 +++++++++++++++++++++++++++++
+ tests/overlay/039.out |   2 +
+ tests/overlay/040     |  85 ++++++++++++++++++++++++++++
+ tests/overlay/040.out |   2 +
+ tests/overlay/group   |   2 +
+ tests/xfs/115         |  89 +++++++++++++++++++++++++++++
+ tests/xfs/115.out     |   2 +
+ 15 files changed, 560 insertions(+), 2 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--Zz6dsFQaWLuU
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZvoZkAAoJECZSqilcj+djj7kP/RObuDiCWpzgyz747r8eudXc
+cFkzbuMZUTYEbHvp87pBTHhUg7iFVvnOcOsnfkVtngVjoqqsjWmHNxEPgiETNQur
+ZTfVu2tETw1DZgU+kSJG/W7anR7z9McXVDS3Syp+EVM4ysAwQ8eeoPrh9p9uh4UU
+YghuG6OXQlnWntzflvY23rhRkSDPnXELwfLUv4mhNJRfck/t03xztckHOJwB7au/
+OoEnI6/LoFmC2thlulF3Sz+ulAwQFWyNMJO9GpGFVIXIUDV+VSahSzSMy88GwNow
+X6bShIxzqTRENpVt5Q7MQ5rjMYwplvJ73SR5XtCqCuGsQnS7XuMkHn+hZ9YQQ23F
+Gz48utZSCf0SSguG/SXCy6R2eF3X/o+wx/sYPe1mW00c7VyX9MW/RP+ML/KnPrv0
+zoSE/m91jPQLOSw3FNoktE+FSbX++lavXhMuoLYZtkWot4MU1BkDvX/5QWD1hmmy
+Kl6hvdBlR+COXI4juXxH3UION4PvrwDkhC5YhznjS6fdhS7PkUj2YcmxborGwxFV
+vY+2eNanDAIf8NyIKe96Yni7W39gvxSdTZIf7SH1pBWM02d2tKmLW3B4TjNjCN9A
+8Fdmfru78QAV46TArY1gSz/hXIzPJ8fyYuP6YzgZfnfnEM5i6EwJTJnLD3YgR7Gg
+Tk92kILkZK+oG0sNuYnZ
+=ggrI
+-----END PGP SIGNATURE-----
+
+--Zz6dsFQaWLuU--
