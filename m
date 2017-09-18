@@ -1,55 +1,48 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39712 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751429AbdIRCpj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 17 Sep 2017 22:45:39 -0400
-Date: Mon, 18 Sep 2017 10:45:37 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/115: add missing 115 into group file
-Message-ID: <20170918024537.GM8034@eguan.usersys.redhat.com>
-References: <1505698140-3414-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx2.suse.de ([195.135.220.15]:50514 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750710AbdIRHrR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 Sep 2017 03:47:17 -0400
+Date: Mon, 18 Sep 2017 09:47:13 +0200
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
+Message-ID: <20170918074713.5lravsj234d5pbdj@linux-x5ow.site>
+References: <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
+ <20170913233438.GY10621@dastard>
+ <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
+ <20170914004038.GZ10621@dastard>
+ <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
+ <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
+ <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
+ <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
+ <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
+ <CAA9_cmdrV13OgnRxpd0W9yYGBm4XP=fdTHDZvCBk4YR7gt8M5g@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <1505698140-3414-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <CAA9_cmdrV13OgnRxpd0W9yYGBm4XP=fdTHDZvCBk4YR7gt8M5g@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Dan Williams <dan.j.williams@intel.com>
+Cc: Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 18, 2017 at 09:29:00AM +0800, Xiao Yang wrote:
-> From: xiao yang <yangx.jy@cn.fujitsu.com>
-> 
-> Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
+On Fri, Sep 15, 2017 at 10:39:05AM -0700, Dan Williams wrote:
+> Yes, but what we're worried about in the libnvdimm/nfit_test case is
+> internals behind sysfs interfaces. But point taken, we can at least
+> use the presence of certain attributes to gate tests. However, it does
+> mean we lose the tests for when an attribute is missing due to an
+> incomplete backport.
 
-Ah, I forgot adding the group entry back when resolving git am
-conflicts.. It was my fault, Carlos's original patch is fine.
+Of cause, but all we loose is a group of testcases to be run and this can=
+ be
+an indication of a bad backport as well, so I think this is quite helpful.
 
-Thanks for fixing this!
-
-Eryu
-
-> ---
->  tests/xfs/group | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 0a449b9..b0a8119 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -112,6 +112,7 @@
->  112 fuzzers
->  113 fuzzers
->  114 auto quick clone rmap
-> +115 auto quick fuzzers dangerous
->  116 quota auto quick
->  117 fuzzers
->  118 auto quick fsr dangerous
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Byte,
+	Johannes
+--=20
+Johannes Thumshirn                                          Storage
+jthumshirn@suse.de                                +49 911 74053 689
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
+GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
+HRB 21284 (AG N=FCrnberg)
+Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
