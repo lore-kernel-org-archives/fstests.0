@@ -1,48 +1,114 @@
-Received: from mx2.suse.de ([195.135.220.15]:50514 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750710AbdIRHrR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 18 Sep 2017 03:47:17 -0400
-Date: Mon, 18 Sep 2017 09:47:13 +0200
-From: Johannes Thumshirn <jthumshirn@suse.de>
-Subject: Re: [PATCH] xfs: add regression test for DAX mount option usage
-Message-ID: <20170918074713.5lravsj234d5pbdj@linux-x5ow.site>
-References: <CAPcyv4hGSLQS1GmTYtzMCBDDNNuK1nLRKme6e-Vpx8_pyaJwrg@mail.gmail.com>
- <20170913233438.GY10621@dastard>
- <CAPcyv4hYc5=44vyyL+_hW9qpq54izKMMEOEQq1yHHkZVv-MR0w@mail.gmail.com>
- <20170914004038.GZ10621@dastard>
- <CAPcyv4iNcnq9sJVLeju-3Ua+XYfTscOb9iiWDS5yB768WJTOXQ@mail.gmail.com>
- <x49a81xeakx.fsf@segfault.boston.devel.redhat.com>
- <20170914131638.qxbzeocvrkhjcjcu@linux-x5ow.site>
- <CAPcyv4j4GUjQBa7ePUGLuHjZcf3G+0suvc7r6wmgGM_G_L5Gcw@mail.gmail.com>
- <20170915091845.pmp3wer5lwx2xhjz@linux-x5ow.site>
- <CAA9_cmdrV13OgnRxpd0W9yYGBm4XP=fdTHDZvCBk4YR7gt8M5g@mail.gmail.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:50372 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752125AbdIRILd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Sep 2017 04:11:33 -0400
+From: Gu Jinxiang <gujx@cn.fujitsu.com>
+Subject: [PATCH 1/2] xfstests: Split MOUNT_OPTIONS to TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS
+Date: Mon, 18 Sep 2017 16:11:09 +0800
+Message-ID: <1505722270-24648-1-git-send-email-gujx@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
-Content-Disposition: inline
-In-Reply-To: <CAA9_cmdrV13OgnRxpd0W9yYGBm4XP=fdTHDZvCBk4YR7gt8M5g@mail.gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dan Williams <dan.j.williams@intel.com>
-Cc: Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, "linux-nvdimm@lists.01.org" <linux-nvdimm@lists.01.org>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Christoph Hellwig <hch@lst.de>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 15, 2017 at 10:39:05AM -0700, Dan Williams wrote:
-> Yes, but what we're worried about in the libnvdimm/nfit_test case is
-> internals behind sysfs interfaces. But point taken, we can at least
-> use the presence of certain attributes to gate tests. However, it does
-> mean we lose the tests for when an attribute is missing due to an
-> incomplete backport.
+Resovle the inconsistent of mount option.
+Btrfs use MOUNT_OPTIONS for both scrath_dev and test_dev. Change to
+MOUNT_OPTIONS for scratch mount, and TEST_FS_MOUNT_OPTS for test dev
+mount.
 
-Of cause, but all we loose is a group of testcases to be run and this can=
- be
-an indication of a bad backport as well, so I think this is quite helpful.
+Signed-off-by: Gu Jinxiang <gujx@cn.fujitsu.com>
+---
+As mentioned by https://patchwork.kernel.org/patch/9742039/, the usage
+of MOUNT_OPTIONS is inconsistent.
 
-Byte,
-	Johannes
---=20
-Johannes Thumshirn                                          Storage
-jthumshirn@suse.de                                +49 911 74053 689
-SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=FCrnberg
-GF: Felix Imend=F6rffer, Jane Smithard, Graham Norton
-HRB 21284 (AG N=FCrnberg)
-Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
+ common/btrfs | 56 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc    |  2 +-
+ 2 files changed, 57 insertions(+), 1 deletion(-)
+
+diff --git a/common/btrfs b/common/btrfs
+index fd762ef..2a1cfaf 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -89,6 +89,62 @@ _require_btrfs_fs_feature()
+ 		_notrun "Feature $feat not supported by the available btrfs version"
+ }
+ 
++_check_test_btrfs_filesystem()
++{
++	device=$1
++
++	# If type is set, we're mounted
++	type=`_fs_type $device`
++	ok=1
++
++	if [ "$type" = "$FSTYP" ]; then
++		# mounted ...
++		mountpoint=`_umount_or_remount_ro $device`
++	fi
++
++	if [ -f ${RESULT_DIR}/require_scratch.require_qgroup_report ]; then
++		$BTRFS_UTIL_PROG check $device --qgroup-report > $tmp.qgroup_report 2>&1
++		if grep -qE "Counts for qgroup.*are different" $tmp.qgroup_report ; then
++			_log_err "_check_btrfs_filesystem: filesystem on $device has wrong qgroup numbers"
++			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
++			cat $tmp.qgroup_report				>>$seqres.full
++			echo "*** qgroup_report.$FSTYP output ***"	>>$seqres.full
++		fi
++		rm -f $tmp.qgroup_report
++	fi
++
++	$BTRFS_UTIL_PROG check $device >$tmp.fsck 2>&1
++	if [ $? -ne 0 ]; then
++		_log_err "_check_btrfs_filesystem: filesystem on $device is inconsistent"
++		echo "*** fsck.$FSTYP output ***"	>>$seqres.full
++		cat $tmp.fsck				>>$seqres.full
++		echo "*** end fsck.$FSTYP output"	>>$seqres.full
++
++		ok=0
++	fi
++	rm -f $tmp.fsck
++
++	if [ $ok -eq 0 ]; then
++		echo "*** mount output ***"		>>$seqres.full
++		_mount					>>$seqres.full
++		echo "*** end mount output"		>>$seqres.full
++	elif [ "$type" = "$FSTYP" ]; then
++		# was mounted ...
++		_mount_or_remount_rw "$TEST_FS_MOUNT_OPTS" $device $mountpoint
++		ok=$?
++	fi
++
++	if [ $ok -eq 0 ]; then
++		status=1
++		if [ "$iam" != "check" ]; then
++			exit 1
++		fi
++		return 1
++	fi
++
++	return 0
++}
++
+ _check_btrfs_filesystem()
+ {
+ 	device=$1
+diff --git a/common/rc b/common/rc
+index cd53a37..eb9c469 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2624,7 +2624,7 @@ _check_test_fs()
+ 	# do nothing for now
+ 	;;
+     btrfs)
+-	_check_btrfs_filesystem $TEST_DEV
++	_check_test_btrfs_filesystem $TEST_DEV
+ 	;;
+     tmpfs)
+ 	# no way to check consistency for tmpfs
+-- 
+1.9.1
+
+
+
