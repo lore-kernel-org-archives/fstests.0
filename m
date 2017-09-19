@@ -1,36 +1,34 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58862 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751016AbdISO6z (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 19 Sep 2017 10:58:55 -0400
-Date: Tue, 19 Sep 2017 10:58:51 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] test race when checking i_size on direct i/o read
-Message-ID: <20170919145851.GD3487@bfoster.bfoster>
-References: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
- <20170919073616.GP8034@eguan.usersys.redhat.com>
- <20170919141351.GB3487@bfoster.bfoster>
- <20170919143406.GA7437@infradead.org>
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:48391 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751445AbdISUYo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Sep 2017 16:24:44 -0400
+From: Richard Wareing <rwareing@fb.com>
+Subject: Re: test case for "xfs: XFS_IS_REALTIME_INODE() should be false if no
+ rt device present"
+Date: Tue, 19 Sep 2017 20:24:15 +0000
+Message-ID: <6F22EB38-ED31-4EE2-9507-1EA78293465A@fb.com>
+References: <20170919145111.GA20486@infradead.org>
+In-Reply-To: <20170919145111.GA20486@infradead.org>
+Content-Language: en-US
+Content-Type: text/plain; charset="us-ascii"
+Content-ID: <204B1862FA4CFE4DB3C6A9C2C5EA7C9F@namprd15.prod.outlook.com>
+Content-Transfer-Encoding: quoted-printable
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170919143406.GA7437@infradead.org>
 Sender: fstests-owner@vger.kernel.org
 To: Christoph Hellwig <hch@infradead.org>
-Cc: Eryu Guan <eguan@redhat.com>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, Zheng Liu <wenqing.lz@taobao.com>, linux-xfs@vger.kernel.org
+Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 19, 2017 at 07:34:06AM -0700, Christoph Hellwig wrote:
-> On Tue, Sep 19, 2017 at 10:13:52AM -0400, Brian Foster wrote:
-> > Can we pass a boolean or flag to xfs_iomap_write_unwritten() to have it
-> > update the incore i_size after unwritten extent conversion? Then move
-> > (or remove) the associated update from xfs_dio_write_end_io().
-> 
-> I don't think we even need a flag - all three callers of
-> xfs_iomap_write_unwritten want to update the file size.
+I'll send one today.
 
-Sounds reasonable to me. I wasn't sure if there was anything special
-about the pnfs case. isize should probably already be stable in the
-writeback case, so perhaps this would be fine as long as we ensure the
-in-core size only increases (as we currently do for di_size).
+Richard
 
-Brian
+
+Christoph Hellwig <hch@infradead.org> wrote:
+
+> Hi Richard,
+>
+> can you send an xfstests test case for your XFS_IS_REALTIME_INODE()
+> fix?
+
+
