@@ -1,34 +1,152 @@
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:48391 "EHLO
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:49945 "EHLO
         mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751445AbdISUYo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Sep 2017 16:24:44 -0400
+        by vger.kernel.org with ESMTP id S1751391AbdITAa5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Sep 2017 20:30:57 -0400
+Received: from pps.filterd (m0001303.ppops.net [127.0.0.1])
+        by m0001303.ppops.net (8.16.0.21/8.16.0.21) with SMTP id v8K0QoNs029333
+        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:30:56 -0700
+Received: from mail.thefacebook.com ([199.201.64.23])
+        by m0001303.ppops.net with ESMTP id 2d3ctxg9cy-1
+        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:30:56 -0700
 From: Richard Wareing <rwareing@fb.com>
-Subject: Re: test case for "xfs: XFS_IS_REALTIME_INODE() should be false if no
- rt device present"
-Date: Tue, 19 Sep 2017 20:24:15 +0000
-Message-ID: <6F22EB38-ED31-4EE2-9507-1EA78293465A@fb.com>
-References: <20170919145111.GA20486@infradead.org>
-In-Reply-To: <20170919145111.GA20486@infradead.org>
-Content-Language: en-US
-Content-Type: text/plain; charset="us-ascii"
-Content-ID: <204B1862FA4CFE4DB3C6A9C2C5EA7C9F@namprd15.prod.outlook.com>
-Content-Transfer-Encoding: quoted-printable
+Subject: [PATCH] xfs: Add test for CVE-2017-14340
+Date: Tue, 19 Sep 2017 17:30:54 -0700
+Message-ID: <20170920003054.4171675-1-rwareing@fb.com>
 MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-I'll send one today.
+Verify kernel doesn't panic when user attempts to set realtime flags
+on non-realtime FS, using kernel compiled with CONFIG_XFS_RT.  Unpatched
+kernels will panic during this test.  Kernels not compiled with
+CONFIG_XFS_RT should pass test.
 
-Richard
+This bug was fixed via commit b31ff3cdf540110da4572e3e29bd172087af65cc
+on the main kernel tree.
 
+Signed-off-by: Richard Wareing <rwareing@fb.com>
+---
+ tests/xfs/431     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/431.out |  3 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/xfs/431
+ create mode 100644 tests/xfs/431.out
 
-Christoph Hellwig <hch@infradead.org> wrote:
-
-> Hi Richard,
->
-> can you send an xfstests test case for your XFS_IS_REALTIME_INODE()
-> fix?
-
+diff --git a/tests/xfs/431 b/tests/xfs/431
+new file mode 100755
+index 0000000..f928abc
+--- /dev/null
++++ b/tests/xfs/431
+@@ -0,0 +1,86 @@
++#! /bin/bash
++# FS QA Test 431
++#
++# Verify kernel doesn't panic when user attempts to set realtime flags
++# on non-realtime FS, using kernel compiled with CONFIG_XFS_RT.  Unpatched 
++# kernels will panic during this test.  Kernels not compiled with 
++# CONFIG_XFS_RT should pass test.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_xfs_io_command "chattr"
++_require_xfs_io_command "fsync"
++_require_xfs_io_command "pwrite"
++_require_scratch
++_require_test
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
++
++# Set realtime inherit flag on scratch mount, suppress output
++# as this may simply error out on future kernels, we will check
++# exit code instead.
++$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT &> /dev/null
++chattr_ret=$?
++
++# Erroring out here is fine, this would be desired behavior for
++# FSes without realtime devices present.
++if (( chattr_ret == 0)); then
++  # Attempt to write/fsync data to file
++  $XFS_IO_PROG -fc 'pwrite 0 1m' -c fsync $SCRATCH_MNT/testfile | 
++    tee -a $seqres.full | common_line_filter | _filter_xfs_io
++
++  # Remove the rt inherit flag after we are done or xfs_repair
++  # will fail.
++  $XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT | tee -a $seqres.full 2>&1
++fi
++
++
++rm -f $SCRATCH_MNT/testfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/431.out b/tests/xfs/431.out
+new file mode 100644
+index 0000000..8c14f11
+--- /dev/null
++++ b/tests/xfs/431.out
+@@ -0,0 +1,3 @@
++QA output created by 431
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 0a449b9..3f97f02 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -427,3 +427,4 @@
+ 428 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 429 dangerous_fuzzers dangerous_scrub dangerous_repair
+ 430 dangerous_fuzzers dangerous_scrub dangerous_online_repair
++431 quick
+-- 
+2.9.5
 
