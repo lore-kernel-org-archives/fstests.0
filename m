@@ -1,18 +1,18 @@
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:49945 "EHLO
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:47690 "EHLO
         mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1751391AbdITAa5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Sep 2017 20:30:57 -0400
-Received: from pps.filterd (m0001303.ppops.net [127.0.0.1])
-        by m0001303.ppops.net (8.16.0.21/8.16.0.21) with SMTP id v8K0QoNs029333
-        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:30:56 -0700
+        by vger.kernel.org with ESMTP id S1751396AbdITAiR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Sep 2017 20:38:17 -0400
+Received: from pps.filterd (m0001255.ppops.net [127.0.0.1])
+        by mx0b-00082601.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v8K0aZMP005487
+        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:38:16 -0700
 Received: from mail.thefacebook.com ([199.201.64.23])
-        by m0001303.ppops.net with ESMTP id 2d3ctxg9cy-1
+        by mx0b-00082601.pphosted.com with ESMTP id 2d2wry4skx-1
         (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:30:56 -0700
+        for <fstests@vger.kernel.org>; Tue, 19 Sep 2017 17:38:16 -0700
 From: Richard Wareing <rwareing@fb.com>
-Subject: [PATCH] xfs: Add test for CVE-2017-14340
-Date: Tue, 19 Sep 2017 17:30:54 -0700
-Message-ID: <20170920003054.4171675-1-rwareing@fb.com>
+Subject: [PATCH v2] xfs: Add test for CVE-2017-14340
+Date: Tue, 19 Sep 2017 17:38:15 -0700
+Message-ID: <20170920003815.4050-1-rwareing@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -30,6 +30,9 @@ on the main kernel tree.
 
 Signed-off-by: Richard Wareing <rwareing@fb.com>
 ---
+Changes since v1:
+* Corrected copyright text
+
  tests/xfs/431     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/xfs/431.out |  3 ++
  tests/xfs/group   |  1 +
@@ -39,7 +42,7 @@ Signed-off-by: Richard Wareing <rwareing@fb.com>
 
 diff --git a/tests/xfs/431 b/tests/xfs/431
 new file mode 100755
-index 0000000..f928abc
+index 0000000..836b0c7
 --- /dev/null
 +++ b/tests/xfs/431
 @@ -0,0 +1,86 @@
@@ -52,7 +55,7 @@ index 0000000..f928abc
 +# CONFIG_XFS_RT should pass test.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
++# Copyright (c) 2017 Facebook, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
