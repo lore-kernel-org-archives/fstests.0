@@ -1,237 +1,182 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46172 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750912AbdIUF47 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Sep 2017 01:56:59 -0400
-Date: Thu, 21 Sep 2017 13:56:56 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs: Add test for CVE-2017-14340
-Message-ID: <20170921055656.GW8034@eguan.usersys.redhat.com>
-References: <20170920003054.4171675-1-rwareing@fb.com>
- <20170920004125.GD7112@magnolia>
- <BA0F6FA4-4C58-4263-BF66-32C20DCA090E@fb.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:45853 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751636AbdIUHEF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2017 03:04:05 -0400
+Date: Thu, 21 Sep 2017 15:03:45 +0800
+From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH] fstests: btrfs/150 regression test for reading
+ compressed data
+Message-ID: <20170921070344.GB471@fnst.localdomain>
+References: <20170920235243.11822-1-bo.li.liu@oracle.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset="us-ascii"
 Content-Disposition: inline
-In-Reply-To: <BA0F6FA4-4C58-4263-BF66-32C20DCA090E@fb.com>
+In-Reply-To: <20170920235243.11822-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Richard Wareing <rwareing@fb.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-xfs@vger.kernel.org" <linux-xfs@vger.kernel.org>
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 20, 2017 at 03:40:06AM +0000, Richard Wareing wrote:
-> Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> 
-> > On Tue, Sep 19, 2017 at 05:30:54PM -0700, Richard Wareing wrote:
-> >> Verify kernel doesn't panic when user attempts to set realtime flags
-> >> on non-realtime FS, using kernel compiled with CONFIG_XFS_RT.  Unpatched
-> >> kernels will panic during this test.  Kernels not compiled with
-> >> CONFIG_XFS_RT should pass test.
-> >>
-> >> This bug was fixed via commit b31ff3cdf540110da4572e3e29bd172087af65cc
-> >
-> > Oooh, a commit id, nice! :)
-> >
-> >> on the main kernel tree.
-> >>
-> >> Signed-off-by: Richard Wareing <rwareing@fb.com>
-> >> ---
-> >>  tests/xfs/431     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/xfs/431.out |  3 ++
-> >>  tests/xfs/group   |  1 +
-> >>  3 files changed, 90 insertions(+)
-> >>  create mode 100755 tests/xfs/431
-> >>  create mode 100644 tests/xfs/431.out
-> >>
-> >> diff --git a/tests/xfs/431 b/tests/xfs/431
-> >> new file mode 100755
-> >> index 0000000..f928abc
-> >> --- /dev/null
-> >> +++ b/tests/xfs/431
-> >> @@ -0,0 +1,86 @@
-> >> +#! /bin/bash
-> >> +# FS QA Test 431
-> >> +#
-> >> +# Verify kernel doesn't panic when user attempts to set realtime flags
-> >> +# on non-realtime FS, using kernel compiled with CONFIG_XFS_RT.   
-> >> Unpatched
-> >> +# kernels will panic during this test.  Kernels not compiled with
-> >> +# CONFIG_XFS_RT should pass test.
-> >> +#
-> >> +#-----------------------------------------------------------------------
-> >> +# Copyright (c) 2017 YOUR NAME HERE.  All Rights Reserved.
-> >
-> > Mr. HERE, please update this line! :)
-> >
-> 
-> Fixed in v2.
-> 
-> >> +#
-> >> +# This program is free software; you can redistribute it and/or
-> >> +# modify it under the terms of the GNU General Public License as
-> >> +# published by the Free Software Foundation.
-> >> +#
-> >> +# This program is distributed in the hope that it would be useful,
-> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >> +# GNU General Public License for more details.
-> >> +#
-> >> +# You should have received a copy of the GNU General Public License
-> >> +# along with this program; if not, write the Free Software Foundation,
-> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >> +#-----------------------------------------------------------------------
-> >> +#
-> >> +
-> >> +seq=`basename $0`
-> >> +seqres=$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=`pwd`
-> >> +tmp=/tmp/$$
-> >> +status=1	# failure is the default!
-> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> >> +
-> >> +_cleanup()
-> >> +{
-> >> +	cd /
-> >> +	rm -f $tmp.*
-> >> +}
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/filter
-> >> +
-> >> +# remove previous $seqres.full before test
-> >> +rm -f $seqres.full
-> >> +
-> >> +# real QA test starts here
-> >> +
-> >> +# Modify as appropriate.
-> >> +_supported_fs xfs
-> >> +_supported_os Linux
-> >> +_require_xfs_io_command "chattr"
-> >> +_require_xfs_io_command "fsync"
-> >> +_require_xfs_io_command "pwrite"
-> >> +_require_scratch
-> >> +_require_test
-> >> +
-> >
-> > Shouldn't we unset USE_EXTERNAL/SCRATCH_RTDEV here since the bug only
-> > affects non-rt xfses?
-> >
-> 
-> I tried playing around with this, but wasn't able to get it to
-> work.  The best I think to do is create a "_require_no_realtime"
-> and skip the test if it's being run under a realtime test run.
+On Wed, Sep 20, 2017 at 05:52:43PM -0600, Liu Bo wrote:
+>We had a bug in btrfs compression code which could end up with a
+>kernel panic.
+>
+>This is adding a regression test for the bug and I've also sent a
+>kernel patch to fix the bug.
+>
+>The patch is "Btrfs: fix kernel oops while reading compressed data".
+>
+>Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+>---
+> tests/btrfs/150     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> tests/btrfs/150.out |   3 ++
+> tests/btrfs/group   |   1 +
+> 3 files changed, 106 insertions(+)
+> create mode 100755 tests/btrfs/150
+> create mode 100644 tests/btrfs/150.out
+>
+>diff --git a/tests/btrfs/150 b/tests/btrfs/150
+>new file mode 100755
+>index 0000000..834be51
+>--- /dev/null
+>+++ b/tests/btrfs/150
+>@@ -0,0 +1,102 @@
+>+#! /bin/bash
+>+# FS QA Test btrfs/150
+>+#
+>+# This is a regression test which ends up with a kernel oops in btrfs.
+>+# It occurs when btrfs's read repair happens while reading a compressed
+>+# extent.
+>+# The patch for this is 
+>+# xxxxx
+>+#
+>+#-----------------------------------------------------------------------
+>+# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
+>+#
+>+# This program is free software; you can redistribute it and/or
+>+# modify it under the terms of the GNU General Public License as
+>+# published by the Free Software Foundation.
+>+#
+>+# This program is distributed in the hope that it would be useful,
+>+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>+# GNU General Public License for more details.
+>+#
+>+# You should have received a copy of the GNU General Public License
+>+# along with this program; if not, write the Free Software Foundation,
+>+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>+#-----------------------------------------------------------------------
+>+#
+>+
+>+seq=`basename $0`
+>+seqres=$RESULT_DIR/$seq
+>+echo "QA output created by $seq"
+>+
+>+here=`pwd`
+>+tmp=/tmp/$$
+>+status=1	# failure is the default!
+>+trap "_cleanup; exit \$status" 0 1 2 3 15
+>+
+>+_cleanup()
+>+{
+>+	cd /
+>+	rm -f $tmp.*
+>+}
+>+
+>+# get standard environment, filters and checks
+>+. ./common/rc
+>+. ./common/filter
+>+
+>+# remove previous $seqres.full before test
+>+rm -f $seqres.full
+>+
+>+# real QA test starts here
+>+
+>+# Modify as appropriate.
+>+_supported_fs btrfs
+>+_supported_os Linux
+>+_require_scratch
+>+_require_fail_make_request
+>+_require_scratch_dev_pool 2 
+>+
+>+SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
+>+enable_io_failure()
+>+{
+>+        echo 100 > $DEBUGFS_MNT/fail_make_request/probability
+>+        echo 1000 > $DEBUGFS_MNT/fail_make_request/times
 
-Hmm, I don't think we need to exclude test with rtdev, it's true that
-the bug only affects non-rt XFS but there's no harm to do such a
-'sanity' test with rtdev present.
+What does 1000 mean? Enough failures?
+Why not set times to -1?
 
-> 
-> 
-> >> +_scratch_mkfs >/dev/null 2>&1
-> >> +_scratch_mount
-> >> +
-> >> +# Set realtime inherit flag on scratch mount, suppress output
-> >> +# as this may simply error out on future kernels, we will check
-> >> +# exit code instead.
-> >> +$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT &> /dev/null
-> >> +chattr_ret=$?
+>+        echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
+>+        echo 1 > $SYSFS_BDEV/make-it-fail
+>+}
+>+
+>+disable_io_failure()
+>+{
+>+        echo 0 > $SYSFS_BDEV/make-it-fail
+>+        echo 0 > $DEBUGFS_MNT/fail_make_request/probability
+>+        echo 0 > $DEBUGFS_MNT/fail_make_request/times
+>+}
+>+
+>+_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+>+
+>+# It doesn't matter which compression algorithm we use.
+>+_scratch_mount -ocompress
+>+
+>+# Create a file with all data being compressed
+>+$XFS_IO_PROG -f -c "pwrite -W 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+>+
+>+# Raid1 consists of two copies and btrfs decides which copy to read by reader's
+>+# %pid.  Now we inject errors to copy #1 and copy #0 is good.  We want to read
+>+# the bad copy to trigger read-repair.
+>+while true; do
+>+	disable_io_failure
+>+	# invalidate the page cache
+>+	$XFS_IO_PROG -f -c "fadvise -d 0 128K" $SCRATCH_MNT/foobar | _filter_xfs_io
+>+
+>+	enable_io_failure
+>+	od -x $SCRATCH_MNT/foobar > /dev/null &
+>+	pid=$!
+>+	wait
+>+	[ $((pid % 2)) == 1 ] && break
+>+done
+>+
+>+disable_io_failure
+>+
+>+# success, all done
+>+status=0
+>+exit
+>diff --git a/tests/btrfs/150.out b/tests/btrfs/150.out
+>new file mode 100644
+>index 0000000..c492c24
+>--- /dev/null
+>+++ b/tests/btrfs/150.out
+>@@ -0,0 +1,3 @@
+>+QA output created by 150
+>+wrote 8192/8192 bytes at offset 0
+>+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>diff --git a/tests/btrfs/group b/tests/btrfs/group
+>index 70c3f05..b70a122 100644
+>--- a/tests/btrfs/group
+>+++ b/tests/btrfs/group
+>@@ -152,3 +152,4 @@
+> 147 auto quick send
+> 148 auto quick rw
+> 149 auto quick send compress
+>+150 auto quick
+>-- 
+>2.5.0
+>
+>--
+>To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+>the body of a message to majordomo@vger.kernel.org
+>More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
 
-It seems that xfs_io always returns 0 even the command fails, e.g.
-
-[root@bootp-73-5-205 xfstests]# xfs_io -c "pwrite 0 4k" /
-pwrite: Bad file descriptor
-[root@bootp-73-5-205 xfstests]# echo $?
-0
-
-So we should not depend on xfs_io's return value. And I think doing the
-'pwrite' & 'fsync' test unconditionally should be fine, e.g.
-
-$XFS_IO_PROG -c 'chattr +t' $SCRATCH_MNT >>$seqres.full 2>&1
-$XFS_IO_PROG -fc 'pwrite 0 1m' -c fsync ..
-$XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT...
-
-I tested on 4.14-rc1 kernels with and without CONFIG_XFS_RT, and with
-and without rtdev present when CONFIG_XFS_RT=y, all tests passed.
-
-> >> +
-> >> +# Erroring out here is fine, this would be desired behavior for
-> >> +# FSes without realtime devices present.
-> >> +if (( chattr_ret == 0)); then
-> >> +  # Attempt to write/fsync data to file
-> >> +  $XFS_IO_PROG -fc 'pwrite 0 1m' -c fsync $SCRATCH_MNT/testfile |
-> >> +    tee -a $seqres.full | common_line_filter | _filter_xfs_io
-
-(common_line_filter | _filter_xfs_io) == _filter_xfs_io_unique
-
-But I think a bare _filter_xfs_io should just work, there's no common
-lines to be filtered anyway.
-
-> >> +
-> >> +  # Remove the rt inherit flag after we are done or xfs_repair
-> >> +  # will fail.
-> >> +  $XFS_IO_PROG -c 'chattr -t' $SCRATCH_MNT | tee -a $seqres.full 2>&1
-
-And please use real tab as indention :)
-
-> >> +fi
-> >> +
-> >> +
-> >> +rm -f $SCRATCH_MNT/testfile
-> >> +
-> >> +# success, all done
-> >> +status=0
-> >> +exit
-> >> diff --git a/tests/xfs/431.out b/tests/xfs/431.out
-> >> new file mode 100644
-> >> index 0000000..8c14f11
-> >> --- /dev/null
-> >> +++ b/tests/xfs/431.out
-> >> @@ -0,0 +1,3 @@
-> >> +QA output created by 431
-> >> +wrote 1048576/1048576 bytes at offset 0
-> >> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> >> diff --git a/tests/xfs/group b/tests/xfs/group
-> >> index 0a449b9..3f97f02 100644
-> >> --- a/tests/xfs/group
-> >> +++ b/tests/xfs/group
-> >> @@ -427,3 +427,4 @@
-> >>  428 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-> >>  429 dangerous_fuzzers dangerous_scrub dangerous_repair
-> >>  430 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-> >> +431 quick
-> >
-> > This ought to have 'dangerous' too, so that everyone knows that it can
-> > crash an unpatched kernel.
-> >
-> > (After stable/distros have had a few weeks to fix this you could add it
-> > to the 'auto' group as well so that everyone will run it.)
-
-'quick' is just a subset of 'auto', all 'quick' tests should be in
-'auto' group too, the only difference is 'quick' is quick :) usually run
-time is less than 30s. If you want to exclude tests in 'dangerous' group
-you can run check with '-x dangerous' option.
-
+-- 
 Thanks,
-Eryu
+Lu
 
-> >
-> 
-> Fixed in v3.
-> 
-> > --D
-> >
-> >> -- 
-> >> 2.9.5
-> >>
-> >> --
-> >> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> >> the body of a message to majordomo@vger.kernel.org
-> >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
