@@ -1,657 +1,256 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34668 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52428 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751485AbdIUIYb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Sep 2017 04:24:31 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5C1D84ACBA
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2017 08:24:31 +0000 (UTC)
-Received: from dhcp-12-116.nay.redhat.com (dhcp-12-116.nay.redhat.com [10.66.12.116])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 4C51560621
-        for <fstests@vger.kernel.org>; Thu, 21 Sep 2017 08:24:29 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] generic: test mount move semantics
-Date: Thu, 21 Sep 2017 16:24:23 +0800
-Message-Id: <20170921082423.22710-1-zlang@redhat.com>
+        id S1751387AbdIUKJt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 21 Sep 2017 06:09:49 -0400
+Date: Thu, 21 Sep 2017 18:09:44 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] test race when checking i_size on direct i/o read
+Message-ID: <20170921100944.GX8034@eguan.usersys.redhat.com>
+References: <799f63d9-de03-eab3-1e6e-cd747aa04c36@redhat.com>
+ <20170919073616.GP8034@eguan.usersys.redhat.com>
+ <20170919141351.GB3487@bfoster.bfoster>
+ <20170919143406.GA7437@infradead.org>
+ <20170920110504.GU8034@eguan.usersys.redhat.com>
+ <20170920125529.GA16481@bfoster.bfoster>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170920125529.GA16481@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, Zheng Liu <wenqing.lz@taobao.com>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This's a functional test case for mount --move operation, it verifies
-below semantics:
+On Wed, Sep 20, 2017 at 08:55:30AM -0400, Brian Foster wrote:
+> On Wed, Sep 20, 2017 at 07:05:04PM +0800, Eryu Guan wrote:
+> > On Tue, Sep 19, 2017 at 07:34:06AM -0700, Christoph Hellwig wrote:
+> > > On Tue, Sep 19, 2017 at 10:13:52AM -0400, Brian Foster wrote:
+> > > > Can we pass a boolean or flag to xfs_iomap_write_unwritten() to have it
+> > > > update the incore i_size after unwritten extent conversion? Then move
+> > > > (or remove) the associated update from xfs_dio_write_end_io().
+> > > 
+> > > I don't think we even need a flag - all three callers of
+> > > xfs_iomap_write_unwritten want to update the file size.
+> > 
+> > I tried this approach, but seems there's some problem in the buffered
+> > aio path, generic/112 (aio fsx) failed quickly. But I haven't digged
+> > into the reason (maybe I screwed it up, not the method is wrong..).
+> > 
+> 
+> From the generic/112 results:
+> 
+> Size error: expected 0x3785b stat 0x38000 seek 0x38000
+> 
+> I suspect the problem is that the offset+size from buffered I/O
+> completion is not based on the inode size. Rather, it is buffer head
+> granularity size of the ioend. Given that, it probably does make sense
+> to skip the update from this path.
 
-  ---------------------------------------------------------------------------
-  |         MOVE MOUNT OPERATION                                            |
-  |**************************************************************************
-  |source(A)->| shared       |       private  |       slave    | unbindable |
-  | dest(B)  |               |                |                |            |
-  |   |      |               |                |                |            |
-  |   v      |               |                |                |            |
-  |**************************************************************************
-  |  shared  | shared        |     shared     | shared & slave |  invalid   |
-  |          |               |                |                |            |
-  |non-shared| shared        |      private   |      slave     | unbindable |
-  ***************************************************************************
-  NOTE: moving a mount residing under a shared mount is invalid.
+Yeah, you're right.
 
-This case uses fsstress to produce a little random load, to make
-sure basic operations won't break the the moved mountpoints.
+xfs_io -fc "falloc -k 0 4k" -c "pwrite 0 2k" -c fsync /mnt/xfs/testfile
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- common/rc             |   6 +
- tests/generic/461     | 192 ++++++++++++++++++++++++++
- tests/generic/461.out | 374 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/group   |   1 +
- 4 files changed, 573 insertions(+)
- create mode 100755 tests/generic/461
- create mode 100644 tests/generic/461.out
+This results in 4k file size (block size is also 4k).
 
-diff --git a/common/rc b/common/rc
-index cd53a373..1e6ebe3b 100644
---- a/common/rc
-+++ b/common/rc
-@@ -200,6 +200,12 @@ _get_mount()
- 
- 	_mount $*
- 	if [ $? -eq 0 ]; then
-+		# mount --move operation updates the mountpoint, so remove
-+		# the old one and insert the new one
-+		if [[ "$*" =~ --move|-M ]]; then
-+			MOUNTED_POINT_STACK=`echo $MOUNTED_POINT_STACK | \
-+						cut -d\  -f2-`
-+		fi
- 		MOUNTED_POINT_STACK="$mnt_point $MOUNTED_POINT_STACK"
- 	else
- 		return 1
-diff --git a/tests/generic/461 b/tests/generic/461
-new file mode 100755
-index 00000000..03134733
---- /dev/null
-+++ b/tests/generic/461
-@@ -0,0 +1,192 @@
-+#! /bin/bash
-+# FS QA Test 461
-+#
-+# Test mount shared subtrees, verify the move semantics:
-+#
-+# ---------------------------------------------------------------------------
-+# |         MOVE MOUNT OPERATION                                            |
-+# |**************************************************************************
-+# |source(A)->| shared       |       private  |       slave    | unbindable |
-+# | dest(B)  |               |                |                |            |
-+# |   |      |               |                |                |            |
-+# |   v      |               |                |                |            |
-+# |**************************************************************************
-+# |  shared  | shared        |     shared     | shared & slave |  invalid   |
-+# |          |               |                |                |            |
-+# |non-shared| shared        |      private   |      slave     | unbindable |
-+# ***************************************************************************
-+#   NOTE: moving a mount residing under a shared mount is invalid.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_clear_mount_stack
-+	# make sure there's no bug cause dentry isn't be freed
-+	rm -rf $MNTHEAD
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_local_device $SCRATCH_DEV
-+
-+fs_stress()
-+{
-+	local target=$1
-+
-+	$FSSTRESS_PROG -n 50 -p 3 -d $target >/dev/null
-+	sync
-+}
-+
-+# prepare some mountpoint dir
-+SRCHEAD=$TEST_DIR/$seq-src
-+DESHEAD=$TEST_DIR/$seq-des
-+rm -rf $SRCHEAD $DESHEAD
-+mkdir $SRCHEAD $DESHEAD 2>>$seqres.full
-+mpA=$SRCHEAD/"$$"_mpA
-+mpB=$SRCHEAD/"$$"_mpB
-+mpC=$DESHEAD/"$$"_mpC
-+mpD=$DESHEAD/"$$"_mpD
-+
-+find_mnt()
-+{
-+	echo "------"
-+	findmnt -n -o TARGET,SOURCE $SCRATCH_DEV | \
-+		sed -e "s;$mpA;mpA;g" \
-+		    -e "s;$mpB;mpB;g" \
-+		    -e "s;$mpC;mpC;g" \
-+		    -e "s;$mpD;mpD;g" | \
-+		_filter_spaces | _filter_testdir_and_scratch | sort
-+	echo "======"
-+}
-+
-+start_test()
-+{
-+	local type=$1
-+
-+	_scratch_mkfs >$seqres.full 2>&1
-+
-+	_get_mount -t $FSTYP $SCRATCH_DEV $SRCHEAD
-+	$MOUNT_PROG --make-private $SRCHEAD
-+
-+	_get_mount -t $FSTYP $SCRATCH_DEV $DESHEAD
-+	_get_mount --bind $DESHEAD $DESHEAD
-+	$MOUNT_PROG --make-"${type}" $DESHEAD
-+	mkdir $mpA $mpB $mpC $mpD
-+}
-+
-+end_test()
-+{
-+	_clear_mount_stack
-+	rm -rf $mpA $mpB $mpC $mpD
-+}
-+
-+move_run()
-+{
-+	local source=$1
-+	local dest=$2
-+
-+	start_test $dest
-+
-+	echo "move $source to $dest"
-+	_get_mount -t $FSTYP $SCRATCH_DEV $mpA
-+	mkdir -p $mpA/dir 2>/dev/null
-+	$MOUNT_PROG --make-shared $mpA
-+	_get_mount --bind $mpA $mpB
-+	$MOUNT_PROG --make-"$source" $mpB
-+	# maybe unbindable at here
-+	_get_mount --move $mpB $mpC 2>/dev/null
-+	if [ $? -ne 0 ]; then
-+		find_mnt
-+		end_test
-+		return 0
-+	fi
-+
-+	# check mpC before move it to mpD
-+	for m in $mpA $mpC; do
-+		_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
-+		fs_stress $m/dir
-+		find_mnt
-+		_put_mount
-+	done
-+
-+	# mpC will be in different parent mount, test moveing from different
-+	# parent mount, and moving a mount residing under a shared mount is
-+	# invalid
-+	_get_mount --move $mpC $mpD 2>/dev/null
-+	if [ $? -ne 0 ]; then
-+		find_mnt
-+		end_test
-+		return 0
-+	fi
-+	for m in $mpA $mpD; do
-+		_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
-+		fs_stress $m/dir
-+		find_mnt
-+		_put_mount
-+	done
-+
-+	end_test
-+}
-+
-+move_test()
-+{
-+	#        source     dest
-+	move_run shared     shared
-+	move_run slave      shared
-+	move_run private    shared
-+	move_run unbindable shared
-+
-+	move_run shared     slave
-+	move_run slave      slave
-+	move_run private    slave
-+	move_run unbindable slave
-+
-+	move_run shared     private
-+	move_run slave      private
-+	move_run private    private
-+	move_run unbindable private
-+}
-+
-+move_test
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/461.out b/tests/generic/461.out
-new file mode 100644
-index 00000000..8840e383
---- /dev/null
-+++ b/tests/generic/461.out
-@@ -0,0 +1,374 @@
-+QA output created by 461
-+move shared to shared
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+move slave to shared
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+move private to shared
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+move unbindable to shared
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpB SCRATCH_DEV
-+======
-+move shared to slave
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move slave to slave
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move private to slave
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move unbindable to slave
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move shared to private
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move slave to private
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move private to private
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-+move unbindable to private
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpC SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpC SCRATCH_DEV
-+mpC/dir SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpA/dir SCRATCH_DEV
-+mpD SCRATCH_DEV
-+======
-+------
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-des SCRATCH_DEV
-+TEST_DIR/461-src SCRATCH_DEV
-+mpA SCRATCH_DEV
-+mpD SCRATCH_DEV
-+mpD/dir SCRATCH_DEV
-+======
-diff --git a/tests/generic/group b/tests/generic/group
-index f922b496..7482fd0c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -463,3 +463,4 @@
- 458 auto quick clone
- 459 auto dangerous
- 460 auto quick rw
-+461 auto quick mount
--- 
-2.13.5
+> 
+> > Then I tried Brian's suggestion, pass a boolean to
+> > xfs_iomap_write_unwritten() to tell if we want it to update in-core
+> > isize after unwritten extent conversion, and skip the in-core isize
+> > update in xfs_dio_write_end_io() accordingly. This approach seems to
+> > work, it passed the test Eric posted here, and fstests 'aio' group
+> > tests, a run of 'quick' group didn't find any new failure as well.
+> > 
+> > I attached the WIP patch (without proper comments) I was testing, if
+> > this looks fine I can format a formal patch and do more testings.
+> >
+> 
+> Thanks. This mostly looks reasonable to me...
+>  
+> > Thanks,
+> > Eryu
+> > 
+> > diff --git a/fs/xfs/xfs_aops.c b/fs/xfs/xfs_aops.c
+> > index 29172609f2a3..288da47e9ac5 100644
+> > --- a/fs/xfs/xfs_aops.c
+> > +++ b/fs/xfs/xfs_aops.c
+> > @@ -343,7 +343,7 @@ xfs_end_io(
+> >  		error = xfs_reflink_end_cow(ip, offset, size);
+> >  		break;
+> >  	case XFS_IO_UNWRITTEN:
+> > -		error = xfs_iomap_write_unwritten(ip, offset, size);
+> > +		error = xfs_iomap_write_unwritten(ip, offset, size, false);
+> 
+> Maybe add a single line comment here wrt to the above (why we don't
+> update isize).
 
+Will do.
+
+> 
+> >  		break;
+> >  	default:
+> >  		ASSERT(!xfs_ioend_is_append(ioend) || ioend->io_append_trans);
+> > diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
+> > index 350b6d43ba23..f3ad024573e7 100644
+> > --- a/fs/xfs/xfs_file.c
+> > +++ b/fs/xfs/xfs_file.c
+> > @@ -435,6 +435,7 @@ xfs_dio_write_end_io(
+> >  	struct xfs_inode	*ip = XFS_I(inode);
+> >  	loff_t			offset = iocb->ki_pos;
+> >  	bool			update_size = false;
+> > +	bool			write_unwritten = (flags & IOMAP_DIO_UNWRITTEN);
+> >  	int			error = 0;
+> >  
+> >  	trace_xfs_end_io_direct_write(ip, offset, size);
+> > @@ -458,7 +459,8 @@ xfs_dio_write_end_io(
+> >  	 */
+> >  	spin_lock(&ip->i_flags_lock);
+> >  	if (offset + size > i_size_read(inode)) {
+> > -		i_size_write(inode, offset + size);
+> > +		if (!write_unwritten)
+> > +			i_size_write(inode, offset + size);
+> >  		update_size = true;
+> 
+> I find the logic a little confusing here. For !write_unwritten,
+> update_size means to update the on-disk size. Otherwise, it instructs
+> iomap_write_unwritten() to also update the in-core size. The latter also
+> checks for appends, however, so it might as well always be true from
+> here. It seems that for such a small function, we should be able to make
+> this a bit easier to follow. ;P
+
+Agreed, it looks confusing when update_size serves as indicators of both
+in-core and on-disk size update. And we can pass 'true' unconditionally
+to xfs_iomap_write_unwritten() in this case.
+
+> 
+> Should we ever see an isize update at all on a IOMAP_DIO_COW completion
+> (wouldn't reflinked blocks have to be within eof)? If not, then we can
+> presumably rule out isize updates in that case. I think that just leaves
+> the case where a dio write occurs on a pre-existing block. Hmm, could we
+> just move this whole hunk down to after the iomap_write_unwritten() call
+> and eliminate the need for the flag entirely? E.g., something like:
+> 
+> 	...
+> 	if (IOMAP_DIO_COW) {
+> 		...
+> 	}
+> 
+> 	/* unwritten conversion updates isize */
+> 	if (IOMAP_DIO_UNWRITTEN)
+> 		return xfs_iomap_write_unwritten(ip, offset, size, true);
+> 
+> 	if (offset + size > i_size_read(inode)) {
+> 		i_size_write(inode, offset + size);
+> 		error = xfs_setfilesize(...);
+> 	}
+> 
+> 	return error;
+
+This seems fine, tests in 'clone' group all passed without new failures,
+I'll update patch as you suggested. I thought about something like this
+too, but I'm not familiar with the CoW path, so I decided to keep the
+original logic as much as possible.
+
+Thanks for your review and suggestions!
+
+Eryu
+
+> 
+> >  	}
+> >  	spin_unlock(&ip->i_flags_lock);
+> > @@ -469,8 +471,8 @@ xfs_dio_write_end_io(
+> >  			return error;
+> >  	}
+> >  
+> > -	if (flags & IOMAP_DIO_UNWRITTEN)
+> > -		error = xfs_iomap_write_unwritten(ip, offset, size);
+> > +	if (write_unwritten)
+> > +		error = xfs_iomap_write_unwritten(ip, offset, size, update_size);
+> >  	else if (update_size)
+> >  		error = xfs_setfilesize(ip, offset, size);
+> >  
+> > diff --git a/fs/xfs/xfs_iomap.c b/fs/xfs/xfs_iomap.c
+> > index a1909bc064e9..0a088586371e 100644
+> > --- a/fs/xfs/xfs_iomap.c
+> > +++ b/fs/xfs/xfs_iomap.c
+> > @@ -829,7 +829,8 @@ int
+> >  xfs_iomap_write_unwritten(
+> >  	xfs_inode_t	*ip,
+> >  	xfs_off_t	offset,
+> > -	xfs_off_t	count)
+> > +	xfs_off_t	count,
+> > +	bool		update_size)
+> >  {
+> >  	xfs_mount_t	*mp = ip->i_mount;
+> >  	xfs_fileoff_t	offset_fsb;
+> > @@ -840,6 +841,7 @@ xfs_iomap_write_unwritten(
+> >  	xfs_trans_t	*tp;
+> >  	xfs_bmbt_irec_t imap;
+> >  	struct xfs_defer_ops dfops;
+> > +	struct inode	*inode = VFS_I(ip);
+> >  	xfs_fsize_t	i_size;
+> >  	uint		resblks;
+> >  	int		error;
+> > @@ -900,6 +902,13 @@ xfs_iomap_write_unwritten(
+> >  		if (i_size > offset + count)
+> >  			i_size = offset + count;
+> >  
+> > +		if (update_size) {
+> > +			spin_lock(&ip->i_flags_lock);
+> > +			if (i_size > i_size_read(inode))
+> > +				i_size_write(inode, i_size);
+> > +			spin_unlock(&ip->i_flags_lock);
+> 
+> We have XFS_ILOCK_EXCL here so I don't think the spinlocks are
+> necessary any longer. That means this could probably be condensed to
+> something like
+> 
+> 		if (update_size && i_size > i_size_read(inode))
+> 			i_size_write(inode, i_size)
+> 
+> > +		}
+> > +
+> >  		i_size = xfs_new_eof(ip, i_size);
+> >  		if (i_size) {
+> >  			ip->i_d.di_size = i_size;
+> > diff --git a/fs/xfs/xfs_iomap.h b/fs/xfs/xfs_iomap.h
+> > index 00db3ecea084..ee535065c5d0 100644
+> > --- a/fs/xfs/xfs_iomap.h
+> > +++ b/fs/xfs/xfs_iomap.h
+> > @@ -27,7 +27,7 @@ int xfs_iomap_write_direct(struct xfs_inode *, xfs_off_t, size_t,
+> >  			struct xfs_bmbt_irec *, int);
+> >  int xfs_iomap_write_allocate(struct xfs_inode *, int, xfs_off_t,
+> >  			struct xfs_bmbt_irec *);
+> > -int xfs_iomap_write_unwritten(struct xfs_inode *, xfs_off_t, xfs_off_t);
+> > +int xfs_iomap_write_unwritten(struct xfs_inode *, xfs_off_t, xfs_off_t, bool);
+> >  
+> >  void xfs_bmbt_to_iomap(struct xfs_inode *, struct iomap *,
+> >  		struct xfs_bmbt_irec *);
+> > diff --git a/fs/xfs/xfs_pnfs.c b/fs/xfs/xfs_pnfs.c
+> > index 2f2dc3c09ad0..4246876df7b7 100644
+> > --- a/fs/xfs/xfs_pnfs.c
+> > +++ b/fs/xfs/xfs_pnfs.c
+> > @@ -274,7 +274,7 @@ xfs_fs_commit_blocks(
+> >  					(end - 1) >> PAGE_SHIFT);
+> >  		WARN_ON_ONCE(error);
+> >  
+> > -		error = xfs_iomap_write_unwritten(ip, start, length);
+> > +		error = xfs_iomap_write_unwritten(ip, start, length, false);
+> 
+> Note that this path does update isize. It runs another transaction to
+> get around the fact that write_unwritten() wouldn't log a new on disk
+> size. There is some validation thing here though, so we might need to
+> check whether it is Ok to run that earlier and whether it should
+> continue to return an error on failure. Christoph?
+> 
+> That said, maybe a follow on patch would be better since this one might
+> be stable fodder.
+> 
+> Brian
+> 
+> >  		if (error)
+> >  			goto out_drop_iolock;
+> >  	}
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
