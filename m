@@ -1,182 +1,657 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:45853 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751636AbdIUHEF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Sep 2017 03:04:05 -0400
-Date: Thu, 21 Sep 2017 15:03:45 +0800
-From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: Re: [PATCH] fstests: btrfs/150 regression test for reading
- compressed data
-Message-ID: <20170921070344.GB471@fnst.localdomain>
-References: <20170920235243.11822-1-bo.li.liu@oracle.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
-Content-Disposition: inline
-In-Reply-To: <20170920235243.11822-1-bo.li.liu@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:34668 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751485AbdIUIYb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 21 Sep 2017 04:24:31 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 5C1D84ACBA
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2017 08:24:31 +0000 (UTC)
+Received: from dhcp-12-116.nay.redhat.com (dhcp-12-116.nay.redhat.com [10.66.12.116])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4C51560621
+        for <fstests@vger.kernel.org>; Thu, 21 Sep 2017 08:24:29 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic: test mount move semantics
+Date: Thu, 21 Sep 2017 16:24:23 +0800
+Message-Id: <20170921082423.22710-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 20, 2017 at 05:52:43PM -0600, Liu Bo wrote:
->We had a bug in btrfs compression code which could end up with a
->kernel panic.
->
->This is adding a regression test for the bug and I've also sent a
->kernel patch to fix the bug.
->
->The patch is "Btrfs: fix kernel oops while reading compressed data".
->
->Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
->---
-> tests/btrfs/150     | 102 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> tests/btrfs/150.out |   3 ++
-> tests/btrfs/group   |   1 +
-> 3 files changed, 106 insertions(+)
-> create mode 100755 tests/btrfs/150
-> create mode 100644 tests/btrfs/150.out
->
->diff --git a/tests/btrfs/150 b/tests/btrfs/150
->new file mode 100755
->index 0000000..834be51
->--- /dev/null
->+++ b/tests/btrfs/150
->@@ -0,0 +1,102 @@
->+#! /bin/bash
->+# FS QA Test btrfs/150
->+#
->+# This is a regression test which ends up with a kernel oops in btrfs.
->+# It occurs when btrfs's read repair happens while reading a compressed
->+# extent.
->+# The patch for this is 
->+# xxxxx
->+#
->+#-----------------------------------------------------------------------
->+# Copyright (c) 2017 Liu Bo.  All Rights Reserved.
->+#
->+# This program is free software; you can redistribute it and/or
->+# modify it under the terms of the GNU General Public License as
->+# published by the Free Software Foundation.
->+#
->+# This program is distributed in the hope that it would be useful,
->+# but WITHOUT ANY WARRANTY; without even the implied warranty of
->+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->+# GNU General Public License for more details.
->+#
->+# You should have received a copy of the GNU General Public License
->+# along with this program; if not, write the Free Software Foundation,
->+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->+#-----------------------------------------------------------------------
->+#
->+
->+seq=`basename $0`
->+seqres=$RESULT_DIR/$seq
->+echo "QA output created by $seq"
->+
->+here=`pwd`
->+tmp=/tmp/$$
->+status=1	# failure is the default!
->+trap "_cleanup; exit \$status" 0 1 2 3 15
->+
->+_cleanup()
->+{
->+	cd /
->+	rm -f $tmp.*
->+}
->+
->+# get standard environment, filters and checks
->+. ./common/rc
->+. ./common/filter
->+
->+# remove previous $seqres.full before test
->+rm -f $seqres.full
->+
->+# real QA test starts here
->+
->+# Modify as appropriate.
->+_supported_fs btrfs
->+_supported_os Linux
->+_require_scratch
->+_require_fail_make_request
->+_require_scratch_dev_pool 2 
->+
->+SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
->+enable_io_failure()
->+{
->+        echo 100 > $DEBUGFS_MNT/fail_make_request/probability
->+        echo 1000 > $DEBUGFS_MNT/fail_make_request/times
+This's a functional test case for mount --move operation, it verifies
+below semantics:
 
-What does 1000 mean? Enough failures?
-Why not set times to -1?
+  ---------------------------------------------------------------------------
+  |         MOVE MOUNT OPERATION                                            |
+  |**************************************************************************
+  |source(A)->| shared       |       private  |       slave    | unbindable |
+  | dest(B)  |               |                |                |            |
+  |   |      |               |                |                |            |
+  |   v      |               |                |                |            |
+  |**************************************************************************
+  |  shared  | shared        |     shared     | shared & slave |  invalid   |
+  |          |               |                |                |            |
+  |non-shared| shared        |      private   |      slave     | unbindable |
+  ***************************************************************************
+  NOTE: moving a mount residing under a shared mount is invalid.
 
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
->+        echo 1 > $SYSFS_BDEV/make-it-fail
->+}
->+
->+disable_io_failure()
->+{
->+        echo 0 > $SYSFS_BDEV/make-it-fail
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/probability
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/times
->+}
->+
->+_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
->+
->+# It doesn't matter which compression algorithm we use.
->+_scratch_mount -ocompress
->+
->+# Create a file with all data being compressed
->+$XFS_IO_PROG -f -c "pwrite -W 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
->+
->+# Raid1 consists of two copies and btrfs decides which copy to read by reader's
->+# %pid.  Now we inject errors to copy #1 and copy #0 is good.  We want to read
->+# the bad copy to trigger read-repair.
->+while true; do
->+	disable_io_failure
->+	# invalidate the page cache
->+	$XFS_IO_PROG -f -c "fadvise -d 0 128K" $SCRATCH_MNT/foobar | _filter_xfs_io
->+
->+	enable_io_failure
->+	od -x $SCRATCH_MNT/foobar > /dev/null &
->+	pid=$!
->+	wait
->+	[ $((pid % 2)) == 1 ] && break
->+done
->+
->+disable_io_failure
->+
->+# success, all done
->+status=0
->+exit
->diff --git a/tests/btrfs/150.out b/tests/btrfs/150.out
->new file mode 100644
->index 0000000..c492c24
->--- /dev/null
->+++ b/tests/btrfs/150.out
->@@ -0,0 +1,3 @@
->+QA output created by 150
->+wrote 8192/8192 bytes at offset 0
->+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->diff --git a/tests/btrfs/group b/tests/btrfs/group
->index 70c3f05..b70a122 100644
->--- a/tests/btrfs/group
->+++ b/tests/btrfs/group
->@@ -152,3 +152,4 @@
-> 147 auto quick send
-> 148 auto quick rw
-> 149 auto quick send compress
->+150 auto quick
->-- 
->2.5.0
->
->--
->To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+This case uses fsstress to produce a little random load, to make
+sure basic operations won't break the the moved mountpoints.
 
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ common/rc             |   6 +
+ tests/generic/461     | 192 ++++++++++++++++++++++++++
+ tests/generic/461.out | 374 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/group   |   1 +
+ 4 files changed, 573 insertions(+)
+ create mode 100755 tests/generic/461
+ create mode 100644 tests/generic/461.out
+
+diff --git a/common/rc b/common/rc
+index cd53a373..1e6ebe3b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -200,6 +200,12 @@ _get_mount()
+ 
+ 	_mount $*
+ 	if [ $? -eq 0 ]; then
++		# mount --move operation updates the mountpoint, so remove
++		# the old one and insert the new one
++		if [[ "$*" =~ --move|-M ]]; then
++			MOUNTED_POINT_STACK=`echo $MOUNTED_POINT_STACK | \
++						cut -d\  -f2-`
++		fi
+ 		MOUNTED_POINT_STACK="$mnt_point $MOUNTED_POINT_STACK"
+ 	else
+ 		return 1
+diff --git a/tests/generic/461 b/tests/generic/461
+new file mode 100755
+index 00000000..03134733
+--- /dev/null
++++ b/tests/generic/461
+@@ -0,0 +1,192 @@
++#! /bin/bash
++# FS QA Test 461
++#
++# Test mount shared subtrees, verify the move semantics:
++#
++# ---------------------------------------------------------------------------
++# |         MOVE MOUNT OPERATION                                            |
++# |**************************************************************************
++# |source(A)->| shared       |       private  |       slave    | unbindable |
++# | dest(B)  |               |                |                |            |
++# |   |      |               |                |                |            |
++# |   v      |               |                |                |            |
++# |**************************************************************************
++# |  shared  | shared        |     shared     | shared & slave |  invalid   |
++# |          |               |                |                |            |
++# |non-shared| shared        |      private   |      slave     | unbindable |
++# ***************************************************************************
++#   NOTE: moving a mount residing under a shared mount is invalid.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Red Hat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	_clear_mount_stack
++	# make sure there's no bug cause dentry isn't be freed
++	rm -rf $MNTHEAD
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_scratch
++_require_local_device $SCRATCH_DEV
++
++fs_stress()
++{
++	local target=$1
++
++	$FSSTRESS_PROG -n 50 -p 3 -d $target >/dev/null
++	sync
++}
++
++# prepare some mountpoint dir
++SRCHEAD=$TEST_DIR/$seq-src
++DESHEAD=$TEST_DIR/$seq-des
++rm -rf $SRCHEAD $DESHEAD
++mkdir $SRCHEAD $DESHEAD 2>>$seqres.full
++mpA=$SRCHEAD/"$$"_mpA
++mpB=$SRCHEAD/"$$"_mpB
++mpC=$DESHEAD/"$$"_mpC
++mpD=$DESHEAD/"$$"_mpD
++
++find_mnt()
++{
++	echo "------"
++	findmnt -n -o TARGET,SOURCE $SCRATCH_DEV | \
++		sed -e "s;$mpA;mpA;g" \
++		    -e "s;$mpB;mpB;g" \
++		    -e "s;$mpC;mpC;g" \
++		    -e "s;$mpD;mpD;g" | \
++		_filter_spaces | _filter_testdir_and_scratch | sort
++	echo "======"
++}
++
++start_test()
++{
++	local type=$1
++
++	_scratch_mkfs >$seqres.full 2>&1
++
++	_get_mount -t $FSTYP $SCRATCH_DEV $SRCHEAD
++	$MOUNT_PROG --make-private $SRCHEAD
++
++	_get_mount -t $FSTYP $SCRATCH_DEV $DESHEAD
++	_get_mount --bind $DESHEAD $DESHEAD
++	$MOUNT_PROG --make-"${type}" $DESHEAD
++	mkdir $mpA $mpB $mpC $mpD
++}
++
++end_test()
++{
++	_clear_mount_stack
++	rm -rf $mpA $mpB $mpC $mpD
++}
++
++move_run()
++{
++	local source=$1
++	local dest=$2
++
++	start_test $dest
++
++	echo "move $source to $dest"
++	_get_mount -t $FSTYP $SCRATCH_DEV $mpA
++	mkdir -p $mpA/dir 2>/dev/null
++	$MOUNT_PROG --make-shared $mpA
++	_get_mount --bind $mpA $mpB
++	$MOUNT_PROG --make-"$source" $mpB
++	# maybe unbindable at here
++	_get_mount --move $mpB $mpC 2>/dev/null
++	if [ $? -ne 0 ]; then
++		find_mnt
++		end_test
++		return 0
++	fi
++
++	# check mpC before move it to mpD
++	for m in $mpA $mpC; do
++		_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
++		fs_stress $m/dir
++		find_mnt
++		_put_mount
++	done
++
++	# mpC will be in different parent mount, test moveing from different
++	# parent mount, and moving a mount residing under a shared mount is
++	# invalid
++	_get_mount --move $mpC $mpD 2>/dev/null
++	if [ $? -ne 0 ]; then
++		find_mnt
++		end_test
++		return 0
++	fi
++	for m in $mpA $mpD; do
++		_get_mount -t $FSTYP $SCRATCH_DEV $m/dir
++		fs_stress $m/dir
++		find_mnt
++		_put_mount
++	done
++
++	end_test
++}
++
++move_test()
++{
++	#        source     dest
++	move_run shared     shared
++	move_run slave      shared
++	move_run private    shared
++	move_run unbindable shared
++
++	move_run shared     slave
++	move_run slave      slave
++	move_run private    slave
++	move_run unbindable slave
++
++	move_run shared     private
++	move_run slave      private
++	move_run private    private
++	move_run unbindable private
++}
++
++move_test
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/461.out b/tests/generic/461.out
+new file mode 100644
+index 00000000..8840e383
+--- /dev/null
++++ b/tests/generic/461.out
+@@ -0,0 +1,374 @@
++QA output created by 461
++move shared to shared
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++move slave to shared
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++move private to shared
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++move unbindable to shared
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpB SCRATCH_DEV
++======
++move shared to slave
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move slave to slave
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move private to slave
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move unbindable to slave
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move shared to private
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move slave to private
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move private to private
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
++move unbindable to private
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpC SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpC SCRATCH_DEV
++mpC/dir SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpA/dir SCRATCH_DEV
++mpD SCRATCH_DEV
++======
++------
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-des SCRATCH_DEV
++TEST_DIR/461-src SCRATCH_DEV
++mpA SCRATCH_DEV
++mpD SCRATCH_DEV
++mpD/dir SCRATCH_DEV
++======
+diff --git a/tests/generic/group b/tests/generic/group
+index f922b496..7482fd0c 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -463,3 +463,4 @@
+ 458 auto quick clone
+ 459 auto dangerous
+ 460 auto quick rw
++461 auto quick mount
 -- 
-Thanks,
-Lu
-
+2.13.5
 
