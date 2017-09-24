@@ -1,193 +1,100 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:55889 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750947AbdIXHPf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Sep 2017 03:15:35 -0400
-Date: Sun, 24 Sep 2017 15:15:10 +0800
-From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: Re: [PATCH v2] fstests: btrfs/150 regression test for reading
- compressed data
-Message-ID: <20170924071510.GE471@fnst.localdomain>
-References: <20170920235243.11822-1-bo.li.liu@oracle.com>
- <20170922232127.12032-1-bo.li.liu@oracle.com>
+Received: from mail-pg0-f50.google.com ([74.125.83.50]:49674 "EHLO
+        mail-pg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752590AbdIXRYg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Sep 2017 13:24:36 -0400
+Received: by mail-pg0-f50.google.com with SMTP id m30so2813201pgn.6
+        for <fstests@vger.kernel.org>; Sun, 24 Sep 2017 10:24:36 -0700 (PDT)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id 184sm7467334pfg.18.2017.09.24.10.24.34
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 24 Sep 2017 10:24:34 -0700 (PDT)
+Message-ID: <59c7ea52.c106620a.572ea.29c0@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Mon, 25 Sep 2017 01:24:32 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to ea817058b0bc
 MIME-Version: 1.0
-Content-Type: text/plain; charset="us-ascii"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="qJ8oYlIuVzpZ"
 Content-Disposition: inline
-In-Reply-To: <20170922232127.12032-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 22, 2017 at 05:21:27PM -0600, Liu Bo wrote:
->We had a bug in btrfs compression code which could end up with a
->kernel panic.
->
->This is adding a regression test for the bug and I've also sent a
->kernel patch to fix the bug.
->
->The patch is "Btrfs: fix kernel oops while reading compressed data".
->
->Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
->---
->v2: - Fix ambiguous copyright.
->    - Use /proc/$pid/make-it-fail to specify IO failure
 
-- /sys/kernel/debug/fail*/task-filter:
+--qJ8oYlIuVzpZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-        Format: { 'Y' | 'N' }
-        A value of 'N' disables filtering by process (default).
-        Any positive value limits failures to only processes indicated by
-        /proc/<pid>/make-it-fail==1.
+Hi all,
 
--- 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a normal bug fixes and improvements update,
+with only one new test for XFS, and I didn't see any new failures introduced.
+
 Thanks,
-Lu
+Eryu
 
->    - Use bash -c to run test only when pid is odd.
->    - Add test to dangerous group.
->
-> tests/btrfs/150     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> tests/btrfs/150.out |   3 ++
-> tests/btrfs/group   |   1 +
-> 3 files changed, 107 insertions(+)
-> create mode 100755 tests/btrfs/150
-> create mode 100644 tests/btrfs/150.out
->
->diff --git a/tests/btrfs/150 b/tests/btrfs/150
->new file mode 100755
->index 0000000..8891c38
->--- /dev/null
->+++ b/tests/btrfs/150
->@@ -0,0 +1,103 @@
->+#! /bin/bash
->+# FS QA Test btrfs/150
->+#
->+# This is a regression test which ends up with a kernel oops in btrfs.
->+# It occurs when btrfs's read repair happens while reading a compressed
->+# extent.
->+# The patch to fix it is
->+#	Btrfs: fix kernel oops while reading compressed data
->+#
->+#-----------------------------------------------------------------------
->+# Copyright (c) 2017 Oracle.  All Rights Reserved.
->+#
->+# This program is free software; you can redistribute it and/or
->+# modify it under the terms of the GNU General Public License as
->+# published by the Free Software Foundation.
->+#
->+# This program is distributed in the hope that it would be useful,
->+# but WITHOUT ANY WARRANTY; without even the implied warranty of
->+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->+# GNU General Public License for more details.
->+#
->+# You should have received a copy of the GNU General Public License
->+# along with this program; if not, write the Free Software Foundation,
->+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->+#-----------------------------------------------------------------------
->+#
->+
->+seq=`basename $0`
->+seqres=$RESULT_DIR/$seq
->+echo "QA output created by $seq"
->+
->+here=`pwd`
->+tmp=/tmp/$$
->+status=1	# failure is the default!
->+trap "_cleanup; exit \$status" 0 1 2 3 15
->+
->+_cleanup()
->+{
->+	cd /
->+	rm -f $tmp.*
->+}
->+
->+# get standard environment, filters and checks
->+. ./common/rc
->+. ./common/filter
->+
->+# remove previous $seqres.full before test
->+rm -f $seqres.full
->+
->+# real QA test starts here
->+
->+# Modify as appropriate.
->+_supported_fs btrfs
->+_supported_os Linux
->+_require_scratch
->+_require_fail_make_request
->+_require_scratch_dev_pool 2 
->+
->+SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
->+enable_io_failure()
->+{
->+        echo 100 > $DEBUGFS_MNT/fail_make_request/probability
->+        echo 1000 > $DEBUGFS_MNT/fail_make_request/times
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
->+        echo 1 > $SYSFS_BDEV/make-it-fail
->+}
->+
->+disable_io_failure()
->+{
->+        echo 0 > $SYSFS_BDEV/make-it-fail
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/probability
->+        echo 0 > $DEBUGFS_MNT/fail_make_request/times
->+}
->+
->+_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
->+
->+# It doesn't matter which compression algorithm we use.
->+_scratch_mount -ocompress
->+
->+# Create a file with all data being compressed
->+$XFS_IO_PROG -f -c "pwrite -W 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
->+
->+# Raid1 consists of two copies and btrfs decides which copy to read by reader's
->+# %pid.  Now we inject errors to copy #1 and copy #0 is good.  We want to read
->+# the bad copy to trigger read-repair.
->+while [[ -z $result ]]; do
->+	# invalidate the page cache
->+	$XFS_IO_PROG -f -c "fadvise -d 0 8K" $SCRATCH_MNT/foobar
->+
->+	enable_io_failure
->+
->+	result=$(bash -c "
->+	if [ \$((\$\$ % 2)) == 1 ]; then
->+		echo 1 > /proc/\$\$/make-it-fail
->+		exec $XFS_IO_PROG -c \"pread 0 8K\" \$SCRATCH_MNT/foobar
->+	fi")
->+
->+	disable_io_failure
->+done
->+
->+# success, all done
->+status=0
->+exit
->diff --git a/tests/btrfs/150.out b/tests/btrfs/150.out
->new file mode 100644
->index 0000000..c492c24
->--- /dev/null
->+++ b/tests/btrfs/150.out
->@@ -0,0 +1,3 @@
->+QA output created by 150
->+wrote 8192/8192 bytes at offset 0
->+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->diff --git a/tests/btrfs/group b/tests/btrfs/group
->index 70c3f05..e73bb1b 100644
->--- a/tests/btrfs/group
->+++ b/tests/btrfs/group
->@@ -152,3 +152,4 @@
-> 147 auto quick send
-> 148 auto quick rw
-> 149 auto quick send compress
->+150 auto quick dangerous
->-- 
->2.5.0
->
->--
->To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
->the body of a message to majordomo@vger.kernel.org
->More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
+The new head of the master branch is commit:
+
+ea817058b0bc xfs: Add test for CVE-2017-14340
+
+New commits:
+
+Amir Goldstein (3):
+      [de5925929857] overlay/038: fix impure xattr test
+      [5052c432b558] overlay/014: correct comment relating to workdir reuse
+      [a21f34f87f8e] overlay/031: fix test with inodes index enabled
+
+Andreas Gruenbacher (1):
+      [e04905eba73a] common/rc: Improve gfs2 support
+
+Christoph Hellwig (1):
+      [b88444413a0f] xfs/310: relax extent count check
+
+Richard Wareing (1):
+      [ea817058b0bc] xfs: Add test for CVE-2017-14340
+
+xiao yang (1):
+      [7ef45e8a3856] xfs/115: add missing 115 into group file
 
 
+Code Diffstat:
+
+ common/rc         |  6 ++++
+ tests/overlay/014 |  7 ++---
+ tests/overlay/031 | 23 ++++++++++-----
+ tests/overlay/038 | 12 ++++----
+ tests/xfs/310     |  5 ++--
+ tests/xfs/431     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/431.out |  3 ++
+ tests/xfs/group   |  2 ++
+ 8 files changed, 123 insertions(+), 19 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--qJ8oYlIuVzpZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZx+mWAAoJECZSqilcj+djl6YQALBGBixUOzr0r44MiX5i6zK0
+Dhp810rgKvgVQKmM/L8SMrAl0vcUErwf7Vkf6MAK2ZQCOBMkly7//FkHU0JTnlEP
+iW8TGa5528hddiNq3cMbxHh+aXyza/We71Nw7qYRVcNKVchnJYx9w6Pmleog3u5b
+Cji6xTSW6Re/eG3Suu2cCehucOFRZIVEtrfFGeFKBbnCNdTvMRqirXwH5BScXGeu
+3nBPID5jl1yYWFcvHbV7PAaUqHTFC7s+XTBHTjPyy1dx+CyzN1yLvB0+ysCRnK0D
+a9+Qr9/CTipwF81M4tekhhOedqCSZVByS9dMzA5fLmCdAvidr1k0+tDElXH2mq8/
+8nZzuvgzHY+A/bZ02S6hrGtv2XNXxiUDHNmDID1k695jZxKmBGPNgQNQe/HElcTM
+9TlUK2Nz2KCcZWtOU6chGGSmVJG9ffnDQ7GetrErUB+lSSS+nAZE0jIUrQ2R1ELA
+lg33sI1gXIFrR7wFL1dGsIpKJ+IkI+kAU6XEtZNOT8OHBFve5K2nhcQj7wt1nzr/
+K5jSsev9U8K1dIbcQzpE2F/lTB00ZN17hCiWElJw6lYqsLIKHWrplPChqJOh0r9D
+lfnQ9M2d6Me69Xkkhh4XpqaEM/d44StmWCHiV9quofVaZmLex9T79zBos1qCTCqH
+U3HqIxcWoFHEHh8xVoG2
+=2VPk
+-----END PGP SIGNATURE-----
+
+--qJ8oYlIuVzpZ--
