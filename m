@@ -1,86 +1,27 @@
-Received: from mail-yw0-f182.google.com ([209.85.161.182]:51494 "EHLO
-        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934823AbdIYKxY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Sep 2017 06:53:24 -0400
+Received: from mga14.intel.com ([192.55.52.115]:31432 "EHLO mga14.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934032AbdIYQ7j (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 25 Sep 2017 12:59:39 -0400
+Date: Mon, 25 Sep 2017 10:59:28 -0600
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH v5 3/3] xfs/260: remove per-inode DAX flag test
+Message-ID: <20170925165928.GA26723@linux.intel.com>
+References: <1492413255-11146-1-git-send-email-xzhou@redhat.com>
+ <1506328847-1669-1-git-send-email-xzhou@redhat.com>
+ <1506328847-1669-4-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <59C8D147.1060608@cn.fujitsu.com>
-References: <1503830683-21455-1-git-send-email-amir73il@gmail.com> <59C8D147.1060608@cn.fujitsu.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 25 Sep 2017 13:53:21 +0300
-Message-ID: <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
-Subject: Re: [RFC][PATCH] fstest: regression test for ext4 crash consistency bug
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1506328847-1669-4-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 25, 2017 at 12:49 PM, Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
-> On 2017/08/27 18:44, Amir Goldstein wrote:
->> This test is motivated by a bug found in ext4 during random crash
->> consistency tests.
->>
->> This test uses device mapper flakey target to demonstrate the bug
->> found using device mapper log-writes target.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>
->> Ted,
->>
->> While working on crash consistency xfstests [1], I stubmled on what
->> appeared to be an ext4 crash consistency bug.
->>
->> The tests I used rely on the log-writes dm target code written
->> by Josef Bacik, which had little exposure to the wide community
->> as far as I know.  I wanted to prove to myself that the found
->> inconsistency was not due to a test bug, so I bisected the failed
->> test to the minimal operations that trigger the failure and wrote
->> a small independent test to reproduce the issue using dm flakey target.
->>
->> The following fsck error is reliably reproduced by replaying some fsx ops
->> on overlapping file regions, then emulating a crash, followed by mount,
->> umount and fsck -nf:
->>
->>   ./ltp/fsx -d --replay-ops /tmp/8995.fsxops /mnt/scratch/testfile
->>   1 write 0x137dd thru    0x21445 (0xdc69 bytes)
->>   2 falloc        from 0xb531 to 0x16ade (0xb5ad bytes)
->>   3 collapse      from 0x1c000 to 0x20000, (0x4000 bytes)
->>   4 write 0x3e5ec thru    0x3ffff (0x1a14 bytes)
->>   5 zero  from 0x20fac to 0x27d48, (0x6d9c bytes)
->>   6 mapwrite      0x216ad thru    0x23dfb (0x274f bytes)
->>   All 7 operations completed A-OK!
->>   _check_generic_filesystem: filesystem on /dev/mapper/ssd-scratch is inconsistent
->>   *** fsck.ext4 output ***
->>   fsck from util-linux 2.27.1
->>   e2fsck 1.42.13 (17-May-2015)
->>   Pass 1: Checking inodes, blocks, and sizes
->>   Inode 12, end of extent exceeds allowed value
->>           (logical block 33, physical block 33441, len 7)
->>   Clear? no
->>   Inode 12, i_blocks is 184, should be 128.  Fix? no
-> Hi Amir,
->
-> I always get the following output when running your xfstests test case 501.
+On Mon, Sep 25, 2017 at 04:40:47PM +0800, Xiong Zhou wrote:
+> This flag has been disabled upstream kernel.
 
-Now merged as test generic/456
-
-> ---------------------------------------------------------------------------
-> e2fsck 1.42.9 (28-Dec-2013)
-> Pass 1: Checking inodes, blocks, and sizes
-> Inode 12, i_size is 147456, should be 163840. Fix? no
-> ---------------------------------------------------------------------------
->
-> Could you tell me how to get the expected output as you reported?
-
-I can't say I am doing anything special, but I can say that I get the
-same output as you did when running the test inside kvm-xfstests.
-Actually, I could not reproduce ANY of the the crash consistency bugs
-inside kvm-xfstests. Must be something to do with different timing of
-IO with KVM+virtio disks??
-
-When running on my laptop (Ubuntu 16.04 with latest kernel)
-on a 10G SSD volume, I always get the error reported above.
-I just re-verified with latest stable e2fsprogs (1.43.6).
-
-Amir.
+I am working on patches to re-enable the DAX inode flag in the upstream
+kernel, so I'd prefer that we keep this test.  It currently passes even with
+the per-inode DAX flag in XFS disables, so I don't see the harm in keeping it
+around.
