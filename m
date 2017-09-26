@@ -1,191 +1,162 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44158 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39078 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S967311AbdIZJCi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 26 Sep 2017 05:02:38 -0400
-Date: Tue, 26 Sep 2017 17:02:36 +0800
+        id S1752130AbdIZKBD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 26 Sep 2017 06:01:03 -0400
+Date: Tue, 26 Sep 2017 18:01:00 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2] fstests: btrfs/150 regression test for reading
- compressed data
-Message-ID: <20170926090236.GI8034@eguan.usersys.redhat.com>
-References: <20170920235243.11822-1-bo.li.liu@oracle.com>
- <20170922232127.12032-1-bo.li.liu@oracle.com>
+Subject: Re: [PATCH v2 1/3] xfs/realtime: Add require_no_realtime function
+Message-ID: <20170926100100.GJ8034@eguan.usersys.redhat.com>
+References: <20170925195625.756877-1-rwareing@fb.com>
+ <20170925213845.GC5020@magnolia>
+ <EF76A1C7-91D1-488E-A81F-E628F0965B1B@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170922232127.12032-1-bo.li.liu@oracle.com>
+In-Reply-To: <EF76A1C7-91D1-488E-A81F-E628F0965B1B@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Richard Wareing <rwareing@fb.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 22, 2017 at 05:21:27PM -0600, Liu Bo wrote:
-> We had a bug in btrfs compression code which could end up with a
-> kernel panic.
+On Mon, Sep 25, 2017 at 07:25:27PM -0700, Richard Wareing wrote:
+> Darrick J. Wong <darrick.wong@oracle.com> wrote:
 > 
-> This is adding a regression test for the bug and I've also sent a
-> kernel patch to fix the bug.
+> > On Mon, Sep 25, 2017 at 12:56:23PM -0700, Richard Wareing wrote:
+> > > Some tests do not play well with realtime devices, in an effort to
+> > > produce a stable set of test which exercise the realtime code paths
+> > > we introduce a _require_no_realtime function to allow tests to opt
+> > > out of realtime subvolume test runs.
+> > > 
+> > > Signed-off-by: Richard Wareing <rwareing@fb.com>
+> > > ---
+> > > Changes since v1:
+> > > * None
+> > > 
+> > >  common/rc                      | 8 ++++++++
+> > >  tests/generic/409              | 1 +
+> > >  tests/generic/410              | 1 +
+> > 
+> > Why don't shared subtree tests work w/ rt?
+> > 
 > 
-> The patch is "Btrfs: fix kernel oops while reading compressed data".
+> 409, 410 decide to mount without the -o rtdev, option.  The fix
+> here could be trivial, or more involved I'm not really sure.
 > 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
-
-Hmm, I can't reproduce the panic with 4.13 kernel, which doesn't have
-the fix applied. Can you please help confirm if it panics on your test
-environment?
-
-> ---
-> v2: - Fix ambiguous copyright.
->     - Use /proc/$pid/make-it-fail to specify IO failure
->     - Use bash -c to run test only when pid is odd.
->     - Add test to dangerous group.
 > 
->  tests/btrfs/150     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/150.out |   3 ++
->  tests/btrfs/group   |   1 +
->  3 files changed, 107 insertions(+)
->  create mode 100755 tests/btrfs/150
->  create mode 100644 tests/btrfs/150.out
 > 
-> diff --git a/tests/btrfs/150 b/tests/btrfs/150
-> new file mode 100755
-> index 0000000..8891c38
-> --- /dev/null
-> +++ b/tests/btrfs/150
-> @@ -0,0 +1,103 @@
-> +#! /bin/bash
-> +# FS QA Test btrfs/150
-> +#
-> +# This is a regression test which ends up with a kernel oops in btrfs.
-> +# It occurs when btrfs's read repair happens while reading a compressed
-> +# extent.
-> +# The patch to fix it is
-> +#	Btrfs: fix kernel oops while reading compressed data
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_fail_make_request
-> +_require_scratch_dev_pool 2 
+> > > tests/generic/411              | 1 +
+> > 
+> > Some sort of mount regression?
+> > 
+> 
+> Same as 409/410.
 
-Trailing whitespace in above line.
+It seems generic/409-411 are not hard to fix, just make _get_mount honor
+$SCRATCH_OPTIONS (need to make 'type' in _scratch_options local,
+otherwise 'type' in the test would be overwritten). But these three
+tests are testing vfs level mount semantics, realtime or not should not
+make any difference, seems not worth the effort to me.
 
-> +
-> +SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
-> +enable_io_failure()
-> +{
-> +        echo 100 > $DEBUGFS_MNT/fail_make_request/probability
-> +        echo 1000 > $DEBUGFS_MNT/fail_make_request/times
-> +        echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
-> +        echo 1 > $SYSFS_BDEV/make-it-fail
-> +}
-> +
-> +disable_io_failure()
-> +{
-> +        echo 0 > $SYSFS_BDEV/make-it-fail
-> +        echo 0 > $DEBUGFS_MNT/fail_make_request/probability
-> +        echo 0 > $DEBUGFS_MNT/fail_make_request/times
-> +}
-> +
-> +_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
-> +
-> +# It doesn't matter which compression algorithm we use.
-> +_scratch_mount -ocompress
-> +
-> +# Create a file with all data being compressed
-> +$XFS_IO_PROG -f -c "pwrite -W 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
-> +
-> +# Raid1 consists of two copies and btrfs decides which copy to read by reader's
-> +# %pid.  Now we inject errors to copy #1 and copy #0 is good.  We want to read
-> +# the bad copy to trigger read-repair.
-> +while [[ -z $result ]]; do
-> +	# invalidate the page cache
-> +	$XFS_IO_PROG -f -c "fadvise -d 0 8K" $SCRATCH_MNT/foobar
+> 
+> > > tests/xfs/077                  | 1 +
+> 
+> Uses xfs_copy which does not have realtime support.
+> 
+> > >  tests/xfs/189                  | 1 +
+> 
+> Bails with "noattr2 mount option not supported on /dev/loop32".
+> Possibly a trivial fix?
 
-Does 'echo 3 > /proc/sys/vm/drop_caches' work?
+This test already _notrun with above message gracefully when testing
+with rtdev set, I don't think it needs an extra no_realtime rule.
+
+> 
+> > >  tests/xfs/191-input-validation | 1 +
+> 
+> Fails with:
+>  QA output created by 191-input-validation
+>  silence is golden
+> +pass -b size=512 -l sectsize=1024 /dev/loop32
+> +fail -d size=4294967296 /dev/loop32
+> +fail -d agsize=1g /dev/loop32
+> +fail -l size=419430400 -d size=4294967296 /dev/loop32
+> +pass -n ftype=0 /dev/loop32
+> 
+> This test makes my eyes bleed, hoping somebody with more context on
+> this test can point me in the right direction here.
+
+This test passes for me with rtdev set, I'm using latest for-next branch
+of upstream xfsprogs repo. (Maybe because you're using a too small
+SCRATCH_DEV?)
+
+> 
+> 
+> > >  tests/xfs/202                  | 1 +
+> 
+> Upon further inspection, this fails because it assumes your
+> scratch device is >1GB.  Though it should probably throw a nice
+> error indicating your scratch device isn't large enough.
+
+Tested with 10G SCRATCH_DEV with rtdev set, and test passed, so the
+failure has nothing to do with realtime. I agreed it should _notrun if
+SCRATCH_DEV doesn't have enough space, perhaps do a
+
+_scratch_mkfs_sized $((1024 * 1024 * 1024))
+
+first, which would _notrun gracefully if SCRATCH_DEV is smaller than 1G.
+
+But I'd recommend testing with larger devices, 15G should be good
+enough.
+
+> 
+> > >  tests/xfs/284                  | 1 +
+> 
+> Uses xfs_copy which does not support realtime.
+> 
+> > 
+> > This test checks that xfsprogs don't run on a mounted fs.  Why would
+> > that be excluded from rt testing?
+> > 
+> > Since there's only 8 tests on your list, I'm curious why each of them
+> > gets disabled for rt filesystems?
+> > 
+> 
+> Aside from the tests using xfs_copy, I can probably add RT support
+
+For the xfs_copy tests, a comment saying why we need
+_require_no_realtime would be good.
+
+> to most of these tests, but I figured the first step was to first
+> get to a  stable set of working tests for realtime.
+> 
+> Richard
+> 
+> 
+> 
+> > --D
+> > 
+> > > 9 files changed, 16 insertions(+)
+> > > 
+> > > diff --git a/common/rc b/common/rc
+> > > index 53bbb11..a0081f1 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -1835,6 +1835,14 @@ _require_realtime()
+> > >  	_notrun "Realtime device required, skipped this test"
+> > >  }
+> > > 
+> > > +# This test requires that a realtime subvolume is not in use
+> > > +#
+> > > +_require_no_realtime()
+> > > +{
+> > > +    [ -n "$SCRATCH_RTDEV" ] && \
+> > > +	_notrun "Test not compatible with realtime subvolumes, skipped
+> > > this test"
+
+We should check if $USE_EXTERNAL is 'yes' too, SCRATCH_RTDEV alone won't
+enable realtime testings.
+
+	[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \ ...
 
 Thanks,
 Eryu
-
-> +
-> +	enable_io_failure
-> +
-> +	result=$(bash -c "
-> +	if [ \$((\$\$ % 2)) == 1 ]; then
-> +		echo 1 > /proc/\$\$/make-it-fail
-> +		exec $XFS_IO_PROG -c \"pread 0 8K\" \$SCRATCH_MNT/foobar
-> +	fi")
-> +
-> +	disable_io_failure
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/150.out b/tests/btrfs/150.out
-> new file mode 100644
-> index 0000000..c492c24
-> --- /dev/null
-> +++ b/tests/btrfs/150.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 150
-> +wrote 8192/8192 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 70c3f05..e73bb1b 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -152,3 +152,4 @@
->  147 auto quick send
->  148 auto quick rw
->  149 auto quick send compress
-> +150 auto quick dangerous
-> -- 
-> 2.5.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
