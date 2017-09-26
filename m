@@ -1,117 +1,200 @@
-Received: from mail-yw0-f169.google.com ([209.85.161.169]:52455 "EHLO
-        mail-yw0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965952AbdIZLs2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2017 07:48:28 -0400
-MIME-Version: 1.0
-In-Reply-To: <59CA2FDF.5020806@cn.fujitsu.com>
-References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
- <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
- <59CA2FDF.5020806@cn.fujitsu.com>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:37750 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S966056AbdIZPwi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2017 11:52:38 -0400
+Received: by mail-wr0-f194.google.com with SMTP id u48so2755551wrf.4
+        for <fstests@vger.kernel.org>; Tue, 26 Sep 2017 08:52:37 -0700 (PDT)
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 26 Sep 2017 14:48:27 +0300
-Message-ID: <CAOQ4uxispZ9WYDOt+dgYNs7rcFDopc6u0VHQvyAmw9y+D3UOmg@mail.gmail.com>
-Subject: Re: [RFC][PATCH] fstest: regression test for ext4 crash consistency bug
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH] test-appliance: fix MNTOPTS parsing
+Date: Tue, 26 Sep 2017 18:53:05 +0300
+Message-Id: <1506441185-9690-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 26, 2017 at 1:45 PM, Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
-> On 2017/09/25 18:53, Amir Goldstein wrote:
->>
->> On Mon, Sep 25, 2017 at 12:49 PM, Xiao Yang<yangx.jy@cn.fujitsu.com>
->> wrote:
->>>
->>> On 2017/08/27 18:44, Amir Goldstein wrote:
->>>>
->>>> This test is motivated by a bug found in ext4 during random crash
->>>> consistency tests.
->>>>
->>>> This test uses device mapper flakey target to demonstrate the bug
->>>> found using device mapper log-writes target.
->>>>
->>>> Signed-off-by: Amir Goldstein<amir73il@gmail.com>
->>>> ---
->>>>
->>>> Ted,
->>>>
->>>> While working on crash consistency xfstests [1], I stubmled on what
->>>> appeared to be an ext4 crash consistency bug.
->>>>
->>>> The tests I used rely on the log-writes dm target code written
->>>> by Josef Bacik, which had little exposure to the wide community
->>>> as far as I know.  I wanted to prove to myself that the found
->>>> inconsistency was not due to a test bug, so I bisected the failed
->>>> test to the minimal operations that trigger the failure and wrote
->>>> a small independent test to reproduce the issue using dm flakey target.
->>>>
->>>> The following fsck error is reliably reproduced by replaying some fsx
->>>> ops
->>>> on overlapping file regions, then emulating a crash, followed by mount,
->>>> umount and fsck -nf:
->>>>
->>>>    ./ltp/fsx -d --replay-ops /tmp/8995.fsxops /mnt/scratch/testfile
->>>>    1 write 0x137dd thru    0x21445 (0xdc69 bytes)
->>>>    2 falloc        from 0xb531 to 0x16ade (0xb5ad bytes)
->>>>    3 collapse      from 0x1c000 to 0x20000, (0x4000 bytes)
->>>>    4 write 0x3e5ec thru    0x3ffff (0x1a14 bytes)
->>>>    5 zero  from 0x20fac to 0x27d48, (0x6d9c bytes)
->>>>    6 mapwrite      0x216ad thru    0x23dfb (0x274f bytes)
->>>>    All 7 operations completed A-OK!
->>>>    _check_generic_filesystem: filesystem on /dev/mapper/ssd-scratch is
->>>> inconsistent
->>>>    *** fsck.ext4 output ***
->>>>    fsck from util-linux 2.27.1
->>>>    e2fsck 1.42.13 (17-May-2015)
->>>>    Pass 1: Checking inodes, blocks, and sizes
->>>>    Inode 12, end of extent exceeds allowed value
->>>>            (logical block 33, physical block 33441, len 7)
->>>>    Clear? no
->>>>    Inode 12, i_blocks is 184, should be 128.  Fix? no
->>>
->>> Hi Amir,
->>>
->>> I always get the following output when running your xfstests test case
->>> 501.
->>
->> Now merged as test generic/456
->>
->>>
->>> ---------------------------------------------------------------------------
->>> e2fsck 1.42.9 (28-Dec-2013)
->>> Pass 1: Checking inodes, blocks, and sizes
->>> Inode 12, i_size is 147456, should be 163840. Fix? no
->>>
->>> ---------------------------------------------------------------------------
->>>
->>> Could you tell me how to get the expected output as you reported?
->>
->> I can't say I am doing anything special, but I can say that I get the
->> same output as you did when running the test inside kvm-xfstests.
->> Actually, I could not reproduce ANY of the the crash consistency bugs
->> inside kvm-xfstests. Must be something to do with different timing of
->> IO with KVM+virtio disks??
->>
->> When running on my laptop (Ubuntu 16.04 with latest kernel)
->> on a 10G SSD volume, I always get the error reported above.
->> I just re-verified with latest stable e2fsprogs (1.43.6).
->
-> Hi Amir,
->
-> I tested generic/456 with KVM+virtio disks and SATA volumes on some kernels
+When passing MNTOPTS via kvm-xfstests -m command,
+mount options where not exported to environment,
+unless the specific fs cfg file had already exported
+the mount options variable.
 
-I don't understand. Did you also test without KVM?
-Otherwise I suggest that you test without KVM/virtio.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-> (including
-> v3.10.0, the latest kernel), but i still got the same output as i reported.
->
-> Could you determine whether the two different outputs are caused by the same
-> bug
-> or not ?
+Ted,
 
-No idea if those are 2 symptoms of the same bug or 2 different bugs
-I did not investigate the root cause.
+While working on overlayfs tests, I found out that
+kvm-xfstests -m <mount_options> was broken for overlayfs.
+I decided to fix the problem in overlay/config instead of
+in individual cfg/* files.
 
+I made a similar fix to all other fs, although there may
+not be a problem with specific cfg files and although
+I tested the -m option only with overlayfs.
+
+This fix is based on an eariler overlay config change
+from March and added to the same pull request:
+https://github.com/tytso/xfstests-bld/pull/4
+
+If you want to pick only this fix, there will be a
+very trivial merge conflict in the overlay cfg files.
+
+Please pull.
+
+Thanks,
 Amir.
+
+ kvm-xfstests/test-appliance/files/root/fs/btrfs/config      | 4 ++--
+ kvm-xfstests/test-appliance/files/root/fs/ext2/config       | 4 ++--
+ kvm-xfstests/test-appliance/files/root/fs/ext4/config       | 6 +++---
+ kvm-xfstests/test-appliance/files/root/fs/f2fs/config       | 4 ++--
+ kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large | 1 -
+ kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small | 1 -
+ kvm-xfstests/test-appliance/files/root/fs/overlay/config    | 6 +++---
+ kvm-xfstests/test-appliance/files/root/fs/tmpfs/config      | 4 ++--
+ kvm-xfstests/test-appliance/files/root/fs/xfs/config        | 4 ++--
+ 9 files changed, 16 insertions(+), 18 deletions(-)
+
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/btrfs/config b/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
+index bd51112..51e0e63 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
+@@ -30,9 +30,9 @@ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+ 	if test -n "$MOUNT_OPTIONS" ; then
+-            MOUNT_OPTIONS="$MOUNT_OPTIONS,$MNTOPTS"
++            export MOUNT_OPTIONS="$MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    MOUNT_OPTIONS="-o $MNTOPTS"
++	    export MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext2/config b/kvm-xfstests/test-appliance/files/root/fs/ext2/config
+index 58803ae..e2ad484 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/ext2/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/ext2/config
+@@ -30,9 +30,9 @@ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+ 	if test -n "$EXT_MOUNT_OPTIONS" ; then
+-            EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
++            export EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    EXT_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export EXT_MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/config b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
+index 3ef2dd6..0a02284 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/ext4/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
+@@ -30,12 +30,12 @@ function setup_mount_opts()
+ {
+     export MKFS_OPTIONS="$EXT_MKFS_OPTIONS"
+     if test -n "$EXT_MOUNT_OPTIONS" ; then
+-	EXT_MOUNT_OPTIONS="-o block_validity,$EXT_MOUNT_OPTIONS"
++	export EXT_MOUNT_OPTIONS="-o block_validity,$EXT_MOUNT_OPTIONS"
+     else
+-	EXT_MOUNT_OPTIONS="-o block_validity"
++	export EXT_MOUNT_OPTIONS="-o block_validity"
+     fi
+     if test -n "$MNTOPTS" ; then
+-	EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
++	export EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
+     fi
+     if echo "$EXT_MOUNT_OPTIONS" | grep -q test_dummy_encryption; then
+         local mode='\x00\x00\x00\x00'
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
+index 3cab963..45fb2dd 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
+@@ -28,9 +28,9 @@ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+ 	if test -n "$F2FS_MOUNT_OPTIONS" ; then
+-	    F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
++	    export F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
+index ab9a2bb..413462e 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
+@@ -13,6 +13,5 @@ export TEST_DEV=$LG_TST_DEV
+ export TEST_DIR=$LG_TST_MNT
+ export SCRATCH_DEV=$LG_SCR_DEV
+ export SCRATCH_MNT=$LG_SCR_MNT
+-export EXT_MOUNT_OPTIONS=""
+ TESTNAME="overlayfs large"
+ mkdir -p /test/tmp /test/scratch
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
+index 552e302..7abb055 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
+@@ -13,6 +13,5 @@ export TEST_DEV=$SM_TST_DEV
+ export TEST_DIR=$SM_TST_MNT
+ export SCRATCH_DEV=$SM_SCR_DEV
+ export SCRATCH_MNT=$SM_SCR_MNT
+-export EXT_MOUNT_OPTIONS=""
+ TESTNAME="overlayfs small"
+ mkdir -p /test/tmp /test/scratch
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/config b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
+index 3ea3a84..79c87d7 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/overlay/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
+@@ -92,10 +92,10 @@ function format_filesystem()
+ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+-	if test -n "OVERLAY_MOUNT_OPTIONS" ; then
+-            OVERLAY_MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS,$MNTOPTS"
++	if test -n "$OVERLAY_MOUNT_OPTIONS" ; then
++            export OVERLAY_MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    OVERLAY_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export OVERLAY_MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config b/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
+index 31acc11..fa83208 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
+@@ -18,9 +18,9 @@ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+ 	if test -n "$TMPFS_MOUNT_OPTIONS" ; then
+-            TMPFS_MOUNT_OPTIONS="$TMPFS_MOUNT_OPTIONS,$MNTOPTS"
++            export TMPFS_MOUNT_OPTIONS="$TMPFS_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    TMPFS_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export TMPFS_MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/config b/kvm-xfstests/test-appliance/files/root/fs/xfs/config
+index 943c8a3..ec03649 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/xfs/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/config
+@@ -30,9 +30,9 @@ function setup_mount_opts()
+ {
+     if test -n "$MNTOPTS" ; then
+ 	if test -n "$XFS_MOUNT_OPTIONS" ; then
+-            XFS_MOUNT_OPTIONS="$XFS_MOUNT_OPTIONS,$MNTOPTS"
++            export XFS_MOUNT_OPTIONS="$XFS_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    XFS_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export XFS_MOUNT_OPTIONS="-o $MNTOPTS"
+ 	fi
+     fi
+ }
+-- 
+2.7.4
+
