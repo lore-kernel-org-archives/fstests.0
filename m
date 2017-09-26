@@ -1,200 +1,209 @@
-Received: from mail-wr0-f194.google.com ([209.85.128.194]:37750 "EHLO
-        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966056AbdIZPwi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2017 11:52:38 -0400
-Received: by mail-wr0-f194.google.com with SMTP id u48so2755551wrf.4
-        for <fstests@vger.kernel.org>; Tue, 26 Sep 2017 08:52:37 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] test-appliance: fix MNTOPTS parsing
-Date: Tue, 26 Sep 2017 18:53:05 +0300
-Message-Id: <1506441185-9690-1-git-send-email-amir73il@gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:46577 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964845AbdIZXln (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2017 19:41:43 -0400
+Date: Tue, 26 Sep 2017 16:37:52 -0700
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: Re: [PATCH v2] fstests: btrfs/150 regression test for reading
+ compressed data
+Message-ID: <20170926233752.GB27095@lim.localdomain>
+Reply-To: bo.li.liu@oracle.com
+References: <20170920235243.11822-1-bo.li.liu@oracle.com>
+ <20170922232127.12032-1-bo.li.liu@oracle.com>
+ <20170926090236.GI8034@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170926090236.GI8034@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When passing MNTOPTS via kvm-xfstests -m command,
-mount options where not exported to environment,
-unless the specific fs cfg file had already exported
-the mount options variable.
+On Tue, Sep 26, 2017 at 05:02:36PM +0800, Eryu Guan wrote:
+> On Fri, Sep 22, 2017 at 05:21:27PM -0600, Liu Bo wrote:
+> > We had a bug in btrfs compression code which could end up with a
+> > kernel panic.
+> > 
+> > This is adding a regression test for the bug and I've also sent a
+> > kernel patch to fix the bug.
+> > 
+> > The patch is "Btrfs: fix kernel oops while reading compressed data".
+> > 
+> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> 
+> Hmm, I can't reproduce the panic with 4.13 kernel, which doesn't have
+> the fix applied. Can you please help confirm if it panics on your test
+> environment?
+>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+Yes, it is reproducible on my box, hrm...I'll be running it more times
+to double check.
 
-Ted,
+> > ---
+> > v2: - Fix ambiguous copyright.
+> >     - Use /proc/$pid/make-it-fail to specify IO failure
+> >     - Use bash -c to run test only when pid is odd.
+> >     - Add test to dangerous group.
+> > 
+> >  tests/btrfs/150     | 103 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/btrfs/150.out |   3 ++
+> >  tests/btrfs/group   |   1 +
+> >  3 files changed, 107 insertions(+)
+> >  create mode 100755 tests/btrfs/150
+> >  create mode 100644 tests/btrfs/150.out
+> > 
+> > diff --git a/tests/btrfs/150 b/tests/btrfs/150
+> > new file mode 100755
+> > index 0000000..8891c38
+> > --- /dev/null
+> > +++ b/tests/btrfs/150
+> > @@ -0,0 +1,103 @@
+> > +#! /bin/bash
+> > +# FS QA Test btrfs/150
+> > +#
+> > +# This is a regression test which ends up with a kernel oops in btrfs.
+> > +# It occurs when btrfs's read repair happens while reading a compressed
+> > +# extent.
+> > +# The patch to fix it is
+> > +#	Btrfs: fix kernel oops while reading compressed data
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2017 Oracle.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs btrfs
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_fail_make_request
+> > +_require_scratch_dev_pool 2 
+> 
+> Trailing whitespace in above line.
+> 
+> > +
+> > +SYSFS_BDEV=`_sysfs_dev $SCRATCH_DEV`
+> > +enable_io_failure()
+> > +{
+> > +        echo 100 > $DEBUGFS_MNT/fail_make_request/probability
+> > +        echo 1000 > $DEBUGFS_MNT/fail_make_request/times
+> > +        echo 0 > $DEBUGFS_MNT/fail_make_request/verbose
+> > +        echo 1 > $SYSFS_BDEV/make-it-fail
+> > +}
+> > +
+> > +disable_io_failure()
+> > +{
+> > +        echo 0 > $SYSFS_BDEV/make-it-fail
+> > +        echo 0 > $DEBUGFS_MNT/fail_make_request/probability
+> > +        echo 0 > $DEBUGFS_MNT/fail_make_request/times
+> > +}
+> > +
+> > +_scratch_pool_mkfs "-d raid1 -b 1G" >> $seqres.full 2>&1
+> > +
+> > +# It doesn't matter which compression algorithm we use.
+> > +_scratch_mount -ocompress
+> > +
+> > +# Create a file with all data being compressed
+> > +$XFS_IO_PROG -f -c "pwrite -W 0 8K" $SCRATCH_MNT/foobar | _filter_xfs_io
+> > +
+> > +# Raid1 consists of two copies and btrfs decides which copy to read by reader's
+> > +# %pid.  Now we inject errors to copy #1 and copy #0 is good.  We want to read
+> > +# the bad copy to trigger read-repair.
+> > +while [[ -z $result ]]; do
+> > +	# invalidate the page cache
+> > +	$XFS_IO_PROG -f -c "fadvise -d 0 8K" $SCRATCH_MNT/foobar
+> 
+> Does 'echo 3 > /proc/sys/vm/drop_caches' work?
+>
 
-While working on overlayfs tests, I found out that
-kvm-xfstests -m <mount_options> was broken for overlayfs.
-I decided to fix the problem in overlay/config instead of
-in individual cfg/* files.
+Yes, it works, drop_caches is system-wide, while here I'm just
+dropping caches on this single inode.
 
-I made a similar fix to all other fs, although there may
-not be a problem with specific cfg files and although
-I tested the -m option only with overlayfs.
+Or are you implying that it's 'fadvise' that makes the test fail to
+show oops?
 
-This fix is based on an eariler overlay config change
-from March and added to the same pull request:
-https://github.com/tytso/xfstests-bld/pull/4
+thanks,
 
-If you want to pick only this fix, there will be a
-very trivial merge conflict in the overlay cfg files.
+-liubo
 
-Please pull.
-
-Thanks,
-Amir.
-
- kvm-xfstests/test-appliance/files/root/fs/btrfs/config      | 4 ++--
- kvm-xfstests/test-appliance/files/root/fs/ext2/config       | 4 ++--
- kvm-xfstests/test-appliance/files/root/fs/ext4/config       | 6 +++---
- kvm-xfstests/test-appliance/files/root/fs/f2fs/config       | 4 ++--
- kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large | 1 -
- kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small | 1 -
- kvm-xfstests/test-appliance/files/root/fs/overlay/config    | 6 +++---
- kvm-xfstests/test-appliance/files/root/fs/tmpfs/config      | 4 ++--
- kvm-xfstests/test-appliance/files/root/fs/xfs/config        | 4 ++--
- 9 files changed, 16 insertions(+), 18 deletions(-)
-
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/btrfs/config b/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
-index bd51112..51e0e63 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/btrfs/config
-@@ -30,9 +30,9 @@ function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
- 	if test -n "$MOUNT_OPTIONS" ; then
--            MOUNT_OPTIONS="$MOUNT_OPTIONS,$MNTOPTS"
-+            export MOUNT_OPTIONS="$MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext2/config b/kvm-xfstests/test-appliance/files/root/fs/ext2/config
-index 58803ae..e2ad484 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/ext2/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/ext2/config
-@@ -30,9 +30,9 @@ function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
- 	if test -n "$EXT_MOUNT_OPTIONS" ; then
--            EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
-+            export EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    EXT_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export EXT_MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/config b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-index 3ef2dd6..0a02284 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/config
-@@ -30,12 +30,12 @@ function setup_mount_opts()
- {
-     export MKFS_OPTIONS="$EXT_MKFS_OPTIONS"
-     if test -n "$EXT_MOUNT_OPTIONS" ; then
--	EXT_MOUNT_OPTIONS="-o block_validity,$EXT_MOUNT_OPTIONS"
-+	export EXT_MOUNT_OPTIONS="-o block_validity,$EXT_MOUNT_OPTIONS"
-     else
--	EXT_MOUNT_OPTIONS="-o block_validity"
-+	export EXT_MOUNT_OPTIONS="-o block_validity"
-     fi
-     if test -n "$MNTOPTS" ; then
--	EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
-+	export EXT_MOUNT_OPTIONS="$EXT_MOUNT_OPTIONS,$MNTOPTS"
-     fi
-     if echo "$EXT_MOUNT_OPTIONS" | grep -q test_dummy_encryption; then
-         local mode='\x00\x00\x00\x00'
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-index 3cab963..45fb2dd 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-@@ -28,9 +28,9 @@ function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
- 	if test -n "$F2FS_MOUNT_OPTIONS" ; then
--	    F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
-+	    export F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
-index ab9a2bb..413462e 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
-+++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/large
-@@ -13,6 +13,5 @@ export TEST_DEV=$LG_TST_DEV
- export TEST_DIR=$LG_TST_MNT
- export SCRATCH_DEV=$LG_SCR_DEV
- export SCRATCH_MNT=$LG_SCR_MNT
--export EXT_MOUNT_OPTIONS=""
- TESTNAME="overlayfs large"
- mkdir -p /test/tmp /test/scratch
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
-index 552e302..7abb055 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
-+++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/cfg/small
-@@ -13,6 +13,5 @@ export TEST_DEV=$SM_TST_DEV
- export TEST_DIR=$SM_TST_MNT
- export SCRATCH_DEV=$SM_SCR_DEV
- export SCRATCH_MNT=$SM_SCR_MNT
--export EXT_MOUNT_OPTIONS=""
- TESTNAME="overlayfs small"
- mkdir -p /test/tmp /test/scratch
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/overlay/config b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
-index 3ea3a84..79c87d7 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/overlay/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/overlay/config
-@@ -92,10 +92,10 @@ function format_filesystem()
- function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
--	if test -n "OVERLAY_MOUNT_OPTIONS" ; then
--            OVERLAY_MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS,$MNTOPTS"
-+	if test -n "$OVERLAY_MOUNT_OPTIONS" ; then
-+            export OVERLAY_MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    OVERLAY_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export OVERLAY_MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config b/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
-index 31acc11..fa83208 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/tmpfs/config
-@@ -18,9 +18,9 @@ function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
- 	if test -n "$TMPFS_MOUNT_OPTIONS" ; then
--            TMPFS_MOUNT_OPTIONS="$TMPFS_MOUNT_OPTIONS,$MNTOPTS"
-+            export TMPFS_MOUNT_OPTIONS="$TMPFS_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    TMPFS_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export TMPFS_MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/config b/kvm-xfstests/test-appliance/files/root/fs/xfs/config
-index 943c8a3..ec03649 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/xfs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/config
-@@ -30,9 +30,9 @@ function setup_mount_opts()
- {
-     if test -n "$MNTOPTS" ; then
- 	if test -n "$XFS_MOUNT_OPTIONS" ; then
--            XFS_MOUNT_OPTIONS="$XFS_MOUNT_OPTIONS,$MNTOPTS"
-+            export XFS_MOUNT_OPTIONS="$XFS_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    XFS_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export XFS_MOUNT_OPTIONS="-o $MNTOPTS"
- 	fi
-     fi
- }
--- 
-2.7.4
-
+> Thanks,
+> Eryu
+> 
+> > +
+> > +	enable_io_failure
+> > +
+> > +	result=$(bash -c "
+> > +	if [ \$((\$\$ % 2)) == 1 ]; then
+> > +		echo 1 > /proc/\$\$/make-it-fail
+> > +		exec $XFS_IO_PROG -c \"pread 0 8K\" \$SCRATCH_MNT/foobar
+> > +	fi")
+> > +
+> > +	disable_io_failure
+> > +done
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/btrfs/150.out b/tests/btrfs/150.out
+> > new file mode 100644
+> > index 0000000..c492c24
+> > --- /dev/null
+> > +++ b/tests/btrfs/150.out
+> > @@ -0,0 +1,3 @@
+> > +QA output created by 150
+> > +wrote 8192/8192 bytes at offset 0
+> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> > diff --git a/tests/btrfs/group b/tests/btrfs/group
+> > index 70c3f05..e73bb1b 100644
+> > --- a/tests/btrfs/group
+> > +++ b/tests/btrfs/group
+> > @@ -152,3 +152,4 @@
+> >  147 auto quick send
+> >  148 auto quick rw
+> >  149 auto quick send compress
+> > +150 auto quick dangerous
+> > -- 
+> > 2.5.0
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
