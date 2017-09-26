@@ -1,109 +1,74 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:8230 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S965157AbdIZKpz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Sep 2017 06:45:55 -0400
-Message-ID: <59CA2FDF.5020806@cn.fujitsu.com>
-Date: Tue, 26 Sep 2017 18:45:51 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39482 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934183AbdIZKuT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 26 Sep 2017 06:50:19 -0400
+Date: Tue, 26 Sep 2017 18:50:16 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 2/3] xfs/realtime: Default rtinherit=1, add
+ _require_no_rtinherit function
+Message-ID: <20170926105016.GK8034@eguan.usersys.redhat.com>
+References: <20170925195625.756877-1-rwareing@fb.com>
+ <20170925195625.756877-2-rwareing@fb.com>
 MIME-Version: 1.0
-Subject: Re: [RFC][PATCH] fstest: regression test for ext4 crash consistency
- bug
-References: <1503830683-21455-1-git-send-email-amir73il@gmail.com> <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
-In-Reply-To: <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
-Content-Type: text/plain; charset="UTF-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20170925195625.756877-2-rwareing@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+To: Richard Wareing <rwareing@fb.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/09/25 18:53, Amir Goldstein wrote:
-> On Mon, Sep 25, 2017 at 12:49 PM, Xiao Yang<yangx.jy@cn.fujitsu.com>  wrote:
->> On 2017/08/27 18:44, Amir Goldstein wrote:
->>> This test is motivated by a bug found in ext4 during random crash
->>> consistency tests.
->>>
->>> This test uses device mapper flakey target to demonstrate the bug
->>> found using device mapper log-writes target.
->>>
->>> Signed-off-by: Amir Goldstein<amir73il@gmail.com>
->>> ---
->>>
->>> Ted,
->>>
->>> While working on crash consistency xfstests [1], I stubmled on what
->>> appeared to be an ext4 crash consistency bug.
->>>
->>> The tests I used rely on the log-writes dm target code written
->>> by Josef Bacik, which had little exposure to the wide community
->>> as far as I know.  I wanted to prove to myself that the found
->>> inconsistency was not due to a test bug, so I bisected the failed
->>> test to the minimal operations that trigger the failure and wrote
->>> a small independent test to reproduce the issue using dm flakey target.
->>>
->>> The following fsck error is reliably reproduced by replaying some fsx ops
->>> on overlapping file regions, then emulating a crash, followed by mount,
->>> umount and fsck -nf:
->>>
->>>    ./ltp/fsx -d --replay-ops /tmp/8995.fsxops /mnt/scratch/testfile
->>>    1 write 0x137dd thru    0x21445 (0xdc69 bytes)
->>>    2 falloc        from 0xb531 to 0x16ade (0xb5ad bytes)
->>>    3 collapse      from 0x1c000 to 0x20000, (0x4000 bytes)
->>>    4 write 0x3e5ec thru    0x3ffff (0x1a14 bytes)
->>>    5 zero  from 0x20fac to 0x27d48, (0x6d9c bytes)
->>>    6 mapwrite      0x216ad thru    0x23dfb (0x274f bytes)
->>>    All 7 operations completed A-OK!
->>>    _check_generic_filesystem: filesystem on /dev/mapper/ssd-scratch is inconsistent
->>>    *** fsck.ext4 output ***
->>>    fsck from util-linux 2.27.1
->>>    e2fsck 1.42.13 (17-May-2015)
->>>    Pass 1: Checking inodes, blocks, and sizes
->>>    Inode 12, end of extent exceeds allowed value
->>>            (logical block 33, physical block 33441, len 7)
->>>    Clear? no
->>>    Inode 12, i_blocks is 184, should be 128.  Fix? no
->> Hi Amir,
->>
->> I always get the following output when running your xfstests test case 501.
-> Now merged as test generic/456
->
->> ---------------------------------------------------------------------------
->> e2fsck 1.42.9 (28-Dec-2013)
->> Pass 1: Checking inodes, blocks, and sizes
->> Inode 12, i_size is 147456, should be 163840. Fix? no
->> ---------------------------------------------------------------------------
->>
->> Could you tell me how to get the expected output as you reported?
-> I can't say I am doing anything special, but I can say that I get the
-> same output as you did when running the test inside kvm-xfstests.
-> Actually, I could not reproduce ANY of the the crash consistency bugs
-> inside kvm-xfstests. Must be something to do with different timing of
-> IO with KVM+virtio disks??
->
-> When running on my laptop (Ubuntu 16.04 with latest kernel)
-> on a 10G SSD volume, I always get the error reported above.
-> I just re-verified with latest stable e2fsprogs (1.43.6).
-Hi Amir,
+On Mon, Sep 25, 2017 at 12:56:24PM -0700, Richard Wareing wrote:
+> To better exercise the data path code of realtime subvolumes, we will
+> set rtinherit=1 during mkfs calls.  For tests which this is not desired
+> we introduce a _require_no_rtinherit function to opt out of this
+> behavior.
+> 
+> Signed-off-by: Richard Wareing <rwareing@fb.com>
+> ---
+> Changes since v1:
+> * None
+> 
+>  common/rc         | 24 +++++++++++++++++++++++-
+>  tests/generic/250 |  1 +
+>  tests/generic/252 |  1 +
+>  tests/generic/427 |  1 +
+>  tests/generic/441 |  1 +
+>  tests/xfs/019     |  1 +
+>  tests/xfs/031     |  1 +
+>  tests/xfs/170     |  1 +
+>  tests/xfs/187     |  1 +
+>  9 files changed, 31 insertions(+), 1 deletion(-)
 
-I tested generic/456 with KVM+virtio disks and SATA volumes on some 
-kernels (including
-v3.10.0, the latest kernel), but i still got the same output as i reported.
+I don't think we need an extra RT_INHERT flag, this is just one of the
+normal test configurations and can be easily tested by setting correct
+MKFS_OPTIONS, e.g.
 
-Could you determine whether the two different outputs are caused by the 
-same bug
-or not ?
+MKFS_OPTIONS="-d rtinherit=1" ./check ...
+
+Then we can check if MKFS_OPTIONS has rtinherit defined in
+_require_no_rtinherit(), e.g.
+
+_require_no_rtinherit()
+{
+	echo "$MKFS_OPTIONS" | egrep -q "rtinherit([^=]|=1)" && \
+		_notrun "<notrun message here>"
+}
+
+Unfortunately, mkfs.xfs doesn't print rtinherit status at mkfs time,
+otherwise we could check mkfs.xfs output directly.
+
+And xfs/019 xfs/031 passed even with "-d rtinherit=1", and xfs/187
+already _notrun with proper message, so seems they don't need
+_require_no_rtinherit rule.
+
+generic/427 fails because xfs_io prints out its write log, after
+redirecting stdout of xfs_io to /dev/null, generic/427 passed for me
+too, the xfs_io write is meant to write a special pattern to the disk
+anyway.
+
+For other tests that do need _require_no_rtinherit, a comment to explain
+why this rule is needed would be good.
 
 Thanks,
-Xiao Yang.
-> Amir.
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-> .
->
-
-
-
+Eryu
