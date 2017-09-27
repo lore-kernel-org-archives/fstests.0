@@ -1,290 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50816 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751787AbdI0J5Z (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Sep 2017 05:57:25 -0400
-Date: Wed, 27 Sep 2017 17:57:23 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v5 1/3] generic: mmap write readonly DAX file
-Message-ID: <20170927095723.GQ8034@eguan.usersys.redhat.com>
-References: <1492413255-11146-1-git-send-email-xzhou@redhat.com>
- <1506328847-1669-1-git-send-email-xzhou@redhat.com>
- <1506328847-1669-2-git-send-email-xzhou@redhat.com>
+Received: from mail-wm0-f51.google.com ([74.125.82.51]:50091 "EHLO
+        mail-wm0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751800AbdI0KBO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2017 06:01:14 -0400
+Received: by mail-wm0-f51.google.com with SMTP id r74so16212889wme.4
+        for <fstests@vger.kernel.org>; Wed, 27 Sep 2017 03:01:13 -0700 (PDT)
+Date: Wed, 27 Sep 2017 12:01:10 +0200
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH] src/nsexec: fix stack pointer alignment exception
+Message-ID: <20170927100110.rfhl3hjqek4z2q6z@hades.localdomain>
+References: <20170927055252.12225-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1506328847-1669-2-git-send-email-xzhou@redhat.com>
+In-Reply-To: <20170927055252.12225-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 25, 2017 at 04:40:45PM +0800, Xiong Zhou wrote:
-> Regression case that one can write to read-only
-> file in a DAX mountpoint.
+On Wed, Sep 27, 2017 at 05:52:52AM +0000, Zorro Lang wrote:
+> When test g/317 or g/318 on ARM server, we got a kernel exception:
 > 
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+>   kernel: nsexec[8203]: SP Alignment exception: pc=00000000004010a0 sp=00000000005200e8
+> 
+> nsexec gives an unaligned child stack address to clone() system
+> call sometimes. For making sure it's always aligned, use
+> "__attribute__((aligned))" extension of GCC (Thanks this suggestion
+> from Eric sandeen).
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
->  .gitignore            |  1 +
->  src/Makefile          |  2 +-
->  src/t_mmap_write_ro.c | 77 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/461     | 93 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/461.out |  2 ++
->  tests/generic/group   |  1 +
->  6 files changed, 175 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_mmap_write_ro.c
->  create mode 100755 tests/generic/461
->  create mode 100644 tests/generic/461.out
+>  src/nsexec.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/.gitignore b/.gitignore
-> index 63928b4..864d899 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -155,6 +155,7 @@
->  /src/t_mmap_cow_race
->  /src/t_mmap_fallocate
->  /src/log-writes/replay-log
-> +/src/t_mmap_write_ro
+> diff --git a/src/nsexec.c b/src/nsexec.c
+> index f033b1a4..205dd081 100644
+> --- a/src/nsexec.c
+> +++ b/src/nsexec.c
+> @@ -138,7 +138,8 @@ childFunc(void *arg)
+>  
+>  #define STACK_SIZE (1024 * 1024)
+>  
+> -static char child_stack[STACK_SIZE];    /* Space for child's stack */
+> +/* Space for child's stack */
+> +static char __attribute__((aligned)) child_stack[STACK_SIZE];
 
-Better to make these entries sorted, perhaps in a separate patch.
+I don't really think the comment is necessary, other than that:
+
+Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
 
 >  
->  # dmapi/ binaries
->  /dmapi/src/common/cmd/read_invis
-> diff --git a/src/Makefile b/src/Makefile
-> index 7d1306b..3eb25b1 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -13,7 +13,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->  	multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
->  	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
->  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
-> -	t_mmap_cow_race t_mmap_fallocate fsync-err
-> +	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro
->  
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/t_mmap_write_ro.c b/src/t_mmap_write_ro.c
-> new file mode 100644
-> index 0000000..55cb3d1
-> --- /dev/null
-> +++ b/src/t_mmap_write_ro.c
-> @@ -0,0 +1,77 @@
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <fcntl.h>
-> +#include <unistd.h>
-> +#include <libgen.h>
-> +#include <errno.h>
-> +#include <sys/mman.h>
-> +
-> +void
-> +err_exit(char *op)
-> +{
-> +	fprintf(stderr, "%s: %s\n", op, strerror(errno));
-> +	exit(1);
-> +}
-> +
-> +int
-> +main(int argc, char **argv)
-> +{
-> +	int fd, pfd, ret;
-> +	char *buf;
-> +	/* gcc -O2 will optimize foo's storage, preventing
+>  int
+>  main(int argc, char *argv[])
+> -- 
+> 2.13.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Nitpick, let "/*" stays in the line alone for multi-line comments.
-	/*
-	 * gcc -O2...
-	 * ...
-	 */
-
-> +	 * reproduce this issue.
-> +	 * foo is never actually used after fault in value stored.
-> +	 */
-> +	volatile char foo __attribute__((__unused__));
-> +	int pagesize = getpagesize();
-> +
-> +	if (argc < 3) {
-> +		printf("Usage: %s <file> <pmem file>\n", basename(argv[0]));
-> +		exit(0);
-> +	}
-> +
-> +	fd = open(argv[1], O_RDONLY|O_DIRECT);
-
-Is O_DIRECT really required? If so, some comments would be good.
-
-> +	if (fd < 0)
-> +		err_exit("open");
-> +
-> +	pfd = open(argv[2], O_RDONLY);
-> +	if (pfd < 0)
-> +		err_exit("pmem open");
-> +
-> +	buf = mmap(NULL, pagesize, PROT_READ, MAP_SHARED, pfd, 0);
-> +	if (buf == MAP_FAILED)
-> +		err_exit("mmap");
-> +
-> +	/*
-> +	 * Read from the DAX mmap to populate the first page in the
-> +	 * address_space with a read-only mapping.
-> +	 */
-> +	foo = *buf;
-> +
-> +	/*
-> +	 * Now write to the DAX mmap.  This *should* fail, but if the bug is
-> +	 * present in __get_user_pages_fast(), it will succeed.
-> +	 */
-> +	ret = read(fd, buf, pagesize);
-> +	if (ret != pagesize)
-> +		err_exit("read");
-> +
-> +	ret = msync(buf, pagesize, MS_SYNC);
-> +	if (ret != 0)
-> +		err_exit("msync");
-> +
-> +	ret = munmap(buf, pagesize);
-> +	if (ret < 0)
-> +		err_exit("munmap");
-> +
-> +	ret = close(fd);
-> +	if (ret < 0)
-> +		err_exit("clsoe fd");
-> +
-> +	ret = close(pfd);
-> +	if (ret < 0)
-> +		err_exit("close pfd");
-> +
-> +	exit(0);
-> +}
-> diff --git a/tests/generic/461 b/tests/generic/461
-> new file mode 100755
-> index 0000000..a6df2b6
-> --- /dev/null
-> +++ b/tests/generic/461
-> @@ -0,0 +1,93 @@
-> +#! /bin/bash
-> +# FS QA Test 461
-> +#
-> +# This is a regression test for kernel commit
-> +#  ef947b2 x86, mm: fix gup_pte_range() vs DAX mappings
-> +# created by Jeffrey Moyer <jmoyer@redhat.com>
-> +#
-> +# This is reproducible only when testing on pmem device
-> +# which is configured in "memory mode", not in "raw mode".
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Red Hat.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch_dax
-> +_require_test_program "t_mmap_write_ro"
-> +_require_user
-
-Hmm, not sure why we need the test run by unprivileged user just from
-the test.
-
-> +
-> +# real QA test starts here
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount "-o dax"
-> +
-> +# remount TEST_DEV wo/ dax
-> +export MOUNT_OPTIONS=""
-
-This is not needed.
-
-> +export TEST_FS_MOUNT_OPTS=""
-> +_test_cycle_mount
-> +
-> +# prepare a 4k read-only DAX file, save its md5sum
-> +$XFS_IO_PROG -f -c "pwrite -S 0xFFFF 0 4096" \
-
-"pwrite -S 0xFF" should be sufficient.
-
-> +  $SCRATCH_MNT/readonlyfile >> $seqres.full 2>&1
-> +chmod 0644  $SCRATCH_MNT/readonlyfile
-> +md5_1="$(_md5_checksum $SCRATCH_MNT/readonlyfile)"
-> +
-> +# prepare another larger non-DAX file
-> +$XFS_IO_PROG -f -c "pwrite -S 0x0000 0 40960" \
-> +  $TEST_DIR/${seq}.largefile >> $seqres.full 2>&1
-> +# allow qa_user access
-> +chown $qa_user $TEST_DIR/${seq}.largefile
-> +
-> +# run test programme, read another larger file writing into
-> +# the read-only file with mmap, which should fail.
-> +_user_do "src/t_mmap_write_ro $TEST_DIR/${seq}.largefile \
-> +  $SCRATCH_MNT/readonlyfile"
-> +
-> +# read-only file should not get updated, md5sum again.
-> +md5_2="$(_md5_checksum $SCRATCH_MNT/readonlyfile)"
-> +
-> +[ "$md5_1" != "$md5_2" ] && echo "read only file changed"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/461.out b/tests/generic/461.out
-> new file mode 100644
-> index 0000000..8b1e29c
-> --- /dev/null
-> +++ b/tests/generic/461.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 461
-> +read: Bad address
-> diff --git a/tests/generic/group b/tests/generic/group
-> index f922b49..1575a2d 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -463,3 +463,4 @@
->  458 auto quick clone
->  459 auto dangerous
->  460 auto quick rw
-> +461 auto quick
-
-Time for a new 'dax' group? Perhaps add 'dax' group to other existing
-tests too in a separate patch.
-
-Thanks,
-Eryu
+-- 
+Carlos
