@@ -1,49 +1,52 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55384 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751396AbdI0FxA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Sep 2017 01:53:00 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 6962C1F574
-        for <fstests@vger.kernel.org>; Wed, 27 Sep 2017 05:53:00 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] src/nsexec: fix stack pointer alignment exception
-Date: Wed, 27 Sep 2017 13:52:52 +0800
-Message-Id: <20170927055252.12225-1-zlang@redhat.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:45525 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751136AbdI0HDl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2017 03:03:41 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 0/4] fstests: fixes for config option OVERLAY_MOUNT_OPTIONS
+Date: Wed, 27 Sep 2017 10:04:08 +0300
+Message-Id: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: sandeen@redhat.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When test g/317 or g/318 on ARM server, we got a kernel exception:
+Eryu,
 
-  kernel: nsexec[8203]: SP Alignment exception: pc=00000000004010a0 sp=00000000005200e8
+Since v4.13, overlayfs supports mount option index=on/off per mount
+and kernel config option CONFIG_OVERLAY_FS_INDEX that sets the default
+system wide value when mount option is not specified.
 
-nsexec gives an unaligned child stack address to clone() system
-call sometimes. For making sure it's always aligned, use
-"__attribute__((aligned))" extension of GCC (Thanks this suggestion
-from Eric sandeen).
+The behavior of overlayfs may differ for index=on/off, specifically
+for hardlinks. It is therefore important to be able to test overlayfs
+with both index=on/off.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- src/nsexec.c | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+To that end exists the OVERLAY_MOUNT_OPTIONS config option, only
+when I tried to use it I found it was broken in more than one way.
+This series fixed the use of OVERLAY_MOUNT_OPTIONS and refactors
+some customized overlay mount helpers along the way.
 
-diff --git a/src/nsexec.c b/src/nsexec.c
-index f033b1a4..205dd081 100644
---- a/src/nsexec.c
-+++ b/src/nsexec.c
-@@ -138,7 +138,8 @@ childFunc(void *arg)
- 
- #define STACK_SIZE (1024 * 1024)
- 
--static char child_stack[STACK_SIZE];    /* Space for child's stack */
-+/* Space for child's stack */
-+static char __attribute__((aligned)) child_stack[STACK_SIZE];
- 
- int
- main(int argc, char *argv[])
+NOTE for users of kvm-xfstests, this test-appliance change is also
+required for invoking kvm-xfstests -m index=on/off
+https://github.com/tytso/xfstests-bld/pull/4
+
+Amir Goldstein (4):
+  overlay: remove stale implementation of _scratch_mount_options
+  overlay: use default overlay mount options _overlay_mount_dirs()
+  overlay: create helper _overlay_scratch_mount_dirs()
+  overlay: fix _overlay_config_override of MOUNT_OPTIONS
+
+ common/config     |  4 ++++
+ common/rc         | 36 ++++++++++++++++--------------------
+ tests/overlay/005 |  2 +-
+ tests/overlay/010 |  3 +--
+ tests/overlay/014 |  8 +++-----
+ tests/overlay/031 | 11 +++++------
+ tests/overlay/035 |  3 +--
+ tests/overlay/037 | 14 ++++++--------
+ tests/overlay/038 |  3 +--
+ 9 files changed, 38 insertions(+), 46 deletions(-)
+
 -- 
-2.13.5
+2.7.4
 
