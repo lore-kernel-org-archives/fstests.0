@@ -1,50 +1,64 @@
-Received: from mx1.redhat.com ([209.132.183.28]:22120 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:40104 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751787AbdI0IFx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Sep 2017 04:05:53 -0400
-Date: Wed, 27 Sep 2017 16:05:49 +0800
+        id S1752545AbdI0Jqr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 27 Sep 2017 05:46:47 -0400
+Date: Wed, 27 Sep 2017 17:46:44 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/4] overlay: use default overlay mount options
- _overlay_mount_dirs()
-Message-ID: <20170927080549.GM8034@eguan.usersys.redhat.com>
-References: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
- <1506495852-7295-3-git-send-email-amir73il@gmail.com>
- <CAOQ4uxhr+1g0Pa8-UPTfG2k-ebU1aCygsXfwmFjjgrpf-gFq2Q@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs/150 regression test for reading
+ compressed data
+Message-ID: <20170927094644.GO8034@eguan.usersys.redhat.com>
+References: <20170920235243.11822-1-bo.li.liu@oracle.com>
+ <20170922232127.12032-1-bo.li.liu@oracle.com>
+ <20170926090236.GI8034@eguan.usersys.redhat.com>
+ <20170926233752.GB27095@lim.localdomain>
+ <20170927001851.GA22418@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhr+1g0Pa8-UPTfG2k-ebU1aCygsXfwmFjjgrpf-gFq2Q@mail.gmail.com>
+In-Reply-To: <20170927001851.GA22418@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Vivek Goyal <vgoyal@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 27, 2017 at 10:50:46AM +0300, Amir Goldstein wrote:
-> On Wed, Sep 27, 2017 at 10:04 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > Tests that use _overlay_mount_dirs() should also use the
-> > default overlay mount options.
+On Tue, Sep 26, 2017 at 05:18:51PM -0700, Liu Bo wrote:
+> On Tue, Sep 26, 2017 at 04:37:52PM -0700, Liu Bo wrote:
+> > On Tue, Sep 26, 2017 at 05:02:36PM +0800, Eryu Guan wrote:
+> > > On Fri, Sep 22, 2017 at 05:21:27PM -0600, Liu Bo wrote:
+> > > > We had a bug in btrfs compression code which could end up with a
+> > > > kernel panic.
+> > > > 
+> > > > This is adding a regression test for the bug and I've also sent a
+> > > > kernel patch to fix the bug.
+> > > > 
+> > > > The patch is "Btrfs: fix kernel oops while reading compressed data".
+> > > > 
+> > > > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> > > 
+> > > Hmm, I can't reproduce the panic with 4.13 kernel, which doesn't have
+> > > the fix applied. Can you please help confirm if it panics on your test
+> > > environment?
+> > >
+> > 
+> > Yes, it is reproducible on my box, hrm...I'll be running it more times
+> > to double check.
+> > 
 > 
-> Vivek, Eryu,
+> It worked for me...both v4.13 and v4.14.0-rc2 have the following
+> messages[1].
 > 
-> I should make a disclaimer here: I did not test with SELINUX_MOUNT_OPTIONS
-> because I have no SELinux in my test setup.
+> This requires two config:
+> CONFIG_FAULT_INJECTION=y
+> CONFIG_FAULT_INJECTION_DEBUG_FS=y
 > 
-> Specifically, I am concerned that tests that compose "special" overlay mounts,
-> like tmpfs mounts and stacked overlay mounts (overlay/029) may not play well
-> with SELINUX_MOUNT_OPTIONS applied to the special mounts.
-> I am less concerned about the tests that were converted to use
-> _overlay_scratch_mount_dirs() helper.
-> 
-> Can either of you run a -g overlay/quick test with this series and valid
-> SELINUX_MOUNT_OPTIONS?
+> Could you please check again?
 
-Sure, I'll do the testings anyway, and I have selinux enabled on my test
-vms.
+I re-compiled 4.14-rc2 kernel on my test vm with FAIL_MAKE_REQUEST
+enabled (which requires FAULT_INJECTION), and I can reproduce the crash
+now. It was so weired that previously I did have FAIL_MAKE_REQUEST
+enabled and test ran normally without hitting the bug, but now I can hit
+the bug quite reliably. Not sure what was happning in my previous test..
 
-I noticed the overlay mount option mess too when I was reviewing
-MOUNT_OPTIONS fixes for btrfs from Gu Jinxiang last week. I was hoping
-to refactor the whole mount option handling through fstests. Perhaps
-this patchset is good start toward that direction. I'll test and review
-them. Thanks!
+Thanks for confirming!
 
 Eryu
