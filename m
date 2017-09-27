@@ -1,48 +1,37 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:33954 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751436AbdI0HDq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2017 03:03:46 -0400
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:50337 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750917AbdI0Hur (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Sep 2017 03:50:47 -0400
+MIME-Version: 1.0
+In-Reply-To: <1506495852-7295-3-git-send-email-amir73il@gmail.com>
+References: <1506495852-7295-1-git-send-email-amir73il@gmail.com> <1506495852-7295-3-git-send-email-amir73il@gmail.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 4/4] overlay: fix _overlay_config_override of MOUNT_OPTIONS
-Date: Wed, 27 Sep 2017 10:04:12 +0300
-Message-Id: <1506495852-7295-5-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
-References: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
+Date: Wed, 27 Sep 2017 10:50:46 +0300
+Message-ID: <CAOQ4uxhr+1g0Pa8-UPTfG2k-ebU1aCygsXfwmFjjgrpf-gFq2Q@mail.gmail.com>
+Subject: Re: [PATCH 2/4] overlay: use default overlay mount options _overlay_mount_dirs()
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, Vivek Goyal <vgoyal@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-The config variable OVERLAY_MOUNT_OPTIONS is used to configure
-the overlay mount options when running ./check -overlay.
-The config variable MOUNT_OPTIONS is used to configure the
-mount options for base fs.
+On Wed, Sep 27, 2017 at 10:04 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> Tests that use _overlay_mount_dirs() should also use the
+> default overlay mount options.
 
-If config sets value of OVERLAY_MOUNT_OPTIONS and
-does not set MOUNT_OPTIONS, the value of MOUNT_OPTIONS
-may be leftover from previous _overlay_config_override, so
-don't use that value for base fs mount.
+Vivek, Eryu,
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/config | 4 ++++
- 1 file changed, 4 insertions(+)
+I should make a disclaimer here: I did not test with SELINUX_MOUNT_OPTIONS
+because I have no SELinux in my test setup.
 
-diff --git a/common/config b/common/config
-index 71798f0..8844173 100644
---- a/common/config
-+++ b/common/config
-@@ -532,6 +532,10 @@ _overlay_config_override()
- 	# Store original base fs vars
- 	export OVL_BASE_TEST_DEV="$TEST_DEV"
- 	export OVL_BASE_TEST_DIR="$TEST_DIR"
-+	# If config does not set MOUNT_OPTIONS, its value may be
-+	# leftover from previous _overlay_config_override, so
-+	# don't use that value for base fs mount
-+	[ "$MOUNT_OPTIONS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset MOUNT_OPTIONS
- 	export OVL_BASE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
- 
- 	# Set TEST vars to overlay base and mount dirs inside base fs
--- 
-2.7.4
+Specifically, I am concerned that tests that compose "special" overlay mounts,
+like tmpfs mounts and stacked overlay mounts (overlay/029) may not play well
+with SELINUX_MOUNT_OPTIONS applied to the special mounts.
+I am less concerned about the tests that were converted to use
+_overlay_scratch_mount_dirs() helper.
 
+Can either of you run a -g overlay/quick test with this series and valid
+SELINUX_MOUNT_OPTIONS?
+
+Thanks,
+Amir.
