@@ -1,182 +1,32 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35570 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751917AbdI1Izn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Sep 2017 04:55:43 -0400
-Date: Thu, 28 Sep 2017 16:55:38 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs: test increased overlong directory extent discard
- threshold
-Message-ID: <20170928085538.GU8034@eguan.usersys.redhat.com>
-References: <20170927010348.GK5020@magnolia>
+Received: from ipmail02.adl2.internode.on.net ([150.101.137.139]:59992 "EHLO
+        ipmail02.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751591AbdI1LKM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2017 07:10:12 -0400
+Date: Thu, 28 Sep 2017 21:10:08 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v6 2/4] gitignore: sort src/ binaries name
+Message-ID: <20170928111008.GA15067@dastard>
+References: <1506328847-1669-1-git-send-email-xzhou@redhat.com>
+ <1506584500-867-1-git-send-email-xzhou@redhat.com>
+ <1506584500-867-3-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170927010348.GK5020@magnolia>
+In-Reply-To: <1506584500-867-3-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 26, 2017 at 06:03:48PM -0700, Darrick J. Wong wrote:
-> As of 2007, metadump has an interesting "feature" where it discards
-> directory extents that are longer than 1000 (originally 20) blocks.
-> This ostensibly was to protect metadump from corrupt bmbt records, but
-> it also has the effect of omitting from the metadump valid long extents.
-> The end result is that we create incomplete metadumps, which is
-> exacerbated by the lack of warning unless -w is passed.
-> 
-> So now that we've fixed the default threshold to MAXEXTLEN, check that
-> the installed metadump no longer exhibits this behavior.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/707     |  101 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/707.out |    6 +++
->  tests/xfs/group   |    1 +
->  3 files changed, 108 insertions(+)
->  create mode 100755 tests/xfs/707
->  create mode 100644 tests/xfs/707.out
-> 
-> diff --git a/tests/xfs/707 b/tests/xfs/707
-> new file mode 100755
-> index 0000000..f97d029
-> --- /dev/null
-> +++ b/tests/xfs/707
-> @@ -0,0 +1,101 @@
-> +#! /bin/bash
-> +# FS QA Test No. 707
-> +#
-> +# Ensure that metadump copies large directory extents
-> +#
-> +# Metadump helpfully discards directory (and xattr) extents that are
-> +# longer than 1000 blocks.  This is a little silly since a hardlink farm
-> +# can easily create such a monster.
-> +#
-> +# Now that we've upped metadump's default too-long-extent discard
-> +# threshold to 2^21 blocks, make sure we never do that again.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename "$0"`
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf "$tmp".* $metadump_file $metadump_img
+On Thu, Sep 28, 2017 at 03:41:38PM +0800, Xiong Zhou wrote:
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 
-'rm -f' to be safe :)
+Why? you're not fixing any problem here, and it's completely
+unrelated to fixing the issue the series is about....
 
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scratch
-> +
-> +rm -f "$seqres.full"
-> +
-> +echo "Format and mount"
-> +_scratch_mkfs -b size=1k -n size=64k > "$seqres.full" 2>&1
+Cheers,
 
-Add some comments about the non-default mkfs options?
-
-> +_scratch_mount >> "$seqres.full" 2>&1
-> +
-> +metadump_file="$TEST_DIR/meta-$seq"
-> +metadump_img="$TEST_DIR/img-$seq"
-> +rm -rf $metadump_file $metadump_img
-
-Same here, 'rm -f'
-
-> +testdir="$SCRATCH_MNT/test-$seq"
-> +max_fname_len=255
-> +blksz=$(_get_block_size $SCRATCH_MNT)
-> +
-> +# Try to create a directory w/ extents
-> +blocks=1050
-> +names=$((blocks * (blksz / max_fname_len)))
-> +echo "Create huge dir"
-> +mkdir -p $testdir
-> +touch $SCRATCH_MNT/a
-> +seq 0 $names | while read f; do
-> +	name="$testdir/$(printf "%0${max_fname_len}d" $f)"
-> +	ln $SCRATCH_MNT/a $name
-> +done
-> +dir_inum=$(stat -c %i $testdir)
-> +
-> +echo "Check for > 1000 block extent?"
-> +_scratch_unmount
-> +check_for_long_extent() {
-> +	inum=$1
-> +
-> +	_scratch_xfs_db -x -c "inode $dir_inum" -c bmap | \
-> +		sed -e 's/^.*count \([0-9]*\) flag.*$/\1/g' | \
-> +		awk '{if ($1 > 1000) { printf("yes, %d\n", $1); } }'
-> +}
-> +extlen="$(check_for_long_extent $dir_inum)"
-> +echo "qualifying extent: $extlen blocks" >> $seqres.full
-> +test -n "$extlen" || _fail "could not create dir extent > 1000 blocks"
-
-Is this really a failure? IMHO, _notrun makes more sense here.
-
-Thanks,
-Eryu
-
-> +
-> +echo "Try to metadump"
-> +_scratch_metadump $metadump_file -w
-> +xfs_mdrestore $metadump_file $metadump_img
-> +
-> +echo "Check restored metadump image"
-> +$XFS_REPAIR_PROG -n $metadump_img >> $seqres.full 2>&1
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/707.out b/tests/xfs/707.out
-> new file mode 100644
-> index 0000000..0d2a222
-> --- /dev/null
-> +++ b/tests/xfs/707.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 707
-> +Format and mount
-> +Create huge dir
-> +Check for > 1000 block extent?
-> +Try to metadump
-> +Check restored metadump image
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 7353b9c..a70c884 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -432,3 +432,4 @@
->  703 auto quick clone fsr
->  704 auto quick clone
->  705 auto quick clone fsr
-> +707 auto quick dir metadata
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
