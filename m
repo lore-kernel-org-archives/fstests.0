@@ -1,45 +1,37 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34388 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752993AbdI1M2f (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Sep 2017 08:28:35 -0400
-Date: Thu, 28 Sep 2017 20:28:32 +0800
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH v6 2/4] gitignore: sort src/ binaries name
-Message-ID: <20170928122832.yowvdelvhihn67xg@XZHOUW.usersys.redhat.com>
-References: <1506328847-1669-1-git-send-email-xzhou@redhat.com>
- <1506584500-867-1-git-send-email-xzhou@redhat.com>
- <1506584500-867-3-git-send-email-xzhou@redhat.com>
- <20170928111008.GA15067@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20170928111008.GA15067@dastard>
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:38740 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751136AbdI1QkP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2017 12:40:15 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] generic/447: not a quick test
+Date: Thu, 28 Sep 2017 19:40:41 +0300
+Message-Id: <1506616841-24121-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Xiong Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com
+To: Christoph Hellwig <hch@lst.de>
+Cc: Eryu Guan <eguan@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 28, 2017 at 09:10:08PM +1000, Dave Chinner wrote:
-> On Thu, Sep 28, 2017 at 03:41:38PM +0800, Xiong Zhou wrote:
-> > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> 
-> Why? you're not fixing any problem here, and it's completely
-> unrelated to fixing the issue the series is about....
+It hogged my cpu for a good 300s.
+Test was inheritted from generic/176, which is not quick.
 
-Yes. It's not related and a little weird. Because I'm too lazy
-to split them. This is a "by the way" patch.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/generic/group | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-If you strongly recommend, I could resend these into 2 series:
-one with the fix of fake failures, the other is the write_ro
-case with the name/group fixes.
+diff --git a/tests/generic/group b/tests/generic/group
+index f922b49..a9ad05d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -449,7 +449,7 @@
+ 444 auto quick acl
+ 445 auto quick rw
+ 446 auto quick rw dangerous
+-447 auto quick clone
++447 auto clone
+ 448 auto quick rw
+ 449 auto quick acl enospc
+ 450 auto quick rw
+-- 
+2.7.4
 
-Thanks,
-Xiong
-
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
