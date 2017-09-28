@@ -1,84 +1,78 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:17523 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751077AbdI1GEi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Sep 2017 02:04:38 -0400
-Date: Thu, 28 Sep 2017 16:02:04 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/2] generic/461: Test RWF_NOWAIT
-Message-ID: <20170928060204.GI10621@dastard>
-References: <20170927191003.10099-1-rgoldwyn@suse.de>
- <20170927213454.GD3666@dastard>
- <2292b367-9880-8e03-fe59-84dc1f2b13da@suse.de>
- <20170927215139.GE3666@dastard>
- <4be71a29-e84f-5e3d-67f6-6787f45e1b27@suse.de>
- <20170928015139.GH10621@dastard>
- <a474211d-66a0-51bf-e12c-a5f5b7a146cc@suse.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a474211d-66a0-51bf-e12c-a5f5b7a146cc@suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:34277 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751817AbdI1Hly (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Sep 2017 03:41:54 -0400
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH v6 1/4] tests: add new group dax
+Date: Thu, 28 Sep 2017 15:41:37 +0800
+Message-Id: <1506584500-867-2-git-send-email-xzhou@redhat.com>
+In-Reply-To: <1506584500-867-1-git-send-email-xzhou@redhat.com>
+References: <1506328847-1669-1-git-send-email-xzhou@redhat.com>
+ <1506584500-867-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: ross.zwisler@linux.intel.com, dan.j.williams@intel.com, jmoyer@redhat.com, eguan@redhat.com, Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 27, 2017 at 09:09:55PM -0500, Goldwyn Rodrigues wrote:
-> 
-> 
-> On 09/27/2017 08:51 PM, Dave Chinner wrote:
-> > On Wed, Sep 27, 2017 at 05:24:49PM -0500, Goldwyn Rodrigues wrote:
-> >>
-> >>
-> >> On 09/27/2017 04:51 PM, Dave Chinner wrote:
-> >>> On Wed, Sep 27, 2017 at 04:39:20PM -0500, Goldwyn Rodrigues wrote:
-> >>>>
-> >>>>
-> >>>> On 09/27/2017 04:34 PM, Dave Chinner wrote:
-> >>>>> On Wed, Sep 27, 2017 at 02:10:02PM -0500, Goldwyn Rodrigues wrote:
-> >>>>>> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> >>>>>>
-> >>>>>> Tests the RWF_NOWAIT flag so the I/O returns immediately on
-> >>>>>> a new file, without any block allocations.
-> >>>>>>
-> >>>>>> A new program which includes the pwritev2() call is used. This allows
-> >>>>>> passing flags for the I/O to be performed.
-> >>>>>
-> >>>>> Rather than write a one-off test program for this that effectively
-> >>>>> replicates xfs_io pread/pwrite functionality, please add RWF_NOWAIT
-> >>>>> flag support to xfs_io.
-> >>>>>
-> >>>>
-> >>>> This one off program is required because xfs_io does not support partial
-> >>>> writes. It tries to do that within the loop and does not return the
-> >>>> number of bytes written. This is required for test generic/462.
-> >>>
-> >>> Then please also extend xfs_io to support partial reads and writes
-> >>> in the manner you need.
-> >>>
-> >>
-> >> That will break existing tests which rely on nothing but the error
-> >> returned in case of partial writes.
-> > 
-> > So trigger necessary partial write behaviour only when the CLI
-> > option to use RWF_NOWAIT is present....
-> > 
-> 
-> Partial write test case is not related to RWF_NOWAIT test case. These
-> are two separate test cases.
-> 
-> Anyways, I am working on implementing this. Would you prefer pwritev2 be
-> a separate subcommand calling pwritev2() or should I transform pwritev()
-> to pwritev2()? The system call is relatively new and there are
-> overlapping features such as RWF_DSYNC and RWF_SYNC. I am assuming the
-> former.
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+---
+ tests/generic/group | 8 ++++----
+ tests/xfs/group     | 2 +-
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
-If pwritev2 exists at build time, build in support for it. If it
-returns ENOSYS or it is not present at build time, fall back to
-pwritev()...
-
-Cheers,
-
-Dave.
+diff --git a/tests/generic/group b/tests/generic/group
+index f922b49..0d42d54 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -415,7 +415,7 @@
+ 410 auto quick mount
+ 411 auto quick mount
+ 412 auto quick metadata
+-413 auto quick
++413 auto quick dax
+ 414 auto quick clone
+ 415 auto clone
+ 416 auto enospc
+@@ -430,7 +430,7 @@
+ 425 auto quick attr
+ 426 auto quick exportfs
+ 427 auto quick aio rw
+-428 auto quick
++428 auto quick dax
+ 429 auto encrypt
+ 430 auto quick copy
+ 431 auto quick copy
+@@ -439,7 +439,7 @@
+ 434 auto quick copy
+ 435 auto encrypt
+ 436 auto quick rw
+-437 auto quick
++437 auto quick dax
+ 438 auto
+ 439 auto quick punch
+ 440 auto quick encrypt
+@@ -454,7 +454,7 @@
+ 449 auto quick acl enospc
+ 450 auto quick rw
+ 451 auto quick rw aio
+-452 auto quick
++452 auto quick dax
+ 453 auto quick dir
+ 454 auto quick attr
+ 455 auto log replay
+diff --git a/tests/xfs/group b/tests/xfs/group
+index d352fe0..42e928b 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -257,7 +257,7 @@
+ 257 auto quick clone
+ 258 auto quick clone
+ 259 auto quick
+-260 auto attr quick
++260 auto attr quick dax
+ 261 auto quick quota
+ 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+ 263 auto quick quota
 -- 
-Dave Chinner
-david@fromorbit.com
+1.8.3.1
+
