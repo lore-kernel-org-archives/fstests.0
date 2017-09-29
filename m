@@ -1,19 +1,19 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38784 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37982 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751899AbdI2Qhe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 29 Sep 2017 12:37:34 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        id S1752108AbdI2Qta (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 29 Sep 2017 12:49:30 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 70893C04AC52
-        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 16:37:34 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7E67CC058EBD
+        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 16:49:30 +0000 (UTC)
 Received: from localhost.localdomain.com (ovpn-12-44.pek2.redhat.com [10.72.12.44])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 8CF2118621
-        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 16:37:33 +0000 (UTC)
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 943276060C
+        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 16:49:29 +0000 (UTC)
 From: Zorro Lang <zlang@redhat.com>
 Subject: [PATCH v2] src/nsexec: fix stack pointer alignment exception
-Date: Sat, 30 Sep 2017 00:37:28 +0800
-Message-Id: <20170929163728.17859-1-zlang@redhat.com>
+Date: Sat, 30 Sep 2017 00:49:25 +0800
+Message-Id: <20170929164925.18562-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
@@ -30,6 +30,8 @@ from Eric sandeen).
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
+Sorry I made a wrong V2, this's the right one.
+
 V2 move the "__attribute__((aligned))" after array name, for following
 common "__attribute__" usage.
 
@@ -40,7 +42,7 @@ Zorro
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/nsexec.c b/src/nsexec.c
-index f033b1a4..205dd081 100644
+index f033b1a4..c2d172fe 100644
 --- a/src/nsexec.c
 +++ b/src/nsexec.c
 @@ -138,7 +138,8 @@ childFunc(void *arg)
@@ -49,7 +51,7 @@ index f033b1a4..205dd081 100644
  
 -static char child_stack[STACK_SIZE];    /* Space for child's stack */
 +/* Space for child's stack */
-+static char __attribute__((aligned)) child_stack[STACK_SIZE];
++static char child_stack[STACK_SIZE] __attribute__((aligned));
  
  int
  main(int argc, char *argv[])
