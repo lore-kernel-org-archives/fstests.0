@@ -1,297 +1,62 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:35497 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750807AbdI2KxB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2017 06:53:01 -0400
-Received: by mail-wr0-f196.google.com with SMTP id n64so992004wrb.2
-        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 03:53:01 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] kernel-configs: enable namespace support
-Date: Fri, 29 Sep 2017 13:53:37 +0300
-Message-Id: <1506682417-8701-1-git-send-email-amir73il@gmail.com>
+Received: from sandeen.net ([63.231.237.45]:51620 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752154AbdI2OoG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 29 Sep 2017 10:44:06 -0400
+Subject: Re: [PATCH] src/nsexec: fix stack pointer alignment exception
+References: <20170927055252.12225-1-zlang@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <3480df1f-d1d0-630d-985f-3dfd33e3ab9d@sandeen.net>
+Date: Fri, 29 Sep 2017 09:44:05 -0500
+MIME-Version: 1.0
+In-Reply-To: <20170927055252.12225-1-zlang@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eric Biggers <ebiggers@google.com>, Eryu Guan <eguan@redhat.com>, Vivek Goyal <vgoyal@redhat.com>, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-At this time there is only one xfstest that requires namespaces
-support (overlay/020) and it requires user namespace support.
-This test fails with default kvm-xfstests configs.
+On 9/27/17 12:52 AM, Zorro Lang wrote:
+> When test g/317 or g/318 on ARM server, we got a kernel exception:
+> 
+>   kernel: nsexec[8203]: SP Alignment exception: pc=00000000004010a0 sp=00000000005200e8
+> 
+> nsexec gives an unaligned child stack address to clone() system
+> call sometimes. For making sure it's always aligned, use
+> "__attribute__((aligned))" extension of GCC (Thanks this suggestion
+> from Eric sandeen).
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  src/nsexec.c | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
+> 
+> diff --git a/src/nsexec.c b/src/nsexec.c
+> index f033b1a4..205dd081 100644
+> --- a/src/nsexec.c
+> +++ b/src/nsexec.c
+> @@ -138,7 +138,8 @@ childFunc(void *arg)
+>  
+>  #define STACK_SIZE (1024 * 1024)
+>  
+> -static char child_stack[STACK_SIZE];    /* Space for child's stack */
+> +/* Space for child's stack */
+> +static char __attribute__((aligned)) child_stack[STACK_SIZE];
 
-Recently, a regression with overlayfs was reported relating
-to mount ns, so tests that require only mount ns may be needed too.
+Does it matter if the __attribute__ goes before or after
+the array name (child_stack[])?  I can't quite tell from reading i.e.
+https://gcc.gnu.org/onlinedocs/gcc-3.1/gcc/Variable-Attributes.html#Variable%20Attributes
+if it does, though most examples I see have the __attribute__ after the variable
+name, i.e.
 
-This change re-enables the kernel default namespace support for all
-kernel configurations and enables user ns support for stable kernels
-v3.18 and above, where user ns is considered stable and maintained.
+> short array[3] __attribute__ ((aligned));
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- kernel-configs/i386-config-3.10   | 4 ----
- kernel-configs/i386-config-3.14   | 4 ----
- kernel-configs/i386-config-3.18   | 5 +----
- kernel-configs/i386-config-3.2    | 4 ----
- kernel-configs/i386-config-3.4    | 4 ----
- kernel-configs/i386-config-4.1    | 5 +----
- kernel-configs/i386-config-4.4    | 5 +----
- kernel-configs/i386-config-4.9    | 5 +----
- kernel-configs/x86_64-config-3.10 | 4 ----
- kernel-configs/x86_64-config-3.14 | 4 ----
- kernel-configs/x86_64-config-3.18 | 5 +----
- kernel-configs/x86_64-config-3.2  | 4 ----
- kernel-configs/x86_64-config-3.4  | 4 ----
- kernel-configs/x86_64-config-4.1  | 5 +----
- kernel-configs/x86_64-config-4.4  | 5 +----
- kernel-configs/x86_64-config-4.9  | 5 +----
- 16 files changed, 8 insertions(+), 64 deletions(-)
+in the URL above.
 
-diff --git a/kernel-configs/i386-config-3.10 b/kernel-configs/i386-config-3.10
-index 20f2e18..0ec01c5 100644
---- a/kernel-configs/i386-config-3.10
-+++ b/kernel-configs/i386-config-3.10
-@@ -8,10 +8,6 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-3.14 b/kernel-configs/i386-config-3.14
-index 1bd5159..7270033 100644
---- a/kernel-configs/i386-config-3.14
-+++ b/kernel-configs/i386-config-3.14
-@@ -8,10 +8,6 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-3.18 b/kernel-configs/i386-config-3.18
-index d31dcab..119ba1b 100644
---- a/kernel-configs/i386-config-3.18
-+++ b/kernel-configs/i386-config-3.18
-@@ -8,10 +8,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-3.2 b/kernel-configs/i386-config-3.2
-index f098214..a90b672 100644
---- a/kernel-configs/i386-config-3.2
-+++ b/kernel-configs/i386-config-3.2
-@@ -6,10 +6,6 @@ CONFIG_FHANDLE=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-3.4 b/kernel-configs/i386-config-3.4
-index 5703598..54224ce 100644
---- a/kernel-configs/i386-config-3.4
-+++ b/kernel-configs/i386-config-3.4
-@@ -6,10 +6,6 @@ CONFIG_FHANDLE=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-4.1 b/kernel-configs/i386-config-4.1
-index 2b65848..88d52d5 100644
---- a/kernel-configs/i386-config-4.1
-+++ b/kernel-configs/i386-config-4.1
-@@ -8,10 +8,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-4.4 b/kernel-configs/i386-config-4.4
-index 1f53d44..62854a7 100644
---- a/kernel-configs/i386-config-4.4
-+++ b/kernel-configs/i386-config-4.4
-@@ -8,10 +8,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/i386-config-4.9 b/kernel-configs/i386-config-4.9
-index 7c8b764..bb26945 100644
---- a/kernel-configs/i386-config-4.9
-+++ b/kernel-configs/i386-config-4.9
-@@ -7,10 +7,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-3.10 b/kernel-configs/x86_64-config-3.10
-index cf8216a..a763eed 100644
---- a/kernel-configs/x86_64-config-3.10
-+++ b/kernel-configs/x86_64-config-3.10
-@@ -7,10 +7,6 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-3.14 b/kernel-configs/x86_64-config-3.14
-index 3a40b3d..a276318 100644
---- a/kernel-configs/x86_64-config-3.14
-+++ b/kernel-configs/x86_64-config-3.14
-@@ -7,10 +7,6 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-3.18 b/kernel-configs/x86_64-config-3.18
-index 0eaf2cd..6a8afc8 100644
---- a/kernel-configs/x86_64-config-3.18
-+++ b/kernel-configs/x86_64-config-3.18
-@@ -7,10 +7,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-3.2 b/kernel-configs/x86_64-config-3.2
-index b92cbcc..64ee6a4 100644
---- a/kernel-configs/x86_64-config-3.2
-+++ b/kernel-configs/x86_64-config-3.2
-@@ -6,10 +6,6 @@ CONFIG_FHANDLE=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-3.4 b/kernel-configs/x86_64-config-3.4
-index dcf2008..1a24556 100644
---- a/kernel-configs/x86_64-config-3.4
-+++ b/kernel-configs/x86_64-config-3.4
-@@ -6,10 +6,6 @@ CONFIG_FHANDLE=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-4.1 b/kernel-configs/x86_64-config-4.1
-index 961cf66..c8610d4 100644
---- a/kernel-configs/x86_64-config-4.1
-+++ b/kernel-configs/x86_64-config-4.1
-@@ -7,10 +7,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-4.4 b/kernel-configs/x86_64-config-4.4
-index 65d925e..7dfb7b4 100644
---- a/kernel-configs/x86_64-config-4.4
-+++ b/kernel-configs/x86_64-config-4.4
-@@ -7,10 +7,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
-diff --git a/kernel-configs/x86_64-config-4.9 b/kernel-configs/x86_64-config-4.9
-index 66348a3..16e54bc 100644
---- a/kernel-configs/x86_64-config-4.9
-+++ b/kernel-configs/x86_64-config-4.9
-@@ -6,10 +6,7 @@ CONFIG_HIGH_RES_TIMERS=y
- CONFIG_IKCONFIG=y
- CONFIG_IKCONFIG_PROC=y
- CONFIG_CGROUPS=y
--# CONFIG_UTS_NS is not set
--# CONFIG_IPC_NS is not set
--# CONFIG_PID_NS is not set
--# CONFIG_NET_NS is not set
-+CONFIG_USER_NS=y
- CONFIG_BLK_DEV_INITRD=y
- # CONFIG_COMPAT_BRK is not set
- CONFIG_SLAB=y
--- 
-2.7.4
+-Eric
 
+>  
+>  int
+>  main(int argc, char *argv[])
+> 
