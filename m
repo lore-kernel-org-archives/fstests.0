@@ -1,184 +1,63 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:43871 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750996AbdI2Fhn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2017 01:37:43 -0400
-Date: Thu, 28 Sep 2017 22:37:39 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2] xfs: test increased overlong directory extent discard
- threshold
-Message-ID: <20170929053739.GW5020@magnolia>
-References: <20170927010348.GK5020@magnolia>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:57716 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751855AbdI2JWp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Sep 2017 05:22:45 -0400
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1dxrVJ-0005I3-FW
+        for fstests@vger.kernel.org; Fri, 29 Sep 2017 19:22:41 +1000
+Date: Fri, 29 Sep 2017 19:22:41 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: copy_file_range test failures, maybe iscsi related?
+Message-ID: <20170929092241.GD15067@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20170927010348.GK5020@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-As of 2007, metadump has an interesting "feature" where it discards
-directory extents that are longer than 1000 (originally 20) blocks.
-This ostensibly was to protect metadump from corrupt bmbt records, but
-it also has the effect of omitting from the metadump valid long extents.
-The end result is that we create incomplete metadumps, which is
-exacerbated by the lack of warning unless -w is passed.
+Hi folks,
 
-So now that we've fixed the default threshold to MAXEXTLEN, check that
-the installed metadump no longer exhibits this behavior.
+I've just got my iscsi test systems back up and running and I'm
+seeing tests generic/43[014] all getting stuck in the same way.
+xfs_io is hard looping and not making progress, and the strace
+output looks like this:
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: work out the maths to capture why we're using mkfs options
----
- tests/xfs/707     |  117 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/707.out |    6 +++
- tests/xfs/group   |    1 
- 3 files changed, 124 insertions(+)
- create mode 100755 tests/xfs/707
- create mode 100644 tests/xfs/707.out
+.....
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+copy_file_range(4, [1000], 3, [0], 100, 0) = 0
+.....
 
-diff --git a/tests/xfs/707 b/tests/xfs/707
-new file mode 100755
-index 0000000..f7a90d0
---- /dev/null
-+++ b/tests/xfs/707
-@@ -0,0 +1,117 @@
-+#! /bin/bash
-+# FS QA Test No. 707
-+#
-+# Ensure that metadump copies large directory extents
-+#
-+# Metadump helpfully discards directory (and xattr) extents that are
-+# longer than 1000 blocks.  This is a little silly since a hardlink farm
-+# can easily create such a monster.
-+#
-+# Now that we've upped metadump's default too-long-extent discard
-+# threshold to 2^21 blocks, make sure we never do that again.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f "$tmp".* $metadump_file $metadump_img
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
-+
-+rm -f "$seqres.full"
-+
-+echo "Format and mount"
-+# We need to create a directory with a huuuge extent record.  Normally
-+# a rapidly expanding directory gets its blocks allocated in lockstep --
-+# physically we end up writing (a couple of dir data blocks) followed by
-+# (a da btree block) over and over.
-+#
-+# Therefore, we crank the directory block size up to maximum and the
-+# filesystem down to minimum so that we have to allocate 64 blocks at
-+# a time, trying to end up with the result that we have > 1000 blocks
-+# allocated in a single extent.
-+#
-+# In theory the math works out here -- ~65500 bytes for a da leaf block /
-+# 8 bytes per da leaf entry == ~8187 hash entries for a da node.  65500
-+# bytes for a dir data block / 264 bytes per dirent == ~248 dirents per
-+# block.  8187 hashes/dablk / 248 dirents/dirblock = ~33 dirblocks per
-+# dablock.  33 dirblocks * 64k mean that we can expand a directory by
-+# 2112k before we have to allocate another da btree block.
-+_scratch_mkfs -b size=1k -n size=64k > "$seqres.full" 2>&1
-+_scratch_mount >> "$seqres.full" 2>&1
-+
-+metadump_file="$TEST_DIR/meta-$seq"
-+metadump_img="$TEST_DIR/img-$seq"
-+rm -f $metadump_file $metadump_img
-+testdir="$SCRATCH_MNT/test-$seq"
-+max_fname_len=255
-+blksz=$(_get_block_size $SCRATCH_MNT)
-+
-+# Try to create a directory w/ extents
-+blocks=1050
-+names=$((blocks * (blksz / max_fname_len)))
-+echo "Create huge dir"
-+mkdir -p $testdir
-+touch $SCRATCH_MNT/a
-+seq 0 $names | while read f; do
-+	name="$testdir/$(printf "%0${max_fname_len}d" $f)"
-+	ln $SCRATCH_MNT/a $name
-+done
-+dir_inum=$(stat -c %i $testdir)
-+
-+echo "Check for > 1000 block extent?"
-+_scratch_unmount
-+check_for_long_extent() {
-+	inum=$1
-+
-+	_scratch_xfs_db -x -c "inode $dir_inum" -c bmap | \
-+		sed -e 's/^.*count \([0-9]*\) flag.*$/\1/g' | \
-+		awk '{if ($1 > 1000) { printf("yes, %d\n", $1); } }'
-+}
-+extlen="$(check_for_long_extent $dir_inum)"
-+echo "qualifying extent: $extlen blocks" >> $seqres.full
-+test -n "$extlen" || _notrun "could not create dir extent > 1000 blocks"
-+
-+echo "Try to metadump"
-+_scratch_metadump $metadump_file -w
-+xfs_mdrestore $metadump_file $metadump_img
-+
-+echo "Check restored metadump image"
-+$XFS_REPAIR_PROG -n $metadump_img >> $seqres.full 2>&1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/707.out b/tests/xfs/707.out
-new file mode 100644
-index 0000000..0d2a222
---- /dev/null
-+++ b/tests/xfs/707.out
-@@ -0,0 +1,6 @@
-+QA output created by 707
-+Format and mount
-+Create huge dir
-+Check for > 1000 block extent?
-+Try to metadump
-+Check restored metadump image
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 7353b9c..a70c884 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -432,3 +432,4 @@
- 703 auto quick clone fsr
- 704 auto quick clone
- 705 auto quick clone fsr
-+707 auto quick dir metadata
+I can kill the xfs_io process and the test then fails and moves on
+to the next, so it appears there's a problem with the
+copy_file_range() implementation. On the same kernel (4.14-rc2) but
+different devices (local SSD, ram disk or pmem) there is no problems
+being reported by these tests and they complete extremely quickly.
+
+It's clearly not related to XFS's reflink mkfs option, because I can
+reproduce it on filesystems without that option enabled.  And I just
+reproduced it on an ext4 filesystem, too, so this implies it is
+probably an iscsi copy offload bug.
+
+Is anyone else running xfstests on iscsi devices, and if so, are
+they seeing these problems?
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
