@@ -1,16 +1,16 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44568 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:38672 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750826AbdI2CUS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Sep 2017 22:20:18 -0400
+        id S1750891AbdI2CUV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Sep 2017 22:20:21 -0400
 Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
         (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
         (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 21DB0859FA
-        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 02:20:18 +0000 (UTC)
+        by mx1.redhat.com (Postfix) with ESMTPS id D8EA25D689
+        for <fstests@vger.kernel.org>; Fri, 29 Sep 2017 02:20:20 +0000 (UTC)
 From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH 1/2] tests: add new group dax
-Date: Fri, 29 Sep 2017 10:20:02 +0800
-Message-Id: <1506651603-21876-2-git-send-email-xzhou@redhat.com>
+Subject: [PATCH 2/2] gitignore: sort src/ binaries name
+Date: Fri, 29 Sep 2017 10:20:03 +0800
+Message-Id: <1506651603-21876-3-git-send-email-xzhou@redhat.com>
 In-Reply-To: <1506651603-21876-1-git-send-email-xzhou@redhat.com>
 References: <1506651603-21876-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -20,63 +20,88 @@ List-ID: <fstests@vger.kernel.org>
 
 Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 ---
- tests/generic/group | 8 ++++----
- tests/xfs/group     | 2 +-
- 2 files changed, 5 insertions(+), 5 deletions(-)
+ .gitignore | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
 
-diff --git a/tests/generic/group b/tests/generic/group
-index f922b49..0d42d54 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -415,7 +415,7 @@
- 410 auto quick mount
- 411 auto quick mount
- 412 auto quick metadata
--413 auto quick
-+413 auto quick dax
- 414 auto quick clone
- 415 auto clone
- 416 auto enospc
-@@ -430,7 +430,7 @@
- 425 auto quick attr
- 426 auto quick exportfs
- 427 auto quick aio rw
--428 auto quick
-+428 auto quick dax
- 429 auto encrypt
- 430 auto quick copy
- 431 auto quick copy
-@@ -439,7 +439,7 @@
- 434 auto quick copy
- 435 auto encrypt
- 436 auto quick rw
--437 auto quick
-+437 auto quick dax
- 438 auto
- 439 auto quick punch
- 440 auto quick encrypt
-@@ -454,7 +454,7 @@
- 449 auto quick acl enospc
- 450 auto quick rw
- 451 auto quick rw aio
--452 auto quick
-+452 auto quick dax
- 453 auto quick dir
- 454 auto quick attr
- 455 auto log replay
-diff --git a/tests/xfs/group b/tests/xfs/group
-index d352fe0..42e928b 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -257,7 +257,7 @@
- 257 auto quick clone
- 258 auto quick clone
- 259 auto quick
--260 auto attr quick
-+260 auto attr quick dax
- 261 auto quick quota
- 262 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 263 auto quick quota
+diff --git a/.gitignore b/.gitignore
+index 63928b4..cfabcb3 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -56,10 +56,12 @@
+ /src/bstat
+ /src/bulkstat_unlink_test
+ /src/bulkstat_unlink_test_modified
++/src/cloner
+ /src/dbtest
+ /src/devzero
+ /src/dio-interleaved
+ /src/dio-invalidate-cache
++/src/dirhash_collide
+ /src/dirperf
+ /src/dirstress
+ /src/dmiperf
+@@ -76,7 +78,6 @@
+ /src/fsync-tester
+ /src/ftrunc
+ /src/genhashnames
+-/src/dirhash_collide
+ /src/getdevicesize
+ /src/getpagesize
+ /src/godown
+@@ -98,11 +99,11 @@
+ /src/permname
+ /src/preallo_rw_pattern_reader
+ /src/preallo_rw_pattern_writer
++/src/punch-alternating
+ /src/pwrite_mmap_blocked
+ /src/randholes
+-/src/t_readdir_1
+-/src/t_readdir_2
+ /src/rename
++/src/renameat2
+ /src/resvtest
+ /src/runas
+ /src/seek_copy_test
+@@ -118,8 +119,15 @@
+ /src/t_getcwd
+ /src/t_holes
+ /src/t_immutable
++/src/t_mmap_cow_race
++/src/t_mmap_dio
++/src/t_mmap_fallocate
++/src/t_mmap_stale_pmd
+ /src/t_mmap_writev
+ /src/t_mtab
++/src/t_readdir_1
++/src/t_readdir_2
++/src/t_rename_overwrite
+ /src/t_stripealign
+ /src/t_truncate_cmtime
+ /src/t_truncate_self
+@@ -134,6 +142,7 @@
+ /src/writev_on_pagefault
+ /src/xfsctl
+ /src/aio-dio-regress/aio-dio-cycle-write
++/src/aio-dio-regress/aio-dio-eof-race
+ /src/aio-dio-regress/aio-dio-extend-stat
+ /src/aio-dio-regress/aio-dio-fcntl-race
+ /src/aio-dio-regress/aio-dio-hole-filling-race
+@@ -145,15 +154,6 @@
+ /src/aio-dio-regress/aio-last-ref-held-by-io
+ /src/aio-dio-regress/aiocp
+ /src/aio-dio-regress/aiodio_sparse2
+-/src/aio-dio-regress/aio-dio-eof-race
+-/src/punch-alternating
+-/src/cloner
+-/src/renameat2
+-/src/t_rename_overwrite
+-/src/t_mmap_dio
+-/src/t_mmap_stale_pmd
+-/src/t_mmap_cow_race
+-/src/t_mmap_fallocate
+ /src/log-writes/replay-log
+ 
+ # dmapi/ binaries
 -- 
 1.8.3.1
 
