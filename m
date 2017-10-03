@@ -1,45 +1,60 @@
-Received: from imap.thunk.org ([74.207.234.97]:51342 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750943AbdJBDjm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 1 Oct 2017 23:39:42 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] report: fix summary statistics in xUnit header
-Date: Sun,  1 Oct 2017 23:39:32 -0400
-Message-Id: <20171002033932.12419-1-tytso@mit.edu>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:37481 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751111AbdJCIVh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Oct 2017 04:21:37 -0400
+Date: Tue, 3 Oct 2017 19:21:34 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: fstests: update mkfs.xfs filters for new refactoring
+Message-ID: <20171003082134.GJ3666@dastard>
+References: <20171003080607.GM15067@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171003080607.GM15067@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>, Dmitry Monakhov <dmonakhov@openvz.org>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The xUnit XML DTD distinguishes between test failures and test errors,
-where a test failure indicate that the test has explicitly indicated
-that the code under test has behaved in an unexpected fashion, whereas
-a test error indicates the test code itself has thrown an error or
-there has been some other test implementation error.
+fstests: update mkfs.xfs filters for new refactoring
 
-Xfstest failures are correctly marked as xUnit failures, but in the
-attributes of the testsuite XML element, the number of test failures
-was incorrectly reported as the number of errors.
+From: Dave Chinner <dchinner@redhat.com>
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-Cc: Dmitry Monakhov <dmonakhov@openvz.org>
+The new mkfs code adds some output to indicate where the defaults
+were sourced from, so filter that out so it doesn't contaminate
+tests unnecessarily.
+
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
 ---
- common/report | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/xfs    | 3 ++-
+ tests/xfs/206 | 3 ++-
+ 2 files changed, 4 insertions(+), 2 deletions(-)
 
-diff --git a/common/report b/common/report
-index bb689836..058c0bba 100644
---- a/common/report
-+++ b/common/report
-@@ -59,7 +59,7 @@ _xunit_make_section_report()
- 	# Header
- 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
- 	local dtime=`echo $date_time| tr  " " 'T'`
--	local stats="errors=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
-+	local stats="failures=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
- 	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
- 	echo "<testsuite name=\"xfstests\" $stats  $hw_info >" >> $REPORT_DIR/result.xml
+diff --git a/common/xfs b/common/xfs
+index def28bfc7309..603792092060 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -81,7 +81,8 @@ _scratch_mkfs_xfs()
+ {
+ 	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
+ 	local mkfs_filter="sed -e '/less than device physical sector/d' \
+-			       -e '/switching to logical sector/d'"
++			       -e '/switching to logical sector/d' \
++			       -e '/Default configuration/d'"
+ 	local tmp=`mktemp -u`
+ 	local mkfs_status
  
--- 
-2.11.0.rc0.7.gbe5a750
-
+diff --git a/tests/xfs/206 b/tests/xfs/206
+index 70997e3fe83e..01782b7b93a9 100755
+--- a/tests/xfs/206
++++ b/tests/xfs/206
+@@ -84,7 +84,8 @@ mkfs_filter()
+ 	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
+ 	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
+ 	    -e "s/, lazy-count=[0-9]//" \
+-	    -e "/.*crc=/d"
++	    -e "/.*crc=/d" \
++	    -e "/^Default configuration/d"
+ }
+ 
+ # mkfs slightly smaller than that, small log for speed.
