@@ -1,46 +1,185 @@
-Received: from mx2.mpynet.fi ([82.197.21.85]:41190 "EHLO mx2.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751380AbdJEM7L (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Oct 2017 08:59:11 -0400
-From: Rostislav Skudnov <rostislav@tuxera.com>
-Subject: [PATCH 1/4] fsstress: Fix wrong size argument to getcwd()
-Date: Thu, 5 Oct 2017 12:49:57 +0000
-Message-ID: <1507207800-5688-1-git-send-email-rostislav@tuxera.com>
+Received: from mail-ua0-f179.google.com ([209.85.217.179]:49340 "EHLO
+        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750965AbdJEPEZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Oct 2017 11:04:25 -0400
+Received: by mail-ua0-f179.google.com with SMTP id 97so9296785uai.6
+        for <fstests@vger.kernel.org>; Thu, 05 Oct 2017 08:04:25 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <59D5DEE0.6080506@cn.fujitsu.com>
+References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
+ <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
+ <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com> <59D5DEE0.6080506@cn.fujitsu.com>
+From: Ashlie Martinez <ashmrtn@utexas.edu>
+Date: Thu, 5 Oct 2017 10:04:23 -0500
+Message-ID: <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
+Subject: Re: [RFC][PATCH] fstest: regression test for ext4 crash consistency bug
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Fixes the following ASAN failure:
+On Thu, Oct 5, 2017 at 2:27 AM, Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
+> On 2017/09/30 22:15, Ashlie Martinez wrote:
+>>
+>> Hi Xiao,
+>>
+>> I am a student at the University of Texas at Austin. Some researchers
+>> in the computer science department at UT, myself included, have
+>> recently been working to develop a file system crash consistency test
+>> harness called CrashMonkey [1][2]. I have been working on the
+>> CrashMonkey project since it was started late last year. With
+>> CrashMonkey we have also been able to reproduce the incorrect i_size
+>> error you noted but we have not been able to reproduce the other
+>> output that Amir found. CrashMonkey works by logging and replaying
+>> operations for a workload, so it should not be sensitive to
+>> differences in timing that could be caused by things like KVM+virtio.
+>> I also did a few experiments with Amir's new xfstests test 456 (both
+>> with and without KVM and virtio) and I was unable to reproduce the
+>> output noted in the xfstest. I have not spent a lot of time looking
+>> into the cause of the bug that Amir found and it is rather unfortunate
+>> that I was unable to reproduce it with either xfstests or CrashMonkey.
+>
+> Hi Ashlie,
+>
+> Thanks for your detailed comments.
+>
+> 1) Do you think the output that Amir noted in xfstests is a false positive?
 
-==11670==WARNING: AddressSanitizer failed to allocate 0xffffffffffffffff bytes
-==11670==AddressSanitizer's allocator is terminating the process instead of returning 0
+It almost seems that way, though to be honest, I don't think I know
+enough about 1. the setup used by Amir and 2. all the internal working
+of KVM+virtio to say for sure. One thing I have identified as being a
+potential source of false positives is code in the kernel to remap the
+block number sent to device drives to something relative to the start
+of a block device, not the start of a partition. I'm thinking this
+could cause trouble if 1. a partition higher than the first partition
+is monitored by dm-log-writes, 2. the block numbers are recorded
+verbatim in dm-log-writes, and 3. the dm-log-writes log is replayed on
+a different device with different partitions (or possibly the same
+device, but a different partition). I know some other undergrad
+students at UT on the CrashMonkey team are looking into this right
+now, but I have not had time to test this myself. The offending code
+in the kernel is in the completely misnamed
+`generic_make_request_checks` function which has given the CrashMonkey
+team trouble in the past. Links to that function and the remapping
+function it calls are below.
 
-...
+http://elixir.free-electrons.com/linux/latest/source/block/blk-core.c#L2041
+http://elixir.free-electrons.com/linux/latest/source/block/blk-core.c#L1902
 
-    #5 0x4bb230 in __interceptor_malloc /home/vak-local/3.9.1/release/final/llvm.src/projects/compiler-rt/lib/asan/asan_malloc_linux.cc:65:10
-    #6 0x7f97e6491405 in getcwd /build/glibc-6V9RKT/glibc-2.19/io/../sysdeps/unix/sysv/linux/getcwd.c:68
-    #7 0x454691 in getcwd /home/vak-local/3.9.1/release/final/llvm.src/projects/compiler-rt/lib/asan/../sanitizer_common/sanitizer_common_interceptors.inc:2822:15
-    #8 0x4f765d in doproc /.../ltp/fsstress.c:933:12
-    #9 0x4f5f54 in main /.../ltp/fsstress.c:581:5
----
- ltp/fsstress.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> 2) About the output that both i and you reproduced,  did you look into it
+> and find its root cause?
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 24c063e..96f48b1 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -965,7 +965,7 @@ doproc(void)
- 		_exit(1);
- 	}
- 	top_ino = statbuf.st_ino;
--	homedir = getcwd(NULL, -1);
-+	homedir = getcwd(NULL, 0);
- 	seed += procid;
- 	srandom(seed);
- 	if (namerand)
--- 
-2.1.4
+I have not looked to find the root cause of the issue that we both
+reliably reproduce.
 
+>
+> Thanks,
+> Xiao Yang
+>>
+>> At any rate, CrashMonkey is still under development, so it does have
+>> some caveats. First, we are running with a fixed random seed in our
+>> default RandomPermuter (used to generate crash states) to aid
+>> development. Second, the branch with the reproduction of this ext4
+>> regression bug in CrashMonkey [3] will yield a few false positives due
+>> to the way CrashMonkey works and how fsx runs. These false positives
+>> are due to CrashMonkey generating crash states where the directories
+>> for files used for the test have not be fsync-ed in the file system.
+>> The top of the README in the CrashMonkey branch with this bug
+>> reproduction outlines how we determined these were false positives
+>>
+>> [1] https://github.com/utsaslab/crashmonkey
+>> [2]
+>> https://www.usenix.org/conference/hotstorage17/program/presentation/martinez
+>> [3] https://github.com/utsaslab/crashmonkey/tree/ext4_regression_bug
+>>
+>>
+>> On Mon, Sep 25, 2017 at 5:53 AM, Amir Goldstein<amir73il@gmail.com>
+>> wrote:
+>>>
+>>> On Mon, Sep 25, 2017 at 12:49 PM, Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>> wrote:
+>>>>
+>>>> On 2017/08/27 18:44, Amir Goldstein wrote:
+>>>>>
+>>>>> This test is motivated by a bug found in ext4 during random crash
+>>>>> consistency tests.
+>>>>>
+>>>>> This test uses device mapper flakey target to demonstrate the bug
+>>>>> found using device mapper log-writes target.
+>>>>>
+>>>>> Signed-off-by: Amir Goldstein<amir73il@gmail.com>
+>>>>> ---
+>>>>>
+>>>>> Ted,
+>>>>>
+>>>>> While working on crash consistency xfstests [1], I stubmled on what
+>>>>> appeared to be an ext4 crash consistency bug.
+>>>>>
+>>>>> The tests I used rely on the log-writes dm target code written
+>>>>> by Josef Bacik, which had little exposure to the wide community
+>>>>> as far as I know.  I wanted to prove to myself that the found
+>>>>> inconsistency was not due to a test bug, so I bisected the failed
+>>>>> test to the minimal operations that trigger the failure and wrote
+>>>>> a small independent test to reproduce the issue using dm flakey target.
+>>>>>
+>>>>> The following fsck error is reliably reproduced by replaying some fsx
+>>>>> ops
+>>>>> on overlapping file regions, then emulating a crash, followed by mount,
+>>>>> umount and fsck -nf:
+>>>>>
+>>>>>    ./ltp/fsx -d --replay-ops /tmp/8995.fsxops /mnt/scratch/testfile
+>>>>>    1 write 0x137dd thru    0x21445 (0xdc69 bytes)
+>>>>>    2 falloc        from 0xb531 to 0x16ade (0xb5ad bytes)
+>>>>>    3 collapse      from 0x1c000 to 0x20000, (0x4000 bytes)
+>>>>>    4 write 0x3e5ec thru    0x3ffff (0x1a14 bytes)
+>>>>>    5 zero  from 0x20fac to 0x27d48, (0x6d9c bytes)
+>>>>>    6 mapwrite      0x216ad thru    0x23dfb (0x274f bytes)
+>>>>>    All 7 operations completed A-OK!
+>>>>>    _check_generic_filesystem: filesystem on /dev/mapper/ssd-scratch is
+>>>>> inconsistent
+>>>>>    *** fsck.ext4 output ***
+>>>>>    fsck from util-linux 2.27.1
+>>>>>    e2fsck 1.42.13 (17-May-2015)
+>>>>>    Pass 1: Checking inodes, blocks, and sizes
+>>>>>    Inode 12, end of extent exceeds allowed value
+>>>>>            (logical block 33, physical block 33441, len 7)
+>>>>>    Clear? no
+>>>>>    Inode 12, i_blocks is 184, should be 128.  Fix? no
+>>>>
+>>>> Hi Amir,
+>>>>
+>>>> I always get the following output when running your xfstests test case
+>>>> 501.
+>>>
+>>> Now merged as test generic/456
+>>>
+>>>>
+>>>> ---------------------------------------------------------------------------
+>>>> e2fsck 1.42.9 (28-Dec-2013)
+>>>> Pass 1: Checking inodes, blocks, and sizes
+>>>> Inode 12, i_size is 147456, should be 163840. Fix? no
+>>>>
+>>>> ---------------------------------------------------------------------------
+>>>>
+>>>> Could you tell me how to get the expected output as you reported?
+>>>
+>>> I can't say I am doing anything special, but I can say that I get the
+>>> same output as you did when running the test inside kvm-xfstests.
+>>> Actually, I could not reproduce ANY of the the crash consistency bugs
+>>> inside kvm-xfstests. Must be something to do with different timing of
+>>> IO with KVM+virtio disks??
+>>>
+>>> When running on my laptop (Ubuntu 16.04 with latest kernel)
+>>> on a 10G SSD volume, I always get the error reported above.
+>>> I just re-verified with latest stable e2fsprogs (1.43.6).
+>>>
+>>> Amir.
+>>
+>>
+>> .
+>>
+>
+>
+>
