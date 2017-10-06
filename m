@@ -1,55 +1,47 @@
-Received: from mx1.mpynet.fi ([82.197.21.84]:39758 "EHLO mx1.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750882AbdJFI1N (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Oct 2017 04:27:13 -0400
-From: Rostislav Skudnov <rostislav@tuxera.com>
-Subject: [PATCH v2] bulkstat_unlink_test_modified: Remove extraneous if statement
-Date: Fri, 6 Oct 2017 08:25:19 +0000
-Message-ID: <1507278319-17380-1-git-send-email-rostislav@tuxera.com>
-In-Reply-To: <20171005194629.GA21115@infradead.org>
-References: <20171005194629.GA21115@infradead.org>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:50216 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753343AbdJFJ2t (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Oct 2017 05:28:49 -0400
+Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v969OQ3i018857
+        for <fstests@vger.kernel.org>; Fri, 6 Oct 2017 05:28:48 -0400
+Received: from e18.ny.us.ibm.com (e18.ny.us.ibm.com [129.33.205.208])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2de6q41h7v-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Fri, 06 Oct 2017 05:28:48 -0400
+Received: from localhost
+        by e18.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Fri, 6 Oct 2017 05:28:47 -0400
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] overlay/038: Remove af_unix program requirement
+Date: Fri,  6 Oct 2017 14:59:33 +0530
+Message-Id: <20171006092933.15642-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, amir73il@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Fixes the following compiler warning:
+overlay/038 does not use src/af_unix program. This commit removes the
+corresponding _require_test_program statement.
 
-bulkstat_unlink_test_modified.c:171:26: warning: equality comparison
-with extraneous parentheses [-Wparentheses-equality]
-                    if ((ret[i].bs_ino == inodelist[j])) {
-                         ~~~~~~~~~~~~~~^~~~~~~~~~~~~~~
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
-Updated according to your suggestion, removed extra parentheses.
+ tests/overlay/038 | 1 -
+ 1 file changed, 1 deletion(-)
 
- src/bulkstat_unlink_test_modified.c | 13 ++++++-------
- 1 file changed, 6 insertions(+), 7 deletions(-)
-
-diff --git a/src/bulkstat_unlink_test_modified.c b/src/bulkstat_unlink_test_modified.c
-index 6604992..981d80c 100644
---- a/src/bulkstat_unlink_test_modified.c
-+++ b/src/bulkstat_unlink_test_modified.c
-@@ -168,13 +168,12 @@ main(int argc, char *argv[])
- 				 genlist[j]);
- 			exit(1);
- 		    }
--		    if ((ret[i].bs_ino == inodelist[j])) {
--			if ((genlist[j] + 1) != ret[i].bs_gen) {
--				/* oops, the new gen number is not 1 bigger than the old */
--				printf("Inode with old generation %d, new generation %d\n",
--				genlist[j], ret[i].bs_gen);
--				exit(1);
--			}
-+		    if (ret[i].bs_ino == inodelist[j] &&
-+			ret[i].bs_gen != genlist[j] + 1) {
-+			/* oops, the new gen number is not 1 bigger than the old */
-+			printf("Inode with old generation %d, new generation %d\n",
-+			genlist[j], ret[i].bs_gen);
-+			exit(1);
- 		    }
- 		}
- 	    }
+diff --git a/tests/overlay/038 b/tests/overlay/038
+index 69fd76a..6079b95 100755
+--- a/tests/overlay/038
++++ b/tests/overlay/038
+@@ -48,7 +48,6 @@ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+ _require_attrs
+-_require_test_program "af_unix"
+ _require_test_program "t_dir_type"
+ 
+ rm -f $seqres.full
 -- 
-2.1.4
+2.9.5
 
