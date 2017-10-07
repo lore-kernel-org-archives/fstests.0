@@ -1,130 +1,132 @@
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:35474 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751535AbdJFLv3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 6 Oct 2017 07:51:29 -0400
+Received: from imap.thunk.org ([74.207.234.97]:46434 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752278AbdJGD30 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 6 Oct 2017 23:29:26 -0400
+Date: Fri, 6 Oct 2017 23:29:17 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] ext4: fix interaction between i_size, fallocate, and
+ delalloc after a crash
+Message-ID: <20171007032917.bntgnubthdstmrrt@thunk.org>
+References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
+ <59C8D147.1060608@cn.fujitsu.com>
+ <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
+ <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com>
+ <59D5DEE0.6080506@cn.fujitsu.com>
+ <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
+ <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
+ <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20171006092946.15718-1-chandan@linux.vnet.ibm.com>
-References: <20171006092946.15718-1-chandan@linux.vnet.ibm.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 6 Oct 2017 14:51:28 +0300
-Message-ID: <CAOQ4uxgCZUYMW0qgeSgKV7TRnTDtw=cC999RcyPTT7BcB8C+Wg@mail.gmail.com>
-Subject: Re: [PATCH] constant d_ino test for non-samefs setup
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: Ashlie Martinez <ashmrtn@utexas.edu>
+Cc: Amir Goldstein <amir73il@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 6, 2017 at 12:29 PM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-> ---
->  tests/overlay/041     | 210 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/041.out |   2 +
->  tests/overlay/group   |   1 +
->  3 files changed, 213 insertions(+)
->  create mode 100755 tests/overlay/041
->  create mode 100644 tests/overlay/041.out
->
-> diff --git a/tests/overlay/041 b/tests/overlay/041
-> new file mode 100755
-> index 0000000..b992346
-> --- /dev/null
-> +++ b/tests/overlay/041
-> @@ -0,0 +1,210 @@
-> +#! /bin/bash
-> +# FSQA Test No. 041
-> +#
-> +# Test constant d_ino numbers on non-samefs setup
+On Thu, Oct 05, 2017 at 07:34:10PM -0500, Ashlie Martinez wrote:
+> >> It almost seems that way, though to be honest, I don't think I know
+> >> enough about 1. the setup used by Amir and 2. all the internal working
+> >> of KVM+virtio to say for sure.
+> >
+> > I believe you misread my email.
+> > The problem was NOT reproduced on KVM+virtio.
+> > The problem *is* reproduced on a 10G LVM volume over SSD on
+> > Ubuntu 16.04 with latest kernel and latest e2fsprogs.
 
-Chandan,
+I was able to reproduce it using both kvm-xfstests[1] and gce-xfstests[2].
 
-Some of my comments may also apply to the origin 038 test,
-which I missed in review, starting with the description of the test -
-"Test constant d_ino numbers" is not really what this test does,
-what it really does is "Test consistent d_ino/st_ino numbers"
+[1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
+[2] https://thunk.org/gce-xfstests
 
-Also, please note in description that this is a variant of test 038,
-so if someone fixes this test, they will know to fix the origin as well.
+It did turn out to be timing related, and it requires that a journal
+commit take place after fsstress runs, but it can *not* be triggered
+by a sync/fsync (as this would cause the delayed allocation writes to
+be forced out to disk, and that makes the problem go away).
 
-BTW, it would be good, when you are done with this test to also add
-a test for "Test constant inode numbers on non-samefs setup", a variant
-of overlay/017, which also checks the st_dev assertions.
-I know you wrote these tests for unionmount testsuite, but an
-xfstest has greater value.
+I initially tried using xfs_io as a replacement for fsstress (since it
+is more flexible and would allow me to more easily run experiments),
+but it turns out xfs_io was too fast/efficient, and so using xfs_io to
+execute the same system calls (verified by strace) would not replicate
+the problem.
 
-...
+> > Now you have a broken file system image and the exact set of operations
+> > that led to it. That's should be a pretty big lead for investigation.
 
-> +
-> +_scratch_unmount &>>$seqres.full
-> +_test_unmount &>>$seqres.full
-> +
-> +$MOUNT_PROG $OVL_BASE_SCRATCH_DEV $OVL_BASE_SCRATCH_MNT
-> +$MOUNT_PROG $OVL_BASE_TEST_DEV $OVL_BASE_TEST_DIR
+It was indeed a big lead for investigation (thanks, Amir!), but it
+still took me several hours before I was finally able to figure out
+the problem.  The patch and the commit description should explain what
+was going on.
 
-FYI, OVL_BASE_SCRATCH_DEV/OVL_BASE_TEST_DEV may not be configured
-at all. Doesn't matter because you shouldn't be using those commands anyway
-(see below)
+I'll leave it to Ashlie and Vijay to investigate how to improve Crash
+Monkey so it can better find problems like this automatically.  Since
+you now have a clear reproducer (you can use generic/456 and run it on
+gce-xfstests, using is a standard cloud VM configuration) and an
+explanation of the bug and the four-line fix, I suspect this might be
+good grist for follow-on research after your Hot Storage '17 workshop
+paper.  :-)
 
-> +
-> +rm -rf $OVL_BASE_SCRATCH_MNT/*
-> +rm -rf $OVL_BASE_TEST_DIR/*
-> +
+Best regards,
 
-Wiping out TEST_DIR is not playing by the rules.
-Tests should not format TEST partition.
-You  can either use tmpfs for lower dir, like some other tests do
-or you can use a directory in BASE_TEST_DIR for lower dir, for example:
-lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
-rm -rf $lowerdir
+					- Ted
 
 
-> +lowerdir=$OVL_BASE_TEST_DIR/ovl-lower
-> +upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
-> +ovlmnt=$OVL_BASE_SCRATCH_MNT/ovl-mnt
-> +
-> +mkdir $lowerdir
-> +mkdir $upperdir
-> +mkdir $workdir
-> +mkdir $ovlmnt
-> +
+commit 3912e7b44cf77e9452d4d0cb6c1da9c7043bb7f1
+Author: Theodore Ts'o <tytso@mit.edu>
+Date:   Fri Oct 6 23:09:55 2017 -0400
 
-All of the operations above with SCRATCH partition beginning with
-_scratch_unmount should be replaced with a single command that
-does exactly what you re-implemented:
+    ext4: fix interaction between i_size, fallocate, and delalloc after a crash
+    
+    If there are pending writes subject to delayed allocation, then i_size
+    will show size after the writes have completed, while i_disksize
+    contains the value of i_size on the disk (since the writes have not
+    been persisted to disk).
+    
+    If fallocate(2) is called with the FALLOC_FL_KEEP_SIZE flag, either
+    with or without the FALLOC_FL_ZERO_RANGE flag set, and the new size
+    after the fallocate(2) is between i_size and i_disksize, then after a
+    crash, if a journal commit has resulted in the changes made by the
+    fallocate() call to be persisted after a crash, but the delayed
+    allocation write has not resolved itself, i_size would not be updated,
+    and this would cause the following e2fsck complaint:
+    
+    Inode 12, end of extent exceeds allowed value
+            (logical block 33, physical block 33441, len 7)
+    
+    This can only take place on a sparse file, where the fallocate(2) call
+    is allocating blocks in a range which is before a pending delayed
+    allocation write which is extending i_size.  Since this situation is
+    quite rare, and the window in which the crash must take place is
+    typically < 30 seconds, in practice this condition will rarely happen.
+    
+    Nevertheless, it can be triggered in testing, and in particular by
+    xfstests generic/456.
+    
+    Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+    Reported-by: Amir Goldstein <amir73il@gmail.com>
+    Cc: stable@vger.kernel.org
 
-_scratch_mkfs
-
-> +# Create our test files.
-> +mkdir $lowerdir/test_dir/
-> +mkdir $lowerdir/test_dir/pure_lower_dir
-> +mkdir $lowerdir/test_dir/merged_dir
-> +
-> +touch $lowerdir/test_file
-> +
-> +$MOUNT_PROG -t overlay overlay -o lowerdir=$lowerdir \
-> +           -o upperdir=$upperdir -o workdir=$workdir $ovlmnt
-> +
-
-This should be using _overlay_mount_dirs()
-I already fixed this for overlay/038 on my overlayfs-devel branch
-that was posted for review last week.
-
-...
-
-> +
-> +chown -h 100 $ovlmnt/test_file
-
-This chown looks like a leftover from test overlay/017
-Not sure what is the role it is playing in this test, unless
-I am missing something (mv will already copy up test_file).
-Same comment applies to test 038.
-
-> +test_file_st_ino=$(stat -c '%i' $ovlmnt/test_file)
-> +
-> +mv $ovlmnt/test_file $impure_dir
-> +
-
-Thanks,
-Amir.
+diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
+index 97f0fd06728d..07bca11749d4 100644
+--- a/fs/ext4/extents.c
++++ b/fs/ext4/extents.c
+@@ -4794,7 +4794,8 @@ static long ext4_zero_range(struct file *file, loff_t offset,
+ 	}
+ 
+ 	if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+-	     offset + len > i_size_read(inode)) {
++	    (offset + len > i_size_read(inode) ||
++	     offset + len > EXT4_I(inode)->i_disksize)) {
+ 		new_size = offset + len;
+ 		ret = inode_newsize_ok(inode, new_size);
+ 		if (ret)
+@@ -4965,7 +4966,8 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
+ 	}
+ 
+ 	if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+-	     offset + len > i_size_read(inode)) {
++	    (offset + len > i_size_read(inode) ||
++	     offset + len > EXT4_I(inode)->i_disksize)) {
+ 		new_size = offset + len;
+ 		ret = inode_newsize_ok(inode, new_size);
+ 		if (ret)
