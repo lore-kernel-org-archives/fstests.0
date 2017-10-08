@@ -1,39 +1,34 @@
-Received: from imap.thunk.org ([74.207.234.97]:49634 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753408AbdJHT1t (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 8 Oct 2017 15:27:49 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] ext4: skip project quota tests if the kernel does not support them
-Date: Sun,  8 Oct 2017 15:27:46 -0400
-Message-Id: <20171008192746.20709-1-tytso@mit.edu>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:3570 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751241AbdJHVkF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2017 17:40:05 -0400
+Date: Mon, 9 Oct 2017 08:40:02 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH V2] Consistent d_ino test for non-samefs setup
+Message-ID: <20171008214002.GT15067@dastard>
+References: <20171008112558.19061-1-chandan@linux.vnet.ibm.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171008112558.19061-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: fstests@vger.kernel.org, amir73il@gmail.com, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-In _scratch_enable_pquota, use _notrun if the file system with project
-quotas enable can't be mounted, since that indicates the kernel
-doesn't support that feature.
+On Sun, Oct 08, 2017 at 04:55:58PM +0530, Chandan Rajendra wrote:
+> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/quota | 3 +++
- 1 file changed, 3 insertions(+)
+Can you please describe the test, what bug it's addressing, what a
+"non-samefs" configuration is, etc in the commit message? 
 
-diff --git a/common/quota b/common/quota
-index f49728c2..d027a8c1 100644
---- a/common/quota
-+++ b/common/quota
-@@ -119,6 +119,9 @@ _scratch_enable_pquota()
- 	[ "$FSTYP" != "ext4" ] && return
- 
- 	tune2fs -O quota,project $SCRATCH_DEV >>$seqres.full 2>&1
-+	_scratch_mount >/dev/null 2>&1 \
-+		|| _notrun "kernel doesn't support project feature on $FSTYP"
-+	_scratch_unmount
- }
- 
- #
+I've got absolutely no clue what this test is actually trying to
+exercise, and I doubt anyone not intimately familiar with overlay
+has any idea, either...
+
+Cheers,
+
+Dave.
 -- 
-2.11.0.rc0.7.gbe5a750
-
+Dave Chinner
+david@fromorbit.com
