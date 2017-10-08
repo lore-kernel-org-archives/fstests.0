@@ -1,35 +1,39 @@
-Received: from imap.thunk.org ([74.207.234.97]:49620 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:49634 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753408AbdJHTXb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 8 Oct 2017 15:23:31 -0400
+        id S1753408AbdJHT1t (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 8 Oct 2017 15:27:49 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] ext4/026: skip test if kernel does not support the ea_inode feature
-Date: Sun,  8 Oct 2017 15:23:24 -0400
-Message-Id: <20171008192324.20477-1-tytso@mit.edu>
+Subject: [PATCH] ext4: skip project quota tests if the kernel does not support them
+Date: Sun,  8 Oct 2017 15:27:46 -0400
+Message-Id: <20171008192746.20709-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
+In _scratch_enable_pquota, use _notrun if the file system with project
+quotas enable can't be mounted, since that indicates the kernel
+doesn't support that feature.
+
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
- tests/ext4/026 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ common/quota | 3 +++
+ 1 file changed, 3 insertions(+)
 
-diff --git a/tests/ext4/026 b/tests/ext4/026
-index 94a737ce..ba77f36e 100755
---- a/tests/ext4/026
-+++ b/tests/ext4/026
-@@ -53,7 +53,8 @@ _require_attrs
- _require_ext4_mkfs_feature ea_inode
+diff --git a/common/quota b/common/quota
+index f49728c2..d027a8c1 100644
+--- a/common/quota
++++ b/common/quota
+@@ -119,6 +119,9 @@ _scratch_enable_pquota()
+ 	[ "$FSTYP" != "ext4" ] && return
  
- _scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
--_scratch_mount
-+_scratch_mount >/dev/null 2>&1 \
-+	|| _notrun "kernel doesn't support ea_inode feature on $FSTYP"
+ 	tune2fs -O quota,project $SCRATCH_DEV >>$seqres.full 2>&1
++	_scratch_mount >/dev/null 2>&1 \
++		|| _notrun "kernel doesn't support project feature on $FSTYP"
++	_scratch_unmount
+ }
  
- # Sets an extended attribute on a file.
- attr_set()
+ #
 -- 
 2.11.0.rc0.7.gbe5a750
 
