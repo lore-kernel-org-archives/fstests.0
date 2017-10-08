@@ -1,23 +1,70 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:38011 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751457AbdJHJES (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2017 05:04:18 -0400
-Date: Sun, 8 Oct 2017 02:04:18 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v2] bulkstat_unlink_test_modified: Remove extraneous if
- statement
-Message-ID: <20171008090418.GB22995@infradead.org>
-References: <20171005194629.GA21115@infradead.org>
- <1507278319-17380-1-git-send-email-rostislav@tuxera.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1507278319-17380-1-git-send-email-rostislav@tuxera.com>
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:33812 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751651AbdJHLY5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2017 07:24:57 -0400
+Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id v98BNml5011425
+        for <fstests@vger.kernel.org>; Sun, 8 Oct 2017 07:24:56 -0400
+Received: from e15.ny.us.ibm.com (e15.ny.us.ibm.com [129.33.205.205])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2dey8f1tvs-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Sun, 08 Oct 2017 07:24:56 -0400
+Received: from localhost
+        by e15.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Sun, 8 Oct 2017 07:24:55 -0400
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] overlay/038: Miscellaneous fixes
+Date: Sun,  8 Oct 2017 16:55:35 +0530
+Message-Id: <20171008112535.18975-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Rostislav Skudnov <rostislav@tuxera.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, amir73il@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Looks good,
+This commit removes the redundant chown operation which was supposed to
+cause the test file to be copied up. Also, _overlay_scratch_unmount() is
+used to unmount the overlay filesystem rather than invoking $UMOUNT_PROG.
 
-Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+ tests/overlay/038 | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
+
+diff --git a/tests/overlay/038 b/tests/overlay/038
+index 57281fa..148995b 100755
+--- a/tests/overlay/038
++++ b/tests/overlay/038
+@@ -1,7 +1,7 @@
+ #! /bin/bash
+ # FSQA Test No. 038
+ #
+-# Test constant d_ino numbers
++# Test consistent d_ino numbers for samefs setup.
+ #
+ #-----------------------------------------------------------------------
+ #
+@@ -102,10 +102,8 @@ current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
+ [[ $current_d == ". d" ]] || \
+     echo "Before dir becomes impure: Invalid d_ino reported for ."
+ 
+-chown -h 100 $SCRATCH_MNT/test_file
+-test_file_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_file)
+-
+ mv $SCRATCH_MNT/test_file $impure_dir
++test_file_st_ino=$(stat -c '%i' $impure_dir/test_file)
+ 
+ impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
+ 			$upperdir/test_dir/impure_dir)
+@@ -187,7 +185,7 @@ parent_d=$($here/src/t_dir_type $SCRATCH_MNT/test_dir/pure_lower_dir $test_dir_s
+ [[ $parent_d == ".. d" ]] || \
+ 	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for .."
+ 
+-$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_unmount
+ 
+ echo "Silence is golden"
+ status=0
+-- 
+2.9.5
+
