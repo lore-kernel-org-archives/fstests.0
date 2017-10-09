@@ -1,58 +1,141 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:16485 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751230AbdJHWki (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2017 18:40:38 -0400
-Date: Mon, 9 Oct 2017 09:40:10 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] ext4/026: skip test if kernel does not support the
- ea_inode feature
-Message-ID: <20171008224010.GY15067@dastard>
-References: <20171008192324.20477-1-tytso@mit.edu>
- <20171008214117.GU15067@dastard>
- <20171008215110.qxhel7nkcsifybu2@thunk.org>
+Received: from mail-vk0-f48.google.com ([209.85.213.48]:46548 "EHLO
+        mail-vk0-f48.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751489AbdJIAhi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Oct 2017 20:37:38 -0400
+Received: by mail-vk0-f48.google.com with SMTP id k123so1402251vkb.3
+        for <fstests@vger.kernel.org>; Sun, 08 Oct 2017 17:37:38 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171008215110.qxhel7nkcsifybu2@thunk.org>
+In-Reply-To: <20171007032917.bntgnubthdstmrrt@thunk.org>
+References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
+ <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
+ <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com>
+ <59D5DEE0.6080506@cn.fujitsu.com> <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
+ <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
+ <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com> <20171007032917.bntgnubthdstmrrt@thunk.org>
+From: Ashlie Martinez <ashmrtn@utexas.edu>
+Date: Sun, 8 Oct 2017 19:37:37 -0500
+Message-ID: <CAFk8rvY1M3NJ=h=i5YtKu+5H7Q9wNR0CLO21fuNYz=X7i4LeQA@mail.gmail.com>
+Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
+ delalloc after a crash
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Ext4 Developers List <linux-ext4@vger.kernel.org>
+Cc: Amir Goldstein <amir73il@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Oct 08, 2017 at 05:51:10PM -0400, Theodore Ts'o wrote:
-> On Mon, Oct 09, 2017 at 08:41:17AM +1100, Dave Chinner wrote:
-> > On Sun, Oct 08, 2017 at 03:23:24PM -0400, Theodore Ts'o wrote:
-> > > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > > ---
-> > >  tests/ext4/026 | 3 ++-
-> > >  1 file changed, 2 insertions(+), 1 deletion(-)
-> > > 
-> > > diff --git a/tests/ext4/026 b/tests/ext4/026
-> > > index 94a737ce..ba77f36e 100755
-> > > --- a/tests/ext4/026
-> > > +++ b/tests/ext4/026
-> > > @@ -53,7 +53,8 @@ _require_attrs
-> > >  _require_ext4_mkfs_feature ea_inode
-> > >  
-> > >  _scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
-> > > -_scratch_mount
-> > > +_scratch_mount >/dev/null 2>&1 \
-> > > +	|| _notrun "kernel doesn't support ea_inode feature on $FSTYP"
-> > 
-> > Needs to be in a _requires check?
-> 
-> There's only one test currently testing ea_inode at the moment, but
-> sure, I can make it into a _requires check.
+Ted,
 
-I note there's a _require_ext4_mkfs_feature check above. Perhaps
-just turn that into a _require_ext4_feature that checks both mkfs
-and whether the kernel supports the functionality? That's typically
-what we've done in the past - one _require rule to check all
-aspects of support needed to use the feature...
+Thanks for looking into this more. The information about what was
+causing the output Amir saw will certainly help us improve CrashMonkey
+so we can detect bugs better in the future!
 
-Cheers,
+Best,
+Ashlie
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+On Fri, Oct 6, 2017 at 10:29 PM, Theodore Ts'o <tytso@mit.edu> wrote:
+> On Thu, Oct 05, 2017 at 07:34:10PM -0500, Ashlie Martinez wrote:
+>> >> It almost seems that way, though to be honest, I don't think I know
+>> >> enough about 1. the setup used by Amir and 2. all the internal working
+>> >> of KVM+virtio to say for sure.
+>> >
+>> > I believe you misread my email.
+>> > The problem was NOT reproduced on KVM+virtio.
+>> > The problem *is* reproduced on a 10G LVM volume over SSD on
+>> > Ubuntu 16.04 with latest kernel and latest e2fsprogs.
+>
+> I was able to reproduce it using both kvm-xfstests[1] and gce-xfstests[2].
+>
+> [1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
+> [2] https://thunk.org/gce-xfstests
+>
+> It did turn out to be timing related, and it requires that a journal
+> commit take place after fsstress runs, but it can *not* be triggered
+> by a sync/fsync (as this would cause the delayed allocation writes to
+> be forced out to disk, and that makes the problem go away).
+>
+> I initially tried using xfs_io as a replacement for fsstress (since it
+> is more flexible and would allow me to more easily run experiments),
+> but it turns out xfs_io was too fast/efficient, and so using xfs_io to
+> execute the same system calls (verified by strace) would not replicate
+> the problem.
+>
+>> > Now you have a broken file system image and the exact set of operations
+>> > that led to it. That's should be a pretty big lead for investigation.
+>
+> It was indeed a big lead for investigation (thanks, Amir!), but it
+> still took me several hours before I was finally able to figure out
+> the problem.  The patch and the commit description should explain what
+> was going on.
+>
+> I'll leave it to Ashlie and Vijay to investigate how to improve Crash
+> Monkey so it can better find problems like this automatically.  Since
+> you now have a clear reproducer (you can use generic/456 and run it on
+> gce-xfstests, using is a standard cloud VM configuration) and an
+> explanation of the bug and the four-line fix, I suspect this might be
+> good grist for follow-on research after your Hot Storage '17 workshop
+> paper.  :-)
+>
+> Best regards,
+>
+>                                         - Ted
+>
+>
+> commit 3912e7b44cf77e9452d4d0cb6c1da9c7043bb7f1
+> Author: Theodore Ts'o <tytso@mit.edu>
+> Date:   Fri Oct 6 23:09:55 2017 -0400
+>
+>     ext4: fix interaction between i_size, fallocate, and delalloc after a crash
+>
+>     If there are pending writes subject to delayed allocation, then i_size
+>     will show size after the writes have completed, while i_disksize
+>     contains the value of i_size on the disk (since the writes have not
+>     been persisted to disk).
+>
+>     If fallocate(2) is called with the FALLOC_FL_KEEP_SIZE flag, either
+>     with or without the FALLOC_FL_ZERO_RANGE flag set, and the new size
+>     after the fallocate(2) is between i_size and i_disksize, then after a
+>     crash, if a journal commit has resulted in the changes made by the
+>     fallocate() call to be persisted after a crash, but the delayed
+>     allocation write has not resolved itself, i_size would not be updated,
+>     and this would cause the following e2fsck complaint:
+>
+>     Inode 12, end of extent exceeds allowed value
+>             (logical block 33, physical block 33441, len 7)
+>
+>     This can only take place on a sparse file, where the fallocate(2) call
+>     is allocating blocks in a range which is before a pending delayed
+>     allocation write which is extending i_size.  Since this situation is
+>     quite rare, and the window in which the crash must take place is
+>     typically < 30 seconds, in practice this condition will rarely happen.
+>
+>     Nevertheless, it can be triggered in testing, and in particular by
+>     xfstests generic/456.
+>
+>     Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+>     Reported-by: Amir Goldstein <amir73il@gmail.com>
+>     Cc: stable@vger.kernel.org
+>
+> diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
+> index 97f0fd06728d..07bca11749d4 100644
+> --- a/fs/ext4/extents.c
+> +++ b/fs/ext4/extents.c
+> @@ -4794,7 +4794,8 @@ static long ext4_zero_range(struct file *file, loff_t offset,
+>         }
+>
+>         if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+> -            offset + len > i_size_read(inode)) {
+> +           (offset + len > i_size_read(inode) ||
+> +            offset + len > EXT4_I(inode)->i_disksize)) {
+>                 new_size = offset + len;
+>                 ret = inode_newsize_ok(inode, new_size);
+>                 if (ret)
+> @@ -4965,7 +4966,8 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
+>         }
+>
+>         if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+> -            offset + len > i_size_read(inode)) {
+> +           (offset + len > i_size_read(inode) ||
+> +            offset + len > EXT4_I(inode)->i_disksize)) {
+>                 new_size = offset + len;
+>                 ret = inode_newsize_ok(inode, new_size);
+>                 if (ret)
