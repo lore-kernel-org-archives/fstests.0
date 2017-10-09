@@ -1,42 +1,58 @@
-Received: from mail-qt0-f194.google.com ([209.85.216.194]:36259 "EHLO
-        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751635AbdJIFpo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 9 Oct 2017 01:45:44 -0400
+Received: from mail-qt0-f193.google.com ([209.85.216.193]:34899 "EHLO
+        mail-qt0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751635AbdJIGAU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Oct 2017 02:00:20 -0400
 MIME-Version: 1.0
-In-Reply-To: <20171008214002.GT15067@dastard>
-References: <20171008112558.19061-1-chandan@linux.vnet.ibm.com> <20171008214002.GT15067@dastard>
+In-Reply-To: <20171008224010.GY15067@dastard>
+References: <20171008192324.20477-1-tytso@mit.edu> <20171008214117.GU15067@dastard>
+ <20171008215110.qxhel7nkcsifybu2@thunk.org> <20171008224010.GY15067@dastard>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 9 Oct 2017 08:45:43 +0300
-Message-ID: <CAOQ4uxjg7pq66xyOotNeTUYTpourRHpLTmK1nQN7DWxN96Fh8A@mail.gmail.com>
-Subject: Re: [PATCH V2] Consistent d_ino test for non-samefs setup
+Date: Mon, 9 Oct 2017 09:00:18 +0300
+Message-ID: <CAOQ4uxgHY+yyOcFX2mtWHX3oz9rtSidLM1_Ni3q-Lw-DcnHxLA@mail.gmail.com>
+Subject: Re: [PATCH] ext4/026: skip test if kernel does not support the
+ ea_inode feature
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, Ext4 Developers List <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 9, 2017 at 12:40 AM, Dave Chinner <david@fromorbit.com> wrote:
-> On Sun, Oct 08, 2017 at 04:55:58PM +0530, Chandan Rajendra wrote:
->> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+On Mon, Oct 9, 2017 at 1:40 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Sun, Oct 08, 2017 at 05:51:10PM -0400, Theodore Ts'o wrote:
+>> On Mon, Oct 09, 2017 at 08:41:17AM +1100, Dave Chinner wrote:
+>> > On Sun, Oct 08, 2017 at 03:23:24PM -0400, Theodore Ts'o wrote:
+>> > > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+>> > > ---
+>> > >  tests/ext4/026 | 3 ++-
+>> > >  1 file changed, 2 insertions(+), 1 deletion(-)
+>> > >
+>> > > diff --git a/tests/ext4/026 b/tests/ext4/026
+>> > > index 94a737ce..ba77f36e 100755
+>> > > --- a/tests/ext4/026
+>> > > +++ b/tests/ext4/026
+>> > > @@ -53,7 +53,8 @@ _require_attrs
+>> > >  _require_ext4_mkfs_feature ea_inode
+>> > >
+>> > >  _scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
+>> > > -_scratch_mount
+>> > > +_scratch_mount >/dev/null 2>&1 \
+>> > > + || _notrun "kernel doesn't support ea_inode feature on $FSTYP"
+>> >
+>> > Needs to be in a _requires check?
+>>
+>> There's only one test currently testing ea_inode at the moment, but
+>> sure, I can make it into a _requires check.
 >
-> Can you please describe the test, what bug it's addressing, what a
-> "non-samefs" configuration is, etc in the commit message?
+> I note there's a _require_ext4_mkfs_feature check above. Perhaps
+> just turn that into a _require_ext4_feature that checks both mkfs
+> and whether the kernel supports the functionality? That's typically
+> what we've done in the past - one _require rule to check all
+> aspects of support needed to use the feature...
 >
 
-Chandan I suggest that you include the elaborate description
-That was part of 038 commit message in both test descriptions.
 
-To be clear, please State the goal of this test is to verify that
-Inode numbers returned by readdir d_ino are consistent with
-Inode numbers returned by stat st_ino in all the listed cases.
-
-> I've got absolutely no clue what this test is actually trying to
-> exercise, and I doubt anyone not intimately familiar with overlay
-> has any idea, either...
->
-> Cheers,
->
-> Dave.
-> --
-> Dave Chinner
-> david@fromorbit.com
+At the time when I introduced _require_scratch_overlay_feature Eryu
+requested that I make it generic , so please hook
+_require_scratch_ext4_feature to the generic helper.
+Btw there is a cleanup patch factoring out
+_require_scratch_overlay_feature helper which has not been merged yet
