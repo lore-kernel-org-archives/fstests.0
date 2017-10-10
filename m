@@ -1,90 +1,33 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:48445 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756234AbdJJOz2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2017 10:55:28 -0400
-Received: by mail-wm0-f66.google.com with SMTP id i124so5929454wmf.3
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2017 07:55:27 -0700 (PDT)
-From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 1/3] common/rc: move _filter_xfs_dmesg() to common/rc
-Date: Tue, 10 Oct 2017 16:54:56 +0200
-Message-Id: <1507647298-9971-2-git-send-email-idryomov@gmail.com>
-In-Reply-To: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
-References: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:53841 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932484AbdJJRV3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2017 13:21:29 -0400
+Received: by mail-qt0-f180.google.com with SMTP id n61so25498390qte.10
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2017 10:21:29 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH 0/2] Add fio performance tracking to fstests
+Date: Tue, 10 Oct 2017 13:21:23 -0400
+Message-Id: <1507656085-17101-1-git-send-email-josef@toxicpanda.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Lukas Czerner <lczerner@redhat.com>
+To: kernel-team@fb.com, fstests@vger.kernel.org, david@fromorbit.com, tytso@mit.edu
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
----
- common/rc  | 23 +++++++++++++++++++++++
- common/xfs | 22 ----------------------
- 2 files changed, 23 insertions(+), 22 deletions(-)
+Everybody agrees that a new project for performance testing is not super useful,
+and that it would be better to integrate it into something we all already run.
+These two patches take what was fsperf and puts it into fstests proper.  This
+provides better flexibility for test environments, and at least gets us started
+towards adding more of these sort of tests into our day to day activities.
 
-diff --git a/common/rc b/common/rc
-index 53bbb1187f81..e15c8fc27405 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2027,6 +2027,29 @@ _run_aiodio()
-     return $status
- }
- 
-+# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
-+# direct IO on the same file. This is a helper for _check_dmesg() to filter out
-+# such warnings.
-+_filter_xfs_dmesg()
-+{
-+	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
-+	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
-+	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
-+	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
-+	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
-+	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
-+	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
-+	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
-+	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
-+	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
-+	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
-+	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
-+	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
-+	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
-+	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
-+	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#"
-+}
-+
- # this test requires y2038 sysfs switch and filesystem
- # timestamp ranges support.
- _require_y2038()
-diff --git a/common/xfs b/common/xfs
-index 93eb50394984..d4fef941d321 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -599,25 +599,3 @@ _require_no_xfs_debug()
- 		_notrun "Require XFS built without CONFIG_XFS_DEBUG"
- 	fi
- }
--# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
--# direct IO on the same file. This is a helper for _check_dmesg() to filter out
--# such warnings.
--_filter_xfs_dmesg()
--{
--	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
--	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
--	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
--	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
--	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
--	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
--	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
--	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
--	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
--	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
--	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
--	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
--	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
--	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
--	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
--	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#"
--}
--- 
-2.4.3
+The only thing extra to run these tests is the PERF_CONFIGNAME option that must
+be specified in order for the perf tests to be run.  We need this (or something
+like it) to make sure that we compare runs that have similar setups so that we
+don't end up failing because we did one run with NVME but the next run with
+SATA.
 
+I've only added one of the fio tests from fsperf because I want to make sure
+we're all happy with the generic support that I've added.  Once these are merged
+I'll send the next tests along and rework how we do comparisons so we're
+comparing averages of previous runs instead of just whatever the last run was.
+Thanks,
+
+Josef
