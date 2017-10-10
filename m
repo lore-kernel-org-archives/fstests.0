@@ -1,13 +1,13 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:54686 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751385AbdJJOz3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2017 10:55:29 -0400
-Received: by mail-wm0-f67.google.com with SMTP id i124so6141607wmf.3
-        for <fstests@vger.kernel.org>; Tue, 10 Oct 2017 07:55:28 -0700 (PDT)
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:48445 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1756234AbdJJOz2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Oct 2017 10:55:28 -0400
+Received: by mail-wm0-f66.google.com with SMTP id i124so5929454wmf.3
+        for <fstests@vger.kernel.org>; Tue, 10 Oct 2017 07:55:27 -0700 (PDT)
 From: Ilya Dryomov <idryomov@gmail.com>
-Subject: [PATCH 2/3] common/rc: turn _filter_xfs_dmesg() into _filter_aiodio_dmesg()
-Date: Tue, 10 Oct 2017 16:54:57 +0200
-Message-Id: <1507647298-9971-3-git-send-email-idryomov@gmail.com>
+Subject: [PATCH 1/3] common/rc: move _filter_xfs_dmesg() to common/rc
+Date: Tue, 10 Oct 2017 16:54:56 +0200
+Message-Id: <1507647298-9971-2-git-send-email-idryomov@gmail.com>
 In-Reply-To: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
 References: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,139 +15,76 @@ To: fstests@vger.kernel.org
 Cc: Lukas Czerner <lczerner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-With upstream commit 332391a9935d ("fs: Fix page cache inconsistency
-when mixing buffered and AIO DIO"), ext4 (and probably other non-iomap
-based filesystems) need a _check_dmesg() whitelist entry for a new WARN
-in dio_complete() -- generic/095 and 247 trigger a dio_complete() splat
-pretty reliably for me.
-
-Add dio_complete() entry to _filter_xfs_dmesg(), rename it and use it
-unconditionally in generic/095, 224, 247 and 446.
-
 Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
 ---
- common/rc         | 8 +++++---
- tests/generic/095 | 7 ++-----
- tests/generic/224 | 9 +++------
- tests/generic/247 | 9 +++------
- tests/generic/446 | 9 +++------
- 5 files changed, 16 insertions(+), 26 deletions(-)
+ common/rc  | 23 +++++++++++++++++++++++
+ common/xfs | 22 ----------------------
+ 2 files changed, 23 insertions(+), 22 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index e15c8fc27405..03d2a9cd2484 100644
+index 53bbb1187f81..e15c8fc27405 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -2027,10 +2027,10 @@ _run_aiodio()
+@@ -2027,6 +2027,29 @@ _run_aiodio()
      return $status
  }
  
--# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
-+# We generate WARNINGs on purpose when applications mix buffered/mmap IO with
- # direct IO on the same file. This is a helper for _check_dmesg() to filter out
- # such warnings.
--_filter_xfs_dmesg()
-+_filter_aiodio_dmesg()
- {
- 	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
- 	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
-@@ -2040,6 +2040,7 @@ _filter_xfs_dmesg()
- 	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
- 	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
- 	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
-+	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
- 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
- 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
- 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
-@@ -2047,7 +2048,8 @@ _filter_xfs_dmesg()
- 	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
- 	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
- 	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
--	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#"
-+	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
-+	    -e "s#$warn9#Intentional warnings in dio_complete#"
- }
- 
++# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
++# direct IO on the same file. This is a helper for _check_dmesg() to filter out
++# such warnings.
++_filter_xfs_dmesg()
++{
++	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
++	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
++	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
++	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
++	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
++	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
++	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
++	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
++	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
++	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
++	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
++	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
++	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
++	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
++	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
++	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#"
++}
++
  # this test requires y2038 sysfs switch and filesystem
-diff --git a/tests/generic/095 b/tests/generic/095
-index 050215d41700..fd4f13fd0a1b 100755
---- a/tests/generic/095
-+++ b/tests/generic/095
-@@ -126,10 +126,7 @@ $FIO_PROG $fio_config >>$seqres.full 2>&1
- # umount before checking dmesg in case umount triggers any WARNING or Oops
- _scratch_unmount
- 
--if [ "$FSTYP" == "xfs" ]; then
--	_check_dmesg _filter_xfs_dmesg
--else
--	_check_dmesg
--fi
-+_check_dmesg _filter_aiodio_dmesg
-+
- status=$?
- exit
-diff --git a/tests/generic/224 b/tests/generic/224
-index 29b1c05d06df..6b3a81536aa8 100755
---- a/tests/generic/224
-+++ b/tests/generic/224
-@@ -83,13 +83,10 @@ done
- wait
- echo "*** Silence is golden ***"
- 
--# unmount and check dmesg, filtering out expected XFS warnings about mixed
-+# unmount and check dmesg, filtering out expected warnings about mixed
- # direct and buffered I/O
- _scratch_unmount
--if [ "$FSTYP" == "xfs" ]; then
--	_check_dmesg _filter_xfs_dmesg
--else
--	_check_dmesg
--fi
-+_check_dmesg _filter_aiodio_dmesg
-+
- status=$?
- exit
-diff --git a/tests/generic/247 b/tests/generic/247
-index aac7078045ee..0614100cd7a8 100755
---- a/tests/generic/247
-+++ b/tests/generic/247
-@@ -80,13 +80,10 @@ wait
- 
- echo "Silence is golden."
- 
--# unmount and check dmesg, filtering out expected XFS warnings about mixed
-+# unmount and check dmesg, filtering out expected warnings about mixed
- # mmap/dio
- _test_unmount
--if [ "$FSTYP" == "xfs" ]; then
--	_check_dmesg _filter_xfs_dmesg
--else
--	_check_dmesg
--fi
-+_check_dmesg _filter_aiodio_dmesg
-+
- status=$?
- exit
-diff --git a/tests/generic/446 b/tests/generic/446
-index 6a1b69aa2edc..01228322911e 100755
---- a/tests/generic/446
-+++ b/tests/generic/446
-@@ -79,13 +79,10 @@ wait $dread_pid > /dev/null 2>&1
- 
- echo "Silence is golden"
- 
--# check dmesg, filtering out expected XFS warnings about mixed mmap/dio
-+# check dmesg, filtering out expected warnings about mixed mmap/dio
- # and umount first in case umount triggers warnings
- _scratch_unmount
--if [ "$FSTYP" == "xfs" ]; then
--	_check_dmesg _filter_xfs_dmesg
--else
--	_check_dmesg
--fi
-+_check_dmesg _filter_aiodio_dmesg
-+
- status=$?
- exit
+ # timestamp ranges support.
+ _require_y2038()
+diff --git a/common/xfs b/common/xfs
+index 93eb50394984..d4fef941d321 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -599,25 +599,3 @@ _require_no_xfs_debug()
+ 		_notrun "Require XFS built without CONFIG_XFS_DEBUG"
+ 	fi
+ }
+-# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
+-# direct IO on the same file. This is a helper for _check_dmesg() to filter out
+-# such warnings.
+-_filter_xfs_dmesg()
+-{
+-	local warn1="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_write.*"
+-	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
+-	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
+-	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
+-	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
+-	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
+-	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+-	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
+-	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+-	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+-	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+-	    -e "s#$warn4#Intentional warnings in xfs_file_aio_read#" \
+-	    -e "s#$warn5#Intentional warnings in iomap_dio_rw#" \
+-	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
+-	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
+-	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#"
+-}
 -- 
 2.4.3
 
