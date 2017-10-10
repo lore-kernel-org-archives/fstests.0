@@ -1,374 +1,101 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59450 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:13034 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932224AbdJJOCR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Oct 2017 10:02:17 -0400
-Date: Tue, 10 Oct 2017 10:02:09 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v2 2/2] generic: test race when checking i_size on direct
- i/o read
-Message-ID: <20171010140209.GD24506@bfoster.bfoster>
-References: <20171010074208.15389-1-eguan@redhat.com>
- <20171010074208.15389-2-eguan@redhat.com>
+        id S1751384AbdJJOnP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 10 Oct 2017 10:43:15 -0400
+Reply-To: sandeen@redhat.com
+Subject: Re: [lkp-robot] [fs] 332391a993:
+ WARNING:at_fs/iomap.c:#iomap_dio_complete
+References: <20171010121627.GD5445@yexl-desktop>
+ <x49bmlf5au9.fsf@segfault.boston.devel.redhat.com>
+From: Eric Sandeen <esandeen@redhat.com>
+Message-ID: <d147de56-a36b-2ce3-202d-a8c1a6d28bd7@redhat.com>
+Date: Tue, 10 Oct 2017 09:43:14 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171010074208.15389-2-eguan@redhat.com>
+In-Reply-To: <x49bmlf5au9.fsf@segfault.boston.devel.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Zheng Liu <wenqing.lz@taobao.com>, Eric Sandeen <sandeen@redhat.com>
+To: Jeff Moyer <jmoyer@redhat.com>, kernel test robot <xiaolong.ye@intel.com>
+Cc: Lukas Czerner <lczerner@redhat.com>, Jens Axboe <axboe@kernel.dk>, Jan Kara <jack@suse.cz>, "Darrick J. Wong" <darrick.wong@oracle.com>, LKML <linux-kernel@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, lkp@01.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 10, 2017 at 03:42:08PM +0800, Eryu Guan wrote:
-> From: Zheng Liu <wenqing.lz@taobao.com>
-> 
-> In this commit a new test case is added to test that i_size races
-> don't occur under dio reads/writes.  We add a program in /src dir,
-> which has a writer to issue some append dio writes.  Meanwhile it
-> has a reader in this test to do some dio reads.  As we expect,
-> reader should read nothing or data with 'a'. But it might read some
-> data with '0'.
-> 
-> The bug can be reproduced by this test case [1].
-> 
-> 1.  http://patchwork.ozlabs.org/patch/311761/
-> 
-> This ostensibly tests commit:
-> 9fe55eea7 Fix race when checking i_size on direct i/o read
-> 
-> Update by Eric Sandeen:
-> - update to recent xfstests
-> - update commit log
-> 
-> Update by Eryu Guan:
-> - add aio-dio support to the test and add 'aio' group
-> - add ability to test different alignments
-> - move test from src/ to src/aio-dio-regress/
-> - add .gitignore entry
-> - rebase against latest xfstests with various minor fixes & cleanups
-> - update commit log
-> 
-> Signed-off-by: Zheng Liu <wenqing.lz@taobao.com>
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> v2:
-> - start background reader in a thread first then start writer only after
->   reader starts issuing reads
-> 
-> Confirmed that v2 still reproduces the bug reliably with unpatched
-> kernel and test passed with v4.14-rc3 kernel. 
-> 
-> Eric's original post
-> http://www.spinics.net/lists/fstests/msg06978.html
-> 
->  .gitignore                                         |   1 +
->  .../aio-dio-append-write-read-race.c               | 230 +++++++++++++++++++++
->  tests/generic/464                                  |  75 +++++++
->  tests/generic/464.out                              |   3 +
->  tests/generic/group                                |   1 +
->  5 files changed, 310 insertions(+)
->  create mode 100644 src/aio-dio-regress/aio-dio-append-write-read-race.c
->  create mode 100755 tests/generic/464
->  create mode 100644 tests/generic/464.out
-> 
-...
-> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/aio-dio-regress/aio-dio-append-write-read-race.c
-> new file mode 100644
-> index 000000000000..2956599c1474
-> --- /dev/null
-> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
-> @@ -0,0 +1,230 @@
-...
-> +static void *reader(void *arg)
-> +{
-> +	struct io_data *data = (struct io_data *)arg;
-> +	int ret;
-> +
-> +	memset(data->buf, 'b', data->blksize);
-> +	do {
-> +		ret = pread(data->fd, data->buf, data->blksize, data->offset);
-> +		if (ret < 0)
-> +			perror("read file");
-> +		if (!reader_ready)
-> +			reader_ready = 1;
 
-Hmm, this looks potentially racy with the associated reader_ready = 0
-down in writer(). Once writer() executes, suppose it resets
-reader_read, then reader() reads the data, resets reader_ready = 1 and
-exits. ISTM reader_ready would incorrectly == 1 the next time around the
-loop.
 
-I think it's fine to set reader_ready = 1 after the memset(). Then just
-reinit it to 0 in main() before the reader thread is started (instead of
-down in writer())..?
-
-Brian
-
-> +	} while (ret <= 0);
-> +
-> +	return NULL;
-> +}
-> +
-> +static void *writer(struct io_data *data)
-> +{
-> +	int ret;
-> +
-> +	while (!reader_ready)
-> +		usleep(1);
-> +
-> +	if (data->use_aio) {
-> +		struct io_context *ctx = NULL;
-> +		struct io_event evs[1];
-> +		struct iocb iocb;
-> +		struct iocb *iocbs[] = { &iocb };
-> +
-> +		ret = io_setup(1, &ctx);
-> +		if (ret) {
-> +			fprintf(stderr, "error %s during io_setup\n",
-> +				strerror(ret));
-> +			return NULL;
-> +		}
-> +		io_prep_pwrite(&iocb, data->fd, data->buf, data->blksize, data->offset);
-> +		ret = io_submit(ctx, 1, iocbs);
-> +		if (ret != 1) {
-> +			fprintf(stderr, "error %s during io_submit\n",
-> +				strerror(ret));
-> +			return NULL;
-> +		}
-> +		ret = io_getevents(ctx, 1, 1, evs, NULL);
-> +		if (ret != 1) {
-> +			fprintf(stderr, "error %s during io_getevents\n",
-> +				strerror(ret));
-> +			return NULL;
-> +		}
-> +	} else {
-> +		ret = pwrite(data->fd, data->buf, data->blksize, data->offset);
-> +		if (ret < 0)
-> +			perror("write file failed");
-> +	}
-> +
-> +	reader_ready = 0;
-> +	return NULL;
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +	pthread_t tid;
-> +	struct io_data wdata;
-> +	struct io_data rdata;
-> +	size_t max_blocks = 128;		/* 128 */
-> +	size_t blksize = 1 * 1024 * 1024;	/* 1M */
-> +	char *rbuf = NULL, *wbuf = NULL;
-> +	int rfd = 0, wfd = 0;
-> +	int i, j, c;
-> +	int use_aio = 1;
-> +	int ret = 0;
-> +	int io_align = 4096;
-> +	char *prog;
-> +	char *testfile;
-> +
-> +
-> +	prog = basename(argv[0]);
-> +
-> +	while ((c = getopt(argc, argv, "a:d")) != -1) {
-> +		switch (c) {
-> +		case 'a':
-> +			io_align = strtol(optarg, NULL, 0);
-> +			break;
-> +		case 'd':
-> +			use_aio = 0;
-> +			break;
-> +		default:
-> +			usage(prog);
-> +		}
-> +	}
-> +	if (optind != argc - 1)
-> +		usage(prog);
-> +	testfile = argv[optind];
-> +
-> +	wfd = open(testfile, O_CREAT|O_DIRECT|O_WRONLY|O_TRUNC, 0644);
-> +	if (wfd < 0) {
-> +		perror("open for write");
-> +		exit(1);
-> +	}
-> +
-> +	rfd = open(testfile, O_DIRECT|O_RDONLY, 0644);
-> +	if (rfd < 0) {
-> +		perror("open for read");
-> +		ret = 1;
-> +		goto err;
-> +	}
-> +
-> +	ret = posix_memalign((void **)&wbuf, io_align, blksize);
-> +	if (ret) {
-> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(ret));
-> +		ret = 1;
-> +		goto err;
-> +	}
-> +
-> +	ret = posix_memalign((void **)&rbuf, io_align, blksize);
-> +	if (ret) {
-> +		fprintf(stderr, "failed to alloc memory: %s\n", strerror(ret));
-> +		ret = 1;
-> +		goto err;
-> +	}
-> +
-> +	memset(wbuf, 'a', blksize);
-> +	wdata.fd = wfd;
-> +	wdata.blksize = blksize;
-> +	wdata.buf = wbuf;
-> +	wdata.use_aio = use_aio;
-> +	rdata.fd = rfd;
-> +	rdata.blksize = blksize;
-> +	rdata.buf = rbuf;
-> +
-> +	for (i = 0; i < max_blocks; i++) {
-> +		wdata.offset = rdata.offset = i * blksize;
-> +
-> +		ret = pthread_create(&tid, NULL, reader, &rdata);
-> +		if (ret) {
-> +			fprintf(stderr, "create reader thread failed: %s\n",
-> +				strerror(ret));
-> +			ret = 1;
-> +			goto err;
-> +		}
-> +
-> +		writer(&wdata);
-> +
-> +		ret = pthread_join(tid, NULL);
-> +		if (ret) {
-> +			fprintf(stderr, "pthread join reader failed: %s\n",
-> +				strerror(ret));
-> +			ret = 1;
-> +			goto err;
-> +		}
-> +
-> +		for (j = 0; j < blksize; j++) {
-> +			if (rdata.buf[j] != 'a') {
-> +				fprintf(stderr, "encounter an error: "
-> +					"block %d offset %d, content %x\n",
-> +					i, j, rbuf[j]);
-> +				ret = 1;
-> +				goto err;
-> +			}
-> +		}
-> +	}
-> +
-> +err:
-> +	if (rfd)
-> +		close(rfd);
-> +	if (wfd)
-> +		close(wfd);
-> +	if (rbuf)
-> +		free(rbuf);
-> +	if (wbuf)
-> +		free(wbuf);
-> +
-> +	exit(ret);
-> +}
-> diff --git a/tests/generic/464 b/tests/generic/464
-> new file mode 100755
-> index 000000000000..b0423c91a7cf
-> --- /dev/null
-> +++ b/tests/generic/464
-> @@ -0,0 +1,75 @@
-> +#! /bin/bash
-> +# FS QA Test No. 464
-> +#
-> +# Test i_size is updated properly under dio read/write
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2013 Alibaba Group.  All Rights Reserved.
-> +# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.* $testfile.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_aiodio aio-dio-append-write-read-race
-> +_require_test_program "feature"
-> +
-> +testfile=$TEST_DIR/$seq.$$
-> +min_dio_align=`_min_dio_alignment $TEST_DEV`
-> +page_size=`$here/src/feature -s`
-> +
-> +rm -f $seqres.full
-> +
-> +echo "non-aio dio test"
-> +align=$min_dio_align
-> +while [ $align -le $page_size ]; do
-> +	echo "$AIO_TEST -a $align -d $testfile.$align" >> $seqres.full
-> +	$AIO_TEST -a $align -d $testfile.$align 2>&1 | tee -a $seqres.full
-> +	align=$((align * 2))
-> +done
-> +
-> +echo "aio-dio test"
-> +align=$min_dio_align
-> +while [ $align -le $page_size ]; do
-> +	echo "$AIO_TEST -a $align $testfile.$align" >> $seqres.full
-> +	$AIO_TEST -a $align $testfile.$align 2>&1 | tee -a $seqres.full
-> +	align=$((align * 2))
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/464.out b/tests/generic/464.out
-> new file mode 100644
-> index 000000000000..14e66fe7d778
-> --- /dev/null
-> +++ b/tests/generic/464.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 464
-> +non-aio dio test
-> +aio-dio test
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 9f173e7a63c9..556add16286b 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -466,3 +466,4 @@
->  461 auto shutdown stress
->  462 auto quick dax
->  463 auto rw
-> +464 auto rw quick aio
-> -- 
-> 2.13.6
+On 10/10/17 9:36 AM, Jeff Moyer wrote:
+> kernel test robot <xiaolong.ye@intel.com> writes:
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> FYI, we noticed the following commit (built with gcc-6):
+>>
+>> commit: 332391a9935da939319e473b4680e173df75afcf ("fs: Fix page cache
+>> inconsistency when mixing buffered and AIO DIO")
+>> https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git master
+> 
+> [...]
+> 
+>> [  170.063040] WARNING: CPU: 0 PID: 33 at fs/iomap.c:731 iomap_dio_complete+0x129/0x130
+>> [ 170.068758] Modules linked in: xfs dm_mod rpcsec_gss_krb5
+>> auth_rpcgss nfsv4 dns_resolver sr_mod cdrom sg ata_generic pata_acpi
+>> ppdev ata_piix parport_pc snd_pcm snd_timer snd soundcore serio_raw
+>> pcspkr i2c_piix4 libata floppy parport ip_tables
+>> [  170.074819] CPU: 0 PID: 33 Comm: kworker/0:1 Not tainted 4.14.0-rc1-00056-g332391a #1
+>> [  170.077915] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.10.2-1 04/01/2014
+>> [  170.081047] Workqueue: dio/vda iomap_dio_complete_work
+>> [  170.081974] task: ffff88012e504a80 task.stack: ffffc90000758000
+>> [  170.084465] RIP: 0010:iomap_dio_complete+0x129/0x130
+>> [  170.085381] RSP: 0018:ffffc9000075be18 EFLAGS: 00010286
+>> [  170.087536] RAX: 00000000fffffff0 RBX: 0000000000000001 RCX: 000000000000000c
+>> [  170.088853] RDX: 0000000000000000 RSI: ffffc9000075bc50 RDI: ffff880075715da9
+>> [  170.092113] RBP: ffffc9000075be30 R08: ffffc9000075bcf0 R09: ffff880075715da8
+>> [  170.093254] R10: 000000000000000c R11: 0000000000000000 R12: ffff88007afa9300
+>> [  170.096475] R13: ffff88007ac7ad80 R14: ffff88007afa9338 R15: ffff88007afa9330
+>> [  170.098187] FS:  0000000000000000(0000) GS:ffff88013fc00000(0000) knlGS:0000000000000000
+>> [  170.101322] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+>> [  170.102265] CR2: 00007f3ad48a8020 CR3: 000000007fe16000 CR4: 00000000000006f0
+>> [  170.104631] Call Trace:
+>> [  170.105146]  iomap_dio_complete_work+0x25/0x80
+>> [  170.106704]  process_one_work+0x198/0x3e0
+>> [  170.107874]  worker_thread+0x4e/0x3e0
+>> [  170.108522]  kthread+0x114/0x150
+>> [  170.110683]  ? process_one_work+0x3e0/0x3e0
+>> [  170.111362]  ? kthread_create_on_node+0x40/0x40
+>> [  170.113111]  ret_from_fork+0x25/0x30
+>> [ 170.113752] Code: c9 74 17 49 63 74 24 28 41 8b 54 24 24 85 f6 0f 84
+>> 2a ff ff ff e9 3e ff ff ff 41 8b 74 24 28 49 8b 45 00 48 63 de e9 39
+>> ff ff ff <0f> ff eb ca 0f 1f 00 0f 1f 44 00 00 55 48 83 ef 30 48 89 e5
+>> 41
+> 
+> The test case is doing buffered and direct writes to the same file from
+> different processes, and is intended to trigger the case where
+> invalidate_inode_pages2_range fails.  I guess it's easier to hit now
+> since we defer completion to a worker thread?  Anyway, we should update
+> xfstests to ignore this warning.
+> 
+> Cheers,
+> Jeff
+
+I think this can be fixed in a similar manner to what generic/095 does:
+
+# xfs generates WARNINGs on purpose when applications mix buffered/mmap IO with
+# direct IO on the same file. On the other hand, this fio job has been proven
+# to be potent, we don't want to simply _disable_dmesg_check which could miss
+# other potential bugs. So filter out the intentional WARNINGs, make sure test
+# doesn't fail because of this warning and fails on other WARNINGs.
+
+# umount before checking dmesg in case umount triggers any WARNING or Oops
+_scratch_unmount
+
+if [ "$FSTYP" == "xfs" ]; then
+        _check_dmesg _filter_xfs_dmesg
+else
+        _check_dmesg
+fi
+
+i.e. we can call _check_dmesg with a custom filter in generic/208 that ignores
+this specific WARN_ON.
+
+If _check_dmesg is run from the test itself, then the "generic" check_dmesg
+from the test harness won't run and the test won't fail.
+
+-Eric
+
