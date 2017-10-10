@@ -1,152 +1,211 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51490 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:55804 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751398AbdJJK4X (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Oct 2017 06:56:23 -0400
-Date: Tue, 10 Oct 2017 06:56:22 -0400
-From: Brian Foster <bfoster@redhat.com>
+        id S1751415AbdJJMo4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 10 Oct 2017 08:44:56 -0400
+Date: Tue, 10 Oct 2017 20:44:55 +0800
+From: Xiong Zhou <xzhou@redhat.com>
 Subject: Re: [PATCH] generic: test race between block map change and writeback
-Message-ID: <20171010105622.GA23057@bfoster.bfoster>
+Message-ID: <20171010124455.kmnld7ejc6h7kgsz@XZHOUW.usersys.redhat.com>
 References: <20170831040237.16022-1-eguan@redhat.com>
- <20171009161255.GA19847@bfoster.bfoster>
- <20171010043649.GI10593@eguan.usersys.redhat.com>
- <20171010052459.GB15067@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171010052459.GB15067@dastard>
+In-Reply-To: <20170831040237.16022-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 10, 2017 at 04:24:59PM +1100, Dave Chinner wrote:
-> On Tue, Oct 10, 2017 at 12:36:49PM +0800, Eryu Guan wrote:
-> > On Mon, Oct 09, 2017 at 12:12:55PM -0400, Brian Foster wrote:
-> > > On Thu, Aug 31, 2017 at 12:02:37PM +0800, Eryu Guan wrote:
-> > > > Run delalloc writes & append writes & non-data-integrity syncs
-> > > > concurrently to test the race between block map change vs writeback.
-> > > > 
-> > > > This is to cover an XFS bug that data could be written to wrong
-> > > > block and delay allocated blocks are leaked because the block map
-> > > > was changed due to the removal of speculative allocated eofblocks
-> > > > when writeback is in progress.
-> > > > 
-> > > > And this test partially mimics what lustre-racer[1] test does, using
-> > > > which this bug was first found.
-> > > > 
-> > > > [1] https://git.hpdd.intel.com/?p=fs/lustre-release.git;a=tree;f=lustre/tests/racer;hb=HEAD
-> > > > 
-> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > > > ---
-> > > > 
-> > > > This may not reproduce the bug on all hosts, but it does reproduce the XFS
-> > > > corruption issue reliably on my different test hosts.
-> > > > 
-> > > 
-> > > Was this problem fixed already or are we still waiting on a fix?
-> > 
-> > It's still an unfixed problem. Dave provided a test patch (which did fix
-> > the bug for me)
+On Thu, Aug 31, 2017 at 12:02:37PM +0800, Eryu Guan wrote:
+> Run delalloc writes & append writes & non-data-integrity syncs
+> concurrently to test the race between block map change vs writeback.
 > 
-> The test patch I provided broken the COW writeback path, primarily
-> because it's a separate mapping path and the change I made doesn't
-> work at all well with it....
+> This is to cover an XFS bug that data could be written to wrong
+> block and delay allocated blocks are leaked because the block map
+> was changed due to the removal of speculative allocated eofblocks
+> when writeback is in progress.
 > 
-> > then Christoph suggested a fix based on seqlock, and
-> > things stalled there.
+> And this test partially mimics what lustre-racer[1] test does, using
+> which this bug was first found.
 > 
-> I had a look at doing that and got stalled on the fact that, again,
-> the COW writeback is completely separate to the existing block
-> mapping during writeback path and so applying a seqlock algorithm is
-> pretty difficult.
+> [1] https://git.hpdd.intel.com/?p=fs/lustre-release.git;a=tree;f=lustre/tests/racer;hb=HEAD
 > 
-> Basically, to fix the problem, we first need to merge the COW and
-> delalloc paths in the writepage code and then we'll have a sane base
-> on which to apply a proper fix...
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
 > 
-> (we need to do this to get rid of the bufferhead dependency, anyway)
+> This may not reproduce the bug on all hosts, but it does reproduce the XFS
+> corruption issue reliably on my different test hosts.
 > 
-> > (I'm happy to pick up the work, but I'm not that
-> > familiar with all the allocation paths that could change the extent map,
-> > so I may need some guidance and time to play with it.)
+>  tests/generic/451     | 130 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/451.out |   2 +
+>  tests/generic/group   |   1 +
+>  3 files changed, 133 insertions(+)
+>  create mode 100755 tests/generic/451
+>  create mode 100644 tests/generic/451.out
 > 
-> There's some black magic in amongst it all. I'll spend some time on
-> it again over the next week and see what I come up with...
-> 
+> diff --git a/tests/generic/451 b/tests/generic/451
+> new file mode 100755
+> index 000000000000..72cdd1c01de2
+> --- /dev/null
+> +++ b/tests/generic/451
+> @@ -0,0 +1,130 @@
+> +#! /bin/bash
+> +# FS QA Test 451
+> +#
+> +# Run delalloc writes & append writes & non-data-integrity syncs concurrently
+> +# to test the race between block map change vs writeback.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat Inc. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +MAXFILES=200
+> +BLOCK_SZ=65536
+> +
+> +LOOP_CNT=12
+> +LOOP_TIME=5
+> +PROC_CNT=16
+> +
+> +stop=$tmp.stop
+> +
+> +# get a random file to work on
+> +getfile()
+> +{
+> +	echo $SCRATCH_MNT/$((RANDOM % MAXFILES))
+> +}
+> +
+> +# delalloc write a relative big file to get enough dirty pages to be written
+> +# back, and XFS needs big enough file to trigger speculative preallocations, so
+> +# freeing these eofblocks could change the extent record
+> +do_write()
+> +{
+> +	local blockcount=$((RANDOM % 100))
+> +	local filesize=$((blockcount * BLOCK_SZ))
+> +	$XFS_IO_PROG -ftc "pwrite -b $BLOCK_SZ 0 $filesize" `getfile` >/dev/null 2>&1
+> +}
+> +
+> +# append another dirty page to the file, the writeback might pick it up too if
+> +# the file is already under writeback
+> +do_append()
+> +{
+> +	echo "test string" >> `getfile`
+> +}
+> +
+> +# issue WB_SYNC_NONE writeback with the '-w' option of sync_range xfs_io
+> +# command, so that the last dirty page from append write can be picked up in
+> +# this writeback cycle. This is not mandatory but could help reproduce XFS
+> +# corruption more easily.
+> +do_writeback()
+> +{
+> +	$XFS_IO_PROG -c "sync_range -w 0 0" `getfile` >/dev/null 2>&1
+> +}
 
-Hmm, is this[1] the test patch/thread associated with this test case? If
-so, I'm still wondering why we can't just trim the mapping to eof like
-the previous code had effectively done for so long..? Eryu, does the
-appended diff address this test case?
+How about adding a do_read() to read some data and check.
 
-Note that I'm not saying that there isn't also a similar mapping
-validation issue associated with user interaction (as opposed to
-eofblocks), but if so, I am skeptical that this test reproduces it. IOW,
-I think the latter should be independently verified (I don't see any
-follow up to that in the previous thread) and may very well warrant a
-unique test.
+Thanks,
+Xiong
 
-Brian
-
-[1] https://marc.info/?l=linux-xfs&m=150407819630651&w=2
-
---- 8< ---
-
-diff --git a/fs/xfs/libxfs/xfs_bmap.c b/fs/xfs/libxfs/xfs_bmap.c
-index 044a363..dd3fb7b 100644
---- a/fs/xfs/libxfs/xfs_bmap.c
-+++ b/fs/xfs/libxfs/xfs_bmap.c
-@@ -3852,6 +3852,17 @@ xfs_trim_extent(
- 	}
- }
- 
-+/* trim extent to within eof */
-+void
-+xfs_trim_extent_eof(
-+	struct xfs_bmbt_irec	*irec,
-+	struct xfs_inode	*ip)
-+
-+{
-+	xfs_trim_extent(irec, 0, XFS_B_TO_FSB(ip->i_mount,
-+					      i_size_read(VFS_I(ip))));
-+}
-+
- /*
-  * Trim the returned map to the required bounds
-  */
-diff --git a/fs/xfs/libxfs/xfs_bmap.h b/fs/xfs/libxfs/xfs_bmap.h
-index 851982a..502e0d8 100644
---- a/fs/xfs/libxfs/xfs_bmap.h
-+++ b/fs/xfs/libxfs/xfs_bmap.h
-@@ -208,6 +208,7 @@ void	xfs_bmap_trace_exlist(struct xfs_inode *ip, xfs_extnum_t cnt,
- 
- void	xfs_trim_extent(struct xfs_bmbt_irec *irec, xfs_fileoff_t bno,
- 		xfs_filblks_t len);
-+void	xfs_trim_extent_eof(struct xfs_bmbt_irec *, struct xfs_inode *);
- int	xfs_bmap_add_attrfork(struct xfs_inode *ip, int size, int rsvd);
- void	xfs_bmap_local_to_extents_empty(struct xfs_inode *ip, int whichfork);
- void	xfs_bmap_add_free(struct xfs_mount *mp, struct xfs_defer_ops *dfops,
-diff --git a/fs/xfs/xfs_aops.c b/fs/xfs/xfs_aops.c
-index 1dbc5cf..3ab6d9d 100644
---- a/fs/xfs/xfs_aops.c
-+++ b/fs/xfs/xfs_aops.c
-@@ -423,7 +423,7 @@ xfs_map_blocks(
- 				imap);
- 		if (!error)
- 			trace_xfs_map_blocks_alloc(ip, offset, count, type, imap);
--		return error;
-+		goto out_trim;
- 	}
- 
- #ifdef DEBUG
-@@ -435,7 +435,9 @@ xfs_map_blocks(
- #endif
- 	if (nimaps)
- 		trace_xfs_map_blocks_found(ip, offset, count, type, imap);
--	return 0;
-+out_trim:
-+	xfs_trim_extent_eof(imap, ip);
-+	return error;
- }
- 
- STATIC bool
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +# do fsck after each iteration in test
+> +_require_scratch_nocheck
+> +_require_xfs_io_command "sync_range"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# loop for $LOOP_CNT iterations, and each iteration starts $PROC_CNT processes
+> +# for each operation and runs for $LOOP_TIME seconds, and check filesystem
+> +# consistency after each iteration
+> +for i in `seq 1 $LOOP_CNT`; do
+> +	rm -f $stop
+> +	for j in `seq 1 $PROC_CNT`; do
+> +		while [ ! -e $stop ]; do
+> +			do_write
+> +		done &
+> +
+> +		while [ ! -e $stop ]; do
+> +			do_append
+> +		done &
+> +
+> +		while [ ! -e $stop ]; do
+> +			do_writeback
+> +		done &
+> +	done
+> +	sleep $LOOP_TIME
+> +	touch $stop
+> +	wait
+> +
+> +	_scratch_unmount
+> +	# test exits here if fs is inconsistent
+> +	_check_scratch_fs
+> +	_scratch_mount
+> +done
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/451.out b/tests/generic/451.out
+> new file mode 100644
+> index 000000000000..db924411b72f
+> --- /dev/null
+> +++ b/tests/generic/451.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 451
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 044ec3f355ed..b4bd66bc65a9 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -453,3 +453,4 @@
+>  448 auto quick rw
+>  449 auto quick acl enospc
+>  450 auto quick rw
+> +451 auto rw
+> -- 
+> 2.13.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
