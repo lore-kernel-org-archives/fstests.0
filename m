@@ -1,214 +1,253 @@
-Received: from mail-qt0-f171.google.com ([209.85.216.171]:50945 "EHLO
-        mail-qt0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751462AbdJKNeC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Oct 2017 09:34:02 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:39790 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752111AbdJKNr6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 11 Oct 2017 09:47:58 -0400
+Date: Wed, 11 Oct 2017 09:47:56 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] generic: test race between block map change and writeback
+Message-ID: <20171011134756.GG32909@bfoster.bfoster>
+References: <20170831040237.16022-1-eguan@redhat.com>
+ <20171009161255.GA19847@bfoster.bfoster>
+ <20171010043649.GI10593@eguan.usersys.redhat.com>
+ <20171010052459.GB15067@dastard>
+ <20171010105622.GA23057@bfoster.bfoster>
+ <20171011053025.GC15067@dastard>
+ <20171011094553.GB32909@bfoster.bfoster>
+ <20171011104234.GG15067@dastard>
 MIME-Version: 1.0
-In-Reply-To: <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
-References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
- <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
- <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com>
- <59D5DEE0.6080506@cn.fujitsu.com> <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
- <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
- <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
- <20171007032917.bntgnubthdstmrrt@thunk.org> <59DDFC47.3050300@cn.fujitsu.com> <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 11 Oct 2017 16:34:00 +0300
-Message-ID: <CAOQ4uxjtf8_y7Hmb4GU9YN7DvMa7WNtpeRzGoK5m2=Vw=ChStA@mail.gmail.com>
-Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
- delalloc after a crash
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171011104234.GG15067@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Ashlie Martinez <ashmrtn@utexas.edu>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 11, 2017 at 4:17 PM, Ashlie Martinez <ashmrtn@utexas.edu> wrote:
-> On Wed, Oct 11, 2017 at 6:11 AM, Xiao Yang <yangx.jy@cn.fujitsu.com> wrote:
->> On 2017/10/07 11:29, Theodore Ts'o wrote:
->>>
->>> On Thu, Oct 05, 2017 at 07:34:10PM -0500, Ashlie Martinez wrote:
->>>>>>
->>>>>> It almost seems that way, though to be honest, I don't think I know
->>>>>> enough about 1. the setup used by Amir and 2. all the internal working
->>>>>> of KVM+virtio to say for sure.
->>>>>
->>>>> I believe you misread my email.
->>>>> The problem was NOT reproduced on KVM+virtio.
->>>>> The problem *is* reproduced on a 10G LVM volume over SSD on
->>>>> Ubuntu 16.04 with latest kernel and latest e2fsprogs.
->>>
->>> I was able to reproduce it using both kvm-xfstests[1] and gce-xfstests[2].
->>>
->>> [1]
->>> https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
->>> [2] https://thunk.org/gce-xfstests
->>>
->>> It did turn out to be timing related, and it requires that a journal
->>> commit take place after fsstress runs, but it can *not* be triggered
->>> by a sync/fsync (as this would cause the delayed allocation writes to
->>> be forced out to disk, and that makes the problem go away).
->
-> Amir,
->
-> I was actually looking into why only some machines can reproduce the
-> output from generic/456 and I found that I was a little unsure about
-> exactly how the test itself was operating. I'm not an expert on how
-> device mapper works, so I was wondering if you could help shed some
-> light on it.
->
-> From what I've surmised from the test case, it replays the workload
-> you specified with fsx and then immediately inserts the dm_flakey
-> table and device in place of the hard disk *while requests are still
-> in flight* (see nolockfs flag in dmsetup which is used by dm_flakey
-> calls). The flakey device drops all requests sent to it. The flakey
-> device is then unmounted (to force all pending writes out), the dm
-> table changed once again back to the original backing block device,
-> and then mounted again.
->
-> Is this summary of the test case correct? If it is, then perhaps the
-> reason why it is so hard for some people to reproduce the exact bug
-> output you saw is because there does not appear to be anything in the
-> test case that specifies the timing for when dm_flakey should begin
-> dropping requests. Since the flakey device could be inserted any time
-> after fsx completes, but writes are still pending, it seems like the
-> test creates a race condition between inserting dm_flakey and a kernel
-> thread waking up to persist writes. This race condition would likely
-> be affected by things like having > 1 core on the VM or hardware (so
-> that dm_flakey could be inserted at the same time a kernel thread on
-> another core is trying to persist writes) the test is running on,
-> system load, dirty writeback times, etc.
->
-> Do you have any thoughts on the above?
+On Wed, Oct 11, 2017 at 09:42:34PM +1100, Dave Chinner wrote:
+> On Wed, Oct 11, 2017 at 05:45:53AM -0400, Brian Foster wrote:
+> > On Wed, Oct 11, 2017 at 04:30:25PM +1100, Dave Chinner wrote:
+> > > On Tue, Oct 10, 2017 at 06:56:22AM -0400, Brian Foster wrote:
+> > > > On Tue, Oct 10, 2017 at 04:24:59PM +1100, Dave Chinner wrote:
+> > > > > On Tue, Oct 10, 2017 at 12:36:49PM +0800, Eryu Guan wrote:
+> > > > > > On Mon, Oct 09, 2017 at 12:12:55PM -0400, Brian Foster
+> > > > > > wrote:
+> > > > > > > On Thu, Aug 31, 2017 at 12:02:37PM +0800, Eryu Guan
+> > > > > > > wrote:
+> > > > > > > > Run delalloc writes & append writes &
+> > > > > > > > non-data-integrity syncs concurrently to test the race
+> > > > > > > > between block map change vs writeback.
+> > > > > > > > 
+> > > > > > > > This is to cover an XFS bug that data could be written
+> > > > > > > > to wrong block and delay allocated blocks are leaked
+> > > > > > > > because the block map was changed due to the removal
+> > > > > > > > of speculative allocated eofblocks when writeback is
+> > > > > > > > in progress.
+> > > > > > > > 
+> > > > > > > > And this test partially mimics what lustre-racer[1]
+> > > > > > > > test does, using which this bug was first found.
+> > > > > > > > 
+> > > > > > > > [1]
+> > > > > > > > https://git.hpdd.intel.com/?p=fs/lustre-release.git;a=tree;f=lustre/tests/racer;hb=HEAD
+> > > > > > > > 
+> > > > > > > > Signed-off-by: Eryu Guan <eguan@redhat.com> ---
+> > > > > > > > 
+> > > > > > > > This may not reproduce the bug on all hosts, but it
+> > > > > > > > does reproduce the XFS corruption issue reliably on my
+> > > > > > > > different test hosts.
+> > > > > > > > 
+> > > > > > > 
+> > > > > > > Was this problem fixed already or are we still waiting
+> > > > > > > on a fix?
+> > > > > > 
+> > > > > > It's still an unfixed problem. Dave provided a test patch
+> > > > > > (which did fix the bug for me)
+> > > > > 
+> > > > > The test patch I provided broken the COW writeback path,
+> > > > > primarily because it's a separate mapping path and the
+> > > > > change I made doesn't work at all well with it....
+> > > > > 
+> > > > > > then Christoph suggested a fix based on seqlock, and
+> > > > > > things stalled there.
+> > > > > 
+> > > > > I had a look at doing that and got stalled on the fact that,
+> > > > > again, the COW writeback is completely separate to the
+> > > > > existing block mapping during writeback path and so applying
+> > > > > a seqlock algorithm is pretty difficult.
+> > > > > 
+> > > > > Basically, to fix the problem, we first need to merge the
+> > > > > COW and delalloc paths in the writepage code and then we'll
+> > > > > have a sane base on which to apply a proper fix...
+> > > > > 
+> > > > > (we need to do this to get rid of the bufferhead dependency,
+> > > > > anyway)
+> > > > > 
+> > > > > > (I'm happy to pick up the work, but I'm not that familiar
+> > > > > > with all the allocation paths that could change the extent
+> > > > > > map, so I may need some guidance and time to play with
+> > > > > > it.)
+> > > > > 
+> > > > > There's some black magic in amongst it all. I'll spend some
+> > > > > time on it again over the next week and see what I come up
+> > > > > with...
+> > > > > 
+> > > > 
+> > > > Hmm, is this[1] the test patch/thread associated with this
+> > > > test case? If so, I'm still wondering why we can't just trim
+> > > > the mapping to eof like the previous code had effectively done
+> > > > for so long..? Eryu, does the appended diff address this test
+> > > > case?
+> > > 
+> > > I'm not sure that is sufficient. To me addresses the symptom,
+> > > not the root problem. The cached extent can go stale at any
+> > > time, so we really need to ensure that cannot go unnoticed in
+> > > any circumstance, not just EOF trimming....
+> > > 
+> > 
+> > I agree that it may not be sufficient. But the fact remains that
+> > the only currently reproducible component of this is a regression
+> > as of the page writeback rework that killed off the old
+> > cluster_write() bits. I've asked a couple times about proving out
+> > the broader design flaw of the mapping going stale leading to a
+> > tangible problem (using instrumentation, if necessary) without any
+> > feedback so far, so I'm going to consider that a theoretical
+> > problem until that happens.
+> 
+> It's most definitely not theoretical - I can show you the scars if
+> you want.  We know it's a real problem and have for years, so i see
+> no need to "prove" anything here. The recent regression was
+> introduced because we broke one of the badly documented bandaids
+> we did years ago to solve a specific xfstests failure.
+> 
 
-Sounds about right.
-Having more cores to the VM was my first guess as the reason.
-Note that all the bugs I found so far depended on some timing between
-processes or kernel threads, so crash monkey trying all io completion
-combinations would not have helped. Maybe it would help to find other
-bugs though.
+It's not so much about proving it in general as opposed to doing so from
+the context of writeback and also attempting to ensure we have a test
+case that sufficiently verifies a fix in that context.
 
->
->>>
->>> I initially tried using xfs_io as a replacement for fsstress (since it
->>> is more flexible and would allow me to more easily run experiments),
->>> but it turns out xfs_io was too fast/efficient, and so using xfs_io to
->>> execute the same system calls (verified by strace) would not replicate
->>> the problem.
->>>
->>>>> Now you have a broken file system image and the exact set of operations
->>>>> that led to it. That's should be a pretty big lead for investigation.
->>>
->>> It was indeed a big lead for investigation (thanks, Amir!), but it
->>> still took me several hours before I was finally able to figure out
->>> the problem.  The patch and the commit description should explain what
->>> was going on.
->>>
->>> I'll leave it to Ashlie and Vijay to investigate how to improve Crash
->>> Monkey so it can better find problems like this automatically.  Since
->>> you now have a clear reproducer (you can use generic/456 and run it on
->>> gce-xfstests, using is a standard cloud VM configuration) and an
->>> explanation of the bug and the four-line fix, I suspect this might be
->>> good grist for follow-on research after your Hot Storage '17 workshop
->>> paper.  :-)
->>>
->>> Best regards,
->>>
->>>                                         - Ted
->>>
->>>
->>> commit 3912e7b44cf77e9452d4d0cb6c1da9c7043bb7f1
->>> Author: Theodore Ts'o<tytso@mit.edu>
->>> Date:   Fri Oct 6 23:09:55 2017 -0400
->>>
->>>      ext4: fix interaction between i_size, fallocate, and delalloc after a
->>> crash
->>
->> Hi Theodore,
->>
->> After applying your patch, generic/456 always passes on my system which just
->> triggers the output[2].
->> So i could believe this two different outputs[1][2] are triggered by
->> different environments, but they
->> are caused by the same bug which your patch fixes.  Is this right?
->>
->> [1] Inode 12, end of extent exceeds allowed value(logical block 33, physical
->> block 33441, len 7)Clear? no
->>       Inode 12, i_blocks is 184, should be 128. Fix? no
->> [2] Inode 12, i_size is 147456, should be 163840. Fix? no
->>
->> Sorry, i am not familiar with ext4.
->>
->> Thanks,
->> Xiao Yang
->>>
->>>
->>>      If there are pending writes subject to delayed allocation, then
->>> i_size
->>>      will show size after the writes have completed, while i_disksize
->>>      contains the value of i_size on the disk (since the writes have not
->>>      been persisted to disk).
->>>
->>>      If fallocate(2) is called with the FALLOC_FL_KEEP_SIZE flag, either
->>>      with or without the FALLOC_FL_ZERO_RANGE flag set, and the new size
->>>      after the fallocate(2) is between i_size and i_disksize, then after a
->>>      crash, if a journal commit has resulted in the changes made by the
->>>      fallocate() call to be persisted after a crash, but the delayed
->>>      allocation write has not resolved itself, i_size would not be
->>> updated,
->>>      and this would cause the following e2fsck complaint:
->>>
->>>      Inode 12, end of extent exceeds allowed value
->>>              (logical block 33, physical block 33441, len 7)
->>>
->>>      This can only take place on a sparse file, where the fallocate(2)
->>> call
->>>      is allocating blocks in a range which is before a pending delayed
->>>      allocation write which is extending i_size.  Since this situation is
->>>      quite rare, and the window in which the crash must take place is
->>>      typically<  30 seconds, in practice this condition will rarely
->>> happen.
->>>
->>>      Nevertheless, it can be triggered in testing, and in particular by
->>>      xfstests generic/456.
->>>
->>>      Signed-off-by: Theodore Ts'o<tytso@mit.edu>
->>>      Reported-by: Amir Goldstein<amir73il@gmail.com>
->>>      Cc: stable@vger.kernel.org
->>>
->>> diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
->>> index 97f0fd06728d..07bca11749d4 100644
->>> --- a/fs/ext4/extents.c
->>> +++ b/fs/ext4/extents.c
->>> @@ -4794,7 +4794,8 @@ static long ext4_zero_range(struct file *file,
->>> loff_t offset,
->>>         }
->>>
->>>         if (!(mode&  FALLOC_FL_KEEP_SIZE)&&
->>> -            offset + len>  i_size_read(inode)) {
->>> +           (offset + len>  i_size_read(inode) ||
->>> +            offset + len>  EXT4_I(inode)->i_disksize)) {
->>>                 new_size = offset + len;
->>>                 ret = inode_newsize_ok(inode, new_size);
->>>                 if (ret)
->>> @@ -4965,7 +4966,8 @@ long ext4_fallocate(struct file *file, int mode,
->>> loff_t offset, loff_t len)
->>>         }
->>>
->>>         if (!(mode&  FALLOC_FL_KEEP_SIZE)&&
->>> -            offset + len>  i_size_read(inode)) {
->>> +           (offset + len>  i_size_read(inode) ||
->>> +            offset + len>  EXT4_I(inode)->i_disksize)) {
->>>                 new_size = offset + len;
->>>                 ret = inode_newsize_ok(inode, new_size);
->>>                 if (ret)
->>> --
->>> To unsubscribe from this list: send the line "unsubscribe fstests" in
->>> the body of a message to majordomo@vger.kernel.org
->>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->>>
->>>
->>> .
->>>
->>
->>
->>
+> Keep in mind that these bandaids were done back when nobody had the
+> knowledge to realise that there was a general problem.  SGI had bled
+> away all of it's original XFS expertise and most of us working on it
+> only had a couple of years experience. Nobody really understood the
+> big picture about any of the complex XFS code
+> 
+> Hence the result was that the stupid moron who kept tripping over
+> the problems only knew just enough to work around the problems. He
+> didn't have the knoweldge base needed to recognise there was a
+> common underlying cause to many of the problems that were occurring
+> in algorithms inherited from the Irix code base. We were struggling
+> just to get tests to pass without data corruption or filesystem
+> shutdowns being reported.
+> 
+> e.g. the xfs_map_buffer -> xfs_iomap_write_allocate map coherency
+> problem that concurrent fsstress tests in xfstests kept tripping
+> over got "fixed" like this:
+> 
+> commit e4143a1cf5973e3443c0650fc4c35292d3b7baa8
+> Author: David Chinner <dgc@sgi.com>
+> Date:   Fri Nov 23 16:29:11 2007 +1100
+> 
+>     [XFS] Fix transaction overrun during writeback.
+>     
+>     Prevent transaction overrun in xfs_iomap_write_allocate() if we race with
+>     a truncate that overlaps the delalloc range we were planning to allocate.
+>     
+>     If we race, we may allocate into a hole and that requires block
+>     allocation. At this point in time we don't have a reservation for block
+>     allocation (apart from metadata blocks) and so allocating into a hole
+>     rather than a delalloc region results in overflowing the transaction block
+>     reservation.
+>     
+>     Fix it by only allowing a single extent to be allocated at a time.
+>     
+>     SGI-PV: 972757
+>     SGI-Modid: xfs-linux-melb:xfs-kern:30005a
+>     
+>     Signed-off-by: David Chinner <dgc@sgi.com>
+>     Signed-off-by: Lachlan McIlroy <lachlan@sgi.com>
+> 
+> IOWs, if we passed two maps from xfs_bmapi_read() to
+> xfs_iomap_write_allocate() then the second map might be stale by
+> the time we used it. The fix didn't solve the cached map problem -
+> it just mitigated it to the point where it didn't cause corruption
+> or shutdowns.
+> 
+> And so here we are, 10 years later, dealing with the same "cached
+> map without locks held is stale" problems in the writeback code....
+> 
+
+Ok, thanks for the background. That suggests a broader approach is
+worthwhile regardless of whether this variant is "theoretical." While I
+don't have this historical context, note again that I'm not contending
+we don't have (or never had) this kind of mapping issue anywhere in XFS.
+
+> And, FWIW, it looks to me like the new COW writeback code has a
+> bunch of interesting coherency issues that have been worked around
+> because there isn't a general solution for ensuring cached maps are
+> valid. Yeah, I tripped over XFS_BMAPI_DELALLOC today for the first
+> time today and could not understand what it was there for from the
+> code....
+> 
+> > I think it would be a bit of a shame to fix this kind of longstanding
+> > design flaw using a regression test that only tests for a particular
+> > symptom, as you put it. Simple changes to speculative preallocation in
+> > the future could potentially render it (silently) ineffective.
+> 
+> As I've just mentioned, there's a bunch of existing xfstests that
+> trip over the stale cached extent problem I describe above. That's
+> how we found them and patched them in the first place.
+> 
+> > The workaround doesn't elide the need for the design fix. The latter can
+> > essentially replace the former, but a workaround first allows us to fix
+> > the regression more quickly and with limited risk to older kernels. It
+> > looks like this regression was introduced in v4.6, thus taking over a
+> > year to be teased out.
+> 
+> I guess the difference here is that I'm just not interested in
+> trying to work around problems like this anymore. We need to
+> understand and fix them properly to ensure we kill them dead for
+> good and they won't rise from the dead ten years later and bite us
+> again. Then we can decide if a targetted workaround is appropriate
+> as a first step for backports....
+> 
+
+The following items:
+
+1.) The severity of the bug as a file/fs corruption vector.
+
+2.) We don't yet have a fix more than a month after the regression was
+reported and diagnosed to a fairly trivial change in behavior associated
+with the writeback rework.
+
+3.) We have a regression test that the workaround addresses and from
+feedback so far, the only known problem it has is it doesn't implement a
+generic enough solution to prevent the same problem we've had
+historically in other places.
+
+4.) We need to backport whatever fix we end up with back to v4.6 (before
+reflink/COW was relevant) and to distro kernels.
+
+5.) A quick glance at the commit log alone of the rfc to fix whatever is
+wrong with writeback mapping (to facilitate the broader fix) shows that
+it is notably more complex than the workaround.
+
+... are together, more than enough to suggest to me that a workaround is
+worthwhile. The writeback problem really should have been fixed by now
+and doing so doesn't mean we have to stop pursuing a broader fix for
+related problems.
+
+I think I'm going to post that patch in the meantime and as suggested
+earlier, I'll try to play around with another test in addition to this
+one to see if we can have something that reproduces any other writeback
+problems outside of the scope of speculative preallocation.
+
+Brian
+
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
