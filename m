@@ -1,102 +1,88 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:32112 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751958AbdJKMUM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Oct 2017 08:20:12 -0400
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1e2Fzd-0006E9-HK
-        for fstests@vger.kernel.org; Wed, 11 Oct 2017 23:20:09 +1100
-Date: Wed, 11 Oct 2017 23:20:09 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [whacky issue] xfs/277 endlessly looping in
- _require_xfs_io_command
-Message-ID: <20171011122009.GI15067@dastard>
-References: <20171011080047.GE15067@dastard>
- <20171011081330.GF15067@dastard>
+Received: from mail-qt0-f177.google.com ([209.85.216.177]:54951 "EHLO
+        mail-qt0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752006AbdJKMf7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Oct 2017 08:35:59 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171011081330.GF15067@dastard>
+In-Reply-To: <20171011115020.GW10593@eguan.usersys.redhat.com>
+References: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
+ <1506495852-7295-5-git-send-email-amir73il@gmail.com> <20171011115020.GW10593@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 11 Oct 2017 15:35:58 +0300
+Message-ID: <CAOQ4uxiRFnyaG94i-P6y8-3rq9z_-7wRc2kaPw8OrJ2Evb_OSQ@mail.gmail.com>
+Subject: Re: [PATCH 4/4] overlay: fix _overlay_config_override of MOUNT_OPTIONS
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 11, 2017 at 07:13:30PM +1100, Dave Chinner wrote:
-> On Wed, Oct 11, 2017 at 07:00:47PM +1100, Dave Chinner wrote:
-> > HI folks,
-> > 
-> > I was wondering if anyone else had seen this problem, because it's
-> > got me absolutely stumped. One of my test VMs is having a really
-> > weird livelock in xfs/277. It's getting stuck in an endless loop
-> > burning the entire CPU in a the 277 process (i.e. running bash).
-> > What it is stuck on makes no sense to me, nor does the looping
-> > behaviour, and I can only reproduce it on this one machine.
-> 
-> FWIW, the trigger for this was enabling rmap+reflink on the test
-> device on this machine for the first time. Hence this is the first
-> time the test has been run on that machine...
+On Wed, Oct 11, 2017 at 2:50 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Sep 27, 2017 at 10:04:12AM +0300, Amir Goldstein wrote:
+>> The config variable OVERLAY_MOUNT_OPTIONS is used to configure
+>> the overlay mount options when running ./check -overlay.
+>> The config variable MOUNT_OPTIONS is used to configure the
+>> mount options for base fs.
+>>
+>> If config sets value of OVERLAY_MOUNT_OPTIONS and
+>> does not set MOUNT_OPTIONS, the value of MOUNT_OPTIONS
+>> may be leftover from previous _overlay_config_override, so
+>> don't use that value for base fs mount.
+>>
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+>>  common/config | 4 ++++
+>>  1 file changed, 4 insertions(+)
+>>
+>> diff --git a/common/config b/common/config
+>> index 71798f0..8844173 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -532,6 +532,10 @@ _overlay_config_override()
+>>       # Store original base fs vars
+>>       export OVL_BASE_TEST_DEV="$TEST_DEV"
+>>       export OVL_BASE_TEST_DIR="$TEST_DIR"
+>> +     # If config does not set MOUNT_OPTIONS, its value may be
+>> +     # leftover from previous _overlay_config_override, so
+>> +     # don't use that value for base fs mount
+>> +     [ "$MOUNT_OPTIONS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset MOUNT_OPTIONS
+>>       export OVL_BASE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
+>
+> Hmm, I don't like the idea that specify mount options for base fs
+> through MOUNT_OPTIONS. With this, we can only specify overlay mount
+> options via OVERLAY_MOUNT_OPTIONS but not MOUNT_OPTIONS. Ideally, I'd
+> like both of them work, and OVERLAY_MOUNT_OPTIONS is assigned to
+> MOUNT_OPTIONS when the latter is empty.
+>
+> I think MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS should always be the mount
+> options for filesystem we're currently testing (overlay in this case)
+> not something else.
+>
+> OTOH, We can always specify OVL_BASE_MOUNT_OPTIONS directly for base fs
+> mount options if we want.
+>
 
-TL;DR: this is a result of bugs in the xfstests code. "echo $var"
-results in $var being evaluated for glob/regex matches with
-files in the current working directory.
+It's not exactly how the base fs options work.
+Right now user is never expected to configure OVL_BASE options directly
+They are always inherited from a config file of another fs, so you can
+run check and check -overlay with the same fs config file.
 
+You are right that OVERLAY MOUNT OPTIONS was meant to be used for
+default mount options for overlay mount options and not specifically
+for check -overlay, so maybe need a new name for config options of
+overlay test and scratch mounts, but I am out of ideas for good names.
+It does make sense to use it in the context of check -overlay run,
+because there is no other value for mount options for the overlay
+mount.
 
-Longer: the fsmap
-output contains test like [1234..5678] on every line, and there were
-5,000 lines of output being generated with about 100k of characters
-inside [] brackets. If you run 'echo [1234]', it
-does not output '[1234]' to the console - it treats [1234] as a glob
-and goes searching the current working directory for matches. That's
-where the readdir output comes from.
-
-So:
-
-$ echo foo [1234..5768] bar
-foo 1 bar
-$ ls -l |grep " 1$"
--rw-r--r-- 1 dave dave         35 Apr 14  2010 1
-$
-
-The "1" is output because it matches a file in the local directory.
-
-and if I strace the echo command. I see:
-
-open(".", O_RDONLY|O_NONBLOCK|O_DIRECTORY|O_CLOEXEC) = 3
-fstat(3, {st_mode=S_IFDIR|0755, st_size=28672, ...}) = 0
-getdents(3, /* 1109 entries */, 32768)  = 31656
-getdents(3, /* 0 entries */, 32768)     = 0
-close(3) = 0
-write(1, "foo 1 bar\n", 10)             = 10
-
-So, that's where the readdir comes from. Doesn't explain the
-slowness, or why it doesn't reproduce in a interactive shell or on
-any other machine.
-
-
-So, look at what directory it is running in ($here, the root of the
-xfstests installation) and now add other xfstests bugs that havei
-resulted in ~6500 test files being dumped in $here.
-
-(generic/109 is one of the culprits)
-
-Now we have ~100k characters being matched against ~6500 filenames.
-There's the slowness.  I simply wasn't patient enough to wait for
-it.
-
-One `git clean -f -d` later, and the test now runs and completes in
-4s.
-
-So, what's the bug in xfstests? The usual bug in shell programs:i
-missing variable quoting.
-
-$ echo foo [1234..5768] bar 
-foo 1 bar
-$ echo "foo [1234..5768] bar"
-foo [1234..5768] bar
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> But this problem has nothing to do with this patchset, it goes back to
+> the time when overlay supports base test/scratch dev, so I'm fine with
+> this patch going in right now.
+>
+> Thanks,
+> Eryu
+>
+>>
+>>       # Set TEST vars to overlay base and mount dirs inside base fs
+>> --
+>> 2.7.4
+>>
