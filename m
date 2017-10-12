@@ -1,310 +1,97 @@
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:38656 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751004AbdJLNo7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 12 Oct 2017 09:44:59 -0400
+Received: from mx2.suse.de ([195.135.220.15]:46295 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752977AbdJLOjB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Oct 2017 10:39:01 -0400
+Date: Thu, 12 Oct 2017 16:38:59 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
+ delalloc after a crash
+Message-ID: <20171012143859.GA31488@quack2.suse.cz>
+References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
+ <59C8D147.1060608@cn.fujitsu.com>
+ <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
+ <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com>
+ <59D5DEE0.6080506@cn.fujitsu.com>
+ <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
+ <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
+ <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
+ <20171007032917.bntgnubthdstmrrt@thunk.org>
 MIME-Version: 1.0
-In-Reply-To: <20171012133432.20645-1-chandan@linux.vnet.ibm.com>
-References: <20171012133432.20645-1-chandan@linux.vnet.ibm.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 12 Oct 2017 16:44:53 +0300
-Message-ID: <CAOQ4uxgrW2t7as8PvZh=8n2L4K8aJm9o4cSs0pwUqNd6nCgeQQ@mail.gmail.com>
-Subject: Re: [PATCH V4] overlay: Test consistent d_ino feature for non-samefs setup
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171007032917.bntgnubthdstmrrt@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: fstests <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Ashlie Martinez <ashmrtn@utexas.edu>, Amir Goldstein <amir73il@gmail.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 12, 2017 at 4:34 PM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> This commit adds a test to verify consistent d_ino feature when
-> the overlayfs instance is composed of two different underlying
-> filesystem instances.
->
-> For example,
-> $ mount -t xfs /dev/loop0 /mnt/test
-> $ mount -t xfs /dev/loop1 /mnt/scratch
-> $ mkdir /mnt/scratch/upper
-> $ mkdir /mnt/scratch/work
-> $ mount -t overlay overlay -o lowerdir=/mnt/test \
->         -o upperdir=/mnt/scratch/upper \
->         -o workdir=/mnt/scratch/work /mnt/merge
->
-> The goal of this test is to verify that the inode numbers returned by
-> readdir(3) (i.e. dirent->d_ino) are consistent with inode numbers
-> returned by stat(2) (i.e. stat->st_ino) in all the below listed cases,
-> - Parent's (i.e. "..") d_ino must always be calculated because a
->   pure dir can be residing inside a merged dir.
-> - d_ino for "." must always be calculated because the present
->   directory can have a copy-up origin.
-> - Verify d_ino of '.' and '..' before and after dir becomes impure.
->   While at it also verify if trusted.overlay.impure xattr is
->   set/reset appropriately and invalidation of readdir cache.
-> - Verify copied up file's (inside a impure dir) d_ino.
-> - Verify invalidation of readdir cache.
-> - Verify d_ino values corresponding to "." and ".." entries of a
->   pure lower dir.
-> - Verify d_ino of ".." entry of a merged dir.
-> - Verify pure lower residing in dir which has another lower layer
->
-> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-> ---
-> Eryu,
-> This test requires the following "yet to be upstreamed" overlayfs kernel
-> patches to be merged,
+> commit 3912e7b44cf77e9452d4d0cb6c1da9c7043bb7f1
+> Author: Theodore Ts'o <tytso@mit.edu>
+> Date:   Fri Oct 6 23:09:55 2017 -0400
+> 
+>     ext4: fix interaction between i_size, fallocate, and delalloc after a crash
+>     
+>     If there are pending writes subject to delayed allocation, then i_size
+>     will show size after the writes have completed, while i_disksize
+>     contains the value of i_size on the disk (since the writes have not
+>     been persisted to disk).
+>     
+>     If fallocate(2) is called with the FALLOC_FL_KEEP_SIZE flag, either
+>     with or without the FALLOC_FL_ZERO_RANGE flag set, and the new size
+>     after the fallocate(2) is between i_size and i_disksize, then after a
+>     crash, if a journal commit has resulted in the changes made by the
+>     fallocate() call to be persisted after a crash, but the delayed
+>     allocation write has not resolved itself, i_size would not be updated,
+>     and this would cause the following e2fsck complaint:
+>     
+>     Inode 12, end of extent exceeds allowed value
+>             (logical block 33, physical block 33441, len 7)
+>     
+>     This can only take place on a sparse file, where the fallocate(2) call
+>     is allocating blocks in a range which is before a pending delayed
+>     allocation write which is extending i_size.  Since this situation is
+>     quite rare, and the window in which the crash must take place is
+>     typically < 30 seconds, in practice this condition will rarely happen.
+>     
+>     Nevertheless, it can be triggered in testing, and in particular by
+>     xfstests generic/456.
+>     
+>     Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+>     Reported-by: Amir Goldstein <amir73il@gmail.com>
+>     Cc: stable@vger.kernel.org
 
-Clarification. The test *requires* those patches to pass, but IMO
-there is nothing to prevent merging the test now.
-As several functional tests before it, the test fails on upstream kernel
-because overlayfs doesn't behave as it should.
+The patch looks good to me. You can add:
 
-> https://marc.info/?l=linux-unionfs&m=150728247029074&w=2
-> https://marc.info/?l=linux-unionfs&m=150728190228896&w=2
-> https://marc.info/?l=linux-unionfs&m=150728190428897&w=2
->
-> Changelog:
->  v1->v2:
->  Address the following review comments from Amir.
->  1. overlay/041 now uses _overlay_scratch_mount_dirs() introduced by the patch
->  "overlay: create helper _overlay_scratch_mount_dirs()" (unmerged patch from
->  Amir Goldstein).
->  2. Use _scratch_mkfs() instead of manually setting of the base filesystem.
->  3. Use a directory in $OVL_BASE_TEST_DIR as the overlay instance's lowerdir.
->  4. Remove redundant invocation of "chown" operation on a regular file to cause
->  copy-up to occur.
->
->  v2->v3:
->  1. Remove debug code. Thanks to Amir for spotting this.
->  2. Add a commit message describing non-samefs setup of an overlayfs instance
->  and the scenarios being tested by this test.
->
->  v3->v4:
->  1. Replace _overlay_scratch_unmount invocation with _scratch_unmount.
->
-> tests/overlay/041     | 193 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/041.out |   2 +
->  tests/overlay/group   |   1 +
->  3 files changed, 196 insertions(+)
->  create mode 100755 tests/overlay/041
->  create mode 100644 tests/overlay/041.out
->
-> diff --git a/tests/overlay/041 b/tests/overlay/041
-> new file mode 100755
-> index 0000000..4d7feb8
-> --- /dev/null
-> +++ b/tests/overlay/041
-> @@ -0,0 +1,193 @@
-> +#! /bin/bash
-> +# FSQA Test No. 041
-> +#
-> +# Test consistent d_ino numbers on non-samefs setup
-> +# This is a variant of overlay/038 to test consistent d_ino numbers
-> +# for non-samefs setup.
-> +#
-> +#-----------------------------------------------------------------------
-> +#
-> +# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
-> +# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch
-> +_require_test
-> +_require_attrs
-> +_require_test_program "t_dir_type"
-> +
-> +rm -f $seqres.full
-> +
-> +lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
-> +rm -rf $lowerdir
-> +mkdir $lowerdir
-> +
-> +# Create our test files.
-> +mkdir $lowerdir/test_dir/
-> +mkdir $lowerdir/test_dir/pure_lower_dir
-> +mkdir $lowerdir/test_dir/merged_dir
-> +touch $lowerdir/test_file
-> +
-> +_scratch_mkfs
-> +
-> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-> +
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-> +
-> +test_dir=$SCRATCH_MNT/test_dir/
-> +merged_dir=$test_dir/merged_dir
-> +pure_upper_dir=$merged_dir/pure_upper_dir
-> +
-> +mkdir -p $pure_upper_dir
-> +
-> +merged_dir_st_ino=$(stat -c '%i' $merged_dir)
-> +
-> +# Pure dir's parent d_ino must always be calculated because
-> +# it can be residing inside a merged dir.
-> +parent_d=$($here/src/t_dir_type $pure_upper_dir $merged_dir_st_ino)
-> +[[ $parent_d == ".. d" ]] || \
-> +       echo "Pure dir inside a merged dir: Invalid d_ino reported for .."
-> +
-> +# d_ino for "." must always be calculated because the present
-> +# directory can have a copy-up origin.
-> +current_d=$($here/src/t_dir_type $merged_dir $merged_dir_st_ino)
-> +[[ $current_d == ". d" ]] || echo "Merged dir: Invalid d_ino reported for ."
-> +
-> +# Verify d_ino of '.' and '..' before and after dir becomes impure.
-> +impure_dir=$test_dir/impure_dir
-> +mkdir -p $impure_dir
-> +
-> +impure_dir_st_ino=$(stat -c '%i' $impure_dir)
-> +impure_dir_parent_st_ino=$(stat -c '%i' $test_dir)
-> +
-> +# Before $impure_dir becomes impure
-> +parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-> +[[ $parent_d == ".. d" ]] || \
-> +    echo "Before dir becomes impure: Invalid d_ino reported for .."
-> +
-> +current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-> +[[ $current_d == ". d" ]] || \
-> +    echo "Before dir becomes impure: Invalid d_ino reported for ."
-> +
-> +
-> +mv $SCRATCH_MNT/test_file $impure_dir
-> +test_file_st_ino=$(stat -c '%i' $impure_dir/test_file)
-> +
-> +impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
-> +                       $upperdir/test_dir/impure_dir)
-> +[[ $impure == "y" ]] || echo "Impure directory missing impure xattr"
-> +
-> +# After $impure_dir becomes impure
-> +parent_d=$($here/src/t_dir_type $impure_dir $impure_dir_parent_st_ino)
-> +[[ $parent_d == ".. d" ]] || \
-> +    echo "After dir becomes impure: Invalid d_ino reported for .."
-> +
-> +current_d=$($here/src/t_dir_type $impure_dir $impure_dir_st_ino)
-> +[[ $current_d == ". d" ]] || \
-> +    echo "After dir becomes impure: Invalid d_ino reported for ."
-> +
-> +# Verify copy up file's d_ino
-> +file_d=$($here/src/t_dir_type $impure_dir $test_file_st_ino)
-> +[[ $file_d == "test_file f" ]] || \
-> +       echo "Impure dir: Invalid d_ino reported for entry with copy-up origin"
-> +
-> +# Make $impure_dir pure
-> +rm -rf $impure_dir/test_file
-> +
-> +# Verify invalidation of readdir cache
-> +$here/src/t_dir_type $impure_dir $test_file_st_ino
-> +[[ $? != 0 ]] || echo "Directory's readdir cache has stale entries"
-> +
-> +impure=$($GETFATTR_PROG --absolute-names --only-values -n 'trusted.overlay.impure' \
-> +                       $upperdir/test_dir/impure_dir 2>/dev/null)
-> +[[ -z $impure ]] || echo "Pure directory has impure xattr"
-> +
-> +# Verify d_ino values corresponding to "." and ".." entries of a
-> +# pure lower dir.
-> +parent_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-> +pure_lower_dir=$SCRATCH_MNT/test_dir/pure_lower_dir
-> +
-> +parent_d=$($here/src/t_dir_type $pure_lower_dir $parent_st_ino)
-> +[[ $parent_d == ".. d" ]] || echo "Pure lower dir: Invalid d_ino reported for .."
-> +
-> +pure_lower_dir_st_ino=$(stat -c '%i' $pure_lower_dir)
-> +
-> +current_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_dir_st_ino)
-> +[[ $current_d == ". d" ]] || echo "Pure lower dir: Invalid d_ino reported for ."
-> +
-> +# Verify d_ino of ".." entry of a merged dir.
-> +merged_dir=$SCRATCH_MNT/test_dir/merged_dir
-> +
-> +parent_d=$($here/src/t_dir_type $merged_dir $parent_st_ino)
-> +[[ $parent_d == ".. d" ]] || echo "Merged dir: Invalid d_ino reported for .."
-> +
-> +_scratch_unmount
-> +
-> +# Verify pure lower residing in dir which has another lower layer
-> +middir=$OVL_BASE_TEST_DIR/$seq-ovl-mid
-> +lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
-> +rm -rf $middir
-> +rm -rf $lowerdir
-> +mkdir $middir
-> +mkdir $lowerdir
-> +
-> +mkdir -p $middir/test_dir
-> +mkdir -p $lowerdir/test_dir/pure_lower_dir
-> +
-> +_scratch_mkfs
-> +
-> +upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
-> +
-> +_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
-> +
-> +# Copy up test_dir
-> +touch $SCRATCH_MNT/test_dir/test_file
-> +
-> +test_dir_st_ino=$(stat -c '%i' $SCRATCH_MNT/test_dir)
-> +
-> +parent_d=$($here/src/t_dir_type $SCRATCH_MNT/test_dir/pure_lower_dir $test_dir_st_ino)
-> +[[ $parent_d == ".. d" ]] || \
-> +       echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for .."
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/overlay/041.out b/tests/overlay/041.out
-> new file mode 100644
-> index 0000000..04f5bf1
-> --- /dev/null
-> +++ b/tests/overlay/041.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 041
-> +Silence is golden
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 022f2ef..8629325 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -43,3 +43,4 @@
->  038 auto quick copyup
->  039 auto quick atime
->  040 auto quick
-> +041 auto quick copyup nonsamefs
-> --
-> 2.9.5
->
+Reviewed-by: Jan Kara <jack@suse.cz>
+
+								Honza
+
+
+> 
+> diff --git a/fs/ext4/extents.c b/fs/ext4/extents.c
+> index 97f0fd06728d..07bca11749d4 100644
+> --- a/fs/ext4/extents.c
+> +++ b/fs/ext4/extents.c
+> @@ -4794,7 +4794,8 @@ static long ext4_zero_range(struct file *file, loff_t offset,
+>  	}
+>  
+>  	if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+> -	     offset + len > i_size_read(inode)) {
+> +	    (offset + len > i_size_read(inode) ||
+> +	     offset + len > EXT4_I(inode)->i_disksize)) {
+>  		new_size = offset + len;
+>  		ret = inode_newsize_ok(inode, new_size);
+>  		if (ret)
+> @@ -4965,7 +4966,8 @@ long ext4_fallocate(struct file *file, int mode, loff_t offset, loff_t len)
+>  	}
+>  
+>  	if (!(mode & FALLOC_FL_KEEP_SIZE) &&
+> -	     offset + len > i_size_read(inode)) {
+> +	    (offset + len > i_size_read(inode) ||
+> +	     offset + len > EXT4_I(inode)->i_disksize)) {
+>  		new_size = offset + len;
+>  		ret = inode_newsize_ok(inode, new_size);
+>  		if (ret)
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
