@@ -1,34 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59274 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59868 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750722AbdJLEZR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Oct 2017 00:25:17 -0400
-Date: Thu, 12 Oct 2017 12:25:15 +0800
+        id S1750758AbdJLGIK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Oct 2017 02:08:10 -0400
+Date: Thu, 12 Oct 2017 14:08:08 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 0/3] generalize AIO/DIO dmesg filter
-Message-ID: <20171012042515.GY10593@eguan.usersys.redhat.com>
-References: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
+Subject: Re: [PATCH 2/4] overlay: use default overlay mount options
+ _overlay_mount_dirs()
+Message-ID: <20171012060808.GZ10593@eguan.usersys.redhat.com>
+References: <1506495852-7295-1-git-send-email-amir73il@gmail.com>
+ <1506495852-7295-3-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxhr+1g0Pa8-UPTfG2k-ebU1aCygsXfwmFjjgrpf-gFq2Q@mail.gmail.com>
+ <20170927080549.GM8034@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1507647298-9971-1-git-send-email-idryomov@gmail.com>
+In-Reply-To: <20170927080549.GM8034@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: fstests@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Vivek Goyal <vgoyal@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 10, 2017 at 04:54:55PM +0200, Ilya Dryomov wrote:
-> With upstream commit 332391a9935d ("fs: Fix page cache inconsistency
-> when mixing buffered and AIO DIO"), we need to whitelist dio_complete()
-> for ext4 pretty much everywhere iomap_dio_complete() and friends are
-> whitelisted for xfs.
+On Wed, Sep 27, 2017 at 04:05:49PM +0800, Eryu Guan wrote:
+> On Wed, Sep 27, 2017 at 10:50:46AM +0300, Amir Goldstein wrote:
+> > On Wed, Sep 27, 2017 at 10:04 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> > > Tests that use _overlay_mount_dirs() should also use the
+> > > default overlay mount options.
+> > 
+> > Vivek, Eryu,
+> > 
+> > I should make a disclaimer here: I did not test with SELINUX_MOUNT_OPTIONS
+> > because I have no SELinux in my test setup.
+> > 
+> > Specifically, I am concerned that tests that compose "special" overlay mounts,
+> > like tmpfs mounts and stacked overlay mounts (overlay/029) may not play well
+> > with SELINUX_MOUNT_OPTIONS applied to the special mounts.
+> > I am less concerned about the tests that were converted to use
+> > _overlay_scratch_mount_dirs() helper.
+> > 
+> > Can either of you run a -g overlay/quick test with this series and valid
+> > SELINUX_MOUNT_OPTIONS?
+> 
+> Sure, I'll do the testings anyway, and I have selinux enabled on my test
+> vms.
 
-Thanks for fixing this! I agreed with Dave that we should move the
-filter to common/filter file, but that's easy to do and I can fix it up
-at commit time.
+I just finished a '-g auto' run with OVERLAY_MOUNT_OPTIONS="-o index=on"
+and selinux enabled, and the results look fine, all failures are known
+issues. Thanks for the work!
 
-I was thinking adding this filter to _check_dmesg unconditionally, so we
-don't have to the filter case by case. But I guess it's better to be
-more careful, in case we miss any real bug.
-
-Thanks,
 Eryu
