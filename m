@@ -1,37 +1,72 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43014 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:58702 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751600AbdJLQGx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Oct 2017 12:06:53 -0400
-Date: Fri, 13 Oct 2017 00:06:51 +0800
+        id S1751040AbdJLQLp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Oct 2017 12:11:45 -0400
+Date: Fri, 13 Oct 2017 00:11:43 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 2/3] common: turn _filter_xfs_dmesg() into
- _filter_aiodio_dmesg()
-Message-ID: <20171012160651.GH10593@eguan.usersys.redhat.com>
-References: <1507820044-2161-1-git-send-email-idryomov@gmail.com>
- <1507820044-2161-3-git-send-email-idryomov@gmail.com>
+Subject: Re: [PATCH V4] overlay: Test consistent d_ino feature for non-samefs
+ setup
+Message-ID: <20171012161143.GI10593@eguan.usersys.redhat.com>
+References: <20171012133432.20645-1-chandan@linux.vnet.ibm.com>
+ <CAOQ4uxgrW2t7as8PvZh=8n2L4K8aJm9o4cSs0pwUqNd6nCgeQQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1507820044-2161-3-git-send-email-idryomov@gmail.com>
+In-Reply-To: <CAOQ4uxgrW2t7as8PvZh=8n2L4K8aJm9o4cSs0pwUqNd6nCgeQQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ilya Dryomov <idryomov@gmail.com>
-Cc: fstests@vger.kernel.org, Lukas Czerner <lczerner@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, fstests <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 12, 2017 at 04:54:03PM +0200, Ilya Dryomov wrote:
-> With upstream commit 332391a9935d ("fs: Fix page cache inconsistency
-> when mixing buffered and AIO DIO"), ext4 (and probably other non-iomap
-> based filesystems) need a _check_dmesg() whitelist entry for a new WARN
-> in dio_complete() -- generic/095 and 247 trigger a dio_complete() splat
-> pretty reliably for me.
+On Thu, Oct 12, 2017 at 04:44:53PM +0300, Amir Goldstein wrote:
+> On Thu, Oct 12, 2017 at 4:34 PM, Chandan Rajendra
+> <chandan@linux.vnet.ibm.com> wrote:
+> > This commit adds a test to verify consistent d_ino feature when
+> > the overlayfs instance is composed of two different underlying
+> > filesystem instances.
+> >
+> > For example,
+> > $ mount -t xfs /dev/loop0 /mnt/test
+> > $ mount -t xfs /dev/loop1 /mnt/scratch
+> > $ mkdir /mnt/scratch/upper
+> > $ mkdir /mnt/scratch/work
+> > $ mount -t overlay overlay -o lowerdir=/mnt/test \
+> >         -o upperdir=/mnt/scratch/upper \
+> >         -o workdir=/mnt/scratch/work /mnt/merge
+> >
+> > The goal of this test is to verify that the inode numbers returned by
+> > readdir(3) (i.e. dirent->d_ino) are consistent with inode numbers
+> > returned by stat(2) (i.e. stat->st_ino) in all the below listed cases,
+> > - Parent's (i.e. "..") d_ino must always be calculated because a
+> >   pure dir can be residing inside a merged dir.
+> > - d_ino for "." must always be calculated because the present
+> >   directory can have a copy-up origin.
+> > - Verify d_ino of '.' and '..' before and after dir becomes impure.
+> >   While at it also verify if trusted.overlay.impure xattr is
+> >   set/reset appropriately and invalidation of readdir cache.
+> > - Verify copied up file's (inside a impure dir) d_ino.
+> > - Verify invalidation of readdir cache.
+> > - Verify d_ino values corresponding to "." and ".." entries of a
+> >   pure lower dir.
+> > - Verify d_ino of ".." entry of a merged dir.
+> > - Verify pure lower residing in dir which has another lower layer
+> >
+> > Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> > Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> > ---
+> > Eryu,
+> > This test requires the following "yet to be upstreamed" overlayfs kernel
+> > patches to be merged,
 > 
-> Add dio_complete() entry to _filter_xfs_dmesg(), rename it and use it
-> unconditionally in generic/095, 224, 247 and 446.
+> Clarification. The test *requires* those patches to pass, but IMO
+> there is nothing to prevent merging the test now.
+> As several functional tests before it, the test fails on upstream kernel
+> because overlayfs doesn't behave as it should.
 > 
-> Signed-off-by: Ilya Dryomov <idryomov@gmail.com>
+> > https://marc.info/?l=linux-unionfs&m=150728247029074&w=2
+> > https://marc.info/?l=linux-unionfs&m=150728190228896&w=2
+> > https://marc.info/?l=linux-unionfs&m=150728190428897&w=2
 
-Thanks for the repost! I added "source ./common/filter" to generic/446
-too, which was not sourced originally.
+Thanks all for updated test and review, and the upstream context!
 
-Thanks,
 Eryu
