@@ -1,76 +1,62 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42534 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:44686 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750772AbdJNHHg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 14 Oct 2017 03:07:36 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A71E23680C
-        for <fstests@vger.kernel.org>; Sat, 14 Oct 2017 07:07:36 +0000 (UTC)
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH] ltp/fsstress: check mkdir(2) return value
-Date: Sat, 14 Oct 2017 15:07:17 +0800
-Message-Id: <1507964837-10820-1-git-send-email-xzhou@redhat.com>
+        id S1750704AbdJOHQH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 15 Oct 2017 03:16:07 -0400
+Date: Sun, 15 Oct 2017 15:16:05 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] tests/xfs: test for NULL xattr buffer problem during
+ unlink
+Message-ID: <20171015071605.GX10593@eguan.usersys.redhat.com>
+References: <20171012113627.39452-1-bfoster@redhat.com>
+ <20171013054605.GN10593@eguan.usersys.redhat.com>
+ <20171013100838.GA44117@bfoster.bfoster>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171013100838.GA44117@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiong Zhou <xzhou@redhat.com>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If mkdir(2) fails, the following chdir(2) would fail either.
-Although dirname and error message are printed, we don't know
-which operation has failed.
+On Fri, Oct 13, 2017 at 06:08:39AM -0400, Brian Foster wrote:
+> On Fri, Oct 13, 2017 at 01:46:05PM +0800, Eryu Guan wrote:
+> > On Thu, Oct 12, 2017 at 07:36:27AM -0400, Brian Foster wrote:
+> > > XFS had a bug that resulted in an unexpected NULL buffer during
+> > > unlink of an inode with a multi-level attr fork tree. This occurred
+> > > due to a stale reference to content in a released/reclaimed buffer.
+> > > 
+> > > Use the XFS buffer LRU reference count error injection tag to
+> > > recreate the conditions for the bug. Create a file with a
+> > > multi-level attr fork tree and then unlink it with buffer caching
+> > > disabled.
+> > > 
+> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > > ---
+> > > 
+> > > Note that this test depends on a pending[1] XFS error injection tag.
+> > > 
+> > > Brian
+> > > 
+> > > [1] https://marc.info/?l=linux-xfs&m=150765408521029&w=2
+> > 
+> > I ran this test with above patch applied (v4.14-rc4 based), and kernel
+> > crashed as expected. Then cherry-pick commit f35c5e10c6ed ("xfs: reinit
+> > btree pointer on attr tree inactivation walk") and test passed. So test
+> > looks good to me, just that I added 'dangerous' group and referenced the
+> > fix in commit log and test description.
+> > 
+> 
+> I don't think dangerous is really necessary because this test won't run
+> on any kernels prior to those with the patch above, which is still
+> pending, and the crash issue had already been addressed in commit
+> cd87d8679 ("xfs: don't crash on unexpected holes in dir/attr btrees").
+> 
+> There is technically a crash possibility for custom kernels that
+> backport the later errortag patch without the earlier crash/corruption
+> fix, as you have for testing purposes. I think that is out of the
+> ordinary and doesn't really justify tagging the test, IMO.
 
-Like this:
-+/test2/fsstress.1582: No such file or directory
+That makes sense, I'll drop dangerous group, thanks!
 
-This trivial fix will check the return value and print detail
-error info if fail.
-
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
----
- ltp/fsstress.c | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
-
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 96f48b1..1962d14 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -493,7 +493,11 @@ int main(int argc, char **argv)
-             exit(1);
-         }
- 
--	(void)mkdir(dirname, 0777);
-+	if (mkdir((const char *)dirname, 0777) < 0) {
-+		fprintf(stderr, "mkdir %s failed: %s\n", dirname,
-+			strerror(errno));
-+		exit(1);
-+	}
- 	if (logname && logname[0] != '/') {
- 		if (getcwd(rpath, sizeof(rpath)) < 0){
- 			perror("getcwd failed");
-@@ -503,7 +507,8 @@ int main(int argc, char **argv)
- 		rpath[0] = '\0';
- 	}
- 	if (chdir(dirname) < 0) {
--		perror(dirname);
-+		fprintf(stderr, "chdir %s failed: %s\n", dirname,
-+			strerror(errno));
- 		exit(1);
- 	}
- 	if (logname) {
-@@ -959,7 +964,11 @@ doproc(void)
- 
- 	dividend = (operations + execute_freq) / (execute_freq + 1);
- 	sprintf(buf, "p%x", procid);
--	(void)mkdir(buf, 0777);
-+	if (mkdir((const char *)buf, 0777) < 0) {
-+		fprintf(stderr, "mkdir %s failed: %s\n", buf,
-+			strerror(errno));
-+		exit(1);
-+	}
- 	if (chdir(buf) < 0 || stat64(".", &statbuf) < 0) {
- 		perror(buf);
- 		_exit(1);
--- 
-1.8.3.1
-
+Eryu
