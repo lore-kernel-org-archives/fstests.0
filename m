@@ -1,84 +1,111 @@
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:43511 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932280AbdJPVLm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Oct 2017 17:11:42 -0400
-MIME-Version: 1.0
-In-Reply-To: <CAFk8rvZoOcU4Di8mkV_uPd3e4ccqPrB5kg2Y5WufhJX6W73k7w@mail.gmail.com>
-References: <1503830683-21455-1-git-send-email-amir73il@gmail.com>
- <59C8D147.1060608@cn.fujitsu.com> <CAOQ4uxgnK3mGKG+owRUNGyDVOCeicArwaufGgwXaSVxC26+peQ@mail.gmail.com>
- <CAFk8rvYvrGo6SjA6e0yj0XL_BARMmZoofB5kESM4EY4S2n-==w@mail.gmail.com>
- <59D5DEE0.6080506@cn.fujitsu.com> <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
- <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
- <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
- <20171007032917.bntgnubthdstmrrt@thunk.org> <59DDFC47.3050300@cn.fujitsu.com>
- <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
- <CAOQ4uxjtf8_y7Hmb4GU9YN7DvMa7WNtpeRzGoK5m2=Vw=ChStA@mail.gmail.com> <CAFk8rvZoOcU4Di8mkV_uPd3e4ccqPrB5kg2Y5WufhJX6W73k7w@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 17 Oct 2017 00:11:40 +0300
-Message-ID: <CAOQ4uxiKdRq1KyiEW-d9rp+hWQanVzMXQa1vW2JHmhtEVM1-GA@mail.gmail.com>
+Received: from imap.thunk.org ([74.207.234.97]:53978 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754985AbdJQAJd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 16 Oct 2017 20:09:33 -0400
+Date: Mon, 16 Oct 2017 20:09:25 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
  delalloc after a crash
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20171017000925.jdh6j66ejnebbckg@thunk.org>
+References: <59D5DEE0.6080506@cn.fujitsu.com>
+ <CAFk8rvbi3MHbRBtaZVTJKDcORaDTtMpwy2X2ZdXTZt=LE5smZw@mail.gmail.com>
+ <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
+ <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
+ <20171007032917.bntgnubthdstmrrt@thunk.org>
+ <59DDFC47.3050300@cn.fujitsu.com>
+ <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
+ <CAOQ4uxjtf8_y7Hmb4GU9YN7DvMa7WNtpeRzGoK5m2=Vw=ChStA@mail.gmail.com>
+ <CAFk8rvZoOcU4Di8mkV_uPd3e4ccqPrB5kg2Y5WufhJX6W73k7w@mail.gmail.com>
+ <CAOQ4uxiKdRq1KyiEW-d9rp+hWQanVzMXQa1vW2JHmhtEVM1-GA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxiKdRq1KyiEW-d9rp+hWQanVzMXQa1vW2JHmhtEVM1-GA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ashlie Martinez <ashmrtn@utexas.edu>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, Theodore Tso <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Ashlie Martinez <ashmrtn@utexas.edu>, Xiao Yang <yangx.jy@cn.fujitsu.com>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Vijay Chidambaram <vvijay03@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 16, 2017 at 10:32 PM, Ashlie Martinez <ashmrtn@utexas.edu> wrote:
-> Amir,
->
-> I know this is a bit late, but I've spent some time working through
-> the disk image that you provided (so that I could determine how/if I
-> could modify CrashMonkey to catch errors like this) and I don't think
-> I understand what state the disk image reflects.
+On Tue, Oct 17, 2017 at 12:11:40AM +0300, Amir Goldstein wrote:
+> 
+> The disk image SHOULD reflect a state on a disk after the power was
+> cut in the middle of mounted fs. Then power came back on, filesystem
+> was mounted, journal recovered, then filesystem was cleanly unmounted.
+> At this stage, I don't expect there should be anything interesting in the
+> journal.
 
-The disk image SHOULD reflect a state on a disk after the power was
-cut in the middle of mounted fs. Then power came back on, filesystem
-was mounted, journal recovered, then filesystem was cleanly unmounted.
-At this stage, I don't expect there should be anything interesting in the
-journal.
+I suspect what Ashlie was hoping for was a file system image *before*
+the file system was remounted and the journal replayed (and then
+truncated).  That would allow for an analysis of image right after the
+simulated power cut, so it could be seen what was in the journal.
 
-> After digging around
-> the journal of the disk image you provided, I found that the first 10
-> journal blocks are used, with the journal superblock being placed in
-> the very first block of the journal. The journal superblock says that
-> the first journal transaction ID that should be in the journal is
-> transaction ID 4. However, dumping the other journal blocks, I found
-> that the next block is a descriptor block for transaction ID 2. The
-> rest of the journal blocks are data blocks for that transaction plus a
-> transaction commit block. This seems a little odd considering that the
-> journal refers to a 4th transaction, which I have not been able to
-> find (I quickly dumped the first 50 blocks in debugfs and found the
-> rest to contain only zeros).
->
+The only way to get that is to modify the test so that it aborts
+before the file system is remounted.  I did some investigations where
+I ran commands (such as "debugfs -R "logdump -ac /dev/vdc") before the
+file system was remounted to gather debugging information.  That's how
+I tracked down the problem.  Unfortunately I never bothered to grab
+full file system snapshot, so I can't give Ashlie what she's hoping
+for.
 
-I did not spend time analyzing the image, so I'll take your word for it,
-but I can't help you understand your findings.
+> I believe umount call should be blocked until all writes have been flushed
+> out to flakey device.
 
-> With this in mind, I looked back at the xfstests code for controlling
-> the dm_flakey device. What I realized is the `nolockfs` flag is
-> provided both when it switches from the real device to the flakey
-> device that drops writes and when it switches from the flakey device
-> back to the real device. I know there is a call to umount once the
-> flakey device that drops writes is inserted, but do you think it is
-> possible that the flakey device is swapped back to the real device
-> before all the writes forced out by umount have made it to the flakey
-> device?
+That is correct.
 
-I believe umount call should be blocked until all writes have been flushed
-out to flakey device.
+> Ted explained that the bug related to very specific timing of flusher
+> thread vs. fallocate thread.
+> I was under the impression that CrashMonkey can only reorder writes
+> between recorded FLUSH requests, so I am not really sure how you intent to
+> modify CrashMonkey to catch this bug.
 
-> Unfortunately I still don't have a local machine that is
-> capable of reproducing your test results and I have not made any gce
-> test appliance images to test this yet, so I'm not sure if this is a
-> valid theory.
->
+The real issue is that what CrashMonkey is testing is given a test
+trace with N CACHE FLUSH operations, given a random X such that:
 
-Ted explained that the bug related to very specific timing of flusher
-thread vs. fallocate thread.
-I was under the impression that CrashMonkey can only reorder writes
-between recorded FLUSH requests, so I am not really sure how you intent to
-modify CrashMonkey to catch this bug.
+       1 <= X < N
 
-Cheers,
-Amir.
+If of the writes before the Xth CACHE FLUSH are completed, and a
+random set of writes between the Xth and (X+1)th CACHE FLUSH are
+completed, is the file system still consistent after a journal replay.
+
+That's a fine thing to test, although you can probably do that more
+efficiently by simply looking at all of the metadata writes between
+the Xth and X+1th CACHE FLUSH.  Those writes must be effective no-ops
+after the journal is replayed up to the Xth cache flush.  Which is to
+say, the writes must either (a) be to a data block, or (b) the
+contents of the writes must match either (a) the most recent journal
+entry for that block (up to the Xth cache flush), or (b) the current
+state of the disk.
+
+So if you are willing to assume knowledge of what is stored in the
+journal and how ext4 works, it should be possible to implement
+CrashMonkey much more effectively.
+
+
+The problem that this bug exposed is different sort of problem.  To
+find this bug, given the I/O stream, you can simply examine the file
+system state after each journal commit.  (e.g., after each CACHE
+FLUSH).  And just make sure the file system state is consistent.
+There is no need to include some random set of writes from the last
+commit epoch.
+
+The sort of searching of the test space new CrashMonkey' would have to
+test can't be done just by looking at the io traces.  Instead, a
+workload consists of a series of micro-transactions (jbd2 handles)
+which are assigned to a set of journal transactions.  Normally, which
+handles get assigned to a given transaction is based on timing (we
+close a transaction every 5 seconds), or based on the size of the
+transaction (we limit the number of blocks in a transaction), or based
+file system operations --- e.g., a fsync() will cause a transaction to
+close.
+
+This CrashMoney' would have to explore a different set of transaction
+boundaries (e.g., which handles are assigned to a transaction before a
+transaction closes), and whether the file system is consistent at each
+transaction boundary given a each possible assignment of handles to
+transactions.
+
+It's doable, but it would have to be done by logging the data passed
+to the jbd2 logging layer, and checking file system consistency at
+each handle boundary.
+
+							- Ted
