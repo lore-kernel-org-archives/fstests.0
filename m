@@ -1,51 +1,66 @@
-Received: from mail-qt0-f195.google.com ([209.85.216.195]:49687 "EHLO
-        mail-qt0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933044AbdJQLyR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Oct 2017 07:54:17 -0400
-Received: by mail-qt0-f195.google.com with SMTP id k31so2817684qta.6
-        for <fstests@vger.kernel.org>; Tue, 17 Oct 2017 04:54:17 -0700 (PDT)
+Received: from imap.thunk.org ([74.207.234.97]:56932 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932790AbdJQOlY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Oct 2017 10:41:24 -0400
+Date: Tue, 17 Oct 2017 10:41:17 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
+ delalloc after a crash
+Message-ID: <20171017144117.ispjgvwrespix5z3@thunk.org>
+References: <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
+ <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
+ <20171007032917.bntgnubthdstmrrt@thunk.org>
+ <59DDFC47.3050300@cn.fujitsu.com>
+ <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
+ <CAOQ4uxjtf8_y7Hmb4GU9YN7DvMa7WNtpeRzGoK5m2=Vw=ChStA@mail.gmail.com>
+ <CAFk8rvZoOcU4Di8mkV_uPd3e4ccqPrB5kg2Y5WufhJX6W73k7w@mail.gmail.com>
+ <CAOQ4uxiKdRq1KyiEW-d9rp+hWQanVzMXQa1vW2JHmhtEVM1-GA@mail.gmail.com>
+ <20171017000925.jdh6j66ejnebbckg@thunk.org>
+ <CAPaz=E+jFuOmRk8+EmVhNawwogNzW3VkciFrCc0Fk23OfGbwuA@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1508210445-27135-1-git-send-email-houtao1@huawei.com>
-References: <1508210445-27135-1-git-send-email-houtao1@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 17 Oct 2017 14:54:16 +0300
-Message-ID: <CAOQ4uxjZzkWNzYKyFFBab0+pY=0=mHpA3ASc2UMJqn3AYrrNqg@mail.gmail.com>
-Subject: Re: [PATCH] log-writes: fix possible infinite loop in zero_range()
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAPaz=E+jFuOmRk8+EmVhNawwogNzW3VkciFrCc0Fk23OfGbwuA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Hou Tao <houtao1@huawei.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Vijay Chidambaram <vvijay03@gmail.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Ashlie Martinez <ashmrtn@utexas.edu>, Eryu Guan <eguan@redhat.com>, Ext4 <linux-ext4@vger.kernel.org>, Josef Bacik <jbacik@fb.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 17, 2017 at 6:20 AM, Hou Tao <houtao1@huawei.com> wrote:
-> Found it when trying to remove the limitation of log->max_zero_size.
->
-> Signed-off-by: Hou Tao <houtao1@huawei.com>
+On Tue, Oct 17, 2017 at 12:43:20AM +0000, Vijay Chidambaram wrote:
+> It does expand our already-large search space, but our first order of
+> business is making sure CrashMonkey can reproduce every crash-consistency
+> bug reported in recent times (mostly by Amir :) ). So for now we were just
+> analyzing the bug and trying to understand it, but it looks like the
+> post-recovery image is not very useful for this.
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Right, the post-recovery (after the journal replayed) is not very
+useful.  Unfortunately, the pre-recovery (after the power cut, but
+before the journal replay) I suspect won't be terribly interesting
+either.  It will show that the corruption is baked into the journal
+--- which is to say, the problem wasn't in whether the calls to the
+jbd2 layer were correct --- but rather, that one of the file system
+mutations in a specific jbd2 handle's "micro-transaction" left the
+file system is an inconsistent state.
 
-> ---
->  src/log-writes/log-writes.c | 3 +++
->  1 file changed, 3 insertions(+)
->
-> diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-> index fab447a..0939157 100644
-> --- a/src/log-writes/log-writes.c
-> +++ b/src/log-writes/log-writes.c
-> @@ -65,6 +65,9 @@ static int zero_range(struct log *log, u64 start, u64 len)
->
->         memset(buf, 0, bufsize);
->         while (len) {
-> +               if (len < bufsize)
-> +                       bufsize = len;
-> +
->                 ret = pwrite(log->replayfd, buf, bufsize, start);
->                 if (ret != bufsize) {
->                         fprintf(stderr, "Error zeroing file: %d\n", errno);
-> --
-> 2.5.0
->
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Not a terrible inconsistency, and it would be quickly papered over in
+a follow-up handle --- but one where if the handle which left the file
+system in an inconsistent state, and the handle which cleaned it up
+were in different transactions, and the power cut happened after the
+first transaction, the file system be left in a state where e2fsck
+would complain.
+
+So if you have the I/O trace where the handles in question were
+assigned to the right (wrong) set of transactions, then yes, you'll
+see the problem, just as the xfstest will see the problem.
+
+But if you want to improve the CrashMonkey's search of the problem
+space, it will require higher-level logging, because this is really a
+different sort of bug.  CrashMonkey will find (a) bugs in jbd2, and
+(b) bugs in how the jbd2 layer is called.  This bug is really a bug in
+ext4 implementation, because it is in *how* the file system was
+mutated that temporarily left it in an inconsistent state, and that's
+a different thing from (a) or (b).  Which is great --- it's arguably
+additional research work that can be segregated into a different
+"Minimum Publishable Unit".  :-)
+
+					- Ted
