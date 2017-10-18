@@ -1,93 +1,160 @@
-Received: from mail-ua0-f170.google.com ([209.85.217.170]:49870 "EHLO
-        mail-ua0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754177AbdJQXRG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Oct 2017 19:17:06 -0400
-MIME-Version: 1.0
-In-Reply-To: <20171017144117.ispjgvwrespix5z3@thunk.org>
-References: <CAOQ4uxgc77_P472KEyHfAXSOE6DD7c=2VrJWBJT6ahiSYb=iJQ@mail.gmail.com>
- <CAFk8rvYtyraezVEP1e3LFEE+9t5YoRH2YwjKxex8hgSY74Lw7A@mail.gmail.com>
- <20171007032917.bntgnubthdstmrrt@thunk.org> <59DDFC47.3050300@cn.fujitsu.com>
- <CAFk8rvbi6eDn4P7rfBr6+90xbsQcfEBJAp0wQh+tczNEwdMTpw@mail.gmail.com>
- <CAOQ4uxjtf8_y7Hmb4GU9YN7DvMa7WNtpeRzGoK5m2=Vw=ChStA@mail.gmail.com>
- <CAFk8rvZoOcU4Di8mkV_uPd3e4ccqPrB5kg2Y5WufhJX6W73k7w@mail.gmail.com>
- <CAOQ4uxiKdRq1KyiEW-d9rp+hWQanVzMXQa1vW2JHmhtEVM1-GA@mail.gmail.com>
- <20171017000925.jdh6j66ejnebbckg@thunk.org> <CAPaz=E+jFuOmRk8+EmVhNawwogNzW3VkciFrCc0Fk23OfGbwuA@mail.gmail.com>
- <20171017144117.ispjgvwrespix5z3@thunk.org>
-From: Vijay Chidambaram <vvijay03@gmail.com>
-Date: Tue, 17 Oct 2017 18:16:24 -0500
-Message-ID: <CAPaz=EJ7jOG1Ji2w7+7Z82nfMvYR7C6puDoaQQ5fpM=UysBPjg@mail.gmail.com>
-Subject: Re: [PATCH] ext4: fix interaction between i_size, fallocate, and
- delalloc after a crash
-Content-Type: text/plain; charset="UTF-8"
+Received: from mail.kernel.org ([198.145.29.99]:42272 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S964939AbdJRFUx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Oct 2017 01:20:53 -0400
+From: Shaohua Li <shli@kernel.org>
+Subject: [PATCH] xfstests: add a simple cgroup2 writeback test
+Date: Tue, 17 Oct 2017 22:20:49 -0700
+Message-Id: <3d68f8b67b575bd82083db4111aa4c5b75be7830.1508303489.git.shli@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Amir Goldstein <amir73il@gmail.com>, Ashlie Martinez <ashmrtn@utexas.edu>, Eryu Guan <eguan@redhat.com>, Ext4 <linux-ext4@vger.kernel.org>, Josef Bacik <jbacik@fb.com>, Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Kernel-team@fb.com, Dave Chinner <david@fromorbit.com>, Shaohua Li <shli@fb.com>
 List-ID: <fstests@vger.kernel.org>
 
-Amir, thank you for providing io recording, this is really useful!
-Most of our work in recent weeks has driven by your input and your
-posts to the mailing list!
+From: Shaohua Li <shli@fb.com>
 
-Ted, I agree with your characterization of the bug. Its true that
-CrashMonkey will be missing context for certain bugs, and for those
-kinds of bugs, we will probably have a different project :)
+If filesystem supports cgroup2 writeback, the writeback IO should belong
+to the cgroup which writes the file. To verify this, we set a write
+bandwidth limit for a cgroup using block-throttling, the writeback IO
+should be throttled according to the write bandwidth.
 
-But for now, we are trying to widen the scope of CrashMonkey as much
-as we can. I think for the current bug, we can handle it in the
-following way:
-1. run CrashMonkey with the smallest journal possible
-2. in the setup phase of CrashMonkey, do N random metadata operations
-(that will fill up some percentage of the journal space)
-3. run the test workload and collect the IO trace
+Thanks Dave Chinner's idea to use syncfs to wait for writeback
+completion.
 
-We will do steps 2 and 3 with different N. For this bug, there must be
-a particular N that will force the micro-transaction to be at the end
-of the journal tx, revealing the bug.
+Signed-off-by: Shaohua Li <shli@fb.com>
+---
+ common/cgroup2        | 18 +++++++++++++
+ tests/generic/463     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/463.out |  3 +++
+ tests/generic/group   |  1 +
+ 4 files changed, 97 insertions(+)
+ create mode 100644 common/cgroup2
+ create mode 100755 tests/generic/463
+ create mode 100644 tests/generic/463.out
 
-In general, it might be good for CrashMonkey to force the metadata
-from the test workload to be distributed across different journal
-transactions. The trick is to do it without modifying the file system
-itself.
+diff --git a/common/cgroup2 b/common/cgroup2
+new file mode 100644
+index 00000000..bf935fee
+--- /dev/null
++++ b/common/cgroup2
+@@ -0,0 +1,18 @@
++#!/bin/bash
++# cgroup2 specific common functions
++
++export CGROUP2_PATH="/sys/fs/cgroup"
++
++_require_cgroup2()
++{
++    if [ ! -f ${CGROUP2_PATH}/cgroup.subtree_control ]; then
++        _notrun "Test requires cgroup2 enabled"
++    fi
++}
++
++_get_scratch_dev_devt()
++{
++    ls -l $SCRATCH_DEV | awk '{printf("%s:%s", substr($5, 1, length($5)-1), 0)}'
++}
++
++/bin/true
+diff --git a/tests/generic/463 b/tests/generic/463
+new file mode 100755
+index 00000000..620a14a4
+--- /dev/null
++++ b/tests/generic/463
+@@ -0,0 +1,75 @@
++#! /bin/bash
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/cgroup2
++
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++cgname=`mktemp -du ${CGROUP2_PATH}/test.XXXXXX`
++_cleanup()
++{
++    cd /
++    _scratch_unmount
++    sync
++    rmdir $cgname
++}
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_cgroup2
++
++# Setup Filesystem
++_scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
++
++_scratch_mount || _fail "mount failed"
++
++test_speed()
++{
++    start=$(date +%s)
++    $XFS_IO_PROG -f -d -c "pwrite -b 1m 0 500m" "$SCRATCH_MNT/image" \
++        > /dev/null 2>&1
++    echo $(($(date +%s) - $start))
++}
++time=$(test_speed)
++
++if [ $time -gt 25 ]; then
++    echo "Disk is too slow, make sure disk can do 20MB/s at least"
++    status=1
++    exit 1
++fi
++
++echo "Disk speed is ok, start throttled writeback test"
++
++echo +io > ${CGROUP2_PATH}/cgroup.subtree_control
++mkdir $cgname
++echo "$(_get_scratch_dev_devt) wbps=$((5*1024*1024))" > $cgname/io.max
++
++run_writeback()
++{
++    start=$(date +%s)
++    $XFS_IO_PROG -f -c "pwrite 0 500m" -c "syncfs" "$SCRATCH_MNT/image" \
++        > /dev/null 2>&1
++    echo $(($(date +%s) - $start))
++}
++time=$(
++echo $BASHPID > $cgname/cgroup.procs;
++run_writeback
++)
++_within_tolerance "Throttled writeback runtime" $time 100 10% -v
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/463.out b/tests/generic/463.out
+new file mode 100644
+index 00000000..c69f87c2
+--- /dev/null
++++ b/tests/generic/463.out
+@@ -0,0 +1,3 @@
++QA output created by 463
++Disk speed is ok, start throttled writeback test
++Throttled writeback runtime is in range
+diff --git a/tests/generic/group b/tests/generic/group
+index f2a6cdad..ea7b6956 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -465,3 +465,4 @@
+ 460 auto quick rw
+ 461 auto shutdown stress
+ 462 auto quick dax
++463 cgroup writeback test
+-- 
+2.11.0
 
-Thanks,
-Vijay
-
-On Tue, Oct 17, 2017 at 9:41 AM, Theodore Ts'o <tytso@mit.edu> wrote:
-> On Tue, Oct 17, 2017 at 12:43:20AM +0000, Vijay Chidambaram wrote:
->> It does expand our already-large search space, but our first order of
->> business is making sure CrashMonkey can reproduce every crash-consistency
->> bug reported in recent times (mostly by Amir :) ). So for now we were just
->> analyzing the bug and trying to understand it, but it looks like the
->> post-recovery image is not very useful for this.
->
-> Right, the post-recovery (after the journal replayed) is not very
-> useful.  Unfortunately, the pre-recovery (after the power cut, but
-> before the journal replay) I suspect won't be terribly interesting
-> either.  It will show that the corruption is baked into the journal
-> --- which is to say, the problem wasn't in whether the calls to the
-> jbd2 layer were correct --- but rather, that one of the file system
-> mutations in a specific jbd2 handle's "micro-transaction" left the
-> file system is an inconsistent state.
->
-> Not a terrible inconsistency, and it would be quickly papered over in
-> a follow-up handle --- but one where if the handle which left the file
-> system in an inconsistent state, and the handle which cleaned it up
-> were in different transactions, and the power cut happened after the
-> first transaction, the file system be left in a state where e2fsck
-> would complain.
->
-> So if you have the I/O trace where the handles in question were
-> assigned to the right (wrong) set of transactions, then yes, you'll
-> see the problem, just as the xfstest will see the problem.
->
-> But if you want to improve the CrashMonkey's search of the problem
-> space, it will require higher-level logging, because this is really a
-> different sort of bug.  CrashMonkey will find (a) bugs in jbd2, and
-> (b) bugs in how the jbd2 layer is called.  This bug is really a bug in
-> ext4 implementation, because it is in *how* the file system was
-> mutated that temporarily left it in an inconsistent state, and that's
-> a different thing from (a) or (b).  Which is great --- it's arguably
-> additional research work that can be segregated into a different
-> "Minimum Publishable Unit".  :-)
->
->                                         - Ted
