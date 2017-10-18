@@ -1,160 +1,62 @@
-Received: from mail.kernel.org ([198.145.29.99]:42272 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:39918 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S964939AbdJRFUx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Oct 2017 01:20:53 -0400
-From: Shaohua Li <shli@kernel.org>
-Subject: [PATCH] xfstests: add a simple cgroup2 writeback test
-Date: Tue, 17 Oct 2017 22:20:49 -0700
-Message-Id: <3d68f8b67b575bd82083db4111aa4c5b75be7830.1508303489.git.shli@fb.com>
+        id S935588AbdJRH00 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 18 Oct 2017 03:26:26 -0400
+Date: Wed, 18 Oct 2017 15:26:25 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/2][v2] perf/001: a random write buffered fio perf test
+Message-ID: <20171018072625.GI10593@eguan.usersys.redhat.com>
+References: <1507665511-23515-1-git-send-email-josef@toxicpanda.com>
+ <1507665511-23515-2-git-send-email-josef@toxicpanda.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1507665511-23515-2-git-send-email-josef@toxicpanda.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Kernel-team@fb.com, Dave Chinner <david@fromorbit.com>, Shaohua Li <shli@fb.com>
+To: Josef Bacik <josef@toxicpanda.com>
+Cc: fstests@vger.kernel.org, tytso@mit.edu, david@fromorbit.com, darrick.wong@oracle.com, Josef Bacik <jbacik@fb.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Shaohua Li <shli@fb.com>
+Hi Josef,
 
-If filesystem supports cgroup2 writeback, the writeback IO should belong
-to the cgroup which writes the file. To verify this, we set a write
-bandwidth limit for a cgroup using block-throttling, the writeback IO
-should be throttled according to the write bandwidth.
+On Tue, Oct 10, 2017 at 03:58:31PM -0400, Josef Bacik wrote:
+> From: Josef Bacik <jbacik@fb.com>
+> 
+> This uses the new fio results perf helpers to run a rand write buffered
+> workload on the scratch device.
+> 
+> Signed-off-by: Josef Bacik <jbacik@fb.com>
+> ---
+> v1->v2:
+> - updated to use the new _require_fio_results helper and moved the
+>   _fio_results_init call to after teh _require_fio check
 
-Thanks Dave Chinner's idea to use syncfs to wait for writeback
-completion.
+I tried this v2 a bit, but met some problems, I haven't looked into the
+code closely though, just wanted to get a first impression of this perf
+test frame work.
 
-Signed-off-by: Shaohua Li <shli@fb.com>
----
- common/cgroup2        | 18 +++++++++++++
- tests/generic/463     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/463.out |  3 +++
- tests/generic/group   |  1 +
- 4 files changed, 97 insertions(+)
- create mode 100644 common/cgroup2
- create mode 100755 tests/generic/463
- create mode 100644 tests/generic/463.out
+- missing perf/group file, so test won't be run by check
+- this test writes 16G files to SCRATCH_DEV by default, and my device
+  has only 15G, so fio failed with ENOSPC, I think we need a require
+  rule on the test device
+- after working around the group file and device size issue, test still
+  failed like
 
-diff --git a/common/cgroup2 b/common/cgroup2
-new file mode 100644
-index 00000000..bf935fee
---- /dev/null
-+++ b/common/cgroup2
-@@ -0,0 +1,18 @@
-+#!/bin/bash
-+# cgroup2 specific common functions
-+
-+export CGROUP2_PATH="/sys/fs/cgroup"
-+
-+_require_cgroup2()
-+{
-+    if [ ! -f ${CGROUP2_PATH}/cgroup.subtree_control ]; then
-+        _notrun "Test requires cgroup2 enabled"
-+    fi
-+}
-+
-+_get_scratch_dev_devt()
-+{
-+    ls -l $SCRATCH_DEV | awk '{printf("%s:%s", substr($5, 1, length($5)-1), 0)}'
-+}
-+
-+/bin/true
-diff --git a/tests/generic/463 b/tests/generic/463
-new file mode 100755
-index 00000000..620a14a4
---- /dev/null
-+++ b/tests/generic/463
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/cgroup2
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+cgname=`mktemp -du ${CGROUP2_PATH}/test.XXXXXX`
-+_cleanup()
-+{
-+    cd /
-+    _scratch_unmount
-+    sync
-+    rmdir $cgname
-+}
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_cgroup2
-+
-+# Setup Filesystem
-+_scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
-+
-+_scratch_mount || _fail "mount failed"
-+
-+test_speed()
-+{
-+    start=$(date +%s)
-+    $XFS_IO_PROG -f -d -c "pwrite -b 1m 0 500m" "$SCRATCH_MNT/image" \
-+        > /dev/null 2>&1
-+    echo $(($(date +%s) - $start))
-+}
-+time=$(test_speed)
-+
-+if [ $time -gt 25 ]; then
-+    echo "Disk is too slow, make sure disk can do 20MB/s at least"
-+    status=1
-+    exit 1
-+fi
-+
-+echo "Disk speed is ok, start throttled writeback test"
-+
-+echo +io > ${CGROUP2_PATH}/cgroup.subtree_control
-+mkdir $cgname
-+echo "$(_get_scratch_dev_devt) wbps=$((5*1024*1024))" > $cgname/io.max
-+
-+run_writeback()
-+{
-+    start=$(date +%s)
-+    $XFS_IO_PROG -f -c "pwrite 0 500m" -c "syncfs" "$SCRATCH_MNT/image" \
-+        > /dev/null 2>&1
-+    echo $(($(date +%s) - $start))
-+}
-+time=$(
-+echo $BASHPID > $cgname/cgroup.procs;
-+run_writeback
-+)
-+_within_tolerance "Throttled writeback runtime" $time 100 10% -v
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/463.out b/tests/generic/463.out
-new file mode 100644
-index 00000000..c69f87c2
---- /dev/null
-+++ b/tests/generic/463.out
-@@ -0,0 +1,3 @@
-+QA output created by 463
-+Disk speed is ok, start throttled writeback test
-+Throttled writeback runtime is in range
-diff --git a/tests/generic/group b/tests/generic/group
-index f2a6cdad..ea7b6956 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -465,3 +465,4 @@
- 460 auto quick rw
- 461 auto shutdown stress
- 462 auto quick dax
-+463 cgroup writeback test
--- 
-2.11.0
+perf/001.full:
+....
+# /usr/local/bin/fio --output-format=json --output=/tmp/30750.json /tmp/30750.fio
+# /usr/bin/python2 /root/xfstests/src/perf/fio-insert-and-compare.py -c default -d /root/xfstests/results//fio-results.db -n 001 /tmp/30750.json
+Traceback (most recent call last):
+  File "/root/xfstests/src/perf/fio-insert-and-compare.py", line 28, in <module>
+    result_data.insert_result(data)
+  File "/root/xfstests/src/perf/ResultData.py", line 43, in insert_result
+    self._insert_obj('fio_jobs', job)
+  File "/root/xfstests/src/perf/ResultData.py", line 35, in _insert_obj
+    cur.execute(cmd, tuple(values))
+sqlite3.IntegrityError: fio_jobs.trim_lat_ns_mean may not be NULL
+failed: '/usr/bin/python2 /root/xfstests/src/perf/fio-insert-and-compare.py -c default -d /root/xfstests/results//fio-results.db -n 001 /tmp/30750.json'
 
+Am I missing something? BTW, I was using fio-2.6-2.el7.x86_64.
+
+Thanks,
+Eryu
