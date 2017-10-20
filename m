@@ -1,88 +1,207 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:31671 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753269AbdJTR51 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 20 Oct 2017 13:57:27 -0400
-Date: Fri, 20 Oct 2017 10:56:48 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 4/5] generic/45[34]: force UTF-8 codeset to enable utf-8
- namer checks in xfs_scrub
-Message-ID: <20171020175648.GA4741@magnolia>
-References: <150836985024.27213.3715197937819365388.stgit@magnolia>
- <150836987529.27213.1335818370452284585.stgit@magnolia>
- <20171019071842.GA28970@infradead.org>
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:49915 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752752AbdJTT46 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 20 Oct 2017 15:56:58 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <20171019071842.GA28970@infradead.org>
+In-Reply-To: <20171020170558.GY4755@magnolia>
+References: <CADxRZqwUfeGJOxsdEyaOHHJPmQUp8sNkxQdZPOKjyEejeZXMmA@mail.gmail.com>
+ <20171020170558.GY4755@magnolia>
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Fri, 20 Oct 2017 22:56:56 +0300
+Message-ID: <CADxRZqx2xitDTYG2cD21mYXFZvNKmNu6VdW+ftfom0wzgr-iUQ@mail.gmail.com>
+Subject: Re: [fstests] hardcoded values in common/rc for xfs (and probably others)
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Christoph Hellwig <hch@infradead.org>
-Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 19, 2017 at 12:18:42AM -0700, Christoph Hellwig wrote:
-> On Wed, Oct 18, 2017 at 04:37:55PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> >=20
-> > The upcoming xfs_scrub tool will have the ability to warn about
-> > suspicious UTF-8 normalization collisions.  We want generic/45[34] to=
- be
-> > able to test this functionality, but to do that we have to forcibly s=
-et
-> > the codeset to UTF-8 via LC_ALL since the rest of xfstests only uses
-> > LC_ALL=3DC.
->=20
-> Wait.  Where do you want to validate UTF-8 normalization?  There is
-> absolutely no guarantee that someone uses UTF-8, so any reliance on
-> the character set in the file system is bogus.
+On Fri, Oct 20, 2017 at 8:05 PM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> On Fri, Oct 20, 2017 at 07:52:31PM +0300, Anatoly Pugachev wrote:
+>> Can someone look into this issue?
+>
+> Does the following xfstests patch help?
+>
+> --D
+>
+> diff --git a/common/punch b/common/punch
+> index c4ed261..5648bd8 100644
+> --- a/common/punch
+> +++ b/common/punch
+> @@ -341,13 +341,26 @@ _test_generic_punch()
+>         testfile=$6
+>         multiple=1
+>
+> +       # This routine was originally written for fallocate modes that
+> +       # don't have alignment requirements so the (sort of) hardcoded
+> +       # 4k offsets didn't matter.  fcollapse and finsert require
+> +       # block-aligned arguments, so increase $multiple until we get
+> +       # to the file's minimum data block size.
+> +       case "$zero_cmd" in
+> +       "fcollapse"|"finsert")
+> +               touch $testfile
+> +               bs=$(_get_file_block_size $testfile)
+> +               test "$bs" -gt 4096 && multiple=$((bs / 4096))
+> +               ;;
+> +       esac
+> +
+>         #
+>         # If we are testing collapse range, we increare all the offsets of this
+>         # test by a factor of 4. We do this because unlike punch, collapse
+>         # range also decreases the size of file hence require bigger offsets.
+>         #
+>         if [ "$zero_cmd" == "fcollapse" ]; then
+> -               multiple=4
+> +               multiple=$((multiple * 4))
+>         fi
+>
+>         _4k="$((multiple * 4))k"
+> diff --git a/common/rc b/common/rc
+> index fe68d67..b585016 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2063,8 +2063,8 @@ _require_xfs_io_command()
+>                 param_checked=1
+>                 ;;
+>         "fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" | "funshare")
+> -               testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
+> -                       -c "$command 4k 8k" $testfile 2>&1`
+> +               testio=`$XFS_IO_PROG -F -f -c "pwrite 0 256k" -c "fsync" \
+> +                       -c "$command 64k 128k" $testfile 2>&1`
+>                 ;;
+>         "fiemap")
+>                 testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
 
-I'll start by summarizing a problem statement[1].  In XFS (and nearly
-all the other filesystems), neither the on-disk format nor the kernel
-driver care about the contents of file names or attribute names; they
-treat these as an arbitrary byte sequence.  Userspace can set whatever
-localization and encoding parameters it wants, and the kernel doesn't
-care except for '\0' and '/'.  That doesn't change.
+Darrick,
 
-In modern Linux userspace, however, we /do/ care about being able to
-encode Unicode codepoints into byte streams, so we encode them in UTF8.
-Because there's two different normalization methods in Unicode, this
-leads to the funny situation where two unique filename byte sequences
-can render the same but point to totally different files:
+I had to change from
+bs=$(_get_file_block_size $testfile)
+to
+bs=$(_get_file_block_size $testdir)
 
-$ echo NFC > "$(echo -e "french_caf\xc3\xa9.txt")"
-$ echo NFD > "$(echo -e "french_caf\xcc\x81.txt")"
-$ ls -lai
-133 -rw-r--r-- 1 root root   4 Oct 20 10:40 french_cafe=CC=81.txt
-132 -rw-r--r-- 1 root root   4 Oct 20 10:40 french_caf=C3=A9.txt
-$ echo $LANG
-en_US.UTF-8
+since _get_file_block_size gets directory as a parameter (and i'm
+puzzled why it's called _get_file_block_size, if it really wants a
+directory as a parameter, and there's _get_block_size as well).
 
-At least on my computer, the two filenames render identically yet point
-to different inodes.  This could be used to mislead people into opening
-a malicious file whose name appears identical to a legitimate file.
+the patch makes test as passed, but with error.
 
-xfs_scrub is the (proposed) userspace component of XFS online fsck.  The
-first four phases simply call the in-kernel fsck code and pass status
-back, but the fifth phase walks the directory tree looking for problems.
+For example, with the default mkfs.xfs (4k block size), it is executed
+as follows:
 
-If xfs_scrub (the userspace component of online fsck) was built with
-libunistring and the LC_MESSAGES string contains "UTF-8", phase 5 will
-warn if it finds multiple filenames in a directory that normalize to the
-same string but point to different inodes.  Similarly, it will warn
-about colliding attribute names.  Warnings in xfs_scrub are for
-situations that warrant administrative review but are not filesystem
-corruptions.
+root@ttip:xfstests-dev# mkfs.xfs -f /dev/vdiskb1
+specified blocksize 4096 is less than device physical sector size 8192
+switching to logical sector size 512
+meta-data=/dev/vdiskb1           isize=512    agcount=4, agsize=1966016 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=0,
+rmapbt=0, reflink=0
+data     =                       bsize=4096   blocks=7864064, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+log      =internal log           bsize=4096   blocks=3839, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+root@ttip:xfstests-dev# ./check  generic/012
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/sparc64 ttip 4.14.0-rc5
+MKFS_OPTIONS  -- -f -m reflink=1 /dev/loop0
+MOUNT_OPTIONS -- /dev/loop0 /1/scratch
 
-IOWs, if userspace is configured for UTF-8, the userspace part of online
-fsck will flag suspicious-looking uses of Unicode for admin review.  The
-kernel remains uninvolved.
+generic/012 2s ... 1s
+Ran: generic/012
+Passed all 1 tests
 
---D
 
-[1] https://eclecticlight.co/2017/04/06/apfs-is-currently-unusable-with-m=
-ost-non-english-languages/
+but if I change block size, it ends with an error:
 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+root@ttip:xfstests-dev# mkfs.xfs -f -b size=8192 /dev/vdiskb1
+meta-data=/dev/vdiskb1           isize=512    agcount=4, agsize=983008 blks
+         =                       sectsz=8192  attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=0,
+rmapbt=0, reflink=0
+data     =                       bsize=8192   blocks=3932032, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=8192   ascii-ci=0 ftype=1
+log      =internal log           bsize=8192   blocks=1919, version=2
+         =                       sectsz=8192  sunit=1 blks, lazy-count=1
+realtime =none                   extsz=8192   blocks=0, rtextents=0
+root@ttip:xfstests-dev# ./check  generic/012
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/sparc64 ttip 4.14.0-rc5
+MKFS_OPTIONS  -- -f -m reflink=1 /dev/loop0
+MOUNT_OPTIONS -- /dev/loop0 /1/scratch
+
+generic/012 1s ... - output mismatch (see
+/1/mator/xfstests-dev/results/generic/012.out.bad)
+    --- tests/generic/012.out   2016-09-24 11:51:48.238890811 +0300
+    +++ /1/mator/xfstests-dev/results/generic/012.out.bad
+2017-10-20 21:54:51.594814663 +0300
+    @@ -1,49 +1,49 @@
+     QA output created by 012
+        1. into a hole
+    -f4f35d60b3cc18aaa6d8d92f0cd3708a
+    +0a9156c4e3c48ef827980639c4d1e263
+        2. into allocated space
+    -0: [0..95]: extent
+    -f1894a71ac539f6f90426d98a4990a47
+    ...
+    (Run 'diff -u tests/generic/012.out
+/1/mator/xfstests-dev/results/generic/012.out.bad'  to see the entire
+diff)
+Ran: generic/012
+Failures: generic/012
+Failed 1 of 1 tests
+
+root@ttip:xfstests-dev# cat results/generic/012.out.bad
+QA output created by 012
+        1. into a hole
+0a9156c4e3c48ef827980639c4d1e263
+        2. into allocated space
+0: [0..191]: extent
+6f1f8907250bdbf673e1e55212b56b82
+        3. into unwritten space
+0: [0..191]: extent
+39bf78f7c676fdcf11558ad3a1a23aef
+        4. hole -> data
+0: [0..127]: extent
+1: [128..191]: hole
+c9a5ea7ad1648eee6202850420432dfc
+        5. hole -> unwritten
+0: [0..127]: extent
+1: [128..191]: hole
+39bf78f7c676fdcf11558ad3a1a23aef
+        6. data -> hole
+0: [0..63]: extent
+1: [64..191]: hole
+39bf78f7c676fdcf11558ad3a1a23aef
+        7. data -> unwritten
+0: [0..127]: extent
+1: [128..191]: hole
+39bf78f7c676fdcf11558ad3a1a23aef
+        8. unwritten -> hole
+0: [0..63]: extent
+1: [64..191]: hole
+39bf78f7c676fdcf11558ad3a1a23aef
+        9. unwritten -> data
+0: [0..127]: extent
+1: [128..191]: hole
+c9a5ea7ad1648eee6202850420432dfc
+        10. hole -> data -> hole
+0: [0..63]: extent
+1: [64..127]: hole
+d5755b0153a84fc6789af22ab8d1bb04
+        11. data -> hole -> data
+0: [0..127]: extent
+27c9068d1b51da575a53ad34c57ca5cc
+        12. unwritten -> data -> unwritten
+0: [0..127]: extent
+d5755b0153a84fc6789af22ab8d1bb04
+        13. data -> unwritten -> data
+0: [0..127]: extent
+27c9068d1b51da575a53ad34c57ca5cc
+        14. data -> hole @ 0
+0: [0..191]: extent
+6f1f8907250bdbf673e1e55212b56b82
+root@ttip:xfstests-dev#
