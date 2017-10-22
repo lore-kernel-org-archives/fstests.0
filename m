@@ -1,296 +1,101 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:55107 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751182AbdJVG4D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 22 Oct 2017 02:56:03 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:44058 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751559AbdJVL0J (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 22 Oct 2017 07:26:09 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id CA6E0C049D49
+        for <fstests@vger.kernel.org>; Sun, 22 Oct 2017 11:26:08 +0000 (UTC)
+Date: Sun, 22 Oct 2017 19:26:06 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] ltp/fsstress: check mkdir(2) return value
+Message-ID: <20171022112606.GA3235@eguan.usersys.redhat.com>
+References: <1507964837-10820-1-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20171020212556.30816-1-ross.zwisler@linux.intel.com>
-References: <20171020052943.15104-1-ross.zwisler@linux.intel.com> <20171020212556.30816-1-ross.zwisler@linux.intel.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 22 Oct 2017 09:56:02 +0300
-Message-ID: <CAOQ4uxjWp3khOix__jqfsiyjhNehGtkqXXv1o7EuGB1j3b2moQ@mail.gmail.com>
-Subject: Re: [fstests PATCH v2] generic: add test for DAX MAP_SYNC support
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1507964837-10820-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: linux-kernel <linux-kernel@vger.kernel.org>, Josef Bacik <jbacik@fb.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Mike Snitzer <snitzer@redhat.com>, Shaohua Li <shli@kernel.org>, dm-devel@redhat.com, linux-nvdimm@lists.01.org, linux-raid@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 21, 2017 at 12:25 AM, Ross Zwisler
-<ross.zwisler@linux.intel.com> wrote:
-> Add a test that exercises DAX's new MAP_SYNC flag.
->
-> This test creates a file and writes to it via an mmap(), but never syncs
-> via fsync/msync.  This process is tracked via dm-log-writes, then replayed.
->
-> If MAP_SYNC is working the dm-log-writes replay will show the test file
-> with 1MiB of on-media block allocations.  This is because each allocating
-> page fault included an implicit metadata sync.  If MAP_SYNC isn't working
-> (which you can test by fiddling with the parameters to mmap()) the file
-> will be smaller or missing entirely.
->
-> Note that dm-log-writes doesn't track the data that we write via the
-> mmap(), so we can't do any data integrity checking.  We can only verify
-> that the metadata writes for the page faults happened.
->
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
->
+On Sat, Oct 14, 2017 at 03:07:17PM +0800, Xiong Zhou wrote:
+> If mkdir(2) fails, the following chdir(2) would fail either.
+> Although dirname and error message are printed, we don't know
+> which operation has failed.
+> 
+> Like this:
+> +/test2/fsstress.1582: No such file or directory
+> 
+> This trivial fix will check the return value and print detail
+> error info if fail.
+> 
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
->
-> Changes since v1:
->  - Addressed review feedback from Amir.  Thank you for the review!
+>  ltp/fsstress.c | 15 ++++++++++++---
+>  1 file changed, 12 insertions(+), 3 deletions(-)
+> 
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 96f48b1..1962d14 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -493,7 +493,11 @@ int main(int argc, char **argv)
+>              exit(1);
+>          }
+>  
+> -	(void)mkdir(dirname, 0777);
+> +	if (mkdir((const char *)dirname, 0777) < 0) {
+> +		fprintf(stderr, "mkdir %s failed: %s\n", dirname,
+> +			strerror(errno));
+> +		exit(1);
+> +	}
 
-Looks good.
+This changed current fsstress behavior and made some tests fail, e.g.
+generic/013, because fsstress exited with EEXIST if there was a
+pre-created test dir. e.g.
 
->
-> ---
->  .gitignore            |  1 +
->  common/dmlogwrites    |  1 -
->  src/Makefile          |  3 +-
->  src/t_map_sync.c      | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/466     | 76 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/466.out |  3 ++
->  tests/generic/group   |  1 +
->  7 files changed, 175 insertions(+), 2 deletions(-)
->  create mode 100644 src/t_map_sync.c
->  create mode 100755 tests/generic/466
->  create mode 100644 tests/generic/466.out
->
-> diff --git a/.gitignore b/.gitignore
-> index 2014c08..9fc0695 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -119,6 +119,7 @@
->  /src/t_getcwd
->  /src/t_holes
->  /src/t_immutable
-> +/src/t_map_sync
->  /src/t_mmap_cow_race
->  /src/t_mmap_dio
->  /src/t_mmap_fallocate
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index 247c744..5b57df9 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -23,7 +23,6 @@ _require_log_writes()
->         [ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
->                 _notrun "This test requires a valid \$LOGWRITES_DEV"
->
-> -       _exclude_scratch_mount_option dax
->         _require_dm_target log-writes
->         _require_test_program "log-writes/replay-log"
->  }
-> diff --git a/src/Makefile b/src/Makefile
-> index 3eb25b1..af7e7e9 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -13,7 +13,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
->         multi_open_unlink dmiperf unwritten_sync genhashnames t_holes \
->         t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
->         holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
-> -       t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro
-> +       t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
-> +       t_map_sync
->
->  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
->         preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/t_map_sync.c b/src/t_map_sync.c
-> new file mode 100644
-> index 0000000..29b546a
-> --- /dev/null
-> +++ b/src/t_map_sync.c
-> @@ -0,0 +1,92 @@
-> +#include <errno.h>
-> +#include <fcntl.h>
-> +#include <stdio.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <sys/mman.h>
-> +#include <sys/stat.h>
-> +#include <sys/types.h>
-> +#include <unistd.h>
-> +
-> +#define MiB(a) ((a)*1024*1024)
-> +
-> +/*
-> + * These two defines were added to the kernel via commits entitled
-> + * "mm: Define MAP_SYNC and VM_SYNC flags" and
-> + * "mm: introduce MAP_SHARED_VALIDATE, a mechanism to safely define new mmap
-> + * flags", respectively.
-> + */
-> +#ifndef MAP_SYNC
-> +#define MAP_SYNC 0x80000
-> +#endif
-> +
-> +#ifndef MAP_SHARED_VALIDATE
-> +#define MAP_SHARED_VALIDATE 0x3
-> +#endif
-> +
-> +void err_exit(char *op)
-> +{
-> +       fprintf(stderr, "%s: %s\n", op, strerror(errno));
-> +       exit(1);
-> +}
-> +
-> +void mark_log(char *logwrites_name, char *mark_name)
-> +{
-> +       char command[256];
-> +
-> +       snprintf(command, 256, "dmsetup message %s 0 mark %s",
-> +                       logwrites_name, mark_name);
-> +
-> +       if (system(command))
-> +               err_exit("mark_log");
-> +}
-> +
-> +int main(int argc, char *argv[])
-> +{
-> +       int page_size = getpagesize();
-> +       int len = MiB(1);
-> +       int i, fd, err;
-> +       char *data;
-> +
-> +       if (argc < 4) {
-> +               printf("Usage: %s <file> <logwrites_name> <mark_name>\n",
-> +                               basename(argv[0]));
-> +               exit(0);
-> +       }
-> +
-> +       fd = open(argv[1], O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
-> +       if (fd < 0)
-> +               err_exit("fd");
-> +
-> +       ftruncate(fd, len);
-> +
-> +       data = mmap(NULL, len, PROT_READ|PROT_WRITE,
-> +                       MAP_SHARED_VALIDATE|MAP_SYNC, fd, 0);
-> +       if (data == MAP_FAILED)
-> +               err_exit("mmap");
-> +
-> +       /*
-> +        * We intentionally don't sync 'fd' manually.  If MAP_SYNC is working
-> +        * these allocating page faults will cause the filesystem to sync its
-> +        * metadata so that when we replay the dm-log-writes log the test file
-> +        * will have 1 MiB worth of block allocations.
-> +        *
-> +        * dm-log-writes doesn't track the data that we write via the mmap(),
-> +        * so we can't check that, we can only verify that the metadata writes
-> +        * happened.
-> +        */
-> +       for (i = 0; i < len; i+=page_size)
-> +               data[i] = 0xff;
-> +
-> +       mark_log(argv[2], argv[3]);
-> +
-> +       err = munmap(data, len);
-> +       if (err < 0)
-> +               err_exit("munmap");
-> +
-> +       err = close(fd);
-> +       if (err < 0)
-> +               err_exit("close");
-> +
-> +       return 0;
-> +}
-> diff --git a/tests/generic/466 b/tests/generic/466
-> new file mode 100755
-> index 0000000..592213f
-> --- /dev/null
-> +++ b/tests/generic/466
-> @@ -0,0 +1,76 @@
-> +#! /bin/bash
-> +# FS QA Test No. 466
-> +#
-> +# Use md_log_writes to verify that MAP_SYNC actually syncs metadata during
-> +# page faults.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       _log_writes_cleanup
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmlogwrites
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_log_writes
-> +_require_scratch_dax
-> +_require_test_program "t_map_sync"
-> +
-> +_log_writes_init
-> +_log_writes_mkfs >> $seqres.full 2>&1
-> +_log_writes_mount -o dax
-> +
-> +src/t_map_sync $SCRATCH_MNT/test $LOGWRITES_NAME pre_unmap
-> +
-> +# Unmount the scratch dir and tear down the log writes target
-> +_log_writes_unmount
-> +_log_writes_remove
-> +_check_scratch_fs
-> +
-> +# check pre-unmap state
-> +_log_writes_replay_log pre_unmap
-> +_scratch_mount
-> +
-> +# We should see $SCRATCH_MNT/test as having 1MiB in block allocations
-> +du -sh $SCRATCH_MNT/test | _filter_scratch | _filter_spaces
-> +
-> +_scratch_unmount
-> +_check_scratch_fs
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/generic/466.out b/tests/generic/466.out
-> new file mode 100644
-> index 0000000..4c54d7a
-> --- /dev/null
-> +++ b/tests/generic/466.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 466
-> +1.0M SCRATCH_MNT/test
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index fbe0a7f..65328c6 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -468,3 +468,4 @@
->  463 auto quick clone dangerous
->  464 auto rw
->  465 auto rw quick aio
-> +466 auto quick dax
+mkdir /mnt/test/fsstress
+./ltp/fsstress -d /mnt/test/fsstress -n 10 -p 10 -v
+mkdir /mnt/test/fsstress failed: File exists
+
+>  	if (logname && logname[0] != '/') {
+>  		if (getcwd(rpath, sizeof(rpath)) < 0){
+>  			perror("getcwd failed");
+> @@ -503,7 +507,8 @@ int main(int argc, char **argv)
+>  		rpath[0] = '\0';
+>  	}
+>  	if (chdir(dirname) < 0) {
+> -		perror(dirname);
+> +		fprintf(stderr, "chdir %s failed: %s\n", dirname,
+> +			strerror(errno));
+>  		exit(1);
+>  	}
+>  	if (logname) {
+> @@ -959,7 +964,11 @@ doproc(void)
+>  
+>  	dividend = (operations + execute_freq) / (execute_freq + 1);
+>  	sprintf(buf, "p%x", procid);
+> -	(void)mkdir(buf, 0777);
+> +	if (mkdir((const char *)buf, 0777) < 0) {
+> +		fprintf(stderr, "mkdir %s failed: %s\n", buf,
+> +			strerror(errno));
+> +		exit(1);
+> +	}
+
+Same here.
+
+Thanks,
+Eryu
+
+>  	if (chdir(buf) < 0 || stat64(".", &statbuf) < 0) {
+>  		perror(buf);
+>  		_exit(1);
+> -- 
+> 1.8.3.1
+> 
 > --
-> 2.9.5
->
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
