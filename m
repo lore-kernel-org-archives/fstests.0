@@ -1,74 +1,196 @@
-Received: from mx2.suse.de ([195.135.220.15]:54302 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:53600 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932378AbdJYKcq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Oct 2017 06:32:46 -0400
-Subject: Re: [PATCH] fstests: btrfs/143: make test case more reliable
-References: <20171023205733.14896-1-bo.li.liu@oracle.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <c4849a9b-abe2-1729-0154-e301bc5e51b3@suse.com>
-Date: Wed, 25 Oct 2017 13:32:43 +0300
+        id S1750788AbdJYLEs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 25 Oct 2017 07:04:48 -0400
+Date: Wed, 25 Oct 2017 19:04:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/5] common/xfs: refactor xfs_scrub presence testing
+Message-ID: <20171025110447.GF3235@eguan.usersys.redhat.com>
+References: <150836985024.27213.3715197937819365388.stgit@magnolia>
+ <150836986275.27213.11426507059309321722.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20171023205733.14896-1-bo.li.liu@oracle.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <150836986275.27213.11426507059309321722.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 23.10.2017 23:57, Liu Bo wrote:
-> Currently drop_caches is used to invalidate file's page cache so that
-> buffered read can hit disk, but the problem is that it may also
-> invalidate metadata's page cache, so the test case may not get read
-> errors (and repair) if reading metadata has consumed the injected
-> faults.
+On Wed, Oct 18, 2017 at 04:37:42PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> This changes it to do 'fadvise -d' to firstly access all metadata it
-> needs to locate the file and then only drops the test file's page
-> cache.  Also this changes it to read the file only if pid%2 == 1.
+> Move all the requirements checking for xfs_scrub into a helper function.
+> Make sure the helper properly detects the presence of the scrub ioctl
+> and situations where we can't run scrub (e.g. norecovery).
 > 
-> Reported-by: Nikolay Borisov <nborisov@suse.com>
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> Refactor the existing three xfs_scrub call sites to use the helper to
+> check if it's appropriate to run scrub.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/btrfs/143 | 20 ++++++++++----------
->  1 file changed, 10 insertions(+), 10 deletions(-)
+>  common/rc         |    2 +-
+>  common/xfs        |   40 +++++++++++++++++++++++++++++++++-------
+>  tests/generic/453 |   11 +----------
+>  tests/generic/454 |   11 +----------
+>  4 files changed, 36 insertions(+), 28 deletions(-)
 > 
-> diff --git a/tests/btrfs/143 b/tests/btrfs/143
-> index da7bfd8..dabd03d 100755
-> --- a/tests/btrfs/143
-> +++ b/tests/btrfs/143
-> @@ -127,16 +127,16 @@ echo "step 3......repair the bad copy" >>$seqres.full
->  # since raid1 consists of two copies, and the bad copy was put on stripe #1
->  # while the good copy lies on stripe #0, the bad copy only gets access when the
->  # reader's pid % 2 == 1 is true
-> -while true; do
-> -	# start_fail only fails the following buffered read so the repair is
-> -	# supposed to work.
-> -	echo 3 > /proc/sys/vm/drop_caches
-> -	start_fail
-> -	$XFS_IO_PROG -c "pread 0 4K" "$SCRATCH_MNT/foobar" > /dev/null &
-> -	pid=$!
-> -	wait
-> -	stop_fail
-> -	[ $((pid % 2)) == 1 ] && break
-> +while [[ -z ${result} ]]; do
-> +    # invalidate the page cache.
-> +    $XFS_IO_PROG -c "fadvise -d 0 128K" $SCRATCH_MNT/foobar
+> 
+> diff --git a/common/rc b/common/rc
+> index 1a4d81e..83aaced 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2091,7 +2091,7 @@ _require_xfs_io_command()
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+>  	"scrub"|"repair")
+> -		testio=`$XFS_IO_PROG -x -c "$command test 0" $TEST_DIR 2>&1`
+> +		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
+>  		echo $testio | grep -q "Inappropriate ioctl" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+> diff --git a/common/xfs b/common/xfs
+> index dff8454..7d8f275 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -298,6 +298,29 @@ _require_xfs_db_command()
+>  		_notrun "xfs_db $command support is missing"
+>  }
+>  
+> +# Does the filesystem mounted from a particular device support scrub?
+> +_supports_xfs_scrub()
+> +{
+> +	mountpoint="$1"
+> +	device="$2"
+> +
+> +	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
+> +		echo "Usage: _supports_xfs_scrub mountpoint device"
+> +		exit 1
+> +	fi
+> +
+> +	test "$FSTYP" = "xfs" || return 1
+> +	test -x "$XFS_SCRUB_PROG" || return 1
+> +
+> +	# Probe for kernel support...
+> +	$XFS_IO_PROG -x -c "scrub probe 0" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
+> +
+> +	# Scrub can't run on norecovery mounts
+> +	_fs_options "$device" | grep -q "norecovery" && return 1
+> +
+> +	return 0
+> +}
 
-I think an even better approach would be to just unmount and then mount
-it. That ensures the page cache is truncated.
+Hmm, this enables scrub after each test by default, because
+$TEST_XFS_SCRUB is not checked anymore. Either remove TEST_XFS_SCRUB
+completely (it's documented in README) or check it in this
+_supports_xfs_scrub() helper. I'm fine with either way :)
 
 > +
-> +    start_fail
-> +    result=$(bash -c "
-> +        if [[ \$((\$\$ % 2)) -eq 1 ]]; then
-> +                exec $XFS_IO_PROG -c \"pread 0 4K\" \"$SCRATCH_MNT/foobar\"
-> +        fi");
-> +    stop_fail
->  done
+>  # run xfs_check and friends on a FS.
+>  _check_xfs_filesystem()
+>  {
+> @@ -330,14 +353,17 @@ _check_xfs_filesystem()
+>  	type=`_fs_type $device`
+>  	ok=1
 >  
->  _scratch_unmount
+> -	if [ "$type" = "xfs" ]; then
+> -		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
+> -			"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
+> -			if [ $? -ne 0 ]; then
+> -				_log_err "filesystem on $device failed scrub"
+> -				ok=0
+> -			fi
+> +	# Run online scrub if we can.
+> +	mntpt="$(_is_mounted $device)"
+> +	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
+> +		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
+
+Dump stderr to $seqres.full too? I noticed many warning messages printed
+by xfs_scrub, though the tests didn't fail.
+
+/mnt/testarea/test: Found more data blocks than reported (scrub.c line 382)
+/mnt/testarea/test: 1 warnings found.
+generic/450 0s ... 0s
+/mnt/testarea/test: Found more data blocks than reported (scrub.c line 382)
+/mnt/testarea/test: 1 warnings found.
+generic/453 0s ... 0s
+/mnt/testarea/scratch: Found more data blocks than reported (scrub.c line 382)
+/mnt/testarea/scratch: 1 warnings found.
+generic/454 1s ... 0s
+/mnt/testarea/scratch: Found more data blocks than reported (scrub.c line 382)
+/mnt/testarea/scratch: 1 warnings found.
+Ran: generic/450 generic/453 generic/454
+Passed all 3 tests
+
+Thanks,
+Eryu
+
+> +		if [ $? -ne 0 ]; then
+> +			_log_err "filesystem on $device failed scrub"
+> +			ok=0
+>  		fi
+> +	fi
+> +
+> +	if [ "$type" = "xfs" ]; then
+>  		# mounted ...
+>  		mountpoint=`_umount_or_remount_ro $device`
+>  	fi
+> diff --git a/tests/generic/453 b/tests/generic/453
+> index ff29736..40fae91 100755
+> --- a/tests/generic/453
+> +++ b/tests/generic/453
+> @@ -136,10 +136,7 @@ echo "Test XFS online scrub, if applicable"
+>  
+>  # Only run this on xfs if xfs_scrub is available and has the unicode checker
+>  check_xfs_scrub() {
+> -	# Ignore non-XFS fs or no scrub program...
+> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
+> -		return 1
+> -	fi
+> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+>  
+>  	# We only care if xfs_scrub has unicode string support...
+>  	if ! type ldd > /dev/null 2>&1 || \
+> @@ -147,12 +144,6 @@ check_xfs_scrub() {
+>  		return 1
+>  	fi
+>  
+> -	# Does the ioctl work?
+> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
+> -	   grep -q "Inappropriate ioctl"; then
+> -		return 1
+> -	fi
+> -
+>  	return 0
+>  }
+>  
+> diff --git a/tests/generic/454 b/tests/generic/454
+> index 01279ee..462185a 100755
+> --- a/tests/generic/454
+> +++ b/tests/generic/454
+> @@ -132,10 +132,7 @@ echo "Test XFS online scrub, if applicable"
+>  
+>  # Only run this on xfs if xfs_scrub is available and has the unicode checker
+>  check_xfs_scrub() {
+> -	# Ignore non-XFS fs or no scrub program...
+> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
+> -		return 1
+> -	fi
+> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+>  
+>  	# We only care if xfs_scrub has unicode string support...
+>  	if ! type ldd > /dev/null 2>&1 || \
+> @@ -143,12 +140,6 @@ check_xfs_scrub() {
+>  		return 1
+>  	fi
+>  
+> -	# Does the ioctl work?
+> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
+> -	   grep -q "Inappropriate ioctl"; then
+> -		return 1
+> -	fi
+> -
+>  	return 0
+>  }
+>  
 > 
