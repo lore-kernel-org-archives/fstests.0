@@ -1,91 +1,206 @@
-Received: from mga09.intel.com ([134.134.136.24]:48317 "EHLO mga09.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932219AbdJYRM2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 25 Oct 2017 13:12:28 -0400
-Date: Wed, 25 Oct 2017 11:12:24 -0600
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: Re: [fstests PATCH v2] generic: add test for DAX MAP_SYNC support
-Message-ID: <20171025171224.GA12331@linux.intel.com>
-References: <20171020052943.15104-1-ross.zwisler@linux.intel.com>
- <20171020212556.30816-1-ross.zwisler@linux.intel.com>
- <CAOQ4uxjWp3khOix__jqfsiyjhNehGtkqXXv1o7EuGB1j3b2moQ@mail.gmail.com>
- <CAOQ4uxh25JmAv3DjCp11fAfpHVP=d2sp+=Gk4SxYfBtmOgaUPw@mail.gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:18399 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932162AbdJYSyf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Oct 2017 14:54:35 -0400
+Date: Wed, 25 Oct 2017 11:54:30 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/5] common/xfs: refactor xfs_scrub presence testing
+Message-ID: <20171025185430.GC20669@magnolia>
+References: <150836985024.27213.3715197937819365388.stgit@magnolia>
+ <150836986275.27213.11426507059309321722.stgit@magnolia>
+ <20171025110447.GF3235@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxh25JmAv3DjCp11fAfpHVP=d2sp+=Gk4SxYfBtmOgaUPw@mail.gmail.com>
+In-Reply-To: <20171025110447.GF3235@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-kernel <linux-kernel@vger.kernel.org>, Josef Bacik <jbacik@fb.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Mike Snitzer <snitzer@redhat.com>, Shaohua Li <shli@kernel.org>, dm-devel@redhat.com, linux-nvdimm@lists.01.org, linux-raid@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 25, 2017 at 03:19:22PM +0300, Amir Goldstein wrote:
-> On Sun, Oct 22, 2017 at 9:56 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> > On Sat, Oct 21, 2017 at 12:25 AM, Ross Zwisler
-> > <ross.zwisler@linux.intel.com> wrote:
-> >> Add a test that exercises DAX's new MAP_SYNC flag.
-> >>
-> >> This test creates a file and writes to it via an mmap(), but never syncs
-> >> via fsync/msync.  This process is tracked via dm-log-writes, then replayed.
-> >>
-> >> If MAP_SYNC is working the dm-log-writes replay will show the test file
-> >> with 1MiB of on-media block allocations.  This is because each allocating
-> >> page fault included an implicit metadata sync.  If MAP_SYNC isn't working
-> >> (which you can test by fiddling with the parameters to mmap()) the file
-> >> will be smaller or missing entirely.
-> >>
-> >> Note that dm-log-writes doesn't track the data that we write via the
-> >> mmap(), so we can't do any data integrity checking.  We can only verify
-> >> that the metadata writes for the page faults happened.
-> >>
-> >> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> >>
-> >> ---
-> >>
-> >> Changes since v1:
-> >>  - Addressed review feedback from Amir.  Thank you for the review!
-> >
-> > Looks good.
-> >
-> >>
-> >> ---
-> >>  .gitignore            |  1 +
-> >>  common/dmlogwrites    |  1 -
-> >>  src/Makefile          |  3 +-
-> >>  src/t_map_sync.c      | 92 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/generic/466     | 76 ++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/generic/466.out |  3 ++
-> >>  tests/generic/group   |  1 +
-> >>  7 files changed, 175 insertions(+), 2 deletions(-)
-> >>  create mode 100644 src/t_map_sync.c
-> >>  create mode 100755 tests/generic/466
-> >>  create mode 100644 tests/generic/466.out
-> >>
-> >> diff --git a/.gitignore b/.gitignore
-> >> index 2014c08..9fc0695 100644
-> >> --- a/.gitignore
-> >> +++ b/.gitignore
-> >> @@ -119,6 +119,7 @@
-> >>  /src/t_getcwd
-> >>  /src/t_holes
-> >>  /src/t_immutable
-> >> +/src/t_map_sync
-> >>  /src/t_mmap_cow_race
-> >>  /src/t_mmap_dio
-> >>  /src/t_mmap_fallocate
-> >> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> >> index 247c744..5b57df9 100644
-> >> --- a/common/dmlogwrites
-> >> +++ b/common/dmlogwrites
-> >> @@ -23,7 +23,6 @@ _require_log_writes()
-> >>         [ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
-> >>                 _notrun "This test requires a valid \$LOGWRITES_DEV"
-> >>
-> >> -       _exclude_scratch_mount_option dax
+On Wed, Oct 25, 2017 at 07:04:47PM +0800, Eryu Guan wrote:
+> On Wed, Oct 18, 2017 at 04:37:42PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Move all the requirements checking for xfs_scrub into a helper function.
+> > Make sure the helper properly detects the presence of the scrub ioctl
+> > and situations where we can't run scrub (e.g. norecovery).
+> > 
+> > Refactor the existing three xfs_scrub call sites to use the helper to
+> > check if it's appropriate to run scrub.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  common/rc         |    2 +-
+> >  common/xfs        |   40 +++++++++++++++++++++++++++++++++-------
+> >  tests/generic/453 |   11 +----------
+> >  tests/generic/454 |   11 +----------
+> >  4 files changed, 36 insertions(+), 28 deletions(-)
+> > 
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 1a4d81e..83aaced 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -2091,7 +2091,7 @@ _require_xfs_io_command()
+> >  			_notrun "xfs_io $command support is missing"
+> >  		;;
+> >  	"scrub"|"repair")
+> > -		testio=`$XFS_IO_PROG -x -c "$command test 0" $TEST_DIR 2>&1`
+> > +		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
+> >  		echo $testio | grep -q "Inappropriate ioctl" && \
+> >  			_notrun "xfs_io $command support is missing"
+> >  		;;
+> > diff --git a/common/xfs b/common/xfs
+> > index dff8454..7d8f275 100644
+> > --- a/common/xfs
+> > +++ b/common/xfs
+> > @@ -298,6 +298,29 @@ _require_xfs_db_command()
+> >  		_notrun "xfs_db $command support is missing"
+> >  }
+> >  
+> > +# Does the filesystem mounted from a particular device support scrub?
+> > +_supports_xfs_scrub()
+> > +{
+> > +	mountpoint="$1"
+> > +	device="$2"
+> > +
+> > +	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
+> > +		echo "Usage: _supports_xfs_scrub mountpoint device"
+> > +		exit 1
+> > +	fi
+> > +
+> > +	test "$FSTYP" = "xfs" || return 1
+> > +	test -x "$XFS_SCRUB_PROG" || return 1
+> > +
+> > +	# Probe for kernel support...
+> > +	$XFS_IO_PROG -x -c "scrub probe 0" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
+> > +
+> > +	# Scrub can't run on norecovery mounts
+> > +	_fs_options "$device" | grep -q "norecovery" && return 1
+> > +
+> > +	return 0
+> > +}
 > 
-> Wait. It this really ok to relax no dax from _require_log_writes()?
-> Shouldn't you check log-write target version or something to verify
-> that log-writes+dax is really supported?
-> I think you should.
+> Hmm, this enables scrub after each test by default, because
+> $TEST_XFS_SCRUB is not checked anymore. Either remove TEST_XFS_SCRUB
+> completely (it's documented in README) or check it in this
+> _supports_xfs_scrub() helper. I'm fine with either way :)
 
-Ah, yep, that makes sense.  I'll update for v3.
+Ok.  We're moving towards running scrub any time the fs is still mounted,
+and eventually will drop xfs_check^Wxfs_db -c check.
+
+> > +
+> >  # run xfs_check and friends on a FS.
+> >  _check_xfs_filesystem()
+> >  {
+> > @@ -330,14 +353,17 @@ _check_xfs_filesystem()
+> >  	type=`_fs_type $device`
+> >  	ok=1
+> >  
+> > -	if [ "$type" = "xfs" ]; then
+> > -		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
+> > -			"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
+> > -			if [ $? -ne 0 ]; then
+> > -				_log_err "filesystem on $device failed scrub"
+> > -				ok=0
+> > -			fi
+> > +	# Run online scrub if we can.
+> > +	mntpt="$(_is_mounted $device)"
+> > +	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
+> > +		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
+> 
+> Dump stderr to $seqres.full too? I noticed many warning messages printed
+> by xfs_scrub, though the tests didn't fail.
+> 
+> /mnt/testarea/test: Found more data blocks than reported (scrub.c line 382)
+> /mnt/testarea/test: 1 warnings found.
+> generic/450 0s ... 0s
+> /mnt/testarea/test: Found more data blocks than reported (scrub.c line 382)
+> /mnt/testarea/test: 1 warnings found.
+> generic/453 0s ... 0s
+> /mnt/testarea/scratch: Found more data blocks than reported (scrub.c line 382)
+> /mnt/testarea/scratch: 1 warnings found.
+> generic/454 1s ... 0s
+> /mnt/testarea/scratch: Found more data blocks than reported (scrub.c line 382)
+> /mnt/testarea/scratch: 1 warnings found.
+> Ran: generic/450 generic/453 generic/454
+> Passed all 3 tests
+
+Will fix, even though as you point out the next patch fixes it anyway.
+
+--D
+
+> 
+> Thanks,
+> Eryu
+> 
+> > +		if [ $? -ne 0 ]; then
+> > +			_log_err "filesystem on $device failed scrub"
+> > +			ok=0
+> >  		fi
+> > +	fi
+> > +
+> > +	if [ "$type" = "xfs" ]; then
+> >  		# mounted ...
+> >  		mountpoint=`_umount_or_remount_ro $device`
+> >  	fi
+> > diff --git a/tests/generic/453 b/tests/generic/453
+> > index ff29736..40fae91 100755
+> > --- a/tests/generic/453
+> > +++ b/tests/generic/453
+> > @@ -136,10 +136,7 @@ echo "Test XFS online scrub, if applicable"
+> >  
+> >  # Only run this on xfs if xfs_scrub is available and has the unicode checker
+> >  check_xfs_scrub() {
+> > -	# Ignore non-XFS fs or no scrub program...
+> > -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
+> > -		return 1
+> > -	fi
+> > +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+> >  
+> >  	# We only care if xfs_scrub has unicode string support...
+> >  	if ! type ldd > /dev/null 2>&1 || \
+> > @@ -147,12 +144,6 @@ check_xfs_scrub() {
+> >  		return 1
+> >  	fi
+> >  
+> > -	# Does the ioctl work?
+> > -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
+> > -	   grep -q "Inappropriate ioctl"; then
+> > -		return 1
+> > -	fi
+> > -
+> >  	return 0
+> >  }
+> >  
+> > diff --git a/tests/generic/454 b/tests/generic/454
+> > index 01279ee..462185a 100755
+> > --- a/tests/generic/454
+> > +++ b/tests/generic/454
+> > @@ -132,10 +132,7 @@ echo "Test XFS online scrub, if applicable"
+> >  
+> >  # Only run this on xfs if xfs_scrub is available and has the unicode checker
+> >  check_xfs_scrub() {
+> > -	# Ignore non-XFS fs or no scrub program...
+> > -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
+> > -		return 1
+> > -	fi
+> > +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+> >  
+> >  	# We only care if xfs_scrub has unicode string support...
+> >  	if ! type ldd > /dev/null 2>&1 || \
+> > @@ -143,12 +140,6 @@ check_xfs_scrub() {
+> >  		return 1
+> >  	fi
+> >  
+> > -	# Does the ioctl work?
+> > -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
+> > -	   grep -q "Inappropriate ioctl"; then
+> > -		return 1
+> > -	fi
+> > -
+> >  	return 0
+> >  }
+> >  
+> > 
