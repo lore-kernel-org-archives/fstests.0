@@ -1,230 +1,162 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:9508 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751166AbdJZHcV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Oct 2017 03:32:21 -0400
-From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH 2/2] xfs: test for umount hang caused by the pending dquota log item in AIL
-Date: Thu, 26 Oct 2017 15:37:52 +0800
-Message-ID: <1509003472-24191-2-git-send-email-houtao1@huawei.com>
-In-Reply-To: <1509003472-24191-1-git-send-email-houtao1@huawei.com>
-References: <1509003472-24191-1-git-send-email-houtao1@huawei.com>
+Received: from mout.gmx.net ([212.227.15.19]:49861 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750919AbdJZHdG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 26 Oct 2017 03:33:06 -0400
+Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
+ in read-only mode
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
+ <20171026065218.GK3235@eguan.usersys.redhat.com>
+ <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
+Message-ID: <951b24f7-6617-0f95-c1f3-e5fb86f04b0e@gmx.com>
+Date: Thu, 26 Oct 2017 15:32:48 +0800
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="7dBUdfXIJ8gxvdqAvLC7seiGnVJeeWqVT"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
+To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When the first writeback and the retried writeback of dquota buffer get
-the same IO error, XFS will let xfsaild to restart the writeback and
-xfs_qm_dqflush_done() will not be invoked. xfsaild will try to re-push
-the quota log item in AIL, the push will return early everytime after
-checking xfs_dqflock_nowait(), and xfsaild will try to push it again.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--7dBUdfXIJ8gxvdqAvLC7seiGnVJeeWqVT
+Content-Type: multipart/mixed; boundary="3Rkx1SFlRb37X6twIwSNVLcPPI9mvADJQ";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Message-ID: <951b24f7-6617-0f95-c1f3-e5fb86f04b0e@gmx.com>
+Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
+ in read-only mode
+References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
+ <20171026065218.GK3235@eguan.usersys.redhat.com>
+ <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
+In-Reply-To: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
 
-IOWs, AIL will never be empty, and the umount process will wait for the
-drain of AIL, so the umount process hangs.
+--3Rkx1SFlRb37X6twIwSNVLcPPI9mvADJQ
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-Signed-off-by: Hou Tao <houtao1@huawei.com>
----
- tests/xfs/999     | 169 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 172 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
 
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 0000000..4b89899
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,169 @@
-+#! /bin/bash
-+# FS QA Test No. 999
-+#
-+# Test for XFS umount hang problem caused by the unceasing push
-+# of dquot log item in AIL. Because xfs_qm_dqflush_done() will
-+# not be invoked, so each time xfsaild initiates the push,
-+# the push will return early after checking xfs_dqflock_nowait().
-+#
-+# xfs_qm_dqflush_done() should be invoked by xfs_buf_do_callbacks().
-+# However after the first write and the retried write of dquota buffer
-+# get the same IO error, XFS will let xfsaild to restart the write and
-+# xfs_buf_do_callbacks() will not be inovked.
-+#
-+# This test emulates the write error by using dm-flakey. The log
-+# area of the XFS filesystem is excluded from the range covered by
-+# dm-flakey, so the XFS will not be shutdown prematurely.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	sysctl -w fs.xfs.xfssyncd_centisecs=3000 >/dev/null 2>&1
-+	_unmount_flakey >/dev/null 2>&1
-+	_cleanup_flakey > /dev/null 2>&1
-+}
-+
-+_get_xfs_scratch_sb_field()
-+{
-+	local field=$1
-+
-+	echo $(_scratch_xfs_db -r -c "sb 0" -c "print $field" | \
-+		awk -v field=$field '$0 ~ field {print $3}')
-+}
-+
-+# inject IO write error for the XFS filesystem except its log section
-+_make_xfs_scratch_flakey_table()
-+{
-+	local opt="0 1 1 error_writes"
-+	local dev=${SCRATCH_DEV}
-+	local dev_sz=$(blockdev --getsz $dev)
-+
-+	if [ "${USE_EXTERNAL}" = "yes" -a ! -z "$SCRATCH_LOGDEV" ]; then
-+		echo "0 ${dev_sz} flakey $dev 0 ${opt}"
-+		return
-+	fi
-+
-+	local blk_sz=$(_get_xfs_scratch_sb_field blocksize)
-+	local log_ofs=$(_get_xfs_scratch_sb_field logstart)
-+	local log_sz=$(_get_xfs_scratch_sb_field logblocks)
-+	local table=""
-+	local ofs=0
-+	local sz
-+
-+	let "log_ofs *= blk_sz / 512"
-+	let "log_sz *= blk_sz / 512"
-+
-+	if [ "$ofs" -lt "${log_ofs}" ]; then
-+		let "sz = log_ofs - ofs"
-+		table="$ofs $sz flakey $dev $ofs ${opt}"
-+	fi
-+
-+	table="$table\n${log_ofs} ${log_sz} linear $dev ${log_ofs}"
-+
-+	let "ofs = log_ofs + log_sz"
-+	if [ "$ofs" -lt "${dev_sz}" ]; then
-+		let "sz = dev_sz - ofs"
-+		table="$table\n$ofs $sz flakey $dev $ofs ${opt}"
-+	fi
-+
-+	echo -e $table
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/dmflakey
-+. ./common/xfs
-+. ./common/quota
-+
-+_supported_fs xfs
-+_supported_os Linux
-+
-+# due to the injection of write IO error, the fs will be inconsistent
-+_require_scratch_nocheck
-+_require_dm_target linear
-+_require_dm_target flakey
-+_require_user
-+_require_xfs_quota
-+_require_freeze
-+
-+rm -f $seqres.full
-+
-+echo "Silence is golden"
-+
-+_scratch_mkfs_xfs >/dev/null 2>&1
-+
-+_init_flakey
-+
-+# no error will be injected
-+FLAKEY_TABLE="0 $(blockdev --getsz $SCRATCH_DEV) linear $SCRATCH_DEV 0"
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+$DMSETUP_PROG info >> $seqres.full
-+$DMSETUP_PROG table >> $seqres.full
-+
-+# shorten the time waiting for the push of ail items
-+sysctl -w fs.xfs.xfssyncd_centisecs=100 >/dev/null 2>&1
-+
-+_qmount_option "usrquota"
-+_mount_flakey
-+
-+# We need to set the quota limitation twice, and inject the write error
-+# after the second setting. If we try to inject the write error after
-+# the first setting, the initialization of the dquota buffer will get
-+# IO error and also be retried, and during the umount process the
-+# write will be ended, and xfs_qm_dqflush_done() will be inovked, and
-+# the umount will exit normally.
-+$XFS_QUOTA_PROG -x -c "limit -u isoft=500 fsgqa" $SCRATCH_MNT
-+$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
-+
-+# ensure the initialization of the dquota buffer is done
-+xfs_freeze -f $SCRATCH_MNT
-+xfs_freeze -u $SCRATCH_MNT
-+
-+$XFS_QUOTA_PROG -x -c "limit -u isoft=400 fsgqa" $SCRATCH_MNT
-+$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
-+
-+# inject write IO error
-+FLAKEY_TABLE=$(_make_xfs_scratch_flakey_table)
-+_load_flakey_table $FLAKEY_ALLOW_WRITES
-+$DMSETUP_PROG info >> $seqres.full
-+$DMSETUP_PROG table >> $seqres.full
-+
-+sync
-+# wait for the push of the dquota log item in AIL and
-+# the completion of the retried write of dquota buffer
-+sleep 2
-+
-+_unmount_flakey
-+
-+_cleanup_flakey
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 0000000..3b276ca
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index b439842..d11cbfd 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -431,3 +431,4 @@
- 431 auto quick dangerous
- 432 auto quick dir metadata
- 433 auto quick attr
-+999 quota dangerous
--- 
-2.7.5
 
+On 2017=E5=B9=B410=E6=9C=8826=E6=97=A5 15:13, Qu Wenruo wrote:
+>=20
+>=20
+> On 2017=E5=B9=B410=E6=9C=8826=E6=97=A5 14:52, Eryu Guan wrote:
+>> On Thu, Oct 26, 2017 at 01:57:46PM +0800, Gu Jinxiang wrote:
+>>> From: Gu JinXiang <gujx@cn.fujitsu.com>
+>>>
+>>> btrfs-progs now support FST in read-only mode, so when space_cache=3D=
+v2
+>>> enabled, this test case will fail.
+>>> Add message to help user to understand this status.
+>>
+>> Sorry, I don't quite understand the new 'FST' feature.
+>=20
+> FST is Free Space (cache) Tree, which is one of the internal methods to=
+
+> manage the free space cache for btrfs.
+>=20
+>=20
+>> But is it a bug
+>> that we want to fix when mounting with space_cache=3Dv2 option, or we =
+just
+>> couldn't do btrfs-convert in this case? If it's a real bug, I'd say le=
+t
+>> the test fail as it is, and track bug in tools like bugzilla not
+>> comments/messages in the test; if it's the latter case, then just
+>> _notrun the test if space_cache=3Dv2 option is specified, e.g.
+>=20
+> The problem is not about the kernel, it's btrfs-convert to blame, which=
+
+> can't handle free space cache tree.
+>=20
+> However, since btrfs-convert is just rollbacking the btrfs to ext*, it
+> doesn't really need to do any write to *btrfs*, so the correct method
+> here is to fix btrfs-convert rollback, to do a *readonly* open other
+> than RW open, other than skipping special mount option.
+>=20
+> I'll fix it soon.
+
+Here comes the fix for btrfs-progs.
+https://patchwork.kernel.org/patch/10027529/
+
+Thanks,
+Qu
+
+>=20
+> Thanks,
+> Qu
+>=20
+>>
+>> _exclude_scratch_mount_option "space_cache=3Dv2"
+>>
+>> Thanks,
+>> Eryu
+>>
+>>>
+>>> Signed-off-by: Gu JinXiang <gujx@cn.fujitsu.com>
+>>> ---
+>>>  tests/btrfs/012 | 6 ++++++
+>>>  1 file changed, 6 insertions(+)
+>>>
+>>> diff --git a/tests/btrfs/012 b/tests/btrfs/012
+>>> index 85c82f07..529e6eca 100755
+>>> --- a/tests/btrfs/012
+>>> +++ b/tests/btrfs/012
+>>> @@ -96,6 +96,12 @@ cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
+>>> =20
+>>>  _scratch_unmount
+>>> =20
+>>> +space_cache_version=3D$(echo "$MOUNT_OPTIONS" | grep "space_cache=3D=
+v2")
+>>> +if [ -n "$space_cache_version" ]; then
+>>> +	_fail "since used space_cache=3Dv2 when mount," \
+>>> +	       "and for FST btrfs-progs support is read-only."\
+>>> +	      "so btrfs-convert rollback will fail"
+>>> +fi
+>>>  # Now restore the ext4 device
+>>>  $BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1 || \
+>>>  	_fail "btrfs-convert rollback failed"
+>>> --=20
+>>> 2.13.5
+>>>
+>>>
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe fstests" in=
+
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-btrfs"=
+ in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>=20
+
+
+--3Rkx1SFlRb37X6twIwSNVLcPPI9mvADJQ--
+
+--7dBUdfXIJ8gxvdqAvLC7seiGnVJeeWqVT
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlnxj6AXHHF1d2VucnVv
+LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qjOeAf+NYxjpMkL0o9VqZONwdqlzKQg
+f04RHpHLXVEBOAVtysfBBptYdnKXjPIVE2iKZ7m9rHGczGsx3xMKWunGI+J/KrTa
+0ZHCdJlCza1lRXyxPxw4NkDsPAQOUHtFMpHoEa0psCnk1W7mH3zq1Be7DDwKGCuo
+zUp5j4vuh/gRljmSAmESKksL9+sPH7btktBPbr5m2UdE4Q4uNX5vW/reRmPr4uBq
+9K5B5L59fNXwpVcWfnvI42losg4FnNoTeZCsUpd2f5Yfdt8oTw+Ghxc4t0LQ1tEm
+ICbgQ3eax49es+j/pSDpF99UQMTApcsJHJgwC29aJxGw0w0uiohlg7ZGrXG5CA==
+=nHS2
+-----END PGP SIGNATURE-----
+
+--7dBUdfXIJ8gxvdqAvLC7seiGnVJeeWqVT--
