@@ -1,70 +1,146 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47224 "EHLO mx1.redhat.com"
+Received: from mout.gmx.net ([212.227.15.18]:61318 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750997AbdJZGwU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Oct 2017 02:52:20 -0400
-Date: Thu, 26 Oct 2017 14:52:18 +0800
-From: Eryu Guan <eguan@redhat.com>
+        id S1750997AbdJZHNm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 26 Oct 2017 03:13:42 -0400
 Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
  in read-only mode
-Message-ID: <20171026065218.GK3235@eguan.usersys.redhat.com>
 References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
+ <20171026065218.GK3235@eguan.usersys.redhat.com>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
+Date: Thu, 26 Oct 2017 15:13:25 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
+In-Reply-To: <20171026065218.GK3235@eguan.usersys.redhat.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="enpchfWIltXcbeURqt9UMM5rMvVqwPv2f"
 Sender: fstests-owner@vger.kernel.org
-To: Gu Jinxiang <gujx@cn.fujitsu.com>
+To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
 Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 26, 2017 at 01:57:46PM +0800, Gu Jinxiang wrote:
-> From: Gu JinXiang <gujx@cn.fujitsu.com>
-> 
-> btrfs-progs now support FST in read-only mode, so when space_cache=v2
-> enabled, this test case will fail.
-> Add message to help user to understand this status.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--enpchfWIltXcbeURqt9UMM5rMvVqwPv2f
+Content-Type: multipart/mixed; boundary="sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Message-ID: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
+Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
+ in read-only mode
+References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
+ <20171026065218.GK3235@eguan.usersys.redhat.com>
+In-Reply-To: <20171026065218.GK3235@eguan.usersys.redhat.com>
 
-Sorry, I don't quite understand the new 'FST' feature. But is it a bug
-that we want to fix when mounting with space_cache=v2 option, or we just
-couldn't do btrfs-convert in this case? If it's a real bug, I'd say let
-the test fail as it is, and track bug in tools like bugzilla not
-comments/messages in the test; if it's the latter case, then just
-_notrun the test if space_cache=v2 option is specified, e.g.
+--sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-_exclude_scratch_mount_option "space_cache=v2"
+
+
+On 2017=E5=B9=B410=E6=9C=8826=E6=97=A5 14:52, Eryu Guan wrote:
+> On Thu, Oct 26, 2017 at 01:57:46PM +0800, Gu Jinxiang wrote:
+>> From: Gu JinXiang <gujx@cn.fujitsu.com>
+>>
+>> btrfs-progs now support FST in read-only mode, so when space_cache=3Dv=
+2
+>> enabled, this test case will fail.
+>> Add message to help user to understand this status.
+>=20
+> Sorry, I don't quite understand the new 'FST' feature.
+
+FST is Free Space (cache) Tree, which is one of the internal methods to
+manage the free space cache for btrfs.
+
+
+> But is it a bug
+> that we want to fix when mounting with space_cache=3Dv2 option, or we j=
+ust
+> couldn't do btrfs-convert in this case? If it's a real bug, I'd say let=
+
+> the test fail as it is, and track bug in tools like bugzilla not
+> comments/messages in the test; if it's the latter case, then just
+> _notrun the test if space_cache=3Dv2 option is specified, e.g.
+
+The problem is not about the kernel, it's btrfs-convert to blame, which
+can't handle free space cache tree.
+
+However, since btrfs-convert is just rollbacking the btrfs to ext*, it
+doesn't really need to do any write to *btrfs*, so the correct method
+here is to fix btrfs-convert rollback, to do a *readonly* open other
+than RW open, other than skipping special mount option.
+
+I'll fix it soon.
 
 Thanks,
-Eryu
+Qu
 
-> 
-> Signed-off-by: Gu JinXiang <gujx@cn.fujitsu.com>
-> ---
->  tests/btrfs/012 | 6 ++++++
->  1 file changed, 6 insertions(+)
-> 
-> diff --git a/tests/btrfs/012 b/tests/btrfs/012
-> index 85c82f07..529e6eca 100755
-> --- a/tests/btrfs/012
-> +++ b/tests/btrfs/012
-> @@ -96,6 +96,12 @@ cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
->  
->  _scratch_unmount
->  
-> +space_cache_version=$(echo "$MOUNT_OPTIONS" | grep "space_cache=v2")
-> +if [ -n "$space_cache_version" ]; then
-> +	_fail "since used space_cache=v2 when mount," \
-> +	       "and for FST btrfs-progs support is read-only."\
-> +	      "so btrfs-convert rollback will fail"
-> +fi
->  # Now restore the ext4 device
->  $BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1 || \
->  	_fail "btrfs-convert rollback failed"
-> -- 
-> 2.13.5
-> 
-> 
-> 
+>=20
+> _exclude_scratch_mount_option "space_cache=3Dv2"
+>=20
+> Thanks,
+> Eryu
+>=20
+>>
+>> Signed-off-by: Gu JinXiang <gujx@cn.fujitsu.com>
+>> ---
+>>  tests/btrfs/012 | 6 ++++++
+>>  1 file changed, 6 insertions(+)
+>>
+>> diff --git a/tests/btrfs/012 b/tests/btrfs/012
+>> index 85c82f07..529e6eca 100755
+>> --- a/tests/btrfs/012
+>> +++ b/tests/btrfs/012
+>> @@ -96,6 +96,12 @@ cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
+>> =20
+>>  _scratch_unmount
+>> =20
+>> +space_cache_version=3D$(echo "$MOUNT_OPTIONS" | grep "space_cache=3Dv=
+2")
+>> +if [ -n "$space_cache_version" ]; then
+>> +	_fail "since used space_cache=3Dv2 when mount," \
+>> +	       "and for FST btrfs-progs support is read-only."\
+>> +	      "so btrfs-convert rollback will fail"
+>> +fi
+>>  # Now restore the ext4 device
+>>  $BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1 || \
+>>  	_fail "btrfs-convert rollback failed"
+>> --=20
+>> 2.13.5
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
+in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+
+
+--sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA--
+
+--enpchfWIltXcbeURqt9UMM5rMvVqwPv2f
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlnxixUXHHF1d2VucnVv
+LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qhtNAf9FY4V9K+GBMwoB7rstUJqrpGx
+KY253pmiqZUfUcsPOX0ch2tSqtX4eQpXRpMMo5CpT+XMFAY3vhfdOZ+WoZT6Mj69
+70ZeThv883GZDJ3C7gtG4AyzT8M34h+TUlszAGyPdG/N6ghZkYjby3uMVwOn4B0G
+4nPrP+tG7n/kaQrRY/us5RfQsMdqvAkQ4XuFnZwQYa+dkc69ldTaUdZ1bPjyr4L5
+D8s3TYt5EmHVTiVivsxM0cMUeAyLZKYuwKX7uAh2DeHaKaNkkHH8Dc7/D0VLn8UA
+P5M+liuBU8UVavCaOxNDCtapUVsPkZLKHFUEFaMNcXp+7qWh5MJk/qj1R5xeWg==
+=mqaO
+-----END PGP SIGNATURE-----
+
+--enpchfWIltXcbeURqt9UMM5rMvVqwPv2f--
