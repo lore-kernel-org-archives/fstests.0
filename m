@@ -1,165 +1,70 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50408 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47224 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750974AbdJZGnP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Oct 2017 02:43:15 -0400
-Date: Thu, 26 Oct 2017 14:43:13 +0800
+        id S1750997AbdJZGwU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 26 Oct 2017 02:52:20 -0400
+Date: Thu, 26 Oct 2017 14:52:18 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 5/6] misc: add module reloading helpers
-Message-ID: <20171026064313.GJ3235@eguan.usersys.redhat.com>
-References: <150899709935.18389.17266737014565285073.stgit@magnolia>
- <150899712429.18389.5159489339127196469.stgit@magnolia>
+Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
+ in read-only mode
+Message-ID: <20171026065218.GK3235@eguan.usersys.redhat.com>
+References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150899712429.18389.5159489339127196469.stgit@magnolia>
+In-Reply-To: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Gu Jinxiang <gujx@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 25, 2017 at 10:52:04PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Oct 26, 2017 at 01:57:46PM +0800, Gu Jinxiang wrote:
+> From: Gu JinXiang <gujx@cn.fujitsu.com>
 > 
-> Add some helper functions to require that we can reload a given module,
-> and add a helper to actually do that.  Refactor the existing users to
-> use the generics.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  common/btrfs    |   12 ------------
->  common/rc       |   15 +++++++++++++++
->  tests/btrfs/124 |    9 +++------
->  tests/btrfs/125 |    9 +++------
->  4 files changed, 21 insertions(+), 24 deletions(-)
-> 
-> 
-> diff --git a/common/btrfs b/common/btrfs
-> index fd762ef..c09206c 100644
-> --- a/common/btrfs
-> +++ b/common/btrfs
-> @@ -349,18 +349,6 @@ _btrfs_qgroup_units()
->  	$BTRFS_UTIL_PROG qgroup show --help 2>&1 | grep -q -- --raw && echo "--raw"
->  }
->  
-> -_require_btrfs_loadable()
-> -{
-> -	modprobe -r btrfs || _notrun "btrfs unloadable"
-> -	modprobe btrfs || _notrun "Can't load btrfs"
-> -}
-> -
-> -_reload_btrfs_ko()
-> -{
-> -	modprobe -r btrfs || _fail "btrfs unload failed"
-> -	modprobe btrfs || _fail "btrfs load failed"
-> -}
-> -
->  _btrfs_compression_algos()
->  {
->  	echo zlib
-> diff --git a/common/rc b/common/rc
-> index 83aaced..5375f7b 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3580,6 +3580,21 @@ _require_scratch_feature()
->  	esac
->  }
->  
-> +# Check that we have a module that can be loaded.
-> +_require_loadable_module()
-> +{
-> +	module="$1"
-> +	modinfo "$module" > /dev/null 2>&1 || _notrun "${module}: must be a module."
+> btrfs-progs now support FST in read-only mode, so when space_cache=v2
+> enabled, this test case will fail.
+> Add message to help user to understand this status.
 
-I think we should try to unload the given module too to see if we really
-could unload it, otherwise a later _reload_module() still fails if
-rootfs is mounted as $module type, even if we already umounted TEST_DEV
-and SCRATCH_DEV.
+Sorry, I don't quite understand the new 'FST' feature. But is it a bug
+that we want to fix when mounting with space_cache=v2 option, or we just
+couldn't do btrfs-convert in this case? If it's a real bug, I'd say let
+the test fail as it is, and track bug in tools like bugzilla not
+comments/messages in the test; if it's the latter case, then just
+_notrun the test if space_cache=v2 option is specified, e.g.
 
-> +}
-> +
-> +# Reload a particular module.
-> +_reload_module()
-> +{
-> +	module="$1"
-> +
-> +	modprobe -r "${module}" || _fail "${module} unload failed"
-> +	modprobe "${module}" || _fail "${module} load failed"
-> +}
->  
->  init_rc
->  
-> diff --git a/tests/btrfs/124 b/tests/btrfs/124
-> index 7206094..1b6cb24 100755
-> --- a/tests/btrfs/124
-> +++ b/tests/btrfs/124
-> @@ -64,10 +64,7 @@ rm -f $seqres.full
->  _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch_dev_pool 2
-> -
-> -# the mounted test dir prevent btrfs unload, we need to unmount
-> -_test_unmount
-> -_require_btrfs_loadable
-> +_require_loadable_module "btrfs"
-
-Then keep the above comments and _test_unmount?
+_exclude_scratch_mount_option "space_cache=v2"
 
 Thanks,
 Eryu
 
->  
->  _scratch_dev_pool_get 2
->  
-> @@ -102,7 +99,7 @@ echo "clean btrfs ko" >> $seqres.full
->  _scratch_unmount
->  
->  # un-scan the btrfs devices
-> -_reload_btrfs_ko
-> +_reload_module "btrfs"
->  
->  echo >> $seqres.full
->  echo "-----Write degraded mount fill upto $max_fs_sz bytes-----" >> $seqres.full
-> @@ -141,7 +138,7 @@ echo
->  echo "Mount degraded with the other dev"
->  _scratch_unmount
->  # un-scan the btrfs devices
-> -_reload_btrfs_ko
-> +_reload_module "btrfs"
->  _mount -o degraded $dev2 $SCRATCH_MNT >>$seqres.full 2>&1
->  _run_btrfs_util_prog filesystem show
->  checkpoint3=`md5sum $SCRATCH_MNT/tf2`
-> diff --git a/tests/btrfs/125 b/tests/btrfs/125
-> index 91aa8d8..dbb226c 100755
-> --- a/tests/btrfs/125
-> +++ b/tests/btrfs/125
-> @@ -63,10 +63,7 @@ rm -f $seqres.full
->  _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch_dev_pool 3
-> -
-> -# we need btrfs to unload, need test dir unmounted
-> -_test_unmount
-> -_require_btrfs_loadable
-> +_require_loadable_module "btrfs"
->  
->  _scratch_dev_pool_get 3
->  
-> @@ -118,7 +115,7 @@ echo "unmount" >> $seqres.full
->  _scratch_unmount
->  echo "clean btrfs ko" >> $seqres.full
->  # un-scan the btrfs devices
-> -_reload_btrfs_ko
-> +_reload_module "btrfs"
->  _mount -o degraded,device=$dev2 $dev1 $SCRATCH_MNT >>$seqres.full 2>&1
->  dd if=/dev/zero of="$SCRATCH_MNT"/tf2 bs=$bs count=$count \
->  					>>$seqres.full 2>&1
-> @@ -154,7 +151,7 @@ echo "Mount degraded but with other dev"
->  
->  _scratch_unmount
->  # un-scan the btrfs devices
-> -_reload_btrfs_ko
-> +_reload_module "btrfs"
->  
->  _mount -o degraded,device=${dev2} $dev3 $SCRATCH_MNT >>$seqres.full 2>&1
->  
 > 
+> Signed-off-by: Gu JinXiang <gujx@cn.fujitsu.com>
+> ---
+>  tests/btrfs/012 | 6 ++++++
+>  1 file changed, 6 insertions(+)
+> 
+> diff --git a/tests/btrfs/012 b/tests/btrfs/012
+> index 85c82f07..529e6eca 100755
+> --- a/tests/btrfs/012
+> +++ b/tests/btrfs/012
+> @@ -96,6 +96,12 @@ cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
+>  
+>  _scratch_unmount
+>  
+> +space_cache_version=$(echo "$MOUNT_OPTIONS" | grep "space_cache=v2")
+> +if [ -n "$space_cache_version" ]; then
+> +	_fail "since used space_cache=v2 when mount," \
+> +	       "and for FST btrfs-progs support is read-only."\
+> +	      "so btrfs-convert rollback will fail"
+> +fi
+>  # Now restore the ext4 device
+>  $BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1 || \
+>  	_fail "btrfs-convert rollback failed"
+> -- 
+> 2.13.5
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
