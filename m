@@ -1,75 +1,45 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:61292 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751856AbdJZHQF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Oct 2017 03:16:05 -0400
-From: "Gu, Jinxiang" <gujx@cn.fujitsu.com>
-Subject: RE: [PATCH] xfstests: Add message indicating btrfs-progs support
- FST in read-only mode
-Date: Thu, 26 Oct 2017 07:16:02 +0000
-Message-ID: <516DDBE5B1D92D42BCF7A2E37F045A5D01479E2127@G08CNEXMBPEKD02.g08.fujitsu.local>
-References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
- <20171026065218.GK3235@eguan.usersys.redhat.com>
-In-Reply-To: <20171026065218.GK3235@eguan.usersys.redhat.com>
-Content-Language: ja-JP
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+Received: from szxga05-in.huawei.com ([45.249.212.191]:9507 "EHLO
+        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751166AbdJZHcR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Oct 2017 03:32:17 -0400
+From: Hou Tao <houtao1@huawei.com>
+Subject: [PATCH 1/2] dmflakey: support multiple dm targets for a dm-flakey device
+Date: Thu, 26 Oct 2017 15:37:51 +0800
+Message-ID: <1509003472-24191-1-git-send-email-houtao1@huawei.com>
 MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
-RXJ5dSBHdWFuIFttYWlsdG86ZWd1YW5AcmVkaGF0LmNvbV0NCj4gU2VudDog
-VGh1cnNkYXksIE9jdG9iZXIgMjYsIDIwMTcgMjo1MiBQTQ0KPiBUbzogR3Us
-IEppbnhpYW5nL7nLIL3wz+MgPGd1anhAY24uZnVqaXRzdS5jb20+DQo+IENj
-OiBmc3Rlc3RzQHZnZXIua2VybmVsLm9yZzsgbGludXgtYnRyZnNAdmdlci5r
-ZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIHhmc3Rlc3RzOiBB
-ZGQgbWVzc2FnZSBpbmRpY2F0aW5nIGJ0cmZzLXByb2dzIHN1cHBvcnQgRlNU
-IGluIHJlYWQtb25seSBtb2RlDQo+IA0KPiBPbiBUaHUsIE9jdCAyNiwgMjAx
-NyBhdCAwMTo1Nzo0NlBNICswODAwLCBHdSBKaW54aWFuZyB3cm90ZToNCj4g
-PiBGcm9tOiBHdSBKaW5YaWFuZyA8Z3VqeEBjbi5mdWppdHN1LmNvbT4NCj4g
-Pg0KPiA+IGJ0cmZzLXByb2dzIG5vdyBzdXBwb3J0IEZTVCBpbiByZWFkLW9u
-bHkgbW9kZSwgc28gd2hlbiBzcGFjZV9jYWNoZT12Mg0KPiA+IGVuYWJsZWQs
-IHRoaXMgdGVzdCBjYXNlIHdpbGwgZmFpbC4NCj4gPiBBZGQgbWVzc2FnZSB0
-byBoZWxwIHVzZXIgdG8gdW5kZXJzdGFuZCB0aGlzIHN0YXR1cy4NCj4gDQo+
-IFNvcnJ5LCBJIGRvbid0IHF1aXRlIHVuZGVyc3RhbmQgdGhlIG5ldyAnRlNU
-JyBmZWF0dXJlLiBCdXQgaXMgaXQgYSBidWcgdGhhdCB3ZSB3YW50IHRvIGZp
-eCB3aGVuIG1vdW50aW5nIHdpdGggc3BhY2VfY2FjaGU9djINCj4gb3B0aW9u
-LCBvciB3ZSBqdXN0IGNvdWxkbid0IGRvIGJ0cmZzLWNvbnZlcnQgaW4gdGhp
-cyBjYXNlPyBJZiBpdCdzIGEgcmVhbCBidWcsIEknZCBzYXkgbGV0IHRoZSB0
-ZXN0IGZhaWwgYXMgaXQgaXMsIGFuZA0KPiB0cmFjayBidWcgaW4gdG9vbHMg
-bGlrZSBidWd6aWxsYSBub3QgY29tbWVudHMvbWVzc2FnZXMgaW4gdGhlIHRl
-c3Q7IGlmIGl0J3MgdGhlIGxhdHRlciBjYXNlLCB0aGVuIGp1c3QgX25vdHJ1
-biB0aGUgdGVzdA0KPiBpZiBzcGFjZV9jYWNoZT12MiBvcHRpb24gaXMgc3Bl
-Y2lmaWVkLCBlLmcuDQo+IA0KPiBfZXhjbHVkZV9zY3JhdGNoX21vdW50X29w
-dGlvbiAic3BhY2VfY2FjaGU9djIiDQpUaGFuayB5b3UgZm9yIHlvdXIgc3Vn
-Z2VzdGlvbi4NCkFzIGFuIGtub3duIGJlaGF2aW9yIHdoZW4gdXNlIGJ0cmZz
-LWNvbnZlcnQgd2hlbiBzcGFjZV9jYWNoZT12MiBlbmFibGVkLCBJIHByZWZl
-ciB0byBtb2RpZnkgdGhpcyBjYXNlIG5vdCB0byBiZSBydW4uDQpJIGFsbCBz
-ZW5kIGEgbmV3IHBhdGNoIGZvciB0aGlzLg0KDQo+IA0KPiBUaGFua3MsDQo+
-IEVyeXUNCj4gDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBHdSBKaW5YaWFu
-ZyA8Z3VqeEBjbi5mdWppdHN1LmNvbT4NCj4gPiAtLS0NCj4gPiAgdGVzdHMv
-YnRyZnMvMDEyIHwgNiArKysrKysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDYg
-aW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL3Rlc3RzL2J0
-cmZzLzAxMiBiL3Rlc3RzL2J0cmZzLzAxMiBpbmRleA0KPiA+IDg1YzgyZjA3
-Li41MjllNmVjYSAxMDA3NTUNCj4gPiAtLS0gYS90ZXN0cy9idHJmcy8wMTIN
-Cj4gPiArKysgYi90ZXN0cy9idHJmcy8wMTINCj4gPiBAQCAtOTYsNiArOTYs
-MTIgQEAgY3AgLWFSIC9saWIvbW9kdWxlcy9gdW5hbWUgLXJgLyAkU0NSQVRD
-SF9NTlQvbmV3DQo+ID4NCj4gPiAgX3NjcmF0Y2hfdW5tb3VudA0KPiA+DQo+
-ID4gK3NwYWNlX2NhY2hlX3ZlcnNpb249JChlY2hvICIkTU9VTlRfT1BUSU9O
-UyIgfCBncmVwICJzcGFjZV9jYWNoZT12MiIpDQo+ID4gK2lmIFsgLW4gIiRz
-cGFjZV9jYWNoZV92ZXJzaW9uIiBdOyB0aGVuDQo+ID4gKwlfZmFpbCAic2lu
-Y2UgdXNlZCBzcGFjZV9jYWNoZT12MiB3aGVuIG1vdW50LCIgXA0KPiA+ICsJ
-ICAgICAgICJhbmQgZm9yIEZTVCBidHJmcy1wcm9ncyBzdXBwb3J0IGlzIHJl
-YWQtb25seS4iXA0KPiA+ICsJICAgICAgInNvIGJ0cmZzLWNvbnZlcnQgcm9s
-bGJhY2sgd2lsbCBmYWlsIg0KPiA+ICtmaQ0KPiA+ICAjIE5vdyByZXN0b3Jl
-IHRoZSBleHQ0IGRldmljZQ0KPiA+ICAkQlRSRlNfQ09OVkVSVF9QUk9HIC1y
-ICRTQ1JBVENIX0RFViA+PiAkc2VxcmVzLmZ1bGwgMj4mMSB8fCBcDQo+ID4g
-IAlfZmFpbCAiYnRyZnMtY29udmVydCByb2xsYmFjayBmYWlsZWQiDQo+ID4g
-LS0NCj4gPiAyLjEzLjUNCj4gPg0KPiA+DQo+ID4NCj4gPiAtLQ0KPiA+IFRv
-IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
-bnN1YnNjcmliZSBmc3Rlc3RzIiBpbg0KPiA+IHRoZSBib2R5IG9mIGEgbWVz
-c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
-b21vIGluZm8NCj4gPiBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
-cmRvbW8taW5mby5odG1sDQo+IA0KDQoKCg==
+dm-flakey is used to emulate IO error, however, when we also
+need to prevent the IO error for a specific range of the block
+device (eg., the log region of a XFS), we need to specify
+multiple dm targets for the dm device.
+
+Option --table can not accommodate the multiple dm targets case,
+so let dmsetup get the possible-multiple-targets table from
+standard input.
+
+Signed-off-by: Hou Tao <houtao1@huawei.com>
+---
+ common/dmflakey | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/common/dmflakey b/common/dmflakey
+index 4434307..16b82d2 100644
+--- a/common/dmflakey
++++ b/common/dmflakey
+@@ -77,7 +77,7 @@ _load_flakey_table()
+ 	$DMSETUP_PROG suspend $suspend_opt flakey-test
+ 	[ $? -ne 0 ] && _fatal "failed to suspend flakey-test"
+ 
+-	$DMSETUP_PROG load flakey-test --table "$table"
++	echo -e "$table" | $DMSETUP_PROG load flakey-test
+ 	[ $? -ne 0 ] && _fatal "failed to load table into flakey-test"
+ 
+ 	$DMSETUP_PROG resume flakey-test
+-- 
+2.7.5
+
