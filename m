@@ -1,146 +1,75 @@
-Received: from mout.gmx.net ([212.227.15.18]:61318 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750997AbdJZHNm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 26 Oct 2017 03:13:42 -0400
-Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
- in read-only mode
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:61292 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751856AbdJZHQF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Oct 2017 03:16:05 -0400
+From: "Gu, Jinxiang" <gujx@cn.fujitsu.com>
+Subject: RE: [PATCH] xfstests: Add message indicating btrfs-progs support
+ FST in read-only mode
+Date: Thu, 26 Oct 2017 07:16:02 +0000
+Message-ID: <516DDBE5B1D92D42BCF7A2E37F045A5D01479E2127@G08CNEXMBPEKD02.g08.fujitsu.local>
 References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
  <20171026065218.GK3235@eguan.usersys.redhat.com>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
-Date: Thu, 26 Oct 2017 15:13:25 +0800
-MIME-Version: 1.0
 In-Reply-To: <20171026065218.GK3235@eguan.usersys.redhat.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="enpchfWIltXcbeURqt9UMM5rMvVqwPv2f"
+Content-Language: ja-JP
+Content-Type: text/plain; charset="gb2312"
+Content-Transfer-Encoding: base64
+MIME-Version: 1.0
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---enpchfWIltXcbeURqt9UMM5rMvVqwPv2f
-Content-Type: multipart/mixed; boundary="sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: Eryu Guan <eguan@redhat.com>, Gu Jinxiang <gujx@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Message-ID: <53ac8baa-1a31-a428-b02f-ecd32fb5222f@gmx.com>
-Subject: Re: [PATCH] xfstests: Add message indicating btrfs-progs support FST
- in read-only mode
-References: <1508997466-12859-1-git-send-email-gujx@cn.fujitsu.com>
- <20171026065218.GK3235@eguan.usersys.redhat.com>
-In-Reply-To: <20171026065218.GK3235@eguan.usersys.redhat.com>
-
---sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 2017=E5=B9=B410=E6=9C=8826=E6=97=A5 14:52, Eryu Guan wrote:
-> On Thu, Oct 26, 2017 at 01:57:46PM +0800, Gu Jinxiang wrote:
->> From: Gu JinXiang <gujx@cn.fujitsu.com>
->>
->> btrfs-progs now support FST in read-only mode, so when space_cache=3Dv=
-2
->> enabled, this test case will fail.
->> Add message to help user to understand this status.
->=20
-> Sorry, I don't quite understand the new 'FST' feature.
-
-FST is Free Space (cache) Tree, which is one of the internal methods to
-manage the free space cache for btrfs.
-
-
-> But is it a bug
-> that we want to fix when mounting with space_cache=3Dv2 option, or we j=
-ust
-> couldn't do btrfs-convert in this case? If it's a real bug, I'd say let=
-
-> the test fail as it is, and track bug in tools like bugzilla not
-> comments/messages in the test; if it's the latter case, then just
-> _notrun the test if space_cache=3Dv2 option is specified, e.g.
-
-The problem is not about the kernel, it's btrfs-convert to blame, which
-can't handle free space cache tree.
-
-However, since btrfs-convert is just rollbacking the btrfs to ext*, it
-doesn't really need to do any write to *btrfs*, so the correct method
-here is to fix btrfs-convert rollback, to do a *readonly* open other
-than RW open, other than skipping special mount option.
-
-I'll fix it soon.
-
-Thanks,
-Qu
-
->=20
-> _exclude_scratch_mount_option "space_cache=3Dv2"
->=20
-> Thanks,
-> Eryu
->=20
->>
->> Signed-off-by: Gu JinXiang <gujx@cn.fujitsu.com>
->> ---
->>  tests/btrfs/012 | 6 ++++++
->>  1 file changed, 6 insertions(+)
->>
->> diff --git a/tests/btrfs/012 b/tests/btrfs/012
->> index 85c82f07..529e6eca 100755
->> --- a/tests/btrfs/012
->> +++ b/tests/btrfs/012
->> @@ -96,6 +96,12 @@ cp -aR /lib/modules/`uname -r`/ $SCRATCH_MNT/new
->> =20
->>  _scratch_unmount
->> =20
->> +space_cache_version=3D$(echo "$MOUNT_OPTIONS" | grep "space_cache=3Dv=
-2")
->> +if [ -n "$space_cache_version" ]; then
->> +	_fail "since used space_cache=3Dv2 when mount," \
->> +	       "and for FST btrfs-progs support is read-only."\
->> +	      "so btrfs-convert rollback will fail"
->> +fi
->>  # Now restore the ext4 device
->>  $BTRFS_CONVERT_PROG -r $SCRATCH_DEV >> $seqres.full 2>&1 || \
->>  	_fail "btrfs-convert rollback failed"
->> --=20
->> 2.13.5
->>
->>
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-
---sBvPSvO9e8opsEPh7STh0JQeOqGrwtDlA--
-
---enpchfWIltXcbeURqt9UMM5rMvVqwPv2f
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlnxixUXHHF1d2VucnVv
-LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qhtNAf9FY4V9K+GBMwoB7rstUJqrpGx
-KY253pmiqZUfUcsPOX0ch2tSqtX4eQpXRpMMo5CpT+XMFAY3vhfdOZ+WoZT6Mj69
-70ZeThv883GZDJ3C7gtG4AyzT8M34h+TUlszAGyPdG/N6ghZkYjby3uMVwOn4B0G
-4nPrP+tG7n/kaQrRY/us5RfQsMdqvAkQ4XuFnZwQYa+dkc69ldTaUdZ1bPjyr4L5
-D8s3TYt5EmHVTiVivsxM0cMUeAyLZKYuwKX7uAh2DeHaKaNkkHH8Dc7/D0VLn8UA
-P5M+liuBU8UVavCaOxNDCtapUVsPkZLKHFUEFaMNcXp+7qWh5MJk/qj1R5xeWg==
-=mqaO
------END PGP SIGNATURE-----
-
---enpchfWIltXcbeURqt9UMM5rMvVqwPv2f--
+SGksDQoNCj4gLS0tLS1PcmlnaW5hbCBNZXNzYWdlLS0tLS0NCj4gRnJvbTog
+RXJ5dSBHdWFuIFttYWlsdG86ZWd1YW5AcmVkaGF0LmNvbV0NCj4gU2VudDog
+VGh1cnNkYXksIE9jdG9iZXIgMjYsIDIwMTcgMjo1MiBQTQ0KPiBUbzogR3Us
+IEppbnhpYW5nL7nLIL3wz+MgPGd1anhAY24uZnVqaXRzdS5jb20+DQo+IENj
+OiBmc3Rlc3RzQHZnZXIua2VybmVsLm9yZzsgbGludXgtYnRyZnNAdmdlci5r
+ZXJuZWwub3JnDQo+IFN1YmplY3Q6IFJlOiBbUEFUQ0hdIHhmc3Rlc3RzOiBB
+ZGQgbWVzc2FnZSBpbmRpY2F0aW5nIGJ0cmZzLXByb2dzIHN1cHBvcnQgRlNU
+IGluIHJlYWQtb25seSBtb2RlDQo+IA0KPiBPbiBUaHUsIE9jdCAyNiwgMjAx
+NyBhdCAwMTo1Nzo0NlBNICswODAwLCBHdSBKaW54aWFuZyB3cm90ZToNCj4g
+PiBGcm9tOiBHdSBKaW5YaWFuZyA8Z3VqeEBjbi5mdWppdHN1LmNvbT4NCj4g
+Pg0KPiA+IGJ0cmZzLXByb2dzIG5vdyBzdXBwb3J0IEZTVCBpbiByZWFkLW9u
+bHkgbW9kZSwgc28gd2hlbiBzcGFjZV9jYWNoZT12Mg0KPiA+IGVuYWJsZWQs
+IHRoaXMgdGVzdCBjYXNlIHdpbGwgZmFpbC4NCj4gPiBBZGQgbWVzc2FnZSB0
+byBoZWxwIHVzZXIgdG8gdW5kZXJzdGFuZCB0aGlzIHN0YXR1cy4NCj4gDQo+
+IFNvcnJ5LCBJIGRvbid0IHF1aXRlIHVuZGVyc3RhbmQgdGhlIG5ldyAnRlNU
+JyBmZWF0dXJlLiBCdXQgaXMgaXQgYSBidWcgdGhhdCB3ZSB3YW50IHRvIGZp
+eCB3aGVuIG1vdW50aW5nIHdpdGggc3BhY2VfY2FjaGU9djINCj4gb3B0aW9u
+LCBvciB3ZSBqdXN0IGNvdWxkbid0IGRvIGJ0cmZzLWNvbnZlcnQgaW4gdGhp
+cyBjYXNlPyBJZiBpdCdzIGEgcmVhbCBidWcsIEknZCBzYXkgbGV0IHRoZSB0
+ZXN0IGZhaWwgYXMgaXQgaXMsIGFuZA0KPiB0cmFjayBidWcgaW4gdG9vbHMg
+bGlrZSBidWd6aWxsYSBub3QgY29tbWVudHMvbWVzc2FnZXMgaW4gdGhlIHRl
+c3Q7IGlmIGl0J3MgdGhlIGxhdHRlciBjYXNlLCB0aGVuIGp1c3QgX25vdHJ1
+biB0aGUgdGVzdA0KPiBpZiBzcGFjZV9jYWNoZT12MiBvcHRpb24gaXMgc3Bl
+Y2lmaWVkLCBlLmcuDQo+IA0KPiBfZXhjbHVkZV9zY3JhdGNoX21vdW50X29w
+dGlvbiAic3BhY2VfY2FjaGU9djIiDQpUaGFuayB5b3UgZm9yIHlvdXIgc3Vn
+Z2VzdGlvbi4NCkFzIGFuIGtub3duIGJlaGF2aW9yIHdoZW4gdXNlIGJ0cmZz
+LWNvbnZlcnQgd2hlbiBzcGFjZV9jYWNoZT12MiBlbmFibGVkLCBJIHByZWZl
+ciB0byBtb2RpZnkgdGhpcyBjYXNlIG5vdCB0byBiZSBydW4uDQpJIGFsbCBz
+ZW5kIGEgbmV3IHBhdGNoIGZvciB0aGlzLg0KDQo+IA0KPiBUaGFua3MsDQo+
+IEVyeXUNCj4gDQo+ID4NCj4gPiBTaWduZWQtb2ZmLWJ5OiBHdSBKaW5YaWFu
+ZyA8Z3VqeEBjbi5mdWppdHN1LmNvbT4NCj4gPiAtLS0NCj4gPiAgdGVzdHMv
+YnRyZnMvMDEyIHwgNiArKysrKysNCj4gPiAgMSBmaWxlIGNoYW5nZWQsIDYg
+aW5zZXJ0aW9ucygrKQ0KPiA+DQo+ID4gZGlmZiAtLWdpdCBhL3Rlc3RzL2J0
+cmZzLzAxMiBiL3Rlc3RzL2J0cmZzLzAxMiBpbmRleA0KPiA+IDg1YzgyZjA3
+Li41MjllNmVjYSAxMDA3NTUNCj4gPiAtLS0gYS90ZXN0cy9idHJmcy8wMTIN
+Cj4gPiArKysgYi90ZXN0cy9idHJmcy8wMTINCj4gPiBAQCAtOTYsNiArOTYs
+MTIgQEAgY3AgLWFSIC9saWIvbW9kdWxlcy9gdW5hbWUgLXJgLyAkU0NSQVRD
+SF9NTlQvbmV3DQo+ID4NCj4gPiAgX3NjcmF0Y2hfdW5tb3VudA0KPiA+DQo+
+ID4gK3NwYWNlX2NhY2hlX3ZlcnNpb249JChlY2hvICIkTU9VTlRfT1BUSU9O
+UyIgfCBncmVwICJzcGFjZV9jYWNoZT12MiIpDQo+ID4gK2lmIFsgLW4gIiRz
+cGFjZV9jYWNoZV92ZXJzaW9uIiBdOyB0aGVuDQo+ID4gKwlfZmFpbCAic2lu
+Y2UgdXNlZCBzcGFjZV9jYWNoZT12MiB3aGVuIG1vdW50LCIgXA0KPiA+ICsJ
+ICAgICAgICJhbmQgZm9yIEZTVCBidHJmcy1wcm9ncyBzdXBwb3J0IGlzIHJl
+YWQtb25seS4iXA0KPiA+ICsJICAgICAgInNvIGJ0cmZzLWNvbnZlcnQgcm9s
+bGJhY2sgd2lsbCBmYWlsIg0KPiA+ICtmaQ0KPiA+ICAjIE5vdyByZXN0b3Jl
+IHRoZSBleHQ0IGRldmljZQ0KPiA+ICAkQlRSRlNfQ09OVkVSVF9QUk9HIC1y
+ICRTQ1JBVENIX0RFViA+PiAkc2VxcmVzLmZ1bGwgMj4mMSB8fCBcDQo+ID4g
+IAlfZmFpbCAiYnRyZnMtY29udmVydCByb2xsYmFjayBmYWlsZWQiDQo+ID4g
+LS0NCj4gPiAyLjEzLjUNCj4gPg0KPiA+DQo+ID4NCj4gPiAtLQ0KPiA+IFRv
+IHVuc3Vic2NyaWJlIGZyb20gdGhpcyBsaXN0OiBzZW5kIHRoZSBsaW5lICJ1
+bnN1YnNjcmliZSBmc3Rlc3RzIiBpbg0KPiA+IHRoZSBib2R5IG9mIGEgbWVz
+c2FnZSB0byBtYWpvcmRvbW9Admdlci5rZXJuZWwub3JnIE1vcmUgbWFqb3Jk
+b21vIGluZm8NCj4gPiBhdCAgaHR0cDovL3ZnZXIua2VybmVsLm9yZy9tYWpv
+cmRvbW8taW5mby5odG1sDQo+IA0KDQoKCg==
