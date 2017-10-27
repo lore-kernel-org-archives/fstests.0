@@ -1,11 +1,11 @@
-Received: from mx2.suse.de ([195.135.220.15]:46970 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:46973 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752589AbdJ0MhU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Oct 2017 08:37:20 -0400
+        id S1752631AbdJ0MhV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Oct 2017 08:37:21 -0400
 From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH 2/2] fiemap: Implement ranged query
-Date: Fri, 27 Oct 2017 15:37:11 +0300
-Message-Id: <1509107832-22286-4-git-send-email-nborisov@suse.com>
+Subject: [PATCH 2/2] generic: Adjust generic test ouputs for new fiemap implementation
+Date: Fri, 27 Oct 2017 15:37:12 +0300
+Message-Id: <1509107832-22286-5-git-send-email-nborisov@suse.com>
 In-Reply-To: <1509107832-22286-1-git-send-email-nborisov@suse.com>
 References: <1509107832-22286-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,208 +13,230 @@ To: linux-xfs@vger.kernel.org
 Cc: fstests@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Currently the fiemap implementation of xfs_io doesn't support making ranged
-queries. This patch implements two optional arguments which take the starting
-offset and the length of the region to be queried. This also requires changing
-of how the final hole range is calculated. Namely, it's now being done as
-[last_logical, logical addres of next extent] rather than being statically
-determined by [last_logical, filesize]. Also now fiemap explicitly 
-prints if a file consists of only a hole rather than staying silent.
+ Since xfs_io's fiemap implementation was changed to explicitly show a whole
+ when a file consists only of it adjust the output of various test accordingly. 
+ Essentially only test 1 and 10 of _test_generic_punch require changes
 
 Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- io/fiemap.c       | 72 +++++++++++++++++++++++++++++++++++++++++++++++--------
- man/man8/xfs_io.8 |  5 ++--
- 2 files changed, 65 insertions(+), 12 deletions(-)
+ tests/generic/012.out | 1 +
+ tests/generic/016.out | 1 +
+ tests/generic/021.out | 2 ++
+ tests/generic/022.out | 2 ++
+ tests/generic/058.out | 1 +
+ tests/generic/060.out | 1 +
+ tests/generic/061.out | 1 +
+ tests/generic/063.out | 1 +
+ tests/generic/255.out | 6 ++++++
+ tests/generic/316.out | 6 ++++++
+ 10 files changed, 22 insertions(+)
 
-diff --git a/io/fiemap.c b/io/fiemap.c
-index 4a52bff974e8..56bfb1a5f2d5 100644
---- a/io/fiemap.c
-+++ b/io/fiemap.c
-@@ -27,6 +27,9 @@
- 
- static cmdinfo_t fiemap_cmd;
- static int max_extents = -1;
-+static __u64 covered_length = 0;
-+static __u64 len = -1LL;
-+static bool range_limit = false;
- 
- static void
- fiemap_help(void)
-@@ -79,7 +82,7 @@ print_hole(
- 		       boff_w, _("hole"), tot_w, lstart - llast);
- 	   }
- 
--
-+	   covered_length += BBTOB(lstart - llast);
- }
- 
- static int
-@@ -90,7 +93,8 @@ print_verbose(
- 	int			tot_w,
- 	int			flg_w,
- 	int			cur_extent,
--	__u64			last_logical)
-+	__u64			last_logical,
-+	__u64			limit)
- {
- 	__u64			lstart;
- 	__u64			llast;
-@@ -122,7 +126,7 @@ print_verbose(
- 		cur_extent++;
- 	}
- 
--	if (cur_extent == max_extents)
-+	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
- 		return 1;
- 
- 	snprintf(lbuf, sizeof(lbuf), "[%llu..%llu]:", lstart,
-@@ -140,7 +144,8 @@ print_plain(
- 	struct fiemap_extent	*extent,
- 	int			lflag,
- 	int			cur_extent,
--	__u64			last_logical)
-+	__u64			last_logical,
-+	__u64			limit)
- {
- 	__u64			lstart;
- 	__u64			llast;
-@@ -157,7 +162,7 @@ print_plain(
- 		cur_extent++;
- 	}
- 
--	if (cur_extent == max_extents)
-+	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
- 		return 1;
- 
- 	printf("\t%d: [%llu..%llu]: %llu..%llu", cur_extent,
-@@ -255,8 +260,11 @@ fiemap_f(
- 	int		tot_w = 5;	/* 5 since its just one number */
- 	int		flg_w = 5;
- 	__u64		last_logical = 0;
-+	size_t		fsblocksize, fssectsize;
- 	struct stat	st;
- 
-+	init_cvtnum(&fsblocksize, &fssectsize);
-+
- 	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
- 		switch (c) {
- 		case 'a':
-@@ -276,6 +284,26 @@ fiemap_f(
- 		}
- 	}
- 
-+	if (optind < argc) {
-+		off64_t start_offset = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (start_offset < 0) {
-+			printf("non-numeric offset argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		last_logical = start_offset;
-+		optind++;
-+	}
-+
-+	if (optind < argc) {
-+		off64_t length = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (length < 0) {
-+			printf("non-numeric len argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		len = length;
-+		range_limit = true;
-+	}
-+
- 	map_size = sizeof(struct fiemap) +
- 		(EXTENT_BATCH * sizeof(struct fiemap_extent));
- 	fiemap = malloc(map_size);
-@@ -316,14 +344,18 @@ fiemap_f(
- 				num_printed = print_verbose(extent, foff_w,
- 							    boff_w, tot_w,
- 							    flg_w, cur_extent,
--							    last_logical);
-+							    last_logical,
-+							    len);
- 			} else
- 				num_printed = print_plain(extent, lflag,
- 							  cur_extent,
--							  last_logical);
-+							  last_logical,
-+							  len);
- 
- 			cur_extent += num_printed;
- 			last_logical = extent->fe_logical + extent->fe_length;
-+			if (num_printed == 2)
-+				covered_length += extent->fe_length;
- 
- 			if (extent->fe_flags & FIEMAP_EXTENT_LAST) {
- 				last = 1;
-@@ -332,6 +364,9 @@ fiemap_f(
- 
- 			if (cur_extent == max_extents)
- 				break;
-+
-+			if (range_limit && covered_length >= len)
-+				goto out;
- 		}
- 	}
- 
-@@ -347,9 +382,26 @@ fiemap_f(
- 		return 0;
- 	}
- 
--	if (cur_extent && last_logical < st.st_size)
-+	if (last_logical < st.st_size &&
-+	    (!range_limit || covered_length < len)) {
-+		int end;
-+
-+		ret = __fiemap(fiemap, map_size, fiemap_flags, last_logical,
-+			       st.st_size);
-+		if (ret < 0) {
-+			exitcode = 1;
-+			goto out;
-+		}
-+
-+		if (!fiemap->fm_mapped_extents)
-+			end = BTOBBT(st.st_size);
-+		else
-+			end = BTOBBT(fiemap->fm_extents[0].fe_logical);
-+
-+
- 		print_hole(foff_w, boff_w, tot_w, cur_extent, lflag, !vflag,
--			   BTOBBT(last_logical), BTOBBT(st.st_size));
-+			   BTOBBT(last_logical), end);
-+	}
- 
- out:
- 	free(fiemap);
-@@ -364,7 +416,7 @@ fiemap_init(void)
- 	fiemap_cmd.argmin = 0;
- 	fiemap_cmd.argmax = -1;
- 	fiemap_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
--	fiemap_cmd.args = _("[-alv] [-n nx]");
-+	fiemap_cmd.args = _("[-alv] [-n nx] [offset [len]]");
- 	fiemap_cmd.oneline = _("print block mapping for a file");
- 	fiemap_cmd.help = fiemap_help;
- 
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index 0fd9b951199c..27f1ae163913 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -295,11 +295,12 @@ Prints the block mapping for the current open file. Refer to the
- .BR xfs_bmap (8)
- manual page for complete documentation.
- .TP
--.BI "fiemap [ \-alv ] [ \-n " nx " ]"
-+.BI "fiemap [ \-alv ] [ \-n " nx " ] [ " offset " [ " len " ]]"
- Prints the block mapping for the current open file using the fiemap
- ioctl.  Options behave as described in the
- .BR xfs_bmap (8)
--manual page.
-+manual page. Optionally, this command also supports passing the start offset
-+from where to begin the fiemap and the length of that region.
- .TP
- .BI "fsmap [ \-d | \-l | \-r ] [ \-m | \-v ] [ \-n " nx " ] [ " start " ] [ " end " ]
- Prints the mapping of disk blocks used by the filesystem hosting the current
+diff --git a/tests/generic/012.out b/tests/generic/012.out
+index ffbf8a3..8045471 100644
+--- a/tests/generic/012.out
++++ b/tests/generic/012.out
+@@ -1,5 +1,6 @@
+ QA output created by 012
+ 	1. into a hole
++0: [0..95]: hole
+ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 	2. into allocated space
+ 0: [0..95]: extent
+diff --git a/tests/generic/016.out b/tests/generic/016.out
+index c45a44a..1371ce7 100644
+--- a/tests/generic/016.out
++++ b/tests/generic/016.out
+@@ -1,5 +1,6 @@
+ QA output created by 016
+ 	1. into a hole
++0: [0..95]: hole
+ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 	2. into allocated space
+ 0: [0..95]: extent
+diff --git a/tests/generic/021.out b/tests/generic/021.out
+index 1137741..791b78a 100644
+--- a/tests/generic/021.out
++++ b/tests/generic/021.out
+@@ -1,5 +1,6 @@
+ QA output created by 021
+ 	1. into a hole
++0: [0..95]: hole
+ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 	2. into allocated space
+ 0: [0..95]: extent
+@@ -34,6 +35,7 @@ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 1: [64..95]: hole
+ d8f51c20223dbce5c7c90db87bc221b0
+ 	10. hole -> data -> hole
++0: [0..63]: hole
+ bb7df04e1b0a2570657527a7e108ae23
+ 	11. data -> hole -> data
+ 0: [0..63]: extent
+diff --git a/tests/generic/022.out b/tests/generic/022.out
+index fbffa59..6dbc192 100644
+--- a/tests/generic/022.out
++++ b/tests/generic/022.out
+@@ -1,5 +1,6 @@
+ QA output created by 022
+ 	1. into a hole
++0: [0..95]: hole
+ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 	2. into allocated space
+ 0: [0..95]: extent
+@@ -34,6 +35,7 @@ f4f35d60b3cc18aaa6d8d92f0cd3708a
+ 1: [64..95]: hole
+ d8f51c20223dbce5c7c90db87bc221b0
+ 	10. hole -> data -> hole
++0: [0..63]: hole
+ bb7df04e1b0a2570657527a7e108ae23
+ 	11. data -> hole -> data
+ 0: [0..63]: extent
+diff --git a/tests/generic/058.out b/tests/generic/058.out
+index b15308d..3bbc2a4 100644
+--- a/tests/generic/058.out
++++ b/tests/generic/058.out
+@@ -1,5 +1,6 @@
+ QA output created by 058
+ 	1. into a hole
++0: [0..55]: hole
+ cf845a781c107ec1346e849c9dd1b7e8
+ 	2. into allocated space
+ 0: [0..7]: extent
+diff --git a/tests/generic/060.out b/tests/generic/060.out
+index 909b578..210af74 100644
+--- a/tests/generic/060.out
++++ b/tests/generic/060.out
+@@ -1,5 +1,6 @@
+ QA output created by 060
+ 	1. into a hole
++0: [0..55]: hole
+ cf845a781c107ec1346e849c9dd1b7e8
+ 	2. into allocated space
+ 0: [0..7]: extent
+diff --git a/tests/generic/061.out b/tests/generic/061.out
+index 78d6c6d..6d95680 100644
+--- a/tests/generic/061.out
++++ b/tests/generic/061.out
+@@ -1,5 +1,6 @@
+ QA output created by 061
+ 	1. into a hole
++0: [0..55]: hole
+ cf845a781c107ec1346e849c9dd1b7e8
+ 	2. into allocated space
+ 0: [0..7]: extent
+diff --git a/tests/generic/063.out b/tests/generic/063.out
+index d828ff6..10db43f 100644
+--- a/tests/generic/063.out
++++ b/tests/generic/063.out
+@@ -1,5 +1,6 @@
+ QA output created by 063
+ 	1. into a hole
++0: [0..55]: hole
+ cf845a781c107ec1346e849c9dd1b7e8
+ 	2. into allocated space
+ 0: [0..7]: extent
+diff --git a/tests/generic/255.out b/tests/generic/255.out
+index 217ef3e..441fde8 100644
+--- a/tests/generic/255.out
++++ b/tests/generic/255.out
+@@ -1,5 +1,6 @@
+ QA output created by 255
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -42,6 +43,7 @@ daa100df6e6711906b61c9ab5aa16032
+ 3: [32..39]: hole
+ cc63069677939f69a6e8f68cae6a6dac
+ 	10. hole -> data -> hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	11. data -> hole -> data
+ 0: [0..7]: extent
+@@ -79,6 +81,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -121,6 +124,7 @@ daa100df6e6711906b61c9ab5aa16032
+ 3: [32..39]: hole
+ cc63069677939f69a6e8f68cae6a6dac
+ 	10. hole -> data -> hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	11. data -> hole -> data
+ 0: [0..7]: extent
+@@ -158,6 +162,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -240,6 +245,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+diff --git a/tests/generic/316.out b/tests/generic/316.out
+index 383f0d1..5506198 100644
+--- a/tests/generic/316.out
++++ b/tests/generic/316.out
+@@ -1,5 +1,6 @@
+ QA output created by 316
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -16,6 +17,7 @@ cc63069677939f69a6e8f68cae6a6dac
+ 1: [8..39]: hole
+ 1b3779878366498b28c702ef88c4a773
+ 	10. hole -> data -> hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	11. data -> hole -> data
+ 0: [0..7]: extent
+@@ -43,6 +45,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -59,6 +62,7 @@ cc63069677939f69a6e8f68cae6a6dac
+ 1: [8..39]: hole
+ 1b3779878366498b28c702ef88c4a773
+ 	10. hole -> data -> hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	11. data -> hole -> data
+ 0: [0..7]: extent
+@@ -86,6 +90,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
+@@ -133,6 +138,7 @@ eecb7aa303d121835de05028751d301c
+ 0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+ *
+ 	1. into a hole
++0: [0..39]: hole
+ daa100df6e6711906b61c9ab5aa16032
+ 	2. into allocated space
+ 0: [0..7]: extent
 -- 
 2.7.4
 
