@@ -1,216 +1,278 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33472 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37496 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750930AbdJ0EhR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Oct 2017 00:37:17 -0400
-Date: Fri, 27 Oct 2017 12:37:15 +0800
+        id S1750827AbdJ0ElO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Oct 2017 00:41:14 -0400
+Date: Fri, 27 Oct 2017 12:41:12 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/6] common/xfs: refactor xfs_scrub presence testing
-Message-ID: <20171027043715.GS3235@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v2 5/6] misc: add module reloading helpers
+Message-ID: <20171027044112.GT3235@eguan.usersys.redhat.com>
 References: <150899709935.18389.17266737014565285073.stgit@magnolia>
- <150899710564.18389.16849719285455223701.stgit@magnolia>
+ <150899712429.18389.5159489339127196469.stgit@magnolia>
+ <20171027003817.GC5486@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150899710564.18389.16849719285455223701.stgit@magnolia>
+In-Reply-To: <20171027003817.GC5486@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 25, 2017 at 10:51:45PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Oct 26, 2017 at 05:38:17PM -0700, Darrick J. Wong wrote:
+> Add some helper functions to require that we can reload a given module,
+> and add a helper to actually do that.  Refactor the existing users to
+> use the generics.
 > 
-> Move all the requirements checking for xfs_scrub into a helper function.
-> Make sure the helper properly detects the presence of the scrub ioctl
-> and situations where we can't run scrub (e.g. norecovery).
-> 
-> Refactor the existing three xfs_scrub call sites to use the helper to
-> check if it's appropriate to run scrub.
+> We need to hoist completely the behaviors of the old btrfs module helper
+> because we need to confirm before starting the test that we actually can
+> remove the module.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  README            |    6 +++---
->  common/rc         |    2 +-
->  common/xfs        |   40 +++++++++++++++++++++++++++++++++-------
->  tests/generic/453 |   11 +----------
->  tests/generic/454 |   11 +----------
->  5 files changed, 39 insertions(+), 31 deletions(-)
+>  common/btrfs    |   12 --------
+>  common/module   |   83 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/overlay  |    1 +
+>  common/rc       |   11 -------
+>  tests/btrfs/124 |    9 +++---
+>  tests/btrfs/125 |    9 +++---
+>  6 files changed, 92 insertions(+), 33 deletions(-)
+>  create mode 100644 common/module
 > 
-> 
-> diff --git a/README b/README
-> index 4963d28..a9da4f0 100644
-> --- a/README
-> +++ b/README
-> @@ -88,9 +88,9 @@ Preparing system for tests:
->                 run xfs_repair -n to check the filesystem; xfs_repair to rebuild
->                 metadata indexes; and xfs_repair -n (a third time) to check the
->                 results of the rebuilding.
-> -             - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
-> -               xfs_scrub -vd to scrub the filesystem metadata online before
-> -               unmounting to run the offline check.
-> +             - xfs_scrub, if present, will always check the test and scratch
-> +               filesystems if they are still online at the end of the test.
-> +               It is no longer necessary to set TEST_XFS_SCRUB.
->               - setenv LOGWRITES_DEV to a block device to use for power fail
->                 testing.
+> diff --git a/common/btrfs b/common/btrfs
+> index fd762ef..c09206c 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -349,18 +349,6 @@ _btrfs_qgroup_units()
+>  	$BTRFS_UTIL_PROG qgroup show --help 2>&1 | grep -q -- --raw && echo "--raw"
+>  }
+>  
+> -_require_btrfs_loadable()
+> -{
+> -	modprobe -r btrfs || _notrun "btrfs unloadable"
+> -	modprobe btrfs || _notrun "Can't load btrfs"
+> -}
+> -
+> -_reload_btrfs_ko()
+> -{
+> -	modprobe -r btrfs || _fail "btrfs unload failed"
+> -	modprobe btrfs || _fail "btrfs load failed"
+> -}
+> -
+>  _btrfs_compression_algos()
+>  {
+>  	echo zlib
+> diff --git a/common/module b/common/module
+> new file mode 100644
+> index 0000000..59cbd8a
+> --- /dev/null
+> +++ b/common/module
+> @@ -0,0 +1,83 @@
+> +##/bin/bash
+> +
+> +# Routines for messing around with loadable kernel modules
+> +#
+> +#-----------------------------------------------------------------------
+> +#  Copyright (c) 2017 Oracle.  All Rights Reserved.
+> +#  This program is free software; you can redistribute it and/or modify
+> +#  it under the terms of the GNU General Public License as published by
+> +#  the Free Software Foundation; either version 2 of the License, or
+> +#  (at your option) any later version.
+> +#
+> +#  This program is distributed in the hope that it will be useful,
+> +#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +#  GNU General Public License for more details.
+> +#
+> +#  You should have received a copy of the GNU General Public License
+> +#  along with this program; if not, write to the Free Software
+> +#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307
+> +#  USA
+> +#-----------------------------------------------------------------------
+> +
+> +# Return the module name for this fs.
+> +_module_for_fs()
+> +{
+> +	echo "$FSTYP"
+> +}
+> +
+> +# Reload a particular module.  This module MUST NOT be the module that
+> +# underlies the filesystem.
+> +_reload_module()
+> +{
+> +	module="$1"
+> +
+> +	modprobe -r "${module}" || _fail "${module} unload failed"
+> +	modprobe "${module}" || _fail "${module} load failed"
+> +}
+> +
+> +# Reload the filesystem module.
+> +_reload_fs_module()
+> +{
+> +	module="$1"
+> +
+> +	# Unload test fs, try to reload module, remount
+> +	had_testfs=""
+> +	had_scratchfs=""
+> +	_check_mounted_on TEST_DEV $TEST_DEV TEST_DIR $TEST_DIR && had_testfs="true"
+> +	_check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT && had_scratchfs="true"
+> +	test -n "$had_testfs" && _test_unmount
+> +	test -n "$had_scratchfs" && _scratch_unmount
+> +	_reload_module "$module"
+> +	test -n "$had_scratchfs" && _scratch_mount 2> /dev/null
+> +	test -n "$had_testfs" && _test_mount 2> /dev/null
+> +}
+> +
+> +# Check that we have a module that can be loaded.  This module MUST NOT
+> +# be the module that underlies the filesystem.
+> +_require_loadable_module()
+> +{
+> +	module="$1"
+> +
+> +	modinfo "$module" > /dev/null 2>&1 || _notrun "${module}: must be a module."
+> +	_reload_module "$module"
+> +}
+> +
+> +# Check that the module for FSTYP can be loaded.
+> +_require_loadable_fs_module()
+> +{
+> +	module="$1"
+> +
+> +	modinfo "$module" > /dev/null 2>&1 || _notrun "${module}: must be a module."
+> +	_reload_fs_module "$module"
 
-With xfs_scrub check enabled by default, I always see scrub failures
-like this:
+_reload_module() or _reload_fs_module() fails the test directly if the
+module is still in use. IMHO we should _notrun in this case.
 
-_check_xfs_filesystem: filesystem on /dev/vda5 failed scrub
-(see /root/xfstests/results//check.full for details)
-xfs_growfs: /mnt/testarea/test is not a mounted XFS filesystem
-generic/445 1s ... 1s
-_check_xfs_filesystem: filesystem on /dev/vda5 failed scrub
-(see /root/xfstests/results//xfs_4k_crc/generic/445.full for details)
-xfs_growfs: /mnt/testarea/test is not a mounted XFS filesystem
-Ran: generic/445
-Passed all 1 tests
-
-And in check.full or 445.full:
-*** xfs_scrub  -v -d -n output ***
-Phase 1: Find filesystem geometry.
-Info: /mnt/testarea/test: Kernel metadata scrub is required. (ioctl.c line 946)
-Info: /mnt/testarea/test: Scrub aborted after phase 1. (scrub.c line 801)
-
-And this happens to all tests and all test configs. Is this a known
-issue of scrub?
-
-The xfs_growfs message probably comes from _check_xfs_test_fs(), stderr
-of xfs_growfs should go to the pipe too.
+Currently xfs/70[345] still fail if rootfs is xfs.
 
 Thanks,
 Eryu
 
->  
-> diff --git a/common/rc b/common/rc
-> index 1a4d81e..83aaced 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2091,7 +2091,7 @@ _require_xfs_io_command()
->  			_notrun "xfs_io $command support is missing"
->  		;;
->  	"scrub"|"repair")
-> -		testio=`$XFS_IO_PROG -x -c "$command test 0" $TEST_DIR 2>&1`
-> +		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
->  		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
-> diff --git a/common/xfs b/common/xfs
-> index dff8454..df7d029 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -298,6 +298,29 @@ _require_xfs_db_command()
->  		_notrun "xfs_db $command support is missing"
->  }
->  
-> +# Does the filesystem mounted from a particular device support scrub?
-> +_supports_xfs_scrub()
-> +{
-> +	mountpoint="$1"
-> +	device="$2"
-> +
-> +	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
-> +		echo "Usage: _supports_xfs_scrub mountpoint device"
-> +		exit 1
-> +	fi
-> +
-> +	test "$FSTYP" = "xfs" || return 1
-> +	test -x "$XFS_SCRUB_PROG" || return 1
-> +
-> +	# Probe for kernel support...
-> +	$XFS_IO_PROG -x -c "scrub probe 0" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
-> +
-> +	# Scrub can't run on norecovery mounts
-> +	_fs_options "$device" | grep -q "norecovery" && return 1
-> +
-> +	return 0
 > +}
 > +
->  # run xfs_check and friends on a FS.
->  _check_xfs_filesystem()
->  {
-> @@ -330,14 +353,17 @@ _check_xfs_filesystem()
->  	type=`_fs_type $device`
->  	ok=1
+> +# Print the value of a filesystem module parameter
+> +# at /sys/module/$FSTYP/parameters/$PARAM
+> +#
+> +# Usage example (FSTYP=overlay):
+> +#   _get_fs_module_param index
+> +_get_fs_module_param()
+> +{
+> +	cat /sys/module/${FSTYP}/parameters/${1} 2>/dev/null
+> +}
+> diff --git a/common/overlay b/common/overlay
+> index 79097ba..1da4ab1 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -1,6 +1,7 @@
+>  #
+>  # overlayfs specific common functions.
+>  #
+> +. ./common/module
 >  
-> -	if [ "$type" = "xfs" ]; then
-> -		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
-> -			"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
-> -			if [ $? -ne 0 ]; then
-> -				_log_err "filesystem on $device failed scrub"
-> -				ok=0
-> -			fi
-> +	# Run online scrub if we can.
-> +	mntpt="$(_is_mounted $device)"
-> +	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
-> +		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full 2>&1
-> +		if [ $? -ne 0 ]; then
-> +			_log_err "filesystem on $device failed scrub"
-> +			ok=0
->  		fi
-> +	fi
-> +
-> +	if [ "$type" = "xfs" ]; then
->  		# mounted ...
->  		mountpoint=`_umount_or_remount_ro $device`
->  	fi
-> diff --git a/tests/generic/453 b/tests/generic/453
-> index ff29736..40fae91 100755
-> --- a/tests/generic/453
-> +++ b/tests/generic/453
-> @@ -136,10 +136,7 @@ echo "Test XFS online scrub, if applicable"
->  
->  # Only run this on xfs if xfs_scrub is available and has the unicode checker
->  check_xfs_scrub() {
-> -	# Ignore non-XFS fs or no scrub program...
-> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
-> -		return 1
-> -	fi
-> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
->  
->  	# We only care if xfs_scrub has unicode string support...
->  	if ! type ldd > /dev/null 2>&1 || \
-> @@ -147,12 +144,6 @@ check_xfs_scrub() {
->  		return 1
->  	fi
->  
-> -	# Does the ioctl work?
-> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
-> -	   grep -q "Inappropriate ioctl"; then
-> -		return 1
-> -	fi
-> -
->  	return 0
+>  # helper function to do the actual overlayfs mount operation
+>  _overlay_mount_dirs()
+> diff --git a/common/rc b/common/rc
+> index 83aaced..c708bfa 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3554,16 +3554,6 @@ _get_fs_sysfs_attr()
+>  	cat /sys/fs/${FSTYP}/${dname}/${attr}
 >  }
 >  
-> diff --git a/tests/generic/454 b/tests/generic/454
-> index 01279ee..462185a 100755
-> --- a/tests/generic/454
-> +++ b/tests/generic/454
-> @@ -132,10 +132,7 @@ echo "Test XFS online scrub, if applicable"
->  
->  # Only run this on xfs if xfs_scrub is available and has the unicode checker
->  check_xfs_scrub() {
-> -	# Ignore non-XFS fs or no scrub program...
-> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
-> -		return 1
-> -	fi
-> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
->  
->  	# We only care if xfs_scrub has unicode string support...
->  	if ! type ldd > /dev/null 2>&1 || \
-> @@ -143,12 +140,6 @@ check_xfs_scrub() {
->  		return 1
->  	fi
->  
-> -	# Does the ioctl work?
-> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
-> -	   grep -q "Inappropriate ioctl"; then
-> -		return 1
-> -	fi
+> -# Print the value of a filesystem module parameter
+> -# at /sys/module/$FSTYP/parameters/$PARAM
+> -#
+> -# Usage example (FSTYP=overlay):
+> -#   _get_fs_module_param index
+> -_get_fs_module_param()
+> -{
+> -	cat /sys/module/${FSTYP}/parameters/${1} 2>/dev/null
+> -}
 > -
->  	return 0
->  }
+>  # Generic test for specific filesystem feature.
+>  # Currently only implemented to test overlayfs features.
+>  _require_scratch_feature()
+> diff --git a/tests/btrfs/124 b/tests/btrfs/124
+> index 7206094..a648627 100755
+> --- a/tests/btrfs/124
+> +++ b/tests/btrfs/124
+> @@ -55,6 +55,7 @@ _cleanup()
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/filter
+> +. ./common/module
 >  
-> 
+>  # remove previous $seqres.full before test
+>  rm -f $seqres.full
+> @@ -64,10 +65,8 @@ rm -f $seqres.full
+>  _supported_fs btrfs
+>  _supported_os Linux
+>  _require_scratch_dev_pool 2
+> -
+> -# the mounted test dir prevent btrfs unload, we need to unmount
+>  _test_unmount
+> -_require_btrfs_loadable
+> +_require_loadable_fs_module "btrfs"
+>  
+>  _scratch_dev_pool_get 2
+>  
+> @@ -102,7 +101,7 @@ echo "clean btrfs ko" >> $seqres.full
+>  _scratch_unmount
+>  
+>  # un-scan the btrfs devices
+> -_reload_btrfs_ko
+> +_reload_fs_module "btrfs"
+>  
+>  echo >> $seqres.full
+>  echo "-----Write degraded mount fill upto $max_fs_sz bytes-----" >> $seqres.full
+> @@ -141,7 +140,7 @@ echo
+>  echo "Mount degraded with the other dev"
+>  _scratch_unmount
+>  # un-scan the btrfs devices
+> -_reload_btrfs_ko
+> +_reload_fs_module "btrfs"
+>  _mount -o degraded $dev2 $SCRATCH_MNT >>$seqres.full 2>&1
+>  _run_btrfs_util_prog filesystem show
+>  checkpoint3=`md5sum $SCRATCH_MNT/tf2`
+> diff --git a/tests/btrfs/125 b/tests/btrfs/125
+> index 91aa8d8..19961a1 100755
+> --- a/tests/btrfs/125
+> +++ b/tests/btrfs/125
+> @@ -54,6 +54,7 @@ _cleanup()
+>  # get standard environment, filters and checks
+>  . ./common/rc
+>  . ./common/filter
+> +. ./common/module
+>  
+>  # remove previous $seqres.full before test
+>  rm -f $seqres.full
+> @@ -63,10 +64,8 @@ rm -f $seqres.full
+>  _supported_fs btrfs
+>  _supported_os Linux
+>  _require_scratch_dev_pool 3
+> -
+> -# we need btrfs to unload, need test dir unmounted
+>  _test_unmount
+> -_require_btrfs_loadable
+> +_require_loadable_fs_module "btrfs"
+>  
+>  _scratch_dev_pool_get 3
+>  
+> @@ -118,7 +117,7 @@ echo "unmount" >> $seqres.full
+>  _scratch_unmount
+>  echo "clean btrfs ko" >> $seqres.full
+>  # un-scan the btrfs devices
+> -_reload_btrfs_ko
+> +_reload_fs_module "btrfs"
+>  _mount -o degraded,device=$dev2 $dev1 $SCRATCH_MNT >>$seqres.full 2>&1
+>  dd if=/dev/zero of="$SCRATCH_MNT"/tf2 bs=$bs count=$count \
+>  					>>$seqres.full 2>&1
+> @@ -154,7 +153,7 @@ echo "Mount degraded but with other dev"
+>  
+>  _scratch_unmount
+>  # un-scan the btrfs devices
+> -_reload_btrfs_ko
+> +_reload_fs_module "btrfs"
+>  
+>  _mount -o degraded,device=${dev2} $dev3 $SCRATCH_MNT >>$seqres.full 2>&1
+>  
