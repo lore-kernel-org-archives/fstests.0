@@ -1,78 +1,96 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50908 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750741AbdJ2Glh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 29 Oct 2017 02:41:37 -0400
-Date: Sun, 29 Oct 2017 14:41:34 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: generic/459 requires thin_check?
-Message-ID: <20171029064134.GB17339@eguan.usersys.redhat.com>
-References: <20171028204029.GA4908@magnolia>
+Received: from mail-qk0-f173.google.com ([209.85.220.173]:55939 "EHLO
+        mail-qk0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751147AbdJ2Lsa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Oct 2017 07:48:30 -0400
+Received: by mail-qk0-f173.google.com with SMTP id x82so13046711qkb.12
+        for <fstests@vger.kernel.org>; Sun, 29 Oct 2017 04:48:29 -0700 (PDT)
+Received: from localhost (nat-pool-bos-t.redhat.com. [66.187.233.206])
+        by smtp.gmail.com with ESMTPSA id e190sm2925497qkf.55.2017.10.29.04.48.27
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 29 Oct 2017 04:48:28 -0700 (PDT)
+Message-ID: <59f5c00c.c7b5370a.d4a8d.1c13@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 29 Oct 2017 19:48:25 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 4b69106b60cb
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="J3LC8yiZ55ij"
 Content-Disposition: inline
-In-Reply-To: <20171028204029.GA4908@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Oct 28, 2017 at 01:40:29PM -0700, Darrick J. Wong wrote:
-> Hi,
-> 
-> I noticed a test failure when running generic/459 -- it seems that this
-> test wants thin_check to be installed, doesn't explicitly check for it
-> (possibly because it is indirectly run by lvcreate), and therefore the
-> thin pool fails to activate.  I think this test needs to look for
-> thin_check and _notrun if it's not found.  Comments?
 
->From lvmthin(7):
+--J3LC8yiZ55ij
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-"
-When a thin pool LV is activated, lvm runs the thin_check command to check the correctness of the metadata on the pool metadata LV.
+Hi all,
 
-lvm.conf(5) thin_check_executable
-can be set to an empty string ("") to disable the thin_check step.  This is not recommended.
-"
+The master branch of the xfstests repository at:
 
-and in my RHEL7 system 'thin_check_executable' config is commented out
-in /etc/lvm/lvm.conf, which means it uses the default
-/usr/sbin/thin_check command to do the metadata check. And thin_check is
-provided by package device-mapper-persistent-data.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-So IMHO it's totally valid to create thin-pool with lvcreate without
-thin_check command (i.e. it's not a distro bug that messed up the lvm
-dependency), and it makes sense to check the existence of thin_check in
-generic/459.
+have just been updated. This is a small update that contains only minor random
+fixes. Please note that the sporadic XFS test failures in generic/{23[123],270}
+should be fixed if you have xfs_spaceman built/installed.
+
+I didn't see any new failures after this update.
 
 Thanks,
 Eryu
 
-> 
-> --D
-> 
-> results/generic/459.out is as follows:
-> 
-> meta-data=/dev/pmem4             isize=512    agcount=4, agsize=16000 blks
->          =                       sectsz=4096  attr=2, projid32bit=1
->          =                       crc=1        finobt=1, sparse=1, rmapbt=1, reflink=1
-> data     =                       bsize=4096   blocks=64000, imaxpct=25
->          =                       sunit=0      swidth=0 blks
-> naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-> log      =internal log           bsize=4096   blocks=3609, version=2
->          =                       sectsz=4096  sunit=1 blks, lazy-count=1
-> realtime =none                   extsz=4096   blocks=0, rtextents=0
-> File descriptor 3 (/tmp/log) leaked on lvm invocation. Parent PID 11865: /bin/bash
->   Wiping xfs signature on /dev/pmem4.
->   Physical volume "/dev/pmem4" successfully created
-> File descriptor 3 (/tmp/log) leaked on lvm invocation. Parent PID 11865: /bin/bash
->   Volume group "vg_459" successfully created
-> File descriptor 3 (/tmp/log) leaked on lvm invocation. Parent PID 11865: /bin/bash
->   Logical volume "pool_459" created.
-> File descriptor 3 (/tmp/log) leaked on lvm invocation. Parent PID 11865: /bin/bash
->   /usr/sbin/thin_check: execvp failed: No such file or directory
->   WARNING: Integrity check of metadata for pool vg_459/pool_459 failed.
->   WARNING: Sum of all thin volume sizes (200.00 MiB) exceeds the size of thin pool vg_459/pool_459 (100.00 MiB)!
->   For thin pool auto extension activation/thin_pool_autoextend_threshold should be below 100.
->   /usr/sbin/thin_check: execvp failed: No such file or directory
->   Check of pool vg_459/pool_459 failed (status:2). Manual repair required!
->   Failed to activate thin pool vg_459/pool_459.
+The new head of the master branch is commit:
+
+4b69106b60cb common/fuzzy: online re-scrub should not preen
+
+New commits:
+
+Darrick J. Wong (3):
+      [148090c1c440] quota: clear speculative delalloc when checking quota usage
+      [a7ee21e5cbec] generic/45[34]: force UTF-8 codeset to enable utf-8 namer checks in xfs_scrub
+      [4b69106b60cb] common/fuzzy: online re-scrub should not preen
+
+Qu Wenruo (1):
+      [fb26a0cf51c5] btrfs/130: Remove from auto group
+
+Robbie Ko (1):
+      [23e7ba4e1047] btrfs/010: fix offset in test Btrfs delalloc accounting overflow
+
+
+Code Diffstat:
+
+ common/config     | 1 +
+ common/fuzzy      | 2 +-
+ common/quota      | 6 ++++++
+ tests/btrfs/010   | 2 +-
+ tests/btrfs/group | 2 +-
+ tests/generic/453 | 2 +-
+ tests/generic/454 | 2 +-
+ 7 files changed, 12 insertions(+), 5 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--J3LC8yiZ55ij
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJZ9btKAAoJECZSqilcj+djuyYP/0EjWO9lCrKYz6/sFJrVgqHc
+ba2OZUeRoyVN1QUjRqnbzxFwPeZfvuSjka/QJoZZNEZUpHe6HC3a22X2HJ2/j4P2
+5i9m1cVRNsE0pbftlETv7KOEHaWnf4TcM0vZUM/TeLx2U3o9nJEfKZ2ESJEOtYUH
+hNPFAULQZlSdX6YgEJJ2VpgeiI+/6rm2rqETH0po0cY797iVnjXpUMhLGC7iANYW
+BuHIJ2ROFi2w9NmV6/PyUixcmyv8L/AkA6C7VVTZF1csWfnLg8gj9tcJ3UhnHk6M
+4TCY8aXquvRFi8pdZGEW7Q5YymPtM0A5xNFd61IMfZyJMLHAxKz0UN+UTfuZdILf
+tBKP9YQdr/jnQhN2nYwmypn8y1yaTY0AYfMe0EDlHN1Uy/bxcOdFGzyWrPfiUU3J
+AtXin0U9HdZ955O2EGc50XrAYB4lDFMEosS8j7Lk6lBxe+tMEUjvQAWwrjZhRoKG
+H0XNk+Rr5H3UxX8bs11bmlx5W2HAaMTrDWH0UmYc8xPWh1RfLvVmskBzBswwraRU
+0MkoU13r6n6pQGufP22wLn7XJ3eUYEDYSdr4ASnfJegltVDEyL3bBM6FCUlFwOEM
+rrOm+1OIPpPstzZLR5KhaVr07BPlbvwPha9ICLdFGTu4B9kY1hvrLM+Pm3oW73qE
+8heiVkfs5dDcYeIE/zHZ
+=vfu0
+-----END PGP SIGNATURE-----
+
+--J3LC8yiZ55ij--
