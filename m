@@ -1,119 +1,118 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41946 "EHLO mx1.redhat.com"
+Received: from mx141.netapp.com ([216.240.21.12]:7748 "EHLO mx141.netapp.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751402AbdJaJcr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 31 Oct 2017 05:32:47 -0400
-Date: Tue, 31 Oct 2017 17:32:45 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/2] initial fiemap test
-Message-ID: <20171031093245.GK17339@eguan.usersys.redhat.com>
-References: <1509107832-22286-1-git-send-email-nborisov@suse.com>
- <1509107832-22286-3-git-send-email-nborisov@suse.com>
- <20171027124414.GX3235@eguan.usersys.redhat.com>
- <ff61b10a-4284-ccd3-2f1d-40d3683fe611@suse.com>
+        id S932342AbdJaK0J (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 31 Oct 2017 06:26:09 -0400
+Subject: Re: [PATCH] generic/4[13,62]: restore TEST mount options
+References: <20171030080831.7339-1-Omer.Zilberberg@netapp.com>
+ <20171030203658.GA4094@dastard>
+ <20171031043758.GF17339@eguan.usersys.redhat.com>
+From: Omer Zilberberg <omerz@netapp.com>
+Message-ID: <9513dd3d-22bf-0dde-6cfb-6d8f4bc9775c@netapp.com>
+Date: Tue, 31 Oct 2017 12:25:51 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <ff61b10a-4284-ccd3-2f1d-40d3683fe611@suse.com>
+In-Reply-To: <20171031043758.GF17339@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Nikolay Borisov <nborisov@suse.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Eryu Guan <eguan@redhat.com>, Dave Chinner <david@fromorbit.com>, Omer Zilberberg <Omer.Zilberberg@netapp.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 31, 2017 at 11:22:48AM +0200, Nikolay Borisov wrote:
-> 
-> 
-> On 27.10.2017 15:44, Eryu Guan wrote:
-> > On Fri, Oct 27, 2017 at 03:37:10PM +0300, Nikolay Borisov wrote:
-> >> Test various range queries of fiemap and ensure they produce expected output. 
-> >>
-> >> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> >> ---
-> >>  tests/xfs/900     |  96 ++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/xfs/900.out | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>  2 files changed, 214 insertions(+)
-> >>  create mode 100755 tests/xfs/900
-> >>  create mode 100644 tests/xfs/900.out
-> >>
-> >> diff --git a/tests/xfs/900 b/tests/xfs/900
-> >> new file mode 100755
-> >> index 0000000..e535820
-> >> --- /dev/null
-> >> +++ b/tests/xfs/900
-> >> @@ -0,0 +1,96 @@
-> >> +#! /bin/bash
-> >> +# FS QA Test No. 900
-> >> +#
-> >> +#-----------------------------------------------------------------------
-> >> +# Copyright (c) 2017 SUSE Linux Products GmbH.  All Rights Reserved.
-> >> +#
-> >> +# This program is free software; you can redistribute it and/or
-> >> +# modify it under the terms of the GNU General Public License as
-> >> +# published by the Free Software Foundation.
-> >> +#
-> >> +# This program is distributed in the hope that it would be useful,
-> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >> +# GNU General Public License for more details.
-> >> +#
-> >> +# You should have received a copy of the GNU General Public License
-> >> +# along with this program; if not, write the Free Software Foundation,
-> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >> +#-----------------------------------------------------------------------
-> >> +#
-> >> +
-> >> +seq=`basename $0`
-> >> +seqres=$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=`pwd`
-> >> +tmp=/tmp/$$
-> >> +status=1	# failure is the default!
-> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> >> +
-> >> +_cleanup()
-> >> +{
-> >> +	cd /
-> >> +	rm -f $tmp.*
-> >> +}
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/punch
-> >> +
-> >> +# remove previous $seqres.full before test
-> >> +rm -f $seqres.full
-> >> +
-> >> +# real QA test starts here
-> >> +
-> >> +# Modify as appropriate.
-> >> +_supported_fs generic
-> >> +_supported_os Linux
-> >> +_require_scratch
-> >> +_require_xfs_io_command "falloc"
-> >> +_require_xfs_io_command "fiemap"
-> > 
-> > I haven't run the test yet, but from a quick look, it looks like test
-> > fails with old xfs_io without fiemap range support. Not sure adding
-> > range param to _require_xfs_io_command helps, e.g.
-> > 
-> > _require_xfs_io_command "fiemap" "0 4k"
-> 
-> Apparently it doesn't :
-> ./io/xfs_io -c "fiemap 0 2k" ../xfstests-dev/trace.dat
-> ../xfstests-dev/trace.dat:
-> 	0: [0..6095]: 18477056..18483151
 
-Looks like fiemap ignores all non-option arguments..
 
-> 
-> 
-> the xfs_io is just v4.13.1 HEAD. One other things that comes to mind is
-> to play tricks with the xfs_io -c "help fiemap" invocation and parse the
-> first line. If the range param is supported then it will be present in
-> the one-line help if not, it won't be. Do you think that's acceptable ?
+On 10/31/2017 06:37 AM, Eryu Guan wrote:
+> On Tue, Oct 31, 2017 at 07:36:58AM +1100, Dave Chinner wrote:
+>> On Mon, Oct 30, 2017 at 10:08:31AM +0200, Omer Zilberberg wrote:
+>>> These tests locally change the TEST_FS_MOUNT_OPTS/MOUNT_OPTIONS
+>>> environment variables, and run _test_cycle_mount. As a result, follow=
+ing
+>>> tests using the TEST mount point may start with different mount optio=
+ns,
+>>> depending on run order.
+>> I don't think that's the case. The change of the environment
+>> variable should only affect the current test process and it's
+>> children. When the test exits, we go back to the environment of the
+>> check process, where the TEST_FS_MOUNT_OPTS environment variable is
+>> still correctly set, and all future tests inherit from that. i.e.:
+>>
+>> $ export FOO=3Dfoo
+>> $ echo $FOO
+>> foo
+>> $ bash
+>> $ echo $FOO
+>> foo
+>> $ export FOO=3Dbar
+>> $ echo $FOO
+>> bar
+>> $ exit
+>> $ echo $FOO
+>> foo
+>> $
+>>
+>> And after each test, check runs _check_filesystems(), which cycles
+>> the test mount, so for each new test process that is run they should
+>> already start in the correct state...
+> I agreed, the changing of variables in a sub-shell won't affect the
+> parent's copy, and check will restore the mounts with the untouched
+> options.
+>
+> But the problem is that _check_test_fs() will cycle mount TEST_DEV with
+> MOUNT_OPTIONS not TEST_FS_MOUNT_OPTS, so if you have different mount
+> options set for TEST_DEV and SCRATCH_DEV, you'll see mount options
+> changed for TEST_DEV. e.g.
+>
+> MOUNT_OPTIONS=3D"-o dax" TEST_FS_MOUNT_OPTS=3D"" ./check generic/413 ge=
+neric/445
+> generic/445 mount TEST_DEV with "-o dax" too
+>
+> MOUNT_OPTIONS=3D"" TEST_FS_MOUNT_OPTS=3D"-o dax" ./check generic/413 ge=
+neric/445
+> generic/445 mount TEST_DEV without "-o dax"
+>
+> MOUNT_OPTIONS=3D"-o dax" TEST_FS_MOUNT_OPTS=3D"-o dax" ./check generic/=
+413 generic/445
+> both tests and both devices mount with "-o dax"
+>
+> That's been discussed in this thread:
+> https://patchwork.kernel.org/patch/9742039/
+>
+> Omer, can you please confirm if you're hitting this issue?
+I'm not 100% that's the case, so I better describe my settings more clear=
+ly:
+I have a debug mount option on my system to recover the FS from a backup.
+When that flag is set, umount writes everything to the backup.
+Mount restores from it, overwriting everything.
 
-I'm fine with it, we do have similar code to do such check on help
-message.
+As long as generic/413 is not involved, everything works well.
+All _test_cycle_mount() calls first back everything up on umount,
+then restore upon mount. So I get the same FS contents.
 
-Thanks,
-Eryu
+But, consider generic/118 running after generic/413:
+- generic/413 finishes with a mount point with no mount options
+- generic/118 begins with restored TEST_FS_MOUNT_OPTS, as you've pointed =
+out.
+- some writes are performed to the FS
+- next _test_cycle_mount:
+=C2=A0 calls umount w/o backing up (debug flag previously unset by generi=
+c/413).
+=C2=A0 calls mount WITH the debug flag, and recovers from an empty backup=
+,
+=C2=A0 deleting the earlier writes.
+- subsequent md5sum fails on "No such file or directory", as FS is now em=
+pty.
+
+> I think fixing _check_<fs>_filesystem() is the correct way. And I guess
+> we can refactor out a common function and call it in
+> _check_[xfs|btrfs|generic]_filesystem, pass the correct mount options
+> based on what device we're working on.
+If indeed we're talking about the same problem,
+please let me know if you'd like me to prepare a different patch.
+>
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
