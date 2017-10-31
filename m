@@ -1,88 +1,78 @@
-Received: from mx2.suse.de ([195.135.220.15]:48987 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:49718 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752209AbdJaOKR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 31 Oct 2017 10:10:17 -0400
+        id S1753280AbdJaOMb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 31 Oct 2017 10:12:31 -0400
 From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2 1/2] fiemap: Factor out actual fiemap call code
-Date: Tue, 31 Oct 2017 16:10:10 +0200
-Message-Id: <1509459011-7398-1-git-send-email-nborisov@suse.com>
-In-Reply-To: <1509107832-22286-1-git-send-email-nborisov@suse.com>
-References: <1509107832-22286-1-git-send-email-nborisov@suse.com>
+Subject: [PATCH v2 2/4] punch: Implement fixup for fiemap range queries
+Date: Tue, 31 Oct 2017 16:11:34 +0200
+Message-Id: <1509459096-7585-2-git-send-email-nborisov@suse.com>
+In-Reply-To: <1509459096-7585-1-git-send-email-nborisov@suse.com>
+References: <1509459011-7398-1-git-send-email-nborisov@suse.com>
+ <1509459096-7585-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, eguan@redhat.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-This will be needed to in a subsequent patch to avoid code duplication
+With the new  range query support for the fiemap command,
+the command also started printing hole extent for files which
+consist of only a hole. This change breaks tests which are
+executed with a version of xfs_io that doesn't support fiemap's
+range query.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Fix this by implementing a function which will fixup the output
+of tests which are broken by emulating the output on older
+xfs_io versions
+
+Signed-off-by: Nikolay Borisov <nborisov@suse.com> 
 ---
-v2:
- * Incorporated Daricks feedback - removed variables which weren't introduced
- until the next patch as a result the build with this patch was broken. This is 
- fixed now
- io/fiemap.c | 39 ++++++++++++++++++++++++++++-----------
- 1 file changed, 28 insertions(+), 11 deletions(-)
+ common/punch | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
 
-diff --git a/io/fiemap.c b/io/fiemap.c
-index e6fd66da753d..08391f69d9bd 100644
---- a/io/fiemap.c
-+++ b/io/fiemap.c
-@@ -211,6 +211,31 @@ calc_print_format(
- 	}
+diff --git a/common/punch b/common/punch
+index c4ed261..b20dc30 100644
+--- a/common/punch
++++ b/common/punch
+@@ -218,6 +218,23 @@ _filter_fiemap()
+ 	_coalesce_extents
  }
  
-+static int
-+__fiemap(
-+	 struct fiemap * fiemap,
-+	 int		 mapsize,
-+	 __u32		 flags,
-+	 __u64		 start,
-+	 __u64		 length) {
++_fiemap_range_fixup()
++{
++	#check if we support ranged query
++	$XFS_IO_PROG -c "help fiemap" | head -n 1 | grep -q "[offset [len]]"
++	local range_sup=$?
++	#check if the file consists of a single hole only
++	echo "$1" | grep -q "^0\: \[.*\]\: hole$"
++	local sole_hole=$?
++	local filesize="$(((`stat -c %s $1` / 512) - 1))"
++	local output_line_num=`$XFS_IO_PROG -c 'fiemap' $testfile | wc -l`
 +
-+	int ret;
-+
-+	memset(fiemap, 0, mapsize);
-+	fiemap->fm_flags = flags;
-+	fiemap->fm_start = start;
-+	fiemap->fm_length = length;
-+	fiemap->fm_extent_count = EXTENT_BATCH;
-+	ret = ioctl(file->fd, FS_IOC_FIEMAP, fiemap);
-+	if (ret < 0) {
-+	        fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
-+	                "%s\n", progname, file->name, strerror(errno));
-+	        return ret;
-+	}
-+
-+	return 0;
++	if [ $range_sup -eq 1 ] && [ $sole_hole -eq 1  ] && [ $output_line_num -eq 1 ]
++	then
++		echo "0: [0..$filesize]: hole"
++	fi
 +}
 +
- int
- fiemap_f(
- 	int		argc,
-@@ -266,19 +291,11 @@ fiemap_f(
+ _filter_fiemap_flags()
+ {
+ 	$AWK_PROG '
+@@ -363,6 +380,7 @@ _test_generic_punch()
+ 	$XFS_IO_PROG -f -c "truncate $_20k" \
+ 		-c "$zero_cmd $_4k $_8k" \
+ 		-c "$map_cmd -v" $testfile | $filter_cmd
++	_fiemap_range_fixup $testfile
+ 	[ $? -ne 0 ] && die_now
+ 	_md5_checksum $testfile
  
- 	while (!last && (cur_extent != max_extents)) {
+@@ -470,6 +488,7 @@ _test_generic_punch()
+ 		-c "pwrite $_8k $_4k" $sync_cmd \
+ 		-c "$zero_cmd $_4k $_12k" \
+ 		-c "$map_cmd -v" $testfile | $filter_cmd
++	_fiemap_range_fixup $testfile
+ 	[ $? -ne 0 ] && die_now
+ 	_md5_checksum $testfile
  
--		memset(fiemap, 0, map_size);
--		fiemap->fm_flags = fiemap_flags;
--		fiemap->fm_start = last_logical;
--		fiemap->fm_length = -1LL;
--		fiemap->fm_extent_count = EXTENT_BATCH;
--
--		ret = ioctl(file->fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
-+		ret = __fiemap(fiemap, map_size, fiemap_flags, last_logical,
-+			       -1LL);
- 		if (ret < 0) {
--			fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
--				"%s\n", progname, file->name, strerror(errno));
--			free(fiemap);
- 			exitcode = 1;
--			return 0;
-+			goto out;
- 		}
- 
- 		/* No more extents to map, exit */
 -- 
 2.7.4
 
