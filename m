@@ -1,120 +1,220 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35060 "EHLO mx1.redhat.com"
+Received: from mx2.suse.de ([195.135.220.15]:48986 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751925AbdJaOAq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 31 Oct 2017 10:00:46 -0400
-Date: Tue, 31 Oct 2017 22:00:41 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] xfs: test for umount hang caused by the pending
- dquota log item in AIL
-Message-ID: <20171031140041.GO17339@eguan.usersys.redhat.com>
-References: <1509003472-24191-1-git-send-email-houtao1@huawei.com>
- <1509003472-24191-2-git-send-email-houtao1@huawei.com>
- <20171031064617.GH17339@eguan.usersys.redhat.com>
- <07ce7e5b-2528-f9ff-69a1-5db7a620e846@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <07ce7e5b-2528-f9ff-69a1-5db7a620e846@huawei.com>
+        id S1752341AbdJaOKR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 31 Oct 2017 10:10:17 -0400
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH v2 2/2] fiemap: Implement ranged query
+Date: Tue, 31 Oct 2017 16:10:11 +0200
+Message-Id: <1509459011-7398-2-git-send-email-nborisov@suse.com>
+In-Reply-To: <1509459011-7398-1-git-send-email-nborisov@suse.com>
+References: <1509107832-22286-1-git-send-email-nborisov@suse.com>
+ <1509459011-7398-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Hou Tao <houtao1@huawei.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Oct 31, 2017 at 08:34:50PM +0800, Hou Tao wrote:
-> Hi Eryu,
-> 
-> Thanks for your detailed review.
-> 
-> On 2017/10/31 14:46, Eryu Guan wrote:
-> > On Thu, Oct 26, 2017 at 03:37:52PM +0800, Hou Tao wrote:
-> >> When the first writeback and the retried writeback of dquota buffer get
-> >> the same IO error, XFS will let xfsaild to restart the writeback and
-> >> xfs_qm_dqflush_done() will not be invoked. xfsaild will try to re-push
-> >> the quota log item in AIL, the push will return early everytime after
-> >> checking xfs_dqflock_nowait(), and xfsaild will try to push it again.
-> >>
-> >> IOWs, AIL will never be empty, and the umount process will wait for the
-> >> drain of AIL, so the umount process hangs.
-> >>
-> >> Signed-off-by: Hou Tao <houtao1@huawei.com>
-> > 
-> > Sorry for the late review. Is there a specific patch or patchset fixed
-> > this bug? I tested on v4.14-rc2 kernel and for-next branch on Darrick's
-> > tree, test survivied multiple runs on both kernels.
-> The problem has not been fixed yet, and Carlos Maiolino is working on the it [1].
-> The pass of the test case is out of my expectation. I had tried it on v4.14-rc6,
-> and the test case hangs on umount.
-> 
-> Have you applied the first patch "[PATCH 1/2] dmflakey: support multiple dm targets
-> for a dm-flakey device" during the test ? If you have applied it, could you show me
-> the full result file of the test case, namely results/xfs/999.full ?
+Currently the fiemap implementation of xfs_io doesn't support making ranged
+queries. This patch implements two optional arguments which take the starting
+offset and the length of the region to be queried. This also requires changing
+of the final hole range is calculated. Namely, it's now being done as
+[last_logical, logical addres of next extent] rather than being statically
+determined by [last_logical, filesize].
 
-Yes, I applied both of your patches before testing. Test host is a kvm
-guest with 4 vcpus and 8G mem running v4.14-rc2 kernel. Below is the
-xfs/999.full
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+ io/fiemap.c       | 72 +++++++++++++++++++++++++++++++++++++++++++++++--------
+ man/man8/xfs_io.8 |  5 ++--
+ 2 files changed, 65 insertions(+), 12 deletions(-)
 
-me:              flakey-test
-State:             ACTIVE
-Read Ahead:        256
-Tables present:    LIVE
-Open count:        0
-Event number:      0
-Major, minor:      252, 0
-Number of targets: 1
+diff --git a/io/fiemap.c b/io/fiemap.c
+index 08391f69d9bd..668f8fe4e732 100644
+--- a/io/fiemap.c
++++ b/io/fiemap.c
+@@ -27,6 +27,9 @@
+ 
+ static cmdinfo_t fiemap_cmd;
+ static int max_extents = -1;
++static __u64 covered_length = 0;
++static __u64 len = -1LL;
++static bool range_limit = false;
+ 
+ static void
+ fiemap_help(void)
+@@ -79,7 +82,7 @@ print_hole(
+ 		       boff_w, _("hole"), tot_w, lstart - llast);
+ 	   }
+ 
+-
++	   covered_length += BBTOB(lstart - llast);
+ }
+ 
+ static int
+@@ -90,7 +93,8 @@ print_verbose(
+ 	int			tot_w,
+ 	int			flg_w,
+ 	int			cur_extent,
+-	__u64			last_logical)
++	__u64			last_logical,
++	__u64			limit)
+ {
+ 	__u64			lstart;
+ 	__u64			llast;
+@@ -122,7 +126,7 @@ print_verbose(
+ 		cur_extent++;
+ 	}
+ 
+-	if (cur_extent == max_extents)
++	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
+ 		return 1;
+ 
+ 	snprintf(lbuf, sizeof(lbuf), "[%llu..%llu]:", lstart,
+@@ -140,7 +144,8 @@ print_plain(
+ 	struct fiemap_extent	*extent,
+ 	int			lflag,
+ 	int			cur_extent,
+-	__u64			last_logical)
++	__u64			last_logical,
++	__u64			limit)
+ {
+ 	__u64			lstart;
+ 	__u64			llast;
+@@ -157,7 +162,7 @@ print_plain(
+ 		cur_extent++;
+ 	}
+ 
+-	if (cur_extent == max_extents)
++	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
+ 		return 1;
+ 
+ 	printf("\t%d: [%llu..%llu]: %llu..%llu", cur_extent,
+@@ -256,8 +261,11 @@ fiemap_f(
+ 	int		tot_w = 5;	/* 5 since its just one number */
+ 	int		flg_w = 5;
+ 	__u64		last_logical = 0;
++	size_t		fsblocksize, fssectsize;
+ 	struct stat	st;
+ 
++	init_cvtnum(&fsblocksize, &fssectsize);
++
+ 	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
+ 		switch (c) {
+ 		case 'a':
+@@ -277,6 +285,26 @@ fiemap_f(
+ 		}
+ 	}
+ 
++	if (optind < argc) {
++		off64_t start_offset = cvtnum(fsblocksize, fssectsize, argv[optind]);
++		if (start_offset < 0) {
++			printf("non-numeric offset argument -- %s\n", argv[optind]);
++			return 0;
++		}
++		last_logical = start_offset;
++		optind++;
++	}
++
++	if (optind < argc) {
++		off64_t length = cvtnum(fsblocksize, fssectsize, argv[optind]);
++		if (length < 0) {
++			printf("non-numeric len argument -- %s\n", argv[optind]);
++			return 0;
++		}
++		len = length;
++		range_limit = true;
++	}
++
+ 	map_size = sizeof(struct fiemap) +
+ 		(EXTENT_BATCH * sizeof(struct fiemap_extent));
+ 	fiemap = malloc(map_size);
+@@ -317,14 +345,18 @@ fiemap_f(
+ 				num_printed = print_verbose(extent, foff_w,
+ 							    boff_w, tot_w,
+ 							    flg_w, cur_extent,
+-							    last_logical);
++							    last_logical,
++							    len);
+ 			} else
+ 				num_printed = print_plain(extent, lflag,
+ 							  cur_extent,
+-							  last_logical);
++							  last_logical,
++							  len);
+ 
+ 			cur_extent += num_printed;
+ 			last_logical = extent->fe_logical + extent->fe_length;
++			if (num_printed == 2)
++				covered_length += extent->fe_length;
+ 
+ 			if (extent->fe_flags & FIEMAP_EXTENT_LAST) {
+ 				last = 1;
+@@ -333,6 +365,9 @@ fiemap_f(
+ 
+ 			if (cur_extent == max_extents)
+ 				break;
++
++			if (range_limit && covered_length >= len)
++				goto out;
+ 		}
+ 	}
+ 
+@@ -348,9 +383,26 @@ fiemap_f(
+ 		return 0;
+ 	}
+ 
+-	if (cur_extent && last_logical < st.st_size)
++	if (last_logical < st.st_size &&
++	    (!range_limit || covered_length < len)) {
++		int end;
++
++		ret = __fiemap(fiemap, map_size, fiemap_flags, last_logical,
++			       st.st_size);
++		if (ret < 0) {
++			exitcode = 1;
++			goto out;
++		}
++
++		if (!fiemap->fm_mapped_extents)
++			end = BTOBBT(st.st_size);
++		else
++			end = BTOBBT(fiemap->fm_extents[0].fe_logical);
++
++
+ 		print_hole(foff_w, boff_w, tot_w, cur_extent, lflag, !vflag,
+-			   BTOBBT(last_logical), BTOBBT(st.st_size));
++			   BTOBBT(last_logical), end);
++	}
+ 
+ out:
+ 	free(fiemap);
+@@ -365,7 +417,7 @@ fiemap_init(void)
+ 	fiemap_cmd.argmin = 0;
+ 	fiemap_cmd.argmax = -1;
+ 	fiemap_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+-	fiemap_cmd.args = _("[-alv] [-n nx]");
++	fiemap_cmd.args = _("[-alv] [-n nx] [offset [len]]");
+ 	fiemap_cmd.oneline = _("print block mapping for a file");
+ 	fiemap_cmd.help = fiemap_help;
+ 
+diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+index 0fd9b951199c..27f1ae163913 100644
+--- a/man/man8/xfs_io.8
++++ b/man/man8/xfs_io.8
+@@ -295,11 +295,12 @@ Prints the block mapping for the current open file. Refer to the
+ .BR xfs_bmap (8)
+ manual page for complete documentation.
+ .TP
+-.BI "fiemap [ \-alv ] [ \-n " nx " ]"
++.BI "fiemap [ \-alv ] [ \-n " nx " ] [ " offset " [ " len " ]]"
+ Prints the block mapping for the current open file using the fiemap
+ ioctl.  Options behave as described in the
+ .BR xfs_bmap (8)
+-manual page.
++manual page. Optionally, this command also supports passing the start offset
++from where to begin the fiemap and the length of that region.
+ .TP
+ .BI "fsmap [ \-d | \-l | \-r ] [ \-m | \-v ] [ \-n " nx " ] [ " start " ] [ " end " ]
+ Prints the mapping of disk blocks used by the filesystem hosting the current
+-- 
+2.7.4
 
-flakey-test: 0 31457280 linear 253:6 0
-MOUNT_OPTIONS =  -o usrquota
-User quota on /mnt/testarea/scratch (/dev/mapper/flakey-test)
-                        Inodes              
-User ID      Used   Soft   Hard Warn/Grace  
----------- --------------------------------- 
-root            3      0      0  00 [------]
-fsgqa           0    500      0  00 [------]
-
-User quota on /mnt/testarea/scratch (/dev/mapper/flakey-test)
-                        Inodes              
-User ID      Used   Soft   Hard Warn/Grace  
----------- --------------------------------- 
-root            3      0      0  00 [------]
-fsgqa           0    400      0  00 [------]
-
-Name:              flakey-test
-State:             ACTIVE
-Read Ahead:        256
-Tables present:    LIVE
-Open count:        1
-Event number:      0
-Major, minor:      252, 0
-Number of targets: 3
-
-flakey-test: 0 16777256 flakey 253:6 0 0 1 1 error_writes 
-flakey-test: 16777256 20480 linear 253:6 16777256
-flakey-test: 16797736 14659544 flakey 253:6 16797736 0 1 1 error_writes
-
-[snip]
-
-> >> +
-> >> +# inject write IO error
-> >> +FLAKEY_TABLE=$(_make_xfs_scratch_flakey_table)
-> >> +_load_flakey_table $FLAKEY_ALLOW_WRITES
-> > 
-> > Set FLAKEY_TABLE_DROP here and call _load_flakey_table with
-> > $FLAKEY_DROP_WRITES
-> 
-> No. We need to use the customized table instead of FLAKEY_TABLE_DROP,
-> because we need to let the write return IO error instead of being droppped
-> silently and we need to ensure the write of the log will succeed.
-
-I mean something like:
-
-FLAKEY_TABLE_DROP=$(_make_xfs_scratch_flakey_table)
-_load_flakey_table $FLAKEY_DROP_WRITES
-
-This basically does the same work as your code, but loading a different
-table var. _load_flakey_table selects FLAKEY_TABLE when first argument
-is $FLAKEY_ALLOW_WRITES, and selects FLAKEY_TABLE_DROP when the argument
-is $FLAKEY_DROP_WRITES. And because you're going to error/drop writes,
-it's weired to load table with $FLAKEY_ALLOW_WRITES.
-
-Thanks,
-Eryu
