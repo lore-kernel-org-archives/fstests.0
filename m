@@ -1,220 +1,88 @@
-Received: from mx2.suse.de ([195.135.220.15]:48986 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:48987 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752341AbdJaOKR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1752209AbdJaOKR (ORCPT <rfc822;fstests@vger.kernel.org>);
         Tue, 31 Oct 2017 10:10:17 -0400
 From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2 2/2] fiemap: Implement ranged query
-Date: Tue, 31 Oct 2017 16:10:11 +0200
-Message-Id: <1509459011-7398-2-git-send-email-nborisov@suse.com>
-In-Reply-To: <1509459011-7398-1-git-send-email-nborisov@suse.com>
+Subject: [PATCH v2 1/2] fiemap: Factor out actual fiemap call code
+Date: Tue, 31 Oct 2017 16:10:10 +0200
+Message-Id: <1509459011-7398-1-git-send-email-nborisov@suse.com>
+In-Reply-To: <1509107832-22286-1-git-send-email-nborisov@suse.com>
 References: <1509107832-22286-1-git-send-email-nborisov@suse.com>
- <1509459011-7398-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: linux-xfs@vger.kernel.org
 Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Currently the fiemap implementation of xfs_io doesn't support making ranged
-queries. This patch implements two optional arguments which take the starting
-offset and the length of the region to be queried. This also requires changing
-of the final hole range is calculated. Namely, it's now being done as
-[last_logical, logical addres of next extent] rather than being statically
-determined by [last_logical, filesize].
+This will be needed to in a subsequent patch to avoid code duplication
 
 Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- io/fiemap.c       | 72 +++++++++++++++++++++++++++++++++++++++++++++++--------
- man/man8/xfs_io.8 |  5 ++--
- 2 files changed, 65 insertions(+), 12 deletions(-)
+v2:
+ * Incorporated Daricks feedback - removed variables which weren't introduced
+ until the next patch as a result the build with this patch was broken. This is 
+ fixed now
+ io/fiemap.c | 39 ++++++++++++++++++++++++++++-----------
+ 1 file changed, 28 insertions(+), 11 deletions(-)
 
 diff --git a/io/fiemap.c b/io/fiemap.c
-index 08391f69d9bd..668f8fe4e732 100644
+index e6fd66da753d..08391f69d9bd 100644
 --- a/io/fiemap.c
 +++ b/io/fiemap.c
-@@ -27,6 +27,9 @@
- 
- static cmdinfo_t fiemap_cmd;
- static int max_extents = -1;
-+static __u64 covered_length = 0;
-+static __u64 len = -1LL;
-+static bool range_limit = false;
- 
- static void
- fiemap_help(void)
-@@ -79,7 +82,7 @@ print_hole(
- 		       boff_w, _("hole"), tot_w, lstart - llast);
- 	   }
- 
--
-+	   covered_length += BBTOB(lstart - llast);
+@@ -211,6 +211,31 @@ calc_print_format(
+ 	}
  }
  
- static int
-@@ -90,7 +93,8 @@ print_verbose(
- 	int			tot_w,
- 	int			flg_w,
- 	int			cur_extent,
--	__u64			last_logical)
-+	__u64			last_logical,
-+	__u64			limit)
- {
- 	__u64			lstart;
- 	__u64			llast;
-@@ -122,7 +126,7 @@ print_verbose(
- 		cur_extent++;
- 	}
- 
--	if (cur_extent == max_extents)
-+	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
- 		return 1;
- 
- 	snprintf(lbuf, sizeof(lbuf), "[%llu..%llu]:", lstart,
-@@ -140,7 +144,8 @@ print_plain(
- 	struct fiemap_extent	*extent,
- 	int			lflag,
- 	int			cur_extent,
--	__u64			last_logical)
-+	__u64			last_logical,
-+	__u64			limit)
- {
- 	__u64			lstart;
- 	__u64			llast;
-@@ -157,7 +162,7 @@ print_plain(
- 		cur_extent++;
- 	}
- 
--	if (cur_extent == max_extents)
-+	if (cur_extent == max_extents || (range_limit && covered_length >= limit))
- 		return 1;
- 
- 	printf("\t%d: [%llu..%llu]: %llu..%llu", cur_extent,
-@@ -256,8 +261,11 @@ fiemap_f(
- 	int		tot_w = 5;	/* 5 since its just one number */
- 	int		flg_w = 5;
- 	__u64		last_logical = 0;
-+	size_t		fsblocksize, fssectsize;
- 	struct stat	st;
- 
-+	init_cvtnum(&fsblocksize, &fssectsize);
++static int
++__fiemap(
++	 struct fiemap * fiemap,
++	 int		 mapsize,
++	 __u32		 flags,
++	 __u64		 start,
++	 __u64		 length) {
 +
- 	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
- 		switch (c) {
- 		case 'a':
-@@ -277,6 +285,26 @@ fiemap_f(
- 		}
- 	}
- 
-+	if (optind < argc) {
-+		off64_t start_offset = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (start_offset < 0) {
-+			printf("non-numeric offset argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		last_logical = start_offset;
-+		optind++;
++	int ret;
++
++	memset(fiemap, 0, mapsize);
++	fiemap->fm_flags = flags;
++	fiemap->fm_start = start;
++	fiemap->fm_length = length;
++	fiemap->fm_extent_count = EXTENT_BATCH;
++	ret = ioctl(file->fd, FS_IOC_FIEMAP, fiemap);
++	if (ret < 0) {
++	        fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
++	                "%s\n", progname, file->name, strerror(errno));
++	        return ret;
 +	}
 +
-+	if (optind < argc) {
-+		off64_t length = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (length < 0) {
-+			printf("non-numeric len argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		len = length;
-+		range_limit = true;
-+	}
++	return 0;
++}
 +
- 	map_size = sizeof(struct fiemap) +
- 		(EXTENT_BATCH * sizeof(struct fiemap_extent));
- 	fiemap = malloc(map_size);
-@@ -317,14 +345,18 @@ fiemap_f(
- 				num_printed = print_verbose(extent, foff_w,
- 							    boff_w, tot_w,
- 							    flg_w, cur_extent,
--							    last_logical);
-+							    last_logical,
-+							    len);
- 			} else
- 				num_printed = print_plain(extent, lflag,
- 							  cur_extent,
--							  last_logical);
-+							  last_logical,
-+							  len);
+ int
+ fiemap_f(
+ 	int		argc,
+@@ -266,19 +291,11 @@ fiemap_f(
  
- 			cur_extent += num_printed;
- 			last_logical = extent->fe_logical + extent->fe_length;
-+			if (num_printed == 2)
-+				covered_length += extent->fe_length;
+ 	while (!last && (cur_extent != max_extents)) {
  
- 			if (extent->fe_flags & FIEMAP_EXTENT_LAST) {
- 				last = 1;
-@@ -333,6 +365,9 @@ fiemap_f(
- 
- 			if (cur_extent == max_extents)
- 				break;
-+
-+			if (range_limit && covered_length >= len)
-+				goto out;
- 		}
- 	}
- 
-@@ -348,9 +383,26 @@ fiemap_f(
- 		return 0;
- 	}
- 
--	if (cur_extent && last_logical < st.st_size)
-+	if (last_logical < st.st_size &&
-+	    (!range_limit || covered_length < len)) {
-+		int end;
-+
+-		memset(fiemap, 0, map_size);
+-		fiemap->fm_flags = fiemap_flags;
+-		fiemap->fm_start = last_logical;
+-		fiemap->fm_length = -1LL;
+-		fiemap->fm_extent_count = EXTENT_BATCH;
+-
+-		ret = ioctl(file->fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
 +		ret = __fiemap(fiemap, map_size, fiemap_flags, last_logical,
-+			       st.st_size);
-+		if (ret < 0) {
-+			exitcode = 1;
++			       -1LL);
+ 		if (ret < 0) {
+-			fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
+-				"%s\n", progname, file->name, strerror(errno));
+-			free(fiemap);
+ 			exitcode = 1;
+-			return 0;
 +			goto out;
-+		}
-+
-+		if (!fiemap->fm_mapped_extents)
-+			end = BTOBBT(st.st_size);
-+		else
-+			end = BTOBBT(fiemap->fm_extents[0].fe_logical);
-+
-+
- 		print_hole(foff_w, boff_w, tot_w, cur_extent, lflag, !vflag,
--			   BTOBBT(last_logical), BTOBBT(st.st_size));
-+			   BTOBBT(last_logical), end);
-+	}
+ 		}
  
- out:
- 	free(fiemap);
-@@ -365,7 +417,7 @@ fiemap_init(void)
- 	fiemap_cmd.argmin = 0;
- 	fiemap_cmd.argmax = -1;
- 	fiemap_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
--	fiemap_cmd.args = _("[-alv] [-n nx]");
-+	fiemap_cmd.args = _("[-alv] [-n nx] [offset [len]]");
- 	fiemap_cmd.oneline = _("print block mapping for a file");
- 	fiemap_cmd.help = fiemap_help;
- 
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index 0fd9b951199c..27f1ae163913 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -295,11 +295,12 @@ Prints the block mapping for the current open file. Refer to the
- .BR xfs_bmap (8)
- manual page for complete documentation.
- .TP
--.BI "fiemap [ \-alv ] [ \-n " nx " ]"
-+.BI "fiemap [ \-alv ] [ \-n " nx " ] [ " offset " [ " len " ]]"
- Prints the block mapping for the current open file using the fiemap
- ioctl.  Options behave as described in the
- .BR xfs_bmap (8)
--manual page.
-+manual page. Optionally, this command also supports passing the start offset
-+from where to begin the fiemap and the length of that region.
- .TP
- .BI "fsmap [ \-d | \-l | \-r ] [ \-m | \-v ] [ \-n " nx " ] [ " start " ] [ " end " ]
- Prints the mapping of disk blocks used by the filesystem hosting the current
+ 		/* No more extents to map, exit */
 -- 
 2.7.4
 
