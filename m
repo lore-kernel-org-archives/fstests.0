@@ -1,52 +1,57 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50486 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:37158 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933418AbdKBPQ3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Nov 2017 11:16:29 -0400
-Date: Thu, 2 Nov 2017 23:16:27 +0800
+        id S932390AbdKBPt5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 2 Nov 2017 11:49:57 -0400
+Date: Thu, 2 Nov 2017 23:49:52 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 14/14] generic: test IO at maximum file offset
-Message-ID: <20171102151627.GA17339@eguan.usersys.redhat.com>
-References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957287448.18388.6362701157489515704.stgit@magnolia>
+Subject: Re: [PATCH] fstests: btrfs: add test case for raid6 reconstruction
+ bug
+Message-ID: <20171102154952.GB17339@eguan.usersys.redhat.com>
+References: <20171102000123.25595-1-bo.li.liu@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150957287448.18388.6362701157489515704.stgit@magnolia>
+In-Reply-To: <20171102000123.25595-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 01, 2017 at 02:47:54PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Nov 01, 2017 at 06:01:23PM -0600, Liu Bo wrote:
+> This is to reproduce a raid6 reconstruction bug after two drives
+> getting offline and online via hotplug.
 > 
-> Make sure we can write to and read from the highest possible offset
-> that Linux will allow.  Format the filesystem with a variety of
-> possible blocksizes to stress the filesystem.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Signed-off-by: James Alandt <James.Alandt@wdc.com>
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+
+I don't have 5 deletable pool devices to actually test this patch, but
+just comment issues I can see from the code.
+
 > ---
->  tests/generic/705     |   97 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/705.out |    2 +
->  tests/generic/group   |    1 +
->  3 files changed, 100 insertions(+)
->  create mode 100755 tests/generic/705
->  create mode 100644 tests/generic/705.out
+>  tests/btrfs/152   | 121 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/group |   1 +
+>  2 files changed, 122 insertions(+)
+>  create mode 100755 tests/btrfs/152
 > 
-> 
-> diff --git a/tests/generic/705 b/tests/generic/705
+> diff --git a/tests/btrfs/152 b/tests/btrfs/152
 > new file mode 100755
-> index 0000000..4ab97e5
+> index 0000000..2b3d98c
 > --- /dev/null
-> +++ b/tests/generic/705
-> @@ -0,0 +1,97 @@
+> +++ b/tests/btrfs/152
+> @@ -0,0 +1,121 @@
 > +#! /bin/bash
-> +# FS QA Test No. 705
+> +# FS QA Test 152
 > +#
-> +# Check that high-offset reads and writes work.
+> +# This test is to reproduce a bug of btrfs raid6 reconstruction.
+
+Better to provide more information about the bug and how would you like
+to test it, it helps others to understand the bug and test, also it will
+be helpful to debug test failure if it fails, say 5 years later.
+
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017, Oracle and/or its affiliates.  All Rights Reserved.
+> +# Copyright (c) 2017 Oracle.  All Rights Reserved.
+> +# Author: Liu Bo <bo.li.liu@oracle.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -61,6 +66,7 @@ On Wed, Nov 01, 2017 at 02:47:54PM -0700, Darrick J. Wong wrote:
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 > +#-----------------------------------------------------------------------
+> +#
 > +
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -68,109 +74,157 @@ On Wed, Nov 01, 2017 at 02:47:54PM -0700, Darrick J. Wong wrote:
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1    # failure is the default!
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +    cd /
-> +    rm -rf $tmp.*
+> +	cd /
+> +	rm -f $tmp.*
+> +	if [ $removed == 1 ]; then
+	     $removed -eq 1 looks better
+
+> +		_scratch_umount
+> +		_devmgt_add ${disk1_remove}
+> +		_devmgt_add ${disk2_remove}
+> +	fi
+
+Better to initialize all the variables used here before _cleanup.
+
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
 > +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_scratch
-
-As we do _check_scratch_fs after each loop, _require_scratch_nocheck
-should be OK here.
-
-> +
+> +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +echo "Silence is golden"
+> +# real QA test starts here
 > +
-> +echo "Starting test" > $seqres.full
-> +for blocksize in 512 1024 2048 4096 8192 16384 32768 65536; do
-> +	echo "+ Format blocksize $blocksize and mount" >> $seqres.full
-> +	devsize=$(blockdev --getsize64 $SCRATCH_DEV)
-> +	_scratch_unmount > /dev/null 2>&1
-> +	# Try to format and mount with the given blocksize.  If they don't
-> +	# succeed, move on to the next block size.
-> +	if ! _scratch_mkfs_sized $devsize $blocksize >> $seqres.full 2>&1 ||
-> +	   ! _scratch_mount >> $seqres.full 2>&1 ||
-> +	   test "$(stat -f -c '%S' $SCRATCH_MNT)" -ne "$blocksize"; then
-> +		echo "+++ Format and mount failed" >> $seqres.full
-> +		continue
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_scratch_nocheck
 
-We need to unset MKFS_OPTIONS before this loop, because
-_scratch_mkfs_sized takes the block size specified in MKFS_OPTIONS as
-the default size and ignores the second argument, the provided block
-size is only used if no block size specified in MKFS_OPTIONS.
+Above two _requires are not needed.
 
-> +	fi
+> +_require_scratch_dev_pool 5
+
+Because you have this one.
+
+> +_require_deletable_scratch_dev_pool
 > +
-> +	testdir=$SCRATCH_MNT/test-$seq
-> +	mkdir $testdir
+> +# umount test so that we can unload btrfs module
+> +_test_unmount
+> +_require_btrfs_loadable
+
+Perhaps you can take use of the new helpers introduced by Darrick's
+pending patch "fstests: add module reloading helpers" (you can find the
+patch in list), and with new helpers you don't have to umount test dev
+before "_require_loadable_fs_module btrfs", which will be the
+replacement of _require_btrfs_loadable.
+
 > +
-> +	echo "++ Create the original files" >> $seqres.full
-> +	bigoff=9223372036854775806
-> +	len=9223372036854775807
+> +_scratch_dev_pool_get 5
+> +
+> +devs=( $SCRATCH_DEV_POOL )
+> +n=${#devs[@]}
+> +
+> +mkfs_opts="-draid6 -mraid6 -n64K -b 1G"
+> +_scratch_pool_mkfs $mkfs_opts >> $seqres.full 2>&1
+> +
+> +_scratch_mount -o nospace_cache
 
-Calculating the numbers might be easier to read, e.g.
+Please comment any non-obvious & non-default mkfs/mount options like
+-n64k, -o nospace_cache :)
 
-	len=`echo "2^63-1" | $BC_PROG`
-	bigoff=`echo "$len-1" | $BC_PROG`
+> +
+> +# 1st 4k write
+> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f1 | _filter_xfs_io
+> +sync
+
+No need to sync with "-W" pwrite.
+
+> +
+> +# hotplug disk1
+> +disk1=${devs[$((n-1))]}
+> +disk1_short=`_short_dev ${disk1}`
+> +disk1_remove=`readlink -f /sys/block/${disk1_short} | rev | cut -d "/" -f 3 | rev`
+
+Factor this into a common function? I see similar code in btrfs/003 to
+do the same task.
+
+> +_devmgt_remove ${disk1_remove} $disk1_short
+> +removed=1
+> +
+> +# 2nd 4K write
+> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f2 | _filter_xfs_io
+> +sync
+
+Same here (and other places below), sync not needed.
+
+> +
+> +# hotplug disk2
+> +disk2=${devs[$((n-2))]}
+> +disk2_short=`_short_dev ${disk2}`
+> +disk2_remove=`readlink -f /sys/block/${disk2_short} | rev | cut -d "/" -f 3 | rev`
+> +_devmgt_remove ${disk2_remove} $disk2_short
+> +removed=1
+> +
+> +# 3rd 4K write
+> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f3 | _filter_xfs_io
+> +sync
+> +
+> +_scratch_unmount
+> +
+> +# bring disk1 & disk2 online
+> +_devmgt_add ${disk1_remove}
+> +_devmgt_add ${disk2_remove}
+> +removed=0
+> +
+> +# reload the module to simulate 'reboot'
+> +_reload_btrfs_ko
+
+With the new helper, this should be "_reload_fs_module btrfs"
+
+> +
+> +# have every disk available for btrfs
+> +btrfs dev scan
+
+$BTRFS_UTIL_PROG device scan
+
+Use full btrfs command name, e.g. dev->device, subvol->subvolume.
+
+> +
+> +_scratch_mount -onospace_cache,degraded || _fail "mount -onospace_cache,degraded failed"
+
+If we _fail here then we skip _scratch_dev_pool_put. So just print out a
+message to break the golden output.
 
 Thanks,
 Eryu
 
-> +	$XFS_IO_PROG -f -c "truncate $len" $testdir/file0 >> $seqres.full 2>&1
-> +	if [ ! -s $testdir/file0 ]; then
-> +		# If we can't set a large file size then don't bother
-> +		# with this blocksize because the fs doesn't support it.
-> +		echo "+++ High offset ftruncate failed" >> $seqres.full
-> +		continue
-> +	fi
-> +	_pwrite_byte 0x61 $bigoff 1 $testdir/file1 >> $seqres.full
 > +
-> +	echo "++ Check file creation" >> $seqres.full
-> +	_scratch_cycle_mount
-> +
-> +	expected="7ffffffffffffffe:  61  a"
-> +	actual="$($XFS_IO_PROG -c "pread -v -q $bigoff 1" $testdir/file1)"
-> +	if [ "$expected" = "$actual" ]; then
-> +		echo "+++ Success!" >> $seqres.full
-> +	else
-> +		echo "+++ Discrepancy @ blocksize $blocksize" >> $seqres.full
-> +		echo "Discrepancy @ blocksize $blocksize"
-> +	fi
-> +
-> +	echo "++ Check scratchfs" >> $seqres.full
-> +	_check_scratch_fs
-> +done
+> +_scratch_dev_pool_put
 > +
 > +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/generic/705.out b/tests/generic/705.out
-> new file mode 100644
-> index 0000000..6fcdec0
-> --- /dev/null
-> +++ b/tests/generic/705.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 705
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index fbe0a7f..2c55b93 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -468,3 +468,4 @@
->  463 auto quick clone dangerous
->  464 auto rw
->  465 auto rw quick aio
-> +705 auto quick rw
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index a7ff7b0..1dbb66f 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -154,3 +154,4 @@
+>  149 auto quick send compress
+>  150 auto quick dangerous
+>  151 auto quick
+> +152 auto quick
+> -- 
+> 2.5.0
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
