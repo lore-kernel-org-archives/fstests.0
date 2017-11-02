@@ -1,75 +1,67 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:32827 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933120AbdKBQti (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 12:49:38 -0400
-Date: Thu, 2 Nov 2017 09:49:33 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 07/14] generic/459: explicitly require thin_check
-Message-ID: <20171102164933.GW4911@magnolia>
-References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957283171.18388.10837345130257598513.stgit@magnolia>
- <20171102122514.GX17339@eguan.usersys.redhat.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:55915 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933025AbdKBSLY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 14:11:24 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171102122514.GX17339@eguan.usersys.redhat.com>
+In-Reply-To: <20171102163953.GT4911@magnolia>
+References: <150957278824.18388.17975162441125293654.stgit@magnolia>
+ <150957284389.18388.370732842906149356.stgit@magnolia> <20171102124214.GY17339@eguan.usersys.redhat.com>
+ <CAOQ4uxjJD+r5uvQ4=F5zaL5uUkLQu3sW2nVcWqsUS2YP3hxrUQ@mail.gmail.com> <20171102163953.GT4911@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 2 Nov 2017 20:11:22 +0200
+Message-ID: <CAOQ4uxjkzabQMViRmysJgj9Hk0K3T7rtmqyuM=v-pzuKmxZ+pA@mail.gmail.com>
+Subject: Re: [PATCH 09/14] xfs/348: dir->symlink corruption must not be allowed
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 02, 2017 at 08:25:14PM +0800, Eryu Guan wrote:
-> On Wed, Nov 01, 2017 at 02:47:11PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > The lvm command can invoke the thin pool utilities as part of managing
-> > a thin volume.  It'll fail if the thin provisioning utilities are not
-> > installed, so we need to check for its presence before running a test.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  common/config     |    1 +
-> >  tests/generic/459 |    1 +
-> >  2 files changed, 2 insertions(+)
-> > 
-> > 
-> > diff --git a/common/config b/common/config
-> > index 96503c6..eea8669 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -196,6 +196,7 @@ export MAN_PROG="`set_prog_path man`"
-> >  export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
-> >  export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
-> >  export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
-> > +THIN_CHECK_PROG="$(set_prog_path thin_check)"
-> 
-> I added an 'export' here.
+On Thu, Nov 2, 2017 at 6:39 PM, Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> On Thu, Nov 02, 2017 at 03:14:45PM +0200, Amir Goldstein wrote:
+>> On Thu, Nov 2, 2017 at 2:42 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Wed, Nov 01, 2017 at 02:47:23PM -0700, Darrick J. Wong wrote:
+>> >> From: Darrick J. Wong <darrick.wong@oracle.com>
+>> >>
+>> >> A directory corrupted into a symlink will be caught by the upcoming
+>> >> local format ifork verifiers.
+>> >>
+>> >> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+>> >> ---
+>> >>  tests/xfs/348.out |    2 +-
+>> >>  1 file changed, 1 insertion(+), 1 deletion(-)
+>> >>
+>> >>
+>> >> diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+>> >> index f4a7a71..17d9be2 100644
+>> >> --- a/tests/xfs/348.out
+>> >> +++ b/tests/xfs/348.out
+>> >> @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
+>> >>  would have junked entry "DIR" in directory PARENT_INO
+>> >>  would have junked entry "EMPTY" in directory PARENT_INO
+>> >>  would have junked entry "FIFO" in directory PARENT_INO
+>> >> -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
+>> >> +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
+>> >
+>> > But this breaks tests on old kernels. Or with the new ifork verifiers,
+>> > old kernels can be considered as buggy?
+>> >
+>>
+>> Can filter new and old error into canonicalized string.
+>> Dodgy, bug we've done it before.
+>> See:
+>> git grep sed | grep 'Operation not permitted\|Permission denied'
+>
+> I tried that, but the "stat: XXX is a symbolic link" message comes from
+> a different path in the test file code.
+>
+> Unless... you're suggesting that I should sed the error output to make
+> it look like the previous (broken) output?
+>
 
-Oops, thanks for catching this.
+Let's say I am not *suggesting* this, but I have seen tests that do that
+See generic/160 and other tests that show in this grep output:
 
---D
+git grep sed | grep 'Operation not permitted\|Permission denied'
 
-> 
-> Thanks,
-> Eryu
-> 
-> >  
-> >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
-> >  # newer systems have udevadm command but older systems like RHEL5 don't.
-> > diff --git a/tests/generic/459 b/tests/generic/459
-> > index 7c10c2a..d1ad372 100755
-> > --- a/tests/generic/459
-> > +++ b/tests/generic/459
-> > @@ -63,6 +63,7 @@ _supported_os Linux
-> >  _require_scratch_nocheck
-> >  _require_dm_target thin-pool
-> >  _require_command $LVM_PROG lvm
-> > +_require_command "$THIN_CHECK_PROG" thin_check
-> >  _require_freeze
-> >  
-> >  # remove previous $seqres.full before test
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Amir.
