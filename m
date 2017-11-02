@@ -1,230 +1,65 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37158 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932390AbdKBPt5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Nov 2017 11:49:57 -0400
-Date: Thu, 2 Nov 2017 23:49:52 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: btrfs: add test case for raid6 reconstruction
- bug
-Message-ID: <20171102154952.GB17339@eguan.usersys.redhat.com>
-References: <20171102000123.25595-1-bo.li.liu@oracle.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:43939 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933146AbdKBQh7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 12:37:59 -0400
+Date: Thu, 2 Nov 2017 09:37:54 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 09/14] xfs/348: dir->symlink corruption must not be
+ allowed
+Message-ID: <20171102163754.GS4911@magnolia>
+References: <150957278824.18388.17975162441125293654.stgit@magnolia>
+ <150957284389.18388.370732842906149356.stgit@magnolia>
+ <20171102124214.GY17339@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171102000123.25595-1-bo.li.liu@oracle.com>
+In-Reply-To: <20171102124214.GY17339@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 01, 2017 at 06:01:23PM -0600, Liu Bo wrote:
-> This is to reproduce a raid6 reconstruction bug after two drives
-> getting offline and online via hotplug.
+On Thu, Nov 02, 2017 at 08:42:14PM +0800, Eryu Guan wrote:
+> On Wed, Nov 01, 2017 at 02:47:23PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > A directory corrupted into a symlink will be caught by the upcoming
+> > local format ifork verifiers.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/348.out |    2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > 
+> > diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+> > index f4a7a71..17d9be2 100644
+> > --- a/tests/xfs/348.out
+> > +++ b/tests/xfs/348.out
+> > @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
+> >  would have junked entry "DIR" in directory PARENT_INO
+> >  would have junked entry "EMPTY" in directory PARENT_INO
+> >  would have junked entry "FIFO" in directory PARENT_INO
+> > -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
+> > +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
 > 
-> Signed-off-by: James Alandt <James.Alandt@wdc.com>
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+> But this breaks tests on old kernels. Or with the new ifork verifiers,
+> old kernels can be considered as buggy?
 
-I don't have 5 deletable pool devices to actually test this patch, but
-just comment issues I can see from the code.
+Yes, they're buggy since we shouldn't be interpreting directory entries
+as a link target given that the zero bytes in the "link target" will
+screw things up.
 
-> ---
->  tests/btrfs/152   | 121 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/group |   1 +
->  2 files changed, 122 insertions(+)
->  create mode 100755 tests/btrfs/152
+--D
+
+> Thanks,
+> Eryu
 > 
-> diff --git a/tests/btrfs/152 b/tests/btrfs/152
-> new file mode 100755
-> index 0000000..2b3d98c
-> --- /dev/null
-> +++ b/tests/btrfs/152
-> @@ -0,0 +1,121 @@
-> +#! /bin/bash
-> +# FS QA Test 152
-> +#
-> +# This test is to reproduce a bug of btrfs raid6 reconstruction.
-
-Better to provide more information about the bug and how would you like
-to test it, it helps others to understand the bug and test, also it will
-be helpful to debug test failure if it fails, say 5 years later.
-
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Oracle.  All Rights Reserved.
-> +# Author: Liu Bo <bo.li.liu@oracle.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	if [ $removed == 1 ]; then
-	     $removed -eq 1 looks better
-
-> +		_scratch_umount
-> +		_devmgt_add ${disk1_remove}
-> +		_devmgt_add ${disk2_remove}
-> +	fi
-
-Better to initialize all the variables used here before _cleanup.
-
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_scratch_nocheck
-
-Above two _requires are not needed.
-
-> +_require_scratch_dev_pool 5
-
-Because you have this one.
-
-> +_require_deletable_scratch_dev_pool
-> +
-> +# umount test so that we can unload btrfs module
-> +_test_unmount
-> +_require_btrfs_loadable
-
-Perhaps you can take use of the new helpers introduced by Darrick's
-pending patch "fstests: add module reloading helpers" (you can find the
-patch in list), and with new helpers you don't have to umount test dev
-before "_require_loadable_fs_module btrfs", which will be the
-replacement of _require_btrfs_loadable.
-
-> +
-> +_scratch_dev_pool_get 5
-> +
-> +devs=( $SCRATCH_DEV_POOL )
-> +n=${#devs[@]}
-> +
-> +mkfs_opts="-draid6 -mraid6 -n64K -b 1G"
-> +_scratch_pool_mkfs $mkfs_opts >> $seqres.full 2>&1
-> +
-> +_scratch_mount -o nospace_cache
-
-Please comment any non-obvious & non-default mkfs/mount options like
--n64k, -o nospace_cache :)
-
-> +
-> +# 1st 4k write
-> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f1 | _filter_xfs_io
-> +sync
-
-No need to sync with "-W" pwrite.
-
-> +
-> +# hotplug disk1
-> +disk1=${devs[$((n-1))]}
-> +disk1_short=`_short_dev ${disk1}`
-> +disk1_remove=`readlink -f /sys/block/${disk1_short} | rev | cut -d "/" -f 3 | rev`
-
-Factor this into a common function? I see similar code in btrfs/003 to
-do the same task.
-
-> +_devmgt_remove ${disk1_remove} $disk1_short
-> +removed=1
-> +
-> +# 2nd 4K write
-> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f2 | _filter_xfs_io
-> +sync
-
-Same here (and other places below), sync not needed.
-
-> +
-> +# hotplug disk2
-> +disk2=${devs[$((n-2))]}
-> +disk2_short=`_short_dev ${disk2}`
-> +disk2_remove=`readlink -f /sys/block/${disk2_short} | rev | cut -d "/" -f 3 | rev`
-> +_devmgt_remove ${disk2_remove} $disk2_short
-> +removed=1
-> +
-> +# 3rd 4K write
-> +$XFS_IO_PROG -f -c "pwrite -W 0 4K" $SCRATCH_MNT/f3 | _filter_xfs_io
-> +sync
-> +
-> +_scratch_unmount
-> +
-> +# bring disk1 & disk2 online
-> +_devmgt_add ${disk1_remove}
-> +_devmgt_add ${disk2_remove}
-> +removed=0
-> +
-> +# reload the module to simulate 'reboot'
-> +_reload_btrfs_ko
-
-With the new helper, this should be "_reload_fs_module btrfs"
-
-> +
-> +# have every disk available for btrfs
-> +btrfs dev scan
-
-$BTRFS_UTIL_PROG device scan
-
-Use full btrfs command name, e.g. dev->device, subvol->subvolume.
-
-> +
-> +_scratch_mount -onospace_cache,degraded || _fail "mount -onospace_cache,degraded failed"
-
-If we _fail here then we skip _scratch_dev_pool_put. So just print out a
-message to break the golden output.
-
-Thanks,
-Eryu
-
-> +
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index a7ff7b0..1dbb66f 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -154,3 +154,4 @@
->  149 auto quick send compress
->  150 auto quick dangerous
->  151 auto quick
-> +152 auto quick
-> -- 
-> 2.5.0
-> 
+> >  stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
+> >  stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+> >  stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
+> > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
