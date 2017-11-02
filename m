@@ -1,52 +1,74 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:45998 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755395AbdKBNOq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 09:14:46 -0400
-MIME-Version: 1.0
-In-Reply-To: <20171102124214.GY17339@eguan.usersys.redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:55864 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752688AbdKBOXu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 2 Nov 2017 10:23:50 -0400
+Date: Thu, 2 Nov 2017 22:23:48 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 12/14] generic/204: break out of fs-filling loop early if
+ we ENOSPC
+Message-ID: <20171102142348.GZ17339@eguan.usersys.redhat.com>
 References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957284389.18388.370732842906149356.stgit@magnolia> <20171102124214.GY17339@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 2 Nov 2017 15:14:45 +0200
-Message-ID: <CAOQ4uxjJD+r5uvQ4=F5zaL5uUkLQu3sW2nVcWqsUS2YP3hxrUQ@mail.gmail.com>
-Subject: Re: [PATCH 09/14] xfs/348: dir->symlink corruption must not be allowed
-Content-Type: text/plain; charset="UTF-8"
+ <150957286222.18388.3253654888670864191.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <150957286222.18388.3253654888670864191.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 2, 2017 at 2:42 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Nov 01, 2017 at 02:47:23PM -0700, Darrick J. Wong wrote:
->> From: Darrick J. Wong <darrick.wong@oracle.com>
->>
->> A directory corrupted into a symlink will be caught by the upcoming
->> local format ifork verifiers.
->>
->> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
->> ---
->>  tests/xfs/348.out |    2 +-
->>  1 file changed, 1 insertion(+), 1 deletion(-)
->>
->>
->> diff --git a/tests/xfs/348.out b/tests/xfs/348.out
->> index f4a7a71..17d9be2 100644
->> --- a/tests/xfs/348.out
->> +++ b/tests/xfs/348.out
->> @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
->>  would have junked entry "DIR" in directory PARENT_INO
->>  would have junked entry "EMPTY" in directory PARENT_INO
->>  would have junked entry "FIFO" in directory PARENT_INO
->> -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
->> +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
->
-> But this breaks tests on old kernels. Or with the new ifork verifiers,
-> old kernels can be considered as buggy?
->
+On Wed, Nov 01, 2017 at 02:47:42PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> If filling up the filesystem causes us to hit ENOSPC earlier than we
+> thought we would (the sizing estimates become less and less accurate as
+> we add more metadata) then just bail out -- we're checking that the fs
+> is robust enough to cut us off before we actually run out of space for
+> writing metadata and crash the fs.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/generic/204 |   11 +++++++++--
+>  1 file changed, 9 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/204 b/tests/generic/204
+> index 4c203a2..1e2c1e1 100755
+> --- a/tests/generic/204
+> +++ b/tests/generic/204
+> @@ -82,8 +82,15 @@ echo files $files, resvblks $resv_blks >> $seqres.full
+>  _scratch_resvblks $resv_blks >> $seqres.full 2>&1
+>  
+>  for i in `seq 1 $files`; do
+> -    echo -n > $SCRATCH_MNT/$i
+> -    echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > $SCRATCH_MNT/$i
+> +	# Open/truncate file, write stuff.  If we run out of space early,
+> +	# we can bail out of the loop.
+> +	out="$($XFS_IO_PROG \
+> +		-c "open -f -t $SCRATCH_MNT/$i" \
+> +		-c 'close' \
+> +		-c "open -f -t $SCRATCH_MNT/$i" \
+> +		-c 'pwrite -q -S 0x58 0 36' 2>&1 | _filter_scratch)"
+> +	echo "${out}" | grep -q 'No space left on device' && break
 
-Can filter new and old error into canonicalized string.
-Dodgy, bug we've done it before.
-See:
-git grep sed | grep 'Operation not permitted\|Permission denied'
+This doesn't look correct to me. This test is meant to catch spurious
+ENOSPC, it's designed to be a "delayed allocation ENOSPC test"[1] by
+"writing lots of single block files" and catch early ENOSPC. IMHO, this
+change ignores ENOSPC, which defeats the test purpose. And I don't quite
+understand the purpose of truncate open/close/truncate open/write
+sequence..
 
-Amir.
+Also this significantly increases the test time, 4s -> ~120s for me.
+
+Thanks,
+Eryu
+
+[1] commit 143368a047ea ("xfstests: add test 204, a simple delayed
+allocation ENOSPC test")
+
+> +	test -n "${out}" && echo "${out}"
+>  done
+>  
+>  # success, all done
+> 
