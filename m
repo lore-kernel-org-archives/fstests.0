@@ -1,11 +1,11 @@
-Received: from mail-wr0-f169.google.com ([209.85.128.169]:55830 "EHLO
-        mail-wr0-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933324AbdKBKPH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 06:15:07 -0400
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:46221 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933303AbdKBKPD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Nov 2017 06:15:03 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 7/7] fstests: add test with more open by file handle use cases
-Date: Thu,  2 Nov 2017 12:15:39 +0200
-Message-Id: <1509617739-15744-8-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 4/7] open_by_handle: test directory file handle
+Date: Thu,  2 Nov 2017 12:15:36 +0200
+Message-Id: <1509617739-15744-5-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
 References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,174 +13,241 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test is a variant of test generic/426 that tests with less
-files and more use cases:
-- Create test dir with non empty files with known content and verify
-  their content after opening file by handle.
-- Check open by handle of directory.
-- Check open by handle of files that have been unlinked, but still open.
-- Check open by handle of files that have been renamed in same dir,
-  moved to new dir and whose parent dir has been renamed.
+usage: open_by_handle -cp <test_dir> [N]
+usage: open_by_handle  -p <test_dir> [N]
+usage: open_by_handle -dp <test_dir> [N]
+
+With -p flag, create/delete also the test_dir itself and try to open by
+handle also test_dir itself after droping caches and use dir fd to test
+faccessat() of a file inside dir.
+mount_fd argument to open_by_handle_at() is open fd of test_dir's parent.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/generic/500     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/500.out |  10 +++++
- tests/generic/group   |   1 +
- 3 files changed, 130 insertions(+)
- create mode 100755 tests/generic/500
- create mode 100644 tests/generic/500.out
+ src/open_by_handle.c | 114 +++++++++++++++++++++++++++++++++++++++++++++------
+ 1 file changed, 101 insertions(+), 13 deletions(-)
 
-diff --git a/tests/generic/500 b/tests/generic/500
-new file mode 100755
-index 0000000..ab3d119
---- /dev/null
-+++ b/tests/generic/500
-@@ -0,0 +1,119 @@
-+#! /bin/bash
-+# FS QA Test No. 500
-+#
-+# Check open by file handle.
-+# This is a variant of test generic/426 that tests with less
-+# files and more use cases:
-+# - open directory by file handle
-+# - verify content integrity of file after opening by file handle
-+# - open by file handle of unlinked open files
-+# - open by file handle of renamed files
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index 581dc05..e8edcf5 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -27,13 +27,13 @@
+ 
+ /*
+ 
+-usage: open_by_handle [-cludmrwa] <test_dir> [num_files]
++usage: open_by_handle [-cludmrwap] <test_dir> [num_files]
+ 
+ Examples:
+ 
+-1. Create test set of N files and try to get their NFS handles:
++1. Create test set of of test_dir with N files and try to get their NFS handles:
+ 
+-   open_by_handle -c <test_dir> [N]
++   open_by_handle -cp <test_dir> [N]
+ 
+    This is used by new helper _require_exportfs() to check
+    if filesystem supports exportfs
+@@ -41,7 +41,7 @@ Examples:
+ 2. Get file handles for existing test set, drop caches and try to
+    open all files by handle:
+ 
+-   open_by_handle <test_dir> [N]
++   open_by_handle -p <test_dir> [N]
+ 
+ 3. Get file handles for existing test set, write data to files,
+    drop caches, open all files by handle, read and verify written
+@@ -50,9 +50,10 @@ Examples:
+    open_by_handle -rwa <test_dir> [N]
+ 
+ 4. Get file handles for existing test set, unlink all test files,
+-   drop caches, try to open all files by handle and expect ESTALE:
++   remove test_dir, drop caches, try to open all files by handle
++   and expect ESTALE:
+ 
+-   open_by_handle -d <test_dir> [N]
++   open_by_handle -dp <test_dir> [N]
+ 
+ 5. Get file handles for existing test set, rename all test files,
+    drop caches, try to open all files by handle (should work):
+@@ -85,17 +86,18 @@ Examples:
+ #include <sys/types.h>
+ #include <errno.h>
+ #include <linux/limits.h>
++#include <libgen.h>
+ 
+ #define MAXFILES 1024
+ 
+ struct handle {
+ 	struct file_handle fh;
+ 	unsigned char fid[MAX_HANDLE_SZ];
+-} handle[MAXFILES];
++} handle[MAXFILES], dir_handle;
+ 
+ void usage(void)
+ {
+-	fprintf(stderr, "usage: open_by_handle [-cludmrwa] <test_dir> [num_files]\n");
++	fprintf(stderr, "usage: open_by_handle [-cludmrwap] <test_dir> [num_files]\n");
+ 	fprintf(stderr, "\n");
+ 	fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
+ 	fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
+@@ -106,6 +108,7 @@ void usage(void)
+ 	fprintf(stderr, "open_by_handle -u <test_dir> [N] - unlink (hardlinked) test files, drop caches and try to open by handle\n");
+ 	fprintf(stderr, "open_by_handle -d <test_dir> [N] - unlink test files and hardlinks, drop caches and try to open by handle\n");
+ 	fprintf(stderr, "open_by_handle -m <test_dir> [N] - rename test files, drop caches and try to open by handle\n");
++	fprintf(stderr, "open_by_handle -p <test_dir>     - create/delete and try to open by handle also test_dir itself\n");
+ 	exit(EXIT_FAILURE);
+ }
+ 
+@@ -113,20 +116,22 @@ int main(int argc, char **argv)
+ {
+ 	int	i, c;
+ 	int	fd;
+-	int	ret;
++	int	ret = 0;
+ 	int	failed = 0;
++	char	dname[PATH_MAX];
+ 	char	fname[PATH_MAX];
+ 	char	fname2[PATH_MAX];
+ 	char	*test_dir;
++	char	*mount_dir;
+ 	int	mount_fd, mount_id;
+ 	int	numfiles = 1;
+ 	int	create = 0, delete = 0, nlink = 1, move = 0;
+-	int	rd = 0, wr = 0, wrafter = 0;
++	int	rd = 0, wr = 0, wrafter = 0, parent = 0;
+ 
+ 	if (argc < 2 || argc > 4)
+ 		usage();
+ 
+-	while ((c = getopt(argc, argv, "cludmrwa")) != -1) {
++	while ((c = getopt(argc, argv, "cludmrwap")) != -1) {
+ 		switch (c) {
+ 		case 'c':
+ 			create = 1;
+@@ -157,6 +162,9 @@ int main(int argc, char **argv)
+ 		case 'm':
+ 			move = 1;
+ 			break;
++		case 'p':
++			parent = 1;
++			break;
+ 		default:
+ 			fprintf(stderr, "illegal option '%s'\n", argv[optind]);
+ 		case 'h':
+@@ -173,9 +181,27 @@ int main(int argc, char **argv)
+ 		usage();
+ 	}
+ 
+-	mount_fd = open(test_dir, O_RDONLY|O_DIRECTORY);
++	if (parent) {
++		strcpy(dname, test_dir);
++		/*
++		 * -p flag implies that test_dir is NOT a mount point,
++		 * so its parent can be used as mount_fd for open_by_handle_at.
++		 */
++		mount_dir = dirname(dname);
++		if (create)
++			ret = mkdir(test_dir, 0700);
++		if (ret < 0 && errno != EEXIST) {
++			strcat(dname, ": mkdir");
++			perror(dname);
++			return EXIT_FAILURE;
++		}
++	} else {
++		mount_dir = test_dir;
++	}
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++	mount_fd = open(mount_dir, O_RDONLY|O_DIRECTORY);
+ 	if (mount_fd < 0) {
+-		perror(test_dir);
++		perror(mount_dir);
+ 		return EXIT_FAILURE;
+ 	}
+ 
+@@ -216,6 +242,16 @@ int main(int argc, char **argv)
+ 		}
+ 	}
+ 
++	if (parent) {
++		dir_handle.fh.handle_bytes = MAX_HANDLE_SZ;
++		ret = name_to_handle_at(AT_FDCWD, test_dir, &dir_handle.fh, &mount_id, 0);
++		if (ret < 0) {
++			strcat(dname, ": name_to_handle");
++			perror(dname);
++			return EXIT_FAILURE;
++		}
++	}
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
+ 	/* write data to files */
+ 	for (i=0; wr && i < numfiles; i++) {
+ 		sprintf(fname, "%s/file%06d", test_dir, i);
+@@ -281,6 +317,15 @@ int main(int argc, char **argv)
+ 		}
+ 	}
+ 
++	if (parent && delete && !nlink) {
++		ret = rmdir(test_dir);
++		if (ret < 0) {
++			strcat(dname, ": rmdir");
++			perror(dname);
++			return EXIT_FAILURE;
++		}
++	}
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
+ 	/* sync to get log forced for unlink transactions to hit the disk */
+ 	sync();
+ 
+@@ -339,6 +384,49 @@ int main(int argc, char **argv)
+ 		}
+ 		failed++;
+ 	}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
++	if (parent) {
++		fd = open_by_handle_at(mount_fd, &dir_handle.fh, O_RDONLY|O_DIRECTORY);
++		if (fd >= 0) {
++			if (!nlink) {
++				printf("open_by_handle(%s) opened an unlinked dir!\n", dname);
++				return EXIT_FAILURE;
++			} else {
++				/*
++				 * Sanity check dir fd - expect to access orig file IFF
++				 * it was not unlinked nor renamed.
++				 */
++				strcpy(fname, "file000000");
++				ret = faccessat(fd, fname, F_OK, 0);
++				if ((ret == 0) != (!delete && !move) ||
++				    ((ret < 0) && errno != ENOENT)) {
++					strcat(fname, ": unexpected result from faccessat");
++					perror(fname);
++					return EXIT_FAILURE;
++				}
++				/*
++				 * Expect to access link file if ran test with -l flag
++				 * (nlink > 1), -m flag (orig moved to link name) or
++				 * -u flag (which implied previous -l run).
++				 */
++				strcpy(fname2, "link000000");
++				ret = faccessat(fd, fname2, F_OK, 0);
++				if (ret < 0 && (nlink > 1 || delete || move ||
++						errno != ENOENT)) {
++					strcat(fname2, ": unexpected result from faccessat");
++					perror(fname2);
++					return EXIT_FAILURE;
++				}
++			}
++			close(fd);
++		} else if (nlink || !(errno == ENOENT || errno == ESTALE)) {
++			printf("open_by_handle(%s) returned %d incorrectly on %s dir!\n",
++					dname, errno,
++					nlink ? "a linked" : "an unlinked");
++			return EXIT_FAILURE;
++		}
++	}
 +
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+# _require_exportfs already requires open_by_handle, but let's not count on it
-+_require_test_program "open_by_handle"
-+_require_exportfs
-+
-+NUMFILES=10
-+testdir=$TEST_DIR/$seq-dir
-+
-+# Create test dir and non-empty test files
-+create_test_files()
-+{
-+	local dir=$1
-+	local opt=$2
-+
-+	rm -rf $dir
-+	src/open_by_handle -cwp $dir $NUMFILES
-+}
-+
-+# Test encode/decode file handles
-+test_file_handles()
-+{
-+	local dir=$1
-+	local opt=$2
-+
-+	echo test_file_handles $* | _filter_test_dir
-+	src/open_by_handle $opt $dir $NUMFILES
-+}
-+
-+# Check stale handles to deleted files/dir
-+create_test_files $testdir
-+test_file_handles $testdir -dp
-+
-+# Check non-stale handles to linked files/dir
-+create_test_files $testdir
-+test_file_handles $testdir -rp
-+
-+# Check non-stale handles to unlinked open files
-+create_test_files $testdir
-+test_file_handles $testdir -dkr
-+
-+# Check non-stale handles to files that were hardlinked and original deleted
-+create_test_files $testdir
-+test_file_handles $testdir -lr
-+test_file_handles $testdir -ur
-+
-+# Check non-stale file handles of renamed files
-+create_test_files $testdir
-+test_file_handles $testdir -mr
-+
-+# Check non-stale file handles after rename of parent
-+create_test_files $testdir
-+rm -rf $testdir.renamed
-+mv $testdir $testdir.renamed/
-+test_file_handles $testdir.renamed -rp
-+
-+# Check non-stale file handles after move to new parent
-+create_test_files $testdir
-+rm -rf $testdir.new
-+mkdir -p $testdir.new
-+mv $testdir/* $testdir.new/
-+test_file_handles $testdir.new -rp
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/500.out b/tests/generic/500.out
-new file mode 100644
-index 0000000..0035d21
---- /dev/null
-+++ b/tests/generic/500.out
-@@ -0,0 +1,10 @@
-+QA output created by 500
-+test_file_handles TEST_DIR/500-dir -dp
-+test_file_handles TEST_DIR/500-dir -rp
-+test_file_handles TEST_DIR/500-dir -dkr
-+test_file_handles TEST_DIR/500-dir -lr
-+test_file_handles TEST_DIR/500-dir -ur
-+test_file_handles TEST_DIR/500-dir -mr
-+test_file_handles TEST_DIR/500-dir.renamed -rp
-+test_file_handles TEST_DIR/500-dir.new -rp
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index fbe0a7f..0b41c15 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -468,3 +468,4 @@
- 463 auto quick clone dangerous
- 464 auto rw
- 465 auto rw quick aio
-+500 auto quick exportfs
+ 	if (failed)
+ 		return EXIT_FAILURE;
+ 	return EXIT_SUCCESS;
 -- 
 2.7.4
 
