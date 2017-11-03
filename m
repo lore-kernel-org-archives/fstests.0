@@ -1,89 +1,69 @@
-Received: from mail.kernel.org ([198.145.29.99]:47552 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:36956 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1756012AbdKCMWD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 3 Nov 2017 08:22:03 -0400
-Message-ID: <1509711720.4744.9.camel@kernel.org>
-Subject: Re: [PATCH 0/7] More NFS file handle unit tests
-From: Jeff Layton <jlayton@kernel.org>
-Date: Fri, 03 Nov 2017 08:22:00 -0400
-In-Reply-To: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
-References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
-Content-Type: text/plain; charset="UTF-8"
-Mime-Version: 1.0
+        id S1755972AbdKCOFk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Nov 2017 10:05:40 -0400
+Subject: Re: [PATCH v3] common: Check for fiemap range argument support
+References: <20171102031622.GV17339@eguan.usersys.redhat.com>
+ <1509610421-16716-1-git-send-email-nborisov@suse.com>
+ <20171102211259.GE4094@dastard>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <4a351be1-a6a7-7be0-f139-a2e3aa1c648d@suse.com>
+Date: Fri, 3 Nov 2017 16:05:37 +0200
+MIME-Version: 1.0
+In-Reply-To: <20171102211259.GE4094@dastard>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>
-Cc: "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, 2017-11-02 at 12:15 +0200, Amir Goldstein wrote:
-> Eryu,
-> 
-> This series enhances test coverage for generic NFS file handles
-> encode/decode functionality and adds a new gereric/exportfs test.
-> 
-> Please note that the new test output includes the temporary test
-> number 500, so don't forget to fix those when renaming the test.
-> 
-> The enhanced open_by_handle program is going to be used later on for
-> overlayfs specific exportfs tests [1].
-> 
-> The open_by_handle program is limited to encoding "non-connectable"
-> file handles (used by nfsd on 'no_subtree_check' exports), because there
-> is no user available API (that I know of) to encode a "connecctable" file
-> handle (used by nfsd on 'subtree_check' exports). I used a test patch
-> "test connectable file handles", available on my tree [1] to tun the tests
-> with "connectable" file handles.
-> 
-> I verified that the new test passes on xfs, ext4, ext2, btrfs, f2fs.
-> However, the test fails on tmpfs due to:
-> "open_by_handle() returned 116 incorrectly on an unlinked open file!"
-> 
-> This happens because tmpfs uses d_find_alias() to get a decoded dentry,
-> but d_find_alias() skips unhashed (deleted with refcount) dentries.
-> 
-> I don't know if being able to decode a file handle of a deleted but open
-> file is a requirement for nfsd or just a recommendation, but IMO it is a
-> common case that is worth testing, even if tmpfs (or other file systems)
-> choose not to fix this.
-> 
-> Bruce, Jeff,
-> 
-> What is your view on this issue?
-> 
-> 
 
-It seems like something that should be a requirement.
 
-A client could (for instance) send a READ for a filehandle with one of
-the special anonymous stateids. If you can't decode the filehandle, you
-really have no way to know what inode against which to issue the read.
+On  2.11.2017 23:12, Dave Chinner wrote:
+> On Thu, Nov 02, 2017 at 10:13:41AM +0200, Nikolay Borisov wrote:
+>> From: Nikolay Borsiov <nborisov@suse.com>
+>>
+>> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+>> ---
+>> v3:
+>>  * Changed the way we detect ranged args. Now use a regexp which checks 
+>>  explicitly for the ranged args
+>>  common/rc | 7 +++++++
+>>  1 file changed, 7 insertions(+)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index e2a8229..f7a5fe9 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -2053,8 +2053,15 @@ _require_xfs_io_command()
+>>  			-c "$command 4k 8k" $testfile 2>&1`
+>>  		;;
+>>  	"fiemap")
+>> +		if echo "$param" | egrep -q "[[:digit:]]+[bskmgtpe]? [[:digit:]]+[bskmgtpe]?$"
+> 
+> What is that for?
+> 
+> If you're going to dump crazy complex regexes to match something,
+> you need comments to explain it in both the commit message and the
+> code.
+> 
+> And, really, if we need to add complex or tricky code to check a
+> command exists, we've done somethign wrong. Don't make the "fiemap
+> range" command by triggered/detected by an optional parameter, add a
+> specific option instead e.g. "-r" for "range query":
+> 
+> $ xfs_io -c "fiemap -r 0 10k" /mnt/foo
 
-> Thanks,
-> Amir.
-> 
-> [1] https://github.com/amir73il/xfstests/commits/ovl-nfs-export
-> [2] https://github.com/amir73il/linux/commits/ovl-nfs-export-v1
-> 
-> Amir Goldstein (7):
->   open_by_handle: add filename to error reports
->   open_by_handle: test file handles of renamed files
->   open_by_handle: test content of open file handle
->   open_by_handle: test directory file handle
->   open_by_handle: test file handles of open files
->   generic/426: factor out helper functions
->   fstests: add test with more open by file handle use cases
-> 
->  src/open_by_handle.c  | 247 ++++++++++++++++++++++++++++++++++++++++++++------
->  tests/generic/426     |  40 +++++---
->  tests/generic/426.out |   4 +
->  tests/generic/500     | 119 ++++++++++++++++++++++++
->  tests/generic/500.out |  10 ++
->  tests/generic/group   |   1 +
->  6 files changed, 383 insertions(+), 38 deletions(-)
->  create mode 100755 tests/generic/500
->  create mode 100644 tests/generic/500.out
-> 
+Do you mean having the range params as arguments to the -r option (which
+would be a bitch to parse since getopt doesn't support multiple args to
+an options). Or having the -r serve as a boolean indicating we'd need to
+parse the final 2 args (as it's done currently)?
 
--- 
-Jeff Layton <jlayton@kernel.org>
+> 
+> Then you can test it like the falloc command tests it's different
+> parameters....
+> 
+> -Dave.
+> 
