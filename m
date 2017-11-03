@@ -1,44 +1,58 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:31030 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750707AbdKCE2W (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Nov 2017 00:28:22 -0400
-Date: Thu, 2 Nov 2017 21:28:02 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH 15/14] xfs/020: check that we have enough space to write out
- a huge fs
-Message-ID: <20171103042802.GD1233@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:51710 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750707AbdKCEa2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Nov 2017 00:30:28 -0400
+Date: Fri, 3 Nov 2017 12:30:22 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 09/14] xfs/348: dir->symlink corruption must not be
+ allowed
+Message-ID: <20171103043022.GC17339@eguan.usersys.redhat.com>
 References: <150957278824.18388.17975162441125293654.stgit@magnolia>
+ <150957284389.18388.370732842906149356.stgit@magnolia>
+ <20171102124214.GY17339@eguan.usersys.redhat.com>
+ <20171102163754.GS4911@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150957278824.18388.17975162441125293654.stgit@magnolia>
+In-Reply-To: <20171102163754.GS4911@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Nov 02, 2017 at 09:37:54AM -0700, Darrick J. Wong wrote:
+> On Thu, Nov 02, 2017 at 08:42:14PM +0800, Eryu Guan wrote:
+> > On Wed, Nov 01, 2017 at 02:47:23PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > A directory corrupted into a symlink will be caught by the upcoming
+> > > local format ifork verifiers.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  tests/xfs/348.out |    2 +-
+> > >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > > 
+> > > 
+> > > diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+> > > index f4a7a71..17d9be2 100644
+> > > --- a/tests/xfs/348.out
+> > > +++ b/tests/xfs/348.out
+> > > @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
+> > >  would have junked entry "DIR" in directory PARENT_INO
+> > >  would have junked entry "EMPTY" in directory PARENT_INO
+> > >  would have junked entry "FIFO" in directory PARENT_INO
+> > > -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
+> > > +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
+> > 
+> > But this breaks tests on old kernels. Or with the new ifork verifiers,
+> > old kernels can be considered as buggy?
+> 
+> Yes, they're buggy since we shouldn't be interpreting directory entries
+> as a link target given that the zero bytes in the "link target" will
+> screw things up.
 
-Make sure that we have enough free space on the test fs to create a
-60t sparse filesystem.
+Then I'm fine with taking it, and probably will edit the commit log a
+bit to reflect that we were missing a error case previously. Thanks!
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/020 |    4 ++++
- 1 file changed, 4 insertions(+)
-
-diff --git a/tests/xfs/020 b/tests/xfs/020
-index 120492d..b037369 100755
---- a/tests/xfs/020
-+++ b/tests/xfs/020
-@@ -49,6 +49,10 @@ _supported_fs xfs
- _supported_os Linux
- _require_test
- 
-+# Writing a 60t fs requires about 2GB of space, so make sure
-+# we have plenty of space to do that.
-+_require_fs_space $TEST_DIR 2500000
-+
- echo "Silence is golden"
- 
- fsfile=$TEST_DIR/fsfile.$seq
+Eryu
