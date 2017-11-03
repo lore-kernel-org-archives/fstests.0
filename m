@@ -1,197 +1,89 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36300 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:47552 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752719AbdKCLKH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 3 Nov 2017 07:10:07 -0400
-Date: Fri, 3 Nov 2017 19:10:05 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 01/14] common/xfs: refactor xfs_scrub presence testing
-Message-ID: <20171103111005.GF17339@eguan.usersys.redhat.com>
-References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957279473.18388.16116724960221536771.stgit@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <150957279473.18388.16116724960221536771.stgit@magnolia>
+        id S1756012AbdKCMWD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 3 Nov 2017 08:22:03 -0400
+Message-ID: <1509711720.4744.9.camel@kernel.org>
+Subject: Re: [PATCH 0/7] More NFS file handle unit tests
+From: Jeff Layton <jlayton@kernel.org>
+Date: Fri, 03 Nov 2017 08:22:00 -0400
+In-Reply-To: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
+References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>
+Cc: "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 01, 2017 at 02:46:34PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, 2017-11-02 at 12:15 +0200, Amir Goldstein wrote:
+> Eryu,
 > 
-> Move all the requirements checking for xfs_scrub into a helper function.
-> Make sure the helper properly detects the presence of the scrub ioctl
-> and situations where we can't run scrub (e.g. norecovery).
+> This series enhances test coverage for generic NFS file handles
+> encode/decode functionality and adds a new gereric/exportfs test.
 > 
-> Refactor the existing three xfs_scrub call sites to use the helper to
-> check if it's appropriate to run scrub.
+> Please note that the new test output includes the temporary test
+> number 500, so don't forget to fix those when renaming the test.
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  README            |    6 +++---
->  common/rc         |    2 +-
->  common/xfs        |   41 ++++++++++++++++++++++++++++++++++-------
->  tests/generic/453 |   11 +----------
->  tests/generic/454 |   11 +----------
->  5 files changed, 40 insertions(+), 31 deletions(-)
+> The enhanced open_by_handle program is going to be used later on for
+> overlayfs specific exportfs tests [1].
+> 
+> The open_by_handle program is limited to encoding "non-connectable"
+> file handles (used by nfsd on 'no_subtree_check' exports), because there
+> is no user available API (that I know of) to encode a "connecctable" file
+> handle (used by nfsd on 'subtree_check' exports). I used a test patch
+> "test connectable file handles", available on my tree [1] to tun the tests
+> with "connectable" file handles.
+> 
+> I verified that the new test passes on xfs, ext4, ext2, btrfs, f2fs.
+> However, the test fails on tmpfs due to:
+> "open_by_handle() returned 116 incorrectly on an unlinked open file!"
+> 
+> This happens because tmpfs uses d_find_alias() to get a decoded dentry,
+> but d_find_alias() skips unhashed (deleted with refcount) dentries.
+> 
+> I don't know if being able to decode a file handle of a deleted but open
+> file is a requirement for nfsd or just a recommendation, but IMO it is a
+> common case that is worth testing, even if tmpfs (or other file systems)
+> choose not to fix this.
+> 
+> Bruce, Jeff,
+> 
+> What is your view on this issue?
 > 
 > 
-> diff --git a/README b/README
-> index 4963d28..a9da4f0 100644
-> --- a/README
-> +++ b/README
-> @@ -88,9 +88,9 @@ Preparing system for tests:
->                 run xfs_repair -n to check the filesystem; xfs_repair to rebuild
->                 metadata indexes; and xfs_repair -n (a third time) to check the
->                 results of the rebuilding.
-> -             - set TEST_XFS_SCRUB=1 to have _check_xfs_filesystem run
-> -               xfs_scrub -vd to scrub the filesystem metadata online before
-> -               unmounting to run the offline check.
-> +             - xfs_scrub, if present, will always check the test and scratch
-> +               filesystems if they are still online at the end of the test.
-> +               It is no longer necessary to set TEST_XFS_SCRUB.
->               - setenv LOGWRITES_DEV to a block device to use for power fail
->                 testing.
->  
-> diff --git a/common/rc b/common/rc
-> index 1a4d81e..83aaced 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2091,7 +2091,7 @@ _require_xfs_io_command()
->  			_notrun "xfs_io $command support is missing"
->  		;;
->  	"scrub"|"repair")
-> -		testio=`$XFS_IO_PROG -x -c "$command test 0" $TEST_DIR 2>&1`
-> +		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
->  		echo $testio | grep -q "Inappropriate ioctl" && \
->  			_notrun "xfs_io $command support is missing"
->  		;;
-> diff --git a/common/xfs b/common/xfs
-> index dff8454..de3c560 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -298,6 +298,30 @@ _require_xfs_db_command()
->  		_notrun "xfs_db $command support is missing"
->  }
->  
-> +# Does the filesystem mounted from a particular device support scrub?
-> +_supports_xfs_scrub()
-> +{
-> +	mountpoint="$1"
-> +	device="$2"
-> +
-> +	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
-> +		echo "Usage: _supports_xfs_scrub mountpoint device"
-> +		exit 1
-> +	fi
-> +
-> +	test "$FSTYP" = "xfs" || return 1
-> +	test -x "$XFS_SCRUB_PROG" || return 1
-> +
-> +	# Probe for kernel support...
-> +	$XFS_IO_PROG -c 'help scrub' 2>&1 | grep -q 'types are:.*probe' || return 1
-> +	$XFS_IO_PROG -c "scrub probe 0" "$mountpoint" 2>&1 | grep -q "Inappropriate ioctl" && return 1
-> +
-> +	# Scrub can't run on norecovery mounts
-> +	_fs_options "$device" | grep -q "norecovery" && return 1
-> +
-> +	return 0
-> +}
-> +
->  # run xfs_check and friends on a FS.
->  _check_xfs_filesystem()
->  {
-> @@ -330,14 +354,17 @@ _check_xfs_filesystem()
->  	type=`_fs_type $device`
->  	ok=1
->  
-> -	if [ "$type" = "xfs" ]; then
-> -		if [ -n "$TEST_XFS_SCRUB" ] && [ -x "$XFS_SCRUB_PROG" ]; then
-> -			"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full
-> -			if [ $? -ne 0 ]; then
-> -				_log_err "filesystem on $device failed scrub"
-> -				ok=0
-> -			fi
-> +	# Run online scrub if we can.
-> +	mntpt="$(_is_mounted $device)"
-> +	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
-> +		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device >>$seqres.full 2>&1
-> +		if [ $? -ne 0 ]; then
-> +			_log_err "filesystem on $device failed scrub"
-> +			ok=0
->  		fi
-> +	fi
-> +
-> +	if [ "$type" = "xfs" ]; then
->  		# mounted ...
->  		mountpoint=`_umount_or_remount_ro $device`
->  	fi
-> diff --git a/tests/generic/453 b/tests/generic/453
-> index bda1112..16589d1 100755
-> --- a/tests/generic/453
-> +++ b/tests/generic/453
-> @@ -136,10 +136,7 @@ echo "Test XFS online scrub, if applicable"
->  
->  # Only run this on xfs if xfs_scrub is available and has the unicode checker
->  check_xfs_scrub() {
-> -	# Ignore non-XFS fs or no scrub program...
-> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
-> -		return 1
-> -	fi
 
-I added the $FSTYP check back in check_xfs_scrub here and in
-generic/454, because _supports_xfs_scrub is in common/xfs and it's not
-sourced if we're testing non-xfs, and test fails due to missing
-_supports_xfs_scrub command. This was caught in my release testing.
+It seems like something that should be a requirement.
 
-Thanks,
-Eryu
+A client could (for instance) send a READ for a filehandle with one of
+the special anonymous stateids. If you can't decode the filehandle, you
+really have no way to know what inode against which to issue the read.
 
-> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
->  
->  	# We only care if xfs_scrub has unicode string support...
->  	if ! type ldd > /dev/null 2>&1 || \
-> @@ -147,12 +144,6 @@ check_xfs_scrub() {
->  		return 1
->  	fi
->  
-> -	# Does the ioctl work?
-> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
-> -	   grep -q "Inappropriate ioctl"; then
-> -		return 1
-> -	fi
-> -
->  	return 0
->  }
->  
-> diff --git a/tests/generic/454 b/tests/generic/454
-> index d1f93b2..efac860 100755
-> --- a/tests/generic/454
-> +++ b/tests/generic/454
-> @@ -132,10 +132,7 @@ echo "Test XFS online scrub, if applicable"
->  
->  # Only run this on xfs if xfs_scrub is available and has the unicode checker
->  check_xfs_scrub() {
-> -	# Ignore non-XFS fs or no scrub program...
-> -	if [ "${FSTYP}" != "xfs" ] || [ ! -x "${XFS_SCRUB_PROG}" ]; then
-> -		return 1
-> -	fi
-> +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
->  
->  	# We only care if xfs_scrub has unicode string support...
->  	if ! type ldd > /dev/null 2>&1 || \
-> @@ -143,12 +140,6 @@ check_xfs_scrub() {
->  		return 1
->  	fi
->  
-> -	# Does the ioctl work?
-> -	if $XFS_IO_PROG -x -c "scrub probe 0" $SCRATCH_MNT 2>&1 | \
-> -	   grep -q "Inappropriate ioctl"; then
-> -		return 1
-> -	fi
-> -
->  	return 0
->  }
->  
+> Thanks,
+> Amir.
 > 
+> [1] https://github.com/amir73il/xfstests/commits/ovl-nfs-export
+> [2] https://github.com/amir73il/linux/commits/ovl-nfs-export-v1
+> 
+> Amir Goldstein (7):
+>   open_by_handle: add filename to error reports
+>   open_by_handle: test file handles of renamed files
+>   open_by_handle: test content of open file handle
+>   open_by_handle: test directory file handle
+>   open_by_handle: test file handles of open files
+>   generic/426: factor out helper functions
+>   fstests: add test with more open by file handle use cases
+> 
+>  src/open_by_handle.c  | 247 ++++++++++++++++++++++++++++++++++++++++++++------
+>  tests/generic/426     |  40 +++++---
+>  tests/generic/426.out |   4 +
+>  tests/generic/500     | 119 ++++++++++++++++++++++++
+>  tests/generic/500.out |  10 ++
+>  tests/generic/group   |   1 +
+>  6 files changed, 383 insertions(+), 38 deletions(-)
+>  create mode 100755 tests/generic/500
+>  create mode 100644 tests/generic/500.out
+> 
+
+-- 
+Jeff Layton <jlayton@kernel.org>
