@@ -1,47 +1,52 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:46683 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755158AbdKCQbC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 3 Nov 2017 12:31:02 -0400
-Date: Fri, 3 Nov 2017 09:30:57 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 09/14] xfs/348: dir->symlink corruption must not be
- allowed
-Message-ID: <20171103163057.GI4911@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:45082 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750750AbdKDFZH (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 4 Nov 2017 01:25:07 -0400
+Date: Sat, 4 Nov 2017 13:25:04 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 12/14] generic/204: use available blocks to determine
+ the number of files to create
+Message-ID: <20171104052504.GG17339@eguan.usersys.redhat.com>
 References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957284389.18388.370732842906149356.stgit@magnolia>
- <20171102124214.GY17339@eguan.usersys.redhat.com>
- <20171102163754.GS4911@magnolia>
- <20171103043022.GC17339@eguan.usersys.redhat.com>
- <20171103161448.gqx3odbsoppsjrld@thunk.org>
+ <150957286222.18388.3253654888670864191.stgit@magnolia>
+ <20171103042619.GB1233@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171103161448.gqx3odbsoppsjrld@thunk.org>
+In-Reply-To: <20171103042619.GB1233@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eryu Guan <eguan@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 03, 2017 at 12:14:48PM -0400, Theodore Ts'o wrote:
-> On Fri, Nov 03, 2017 at 12:30:22PM +0800, Eryu Guan wrote:
-> > > Yes, they're buggy since we shouldn't be interpreting directory entries
-> > > as a link target given that the zero bytes in the "link target" will
-> > > screw things up.
-> > 
-> > Then I'm fine with taking it, and probably will edit the commit log a
-> > bit to reflect that we were missing a error case previously. Thanks!
+On Thu, Nov 02, 2017 at 09:26:19PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Darrick, can we add a note indicating what commit needs to be
-> backported to make the failure go away?
+> Use the available block count to compute the number of files we think
+> we can create, rather than hardcoding a particular size.  This fixes
+> the ENOSPC failures for xfs filesystems with rmap/reflink support.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/generic/204 |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/204 b/tests/generic/204
+> index 4c203a2..ac417a7 100755
+> --- a/tests/generic/204
+> +++ b/tests/generic/204
+> @@ -69,7 +69,7 @@ _scratch_mount
+>  # work out correctly. Space usages is based 22500 files and 1024 reserved blocks
+>  # on a 4k block size 256 byte inode size filesystem.
+>  resv_blks=1024
+> -space=97920000
+> +space=$(stat -f -c '%f * %S' $SCRATCH_MNT | $BC_PROG)
 
-Will do when the time comes.  TBH we've not been consistent about
-marking regression tests with the appropriate upstream commit id once
-they're available.
+Hmm, this regressed test with 512B block size XFS. I'll drop it for now.
 
---D
+Thanks,
+Eryu
 
-> 					- Ted
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  
+>  # decrease files for inode size.
+>  #	22500 * (256 + 4k) = ~97MB
