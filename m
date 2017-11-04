@@ -1,52 +1,76 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45082 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:53480 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750750AbdKDFZH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 4 Nov 2017 01:25:07 -0400
-Date: Sat, 4 Nov 2017 13:25:04 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 12/14] generic/204: use available blocks to determine
- the number of files to create
-Message-ID: <20171104052504.GG17339@eguan.usersys.redhat.com>
-References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957286222.18388.3253654888670864191.stgit@magnolia>
- <20171103042619.GB1233@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171103042619.GB1233@magnolia>
+        id S1751477AbdKDXXj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 4 Nov 2017 19:23:39 -0400
+Message-ID: <1509837816.3820.4.camel@kernel.org>
+Subject: Re: [PATCH 0/7] More NFS file handle unit tests
+From: Jeff Layton <jlayton@kernel.org>
+Date: Sat, 04 Nov 2017 19:23:36 -0400
+In-Reply-To: <1509711720.4744.9.camel@kernel.org>
+References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
+         <1509711720.4744.9.camel@kernel.org>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>
+Cc: "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 02, 2017 at 09:26:19PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Fri, 2017-11-03 at 08:22 -0400, Jeff Layton wrote:
+> On Thu, 2017-11-02 at 12:15 +0200, Amir Goldstein wrote:
+> > Eryu,
+> > 
+> > This series enhances test coverage for generic NFS file handles
+> > encode/decode functionality and adds a new gereric/exportfs test.
+> > 
+> > Please note that the new test output includes the temporary test
+> > number 500, so don't forget to fix those when renaming the test.
+> > 
+> > The enhanced open_by_handle program is going to be used later on for
+> > overlayfs specific exportfs tests [1].
+> > 
+> > The open_by_handle program is limited to encoding "non-connectable"
+> > file handles (used by nfsd on 'no_subtree_check' exports), because there
+> > is no user available API (that I know of) to encode a "connecctable" file
+> > handle (used by nfsd on 'subtree_check' exports). I used a test patch
+> > "test connectable file handles", available on my tree [1] to tun the tests
+> > with "connectable" file handles.
+> > 
+> > I verified that the new test passes on xfs, ext4, ext2, btrfs, f2fs.
+> > However, the test fails on tmpfs due to:
+> > "open_by_handle() returned 116 incorrectly on an unlinked open file!"
+> > 
+> > This happens because tmpfs uses d_find_alias() to get a decoded dentry,
+> > but d_find_alias() skips unhashed (deleted with refcount) dentries.
+> > 
+> > I don't know if being able to decode a file handle of a deleted but open
+> > file is a requirement for nfsd or just a recommendation, but IMO it is a
+> > common case that is worth testing, even if tmpfs (or other file systems)
+> > choose not to fix this.
+> > 
+> > Bruce, Jeff,
+> > 
+> > What is your view on this issue?
+> > 
+> > 
 > 
-> Use the available block count to compute the number of files we think
-> we can create, rather than hardcoding a particular size.  This fixes
-> the ENOSPC failures for xfs filesystems with rmap/reflink support.
+> It seems like something that should be a requirement.
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/generic/204 |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/204 b/tests/generic/204
-> index 4c203a2..ac417a7 100755
-> --- a/tests/generic/204
-> +++ b/tests/generic/204
-> @@ -69,7 +69,7 @@ _scratch_mount
->  # work out correctly. Space usages is based 22500 files and 1024 reserved blocks
->  # on a 4k block size 256 byte inode size filesystem.
->  resv_blks=1024
-> -space=97920000
-> +space=$(stat -f -c '%f * %S' $SCRATCH_MNT | $BC_PROG)
+> A client could (for instance) send a READ for a filehandle with one of
+> the special anonymous stateids. If you can't decode the filehandle, you
+> really have no way to know what inode against which to issue the read.
 
-Hmm, this regressed test with 512B block size XFS. I'll drop it for now.
+That said...
 
-Thanks,
-Eryu
+If an open file is unlinked, and the server reboots you're more or less
+back in the same situation anyway. That's generally the reason for
+sillyrenaming in NFSv4.x instead of just removing the files outright.
 
->  
->  # decrease files for inode size.
->  #	22500 * (256 + 4k) = ~97MB
+The main takeaway is that with NFS in general, it's actually rather
+difficult to ensure that behavior across all server failure scenarios.
+It'd be nice if tmpfs did this like the others, but it's probably not
+fatal if it doesn't.
+
+-- 
+Jeff Layton <jlayton@kernel.org>
