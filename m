@@ -1,122 +1,94 @@
-Received: from mail.kernel.org ([198.145.29.99]:56742 "EHLO mail.kernel.org"
+Received: from fieldses.org ([173.255.197.46]:48598 "EHLO fieldses.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965341AbdKGP3d (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 7 Nov 2017 10:29:33 -0500
-Subject: Re: [PATCH] generic/392: support to test fallocate
-References: <20171105123935.14702-1-chao@kernel.org>
- <20171107044817.GH17339@eguan.usersys.redhat.com>
-From: Chao Yu <chao@kernel.org>
-Message-ID: <ceb7b2ed-a054-bee0-b2e6-713c8d58afeb@kernel.org>
-Date: Tue, 7 Nov 2017 23:29:22 +0800
+        id S1751986AbdKGTyw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Nov 2017 14:54:52 -0500
+Date: Tue, 7 Nov 2017 14:54:51 -0500
+From: "J . Bruce Fields" <bfields@fieldses.org>
+Subject: Re: [PATCH 0/7] More NFS file handle unit tests
+Message-ID: <20171107195451.GC24262@fieldses.org>
+References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
+ <1509711720.4744.9.camel@kernel.org>
+ <1509837816.3820.4.camel@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20171107044817.GH17339@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1509837816.3820.4.camel@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, Chao Yu <yuchao0@huawei.com>
+To: Jeff Layton <jlayton@kernel.org>
+Cc: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/11/7 12:48, Eryu Guan wrote:
-> On Sun, Nov 05, 2017 at 08:39:35PM +0800, Chao Yu wrote:
->> From: Chao Yu <yuchao0@huawei.com>
->>
->> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
->> to recovery isize according to valid block address or preallocated flag
->> in last fsynced dnode block.
->>
->> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
->> flag, since it can preallocated block cross EOF, once the file is fsynced,
->> in POR, we will recover isize incorrectly based on these fallocated
->> blocks.
->>
->> This patch enables generic/392 to test fallocate case, in order to verify
->> whether filesystem will do incorrect recovery on isize.
->>
->> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> 
-> Usually we don't add new sub-tests to existing tests, so new failures
-> introduced by the new sub-tests won't be treated as false regressions.
-> Please add a new test instead. (I notice the new falloc test fails on
-> ext4 too, the allocated block counts changed after power cycle).
+On Sat, Nov 04, 2017 at 07:23:36PM -0400, Jeff Layton wrote:
+> On Fri, 2017-11-03 at 08:22 -0400, Jeff Layton wrote:
+> > On Thu, 2017-11-02 at 12:15 +0200, Amir Goldstein wrote:
+> > > Eryu,
+> > > 
+> > > This series enhances test coverage for generic NFS file handles
+> > > encode/decode functionality and adds a new gereric/exportfs test.
+> > > 
+> > > Please note that the new test output includes the temporary test
+> > > number 500, so don't forget to fix those when renaming the test.
+> > > 
+> > > The enhanced open_by_handle program is going to be used later on for
+> > > overlayfs specific exportfs tests [1].
+> > > 
+> > > The open_by_handle program is limited to encoding "non-connectable"
+> > > file handles (used by nfsd on 'no_subtree_check' exports), because there
+> > > is no user available API (that I know of) to encode a "connecctable" file
+> > > handle (used by nfsd on 'subtree_check' exports). I used a test patch
+> > > "test connectable file handles", available on my tree [1] to tun the tests
+> > > with "connectable" file handles.
+> > > 
+> > > I verified that the new test passes on xfs, ext4, ext2, btrfs, f2fs.
+> > > However, the test fails on tmpfs due to:
+> > > "open_by_handle() returned 116 incorrectly on an unlinked open file!"
+> > > 
+> > > This happens because tmpfs uses d_find_alias() to get a decoded dentry,
+> > > but d_find_alias() skips unhashed (deleted with refcount) dentries.
+> > > 
+> > > I don't know if being able to decode a file handle of a deleted but open
+> > > file is a requirement for nfsd or just a recommendation, but IMO it is a
+> > > common case that is worth testing, even if tmpfs (or other file systems)
+> > > choose not to fix this.
+> > > 
+> > > Bruce, Jeff,
+> > > 
+> > > What is your view on this issue?
+> > > 
+> > > 
+> > 
+> > It seems like something that should be a requirement.
+> > 
+> > A client could (for instance) send a READ for a filehandle with one of
+> > the special anonymous stateids. If you can't decode the filehandle, you
+> > really have no way to know what inode against which to issue the read.
 
-Ah, make sense to me, I will prepare patch to add a new test.
+Also even if you use a "real" stateid the current implementation will
+error out if the filehandle lookup fails, and that might be complicated
+to fix.
 
+> That said...
 > 
->> ---
->>  tests/generic/392     | 14 ++++++++++++++
->>  tests/generic/392.out |  6 ++++++
->>  2 files changed, 20 insertions(+)
->>
->> diff --git a/tests/generic/392 b/tests/generic/392
->> index 6922f7d2..f4ebeb2f 100755
->> --- a/tests/generic/392
->> +++ b/tests/generic/392
->> @@ -125,12 +125,26 @@ test_punch()
->>  	check_inode_metadata $1
->>  }
->>  
->> +test_falloc()
->> +{
->> +	echo "==== falloc $2 test with $1 ====" | tee -a $seqres.full
->> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
->> +			-c "pwrite 0 4202496"	\
->> +			-c "fsync"		\
->> +			-c "falloc -k 4202496 $2"\
+> If an open file is unlinked, and the server reboots you're more or less
+> back in the same situation anyway. That's generally the reason for
+> sillyrenaming in NFSv4.x instead of just removing the files outright.
 > 
-> Need to require falloc -k support by
-> 
-> _require_xfs_io_command "falloc" "-k"
+> The main takeaway is that with NFS in general, it's actually rather
+> difficult to ensure that behavior across all server failure scenarios.
+> It'd be nice if tmpfs did this like the others, but it's probably not
+> fatal if it doesn't.
 
-Got it, thanks for the reminder.
+I guess.  The idea of failing on an unlinked inode still makes me
+nervous, though.  It's supposed to be a look up by *inode*, not dentry.
+NFSv4 client can hold files open after unlink, even if the possibility
+of server reboots means applications don't get a real guarantee of that.
+tmpfs exports aren't much use across server reboots anyway, though.
 
-> 
-> And maybe test falloc without keep_size too?
+Some day we may fix the reboot problem--but possibly just by doing
+something like sillyrename on the server side, so that wouldn't affect
+this case much.
 
-Agreed, will add. :)
+I think some users would likely notice if we broke the ability to look
+up an unlinked file so I'd rather we kept that test in.
 
-Thanks,
-
-> 
-> Thanks,
-> Eryu
-> 
->> +			$testfile >/dev/null
->> +	check_inode_metadata $1
->> +}
->> +
->>  for i in fsync fdatasync; do
->>  	test_i_size $i 1024
->>  	test_i_size $i 4096
->>  	test_i_time $i
->>  	test_punch $i 1024
->>  	test_punch $i 4096
->> +	test_falloc $i 1024
->> +	test_falloc $i 4096
->> +	test_falloc $i 104857600
->>  done
->>  
->>  exit
->> diff --git a/tests/generic/392.out b/tests/generic/392.out
->> index 5d3330a6..d278bdf9 100644
->> --- a/tests/generic/392.out
->> +++ b/tests/generic/392.out
->> @@ -4,8 +4,14 @@ QA output created by 392
->>  ==== i_time test with fsync ====
->>  ==== fpunch 1024 test with fsync ====
->>  ==== fpunch 4096 test with fsync ====
->> +==== falloc 1024 test with fsync ====
->> +==== falloc 4096 test with fsync ====
->> +==== falloc 104857600 test with fsync ====
->>  ==== i_size 1024 test with fdatasync ====
->>  ==== i_size 4096 test with fdatasync ====
->>  ==== i_time test with fdatasync ====
->>  ==== fpunch 1024 test with fdatasync ====
->>  ==== fpunch 4096 test with fdatasync ====
->> +==== falloc 1024 test with fdatasync ====
->> +==== falloc 4096 test with fdatasync ====
->> +==== falloc 104857600 test with fdatasync ====
->> -- 
->> 2.14.1.145.gb3622a4ee
->>
+--b.
