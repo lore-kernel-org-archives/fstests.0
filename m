@@ -1,108 +1,252 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41026 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:56346 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751763AbdKGEsS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 6 Nov 2017 23:48:18 -0500
-Date: Tue, 7 Nov 2017 12:48:17 +0800
+        id S1752580AbdKGFPj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Nov 2017 00:15:39 -0500
+Date: Tue, 7 Nov 2017 13:15:38 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/392: support to test fallocate
-Message-ID: <20171107044817.GH17339@eguan.usersys.redhat.com>
-References: <20171105123935.14702-1-chao@kernel.org>
+Subject: Re: [PATCH v2 3/4] generic: Adjust generic test ouputs for new
+ fiemap implementation
+Message-ID: <20171107051538.GI17339@eguan.usersys.redhat.com>
+References: <1509459011-7398-1-git-send-email-nborisov@suse.com>
+ <1509459096-7585-1-git-send-email-nborisov@suse.com>
+ <1509459096-7585-3-git-send-email-nborisov@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171105123935.14702-1-chao@kernel.org>
+In-Reply-To: <1509459096-7585-3-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chao Yu <chao@kernel.org>
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, Chao Yu <yuchao0@huawei.com>
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Nov 05, 2017 at 08:39:35PM +0800, Chao Yu wrote:
-> From: Chao Yu <yuchao0@huawei.com>
-> 
-> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
-> to recovery isize according to valid block address or preallocated flag
-> in last fsynced dnode block.
-> 
-> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
-> flag, since it can preallocated block cross EOF, once the file is fsynced,
-> in POR, we will recover isize incorrectly based on these fallocated
-> blocks.
-> 
-> This patch enables generic/392 to test fallocate case, in order to verify
-> whether filesystem will do incorrect recovery on isize.
-> 
-> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+On Tue, Oct 31, 2017 at 04:11:35PM +0200, Nikolay Borisov wrote:
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 
-Usually we don't add new sub-tests to existing tests, so new failures
-introduced by the new sub-tests won't be treated as false regressions.
-Please add a new test instead. (I notice the new falloc test fails on
-ext4 too, the allocated block counts changed after power cycle).
-
-> ---
->  tests/generic/392     | 14 ++++++++++++++
->  tests/generic/392.out |  6 ++++++
->  2 files changed, 20 insertions(+)
-> 
-> diff --git a/tests/generic/392 b/tests/generic/392
-> index 6922f7d2..f4ebeb2f 100755
-> --- a/tests/generic/392
-> +++ b/tests/generic/392
-> @@ -125,12 +125,26 @@ test_punch()
->  	check_inode_metadata $1
->  }
->  
-> +test_falloc()
-> +{
-> +	echo "==== falloc $2 test with $1 ====" | tee -a $seqres.full
-> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
-> +			-c "pwrite 0 4202496"	\
-> +			-c "fsync"		\
-> +			-c "falloc -k 4202496 $2"\
-
-Need to require falloc -k support by
-
-_require_xfs_io_command "falloc" "-k"
-
-And maybe test falloc without keep_size too?
+I think patch 2 and 3 should be merged to a single patch, so we don't
+have a tiny window to break the affected tests with old fiemap command.
 
 Thanks,
 Eryu
 
-> +			$testfile >/dev/null
-> +	check_inode_metadata $1
-> +}
-> +
->  for i in fsync fdatasync; do
->  	test_i_size $i 1024
->  	test_i_size $i 4096
->  	test_i_time $i
->  	test_punch $i 1024
->  	test_punch $i 4096
-> +	test_falloc $i 1024
-> +	test_falloc $i 4096
-> +	test_falloc $i 104857600
->  done
->  
->  exit
-> diff --git a/tests/generic/392.out b/tests/generic/392.out
-> index 5d3330a6..d278bdf9 100644
-> --- a/tests/generic/392.out
-> +++ b/tests/generic/392.out
-> @@ -4,8 +4,14 @@ QA output created by 392
->  ==== i_time test with fsync ====
->  ==== fpunch 1024 test with fsync ====
->  ==== fpunch 4096 test with fsync ====
-> +==== falloc 1024 test with fsync ====
-> +==== falloc 4096 test with fsync ====
-> +==== falloc 104857600 test with fsync ====
->  ==== i_size 1024 test with fdatasync ====
->  ==== i_size 4096 test with fdatasync ====
->  ==== i_time test with fdatasync ====
->  ==== fpunch 1024 test with fdatasync ====
->  ==== fpunch 4096 test with fdatasync ====
-> +==== falloc 1024 test with fdatasync ====
-> +==== falloc 4096 test with fdatasync ====
-> +==== falloc 104857600 test with fdatasync ====
+> ---
+>  tests/generic/012.out | 1 +
+>  tests/generic/016.out | 1 +
+>  tests/generic/021.out | 2 ++
+>  tests/generic/022.out | 2 ++
+>  tests/generic/058.out | 1 +
+>  tests/generic/060.out | 1 +
+>  tests/generic/061.out | 1 +
+>  tests/generic/063.out | 1 +
+>  tests/generic/255.out | 6 ++++++
+>  tests/generic/316.out | 6 ++++++
+>  10 files changed, 22 insertions(+)
+> 
+> diff --git a/tests/generic/012.out b/tests/generic/012.out
+> index ffbf8a3..8045471 100644
+> --- a/tests/generic/012.out
+> +++ b/tests/generic/012.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 012
+>  	1. into a hole
+> +0: [0..95]: hole
+>  f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  	2. into allocated space
+>  0: [0..95]: extent
+> diff --git a/tests/generic/016.out b/tests/generic/016.out
+> index c45a44a..1371ce7 100644
+> --- a/tests/generic/016.out
+> +++ b/tests/generic/016.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 016
+>  	1. into a hole
+> +0: [0..95]: hole
+>  f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  	2. into allocated space
+>  0: [0..95]: extent
+> diff --git a/tests/generic/021.out b/tests/generic/021.out
+> index 1137741..791b78a 100644
+> --- a/tests/generic/021.out
+> +++ b/tests/generic/021.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 021
+>  	1. into a hole
+> +0: [0..95]: hole
+>  f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  	2. into allocated space
+>  0: [0..95]: extent
+> @@ -34,6 +35,7 @@ f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  1: [64..95]: hole
+>  d8f51c20223dbce5c7c90db87bc221b0
+>  	10. hole -> data -> hole
+> +0: [0..63]: hole
+>  bb7df04e1b0a2570657527a7e108ae23
+>  	11. data -> hole -> data
+>  0: [0..63]: extent
+> diff --git a/tests/generic/022.out b/tests/generic/022.out
+> index fbffa59..6dbc192 100644
+> --- a/tests/generic/022.out
+> +++ b/tests/generic/022.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 022
+>  	1. into a hole
+> +0: [0..95]: hole
+>  f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  	2. into allocated space
+>  0: [0..95]: extent
+> @@ -34,6 +35,7 @@ f4f35d60b3cc18aaa6d8d92f0cd3708a
+>  1: [64..95]: hole
+>  d8f51c20223dbce5c7c90db87bc221b0
+>  	10. hole -> data -> hole
+> +0: [0..63]: hole
+>  bb7df04e1b0a2570657527a7e108ae23
+>  	11. data -> hole -> data
+>  0: [0..63]: extent
+> diff --git a/tests/generic/058.out b/tests/generic/058.out
+> index b15308d..3bbc2a4 100644
+> --- a/tests/generic/058.out
+> +++ b/tests/generic/058.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 058
+>  	1. into a hole
+> +0: [0..55]: hole
+>  cf845a781c107ec1346e849c9dd1b7e8
+>  	2. into allocated space
+>  0: [0..7]: extent
+> diff --git a/tests/generic/060.out b/tests/generic/060.out
+> index 909b578..210af74 100644
+> --- a/tests/generic/060.out
+> +++ b/tests/generic/060.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 060
+>  	1. into a hole
+> +0: [0..55]: hole
+>  cf845a781c107ec1346e849c9dd1b7e8
+>  	2. into allocated space
+>  0: [0..7]: extent
+> diff --git a/tests/generic/061.out b/tests/generic/061.out
+> index 78d6c6d..6d95680 100644
+> --- a/tests/generic/061.out
+> +++ b/tests/generic/061.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 061
+>  	1. into a hole
+> +0: [0..55]: hole
+>  cf845a781c107ec1346e849c9dd1b7e8
+>  	2. into allocated space
+>  0: [0..7]: extent
+> diff --git a/tests/generic/063.out b/tests/generic/063.out
+> index d828ff6..10db43f 100644
+> --- a/tests/generic/063.out
+> +++ b/tests/generic/063.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 063
+>  	1. into a hole
+> +0: [0..55]: hole
+>  cf845a781c107ec1346e849c9dd1b7e8
+>  	2. into allocated space
+>  0: [0..7]: extent
+> diff --git a/tests/generic/255.out b/tests/generic/255.out
+> index 217ef3e..441fde8 100644
+> --- a/tests/generic/255.out
+> +++ b/tests/generic/255.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 255
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -42,6 +43,7 @@ daa100df6e6711906b61c9ab5aa16032
+>  3: [32..39]: hole
+>  cc63069677939f69a6e8f68cae6a6dac
+>  	10. hole -> data -> hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	11. data -> hole -> data
+>  0: [0..7]: extent
+> @@ -79,6 +81,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -121,6 +124,7 @@ daa100df6e6711906b61c9ab5aa16032
+>  3: [32..39]: hole
+>  cc63069677939f69a6e8f68cae6a6dac
+>  	10. hole -> data -> hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	11. data -> hole -> data
+>  0: [0..7]: extent
+> @@ -158,6 +162,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -240,6 +245,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> diff --git a/tests/generic/316.out b/tests/generic/316.out
+> index 383f0d1..5506198 100644
+> --- a/tests/generic/316.out
+> +++ b/tests/generic/316.out
+> @@ -1,5 +1,6 @@
+>  QA output created by 316
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -16,6 +17,7 @@ cc63069677939f69a6e8f68cae6a6dac
+>  1: [8..39]: hole
+>  1b3779878366498b28c702ef88c4a773
+>  	10. hole -> data -> hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	11. data -> hole -> data
+>  0: [0..7]: extent
+> @@ -43,6 +45,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -59,6 +62,7 @@ cc63069677939f69a6e8f68cae6a6dac
+>  1: [8..39]: hole
+>  1b3779878366498b28c702ef88c4a773
+>  	10. hole -> data -> hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	11. data -> hole -> data
+>  0: [0..7]: extent
+> @@ -86,6 +90,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
+> @@ -133,6 +138,7 @@ eecb7aa303d121835de05028751d301c
+>  0000400 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+>  *
+>  	1. into a hole
+> +0: [0..39]: hole
+>  daa100df6e6711906b61c9ab5aa16032
+>  	2. into allocated space
+>  0: [0..7]: extent
 > -- 
-> 2.14.1.145.gb3622a4ee
+> 2.7.4
 > 
