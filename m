@@ -1,146 +1,122 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:10018 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756974AbdKGKiU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Nov 2017 05:38:20 -0500
-Subject: Re: [PATCH 2/2] xfs: test for umount hang caused by the pending
- dquota log item in AIL
-References: <1509003472-24191-1-git-send-email-houtao1@huawei.com>
- <1509003472-24191-2-git-send-email-houtao1@huawei.com>
- <20171031064617.GH17339@eguan.usersys.redhat.com>
- <07ce7e5b-2528-f9ff-69a1-5db7a620e846@huawei.com>
- <20171031140041.GO17339@eguan.usersys.redhat.com>
-From: Hou Tao <houtao1@huawei.com>
-Message-ID: <7a1ea7f9-1d24-2fb2-b759-de9bf93f162b@huawei.com>
-Date: Tue, 7 Nov 2017 18:37:55 +0800
+Received: from mail.kernel.org ([198.145.29.99]:56742 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S965341AbdKGP3d (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 7 Nov 2017 10:29:33 -0500
+Subject: Re: [PATCH] generic/392: support to test fallocate
+References: <20171105123935.14702-1-chao@kernel.org>
+ <20171107044817.GH17339@eguan.usersys.redhat.com>
+From: Chao Yu <chao@kernel.org>
+Message-ID: <ceb7b2ed-a054-bee0-b2e6-713c8d58afeb@kernel.org>
+Date: Tue, 7 Nov 2017 23:29:22 +0800
 MIME-Version: 1.0
-In-Reply-To: <20171031140041.GO17339@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="windows-1252"
+In-Reply-To: <20171107044817.GH17339@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
+Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
-
-On 2017/10/31 22:00, Eryu Guan wrote:
-> On Tue, Oct 31, 2017 at 08:34:50PM +0800, Hou Tao wrote:
->> Hi Eryu,
+On 2017/11/7 12:48, Eryu Guan wrote:
+> On Sun, Nov 05, 2017 at 08:39:35PM +0800, Chao Yu wrote:
+>> From: Chao Yu <yuchao0@huawei.com>
 >>
->> Thanks for your detailed review.
+>> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
+>> to recovery isize according to valid block address or preallocated flag
+>> in last fsynced dnode block.
 >>
->> On 2017/10/31 14:46, Eryu Guan wrote:
->>> On Thu, Oct 26, 2017 at 03:37:52PM +0800, Hou Tao wrote:
->>>> When the first writeback and the retried writeback of dquota buffer get
->>>> the same IO error, XFS will let xfsaild to restart the writeback and
->>>> xfs_qm_dqflush_done() will not be invoked. xfsaild will try to re-push
->>>> the quota log item in AIL, the push will return early everytime after
->>>> checking xfs_dqflock_nowait(), and xfsaild will try to push it again.
->>>>
->>>> IOWs, AIL will never be empty, and the umount process will wait for the
->>>> drain of AIL, so the umount process hangs.
->>>>
->>>> Signed-off-by: Hou Tao <houtao1@huawei.com>
->>>
->>> Sorry for the late review. Is there a specific patch or patchset fixed
->>> this bug? I tested on v4.14-rc2 kernel and for-next branch on Darrick's
->>> tree, test survivied multiple runs on both kernels.
->> The problem has not been fixed yet, and Carlos Maiolino is working on the it [1].
->> The pass of the test case is out of my expectation. I had tried it on v4.14-rc6,
->> and the test case hangs on umount.
+>> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
+>> flag, since it can preallocated block cross EOF, once the file is fsynced,
+>> in POR, we will recover isize incorrectly based on these fallocated
+>> blocks.
 >>
->> Have you applied the first patch "[PATCH 1/2] dmflakey: support multiple dm targets
->> for a dm-flakey device" during the test ? If you have applied it, could you show me
->> the full result file of the test case, namely results/xfs/999.full ?
-> 
-> Yes, I applied both of your patches before testing. Test host is a kvm
-> guest with 4 vcpus and 8G mem running v4.14-rc2 kernel. Below is the
-> xfs/999.full
-> 
-> me:              flakey-test
-> State:             ACTIVE
-> Read Ahead:        256
-> Tables present:    LIVE
-> Open count:        0
-> Event number:      0
-> Major, minor:      252, 0
-> Number of targets: 1
-> 
-> flakey-test: 0 31457280 linear 253:6 0
-> MOUNT_OPTIONS =  -o usrquota
-> User quota on /mnt/testarea/scratch (/dev/mapper/flakey-test)
->                         Inodes              
-> User ID      Used   Soft   Hard Warn/Grace  
-> ---------- --------------------------------- 
-> root            3      0      0  00 [------]
-> fsgqa           0    500      0  00 [------]
-> 
-> User quota on /mnt/testarea/scratch (/dev/mapper/flakey-test)
->                         Inodes              
-> User ID      Used   Soft   Hard Warn/Grace  
-> ---------- --------------------------------- 
-> root            3      0      0  00 [------]
-> fsgqa           0    400      0  00 [------]
-> 
-> Name:              flakey-test
-> State:             ACTIVE
-> Read Ahead:        256
-> Tables present:    LIVE
-> Open count:        1
-> Event number:      0
-> Major, minor:      252, 0
-> Number of targets: 3
-> 
-> flakey-test: 0 16777256 flakey 253:6 0 0 1 1 error_writes 
-> flakey-test: 16777256 20480 linear 253:6 16777256
-> flakey-test: 16797736 14659544 flakey 253:6 16797736 0 1 1 error_writes
-> 
-> [snip]
-> 
-
-It's a bit weird that the hang problem doesn't occur on your VM guest. The content
-of xfs/999.full seems OK to me.
-
-One possibility of the non-occurrence is the XFS error handler configurations of
-your environment are not the default ones, namely /sys/fs/xfs/$dev/error/. Could you
-please ensure the configurations are the same as the default ones ?
-
-Another possibility is that the AIL item and CIL item of dquota had been flushed to
-the disk before the injection of the IO error, so the umount exits successfully. To
-fix that race, the test needs to inject the IO error first, then uses xfs_io to modify
-the dquota buffer.
-
->>>> +
->>>> +# inject write IO error
->>>> +FLAKEY_TABLE=$(_make_xfs_scratch_flakey_table)
->>>> +_load_flakey_table $FLAKEY_ALLOW_WRITES
->>>
->>> Set FLAKEY_TABLE_DROP here and call _load_flakey_table with
->>> $FLAKEY_DROP_WRITES
+>> This patch enables generic/392 to test fallocate case, in order to verify
+>> whether filesystem will do incorrect recovery on isize.
 >>
->> No. We need to use the customized table instead of FLAKEY_TABLE_DROP,
->> because we need to let the write return IO error instead of being droppped
->> silently and we need to ensure the write of the log will succeed.
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
 > 
-> I mean something like:
-> 
-> FLAKEY_TABLE_DROP=$(_make_xfs_scratch_flakey_table)
-> _load_flakey_table $FLAKEY_DROP_WRITES
-> 
-> This basically does the same work as your code, but loading a different
-> table var. _load_flakey_table selects FLAKEY_TABLE when first argument
-> is $FLAKEY_ALLOW_WRITES, and selects FLAKEY_TABLE_DROP when the argument
-> is $FLAKEY_DROP_WRITES. And because you're going to error/drop writes,
-> it's weired to load table with $FLAKEY_ALLOW_WRITES.
+> Usually we don't add new sub-tests to existing tests, so new failures
+> introduced by the new sub-tests won't be treated as false regressions.
+> Please add a new test instead. (I notice the new falloc test fails on
+> ext4 too, the allocated block counts changed after power cycle).
 
-Sorry for the misunderstanding. Your suggestion seems better, and i will follow it.
+Ah, make sense to me, I will prepare patch to add a new test.
+
+> 
+>> ---
+>>  tests/generic/392     | 14 ++++++++++++++
+>>  tests/generic/392.out |  6 ++++++
+>>  2 files changed, 20 insertions(+)
+>>
+>> diff --git a/tests/generic/392 b/tests/generic/392
+>> index 6922f7d2..f4ebeb2f 100755
+>> --- a/tests/generic/392
+>> +++ b/tests/generic/392
+>> @@ -125,12 +125,26 @@ test_punch()
+>>  	check_inode_metadata $1
+>>  }
+>>  
+>> +test_falloc()
+>> +{
+>> +	echo "==== falloc $2 test with $1 ====" | tee -a $seqres.full
+>> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
+>> +			-c "pwrite 0 4202496"	\
+>> +			-c "fsync"		\
+>> +			-c "falloc -k 4202496 $2"\
+> 
+> Need to require falloc -k support by
+> 
+> _require_xfs_io_command "falloc" "-k"
+
+Got it, thanks for the reminder.
+
+> 
+> And maybe test falloc without keep_size too?
+
+Agreed, will add. :)
 
 Thanks,
-Tao
 
+> 
 > Thanks,
 > Eryu
 > 
-> .
-> 
-
+>> +			$testfile >/dev/null
+>> +	check_inode_metadata $1
+>> +}
+>> +
+>>  for i in fsync fdatasync; do
+>>  	test_i_size $i 1024
+>>  	test_i_size $i 4096
+>>  	test_i_time $i
+>>  	test_punch $i 1024
+>>  	test_punch $i 4096
+>> +	test_falloc $i 1024
+>> +	test_falloc $i 4096
+>> +	test_falloc $i 104857600
+>>  done
+>>  
+>>  exit
+>> diff --git a/tests/generic/392.out b/tests/generic/392.out
+>> index 5d3330a6..d278bdf9 100644
+>> --- a/tests/generic/392.out
+>> +++ b/tests/generic/392.out
+>> @@ -4,8 +4,14 @@ QA output created by 392
+>>  ==== i_time test with fsync ====
+>>  ==== fpunch 1024 test with fsync ====
+>>  ==== fpunch 4096 test with fsync ====
+>> +==== falloc 1024 test with fsync ====
+>> +==== falloc 4096 test with fsync ====
+>> +==== falloc 104857600 test with fsync ====
+>>  ==== i_size 1024 test with fdatasync ====
+>>  ==== i_size 4096 test with fdatasync ====
+>>  ==== i_time test with fdatasync ====
+>>  ==== fpunch 1024 test with fdatasync ====
+>>  ==== fpunch 4096 test with fdatasync ====
+>> +==== falloc 1024 test with fdatasync ====
+>> +==== falloc 4096 test with fdatasync ====
+>> +==== falloc 104857600 test with fdatasync ====
+>> -- 
+>> 2.14.1.145.gb3622a4ee
+>>
