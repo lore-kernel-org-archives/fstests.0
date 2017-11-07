@@ -1,70 +1,108 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:22629 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751423AbdKGByZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 Nov 2017 20:54:25 -0500
-Date: Mon, 6 Nov 2017 17:54:11 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v3 12/14] generic/204: break out of fs-filling loop early if
- we ENOSPC
-Message-ID: <20171107015411.GA28335@magnolia>
-References: <150957278824.18388.17975162441125293654.stgit@magnolia>
- <150957286222.18388.3253654888670864191.stgit@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:41026 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751763AbdKGEsS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 6 Nov 2017 23:48:18 -0500
+Date: Tue, 7 Nov 2017 12:48:17 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] generic/392: support to test fallocate
+Message-ID: <20171107044817.GH17339@eguan.usersys.redhat.com>
+References: <20171105123935.14702-1-chao@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <150957286222.18388.3253654888670864191.stgit@magnolia>
+In-Reply-To: <20171105123935.14702-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Sun, Nov 05, 2017 at 08:39:35PM +0800, Chao Yu wrote:
+> From: Chao Yu <yuchao0@huawei.com>
+> 
+> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
+> to recovery isize according to valid block address or preallocated flag
+> in last fsynced dnode block.
+> 
+> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
+> flag, since it can preallocated block cross EOF, once the file is fsynced,
+> in POR, we will recover isize incorrectly based on these fallocated
+> blocks.
+> 
+> This patch enables generic/392 to test fallocate case, in order to verify
+> whether filesystem will do incorrect recovery on isize.
+> 
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
 
-Use the available block count to compute the number of files we think
-we can create, rather than hardcoding a particular size.  This fixes
-the ENOSPC failures for xfs filesystems with rmap/reflink support.
+Usually we don't add new sub-tests to existing tests, so new failures
+introduced by the new sub-tests won't be treated as false regressions.
+Please add a new test instead. (I notice the new falloc test fails on
+ext4 too, the allocated block counts changed after power cycle).
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v3: factor in space used for file names
----
- tests/generic/204 |   14 ++++++++++++--
- 1 file changed, 12 insertions(+), 2 deletions(-)
+> ---
+>  tests/generic/392     | 14 ++++++++++++++
+>  tests/generic/392.out |  6 ++++++
+>  2 files changed, 20 insertions(+)
+> 
+> diff --git a/tests/generic/392 b/tests/generic/392
+> index 6922f7d2..f4ebeb2f 100755
+> --- a/tests/generic/392
+> +++ b/tests/generic/392
+> @@ -125,12 +125,26 @@ test_punch()
+>  	check_inode_metadata $1
+>  }
+>  
+> +test_falloc()
+> +{
+> +	echo "==== falloc $2 test with $1 ====" | tee -a $seqres.full
+> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
+> +			-c "pwrite 0 4202496"	\
+> +			-c "fsync"		\
+> +			-c "falloc -k 4202496 $2"\
 
-diff --git a/tests/generic/204 b/tests/generic/204
-index 4c203a2..71bee83 100755
---- a/tests/generic/204
-+++ b/tests/generic/204
-@@ -69,7 +69,7 @@ _scratch_mount
- # work out correctly. Space usages is based 22500 files and 1024 reserve=
-d blocks
- # on a 4k block size 256 byte inode size filesystem.
- resv_blks=3D1024
--space=3D97920000
-+space=3D$(stat -f -c '%f * %S' $SCRATCH_MNT | $BC_PROG)
-=20
- # decrease files for inode size.
- #	22500 * (256 + 4k) =3D ~97MB
-@@ -78,10 +78,20 @@ space=3D97920000
-=20
- files=3D$((space / (isize + dbsize)))
-=20
-+# Now do it again, but factor in the filename sizes too.
-+# We na=EFvely assume 8 bytes for inode number, 1 byte for ftype,
-+# and 1 more byte for namelen, then round up to the nearest 8
-+# bytes.
-+
-+namelen=3D"$(echo -n "$files" | wc -c)"
-+direntlen=3D"$(echo "(10 + $namelen + 7) / 8 * 8" | $BC_PROG)"
-+
-+files=3D$((space / (direntlen + isize + dbsize)))
-+
- echo files $files, resvblks $resv_blks >> $seqres.full
- _scratch_resvblks $resv_blks >> $seqres.full 2>&1
-=20
--for i in `seq 1 $files`; do
-+for i in `seq -w 1 $files`; do
-     echo -n > $SCRATCH_MNT/$i
-     echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX > $SCRATCH_MNT/$i
- done
+Need to require falloc -k support by
+
+_require_xfs_io_command "falloc" "-k"
+
+And maybe test falloc without keep_size too?
+
+Thanks,
+Eryu
+
+> +			$testfile >/dev/null
+> +	check_inode_metadata $1
+> +}
+> +
+>  for i in fsync fdatasync; do
+>  	test_i_size $i 1024
+>  	test_i_size $i 4096
+>  	test_i_time $i
+>  	test_punch $i 1024
+>  	test_punch $i 4096
+> +	test_falloc $i 1024
+> +	test_falloc $i 4096
+> +	test_falloc $i 104857600
+>  done
+>  
+>  exit
+> diff --git a/tests/generic/392.out b/tests/generic/392.out
+> index 5d3330a6..d278bdf9 100644
+> --- a/tests/generic/392.out
+> +++ b/tests/generic/392.out
+> @@ -4,8 +4,14 @@ QA output created by 392
+>  ==== i_time test with fsync ====
+>  ==== fpunch 1024 test with fsync ====
+>  ==== fpunch 4096 test with fsync ====
+> +==== falloc 1024 test with fsync ====
+> +==== falloc 4096 test with fsync ====
+> +==== falloc 104857600 test with fsync ====
+>  ==== i_size 1024 test with fdatasync ====
+>  ==== i_size 4096 test with fdatasync ====
+>  ==== i_time test with fdatasync ====
+>  ==== fpunch 1024 test with fdatasync ====
+>  ==== fpunch 4096 test with fdatasync ====
+> +==== falloc 1024 test with fdatasync ====
+> +==== falloc 4096 test with fdatasync ====
+> +==== falloc 104857600 test with fdatasync ====
+> -- 
+> 2.14.1.145.gb3622a4ee
+> 
