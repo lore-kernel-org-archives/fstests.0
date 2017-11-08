@@ -1,132 +1,41 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45110 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750985AbdKHEKL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 7 Nov 2017 23:10:11 -0500
-Date: Wed, 8 Nov 2017 12:10:08 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/7] open_by_handle: test file handles of renamed files
-Message-ID: <20171108041008.GL17339@eguan.usersys.redhat.com>
-References: <1509617739-15744-1-git-send-email-amir73il@gmail.com>
- <1509617739-15744-3-git-send-email-amir73il@gmail.com>
+Received: from mgwkm03.jp.fujitsu.com ([202.219.69.170]:43451 "EHLO
+        mgwkm03.jp.fujitsu.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750917AbdKHEiW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 Nov 2017 23:38:22 -0500
+From: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>
+Subject: [PATCH] fstests: btrfs: add 'zstd' to compress property filter
+Message-ID: <be482613-1e30-d59b-98dc-b882a2df1b0d@jp.fujitsu.com>
+Date: Wed, 8 Nov 2017 13:27:00 +0900
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1509617739-15744-3-git-send-email-amir73il@gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 02, 2017 at 12:15:34PM +0200, Amir Goldstein wrote:
-> usage: open_by_handle -m <test_dir> [N]
-> 
-> Get file handles for existing test set, rename all test files,
-> drop cache and try to open all files by handle.
-> 
-> This is needed for testing that overlayfs can find the upper
-> inode from lower file handle even when upper is not in the same
-> path as lower.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  src/open_by_handle.c | 31 ++++++++++++++++++++++++++-----
->  1 file changed, 26 insertions(+), 5 deletions(-)
-> 
-> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> index 52973c6..8b12df3 100644
-> --- a/src/open_by_handle.c
-> +++ b/src/open_by_handle.c
-> @@ -27,7 +27,7 @@
->  
->  /*
->  
-> -usage: open_by_handle [-c|-l|-u|-d] <test_dir> [num_files]
-> +usage: open_by_handle [-cludm] <test_dir> [num_files]
->  
->  Examples:
->  
-> @@ -48,7 +48,12 @@ Examples:
->  
->     open_by_handle -d <test_dir> [N]
->  
-> -4. Get file handles for existing test set, hardlink all test files,
-> +4. Get file handles for existing test set, rename all test files,
-> +   drop caches, try to open all files by handle (should work):
-> +
-> +   open_by_handle -m <test_dir> [N]
-> +
-> +5. Get file handles for existing test set, hardlink all test files,
->     then unlink the original files, drop caches and try to open all
->     files by handle (should work):
->  
-> @@ -84,13 +89,14 @@ struct handle {
->  
->  void usage(void)
->  {
-> -	fprintf(stderr, "usage: open_by_handle [-c|-l|-u|-d] <test_dir> [num_files]\n");
-> +	fprintf(stderr, "usage: open_by_handle [-cludm] <test_dir> [num_files]\n");
->  	fprintf(stderr, "\n");
->  	fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
->  	fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -l <test_dir> [N] - create hardlinks to test files, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -u <test_dir> [N] - unlink (hardlinked) test files, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -d <test_dir> [N] - unlink test files and hardlinks, drop caches and try to open by handle\n");
-> +	fprintf(stderr, "open_by_handle -m <test_dir> [N] - rename test files, drop caches and try to open by handle\n");
->  	exit(EXIT_FAILURE);
->  }
->  
-> @@ -105,12 +111,12 @@ int main(int argc, char **argv)
->  	char	*test_dir;
->  	int	mount_fd, mount_id;
->  	int	numfiles = 1;
-> -	int	create = 0, delete = 0, nlink = 1;
-> +	int	create = 0, delete = 0, nlink = 1, move = 0;
->  
->  	if (argc < 2 || argc > 4)
->  		usage();
->  
-> -	while ((c = getopt(argc, argv, "clud")) != -1) {
-> +	while ((c = getopt(argc, argv, "cludm")) != -1) {
->  		switch (c) {
->  		case 'c':
->  			create = 1;
-> @@ -126,6 +132,9 @@ int main(int argc, char **argv)
->  			delete = 1;
->  			nlink = 0;
->  			break;
-> +		case 'm':
-> +			move = 1;
-> +			break;
->  		default:
->  			fprintf(stderr, "illegal option '%s'\n", argv[optind]);
->  		case 'h':
-> @@ -201,6 +210,18 @@ int main(int argc, char **argv)
->  		}
->  	}
->  
-> +	/* rename the files */
-> +	for (i=0; move && i < numfiles; i++) {
-> +		sprintf(fname, "%s/file%06d", test_dir, i);
-> +		sprintf(fname2, "%s/link%06d", test_dir, i);
+This fixes the false failure of btrfs/059 when running with the 
+mount option '-o compress=zstd'.
 
-Should we choose another prefix for moved files? "link" is used for
-hardlink files already, use something like "move"? (I can fix it up if
-you agree to do so.)
+Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
+---
+ common/filter.btrfs | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Thanks,
-Eryu
+diff --git a/common/filter.btrfs b/common/filter.btrfs
+index 0cf7f0d3..aaff2278 100644
+--- a/common/filter.btrfs
++++ b/common/filter.btrfs
+@@ -69,7 +69,7 @@ _filter_btrfs_subvol_delete()
+ 
+ _filter_btrfs_compress_property()
+ {
+-	sed -e "s/compression=\(lzo\|zlib\)/COMPRESSION=XXX/g"
++	sed -e "s/compression=\(lzo\|zlib\|zstd\)/COMPRESSION=XXX/g"
+ }
+ 
+ # filter error messages from btrfs prop, optionally verify against $1
+-- 
+2.13.6
 
-> +		ret = rename(fname, fname2);
-> +		if (ret < 0) {
-> +			strcat(fname2, ": rename");
-> +			perror(fname2);
-> +			return EXIT_FAILURE;
-> +		}
-> +	}
-> +
->  	/* unlink the files */
->  	for (i=0; delete && i < numfiles; i++) {
->  		sprintf(fname, "%s/file%06d", test_dir, i);
-> -- 
-> 2.7.4
-> 
