@@ -1,11 +1,13 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:53837 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:53840 "EHLO huawei.com"
         rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751111AbdKHH5I (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1751040AbdKHH5I (ORCPT <rfc822;fstests@vger.kernel.org>);
         Wed, 8 Nov 2017 02:57:08 -0500
 From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH v2 0/4] test for XFS umount hang caused by the pending dquota log item in AIL
-Date: Wed, 8 Nov 2017 16:02:46 +0800
-Message-ID: <20171108080250.5662-1-houtao1@huawei.com>
+Subject: [PATCH v2 2/4] common/rc: support checking the version of dm-target in _require_dm_target()
+Date: Wed, 8 Nov 2017 16:02:48 +0800
+Message-ID: <20171108080250.5662-3-houtao1@huawei.com>
+In-Reply-To: <20171108080250.5662-1-houtao1@huawei.com>
+References: <20171108080250.5662-1-houtao1@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,72 +15,75 @@ To: fstests@vger.kernel.org
 Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+Some features of dm-target are not available on the old linux kernel,
+and we can use the version of dm-target to check the availability.
 
-This is the v2 patchset for testing the XFS umount hang problem caused by
-the pending dquota log item in AIL. The problem has not been fixed in
-XFS yet, and Carlos Maiolino is working on it [1]. I had tested
-it on 4.14-rc7, and the problem can be reproduced reliably.
-
-Changes since v1:
-* dmflakey: support multiple dm targets for a dm-flakey device
-	* no update
-
-* xfs: test for umount hang caused by the pending dquota log item in AIL
-	* a bunch of suggestions from Eryu Guan
-	* update the dquota buffer after the error injection to better
-	  reproduce the problem
-
-* common/rc: support checking the version of dm-target in
-_require_dm_target()
-	* new patch
-	* introduce a way to check the availability of error_write feature
-	in dm-flakey target, and accomplish it by checking the version of
-	dm-target.
-
-* common/rc: factor out _get|set_xfs_scratch_sb_field()
-	* new patch
-	* the modified test cases had been tested after applying the patch:
-	(1) xfs/098 failed, but the failure has nothing to do with the patch
-	(2) xfs/339 and xfs/340 were not runnable, because rtdev + rmap is not
-	  supported now.
-	(3) the remaing test cases passed
-
-v1:
-	* https://www.spinics.net/lists/fstests/msg07622.html
-
-Comments and questions are welcome.
-
-Regards,
-Tao
-
-[1]: https://www.spinics.net/lists/linux-xfs/msg11614.html
+Signed-off-by: Hou Tao <houtao1@huawei.com>
 ---
-Hou Tao (4):
-  dmflakey: support multiple dm targets for a dm-flakey device
-  common/rc: support checking the version of dm-target in
-    _require_dm_target()
-  xfs: test for umount hang caused by the pending dquota log item in AIL
-  common/rc: factor out _get|set_xfs_scratch_sb_field()
+ common/rc | 39 ++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 34 insertions(+), 5 deletions(-)
 
- common/dmflakey   |   2 +-
- common/rc         |  39 +++++++++++--
- common/xfs        |  20 +++++++
- tests/xfs/007     |   6 +-
- tests/xfs/098     |   4 +-
- tests/xfs/186     |   3 +-
- tests/xfs/199     |  13 ++---
- tests/xfs/307     |  11 +---
- tests/xfs/308     |  11 +---
- tests/xfs/339     |   6 +-
- tests/xfs/340     |   2 +-
- tests/xfs/999     | 163 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out |   2 +
- tests/xfs/group   |   1 +
- 14 files changed, 238 insertions(+), 45 deletions(-)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
-
+diff --git a/common/rc b/common/rc
+index e2a8229..9ea84ba 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1779,10 +1779,12 @@ _require_sane_bdev_flush()
+ 	fi
+ }
+ 
+-# this test requires a specific device mapper target
++# this test requires a specific device mapper target and
++# an optional version number (e.g., 1.4.0)
+ _require_dm_target()
+ {
+-	_target=$1
++	local target=$1
++	local version=$2
+ 
+ 	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
+ 	# behaviour
+@@ -1790,11 +1792,38 @@ _require_dm_target()
+ 	_require_sane_bdev_flush $SCRATCH_DEV
+ 	_require_command "$DMSETUP_PROG" dmsetup
+ 
+-	modprobe dm-$_target >/dev/null 2>&1
++	modprobe dm-$target >/dev/null 2>&1
+ 
+-	$DMSETUP_PROG targets 2>&1 | grep -q ^$_target
++	$DMSETUP_PROG targets 2>&1 | grep -q ^$target
+ 	if [ $? -ne 0 ]; then
+-		_notrun "This test requires dm $_target support"
++		_notrun "This test requires dm $target support"
++	fi
++
++	if [ -n "$version" ]; then
++		local got
++
++		got=$($DMSETUP_PROG targets 2>&1 | \
++				awk -v tgt=$target '$0 ~ tgt {sub("v", "", $2); print $2}')
++		if [ -z "$got" ]; then
++			_notrun "This test requires dm $target $version at least (got unknown)"
++		fi
++
++		awk -v min=$version -v got=$got '
++		BEGIN \
++		{
++			cmin = split(min, amin, ".");
++			cgot = split(got, agot, ".");
++			for (i = 1; i <= cgot && i <= cmin; i++) {
++				if (agot[i] != amin[i]) {
++					exit(agot[i] < amin[i]);
++				}
++			}
++			exit(cgot < cmin);
++		}
++		'
++		if [ $? -ne 0 ]; then
++			_notrun "This test requires dm $target $version at least (got $got)"
++		fi
+ 	fi
+ }
+ 
 -- 
 2.9.5
 
