@@ -1,346 +1,66 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:10041 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752650AbdKIH0h (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 Nov 2017 02:26:37 -0500
-From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH v3 4/4] common/rc: factor out _scratch_xfs_[get|set]_sb_field
-Date: Thu, 9 Nov 2017 15:32:52 +0800
-Message-ID: <20171109073252.36001-5-houtao1@huawei.com>
-In-Reply-To: <20171109073252.36001-1-houtao1@huawei.com>
-References: <20171109073252.36001-1-houtao1@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.redhat.com ([209.132.183.28]:45948 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753144AbdKIIJG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 9 Nov 2017 03:09:06 -0500
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 5774C85A02
+        for <fstests@vger.kernel.org>; Thu,  9 Nov 2017 08:09:06 +0000 (UTC)
+Received: from dhcp-12-148.nay.redhat.com (dhcp-12-148.nay.redhat.com [10.66.12.148])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 4592760BE3
+        for <fstests@vger.kernel.org>; Thu,  9 Nov 2017 08:09:05 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic/252: fix aiocp buffer alignment
+Date: Thu,  9 Nov 2017 16:09:01 +0800
+Message-Id: <20171109080901.11214-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-It's common to get and set the values of fields in XFS super block,
-so factor them out as scratch_xfs_[get|set]_sb_field, reimplement
-them based on _scratch_xfs_[get|set]_metadata_field, and update the
-related test cases accordingly.
+g/252 fails on 4k hard sector size disk, due to aiocp.c use 512
+bytes alignment by default. So use the '-a' option of aiocp, to
+specify a proper alignment size.
 
-Also move _scratch_xfs_[get|set]_metadata_field from common/fuzzy
-to common/xfs.
-
-Signed-off-by: Hou Tao <houtao1@huawei.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- common/fuzzy  | 33 ---------------------------------
- common/xfs    | 47 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/007 |  6 ++----
- tests/xfs/098 |  4 ++--
- tests/xfs/186 |  3 +--
- tests/xfs/199 | 13 ++++---------
- tests/xfs/307 | 11 ++---------
- tests/xfs/308 | 11 ++---------
- tests/xfs/339 |  6 +++---
- tests/xfs/340 |  2 +-
- tests/xfs/999 | 14 +++-----------
- 11 files changed, 67 insertions(+), 83 deletions(-)
 
-diff --git a/common/fuzzy b/common/fuzzy
-index 8453c29..9642809 100644
---- a/common/fuzzy
-+++ b/common/fuzzy
-@@ -120,39 +120,6 @@ _scratch_xfs_list_metadata_fields() {
- 	_scratch_xfs_db "${cmds[@]}" -c print | __filter_xfs_db_print_fields "${filter}"
- }
+Test this patch with below sector size:
+TEST_DEV       SCRATCH_DEV
+4k             4k
+4k             512
+512            4k
+512            512
+
+All passed.
+
+Thanks,
+Zorro
+
+ tests/generic/252 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tests/generic/252 b/tests/generic/252
+index ffedd569..418465b0 100755
+--- a/tests/generic/252
++++ b/tests/generic/252
+@@ -69,6 +69,7 @@ nr=640
+ bufnr=128
+ filesize=$((blksz * nr))
+ bufsize=$((blksz * bufnr))
++alignment=`_min_dio_alignment $TEST_DEV`
  
--# Get a metadata field
--# The first arg is the field name
--# The rest of the arguments are xfs_db commands to find the metadata.
--_scratch_xfs_get_metadata_field() {
--	key="$1"
--	shift
--
--	grep_key="$(echo "${key}" | tr '[]()' '....')"
--	local cmds=()
--	for arg in "$@"; do
--		cmds+=("-c" "${arg}")
--	done
--	_scratch_xfs_db "${cmds[@]}" -c "print ${key}" | grep "^${grep_key}" | \
--		sed -e 's/^.* = //g'
--}
--
--# Set a metadata field
--# The first arg is the field name
--# The second arg is the new value
--# The rest of the arguments are xfs_db commands to find the metadata.
--_scratch_xfs_set_metadata_field() {
--	key="$1"
--	value="$2"
--	shift; shift
--
--	local cmds=()
--	for arg in "$@"; do
--		cmds+=("-c" "${arg}")
--	done
--	_scratch_xfs_db -x "${cmds[@]}" -c "write -d ${key} ${value}"
--	echo
--}
--
- # Fuzz a metadata field
- # The first arg is the field name
- # The second arg is the xfs_db fuzz verb
-diff --git a/common/xfs b/common/xfs
-index d4fef94..0509760 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -599,3 +599,50 @@ _require_no_xfs_debug()
- 		_notrun "Require XFS built without CONFIG_XFS_DEBUG"
- 	fi
- }
-+
-+# Get a metadata field
-+# The first arg is the field name
-+# The rest of the arguments are xfs_db commands to find the metadata.
-+_scratch_xfs_get_metadata_field()
-+{
-+	local key="$1"
-+	shift
-+
-+	local grep_key="$(echo "${key}" | tr '[]()' '....')"
-+	local cmds=()
-+	local arg
-+	for arg in "$@"; do
-+		cmds+=("-c" "${arg}")
-+	done
-+	_scratch_xfs_db "${cmds[@]}" -c "print ${key}" | grep "^${grep_key}" | \
-+		sed -e 's/^.* = //g'
-+}
-+
-+# Set a metadata field
-+# The first arg is the field name
-+# The second arg is the new value
-+# The rest of the arguments are xfs_db commands to find the metadata.
-+_scratch_xfs_set_metadata_field()
-+{
-+	local key="$1"
-+	local value="$2"
-+	shift; shift
-+
-+	local cmds=()
-+	local arg
-+	for arg in "$@"; do
-+		cmds+=("-c" "${arg}")
-+	done
-+	_scratch_xfs_db -x "${cmds[@]}" -c "write -d ${key} ${value}"
-+	echo
-+}
-+
-+_scratch_xfs_get_sb_field()
-+{
-+	_scratch_xfs_get_metadata_field "$1" "sb 0"
-+}
-+
-+_scratch_xfs_set_sb_field()
-+{
-+	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
-+}
-diff --git a/tests/xfs/007 b/tests/xfs/007
-index d80d380..215bd1d 100755
---- a/tests/xfs/007
-+++ b/tests/xfs/007
-@@ -62,10 +62,8 @@ do_test()
- 	echo "*** umount"
- 	_scratch_unmount
+ _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 5 / 4))
  
--	QINO_1=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
--			grep $qino_1 | awk '{print $NF}'`
--	QINO_2=`xfs_db -c "sb 0" -c "p" $SCRATCH_DEV | \
--			grep $qino_2 | awk '{print $NF}'`
-+	QINO_1=`_scratch_xfs_get_sb_field $qino_1`
-+	QINO_2=`_scratch_xfs_get_sb_field $qino_2`
- 
- 	echo "*** Usage before quotarm ***"
- 	_scratch_xfs_db -c "inode $QINO_1" -c "p core.nblocks"
-diff --git a/tests/xfs/098 b/tests/xfs/098
-index 7873f32..9bcd94b 100755
---- a/tests/xfs/098
-+++ b/tests/xfs/098
-@@ -96,9 +96,9 @@ echo "+ check fs"
- _scratch_xfs_repair -n >> $seqres.full 2>&1 || _fail "xfs_repair should not fail"
- 
- echo "+ corrupt image"
--logstart="$(_scratch_xfs_db -c 'sb 0' -c 'p' | grep '^logstart =' | cut -d ' ' -f 3)"
-+logstart="$(_scratch_xfs_get_sb_field logstart)"
- logstart="$(_scratch_xfs_db -c "convert fsblock ${logstart} byte" | sed -e 's/^.*(\([0-9]*\).*$/\1/g')"
--logblocks="$(xfs_db -c 'sb 0' -c 'p' "${SCRATCH_DEV}" | grep '^logblocks =' | cut -d ' ' -f 3)"
-+logblocks="$(_scratch_xfs_get_sb_field logblocks)"
- $XFS_IO_PROG -f -c "pwrite -S 0x62 ${logstart} $((logblocks * blksz))" "${SCRATCH_DEV}" >> $seqres.full
- 
- echo "+ mount image"
-diff --git a/tests/xfs/186 b/tests/xfs/186
-index 4b36ae6..a4527ed 100755
---- a/tests/xfs/186
-+++ b/tests/xfs/186
-@@ -173,8 +173,7 @@ fi
- 
- # set inum to root dir ino
- # we'll add in dirents and EAs into the root directory
--eval `_scratch_xfs_db -r -c 'sb 0' -c 'p rootino' | $SED_PROG 's/ //g'`
--inum=$rootino
-+inum=`_scratch_xfs_get_sb_field rootino`
- fork_dir=$SCRATCH_MNT
- _print_inode
- 
-diff --git a/tests/xfs/199 b/tests/xfs/199
-index ee26439..a0f48ad 100755
---- a/tests/xfs/199
-+++ b/tests/xfs/199
-@@ -49,11 +49,6 @@ _supported_os Linux
- 
- _require_scratch
- 
--get_features()
--{
--	_scratch_xfs_db -x  -c "sb" -c "print $1" | awk '// {print $3}'
--}
--
- # clear any mkfs options so that we can directly specify the options we need to
- # be able to test the features bitmask behaviour correctly.
- MKFS_OPTIONS=
-@@ -63,8 +58,8 @@ _scratch_mkfs_xfs -m crc=0 -l lazy-count=1 >/dev/null 2>&1
- # gives us the values the resultant tests should be the same as for testing at
- # the end of the test. We don't hard code feature values, because that makes the
- # test break every time we change mkfs feature defaults.
--f2=`get_features features2`
--bf2=`get_features bad_features2`
-+f2=`_scratch_xfs_get_sb_field features2`
-+bf2=`_scratch_xfs_get_sb_field bad_features2`
- 
- #
- # Now clear the normal flags
-@@ -74,7 +69,7 @@ _scratch_xfs_db -x  -c 'sb' -c 'write features2 0'
- 
- _scratch_mount
- _scratch_unmount
--rwf2=`get_features features2`
-+rwf2=`_scratch_xfs_get_sb_field features2`
- 
- #
- # Clear the normal flags again for the second rount.
-@@ -88,7 +83,7 @@ _scratch_xfs_db -x  -c 'sb' -c 'write features2 0'
- _scratch_mount -o ro
- _scratch_mount -o remount,rw
- _scratch_unmount
--rof2=`get_features features2`
-+rof2=`_scratch_xfs_get_sb_field features2`
- 
- [ "$f2" != "$bf2" ] && echo "mkfs: features2 $f2 != bad_features2 $bf2"
- [ "$f2" != "$rwf2" ] && echo "mount rw: old features2 $f2 != new features2 $rwf2"
-diff --git a/tests/xfs/307 b/tests/xfs/307
-index 4ce3e66..d829524 100755
---- a/tests/xfs/307
-+++ b/tests/xfs/307
-@@ -71,18 +71,11 @@ _set_agf_data() {
- }
- 
- _get_sb_data() {
--	field="$1"
--	shift
--
--	_scratch_xfs_db -c 'sb 0' "$@" -c "p $field"  | awk '{print $3}'
-+	_scratch_xfs_get_sb_field "$@"
- }
- 
- _set_sb_data() {
--	field="$1"
--	value="$2"
--	shift; shift
--
--	_scratch_xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value"  >> $seqres.full
-+	_scratch_xfs_set_sb_field "$@" >> $seqres.full
- }
- 
- _filter_leftover() {
-diff --git a/tests/xfs/308 b/tests/xfs/308
-index e9d7f76..7e7adac 100755
---- a/tests/xfs/308
-+++ b/tests/xfs/308
-@@ -71,18 +71,11 @@ _set_agf_data() {
- }
- 
- _get_sb_data() {
--	field="$1"
--	shift
--
--	_scratch_xfs_db -c 'sb 0' "$@" -c "p $field"  | awk '{print $3}'
-+	_scratch_xfs_get_sb_field "$@"
- }
- 
- _set_sb_data() {
--	field="$1"
--	value="$2"
--	shift; shift
--
--	_scratch_xfs_db -x -c 'sb 0' "$@" -c "write $field -- $value"  >> $seqres.full
-+	_scratch_xfs_set_sb_field "$@" >> $seqres.full
- }
- 
- _filter_leftover() {
-diff --git a/tests/xfs/339 b/tests/xfs/339
-index 734d47b..78b714f 100755
---- a/tests/xfs/339
-+++ b/tests/xfs/339
-@@ -59,9 +59,9 @@ ln $SCRATCH_MNT/f3 $SCRATCH_MNT/f4
- _scratch_unmount
- 
- echo "Corrupt fs"
--rrmapino=$(_scratch_xfs_db -c 'sb 0' -c 'p rrmapino' | awk '{print $3}')
--_scratch_xfs_db -x -c 'sb 0' -c 'addr rootino' \
--	-c "write u3.sfdir3.list[3].inumber.i4 $rrmapino" >> $seqres.full
-+rrmapino=`_scratch_xfs_get_sb_field rrmapino`
-+_scratch_xfs_set_metadata_field "u3.sfdir3.list[3].inumber.i4" $rrmapino \
-+	'sb 0' 'addr rootino' >> $seqres.full
- _scratch_mount
- 
- echo "Check files"
-diff --git a/tests/xfs/340 b/tests/xfs/340
-index 8cc50a2..7b1b7d1 100755
---- a/tests/xfs/340
-+++ b/tests/xfs/340
-@@ -59,7 +59,7 @@ ino=$(stat -c '%i' $SCRATCH_MNT/f3)
- _scratch_unmount
- 
- echo "Corrupt fs"
--rrmapino=$(_scratch_xfs_db -c 'sb 0' -c 'p rrmapino' | awk '{print $3}')
-+rrmapino=$(_scratch_xfs_get_sb_field rrmapino)
- _scratch_xfs_db -x -c "inode $rrmapino" \
- 	-c 'write core.format 2' -c 'write core.size 0' \
- 	-c 'write core.nblocks 0' -c 'sb 0' -c 'addr rootino' \
-diff --git a/tests/xfs/999 b/tests/xfs/999
-index 22f7ba3..2b0b1e5 100755
---- a/tests/xfs/999
-+++ b/tests/xfs/999
-@@ -51,14 +51,6 @@ _cleanup()
- 	_cleanup_flakey > /dev/null 2>&1
- }
- 
--get_xfs_scratch_sb_field()
--{
--	local field=$1
--
--	_scratch_xfs_db -r -c "sb 0" -c "print $field" | \
--	awk -v field=$field '$0 ~ field {print $3}'
--}
--
- # inject IO write error for the XFS filesystem except its log section
- make_xfs_scratch_flakey_table()
- {
-@@ -72,9 +64,9 @@ make_xfs_scratch_flakey_table()
- 		return
- 	fi
- 
--	local blk_sz=$(get_xfs_scratch_sb_field blocksize)
--	local log_ofs=$(get_xfs_scratch_sb_field logstart)
--	local log_sz=$(get_xfs_scratch_sb_field logblocks)
-+	local blk_sz=$(_scratch_xfs_get_sb_field blocksize)
-+	local log_ofs=$(_scratch_xfs_get_sb_field logstart)
-+	local log_sz=$(_scratch_xfs_get_sb_field logblocks)
- 	local table=""
- 	local ofs=0
- 	local sz
+@@ -85,7 +86,7 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
+ $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
+ sync
+ _dmerror_load_error_table
+-$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
++$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
+ _dmerror_load_working_table
+ _dmerror_unmount
+ _dmerror_mount
 -- 
-2.9.5
+2.13.6
 
