@@ -1,65 +1,42 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60036 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:33906 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755546AbdKJD5y (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 9 Nov 2017 22:57:54 -0500
+        id S1755871AbdKJEyq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 9 Nov 2017 23:54:46 -0500
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 01F14C058EB0
+        for <fstests@vger.kernel.org>; Fri, 10 Nov 2017 04:54:46 +0000 (UTC)
+Date: Fri, 10 Nov 2017 12:54:44 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v2] fstests: do not call _scratch_mkfs_sized in a pipe
-Date: Fri, 10 Nov 2017 11:57:49 +0800
-Message-Id: <20171110035749.8304-1-eguan@redhat.com>
+Subject: Re: [PATCH] generic/252: fix aiocp buffer alignment
+Message-ID: <20171110045444.GA17339@eguan.usersys.redhat.com>
+References: <20171109080901.11214-1-zlang@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171109080901.11214-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Eryu Guan <eguan@redhat.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_scratch_mkfs_sized will create a filesystem of the given size, and
-call _notrun and exit if current $FSTYP doesn't support sized mkfs.
-But when it's called in a pipe, the exit in _notrun only exits from
-the subshell created by the pipe not the test itself, and test
-continues to run unnecessarily, though the test is still reported as
-[notrun] due to existence of $seqres.notrun file.
+On Thu, Nov 09, 2017 at 04:09:01PM +0800, Zorro Lang wrote:
+> g/252 fails on 4k hard sector size disk, due to aiocp.c use 512
+> bytes alignment by default. So use the '-a' option of aiocp, to
+> specify a proper alignment size.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Fix it by not calling _scratch_mkfs_sized in a pipe, but dumping the
-output to a tmp file, which will be fed to _filter_mkfs later.
+There're other tests that calls aiocp with direct I/O, I think they can
+be fixed too in one patch.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v2:
-- fix xfs/015 as well
-- update commit log a bit
+$ grep -H DIRECT `grep aiocp tests/* -rI | cut -d: -f1 | sort | uniq`
+tests/generic/252:$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
+tests/generic/329:$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
+tests/generic/330:$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
+tests/xfs/237:$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
+tests/xfs/239:$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
 
- tests/generic/204 | 4 ++--
- tests/xfs/015     | 3 ++-
- 2 files changed, 4 insertions(+), 3 deletions(-)
-
-diff --git a/tests/generic/204 b/tests/generic/204
-index 4c203a213f5b..ebc9c0fa001b 100755
---- a/tests/generic/204
-+++ b/tests/generic/204
-@@ -58,8 +58,8 @@ _scratch_mkfs 2> /dev/null | _filter_mkfs 2> $tmp.mkfs > /dev/null
- [ $FSTYP = "xfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -l size=16m -i maxpct=50"
- 
- SIZE=`expr 115 \* 1024 \* 1024`
--_scratch_mkfs_sized $SIZE $dbsize 2> /dev/null \
--		| _filter_mkfs 2> $tmp.mkfs > /dev/null
-+_scratch_mkfs_sized $SIZE $dbsize 2> /dev/null > $tmp.mkfs.raw
-+cat $tmp.mkfs.raw | _filter_mkfs 2> $tmp.mkfs > /dev/null
- _scratch_mount
- 
- # Source $tmp.mkfs to get geometry
-diff --git a/tests/xfs/015 b/tests/xfs/015
-index 55666a8e3473..2c57f7882308 100755
---- a/tests/xfs/015
-+++ b/tests/xfs/015
-@@ -74,7 +74,8 @@ _scratch_unmount
- 
- rm -f $seqres.full
- 
--_scratch_mkfs_sized $((16 * 1024 * 1024)) | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-+_scratch_mkfs_sized $((16 * 1024 * 1024)) > $tmp.mkfs.raw
-+cat $tmp.mkfs.raw | _filter_mkfs >$seqres.full 2>$tmp.mkfs
- # get original data blocks number and agcount
- . $tmp.mkfs
- _scratch_mount
--- 
-2.13.6
-
+Thanks,
+Eryu
