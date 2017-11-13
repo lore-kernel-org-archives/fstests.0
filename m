@@ -1,264 +1,314 @@
-Received: from mx2.suse.de ([195.135.220.15]:33512 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753407AbdKMPuf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 13 Nov 2017 10:50:35 -0500
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v3 2/2] xfs: initial fiemap range query test
-Date: Mon, 13 Nov 2017 17:50:29 +0200
-Message-Id: <1510588229-6079-2-git-send-email-nborisov@suse.com>
-In-Reply-To: <1510588229-6079-1-git-send-email-nborisov@suse.com>
-References: <1510588073-5665-1-git-send-email-nborisov@suse.com>
- <1510588229-6079-1-git-send-email-nborisov@suse.com>
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:50231 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754172AbdKMRr5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Nov 2017 12:47:57 -0500
+MIME-Version: 1.0
+In-Reply-To: <20171113144527.1034-2-chandan@linux.vnet.ibm.com>
+References: <20171113144527.1034-1-chandan@linux.vnet.ibm.com> <20171113144527.1034-2-chandan@linux.vnet.ibm.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 13 Nov 2017 19:47:55 +0200
+Message-ID: <CAOQ4uxj6kLdqdzukFU1JciwmpBmKS7j5pEnbFH2fjfMf7rfBcQ@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay: Test consistent st_ino numbers for
+ non-samefs scenario
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, eguan@redhat.com, david@fromorbit.com, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
+On Mon, Nov 13, 2017 at 4:45 PM, Chandan Rajendra
+<chandan@linux.vnet.ibm.com> wrote:
+> This commit adds a test to verify consistent st_ino feature when
+> the overlayfs instance is composed of two different underlying
+> filesystem instances.
+>
+> For example,
+> $ mount -t xfs /dev/loop0 /mnt/test
+> $ mount -t xfs /dev/loop1 /mnt/scratch
+> $ mkdir /mnt/scratch/upper
+> $ mkdir /mnt/scratch/work
+> $ mount -t overlay overlay -o lowerdir=/mnt/test \
+>         -o upperdir=/mnt/scratch/upper \
+>         -o workdir=/mnt/scratch/work /mnt/merge
+>
+> The goal of this test is to verify that overlayfs returns consistent
+> st_ino for the following scenarios,
+> - Copy-up of lowerdir files
+> - Rename files and drop dentry/inode cache
+> - Remount the overlayfs instance
+>
+> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> ---
+> Eryu,
+> To pass, This test requires Amir's "Overlayfs: constant st_ino/d_ino for
+> non-samefs" patchset. But this patch can be merged as it indicates an
+> incorrect behaviour by overlayfs code as presently available on
+> upstream kernel.
+>
+>  tests/overlay/043     | 197 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/043.out |   2 +
+>  tests/overlay/group   |   1 +
+>  3 files changed, 200 insertions(+)
+>  create mode 100755 tests/overlay/043
+>  create mode 100644 tests/overlay/043.out
+>
+> diff --git a/tests/overlay/043 b/tests/overlay/043
+> new file mode 100755
+> index 0000000..2b3c1c2
+> --- /dev/null
+> +++ b/tests/overlay/043
+> @@ -0,0 +1,197 @@
+> +#! /bin/bash
+> +# FSQA Test No. 043
+> +#
+> +# Test constant inode numbers on non-samefs setup
+> +# This is a variant of overlay/017 to test constant st_ino numbers for
+> +# non-samefs setup.
+> +#
+> +# This simple test demonstrates a known issue with overlayfs:
+> +# - stat file A shows inode number X
+> +# - modify A to trigger copy up
+> +# - stat file A shows inode number Y != X
+> +#
+> +# Test if inode numbers of all file types persist after copy-up. For
+> +# non-dirs, test if inode numbers persist after rename, drop caches
+> +# and mount cycle.
+> +#
+> +# With 'xino' mount option enabled, test if d_ino of readdir entries changes
+> +# after copy up and if inode numbers persist after rename, drop caches and
+> +# mount cycle.
+> +#
 
-V3: 
- * Added tests for -r parameter error handling
- tests/xfs/900     |  98 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/900.out | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 222 insertions(+)
- create mode 100755 tests/xfs/900
- create mode 100644 tests/xfs/900.out
+There are 2 ways we can do this IMO:
+1. require that xino mount option is supported and force enable xino on
+    _overlay_scratch_mount_dirs
+2. Let the test check what it is meant to test regardless of mount options
+    provided by user, so test will fail (as in real setups) with no
+xino mount option
 
-diff --git a/tests/xfs/900 b/tests/xfs/900
-new file mode 100755
-index 0000000..570f7d6
---- /dev/null
-+++ b/tests/xfs/900
-@@ -0,0 +1,98 @@
-+#! /bin/bash
-+# FS QA Test No. 900
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Nikolay Borisov <nborisov@suse.com>
-+#
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/punch
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fiemap" "-r 0 4k"
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount || _fail "mount failure"
-+
-+file=$SCRATCH_MNT/testfile
-+$XFS_IO_PROG -f -c "falloc 0 256k" $file 
-+for i in {0..31}; do $XFS_IO_PROG -c "fpunch $(($i*8))k 4k" $file; done
-+
-+# Query 1 data extent between 4k..8k range
-+echo "Basic data extent"
-+$XFS_IO_PROG -c "fiemap -v -r 4k 4k" $file | _filter_fiemap 
-+
-+# Query data and hole extent
-+echo "Data + Hole"
-+$XFS_IO_PROG -c "fiemap -v -r 4k 5k" $file | _filter_fiemap
-+
-+echo "Hole + Data + Hole"
-+$XFS_IO_PROG -c "fiemap -v -r 8k 10k" $file | _filter_fiemap
-+
-+echo "Beginning with a hole"
-+$XFS_IO_PROG -c "fiemap -v -r 0 3k" $file | _filter_fiemap
-+
-+# Query for 0..160k that's 40 extents, more than the EXTENT_BATCH
-+echo "Query more than 32 extents"
-+$XFS_IO_PROG -c "fiemap -v -r 0 160k" $file | _filter_fiemap
-+
-+echo "Larger query than file size"
-+$XFS_IO_PROG -c "fiemap -v -r 0 300k" $file | _filter_fiemap
-+
-+echo "Parameter parsing tests"
-+
-+#check everything without the first hole, should print 65
-+$XFS_IO_PROG -c "fiemap -v -r 4k" $file | wc -l
-+
-+#check correct handling of [-r offset] followed by another param
-+$XFS_IO_PROG -c "fiemap -v -r 4k -n 5" $file | wc -l
-+
-+#check correct handling of [-r offset len] followed by another param
-+$XFS_IO_PROG -c "fiemap -v -r 4k 12k -n 2" $file | wc -l
-+
-+#check incorrect offset arg. should return error
-+$XFS_IO_PROG -c "fiemap -v -r -n 1" $file
-+$XFS_IO_PROG -c "fiemap -v -r" $file
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/900.out b/tests/xfs/900.out
-new file mode 100644
-index 0000000..fa25565
---- /dev/null
-+++ b/tests/xfs/900.out
-@@ -0,0 +1,124 @@
-+QA output created by 900
-+Basic data extent
-+0: [8..15]: unwritten
-+Data + Hole
-+0: [8..15]: unwritten
-+1: [16..23]: hole
-+Hole + Data + Hole
-+0: [16..23]: hole
-+1: [24..31]: unwritten
-+2: [32..39]: hole
-+Beginning with a hole
-+0: [0..7]: hole
-+Query more than 32 extents
-+0: [0..7]: hole
-+1: [8..15]: unwritten
-+2: [16..23]: hole
-+3: [24..31]: unwritten
-+4: [32..39]: hole
-+5: [40..47]: unwritten
-+6: [48..55]: hole
-+7: [56..63]: unwritten
-+8: [64..71]: hole
-+9: [72..79]: unwritten
-+10: [80..87]: hole
-+11: [88..95]: unwritten
-+12: [96..103]: hole
-+13: [104..111]: unwritten
-+14: [112..119]: hole
-+15: [120..127]: unwritten
-+16: [128..135]: hole
-+17: [136..143]: unwritten
-+18: [144..151]: hole
-+19: [152..159]: unwritten
-+20: [160..167]: hole
-+21: [168..175]: unwritten
-+22: [176..183]: hole
-+23: [184..191]: unwritten
-+24: [192..199]: hole
-+25: [200..207]: unwritten
-+26: [208..215]: hole
-+27: [216..223]: unwritten
-+28: [224..231]: hole
-+29: [232..239]: unwritten
-+30: [240..247]: hole
-+31: [248..255]: unwritten
-+32: [256..263]: hole
-+33: [264..271]: unwritten
-+34: [272..279]: hole
-+35: [280..287]: unwritten
-+36: [288..295]: hole
-+37: [296..303]: unwritten
-+38: [304..311]: hole
-+39: [312..319]: unwritten
-+Larger query than file size
-+0: [0..7]: hole
-+1: [8..15]: unwritten
-+2: [16..23]: hole
-+3: [24..31]: unwritten
-+4: [32..39]: hole
-+5: [40..47]: unwritten
-+6: [48..55]: hole
-+7: [56..63]: unwritten
-+8: [64..71]: hole
-+9: [72..79]: unwritten
-+10: [80..87]: hole
-+11: [88..95]: unwritten
-+12: [96..103]: hole
-+13: [104..111]: unwritten
-+14: [112..119]: hole
-+15: [120..127]: unwritten
-+16: [128..135]: hole
-+17: [136..143]: unwritten
-+18: [144..151]: hole
-+19: [152..159]: unwritten
-+20: [160..167]: hole
-+21: [168..175]: unwritten
-+22: [176..183]: hole
-+23: [184..191]: unwritten
-+24: [192..199]: hole
-+25: [200..207]: unwritten
-+26: [208..215]: hole
-+27: [216..223]: unwritten
-+28: [224..231]: hole
-+29: [232..239]: unwritten
-+30: [240..247]: hole
-+31: [248..255]: unwritten
-+32: [256..263]: hole
-+33: [264..271]: unwritten
-+34: [272..279]: hole
-+35: [280..287]: unwritten
-+36: [288..295]: hole
-+37: [296..303]: unwritten
-+38: [304..311]: hole
-+39: [312..319]: unwritten
-+40: [320..327]: hole
-+41: [328..335]: unwritten
-+42: [336..343]: hole
-+43: [344..351]: unwritten
-+44: [352..359]: hole
-+45: [360..367]: unwritten
-+46: [368..375]: hole
-+47: [376..383]: unwritten
-+48: [384..391]: hole
-+49: [392..399]: unwritten
-+50: [400..407]: hole
-+51: [408..415]: unwritten
-+52: [416..423]: hole
-+53: [424..431]: unwritten
-+54: [432..439]: hole
-+55: [440..447]: unwritten
-+56: [448..455]: hole
-+57: [456..463]: unwritten
-+58: [464..471]: hole
-+59: [472..479]: unwritten
-+60: [480..487]: hole
-+61: [488..495]: unwritten
-+62: [496..503]: hole
-+63: [504..511]: unwritten
-+Parameter parsing tests
-+65
-+7
-+4
-+Invalid offset argument for -r
-+Invalid offset argument for -r
--- 
-2.7.4
+I am leaning towards options #1, which is what overlay/018 does for index=on,
+but it is worth noting that overlay/017, the origin of this test, does
+not require nor
+enable index=on and in fact fails without index=on mount/config option.
 
+It is also worth mentioning that for fs with 32bit inode numbers, the test is
+expected to pass even without the xino mount option.
+
+For now I chose option #2 for my enhanced overlay/041 test.
+Please see commit "overlay/041: adapt test to 'xino' mount option" on
+my overlayfs-devel branch for the details.
+
+
+> +#-----------------------------------------------------------------------
+> +#
+> +# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
+> +# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+_require_test
+> +_require_test_program "af_unix"
+> +_require_test_program "t_dir_type"
+> +
+> +rm -f $seqres.full
+> +
+> +lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
+> +rm -rf $lowerdir
+> +mkdir $lowerdir
+> +
+> +# Create our test files.
+> +mkdir $lowerdir/dir
+> +touch $lowerdir/file
+> +ln -s $lowerdir/file $lowerdir/symlink
+> +mknod $lowerdir/chrdev c 1 1
+> +mknod $lowerdir/blkdev b 1 1
+> +mknod $lowerdir/fifo p
+> +$here/src/af_unix $lowerdir/socket
+> +touch $lowerdir/hardlink1
+> +ln $lowerdir/hardlink1 $lowerdir/hardlink2
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +
+> +upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+> +workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+> +
+> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+
+Here we must either add -o xino or add $OVERLAY_MOUNT_OPTIONS,
+because _overlay_scratch_mount_dirs won't carry those options by itself.
+
+> +
+> +FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
+> +
+> +# Record inode numbers in format <ino> <basename>
+> +function record_inode_numbers()
+> +{
+> +       local dir=$1
+> +       local outfile=$2
+> +
+> +       for f in $FILES; do
+> +               ls -id $dir/$f
+> +       done | \
+> +       while read ino file; do
+> +               echo $ino `basename $file` `stat -c '%F' $file` >> $outfile
+> +       done
+> +}
+> +
+> +# Check inode numbers match recorder inode numbers
+> +function check_inode_numbers()
+> +{
+> +       local dir=$1
+> +       local before=$2
+> +       local after=$3
+> +       local xino=$4
+> +       local ignore_dir=$5
+> +
+> +       record_inode_numbers $dir $after
+> +
+> +       if [[ $ignore_dir && $xino == 0 ]]; then
+
+What's all this about?
+Test should not change depending on xino.
+Test is should check correctness/consistency of inode numbers.
+Either we not_run the test if xino is not supported of we let it fail,
+like overlay/017 fails when index=off.
+
+> +               cat $before | $AWK_PROG '
+> +               /directory/ {
+> +                           sub(/^[[:digit:]]+/, "XXXX", $0)
+> +                           print
+> +                           next
+> +               }
+> +               {
+> +                       print
+> +                       next
+> +               }' > $tmp.mod_before
+> +               cat $after | $AWK_PROG '
+> +               /directory/ {
+> +                           sub(/^[[:digit:]]+/, "XXXX", $0)
+> +                           print
+> +                           next
+> +               }
+> +               {
+> +                       print
+> +                       next
+> +               }' > $tmp.mod_after
+> +
+> +               before=$tmp.mod_before
+> +               after=$tmp.mod_after
+> +       fi
+> +
+> +       # Test constant stat(2) st_ino -
+> +       # Compare before..after - expect silence
+> +       # We use diff -u so out.bad will tell us which stage failed
+> +       diff -u $before $after
+> +
+> +       [[ $xino == 0  ]] && return
+
+No discounts please ;)
+Fs is wrong, so fs shoulud fail the test.
+
+> +
+> +       # Test constant readdir(3)/getdents(2) d_ino -
+> +       # Expect to find file by inode number
+> +       cat $before | while read ino f ftype; do
+> +               $here/src/t_dir_type $dir $ino | grep -q $f || \
+> +                       echo "$f not found by ino $ino (from $before)"
+> +       done
+> +}
+> +
+> +rm -f $tmp.*
+> +testdir=$SCRATCH_MNT/test
+> +mkdir -p $testdir
+> +
+> +xino=0
+> +echo $MOUNT_OPTIONS | grep -q xino
+> +[[ $? == 0 ]] && xino=1
+> +
+> +# Record inode numbers before copy up
+> +record_inode_numbers $SCRATCH_MNT $tmp.before
+> +
+> +for f in $FILES; do
+> +       # chown -h modifies all those file types
+> +       chown -h 100 $SCRATCH_MNT/$f
+> +done
+> +
+> +# Compare inode numbers before/after copy up
+> +check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup $xino 0
+> +
+> +for f in $FILES; do
+> +       # move to another dir
+> +       mv $SCRATCH_MNT/$f $testdir/
+> +done
+> +
+> +echo 3 > /proc/sys/vm/drop_caches
+> +
+> +# Compare inode numbers before/after rename and drop caches
+> +check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move $xino 1
+> +
+> +# Verify that the inode numbers survive a mount cycle
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+> +
+> +# Compare inode numbers before/after mount cycle
+> +check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle $xino 1
+> +
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/overlay/043.out b/tests/overlay/043.out
+> new file mode 100644
+> index 0000000..f90f0a5
+> --- /dev/null
+> +++ b/tests/overlay/043.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 043
+> +Silence is golden
+> diff --git a/tests/overlay/group b/tests/overlay/group
+> index 782c39f..a99ff07 100644
+> --- a/tests/overlay/group
+> +++ b/tests/overlay/group
+> @@ -45,3 +45,4 @@
+>  040 auto quick
+>  041 auto quick copyup nonsamefs
+>  042 auto quick copyup hardlink
+> +043 auto quick copyup nonsamefs
+> --
+> 2.9.5
+>
