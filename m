@@ -1,389 +1,170 @@
-Received: from mail-io0-f195.google.com ([209.85.223.195]:48971 "EHLO
-        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752547AbdKMVjB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Nov 2017 16:39:01 -0500
-Received: by mail-io0-f195.google.com with SMTP id d66so22245524ioe.5
-        for <fstests@vger.kernel.org>; Mon, 13 Nov 2017 13:39:01 -0800 (PST)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [xfstests-bld PATCH] kernel-configs: add 4.14 configs
-Date: Mon, 13 Nov 2017 13:37:52 -0800
-Message-Id: <20171113213752.18123-1-ebiggers3@gmail.com>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:56174 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752434AbdKMVpB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Nov 2017 16:45:01 -0500
+Date: Tue, 14 Nov 2017 08:44:57 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v3 2/2] fiemap: Implement ranged query
+Message-ID: <20171113214457.GX4094@dastard>
+References: <1510588073-5665-1-git-send-email-nborisov@suse.com>
+ <1510588073-5665-2-git-send-email-nborisov@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1510588073-5665-2-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, eguan@redhat.com, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Mon, Nov 13, 2017 at 05:47:53PM +0200, Nikolay Borisov wrote:
+> Currently the fiemap implementation of xfs_io doesn't support making ranged
+> queries. This patch implements the '-r' parameter, taking up to 2 arguments - 
+> the starting offset and the length of the region to be queried. This also 
+> requires changing of the final hole range is calculated. Namely, it's now being
+> done as [last_logical, logical addres of next extent] rather than being
+> statically determined by [last_logical, filesize].
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> ---
+> V3: 
+>  * Fixed a bug where incorrect extent index was shown if we didn't print a 
+>  hole. This was due to statically returning 2 at the end of print_(plain|verbose)
+>  Now, the actual number of printed extents inside the 2 functions is used. 
+>  This bug is visible only with the -r parameter
+> 
+>  * Fixed a bug where 1 additional extent would be printed. This was a result of 
+>  the aforementioned bug fix, since now printing function can return 1 and still
+>  have printed an extent and no hole. This can happen when you use -r parameter,
+>  this is now fixed and a comment explaining it is put. 
+> 
+>  * Reworked the handling of the new params by making them arguments to the 
+>  -r parameter. 
+> 
+> V2:
+>  * Incorporated Daricks feedback - removed variables which weren't introduced
+>   until the next patch as a result the build with this patch was broken. This is 
+>   fixed now
+.....
 
-Enabled the following new options:
+> @@ -256,9 +269,12 @@ fiemap_f(
+>  	int		tot_w = 5;	/* 5 since its just one number */
+>  	int		flg_w = 5;
+>  	__u64		last_logical = 0;
+> +	size_t		fsblocksize, fssectsize;
+>  	struct stat	st;
+>  
+> -	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
+> +	init_cvtnum(&fsblocksize, &fssectsize);
+> +
+> +	while ((c = getopt(argc, argv, "aln:vr")) != EOF) {
 
-    CONFIG_REFCOUNT_FULL=y
-    CONFIG_UBIFS_FS_ENCRYPTION=y
-    CONFIG_FORTIFY_SOURCE=y
+Ok, you're not telling gotopt that "-r" has parameters, so....
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kernel-configs/i386-config-4.14   | 169 ++++++++++++++++++++++++++++++++++++
- kernel-configs/x86_64-config-4.14 | 174 ++++++++++++++++++++++++++++++++++++++
- 2 files changed, 343 insertions(+)
- create mode 100644 kernel-configs/i386-config-4.14
- create mode 100644 kernel-configs/x86_64-config-4.14
+>  		switch (c) {
+>  		case 'a':
+>  			fiemap_flags |= FIEMAP_FLAG_XATTR;
+> @@ -272,6 +288,50 @@ fiemap_f(
+>  		case 'v':
+>  			vflag++;
+>  			break;
+> +		case 'r':
+> +			/* Parse the first option which is mandatory */
+> +			if (optind < argc && argv[optind][0] != '-') {
+> +				off64_t start_offset = cvtnum(fsblocksize,
+> +							      fssectsize,
+> +							      argv[optind]);
+> +				if (start_offset < 0) {
+> +					printf("non-numeric offset argument -- "
+> +					       "%s\n", argv[optind]);
+> +					return 0;
+> +				}
+> +				last_logical = start_offset;
+> +				optind++;
+> +			} else {
+> +				fprintf(stderr, _("Invalid offset argument for"
+> +						  " -r\n"));
+> +				exitcode = 1;
+> +				return 0;
+> +			}
+> +
+> +			if (optind < argc) {
+> +				/* first check if what follows doesn't begin
+> +				 * with '-' which means it would be a param and
+> +				 * not an argument
+> +				 */
+> +				if (argv[optind][0] == '-') {
+> +					optind--;
+> +					break;
+> +
+> +				}
+> +
+> +				off64_t length = cvtnum(fsblocksize,
+> +							fssectsize,
+> +							argv[optind]);
+> +				if (length < 0) {
+> +					printf("non-numeric len argument --"
+> +					       " %s\n", argv[optind]);
+> +					return 0;
+> +				}
+> +				len = length;
+> +				range_limit = true;
+> +			}
+> +			break;
 
-diff --git a/kernel-configs/i386-config-4.14 b/kernel-configs/i386-config-4.14
-new file mode 100644
-index 0000000..364cdc2
---- /dev/null
-+++ b/kernel-configs/i386-config-4.14
-@@ -0,0 +1,169 @@
-+# CONFIG_64BIT is not set
-+CONFIG_LOCALVERSION="-xfstests"
-+CONFIG_SYSVIPC=y
-+CONFIG_POSIX_MQUEUE=y
-+CONFIG_NO_HZ=y
-+CONFIG_HIGH_RES_TIMERS=y
-+CONFIG_IKCONFIG=y
-+CONFIG_IKCONFIG_PROC=y
-+CONFIG_CGROUPS=y
-+CONFIG_USER_NS=y
-+CONFIG_BLK_DEV_INITRD=y
-+# CONFIG_COMPAT_BRK is not set
-+CONFIG_SLAB=y
-+CONFIG_JUMP_LABEL=y
-+CONFIG_REFCOUNT_FULL=y
-+CONFIG_SMP=y
-+# CONFIG_X86_EXTENDED_PLATFORM is not set
-+CONFIG_HYPERVISOR_GUEST=y
-+CONFIG_PARAVIRT=y
-+CONFIG_PARAVIRT_SPINLOCKS=y
-+CONFIG_PARAVIRT_TIME_ACCOUNTING=y
-+CONFIG_MCORE2=y
-+# CONFIG_X86_MCE_AMD is not set
-+# CONFIG_MICROCODE is not set
-+CONFIG_X86_CHECK_BIOS_CORRUPTION=y
-+CONFIG_HZ_300=y
-+CONFIG_KEXEC=y
-+# CONFIG_SUSPEND is not set
-+# CONFIG_ACPI_REV_OVERRIDE_POSSIBLE is not set
-+# CONFIG_ACPI_TABLE_UPGRADE is not set
-+CONFIG_PCI_MSI=y
-+CONFIG_NET=y
-+CONFIG_PACKET=y
-+CONFIG_PACKET_DIAG=y
-+CONFIG_UNIX=y
-+CONFIG_UNIX_DIAG=y
-+CONFIG_INET=y
-+CONFIG_SYN_COOKIES=y
-+# CONFIG_INET_XFRM_MODE_TRANSPORT is not set
-+# CONFIG_INET_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET_XFRM_MODE_BEET is not set
-+CONFIG_INET_UDP_DIAG=y
-+# CONFIG_INET6_XFRM_MODE_TRANSPORT is not set
-+# CONFIG_INET6_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET6_XFRM_MODE_BEET is not set
-+CONFIG_NETLINK_DIAG=y
-+# CONFIG_WIRELESS is not set
-+CONFIG_DEVTMPFS=y
-+CONFIG_MTD=y
-+CONFIG_MTD_BLOCK2MTD=y
-+CONFIG_MTD_UBI=y
-+CONFIG_BLK_DEV_LOOP=y
-+CONFIG_VIRTIO_BLK=y
-+CONFIG_SCSI=y
-+# CONFIG_SCSI_PROC_FS is not set
-+CONFIG_BLK_DEV_SD=y
-+CONFIG_SCSI_VIRTIO=y
-+CONFIG_MD=y
-+CONFIG_BLK_DEV_DM=y
-+CONFIG_DM_SNAPSHOT=y
-+CONFIG_DM_THIN_PROVISIONING=y
-+CONFIG_DM_ZERO=y
-+CONFIG_DM_FLAKEY=y
-+CONFIG_NETDEVICES=y
-+CONFIG_VIRTIO_NET=y
-+# CONFIG_ETHERNET is not set
-+# CONFIG_WLAN is not set
-+# CONFIG_INPUT_MOUSE is not set
-+# CONFIG_SERIO_SERPORT is not set
-+# CONFIG_LEGACY_PTYS is not set
-+CONFIG_SERIAL_8250=y
-+# CONFIG_SERIAL_8250_DEPRECATED_OPTIONS is not set
-+CONFIG_SERIAL_8250_CONSOLE=y
-+CONFIG_SERIAL_8250_NR_UARTS=32
-+CONFIG_SERIAL_8250_RUNTIME_UARTS=32
-+# CONFIG_HW_RANDOM_INTEL is not set
-+# CONFIG_HW_RANDOM_AMD is not set
-+# CONFIG_HW_RANDOM_VIA is not set
-+CONFIG_HW_RANDOM_VIRTIO=y
-+# CONFIG_HWMON is not set
-+# CONFIG_X86_PKG_TEMP_THERMAL is not set
-+# CONFIG_HID is not set
-+# CONFIG_USB_SUPPORT is not set
-+CONFIG_RTC_CLASS=y
-+# CONFIG_RTC_DRV_CMOS is not set
-+CONFIG_VIRT_DRIVERS=y
-+CONFIG_VIRTIO_PCI=y
-+CONFIG_VIRTIO_BALLOON=y
-+# CONFIG_X86_PLATFORM_DEVICES is not set
-+# CONFIG_IOMMU_SUPPORT is not set
-+# CONFIG_DMIID is not set
-+CONFIG_EXT2_FS=y
-+CONFIG_EXT2_FS_XATTR=y
-+CONFIG_EXT2_FS_POSIX_ACL=y
-+CONFIG_EXT2_FS_SECURITY=y
-+CONFIG_EXT4_FS=y
-+CONFIG_EXT4_FS_POSIX_ACL=y
-+CONFIG_EXT4_FS_SECURITY=y
-+CONFIG_EXT4_ENCRYPTION=y
-+CONFIG_EXT4_DEBUG=y
-+CONFIG_JBD2_DEBUG=y
-+CONFIG_XFS_FS=y
-+CONFIG_XFS_QUOTA=y
-+CONFIG_XFS_POSIX_ACL=y
-+CONFIG_XFS_RT=y
-+CONFIG_BTRFS_FS=y
-+CONFIG_BTRFS_FS_POSIX_ACL=y
-+CONFIG_BTRFS_DEBUG=y
-+CONFIG_BTRFS_ASSERT=y
-+CONFIG_F2FS_FS=y
-+CONFIG_F2FS_FS_SECURITY=y
-+CONFIG_F2FS_CHECK_FS=y
-+CONFIG_F2FS_FS_ENCRYPTION=y
-+CONFIG_FS_DAX=y
-+CONFIG_QUOTA=y
-+CONFIG_QUOTA_NETLINK_INTERFACE=y
-+# CONFIG_PRINT_QUOTA_WARNING is not set
-+CONFIG_QFMT_V2=y
-+CONFIG_AUTOFS4_FS=y
-+CONFIG_OVERLAY_FS=y
-+CONFIG_PROC_KCORE=y
-+CONFIG_PROC_CHILDREN=y
-+CONFIG_TMPFS=y
-+CONFIG_TMPFS_POSIX_ACL=y
-+CONFIG_UBIFS_FS=y
-+CONFIG_UBIFS_FS_ENCRYPTION=y
-+# CONFIG_NETWORK_FILESYSTEMS is not set
-+CONFIG_NLS_DEFAULT="utf8"
-+CONFIG_NLS_ASCII=y
-+CONFIG_NLS_UTF8=y
-+CONFIG_PRINTK_TIME=y
-+CONFIG_DYNAMIC_DEBUG=y
-+CONFIG_DEBUG_INFO=y
-+CONFIG_DEBUG_INFO_REDUCED=y
-+CONFIG_DEBUG_SECTION_MISMATCH=y
-+CONFIG_MAGIC_SYSRQ=y
-+CONFIG_DEBUG_KERNEL=y
-+CONFIG_DEBUG_PAGEALLOC=y
-+CONFIG_DEBUG_OBJECTS=y
-+CONFIG_DEBUG_SLAB=y
-+CONFIG_DEBUG_SLAB_LEAK=y
-+CONFIG_DEBUG_KMEMLEAK=y
-+CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
-+CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
-+CONFIG_DEBUG_STACKOVERFLOW=y
-+CONFIG_HARDLOCKUP_DETECTOR=y
-+CONFIG_WQ_WATCHDOG=y
-+CONFIG_PANIC_TIMEOUT=5
-+CONFIG_PROVE_LOCKING=y
-+CONFIG_LOCK_STAT=y
-+CONFIG_DEBUG_ATOMIC_SLEEP=y
-+CONFIG_DEBUG_LIST=y
-+CONFIG_DEBUG_SG=y
-+CONFIG_RCU_EQS_DEBUG=y
-+CONFIG_FAULT_INJECTION=y
-+CONFIG_FAIL_MAKE_REQUEST=y
-+CONFIG_FAULT_INJECTION_DEBUG_FS=y
-+CONFIG_FUNCTION_TRACER=y
-+CONFIG_FTRACE_SYSCALLS=y
-+CONFIG_TRACER_SNAPSHOT=y
-+CONFIG_BLK_DEV_IO_TRACE=y
-+CONFIG_FUNCTION_PROFILER=y
-+CONFIG_DEBUG_WX=y
-+CONFIG_FORTIFY_SOURCE=y
-+# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set
-+CONFIG_CRYPTO_CRC32C_INTEL=y
-+CONFIG_CRYPTO_CRC32_PCLMUL=y
-+CONFIG_CRYPTO_AES_NI_INTEL=y
-+# CONFIG_CRYPTO_HW is not set
-diff --git a/kernel-configs/x86_64-config-4.14 b/kernel-configs/x86_64-config-4.14
-new file mode 100644
-index 0000000..efc5a2e
---- /dev/null
-+++ b/kernel-configs/x86_64-config-4.14
-@@ -0,0 +1,174 @@
-+CONFIG_LOCALVERSION="-xfstests"
-+CONFIG_SYSVIPC=y
-+CONFIG_POSIX_MQUEUE=y
-+CONFIG_NO_HZ=y
-+CONFIG_HIGH_RES_TIMERS=y
-+CONFIG_IKCONFIG=y
-+CONFIG_IKCONFIG_PROC=y
-+CONFIG_CGROUPS=y
-+CONFIG_USER_NS=y
-+CONFIG_BLK_DEV_INITRD=y
-+# CONFIG_COMPAT_BRK is not set
-+CONFIG_SLAB=y
-+CONFIG_JUMP_LABEL=y
-+CONFIG_REFCOUNT_FULL=y
-+CONFIG_SMP=y
-+CONFIG_X86_X2APIC=y
-+# CONFIG_X86_EXTENDED_PLATFORM is not set
-+CONFIG_HYPERVISOR_GUEST=y
-+CONFIG_PARAVIRT=y
-+CONFIG_PARAVIRT_SPINLOCKS=y
-+CONFIG_PARAVIRT_TIME_ACCOUNTING=y
-+CONFIG_MCORE2=y
-+CONFIG_NR_CPUS=48
-+# CONFIG_X86_MCE_AMD is not set
-+# CONFIG_MICROCODE is not set
-+CONFIG_NUMA=y
-+# CONFIG_AMD_NUMA is not set
-+CONFIG_X86_CHECK_BIOS_CORRUPTION=y
-+CONFIG_HZ_300=y
-+CONFIG_KEXEC=y
-+# CONFIG_SUSPEND is not set
-+# CONFIG_ACPI_REV_OVERRIDE_POSSIBLE is not set
-+# CONFIG_ACPI_TABLE_UPGRADE is not set
-+CONFIG_PCI_MSI=y
-+CONFIG_IA32_EMULATION=y
-+CONFIG_NET=y
-+CONFIG_PACKET=y
-+CONFIG_PACKET_DIAG=y
-+CONFIG_UNIX=y
-+CONFIG_UNIX_DIAG=y
-+CONFIG_INET=y
-+CONFIG_SYN_COOKIES=y
-+# CONFIG_INET_XFRM_MODE_TRANSPORT is not set
-+# CONFIG_INET_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET_XFRM_MODE_BEET is not set
-+CONFIG_INET_UDP_DIAG=y
-+# CONFIG_INET6_XFRM_MODE_TRANSPORT is not set
-+# CONFIG_INET6_XFRM_MODE_TUNNEL is not set
-+# CONFIG_INET6_XFRM_MODE_BEET is not set
-+CONFIG_NETLINK_DIAG=y
-+# CONFIG_WIRELESS is not set
-+CONFIG_DEVTMPFS=y
-+CONFIG_MTD=y
-+CONFIG_MTD_BLOCK2MTD=y
-+CONFIG_MTD_UBI=y
-+CONFIG_BLK_DEV_LOOP=y
-+CONFIG_VIRTIO_BLK=y
-+CONFIG_SCSI=y
-+# CONFIG_SCSI_PROC_FS is not set
-+CONFIG_BLK_DEV_SD=y
-+CONFIG_SCSI_VIRTIO=y
-+CONFIG_MD=y
-+CONFIG_BLK_DEV_DM=y
-+CONFIG_DM_SNAPSHOT=y
-+CONFIG_DM_THIN_PROVISIONING=y
-+CONFIG_DM_ZERO=y
-+CONFIG_DM_FLAKEY=y
-+CONFIG_NETDEVICES=y
-+CONFIG_VIRTIO_NET=y
-+# CONFIG_ETHERNET is not set
-+# CONFIG_WLAN is not set
-+# CONFIG_INPUT_MOUSE is not set
-+# CONFIG_SERIO_SERPORT is not set
-+# CONFIG_LEGACY_PTYS is not set
-+CONFIG_SERIAL_8250=y
-+# CONFIG_SERIAL_8250_DEPRECATED_OPTIONS is not set
-+CONFIG_SERIAL_8250_CONSOLE=y
-+CONFIG_SERIAL_8250_NR_UARTS=32
-+CONFIG_SERIAL_8250_RUNTIME_UARTS=32
-+# CONFIG_HW_RANDOM_INTEL is not set
-+# CONFIG_HW_RANDOM_AMD is not set
-+# CONFIG_HW_RANDOM_VIA is not set
-+CONFIG_HW_RANDOM_VIRTIO=y
-+# CONFIG_HWMON is not set
-+# CONFIG_X86_PKG_TEMP_THERMAL is not set
-+# CONFIG_HID is not set
-+# CONFIG_USB_SUPPORT is not set
-+CONFIG_RTC_CLASS=y
-+# CONFIG_RTC_DRV_CMOS is not set
-+CONFIG_VIRT_DRIVERS=y
-+CONFIG_VIRTIO_PCI=y
-+CONFIG_VIRTIO_BALLOON=y
-+# CONFIG_X86_PLATFORM_DEVICES is not set
-+# CONFIG_IOMMU_SUPPORT is not set
-+CONFIG_LIBNVDIMM=y
-+# CONFIG_DMIID is not set
-+CONFIG_EXT2_FS=y
-+CONFIG_EXT2_FS_XATTR=y
-+CONFIG_EXT2_FS_POSIX_ACL=y
-+CONFIG_EXT2_FS_SECURITY=y
-+CONFIG_EXT4_FS=y
-+CONFIG_EXT4_FS_POSIX_ACL=y
-+CONFIG_EXT4_FS_SECURITY=y
-+CONFIG_EXT4_ENCRYPTION=y
-+CONFIG_EXT4_DEBUG=y
-+CONFIG_JBD2_DEBUG=y
-+CONFIG_XFS_FS=y
-+CONFIG_XFS_QUOTA=y
-+CONFIG_XFS_POSIX_ACL=y
-+CONFIG_XFS_RT=y
-+CONFIG_BTRFS_FS=y
-+CONFIG_BTRFS_FS_POSIX_ACL=y
-+CONFIG_BTRFS_DEBUG=y
-+CONFIG_BTRFS_ASSERT=y
-+CONFIG_F2FS_FS=y
-+CONFIG_F2FS_FS_SECURITY=y
-+CONFIG_F2FS_CHECK_FS=y
-+CONFIG_F2FS_FS_ENCRYPTION=y
-+CONFIG_FS_DAX=y
-+CONFIG_QUOTA=y
-+CONFIG_QUOTA_NETLINK_INTERFACE=y
-+# CONFIG_PRINT_QUOTA_WARNING is not set
-+CONFIG_QFMT_V2=y
-+CONFIG_AUTOFS4_FS=y
-+CONFIG_OVERLAY_FS=y
-+CONFIG_PROC_KCORE=y
-+CONFIG_PROC_CHILDREN=y
-+CONFIG_TMPFS=y
-+CONFIG_TMPFS_POSIX_ACL=y
-+CONFIG_UBIFS_FS=y
-+CONFIG_UBIFS_FS_ENCRYPTION=y
-+# CONFIG_NETWORK_FILESYSTEMS is not set
-+CONFIG_NLS_DEFAULT="utf8"
-+CONFIG_NLS_ASCII=y
-+CONFIG_NLS_UTF8=y
-+CONFIG_PRINTK_TIME=y
-+CONFIG_DYNAMIC_DEBUG=y
-+CONFIG_DEBUG_INFO=y
-+CONFIG_DEBUG_INFO_REDUCED=y
-+CONFIG_DEBUG_SECTION_MISMATCH=y
-+CONFIG_MAGIC_SYSRQ=y
-+CONFIG_DEBUG_KERNEL=y
-+CONFIG_DEBUG_PAGEALLOC=y
-+CONFIG_DEBUG_OBJECTS=y
-+CONFIG_DEBUG_SLAB=y
-+CONFIG_DEBUG_SLAB_LEAK=y
-+CONFIG_DEBUG_KMEMLEAK=y
-+CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
-+CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
-+CONFIG_DEBUG_STACKOVERFLOW=y
-+CONFIG_HARDLOCKUP_DETECTOR=y
-+CONFIG_WQ_WATCHDOG=y
-+CONFIG_PANIC_TIMEOUT=5
-+CONFIG_PROVE_LOCKING=y
-+CONFIG_LOCK_STAT=y
-+CONFIG_DEBUG_ATOMIC_SLEEP=y
-+CONFIG_DEBUG_LIST=y
-+CONFIG_DEBUG_SG=y
-+CONFIG_RCU_EQS_DEBUG=y
-+CONFIG_FAULT_INJECTION=y
-+CONFIG_FAIL_MAKE_REQUEST=y
-+CONFIG_FAULT_INJECTION_DEBUG_FS=y
-+CONFIG_FUNCTION_TRACER=y
-+CONFIG_FTRACE_SYSCALLS=y
-+CONFIG_TRACER_SNAPSHOT=y
-+CONFIG_BLK_DEV_IO_TRACE=y
-+CONFIG_FUNCTION_PROFILER=y
-+CONFIG_DEBUG_WX=y
-+CONFIG_FORTIFY_SOURCE=y
-+# CONFIG_CRYPTO_MANAGER_DISABLE_TESTS is not set
-+CONFIG_CRYPTO_CRC32C_INTEL=y
-+CONFIG_CRYPTO_CRC32_PCLMUL=y
-+CONFIG_CRYPTO_AES_NI_INTEL=y
-+# CONFIG_CRYPTO_HW is not set
+.... this is pretty nasty because you're having to check if the next
+option should be parsed by the main loop or not. This assumes that
+getopt is giving us the options in the order they were presented on
+the command line, which is not a good assumption to make as glibc
+can mutate the order as it parses the listi of know options and
+arguments.
+
+Given that "-r" is the only option that has parameters, then this
+can be massively simplified just by noting we've seen the rflag, and
+leaving the non-arg parameter parsing to after the end of the loop.
+i.e.:
+
+
+		case 'r':
+			range_limit = true;
+			break;
+......
+
+	if (!range_limit) {
+		/* no extra parameters */
+		if (optind != argc)
+			usage();
+	} else if (optind != argc - 2) {
+		/* wrong number of parameters for rflag */
+		usage();
+	} else {
+		/* parse range variables */
+		offset = cvtnum(fsblocksize, fssectsize, argv[optind++]);
+		length = cvtnum(fsblocksize, fssectsize, argv[optind]);
+		if (offset < 0 || length < 0) {
+			/* invalid options */
+			usage();
+		}
+	}
+
+
+
+>  
+>  			cur_extent += num_printed;
+>  			last_logical = extent->fe_logical + extent->fe_length;
+> +			/* If num_printed > 0 then we dunno if we have printed
+> +			 * a hole or an extent and a hole but we don't really
+> +			 * care. Termination of the loop is still going to be
+> +			 * correct
+> +			 */
+
+/*
+ * Please use the standard comment format.
+ */
+
+Cheers,
+
+Dave.
 -- 
-2.15.0.448.gf294e3d99a-goog
-
+Dave Chinner
+david@fromorbit.com
