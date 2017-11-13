@@ -1,55 +1,93 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:10526 "EHLO
-        szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751638AbdKMIyS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 Nov 2017 03:54:18 -0500
-From: Chao Yu <yuchao0@huawei.com>
-Subject: [PATCH] generic: add testcase to test fallocate & f{data,}sync
-Date: Mon, 13 Nov 2017 16:53:50 +0800
-Message-ID: <20171113085350.42455-1-yuchao0@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:57108 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751303AbdKMOon (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 Nov 2017 09:44:43 -0500
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id vADEiWG4114104
+        for <fstests@vger.kernel.org>; Mon, 13 Nov 2017 09:44:43 -0500
+Received: from e38.co.us.ibm.com (e38.co.us.ibm.com [32.97.110.159])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2e7afchdaa-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 13 Nov 2017 09:44:42 -0500
+Received: from localhost
+        by e38.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Mon, 13 Nov 2017 07:44:40 -0700
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH 2/2] overlay: Test consistent st_ino numbers for non-samefs scenario
+Date: Mon, 13 Nov 2017 20:15:27 +0530
+In-Reply-To: <20171113144527.1034-1-chandan@linux.vnet.ibm.com>
+References: <20171113144527.1034-1-chandan@linux.vnet.ibm.com>
+Message-Id: <20171113144527.1034-2-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org
-Cc: jaegeuk@kernel.org, chao@kernel.org, yuchao0@huawei.com
+To: fstests@vger.kernel.org, amir73il@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-f2fs can skip isize updating in fsync(), since during mount, f2fs tries
-to recovery isize according to valid block address or preallocated flag
-in last fsynced dnode block.
+This commit adds a test to verify consistent st_ino feature when
+the overlayfs instance is composed of two different underlying
+filesystem instances.
 
-However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
-flag, since it can preallocated block cross EOF, once the file is fsynced,
-in POR, we will recover isize incorrectly based on these fallocated
-blocks.
+For example,
+$ mount -t xfs /dev/loop0 /mnt/test
+$ mount -t xfs /dev/loop1 /mnt/scratch
+$ mkdir /mnt/scratch/upper
+$ mkdir /mnt/scratch/work
+$ mount -t overlay overlay -o lowerdir=/mnt/test \
+        -o upperdir=/mnt/scratch/upper \
+        -o workdir=/mnt/scratch/work /mnt/merge
 
-This patch adds a new testcase to test fallocate, in order to verify
-whether filesystem will do correct recovery on isize.
+The goal of this test is to verify that overlayfs returns consistent
+st_ino for the following scenarios,
+- Copy-up of lowerdir files
+- Rename files and drop dentry/inode cache
+- Remount the overlayfs instance
 
-Signed-off-by: Chao Yu <yuchao0@huawei.com>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/468     | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/468.out |  13 ++++++
- tests/generic/group   |   1 +
- 3 files changed, 131 insertions(+)
- create mode 100755 tests/generic/468
- create mode 100644 tests/generic/468.out
+Eryu,
+To pass, This test requires Amir's "Overlayfs: constant st_ino/d_ino for
+non-samefs" patchset. But this patch can be merged as it indicates an
+incorrect behaviour by overlayfs code as presently available on
+upstream kernel.
 
-diff --git a/tests/generic/468 b/tests/generic/468
+ tests/overlay/043     | 197 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/043.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 200 insertions(+)
+ create mode 100755 tests/overlay/043
+ create mode 100644 tests/overlay/043.out
+
+diff --git a/tests/overlay/043 b/tests/overlay/043
 new file mode 100755
-index 000000000000..af3c5958750f
+index 0000000..2b3c1c2
 --- /dev/null
-+++ b/tests/generic/468
-@@ -0,0 +1,117 @@
++++ b/tests/overlay/043
+@@ -0,0 +1,197 @@
 +#! /bin/bash
-+# FS QA Test 468
++# FSQA Test No. 043
 +#
-+# Do test with fallocate, f{data,}sync, power-cuts, check inode's metadata
-+# after filesystem recovery.
-+# In the case of fsync, filesystem should recover all the inode metadata, while
-+# recovering i_blocks and i_size at least for fdatasync.
++# Test constant inode numbers on non-samefs setup
++# This is a variant of overlay/017 to test constant st_ino numbers for
++# non-samefs setup.
++#
++# This simple test demonstrates a known issue with overlayfs:
++# - stat file A shows inode number X
++# - modify A to trigger copy up
++# - stat file A shows inode number Y != X
++#
++# Test if inode numbers of all file types persist after copy-up. For
++# non-dirs, test if inode numbers persist after rename, drop caches
++# and mount cycle.
++#
++# With 'xino' mount option enabled, test if d_ino of readdir entries changes
++# after copy up and if inode numbers persist after rename, drop caches and
++# mount cycle.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Chao Yu.  All Rights Reserved.
++#
++# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
++# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -72,7 +110,7 @@ index 000000000000..af3c5958750f
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=0	# failure is the default!
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
@@ -85,106 +123,161 @@ index 000000000000..af3c5958750f
 +. ./common/rc
 +. ./common/filter
 +
-+# remove previous $seqres.full before test
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_test_program "af_unix"
++_require_test_program "t_dir_type"
++
 +rm -f $seqres.full
 +
-+# real QA test starts here
++lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
++rm -rf $lowerdir
++mkdir $lowerdir
 +
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
++# Create our test files.
++mkdir $lowerdir/dir
++touch $lowerdir/file
++ln -s $lowerdir/file $lowerdir/symlink
++mknod $lowerdir/chrdev c 1 1
++mknod $lowerdir/blkdev b 1 1
++mknod $lowerdir/fifo p
++$here/src/af_unix $lowerdir/socket
++touch $lowerdir/hardlink1
++ln $lowerdir/hardlink1 $lowerdir/hardlink2
 +
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "falloc" "-k"
++_scratch_mkfs >>$seqres.full 2>&1
 +
-+_scratch_mkfs >/dev/null 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_scratch_mount
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
 +
-+testfile=$SCRATCH_MNT/testfile
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
 +
-+# check inode metadata after shutdown
-+check_inode_metadata()
++FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
++
++# Record inode numbers in format <ino> <basename>
++function record_inode_numbers()
 +{
-+	sync_mode=$1
++	local dir=$1
++	local outfile=$2
 +
-+	# fsync or fdatasync
-+	if [ $sync_mode = "fsync" ]; then
-+		stat_opt='-c "b: %b s: %s a: %x m: %y c: %z"'
-+	else
-+		stat_opt='-c "b: %b s: %s"'
-+	fi
-+
-+	before=`stat "$stat_opt" $testfile`
-+
-+	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
-+	src/godown $SCRATCH_MNT | tee -a $seqres.full
-+	_scratch_cycle_mount
-+
-+	after=`stat "$stat_opt" $testfile`
-+
-+	if [ "$before" != "$after" ]; then
-+		echo "Before: $before"
-+		echo "After : $after"
-+		status=1;	# this is a failure!
-+	fi
-+	echo "Before: $before" >> $seqres.full
-+	echo "After : $after" >> $seqres.full
-+	rm $testfile
++	for f in $FILES; do
++		ls -id $dir/$f
++	done | \
++	while read ino file; do
++		echo $ino `basename $file` `stat -c '%F' $file` >> $outfile
++	done
 +}
 +
-+# fallocate XX KB with f{data}sync, followed by power-cut
-+test_falloc()
++# Check inode numbers match recorder inode numbers
++function check_inode_numbers()
 +{
-+	echo "==== falloc $2$3 test with $1 ====" | tee -a $seqres.full
-+	$XFS_IO_PROG -f -c "truncate 4202496"	\
-+			-c "pwrite 0 4202496"	\
-+			-c "fsync"		\
-+			-c "falloc $2 4202496 $3"\
-+			$testfile >/dev/null
-+	check_inode_metadata $1
++	local dir=$1
++	local before=$2
++	local after=$3
++	local xino=$4
++	local ignore_dir=$5
++
++	record_inode_numbers $dir $after
++
++	if [[ $ignore_dir && $xino == 0 ]]; then
++		cat $before | $AWK_PROG '
++		/directory/ {
++			    sub(/^[[:digit:]]+/, "XXXX", $0)
++    			    print
++    			    next
++		}
++		{
++			print
++    			next
++		}' > $tmp.mod_before
++		cat $after | $AWK_PROG '
++		/directory/ {
++			    sub(/^[[:digit:]]+/, "XXXX", $0)
++    			    print
++    			    next
++		}
++		{
++			print
++    			next
++		}' > $tmp.mod_after
++
++		before=$tmp.mod_before
++		after=$tmp.mod_after
++	fi
++
++	# Test constant stat(2) st_ino -
++	# Compare before..after - expect silence
++	# We use diff -u so out.bad will tell us which stage failed
++	diff -u $before $after
++
++	[[ $xino == 0  ]] && return
++
++	# Test constant readdir(3)/getdents(2) d_ino -
++	# Expect to find file by inode number
++	cat $before | while read ino f ftype; do
++		$here/src/t_dir_type $dir $ino | grep -q $f || \
++			echo "$f not found by ino $ino (from $before)"
++	done
 +}
 +
-+for i in fsync fdatasync; do
-+	test_falloc $i "" 1024
-+	test_falloc $i "" 4096
-+	test_falloc $i "" 104857600
-+	test_falloc $i "-k " 1024
-+	test_falloc $i "-k " 4096
-+	test_falloc $i "-k " 104857600
++rm -f $tmp.*
++testdir=$SCRATCH_MNT/test
++mkdir -p $testdir
++
++xino=0
++echo $MOUNT_OPTIONS | grep -q xino
++[[ $? == 0 ]] && xino=1
++
++# Record inode numbers before copy up
++record_inode_numbers $SCRATCH_MNT $tmp.before
++
++for f in $FILES; do
++	# chown -h modifies all those file types
++	chown -h 100 $SCRATCH_MNT/$f
 +done
 +
++# Compare inode numbers before/after copy up
++check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup $xino 0
++
++for f in $FILES; do
++	# move to another dir
++	mv $SCRATCH_MNT/$f $testdir/
++done
++
++echo 3 > /proc/sys/vm/drop_caches
++
++# Compare inode numbers before/after rename and drop caches
++check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move $xino 1
++
++# Verify that the inode numbers survive a mount cycle
++$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++
++# Compare inode numbers before/after mount cycle
++check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle $xino 1
++
++echo "Silence is golden"
++status=0
 +exit
-diff --git a/tests/generic/468.out b/tests/generic/468.out
+diff --git a/tests/overlay/043.out b/tests/overlay/043.out
 new file mode 100644
-index 000000000000..b3a28d5ea07c
+index 0000000..f90f0a5
 --- /dev/null
-+++ b/tests/generic/468.out
-@@ -0,0 +1,13 @@
-+QA output created by 468
-+==== falloc 1024 test with fsync ====
-+==== falloc 4096 test with fsync ====
-+==== falloc 104857600 test with fsync ====
-+==== falloc -k 1024 test with fsync ====
-+==== falloc -k 4096 test with fsync ====
-+==== falloc -k 104857600 test with fsync ====
-+==== falloc 1024 test with fdatasync ====
-+==== falloc 4096 test with fdatasync ====
-+==== falloc 104857600 test with fdatasync ====
-+==== falloc -k 1024 test with fdatasync ====
-+==== falloc -k 4096 test with fdatasync ====
-+==== falloc -k 104857600 test with fdatasync ====
-diff --git a/tests/generic/group b/tests/generic/group
-index 9183950c8dfc..ea2dc04d931e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -470,3 +470,4 @@
- 465 auto rw quick aio
- 466 auto quick rw
- 467 auto quick exportfs
-+468 shutdown auto quick metadata
++++ b/tests/overlay/043.out
+@@ -0,0 +1,2 @@
++QA output created by 043
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 782c39f..a99ff07 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -45,3 +45,4 @@
+ 040 auto quick
+ 041 auto quick copyup nonsamefs
+ 042 auto quick copyup hardlink
++043 auto quick copyup nonsamefs
 -- 
-2.15.0.55.gc2ece9dc4de6
+2.9.5
 
