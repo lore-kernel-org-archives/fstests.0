@@ -1,144 +1,252 @@
-Received: from imap.thunk.org ([74.207.234.97]:36942 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750847AbdKLNg0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 12 Nov 2017 08:36:26 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] common: rework _require_ext4_mkfs_feature
-Date: Sun, 12 Nov 2017 08:36:21 -0500
-Message-Id: <20171112133621.2474-1-tytso@mit.edu>
+Received: from userp1040.oracle.com ([156.151.31.81]:31160 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751110AbdKMCZd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 Nov 2017 21:25:33 -0500
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] btrfs/154: test for device dynamic rescan
+Date: Mon, 13 Nov 2017 10:25:41 +0800
+Message-Id: <20171113022541.7413-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In all of the places where we need check to see if mkfs.ext4 can
-support a set of file system features, we also should be checking to
-see if the kernel can support those file system features.  So rename
-_require_ext4_mkfs_feature to _require_ext4_feature, and actually
-format the file system in $SCRATCH.  To avoid running mkfs twice in
-most tests, we will teach the tests to assume that
-_require_ext4_feature actually leaves $SCRATCH formatted with a file
-system with those features.
+Make sure missing device is included in the alloc list when it is
+scanned on a mounted FS.
 
-Also remove a completely unneeded _require_ext4_mkfs_feature "64bit"
-from ext4/306.
+This test case needs btrfs kernel patch which is in the ML
+  [PATCH] btrfs: handle dynamically reappearing missing device
+Without the kernel patch, the test will run, but reports as
+failed, as the device scanned won't appear in the alloc_list.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
+ tests/btrfs/154     | 188 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/154.out |  10 +++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 199 insertions(+)
+ create mode 100755 tests/btrfs/154
+ create mode 100644 tests/btrfs/154.out
 
-This is a replacement for "ext4/026: skip test if kernel does not
-support the ea_inode feature"
-
- common/rc      | 28 ++++++++++------------------
- tests/ext4/003 |  3 +--
- tests/ext4/025 |  3 +--
- tests/ext4/026 |  3 +--
- tests/ext4/306 |  1 -
- 5 files changed, 13 insertions(+), 25 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index da6213a0..3febf16f 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1899,31 +1899,23 @@ _require_scratch_ext4_crc()
- 	_scratch_unmount
- }
- 
--# Check the specified feature whether it is available in mkfs.ext4 or not.
--_require_ext4_mkfs_feature()
-+# Check whether the specified feature whether it is supported by
-+# mkfs.ext4 and the kernel.
-+_require_ext4_feature()
- {
--	local feature=$1
--	local testfile=/tmp/$$.ext4_mkfs
-+	local feature="$1"
-+	local sz="$2"
- 
- 	if [ -z "$feature" ]; then
--                echo "Usage: _require_ext4_mkfs_feature feature"
-+                echo "Usage: _require_ext4_feature feature"
-                 exit 1
-         fi
- 
--	touch $testfile
--	local result=$($MKFS_EXT4_PROG -F -O $feature -n $testfile 512m 2>&1)
--	rm -f $testfile
--	echo $result | grep -q "Invalid filesystem option" && \
--		_notrun "mkfs.ext4 doesn't support $feature feature"
--}
--
--# this test requires the ext4 kernel support bigalloc feature
--#
--_require_ext4_bigalloc()
--{
--	$MKFS_EXT4_PROG -F -O bigalloc $SCRATCH_DEV 512m >/dev/null 2>&1
-+	$MKFS_EXT4_PROG -F $MKFS_OPTIONS -O "$feature" \
-+	    $SCRATCH_DEV $sz >>$seqres.full 2>&1 \
-+		|| _notrun "mkfs.ext4 doesn't support $feature feature"
- 	_scratch_mount >/dev/null 2>&1 \
--	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
-+		|| _notrun "Kernel doesn't support the ext4 feature: $feature"
- 	_scratch_unmount
- }
- 
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index 9be40178..2498632f 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -38,8 +38,7 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
--_require_ext4_mkfs_feature "bigalloc"
--_require_ext4_bigalloc
-+_require_ext4_feature "bigalloc" "512m"
- 
- rm -f $seqres.full
- 
-diff --git a/tests/ext4/025 b/tests/ext4/025
-index 49ecb462..013c1940 100755
---- a/tests/ext4/025
-+++ b/tests/ext4/025
-@@ -48,10 +48,9 @@ _supported_fs ext4
- _supported_os Linux
- _require_scratch_nocheck
- _require_command "$DEBUGFS_PROG" debugfs
--_require_ext4_mkfs_feature "bigalloc,meta_bg,^resize_inode"
-+_require_ext4_feature "bigalloc,meta_bg,^resize_inode"
- 
- echo "Create ext4 fs and modify first_meta_bg's value"
--_scratch_mkfs "-O bigalloc,meta_bg,^resize_inode" >> $seqres.full 2>&1
- 
- # set a big enough first_meta_bg to trigger buffer overrun
- # 842150400 is from original fuzzed ext4 image in bug report
-diff --git a/tests/ext4/026 b/tests/ext4/026
-index 94a737ce..828b9b89 100755
---- a/tests/ext4/026
-+++ b/tests/ext4/026
-@@ -50,9 +50,8 @@ _supported_fs ext4
- _supported_os Linux
- _require_scratch
- _require_attrs
--_require_ext4_mkfs_feature ea_inode
-+_require_ext4_feature "ea_inode"
- 
--_scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
- _scratch_mount
- 
- # Sets an extended attribute on a file.
-diff --git a/tests/ext4/306 b/tests/ext4/306
-index be765e6a..fa3b782d 100755
---- a/tests/ext4/306
-+++ b/tests/ext4/306
-@@ -44,7 +44,6 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
--_require_ext4_mkfs_feature "64bit"
- 
- rm -f $seqres.full
- 
+diff --git a/tests/btrfs/154 b/tests/btrfs/154
+new file mode 100755
+index 000000000000..8b06fc4d9347
+--- /dev/null
++++ b/tests/btrfs/154
+@@ -0,0 +1,188 @@
++#! /bin/bash
++# FS QA Test 154
++#
++# Test for reappearing missing device functionality.
++#   This test will fail without the btrfs kernel patch
++#   [PATCH] btrfs: handle dynamically reappearing missing device
++#
++#---------------------------------------------------------------------
++# Copyright (c) 2017 Oracle.  All Rights Reserved.
++# Author: Anand Jain <anand.jain@oracle.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#---------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/module
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++_test_unmount
++_require_loadable_fs_module "btrfs"
++
++_scratch_dev_pool_get 2
++
++DEV1=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
++DEV2=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
++
++echo DEV1=$DEV1 >> $seqres.full
++echo DEV2=$DEV2 >> $seqres.full
++
++# Balance won't be successful if filled too much
++DEV1_SZ=`blockdev --getsize64 $DEV1`
++DEV2_SZ=`blockdev --getsize64 $DEV2`
++
++# get min
++MAX_FS_SZ=`echo -e "$DEV1_SZ\n$DEV2_SZ" | sort | head -1`
++# Need disks with more than 2G
++if [ $MAX_FS_SZ -lt 2000000000 ]; then
++	_scratch_dev_pool_put
++	_test_mount
++	_notrun "Smallest dev size $MAX_FS_SZ, Need at least 2G"
++fi
++
++MAX_FS_SZ=100000000
++bs="1M"
++COUNT=$(($MAX_FS_SZ / 1000000))
++CHECKPOINT1=0
++CHECKPOINT2=0
++
++setup()
++{
++	echo >> $seqres.full
++	echo "MAX_FS_SZ=$MAX_FS_SZ COUNT=$COUNT" >> $seqres.full
++	echo "setup"
++	echo "-----setup-----" >> $seqres.full
++	_scratch_pool_mkfs "-mraid1 -draid1" >> $seqres.full 2>&1
++	_scratch_mount >> $seqres.full 2>&1
++	dd if=/dev/urandom of="$SCRATCH_MNT"/tf bs=$bs count=1 \
++					>>$seqres.full 2>&1
++	_run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
++	_run_btrfs_util_prog filesystem df $SCRATCH_MNT
++	COUNT=$(( $COUNT - 1 ))
++	echo "unmount" >> $seqres.full
++	_scratch_unmount
++}
++
++degrade_mount_write()
++{
++	echo >> $seqres.full
++	echo "--degraded mount: max_fs_sz $max_fs_sz bytes--" >> $seqres.full
++	echo
++	echo "degraded mount"
++
++	echo "clean btrfs ko" >> $seqres.full
++	# un-scan the btrfs devices
++	_reload_fs_module "btrfs"
++	_mount -o degraded $DEV1 $SCRATCH_MNT >>$seqres.full 2>&1
++	cnt=$(( $COUNT/10 ))
++	dd if=/dev/urandom of="$SCRATCH_MNT"/tf1 bs=$bs count=$cnt \
++					>>$seqres.full 2>&1
++	COUNT=$(( $COUNT - $cnt ))
++	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
++	_run_btrfs_util_prog filesystem df $SCRATCH_MNT
++	CHECKPOINT1=`md5sum $SCRATCH_MNT/tf1`
++	echo $SCRATCH_MNT/tf1:$CHECKPOINT1 >> $seqres.full 2>&1
++}
++
++scan_missing_dev_and_write()
++{
++	echo >> $seqres.full
++	echo "--scan missing $DEV2--" >> $seqres.full
++	echo
++	echo "scan missing dev and write"
++
++	_run_btrfs_util_prog device scan $DEV2
++
++	echo >> $seqres.full
++
++	_run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
++	_run_btrfs_util_prog filesystem df ${SCRATCH_MNT}
++
++	dd if=/dev/urandom of="$SCRATCH_MNT"/tf2 bs=$bs count=$COUNT \
++						>>$seqres.full 2>&1
++	CHECKPOINT2=`md5sum $SCRATCH_MNT/tf2`
++	echo $SCRATCH_MNT/tf2:$CHECKPOINT2 >> $seqres.full 2>&1
++}
++
++balance_convert()
++{
++	echo >> $seqres.full
++	echo "----- run balance -----" >> $seqres.full
++	echo
++	echo "run balance"
++
++	_run_btrfs_util_prog bal start --full-balance -dconvert=raid1 \
++				-mconvert=raid1 ${SCRATCH_MNT}
++}
++
++verify()
++{
++	echo >> $seqres.full
++	echo "--mount reconstructed dev only and check md5sum--" >> $seqres.full
++	echo
++	echo "mount reconstructed dev only and check md5sum"
++	echo "unmount" >> $seqres.full
++
++	_scratch_unmount
++	_reload_fs_module "btrfs"
++	_mount -o degraded $DEV2 $SCRATCH_MNT >>$seqres.full 2>&1
++	verify_checkpoint1=`md5sum $SCRATCH_MNT/tf1`
++	verify_checkpoint2=`md5sum $SCRATCH_MNT/tf2`
++
++	if [ "$verify_checkpoint1" != "$CHECKPOINT1" ]; then
++		echo "checkpoint1 does not match with after scrub"
++	fi
++
++	if [ "$verify_checkpoint2" != "$CHECKPOINT2" ]; then
++		echo "checkpoint2 does not match with after scrub"
++	fi
++}
++
++setup
++degrade_mount_write
++scan_missing_dev_and_write
++balance_convert
++verify
++
++$UMOUNT_PROG $DEV2
++_scratch_dev_pool_put
++_test_mount
++
++status=0
++exit
+diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
+new file mode 100644
+index 000000000000..4a4939d448aa
+--- /dev/null
++++ b/tests/btrfs/154.out
+@@ -0,0 +1,10 @@
++QA output created by 154
++setup
++
++degraded mount
++
++scan missing dev and write
++
++run balance
++
++mount reconstructed dev only and check md5sum
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 15c2ecbf553c..c98cf823224e 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -156,3 +156,4 @@
+ 151 auto quick
+ 152 auto quick metadata qgroup send
+ 153 auto quick qgroup
++154 auto quick
 -- 
-2.11.0.rc0.7.gbe5a750
+2.13.1
 
