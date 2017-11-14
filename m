@@ -1,77 +1,54 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44630 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:65139 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751466AbdKNJP6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Nov 2017 04:15:58 -0500
-Date: Tue, 14 Nov 2017 17:15:56 +0800
+        id S1754406AbdKNKyt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Nov 2017 05:54:49 -0500
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/1] overlay/035: small fix for newer util-linux
-Message-ID: <20171114091556.GF17339@eguan.usersys.redhat.com>
-References: <7a255645-5148-cd45-c0f7-1645982ca4e9@jp.fujitsu.com>
- <8389cef1-9d9b-a9f2-e5b7-e409e42e2df3@jp.fujitsu.com>
- <CAOQ4uxjwYhJVR38pBbrTtLXfLoW3TaT_2TWEH+BqnU=Rf8Dyrw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjwYhJVR38pBbrTtLXfLoW3TaT_2TWEH+BqnU=Rf8Dyrw@mail.gmail.com>
+Subject: [PATCH 0/3] fix failures caused by mount error msg change in util-linux v2.30
+Date: Tue, 14 Nov 2017 18:53:58 +0800
+Message-Id: <20171114105401.10542-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 14, 2017 at 10:55:34AM +0200, Amir Goldstein wrote:
-> On Tue, Nov 14, 2017 at 3:10 AM, Misono, Tomohiro
-> <misono.tomohiro@jp.fujitsu.com> wrote:
-> > Modify filter in order make the test run correctly for
-> > both old (2.29) and new (2.30) util-linux.
-> >
-> > Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
-> > ---
-> >  tests/overlay/035 | 6 ++++--
-> >  1 file changed, 4 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/tests/overlay/035 b/tests/overlay/035
-> > index 64fcd708..6f1627c6 100755
-> > --- a/tests/overlay/035
-> > +++ b/tests/overlay/035
-> > @@ -69,7 +69,8 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
-> >  $MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
-> >                         $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> >  touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
-> > -_scratch_remount rw 2>&1 | _filter_scratch
-> > +_scratch_remount rw 2>&1 | _filter_scratch \
-> > +       | sed -e "s,SCRATCH_MNT: ,," | sed -e "s,\.$,,"
-> >  $UMOUNT_PROG $SCRATCH_MNT
-> >
-> 
-> 
-> This change doesn't look right and/or not explained properly.
-> Any change to accommodate tool differences should be done
-> in the filter helpers, not in an individual test that filters the
-> output of a generic helper.
+util-linux v2.30 changed mount error message again and caused several
+tests to fail (reported by Misono Tomohiro, thanks!), this is mainly due
+to two util-linux commits in v2.30-rc1
 
-If this is a really cornor case that only affects this case and not
-likely affects future tests, I think this one-time fix is fine.
+6dede2f2f7c5 libmount: support MS_RDONLY on write-protected devices
+ea848180dd34 libmount: add mnt_context_get_excode()
 
-But this is not that case. I found generic/050, xfs/005, xfs/333 and
-overlay/03[567] are all affected by the change in util-linux, and in
-different ways. So generic helper(s) might be more useful.
+This patchset introduced _filter_ending_dot, _filter_error_mount and
+_filter_busy_mount and improved _filter_ro_mount to deal with all these
+output differences between old and new util-linux versions.
 
-I'm now working on a patchset to do the filter using common helpers,
-will post them later.
+I've tested and confirmed generic/050, xfs/005 and overlay/03[567] all
+passed with both old and new util-linux. xfs/333 is always _notrun
+because there's no realtime-rmapbt support yet.
 
-> 
-> What is the change 2.29 -> 2.30 that causes the problem?
-> Without mentioning this, it is really hard to review if your change is correct.
+Perhaps there're better and cleaner ways to fix the problems, please
+help review and advise, thanks!
 
-Agreed, at least please provide both 'old' and 'new' format in the
-commit log or comments, that'll be easier to review.
-
-Thanks,
 Eryu
 
-> 
-> Amir.
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Eryu Guan (3):
+  fstests: filter mount error message for EUCLEAN and ESTALE
+  overlay/036: filter busy mount message
+  fstests: filter readonly mount error messages
+
+ common/filter         | 70 ++++++++++++++++++++++++++++++++++++++++++++++++++-
+ tests/generic/050     |  2 +-
+ tests/generic/050.out |  8 +++---
+ tests/overlay/035     |  9 +++++--
+ tests/overlay/036     |  9 +++++--
+ tests/overlay/036.out |  4 +--
+ tests/overlay/037     |  4 +--
+ tests/overlay/037.out |  4 +--
+ tests/xfs/005         |  7 +-----
+ tests/xfs/333         |  2 +-
+ tests/xfs/333.out     |  2 +-
+ 11 files changed, 97 insertions(+), 24 deletions(-)
+
+-- 
+2.13.6
+
