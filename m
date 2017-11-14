@@ -1,122 +1,107 @@
-Received: from mail-qt0-f175.google.com ([209.85.216.175]:55963 "EHLO
-        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755066AbdKNNpT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 14 Nov 2017 08:45:19 -0500
+Received: from sandeen.net ([63.231.237.45]:37428 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753282AbdKNOgm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Nov 2017 09:36:42 -0500
+Subject: Re: [PATCH v3 2/2] xfs: initial fiemap range query test
+References: <1510588073-5665-1-git-send-email-nborisov@suse.com>
+ <1510588229-6079-1-git-send-email-nborisov@suse.com>
+ <1510588229-6079-2-git-send-email-nborisov@suse.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <5b67930f-a734-84c7-b71d-820fa8873a64@sandeen.net>
+Date: Tue, 14 Nov 2017 08:36:40 -0600
 MIME-Version: 1.0
-In-Reply-To: <20171114110948.31345-1-chandan@linux.vnet.ibm.com>
-References: <20171114110948.31345-1-chandan@linux.vnet.ibm.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 14 Nov 2017 15:45:17 +0200
-Message-ID: <CAOQ4uxj993Dihz3aTbC-ejcnZrxnh2AqufV25agpjfW_02Dbbg@mail.gmail.com>
-Subject: Re: [PATCH V2] overlay: Test consistent st_ino numbers for non-samefs scenario
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <1510588229-6079-2-git-send-email-nborisov@suse.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: Nikolay Borisov <nborisov@suse.com>, linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, eguan@redhat.com, david@fromorbit.com, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 14, 2017 at 1:09 PM, Chandan Rajendra
-<chandan@linux.vnet.ibm.com> wrote:
-> This commit adds a test to verify consistent st_ino feature when
-> the overlayfs instance is composed of two different underlying
-> filesystem instances.
->
-> For example,
-> $ mount -t xfs /dev/loop0 /mnt/test
-> $ mount -t xfs /dev/loop1 /mnt/scratch
-> $ mkdir /mnt/scratch/upper
-> $ mkdir /mnt/scratch/work
-> $ mount -t overlay overlay -o lowerdir=/mnt/test \
->         -o upperdir=/mnt/scratch/upper \
->         -o workdir=/mnt/scratch/work /mnt/merge
->
-> The goal of this test is to verify that overlayfs returns consistent
-> st_ino for the following scenarios,
-> - Copy-up of lowerdir files
-> - Rename files and drop dentry/inode cache
-> - Remount the overlayfs instance
->
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+
+
+On 11/13/17 9:50 AM, Nikolay Borisov wrote:
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 > ---
-> Changelog:
-> v1->v2:
-> Address review comments provided by Amir.
-> 1. To succeed, the test now requires the underlying base filesystems to provide
->    32-bit inode numbers or the user to provide "xino" mount option. The test
->    also requires that either overlayfs 'index' config feature to be enabled by
->    default or to be enabled by using the 'index=on' mount option.
-> 2. Require $TEST_DEV for use as Overlayfs' lowerdir.
-> 3. Pass $OVERLAY_MOUNT_OPTIONS as argument to _overlay_scratch_mount_dirs().
->
->  tests/overlay/043     | 167 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/043.out |   2 +
->  tests/overlay/group   |   1 +
->  3 files changed, 170 insertions(+)
->  create mode 100755 tests/overlay/043
->  create mode 100644 tests/overlay/043.out
->
-> diff --git a/tests/overlay/043 b/tests/overlay/043
+> 
+> V3: 
+>  * Added tests for -r parameter error handling
+>  tests/xfs/900     |  98 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/900.out | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 222 insertions(+)
+>  create mode 100755 tests/xfs/900
+>  create mode 100644 tests/xfs/900.out
+> 
+> diff --git a/tests/xfs/900 b/tests/xfs/900
 > new file mode 100755
-> index 0000000..5778564
+> index 0000000..570f7d6
 > --- /dev/null
-> +++ b/tests/overlay/043
-> @@ -0,0 +1,167 @@
+> +++ b/tests/xfs/900
+> @@ -0,0 +1,98 @@
 > +#! /bin/bash
-> +# FSQA Test No. 043
+> +# FS QA Test No. 900
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Nikolay Borisov <nborisov@suse.com>
 > +#
-> +# Test constant inode numbers on non-samefs setup
-> +# This is a variant of overlay/017 to test constant st_ino numbers for
-> +# non-samefs setup.
 > +#
-> +# This simple test demonstrates a known issue with overlayfs:
-> +# - stat file A shows inode number X
-> +# - modify A to trigger copy up
-> +# - stat file A shows inode number Y != X
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
 > +#
-> +# Also test if d_ino of readdir entries changes after copy up
-> +# and if inode numbers persist after rename, drop caches and
-> +# mount cycle.
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
 > +#
-> +# This test succeeds when either the underlying filesystems provide 32-bit
-> +# inode numbers or when the xino mount option is provided. This test
-> +# also requires that either overlayfs 'index' config feature to be enabled by
-> +# default or to be enabled by using the 'index=on' mount option.
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
 > +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/punch
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+
+This says generic but you have it under xfs/ tests, is that intentional?
+
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fiemap" "-r 0 4k"
 
 
-Test looks good, but I am not happy with merging this text, even though I wrote
-part of it...
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
 
-Regarding the claim that the test succeeds on 32bit ino file systems,
-this is not
-yet true and may not be true in the future. We won't know how 'xino' will be
-call or configured until the feature is merged, so I suggest to leave
-this paragraph
-out of the test description before merging.
+Do you need to explicitly mkfs w/ a 4k block size so all the
+below tests on 4k boundaries will pass?
 
-Regarding the 'index' feature text, I don't like the situation as it is.
-I would like to get a feedback from Eryu after he understands the options,
-but my proposal is as follows:
+(IOWs does this work on 2k or 8k fs block size?)
 
-- Test overlay/017 (constant st_ino/d_ino) should be independent of index
-  so remove "hardlink1 hardlink2" from overlay/017 FILES, because the
-  hardlinks use case is already covered by the more specific 018 test
-  which does require and enable index.
-- Add the d_ino verification from 017 also to 018, so test coverage for
-  hardlinks doesn't change
-- That makes 017 a regression test for constant st_ino/d_ino (excluding
-  hardlinks), even if index is disabled and 018 a regression test for hardlinks
-  (including st_ino/d_ino) which depends on index feature
-
-If that is acceptable then the new variants 017 should not require index
-and a nonsamefs variant of 018 which does require index would be nice.
-
-Thinking out loud: would it have been better if we added a general way
-to configure all tests to tun in non-samefs configuration instead of duplicating
-individual test? I don't have any good ideas how that would work.
-
-Eryu,
-
-What do you think about all this?
-
-Amir.
+-Eric
