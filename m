@@ -1,160 +1,255 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39272 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754554AbdKNKyy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Nov 2017 05:54:54 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 3/3] fstests: filter readonly mount error messages
-Date: Tue, 14 Nov 2017 18:54:01 +0800
-Message-Id: <20171114105401.10542-4-eguan@redhat.com>
-In-Reply-To: <20171114105401.10542-1-eguan@redhat.com>
-References: <20171114105401.10542-1-eguan@redhat.com>
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:57834 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1751831AbdKNLJW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 14 Nov 2017 06:09:22 -0500
+Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id vAEB4FTx086565
+        for <fstests@vger.kernel.org>; Tue, 14 Nov 2017 06:09:21 -0500
+Received: from e31.co.us.ibm.com (e31.co.us.ibm.com [32.97.110.149])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2e7uwvb0y7-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Tue, 14 Nov 2017 06:09:21 -0500
+Received: from localhost
+        by e31.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Tue, 14 Nov 2017 04:09:20 -0700
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH V2] overlay: Test consistent st_ino numbers for non-samefs scenario
+Date: Tue, 14 Nov 2017 16:39:48 +0530
+Message-Id: <20171114110948.31345-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org, amir73il@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-write-protected devices") changed the error message on read-only
-block device, and in the failure case printed one line message
-instead of two (for details please see comments in common/filter),
-and this change broke generic/050 and overlay/035.
+This commit adds a test to verify consistent st_ino feature when
+the overlayfs instance is composed of two different underlying
+filesystem instances.
 
-Fix it by adding more filter rules to _filter_ro_mount and updating
-associated .out files to unify the output from both old and new
-util-linux versions.
+For example,
+$ mount -t xfs /dev/loop0 /mnt/test
+$ mount -t xfs /dev/loop1 /mnt/scratch
+$ mkdir /mnt/scratch/upper
+$ mkdir /mnt/scratch/work
+$ mount -t overlay overlay -o lowerdir=/mnt/test \
+        -o upperdir=/mnt/scratch/upper \
+        -o workdir=/mnt/scratch/work /mnt/merge
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+The goal of this test is to verify that overlayfs returns consistent
+st_ino for the following scenarios,
+- Copy-up of lowerdir files
+- Rename files and drop dentry/inode cache
+- Remount the overlayfs instance
+
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- common/filter         | 35 ++++++++++++++++++++++++++++++++++-
- tests/generic/050     |  2 +-
- tests/generic/050.out |  8 ++++----
- tests/overlay/035     |  9 +++++++--
- 4 files changed, 46 insertions(+), 8 deletions(-)
+Changelog:
+v1->v2:
+Address review comments provided by Amir.
+1. To succeed, the test now requires the underlying base filesystems to provide
+   32-bit inode numbers or the user to provide "xino" mount option. The test
+   also requires that either overlayfs 'index' config feature to be enabled by
+   default or to be enabled by using the 'index=on' mount option.
+2. Require $TEST_DEV for use as Overlayfs' lowerdir.
+3. Pass $OVERLAY_MOUNT_OPTIONS as argument to _overlay_scratch_mount_dirs().
+   
+ tests/overlay/043     | 167 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/043.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 170 insertions(+)
+ create mode 100755 tests/overlay/043
+ create mode 100644 tests/overlay/043.out
 
-diff --git a/common/filter b/common/filter
-index b1cd558ab0e1..357c4c9357c3 100644
---- a/common/filter
-+++ b/common/filter
-@@ -399,9 +399,42 @@ _filter_ending_dot()
- 
- # Older mount output referred to "block device" when mounting RO devices
- # It's gone in newer versions
+diff --git a/tests/overlay/043 b/tests/overlay/043
+new file mode 100755
+index 0000000..5778564
+--- /dev/null
++++ b/tests/overlay/043
+@@ -0,0 +1,167 @@
++#! /bin/bash
++# FSQA Test No. 043
 +#
-+# And util-linux v2.30 changed the output again, e.g.
-+# for a successful ro mount:
-+# prior to v2.30:  mount: <device> is write-protected, mounting read-only
-+# v2.30 and later: mount: <mountpoint>: WARNING: device write-protected, mounted read-only.
++# Test constant inode numbers on non-samefs setup
++# This is a variant of overlay/017 to test constant st_ino numbers for
++# non-samefs setup.
 +#
-+# a failed ro mount:
-+# prior to v2.30:
-+# mount: <device> is write-protected, mounting read-only
-+# mount: cannot mount <device> read-only
-+# v2.30 and later:
-+# mount: <mountpoint>: cannot mount <device> read-only.
++# This simple test demonstrates a known issue with overlayfs:
++# - stat file A shows inode number X
++# - modify A to trigger copy up
++# - stat file A shows inode number Y != X
 +#
-+# a failed rw remount:
-+# prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
-+# v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
++# Also test if d_ino of readdir entries changes after copy up
++# and if inode numbers persist after rename, drop caches and
++# mount cycle.
 +#
-+# Now use _filter_ro_mount to unify all these differences across old & new
-+# util-linux versions.
- _filter_ro_mount() {
- 	sed -e "s/mount: block device/mount:/g" \
--	    -e "s/mount: cannot mount block device/mount: cannot mount/g"
-+	    -e "s/mount: cannot mount block device/mount: cannot mount/g" | \
-+	_filter_ending_dot | \
-+	perl -ne '
-+	if (/write-protected, mount.*read-only/) {
-+		print "mount: device write-protected, mounting read-only\n";
-+	} elsif (/mount: .*: cannot mount.*read-only/) {
-+		print "mount: device write-protected, mounting read-only\n";
-+		print "mount: cannot mount read-only\n";
-+	} elsif (/mount: .*: cannot remount (.*) read-write.*/) {
-+		print "mount: cannot remount $1 read-write, is write-protected\n";
-+	} elsif (/(^mount: cannot mount) .* (read-only$)/) {
-+		print "$1 $2\n";
-+	} else {
-+		print "$_";
-+	}'
- }
- 
- # Filter a failed mount output, util-linux changed the message several times.
-diff --git a/tests/generic/050 b/tests/generic/050
-index 5fa28a7648e5..65fcb018ca5f 100755
---- a/tests/generic/050
-+++ b/tests/generic/050
-@@ -98,7 +98,7 @@ echo "mounting filesystem that needs recovery on a read-only device:"
- _scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
- 
- echo "unmounting read-only filesystem"
--_scratch_unmount 2>&1 | _filter_scratch
-+_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
- 
- #
- # This is the way out if the underlying device really is read-only.
-diff --git a/tests/generic/050.out b/tests/generic/050.out
-index fb90f6ea5819..2187d16fa328 100644
---- a/tests/generic/050.out
-+++ b/tests/generic/050.out
-@@ -1,7 +1,7 @@
- QA output created by 050
- setting device read-only
- mounting read-only block device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
-+mount: device write-protected, mounting read-only
- touching file on read-only filesystem (should fail)
- touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
- unmounting read-only filesystem
-@@ -12,12 +12,12 @@ going down:
- unmounting shutdown filesystem:
- setting device read-only
- mounting filesystem that needs recovery on a read-only device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
--mount: cannot mount SCRATCH_DEV read-only
-+mount: device write-protected, mounting read-only
-+mount: cannot mount read-only
- unmounting read-only filesystem
- umount: SCRATCH_DEV: not mounted
- mounting filesystem with -o norecovery on a read-only device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
-+mount: device write-protected, mounting read-only
- unmounting read-only filesystem
- setting device read-write
- mounting filesystem that needs recovery with -o ro:
-diff --git a/tests/overlay/035 b/tests/overlay/035
-index 64fcd708105e..d285d44ae9df 100755
---- a/tests/overlay/035
-+++ b/tests/overlay/035
-@@ -45,6 +45,11 @@ _cleanup()
- . ./common/rc
- . ./common/filter
- 
-+filter_mount()
++# This test succeeds when either the underlying filesystems provide 32-bit
++# inode numbers or when the xino mount option is provided. This test
++# also requires that either overlayfs 'index' config feature to be enabled by
++# default or to be enabled by using the 'index=on' mount option.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
++# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	_filter_scratch | _filter_ro_mount
++	cd /
++	rm -f $tmp.*
 +}
 +
- # remove previous $seqres.full before test
- rm -f $seqres.full
- 
-@@ -69,7 +74,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
- $MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
- 			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
- touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
--_scratch_remount rw 2>&1 | _filter_scratch
-+_scratch_remount rw 2>&1 | filter_mount
- $UMOUNT_PROG $SCRATCH_MNT
- 
- # Make workdir immutable to prevent workdir re-create on mount
-@@ -79,7 +84,7 @@ $CHATTR_PROG +i $workdir
- # Verify that overlay is mounted read-only and that it cannot be remounted rw.
- _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir
- touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
--_scratch_remount rw 2>&1 | _filter_scratch
-+_scratch_remount rw 2>&1 | filter_mount
- 
- # success, all done
- status=0
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_test
++_require_test_program "af_unix"
++_require_test_program "t_dir_type"
++
++rm -f $seqres.full
++
++lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
++rm -rf $lowerdir
++mkdir $lowerdir
++
++# Create our test files.
++mkdir $lowerdir/dir
++touch $lowerdir/file
++ln -s $lowerdir/file $lowerdir/symlink
++mknod $lowerdir/chrdev c 1 1
++mknod $lowerdir/blkdev b 1 1
++mknod $lowerdir/fifo p
++$here/src/af_unix $lowerdir/socket
++touch $lowerdir/hardlink1
++ln $lowerdir/hardlink1 $lowerdir/hardlink2
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir \
++			    $OVERLAY_MOUNT_OPTIONS
++
++FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
++
++# Record inode numbers in format <ino> <basename>
++function record_inode_numbers()
++{
++	dir=$1
++	outfile=$2
++
++	for f in $FILES; do
++		ls -id $dir/$f
++	done | \
++	while read ino file; do
++		echo $ino `basename $file` >> $outfile
++	done
++}
++
++# Check inode numbers match recorder inode numbers
++function check_inode_numbers()
++{
++	dir=$1
++	before=$2
++	after=$3
++
++	record_inode_numbers $dir $after
++
++	# Test constant stat(2) st_ino -
++	# Compare before..after - expect silence
++	# We use diff -u so out.bad will tell us which stage failed
++	diff -u $before $after
++
++	# Test constant readdir(3)/getdents(2) d_ino -
++	# Expect to find file by inode number
++	cat $before | while read ino f; do
++		$here/src/t_dir_type $dir $ino | grep -q $f || \
++			echo "$f not found by ino $ino (from $before)"
++	done
++}
++
++rm -f $tmp.*
++testdir=$SCRATCH_MNT/test
++mkdir -p $testdir
++
++# Record inode numbers before copy up
++record_inode_numbers $SCRATCH_MNT $tmp.before
++
++for f in $FILES; do
++	# chown -h modifies all those file types
++	chown -h 100 $SCRATCH_MNT/$f
++done
++
++# Compare inode numbers before/after copy up
++check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup
++
++for f in $FILES; do
++	# move to another dir
++	mv $SCRATCH_MNT/$f $testdir/
++done
++
++echo 3 > /proc/sys/vm/drop_caches
++
++# Compare inode numbers before/after rename and drop caches
++check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
++
++# Verify that the inode numbers survive a mount cycle
++$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir \
++			    $OVERLAY_MOUNT_OPTIONS
++
++# Compare inode numbers before/after mount cycle
++check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/043.out b/tests/overlay/043.out
+new file mode 100644
+index 0000000..f90f0a5
+--- /dev/null
++++ b/tests/overlay/043.out
+@@ -0,0 +1,2 @@
++QA output created by 043
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 782c39f..a99ff07 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -45,3 +45,4 @@
+ 040 auto quick
+ 041 auto quick copyup nonsamefs
+ 042 auto quick copyup hardlink
++043 auto quick copyup nonsamefs
 -- 
-2.13.6
+2.9.5
 
