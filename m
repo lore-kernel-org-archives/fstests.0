@@ -1,54 +1,98 @@
-Received: from mx1.redhat.com ([209.132.183.28]:65139 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:50208 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754406AbdKNKyt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Nov 2017 05:54:49 -0500
+        id S1754114AbdKNKyw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Nov 2017 05:54:52 -0500
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 0/3] fix failures caused by mount error msg change in util-linux v2.30
-Date: Tue, 14 Nov 2017 18:53:58 +0800
-Message-Id: <20171114105401.10542-1-eguan@redhat.com>
+Subject: [PATCH 2/3] overlay/036: filter busy mount message
+Date: Tue, 14 Nov 2017 18:54:00 +0800
+Message-Id: <20171114105401.10542-3-eguan@redhat.com>
+In-Reply-To: <20171114105401.10542-1-eguan@redhat.com>
+References: <20171114105401.10542-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-util-linux v2.30 changed mount error message again and caused several
-tests to fail (reported by Misono Tomohiro, thanks!), this is mainly due
-to two util-linux commits in v2.30-rc1
+util-linux v2.30 changed error message of a busy mount and caused
+overlay/036 to fail. e.g.
 
-6dede2f2f7c5 libmount: support MS_RDONLY on write-protected devices
-ea848180dd34 libmount: add mnt_context_get_excode()
+ - mount: <device> is already mounted or <mountpoint> busy
+ + mount: <mountpoint>: <device> already mounted or mount point busy.
 
-This patchset introduced _filter_ending_dot, _filter_error_mount and
-_filter_busy_mount and improved _filter_ro_mount to deal with all these
-output differences between old and new util-linux versions.
+Filter the mount output by a newly introduced _filter_busy_mount
+into a unified format.
 
-I've tested and confirmed generic/050, xfs/005 and overlay/03[567] all
-passed with both old and new util-linux. xfs/333 is always _notrun
-because there's no realtime-rmapbt support yet.
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+ common/filter         | 12 ++++++++++++
+ tests/overlay/036     |  9 +++++++--
+ tests/overlay/036.out |  4 ++--
+ 3 files changed, 21 insertions(+), 4 deletions(-)
 
-Perhaps there're better and cleaner ways to fix the problems, please
-help review and advise, thanks!
-
-Eryu
-
-Eryu Guan (3):
-  fstests: filter mount error message for EUCLEAN and ESTALE
-  overlay/036: filter busy mount message
-  fstests: filter readonly mount error messages
-
- common/filter         | 70 ++++++++++++++++++++++++++++++++++++++++++++++++++-
- tests/generic/050     |  2 +-
- tests/generic/050.out |  8 +++---
- tests/overlay/035     |  9 +++++--
- tests/overlay/036     |  9 +++++--
- tests/overlay/036.out |  4 +--
- tests/overlay/037     |  4 +--
- tests/overlay/037.out |  4 +--
- tests/xfs/005         |  7 +-----
- tests/xfs/333         |  2 +-
- tests/xfs/333.out     |  2 +-
- 11 files changed, 97 insertions(+), 24 deletions(-)
-
+diff --git a/common/filter b/common/filter
+index d1bb94818e3d..b1cd558ab0e1 100644
+--- a/common/filter
++++ b/common/filter
+@@ -420,6 +420,18 @@ _filter_error_mount()
+ 	sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
+ }
+ 
++# Similar to _filter_error_mount, filter a busy mount output.
++# Turn both old (prior to util-linux v2.30) and new (v2.30 and later) format to
++# a simple one. e.g.
++# old: mount: <device> is already mounted or <mountpoint> busy
++# new: mount: <mountpoint>: <device> already mounted or mount point busy.
++# filtered: mount: <device> already mounted or mount point busy
++_filter_busy_mount()
++{
++	sed -e "s/.*: \([^ ]*\).* already mounted.*busy/mount: \1 already mounted or mount point busy/" | \
++		_filter_ending_dot
++}
++
+ _filter_od()
+ {
+ 	BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
+diff --git a/tests/overlay/036 b/tests/overlay/036
+index 544d4e4eaa87..4c4b56ff9817 100755
+--- a/tests/overlay/036
++++ b/tests/overlay/036
+@@ -63,6 +63,11 @@ _cleanup()
+ . ./common/rc
+ . ./common/filter
+ 
++filter_mount()
++{
++	_filter_scratch | _filter_busy_mount
++}
++
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+@@ -103,12 +108,12 @@ _overlay_mount_dirs $lowerdir2 $upperdir2 $workdir \
+ # Try to mount another overlay with the same upperdir
+ # with index=on - expect EBUSY
+ _overlay_mount_dirs $lowerdir2 $upperdir $workdir2 \
+-		    overlay2 $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
++		    overlay2 $SCRATCH_MNT -oindex=on 2>&1 | filter_mount
+ 
+ # Try to mount another overlay with the same workdir
+ # with index=on - expect EBUSY
+ _overlay_mount_dirs $lowerdir2 $upperdir2 $workdir \
+-		    overlay3 $SCRATCH_MNT -oindex=on 2>&1 | _filter_scratch
++		    overlay3 $SCRATCH_MNT -oindex=on 2>&1 | filter_mount
+ 
+ 
+ # success, all done
+diff --git a/tests/overlay/036.out b/tests/overlay/036.out
+index 51746114db1c..fbe224e1bac7 100644
+--- a/tests/overlay/036.out
++++ b/tests/overlay/036.out
+@@ -1,3 +1,3 @@
+ QA output created by 036
+-mount: overlay2 is already mounted or SCRATCH_MNT busy
+-mount: overlay3 is already mounted or SCRATCH_MNT busy
++mount: overlay2 already mounted or mount point busy
++mount: overlay3 already mounted or mount point busy
 -- 
 2.13.6
 
