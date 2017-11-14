@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44762 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:39272 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755015AbdKNKyu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Nov 2017 05:54:50 -0500
+        id S1754554AbdKNKyy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Nov 2017 05:54:54 -0500
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/3] fstests: filter mount error message for EUCLEAN and ESTALE
-Date: Tue, 14 Nov 2017 18:53:59 +0800
-Message-Id: <20171114105401.10542-2-eguan@redhat.com>
+Subject: [PATCH 3/3] fstests: filter readonly mount error messages
+Date: Tue, 14 Nov 2017 18:54:01 +0800
+Message-Id: <20171114105401.10542-4-eguan@redhat.com>
 In-Reply-To: <20171114105401.10542-1-eguan@redhat.com>
 References: <20171114105401.10542-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,148 +13,148 @@ To: fstests@vger.kernel.org
 Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-util-linux commit ea848180dd34 ("libmount: add
-mnt_context_get_excode()") since v2.30 changed the error message on
-EUCLEAN and ESTALE again (and maybe other errno too):
+util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
+write-protected devices") changed the error message on read-only
+block device, and in the failure case printed one line message
+instead of two (for details please see comments in common/filter),
+and this change broke generic/050 and overlay/035.
 
- - mount: <device> on <mountpoint> failed: Structure needs cleaning
- + mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
-
-and it causes xfs/005, overlay/037 to fail (and probably xfs/333 too,
-but it's always _notrun for now).
-
-So let's filter out the changing parts and keep the error message
-simple.
+Fix it by adding more filter rules to _filter_ro_mount and updating
+associated .out files to unify the output from both old and new
+util-linux versions.
 
 Signed-off-by: Eryu Guan <eguan@redhat.com>
 ---
- common/filter         | 23 +++++++++++++++++++++++
- tests/overlay/037     |  4 ++--
- tests/overlay/037.out |  4 ++--
- tests/xfs/005         |  7 +------
- tests/xfs/333         |  2 +-
- tests/xfs/333.out     |  2 +-
- 6 files changed, 30 insertions(+), 12 deletions(-)
+ common/filter         | 35 ++++++++++++++++++++++++++++++++++-
+ tests/generic/050     |  2 +-
+ tests/generic/050.out |  8 ++++----
+ tests/overlay/035     |  9 +++++++--
+ 4 files changed, 46 insertions(+), 8 deletions(-)
 
 diff --git a/common/filter b/common/filter
-index 0cb458b0051f..d1bb94818e3d 100644
+index b1cd558ab0e1..357c4c9357c3 100644
 --- a/common/filter
 +++ b/common/filter
-@@ -390,6 +390,13 @@ _filter_fstrim()
- 	egrep -o "[0-9]+ bytes" | $AWK_PROG '{print $1}'
- }
+@@ -399,9 +399,42 @@ _filter_ending_dot()
  
-+# Remove the ending dot appended to mount error message, util-linux 2.30
-+# starts to do so.
-+_filter_ending_dot()
-+{
-+	sed -e "s/\.$//"
-+}
-+
  # Older mount output referred to "block device" when mounting RO devices
  # It's gone in newer versions
- _filter_ro_mount() {
-@@ -397,6 +404,22 @@ _filter_ro_mount() {
- 	    -e "s/mount: cannot mount block device/mount: cannot mount/g"
- }
- 
-+# Filter a failed mount output, util-linux changed the message several times.
 +#
-+# prior to v2.21:
-+# mount: Structure needs cleaning
-+# v2.21 to v2.29:
-+# mount: mount <device> on <mountpoint> failed: Structure needs cleaning
++# And util-linux v2.30 changed the output again, e.g.
++# for a successful ro mount:
++# prior to v2.30:  mount: <device> is write-protected, mounting read-only
++# v2.30 and later: mount: <mountpoint>: WARNING: device write-protected, mounted read-only.
++#
++# a failed ro mount:
++# prior to v2.30:
++# mount: <device> is write-protected, mounting read-only
++# mount: cannot mount <device> read-only
 +# v2.30 and later:
-+# mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
++# mount: <mountpoint>: cannot mount <device> read-only.
 +#
-+# This is also true for ESTALE error. So let's remove all the changing parts
-+# and keep the 'prior to v2.21' format.
-+_filter_error_mount()
-+{
-+	sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
-+}
-+
- _filter_od()
- {
- 	BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
-diff --git a/tests/overlay/037 b/tests/overlay/037
-index 728732903358..b897ec9263ee 100755
---- a/tests/overlay/037
-+++ b/tests/overlay/037
-@@ -76,12 +76,12 @@ $UMOUNT_PROG $SCRATCH_MNT
- 
- # Try to mount an overlay with the same upperdir and different lowerdir - expect ESTALE
- _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir -oindex=on \
--	2>&1 | _filter_scratch
-+	2>&1 | _filter_scratch | _filter_error_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- 
- # Try to mount an overlay with the same workdir and different upperdir - expect ESTALE
- _overlay_scratch_mount_dirs $lowerdir $upperdir2 $workdir -oindex=on \
--	2>&1 | _filter_scratch
-+	2>&1 | _filter_scratch | _filter_error_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- 
- # Mount overlay with original lowerdir, upperdir, workdir and index=on - expect success
-diff --git a/tests/overlay/037.out b/tests/overlay/037.out
-index 786ef85c29e3..d6ad7cfad687 100644
---- a/tests/overlay/037.out
-+++ b/tests/overlay/037.out
-@@ -1,3 +1,3 @@
- QA output created by 037
--mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
--mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Stale file handle
-+mount: Stale file handle
-+mount: Stale file handle
-diff --git a/tests/xfs/005 b/tests/xfs/005
-index fade4bbf282b..ebf4b15ec9b5 100755
---- a/tests/xfs/005
-+++ b/tests/xfs/005
-@@ -40,11 +40,6 @@ _cleanup()
-     rm -f $tmp.*
++# a failed rw remount:
++# prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
++# v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
++#
++# Now use _filter_ro_mount to unify all these differences across old & new
++# util-linux versions.
+ _filter_ro_mount() {
+ 	sed -e "s/mount: block device/mount:/g" \
+-	    -e "s/mount: cannot mount block device/mount: cannot mount/g"
++	    -e "s/mount: cannot mount block device/mount: cannot mount/g" | \
++	_filter_ending_dot | \
++	perl -ne '
++	if (/write-protected, mount.*read-only/) {
++		print "mount: device write-protected, mounting read-only\n";
++	} elsif (/mount: .*: cannot mount.*read-only/) {
++		print "mount: device write-protected, mounting read-only\n";
++		print "mount: cannot mount read-only\n";
++	} elsif (/mount: .*: cannot remount (.*) read-write.*/) {
++		print "mount: cannot remount $1 read-write, is write-protected\n";
++	} elsif (/(^mount: cannot mount) .* (read-only$)/) {
++		print "$1 $2\n";
++	} else {
++		print "$_";
++	}'
  }
  
--filter_mount()
--{
--	sed -e "s/mount .* failed: //"
--}
--
- # get standard environment, filters and checks
+ # Filter a failed mount output, util-linux changed the message several times.
+diff --git a/tests/generic/050 b/tests/generic/050
+index 5fa28a7648e5..65fcb018ca5f 100755
+--- a/tests/generic/050
++++ b/tests/generic/050
+@@ -98,7 +98,7 @@ echo "mounting filesystem that needs recovery on a read-only device:"
+ _scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
+ 
+ echo "unmounting read-only filesystem"
+-_scratch_unmount 2>&1 | _filter_scratch
++_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+ 
+ #
+ # This is the way out if the underlying device really is read-only.
+diff --git a/tests/generic/050.out b/tests/generic/050.out
+index fb90f6ea5819..2187d16fa328 100644
+--- a/tests/generic/050.out
++++ b/tests/generic/050.out
+@@ -1,7 +1,7 @@
+ QA output created by 050
+ setting device read-only
+ mounting read-only block device:
+-mount: SCRATCH_DEV is write-protected, mounting read-only
++mount: device write-protected, mounting read-only
+ touching file on read-only filesystem (should fail)
+ touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
+ unmounting read-only filesystem
+@@ -12,12 +12,12 @@ going down:
+ unmounting shutdown filesystem:
+ setting device read-only
+ mounting filesystem that needs recovery on a read-only device:
+-mount: SCRATCH_DEV is write-protected, mounting read-only
+-mount: cannot mount SCRATCH_DEV read-only
++mount: device write-protected, mounting read-only
++mount: cannot mount read-only
+ unmounting read-only filesystem
+ umount: SCRATCH_DEV: not mounted
+ mounting filesystem with -o norecovery on a read-only device:
+-mount: SCRATCH_DEV is write-protected, mounting read-only
++mount: device write-protected, mounting read-only
+ unmounting read-only filesystem
+ setting device read-write
+ mounting filesystem that needs recovery with -o ro:
+diff --git a/tests/overlay/035 b/tests/overlay/035
+index 64fcd708105e..d285d44ae9df 100755
+--- a/tests/overlay/035
++++ b/tests/overlay/035
+@@ -45,6 +45,11 @@ _cleanup()
  . ./common/rc
  . ./common/filter
-@@ -64,7 +59,7 @@ _scratch_mkfs_xfs -m crc=1 >> $seqres.full 2>&1 || _fail "mkfs failed"
- $XFS_IO_PROG -c "pwrite 224 4" -c fsync $SCRATCH_DEV | _filter_xfs_io
  
- # should FAIL, the crc is bad; golden output contains mount failure
--_scratch_mount 2>&1 | filter_mount
-+_scratch_mount 2>&1 | _filter_error_mount
++filter_mount()
++{
++	_filter_scratch | _filter_ro_mount
++}
++
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+@@ -69,7 +74,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+ $MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
+ 			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+ touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+-_scratch_remount rw 2>&1 | _filter_scratch
++_scratch_remount rw 2>&1 | filter_mount
+ $UMOUNT_PROG $SCRATCH_MNT
+ 
+ # Make workdir immutable to prevent workdir re-create on mount
+@@ -79,7 +84,7 @@ $CHATTR_PROG +i $workdir
+ # Verify that overlay is mounted read-only and that it cannot be remounted rw.
+ _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir
+ touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
+-_scratch_remount rw 2>&1 | _filter_scratch
++_scratch_remount rw 2>&1 | filter_mount
  
  # success, all done
  status=0
-diff --git a/tests/xfs/333 b/tests/xfs/333
-index bf0c811d2435..0a66f08a1062 100755
---- a/tests/xfs/333
-+++ b/tests/xfs/333
-@@ -64,7 +64,7 @@ _scratch_unmount
- 
- echo "Corrupt fs"
- _scratch_xfs_db -x -c 'sb 0' -c "write rrmapino $ino" >> $seqres.full
--_scratch_mount 2>&1 | _filter_scratch
-+_scratch_mount 2>&1 | _filter_scratch | _filter_error_mount
- 
- echo "Test done, mount should have failed"
- 
-diff --git a/tests/xfs/333.out b/tests/xfs/333.out
-index f7518f46d900..b3c698750f8f 100644
---- a/tests/xfs/333.out
-+++ b/tests/xfs/333.out
-@@ -2,5 +2,5 @@ QA output created by 333
- Format and mount
- Create some files
- Corrupt fs
--mount: mount SCRATCH_DEV on SCRATCH_MNT failed: Structure needs cleaning
-+mount: Structure needs cleaning
- Test done, mount should have failed
 -- 
 2.13.6
 
