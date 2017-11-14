@@ -1,75 +1,80 @@
-Received: from sandeen.net ([63.231.237.45]:37310 "EHLO sandeen.net"
+Received: from imap.thunk.org ([74.207.234.97]:45658 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752528AbdKNUy4 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 14 Nov 2017 15:54:56 -0500
-Subject: Re: [PATCH v3 2/2] fiemap: Implement ranged query
-References: <1510588073-5665-1-git-send-email-nborisov@suse.com>
- <1510588073-5665-2-git-send-email-nborisov@suse.com>
- <20171113214457.GX4094@dastard>
- <e97f774f-a3ae-04c0-4b74-6a4f26e72674@suse.com>
- <3491ce98-b744-90de-e01b-83f13abadfa9@sandeen.net>
- <6619a7bc-ecc1-b8aa-82d0-1747ee812463@suse.com>
- <bbfdb7c8-81a7-0a42-ccfc-003f3b89de9b@sandeen.net>
- <20171114205226.GB4094@dastard>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <16c5de37-f9ad-a55b-c32d-388bb75a938d@sandeen.net>
-Date: Tue, 14 Nov 2017 14:54:54 -0600
+        id S1756021AbdKNXiw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 14 Nov 2017 18:38:52 -0500
+Date: Tue, 14 Nov 2017 18:38:49 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] common: rework _require_ext4_mkfs_feature
+Message-ID: <20171114233849.fnbutentfj4i7tcs@thunk.org>
+References: <20171112133621.2474-1-tytso@mit.edu>
+ <20171114114315.GH17339@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20171114205226.GB4094@dastard>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171114114315.GH17339@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Nikolay Borisov <nborisov@suse.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, eguan@redhat.com, darrick.wong@oracle.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Nov 14, 2017 at 07:43:15PM +0800, Eryu Guan wrote:
+> Hmm, I don't think this the correct usage of _require rules. We use
+> _require rule to check if the requirements have been met, but don't
+> count on it to do any actual work. And we could always create a small
+> filesystem (say 512m) if we want to reduce the mkfs time in the _require
+> rule.
 
+I'm trying to avoid duplicating work; in most of the cases where we
+call _require_ext4_feature, we immediately create a file system with
+the given features.
 
-On 11/14/17 2:52 PM, Dave Chinner wrote:
-> On Tue, Nov 14, 2017 at 07:31:34AM -0600, Eric Sandeen wrote:
->>
->>
->> On 11/14/17 12:32 AM, Nikolay Borisov wrote:
->>>
->>>
->>> On 14.11.2017 00:22, Eric Sandeen wrote:
->>>> On 11/13/17 4:05 PM, Nikolay Borisov wrote:
->>
->> ...
->>
->>>>> You are right this is a bit ugly, but it seems more consistend to me,
->>>>> rather than something like
->>>>>
->>>>> xfs_io -c "fiemap -r -n 10 -v 4k 10k" for example. And the reason why
->>>>> I'm using this hackish way and not declaring r as r: in getopt is
->>>>> because getopt doesn't recognise when a parameter takes more than 1
->>>>> argument.
->>>>
->>>> Sorry for chiming in so late after all the go-rounds, but:
->>>>
->>>> Why not just drop -r entirely, and make fiemap go into ranged mode iff a
->>>> range is specified at the end of the command, i.e.:
->>>>
->>>> fiemap [ -alv ] [ -n nx ] [ offset length ]
->>>
->>> V2 was like that but it required some changing to the generic code which
->>> detects the presence of this feature and Dave objected hence v3.
->>
->> Ok, sorry for being so behind and rehashing old discussions.  Let me look
->> at that.
+My original version of the patch to modify an ext4 test simply open
+coded the check for the failure and then ran "_notrun".  Which was
+criticized because the reviewers thought that it should be factored
+out into common code.  That's fine, but if we have to call mke2fs
+twice, that would be sad....
+
+> How about naming it as _require_scratch_ext4_feature? So it indicates
+> that we assume $SCRATCH_DEV is present here and acts as a reminder to
+> _require_scratch first.
+
+Sure.  How about simply including _require_scratch into the function?
+
 > 
-> I suggested "-r" because of the fact that you can't detect optional
-> parameters in fstests without jumping through really nasty hoops
-> involving regex line noise.
-
-Yeah, but I'd rather have nasty stuff in xfstests than in xfsprogs interfaces.
- 
-See also my suggestion to try mapping past EOF as a detection method.
-
--Eric
-
-> Cheers,
+> >  {
+> > -	local feature=$1
+> > -	local testfile=/tmp/$$.ext4_mkfs
+> > +	local feature="$1"
+> > +	local sz="$2"
 > 
-> Daves.
+> Assign sz=512m unconditionally?
+
+In half of the cases we actually want to format the file system to
+take up the whole disk.  So if sz is not specified, we end up omitting
+the size parameter to mke2fs, which is by design.
+
+> > +++ b/tests/ext4/306
+> > @@ -44,7 +44,6 @@ _supported_fs ext4
+> >  _supported_os Linux
+> >  
+> >  _require_scratch
+> > -_require_ext4_mkfs_feature "64bit"
 > 
+> This is actually for old distros that mkfs.ext4 doesn't support 64bit
+> feature, e.g. RHEL6. I think it's still meanful for now.
+
+The funny thing is that ext4/306 is actually formatting the file
+system *without* 64-bit feature.  So the _require_ext4_mkfs_feature is
+really trying to make sure that this mke2fs doesn't fail:
+
+$MKFS_EXT4_PROG -F -O ^extents,^64bit $SCRATCH_DEV 512m
+
+So what we can probably do is this:
+
+features="^extents"
+if grep -q 64bit /etc/mke2fs.conf ; then
+    features="^extents,^64bit"
+fi
+$MKFS_EXT4_PROG -F -O $features $SCRATCH_DEV 512m
+
+						- Ted
