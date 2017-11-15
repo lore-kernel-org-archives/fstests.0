@@ -1,251 +1,82 @@
-Received: from mail.kernel.org ([198.145.29.99]:46084 "EHLO mail.kernel.org"
+Received: from mx2.suse.de ([195.135.220.15]:46090 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757701AbdKOLrH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Nov 2017 06:47:07 -0500
-Subject: Re: [PATCH v2] generic: add testcase to test fallocate & f{data,}sync
-References: <20171115085833.55207-1-yuchao0@huawei.com>
- <20171115113728.GS17339@eguan.usersys.redhat.com>
-From: Chao Yu <chao@kernel.org>
-Message-ID: <f61cd7cc-9c9b-b2f8-2bea-df24b3b25a76@kernel.org>
-Date: Wed, 15 Nov 2017 19:46:39 +0800
-MIME-Version: 1.0
-In-Reply-To: <20171115113728.GS17339@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S1757342AbdKOMK0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Nov 2017 07:10:26 -0500
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH v4 1/2] fiemap: Factor out actual fiemap call code
+Date: Wed, 15 Nov 2017 14:10:20 +0200
+Message-Id: <1510747821-13270-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Chao Yu <yuchao0@huawei.com>, linux-ext4@vger.kernel.org
-Cc: fstests@vger.kernel.org, jaegeuk@kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, eguan@redhat.com, david@fromorbit.com, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/11/15 19:37, Eryu Guan wrote:
-> [adding ext4 list]
-> 
-> On Wed, Nov 15, 2017 at 04:58:33PM +0800, Chao Yu wrote:
->> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
->> to recovery isize according to valid block address or preallocated flag
->> in last fsynced dnode block.
->>
->> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
->> flag, since it can preallocated block cross EOF, once the file is fsynced,
->> in POR, we will recover isize incorrectly based on these fallocated
->> blocks.
->>
->> This patch adds a new testcase to test fallocate, in order to verify
->> whether filesystem will do correct recovery on isize.
->>
->> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> 
-> This test fails on ext4 as
-> 
->  ==== falloc -k 1024 test with fdatasync ====
-> +Before:  "b: 8216 s: 4202496"
-> +After :  "b: 8208 s: 4202496"
->  ==== falloc -k 4096 test with fdatasync ====
-> +Before:  "b: 8216 s: 4202496"
-> +After :  "b: 8208 s: 4202496"
->  ==== falloc -k 104857600 test with fdatasync ====
-> +Before:  "b: 213008 s: 4202496"
-> +After :  "b: 8208 s: 4202496"
-> 
-> So the block counts are changed after fdatasync & fs shutdown in the
-> fallocate(2) KEEP_SIZE case. Looks like a real ext4 bug, fdatasync
-> failed to flush the preallocated blocks beyond EOF to disk, but I want
-> to confirm first with ext4 people. If it turns out to be a case issue,
-> we'd like to update test case accordingly before merging it.
-> 
->> ---
->> v2:
->> - change copyright to Huawei Co.
->> - refactor description of testcase.
->> - set status correctly.
->>  tests/generic/468     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/generic/468.out |  13 ++++++
->>  tests/generic/group   |   1 +
->>  3 files changed, 141 insertions(+)
->>  create mode 100755 tests/generic/468
->>  create mode 100644 tests/generic/468.out
->>
->> diff --git a/tests/generic/468 b/tests/generic/468
->> new file mode 100755
->> index 000000000000..242589a35e34
->> --- /dev/null
->> +++ b/tests/generic/468
->> @@ -0,0 +1,127 @@
->> +#! /bin/bash
->> +# FS QA Test 468
->> +#
->> +# This testcase is a fallocate variant of generic/392, it expands to test
->> +# block preallocation functionality of fallocate.
->> +# In this case, we are trying to execute:
->> +# 1. fallocate {,-k}
->> +# 2. f{data,}sync
->> +# 3. power-cuts
->> +# 4. recovery filesystem during mount
->> +# 5. check inode's metadata
->> +#
->> +# In the case of fsync, filesystem should recover all the inode metadata, while
->> +# recovering i_blocks and i_size at least for fdatasync, so this testcase excepts
->> +# that inode metadata will be unchanged after recovery.
->> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2017 Huawei.  All Rights Reserved.
->> +# Author: Chao Yu <yuchao0@huawei.com>
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_test
-> 
-> I'd removed this _require_test call, as test device is not used. I'll
-> fix it on commit if we don't need v3 (due to the ext4 failure).
+This will be needed to in a subsequent patch to avoid code duplication
 
-Oh, that's right, let me know if we need v3. ;)
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
+ io/fiemap.c | 39 ++++++++++++++++++++++++++++-----------
+ 1 file changed, 28 insertions(+), 11 deletions(-)
 
-> 
->> +
->> +_require_scratch
->> +_require_scratch_shutdown
->> +_require_xfs_io_command "falloc" "-k"
->> +
->> +_scratch_mkfs >/dev/null 2>&1
->> +_require_metadata_journaling $SCRATCH_DEV
->> +_scratch_mount
->> +
->> +testfile=$SCRATCH_MNT/testfile
->> +
->> +# check inode metadata after shutdown
->> +check_inode_metadata()
->> +{
->> +	sync_mode=$1
->> +
->> +	# fsync or fdatasync
->> +	if [ $sync_mode = "fsync" ]; then
->> +		stat_opt='-c "b: %b s: %s a: %x m: %y c: %z"'
->> +	else
->> +		stat_opt='-c "b: %b s: %s"'
->> +	fi
->> +
->> +	before=`stat "$stat_opt" $testfile`
->> +
->> +	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
->> +	src/godown $SCRATCH_MNT | tee -a $seqres.full
->> +	_scratch_cycle_mount
->> +
->> +	after=`stat "$stat_opt" $testfile`
->> +
->> +	if [ "$before" != "$after" ]; then
->> +		echo "Before: $before"
->> +		echo "After : $after"
->> +		status=1;	# this is a failure!
->> +	fi
->> +	echo "Before: $before" >> $seqres.full
->> +	echo "After : $after" >> $seqres.full
->> +	rm $testfile
->> +}
->> +
->> +# fallocate XX KB with f{data}sync, followed by power-cut
->> +test_falloc()
->> +{
->> +	echo "==== falloc $2$3 test with $1 ====" | tee -a $seqres.full
->> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
->> +			-c "pwrite 0 4202496"	\
->> +			-c "fsync"		\
->> +			-c "falloc $2 4202496 $3"\
->> +			$testfile >/dev/null
->> +	check_inode_metadata $1
->> +}
->> +
->> +for i in fsync fdatasync; do
->> +	test_falloc $i "" 1024
->> +	test_falloc $i "" 4096
->> +	test_falloc $i "" 104857600
->> +	test_falloc $i "-k " 1024
->> +	test_falloc $i "-k " 4096
->> +	test_falloc $i "-k " 104857600
->> +done
->> +
->> +status = 0
-> 
-> This is wrong in bash, should be "status=0", no spaces between "=" :)
-> I can fix it on commit too.
+diff --git a/io/fiemap.c b/io/fiemap.c
+index e6fd66da753d..08391f69d9bd 100644
+--- a/io/fiemap.c
++++ b/io/fiemap.c
+@@ -211,6 +211,31 @@ calc_print_format(
+ 	}
+ }
+ 
++static int
++__fiemap(
++	 struct fiemap * fiemap,
++	 int		 mapsize,
++	 __u32		 flags,
++	 __u64		 start,
++	 __u64		 length) {
++
++	int ret;
++
++	memset(fiemap, 0, mapsize);
++	fiemap->fm_flags = flags;
++	fiemap->fm_start = start;
++	fiemap->fm_length = length;
++	fiemap->fm_extent_count = EXTENT_BATCH;
++	ret = ioctl(file->fd, FS_IOC_FIEMAP, fiemap);
++	if (ret < 0) {
++	        fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
++	                "%s\n", progname, file->name, strerror(errno));
++	        return ret;
++	}
++
++	return 0;
++}
++
+ int
+ fiemap_f(
+ 	int		argc,
+@@ -266,19 +291,11 @@ fiemap_f(
+ 
+ 	while (!last && (cur_extent != max_extents)) {
+ 
+-		memset(fiemap, 0, map_size);
+-		fiemap->fm_flags = fiemap_flags;
+-		fiemap->fm_start = last_logical;
+-		fiemap->fm_length = -1LL;
+-		fiemap->fm_extent_count = EXTENT_BATCH;
+-
+-		ret = ioctl(file->fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
++		ret = __fiemap(fiemap, map_size, fiemap_flags, last_logical,
++			       -1LL);
+ 		if (ret < 0) {
+-			fprintf(stderr, "%s: ioctl(FS_IOC_FIEMAP) [\"%s\"]: "
+-				"%s\n", progname, file->name, strerror(errno));
+-			free(fiemap);
+ 			exitcode = 1;
+-			return 0;
++			goto out;
+ 		}
+ 
+ 		/* No more extents to map, exit */
+-- 
+2.7.4
 
-Thanks for correcting my coding style issue.
-
-Thanks,
-
-> 
-> Thanks,
-> Eryu
-> 
->> +exit
->> diff --git a/tests/generic/468.out b/tests/generic/468.out
->> new file mode 100644
->> index 000000000000..b3a28d5ea07c
->> --- /dev/null
->> +++ b/tests/generic/468.out
->> @@ -0,0 +1,13 @@
->> +QA output created by 468
->> +==== falloc 1024 test with fsync ====
->> +==== falloc 4096 test with fsync ====
->> +==== falloc 104857600 test with fsync ====
->> +==== falloc -k 1024 test with fsync ====
->> +==== falloc -k 4096 test with fsync ====
->> +==== falloc -k 104857600 test with fsync ====
->> +==== falloc 1024 test with fdatasync ====
->> +==== falloc 4096 test with fdatasync ====
->> +==== falloc 104857600 test with fdatasync ====
->> +==== falloc -k 1024 test with fdatasync ====
->> +==== falloc -k 4096 test with fdatasync ====
->> +==== falloc -k 104857600 test with fdatasync ====
->> diff --git a/tests/generic/group b/tests/generic/group
->> index 9183950c8dfc..ea2dc04d931e 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -470,3 +470,4 @@
->>  465 auto rw quick aio
->>  466 auto quick rw
->>  467 auto quick exportfs
->> +468 shutdown auto quick metadata
->> -- 
->> 2.15.0.55.gc2ece9dc4de6
->>
