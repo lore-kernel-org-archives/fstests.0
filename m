@@ -1,288 +1,240 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:31573 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755502AbdKOKN0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 05:13:26 -0500
-Subject: Re: [PATCH v2] btrfs/154: test for device dynamic rescan
-References: <20171113022541.7413-1-anand.jain@oracle.com>
- <20171115030515.19922-1-anand.jain@oracle.com>
- <20171115064745.GL17339@eguan.usersys.redhat.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <1979284e-099f-47e8-e1fc-98bf4576cd93@oracle.com>
-Date: Wed, 15 Nov 2017 18:13:33 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:37482 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757704AbdKOLhb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 15 Nov 2017 06:37:31 -0500
+Date: Wed, 15 Nov 2017 19:37:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] generic: add testcase to test fallocate & f{data,}sync
+Message-ID: <20171115113728.GS17339@eguan.usersys.redhat.com>
+References: <20171115085833.55207-1-yuchao0@huawei.com>
 MIME-Version: 1.0
-In-Reply-To: <20171115064745.GL17339@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171115085833.55207-1-yuchao0@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Chao Yu <yuchao0@huawei.com>, linux-ext4@vger.kernel.org
+Cc: fstests@vger.kernel.org, jaegeuk@kernel.org, chao@kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+[adding ext4 list]
 
-
-On 11/15/2017 02:47 PM, Eryu Guan wrote:
-> On Wed, Nov 15, 2017 at 11:05:15AM +0800, Anand Jain wrote:
->> Make sure missing device is included in the alloc list when it is
->> scanned on a mounted FS.
->>
->> This test case needs btrfs kernel patch which is in the ML
->>    [PATCH] btrfs: handle dynamically reappearing missing device
->> Without the kernel patch, the test will run, but reports as
->> failed, as the device scanned won't appear in the alloc_list.
->>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->> v2: Fixed review comments.
->>   tests/btrfs/154     | 186 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/154.out |  10 +++
->>   tests/btrfs/group   |   1 +
->>   3 files changed, 197 insertions(+)
->>   create mode 100755 tests/btrfs/154
->>   create mode 100644 tests/btrfs/154.out
->>
->> diff --git a/tests/btrfs/154 b/tests/btrfs/154
->> new file mode 100755
->> index 000000000000..73a185157389
->> --- /dev/null
->> +++ b/tests/btrfs/154
->> @@ -0,0 +1,186 @@
->> +#! /bin/bash
->> +# FS QA Test 154
->> +#
->> +# Test for reappearing missing device functionality.
->> +#   This test will fail without the btrfs kernel patch
->> +#   [PATCH] btrfs: handle dynamically reappearing missing device
->> +#
->> +#---------------------------------------------------------------------
->> +# Copyright (c) 2017 Oracle.  All Rights Reserved.
->> +# Author: Anand Jain <anand.jain@oracle.com>
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#---------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +. ./common/module
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_scratch_dev_pool 2
->> +_require_loadable_fs_module "btrfs"
->> +
->> +_scratch_dev_pool_get 2
->> +
->> +DEV1=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
->> +DEV2=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
->> +
->> +echo DEV1=$DEV1 >> $seqres.full
->> +echo DEV2=$DEV2 >> $seqres.full
->> +
->> +# Balance won't be successful if filled too much
->> +DEV1_SZ=`blockdev --getsize64 $DEV1`
->> +DEV2_SZ=`blockdev --getsize64 $DEV2`
->> +
->> +# get min
->> +MAX_FS_SZ=`echo -e "$DEV1_SZ\n$DEV2_SZ" | sort | head -1`
->> +# Need disks with more than 2G
->> +if [ $MAX_FS_SZ -lt 2000000000 ]; then
->> +	_scratch_dev_pool_put
->> +	_notrun "Smallest dev size $MAX_FS_SZ, Need at least 2G"
->> +fi
->> +
->> +MAX_FS_SZ=100000000
->> +bs="1M"
->> +COUNT=$(($MAX_FS_SZ / 1000000))
->> +CHECKPOINT1=0
->> +CHECKPOINT2=0
->> +
->> +setup()
->> +{
->> +	echo >> $seqres.full
->> +	echo "MAX_FS_SZ=$MAX_FS_SZ COUNT=$COUNT" >> $seqres.full
->> +	echo "setup"
->> +	echo "-----setup-----" >> $seqres.full
->> +	_scratch_pool_mkfs "-mraid1 -draid1" >> $seqres.full 2>&1
->> +	_scratch_mount >> $seqres.full 2>&1
->> +	dd if=/dev/urandom of="$SCRATCH_MNT"/tf bs=$bs count=1 \
->> +					>>$seqres.full 2>&1
->> +	_run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
->> +	_run_btrfs_util_prog filesystem df $SCRATCH_MNT
->> +	COUNT=$(( $COUNT - 1 ))
->> +	echo "unmount" >> $seqres.full
->> +	_scratch_unmount
->> +}
->> +
->> +degrade_mount_write()
->> +{
->> +	echo >> $seqres.full
->> +	echo "--degraded mount: max_fs_sz $max_fs_sz bytes--" >> $seqres.full
->> +	echo
->> +	echo "degraded mount"
->> +
->> +	echo "clean btrfs ko" >> $seqres.full
->> +	# un-scan the btrfs devices
->> +	_reload_fs_module "btrfs"
->> +	_mount -o degraded $DEV1 $SCRATCH_MNT >>$seqres.full 2>&1
->> +	cnt=$(( $COUNT/10 ))
->> +	dd if=/dev/urandom of="$SCRATCH_MNT"/tf1 bs=$bs count=$cnt \
->> +					>>$seqres.full 2>&1
->> +	COUNT=$(( $COUNT - $cnt ))
->> +	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
->> +	_run_btrfs_util_prog filesystem df $SCRATCH_MNT
->> +	CHECKPOINT1=`md5sum $SCRATCH_MNT/tf1`
->> +	echo $SCRATCH_MNT/tf1:$CHECKPOINT1 >> $seqres.full
->> +}
->> +
->> +scan_missing_dev_and_write()
->> +{
->> +	echo >> $seqres.full
->> +	echo "--scan missing $DEV2--" >> $seqres.full
->> +	echo
->> +	echo "scan missing dev and write"
->> +
->> +	_run_btrfs_util_prog device scan $DEV2
->> +
->> +	echo >> $seqres.full
->> +
->> +	_run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
->> +	_run_btrfs_util_prog filesystem df ${SCRATCH_MNT}
->> +
->> +	dd if=/dev/urandom of="$SCRATCH_MNT"/tf2 bs=$bs count=$COUNT \
->> +						>>$seqres.full 2>&1
->> +	CHECKPOINT2=`md5sum $SCRATCH_MNT/tf2`
->> +	echo $SCRATCH_MNT/tf2:$CHECKPOINT2 >> $seqres.full
->> +}
->> +
->> +balance_convert()
->> +{
->> +	echo >> $seqres.full
->> +	echo "----- run balance -----" >> $seqres.full
->> +	echo
->> +	echo "run balance"
->> +
->> +	_run_btrfs_util_prog balance start --full-balance -dconvert=raid1 \
->> +				-mconvert=raid1 ${SCRATCH_MNT}
->> +}
->> +
->> +verify()
->> +{
->> +	echo >> $seqres.full
->> +	echo "--mount reconstructed dev only and check md5sum--" >> $seqres.full
->> +	echo
->> +	echo "mount reconstructed dev only and check md5sum"
->> +	echo "unmount" >> $seqres.full
->> +
->> +	_scratch_unmount
->> +	_reload_fs_module "btrfs"
->> +	_mount -o degraded $DEV2 $SCRATCH_MNT >>$seqres.full 2>&1
->> +	verify_checkpoint1=`md5sum $SCRATCH_MNT/tf1`
->> +	verify_checkpoint2=`md5sum $SCRATCH_MNT/tf2`
->> +
->> +	if [ "$verify_checkpoint1" != "$CHECKPOINT1" ]; then
->> +		echo "checkpoint1 on reappeared disk does not match after balance"
->> +	fi
->> +
->> +	if [ "$verify_checkpoint2" != "$CHECKPOINT2" ]; then
->> +		echo "checkpoint2 on reappeared disk does not match after balance"
->> +	fi
->> +}
->> +
->> +setup
->> +degrade_mount_write
->> +scan_missing_dev_and_write
->> +balance_convert
->> +verify
->> +
->> +$UMOUNT_PROG $DEV2
->> +_scratch_dev_pool_put
->> +_test_mount
+On Wed, Nov 15, 2017 at 04:58:33PM +0800, Chao Yu wrote:
+> f2fs can skip isize updating in fsync(), since during mount, f2fs tries
+> to recovery isize according to valid block address or preallocated flag
+> in last fsynced dnode block.
 > 
-> This _test_mount is not needed either, and it breaks test now as
+> However, fallocate() breaks our rule with setting FALLOC_FL_KEEP_SIZE
+> flag, since it can preallocated block cross EOF, once the file is fsynced,
+> in POR, we will recover isize incorrectly based on these fallocated
+> blocks.
 > 
->     +mount: /dev/sdc1 is already mounted or /sdc1 busy
->     +       /dev/sdc1 is already mounted on /sdc1
+> This patch adds a new testcase to test fallocate, in order to verify
+> whether filesystem will do correct recovery on isize.
 > 
-> I'll fix it on commit.
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
 
-  oops. I just verified _reload_fs_module() and missed to remove
-  _test_mount here. Thanks for fixing Eryu.
+This test fails on ext4 as
 
--Anand
+ ==== falloc -k 1024 test with fdatasync ====
++Before:  "b: 8216 s: 4202496"
++After :  "b: 8208 s: 4202496"
+ ==== falloc -k 4096 test with fdatasync ====
++Before:  "b: 8216 s: 4202496"
++After :  "b: 8208 s: 4202496"
+ ==== falloc -k 104857600 test with fdatasync ====
++Before:  "b: 213008 s: 4202496"
++After :  "b: 8208 s: 4202496"
 
-> Thanks,
-> Eryu
+So the block counts are changed after fdatasync & fs shutdown in the
+fallocate(2) KEEP_SIZE case. Looks like a real ext4 bug, fdatasync
+failed to flush the preallocated blocks beyond EOF to disk, but I want
+to confirm first with ext4 people. If it turns out to be a case issue,
+we'd like to update test case accordingly before merging it.
+
+> ---
+> v2:
+> - change copyright to Huawei Co.
+> - refactor description of testcase.
+> - set status correctly.
+>  tests/generic/468     | 127 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/468.out |  13 ++++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 141 insertions(+)
+>  create mode 100755 tests/generic/468
+>  create mode 100644 tests/generic/468.out
 > 
->> +
->> +status=0
->> +exit
->> diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
->> new file mode 100644
->> index 000000000000..4a4939d448aa
->> --- /dev/null
->> +++ b/tests/btrfs/154.out
->> @@ -0,0 +1,10 @@
->> +QA output created by 154
->> +setup
->> +
->> +degraded mount
->> +
->> +scan missing dev and write
->> +
->> +run balance
->> +
->> +mount reconstructed dev only and check md5sum
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 15c2ecbf553c..c98cf823224e 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -156,3 +156,4 @@
->>   151 auto quick
->>   152 auto quick metadata qgroup send
->>   153 auto quick qgroup
->> +154 auto quick
->> -- 
->> 2.13.1
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/tests/generic/468 b/tests/generic/468
+> new file mode 100755
+> index 000000000000..242589a35e34
+> --- /dev/null
+> +++ b/tests/generic/468
+> @@ -0,0 +1,127 @@
+> +#! /bin/bash
+> +# FS QA Test 468
+> +#
+> +# This testcase is a fallocate variant of generic/392, it expands to test
+> +# block preallocation functionality of fallocate.
+> +# In this case, we are trying to execute:
+> +# 1. fallocate {,-k}
+> +# 2. f{data,}sync
+> +# 3. power-cuts
+> +# 4. recovery filesystem during mount
+> +# 5. check inode's metadata
+> +#
+> +# In the case of fsync, filesystem should recover all the inode metadata, while
+> +# recovering i_blocks and i_size at least for fdatasync, so this testcase excepts
+> +# that inode metadata will be unchanged after recovery.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Huawei.  All Rights Reserved.
+> +# Author: Chao Yu <yuchao0@huawei.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+
+I'd removed this _require_test call, as test device is not used. I'll
+fix it on commit if we don't need v3 (due to the ext4 failure).
+
+> +
+> +_require_scratch
+> +_require_scratch_shutdown
+> +_require_xfs_io_command "falloc" "-k"
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_require_metadata_journaling $SCRATCH_DEV
+> +_scratch_mount
+> +
+> +testfile=$SCRATCH_MNT/testfile
+> +
+> +# check inode metadata after shutdown
+> +check_inode_metadata()
+> +{
+> +	sync_mode=$1
+> +
+> +	# fsync or fdatasync
+> +	if [ $sync_mode = "fsync" ]; then
+> +		stat_opt='-c "b: %b s: %s a: %x m: %y c: %z"'
+> +	else
+> +		stat_opt='-c "b: %b s: %s"'
+> +	fi
+> +
+> +	before=`stat "$stat_opt" $testfile`
+> +
+> +	$XFS_IO_PROG -c "$sync_mode" $testfile | _filter_xfs_io
+> +	src/godown $SCRATCH_MNT | tee -a $seqres.full
+> +	_scratch_cycle_mount
+> +
+> +	after=`stat "$stat_opt" $testfile`
+> +
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before: $before"
+> +		echo "After : $after"
+> +		status=1;	# this is a failure!
+> +	fi
+> +	echo "Before: $before" >> $seqres.full
+> +	echo "After : $after" >> $seqres.full
+> +	rm $testfile
+> +}
+> +
+> +# fallocate XX KB with f{data}sync, followed by power-cut
+> +test_falloc()
+> +{
+> +	echo "==== falloc $2$3 test with $1 ====" | tee -a $seqres.full
+> +	$XFS_IO_PROG -f -c "truncate 4202496"	\
+> +			-c "pwrite 0 4202496"	\
+> +			-c "fsync"		\
+> +			-c "falloc $2 4202496 $3"\
+> +			$testfile >/dev/null
+> +	check_inode_metadata $1
+> +}
+> +
+> +for i in fsync fdatasync; do
+> +	test_falloc $i "" 1024
+> +	test_falloc $i "" 4096
+> +	test_falloc $i "" 104857600
+> +	test_falloc $i "-k " 1024
+> +	test_falloc $i "-k " 4096
+> +	test_falloc $i "-k " 104857600
+> +done
+> +
+> +status = 0
+
+This is wrong in bash, should be "status=0", no spaces between "=" :)
+I can fix it on commit too.
+
+Thanks,
+Eryu
+
+> +exit
+> diff --git a/tests/generic/468.out b/tests/generic/468.out
+> new file mode 100644
+> index 000000000000..b3a28d5ea07c
+> --- /dev/null
+> +++ b/tests/generic/468.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 468
+> +==== falloc 1024 test with fsync ====
+> +==== falloc 4096 test with fsync ====
+> +==== falloc 104857600 test with fsync ====
+> +==== falloc -k 1024 test with fsync ====
+> +==== falloc -k 4096 test with fsync ====
+> +==== falloc -k 104857600 test with fsync ====
+> +==== falloc 1024 test with fdatasync ====
+> +==== falloc 4096 test with fdatasync ====
+> +==== falloc 104857600 test with fdatasync ====
+> +==== falloc -k 1024 test with fdatasync ====
+> +==== falloc -k 4096 test with fdatasync ====
+> +==== falloc -k 104857600 test with fdatasync ====
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 9183950c8dfc..ea2dc04d931e 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -470,3 +470,4 @@
+>  465 auto rw quick aio
+>  466 auto quick rw
+>  467 auto quick exportfs
+> +468 shutdown auto quick metadata
+> -- 
+> 2.15.0.55.gc2ece9dc4de6
 > 
