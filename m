@@ -1,44 +1,70 @@
-Received: from mx2.suse.de ([195.135.220.15]:46155 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1757642AbdKOMLo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 15 Nov 2017 07:11:44 -0500
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v4 2/3] common: Implement fiemap's range query check
-Date: Wed, 15 Nov 2017 14:11:39 +0200
-Message-Id: <1510747900-13440-2-git-send-email-nborisov@suse.com>
-In-Reply-To: <1510747900-13440-1-git-send-email-nborisov@suse.com>
-References: <1510747821-13270-1-git-send-email-nborisov@suse.com>
- <1510747900-13440-1-git-send-email-nborisov@suse.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:32694 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753775AbdKPAuQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 19:50:16 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH v2] fstests: btrfs/143: make test case more reliable
+Date: Wed, 15 Nov 2017 16:47:59 -0700
+Message-Id: <20171115234759.19168-1-bo.li.liu@oracle.com>
+In-Reply-To: <20171023205733.14896-1-bo.li.liu@oracle.com>
+References: <20171023205733.14896-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, eguan@redhat.com, david@fromorbit.com, darrick.wong@oracle.com, Nikolay Borisov <nborisov@suse.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Allow for users of xfstest to assert the presence of fiemap's
-range query capabilities by requesting the "ranged" parameter.
+This changes to use '_scratch_cycle_mount' to drop all caches btrfs could have
+in order to avoid an issue that drop_caches somehow doesn't work on Nikolay's
+box.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Also use bash -c to run 'read' only when %pid is odd so that we can read the
+faulty disk.
+
+Reported-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 ---
- common/rc | 6 ++++++
- 1 file changed, 6 insertions(+)
+v2: Change 'fadvise -d' to _scratch_cycle_mount.
 
-diff --git a/common/rc b/common/rc
-index e2a8229..c98c224 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2053,6 +2053,12 @@ _require_xfs_io_command()
- 			-c "$command 4k 8k" $testfile 2>&1`
- 		;;
- 	"fiemap")
-+		if echo "$param" | grep -q "ranged"; then
-+			param=$(echo "$param" | sed "s/ranged//")
-+			$XFS_IO_PROG -F -f -c "pwrite 0 5k" -c "fsync" $testfile > /dev/null 2>&1
-+			lines=$($XFS_IO_PROG -c "fiemap 6k" $testfile 2>&1 | wc -l)
-+			[ $lines -eq 1 ] || _notrun "xfs_io $command ranged support is missing"
-+		fi
- 		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
- 			-c "fiemap -v $param" $testfile 2>&1`
- 		param_checked=1
+To Nikolay,
+
+I didn't add your tested-by, but could you please verify if this also
+works on your test box?
+
+
+ tests/btrfs/143 | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
+
+diff --git a/tests/btrfs/143 b/tests/btrfs/143
+index da7bfd8..3875b6c 100755
+--- a/tests/btrfs/143
++++ b/tests/btrfs/143
+@@ -127,16 +127,16 @@ echo "step 3......repair the bad copy" >>$seqres.full
+ # since raid1 consists of two copies, and the bad copy was put on stripe #1
+ # while the good copy lies on stripe #0, the bad copy only gets access when the
+ # reader's pid % 2 == 1 is true
+-while true; do
+-	# start_fail only fails the following buffered read so the repair is
+-	# supposed to work.
+-	echo 3 > /proc/sys/vm/drop_caches
+-	start_fail
+-	$XFS_IO_PROG -c "pread 0 4K" "$SCRATCH_MNT/foobar" > /dev/null &
+-	pid=$!
+-	wait
+-	stop_fail
+-	[ $((pid % 2)) == 1 ] && break
++while [[ -z ${result} ]]; do
++    # invalidate the page cache.
++    _scratch_cycle_mount
++
++    start_fail
++    result=$(bash -c "
++        if [[ \$((\$\$ % 2)) -eq 1 ]]; then
++                exec $XFS_IO_PROG -c \"pread 0 4K\" \"$SCRATCH_MNT/foobar\"
++        fi");
++    stop_fail
+ done
+ 
+ _scratch_unmount
 -- 
-2.7.4
+2.5.0
 
