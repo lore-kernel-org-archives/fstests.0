@@ -1,70 +1,53 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:32694 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753775AbdKPAuQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 19:50:16 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2] fstests: btrfs/143: make test case more reliable
-Date: Wed, 15 Nov 2017 16:47:59 -0700
-Message-Id: <20171115234759.19168-1-bo.li.liu@oracle.com>
-In-Reply-To: <20171023205733.14896-1-bo.li.liu@oracle.com>
-References: <20171023205733.14896-1-bo.li.liu@oracle.com>
+Received: from userp1040.oracle.com ([156.151.31.81]:49055 "EHLO
+        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932650AbdKPBWa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 20:22:30 -0500
+Subject: [PATCH 1/5] common/fuzzy: if the fuzz verb is random,
+ keep fuzzing until we get a new value
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Wed, 15 Nov 2017 17:22:25 -0800
+Message-ID: <151079534548.25590.4625031168242667972.stgit@magnolia>
+In-Reply-To: <151079533937.25590.1037061486182471724.stgit@magnolia>
+References: <151079533937.25590.1037061486182471724.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+To: eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This changes to use '_scratch_cycle_mount' to drop all caches btrfs could have
-in order to avoid an issue that drop_caches somehow doesn't work on Nikolay's
-box.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Also use bash -c to run 'read' only when %pid is odd so that we can read the
-faulty disk.
+If the fuzz verb is 'random', keep generating new random values until
+we get one that is distinct from the previous value.
 
-Reported-by: Nikolay Borisov <nborisov@suse.com>
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
-v2: Change 'fadvise -d' to _scratch_cycle_mount.
-
-To Nikolay,
-
-I didn't add your tested-by, but could you please verify if this also
-works on your test box?
+ common/fuzzy |   11 ++++++++---
+ 1 file changed, 8 insertions(+), 3 deletions(-)
 
 
- tests/btrfs/143 | 20 ++++++++++----------
- 1 file changed, 10 insertions(+), 10 deletions(-)
-
-diff --git a/tests/btrfs/143 b/tests/btrfs/143
-index da7bfd8..3875b6c 100755
---- a/tests/btrfs/143
-+++ b/tests/btrfs/143
-@@ -127,16 +127,16 @@ echo "step 3......repair the bad copy" >>$seqres.full
- # since raid1 consists of two copies, and the bad copy was put on stripe #1
- # while the good copy lies on stripe #0, the bad copy only gets access when the
- # reader's pid % 2 == 1 is true
--while true; do
--	# start_fail only fails the following buffered read so the repair is
--	# supposed to work.
--	echo 3 > /proc/sys/vm/drop_caches
--	start_fail
--	$XFS_IO_PROG -c "pread 0 4K" "$SCRATCH_MNT/foobar" > /dev/null &
--	pid=$!
--	wait
--	stop_fail
--	[ $((pid % 2)) == 1 ] && break
-+while [[ -z ${result} ]]; do
-+    # invalidate the page cache.
-+    _scratch_cycle_mount
-+
-+    start_fail
-+    result=$(bash -c "
-+        if [[ \$((\$\$ % 2)) -eq 1 ]]; then
-+                exec $XFS_IO_PROG -c \"pread 0 4K\" \"$SCRATCH_MNT/foobar\"
-+        fi");
-+    stop_fail
- done
- 
- _scratch_unmount
--- 
-2.5.0
+diff --git a/common/fuzzy b/common/fuzzy
+index b9c7399..390f91f 100644
+--- a/common/fuzzy
++++ b/common/fuzzy
+@@ -179,9 +179,14 @@ _scratch_xfs_fuzz_metadata_field() {
+ 	for arg in "$@"; do
+ 		cmds+=("-c" "${arg}")
+ 	done
+-	_scratch_xfs_db -x "${cmds[@]}" -c "fuzz ${fuzz_arg} ${key} ${value}"
+-	echo
+-	newval="$(_scratch_xfs_get_metadata_field "${key}" "$@" 2> /dev/null)"
++	while true; do
++		_scratch_xfs_db -x "${cmds[@]}" -c "fuzz ${fuzz_arg} ${key} ${value}"
++		echo
++		newval="$(_scratch_xfs_get_metadata_field "${key}" "$@" 2> /dev/null)"
++		if [ "${key}" != "random" ] || [ "${oldval}" != "${newval}" ]; then
++			break;
++		fi
++	done
+ 	if [ "${oldval}" = "${newval}" ]; then
+ 		echo "Field ${key} already set to ${newval}, skipping test."
+ 		return 1
 
