@@ -1,13 +1,11 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:49179 "EHLO
+Received: from userp1040.oracle.com ([156.151.31.81]:49035 "EHLO
         userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933234AbdKPBXD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 20:23:03 -0500
-Subject: [PATCH 5/5] xfs/122: don't check xfs_iext_cursor
+        with ESMTP id S932650AbdKPBWX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 15 Nov 2017 20:22:23 -0500
+Subject: [PATCH 0/5] weekly fstests changes
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 15 Nov 2017 17:22:50 -0800
-Message-ID: <151079537016.25590.3421772833264696226.stgit@magnolia>
-In-Reply-To: <151079533937.25590.1037061486182471724.stgit@magnolia>
-References: <151079533937.25590.1037061486182471724.stgit@magnolia>
+Date: Wed, 15 Nov 2017 17:22:19 -0800
+Message-ID: <151079533937.25590.1037061486182471724.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -16,26 +14,24 @@ To: eguan@redhat.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Hi,
 
-Don't size-check the incore extent map cursor; it's not a disk structure.
+Here's another pile of fstests changes.  The first patch stabilizes the
+'random' field fuzzer for xfs filesystems -- if the random value is the
+same as the old value, we'll keep trying until the value changes.
+Hopefully this stabilizes the fuzz test output.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/122 |    1 +
- 1 file changed, 1 insertion(+)
+The second patch tests filesystems' ability to store emoji in file and
+xattr names.
 
+The third patch prevents one of the aiodio regression tests from looping
+infinitely in a read thread if the writer thread never actually writes
+anything.
 
-diff --git a/tests/xfs/122 b/tests/xfs/122
-index f39ceba..671a77b 100755
---- a/tests/xfs/122
-+++ b/tests/xfs/122
-@@ -187,6 +187,7 @@ xfs_trans_t
- xfs_dirent_t
- xfs_fsop_getparents_handlereq_t
- xfs_dinode_core_t
-+struct xfs_iext_cursor
- EOF
- 
- echo 'int main(int argc, char *argv[]) {' >>$cprog
+The fourth patch teaches fstests to scan dmesg for UBSAN reports from
+the kernel.
 
+The fifth patch teaches xfs/122 to ignore the incore extent cursor
+that's new in 4.15.
+
+--D
