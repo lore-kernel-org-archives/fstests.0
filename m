@@ -1,151 +1,149 @@
-Received: from mail-qt0-f196.google.com ([209.85.216.196]:50373 "EHLO
-        mail-qt0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S966026AbdKPSaD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Nov 2017 13:30:03 -0500
-Received: by mail-qt0-f196.google.com with SMTP id u42so22243737qte.7
-        for <fstests@vger.kernel.org>; Thu, 16 Nov 2017 10:30:02 -0800 (PST)
-From: Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH 2/2][v5] perf/001: a random write buffered fio perf test
-Date: Thu, 16 Nov 2017 13:29:59 -0500
-Message-Id: <1510856999-18693-2-git-send-email-josef@toxicpanda.com>
-In-Reply-To: <1510856999-18693-1-git-send-email-josef@toxicpanda.com>
-References: <1510856999-18693-1-git-send-email-josef@toxicpanda.com>
+Received: from mga11.intel.com ([192.55.52.93]:10900 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751599AbdKPV2Q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 16 Nov 2017 16:28:16 -0500
+Date: Thu, 16 Nov 2017 14:28:15 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH v3] generic: add test for DAX MAP_SYNC support
+Message-ID: <20171116212815.GA27448@linux.intel.com>
+References: <CAOQ4uxh25JmAv3DjCp11fAfpHVP=d2sp+=Gk4SxYfBtmOgaUPw@mail.gmail.com>
+ <20171025204704.3382-1-ross.zwisler@linux.intel.com>
+ <20171025215638.GA30335@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171025215638.GA30335@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: kernel-team@fb.com, david@fromorbit.com, fstests@vger.kernel.org, tytso@mit.edu, eguan@redhat.com, darrick.wong@oracle.com
-Cc: Josef Bacik <jbacik@fb.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Amir Goldstein <amir73il@gmail.com>, Josef Bacik <jbacik@fb.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, linux-kernel <linux-kernel@vger.kernel.org>, Alasdair Kergon <agk@redhat.com>, Dan Williams <dan.j.williams@intel.com>, Jan Kara <jack@suse.cz>, Mike Snitzer <snitzer@redhat.com>, Shaohua Li <shli@kernel.org>, dm-devel@redhat.com, linux-nvdimm@lists.01.org, linux-raid@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Josef Bacik <jbacik@fb.com>
+On Thu, Oct 26, 2017 at 08:56:38AM +1100, Dave Chinner wrote:
+> On Wed, Oct 25, 2017 at 02:47:04PM -0600, Ross Zwisler wrote:
+> > Add a test that exercises DAX's new MAP_SYNC flag.
+> > 
+> > This test creates a file and writes to it via an mmap(), but never syncs
+> > via fsync/msync.  This process is tracked via dm-log-writes, then replayed.
+> > 
+> > If MAP_SYNC is working the dm-log-writes replay will show the test file
+> > with 1MiB of on-media block allocations.  This is because each allocating
+> > page fault included an implicit metadata sync.  If MAP_SYNC isn't working
+> > (which you can test by fiddling with the parameters to mmap()) the file
+> > will be smaller or missing entirely.
+> > 
+> > Note that dm-log-writes doesn't track the data that we write via the
+> > mmap(), so we can't do any data integrity checking.  We can only verify
+> > that the metadata writes for the page faults happened.
+> > 
+> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> .....
+> > --- /dev/null
+> > +++ b/src/t_map_sync.c
+> > @@ -0,0 +1,92 @@
+> > +#include <errno.h>
+> > +#include <fcntl.h>
+> > +#include <stdio.h>
+> > +#include <stdlib.h>
+> > +#include <string.h>
+> > +#include <sys/mman.h>
+> > +#include <sys/stat.h>
+> > +#include <sys/types.h>
+> > +#include <unistd.h>
+> > +
+> > +#define MiB(a) ((a)*1024*1024)
+> > +
+> > +/*
+> > + * These two defines were added to the kernel via commits entitled
+> > + * "mm: Define MAP_SYNC and VM_SYNC flags" and
+> > + * "mm: introduce MAP_SHARED_VALIDATE, a mechanism to safely define new mmap
+> > + * flags", respectively.
+> > + */
+> > +#ifndef MAP_SYNC
+> > +#define MAP_SYNC 0x80000
+> > +#endif
+> > +
+> > +#ifndef MAP_SHARED_VALIDATE
+> > +#define MAP_SHARED_VALIDATE 0x3
+> > +#endif
+> 
+> Autoconf rules for detecting supported functionality, please...
 
-This uses the new fio results perf helpers to run a rand write buffered
-workload on the scratch device.
+Yep, that's better.  As you've suggested down below I'm adding this
+functionality to xfs_io instead, and I've added autoconf rules there.
 
-Signed-off-by: Josef Bacik <jbacik@fb.com>
----
-v4->v5:
-- no change
+> > +
+> > +void err_exit(char *op)
+> > +{
+> > +	fprintf(stderr, "%s: %s\n", op, strerror(errno));
+> > +	exit(1);
+> > +}
+> > +
+> > +void mark_log(char *logwrites_name, char *mark_name)
+> > +{
+> > +	char command[256];
+> > +
+> > +	snprintf(command, 256, "dmsetup message %s 0 mark %s",
+> > +			logwrites_name, mark_name);
+> > +
+> > +	if (system(command))
+> > +		err_exit("mark_log");
+> > +}
+> > +
+> > +int main(int argc, char *argv[])
+> > +{
+> > +	int page_size = getpagesize();
+> > +	int len = MiB(1);
+> > +	int i, fd, err;
+> > +	char *data;
+> > +
+> > +	if (argc < 4) {
+> > +		printf("Usage: %s <file> <logwrites_name> <mark_name>\n",
+> > +				basename(argv[0]));
+> > +		exit(0);
+> > +	}
+> > +
+> > +	fd = open(argv[1], O_RDWR|O_CREAT|O_TRUNC, S_IRUSR|S_IWUSR);
+> > +	if (fd < 0)
+> > +		err_exit("fd");
+> > +
+> > +	ftruncate(fd, len);
+> > +
+> > +	data = mmap(NULL, len, PROT_READ|PROT_WRITE,
+> > +			MAP_SHARED_VALIDATE|MAP_SYNC, fd, 0);
+> > +	if (data == MAP_FAILED)
+> > +		err_exit("mmap");
+> 
+> As I say to all these sorts of one-off test prgrams: please add the
+> new MAP_SYNC flag to xfs_io rather than writing a one-off
+> test program to set it and write some data.
+> 
+> And if we're going to be adding special custom tests just because
+> we need to insert dm-log marks, add that functionality to xfs_io,
+> too.
+> 
+> That way we can create complex custom dm logwrite tests without
+> needing one-off test programs for them all...
 
-v3->v4:
-- use _require_fs_space instead of _scratch_mkfs_sized.
-- remove run_check from running fio.
+Yep, that was a better path.  I've got things working - need to clean up and
+I'll send out soon.
 
-v2->v3:
-- use _scratch_mkfs_sized so we skip if our scratch device is too small.
-- dump the fio results into teh seqres.full file for debugging.
-- fixed the _size math, it was all wrong.
+> > +#! /bin/bash
+> > +# FS QA Test No. 466
+> > +#
+> > +# Use md_log_writes to verify that MAP_SYNC actually syncs metadata during
+> 
+> dm_log_writes?
 
-v1->v2:
-- no change
+Fixed.
 
- tests/perf/001     | 80 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/perf/001.out |  2 ++
- tests/perf/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100644 tests/perf/001
- create mode 100644 tests/perf/001.out
- create mode 100644 tests/perf/group
+> > +# We should see $SCRATCH_MNT/test as having 1MiB in block allocations
+> > +du -sh $SCRATCH_MNT/test | _filter_scratch | _filter_spaces
+> 
+> Perhaps stat -c %b $SCRATCH_MNT/test ?
 
-diff --git a/tests/perf/001 b/tests/perf/001
-new file mode 100644
-index 000000000000..a9e933df7791
---- /dev/null
-+++ b/tests/perf/001
-@@ -0,0 +1,80 @@
-+#! /bin/bash
-+# perf/001 Test
-+#
-+# Buffered random write performance test.
-+#
-+#-----------------------------------------------------------------------
-+# (c) 2017 Josef Bacik
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+fio_config=$tmp.fio
-+fio_results=$tmp.json
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/perf
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_block_device $SCRATCH_DEV
-+_require_fio_results
-+
-+rm -f $seqres.full
-+
-+_size=$((16 * $LOAD_FACTOR))
-+cat >$fio_config <<EOF
-+[t1]
-+directory=${SCRATCH_MNT}
-+allrandrepeat=1
-+readwrite=randwrite
-+size=${_size}G
-+ioengine=psync
-+end_fsync=1
-+fallocate=none
-+EOF
-+
-+_require_fio $fio_config
-+
-+_fio_results_init
-+
-+# We are going to write at least 16gib, make sure our scratch fs is large enough
-+# to fit and not deal with any enospc overhead.
-+_size=$(($_size * 4 * 1024 * 1024))
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+_require_fs_space $SCRATCH_MNT $_size
-+
-+cat $fio_config >> $seqres.full
-+$FIO_PROG --output-format=json --output=$fio_results $fio_config
-+
-+_scratch_unmount
-+cat $fio_results >> $seqres.full
-+_fio_results_compare $seq $fio_results
-+echo "Silence is golden"
-+status=0; exit
-diff --git a/tests/perf/001.out b/tests/perf/001.out
-new file mode 100644
-index 000000000000..88678b8ed5ad
---- /dev/null
-+++ b/tests/perf/001.out
-@@ -0,0 +1,2 @@
-+QA output created by 001
-+Silence is golden
-diff --git a/tests/perf/group b/tests/perf/group
-new file mode 100644
-index 000000000000..d3ed434926e7
---- /dev/null
-+++ b/tests/perf/group
-@@ -0,0 +1 @@
-+001 auto
--- 
-2.7.5
+Maybe, but doesn't the output of 'stat -c %b' depend on the block size the
+filesystem is using?  I think to use stat I'd have to check both %b and %B,
+and account for different block sizes, or do some shell math.  I think it may
+be easier to just use du.
 
+Thank you for the review, sorry for the delayed response.
