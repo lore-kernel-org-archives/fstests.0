@@ -1,198 +1,48 @@
-Received: from mga03.intel.com ([134.134.136.65]:48352 "EHLO mga03.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:56448 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1760997AbdKQUZi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Nov 2017 15:25:38 -0500
+        id S1759214AbdKQU2g (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Nov 2017 15:28:36 -0500
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [xfsprogs PATCH 2/2] xfs_io: add a new 'log_writes' command
-Date: Fri, 17 Nov 2017 13:25:24 -0700
-Message-Id: <20171117202524.24696-3-ross.zwisler@linux.intel.com>
-In-Reply-To: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
-References: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH v4 1/4] common/rc: add _scratch_has_mount_option()
+Date: Fri, 17 Nov 2017 13:28:25 -0700
+Message-Id: <20171117202828.25472-2-ross.zwisler@linux.intel.com>
+In-Reply-To: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
+References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs <linux-xfs@vger.kernel.org>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
+To: fstests <fstests@vger.kernel.org>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
-log marks via the external 'dmsetup' executable.  It's helpful to allow
-users of xfs_io to adds these marks from within xfs_io instead of waiting
-until after xfs_io exits because then they are able to replay the
-dm-log-writes log up to immediately after another xfs_io operation such as
-mwrite.  This isolates the log replay from other operations that happen as
-part of xfs_io exiting (file handles being closed, mmaps being torn down,
-etc.).  This also allows users to insert multiple marks between different
-xfs_io commands.
+Allow tests to inquire about whether a mount option is set, rather than
+just disallowing it via _exclude_scratch_mount_option().
 
 Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-Suggested-by: Dave Chinner <david@fromorbit.com>
+Suggested-by: Amir Goldstein <amir73il@gmail.com>
 ---
- io/Makefile       |  5 ++--
- io/init.c         |  1 +
- io/io.h           |  1 +
- io/log_writes.c   | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- man/man8/xfs_io.8 | 19 ++++++++++++++
- 5 files changed, 102 insertions(+), 2 deletions(-)
- create mode 100644 io/log_writes.c
+ common/rc | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
 
-diff --git a/io/Makefile b/io/Makefile
-index 050d6bd..51b2eae 100644
---- a/io/Makefile
-+++ b/io/Makefile
-@@ -10,8 +10,9 @@ LSRCFILES = xfs_bmap.sh xfs_freeze.sh xfs_mkfile.sh
- HFILES = init.h io.h
- CFILES = init.c \
- 	attr.c bmap.c cowextsize.c encrypt.c file.c freeze.c fsync.c \
--	getrusage.c imap.c link.c mmap.c open.c parent.c pread.c prealloc.c \
--	pwrite.c reflink.c seek.c shutdown.c stat.c sync.c truncate.c utimes.c
-+	getrusage.c imap.c link.c log_writes.c mmap.c open.c parent.c pread.c \
-+	prealloc.c pwrite.c reflink.c seek.c shutdown.c stat.c sync.c \
-+	truncate.c utimes.c
+diff --git a/common/rc b/common/rc
+index 0cda9da..701b1ff 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3105,6 +3105,16 @@ _exclude_scratch_mount_option()
+ 	done
+ }
  
- LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
- LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
-diff --git a/io/init.c b/io/init.c
-index 20d5f80..34d87b5 100644
---- a/io/init.c
-+++ b/io/init.c
-@@ -72,6 +72,7 @@ init_commands(void)
- 	help_init();
- 	imap_init();
- 	inject_init();
-+	log_writes_init();
- 	madvise_init();
- 	mincore_init();
- 	mmap_init();
-diff --git a/io/io.h b/io/io.h
-index 8b2753b..d62034a 100644
---- a/io/io.h
-+++ b/io/io.h
-@@ -109,6 +109,7 @@ extern void		getrusage_init(void);
- extern void		help_init(void);
- extern void		imap_init(void);
- extern void		inject_init(void);
-+extern void		log_writes_init(void);
- extern void		mmap_init(void);
- extern void		open_init(void);
- extern void		parent_init(void);
-diff --git a/io/log_writes.c b/io/log_writes.c
-new file mode 100644
-index 0000000..bc3952c
---- /dev/null
-+++ b/io/log_writes.c
-@@ -0,0 +1,78 @@
-+/*
-+ * Copyright (c) 2017 Intel Corporation.
-+ * All Rights Reserved.
-+ *
-+ * This program is free software; you can redistribute it and/or
-+ * modify it under the terms of the GNU General Public License as
-+ * published by the Free Software Foundation.
-+ *
-+ * This program is distributed in the hope that it would be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, write the Free Software Foundation,
-+ * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+ */
-+
-+#include "platform_defs.h"
-+#include "command.h"
-+#include "init.h"
-+
-+static cmdinfo_t log_writes_cmd;
-+
-+static int
-+mark_log(char *device, char *mark)
++_scratch_has_mount_option()
 +{
-+	char command[256];
++	local mnt_opts=$(_normalize_mount_options)
 +
-+	snprintf(command, 256, "dmsetup message %s 0 mark %s",
-+			device, mark);
-+
-+	return system(command);
++	if echo $mnt_opts | grep -qw "$1"; then
++		return 0
++	fi
++	return 1
 +}
 +
-+static int
-+log_writes_f(
-+	int			argc,
-+	char			**argv)
-+{
-+	char *device = NULL;
-+	char *mark = NULL;
-+	int c;
-+
-+	while ((c = getopt(argc, argv, "d:m:")) != EOF) {
-+		switch (c) {
-+		case 'd':
-+			device = optarg;
-+			break;
-+		case 'm':
-+			mark = optarg;
-+			break;
-+		default:
-+			return command_usage(&log_writes_cmd);
-+		}
-+	}
-+
-+	if (device == NULL || mark == NULL)
-+		return command_usage(&log_writes_cmd);
-+
-+	return mark_log(device, mark);
-+}
-+
-+void
-+log_writes_init(void)
-+{
-+	log_writes_cmd.name = "log_writes";
-+	log_writes_cmd.altname = "lw";
-+	log_writes_cmd.cfunc = log_writes_f;
-+	log_writes_cmd.flags = CMD_NOMAP_OK | CMD_NOFILE_OK | CMD_FOREIGN_OK;
-+	log_writes_cmd.argmin = 0;
-+	log_writes_cmd.argmax = -1;
-+	log_writes_cmd.args = _("-d device -m mark");
-+	log_writes_cmd.oneline =
-+		_("uses dmsetup to interact with the dm-log-writes module");
-+
-+	add_command(&log_writes_cmd);
-+}
-diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-index 1693f7f..f18af99 100644
---- a/man/man8/xfs_io.8
-+++ b/man/man8/xfs_io.8
-@@ -1123,7 +1123,25 @@ version of policy structure (numeric)
- .BR get_encpolicy
- On filesystems that support encryption, display the encryption policy of the
- current file.
-+.RE
-+.PD
-+.TP
-+.BI "log_writes \-d " device " \-m "  mark
-+Use
-+.B dmsetup
-+to interact with the
-+.B dm-log-writes
-+kernel module.  Currently the only operation
-+supported is the creation of a mark in the log by executing the shell command:
- 
-+.B dmsetup message <device> 0 mark <mark>
-+.PD
-+.RE
-+.TP
-+.B lw
-+See the
-+.B log_writes
-+command.
- .SH SEE ALSO
- .BR mkfs.xfs (8),
- .BR xfsctl (3),
-@@ -1142,3 +1160,4 @@ current file.
- .BR pread (2),
- .BR pwrite (2),
- .BR readdir (3).
-+.BR dmsetup (8).
+ _require_atime()
+ {
+ 	_exclude_scratch_mount_option "noatime"
 -- 
 2.9.5
 
