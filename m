@@ -1,75 +1,39 @@
-Received: from mail-ot0-f195.google.com ([74.125.82.195]:43592 "EHLO
-        mail-ot0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1422735AbdKQUfo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Nov 2017 15:35:44 -0500
-Received: by mail-ot0-f195.google.com with SMTP id 105so3052190oth.10
-        for <fstests@vger.kernel.org>; Fri, 17 Nov 2017 12:35:44 -0800 (PST)
+Received: from sandeen.net ([63.231.237.45]:56486 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757043AbdKQUjK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Nov 2017 15:39:10 -0500
+Subject: Re: [xfsprogs PATCH 2/2] xfs_io: add a new 'log_writes' command
+References: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
+ <20171117202524.24696-3-ross.zwisler@linux.intel.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <84006b9c-90db-7eea-0bdc-b73da1bb1394@sandeen.net>
+Date: Fri, 17 Nov 2017 14:39:07 -0600
 MIME-Version: 1.0
-In-Reply-To: <20171117202524.24696-2-ross.zwisler@linux.intel.com>
-References: <20171117202524.24696-1-ross.zwisler@linux.intel.com> <20171117202524.24696-2-ross.zwisler@linux.intel.com>
-From: Dan Williams <dan.j.williams@intel.com>
-Date: Fri, 17 Nov 2017 12:35:43 -0800
-Message-ID: <CAPcyv4g+3Drmpwva1Cxpq0SNsR0SJwT1vZGmXt-NGgL_2Zt48Q@mail.gmail.com>
-Subject: Re: [xfsprogs PATCH 1/2] xfs_io: add MAP_SYNC support to mmap()
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20171117202524.24696-3-ross.zwisler@linux.intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>
+To: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>
+Cc: linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 17, 2017 at 12:25 PM, Ross Zwisler
-<ross.zwisler@linux.intel.com> wrote:
-> Add support for a new -S flag to xfs_io's mmap command.  This opens the
-> mapping with the (MAP_SYNC | MAP_SHARED_VALIDATE) flags instead of the
-> standard MAP_SHARED flag.
->
+On 11/17/17 2:25 PM, Ross Zwisler wrote:
+> Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
+> log marks via the external 'dmsetup' executable.  It's helpful to allow
+> users of xfs_io to adds these marks from within xfs_io instead of waiting
+> until after xfs_io exits because then they are able to replay the
+> dm-log-writes log up to immediately after another xfs_io operation such as
+> mwrite.  This isolates the log replay from other operations that happen as
+> part of xfs_io exiting (file handles being closed, mmaps being torn down,
+> etc.).  This also allows users to insert multiple marks between different
+> xfs_io commands.
+> 
 > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 > Suggested-by: Dave Chinner <david@fromorbit.com>
-> ---
->  configure.ac          |  1 +
->  include/builddefs.in  |  1 +
->  include/linux.h       |  5 +++++
->  io/io.h               |  1 +
->  io/mmap.c             | 19 ++++++++++++++-----
->  m4/package_libcdev.m4 | 16 ++++++++++++++++
->  man/man8/xfs_io.8     |  6 +++++-
->  7 files changed, 43 insertions(+), 6 deletions(-)
->
-> diff --git a/configure.ac b/configure.ac
-> index cb23fb8..7153c9f 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -162,6 +162,7 @@ AC_HAVE_FSETXATTR
->  AC_HAVE_MREMAP
->  AC_NEED_INTERNAL_FSXATTR
->  AC_HAVE_GETFSMAP
-> +AC_HAVE_MAP_SYNC
->
->  if test "$enable_blkid" = yes; then
->  AC_HAVE_BLKID_TOPO
-> diff --git a/include/builddefs.in b/include/builddefs.in
-> index 1d454b6..78b71fe 100644
-> --- a/include/builddefs.in
-> +++ b/include/builddefs.in
-> @@ -114,6 +114,7 @@ HAVE_FSETXATTR = @have_fsetxattr@
->  HAVE_MREMAP = @have_mremap@
->  NEED_INTERNAL_FSXATTR = @need_internal_fsxattr@
->  HAVE_GETFSMAP = @have_getfsmap@
-> +HAVE_MAP_SYNC = @have_map_sync@
->
->  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
->  #         -Wbitwise -Wno-transparent-union -Wno-old-initializer -Wno-decl
-> diff --git a/include/linux.h b/include/linux.h
-> index 6ce344c..4ee03ed 100644
-> --- a/include/linux.h
-> +++ b/include/linux.h
-> @@ -327,4 +327,9 @@ fsmap_advance(
->  #define HAVE_GETFSMAP
->  #endif /* HAVE_GETFSMAP */
->
-> +#ifndef HAVE_MAP_SYNC
-> +#define MAP_SYNC 0x80000
 
-Hmm, this is the x86 specific value of MAP_SYNC. I think it would be
-better to define MAP_SYNC to zero in this case and check for MAP_SYNC
-== 0 at run time.
+Without reviewing in detail, what is the advantage of wrapping dmsetup
+into xfs_io?  My first inclination is that there is none at all, and
+xfstests can call dmsetup as easily as they can call xfs_io.  No?
+
+-Eric
