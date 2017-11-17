@@ -1,144 +1,221 @@
-Received: from sandeen.net ([63.231.237.45]:57572 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:46654 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755539AbdKQCrK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 16 Nov 2017 21:47:10 -0500
-Subject: Re: [PATCH v4 2/2] fiemap: Implement ranged query
-References: <1510747821-13270-1-git-send-email-nborisov@suse.com>
- <1510747821-13270-2-git-send-email-nborisov@suse.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <26736c47-b807-62eb-202b-4a959f16832c@sandeen.net>
-Date: Thu, 16 Nov 2017 20:47:08 -0600
+        id S1756989AbdKQG6W (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Nov 2017 01:58:22 -0500
+Date: Fri, 17 Nov 2017 14:58:20 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 2/2] generic: test zero page cache beyond new EOF on
+ truncate down
+Message-ID: <20171117065820.GB2749@eguan.usersys.redhat.com>
+References: <20171109083242.32373-1-eguan@redhat.com>
+ <20171109083242.32373-2-eguan@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1510747821-13270-2-git-send-email-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171109083242.32373-2-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Nikolay Borisov <nborisov@suse.com>, linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org, eguan@redhat.com, david@fromorbit.com, darrick.wong@oracle.com
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 11/15/17 6:10 AM, Nikolay Borisov wrote:
-> Currently the fiemap implementation of xfs_io doesn't support making ranged
-> queries. This patch implements two optional arguments which take the starting
-> offset and the length of the region to be queried. This also requires changing
-> of the final hole range is calculated. Namely, it's now being done as
-> [last_logical, logical addres of next extent] rather than being statically
-> determined by [last_logical, filesize].
+On Thu, Nov 09, 2017 at 04:32:42PM +0800, Eryu Guan wrote:
+> From mmap(2) manpage, "a file is mapped in multiples of the page
+> size. For a file that is not a multiple of the page size, the
+> remaining memory is zeroed when mapped", this test is to test this
+> behavior on truncate down.
 > 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> This is inspired by an XFS bug that truncate down fails to zero page
+> cache beyond new EOF and causes stale data written to disk
+> unexpectedly and a subsequent mmap sees non-zeros post EOF.
+> 
+> Patch "xfs: truncate pagecache before writeback in
+> xfs_setattr_size()" fixed the bug on XFS.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+> v2:
+> - update comments and commit log to reflect the final fix of the bug
+> - dump fsx error message to stdout on error, so it's easier to know
+>   what is failing
 
-Ok, so first an apology for taking so long to really, really look at this.
+Ping on this test.
 
-When I started reviewing this, and dreading the complexity of the fiemap loop
-control (why /is/ it so complicated today, anyway?) I started wondering: why
-do we need a lot more logic?  Why can't we simply:
+Thanks,
+Eryu
 
-1) Set a non-zero mapping start
-2) Set a non-maximal mapping length
-3) Decrement that length as we map, and
-4) When the kernel tells us mapped_extents for the range is 0, stop.
-
-And this is what I ended up with, which seems a lot simpler.  Is there any
-problem with this approach?
-
-This /almost/ passes your test; what it doesn't do is show holes at the edges
-of the mapping range, but I think that's ok.
-
-The interface itself says nothing about holes, it only maps allocated ranges.
-
-If we ask for a ranged query, I think it's appropriate to /not/ print holes
-on either side of the requested range.
-
-
-Thoughts?
-
-
-
-diff --git a/io/fiemap.c b/io/fiemap.c
-index bdcfacd..bbf6d63 100644
---- a/io/fiemap.c
-+++ b/io/fiemap.c
-@@ -49,6 +49,8 @@ fiemap_help(void)
- " -l -- also displays the length of each extent in 512-byte blocks.\n"
- " -n -- query n extents.\n"
- " -v -- Verbose information\n"
-+" offset is the starting offset to map, and is optional.  If offset is\n"
-+" specified, mapping length may (optionally) be specified as well."
- "\n"));
- }
- 
-@@ -235,9 +237,15 @@ fiemap_f(
- 	int		boff_w = 16;
- 	int		tot_w = 5;	/* 5 since its just one number */
- 	int		flg_w = 5;
--	__u64		last_logical = 0;
-+	__u64		last_logical = 0;	/* last extent offset handled */
-+	off64_t		start_offset = 0;	/* mapping start */
-+	off64_t		length = -1LL;		/* mapping length */
-+	off64_t		range_end = -1LL;	/* mapping end*/
-+	size_t		fsblocksize, fssectsize;
- 	struct stat	st;
- 
-+	init_cvtnum(&fsblocksize, &fssectsize);
-+
- 	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
- 		switch (c) {
- 		case 'a':
-@@ -257,6 +265,27 @@ fiemap_f(
- 		}
- 	}
- 
-+	/* Range start (optional) */
-+	if (optind < argc) {
-+		start_offset = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (start_offset < 0) {
-+			printf("non-numeric offset argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		last_logical = start_offset;
-+		optind++;
-+	}
-+
-+	/* Range length (optional if range start was specified) */
-+	if (optind < argc) {
-+		length = cvtnum(fsblocksize, fssectsize, argv[optind]);
-+		if (length < 0) {
-+			printf("non-numeric len argument -- %s\n", argv[optind]);
-+			return 0;
-+		}
-+		range_end = start_offset + length;
-+	}
-+
- 	map_size = sizeof(struct fiemap) +
- 		(EXTENT_BATCH * sizeof(struct fiemap_extent));
- 	fiemap = malloc(map_size);
-@@ -274,7 +303,7 @@ fiemap_f(
- 		memset(fiemap, 0, map_size);
- 		fiemap->fm_flags = fiemap_flags;
- 		fiemap->fm_start = last_logical;
--		fiemap->fm_length = -1LL;
-+		fiemap->fm_length = range_end - last_logical;
- 		fiemap->fm_extent_count = EXTENT_BATCH;
- 
- 		ret = ioctl(file->fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
-@@ -336,7 +365,8 @@ fiemap_f(
- 		return 0;
- 	}
- 
--	if (cur_extent && last_logical < st.st_size)
-+	/* Print last hole to EOF only if range end was not specified */
-+	if (cur_extent && (range_end == -1LL) && (last_logical < st.st_size))
- 		print_hole(foff_w, boff_w, tot_w, cur_extent, lflag, !vflag,
- 			   BTOBBT(last_logical), BTOBBT(st.st_size));
- 
-@@ -353,7 +383,7 @@ fiemap_init(void)
- 	fiemap_cmd.argmin = 0;
- 	fiemap_cmd.argmax = -1;
- 	fiemap_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
--	fiemap_cmd.args = _("[-alv] [-n nx]");
-+	fiemap_cmd.args = _("[-alv] [-n nx] [offset [len]]");
- 	fiemap_cmd.oneline = _("print block mapping for a file");
- 	fiemap_cmd.help = fiemap_help;
- 
-
+> 
+>  tests/generic/466     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/466.out |   9 ++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 145 insertions(+)
+>  create mode 100755 tests/generic/466
+>  create mode 100644 tests/generic/466.out
+> 
+> diff --git a/tests/generic/466 b/tests/generic/466
+> new file mode 100755
+> index 000000000000..435bd39a42cc
+> --- /dev/null
+> +++ b/tests/generic/466
+> @@ -0,0 +1,135 @@
+> +#! /bin/bash
+> +# FS QA Test 466
+> +#
+> +# Test that mmap read doesn't see non-zero data past EOF on truncate down.
+> +#
+> +# This is inspired by an XFS bug that truncate down fails to zero page cache
+> +# beyond new EOF and causes stale data written to disk unexpectedly and a
+> +# subsequent mmap reads and sees non-zeros post EOF.
+> +#
+> +# Patch "xfs: truncate pagecache before writeback in xfs_setattr_size()" fixed
+> +# the bug on XFS.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Red Hat Inc., All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +file=$TEST_DIR/$seq.fsx
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $file $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +
+> +run_fsx()
+> +{
+> +	$here/ltp/fsx $2 --replay-ops $1 $file 2>&1 | tee -a $seqres.full >$tmp.fsx
+> +	if [ ${PIPESTATUS[0]} -ne 0 ]; then
+> +		cat $tmp.fsx
+> +		exit 1
+> +	fi
+> +}
+> +
+> +# run fsx with and without fsync(2) after write to get more coverage
+> +test_fsx()
+> +{
+> +	echo "fsx --replay-ops ${1#*.}"
+> +	run_fsx $1
+> +
+> +	echo "fsx -y --replay-ops ${1#*.}"
+> +	run_fsx $1 -y
+> +}
+> +
+> +# simplified fsx operations that work on small & not blocksize-aligned offsets,
+> +# so filesystems with small block size could reproduce too
+> +cat >$tmp.fsxops.0 <<EOF
+> +# create file with unwritten extent, KEEP_SIZE flag is required, otherwise page
+> +# straddles new i_size in the writeback triggered by truncate, range [i_size,
+> +# page_boundary] will be zeroed there, and bug won't be reproduced
+> +fallocate 0x0 0x1000 0x0 keep_size
+> +
+> +# overwrite the unwritten extents with non-zeros, but extent will stay in
+> +# unwritten till I/O completion
+> +write 0x0 0x1000 0x0
+> +
+> +# truncate down the file, which should zero page cache beyong new EOF but a
+> +# buggy kernel won't
+> +truncate 0x0 0x10 0x1000
+> +
+> +# unmap the file and invalidate the pagecache of the block
+> +punch_hole 0x0 0x10 0x10
+> +
+> +# mmap reads the whole block from disk, and fsx will check page range beyond
+> +# EOF to make sure we only see zeros there
+> +mapread 0x0 0x10 0x10
+> +EOF
+> +
+> +# to get a bit more test coverage, try other operation combinations too
+> +# same as fsxops.0, but skip punch_hole to keep the pagecache before mapread
+> +cat >$tmp.fsxops.1 <<EOF
+> +fallocate 0x0 0x1000 0x0 keep_size
+> +write 0x0 0x1000 0x0
+> +truncate 0x0 0x10 0x1000
+> +mapread 0x0 0x10 0x10
+> +EOF
+> +
+> +# same as fsxops.0, but fallocate without KEEP_SIZE flag
+> +cat >$tmp.fsxops.2 <<EOF
+> +fallocate 0x0 0x1000 0x0
+> +write 0x0 0x1000 0x0
+> +truncate 0x0 0x10 0x1000
+> +punch_hole 0x0 0x10 0x10
+> +mapread 0x0 0x10 0x10
+> +EOF
+> +
+> +# this is from the original fsxops when bug was first hit
+> +cat >$tmp.fsxops.3 <<EOF
+> +fallocate 0x35870 0xa790 0x0 keep_size
+> +write 0x2aa50 0xc37f 0x0
+> +truncate 0x0 0x36dcd 0x36dcf
+> +zero_range 0x35849 0x1584 0x36dcd
+> +mapread 0x361c8 0xc05 0x36dcd
+> +EOF
+> +
+> +for i in 0 1 2 3; do
+> +	test_fsx $tmp.fsxops.$i
+> +done
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/466.out b/tests/generic/466.out
+> new file mode 100644
+> index 000000000000..8430bb462ad1
+> --- /dev/null
+> +++ b/tests/generic/466.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 466
+> +fsx --replay-ops fsxops.0
+> +fsx -y --replay-ops fsxops.0
+> +fsx --replay-ops fsxops.1
+> +fsx -y --replay-ops fsxops.1
+> +fsx --replay-ops fsxops.2
+> +fsx -y --replay-ops fsxops.2
+> +fsx --replay-ops fsxops.3
+> +fsx -y --replay-ops fsxops.3
+> diff --git a/tests/generic/group b/tests/generic/group
+> index fbe0a7f4a717..b71644008b55 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -468,3 +468,4 @@
+>  463 auto quick clone dangerous
+>  464 auto rw
+>  465 auto rw quick aio
+> +466 auto quick
+> -- 
+> 2.13.6
+> 
