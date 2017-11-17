@@ -1,234 +1,211 @@
-Received: from userp1040.oracle.com ([156.151.31.81]:39240 "EHLO
-        userp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965320AbdKQUkd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 17 Nov 2017 15:40:33 -0500
-Date: Fri, 17 Nov 2017 12:40:21 -0800
+Received: from aserp1040.oracle.com ([141.146.126.69]:35650 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759391AbdKQUoX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 17 Nov 2017 15:44:23 -0500
+Date: Fri, 17 Nov 2017 12:44:13 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [xfsprogs PATCH 1/2] xfs_io: add MAP_SYNC support to mmap()
-Message-ID: <20171117204021.GO5119@magnolia>
+Subject: Re: [xfsprogs PATCH 2/2] xfs_io: add a new 'log_writes' command
+Message-ID: <20171117204413.GP5119@magnolia>
 References: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
- <20171117202524.24696-2-ross.zwisler@linux.intel.com>
+ <20171117202524.24696-3-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171117202524.24696-2-ross.zwisler@linux.intel.com>
+In-Reply-To: <20171117202524.24696-3-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
 To: Ross Zwisler <ross.zwisler@linux.intel.com>
 Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 17, 2017 at 01:25:23PM -0700, Ross Zwisler wrote:
-> Add support for a new -S flag to xfs_io's mmap command.  This opens the
-> mapping with the (MAP_SYNC | MAP_SHARED_VALIDATE) flags instead of the
-> standard MAP_SHARED flag.
+On Fri, Nov 17, 2017 at 01:25:24PM -0700, Ross Zwisler wrote:
+> Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
+> log marks via the external 'dmsetup' executable.  It's helpful to allow
+> users of xfs_io to adds these marks from within xfs_io instead of waiting
+> until after xfs_io exits because then they are able to replay the
+> dm-log-writes log up to immediately after another xfs_io operation such as
+> mwrite.  This isolates the log replay from other operations that happen as
+> part of xfs_io exiting (file handles being closed, mmaps being torn down,
+> etc.).  This also allows users to insert multiple marks between different
+> xfs_io commands.
 > 
 > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 > Suggested-by: Dave Chinner <david@fromorbit.com>
 > ---
->  configure.ac          |  1 +
->  include/builddefs.in  |  1 +
->  include/linux.h       |  5 +++++
->  io/io.h               |  1 +
->  io/mmap.c             | 19 ++++++++++++++-----
->  m4/package_libcdev.m4 | 16 ++++++++++++++++
->  man/man8/xfs_io.8     |  6 +++++-
->  7 files changed, 43 insertions(+), 6 deletions(-)
+>  io/Makefile       |  5 ++--
+>  io/init.c         |  1 +
+>  io/io.h           |  1 +
+>  io/log_writes.c   | 78 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  man/man8/xfs_io.8 | 19 ++++++++++++++
+>  5 files changed, 102 insertions(+), 2 deletions(-)
+>  create mode 100644 io/log_writes.c
 > 
-> diff --git a/configure.ac b/configure.ac
-> index cb23fb8..7153c9f 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -162,6 +162,7 @@ AC_HAVE_FSETXATTR
->  AC_HAVE_MREMAP
->  AC_NEED_INTERNAL_FSXATTR
->  AC_HAVE_GETFSMAP
-> +AC_HAVE_MAP_SYNC
+> diff --git a/io/Makefile b/io/Makefile
+> index 050d6bd..51b2eae 100644
+> --- a/io/Makefile
+> +++ b/io/Makefile
+> @@ -10,8 +10,9 @@ LSRCFILES = xfs_bmap.sh xfs_freeze.sh xfs_mkfile.sh
+>  HFILES = init.h io.h
+>  CFILES = init.c \
+>  	attr.c bmap.c cowextsize.c encrypt.c file.c freeze.c fsync.c \
+> -	getrusage.c imap.c link.c mmap.c open.c parent.c pread.c prealloc.c \
+> -	pwrite.c reflink.c seek.c shutdown.c stat.c sync.c truncate.c utimes.c
+> +	getrusage.c imap.c link.c log_writes.c mmap.c open.c parent.c pread.c \
+> +	prealloc.c pwrite.c reflink.c seek.c shutdown.c stat.c sync.c \
+> +	truncate.c utimes.c
 >  
->  if test "$enable_blkid" = yes; then
->  AC_HAVE_BLKID_TOPO
-> diff --git a/include/builddefs.in b/include/builddefs.in
-> index 1d454b6..78b71fe 100644
-> --- a/include/builddefs.in
-> +++ b/include/builddefs.in
-> @@ -114,6 +114,7 @@ HAVE_FSETXATTR = @have_fsetxattr@
->  HAVE_MREMAP = @have_mremap@
->  NEED_INTERNAL_FSXATTR = @need_internal_fsxattr@
->  HAVE_GETFSMAP = @have_getfsmap@
-> +HAVE_MAP_SYNC = @have_map_sync@
->  
->  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
->  #	   -Wbitwise -Wno-transparent-union -Wno-old-initializer -Wno-decl
-> diff --git a/include/linux.h b/include/linux.h
-> index 6ce344c..4ee03ed 100644
-> --- a/include/linux.h
-> +++ b/include/linux.h
-> @@ -327,4 +327,9 @@ fsmap_advance(
->  #define HAVE_GETFSMAP
->  #endif /* HAVE_GETFSMAP */
->  
-> +#ifndef HAVE_MAP_SYNC
-> +#define MAP_SYNC 0x80000
-> +#define MAP_SHARED_VALIDATE 0x3
-> +#endif /* HAVE_MAP_SYNC */
-
-Hmm, what's the point of ifndef/define if you have an configure.ac check?
-
-> +
->  #endif	/* __XFS_LINUX_H__ */
+>  LLDLIBS = $(LIBXCMD) $(LIBHANDLE) $(LIBPTHREAD)
+>  LTDEPENDENCIES = $(LIBXCMD) $(LIBHANDLE)
+> diff --git a/io/init.c b/io/init.c
+> index 20d5f80..34d87b5 100644
+> --- a/io/init.c
+> +++ b/io/init.c
+> @@ -72,6 +72,7 @@ init_commands(void)
+>  	help_init();
+>  	imap_init();
+>  	inject_init();
+> +	log_writes_init();
+>  	madvise_init();
+>  	mincore_init();
+>  	mmap_init();
 > diff --git a/io/io.h b/io/io.h
-> index 3862985..8b2753b 100644
+> index 8b2753b..d62034a 100644
 > --- a/io/io.h
 > +++ b/io/io.h
-> @@ -65,6 +65,7 @@ typedef struct mmap_region {
->  	size_t		length;		/* length of mapping */
->  	off64_t		offset;		/* start offset into backing file */
->  	int		prot;		/* protection mode of the mapping */
-> +	bool		map_sync;	/* is this a MAP_SYNC mapping? */
->  	char		*name;		/* name of backing file */
->  } mmap_region_t;
->  
-> diff --git a/io/mmap.c b/io/mmap.c
-> index 7a8150e..520b037 100644
-> --- a/io/mmap.c
-> +++ b/io/mmap.c
-> @@ -42,7 +42,7 @@ print_mapping(
->  	int		index,
->  	int		braces)
->  {
-> -	unsigned char	buffer[8] = { 0 };
-> +	char		buffer[8] = { 0 };
->  	int		i;
->  
->  	static struct {
-> @@ -57,6 +57,10 @@ print_mapping(
->  
->  	for (i = 0, p = pflags; p->prot != PROT_NONE; i++, p++)
->  		buffer[i] = (map->prot & p->prot) ? p->mode : '-';
+> @@ -109,6 +109,7 @@ extern void		getrusage_init(void);
+>  extern void		help_init(void);
+>  extern void		imap_init(void);
+>  extern void		inject_init(void);
+> +extern void		log_writes_init(void);
+>  extern void		mmap_init(void);
+>  extern void		open_init(void);
+>  extern void		parent_init(void);
+> diff --git a/io/log_writes.c b/io/log_writes.c
+> new file mode 100644
+> index 0000000..bc3952c
+> --- /dev/null
+> +++ b/io/log_writes.c
+> @@ -0,0 +1,78 @@
+> +/*
+> + * Copyright (c) 2017 Intel Corporation.
+> + * All Rights Reserved.
+> + *
+> + * This program is free software; you can redistribute it and/or
+> + * modify it under the terms of the GNU General Public License as
+> + * published by the Free Software Foundation.
+> + *
+> + * This program is distributed in the hope that it would be useful,
+> + * but WITHOUT ANY WARRANTY; without even the implied warranty of
+> + * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> + * GNU General Public License for more details.
+> + *
+> + * You should have received a copy of the GNU General Public License
+> + * along with this program; if not, write the Free Software Foundation,
+> + * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> + */
 > +
-> +	if (map->map_sync)
-> +		sprintf(&buffer[i], " S");
-
-Does buffer need enlarging here?
-
+> +#include "platform_defs.h"
+> +#include "command.h"
+> +#include "init.h"
 > +
->  	printf("%c%03d%c 0x%lx - 0x%lx %s  %14s (%lld : %ld)\n",
->  		braces? '[' : ' ', index, braces? ']' : ' ',
->  		(unsigned long)map->addr,
-> @@ -146,6 +150,7 @@ mmap_help(void)
->  " -r -- map with PROT_READ protection\n"
->  " -w -- map with PROT_WRITE protection\n"
->  " -x -- map with PROT_EXEC protection\n"
-> +" -S -- map with MAP_SHARED_VALIDATE and MAP_SYNC flags\n"
->  " -s <size> -- first do mmap(size)/munmap(size), try to reserve some free space\n"
->  " If no protection mode is specified, all are used by default.\n"
->  "\n"));
-> @@ -161,7 +166,7 @@ mmap_f(
->  	void		*address = NULL;
->  	char		*filename;
->  	size_t		blocksize, sectsize;
-> -	int		c, prot = 0;
-> +	int		c, prot = 0, flags = MAP_SHARED;
->  
->  	if (argc == 1) {
->  		if (mapping)
-> @@ -184,7 +189,7 @@ mmap_f(
->  
->  	init_cvtnum(&blocksize, &sectsize);
->  
-> -	while ((c = getopt(argc, argv, "rwxs:")) != EOF) {
-> +	while ((c = getopt(argc, argv, "rwxSs:")) != EOF) {
->  		switch (c) {
->  		case 'r':
->  			prot |= PROT_READ;
-> @@ -195,6 +200,9 @@ mmap_f(
->  		case 'x':
->  			prot |= PROT_EXEC;
->  			break;
-> +		case 'S':
-> +			flags = MAP_SHARED_VALIDATE | MAP_SYNC;
-> +			break;
->  		case 's':
->  			length2 = cvtnum(blocksize, sectsize, optarg);
->  			break;
-> @@ -238,7 +246,7 @@ mmap_f(
->  		               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
->  		munmap(address, length2);
->  	}
-> -	address = mmap(address, length, prot, MAP_SHARED, file->fd, offset);
-> +	address = mmap(address, length, prot, flags, file->fd, offset);
->  	if (address == MAP_FAILED) {
->  		perror("mmap");
->  		free(filename);
-> @@ -263,6 +271,7 @@ mmap_f(
->  	mapping->offset = offset;
->  	mapping->name = filename;
->  	mapping->prot = prot;
-> +	mapping->map_sync = (flags == (MAP_SHARED_VALIDATE | MAP_SYNC));
->  	return 0;
->  }
->  
-> @@ -676,7 +685,7 @@ mmap_init(void)
->  	mmap_cmd.argmax = -1;
->  	mmap_cmd.flags = CMD_NOMAP_OK | CMD_NOFILE_OK |
->  			 CMD_FOREIGN_OK | CMD_FLAG_ONESHOT;
-> -	mmap_cmd.args = _("[N] | [-rwx] [-s size] [off len]");
-> +	mmap_cmd.args = _("[N] | [-rwxS] [-s size] [off len]");
->  	mmap_cmd.oneline =
->  		_("mmap a range in the current file, show mappings");
->  	mmap_cmd.help = mmap_help;
-> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
-> index fdf9d69..598f5df 100644
-> --- a/m4/package_libcdev.m4
-> +++ b/m4/package_libcdev.m4
-> @@ -314,3 +314,19 @@ AC_DEFUN([AC_HAVE_GETFSMAP],
->         AC_MSG_RESULT(no))
->      AC_SUBST(have_getfsmap)
->    ])
+> +static cmdinfo_t log_writes_cmd;
 > +
-> +#
-> +# Check if we have MAP_SYNC defines (Linux)
-> +#
-> +AC_DEFUN([AC_HAVE_MAP_SYNC],
-> +  [ AC_MSG_CHECKING([for MAP_SYNC])
-> +    AC_TRY_COMPILE([
-> +#include <asm-generic/mman.h>
-> +#include <asm-generic/mman-common.h>
-> +    ], [
-> +         int flags = MAP_SHARED_VALIDATE | MAP_SYNC;
-> +    ], have_map_sync=yes
-> +       AC_MSG_RESULT(yes),
-> +       AC_MSG_RESULT(no))
-> +    AC_SUBST(have_map_sync)
-> +  ])
-> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
-> index 9bf1a47..1693f7f 100644
-> --- a/man/man8/xfs_io.8
-> +++ b/man/man8/xfs_io.8
-> @@ -764,7 +764,7 @@ Each (sec, nsec) pair constitutes a single timestamp value.
->  
->  .SH MEMORY MAPPED I/O COMMANDS
->  .TP
-> -.BI "mmap [ " N " | [[ \-rwx ] [\-s " size " ] " "offset length " ]]
-> +.BI "mmap [ " N " | [[ \-rwxS ] [\-s " size " ] " "offset length " ]]
->  With no arguments,
->  .B mmap
->  shows the current mappings. Specifying a single numeric argument
-> @@ -780,6 +780,10 @@ PROT_WRITE
->  .RB ( \-w ),
->  and PROT_EXEC
->  .RB ( \-x ).
-> +The mapping will be created with the MAP_SHARED flag by default, or with the
-> +Linux specific (MAP_SYNC | MAP_SHARED_VALIDATE) flags if
-> +.B -S
-> +is given.
+> +static int
+> +mark_log(char *device, char *mark)
+> +{
+> +	char command[256];
+> +
+> +	snprintf(command, 256, "dmsetup message %s 0 mark %s",
+> +			device, mark);
+> +
+> +	return system(command);
 
-Woo, documentation!
+I want to call my mark "bobby'; DROP TABLES;"... ;)
+
+Maybe we should check snprintf return value just in case someone feeds
+us an overlong string?
 
 --D
 
->  .BI \-s " size"
->  is used to do a mmap(size) && munmap(size) operation at first, try to reserve some
->  extendible free memory space, if
+> +}
+> +
+> +static int
+> +log_writes_f(
+> +	int			argc,
+> +	char			**argv)
+> +{
+> +	char *device = NULL;
+> +	char *mark = NULL;
+> +	int c;
+> +
+> +	while ((c = getopt(argc, argv, "d:m:")) != EOF) {
+> +		switch (c) {
+> +		case 'd':
+> +			device = optarg;
+> +			break;
+> +		case 'm':
+> +			mark = optarg;
+> +			break;
+> +		default:
+> +			return command_usage(&log_writes_cmd);
+> +		}
+> +	}
+> +
+> +	if (device == NULL || mark == NULL)
+> +		return command_usage(&log_writes_cmd);
+> +
+> +	return mark_log(device, mark);
+> +}
+> +
+> +void
+> +log_writes_init(void)
+> +{
+> +	log_writes_cmd.name = "log_writes";
+> +	log_writes_cmd.altname = "lw";
+> +	log_writes_cmd.cfunc = log_writes_f;
+> +	log_writes_cmd.flags = CMD_NOMAP_OK | CMD_NOFILE_OK | CMD_FOREIGN_OK;
+> +	log_writes_cmd.argmin = 0;
+> +	log_writes_cmd.argmax = -1;
+> +	log_writes_cmd.args = _("-d device -m mark");
+> +	log_writes_cmd.oneline =
+> +		_("uses dmsetup to interact with the dm-log-writes module");
+> +
+> +	add_command(&log_writes_cmd);
+> +}
+> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+> index 1693f7f..f18af99 100644
+> --- a/man/man8/xfs_io.8
+> +++ b/man/man8/xfs_io.8
+> @@ -1123,7 +1123,25 @@ version of policy structure (numeric)
+>  .BR get_encpolicy
+>  On filesystems that support encryption, display the encryption policy of the
+>  current file.
+> +.RE
+> +.PD
+> +.TP
+> +.BI "log_writes \-d " device " \-m "  mark
+> +Use
+> +.B dmsetup
+> +to interact with the
+> +.B dm-log-writes
+> +kernel module.  Currently the only operation
+> +supported is the creation of a mark in the log by executing the shell command:
+>  
+> +.B dmsetup message <device> 0 mark <mark>
+> +.PD
+> +.RE
+> +.TP
+> +.B lw
+> +See the
+> +.B log_writes
+> +command.
+>  .SH SEE ALSO
+>  .BR mkfs.xfs (8),
+>  .BR xfsctl (3),
+> @@ -1142,3 +1160,4 @@ current file.
+>  .BR pread (2),
+>  .BR pwrite (2),
+>  .BR readdir (3).
+> +.BR dmsetup (8).
 > -- 
 > 2.9.5
 > 
