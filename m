@@ -1,80 +1,211 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55682 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:50150 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753100AbdKXKiT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 24 Nov 2017 05:38:19 -0500
-Date: Fri, 24 Nov 2017 11:38:14 +0100
-From: Karel Zak <kzak@redhat.com>
-Subject: Re: [PATCH v4] fstests: filter readonly mount error messages
-Message-ID: <20171124103814.gfvxw3ethkcvm6xa@ws.net.home>
-References: <20171123111031.6550-4-eguan@redhat.com>
- <20171124050144.23549-1-eguan@redhat.com>
- <CAOQ4uxgxRxByGHhePr3b4H+W1zEGxUX6Emj9PBzZpEKEs2iHog@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgxRxByGHhePr3b4H+W1zEGxUX6Emj9PBzZpEKEs2iHog@mail.gmail.com>
+        id S1753239AbdKXLbs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Nov 2017 06:31:48 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs: test send for files with multiple hard links renamed
+Date: Fri, 17 Nov 2017 14:49:05 +0000
+Message-Id: <20171117144905.17903-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 24, 2017 at 10:04:33AM +0200, Amir Goldstein wrote:
-> [cc: Karel Zak]
-> 
-> On Fri, Nov 24, 2017 at 7:01 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-> > write-protected devices") changed the error message on read-only
-> > block device, and in the failure case printed one line message
-> > instead of two (for details please see comments in common/filter),
-> > and this change broke generic/050 and overlay/035.
-> >
-> > Fix it by adding more filter rules to _filter_ro_mount and updating
-> > associated .out files to unify the output from both old and new
-> > util-linux versions.
-> >
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> > v4 (also passed with both old & new util-linux):
-> > - add more comments to explain the output differences between util-linux
-> >   versions
-> > - print out message directly instead of using perl variables
-> > - add word "device" to failed ro mount message
-> 
-> 
-> Eryu,
-> 
-> This looks good and you can take it as an ACK on the series.
-> 
-> I've CC'ed Karel, so maybe he thinks about us fstests guys before making
-> these sort of changes again...
+From: Filipe Manana <fdmanana@suse.com>
 
-Frankly, we have never promised that things like warning messages (or
-another messages) are stable interface. It's fragile to depend on this
-stuff...
+Test that an incremental send operation works if a file that has multiple
+hard links has some of its hard links renamed in the send snapshot, with
+one of them getting the same path that some other inode had in the send
+snapshot.
 
-> Thinking out loud, does xfstest even need to use mount program from
-> util-linux? Do we ever need anything other than the bare libc mount(2)?
-> We need it for -o loop, but that is the exception to the rule.
+At the moment this test fails on btrfs and a fix is provived by a linux
+kernel patch titled:
 
-Well, I don't think that create a parallel universe is the best
-solution.
+  "Btrfs: incremental send, fix wrong unlink path after renaming file"
 
-> For fs that have mount helpers (cifs,nfs), we could use mount.$FSTYP
-> directly (what error formats are reported from the helpers??). For all other
-> fs we can write a simple t_mount program to wrap libc mount(2) and not be
-> dependent on util-linux error message formats.
-> Maybe we can consider it next time util-linux changes..
-> 
-> Another idea to through in the air in the direction of Karel -
-> Maybe it makes sense for util-linux to check some env variable
-> and then print all error messages in a unified machine format, e.g.:
-> fprintf("%s: errno=%d\n", progname, errno);
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/155     | 147 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/155.out |   6 +++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 154 insertions(+)
+ create mode 100755 tests/btrfs/155
+ create mode 100644 tests/btrfs/155.out
 
-This is good idea, I can try to implement it into libmount. 
-
- Karel
-
-
+diff --git a/tests/btrfs/155 b/tests/btrfs/155
+new file mode 100755
+index 00000000..37c23260
+--- /dev/null
++++ b/tests/btrfs/155
+@@ -0,0 +1,147 @@
++#! /bin/bash
++# FS QA Test No. btrfs/155
++#
++# Test that an incremental send operation works if a file that has multiple
++# hard links has some of its hard links renamed in the send snapshot, with one
++# of them getting the same path that some other inode had in the send snapshot.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2017 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch
++_require_fssum
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++mkdir $SCRATCH_MNT/a
++touch $SCRATCH_MNT/a/f1
++mkdir -p $SCRATCH_MNT/a/b/c
++ln $SCRATCH_MNT/a/f1 $SCRATCH_MNT/a/b/c/f1l1
++touch $SCRATCH_MNT/a/b/f2
++mkdir $SCRATCH_MNT/d
++mv $SCRATCH_MNT/a/b/c/f1l1 $SCRATCH_MNT/d/f1l1_2
++ln $SCRATCH_MNT/a/b/f2 $SCRATCH_MNT/a/f2l1
++ln $SCRATCH_MNT/a/b/f2 $SCRATCH_MNT/d/f2l2
++mv $SCRATCH_MNT/a/f1 $SCRATCH_MNT/d/f1_2
++
++# Filesystem looks like:
++#
++# .                                                      (ino 256)
++# |---- a/                                               (ino 257)
++# |     |---- b/                                         (ino 259)
++# |     |     |---- c/                                   (ino 260)
++# |     |     |---- f2                                   (ino 261)
++# |     |
++# |     |---- f2l1                                       (ino 261)
++# |
++# |---- d/                                               (ino 262)
++#       |---- f1l1_2                                     (ino 258)
++#       |---- f2l2                                       (ino 261)
++#       |---- f1_2                                       (ino 258)
++#
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++	$SCRATCH_MNT/mysnap1 > /dev/null
++
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap \
++	$SCRATCH_MNT/mysnap1 2>&1 1>/dev/null | _filter_scratch
++
++mv $SCRATCH_MNT/d $SCRATCH_MNT/a/b/d2
++mv $SCRATCH_MNT/a/f2l1 $SCRATCH_MNT/d
++mkdir $SCRATCH_MNT/a/f2l1
++ln $SCRATCH_MNT/a/b/d2/f1_2 $SCRATCH_MNT/a/b/f1l2
++mv $SCRATCH_MNT/a/b $SCRATCH_MNT/a/f2l1/b2
++mv $SCRATCH_MNT/a/f2l1/b2/d2 $SCRATCH_MNT/a/f2l1/b2/c/d3
++mv $SCRATCH_MNT/a/f2l1/b2/c/d3/f2l2 $SCRATCH_MNT/a/f2l1/b2/c/d3/f2l2_2
++
++# Filesystem now looks like:
++#
++# .                                                      (ino 256)
++# |---- a/                                               (ino 257)
++# |     |---- f2l1/                                      (ino 263)
++# |             |---- b2/                                (ino 259)
++# |                   |---- c/                           (ino 260)
++# |                   |     |---- d3                     (ino 262)
++# |                   |           |---- f1l1_2           (ino 258)
++# |                   |           |---- f2l2_2           (ino 261)
++# |                   |           |---- f1_2             (ino 258)
++# |                   |
++# |                   |---- f2                           (ino 261)
++# |                   |---- f1l2                         (ino 258)
++# |
++# |---- d                                                (ino 261)
++#
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT \
++		 $SCRATCH_MNT/mysnap2 > /dev/null
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
++		 $SCRATCH_MNT/mysnap2 2>&1 1>/dev/null | _filter_scratch
++
++$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT > /dev/null
++# The incremental send operation below used to issue an unlink operation for the
++# path "d/f2l1" after it orphanized inode 262 (renamed it to o262-7-0) and after
++# it created the link named "d" for inode 261, which made the receiver fail on
++# the unlink operation with error code ENOTDIR. That unlink operation should
++# have had the path "o262-7-0/f2l2" instead.
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT > /dev/null
++$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++status=0
++exit
+diff --git a/tests/btrfs/155.out b/tests/btrfs/155.out
+new file mode 100644
+index 00000000..7dc5e9a2
+--- /dev/null
++++ b/tests/btrfs/155.out
+@@ -0,0 +1,6 @@
++QA output created by 155
++At subvol SCRATCH_MNT/mysnap1
++At subvol SCRATCH_MNT/mysnap2
++At subvol mysnap1
++OK
++OK
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index c98cf823..b9879e6a 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -157,3 +157,4 @@
+ 152 auto quick metadata qgroup send
+ 153 auto quick qgroup
+ 154 auto quick
++155 auto quick send
 -- 
- Karel Zak  <kzak@redhat.com>
- http://karelzak.blogspot.com
+2.11.0
+
