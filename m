@@ -1,11 +1,11 @@
-Received: from mga02.intel.com ([134.134.136.20]:54246 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:56448 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1760307AbdKQU2i (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1760132AbdKQU2i (ORCPT <rfc822;fstests@vger.kernel.org>);
         Fri, 17 Nov 2017 15:28:38 -0500
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [fstests PATCH v4 4/4] generic: add test for DAX MAP_SYNC support
-Date: Fri, 17 Nov 2017 13:28:28 -0700
-Message-Id: <20171117202828.25472-5-ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH v4 3/4] dm-log-writes: allow DAX to be used when possible
+Date: Fri, 17 Nov 2017 13:28:27 -0700
+Message-Id: <20171117202828.25472-4-ross.zwisler@linux.intel.com>
 In-Reply-To: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
 References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,135 +13,95 @@ To: fstests <fstests@vger.kernel.org>
 Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-This test creates a file and writes to it via an mmap(), but never syncs
-via fsync/msync.  This process is tracked via dm-log-writes, then replayed.
+Enhance _require_dm_target so that a user can request a minimum version of a
+given dm target.
 
-If MAP_SYNC is working the dm-log-writes replay will show the test file
-with 1 MiB of on-media block allocations.  This is because each allocating
-page fault included an implicit metadata sync.  If MAP_SYNC isn't working
-(which you can test by removing the "-S" flag to xfs_io mmap) the file
-will be smaller or missing entirely.
-
-Note that dm-log-writes doesn't track the data that we write via the
-mmap(), so we can't do any data integrity checking.  We can only verify
-that the metadata writes for the page faults happened.
+DAX support was added to v1.1.0 of the dm-log-writes kernel module, so
+allow the DAX mount option starting with that version.
 
 Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+Suggested-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/generic/468     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/468.out |  3 ++
- tests/generic/group   |  1 +
- 3 files changed, 87 insertions(+)
- create mode 100755 tests/generic/468
- create mode 100644 tests/generic/468.out
+ common/dmlogwrites           |  5 +++--
+ common/rc                    | 23 +++++++++++++++++++++--
+ doc/requirement-checking.txt |  5 +++--
+ 3 files changed, 27 insertions(+), 6 deletions(-)
 
-diff --git a/tests/generic/468 b/tests/generic/468
-new file mode 100755
-index 0000000..fcbbf34
---- /dev/null
-+++ b/tests/generic/468
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# FS QA Test No. 468
-+#
-+# Use dm-log-writes to verify that MAP_SYNC actually syncs metadata during
-+# page faults.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/common/dmlogwrites b/common/dmlogwrites
+index 80ed4fc..2cb804c 100644
+--- a/common/dmlogwrites
++++ b/common/dmlogwrites
+@@ -23,8 +23,9 @@ _require_log_writes()
+ 	[ -z "$LOGWRITES_DEV" -o ! -b "$LOGWRITES_DEV" ] && \
+ 		_notrun "This test requires a valid \$LOGWRITES_DEV"
+ 
+-	_exclude_scratch_mount_option dax
+-	_require_dm_target log-writes
++	local z=0
++	_scratch_has_mount_option dax && z=1
++	_require_dm_target log-writes 1 $z 0
+ 	_require_test_program "log-writes/replay-log"
+ }
+ 
+diff --git a/common/rc b/common/rc
+index 701b1ff..c1f24ed 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1782,6 +1782,18 @@ _require_sane_bdev_flush()
+ 	fi
+ }
+ 
++_compare_dm_target_versions()
 +{
-+	_log_writes_cleanup
++	for i in $(seq 0 2); do
++		if [[ ${_actual_ver[$i]} > ${_required_ver[$i]} ]]; then
++			return
++		fi
++		if [[ ${_actual_ver[$i]} < ${_required_ver[$i]} ]]; then
++			_notrun "dm $_target version ${_required_ver[@]} required"
++		fi
++	done
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmlogwrites
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_log_writes
-+_require_scratch_dax
-+_require_xfs_io_command "log_writes"
-+
-+_log_writes_init
-+_log_writes_mkfs >> $seqres.full 2>&1
-+_log_writes_mount -o dax
-+
-+LEN=$((1024 * 1024)) # 1 MiB
-+
-+xfs_io -t -c "truncate $LEN" -c "mmap -S 0 $LEN" -c "mwrite 0 $LEN" \
-+	-c "log_writes -d $LOGWRITES_NAME -m preunmap" \
-+	-f $SCRATCH_MNT/test > /dev/null 2>&1
-+
-+# Unmount the scratch dir and tear down the log writes target
-+_log_writes_unmount
-+_log_writes_remove
-+_check_scratch_fs
-+
-+# destroy previous filesystem so we can be sure our rebuild works
-+_scratch_mkfs >> $seqres.full 2>&1
-+
-+# check pre-unmap state
-+_log_writes_replay_log preunmap
-+_scratch_mount
-+
-+# We should see $SCRATCH_MNT/test as having 1 MiB in block allocations
-+stat -c "%s" $SCRATCH_MNT/test
-+
-+_scratch_unmount
-+_check_scratch_fs
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/468.out b/tests/generic/468.out
-new file mode 100644
-index 0000000..5f897af
---- /dev/null
-+++ b/tests/generic/468.out
-@@ -0,0 +1,3 @@
-+QA output created by 468
-+1048576
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 9183950..c061842 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -470,3 +470,4 @@
- 465 auto rw quick aio
- 466 auto quick rw
- 467 auto quick exportfs
-+468 auto quick dax
+ # this test requires a specific device mapper target
+ _require_dm_target()
+ {
+@@ -1795,8 +1807,15 @@ _require_dm_target()
+ 
+ 	modprobe dm-$_target >/dev/null 2>&1
+ 
+-	$DMSETUP_PROG targets 2>&1 | grep -q ^$_target
+-	if [ $? -ne 0 ]; then
++	local _version=$($DMSETUP_PROG targets 2>&1 | grep ^$_target)
++	if [[ $_version =~ .*v([0-9]+)\.([0-9]+)\.([0-9]+) ]]; then
++		# check for a required minimum version?
++		if [[ $# == 4 ]]; then
++			local _actual_ver=(${BASH_REMATCH[@]:1})
++			local _required_ver=($2 $3 $4)
++			_compare_dm_target_versions
++		fi
++	else
+ 		_notrun "This test requires dm $_target support"
+ 	fi
+ }
+diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
+index 4e01b1f..bbfc34f 100644
+--- a/doc/requirement-checking.txt
++++ b/doc/requirement-checking.txt
+@@ -112,10 +112,11 @@ _require_statx
+ DEVICE MAPPER REQUIREMENTS
+ ==========================
+ 
+-_require_dm_target <name>
++_require_dm_target <name> [<version 1> <version 2> <version 3>]
+ 
+      The test requires the use of the device mapper target and will be skipped
+-     if it isn't available in the kernel.
++     if it isn't available in the kernel.  Optionally specify the minimum
++     three part version number of the dm target that is required.
+ 
+ _require_log_writes
+ 
 -- 
 2.9.5
 
