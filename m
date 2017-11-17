@@ -1,72 +1,147 @@
-Received: from mga02.intel.com ([134.134.136.20]:56448 "EHLO mga02.intel.com"
+Received: from mga02.intel.com ([134.134.136.20]:54246 "EHLO mga02.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754068AbdKQU2f (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Nov 2017 15:28:35 -0500
+        id S1760307AbdKQU2i (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Nov 2017 15:28:38 -0500
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [fstests PATCH v4 0/4] add test for DAX MAP_SYNC support
-Date: Fri, 17 Nov 2017 13:28:24 -0700
-Message-Id: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH v4 4/4] generic: add test for DAX MAP_SYNC support
+Date: Fri, 17 Nov 2017 13:28:28 -0700
+Message-Id: <20171117202828.25472-5-ross.zwisler@linux.intel.com>
+In-Reply-To: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
+References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests <fstests@vger.kernel.org>
 Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-The purpose of this series is to exercise the new MAP_SYNC mmap()
-functionality [1].  It adds a test which uses dm-log-writes to try and
-replay filesystem metadata operations for a file that is being written via
-mmap().
+This test creates a file and writes to it via an mmap(), but never syncs
+via fsync/msync.  This process is tracked via dm-log-writes, then replayed.
 
-If MAP_SYNC is active the dm-log-writes replay will recreate the file's
-block allocations and you'll end up with a test file which is a known
-size.
+If MAP_SYNC is working the dm-log-writes replay will show the test file
+with 1 MiB of on-media block allocations.  This is because each allocating
+page fault included an implicit metadata sync.  If MAP_SYNC isn't working
+(which you can test by removing the "-S" flag to xfs_io mmap) the file
+will be smaller or missing entirely.
 
-If MAP_SYNC is not active the metadata writes will most likely be lost and
-the replay will either fail to create the test file at all or it will may
-be smaller.  In all of my testing the file simply doesn't exist on the
-replay if MAP_SYNC is ommited.
+Note that dm-log-writes doesn't track the data that we write via the
+mmap(), so we can't do any data integrity checking.  We can only verify
+that the metadata writes for the page faults happened.
 
-This test relies on a kernel with both the MAP_SYNC mmap() functionality
-and the DAX enabling in dm-log-writes.  These will both appear in kernel
-v4.15-rc1.  For ease of testing I've posted a kernel that is v4.14 plus
-just those two patch series [2].
-
-This test also relies on xfsprogs having support for MAP_SYNC and for
-dm-log-writes.  I've posed a tree adding that support [3].  This xfsprogs
-series is still under review so if the xfs_io interfaces change this
-test will of course need to be updated as well.
-
-Lastly, I've also posted a working version of this series [4].
-
-Changes since v3:
- - Enhanced xfs_io with MAP_SYNC and dm-log-writes functionality instead of
-   creating a one-off test program.  (Dave Chinner)
-
- - Improved dm target version checking. (Amir)
-
- - Fixed dm-log-writes replay issue, some general cleanup, broke changes
-   out into a series.
-
-[1]: https://lists.01.org/pipermail/linux-nvdimm/2017-November/013164.html
-[2]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/linux.git/log/?h=map_sync_dm_log_writes
-[3]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfsprogs-dev.git/log/?h=map_sync
-[4]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfstests-dev.git/log/?h=map_sync_test_v4
-
-Ross Zwisler (4):
-  common/rc: add _scratch_has_mount_option()
-  dm-log-writes: only replay log to marks that exist
-  dm-log-writes: allow DAX to be used when possible
-  generic: add test for DAX MAP_SYNC support
-
- common/dmlogwrites           |  9 +++--
- common/rc                    | 33 ++++++++++++++++--
- doc/requirement-checking.txt |  5 +--
- tests/generic/468            | 83 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/468.out        |  3 ++
- tests/generic/group          |  1 +
- 6 files changed, 128 insertions(+), 6 deletions(-)
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+---
+ tests/generic/468     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/468.out |  3 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 87 insertions(+)
  create mode 100755 tests/generic/468
  create mode 100644 tests/generic/468.out
 
+diff --git a/tests/generic/468 b/tests/generic/468
+new file mode 100755
+index 0000000..fcbbf34
+--- /dev/null
++++ b/tests/generic/468
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# FS QA Test No. 468
++#
++# Use dm-log-writes to verify that MAP_SYNC actually syncs metadata during
++# page faults.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Intel Corporation.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_log_writes_cleanup
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_log_writes
++_require_scratch_dax
++_require_xfs_io_command "log_writes"
++
++_log_writes_init
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mount -o dax
++
++LEN=$((1024 * 1024)) # 1 MiB
++
++xfs_io -t -c "truncate $LEN" -c "mmap -S 0 $LEN" -c "mwrite 0 $LEN" \
++	-c "log_writes -d $LOGWRITES_NAME -m preunmap" \
++	-f $SCRATCH_MNT/test > /dev/null 2>&1
++
++# Unmount the scratch dir and tear down the log writes target
++_log_writes_unmount
++_log_writes_remove
++_check_scratch_fs
++
++# destroy previous filesystem so we can be sure our rebuild works
++_scratch_mkfs >> $seqres.full 2>&1
++
++# check pre-unmap state
++_log_writes_replay_log preunmap
++_scratch_mount
++
++# We should see $SCRATCH_MNT/test as having 1 MiB in block allocations
++stat -c "%s" $SCRATCH_MNT/test
++
++_scratch_unmount
++_check_scratch_fs
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/468.out b/tests/generic/468.out
+new file mode 100644
+index 0000000..5f897af
+--- /dev/null
++++ b/tests/generic/468.out
+@@ -0,0 +1,3 @@
++QA output created by 468
++1048576
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 9183950..c061842 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -470,3 +470,4 @@
+ 465 auto rw quick aio
+ 466 auto quick rw
+ 467 auto quick exportfs
++468 auto quick dax
 -- 
 2.9.5
 
