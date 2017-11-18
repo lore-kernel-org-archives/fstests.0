@@ -1,53 +1,69 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42590 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1161737AbdKRGTL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 18 Nov 2017 01:19:11 -0500
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 1EE89883AB
-        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 06:19:11 +0000 (UTC)
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] ltp/fsx: really skip fallocate keep_size calls when replaying ops
-Date: Sat, 18 Nov 2017 14:19:06 +0800
-Message-Id: <20171118061906.11227-1-eguan@redhat.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:28731 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1163700AbdKROD2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 18 Nov 2017 09:03:28 -0500
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH v2 1/2] btrfs: add function to device list delete
+Date: Sat, 18 Nov 2017 22:03:36 +0800
+Message-Id: <20171118140337.13612-1-anand.jain@oracle.com>
+In-Reply-To: <20171113054410.24872-1-anand.jain@oracle.com>
+References: <20171113054410.24872-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@redhat.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On start up, fsx checks for various fallocate(2) operation support
-status and disables unsupported operations. But when replaying
-operations from a log, fsx failed to skip KEEP_SIZE fallocate(2)
-calls if underlying filesystem doesn't support it. For example,
-NFSv4.2 supports fallocate(2) but not KEEP_SIZE, and this causes
-generic/469 fails on NFSv4.2.
+We need device delete from the dev_list so create a new function,
+instead of refactor of btrfs_free_stale_device() because,
+btrfs_free_stale_device() doesn't hold device_list_mutex which
+is actually needed here.
 
-Fix it by taking 'keep_size_calls' into consideration when replaying
-ops from log file.
-
-Signed-off-by: Eryu Guan <eguan@redhat.com>
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
+v1: title of this patch
+  btrfs: refactor btrfs_free_stale_device() to get device list delete
+v2:
+ add new function instead of peal from
+ btrfs_free_stale_device() to delete a device from the device list,
+ since btrfs_free_stale_device() does not hold device_list_mutex,
+ may be it can be fixed later.
 
-Note that generic/469 hasn't been pushed to upstream yet. Will do in
-this week's update.
 
- ltp/fsx.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ /btrfs/volumes.c | 21 +++++++++++++++++++++
+ 1 file changed, 21 insertions(+)
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 9c358f27bd92..fc1381e60f09 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1469,7 +1469,7 @@ test(void)
- 			offset = log_entry.args[0];
- 			size = log_entry.args[1];
- 			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
--			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
-+			keep_size = !!((log_entry.flags & FL_KEEP_SIZE) && keep_size_calls);
- 			goto have_op;
- 		}
- 		return 0;
+diff --git a/fs/btrfs/volumes.c b/fs/btrfs/volumes.c
+index bddf75d5e6a0..68f1dd44385b 100644
+--- a/fs/btrfs/volumes.c
++++ b/fs/btrfs/volumes.c
+@@ -546,6 +546,27 @@ static void pending_bios_fn(struct btrfs_work *work)
+ 	run_scheduled_bios(device);
+ }
+ 
++static void delete_device_from_list(struct btrfs_device *device)
++{
++	struct btrfs_fs_devices *fs_devices;
++	fs_devices = device->fs_devices;
++
++	lockdep_assert_held(&uuid_mutex);
++
++	mutex_lock(&fs_devices->device_list_mutex);
++	fs_devices->num_devices--;
++	list_del(&device->dev_list);
++	mutex_unlock(&fs_devices->device_list_mutex);
++
++	rcu_string_free(device->name);
++	kfree(device);
++
++	if (fs_devices->num_devices == 0) {
++		btrfs_sysfs_remove_fsid(fs_devices);
++		list_del(&fs_devices->list);
++		free_fs_devices(fs_devices);
++	}
++}
+ 
+ void btrfs_free_stale_device(struct btrfs_device *cur_dev)
+ {
 -- 
-2.14.3
+2.15.0
 
