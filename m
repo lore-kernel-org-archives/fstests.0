@@ -1,53 +1,34 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:48688 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1161422AbdKRF5M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 18 Nov 2017 00:57:12 -0500
-Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id vAI5sUTI097833
-        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 00:57:11 -0500
-Received: from e18.ny.us.ibm.com (e18.ny.us.ibm.com [129.33.205.208])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2eaehc13ug-1
-        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 00:57:11 -0500
-Received: from localhost
-        by e18.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Sat, 18 Nov 2017 00:57:10 -0500
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH 1/3] overlay/017: Remove constant st_ino/d_ino test for hardlinks
-Date: Sat, 18 Nov 2017 11:28:02 +0530
-Message-Id: <20171118055804.17611-1-chandan@linux.vnet.ibm.com>
+Received: from mx1.redhat.com ([209.132.183.28]:42148 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1161678AbdKRGRF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 18 Nov 2017 01:17:05 -0500
+Date: Sat, 18 Nov 2017 14:17:03 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [fstests PATCH v4 3/4] dm-log-writes: allow DAX to be used when
+ possible
+Message-ID: <20171118061703.GD2749@eguan.usersys.redhat.com>
+References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
+ <20171117202828.25472-4-ross.zwisler@linux.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171117202828.25472-4-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, amir73il@gmail.com
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Constant st_ino/d_ino for hardlinks requires "index" config
-feature/mount option to be enabled. overlay/018 already tests constant
-st_ino feature for hardlinks. A future commit will add constant d_ino
-test to overlay/018 test.
+On Fri, Nov 17, 2017 at 01:28:27PM -0700, Ross Zwisler wrote:
+> Enhance _require_dm_target so that a user can request a minimum version of a
+> given dm target.
+> 
+> DAX support was added to v1.1.0 of the dm-log-writes kernel module, so
+> allow the DAX mount option starting with that version.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
- tests/overlay/017 | 4 +---
- 1 file changed, 1 insertion(+), 3 deletions(-)
+Is is possible not relying on the version numbers but actually trying
+what you want to do and _notrun if that fails? Currently fstests does no
+version number checking at all, and it'd be great if we keep that
+tradition.
 
-diff --git a/tests/overlay/017 b/tests/overlay/017
-index e9c8525..03955d0 100755
---- a/tests/overlay/017
-+++ b/tests/overlay/017
-@@ -72,10 +72,8 @@ mknod $lowerdir/chrdev c 1 1
- mknod $lowerdir/blkdev b 1 1
- mknod $lowerdir/fifo p
- $here/src/af_unix $lowerdir/socket
--touch $lowerdir/hardlink1
--ln $lowerdir/hardlink1 $lowerdir/hardlink2
- 
--FILES="dir file symlink chrdev blkdev fifo socket hardlink1 hardlink2"
-+FILES="dir file symlink chrdev blkdev fifo socket"
- 
- # Record inode numbers in format <ino> <basename>
- function record_inode_numbers()
--- 
-2.9.5
-
+Thanks,
+Eryu
