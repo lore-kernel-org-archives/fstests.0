@@ -1,34 +1,53 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42148 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:42590 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1161678AbdKRGRF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 18 Nov 2017 01:17:05 -0500
-Date: Sat, 18 Nov 2017 14:17:03 +0800
+        id S1161737AbdKRGTL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 18 Nov 2017 01:19:11 -0500
+Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 1EE89883AB
+        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 06:19:11 +0000 (UTC)
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [fstests PATCH v4 3/4] dm-log-writes: allow DAX to be used when
- possible
-Message-ID: <20171118061703.GD2749@eguan.usersys.redhat.com>
-References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
- <20171117202828.25472-4-ross.zwisler@linux.intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171117202828.25472-4-ross.zwisler@linux.intel.com>
+Subject: [PATCH] ltp/fsx: really skip fallocate keep_size calls when replaying ops
+Date: Sat, 18 Nov 2017 14:19:06 +0800
+Message-Id: <20171118061906.11227-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 17, 2017 at 01:28:27PM -0700, Ross Zwisler wrote:
-> Enhance _require_dm_target so that a user can request a minimum version of a
-> given dm target.
-> 
-> DAX support was added to v1.1.0 of the dm-log-writes kernel module, so
-> allow the DAX mount option starting with that version.
+On start up, fsx checks for various fallocate(2) operation support
+status and disables unsupported operations. But when replaying
+operations from a log, fsx failed to skip KEEP_SIZE fallocate(2)
+calls if underlying filesystem doesn't support it. For example,
+NFSv4.2 supports fallocate(2) but not KEEP_SIZE, and this causes
+generic/469 fails on NFSv4.2.
 
-Is is possible not relying on the version numbers but actually trying
-what you want to do and _notrun if that fails? Currently fstests does no
-version number checking at all, and it'd be great if we keep that
-tradition.
+Fix it by taking 'keep_size_calls' into consideration when replaying
+ops from log file.
 
-Thanks,
-Eryu
+Signed-off-by: Eryu Guan <eguan@redhat.com>
+---
+
+Note that generic/469 hasn't been pushed to upstream yet. Will do in
+this week's update.
+
+ ltp/fsx.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 9c358f27bd92..fc1381e60f09 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -1469,7 +1469,7 @@ test(void)
+ 			offset = log_entry.args[0];
+ 			size = log_entry.args[1];
+ 			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
+-			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
++			keep_size = !!((log_entry.flags & FL_KEEP_SIZE) && keep_size_calls);
+ 			goto have_op;
+ 		}
+ 		return 0;
+-- 
+2.14.3
+
