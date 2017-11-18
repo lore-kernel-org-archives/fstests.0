@@ -1,64 +1,82 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43648 "EHLO mx1.redhat.com"
+Received: from sandeen.net ([63.231.237.45]:38570 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933066AbdKRDvC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Nov 2017 22:51:02 -0500
-Date: Sat, 18 Nov 2017 11:51:00 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [fstests PATCH v4 2/4] dm-log-writes: only replay log to marks
- that exist
-Message-ID: <20171118035100.GC2749@eguan.usersys.redhat.com>
-References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
- <20171117202828.25472-3-ross.zwisler@linux.intel.com>
+        id S1752412AbdKREoa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Nov 2017 23:44:30 -0500
+Subject: Re: [xfsprogs PATCH 2/2] xfs_io: add a new 'log_writes' command
+References: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
+ <20171117202524.24696-3-ross.zwisler@linux.intel.com>
+ <84006b9c-90db-7eea-0bdc-b73da1bb1394@sandeen.net>
+ <20171117204801.GA16597@linux.intel.com>
+ <960d0051-d357-033a-0ab7-9eb99d8e63fa@sandeen.net>
+ <20171117211434.GB16597@linux.intel.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <fda7a7d9-0709-74be-666d-49e5cf295faa@sandeen.net>
+Date: Fri, 17 Nov 2017 22:44:27 -0600
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171117202828.25472-3-ross.zwisler@linux.intel.com>
+In-Reply-To: <20171117211434.GB16597@linux.intel.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 17, 2017 at 01:28:26PM -0700, Ross Zwisler wrote:
-> The 'replay-log' executable will replay the dm-log-writes log until the
-> given mark, or until the end of the log if the mark isn't found.
-> 
-> This means that if the mark you're looking for was never inserted in the
-> log or if you give garbage to _log_writes_replay_log() the entire log will
-> be replayed.  This can cause unexpected test results.
-> 
-> Fix this by making sure that the mark we're given actually exists in the
-> log before we allow the replay.
-> 
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> ---
->  common/dmlogwrites | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index 247c744..80ed4fc 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -72,6 +72,10 @@ _log_writes_replay_log()
->  {
->  	_mark=$1
->  
-> +	$here/src/log-writes/replay-log --log $LOGWRITES_DEV --find \
-> +		--end-mark $_mark >> $seqres.full 2>&1
-> +	[ $? -ne 0 ] && _fail "mark does not exist"
 
-Print out $_mark too?
 
-Thanks,
-Eryu
-
-> +
->  	$here/src/log-writes/replay-log --log $LOGWRITES_DEV --replay $SCRATCH_DEV \
->  		--end-mark $_mark >> $seqres.full 2>&1
->  	[ $? -ne 0 ] && _fail "replay failed"
-> -- 
-> 2.9.5
+On 11/17/17 3:14 PM, Ross Zwisler wrote:
+> On Fri, Nov 17, 2017 at 03:03:39PM -0600, Eric Sandeen wrote:
+>> On 11/17/17 2:48 PM, Ross Zwisler wrote:
+>>> On Fri, Nov 17, 2017 at 02:39:07PM -0600, Eric Sandeen wrote:
+>>>> On 11/17/17 2:25 PM, Ross Zwisler wrote:
+>>>>> Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
+>>>>> log marks via the external 'dmsetup' executable.  It's helpful to allow
+>>>>> users of xfs_io to adds these marks from within xfs_io instead of waiting
+>>>>> until after xfs_io exits because then they are able to replay the
+>>>>> dm-log-writes log up to immediately after another xfs_io operation such as
+>>>>> mwrite.  This isolates the log replay from other operations that happen as
+>>>>> part of xfs_io exiting (file handles being closed, mmaps being torn down,
+>>>>> etc.).  This also allows users to insert multiple marks between different
+>>>>> xfs_io commands.
+>>>>>
+>>>>> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+>>>>> Suggested-by: Dave Chinner <david@fromorbit.com>
+>>>>
+>>>> Without reviewing in detail, what is the advantage of wrapping dmsetup
+>>>> into xfs_io?  My first inclination is that there is none at all, and
+>>>> xfstests can call dmsetup as easily as they can call xfs_io.  No?
+>>>>
+>>>> -Eric
+>>>
+>>> I commented on this a bit in the changelog for the 2nd patch:
+>>>
+>>> It's helpful to allow users of xfs_io to adds these marks from within xfs_io
+>>> instead of waiting until after xfs_io exits because then they are able to
+>>> replay the dm-log-writes log up to immediately after another xfs_io operation
+>>> such as mwrite.  This isolates the log replay from other operations that
+>>> happen as part of xfs_io exiting (file handles being closed, mmaps being torn
+>>> down, etc.).  This also allows users to insert multiple marks between
+>>> different xfs_io commands.
+>>>
+>>> I agree that the shell-out to dmsetup isn't awesome...  For the current test I
+>>> have written I think we can get away with just assuming that the xfs_io exit
+>>> stuff won't interact too heavily with the dm-log-writes log, and we could
+>>> potentially move the dmsetup call back into the fstest.  This is how I
+>>> initially had it, and moved it into the C program via shell-out in response to
+>>> Amir's feedback:
+>>
+>> Sorry, terrible of me to not have read that.  :(  Ok, so next question - 
+>> DM_TARGET_MSG seems to be public, can we just invoke the ioctl directly
+>> instead of shelling out to dmsetup?
+>>
+>> I'm checking w/ the dm folks too, to make sure that's expected to work.  As
+>> long as the use isn't too tricky it seems like that might be better.
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Yea, that seems like a better option - I'll take a look.  Thanks for the
+> suggestion.
+
+FWIW, agk is saying the only right way to do it is to use libdevicemapper ...
+sounds like they don't expect anyone to use the ioctl directly, though I'm
+not sure why, or what the complexity is.
+
+-Eric
