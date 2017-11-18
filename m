@@ -1,82 +1,253 @@
-Received: from sandeen.net ([63.231.237.45]:38570 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752412AbdKREoa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 Nov 2017 23:44:30 -0500
-Subject: Re: [xfsprogs PATCH 2/2] xfs_io: add a new 'log_writes' command
-References: <20171117202524.24696-1-ross.zwisler@linux.intel.com>
- <20171117202524.24696-3-ross.zwisler@linux.intel.com>
- <84006b9c-90db-7eea-0bdc-b73da1bb1394@sandeen.net>
- <20171117204801.GA16597@linux.intel.com>
- <960d0051-d357-033a-0ab7-9eb99d8e63fa@sandeen.net>
- <20171117211434.GB16597@linux.intel.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <fda7a7d9-0709-74be-666d-49e5cf295faa@sandeen.net>
-Date: Fri, 17 Nov 2017 22:44:27 -0600
-MIME-Version: 1.0
-In-Reply-To: <20171117211434.GB16597@linux.intel.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:38560 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1161366AbdKRF4M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 18 Nov 2017 00:56:12 -0500
+Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id vAI5rtWW109780
+        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 00:56:12 -0500
+Received: from e19.ny.us.ibm.com (e19.ny.us.ibm.com [129.33.205.209])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2eaehuruu9-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Sat, 18 Nov 2017 00:56:11 -0500
+Received: from localhost
+        by e19.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Sat, 18 Nov 2017 00:56:11 -0500
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH V3] overlay: Test consistent st_ino numbers for non-samefs scenario
+Date: Sat, 18 Nov 2017 11:27:00 +0530
+Message-Id: <20171118055700.17442-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
+To: fstests@vger.kernel.org, amir73il@gmail.com
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, eguan@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
+This commit adds a test to verify consistent st_ino feature when
+the overlayfs instance is composed of two different underlying
+filesystem instances.
+
+For example,
+$ mount -t xfs /dev/loop0 /mnt/test
+$ mount -t xfs /dev/loop1 /mnt/scratch
+$ mkdir /mnt/scratch/upper
+$ mkdir /mnt/scratch/work
+$ mount -t overlay overlay -o lowerdir=/mnt/test \
+        -o upperdir=/mnt/scratch/upper \
+        -o workdir=/mnt/scratch/work /mnt/merge
+
+The goal of this test is to verify that overlayfs returns consistent
+st_ino for the following scenarios,
+- Copy-up of lowerdir files
+- Rename files and drop dentry/inode cache
+- Remount the overlayfs instance
+
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+Changelog:
+v1->v2:
+Address review comments provided by Amir.
+1. To succeed, the test now requires the underlying base filesystems to provide
+   32-bit inode numbers or the user to provide "xino" mount option. The test
+   also requires that either overlayfs 'index' config feature to be enabled by
+   default or to be enabled by using the 'index=on' mount option.
+2. Require $TEST_DEV for use as Overlayfs' lowerdir.
+3. Pass $OVERLAY_MOUNT_OPTIONS as argument to _overlay_scratch_mount_dirs().
+
+v2->v3:
+1. Remove the description about how "xino" mount option is required for this
+   test to succeed.
 
 
-On 11/17/17 3:14 PM, Ross Zwisler wrote:
-> On Fri, Nov 17, 2017 at 03:03:39PM -0600, Eric Sandeen wrote:
->> On 11/17/17 2:48 PM, Ross Zwisler wrote:
->>> On Fri, Nov 17, 2017 at 02:39:07PM -0600, Eric Sandeen wrote:
->>>> On 11/17/17 2:25 PM, Ross Zwisler wrote:
->>>>> Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
->>>>> log marks via the external 'dmsetup' executable.  It's helpful to allow
->>>>> users of xfs_io to adds these marks from within xfs_io instead of waiting
->>>>> until after xfs_io exits because then they are able to replay the
->>>>> dm-log-writes log up to immediately after another xfs_io operation such as
->>>>> mwrite.  This isolates the log replay from other operations that happen as
->>>>> part of xfs_io exiting (file handles being closed, mmaps being torn down,
->>>>> etc.).  This also allows users to insert multiple marks between different
->>>>> xfs_io commands.
->>>>>
->>>>> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
->>>>> Suggested-by: Dave Chinner <david@fromorbit.com>
->>>>
->>>> Without reviewing in detail, what is the advantage of wrapping dmsetup
->>>> into xfs_io?  My first inclination is that there is none at all, and
->>>> xfstests can call dmsetup as easily as they can call xfs_io.  No?
->>>>
->>>> -Eric
->>>
->>> I commented on this a bit in the changelog for the 2nd patch:
->>>
->>> It's helpful to allow users of xfs_io to adds these marks from within xfs_io
->>> instead of waiting until after xfs_io exits because then they are able to
->>> replay the dm-log-writes log up to immediately after another xfs_io operation
->>> such as mwrite.  This isolates the log replay from other operations that
->>> happen as part of xfs_io exiting (file handles being closed, mmaps being torn
->>> down, etc.).  This also allows users to insert multiple marks between
->>> different xfs_io commands.
->>>
->>> I agree that the shell-out to dmsetup isn't awesome...  For the current test I
->>> have written I think we can get away with just assuming that the xfs_io exit
->>> stuff won't interact too heavily with the dm-log-writes log, and we could
->>> potentially move the dmsetup call back into the fstest.  This is how I
->>> initially had it, and moved it into the C program via shell-out in response to
->>> Amir's feedback:
->>
->> Sorry, terrible of me to not have read that.  :(  Ok, so next question - 
->> DM_TARGET_MSG seems to be public, can we just invoke the ioctl directly
->> instead of shelling out to dmsetup?
->>
->> I'm checking w/ the dm folks too, to make sure that's expected to work.  As
->> long as the use isn't too tricky it seems like that might be better.
-> 
-> Yea, that seems like a better option - I'll take a look.  Thanks for the
-> suggestion.
+ tests/overlay/043     | 160 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/043.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 163 insertions(+)
+ create mode 100755 tests/overlay/043
+ create mode 100644 tests/overlay/043.out
 
-FWIW, agk is saying the only right way to do it is to use libdevicemapper ...
-sounds like they don't expect anyone to use the ioctl directly, though I'm
-not sure why, or what the complexity is.
+diff --git a/tests/overlay/043 b/tests/overlay/043
+new file mode 100755
+index 0000000..858b6a9
+--- /dev/null
++++ b/tests/overlay/043
+@@ -0,0 +1,160 @@
++#! /bin/bash
++# FSQA Test No. 043
++#
++# Test constant inode numbers on non-samefs setup
++# This is a variant of overlay/017 to test constant st_ino numbers for
++# non-samefs setup.
++#
++# This simple test demonstrates a known issue with overlayfs:
++# - stat file A shows inode number X
++# - modify A to trigger copy up
++# - stat file A shows inode number Y != X
++#
++# Also test if d_ino of readdir entries changes after copy up
++# and if inode numbers persist after rename, drop caches and
++# mount cycle.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2017 IBM Corporation. All Rights Reserved.
++# Author: Chandan Rajendra <chandan@linux.vnet.ibm.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_test
++_require_test_program "af_unix"
++_require_test_program "t_dir_type"
++
++rm -f $seqres.full
++
++lowerdir=$OVL_BASE_TEST_DIR/$seq-ovl-lower
++rm -rf $lowerdir
++mkdir $lowerdir
++
++# Create our test files.
++mkdir $lowerdir/dir
++touch $lowerdir/file
++ln -s $lowerdir/file $lowerdir/symlink
++mknod $lowerdir/chrdev c 1 1
++mknod $lowerdir/blkdev b 1 1
++mknod $lowerdir/fifo p
++$here/src/af_unix $lowerdir/socket
++
++_scratch_mkfs >>$seqres.full 2>&1
++
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir \
++			    $OVERLAY_MOUNT_OPTIONS
++
++FILES="dir file symlink chrdev blkdev fifo socket"
++
++# Record inode numbers in format <ino> <basename>
++function record_inode_numbers()
++{
++	dir=$1
++	outfile=$2
++
++	for f in $FILES; do
++		ls -id $dir/$f
++	done | \
++	while read ino file; do
++		echo $ino `basename $file` >> $outfile
++	done
++}
++
++# Check inode numbers match recorder inode numbers
++function check_inode_numbers()
++{
++	dir=$1
++	before=$2
++	after=$3
++
++	record_inode_numbers $dir $after
++
++	# Test constant stat(2) st_ino -
++	# Compare before..after - expect silence
++	# We use diff -u so out.bad will tell us which stage failed
++	diff -u $before $after
++
++	# Test constant readdir(3)/getdents(2) d_ino -
++	# Expect to find file by inode number
++	cat $before | while read ino f; do
++		$here/src/t_dir_type $dir $ino | grep -q $f || \
++			echo "$f not found by ino $ino (from $before)"
++	done
++}
++
++rm -f $tmp.*
++testdir=$SCRATCH_MNT/test
++mkdir -p $testdir
++
++# Record inode numbers before copy up
++record_inode_numbers $SCRATCH_MNT $tmp.before
++
++for f in $FILES; do
++	# chown -h modifies all those file types
++	chown -h 100 $SCRATCH_MNT/$f
++done
++
++# Compare inode numbers before/after copy up
++check_inode_numbers $SCRATCH_MNT $tmp.before $tmp.after_copyup
++
++for f in $FILES; do
++	# move to another dir
++	mv $SCRATCH_MNT/$f $testdir/
++done
++
++echo 3 > /proc/sys/vm/drop_caches
++
++# Compare inode numbers before/after rename and drop caches
++check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
++
++# Verify that the inode numbers survive a mount cycle
++$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir \
++			    $OVERLAY_MOUNT_OPTIONS
++
++# Compare inode numbers before/after mount cycle
++check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
++
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/043.out b/tests/overlay/043.out
+new file mode 100644
+index 0000000..f90f0a5
+--- /dev/null
++++ b/tests/overlay/043.out
+@@ -0,0 +1,2 @@
++QA output created by 043
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 782c39f..a99ff07 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -45,3 +45,4 @@
+ 040 auto quick
+ 041 auto quick copyup nonsamefs
+ 042 auto quick copyup hardlink
++043 auto quick copyup nonsamefs
+-- 
+2.9.5
 
--Eric
