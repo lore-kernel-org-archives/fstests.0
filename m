@@ -1,79 +1,54 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:32417 "EHLO
-        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751061AbdKTIXC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 Nov 2017 03:23:02 -0500
-Subject: Re: [PATCH v2 1/2] btrfs: add function to device list delete
-From: Anand Jain <anand.jain@oracle.com>
-References: <20171113054410.24872-1-anand.jain@oracle.com>
- <20171118140337.13612-1-anand.jain@oracle.com>
-Message-ID: <7bf08094-478e-d417-c757-b319a667d482@oracle.com>
-Date: Mon, 20 Nov 2017 16:23:20 +0800
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:57448 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750974AbdKTI5f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 Nov 2017 03:57:35 -0500
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.21/8.16.0.21) with SMTP id vAK8tRTm006835
+        for <fstests@vger.kernel.org>; Mon, 20 Nov 2017 03:57:35 -0500
+Received: from e06smtp11.uk.ibm.com (e06smtp11.uk.ibm.com [195.75.94.107])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2ebrdxaxq4-1
+        (version=TLSv1.2 cipher=AES256-SHA bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 20 Nov 2017 03:57:35 -0500
+Received: from localhost
+        by e06smtp11.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Mon, 20 Nov 2017 08:57:32 -0000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: Re: [PATCH 0/3] More nonsamefs d_ino test cleanups
+Date: Mon, 20 Nov 2017 14:28:33 +0530
+In-Reply-To: <1511092589-29179-1-git-send-email-amir73il@gmail.com>
+References: <1511092589-29179-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20171118140337.13612-1-anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
+Message-Id: <4911339.3rRr1GUodZ@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Sunday, November 19, 2017 5:26:26 PM IST Amir Goldstein wrote:
+> Chandan,
+> 
+> Please review my cleanups to overlay/041.
+> I hope I did not "cleanup" anything important.
+> This is the version of the test I used for testing xino feature,
+> because it has improved test coverage for subdirs d_ino.
+> 
 
-   Wrong ML. Pls ignore.
+The changes looks good.
 
-Thanks, Anand
+Reviewed-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 
+> If you approve of these changes, at least first 2 patches should
+> be applied to the samefs test flavor (overlay/038), so the flavor
+> difference remains only the layers setup used by the test.
+> 
+> Let me know if you want me to apply the changes to 038 myself or if
+> you intend to do that yourself.
 
-On 11/18/2017 10:03 PM, Anand Jain wrote:
-> We need device delete from the dev_list so create a new function,
-> instead of refactor of btrfs_free_stale_device() because,
-> btrfs_free_stale_device() doesn't hold device_list_mutex which
-> is actually needed here.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v1: title of this patch
->    btrfs: refactor btrfs_free_stale_device() to get device list delete
-> v2:
->   add new function instead of peal from
->   btrfs_free_stale_device() to delete a device from the device list,
->   since btrfs_free_stale_device() does not hold device_list_mutex,
->   may be it can be fixed later.
-> 
-> 
->   /btrfs/volumes.c | 21 +++++++++++++++++++++
->   1 file changed, 21 insertions(+)
-> 
-> diff --git a/fs/btrfs/volumes.c b/fs/btrfs/volumes.c
-> index bddf75d5e6a0..68f1dd44385b 100644
-> --- a/fs/btrfs/volumes.c
-> +++ b/fs/btrfs/volumes.c
-> @@ -546,6 +546,27 @@ static void pending_bios_fn(struct btrfs_work *work)
->   	run_scheduled_bios(device);
->   }
->   
-> +static void delete_device_from_list(struct btrfs_device *device)
-> +{
-> +	struct btrfs_fs_devices *fs_devices;
-> +	fs_devices = device->fs_devices;
-> +
-> +	lockdep_assert_held(&uuid_mutex);
-> +
-> +	mutex_lock(&fs_devices->device_list_mutex);
-> +	fs_devices->num_devices--;
-> +	list_del(&device->dev_list);
-> +	mutex_unlock(&fs_devices->device_list_mutex);
-> +
-> +	rcu_string_free(device->name);
-> +	kfree(device);
-> +
-> +	if (fs_devices->num_devices == 0) {
-> +		btrfs_sysfs_remove_fsid(fs_devices);
-> +		list_del(&fs_devices->list);
-> +		free_fs_devices(fs_devices);
-> +	}
-> +}
->   
->   void btrfs_free_stale_device(struct btrfs_device *cur_dev)
->   {
-> 
+Amir, I will make the changes to overlay/038 and post them soon.
+
+-- 
+chandan
+
