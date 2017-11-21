@@ -1,41 +1,31 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:3946 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751899AbdKUG1d (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 Nov 2017 01:27:33 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] generic/459: add check for dm-snapshot target
-Date: Tue, 21 Nov 2017 14:27:20 +0800
-Message-ID: <1511245640-12862-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20171121060714.GM2749@eguan.usersys.redhat.com>
-References: <20171121060714.GM2749@eguan.usersys.redhat.com>
+Received: from mail-yb0-f196.google.com ([209.85.213.196]:44608 "EHLO
+        mail-yb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753069AbdKUGaa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Nov 2017 01:30:30 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20171120143410.23357-2-chandan@linux.vnet.ibm.com>
+References: <20171120143410.23357-1-chandan@linux.vnet.ibm.com> <20171120143410.23357-2-chandan@linux.vnet.ibm.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 21 Nov 2017 08:30:29 +0200
+Message-ID: <CAOQ4uxjKdwKHLrOXh2uJgmvY9-YnNRDBA=BqQfpQeueQiDR7qA@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay/038: test consistent values of st_ino/d_ino
+ for subdirs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-generic/459 should be skipped when dm-snapshot is not supported.
+On Mon, Nov 20, 2017 at 4:34 PM, Chandan Rajendra
+<chandan@linux.vnet.ibm.com> wrote:
+> This commit implements similar changes made to overlay/038 test i.e. in
+> addition to checking consistent values of st_ino/d_ino for "."  and ".."
+> entries, check also the values for subdir inside each tested directory
+> setup.
+>
+> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/generic/459 | 1 +
- 1 file changed, 1 insertion(+)
+Lokks good and tested.
 
-diff --git a/tests/generic/459 b/tests/generic/459
-index d1ad372..eb05fb8 100755
---- a/tests/generic/459
-+++ b/tests/generic/459
-@@ -62,6 +62,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch_nocheck
- _require_dm_target thin-pool
-+_require_dm_target snapshot
- _require_command $LVM_PROG lvm
- _require_command "$THIN_CHECK_PROG" thin_check
- _require_freeze
--- 
-1.8.3.1
-
-
-
+Thanks,
+Amir.
