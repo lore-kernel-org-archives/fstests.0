@@ -1,130 +1,76 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45036 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752875AbdKUGHQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 21 Nov 2017 01:07:16 -0500
-Date: Tue, 21 Nov 2017 14:07:14 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: update _require_dm_target() helper
-Message-ID: <20171121060714.GM2749@eguan.usersys.redhat.com>
-References: <1511236671-5835-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from szxga04-in.huawei.com ([45.249.212.190]:10960 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752429AbdKUGIn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 Nov 2017 01:08:43 -0500
+Subject: Re: [fsck.overlay RFC PATCH] overlay: add fsck utility
+References: <20171117054919.712-1-yi.zhang@huawei.com>
+ <CAOQ4uxgCN-ZdLsZQmYYW-PyJLB4WWsr9A8gqOtcSC6S9Uj8qZA@mail.gmail.com>
+ <0932944e-bbb7-22c6-9b75-19c42f8c7e41@huawei.com>
+ <20171120074252.GG2749@eguan.usersys.redhat.com>
+ <20171121023049.5yb2hsm5l5xegy4h@thunk.org>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <650fbf2c-ac08-5d02-75b9-107117541c67@huawei.com>
+Date: Tue, 21 Nov 2017 14:06:28 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1511236671-5835-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20171121023049.5yb2hsm5l5xegy4h@thunk.org>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 21, 2017 at 11:57:51AM +0800, Xiao Yang wrote:
-> 1) generic/459 should be skipped when dm_snapshot is not supported.
-> 2) update _require_dm_target() to handle multiple dm targets
+On 2017/11/21 10:30, Theodore Ts'o Wrote:
+> On Mon, Nov 20, 2017 at 03:42:52PM +0800, Eryu Guan wrote:
+>>> I found that e2fsprogs put tests in the e2fsprogs repository, so I write it
+>>> and put in the same place. Now I notice that all xfs test cases put together
+>>> in xfstests, so It's also a good choice, not sure which one is better. How
+>>> about Eryu's opinion ?
+>>
+>> IMHO, xfstests is a good place for fsck.overlay tests, but I don't think
+>> that's something conflicting with in-repo unit tests, some tests are
+>> just not suitable for xfstests. How about writing tests in xfstests by
+>> default and only keeping them in repository, if there's any, if the
+>> tests are not fitting in xfstests well?
 > 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  common/dmhugedisk            |  3 +--
->  common/rc                    | 16 ++++++++--------
->  doc/requirement-checking.txt |  6 +++---
->  tests/generic/459            |  2 +-
->  4 files changed, 13 insertions(+), 14 deletions(-)
+> Zhangyi,
 > 
-> diff --git a/common/dmhugedisk b/common/dmhugedisk
-> index 4d3b63f..1c116c2 100644
-> --- a/common/dmhugedisk
-> +++ b/common/dmhugedisk
-> @@ -23,8 +23,7 @@
->  
->  _require_dmhugedisk()
->  {
-> -	_require_dm_target zero
-> -	_require_dm_target snapshot
-> +	_require_dm_target zero snapshot
->  }
->  
->  _dmhugedisk_init()
-> diff --git a/common/rc b/common/rc
-> index 4c053a5..6fe0ce9 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1782,23 +1782,23 @@ _require_sane_bdev_flush()
->  	fi
->  }
->  
-> -# this test requires a specific device mapper target
-> +# this test requires specific device mapper targets
->  _require_dm_target()
->  {
-> -	_target=$1
-> -
->  	# require SCRATCH_DEV to be a valid block device with sane BLKFLSBUF
->  	# behaviour
->  	_require_block_device $SCRATCH_DEV
->  	_require_sane_bdev_flush $SCRATCH_DEV
->  	_require_command "$DMSETUP_PROG" dmsetup
->  
-> -	modprobe dm-$_target >/dev/null 2>&1
-> +	for _target in "$@"; do
-> +		modprobe dm-$_target >/dev/null 2>&1
->  
-> -	$DMSETUP_PROG targets 2>&1 | grep -q ^$_target
-> -	if [ $? -ne 0 ]; then
-> -		_notrun "This test requires dm $_target support"
-> -	fi
-> +		$DMSETUP_PROG targets 2>&1 | grep -q ^$_target
-> +		if [ $? -ne 0 ]; then
-> +			_notrun "This test requires dm $_target support"
-> +		fi
-> +	done
->  }
->  
->  # this test requires the ext4 kernel support crc feature on scratch device
-> diff --git a/doc/requirement-checking.txt b/doc/requirement-checking.txt
-> index 4e01b1f..e27aacd 100644
-> --- a/doc/requirement-checking.txt
-> +++ b/doc/requirement-checking.txt
-> @@ -112,10 +112,10 @@ _require_statx
->  DEVICE MAPPER REQUIREMENTS
->  ==========================
->  
-> -_require_dm_target <name>
-> +_require_dm_target <name1> <name2> ...
->  
-> -     The test requires the use of the device mapper target and will be skipped
-> -     if it isn't available in the kernel.
-> +     The test requires the use of the device mapper targets and will be skipped
-> +     if any one isn't available in the kernel.
->  
->  _require_log_writes
->  
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index d1ad372..e3ac374 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -61,7 +61,7 @@ _cleanup()
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch_nocheck
-> -_require_dm_target thin-pool
-> +_require_dm_target thin-pool snapshot
+> Here's my opinion, for whatever it's worth.  Things which don't
+> require root and which run fairly quickly (ideally less than 10
+> seconds; preferably under 5), are better to do in the fsck git
+> repository.  That's because it's much faster to run "make ; make
+> check".
+> 
+> Tests are most effective when they are frequently run and used.  You
+> may be more willing to live an exciting life, but I'm not particularly
+> fond of running "make install" of a development branch of e2fsprogs
+> just to run tests.  So that means I have to build e2fsprogs packages,
+> rebuild the test appliance VM, and then run tests --- which takes
+> *easily* 10x more time.
+> 
+> The place where it makes a lot of sense to put fsck and resize tests
+> into xfstests is where it requires root, or if the tests have a long
+> run-time.  For similar reasons of not wanting to live an exciting life
+> when it comes to my development environment, I don't like running
+> "make check" as repository which can be updated by others as root.  So
+> if a file system needs to be mounted (for example, to set up a test),
+> or if you want to test on-line resize, then that's an argument for
+> doing it in xfstests.
+> 
+> For overlayfs, it might be that you need to do a lot of mount and
+> unmount operations as root in order to run your tests.  So maybe
+> that's a good argument to run it under xfstests.  Unless you can make
+> small, pre-prepared file system images that you can untar and then
+> point at your overlayfsck to check.
+> 
+> As the Perl developers would say, "there's more than one way to do things".  :-)
+> 
+Hi Ted,
 
-Hmm, why not just add another "_require_dm_target snapshot"? That's much
-simpler to do and keeps the helper simple too. (We may add parameters
-support to _require_dm_target in the future, there're already patches
-trying to do so, I think keeping it simple avoids future conflicts and
-complexity too).
+Thanks for your explain and advice, writing tests in xfstests feels better.
+I will consider it and split tests from fsck source code to put them(maybe part of)
+into xfstests.
 
 Thanks,
-Eryu
+Yi.
 
->  _require_command $LVM_PROG lvm
->  _require_command "$THIN_CHECK_PROG" thin_check
->  _require_freeze
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
