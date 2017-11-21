@@ -1,317 +1,257 @@
-Received: from mx2.suse.de ([195.135.220.15]:56067 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:56666 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751154AbdKUPKt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 21 Nov 2017 10:10:49 -0500
-Subject: Re: [PATCH v4 3/3] xfs: initial fiemap range query test
-References: <1510747821-13270-1-git-send-email-nborisov@suse.com>
- <1510747900-13440-1-git-send-email-nborisov@suse.com>
- <1510747900-13440-3-git-send-email-nborisov@suse.com>
- <20171121054541.GK2749@eguan.usersys.redhat.com>
+        id S1751310AbdKUPRG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 Nov 2017 10:17:06 -0500
 From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <699dc53a-4e13-3a90-de16-e4dd1f985948@suse.com>
-Date: Tue, 21 Nov 2017 17:10:44 +0200
-MIME-Version: 1.0
-In-Reply-To: <20171121054541.GK2749@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v5] xfs_io: implement ranged fiemap query
+Date: Tue, 21 Nov 2017 17:16:55 +0200
+Message-Id: <1511277416-3191-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, david@fromorbit.com, darrick.wong@oracle.com
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, eguan@redhat.com, sandeen@sandeen.net, Nikolay Borisov <nborisov@suse.com>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+Currently the fiemap implementation of xfs_io doesn't support making ranged
+queries. This patch implements two optional arguments which take the starting
+offset and the length of the region to be queried.
 
+When the end of the requested region falls within an extend boundary then we
+print the whole extent (i.e. return the information that the kernel has given
+us). When the end offset falls within a hole then the printed range is
+truncated to the requested one since we do not have information how long the
+hole is
 
-On 21.11.2017 07:45, Eryu Guan wrote:
-> On Wed, Nov 15, 2017 at 02:11:40PM +0200, Nikolay Borisov wrote:
->> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> 
-> Please add test description to commit log too.
-> 
->> ---
->>
->> V4: 
->>  * Added test description
->>  * Added new test for past-eof behavior
->>  * Removed supported_generic_fs line
->>  * Switched to using the "ranged" param require
->>  * Revert v3 changes
->>
->> V3:
->>  * Adjusted tests for '-r' fiemap param
->>  * Tests for invalid -r combination
->>
->> V2: No change
->> V1: No change
->>
->>  tests/xfs/900     |  92 +++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/900.out | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  2 files changed, 211 insertions(+)
->>  create mode 100755 tests/xfs/900
->>  create mode 100644 tests/xfs/900.out
->>
->> diff --git a/tests/xfs/900 b/tests/xfs/900
->> new file mode 100755
->> index 0000000..06a5c64
->> --- /dev/null
->> +++ b/tests/xfs/900
->> @@ -0,0 +1,92 @@
->> +#! /bin/bash
->> +# FS QA Test No. 900
-> 
-> Add an empty line after the first line.
-> 
->> +# Test for the new ranged query functionality in xfs_io's fiemap command.
->> +# This tests various combinations of hole + data layout being printed.
->> +# Also the test used 16k holes to be compatible with 16k block filesystems
-> 
-> Empty line here too.
-> 
->> +#-----------------------------------------------------------------------
->> +# Copyright (c) 2017 SUSE Linux Products GmbH. All Rights Reserved.
->> +# Author: Nikolay Borisov <nborisov@suse.com>
->> +#
->> +#
-> 
-> Extra empty line here.
-> 
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/punch
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_os Linux
->> +_require_scratch
->> +_require_xfs_io_command "falloc"
->> +_require_xfs_io_command "fiemap" "ranged"
-> 
-> Better to add comments about the "ranged" too in the test.
-> 
->> +
->> +_scratch_mkfs > $seqres.full 2>&1
->> +_scratch_mount || _fail "mount failure"
->> +
->> +file=$SCRATCH_MNT/testfile
->> +$XFS_IO_PROG -f -c "falloc 0 1m" $file 
-> 
-> Trailing whitespace in above line.
-> 
->> +for i in {0..31}; do $XFS_IO_PROG -c "fpunch $(($i*32))k 16k" $file; done
->> +
->> +# Query 1 data extent between 16k..16k range
->> +echo "Basic data extent"
->> +$XFS_IO_PROG -c "fiemap -v 16k 16k" $file | _filter_fiemap 
-> 
-> Trailing whitespace in above line.
-> 
->> +
->> +# Query data and hole extent
->> +echo "Data + Hole"
->> +$XFS_IO_PROG -c "fiemap -v 16k 20k" $file | _filter_fiemap
->> +
->> +echo "Hole + Data + Hole"
->> +$XFS_IO_PROG -c "fiemap -v 32k 40k" $file | _filter_fiemap
-> 
-> Test "Only hole", "Hole + Data" and "Data + Hole + Data" too? As well as
-> some tests to exercise range boundaries are not aligned with extent
-> boundaries?
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+[sandeen: simplify/rewrite ranged logic]
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 
-Only hole is covered by "Begining with a hole", I've added the next 2
-suggestions. Also some tests already have boundaries which are not
-aligned and the behavior there is pretty well defined by the kernel so
-no point in adding specific tests for those.
+---
+V5: 
+ * Now based on Eric's simpler approach. 
 
-> 
->> +
->> +echo "Beginning with a hole"
->> +$XFS_IO_PROG -c "fiemap -v 0 3k" $file | _filter_fiemap
->> +
->> +# Query for 0..160k that's 40 extents, more than the EXTENT_BATCH
->> +echo "Query more than 32 extents"
->> +$XFS_IO_PROG -c "fiemap -v 0 640k" $file | _filter_fiemap
->> +
->> +echo "Larger query than file size"
->> +$XFS_IO_PROG -c "fiemap -v 0 2m" $file | _filter_fiemap
->> +
->> +#mapping past eof shouldn't print anything"
-> 
-> Add a space after "#" for comments.
-> 
->> +$XFS_IO_PROG -c "fiemap -v 2m" $file | _filter_fiemap
->> +
->> +#check everything without the first hole
-> 
-> Same here.
-> 
-> Thanks,
-> Eryu
-> 
->> +$XFS_IO_PROG -c "fiemap -v 16k" $file | wc -l
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/xfs/900.out b/tests/xfs/900.out
->> new file mode 100644
->> index 0000000..6ecf1b6
->> --- /dev/null
->> +++ b/tests/xfs/900.out
->> @@ -0,0 +1,119 @@
->> +QA output created by 900
->> +Basic data extent
->> +0: [32..63]: unwritten
->> +Data + Hole
->> +0: [32..63]: unwritten
->> +1: [64..95]: hole
->> +Hole + Data + Hole
->> +0: [64..95]: hole
->> +1: [96..127]: unwritten
->> +2: [128..159]: hole
->> +Beginning with a hole
->> +0: [0..31]: hole
->> +Query more than 32 extents
->> +0: [0..31]: hole
->> +1: [32..63]: unwritten
->> +2: [64..95]: hole
->> +3: [96..127]: unwritten
->> +4: [128..159]: hole
->> +5: [160..191]: unwritten
->> +6: [192..223]: hole
->> +7: [224..255]: unwritten
->> +8: [256..287]: hole
->> +9: [288..319]: unwritten
->> +10: [320..351]: hole
->> +11: [352..383]: unwritten
->> +12: [384..415]: hole
->> +13: [416..447]: unwritten
->> +14: [448..479]: hole
->> +15: [480..511]: unwritten
->> +16: [512..543]: hole
->> +17: [544..575]: unwritten
->> +18: [576..607]: hole
->> +19: [608..639]: unwritten
->> +20: [640..671]: hole
->> +21: [672..703]: unwritten
->> +22: [704..735]: hole
->> +23: [736..767]: unwritten
->> +24: [768..799]: hole
->> +25: [800..831]: unwritten
->> +26: [832..863]: hole
->> +27: [864..895]: unwritten
->> +28: [896..927]: hole
->> +29: [928..959]: unwritten
->> +30: [960..991]: hole
->> +31: [992..1023]: unwritten
->> +32: [1024..1055]: hole
->> +33: [1056..1087]: unwritten
->> +34: [1088..1119]: hole
->> +35: [1120..1151]: unwritten
->> +36: [1152..1183]: hole
->> +37: [1184..1215]: unwritten
->> +38: [1216..1247]: hole
->> +39: [1248..1279]: unwritten
->> +Larger query than file size
->> +0: [0..31]: hole
->> +1: [32..63]: unwritten
->> +2: [64..95]: hole
->> +3: [96..127]: unwritten
->> +4: [128..159]: hole
->> +5: [160..191]: unwritten
->> +6: [192..223]: hole
->> +7: [224..255]: unwritten
->> +8: [256..287]: hole
->> +9: [288..319]: unwritten
->> +10: [320..351]: hole
->> +11: [352..383]: unwritten
->> +12: [384..415]: hole
->> +13: [416..447]: unwritten
->> +14: [448..479]: hole
->> +15: [480..511]: unwritten
->> +16: [512..543]: hole
->> +17: [544..575]: unwritten
->> +18: [576..607]: hole
->> +19: [608..639]: unwritten
->> +20: [640..671]: hole
->> +21: [672..703]: unwritten
->> +22: [704..735]: hole
->> +23: [736..767]: unwritten
->> +24: [768..799]: hole
->> +25: [800..831]: unwritten
->> +26: [832..863]: hole
->> +27: [864..895]: unwritten
->> +28: [896..927]: hole
->> +29: [928..959]: unwritten
->> +30: [960..991]: hole
->> +31: [992..1023]: unwritten
->> +32: [1024..1055]: hole
->> +33: [1056..1087]: unwritten
->> +34: [1088..1119]: hole
->> +35: [1120..1151]: unwritten
->> +36: [1152..1183]: hole
->> +37: [1184..1215]: unwritten
->> +38: [1216..1247]: hole
->> +39: [1248..1279]: unwritten
->> +40: [1280..1311]: hole
->> +41: [1312..1343]: unwritten
->> +42: [1344..1375]: hole
->> +43: [1376..1407]: unwritten
->> +44: [1408..1439]: hole
->> +45: [1440..1471]: unwritten
->> +46: [1472..1503]: hole
->> +47: [1504..1535]: unwritten
->> +48: [1536..1567]: hole
->> +49: [1568..1599]: unwritten
->> +50: [1600..1631]: hole
->> +51: [1632..1663]: unwritten
->> +52: [1664..1695]: hole
->> +53: [1696..1727]: unwritten
->> +54: [1728..1759]: hole
->> +55: [1760..1791]: unwritten
->> +56: [1792..1823]: hole
->> +57: [1824..1855]: unwritten
->> +58: [1856..1887]: hole
->> +59: [1888..1919]: unwritten
->> +60: [1920..1951]: hole
->> +61: [1952..1983]: unwritten
->> +62: [1984..2015]: hole
->> +63: [2016..2047]: unwritten
->> +65
->> -- 
->> 2.7.4
->>
-> 
+V4: 
+ * Don't do any fiemap processing if passed offset is past EOF. Filesystems
+ might have custom handling for this. XFS for example pretends there is a 
+ hole. 
+
+ * Restore offset/len handling to using the optional params at the end of 
+ getopt and not using an additional '-r' param
+
+V3: 
+ * Fixed a bug where incorrect extent index was shown if we didn't print a 
+ hole. This was due to statically returning 2 at the end of print_(plain|verbose)
+ Now, the actual number of printed extents inside the 2 functions is used. 
+ This bug is visible only with the -r parameter
+
+ * Fixed a bug where 1 additional extent would be printed. This was a result of 
+ the aforementioned bug fix, since now printing function can return 1 and still
+ have printed an extent and no hole. This can happen when you use -r parameter,
+ this is now fixed and a comment explaining it is put. 
+
+ * Reworked the handling of the new params by making them arguments to the 
+ -r parameter. 
+
+V2:
+ * Incorporated Daricks feedback - removed variables which weren't introduced
+  until the next patch as a result the build with this patch was broken. This is 
+  fixed now
+ io/fiemap.c       | 67 +++++++++++++++++++++++++++++++++++++++++++++----------
+ man/man8/xfs_io.8 |  5 +++--
+ 2 files changed, 58 insertions(+), 14 deletions(-)
+
+diff --git a/io/fiemap.c b/io/fiemap.c
+index bdcfacdb2811..b94d6429566c 100644
+--- a/io/fiemap.c
++++ b/io/fiemap.c
+@@ -49,6 +49,8 @@ fiemap_help(void)
+ " -l -- also displays the length of each extent in 512-byte blocks.\n"
+ " -n -- query n extents.\n"
+ " -v -- Verbose information\n"
++" offset is the starting offset to map, and is optional.  If offset is\n"
++" specified, mapping length may (optionally) be specified as well."
+ "\n"));
+ }
+ 
+@@ -101,6 +103,7 @@ print_verbose(
+ 	char			lbuf[48];
+ 	char			bbuf[48];
+ 	char			flgbuf[16];
++	int			num_printed = 0;
+ 
+ 	llast = BTOBBT(last_logical);
+ 	lstart = BTOBBT(extent->fe_logical);
+@@ -118,14 +121,15 @@ print_verbose(
+ 			flg_w, _("FLAGS"));
+ 	}
+ 
+-	if (lstart != llast) {
++	if (lstart > llast) {
+ 		print_hole(foff_w, boff_w, tot_w, cur_extent, 0, false, llast,
+ 			   lstart);
+ 		cur_extent++;
++		num_printed++;
+ 	}
+ 
+ 	if (cur_extent == max_extents)
+-		return 1;
++		return num_printed;
+ 
+ 	snprintf(lbuf, sizeof(lbuf), "[%llu..%llu]:",
+ 		 (unsigned long long)lstart, lstart + len - 1ULL);
+@@ -135,7 +139,9 @@ print_verbose(
+ 	printf("%4d: %-*s %-*s %*llu %*s\n", cur_extent, foff_w, lbuf,
+ 	       boff_w, bbuf, tot_w, (unsigned long long)len, flg_w, flgbuf);
+ 
+-	return 2;
++	num_printed++;
++
++	return num_printed;
+ }
+ 
+ static int
+@@ -149,29 +155,33 @@ print_plain(
+ 	__u64			llast;
+ 	__u64			block;
+ 	__u64			len;
++	int			num_printed = 0;
+ 
+ 	llast = BTOBBT(last_logical);
+ 	lstart = BTOBBT(extent->fe_logical);
+ 	len = BTOBBT(extent->fe_length);
+ 	block = BTOBBT(extent->fe_physical);
+ 
+-	if (lstart != llast) {
++	if (lstart > llast) {
+ 		print_hole(0, 0, 0, cur_extent, lflag, true, llast, lstart);
+ 		cur_extent++;
++		num_printed++;
+ 	}
+ 
+ 	if (cur_extent == max_extents)
+-		return 1;
++		return num_printed;
+ 
+ 	printf("\t%d: [%llu..%llu]: %llu..%llu", cur_extent,
+ 	       (unsigned long long)lstart, lstart + len - 1ULL,
+ 	       (unsigned long long)block, block + len - 1ULL);
+ 
++	num_printed++;
++
+ 	if (lflag)
+ 		printf(_(" %llu blocks\n"), (unsigned long long)len);
+ 	else
+ 		printf("\n");
+-	return 2;
++	return num_printed;
+ }
+ 
+ /*
+@@ -235,9 +245,15 @@ fiemap_f(
+ 	int		boff_w = 16;
+ 	int		tot_w = 5;	/* 5 since its just one number */
+ 	int		flg_w = 5;
+-	__u64		last_logical = 0;
++	__u64		last_logical = 0;	/* last extent offset handled */
++	off64_t		start_offset = 0;	/* mapping start */
++	off64_t		length = -1LL;		/* mapping length */
++	off64_t		range_end = -1LL;	/* mapping end*/
++	size_t		fsblocksize, fssectsize;
+ 	struct stat	st;
+ 
++	init_cvtnum(&fsblocksize, &fssectsize);
++
+ 	while ((c = getopt(argc, argv, "aln:v")) != EOF) {
+ 		switch (c) {
+ 		case 'a':
+@@ -257,6 +273,27 @@ fiemap_f(
+ 		}
+ 	}
+ 
++	/* Range start (optional) */
++	if (optind < argc) {
++		start_offset = cvtnum(fsblocksize, fssectsize, argv[optind]);
++		if (start_offset < 0) {
++			printf("non-numeric offset argument -- %s\n", argv[optind]);
++			return 0;
++		}
++		last_logical = start_offset;
++		optind++;
++	}
++
++	/* Range length (optional if range start was specified) */
++	if (optind < argc) {
++		length = cvtnum(fsblocksize, fssectsize, argv[optind]);
++		if (length < 0) {
++			printf("non-numeric len argument -- %s\n", argv[optind]);
++			return 0;
++		}
++		range_end = start_offset + length;
++	}
++
+ 	map_size = sizeof(struct fiemap) +
+ 		(EXTENT_BATCH * sizeof(struct fiemap_extent));
+ 	fiemap = malloc(map_size);
+@@ -269,12 +306,15 @@ fiemap_f(
+ 
+ 	printf("%s:\n", file->name);
+ 
+-	while (!last && (cur_extent != max_extents)) {
++	while (!last /* last extent of file */
++	       && (cur_extent != max_extents) /* limit passed to -n */
++	       && last_logical < range_end /* printed requested range */
++	       ) {
+ 
+ 		memset(fiemap, 0, map_size);
+ 		fiemap->fm_flags = fiemap_flags;
+ 		fiemap->fm_start = last_logical;
+-		fiemap->fm_length = -1LL;
++		fiemap->fm_length = range_end - last_logical;
+ 		fiemap->fm_extent_count = EXTENT_BATCH;
+ 
+ 		ret = ioctl(file->fd, FS_IOC_FIEMAP, (unsigned long)fiemap);
+@@ -336,9 +376,12 @@ fiemap_f(
+ 		return 0;
+ 	}
+ 
+-	if (cur_extent && last_logical < st.st_size)
++	/* Print last hole to EOF or to end of requested range */
++	range_end = min((uint64_t)range_end, st.st_size);
++
++	if (cur_extent && last_logical < range_end)
+ 		print_hole(foff_w, boff_w, tot_w, cur_extent, lflag, !vflag,
+-			   BTOBBT(last_logical), BTOBBT(st.st_size));
++			   BTOBBT(last_logical), BTOBBT(range_end));
+ 
+ out:
+ 	free(fiemap);
+@@ -353,7 +396,7 @@ fiemap_init(void)
+ 	fiemap_cmd.argmin = 0;
+ 	fiemap_cmd.argmax = -1;
+ 	fiemap_cmd.flags = CMD_NOMAP_OK | CMD_FOREIGN_OK;
+-	fiemap_cmd.args = _("[-alv] [-n nx]");
++	fiemap_cmd.args = _("[-alv] [-n nx] [offset [len]]");
+ 	fiemap_cmd.oneline = _("print block mapping for a file");
+ 	fiemap_cmd.help = fiemap_help;
+ 
+diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+index 9bf1a4783c4f..76337346ca0c 100644
+--- a/man/man8/xfs_io.8
++++ b/man/man8/xfs_io.8
+@@ -304,11 +304,12 @@ Prints the block mapping for the current open file. Refer to the
+ .BR xfs_bmap (8)
+ manual page for complete documentation.
+ .TP
+-.BI "fiemap [ \-alv ] [ \-n " nx " ]"
++.BI "fiemap [ \-alv ] [ \-n " nx " ] [ " offset " [ " len " ]]"
+ Prints the block mapping for the current open file using the fiemap
+ ioctl.  Options behave as described in the
+ .BR xfs_bmap (8)
+-manual page.
++manual page. Optionally, this command also supports passing the start offset
++from where to begin the fiemap and the length of that region.
+ .TP
+ .BI "fsmap [ \-d | \-l | \-r ] [ \-m | \-v ] [ \-n " nx " ] [ " start " ] [ " end " ]
+ Prints the mapping of disk blocks used by the filesystem hosting the current
+-- 
+2.7.4
+
