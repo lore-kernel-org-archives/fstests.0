@@ -1,184 +1,178 @@
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:34647 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752737AbdKWO0g (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Nov 2017 09:26:36 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay: add a test for multiple redirects to the same lower dir
-Date: Thu, 23 Nov 2017 16:27:04 +0200
-Message-Id: <1511447224-2301-1-git-send-email-amir73il@gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:49449 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753022AbdKWP2s (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 23 Nov 2017 10:28:48 -0500
+Subject: Re: [PATCH 1/2] generic/470: Test RWF_NOWAIT
+References: <20171122123215.32292-1-rgoldwyn@suse.de>
+ <20171122174254.GD5111@magnolia>
+From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Message-ID: <23c617c8-742d-b9b6-fc64-63d90c5f23d5@suse.de>
+Date: Thu, 23 Nov 2017 09:28:44 -0600
+MIME-Version: 1.0
+In-Reply-To: <20171122174254.GD5111@magnolia>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, zhangyi <yi.zhang@huawei.com>, Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Multiple redirects to the same lower dir will falsely return the
-same st_ino/st_dev for two different upper dirs and will cause 'diff'
-to falsely report that content of directories is the same when it is not.
 
-This is a test for a regression introduced in kernel v4.12 by
-commit 72b608f08528 ("ovl: constant st_ino/st_dev across copy up"),
-but also the first xfstest to require the redirect_dir feature that
-was introduced as an opt-in feature in kernel v4.10.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+On 11/22/2017 11:42 AM, Darrick J. Wong wrote:
+> On Wed, Nov 22, 2017 at 06:32:14AM -0600, Goldwyn Rodrigues wrote:
+>> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+>>
+>> Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
+>> on a new file since it requires block allocation.
+>>
+>> It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
+>> This should succeed.
+>>
+>> Finally, read the contents to make sure the overwrite is successful.
+>>
+>> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+>> ---
+>>  tests/generic/470     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/470.out |  9 +++++++
+>>  tests/generic/group   |  1 +
+>>  3 files changed, 83 insertions(+)
+>>  create mode 100644 tests/generic/470
+>>  create mode 100644 tests/generic/470.out
+>>
+>> diff --git a/tests/generic/470 b/tests/generic/470
+>> new file mode 100644
+>> index 00000000..8a742258
+>> --- /dev/null
+>> +++ b/tests/generic/470
+>> @@ -0,0 +1,73 @@
+>> +#! /bin/bash
+>> +# FS QA Test No. 470
+>> +#
+>> +# write() to a file opened with O_DIRECT with count > remaining
+>> +# bytes. Result should be remaining bytes (to aligned bytes) instead
+>> +# of ENOSPC error
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1    # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +    cd /
+>> +    rm -rf $tmp.* $testdir1
+> 
+> $testdir, not $testdir1?
+> 
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/populate
+>> +. ./common/filter
+>> +. ./common/attr
+>> +
+>> +# real QA test starts here
+>> +_supported_os Linux
+>> +_require_odirect
+>> +_require_scratch
+>> +
+>> +_scratch_mkfs > /dev/null 2>&1
+>> +_scratch_mount > /dev/null 2>&1
+>> +testdir=$SCRATCH_MNT/test-$seq
+>> +mkdir $testdir
+>> +
+>> +# Create a file with pwrite nowait (will fail with EAGAIN)
+>> +xfs_io -f -d -c "pwrite -N -V 1 -b 128M 0 128M" $testdir/f1
+> 
+> $XFS_IO_PROG, not xfs_io
+> 
+> Also does this test need _require_xfs_io_command pwrite -N ?
 
-Eryu,
+Yes, I was looking for something with version compatibility. Thanks.
 
-This test is for a "bug" that has not been acknoledges by Miklos
-as a kernel bug yet. It may well fall within the jurisdiction of
-fsck.overlayfs.
+> 
+>> +
+>> +# Write the file without nowait
+>> +xfs_io -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 128M 0 128M" $testdir/f1 | _filter_xfs_io
+>> +
+>> +time_taken=`xfs_io -d -c "pwrite -N -V 1 -b 64M 0 64M" $testdir/f1 | awk '/^64/ {print $5}'`
+>> +if (( $(echo "$time_taken < 0.05" | bc -l) )); then
+> 
+> We're assuming that the hardware is capable of handling a direct write
+> 64M in under 51ms, correct?  I'm not sure my disks can do that.
 
-IMO, cp -a of upper files and dirs qualifies to the statement in
-Documentation/filesystems/overlayfs.txt:
-"Offline changes, when the overlay is not mounted, are allowed to either
-the upper or the lower trees."
+Yes, though a little different. The blocks are already allocated so it
+should be fast. I will add a comment.
 
-So unless Miklos objects to ever fixing this "bug"?
-I suggest that we include the failing test until kernel is fixed.
 
-Incidently, I already have patches for 'verify' feature [1], which
-I intend to post after the merge window closes.
-With 'verify' feature enabled this test passes.
+> 
+> --D
+> 
+>> +	echo "RWF_NOWAIT time is within limits."
+>> +else
+>> +	echo "RWF_NOWAIT took $time_taken seconds"
+>> +fi
+>> +
+>> +xfs_io -f -d -c "pread -v 0 2M" $testdir/f1 | _filter_xfs_io_unique
+>> +
+>> +# success, all done
+>> +status=0
+>> +exit
+>> diff --git a/tests/generic/470.out b/tests/generic/470.out
+>> new file mode 100644
+>> index 00000000..73a210b4
+>> --- /dev/null
+>> +++ b/tests/generic/470.out
+>> @@ -0,0 +1,9 @@
+>> +QA output created by 470
+>> +pwrite: Resource temporarily unavailable
+>> +wrote 134217728/134217728 bytes at offset 0
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> +RWF_NOWAIT time is within limits.
+>> +00000000:  cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
+>> +*
+>> +read 2097152/2097152 bytes at offset 0
+>> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index 6c3bb03a..11ccfb01 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -472,3 +472,4 @@
+>>  467 auto quick exportfs
+>>  468 shutdown auto quick metadata
+>>  469 auto quick
+>> +470 auto quick
+>> -- 
+>> 2.14.2
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Amir.
-
-[1] https://github.com/amir73il/linux/commits/ovl-index-all
-
- tests/overlay/049     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/049.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 107 insertions(+)
- create mode 100755 tests/overlay/049
- create mode 100644 tests/overlay/049.out
-
-diff --git a/tests/overlay/049 b/tests/overlay/049
-new file mode 100755
-index 0000000..701a649
---- /dev/null
-+++ b/tests/overlay/049
-@@ -0,0 +1,104 @@
-+#! /bin/bash
-+# FS QA Test 049
-+#
-+# Test multiple redirects to the same lower dir.
-+#
-+# Multiple redirects to the same lower dir will falsely return
-+# the same st_ino/st_dev for two different upper dirs and will
-+# cause 'diff' to falsely report that content of directories
-+# is the same when it is not.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# Rename lower dir to create a redirected upper dir and
-+# touch lower file to create copy up with origin xattr
-+create_redirect()
-+{
-+	local redirect=$1
-+
-+	mkdir -p $lowerdir/origin
-+	touch $lowerdir/origin/file
-+
-+	_scratch_mount -o redirect_dir=on
-+	touch $SCRATCH_MNT/origin/file
-+	mv $SCRATCH_MNT/origin $SCRATCH_MNT/$redirect
-+
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_scratch_feature redirect_dir
-+
-+# remove all files from previous runs
-+_scratch_mkfs
-+
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+
-+# Create redirected dir with copied up file
-+create_redirect redirect1
-+# Duplicate the redirected dir and copied up file
-+cp -a $upperdir/redirect1 $upperdir/redirect2
-+
-+# Diverge the content of the two copies of file
-+# and the content of two copies of redirected dir
-+echo right >> $upperdir/redirect1/file
-+touch $upperdir/redirect1/right
-+echo wrong >> $upperdir/redirect2/file
-+touch $upperdir/redirect2/wrong
-+
-+_scratch_mount -o redirect_dir=on
-+
-+# If both copies of file/dir use the same st_dev/st_ino in overlay
-+# diff won't detect that their content differs
-+diff -q $SCRATCH_MNT/redirect1/file $SCRATCH_MNT/redirect2/file &>/dev/null && \
-+	echo "diff on files inside duplicate redirect parent doesn't know right from wrong!"
-+
-+diff -q $SCRATCH_MNT/redirect1 $SCRATCH_MNT/redirect2 &> /dev/null && \
-+	echo "diff on duplicate redirect dirs doesn't know right from wrong!"
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/049.out b/tests/overlay/049.out
-new file mode 100644
-index 0000000..c69568a
---- /dev/null
-+++ b/tests/overlay/049.out
-@@ -0,0 +1,2 @@
-+QA output created by 049
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index b32c6cd..cf21750 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -47,3 +47,4 @@
- 042 auto quick copyup hardlink
- 043 auto quick copyup nonsamefs
- 044 auto quick copyup hardlink nonsamefs
-+049 auto quick copyup redirect
 -- 
-2.7.4
-
+Goldwyn
