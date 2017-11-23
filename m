@@ -1,94 +1,63 @@
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:44361 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752179AbdKWIuM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 23 Nov 2017 03:50:12 -0500
-Received: by mail-yw0-f179.google.com with SMTP id d2so8207015ywb.11
-        for <fstests@vger.kernel.org>; Thu, 23 Nov 2017 00:50:11 -0800 (PST)
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:46954 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751643AbdKWI5n (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Nov 2017 03:57:43 -0500
 MIME-Version: 1.0
-In-Reply-To: <20171123082812.GU2749@eguan.usersys.redhat.com>
-References: <20171118061906.11227-1-eguan@redhat.com> <20171123070804.GT2749@eguan.usersys.redhat.com>
- <CAOQ4uxhoD=zgXJ9UC2+6+jCL6u+3_sxPanRb4xJ9M2SZSrPysQ@mail.gmail.com> <20171123082812.GU2749@eguan.usersys.redhat.com>
+In-Reply-To: <20171114123310.25286-3-eguan@redhat.com>
+References: <20171114123310.25286-1-eguan@redhat.com> <20171114123310.25286-3-eguan@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 23 Nov 2017 10:50:10 +0200
-Message-ID: <CAOQ4uxhm5mzteF3+CQwQ1Uw9D+5ms_LWvnpqbgr=-YRwm4Bm0w@mail.gmail.com>
-Subject: Re: [PATCH] ltp/fsx: really skip fallocate keep_size calls when
- replaying ops
+Date: Thu, 23 Nov 2017 10:57:42 +0200
+Message-ID: <CAOQ4uxhHY6QRV-xkY57Nx-Mwms0UPHETB47kP8PgFAXM+Q7t2A@mail.gmail.com>
+Subject: Re: [PATCH v2 2/3] overlay/036: filter busy mount message
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 23, 2017 at 10:28 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Thu, Nov 23, 2017 at 10:05:00AM +0200, Amir Goldstein wrote:
->> On Thu, Nov 23, 2017 at 9:08 AM, Eryu Guan <eguan@redhat.com> wrote:
->> > On Sat, Nov 18, 2017 at 02:19:06PM +0800, Eryu Guan wrote:
->> >> On start up, fsx checks for various fallocate(2) operation support
->> >> status and disables unsupported operations. But when replaying
->> >> operations from a log, fsx failed to skip KEEP_SIZE fallocate(2)
->> >> calls if underlying filesystem doesn't support it. For example,
->> >> NFSv4.2 supports fallocate(2) but not KEEP_SIZE, and this causes
->> >> generic/469 fails on NFSv4.2.
->> >>
->> >> Fix it by taking 'keep_size_calls' into consideration when replaying
->> >> ops from log file.
->> >>
->> >> Signed-off-by: Eryu Guan <eguan@redhat.com>
->> >> ---
->> >>
->> >> Note that generic/469 hasn't been pushed to upstream yet. Will do in
->> >> this week's update.
->> >
->> > generic/469 is upstream now, still need some reviews on this patch.
->> >
->>
->> I don't like the path we have taken starting with generic/456 (so partly
->> my own blame) that the test passes instead of "not run" for fs that
->> don't support the replayed fsx operations, because fsx skips them.
+On Tue, Nov 14, 2017 at 2:33 PM, Eryu Guan <eguan@redhat.com> wrote:
+> util-linux v2.30 changed error message of a busy mount and caused
+> overlay/036 to fail. e.g.
 >
-> Firstly thanks a lot for the review!
+>  - mount: <device> is already mounted or <mountpoint> busy
+>  + mount: <mountpoint>: <device> already mounted or mount point busy.
 >
-> IMHO, there's no harm to run more tests even if that's not the
-> primary/original test goal, as long as test doesn't fail due to the
-> unsupported operations. I've seen quite a few bugs found by totally
-> unexpected test cases, you'll never know when and where bug happens :)
+> Filter the mount output by a newly introduced _filter_busy_mount
+> into a unified format.
 >
->>
->> Because the sub-test in question really wants to test KEEP_SIZE,
->> IMO we should explicitly:
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
+>  common/filter         | 12 ++++++++++++
+>  tests/overlay/036     |  4 ++--
+>  tests/overlay/036.out |  4 ++--
+>  3 files changed, 16 insertions(+), 4 deletions(-)
 >
-> generic/469 also tests the non-KEEP_SIZE path for better test coverage,
-> though that won't reproduce the original bug. But I agreed that it can
-> be a bit confusing to test on filesystems without KEEP_SIZE support.
+> diff --git a/common/filter b/common/filter
+> index d1bb94818e3d..b1cd558ab0e1 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -420,6 +420,18 @@ _filter_error_mount()
+>         sed -e "s/mount:\(.*failed:\)/mount:/" | _filter_ending_dot
+>  }
 >
-> So how about I adding some comments to generic/456 and 469 to state that
-> it's intentional, for better test coverage, to run tests on filesystems
-> that don't support the replayed operations?
+> +# Similar to _filter_error_mount, filter a busy mount output.
+> +# Turn both old (prior to util-linux v2.30) and new (v2.30 and later) format to
+> +# a simple one. e.g.
+> +# old: mount: <device> is already mounted or <mountpoint> busy
+> +# new: mount: <mountpoint>: <device> already mounted or mount point busy.
+> +# filtered: mount: <device> already mounted or mount point busy
+> +_filter_busy_mount()
+> +{
+> +       sed -e "s/.*: \([^ ]*\).* already mounted.*busy/mount: \1 already mounted or mount point busy/" | \
+> +               _filter_ending_dot
 
-OK, but I still don't like the patch.
+Same comment as for romount error. Please canonicalize output to:
+"mount: block device already mounted or mount point busy"
+so we can do away with _filter_scratch.
 
-Here is what I think you should do:
+_filter_scratch is not needed for overlay/036, but that is not the common case.
 
-Test for KEEP_SIZE support and conditionally set
-keep_size=keep_size
-
-Use $keep_size in fsxops generation.
-
-Explain is comment why.
-
-The reason I do not like the patch is because I don't like the fact
-that:
-fsx --replay-ops=ops.in  --record-ops=ops.out
-
-Results in ops.out different than opts.in.
-I know it is already the case for the "skipped" operations, but
-at least that is well annotated, whereas your patch silently
-drops the keep_size argument from ops script.
-
-I would even go further and suggest a command line option
-to fsx that will fail unsupported scripted ops instead of
-skipping them, because one might imagine that was the intention
-of the author of an ops script. IMO that should be the default
-behavior of fsx --replay-ops.
+And a nit: I would keep the word "or" in the left side.
+"already mounted or .*busy" is a nicer expression to read IMO.
 
 Amir.
