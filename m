@@ -1,161 +1,184 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37518 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752020AbdKWOJ3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 23 Nov 2017 09:09:29 -0500
-Date: Thu, 23 Nov 2017 22:09:27 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3 3/3] fstests: filter readonly mount error messages
-Message-ID: <20171123140927.GX2749@eguan.usersys.redhat.com>
-References: <20171123111031.6550-1-eguan@redhat.com>
- <20171123111031.6550-4-eguan@redhat.com>
- <CAOQ4uxjg-SYNidgzwpZWxKCWxqzrDEj6TvRK1AWmYQr6fcrPSQ@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjg-SYNidgzwpZWxKCWxqzrDEj6TvRK1AWmYQr6fcrPSQ@mail.gmail.com>
+Received: from mail-wr0-f193.google.com ([209.85.128.193]:34647 "EHLO
+        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752737AbdKWO0g (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 23 Nov 2017 09:26:36 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay: add a test for multiple redirects to the same lower dir
+Date: Thu, 23 Nov 2017 16:27:04 +0200
+Message-Id: <1511447224-2301-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, zhangyi <yi.zhang@huawei.com>, Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 23, 2017 at 03:28:58PM +0200, Amir Goldstein wrote:
-> On Thu, Nov 23, 2017 at 1:10 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-> > write-protected devices") changed the error message on read-only
-> > block device, and in the failure case printed one line message
-> > instead of two (for details please see comments in common/filter),
-> > and this change broke generic/050 and overlay/035.
-> >
-> > Fix it by adding more filter rules to _filter_ro_mount and updating
-> > associated .out files to unify the output from both old and new
-> > util-linux versions.
-> >
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> > v3:
-> > - document the filtered format in comments
-> > - remove legacy sed filter, the perl filter covers the legacy case well
-> > - filter out $SCRATCH_DEV/MNT too and use a consistent output
-> > - remove the new filter_mount helper in overlay/035
-> >
-> >  common/filter         | 48 ++++++++++++++++++++++++++++++++++++++++++++++--
-> >  tests/generic/050     |  8 ++++----
-> >  tests/generic/050.out |  8 ++++----
-> >  tests/overlay/035     |  4 ++--
-> >  tests/overlay/035.out |  4 ++--
-> >  5 files changed, 58 insertions(+), 14 deletions(-)
-> >
-> > diff --git a/common/filter b/common/filter
-> > index a212c09aa138..6140b331017f 100644
-> > --- a/common/filter
-> > +++ b/common/filter
-> > @@ -399,9 +399,53 @@ _filter_ending_dot()
-> >
-> >  # Older mount output referred to "block device" when mounting RO devices
-> >  # It's gone in newer versions
-> > +#
-> > +# And util-linux v2.30 changed the output again, e.g.
-> > +# for a successful ro mount:
-> > +# prior to v2.30:  mount: <device> is write-protected, mounting read-only
-> > +# v2.30 and later: mount: <mountpoint>: WARNING: device write-protected, mounted read-only.
-> > +#
-> > +# a failed ro mount:
-> > +# prior to v2.30:
-> > +# mount: <device> is write-protected, mounting read-only
-> > +# mount: cannot mount <device> read-only
-> > +# v2.30 and later:
-> > +# mount: <mountpoint>: cannot mount <device> read-only.
-> > +#
-> > +# a failed rw remount:
-> > +# prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
-> > +# v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
-> > +#
-> > +# Now use _filter_ro_mount to unify all these differences across old & new
-> > +# util-linux versions. So the filtered format would be:
-> > +#
-> > +# successful ro mount:
-> > +# mount: device write-protected, mounting read-only
-> > +#
-> > +# failed ro mount:
-> > +# mount: device write-protected, mounting read-only
-> > +# mount: cannot mount read-only
-> > +#
-> > +# failed rw remount:
-> > +# mount: cannot remount device read-write, is write-protected
-> >  _filter_ro_mount() {
-> > -       sed -e "s/mount: block device/mount:/g" \
-> > -           -e "s/mount: cannot mount block device/mount: cannot mount/g"
-> > +       perl -ne '
-> > +       if (/write-protected, mount.*read-only/) {
-> > +               # successful ro mount
-> > +               print "mount: device write-protected, mounting read-only\n";
-> > +       } elsif (/mount: .*: cannot mount.*read-only/) {
-> > +               # filter v2.30 format failed ro mount
-> > +               print "mount: device write-protected, mounting read-only\n";
-> 
-> Leftover copy&paste line?
+Multiple redirects to the same lower dir will falsely return the
+same st_ino/st_dev for two different upper dirs and will cause 'diff'
+to falsely report that content of directories is the same when it is not.
 
-No, that's intentional. Prior to v2.30, mount printed two-line error
-messages, as described in the comments above:
+This is a test for a regression introduced in kernel v4.12 by
+commit 72b608f08528 ("ovl: constant st_ino/st_dev across copy up"),
+but also the first xfstest to require the redirect_dir feature that
+was introduced as an opt-in feature in kernel v4.10.
 
-# a failed ro mount:
-# prior to v2.30:
-# mount: <device> is write-protected, mounting read-only
-# mount: cannot mount <device> read-only
-# v2.30 and later:
-# mount: <mountpoint>: cannot mount <device> read-only.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-So this is matching the one-line v2.30 format and converting it to
-two-line messages.
+Eryu,
 
-> 
-> > +               print "mount: cannot mount read-only\n";
-> > +       } elsif (/(^mount: cannot mount) .* (read-only$)/) {
-> > +               # filter prior to v2.30 format failed ro mount
-> > +               print "$1 $2\n";
-> 
-> Maybe I am missing something, but why are you printing arguments
-> when you know what the expected output should be?
+This test is for a "bug" that has not been acknoledges by Miklos
+as a kernel bug yet. It may well fall within the jurisdiction of
+fsck.overlayfs.
 
-No special reason, perhaps that was easier to type :) I'll print the
-expected output directly, and change the output to
+IMO, cp -a of upper files and dirs qualifies to the statement in
+Documentation/filesystems/overlayfs.txt:
+"Offline changes, when the overlay is not mounted, are allowed to either
+the upper or the lower trees."
 
-mount: cannot mount device read-only
+So unless Miklos objects to ever fixing this "bug"?
+I suggest that we include the failing test until kernel is fixed.
 
-as you suggested.
+Incidently, I already have patches for 'verify' feature [1], which
+I intend to post after the merge window closes.
+With 'verify' feature enabled this test passes.
 
-> Also, in what is that match expression different from the v2.30 format?
+Amir.
 
-v2.30 failed ro mount output is a single-line message, with the
-"<mountpoint> :" string in between "mount: " and "cannot mount", so I'm
-explicitly matching the colon with ".*:".
+[1] https://github.com/amir73il/linux/commits/ovl-index-all
 
-prior to v2.30, failed ro mount output is two-line message, with the
-first line identical to the "successful ro mount" case (maybe I should
-have mentioned it too along with the "successful ro mount" comment), so
-I'm matching the second line here.
+ tests/overlay/049     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/049.out |   2 +
+ tests/overlay/group   |   1 +
+ 3 files changed, 107 insertions(+)
+ create mode 100755 tests/overlay/049
+ create mode 100644 tests/overlay/049.out
 
-> Can't you merge both cases to use the more generic match expr
-> (without .*:) and print the expected result?
+diff --git a/tests/overlay/049 b/tests/overlay/049
+new file mode 100755
+index 0000000..701a649
+--- /dev/null
++++ b/tests/overlay/049
+@@ -0,0 +1,104 @@
++#! /bin/bash
++# FS QA Test 049
++#
++# Test multiple redirects to the same lower dir.
++#
++# Multiple redirects to the same lower dir will falsely return
++# the same st_ino/st_dev for two different upper dirs and will
++# cause 'diff' to falsely report that content of directories
++# is the same when it is not.
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2017 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# Rename lower dir to create a redirected upper dir and
++# touch lower file to create copy up with origin xattr
++create_redirect()
++{
++	local redirect=$1
++
++	mkdir -p $lowerdir/origin
++	touch $lowerdir/origin/file
++
++	_scratch_mount -o redirect_dir=on
++	touch $SCRATCH_MNT/origin/file
++	mv $SCRATCH_MNT/origin $SCRATCH_MNT/$redirect
++
++	$UMOUNT_PROG $SCRATCH_MNT
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_scratch_feature redirect_dir
++
++# remove all files from previous runs
++_scratch_mkfs
++
++upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++
++# Create redirected dir with copied up file
++create_redirect redirect1
++# Duplicate the redirected dir and copied up file
++cp -a $upperdir/redirect1 $upperdir/redirect2
++
++# Diverge the content of the two copies of file
++# and the content of two copies of redirected dir
++echo right >> $upperdir/redirect1/file
++touch $upperdir/redirect1/right
++echo wrong >> $upperdir/redirect2/file
++touch $upperdir/redirect2/wrong
++
++_scratch_mount -o redirect_dir=on
++
++# If both copies of file/dir use the same st_dev/st_ino in overlay
++# diff won't detect that their content differs
++diff -q $SCRATCH_MNT/redirect1/file $SCRATCH_MNT/redirect2/file &>/dev/null && \
++	echo "diff on files inside duplicate redirect parent doesn't know right from wrong!"
++
++diff -q $SCRATCH_MNT/redirect1 $SCRATCH_MNT/redirect2 &> /dev/null && \
++	echo "diff on duplicate redirect dirs doesn't know right from wrong!"
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/overlay/049.out b/tests/overlay/049.out
+new file mode 100644
+index 0000000..c69568a
+--- /dev/null
++++ b/tests/overlay/049.out
+@@ -0,0 +1,2 @@
++QA output created by 049
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index b32c6cd..cf21750 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -47,3 +47,4 @@
+ 042 auto quick copyup hardlink
+ 043 auto quick copyup nonsamefs
+ 044 auto quick copyup hardlink nonsamefs
++049 auto quick copyup redirect
+-- 
+2.7.4
 
-Seems no, I need to distinguish the two cases and decide if I should
-print out single-line or two-line messages.
-
-It's a bit complicated, maybe I missed some obvious straightforward fix,
-that's why I said the following in v1/v2 cover letter :)
-
-"Perhaps there're better and cleaner ways to fix the problems, please
-help review and advise"
-
-Thanks,
-Eryu
-
-> 
-> > +       } elsif (/mount:.* cannot remount .* read-write.*/) {
-> > +               # failed rw remount
-> > +               print "mount: cannot remount device read-write, is write-protected\n";
-> > +       } else {
-> > +               print "$_";
-> > +       }' | _filter_ending_dot
-> >  }
-> >
