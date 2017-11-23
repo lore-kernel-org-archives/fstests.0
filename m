@@ -1,93 +1,58 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48346 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:34186 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752007AbdKWJ25 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 23 Nov 2017 04:28:57 -0500
-Date: Thu, 23 Nov 2017 17:28:55 +0800
+        id S1752571AbdKWLKu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 23 Nov 2017 06:10:50 -0500
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 1/3] fstests: filter mount error message for EUCLEAN
- and ESTALE
-Message-ID: <20171123092855.GW2749@eguan.usersys.redhat.com>
-References: <20171114123310.25286-1-eguan@redhat.com>
- <20171114123310.25286-2-eguan@redhat.com>
- <CAOQ4uxig6TeT62EkHsXFU-2Phstsyd3xiRE5WKmG0hkWu5r5Xw@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxig6TeT62EkHsXFU-2Phstsyd3xiRE5WKmG0hkWu5r5Xw@mail.gmail.com>
+Subject: [PATCH v3 0/3] fix failures caused by mount error msg change in util-linux v2.30
+Date: Thu, 23 Nov 2017 19:10:28 +0800
+Message-Id: <20171123111031.6550-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, amir73il@gmail.com, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 23, 2017 at 11:04:57AM +0200, Amir Goldstein wrote:
-> On Tue, Nov 14, 2017 at 2:33 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > util-linux commit ea848180dd34 ("libmount: add
-> > mnt_context_get_excode()") since v2.30 changed the error message on
-> > EUCLEAN and ESTALE again (and maybe other errno too):
-> >
-> >  - mount: <device> on <mountpoint> failed: Structure needs cleaning
-> >  + mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
-> >
-> > and it causes xfs/005, overlay/037 to fail (and probably xfs/333 too,
-> > but it's always _notrun for now).
-> >
-> > So let's filter out the changing parts and keep the error message
-> > simple.
-> >
-> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> > ---
-> >  common/filter         | 23 +++++++++++++++++++++++
-> >  tests/overlay/037     |  4 ++--
-> >  tests/overlay/037.out |  4 ++--
-> >  tests/xfs/005         |  7 +------
-> >  tests/xfs/333         |  2 +-
-> >  tests/xfs/333.out     |  2 +-
-> >  6 files changed, 30 insertions(+), 12 deletions(-)
-> >
-> > diff --git a/common/filter b/common/filter
-> > index 0cb458b0051f..d1bb94818e3d 100644
-> > --- a/common/filter
-> > +++ b/common/filter
-> > @@ -390,6 +390,13 @@ _filter_fstrim()
-> >         egrep -o "[0-9]+ bytes" | $AWK_PROG '{print $1}'
-> >  }
-> >
-> > +# Remove the ending dot appended to mount error message, util-linux 2.30
-> > +# starts to do so.
-> > +_filter_ending_dot()
-> > +{
-> > +       sed -e "s/\.$//"
-> > +}
-> > +
-> >  # Older mount output referred to "block device" when mounting RO devices
-> >  # It's gone in newer versions
-> >  _filter_ro_mount() {
-> > @@ -397,6 +404,22 @@ _filter_ro_mount() {
-> >             -e "s/mount: cannot mount block device/mount: cannot mount/g"
-> >  }
-> >
-> > +# Filter a failed mount output, util-linux changed the message several times.
-> > +#
-> > +# prior to v2.21:
-> > +# mount: Structure needs cleaning
-> 
-> So the mentioned tests are currently also broken with util-linux < v2.21?
-> Maybe mention this is commit message.
+util-linux v2.30 changed mount error message again and caused several
+tests to fail (reported by Misono Tomohiro, thanks!), this is mainly due
+to two util-linux commits in v2.30-rc1
 
-Yeah, I think so, just v2.21 is pretty old, the affected tests are
-usually _notrun on such old distributions that ship util-linux < v2.21,
-e.g. RHEL6, so no one noticed it. I'll mention it in commit log.
+6dede2f2f7c5 libmount: support MS_RDONLY on write-protected devices
+ea848180dd34 libmount: add mnt_context_get_excode()
 
-> 
-> > +# v2.21 to v2.29:
-> > +# mount: mount <device> on <mountpoint> failed: Structure needs cleaning
-> > +# v2.30 and later:
-> > +# mount: <mountpoint>: mount(2) system call failed: Structure needs cleaning.
-> > +#
-> 
-> Please document filtered format.
+This patchset introduced _filter_ending_dot, _filter_error_mount and
+_filter_busy_mount and improved _filter_ro_mount to deal with all these
+output differences between old and new util-linux versions.
 
-OK.
+I've tested and confirmed generic/050, xfs/005 and overlay/03[567] all
+passed with both old and new util-linux. xfs/333 is always _notrun
+because there's no realtime-rmapbt support yet.
 
 Thanks,
 Eryu
+
+v3:
+- address Amir's review comments, detailed change log goes to each patch
+v2:
+- remove not-needed _filter_scratch from tests
+
+Eryu Guan (3):
+  fstests: filter mount error message for EUCLEAN and ESTALE
+  overlay/036: filter busy mount message
+  fstests: filter readonly mount error messages
+
+ common/filter         | 86 +++++++++++++++++++++++++++++++++++++++++++++++++--
+ tests/generic/050     |  8 ++---
+ tests/generic/050.out |  8 ++---
+ tests/overlay/035     |  4 +--
+ tests/overlay/035.out |  4 +--
+ tests/overlay/036     |  4 +--
+ tests/overlay/036.out |  4 +--
+ tests/overlay/037     |  4 +--
+ tests/overlay/037.out |  4 +--
+ tests/xfs/005         |  7 +----
+ tests/xfs/333         |  2 +-
+ tests/xfs/333.out     |  2 +-
+ 12 files changed, 107 insertions(+), 30 deletions(-)
+
+-- 
+2.14.3
+
