@@ -1,250 +1,243 @@
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:35107 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752179AbdKXIEf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 24 Nov 2017 03:04:35 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:52590 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751557AbdKXILC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Nov 2017 03:11:02 -0500
+Date: Fri, 24 Nov 2017 16:11:00 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v6] generic: initial fiemap range query test
+Message-ID: <20171124081100.GB2749@eguan.usersys.redhat.com>
+References: <1511439214-8400-1-git-send-email-nborisov@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <20171124050144.23549-1-eguan@redhat.com>
-References: <20171123111031.6550-4-eguan@redhat.com> <20171124050144.23549-1-eguan@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 24 Nov 2017 10:04:33 +0200
-Message-ID: <CAOQ4uxgxRxByGHhePr3b4H+W1zEGxUX6Emj9PBzZpEKEs2iHog@mail.gmail.com>
-Subject: Re: [PATCH v4] fstests: filter readonly mount error messages
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1511439214-8400-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>, Karel Zak <kzak@redhat.com>
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, sandeen@sandeen.net
 List-ID: <fstests@vger.kernel.org>
 
-[cc: Karel Zak]
+On Thu, Nov 23, 2017 at 02:13:34PM +0200, Nikolay Borisov wrote:
+> Fiemap gained support for passing in optional offset len
+> which denote the range requested, so this patch adds
+> testcases for this functionality. Aditionally, a special "ranged"
+> argument is added to the require_xfs_io_command which checks
+> for the presence of fiemap range support.
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> --- 
+>  V6:
+>  * Moved to generic tests and successfully ran against ext4/btrfs
+>  * Use pwrite to create the holes to make it even more generic
 
-On Fri, Nov 24, 2017 at 7:01 AM, Eryu Guan <eguan@redhat.com> wrote:
-> util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-> write-protected devices") changed the error message on read-only
-> block device, and in the failure case printed one line message
-> instead of two (for details please see comments in common/filter),
-> and this change broke generic/050 and overlay/035.
->
-> Fix it by adding more filter rules to _filter_ro_mount and updating
-> associated .out files to unify the output from both old and new
-> util-linux versions.
->
-> Signed-off-by: Eryu Guan <eguan@redhat.com>
-> ---
-> v4 (also passed with both old & new util-linux):
-> - add more comments to explain the output differences between util-linux
->   versions
-> - print out message directly instead of using perl variables
-> - add word "device" to failed ro mount message
+Sorry, I found another issue when testing with btrfs on ppc64 host,
+where page size is 64k, for details please see below. Sorry for pushing
+this test back and forth so many times..
 
-
-Eryu,
-
-This looks good and you can take it as an ACK on the series.
-
-I've CC'ed Karel, so maybe he thinks about us fstests guys before making
-these sort of changes again...
-
-Thinking out loud, does xfstest even need to use mount program from
-util-linux? Do we ever need anything other than the bare libc mount(2)?
-We need it for -o loop, but that is the exception to the rule.
-
-For fs that have mount helpers (cifs,nfs), we could use mount.$FSTYP
-directly (what error formats are reported from the helpers??). For all other
-fs we can write a simple t_mount program to wrap libc mount(2) and not be
-dependent on util-linux error message formats.
-Maybe we can consider it next time util-linux changes..
-
-Another idea to through in the air in the direction of Karel -
-Maybe it makes sense for util-linux to check some env variable
-and then print all error messages in a unified machine format, e.g.:
-fprintf("%s: errno=%d\n", progname, errno);
-
-Cheers,
-Amir.
-
->
-> v3:
-> - document the filtered format in comments
-> - remove legacy sed filter, the perl filter covers the legacy case well
-> - filter out $SCRATCH_DEV/MNT too and use a consistent output
-> - remove the new filter_mount helper in overlay/035
->
->  common/filter         | 59 +++++++++++++++++++++++++++++++++++++++++++++++----
->  tests/generic/050     |  8 +++----
->  tests/generic/050.out |  8 +++----
->  tests/overlay/035     |  4 ++--
->  tests/overlay/035.out |  4 ++--
->  5 files changed, 67 insertions(+), 16 deletions(-)
->
-> diff --git a/common/filter b/common/filter
-> index a212c09aa138..9c33efacea6c 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -397,11 +397,62 @@ _filter_ending_dot()
->         sed -e "s/\.$//"
->  }
->
-> -# Older mount output referred to "block device" when mounting RO devices
-> -# It's gone in newer versions
-> +# Older mount output referred to "block device" when mounting RO devices. It's
-> +# gone in newer versions. v2.30 changed the output again. This filter is to
-> +# unify all read-only mount messages across all util-linux versions.
+> 
+>  V5: 
+>   * Drop changes to existing generic punch hole tests since 
+>   the new fiemap implementation don't require them 
+>   * Merge the common/rc change with this patch
+>   * Added Data + Hole + Data and Hole + Data tests as per Eryu's request
+>   * Adjusted output of some tests which fall in a hole, since holes are
+>   truncated to passed range
+>   * Simplified the logic to check for fiemap range support (Eryu)
+> 
+>  V4: 
+>   * Added test description
+>   * Added new test for past-eof behavior
+>   * Removed supported_generic_fs line
+>   * Switched to using the "ranged" param require
+>   * Revert v3 changes
+> 
+>  V3:
+>   * Adjusted tests for '-r' fiemap param
+>   * Tests for invalid -r combination
+> 
+>  V2: No change
+>  V1: No change
+>  common/rc             |   7 +++
+>  tests/generic/900     | 108 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/900.out | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/group   |   1 +
+>  4 files changed, 241 insertions(+)
+>  create mode 100755 tests/generic/900
+>  create mode 100644 tests/generic/900.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 4c053a5..a0d162a 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2056,6 +2056,13 @@ _require_xfs_io_command()
+>  			-c "$command 4k 8k" $testfile 2>&1`
+>  		;;
+>  	"fiemap")
+> +		# If 'ranged' is passed as argument then we check to see if fiemap supports
+> +		# ranged query params
+> +		if echo "$param" | grep -q "ranged"; then
+> +			param=$(echo "$param" | sed "s/ranged//")
+> +			$XFS_IO_PROG -c "help fiemap" | grep -q "\[offset \[len\]\]"
+> +			[ $? -eq 0 ] || _notrun "xfs_io $command ranged support is missing"
+> +		fi
+>  		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
+>  			-c "fiemap -v $param" $testfile 2>&1`
+>  		param_checked=1
+> diff --git a/tests/generic/900 b/tests/generic/900
+> new file mode 100755
+> index 0000000..64a762f
+> --- /dev/null
+> +++ b/tests/generic/900
+> @@ -0,0 +1,108 @@
+> +#! /bin/bash
+> +# FS QA Test No. 900
+> +
+> +# Test for the new ranged query functionality in xfs_io's fiemap command.
+> +# This tests various combinations of hole + data layout being printed.
+> +# Also the test used 16k holes to be compatible with 16k block filesystems
+> +
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 SUSE Linux Products GmbH. All Rights Reserved.
+> +# Author: Nikolay Borisov <nborisov@suse.com>
 > +#
-> +# for a successful ro mount:
-> +# ancient:        mount: block device <device> is write-protected, mounting read-only
-> +# prior to v2.30:  mount: <device> is write-protected, mounting read-only
-> +# v2.30 and later: mount: <mountpoint>: WARNING: device write-protected, mounted read-only.
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
 > +#
-> +# a failed ro mount:
-> +# ancient (two-line message):
-> +# mount: block device <device> is write-protected, mounting read-only
-> +# mount: cannot mount block device <device> read-only
-> +# prior to v2.30 (two-line message):
-> +# mount: <device> is write-protected, mounting read-only
-> +# mount: cannot mount <device> read-only
-> +# v2.30 and later (single-line message):
-> +# mount: <mountpoint>: cannot mount <device> read-only.
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
 > +#
-> +# a failed rw remount:
-> +# ancient:        mount: cannot remount block device <device> read-write, is write-protected
-> +# prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
-> +# v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
 > +#
-> +# Now use _filter_ro_mount to unify all these differences across old & new
-> +# util-linux versions. So the filtered format would be:
-> +#
-> +# successful ro mount:
-> +# mount: device write-protected, mounting read-only
-> +#
-> +# failed ro mount:
-> +# mount: device write-protected, mounting read-only
-> +# mount: cannot mount device read-only
-> +#
-> +# failed rw remount:
-> +# mount: cannot remount device read-write, is write-protected
->  _filter_ro_mount() {
-> -       sed -e "s/mount: block device/mount:/g" \
-> -           -e "s/mount: cannot mount block device/mount: cannot mount/g"
-> +       perl -ne '
-> +       if (/write-protected, mount.*read-only/) {
-> +               # filter successful ro mount, and first line of prior to v2.30
-> +               # format failed ro mount
-> +               print "mount: device write-protected, mounting read-only\n";
-> +       } elsif (/mount: .*: cannot mount.*read-only/) {
-> +               # filter v2.30 format failed ro mount, convert single-line
-> +               # message to two-line message
-> +               print "mount: device write-protected, mounting read-only\n";
-> +               print "mount: cannot mount device read-only\n";
-> +       } elsif (/^mount: cannot mount .* read-only$/) {
-> +               # filter prior to v2.30 format failed ro mount
-> +               print "mount: cannot mount device read-only\n";
-> +       } elsif (/mount:.* cannot remount .* read-write.*/) {
-> +               # filter failed rw remount
-> +               print "mount: cannot remount device read-write, is write-protected\n";
-> +       } else {
-> +               print "$_";
-> +       }' | _filter_ending_dot
->  }
->
->  # Filter a failed mount output due to EUCLEAN and USTALE, util-linux changed
-> diff --git a/tests/generic/050 b/tests/generic/050
-> index 5fa28a7648e5..efa45f04825b 100755
-> --- a/tests/generic/050
-> +++ b/tests/generic/050
-> @@ -60,7 +60,7 @@ blockdev --setro $SCRATCH_DEV
->  # Mount it, and make sure we can't write to it, and we can unmount it again
->  #
->  echo "mounting read-only block device:"
-> -_scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
-> +_scratch_mount 2>&1 | _filter_ro_mount
->
->  echo "touching file on read-only filesystem (should fail)"
->  touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
-> @@ -95,10 +95,10 @@ blockdev --setro $SCRATCH_DEV
->  # -o norecovery is used.
->  #
->  echo "mounting filesystem that needs recovery on a read-only device:"
-> -_scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
-> +_scratch_mount 2>&1 | _filter_ro_mount
->
->  echo "unmounting read-only filesystem"
-> -_scratch_unmount 2>&1 | _filter_scratch
-> +_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
->
->  #
->  # This is the way out if the underlying device really is read-only.
-> @@ -106,7 +106,7 @@ _scratch_unmount 2>&1 | _filter_scratch
->  # data recovery hack.
->  #
->  echo "mounting filesystem with -o norecovery on a read-only device:"
-> -_scratch_mount -o norecovery 2>&1 | _filter_scratch | _filter_ro_mount
-> +_scratch_mount -o norecovery 2>&1 | _filter_ro_mount
->
->  echo "unmounting read-only filesystem"
->  _scratch_unmount 2>&1 | _filter_scratch
-> diff --git a/tests/generic/050.out b/tests/generic/050.out
-> index fb90f6ea5819..7d70ddee83cb 100644
-> --- a/tests/generic/050.out
-> +++ b/tests/generic/050.out
-> @@ -1,7 +1,7 @@
->  QA output created by 050
->  setting device read-only
->  mounting read-only block device:
-> -mount: SCRATCH_DEV is write-protected, mounting read-only
-> +mount: device write-protected, mounting read-only
->  touching file on read-only filesystem (should fail)
->  touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
->  unmounting read-only filesystem
-> @@ -12,12 +12,12 @@ going down:
->  unmounting shutdown filesystem:
->  setting device read-only
->  mounting filesystem that needs recovery on a read-only device:
-> -mount: SCRATCH_DEV is write-protected, mounting read-only
-> -mount: cannot mount SCRATCH_DEV read-only
-> +mount: device write-protected, mounting read-only
-> +mount: cannot mount device read-only
->  unmounting read-only filesystem
->  umount: SCRATCH_DEV: not mounted
->  mounting filesystem with -o norecovery on a read-only device:
-> -mount: SCRATCH_DEV is write-protected, mounting read-only
-> +mount: device write-protected, mounting read-only
->  unmounting read-only filesystem
->  setting device read-write
->  mounting filesystem that needs recovery with -o ro:
-> diff --git a/tests/overlay/035 b/tests/overlay/035
-> index 64fcd708105e..05447741a1ba 100755
-> --- a/tests/overlay/035
-> +++ b/tests/overlay/035
-> @@ -69,7 +69,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
->  $MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
->                         $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
->  touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
-> -_scratch_remount rw 2>&1 | _filter_scratch
-> +_scratch_remount rw 2>&1 | _filter_ro_mount
->  $UMOUNT_PROG $SCRATCH_MNT
->
->  # Make workdir immutable to prevent workdir re-create on mount
-> @@ -79,7 +79,7 @@ $CHATTR_PROG +i $workdir
->  # Verify that overlay is mounted read-only and that it cannot be remounted rw.
->  _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir
->  touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
-> -_scratch_remount rw 2>&1 | _filter_scratch
-> +_scratch_remount rw 2>&1 | _filter_ro_mount
->
->  # success, all done
->  status=0
-> diff --git a/tests/overlay/035.out b/tests/overlay/035.out
-> index 5a5f67771402..e08ba2ebc691 100644
-> --- a/tests/overlay/035.out
-> +++ b/tests/overlay/035.out
-> @@ -1,5 +1,5 @@
->  QA output created by 035
->  touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
-> -mount: cannot remount SCRATCH_DEV read-write, is write-protected
-> +mount: cannot remount device read-write, is write-protected
->  touch: cannot touch 'SCRATCH_MNT/bar': Read-only file system
-> -mount: cannot remount SCRATCH_DEV read-write, is write-protected
-> +mount: cannot remount device read-write, is write-protected
-> --
-> 2.14.3
->
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/punch
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_os Linux
+> +_require_scratch
+
+I just realized that test can be done without SCRATCH_DEV, just
+_require_test and test in $TEST_DIR. e.g.
+
+file=$TEST_DIR/fiemap.$seq
+rm -f $file
+$XFS_IO_PROG -f -c "truncate ..." $file
+...
+
+> +_require_xfs_io_command "truncate"
+> +# ranged is a special argument which checks if fiemap supports
+> +# [offset [len]] args
+> +_require_xfs_io_command "fiemap" "ranged"
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount || _fail "mount failure"
+> +
+> +file=$SCRATCH_MNT/testfile
+> +
+> +# Create a file with 16k hole followed by 16k data, and this pattern
+> +# repeats till it reaches 1M file size, so each extent has 16k data.
+> +# But truncate file to its final size first, otherwise XFS would merge
+> +# some extents due to speculative preallocation.
+> +$XFS_IO_PROG -f -c "truncate 1m" $file
+> +for i in {0..31}; do
+> +	$XFS_IO_PROG -c "pwrite $(($i*32+16))k 16k" $file >/dev/null;
+> +done
+
+On ppc64 hosts, this results in a single extent with btrfs, not 64 as
+expected, and all sub-tests failed. Using 64k extent as suggested by
+Darrick earlier fixes the problem for me, i.e. the following commands
+result in 64 extents:
+
+$XFS_IO_PROG -f -c "truncate 4m" $file
+for i in {0..31}; do
+	$XFS_IO_PROG -c "pwrite $(($i*128+64))k 64k" $file >/dev/null;
+done
+
+> +
+> +# Query 1 data extent between 16k..16k range
+> +echo "Basic data extent"
+> +$XFS_IO_PROG -c "fiemap -v 16k 16k" $file | _filter_fiemap
+
+Then all these ranges need update..
+
+> +
+> +# Query data and hole extent
+> +echo "Data + Hole"
+> +$XFS_IO_PROG -c "fiemap -v 16k 20k" $file | _filter_fiemap
+> +
+> +echo "Hole + Data"
+> +$XFS_IO_PROG -c "fiemap -v 0 17k" $file | _filter_fiemap
+> +
+> +echo "Hole + Data + Hole"
+> +$XFS_IO_PROG -c "fiemap -v 32k 40k" $file | _filter_fiemap
+> +
+> +echo "Data + Hole + Data"
+> +$XFS_IO_PROG -c "fiemap -v 16k 33k" $file | _filter_fiemap
+> +
+> +echo "Beginning with a hole"
+> +$XFS_IO_PROG -c "fiemap -v 0 3k" $file | _filter_fiemap
+> +
+> +# Query for 0..160k that's 40 extents, more than the EXTENT_BATCH
+                  ^^^^ meant 640k previously?
+
+> +echo "Query more than 32 extents"
+> +$XFS_IO_PROG -c "fiemap -v 0 640k" $file | _filter_fiemap
+> +
+> +echo "Larger query than file size"
+> +$XFS_IO_PROG -c "fiemap -v 0 2m" $file | _filter_fiemap
+> +
+> +# mapping past eof shouldn't print anything"
+> +$XFS_IO_PROG -c "fiemap -v 2m" $file | _filter_fiemap
+> +
+> +# check everything without the first hole
+> +$XFS_IO_PROG -c "fiemap -v 16k" $file | wc -l
+
+Any reason doing "wc -l" instead of "_filter_fiemap" here?
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+...
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -472,3 +472,4 @@
+>  467 auto quick exportfs
+>  468 shutdown auto quick metadata
+>  469 auto quick
+> +900
+
+group can be fixed then :)
+
+Thanks,
+Eryu
+
+> -- 
+> 2.7.4
+> 
