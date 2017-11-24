@@ -1,218 +1,50 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54784 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45132 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750715AbdKXFB6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 24 Nov 2017 00:01:58 -0500
+        id S1751542AbdKXFFo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 Nov 2017 00:05:44 -0500
+Date: Fri, 24 Nov 2017 13:05:41 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH v4] fstests: filter readonly mount error messages
-Date: Fri, 24 Nov 2017 13:01:44 +0800
-Message-Id: <20171124050144.23549-1-eguan@redhat.com>
-In-Reply-To: <20171123111031.6550-4-eguan@redhat.com>
-References: <20171123111031.6550-4-eguan@redhat.com>
+Subject: Re: [PATCH] overlay: add a test for multiple redirects to the same
+ lower dir
+Message-ID: <20171124050541.GY2749@eguan.usersys.redhat.com>
+References: <1511447224-2301-1-git-send-email-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1511447224-2301-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: misono.tomohiro@jp.fujitsu.com, linux-xfs@vger.kernel.org, amir73il@gmail.com, Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, zhangyi <yi.zhang@huawei.com>, Chandan Rajendra <chandan@linux.vnet.ibm.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-write-protected devices") changed the error message on read-only
-block device, and in the failure case printed one line message
-instead of two (for details please see comments in common/filter),
-and this change broke generic/050 and overlay/035.
+On Thu, Nov 23, 2017 at 04:27:04PM +0200, Amir Goldstein wrote:
+> Multiple redirects to the same lower dir will falsely return the
+> same st_ino/st_dev for two different upper dirs and will cause 'diff'
+> to falsely report that content of directories is the same when it is not.
+> 
+> This is a test for a regression introduced in kernel v4.12 by
+> commit 72b608f08528 ("ovl: constant st_ino/st_dev across copy up"),
+> but also the first xfstest to require the redirect_dir feature that
+> was introduced as an opt-in feature in kernel v4.10.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+> 
+> Eryu,
+> 
+> This test is for a "bug" that has not been acknoledges by Miklos
+> as a kernel bug yet. It may well fall within the jurisdiction of
+> fsck.overlayfs.
+> 
+> IMO, cp -a of upper files and dirs qualifies to the statement in
+> Documentation/filesystems/overlayfs.txt:
+> "Offline changes, when the overlay is not mounted, are allowed to either
+> the upper or the lower trees."
+> 
+> So unless Miklos objects to ever fixing this "bug"?
+> I suggest that we include the failing test until kernel is fixed.
 
-Fix it by adding more filter rules to _filter_ro_mount and updating
-associated .out files to unify the output from both old and new
-util-linux versions.
+Thanks for the info! Then I'll wait until it's been acked as a bug.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
-v4 (also passed with both old & new util-linux):
-- add more comments to explain the output differences between util-linux
-  versions
-- print out message directly instead of using perl variables
-- add word "device" to failed ro mount message
-
-v3:
-- document the filtered format in comments
-- remove legacy sed filter, the perl filter covers the legacy case well
-- filter out $SCRATCH_DEV/MNT too and use a consistent output
-- remove the new filter_mount helper in overlay/035
-
- common/filter         | 59 +++++++++++++++++++++++++++++++++++++++++++++++----
- tests/generic/050     |  8 +++----
- tests/generic/050.out |  8 +++----
- tests/overlay/035     |  4 ++--
- tests/overlay/035.out |  4 ++--
- 5 files changed, 67 insertions(+), 16 deletions(-)
-
-diff --git a/common/filter b/common/filter
-index a212c09aa138..9c33efacea6c 100644
---- a/common/filter
-+++ b/common/filter
-@@ -397,11 +397,62 @@ _filter_ending_dot()
- 	sed -e "s/\.$//"
- }
- 
--# Older mount output referred to "block device" when mounting RO devices
--# It's gone in newer versions
-+# Older mount output referred to "block device" when mounting RO devices. It's
-+# gone in newer versions. v2.30 changed the output again. This filter is to
-+# unify all read-only mount messages across all util-linux versions.
-+#
-+# for a successful ro mount:
-+# ancient:	   mount: block device <device> is write-protected, mounting read-only
-+# prior to v2.30:  mount: <device> is write-protected, mounting read-only
-+# v2.30 and later: mount: <mountpoint>: WARNING: device write-protected, mounted read-only.
-+#
-+# a failed ro mount:
-+# ancient (two-line message):
-+# mount: block device <device> is write-protected, mounting read-only
-+# mount: cannot mount block device <device> read-only
-+# prior to v2.30 (two-line message):
-+# mount: <device> is write-protected, mounting read-only
-+# mount: cannot mount <device> read-only
-+# v2.30 and later (single-line message):
-+# mount: <mountpoint>: cannot mount <device> read-only.
-+#
-+# a failed rw remount:
-+# ancient:	   mount: cannot remount block device <device> read-write, is write-protected
-+# prior to v2.30:  mount: cannot remount <device> read-write, is write-protected
-+# v2.30 and later: mount: <mountpoint>: cannot remount <device> read-write, is write-protected.
-+#
-+# Now use _filter_ro_mount to unify all these differences across old & new
-+# util-linux versions. So the filtered format would be:
-+#
-+# successful ro mount:
-+# mount: device write-protected, mounting read-only
-+#
-+# failed ro mount:
-+# mount: device write-protected, mounting read-only
-+# mount: cannot mount device read-only
-+#
-+# failed rw remount:
-+# mount: cannot remount device read-write, is write-protected
- _filter_ro_mount() {
--	sed -e "s/mount: block device/mount:/g" \
--	    -e "s/mount: cannot mount block device/mount: cannot mount/g"
-+	perl -ne '
-+	if (/write-protected, mount.*read-only/) {
-+		# filter successful ro mount, and first line of prior to v2.30
-+		# format failed ro mount
-+		print "mount: device write-protected, mounting read-only\n";
-+	} elsif (/mount: .*: cannot mount.*read-only/) {
-+		# filter v2.30 format failed ro mount, convert single-line
-+		# message to two-line message
-+		print "mount: device write-protected, mounting read-only\n";
-+		print "mount: cannot mount device read-only\n";
-+	} elsif (/^mount: cannot mount .* read-only$/) {
-+		# filter prior to v2.30 format failed ro mount
-+		print "mount: cannot mount device read-only\n";
-+	} elsif (/mount:.* cannot remount .* read-write.*/) {
-+		# filter failed rw remount
-+		print "mount: cannot remount device read-write, is write-protected\n";
-+	} else {
-+		print "$_";
-+	}' | _filter_ending_dot
- }
- 
- # Filter a failed mount output due to EUCLEAN and USTALE, util-linux changed
-diff --git a/tests/generic/050 b/tests/generic/050
-index 5fa28a7648e5..efa45f04825b 100755
---- a/tests/generic/050
-+++ b/tests/generic/050
-@@ -60,7 +60,7 @@ blockdev --setro $SCRATCH_DEV
- # Mount it, and make sure we can't write to it, and we can unmount it again
- #
- echo "mounting read-only block device:"
--_scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
-+_scratch_mount 2>&1 | _filter_ro_mount
- 
- echo "touching file on read-only filesystem (should fail)"
- touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
-@@ -95,10 +95,10 @@ blockdev --setro $SCRATCH_DEV
- # -o norecovery is used.
- #
- echo "mounting filesystem that needs recovery on a read-only device:"
--_scratch_mount 2>&1 | _filter_scratch | _filter_ro_mount
-+_scratch_mount 2>&1 | _filter_ro_mount
- 
- echo "unmounting read-only filesystem"
--_scratch_unmount 2>&1 | _filter_scratch
-+_scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
- 
- #
- # This is the way out if the underlying device really is read-only.
-@@ -106,7 +106,7 @@ _scratch_unmount 2>&1 | _filter_scratch
- # data recovery hack.
- #
- echo "mounting filesystem with -o norecovery on a read-only device:"
--_scratch_mount -o norecovery 2>&1 | _filter_scratch | _filter_ro_mount
-+_scratch_mount -o norecovery 2>&1 | _filter_ro_mount
- 
- echo "unmounting read-only filesystem"
- _scratch_unmount 2>&1 | _filter_scratch
-diff --git a/tests/generic/050.out b/tests/generic/050.out
-index fb90f6ea5819..7d70ddee83cb 100644
---- a/tests/generic/050.out
-+++ b/tests/generic/050.out
-@@ -1,7 +1,7 @@
- QA output created by 050
- setting device read-only
- mounting read-only block device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
-+mount: device write-protected, mounting read-only
- touching file on read-only filesystem (should fail)
- touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
- unmounting read-only filesystem
-@@ -12,12 +12,12 @@ going down:
- unmounting shutdown filesystem:
- setting device read-only
- mounting filesystem that needs recovery on a read-only device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
--mount: cannot mount SCRATCH_DEV read-only
-+mount: device write-protected, mounting read-only
-+mount: cannot mount device read-only
- unmounting read-only filesystem
- umount: SCRATCH_DEV: not mounted
- mounting filesystem with -o norecovery on a read-only device:
--mount: SCRATCH_DEV is write-protected, mounting read-only
-+mount: device write-protected, mounting read-only
- unmounting read-only filesystem
- setting device read-write
- mounting filesystem that needs recovery with -o ro:
-diff --git a/tests/overlay/035 b/tests/overlay/035
-index 64fcd708105e..05447741a1ba 100755
---- a/tests/overlay/035
-+++ b/tests/overlay/035
-@@ -69,7 +69,7 @@ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
- $MOUNT_PROG -t overlay -o"lowerdir=$lowerdir2:$lowerdir1" \
- 			$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
- touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
--_scratch_remount rw 2>&1 | _filter_scratch
-+_scratch_remount rw 2>&1 | _filter_ro_mount
- $UMOUNT_PROG $SCRATCH_MNT
- 
- # Make workdir immutable to prevent workdir re-create on mount
-@@ -79,7 +79,7 @@ $CHATTR_PROG +i $workdir
- # Verify that overlay is mounted read-only and that it cannot be remounted rw.
- _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir
- touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
--_scratch_remount rw 2>&1 | _filter_scratch
-+_scratch_remount rw 2>&1 | _filter_ro_mount
- 
- # success, all done
- status=0
-diff --git a/tests/overlay/035.out b/tests/overlay/035.out
-index 5a5f67771402..e08ba2ebc691 100644
---- a/tests/overlay/035.out
-+++ b/tests/overlay/035.out
-@@ -1,5 +1,5 @@
- QA output created by 035
- touch: cannot touch 'SCRATCH_MNT/foo': Read-only file system
--mount: cannot remount SCRATCH_DEV read-write, is write-protected
-+mount: cannot remount device read-write, is write-protected
- touch: cannot touch 'SCRATCH_MNT/bar': Read-only file system
--mount: cannot remount SCRATCH_DEV read-write, is write-protected
-+mount: cannot remount device read-write, is write-protected
--- 
-2.14.3
-
+Thanks,
+Eryu
