@@ -1,199 +1,57 @@
-Received: from mail-yb0-f179.google.com ([209.85.213.179]:36075 "EHLO
-        mail-yb0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751598AbdK0J47 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Nov 2017 04:56:59 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:32778 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752294AbdK0Kya (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 27 Nov 2017 05:54:30 -0500
+Date: Mon, 27 Nov 2017 11:54:25 +0100
+From: Karel Zak <kzak@redhat.com>
+Subject: Re: [PATCH v4] fstests: filter readonly mount error messages
+Message-ID: <20171127105425.zxcgjo5eju6azj5u@ws.net.home>
+References: <20171123111031.6550-4-eguan@redhat.com>
+ <20171124050144.23549-1-eguan@redhat.com>
+ <CAOQ4uxgxRxByGHhePr3b4H+W1zEGxUX6Emj9PBzZpEKEs2iHog@mail.gmail.com>
+ <20171124103814.gfvxw3ethkcvm6xa@ws.net.home>
+ <CAOQ4uxjbnrgJG3PLVV6TvAS-Fjgskms_jWc5-b4DVmLhbVUdFg@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1504638680-25682-11-git-send-email-amir73il@gmail.com>
-References: <1504638680-25682-1-git-send-email-amir73il@gmail.com> <1504638680-25682-11-git-send-email-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 27 Nov 2017 11:56:58 +0200
-Message-ID: <CAOQ4uxi_SjKCJ97Knvh4S6UiD3jskHEqDja7wwc+-mXp4CNbEw@mail.gmail.com>
-Subject: Re: [PATCH v3 10/13] fstests: crash consistency fsx test using dm-log-writes
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjbnrgJG3PLVV6TvAS-Fjgskms_jWc5-b4DVmLhbVUdFg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <jbacik@fb.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 5, 2017 at 10:11 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> Cherry-picked the test from commit 70d41e17164b
-> in Josef Bacik's fstests tree (https://github.com/josefbacik/fstests).
-> Quoting from Josef's commit message:
->
->   The test just runs some ops and exits, then finds all of the good buffers
->   in the directory we provided and:
->   - replays up to the mark given
->   - mounts the file system and compares the md5sum
->   - unmounts and fsck's to check for metadata integrity
->
->   dm-log-writes will pretend to do discard and the replay-log tool will
->   replay it properly depending on the underlying device, either by writing
->   0's or actually calling the discard ioctl, so I've enabled discard in the
->   test for maximum fun.
->
-> [Amir:]
-> - Removed unneeded _test_falloc_support dynamic FSX_OPTS
-> - Fold repetitions into for loops
-> - Added place holders for using constant random seeds
-> - Add pre umount checkpint
-> - Add test to new 'replay' group
-> - Address review comments by Eryu Guan
->
-> Cc: Josef Bacik <jbacik@fb.com>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+On Sun, Nov 26, 2017 at 10:56:40AM +0200, Amir Goldstein wrote:
+> >> Thinking out loud, does xfstest even need to use mount program from
+> >> util-linux? Do we ever need anything other than the bare libc mount(2)?
+> >> We need it for -o loop, but that is the exception to the rule.
+> >
+> > Well, I don't think that create a parallel universe is the best
+> > solution.
+> >
+> 
+> I agree. However, xfstest uses 'mount' is a very particular way:
+> - User has to provide both block device and mount point
+> - xfstests already checks that those block device and mount point
+>   are not in use in /proc/mounts *before* calling 'mount'
 
+OK, I see, than the wrapper is not so bad idea (if you're able to keep
+it simple and stupid:-)
 
-Josef,
+> So I prefer the 'machine output format' solution going forward, but
+> since xfstests will need to continue supporting old util-linux installations
+> it might be less clumsy to use a simple C wrapper to mount(2), then
+> to carry these error format filters.
+> xfstests can also check for availability of the new machine format in
+> 'mount' and if it doesn't exist fall back to using its private mount helper.
 
-As you know, this test is now merged to xfstest as generic/455.
-I have been running the test for a while on xfs and it occasionally
-reports inconsistencies which I try to investigate.
+If you want to implement the wrapper than it's probably better use it
+in all cases and then you can remove all the backward compatibility
+filters. In thins case it seems better to depend on the wrapper only.
+So, the unified messages maintained by unit-linux mount(8) will be
+unnecessary.
 
-In some of the reports, it appears that dm-log-writes may be exhibiting
-a reliability issue (see below).
+    Karel
 
-> ---
->  tests/generic/500     | 135 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/500.out |   2 +
->  tests/generic/group   |   1 +
->  3 files changed, 138 insertions(+)
->  create mode 100755 tests/generic/500
->  create mode 100644 tests/generic/500.out
->
-> diff --git a/tests/generic/500 b/tests/generic/500
-> new file mode 100755
-> index 0000000..82f7a93
-> --- /dev/null
-> +++ b/tests/generic/500
-> @@ -0,0 +1,135 @@
-> +#! /bin/bash
-> +# FS QA Test No. 500
-> +#
-> +# Run fsx with log writes to verify power fail safeness.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2015 Facebook. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +status=1       # failure is the default!
-> +
-> +_cleanup()
-> +{
-> +       _log_writes_cleanup
-> +}
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmlogwrites
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch_nocheck
-> +_require_log_writes
-> +
-> +rm -f $seqres.full
-> +
-> +check_files()
-> +{
-> +       local name=$1
-> +
-> +       # Now look for our files
-> +       for i in $(find $SANITY_DIR -type f | grep $name | grep mark)
-> +       do
-> +               local filename=$(basename $i)
-> +               local mark="${filename##*.}"
-> +               echo "checking $filename" >> $seqres.full
-> +               _log_writes_replay_log $filename
-> +               _scratch_mount
-> +               local expected_md5=$(_md5_checksum $i)
-> +               local md5=$(_md5_checksum $SCRATCH_MNT/$name)
-> +               [ "${md5}" != "${expected_md5}" ] && _fail "$filename md5sum mismatched"
-
-One time, the test reported md5 mismatch on a file, but when I replayed
-the log to the same mark I found that md5 of the file is correct compared to the
-'snapshot' file in test partition.
-
-> +               _scratch_unmount
-> +               _check_scratch_fs
-> +       done
-> +}
-> +
-> +SANITY_DIR=$TEST_DIR/fsxtests
-> +rm -rf $SANITY_DIR
-> +mkdir $SANITY_DIR
-> +
-> +# Create the log
-> +_log_writes_init
-> +
-> +_log_writes_mkfs >> $seqres.full 2>&1
-> +
-> +# Log writes emulates discard support, turn it on for maximum crying.
-> +_log_writes_mount -o discard
-> +
-> +NUM_FILES=4
-> +NUM_OPS=200
-> +FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
-> +# Set random seeds for fsx runs (0 for timestamp + pid)
-> +seeds=(0 0 0 0)
-> +# Run fsx for a while
-> +for j in `seq 0 $((NUM_FILES-1))`
-> +do
-> +       run_check $here/ltp/fsx $FSX_OPTS -S ${seeds[$j]} -j $j $SCRATCH_MNT/testfile$j &
-> +done
-> +wait
-> +
-> +test_md5=()
-> +for j in `seq 0 $((NUM_FILES-1))`
-> +do
-> +       test_md5[$j]=$(_md5_checksum $SCRATCH_MNT/testfile$j)
-> +done
-> +
-> +# Unmount the scratch dir and tear down the log writes target
-> +_log_writes_mark last
-> +_log_writes_unmount
-> +_log_writes_mark end
-> +_log_writes_remove
-> +_check_scratch_fs
-> +
-
-Another time xfs_repair complained about dirty log right after
-_log_writes_remove
-and I wasn't able to seek to the "end" mark. Log entries were valid a
-few entries
-after the "last" mark.
-
-This leads me to believe that perhaps dm-log-writes doesn't flush all
-its pending
-log io before remove? Anyway, I added a "sync $LOGWRITES_DEV" call inside
-_log_writes_remove. Not sure if that helps or if that is required
-before removing the
-target?
-
-I will report if I see that the problem persists.
-Thought? suggestions?
-
-Thanks,
-Amir.
+-- 
+ Karel Zak  <kzak@redhat.com>
+ http://karelzak.blogspot.com
