@@ -1,49 +1,49 @@
-Received: from mail-qt0-f172.google.com ([209.85.216.172]:37471 "EHLO
-        mail-qt0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752369AbdK0PHX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Nov 2017 10:07:23 -0500
-Received: by mail-qt0-f172.google.com with SMTP id d15so39404039qte.4
-        for <fstests@vger.kernel.org>; Mon, 27 Nov 2017 07:07:23 -0800 (PST)
-Date: Mon, 27 Nov 2017 10:07:21 -0500
-From: Josef Bacik <josef@toxicpanda.com>
-Subject: Re: [PATCH v3 10/13] fstests: crash consistency fsx test using
- dm-log-writes
-Message-ID: <20171127150720.oixyv7vggvjax5m3@destiny>
-References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
- <1504638680-25682-11-git-send-email-amir73il@gmail.com>
- <CAOQ4uxi_SjKCJ97Knvh4S6UiD3jskHEqDja7wwc+-mXp4CNbEw@mail.gmail.com>
- <CAFk8rvZX3YWoShy2i_Jr+-cGt2bhjDxVRaFHgXQNzbmWAkdcXQ@mail.gmail.com>
+Received: from aserp1040.oracle.com ([141.146.126.69]:31224 "EHLO
+        aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752777AbdK0Qr7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Nov 2017 11:47:59 -0500
+Date: Mon, 27 Nov 2017 08:47:49 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 1/2] generic/458: document the fix commit
+Message-ID: <20171127164749.GA19370@magnolia>
+References: <1511419423-7905-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAFk8rvZX3YWoShy2i_Jr+-cGt2bhjDxVRaFHgXQNzbmWAkdcXQ@mail.gmail.com>
+In-Reply-To: <1511419423-7905-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ashlie Martinez <ashmrtn@utexas.edu>
-Cc: Amir Goldstein <amir73il@gmail.com>, Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>, Josef Bacik <jbacik@fb.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 27, 2017 at 08:23:49AM -0600, Ashlie Martinez wrote:
-> Amir,
-> 
-> Just to throw in what I believe I've found about dm-log-writes (though
-> Josef would know more about this as it's just what I've concluded
-> after looking at  the code): dm-log-writes logs at IO completion,
-> meaning disks that ignore flush operations could exhibit bugs where
-> there are none, and dm-log-writes does synchronous marks though this
-> may not line up with the stream of IO operations (due to buffering)
-> unless you just did a sync. The CrashMonkey team wanted to make
-> something similar to the "mark" operation dm-log-writes has and we
-> concluded that the only place we could guarantee a mark would line up
-> with the stream of IO operations the user had performed was right
-> after a call to sync as that would force cached updates to disk. If
-> you call mark without a sync, then you could insert a mark after a
-> write(2) returns, but before the delayed allocation for that write(2)
-> actually allocates blocks and changes the extent tree on disk.
-> 
+On Thu, Nov 23, 2017 at 08:43:42AM +0200, Amir Goldstein wrote:
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
-Yeah dm-log-writes gladly hands you the loaded gun, it's your job to not shoot
-yourself with it.  This fsx test is specifically set up to only do the mark
-_after_ a successful call of fsync(), which means that the mark will be after
-where we expect our data to be consistent.  Thanks,
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Josef
+> ---
+>  tests/generic/458 | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/tests/generic/458 b/tests/generic/458
+> index 7b408cb..730561f 100755
+> --- a/tests/generic/458
+> +++ b/tests/generic/458
+> @@ -4,6 +4,9 @@
+>  # Regression test for xfs leftover CoW extents after truncate
+>  # and umount
+>  #
+> +# Fixed by commit 3af423b03435 ("xfs: evict CoW fork extents when performing
+> +# finsert/fcollapse")
+> +#
+>  #-----------------------------------------------------------------------
+>  # Copyright (C) 2017 CTERA Networks. All Rights Reserved.
+>  # Author: Amir Goldstein <amir73il@gmail.com>
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
