@@ -1,93 +1,53 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54910 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752452AbdK1HwW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 28 Nov 2017 02:52:22 -0500
-Date: Tue, 28 Nov 2017 15:52:15 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4] fstests: filter readonly mount error messages
-Message-ID: <20171128075215.GG2749@eguan.usersys.redhat.com>
-References: <20171123111031.6550-4-eguan@redhat.com>
- <20171124050144.23549-1-eguan@redhat.com>
- <CAOQ4uxgxRxByGHhePr3b4H+W1zEGxUX6Emj9PBzZpEKEs2iHog@mail.gmail.com>
- <20171124103814.gfvxw3ethkcvm6xa@ws.net.home>
- <CAOQ4uxjbnrgJG3PLVV6TvAS-Fjgskms_jWc5-b4DVmLhbVUdFg@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjbnrgJG3PLVV6TvAS-Fjgskms_jWc5-b4DVmLhbVUdFg@mail.gmail.com>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:44294 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752730AbdK1QmA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Nov 2017 11:42:00 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 0/3] Overlayfs orphan index cleanup tests
+Date: Tue, 28 Nov 2017 18:41:59 +0200
+Message-Id: <1511887322-29254-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Karel Zak <kzak@redhat.com>, fstests <fstests@vger.kernel.org>, "Misono, Tomohiro" <misono.tomohiro@jp.fujitsu.com>, linux-xfs <linux-xfs@vger.kernel.org>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Nov 26, 2017 at 10:56:40AM +0200, Amir Goldstein wrote:
-> On Fri, Nov 24, 2017 at 12:38 PM, Karel Zak <kzak@redhat.com> wrote:
-> > On Fri, Nov 24, 2017 at 10:04:33AM +0200, Amir Goldstein wrote:
-> >> [cc: Karel Zak]
-> >>
-> >> On Fri, Nov 24, 2017 at 7:01 AM, Eryu Guan <eguan@redhat.com> wrote:
-> >> > util-linux commit 6dede2f2f7c5 ("libmount: support MS_RDONLY on
-> >> > write-protected devices") changed the error message on read-only
-> >> > block device, and in the failure case printed one line message
-> >> > instead of two (for details please see comments in common/filter),
-> >> > and this change broke generic/050 and overlay/035.
-> >> >
-> >> > Fix it by adding more filter rules to _filter_ro_mount and updating
-> >> > associated .out files to unify the output from both old and new
-> >> > util-linux versions.
-> >> >
-> >> > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> >> > ---
-> >> > v4 (also passed with both old & new util-linux):
-> >> > - add more comments to explain the output differences between util-linux
-> >> >   versions
-> >> > - print out message directly instead of using perl variables
-> >> > - add word "device" to failed ro mount message
-> >>
-> >>
-> >> Eryu,
-> >>
-> >> This looks good and you can take it as an ACK on the series.
-> >>
-> >> I've CC'ed Karel, so maybe he thinks about us fstests guys before making
-> >> these sort of changes again...
-> >
-> > Frankly, we have never promised that things like warning messages (or
-> > another messages) are stable interface. It's fragile to depend on this
-> > stuff...
-> >
-> 
-> I know. No complains. Just wanted to inform you of the downstream
-> ripples.
+Eryu,
 
-Agreed.
+Vivek found a bug with the index nlink accounting of the index feature
+that was introduced in kernel v4.13.
 
-> 
-> >> Thinking out loud, does xfstest even need to use mount program from
-> >> util-linux? Do we ever need anything other than the bare libc mount(2)?
-> >> We need it for -o loop, but that is the exception to the rule.
-> >
-> > Well, I don't think that create a parallel universe is the best
-> > solution.
-> >
-> 
-> I agree. However, xfstest uses 'mount' is a very particular way:
-> - User has to provide both block device and mount point
-> - xfstests already checks that those block device and mount point
->   are not in use in /proc/mounts *before* calling 'mount'
+The bug was there from the first implementation of index and the
+tests I wrote to verify nlink accounting (overlay/033,034) did not
+cover the bug use case.
 
-The problem is it's not a mount-only issue, outputs from other
-util-linux commands and commands from coreutils have been changing over
-time too, we really can't "fork" & maintain a local wrapper all the
-changing pieces. As long as fstests still go with the 'match golden
-image' path, it's not likely to avoid such problems completely. OTOH,
-the output changes are not so frequent (such a change per 3-4 years
-maybe?), I think the maintain burden of filters is much less than
-maintaining local wrappers of such commands.
+The first regression test (overlay/047) demonstrates the effects
+of the bug on end user.
 
-And commands like mount are fs-related, it's better to get them some
-(indirect) test coverage in fstests too, as we test other fs-specific
-userspace tools like xfsprogs, e2fsprogs etc.
+The second regression test (overlay/048) adds the missing test coverage
+of the existing nlink accounting tests.
 
-Thanks,
-Eryu
+The kernel bug was hiding a bug in test overlay/042, so Vivek's
+kernel fix broke the test. The last patch fixes the wrong/broken test.
+
+Amir.
+
+Amir Goldstein (3):
+  overlay: regression test for hardlink breakage after unlink and mount
+  overlay: regression test for orphan index cleanup on mount
+  overlay/042: remove wrong check for empty index
+
+ tests/overlay/042     |   4 --
+ tests/overlay/047     | 107 ++++++++++++++++++++++++++++++++++++++
+ tests/overlay/047.out |  16 ++++++
+ tests/overlay/048     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/048.out |  18 +++++++
+ tests/overlay/group   |   2 +
+ 6 files changed, 284 insertions(+), 4 deletions(-)
+ create mode 100755 tests/overlay/047
+ create mode 100644 tests/overlay/047.out
+ create mode 100755 tests/overlay/048
+ create mode 100644 tests/overlay/048.out
+
+-- 
+2.7.4
+
