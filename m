@@ -1,161 +1,104 @@
-Received: from mx2.suse.de ([195.135.220.15]:49684 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:51032 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752887AbdK0Sta (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 27 Nov 2017 13:49:30 -0500
-From: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Subject: [PATCH v2 3/3] generic/471: Partial direct write test
-Date: Mon, 27 Nov 2017 12:49:20 -0600
-Message-Id: <20171127184920.13864-3-rgoldwyn@suse.de>
-In-Reply-To: <20171127184920.13864-1-rgoldwyn@suse.de>
-References: <20171127184920.13864-1-rgoldwyn@suse.de>
+        id S1751690AbdK1HUa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 28 Nov 2017 02:20:30 -0500
+Date: Tue, 28 Nov 2017 15:20:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2] generic/465: just check the actual read data under
+ dio read/write
+Message-ID: <20171128072028.GF2749@eguan.usersys.redhat.com>
+References: <20171123061417.GR2749@eguan.usersys.redhat.com>
+ <1511750067-5722-1-git-send-email-yangx.jy@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1511750067-5722-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+On Mon, Nov 27, 2017 at 10:34:27AM +0800, Xiao Yang wrote:
+> I got the following message when running generic/465 in ext4 data=journal mode
+> ---------------------------------------------------------------
+> QA output created by 465
+> non-aio dio test
+> encounter an error: block 0 offset 4096, content 62
+> encounter an error: block 0 offset 122880, content 62
+> encounter an error: block 0 offset 274432, content 62
+> encounter an error: block 0 offset 86016, content 62
+> aio-dio test
+> encounter an error: block 0 offset 28672, content 62
+> encounter an error: block 0 offset 12288, content 62
+> encounter an error: block 2 offset 16384, content 62
+> encounter an error: block 1 offset 565248, content 62
+> ---------------------------------------------------------------
+> 
+> In ext4 data=journal mode, direct read will fall back to buffer read, and buffer
+> read doesn't take inode lock, so it doesn't need to wait for the writer to finish
+> first and sees the intermediate inode size and returns data less than 1M.
+> 
+> We can just check the actual read data instead of the whole read buffer.
+> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  src/aio-dio-regress/aio-dio-append-write-read-race.c | 10 +++++-----
+>  1 file changed, 5 insertions(+), 5 deletions(-)
+> 
+> diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> index 8f94d50..eaec784 100644
+> --- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> +++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
+> @@ -43,6 +43,7 @@ struct io_data {
+>  	off_t offset;
+>  	char *buf;
+>  	int use_aio;
+> +	size_t act_sz;
 
-Getting an error midway through a direct write would return an error
-and the error-code is returned in the write() call. However, partial
-data is over-written during the call.
+I think this should be a signed value, as pread returns ssize_t. And
+maybe rename the variable to read_sz? Otherwise looks fine to me. And I
+can do the updates on commit, if there's no further review comments.
 
-This tests simulates the ENOSPC error to check for partial direct
-write consistency.
+Thanks,
+Eryu
 
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-
-Changes since v1:
- - Check for option pwrite -O
- - Create a 200M file instead of multiple 40M files.
-
----
- tests/generic/471     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/471.out |  9 ++++++
- tests/generic/group   |  1 +
- 3 files changed, 100 insertions(+)
- create mode 100755 tests/generic/471
- create mode 100644 tests/generic/471.out
-
-diff --git a/tests/generic/471 b/tests/generic/471
-new file mode 100755
-index 00000000..a7780af1
---- /dev/null
-+++ b/tests/generic/471
-@@ -0,0 +1,90 @@
-+#! /bin/bash
-+# FS QA Test No. 471
-+#
-+# write() to a file opened with O_DIRECT with count > remaining
-+# bytes. In case of a bug, the write returns ENOSPC wheras the
-+# showing no data is written, but the file contents are updated.
-+# Result should be the write should return remaining bytes
-+# (to aligned bytes) instead of ENOSPC error.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/populate
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_odirect
-+_require_xfs_io_command pwrite -O
-+
-+rm -f $seqres.full
-+
-+echo "Reformat with 320M size"
-+umount $SCRATCH_MNT
-+sz_bytes=$((320 * 1024 * 1024))
-+_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+testdir=$SCRATCH_MNT/test-$seq
-+rm -rf $testdir
-+mkdir $testdir
-+sync
-+
-+#Almost fill the filesystem
-+echo "Almost fill the filesystem"
-+$XFS_IO_PROG -f -c "pwrite 0 200M" $testdir/f1 > /dev/null
-+
-+# Create a file using buffered I/O which succeeds only partially
-+$XFS_IO_PROG -f -c "pwrite -w -S 0xaa 0 128M" $testdir/partial
-+
-+# re-write using direct I/O with another pattern using one single buffer, once
-+write_size=`$XFS_IO_PROG -d -c "pwrite -O -S 0xcd -V 1 -b 128M 0 128M" $testdir/partial | awk '/^wrote/ {split($2, bytes, "/"); print bytes[1]}'`
-+if [ -z $write_size ]; then
-+	write_size=0
-+fi
-+
-+# If bug is not fixed, pwrite will return error and but still write data
-+if [ $write_size -gt 0 ]; then
-+	echo "pwrite wrote more than zero bytes."
-+else
-+	echo "pwrite wrote zero bytes"
-+fi
-+
-+# read the partial file to check if data written is of last write
-+$XFS_IO_PROG -c "pread 0 2M -v" $testdir/partial | _filter_xfs_io_unique
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/471.out b/tests/generic/471.out
-new file mode 100644
-index 00000000..e01687c8
---- /dev/null
-+++ b/tests/generic/471.out
-@@ -0,0 +1,9 @@
-+QA output created by 471
-+Reformat with 320M size
-+Almost fill the filesystem
-+pwrite: No space left on device
-+pwrite wrote more than zero bytes.
-+00000000:  cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-+*
-+read 2097152/2097152 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/generic/group b/tests/generic/group
-index 11ccfb01..f4591620 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -473,3 +473,4 @@
- 468 shutdown auto quick metadata
- 469 auto quick
- 470 auto quick
-+471 auto quick rw
--- 
-2.14.2
-
+>  };
+>  
+>  int reader_ready = 0;
+> @@ -57,15 +58,14 @@ static void usage(const char *prog)
+>  static void *reader(void *arg)
+>  {
+>  	struct io_data *data = (struct io_data *)arg;
+> -	int ret;
+>  
+>  	memset(data->buf, 'b', data->blksize);
+>  	reader_ready = 1;
+>  	do {
+> -		ret = pread(data->fd, data->buf, data->blksize, data->offset);
+> -		if (ret < 0)
+> +		data->act_sz = pread(data->fd, data->buf, data->blksize, data->offset);
+> +		if (data->act_sz < 0)
+>  			perror("read file");
+> -	} while (ret <= 0);
+> +	} while (data->act_sz <= 0);
+>  
+>  	return NULL;
+>  }
+> @@ -203,7 +203,7 @@ int main(int argc, char *argv[])
+>  			goto err;
+>  		}
+>  
+> -		for (j = 0; j < blksize; j++) {
+> +		for (j = 0; j < rdata.act_sz; j++) {
+>  			if (rdata.buf[j] != 'a') {
+>  				fail("encounter an error: "
+>  					"block %d offset %d, content %x\n",
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
