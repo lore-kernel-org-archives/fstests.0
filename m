@@ -1,88 +1,128 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:31506 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752643AbdK2Bob (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 Nov 2017 20:44:31 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v3] generic/465: just check the actual read data under dio read/write
-Date: Wed, 29 Nov 2017 09:44:17 +0800
-Message-ID: <1511919857-21458-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20171128072028.GF2749@eguan.usersys.redhat.com>
-References: <20171128072028.GF2749@eguan.usersys.redhat.com>
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:43552 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751368AbdK2Dda (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 Nov 2017 22:33:30 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20171128223308.GC21412@magnolia>
+References: <1504638680-25682-1-git-send-email-amir73il@gmail.com>
+ <1504638680-25682-11-git-send-email-amir73il@gmail.com> <CAOQ4uxi_SjKCJ97Knvh4S6UiD3jskHEqDja7wwc+-mXp4CNbEw@mail.gmail.com>
+ <20171127150439.i4tpt4yhooxnoaiz@destiny> <CAOQ4uxiGryFy7GLZUa0EWcbT+50cMfBb8a2dYa1mZ7tEf+UURg@mail.gmail.com>
+ <20171128172152.ktvpnwv233govfwl@destiny> <CAOQ4uxgeKdZnxXcvt10MG2kT4PTZ4eZH+-v2R0zPJXTcRvONeQ@mail.gmail.com>
+ <20171128200035.26kqhetxtemnm7z4@destiny> <CAOQ4uxh2OX9Lbnauv-ip5GC_8oCJ38hYsjjvp0+JFGYLqRk7nw@mail.gmail.com>
+ <CAOQ4uxhQu-1AK71zg4Ce0cJd+xRt3Gf9zMMVb=Rs00zFuWA3hQ@mail.gmail.com> <20171128223308.GC21412@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 29 Nov 2017 05:33:28 +0200
+Message-ID: <CAOQ4uxhj0-SBO_6cORsdJURmyrwvv_nxBRhKjMAb-PvxyeU6ew@mail.gmail.com>
+Subject: Re: [PATCH v3 10/13] fstests: crash consistency fsx test using dm-log-writes
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Josef Bacik <jbacik@fb.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
 List-ID: <fstests@vger.kernel.org>
 
-I got the following message when running generic/465 in ext4 data=journal mode
----------------------------------------------------------------
-QA output created by 465
-non-aio dio test
-encounter an error: block 0 offset 4096, content 62
-encounter an error: block 0 offset 122880, content 62
-encounter an error: block 0 offset 274432, content 62
-encounter an error: block 0 offset 86016, content 62
-aio-dio test
-encounter an error: block 0 offset 28672, content 62
-encounter an error: block 0 offset 12288, content 62
-encounter an error: block 2 offset 16384, content 62
-encounter an error: block 1 offset 565248, content 62
----------------------------------------------------------------
+On Wed, Nov 29, 2017 at 12:33 AM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> On Tue, Nov 28, 2017 at 11:17:01PM +0200, Amir Goldstein wrote:
+[...]
+>> Well, what do you know.
+>> xfs crashed and burned after 18 rounds of 455 on test partition.
+>> Same check fs error I blamed dm-log-writes for.
+>>
+>> Darrick,
+>>
+>> Attached the modified 455 test which runs fsx on test partition
+>> and full log (+ dmesg with nothing of interest AFAICT).
+>> xfs code is 4.14.0-rc8 + your patch
+>> "xfs: log recovery should replay deferred ops in order"
+>>
+>> The test was run on a 100G partition on a spinning disk.
+>>
+>> Let me know what you think.
+>
+> I didn't even get /that/ far; with 4.15-rc1 and a vanilla g/455 I see
+> immediately:
 
-In ext4 data=journal mode, direct read will fall back to buffer read, and buffer
-read doesn't take inode lock, so it doesn't need to wait for the writer to finish
-first and sees the intermediate inode size and returns data less than 1M.
+You mean vanilla g/457?
 
-We can just check the actual read data instead of the whole read buffer.
+>
+> [18395.236285] run fstests generic/457 at 2017-11-28 14:15:49
+> [18395.561112] XFS (sdf): Unmounting Filesystem
+> [18395.752713] XFS (sdf): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [18395.753469] XFS (sdf): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [18395.754259] XFS (sdf): Mounting V5 Filesystem
+> [18395.757525] XFS (sdf): Ending clean mount
+> [18395.796992] XFS (sdf): Unmounting Filesystem
+> [18395.949561] XFS (dm-0): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [18395.950316] XFS (dm-0): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [18395.951103] XFS (dm-0): Mounting V5 Filesystem
+> [18395.954946] XFS (dm-0): Ending clean mount
+> [18396.132701] XFS (dm-0): Unmounting Filesystem
+> [18396.309939] XFS (sdf): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [18396.310913] XFS (sdf): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [18396.311798] XFS (sdf): Mounting V5 Filesystem
+> [18396.330304] XFS (sdf): Starting recovery (logdev: internal)
+> [18396.334996] XFS (sdf): Metadata corruption detected at xfs_inode_buf_verify+0xc4/0x330 [xfs], xfs_inode block 0x80
+> [18396.336389] XFS (sdf): Unmount and run xfs_repair
+> [18396.336945] XFS (sdf): First 64 bytes of corrupted metadata buffer:
+> [18396.337679] ffffc90004080000: 00 4e 41 ed 03 01 00 00 00 00 00 00 00 00 00 00  .NA.............
+> [18396.338647] ffffc90004080010: 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00 00  ................
+> [18396.339576] ffffc90004080020: 00 00 00 00 00 00 00 00 5a 1d e0 16 0b 69 8a 10  ........Z....i..
+> [18396.340341] ffffc90004080030: 5a 1d e0 16 0b 69 8a 10 00 00 00 00 00 00 00 06  Z....i..........
+> [18396.341091] XFS (sdf): bad inode magic/vsn daddr 128 #0 (magic=4e)
+> [18396.341754] XFS (sdf): metadata I/O error: block 0x80 ("xlog_recover_do..(read#2)") error 117 numblks 32
+> [18396.343131] XFS (sdf): log mount/recovery failed: error -117
+> [18396.343852] XFS (sdf): log mount failed
+>
+> Off by one in the inode verifier... am I supposed to have Josef's patch?
+>
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- src/aio-dio-regress/aio-dio-append-write-read-race.c | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+I donno. Josef's patch makes sense, but it only matters for cleaning
+logdev page cache
+from stale data in between 2 different runs
 
-diff --git a/src/aio-dio-regress/aio-dio-append-write-read-race.c b/src/aio-dio-regress/aio-dio-append-write-read-race.c
-index 8f94d50..7805af1 100644
---- a/src/aio-dio-regress/aio-dio-append-write-read-race.c
-+++ b/src/aio-dio-regress/aio-dio-append-write-read-race.c
-@@ -43,6 +43,7 @@ struct io_data {
- 	off_t offset;
- 	char *buf;
- 	int use_aio;
-+	int read_sz;
- };
- 
- int reader_ready = 0;
-@@ -57,15 +58,14 @@ static void usage(const char *prog)
- static void *reader(void *arg)
- {
- 	struct io_data *data = (struct io_data *)arg;
--	int ret;
- 
- 	memset(data->buf, 'b', data->blksize);
- 	reader_ready = 1;
- 	do {
--		ret = pread(data->fd, data->buf, data->blksize, data->offset);
--		if (ret < 0)
-+		data->read_sz = pread(data->fd, data->buf, data->blksize, data->offset);
-+		if (data->read_sz < 0)
- 			perror("read file");
--	} while (ret <= 0);
-+	} while (data->read_sz <= 0);
- 
- 	return NULL;
- }
-@@ -203,7 +203,7 @@ int main(int argc, char *argv[])
- 			goto err;
- 		}
- 
--		for (j = 0; j < blksize; j++) {
-+		for (j = 0; j < rdata.read_sz; j++) {
- 			if (rdata.buf[j] != 'a') {
- 				fail("encounter an error: "
- 					"block %d offset %d, content %x\n",
--- 
-1.8.3.1
+> Also, fwiw I don't see any test failures (or interesting output) with
+> your modified 455:
+>
+> [19344.527290] run fstests generic/455 at 2017-11-28 14:31:38
+> [19344.948061] XFS (pmem4): Unmounting Filesystem
+> [19345.098299] XFS (dm-0): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [19345.099328] XFS (dm-0): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [19345.100427] XFS (dm-0): Mounting V5 Filesystem
+> [19345.105724] XFS (dm-0): Ending clean mount
+> [19345.476248] XFS (dm-0): Unmounting Filesystem
+> [19346.055840] XFS (pmem4): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [19346.057092] XFS (pmem4): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [19346.057883] XFS (pmem4): Mounting V5 Filesystem
+> [19346.059640] XFS (pmem4): Ending clean mount
+> [19346.084019] XFS (pmem4): Unmounting Filesystem
+> [19346.492297] XFS (pmem4): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [19346.492950] XFS (pmem4): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [19346.493865] XFS (pmem4): Mounting V5 Filesystem
+> [19346.495732] XFS (pmem4): Ending clean mount
+> [19346.556181] XFS (pmem4): Unmounting Filesystem
+> [19346.780951] XFS (pmem3): Unmounting Filesystem
+> [19346.857051] XFS (pmem3): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [19346.858352] XFS (pmem3): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [19346.859053] XFS (pmem3): Mounting V5 Filesystem
+> [19346.861319] XFS (pmem3): Ending clean mount
+> [19346.940162] XFS (pmem3): Unmounting Filesystem
+> [19346.980932] XFS (pmem3): EXPERIMENTAL reverse mapping btree feature enabled. Use at your own risk!
+> [19346.981640] XFS (pmem3): EXPERIMENTAL reflink feature enabled. Use at your own risk!
+> [19346.982359] XFS (pmem3): Mounting V5 Filesystem
+> [19346.984765] XFS (pmem3): Ending clean mount
+> [19347.204449] XFS (pmem3): Unmounting Filesystem
+>
+> I think it's supposed to cycle more than that, right?
+>
 
+Usually yes. This time around I got it after 18 rounds, but sometimes
+it takes more than 100 rounds.
+Modified 455 is much faster because it skips all the replays, so I can
+expedite the testing.
+Also, since most of the failures I have seen were on the slow spinning
+disk, not sure you would get
+them on pmem device.
 
+I'll continue to bisect.
 
+Amir.
