@@ -1,170 +1,38 @@
-Received: from mx2.suse.de ([195.135.220.15]:45729 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753719AbdK2QeJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 29 Nov 2017 11:34:09 -0500
-From: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Subject: [PATCH 3/3] generic/471: Partial direct write test
-Date: Wed, 29 Nov 2017 10:33:58 -0600
-Message-Id: <20171129163358.19759-3-rgoldwyn@suse.de>
-In-Reply-To: <20171129163358.19759-1-rgoldwyn@suse.de>
-References: <20171129163358.19759-1-rgoldwyn@suse.de>
+Received: from mail-it0-f65.google.com ([209.85.214.65]:36169 "EHLO
+        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752638AbdK2USH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Nov 2017 15:18:07 -0500
+Received: by mail-it0-f65.google.com with SMTP id d16so5704555itj.1
+        for <fstests@vger.kernel.org>; Wed, 29 Nov 2017 12:18:07 -0800 (PST)
+Date: Wed, 29 Nov 2017 12:18:04 -0800
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: [xfstests-bld PATCH] kernel-configs: add 4.14 configs
+Message-ID: <20171129201804.GA65846@gmail.com>
+References: <20171113213752.18123-1-ebiggers3@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171113213752.18123-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: darrick.wong@oracle.com, eguan@redhat.com
-Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+On Mon, Nov 13, 2017 at 01:37:52PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> Enabled the following new options:
+> 
+>     CONFIG_REFCOUNT_FULL=y
+>     CONFIG_UBIFS_FS_ENCRYPTION=y
+>     CONFIG_FORTIFY_SOURCE=y
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  kernel-configs/i386-config-4.14   | 169 ++++++++++++++++++++++++++++++++++++
+>  kernel-configs/x86_64-config-4.14 | 174 ++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 343 insertions(+)
+>  create mode 100644 kernel-configs/i386-config-4.14
+>  create mode 100644 kernel-configs/x86_64-config-4.14
 
-Getting an error midway through a direct write would return an error
-and the error-code is returned in the write() call. However, partial
-data is over-written during the call.
-
-This tests simulates the ENOSPC error to check for partial direct
-write consistency.
-
-Changes since v1:
- - Check for option pwrite -O
- - Create a 200M file instead of multiple 40M files.
-
-Changes since v2:
- - new leaner look ;)
- - use _fill_fs after reserving some space to create an almost full FS
- - _require_scratch for reseting system
-
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
----
- tests/generic/471     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/471.out |  9 +++++
- tests/generic/group   |  1 +
- 3 files changed, 105 insertions(+)
- create mode 100755 tests/generic/471
- create mode 100644 tests/generic/471.out
-
-diff --git a/tests/generic/471 b/tests/generic/471
-new file mode 100755
-index 00000000..51723548
---- /dev/null
-+++ b/tests/generic/471
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# FS QA Test No. 471
-+#
-+# write() to a file opened with O_DIRECT with count > remaining
-+# bytes. In case of a bug, the write returns ENOSPC wheras the
-+# showing no data is written, but the file contents are updated.
-+# Result should be the write should return remaining bytes
-+# (to aligned bytes) instead of ENOSPC error.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/populate
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_odirect
-+_require_xfs_io_command pwrite -O
-+_require_scratch
-+
-+rm -f $seqres.full
-+
-+echo "Reformat with 320M size"
-+sz_bytes=$((320 * 1024 * 1024))
-+_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+testdir=$SCRATCH_MNT/$seq
-+mkdir $testdir
-+
-+# Reserve some space to remove later
-+$XFS_IO_PROG -f -c "pwrite 0 2M" $testdir/reserve > /dev/null
-+
-+mkdir $testdir/fillspace
-+echo "Fill the filesystem"
-+_fill_fs $(( 1024 * 1024 * 1024 )) $testdir/fillspace 4096 0 > /dev/null 2>&1
-+
-+# Remove the reserve file to work on almost full filesystem
-+rm $testdir/reserve
-+sync
-+
-+# Create a file using buffered I/O which succeeds only partially
-+$XFS_IO_PROG -f -c "pwrite -w -S 0xaa 0 4M" $testdir/partial
-+
-+# re-write using direct I/O with another pattern using one single buffer, once
-+write_size=`$XFS_IO_PROG -d -c "pwrite -O -S 0xbb -V 1 -b 4M 0 4M" $testdir/partial | awk '/^wrote/ {split($2, bytes, "/"); print bytes[1]}'`
-+if [ -z $write_size ]; then
-+	write_size=0
-+fi
-+
-+# If bug is not fixed, pwrite will return error and but still write data
-+if [ $write_size -gt 0 ]; then
-+	echo "pwrite wrote more than zero bytes."
-+else
-+	echo "pwrite wrote zero bytes"
-+fi
-+
-+# read the partial file to check if data written is of last write
-+$XFS_IO_PROG -c "pread 0 1M -v" $testdir/partial | _filter_xfs_io_unique
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/471.out b/tests/generic/471.out
-new file mode 100644
-index 00000000..b846eb32
---- /dev/null
-+++ b/tests/generic/471.out
-@@ -0,0 +1,9 @@
-+QA output created by 471
-+Reformat with 320M size
-+Fill the filesystem
-+pwrite: No space left on device
-+pwrite wrote more than zero bytes.
-+00000000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
-+*
-+read 1048576/1048576 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/generic/group b/tests/generic/group
-index cf8529ea..160e0e7b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -473,3 +473,4 @@
- 468 shutdown auto quick metadata
- 469 auto quick
- 470 auto quick rw
-+471 auto quick rw
--- 
-2.14.2
-
+Ping
