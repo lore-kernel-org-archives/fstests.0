@@ -1,63 +1,60 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53546 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57736 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932287AbdK2KZa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 29 Nov 2017 05:25:30 -0500
-Date: Wed, 29 Nov 2017 18:25:28 +0800
+        id S1752804AbdK2Kqa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 29 Nov 2017 05:46:30 -0500
+Date: Wed, 29 Nov 2017 18:46:28 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 2/3] generic/470: Test RWF_NOWAIT
-Message-ID: <20171129102528.GQ2749@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v2 3/3] generic/471: Partial direct write test
+Message-ID: <20171129104628.GR2749@eguan.usersys.redhat.com>
 References: <20171127184920.13864-1-rgoldwyn@suse.de>
- <20171127184920.13864-2-rgoldwyn@suse.de>
+ <20171127184920.13864-3-rgoldwyn@suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171127184920.13864-2-rgoldwyn@suse.de>
+In-Reply-To: <20171127184920.13864-3-rgoldwyn@suse.de>
 Sender: fstests-owner@vger.kernel.org
 To: Goldwyn Rodrigues <rgoldwyn@suse.de>
 Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 27, 2017 at 12:49:19PM -0600, Goldwyn Rodrigues wrote:
+On Mon, Nov 27, 2017 at 12:49:20PM -0600, Goldwyn Rodrigues wrote:
 > From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 > 
-> Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
-> on a new file since it requires block allocation.
+> Getting an error midway through a direct write would return an error
+> and the error-code is returned in the write() call. However, partial
+> data is over-written during the call.
 > 
-> It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
-> This should succeed.
-> 
-> Finally, read the contents to make sure the overwrite is successful.
+> This tests simulates the ENOSPC error to check for partial direct
+> write consistency.
 > 
 > Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
 > 
 > Changes since v1:
->  - Fix testdir name
->  - use of $XFS_IO_PROG instead of xfs_io
->  - check pwrite accepts -N
+>  - Check for option pwrite -O
+>  - Create a 200M file instead of multiple 40M files.
 > 
 > ---
->  tests/generic/470     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/470.out | 13 +++++++++
+>  tests/generic/471     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/471.out |  9 ++++++
 >  tests/generic/group   |  1 +
->  3 files changed, 88 insertions(+)
->  create mode 100755 tests/generic/470
->  create mode 100644 tests/generic/470.out
+>  3 files changed, 100 insertions(+)
+>  create mode 100755 tests/generic/471
+>  create mode 100644 tests/generic/471.out
 > 
-> diff --git a/tests/generic/470 b/tests/generic/470
+> diff --git a/tests/generic/471 b/tests/generic/471
 > new file mode 100755
-> index 00000000..7439dfd3
+> index 00000000..a7780af1
 > --- /dev/null
-> +++ b/tests/generic/470
-> @@ -0,0 +1,74 @@
+> +++ b/tests/generic/471
+> @@ -0,0 +1,90 @@
 > +#! /bin/bash
-> +# FS QA Test No. 470
+> +# FS QA Test No. 471
 > +#
 > +# write() to a file opened with O_DIRECT with count > remaining
-> +# bytes. Result should be remaining bytes (to aligned bytes) instead
-> +# of ENOSPC error
-
-Wrong test description? It seems for generic/471.
-
+> +# bytes. In case of a bug, the write returns ENOSPC wheras the
+> +# showing no data is written, but the file contents are updated.
+> +# Result should be the write should return remaining bytes
+> +# (to aligned bytes) instead of ENOSPC error.
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
@@ -88,7 +85,7 @@ Wrong test description? It seems for generic/471.
 > +_cleanup()
 > +{
 > +    cd /
-> +    rm -rf $tmp.* $testdir
+> +    rm -rf $tmp.* $testdir1
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -100,77 +97,99 @@ Wrong test description? It seems for generic/471.
 > +# real QA test starts here
 > +_supported_os Linux
 > +_require_odirect
-> +_require_scratch
 
-I think this test can be run on $TEST_DEV directly, so _require_test
-here and do all the tests in $TEST_DIR would be fine.
+Missed _require_scratch
 
-> +_require_xfs_io_command pwrite -N
+> +_require_xfs_io_command pwrite -O
 > +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount > /dev/null 2>&1
+> +rm -f $seqres.full
+> +
+> +echo "Reformat with 320M size"
+> +umount $SCRATCH_MNT
+
+No need to umount $SCRATCH_MNT, _require_scratch will do it for you.
+
+> +sz_bytes=$((320 * 1024 * 1024))
+> +_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
 > +testdir=$SCRATCH_MNT/test-$seq
+> +rm -rf $testdir
+
+No need to remove $testdir here, scratch_dev is freshly created.
+
 > +mkdir $testdir
+> +sync
 > +
-> +# Create a file with pwrite nowait (will fail with EAGAIN)
-> +$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 128M 0 128M" $testdir/f1
+> +#Almost fill the filesystem
+   ^^ add a space after '#' for comments
+
+> +echo "Almost fill the filesystem"
+> +$XFS_IO_PROG -f -c "pwrite 0 200M" $testdir/f1 > /dev/null
 > +
-> +# Write the file without nowait
-> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 128M 0 128M" $testdir/f1 | _filter_xfs_io
-
-Hmm, any reason using 128M block size? I'm afraid it will cause problems
-when memory is low.
-
+> +# Create a file using buffered I/O which succeeds only partially
+> +$XFS_IO_PROG -f -c "pwrite -w -S 0xaa 0 128M" $testdir/partial
 > +
-> +time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 4M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
-> +if (( $(echo "$time_taken < 0.05" | bc -l) )); then
-> +	echo "RWF_NOWAIT time is within limits."
-> +else
-> +	echo "RWF_NOWAIT took $time_taken seconds"
-> +fi
+> +# re-write using direct I/O with another pattern using one single buffer, once
+> +write_size=`$XFS_IO_PROG -d -c "pwrite -O -S 0xcd -V 1 -b 128M 0 128M" $testdir/partial | awk '/^wrote/ {split($2, bytes, "/"); print bytes[1]}'`
 
-This looks fragile to me, at least this needs a big comment.
+Hmm, I can see that "-O" requires bigger block size in this case. Then
+how about reserving some space first and fill the rest then remove the
+reserved file? So we have a fixed amount of space to do the test. e.g.
 
-> +
-> +$XFS_IO_PROG -c "pread -v 0 128M" $testdir/f1 | _filter_xfs_io_unique
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/470.out b/tests/generic/470.out
-> new file mode 100644
-> index 00000000..6d47b219
-> --- /dev/null
-> +++ b/tests/generic/470.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 470
-> +pwrite: Resource temporarily unavailable
-> +wrote 134217728/134217728 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +RWF_NOWAIT time is within limits.
-> +00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +*
-> +00400000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
-> +*
-> +00500000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +*
-> +read 134217728/134217728 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 6c3bb03a..11ccfb01 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -472,3 +472,4 @@
->  467 auto quick exportfs
->  468 shutdown auto quick metadata
->  469 auto quick
-> +470 auto quick
-
-Perhaps 'rw' group too.
+# reserve 2m space first
+$XFS_IO_PROG -fc "pwrite 0 2m" $testdir/reserve
+# fill the rest of the fs
+$XFS_IO_PROG -fc "pwrite 0 320m" $testdir/fill
+# remove the reserve file to get space free
+rm -f $testdir/reserve
+...
+$XFS_IO_PROG -dc "pwrite -O -S 0xcd -V 1 -b 4m 0 4m" $testdir/partial
+...
 
 Thanks,
 Eryu
 
+> +if [ -z $write_size ]; then
+> +	write_size=0
+> +fi
+> +
+> +# If bug is not fixed, pwrite will return error and but still write data
+> +if [ $write_size -gt 0 ]; then
+> +	echo "pwrite wrote more than zero bytes."
+> +else
+> +	echo "pwrite wrote zero bytes"
+> +fi
+> +
+> +# read the partial file to check if data written is of last write
+> +$XFS_IO_PROG -c "pread 0 2M -v" $testdir/partial | _filter_xfs_io_unique
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/471.out b/tests/generic/471.out
+> new file mode 100644
+> index 00000000..e01687c8
+> --- /dev/null
+> +++ b/tests/generic/471.out
+> @@ -0,0 +1,9 @@
+> +QA output created by 471
+> +Reformat with 320M size
+> +Almost fill the filesystem
+> +pwrite: No space left on device
+> +pwrite wrote more than zero bytes.
+> +00000000:  cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
+> +*
+> +read 2097152/2097152 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 11ccfb01..f4591620 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -473,3 +473,4 @@
+>  468 shutdown auto quick metadata
+>  469 auto quick
+>  470 auto quick
+> +471 auto quick rw
 > -- 
 > 2.14.2
 > 
