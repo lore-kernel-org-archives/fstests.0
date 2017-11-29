@@ -1,199 +1,142 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57736 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752804AbdK2Kqa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 29 Nov 2017 05:46:30 -0500
-Date: Wed, 29 Nov 2017 18:46:28 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v2 3/3] generic/471: Partial direct write test
-Message-ID: <20171129104628.GR2749@eguan.usersys.redhat.com>
-References: <20171127184920.13864-1-rgoldwyn@suse.de>
- <20171127184920.13864-3-rgoldwyn@suse.de>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:27829 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752660AbdK2MCj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 29 Nov 2017 07:02:39 -0500
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 1477B487F179
+        for <fstests@vger.kernel.org>; Wed, 29 Nov 2017 20:02:34 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] generic/473: test return EBUSY from BLKRRPART for mounted whole-dev
+Date: Wed, 29 Nov 2017 20:02:26 +0800
+Message-ID: <1511956946-16667-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171127184920.13864-3-rgoldwyn@suse.de>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 27, 2017 at 12:49:20PM -0600, Goldwyn Rodrigues wrote:
-> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> 
-> Getting an error midway through a direct write would return an error
-> and the error-code is returned in the write() call. However, partial
-> data is over-written during the call.
-> 
-> This tests simulates the ENOSPC error to check for partial direct
-> write consistency.
-> 
-> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> 
-> Changes since v1:
->  - Check for option pwrite -O
->  - Create a 200M file instead of multiple 40M files.
-> 
-> ---
->  tests/generic/471     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/471.out |  9 ++++++
->  tests/generic/group   |  1 +
->  3 files changed, 100 insertions(+)
->  create mode 100755 tests/generic/471
->  create mode 100644 tests/generic/471.out
-> 
-> diff --git a/tests/generic/471 b/tests/generic/471
-> new file mode 100755
-> index 00000000..a7780af1
-> --- /dev/null
-> +++ b/tests/generic/471
-> @@ -0,0 +1,90 @@
-> +#! /bin/bash
-> +# FS QA Test No. 471
-> +#
-> +# write() to a file opened with O_DIRECT with count > remaining
-> +# bytes. In case of a bug, the write returns ENOSPC wheras the
-> +# showing no data is written, but the file contents are updated.
-> +# Result should be the write should return remaining bytes
-> +# (to aligned bytes) instead of ENOSPC error.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -rf $tmp.* $testdir1
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/populate
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_odirect
+If the entire block device is formatted with a filesystem and
+mounted, running "blockdev --rereadpt" should fail and return
+EBUSY instead of pass.
 
-Missed _require_scratch
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/generic/473     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/473.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/generic/473
+ create mode 100644 tests/generic/473.out
 
-> +_require_xfs_io_command pwrite -O
-> +
-> +rm -f $seqres.full
-> +
-> +echo "Reformat with 320M size"
-> +umount $SCRATCH_MNT
+diff --git a/tests/generic/473 b/tests/generic/473
+new file mode 100755
+index 0000000..d7998cd
+--- /dev/null
++++ b/tests/generic/473
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# FS QA Test No. 473
++#
++# Regression test for commit:
++# 77032ca ("Return EBUSY from BLKRRPART for mounted whole-dev fs")
++#
++# If the entire block device is formatted with a filesystem and
++# mounted, running "blockdev --rereadpt" should fail and return
++# EBUSY.  On buggy kernel, it passes unexpectedly.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 FUJITSU LIMITED. All rights reserved.
++# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmpdir=`mktemp -d`
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
++
++_cleanup()
++{
++	# Umount
++	$UMOUNT_PROG $tmpdir >>$seqres.full 2>&1
++	# Destroy device
++        _put_scsi_debug_dev
++	rm -rf $tmpdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/scsi_debug
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_os Linux
++_require_scsi_debug
++
++# Create and format
++test_dev=`_get_scsi_debug_dev`
++_mkfs_dev $test_dev >>$seqres.full 2>&1
++
++# Mount and check mounted whole-dev
++_mount $test_dev $tmpdir
++
++out=$(blockdev --rereadpt $test_dev 2>&1)
++res=$?
++
++echo $out | grep -q "Unknown command" && \
++	_notrun "blockdev --rereadpt was not supported"
++
++[ $res -eq 0 ] && _fail "blockdev --rereadpt passed when checking mounted whole-dev"
++
++echo $out | grep -q "Device or resource busy" || \
++	_fail "blockdev --rereadpt returned unexpected error when checking mounted whole-dev"
++
++echo $out >> $seqres.full
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/473.out b/tests/generic/473.out
+new file mode 100644
+index 0000000..854fbcd
+--- /dev/null
++++ b/tests/generic/473.out
+@@ -0,0 +1,2 @@
++QA output created by 473
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 6c3bb03..54b9404 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -472,3 +472,4 @@
+ 467 auto quick exportfs
+ 468 shutdown auto quick metadata
+ 469 auto quick
++473 auto quick blockdev
+-- 
+1.8.3.1
 
-No need to umount $SCRATCH_MNT, _require_scratch will do it for you.
 
-> +sz_bytes=$((320 * 1024 * 1024))
-> +_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +testdir=$SCRATCH_MNT/test-$seq
-> +rm -rf $testdir
 
-No need to remove $testdir here, scratch_dev is freshly created.
-
-> +mkdir $testdir
-> +sync
-> +
-> +#Almost fill the filesystem
-   ^^ add a space after '#' for comments
-
-> +echo "Almost fill the filesystem"
-> +$XFS_IO_PROG -f -c "pwrite 0 200M" $testdir/f1 > /dev/null
-> +
-> +# Create a file using buffered I/O which succeeds only partially
-> +$XFS_IO_PROG -f -c "pwrite -w -S 0xaa 0 128M" $testdir/partial
-> +
-> +# re-write using direct I/O with another pattern using one single buffer, once
-> +write_size=`$XFS_IO_PROG -d -c "pwrite -O -S 0xcd -V 1 -b 128M 0 128M" $testdir/partial | awk '/^wrote/ {split($2, bytes, "/"); print bytes[1]}'`
-
-Hmm, I can see that "-O" requires bigger block size in this case. Then
-how about reserving some space first and fill the rest then remove the
-reserved file? So we have a fixed amount of space to do the test. e.g.
-
-# reserve 2m space first
-$XFS_IO_PROG -fc "pwrite 0 2m" $testdir/reserve
-# fill the rest of the fs
-$XFS_IO_PROG -fc "pwrite 0 320m" $testdir/fill
-# remove the reserve file to get space free
-rm -f $testdir/reserve
-...
-$XFS_IO_PROG -dc "pwrite -O -S 0xcd -V 1 -b 4m 0 4m" $testdir/partial
-...
-
-Thanks,
-Eryu
-
-> +if [ -z $write_size ]; then
-> +	write_size=0
-> +fi
-> +
-> +# If bug is not fixed, pwrite will return error and but still write data
-> +if [ $write_size -gt 0 ]; then
-> +	echo "pwrite wrote more than zero bytes."
-> +else
-> +	echo "pwrite wrote zero bytes"
-> +fi
-> +
-> +# read the partial file to check if data written is of last write
-> +$XFS_IO_PROG -c "pread 0 2M -v" $testdir/partial | _filter_xfs_io_unique
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/471.out b/tests/generic/471.out
-> new file mode 100644
-> index 00000000..e01687c8
-> --- /dev/null
-> +++ b/tests/generic/471.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 471
-> +Reformat with 320M size
-> +Almost fill the filesystem
-> +pwrite: No space left on device
-> +pwrite wrote more than zero bytes.
-> +00000000:  cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> +*
-> +read 2097152/2097152 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 11ccfb01..f4591620 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -473,3 +473,4 @@
->  468 shutdown auto quick metadata
->  469 auto quick
->  470 auto quick
-> +471 auto quick rw
-> -- 
-> 2.14.2
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
