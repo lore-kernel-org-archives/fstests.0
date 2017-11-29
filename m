@@ -1,142 +1,71 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:27829 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752660AbdK2MCj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 29 Nov 2017 07:02:39 -0500
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-        by cn.fujitsu.com (Postfix) with ESMTP id 1477B487F179
-        for <fstests@vger.kernel.org>; Wed, 29 Nov 2017 20:02:34 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/473: test return EBUSY from BLKRRPART for mounted whole-dev
-Date: Wed, 29 Nov 2017 20:02:26 +0800
-Message-ID: <1511956946-16667-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx2.suse.de ([195.135.220.15]:45704 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753310AbdK2QeF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 29 Nov 2017 11:34:05 -0500
+From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Subject: [PATCH 1/3] Check pwrite parameters
+Date: Wed, 29 Nov 2017 10:33:56 -0600
+Message-Id: <20171129163358.19759-1-rgoldwyn@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: darrick.wong@oracle.com, eguan@redhat.com
+Cc: fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-If the entire block device is formatted with a filesystem and
-mounted, running "blockdev --rereadpt" should fail and return
-EBUSY instead of pass.
+From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+There are some parameters added with xfs_io. Check if the pwrite
+parameters are available. For some cases, xfs_io now returns "command
+-%c not supported", so added "not supported" to count as error.
+
+Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+
+Change since v2:
+ - More comments
+ - opts to become local variable
+
 ---
- tests/generic/473     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/473.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/generic/473
- create mode 100644 tests/generic/473.out
+ common/rc | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/473 b/tests/generic/473
-new file mode 100755
-index 0000000..d7998cd
---- /dev/null
-+++ b/tests/generic/473
-@@ -0,0 +1,83 @@
-+#! /bin/bash
-+# FS QA Test No. 473
-+#
-+# Regression test for commit:
-+# 77032ca ("Return EBUSY from BLKRRPART for mounted whole-dev fs")
-+#
-+# If the entire block device is formatted with a filesystem and
-+# mounted, running "blockdev --rereadpt" should fail and return
-+# EBUSY.  On buggy kernel, it passes unexpectedly.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 FUJITSU LIMITED. All rights reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmpdir=`mktemp -d`
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	# Umount
-+	$UMOUNT_PROG $tmpdir >>$seqres.full 2>&1
-+	# Destroy device
-+        _put_scsi_debug_dev
-+	rm -rf $tmpdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/scsi_debug
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scsi_debug
-+
-+# Create and format
-+test_dev=`_get_scsi_debug_dev`
-+_mkfs_dev $test_dev >>$seqres.full 2>&1
-+
-+# Mount and check mounted whole-dev
-+_mount $test_dev $tmpdir
-+
-+out=$(blockdev --rereadpt $test_dev 2>&1)
-+res=$?
-+
-+echo $out | grep -q "Unknown command" && \
-+	_notrun "blockdev --rereadpt was not supported"
-+
-+[ $res -eq 0 ] && _fail "blockdev --rereadpt passed when checking mounted whole-dev"
-+
-+echo $out | grep -q "Device or resource busy" || \
-+	_fail "blockdev --rereadpt returned unexpected error when checking mounted whole-dev"
-+
-+echo $out >> $seqres.full
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/473.out b/tests/generic/473.out
-new file mode 100644
-index 0000000..854fbcd
---- /dev/null
-+++ b/tests/generic/473.out
-@@ -0,0 +1,2 @@
-+QA output created by 473
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 6c3bb03..54b9404 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -472,3 +472,4 @@
- 467 auto quick exportfs
- 468 shutdown auto quick metadata
- 469 auto quick
-+473 auto quick blockdev
+diff --git a/common/rc b/common/rc
+index 4c053a53..90408b7e 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2035,6 +2035,7 @@ _require_xfs_io_command()
+ 	shift
+ 	local param="$*"
+ 	local param_checked=0
++	local opts=""
+ 
+ 	testfile=$TEST_DIR/$$.xfs_io
+ 	case $command in
+@@ -2079,6 +2080,15 @@ _require_xfs_io_command()
+ 		echo $testio | grep -q "invalid option" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
++	"pwrite")
++		# -N (RWF_NOWAIT) only works with direct I/O writes
++		if [ "$param" == "-N" ]; then
++			opts+=" -d"
++		fi
++		testio=`$XFS_IO_PROG -f $opts -c "pwrite $param 0 1M" \
++			$testfile 2>&1`
++		param_checked=1
++		;;
+ 	"scrub"|"repair")
+ 		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
+ 		echo $testio | grep -q "Inappropriate ioctl" && \
+@@ -2109,7 +2119,9 @@ _require_xfs_io_command()
+ 		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	else
+-		echo $testio | grep -q "invalid option" && \
++		# xfs_io could result in "command %c not supported" if it was
++		# built on kernels not supporting pwritev2() calls
++		echo $testio | grep -q "\(invalid option\|not supported\)" && \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	fi
+ }
 -- 
-1.8.3.1
-
-
+2.14.2
 
