@@ -1,11 +1,11 @@
-Received: from mx2.suse.de ([195.135.220.15]:45709 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:45729 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753719AbdK2QeH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 29 Nov 2017 11:34:07 -0500
+        id S1753719AbdK2QeJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 29 Nov 2017 11:34:09 -0500
 From: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Subject: [PATCH 2/3] generic/470: Test RWF_NOWAIT
-Date: Wed, 29 Nov 2017 10:33:57 -0600
-Message-Id: <20171129163358.19759-2-rgoldwyn@suse.de>
+Subject: [PATCH 3/3] generic/471: Partial direct write test
+Date: Wed, 29 Nov 2017 10:33:58 -0600
+Message-Id: <20171129163358.19759-3-rgoldwyn@suse.de>
 In-Reply-To: <20171129163358.19759-1-rgoldwyn@suse.de>
 References: <20171129163358.19759-1-rgoldwyn@suse.de>
 Sender: fstests-owner@vger.kernel.org
@@ -15,46 +15,45 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
-Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
-on a new file since it requires block allocation.
+Getting an error midway through a direct write would return an error
+and the error-code is returned in the write() call. However, partial
+data is over-written during the call.
 
-It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
-This should succeed.
-
-Finally, read the contents to make sure the overwrite is successful.
-
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+This tests simulates the ENOSPC error to check for partial direct
+write consistency.
 
 Changes since v1:
- - Fix testdir name
- - use of $XFS_IO_PROG instead of xfs_io
- - check pwrite accepts -N
+ - Check for option pwrite -O
+ - Create a 200M file instead of multiple 40M files.
 
 Changes since v2:
- - corrected test description and improved documentation
  - new leaner look ;)
- - rw group
----
- tests/generic/470     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/470.out | 13 +++++++++
- tests/generic/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/generic/470
- create mode 100644 tests/generic/470.out
+ - use _fill_fs after reserving some space to create an almost full FS
+ - _require_scratch for reseting system
 
-diff --git a/tests/generic/470 b/tests/generic/470
+Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+---
+ tests/generic/471     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/471.out |  9 +++++
+ tests/generic/group   |  1 +
+ 3 files changed, 105 insertions(+)
+ create mode 100755 tests/generic/471
+ create mode 100644 tests/generic/471.out
+
+diff --git a/tests/generic/471 b/tests/generic/471
 new file mode 100755
-index 00000000..5580718b
+index 00000000..51723548
 --- /dev/null
-+++ b/tests/generic/470
-@@ -0,0 +1,74 @@
++++ b/tests/generic/471
+@@ -0,0 +1,95 @@
 +#! /bin/bash
-+# FS QA Test No. 470
++# FS QA Test No. 471
 +#
-+# write a file with RWF_NOWAIT and it would fail because there are no
-+# blocks allocated. Create a file with direct I/O and re-write it
-+# using RWF_NOWAIT. I/O should finish within 50 microsecods since
-+# block allocations are already performed.
++# write() to a file opened with O_DIRECT with count > remaining
++# bytes. In case of a bug, the write returns ENOSPC wheras the
++# showing no data is written, but the file contents are updated.
++# Result should be the write should return remaining bytes
++# (to aligned bytes) instead of ENOSPC error.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
@@ -80,6 +79,13 @@ index 00000000..5580718b
 +here=`pwd`
 +tmp=/tmp/$$
 +status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir1
++}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
@@ -90,66 +96,75 @@ index 00000000..5580718b
 +# real QA test starts here
 +_supported_os Linux
 +_require_odirect
-+_require_test
-+_require_xfs_io_command pwrite -N
++_require_xfs_io_command pwrite -O
++_require_scratch
 +
-+# Remove reminiscence of previously run tests
-+testdir=$TEST_DIR/$seq
-+if [ -e $testdir ]; then
-+	rm -Rf $testdir
-+fi
++rm -f $seqres.full
 +
++echo "Reformat with 320M size"
++sz_bytes=$((320 * 1024 * 1024))
++_scratch_mkfs_sized $sz_bytes >> $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++testdir=$SCRATCH_MNT/$seq
 +mkdir $testdir
 +
-+# Create a file with pwrite nowait (will fail with EAGAIN)
-+$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
++# Reserve some space to remove later
++$XFS_IO_PROG -f -c "pwrite 0 2M" $testdir/reserve > /dev/null
 +
-+# Write the file without nowait
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1 | _filter_xfs_io
++mkdir $testdir/fillspace
++echo "Fill the filesystem"
++_fill_fs $(( 1024 * 1024 * 1024 )) $testdir/fillspace 4096 0 > /dev/null 2>&1
 +
-+time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
++# Remove the reserve file to work on almost full filesystem
++rm $testdir/reserve
++sync
 +
-+# RWF_NOWAIT should finish within a short period of time. Anything longer
-+# means it is waiting for something in the kernel which would be a fail.
-+if (( $(echo "$time_taken < 0.05" | bc -l) )); then
-+	echo "RWF_NOWAIT time is within limits."
-+else
-+	echo "RWF_NOWAIT took $time_taken seconds"
++# Create a file using buffered I/O which succeeds only partially
++$XFS_IO_PROG -f -c "pwrite -w -S 0xaa 0 4M" $testdir/partial
++
++# re-write using direct I/O with another pattern using one single buffer, once
++write_size=`$XFS_IO_PROG -d -c "pwrite -O -S 0xbb -V 1 -b 4M 0 4M" $testdir/partial | awk '/^wrote/ {split($2, bytes, "/"); print bytes[1]}'`
++if [ -z $write_size ]; then
++	write_size=0
 +fi
 +
-+$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
++# If bug is not fixed, pwrite will return error and but still write data
++if [ $write_size -gt 0 ]; then
++	echo "pwrite wrote more than zero bytes."
++else
++	echo "pwrite wrote zero bytes"
++fi
++
++# read the partial file to check if data written is of last write
++$XFS_IO_PROG -c "pread 0 1M -v" $testdir/partial | _filter_xfs_io_unique
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/470.out b/tests/generic/470.out
+diff --git a/tests/generic/471.out b/tests/generic/471.out
 new file mode 100644
-index 00000000..e46622cb
+index 00000000..b846eb32
 --- /dev/null
-+++ b/tests/generic/470.out
-@@ -0,0 +1,13 @@
-+QA output created by 470
-+pwrite: Resource temporarily unavailable
-+wrote 8388608/8388608 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+RWF_NOWAIT time is within limits.
-+00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
++++ b/tests/generic/471.out
+@@ -0,0 +1,9 @@
++QA output created by 471
++Reformat with 320M size
++Fill the filesystem
++pwrite: No space left on device
++pwrite wrote more than zero bytes.
++00000000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
 +*
-+00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
-+*
-+00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+*
-+read 8388608/8388608 bytes at offset 0
++read 1048576/1048576 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 diff --git a/tests/generic/group b/tests/generic/group
-index 6c3bb03a..cf8529ea 100644
+index cf8529ea..160e0e7b 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -472,3 +472,4 @@
- 467 auto quick exportfs
+@@ -473,3 +473,4 @@
  468 shutdown auto quick metadata
  469 auto quick
-+470 auto quick rw
+ 470 auto quick rw
++471 auto quick rw
 -- 
 2.14.2
 
