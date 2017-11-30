@@ -1,11 +1,13 @@
-Received: from mx1.mpynet.fi ([82.197.21.84]:26187 "EHLO mx1.mpynet.fi"
+Received: from mx1.mpynet.fi ([82.197.21.84]:38062 "EHLO mx1.mpynet.fi"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753070AbdK3Rdy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 30 Nov 2017 12:33:54 -0500
+        id S1753717AbdK3ReC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 30 Nov 2017 12:34:02 -0500
 From: Ari Sundholm <ari@tuxera.com>
-Subject: [PATCH 1/2] fsstress: Fix memory leaks
-Date: Thu, 30 Nov 2017 19:31:23 +0200
-Message-ID: <1512063084-12105-1-git-send-email-ari@tuxera.com>
+Subject: [PATCH 2/2] fsstress: getcwd() return value fixes
+Date: Thu, 30 Nov 2017 19:31:24 +0200
+Message-ID: <1512063084-12105-2-git-send-email-ari@tuxera.com>
+In-Reply-To: <1512063084-12105-1-git-send-email-ari@tuxera.com>
+References: <1512063084-12105-1-git-send-email-ari@tuxera.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,44 +15,39 @@ To: fstests@vger.kernel.org
 Cc: Ari Sundholm <ari@tuxera.com>
 List-ID: <fstests@vger.kernel.org>
 
-This patch fixes the memory leaks we found when running fsstress under
-valgrind.
+Add a check for the return value of getcwd(). Fix another check
+which mistakenly checks if the return value is less than zero
+instead of checking whether the return value is NULL.
 
 Signed-off-by: Ari Sundholm <ari@tuxera.com>
 ---
- ltp/fsstress.c | 5 +++++
- 1 file changed, 5 insertions(+)
+ ltp/fsstress.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 96f48b1..13d5dd5 100644
+index 13d5dd5..028c232 100644
 --- a/ltp/fsstress.c
 +++ b/ltp/fsstress.c
-@@ -614,6 +614,9 @@ int main(int argc, char **argv)
- 				return 1;
- 			}
- #endif
-+
-+			cleanup_flist();
-+			free(freq_table);
- 			return 0;
- 		}
- 	}
-@@ -640,6 +643,7 @@ int main(int argc, char **argv)
- 		close(fd);
- 	}
+@@ -495,7 +495,7 @@ int main(int argc, char **argv)
  
-+	free(freq_table);
- 	unlink(buf);
- 	return 0;
- }
-@@ -997,6 +1001,7 @@ doproc(void)
+ 	(void)mkdir(dirname, 0777);
+ 	if (logname && logname[0] != '/') {
+-		if (getcwd(rpath, sizeof(rpath)) < 0){
++		if (!getcwd(rpath, sizeof(rpath))){
+ 			perror("getcwd failed");
+ 			exit(1);
+ 		}
+@@ -970,6 +970,10 @@ doproc(void)
  	}
- errout:
- 	chdir("..");
-+	free(homedir);
- 	if (cleanup) {
- 		sprintf(cmd, "rm -rf %s", buf);
- 		system(cmd);
+ 	top_ino = statbuf.st_ino;
+ 	homedir = getcwd(NULL, 0);
++	if (!homedir) {
++		perror("getcwd failed");
++		_exit(1);
++	}
+ 	seed += procid;
+ 	srandom(seed);
+ 	if (namerand)
 -- 
 2.7.4
 
