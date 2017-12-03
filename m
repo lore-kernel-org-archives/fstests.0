@@ -1,110 +1,124 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:10380 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752232AbdLBVke (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Dec 2017 16:40:34 -0500
-Date: Sun, 3 Dec 2017 08:40:30 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] common: Add infrastructure for syncfs syscall tests
-Message-ID: <20171202214030.GW4094@dastard>
-References: <1512100554-16368-1-git-send-email-cgxu@mykernel.net>
- <621FF37E-8612-489C-8721-4BBC08BAB336@mykernel.net>
- <20171201041301.GB2749@eguan.usersys.redhat.com>
- <DF0589AC-18BE-495E-8DFD-54F0690CC8E7@mykernel.net>
- <CAOQ4uxgOyPy9w96_HaUtM1thHcajn1LuHkiFSOtMZw0f-=HR8g@mail.gmail.com>
- <20171201214320.GU4094@dastard>
- <CAOQ4uxg5RfRXATfcBK3CRouioEDwu_RpqxPLry2fyp8Qq0RdjQ@mail.gmail.com>
+Received: from mail-pl0-f68.google.com ([209.85.160.68]:34645 "EHLO
+        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751790AbdLCGoX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Dec 2017 01:44:23 -0500
+Received: by mail-pl0-f68.google.com with SMTP id d21so8617005pll.1
+        for <fstests@vger.kernel.org>; Sat, 02 Dec 2017 22:44:23 -0800 (PST)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id i20sm20947252pfj.58.2017.12.02.22.44.21
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sat, 02 Dec 2017 22:44:22 -0800 (PST)
+Message-ID: <5a239d46.9457620a.b9928.6ce8@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 03 Dec 2017 14:44:16 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 88231c0c0b9d
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="9nbYH2fDeJe4"
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxg5RfRXATfcBK3CRouioEDwu_RpqxPLry2fyp8Qq0RdjQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Chengguang Xu <cgxu@mykernel.net>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Dec 02, 2017 at 12:43:18PM +0200, Amir Goldstein wrote:
-> On Fri, Dec 1, 2017 at 11:43 PM, Dave Chinner <david@fromorbit.com> wrote:
-> > On Fri, Dec 01, 2017 at 09:21:15AM +0200, Amir Goldstein wrote:
-> [...]
-> >>
-> >> Anyway, I see people are not so fond of the delalloc "canary test".
-> >> Perhaps a still simple and quick test would be to do small buffered
-> >> write; sync; small direct io read?
-> >
-> > No, because the direct IO read can flush dirty buffers across the
-> > range the IO is being done on. IOWs, you don't know if the sync
-> > actually flushed it, the direct IO read flushed it, or the direct IO
-> > read fell back to buffered IO and simply read the in memory copy.
-> >
-> > Let's step back a moment: What bug/regression are you actually
-> > trying to expose/reproduce here?
-> 
-> 
-> The overlayfs bug (not regression) that Chengguang reported and posted
-> a fix for - syncfs on overlayfs doesn't flush dirty inodes:
-> https://marc.info/?l=linux-unionfs&m=151192099131198&w=2
-> 
-> > Why is it not already covered by at
-> > least one of the other generic sync/fsync tests we already have?
-> >
-> 
-> Because there are zero "syncfs" tests.
 
-It uses the same code as sync, so all the sync tests are testing
-syncfs, too. If syncfs is broken, then sync was also broken on
-overlay.
+--9nbYH2fDeJe4
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> AFAIK, "fsync" is not broken on overlayfs, because it operated on
-> the real underlying inode and "sync" is not a problem, because
-> dirty underlying inodes will be flushed by sync_filesystem() of the
-> underlying fs.
+Hi all,
 
-Which means nobody had tested a setup where the order of syncing
-inodes in different overlay layers exposed crash inconsistencies....
+The master branch of the xfstests repository at:
 
-> Still, I recommended that Chengguang's test, whichever method
-> is chosen, will be generic and cover all those sync variants.
-> 
-> If I would to write a generic syncfs test for a blockdev fs, I would have
-> chosen to _mount_flakey, call _flakey_drop_and_remount after syncfs
-> and examine compare md5sum of the written file.
-> 
-> Alas, overlayfs is not a blockdev fs, so using the flakey helpers as is
-> the generic test won't run on overlayfs.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-That doesn't make stuffing about with the extent state of underlying
-filesytems any less hacky.
+have just been updated. This update mainly contains new regression tests for
+btrfs and overlay, along with other minor bugfixes.
 
-> It is possible to write an overlayfs specific test, which sets up a
-> dm-flakey target over a loop device and uses that fs as the overlayfs
-> upper fs, but then the test won't be generic. If you think we should go
-> for non-generic overlayfs test, that is fine by me.
+My test host that's hosting all my test vms broke down last week, which slowed
+down my review process. There're still around 10 patches sitting in my
+'to-review' mailbox, so please be patient. I'd really appriciate if someone
+could help review the pending patches!
 
-That's precisely what the per-filesystem test directories are for.
-Put tests that are overlay specific or too dodgy to reliably run on all
-filesystems into tests/overlay. I don't care what you put in their
-because those tests then don't affect my XFS testing, or anyone
-else's non-overlay testing.
+Nov 28   Darrick J. Wong    [2.3K] [PATCH] common/rc: report kmemleak errors                                                                                                                                
+Nov 29   Xiao Yang          [3.6K] [PATCH] generic/473: test return EBUSY from BLKRRPART for mounted whole-dev
+Nov 29   Goldwyn Rodrigues  [1.7K] [PATCH 1/3] Check pwrite parameters                                                                                                                                      
+Nov 29   Goldwyn Rodrigues  [4.3K] ├─>[PATCH 2/3] generic/470: Test RWF_NOWAIT                                                                                                                              
+Nov 29   Goldwyn Rodrigues  [4.7K] └─>[PATCH 3/3] generic/471: Partial direct write test                                                                                                                    
+Nov 30   Nikolay Borisov    [ 10K] [PATCH v7] generic: initial fiemap range query test                                                                                                                      
+Nov 30   Ari Sundholm       [0.9K] [PATCH 1/2] fsstress: Fix memory leaks
+Nov 30   Ari Sundholm       [1.1K] └─>[PATCH 2/2] fsstress: getcwd() return value fixes
+Dec 01   yang xu            [1.2K] [PATCH] generic/459: Fix check for ro-remount in extN
 
-> If you have a clever idea how to write a generic "syncfs" test
-> that would also apply to non blockdev fs, please do share it,
-> because *that* was the requirement that lead me to the "delalloc
-> canary" test.
+New failures I've noticed in this update:
+- btrfs/15[56] both fail with current v4.15-rc1 kernel
+- overlay/047 fails with v4.15-rc1 too
 
-Implement FS_IOC_SHUTDOWN on overlay, then you can test it via
-software controlled shutdown. i.e. make overlay return true for
-_require_scratch_shutdown() and implement what is needed to shut it
-all down and prevent further writes of dirty inodes. Thens do
-data/metadata checks after a shutdown/unmount/mount cycle. Then
-what you have on disk after the mount cycle is what was written by
-sync/fsync/syncfs...
+Thanks,
+Eryu
 
-We've only been using this shutdown mechanism to test fsync/sync
-mechanisms on XFS for ~20 years.
+The new head of the master branch is commit:
 
-Cheers,
+88231c0c0b9d btrfs: make sure btrfs can handle full fs trim correctly
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+New commits:
+
+Amir Goldstein (3):
+      [77847f3e4489] overlay: regression test for hardlink breakage after unlink and mount cycle
+      [be7b6165bc20] overlay: regression test for orphan index cleanup on mount
+      [959081e0d3ca] overlay/042: remove wrong check for empty index
+
+Darrick J. Wong (1):
+      [f210cedc0015] generic/388: use TIME_FACTOR to scale test duration
+
+Filipe Manana (1):
+      [d0bbfca132b3] btrfs: test send for files with multiple hard links renamed
+
+Qu Wenruo (1):
+      [88231c0c0b9d] btrfs: make sure btrfs can handle full fs trim correctly
+
+Xiao Yang (1):
+      [2428c08a6025] generic/465: just check the actual read data under dio read/write
+
+
+Code Diffstat:
+
+ .../aio-dio-append-write-read-race.c               |  11 +-
+ tests/btrfs/155                                    | 147 +++++++++++++++++++++
+ tests/btrfs/155.out                                |   6 +
+ tests/btrfs/156                                    | 120 +++++++++++++++++
+ tests/btrfs/156.out                                |   2 +
+ tests/btrfs/group                                  |   2 +
+ tests/generic/388                                  |   2 +-
+ tests/overlay/042                                  |   4 -
+ tests/overlay/047                                  | 107 +++++++++++++++
+ tests/overlay/047.out                              |  16 +++
+ tests/overlay/048                                  | 141 ++++++++++++++++++++
+ tests/overlay/048.out                              |  18 +++
+ tests/overlay/group                                |   2 +
+ 13 files changed, 568 insertions(+), 10 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--9nbYH2fDeJe4
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJaI5zWAAoJECZSqilcj+djjJ8P/R4pQ2IJooV59tFGiWjlv4Bg
+FczFuYo2mx02b3VPbMKqDBn3iIaERW8FvrAnn6P7I9ApEnaS/dTTdRnC4sGK4Rud
+wVnPe4XCZeU2EmLadBNcDlIxeIRSMpCp/qBnYJYfhw+ZF0XZN5sY6zaNLAD7Mzqh
+B/jgVyHQcEqVnXebwJVrYbk7+aJERjagyt5ME2hHMjkQBrcY1hOXUUjo1MuZwjQz
++xsye6sbvXPHhJh6pdpLwS+gjy2QZUu2Wg7DqFP1FfQTtKuWU6x7c6Q0F4MqqxEQ
+9InmHv2Ew5t3XMvQc/ixc6UJ66rY5A3z9PBmGobmYWttD7S3/2wIPbSGl0KmXeLu
+KGbfXgq3pwMTH+XCuvaBrOYnpI6vsQtWbmRBlUuYiYSGIa/kqe/sBd9AeJ45C15y
+I25p/9DhfzZrMuD6DdMmwxOgnSmSxrlDhVEtj5wmzOByF04nW01jdO4xmDrX0Uic
+eBuYYodzNLSD9joX6FNd/csGANwKxtA21AD/v0o72A/e6cxS3PMkXWf4Tovkay+8
+OatybZJB0Y6aCTr5kDq3V7Axnin03pHLi28rqi86+fxCpj+fMwmmSL+4GBhmKehF
+ZllYeMESs/GFARSBgpKBxjsutjTx2n7K+2NQ1Ysnj1Lwfrgjyqk1V3np4uvjKJvF
+8u0XgxSjqNMI8YySYIf1
+=KONg
+-----END PGP SIGNATURE-----
+
+--9nbYH2fDeJe4--
