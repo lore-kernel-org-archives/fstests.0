@@ -1,16 +1,16 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:39914 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752039AbdLCIIa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Dec 2017 03:08:30 -0500
-Received: by mail-yw0-f194.google.com with SMTP id y187so5614153ywg.6
-        for <fstests@vger.kernel.org>; Sun, 03 Dec 2017 00:08:29 -0800 (PST)
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:39803 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751921AbdLCIrW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Dec 2017 03:47:22 -0500
+Received: by mail-yw0-f193.google.com with SMTP id y187so5628037ywg.6
+        for <fstests@vger.kernel.org>; Sun, 03 Dec 2017 00:47:22 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <1512063084-12105-2-git-send-email-ari@tuxera.com>
-References: <1512063084-12105-1-git-send-email-ari@tuxera.com> <1512063084-12105-2-git-send-email-ari@tuxera.com>
+In-Reply-To: <1512063084-12105-1-git-send-email-ari@tuxera.com>
+References: <1512063084-12105-1-git-send-email-ari@tuxera.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 3 Dec 2017 10:08:28 +0200
-Message-ID: <CAOQ4uxgzXgJXnGY2QRfQBxHib+q-DEAKH=hFKTBX9=q-0jbdUA@mail.gmail.com>
-Subject: Re: [PATCH 2/2] fsstress: getcwd() return value fixes
+Date: Sun, 3 Dec 2017 10:47:21 +0200
+Message-ID: <CAOQ4uxgrMpm0kOm85=ekZFBf_daeJ0HZ6HVzWZBBbVHk19Jisw@mail.gmail.com>
+Subject: Re: [PATCH 1/2] fsstress: Fix memory leaks
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Ari Sundholm <ari@tuxera.com>
@@ -18,43 +18,48 @@ Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 On Thu, Nov 30, 2017 at 7:31 PM, Ari Sundholm <ari@tuxera.com> wrote:
-> Add a check for the return value of getcwd(). Fix another check
-> which mistakenly checks if the return value is less than zero
-> instead of checking whether the return value is NULL.
+> This patch fixes the memory leaks we found when running fsstress under
+> valgrind.
 >
 > Signed-off-by: Ari Sundholm <ari@tuxera.com>
 > ---
->  ltp/fsstress.c | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
+>  ltp/fsstress.c | 5 +++++
+>  1 file changed, 5 insertions(+)
 >
 > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 13d5dd5..028c232 100644
+> index 96f48b1..13d5dd5 100644
 > --- a/ltp/fsstress.c
 > +++ b/ltp/fsstress.c
-> @@ -495,7 +495,7 @@ int main(int argc, char **argv)
->
->         (void)mkdir(dirname, 0777);
->         if (logname && logname[0] != '/') {
-> -               if (getcwd(rpath, sizeof(rpath)) < 0){
-> +               if (!getcwd(rpath, sizeof(rpath))){
->                         perror("getcwd failed");
->                         exit(1);
+> @@ -614,6 +614,9 @@ int main(int argc, char **argv)
+>                                 return 1;
+>                         }
+>  #endif
+> +
+> +                       cleanup_flist();
+> +                       free(freq_table);
+>                         return 0;
 >                 }
-> @@ -970,6 +970,10 @@ doproc(void)
 >         }
->         top_ino = statbuf.st_ino;
->         homedir = getcwd(NULL, 0);
-> +       if (!homedir) {
-> +               perror("getcwd failed");
-> +               _exit(1);
-> +       }
->         seed += procid;
->         srandom(seed);
->         if (namerand)
+> @@ -640,6 +643,7 @@ int main(int argc, char **argv)
+>                 close(fd);
+>         }
+>
+> +       free(freq_table);
+>         unlink(buf);
+>         return 0;
+>  }
+> @@ -997,6 +1001,7 @@ doproc(void)
+>         }
+>  errout:
+>         chdir("..");
+> +       free(homedir);
+>         if (cleanup) {
+>                 sprintf(cmd, "rm -rf %s", buf);
+>                 system(cmd);
 
-The change itself looks correct, but I have no idea what's the purpose
-of saving homedir. It is only used in DEBUG code to chdir(homedir)
-before abort().
-Is there any obscure meaning to that chdir() that I don't understand?
+
+I don't see the point in those cleanups before returning from main()
+and I don't see the point in storing homedir in the first place at all
+and calling chdir(homedir) before abort.
 
 Amir.
