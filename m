@@ -1,144 +1,81 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47432 "EHLO mx1.redhat.com"
+Received: from smtpbg299.qq.com ([184.105.67.99]:44225 "EHLO smtpbg299.qq.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753219AbdLDEzS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 3 Dec 2017 23:55:18 -0500
-Date: Mon, 4 Dec 2017 12:55:13 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] common/rc: report kmemleak errors
-Message-ID: <20171204045513.GD2749@eguan.usersys.redhat.com>
-References: <20171129010937.GB31372@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171129010937.GB31372@magnolia>
+        id S1753155AbdLDGMj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 4 Dec 2017 01:12:39 -0500
+Content-Type: text/plain;
+        charset=gb2312
+Mime-Version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
+Subject: Re: [PATCH] common: Add infrastructure for syncfs syscall tests
+From: Chengguang Xu <cgxu@mykernel.net>
+In-Reply-To: <CAOQ4uxj4kBygrqA44OPCoJ4qRFFF_hPSeY8DL=Y8DA_eTa=p4Q@mail.gmail.com>
+Date: Mon, 4 Dec 2017 14:05:16 +0800
+Message-Id: <226EEED1-8707-485D-BEE8-45DBB4D4F670@mykernel.net>
+References: <1512100554-16368-1-git-send-email-cgxu@mykernel.net>
+ <621FF37E-8612-489C-8721-4BBC08BAB336@mykernel.net>
+ <20171201041301.GB2749@eguan.usersys.redhat.com>
+ <DF0589AC-18BE-495E-8DFD-54F0690CC8E7@mykernel.net>
+ <CAOQ4uxgOyPy9w96_HaUtM1thHcajn1LuHkiFSOtMZw0f-=HR8g@mail.gmail.com>
+ <20171201214320.GU4094@dastard>
+ <CAOQ4uxg5RfRXATfcBK3CRouioEDwu_RpqxPLry2fyp8Qq0RdjQ@mail.gmail.com>
+ <20171202214030.GW4094@dastard>
+ <CAOQ4uxj4kBygrqA44OPCoJ4qRFFF_hPSeY8DL=Y8DA_eTa=p4Q@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 28, 2017 at 05:09:37PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> If kmemleak is enabled, scan and report memory leaks after every test.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  check     |    2 ++
->  common/rc |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  2 files changed, 53 insertions(+)
-> 
-> diff --git a/check b/check
-> index b2d251a..469188e 100755
-> --- a/check
-> +++ b/check
-> @@ -497,6 +497,7 @@ _check_filesystems()
->  	fi
->  }
->  
-> +_init_kmemleak
->  _prepare_test_list
->  
->  if $OPTIONS_HAVE_SECTIONS; then
-> @@ -793,6 +794,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
->  		    n_try=`expr $n_try + 1`
->  		    _check_filesystems
->  		    _check_dmesg || err=true
-> +		    _check_kmemleak || err=true
->  		fi
->  
->  	    fi
-> diff --git a/common/rc b/common/rc
-> index cb83918..6dc77d5 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3339,6 +3339,57 @@ _check_dmesg()
->  	fi
->  }
->  
-> +# set up kmemleak
-> +_init_kmemleak()
-> +{
-> +	local _kern_knob="/sys/kernel/debug/kmemleak"
 
-Use $DEBUGFS_MNT? e.g. $DEBUGFS_MNT/kmemleak
+>=20
+> =D4=DA 2017=C4=EA12=D4=C23=C8=D5=A3=AC=CF=C2=CE=E72:45=A3=ACAmir Goldst=
+ein <amir73il@gmail.com> =D0=B4=B5=C0=A3=BA
+>=20
+> On Sat, Dec 2, 2017 at 11:40 PM, Dave Chinner <david@fromorbit.com> wro=
+te:
+>> On Sat, Dec 02, 2017 at 12:43:18PM +0200, Amir Goldstein wrote:
+>>> On Fri, Dec 1, 2017 at 11:43 PM, Dave Chinner <david@fromorbit.com> w=
+rote:
+> [...]
+>=20
+>>=20
+>> Implement FS_IOC_SHUTDOWN on overlay, then you can test it via
+>> software controlled shutdown. i.e. make overlay return true for
+>> _require_scratch_shutdown() and implement what is needed to shut it
+>> all down and prevent further writes of dirty inodes. Thens do
+>> data/metadata checks after a shutdown/unmount/mount cycle. Then
+>> what you have on disk after the mount cycle is what was written by
+>> sync/fsync/syncfs...
+>>=20
+>> We've only been using this shutdown mechanism to test fsync/sync
+>> mechanisms on XFS for ~20 years.
+>>=20
+>=20
+> All right.
+> We don't need to implement FS_IOC_SHUTDOWN on overlay, we
+> only need to shutdown upper fs if upper fs supports shutdown.
+> Doing that would be the equivalent of a dm-flakey test for a blokdev fs=
+,
+> because upper fs is the only persistent storage of overlayfs.
+> Thanks for the advice.
+>=20
+> Chengguang,
+>=20
+> I propose that you teach _require_scratch_shutdown about
+> OVL_BASE_SCRATCH_MNT and write and overlay/* test
+> that tests syncfs by shutting down upper fs if upper fs supports shutdo=
+wn.
 
-> +
-> +	if [ ! -w "${_kern_knob}" ]; then
-> +		return 0
-> +	fi
-> +
-> +	# Scan for all the memory leaks that have happened to date and
-> +	# clear them so that we can pinpoint leaks to tests accurately.
-> +	# Scan twice because the first write finishes before the scan
-> +	# does....
-> +	echo "scan" > "${_kern_knob}"
-> +	cat "${_kern_knob}" > /dev/null
-> +	echo "scan" > "${_kern_knob}"
-> +	cat "${_kern_knob}" > /dev/null
-> +	echo "clear" > "${_kern_knob}"
+OK, let me try this way, for data correctness I=A1=AFll use stat & md5_ch=
+ecksum.
+Is there anything else should I add for checking?
 
-So this leaves the automatic background scan on, seems this is not a
-problem. But how about disabling automatic scan (echo "scan=off" >
-$DEBUGFS_MNT/kmemleak) and only depend on the manual scan in
-_check_kmemleak?
+>=20
+> It doesn't matter much that the test won't run on all underlying fs as =
+long
+> as a regression will be caught by someone running overlay tests over
+> xfs/ext4.
+>=20
+> Cheers,
+> Amir.
+>=20
 
-> +}
-> +
-> +# check kmemleak log
-> +_check_kmemleak()
-> +{
-> +	local _kern_knob="/sys/kernel/debug/kmemleak"
-> +	local _leak_file="${RESULT_DIR}/check_kmemleak"
-> +
-> +	if [ ! -w "${_kern_knob}" ]; then
-> +		return 0
-> +	fi
-> +
-> +	# Tell the kernel to scan for memory leaks.  Apparently the write
-> +	# returns before the scan is complete, so do it twice in the hopes
-> +	# that twice is enough to capture all the leaks.
-> +	echo "scan" > "${_kern_knob}"
-> +	sed -e 's/age [0-9\.]*s/age XXXX/g' < "${_kern_knob}" > "${_leak_file}.new"
-> +	echo "scan" > "${_kern_knob}"
-> +	sed -e 's/age [0-9\.]*s/age XXXX/g' < "${_kern_knob}" > "${_leak_file}.new"
-> +
-> +	diff -u -N "${_leak_file}" "${_leak_file}.new" > $seqres.kmemleak
-
-Hmm, I think this reports false failure, e.g. let's say generic/001
-leaks memory and generic/002 doesn't
-
- ./check generic/001	# this fails kmemleak check and populates check_kmemleak file
- ./check generic/002	# diff against the stale check_kmemleak file and fails the check too
-
-How about just check if there's anything reported from
-$DEBUGFS_MNT/kmemleak and clearing the kmemleak buffer after each test? e.g.
-
-echo "scan" > $DEBUGFS_MNT/kmemleak
-cat $DEBUGFS_MNT/kmemleak > $seqres.kmemleak
-echo "clear" > $DEBUGFS_MNT/kmemleak
-if [ -s $seqres.kmemleak ]; then
-	_dump_err "_check_kmemleak: something found in kmemleak (see $seqres.kmemleak)"
-	return 1
-else
-	rm -f $seqres.kmemleak
-	return 0
-fi
-
-Thanks,
-Eryu
-
-> +	res=$?
-> +	mv "${_leak_file}.new" "${_leak_file}"
-> +
-> +	if [ $res -ne 0 ]; then
-> +		_dump_err "_check_kmemleak: something found in kmemleak (see $seqres.kmemleak)"
-> +		return 1
-> +	else
-> +		rm -f $seqres.kmemleak
-> +		return 0
-> +	fi
-> +}
-> +
->  # don't check dmesg log after test
->  _disable_dmesg_check()
->  {
