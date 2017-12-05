@@ -1,162 +1,56 @@
-Received: from pv43p51im-ztdg06051601.me.com ([17.133.164.142]:39419 "EHLO
-        pv43p51im-ztdg06051601.me.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751473AbdLEQuj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Dec 2017 11:50:39 -0500
-From: Chengguang Xu <cgxu519@icloud.com>
-Content-type: text/plain; charset=us-ascii
-Content-transfer-encoding: quoted-printable
-MIME-version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
-Subject: [PATCH 2/2] overlay/045: add test for syncfs
-Message-id: <B4077824-4B28-4DC1-9407-33EF2316A4F2@icloud.com>
-Date: Tue, 05 Dec 2017 23:50:34 +0800
+Received: from userp2130.oracle.com ([156.151.31.86]:43535 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752242AbdLEQwj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Dec 2017 11:52:39 -0500
+Date: Tue, 5 Dec 2017 08:51:27 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v7] generic: initial fiemap range query test
+Message-ID: <20171205165127.GD19219@magnolia>
+References: <1512057927-15022-1-git-send-email-nborisov@suse.com>
+ <20171205082406.GK2749@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171205082406.GK2749@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Chengguang Xu <cgxu519@icloud.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Nikolay Borisov <nborisov@suse.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org, sandeen@sandeen.net
 List-ID: <fstests@vger.kernel.org>
 
-Run syncfs and shutdown upper filesystem to check syncfs result.
+On Tue, Dec 05, 2017 at 04:24:06PM +0800, Eryu Guan wrote:
+> On Thu, Nov 30, 2017 at 06:05:27PM +0200, Nikolay Borisov wrote:
+> > Fiemap gained support for passing in optional offset len
+> > which denote the range requested, so this patch adds
+> > testcases for this functionality. Aditionally, a special "ranged"
+> > argument is added to the require_xfs_io_command which checks
+> > for the presence of fiemap range support.
+> > 
+> > Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> > ---
+> > 
+> > For the time being this test is expected to fail on XFS. 
+> > 
+> > V7: 
+> >  * Adjusted for 64k block size filesystem
+> >  * Only use/require a test device and not a scratch device
+> 
+> v7 looks good to me, test passes on ppc64 hosts too, thanks!
+> 
+> But it seems that it's not decided yet whether xfs should trim the
+> ranged fiemap query request, I'd like to see the expected behavior
+> decided first. (BTW, v7 passes with latest RHEL7 kernel too, seems
+> extents are not trimmed there.)
 
-Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
----
-tests/overlay/045     | 107 =
-++++++++++++++++++++++++++++++++++++++++++++++++++
-tests/overlay/045.out |   2 +
-tests/overlay/group   |   1 +
-3 files changed, 110 insertions(+)
-create mode 100755 tests/overlay/045
-create mode 100644 tests/overlay/045.out
+The iomap callers need to tell iomap_apply if they want exactly the
+range they asked for and no more (most of the write paths) or if they
+can handle outside ranges (fiemap), and then we can turn on
+XFS_BMAPI_ENTIRE reporting in xfs_iomap_begin.
 
-diff --git a/tests/overlay/045 b/tests/overlay/045
-new file mode 100755
-index 0000000..402a955
---- /dev/null
-+++ b/tests/overlay/045
-@@ -0,0 +1,107 @@
-+#! /bin/bash
-+# FS QA Test 045
-+#
-+# Inspired by syncfs bug of overlayfs.=20
-+# Run syncfs and shutdown upper filesystem to check syncfs result.
-+# Test will be skipped if underlying upper filesystem does not support
-+# shutdown or syncfs syscall.
-+#
-=
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Chengguang Xu <cgxu519@icloud.com>.
-+# All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-=
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=3D`pwd`
-+tmp=3D/tmp/$$
-+status=3D0
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "syncfs"
-+
-+# if error
-+
-+PREFIX=3D${seq}-testfile
-+TESTFILES=3D${PREFIX}-*
-+FCNT=3D1000
-+
-+write_data()
-+{
-+	if [ $1 -eq 0 ]; then
-+		TARGET=3D$TEST_DIR	=09
-+	else
-+		TARGET=3D$SCRATCH_MNT
-+	fi
-+
-+	rm -f $TARGET/$TESTFILES >/dev/null 2>&1
-+	for i in `seq 1 $FCNT`; do
-+		$XFS_IO_PROG -f -c "pwrite 1K 1K" \
-+				${TARGET}/${PREFIX}-$i >/dev/null 2>&1
-+	done
-+}
-+
-+
-+check_data()
-+{
-+	diff -r $TEST_DIR $SCRATCH_MNT
-+	if [ $? -ne 0 ]; then
-+		status=3D1
-+	fi
-+}
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+write_data 0
-+echo 3 > /proc/sys/vm/drop_caches
-+
-+write_data 1
-+$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT/${PREFIX}-${FCNT} >/dev/null 2>&1
-+
-+_scratch_shutdown
-+_scratch_cycle_mount
-+check_data
-+
-+rm -f $TEST_DIR/$TESTFILES >/dev/null 2>&1
-+rm -f $SCRATCH_MNT/$TESTFILES >/dev/null 2>&1
-+
-+echo "Silence is golden"
-+exit
-diff --git a/tests/overlay/045.out b/tests/overlay/045.out
-new file mode 100644
-index 0000000..66276cf
---- /dev/null
-+++ b/tests/overlay/045.out
-@@ -0,0 +1,2 @@
-+QA output created by 045
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index b32c6cd..eccd7d0 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -47,3 +47,4 @@
-042 auto quick copyup hardlink
-043 auto quick copyup nonsamefs
-044 auto quick copyup hardlink nonsamefs
-+045 auto quick sync
---=20
-1.8.3.1=
+--D
+
+> Thanks,
+> Eryu
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
