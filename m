@@ -1,54 +1,43 @@
-Received: from LGEAMRELO13.lge.com ([156.147.23.53]:47072 "EHLO
-        lgeamrelo13.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752693AbdLEFQr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Dec 2017 00:16:47 -0500
-Subject: Re: False lockdep completion splats with loop device
-References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
-From: Byungchul Park <byungchul.park@lge.com>
-Message-ID: <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
-Date: Tue, 5 Dec 2017 14:16:45 +0900
+Received: from mx1.redhat.com ([209.132.183.28]:53310 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752562AbdLEIYI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Dec 2017 03:24:08 -0500
+Date: Tue, 5 Dec 2017 16:24:06 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v7] generic: initial fiemap range query test
+Message-ID: <20171205082406.GK2749@eguan.usersys.redhat.com>
+References: <1512057927-15022-1-git-send-email-nborisov@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1512057927-15022-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, peterz@infradead.org, mingo@redhat.com, kernel-team@lge.com
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, sandeen@sandeen.net
 List-ID: <fstests@vger.kernel.org>
 
-On 12/5/2017 12:03 PM, Theodore Ts'o wrote:
-> There are a ton of false lockdep splats that were introduced with
-> commit 2dcd5adfb740: "locking/lockdep: Remove the BROKEN flag from
-> CONFIG_LOCKDEP_CROSSRELEASE and CONFIG_LOCKDEP_COMPLETIONS".
+On Thu, Nov 30, 2017 at 06:05:27PM +0200, Nikolay Borisov wrote:
+> Fiemap gained support for passing in optional offset len
+> which denote the range requested, so this patch adds
+> testcases for this functionality. Aditionally, a special "ranged"
+> argument is added to the require_xfs_io_command which checks
+> for the presence of fiemap range support.
 > 
-> I'm seeing this triggered by a number of xfstests tests, including
-> shared/298.  I see there was some discussion about this here:
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> ---
 > 
->    https://www.spinics.net/lists/linux-xfs/msg10832.html
+> For the time being this test is expected to fail on XFS. 
 > 
-> ... but I don't see any solution yet.  Is anyone working on this?
-> 
+> V7: 
+>  * Adjusted for 64k block size filesystem
+>  * Only use/require a test device and not a scratch device
 
-Hello,
+v7 looks good to me, test passes on ppc64 hosts too, thanks!
 
-I believe that the commit e319e1fbd9d42 "block, locking/lockdep: Assign
-a lock_class per gendisk used for wait_for_completion()" solved the
-false positive.
+But it seems that it's not decided yet whether xfs should trim the
+ranged fiemap query request, I'd like to see the expected behavior
+decided first. (BTW, v7 passes with latest RHEL7 kernel too, seems
+extents are not trimmed there.)
 
-Could you tell me if it doesn't handle it, with the report? Then, I
-will follow up and try to solve it.
-
-> Failing that can we please make the completion lockdep something which
-> is optional since the false positives are incredibly !@#@!?! annoying?
-> That way I can still use most of lockdep, instead of being forced to
-> completely disable lockdep?
-> 
-> Thanks,
-> 
-> 						- Ted
-> 
-
--- 
 Thanks,
-Byungchul
+Eryu
