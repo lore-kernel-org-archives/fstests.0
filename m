@@ -1,82 +1,86 @@
 Received: from mga01.intel.com ([192.55.52.88]:65530 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753112AbdLEX5H (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 5 Dec 2017 18:57:07 -0500
+        id S1753038AbdLEX5G (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Dec 2017 18:57:06 -0500
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [xfsprogs PATCH v2 1/3] xfs_io: fix compiler warnings in getfsmap code
-Date: Tue,  5 Dec 2017 16:56:49 -0700
-Message-Id: <20171205235651.17102-2-ross.zwisler@linux.intel.com>
-In-Reply-To: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
-References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
+Subject: [xfsprogs PATCH v2 0/3] Add necessary items for MAP_SYNC testing
+Date: Tue,  5 Dec 2017 16:56:48 -0700
+Message-Id: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
 To: linux-xfs <linux-xfs@vger.kernel.org>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, "Darrick J . Wong" <darrick.wong@oracle.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-I recently upgraded my compiler from
-	gcc (GCC) 6.4.1 20170727 (Red Hat 6.4.1-1)
-to
-	gcc (GCC) 7.2.1 20170915 (Red Hat 7.2.1-2)
-and started getting a bunch of compiler warnings in io/fsmap.c:
+This is the second revision of my MAP_SYNC + dm-log-writes support for
+xfsprogs.  The previous revision can be found here:
 
-  fsmap.c: In function =E2=80=98fsmap_f=E2=80=99:
-  fsmap.c:228:40: warning: =E2=80=98%lld=E2=80=99 directive output may be=
- truncated writing
-  between 1 and 17 bytes into a region of size between 12 and 28
-  [-Wformat-truncation=3D]
-     snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
-  ^~~~
-  fsmap.c:228:32: note: directive argument in the range [0, 3602879701896=
-3967]
-     snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
-  ^~~~~~~~~~~~~~~
-  fsmap.c:228:3: note: =E2=80=98snprintf=E2=80=99 output between 8 and 40=
- bytes into a
-  destination of size 32
-     snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
-     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  (long long)BTOBBT(p->fmr_physical),
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  (long long)BTOBBT(p->fmr_physical + p->fmr_length - 1));
-  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+https://lists.01.org/pipermail/linux-nvdimm/2017-November/013326.html
 
-The issue is that 'bbuf' is only defined to be 32 characters wide, but ea=
-ch
-signed long long can potentially print as many as 19 characters
-(9223372036854775807 is the max value).  The format we're using for bbuf =
-is
-"[%lld..%lld]:" which has 2 signed long longs plus 6 other characters
-"[..]:\0", which means it's possible we'll print up to 44 characters,
-overflowing our 32 char buffer.
+Changes since v1:
 
-Fix this by bumping all the buffer sizes in dump_map_verbose() to 64
-characters.
+ - Updated the dm-log-writes support so that it uses libdevmapper
+   instead of calling the "dmsetup" stand-alone exectuable via system().
+   (Eric and Darrick)
 
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: Darrick J. Wong <darrick.wong@oracle.com>
-Fixes: 3fcab549a234 ("xfs_io: support the new getfsmap ioctl")
+ - Fixed our MAP_SYNC handling so that instead of defining the flags for
+   systems that don't have them in the headers, just set them to 0 and
+   fail when the -S flag is used. (Dan)
+
+You can find an xfsprogs branch with this series here:
+
+https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfsprogs-dev.git/log/?h=map_sync_v2
+
+Both MAP_SYNC and the DAX enhancements for dm-log-writes can be found in
+v4.15-rc*.  For ease of testing I've posted a kernel that is v4.14 plus
+just those two patch series here:
+
+https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/linux.git/log/?h=map_sync_dm_log_writes
+
 ---
- io/fsmap.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/io/fsmap.c b/io/fsmap.c
-index 448fb535..3d8a6700 100644
---- a/io/fsmap.c
-+++ b/io/fsmap.c
-@@ -184,8 +184,8 @@ dump_map_verbose(
- 	off64_t			agoff, bperag;
- 	int			foff_w, boff_w, aoff_w, tot_w, agno_w, own_w;
- 	int			nr_w, dev_w;
--	char			rbuf[32], bbuf[32], abuf[32], obuf[32];
--	char			nbuf[32], dbuf[32], gbuf[32];
-+	char			rbuf[64], bbuf[64], abuf[64], obuf[64];
-+	char			nbuf[64], dbuf[64], gbuf[64];
- 	char			owner[OWNER_BUF_SZ];
- 	int			sunit, swidth;
- 	int			flg =3D 0;
---=20
+As suggested by Dave Chinner:
+
+    As I say to all these sorts of one-off test prgrams: please add the
+    new MAP_SYNC flag to xfs_io rather than writing a one-off
+    test program to set it and write some data.
+
+    And if we're going to be adding special custom tests just because
+    we need to insert dm-log marks, add that functionality to xfs_io,
+    too.
+
+    That way we can create complex custom dm logwrite tests without
+    needing one-off test programs for them all...
+
+This series enhances xfs_io by adding support for the MAP_SYNC mmap() flag
+and for dm-log-writes marks.  This allows the resulting xfstest for
+MAP_SYNC to be much simpler and have no custom C programs.
+
+Ross Zwisler (3):
+  xfs_io: fix compiler warnings in getfsmap code
+  xfs_io: add MAP_SYNC support to mmap()
+  xfs_io: add a new 'log_writes' command
+
+ configure.ac            |   2 +
+ debian/control          |   2 +-
+ include/builddefs.in    |   3 ++
+ include/linux.h         |   8 ++++
+ io/Makefile             |  10 +++++
+ io/fsmap.c              |   4 +-
+ io/init.c               |   1 +
+ io/io.h                 |   7 ++++
+ io/log_writes.c         | 101 ++++++++++++++++++++++++++++++++++++++++++++++++
+ io/mmap.c               |  23 ++++++++---
+ m4/Makefile             |   1 +
+ m4/package_devmapper.m4 |  11 ++++++
+ m4/package_libcdev.m4   |  16 ++++++++
+ man/man8/xfs_io.8       |  29 +++++++++++++-
+ 14 files changed, 208 insertions(+), 10 deletions(-)
+ create mode 100644 io/log_writes.c
+ create mode 100644 m4/package_devmapper.m4
+
+-- 
 2.14.3
 
