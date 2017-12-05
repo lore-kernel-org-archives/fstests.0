@@ -1,181 +1,247 @@
-Received: from aserp1040.oracle.com ([141.146.126.69]:25243 "EHLO
+Received: from aserp1040.oracle.com ([141.146.126.69]:31604 "EHLO
         aserp1040.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751711AbdLDXfp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Dec 2017 18:35:45 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] fstests: btrfs: reproduce a read failure on raid6 setup
-Date: Mon,  4 Dec 2017 15:33:23 -0700
-Message-Id: <20171204223323.3710-1-bo.li.liu@oracle.com>
+        with ESMTP id S1751200AbdLEArq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 4 Dec 2017 19:47:46 -0500
+Date: Mon, 4 Dec 2017 16:47:35 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v3 3/4] xfs: test for umount hang caused by the pending
+ dquota log item in AIL
+Message-ID: <20171205004735.GB6896@magnolia>
+References: <20171109073252.36001-1-houtao1@huawei.com>
+ <20171109073252.36001-4-houtao1@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171109073252.36001-4-houtao1@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Hou Tao <houtao1@huawei.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, linux-xfs@vger.kernel.org, cmaiolino@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-This test case is to reproduce a bug of raid6 reconstruction process.
+On Thu, Nov 09, 2017 at 03:32:51PM +0800, Hou Tao wrote:
+> When the first writeback and the retried writeback of dquota buffer get
+> the same IO error, XFS will let xfsaild to restart the writeback and
+> xfs_qm_dqflush_done() will not be invoked. xfsaild will try to re-push
+> the quota log item in AIL, the push will return early everytime after
+> checking xfs_dqflock_nowait(), and xfsaild will try to push it again.
+> 
+> IOWs, AIL will never be empty, and the umount process will wait for the
+> drain of AIL, so the umount process hangs.
+> 
+> Signed-off-by: Hou Tao <houtao1@huawei.com>
+> ---
+>  tests/xfs/999     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out |   2 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 174 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
+> 
+> diff --git a/tests/xfs/999 b/tests/xfs/999
+> new file mode 100755
+> index 0000000..22f7ba3
+> --- /dev/null
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,171 @@
+> +#! /bin/bash
+> +# FS QA Test No. 999
+> +#
+> +# Test for XFS umount hang problem caused by the unceasing push
+> +# of dquot log item in AIL. Because xfs_qm_dqflush_done() will
+> +# not be invoked, so each time xfsaild initiates the push,
+> +# the push will return early after checking xfs_dqflock_nowait().
+> +#
+> +# xfs_qm_dqflush_done() should be invoked by xfs_buf_do_callbacks().
+> +# However after the first write and the retried write of dquota buffer
+> +# get the same IO error, XFS will let xfsaild to restart the write and
+> +# xfs_buf_do_callbacks() will not be inovked.
+> +#
+> +# This test emulates the write error by using dm-flakey. The log
+> +# area of the XFS filesystem is excluded from the range covered by
+> +# dm-flakey, so the XFS will not be shutdown prematurely.
 
-The kernel fix are
-Btrfs: do not merge rbios if their fail stripe index are not identical
-Btrfs: make raid6 rebuild retry more
+Upstream commit is 373b0589dc8d58bc09c9a28d03611ae4fb216057 ("xfs:
+Properly retry failed dquot items in case of error during buffer
+writeback"), etc.
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
----
- tests/btrfs/155     | 119 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/155.out |  10 +++++
- tests/btrfs/group   |   1 +
- 3 files changed, 130 insertions(+)
- create mode 100755 tests/btrfs/155
- create mode 100644 tests/btrfs/155.out
+--D
 
-diff --git a/tests/btrfs/155 b/tests/btrfs/155
-new file mode 100755
-index 0000000..2dec0c3
---- /dev/null
-+++ b/tests/btrfs/155
-@@ -0,0 +1,119 @@
-+#! /bin/bash
-+# FS QA Test 155
-+#
-+# The test case is to reproduce a bug in raid6 reconstruction process that
-+# would end up with read failure.
-+#
-+# if there is data
-+# corruption on two disks in the same horizontal stripe, e.g. due to bitrot.
-+#
-+# The bug happens a) when all disks are good to read,
-+# b) there is corrupted data on two disks in the same horizontal stripe due to
-+# something like bitrot,
-+# c) when rebuilding data after crc fails, btrfs is not able to tell whether
-+# other copies are good or corrupted because btrfs doesn't have crc for
-+# unallocated blocks.
-+#
-+# The kernel fixes are
-+# Btrfs: do not merge rbios if their fail stripe index are not identical
-+# Btrfs: make raid6 rebuild retry more 
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 4
-+_require_btrfs_command inspect-internal dump-tree
-+
-+get_physical_stripe0()
-+{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+	grep " DATA\|RAID6" -A 10 | $AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /0/) { print $6 }'
-+}
-+
-+get_physical_stripe1()
-+{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+	grep " DATA\|RAID6" -A 10 | $AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /1/) { print $6 }'
-+}
-+
-+_scratch_dev_pool_get 4
-+# step 1: create a raid6 btrfs and create a 4K file
-+echo "step 1......mkfs.btrfs" >>$seqres.full
-+
-+mkfs_opts="-d raid6 -b 1G"
-+_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-+
-+# -o nospace_cache makes sure data is written to the start position of the data
-+# chunk
-+_scratch_mount -o nospace_cache
-+
-+# [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" "$SCRATCH_MNT/foobar" | _filter_xfs_io
-+
-+_scratch_unmount
-+
-+stripe_0=`get_physical_stripe0`
-+stripe_1=`get_physical_stripe1`
-+dev4=`echo $SCRATCH_DEV_POOL | awk '{print $4}'`
-+dev3=`echo $SCRATCH_DEV_POOL | awk '{print $3}'`
-+
-+# step 2: corrupt the 1st and 2nd stripe (stripe 0 and 1)
-+echo "step 2......simulate bitrot at offset $stripe_0 of device_4($dev4) and offset $stripe_1 of device_3($dev3)" >>$seqres.full
-+
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_0 64K" $dev4 | _filter_xfs_io
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_1 64K" $dev3 | _filter_xfs_io
-+
-+# step 3: read foobar to repair the bitrot
-+echo "step 3......repair the bitrot" >> $seqres.full
-+_scratch_mount -o nospace_cache
-+
-+# read the 2nd stripe, i.e. [64K, 128K), to trigger repair
-+od -x -j 64K $SCRATCH_MNT/foobar
-+
-+_scratch_dev_pool_put 
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/155.out b/tests/btrfs/155.out
-new file mode 100644
-index 0000000..7bac256
---- /dev/null
-+++ b/tests/btrfs/155.out
-@@ -0,0 +1,10 @@
-+QA output created by 155
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 9437184
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 9437184
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0200000 aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa
-+*
-+0400000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index c98cf82..c84a166 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -157,3 +157,4 @@
- 152 auto quick metadata qgroup send
- 153 auto quick qgroup
- 154 auto quick
-+155 auto quick repair
--- 
-2.5.0
-
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	[ -z "${interval}" ] || \
+> +		sysctl -w fs.xfs.xfssyncd_centisecs=${interval} >/dev/null 2>&1
+> +	cd /
+> +	rm -f $tmp.*
+> +	_unmount_flakey >/dev/null 2>&1
+> +	_cleanup_flakey > /dev/null 2>&1
+> +}
+> +
+> +get_xfs_scratch_sb_field()
+> +{
+> +	local field=$1
+> +
+> +	_scratch_xfs_db -r -c "sb 0" -c "print $field" | \
+> +	awk -v field=$field '$0 ~ field {print $3}'
+> +}
+> +
+> +# inject IO write error for the XFS filesystem except its log section
+> +make_xfs_scratch_flakey_table()
+> +{
+> +	local tgt=flakey
+> +	local opt="0 1 1 error_writes"
+> +	local dev=${SCRATCH_DEV}
+> +	local dev_sz=$(blockdev --getsz $dev)
+> +
+> +	if [ "${USE_EXTERNAL}" = "yes" -a ! -z "$SCRATCH_LOGDEV" ]; then
+> +		echo "0 ${dev_sz} $tgt $dev 0 $opt"
+> +		return
+> +	fi
+> +
+> +	local blk_sz=$(get_xfs_scratch_sb_field blocksize)
+> +	local log_ofs=$(get_xfs_scratch_sb_field logstart)
+> +	local log_sz=$(get_xfs_scratch_sb_field logblocks)
+> +	local table=""
+> +	local ofs=0
+> +	local sz
+> +
+> +	log_ofs=$(_scratch_xfs_db -r -c "convert fsb ${log_ofs} bb" | \
+> +			awk '{gsub("[()]", "", $2); print $2}')
+> +	let "log_sz *= blk_sz / 512"
+> +
+> +	if [ "$ofs" -lt "${log_ofs}" ]; then
+> +		let "sz = log_ofs - ofs"
+> +		table="$ofs $sz $tgt $dev $ofs $opt"
+> +	fi
+> +
+> +	table="$table\n${log_ofs} ${log_sz} linear $dev ${log_ofs}"
+> +
+> +	let "ofs = log_ofs + log_sz"
+> +	if [ "$ofs" -lt "${dev_sz}" ]; then
+> +		let "sz = dev_sz - ofs"
+> +		table="$table\n$ofs $sz $tgt $dev $ofs $opt"
+> +	fi
+> +
+> +	echo -e $table
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/dmflakey
+> +. ./common/quota
+> +
+> +_supported_fs xfs
+> +_supported_os Linux
+> +
+> +# due to the injection of write IO error, the fs will be inconsistent
+> +_require_scratch_nocheck
+> +_require_flakey_with_error_writes
+> +_require_user
+> +_require_xfs_quota
+> +_require_freeze
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Silence is golden"
+> +
+> +_scratch_mkfs_xfs > $seqres.full 2>&1
+> +
+> +# no error will be injected
+> +_init_flakey
+> +$DMSETUP_PROG info >> $seqres.full
+> +$DMSETUP_PROG table >> $seqres.full
+> +
+> +# save the old value for _cleanup()
+> +interval=$(sysctl -n fs.xfs.xfssyncd_centisecs 2>/dev/null)
+> +# shorten the time waiting for the push of ail items
+> +sysctl -w fs.xfs.xfssyncd_centisecs=100 >> $seqres.full 2>&1
+> +
+> +_qmount_option "usrquota"
+> +_mount_flakey
+> +
+> +# We need to set the quota limitation twice, and inject the write error
+> +# after the second setting. If we try to inject the write error after
+> +# the first setting, the initialization of the dquota buffer will get
+> +# IO error and also be retried, and during the umount process the
+> +# write will be ended, and xfs_qm_dqflush_done() will be inovked, and
+> +# the umount will exit normally.
+> +$XFS_QUOTA_PROG -x -c "limit -u isoft=500 fsgqa" $SCRATCH_MNT
+> +$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
+> +
+> +# ensure the initialization of the dquota buffer is done
+> +xfs_freeze -f $SCRATCH_MNT
+> +xfs_freeze -u $SCRATCH_MNT
+> +
+> +# inject write IO error
+> +FLAKEY_TABLE_ERROR=$(make_xfs_scratch_flakey_table)
+> +_load_flakey_table ${FLAKEY_ERROR_WRITES}
+> +$DMSETUP_PROG info >> $seqres.full
+> +$DMSETUP_PROG table >> $seqres.full
+> +
+> +# update the dquota buffer
+> +$XFS_QUOTA_PROG -x -c "limit -u isoft=400 fsgqa" $SCRATCH_MNT
+> +$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
+> +
+> +sync
+> +
+> +# wait for the push of the dquota log item in AIL and
+> +# the completion of the retried write of dquota buffer
+> +sleep 2
+> +
+> +_unmount_flakey
+> +
+> +_cleanup_flakey
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> new file mode 100644
+> index 0000000..3b276ca
+> --- /dev/null
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index b439842..127019a 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -431,3 +431,4 @@
+>  431 auto quick dangerous
+>  432 auto quick dir metadata
+>  433 auto quick attr
+> +999 auto quick quota dangerous
+> -- 
+> 2.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
