@@ -1,110 +1,36 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:20467 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751112AbdLEVSx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Dec 2017 16:18:53 -0500
-Date: Wed, 6 Dec 2017 08:18:50 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: generic/399 and xfs_io pwrite command
-Message-ID: <20171205211850.GA5858@dastard>
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
+Received: from mga02.intel.com ([134.134.136.20]:46398 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751847AbdLEXVh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Dec 2017 18:21:37 -0500
+Date: Tue, 5 Dec 2017 16:21:36 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH v4 3/4] dm-log-writes: allow DAX to be used when
+ possible
+Message-ID: <20171205232136.GA9541@linux.intel.com>
+References: <20171117202828.25472-1-ross.zwisler@linux.intel.com>
+ <20171117202828.25472-4-ross.zwisler@linux.intel.com>
+ <20171118061703.GD2749@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
+In-Reply-To: <20171118061703.GD2749@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ari Sundholm <ari@tuxera.com>
-Cc: fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
-> On 12/05/2017 12:28 AM, Dave Chinner wrote:
-> >On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
-> >>Hi!
-> >>
-> >>While debugging an issue, we found out that generic/399 seems to
-> >>rely on a behavior that is specific to ext4 in the following section
-> >>of code:
-> >>----------------8<--------snip--------8<------------------------------
-> >>#
-> >># Write files of 1 MB of all the same byte until we hit ENOSPC.
-> >>Note that we
-> >># must not create sparse files, since the contents of sparse files are not
-> >># stored on-disk.  Also, we create multiple files rather than one big file
-> >># because we want to test for reuse of per-file keys.
-> >>#
-> >>total_file_size=0
-> >>i=1
-> >>while true; do
-> >>	file=$SCRATCH_MNT/encrypted_dir/file$i
-> >>	if ! $XFS_IO_PROG -f $file -c 'pwrite 0 1M' &> $tmp.out; then
-> >>		if ! grep -q 'No space left on device' $tmp.out; then
-> >>			echo "FAIL: unexpected pwrite failure"
-> >>			cat $tmp.out
-> >>		elif [ -e $file ]; then
-> >>			total_file_size=$((total_file_size + $(stat -c %s $file)))
-> >>		fi
-> >>		break
-> >>	fi
-> >>	total_file_size=$((total_file_size + $(stat -c %s $file)))
-> >>	i=$((i + 1))
-> >>	if [ $i -gt $fs_size_in_mb ]; then
-> >>		echo "FAIL: filesystem never filled up!"
-> >>		break
-> >>	fi
-> >>done
-> >>----------------8<--------snip--------8<------------------------------
-> >>
-> >>What happens with ext4 is that the xfs_io command gives a nonzero
-> >>exit value not when the pwrite command fails with ENOSPC but during
-> >>the *next* iteration when opening the file fails with ENOSPC. Turns
-> >>out the pwrite command failing does not cause xfs_io to give a
-> >>nonzero exit value.
-> >
-> >That implies ext4 is returning zero bytes written to the pwrite()
-> >call rather than ENOSPC. i.e.:
-> >
-> >                 bytes = do_pwrite(file->fd, off, cnt, buffersize,
-> >                                 pwritev2_flags);
-> >                 if (bytes == 0)
-> >                         break;
-> >                 if (bytes < 0) {
-> >                         perror("pwrite");
-> >                         return -1;
-> >                 }
-> >
-> >So if it's exiting with no error, then we can't have got an error
-> >from ext4 at ENOSPC. If that's the case, it probably should be
-> >considered an ext4 bug, not an issue with xfs_io...
-> >
+On Sat, Nov 18, 2017 at 02:17:03PM +0800, Eryu Guan wrote:
+> On Fri, Nov 17, 2017 at 01:28:27PM -0700, Ross Zwisler wrote:
+> > Enhance _require_dm_target so that a user can request a minimum version of a
+> > given dm target.
+> > 
+> > DAX support was added to v1.1.0 of the dm-log-writes kernel module, so
+> > allow the DAX mount option starting with that version.
 > 
-> No, according to what we've observed, that is not what happens. The
-> pwrite() call does fail and errno is ENOSPC after the call. The
-> immediate problem is that xfs_io does not reflect this failure in
-> its exit value and thus the check in generic/399 does not work in
-> this case. Only when open() fails during the next iteration does
-> xfs_io give a nonzero exit value and cause the check in the test
-> case to allow the test case to end successfully.
+> Is is possible not relying on the version numbers but actually trying
+> what you want to do and _notrun if that fails? Currently fstests does no
+> version number checking at all, and it'd be great if we keep that
+> tradition.
 
-Ah, io/pwrite.c fails to set exitcode on failure iappropriately
-before returning. Looks like there is a bunch of xfs_io commands
-that fail to do this properly.
-
-> What is specific to ext4 here is, as stated in my original message,
-> that open() fails.
-
-Because there are no more inodes to allocate (i.e. inode table is
-full) and so attempts to create more fail with ENOSPC. The xfs_io
-open command set exitcode appropriately, and that's why it finally
-triggers a test abort.
-
-Looks like xfs_io does need fixing to set exitcode appropriately on
-all failures...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Yep, and I agree that this is better.  I'll be fixed in the next version.
+Thanks for the feedback.
