@@ -1,63 +1,55 @@
-Received: from LGEAMRELO11.lge.com ([156.147.23.51]:41346 "EHLO
-        lgeamrelo11.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754750AbdLFFBy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 00:01:54 -0500
-Subject: Re: False lockdep completion splats with loop device
-References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
- <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
- <20171205150741.xsbp4mtilqfrsukl@thunk.org> <20171205210956.GZ5858@dastard>
-From: Byungchul Park <byungchul.park@lge.com>
-Message-ID: <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com>
-Date: Wed, 6 Dec 2017 14:01:51 +0900
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:48642 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751288AbdLFGFL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 01:05:11 -0500
+Date: Wed, 6 Dec 2017 16:43:54 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [xfsprogs PATCH v2 3/3] xfs_io: add a new 'log_writes' command
+Message-ID: <20171206054354.GE5858@dastard>
+References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
+ <20171205235651.17102-4-ross.zwisler@linux.intel.com>
+ <20171206002946.GD5858@dastard>
+ <20171206043813.GA31657@linux.intel.com>
 MIME-Version: 1.0
-In-Reply-To: <20171205210956.GZ5858@dastard>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171206043813.GA31657@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, peterz@infradead.org, mingo@redhat.com, kernel-team@lge.com
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/6/2017 6:09 AM, Dave Chinner wrote:
-> On Tue, Dec 05, 2017 at 10:07:41AM -0500, Theodore Ts'o wrote:
->> On Tue, Dec 05, 2017 at 02:16:45PM +0900, Byungchul Park wrote:
->>>
->>> Hello,
->>>
->>> I believe that the commit e319e1fbd9d42 "block, locking/lockdep: Assign
->>> a lock_class per gendisk used for wait_for_completion()" solved the
->>> false positive.
->>>
->>> Could you tell me if it doesn't handle it, with the report? Then, I
->>> will follow up and try to solve it.
->>
->> No, it doesn't handle it.  And there was some discussion in the linked
->> thread on the xfs mailing list that seemed to indicate that it was not
->> a complete fix.
+On Tue, Dec 05, 2017 at 09:38:13PM -0700, Ross Zwisler wrote:
+> On Wed, Dec 06, 2017 at 11:29:46AM +1100, Dave Chinner wrote:
+> > On Tue, Dec 05, 2017 at 04:56:51PM -0700, Ross Zwisler wrote:
+> > > Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
+> > > log marks.  It's helpful to allow users of xfs_io to adds these marks from
+> > > within xfs_io instead of waiting until after xfs_io exits because then they
+> > > are able to replay the dm-log-writes log up to immediately after another
+> > > xfs_io operation such as mwrite.  This isolates the log replay from other
+> > > operations that happen as part of xfs_io exiting (file handles being
+> > > closed, mmaps being torn down, etc.).  This also allows users to insert
+> > > multiple marks between different xfs_io commands.
+> > > 
+> > > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> > > Suggested-by: Dave Chinner <david@fromorbit.com>
+> > 
+> > having just looked at the xfs_io mess, this new command needs to set
+> > "exitcode = 1" on failure. I haven't looked at anything else in the
+> > patch.
 > 
-> Well, it uses a static key hidden inside the macro
-> alloc_disk_node(), so every disk allocated from the same callsite
-> points to the same static lockdep map. IOWs, every caller of
-> alloc_disk() (i.e. the vast majority of storage devices) are
-> configured to point at the same static lockdep map, regardless of
-> their location in the storage stack.
-> 
-> The loop device uses alloc_disk().
-> 
-> IOWs, it doesn't address the problem of false positives due to
-> layering in the IO stack at all because we can still have
-> filesystems both above and below the lockdep map that has been
-> attached to the devices...
+> Ah, yea, I did think it was odd that when hitting errors in xfs_io it always
+> still returned 0.  I'll fix up for the next version.  Is someone else working
+> on making the rest of the error cases in xfs_io return 1 as well, or should I
+> throw that at the front of the series?
 
-Hello,
+I sent a patch earlier today to do exactly that.
 
-What if we assign different classes to different loop devices? Do
-you think it helps to avoid such false positives?
+https://marc.info/?l=fstests&m=151252000511167&w=2
 
-I'm not sure since I'm unfamiliar with the stacking stuff. It would
-be appriciated if you let me know your opinion about it.
+Cheers,
 
+Dave.
 -- 
-Thanks,
-Byungchul
+Dave Chinner
+david@fromorbit.com
