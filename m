@@ -1,38 +1,45 @@
-Received: from mx1.redhat.com ([209.132.183.28]:47428 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750989AbdLFI4N (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Dec 2017 03:56:13 -0500
-Date: Wed, 6 Dec 2017 16:56:11 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: btrfs: reproduce a read failure on raid6 setup
-Message-ID: <20171206085611.GT2749@eguan.usersys.redhat.com>
-References: <20171204223323.3710-1-bo.li.liu@oracle.com>
+Received: from mail-qt0-f173.google.com ([209.85.216.173]:35091 "EHLO
+        mail-qt0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754400AbdLFJJW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 04:09:22 -0500
+Received: by mail-qt0-f173.google.com with SMTP id u10so7310145qtg.2
+        for <fstests@vger.kernel.org>; Wed, 06 Dec 2017 01:09:21 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171204223323.3710-1-bo.li.liu@oracle.com>
+In-Reply-To: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
+References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Wed, 6 Dec 2017 10:09:20 +0100
+Message-ID: <CAJfpegtJTAF1JBr380UdAAky+4iXHCxaTWeB9bhFvwm5pVGqAw@mail.gmail.com>
+Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 04, 2017 at 03:33:23PM -0700, Liu Bo wrote:
-> This test case is to reproduce a bug of raid6 reconstruction process.
-> 
-> The kernel fix are
-> Btrfs: do not merge rbios if their fail stripe index are not identical
-> Btrfs: make raid6 rebuild retry more
-> 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+On Tue, Dec 5, 2017 at 9:20 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> Hi All,
+>
+> The master branch on my unionmount-testsuite tree [1] has been updated.
+>
+> The head of the master branch is commit:
+> 6d04664 Add a test for rename over empty union dir
+>
+> This small update contains:
+> - A few new simple dir rename and dir remove tests
+> - A fix for running on kernel <= v4.9 with no redirect_dir support
+> - A new setup option --squashfs to setup lower as read-only squashfs
+>
+> With index enabled, there are no known failures.
+> With index disabled this test fails on non-constant st_ino for lower hardlink
+> copy up:
+>   run --ov=1 --samefs --verify rename-mass-5
+>
+> Thanks,
+> Amir.
+>
+> [1] https://github.com/amir73il/unionmount-testsuite
 
-Test failed as expected with v4.15-rc2 kernel and passed with above
-patches applied.
+Thanks for also taking care of this useful resource!
 
-I fixed two trailing whitespace issues and some of the indentions to
-avoid too-long line, also replaced 'repair' group with a new 'raid'
-group. I think 'repair' group is meant for testing filesystem repair
-tools, not the internal raid repair mechanism, so a new 'raid' group
-looks better to me, as we're having more raid-specific tests recently.
-
-Thanks,
-Eryu
+Miklos
