@@ -1,42 +1,86 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:38902 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753044AbdLFA3t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Dec 2017 19:29:49 -0500
-Date: Wed, 6 Dec 2017 11:29:46 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [xfsprogs PATCH v2 3/3] xfs_io: add a new 'log_writes' command
-Message-ID: <20171206002946.GD5858@dastard>
-References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
- <20171205235651.17102-4-ross.zwisler@linux.intel.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171205235651.17102-4-ross.zwisler@linux.intel.com>
+Received: from mga11.intel.com ([192.55.52.93]:6496 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753125AbdLFAhw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Dec 2017 19:37:52 -0500
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH v5 0/2] add test for DAX MAP_SYNC support
+Date: Tue,  5 Dec 2017 17:37:42 -0700
+Message-Id: <20171206003744.28587-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>
+To: fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 05, 2017 at 04:56:51PM -0700, Ross Zwisler wrote:
-> Add a new 'log_writes' command to xfs_io so that we can add dm-log-writes
-> log marks.  It's helpful to allow users of xfs_io to adds these marks from
-> within xfs_io instead of waiting until after xfs_io exits because then they
-> are able to replay the dm-log-writes log up to immediately after another
-> xfs_io operation such as mwrite.  This isolates the log replay from other
-> operations that happen as part of xfs_io exiting (file handles being
-> closed, mmaps being torn down, etc.).  This also allows users to insert
-> multiple marks between different xfs_io commands.
-> 
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
-> Suggested-by: Dave Chinner <david@fromorbit.com>
+This is the fifth revision of my xfstest adding a test for the new
+mmap() MAP_SYNC flag.  The previous version can be found here:
 
-having just looked at the xfs_io mess, this new command needs to set
-"exitcode = 1" on failure. I haven't looked at anything else in the
-patch.
+https://lists.01.org/pipermail/linux-nvdimm/2017-November/013329.html
 
-Cheers,
+Changes since v4:
+ - Test for dm-log-writes + DAX support in the spirit of
+   _require_scratch_dax() instead of relying on specific module version
+   number. (Eryu)
 
-Dave.
+ - Print out the missing mark name in the error output of
+   _log_writes_replay_log().  (Eryu)
+
+ - Go back to using the output from "du -sh" to test our file block
+   allocations.  The "stat -c %s" I was using in v4 was broken if the
+   file existed and only had partial block allocations, and the number
+   of blocks reported by "stat -c %b" can vary based on the block size.
+
+ - Move the test number to 999 to avoid rebasing collisions.  Feel free
+   to renumber as necessary when merging.
+
+I've updated the links at the bottom of this mail to point to the most
+recent version of my xfsprogs changes and to the current version of this
+series.
+
+---
+
+The purpose of this series is to exercise the new MAP_SYNC mmap()
+functionality [1].  It adds a test which uses dm-log-writes to try and
+replay filesystem metadata operations for a file that is being written via
+mmap().
+
+If MAP_SYNC is active the dm-log-writes replay will recreate the file's
+block allocations and you'll end up with a test file which is a known
+size.
+
+If MAP_SYNC is not active the metadata writes will most likely be lost and
+the replay will either fail to create the test file at all or it will may
+be smaller.  In all of my testing the file simply doesn't exist on the
+replay if MAP_SYNC is ommited.
+
+This test relies on a kernel with both the MAP_SYNC mmap() functionality
+and the DAX enabling in dm-log-writes.  These both appear in kernel
+v4.15-rc*.  For ease of testing I've posted a kernel that is v4.14 plus
+just those two patch series [2].
+
+This test also relies on xfsprogs having support for MAP_SYNC and for
+dm-log-writes.  I've posed a tree adding that support [3].  This xfsprogs
+series is still under review so if the xfs_io interfaces change this
+test will of course need to be updated as well.
+
+Lastly, I've also posted a working version of this series [4].
+
+[1]: https://lists.01.org/pipermail/linux-nvdimm/2017-November/013164.html
+[2]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/linux.git/log/?h=map_sync_dm_log_writes
+[3]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfsprogs-dev.git/log/?h=map_sync_v2
+[4]: https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfstests-dev.git/log/?h=map_sync_test_v5
+
+Ross Zwisler (2):
+  dm-log-writes: only replay log to marks that exist
+  generic: add test for DAX MAP_SYNC support
+
+ common/dmlogwrites    | 24 +++++++++++++++
+ tests/generic/999     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  3 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 110 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
 -- 
-Dave Chinner
-david@fromorbit.com
+2.14.3
+
