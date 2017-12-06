@@ -1,112 +1,265 @@
-Received: from LGEAMRELO13.lge.com ([156.147.23.53]:47033 "EHLO
-        lgeamrelo13.lge.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752355AbdLFHBq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 02:01:46 -0500
-Subject: Re: False lockdep completion splats with loop device
-References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
- <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
- <20171205150741.xsbp4mtilqfrsukl@thunk.org> <20171205210956.GZ5858@dastard>
- <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com>
- <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
-From: Byungchul Park <byungchul.park@lge.com>
-Message-ID: <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
-Date: Wed, 6 Dec 2017 16:01:40 +0900
+Received: from mx1.redhat.com ([209.132.183.28]:57370 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752692AbdLFHLh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Dec 2017 02:11:37 -0500
+Date: Wed, 6 Dec 2017 15:11:35 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/2] overlay/045: add test for syncfs
+Message-ID: <20171206071135.GP2749@eguan.usersys.redhat.com>
+References: <B4077824-4B28-4DC1-9407-33EF2316A4F2@icloud.com>
+ <CAOQ4uximkTSb5R=KwW55-+ekj1HimfYshXwWmngoYyg1cbLjYw@mail.gmail.com>
+ <828CB46A-440A-46CE-9CEF-F3980D36C59B@icloud.com>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <828CB46A-440A-46CE-9CEF-F3980D36C59B@icloud.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, kernel-team@lge.com
+Content-Transfer-Encoding: quoted-printable
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/6/2017 3:31 PM, Amir Goldstein wrote:
-> On Wed, Dec 6, 2017 at 7:01 AM, Byungchul Park <byungchul.park@lge.com> wrote:
->> On 12/6/2017 6:09 AM, Dave Chinner wrote:
->>>
->>> On Tue, Dec 05, 2017 at 10:07:41AM -0500, Theodore Ts'o wrote:
->>>>
->>>> On Tue, Dec 05, 2017 at 02:16:45PM +0900, Byungchul Park wrote:
->>>>>
->>>>>
->>>>> Hello,
->>>>>
->>>>> I believe that the commit e319e1fbd9d42 "block, locking/lockdep: Assign
->>>>> a lock_class per gendisk used for wait_for_completion()" solved the
->>>>> false positive.
->>>>>
->>>>> Could you tell me if it doesn't handle it, with the report? Then, I
->>>>> will follow up and try to solve it.
->>>>
->>>>
->>>> No, it doesn't handle it.  And there was some discussion in the linked
->>>> thread on the xfs mailing list that seemed to indicate that it was not
->>>> a complete fix.
->>>
->>>
->>> Well, it uses a static key hidden inside the macro
->>> alloc_disk_node(), so every disk allocated from the same callsite
->>> points to the same static lockdep map. IOWs, every caller of
->>> alloc_disk() (i.e. the vast majority of storage devices) are
->>> configured to point at the same static lockdep map, regardless of
->>> their location in the storage stack.
->>>
->>> The loop device uses alloc_disk().
->>>
->>> IOWs, it doesn't address the problem of false positives due to
->>> layering in the IO stack at all because we can still have
->>> filesystems both above and below the lockdep map that has been
->>> attached to the devices...
->>
->>
->> Hello,
->>
->> What if we assign different classes to different loop devices? Do
->> you think it helps to avoid such false positives?
->>
->> I'm not sure since I'm unfamiliar with the stacking stuff. It would
->> be appriciated if you let me know your opinion about it.
->>
+On Wed, Dec 06, 2017 at 09:34:51AM +0800, Chengguang Xu wrote:
+>=20
+> > =E5=9C=A8 2017=E5=B9=B412=E6=9C=886=E6=97=A5=EF=BC=8C=E4=B8=8A=E5=8D=88=
+4:38=EF=BC=8CAmir Goldstein <amir73il@gmail.com> =E5=86=99=E9=81=93=EF=BC=
+=9A
+> >=20
+> > On Tue, Dec 5, 2017 at 5:50 PM, Chengguang Xu <cgxu519@icloud.com> wr=
+ote:
+> >> Run syncfs and shutdown upper filesystem to check syncfs result.
+> >>=20
+> >=20
+> > Sorry to be zigzagging you from generic to overlay and back, but the =
+test
+> > you wrote is completely generic, which is a good thing, so it belongs=
+ in
+> > generic IMO.
+> > Eryu?
+>=20
+> If Eryu thinks it=E2=80=99s acceptable, I can move to generic again.
 
-Hello Amir,
+I agreed, if overlay gets proper _require_scratch_shutdown support, test
+should be made generic too.
 
-Thanks a lot for your opinion! See the below.
+>=20
+> >=20
+> >> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+> >> ---
+> >> tests/overlay/045     | 107 ++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+> >> tests/overlay/045.out |   2 +
+> >> tests/overlay/group   |   1 +
+> >> 3 files changed, 110 insertions(+)
+> >> create mode 100755 tests/overlay/045
+> >> create mode 100644 tests/overlay/045.out
+> >>=20
+> >> diff --git a/tests/overlay/045 b/tests/overlay/045
+> >> new file mode 100755
+> >> index 0000000..402a955
+> >> --- /dev/null
+> >> +++ b/tests/overlay/045
+> >> @@ -0,0 +1,107 @@
+> >> +#! /bin/bash
+> >> +# FS QA Test 045
+> >> +#
+> >> +# Inspired by syncfs bug of overlayfs.
+> >> +# Run syncfs and shutdown upper filesystem to check syncfs result.
+> >> +# Test will be skipped if underlying upper filesystem does not supp=
+ort
+> >> +# shutdown or syncfs syscall.
 
-> I believe the problem in the tests is that loop is mistaken for the same
-> class/key as another (underlying) blockdev, where the fs of the loop file
-> resides.
-> 
-> For the first order of resolution, it would be enough to assign a different
-> key to different types of block devices, similar to the struct file_system_type
-> lock class keys.
-> 
-> This would be enough to cover to common case of ext4 over loop inside
-> ext4 over real disk (at least for the completion lockdep warnings).
+It's better to describe the overlay bug more and mention the patch that
+fixed the bug if available. It helps to understand the test, especially
+when you look at some test failures months or years later..
 
-This was already done by the commit e319e1fbd9d42 "block,
-locking/lockdep: Assign a lock_class per gendisk used for
-wait_for_completion()".
+> >> +#
+> >> +#------------------------------------------------------------------=
+-----
+> >> +# Copyright (c) 2017 Chengguang Xu <cgxu519@icloud.com>.
+> >> +# All Rights Reserved.
+> >> +#
+> >> +# This program is free software; you can redistribute it and/or
+> >> +# modify it under the terms of the GNU General Public License as
+> >> +# published by the Free Software Foundation.
+> >> +#
+> >> +# This program is distributed in the hope that it would be useful,
+> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> >> +# GNU General Public License for more details.
+> >> +#
+> >> +# You should have received a copy of the GNU General Public License
+> >> +# along with this program; if not, write the Free Software Foundati=
+on,
+> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> >> +#------------------------------------------------------------------=
+-----
+> >> +#
+> >> +
+> >> +seq=3D`basename $0`
+> >> +seqres=3D$RESULT_DIR/$seq
+> >> +echo "QA output created by $seq"
+> >> +
+> >> +here=3D`pwd`
+> >> +tmp=3D/tmp/$$
+> >> +status=3D0
+> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +       cd /
+> >> +       rm -f $tmp.*
+> >> +}
+> >> +
+> >> +# get standard environment, filters and checks
+> >> +. ./common/rc
+> >> +. ./common/filter
+> >> +
+> >> +# remove previous $seqres.full before test
+> >> +rm -f $seqres.full
+> >> +
+> >> +# real QA test starts here
+> >> +
+> >> +# Modify as appropriate.
+> >> +_supported_fs overlay
+> >> +_supported_os Linux
+> >> +_require_test
+> >> +_require_scratch
+> >> +_require_scratch_shutdown
+> >> +_require_xfs_io_command "syncfs"
+> >> +
+> >> +# if error
 
-> For the second order of resolution it may be desired to assign a different
-> key/class to an instance of loop devices and other stackable block devices
-> (e.g. dm, nbd)  to cover the case of a deeper nested blockdev stack,
-> such as: ext4 over loop inside ext4 over loop inside ext4 over real disk.
+Comments from template, can be removed.
 
-This is what I should do.
+> >> +
+> >> +PREFIX=3D${seq}-testfile
+> >> +TESTFILES=3D${PREFIX}-*
 
-> That should be enough to cover the completion lockdep validation,
-> but it still leaves to problem of the file_system_type lock key, which
-> is still the same for the 2 instances of ext4 in the stack above.
-> For that I suggested a solution similar to
-> b1eaa950f7e9 ovl: lockdep annotate of nested stacked overlayfs inode lock
-> but that will require propagating a "bdev_stack_depth" throughout the
-> block and fs stack and increment it when creating loop or nbd device.
-> 
-> Cheers,
-> Amir.
-> 
+This $TESTFILES usage was not fixed since v1..
 
--- 
+> >> +FCNT=3D1000
+> >> +
+> >> +write_data()
+> >> +{
+> >> +       if [ $1 -eq 0 ]; then
+> >> +               TARGET=3D$TEST_DIR
+> >> +       else
+> >> +               TARGET=3D$SCRATCH_MNT
+> >> +       fi
+> >> +
+> >> +       rm -f $TARGET/$TESTFILES >/dev/null 2>&1
+> >> +       for i in `seq 1 $FCNT`; do
+> >> +               $XFS_IO_PROG -f -c "pwrite 1K 1K" \
+> >> +                               ${TARGET}/${PREFIX}-$i >/dev/null 2>=
+&1
+> >> +       done
+
+It's not clear to me, just from the test, why you need to write many
+small files to trigger the bug. Better to have more comments to explain
+the steps in test.
+
+> >> +}
+> >> +
+> >> +
+> >> +check_data()
+> >> +{
+> >> +       diff -r $TEST_DIR $SCRATCH_MNT
+> >=20
+> > TEST_DIR is typically filled with other stuff, so this won't work.
+> > I would have gone for md5sum -c $TEST_DIR/$seq-md5, but diff
+> > is fine as long as you keep it contained inside $TEST_DIR/$seq-dir
+> > or something.
+>=20
+> In my test it works fine. but as you said it=E2=80=99s better make test=
+ dir inside $TEST_DIR.
+
+I don't think you need $TEST_DIR at all, take a look at src/fssum.c and
+_require_fssum and tests that take use of $FSSUM_PROG, the fssum program
+is used to record & compare checksums of a bunch of files. I guess it
+fits your need perfectly?
+
+>=20
+> >=20
+> >> +       if [ $? -ne 0 ]; then
+> >> +               status=3D1
+> >> +       fi
+> >> +}
+> >> +
+> >> +_scratch_mkfs >/dev/null 2>&1
+> >> +_scratch_mount
+> >> +
+> >> +write_data 0
+> >=20
+> > Why 0/1? pass the TARGET path as argument.
+> > Or use md5sum instead or writing twice.
+>=20
+> Need modify as your advice.
+>=20
+> >=20
+> >> +echo 3 > /proc/sys/vm/drop_caches
+> >=20
+> > Why is this needed? if it is really needed add a comment why
+>=20
+> Main purpose is to mitigate interference from write-back,=20
+> but it seems having side effect to outside, I think if
+> we have enough test files then avoid dropping caches is reasonable.
+> This is also the reason why I=E2=80=99m using diff two directories inst=
+ead of
+> using md5sum to one test file.
+
+Yeah, this is something you need to document as comments in the test :)
+
+>=20
+> >=20
+> >> +
+> >> +write_data 1
+> >> +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT/${PREFIX}-${FCNT} >/dev/null =
+2>&1
+> >> +
+> >> +_scratch_shutdown
+> >> +_scratch_cycle_mount
+> >> +check_data
+> >> +
+> >> +rm -f $TEST_DIR/$TESTFILES >/dev/null 2>&1
+> >> +rm -f $SCRATCH_MNT/$TESTFILES >/dev/null 2>&1
+> >=20
+> > In TEST_DIR we leave garbage behind on purpose, clean the dir (e.g. $=
+seq-dir)
+> > on test start.
+> > scratch gets formatted so you don't need to clean it.
+>=20
+> You are right, I did too much here.
+>=20
+> >=20
+> >> +
+> >> +echo "Silence is golden"
+> >> +exit
+> >> diff --git a/tests/overlay/045.out b/tests/overlay/045.out
+> >> new file mode 100644
+> >> index 0000000..66276cf
+> >> --- /dev/null
+> >> +++ b/tests/overlay/045.out
+> >> @@ -0,0 +1,2 @@
+> >> +QA output created by 045
+> >> +Silence is golden
+> >> diff --git a/tests/overlay/group b/tests/overlay/group
+> >> index b32c6cd..eccd7d0 100644
+> >> --- a/tests/overlay/group
+> >> +++ b/tests/overlay/group
+> >> @@ -47,3 +47,4 @@
+> >> 042 auto quick copyup hardlink
+> >> 043 auto quick copyup nonsamefs
+> >> 044 auto quick copyup hardlink nonsamefs
+> >> +045 auto quick sync
+> >=20
+> > Shutdown group seems in order.
+>=20
+> I think shutdown is a way or method to make this test work,
+> but it seems not purpose of test itself.
+
+shutdown is used to simulate power failure, and all other tests that
+shut the filesystem down are in 'shutdown' group too.
+
 Thanks,
-Byungchul
+Eryu
