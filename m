@@ -1,265 +1,71 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57370 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:35672 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752692AbdLFHLh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Dec 2017 02:11:37 -0500
-Date: Wed, 6 Dec 2017 15:11:35 +0800
+        id S1753643AbdLFHfS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Dec 2017 02:35:18 -0500
+Date: Wed, 6 Dec 2017 15:35:16 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] overlay/045: add test for syncfs
-Message-ID: <20171206071135.GP2749@eguan.usersys.redhat.com>
-References: <B4077824-4B28-4DC1-9407-33EF2316A4F2@icloud.com>
- <CAOQ4uximkTSb5R=KwW55-+ekj1HimfYshXwWmngoYyg1cbLjYw@mail.gmail.com>
- <828CB46A-440A-46CE-9CEF-F3980D36C59B@icloud.com>
+Subject: Re: [PATCH] btrfs/057: Fix test case to work on 64K page size
+Message-ID: <20171206073516.GQ2749@eguan.usersys.redhat.com>
+References: <1512542745-26243-1-git-send-email-harish@linux.vnet.ibm.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <828CB46A-440A-46CE-9CEF-F3980D36C59B@icloud.com>
+In-Reply-To: <1512542745-26243-1-git-send-email-harish@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: Harish <harish@linux.vnet.ibm.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 06, 2017 at 09:34:51AM +0800, Chengguang Xu wrote:
->=20
-> > =E5=9C=A8 2017=E5=B9=B412=E6=9C=886=E6=97=A5=EF=BC=8C=E4=B8=8A=E5=8D=88=
-4:38=EF=BC=8CAmir Goldstein <amir73il@gmail.com> =E5=86=99=E9=81=93=EF=BC=
-=9A
-> >=20
-> > On Tue, Dec 5, 2017 at 5:50 PM, Chengguang Xu <cgxu519@icloud.com> wr=
-ote:
-> >> Run syncfs and shutdown upper filesystem to check syncfs result.
-> >>=20
-> >=20
-> > Sorry to be zigzagging you from generic to overlay and back, but the =
-test
-> > you wrote is completely generic, which is a good thing, so it belongs=
- in
-> > generic IMO.
-> > Eryu?
->=20
-> If Eryu thinks it=E2=80=99s acceptable, I can move to generic again.
+On Wed, Dec 06, 2017 at 12:15:45PM +0530, Harish wrote:
+> On platforms with a page size greater than 4Kb, at the moment btrfs
+> doesn't support a node/leaf size smaller than the page size, but it
+> supports a larger one. So use the max supported node size (64Kb) so
+> that the test runs on any platform currently supported by Linux.
+> 
+> Signed-off-by: Harish <harish@linux.vnet.ibm.com>
 
-I agreed, if overlay gets proper _require_scratch_shutdown support, test
-should be made generic too.
-
->=20
-> >=20
-> >> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
-> >> ---
-> >> tests/overlay/045     | 107 ++++++++++++++++++++++++++++++++++++++++=
-++++++++++
-> >> tests/overlay/045.out |   2 +
-> >> tests/overlay/group   |   1 +
-> >> 3 files changed, 110 insertions(+)
-> >> create mode 100755 tests/overlay/045
-> >> create mode 100644 tests/overlay/045.out
-> >>=20
-> >> diff --git a/tests/overlay/045 b/tests/overlay/045
-> >> new file mode 100755
-> >> index 0000000..402a955
-> >> --- /dev/null
-> >> +++ b/tests/overlay/045
-> >> @@ -0,0 +1,107 @@
-> >> +#! /bin/bash
-> >> +# FS QA Test 045
-> >> +#
-> >> +# Inspired by syncfs bug of overlayfs.
-> >> +# Run syncfs and shutdown upper filesystem to check syncfs result.
-> >> +# Test will be skipped if underlying upper filesystem does not supp=
-ort
-> >> +# shutdown or syncfs syscall.
-
-It's better to describe the overlay bug more and mention the patch that
-fixed the bug if available. It helps to understand the test, especially
-when you look at some test failures months or years later..
-
-> >> +#
-> >> +#------------------------------------------------------------------=
------
-> >> +# Copyright (c) 2017 Chengguang Xu <cgxu519@icloud.com>.
-> >> +# All Rights Reserved.
-> >> +#
-> >> +# This program is free software; you can redistribute it and/or
-> >> +# modify it under the terms of the GNU General Public License as
-> >> +# published by the Free Software Foundation.
-> >> +#
-> >> +# This program is distributed in the hope that it would be useful,
-> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >> +# GNU General Public License for more details.
-> >> +#
-> >> +# You should have received a copy of the GNU General Public License
-> >> +# along with this program; if not, write the Free Software Foundati=
-on,
-> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >> +#------------------------------------------------------------------=
------
-> >> +#
-> >> +
-> >> +seq=3D`basename $0`
-> >> +seqres=3D$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=3D`pwd`
-> >> +tmp=3D/tmp/$$
-> >> +status=3D0
-> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> >> +
-> >> +_cleanup()
-> >> +{
-> >> +       cd /
-> >> +       rm -f $tmp.*
-> >> +}
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/filter
-> >> +
-> >> +# remove previous $seqres.full before test
-> >> +rm -f $seqres.full
-> >> +
-> >> +# real QA test starts here
-> >> +
-> >> +# Modify as appropriate.
-> >> +_supported_fs overlay
-> >> +_supported_os Linux
-> >> +_require_test
-> >> +_require_scratch
-> >> +_require_scratch_shutdown
-> >> +_require_xfs_io_command "syncfs"
-> >> +
-> >> +# if error
-
-Comments from template, can be removed.
-
-> >> +
-> >> +PREFIX=3D${seq}-testfile
-> >> +TESTFILES=3D${PREFIX}-*
-
-This $TESTFILES usage was not fixed since v1..
-
-> >> +FCNT=3D1000
-> >> +
-> >> +write_data()
-> >> +{
-> >> +       if [ $1 -eq 0 ]; then
-> >> +               TARGET=3D$TEST_DIR
-> >> +       else
-> >> +               TARGET=3D$SCRATCH_MNT
-> >> +       fi
-> >> +
-> >> +       rm -f $TARGET/$TESTFILES >/dev/null 2>&1
-> >> +       for i in `seq 1 $FCNT`; do
-> >> +               $XFS_IO_PROG -f -c "pwrite 1K 1K" \
-> >> +                               ${TARGET}/${PREFIX}-$i >/dev/null 2>=
-&1
-> >> +       done
-
-It's not clear to me, just from the test, why you need to write many
-small files to trigger the bug. Better to have more comments to explain
-the steps in test.
-
-> >> +}
-> >> +
-> >> +
-> >> +check_data()
-> >> +{
-> >> +       diff -r $TEST_DIR $SCRATCH_MNT
-> >=20
-> > TEST_DIR is typically filled with other stuff, so this won't work.
-> > I would have gone for md5sum -c $TEST_DIR/$seq-md5, but diff
-> > is fine as long as you keep it contained inside $TEST_DIR/$seq-dir
-> > or something.
->=20
-> In my test it works fine. but as you said it=E2=80=99s better make test=
- dir inside $TEST_DIR.
-
-I don't think you need $TEST_DIR at all, take a look at src/fssum.c and
-_require_fssum and tests that take use of $FSSUM_PROG, the fssum program
-is used to record & compare checksums of a bunch of files. I guess it
-fits your need perfectly?
-
->=20
-> >=20
-> >> +       if [ $? -ne 0 ]; then
-> >> +               status=3D1
-> >> +       fi
-> >> +}
-> >> +
-> >> +_scratch_mkfs >/dev/null 2>&1
-> >> +_scratch_mount
-> >> +
-> >> +write_data 0
-> >=20
-> > Why 0/1? pass the TARGET path as argument.
-> > Or use md5sum instead or writing twice.
->=20
-> Need modify as your advice.
->=20
-> >=20
-> >> +echo 3 > /proc/sys/vm/drop_caches
-> >=20
-> > Why is this needed? if it is really needed add a comment why
->=20
-> Main purpose is to mitigate interference from write-back,=20
-> but it seems having side effect to outside, I think if
-> we have enough test files then avoid dropping caches is reasonable.
-> This is also the reason why I=E2=80=99m using diff two directories inst=
-ead of
-> using md5sum to one test file.
-
-Yeah, this is something you need to document as comments in the test :)
-
->=20
-> >=20
-> >> +
-> >> +write_data 1
-> >> +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT/${PREFIX}-${FCNT} >/dev/null =
-2>&1
-> >> +
-> >> +_scratch_shutdown
-> >> +_scratch_cycle_mount
-> >> +check_data
-> >> +
-> >> +rm -f $TEST_DIR/$TESTFILES >/dev/null 2>&1
-> >> +rm -f $SCRATCH_MNT/$TESTFILES >/dev/null 2>&1
-> >=20
-> > In TEST_DIR we leave garbage behind on purpose, clean the dir (e.g. $=
-seq-dir)
-> > on test start.
-> > scratch gets formatted so you don't need to clean it.
->=20
-> You are right, I did too much here.
->=20
-> >=20
-> >> +
-> >> +echo "Silence is golden"
-> >> +exit
-> >> diff --git a/tests/overlay/045.out b/tests/overlay/045.out
-> >> new file mode 100644
-> >> index 0000000..66276cf
-> >> --- /dev/null
-> >> +++ b/tests/overlay/045.out
-> >> @@ -0,0 +1,2 @@
-> >> +QA output created by 045
-> >> +Silence is golden
-> >> diff --git a/tests/overlay/group b/tests/overlay/group
-> >> index b32c6cd..eccd7d0 100644
-> >> --- a/tests/overlay/group
-> >> +++ b/tests/overlay/group
-> >> @@ -47,3 +47,4 @@
-> >> 042 auto quick copyup hardlink
-> >> 043 auto quick copyup nonsamefs
-> >> 044 auto quick copyup hardlink nonsamefs
-> >> +045 auto quick sync
-> >=20
-> > Shutdown group seems in order.
->=20
-> I think shutdown is a way or method to make this test work,
-> but it seems not purpose of test itself.
-
-shutdown is used to simulate power failure, and all other tests that
-shut the filesystem down are in 'shutdown' group too.
+Looks fine to me. Also cc btrfs list for review.
 
 Thanks,
 Eryu
+
+> ---
+>  tests/btrfs/057     | 7 +++++--
+>  tests/btrfs/057.out | 4 ++--
+>  2 files changed, 7 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/btrfs/057 b/tests/btrfs/057
+> index 8d35579..06b2be9 100755
+> --- a/tests/btrfs/057
+> +++ b/tests/btrfs/057
+> @@ -48,8 +48,11 @@ _require_scratch
+>  
+>  rm -f $seqres.full
+>  
+> -# use small leaf size to get higher btree height.
+> -run_check _scratch_mkfs "-b 1g --nodesize 4096"
+> +# Currently in btrfs the node/leaf size can not be smaller than the page
+> +# size (but it can be greater than the page size). So use the largest
+> +# supported node/leaf size (64Kb) so that the test can run on any platform
+> +# that Linux supports.
+> +run_check _scratch_mkfs "-b 1g --nodesize 65536"
+>  
+>  # inode cache is saved in the FS tree itself for every
+>  # individual FS tree,that affects the sizes reported by qgroup show
+> diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
+> index 60cb92d..f2d9e9c 100644
+> --- a/tests/btrfs/057.out
+> +++ b/tests/btrfs/057.out
+> @@ -1,3 +1,3 @@
+>  QA output created by 057
+> -4096 4096
+> -4096 4096
+> +65536 65536
+> +65536 65536
+> -- 
+> 2.7.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
