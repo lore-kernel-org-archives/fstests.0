@@ -1,206 +1,93 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46690 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752054AbdLFKFy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Dec 2017 05:05:54 -0500
-Date: Wed, 6 Dec 2017 18:05:51 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/3] generic/470: Test RWF_NOWAIT
-Message-ID: <20171206100551.GV2749@eguan.usersys.redhat.com>
-References: <20171129163358.19759-1-rgoldwyn@suse.de>
- <20171129163358.19759-2-rgoldwyn@suse.de>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171129163358.19759-2-rgoldwyn@suse.de>
+Received: from pv43p51im-ztdg06051601.me.com ([17.133.164.142]:33506 "EHLO
+        pv43p51im-ztdg06051601.me.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750989AbdLFM0p (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 07:26:45 -0500
+Content-type: text/plain; charset=gb2312
+MIME-version: 1.0 (Mac OS X Mail 11.1 \(3445.4.7\))
+Subject: Re: [PATCH 1/2] common/rc: Add syncfs check and a helper
+ _scratch_shutdown()
+From: Chengguang Xu <cgxu519@icloud.com>
+In-reply-to: <CAOQ4uxghLNLo3Mj=aLpz7C5Yxve8h1xRuc5=7j6ZcU17qB-ZnA@mail.gmail.com>
+Date: Wed, 06 Dec 2017 20:26:14 +0800
+Content-transfer-encoding: quoted-printable
+Message-id: <420AF7BE-0411-42AC-B689-09A8EF00EA09@icloud.com>
+References: <2D8A66F2-6AB9-4B7D-90B0-D3B6807FB353@icloud.com>
+ <CAOQ4uxi35dTxBJSXPjVnx7Ei+Mfud2370Pikzf6KEESpGLdFog@mail.gmail.com>
+ <20171205171416.GO2749@eguan.usersys.redhat.com>
+ <5AFB9273-A9AE-4E2B-A446-56C465404B85@icloud.com>
+ <CAOQ4uxghLNLo3Mj=aLpz7C5Yxve8h1xRuc5=7j6ZcU17qB-ZnA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: darrick.wong@oracle.com, fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 29, 2017 at 10:33:57AM -0600, Goldwyn Rodrigues wrote:
-> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> 
-> Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
-> on a new file since it requires block allocation.
-> 
-> It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
-> This should succeed.
-> 
-> Finally, read the contents to make sure the overwrite is successful.
-> 
-> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> 
-> Changes since v1:
->  - Fix testdir name
->  - use of $XFS_IO_PROG instead of xfs_io
->  - check pwrite accepts -N
-> 
-> Changes since v2:
->  - corrected test description and improved documentation
->  - new leaner look ;)
->  - rw group
-> ---
->  tests/generic/470     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/470.out | 13 +++++++++
->  tests/generic/group   |  1 +
->  3 files changed, 88 insertions(+)
->  create mode 100755 tests/generic/470
->  create mode 100644 tests/generic/470.out
-> 
-> diff --git a/tests/generic/470 b/tests/generic/470
-> new file mode 100755
-> index 00000000..5580718b
-> --- /dev/null
-> +++ b/tests/generic/470
-> @@ -0,0 +1,74 @@
-> +#! /bin/bash
-> +# FS QA Test No. 470
-> +#
-> +# write a file with RWF_NOWAIT and it would fail because there are no
-> +# blocks allocated. Create a file with direct I/O and re-write it
-> +# using RWF_NOWAIT. I/O should finish within 50 microsecods since
-> +# block allocations are already performed.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/populate
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_odirect
-> +_require_test
-> +_require_xfs_io_command pwrite -N
-> +
-> +# Remove reminiscence of previously run tests
-> +testdir=$TEST_DIR/$seq
-> +if [ -e $testdir ]; then
-> +	rm -Rf $testdir
-> +fi
-> +
-> +mkdir $testdir
-> +
-> +# Create a file with pwrite nowait (will fail with EAGAIN)
-> +$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
+>=20
+> =D4=DA 2017=C4=EA12=D4=C26=C8=D5=A3=AC=CF=C2=CE=E72:40=A3=ACAmir =
+Goldstein <amir73il@gmail.com> =D0=B4=B5=C0=A3=BA
+>=20
+> On Wed, Dec 6, 2017 at 2:59 AM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>=20
+>>> =D4=DA 2017=C4=EA12=D4=C26=C8=D5=A3=AC=C9=CF=CE=E71:14=A3=ACEryu =
+Guan <eguan@redhat.com> =D0=B4=B5=C0=A3=BA
+>>>=20
+>>> On Tue, Dec 05, 2017 at 06:13:35PM +0200, Amir Goldstein wrote:
+>>>> On Tue, Dec 5, 2017 at 5:50 PM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>>>> 1. Add a check case in _require_xfs_io_command() to support =
+syncfs.
+>>>>> 2. Introduce a helper to support scratch shutdown for overlayfs.
+>>>>>=20
+>>>>> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+>>>>> ---
+>>>>> common/rc | 22 ++++++++++++++++++++--
+>>>>> 1 file changed, 20 insertions(+), 2 deletions(-)
+>>>>>=20
+>>>>> diff --git a/common/rc b/common/rc
+>>>>> index 4c053a5..e36ee24 100644
+>>>>> --- a/common/rc
+>>>>> +++ b/common/rc
+>>>>> @@ -669,6 +669,21 @@ _scratch_cleanup_files()
+>>>>>       esac
+>>>>> }
+>>>>>=20
+>>>>> +_scratch_shutdown()
+>>>>> +{
+>>>>> +
+>>>>> +       case $FSTYP in
+>>>>> +       overlay)
+>>>>=20
+>>>> Looks good,
+>>>> but first you need to check for [ -z "$OVL_BASE_SCRATCH_MNT" ]
+>>>> meaning that tester is using "old" overlay config and we are not =
+allowed to
+>>>> mess with base fs.
+>>>=20
+>>> Agreed, we don't want to shutdown the root fs accidently.
+>>=20
+>> If "$OVL_BASE_SCRATCH_MNT=A1=B1 is nothing, godown command should =
+fail for improper param, right?
+>> I don=A1=AFt clearly know how it makes rootfs shutdown.
+>> you mean I need to check for [ "$OVL_BASE_SCRATCH_MNT=A1=B1 =3D =A1=B0/=
+=A1=B0 ] ?
+>>=20
+>=20
+> Sorry, I meant you need to check if OVL_BASE_SCRATCH_DEV is not empty.
+> OVL_BASE_SCRATCH_MNT will always be valid dir, but either user set it
+> with old configuration, e.g.:
+> SCRATCH_DEV=3D/my/ovl/root
+> FSTYP=3Doverlay
+>=20
+> OR xfstests mounted a base fs with new overlay configuration, e.g.:
+> SCRATCH_DEV=3D/dev/my-ovl-bdev
+> SCRATCH_MNT=3D/my/ovl/root
+> FSTYP=3Dxfs
+>=20
+> If you shutdown OVL_BASE_SCRATCH_MNT in the first case, you may
+> shutdown the fs of the host running the test.
 
-It's weird that I got "Operation not supported" message here and test
-failed as
+I=A1=AFve got your point now, thanks.
 
-@@ -1,5 +1,5 @@
- QA output created by 470
--pwrite: Resource temporarily unavailable
-+pwrite: Operation not supported
- wrote 8388608/8388608 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- RWF_NOWAIT time is within limits.
-
-I was using latest for-next branch of upstream xfsprogs, and a
-pre-v4.15-rc1 kernel shipped by Fedora rawhide. A simple test showed:
-
-rm -f /mnt/xfs/testfile
-xfs_io -fdc "pwrite -N -V 1 -b 4k 0 4k" /mnt/xfs/testfile
-pwrite: Operation not supported
-
-But an strace run showed pwritev2 did -1 and set EAGAIN as errno, but
-printed "Operation not supported" as error message:
-...
-pwritev2(3, [{iov_base="\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315"..., iov_len=4096}], 1, 0, RWF_NOWAIT) = -1 EAGAIN (Resource temporarily unavailable)
-dup(2)                                  = 4
-fcntl(4, F_GETFL)                       = 0x402 (flags O_RDWR|O_APPEND)
-openat(AT_FDCWD, "/usr/share/locale/en_US.UTF-8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-openat(AT_FDCWD, "/usr/share/locale/en_US.utf8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-openat(AT_FDCWD, "/usr/share/locale/en_US/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-openat(AT_FDCWD, "/usr/share/locale/en.UTF-8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-openat(AT_FDCWD, "/usr/share/locale/en.utf8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-openat(AT_FDCWD, "/usr/share/locale/en/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-fstat(4, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
-write(4, "pwrite: Operation not supported\n", 32pwrite: Operation not supported
-...
-
-Not sure what happened yet, did I miss anything?
-
-> +
-> +# Write the file without nowait
-> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1 | _filter_xfs_io
-
-I think "-w" (fdatasync) can be removed? We already use "-W" (fsync) here.
-
-> +
-> +time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
-> +
-> +# RWF_NOWAIT should finish within a short period of time. Anything longer
-> +# means it is waiting for something in the kernel which would be a fail.
-> +if (( $(echo "$time_taken < 0.05" | bc -l) )); then
-
-Better to describe where does this 0.05 come from.
 
 Thanks,
-Eryu
-
-> +	echo "RWF_NOWAIT time is within limits."
-> +else
-> +	echo "RWF_NOWAIT took $time_taken seconds"
-> +fi
-> +
-> +$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/470.out b/tests/generic/470.out
-> new file mode 100644
-> index 00000000..e46622cb
-> --- /dev/null
-> +++ b/tests/generic/470.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 470
-> +pwrite: Resource temporarily unavailable
-> +wrote 8388608/8388608 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +RWF_NOWAIT time is within limits.
-> +00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +*
-> +00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
-> +*
-> +00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-> +*
-> +read 8388608/8388608 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 6c3bb03a..cf8529ea 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -472,3 +472,4 @@
->  467 auto quick exportfs
->  468 shutdown auto quick metadata
->  469 auto quick
-> +470 auto quick rw
-> -- 
-> 2.14.2
-> 
+Chengguang.=
