@@ -1,117 +1,89 @@
-Received: from mail-yb0-f194.google.com ([209.85.213.194]:36223 "EHLO
-        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752437AbdLFTOM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 14:14:12 -0500
+Received: from mga09.intel.com ([134.134.136.24]:26055 "EHLO mga09.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751208AbdLFUKQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Dec 2017 15:10:16 -0500
+Date: Wed, 6 Dec 2017 13:10:14 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [xfsprogs PATCH v2 1/3] xfs_io: fix compiler warnings in
+ getfsmap code
+Message-ID: <20171206201014.GA27401@linux.intel.com>
+References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
+ <20171205235651.17102-2-ross.zwisler@linux.intel.com>
+ <20171206002743.GC5858@dastard>
 MIME-Version: 1.0
-In-Reply-To: <20171206181700.GA7967@redhat.com>
-References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
- <20171206181700.GA7967@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 6 Dec 2017 21:14:11 +0200
-Message-ID: <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
-Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <20171206002743.GC5858@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Content-Transfer-Encoding: quoted-printable
+To: Dave Chinner <david@fromorbit.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, "Darrick J . Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 6, 2017 at 8:17 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> On Tue, Dec 05, 2017 at 10:20:25PM +0200, Amir Goldstein wrote:
->> Hi All,
->>
->> The master branch on my unionmount-testsuite tree [1] has been updated.
->>
->> The head of the master branch is commit:
->> 6d04664 Add a test for rename over empty union dir
->>
->> This small update contains:
->> - A few new simple dir rename and dir remove tests
->> - A fix for running on kernel <= v4.9 with no redirect_dir support
->> - A new setup option --squashfs to setup lower as read-only squashfs
->>
->
-> Hi Amir,
->
-> It would be nice to also update README file and explain different options.
+On Wed, Dec 06, 2017 at 11:27:43AM +1100, Dave Chinner wrote:
+> On Tue, Dec 05, 2017 at 04:56:49PM -0700, Ross Zwisler wrote:
+> > I recently upgraded my compiler from
+> > 	gcc (GCC) 6.4.1 20170727 (Red Hat 6.4.1-1)
+> > to
+> > 	gcc (GCC) 7.2.1 20170915 (Red Hat 7.2.1-2)
+> > and started getting a bunch of compiler warnings in io/fsmap.c:
+> >=20
+> >   fsmap.c: In function =E2=80=98fsmap_f=E2=80=99:
+> >   fsmap.c:228:40: warning: =E2=80=98%lld=E2=80=99 directive output ma=
+y be truncated writing
+> >   between 1 and 17 bytes into a region of size between 12 and 28
+> >   [-Wformat-truncation=3D]
+> >      snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
+> >   ^~~~
+> >   fsmap.c:228:32: note: directive argument in the range [0, 360287970=
+18963967]
+> >      snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
+> >   ^~~~~~~~~~~~~~~
+> >   fsmap.c:228:3: note: =E2=80=98snprintf=E2=80=99 output between 8 an=
+d 40 bytes into a
+> >   destination of size 32
+> >      snprintf(bbuf, sizeof(bbuf), "[%lld..%lld]:",
+> >      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >   (long long)BTOBBT(p->fmr_physical),
+> >   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >   (long long)BTOBBT(p->fmr_physical + p->fmr_length - 1));
+> >   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> >=20
+> > The issue is that 'bbuf' is only defined to be 32 characters wide, bu=
+t each
+> > signed long long can potentially print as many as 19 characters
+> > (9223372036854775807 is the max value).  The format we're using for b=
+buf is
+> > "[%lld..%lld]:" which has 2 signed long longs plus 6 other characters
+> > "[..]:\0", which means it's possible we'll print up to 44 characters,
+> > overflowing our 32 char buffer.
+> >=20
+> > Fix this by bumping all the buffer sizes in dump_map_verbose() to 64
+> > characters.
+> >=20
+> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> > Cc: Darrick J. Wong <darrick.wong@oracle.com>
+> > Fixes: 3fcab549a234 ("xfs_io: support the new getfsmap ioctl")
+>=20
+> FYI, I posted a fix for this weeks ago. I think Eric has already
+> picked it up, but it hasn't been pushed out into the for-next branch
+> yet.
 
-Yes, that would be nice... will get to it some day if someone doesn't
-beat me to it.
+I'm seeing similar new compiler warnings when compiling xfstests:
 
->
-> Also, how to test with different mount options enabled/disable (index,
-> redirect etc).
->
+write_log.c: In function =E2=80=98wlog_open=E2=80=99:
+write_log.c:124:37: warning: =E2=80=98%s=E2=80=99 directive writing up to=
+ 1023 bytes into a region of size 224 [-Wformat-overflow=3D]
+    "Could not open write_log - open(%s, %#o, %#o) failed:  %s\n",
+                                     ^~
+write_log.c:124:4: note: directive argument in the range [1089, 2047]
+    "Could not open write_log - open(%s, %#o, %#o) failed:  %s\n",
+    ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A preview for README:
-Basically, the testsuite tests for correctness, so if correctness requires
-enabling a feature, then testsuite will fail without the feature, but there are
-some historical exceptions:
-- testsuite predates redirect_dir, so I let the testsuite auto detect
-redirect_dir
-  and kept the "expect EXDEV" logic for redirect_dir disabled
-- until quite recently st_ino was not constant on copy up in most cases,
-  so the verification of constant ino was added as an opt-in feature
-with --verify
+etc.
 
+I don't see any patches posted that fix these, as of yet.  As far as you =
+know,
+am I correct in thinking that these still need to be fixed?
 
->> With index enabled, there are no known failures.
->> With index disabled this test fails on non-constant st_ino for lower hardlink
->> copy up:
->>   run --ov=1 --samefs --verify rename-mass-5
-
-Thus, this test fails because with index disabled, hardlink is broken on copy up
-and does not preserve st_ino.
-
->
-> I ran "./run --ov" and that seems to fail with 4.15.0-rc2 kernel.
->
-> # ./run --ov
-> ***
-> *** ./run --ov --ts=0 open-plain
-> ***
-> TEST open-plain.py:10: Open O_RDONLY
-> /mnt/a/foo100: File on unexpected layer
->
-
-Yes... sorry about that.
-I had this patch that adapts layer checks to anonymous bdev for lower layer
-for a while and was holding on to it until anonymous bdev was merged.
-Finally, anonymous bdev was merged to 4.15.0-rc1, but forgot to
-include the patch
-in the update, so here goes:
-
-The new head of the master branch is:
-
-commit 15670582f2eca275f4ae0811f7b795e5b083de33
-Author: Amir Goldstein <amir73il@gmail.com>
-Date:   Fri Jun 23 16:08:49 2017 +0300
-
-    Update layer check for non samefs --verify case
-
-    With samefs setup, files are on overlay st_dev if st_ino is constant
-    on copy up and on real st_dev if st_ino is not constant.
-    --verify verifies constant st_ino, so it implies overlay st_dev check.
-    Without --verify, we allow for both options.
-
-    With non samefs setup, files are on pseudo or upper st_dev if st_ino
-    is constant on copy up and on lower or upper st_dev otherwise.
-    --verify verifies constant st_ino, so it implies pseudo st_dev check.
-    Without --verify we allow for both options.
-
-    Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-
-As far as I tested, this works well on 4.15.0-rc1, v4.14, v4.13, v4.12
-without --verify and with or without --samefs.
---verify [--samefs] passes on 4.15.0-rc1 and fails on older kernels
-depending on the type of constant st_ino support in those kernels/features.
-
-Please note that --verify checks for constant st_ino, but does NOT check for
-constant st_dev, but it does have some convoluted sanity checks about st_dev,
-which try to comply with a wide range of kernels, which is what this
-last patch is
-all about.
-
-Thanks to Chandan for his help reviewing and testing this patch.
-
-Amir.
+- Ross
