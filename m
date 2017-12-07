@@ -1,55 +1,72 @@
-Received: from bombadil.infradead.org ([65.50.211.133]:48810 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754518AbdLGOxg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Dec 2017 09:53:36 -0500
-Date: Thu, 7 Dec 2017 15:53:25 +0100
-From: Peter Zijlstra <peterz@infradead.org>
-Subject: Re: False lockdep completion splats with loop device
-Message-ID: <20171207145325.47bt3wdd3pm4rvxu@hirez.programming.kicks-ass.net>
-References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
- <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
- <20171205150741.xsbp4mtilqfrsukl@thunk.org>
- <20171205210956.GZ5858@dastard>
- <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com>
- <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
- <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
- <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
- <CAOQ4uxi76Er-a4-oejA894ws4t5w1OvLFBofJG03Tf6Ot+Usdg@mail.gmail.com>
- <20171207143329.ioir5cx3fzyqpo4g@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171207143329.ioir5cx3fzyqpo4g@thunk.org>
+Received: from mx2.suse.de ([195.135.220.15]:51139 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932988AbdLGQAw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Dec 2017 11:00:52 -0500
+From: Goldwyn Rodrigues <rgoldwyn@suse.de>
+Subject: [PATCH v4 1/3] Check pwrite parameters
+Date: Thu,  7 Dec 2017 10:00:42 -0600
+Message-Id: <20171207160044.8913-1-rgoldwyn@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Amir Goldstein <amir73il@gmail.com>, Byungchul Park <byungchul.park@lge.com>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, mingo@redhat.com, kernel-team@lge.com
+To: fstests@vger.kernel.org
+Cc: eguan@redhat.com, darrick.wong@oracle.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 07, 2017 at 09:33:29AM -0500, Theodore Ts'o wrote:
-> Let me ask a potentially stupid question, Can someone give an example
-> of the problem this completion lockdep is actually trying to *catch*.
-> The lockdep message is sufficiently confusing it's not even clear what
-> *good* it is in the first place.
+From: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
+There are some parameters added with xfs_io. Check if the pwrite
+parameters are available. For some cases, xfs_io now returns "command
+-%c not supported", so added "not supported" to count as error.
 
-	lock(A)			lock(A)
-	wait_for_completion(C)	complete(C);
+Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
 
+Changes since v3:
+ - pwrite -N check to add -V parameters to check on pwritev2()
 
-> Is there an example of a bug that this lockdep feature hasf actually
-> caught in real life, as opposed to false positives?
+---
+ common/rc | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-Yes, it caught a fair bunch of real deadlocks in cpu hotplug, watchdog,
-and other places I can't remember.
+diff --git a/common/rc b/common/rc
+index 4c053a53..4f4b9e10 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2035,6 +2035,7 @@ _require_xfs_io_command()
+ 	shift
+ 	local param="$*"
+ 	local param_checked=0
++	local opts=""
+ 
+ 	testfile=$TEST_DIR/$$.xfs_io
+ 	case $command in
+@@ -2079,6 +2080,17 @@ _require_xfs_io_command()
+ 		echo $testio | grep -q "invalid option" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
++	"pwrite")
++		# -N (RWF_NOWAIT) only works with direct I/O writes
++		local pwrite_opts=" "
++		if [ "$param" == "-N" ]; then
++			opts+=" -d"
++			pwrite_opts+="-V 1 -b 4k"
++		fi
++		testio=`$XFS_IO_PROG -f $opts -c \
++		        "pwrite $pwrite_opts $param 0 4k" $testfile 2>&1`
++		param_checked=1
++		;;
+ 	"scrub"|"repair")
+ 		testio=`$XFS_IO_PROG -x -c "$command probe 0" $TEST_DIR 2>&1`
+ 		echo $testio | grep -q "Inappropriate ioctl" && \
+@@ -2109,7 +2121,9 @@ _require_xfs_io_command()
+ 		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	else
+-		echo $testio | grep -q "invalid option" && \
++		# xfs_io could result in "command %c not supported" if it was
++		# built on kernels not supporting pwritev2() calls
++		echo $testio | grep -q "\(invalid option\|not supported\)" && \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	fi
+ }
+-- 
+2.14.2
 
-Here's one in the mm:
-
-  https://lkml.kernel.org/r/20171030152200.ayfnewoqkxbuk4zh@hirez.programming.kicks-ass.net
-
-I have at least one open issue in perf that I've no real idea what to do
-about:
-
-  https://lkml.kernel.org/r/20171027153336.GC3857@worktop
-
-
-Yes lockdep is a pain...
