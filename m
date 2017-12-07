@@ -1,109 +1,166 @@
-Received: from mx2.suse.de ([195.135.220.15]:55217 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:55600 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750781AbdLGGzj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Dec 2017 01:55:39 -0500
-Subject: Re: [PATCH v7] generic: initial fiemap range query test
-References: <1512057927-15022-1-git-send-email-nborisov@suse.com>
- <20171206174506.GI19219@magnolia>
- <0d1b5c25-9187-1405-17a2-1e44b65c53a8@suse.com>
- <20171206210659.GE6896@magnolia> <20171206215711.GG5858@dastard>
- <61675ab2-0943-e5d7-8c94-247d3ef68a05@sandeen.net>
- <20171206221603.GH5858@dastard> <20171206224627.GO19219@magnolia>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <ea697081-b253-e0c2-633c-9a58d6bf1ee1@suse.com>
-Date: Thu, 7 Dec 2017 08:55:36 +0200
+        id S1750919AbdLGHNU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Dec 2017 02:13:20 -0500
+Date: Thu, 7 Dec 2017 15:13:17 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 3/3] generic/470: add syncfs test
+Message-ID: <20171207071317.GE2749@eguan.usersys.redhat.com>
+References: <1512613327-218016-1-git-send-email-cgxu519@icloud.com>
+ <1512613327-218016-3-git-send-email-cgxu519@icloud.com>
+ <20171207054418.GC2749@eguan.usersys.redhat.com>
+ <423B3F2E-73F1-4B29-93D7-BC6F1AA6CCC6@icloud.com>
 MIME-Version: 1.0
-In-Reply-To: <20171206224627.GO19219@magnolia>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <423B3F2E-73F1-4B29-93D7-BC6F1AA6CCC6@icloud.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Dec 07, 2017 at 02:20:26PM +0800, Chengguang Xu wrote:
+> >=20
+> > =E5=9C=A8 2017=E5=B9=B412=E6=9C=887=E6=97=A5=EF=BC=8C=E4=B8=8B=E5=8D=88=
+1:44=EF=BC=8CEryu Guan <eguan@redhat.com> =E5=86=99=E9=81=93=EF=BC=9A
+> >=20
+> > On Thu, Dec 07, 2017 at 10:22:07AM +0800, Chengguang Xu wrote:
+> >> Inspired by syncfs bug of overlayfs which does not sync dirtyinodes =
+in
+> >> underlying filesystem.
+> >> Run syncfs and shutdown filesystem(or underlying filesystem of overl=
+ayfs)
+> >> to check syncfs result.
+> >>=20
+> >> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+> >> ---
+> >>=20
+> >> Changes since v1:
+> >> Use fs shutdown and fssum to check syncfs result instead of
+> >> checking delalloc state of extents.
+> >>=20
+> >> tests/generic/470     | 88 +++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+> >> tests/generic/470.out |  2 ++
+> >> tests/generic/group   |  1 +
+> >> 3 files changed, 91 insertions(+)
+> >> create mode 100755 tests/generic/470
+> >> create mode 100644 tests/generic/470.out
+> >>=20
+> >> diff --git a/tests/generic/470 b/tests/generic/470
+> >> new file mode 100755
+> >> index 0000000..b488747
+> >> --- /dev/null
+> >> +++ b/tests/generic/470
+> >> @@ -0,0 +1,88 @@
+> >> +#! /bin/bash
+> >> +# FS QA Test 470
+> >> +#
+> >> +# Inspired by syncfs bug of overlayfs which does not sync dirty ino=
+des in
+> >> +# underlying filesystem.=20
+> >=20
+> > Trailing whitespace in above line.
+> >=20
+> >> +#
+> >> +# Run syncfs and shutdown filesystem(or underlying filesystem of ov=
+erlayfs)
+> >> +# to check syncfs result.
+> >> +#
+> >> +# Test will be skipped if filesystem(or underlying filesystem of ov=
+erlayfs)
+> >> +# does not support shutdown.
+> >> +#
+> >> +#------------------------------------------------------------------=
+-----
+> >> +# Copyright (c) 2017 Chengguang Xu <cgxu519@icloud.com>
+> >> +# All Rights Reserved.
+> >> +#
+> >> +# This program is free software; you can redistribute it and/or
+> >> +# modify it under the terms of the GNU General Public License as
+> >> +# published by the Free Software Foundation.
+> >> +#
+> >> +# This program is distributed in the hope that it would be useful,
+> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> >> +# GNU General Public License for more details.
+> >> +#
+> >> +# You should have received a copy of the GNU General Public License
+> >> +# along with this program; if not, write the Free Software Foundati=
+on,
+> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> >> +#------------------------------------------------------------------=
+-----
+> >> +#
+> >> +
+> >> +seq=3D`basename $0`
+> >> +seqres=3D$RESULT_DIR/$seq
+> >> +echo "QA output created by $seq"
+> >> +
+> >> +here=3D`pwd`
+> >> +tmp=3D/tmp/$$
+> >> +status=3D1
+> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> >> +
+> >> +_cleanup()
+> >> +{
+> >> +	cd /
+> >> +	rm -f $tmp.*
+> >> +}
+> >> +
+> >> +# get standard environment, filters and checks
+> >> +. ./common/rc
+> >> +. ./common/filter
+> >> +
+> >> +# remove previous $seqres.full before test
+> >> +rm -f $seqres.full
+> >> +
+> >> +# real QA test starts here
+> >> +
+> >> +_supported_fs generic
+> >> +_supported_os Linux
+> >> +_require_test
+> >> +_require_fssum
+> >> +_require_scratch
+> >> +_require_scratch_shutdown
+> >> +_require_xfs_io_command "syncfs"
+> >> +
+> >> +
+> >> +FCNT=3D1000
+> >> +
+> >> +_scratch_mkfs >/dev/null 2>&1
+> >> +_scratch_mount
+> >> +
+> >> +# In order to mitigate interference of write-back,
+> >> +# create many files for test.
+> >=20
+> > Sorry, I still don't understand how writeback could interfere this te=
+st
+> > from this comment, what happens if we don't create such files? Why
+> > writing files starting from offset 1k?
+>=20
+> There is no explicit explanation how writeback interferes this case,
+> also there are many triggers make writeback starts syncing work.
+> I just want to increase hit ratio of failure by make many test files,
+> as many as possible, but it=E2=80=99s also limited by time and other re=
+source.
+>=20
+> The reason of offset 1k is same as above, compare to test a normal file=
+,=20
+> I think file with hole can increase failure ratio sometimes.
 
+Yeah, increasing the reproducibility would be a good reason too. Do you
+happen to tune the number of files to see if 1000 is a good fit? e.g.
+with 100 files test reproduced the overlay bug 20% of times, with 1000
+files the reproducibility increased to 80%, etc. And the hole in the
+beginning too, what's the actual impact on the reproducibility?
 
-On  7.12.2017 00:46, Darrick J. Wong wrote:
-> On Thu, Dec 07, 2017 at 09:16:03AM +1100, Dave Chinner wrote:
->> On Wed, Dec 06, 2017 at 04:01:58PM -0600, Eric Sandeen wrote:
->>> On 12/6/17 3:57 PM, Dave Chinner wrote:
->>>
->>>> There's a *simple answer* to this problem: fix the new command's
->>>> output.
->>>>
->>>> That is: the user asked for a specific range, so the command itself
->>>> should trim the map returned by the kernel to only display the exact
->>>> range the user asked for.  Then it doesn't matter if the underlying
->>>> filesystem trims the extents or not, because the we're going to do
->>>> that anyway in userspace.
->>>
->>> I have a different opinion:
->>>
->>> xfs_io is a debugging tool; the fiemap command sends an ioctl to the kernel.
->>>
->>> Ranged fiemap queries are a real thing; you put numbers into the kernel,
->>> and you get numbers out of the kernel.
->>>
->>> IMNSO, xfs_io should present to the user /what the kernel returned/,
->>> and not re-interpret it to fit some other notion of correctness if we
->>> don't like what the kernel told us.
->>
->> I hardly think "trimming to the range the user asked for" is
->> "re-interpreting what the kernel told us". It's limiting output
->> range to exactly what the user asked for - the output is still
->> correct regardless of how it's filtered to match what the user asked
->> for....
-> 
-> ...except that xfs_io is a tool we use to debug the garbage that FIEMAP
-> sprays back at userspace, so it absolutely should not be hiding things
-> like this from the test suite:
-> 
-> $ xfs_io -c "fiemap -va 0k 65k" moofile
-> moo:
->  EXT: FILE-OFFSET               BLOCK-RANGE            TOTAL FLAGS
->    0: [0..18446744073709551615]: 1585456720..1585456719     0 0x301
->    1: [0..129]:                 hole                     130
+And you're right about the test time, usually we want to balance between
+test time and reproducibility too, so we need to tune and measure the
+numbers like test files, loop counts etc.
 
-Isn't there something similar in xfs_bmapi_read:
+I think these are all good comments for test :)
 
-  /* Reading past eof, act as though there's a hole up to end. */
-                if (eof)
-
-                        got.br_startoff = end;
-
-> 
-> (Yay ext4.  WTF does the extent have length 0?)
-> 
-> So.... historically XFS trimmed the FIEMAP results.  Fix the test to
-> reflect the XFS behavior, get ext4 (and btrfs) to fix their weird
-> implementations, and leave xfs_io alone.
-> 
-> (Don't mind me shifting positions. :P)
-> 
-> --D
-> 
->>> If you want to have some user-friendlier behavior where xfs_io layers
->>> behaviors on top of what the kernel provides, then add a "-t" argument for trim,
->>> but hiding ioctl inconsistencies by filtering them through xfs_io sounds
->>> like the wrong approach to me.
->>
->> Just filter the last output in the test, then, so it looks like
->>
->> 2: [128..XXX] data
->>
->> There is absolutely no excuse for creating multiple tests to support
->> a small difference in trailing extent range output from different
->> filesystem.
->>
->> Cheers,
->>
->> Dave.
->> -- 
->> Dave Chinner
->> david@fromorbit.com
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
+Thanks,
+Eryu
