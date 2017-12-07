@@ -1,148 +1,144 @@
-Received: from [122.225.81.134] ([122.225.81.134]:23527 "EHLO
-        juanniu018037.ss.mogujie.org" rhost-flags-FAIL-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1752248AbdLGCXZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 21:23:25 -0500
-From: Chengguang Xu <cgxu519@icloud.com>
-Subject: [PATCH v2 3/3] generic/470: add syncfs test
-Date: Thu,  7 Dec 2017 10:22:07 +0800
-Message-Id: <1512613327-218016-3-git-send-email-cgxu519@icloud.com>
-In-Reply-To: <1512613327-218016-1-git-send-email-cgxu519@icloud.com>
-References: <1512613327-218016-1-git-send-email-cgxu519@icloud.com>
+Received: from mail-yb0-f178.google.com ([209.85.213.178]:38595 "EHLO
+        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752370AbdLGCqx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 21:46:53 -0500
+MIME-Version: 1.0
+In-Reply-To: <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
+References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org> <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
+ <20171205150741.xsbp4mtilqfrsukl@thunk.org> <20171205210956.GZ5858@dastard>
+ <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com> <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
+ <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 7 Dec 2017 04:46:52 +0200
+Message-ID: <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
+Subject: Re: False lockdep completion splats with loop device
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, amir73il@gmail.com
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, Chengguang Xu <cgxu519@icloud.com>
+To: Byungchul Park <byungchul.park@lge.com>
+Cc: Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, kernel-team@lge.com
 List-ID: <fstests@vger.kernel.org>
 
-Inspired by syncfs bug of overlayfs which does not sync dirtyinodes in
-underlying filesystem.
-Run syncfs and shutdown filesystem(or underlying filesystem of overlayfs)
-to check syncfs result.
+On Wed, Dec 6, 2017 at 9:01 AM, Byungchul Park <byungchul.park@lge.com> wrote:
+> On 12/6/2017 3:31 PM, Amir Goldstein wrote:
+>>
+>> On Wed, Dec 6, 2017 at 7:01 AM, Byungchul Park <byungchul.park@lge.com>
+>> wrote:
+>>>
+>>> On 12/6/2017 6:09 AM, Dave Chinner wrote:
+>>>>
+>>>>
+>>>> On Tue, Dec 05, 2017 at 10:07:41AM -0500, Theodore Ts'o wrote:
+>>>>>
+>>>>>
+>>>>> On Tue, Dec 05, 2017 at 02:16:45PM +0900, Byungchul Park wrote:
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> Hello,
+>>>>>>
+>>>>>> I believe that the commit e319e1fbd9d42 "block, locking/lockdep:
+>>>>>> Assign
+>>>>>> a lock_class per gendisk used for wait_for_completion()" solved the
+>>>>>> false positive.
+>>>>>>
+>>>>>> Could you tell me if it doesn't handle it, with the report? Then, I
+>>>>>> will follow up and try to solve it.
+>>>>>
+>>>>>
+>>>>>
+>>>>> No, it doesn't handle it.  And there was some discussion in the linked
+>>>>> thread on the xfs mailing list that seemed to indicate that it was not
+>>>>> a complete fix.
+>>>>
+>>>>
+>>>>
+>>>> Well, it uses a static key hidden inside the macro
+>>>> alloc_disk_node(), so every disk allocated from the same callsite
+>>>> points to the same static lockdep map. IOWs, every caller of
+>>>> alloc_disk() (i.e. the vast majority of storage devices) are
+>>>> configured to point at the same static lockdep map, regardless of
+>>>> their location in the storage stack.
+>>>>
+>>>> The loop device uses alloc_disk().
+>>>>
+>>>> IOWs, it doesn't address the problem of false positives due to
+>>>> layering in the IO stack at all because we can still have
+>>>> filesystems both above and below the lockdep map that has been
+>>>> attached to the devices...
+>>>
+>>>
+>>>
+>>> Hello,
+>>>
+>>> What if we assign different classes to different loop devices? Do
+>>> you think it helps to avoid such false positives?
+>>>
+>>> I'm not sure since I'm unfamiliar with the stacking stuff. It would
+>>> be appriciated if you let me know your opinion about it.
+>>>
+>
+> Hello Amir,
+>
+> Thanks a lot for your opinion! See the below.
+>
+>> I believe the problem in the tests is that loop is mistaken for the same
+>> class/key as another (underlying) blockdev, where the fs of the loop file
+>> resides.
+>>
+>> For the first order of resolution, it would be enough to assign a
+>> different
+>> key to different types of block devices, similar to the struct
+>> file_system_type
+>> lock class keys.
+>>
+>> This would be enough to cover to common case of ext4 over loop inside
+>> ext4 over real disk (at least for the completion lockdep warnings).
+>
+>
+> This was already done by the commit e319e1fbd9d42 "block,
+> locking/lockdep: Assign a lock_class per gendisk used for
+> wait_for_completion()".
+>
 
-Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
----
+Right...
 
-Changes since v1:
-Use fs shutdown and fssum to check syncfs result instead of
-checking delalloc state of extents.
+>> For the second order of resolution it may be desired to assign a different
+>> key/class to an instance of loop devices and other stackable block devices
+>> (e.g. dm, nbd)  to cover the case of a deeper nested blockdev stack,
+>> such as: ext4 over loop inside ext4 over loop inside ext4 over real disk.
+>
+>
+> This is what I should do.
+>
 
- tests/generic/470     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/470.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 91 insertions(+)
- create mode 100755 tests/generic/470
- create mode 100644 tests/generic/470.out
+But that won't help Ted. The test use case doesn't include doubly nested loop,
+very few setups will do that. Maybe xfstests running within a container over
+loop image. I doubt it that setup is common, so until there are nested container
+implementations out there that are using loop image mount, this use case
+is not very interesting.
 
-diff --git a/tests/generic/470 b/tests/generic/470
-new file mode 100755
-index 0000000..b488747
---- /dev/null
-+++ b/tests/generic/470
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test 470
-+#
-+# Inspired by syncfs bug of overlayfs which does not sync dirty inodes in
-+# underlying filesystem. 
-+#
-+# Run syncfs and shutdown filesystem(or underlying filesystem of overlayfs)
-+# to check syncfs result.
-+#
-+# Test will be skipped if filesystem(or underlying filesystem of overlayfs)
-+# does not support shutdown.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Chengguang Xu <cgxu519@icloud.com>
-+# All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_fssum
-+_require_scratch
-+_require_scratch_shutdown
-+_require_xfs_io_command "syncfs"
-+
-+
-+FCNT=1000
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+
-+# In order to mitigate interference of write-back,
-+# create many files for test.
-+for i in `seq 1 $FCNT`; do
-+	$XFS_IO_PROG -f -c "pwrite 1K 1M" \
-+		$SCRATCH_MNT/$i >/dev/null 2>&1
-+done
-+
-+$FSSUM_PROG -ugomAcdES -f -w $TEST_DIR/before_test $SCRATCH_MNT
-+$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT/${FCNT} >/dev/null 2>&1
-+_scratch_shutdown
-+_scratch_cycle_mount
-+$FSSUM_PROG -ugomAcdES -f -w $TEST_DIR/after_test $SCRATCH_MNT
-+diff $TEST_DIR/before_test $TEST_DIR/after_test
-+if [ $? -eq 0 ]; then
-+	status=0
-+fi
-+
-+echo "Silence is golden"
-+exit
-diff --git a/tests/generic/470.out b/tests/generic/470.out
-new file mode 100644
-index 0000000..79fb532
---- /dev/null
-+++ b/tests/generic/470.out
-@@ -0,0 +1,2 @@
-+QA output created by 470
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 6c3bb03..493a44c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -472,3 +472,4 @@
- 467 auto quick exportfs
- 468 shutdown auto quick metadata
- 469 auto quick
-+470 auto quick shutdown sync
--- 
-1.8.3.1
+>
+>> That should be enough to cover the completion lockdep validation,
+>> but it still leaves to problem of the file_system_type lock key, which
+>> is still the same for the 2 instances of ext4 in the stack above.
+>> For that I suggested a solution similar to
+>> b1eaa950f7e9 ovl: lockdep annotate of nested stacked overlayfs inode lock
+>> but that will require propagating a "bdev_stack_depth" throughout the
+>> block and fs stack and increment it when creating loop or nbd device.
+>>
 
+So this in the problem Ted is reporting and it needs to be solved inside
+ext4 and any other fs that can be loop mounted on a file inside same fs type.
+
+The lockdep chain is: ext4/loop -> loop completion -> ext4/real
+but all the internal ext4 locks (i.e. &meta_group_info[i]->alloc_sem) are
+annotated statically for the ext4 fs type, so to fix that need:
+1. ext4 to know it is mounted over loop/nbd
+2. ext4 to annotate all internal locks that surround blockdev I/O as
+    "loop nested"/"not loop nested" like overlayfs does with the vfs locks
+3. if multi nested looped fs is important (not really) then loop/nbd will
+    need to know if its file is on a looped fs and propagate nesting level
+    to ext4
+
+Cheers,
+Amir.
