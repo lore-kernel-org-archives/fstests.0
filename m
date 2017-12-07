@@ -1,150 +1,55 @@
-Received: from mx2.suse.de ([195.135.220.15]:51144 "EHLO mx2.suse.de"
+Received: from mga05.intel.com ([192.55.52.43]:19927 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932988AbdLGQAx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Dec 2017 11:00:53 -0500
-From: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Subject: [PATCH v4 2/3] generic/470: Test RWF_NOWAIT
-Date: Thu,  7 Dec 2017 10:00:43 -0600
-Message-Id: <20171207160044.8913-2-rgoldwyn@suse.de>
-In-Reply-To: <20171207160044.8913-1-rgoldwyn@suse.de>
-References: <20171207160044.8913-1-rgoldwyn@suse.de>
+        id S1750828AbdLGVfJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Dec 2017 16:35:09 -0500
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [PATCH 1/3] xfstests: fix _BSD_SOURCE complier warning
+Date: Thu,  7 Dec 2017 14:35:01 -0700
+Message-Id: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: eguan@redhat.com, darrick.wong@oracle.com, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Goldwyn Rodrigues <rgoldwyn@suse.com>
+When compiling xfstests with either gcc 6.4.1 or 7.2.1 I see the following
+warning:
 
-Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
-on a new file since it requires block allocation.
+In file included from /usr/include/stdio.h:27:0,
+                 from fssum.c:25:
+/usr/include/features.h:148:3: warning: #warning "_BSD_SOURCE and _SVID_SOURCE
+are deprecated, use _DEFAULT_SOURCE" [-Wcpp]
+ # warning "_BSD_SOURCE and _SVID_SOURCE are deprecated, use _DEFAULT_SOURCE"
+   ^~~~~~~
 
-It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
-This should succeed.
+The feature_test_macros(7) man page says this about _BSD_SOURCE:
 
-Finally, read the contents to make sure the overwrite is successful.
+ Since glibc 2.20, this macro is deprecated. It now has the same effect as
+ defining _DEFAULT_SOURCE, but generates a compile-time warning (unless
+ _DEFAULT_SOURCE is also defined). Use _DEFAULT_SOURCE instead.  To allow
+ code that requires _BSD_SOURCE in glibc 2.19 and earlier and
+ _DEFAULT_SOURCE in glibc 2.20 and later to compile without warnings,
+ define both _BSD_SOURCE and _DEFAULT_SOURCE.
 
-Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
+Keep backwards compatibility with older code by defining both _BSD_SOURCE
+and _DEFAULT_SOURCE.
 
-Changes since v3:
- - Better comment with respect to time taken to perform I/O
-
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 ---
- tests/generic/470     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/470.out | 13 +++++++++
- tests/generic/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/generic/470
- create mode 100644 tests/generic/470.out
+ src/fssum.c | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tests/generic/470 b/tests/generic/470
-new file mode 100755
-index 00000000..27342c3d
---- /dev/null
-+++ b/tests/generic/470
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# FS QA Test No. 470
-+#
-+# write a file with RWF_NOWAIT and it would fail because there are no
-+# blocks allocated. Create a file with direct I/O and re-write it
-+# using RWF_NOWAIT. I/O should finish within 50 microsecods since
-+# block allocations are already performed.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/populate
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_odirect
-+_require_test
-+_require_xfs_io_command pwrite -N
-+
-+# Remove reminiscence of previously run tests
-+testdir=$TEST_DIR/$seq
-+if [ -e $testdir ]; then
-+	rm -Rf $testdir
-+fi
-+
-+mkdir $testdir
-+
-+# Create a file with pwrite nowait (will fail with EAGAIN)
-+$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
-+
-+# Write the file without nowait
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1 | _filter_xfs_io
-+
-+time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
-+
-+# RWF_NOWAIT should finish within a short period of time so we are choosing
-+# a conservative value of 50 ms. Anything longer means it is waiting
-+# for something in the kernel which would be a fail.
-+if (( $(echo "$time_taken < 0.05" | bc -l) )); then
-+	echo "RWF_NOWAIT time is within limits."
-+else
-+	echo "RWF_NOWAIT took $time_taken seconds"
-+fi
-+
-+$XFS_IO_PROG -c "pread -v 0 8M" $testdir/f1 | _filter_xfs_io_unique
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/470.out b/tests/generic/470.out
-new file mode 100644
-index 00000000..e46622cb
---- /dev/null
-+++ b/tests/generic/470.out
-@@ -0,0 +1,13 @@
-+QA output created by 470
-+pwrite: Resource temporarily unavailable
-+wrote 8388608/8388608 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+RWF_NOWAIT time is within limits.
-+00000000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+*
-+00200000:  bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb bb  ................
-+*
-+00300000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
-+*
-+read 8388608/8388608 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-diff --git a/tests/generic/group b/tests/generic/group
-index 6c3bb03a..cf8529ea 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -472,3 +472,4 @@
- 467 auto quick exportfs
- 468 shutdown auto quick metadata
- 469 auto quick
-+470 auto quick rw
+diff --git a/src/fssum.c b/src/fssum.c
+index 04052cdc..13111d6f 100644
+--- a/src/fssum.c
++++ b/src/fssum.c
+@@ -17,6 +17,7 @@
+  */
+ #ifdef __linux__
+ #define _BSD_SOURCE
++#define _DEFAULT_SOURCE
+ #define _LARGEFILE64_SOURCE
+ #ifndef _GNU_SOURCE
+ #define _GNU_SOURCE
 -- 
-2.14.2
+2.14.3
 
