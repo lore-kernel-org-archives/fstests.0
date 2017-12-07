@@ -1,106 +1,78 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:29398 "EHLO
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:14863 "EHLO
         ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750993AbdLGXsu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Dec 2017 18:48:50 -0500
-Date: Fri, 8 Dec 2017 10:46:31 +1100
+        by vger.kernel.org with ESMTP id S1751043AbdLGX7Z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Dec 2017 18:59:25 -0500
+Date: Fri, 8 Dec 2017 10:59:22 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
- xfs_io pwrite command)
-Message-ID: <20171207234631.GI5858@dastard>
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
- <20171205211850.GA5858@dastard>
- <20171206002638.GB5858@dastard>
- <20171207140519.GB3486@bfoster.bfoster>
+Subject: Re: False lockdep completion splats with loop device
+Message-ID: <20171207235922.GJ5858@dastard>
+References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org>
+ <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
+ <20171205150741.xsbp4mtilqfrsukl@thunk.org>
+ <20171205210956.GZ5858@dastard>
+ <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com>
+ <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
+ <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
+ <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171207140519.GB3486@bfoster.bfoster>
+In-Reply-To: <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: Ari Sundholm <ari@tuxera.com>, fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Byungchul Park <byungchul.park@lge.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, kernel-team@lge.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 07, 2017 at 09:05:20AM -0500, Brian Foster wrote:
-> On Wed, Dec 06, 2017 at 11:26:38AM +1100, Dave Chinner wrote:
-> > On Wed, Dec 06, 2017 at 08:18:50AM +1100, Dave Chinner wrote:
-> > > On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
-> > > > On 12/05/2017 12:28 AM, Dave Chinner wrote:
-> > > > >On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
-> ...
-> > 
-> > xfs_io: set exitcode on failure appropriately
-> > 
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Many operations don't set the exitcode when they fail, resulting
-> > in xfs_io exiting with a zero (no failure) exit code despite the
-> > command failing and returning an error. Fix this.
-> > 
-> > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> > ---
-> ...
-> > diff --git a/io/copy_file_range.c b/io/copy_file_range.c
-> > index d1dfc5a5e33a..9b737eff4c02 100644
-> > --- a/io/copy_file_range.c
-> > +++ b/io/copy_file_range.c
-> > @@ -92,6 +92,7 @@ copy_range_f(int argc, char **argv)
-> >  	int ret;
-> >  	int fd;
-> >  
-> > +	exitcode = 1;
-> >  	while ((opt = getopt(argc, argv, "s:d:l:")) != -1) {
-> >  		switch (opt) {
-> >  		case 's':
-> > @@ -132,6 +133,8 @@ copy_range_f(int argc, char **argv)
-> >  
-> >  	ret = copy_file_range(fd, &src, &dst, len);
-> >  	close(fd);
-> > +	if (ret >= 0)
-> > +		exitcode = 0;
+On Thu, Dec 07, 2017 at 04:46:52AM +0200, Amir Goldstein wrote:
+> >> For the second order of resolution it may be desired to assign a different
+> >> key/class to an instance of loop devices and other stackable block devices
+> >> (e.g. dm, nbd)  to cover the case of a deeper nested blockdev stack,
+> >> such as: ext4 over loop inside ext4 over loop inside ext4 over real disk.
+> >
+> >
+> > This is what I should do.
+> >
 > 
-> I don't think it's appropriate to blindly overwrite the global exitcode
-> value like this. What about the case where multiple commands are chained
-> together? Should we expect an error code if any of the commands failed
-> or only the last?
-> 
-> For example:
-> 
->   xfs_io -c "pwrite ..." <file>
-> 
-> ... returns an error if the write fails, while:
-> 
->   xfs_io -c "pwrite ..." -c "fadvise ..." <file>
-> 
-> ... would never so long as the fadvise succeeds.
+> But that won't help Ted. The test use case doesn't include doubly nested loop,
+> very few setups will do that. Maybe xfstests running within a container over
+> loop image. I doubt it that setup is common, so until there are nested container
+> implementations out there that are using loop image mount, this use case
+> is not very interesting.
 
-Yup, I mentioned that this would be a problem on IRC. The patch fixes
-the interactive and the single command cases, but won't work for
-chained commands as you rightly point out.
+xfs/073 nests xfs/loop/xfs/loop/xfs/scratchdev
 
-To fix it properly, it's going to take a lot more than 15 minutes of
-time. We're going to have to change how errors are returned to and
-propagated through the libxcmd infrastruture, how we handle "fatal
-error, don't continue" conditions through the libxcmd command loop,
-etc. If we want to stop at the first error, then we've got to go
-change all the return values from xfs_io commands to return non-zero
-on error. We still have to set the exitcode as per this patch,
-because the non-zero return value simply says "stop parsing input"
-and doesn't affect the exit code of the program.
+And I know that people are running with loop devices on XFS as their
+test/scratch devices. That gives us filesystems nested 4 layers deep
+before we even consider what block device the host filesystem is
+sitting on top of.
 
-Given that xfs_quota, xfs_io, xfs_db, and xfs_spaceman all use the
-same libxcmd infrastructure, we've got to make the changes
-consistently across all of those utilities. This will require an
-audit of all the commands first to determine if there's anything
-special in any of those utilities, then changing all the code, then
-testing all the CLI parsing still works correctly.  xfs_quota, as
-usual, will be the problem child that causes us lots of pain here.
+> The lockdep chain is: ext4/loop -> loop completion -> ext4/real
+> but all the internal ext4 locks (i.e. &meta_group_info[i]->alloc_sem) are
+> annotated statically for the ext4 fs type, so to fix that need:
+> 1. ext4 to know it is mounted over loop/nbd
+> 2. ext4 to annotate all internal locks that surround blockdev I/O as
+>     "loop nested"/"not loop nested" like overlayfs does with the vfs locks
 
-I'm not planning on doing all this in the near future, so I did the
-next best thing that would only affect xfs_io behaviour. i.e.
-directly manipulate the exitcode as many of the existing xfs_io
-commands already do.
+*cough*
+
+And so every filesystem would need to do this annotation, because
+they can all sit above/below a loop device. Essentially you are
+suggesting we use superblock-private lockdep class keys rather
+than static global maps as we use now.
+
+That's possible, but it could be messy and we'd have to change all
+the internal locking setup in every filesystem to do this.
+
+And we'd have to do the same thing for all the block devices that
+use completions internally, too because they can also get stacked
+above/below other block devices.
+
+> 3. if multi nested looped fs is important (not really) then loop/nbd will
+>     need to know if its file is on a looped fs and propagate nesting level
+>     to ext4
+
+This functionality is definitely used and needs to be supported by
+the annotations.
 
 Cheers,
 
