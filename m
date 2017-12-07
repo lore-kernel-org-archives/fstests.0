@@ -1,77 +1,63 @@
-Received: from mga05.intel.com ([192.55.52.43]:19927 "EHLO mga05.intel.com"
+Received: from mga01.intel.com ([192.55.52.88]:16443 "EHLO mga01.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750862AbdLGVfJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Dec 2017 16:35:09 -0500
+        id S1752305AbdLGW6i (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Dec 2017 17:58:38 -0500
+Date: Thu, 7 Dec 2017 15:58:37 -0700
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH 2/3] xfstests: fix TagName overflow issues
-Date: Thu,  7 Dec 2017 14:35:02 -0700
-Message-Id: <20171207213503.31070-2-ross.zwisler@linux.intel.com>
-In-Reply-To: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
-References: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH v5 2/2] generic: add test for DAX MAP_SYNC support
+Message-ID: <20171207225837.GA25831@linux.intel.com>
+References: <20171206003744.28587-1-ross.zwisler@linux.intel.com>
+ <20171206003744.28587-3-ross.zwisler@linux.intel.com>
+ <20171207103657.GF2749@eguan.usersys.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171207103657.GF2749@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-The 'TagName' string is defined to be 40 characters in length, but in three
-places we write into it with a format of "(%.39s)".  This can result in a
-string of up to 42 characters, the 39 character user string plus "()\0".
-This overflows TagName, as we see in the new complier warnings from gcc
-7.2.1:
+On Thu, Dec 07, 2017 at 06:36:57PM +0800, Eryu Guan wrote:
 
-iogen.c:1277:6: note: 'sprintf' output between 3 and 42 bytes into a
-destination of size 40
-  sprintf( TagName, "(%.39s)", optarg );
-  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+> Now we have two _require rules to test log_writes dm target:
+> _require_log_writes 	# _notrun explicitly when MOUNT_OPTIONS contains dax
+> _require_log_writes_dax	# _notrun if log-writes target doesn't support dax
+> 
+> I think we can merge the two into one, i.e. extend _require_log_writes
+> to check dax support status only when
+> - MOUNT_OPTIONS contains dax, or
+> - dax is given as a param explicitly, e.g. _require_log_writes dax
+> 
+> So old kernels that don't support dax log-writes still _notrun, and new
+> kernels that have dax log-writes support could run all log-writes tests,
+> like generic/455 and generic/457, in dax environment.
+> 
+> (I did a quick test with generic/45[57] on v4.15-rc2 kernel, 455 always
+> fails due to md5sum mismatch, not sure where the problem is yet; 457 is
+> _notrun, perhaps due to there's no dax support on reflink XFS.)
 
-Fix this by limiting the user string to 37 characters.
+I looked in to generic/455 md5sum mismatch, and it is expected with the
+current DAX support found in dm-log-writes.  The issue is that we snoop I/O,
+but we *don't* snoop the data written by mmap().
 
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
----
- ltp/doio.c      | 2 +-
- ltp/growfiles.c | 2 +-
- ltp/iogen.c     | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+For DAX mmaps, the sync calls msync()/fsync() don't cause writes to the block
+driver of flushed page cache pages as they would in the page cache case.
+Instead the user writes directly into the persistent memory, and all we see is
+a flush call.  For us to properly handle mmap() writes we'll need to catch the
+flush happening in dm-log-writes, iterate through the flushed data and copy it
+into the dm-log-writes log.
 
-diff --git a/ltp/doio.c b/ltp/doio.c
-index dcb3efd8..b9377187 100644
---- a/ltp/doio.c
-+++ b/ltp/doio.c
-@@ -3184,7 +3184,7 @@ char	*opts;
- 			break;
- 
- 		case 'N':
--			sprintf( TagName, "(%.39s)", optarg );
-+			sprintf( TagName, "(%.37s)", optarg );
- 			break;
- 
- 		case 'n':
-diff --git a/ltp/growfiles.c b/ltp/growfiles.c
-index fb91761f..ad1ecdf5 100644
---- a/ltp/growfiles.c
-+++ b/ltp/growfiles.c
-@@ -794,7 +794,7 @@ extern int Forker_npids;	/* num of forked pid, defined in forker.c */
- 			break;
- 
- 		case 'W':
--			sprintf( TagName, "(%.39s)", optarg );
-+			sprintf( TagName, "(%.37s)", optarg );
- 			break;
- 
- 		case 'y':
-diff --git a/ltp/iogen.c b/ltp/iogen.c
-index 1eaab1f0..8fc339e5 100644
---- a/ltp/iogen.c
-+++ b/ltp/iogen.c
-@@ -1274,7 +1274,7 @@ char	*opts;
- 	    break;
- 
- 	case 'N':
--	    sprintf( TagName, "(%.39s)", optarg );
-+	    sprintf( TagName, "(%.37s)", optarg );
- 	    break;
- 
- 	case 'o':
--- 
-2.14.3
+I actually had this implemented in my initial version of the DAX support for
+dm-log-writes, but by the time I was ready to merge the DAX flush path had
+been removed from DM.  See
+commit c3ca015fab6d ("dax: remove the pmem_dax_ops->flush abstraction")
+for more info.
 
+I can look at adding some level of flush support back into DM so we can handle
+this case.  Until/unless that happens, though, I think we should continue to
+make users specifically request DAX+dm-log-writes support that lacks mmap()
+data verfication capabilities via _require_log_writes_dax.
+
+Thank you for the feedback.  I'll post an updated patch that takes care of the
+rest of your comments.
