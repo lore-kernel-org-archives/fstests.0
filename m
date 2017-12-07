@@ -1,211 +1,150 @@
-Received: from mx1.redhat.com ([209.132.183.28]:56858 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752259AbdLGER6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Dec 2017 23:17:58 -0500
-Date: Thu, 7 Dec 2017 12:17:56 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/3] generic/470: Test RWF_NOWAIT
-Message-ID: <20171207041756.GZ2749@eguan.usersys.redhat.com>
-References: <20171129163358.19759-1-rgoldwyn@suse.de>
- <20171129163358.19759-2-rgoldwyn@suse.de>
- <20171206100551.GV2749@eguan.usersys.redhat.com>
- <0de5a92c-5718-6b09-bd8c-6b673f48662c@suse.de>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:42486 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752177AbdLGESG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Dec 2017 23:18:06 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <0de5a92c-5718-6b09-bd8c-6b673f48662c@suse.de>
+In-Reply-To: <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
+References: <20171205030352.6xdopj7cpy5zlwzv@thunk.org> <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
+ <20171205150741.xsbp4mtilqfrsukl@thunk.org> <20171205210956.GZ5858@dastard>
+ <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com> <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
+ <da627345-1356-d0b0-b552-de7e288712f9@lge.com> <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 7 Dec 2017 06:18:04 +0200
+Message-ID: <CAOQ4uxi76Er-a4-oejA894ws4t5w1OvLFBofJG03Tf6Ot+Usdg@mail.gmail.com>
+Subject: Re: False lockdep completion splats with loop device
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Goldwyn Rodrigues <rgoldwyn@suse.de>
-Cc: darrick.wong@oracle.com, fstests@vger.kernel.org, Goldwyn Rodrigues <rgoldwyn@suse.com>
+To: Byungchul Park <byungchul.park@lge.com>
+Cc: Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, kernel-team@lge.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 06, 2017 at 10:35:06AM -0600, Goldwyn Rodrigues wrote:
-> 
-> 
-> On 12/06/2017 04:05 AM, Eryu Guan wrote:
-> > On Wed, Nov 29, 2017 at 10:33:57AM -0600, Goldwyn Rodrigues wrote:
-> >> From: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> >>
-> >> Tests the RWF_NOWAIT flag so the I/O returns immediately with -EAGAIN
-> >> on a new file since it requires block allocation.
-> >>
-> >> It creates a file, syncs it, and overwrites the file with RWF_NOWAIT.
-> >> This should succeed.
-> >>
-> >> Finally, read the contents to make sure the overwrite is successful.
-> >>
-> >> Signed-off-by: Goldwyn Rodrigues <rgoldwyn@suse.com>
-> >>
-> >> Changes since v1:
-> >>  - Fix testdir name
-> >>  - use of $XFS_IO_PROG instead of xfs_io
-> >>  - check pwrite accepts -N
-> >>
-> >> Changes since v2:
-> >>  - corrected test description and improved documentation
-> >>  - new leaner look ;)
-> >>  - rw group
-> >> ---
-> >>  tests/generic/470     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/generic/470.out | 13 +++++++++
-> >>  tests/generic/group   |  1 +
-> >>  3 files changed, 88 insertions(+)
-> >>  create mode 100755 tests/generic/470
-> >>  create mode 100644 tests/generic/470.out
-> >>
-> >> diff --git a/tests/generic/470 b/tests/generic/470
-> >> new file mode 100755
-> >> index 00000000..5580718b
-> >> --- /dev/null
-> >> +++ b/tests/generic/470
-> >> @@ -0,0 +1,74 @@
-> >> +#! /bin/bash
-> >> +# FS QA Test No. 470
-> >> +#
-> >> +# write a file with RWF_NOWAIT and it would fail because there are no
-> >> +# blocks allocated. Create a file with direct I/O and re-write it
-> >> +# using RWF_NOWAIT. I/O should finish within 50 microsecods since
-> >> +# block allocations are already performed.
-> >> +#
-> >> +#-----------------------------------------------------------------------
-> >> +# Copyright (c) 2017, SUSE Linux Products.  All Rights Reserved.
-> >> +#
-> >> +# This program is free software; you can redistribute it and/or
-> >> +# modify it under the terms of the GNU General Public License as
-> >> +# published by the Free Software Foundation.
-> >> +#
-> >> +# This program is distributed in the hope that it would be useful,
-> >> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> >> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> >> +# GNU General Public License for more details.
-> >> +#
-> >> +# You should have received a copy of the GNU General Public License
-> >> +# along with this program; if not, write the Free Software Foundation,
-> >> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> >> +#-----------------------------------------------------------------------
-> >> +
-> >> +seq=`basename $0`
-> >> +seqres=$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +
-> >> +here=`pwd`
-> >> +tmp=/tmp/$$
-> >> +status=1    # failure is the default!
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/populate
-> >> +. ./common/filter
-> >> +. ./common/attr
-> >> +
-> >> +# real QA test starts here
-> >> +_supported_os Linux
-> >> +_require_odirect
-> >> +_require_test
-> >> +_require_xfs_io_command pwrite -N
-> >> +
-> >> +# Remove reminiscence of previously run tests
-> >> +testdir=$TEST_DIR/$seq
-> >> +if [ -e $testdir ]; then
-> >> +	rm -Rf $testdir
-> >> +fi
-> >> +
-> >> +mkdir $testdir
-> >> +
-> >> +# Create a file with pwrite nowait (will fail with EAGAIN)
-> >> +$XFS_IO_PROG -f -d -c "pwrite -N -V 1 -b 1M 0 1M" $testdir/f1
-> > 
-> > It's weird that I got "Operation not supported" message here and test
-> > failed as
-> > 
-> > @@ -1,5 +1,5 @@
-> >  QA output created by 470
-> > -pwrite: Resource temporarily unavailable
-> > +pwrite: Operation not supported
-> >  wrote 8388608/8388608 bytes at offset 0
-> >  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> >  RWF_NOWAIT time is within limits.
-> > 
-> > I was using latest for-next branch of upstream xfsprogs, and a
-> > pre-v4.15-rc1 kernel shipped by Fedora rawhide. A simple test showed:
-> 
-> What is the output of uname -a
-> It should be compatible with 4.13 onward. OTOH, _require_xfs_io_command
-> will catch that.
+On Thu, Dec 7, 2017 at 4:46 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Wed, Dec 6, 2017 at 9:01 AM, Byungchul Park <byungchul.park@lge.com> wrote:
+>> On 12/6/2017 3:31 PM, Amir Goldstein wrote:
+>>>
+>>> On Wed, Dec 6, 2017 at 7:01 AM, Byungchul Park <byungchul.park@lge.com>
+>>> wrote:
+>>>>
+>>>> On 12/6/2017 6:09 AM, Dave Chinner wrote:
+>>>>>
+>>>>>
+>>>>> On Tue, Dec 05, 2017 at 10:07:41AM -0500, Theodore Ts'o wrote:
+>>>>>>
+>>>>>>
+>>>>>> On Tue, Dec 05, 2017 at 02:16:45PM +0900, Byungchul Park wrote:
+>>>>>>>
+>>>>>>>
+>>>>>>>
+>>>>>>> Hello,
+>>>>>>>
+>>>>>>> I believe that the commit e319e1fbd9d42 "block, locking/lockdep:
+>>>>>>> Assign
+>>>>>>> a lock_class per gendisk used for wait_for_completion()" solved the
+>>>>>>> false positive.
+>>>>>>>
+>>>>>>> Could you tell me if it doesn't handle it, with the report? Then, I
+>>>>>>> will follow up and try to solve it.
+>>>>>>
+>>>>>>
+>>>>>>
+>>>>>> No, it doesn't handle it.  And there was some discussion in the linked
+>>>>>> thread on the xfs mailing list that seemed to indicate that it was not
+>>>>>> a complete fix.
+>>>>>
+>>>>>
+>>>>>
+>>>>> Well, it uses a static key hidden inside the macro
+>>>>> alloc_disk_node(), so every disk allocated from the same callsite
+>>>>> points to the same static lockdep map. IOWs, every caller of
+>>>>> alloc_disk() (i.e. the vast majority of storage devices) are
+>>>>> configured to point at the same static lockdep map, regardless of
+>>>>> their location in the storage stack.
+>>>>>
+>>>>> The loop device uses alloc_disk().
+>>>>>
+>>>>> IOWs, it doesn't address the problem of false positives due to
+>>>>> layering in the IO stack at all because we can still have
+>>>>> filesystems both above and below the lockdep map that has been
+>>>>> attached to the devices...
+>>>>
+>>>>
+>>>>
+>>>> Hello,
+>>>>
+>>>> What if we assign different classes to different loop devices? Do
+>>>> you think it helps to avoid such false positives?
+>>>>
+>>>> I'm not sure since I'm unfamiliar with the stacking stuff. It would
+>>>> be appriciated if you let me know your opinion about it.
+>>>>
+>>
+>> Hello Amir,
+>>
+>> Thanks a lot for your opinion! See the below.
+>>
+>>> I believe the problem in the tests is that loop is mistaken for the same
+>>> class/key as another (underlying) blockdev, where the fs of the loop file
+>>> resides.
+>>>
+>>> For the first order of resolution, it would be enough to assign a
+>>> different
+>>> key to different types of block devices, similar to the struct
+>>> file_system_type
+>>> lock class keys.
+>>>
+>>> This would be enough to cover to common case of ext4 over loop inside
+>>> ext4 over real disk (at least for the completion lockdep warnings).
+>>
+>>
+>> This was already done by the commit e319e1fbd9d42 "block,
+>> locking/lockdep: Assign a lock_class per gendisk used for
+>> wait_for_completion()".
+>>
+>
+> Right...
+>
+>>> For the second order of resolution it may be desired to assign a different
+>>> key/class to an instance of loop devices and other stackable block devices
+>>> (e.g. dm, nbd)  to cover the case of a deeper nested blockdev stack,
+>>> such as: ext4 over loop inside ext4 over loop inside ext4 over real disk.
+>>
+>>
+>> This is what I should do.
+>>
+>
+> But that won't help Ted. The test use case doesn't include doubly nested loop,
+> very few setups will do that. Maybe xfstests running within a container over
+> loop image. I doubt it that setup is common, so until there are nested container
+> implementations out there that are using loop image mount, this use case
+> is not very interesting.
+>
+>>
+>>> That should be enough to cover the completion lockdep validation,
+>>> but it still leaves to problem of the file_system_type lock key, which
+>>> is still the same for the 2 instances of ext4 in the stack above.
+>>> For that I suggested a solution similar to
+>>> b1eaa950f7e9 ovl: lockdep annotate of nested stacked overlayfs inode lock
+>>> but that will require propagating a "bdev_stack_depth" throughout the
+>>> block and fs stack and increment it when creating loop or nbd device.
+>>>
+>
+> So this in the problem Ted is reporting and it needs to be solved inside
+> ext4 and any other fs that can be loop mounted on a file inside same fs type.
+>
+> The lockdep chain is: ext4/loop -> loop completion -> ext4/real
+> but all the internal ext4 locks (i.e. &meta_group_info[i]->alloc_sem) are
+> annotated statically for the ext4 fs type, so to fix that need:
+> 1. ext4 to know it is mounted over loop/nbd
+> 2. ext4 to annotate all internal locks that surround blockdev I/O as
+>     "loop nested"/"not loop nested" like overlayfs does with the vfs locks
+> 3. if multi nested looped fs is important (not really) then loop/nbd will
+>     need to know if its file is on a looped fs and propagate nesting level
+>     to ext4
+>
 
-Linux localhost 4.15.0-0.rc0.git6.1.fc28.x86_64 #1 SMP Mon Nov 20 18:08:48 UTC 2017 x86_64 x86_64 x86_64 GNU/Linux
+So maybe a macro for filesystems to annotate internal locks with
+underlying blockdev's gendisk lockdep_map?
 
-_require_xfs_io_command doesn't run "pwrite -N" with "-V 1" option, so
-test there passes, it only fails with vectors specified
+Does that make sense?
 
-# rm /mnt/xfs/testfile
-# xfs_io -fdc "pwrite -N 0 4k" /mnt/xfs/testfile
-wrote 4096/4096 bytes at offset 0
-4 KiB, 1 ops; 0.0000 sec (787.402 KiB/sec and 196.8504 ops/sec)
-# rm /mnt/xfs/testfile
-# xfs_io -fdc "pwrite -N -V 1 0 4k" /mnt/xfs/testfile
-pwrite: Operation not supported
-
-That's why I was asking if we should include "-V 1" in
-_require_xfs_io_command in patch 1.
-
-> 
-> > 
-> > rm -f /mnt/xfs/testfile
-> > xfs_io -fdc "pwrite -N -V 1 -b 4k 0 4k" /mnt/xfs/testfile
-> > pwrite: Operation not supported
-> 
-> For kernels which do not support RWF_NOWAIT, it will return EOPNOTSUPP.
-> 
-> > 
-> > But an strace run showed pwritev2 did -1 and set EAGAIN as errno, but
-> > printed "Operation not supported" as error message:
-> > ...
-> > pwritev2(3, [{iov_base="\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315"..., iov_len=4096}], 1, 0, RWF_NOWAIT) = -1 EAGAIN (Resource temporarily unavailable)
-> > dup(2)                                  = 4
-> > fcntl(4, F_GETFL)                       = 0x402 (flags O_RDWR|O_APPEND)
-> > openat(AT_FDCWD, "/usr/share/locale/en_US.UTF-8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > openat(AT_FDCWD, "/usr/share/locale/en_US.utf8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > openat(AT_FDCWD, "/usr/share/locale/en_US/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > openat(AT_FDCWD, "/usr/share/locale/en.UTF-8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > openat(AT_FDCWD, "/usr/share/locale/en.utf8/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > openat(AT_FDCWD, "/usr/share/locale/en/LC_MESSAGES/libc.mo", O_RDONLY) = -1 ENOENT (No such file or directory)
-> > fstat(4, {st_mode=S_IFCHR|0620, st_rdev=makedev(136, 0), ...}) = 0
-> > write(4, "pwrite: Operation not supported\n", 32pwrite: Operation not supported
-> > ...
-> > 
-> > Not sure what happened yet, did I miss anything?
-> 
-> Did you trim any lines in between? If you had another error in between
-> before you collect -EAGAIN, it most likely overwrote the value. Not sure
-> what is going on though..
-
-No, I didn't trim any lines in between.
-
-> 
-> > 
-> >> +
-> >> +# Write the file without nowait
-> >> +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -W -w -V 1 -b 1M 0 8M" $testdir/f1 | _filter_xfs_io
-> > 
-> > I think "-w" (fdatasync) can be removed? We already use "-W" (fsync) here.
-> > 
-> >> +
-> >> +time_taken=`$XFS_IO_PROG -d -c "pwrite -S 0xbb -N -V 1 -b 1M 2M 1M" $testdir/f1 | awk '/^1/ {print $5}'`
-> >> +
-> >> +# RWF_NOWAIT should finish within a short period of time. Anything longer
-> >> +# means it is waiting for something in the kernel which would be a fail.
-> >> +if (( $(echo "$time_taken < 0.05" | bc -l) )); then
-> > 
-> > Better to describe where does this 0.05 come from.
-> > 
-> 
-> No significance as such, but a conservative value for the operation to
-> be completed. If you want me to explicitly put 50 ms, I can.
-
-There should be a reason for this 50ms estimation. IMHO, as simple as "a
-conservative value for the operation to be completed" would be better
-than nothing :)
-
-Thanks,
-Eryu
+Amir.
