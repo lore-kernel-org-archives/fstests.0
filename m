@@ -1,55 +1,76 @@
 Received: from mga05.intel.com ([192.55.52.43]:19927 "EHLO mga05.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750828AbdLGVfJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Dec 2017 16:35:09 -0500
+        id S1750828AbdLGVfK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 7 Dec 2017 16:35:10 -0500
 From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [PATCH 1/3] xfstests: fix _BSD_SOURCE complier warning
-Date: Thu,  7 Dec 2017 14:35:01 -0700
-Message-Id: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
+Subject: [PATCH 3/3] xfstests: fix Wlog_Error_String overflow issues
+Date: Thu,  7 Dec 2017 14:35:03 -0700
+Message-Id: <20171207213503.31070-3-ross.zwisler@linux.intel.com>
+In-Reply-To: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
+References: <20171207213503.31070-1-ross.zwisler@linux.intel.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 To: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
 Cc: Ross Zwisler <ross.zwisler@linux.intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-When compiling xfstests with either gcc 6.4.1 or 7.2.1 I see the following
-warning:
+The 'Wlog_Error_String' string is defined to be 256 bytes in length, but =
+in
+two places we write into it with a format that contains a string
+(wfile->w_file) that has length 1024.  This can overflow Wlog_Error_Strin=
+g,
+as we see in the new compiler warnings from gcc 7.2.1:
 
-In file included from /usr/include/stdio.h:27:0,
-                 from fssum.c:25:
-/usr/include/features.h:148:3: warning: #warning "_BSD_SOURCE and _SVID_SOURCE
-are deprecated, use _DEFAULT_SOURCE" [-Wcpp]
- # warning "_BSD_SOURCE and _SVID_SOURCE are deprecated, use _DEFAULT_SOURCE"
-   ^~~~~~~
+ write_log.c:124:37: warning: =E2=80=98%s=E2=80=99 directive writing up t=
+o 1023 bytes into
+ a region of size 224 [-Wformat-overflow=3D]
+ "Could not open write_log - open(%s, %#o, %#o) failed:  %s\n",
+  ^~
 
-The feature_test_macros(7) man page says this about _BSD_SOURCE:
-
- Since glibc 2.20, this macro is deprecated. It now has the same effect as
- defining _DEFAULT_SOURCE, but generates a compile-time warning (unless
- _DEFAULT_SOURCE is also defined). Use _DEFAULT_SOURCE instead.  To allow
- code that requires _BSD_SOURCE in glibc 2.19 and earlier and
- _DEFAULT_SOURCE in glibc 2.20 and later to compile without warnings,
- define both _BSD_SOURCE and _DEFAULT_SOURCE.
-
-Keep backwards compatibility with older code by defining both _BSD_SOURCE
-and _DEFAULT_SOURCE.
+Fix this by increasing the length of Wlog_Error_String to 1280 characters
+(1024 for wfile->w_file plus 256 for the rest of the format string), and =
+by
+using snprintf() instead of sprintf() so we are sure we don't overflow.
 
 Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 ---
- src/fssum.c | 1 +
- 1 file changed, 1 insertion(+)
+ lib/write_log.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/src/fssum.c b/src/fssum.c
-index 04052cdc..13111d6f 100644
---- a/src/fssum.c
-+++ b/src/fssum.c
-@@ -17,6 +17,7 @@
-  */
- #ifdef __linux__
- #define _BSD_SOURCE
-+#define _DEFAULT_SOURCE
- #define _LARGEFILE64_SOURCE
- #ifndef _GNU_SOURCE
- #define _GNU_SOURCE
--- 
+diff --git a/lib/write_log.c b/lib/write_log.c
+index 8c921fc5..3bfa8c7b 100644
+--- a/lib/write_log.c
++++ b/lib/write_log.c
+@@ -73,7 +73,8 @@
+ /*#define PATH_MAX pathconf("/", _PC_PATH_MAX)*/
+ #endif
+=20
+-char	Wlog_Error_String[256];
++#define ERROR_STRING_LEN 1280
++char	Wlog_Error_String[ERROR_STRING_LEN];
+=20
+ #if __STDC__
+ static int	wlog_rec_pack(struct wlog_rec *wrec, char *buf, int flag);
+@@ -120,7 +121,7 @@ int			mode;
+ 	umask(omask);
+=20
+ 	if (wfile->w_afd =3D=3D -1) {
+-		sprintf(Wlog_Error_String,
++		snprintf(Wlog_Error_String, ERROR_STRING_LEN,
+ 			"Could not open write_log - open(%s, %#o, %#o) failed:  %s\n",
+ 			wfile->w_file, oflags, mode, strerror(errno));
+ 		return -1;
+@@ -132,7 +133,7 @@ int			mode;
+=20
+ 	oflags =3D O_RDWR;
+ 	if ((wfile->w_rfd =3D open(wfile->w_file, oflags)) =3D=3D -1) {
+-		sprintf(Wlog_Error_String,
++		snprintf(Wlog_Error_String, ERROR_STRING_LEN,
+ 			"Could not open write log - open(%s, %#o) failed:  %s\n",
+ 			wfile->w_file, oflags, strerror(errno));
+ 		close(wfile->w_afd);
+--=20
 2.14.3
 
