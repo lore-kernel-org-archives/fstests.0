@@ -1,123 +1,57 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:39759 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:42783 "EHLO
         ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753112AbdLHWxY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Dec 2017 17:53:24 -0500
-Date: Sat, 9 Dec 2017 09:52:53 +1100
+        by vger.kernel.org with ESMTP id S1753773AbdLHW6u (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Dec 2017 17:58:50 -0500
+Date: Sat, 9 Dec 2017 09:57:57 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
- xfs_io pwrite command)
-Message-ID: <20171208225253.GO4094@dastard>
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
- <20171205211850.GA5858@dastard>
- <20171206002638.GB5858@dastard>
- <20171207140519.GB3486@bfoster.bfoster>
- <20171207234631.GI5858@dastard>
- <20171208141506.GA55826@bfoster.bfoster>
+Subject: Re: False lockdep completion splats with loop device
+Message-ID: <20171208225757.GP4094@dastard>
+References: <de4d8fd6-48a2-60b6-bab4-d2006e48d828@lge.com>
+ <20171205150741.xsbp4mtilqfrsukl@thunk.org>
+ <20171205210956.GZ5858@dastard>
+ <b0efd17c-eb56-36bf-5be0-06e5bba23c06@lge.com>
+ <CAOQ4uxgCREdY5B4TyujM6zi=E7kwcKWpAqJeLaRuLKZBN6=FWQ@mail.gmail.com>
+ <da627345-1356-d0b0-b552-de7e288712f9@lge.com>
+ <CAOQ4uxg8+P1r_z_9DGYCJivBY5EPpVNnDRKxqPoph_J41JrOmQ@mail.gmail.com>
+ <20171207235922.GJ5858@dastard>
+ <20171208001302.GK21978@ZenIV.linux.org.uk>
+ <CAOQ4uxj=amYQBnOrcYTLCs4_8gN_+ZkiRu8u45tOEd+v9mHvtw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171208141506.GA55826@bfoster.bfoster>
+In-Reply-To: <CAOQ4uxj=amYQBnOrcYTLCs4_8gN_+ZkiRu8u45tOEd+v9mHvtw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: Ari Sundholm <ari@tuxera.com>, fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Al Viro <viro@zeniv.linux.org.uk>, Byungchul Park <byungchul.park@lge.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Peter Zijlstra <peterz@infradead.org>, mingo@redhat.com, kernel-team@lge.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 08, 2017 at 09:15:06AM -0500, Brian Foster wrote:
-> On Fri, Dec 08, 2017 at 10:46:31AM +1100, Dave Chinner wrote:
-> > On Thu, Dec 07, 2017 at 09:05:20AM -0500, Brian Foster wrote:
-> > > On Wed, Dec 06, 2017 at 11:26:38AM +1100, Dave Chinner wrote:
-> > > > On Wed, Dec 06, 2017 at 08:18:50AM +1100, Dave Chinner wrote:
-> > > > > On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
-> > > > > > On 12/05/2017 12:28 AM, Dave Chinner wrote:
-> > > > > > >On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
-> > > ...
-> > > > 
-> > > > xfs_io: set exitcode on failure appropriately
-> > > > 
-> > > > From: Dave Chinner <dchinner@redhat.com>
-> > > > 
-> > > > Many operations don't set the exitcode when they fail, resulting
-> > > > in xfs_io exiting with a zero (no failure) exit code despite the
-> > > > command failing and returning an error. Fix this.
-> > > > 
-> > > > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> > > > ---
-> > > ...
-> > > > diff --git a/io/copy_file_range.c b/io/copy_file_range.c
-> > > > index d1dfc5a5e33a..9b737eff4c02 100644
-> > > > --- a/io/copy_file_range.c
-> > > > +++ b/io/copy_file_range.c
-> > > > @@ -92,6 +92,7 @@ copy_range_f(int argc, char **argv)
-> > > >  	int ret;
-> > > >  	int fd;
-> > > >  
-> > > > +	exitcode = 1;
-> > > >  	while ((opt = getopt(argc, argv, "s:d:l:")) != -1) {
-> > > >  		switch (opt) {
-> > > >  		case 's':
-> > > > @@ -132,6 +133,8 @@ copy_range_f(int argc, char **argv)
-> > > >  
-> > > >  	ret = copy_file_range(fd, &src, &dst, len);
-> > > >  	close(fd);
-> > > > +	if (ret >= 0)
-> > > > +		exitcode = 0;
-> > > 
-> > > I don't think it's appropriate to blindly overwrite the global exitcode
-> > > value like this. What about the case where multiple commands are chained
-> > > together? Should we expect an error code if any of the commands failed
-> > > or only the last?
-> > > 
-> > > For example:
-> > > 
-> > >   xfs_io -c "pwrite ..." <file>
-> > > 
-> > > ... returns an error if the write fails, while:
-> > > 
-> > >   xfs_io -c "pwrite ..." -c "fadvise ..." <file>
-> > > 
-> > > ... would never so long as the fadvise succeeds.
-> > 
-> > Yup, I mentioned that this would be a problem on IRC. The patch fixes
-> > the interactive and the single command cases, but won't work for
-> > chained commands as you rightly point out.
-> > 
-> > To fix it properly, it's going to take a lot more than 15 minutes of
-> > time. We're going to have to change how errors are returned to and
-> > propagated through the libxcmd infrastruture, how we handle "fatal
-> > error, don't continue" conditions through the libxcmd command loop,
-> > etc. If we want to stop at the first error, then we've got to go
-> > change all the return values from xfs_io commands to return non-zero
-> > on error. We still have to set the exitcode as per this patch,
-> > because the non-zero return value simply says "stop parsing input"
-> > and doesn't affect the exit code of the program.
-> > 
-> > Given that xfs_quota, xfs_io, xfs_db, and xfs_spaceman all use the
-> > same libxcmd infrastructure, we've got to make the changes
-> > consistently across all of those utilities. This will require an
-> > audit of all the commands first to determine if there's anything
-> > special in any of those utilities, then changing all the code, then
-> > testing all the CLI parsing still works correctly.  xfs_quota, as
-> > usual, will be the problem child that causes us lots of pain here.
-> > 
-> > I'm not planning on doing all this in the near future, so I did the
-> > next best thing that would only affect xfs_io behaviour. i.e.
-> > directly manipulate the exitcode as many of the existing xfs_io
-> > commands already do.
-> > 
+On Fri, Dec 08, 2017 at 10:15:07AM +0200, Amir Goldstein wrote:
+> On Fri, Dec 8, 2017 at 2:13 AM, Al Viro <viro@zeniv.linux.org.uk> wrote:
+> > On Fri, Dec 08, 2017 at 10:59:22AM +1100, Dave Chinner wrote:
+> >
+> >> > 3. if multi nested looped fs is important (not really) then loop/nbd will
+> >> >     need to know if its file is on a looped fs and propagate nesting level
+> >> >     to ext4
+> >>
+> >> This functionality is definitely used and needs to be supported by
+> >> the annotations.
+> >
+> > FWIW, in addition to loop, there's md.
 > 
-> Sure, I don't dispute the broader work required to fix everything up
-> properly and I don't take issue with modifying exitcode directly in
-> principle. I just don't see how any of this necessitates breaking the
-> chained command case for the those commands that we are trying to fix
-> up, particularly when the problem seems easily avoidable. See below for
-> a tweak to the fadvise example..
+> Do you mean md can sit on a file directly without loop/nbd?
+> I am referring to loop/nbd, because those are the only ones I know
+> of that can be used to nest (non stackable) fs over fs.
 
-You're welcome to do this - I just threw out a quick patch that
-makes the code *less broken* rather than perfect. exit codes for
-chained commands are already somewhat broken, so what I did doesn't
-make the state of affairs any worse.
+The problem is one of stacked completions, not loop/nbd devices. The
+loop and nbd devices are just the simplest way to stack completions.
+MD can sit on MD and other devices in complex stacks, so if there's
+completion in MD, we have the same completion layering problem.
+
+i.e. this is *not specifically a filesystem problem*. This is a
+completion stacking problem, and lots of different layers in the
+storage stack use completions and can be layered in arbitrary
+orders. MD and DM are jsut two more virtual block devices that can
+stack in random orders.
 
 Cheers,
 
