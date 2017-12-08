@@ -1,77 +1,28 @@
-Received: from mail-yb0-f178.google.com ([209.85.213.178]:37009 "EHLO
-        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754545AbdLHQ3z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Dec 2017 11:29:55 -0500
+Received: from mga02.intel.com ([134.134.136.20]:45440 "EHLO mga02.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752100AbdLHRrs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 8 Dec 2017 12:47:48 -0500
+Date: Fri, 8 Dec 2017 10:47:47 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH v6 2/2] generic: add test for DAX MAP_SYNC support
+Message-ID: <20171208174747.GA4308@linux.intel.com>
+References: <20171207103657.GF2749@eguan.usersys.redhat.com>
+ <20171207231950.9023-1-ross.zwisler@linux.intel.com>
+ <20171208063610.GH2749@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
-References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
- <20171206181700.GA7967@redhat.com> <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 8 Dec 2017 18:29:53 +0200
-Message-ID: <CAOQ4uxjM6ZLcyU5-nQXz=T98kuhMrCJ+1df85-19QJQjrr7JiA@mail.gmail.com>
-Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171208063610.GH2749@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 6, 2017 at 9:14 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Wed, Dec 6, 2017 at 8:17 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
->> On Tue, Dec 05, 2017 at 10:20:25PM +0200, Amir Goldstein wrote:
->>> Hi All,
->>>
->>> The master branch on my unionmount-testsuite tree [1] has been updated.
->>>
->>> The head of the master branch is commit:
->>> 6d04664 Add a test for rename over empty union dir
->>>
->>> This small update contains:
->>> - A few new simple dir rename and dir remove tests
->>> - A fix for running on kernel <= v4.9 with no redirect_dir support
->>> - A new setup option --squashfs to setup lower as read-only squashfs
->>>
->>
->> Hi Amir,
->>
->> It would be nice to also update README file and explain different options.
->
-> Yes, that would be nice... will get to it some day if someone doesn't
-> beat me to it.
->
->>
->> Also, how to test with different mount options enabled/disable (index,
->> redirect etc).
->>
->
-> A preview for README:
-> Basically, the testsuite tests for correctness, so if correctness requires
-> enabling a feature, then testsuite will fail without the feature, but there are
-> some historical exceptions:
-> - testsuite predates redirect_dir, so I let the testsuite auto detect
-> redirect_dir
->   and kept the "expect EXDEV" logic for redirect_dir disabled
-> - until quite recently st_ino was not constant on copy up in most cases,
->   so the verification of constant ino was added as an opt-in feature
-> with --verify
->
->
->>> With index enabled, there are no known failures.
->>> With index disabled this test fails on non-constant st_ino for lower hardlink
->>> copy up:
->>>   run --ov=1 --samefs --verify rename-mass-5
->
-> Thus, this test fails because with index disabled, hardlink is broken on copy up
-> and does not preserve st_ino.
->
+On Fri, Dec 08, 2017 at 02:36:10PM +0800, Eryu Guan wrote:
 
-Vivek,
+> (Test was re-numbered as generic/470, BTW.)
 
-I added documentation about all the features I added to unionmount-testsuite at:
-https://github.com/amir73il/overlayfs/wiki/Overlayfs-testing#Unionmount_testsuite
-
-Will add that link to README on the next master branch update.
-Let me know if there is anything missing for you in this wiki page.
-
-Thanks,
-Amir.
+Thanks!  For future reference, does the pattern of us submitting tests with
+high numbers (generic/999) to avoid merge conflicts and asking you to renumber
+them when you merge work for you?  Or would you prefer that we number our
+tests to the next available, which may change from submission to submission?
