@@ -1,184 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58166 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753410AbdLHOPJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 8 Dec 2017 09:15:09 -0500
-Date: Fri, 8 Dec 2017 09:15:06 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
- xfs_io pwrite command)
-Message-ID: <20171208141506.GA55826@bfoster.bfoster>
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
- <20171205211850.GA5858@dastard>
- <20171206002638.GB5858@dastard>
- <20171207140519.GB3486@bfoster.bfoster>
- <20171207234631.GI5858@dastard>
+Received: from mail-yb0-f178.google.com ([209.85.213.178]:37009 "EHLO
+        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754545AbdLHQ3z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Dec 2017 11:29:55 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171207234631.GI5858@dastard>
+In-Reply-To: <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
+References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
+ <20171206181700.GA7967@redhat.com> <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 8 Dec 2017 18:29:53 +0200
+Message-ID: <CAOQ4uxjM6ZLcyU5-nQXz=T98kuhMrCJ+1df85-19QJQjrr7JiA@mail.gmail.com>
+Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Ari Sundholm <ari@tuxera.com>, fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 08, 2017 at 10:46:31AM +1100, Dave Chinner wrote:
-> On Thu, Dec 07, 2017 at 09:05:20AM -0500, Brian Foster wrote:
-> > On Wed, Dec 06, 2017 at 11:26:38AM +1100, Dave Chinner wrote:
-> > > On Wed, Dec 06, 2017 at 08:18:50AM +1100, Dave Chinner wrote:
-> > > > On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
-> > > > > On 12/05/2017 12:28 AM, Dave Chinner wrote:
-> > > > > >On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
-> > ...
-> > > 
-> > > xfs_io: set exitcode on failure appropriately
-> > > 
-> > > From: Dave Chinner <dchinner@redhat.com>
-> > > 
-> > > Many operations don't set the exitcode when they fail, resulting
-> > > in xfs_io exiting with a zero (no failure) exit code despite the
-> > > command failing and returning an error. Fix this.
-> > > 
-> > > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> > > ---
-> > ...
-> > > diff --git a/io/copy_file_range.c b/io/copy_file_range.c
-> > > index d1dfc5a5e33a..9b737eff4c02 100644
-> > > --- a/io/copy_file_range.c
-> > > +++ b/io/copy_file_range.c
-> > > @@ -92,6 +92,7 @@ copy_range_f(int argc, char **argv)
-> > >  	int ret;
-> > >  	int fd;
-> > >  
-> > > +	exitcode = 1;
-> > >  	while ((opt = getopt(argc, argv, "s:d:l:")) != -1) {
-> > >  		switch (opt) {
-> > >  		case 's':
-> > > @@ -132,6 +133,8 @@ copy_range_f(int argc, char **argv)
-> > >  
-> > >  	ret = copy_file_range(fd, &src, &dst, len);
-> > >  	close(fd);
-> > > +	if (ret >= 0)
-> > > +		exitcode = 0;
-> > 
-> > I don't think it's appropriate to blindly overwrite the global exitcode
-> > value like this. What about the case where multiple commands are chained
-> > together? Should we expect an error code if any of the commands failed
-> > or only the last?
-> > 
-> > For example:
-> > 
-> >   xfs_io -c "pwrite ..." <file>
-> > 
-> > ... returns an error if the write fails, while:
-> > 
-> >   xfs_io -c "pwrite ..." -c "fadvise ..." <file>
-> > 
-> > ... would never so long as the fadvise succeeds.
-> 
-> Yup, I mentioned that this would be a problem on IRC. The patch fixes
-> the interactive and the single command cases, but won't work for
-> chained commands as you rightly point out.
-> 
-> To fix it properly, it's going to take a lot more than 15 minutes of
-> time. We're going to have to change how errors are returned to and
-> propagated through the libxcmd infrastruture, how we handle "fatal
-> error, don't continue" conditions through the libxcmd command loop,
-> etc. If we want to stop at the first error, then we've got to go
-> change all the return values from xfs_io commands to return non-zero
-> on error. We still have to set the exitcode as per this patch,
-> because the non-zero return value simply says "stop parsing input"
-> and doesn't affect the exit code of the program.
-> 
-> Given that xfs_quota, xfs_io, xfs_db, and xfs_spaceman all use the
-> same libxcmd infrastructure, we've got to make the changes
-> consistently across all of those utilities. This will require an
-> audit of all the commands first to determine if there's anything
-> special in any of those utilities, then changing all the code, then
-> testing all the CLI parsing still works correctly.  xfs_quota, as
-> usual, will be the problem child that causes us lots of pain here.
-> 
-> I'm not planning on doing all this in the near future, so I did the
-> next best thing that would only affect xfs_io behaviour. i.e.
-> directly manipulate the exitcode as many of the existing xfs_io
-> commands already do.
-> 
+On Wed, Dec 6, 2017 at 9:14 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Wed, Dec 6, 2017 at 8:17 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+>> On Tue, Dec 05, 2017 at 10:20:25PM +0200, Amir Goldstein wrote:
+>>> Hi All,
+>>>
+>>> The master branch on my unionmount-testsuite tree [1] has been updated.
+>>>
+>>> The head of the master branch is commit:
+>>> 6d04664 Add a test for rename over empty union dir
+>>>
+>>> This small update contains:
+>>> - A few new simple dir rename and dir remove tests
+>>> - A fix for running on kernel <= v4.9 with no redirect_dir support
+>>> - A new setup option --squashfs to setup lower as read-only squashfs
+>>>
+>>
+>> Hi Amir,
+>>
+>> It would be nice to also update README file and explain different options.
+>
+> Yes, that would be nice... will get to it some day if someone doesn't
+> beat me to it.
+>
+>>
+>> Also, how to test with different mount options enabled/disable (index,
+>> redirect etc).
+>>
+>
+> A preview for README:
+> Basically, the testsuite tests for correctness, so if correctness requires
+> enabling a feature, then testsuite will fail without the feature, but there are
+> some historical exceptions:
+> - testsuite predates redirect_dir, so I let the testsuite auto detect
+> redirect_dir
+>   and kept the "expect EXDEV" logic for redirect_dir disabled
+> - until quite recently st_ino was not constant on copy up in most cases,
+>   so the verification of constant ino was added as an opt-in feature
+> with --verify
+>
+>
+>>> With index enabled, there are no known failures.
+>>> With index disabled this test fails on non-constant st_ino for lower hardlink
+>>> copy up:
+>>>   run --ov=1 --samefs --verify rename-mass-5
+>
+> Thus, this test fails because with index disabled, hardlink is broken on copy up
+> and does not preserve st_ino.
+>
 
-Sure, I don't dispute the broader work required to fix everything up
-properly and I don't take issue with modifying exitcode directly in
-principle. I just don't see how any of this necessitates breaking the
-chained command case for the those commands that we are trying to fix
-up, particularly when the problem seems easily avoidable. See below for
-a tweak to the fadvise example..
+Vivek,
 
-(I notice that I mistakenly dropped the return code from
-command_usage(), but you get the idea (and it hardcodes to 0)).
+I added documentation about all the features I added to unionmount-testsuite at:
+https://github.com/amir73il/overlayfs/wiki/Overlayfs-testing#Unionmount_testsuite
 
-Brian
+Will add that link to README on the next master branch update.
+Let me know if there is anything missing for you in this wiki page.
 
---- 8< ---
-
-diff --git a/io/fadvise.c b/io/fadvise.c
-index 9cc91a57..f802ce1b 100644
---- a/io/fadvise.c
-+++ b/io/fadvise.c
-@@ -54,7 +54,6 @@ fadvise_f(
- 	off64_t		offset = 0, length = 0;
- 	int		c, range = 0, advise = POSIX_FADV_NORMAL;
- 
--	exitcode = 1;
- 	while ((c = getopt(argc, argv, "dnrsw")) != EOF) {
- 		switch (c) {
- 		case 'd':	/* Don't need these pages */
-@@ -78,37 +77,43 @@ fadvise_f(
- 			range = 1;
- 			break;
- 		default:
--			return command_usage(&fadvise_cmd);
-+			goto usage;
- 		}
- 	}
- 	if (range) {
- 		size_t	blocksize, sectsize;
- 
- 		if (optind != argc - 2)
--			return command_usage(&fadvise_cmd);
-+			goto usage;
- 		init_cvtnum(&blocksize, &sectsize);
- 		offset = cvtnum(blocksize, sectsize, argv[optind]);
- 		if (offset < 0) {
- 			printf(_("non-numeric offset argument -- %s\n"),
- 				argv[optind]);
--			return 0;
-+			goto seterror;
- 		}
- 		optind++;
- 		length = cvtnum(blocksize, sectsize, argv[optind]);
- 		if (length < 0) {
- 			printf(_("non-numeric length argument -- %s\n"),
- 				argv[optind]);
--			return 0;
-+			goto seterror;
- 		}
- 	} else if (optind != argc) {
--		return command_usage(&fadvise_cmd);
-+		goto usage;
- 	}
- 
- 	if (posix_fadvise(file->fd, offset, length, advise) < 0) {
- 		perror("fadvise");
--		return 0;
-+		goto seterror;
- 	}
--	exitcode = 0;
-+
-+	return 0;
-+
-+usage:
-+	command_usage(&fadvise_cmd);
-+seterror:
-+	exitcode = 1;
- 	return 0;
- }
- 
+Thanks,
+Amir.
