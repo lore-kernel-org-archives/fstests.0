@@ -1,149 +1,59 @@
-Received: from imap.thunk.org ([74.207.234.97]:56580 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752105AbdLJR5g (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 10 Dec 2017 12:57:36 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH RESEND -v4] common: rework _require_ext4_mkfs_feature
-Date: Sun, 10 Dec 2017 12:57:30 -0500
-Message-Id: <20171210175730.11889-1-tytso@mit.edu>
+Received: from mail-yb0-f172.google.com ([209.85.213.172]:37114 "EHLO
+        mail-yb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751956AbdLKKqh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Dec 2017 05:46:37 -0500
+MIME-Version: 1.0
+In-Reply-To: <E541A51A-D9B3-4596-8222-453132512449@icloud.com>
+References: <1512613327-218016-1-git-send-email-cgxu519@icloud.com>
+ <1512613327-218016-3-git-send-email-cgxu519@icloud.com> <20171207054418.GC2749@eguan.usersys.redhat.com>
+ <423B3F2E-73F1-4B29-93D7-BC6F1AA6CCC6@icloud.com> <20171207071317.GE2749@eguan.usersys.redhat.com>
+ <EB49C2D0-6500-4588-803F-40F4B9FA6DE3@icloud.com> <CAOQ4uxgiqZBKUksWv-0gomKP4Ov7NB6zUw2TdnzUz7x6VUcpUw@mail.gmail.com>
+ <E541A51A-D9B3-4596-8222-453132512449@icloud.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 11 Dec 2017 12:46:36 +0200
+Message-ID: <CAOQ4uxjxtGd1+empZGX3OMXnYQoZ1YvL-HmKBUh3CBgFs2F1Aw@mail.gmail.com>
+Subject: Re: [PATCH v2 3/3] generic/470: add syncfs test
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-In all of the places where we need check to see if mkfs.ext4 can
-support a set of file system features, we also should be checking to
-see if the kernel can support those file system features.  So rename
-_require_ext4_mkfs_feature to _require_ext4_feature, and actually
-format the file system in $SCRATCH.  To avoid running mkfs twice in
-most tests, we will teach the tests to assume that
-_require_ext4_feature actually leaves $SCRATCH formatted with a file
-system with those features.
+On Mon, Dec 11, 2017 at 12:03 PM, Chengguang Xu <cgxu519@icloud.com> wrote:
+>>
+>> =E5=9C=A8 2017=E5=B9=B412=E6=9C=887=E6=97=A5=EF=BC=8C=E4=B8=8B=E5=8D=884=
+:17=EF=BC=8CAmir Goldstein <amir73il@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+[...]
+>
+> I did more detail tests for three different data modes of ext4 and found
+> the overlayfs syncfs bug is reproducible on data=3Dordered and data=3Dwri=
+teback,
+> but on data=3Djournal mode, data is flushed and correct.
 
-Also allow ext4/306 to run on systems where mke2fs doesn't support the
-"64bit" option.
+That is expected, because overlayfs does call upper's sync_fs() method and
+for journal=3Ddata that will flush all dirty pages as well.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/rc      | 38 +++++++++++++-------------------------
- tests/ext4/003 |  3 +--
- tests/ext4/025 |  2 +-
- tests/ext4/026 |  2 +-
- tests/ext4/306 |  7 +++++--
- 5 files changed, 21 insertions(+), 31 deletions(-)
+> I only wrote only a few words
+> to a single file and the bug is always reproducible on my test environmen=
+t.
+>
+> For writeback interferences, AFAIK, from dirty ratio and period.
+> If we drop all dirty caches & sync before the test, I think we can
+> avoid interference from it.
+>
 
-diff --git a/common/rc b/common/rc
-index 63876a3e..c388fcd3 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1899,32 +1899,20 @@ _require_scratch_ext4_crc()
- 	_scratch_unmount
- }
- 
--# Check the specified feature whether it is available in mkfs.ext4 or not.
--_require_ext4_mkfs_feature()
-+# Check whether the specified feature whether it is supported by
-+# mkfs.ext4 and the kernel.
-+_require_scratch_ext4_feature()
- {
--	local feature=$1
--	local testfile=/tmp/$$.ext4_mkfs
--
--	if [ -z "$feature" ]; then
--                echo "Usage: _require_ext4_mkfs_feature feature"
--                exit 1
--        fi
--
--	touch $testfile
--	local result=$($MKFS_EXT4_PROG -F -O $feature -n $testfile 512m 2>&1)
--	rm -f $testfile
--	echo $result | grep -q "Invalid filesystem option" && \
--		_notrun "mkfs.ext4 doesn't support $feature feature"
--}
--
--# this test requires the ext4 kernel support bigalloc feature
--#
--_require_ext4_bigalloc()
--{
--	$MKFS_EXT4_PROG -F -O bigalloc $SCRATCH_DEV 512m >/dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
--	   || _notrun "Ext4 kernel doesn't support bigalloc feature"
--	_scratch_unmount
-+    if [ -z "$1" ]; then
-+        echo "Usage: _require_scratch_ext4_feature feature"
-+        exit 1
-+    fi
-+    $MKFS_EXT4_PROG -F $MKFS_OPTIONS -O "$1" \
-+		    $SCRATCH_DEV 512m >/dev/null 2>&1 \
-+	|| _notrun "mkfs.ext4 doesn't support $feature feature"
-+    _scratch_mount >/dev/null 2>&1 \
-+	|| _notrun "Kernel doesn't support the ext4 feature(s): $1"
-+    _scratch_unmount
- }
- 
- # this test requires that external log/realtime devices are not in use
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index 9be40178..eafe9a53 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -38,8 +38,7 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
--_require_ext4_mkfs_feature "bigalloc"
--_require_ext4_bigalloc
-+_require_scratch_ext4_feature "bigalloc"
- 
- rm -f $seqres.full
- 
-diff --git a/tests/ext4/025 b/tests/ext4/025
-index 49ecb462..2a7b35fc 100755
---- a/tests/ext4/025
-+++ b/tests/ext4/025
-@@ -48,7 +48,7 @@ _supported_fs ext4
- _supported_os Linux
- _require_scratch_nocheck
- _require_command "$DEBUGFS_PROG" debugfs
--_require_ext4_mkfs_feature "bigalloc,meta_bg,^resize_inode"
-+_require_scratch_ext4_feature "bigalloc,meta_bg,^resize_inode"
- 
- echo "Create ext4 fs and modify first_meta_bg's value"
- _scratch_mkfs "-O bigalloc,meta_bg,^resize_inode" >> $seqres.full 2>&1
-diff --git a/tests/ext4/026 b/tests/ext4/026
-index 94a737ce..7731e923 100755
---- a/tests/ext4/026
-+++ b/tests/ext4/026
-@@ -50,7 +50,7 @@ _supported_fs ext4
- _supported_os Linux
- _require_scratch
- _require_attrs
--_require_ext4_mkfs_feature ea_inode
-+_require_scratch_ext4_feature "ea_inode"
- 
- _scratch_mkfs_ext4 -O ea_inode >/dev/null 2>&1
- _scratch_mount
-diff --git a/tests/ext4/306 b/tests/ext4/306
-index be765e6a..70f281db 100755
---- a/tests/ext4/306
-+++ b/tests/ext4/306
-@@ -44,12 +44,15 @@ _supported_fs ext4
- _supported_os Linux
- 
- _require_scratch
--_require_ext4_mkfs_feature "64bit"
- 
- rm -f $seqres.full
- 
- # Make a small ext4 fs with extents disabled & mount it
--$MKFS_EXT4_PROG -F -O ^extents,^64bit $SCRATCH_DEV 512m >> $seqres.full 2>&1
-+features="^extents"
-+if grep -q 64bit /etc/mke2fs.conf ; then
-+    features="^extents,^64bit"
-+fi
-+$MKFS_EXT4_PROG -F -O "$features" $SCRATCH_DEV 512m >> $seqres.full 2>&1
- _scratch_mount || _fail "couldn't mount fs"
- 
- # Create a small non-extent-based file
--- 
-2.11.0.rc0.7.gbe5a750
+Why? does either drop_caches or sync() reset the flusher thread
+periodic flush dirty pages?
 
+> So if we don=E2=80=99t have anything else to interference test result,
+> I just want to modify to write a small single file as test target.
+>
+> Am I missing anything?
+
+I think the chance of flusher thread interfering the test and
+flushing the dirty page you wrote before _scratch_shutdown exists,
+but is small enough so we can neglect it and keep the test as simple
+as possible.
+
+Amir.
