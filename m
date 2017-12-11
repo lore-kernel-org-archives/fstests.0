@@ -1,48 +1,44 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48582 "EHLO mx1.redhat.com"
+Received: from imap.thunk.org ([74.207.234.97]:60332 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751234AbdLKU7N (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 11 Dec 2017 15:59:13 -0500
-Date: Mon, 11 Dec 2017 15:59:12 -0500
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
-Message-ID: <20171211205912.GD13399@redhat.com>
-References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
- <20171206181700.GA7967@redhat.com>
- <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
- <CAOQ4uxjM6ZLcyU5-nQXz=T98kuhMrCJ+1df85-19QJQjrr7JiA@mail.gmail.com>
- <20171211195920.GA13399@redhat.com>
- <CAOQ4uxhb4yVTt29E0XFYY_OT_ubQ5w0Zgqojn=y7nH+XSZ90GA@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhb4yVTt29E0XFYY_OT_ubQ5w0Zgqojn=y7nH+XSZ90GA@mail.gmail.com>
+        id S1750759AbdLKWgS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Dec 2017 17:36:18 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] test-appliance: exclude generic/382 from the ext3 configuration
+Date: Mon, 11 Dec 2017 17:36:14 -0500
+Message-Id: <20171211223614.21052-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
+To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 11, 2017 at 10:47:15PM +0200, Amir Goldstein wrote:
+The generic/382 test fails on ext3 configuration because the quota
+report, which includs the number of blocks used after writing a 30 meg
+file, is in the golden output.  Unfortunately this doesn't take into
+account the indirect blocks which are needed when we are in ext3 mode
+and the extents feature is disabled.
 
-[..]
-> > - For the xfs reflink test, I am curious that why have you recommended
-> >   to also enabled "rmapbt=1". Is is required for the tests?
-> >
-> 
-> You cannot enable reflink=1 without it.
+It's not clear whether this should be considered a test bug or not,
+but at least for now, suppress this test in the ext3 configuration for
+{kvm,gce,android}-xfstests.
 
-I could do that. Here is the xfs_info output which shows rmapbt=0 and
-reflink=1.
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/ext3.exclude | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-# xfs_info /mnt/test-xfs
-meta-data=/dev/mapper/test--union-lower_layer isize=512    agcount=4, agsize=327680 blks
-         =                       sectsz=512   attr=2, projid32bit=1
-         =                       crc=1        finobt=1 spinodes=0 rmapbt=0
-         =                       reflink=1
-data     =                       bsize=4096   blocks=1310720, imaxpct=25
-         =                       sunit=0      swidth=0 blks
-naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-log      =internal               bsize=4096   blocks=2560, version=2
-         =                       sectsz=512   sunit=0 blks, lazy-count=1
-realtime =none                   extsz=4096   blocks=0, rtextents=0
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/ext3.exclude b/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/ext3.exclude
+index f78524f..c77c75f 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/ext3.exclude
++++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/ext3.exclude
+@@ -1,3 +1,8 @@
+ # This takes a *long* time and doesn't add much value to run on all
+ # configurations.  So we're going to be selective where we run it.
+ generic/027
++
++# The generic/382 test fails on ext3 because the indirect blocks
++# are included in the quota report, and so the resulting quota
++# report output is different from what is expected in the 382.out file
++generic/382
+-- 
+2.11.0.rc0.7.gbe5a750
 
-Vivek
