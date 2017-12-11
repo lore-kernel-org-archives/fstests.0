@@ -1,84 +1,95 @@
-Received: from imap.thunk.org ([74.207.234.97]:59460 "EHLO imap.thunk.org"
+Received: from mx1.redhat.com ([209.132.183.28]:44288 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752376AbdLKR1u (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 11 Dec 2017 12:27:50 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] generic/466: be more precise about which block sizes to use
-Date: Mon, 11 Dec 2017 12:27:42 -0500
-Message-Id: <20171211172742.3490-1-tytso@mit.edu>
+        id S1750725AbdLKT7V (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Dec 2017 14:59:21 -0500
+Date: Mon, 11 Dec 2017 14:59:20 -0500
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: Re: [ANNOUNCE] unionmount-testsuite: Amir's master branch updated
+Message-ID: <20171211195920.GA13399@redhat.com>
+References: <CAOQ4uxiiaiq8dettBvZScC59KV-07B-muxE3SS60BDK3dugJow@mail.gmail.com>
+ <20171206181700.GA7967@redhat.com>
+ <CAOQ4uxhTWV=ZwDK2DQS2KYux7fufoz0sc7Sv+9dz59gnM1u8+w@mail.gmail.com>
+ <CAOQ4uxjM6ZLcyU5-nQXz=T98kuhMrCJ+1df85-19QJQjrr7JiA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjM6ZLcyU5-nQXz=T98kuhMrCJ+1df85-19QJQjrr7JiA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Theodore Ts'o <tytso@mit.edu>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, David Howells <dhowells@redhat.com>, fstests <fstests@vger.kernel.org>, Chandan Rajendra <chandan@linux.vnet.ibm.com>
 List-ID: <fstests@vger.kernel.org>
 
-The test previously blindly tried block sizes from 512 to 65536 and
-relied on mkfs to fail.  This is problematic for a number of file
-systems.  For example, when testing btrfs, _scratch_mkfs_sized simply
-ignores the blocksize, so the test will pointlessly run the same test
-multiple times.  For ext4, when encryption is enabled, the only block
-size which is supported is the page size.
+On Fri, Dec 08, 2017 at 06:29:53PM +0200, Amir Goldstein wrote:
+> On Wed, Dec 6, 2017 at 9:14 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> > On Wed, Dec 6, 2017 at 8:17 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> >> On Tue, Dec 05, 2017 at 10:20:25PM +0200, Amir Goldstein wrote:
+> >>> Hi All,
+> >>>
+> >>> The master branch on my unionmount-testsuite tree [1] has been updated.
+> >>>
+> >>> The head of the master branch is commit:
+> >>> 6d04664 Add a test for rename over empty union dir
+> >>>
+> >>> This small update contains:
+> >>> - A few new simple dir rename and dir remove tests
+> >>> - A fix for running on kernel <= v4.9 with no redirect_dir support
+> >>> - A new setup option --squashfs to setup lower as read-only squashfs
+> >>>
+> >>
+> >> Hi Amir,
+> >>
+> >> It would be nice to also update README file and explain different options.
+> >
+> > Yes, that would be nice... will get to it some day if someone doesn't
+> > beat me to it.
+> >
+> >>
+> >> Also, how to test with different mount options enabled/disable (index,
+> >> redirect etc).
+> >>
+> >
+> > A preview for README:
+> > Basically, the testsuite tests for correctness, so if correctness requires
+> > enabling a feature, then testsuite will fail without the feature, but there are
+> > some historical exceptions:
+> > - testsuite predates redirect_dir, so I let the testsuite auto detect
+> > redirect_dir
+> >   and kept the "expect EXDEV" logic for redirect_dir disabled
+> > - until quite recently st_ino was not constant on copy up in most cases,
+> >   so the verification of constant ino was added as an opt-in feature
+> > with --verify
+> >
+> >
+> >>> With index enabled, there are no known failures.
+> >>> With index disabled this test fails on non-constant st_ino for lower hardlink
+> >>> copy up:
+> >>>   run --ov=1 --samefs --verify rename-mass-5
+> >
+> > Thus, this test fails because with index disabled, hardlink is broken on copy up
+> > and does not preserve st_ino.
+> >
+> 
+> Vivek,
+> 
+> I added documentation about all the features I added to unionmount-testsuite at:
+> https://github.com/amir73il/overlayfs/wiki/Overlayfs-testing#Unionmount_testsuite
+> 
+> Will add that link to README on the next master branch update.
+> Let me know if there is anything missing for you in this wiki page.
 
-So define two new functions _fs_min_blocksize and _fs_max_blocksize,
-and use it so that generic/466 will only try using the block sizes
-that will work.
+Hi Amir,
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/rc         | 23 +++++++++++++++++++++++
- tests/generic/466 |  6 +++++-
- 2 files changed, 28 insertions(+), 1 deletion(-)
+Thanks a lot for this documentation. I tested it and it works for me. So
+far I was only running "./run --ov". Now I can do samefs setups and also
+verify index feature etc.
 
-diff --git a/common/rc b/common/rc
-index 59d4b961..7aa747ad 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1067,6 +1067,29 @@ _scratch_mkfs_blocksized()
-     esac
- }
- 
-+_fs_min_blocksize()
-+{
-+    case $FSTYP in
-+    ext4)
-+	if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
-+	    get_page_size
-+	else
-+            echo 1024
-+	fi
-+       ;;
-+    btrfs)
-+	get_page_size
-+	;;
-+    *)
-+	echo 512
-+    esac
-+}
-+
-+_fs_max_blocksize()
-+{
-+    get_page_size
-+}
-+
- _scratch_resvblks()
- {
- 	case $FSTYP in
-diff --git a/tests/generic/466 b/tests/generic/466
-index 07f24a74..a1d944d3 100755
---- a/tests/generic/466
-+++ b/tests/generic/466
-@@ -54,7 +54,11 @@ unset MKFS_OPTIONS
- 
- echo "Starting test" > $seqres.full
- devsize=$(blockdev --getsize64 $SCRATCH_DEV)
--for blocksize in 512 1024 2048 4096 8192 16384 32768 65536; do
-+min_blocksize=$(_fs_min_blocksize)
-+max_blocksize=$(_fs_max_blocksize)
-+
-+for (( blocksize = min_blocksize ; blocksize <= max_blocksize ;
-+       blocksize = blocksize * 2)); do
- 	echo "+ Format blocksize $blocksize and mount" >> $seqres.full
- 	_scratch_unmount > /dev/null 2>&1
- 	# Try to format and mount with the given blocksize.  If they don't
--- 
-2.11.0.rc0.7.gbe5a750
+Two minor nits/queries.
 
+- Right now "./run --ov --samefs -s" fails if "/base" directory is not
+  there. So in mkdir command, add "base" to the list also.
+
+- For the xfs reflink test, I am curious that why have you recommended
+  to also enabled "rmapbt=1". Is is required for the tests?
+
+Thanks
+Vivek
