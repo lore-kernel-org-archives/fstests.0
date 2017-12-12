@@ -1,51 +1,30 @@
-Received: from imap.thunk.org ([74.207.234.97]:33012 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750731AbdLLFTn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 12 Dec 2017 00:19:43 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] common/populate: fix S_IFDIR.FMT_BLOCK and ATTR.FMT_LOCAL for ext4 encryption
-Date: Tue, 12 Dec 2017 00:19:37 -0500
-Message-Id: <20171212051937.25984-1-tytso@mit.edu>
+Received: from mail-yb0-f177.google.com ([209.85.213.177]:37106 "EHLO
+        mail-yb0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750731AbdLLF6F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Dec 2017 00:58:05 -0500
+MIME-Version: 1.0
+In-Reply-To: <1513048179-151065-1-git-send-email-cgxu519@icloud.com>
+References: <1513048179-151065-1-git-send-email-cgxu519@icloud.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 12 Dec 2017 07:58:03 +0200
+Message-ID: <CAOQ4uxhPBNPONsMVNh-nDrZWPAdsofbGEyBgFPNPym3wt=dn7A@mail.gmail.com>
+Subject: Re: [PATCH v3 1/3] common/rc: add scratch shutdown support for overlayfs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-When ext4 encryption is enabled, the directory entries are encrypted
-so we need to create fewer directory entries to guarantee that they
-will all fit in a single block.
+On Tue, Dec 12, 2017 at 5:09 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
+> OverlayFS overrides SCRATCH_MNT variable to it's own,
+> so adjust target to underlying filesystem(OVL_BASE_SCRATCH_MNT)
+> when running shutdown on overlayfs.
+>
+> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+> ---
 
-Also, the encryption metadata takes up extended attribute room so we
-can only add a single xattr to guarantee that the xattrs will fit in
-the inode.
+Maybe "check -overlay overrides SCRATCH_MNT...
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/populate | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+Otherwise, looks good.
 
-diff --git a/common/populate b/common/populate
-index b77c5081..07ea7e60 100644
---- a/common/populate
-+++ b/common/populate
-@@ -343,7 +343,7 @@ _scratch_ext4_populate() {
- 
- 	# - BLOCK
- 	echo "+ block dir"
--	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BLOCK" "$((dblksz / 24))"
-+	__populate_create_dir "${SCRATCH_MNT}/S_IFDIR.FMT_BLOCK" "$((dblksz / 32))"
- 
- 	# - HTREE
- 	echo "+ htree dir"
-@@ -369,7 +369,7 @@ _scratch_ext4_populate() {
- 	# Attribute formats
- 	# LOCAL
- 	echo "+ local attr"
--	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LOCAL" 1
-+	__populate_create_attr "${SCRATCH_MNT}/ATTR.FMT_LOCAL" 0
- 
- 	# BLOCK
- 	echo "+ block attr"
--- 
-2.11.0.rc0.7.gbe5a750
-
+Amir.
