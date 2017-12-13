@@ -1,12 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:44652 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:45088 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750745AbdLMGIk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 01:08:40 -0500
-Subject: [PATCH 3/8] generic/45[34]: test line draw characters in file/attr
- names
+        with ESMTP id S1751447AbdLMGIx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 01:08:53 -0500
+Subject: [PATCH 5/8] generic: test error shutdown while stressing filesystem
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 12 Dec 2017 22:03:34 -0800
-Message-ID: <151314501414.18893.5214683551573210558.stgit@magnolia>
+Date: Tue, 12 Dec 2017 22:03:48 -0800
+Message-ID: <151314502812.18893.11244203325379063295.stgit@magnolia>
 In-Reply-To: <151314499003.18893.8687182548758898133.stgit@magnolia>
 References: <151314499003.18893.8687182548758898133.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,60 +18,134 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Try to draw a multiline rectangular outline in a file name and xattr
-name, just to see if we can.
-
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/453 |    5 +++++
- tests/generic/454 |    5 +++++
- 2 files changed, 10 insertions(+)
+ tests/generic/932     |   97 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/932.out |    2 +
+ tests/generic/group   |    1 +
+ 3 files changed, 100 insertions(+)
+ create mode 100755 tests/generic/932
+ create mode 100644 tests/generic/932.out
 
 
-diff --git a/tests/generic/453 b/tests/generic/453
-index 38adc8d..424412e 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -109,6 +109,9 @@ setf "urk\xc0\xafmoo" "FAKESLASH"
- # Emoji: octopus butterfly owl giraffe
- setf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
-+# Line draw characters, because why not?
-+setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
+diff --git a/tests/generic/932 b/tests/generic/932
+new file mode 100755
+index 0000000..a440a75
+--- /dev/null
++++ b/tests/generic/932
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# FS QA Test No. 932
++#
++# Test log recovery with repeated (simulated) disk failures.  We kick
++# off fsstress on the scratch fs, then switch out the underlying device
++# with dm-error to see what happens when the disk goes down.  Having
++# taken down the fs in this manner, remount it and repeat.  This test
++# is a Good Enough (tm) simulation of our internal multipath failure
++# testing efforts.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
- ls -la $testdir >> $seqres.full
- 
- echo "Test files"
-@@ -130,6 +133,8 @@ testf "urk\xc0\xafmoo" "FAKESLASH"
- 
- testf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
-+testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
- echo "Uniqueness of inodes?"
- stat -c '%i' "${testdir}/"* | sort | uniq -c | while read nr inum; do
- 	if [ "${nr}" -gt 1 ]; then
-diff --git a/tests/generic/454 b/tests/generic/454
-index f77ab77..24727ab 100755
---- a/tests/generic/454
-+++ b/tests/generic/454
-@@ -107,6 +107,9 @@ setf "urk\xc0\xafmoo" "FAKESLASH"
- # Emoji: octopus butterfly owl giraffe
- setf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
-+# Line draw characters, because why not?
-+setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
- $GETFATTR_PROG --absolute-names -d "${testfile}" >> $seqres.full
- 
- echo "Test files"
-@@ -128,6 +131,8 @@ testf "urk\xc0\xafmoo" "FAKESLASH"
- 
- testf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt" "octopus butterfly owl giraffe emoji"
- 
-+testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++	_dmerror_unmount
++	_dmerror_cleanup
++}
 +
- echo "Uniqueness of keys?"
- crazy_keys="$($GETFATTR_PROG --absolute-names -d "${testfile}" | egrep -c '(french_|chinese_|greek_|arabic_|urk)')"
- expected_keys=11
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/dmerror
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++
++_require_scratch
++_require_dm_target error
++_require_command "$KILLALL_PROG" "killall"
++
++rm -f $seqres.full
++
++echo "Silence is golden."
++
++_scratch_mkfs >> $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_dmerror_init
++_dmerror_mount
++
++for i in $(seq 1 $((50 * TIME_FACTOR)) ); do
++	($FSSTRESS_PROG $FSSTRESS_AVOID -d $SCRATCH_MNT -n 999999 -p $((LOAD_FACTOR * 4)) >> $seqres.full &) \
++		> /dev/null 2>&1
++
++	# purposely include 0 second sleeps to test shutdown immediately after
++	# recovery
++	sleep $((RANDOM % 3))
++
++	# Loading error table without "--nolockfs" option. Because "--nolockfs"
++	# won't freeze fs, then some running I/Os may cause XFS to shutdown
++	# prematurely. That's not what we want to test.
++	_dmerror_load_error_table
++
++	ps -e | grep fsstress > /dev/null 2>&1
++	while [ $? -eq 0 ]; do
++		$KILLALL_PROG -9 fsstress > /dev/null 2>&1
++		wait > /dev/null 2>&1
++		ps -e | grep fsstress > /dev/null 2>&1
++	done
++
++	# Mount again to replay log after loading working table, so we have a
++	# consistent XFS after test.
++	_dmerror_unmount || _fail "unmount failed"
++	_dmerror_load_working_table
++	_dmerror_mount || _fail "mount failed"
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/932.out b/tests/generic/932.out
+new file mode 100644
+index 0000000..1bb668c
+--- /dev/null
++++ b/tests/generic/932.out
+@@ -0,0 +1,2 @@
++QA output created by 932
++Silence is golden.
+diff --git a/tests/generic/group b/tests/generic/group
+index 6c3bb03..ff1ddc9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -472,3 +472,4 @@
+ 467 auto quick exportfs
+ 468 shutdown auto quick metadata
+ 469 auto quick
++932 shutdown auto log metadata
 
