@@ -1,104 +1,70 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:57616 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753144AbdLMRge (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 12:36:34 -0500
-Date: Wed, 13 Dec 2017 09:36:29 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/466: be more precise about which block sizes to
- use
-Message-ID: <20171213173629.GG6896@magnolia>
-References: <20171211172742.3490-1-tytso@mit.edu>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:5951 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752908AbdLMVlc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 16:41:32 -0500
+Date: Thu, 14 Dec 2017 08:41:29 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/9] generic/381: use username fsgqa-381
+Message-ID: <20171213214129.GV4094@dastard>
+References: <20171213004519.29340-1-mcgrof@kernel.org>
+ <20171213004519.29340-2-mcgrof@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171211172742.3490-1-tytso@mit.edu>
+In-Reply-To: <20171213004519.29340-2-mcgrof@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 11, 2017 at 12:27:42PM -0500, Theodore Ts'o wrote:
-> The test previously blindly tried block sizes from 512 to 65536 and
-> relied on mkfs to fail.  This is problematic for a number of file
-> systems.  For example, when testing btrfs, _scratch_mkfs_sized simply
-> ignores the blocksize, so the test will pointlessly run the same test
-> multiple times.  For ext4, when encryption is enabled, the only block
-> size which is supported is the page size.
+On Tue, Dec 12, 2017 at 04:45:11PM -0800, Luis R. Rodriguez wrote:
+> Some systems are not allowing usernames prefixed with a number now.
+> One can however use numbers as a postfix so use that.
 > 
-> So define two new functions _fs_min_blocksize and _fs_max_blocksize,
-> and use it so that generic/466 will only try using the block sizes
-> that will work.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
 > ---
->  common/rc         | 23 +++++++++++++++++++++++
->  tests/generic/466 |  6 +++++-
->  2 files changed, 28 insertions(+), 1 deletion(-)
+>  README                |  2 +-
+>  tests/generic/381     | 16 ++++++++--------
+>  tests/generic/381.out |  4 ++--
+>  3 files changed, 11 insertions(+), 11 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index 59d4b961..7aa747ad 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1067,6 +1067,29 @@ _scratch_mkfs_blocksized()
->      esac
->  }
->  
-> +_fs_min_blocksize()
-> +{
-> +    case $FSTYP in
-> +    ext4)
-> +	if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
-> +	    get_page_size
-> +	else
-> +            echo 1024
-> +	fi
-> +       ;;
-> +    btrfs)
-> +	get_page_size
-> +	;;
-> +    *)
-> +	echo 512
+> diff --git a/README b/README
+> index ed69332e774e..e05142be1a87 100644
+> --- a/README
+> +++ b/README
+> @@ -20,7 +20,7 @@ _______________________
+>  - run make
+>  - run make install
+>  - create fsgqa test user ("sudo useradd fsgqa")
+> -- create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
+> +- create fsgqa-381 test user ("sudo useradd fsgqa-381")
+>  	
+>  ______________________
+>  USING THE FSQA SUITE
+> diff --git a/tests/generic/381 b/tests/generic/381
+> index 006f0d879638..cdc29c2e029e 100755
+> --- a/tests/generic/381
+> +++ b/tests/generic/381
+> @@ -3,7 +3,7 @@
+>  #
+>  # Test xfs_quota when user or names beginning with digits.
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-FWIW XFS' minimum block size is 1k for v5 filesystems, though you can't
-really tell until you run mkfs.xfs -N.
+This isn't a "test names with digits" test, but "test names begining
+with digits" test.  Changing the username to not begin with digits
+invalidates the entire purpose of the test which is to ensure that
+xfs_quota can differentiate between UIDs and names beginning with
+numbers....
 
-> +    esac
-> +}
-> +
-> +_fs_max_blocksize()
-> +{
-> +    get_page_size
+So from that perspective, NAK.
 
-Also, one can run xfstests against a fuse2fs-mounted 64k-block ext4 fs.
+IF there are distros not allowing usernames to start with digits,
+then this test needs a _requires check and to _notrun on those
+systems.
 
---D
+Cheers,
 
-> +}
-> +
->  _scratch_resvblks()
->  {
->  	case $FSTYP in
-> diff --git a/tests/generic/466 b/tests/generic/466
-> index 07f24a74..a1d944d3 100755
-> --- a/tests/generic/466
-> +++ b/tests/generic/466
-> @@ -54,7 +54,11 @@ unset MKFS_OPTIONS
->  
->  echo "Starting test" > $seqres.full
->  devsize=$(blockdev --getsize64 $SCRATCH_DEV)
-> -for blocksize in 512 1024 2048 4096 8192 16384 32768 65536; do
-> +min_blocksize=$(_fs_min_blocksize)
-> +max_blocksize=$(_fs_max_blocksize)
-> +
-> +for (( blocksize = min_blocksize ; blocksize <= max_blocksize ;
-> +       blocksize = blocksize * 2)); do
->  	echo "+ Format blocksize $blocksize and mount" >> $seqres.full
->  	_scratch_unmount > /dev/null 2>&1
->  	# Try to format and mount with the given blocksize.  If they don't
-> -- 
-> 2.11.0.rc0.7.gbe5a750
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
