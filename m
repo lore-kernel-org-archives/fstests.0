@@ -1,38 +1,49 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:14627 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753839AbdLMVzX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 16:55:23 -0500
-Date: Thu, 14 Dec 2017 08:55:20 +1100
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:40295 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751129AbdLMWM0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Dec 2017 17:12:26 -0500
+Date: Thu, 14 Dec 2017 09:12:23 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 8/9] tests/xfs/group: add group for tests which require
- mkfs v4_5
-Message-ID: <20171213215520.GY4094@dastard>
-References: <20171213004519.29340-1-mcgrof@kernel.org>
- <20171213004519.29340-9-mcgrof@kernel.org>
+Subject: Re: [PATCH 4/8] xfs: fix tests to handle removal of no-alloc create
+ nonfeature
+Message-ID: <20171213221223.GZ4094@dastard>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314502196.18893.14496524309954254435.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171213004519.29340-9-mcgrof@kernel.org>
+In-Reply-To: <151314502196.18893.14496524309954254435.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 12, 2017 at 04:45:18PM -0800, Luis R. Rodriguez wrote:
-> This lets us skip these tests on newer systems.
+On Tue, Dec 12, 2017 at 10:03:42PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> We're removing from XFS the ability to perform no-allocation file
+> creation.  This was added years ago because someone at SGI demanded that
+> we still be able to create (empty?) files with zero free blocks
 
-This already _not_runs on new systems. we do not want to be adding
-one-off group descriptors to avoid tests like this - the tests
-themselves already detect whether they should run or not.
+Just to correct the record, it wasn't SGI that demanded this - it
+was implemented by SGI a long, long time ago (~1998) in response to
+customer demands.
 
-xfs/096 2s ... [not run] Requires older mkfs without strict input checks: the last supported version of xfsprogs is 4.5.
+> remaining so long as there were free inodes and space in existing
+> directory blocks.  This came at an unacceptable risk of ENOSPC'ing
+> midway through a transaction and shutting down the fs, so we're removing
+> it for the create case.
 
-Why are you trying to add groups to define tests that not_run
-correctly on systems they aren't supported on?
+Well, 20 years later we consider it an unacceptible risk. :P
 
-Cheers,
+> However, some tests fail as a result, so fix them to be more flexible
+> about not failing when a dir/file creation fails due to ENOSPC.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Dave.
+Looks fine.
+
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
 -- 
 Dave Chinner
 david@fromorbit.com
