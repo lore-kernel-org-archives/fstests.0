@@ -1,52 +1,111 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42760 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751763AbdLNFvE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Dec 2017 00:51:04 -0500
-Date: Thu, 14 Dec 2017 13:51:02 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/9] build: update AC_PACKAGE_WANT_GDBM() and
- src/dbtest.c to build
-Message-ID: <20171214055102.GE2749@eguan.usersys.redhat.com>
-References: <20171213004519.29340-1-mcgrof@kernel.org>
- <20171213004519.29340-5-mcgrof@kernel.org>
+Received: from mail-yb0-f194.google.com ([209.85.213.194]:36434 "EHLO
+        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750720AbdLNGjj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 01:39:39 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171213004519.29340-5-mcgrof@kernel.org>
+In-Reply-To: <151314503583.18893.15475795025536691678.stgit@magnolia>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia> <151314503583.18893.15475795025536691678.stgit@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 14 Dec 2017 08:39:38 +0200
+Message-ID: <CAOQ4uxh-msvkXA0Uyh9DfYicM6QGAohuaOZdwVpkKrfNPpvDTA@mail.gmail.com>
+Subject: Re: [PATCH 6/8] fsstress: implement the clonerange/deduperange ioctls
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 12, 2017 at 04:45:14PM -0800, Luis R. Rodriguez wrote:
-> Modern gdbm-devel packages bundle together gdbm.h and ndbm.h.
-> The old m4 macro had detection support for some old gdbm libraries
-> but not for new ones.
-> 
-> We fix compilation of src/dbtest.c by making the autoconf helper
-> check for this new arrangement:
-> 
-> If both gdbm.h and gdbm.h are found define set both gdbm_ndbm_=true,
-                     ^^^^^^ ndbm.h?
-> and have_db=true, and define HAVE_GDBM_H. The src/dbtest.c already
-> had a HAVE_GDBM_H but there was never a respective autoconf settter for
-> it. We can just re-use this and fix it for new arrangement.
-> 
-> Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
+On Wed, Dec 13, 2017 at 8:03 AM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+>
+> Mix it up a bit by reflinking and deduping data blocks when possible.
+>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  ltp/fsstress.c |  440 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 440 insertions(+)
+>
+>
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 96f48b1..e2dfa5e 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -68,7 +68,9 @@ typedef enum {
+>         OP_BULKSTAT,
+>         OP_BULKSTAT1,
+>         OP_CHOWN,
+> +       OP_CLONERANGE,
+>         OP_CREAT,
+> +       OP_DEDUPERANGE,
+>         OP_DREAD,
+>         OP_DWRITE,
+>         OP_FALLOCATE,
+> @@ -174,7 +176,9 @@ void        awrite_f(int, long);
+>  void   bulkstat_f(int, long);
+>  void   bulkstat1_f(int, long);
+>  void   chown_f(int, long);
+> +void   clonerange_f(int, long);
+>  void   creat_f(int, long);
+> +void   deduperange_f(int, long);
+>  void   dread_f(int, long);
+>  void   dwrite_f(int, long);
+>  void   fallocate_f(int, long);
+> @@ -221,7 +225,9 @@ opdesc_t    ops[] = {
+>         { OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
+>         { OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
+>         { OP_CHOWN, "chown", chown_f, 3, 1 },
+> +       { OP_CLONERANGE, "clonerange", clonerange_f, 4, 1 },
+>         { OP_CREAT, "creat", creat_f, 4, 1 },
+> +       { OP_DEDUPERANGE, "deduperange", deduperange_f, 4, 1},
+>         { OP_DREAD, "dread", dread_f, 4, 0 },
+>         { OP_DWRITE, "dwrite", dwrite_f, 4, 1 },
+>         { OP_FALLOCATE, "fallocate", fallocate_f, 1, 1 },
+> @@ -1312,6 +1318,16 @@ make_freq_table(void)
+>         }
+>  }
+>
+> +void
+> +free_freq_table(void)
+> +{
+> +       if (!freq_table)
+> +               return;
+> +       free(freq_table);
+> +       freq_table = NULL;
+> +       freq_table_size = 0;
+> +}
+> +
+>  int
+>  mkdir_path(pathname_t *name, mode_t mode)
+>  {
+> @@ -2189,6 +2205,430 @@ chown_f(int opno, long r)
+>         free_pathname(&f);
+>  }
+>
+> +static void
+> +disable_op(opty_t opt)
+> +{
+> +       opdesc_t        *p;
+> +
+> +       for (p = ops; p < ops_end; p++) {
+> +               if (opt == p->op) {
+> +                       p->freq = 0;
+> +                       free_freq_table();
+> +                       make_freq_table();
+> +                       return;
+> +               }
+> +       }
+> +}
+> +
 
-This looks fine to me.
+If we want to go down the path of runtime disable ops, the question is:
+Why disable_op clonerange/deduperange and not disable_op
+insert/collapse/zero/punch? there are probably other ops as well.
+This is also inconsistent by the fact that build time disable of
+neither FALLOC nor LONERANGE/DEDUPERANGE will not
+change the random op sequence, while runtime disable will.
 
-The only system I have by hand that have both <gdbm.h> and <ndbm.h> but
-not any <gdbm/[gn]dbm.h> is openSUSE Tumbleweed. Without this patch,
-dbtest was not built on openSUSE, and was built successfully with this
-patch applied. And dbtest is still built on RHEL6/7 and Fedora.
+This is related to the conversation of the golden output of xfs/068.
+Will take my arguments there now...
 
-BTW, I'll queue patch 3 and this patch for next fstests release, while
-other patches seem not necessary, I agreed with Dave that groups are not
-for excluding tests, the required tools and environments should be
-detected by tests and _notrun if not met. (The README change looks fine,
-but it doesn't apply due to the "fsgqa-381" change, so I drop it too for
-now.)
-
-Thanks,
-Eryu
+Amir.
