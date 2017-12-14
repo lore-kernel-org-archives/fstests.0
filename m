@@ -1,67 +1,142 @@
-Received: from mail-yb0-f170.google.com ([209.85.213.170]:33830 "EHLO
-        mail-yb0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750737AbdLNJ12 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 04:27:28 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:53150 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751461AbdLNJhV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Dec 2017 04:37:21 -0500
+Date: Thu, 14 Dec 2017 17:37:18 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 1/8] common/rc: report kmemleak errors
+Message-ID: <20171214093718.GH2749@eguan.usersys.redhat.com>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314499847.18893.9855359031542704591.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20171214064747.20999-1-yi.zhang@huawei.com>
-References: <20171214064747.20999-1-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 14 Dec 2017 11:27:26 +0200
-Message-ID: <CAOQ4uxjLk1HGm1LAK0agy+vFAfUyheL4CqSg_mW8dW5crLq6nA@mail.gmail.com>
-Subject: Re: [PATCH v2 00/18] overlay: implement fsck.overlay utility
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <151314499847.18893.9855359031542704591.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 14, 2017 at 8:47 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Hi all,
->
-> Here is the second version of original fsck.overlay. Changes split to
-> each patch from first version "overlay: implement fsck utility" for
-> readability.
+On Tue, Dec 12, 2017 at 10:03:18PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> If kmemleak is enabled, scan and report memory leaks after every test.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  check     |    2 ++
+>  common/rc |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 54 insertions(+)
+> 
+> 
+> diff --git a/check b/check
+> index b2d251a..469188e 100755
+> --- a/check
+> +++ b/check
+> @@ -497,6 +497,7 @@ _check_filesystems()
+>  	fi
+>  }
+>  
+> +_init_kmemleak
+>  _prepare_test_list
+>  
+>  if $OPTIONS_HAVE_SECTIONS; then
+> @@ -793,6 +794,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  		    n_try=`expr $n_try + 1`
+>  		    _check_filesystems
+>  		    _check_dmesg || err=true
+> +		    _check_kmemleak || err=true
+>  		fi
+>  
+>  	    fi
+> diff --git a/common/rc b/common/rc
+> index cb83918..a2bed36 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3339,6 +3339,58 @@ _check_dmesg()
+>  	fi
+>  }
+>  
+> +# capture the kmemleak report
+> +_capture_kmemleak()
+> +{
+> +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
+> +	local _leak_file="$1"
+> +
+> +	# Tell the kernel to scan for memory leaks.  Apparently the write
+> +	# returns before the scan is complete, so do it twice in the hopes
+> +	# that twice is enough to capture all the leaks.
+> +	echo "scan" > "${_kern_knob}"
+> +	cat "${_kern_knob}" > /dev/null
+> +	echo "scan" > "${_kern_knob}"
+> +	cat "${_kern_knob}" > "${_leak_file}"
+> +	echo "clear" > "${_kern_knob}"
 
-It fine that you left original commit for readability and ease of re-review
-I don't mind that functional review comments, (like -n, -p -a) are
-addressed by an incremental commit, but there are too many patches
-that fix spelling mistakes and build warnings.
-Please squash those fix patches into the relevant commit instead of
-posting them for review.
+Hmm, two scans seem not enough either, I could see false positive easily
+in a 'quick' group run, because some leaks are not reported immediately
+after the test but after next test or next few tests. e.g. I saw
+generic/008 (tested on XFS) being reported as leaking memory, and from
+008.kmemleak I saw:
 
-I will review the entire series when is it re posted as a clean series.
+unreferenced object 0xffff880277679800 (size 512):
+  comm "nametest", pid 25007, jiffies 4300176958 (age 9.854s)
+...
 
->
-> I have already handled most of comments from the first iteration and
-> add/fix some infrastructure, no big features, move tests to xfstests
-> (already tested).
->
-> I will push this "incubator" version to github after review and fix.
-> Any comments is helpful, thanks!
->
-> Changes since v1:
->
-> - Add "-n -p -y" options. (Comment from Amir and Darrick)
-> - Move test cases to xfstests. (Amir, Eryu and Ted)
-> - * Check lowers use base fd + relative path to speed up iterations. (Amir)
-> - Handle missing case of redirect xattr check. (Amir)
-> - Correct copyright and License. (Amir)
-> - Remove duplicate redirect xattr in 'yes' mode.
-> - Add objects counter.
-> - Not enforce fs offline in 'no' mode.
-> - Fix some code mistakes.
->
-> *) This change will cost a lot of 'fd' (up to 500) and will not work
-> if sysctl_nr_open is lower than lowerdir number (special case, default
-> is 1024*1024). I think expand sysctl_nr_open temporary may have some side
-> effect, so just return failure.
->
+But "nametest" is only used in generic/007, the leak should be triggered
+by generic/007 too, but 007 was reported as PASS in my case.
 
-I don't think I follow.
-Perhaps you misunderstood me or I don't remember what I commented on.
-What I meant was that you can keep fd of lowerdirs,upperdir,workdir and
-use those as dir_fd for various syscalls that require overlay relative path,
-instead of composing the upper/lower paths as strings.
-How did we get to 500 fds?
+Not sure what's the best way to deal with these false positive, adding
+more scans seem to work, but that's ugly and requires more test time..
+What do you think?
 
-Amir.
+Otherwise the whole check kmemleak framework looks fine to me.
+
+Thanks,
+Eryu
+
+> +}
+> +
+> +# set up kmemleak
+> +_init_kmemleak()
+> +{
+> +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
+> +
+> +	if [ ! -w "${_kern_knob}" ]; then
+> +		return 0
+> +	fi
+> +
+> +	# Disable the automatic scan so that we can control it completely,
+> +	# then dump all the leaks recorded so far.
+> +	echo "scan=off" > "${_kern_knob}"
+> +	_capture_kmemleak /dev/null
+> +}
+> +
+> +# check kmemleak log
+> +_check_kmemleak()
+> +{
+> +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
+> +	local _leak_file="${seqres}.kmemleak"
+> +
+> +	if [ ! -w "${_kern_knob}" ]; then
+> +		return 0
+> +	fi
+> +
+> +	# Capture and report any leaks
+> +	_capture_kmemleak "${_leak_file}"
+> +	if [ -s "${_leak_file}" ]; then
+> +		_dump_err "_check_kmemleak: something found in kmemleak (see ${_leak_file})"
+> +		return 1
+> +	else
+> +		rm -f "${_leak_file}"
+> +		return 0
+> +	fi
+> +}
+> +
+>  # don't check dmesg log after test
+>  _disable_dmesg_check()
+>  {
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
