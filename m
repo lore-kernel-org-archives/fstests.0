@@ -1,11 +1,11 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:11984 "EHLO
+Received: from szxga05-in.huawei.com ([45.249.212.191]:11985 "EHLO
         szxga05-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751399AbdLNGmC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 01:42:02 -0500
+        with ESMTP id S1751472AbdLNGmD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 01:42:03 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v2 05/18] fsck.overlay: convert path parse to use helper function
-Date: Thu, 14 Dec 2017 14:47:34 +0800
-Message-ID: <20171214064747.20999-6-yi.zhang@huawei.com>
+Subject: [PATCH v2 03/18] fsck.overlay: add -n -p and -y options
+Date: Thu, 14 Dec 2017 14:47:32 +0800
+Message-ID: <20171214064747.20999-4-yi.zhang@huawei.com>
 In-Reply-To: <20171214064747.20999-1-yi.zhang@huawei.com>
 References: <20171214064747.20999-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
@@ -15,111 +15,129 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, darrick.wong@oracle.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
+Add -n -p and -y options to make it official as fsck utilities.
+
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- check.c | 30 +++++++++++++++++++-----------
- 1 file changed, 19 insertions(+), 11 deletions(-)
+ fsck.c | 36 ++++++++++++++++++++++++++++++------
+ lib.c  |  3 ++-
+ lib.h  |  6 +++++-
+ 3 files changed, 37 insertions(+), 8 deletions(-)
 
-diff --git a/check.c b/check.c
-index 1794501..add7e11 100644
---- a/check.c
-+++ b/check.c
-@@ -113,9 +113,13 @@ static int ovl_get_redirect(const char *pathname, size_t dirlen,
- 		buf = srealloc(buf, ret + baselen + 1);
- 		memmove(buf + baselen, buf, ret);
- 		memcpy(buf, pathname+dirlen, baselen);
--		buf[ret + baselen] = '\0';
-+		ret += baselen;
- 	}
- 
-+	ret -= 1;
-+	memmove(buf, buf+1, ret);
-+	buf[ret] = '\0';
-+
- 	*redirect = buf;
- 	return 0;
- }
-@@ -143,7 +147,7 @@ static inline int ovl_create_whiteout(const char *pathname)
-  * skip: skip whiteout.
-  *
-  */
--static int ovl_check_lower(const char *path, unsigned int start,
-+static int ovl_check_lower(const char *pathname, unsigned int start,
- 			   struct ovl_lower_check *chk, bool skip)
+diff --git a/fsck.c b/fsck.c
+index 7f704c8..f4c806b 100644
+--- a/fsck.c
++++ b/fsck.c
+@@ -49,13 +49,16 @@ static void ovl_clean_lowerdirs(void)
+ static void usage(void)
  {
- 	char lower_path[PATH_MAX];
-@@ -151,7 +155,7 @@ static int ovl_check_lower(const char *path, unsigned int start,
- 	unsigned int i;
- 
- 	for (i = start; i < lower_num; i++) {
--		snprintf(lower_path, sizeof(lower_path), "%s%s", lowerdir[i], path);
-+		path_pack(lower_path, sizeof(lower_path), lowerdir[i], pathname);
- 
- 		if (lstat(lower_path, &st) != 0) {
- 			if (errno != ENOENT && errno != ENOTDIR) {
-@@ -165,9 +169,10 @@ static int ovl_check_lower(const char *path, unsigned int start,
- 		if (skip && is_whiteout(&st))
- 			continue;
- 
-+		strncpy(chk->path, lower_path, sizeof(chk->path));
- 		chk->exist = true;
- 		chk->st = st;
--		strncpy(chk->path, lower_path, sizeof(chk->path));
-+
- 		break;
- 	}
- 
-@@ -200,7 +205,8 @@ static int ovl_check_whiteout(struct scan_ctx *sctx)
- 	 * check is there a file or dir with the same name.
- 	 */
- 	start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
--	ret = ovl_check_lower(pathname + sctx->dirlen, start, &chk, true);
-+	ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
-+			      start, &chk, true);
- 	if (ret)
- 		return ret;
- 	if (chk.exist && !is_whiteout(&chk.st))
-@@ -234,7 +240,7 @@ out:
- static int ovl_check_opaque(struct scan_ctx *sctx)
- {
- 	const char *pathname = sctx->pathname;
--	char parent_path[PATH_MAX];
-+	char parent[PATH_MAX];
- 	struct ovl_lower_check chk = {0};
- 	unsigned int start;
+ 	print_info(_("Usage:\n\t%s [-l lowerdir] [-u upperdir] [-w workdir] "
+-		    "[-avhV]\n\n"), program_name);
++		    "[-pnyvhV]\n\n"), program_name);
+ 	print_info(_("Options:\n"
+ 		    "-l, --lowerdir=LOWERDIR   specify lower directories of overlayfs,\n"
+-		    "                          multiple lower use ':' as separator\n"
++		    "                          multiple lower use ':' as separator,\n"
++		    "                          the leftmost one is the toppest\n"
+ 		    "-u, --upperdir=UPPERDIR   specify upper directory of overlayfs\n"
+ 		    "-w, --workdir=WORKDIR     specify work directory of overlayfs\n"
+-		    "-a, --auto                repair automatically (no questions)\n"
++		    "-p,                       automatic repair (no questions)\n"
++		    "-n,                       make no changes to the filesystem\n"
++		    "-y,                       assume \"yes\" to all questions\n"
+ 		    "-v, --verbose             print more messages of overlayfs\n"
+ 		    "-h, --help                display this usage of overlayfs\n"
+ 		    "-V, --version             display version information\n"));
+@@ -67,19 +70,19 @@ static void parse_options(int argc, char *argv[])
+ 	char *lowertemp;
+ 	int c;
  	int ret = 0;
-@@ -252,15 +258,17 @@ static int ovl_check_opaque(struct scan_ctx *sctx)
- 	 * check if there is a file or dir with the same name.
- 	 */
- 	start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
--	ret = ovl_check_lower(pathname + sctx->dirlen, start, &chk, true);
-+	ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
-+			      start, &chk, true);
- 	if (ret)
- 		return ret;
- 	if (chk.exist && !is_whiteout(&chk.st))
- 		goto out;
++	bool opt_conflict = false;
  
- 	/* Check parent directory merged or pure */
--	memcpy(parent_path, pathname, sctx->pathlen-sctx->filelen);
--	ret = ovl_check_lower(parent_path + sctx->dirlen, start, &chk, false);
-+	path_truncate(parent, sizeof(parent), pathname, sctx->filename);
-+	ret = ovl_check_lower(path_pick(parent, sctx->dirlen),
-+			      start, &chk, false);
- 	if (ret)
- 		return ret;
- 	if (chk.exist && is_dir(&chk.st))
-@@ -396,8 +404,8 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
- 				       sctx->num, chk.path);
+ 	struct option long_options[] = {
+ 		{"lowerdir", required_argument, NULL, 'l'},
+ 		{"upperdir", required_argument, NULL, 'u'},
+ 		{"workdir", required_argument, NULL, 'w'},
+-		{"auto", no_argument, NULL, 'a'},
+ 		{"verbose", no_argument, NULL, 'v'},
+ 		{"version", no_argument, NULL, 'V'},
+ 		{"help", no_argument, NULL, 'h'},
+ 		{NULL, 0, NULL, 0}
+ 	};
  
- 		/* Check and fix whiteout or opaque dir */
--		snprintf(redirect_rpath, sizeof(redirect_rpath), "%s%s",
--			 sctx->dirname, redirect);
-+		path_pack(redirect_rpath, sizeof(redirect_rpath),
-+			  sctx->dirname, redirect);
- 		if (lstat(redirect_rpath, &rst) != 0) {
- 			if (errno != ENOENT && errno != ENOTDIR) {
- 				print_err(_("Cannot stat %s: %s\n"),
+-	while ((c = getopt_long(argc, argv, "l:u:w:avVh", long_options, NULL)) != -1) {
++	while ((c = getopt_long(argc, argv, "l:u:w:apnyvVh", long_options, NULL)) != -1) {
+ 		switch (c) {
+ 		case 'l':
+ 			lowertemp = strdup(optarg);
+@@ -105,7 +108,23 @@ static void parse_options(int argc, char *argv[])
+ 			}
+ 			break;
+ 		case 'a':
+-			flags |= FL_AUTO;
++		case 'p':
++			if (flags & (FL_OPT_YES | FL_OPT_NO))
++				opt_conflict = true;
++			else
++				flags |= FL_OPT_AUTO;
++			break;
++		case 'n':
++			if (flags & (FL_OPT_YES | FL_OPT_AUTO))
++				opt_conflict = true;
++			else
++				flags |= FL_OPT_NO;
++			break;
++		case 'y':
++			if (flags & (FL_OPT_NO | FL_OPT_AUTO))
++				opt_conflict = true;
++			else
++				flags |= FL_OPT_YES;
+ 			break;
+ 		case 'v':
+ 			flags |= FL_VERBOSE;
+@@ -127,6 +146,11 @@ static void parse_options(int argc, char *argv[])
+ 		print_info(_("Please specify correct lowerdirs and upperdir\n"));
+ 		usage();
+ 	}
++
++	if (opt_conflict) {
++		print_info(_("Only one of the options -p/-a, -n or -y can be specified.\n"));
++		usage();
++	}
+ }
+ 
+ void fsck_status_check(int *val)
+diff --git a/lib.c b/lib.c
+index a6832fe..7607517 100644
+--- a/lib.c
++++ b/lib.c
+@@ -46,7 +46,8 @@ static int ask_yn(const char *question, int def)
+ /* Ask user */
+ int ask_question(const char *question, int def)
+ {
+-	if (flags & FL_AUTO) {
++	if (flags & FL_OPT_MASK) {
++		def = (flags & FL_OPT_YES) ? 1 : (flags & FL_OPT_NO) ? 0 : def;
+ 		print_info(_("%s? %s\n"), question, def ? _("y") : _("n"));
+ 		return def;
+ 	}
+diff --git a/lib.h b/lib.h
+index 463b263..2956235 100644
+--- a/lib.h
++++ b/lib.h
+@@ -19,7 +19,11 @@
+ #define FL_VERBOSE	(1 << 0)	/* verbose */
+ #define FL_UPPER	(1 << 1)	/* specify upper directory */
+ #define FL_WORK		(1 << 2)	/* specify work directory */
+-#define FL_AUTO		(1 << 3)	/* automactically scan dirs and repair */
++#define FL_OPT_AUTO	(1 << 3)	/* automactically scan dirs and repair */
++#define FL_OPT_NO	(1 << 4)	/* no changes to the filesystem */
++#define FL_OPT_YES	(1 << 5)	/* yes to all questions */
++#define FL_OPT_MASK	(FL_OPT_AUTO|FL_OPT_NO|FL_OPT_YES)
++
+ 
+ /* Scan path type */
+ #define OVL_UPPER	0
 -- 
 2.9.5
 
