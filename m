@@ -1,247 +1,91 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:2287 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750873AbdLNGm6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Dec 2017 01:42:58 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH for xfstests 4/4] overlay: add fsck.overlay redirect directory test
-Date: Thu, 14 Dec 2017 14:48:46 +0800
-Message-ID: <20171214064846.21587-5-yi.zhang@huawei.com>
-In-Reply-To: <20171214064846.21587-1-yi.zhang@huawei.com>
-References: <20171214064846.21587-1-yi.zhang@huawei.com>
+Received: from mail-yb0-f194.google.com ([209.85.213.194]:36258 "EHLO
+        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750873AbdLNGwd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 01:52:33 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20171213234404.GF5858@dastard>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314505158.18893.11894289091110903029.stgit@magnolia> <20171213232805.GI6896@magnolia>
+ <20171213234404.GF5858@dastard>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 14 Dec 2017 08:52:32 +0200
+Message-ID: <CAOQ4uxhXDVPAzv4jNsgsnbuuN4Hm_yGJKS4hBTzQBp+8hw18_Q@mail.gmail.com>
+Subject: Re: [PATCH v2 8/8] xfs/068: fix clonerange problems in file/dir count output
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, darrick.wong@oracle.com, yi.zhang@huawei.com, miaoxie@huawei.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Eryu Guan <eguan@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Add fsck.overlay test case to test it how to deal with invalid/valid
-redirect xattr in underlying directories of overlayfs. It should remove
-the invalid redirect dir xattr automatically and keep the valid one.
+On Thu, Dec 14, 2017 at 1:44 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Wed, Dec 13, 2017 at 03:28:05PM -0800, Darrick J. Wong wrote:
+>> From: Darrick J. Wong <darrick.wong@oracle.com>
+>>
+>> In this test we use a fixed sequence of operations in fsstress to create
+>> some number of files and dirs and then exercise xfsdump/xfsrestore on
+>> them.  Since clonerange/deduperange are not supported on all xfs
+>> configurations, detect if they're in fsstress and disable them so that
+>> we always execute exactly the same sequence of operations no matter how
+>> the filesystem is configured.
+>>
+>> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+>> ---
+>>  tests/xfs/068 |    8 ++++++++
+>>  1 file changed, 8 insertions(+)
+>>
+>> diff --git a/tests/xfs/068 b/tests/xfs/068
+>> index 7151e28..f95a539 100755
+>> --- a/tests/xfs/068
+>> +++ b/tests/xfs/068
+>> @@ -43,6 +43,14 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
+>>  _supported_fs xfs
+>>  _supported_os Linux
+>>
+>> +# Remove fsstress commands that aren't supported on all xfs configs
+>> +if $FSSTRESS_PROG | grep -q clonerange; then
+>> +     FSSTRESS_AVOID="-f clonerange=0 $FSSTRESS_AVOID"
+>> +fi
+>> +if $FSSTRESS_PROG | grep -q deduperange; then
+>> +     FSSTRESS_AVOID="-f deduperange=0 $FSSTRESS_AVOID"
+>> +fi
+>> +
+>
+> I'd put this inside _create_dumpdir_stress_num as it's supposed to
+> DTRT for the dump/restore that follows. Otherwise looks fine.
+>
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
----
- tests/overlay/203     | 185 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/203.out |   8 +++
- tests/overlay/group   |   1 +
- 3 files changed, 194 insertions(+)
- create mode 100755 tests/overlay/203
- create mode 100644 tests/overlay/203.out
+Guys,
 
-diff --git a/tests/overlay/203 b/tests/overlay/203
-new file mode 100755
-index 0000000..ccf1109
---- /dev/null
-+++ b/tests/overlay/203
-@@ -0,0 +1,185 @@
-+#! /bin/bash
-+# FS QA Test 203
-+#
-+# Test fsck.overlay how to deal with redirect xattr in overlayfs.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Huawei.  All Rights Reserved.
-+# Author: zhangyi (F) <yi.zhang@huawei.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+OVL_REDIRECT_XATTR="trusted.overlay.redirect"
-+OVL_OPAQUE_XATTR="trusted.overlay.opaque"
-+OVL_OPAQUE_XATTR_VAL="y"
-+
-+# Set redirect xattr to a directory
-+set_redirect()
-+{
-+	local target=$1
-+	local value=$2
-+
-+	$SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
-+}
-+
-+# Check xattr is correct or not
-+check_xattr()
-+{
-+	local name=$1
-+	local expect=$2
-+	local target=$3
-+
-+	value=$($GETFATTR_PROG --absolute-names --only-values -n $name $target)
-+
-+	[[ $value == $expect ]] || echo "$name xattr incorrect"
-+}
-+
-+# Check whiteout
-+check_whiteout()
-+{
-+	local target=$1
-+
-+	target_type=`stat -c "%F:%t,%T" $target`
-+
-+	[[ $target_type == "character special file:0,0" ]] || \
-+		echo "Valid whiteout removed incorrectly"
-+}
-+
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+
-+mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir
-+
-+# Test invalid redirect xattr point to a nonexistent origin, should remove
-+echo "+ Invalid redirect"
-+mkdir $upperdir/testdir
-+set_redirect $upperdir/testdir "abc"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+$GETFATTR_PROG --absolute-names -d -m $OVL_REDIRECT_XATTR $upperdir/testdir
-+rm -rf $upperdir/*
-+
-+# Test invalid redirect xattr point to a file origin, should remove
-+echo "+ Invalid redirect(2)"
-+touch $lowerdir/origin
-+mkdir $upperdir/testdir
-+set_redirect $upperdir/testdir "origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+$GETFATTR_PROG --absolute-names -d -m $OVL_REDIRECT_XATTR $upperdir/testdir
-+rm -rf $lowerdir/* $upperdir/*
-+
-+# Test valid redirect xattr point to a directory origin in the same directory,
-+# should not remove
-+echo "+ Valid redirect"
-+mkdir $lowerdir/origin
-+mknod $upperdir/origin c 0 0
-+mkdir $upperdir/testdir
-+set_redirect $upperdir/testdir "origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir
-+rm -rf $lowerdir/* $upperdir/*
-+
-+# Test valid redirect xattr point to a directory origin in different directories
-+# should not remove
-+echo "+ Valid redirect(2)"
-+mkdir $lowerdir/origin
-+mknod $upperdir/origin c 0 0
-+mkdir -p $upperdir/testdir1/testdir2
-+set_redirect $upperdir/testdir1/testdir2 "/origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_xattr $OVL_REDIRECT_XATTR "/origin" $upperdir/testdir1/testdir2
-+rm -rf $lowerdir/* $upperdir/*
-+
-+# Test missing whiteout with valid redirect directory, should fix whiteout
-+echo "+ Missing whiteout"
-+mkdir $lowerdir/origin
-+mkdir $upperdir/testdir
-+set_redirect $upperdir/testdir "origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir
-+check_whiteout $upperdir/origin
-+rm -rf $lowerdir/* $upperdir/*
-+
-+# Test missing opaque xattr with valid redirect directory, should fix opaque
-+echo "+ Missing opaque"
-+mkdir $lowerdir/origin
-+mkdir $upperdir/origin
-+mkdir $upperdir/testdir
-+set_redirect $upperdir/testdir "origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir
-+check_xattr $OVL_OPAQUE_XATTR $OVL_OPAQUE_XATTR_VAL $upperdir/origin
-+rm -rf $lowerdir/* $upperdir/*
-+
-+# Test duplicate redirect directories point to one origin, should fail in
-+# -a 'auto' mode, should remove the duplicate one in -y 'yes' mode
-+echo "+ Duplicate redirect"
-+mkdir $lowerdir/origin
-+mknod $upperdir/origin c 0 0
-+mkdir $upperdir/testdir1
-+mkdir $upperdir/testdir2
-+set_redirect $upperdir/testdir1 "origin"
-+set_redirect $upperdir/testdir2 "origin"
-+_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 && \
-+	_fail "fsck should fail"
-+_overlay_fsck_dirs -y $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir2
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/203.out b/tests/overlay/203.out
-new file mode 100644
-index 0000000..3f8155d
---- /dev/null
-+++ b/tests/overlay/203.out
-@@ -0,0 +1,8 @@
-+QA output created by 203
-++ Invalid redirect
-++ Invalid redirect(2)
-++ Valid redirect
-++ Valid redirect(2)
-++ Missing whiteout
-++ Missing opaque
-++ Duplicate redirect
-diff --git a/tests/overlay/group b/tests/overlay/group
-index e39b5e0..f99d89e 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -51,3 +51,4 @@
- 048 auto quick copyup hardlink
- 201 auto quick fsck
- 202 auto quick fsck
-+203 auto quick fsck
--- 
-2.5.0
+Please take a look at the only 2 changes in the history of this test.
+I would like to make sure we are not in a loop:
 
+5d36d85 xfs/068: update golden output due to new operations in fsstress
+6e5194d fsstress: Add fallocate insert range operation
+
+The first change excludes the new insert op (by dchinner on commit)
+The second change re-includes insert op, does not exclude new
+mread/mwrite ops and updates golden output, following this discussion:
+https://marc.info/?l=fstests&m=149014697111838&w=2
+(the referenced thread ends with a ? to Dave, but was followed by v6..v8
+ that were "silently acked" by Dave).
+
+I personally argued that the blacklist approach to xfs/068 is fragile and indeed
+this is the third time the test breaks in the history I know of,
+because of added
+fsstress ops. Fine. As long as we at least stay consistent with a decision about
+update golden output vs. exclude ops and document the decision in a comment
+with the reasoning, so we won't have to repeat this discussion next time.
+
+Darrick,
+
+IMO, we should follow the path of updating golden output and instead of
+dropping clone/dedupe from ops table in runtime, you should make them
+a noop or ignore the error, keeping the random sequence unchanged.
+This is more or less what happens with insert/collapse (error is ignored)
+already, so it would be weird to make exceptions.
+
+For reference, fsx does disable insert/collapse/zero/punch at runtime
+and that does change the random sequence of fsx.
+
+Cheers,
+Amir.
