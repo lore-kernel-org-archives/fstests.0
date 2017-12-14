@@ -1,106 +1,158 @@
-Received: from mail-yb0-f194.google.com ([209.85.213.194]:33064 "EHLO
-        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750785AbdLNIPN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 03:15:13 -0500
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:46135 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751091AbdLNJFZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 04:05:25 -0500
 MIME-Version: 1.0
-In-Reply-To: <20171214074947.GG2749@eguan.usersys.redhat.com>
-References: <151314499003.18893.8687182548758898133.stgit@magnolia>
- <151314505158.18893.11894289091110903029.stgit@magnolia> <20171213232805.GI6896@magnolia>
- <20171213234404.GF5858@dastard> <CAOQ4uxhXDVPAzv4jNsgsnbuuN4Hm_yGJKS4hBTzQBp+8hw18_Q@mail.gmail.com>
- <20171214074947.GG2749@eguan.usersys.redhat.com>
+In-Reply-To: <20171214064846.21587-2-yi.zhang@huawei.com>
+References: <20171214064846.21587-1-yi.zhang@huawei.com> <20171214064846.21587-2-yi.zhang@huawei.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 14 Dec 2017 10:15:12 +0200
-Message-ID: <CAOQ4uxhgV7HCmbFpzsYes_XJVScHDBjJCqLYmYzO+z5JiaoofQ@mail.gmail.com>
-Subject: Re: [PATCH v2 8/8] xfs/068: fix clonerange problems in file/dir count output
+Date: Thu, 14 Dec 2017 11:05:24 +0200
+Message-ID: <CAOQ4uximBJqFpsBMLQMWTJpJsoigBnYemtb7z1h-3PPWyjrkXA@mail.gmail.com>
+Subject: Re: [PATCH for xfstests 1/4] overlay: add filesystem check helper
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 14, 2017 at 9:49 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Thu, Dec 14, 2017 at 08:52:32AM +0200, Amir Goldstein wrote:
->> On Thu, Dec 14, 2017 at 1:44 AM, Dave Chinner <david@fromorbit.com> wrote:
->> > On Wed, Dec 13, 2017 at 03:28:05PM -0800, Darrick J. Wong wrote:
->> >> From: Darrick J. Wong <darrick.wong@oracle.com>
->> >>
->> >> In this test we use a fixed sequence of operations in fsstress to create
->> >> some number of files and dirs and then exercise xfsdump/xfsrestore on
->> >> them.  Since clonerange/deduperange are not supported on all xfs
->> >> configurations, detect if they're in fsstress and disable them so that
->> >> we always execute exactly the same sequence of operations no matter how
->> >> the filesystem is configured.
->> >>
->> >> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
->> >> ---
->> >>  tests/xfs/068 |    8 ++++++++
->> >>  1 file changed, 8 insertions(+)
->> >>
->> >> diff --git a/tests/xfs/068 b/tests/xfs/068
->> >> index 7151e28..f95a539 100755
->> >> --- a/tests/xfs/068
->> >> +++ b/tests/xfs/068
->> >> @@ -43,6 +43,14 @@ trap "rm -rf $tmp.*; exit \$status" 0 1 2 3 15
->> >>  _supported_fs xfs
->> >>  _supported_os Linux
->> >>
->> >> +# Remove fsstress commands that aren't supported on all xfs configs
->> >> +if $FSSTRESS_PROG | grep -q clonerange; then
->> >> +     FSSTRESS_AVOID="-f clonerange=0 $FSSTRESS_AVOID"
->> >> +fi
->> >> +if $FSSTRESS_PROG | grep -q deduperange; then
->> >> +     FSSTRESS_AVOID="-f deduperange=0 $FSSTRESS_AVOID"
->> >> +fi
->> >> +
->> >
->> > I'd put this inside _create_dumpdir_stress_num as it's supposed to
->> > DTRT for the dump/restore that follows. Otherwise looks fine.
->> >
->>
->> Guys,
->>
->> Please take a look at the only 2 changes in the history of this test.
->> I would like to make sure we are not in a loop:
->>
->> 5d36d85 xfs/068: update golden output due to new operations in fsstress
->> 6e5194d fsstress: Add fallocate insert range operation
->>
->> The first change excludes the new insert op (by dchinner on commit)
->> The second change re-includes insert op, does not exclude new
->> mread/mwrite ops and updates golden output, following this discussion:
->> https://marc.info/?l=fstests&m=149014697111838&w=2
->> (the referenced thread ends with a ? to Dave, but was followed by v6..v8
->>  that were "silently acked" by Dave).
->>
->> I personally argued that the blacklist approach to xfs/068 is fragile and indeed
->> this is the third time the test breaks in the history I know of,
->> because of added
->> fsstress ops. Fine. As long as we at least stay consistent with a decision about
->> update golden output vs. exclude ops and document the decision in a comment
->> with the reasoning, so we won't have to repeat this discussion next time.
+On Thu, Dec 14, 2017 at 8:48 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> Add filesystem check helpers for the upcoming fsck.overlay utility,
+> and hook them to _check_test_fs and _check_scratch_fs. This helper
+> works only if fsck.overlay exists.
 >
-> I think the fundamental problem of xfs/068 is the hardcoded file numbers
-> in .out file, perhaps we should calculate the expected number of
-> files/dirs to be dumped/restored before the dump test and extract the
-> actual restored number of files/dirs from xfsrestore output and do a
-> comparison. (or save the whole tree structure for comparison? I haven't
-> done any test yet, just some random thoughts for now.)
+> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
 >
-> Currently, xfs/068 will easily break if there's user-defined
-> FSSTRESS_AVOID, e.g. FSSTRESS_AVOID="-ffallocate=0", and that's totally
-> legal test configuration.
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> ---
+>  common/config  |  1 +
+>  common/overlay | 78 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/rc      |  4 +--
+>  3 files changed, 81 insertions(+), 2 deletions(-)
 >
-> IHMO we really should fix xfs/068 first to avoid hitting the same
-> problem again and again.
+> diff --git a/common/config b/common/config
+> index d0fbfe5..0505b71 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -236,6 +236,7 @@ case "$HOSTOS" in
+>          export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
+>         export E2FSCK_PROG="`set_prog_path e2fsck`"
+>         export TUNE2FS_PROG="`set_prog_path tune2fs`"
+> +       export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
+>          ;;
+>  esac
 >
+> diff --git a/common/overlay b/common/overlay
+> index 1da4ab1..689799c 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -151,3 +151,81 @@ _require_scratch_overlay_feature()
+>                 _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
+>         _scratch_unmount
+>  }
+> +
+> +_overlay_fsck_dirs()
+> +{
+> +       local options=$1
+> +       local lowerdir=$2
+> +       local upperdir=$3
+> +       local workdir=$4
+> +
+> +       [[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
+> +
+> +       $FSCK_OVERLAY_PROG $options -l $lowerdir -u $upperdir -w $workdir
+> +}
+> +
+> +_overlay_check_dirs()
+> +{
+> +       local lowerdir=$1
+> +       local upperdir=$2
+> +       local workdir=$3
+> +       local err=0
+> +
+> +       _overlay_fsck_dirs $FSCK_OPTIONS $* >>$tmp.fsck 2>&1
+> +       if [ $? -ne 0 ]; then
+> +               _log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
+> +               echo "*** fsck.overlay output ***"      >>$seqres.full
+> +               cat $tmp.fsck                           >>$seqres.full
+> +               echo "*** end fsck.overlay output"      >>$seqres.full
+> +               echo "*** mount output ***"             >>$seqres.full
+> +               _mount                                  >>$seqres.full
+> +               echo "*** end mount output"             >>$seqres.full
+> +               err=1
+> +       fi
 
-Agreed.
-And while at it, need to redirect:
+Maybe the tmp.fsck output reporting to seqres.full should be done in
+_overlay_fsck_dirs?
+I think this output could be useful for understanding fsck tests failure.
 
-echo "fsstress : $_param"
+> +       rm -f $tmp.fsck
+> +
+> +       if [ $err != 0 ]; then
+> +               status=1
+> +               if [ "$iam" != "check" ]; then
+> +                       exit 1
+> +               fi
+> +               return 1
+> +       fi
+> +
+> +       return 0
+> +}
+> +
+> +_overlay_check_fs()
+> +{
+> +       local base_dev=$3
+> +       local base_mnt=$4
+> +
+> +       [ "$FSTYP" = overlay ] || return 0
+> +
+> +       # Base fs needs to be mounted to check overlay dirs
+> +       local mounted=""
+> +       [ -z "$base_dev" ] || mounted=`_is_mounted $base_dev`
+> +       [ -n "$mounted" ] || _overlay_base_mount $*
+> +
+> +       # No need to umount overlay for dir checks with default -n option
+> +       _overlay_check_dirs $base_mnt/$OVL_LOWER $base_mnt/$OVL_UPPER \
+> +                           $base_mnt/$OVL_WORK
+> +       local ret=$?
+> +
+> +       [ -n "$mounted" ] || _overlay_base_unmount "$base_dev" "$base_mnt"
+> +       return $ret
+> +}
+> +
+> +_check_overlay_test_fs()
+> +{
+> +       _overlay_check_fs OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
+> +               "$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
+> +               $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
+> +}
+> +
+> +_check_overlay_scratch_fs()
+> +{
+> +       _overlay_check_fs OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
+> +               "$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
+> +               $OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+> +}
+> diff --git a/common/rc b/common/rc
+> index 4c053a5..0837637 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2507,7 +2507,7 @@ _check_test_fs()
+>         # no way to check consistency for GlusterFS
+>         ;;
+>      overlay)
+> -       # no way to check consistency for overlay
+> +       _check_overlay_test_fs
+>         ;;
+>      pvfs2)
+>         ;;
+> @@ -2562,7 +2562,7 @@ _check_scratch_fs()
+>         # no way to check consistency for GlusterFS
+>         ;;
+>      overlay)
+> -       # no way to check consistency for overlay
+> +       _check_overlay_test_fs
 
-to $seq.full and remove it from golden output and print the
-actual parameters in the log including  $FSSTRESS_AVOID, not the
-make believe params.
+_check_overlay_scratch_fs
 
+Thanks,
 Amir.
