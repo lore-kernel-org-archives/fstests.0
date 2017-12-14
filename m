@@ -1,111 +1,67 @@
-Received: from mail-yb0-f194.google.com ([209.85.213.194]:36434 "EHLO
-        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750720AbdLNGjj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 01:39:39 -0500
+Received: from szxga05-in.huawei.com ([45.249.212.191]:2285 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750873AbdLNGlz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Dec 2017 01:41:55 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [PATCH v2 00/18] overlay: implement fsck.overlay utility
+Date: Thu, 14 Dec 2017 14:47:29 +0800
+Message-ID: <20171214064747.20999-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-In-Reply-To: <151314503583.18893.15475795025536691678.stgit@magnolia>
-References: <151314499003.18893.8687182548758898133.stgit@magnolia> <151314503583.18893.15475795025536691678.stgit@magnolia>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 14 Dec 2017 08:39:38 +0200
-Message-ID: <CAOQ4uxh-msvkXA0Uyh9DfYicM6QGAohuaOZdwVpkKrfNPpvDTA@mail.gmail.com>
-Subject: Re: [PATCH 6/8] fsstress: implement the clonerange/deduperange ioctls
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@redhat.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, darrick.wong@oracle.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 13, 2017 at 8:03 AM, Darrick J. Wong
-<darrick.wong@oracle.com> wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> Mix it up a bit by reflinking and deduping data blocks when possible.
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  ltp/fsstress.c |  440 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 440 insertions(+)
->
->
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 96f48b1..e2dfa5e 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -68,7 +68,9 @@ typedef enum {
->         OP_BULKSTAT,
->         OP_BULKSTAT1,
->         OP_CHOWN,
-> +       OP_CLONERANGE,
->         OP_CREAT,
-> +       OP_DEDUPERANGE,
->         OP_DREAD,
->         OP_DWRITE,
->         OP_FALLOCATE,
-> @@ -174,7 +176,9 @@ void        awrite_f(int, long);
->  void   bulkstat_f(int, long);
->  void   bulkstat1_f(int, long);
->  void   chown_f(int, long);
-> +void   clonerange_f(int, long);
->  void   creat_f(int, long);
-> +void   deduperange_f(int, long);
->  void   dread_f(int, long);
->  void   dwrite_f(int, long);
->  void   fallocate_f(int, long);
-> @@ -221,7 +225,9 @@ opdesc_t    ops[] = {
->         { OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
->         { OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
->         { OP_CHOWN, "chown", chown_f, 3, 1 },
-> +       { OP_CLONERANGE, "clonerange", clonerange_f, 4, 1 },
->         { OP_CREAT, "creat", creat_f, 4, 1 },
-> +       { OP_DEDUPERANGE, "deduperange", deduperange_f, 4, 1},
->         { OP_DREAD, "dread", dread_f, 4, 0 },
->         { OP_DWRITE, "dwrite", dwrite_f, 4, 1 },
->         { OP_FALLOCATE, "fallocate", fallocate_f, 1, 1 },
-> @@ -1312,6 +1318,16 @@ make_freq_table(void)
->         }
->  }
->
-> +void
-> +free_freq_table(void)
-> +{
-> +       if (!freq_table)
-> +               return;
-> +       free(freq_table);
-> +       freq_table = NULL;
-> +       freq_table_size = 0;
-> +}
-> +
->  int
->  mkdir_path(pathname_t *name, mode_t mode)
->  {
-> @@ -2189,6 +2205,430 @@ chown_f(int opno, long r)
->         free_pathname(&f);
->  }
->
-> +static void
-> +disable_op(opty_t opt)
-> +{
-> +       opdesc_t        *p;
-> +
-> +       for (p = ops; p < ops_end; p++) {
-> +               if (opt == p->op) {
-> +                       p->freq = 0;
-> +                       free_freq_table();
-> +                       make_freq_table();
-> +                       return;
-> +               }
-> +       }
-> +}
-> +
+Hi all,
 
-If we want to go down the path of runtime disable ops, the question is:
-Why disable_op clonerange/deduperange and not disable_op
-insert/collapse/zero/punch? there are probably other ops as well.
-This is also inconsistent by the fact that build time disable of
-neither FALLOC nor LONERANGE/DEDUPERANGE will not
-change the random op sequence, while runtime disable will.
+Here is the second version of original fsck.overlay. Changes split to
+each patch from first version "overlay: implement fsck utility" for
+readability.
 
-This is related to the conversation of the golden output of xfs/068.
-Will take my arguments there now...
+I have already handled most of comments from the first iteration and
+add/fix some infrastructure, no big features, move tests to xfstests
+(already tested).
 
-Amir.
+I will push this "incubator" version to github after review and fix.
+Any comments is helpful, thanks!
+
+Changes since v1:
+
+- Add "-n -p -y" options. (Comment from Amir and Darrick)
+- Move test cases to xfstests. (Amir, Eryu and Ted)
+- * Check lowers use base fd + relative path to speed up iterations. (Amir)
+- Handle missing case of redirect xattr check. (Amir)
+- Correct copyright and License. (Amir)
+- Remove duplicate redirect xattr in 'yes' mode.
+- Add objects counter.
+- Not enforce fs offline in 'no' mode.
+- Fix some code mistakes.
+
+*) This change will cost a lot of 'fd' (up to 500) and will not work
+if sysctl_nr_open is lower than lowerdir number (special case, default
+is 1024*1024). I think expand sysctl_nr_open temporary may have some side
+effect, so just return failure.
+
+Thanks!
+
+zhangyi (F) (18):
+  overlay: implement fsck utility
+  fsck.overlay: fix uninitialized variable
+  fsck.overlay: add -n -p and -y options
+  fsck.overlay: add path package and split helper
+  fsck.overlay: convert path parse to use helper function
+  fsck.overlay: open lowerdirs in advance
+  fsck.overlay: check lowers use relative path
+  fsck.overlay: fix spelling mistakes
+  fsck.overlay: add counter of checked objects
+  fsck.overlay: fix verbose flag
+  fsck.overlay: add ovl_ask_invalid helper
+  fsck.overlay: remove duplicate redirect xattr in yes mode
+  fsck.overlay: handle missing case of redirecte directory
+  fsck.overlay: correct copyright and License
+  fsck.overlay: fix word mistake
+  fsck.overlay: remove test cases
+  fsck.overlay: not enforce overlayfs is offline in 'no changes' mode
+  fsck.overlay: use relative path when checking lowers
+
