@@ -1,163 +1,132 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:36904 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753748AbdLNSPM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 13:15:12 -0500
-Date: Thu, 14 Dec 2017 10:15:08 -0800
+Received: from userp2120.oracle.com ([156.151.31.85]:40030 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752508AbdLNUUv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 15:20:51 -0500
+Date: Thu, 14 Dec 2017 12:20:43 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/8] common/rc: report kmemleak errors
-Message-ID: <20171214181508.GJ6896@magnolia>
+Subject: Re: [PATCH 6/8] fsstress: implement the clonerange/deduperange ioctls
+Message-ID: <20171214202043.GK6896@magnolia>
 References: <151314499003.18893.8687182548758898133.stgit@magnolia>
- <151314499847.18893.9855359031542704591.stgit@magnolia>
- <20171214093718.GH2749@eguan.usersys.redhat.com>
+ <151314503583.18893.15475795025536691678.stgit@magnolia>
+ <CAOQ4uxh-msvkXA0Uyh9DfYicM6QGAohuaOZdwVpkKrfNPpvDTA@mail.gmail.com>
+ <20171214073246.GF2749@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171214093718.GH2749@eguan.usersys.redhat.com>
+In-Reply-To: <20171214073246.GF2749@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: Amir Goldstein <amir73il@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 14, 2017 at 05:37:18PM +0800, Eryu Guan wrote:
-> On Tue, Dec 12, 2017 at 10:03:18PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Dec 14, 2017 at 03:32:46PM +0800, Eryu Guan wrote:
+> On Thu, Dec 14, 2017 at 08:39:38AM +0200, Amir Goldstein wrote:
+> > On Wed, Dec 13, 2017 at 8:03 AM, Darrick J. Wong
+> > <darrick.wong@oracle.com> wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > >
+> > > Mix it up a bit by reflinking and deduping data blocks when possible.
+> > >
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  ltp/fsstress.c |  440 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  1 file changed, 440 insertions(+)
+> > >
+> > >
+> > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > > index 96f48b1..e2dfa5e 100644
+> > > --- a/ltp/fsstress.c
+> > > +++ b/ltp/fsstress.c
+> > > @@ -68,7 +68,9 @@ typedef enum {
+> > >         OP_BULKSTAT,
+> > >         OP_BULKSTAT1,
+> > >         OP_CHOWN,
+> > > +       OP_CLONERANGE,
+> > >         OP_CREAT,
+> > > +       OP_DEDUPERANGE,
+> > >         OP_DREAD,
+> > >         OP_DWRITE,
+> > >         OP_FALLOCATE,
+> > > @@ -174,7 +176,9 @@ void        awrite_f(int, long);
+> > >  void   bulkstat_f(int, long);
+> > >  void   bulkstat1_f(int, long);
+> > >  void   chown_f(int, long);
+> > > +void   clonerange_f(int, long);
+> > >  void   creat_f(int, long);
+> > > +void   deduperange_f(int, long);
+> > >  void   dread_f(int, long);
+> > >  void   dwrite_f(int, long);
+> > >  void   fallocate_f(int, long);
+> > > @@ -221,7 +225,9 @@ opdesc_t    ops[] = {
+> > >         { OP_BULKSTAT, "bulkstat", bulkstat_f, 1, 0 },
+> > >         { OP_BULKSTAT1, "bulkstat1", bulkstat1_f, 1, 0 },
+> > >         { OP_CHOWN, "chown", chown_f, 3, 1 },
+> > > +       { OP_CLONERANGE, "clonerange", clonerange_f, 4, 1 },
+> > >         { OP_CREAT, "creat", creat_f, 4, 1 },
+> > > +       { OP_DEDUPERANGE, "deduperange", deduperange_f, 4, 1},
+> > >         { OP_DREAD, "dread", dread_f, 4, 0 },
+> > >         { OP_DWRITE, "dwrite", dwrite_f, 4, 1 },
+> > >         { OP_FALLOCATE, "fallocate", fallocate_f, 1, 1 },
+> > > @@ -1312,6 +1318,16 @@ make_freq_table(void)
+> > >         }
+> > >  }
+> > >
+> > > +void
+> > > +free_freq_table(void)
+> > > +{
+> > > +       if (!freq_table)
+> > > +               return;
+> > > +       free(freq_table);
+> > > +       freq_table = NULL;
+> > > +       freq_table_size = 0;
+> > > +}
+> > > +
+> > >  int
+> > >  mkdir_path(pathname_t *name, mode_t mode)
+> > >  {
+> > > @@ -2189,6 +2205,430 @@ chown_f(int opno, long r)
+> > >         free_pathname(&f);
+> > >  }
+> > >
+> > > +static void
+> > > +disable_op(opty_t opt)
+> > > +{
+> > > +       opdesc_t        *p;
+> > > +
+> > > +       for (p = ops; p < ops_end; p++) {
+> > > +               if (opt == p->op) {
+> > > +                       p->freq = 0;
+> > > +                       free_freq_table();
+> > > +                       make_freq_table();
+> > > +                       return;
+> > > +               }
+> > > +       }
+> > > +}
+> > > +
 > > 
-> > If kmemleak is enabled, scan and report memory leaks after every test.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  check     |    2 ++
-> >  common/rc |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  2 files changed, 54 insertions(+)
-> > 
-> > 
-> > diff --git a/check b/check
-> > index b2d251a..469188e 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -497,6 +497,7 @@ _check_filesystems()
-> >  	fi
-> >  }
-> >  
-> > +_init_kmemleak
-> >  _prepare_test_list
-> >  
-> >  if $OPTIONS_HAVE_SECTIONS; then
-> > @@ -793,6 +794,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-> >  		    n_try=`expr $n_try + 1`
-> >  		    _check_filesystems
-> >  		    _check_dmesg || err=true
-> > +		    _check_kmemleak || err=true
-> >  		fi
-> >  
-> >  	    fi
-> > diff --git a/common/rc b/common/rc
-> > index cb83918..a2bed36 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -3339,6 +3339,58 @@ _check_dmesg()
-> >  	fi
-> >  }
-> >  
-> > +# capture the kmemleak report
-> > +_capture_kmemleak()
-> > +{
-> > +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
-> > +	local _leak_file="$1"
-> > +
-> > +	# Tell the kernel to scan for memory leaks.  Apparently the write
-> > +	# returns before the scan is complete, so do it twice in the hopes
-> > +	# that twice is enough to capture all the leaks.
-> > +	echo "scan" > "${_kern_knob}"
-> > +	cat "${_kern_knob}" > /dev/null
-> > +	echo "scan" > "${_kern_knob}"
-> > +	cat "${_kern_knob}" > "${_leak_file}"
-> > +	echo "clear" > "${_kern_knob}"
+> > If we want to go down the path of runtime disable ops, the question is:
+> > Why disable_op clonerange/deduperange and not disable_op
+> > insert/collapse/zero/punch? there are probably other ops as well.
+> > This is also inconsistent by the fact that build time disable of
+> > neither FALLOC nor LONERANGE/DEDUPERANGE will not
+> > change the random op sequence, while runtime disable will.
 > 
-> Hmm, two scans seem not enough either, I could see false positive easily
-> in a 'quick' group run, because some leaks are not reported immediately
-> after the test but after next test or next few tests. e.g. I saw
-> generic/008 (tested on XFS) being reported as leaking memory, and from
-> 008.kmemleak I saw:
-> 
-> unreferenced object 0xffff880277679800 (size 512):
->   comm "nametest", pid 25007, jiffies 4300176958 (age 9.854s)
-> ...
-> 
-> But "nametest" is only used in generic/007, the leak should be triggered
-> by generic/007 too, but 007 was reported as PASS in my case.
-> 
-> Not sure what's the best way to deal with these false positive, adding
-> more scans seem to work, but that's ugly and requires more test time..
-> What do you think?
+> That's a good point. I don't think we want to disable unsupported
+> operations dynamically, fsstress just accepts/ignores whatever result
+> the operation gives and just prints the errno to log in verbose mode.
 
-I'm not sure either -- the brief scan I made of mm/kmemleak.c didn't
-reveal anything obvious that would explain the behavior we see.  It
-might just take a while for determine positively that an item isn't
-gray.
-
-We could change the message to state that found leaks might have
-resulted from the previous test?  That's rather unsatisfying, but I
-don't know what else to do.
-
-Or maybe a sleep 1 in between scans to see if that makes it more likely
-to attribute a leak to the correct test?  I don't anticipate running
-xfstests with kmemleak=on too terribly often, so the extra ~700s won't
-bother me too much.
+Ok, I'll remove all the auto-disabling stuff & resubmit.
 
 --D
 
-> Otherwise the whole check kmemleak framework looks fine to me.
-> 
 > Thanks,
 > Eryu
 > 
-> > +}
-> > +
-> > +# set up kmemleak
-> > +_init_kmemleak()
-> > +{
-> > +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
-> > +
-> > +	if [ ! -w "${_kern_knob}" ]; then
-> > +		return 0
-> > +	fi
-> > +
-> > +	# Disable the automatic scan so that we can control it completely,
-> > +	# then dump all the leaks recorded so far.
-> > +	echo "scan=off" > "${_kern_knob}"
-> > +	_capture_kmemleak /dev/null
-> > +}
-> > +
-> > +# check kmemleak log
-> > +_check_kmemleak()
-> > +{
-> > +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
-> > +	local _leak_file="${seqres}.kmemleak"
-> > +
-> > +	if [ ! -w "${_kern_knob}" ]; then
-> > +		return 0
-> > +	fi
-> > +
-> > +	# Capture and report any leaks
-> > +	_capture_kmemleak "${_leak_file}"
-> > +	if [ -s "${_leak_file}" ]; then
-> > +		_dump_err "_check_kmemleak: something found in kmemleak (see ${_leak_file})"
-> > +		return 1
-> > +	else
-> > +		rm -f "${_leak_file}"
-> > +		return 0
-> > +	fi
-> > +}
-> > +
-> >  # don't check dmesg log after test
-> >  _disable_dmesg_check()
-> >  {
 > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > This is related to the conversation of the golden output of xfs/068.
+> > Will take my arguments there now...
+> > 
+> > Amir.
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
