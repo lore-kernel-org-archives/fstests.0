@@ -1,11 +1,11 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:2679 "EHLO huawei.com"
+Received: from szxga04-in.huawei.com ([45.249.212.190]:2682 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750873AbdLNGmx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Dec 2017 01:42:53 -0500
+        id S1751042AbdLNGmy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Dec 2017 01:42:54 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH for xfstests 2/4] overlay: add fsck.overlay whiteout test
-Date: Thu, 14 Dec 2017 14:48:44 +0800
-Message-ID: <20171214064846.21587-3-yi.zhang@huawei.com>
+Subject: [PATCH for xfstests 3/4] overlay: add fsck.overlay opaque directory test
+Date: Thu, 14 Dec 2017 14:48:45 +0800
+Message-ID: <20171214064846.21587-4-yi.zhang@huawei.com>
 In-Reply-To: <20171214064846.21587-1-yi.zhang@huawei.com>
 References: <20171214064846.21587-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
@@ -15,28 +15,28 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, darrick.wong@oracle.com, yi.zhang@huawei.com, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add fsck.overlay test case to test it how to deal with orphan/valid
-whiteouts in underlying directories of overlayfs.
+Add fsck.overlay test case to test it how to deal with invalid/valid
+opaque xattr in underlying directories of overlayfs.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- tests/overlay/201     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/201.out |  3 ++
- tests/overlay/group   |  1 +
- 3 files changed, 102 insertions(+)
- create mode 100755 tests/overlay/201
- create mode 100644 tests/overlay/201.out
+ tests/overlay/202     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/202.out |   5 ++
+ tests/overlay/group   |   1 +
+ 3 files changed, 147 insertions(+)
+ create mode 100755 tests/overlay/202
+ create mode 100644 tests/overlay/202.out
 
-diff --git a/tests/overlay/201 b/tests/overlay/201
+diff --git a/tests/overlay/202 b/tests/overlay/202
 new file mode 100755
-index 0000000..1052baa
+index 0000000..3f217ad
 --- /dev/null
-+++ b/tests/overlay/201
-@@ -0,0 +1,98 @@
++++ b/tests/overlay/202
+@@ -0,0 +1,141 @@
 +#! /bin/bash
-+# FS QA Test 201
++# FS QA Test 202
 +#
-+# Test fsck.overlay how to deal with whiteouts in overlayfs.
++# Test fsck.overlay how to deal with opaque xattr in overlayfs.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2017 Huawei.  All Rights Reserved.
@@ -75,6 +75,7 @@ index 0000000..1052baa
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -83,20 +84,33 @@ index 0000000..1052baa
 +_supported_fs overlay
 +_supported_os Linux
 +_require_scratch
++_require_attrs
 +_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
 +
 +# remove all files from previous tests
 +_scratch_mkfs
 +
-+# Check whiteout
-+check_whiteout()
++OVL_OPAQUE_XATTR="trusted.overlay.opaque"
++OVL_OPAQUE_XATTR_VAL="y"
++
++# Set opaque xattr to a directory
++set_opaque()
 +{
 +	local target=$1
 +
-+	target_type=`stat -c "%F:%t,%T" $target`
++	$SETFATTR_PROG -n $OVL_OPAQUE_XATTR -v $OVL_OPAQUE_XATTR_VAL $target
++}
 +
-+	[[ $target_type == "character special file:0,0" ]] || \
-+		echo "Valid whiteout removed incorrectly"
++# Check opaque xattr
++check_opaque()
++{
++	local dir=$1
++
++	opaque=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_OPAQUE_XATTR $dir)
++
++	[[ $opaque == $OVL_OPAQUE_XATTR_VAL ]] || \
++		echo "Opaque xattr removed incorrectly"
 +}
 +
 +# Create test directories
@@ -107,48 +121,79 @@ index 0000000..1052baa
 +
 +mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir
 +
-+# Test orphan whiteout in lower and upper layer, should remove
-+echo "+ Orphan whiteout"
-+mknod $lowerdir/foo c 0 0
-+mknod $upperdir/foo c 0 0
-+mknod $upperdir/bar c 0 0
++# Test invalid opaque xattr covering a nonexistent lower target, should remove
++echo "+ Invalid opaque"
++mkdir $lowerdir/testdir1
++mkdir -p $upperdir/testdir/testdir2
++set_opaque $lowerdir/testdir1
++set_opaque $upperdir/testdir/testdir2
 +_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
 +	_fail "fsck should not fail"
-+ls $lowerdir
-+ls $upperdir
++$GETFATTR_PROG --absolute-names -d -m $OVL_OPAQUE_XATTR_VAL $lowerdir/testdir1
++$GETFATTR_PROG --absolute-names -d -m $OVL_OPAQUE_XATTR_VAL $upperdir/testdir/testdir2
 +rm -rf $lowerdir/* $upperdir/*
 +
-+# Test valid whiteout covering lower target, should not remove
-+echo "+ Valid whiteout"
-+touch $lowerdir2/foo $lowerdir2/bar
-+mknod $upperdir/foo c 0 0
-+mknod $lowerdir/bar c 0 0
++# Test valid opaque xattr in upper covering lower target, should not remove
++echo "+ Valid opaque"
++mkdir $lowerdir/testdir
++touch $lowerdir/foo
++mkdir $upperdir/testdir
++mkdir $upperdir/foo
++set_opaque $upperdir/testdir
++set_opaque $upperdir/foo
++_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_opaque $upperdir/testdir
++check_opaque $upperdir/foo
++rm -rf $lowerdir/* $upperdir/*
++
++# Test valid opaque xattr in middle layer covering lower target, should not remove
++echo "+ Valid opaque(2)"
++mkdir $lowerdir2/testdir
++touch $lowerdir2/foo
++mkdir $lowerdir/testdir
++mkdir $lowerdir/foo
++set_opaque $lowerdir/testdir
++set_opaque $lowerdir/foo
 +_overlay_fsck_dirs -a "$lowerdir:$lowerdir2" $upperdir $workdir >> \
-+	 $seqres.full 2>&1 || _fail "fsck should not fail"
-+check_whiteout $upperdir/foo
-+check_whiteout $lowerdir/bar
++	$seqres.full 2>&1 || _fail "fsck should not fail"
++check_opaque $lowerdir/testdir
++check_opaque $lowerdir/foo
++rm -rf $lowerdir2/* $lowerdir/*
++
++# Test valid opaque in merged directory, should not remove
++echo "+ Valid opaque(3)"
++mkdir $lowerdir/testdir1
++mkdir -p $upperdir/testdir1/testdir2
++set_opaque $upperdir/testdir1/testdir2
++_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_opaque $upperdir/testdir1/testdir2
++rm -rf $lowerdir/* $upperdir/*
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/201.out b/tests/overlay/201.out
+diff --git a/tests/overlay/202.out b/tests/overlay/202.out
 new file mode 100644
-index 0000000..20338db
+index 0000000..1aadc4d
 --- /dev/null
-+++ b/tests/overlay/201.out
-@@ -0,0 +1,3 @@
-+QA output created by 201
-++ Orphan whiteout
-++ Valid whiteout
++++ b/tests/overlay/202.out
+@@ -0,0 +1,5 @@
++QA output created by 202
+++ Invalid opaque
+++ Valid opaque
+++ Valid opaque(2)
+++ Valid opaque(3)
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 7e541e4..7c5fcbb 100644
+index 7c5fcbb..e39b5e0 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -49,3 +49,4 @@
- 044 auto quick copyup hardlink nonsamefs
+@@ -50,3 +50,4 @@
  047 auto quick copyup hardlink
  048 auto quick copyup hardlink
-+201 auto quick fsck
+ 201 auto quick fsck
++202 auto quick fsck
 -- 
 2.5.0
 
