@@ -1,119 +1,92 @@
-Received: from mx2.mpynet.fi ([82.197.21.85]:16561 "EHLO mx2.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751538AbdLNMLh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 14 Dec 2017 07:11:37 -0500
-Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
- xfs_io pwrite command)
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
- <20171205211850.GA5858@dastard> <20171206002638.GB5858@dastard>
-From: Ari Sundholm <ari@tuxera.com>
-Message-ID: <27b82a44-b889-212f-af74-cad35c103c86@tuxera.com>
-Date: Thu, 14 Dec 2017 14:11:32 +0200
+Received: from szxga04-in.huawei.com ([45.249.212.190]:11939 "EHLO
+        szxga04-in.huawei.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751839AbdLNMkq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 07:40:46 -0500
+Subject: Re: [PATCH for xfstests 1/4] overlay: add filesystem check helper
+References: <20171214064846.21587-1-yi.zhang@huawei.com>
+ <20171214064846.21587-2-yi.zhang@huawei.com>
+ <CAOQ4uximBJqFpsBMLQMWTJpJsoigBnYemtb7z1h-3PPWyjrkXA@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <0860e6d0-cbdb-bc0d-33e3-ba0f800bdbf2@huawei.com>
+Date: Thu, 14 Dec 2017 20:40:05 +0800
 MIME-Version: 1.0
-In-Reply-To: <20171206002638.GB5858@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
+In-Reply-To: <CAOQ4uximBJqFpsBMLQMWTJpJsoigBnYemtb7z1h-3PPWyjrkXA@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/06/2017 02:26 AM, Dave Chinner wrote:
-> On Wed, Dec 06, 2017 at 08:18:50AM +1100, Dave Chinner wrote:
->> On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
->>> On 12/05/2017 12:28 AM, Dave Chinner wrote:
->>>> On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
->>>>> Hi!
->>>>>
->>>>> While debugging an issue, we found out that generic/399 seems to
->>>>> rely on a behavior that is specific to ext4 in the following section
->>>>> of code:
->>>>> ----------------8<--------snip--------8<------------------------------
->>>>> #
->>>>> # Write files of 1 MB of all the same byte until we hit ENOSPC.
->>>>> Note that we
->>>>> # must not create sparse files, since the contents of sparse files are not
->>>>> # stored on-disk.  Also, we create multiple files rather than one big file
->>>>> # because we want to test for reuse of per-file keys.
->>>>> #
->>>>> total_file_size=0
->>>>> i=1
->>>>> while true; do
->>>>> 	file=$SCRATCH_MNT/encrypted_dir/file$i
->>>>> 	if ! $XFS_IO_PROG -f $file -c 'pwrite 0 1M' &> $tmp.out; then
->>>>> 		if ! grep -q 'No space left on device' $tmp.out; then
->>>>> 			echo "FAIL: unexpected pwrite failure"
->>>>> 			cat $tmp.out
->>>>> 		elif [ -e $file ]; then
->>>>> 			total_file_size=$((total_file_size + $(stat -c %s $file)))
->>>>> 		fi
->>>>> 		break
->>>>> 	fi
->>>>> 	total_file_size=$((total_file_size + $(stat -c %s $file)))
->>>>> 	i=$((i + 1))
->>>>> 	if [ $i -gt $fs_size_in_mb ]; then
->>>>> 		echo "FAIL: filesystem never filled up!"
->>>>> 		break
->>>>> 	fi
->>>>> done
->>>>> ----------------8<--------snip--------8<------------------------------
->>>>>
->>>>> What happens with ext4 is that the xfs_io command gives a nonzero
->>>>> exit value not when the pwrite command fails with ENOSPC but during
->>>>> the *next* iteration when opening the file fails with ENOSPC. Turns
->>>>> out the pwrite command failing does not cause xfs_io to give a
->>>>> nonzero exit value.
->>>>
->>>> That implies ext4 is returning zero bytes written to the pwrite()
->>>> call rather than ENOSPC. i.e.:
->>>>
->>>>                  bytes = do_pwrite(file->fd, off, cnt, buffersize,
->>>>                                  pwritev2_flags);
->>>>                  if (bytes == 0)
->>>>                          break;
->>>>                  if (bytes < 0) {
->>>>                          perror("pwrite");
->>>>                          return -1;
->>>>                  }
->>>>
->>>> So if it's exiting with no error, then we can't have got an error
->>> >from ext4 at ENOSPC. If that's the case, it probably should be
->>>> considered an ext4 bug, not an issue with xfs_io...
->>>>
->>>
->>> No, according to what we've observed, that is not what happens. The
->>> pwrite() call does fail and errno is ENOSPC after the call. The
->>> immediate problem is that xfs_io does not reflect this failure in
->>> its exit value and thus the check in generic/399 does not work in
->>> this case. Only when open() fails during the next iteration does
->>> xfs_io give a nonzero exit value and cause the check in the test
->>> case to allow the test case to end successfully.
+On 2017/12/14 17:05, Amir Goldstein Write:
+> On Thu, Dec 14, 2017 at 8:48 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> Add filesystem check helpers for the upcoming fsck.overlay utility,
+>> and hook them to _check_test_fs and _check_scratch_fs. This helper
+>> works only if fsck.overlay exists.
 >>
->> Ah, io/pwrite.c fails to set exitcode on failure iappropriately
->> before returning. Looks like there is a bunch of xfs_io commands
->> that fail to do this properly.
+>> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
 >>
->>> What is specific to ext4 here is, as stated in my original message,
->>> that open() fails.
+>> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+>> ---
+>>  common/config  |  1 +
+>>  common/overlay | 78 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  common/rc      |  4 +--
+>>  3 files changed, 81 insertions(+), 2 deletions(-)
 >>
->> Because there are no more inodes to allocate (i.e. inode table is
->> full) and so attempts to create more fail with ENOSPC. The xfs_io
->> open command set exitcode appropriately, and that's why it finally
->> triggers a test abort.
->>
->> Looks like xfs_io does need fixing to set exitcode appropriately on
->> all failures...
+[..]
+>> +_overlay_check_dirs()
+>> +{
+>> +       local lowerdir=$1
+>> +       local upperdir=$2
+>> +       local workdir=$3
+>> +       local err=0
+>> +
+>> +       _overlay_fsck_dirs $FSCK_OPTIONS $* >>$tmp.fsck 2>&1
+>> +       if [ $? -ne 0 ]; then
+>> +               _log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
+>> +               echo "*** fsck.overlay output ***"      >>$seqres.full
+>> +               cat $tmp.fsck                           >>$seqres.full
+>> +               echo "*** end fsck.overlay output"      >>$seqres.full
+>> +               echo "*** mount output ***"             >>$seqres.full
+>> +               _mount                                  >>$seqres.full
+>> +               echo "*** end mount output"             >>$seqres.full
+>> +               err=1
+>> +       fi
 > 
-> Try the patch below.
+> Maybe the tmp.fsck output reporting to seqres.full should be done in
+> _overlay_fsck_dirs?
+> I think this output could be useful for understanding fsck tests failure.
+
+If we do these in _overlay_fsck_dirs, we can get output only when fsck return
+fail, but this output maybe useful for understanding fsck.overlay even through
+fsck pass when we test it. So I call _overlay_fsck_dirs and put output to
+seqres.full alone in each test case now, see 0002-0004 patches.
+But it's also fine to put these into _overlay_fsck_dirs.
+
+[..]
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -2507,7 +2507,7 @@ _check_test_fs()
+>>         # no way to check consistency for GlusterFS
+>>         ;;
+>>      overlay)
+>> -       # no way to check consistency for overlay
+>> +       _check_overlay_test_fs
+>>         ;;
+>>      pvfs2)
+>>         ;;
+>> @@ -2562,7 +2562,7 @@ _check_scratch_fs()
+>>         # no way to check consistency for GlusterFS
+>>         ;;
+>>      overlay)
+>> -       # no way to check consistency for overlay
+>> +       _check_overlay_test_fs
+> 
+> _check_overlay_scratch_fs
 > 
 
-Thanks, I'll try it. Sorry for the late response (was on vacation).
+will fix
 
-> Cheers,
-> 
-> Dave.
-> 
+Thanks,
+Yi.
 
