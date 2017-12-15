@@ -1,171 +1,89 @@
-Received: from mx2.mpynet.fi ([82.197.21.85]:54093 "EHLO mx2.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755864AbdLOO02 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 15 Dec 2017 09:26:28 -0500
-Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
- xfs_io pwrite command)
-From: Ari Sundholm <ari@tuxera.com>
-References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
- <20171204222842.GX4094@dastard>
- <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
- <20171205211850.GA5858@dastard> <20171206002638.GB5858@dastard>
- <27b82a44-b889-212f-af74-cad35c103c86@tuxera.com>
-Message-ID: <cf9c4f45-6c8c-3bc4-91c6-0707eb64f828@tuxera.com>
-Date: Fri, 15 Dec 2017 16:26:26 +0200
+Received: from mail-yb0-f175.google.com ([209.85.213.175]:45677 "EHLO
+        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932072AbdLOOoG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Dec 2017 09:44:06 -0500
 MIME-Version: 1.0
-In-Reply-To: <27b82a44-b889-212f-af74-cad35c103c86@tuxera.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
+In-Reply-To: <CAJfpegsQvKfOLh2cWj496+g9pFFPmXbRdwZobqVDaQ_7-EBgrQ@mail.gmail.com>
+References: <20171214064747.20999-1-yi.zhang@huawei.com> <20171214064747.20999-2-yi.zhang@huawei.com>
+ <CAJfpegvCDyD3Zmc-h5hzkYRGC-cAn4myub3fwvqEVhRNse=yaw@mail.gmail.com>
+ <CAOQ4uxh-4kKPLHDXHJux2_tM35frxxNWmPEZcDu2EQ2n+yYkKA@mail.gmail.com>
+ <CAJfpegt7LR=G+UK5VY0kEScduuBj2SFhAw3pf1_8NSM+r61PeQ@mail.gmail.com>
+ <CAOQ4uxg7UahQ=t2sWpf0FEi7MP+OT3XfO8AB_y+0qpeq8CWgrA@mail.gmail.com>
+ <CAJfpegt-Upt3z4wFVQJ5bJf9pBbjOGXd93P+3LZdemSeS0Y_BA@mail.gmail.com>
+ <CAOQ4uxg+DY=9MT+2sPNBnM77qv8eqyY5mCqnE6k1viptmLR8yA@mail.gmail.com>
+ <CAJfpegsMT6ctTDRDQHosz52ZTg5gQgmxr5Em3YGm-htQzdNjCA@mail.gmail.com>
+ <CAOQ4uxhU72XkzeTr19p5G+nGt9ONfb8=AxzqOBk-Sc2seR2fLw@mail.gmail.com> <CAJfpegsQvKfOLh2cWj496+g9pFFPmXbRdwZobqVDaQ_7-EBgrQ@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 15 Dec 2017 16:44:04 +0200
+Message-ID: <CAOQ4uxgxwFjJH6hhxJDZP1vzBViTgPnur6GPuNaQmhhg+QjN1w@mail.gmail.com>
+Subject: Re: [PATCH v2 01/18] overlay: implement fsck utility
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
+To: Miklos Szeredi <miklos@szeredi.hu>
+Cc: "zhangyi (F)" <yi.zhang@huawei.com>, "linux-unionfs@vger.kernel.org" <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>, Vivek Goyal <vgoyal@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/14/2017 02:11 PM, Ari Sundholm wrote:
-> On 12/06/2017 02:26 AM, Dave Chinner wrote:
->> On Wed, Dec 06, 2017 at 08:18:50AM +1100, Dave Chinner wrote:
->>> On Tue, Dec 05, 2017 at 04:23:43PM +0200, Ari Sundholm wrote:
->>>> On 12/05/2017 12:28 AM, Dave Chinner wrote:
->>>>> On Thu, Nov 30, 2017 at 04:21:47PM +0200, Ari Sundholm wrote:
->>>>>> Hi!
->>>>>>
->>>>>> While debugging an issue, we found out that generic/399 seems to
->>>>>> rely on a behavior that is specific to ext4 in the following secti=
-on
->>>>>> of code:
->>>>>> ----------------8<--------snip--------8<--------------------------=
-----=20
->>>>>>
->>>>>> #
->>>>>> # Write files of 1 MB of all the same byte until we hit ENOSPC.
->>>>>> Note that we
->>>>>> # must not create sparse files, since the contents of sparse files=
-=20
->>>>>> are not
->>>>>> # stored on-disk.=C2=A0 Also, we create multiple files rather than=
- one=20
->>>>>> big file
->>>>>> # because we want to test for reuse of per-file keys.
->>>>>> #
->>>>>> total_file_size=3D0
->>>>>> i=3D1
->>>>>> while true; do
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0file=3D$SCRATCH_MNT/encrypted_dir/file$i
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0if ! $XFS_IO_PROG -f $file -c 'pwrite 0 1M=
-' &> $tmp.out; then
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 if ! grep -q 'No space =
-left on device' $tmp.out; then
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- echo "FAIL: unexpected pwrite failure"
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- cat $tmp.out
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 elif [ -e $file ]; then
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- total_file_size=3D$((total_file_size + $(stat -c %s=20
->>>>>> $file)))
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 fi
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 break
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0fi
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0total_file_size=3D$((total_file_size + $(s=
-tat -c %s $file)))
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0i=3D$((i + 1))
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0if [ $i -gt $fs_size_in_mb ]; then
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 echo "FAIL: filesystem =
-never filled up!"
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 break
->>>>>> =C2=A0=C2=A0=C2=A0=C2=A0fi
->>>>>> done
->>>>>> ----------------8<--------snip--------8<--------------------------=
-----=20
->>>>>>
->>>>>>
->>>>>> What happens with ext4 is that the xfs_io command gives a nonzero
->>>>>> exit value not when the pwrite command fails with ENOSPC but durin=
-g
->>>>>> the *next* iteration when opening the file fails with ENOSPC. Turn=
-s
->>>>>> out the pwrite command failing does not cause xfs_io to give a
->>>>>> nonzero exit value.
->>>>>
->>>>> That implies ext4 is returning zero bytes written to the pwrite()
->>>>> call rather than ENOSPC. i.e.:
->>>>>
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0 bytes =3D do_pwrite(file->fd, off, cnt, buffe=
-rsize,
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
-=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 pwritev2_flags);
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (bytes =3D=3D 0)
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- break;
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0 if (bytes < 0) {
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- perror("pwrite");
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=
- return -1;
->>>>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=
-=A0=C2=A0=C2=A0=C2=A0=C2=A0 }
->>>>>
->>>>> So if it's exiting with no error, then we can't have got an error
->>>> >from ext4 at ENOSPC. If that's the case, it probably should be
->>>>> considered an ext4 bug, not an issue with xfs_io...
->>>>>
->>>>
->>>> No, according to what we've observed, that is not what happens. The
->>>> pwrite() call does fail and errno is ENOSPC after the call. The
->>>> immediate problem is that xfs_io does not reflect this failure in
->>>> its exit value and thus the check in generic/399 does not work in
->>>> this case. Only when open() fails during the next iteration does
->>>> xfs_io give a nonzero exit value and cause the check in the test
->>>> case to allow the test case to end successfully.
+On Fri, Dec 15, 2017 at 4:18 PM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+> On Thu, Dec 14, 2017 at 5:29 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+>> On Thu, Dec 14, 2017 at 5:48 PM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+[...]
 >>>
->>> Ah, io/pwrite.c fails to set exitcode on failure iappropriately
->>> before returning. Looks like there is a bunch of xfs_io commands
->>> that fail to do this properly.
+>>>> Exporting index is a challenge for the same reason and also because tar can
+>>>> break hardlinks on extract. Probably index should be rebuilt from scratch on
+>>>> import, based on "redirect".
 >>>
->>>> What is specific to ext4 here is, as stated in my original message,
->>>> that open() fails.
+>>> Yes, hard links need special handling, so will metacopy.  Might be
+>>> worth adding "redirect" to hard links and metacopy to make this issue
+>>> less of a problem.
 >>>
->>> Because there are no more inodes to allocate (i.e. inode table is
->>> full) and so attempts to create more fail with ENOSPC. The xfs_io
->>> open command set exitcode appropriately, and that's why it finally
->>> triggers a test abort.
->>>
->>> Looks like xfs_io does need fixing to set exitcode appropriately on
->>> all failures...
 >>
->> Try the patch below.
+>> Do you mean add it now in kernel? hmm, that's just another thing that
+>> can become inconsistent, so I don't see the immediate value.
+>
+> The immediate value is that no need for a special pack/unpack tool for
+> transferring the overlay "image".
+>
+
+OK, but I don't see how we can escape unpack tool for rebuilding the index
+from redirects.
+Do you mean that you want to also follow non-dir "redirect"?
+Resolve conflicts between "redirect" and "origin"?
+Fix "redirect" by "origin"? fix "origin" by redirect"?
+I am all for that. Already have patches to fix "redirect" by "origin" for dirs:
+https://github.com/amir73il/linux/commits/ovl-redirect-fix
+
 >>
->=20
-> Thanks, I'll try it. Sorry for the late response (was on vacation).
->=20
-
-The patch does seem to fix the specific issue with this test case. Thank=20
-you.
-
-However, it seems there is still some need for discussion and a decision=20
-on what kind of a change should be merged in xfsprogs, if anything,=20
-and/or whether the fstests test case itself could be changed (at least=20
-for now) to accommodate the current xfs_io behavior.
-
-Best regards,
-Ari Sundholm
-ari@tuxera.com
-
->> Cheers,
+>> Which reminds me, you did not provide feedback to the patch I posted
+>> to detect duplicate redirect dir use case:
 >>
->> Dave.
+>> https://marc.info/?l=linux-unionfs&m=151126880100432&w=2
 >>
->=20
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.html
+>> Do you consider this a bug that should be detected by overlayfs
+>> as patch proposed or leave it to be detected only when enabling
+>> opt-in directory indexing (named verify=on in current WIP patches)?
+>>
+>> Also waiting for your feedback about merging the duplicate redirect dir
+>> test case to xfstests:
+>> https://marc.info/?l=fstests&m=151149994629687&w=2
+>>
+>> Bug or not bug?
+>
+> Hmm... I'd lean towards non-bug.  That "offline modification is
+> allowed" rule should point out caveats when messing with overlay
+> specific attributes (opaque, whiteout, redirect, etc).  Obviously
+> having two redirects pointing to the same underlying dir is going to
+> result in inconsistencies.  We can get away with it without constant
+> ino, but I don't think it makes sense to allow that construct.
+>
 
+I also think that allowing user to mess with trusted.overlay xattr is
+not fair play. The test I posted however, doesn't do that.
+The test does cp -a of a redirected upper dir.
+Something that perhaps user could get away with before redirect_dir
+and something that an innocent user may be doing.
+
+Anyway, directories index lookup takes care of duplicate redirect problem
+as a by product of NFS export:
+https://github.com/amir73il/linux/commit/b1dd6461aa7c26091aad7c9b65c04cc1071bb9e0
+
+Amir.
