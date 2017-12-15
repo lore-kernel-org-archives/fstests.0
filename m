@@ -1,82 +1,85 @@
-Received: from mx1.mpynet.fi ([82.197.21.84]:22883 "EHLO mx1.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755566AbdLONar (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 15 Dec 2017 08:30:47 -0500
-Subject: Re: [PATCH 1/2] fsstress: Fix memory leaks
-References: <1512063084-12105-1-git-send-email-ari@tuxera.com>
- <CAOQ4uxgrMpm0kOm85=ekZFBf_daeJ0HZ6HVzWZBBbVHk19Jisw@mail.gmail.com>
-From: Ari Sundholm <ari@tuxera.com>
-Message-ID: <5a929744-de53-47b1-69fa-4bdd5f95d32c@tuxera.com>
-Date: Fri, 15 Dec 2017 15:30:44 +0200
+Received: from mail-qt0-f180.google.com ([209.85.216.180]:45055 "EHLO
+        mail-qt0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755503AbdLOOTA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Dec 2017 09:19:00 -0500
+Received: by mail-qt0-f180.google.com with SMTP id m59so12170923qte.11
+        for <fstests@vger.kernel.org>; Fri, 15 Dec 2017 06:18:59 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgrMpm0kOm85=ekZFBf_daeJ0HZ6HVzWZBBbVHk19Jisw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <CAOQ4uxhU72XkzeTr19p5G+nGt9ONfb8=AxzqOBk-Sc2seR2fLw@mail.gmail.com>
+References: <20171214064747.20999-1-yi.zhang@huawei.com> <20171214064747.20999-2-yi.zhang@huawei.com>
+ <CAJfpegvCDyD3Zmc-h5hzkYRGC-cAn4myub3fwvqEVhRNse=yaw@mail.gmail.com>
+ <CAOQ4uxh-4kKPLHDXHJux2_tM35frxxNWmPEZcDu2EQ2n+yYkKA@mail.gmail.com>
+ <CAJfpegt7LR=G+UK5VY0kEScduuBj2SFhAw3pf1_8NSM+r61PeQ@mail.gmail.com>
+ <CAOQ4uxg7UahQ=t2sWpf0FEi7MP+OT3XfO8AB_y+0qpeq8CWgrA@mail.gmail.com>
+ <CAJfpegt-Upt3z4wFVQJ5bJf9pBbjOGXd93P+3LZdemSeS0Y_BA@mail.gmail.com>
+ <CAOQ4uxg+DY=9MT+2sPNBnM77qv8eqyY5mCqnE6k1viptmLR8yA@mail.gmail.com>
+ <CAJfpegsMT6ctTDRDQHosz52ZTg5gQgmxr5Em3YGm-htQzdNjCA@mail.gmail.com> <CAOQ4uxhU72XkzeTr19p5G+nGt9ONfb8=AxzqOBk-Sc2seR2fLw@mail.gmail.com>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Fri, 15 Dec 2017 15:18:58 +0100
+Message-ID: <CAJfpegsQvKfOLh2cWj496+g9pFFPmXbRdwZobqVDaQ_7-EBgrQ@mail.gmail.com>
+Subject: Re: [PATCH v2 01/18] overlay: implement fsck utility
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+Cc: "zhangyi (F)" <yi.zhang@huawei.com>, "linux-unionfs@vger.kernel.org" <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>, Vivek Goyal <vgoyal@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/03/2017 10:47 AM, Amir Goldstein wrote:
-> On Thu, Nov 30, 2017 at 7:31 PM, Ari Sundholm <ari@tuxera.com> wrote:
->> This patch fixes the memory leaks we found when running fsstress under
->> valgrind.
+On Thu, Dec 14, 2017 at 5:29 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Thu, Dec 14, 2017 at 5:48 PM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+>> On Thu, Dec 14, 2017 at 4:18 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+>>> On Thu, Dec 14, 2017 at 5:10 PM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+> [...]
+>>> Yes :) Docker uses tar alright.
+>>> But for example "origin" xattr cannot be exported as is to a portable format.
+>>> Need to decode file handles during export and change them to "redirect"
+>>> for directories and possible to "redirect" for files as well, that
+>>> would be converted
+>>> back to "origin" on import.
 >>
->> Signed-off-by: Ari Sundholm <ari@tuxera.com>
->> ---
->>   ltp/fsstress.c | 5 +++++
->>   1 file changed, 5 insertions(+)
+>> Is it worth preserving origin for non-hardlinks?  Same story as "cp
+>> -a", inode numbers will change, so there doesn't appear to be a reason
+>> to preserve the connection between origin and the copied up file.
+>
+> Besides metacopy, no reason.
+>
 >>
->> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
->> index 96f48b1..13d5dd5 100644
->> --- a/ltp/fsstress.c
->> +++ b/ltp/fsstress.c
->> @@ -614,6 +614,9 @@ int main(int argc, char **argv)
->>                                  return 1;
->>                          }
->>   #endif
->> +
->> +                       cleanup_flist();
->> +                       free(freq_table);
->>                          return 0;
->>                  }
->>          }
->> @@ -640,6 +643,7 @@ int main(int argc, char **argv)
->>                  close(fd);
->>          }
+>>> Exporting index is a challenge for the same reason and also because tar can
+>>> break hardlinks on extract. Probably index should be rebuilt from scratch on
+>>> import, based on "redirect".
 >>
->> +       free(freq_table);
->>          unlink(buf);
->>          return 0;
->>   }
->> @@ -997,6 +1001,7 @@ doproc(void)
->>          }
->>   errout:
->>          chdir("..");
->> +       free(homedir);
->>          if (cleanup) {
->>                  sprintf(cmd, "rm -rf %s", buf);
->>                  system(cmd);
-> 
-> 
-> I don't see the point in those cleanups before returning from main()
-> and I don't see the point in storing homedir in the first place at all
-> and calling chdir(homedir) before abort.
-> 
+>> Yes, hard links need special handling, so will metacopy.  Might be
+>> worth adding "redirect" to hard links and metacopy to make this issue
+>> less of a problem.
+>>
+>
+> Do you mean add it now in kernel? hmm, that's just another thing that
+> can become inconsistent, so I don't see the immediate value.
 
-I view cleanups like this simply a matter of correctness with regard to 
-resource allocation/deallocation, even if we know such resources would 
-be automatically freed by the OS on process termination. Also, from a 
-practical POV, it is annoying to get complaints from valgrind and 
-similar tools because of issues like this when investigating something else.
+The immediate value is that no need for a special pack/unpack tool for
+transferring the overlay "image".
 
-I have no comment on the purpose of saving homedir.
+>
+> Which reminds me, you did not provide feedback to the patch I posted
+> to detect duplicate redirect dir use case:
+>
+> https://marc.info/?l=linux-unionfs&m=151126880100432&w=2
+>
+> Do you consider this a bug that should be detected by overlayfs
+> as patch proposed or leave it to be detected only when enabling
+> opt-in directory indexing (named verify=on in current WIP patches)?
+>
+> Also waiting for your feedback about merging the duplicate redirect dir
+> test case to xfstests:
+> https://marc.info/?l=fstests&m=151149994629687&w=2
+>
+> Bug or not bug?
 
-Best regards,
-Ari Sundholm
-ari@tuxera.com
+Hmm... I'd lean towards non-bug.  That "offline modification is
+allowed" rule should point out caveats when messing with overlay
+specific attributes (opaque, whiteout, redirect, etc).  Obviously
+having two redirects pointing to the same underlying dir is going to
+result in inconsistencies.  We can get away with it without constant
+ino, but I don't think it makes sense to allow that construct.
 
-> Amir.
-> 
-
+Thanks,
+Miklos
