@@ -1,144 +1,129 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:37030 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754594AbdLOCYc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Dec 2017 21:24:32 -0500
-Date: Thu, 14 Dec 2017 18:17:27 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v4 8/8] xfs/068: fix variability problems in file/dir count
- output
-Message-ID: <20171215021727.GV19219@magnolia>
-References: <151314499003.18893.8687182548758898133.stgit@magnolia>
- <151314505158.18893.11894289091110903029.stgit@magnolia>
+Received: from szxga06-in.huawei.com ([45.249.212.32]:37503 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754824AbdLODff (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 14 Dec 2017 22:35:35 -0500
+Subject: Re: [PATCH v2 01/18] overlay: implement fsck utility
+References: <20171214064747.20999-1-yi.zhang@huawei.com>
+ <20171214064747.20999-2-yi.zhang@huawei.com>
+ <CAJfpegvCDyD3Zmc-h5hzkYRGC-cAn4myub3fwvqEVhRNse=yaw@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <75c3288d-a2d5-d476-17a9-06b56f187152@huawei.com>
+Date: Fri, 15 Dec 2017 11:35:00 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <151314505158.18893.11894289091110903029.stgit@magnolia>
+In-Reply-To: <CAJfpegvCDyD3Zmc-h5hzkYRGC-cAn4myub3fwvqEVhRNse=yaw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Miklos Szeredi <miklos@szeredi.hu>
+Cc: "linux-unionfs@vger.kernel.org" <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Amir Goldstein <amir73il@gmail.com>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, miaoxie@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On 2017/12/14 22:13, Miklos Szeredi Wrote:
+> On Thu, Dec 14, 2017 at 7:47 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> fsck.overlay
+>> ============
+>>
+>> fsck.overlay is used to check and optionally repair underlying
+>> directories of overlay-filesystem.
+> 
+> Thanks for working on this.
+> 
+> 
+>>
+>> Check the following points:
+>>
+>> Whiteouts
+>> ---------
+>>
+>> A whiteout is a character device with 0/0 device number. It is used to
+>> record the removed files or directories, When a whiteout is found in a
+>> directory, there should be at least one directory or file with the same
+>> name in any of the corresponding lower layers. If not exist, the whiteout
+>> will be treated as orphan whiteout and remove.
+> 
+> Okay.
+> 
+>>
+>> Opaque directories
+>> ------------------
+>>
+>> An opaque directory is a directory with "trusted.overlay.opaque" xattr
+>> valued "y". There are two legal situations of making opaque directory: 1)
+>> create directory over whiteout 2) creat directory in merged directory. If an
+>> opaque directory is found, corresponding matching name in lower layers might
+>> exist or parent directory might merged, If not, the opaque xattr will be
+>> treated as invalid and remove.
+> 
+> Current version of overlay fs doesn't bother with removing opaque
+> attribute.  So not sure fsck.overlay should care.  Or at least is
+> should be an optional thing and not worth warning about, since it's
+> perfectly normal.
+> 
+Indeed, we can introduce '-f' option to handle this (e2fsck(8)):
 
-In these tests we use a fixed sequence of operations in fsstress to
-create a directory tree and then exercise xfsdump/xfsrestore on that.
-However, this changes every time someone adds a new fsstress command,
-or someone runs with FSSTRESS_AVOID, etc.
+  -f     Force checking even if the file system seems clean.
 
-Therefore, check the counts directly from xfsrestore output instead
-of relying on the golden output; check that the paths of every file
-in the directory tree match; and check that the md5 of every regular
-file matches.
+>>
+>> Redirect directories
+>> --------------------
+>>
+>> An redirect directory is a directory with "trusted.overlay.redirect"
+>> xattr valued to the path of the original location from the root of the
+>> overlay. It is only used when renaming a directory and "redirect dir"
+>> feature is enabled. If an redirect directory is found, the following
+>> must be met:
+>>
+>> 1) The directory store in redirect xattr should exist in one of lower
+>> layers.
+> 
+> Okay.
+> 
+>> 2) The origin directory should be redirected only once in one layer,
+>> which mean there is only one redirect xattr point to this origin directory in
+>> the specified layer.
+>> 3) A whiteout or an opaque directory with the same name to origin should
+>> exist in the same directory as the redirect directory.
+>>
+>> If not, 1) The redirect xattr is invalid and need to remove 2) One of
+>> the redirect xattr is redundant but not sure which one is, ask user 3)
+>> Create a whiteout device or set opaque xattr to an existing directory if the
+>> parent directory was meregd or remove xattr if not.
+> 
+> Hmm, in this case also should ask the user, as it's not clear that the
+> "new" copy resulting from removal of whiteout on upper is the wanted
+> one or the "old" renamed copy.
+> 
+Thanks for point this out, do you mean the newly created directory over whiteout
+between old renamed directory? If so, Amir have already pointed out in the first
+iteration and I handled it in current version. Please see:
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v4: add lots more checking of everything we restored
----
- common/dump       |   36 ++++++++++++++++++++++++++++++++++--
- tests/xfs/027.out |    2 +-
- tests/xfs/068     |    9 +++++++++
- tests/xfs/068.out |    2 +-
- 4 files changed, 45 insertions(+), 4 deletions(-)
+https://www.spinics.net/lists/linux-unionfs/msg03268.html
 
-diff --git a/common/dump b/common/dump
-index 898aaa4..f4edd53 100644
---- a/common/dump
-+++ b/common/dump
-@@ -316,7 +316,8 @@ _create_dumpdir_stress_num()
-     echo "-----------------------------------------------"
-     echo "fsstress : $_param"
-     echo "-----------------------------------------------"
--    if ! $here/ltp/fsstress $_param -s 1 $FSSTRESS_AVOID -n $_count -d $dump_dir >$tmp.out 2>&1
-+    echo $FSSTRESS_PROG $_param -s 1 $FSSTRESS_AVOID -n $_count -d $dump_dir >> $seqres.full
-+    if ! $FSSTRESS_PROG $_param -s 1 $FSSTRESS_AVOID -n $_count -d $dump_dir >$tmp.out 2>&1
-     then
-         echo "    fsstress (count=$_count) returned $? - see $seqres.full"
- 
-@@ -1240,9 +1241,40 @@ _do_dump_restore()
-     echo "xfsdump|xfsrestore ..."
-     restore_opts="$_restore_debug$restore_args - $restore_dir"
-     dump_opts="$_dump_debug$dump_args -s $dump_sdir - $SCRATCH_MNT"
-+
-+    # We expect there to be one more dir (and inode) than what's in dump_dir.
-+    # Construct the string we expect to see in the output, since fsstress
-+    # will create different directory structures every time someone adds
-+    # a new command, runs with a different FSSTRESS_AVOID, etc.
-+    expected_dirs=$(find $dump_dir -type d | wc -l)
-+    expected_inodes=$(find $dump_dir | wc -l)
-+    expected_str=": $((expected_dirs + 1)) directories and $((expected_inodes + 1)) entries processed"
-+
-+    # Measure the md5 of every file...
-+    (cd $dump_dir ; find . -type f -print0 | xargs -0 md5sum) > $seqres.md5
-+    (cd $dump_dir ; find | sort) > $seqres.fstree
-+
-     echo "xfsdump $dump_opts | xfsrestore $restore_opts" | _dir_filter
--    $XFSDUMP_PROG $dump_opts 2>$tmp.dump.mlog | $XFSRESTORE_PROG $restore_opts 2>&1 | tee -a $seqres.full | _dump_filter
-+    $XFSDUMP_PROG $dump_opts 2>$tmp.dump.mlog | $XFSRESTORE_PROG $restore_opts > $tmp.restore.mlog 2>&1
-+    cat $tmp.restore.mlog >> $seqres.full
-+    echo "xfsrestore output should contain$expected_str" >> $seqres.full
-+    cat $tmp.restore.mlog | _dump_filter | sed -e 's/: \([0-9]*\) directories and \([0-9]*\) entries/: XXX directories and YYY entries/g'
-     _dump_filter <$tmp.dump.mlog
-+
-+    # Did we actually restore as many dirs/files as we had?
-+    if ! grep -q "$expected_str" $tmp.restore.mlog; then
-+        echo "mismatch counts between directory tree and restored filesystem"
-+        grep "directories and.*entries processed" $tmp.restore.mlog | sed -e 's/^.*:/found:/g'
-+        echo "expected$expected_str"
-+    fi
-+
-+    # Does the directory tree match?
-+    diff -u $seqres.fstree <(cd $restore_dir/$dump_sdir ; find | sort)
-+
-+    # Measure the md5 of every restored file...
-+    (cd $restore_dir/$dump_sdir ; md5sum --quiet -c $seqres.md5)
-+
-+    rm -rf $seqres.md5 $seqres.fstree $tmp.restore.mlog $tmp.dump.mlog
- }
- 
- #
-diff --git a/tests/xfs/027.out b/tests/xfs/027.out
-index ba425a3..7665021 100644
---- a/tests/xfs/027.out
-+++ b/tests/xfs/027.out
-@@ -19,7 +19,7 @@ xfsrestore: session id: ID
- xfsrestore: media ID: ID
- xfsrestore: searching media for directory dump
- xfsrestore: reading directories
--xfsrestore: 3 directories and 39 entries processed
-+xfsrestore: XXX directories and YYY entries processed
- xfsrestore: directory post-processing
- xfsrestore: restoring non-directory files
- xfsrestore: restore complete: SECS seconds elapsed
-diff --git a/tests/xfs/068 b/tests/xfs/068
-index 7151e28..9ecb836 100755
---- a/tests/xfs/068
-+++ b/tests/xfs/068
-@@ -44,6 +44,15 @@ _supported_fs xfs
- _supported_os Linux
- 
- _create_dumpdir_stress_num 4096
-+
-+# Let's make sure there's a largeish number of dirs/files here.
-+expected_dirs=$(find $dump_dir -type d | wc -l)
-+expected_inodes=$(find $dump_dir | wc -l)
-+
-+if [ $expected_dirs -lt 100 ] || [ $expected_inodes -lt 600 ]; then
-+	echo "Oddly small dir tree: $((expected_dirs + 1)) directories and $((expected_inodes + 1)) entries processed"
-+fi
-+
- _do_dump_restore
- 
- # success, all done
-diff --git a/tests/xfs/068.out b/tests/xfs/068.out
-index fa3a552..f53c555 100644
---- a/tests/xfs/068.out
-+++ b/tests/xfs/068.out
-@@ -22,7 +22,7 @@ xfsrestore: session id: ID
- xfsrestore: media ID: ID
- xfsrestore: searching media for directory dump
- xfsrestore: reading directories
--xfsrestore: 383 directories and 1335 entries processed
-+xfsrestore: XXX directories and YYY entries processed
- xfsrestore: directory post-processing
- xfsrestore: restoring non-directory files
- xfsrestore: restore complete: SECS seconds elapsed
+Now, fsck will also check dir's redirect xattr for this case, it will add opaque
+xattr only when parent is merged and not redirected.
+
+>>
+>> Usage
+>> =====
+>>
+>> 1. Ensure overlay filesystem is not mounted based on directories which
+>> need to check.
+>>
+>> 2. Run fsck.overlay program:
+>>    Usage:
+>>    fsck.overlay [-l lowerdir] [-u upperdir] [-w workdir] [-avhV]
+>>
+>>    Options:
+>>    -l, --lowerdir=LOWERDIR   specify lower directories of overlayfs,
+>>                              multiple lower use ':' as separator.
+>>    -u, --upperdir=UPPERDIR   specify upper directory of overlayfs
+>>    -w, --workdir=WORKDIR     specify work directory of overlayfs
+> 
+> Not sure what other fsck do, but I'd feel more logical to have the
+> same -olowerdir=..., etc. notation as for mount.
+> 
+It's fine by me, I will change it for current version.
+
+Thanks,
+Yi.
+
