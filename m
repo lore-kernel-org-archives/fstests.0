@@ -1,118 +1,130 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37784 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751292AbdLOHOq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 15 Dec 2017 02:14:46 -0500
-Date: Fri, 15 Dec 2017 15:14:44 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/9] build: update AC_PACKAGE_WANT_GDBM() and
- src/dbtest.c to build
-Message-ID: <20171215071444.GJ2749@eguan.usersys.redhat.com>
-References: <20171213004519.29340-1-mcgrof@kernel.org>
- <20171213004519.29340-5-mcgrof@kernel.org>
- <20171214055102.GE2749@eguan.usersys.redhat.com>
- <20171214175503.GL16026@wotan.suse.de>
+Received: from mail-yb0-f172.google.com ([209.85.213.172]:35919 "EHLO
+        mail-yb0-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753316AbdLOHXL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Dec 2017 02:23:11 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171214175503.GL16026@wotan.suse.de>
+In-Reply-To: <1cafcd12-6a4c-5c45-65ff-aa859463ad14@huawei.com>
+References: <20171214064846.21587-1-yi.zhang@huawei.com> <20171214064846.21587-5-yi.zhang@huawei.com>
+ <CAOQ4uxgx223rHqo=f+T-RDBk6jvbLuHE1Tm_wj+FT3XXJHvy8w@mail.gmail.com> <1cafcd12-6a4c-5c45-65ff-aa859463ad14@huawei.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 15 Dec 2017 09:23:10 +0200
+Message-ID: <CAOQ4uxhvjVowVwje1VB4jaf1SFh-a8YFadzqsck7F6ERcsTtHA@mail.gmail.com>
+Subject: Re: [PATCH for xfstests 4/4] overlay: add fsck.overlay redirect
+ directory test
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Miao Xie <miaoxie@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 14, 2017 at 06:55:03PM +0100, Luis R. Rodriguez wrote:
-> On Thu, Dec 14, 2017 at 01:51:02PM +0800, Eryu Guan wrote:
-> > On Tue, Dec 12, 2017 at 04:45:14PM -0800, Luis R. Rodriguez wrote:
-> > > Modern gdbm-devel packages bundle together gdbm.h and ndbm.h.
-> > > The old m4 macro had detection support for some old gdbm libraries
-> > > but not for new ones.
-> > > 
-> > > We fix compilation of src/dbtest.c by making the autoconf helper
-> > > check for this new arrangement:
-> > > 
-> > > If both gdbm.h and gdbm.h are found define set both gdbm_ndbm_=true,
-> >                      ^^^^^^ ndbm.h?
-> > > and have_db=true, and define HAVE_GDBM_H. The src/dbtest.c already
-> > > had a HAVE_GDBM_H but there was never a respective autoconf settter for
-> > > it. We can just re-use this and fix it for new arrangement.
-> > > 
-> > > Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
-> > 
-> > This looks fine to me.
-> > 
-> > The only system I have by hand that have both <gdbm.h> and <ndbm.h> but
-> > not any <gdbm/[gn]dbm.h> is openSUSE Tumbleweed.
-> 
-> Indeed, openSUSE and SLE releases.
-> 
-> > Without this patch,
-> > dbtest was not built on openSUSE, and was built successfully with this
-> > patch applied.
-> 
-> Yeap.
-> 
-> > And dbtest is still built on RHEL6/7 and Fedora.
-> 
-> Feel free to modify the commit log accordingly then. Curious, what packages
-> does Fedora/ RHEL6/7 use for the requirement here?
-> 
-> We just have one:
-> 
-> $ rpm -ql gdbm-devel-1.12-1.282.x86_64
-> /usr/bin/gdbm_dump
-> /usr/bin/gdbm_load
-> /usr/bin/gdbmtool
-> /usr/include/dbm.h
-> /usr/include/gdbm.h
-> /usr/include/ndbm.h
-> /usr/lib64/libgdbm.a
-> /usr/lib64/libgdbm.so
-> /usr/lib64/libgdbm_compat.a
-> /usr/lib64/libgdbm_compat.so
-> /usr/lib64/libndbm.a
-> /usr/lib64/libndbm.so
-> /usr/share/info/gdbm.info.gz
-> /usr/share/man/man1/gdbm_dump.1.gz
-> /usr/share/man/man1/gdbm_load.1.gz
-> /usr/share/man/man1/gdbmtool.1.gz
-> /usr/share/man/man3/gdbm.3.gz
+On Fri, Dec 15, 2017 at 8:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> On 2017/12/14 21:44, Amir Goldstein Wrote:
+>> On Thu, Dec 14, 2017 at 8:48 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+[...]
+>> Please test the Valid "rename exchange redirect" case:
+>> set_redirect $upperdir/testdir1 "testdir2"
+>> set_redirect $upperdir/testdir2 "testdir1"
+>> fsck should not remove those redirects.
+>>
+> I can add this case. I was wondering why add this special one? If I understand right,
+> these two xattrs will not remove after fsck if $lowerdir/testdir1 and $lowerdir/testdir2
+> exists, just like the second test case "Test valid redirect xattr point to a directory
+> origin in the same directory".
+>
 
-gdbm-devel too, but it has gdbm/[gn]dbm.h pointing to ../[gn]dbm.h, so
-there's no such problem and dbtest is building normally.
+IIUC, the first version of fsck you posted wanted to make sure that
+origin is covered with either a whiteout or opaque dir and I commented
+that it is also legal to be covered by a redirected dir.
+So the test of exchanged redirect dirs checks that this condition is handled
+correctly by fsck.
 
-# rpm -ql gdbm-devel
-/usr/include/dbm.h
-/usr/include/gdbm
-/usr/include/gdbm.h
-/usr/include/gdbm/dbm.h
-/usr/include/gdbm/gdbm.h
-/usr/include/gdbm/ndbm.h
-/usr/include/ndbm.h
-/usr/lib64/libgdbm.so
-/usr/lib64/libgdbm_compat.so
-/usr/share/info/gdbm.info.gz
-/usr/share/man/man3/gdbm.3.gz
+>>> +# Test missing opaque xattr with valid redirect directory, should fix opaque
+>>
+>> Why does fsck prefer redirect over non-redirect?
+>> Why is this not a private case of duplicate redirect?
+>>
+> Sorry, I not follow.
+> This test, I simulate the case of the following:
+> 1) mkdir -p lower/testdir upper/testdir
+> 2) mount overlay
+> 3) mv merge/testdir merge/dir2   (will create an whiteout 'testdir' in upper)
+> 4) mkdir merge/testdir   (create opaque dir)
+> 5) umount overlay
+> 6) remove opaque xattr of upper/testdir (missing opaque xattr lead to lower/testdir/* expose)
+>
+> Am I miss something?
 
-> 
-> > BTW, I'll queue patch 3 and this patch for next fstests release, while
-> > other patches seem not necessary,
-> 
-> I think patch 2 is fine too.
-> 
-> > I agreed with Dave that groups are not
-> > for excluding tests, the required tools and environments should be
-> > detected by tests and _notrun if not met.
-> 
-> Yeah makes sense now. I think we should also document when adding
-> a group makes sense as well.
-> 
-> > (The README change looks fine,
-> > but it doesn't apply due to the "fsgqa-381" change, so I drop it too for
-> > now.)
-> 
-> Feel free to modify it, its not a big deal.
+That is one way of getting to that inconsistency which suggests that the correct
+and automatic fix is to set opaque on uper/testdir, but what about:
 
-OK, I'll modify on commit, thanks!
+1) extract pre-defined image to lower/testdir upper/testdir
+2) mount overlay
+3) mv merge/testdir merge/dir2   (will create an whiteout 'testdir' in upper)
+4) mkdir merge/testdir   (create opaque dir)
+5) umount overlay
+6) re-extract pre-defined image to lower/testdir upper/testdir (*)
 
-Thanks,
-Eryu
+(*) Anything that *can* happen *will* happen...
+
+Note that prior to redirect_dir feature, use could even get a way with this
+partial restore/undo of testdir changes.
+
+My point is that if you have 2 dirs pointing at the same lower, either
+because they are both redirect or because one is not opaque, it is
+not possible to automatically determine which should be the merge dir
+and need to ask user to resolve the conflict.
+
+>
+>>> +echo "+ Missing opaque"
+>>> +mkdir $lowerdir/origin
+>>> +mkdir $upperdir/origin
+>>> +mkdir $upperdir/testdir
+>>> +set_redirect $upperdir/testdir "origin"
+>>> +_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
+>>> +       _fail "fsck should not fail"
+>>> +check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir
+>>> +check_xattr $OVL_OPAQUE_XATTR $OVL_OPAQUE_XATTR_VAL $upperdir/origin
+>>> +rm -rf $lowerdir/* $upperdir/*
+>>> +
+>>> +# Test duplicate redirect directories point to one origin, should fail in
+>>> +# -a 'auto' mode, should remove the duplicate one in -y 'yes' mode
+>>> +echo "+ Duplicate redirect"
+>>> +mkdir $lowerdir/origin
+>>> +mknod $upperdir/origin c 0 0
+>>> +mkdir $upperdir/testdir1
+>>> +mkdir $upperdir/testdir2
+>>> +set_redirect $upperdir/testdir1 "origin"
+>>> +set_redirect $upperdir/testdir2 "origin"
+>>> +_overlay_fsck_dirs -a $lowerdir $upperdir $workdir >> $seqres.full 2>&1 && \
+>>> +       _fail "fsck should fail"
+>>> +_overlay_fsck_dirs -y $lowerdir $upperdir $workdir >> $seqres.full 2>&1 || \
+>>> +       _fail "fsck should not fail"
+>>> +check_xattr $OVL_REDIRECT_XATTR "origin" $upperdir/testdir2
+>>> +
+>>
+>> So what guaranty you have that fsck clears testdir1 and not testdir2?
+>> Maybe check there is exactly one redirect left after fsck?
+>> What does fsck do with -y to the duplicate dir anyway?
+>> If copying from e2fsck behavior for duplicate referenced block, should
+>> copy the content of lower dirs to upper dir and make it opaque, but that can
+>> get nasty for a nested duplicate tree... OTOH, if user got to duplicate
+>> redirect dir by cp -a of a redirected upper dir, then a full copy of the tree
+>> is what user intended for.
+>>
+> Let me see, now, fsck will remove the *later redirect xattr in 'yes' mode,
+> which means that we guess user want to copy the tree in upperdir if they
+> call cp -a when overlayfs is offline, not the whole tree expose in merge
+> layer. I think if we need to copy whole tree include lower dirs maybe too
+> complicated.
+>
+> *) fsck just remove the later one when scaning, I understand it maybe cannot guaranty
+> fsck will clears testdir1 and not testdir2 for some base filesystem, so need to find
+> better way, thoughts?
+>
+
+quite simple I think. Instead of verifying that redirect was removed
+from testdir1
+and remained on testdir2, verify that redirect from removed from either and
+left on exactly one of them. Less trivial scripting, but not impossible.
+
+Amir.
