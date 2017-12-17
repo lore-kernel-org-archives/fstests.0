@@ -1,139 +1,134 @@
-Received: from mail.kernel.org ([198.145.29.99]:57800 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755663AbdLOUlP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 15 Dec 2017 15:41:15 -0500
-From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: [PATCH] generic/381: enable on systems which allows usernames that begin with digits
-Date: Fri, 15 Dec 2017 12:41:07 -0800
-Message-Id: <20171215204107.17690-1-mcgrof@kernel.org>
+Received: from mail-pg0-f46.google.com ([74.125.83.46]:37591 "EHLO
+        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752461AbdLQM5Y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Dec 2017 07:57:24 -0500
+Received: by mail-pg0-f46.google.com with SMTP id y6so8120769pgp.4
+        for <fstests@vger.kernel.org>; Sun, 17 Dec 2017 04:57:24 -0800 (PST)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id m15sm16439897pga.45.2017.12.17.04.57.20
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 17 Dec 2017 04:57:21 -0800 (PST)
+Message-ID: <5a3669b1.0f3f630a.52997.cd04@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 17 Dec 2017 20:57:15 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to 3d04948b8238
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="WYxbKOPYRSky"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org, "Luis R. Rodriguez" <mcgrof@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Some systems are not allowing usernames prefixed with a number now, this
-test however relies on the assumption that you can end up with usernames
-of such type, given the purpose of the test is to ensure that xfs_quota
-can differentiate between UIDs and names beginning with numbers.
 
-systemd >= 232 (circa 2017) no longer allows usernames starting with digits
-[0], there is a systemd exploit (CVE-2017-1000082 [1]) for why that was done,
-however even upstream shadow useradd also does not allow similar user types
-since shadow version v4.0.1 (circa 2007) [2] but there no easy way to check
-shadow's useradd's version.
+--WYxbKOPYRSky
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-You can still shoehorn in these types of users by manually editing files,
-but that's just shooting yourself on the foot given all the precautions
-taken now by userspace, so just check for the systemd version for now as
-requirement for running this test.
+Hi all,
 
-[0] https://github.com/systemd/systemd/issues/6237
-[1] https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-1000082
-[2] https://github.com/shadow-maint/shadow/commit/9db6abfa42c946b4046f4b2fe67dc43ba862eb0e
+The master branch of the xfstests repository at:
 
-Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
----
- README            |  7 +++++--
- common/config     |  1 +
- common/rc         | 42 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/381 |  1 +
- 4 files changed, 49 insertions(+), 2 deletions(-)
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-diff --git a/README b/README
-index ed69332e774e..aff7bdae7cb4 100644
---- a/README
-+++ b/README
-@@ -20,8 +20,11 @@ _______________________
- - run make
- - run make install
- - create fsgqa test user ("sudo useradd fsgqa")
--- create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
--	
-+- Only on systems which allow usernames that start with a digit (older
-+  than  systemd 232 and/or has shadow older than v4.0.1), create the
-+  123456-fsgqa test user:
-+    sudo useradd 123456-fsgqa
-+
- ______________________
- USING THE FSQA SUITE
- ______________________
-diff --git a/common/config b/common/config
-index d0fbfe55a6d2..88fd5dd455b9 100644
---- a/common/config
-+++ b/common/config
-@@ -199,6 +199,7 @@ export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
- export THIN_CHECK_PROG="$(set_prog_path thin_check)"
- export PYTHON2_PROG="`set_prog_path python2`"
- export SQLITE3_PROG="`set_prog_path sqlite3`"
-+export SYSTEMCTL_PROG="`set_prog_path systemctl`"
- 
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
-diff --git a/common/rc b/common/rc
-index 4c053a53711a..445e3471869e 100644
---- a/common/rc
-+++ b/common/rc
-@@ -1983,6 +1983,48 @@ _cat_group()
- 	cat /etc/group
- }
- 
-+# requires systemd
-+#
-+_require_systemd()
-+{
-+    _require_command "$SYSTEMCTL_PROG" systemctl
-+}
-+
-+# gets your version of systemd
-+#
-+_get_systemd_version()
-+{
-+    _require_systemd
-+    $SYSTEMCTL_PROG --version | head -1 | awk '{print $2}'
-+}
-+
-+#  checks if you have a version of systemd older than the one specified
-+#
-+_systemd_version_lessthan()
-+{
-+    _require_systemd
-+    version="$(_get_systemd_version)"
-+    test_version=$1
-+
-+    if [ "$version" -lt "$test_version" ]; then
-+        return 0
-+    else
-+        return 1
-+    fi
-+}
-+
-+# check that userames that start with a digit are allowed
-+#
-+_require_user_digit_allowed()
-+{
-+    if [ ! -x "$SYSTEMCTL_PROG" ]; then
-+	return 0
-+    fi
-+    req_systemd="232"
-+    _systemd_version_lessthan $req_systemd
-+    [ "$?" == "0" ] || _notrun "runs only on old systemd version < $req_systemd"
-+}
-+
- # check for a user on the machine, fsgqa as default
- #
- _require_user()
-diff --git a/tests/generic/381 b/tests/generic/381
-index 006f0d879638..533ca27125cb 100755
---- a/tests/generic/381
-+++ b/tests/generic/381
-@@ -54,6 +54,7 @@ _require_quota
- _require_xfs_quota_foreign
- 
- # need user and group named 123456-fsgqa
-+_require_user_digit_allowed
- _require_user 123456-fsgqa
- _require_group 123456-fsgqa
- 
--- 
-2.15.0
+have just been updated. This is a normal new tests + bug fixes update.
+Currently the new ranged fiemap test (generic/473) fails on XFS, because
+there's no final decision on the expected behavior yet and discussion has
+stalled somehow. And the test is in its 7th revision and has been pushed back
+and forth many times, I think it's better to take the test for now with the
+hope that the failure will drive further discussion and result in a fix either
+in the test or in the kernel or both.
 
+And it's near the end of year, I'll take most of the rest of year off, so the
+review and response from me will be slow. I'll try to keep the weekly update on
+track, but no promise for the next two weeks :)
+
+New failures I've noticed in this update:
+- generic/472 fails on most filesystems, which is a partial direct write test,
+  and the fix is still under review.
+- generic/473 fails on XFS, see above for details.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+3d04948b8238 README: document group fsgqa is required
+
+New commits:
+
+Darrick J. Wong (3):
+      [9d5ea22aea6b] common/xfs: fix scrub support probing again
+      [88b65cf51e82] generic/45[34]: test line draw characters in file/attr names
+      [d69d223dfa90] xfs: fix tests to handle removal of no-alloc create nonfeature
+
+Goldwyn Rodrigues (3):
+      [eef2209b4fdb] common/rc: Check pwrite parameters in _require_xfs_io_command
+      [6a2fd57fb821] generic: Test RWF_NOWAIT
+      [1ed1aad2f879] generic: Partial direct write test
+
+Luis R. Rodriguez (3):
+      [07350fc7583d] generic/group: add 304 to dedupe group
+      [2353022e570f] build: update AC_PACKAGE_WANT_GDBM() and src/dbtest.c to build
+      [3d04948b8238] README: document group fsgqa is required
+
+Nikolay Borisov (1):
+      [1a377268b0d1] generic: initial fiemap range query test
+
+Theodore Ts'o (2):
+      [be341e36fd02] common: rework _require_ext4_mkfs_feature
+      [c71205ec949f] common/populate: fix S_IFDIR.FMT_BLOCK and ATTR.FMT_LOCAL for ext4 encryption
+
+
+Code Diffstat:
+
+ README                |   1 +
+ common/populate       |   4 +-
+ common/rc             |  61 +++++++++-------
+ common/xfs            |   2 +-
+ m4/package_gdbmdev.m4 |   8 +++
+ src/dbtest.c          |   1 +
+ tests/ext4/003        |   3 +-
+ tests/ext4/025        |   2 +-
+ tests/ext4/026        |   2 +-
+ tests/ext4/306        |   7 +-
+ tests/generic/453     |   5 ++
+ tests/generic/454     |   5 ++
+ tests/generic/471     |  75 +++++++++++++++++++
+ tests/generic/471.out |  13 ++++
+ tests/generic/472     |  96 +++++++++++++++++++++++++
+ tests/generic/472.out |   9 +++
+ tests/generic/473     | 107 +++++++++++++++++++++++++++
+ tests/generic/473.out | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/group   |   5 +-
+ tests/xfs/013         |   6 +-
+ tests/xfs/014         |   3 +
+ tests/xfs/104         |   2 +-
+ tests/xfs/109         |   2 +-
+ 23 files changed, 575 insertions(+), 40 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--WYxbKOPYRSky
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJaNmj5AAoJECZSqilcj+djfgQQAIYySAGyNrXKuvDOu8D7QaEh
+KZUj+AVCdQSI/U4mItHI3RZGiEW+W+fJv6SSumojtr2JEwznuVLlfvU4B7hHUZc3
+Qwg2rZ0t+aR+HBr7dYYAapivsMJw8z2EdlJ4e91L7BnvWmsRNfsIfZWWQ6I9WiBn
+nK24jkebobGuGxMCfjfribJANI7zj071Z3+8X/cmGvROWD46zr/dYrpgLPpMiN4M
+7QZOM99Z2X26GHJZs+w6EN7PFTzprBd29hsI/qdcMYiYYa+7qFhkcyLXq0y+S5Ep
+Vz1UZSxqZe3VXtfktJ+SfdsZ4POZTtjq8CL1kkYWoI0tPWrwWsc8KHC++z1QbCkV
+gsVDhinzILjlRVEyXS647JAtl0eZzKzfsptkJRMM27fAOBUnZNx5SBKQxnXei27I
+S1Y4D/lGMrzyPPKWVCOkqPmFmprzCmSj//aDCh6dz7MPPWeiiYLgUdHayWAebsv1
+edQ1pt+zM7ysJJTkOQX+hTEOS6dJUz6GbGq4A7Hz0zHsHSV7yTduft/kTmTOoXI/
+cOkJuV6uoVFVtQwSMYopYlrfa0S4sEfwu6vZOf/YPVijlNjd7PNSNy4lA8YMNIQe
+ZO1Tx4uQ3+4cK1DiUHb0QeLvtFu/GsGvtRdKKZ2bRbXUj9JhbJSnteVU9gOkZmNJ
+DJZ2m2tWeBF9+5HlsEDg
+=DdcT
+-----END PGP SIGNATURE-----
+
+--WYxbKOPYRSky--
