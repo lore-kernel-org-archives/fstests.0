@@ -1,134 +1,220 @@
-Received: from mail-pg0-f46.google.com ([74.125.83.46]:37591 "EHLO
-        mail-pg0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752461AbdLQM5Y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Dec 2017 07:57:24 -0500
-Received: by mail-pg0-f46.google.com with SMTP id y6so8120769pgp.4
-        for <fstests@vger.kernel.org>; Sun, 17 Dec 2017 04:57:24 -0800 (PST)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id m15sm16439897pga.45.2017.12.17.04.57.20
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 17 Dec 2017 04:57:21 -0800 (PST)
-Message-ID: <5a3669b1.0f3f630a.52997.cd04@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 17 Dec 2017 20:57:15 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 3d04948b8238
+Received: from mx1.redhat.com ([209.132.183.28]:51654 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752850AbdLROMa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 Dec 2017 09:12:30 -0500
+Date: Mon, 18 Dec 2017 22:12:27 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: Add 9p network filesystem support
+Message-ID: <20171218141227.GB5123@eguan.usersys.redhat.com>
+References: <20171212171154.5222-1-tuomas@tuxera.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="WYxbKOPYRSky"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---WYxbKOPYRSky
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20171212171154.5222-1-tuomas@tuxera.com>
+Sender: fstests-owner@vger.kernel.org
+To: Tuomas Tynkkynen <tuomas@tuxera.com>
+Cc: fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Tue, Dec 12, 2017 at 07:11:54PM +0200, Tuomas Tynkkynen wrote:
+> This commit adds support for the 9p network file system, which is mainly
+> used by QEMU for sharing a file system from the host to the guest VM.
+> 
+> To run xfstests on it, launch QEMU with e.g.:
+> 
+> -virtfs local,path=$TMPDIR/p9-test,security_model=mapped-xattr,mount_tag=p9-test
+> -virtfs local,path=$TMPDIR/p9-scratch,security_model=mapped-xattr,mount_tag=p9-scratch
+> 
+> and inside the VM run xfstests with:
+> 
+> export TEST_DEV=p9-test
+> export SCRATCH_DEV=p9-scratch
+> export MOUNT_OPTIONS="-o trans=virtio,version=9p2000.L,cache=loose,posixacl"
+> export TEST_FS_MOUNT_OPTS="$MOUNT_OPTIONS"
 
-The master branch of the xfstests repository at:
+We can take 9P_MOUNT_OPTIONS as the default value for both MOUNT_OPTIONS
+and TEST_FS_MOUNT_OPTS in common/config, similar to CIFS_MOUNT_OPTIONS
+etc.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> Signed-off-by: Tuomas Tynkkynen <tuomas@tuxera.com>
 
-have just been updated. This is a normal new tests + bug fixes update.
-Currently the new ranged fiemap test (generic/473) fails on XFS, because
-there's no final decision on the expected behavior yet and discussion has
-stalled somehow. And the test is in its 7th revision and has been pushed back
-and forth many times, I think it's better to take the test for now with the
-hope that the failure will drive further discussion and result in a fix either
-in the test or in the kernel or both.
+This looks fine to me overall. I did a 'quick' group test and tests ran
+fine, though seems that some tests failed and they and/or some of the
+common helpers may need further tweaks. I think follow-up patches would
+be fine.
 
-And it's near the end of year, I'll take most of the rest of year off, so the
-review and response from me will be slow. I'll try to keep the weekly update on
-track, but no promise for the next two weeks :)
+> ---
+>  check         |  2 ++
+>  common/attr   |  4 ++--
+>  common/config |  3 +++
+>  common/rc     | 32 +++++++++++++++++++++++++++++++-
+>  4 files changed, 38 insertions(+), 3 deletions(-)
+> 
+> diff --git check check
+> index f8db3cd6..6078b1ef 100755
+> --- check
+> +++ check
 
-New failures I've noticed in this update:
-- generic/472 fails on most filesystems, which is a partial direct write test,
-  and the fix is still under review.
-- generic/473 fails on XFS, see above for details.
+This patch doesn't apply by default, I have to edit it manually to make
+'git am' work, e.g.
+
+--- a/check
++++ b/check
+
+I think 'git format-patch' would generate the correct patch format.
 
 Thanks,
 Eryu
 
-The new head of the master branch is commit:
-
-3d04948b8238 README: document group fsgqa is required
-
-New commits:
-
-Darrick J. Wong (3):
-      [9d5ea22aea6b] common/xfs: fix scrub support probing again
-      [88b65cf51e82] generic/45[34]: test line draw characters in file/attr names
-      [d69d223dfa90] xfs: fix tests to handle removal of no-alloc create nonfeature
-
-Goldwyn Rodrigues (3):
-      [eef2209b4fdb] common/rc: Check pwrite parameters in _require_xfs_io_command
-      [6a2fd57fb821] generic: Test RWF_NOWAIT
-      [1ed1aad2f879] generic: Partial direct write test
-
-Luis R. Rodriguez (3):
-      [07350fc7583d] generic/group: add 304 to dedupe group
-      [2353022e570f] build: update AC_PACKAGE_WANT_GDBM() and src/dbtest.c to build
-      [3d04948b8238] README: document group fsgqa is required
-
-Nikolay Borisov (1):
-      [1a377268b0d1] generic: initial fiemap range query test
-
-Theodore Ts'o (2):
-      [be341e36fd02] common: rework _require_ext4_mkfs_feature
-      [c71205ec949f] common/populate: fix S_IFDIR.FMT_BLOCK and ATTR.FMT_LOCAL for ext4 encryption
-
-
-Code Diffstat:
-
- README                |   1 +
- common/populate       |   4 +-
- common/rc             |  61 +++++++++-------
- common/xfs            |   2 +-
- m4/package_gdbmdev.m4 |   8 +++
- src/dbtest.c          |   1 +
- tests/ext4/003        |   3 +-
- tests/ext4/025        |   2 +-
- tests/ext4/026        |   2 +-
- tests/ext4/306        |   7 +-
- tests/generic/453     |   5 ++
- tests/generic/454     |   5 ++
- tests/generic/471     |  75 +++++++++++++++++++
- tests/generic/471.out |  13 ++++
- tests/generic/472     |  96 +++++++++++++++++++++++++
- tests/generic/472.out |   9 +++
- tests/generic/473     | 107 +++++++++++++++++++++++++++
- tests/generic/473.out | 196 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/group   |   5 +-
- tests/xfs/013         |   6 +-
- tests/xfs/014         |   3 +
- tests/xfs/104         |   2 +-
- tests/xfs/109         |   2 +-
- 23 files changed, 575 insertions(+), 40 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---WYxbKOPYRSky
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJaNmj5AAoJECZSqilcj+djfgQQAIYySAGyNrXKuvDOu8D7QaEh
-KZUj+AVCdQSI/U4mItHI3RZGiEW+W+fJv6SSumojtr2JEwznuVLlfvU4B7hHUZc3
-Qwg2rZ0t+aR+HBr7dYYAapivsMJw8z2EdlJ4e91L7BnvWmsRNfsIfZWWQ6I9WiBn
-nK24jkebobGuGxMCfjfribJANI7zj071Z3+8X/cmGvROWD46zr/dYrpgLPpMiN4M
-7QZOM99Z2X26GHJZs+w6EN7PFTzprBd29hsI/qdcMYiYYa+7qFhkcyLXq0y+S5Ep
-Vz1UZSxqZe3VXtfktJ+SfdsZ4POZTtjq8CL1kkYWoI0tPWrwWsc8KHC++z1QbCkV
-gsVDhinzILjlRVEyXS647JAtl0eZzKzfsptkJRMM27fAOBUnZNx5SBKQxnXei27I
-S1Y4D/lGMrzyPPKWVCOkqPmFmprzCmSj//aDCh6dz7MPPWeiiYLgUdHayWAebsv1
-edQ1pt+zM7ysJJTkOQX+hTEOS6dJUz6GbGq4A7Hz0zHsHSV7yTduft/kTmTOoXI/
-cOkJuV6uoVFVtQwSMYopYlrfa0S4sEfwu6vZOf/YPVijlNjd7PNSNy4lA8YMNIQe
-ZO1Tx4uQ3+4cK1DiUHb0QeLvtFu/GsGvtRdKKZ2bRbXUj9JhbJSnteVU9gOkZmNJ
-DJZ2m2tWeBF9+5HlsEDg
-=DdcT
------END PGP SIGNATURE-----
-
---WYxbKOPYRSky--
+> @@ -67,6 +67,7 @@ check options
+>      -nfs                test NFS
+>      -glusterfs                test GlusterFS
+>      -cifs               test CIFS
+> +    -9p			test 9p
+>      -overlay		test overlay
+>      -pvfs2          test PVFS2
+>      -tmpfs              test TMPFS
+> @@ -265,6 +266,7 @@ while [ $# -gt 0 ]; do
+>  	-nfs)		FSTYP=nfs ;;
+>  	-glusterfs)	FSTYP=glusterfs ;;
+>  	-cifs)		FSTYP=cifs ;;
+> +	-9p)		FSTYP=9p ;;
+>  	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+>  	-pvfs2)		FSTYP=pvfs2 ;;
+>  	-tmpfs)		FSTYP=tmpfs ;;
+> diff --git common/attr common/attr
+> index 8a5c9eac..66b0227f 100644
+> --- common/attr
+> +++ common/attr
+> @@ -243,7 +243,7 @@ _sort_getfattr_output()
+>  
+>  # set maximum total attr space based on fs type
+>  case "$FSTYP" in
+> -xfs|udf|pvfs2|ceph)
+> +xfs|udf|pvfs2|9p|ceph)
+>  	MAX_ATTRS=1000
+>  	;;
+>  *)
+> @@ -263,7 +263,7 @@ xfs|udf|btrfs)
+>  pvfs2)
+>  	MAX_ATTRVAL_SIZE=8192
+>  	;;
+> -ceph)
+> +9p|ceph)
+>  	MAX_ATTRVAL_SIZE=65536
+>  	;;
+>  *)
+> diff --git common/config common/config
+> index d0fbfe55..5e4a73ed 100644
+> --- common/config
+> +++ common/config
+> @@ -459,6 +459,9 @@ _check_device()
+>  	fi
+>  
+>  	case "$FSTYP" in
+> +	9p)
+> +		# 9p mount tags are just plain strings, so anything is allowed
+> +		;;
+>  	overlay)
+>  		if [ ! -d "$dev" ]; then
+>  			_fatal "common/config: $name ($dev) is not a directory for overlay"
+> diff --git common/rc common/rc
+> index 4c053a53..0d2da68c 100644
+> --- common/rc
+> +++ common/rc
+> @@ -166,6 +166,8 @@ case "$FSTYP" in
+>  	 ;;
+>      cifs)
+>  	 ;;
+> +    9p)
+> +	 ;;
+>      ceph)
+>  	 ;;
+>      glusterfs)
+> @@ -578,6 +580,9 @@ _test_mkfs()
+>      cifs)
+>  	# do nothing for cifs
+>  	;;
+> +    9p)
+> +	# do nothing for 9p
+> +	;;
+>      ceph)
+>  	# do nothing for ceph
+>  	;;
+> @@ -612,6 +617,9 @@ _mkfs_dev()
+>      nfs*)
+>  	# do nothing for nfs
+>  	;;
+> +    9p)
+> +	# do nothing for 9p
+> +	;;
+>      overlay)
+>  	# do nothing for overlay
+>  	;;
+> @@ -676,7 +684,7 @@ _scratch_mkfs()
+>  	local mkfs_status
+>  
+>  	case $FSTYP in
+> -	nfs*|cifs|ceph|overlay|glusterfs|pvfs2)
+> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
+>  		# unable to re-create this fstyp, just remove all files in
+>  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+>  		# created in previous runs
+> @@ -1448,6 +1456,14 @@ _require_scratch_nocheck()
+>  			_notrun "this test requires a valid \$SCRATCH_MNT"
+>  		fi
+>  		;;
+> +	9p)
+> +		if [ -z "$SCRATCH_DEV" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_DEV"
+> +		fi
+> +		if [ ! -d "$SCRATCH_MNT" ]; then
+> +			_notrun "this test requires a valid \$SCRATCH_MNT"
+> +		fi
+> +		;;
+>  	nfs*|ceph)
+>  		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+> @@ -1554,6 +1570,14 @@ _require_test()
+>  			_notrun "this test requires a valid \$TEST_DIR"
+>  		fi
+>  		;;
+> +	9p)
+> +		if [ -z "$TEST_DEV" ]; then
+> +			_notrun "this test requires a valid \$TEST_DEV"
+> +		fi
+> +		if [ ! -d "$TEST_DIR" ]; then
+> +			_notrun "this test requires a valid \$TEST_DIR"
+> +		fi
+> +		;;
+>  	nfs*|ceph)
+>  		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+>  		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+> @@ -2500,6 +2524,9 @@ _check_test_fs()
+>      cifs)
+>  	# no way to check consistency for cifs
+>  	;;
+> +    9p)
+> +	# no way to check consistency for 9p
+> +	;;
+>      ceph)
+>  	# no way to check consistency for CephFS
+>  	;;
+> @@ -2555,6 +2582,9 @@ _check_scratch_fs()
+>      cifs)
+>  	# Don't know how to check a CIFS filesystem, yet.
+>  	;;
+> +    9p)
+> +	# no way to check consistency for 9p
+> +	;;
+>      ceph)
+>  	# no way to check consistency for CephFS
+>  	;;
+> -- 
+> 2.15.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
