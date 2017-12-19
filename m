@@ -1,103 +1,44 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:23931 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1761989AbdLSKpG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Dec 2017 05:45:06 -0500
-Message-ID: <5A38EDAF.5070407@cn.fujitsu.com>
-Date: Tue, 19 Dec 2017 18:45:03 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from mx2.suse.de ([195.135.220.15]:53254 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S936739AbdLSKrL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 19 Dec 2017 05:47:11 -0500
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: Re: [PATCH blktests] block/013: Add test for BLKRRPART ioctl
+References: <20171204182953.GA16308@vader.DHCP.thefacebook.com>
+        <1513679423-13067-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Date: Tue, 19 Dec 2017 11:47:09 +0100
+In-Reply-To: <1513679423-13067-1-git-send-email-yangx.jy@cn.fujitsu.com> (xiao
+        yang's message of "Tue, 19 Dec 2017 18:30:23 +0800")
+Message-ID: <mqd8tdzataq.fsf@linux-x5ow.site>
 MIME-Version: 1.0
-Subject: Re: [PATCH] generic/473: test return EBUSY from BLKRRPART for mounted
- whole-dev
-References: <1511956946-16667-1-git-send-email-yangx.jy@cn.fujitsu.com> <20171204082923.GF2749@eguan.usersys.redhat.com> <5A251225.7080905@cn.fujitsu.com> <20171204092558.GH2749@eguan.usersys.redhat.com> <5A2519F4.5040102@cn.fujitsu.com> <20171204182953.GA16308@vader.DHCP.thefacebook.com>
-In-Reply-To: <20171204182953.GA16308@vader.DHCP.thefacebook.com>
-Content-Type: text/plain; charset="windows-1252"; format=flowed
+Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Omar Sandoval <osandov@osandov.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-block@vger.kernel.org
+To: xiao yang <yangx.jy@cn.fujitsu.com>
+Cc: osandov@osandov.com, eguan@redhat.com, fstests@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/12/05 2:29, Omar Sandoval wrote:
-> On Mon, Dec 04, 2017 at 05:48:36PM +0800, Xiao Yang wrote:
->> On 2017/12/04 17:25, Eryu Guan wrote:
->>> On Mon, Dec 04, 2017 at 05:15:17PM +0800, Xiao Yang wrote:
->>>> On 2017/12/04 16:29, Eryu Guan wrote:
->>>>> On Wed, Nov 29, 2017 at 08:02:26PM +0800, Xiao Yang wrote:
->>>>>> If the entire block device is formatted with a filesystem and
->>>>>> mounted, running "blockdev --rereadpt" should fail and return
->>>>>> EBUSY instead of pass.
->>>>>>
->>>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->>>>> As we have blktests[1] now, I think this may fit in blktests better=
-?
->>>> Hi Eryu,
->>>>
->>>> Do you think test cases which use scsi_debug module should be moved =
-into
->>>> blktests?
->>>> (e.g. generic/108, generic/349, generic/350, generic/351)
->>> I don't think they need to be moved to blktests. Most other tests tha=
-t
->>> take use of scsi_debug are for filesystem testing, e.g. generic/108.
->>> generic/349 generic/35[01] are a bit special, they were there before
->>> blktests was announced available, so they're in a special blockdev gr=
-oup
->>> and not in the auto group. If Omar agrees, I think they can be ported=
- to
->>> blktests.
->> Hi Eryu,
->>
->> Thanks for your explanation, and i will try to send it to blktests.
->>
->> Thanks,
->> Xiao Yang
-> I agree, the three tests Eryu mentioned and this new test would be a
-> good fit for blktests. Let me know if you need any help porting, things
-> are a little different from xfstests.
-Hi Omar,
+xiao yang <yangx.jy@cn.fujitsu.com> writes:
 
-With gcc v4.4.7 on RHEL6, i got the following compiler error:
--------------------------------------------------------------------------=
----------------------------------------------
-[root@RHEL6U9GA_Intel64 blktests]# make
-make -C src all
-make[1]: Entering directory `/root/blktests/src'
-cc -Wall -o sg/syzkaller1 -O2 sg/syzkaller1.c
-sg/syzkaller1.c: In function =91segv_handler=92:
-sg/syzkaller1.c:118: warning: implicit declaration of function=20
-=91__atomic_load_n=92
-sg/syzkaller1.c:118: error: =91__ATOMIC_RELAXED=92 undeclared (first use =
-in=20
-this function)
-sg/syzkaller1.c:118: error: (Each undeclared identifier is reported only=20
-once
-sg/syzkaller1.c:118: error: for each function it appears in.)
-sg/syzkaller1.c: In function =91syz_open_dev=92:
-sg/syzkaller1.c:204: warning: implicit declaration of function=20
-=91__atomic_fetch_add=92
-sg/syzkaller1.c:204: error: =91__ATOMIC_SEQ_CST=92 undeclared (first use =
-in=20
-this function)
-sg/syzkaller1.c:204: warning: implicit declaration of function=20
-=91__atomic_fetch_sub=92
-sg/syzkaller1.c: In function =91test=92:
-sg/syzkaller1.c:406: error: =91__ATOMIC_SEQ_CST=92 undeclared (first use =
-in=20
-this function)
-make[1]: *** [sg/syzkaller1] Error 1
-make[1]: Leaving directory `/root/blktests/src'
-make: *** [all] Error 2
--------------------------------------------------------------------------=
-----------------------------------------------
+> +requires() {
+> +	_have_program mkfs.ext3
+> +}
+[...]
+> +	# Format
+> +	mkfs.ext3 -F "$TEST_DEV" >> "$FULL" 2>&1
 
-It seems that __atomic_* functions are not available, and could you tell=20
-me how to fix
-the compiler error?
+What's the reason to limit the test case to ext3 only? Can you switch it
+to the generic 'mkfs' command? IIRC we require 'util-linux' to be
+present for blktests but mkfs.ext3 is (at least in SUSE based distros)
+in the e2fsprogs package.
 
-Thanks,
-Xiao Yang
->
->
+apart from that:
+Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
 
-
-
+--=20
+Johannes Thumshirn                                          Storage
+jthumshirn@suse.de                                +49 911 74053 689
+SUSE LINUX GmbH, Maxfeldstr. 5, 90409 N=C3=BCrnberg
+GF: Felix Imend=C3=B6rffer, Jane Smithard, Graham Norton
+HRB 21284 (AG N=C3=BCrnberg)
+Key fingerprint =3D EC38 9CAB C2C4 F25D 8600 D0D0 0393 969D 2D76 0850
