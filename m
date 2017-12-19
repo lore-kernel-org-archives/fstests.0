@@ -1,111 +1,103 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:59413 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:23931 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S933857AbdLSKeJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Dec 2017 05:34:09 -0500
-From: xiao yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH blktests] block/013: Add test for BLKRRPART ioctl
-Date: Tue, 19 Dec 2017 18:30:23 +0800
-Message-ID: <1513679423-13067-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20171204182953.GA16308@vader.DHCP.thefacebook.com>
-References: <20171204182953.GA16308@vader.DHCP.thefacebook.com>
+        with ESMTP id S1761989AbdLSKpG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Dec 2017 05:45:06 -0500
+Message-ID: <5A38EDAF.5070407@cn.fujitsu.com>
+Date: Tue, 19 Dec 2017 18:45:03 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Subject: Re: [PATCH] generic/473: test return EBUSY from BLKRRPART for mounted
+ whole-dev
+References: <1511956946-16667-1-git-send-email-yangx.jy@cn.fujitsu.com> <20171204082923.GF2749@eguan.usersys.redhat.com> <5A251225.7080905@cn.fujitsu.com> <20171204092558.GH2749@eguan.usersys.redhat.com> <5A2519F4.5040102@cn.fujitsu.com> <20171204182953.GA16308@vader.DHCP.thefacebook.com>
+In-Reply-To: <20171204182953.GA16308@vader.DHCP.thefacebook.com>
+Content-Type: text/plain; charset="windows-1252"; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: osandov@osandov.com
-Cc: eguan@redhat.com, fstests@vger.kernel.org, linux-block@vger.kernel.org, xiao yang <yangx.jy@cn.fujitsu.com>
+Content-Transfer-Encoding: quoted-printable
+To: Omar Sandoval <osandov@osandov.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-block@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If the entire block device is formatted with a filesystem and
-mounted, running "blockdev --rereadpt" should fail and return
-EBUSY instead of pass.
+On 2017/12/05 2:29, Omar Sandoval wrote:
+> On Mon, Dec 04, 2017 at 05:48:36PM +0800, Xiao Yang wrote:
+>> On 2017/12/04 17:25, Eryu Guan wrote:
+>>> On Mon, Dec 04, 2017 at 05:15:17PM +0800, Xiao Yang wrote:
+>>>> On 2017/12/04 16:29, Eryu Guan wrote:
+>>>>> On Wed, Nov 29, 2017 at 08:02:26PM +0800, Xiao Yang wrote:
+>>>>>> If the entire block device is formatted with a filesystem and
+>>>>>> mounted, running "blockdev --rereadpt" should fail and return
+>>>>>> EBUSY instead of pass.
+>>>>>>
+>>>>>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>>>>> As we have blktests[1] now, I think this may fit in blktests better=
+?
+>>>> Hi Eryu,
+>>>>
+>>>> Do you think test cases which use scsi_debug module should be moved =
+into
+>>>> blktests?
+>>>> (e.g. generic/108, generic/349, generic/350, generic/351)
+>>> I don't think they need to be moved to blktests. Most other tests tha=
+t
+>>> take use of scsi_debug are for filesystem testing, e.g. generic/108.
+>>> generic/349 generic/35[01] are a bit special, they were there before
+>>> blktests was announced available, so they're in a special blockdev gr=
+oup
+>>> and not in the auto group. If Omar agrees, I think they can be ported=
+ to
+>>> blktests.
+>> Hi Eryu,
+>>
+>> Thanks for your explanation, and i will try to send it to blktests.
+>>
+>> Thanks,
+>> Xiao Yang
+> I agree, the three tests Eryu mentioned and this new test would be a
+> good fit for blktests. Let me know if you need any help porting, things
+> are a little different from xfstests.
+Hi Omar,
 
-Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
----
- tests/block/013     | 62 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/block/013.out |  3 +++
- 2 files changed, 65 insertions(+)
- create mode 100755 tests/block/013
- create mode 100644 tests/block/013.out
+With gcc v4.4.7 on RHEL6, i got the following compiler error:
+-------------------------------------------------------------------------=
+---------------------------------------------
+[root@RHEL6U9GA_Intel64 blktests]# make
+make -C src all
+make[1]: Entering directory `/root/blktests/src'
+cc -Wall -o sg/syzkaller1 -O2 sg/syzkaller1.c
+sg/syzkaller1.c: In function =91segv_handler=92:
+sg/syzkaller1.c:118: warning: implicit declaration of function=20
+=91__atomic_load_n=92
+sg/syzkaller1.c:118: error: =91__ATOMIC_RELAXED=92 undeclared (first use =
+in=20
+this function)
+sg/syzkaller1.c:118: error: (Each undeclared identifier is reported only=20
+once
+sg/syzkaller1.c:118: error: for each function it appears in.)
+sg/syzkaller1.c: In function =91syz_open_dev=92:
+sg/syzkaller1.c:204: warning: implicit declaration of function=20
+=91__atomic_fetch_add=92
+sg/syzkaller1.c:204: error: =91__ATOMIC_SEQ_CST=92 undeclared (first use =
+in=20
+this function)
+sg/syzkaller1.c:204: warning: implicit declaration of function=20
+=91__atomic_fetch_sub=92
+sg/syzkaller1.c: In function =91test=92:
+sg/syzkaller1.c:406: error: =91__ATOMIC_SEQ_CST=92 undeclared (first use =
+in=20
+this function)
+make[1]: *** [sg/syzkaller1] Error 1
+make[1]: Leaving directory `/root/blktests/src'
+make: *** [all] Error 2
+-------------------------------------------------------------------------=
+----------------------------------------------
 
-diff --git a/tests/block/013 b/tests/block/013
-new file mode 100755
-index 0000000..77ae55c
---- /dev/null
-+++ b/tests/block/013
-@@ -0,0 +1,62 @@
-+#!/bin/bash
-+#
-+# If the entire block device is formatted with a filesystem and
-+# mounted, running "blockdev --rereadpt" should fail and return
-+# EBUSY.  On buggy kernel, it passes unexpectedly.
-+#
-+# Regression test for commit 77032ca66f86 ("Return EBUSY from
-+# BLKRRPART for mounted whole-dev fs").
-+#
-+# Copyright (c) 2017 FUJITSU LIMITED. All rights reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software: you can redistribute it and/or modify
-+# it under the terms of the GNU General Public License as published by
-+# the Free Software Foundation, either version 3 of the License, or
-+# (at your option) any later version.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+DESCRIPTION="test return EBUSY from BLKRRPART for mounted whole-dev"
-+QUICK=1
-+
-+requires() {
-+	_have_program mkfs.ext3
-+}
-+
-+test_device() {
-+	echo "Running ${TEST_NAME}"
-+
-+	rm -f "$FULL"
-+	mkdir "$TMPDIR/mntpoint"
-+
-+	# Format
-+	mkfs.ext3 -F "$TEST_DEV" >> "$FULL" 2>&1
-+
-+	# Mount
-+	mount "$TEST_DEV" "$TMPDIR/mntpoint"
-+
-+	# Check mounted whole-dev
-+	local out=$(blockdev --rereadpt "$TEST_DEV" 2>&1)
-+	echo $out | grep -q "Device or resource busy"
-+	if [ $? -eq 0 ]; then
-+		echo "Return EBUSY for mounted whole-dev"
-+	else
-+		echo "Don't return EBUSY for mounted whole-dev"
-+	fi
-+
-+	echo $out >> "$FULL"
-+
-+	# Umount
-+	umount "$TMPDIR/mntpoint"
-+
-+	rm -rf "$TMPDIR/mntpoint"
-+
-+	echo "Test complete"
-+}
-diff --git a/tests/block/013.out b/tests/block/013.out
-new file mode 100644
-index 0000000..74d1d08
---- /dev/null
-+++ b/tests/block/013.out
-@@ -0,0 +1,3 @@
-+Running block/013
-+Return EBUSY for mounted whole-dev
-+Test complete
--- 
-1.8.3.1
+It seems that __atomic_* functions are not available, and could you tell=20
+me how to fix
+the compiler error?
+
+Thanks,
+Xiao Yang
+>
+>
 
 
 
