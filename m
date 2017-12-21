@@ -1,122 +1,95 @@
-Received: from mx1.mpynet.fi ([82.197.21.84]:32485 "EHLO mx1.mpynet.fi"
+Received: from mga09.intel.com ([134.134.136.24]:14196 "EHLO mga09.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752433AbdLURkZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Dec 2017 12:40:25 -0500
-Subject: Re: [PATCH] common/encrypt: Create an encrypted equivalent of
- _scratch_mkfs_sized
-From: Ari Sundholm <ari@tuxera.com>
-References: <1513792000-25462-1-git-send-email-ari@tuxera.com>
- <20171221013802.GP5858@dastard>
- <1a058cb8-b2c0-39b5-e65d-d77264c37a54@tuxera.com>
-Message-ID: <b1651c48-4be5-fc7a-e6ea-c099c6913642@tuxera.com>
-Date: Thu, 21 Dec 2017 19:40:23 +0200
+        id S1752351AbdLURlM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 21 Dec 2017 12:41:12 -0500
+Date: Thu, 21 Dec 2017 10:41:10 -0700
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [xfsprogs PATCH v2 2/3] xfs_io: add MAP_SYNC support to mmap()
+Message-ID: <20171221174110.GD2158@linux.intel.com>
+References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
+ <20171205235651.17102-3-ross.zwisler@linux.intel.com>
+ <20171221170908.GT12613@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <1a058cb8-b2c0-39b5-e65d-d77264c37a54@tuxera.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171221170908.GT12613@magnolia>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/21/2017 03:52 PM, Ari Sundholm wrote:
-> Hi!
->=20
-> Thank you for your comments. Please see below.
->=20
-> On 12/21/2017 03:38 AM, Dave Chinner wrote:
->> On Wed, Dec 20, 2017 at 07:46:40PM +0200, Ari Sundholm wrote:
->>> Test case generic/399 hardcodes "-O encrypt" in MKFS_OPTIONS when
->>> calling _scratch_mkfs_sized, which only works with the mkfs of certai=
-n
->>> filesystems. Create a new helper, _scratch_mkfs_sized_encrypted, for
->>> handling the differences between the mkfs tools of different
->>> filesystems. It also allows those filesystems whose mkfs doesn't acce=
-pt
->>> "-O encrypt" to skip the test gracefully until proper support is adde=
-d
->>> for them in the helper.
->>>
->>> Signed-off-by: Ari Sundholm <ari@tuxera.com>
->>> ---
->>> =C2=A0 common/encrypt=C2=A0=C2=A0=C2=A0 | 12 ++++++++++++
->>> =C2=A0 tests/generic/399 |=C2=A0 3 +--
->>> =C2=A0 2 files changed, 13 insertions(+), 2 deletions(-)
->>>
->>> diff --git a/common/encrypt b/common/encrypt
->>> index a6fd89d..189c59e 100644
->>> --- a/common/encrypt
->>> +++ b/common/encrypt
->>> @@ -81,6 +81,18 @@ _scratch_mkfs_encrypted()
->>> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 esac
->>> =C2=A0 }
->>> +_scratch_mkfs_sized_encrypted()
->>> +{
->>> +=C2=A0=C2=A0=C2=A0 case $FSTYP in
->>> +=C2=A0=C2=A0=C2=A0 ext4|f2fs)
->>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 MKFS_OPTIONS=3D"$MKFS_OPT=
-IONS -O encrypt" _scratch_mkfs_sized $*
->>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ;;
->>
->> This does not need to screw around with MKFS_OPTIONS. This:
->>
->> =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _scratch_mkfs_sized -O encr=
-ypt $*
->>
->> Will do just fine.
->=20
-> Hmm, I don't see how that could work. At the moment, _scratch_mkfs_size=
-d=20
-> only takes and uses two arguments, one of which is optional. AFAICS, al=
-l=20
-> additional mkfs options need to be passed using MKFS_OPTIONS to=20
-> _scratch_mkfs_sized.
->=20
-> As for using $* instead of $1 $2, I am hoping that will avoid having to=
-=20
-> change this new function even if the usage of _scratch_mkfs_sized chang=
-es.
->=20
->> Also, _scratch_mkfs_encrypted() supports UBIFS, and this new
->> function doesn't. Seems like it should to me...
->=20
-> _scratch_mkfs_sized does not support ubifs, though, so the operation=20
-> would _notrun anyway. I'm not familiar with ubifs or its tools, but I'l=
-l=20
-> see if I can find out how to implement support for ubifs in=20
-> _scratch_mkfs_sized.
->=20
+On Thu, Dec 21, 2017 at 09:09:08AM -0800, Darrick J. Wong wrote:
+> On Tue, Dec 05, 2017 at 04:56:50PM -0700, Ross Zwisler wrote:
 
-I looked into implementing ubifs support for _scratch_mkfs_sized and=20
-_scratch_mkfs_sized_encrypted. It doesn't seem there is a very good way=20
-of doing this, apart from removing the existing volume and recreating=20
-it, something like this:
-	ubirmvol $SCRATCH_DEV -n 0
-	ubimkvol $SCRATCH_DEV -n 0 -N foobar -s SIZE
+> > @@ -195,6 +200,13 @@ mmap_f(
+> >  		case 'x':
+> >  			prot |= PROT_EXEC;
+> >  			break;
+> > +		case 'S':
+> > +			flags = MAP_SYNC | MAP_SHARED_VALIDATE;
+> > +			if (!flags) {
+> 
+> Heh, subtle. :)
+> 
+> /me wonders if it'd be better to do this explicitly:
+> 
+> #ifdef HAVE_MAP_SYNC
+> 	flags = MAP_SYNC | MAP_SHARED_VALIDATE;
+> #else
+> 	printf("MAP_SYNC not supported\n");
+> 	return 1;
+> #endif
+> 
+> ...though it's ugly.
 
-This has the problem that we may not really know what the volume ID=20
-should be. Can we trust it to be 0? The other issue is that $SCRATCH_DEV=20
-probably points to a UBI volume instead of a UBI device. I guess ubinfo=20
-(or just sed'ing out the volume suffix) could be used to get the=20
-underlying UBI device.
+Yea, I was trying to avoid #ifdefery.  If you prefer this, though, I'm happy
+to change it.  Or maybe a comment would be enough?
 
-I think supporting this should be in a separate patch.
+/*
+ * If MAP_SYNC and MAP_SHARED_VALIDATE aren't defined in the system headers we
+ * will have defined them both as 0.
+ */
 
-Best regards,
-Ari Sundholm
-ari@tuxera.com
+?
 
->> Cheers,
->>
->> Dave.
->>
->=20
-> Thanks,
-> Ari Sundholm
-> ari@tuxera.com
-> --=20
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.html
+> > +				printf("MAP_SYNC not supported\n");
+> > +				return 0;
+> 
+> Are we supposed to be returning nonzero values for failing commands?
 
+I don't think so.  All the other error conditions in this function also return
+0.  I think the important thing is that 'exitcode' is set to 1 at the
+beginning of the function per Dave's patch,
+
+https://www.spinics.net/lists/linux-xfs/msg13605.html
+
+which I pulled into my baseline:
+
+https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfsprogs-dev.git/refs/?h=map_sync_v3
+
+So, I likewise leave 'exitcode' as 1, bail out with a return code of 0, and
+then you get the overall failure return of 1 from xfs_io at the shell.
+
+> > @@ -764,7 +764,7 @@ Each (sec, nsec) pair constitutes a single timestamp value.
+> >  
+> >  .SH MEMORY MAPPED I/O COMMANDS
+> >  .TP
+> > -.BI "mmap [ " N " | [[ \-rwx ] [\-s " size " ] " "offset length " ]]
+> > +.BI "mmap [ " N " | [[ \-rwxS ] [\-s " size " ] " "offset length " ]]
+> >  With no arguments,
+> >  .B mmap
+> >  shows the current mappings. Specifying a single numeric argument
+> > @@ -780,6 +780,10 @@ PROT_WRITE
+> >  .RB ( \-w ),
+> >  and PROT_EXEC
+> >  .RB ( \-x ).
+> > +The mapping will be created with the MAP_SHARED flag by default, or with the
+> > +Linux specific (MAP_SYNC | MAP_SHARED_VALIDATE) flags if
+> 
+> I assume I'll be able to look up exactly what MAP_SYNC provides in the mmap
+> manpage, right?
+
+Yep, Jan updated the man page for both MAP_SYNC and MAP_SHARED_VALIDATE:
+https://lists.01.org/pipermail/linux-nvdimm/2017-November/013158.html
+
+Thank you for the review.
