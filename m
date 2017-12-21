@@ -1,75 +1,79 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42494 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:29760 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751539AbdLUIXo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Dec 2017 03:23:44 -0500
-Date: Thu, 21 Dec 2017 16:23:42 +0800
+        id S1750884AbdLUKWC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 21 Dec 2017 05:22:02 -0500
+Date: Thu, 21 Dec 2017 18:21:58 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/381: enable on systems which allows usernames
- that begin with digits
-Message-ID: <20171221082342.GG5123@eguan.usersys.redhat.com>
-References: <20171215204107.17690-1-mcgrof@kernel.org>
+Subject: Re: [PATCH] fstests: Add 9p network filesystem support
+Message-ID: <20171221102158.GH5123@eguan.usersys.redhat.com>
+References: <20171212171154.5222-1-tuomas@tuxera.com>
+ <20171218141227.GB5123@eguan.usersys.redhat.com>
+ <1513609136.28209.19.camel@tuxera.com>
+ <1513825990.10114.0.camel@tuxera.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171215204107.17690-1-mcgrof@kernel.org>
+In-Reply-To: <1513825990.10114.0.camel@tuxera.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org
+To: Tuomas Tynkkynen <tuomas@tuxera.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 15, 2017 at 12:41:07PM -0800, Luis R. Rodriguez wrote:
-> Some systems are not allowing usernames prefixed with a number now, this
-> test however relies on the assumption that you can end up with usernames
-> of such type, given the purpose of the test is to ensure that xfs_quota
-> can differentiate between UIDs and names beginning with numbers.
+On Thu, Dec 21, 2017 at 05:13:10AM +0200, Tuomas Tynkkynen wrote:
+> On Mon, 2017-12-18 at 16:58 +0200, Tuomas Tynkkynen wrote:
+> > Hi Eryu,
+> > 
+> > On Mon, 2017-12-18 at 22:12 +0800, Eryu Guan wrote:
+> > > On Tue, Dec 12, 2017 at 07:11:54PM +0200, Tuomas Tynkkynen wrote:
+> > > > This commit adds support for the 9p network file system, which is
+> > > > mainly
+> > > > used by QEMU for sharing a file system from the host to the guest
+> > > > VM.
+> > > > 
+> > > > To run xfstests on it, launch QEMU with e.g.:
+> > > > 
+> > > > -virtfs local,path=$TMPDIR/p9-test,security_model=mapped-
+> > > > xattr,mount_tag=p9-test
+> > > > -virtfs local,path=$TMPDIR/p9-scratch,security_model=mapped-
+> > > > xattr,mount_tag=p9-scratch
+> > > > 
+> > > > and inside the VM run xfstests with:
+> > > > 
+> > > > export TEST_DEV=p9-test
+> > > > export SCRATCH_DEV=p9-scratch
+> > > > export MOUNT_OPTIONS="-o
+> > > > trans=virtio,version=9p2000.L,cache=loose,posixacl"
+> > > > export TEST_FS_MOUNT_OPTS="$MOUNT_OPTIONS"
+> > > 
+> > > We can take 9P_MOUNT_OPTIONS as the default value for both
+> > > MOUNT_OPTIONS
+> > > and TEST_FS_MOUNT_OPTS in common/config, similar to
+> > > CIFS_MOUNT_OPTIONS
+> > > etc.
+> > > 
+> > 
+> > Ok, will add in next version.
+> > 
 > 
-> systemd >= 232 (circa 2017) no longer allows usernames starting with digits
-> [0], there is a systemd exploit (CVE-2017-1000082 [1]) for why that was done,
-> however even upstream shadow useradd also does not allow similar user types
-> since shadow version v4.0.1 (circa 2007) [2] but there no easy way to check
-> shadow's useradd's version.
-> 
-> You can still shoehorn in these types of users by manually editing files,
-> but that's just shooting yourself on the foot given all the precautions
-> taken now by userspace, so just check for the systemd version for now as
-> requirement for running this test.
-> 
-> [0] https://github.com/systemd/systemd/issues/6237
-> [1] https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2017-1000082
-> [2] https://github.com/shadow-maint/shadow/commit/9db6abfa42c946b4046f4b2fe67dc43ba862eb0e
-> 
-> Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
-> ---
->  README            |  7 +++++--
->  common/config     |  1 +
->  common/rc         | 42 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/381 |  1 +
->  4 files changed, 49 insertions(+), 2 deletions(-)
-> 
-> diff --git a/README b/README
-> index ed69332e774e..aff7bdae7cb4 100644
-> --- a/README
-> +++ b/README
-> @@ -20,8 +20,11 @@ _______________________
->  - run make
->  - run make install
->  - create fsgqa test user ("sudo useradd fsgqa")
-> -- create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
-> -	
-> +- Only on systems which allow usernames that start with a digit (older
-> +  than  systemd 232 and/or has shadow older than v4.0.1), create the
-> +  123456-fsgqa test user:
-> +    sudo useradd 123456-fsgqa
-> +
+> Oops; no. Bash doesn't like environment variables starting with
 
-IMHO, this doc update is sufficient, generic/381 already _notrun if
-there's no 123456-fsgqa user present because of
+Ah, that's right.
 
-_require_user 123456-fsgqa
+> numbers. P9_MOUNT_OPTIONS maybe then? Though honestly, I've never used
 
-And we don't rely on any version check in fstests, usually we check on
-the actual behavior, e.g. actually mkfs & mount the fs to see if the
-current kernel and userspace support a given feature.
+Or PLAN9_MOUNT_OPTIONS?
+
+> nor really understood the reason for these foo_MOUNT_OPTIONS... same
+> for the -nfs etc. command line flags.
+
+Make update fs-specific mount options in local.config file more easily
+when switching filesysm type to test? You don't have to update
+MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS.
+
+The '-nfs'/'-9p' command line flags are used to indicate which
+filesystem it's testing and set FSTYP variable correctly. Because these
+filesystems can't be detected from $TEST_DEV automatically like XFS,
+ext4 etc.
 
 Thanks,
 Eryu
