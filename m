@@ -1,110 +1,260 @@
-Received: from mx1.mpynet.fi ([82.197.21.84]:55740 "EHLO mx1.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754836AbdLUWRq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Dec 2017 17:17:46 -0500
-Subject: Re: [PATCH] common/encrypt: Create an encrypted equivalent of
- _scratch_mkfs_sized
-References: <1513792000-25462-1-git-send-email-ari@tuxera.com>
- <20171221013802.GP5858@dastard>
- <1a058cb8-b2c0-39b5-e65d-d77264c37a54@tuxera.com>
- <20171221214657.GI4094@dastard>
-From: Ari Sundholm <ari@tuxera.com>
-Message-ID: <75c79bd4-f953-fad5-bdce-12a0a79cef5f@tuxera.com>
-Date: Fri, 22 Dec 2017 00:17:44 +0200
+Received: from userp2120.oracle.com ([156.151.31.85]:44944 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752066AbdLUWUm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Dec 2017 17:20:42 -0500
+Date: Thu, 21 Dec 2017 14:18:18 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [xfsprogs PATCH v4 1/2] xfs_io: add MAP_SYNC support to mmap()
+Message-ID: <20171221221818.GA12613@magnolia>
+References: <20171221220800.14382-1-ross.zwisler@linux.intel.com>
+ <20171221220800.14382-2-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
-In-Reply-To: <20171221214657.GI4094@dastard>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171221220800.14382-2-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 12/21/2017 11:46 PM, Dave Chinner wrote:
-> On Thu, Dec 21, 2017 at 03:52:00PM +0200, Ari Sundholm wrote:
->> Hi!
->>
->> Thank you for your comments. Please see below.
->>
->> On 12/21/2017 03:38 AM, Dave Chinner wrote:
->>> On Wed, Dec 20, 2017 at 07:46:40PM +0200, Ari Sundholm wrote:
->>>> Test case generic/399 hardcodes "-O encrypt" in MKFS_OPTIONS when
->>>> calling _scratch_mkfs_sized, which only works with the mkfs of certain
->>>> filesystems. Create a new helper, _scratch_mkfs_sized_encrypted, for
->>>> handling the differences between the mkfs tools of different
->>>> filesystems. It also allows those filesystems whose mkfs doesn't accept
->>>> "-O encrypt" to skip the test gracefully until proper support is added
->>>> for them in the helper.
->>>>
->>>> Signed-off-by: Ari Sundholm <ari@tuxera.com>
->>>> ---
->>>>   common/encrypt    | 12 ++++++++++++
->>>>   tests/generic/399 |  3 +--
->>>>   2 files changed, 13 insertions(+), 2 deletions(-)
->>>>
->>>> diff --git a/common/encrypt b/common/encrypt
->>>> index a6fd89d..189c59e 100644
->>>> --- a/common/encrypt
->>>> +++ b/common/encrypt
->>>> @@ -81,6 +81,18 @@ _scratch_mkfs_encrypted()
->>>>   	esac
->>>>   }
->>>> +_scratch_mkfs_sized_encrypted()
->>>> +{
->>>> +	case $FSTYP in
->>>> +	ext4|f2fs)
->>>> +		MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" _scratch_mkfs_sized $*
->>>> +		;;
->>>
->>> This does not need to screw around with MKFS_OPTIONS. This:
->>>
->>> 		_scratch_mkfs_sized -O encrypt $*
->>>
->>> Will do just fine.
->>
->> Hmm, I don't see how that could work. At the moment,
->> _scratch_mkfs_sized only takes and uses two arguments, one of which
->> is optional. AFAICS, all additional mkfs options need to be passed
->> using MKFS_OPTIONS to _scratch_mkfs_sized.
+On Thu, Dec 21, 2017 at 03:07:59PM -0700, Ross Zwisler wrote:
+> Add support for a new -S flag to xfs_io's mmap command.  This opens the
+> mapping with the (MAP_SYNC | MAP_SHARED_VALIDATE) flags instead of the
+> standard MAP_SHARED flag.
 > 
-> Oh, I was under the impression that got fixed some time ago.
-> Screwing with MKFS_OPTIONS means defeats some of the test specific
-> mkfs option conflict resolution that some filesystem have.
+> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> Suggested-by: Dave Chinner <david@fromorbit.com>
+
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+> ---
+>  configure.ac          |  1 +
+>  include/builddefs.in  |  1 +
+>  include/linux.h       |  8 ++++++++
+>  io/Makefile           |  4 ++++
+>  io/io.h               |  1 +
+>  io/mmap.c             | 29 ++++++++++++++++++++++++-----
+>  m4/package_libcdev.m4 | 16 ++++++++++++++++
+>  man/man8/xfs_io.8     |  6 +++++-
+>  8 files changed, 60 insertions(+), 6 deletions(-)
 > 
-> i.e. when the options specified by the test cause problems with test
-> run specified MKFS_OPTIONS, the MKFS_OPTIONS get dropped and just
-> the test specific options are used. Setting random test options in
-> MKFS_OPTIONS can cause _scratch_mkfs_sized to not use the options
-> specified by the test at all...
-
-Yes, we were actually bitten by this a while ago. It is a bit tricky to 
-solve this for _scratch_mkfs_sized given that it has an optional 
-argument that we do not want to confuse with the extra arguments the 
-test case specifies. For this reason it can't work like _scratch_mkfs does.
-
->> As for using $* instead of $1 $2, I am hoping that will avoid having
->> to change this new function even if the usage of _scratch_mkfs_sized
->> changes.
->>
->>> Also, _scratch_mkfs_encrypted() supports UBIFS, and this new
->>> function doesn't. Seems like it should to me...
->>
->> _scratch_mkfs_sized does not support ubifs, though, so the operation
->> would _notrun anyway. I'm not familiar with ubifs or its tools, but
->> I'll see if I can find out how to implement support for ubifs in
->> _scratch_mkfs_sized.
+> diff --git a/configure.ac b/configure.ac
+> index e5d0309f..f3325aa0 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -163,6 +163,7 @@ AC_HAVE_MREMAP
+>  AC_NEED_INTERNAL_FSXATTR
+>  AC_HAVE_GETFSMAP
+>  AC_HAVE_STATFS_FLAGS
+> +AC_HAVE_MAP_SYNC
+>  
+>  if test "$enable_blkid" = yes; then
+>  AC_HAVE_BLKID_TOPO
+> diff --git a/include/builddefs.in b/include/builddefs.in
+> index fd274ddc..126f7e95 100644
+> --- a/include/builddefs.in
+> +++ b/include/builddefs.in
+> @@ -115,6 +115,7 @@ HAVE_MREMAP = @have_mremap@
+>  NEED_INTERNAL_FSXATTR = @need_internal_fsxattr@
+>  HAVE_GETFSMAP = @have_getfsmap@
+>  HAVE_STATFS_FLAGS = @have_statfs_flags@
+> +HAVE_MAP_SYNC = @have_map_sync@
+>  
+>  GCCFLAGS = -funsigned-char -fno-strict-aliasing -Wall
+>  #	   -Wbitwise -Wno-transparent-union -Wno-old-initializer -Wno-decl
+> diff --git a/include/linux.h b/include/linux.h
+> index 6ce344c5..1998941a 100644
+> --- a/include/linux.h
+> +++ b/include/linux.h
+> @@ -327,4 +327,12 @@ fsmap_advance(
+>  #define HAVE_GETFSMAP
+>  #endif /* HAVE_GETFSMAP */
+>  
+> +#ifndef HAVE_MAP_SYNC
+> +#define MAP_SYNC 0
+> +#define MAP_SHARED_VALIDATE 0
+> +#else
+> +#include <asm-generic/mman.h>
+> +#include <asm-generic/mman-common.h>
+> +#endif /* HAVE_MAP_SYNC */
+> +
+>  #endif	/* __XFS_LINUX_H__ */
+> diff --git a/io/Makefile b/io/Makefile
+> index 6725936d..2987ee11 100644
+> --- a/io/Makefile
+> +++ b/io/Makefile
+> @@ -103,6 +103,10 @@ ifeq ($(HAVE_MREMAP),yes)
+>  LCFLAGS += -DHAVE_MREMAP
+>  endif
+>  
+> +ifeq ($(HAVE_MAP_SYNC),yes)
+> +LCFLAGS += -DHAVE_MAP_SYNC
+> +endif
+> +
+>  # On linux we get fsmap from the system or define it ourselves
+>  # so include this based on platform type.  If this reverts to only
+>  # the autoconf check w/o local definition, change to testing HAVE_GETFSMAP
+> diff --git a/io/io.h b/io/io.h
+> index 3862985f..8b2753b3 100644
+> --- a/io/io.h
+> +++ b/io/io.h
+> @@ -65,6 +65,7 @@ typedef struct mmap_region {
+>  	size_t		length;		/* length of mapping */
+>  	off64_t		offset;		/* start offset into backing file */
+>  	int		prot;		/* protection mode of the mapping */
+> +	bool		map_sync;	/* is this a MAP_SYNC mapping? */
+>  	char		*name;		/* name of backing file */
+>  } mmap_region_t;
+>  
+> diff --git a/io/mmap.c b/io/mmap.c
+> index b0c1f764..04a828a4 100644
+> --- a/io/mmap.c
+> +++ b/io/mmap.c
+> @@ -42,7 +42,7 @@ print_mapping(
+>  	int		index,
+>  	int		braces)
+>  {
+> -	unsigned char	buffer[8] = { 0 };
+> +	char		buffer[8] = { 0 };
+>  	int		i;
+>  
+>  	static struct {
+> @@ -57,6 +57,10 @@ print_mapping(
+>  
+>  	for (i = 0, p = pflags; p->prot != PROT_NONE; i++, p++)
+>  		buffer[i] = (map->prot & p->prot) ? p->mode : '-';
+> +
+> +	if (map->map_sync)
+> +		sprintf(&buffer[i], " S");
+> +
+>  	printf("%c%03d%c 0x%lx - 0x%lx %s  %14s (%lld : %ld)\n",
+>  		braces? '[' : ' ', index, braces? ']' : ' ',
+>  		(unsigned long)map->addr,
+> @@ -147,6 +151,7 @@ mmap_help(void)
+>  " -r -- map with PROT_READ protection\n"
+>  " -w -- map with PROT_WRITE protection\n"
+>  " -x -- map with PROT_EXEC protection\n"
+> +" -S -- map with MAP_SYNC and MAP_SHARED_VALIDATE flags\n"
+>  " -s <size> -- first do mmap(size)/munmap(size), try to reserve some free space\n"
+>  " If no protection mode is specified, all are used by default.\n"
+>  "\n"));
+> @@ -162,7 +167,7 @@ mmap_f(
+>  	void		*address = NULL;
+>  	char		*filename;
+>  	size_t		blocksize, sectsize;
+> -	int		c, prot = 0;
+> +	int		c, prot = 0, flags = MAP_SHARED;
+>  
+>  	exitcode = 1;
+>  	if (argc == 1) {
+> @@ -186,7 +191,7 @@ mmap_f(
+>  
+>  	init_cvtnum(&blocksize, &sectsize);
+>  
+> -	while ((c = getopt(argc, argv, "rwxs:")) != EOF) {
+> +	while ((c = getopt(argc, argv, "rwxSs:")) != EOF) {
+>  		switch (c) {
+>  		case 'r':
+>  			prot |= PROT_READ;
+> @@ -197,6 +202,19 @@ mmap_f(
+>  		case 'x':
+>  			prot |= PROT_EXEC;
+>  			break;
+> +		case 'S':
+> +			flags = MAP_SYNC | MAP_SHARED_VALIDATE;
+> +
+> +			/*
+> +			 * If MAP_SYNC and MAP_SHARED_VALIDATE aren't defined
+> +			 * in the system headers we will have defined them
+> +			 * both as 0.
+> +			 */
+> +			if (!flags) {
+> +				printf("MAP_SYNC not supported\n");
+> +				return 0;
+> +			}
+> +			break;
+>  		case 's':
+>  			length2 = cvtnum(blocksize, sectsize, optarg);
+>  			break;
+> @@ -240,7 +258,7 @@ mmap_f(
+>  		               MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+>  		munmap(address, length2);
+>  	}
+> -	address = mmap(address, length, prot, MAP_SHARED, file->fd, offset);
+> +	address = mmap(address, length, prot, flags, file->fd, offset);
+>  	if (address == MAP_FAILED) {
+>  		perror("mmap");
+>  		free(filename);
+> @@ -265,6 +283,7 @@ mmap_f(
+>  	mapping->offset = offset;
+>  	mapping->name = filename;
+>  	mapping->prot = prot;
+> +	mapping->map_sync = (flags == (MAP_SYNC | MAP_SHARED_VALIDATE));
+>  	exitcode = 0;
+>  	return 0;
+>  }
+> @@ -691,7 +710,7 @@ mmap_init(void)
+>  	mmap_cmd.argmax = -1;
+>  	mmap_cmd.flags = CMD_NOMAP_OK | CMD_NOFILE_OK |
+>  			 CMD_FOREIGN_OK | CMD_FLAG_ONESHOT;
+> -	mmap_cmd.args = _("[N] | [-rwx] [-s size] [off len]");
+> +	mmap_cmd.args = _("[N] | [-rwxS] [-s size] [off len]");
+>  	mmap_cmd.oneline =
+>  		_("mmap a range in the current file, show mappings");
+>  	mmap_cmd.help = mmap_help;
+> diff --git a/m4/package_libcdev.m4 b/m4/package_libcdev.m4
+> index 7b4dfc85..71cedc5c 100644
+> --- a/m4/package_libcdev.m4
+> +++ b/m4/package_libcdev.m4
+> @@ -328,3 +328,19 @@ AC_DEFUN([AC_HAVE_STATFS_FLAGS],
+>      )
+>      AC_SUBST(have_statfs_flags)
+>    ])
+> +
+> +#
+> +# Check if we have MAP_SYNC defines (Linux)
+> +#
+> +AC_DEFUN([AC_HAVE_MAP_SYNC],
+> +  [ AC_MSG_CHECKING([for MAP_SYNC])
+> +    AC_TRY_COMPILE([
+> +#include <asm-generic/mman.h>
+> +#include <asm-generic/mman-common.h>
+> +    ], [
+> +        int flags = MAP_SYNC | MAP_SHARED_VALIDATE;
+> +    ], have_map_sync=yes
+> +	AC_MSG_RESULT(yes),
+> +	AC_MSG_RESULT(no))
+> +    AC_SUBST(have_map_sync)
+> +  ])
+> diff --git a/man/man8/xfs_io.8 b/man/man8/xfs_io.8
+> index 9bf1a478..1693f7f1 100644
+> --- a/man/man8/xfs_io.8
+> +++ b/man/man8/xfs_io.8
+> @@ -764,7 +764,7 @@ Each (sec, nsec) pair constitutes a single timestamp value.
+>  
+>  .SH MEMORY MAPPED I/O COMMANDS
+>  .TP
+> -.BI "mmap [ " N " | [[ \-rwx ] [\-s " size " ] " "offset length " ]]
+> +.BI "mmap [ " N " | [[ \-rwxS ] [\-s " size " ] " "offset length " ]]
+>  With no arguments,
+>  .B mmap
+>  shows the current mappings. Specifying a single numeric argument
+> @@ -780,6 +780,10 @@ PROT_WRITE
+>  .RB ( \-w ),
+>  and PROT_EXEC
+>  .RB ( \-x ).
+> +The mapping will be created with the MAP_SHARED flag by default, or with the
+> +Linux specific (MAP_SYNC | MAP_SHARED_VALIDATE) flags if
+> +.B -S
+> +is given.
+>  .BI \-s " size"
+>  is used to do a mmap(size) && munmap(size) operation at first, try to reserve some
+>  extendible free memory space, if
+> -- 
+> 2.14.3
 > 
-> Ok, that should be mentioned in the commit message so people know
-> why it isn't supported despite supporting encryption...
-
-Fair enough. Sent v2 with an amended commit message.
-
-> Cheers,
-> 
-> Dave.
-> 
-
-Thanks,
-Ari Sundholm
-ari@tuxera.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
