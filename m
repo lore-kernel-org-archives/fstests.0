@@ -1,111 +1,98 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:37300 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752165AbdLURtV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Dec 2017 12:49:21 -0500
-Date: Thu, 21 Dec 2017 09:46:02 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [xfsprogs PATCH v2 2/3] xfs_io: add MAP_SYNC support to mmap()
-Message-ID: <20171221174602.GV12613@magnolia>
-References: <20171205235651.17102-1-ross.zwisler@linux.intel.com>
- <20171205235651.17102-3-ross.zwisler@linux.intel.com>
- <20171221170908.GT12613@magnolia>
- <20171221174110.GD2158@linux.intel.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:41734 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751705AbdLUVrN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Dec 2017 16:47:13 -0500
+Date: Fri, 22 Dec 2017 08:46:57 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common/encrypt: Create an encrypted equivalent of
+ _scratch_mkfs_sized
+Message-ID: <20171221214657.GI4094@dastard>
+References: <1513792000-25462-1-git-send-email-ari@tuxera.com>
+ <20171221013802.GP5858@dastard>
+ <1a058cb8-b2c0-39b5-e65d-d77264c37a54@tuxera.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20171221174110.GD2158@linux.intel.com>
+In-Reply-To: <1a058cb8-b2c0-39b5-e65d-d77264c37a54@tuxera.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>, Dave Chinner <david@fromorbit.com>, Dan Williams <dan.j.williams@intel.com>
+To: Ari Sundholm <ari@tuxera.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 21, 2017 at 10:41:10AM -0700, Ross Zwisler wrote:
-> On Thu, Dec 21, 2017 at 09:09:08AM -0800, Darrick J. Wong wrote:
-> > On Tue, Dec 05, 2017 at 04:56:50PM -0700, Ross Zwisler wrote:
+On Thu, Dec 21, 2017 at 03:52:00PM +0200, Ari Sundholm wrote:
+> Hi!
 > 
-> > > @@ -195,6 +200,13 @@ mmap_f(
-> > >  		case 'x':
-> > >  			prot |= PROT_EXEC;
-> > >  			break;
-> > > +		case 'S':
-> > > +			flags = MAP_SYNC | MAP_SHARED_VALIDATE;
-> > > +			if (!flags) {
-> > 
-> > Heh, subtle. :)
-> > 
-> > /me wonders if it'd be better to do this explicitly:
-> > 
-> > #ifdef HAVE_MAP_SYNC
-> > 	flags = MAP_SYNC | MAP_SHARED_VALIDATE;
-> > #else
-> > 	printf("MAP_SYNC not supported\n");
-> > 	return 1;
-> > #endif
-> > 
-> > ...though it's ugly.
+> Thank you for your comments. Please see below.
 > 
-> Yea, I was trying to avoid #ifdefery.  If you prefer this, though, I'm happy
-> to change it.  Or maybe a comment would be enough?
+> On 12/21/2017 03:38 AM, Dave Chinner wrote:
+> >On Wed, Dec 20, 2017 at 07:46:40PM +0200, Ari Sundholm wrote:
+> >>Test case generic/399 hardcodes "-O encrypt" in MKFS_OPTIONS when
+> >>calling _scratch_mkfs_sized, which only works with the mkfs of certain
+> >>filesystems. Create a new helper, _scratch_mkfs_sized_encrypted, for
+> >>handling the differences between the mkfs tools of different
+> >>filesystems. It also allows those filesystems whose mkfs doesn't accept
+> >>"-O encrypt" to skip the test gracefully until proper support is added
+> >>for them in the helper.
+> >>
+> >>Signed-off-by: Ari Sundholm <ari@tuxera.com>
+> >>---
+> >>  common/encrypt    | 12 ++++++++++++
+> >>  tests/generic/399 |  3 +--
+> >>  2 files changed, 13 insertions(+), 2 deletions(-)
+> >>
+> >>diff --git a/common/encrypt b/common/encrypt
+> >>index a6fd89d..189c59e 100644
+> >>--- a/common/encrypt
+> >>+++ b/common/encrypt
+> >>@@ -81,6 +81,18 @@ _scratch_mkfs_encrypted()
+> >>  	esac
+> >>  }
+> >>+_scratch_mkfs_sized_encrypted()
+> >>+{
+> >>+	case $FSTYP in
+> >>+	ext4|f2fs)
+> >>+		MKFS_OPTIONS="$MKFS_OPTIONS -O encrypt" _scratch_mkfs_sized $*
+> >>+		;;
+> >
+> >This does not need to screw around with MKFS_OPTIONS. This:
+> >
+> >		_scratch_mkfs_sized -O encrypt $*
+> >
+> >Will do just fine.
 > 
-> /*
->  * If MAP_SYNC and MAP_SHARED_VALIDATE aren't defined in the system headers we
->  * will have defined them both as 0.
->  */
-> 
-> ?
+> Hmm, I don't see how that could work. At the moment,
+> _scratch_mkfs_sized only takes and uses two arguments, one of which
+> is optional. AFAICS, all additional mkfs options need to be passed
+> using MKFS_OPTIONS to _scratch_mkfs_sized.
 
-Works for me.
+Oh, I was under the impression that got fixed some time ago.
+Screwing with MKFS_OPTIONS means defeats some of the test specific
+mkfs option conflict resolution that some filesystem have.
 
-> 
-> > > +				printf("MAP_SYNC not supported\n");
-> > > +				return 0;
-> > 
-> > Are we supposed to be returning nonzero values for failing commands?
-> 
-> I don't think so.  All the other error conditions in this function also return
-> 0.  I think the important thing is that 'exitcode' is set to 1 at the
-> beginning of the function per Dave's patch,
-> 
-> https://www.spinics.net/lists/linux-xfs/msg13605.html
-> 
-> which I pulled into my baseline:
-> 
-> https://git.kernel.org/pub/scm/linux/kernel/git/zwisler/xfsprogs-dev.git/refs/?h=map_sync_v3
-> 
-> So, I likewise leave 'exitcode' as 1, bail out with a return code of 0, and
-> then you get the overall failure return of 1 from xfs_io at the shell.
+i.e. when the options specified by the test cause problems with test
+run specified MKFS_OPTIONS, the MKFS_OPTIONS get dropped and just
+the test specific options are used. Setting random test options in
+MKFS_OPTIONS can cause _scratch_mkfs_sized to not use the options
+specified by the test at all...
 
-Ok.
-
-> > > @@ -764,7 +764,7 @@ Each (sec, nsec) pair constitutes a single timestamp value.
-> > >  
-> > >  .SH MEMORY MAPPED I/O COMMANDS
-> > >  .TP
-> > > -.BI "mmap [ " N " | [[ \-rwx ] [\-s " size " ] " "offset length " ]]
-> > > +.BI "mmap [ " N " | [[ \-rwxS ] [\-s " size " ] " "offset length " ]]
-> > >  With no arguments,
-> > >  .B mmap
-> > >  shows the current mappings. Specifying a single numeric argument
-> > > @@ -780,6 +780,10 @@ PROT_WRITE
-> > >  .RB ( \-w ),
-> > >  and PROT_EXEC
-> > >  .RB ( \-x ).
-> > > +The mapping will be created with the MAP_SHARED flag by default, or with the
-> > > +Linux specific (MAP_SYNC | MAP_SHARED_VALIDATE) flags if
-> > 
-> > I assume I'll be able to look up exactly what MAP_SYNC provides in the mmap
-> > manpage, right?
+> As for using $* instead of $1 $2, I am hoping that will avoid having
+> to change this new function even if the usage of _scratch_mkfs_sized
+> changes.
 > 
-> Yep, Jan updated the man page for both MAP_SYNC and MAP_SHARED_VALIDATE:
-> https://lists.01.org/pipermail/linux-nvdimm/2017-November/013158.html
+> >Also, _scratch_mkfs_encrypted() supports UBIFS, and this new
+> >function doesn't. Seems like it should to me...
+> 
+> _scratch_mkfs_sized does not support ubifs, though, so the operation
+> would _notrun anyway. I'm not familiar with ubifs or its tools, but
+> I'll see if I can find out how to implement support for ubifs in
+> _scratch_mkfs_sized.
 
-Will have a look.
+Ok, that should be mentioned in the commit message so people know
+why it isn't supported despite supporting encryption...
 
-> Thank you for the review.
+Cheers,
 
---D
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
