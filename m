@@ -1,116 +1,84 @@
-Received: from mail-pg0-f47.google.com ([74.125.83.47]:36217 "EHLO
-        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751680AbdLXNuT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Dec 2017 08:50:19 -0500
-Received: by mail-pg0-f47.google.com with SMTP id k134so16225085pga.3
-        for <fstests@vger.kernel.org>; Sun, 24 Dec 2017 05:50:19 -0800 (PST)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id q24sm53245130pfk.168.2017.12.24.05.50.14
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 24 Dec 2017 05:50:17 -0800 (PST)
-Message-ID: <5a3fb099.9890620a.13e63.f98f@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 24 Dec 2017 21:50:03 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 39fa7d89bce5
+Received: from sandeen.net ([63.231.237.45]:59676 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750846AbdLXTvw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 24 Dec 2017 14:51:52 -0500
+Subject: Re: [PATCH] xfs_io: fix exitcode handling (was Re: generic/399 and
+ xfs_io pwrite command)
+References: <7235f31f-5427-ff12-11f9-cba98431e71c@tuxera.com>
+ <20171204222842.GX4094@dastard>
+ <35d2712c-b036-d017-2d42-f74bbc4444a9@tuxera.com>
+ <20171205211850.GA5858@dastard> <20171206002638.GB5858@dastard>
+ <20171207140519.GB3486@bfoster.bfoster>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <9b5928ec-cb2d-52b3-fb4f-cab39c7e0830@sandeen.net>
+Date: Sun, 24 Dec 2017 11:51:49 -0800
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="LvpI4AFsCuRT"
-Content-Disposition: inline
+In-Reply-To: <20171207140519.GB3486@bfoster.bfoster>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>, Dave Chinner <david@fromorbit.com>
+Cc: Ari Sundholm <ari@tuxera.com>, fstests@vger.kernel.org, Emil Karlson <jkarlson@tuxera.com>, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On 12/7/17 6:05 AM, Brian Foster wrote:
+> On Wed, Dec 06, 2017 at 11:26:38AM +1100, Dave Chinner wrote:
 
---LvpI4AFsCuRT
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+...
 
-Hi all,
+>> diff --git a/io/copy_file_range.c b/io/copy_file_range.c
+>> index d1dfc5a5e33a..9b737eff4c02 100644
+>> --- a/io/copy_file_range.c
+>> +++ b/io/copy_file_range.c
+>> @@ -92,6 +92,7 @@ copy_range_f(int argc, char **argv)
+>>  	int ret;
+>>  	int fd;
+>>  
+>> +	exitcode = 1;
+>>  	while ((opt = getopt(argc, argv, "s:d:l:")) != -1) {
+>>  		switch (opt) {
+>>  		case 's':
+>> @@ -132,6 +133,8 @@ copy_range_f(int argc, char **argv)
+>>  
+>>  	ret = copy_file_range(fd, &src, &dst, len);
+>>  	close(fd);
+>> +	if (ret >= 0)
+>> +		exitcode = 0;
+> I don't think it's appropriate to blindly overwrite the global exitcode
+> value like this. What about the case where multiple commands are chained
+> together? Should we expect an error code if any of the commands failed
+> or only the last?
+> 
+> For example:
+> 
+>   xfs_io -c "pwrite ..." <file>
+> 
+> ... returns an error if the write fails, while:
+> 
+>   xfs_io -c "pwrite ..." -c "fadvise ..." <file>
+> 
+> ... would never so long as the fadvise succeeds.
+> 
+> Brian
 
-The master branch of the xfstests repository at:
+<late to the party>
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Seems we need to start by defining the expected behavior, which so far
+has been pretty ad-hoc.
 
-have just been updated. This update mainly picks up patches from Chengguang
-that add shutdown support to overlayfs and a new syncfs(2) test using shutdown
-to test an overlayfs bug. Other patches are random bug fixes. There're still
-some pending patches from Darrick that need review & merge, hopefully I'll get
-them done next week. (But again, no promise, I'm on PTO till 2018.)
+AFAICT this is the expected/desired behavior:
 
-Happy Holidays!
+exitcode is the global xfs_io exit code and indicates that any error
+has occurred during processing.  It should never get reset to 0.
+Using something like do_error to print the failure & set the exitcode
+would seem to make sense.
 
-Thanks,
-Eryu
+Chained commands continue until some ->cfunc (foo_f()) returns nonzero,
+but a nonzero return does /not/ affect exitcode, it simply stops chained
+command processing.
 
-The new head of the master branch is commit:
+It's not clear to me when a cfunc-> /should/ return non-zero and stop
+the processing.
 
-39fa7d89bce5 xfs/040: document purpose
-
-New commits:
-
-Ari Sundholm (2):
-      [6db67b725296] fsstress: Eliminate valgrind noise
-      [db71085194be] fsstress: getcwd() return value fixes
-
-Chengguang Xu (3):
-      [2b4eae7fd825] common/rc: add scratch shutdown support for overlayfs
-      [c3594bec4e7f] common/rc: check syncfs support
-      [0f2373e045cf] generic: add syncfs test
-
-Luis R. Rodriguez (1):
-      [39fa7d89bce5] xfs/040: document purpose
-
-
-Code Diffstat:
-
- common/rc             | 44 ++++++++++++++++++++++++---
- ltp/fsstress.c        | 11 ++++++-
- tests/generic/042     |  1 +
- tests/generic/043     |  2 +-
- tests/generic/044     |  2 +-
- tests/generic/045     |  2 +-
- tests/generic/046     |  2 +-
- tests/generic/047     |  2 +-
- tests/generic/048     |  2 +-
- tests/generic/049     |  2 +-
- tests/generic/050     |  1 +
- tests/generic/051     |  2 +-
- tests/generic/052     |  2 +-
- tests/generic/054     |  2 +-
- tests/generic/055     |  2 +-
- tests/generic/388     |  3 +-
- tests/generic/392     |  2 +-
- tests/generic/417     |  2 +-
- tests/generic/461     |  2 +-
- tests/generic/468     |  2 +-
- tests/generic/474     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/474.out |  2 ++
- tests/generic/group   |  1 +
- tests/xfs/040         |  5 +++
- 24 files changed, 161 insertions(+), 21 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---LvpI4AFsCuRT
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJaP7AuAAoJECZSqilcj+djqngP/jmMcpCx0+ZtNpLho4Wqpb/M
-GcUeQk7EPb7lcRy+U0bBMGuBPa1muSwfqBV4+NkWDWgT2ET7JfoZbnZFzvqzJus7
-MKaLAXAvNbwHbfIhFgvdiofoQ3Tkw5xxCDx5uIyT+mr+vMeR5HL+fMUe3+vEDIb2
-CunmYk2mWCFWGYJeFrmeSYFiAql9AdV5mm2sP3YpP9xg5YrLPLxApjuC2FwE73lx
-BobY9L58teYwb9lI9l4mTw+UEYjdvFNXImKZ7/hlf6lQidbjOwe/bYC9MYucW90i
-BQJDt93QmxlrD0uwW4WwqhbRCoB0pQZHOC3Mx6UCZZCQ/4V38a53g6/qhbzLCewf
-+pwfK3rqnPPlaQ4W3qlvcmMJvvtDuZjC/BpNVBqTmfRdDAcH4p0y741gIzHY+wyo
-PPXGjcLLhcao614RxrHkiq+tyNF40S47VUeI/aaezjFAFrAsNn7TEFmEKD1Qqp7G
-iuI8ZtJwATqo5RpnP3zRxn2OTzHF5Iz0iwkYdB/DmW0BK4eoQMuYfMH6qlyNQfpb
-e0LReUqSbWPF/haeqHyKBiUpA82FEi9DMdlRgfOx+inO7rX4WGBheByxle8EtaCe
-Jk4A7VNg6Ee92FOGa033MynGcuY/0etmXt54v75cHsv4YEAqMisE1j+X4i5+XPSr
-4hbp1Ti6RL6/SSm6+0g+
-=ezqz
------END PGP SIGNATURE-----
-
---LvpI4AFsCuRT--
+-Eric
