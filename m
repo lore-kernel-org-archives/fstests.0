@@ -1,87 +1,75 @@
-Received: from prv3-mh.provo.novell.com ([137.65.250.26]:52999 "EHLO
-        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750705AbdLZF57 (ORCPT
-        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Tue, 26 Dec 2017 00:57:59 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH] fstests: btrfs: Add new 'limit' test group for btrfs
-Date: Tue, 26 Dec 2017 13:57:44 +0800
-Message-Id: <20171226055744.27697-1-wqu@suse.com>
+Received: from mail.kernel.org ([198.145.29.99]:56906 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751145AbdL0TLc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 27 Dec 2017 14:11:32 -0500
+Date: Wed, 27 Dec 2017 11:11:30 -0800
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: xfstests: generic/342 run failed in f2fs
+Message-ID: <20171227191130.GB13490@jaegeuk-macbookpro.roam.corp.google.com>
+References: <2d524305-ecb5-8600-a92a-d79b717b8d13@intel.com>
+ <e367054d-046d-d6e5-943c-7fbe10493029@sandeen.net>
+ <d20cb58e-6646-a7de-bff1-8b7783a30664@intel.com>
+ <d5ff659d-c659-ca47-3999-2f4b16629e42@sandeen.net>
+ <20171225163102.GB14399@thunk.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171225163102.GB14399@thunk.org>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eric Sandeen <sandeen@sandeen.net>, Chen Rong <rongx.a.chen@intel.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, philip.li@intel.com
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs qgroup also supports to limit the usage of specified qgroups.
+On 12/25, Theodore Ts'o wrote:
+> On Sun, Dec 24, 2017 at 11:47:20PM -0800, Eric Sandeen wrote:
+> > Filesystems are free to do /more/ than the minimum required by posix -
+> > see ext4_sync_parent for example.  Or xfs_finish_rename, for synchronous
+> > mounts:
+> > 
+> >          * If this is a synchronous mount, make sure that the rename transaction
+> >          * goes to disk before returning to the user.
+> >          */
+> >         if (tp->t_mountp->m_flags & (XFS_MOUNT_WSYNC|XFS_MOUNT_DIRSYNC))
+> >                 xfs_trans_set_sync(tp);
+> > 
+> > so behavior can be fs-dependent, or mount option dependent, etc.
+> > 
+> > But to be portable, if an app wants directory changes to be persistent
+> > before proceeding, it must fsync the directory after making changes.
+> > 
+> > I don't know about f2fs's design intent, whether it guarantees more
+> > than posix requires, but to guarantee that this test works on any posix
+> > fs, I think that directory fsync is needed.
+> 
+> Agreed that this is a test bug, and we should add the fsync to the
+> parent directory.
 
-It's possible to enable qgroup but doesn't enable limit.
-(Most user won't use qgroup limit for various problems)
+Agreed too. Or, how about using "-o dirsync"?
 
-So add a new test group 'limit' for btrfs, as a subset of existing
-'qgroup' group.
+> 
+> It might also be a good idea for f2fs to do more, given that fsync is
+> a slow enough operation that so long as you can make sure the fsync of
+> the parent directory happens within the same atomic update as the
+> child inode, you might as well give the more expansive guarantee.  But
+> obviously that's up to the f2fs developers to decide whether they want
+> to do that work.
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- tests/btrfs/group | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+Indeed. Actually, since one of our goals was to reduce fsync latencies for
+Android, we decided to support posix in a minimum way. In order to avoid
+complex directory updates recursively, however, we allowed the fsync on
+directories to trigger checkpoint requiring many IO operations.
 
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f68abf4d6655..6324c54d7699 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -24,7 +24,7 @@
- 019 auto quick send
- 020 auto quick replace
- 021 auto quick balance defrag
--022 auto qgroup
-+022 auto qgroup limit
- 023 auto
- 024 auto quick compress
- 025 auto quick send clone
-@@ -44,7 +44,7 @@
- 039 auto quick send
- 040 auto quick send
- 041 auto quick compress
--042 auto quick qgroup
-+042 auto quick qgroup limit
- 043 auto quick send
- 044 auto quick send
- 045 auto quick send
-@@ -101,7 +101,7 @@
- 096 auto quick clone
- 097 auto quick send clone
- 098 auto quick metadata clone
--099 auto quick qgroup
-+099 auto quick qgroup limit
- 100 auto replace
- 101 auto replace
- 102 auto quick metadata enospc
-@@ -128,7 +128,7 @@
- 123 auto quick qgroup
- 124 auto replace
- 125 auto replace
--126 auto quick qgroup
-+126 auto quick qgroup limit
- 127 auto quick send
- 128 auto quick send
- 129 auto quick send
-@@ -141,7 +141,7 @@
- 136 auto convert
- 137 auto quick send
- 138 auto compress
--139 auto qgroup
-+139 auto qgroup limit
- 140 auto quick
- 141 auto quick
- 142 auto quick
-@@ -155,7 +155,7 @@
- 150 auto quick dangerous
- 151 auto quick
- 152 auto quick metadata qgroup send
--153 auto quick qgroup
-+153 auto quick qgroup limit
- 154 auto quick
- 155 auto quick send
- 156 auto quick trim
--- 
-2.15.1
+IMHO, as a quick fix, it seems we need to handle MS_DIRSYNC likewse xfs.
+#define MS_DIRSYNC      128     /* Directory modifications are synchronous */
 
+Thanks,
+
+> 
+> Cheers,
+> 
+>       	     	       	       	    - Ted
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
