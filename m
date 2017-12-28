@@ -1,11 +1,11 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:44791 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752954AbdL1LdS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Dec 2017 06:33:18 -0500
+Received: from szxga04-in.huawei.com ([45.249.212.190]:3191 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752954AbdL1Ldb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Dec 2017 06:33:31 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v3 3/6] fsck.overlay: encapsulate underlying directories options
-Date: Thu, 28 Dec 2017 19:40:20 +0800
-Message-ID: <20171228114023.43999-4-yi.zhang@huawei.com>
+Subject: [PATCH v3 6/6] fsck.overlay: add impure xattr check
+Date: Thu, 28 Dec 2017 19:40:23 +0800
+Message-ID: <20171228114023.43999-7-yi.zhang@huawei.com>
 In-Reply-To: <20171228114023.43999-1-yi.zhang@huawei.com>
 References: <20171228114023.43999-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
@@ -15,536 +15,361 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Encapsulate separate underlying directories options to use -o option as
-for mount, see mount(8).
+An impure directory is a directory with "trusted.overlay.impure" xattr
+valued 'y', which indicate that this directory may contain copy-uped
+targets from lower layers. In oredr to prevent 'd_ino' change while
+copy-up (it create a new inode in upper layer) in getdents(2), impure
+xattr will be set in the parent directory, letting overlay filesystem
+check and get d_ino from lower origin target to ensure consistent d_ino.
 
-Old Usage:
-  fsck.overlay [-l lowerdir] [-u upperdir] [-w workdir]
+There are three situations of setting impure xattr:
+1) Copyup lower target in a directory.
+2) Link an origined target (already copy-uped, have origin xattr) into
+   a directory.
+3) Rename an origined target (include merged subdirectories) into a
+   new directory.
 
-New Usage:
-  fsck.overlay [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>]
-
-Example:
-  fsck.overlay -o lowerdir=lower,upperdir=upper,workdir=work
-  or
-  fsck.overlay -o lowerdir=lower -o upperdir=upper -o workdir=work
+So, if a direcotry which contains several origined targets or redirect
+directories, the impure xattr should be set. If not, fix this xattr.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- README.md |  11 ++--
- check.c   |   4 +-
- fsck.c    |  78 +++++++++++++--------------
- mount.c   | 182 +++++++++++++++++++++++++++++++++++---------------------------
- mount.h   |  12 ++++-
- 5 files changed, 157 insertions(+), 130 deletions(-)
+ README.md | 22 +++++++++++++++-
+ check.c   | 86 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-----
+ lib.c     | 63 +++++++++++++++++++++++++++++++++++-----------
+ lib.h     | 25 +++++++++++++------
+ 4 files changed, 168 insertions(+), 28 deletions(-)
 
 diff --git a/README.md b/README.md
-index 458a815..a8d0b1c 100644
+index 2e6146f..cdbd382 100644
 --- a/README.md
 +++ b/README.md
-@@ -44,13 +44,11 @@ Usage
+@@ -47,6 +47,26 @@ If an invalid redirect xattr was removed by fsck and there is a corresponding
+ lower directory with the same name exists, not sure this directory is merged
+ or not, ask user to make a decision.
  
- 2. Run fsck.overlay program:
-    Usage:
--   fsck.overlay [-l lowerdir] [-u upperdir] [-w workdir] [-pnyvhV]
-+   fsck.overlay [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>] [-pnyvhV]
- 
-    Options:
--   -l, --lowerdir=LOWERDIR   specify lower directories of overlayfs,
--                             multiple lower use ':' as separator.
--   -u, --upperdir=UPPERDIR   specify upper directory of overlayfs
--   -w, --workdir=WORKDIR     specify work directory of overlayfs
-+   -o,                       specify underlying directories of overlayfs:
-+                             multiple lower directories use ':' as separator
-    -p,                       automatic repair (no questions)
-    -n,                       make no changes to the filesystem
-    -y,                       assume "yes" to all questions
-@@ -58,6 +56,9 @@ Usage
-    -h, --help                display this usage of overlayfs
-    -V, --version             display version information
- 
-+   Example:
-+   fsck.overlay -o lowerdir=lower,upperdir=upper,workdir=work
++Impure directories
++------------------
 +
- 3. Exit value:
-    0      No errors
-    1      Filesystem errors corrected
++An impure directory is a directory with "trusted.overlay.impure" xattr valued
++'y', which indicate that this directory may contain copy-uped targets from lower
++layers. In oredr to prevent 'd_ino' change while copy-up (it create a new
++inode in upper layer) in getdents (see getdents(2)), impure xattr will be set
++in the parent directory, letting overlay filesystem check and get d_ino from
++lower origin target to ensure consistent d_ino.
++
++There are three situations of setting impure xattr:
++1) Copyup lower target in a directory.
++2) Link an origined target (already copy-uped, have origin xattr) into
++   a directory.
++3) Rename an origined target (include merged subdirectories) into a
++   new directory.
++
++So, if a direcotry which contains several origined targets or redirect
++directories, the impure xattr should be set. If not, fix this xattr.
++
+ Usage
+ =====
+ 
+@@ -88,6 +108,6 @@ Todo
+    mounted with relative path. Should modify kernel together to support.
+ 2. Check and fix invalid redirect xattr through origin xattr.
+ 3. Symbolic link check.
+-4. Check origin/impure/nlink xattr.
++4. Check origin/nlink xattr.
+ 5. Check index feature consistency.
+ 6. ...
 diff --git a/check.c b/check.c
-index efa180f..0b5d49b 100644
+index 033d4ba..05293c5 100644
 --- a/check.c
 +++ b/check.c
-@@ -58,8 +58,8 @@ struct ovl_redirect_entry {
- #define WHITEOUT_MOD	0
+@@ -111,9 +111,9 @@ static inline bool ovl_is_opaque(const char *pathname)
+ 	return is_dir_xattr(pathname, OVL_OPAQUE_XATTR);
+ }
  
- extern char **lowerdir;
--extern char upperdir[];
--extern char workdir[];
-+extern char *upperdir;
-+extern char *workdir;
- extern int lower_num;
- extern int flags;
- extern int status;
-diff --git a/fsck.c b/fsck.c
-index 44211f7..5d34378 100644
---- a/fsck.c
-+++ b/fsck.c
-@@ -38,15 +38,16 @@
- 
- char *program_name;
- 
-+char *lowerdirs = NULL;
- char **lowerdir = NULL;
--char upperdir[PATH_MAX] = {0};
--char workdir[PATH_MAX] = {0};
-+char *upperdir = NULL;
-+char *workdir = NULL;
- int lower_num = 0;
- int flags = 0;		/* user input option flags */
- int status = 0;		/* fsck scan status */
- 
--/* Cleanup lower directories buf */
--static void ovl_clean_lowerdirs(void)
-+/* Cleanup underlying directories buffer */
-+static void ovl_clean_dirs(void)
+-static inline int ovl_remove_opaque(const char *pathname)
++static inline bool ovl_is_impure(const char *pathname)
  {
- 	int i;
- 
-@@ -57,17 +58,19 @@ static void ovl_clean_lowerdirs(void)
- 	free(lowerdir);
- 	lowerdir = NULL;
- 	lower_num = 0;
-+	free(upperdir);
-+	upperdir = NULL;
-+	free(workdir);
-+	workdir = NULL;
+-	return remove_xattr(pathname, OVL_OPAQUE_XATTR);
++	return is_dir_xattr(pathname, OVL_IMPURE_XATTR);
  }
  
- static void usage(void)
- {
--	print_info(_("Usage:\n\t%s [-l lowerdir] [-u upperdir] [-w workdir] "
-+	print_info(_("Usage:\n\t%s [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>] "
- 		    "[-pnyvhV]\n\n"), program_name);
- 	print_info(_("Options:\n"
--		    "-l, --lowerdir=LOWERDIR   specify lower directories of overlayfs,\n"
--		    "                          multiple lower use ':' as separator\n"
--		    "-u, --upperdir=UPPERDIR   specify upper directory of overlayfs\n"
--		    "-w, --workdir=WORKDIR     specify work directory of overlayfs\n"
-+		    "-o,                       specify underlying directories of overlayfs:\n"
-+		    "                          multiple lower directories use ':' as separator\n"
- 		    "-p,                       automatic repair (no questions)\n"
- 		    "-n,                       make no changes to the filesystem\n"
- 		    "-y,                       assume \"yes\" to all questions\n"
-@@ -79,46 +82,25 @@ static void usage(void)
- 
- static void parse_options(int argc, char *argv[])
- {
--	char *lowertemp;
-+	struct ovl_config config = {0};
-+	char *ovl_opts = NULL;
- 	int c;
- 	int ret = 0;
--	bool show_usage = false;
- 	bool opt_conflict = false;
- 
- 	struct option long_options[] = {
--		{"lowerdir", required_argument, NULL, 'l'},
--		{"upperdir", required_argument, NULL, 'u'},
--		{"workdir", required_argument, NULL, 'w'},
- 		{"verbose", no_argument, NULL, 'v'},
- 		{"version", no_argument, NULL, 'V'},
- 		{"help", no_argument, NULL, 'h'},
- 		{NULL, 0, NULL, 0}
- 	};
- 
--	while ((c = getopt_long(argc, argv, "l:u:w:apnyvVh", long_options, NULL)) != -1) {
-+	while ((c = getopt_long(argc, argv, "o:apnyvVh", long_options, NULL)) != -1) {
- 		switch (c) {
--		case 'l':
--			lowertemp = strdup(optarg);
--			ret = ovl_resolve_lowerdirs(lowertemp, &lowerdir, &lower_num);
--			free(lowertemp);
--			break;
--		case 'u':
--			if (realpath(optarg, upperdir)) {
--				print_debug(_("Upperdir:%s\n"), upperdir);
--				flags |= FL_UPPER;
--			} else {
--				print_err(_("Failed to resolve upperdir:%s\n"), optarg);
--				ret = -1;
--			}
--			break;
--		case 'w':
--			if (realpath(optarg, workdir)) {
--				print_debug(_("Workdir:%s\n"), workdir);
--				flags |= FL_WORK;
--			} else {
--				print_err(_("Failed to resolve workdir:%s\n"), optarg);
--				ret = -1;
--			}
-+		case 'o':
-+			ovl_opts = sstrdup(optarg);
-+			ovl_parse_opt(ovl_opts, &config);
-+			free(ovl_opts);
- 			break;
- 		case 'a':
- 		case 'p':
-@@ -155,23 +137,35 @@ static void parse_options(int argc, char *argv[])
- 			goto err_out;
- 	}
- 
-+	/* Resolve and get each underlying directory of overlay filesystem */
-+	ovl_get_dirs(&config, &lowerdir, &lower_num, &upperdir, &workdir);
-+	if (upperdir)
-+		flags |= FL_UPPER;
-+	if (workdir)
-+		flags |= FL_WORK;
-+
- 	if (!lower_num || (!(flags & FL_UPPER) && lower_num == 1)) {
- 		print_info(_("Please specify correct lowerdirs and upperdir!\n\n"));
--		show_usage = true;
-+		goto err_out;
-+	}
-+
-+	if ((flags & FL_UPPER) && !(flags & FL_WORK)) {
-+		print_info(_("Please specify correct workdir!\n\n"));
- 		goto err_out;
- 	}
- 
- 	if (opt_conflict) {
- 		print_info(_("Only one of the options -p/-a, -n or -y can be specified!\n\n"));
--		show_usage = true;
- 		goto err_out;
- 	}
- 
-+	ovl_free_opt(&config);
- 	return;
- 
- err_out:
--	if (show_usage)
--		usage();
-+	ovl_free_opt(&config);
-+	ovl_clean_dirs();
-+	usage();
- 	exit(1);
+ static inline int ovl_set_opaque(const char *pathname)
+@@ -121,6 +121,11 @@ static inline int ovl_set_opaque(const char *pathname)
+ 	return set_xattr(pathname, OVL_OPAQUE_XATTR, "y", 1);
  }
  
-@@ -212,7 +206,7 @@ int main(int argc, char *argv[])
- 
- out:
- 	fsck_status_check(&exit_value);
--	ovl_clean_lowerdirs();
-+	ovl_clean_dirs();
- 
- 	if (err)
- 		exit_value |= FSCK_ERROR;
-diff --git a/mount.c b/mount.c
-index fba51e9..908cee0 100644
---- a/mount.c
-+++ b/mount.c
-@@ -38,19 +38,18 @@
- #include "mount.h"
- 
- struct ovl_mnt_entry {
--	char *lowers;
- 	char **lowerdir;
- 	int lowernum;
--	char upperdir[PATH_MAX];
--	char workdir[PATH_MAX];
-+	char *upperdir;
-+	char *workdir;
- };
- 
- /* Mount buf allocate a time */
- #define ALLOC_NUM	16
- 
- extern char **lowerdir;
--extern char upperdir[];
--extern char workdir[];
-+extern char *upperdir;
-+extern char *workdir;
- extern int lower_num;
- 
- /*
-@@ -78,9 +77,10 @@ static unsigned int ovl_split_lowerdirs(char *lower)
- }
- 
- /* Resolve each lower directories and check the validity */
--int ovl_resolve_lowerdirs(char *loweropt, char ***lowerdir,
--			  int *lowernum)
-+static int ovl_resolve_lowerdirs(char *loweropt, char ***lowerdir,
-+				 int *lowernum)
- {
-+	char temp[PATH_MAX] = {0};
- 	int num;
- 	char **dirs;
- 	char *p;
-@@ -97,12 +97,12 @@ int ovl_resolve_lowerdirs(char *loweropt, char ***lowerdir,
- 
- 	p = loweropt;
- 	for (i = 0; i < num; i++) {
--		dirs[i] = smalloc(PATH_MAX);
--		if (!realpath(p, dirs[i])) {
-+		if (!realpath(p, temp)) {
- 			print_err(_("Failed to resolve lowerdir:%s:%s\n"),
- 				    p, strerror(errno));
- 			goto err;
- 		}
-+		dirs[i] = sstrdup(temp);
- 		print_debug(_("Lowerdir %u:%s\n"), i, dirs[i]);
- 		p = strchr(p, '\0') + 1;
- 	}
-@@ -115,6 +115,7 @@ err:
- 	for (i--; i >= 0; i--)
- 		free(dirs[i]);
- 	free(dirs);
-+	*lowerdir = NULL;
- 	*lowernum = 0;
- 	return -1;
- }
-@@ -146,79 +147,99 @@ static char *ovl_next_opt(char **s)
- 	return sbegin;
- }
- 
-+static inline char *ovl_match_dump(const char *opt, const char *type)
++static inline int ovl_set_impure(const char *pathname)
 +{
-+	int len = strlen(opt) - strlen(type) + 1;
-+
-+	return sstrndup(opt+strlen(type), len);
++	return set_xattr(pathname, OVL_IMPURE_XATTR, "y", 1);
 +}
 +
- /*
-- * Split and parse opt to each directories.
-- *
-- * Note: FIXME: We cannot distinguish mounted directories if overlayfs was
-- * mounted use relative path, so there may have misjudgment.
-+ * Resolve and get each underlying directory of overlay filesystem
-+ */
-+int ovl_get_dirs(struct ovl_config *config, char ***lowerdir,
-+		 int *lowernum, char **upperdir, char **workdir)
+ static int ovl_get_redirect(const char *pathname, size_t dirlen,
+ 			    size_t filelen, char **redirect)
+ {
+@@ -166,11 +171,20 @@ static inline int ovl_create_whiteout(const char *pathname)
+ 
+ static inline bool ovl_is_redirect(const char *pathname)
+ {
+-       bool exist = false;
+-       ssize_t ret;
++	bool exist = false;
++	ssize_t ret;
++
++	ret = get_xattr(pathname, OVL_REDIRECT_XATTR, NULL, &exist);
++	return ret ? false : exist;
++}
++
++static inline bool ovl_is_origin(const char *pathname)
 +{
-+	char temp[PATH_MAX] = {0};
++	bool exist = false;
++	ssize_t ret;
+ 
+-       ret = get_xattr(pathname, OVL_REDIRECT_XATTR, NULL, &exist);
+-       return ret ? false : exist;
++	ret = get_xattr(pathname, OVL_ORIGIN_XATTR, NULL, &exist);
++	return ret ? false : exist;
+ }
+ 
+ static inline int ovl_ask_action(const char *description, const char *pathname,
+@@ -503,6 +517,7 @@ static void ovl_redirect_free(void)
+ static int ovl_check_redirect(struct scan_ctx *sctx)
+ {
+ 	const char *pathname = sctx->pathname;
++	struct scan_dir_data *parent_ddata = sctx->ddata;
+ 	struct ovl_lower_data od = {0};
+ 	struct stat cover_st;
+ 	bool cover_exist = false;
+@@ -545,6 +560,9 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
+ 				goto remove_d;
+ 		}
+ 
++		/* Now, this redirect xattr is valid */
++		if (parent_ddata)
++			parent_ddata->redirects++;
+ 		ovl_redirect_entry_add(pathname, sctx->dirtype,
+ 				       sctx->num, od.path);
+ 
+@@ -603,9 +621,65 @@ out:
+ 	return ret;
+ }
+ 
++/*
++ * Get origin xattr stored in the target. We cannot check validity for
++ * current overlay filesystem, so trust this is valid now.
++ */
++static int ovl_check_origin(struct scan_ctx *sctx)
++{
++	const char *pathname = sctx->pathname;
++	struct scan_dir_data *parent_ddata = sctx->ddata;
 +
-+	/* Resolve upperdir */
-+	if (!realpath(config->upperdir, temp)) {
-+		print_err(_("Faile to resolve upperdir:%s:%s\n"),
-+			    config->upperdir, strerror(errno));
-+		goto err_out;
-+	}
-+	*upperdir = sstrdup(temp);
-+	print_debug(_("Upperdir: %s\n"), *upperdir);
-+
-+	/* Resolve workdir */
-+	if (!realpath(config->workdir, temp)) {
-+		print_err(_("Faile to resolve workdir:%s:%s\n"),
-+			    config->workdir, strerror(errno));
-+		goto err_work;
-+	}
-+	*workdir = sstrdup(temp);
-+	print_debug(_("Workdir: %s\n"), *workdir);
-+
-+	/* Resolve lowerdir */
-+	if (ovl_resolve_lowerdirs(config->lowerdir, lowerdir, lowernum))
-+		goto err_lower;
++	if (!ovl_is_origin(pathname))
++		return 0;
++	if (parent_ddata)
++		parent_ddata->origins++;
 +
 +	return 0;
-+
-+err_lower:
-+	free(*workdir);
-+	*workdir = NULL;
-+err_work:
-+	free(*upperdir);
-+	*upperdir = NULL;
-+err_out:
-+	return -1;
-+}
-+
-+void ovl_free_opt(struct ovl_config *config)
-+{
-+	free(config->upperdir);
-+	config->upperdir = NULL;
-+	free(config->lowerdir);
-+	config->lowerdir = NULL;
-+	free(config->workdir);
-+	config->workdir = NULL;
 +}
 +
 +/*
-+ * Split and parse opt to each underlying directories.
-  */
--static int ovl_parse_opt(char *opt, struct ovl_mnt_entry *entry)
-+void ovl_parse_opt(char *opt, struct ovl_config *config)
- {
--	char tmp[PATH_MAX] = {0};
- 	char *p;
--	int len;
--	int ret;
--	int i;
- 
- 	while ((p = ovl_next_opt(&opt)) != NULL) {
- 		if (!*p)
- 			continue;
- 
- 		if (!strncmp(p, OPT_UPPERDIR, strlen(OPT_UPPERDIR))) {
--			len = strlen(p) - strlen(OPT_UPPERDIR) + 1;
--			strncpy(tmp, p+strlen(OPT_UPPERDIR), len);
--
--			if (!realpath(tmp, entry->upperdir)) {
--				print_err(_("Faile to resolve path:%s:%s\n"),
--					    tmp, strerror(errno));
--				ret = -1;
--				goto errout;
--			}
-+			free(config->upperdir);
-+			config->upperdir = ovl_match_dump(p, OPT_UPPERDIR);
- 		} else if (!strncmp(p, OPT_LOWERDIR, strlen(OPT_LOWERDIR))) {
--			len = strlen(p) - strlen(OPT_LOWERDIR) + 1;
--			entry->lowers = smalloc(len);
--			strncpy(entry->lowers, p+strlen(OPT_LOWERDIR), len);
--
--			if ((ret = ovl_resolve_lowerdirs(entry->lowers,
--					&entry->lowerdir, &entry->lowernum)))
--				goto errout;
--
-+			free(config->lowerdir);
-+			config->lowerdir = ovl_match_dump(p, OPT_LOWERDIR);
- 		} else if (!strncmp(p, OPT_WORKDIR, strlen(OPT_WORKDIR))) {
--			len = strlen(p) - strlen(OPT_WORKDIR) + 1;
--			strncpy(tmp, p+strlen(OPT_WORKDIR), len);
--
--			if (!realpath(tmp, entry->workdir)) {
--				print_err(_("Faile to resolve path:%s:%s\n"),
--					    tmp, strerror(errno));
--				ret = -1;
--				goto errout;
--			}
-+			free(config->workdir);
-+			config->workdir = ovl_match_dump(p, OPT_WORKDIR);
- 		}
- 	}
--
--errout:
--	if (entry->lowernum) {
--		for (i = 0; i < entry->lowernum; i++)
--			free(entry->lowerdir[i]);
--		free(entry->lowerdir);
--		entry->lowerdir = NULL;
--		entry->lowernum = 0;
--	}
--	free(entry->lowers);
--	entry->lowers = NULL;
--
--	return ret;
- }
- 
- /* Scan current mounted overlayfs and get used underlying directories */
- static int ovl_scan_mount_init(struct ovl_mnt_entry **ovl_mnt_entries,
- 			       int *ovl_mnt_count)
- {
--	struct ovl_mnt_entry *mnt_entries;
--	struct mntent *mnt;
-+	struct ovl_mnt_entry *entries = NULL;
-+	struct mntent *mnt = NULL;
-+	struct ovl_config config = {0};
- 	FILE *fp;
- 	char *opt;
--	int allocated, num = 0;
-+	int allocated, i = 0;
- 
- 	fp = setmntent(MOUNT_TAB, "r");
- 	if (!fp) {
-@@ -227,32 +248,32 @@ static int ovl_scan_mount_init(struct ovl_mnt_entry **ovl_mnt_entries,
- 		return -1;
- 	}
- 
--	allocated = ALLOC_NUM;
--	mnt_entries = smalloc(sizeof(struct ovl_mnt_entry) * allocated);
-+	allocated = sizeof(struct ovl_mnt_entry) * ALLOC_NUM;
-+	entries = smalloc(allocated);
- 
- 	while ((mnt = getmntent(fp))) {
--		if (!strcmp(mnt->mnt_type, OVERLAY_NAME) ||
--		    !strcmp(mnt->mnt_type, OVERLAY_NAME_OLD)) {
-+		if (strcmp(mnt->mnt_type, OVERLAY_NAME))
-+			continue;
- 
--			opt = sstrdup(mnt->mnt_opts);
--			if (ovl_parse_opt(opt, &mnt_entries[num])) {
--				free(opt);
--				continue;
--			}
-+		opt = sstrdup(mnt->mnt_opts);
-+		ovl_parse_opt(opt, &config);
- 
--			num++;
--			if (num % ALLOC_NUM == 0) {
--				allocated += ALLOC_NUM;
--				mnt_entries = srealloc(mnt_entries,
--				     sizeof(struct ovl_mnt_entry) * allocated);
-+		if (!ovl_get_dirs(&config,
-+				 &entries[i].lowerdir, &entries[i].lowernum,
-+				 &entries[i].upperdir, &entries[i].workdir)) {
-+			i++;
-+			if (i % ALLOC_NUM == 0) {
-+				allocated += sizeof(struct ovl_mnt_entry) * ALLOC_NUM;
-+				entries = srealloc(entries, allocated);
- 			}
--
--			free(opt);
- 		}
++ * If a directory has origined target and redirect subdirectories in it,
++ * it may contain copy-up targets. In order to avoid 'd_ino' change after
++ * lower target copyup or renameed (which will create a new inode),
++ * 'impure xattr' will be setted in the parent directory to indicate
++ * overlayfs show origin 'd_ino' when iterate directory.
++ *
++ * Missing "impure xattr" will cause wrong 'd_ino' in readdir() of impure
++ * directory, so check origined or redirected target in a directory and
++ * fix "impure xattr" if necessary.
++ */
++static int ovl_check_impure(struct scan_ctx *sctx)
++{
++	const char *pathname = sctx->pathname;
++	struct scan_dir_data *cur_ddata = sctx->ddata;
++	int ret = 0;
 +
-+		ovl_free_opt(&config);
-+		free(opt);
- 	}
++	/*
++	 * Impure xattr should be set if current directory has redirect
++	 * directory or origin targets.
++	 */
++	if (!cur_ddata->origins && !cur_ddata->redirects)
++		goto out;
++
++	/* Fix impure xattrs */
++	if (!ovl_is_impure(pathname)) {
++		if (ovl_ask_action("Missing impure xattr",
++				   pathname, "Fix", 1)) {
++			ret = ovl_set_impure(pathname);
++			if (ret)
++				goto out;
++		}
++	}
++out:
++	return ret;
++}
++
+ static struct scan_operations ovl_scan_ops = {
+ 	.whiteout = ovl_check_whiteout,
+ 	.redirect = ovl_check_redirect,
++	.origin = ovl_check_origin,
++	.impure = ovl_check_impure,
+ };
  
--	*ovl_mnt_entries = mnt_entries;
--	*ovl_mnt_count = num;
-+	*ovl_mnt_entries = entries;
-+	*ovl_mnt_count = i;
- 
- 	endmntent(fp);
- 	return 0;
-@@ -267,7 +288,8 @@ static void ovl_scan_mount_exit(struct ovl_mnt_entry *ovl_mnt_entries,
- 		for (j = 0; j < ovl_mnt_entries[i].lowernum; j++)
- 			free(ovl_mnt_entries[i].lowerdir[j]);
- 		free(ovl_mnt_entries[i].lowerdir);
--		free(ovl_mnt_entries[i].lowers);
-+		free(ovl_mnt_entries[i].upperdir);
-+		free(ovl_mnt_entries[i].workdir);
- 	}
- 	free(ovl_mnt_entries);
+ static void ovl_scan_report(struct scan_ctx *sctx)
+diff --git a/lib.c b/lib.c
+index 497d357..524246d 100644
+--- a/lib.c
++++ b/lib.c
+@@ -165,8 +165,17 @@ const char *path_pick(const char *path, int baselen)
+ 	return (*p == '/') ? p+1 : p;
  }
-@@ -279,6 +301,8 @@ static void ovl_scan_mount_exit(struct ovl_mnt_entry *ovl_mnt_entries,
-  *
-  * Note: fsck may modify lower layers, so even match only one directory
-  *       is triggered as mounted.
-+ * FIXME: We cannot distinguish mounted directories if overlayfs was
-+ *        mounted use relative path, so there may have misjudgment.
-  */
- int ovl_check_mount(bool *mounted)
- {
-diff --git a/mount.h b/mount.h
-index 7eed0d0..2cf5e6a 100644
---- a/mount.h
-+++ b/mount.h
-@@ -19,8 +19,16 @@
- #ifndef OVL_MOUNT_H
- #define OVL_MOUNT_H
  
--int ovl_resolve_lowerdirs(char *loweropt, char ***lowerdir,
--                          int *lowernum);
-+struct ovl_config {
-+	char *lowerdir;
-+	char *upperdir;
-+	char *workdir;
+-static inline int __check_entry(struct scan_ctx *sctx,
+-				  int (*do_check)(struct scan_ctx *))
++static void scan_entry_init(struct scan_ctx *sctx, FTSENT *ftsent)
++{
++	sctx->pathname = ftsent->fts_path;
++	sctx->pathlen = ftsent->fts_pathlen;
++	sctx->filename = ftsent->fts_name;
++	sctx->filelen = ftsent->fts_namelen;
++	sctx->st = ftsent->fts_statp;
++}
++
++static inline int scan_check_entry(int (*do_check)(struct scan_ctx *),
++				   struct scan_ctx *sctx)
+ {
+ 	return do_check ? do_check(sctx) : 0;
+ }
+@@ -187,8 +196,6 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+ 	}
+ 
+ 	while ((ftsent = fts_read(ftsp)) != NULL) {
+-		int err;
+-
+ 		print_debug(_("Scan:%-3s %2d %7jd   %-40s %s\n"),
+ 			(ftsent->fts_info == FTS_D) ? "d" :
+ 			(ftsent->fts_info == FTS_DNR) ? "dnr" :
+@@ -202,26 +209,54 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+ 			ftsent->fts_path, ftsent->fts_name);
+ 
+ 		/* Fillup base context */
+-		sctx->pathname = ftsent->fts_path;
+-		sctx->pathlen = ftsent->fts_pathlen;
+-		sctx->filename = ftsent->fts_name;
+-		sctx->filelen = ftsent->fts_namelen;
+-		sctx->st = ftsent->fts_statp;
++		scan_entry_init(sctx, ftsent);
+ 
+ 		switch (ftsent->fts_info) {
+ 		case FTS_F:
+ 			sctx->files++;
++
++			/* Check origin */
++			ret = scan_check_entry(sop->origin, sctx);
++			if (ret)
++				goto out;
+ 			break;
+ 		case FTS_DEFAULT:
+ 			/* Check whiteouts */
+-			err = __check_entry(sctx, sop->whiteout);
+-			ret = (err) ? err : ret;
++			ret = scan_check_entry(sop->whiteout, sctx);
++			if (ret)
++				goto out;
++
++			/* Check origin */
++			ret = scan_check_entry(sop->origin, sctx);
++			if (ret)
++				goto out;
+ 			break;
+ 		case FTS_D:
+-			/* Check redirect xattr */
+ 			sctx->directories++;
+-			err = __check_entry(sctx, sop->redirect);
+-			ret = (err) ? err : ret;
++
++			/* Check redirect xattr */
++			ret = scan_check_entry(sop->redirect, sctx);
++			if (ret)
++				goto out;
++
++			/* Check origin */
++			ret = scan_check_entry(sop->origin, sctx);
++			if (ret)
++				goto out;
++
++			/* Save current dir data and create new one */
++			ftsent->fts_pointer = sctx->ddata;
++			sctx->ddata = smalloc(sizeof(struct scan_dir_data));
++			break;
++		case FTS_DP:
++			/* Check impure xattr */
++			ret = scan_check_entry(sop->impure, sctx);
++			if (ret)
++				goto out;
++
++			/* Restore parent's dir data */
++			free(sctx->ddata);
++			sctx->ddata = ftsent->fts_pointer;
+ 			break;
+ 		case FTS_NS:
+ 		case FTS_DNR:
+diff --git a/lib.h b/lib.h
+index 5d94836..5fec773 100644
+--- a/lib.h
++++ b/lib.h
+@@ -52,33 +52,44 @@
+ /* Xattr */
+ #define OVL_OPAQUE_XATTR	"trusted.overlay.opaque"
+ #define OVL_REDIRECT_XATTR	"trusted.overlay.redirect"
++#define OVL_ORIGIN_XATTR	"trusted.overlay.origin"
++#define OVL_IMPURE_XATTR	"trusted.overlay.impure"
+ 
+ 
+-/* Directories scan data struct */
++/* Directories scan data structs */
++struct scan_dir_data {
++	int origins;		/* origin number in this directory (no iterate) */
++	int redirects;		/* redirect number in this directory (no iterate) */
 +};
 +
-+void ovl_parse_opt(char *opt, struct ovl_config *config);
-+void ovl_free_opt(struct ovl_config *config);
-+int ovl_get_dirs(struct ovl_config *config, char ***lowerdir,
-+		 int *lowernum, char **upperdir, char **workdir);
- int ovl_check_mount(bool *mounted);
+ struct scan_ctx {
+ 	const char *dirname;	/* upper/lower root dir */
+ 	size_t dirlen;		/* strlen(dirlen) */
+ 	int dirtype;		/* OVL_UPPER or OVL_LOWER */
+ 	int num;		/* lower dir depth, lower type use only */
  
- #endif /* OVL_MOUNT_H */
++	int files;		/* total files */
++	int directories;	/* total directories */
++	int t_whiteouts;	/* total whiteouts */
++	int i_whiteouts;	/* invalid whiteouts */
++	int t_redirects;	/* total redirect dirs */
++	int i_redirects;	/* invalid redirect dirs */
++
+ 	const char *pathname;	/* file path from the root */
+ 	size_t pathlen;		/* strlen(pathname) */
+ 	const char *filename;	/* filename */
+ 	size_t filelen;		/* strlen(filename) */
+ 	struct stat *st;	/* file stat */
+ 
+-	int files;
+-	int directories;
+-	int t_whiteouts;	/* total whiteouts */
+-	int i_whiteouts;	/* invalid whiteouts */
+-	int t_redirects;	/* total redirect dirs */
+-	int i_redirects;	/* invalid redirect dirs */
++	struct scan_dir_data *ddata;	/* parent dir data of current target */
+ };
+ 
+ /* Directories scan callback operations struct */
+ struct scan_operations {
+ 	int (*whiteout)(struct scan_ctx *);
+ 	int (*redirect)(struct scan_ctx *);
++	int (*origin)(struct scan_ctx *);
++	int (*impure)(struct scan_ctx *);
+ };
+ 
+ static inline void set_st_inconsistency(int *st)
 -- 
 2.9.5
 
