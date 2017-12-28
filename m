@@ -1,11 +1,11 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:3193 "EHLO huawei.com"
+Received: from szxga04-in.huawei.com ([45.249.212.190]:3192 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753131AbdL1Ldb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1753119AbdL1Ldb (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 28 Dec 2017 06:33:31 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v3 5/6] fsck.overlay: fix lower target lookup
-Date: Thu, 28 Dec 2017 19:40:22 +0800
-Message-ID: <20171228114023.43999-6-yi.zhang@huawei.com>
+Subject: [PATCH v3 4/6] fsck.overlay: correct redirect xattr check
+Date: Thu, 28 Dec 2017 19:40:21 +0800
+Message-ID: <20171228114023.43999-5-yi.zhang@huawei.com>
 In-Reply-To: <20171228114023.43999-1-yi.zhang@huawei.com>
 References: <20171228114023.43999-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
@@ -15,385 +15,238 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Current lower target lookup only check pathname in each lower layer
-directly, not consider the following two cases:
+When we found a valid redirect xattr and the lower origin targed was
+covered by a directory, it could be 1) an another redirect directory,
+or 2) an opaque directory created after rename in overlayfs or 3) a
+general directory created in the underlying directory when overlay is
+offline. Currently, we only handled case 2, this patch cover the other
+two cases.
 
-1) Target's parent paths were covered by a file or an opaque directory
-   in a middle layer which is upper than origin target.
-2) Target's parent paths contains a redirect directory point to another
-   lower directory, changing base directory is needed while scaning
-   each lower layers.
-
-Therefore, we may find the wrong target or miss the correct one. This
-patch add parent path checking when scaning target in a specific layer,
-following redirect if we find a redirect directory and terminate if we
-find a file/whiteout or opaque directory.
+This patch ask user if we find a covering directory whitout opaque
+and another redirect xattr.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- check.c | 268 +++++++++++++++++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 207 insertions(+), 61 deletions(-)
+ README.md | 31 ++++++++++++++-------
+ check.c   | 94 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
+ 2 files changed, 90 insertions(+), 35 deletions(-)
 
+diff --git a/README.md b/README.md
+index a8d0b1c..2e6146f 100644
+--- a/README.md
++++ b/README.md
+@@ -25,16 +25,27 @@ If an redirect directory is found, the following must be met:
+ 
+ 1) The directory path pointed by redirect xattr should exist in one of lower
+    layers.
+-2) The origin directory should be redirected only once in one layer, which means
+-   there is only one redirect xattr point to this origin directory in the
+-   specified layer.
+-3) A whiteout or an opaque directory with the same name to origin should exist
+-   in the same directory as the redirect directory.
+-
+-If not, 1) The redirect xattr is invalid and need to remove 2) One of the
+-redirect xattr is redundant but not sure which one is, ask user or warn in
+-auto mode 3) Create a whiteout device or set opaque xattr to an existing
+-directory if the parent directory was meregd or remove xattr if not.
++2) The origin directory should be redirected only once in one layer, which
++   means there is only one redirect xattr point to this origin directory in
++   the specified layer.
++3) There must be something with the same name to the rename origin in its
++   origin place, maybe a whiteout/file or a(an) opaque/redirect directory
++   covering the lower target, maybe a new created directory merging with
++   lower origin directory.
++
++If not,
++1) The redirect xattr is invalid and need to remove.
++2) One of the redirect xattr is redundant but not sure which one is, ask user
++   or warn in auto mode.
++3) Create a whiteout device if there nothing exists in its place. If the lower
++   targed was covered by a directory which is not an another redirect directory,
++   it could be created after rename in overlayfs or created in underlying
++   directory when overlay is offline, not sure this directory is merged or not,
++   ask user by default.
++
++If an invalid redirect xattr was removed by fsck and there is a corresponding
++lower directory with the same name exists, not sure this directory is merged
++or not, ask user to make a decision.
+ 
+ Usage
+ =====
 diff --git a/check.c b/check.c
-index 6db41cd..033d4ba 100644
+index 0b5d49b..6db41cd 100644
 --- a/check.c
 +++ b/check.c
-@@ -33,13 +33,25 @@
- #include "lib.h"
- #include "check.h"
- 
--/* Underlying information */
--struct ovl_lower_check {
--	unsigned int type;	/* check extent type */
-+/* Lookup context */
-+struct ovl_lookup_ctx {
-+	char *path;		/* absolute path for lookup */
-+	size_t dirlen;		/* base directory length */
-+	bool last;		/* in last lower layer ? */
-+	bool skip;		/* skip self check */
-+
-+	char *redirect;		/* redirect path for next lookup */
-+	bool stop;		/* stop lookup */
-+
-+	struct stat st;		/* target's stat(2) */
-+	bool exist;		/* tatget exist or not */
-+};
- 
--	bool exist;
--	char path[PATH_MAX];	/* exist pathname found, only valid if exist */
--	struct stat st;		/* only valid if exist */
-+/* Underlying target information */
-+struct ovl_lower_data {
-+	bool exist;		/* tatget exist or not */
-+	char path[PATH_MAX];	/* tatget's pathname */
-+	struct stat st;		/* target's stat(2) */
- };
- 
- /* Redirect information */
-@@ -177,38 +189,179 @@ static inline int ovl_ask_question(const char *question, const char *pathname,
- 	return ask_question("", action);
+@@ -152,12 +152,29 @@ static inline int ovl_create_whiteout(const char *pathname)
+ 	return ret;
  }
  
-+static int ovl_lookup_single(const char *path, struct stat *st, bool *exist)
+-static inline int ovl_ask_invalid(const char *question, const char *pathname,
+-				  int action)
++static inline bool ovl_is_redirect(const char *pathname)
 +{
-+	int ret = 0;
++       bool exist = false;
++       ssize_t ret;
 +
-+	if (lstat(path, st) == 0) {
-+		*exist = true;
-+	} else {
-+		if (errno != ENOENT && errno != ENOTDIR) {
-+			print_err(_("Cannot stat %s: %s\n"), path,
-+				    strerror(errno));
-+			ret = -1;
-+		}
-+		*exist = false;
-+	}
-+
-+	return ret;
++       ret = get_xattr(pathname, OVL_REDIRECT_XATTR, NULL, &exist);
++       return ret ? false : exist;
 +}
 +
-+static int ovl_lookup_layer(struct ovl_lookup_ctx *lctx)
++static inline int ovl_ask_action(const char *description, const char *pathname,
++				 const char *question, int action)
 +{
-+	char *path = sstrdup(lctx->path);
-+	char *p = NULL, *base = NULL;
-+	int ret = 0;
++	print_info(_("%s: %s "), description, pathname);
 +
-+	if (!lctx->skip) {
-+		ret = ovl_lookup_single(path, &lctx->st, &lctx->exist);
-+		if (ret)
-+			goto out;
-+	}
-+
-+	if (lctx->exist || lctx->last)
-+		goto out;
-+
-+	/* Check if we should stop or redirect for the next layer's lookup */
-+
-+	/* Skip current target */
-+	base = path + lctx->dirlen;
-+	p = path + strlen(path);
-+	for (; *p != '/' && p > base; p--)
-+		*p = '\0';
-+	*p = '\0';
-+
-+	/*
-+	 * Iterate to the first item in the path. If a redirect dir was found,
-+	 * change path for the next lookup. If an opaque directory or a file
-+	 * was found, stop lookup.
-+	 */
-+	while (p > base) {
-+		char *next = NULL, *redirect = NULL;
-+		size_t name_len = 0;
-+		bool exist = false;
-+		struct stat st;
-+
-+		for (next = p; *next != '/'; next--) {
-+			if (next < base)
-+				goto out;
-+		}
-+
-+		ret = ovl_lookup_single(path, &st, &exist);
-+		if (ret)
-+			goto out;
-+		if (!exist)
-+			goto next;
-+
-+		if (!is_dir(&st) || ovl_is_opaque(path)) {
-+			lctx->stop = true;
-+			goto out;
-+		}
-+
-+		if (ovl_is_redirect(path)) {
-+			name_len = p - (next + 1);
-+			ret = ovl_get_redirect(path, lctx->dirlen, name_len,
-+					       &redirect);
-+			if (ret)
-+				goto out;
-+
-+			free(lctx->redirect);
-+			lctx->redirect =
-+				path_pack(NULL, 0, redirect,
-+					  path_pick(lctx->path, strlen(path)));
-+			free(redirect);
-+			goto out;
-+		}
-+next:
-+		*next = '\0';
-+		p = next;
-+	}
-+out:
-+	free(path);
-+	return ret;
++	return ask_question(question, action);
 +}
 +
++static inline int ovl_ask_question(const char *question, const char *pathname,
++				   int action)
+ {
+ 	print_info(_("%s: %s "), question, pathname);
+ 
+-	return ask_question("Remove", action);
++	return ask_question("", action);
+ }
+ 
  /*
-- * Scan each lower dir lower than 'start' and check type matching,
-- * we stop scan if we found something.
-- *
-- * skip: skip whiteout.
-+ * Lookup the lower layers have the same target with the specific one or not.
-  *
-+ * Scan each lower directory start from the layer of 'start' and lookup target
-+ * until find something (skip target founded in start layer), Iterate parent
-+ * directories and check directory type, following redirect directory and
-+ * terminate scan if there is a file or an opaque directory exists.
+@@ -233,7 +250,7 @@ remove:
+ 	sctx->i_whiteouts++;
+ 
+ 	/* Remove orphan whiteout directly or ask user */
+-	if (!ovl_ask_invalid("Orphan whiteout", pathname, 1))
++	if (!ovl_ask_action("Orphan whiteout", pathname, "Remove", 1))
+ 		return 0;
+ 
+ 	ret = unlink(pathname);
+@@ -323,15 +340,21 @@ static void ovl_redirect_free(void)
+  * 2) Count how many directories the origin directory was redirected by.
+  *    If more than one in the same layer, there must be some inconsistency
+  *    but not sure which one is invalid, ask user or warn in auto mode.
+- * 3) Check and fix the missing whiteout or opaque in redierct parent dir.
++ * 3) Check and fix the missing whiteout that covering the redirect lower
++ *    target. If the lower targed was covered by a directory which is not
++ *    an another redirect directory, it could be created after rename in
++ *    overlayfs or created in underlying directory when overlay is offline,
++ *    check opaque xattr and ask user by default.
++ * 4) When an invalid redirect xattr is removed, and the lower layers have
++ *    directory with same name, not sure this is a merged directory, ask
++ *    user by default.
   */
--static int ovl_check_lower(const char *pathname, int start,
--			   struct ovl_lower_check *chk, bool skip)
-+static int ovl_lookup_lower(const char *pathname, int dirtype, int start,
-+			    struct ovl_lower_data *od)
- {
--	struct stat st;
-+	struct ovl_lookup_ctx lctx = {0};
- 	int i;
-+	int ret = 0;
- 
--	for (i = start; i < lower_num; i++) {
--		path_pack(chk->path, sizeof(chk->path), lowerdir[i], pathname);
-+	if (dirtype == OVL_UPPER)
-+		start = 0;
- 
--		if (lstat(chk->path, &st) != 0) {
--			if (errno != ENOENT && errno != ENOTDIR) {
--				print_err(_("Cannot stat %s: %s\n"),
--					    chk->path, strerror(errno));
--				return -1;
--			}
--			continue;
--		}
--		if (skip && is_whiteout(&st))
--			continue;
-+	if (dirtype == OVL_UPPER) {
-+		lctx.path = path_pack(NULL, 0, upperdir, pathname);
-+		lctx.dirlen = strlen(upperdir);
-+		lctx.skip = true;
- 
--		chk->exist = true;
--		chk->st = st;
--		break;
-+		ret = ovl_lookup_layer(&lctx);
-+		if (ret)
-+			goto out;
- 	}
--	return 0;
-+
-+	for (i = start; !lctx.stop && !lctx.exist && i < lower_num; i++) {
-+		lctx.path = path_pack(NULL, 0, lowerdir[i],
-+				      (lctx.redirect) ? lctx.redirect : pathname);
-+		lctx.dirlen = strlen(lowerdir[i]);
-+		lctx.skip = (dirtype == OVL_LOWER && i == start) ? true : false;
-+		lctx.last = (i == lower_num - 1) ? true : false;
-+
-+		ret = ovl_lookup_layer(&lctx);
-+		if (ret)
-+			goto out;
-+	}
-+
-+	od->exist = lctx.exist;
-+	if (od->exist) {
-+		strncpy(od->path, lctx.path, sizeof(od->path));
-+		od->st = lctx.st;
-+	}
-+out:
-+	free(lctx.redirect);
-+	free(lctx.path);
-+	return ret;
-+}
-+
-+/*
-+ * The same as ovl_lookup_lower() except start from the layer of 'start',
-+ * not skip any target founded.
-+ */
-+static int ovl_lookup(const char *pathname, int start, struct ovl_lower_data *od)
-+{
-+	struct ovl_lookup_ctx lctx = {0};
-+	int i;
-+	int ret = 0;
-+
-+	for (i = start; !lctx.stop && !lctx.exist && i < lower_num; i++) {
-+		lctx.path = path_pack(NULL, 0, lowerdir[i],
-+				      (lctx.redirect) ? lctx.redirect : pathname);
-+		lctx.dirlen = strlen(lowerdir[i]);
-+		lctx.last = (i == lower_num - 1) ? true : false;
-+
-+		ret = ovl_lookup_layer(&lctx);
-+		if (ret)
-+			goto out;
-+	}
-+
-+	od->exist = lctx.exist;
-+	if (od->exist) {
-+		strncpy(od->path, lctx.path, sizeof(od->path));
-+		od->st = lctx.st;
-+	}
-+out:
-+	free(lctx.redirect);
-+	free(lctx.path);
-+	return ret;
- }
- 
- /*
-@@ -220,8 +373,7 @@ static int ovl_check_whiteout(struct scan_ctx *sctx)
- {
- 	const char *pathname = sctx->pathname;
- 	const struct stat *st = sctx->st;
--	struct ovl_lower_check chk = {0};
--	int start;
-+	struct ovl_lower_data od = {0};
- 	int ret = 0;
- 
- 	/* Is a whiteout ? */
-@@ -238,12 +390,11 @@ static int ovl_check_whiteout(struct scan_ctx *sctx)
- 	 * Scan each corresponding lower directroy under this layer,
- 	 * check is there a file or dir with the same name.
- 	 */
--	start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
--	ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
--			      start, &chk, true);
-+	ret = ovl_lookup_lower(path_pick(pathname, sctx->dirlen),
-+			       sctx->dirtype, sctx->num, &od);
- 	if (ret)
- 		return ret;
--	if (chk.exist && !is_whiteout(&chk.st))
-+	if (od.exist && !is_whiteout(&od.st))
- 		goto out;
- 
- remove:
-@@ -352,8 +503,9 @@ static void ovl_redirect_free(void)
  static int ovl_check_redirect(struct scan_ctx *sctx)
  {
  	const char *pathname = sctx->pathname;
--	struct ovl_lower_check chk = {0};
--	struct stat rst;
-+	struct ovl_lower_data od = {0};
-+	struct stat cover_st;
-+	bool cover_exist = false;
- 	char *redirect = NULL, *cover_path = NULL;
+ 	struct ovl_lower_check chk = {0};
+-	char redirect_rpath[PATH_MAX];
+ 	struct stat rst;
+-	char *redirect = NULL;
++	char *redirect = NULL, *cover_path = NULL;
  	int start;
  	int ret = 0;
-@@ -368,24 +520,22 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
+ 
+@@ -345,8 +368,10 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
  	sctx->t_redirects++;
  
  	/* Redirect dir in last lower dir ? */
--	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1) {
--		start = lower_num;
-+	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1)
+-	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1)
++	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1) {
++		start = lower_num;
  		goto remove;
--	}
++	}
  
  	/* Scan lower directories to check redirect dir exist or not */
  	start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
--	ret = ovl_check_lower(redirect, start, &chk, false);
-+	ret = ovl_lookup(redirect, start, &od);
- 	if (ret)
- 		goto out;
--	if (chk.exist && is_dir(&chk.st)) {
-+	if (od.exist && is_dir(&od.st)) {
- 		char *tmp;
- 
+@@ -359,14 +384,14 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
  		/* Check duplicate in same layer */
--		if (ovl_redirect_entry_find(chk.path, sctx->dirtype,
-+		if (ovl_redirect_entry_find(od.path, sctx->dirtype,
+ 		if (ovl_redirect_entry_find(chk.path, sctx->dirtype,
  					    sctx->num, &tmp)) {
- 			print_info("Duplicate redirect directory found:%s\n", pathname);
--			print_info("Origin:%s Previous:%s\n", chk.path, tmp);
-+			print_info("Origin:%s Previous:%s\n", od.path, tmp);
+-			print_info("Duplicate redirect directories found:\n");
+-			print_info("origin:%s current:%s last:%s\n",
+-				   chk.path, pathname, tmp);
++			print_info("Duplicate redirect directory found:%s\n", pathname);
++			print_info("Origin:%s Previous:%s\n", chk.path, tmp);
  
  			sctx->i_redirects++;
  
-@@ -396,24 +546,21 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
+ 			/* Don't remove in auto mode */
+-			if (ovl_ask_invalid("Duplicate redirect xattr", pathname, 0))
++			if (ovl_ask_action("Duplicate redirect xattr", pathname,
++					   "Remove", 0))
+ 				goto remove_d;
  		}
  
- 		ovl_redirect_entry_add(pathname, sctx->dirtype,
--				       sctx->num, chk.path);
-+				       sctx->num, od.path);
+@@ -374,25 +399,32 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
+ 				       sctx->num, chk.path);
  
  		/* Check and fix whiteout or opaque dir */
- 		cover_path = path_pack(cover_path, 0, sctx->dirname, redirect);
--		if (lstat(cover_path, &rst) != 0) {
--			if (errno != ENOENT && errno != ENOTDIR) {
--				print_err(_("Cannot stat %s: %s\n"),
--					    cover_path, strerror(errno));
--				goto out;
--			}
--
-+		ret = ovl_lookup_single(cover_path, &cover_st, &cover_exist);
-+		if (ret)
-+			goto out;
-+		if (!cover_exist) {
+-		path_pack(redirect_rpath, sizeof(redirect_rpath),
+-			  sctx->dirname, redirect);
+-		if (lstat(redirect_rpath, &rst) != 0) {
++		cover_path = path_pack(cover_path, 0, sctx->dirname, redirect);
++		if (lstat(cover_path, &rst) != 0) {
+ 			if (errno != ENOENT && errno != ENOTDIR) {
+ 				print_err(_("Cannot stat %s: %s\n"),
+-					    redirect_rpath, strerror(errno));
++					    cover_path, strerror(errno));
+ 				goto out;
+ 			}
+ 
  			/* Found nothing, create a whiteout */
- 			if ((ret = ovl_create_whiteout(cover_path)))
+-			if ((ret = ovl_create_whiteout(redirect_rpath)))
++			if ((ret = ovl_create_whiteout(cover_path)))
  				goto out;
  
  			sctx->t_whiteouts++;
  
--		} else if (is_dir(&rst) && !ovl_is_opaque(cover_path) &&
-+		} else if (is_dir(&cover_st) && !ovl_is_opaque(cover_path) &&
- 			   !ovl_is_redirect(cover_path)) {
- 
- 			/*
-@@ -443,14 +590,13 @@ remove_d:
- 	sctx->i_redirects--;
- 
- 	/* If lower directory exist, ask user to add opaque xattr to cover it */
--	if (start < lower_num) {
--		if ((ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
--					   start, &chk, false)))
--			goto out;
--		if (chk.exist && is_dir(&chk.st) &&
--		    !ovl_ask_question("Is merged dir", pathname, 1))
--			ret = ovl_set_opaque(pathname);
--	}
-+	if ((ret = ovl_lookup_lower(path_pick(pathname, sctx->dirlen),
-+				    sctx->dirtype, sctx->num, &od)))
-+		goto out;
-+	if (od.exist && is_dir(&od.st) &&
-+	    !ovl_ask_question("Is merged dir", pathname, 1))
-+		ret = ovl_set_opaque(pathname);
+-		} else if (is_dir(&rst) && !ovl_is_opaque(redirect_rpath)) {
+-			/* Found a directory but not opaqued, fix opaque xattr */
+-			if ((ret = ovl_set_opaque(redirect_rpath)))
+-				goto out;
++		} else if (is_dir(&rst) && !ovl_is_opaque(cover_path) &&
++			   !ovl_is_redirect(cover_path)) {
 +
++			/*
++			 * Found a directory but not opaqued and not even
++			 * an another redirected directory, maybe created
++			 * when overlayfs is offline, ask user to add the
++			 * opaque xattr if this is not a merged dir.
++			 */
++			if (!ovl_ask_question("Is merged dir", cover_path, 1))
++				if ((ret = ovl_set_opaque(cover_path)))
++					goto out;
+ 		}
+ 
+ 		goto out;
+@@ -402,13 +434,25 @@ remove:
+ 	sctx->i_redirects++;
+ 
+ 	/* Remove redirect xattr or ask user */
+-	if (!ovl_ask_invalid("Invalid redirect xattr", pathname, 1))
++	if (!ovl_ask_action("Invalid redirect xattr", pathname, "Remove", 1))
+ 		goto out;
+ remove_d:
+-	ret = ovl_remove_redirect(pathname);
+-	if (!ret)
+-		sctx->i_redirects--;
++	if ((ret = ovl_remove_redirect(pathname)))
++		goto out;
++
++	sctx->i_redirects--;
++
++	/* If lower directory exist, ask user to add opaque xattr to cover it */
++	if (start < lower_num) {
++		if ((ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
++					   start, &chk, false)))
++			goto out;
++		if (chk.exist && is_dir(&chk.st) &&
++		    !ovl_ask_question("Is merged dir", pathname, 1))
++			ret = ovl_set_opaque(pathname);
++	}
  out:
- 	free(cover_path);
++	free(cover_path);
  	free(redirect);
+ 	return ret;
+ }
 -- 
 2.9.5
 
