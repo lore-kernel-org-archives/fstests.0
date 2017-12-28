@@ -1,118 +1,161 @@
-Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:5991 "EHLO
-        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751086AbdL1JJH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Dec 2017 04:09:07 -0500
-Date: Thu, 28 Dec 2017 20:09:03 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: xfstests: generic/342 run failed in f2fs
-Message-ID: <20171228090903.GQ5858@dastard>
-References: <2d524305-ecb5-8600-a92a-d79b717b8d13@intel.com>
- <e367054d-046d-d6e5-943c-7fbe10493029@sandeen.net>
- <d20cb58e-6646-a7de-bff1-8b7783a30664@intel.com>
- <d5ff659d-c659-ca47-3999-2f4b16629e42@sandeen.net>
- <20171225163102.GB14399@thunk.org>
- <20171227191130.GB13490@jaegeuk-macbookpro.roam.corp.google.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:44779 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751043AbdL1LdP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Dec 2017 06:33:15 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [PATCH v3 0/6] overlay: implement fsck.overlay utility
+Date: Thu, 28 Dec 2017 19:40:17 +0800
+Message-ID: <20171228114023.43999-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171227191130.GB13490@jaegeuk-macbookpro.roam.corp.google.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Jaegeuk Kim <jaegeuk@kernel.org>
-Cc: Theodore Ts'o <tytso@mit.edu>, Eric Sandeen <sandeen@sandeen.net>, Chen Rong <rongx.a.chen@intel.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, philip.li@intel.com
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 27, 2017 at 11:11:30AM -0800, Jaegeuk Kim wrote:
-> On 12/25, Theodore Ts'o wrote:
-> > On Sun, Dec 24, 2017 at 11:47:20PM -0800, Eric Sandeen wrote:
-> > > Filesystems are free to do /more/ than the minimum required by posix -
-> > > see ext4_sync_parent for example.  Or xfs_finish_rename, for synchronous
-> > > mounts:
-> > > 
-> > >          * If this is a synchronous mount, make sure that the rename transaction
-> > >          * goes to disk before returning to the user.
-> > >          */
-> > >         if (tp->t_mountp->m_flags & (XFS_MOUNT_WSYNC|XFS_MOUNT_DIRSYNC))
-> > >                 xfs_trans_set_sync(tp);
-> > > 
-> > > so behavior can be fs-dependent, or mount option dependent, etc.
-> > > 
-> > > But to be portable, if an app wants directory changes to be persistent
-> > > before proceeding, it must fsync the directory after making changes.
-> > > 
-> > > I don't know about f2fs's design intent, whether it guarantees more
-> > > than posix requires, but to guarantee that this test works on any posix
-> > > fs, I think that directory fsync is needed.
-> > 
-> > Agreed that this is a test bug, and we should add the fsync to the
-> > parent directory.
-> 
-> Agreed too. Or, how about using "-o dirsync"?
-> 
-> > 
-> > It might also be a good idea for f2fs to do more, given that fsync is
-> > a slow enough operation that so long as you can make sure the fsync of
-> > the parent directory happens within the same atomic update as the
-> > child inode, you might as well give the more expansive guarantee.  But
-> > obviously that's up to the f2fs developers to decide whether they want
-> > to do that work.
-> 
-> Indeed. Actually, since one of our goals was to reduce fsync latencies for
-> Android, we decided to support posix in a minimum way. In order to avoid
-> complex directory updates recursively, however, we allowed the fsync on
-> directories to trigger checkpoint requiring many IO operations.
+Hi all,
 
-So what you are really saying is that f2fs is not strictly ordered
-w.r.t metadata crash consistency after fsync()? Wasn't that
-considered a bug in btrfs that had to be fixed (and did get fixed)?
+Here is the third version of fsck.overlay. Most of comments from last
+two iterations have been handled, major changes split to each patch
+for readability and minor fix has been squashed into the first patch
+"overlay: implement fsck utility".
 
-Oh, yeah, it's right there in the test commit history:
+Please review and any comments is helpful, thanks!
 
-commit f02fe949113f35ae221ec1ab5c9959912f594bf4
-Author: Filipe Manana <fdmanana@suse.com>
-Date:   Tue Apr 5 11:47:55 2016 +1000
+Changes since v2(v1):
 
-    generic: add test for fsync after renaming file
-    
-    Test that if we rename a file, create a new file that has the old name
-    of the other file and is a child of the same parent directory, fsync the
-    new inode, power fail and mount the filesystem, we do not lose the first
-    file and that file has the name it was renamed to.
-    
-    This test is motivated by an issue found in btrfs which is fixed by the
-    following patch for the linux kernel:
-    
-      "Btrfs: fix file loss caused by fsync after rename and new inode"
-    
-    Signed-off-by: Filipe Manana <fdmanana@suse.com>
-    Reviewed-by: Eryu Guan <eguan@redhat.com>
-    Signed-off-by: Dave Chinner <david@fromorbit.com>
+- Add "-n -p -y" options. (Comment from Amir and Darrick)
+- Change underlying dirs input to '-o' option like mount(8). (Miklos)
+- Remove invalid opaque check. (Miklos)
+- Correct redirect xattr check. (Amir and Miklos)
+- Fix lower target lookup, handle the missing case of opaque and
+  redirect parent.
+- Add impure xattr check. (Amir)
 
-There's a whole lot more detail in the kernel commit 2be63d5ce929
-("Btrfs: fix file loss on log replay after renaming a file and
-fsync") but my point is that we considered this a btrfs filesystem
-bug and so changing the test defeats it's purpose as a regression
-test for the btrfs bug.
+Latest descriptions:
 
-So IMO the test should not be changed. And I think we should be
-consistent and consider this f2fs failure as a f2fs bug that needs
-fixing to bring it's behaviour in line with xfs, ext4, and btrfs.
+fsck.overlay
+============
 
-Remember this when quoting POSIX about fsync behaviour: Posix is a
-terrible standard when it comes to data integrity. We go way, way
-beyond what POSIX specifies as a valid fsync implementation (i.e.
-posix allows "do nothing and return success" as a conformant
-implementation). Ext4, XFS and btrfs all have strictly ordered
-metadata crash recovery semantics and all of the crash recovery
-tests expect this behaviour from the filesytem being tested. The
-underlying intention is that by encoding it into these tests, all
-widely used and future linux filesystems meet or exceed this crash
-integrity requirement.
+fsck.overlay is used to check and optionally repair underlying
+directories of overlay-filesystem.
 
-IOWs, changing the test is the wrong thing to do on many levels....
+Check the following points:
 
-Cheers,
+Whiteouts
+---------
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+A whiteout is a character device with 0/0 device number. It is used to
+record the removed files or directories, When a whiteout is found in a
+directory, there should be at least one directory or file with the
+same name in any of the corresponding lower layers. If not exist, the
+whiteout will be treated as orphan whiteout and remove.
+
+Redirect directories
+--------------------
+
+An redirect directory is a directory with "trusted.overlay.redirect"
+xattr valued to the path of the original location from the root of
+the overlay. It is only used when renaming a directory and "redirect
+dir" feature is enabled.
+
+If an redirect directory is found, the following must be met:
+1) The directory path pointed by redirect xattr should exist in one of
+   lower layers.
+2) The origin directory should be redirected only once in one layer,
+   which means there is only one redirect xattr point to this origin
+   directory in the specified layer.
+3) There must be something with the same name to the rename origin in
+   its origin place, maybe a whiteout/file or a(an) opaque/redirect
+   directory covering the lower target, maybe a new created directory
+   merging with lower origin directory.
+
+If not,
+1) The redirect xattr is invalid and need to remove.
+2) One of the redirect xattr is redundant but not sure which one is,
+   ask user or warn in auto mode.
+3) Create a whiteout device if there nothing exists in its place. If
+   the lower targed was covered by a directory which is not an another
+   redirect directory, it could be created after rename in overlayfs
+   or created in underlying directory when overlay is offline, not sure
+   this directory is merged or not, ask user by default.
+
+If an invalid redirect xattr was removed by fsck and there is a
+corresponding lower directory with the same name exists, not sure this
+directory is merged or not, ask user to make a decision.
+
+Impure directories
+------------------
+
+An impure directory is a directory with "trusted.overlay.impure" xattr
+valued 'y', which indicate that this directory may contain copy-uped
+targets from lower layers. In oredr to prevent 'd_ino' change while
+copy-up (it create a new inode in upper layer) in getdents(2), impure
+xattr will be set in the parent directory, letting overlay filesystem
+check and get d_ino from lower origin target to ensure consistent d_ino.
+
+There are three situations of setting impure xattr:
+1) Copyup lower target in a directory.
+2) Link an origined target (already copy-uped, have origin xattr) into
+   a directory.
+3) Rename an origined target (include merged subdirectories) into a
+   new directory.
+
+So, if a direcotry which contains several origined targets or redirect
+directories, the impure xattr should be set. If not, fix this xattr.
+
+Usage
+=====
+
+1. Ensure overlay filesystem is not mounted based on directories which
+   need to check.
+
+2. Run fsck.overlay program:
+   Usage:
+   fsck.overlay [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>][-pnyvhV]
+
+   Options:
+   -o,                    specify underlying directories of overlayfs:
+                          multiple lower directories use ':' as separator
+   -p,                    automatic repair (no questions)
+   -n,                    make no changes to the filesystem
+   -y,                    assume "yes" to all questions
+   -v, --verbose          print more messages of overlayfs
+   -h, --help             display this usage of overlayfs
+   -V, --version          display version information
+
+   Example:
+   fsck.overlay -o lowerdir=lower,upperdir=upper,workdir=work
+
+3. Exit value:
+   0      No errors
+   1      Filesystem errors corrected
+   2      System should be rebooted
+   4      Filesystem errors left uncorrected
+   8      Operational error
+   16     Usage or syntax error
+   32     Checking canceled by user request
+   128    Shared-library error
+
+Todo
+====
+
+1. Overlay filesystem mounted check. Prevent fscking when overlay is
+   online. Now, We cannot distinguish mounted directories if overlayfs
+   was mounted with relative path. Should modify kernel together to
+   support.
+2. Check and fix invalid redirect xattr through origin xattr.
+3. Symbolic link check.
+4. Check origin/nlink xattr.
+5. Check index feature consistency.
+6. ...
+
+
+zhangyi (F) (6):
+  overlay: implement fsck utility
+  fsck.overlay: add -n -p and -y options
+  fsck.overlay: encapsulate underlying directories options
+  fsck.overlay: correct redirect xattr check
+  fsck.overlay: fix lower target lookup
+  fsck.overlay: add impure xattr check
+
