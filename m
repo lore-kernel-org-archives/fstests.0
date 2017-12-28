@@ -1,266 +1,136 @@
-Received: from mail-yb0-f178.google.com ([209.85.213.178]:47042 "EHLO
-        mail-yb0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753354AbdL1OWF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Dec 2017 09:22:05 -0500
+Received: from mail.kernel.org ([198.145.29.99]:55710 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753547AbdL1Q37 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Dec 2017 11:29:59 -0500
+Date: Thu, 28 Dec 2017 08:29:57 -0800
+From: Jaegeuk Kim <jaegeuk@kernel.org>
+Subject: Re: xfstests: generic/342 run failed in f2fs
+Message-ID: <20171228162957.GA37524@jaegeuk-macbookpro.roam.corp.google.com>
+References: <2d524305-ecb5-8600-a92a-d79b717b8d13@intel.com>
+ <e367054d-046d-d6e5-943c-7fbe10493029@sandeen.net>
+ <d20cb58e-6646-a7de-bff1-8b7783a30664@intel.com>
+ <d5ff659d-c659-ca47-3999-2f4b16629e42@sandeen.net>
+ <20171225163102.GB14399@thunk.org>
+ <20171227191130.GB13490@jaegeuk-macbookpro.roam.corp.google.com>
+ <20171228090903.GQ5858@dastard>
 MIME-Version: 1.0
-In-Reply-To: <20171228114023.43999-5-yi.zhang@huawei.com>
-References: <20171228114023.43999-1-yi.zhang@huawei.com> <20171228114023.43999-5-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 28 Dec 2017 16:22:03 +0200
-Message-ID: <CAOQ4uxh89i3=TaYsAvQv7YvF0_auW3LYOf5PLtLHJkYo9kCHRQ@mail.gmail.com>
-Subject: Re: [PATCH v3 4/6] fsck.overlay: correct redirect xattr check
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171228090903.GQ5858@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Eric Sandeen <sandeen@sandeen.net>, Chen Rong <rongx.a.chen@intel.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, philip.li@intel.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Dec 28, 2017 at 1:40 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> When we found a valid redirect xattr and the lower origin targed was
-> covered by a directory, it could be 1) an another redirect directory,
-> or 2) an opaque directory created after rename in overlayfs or 3) a
-> general directory created in the underlying directory when overlay is
-> offline. Currently, we only handled case 2, this patch cover the other
-> two cases.
->
-> This patch ask user if we find a covering directory whitout opaque
-> and another redirect xattr.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  README.md | 31 ++++++++++++++-------
->  check.c   | 94 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
->  2 files changed, 90 insertions(+), 35 deletions(-)
->
-> diff --git a/README.md b/README.md
-> index a8d0b1c..2e6146f 100644
-> --- a/README.md
-> +++ b/README.md
-> @@ -25,16 +25,27 @@ If an redirect directory is found, the following must be met:
->
->  1) The directory path pointed by redirect xattr should exist in one of lower
->     layers.
-> -2) The origin directory should be redirected only once in one layer, which means
-> -   there is only one redirect xattr point to this origin directory in the
-> -   specified layer.
-> -3) A whiteout or an opaque directory with the same name to origin should exist
-> -   in the same directory as the redirect directory.
-> -
-> -If not, 1) The redirect xattr is invalid and need to remove 2) One of the
-> -redirect xattr is redundant but not sure which one is, ask user or warn in
-> -auto mode 3) Create a whiteout device or set opaque xattr to an existing
-> -directory if the parent directory was meregd or remove xattr if not.
-> +2) The origin directory should be redirected only once in one layer, which
-> +   means there is only one redirect xattr point to this origin directory in
-> +   the specified layer.
-> +3) There must be something with the same name to the rename origin in its
-> +   origin place, maybe a whiteout/file or a(an) opaque/redirect directory
-> +   covering the lower target, maybe a new created directory merging with
-> +   lower origin directory.
-> +
-> +If not,
-> +1) The redirect xattr is invalid and need to remove.
-> +2) One of the redirect xattr is redundant but not sure which one is, ask user
-> +   or warn in auto mode.
-> +3) Create a whiteout device if there nothing exists in its place. If the lower
-> +   targed was covered by a directory which is not an another redirect directory,
-> +   it could be created after rename in overlayfs or created in underlying
-> +   directory when overlay is offline, not sure this directory is merged or not,
-> +   ask user by default.
-> +
-> +If an invalid redirect xattr was removed by fsck and there is a corresponding
-> +lower directory with the same name exists, not sure this directory is merged
-> +or not, ask user to make a decision.
->
->  Usage
->  =====
-> diff --git a/check.c b/check.c
-> index 0b5d49b..6db41cd 100644
-> --- a/check.c
-> +++ b/check.c
-> @@ -152,12 +152,29 @@ static inline int ovl_create_whiteout(const char *pathname)
->         return ret;
->  }
->
-> -static inline int ovl_ask_invalid(const char *question, const char *pathname,
-> -                                 int action)
-> +static inline bool ovl_is_redirect(const char *pathname)
-> +{
-> +       bool exist = false;
-> +       ssize_t ret;
-> +
-> +       ret = get_xattr(pathname, OVL_REDIRECT_XATTR, NULL, &exist);
-> +       return ret ? false : exist;
-> +}
-> +
-> +static inline int ovl_ask_action(const char *description, const char *pathname,
-> +                                const char *question, int action)
-> +{
-> +       print_info(_("%s: %s "), description, pathname);
-> +
-> +       return ask_question(question, action);
-> +}
-> +
-> +static inline int ovl_ask_question(const char *question, const char *pathname,
-> +                                  int action)
->  {
->         print_info(_("%s: %s "), question, pathname);
->
-> -       return ask_question("Remove", action);
-> +       return ask_question("", action);
->  }
->
->  /*
-> @@ -233,7 +250,7 @@ remove:
->         sctx->i_whiteouts++;
->
->         /* Remove orphan whiteout directly or ask user */
-> -       if (!ovl_ask_invalid("Orphan whiteout", pathname, 1))
-> +       if (!ovl_ask_action("Orphan whiteout", pathname, "Remove", 1))
->                 return 0;
->
->         ret = unlink(pathname);
-> @@ -323,15 +340,21 @@ static void ovl_redirect_free(void)
->   * 2) Count how many directories the origin directory was redirected by.
->   *    If more than one in the same layer, there must be some inconsistency
->   *    but not sure which one is invalid, ask user or warn in auto mode.
-> - * 3) Check and fix the missing whiteout or opaque in redierct parent dir.
-> + * 3) Check and fix the missing whiteout that covering the redirect lower
-> + *    target. If the lower targed was covered by a directory which is not
-> + *    an another redirect directory, it could be created after rename in
-> + *    overlayfs or created in underlying directory when overlay is offline,
-> + *    check opaque xattr and ask user by default.
-> + * 4) When an invalid redirect xattr is removed, and the lower layers have
-> + *    directory with same name, not sure this is a merged directory, ask
-> + *    user by default.
->   */
->  static int ovl_check_redirect(struct scan_ctx *sctx)
->  {
->         const char *pathname = sctx->pathname;
->         struct ovl_lower_check chk = {0};
-> -       char redirect_rpath[PATH_MAX];
->         struct stat rst;
-> -       char *redirect = NULL;
-> +       char *redirect = NULL, *cover_path = NULL;
->         int start;
->         int ret = 0;
->
-> @@ -345,8 +368,10 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
->         sctx->t_redirects++;
->
->         /* Redirect dir in last lower dir ? */
-> -       if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1)
-> +       if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1) {
-> +               start = lower_num;
->                 goto remove;
-> +       }
->
->         /* Scan lower directories to check redirect dir exist or not */
->         start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
-> @@ -359,14 +384,14 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
->                 /* Check duplicate in same layer */
->                 if (ovl_redirect_entry_find(chk.path, sctx->dirtype,
->                                             sctx->num, &tmp)) {
-> -                       print_info("Duplicate redirect directories found:\n");
-> -                       print_info("origin:%s current:%s last:%s\n",
-> -                                  chk.path, pathname, tmp);
-> +                       print_info("Duplicate redirect directory found:%s\n", pathname);
-> +                       print_info("Origin:%s Previous:%s\n", chk.path, tmp);
->
->                         sctx->i_redirects++;
->
->                         /* Don't remove in auto mode */
-> -                       if (ovl_ask_invalid("Duplicate redirect xattr", pathname, 0))
-> +                       if (ovl_ask_action("Duplicate redirect xattr", pathname,
-> +                                          "Remove", 0))
->                                 goto remove_d;
->                 }
->
-> @@ -374,25 +399,32 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
->                                        sctx->num, chk.path);
->
->                 /* Check and fix whiteout or opaque dir */
-> -               path_pack(redirect_rpath, sizeof(redirect_rpath),
-> -                         sctx->dirname, redirect);
-> -               if (lstat(redirect_rpath, &rst) != 0) {
-> +               cover_path = path_pack(cover_path, 0, sctx->dirname, redirect);
-> +               if (lstat(cover_path, &rst) != 0) {
->                         if (errno != ENOENT && errno != ENOTDIR) {
->                                 print_err(_("Cannot stat %s: %s\n"),
-> -                                           redirect_rpath, strerror(errno));
-> +                                           cover_path, strerror(errno));
->                                 goto out;
->                         }
->
->                         /* Found nothing, create a whiteout */
-> -                       if ((ret = ovl_create_whiteout(redirect_rpath)))
-> +                       if ((ret = ovl_create_whiteout(cover_path)))
->                                 goto out;
->
->                         sctx->t_whiteouts++;
->
-> -               } else if (is_dir(&rst) && !ovl_is_opaque(redirect_rpath)) {
-> -                       /* Found a directory but not opaqued, fix opaque xattr */
-> -                       if ((ret = ovl_set_opaque(redirect_rpath)))
-> -                               goto out;
-> +               } else if (is_dir(&rst) && !ovl_is_opaque(cover_path) &&
-> +                          !ovl_is_redirect(cover_path)) {
-> +
-> +                       /*
-> +                        * Found a directory but not opaqued and not even
-> +                        * an another redirected directory, maybe created
-> +                        * when overlayfs is offline, ask user to add the
-> +                        * opaque xattr if this is not a merged dir.
-> +                        */
-> +                       if (!ovl_ask_question("Is merged dir", cover_path, 1))
+On 12/28, Dave Chinner wrote:
+> On Wed, Dec 27, 2017 at 11:11:30AM -0800, Jaegeuk Kim wrote:
+> > On 12/25, Theodore Ts'o wrote:
+> > > On Sun, Dec 24, 2017 at 11:47:20PM -0800, Eric Sandeen wrote:
+> > > > Filesystems are free to do /more/ than the minimum required by posix -
+> > > > see ext4_sync_parent for example.  Or xfs_finish_rename, for synchronous
+> > > > mounts:
+> > > > 
+> > > >          * If this is a synchronous mount, make sure that the rename transaction
+> > > >          * goes to disk before returning to the user.
+> > > >          */
+> > > >         if (tp->t_mountp->m_flags & (XFS_MOUNT_WSYNC|XFS_MOUNT_DIRSYNC))
+> > > >                 xfs_trans_set_sync(tp);
+> > > > 
+> > > > so behavior can be fs-dependent, or mount option dependent, etc.
+> > > > 
+> > > > But to be portable, if an app wants directory changes to be persistent
+> > > > before proceeding, it must fsync the directory after making changes.
+> > > > 
+> > > > I don't know about f2fs's design intent, whether it guarantees more
+> > > > than posix requires, but to guarantee that this test works on any posix
+> > > > fs, I think that directory fsync is needed.
+> > > 
+> > > Agreed that this is a test bug, and we should add the fsync to the
+> > > parent directory.
+> > 
+> > Agreed too. Or, how about using "-o dirsync"?
+> > 
+> > > 
+> > > It might also be a good idea for f2fs to do more, given that fsync is
+> > > a slow enough operation that so long as you can make sure the fsync of
+> > > the parent directory happens within the same atomic update as the
+> > > child inode, you might as well give the more expansive guarantee.  But
+> > > obviously that's up to the f2fs developers to decide whether they want
+> > > to do that work.
+> > 
+> > Indeed. Actually, since one of our goals was to reduce fsync latencies for
+> > Android, we decided to support posix in a minimum way. In order to avoid
+> > complex directory updates recursively, however, we allowed the fsync on
+> > directories to trigger checkpoint requiring many IO operations.
+> 
+> So what you are really saying is that f2fs is not strictly ordered
+> w.r.t metadata crash consistency after fsync()? Wasn't that
+> considered a bug in btrfs that had to be fixed (and did get fixed)?
+> 
+> Oh, yeah, it's right there in the test commit history:
+> 
+> commit f02fe949113f35ae221ec1ab5c9959912f594bf4
+> Author: Filipe Manana <fdmanana@suse.com>
+> Date:   Tue Apr 5 11:47:55 2016 +1000
+> 
+>     generic: add test for fsync after renaming file
+>     
+>     Test that if we rename a file, create a new file that has the old name
+>     of the other file and is a child of the same parent directory, fsync the
+>     new inode, power fail and mount the filesystem, we do not lose the first
+>     file and that file has the name it was renamed to.
+>     
+>     This test is motivated by an issue found in btrfs which is fixed by the
+>     following patch for the linux kernel:
+>     
+>       "Btrfs: fix file loss caused by fsync after rename and new inode"
+>     
+>     Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>     Reviewed-by: Eryu Guan <eguan@redhat.com>
+>     Signed-off-by: Dave Chinner <david@fromorbit.com>
+> 
+> There's a whole lot more detail in the kernel commit 2be63d5ce929
+> ("Btrfs: fix file loss on log replay after renaming a file and
+> fsync") but my point is that we considered this a btrfs filesystem
+> bug and so changing the test defeats it's purpose as a regression
+> test for the btrfs bug.
+> 
+> So IMO the test should not be changed. And I think we should be
+> consistent and consider this f2fs failure as a f2fs bug that needs
+> fixing to bring it's behaviour in line with xfs, ext4, and btrfs.
+> 
+> Remember this when quoting POSIX about fsync behaviour: Posix is a
+> terrible standard when it comes to data integrity. We go way, way
+> beyond what POSIX specifies as a valid fsync implementation (i.e.
+> posix allows "do nothing and return success" as a conformant
+> implementation). Ext4, XFS and btrfs all have strictly ordered
+> metadata crash recovery semantics and all of the crash recovery
+> tests expect this behaviour from the filesytem being tested. The
+> underlying intention is that by encoding it into these tests, all
+> widely used and future linux filesystems meet or exceed this crash
+> integrity requirement.
 
-I am not sure what user will understand from this question,
-but maybe I don't see the full flow of info/questions in my mind.
-Anyway, if I am not mistaken, you seem to hold the opinion that
-default behavior if user says (-y := fix it I don't care how) should be
-to set the opaque xattr. If you agree, then you should ask:
-    if (ovl_ask_question("Should set opaque dir", cover_path, 1))
+I just noticed that this test is not applied for generic filesystems,
+but for ones that support metadata_journaling. So, IMHO, we don't have
+to rely on POSIX too much here. Back to metadata_journalling, we indeed
+have to treat this as a bug in f2fs, since this recovery behavior sounds
+like defacto across the major filesystems.
 
+I submitted a patch to address this, based on the hint by Ted.
+https://patchwork.kernel.org/patch/10135085/
 
-> +                               if ((ret = ovl_set_opaque(cover_path)))
-> +                                       goto out;
->                 }
->
->                 goto out;
-> @@ -402,13 +434,25 @@ remove:
->         sctx->i_redirects++;
->
->         /* Remove redirect xattr or ask user */
-> -       if (!ovl_ask_invalid("Invalid redirect xattr", pathname, 1))
-> +       if (!ovl_ask_action("Invalid redirect xattr", pathname, "Remove", 1))
->                 goto out;
->  remove_d:
-> -       ret = ovl_remove_redirect(pathname);
-> -       if (!ret)
-> -               sctx->i_redirects--;
-> +       if ((ret = ovl_remove_redirect(pathname)))
-> +               goto out;
-> +
-> +       sctx->i_redirects--;
-> +
-> +       /* If lower directory exist, ask user to add opaque xattr to cover it */
-> +       if (start < lower_num) {
-> +               if ((ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
-> +                                          start, &chk, false)))
-> +                       goto out;
-> +               if (chk.exist && is_dir(&chk.st) &&
-> +                   !ovl_ask_question("Is merged dir", pathname, 1))
-> +                       ret = ovl_set_opaque(pathname);
+Thanks,
 
-Same here. Better that fsck -y will set opaque right?
-So flip the question to "Should set opaque dir"
-
-> +       }
->  out:
-> +       free(cover_path);
->         free(redirect);
->         return ret;
->  }
+> 
+> IOWs, changing the test is the wrong thing to do on many levels....
+> 
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 > --
-> 2.9.5
->
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
