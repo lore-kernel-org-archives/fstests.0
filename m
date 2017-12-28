@@ -1,13 +1,13 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:3192 "EHLO huawei.com"
+Received: from szxga05-in.huawei.com ([45.249.212.191]:3241 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753119AbdL1Ldb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 28 Dec 2017 06:33:31 -0500
+        id S1751244AbdL1LmV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Dec 2017 06:42:21 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v3 4/6] fsck.overlay: correct redirect xattr check
-Date: Thu, 28 Dec 2017 19:40:21 +0800
-Message-ID: <20171228114023.43999-5-yi.zhang@huawei.com>
-In-Reply-To: <20171228114023.43999-1-yi.zhang@huawei.com>
-References: <20171228114023.43999-1-yi.zhang@huawei.com>
+Subject: [PATCH xfstest v2 4/4] overlay: add fsck.overlay impure xattr test
+Date: Thu, 28 Dec 2017 19:49:33 +0800
+Message-ID: <20171228114933.47759-5-yi.zhang@huawei.com>
+In-Reply-To: <20171228114933.47759-1-yi.zhang@huawei.com>
+References: <20171228114933.47759-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -15,238 +15,166 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-When we found a valid redirect xattr and the lower origin targed was
-covered by a directory, it could be 1) an another redirect directory,
-or 2) an opaque directory created after rename in overlayfs or 3) a
-general directory created in the underlying directory when overlay is
-offline. Currently, we only handled case 2, this patch cover the other
-two cases.
-
-This patch ask user if we find a covering directory whitout opaque
-and another redirect xattr.
+Add fsck.overlay test case to test it how to deal with impure
+xattr in underlying directories of overlayfs.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- README.md | 31 ++++++++++++++-------
- check.c   | 94 ++++++++++++++++++++++++++++++++++++++++++++++-----------------
- 2 files changed, 90 insertions(+), 35 deletions(-)
+ tests/overlay/203     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/203.out |   3 ++
+ tests/overlay/group   |   1 +
+ 3 files changed, 128 insertions(+)
+ create mode 100755 tests/overlay/203
+ create mode 100644 tests/overlay/203.out
 
-diff --git a/README.md b/README.md
-index a8d0b1c..2e6146f 100644
---- a/README.md
-+++ b/README.md
-@@ -25,16 +25,27 @@ If an redirect directory is found, the following must be met:
- 
- 1) The directory path pointed by redirect xattr should exist in one of lower
-    layers.
--2) The origin directory should be redirected only once in one layer, which means
--   there is only one redirect xattr point to this origin directory in the
--   specified layer.
--3) A whiteout or an opaque directory with the same name to origin should exist
--   in the same directory as the redirect directory.
--
--If not, 1) The redirect xattr is invalid and need to remove 2) One of the
--redirect xattr is redundant but not sure which one is, ask user or warn in
--auto mode 3) Create a whiteout device or set opaque xattr to an existing
--directory if the parent directory was meregd or remove xattr if not.
-+2) The origin directory should be redirected only once in one layer, which
-+   means there is only one redirect xattr point to this origin directory in
-+   the specified layer.
-+3) There must be something with the same name to the rename origin in its
-+   origin place, maybe a whiteout/file or a(an) opaque/redirect directory
-+   covering the lower target, maybe a new created directory merging with
-+   lower origin directory.
+diff --git a/tests/overlay/203 b/tests/overlay/203
+new file mode 100755
+index 0000000..f21dc6d
+--- /dev/null
++++ b/tests/overlay/203
+@@ -0,0 +1,124 @@
++#! /bin/bash
++# FS QA Test 203
++#
++# Test fsck.overlay how to deal with impure xattr in overlayfs.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Huawei.  All Rights Reserved.
++# Author: zhangyi (F) <yi.zhang@huawei.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+If not,
-+1) The redirect xattr is invalid and need to remove.
-+2) One of the redirect xattr is redundant but not sure which one is, ask user
-+   or warn in auto mode.
-+3) Create a whiteout device if there nothing exists in its place. If the lower
-+   targed was covered by a directory which is not an another redirect directory,
-+   it could be created after rename in overlayfs or created in underlying
-+   directory when overlay is offline, not sure this directory is merged or not,
-+   ask user by default.
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+If an invalid redirect xattr was removed by fsck and there is a corresponding
-+lower directory with the same name exists, not sure this directory is merged
-+or not, ask user to make a decision.
- 
- Usage
- =====
-diff --git a/check.c b/check.c
-index 0b5d49b..6db41cd 100644
---- a/check.c
-+++ b/check.c
-@@ -152,12 +152,29 @@ static inline int ovl_create_whiteout(const char *pathname)
- 	return ret;
- }
- 
--static inline int ovl_ask_invalid(const char *question, const char *pathname,
--				  int action)
-+static inline bool ovl_is_redirect(const char *pathname)
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+       bool exist = false;
-+       ssize_t ret;
-+
-+       ret = get_xattr(pathname, OVL_REDIRECT_XATTR, NULL, &exist);
-+       return ret ? false : exist;
++	cd /
++	rm -f $tmp.*
 +}
 +
-+static inline int ovl_ask_action(const char *description, const char *pathname,
-+				 const char *question, int action)
-+{
-+	print_info(_("%s: %s "), description, pathname);
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
 +
-+	return ask_question(question, action);
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
++
++# remove all files from previous tests
++_scratch_mkfs
++
++OVL_REDIRECT_XATTR="trusted.overlay.redirect"
++OVL_IMPURE_XATTR="trusted.overlay.impure"
++OVL_IMPURE_XATTR_VAL="y"
++
++# Create a redirect directory
++make_redirect_dir()
++{
++	local target=$1
++	local value=$2
++
++	mkdir -p $target
++	$SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
 +}
 +
-+static inline int ovl_ask_question(const char *question, const char *pathname,
-+				   int action)
- {
- 	print_info(_("%s: %s "), question, pathname);
- 
--	return ask_question("Remove", action);
-+	return ask_question("", action);
- }
- 
- /*
-@@ -233,7 +250,7 @@ remove:
- 	sctx->i_whiteouts++;
- 
- 	/* Remove orphan whiteout directly or ask user */
--	if (!ovl_ask_invalid("Orphan whiteout", pathname, 1))
-+	if (!ovl_ask_action("Orphan whiteout", pathname, "Remove", 1))
- 		return 0;
- 
- 	ret = unlink(pathname);
-@@ -323,15 +340,21 @@ static void ovl_redirect_free(void)
-  * 2) Count how many directories the origin directory was redirected by.
-  *    If more than one in the same layer, there must be some inconsistency
-  *    but not sure which one is invalid, ask user or warn in auto mode.
-- * 3) Check and fix the missing whiteout or opaque in redierct parent dir.
-+ * 3) Check and fix the missing whiteout that covering the redirect lower
-+ *    target. If the lower targed was covered by a directory which is not
-+ *    an another redirect directory, it could be created after rename in
-+ *    overlayfs or created in underlying directory when overlay is offline,
-+ *    check opaque xattr and ask user by default.
-+ * 4) When an invalid redirect xattr is removed, and the lower layers have
-+ *    directory with same name, not sure this is a merged directory, ask
-+ *    user by default.
-  */
- static int ovl_check_redirect(struct scan_ctx *sctx)
- {
- 	const char *pathname = sctx->pathname;
- 	struct ovl_lower_check chk = {0};
--	char redirect_rpath[PATH_MAX];
- 	struct stat rst;
--	char *redirect = NULL;
-+	char *redirect = NULL, *cover_path = NULL;
- 	int start;
- 	int ret = 0;
- 
-@@ -345,8 +368,10 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
- 	sctx->t_redirects++;
- 
- 	/* Redirect dir in last lower dir ? */
--	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1)
-+	if (sctx->dirtype == OVL_LOWER && sctx->num == lower_num-1) {
-+		start = lower_num;
- 		goto remove;
-+	}
- 
- 	/* Scan lower directories to check redirect dir exist or not */
- 	start = (sctx->dirtype == OVL_LOWER) ? sctx->num + 1 : 0;
-@@ -359,14 +384,14 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
- 		/* Check duplicate in same layer */
- 		if (ovl_redirect_entry_find(chk.path, sctx->dirtype,
- 					    sctx->num, &tmp)) {
--			print_info("Duplicate redirect directories found:\n");
--			print_info("origin:%s current:%s last:%s\n",
--				   chk.path, pathname, tmp);
-+			print_info("Duplicate redirect directory found:%s\n", pathname);
-+			print_info("Origin:%s Previous:%s\n", chk.path, tmp);
- 
- 			sctx->i_redirects++;
- 
- 			/* Don't remove in auto mode */
--			if (ovl_ask_invalid("Duplicate redirect xattr", pathname, 0))
-+			if (ovl_ask_action("Duplicate redirect xattr", pathname,
-+					   "Remove", 0))
- 				goto remove_d;
- 		}
- 
-@@ -374,25 +399,32 @@ static int ovl_check_redirect(struct scan_ctx *sctx)
- 				       sctx->num, chk.path);
- 
- 		/* Check and fix whiteout or opaque dir */
--		path_pack(redirect_rpath, sizeof(redirect_rpath),
--			  sctx->dirname, redirect);
--		if (lstat(redirect_rpath, &rst) != 0) {
-+		cover_path = path_pack(cover_path, 0, sctx->dirname, redirect);
-+		if (lstat(cover_path, &rst) != 0) {
- 			if (errno != ENOENT && errno != ENOTDIR) {
- 				print_err(_("Cannot stat %s: %s\n"),
--					    redirect_rpath, strerror(errno));
-+					    cover_path, strerror(errno));
- 				goto out;
- 			}
- 
- 			/* Found nothing, create a whiteout */
--			if ((ret = ovl_create_whiteout(redirect_rpath)))
-+			if ((ret = ovl_create_whiteout(cover_path)))
- 				goto out;
- 
- 			sctx->t_whiteouts++;
- 
--		} else if (is_dir(&rst) && !ovl_is_opaque(redirect_rpath)) {
--			/* Found a directory but not opaqued, fix opaque xattr */
--			if ((ret = ovl_set_opaque(redirect_rpath)))
--				goto out;
-+		} else if (is_dir(&rst) && !ovl_is_opaque(cover_path) &&
-+			   !ovl_is_redirect(cover_path)) {
++# Remove impure xattr
++remove_impure()
++{
++	local target=$1
 +
-+			/*
-+			 * Found a directory but not opaqued and not even
-+			 * an another redirected directory, maybe created
-+			 * when overlayfs is offline, ask user to add the
-+			 * opaque xattr if this is not a merged dir.
-+			 */
-+			if (!ovl_ask_question("Is merged dir", cover_path, 1))
-+				if ((ret = ovl_set_opaque(cover_path)))
-+					goto out;
- 		}
- 
- 		goto out;
-@@ -402,13 +434,25 @@ remove:
- 	sctx->i_redirects++;
- 
- 	/* Remove redirect xattr or ask user */
--	if (!ovl_ask_invalid("Invalid redirect xattr", pathname, 1))
-+	if (!ovl_ask_action("Invalid redirect xattr", pathname, "Remove", 1))
- 		goto out;
- remove_d:
--	ret = ovl_remove_redirect(pathname);
--	if (!ret)
--		sctx->i_redirects--;
-+	if ((ret = ovl_remove_redirect(pathname)))
-+		goto out;
++	$SETFATTR_PROG -x $OVL_IMPURE_XATTR $target
++}
 +
-+	sctx->i_redirects--;
++# Check impure xattr
++check_impure()
++{
++	local target=$1
 +
-+	/* If lower directory exist, ask user to add opaque xattr to cover it */
-+	if (start < lower_num) {
-+		if ((ret = ovl_check_lower(path_pick(pathname, sctx->dirlen),
-+					   start, &chk, false)))
-+			goto out;
-+		if (chk.exist && is_dir(&chk.st) &&
-+		    !ovl_ask_question("Is merged dir", pathname, 1))
-+			ret = ovl_set_opaque(pathname);
-+	}
- out:
-+	free(cover_path);
- 	free(redirect);
- 	return ret;
- }
++        value=$($GETFATTR_PROG --absolute-names --only-values \
++                -n $OVL_IMPURE_XATTR $target)
++
++        [[ $value == $OVL_IMPURE_XATTR_VAL ]] || echo "Missing impure xattr"
++}
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++
++mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir
++
++# Test missing impure xattr in directory which has origin files, should fix
++echo "+ Missing impure"
++mkdir $lowerdir/testdir $upperdir/testdir
++touch $lowerdir/testdir/foo
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++touch $SCRATCH_MNT/testdir/foo
++$UMOUNT_PROG $SCRATCH_MNT
++remove_impure $upperdir/testdir
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_impure $upperdir/testdir
++rm -rf $lowerdir/* $upperdir/*
++
++# Test missing impure xattr in directory which has redirect directories,
++# should fix
++echo "+ Missing impure(2)"
++mkdir -p $lowerdir/origin
++make_redirect_dir $upperdir/testdir/subdir "/origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++        _fail "fsck should not fail"
++check_impure $upperdir/testdir
++rm -rf $lowerdir/* $upperdir/*
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/203.out b/tests/overlay/203.out
+new file mode 100644
+index 0000000..3bedf2a
+--- /dev/null
++++ b/tests/overlay/203.out
+@@ -0,0 +1,3 @@
++QA output created by 203
+++ Missing impure
+++ Missing impure(2)
+diff --git a/tests/overlay/group b/tests/overlay/group
+index e39b5e0..f99d89e 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -51,3 +51,4 @@
+ 048 auto quick copyup hardlink
+ 201 auto quick fsck
+ 202 auto quick fsck
++203 auto quick fsck
 -- 
-2.9.5
+2.5.0
 
