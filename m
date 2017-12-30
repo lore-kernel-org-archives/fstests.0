@@ -1,65 +1,81 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:58049 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753781AbdL2KZj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 29 Dec 2017 05:25:39 -0500
-Subject: Re: [PATCH v3 4/6] fsck.overlay: correct redirect xattr check
-References: <20171228114023.43999-1-yi.zhang@huawei.com>
- <20171228114023.43999-5-yi.zhang@huawei.com>
- <CAOQ4uxh89i3=TaYsAvQv7YvF0_auW3LYOf5PLtLHJkYo9kCHRQ@mail.gmail.com>
- <e5a0395a-ad58-37af-726b-2690f4f96789@huawei.com>
- <CAOQ4uxjSRwWWbBV9qQ7XCqf6Z+JAS0RVjOS+vPKL+4eGPYk1Pw@mail.gmail.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <1c598a02-6d62-0f61-2c4b-3247ef73a59c@huawei.com>
-Date: Fri, 29 Dec 2017 18:25:05 +0800
+Received: from mail-pl0-f67.google.com ([209.85.160.67]:44406 "EHLO
+        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750800AbdL3EGQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Dec 2017 23:06:16 -0500
+Subject: Re: [PATCH xfstest v2 3/4] overlay: add fsck.overlay redirect
+ directory test
+References: <20171228114933.47759-1-yi.zhang@huawei.com>
+ <20171228114933.47759-4-yi.zhang@huawei.com>
+ <CAOQ4uxiyAj7+UmFMW7eP+HeeZuH6pWxCLKd5WKtc53b77ZihoQ@mail.gmail.com>
+From: "zhangyi (F)" <yizhang089@gmail.com>
+Message-ID: <d1601184-7272-b607-ee6e-768a33623e42@gmail.com>
+Date: Sat, 30 Dec 2017 12:06:13 +0800
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxjSRwWWbBV9qQ7XCqf6Z+JAS0RVjOS+vPKL+4eGPYk1Pw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <CAOQ4uxiyAj7+UmFMW7eP+HeeZuH6pWxCLKd5WKtc53b77ZihoQ@mail.gmail.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
+Content-Transfer-Encoding: quoted-printable
+To: Amir Goldstein <amir73il@gmail.com>, "zhangyi (F)" <yi.zhang@huawei.com>
 Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/12/29 17:32, Amir Goldstein Wrote:
->>>> +                       goto out;
->>>> +               if (chk.exist && is_dir(&chk.st) &&
->>>> +                   !ovl_ask_question("Is merged dir", pathname, 1))
->>>> +                       ret = ovl_set_opaque(pathname);
->>>
->>> Same here. Better that fsck -y will set opaque right?
->>> So flip the question to "Should set opaque dir"
->>>
->>
->> Here is also not set opaque xattr in '-y' and '-p' mode.
->> I guess general user may not care about "invalid/duplicate redirect xattr"
->> when they modify underlying layers (eg: call "cp -a" or remove redirect origin
->> directory), but they probably know directories with the same name will merge
->> in overlayfs by default, and they should know the distribution of directories
->> after modification. So I prefer to merge directories. Anyway, neither will
->> affect consistency.  :)
->>
-> 
-> OK, but the question is still wrong, because answering No changes the
-> file systems and didn't fsck -n guaranty NOT to change the file system?
-> I think you probably need a more error prone interface for changing fs
-> that guaranties you cannot change fs when -n was specified.
-> 
-> The way I see it, the only way to resolve this is run several "pass"
-> like e2fsck.
-> The first pass just marks duplicate redirects
-> The second pass (with -y) sets redirect dirs opaque and removes redirect
-> The third pass will ask if to set merge dir opaque in case user answered No
-> for any of the redirect dirs in second pass.
-> 
-> Probably easier for you at this point is to flip the question and not
-> implement the above.
-> 
+On 2017/12/28 20:37, Amir Goldstein Wrote:
 
-You are right, I miss that -n option will change the file system, thanks
-for pointing this out. For simplicity now, I will flip the question as
-you said(set opaque xattr in with -y option). For the first choice (run
-several pass), we can realize it if necessary in the future.
+>
+>> +# Test valid redirect xattr with general directory cover lower origin
+>> +# target, should ask user this directory is merged or not by default
+>> +# and do nothing in auto mode
+>> +echo "+ Valid redirect(4)"
+>> +mkdir $lowerdir/origin
+>> +mkdir $upperdir/origin
+>> +make_redirect_dir $upperdir/testdir "origin"
+>> +
+>> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>=
+&1 || \
+>> +       _fail "fsck should not fail"
+>> +check_redirect "origin" $upperdir/testdir
+>> +$GETFATTR_PROG --absolute-names -d -m $OVL_OPAQUE_XATTR $upperdir/tes=
+tdir
+>> +
+>> +echo "n" > $tmp.input
+> This approach seems a bit fragile to me.
+> Maybe you will want to add some questions in the future.
+> To me it makes better sense to check behavior of fsck -y is automated t=
+est,
+> because some user who does not understand the questions is surely going
+> to run fsck -y to fix problems.
+>
+>> +_overlay_fsck_dirs $lowerdir $upperdir $workdir <$tmp.input >> $seqre=
+s.full 2>&1 || \
+>> +       _fail "fsck should not fail"
+>> +check_redirect "origin" $upperdir/testdir
+>> +check_opaque $upperdir/origin
+>> +rm -rf $lowerdir/* $upperdir/*
+>> +
+Hi Amir=EF=BC=9A
 
-Thanks,
+Think about this again. IIUC, I think there is a consistency problem=20
+about this case.
+If we allow user to create a new directory in upper layer merge with=20
+lower redirect origin target when overlay offline, we will see duplicate=20
+d_ino in overlay filesystem after next mount, becasue current=20
+ovl_getattr() will get the lower d_ino for both merged dir and redirect d=
+ir.
+
+eg:
+mnt: =C2=A0 =C2=A0 =C2=A0=C2=A0=C2=A0 dira(ino=3Dx)=C2=A0=C2=A0=C2=A0 dir=
+b(ino=3Dx)
+upper:=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 *dira(ino=3Dy)=C2=A0=C2=A0 dirb(ino=3D=
+z, redirect=3Ddirb)
+lower:=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 dira(ino=3Dx)
+
+*) User remove whiteout or opaque dir and then newly created when=20
+overlayfs is offline.
+
+Furthermore, if user rename dira again, will lead to duplicate redirect=20
+xattr directly.
+So I think we should forbid user do this and check by fsck.overlay. Or=20
+handle by overlay filesytem?=C2=A0 thought?
+
+Thanks=EF=BC=8C
 Yi.
-
