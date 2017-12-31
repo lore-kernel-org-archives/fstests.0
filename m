@@ -1,123 +1,110 @@
-Received: from mail-pf0-f171.google.com ([209.85.192.171]:43258 "EHLO
-        mail-pf0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750724AbdLaFGz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 31 Dec 2017 00:06:55 -0500
-Subject: Re: [PATCH xfstest v2 3/4] overlay: add fsck.overlay redirect
- directory test
-References: <20171228114933.47759-1-yi.zhang@huawei.com>
- <20171228114933.47759-4-yi.zhang@huawei.com>
- <CAOQ4uxiyAj7+UmFMW7eP+HeeZuH6pWxCLKd5WKtc53b77ZihoQ@mail.gmail.com>
- <d1601184-7272-b607-ee6e-768a33623e42@gmail.com>
- <CAOQ4uxhmGo759uLV6Fvg1Pa2rNJ_sfskL_aPa8rDDZcPXTkwEQ@mail.gmail.com>
-From: zhangyi <yizhang089@gmail.com>
-Message-ID: <6b5ad224-5863-6eb9-fb2a-766bccc4c9c5@gmail.com>
-Date: Sun, 31 Dec 2017 13:06:50 +0800
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:46591 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750762AbdLaOVi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 31 Dec 2017 09:21:38 -0500
+Received: by mail-pf0-f193.google.com with SMTP id c204so23879218pfc.13
+        for <fstests@vger.kernel.org>; Sun, 31 Dec 2017 06:21:38 -0800 (PST)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id 77sm83524686pfh.43.2017.12.31.06.21.35
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 31 Dec 2017 06:21:36 -0800 (PST)
+Message-ID: <5a48f270.d007620a.ade59.d04e@mx.google.com>
+From: Eryu Guan <guaneryu@gmail.com>
+Date: Sun, 31 Dec 2017 22:21:30 +0800
+Subject: [ANNOUNCE] fstests: master branch updated to e6f1dfa3e331
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxhmGo759uLV6Fvg1Pa2rNJ_sfskL_aPa8rDDZcPXTkwEQ@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="TvoCxpYRz61y"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: "zhangyi (F)" <yi.zhang@huawei.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2017/12/30 17:35, Amir Goldstein Wrote:
-> On Sat, Dec 30, 2017 at 6:06 AM, zhangyi (F) <yizhang089@gmail.com> wro=
-te:
->> On 2017/12/28 20:37, Amir Goldstein Wrote:
->>
->>>> +# Test valid redirect xattr with general directory cover lower orig=
-in
->>>> +# target, should ask user this directory is merged or not by defaul=
-t
->>>> +# and do nothing in auto mode
->>>> +echo "+ Valid redirect(4)"
->>>> +mkdir $lowerdir/origin
->>>> +mkdir $upperdir/origin
->>>> +make_redirect_dir $upperdir/testdir "origin"
->>>> +
->>>> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full =
-2>&1
->>>> || \
->>>> +       _fail "fsck should not fail"
->>>> +check_redirect "origin" $upperdir/testdir
->>>> +$GETFATTR_PROG --absolute-names -d -m $OVL_OPAQUE_XATTR
->>>> $upperdir/testdir
->>>> +
->>>> +echo "n" > $tmp.input
->>> This approach seems a bit fragile to me.
->>> Maybe you will want to add some questions in the future.
->>> To me it makes better sense to check behavior of fsck -y is automated
->>> test,
->>> because some user who does not understand the questions is surely goi=
-ng
->>> to run fsck -y to fix problems.
->>>
->>>> +_overlay_fsck_dirs $lowerdir $upperdir $workdir <$tmp.input >>
->>>> $seqres.full 2>&1 || \
->>>> +       _fail "fsck should not fail"
->>>> +check_redirect "origin" $upperdir/testdir
->>>> +check_opaque $upperdir/origin
->>>> +rm -rf $lowerdir/* $upperdir/*
->>>> +
->> Hi Amir=EF=BC=9A
->>
->> Think about this again. IIUC, I think there is a consistency problem a=
-bout
->> this case.
->> If we allow user to create a new directory in upper layer merge with l=
-ower
->> redirect origin target when overlay offline, we will see duplicate d_i=
-no in
->> overlay filesystem after next mount, becasue current ovl_getattr() wil=
-l get
->> the lower d_ino for both merged dir and redirect dir.
->>
->> eg:
->> mnt:         dira(ino=3Dx)    dirb(ino=3Dx)
->> upper:      *dira(ino=3Dy)   dirb(ino=3Dz, redirect=3Ddirb)
->> lower:       dira(ino=3Dx)
->>
->> *) User remove whiteout or opaque dir and then newly created when over=
-layfs
->> is offline.
->>
->> Furthermore, if user rename dira again, will lead to duplicate redirec=
-t
->> xattr directly.
->> So I think we should forbid user do this and check by fsck.overlay. Or
->> handle by overlay filesytem?  thought?
->>
-> I am not sure I follow. Of course there is a consistency problem with
-> allowing merge
-> and redirect to same target. merge dir is just a private case of
-> "redirect to .".
-> merge+redirect is not different in any way than multiple redirect.
-> All our discussion w.r.t the "Is merge dir?" question was revolving aro=
-und the
-> fact that either the merge dir or the redirected dir needs to be fixed.
-Exactly=EF=BC=8CIf user selsect the "merge" option(not opaque), we also s=
-hould=20
-fix the
-redirected dir which point to the same origin. Thanks!
 
-> And duplicate d_ino is the *least* of the problem.
-> With duplicate redirect, there can be many objects (all descendants)
-> in the file system
-> with the same st_dev;st_ino, which may have different data.
->
-> This work in my queue is verifying multiple redirect/merge at lookup ti=
-me,
-> but *only* if directories where indexed to begin with.
-> fsck.overlay will be needed to find and correct duplicate redirects
-> and even merge
-> dirs that were copied up without an index and fix the index (if
-> -overify=3Don is given).
->
-> There is a limitation of verify=3Don that it cannot use index to verify
-> mulitple redirect
-> from mid layers. This is where only fsck.overlay can be used.
-OK, I can add this check and fix latter.=C2=A0 :=EF=BC=89
+--TvoCxpYRz61y
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Cheers,
-Yi.
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is the last update in 2017, which only contains
+three minor fixes.
+
+As this is the last update in 2017, I went through the git history a bit and
+took a very quick scan on it to get a rough idea on what happened in 2017, here
+is what I've observed (the numbers may not be accurate, and I may miss some
+important updates too).
+
+We had 529 patches from 67 contributors merged in 2017, which is the biggest
+update ever (444 patches in 2016 and 282 patches in 2015), around 224 new tests
+were added. I also listed some notable changes in 2017 briefly:
+
+- base filesystem support in overlayfs testing (Amir Goldstein)
+- test result report generator & infrastructure (Dmitry Monakhov)
+- support testing more filesystems:
+  - glusterfs (Zorro Lang)
+  - pvfs (or Orangefs) (Martin Brandenburg)
+  - ubifs (David Oberhollenzer)
+- cross-compilation support (Gwendal Grignou)
+- remove IRIX support (Eric Biggers)
+- dm-log-writes crash consistency test infrastructure (Josef Bacik, Amir Goldstein)
+- fs-perf infrastructure (Josef Bacik)
+
+Many many thanks to all the contributors and reviewers! Happy New Year!
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+e6f1dfa3e331 ext4: use a slightly bigger file system in ext4/021
+
+New commits:
+
+Ari Sundholm (1):
+      [79a3bb053fec] common/encrypt: Create an encrypted equivalent of _scratch_mkfs_sized
+
+Qu Wenruo (1):
+      [5525ac522809] btrfs: Add new 'limit' test group for btrfs
+
+Theodore Ts'o (1):
+      [e6f1dfa3e331] ext4: use a slightly bigger file system in ext4/021
+
+
+Code Diffstat:
+
+ common/encrypt    | 12 ++++++++++++
+ tests/btrfs/group | 12 ++++++------
+ tests/ext4/021    |  4 ++--
+ tests/generic/399 |  3 +--
+ 4 files changed, 21 insertions(+), 10 deletions(-)
+--
+Eryu Guan
+eguan@redhat.com
+
+--TvoCxpYRz61y
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJaSPHXAAoJECZSqilcj+djEmEP/2TLntiAic30TKQL97wSloPE
+/qK7qPPBsVhkLaKNJFg4V2/4y8CO1bGZNEbxfKLQhGINIHKkI2+Cycu1ndj5fvL3
+J16rqMp5pR1AQuIlSLZQNMVmLI7GIDCIHz05mvElXmd2JpsV2rxgewGFahH53V+c
+IkZ41FRZtf13iAASlAJYHvPW8mPZaSQeWFwA7fKlVphfA56qUdCKPPyT51e4+tmW
+Yggk3bGSqNj3ES32OdMvdCOq7NpMFKWcaO0WYkQze6O2V6eoLGTsjLLU1rDvgGYH
+jCTfXLdGiuEtL42d6RSewW0kgqnMroespMdct3ZZqSDkEwE6BbnlZRFCQt3XxMsD
+Z/9+uFManuf9CJs5LrwfHIxPFQPK7qBPJIaal1gj4QNNMMuQpsBIeEMvtoVe4RZd
+pCxfD52XUxlwHHJSRR2DTJ4vFIkTOg3WRkZ0el7cZyyQ9jrt/ef6jhUnpm3EeFXS
+0hHCK0N3Bed/vQ3fyp+vpDyRcLyWHsC2zGfZ6OO5KktCOmcmO15lZXD9LH8WfQVi
+//O9CCv1yXH7Wnher8fJIxduO/EoTqJEtnxH3FxQf/CmmLcxqGRD2EfALiVOocQ+
+mZecynsPM6Qnz0LBHZ4KIjVuT7m9oI8cOuOgdfmKYGDewGkhnKXrmIAQ9LXEvzIH
+ce6wrlG1Sg8t+YMruTLA
+=b9HE
+-----END PGP SIGNATURE-----
+
+--TvoCxpYRz61y--
