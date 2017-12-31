@@ -1,38 +1,40 @@
-Received: from imap.thunk.org ([74.207.234.97]:50948 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755940AbdLVS0L (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 22 Dec 2017 13:26:11 -0500
+Date: Sun, 31 Dec 2017 13:45:08 -0500
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] ext4: use a slightly bigger file system in ext4/021
-Date: Fri, 22 Dec 2017 13:26:07 -0500
-Message-Id: <20171222182607.7745-1-tytso@mit.edu>
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>
+Subject: Re: [PATCH] generic/466: be more precise about which block sizes to
+ use
+Message-ID: <20171231184508.GA29994@thunk.org>
+References: <20171211172742.3490-1-tytso@mit.edu>
+ <20171213173629.GG6896@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20171213173629.GG6896@magnolia>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-An 8 MB file system may not be big enough for certain file system
-configurations --- in particular, if the inode size is 2048 bytes.
-Make the test file system 10MB instead.
+On Wed, Dec 13, 2017 at 09:36:29AM -0800, Darrick J. Wong wrote:
+> > +	get_page_size
+> > +	;;
+> > +    *)
+> > +	echo 512
+> 
+> FWIW XFS' minimum block size is 1k for v5 filesystems, though you can't
+> really tell until you run mkfs.xfs -N.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/ext4/021 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Ok, but I assume we should keep this at 512 since it could be a v4
+file systems that are being tested?
 
-diff --git a/tests/ext4/021 b/tests/ext4/021
-index 8a780873..e46b43be 100755
---- a/tests/ext4/021
-+++ b/tests/ext4/021
-@@ -50,7 +50,7 @@ _require_scratch
- _require_dumpe2fs
- 
- # 8M in bytes
--fssize=$((8 * 1024 * 1024))
-+fssize=$((10 * 1024 * 1024))
- _scratch_mkfs_sized $fssize >> $seqres.full 2>&1
- _require_metadata_journaling $SCRATCH_DEV
- 
--- 
-2.11.0.rc0.7.gbe5a750
+> > +_fs_max_blocksize()
+> > +{
+> > +    get_page_size
+> 
+> Also, one can run xfstests against a fuse2fs-mounted 64k-block ext4 fs.
 
+Really?  Does mmap work on a fuse2fs-mounted 64k-block ext4 file system?
+
+I suppose can just force the block size to be 64k for fuse2fs,
+although I don't think the using some file system like ext4 for
+fuse2fs testing isn't going to work right now anyway, yes?
+
+	      	   	     		     	       - Ted
