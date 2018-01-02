@@ -1,30 +1,39 @@
-Received: from mx2.suse.de ([195.135.220.15]:33886 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:37816 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750749AbeABQ0H (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 2 Jan 2018 11:26:07 -0500
-Date: Tue, 2 Jan 2018 17:24:00 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH] fstests: btrfs: Add new 'limit' test group for btrfs
-Message-ID: <20180102162400.GV3553@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20171226055744.27697-1-wqu@suse.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171226055744.27697-1-wqu@suse.com>
+        id S1751097AbeABRRQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 2 Jan 2018 12:17:16 -0500
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] generic/050: fix _require_local_device $SCRATCH_DEV check order
+Date: Tue,  2 Jan 2018 17:17:05 +0000
+Message-Id: <20180102171705.24066-1-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Chengguang Xu <cgxu519@icloud.com>, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 26, 2017 at 01:57:44PM +0800, Qu Wenruo wrote:
-> Btrfs qgroup also supports to limit the usage of specified qgroups.
-> 
-> It's possible to enable qgroup but doesn't enable limit.
-> (Most user won't use qgroup limit for various problems)
-> 
-> So add a new test group 'limit' for btrfs, as a subset of existing
-> 'qgroup' group.
+Commit 2b4eae7fd825 ("common/rc: add scratch shutdown support for
+overlayfs") added a _require_local_device check to generic tests 042 and
+050.  However, for test 050, this check was added _before_ actually
+verifying that a SCRATCH_DEV actually exists.  This patch simply re-orders
+the _require_local_device to the right place.
 
-The term 'limit' is IMHO too generic, qglimit or qg_limit would be more
-descriptive.
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ tests/generic/050 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/generic/050 b/tests/generic/050
+index dbf0ac5cd185..e6e8bc1b9733 100755
+--- a/tests/generic/050
++++ b/tests/generic/050
+@@ -44,9 +44,9 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ _supported_fs generic
+ _supported_os Linux
+ 
+-_require_local_device $SCRATCH_DEV
+ _require_scratch_nocheck
+ _require_scratch_shutdown
++_require_local_device $SCRATCH_DEV
+ _require_norecovery
+ 
+ _scratch_mkfs >/dev/null 2>&1
