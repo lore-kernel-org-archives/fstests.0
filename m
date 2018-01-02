@@ -1,80 +1,177 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:35998 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750745AbeABUgz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Jan 2018 15:36:55 -0500
-Date: Tue, 2 Jan 2018 12:36:50 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/466: be more precise about which block sizes to
- use
-Message-ID: <20180102203650.GC5146@magnolia>
-References: <20171211172742.3490-1-tytso@mit.edu>
- <20171213173629.GG6896@magnolia>
- <20171231184508.GA29994@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171231184508.GA29994@thunk.org>
+Received: from userp2120.oracle.com ([156.151.31.85]:44808 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750736AbeABVhk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Jan 2018 16:37:40 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] fstests: btrfs/158: reproduce a scrub bug on raid6 corruption
+Date: Tue,  2 Jan 2018 13:35:00 -0700
+Message-Id: <20180102203500.12713-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Dec 31, 2017 at 01:45:08PM -0500, Theodore Ts'o wrote:
-> On Wed, Dec 13, 2017 at 09:36:29AM -0800, Darrick J. Wong wrote:
-> > > +	get_page_size
-> > > +	;;
-> > > +    *)
-> > > +	echo 512
-> > 
-> > FWIW XFS' minimum block size is 1k for v5 filesystems, though you can't
-> > really tell until you run mkfs.xfs -N.
-> 
-> Ok, but I assume we should keep this at 512 since it could be a v4
-> file systems that are being tested?
+This is to reproduce a bug of scrub, with which scrub is unable to
+repair raid6 corruption as expected.
 
-That depends on whether this function returns the smallest blocksize
-guaranteed to pass mkfs given the current set of options or the
-theoretical smallest blocksize supported by that fs given the right set
-of options.  IOWs, if this is a v5 fs being tested, then "mkfs.xfs -b
-size=$(_fs_min_blocksize) -m crc=1" will fail.
+The kernel side fixes are
+  Btrfs: make raid6 rebuild retry more
+  Btrfs: fix scrub to repair raid6 corruption
 
-> > > +_fs_max_blocksize()
-> > > +{
-> > > +    get_page_size
-> > 
-> > Also, one can run xfstests against a fuse2fs-mounted 64k-block ext4 fs.
-> 
-> Really?  Does mmap work on a fuse2fs-mounted 64k-block ext4 file system?
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+---
+ tests/btrfs/158     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/158.out |  10 +++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 125 insertions(+)
+ create mode 100755 tests/btrfs/158
+ create mode 100644 tests/btrfs/158.out
 
-Yes:
+diff --git a/tests/btrfs/158 b/tests/btrfs/158
+new file mode 100755
+index 0000000..43afc2d
+--- /dev/null
++++ b/tests/btrfs/158
+@@ -0,0 +1,114 @@
++#! /bin/bash
++# FS QA Test 158
++#
++# The test case is check if scrub is able fix raid6 data corruption,
++# ie. if there is data corruption on two disks in the same horizontal
++# stripe, e.g.  due to bitrot.
++#
++# The kernel fixes are
++#	Btrfs: make raid6 rebuild retry more
++#	Btrfs: fix scrub to repair raid6 corruption
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Oracle.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 4
++_require_btrfs_command inspect-internal dump-tree
++
++get_physical_stripe0()
++{
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
++	grep " DATA\|RAID6" -A 10 | \
++	$AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /0/) { print $6 }'
++}
++
++get_physical_stripe1()
++{
++	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
++	grep " DATA\|RAID6" -A 10 | \
++	$AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /1/) { print $6 }'
++}
++
++_scratch_dev_pool_get 4
++# step 1: create a raid6 btrfs and create a 4K file
++echo "step 1......mkfs.btrfs" >>$seqres.full
++
++mkfs_opts="-d raid6 -b 1G"
++_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
++
++# -o nospace_cache makes sure data is written to the start position of the data
++# chunk
++_scratch_mount -o nospace_cache
++
++# [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
++$XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
++	"$SCRATCH_MNT/foobar" | _filter_xfs_io
++
++_scratch_unmount
++
++stripe_0=`get_physical_stripe0`
++stripe_1=`get_physical_stripe1`
++dev4=`echo $SCRATCH_DEV_POOL | awk '{print $4}'`
++dev3=`echo $SCRATCH_DEV_POOL | awk '{print $3}'`
++
++# step 2: corrupt the 1st and 2nd stripe (stripe 0 and 1)
++echo "step 2......simulate bitrot at offset $stripe_0 of device_4($dev4) and offset $stripe_1 of device_3($dev3)" >>$seqres.full
++
++$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_0 64K" $dev4 | _filter_xfs_io
++$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_1 64K" $dev3 | _filter_xfs_io
++
++# step 3: read foobar to repair the bitrot
++echo "step 3......repair the bitrot" >> $seqres.full
++_scratch_mount -o nospace_cache
++
++btrfs scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
++
++od -x $SCRATCH_MNT/foobar
++
++_scratch_dev_pool_put
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/158.out b/tests/btrfs/158.out
+new file mode 100644
+index 0000000..1f5ad3f
+--- /dev/null
++++ b/tests/btrfs/158.out
+@@ -0,0 +1,10 @@
++QA output created by 158
++wrote 131072/131072 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 9437184
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 65536/65536 bytes at offset 9437184
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++0000000 aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa
++*
++0400000
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index f68abf4..0b3cf12 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -160,3 +160,4 @@
+ 155 auto quick send
+ 156 auto quick trim
+ 157 auto quick raid
++158 auto quick raid
+-- 
+2.5.0
 
-# uname -a
-Linux magnolia 4.14.8-67-magnolia #2 SMP PREEMPT Fri Dec 22 17:23:52 PST 2017 x86_64 x86_64 x86_64 GNU/Linux
-# truncate -s 1g /tmp/a
-# mkfs.ext4 -b 65536 -F /tmp/a
-...
-# fuse2fs /tmp/a /mnt
-/tmp/a: Writing to the journal is not supported.
-# fallocate -l 128k /mnt/a
-# xfs_io -c 'mmap -rw 0 128k' -c 'mwrite -S 0x58 0 6144' /mnt/a
-# od -tx1 -Ad -c /mnt/a
-0000000  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58
-          X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X
-*
-0006144  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
-         \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
-*
-0131072
-
-> I suppose can just force the block size to be 64k for fuse2fs,
-> although I don't think the using some file system like ext4 for
-> fuse2fs testing isn't going to work right now anyway, yes?
-
-I haven't tried it in some time, but the last time I ran xfstests
-against fuse2fs it more or less worked (modulo all the fancy fallocate
-stuff that it doesn't support).
-
---D
-
-> 
-> 	      	   	     		     	       - Ted
