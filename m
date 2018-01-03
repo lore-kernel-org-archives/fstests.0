@@ -1,177 +1,39 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:44808 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750736AbeABVhk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Jan 2018 16:37:40 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] fstests: btrfs/158: reproduce a scrub bug on raid6 corruption
-Date: Tue,  2 Jan 2018 13:35:00 -0700
-Message-Id: <20180102203500.12713-1-bo.li.liu@oracle.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:3269 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750960AbeACBDT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 2 Jan 2018 20:03:19 -0500
+Subject: Re: [PATCH xfstest v2 2/4] overlay: add fsck.overlay whiteout test
+References: <20171228114933.47759-1-yi.zhang@huawei.com>
+ <20171228114933.47759-3-yi.zhang@huawei.com>
+ <20180102200501.GD15274@redhat.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <ff880368-da17-b3fc-5412-426f98875506@huawei.com>
+Date: Wed, 3 Jan 2018 09:02:47 +0800
+MIME-Version: 1.0
+In-Reply-To: <20180102200501.GD15274@redhat.com>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-This is to reproduce a bug of scrub, with which scrub is unable to
-repair raid6 corruption as expected.
+On 2018/1/3 4:05, Vivek Goyal Wrote:
+> On Thu, Dec 28, 2017 at 07:49:31PM +0800, zhangyi (F) wrote:
+> 
+> [..]
+>> +# Create test directories
+>> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
+>> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
+>> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
+>> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
+>> +
+>> +mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir
+> 
+> Minor nit. Why $workdir has been specified twice. I saw it in another test
+> as well.
+> 
+Will fix, thanks!
 
-The kernel side fixes are
-  Btrfs: make raid6 rebuild retry more
-  Btrfs: fix scrub to repair raid6 corruption
-
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
----
- tests/btrfs/158     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/158.out |  10 +++++
- tests/btrfs/group   |   1 +
- 3 files changed, 125 insertions(+)
- create mode 100755 tests/btrfs/158
- create mode 100644 tests/btrfs/158.out
-
-diff --git a/tests/btrfs/158 b/tests/btrfs/158
-new file mode 100755
-index 0000000..43afc2d
---- /dev/null
-+++ b/tests/btrfs/158
-@@ -0,0 +1,114 @@
-+#! /bin/bash
-+# FS QA Test 158
-+#
-+# The test case is check if scrub is able fix raid6 data corruption,
-+# ie. if there is data corruption on two disks in the same horizontal
-+# stripe, e.g.  due to bitrot.
-+#
-+# The kernel fixes are
-+#	Btrfs: make raid6 rebuild retry more
-+#	Btrfs: fix scrub to repair raid6 corruption
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 4
-+_require_btrfs_command inspect-internal dump-tree
-+
-+get_physical_stripe0()
-+{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+	grep " DATA\|RAID6" -A 10 | \
-+	$AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /0/) { print $6 }'
-+}
-+
-+get_physical_stripe1()
-+{
-+	$BTRFS_UTIL_PROG inspect-internal dump-tree -t 3 $SCRATCH_DEV | \
-+	grep " DATA\|RAID6" -A 10 | \
-+	$AWK_PROG '($1 ~ /stripe/ && $3 ~ /devid/ && $2 ~ /1/) { print $6 }'
-+}
-+
-+_scratch_dev_pool_get 4
-+# step 1: create a raid6 btrfs and create a 4K file
-+echo "step 1......mkfs.btrfs" >>$seqres.full
-+
-+mkfs_opts="-d raid6 -b 1G"
-+_scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
-+
-+# -o nospace_cache makes sure data is written to the start position of the data
-+# chunk
-+_scratch_mount -o nospace_cache
-+
-+# [0,64K) is written to stripe 0 and [64K, 128K) is written to stripe 1
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xaa 0 128K" -c "fsync" \
-+	"$SCRATCH_MNT/foobar" | _filter_xfs_io
-+
-+_scratch_unmount
-+
-+stripe_0=`get_physical_stripe0`
-+stripe_1=`get_physical_stripe1`
-+dev4=`echo $SCRATCH_DEV_POOL | awk '{print $4}'`
-+dev3=`echo $SCRATCH_DEV_POOL | awk '{print $3}'`
-+
-+# step 2: corrupt the 1st and 2nd stripe (stripe 0 and 1)
-+echo "step 2......simulate bitrot at offset $stripe_0 of device_4($dev4) and offset $stripe_1 of device_3($dev3)" >>$seqres.full
-+
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_0 64K" $dev4 | _filter_xfs_io
-+$XFS_IO_PROG -f -d -c "pwrite -S 0xbb $stripe_1 64K" $dev3 | _filter_xfs_io
-+
-+# step 3: read foobar to repair the bitrot
-+echo "step 3......repair the bitrot" >> $seqres.full
-+_scratch_mount -o nospace_cache
-+
-+btrfs scrub start -B $SCRATCH_MNT >> $seqres.full 2>&1
-+
-+od -x $SCRATCH_MNT/foobar
-+
-+_scratch_dev_pool_put
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/158.out b/tests/btrfs/158.out
-new file mode 100644
-index 0000000..1f5ad3f
---- /dev/null
-+++ b/tests/btrfs/158.out
-@@ -0,0 +1,10 @@
-+QA output created by 158
-+wrote 131072/131072 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 9437184
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 65536/65536 bytes at offset 9437184
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+0000000 aaaa aaaa aaaa aaaa aaaa aaaa aaaa aaaa
-+*
-+0400000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f68abf4..0b3cf12 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -160,3 +160,4 @@
- 155 auto quick send
- 156 auto quick trim
- 157 auto quick raid
-+158 auto quick raid
--- 
-2.5.0
+zhangyi.
 
