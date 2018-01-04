@@ -1,84 +1,66 @@
-Received: from pv33p36im-asmtp001.me.com ([17.142.213.62]:28519 "EHLO
-        pv33p36im-asmtp001.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750770AbeADHxf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 4 Jan 2018 02:53:35 -0500
-Content-type: text/plain; charset=gb2312
-MIME-version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
-Subject: Re: [PATCH] common/rc: add overlay support to
- _require_metadata_journaling
-From: Chengguang Xu <cgxu519@icloud.com>
-In-reply-to: <CAOQ4uxgHZQhCHS3NN3y4zBW-+FvCNVCXDLcgQ9Lhecx5w85fZA@mail.gmail.com>
-Date: Thu, 04 Jan 2018 15:53:27 +0800
-Content-transfer-encoding: quoted-printable
-Message-id: <E6ADCC0D-C0B3-4CB6-BABD-0E9BF2131810@icloud.com>
-References: <1515035017-156043-1-git-send-email-cgxu519@icloud.com>
- <CAOQ4uxgHZQhCHS3NN3y4zBW-+FvCNVCXDLcgQ9Lhecx5w85fZA@mail.gmail.com>
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:36687 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752062AbeADIJJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 4 Jan 2018 03:09:09 -0500
+Received: by mail-yw0-f193.google.com with SMTP id r205so313650ywb.3
+        for <fstests@vger.kernel.org>; Thu, 04 Jan 2018 00:09:09 -0800 (PST)
+MIME-Version: 1.0
+In-Reply-To: <20180104011801.10141-1-harshads@google.com>
+References: <20171101001159.88570-1-harshads@google.com> <20180104011801.10141-1-harshads@google.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 4 Jan 2018 10:09:08 +0200
+Message-ID: <CAOQ4uxguExYyi4gkDmAedgQcCSXSucG3_nP4YzT0x9AbqTNJxA@mail.gmail.com>
+Subject: Re: [PATCH v3] ext4/030: Ext4 online resize with bigalloc tests.
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: harshads <harshads@google.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Jan 4, 2018 at 3:18 AM, harshads <harshads@google.com> wrote:
+> Add tests to verify Ext4 online resizing feature with bigalloc feature
+> enabled. We test various resizing scenarios with different cluster
+> sizes.
+>
+> Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+> ---
+>  common/rc          |  23 ++++++++
+>  tests/ext4/030     | 158 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/030.out | 148 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/group   |   1 +
+>  4 files changed, 330 insertions(+)
+>  create mode 100755 tests/ext4/030
+>  create mode 100644 tests/ext4/030.out
+>
+> diff --git a/common/rc b/common/rc
+> index 9216efdb..052dadae 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -1845,6 +1845,29 @@ _require_scratch_ext4_feature()
+>      _scratch_unmount
+>  }
+>
+> +# Check whether the specified feature whether it is supported by
+> +# mkfs.ext4 and the kernel by using a sparse file image.
+> +_require_ext4_feature()
 
-> =D4=DA 2018=C4=EA1=D4=C24=C8=D5=A3=AC=CF=C2=CE=E72:48=A3=ACAmir =
-Goldstein <amir73il@gmail.com> =D0=B4=B5=C0=A3=BA
->=20
-> On Thu, Jan 4, 2018 at 5:03 AM, Chengguang Xu <cgxu519@icloud.com> =
-wrote:
->> metadata journaling check needs base filesystem configureations
->> and ./check -overlay saves those configurations to OVL_BASE_*,
->> so restore/override the configuratons before/after the check.
->>=20
->=20
-> 1. Presumably, you are making this change because you ran into a =
-problem
-> with some setup? Please you specify that motivation in commit message.
+1. please explain why this loop variant is needed
+2. it would be great if you could also change callers to
+_require_scratch_ext4_feature
+    to use _require_scratch_feature and plug
+_require_scratch_ext4_feature in there
+3. probably best to post this as a separate patch from the test itself
 
-Sorry for delaying long time, actually this is a follow-up patch of =
-shutdown=20
-support for overlay, based on our previous discussion and mainly for =
-avoiding
-Eryu=A1=AFs concern as below.
+> +{
+> +    if [ -z "$1" ]; then
+> +        echo "Usage: _require_loop_ext4_feature feature"
 
-=3D=3D=3D
-I think you're right, I was looking at other shutdown tests for too long
-and thought this one needed the jounal check too, sorry about that!
+So which is it, _require_loop_ext4_feature or _require_ext4_feature?
+First one sounds better to me, given that you explain why the loop
+variant is needed.
+If it is needed, will it be useful to have for other fs?
+Then better implement _require_loop_feature and make ext4
+a specific case.
 
-But as Amir suggested, other shutdown tests need overlay support in
-_require_metadata_journaling, but I think that can be fixed in a
-follow-up patch, as using ext2 or no-journal mode ext4 as the backing
-filesystems of overlay is not a common setup, the possiblity of someone
-hitting false positive is relative low.
-=3D=3D=3D
-
-> 2. Can you please give a brief summary of the type of generic tests
-> that are going
-> to "notrun" because of this change without specifying base FSTYP.
-> I suppose it will be good for those tests not to run, just want to get =
-the idea,
-> because I have a feeling that _require_metadata_journaling is used for
-> various different reasons.
-
-Currently it does not check for overlay in _require_metadata_journaling,
-so even if base fs without journal can successfully pass this check, =
-right?
-
-With this change, if we do not specify base FSTYP then FSTYP and =
-OVL_BASE_FSTYP=20
-are all =A1=B0overlay=A1=B1, in this situation I think it=A1=AFs better =
-to stop test and give a
-proper warning to tester because we could not decide what to do.
-
-
-> 3. Please specify with which base fs you tested and preferably, run =
-the
-> test with the 3 major fs as base fs. Bonus points for running the test =
-with
-> multi section config file with several base fs ;-)
-
-I basically tested xfs,ext2,ext4(with journal/no-journal mode) but in =
-one section,
-I=A1=AFll test multi section config later if this change is useful.
-
-
-Thanks,
-Chegnguang.=
+Cheers,
+Amir.
