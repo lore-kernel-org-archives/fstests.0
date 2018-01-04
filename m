@@ -1,53 +1,72 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38602 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750789AbeADFqe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 Jan 2018 00:46:34 -0500
-From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH] xfs/015: enlarge the initial fs size
-Date: Thu,  4 Jan 2018 13:46:26 +0800
-Message-Id: <20180104054626.14458-1-eguan@redhat.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:37549 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750770AbeADGsT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 4 Jan 2018 01:48:19 -0500
+MIME-Version: 1.0
+In-Reply-To: <1515035017-156043-1-git-send-email-cgxu519@icloud.com>
+References: <1515035017-156043-1-git-send-email-cgxu519@icloud.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 4 Jan 2018 08:48:18 +0200
+Message-ID: <CAOQ4uxgHZQhCHS3NN3y4zBW-+FvCNVCXDLcgQ9Lhecx5w85fZA@mail.gmail.com>
+Subject: Re: [PATCH] common/rc: add overlay support to _require_metadata_journaling
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Kernel commit f59cf5c29919 ("xfs: remove "no-allocation"
-reservations for file creations") is known to cause earlier ENOSPC
-conditions, and xfs/015 is affected in the way that no new file/dir
-can be created in a newly created 16M XFS with both reflink and
-rmapbt enabled, thus xfs/015 fails due to the missing test dirs.
+On Thu, Jan 4, 2018 at 5:03 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
+> metadata journaling check needs base filesystem configureations
+> and ./check -overlay saves those configurations to OVL_BASE_*,
+> so restore/override the configuratons before/after the check.
+>
 
-So enlarge the initial fs size to 32M that we're able to create new
-dir/file before growing the filesystem size.
+1. Presumably, you are making this change because you ran into a problem
+with some setup? Please you specify that motivation in commit message.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- tests/xfs/015 | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
+2. Can you please give a brief summary of the type of generic tests
+that are going
+to "notrun" because of this change without specifying base FSTYP.
+I suppose it will be good for those tests not to run, just want to get the idea,
+because I have a feeling that _require_metadata_journaling is used for
+various different reasons.
 
-diff --git a/tests/xfs/015 b/tests/xfs/015
-index 2c57f7882308..4939bb92f6fc 100755
---- a/tests/xfs/015
-+++ b/tests/xfs/015
-@@ -66,15 +66,15 @@ _supported_os Linux
- 
- _require_scratch
- 
--# need 64M space, don't make any assumption
-+# need 128M space, don't make any assumption
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount
--_require_fs_space $SCRATCH_MNT 65536
-+_require_fs_space $SCRATCH_MNT 131072
- _scratch_unmount
- 
- rm -f $seqres.full
- 
--_scratch_mkfs_sized $((16 * 1024 * 1024)) > $tmp.mkfs.raw
-+_scratch_mkfs_sized $((32 * 1024 * 1024)) > $tmp.mkfs.raw
- cat $tmp.mkfs.raw | _filter_mkfs >$seqres.full 2>$tmp.mkfs
- # get original data blocks number and agcount
- . $tmp.mkfs
--- 
-2.14.3
+3. Please specify with which base fs you tested and preferably, run the
+test with the 3 major fs as base fs. Bonus points for running the test with
+multi section config file with several base fs ;-)
 
+Thanks,
+Amir.
+
+> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
+> ---
+>  common/rc | 9 +++++++++
+>  1 file changed, 9 insertions(+)
+>
+> diff --git a/common/rc b/common/rc
+> index 9216efd..83ef3f1 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3007,6 +3007,15 @@ _require_metadata_journaling()
+>                 # ext4 might not load a journal
+>                 _exclude_scratch_mount_option "noload"
+>                 ;;
+> +       overlay)
+> +               if [ ! -z $OVL_BASE_FSTYP -a $OVL_BASE_FSTYP != "overlay" ]; then
+> +                       _overlay_config_restore
+> +                       _require_metadata_journaling
+> +                       _overlay_config_override
+> +               else
+> +                       _notrun "Please specify underlying filesystem type in config file"
+> +               fi
+> +               ;;
+>         *)
+>                 # by default we pass; if you need to, add your fs above!
+>                 ;;
+> --
+> 1.8.3.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-unionfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
