@@ -1,81 +1,90 @@
-Received: from mx1.redhat.com ([209.132.183.28]:57850 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752048AbeADIUa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 Jan 2018 03:20:30 -0500
-Date: Thu, 4 Jan 2018 16:20:28 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3] ext4/030: Ext4 online resize with bigalloc tests.
-Message-ID: <20180104082028.GA5123@eguan.usersys.redhat.com>
-References: <20171101001159.88570-1-harshads@google.com>
- <20180104011801.10141-1-harshads@google.com>
- <CAOQ4uxguExYyi4gkDmAedgQcCSXSucG3_nP4YzT0x9AbqTNJxA@mail.gmail.com>
+Received: from mail-vk0-f47.google.com ([209.85.213.47]:43382 "EHLO
+        mail-vk0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750990AbeADIfF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 4 Jan 2018 03:35:05 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxguExYyi4gkDmAedgQcCSXSucG3_nP4YzT0x9AbqTNJxA@mail.gmail.com>
+In-Reply-To: <E6ADCC0D-C0B3-4CB6-BABD-0E9BF2131810@icloud.com>
+References: <1515035017-156043-1-git-send-email-cgxu519@icloud.com>
+ <CAOQ4uxgHZQhCHS3NN3y4zBW-+FvCNVCXDLcgQ9Lhecx5w85fZA@mail.gmail.com> <E6ADCC0D-C0B3-4CB6-BABD-0E9BF2131810@icloud.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 4 Jan 2018 10:35:04 +0200
+Message-ID: <CAOQ4uxiBOP-pesyCZMcA85Rq5m8enMr_xdMkG0HDQe3ac7RQ7Q@mail.gmail.com>
+Subject: Re: [PATCH] common/rc: add overlay support to _require_metadata_journaling
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, harshads <harshads@google.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Chengguang Xu <cgxu519@icloud.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 04, 2018 at 10:09:08AM +0200, Amir Goldstein wrote:
-> On Thu, Jan 4, 2018 at 3:18 AM, harshads <harshads@google.com> wrote:
-> > Add tests to verify Ext4 online resizing feature with bigalloc feature
-> > enabled. We test various resizing scenarios with different cluster
-> > sizes.
-> >
-> > Signed-off-by: Harshad Shirwadkar <harshads@google.com>
-> > ---
-> >  common/rc          |  23 ++++++++
-> >  tests/ext4/030     | 158 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/030.out | 148 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/ext4/group   |   1 +
-> >  4 files changed, 330 insertions(+)
-> >  create mode 100755 tests/ext4/030
-> >  create mode 100644 tests/ext4/030.out
-> >
-> > diff --git a/common/rc b/common/rc
-> > index 9216efdb..052dadae 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -1845,6 +1845,29 @@ _require_scratch_ext4_feature()
-> >      _scratch_unmount
-> >  }
-> >
-> > +# Check whether the specified feature whether it is supported by
-> > +# mkfs.ext4 and the kernel by using a sparse file image.
-> > +_require_ext4_feature()
-> 
-> 1. please explain why this loop variant is needed
-> 2. it would be great if you could also change callers to
-> _require_scratch_ext4_feature
->     to use _require_scratch_feature and plug
-> _require_scratch_ext4_feature in there
-> 3. probably best to post this as a separate patch from the test itself
+On Thu, Jan 4, 2018 at 9:53 AM, Chengguang Xu <cgxu519@icloud.com> wrote:
+>
+>> =E5=9C=A8 2018=E5=B9=B41=E6=9C=884=E6=97=A5=EF=BC=8C=E4=B8=8B=E5=8D=882:=
+48=EF=BC=8CAmir Goldstein <amir73il@gmail.com> =E5=86=99=E9=81=93=EF=BC=9A
+>>
+>> On Thu, Jan 4, 2018 at 5:03 AM, Chengguang Xu <cgxu519@icloud.com> wrote=
+:
+>>> metadata journaling check needs base filesystem configureations
+>>> and ./check -overlay saves those configurations to OVL_BASE_*,
+>>> so restore/override the configuratons before/after the check.
+>>>
+>>
+>> 1. Presumably, you are making this change because you ran into a problem
+>> with some setup? Please you specify that motivation in commit message.
+>
+> Sorry for delaying long time, actually this is a follow-up patch of shutd=
+own
+> support for overlay, based on our previous discussion and mainly for avoi=
+ding
+> Eryu=E2=80=99s concern as below.
+>
+> =3D=3D=3D
+> I think you're right, I was looking at other shutdown tests for too long
+> and thought this one needed the jounal check too, sorry about that!
+>
+> But as Amir suggested, other shutdown tests need overlay support in
+> _require_metadata_journaling, but I think that can be fixed in a
+> follow-up patch, as using ext2 or no-journal mode ext4 as the backing
+> filesystems of overlay is not a common setup, the possiblity of someone
+> hitting false positive is relative low.
+> =3D=3D=3D
+>
+>> 2. Can you please give a brief summary of the type of generic tests
+>> that are going
+>> to "notrun" because of this change without specifying base FSTYP.
+>> I suppose it will be good for those tests not to run, just want to get t=
+he idea,
+>> because I have a feeling that _require_metadata_journaling is used for
+>> various different reasons.
+>
+> Currently it does not check for overlay in _require_metadata_journaling,
+> so even if base fs without journal can successfully pass this check, righ=
+t?
+>
+> With this change, if we do not specify base FSTYP then FSTYP and OVL_BASE=
+_FSTYP
+> are all =E2=80=9Coverlay=E2=80=9D, in this situation I think it=E2=80=99s=
+ better to stop test and give a
+> proper warning to tester because we could not decide what to do.
+>
+>
+>> 3. Please specify with which base fs you tested and preferably, run the
+>> test with the 3 major fs as base fs. Bonus points for running the test w=
+ith
+>> multi section config file with several base fs ;-)
+>
+> I basically tested xfs,ext2,ext4(with journal/no-journal mode) but in one=
+ section,
+> I=E2=80=99ll test multi section config later if this change is useful.
+>
+>
 
-I haven't went through the whole patch yet, just want to point out that
-the _require_scratch_ext4_feature helper has been added in commit
-be341e36fd02 ("common: rework _require_ext4_mkfs_feature"), but not
-enabled in the more generic _require_scratch_feature helper yet.
+Okay, so IIUC, there is a commit that made a bunch of shutdown tests
+to work with -overlay run and this commit introduced a bug with the
+uncommon setup of overay over ext2/ext4-noload.
 
-It'd be good to plug the ext4 helper to the generic helper in a separate
-patch, as Amir suggested, and perhaps converting all existing callers of
-the ext4 helper to the generic helper.
+That should be the gist of your commit message and the commit
+id and title should be part of that message.
 
 Thanks,
-Eryu
-
-> 
-> > +{
-> > +    if [ -z "$1" ]; then
-> > +        echo "Usage: _require_loop_ext4_feature feature"
-> 
-> So which is it, _require_loop_ext4_feature or _require_ext4_feature?
-> First one sounds better to me, given that you explain why the loop
-> variant is needed.
-> If it is needed, will it be useful to have for other fs?
-> Then better implement _require_loop_feature and make ext4
-> a specific case.
-> 
-> Cheers,
-> Amir.
+Amir.
