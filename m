@@ -1,94 +1,110 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:56864 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751166AbeAECMn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 4 Jan 2018 21:12:43 -0500
-Date: Thu, 4 Jan 2018 18:12:27 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/466: be more precise about which block sizes to
- use
-Message-ID: <20180105021227.GA5606@magnolia>
-References: <20171211172742.3490-1-tytso@mit.edu>
- <20171213173629.GG6896@magnolia>
- <20171231184508.GA29994@thunk.org>
- <20180102203650.GC5146@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:38182 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751637AbeAEEfu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 Jan 2018 23:35:50 -0500
+Date: Fri, 5 Jan 2018 12:35:49 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 6/8] fsstress: implement the clonerange/deduperange
+ ioctls
+Message-ID: <20180105043549.GF5123@eguan.usersys.redhat.com>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314503583.18893.15475795025536691678.stgit@magnolia>
+ <20171215020731.GM6896@magnolia>
+ <20180103084801.GX5123@eguan.usersys.redhat.com>
+ <20180103171211.GB16402@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180102203650.GC5146@magnolia>
+In-Reply-To: <20180103171211.GB16402@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 02, 2018 at 12:36:50PM -0800, Darrick J. Wong wrote:
-> On Sun, Dec 31, 2017 at 01:45:08PM -0500, Theodore Ts'o wrote:
-> > On Wed, Dec 13, 2017 at 09:36:29AM -0800, Darrick J. Wong wrote:
-> > > > +	get_page_size
-> > > > +	;;
-> > > > +    *)
-> > > > +	echo 512
+On Wed, Jan 03, 2018 at 09:12:11AM -0800, Darrick J. Wong wrote:
+> On Wed, Jan 03, 2018 at 04:48:01PM +0800, Eryu Guan wrote:
+> > On Thu, Dec 14, 2017 at 06:07:31PM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
 > > > 
-> > > FWIW XFS' minimum block size is 1k for v5 filesystems, though you can't
-> > > really tell until you run mkfs.xfs -N.
-> > 
-> > Ok, but I assume we should keep this at 512 since it could be a v4
-> > file systems that are being tested?
-> 
-> That depends on whether this function returns the smallest blocksize
-> guaranteed to pass mkfs given the current set of options or the
-> theoretical smallest blocksize supported by that fs given the right set
-> of options.  IOWs, if this is a v5 fs being tested, then "mkfs.xfs -b
-> size=$(_fs_min_blocksize) -m crc=1" will fail.
-
-...but we /could/ just try the known minimums with "_scratch_mkfs -b
-size=XXX -N" because (so long as it doesn't get smart and try to
-override our -b setting) it'll fail on any unsupported size.
-
-> > > > +_fs_max_blocksize()
-> > > > +{
-> > > > +    get_page_size
+> > > Mix it up a bit by reflinking and deduping data blocks when possible.
 > > > 
-> > > Also, one can run xfstests against a fuse2fs-mounted 64k-block ext4 fs.
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > > 
-> > Really?  Does mmap work on a fuse2fs-mounted 64k-block ext4 file system?
-> 
-> Yes:
-> 
-> # uname -a
-> Linux magnolia 4.14.8-67-magnolia #2 SMP PREEMPT Fri Dec 22 17:23:52 PST 2017 x86_64 x86_64 x86_64 GNU/Linux
-> # truncate -s 1g /tmp/a
-> # mkfs.ext4 -b 65536 -F /tmp/a
-> ...
-> # fuse2fs /tmp/a /mnt
-> /tmp/a: Writing to the journal is not supported.
-> # fallocate -l 128k /mnt/a
-> # xfs_io -c 'mmap -rw 0 128k' -c 'mwrite -S 0x58 0 6144' /mnt/a
-> # od -tx1 -Ad -c /mnt/a
-> 0000000  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58  58
->           X   X   X   X   X   X   X   X   X   X   X   X   X   X   X   X
-> *
-> 0006144  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00  00
->          \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0  \0
-> *
-> 0131072
-> 
-> > I suppose can just force the block size to be 64k for fuse2fs,
-> > although I don't think the using some file system like ext4 for
-> > fuse2fs testing isn't going to work right now anyway, yes?
-> 
-> I haven't tried it in some time, but the last time I ran xfstests
-> against fuse2fs it more or less worked (modulo all the fancy fallocate
-> stuff that it doesn't support).
+> > This looks fine overall, but I noticed a soft lockup bug in generic/083
+> > and generic/269 (both test exercise ENOSPC behavior), test config is
+> > reflink+rmapbt XFS with 4k block size. Not sure if the soft lockup is
+> > related to the clonerange/deduperange ops in fsstress yet, will confirm
+> > without clone/dedupe ops.
 
-(Maybe we should separate out ext4/fuse2fs?)
+More testings showed that this may have something to do with the
+deduperange operations. (I was testing with Fedora rawhide with
+v4.15-rc5 kernel, I didn't see hang nor soft lockup with my RHEL7 base
+host, because there's no FIDEDUPERANGE defined there).
 
---D
+I reverted the whole clonerange/deduperange support and retested for two
+rounds of full '-g auto' run without hitting any hang or soft lockup.
+Then I commented out the deduperange ops and left clonerange ops there,
+no hang/lockup either. At last I commented out the clonerange ops but
+left deduperange ops there, I hit a different hang in generic/270 (still
+a ENOSPC test). I pasted partial sysrq-w output here, if full output is
+needed please let me know.
 
-> --D
-> 
+[79200.901901] 14266.fsstress. D12200 14533  14460 0x00000000
+[79200.902419] Call Trace:
+[79200.902655]  ? __schedule+0x2e3/0xb90
+[79200.902969]  ? _raw_spin_unlock_irqrestore+0x32/0x60
+[79200.903442]  schedule+0x2f/0x90   
+[79200.903727]  schedule_timeout+0x1dd/0x540
+[79200.904114]  ? __next_timer_interrupt+0xc0/0xc0
+[79200.904535]  xfs_inode_ag_walk.isra.12+0x3cc/0x670 [xfs]
+[79200.905009]  ? __xfs_inode_clear_blocks_tag+0x120/0x120 [xfs]
+[79200.905563]  ? kvm_clock_read+0x21/0x30
+[79200.905891]  ? sched_clock+0x5/0x10
+[79200.906243]  ? sched_clock_local+0x12/0x80
+[79200.906598]  ? kvm_clock_read+0x21/0x30
+[79200.906920]  ? sched_clock+0x5/0x10
+[79200.907273]  ? sched_clock_local+0x12/0x80
+[79200.907636]  ? __lock_is_held+0x59/0xa0
+[79200.907988]  ? xfs_inode_ag_iterator_tag+0x46/0xb0 [xfs]
+[79200.908497]  ? rcu_read_lock_sched_held+0x6b/0x80
+[79200.908926]  ? xfs_perag_get_tag+0x28b/0x2f0 [xfs]
+[79200.909416]  ? __xfs_inode_clear_blocks_tag+0x120/0x120 [xfs]
+[79200.909922]  xfs_inode_ag_iterator_tag+0x73/0xb0 [xfs]
+[79200.910446]  xfs_file_buffered_aio_write+0x348/0x370 [xfs]
+[79200.910948]  xfs_file_write_iter+0x99/0x140 [xfs]
+[79200.911400]  __vfs_write+0xfc/0x170
+[79200.911726]  vfs_write+0xc1/0x1b0
+[79200.912063]  SyS_write+0x55/0xc0
+[79200.912347]  entry_SYSCALL_64_fastpath+0x1f/0x96
+
+Seems other hangning fsstress processes were all waiting for io
+completion of writeback (sleeping in wb_wait_for_completion).
+
 > > 
-> > 	      	   	     		     	       - Ted
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > [12968.100008] watchdog: BUG: soft lockup - CPU#2 stuck for 22s! [fsstress:6903]
+> > [12968.100038] Modules linked in: loop dm_flakey xfs ip6t_rpfilter ip6t_REJECT nf_reject_ipv6 xt_conntrack ip_set nfnetlink ebtable_nat ebtable_broute bridge stp llc ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6 ip6table_mangle ip6table_raw ip6table_security iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack libcrc32c iptable_mangle iptable_raw iptable_security ebtable_filter ebtables ip6table_filter ip6_tables sunrpc 8139too 8139cp i2c_piix4 joydev mii pcspkr virtio_balloon virtio_pci serio_raw virtio_ring virtio floppy ata_generic pata_acpi
+> > [12968.104043] irq event stamp: 23222196
+> > [12968.104043] hardirqs last  enabled at (23222195): [<000000007d0c2e75>] restore_regs_and_return_to_kernel+0x0/0x2e
+> > [12968.105111] hardirqs last disabled at (23222196): [<000000008f80dc57>] apic_timer_interrupt+0xa7/0xc0
+> > [12968.105111] softirqs last  enabled at (877594): [<0000000034c53d5e>] __do_softirq+0x392/0x502
+> > [12968.105111] softirqs last disabled at (877585): [<000000003f4d9e0b>] irq_exit+0x102/0x110
+> > [12968.105111] CPU: 2 PID: 6903 Comm: fsstress Tainted: G        W    L   4.15.0-rc5 #10
+> > [12968.105111] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2007
+> > [12968.108043] RIP: 0010:xfs_bmapi_update_map+0xc/0xc0 [xfs]
+> 
+> Hmmm, I haven't seen such a hang; I wonder if we're doing something
+> we shouldn't be doing and looping in bmapi_write.  In any case it's
+> a bug with xfs, not fsstress.
+
+Agreed, I'm planning to pull this patch in this week's update, with the
+following fix
+
+- inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v1);
++ inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
+
+Also I'd follow Dave's suggestion on xfs/068 fix, move the
+FSSTRESS_AVOID handling to common/dump on commit. Please let me know if
+you have a different plan now.
+
+Thanks,
+Eryu
