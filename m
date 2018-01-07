@@ -1,117 +1,132 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45430 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59976 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752986AbeAGPbJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Jan 2018 10:31:09 -0500
-Date: Sun, 7 Jan 2018 23:31:06 +0800
+        id S1753090AbeAGPeu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Jan 2018 10:34:50 -0500
+Date: Sun, 7 Jan 2018 23:34:48 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v3] ext4/030: Ext4 online resize with bigalloc tests.
-Message-ID: <20180107153106.GO5123@eguan.usersys.redhat.com>
-References: <20171101001159.88570-1-harshads@google.com>
- <20180104011801.10141-1-harshads@google.com>
- <CAOQ4uxguExYyi4gkDmAedgQcCSXSucG3_nP4YzT0x9AbqTNJxA@mail.gmail.com>
- <20180104082028.GA5123@eguan.usersys.redhat.com>
- <CAMCMpYLZNNwFUBYCUUp8NLtt7_5ui=Kv=RaOGweDv9BGWaPGsA@mail.gmail.com>
+Subject: Re: [PATCH 7/8] generic: run a long-soak write-only fsstress test
+Message-ID: <20180107153448.GP5123@eguan.usersys.redhat.com>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314504409.18893.7360024939760569598.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAMCMpYLZNNwFUBYCUUp8NLtt7_5ui=Kv=RaOGweDv9BGWaPGsA@mail.gmail.com>
+In-Reply-To: <151314504409.18893.7360024939760569598.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Harshad Shirwadkar <harshads@google.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 05, 2018 at 01:21:30PM -0800, Harshad Shirwadkar wrote:
-> On Thu, Jan 4, 2018 at 12:20 AM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Thu, Jan 04, 2018 at 10:09:08AM +0200, Amir Goldstein wrote:
-> >> On Thu, Jan 4, 2018 at 3:18 AM, harshads <harshads@google.com> wrote:
-> >> > Add tests to verify Ext4 online resizing feature with bigalloc feature
-> >> > enabled. We test various resizing scenarios with different cluster
-> >> > sizes.
-> >> >
-> >> > Signed-off-by: Harshad Shirwadkar <harshads@google.com>
-> >> > ---
-> >> >  common/rc          |  23 ++++++++
-> >> >  tests/ext4/030     | 158 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >> >  tests/ext4/030.out | 148 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >> >  tests/ext4/group   |   1 +
-> >> >  4 files changed, 330 insertions(+)
-> >> >  create mode 100755 tests/ext4/030
-> >> >  create mode 100644 tests/ext4/030.out
-> >> >
-> >> > diff --git a/common/rc b/common/rc
-> >> > index 9216efdb..052dadae 100644
-> >> > --- a/common/rc
-> >> > +++ b/common/rc
-> >> > @@ -1845,6 +1845,29 @@ _require_scratch_ext4_feature()
-> >> >      _scratch_unmount
-> >> >  }
-> >> >
-> >> > +# Check whether the specified feature whether it is supported by
-> >> > +# mkfs.ext4 and the kernel by using a sparse file image.
-> >> > +_require_ext4_feature()
-> >>
-> >> 1. please explain why this loop variant is needed
+On Tue, Dec 12, 2017 at 10:04:04PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> As discussed on a previous thread, the loop variant will avoid the
-> need to mkfs twice on scratch device (once in rule and once in test).
-> Also, this particular test doesn't need scratch device at all. So, if
-> I decide to use _require_scratch_ext4_feature, I will have to do
-> _require_scratch just for the rule even though the actual test doesn't
-> need scratch. So, having loop variant helps.
+> Let a lot of writes soak in with multithreaded fsstress to look for bugs
+> and other problems.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/generic/933     |   64 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/933.out |    2 ++
+>  tests/generic/group   |    1 +
+>  3 files changed, 67 insertions(+)
+>  create mode 100755 tests/generic/933
+>  create mode 100644 tests/generic/933.out
+> 
+> 
+> diff --git a/tests/generic/933 b/tests/generic/933
+> new file mode 100755
+> index 0000000..0cbd081
+> --- /dev/null
+> +++ b/tests/generic/933
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# FS QA Test No. 933
+> +#
+> +# Run an all-writes fsstress run with multiple threads to shake out
+> +# bugs in the write path.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +
+> +_require_scratch
+> +_require_command "$KILLALL_PROG" "killall"
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Silence is golden."
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +nr_cpus=$((LOAD_FACTOR * 4))
+> +nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
+> +$FSSTRESS_PROG $FSSTRESS_AVOID -w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus -v >> $seqres.full
 
-Hmm, as the _require_scratch_ext4_feature helper is already there and
-already does mkfs twice (with a very small fs size, so the additional
-mkfs won't add much time), I think it'd be much simpler to just use
-_require_scratch and _require_scratch_feature and create all the test
-images on $SCRATCH_DEV, a loop device variant doesn't seem that
-necessary to me.
+I removed '-v' option on commit, otherwise the resulting $seqres.full is
+too large (almost 200M).
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/933.out b/tests/generic/933.out
+> new file mode 100644
+> index 0000000..758765d
+> --- /dev/null
+> +++ b/tests/generic/933.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 933
+> +Silence is golden.
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ff1ddc9..3c4fff5 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -473,3 +473,4 @@
+>  468 shutdown auto quick metadata
+>  469 auto quick
+>  932 shutdown auto log metadata
+> +933 auto rw clone
+
+I also removed the 'clone' group, it only runs clone operations
+implicitly by fsstress.
 
 Thanks,
 Eryu
-
-> 
-> >> 2. it would be great if you could also change callers to
-> >> _require_scratch_ext4_feature
-> >>     to use _require_scratch_feature and plug
-> >> _require_scratch_ext4_feature in there
-> 
-> Okay, that sounds good.
-> 
-> >> 3. probably best to post this as a separate patch from the test itself
-> 
-> Okay.
-> 
-> >
-> > I haven't went through the whole patch yet, just want to point out that
-> > the _require_scratch_ext4_feature helper has been added in commit
-> > be341e36fd02 ("common: rework _require_ext4_mkfs_feature"), but not
-> > enabled in the more generic _require_scratch_feature helper yet.
-> >
-> > It'd be good to plug the ext4 helper to the generic helper in a separate
-> > patch, as Amir suggested, and perhaps converting all existing callers of
-> > the ext4 helper to the generic helper.
-> >
-> > Thanks,
-> > Eryu
-> >
-> >>
-> >> > +{
-> >> > +    if [ -z "$1" ]; then
-> >> > +        echo "Usage: _require_loop_ext4_feature feature"
-> >>
-> >> So which is it, _require_loop_ext4_feature or _require_ext4_feature?
-> >> First one sounds better to me, given that you explain why the loop
-> >> variant is needed.
-> >> If it is needed, will it be useful to have for other fs?
-> >> Then better implement _require_loop_feature and make ext4
-> >> a specific case.
-> 
-> Thanks for pointing this out. I agree that _require_loop_ext4_feature
-> is better. Sure, I'll add a _require_loop_feature. Alright, I'll do
-> _require_loop stuff in a different patch.
-> 
-> - Harshad.
-> 
-> >>
-> >> Cheers,
-> >> Amir.
