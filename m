@@ -1,129 +1,182 @@
-Received: from mx1.redhat.com ([209.132.183.28]:58864 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60460 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753193AbeAGPYR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Jan 2018 10:24:17 -0500
-Date: Sun, 7 Jan 2018 23:24:14 +0800
+        id S1753754AbeAGPZC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Jan 2018 10:25:02 -0500
+Date: Sun, 7 Jan 2018 23:25:00 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] generic/466: be more precise about which block sizes to
- use
-Message-ID: <20180107152414.GM5123@eguan.usersys.redhat.com>
-References: <20171211172742.3490-1-tytso@mit.edu>
- <20171213173629.GG6896@magnolia>
- <20171231184508.GA29994@thunk.org>
- <20180102203650.GC5146@magnolia>
- <20180105021227.GA5606@magnolia>
- <20180105032843.GA32314@thunk.org>
+Subject: Re: [PATCH 1/8] common/rc: report kmemleak errors
+Message-ID: <20180107152500.GN5123@eguan.usersys.redhat.com>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <151314499847.18893.9855359031542704591.stgit@magnolia>
+ <20171214093718.GH2749@eguan.usersys.redhat.com>
+ <20171214181508.GJ6896@magnolia>
+ <20180105080255.GH5123@eguan.usersys.redhat.com>
+ <20180105170227.GG5602@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180105032843.GA32314@thunk.org>
+In-Reply-To: <20180105170227.GG5602@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 04, 2018 at 10:28:43PM -0500, Theodore Ts'o wrote:
-> > > That depends on whether this function returns the smallest blocksize
-> > > guaranteed to pass mkfs given the current set of options or the
-> > > theoretical smallest blocksize supported by that fs given the right set
-> > > of options.  IOWs, if this is a v5 fs being tested, then "mkfs.xfs -b
-> > > size=$(_fs_min_blocksize) -m crc=1" will fail.
+On Fri, Jan 05, 2018 at 09:02:27AM -0800, Darrick J. Wong wrote:
+> On Fri, Jan 05, 2018 at 04:02:55PM +0800, Eryu Guan wrote:
+> > On Thu, Dec 14, 2017 at 10:15:08AM -0800, Darrick J. Wong wrote:
+> > > On Thu, Dec 14, 2017 at 05:37:18PM +0800, Eryu Guan wrote:
+> > > > On Tue, Dec 12, 2017 at 10:03:18PM -0800, Darrick J. Wong wrote:
+> > > > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > > 
+> > > > > If kmemleak is enabled, scan and report memory leaks after every test.
+> > > > > 
+> > > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > > ---
+> > > > >  check     |    2 ++
+> > > > >  common/rc |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > > >  2 files changed, 54 insertions(+)
+> > > > > 
+> > > > > 
+> > > > > diff --git a/check b/check
+> > > > > index b2d251a..469188e 100755
+> > > > > --- a/check
+> > > > > +++ b/check
+> > > > > @@ -497,6 +497,7 @@ _check_filesystems()
+> > > > >  	fi
+> > > > >  }
+> > > > >  
+> > > > > +_init_kmemleak
+> > > > >  _prepare_test_list
+> > > > >  
+> > > > >  if $OPTIONS_HAVE_SECTIONS; then
+> > > > > @@ -793,6 +794,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> > > > >  		    n_try=`expr $n_try + 1`
+> > > > >  		    _check_filesystems
+> > > > >  		    _check_dmesg || err=true
+> > > > > +		    _check_kmemleak || err=true
+> > > > >  		fi
+> > > > >  
+> > > > >  	    fi
+> > > > > diff --git a/common/rc b/common/rc
+> > > > > index cb83918..a2bed36 100644
+> > > > > --- a/common/rc
+> > > > > +++ b/common/rc
+> > > > > @@ -3339,6 +3339,58 @@ _check_dmesg()
+> > > > >  	fi
+> > > > >  }
+> > > > >  
+> > > > > +# capture the kmemleak report
+> > > > > +_capture_kmemleak()
+> > > > > +{
+> > > > > +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
+> > > > > +	local _leak_file="$1"
+> > > > > +
+> > > > > +	# Tell the kernel to scan for memory leaks.  Apparently the write
+> > > > > +	# returns before the scan is complete, so do it twice in the hopes
+> > > > > +	# that twice is enough to capture all the leaks.
+> > > > > +	echo "scan" > "${_kern_knob}"
+> > > > > +	cat "${_kern_knob}" > /dev/null
+> > > > > +	echo "scan" > "${_kern_knob}"
+> > > > > +	cat "${_kern_knob}" > "${_leak_file}"
+> > > > > +	echo "clear" > "${_kern_knob}"
+> > > > 
+> > > > Hmm, two scans seem not enough either, I could see false positive easily
+> > > > in a 'quick' group run, because some leaks are not reported immediately
+> > > > after the test but after next test or next few tests. e.g. I saw
+> > > > generic/008 (tested on XFS) being reported as leaking memory, and from
+> > > > 008.kmemleak I saw:
+> > > > 
+> > > > unreferenced object 0xffff880277679800 (size 512):
+> > > >   comm "nametest", pid 25007, jiffies 4300176958 (age 9.854s)
+> > > > ...
+> > > > 
+> > > > But "nametest" is only used in generic/007, the leak should be triggered
+> > > > by generic/007 too, but 007 was reported as PASS in my case.
+> > > > 
+> > > > Not sure what's the best way to deal with these false positive, adding
+> > > > more scans seem to work, but that's ugly and requires more test time..
+> > > > What do you think?
+> > > 
+> > > I'm not sure either -- the brief scan I made of mm/kmemleak.c didn't
+> > > reveal anything obvious that would explain the behavior we see.  It
+> > > might just take a while for determine positively that an item isn't
+> > > gray.
+> > 
+> > Seems so, I did read similar statements elsewhere, but I can't remember
+> > now..
+> > 
+> > > 
+> > > We could change the message to state that found leaks might have
+> > > resulted from the previous test?  That's rather unsatisfying, but I
+> > > don't know what else to do.
+> > 
+> > Seems like a reasonable way to go at this stage. I also noticed some
+> > leaks probably were not from the test we ran nor fs-related, but other
+> > processes on the system, e.g. 
+> > 
+> > unreferenced object 0xffff8801768be3c0 (size 256):
+> >   comm "softirq", pid 0, jiffies 4299031078 (age 14.234s)
+> >   hex dump (first 32 bytes):
+> >     01 00 00 00 00 00 00 00 03 00 00 00 00 03 00 00  ................
+> >     b7 fd 01 00 00 00 00 00 d8 f6 1f 79 02 88 ff ff  ...........y....
+> >   backtrace:
+> >     [<ffffffffa077cae8>] init_conntrack+0x4a8/0x4c0 [nf_conntrack]
+> >     [<ffffffffa077d2c4>] nf_conntrack_in+0x494/0x510 [nf_conntrack]
+> >     [<ffffffff815f32d7>] nf_hook_slow+0x37/0xb0
+> >     [<ffffffff815fd6a0>] ip_rcv+0x2f0/0x3c0
+> >     [<ffffffff815b5833>] __netif_receive_skb_core+0x3d3/0xaa0
+> >     [<ffffffff815b8154>] netif_receive_skb_internal+0x34/0xc0
+> >     [<ffffffffa0356654>] br_pass_frame_up+0xb4/0x140 [bridge]
+> >     [<ffffffffa03568eb>] br_handle_frame_finish+0x20b/0x3f0 [bridge]
+> >     [<ffffffffa0356c7b>] br_handle_frame+0x16b/0x2c0 [bridge]
+> >     [<ffffffff815b5651>] __netif_receive_skb_core+0x1f1/0xaa0
+> >     [<ffffffff815b8154>] netif_receive_skb_internal+0x34/0xc0
+> >     [<ffffffff815b8dbc>] napi_gro_receive+0xbc/0xe0
+> >     [<ffffffffa004f64c>] bnx2_poll_work+0x8fc/0x1190 [bnx2]
+> >     [<ffffffffa004ff13>] bnx2_poll_msix+0x33/0xb0 [bnx2]
+> >     [<ffffffff815b868e>] net_rx_action+0x26e/0x3a0
+> >     [<ffffffff816e8778>] __do_softirq+0xc8/0x26c
+> > 
+> > Perhaps we can mark the kmemleak check as "experimental" or so? By
+> > adding some kind of "disclaimer" in the beginning of $seqres.kmemleak
+> > file? So people could have the right expectation on these kmemleak
+> > failures.
 > 
-> Some of the discussion that we had on our weekly ext4 developer's
-> conference call.  One of the motivations for this patch is due to a
-> local change that I have in my xfstests tree, which adds:
+> How about:
 > 
-> 	|| _die "${MKFS_PROG}.$FSTYP failed!"
-> 
-> to the ${MKFS_PROG}.$FSTYP call in _scratch_mkfs_sized and similar
-> functions.  The reason for that is there a number of tests which use
-> additional file system options, different block sizes, unusually small
-> file system sizes, etc. --- and 99.97% of them don't bother to do any
-> error checking.
+> "EXPERIMENTAL kmemleak reported some memory leaks!  Due to the way kmemleak
+> works, the leak might be from an earlier test, or something totally unrelated.
 
-My first reaction is to fix _scratch_mkfs_sized so it could retry with
-only user specified mkfs options, if the first mkfs failed due to
-conflicts between MKFS_OPTIONS and addtional mkfs options specified in
-the tests. (We've done similar update to _scratch_mkfs in commit
-596a068bf130 ("fstests: teach _scratch_mkfs to handle mkfs option
-conflicts"), and Dave just brought up that _scratch_mkfs_sized couldn't
-handle conflicts in mkfs options just a few days ago.)
-
-And we can fix the tests that fail mkfs due to small fs size, enlarge
-the default fs size so mkfs succeeds even with additional mkfs options
-specified.
-
-But I'd like to know some exact example tests that fail for you, so I
-can dig into them more.
-
-> 
-> So what ends up happening is the test will not notice that the mkfs
-> had failed, and would continue staggering on, sometimes succeeding,
-> and sometimes failing --- depending on what test was running
-> previously and the state of the scratch device.  Ugh.  Hence, my
-> addition of the "|| die ..."
-
-Yeah, this sometimes does happen. Historically we kind prefer letting
-the tests continue even if mkfs and/or mount failed, so the tests could
-run in some uncommon setups and exercise some corner cases (this did
-help find bugs that are hard to hit before), and in most cases tests
-would fail in the end so we noticed such failures.
-
-But we would check mkfs and/or mount failure explicitly if the test will
-do destructive operations on scratch dev, e.g. freeze $SCRATCH_DEV or
-fulfill $SCRATCH_MNT, so tests won't destroy the underlying filesystem
-(usually root fs).
+Yeah, this looks good to me!
 
 Thanks,
 Eryu
 
 > 
-> The problem is that generic/466 is one of the few tests that actually
-> (a) deliberately feed arguments that cause _scratch_mkfs_sized to
-> fail, and (b) actually does error checking.
+> "unreferenced object 0xffff8801768be3c0 (size 256):
+>   comm "softirq", pid 0, jiffies 4299031078 (age 14.234s)
+> ..."
 > 
-> Darrick mentioned on the call that he's seen similar problems which
-> he's had to track down when testing xfs, and it was simiarly annoying.
-> 
-> So instead of it being a local hack in my xfstests tree, perhaps this
-> is something we should try to fix more generally.  There a number of I
-> could imagine going about this.
-> 
-> 1) The approach I took in this patch, which is requires accurately
-> determine min and max blocksizes --- and then to add error checks to
-> all of the mkfs invocations in _scratch_mkfs_blocksized for all file
-> systems.
-> 
-> 2) Add an argument to _scratch_mkfs_blockized() and similar functions
-> which indicates that error checking should _not_ be done, since it
-> will be done by the caller (such as generic/466).  And then add error
-> checks in _scratch_mkfs_blocksized() and similar functions unless the
-> optional flag is passed by the test.
-> 
-> 3)  Sweep through all of the tests scripts adding error checks.
-> 
-> It seems to me (2) might be the simplest approach, although (1) does
-> speed up the test somewhat, and so maybe we should do (1) as well as
-> (2).  Eryu, do you have any thoughts/opinions?
-> 
-> > > I haven't tried it in some time, but the last time I ran xfstests
-> > > against fuse2fs it more or less worked (modulo all the fancy fallocate
-> > > stuff that it doesn't support).
+> > > 
+> > > Or maybe a sleep 1 in between scans to see if that makes it more likely
+> > > to attribute a leak to the correct test?  I don't anticipate running
+> > > xfstests with kmemleak=on too terribly often, so the extra ~700s won't
+> > > bother me too much.
 > > 
-> > (Maybe we should separate out ext4/fuse2fs?)
+> > This doesn't improve anything to me, 7 of the first 8 tests failed due
+> > to kmemleak check after adding 'sleep 1' between scans.
 > 
-> Darrick explained this require bind mounting mount.fuse2fs on
-> mount.ext4, and other unnatural hacks.  It seems to me that it might
-> be useful to add first class support for fuse2fs to xfstests, with
-> arguments ala overlayfs to specify what the fuse driver (such as
-> fuse2fs) should be used; what should be used for mkfs, etc.
+> <nod>
 > 
-> Once we do this, we can use a different max blocksize for fuse2fs.
+> --D
 > 
->      	   	    	      		- Ted
-> 
-> 					
+> > Thanks,
+> > Eryu
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
