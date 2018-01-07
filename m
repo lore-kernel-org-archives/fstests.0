@@ -1,129 +1,248 @@
-Received: from mail-pf0-f176.google.com ([209.85.192.176]:43269 "EHLO
-        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753452AbeAGP7G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Jan 2018 10:59:06 -0500
-Received: by mail-pf0-f176.google.com with SMTP id e3so4258257pfi.10
-        for <fstests@vger.kernel.org>; Sun, 07 Jan 2018 07:59:06 -0800 (PST)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id t4sm25292689pfj.56.2018.01.07.07.59.04
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 07 Jan 2018 07:59:05 -0800 (PST)
-Message-ID: <5a5243c9.8467620a.10c7f.cc40@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 07 Jan 2018 23:58:58 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 95c924c65113
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="eMvz7ftlHJzD"
-Content-Disposition: inline
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:40009 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754273AbeAGSGi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Jan 2018 13:06:38 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 1/7] open_by_handle: store and load file handles from file
+Date: Sun,  7 Jan 2018 20:07:19 +0200
+Message-Id: <1515348445-1403-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
+References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+usage:
+ open_by_handle -p -o <handles_file> <test_dir> [N]
+ open_by_handle -p -i <handles_file> <test_dir> [N]
 
---eMvz7ftlHJzD
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This will be used to test decoding of file handles after various
+file systems operations including mount cycle.
 
-Hi all,
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ src/open_by_handle.c | 110 +++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 85 insertions(+), 25 deletions(-)
 
-The master branch of the xfstests repository at:
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index dbc5b0f..f9dfefc 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -43,30 +43,36 @@ Examples:
+ 
+    open_by_handle -p <test_dir> [N]
+ 
+-3. Get file handles for existing test set, write data to files,
++3. Get file handles for existing test set and write them to a file.
++   Read file handles from file and open files by handle:
++
++   open_by_handle -p -o <handles_file> <test_dir> [N]
++   open_by_handle -p -i <handles_file> <test_dir> [N]
++
++4. Get file handles for existing test set, write data to files,
+    drop caches, open all files by handle, read and verify written
+    data, write new data to file:
+ 
+    open_by_handle -rwa <test_dir> [N]
+ 
+-4. Get file handles for existing test set, unlink all test files,
++5. Get file handles for existing test set, unlink all test files,
+    remove test_dir, drop caches, try to open all files by handle
+    and expect ESTALE:
+ 
+    open_by_handle -dp <test_dir> [N]
+ 
+-5. Get file handles for existing test set, keep open file handles for all
++6. Get file handles for existing test set, keep open file handles for all
+    test files, unlink all test files, drop caches and try to open all files
+    by handle (should work):
+ 
+    open_by_handle -dk <test_dir> [N]
+ 
+-6. Get file handles for existing test set, rename all test files,
++7. Get file handles for existing test set, rename all test files,
+    drop caches, try to open all files by handle (should work):
+ 
+    open_by_handle -m <test_dir> [N]
+ 
+-7. Get file handles for existing test set, hardlink all test files,
++8. Get file handles for existing test set, hardlink all test files,
+    then unlink the original files, drop caches and try to open all
+    files by handle (should work):
+ 
+@@ -103,7 +109,7 @@ struct handle {
+ 
+ void usage(void)
+ {
+-	fprintf(stderr, "usage: open_by_handle [-cludmrwapk] <test_dir> [num_files]\n");
++	fprintf(stderr, "usage: open_by_handle [-cludmrwapk] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
+ 	fprintf(stderr, "\n");
+ 	fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
+ 	fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
+@@ -116,6 +122,8 @@ void usage(void)
+ 	fprintf(stderr, "open_by_handle -d <test_dir> [N] - unlink test files and hardlinks, drop caches and try to open by handle\n");
+ 	fprintf(stderr, "open_by_handle -m <test_dir> [N] - rename test files, drop caches and try to open by handle\n");
+ 	fprintf(stderr, "open_by_handle -p <test_dir>     - create/delete and try to open by handle also test_dir itself\n");
++	fprintf(stderr, "open_by_handle -i <handles_file> <test_dir> [N] - read test files handles from file and try to open by handle\n");
++	fprintf(stderr, "open_by_handle -o <handles_file> <test_dir> [N] - get file handles of test files and write handles to file\n");
+ 	exit(EXIT_FAILURE);
+ }
+ 
+@@ -131,15 +139,16 @@ int main(int argc, char **argv)
+ 	char	*test_dir;
+ 	char	*mount_dir;
+ 	int	mount_fd, mount_id;
++	int	in_fd = 0, out_fd = 0;
+ 	int	numfiles = 1;
+ 	int	create = 0, delete = 0, nlink = 1, move = 0;
+ 	int	rd = 0, wr = 0, wrafter = 0, parent = 0;
+ 	int	keepopen = 0;
+ 
+-	if (argc < 2 || argc > 4)
++	if (argc < 2)
+ 		usage();
+ 
+-	while ((c = getopt(argc, argv, "cludmrwapk")) != -1) {
++	while ((c = getopt(argc, argv, "cludmrwapki:o:")) != -1) {
+ 		switch (c) {
+ 		case 'c':
+ 			create = 1;
+@@ -176,13 +185,27 @@ int main(int argc, char **argv)
+ 		case 'k':
+ 			keepopen = 1;
+ 			break;
++		case 'i':
++			in_fd = open(optarg, O_RDONLY);
++			if (in_fd < 0) {
++				perror(optarg);
++				return EXIT_FAILURE;
++			}
++			break;
++		case 'o':
++			out_fd = creat(optarg, 0644);
++			if (out_fd < 0) {
++				perror(optarg);
++				return EXIT_FAILURE;
++			}
++			break;
+ 		default:
+ 			fprintf(stderr, "illegal option '%s'\n", argv[optind]);
+ 		case 'h':
+ 			usage();
+ 		}
+ 	}
+-        if (optind == argc || optind > 2)
++        if (optind == argc)
+             usage();
+ 	test_dir = argv[optind++];
+ 	if (optind < argc)
+@@ -192,11 +215,14 @@ int main(int argc, char **argv)
+ 		usage();
+ 	}
+ 
+-	if (parent) {
++	if (parent && !in_fd) {
+ 		strcpy(dname, test_dir);
+ 		/*
+ 		 * -p flag implies that test_dir is NOT a mount point,
+ 		 * so its parent can be used as mount_fd for open_by_handle_at.
++		 * -i flag implies that test_dir IS a mount point, because we
++		 *  are testing open by handle of dir, which may have been
++		 *  deleted or renamed.
+ 		 */
+ 		mount_dir = dirname(dname);
+ 		if (create)
+@@ -241,15 +267,24 @@ int main(int argc, char **argv)
+ 	/* sync to get the new inodes to hit the disk */
+ 	sync();
+ 
+-	/* create the handles */
++	/* create/read the handles */
+ 	for (i=0; i < numfiles; i++) {
+ 		sprintf(fname, "%s/file%06d", test_dir, i);
+-		handle[i].fh.handle_bytes = MAX_HANDLE_SZ;
+-		ret = name_to_handle_at(AT_FDCWD, fname, &handle[i].fh, &mount_id, 0);
+-		if (ret < 0) {
+-			strcat(fname, ": name_to_handle");
+-			perror(fname);
+-			return EXIT_FAILURE;
++		if (in_fd) {
++			ret = read(in_fd, (char *)&handle[i], sizeof(*handle));
++			if (ret < sizeof(*handle)) {
++				strcat(fname, ": read handle");
++				perror(fname);
++				return EXIT_FAILURE;
++			}
++		} else {
++			handle[i].fh.handle_bytes = MAX_HANDLE_SZ;
++			ret = name_to_handle_at(AT_FDCWD, fname, &handle[i].fh, &mount_id, 0);
++			if (ret < 0) {
++				strcat(fname, ": name_to_handle");
++				perror(fname);
++				return EXIT_FAILURE;
++			}
+ 		}
+ 		if (keepopen) {
+ 			/* Open without close to keep unlinked files around */
+@@ -260,15 +295,40 @@ int main(int argc, char **argv)
+ 				return EXIT_FAILURE;
+ 			}
+ 		}
++		if (out_fd) {
++			ret = write(out_fd, (char *)&handle[i], sizeof(*handle));
++			if (ret < sizeof(*handle)) {
++				strcat(fname, ": write handle");
++				perror(fname);
++				return EXIT_FAILURE;
++			}
++		}
+ 	}
+ 
+ 	if (parent) {
+-		dir_handle.fh.handle_bytes = MAX_HANDLE_SZ;
+-		ret = name_to_handle_at(AT_FDCWD, test_dir, &dir_handle.fh, &mount_id, 0);
+-		if (ret < 0) {
+-			strcat(dname, ": name_to_handle");
+-			perror(dname);
+-			return EXIT_FAILURE;
++		if (in_fd) {
++			ret = read(in_fd, (char *)&dir_handle, sizeof(*handle));
++			if (ret < sizeof(*handle)) {
++				strcat(dname, ": read handle");
++				perror(dname);
++				return EXIT_FAILURE;
++			}
++		} else {
++			dir_handle.fh.handle_bytes = MAX_HANDLE_SZ;
++			ret = name_to_handle_at(AT_FDCWD, test_dir, &dir_handle.fh, &mount_id, 0);
++			if (ret < 0) {
++				strcat(dname, ": name_to_handle");
++				perror(dname);
++				return EXIT_FAILURE;
++			}
++		}
++		if (out_fd) {
++			ret = write(out_fd, (char *)&dir_handle, sizeof(*handle));
++			if (ret < sizeof(*handle)) {
++				strcat(dname, ": write handle");
++				perror(dname);
++				return EXIT_FAILURE;
++			}
+ 		}
+ 	}
+ 
+@@ -289,8 +349,8 @@ int main(int argc, char **argv)
+ 		close(fd);
+ 	}
+ 
+-	/* after creating test set only check that fs supports exportfs */
+-	if (create)
++	/* If creating test set or saving files handles, we are done */
++	if (create || out_fd)
+ 		return EXIT_SUCCESS;
+ 
+ 	/* hardlink the files */
+-- 
+2.7.4
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. clonerange and deduperange operations are added to
-fsstress in this update, so we get more test coverage on FICLONERANGE and
-FIDEDUPERANGE syscalls. Two new tests that run fsstress are added too, one runs
-fsstress on dmerror device to simulate disk falures and another runs fsstress
-in write-only mode. We also have two new ext4 regression tests on DAX mount,
-and a new btrfs test on raid6 scrub code.
-
-New failures I've noticed in this update:
-- generic/475 sometimes fails on ext4, I saw ext4 corruption after test (around
-  20% reproducibility)
-- generic/232 fails post-test fsck on reflink enabled XFS, I guess it has
-  something to do with the new clonerange and deduperange operations
-- generic/083, generic/269 and generic/270 would hang (soft lockup) on reflink
-  enabled XFS, they all exercise behavior near ENOSPC, and generic/269 would
-  hit the soft lockup more easily
-- btrfs/158 fails on btrfs, the fixes are referenced in the test
-
-Perhaps there're other failures that're caused by the new clone and dedupe
-operations in fsstress, please report and/or contribute patches if you think
-that's a case bug that needs fix.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-95c924c65113 ext4: test for inline data + DAX corruption
-
-New commits:
-
-Darrick J. Wong (4):
-      [ce02f1b2f8ed] generic: test error shutdown while stressing filesystem
-      [e76e13ce8c0b] fsstress: implement the clonerange/deduperange ioctls
-      [3b1382f992bf] generic: run a long-soak write-only fsstress test
-      [451504891031] xfs/068: fix clonerange problems in file/dir count output
-
-Liu Bo (1):
-      [70138c383bf5] btrfs: make sure scrub fixes raid6 corruption
-
-Luis Henriques (1):
-      [ebe1aa88a197] generic/050: fix _require_local_device $SCRATCH_DEV check order
-
-Ross Zwisler (2):
-      [750a24e99e48] ext4: test for DAX + journaling corruption
-      [95c924c65113] ext4: test for inline data + DAX corruption
-
-
-Code Diffstat:
-
- .gitignore                          |   2 +
- common/dump                         |  11 +
- ltp/fsstress.c                      | 391 ++++++++++++++++++++++++++++++++++++
- src/Makefile                        |   3 +-
- src/t_ext4_dax_inline_corruption.c  |  70 +++++++
- src/t_ext4_dax_journal_corruption.c | 102 ++++++++++
- tests/btrfs/158                     | 114 +++++++++++
- tests/btrfs/158.out                 |  10 +
- tests/btrfs/group                   |   1 +
- tests/ext4/030                      |  74 +++++++
- tests/ext4/030.out                  |   2 +
- tests/ext4/031                      |  86 ++++++++
- tests/ext4/031.out                  |   2 +
- tests/ext4/group                    |   2 +
- tests/generic/050                   |   2 +-
- tests/generic/475                   |  97 +++++++++
- tests/generic/475.out               |   2 +
- tests/generic/476                   |  64 ++++++
- tests/generic/476.out               |   2 +
- tests/generic/group                 |   2 +
- 20 files changed, 1037 insertions(+), 2 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---eMvz7ftlHJzD
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJaUkNCAAoJECZSqilcj+djM5AP/08gAZqrCe9gzglLyXigyOuU
-/PlC9rc70xx0G8qU6YjLiKLQWkti6I8qSjbmvRyZwaAY58yznf9YT6Kmf0eZApMY
-WuPPFt8/VsWv8KsTsJIEPLBn1YygN4Zp9NRwO8LVAiyKlnHxOFVuwmwKV8jekvWe
-I8xsuuqZKRga7aLgzbr7DJQhlvEozAewTXRSlXoB4Zn6BELqTpd9HHiVtpE6nWGL
-gwKpnf/o+oFU5SqzW6/IUXwlNWbvGsIXwOHcSJubAIBVBKE17eYXMXnjdaiDgPAh
-HLXFtUyb7lWBgTttTt86r1ulDDmGzPwLHop5Yb85NfAIgGz4ySPM4a5ClnOP1jsK
-Q4A0ddDhsPdQfmjRQwbPTW9HHnLQdB5BvC3yH0HQ/p4K/7ZK5vQCYHwXdqzbsDKd
-qoHcrF7Jkt6RlLzeHRKgZR8xkg5+y3W+uw21GDt0bdCVfrEewj7eJuHC0DIjWRvC
-UWSmbRgGQ7C7Sli90zEPk7CrQ8bfinH/Os/wjITgwKtX7Uu8y6QSlbbrUBqmXoRA
-Bh4ylXJWAoouaBfhhRsm1DYIp9P3rPKt80kNBq/brhnAR8d4+76Ic7SCgWFnZZPz
-KVdF+6SlXrrQG/19cxnBaehymlI+wZm2FRjKouEHN9Ujf7182z+f+VD5N8ivpHRM
-6JW6UGn623lbkqy4Ntjc
-=UV6x
------END PGP SIGNATURE-----
-
---eMvz7ftlHJzD--
