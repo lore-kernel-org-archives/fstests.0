@@ -1,182 +1,117 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60460 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:45430 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753754AbeAGPZC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Jan 2018 10:25:02 -0500
-Date: Sun, 7 Jan 2018 23:25:00 +0800
+        id S1752986AbeAGPbJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Jan 2018 10:31:09 -0500
+Date: Sun, 7 Jan 2018 23:31:06 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/8] common/rc: report kmemleak errors
-Message-ID: <20180107152500.GN5123@eguan.usersys.redhat.com>
-References: <151314499003.18893.8687182548758898133.stgit@magnolia>
- <151314499847.18893.9855359031542704591.stgit@magnolia>
- <20171214093718.GH2749@eguan.usersys.redhat.com>
- <20171214181508.GJ6896@magnolia>
- <20180105080255.GH5123@eguan.usersys.redhat.com>
- <20180105170227.GG5602@magnolia>
+Subject: Re: [PATCH v3] ext4/030: Ext4 online resize with bigalloc tests.
+Message-ID: <20180107153106.GO5123@eguan.usersys.redhat.com>
+References: <20171101001159.88570-1-harshads@google.com>
+ <20180104011801.10141-1-harshads@google.com>
+ <CAOQ4uxguExYyi4gkDmAedgQcCSXSucG3_nP4YzT0x9AbqTNJxA@mail.gmail.com>
+ <20180104082028.GA5123@eguan.usersys.redhat.com>
+ <CAMCMpYLZNNwFUBYCUUp8NLtt7_5ui=Kv=RaOGweDv9BGWaPGsA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180105170227.GG5602@magnolia>
+In-Reply-To: <CAMCMpYLZNNwFUBYCUUp8NLtt7_5ui=Kv=RaOGweDv9BGWaPGsA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Harshad Shirwadkar <harshads@google.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 05, 2018 at 09:02:27AM -0800, Darrick J. Wong wrote:
-> On Fri, Jan 05, 2018 at 04:02:55PM +0800, Eryu Guan wrote:
-> > On Thu, Dec 14, 2017 at 10:15:08AM -0800, Darrick J. Wong wrote:
-> > > On Thu, Dec 14, 2017 at 05:37:18PM +0800, Eryu Guan wrote:
-> > > > On Tue, Dec 12, 2017 at 10:03:18PM -0800, Darrick J. Wong wrote:
-> > > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > > 
-> > > > > If kmemleak is enabled, scan and report memory leaks after every test.
-> > > > > 
-> > > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > > ---
-> > > > >  check     |    2 ++
-> > > > >  common/rc |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > > >  2 files changed, 54 insertions(+)
-> > > > > 
-> > > > > 
-> > > > > diff --git a/check b/check
-> > > > > index b2d251a..469188e 100755
-> > > > > --- a/check
-> > > > > +++ b/check
-> > > > > @@ -497,6 +497,7 @@ _check_filesystems()
-> > > > >  	fi
-> > > > >  }
-> > > > >  
-> > > > > +_init_kmemleak
-> > > > >  _prepare_test_list
-> > > > >  
-> > > > >  if $OPTIONS_HAVE_SECTIONS; then
-> > > > > @@ -793,6 +794,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-> > > > >  		    n_try=`expr $n_try + 1`
-> > > > >  		    _check_filesystems
-> > > > >  		    _check_dmesg || err=true
-> > > > > +		    _check_kmemleak || err=true
-> > > > >  		fi
-> > > > >  
-> > > > >  	    fi
-> > > > > diff --git a/common/rc b/common/rc
-> > > > > index cb83918..a2bed36 100644
-> > > > > --- a/common/rc
-> > > > > +++ b/common/rc
-> > > > > @@ -3339,6 +3339,58 @@ _check_dmesg()
-> > > > >  	fi
-> > > > >  }
-> > > > >  
-> > > > > +# capture the kmemleak report
-> > > > > +_capture_kmemleak()
-> > > > > +{
-> > > > > +	local _kern_knob="${DEBUGFS_MNT}/kmemleak"
-> > > > > +	local _leak_file="$1"
-> > > > > +
-> > > > > +	# Tell the kernel to scan for memory leaks.  Apparently the write
-> > > > > +	# returns before the scan is complete, so do it twice in the hopes
-> > > > > +	# that twice is enough to capture all the leaks.
-> > > > > +	echo "scan" > "${_kern_knob}"
-> > > > > +	cat "${_kern_knob}" > /dev/null
-> > > > > +	echo "scan" > "${_kern_knob}"
-> > > > > +	cat "${_kern_knob}" > "${_leak_file}"
-> > > > > +	echo "clear" > "${_kern_knob}"
-> > > > 
-> > > > Hmm, two scans seem not enough either, I could see false positive easily
-> > > > in a 'quick' group run, because some leaks are not reported immediately
-> > > > after the test but after next test or next few tests. e.g. I saw
-> > > > generic/008 (tested on XFS) being reported as leaking memory, and from
-> > > > 008.kmemleak I saw:
-> > > > 
-> > > > unreferenced object 0xffff880277679800 (size 512):
-> > > >   comm "nametest", pid 25007, jiffies 4300176958 (age 9.854s)
-> > > > ...
-> > > > 
-> > > > But "nametest" is only used in generic/007, the leak should be triggered
-> > > > by generic/007 too, but 007 was reported as PASS in my case.
-> > > > 
-> > > > Not sure what's the best way to deal with these false positive, adding
-> > > > more scans seem to work, but that's ugly and requires more test time..
-> > > > What do you think?
-> > > 
-> > > I'm not sure either -- the brief scan I made of mm/kmemleak.c didn't
-> > > reveal anything obvious that would explain the behavior we see.  It
-> > > might just take a while for determine positively that an item isn't
-> > > gray.
-> > 
-> > Seems so, I did read similar statements elsewhere, but I can't remember
-> > now..
-> > 
-> > > 
-> > > We could change the message to state that found leaks might have
-> > > resulted from the previous test?  That's rather unsatisfying, but I
-> > > don't know what else to do.
-> > 
-> > Seems like a reasonable way to go at this stage. I also noticed some
-> > leaks probably were not from the test we ran nor fs-related, but other
-> > processes on the system, e.g. 
-> > 
-> > unreferenced object 0xffff8801768be3c0 (size 256):
-> >   comm "softirq", pid 0, jiffies 4299031078 (age 14.234s)
-> >   hex dump (first 32 bytes):
-> >     01 00 00 00 00 00 00 00 03 00 00 00 00 03 00 00  ................
-> >     b7 fd 01 00 00 00 00 00 d8 f6 1f 79 02 88 ff ff  ...........y....
-> >   backtrace:
-> >     [<ffffffffa077cae8>] init_conntrack+0x4a8/0x4c0 [nf_conntrack]
-> >     [<ffffffffa077d2c4>] nf_conntrack_in+0x494/0x510 [nf_conntrack]
-> >     [<ffffffff815f32d7>] nf_hook_slow+0x37/0xb0
-> >     [<ffffffff815fd6a0>] ip_rcv+0x2f0/0x3c0
-> >     [<ffffffff815b5833>] __netif_receive_skb_core+0x3d3/0xaa0
-> >     [<ffffffff815b8154>] netif_receive_skb_internal+0x34/0xc0
-> >     [<ffffffffa0356654>] br_pass_frame_up+0xb4/0x140 [bridge]
-> >     [<ffffffffa03568eb>] br_handle_frame_finish+0x20b/0x3f0 [bridge]
-> >     [<ffffffffa0356c7b>] br_handle_frame+0x16b/0x2c0 [bridge]
-> >     [<ffffffff815b5651>] __netif_receive_skb_core+0x1f1/0xaa0
-> >     [<ffffffff815b8154>] netif_receive_skb_internal+0x34/0xc0
-> >     [<ffffffff815b8dbc>] napi_gro_receive+0xbc/0xe0
-> >     [<ffffffffa004f64c>] bnx2_poll_work+0x8fc/0x1190 [bnx2]
-> >     [<ffffffffa004ff13>] bnx2_poll_msix+0x33/0xb0 [bnx2]
-> >     [<ffffffff815b868e>] net_rx_action+0x26e/0x3a0
-> >     [<ffffffff816e8778>] __do_softirq+0xc8/0x26c
-> > 
-> > Perhaps we can mark the kmemleak check as "experimental" or so? By
-> > adding some kind of "disclaimer" in the beginning of $seqres.kmemleak
-> > file? So people could have the right expectation on these kmemleak
-> > failures.
+On Fri, Jan 05, 2018 at 01:21:30PM -0800, Harshad Shirwadkar wrote:
+> On Thu, Jan 4, 2018 at 12:20 AM, Eryu Guan <eguan@redhat.com> wrote:
+> > On Thu, Jan 04, 2018 at 10:09:08AM +0200, Amir Goldstein wrote:
+> >> On Thu, Jan 4, 2018 at 3:18 AM, harshads <harshads@google.com> wrote:
+> >> > Add tests to verify Ext4 online resizing feature with bigalloc feature
+> >> > enabled. We test various resizing scenarios with different cluster
+> >> > sizes.
+> >> >
+> >> > Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+> >> > ---
+> >> >  common/rc          |  23 ++++++++
+> >> >  tests/ext4/030     | 158 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >> >  tests/ext4/030.out | 148 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >> >  tests/ext4/group   |   1 +
+> >> >  4 files changed, 330 insertions(+)
+> >> >  create mode 100755 tests/ext4/030
+> >> >  create mode 100644 tests/ext4/030.out
+> >> >
+> >> > diff --git a/common/rc b/common/rc
+> >> > index 9216efdb..052dadae 100644
+> >> > --- a/common/rc
+> >> > +++ b/common/rc
+> >> > @@ -1845,6 +1845,29 @@ _require_scratch_ext4_feature()
+> >> >      _scratch_unmount
+> >> >  }
+> >> >
+> >> > +# Check whether the specified feature whether it is supported by
+> >> > +# mkfs.ext4 and the kernel by using a sparse file image.
+> >> > +_require_ext4_feature()
+> >>
+> >> 1. please explain why this loop variant is needed
 > 
-> How about:
-> 
-> "EXPERIMENTAL kmemleak reported some memory leaks!  Due to the way kmemleak
-> works, the leak might be from an earlier test, or something totally unrelated.
+> As discussed on a previous thread, the loop variant will avoid the
+> need to mkfs twice on scratch device (once in rule and once in test).
+> Also, this particular test doesn't need scratch device at all. So, if
+> I decide to use _require_scratch_ext4_feature, I will have to do
+> _require_scratch just for the rule even though the actual test doesn't
+> need scratch. So, having loop variant helps.
 
-Yeah, this looks good to me!
+Hmm, as the _require_scratch_ext4_feature helper is already there and
+already does mkfs twice (with a very small fs size, so the additional
+mkfs won't add much time), I think it'd be much simpler to just use
+_require_scratch and _require_scratch_feature and create all the test
+images on $SCRATCH_DEV, a loop device variant doesn't seem that
+necessary to me.
 
 Thanks,
 Eryu
 
 > 
-> "unreferenced object 0xffff8801768be3c0 (size 256):
->   comm "softirq", pid 0, jiffies 4299031078 (age 14.234s)
-> ..."
+> >> 2. it would be great if you could also change callers to
+> >> _require_scratch_ext4_feature
+> >>     to use _require_scratch_feature and plug
+> >> _require_scratch_ext4_feature in there
 > 
-> > > 
-> > > Or maybe a sleep 1 in between scans to see if that makes it more likely
-> > > to attribute a leak to the correct test?  I don't anticipate running
-> > > xfstests with kmemleak=on too terribly often, so the extra ~700s won't
-> > > bother me too much.
-> > 
-> > This doesn't improve anything to me, 7 of the first 8 tests failed due
-> > to kmemleak check after adding 'sleep 1' between scans.
+> Okay, that sounds good.
 > 
-> <nod>
+> >> 3. probably best to post this as a separate patch from the test itself
 > 
-> --D
+> Okay.
 > 
+> >
+> > I haven't went through the whole patch yet, just want to point out that
+> > the _require_scratch_ext4_feature helper has been added in commit
+> > be341e36fd02 ("common: rework _require_ext4_mkfs_feature"), but not
+> > enabled in the more generic _require_scratch_feature helper yet.
+> >
+> > It'd be good to plug the ext4 helper to the generic helper in a separate
+> > patch, as Amir suggested, and perhaps converting all existing callers of
+> > the ext4 helper to the generic helper.
+> >
 > > Thanks,
 > > Eryu
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> >
+> >>
+> >> > +{
+> >> > +    if [ -z "$1" ]; then
+> >> > +        echo "Usage: _require_loop_ext4_feature feature"
+> >>
+> >> So which is it, _require_loop_ext4_feature or _require_ext4_feature?
+> >> First one sounds better to me, given that you explain why the loop
+> >> variant is needed.
+> >> If it is needed, will it be useful to have for other fs?
+> >> Then better implement _require_loop_feature and make ext4
+> >> a specific case.
+> 
+> Thanks for pointing this out. I agree that _require_loop_ext4_feature
+> is better. Sure, I'll add a _require_loop_feature. Alright, I'll do
+> _require_loop stuff in a different patch.
+> 
+> - Harshad.
+> 
+> >>
+> >> Cheers,
+> >> Amir.
