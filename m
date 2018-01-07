@@ -1,64 +1,73 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:47097 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754254AbeAGSGg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Jan 2018 13:06:36 -0500
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:39189 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754273AbeAGSGn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Jan 2018 13:06:43 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 0/7] Overlayfs exportfs tests
-Date: Sun,  7 Jan 2018 20:07:18 +0200
-Message-Id: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 5/7] generic/exportfs: add a test case for renamed parent dir
+Date: Sun,  7 Jan 2018 20:07:23 +0200
+Message-Id: <1515348445-1403-6-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
+References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+Check that a dir file handle can be opened after its parent
+has been renamed.
 
-Following patches were used to test overlayfs NFS export.
+Retry decoding subdir file handle when parent is in dcache
+and when parent is not in dcache.
 
-Patches 1-5 improve generic/exportfs tests, by adding test coverage
-of some directory file handle use cases.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/generic/467     | 7 +++++++
+ tests/generic/467.out | 3 +++
+ 2 files changed, 10 insertions(+)
 
-Patches 6-7 add two overlay specific tests for NFS file handles
-for overlay setup of same fs and non same fs.
-
-The new overlay tests don't run on upstream kernel and pass with
-my overlayfs NFS export V2 branch [1]. You may want to wait with
-merging those tests until overlayfs NFS support is merged - up to you,
-but a review would be most welcome.
-
-Merging patches 1-5 seems like a good idea to me regardless of
-overlayfs NFS export support.
-
-Thanks,
-Amir.
-
-[1] https://github.com/amir73il/linux/commits/ovl-nfs-export-v2
-
-Amir Goldstein (7):
-  open_by_handle: store and load file handles from file
-  open_by_handle: verify dir content only with -r flag
-  generic/exportfs: golden output is not silent
-  generic/exportfs: store and load file handles from file
-  generic/exportfs: add a test case for renamed parent dir
-  overlay: test encode/decode overlay file handles
-  overlay: test encode/decode of non-samefs overlay file handles
-
- src/open_by_handle.c  | 112 +++++++++++++-----
- tests/generic/426     |   1 -
- tests/generic/426.out |   1 -
- tests/generic/467     |  37 ++++--
- tests/generic/467.out |  10 +-
- tests/overlay/050     | 291 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/050.out |  50 ++++++++
- tests/overlay/051     | 311 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/051.out |  50 ++++++++
- tests/overlay/group   |   2 +
- 10 files changed, 822 insertions(+), 43 deletions(-)
- create mode 100755 tests/overlay/050
- create mode 100644 tests/overlay/050.out
- create mode 100755 tests/overlay/051
- create mode 100644 tests/overlay/051.out
-
+diff --git a/tests/generic/467 b/tests/generic/467
+index 592ffbe..555b44b 100755
+--- a/tests/generic/467
++++ b/tests/generic/467
+@@ -67,6 +67,7 @@ create_test_files()
+ 	local opt=$2
+ 
+ 	rm -rf $dir
++	mkdir -p $dir
+ 	$here/src/open_by_handle -cwp $dir $NUMFILES
+ }
+ 
+@@ -114,12 +115,18 @@ test_file_handles $TEST_DIR -r -i $tmp.file_handles
+ 
+ # Check non-stale file handles of renamed dirs
+ create_test_files $testdir
++create_test_files $testdir/subdir
+ rm -rf $testdir.renamed
+ # Store file handles before rename of testdir
+ test_file_handles $testdir -p -o $tmp.file_handles
++test_file_handles $testdir/subdir -p -o $tmp.subdir_file_handles
+ mv $testdir $testdir.renamed/
+ # Check open, read and readdir from stored file handles
+ test_file_handles $TEST_DIR -rp -i $tmp.file_handles
++test_file_handles $TEST_DIR -rp -i $tmp.subdir_file_handles
++# Retry decoding subdir file handle when testdir is in dcache
++# (providing renamed testdir argument pins testdir to dcache)
++test_file_handles $testdir.renamed -rp -i $tmp.subdir_file_handles
+ 
+ status=0
+ exit
+diff --git a/tests/generic/467.out b/tests/generic/467.out
+index c29289e..dfa3240 100644
+--- a/tests/generic/467.out
++++ b/tests/generic/467.out
+@@ -8,4 +8,7 @@ test_file_handles TEST_DIR/467-dir -mr
+ test_file_handles TEST_DIR/467-dir -o file_handles
+ test_file_handles TEST_DIR -r -i file_handles
+ test_file_handles TEST_DIR/467-dir -p -o file_handles
++test_file_handles TEST_DIR/467-dir/subdir -p -o subdir_file_handles
+ test_file_handles TEST_DIR -rp -i file_handles
++test_file_handles TEST_DIR -rp -i subdir_file_handles
++test_file_handles TEST_DIR/467-dir.renamed -rp -i subdir_file_handles
 -- 
 2.7.4
 
