@@ -1,361 +1,53 @@
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:36104 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755274AbeAHESp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Jan 2018 23:18:45 -0500
-Received: by mail-pf0-f195.google.com with SMTP id 23so2470467pfp.3
-        for <fstests@vger.kernel.org>; Sun, 07 Jan 2018 20:18:45 -0800 (PST)
-From: harshads <harshads@google.com>
-Subject: [PATCH v4] ext4/030: Ext4 online resize with bigalloc tests.
-Date: Sun,  7 Jan 2018 20:18:15 -0800
-Message-Id: <20180108041815.120821-1-harshads@google.com>
-In-Reply-To: <20180104011801.10141-1-harshads@google.com>
-References: <20180104011801.10141-1-harshads@google.com>
+Received: from mx2.suse.de ([195.135.220.15]:41986 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755907AbeAHIne (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Jan 2018 03:43:34 -0500
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] generic/015: Change the test filesystem size to 101mb
+Date: Mon,  8 Jan 2018 10:43:30 +0200
+Message-Id: <1515401010-26802-1-git-send-email-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, harshads <harshads@google.com>
+To: fstests@vger.kernel.org
+Cc: dsterba@suse.cz, linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add tests to verify Ext4 online resizing feature with bigalloc feature
-enabled. We test various resizing scenarios with different cluster
-sizes.
+This test has been failing for btrfs for quite some time,
+at least since 4.7. There are 2 implementation details of btrfs that
+it exposes:
 
-Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+1. Currently btrfs filesystem under 100mb are created in Mixed block
+group mode. Freespace accounting for it is not 100% accurate - I've
+observed around 100-200kb discrepancy between a newly created filesystem,
+then writing a file and deleting it and checking the free space. This
+falls within %3 and not %1 as hardcoded in the test. 
+
+2. BTRFS won't flush it's delayed allocation on file deletion if less
+than 32mb are deleted. On such files we need to perform sync (missing
+in the test) or wait until time elapses for transaction commit.
+
+Since mixed mode is somewhat deprecated and btrfs is not really intended
+to be used on really small devices let's just adjust the test to
+create a 101mb fs, which doesn't use mixed mode and really test
+freespace accounting.
+
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- tests/ext4/030     | 156 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/030.out | 148 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/group   |   1 +
- 3 files changed, 305 insertions(+)
- create mode 100755 tests/ext4/030
- create mode 100644 tests/ext4/030.out
+ tests/generic/015 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/ext4/030 b/tests/ext4/030
-new file mode 100755
-index 00000000..99ca9362
---- /dev/null
-+++ b/tests/ext4/030
-@@ -0,0 +1,156 @@
-+#! /bin/bash
-+# FS QA Test ext4/030
-+#
-+# Ext4 online resize tests of small and crucial resizes with bigalloc
-+# feature.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-+#
-+# Author: Harshad Shirwadkar <harshads@google.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_bytes2blk()
-+{
-+    local bytes=$1
-+    BLKSIZ=4096
-+    echo $((bytes / $BLKSIZ))
-+}
-+
-+_ext4_online_resize()
-+{
-+    local image_file=$1
-+    local image_mount=$2
-+    local original_size=$3
-+    local final_size=$4
-+    local cluster_size=$5
-+
-+    echo "+ truncate image file to $(_bytes2blk $final_size)"
-+    $XFS_IO_PROG -f -c "truncate ${final_size}" ${image_file}
-+    LOOP_DEVICE=`_create_loop_device $image_file || _fail "losetup failed"`
-+
-+    echo "+ create fs on image file $(_bytes2blk $original_size)"
-+    ${MKFS_PROG}.${FSTYP} -F -O bigalloc,resize_inode,metadata_csum \
-+		-C ${cluster_size} -b 4096 \
-+		${LOOP_DEVICE} $(_bytes2blk $original_size) > /dev/null 2>&1 || \
-+	_fail "mkfs failed"
-+
-+    echo "+ mount image file"
-+    $MOUNT_PROG -t ${FSTYP} ${LOOP_DEVICE} ${image_mount} > \
-+		/dev/null 2>&1 || _fail "mount failed"
-+
-+    echo "+ resize fs to $(_bytes2blk $final_size)"
-+    resize2fs -f ${LOOP_DEVICE} $(_bytes2blk $final_size) >> $seqres.full 2>&1 || \
-+	_fail "resize2fs failed"
-+
-+    echo "+ umount fs"
-+    $UMOUNT_PROG ${image_mount}
-+
-+    echo "+ check fs"
-+    _check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+    _destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
-+}
-+
-+_cleanup()
-+{
-+    cd /
-+    [ -n "$LOOP_DEVICE" ] && _destroy_loop_device $LOOP_DEVICE > /dev/null 2>&1
-+    rm -f $tmp.*
-+    umount ${IMG_MNT} > /dev/null 2>&1
-+    rm -f ${IMG_FILE} > /dev/null 2>&1
-+}
-+
-+# get standard environment and checks
-+. ./common/rc
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs ext4
-+_supported_os Linux
-+
-+_require_loop
-+_require_scratch
-+_require_scratch_ext4_feature "bigalloc,resize_inode,metadata_csum"
-+
-+IMG_FILE=$TEST_DIR/$seq.fs
-+IMG_MNT=$TEST_DIR/$seq.mnt
-+
-+rm -f $seqres.full
-+
-+rmdir $IMG_MNT 2>/dev/null
-+mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
-+
-+## We perform resizing to various multiples of block group sizes to
-+## ensure that we cover maximum edge cases in the kernel code.
-+for cluster_size in 4096 16384 65536; do
-+    echo "+ set cluster size to ${cluster_size}"
-+    ## Extending a 1/2 block group to a 2/3 block group.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((16384 * $cluster_size)) \
-+			$((24576 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to one cluster less than a
-+    ## full block group.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((32767 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to a full block group.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((32768 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to 2 block groups.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((65536 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to 15 block groups and one
-+    ## cluster.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((491521 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to 15 and a half block groups.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((507904 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to 16 block groups.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((524288 * $cluster_size)) ${cluster_size}
-+
-+    ## Extending a 2/3rd block group to 160 block groups.
-+    _ext4_online_resize ${IMG_FILE} ${IMG_MNT} \
-+			$((24576 * $cluster_size)) \
-+			$((5242880 * $cluster_size)) ${cluster_size}
-+done
-+
-+status=0
-+exit
-diff --git a/tests/ext4/030.out b/tests/ext4/030.out
-new file mode 100644
-index 00000000..17cc4d99
---- /dev/null
-+++ b/tests/ext4/030.out
-@@ -0,0 +1,148 @@
-+QA output created by 030
-++ set cluster size to 4096
-++ truncate image file to 24576
-++ create fs on image file 16384
-++ mount image file
-++ resize fs to 24576
-++ umount fs
-++ check fs
-++ truncate image file to 32767
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 32767
-++ umount fs
-++ check fs
-++ truncate image file to 32768
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 32768
-++ umount fs
-++ check fs
-++ truncate image file to 65536
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 65536
-++ umount fs
-++ check fs
-++ truncate image file to 491521
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 491521
-++ umount fs
-++ check fs
-++ truncate image file to 507904
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 507904
-++ umount fs
-++ check fs
-++ truncate image file to 524288
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 524288
-++ umount fs
-++ check fs
-++ truncate image file to 5242880
-++ create fs on image file 24576
-++ mount image file
-++ resize fs to 5242880
-++ umount fs
-++ check fs
-++ set cluster size to 16384
-++ truncate image file to 98304
-++ create fs on image file 65536
-++ mount image file
-++ resize fs to 98304
-++ umount fs
-++ check fs
-++ truncate image file to 131068
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 131068
-++ umount fs
-++ check fs
-++ truncate image file to 131072
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 131072
-++ umount fs
-++ check fs
-++ truncate image file to 262144
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 262144
-++ umount fs
-++ check fs
-++ truncate image file to 1966084
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 1966084
-++ umount fs
-++ check fs
-++ truncate image file to 2031616
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 2031616
-++ umount fs
-++ check fs
-++ truncate image file to 2097152
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 2097152
-++ umount fs
-++ check fs
-++ truncate image file to 20971520
-++ create fs on image file 98304
-++ mount image file
-++ resize fs to 20971520
-++ umount fs
-++ check fs
-++ set cluster size to 65536
-++ truncate image file to 393216
-++ create fs on image file 262144
-++ mount image file
-++ resize fs to 393216
-++ umount fs
-++ check fs
-++ truncate image file to 524272
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 524272
-++ umount fs
-++ check fs
-++ truncate image file to 524288
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 524288
-++ umount fs
-++ check fs
-++ truncate image file to 1048576
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 1048576
-++ umount fs
-++ check fs
-++ truncate image file to 7864336
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 7864336
-++ umount fs
-++ check fs
-++ truncate image file to 8126464
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 8126464
-++ umount fs
-++ check fs
-++ truncate image file to 8388608
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 8388608
-++ umount fs
-++ check fs
-++ truncate image file to 83886080
-++ create fs on image file 393216
-++ mount image file
-++ resize fs to 83886080
-++ umount fs
-++ check fs
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 257bb646..f29d3de6 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -32,6 +32,7 @@
- 027 auto quick fsmap
- 028 auto quick fsmap
- 029 auto quick fsmap
-+030 auto quick ioctl resize
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
+diff --git a/tests/generic/015 b/tests/generic/015
+index 78f2b13..416c4ae 100755
+--- a/tests/generic/015
++++ b/tests/generic/015
+@@ -53,7 +53,7 @@ _supported_os Linux
+ _require_scratch
+ _require_no_large_scratch_dev
+ 
+-_scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >/dev/null 2>&1 \
++_scratch_mkfs_sized `expr 101 \* 1024 \* 1024` >/dev/null 2>&1 \
+     || _fail "mkfs failed"
+ _scratch_mount || _fail "mount failed"
+ out=$SCRATCH_MNT/fillup.$$
 -- 
-2.16.0.rc0.223.g4a4ac83678-goog
+2.7.4
 
