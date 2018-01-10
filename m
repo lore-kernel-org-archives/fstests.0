@@ -1,258 +1,103 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:47280 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752378AbeAJA1K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 Jan 2018 19:27:10 -0500
-Date: Tue, 9 Jan 2018 16:20:15 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v3 3/4] xfs: test for umount hang caused by the pending
- dquota log item in AIL
-Message-ID: <20180110002015.GE5606@magnolia>
-References: <20171109073252.36001-1-houtao1@huawei.com>
- <20171109073252.36001-4-houtao1@huawei.com>
- <20171205004735.GB6896@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20171205004735.GB6896@magnolia>
+Received: from pv33p36im-asmtp002.me.com ([17.142.213.63]:63968 "EHLO
+        pv33p36im-asmtp002.me.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752792AbeAJCfh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Jan 2018 21:35:37 -0500
+Content-type: text/plain; charset=gb2312
+MIME-version: 1.0 (Mac OS X Mail 11.2 \(3445.5.20\))
+Subject: Re: [PATCH v3 1/3] common/rc: add scratch shutdown support for
+ overlayfs
+From: Chengguang Xu <cgxu519@icloud.com>
+In-reply-to: <CAOQ4uxhPzjEpxz1sroca+QLhd9us8orkGetzo9Zz8wC4B8RuZA@mail.gmail.com>
+Date: Wed, 10 Jan 2018 10:35:31 +0800
+Content-transfer-encoding: quoted-printable
+Message-id: <52534DE8-89B1-48E7-BEF1-985276BEC878@icloud.com>
+References: <1513048179-151065-1-git-send-email-cgxu519@icloud.com>
+ <20171212091622.GQ2749@eguan.usersys.redhat.com>
+ <CA402BA4-C027-4237-A348-0A7A5E606E56@icloud.com>
+ <20171212133911.GU2749@eguan.usersys.redhat.com>
+ <DB72F77F-23E3-4F5E-93CB-F61B94F9EA86@icloud.com>
+ <CAOQ4uxg0x3fC_uJMDjD9OB-fZuXJzsib5iAU3qckLqCivSc_KQ@mail.gmail.com>
+ <698CC47A-DC4A-4705-B112-6AAC36A088A4@icloud.com>
+ <CAOQ4uxhPzjEpxz1sroca+QLhd9us8orkGetzo9Zz8wC4B8RuZA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Hou Tao <houtao1@huawei.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, linux-xfs@vger.kernel.org, cmaiolino@redhat.com
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 04, 2017 at 04:47:35PM -0800, Darrick J. Wong wrote:
-> On Thu, Nov 09, 2017 at 03:32:51PM +0800, Hou Tao wrote:
-> > When the first writeback and the retried writeback of dquota buffer get
-> > the same IO error, XFS will let xfsaild to restart the writeback and
-> > xfs_qm_dqflush_done() will not be invoked. xfsaild will try to re-push
-> > the quota log item in AIL, the push will return early everytime after
-> > checking xfs_dqflock_nowait(), and xfsaild will try to push it again.
-> > 
-> > IOWs, AIL will never be empty, and the umount process will wait for the
-> > drain of AIL, so the umount process hangs.
-> > 
-> > Signed-off-by: Hou Tao <houtao1@huawei.com>
-> > ---
-> >  tests/xfs/999     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/999.out |   2 +
-> >  tests/xfs/group   |   1 +
-> >  3 files changed, 174 insertions(+)
-> >  create mode 100755 tests/xfs/999
-> >  create mode 100644 tests/xfs/999.out
-> > 
-> > diff --git a/tests/xfs/999 b/tests/xfs/999
-> > new file mode 100755
-> > index 0000000..22f7ba3
-> > --- /dev/null
-> > +++ b/tests/xfs/999
-> > @@ -0,0 +1,171 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. 999
-> > +#
-> > +# Test for XFS umount hang problem caused by the unceasing push
-> > +# of dquot log item in AIL. Because xfs_qm_dqflush_done() will
-> > +# not be invoked, so each time xfsaild initiates the push,
-> > +# the push will return early after checking xfs_dqflock_nowait().
-> > +#
-> > +# xfs_qm_dqflush_done() should be invoked by xfs_buf_do_callbacks().
-> > +# However after the first write and the retried write of dquota buffer
-> > +# get the same IO error, XFS will let xfsaild to restart the write and
-> > +# xfs_buf_do_callbacks() will not be inovked.
-> > +#
-> > +# This test emulates the write error by using dm-flakey. The log
-> > +# area of the XFS filesystem is excluded from the range covered by
-> > +# dm-flakey, so the XFS will not be shutdown prematurely.
-> 
-> Upstream commit is 373b0589dc8d58bc09c9a28d03611ae4fb216057 ("xfs:
-> Properly retry failed dquot items in case of error during buffer
-> writeback"), etc.
+=D4=DA 2018=C4=EA1=D4=C23=C8=D5=A3=AC=CF=C2=CE=E710:54=A3=ACAmir =
+Goldstein <amir73il@gmail.com> =D0=B4=B5=C0=A3=BA
+>=20
+> On Wed, Jan 3, 2018 at 4:25 PM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>>=20
+>>> =D4=DA 2018=C4=EA1=D4=C23=C8=D5=A3=AC=CF=C2=CE=E78:58=A3=ACAmir =
+Goldstein <amir73il@gmail.com> =D0=B4=B5=C0=A3=BA
+>>>=20
+>>> On Wed, Jan 3, 2018 at 2:44 PM, Chengguang Xu <cgxu519@icloud.com> =
+wrote:
+>>>>=20
+>>> [...]
+>>>> In order to add overlay support in some requirement checks like  =
+_require_metadata_journaling,
+>>>> I think it=A1=AFs better save underlying filesystem type to =
+$OVL_BASE_FSTYP and doing proper check based
+>>>> on it.
+>>>>=20
+>>>> Currently $OVL_BASE_FSTYP and $FSTYP all set to =A1=B0overlay=A1=B1, =
+Is there any specific reason for it?
+>>>>=20
+>>>=20
+>>> In _overlay_config_override():
+>>>       # Config file may specify base fs type, but we obay -overlay =
+flag
+>>>       export OVL_BASE_FSTYP=3D"$FSTYP"
+>>>       export FSTYP=3Doverlay
+>>>=20
+>>> So either your setup is wrong or there is a bug.
+>>> $OVL_BASE_FSTYP *should* contain the base fs type,
+>>> but only if you defined FSTYPE in your config file when running =
+./check -overlay
+>>=20
+>> Yeah, I didn=A1=AFt specify by hand in config file and just supposed =
+to detect automatically.
+>> I didn=A1=AFt check very carefully but seems just slight modification =
+like below could let it
+>> support auto detection.
+>>=20
+>=20
+> Sorry, I do not wish invest time to review this change because:
+> 1. I don't see the need to support auto detect of base fs type (feel
+> free to explain)
 
-Ping?  This has been fixed upstream for a month, still waiting for tests
-to get revised & resent....
+The reason of supporting auto detection maybe is the same as xfstests =
+for local filesystem.
+For some people who need to frequently change testing filesystem, they =
+would prefer to
+automatically recognize testing filesystem than modifying config file =
+again and again.
 
---D
+> 2. I ran a lot of test to sanitize the new overlay config option with =
+many
+>    configurations and this adds a lot more variants. I you wish to =
+push this
+>    forward and have a good claim for the need, please specify which =
+tests
+>    you ran to sanitize your change before requesting review.
+>=20
+> If you wish to contribute to the xfstests overlay infrastructure there
+> are other features
+> that would bring more gain IMO, for example:
+> - Support mkfs and MKFS_OPTIONS for base fs
+> - Try to increase the number of generic tests that can be run with
+> basefs+overlay
+>  similar to your effort with the shutdown group tests
 
-> --D
-> 
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2017 Huawei Technologies Co., Ltd. All Rights Reserved.
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +#
-> > +
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	[ -z "${interval}" ] || \
-> > +		sysctl -w fs.xfs.xfssyncd_centisecs=${interval} >/dev/null 2>&1
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +	_unmount_flakey >/dev/null 2>&1
-> > +	_cleanup_flakey > /dev/null 2>&1
-> > +}
-> > +
-> > +get_xfs_scratch_sb_field()
-> > +{
-> > +	local field=$1
-> > +
-> > +	_scratch_xfs_db -r -c "sb 0" -c "print $field" | \
-> > +	awk -v field=$field '$0 ~ field {print $3}'
-> > +}
-> > +
-> > +# inject IO write error for the XFS filesystem except its log section
-> > +make_xfs_scratch_flakey_table()
-> > +{
-> > +	local tgt=flakey
-> > +	local opt="0 1 1 error_writes"
-> > +	local dev=${SCRATCH_DEV}
-> > +	local dev_sz=$(blockdev --getsz $dev)
-> > +
-> > +	if [ "${USE_EXTERNAL}" = "yes" -a ! -z "$SCRATCH_LOGDEV" ]; then
-> > +		echo "0 ${dev_sz} $tgt $dev 0 $opt"
-> > +		return
-> > +	fi
-> > +
-> > +	local blk_sz=$(get_xfs_scratch_sb_field blocksize)
-> > +	local log_ofs=$(get_xfs_scratch_sb_field logstart)
-> > +	local log_sz=$(get_xfs_scratch_sb_field logblocks)
-> > +	local table=""
-> > +	local ofs=0
-> > +	local sz
-> > +
-> > +	log_ofs=$(_scratch_xfs_db -r -c "convert fsb ${log_ofs} bb" | \
-> > +			awk '{gsub("[()]", "", $2); print $2}')
-> > +	let "log_sz *= blk_sz / 512"
-> > +
-> > +	if [ "$ofs" -lt "${log_ofs}" ]; then
-> > +		let "sz = log_ofs - ofs"
-> > +		table="$ofs $sz $tgt $dev $ofs $opt"
-> > +	fi
-> > +
-> > +	table="$table\n${log_ofs} ${log_sz} linear $dev ${log_ofs}"
-> > +
-> > +	let "ofs = log_ofs + log_sz"
-> > +	if [ "$ofs" -lt "${dev_sz}" ]; then
-> > +		let "sz = dev_sz - ofs"
-> > +		table="$table\n$ofs $sz $tgt $dev $ofs $opt"
-> > +	fi
-> > +
-> > +	echo -e $table
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/dmflakey
-> > +. ./common/quota
-> > +
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +
-> > +# due to the injection of write IO error, the fs will be inconsistent
-> > +_require_scratch_nocheck
-> > +_require_flakey_with_error_writes
-> > +_require_user
-> > +_require_xfs_quota
-> > +_require_freeze
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +_scratch_mkfs_xfs > $seqres.full 2>&1
-> > +
-> > +# no error will be injected
-> > +_init_flakey
-> > +$DMSETUP_PROG info >> $seqres.full
-> > +$DMSETUP_PROG table >> $seqres.full
-> > +
-> > +# save the old value for _cleanup()
-> > +interval=$(sysctl -n fs.xfs.xfssyncd_centisecs 2>/dev/null)
-> > +# shorten the time waiting for the push of ail items
-> > +sysctl -w fs.xfs.xfssyncd_centisecs=100 >> $seqres.full 2>&1
-> > +
-> > +_qmount_option "usrquota"
-> > +_mount_flakey
-> > +
-> > +# We need to set the quota limitation twice, and inject the write error
-> > +# after the second setting. If we try to inject the write error after
-> > +# the first setting, the initialization of the dquota buffer will get
-> > +# IO error and also be retried, and during the umount process the
-> > +# write will be ended, and xfs_qm_dqflush_done() will be inovked, and
-> > +# the umount will exit normally.
-> > +$XFS_QUOTA_PROG -x -c "limit -u isoft=500 fsgqa" $SCRATCH_MNT
-> > +$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
-> > +
-> > +# ensure the initialization of the dquota buffer is done
-> > +xfs_freeze -f $SCRATCH_MNT
-> > +xfs_freeze -u $SCRATCH_MNT
-> > +
-> > +# inject write IO error
-> > +FLAKEY_TABLE_ERROR=$(make_xfs_scratch_flakey_table)
-> > +_load_flakey_table ${FLAKEY_ERROR_WRITES}
-> > +$DMSETUP_PROG info >> $seqres.full
-> > +$DMSETUP_PROG table >> $seqres.full
-> > +
-> > +# update the dquota buffer
-> > +$XFS_QUOTA_PROG -x -c "limit -u isoft=400 fsgqa" $SCRATCH_MNT
-> > +$XFS_QUOTA_PROG -x -c "report -ih" $SCRATCH_MNT >> $seqres.full
-> > +
-> > +sync
-> > +
-> > +# wait for the push of the dquota log item in AIL and
-> > +# the completion of the retried write of dquota buffer
-> > +sleep 2
-> > +
-> > +_unmount_flakey
-> > +
-> > +_cleanup_flakey
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> > new file mode 100644
-> > index 0000000..3b276ca
-> > --- /dev/null
-> > +++ b/tests/xfs/999.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 999
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index b439842..127019a 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -431,3 +431,4 @@
-> >  431 auto quick dangerous
-> >  432 auto quick dir metadata
-> >  433 auto quick attr
-> > +999 auto quick quota dangerous
-> > -- 
-> > 2.9.5
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+OK=A3=AClet=A1=AFs do these first.
+
+Thanks,
+Chengguang.
+
+
+
+
+
