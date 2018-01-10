@@ -1,50 +1,45 @@
-Received: from mga01.intel.com ([192.55.52.88]:54014 "EHLO mga01.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754356AbeAJIZ7 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 10 Jan 2018 03:25:59 -0500
-From: Chen Rong <rongx.a.chen@intel.com>
-Subject: [PATCH] common: support defrag test on f2fs
-Date: Wed, 10 Jan 2018 16:24:50 +0800
-Message-Id: <1515572690-11377-1-git-send-email-rongx.a.chen@intel.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:46219 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752312AbeAJVTJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Jan 2018 16:19:09 -0500
+Date: Wed, 10 Jan 2018 16:19:05 -0500
+From: Eric Whitney <enwlinux@gmail.com>
+Subject: [PATCH] common/rc: ext4 doesn't support O_DIRECT with data journaling
+Message-ID: <20180110211905.4ulqeqnwbs2bh66o@localhost.localdomain>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chen Rong <rongx.a.chen@intel.com>
+Cc: linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-f2fs-tools has a defragment tool, so we can test generic/324 on f2fs
+Modify _require_odirect() to skip O_DIRECT tests if the ext4 mount
+option data=journal has been applied.  Because ext4 disables its
+O_DIRECT support when in data journaling mode, no significant value is
+obtained by running these tests and they consume a significant amount
+of run time.  Additionally, this change eliminates the need to triage
+false negative O_DIRECT test results caused by test problems, as has
+occurred from time to time.
 
-Signed-off-by: Chen Rong <rongx.a.chen@intel.com>
+Signed-off-by: Eric Whitney <enwlinux@gmail.com>
 ---
- common/config | 1 +
- common/defrag | 3 +++
- 2 files changed, 4 insertions(+)
+ common/rc | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/common/config b/common/config
-index d0fbfe5..71cb367 100644
---- a/common/config
-+++ b/common/config
-@@ -226,6 +226,7 @@ case "$HOSTOS" in
-         export MKFS_BTRFS_PROG="`set_btrfs_mkfs_prog_path_with_opts`"
-         export MKFS_F2FS_PROG="`set_prog_path mkfs.f2fs`"
-         export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
-+        export DEFRAG_F2FS_PROG="`set_prog_path defrag.f2fs`"
-         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
-         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
- 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-diff --git a/common/defrag b/common/defrag
-index d279382..d54b89c 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -44,6 +44,9 @@ _require_defrag()
-     btrfs)
- 	DEFRAG_PROG="$BTRFS_UTIL_PROG filesystem defragment"
- 	;;
-+    f2fs)
-+	DEFRAG_PROG="$DEFRAG_F2FS_PROG"
-+	;;
-     *)
-         _notrun "defragmentation not supported for fstype \"$FSTYP\""
- 	;;
+diff --git a/common/rc b/common/rc
+index 9216efdb..86cc9665 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2150,6 +2150,8 @@ _require_odirect()
+ 	if [ $FSTYP = "ext4" ] ; then
+ 		if echo "$MOUNT_OPTIONS" | grep -q "test_dummy_encryption"; then
+ 			_notrun "ext4 encryption doesn't support O_DIRECT"
++		elif echo "$MOUNT_OPTIONS" | grep -q "data=journal"; then
++			_notrun "ext4 data journaling doesn't support O_DIRECT"
+ 		fi
+ 	fi
+ 	testfile=$TEST_DIR/$$.direct
 -- 
-2.7.4
+2.11.0
 
