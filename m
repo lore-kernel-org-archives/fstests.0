@@ -1,69 +1,208 @@
-Received: from mx2.suse.de ([195.135.220.15]:33678 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751592AbeAIO7j (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Jan 2018 09:59:39 -0500
-Subject: Re: [PATCH] generic/015: Change the test filesystem size to 101mb
-References: <1515401010-26802-1-git-send-email-nborisov@suse.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <6de2f198-91d7-f71f-47d1-d8a6846401ff@suse.com>
-Date: Tue, 9 Jan 2018 16:59:37 +0200
+Received: from userp2120.oracle.com ([156.151.31.85]:60522 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751035AbeAJADu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 9 Jan 2018 19:03:50 -0500
+Date: Tue, 9 Jan 2018 16:03:44 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 10/8] xfs: check that fs freeze minimizes required
+ recovery
+Message-ID: <20180110000344.GD5606@magnolia>
+References: <151314499003.18893.8687182548758898133.stgit@magnolia>
+ <20180103192626.GB4854@magnolia>
+ <20180109113316.GX5123@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <1515401010-26802-1-git-send-email-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180109113316.GX5123@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: dsterba@suse.cz, linux-btrfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Jan 09, 2018 at 07:33:16PM +0800, Eryu Guan wrote:
+> On Wed, Jan 03, 2018 at 11:26:26AM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Make sure that a fs freeze operation cleans up as much of the filesystem
+> > so as to minimize the recovery required in a crash/remount scenario.  In
+> > particular we want to check that we don't leave CoW preallocations
+> > sitting around in the refcountbt, though this test looks for anything
+> > out of the ordinary on the frozen fs.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/903     |  107 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/903.out |   10 +++++
+> >  tests/xfs/group   |    1 
+> >  3 files changed, 118 insertions(+)
+> >  create mode 100755 tests/xfs/903
+> >  create mode 100644 tests/xfs/903.out
+> > 
+> > diff --git a/tests/xfs/903 b/tests/xfs/903
+> > new file mode 100755
+> > index 0000000..1686356
+> > --- /dev/null
+> > +++ b/tests/xfs/903
+> > @@ -0,0 +1,107 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 903
+> > +#
+> > +# Test that frozen filesystems are relatively clean and not full of errors.
+> > +# Prior to freezing a filesystem, we want to minimize the amount of recovery
+> > +# that will have to happen if the system goes down while the fs is frozen.
+> > +# Therefore, start up fsstress and cycle through a few freeze/thaw cycles
+> > +# to ensure that nothing blows up when we try to do this.
+> > +#
+> > +# Unfortunately the log will probably still be dirty, so we can't do much
+> > +# about enforcing a clean repair -n run.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2000-2002 Silicon Graphics, Inc.  All Rights Reserved.
+> > +# Copyright (c) 2018 Oracle.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1
+> > +trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	# Make sure we thaw the fs before we unmount or else we remove the
+> > +	# mount without actually deactivating the filesystem(!)
+> > +	$XFS_IO_PROG -x -c "thaw" $SCRATCH_MNT 2> /dev/null
+> > +	echo "*** unmount"
+> > +	_scratch_unmount 2>/dev/null
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_supported_os Linux
+> > +
+> > +_require_scratch
+> > +
+> > +# xfs_db will OOM kill the machine if you don't have huge amounts of RAM, so
+> > +# don't run this on large filesystems.
+> > +_require_no_large_scratch_dev
+> 
+> Looks like this is copied from some other test, but seems
+> _check_xfs_filesystem already skips _xfs_check if $LARGE_SCRATCH_DEV is
+> 'yes', so we don't need this _require rule now.
 
+Oops, this was just leftover from debugging that wasn't necessary either.
 
-On  8.01.2018 10:43, Nikolay Borisov wrote:
-> This test has been failing for btrfs for quite some time,
-> at least since 4.7. There are 2 implementation details of btrfs that
-> it exposes:
+> > +
+> > +echo "*** init FS"
+> > +
+> > +rm -f $seqres.full
+> > +_scratch_unmount >/dev/null 2>&1
 > 
-> 1. Currently btrfs filesystem under 100mb are created in Mixed block
-> group mode. Freespace accounting for it is not 100% accurate - I've
-> observed around 100-200kb discrepancy between a newly created filesystem,
-> then writing a file and deleting it and checking the free space. This
-> falls within %3 and not %1 as hardcoded in the test. 
+> _require_scratch umounts it for you :)
 > 
-> 2. BTRFS won't flush it's delayed allocation on file deletion if less
-> than 32mb are deleted. On such files we need to perform sync (missing
-> in the test) or wait until time elapses for transaction commit.
+> > +echo "*** MKFS ***" >>$seqres.full
+> > +echo "" >>$seqres.full
+> > +_scratch_mkfs_xfs >>$seqres.full 2>&1 || _fail "mkfs failed"
+> > +_scratch_mount >>$seqres.full 2>&1 || _fail "mount failed"
+> > +
+> > +echo "*** test"
+> > +
+> > +for l in 0 1 2 3 4
+> > +do
+> > +	echo "    *** test $l"
+> > +	FSSTRESS_ARGS=`_scale_fsstress_args -d $SCRATCH_MNT -n 1000 $FSSTRESS_AVOID`
+> > +	$FSSTRESS_PROG  $FSSTRESS_ARGS >>$seqres.full
+> > +
+> > +	$XFS_IO_PROG -x -c 'freeze' $SCRATCH_MNT
+> > +
+> > +	# Log will probably be dirty after the freeze, record state
+> > +	echo "" >>$seqres.full
+> > +	echo "*** xfs_logprint ***" >>$seqres.full
+> > +	echo "" >>$seqres.full
+> > +	log=clean
+> > +	_scratch_xfs_logprint -tb 2>&1 | tee -a $seqres.full \
+> > +		| head | grep -q "<CLEAN>" || log=dirty
+> > +
+> > +	# Fail if repair complains and the log is clean
+> > +	echo "" >>$seqres.full
+> > +	echo "*** XFS_REPAIR -n ***" >>$seqres.full
+> > +	echo "" >>$seqres.full
+> > +	_scratch_xfs_repair -f -n >> $seqres.full 2>&1
+> > +
+> > +	if [ $? -ne 0 ] && [ "$log" = "clean" ]; then
+> > +		_fail "xfs_repair failed"
+> > +	fi
 > 
-> Since mixed mode is somewhat deprecated and btrfs is not really intended
-> to be used on really small devices let's just adjust the test to
-> create a 101mb fs, which doesn't use mixed mode and really test
-> freespace accounting.
-> 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> Hmm, I enlarged the loop count to 100 and didn't see a single CLEAN log,
+> I suspect this test is unlikely to fail..
 
-After further experimentation this test is indeed hitting a very
-pathological edge case. So when we create a btrfs file system in mixed
-mode with default raid levels the system chunk occupies 0-4mb. As such
-we can never allocate a chunk which spans this range so the -1mb in
-btrfs_calc_avail_data_space is not required in this case. Anyway, I
-believe this to be a really minor nuisance not worth complicating the
-code to fix, so I'd suggest this test change be merged.
+Hmmm, you're right, we're really looking for cow extents that haven't
+been cleaned out of the refcount btrees.  I'll add a clause to make it
+look for them directly.  That said, the cow extent cleanup depends on
+"vfs/xfs: clean up cow mappings during fs data freeze", so there's
+no hurry to get this in.
 
-> ---
->  tests/generic/015 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+--D
+
 > 
-> diff --git a/tests/generic/015 b/tests/generic/015
-> index 78f2b13..416c4ae 100755
-> --- a/tests/generic/015
-> +++ b/tests/generic/015
-> @@ -53,7 +53,7 @@ _supported_os Linux
->  _require_scratch
->  _require_no_large_scratch_dev
->  
-> -_scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >/dev/null 2>&1 \
-> +_scratch_mkfs_sized `expr 101 \* 1024 \* 1024` >/dev/null 2>&1 \
->      || _fail "mkfs failed"
->  _scratch_mount || _fail "mount failed"
->  out=$SCRATCH_MNT/fillup.$$
+> Thanks,
+> Eryu
 > 
+> > +
+> > +	$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT
+> > +done
+> > +
+> > +echo "*** done"
+> > +status=0
+> > +exit 0
+> > diff --git a/tests/xfs/903.out b/tests/xfs/903.out
+> > new file mode 100644
+> > index 0000000..378f0cb
+> > --- /dev/null
+> > +++ b/tests/xfs/903.out
+> > @@ -0,0 +1,10 @@
+> > +QA output created by 903
+> > +*** init FS
+> > +*** test
+> > +    *** test 0
+> > +    *** test 1
+> > +    *** test 2
+> > +    *** test 3
+> > +    *** test 4
+> > +*** done
+> > +*** unmount
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index e1b1582..23c26c2 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -435,3 +435,4 @@
+> >  435 auto quick clone
+> >  436 auto quick clone fsr
+> >  708 auto quick other
+> > +903 mount auto quick stress
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
