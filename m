@@ -1,89 +1,92 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:4167 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753600AbeAKJYZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 Jan 2018 04:24:25 -0500
-Subject: Re: [PATCH v4 0/4] test for XFS umount hang caused by the pending
- dquota log item in AIL
-References: <20180111064933.12088-1-houtao1@huawei.com>
- <20180111080242.GI5123@eguan.usersys.redhat.com>
-From: Hou Tao <houtao1@huawei.com>
-Message-ID: <65b44353-ff8b-b7bf-900b-c4a7863dd428@huawei.com>
-Date: Thu, 11 Jan 2018 17:23:38 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:37164 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754094AbeAKLni (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Jan 2018 06:43:38 -0500
+Date: Thu, 11 Jan 2018 19:43:35 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 0/7] Overlayfs exportfs tests
+Message-ID: <20180111114335.GK5123@eguan.usersys.redhat.com>
+References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20180111080242.GI5123@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
-
-On 2018/1/11 16:02, Eryu Guan wrote:
-> On Thu, Jan 11, 2018 at 02:49:29PM +0800, Hou Tao wrote:
->> Hi,
->>
->> This is the v4 patchset for testing the XFS umount hang problem caused by
->> the pending dquota log item in AIL. The problem had been fixed by commit
->> 373b058 ("xfs: Properly retry failed dquot items in case of error during
->> buffer writeback"). The changes for v4 are appended in the commit log
->> of each patches.
->>
->> Comments and questions are welcome.
+On Sun, Jan 07, 2018 at 08:07:18PM +0200, Amir Goldstein wrote:
+> Eryu,
 > 
-> The patches all look good, thanks a lot for the revision!
+> Following patches were used to test overlayfs NFS export.
 > 
->>
->> Regards,
->> Tao
->>
->> Hou Tao (4):
->>   dmflakey: support multiple dm targets for a dm-flakey device
->>   dmflakey: support error_writes feature for dm-flakey
->>   xfs: test for umount hang caused by the pending dquota log item in AIL
->>   common/rc: factor out _scratch_xfs_[get|set]_sb_field
+> Patches 1-5 improve generic/exportfs tests, by adding test coverage
+> of some directory file handle use cases.
+
+open_by_handle test is covering more and more cases, thanks! OTOH, it's
+getting more and more complicated :) Everytime I start looking at
+open_by_handle tests/patches I need some time to get familiar with it
+again, so the review process might be slow..
+
+But from a quick scan, I think it's time to stop adding new sub-tests to
+existing tests (maybe we should have done this since last time we added
+new sub-tests to generic/467), because generic/467 is getting more
+complex too and makes review harder. Perhaps we can factor out some
+helper functions from generic/467 to common helpers and use them in new
+tests.
+
 > 
-> I switched the order of the last two patches, i.e. refactor
-> _scratch_xfs_[get|set]_sb_field first then use the new helper in the new
-> test in the end, so we don't add new test then update it again in the
-> same patch set.
+> Patches 6-7 add two overlay specific tests for NFS file handles
+> for overlay setup of same fs and non same fs.
+> 
+> The new overlay tests don't run on upstream kernel and pass with
+> my overlayfs NFS export V2 branch [1]. You may want to wait with
+> merging those tests until overlayfs NFS support is merged - up to you,
+> but a review would be most welcome.
 
-Yes, it's better after the order switch and thanks for that.
+OK, I'll see after reviewing all the tests.
 
-Regards,
-Tao
+> 
+> Merging patches 1-5 seems like a good idea to me regardless of
+> overlayfs NFS export support.
 
+Agreed.
+
+Thanks,
+Eryu
+
+> 
 > Thanks,
-> Eryu
+> Amir.
 > 
->>
->>  common/dmflakey   |  31 +++++++++-
->>  common/fuzzy      |  33 -----------
->>  common/xfs        |  47 +++++++++++++++
->>  tests/xfs/007     |   6 +-
->>  tests/xfs/098     |   4 +-
->>  tests/xfs/186     |   3 +-
->>  tests/xfs/199     |  13 ++--
->>  tests/xfs/307     |  11 +---
->>  tests/xfs/308     |  11 +---
->>  tests/xfs/339     |   6 +-
->>  tests/xfs/340     |   2 +-
->>  tests/xfs/999     | 174 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/999.out |   2 +
->>  tests/xfs/group   |   1 +
->>  14 files changed, 269 insertions(+), 75 deletions(-)
->>  create mode 100755 tests/xfs/999
->>  create mode 100644 tests/xfs/999.out
->>
->> -- 
->> 2.9.5
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> [1] https://github.com/amir73il/linux/commits/ovl-nfs-export-v2
 > 
-> .
+> Amir Goldstein (7):
+>   open_by_handle: store and load file handles from file
+>   open_by_handle: verify dir content only with -r flag
+>   generic/exportfs: golden output is not silent
+>   generic/exportfs: store and load file handles from file
+>   generic/exportfs: add a test case for renamed parent dir
+>   overlay: test encode/decode overlay file handles
+>   overlay: test encode/decode of non-samefs overlay file handles
 > 
-
+>  src/open_by_handle.c  | 112 +++++++++++++-----
+>  tests/generic/426     |   1 -
+>  tests/generic/426.out |   1 -
+>  tests/generic/467     |  37 ++++--
+>  tests/generic/467.out |  10 +-
+>  tests/overlay/050     | 291 ++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/050.out |  50 ++++++++
+>  tests/overlay/051     | 311 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/051.out |  50 ++++++++
+>  tests/overlay/group   |   2 +
+>  10 files changed, 822 insertions(+), 43 deletions(-)
+>  create mode 100755 tests/overlay/050
+>  create mode 100644 tests/overlay/050.out
+>  create mode 100755 tests/overlay/051
+>  create mode 100644 tests/overlay/051.out
+> 
+> -- 
+> 2.7.4
+> 
