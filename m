@@ -1,20 +1,18 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:59078 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753377AbeAKDJE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Jan 2018 22:09:04 -0500
-Received: from pps.filterd (m0109333.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0B35P3P029231
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:41412 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1753438AbeAKDJF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 10 Jan 2018 22:09:05 -0500
+Received: from pps.filterd (m0089730.ppops.net [127.0.0.1])
+        by m0089730.ppops.net (8.16.0.22/8.16.0.22) with SMTP id w0B38iTR020446
         for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:04 -0800
 Received: from mail.thefacebook.com ([199.201.64.23])
-        by mx0a-00082601.pphosted.com with ESMTP id 2fdtyjguef-4
+        by m0089730.ppops.net with ESMTP id 2fdwwtr84p-3
         (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
         for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:04 -0800
 From: Richard Wareing <rwareing@fb.com>
-Subject: [PATCH v3 2/3] xfs/realtime: Default rtinherit=1, add _require_no_rtinherit function
-Date: Wed, 10 Jan 2018 19:09:00 -0800
-Message-ID: <20180111030901.1961285-3-rwareing@fb.com>
-In-Reply-To: <20180111030901.1961285-1-rwareing@fb.com>
-References: <20180111030901.1961285-1-rwareing@fb.com>
+Subject: [PATCH v3 0/3] Fix/harden "quick" tests for realtime subvolumes
+Date: Wed, 10 Jan 2018 19:08:58 -0800
+Message-ID: <20180111030901.1961285-1-rwareing@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -22,106 +20,60 @@ To: fstests@vger.kernel.org
 Cc: darrick.wong@oracle.com, eguan@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-To better exercise the data path code of realtime subvolumes, we will
-set rtinherit=1 during mkfs calls.  For tests which this is not desired
-we introduce a _require_no_rtinherit function to opt out of this
-behavior.
+Applies clean to commit 95c924c65113d2b706436d8cd09cd391eddb795a.
 
-Signed-off-by: Richard Wareing <rwareing@fb.com>
----
-Changes since v2:
-* Removed use of RT_INHERT, instead we now simply bail from the test.  Users
-  will have to create two separate configs for realtime one with rtinherit=1
-  in the mkfs options, one without and do separate runs to get full test
-  coverage.
-* Added comments explaining reasons for _require_no_rtinherit declarations
+Kernel: 4.14-rc8 (Commit 39dae59d66acd86d1de24294bd2f343fd5e7a625)
+MKFS_OPTIONS="-m finobt=1,crc=1,reflink=1"
 
-Changes since v1:
-* None
+Updated patch set to address comments made by reviewers.  Changes are noted
+on the patches.
 
- common/rc         | 11 +++++++++++
+A couple of tests (e.g. tests/xfs/191-input-validation) which work for Eryu 
+still fail for me, but I'll comment on those w/ sample output on the mailing 
+list, as I might have some toolchain issue on my end.
+
+==== Original Cover Letter ===
+
+Some tests have issues when being run with realtime subvolumes.  This patch
+set aims to harden fs tests so we can get reliable/reproducible test runs
+with fstests for realtime subvolumes.
+
+Two new _require functions are introduced along with a new flag to
+automatically set the rtinherit=1 option upon mkfs'ing.
+
+The problems I found were usually one of:
+1. Snapshot + subsequent test being performed without regard to the realtime
+subvolume.
+2. Use of functions which are not supported by realtime devices.  Not setting
+rtinherit on scratch devices for these cases fixes these tests.  Non-scratch
+cases are more tricky since we don't control what goes into the MKFS_OPTIONS
+variable.
+3. xfs_repair being used directly without checking for RT devices.
+
+After fixing these cases, you get 86 good "quick: xfs tests & 180 good "quick"
+generic tests with the bulk are not run due to the lack of reflink and/or quota
+support on realtime scratch targets.
+
+P.S I haven't forgotten about the non-"quick" tests, but I had to start
+somewhere, and break this up a bit into a more manageable problem.
+
+Richard Wareing (3):
+  xfs/realtime: Add require_no_realtime function
+  xfs/realtime: Default rtinherit=1, add _require_no_rtinherit function
+  xfs/realtime: Fix direct invocations of xfs_repair
+
+ common/rc         | 29 +++++++++++++++++++++++++++--
  tests/generic/250 |  3 +++
  tests/generic/252 |  3 +++
  tests/generic/441 |  3 +++
+ tests/xfs/070     |  5 ++++-
+ tests/xfs/077     |  2 ++
  tests/xfs/170     |  1 +
- 5 files changed, 21 insertions(+)
+ tests/xfs/189     |  1 +
+ tests/xfs/284     |  2 ++
+ tests/xfs/291     |  5 ++++-
+ 10 files changed, 50 insertions(+), 4 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index f5fe739..1720a72 100644
---- a/common/rc
-+++ b/common/rc
-@@ -33,6 +33,17 @@ BC=$(which bc 2> /dev/null) || BC=
- VALID_TEST_ID="[0-9]\{3\}"
- VALID_TEST_NAME="$VALID_TEST_ID-\?[[:alnum:]-]*"
- 
-+# When running tests with a realtime device configured, the realtime inherit
-+# flag will be set during mkfs via -d rtinherit=1 option.  For some tests
-+# this may render the test invalid (i.e. it uses a function which is not
-+# supported by the realtime subvolume); to prevent failure these tests may
-+# disable this behavior by calling _require_no_rtinherit .
-+_require_no_rtinherit()
-+{
-+  echo "$MKFS_OPTIONS" | egrep -q "rtinherit([^=]|=1)" && \
-+    _notrun "rtinherit mkfs option is not supported by this test."
-+}
-+
- _require_math()
- {
- 	if [ -z "$BC" ]; then
-diff --git a/tests/generic/250 b/tests/generic/250
-index 3c4fe6d..a8fd97e 100755
---- a/tests/generic/250
-+++ b/tests/generic/250
-@@ -48,6 +48,9 @@ _require_scratch
- _require_dm_target error
- _require_xfs_io_command "falloc"
- _require_odirect
-+# This test uses "dm" without taking into account the data could be on
-+# realtime subvolume, thus the test will fail with rtinherit=1
-+_require_no_rtinherit
- 
- rm -f $seqres.full
- 
-diff --git a/tests/generic/252 b/tests/generic/252
-index ffedd56..b506d59 100755
---- a/tests/generic/252
-+++ b/tests/generic/252
-@@ -47,6 +47,9 @@ _supported_os Linux
- _require_scratch
- _require_dm_target error
- _require_xfs_io_command "falloc"
-+# This test uses "dm" without taking into account the data could be on
-+# realtime subvolume, thus the test will fail with rtinherit=1
-+_require_no_rtinherit
- _require_aiodio "aiocp"
- AIO_TEST="src/aio-dio-regress/aiocp"
- 
-diff --git a/tests/generic/441 b/tests/generic/441
-index 075d877..5fbfece 100755
---- a/tests/generic/441
-+++ b/tests/generic/441
-@@ -47,6 +47,9 @@ _cleanup()
- # real QA test starts here
- _supported_os Linux
- _require_scratch
-+# This test uses "dm" without taking into account the data could be on
-+# realtime subvolume, thus the test will fail with rtinherit=1
-+_require_no_rtinherit
- 
- # Generally, we want to avoid journal errors on the extended testcase. Only
- # unset the -s flag if we have a logdev
-diff --git a/tests/xfs/170 b/tests/xfs/170
-index c5ae8e4..6deef1b 100755
---- a/tests/xfs/170
-+++ b/tests/xfs/170
-@@ -50,6 +50,7 @@ _supported_fs xfs
- _supported_os Linux
- 
- _require_scratch
-+_require_no_rtinherit
- 
- _check_filestreams_support || _notrun "filestreams not available"
- 
 -- 
 2.9.5
 
