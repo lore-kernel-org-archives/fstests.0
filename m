@@ -1,12 +1,12 @@
-Received: from prv3-mh.provo.novell.com ([137.65.250.26]:41288 "EHLO
+Received: from victor.provo.novell.com ([137.65.250.26]:44515 "EHLO
         prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753978AbeAKG4K (ORCPT
+        with ESMTP id S1753978AbeAKG4Z (ORCPT
         <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Thu, 11 Jan 2018 01:56:10 -0500
+        Thu, 11 Jan 2018 01:56:25 -0500
 From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 3/5] fstests: btrfs/141: Filter out offset to handle mkfs chunk layout change
-Date: Thu, 11 Jan 2018 14:55:59 +0800
-Message-Id: <20180111065601.5831-3-wqu@suse.com>
+Subject: [PATCH 4/5] fstests: btrfs/142: Filter out offset to handle mkfs chunk layout change
+Date: Thu, 11 Jan 2018 14:56:00 +0800
+Message-Id: <20180111065601.5831-4-wqu@suse.com>
 In-Reply-To: <20180111065601.5831-1-wqu@suse.com>
 References: <20180111065601.5831-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
@@ -15,24 +15,24 @@ Cc: dsterba@suse.cz
 List-ID: <fstests@vger.kernel.org>
 
 Due to recent mkfs.btrfs chunk layout change, offset in golden output is
-not flex enough to handle different mkfs chunk layout.
+not flex to handle different mkfs chunk layout.
 
 So use _filter_xfs_io_offset to filter out offset so golden output can
 handle any chunk layout.
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/btrfs/141     |  9 ++++---
- tests/btrfs/141.out | 70 ++++++++++++++++++++++++++---------------------------
+ tests/btrfs/142     |  9 ++++---
+ tests/btrfs/142.out | 70 ++++++++++++++++++++++++++---------------------------
  2 files changed, 41 insertions(+), 38 deletions(-)
 
-diff --git a/tests/btrfs/141 b/tests/btrfs/141
-index 709bb0af..643ce6df 100755
---- a/tests/btrfs/141
-+++ b/tests/btrfs/141
-@@ -78,7 +78,8 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+diff --git a/tests/btrfs/142 b/tests/btrfs/142
+index 5bd8b728..267bdfac 100755
+--- a/tests/btrfs/142
++++ b/tests/btrfs/142
+@@ -99,7 +99,8 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
  # chunk
- _scratch_mount -o nospace_cache
+ _scratch_mount -o nospace_cache,nodatasum
  
 -$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
 +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
@@ -40,7 +40,7 @@ index 709bb0af..643ce6df 100755
  
  # step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
  # one in $SCRATCH_DEV_POOL
-@@ -89,7 +90,8 @@ logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | c
+@@ -110,7 +111,8 @@ logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | c
  physical_on_scratch=`get_physical ${logical_in_btrfs}`
  
  _scratch_unmount
@@ -48,9 +48,9 @@ index 709bb0af..643ce6df 100755
 +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV |\
 +	_filter_xfs_io | _filter_xfs_io_offset
  
- _scratch_mount
+ _scratch_mount -o nospace_cache
  
-@@ -110,7 +112,8 @@ done
+@@ -135,7 +137,8 @@ stop_fail
  _scratch_unmount
  
  # check if the repair works
@@ -60,12 +60,12 @@ index 709bb0af..643ce6df 100755
  
  _scratch_dev_pool_put
  # success, all done
-diff --git a/tests/btrfs/141.out b/tests/btrfs/141.out
-index 2e08fc22..116f98a2 100644
---- a/tests/btrfs/141.out
-+++ b/tests/btrfs/141.out
+diff --git a/tests/btrfs/142.out b/tests/btrfs/142.out
+index d8be7fbf..0f32ffbe 100644
+--- a/tests/btrfs/142.out
++++ b/tests/btrfs/142.out
 @@ -1,39 +1,39 @@
- QA output created by 141
+ QA output created by 142
 -wrote 131072/131072 bytes at offset 0
 +wrote 131072/131072 bytes
  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
