@@ -1,291 +1,210 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46806 "EHLO mx1.redhat.com"
+Received: from mx1.mpynet.fi ([82.197.21.84]:16761 "EHLO mx1.mpynet.fi"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932067AbeAKL7G (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 Jan 2018 06:59:06 -0500
-Date: Thu, 11 Jan 2018 19:59:04 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 1/7] open_by_handle: store and load file handles from file
-Message-ID: <20180111115904.GL5123@eguan.usersys.redhat.com>
-References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
- <1515348445-1403-2-git-send-email-amir73il@gmail.com>
+        id S1751607AbeAKOGB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Jan 2018 09:06:01 -0500
+From: Tuomas Tynkkynen <tuomas@tuxera.com>
+Subject: [PATCH v2] fstests: Add 9p network filesystem support
+Date: Thu, 11 Jan 2018 16:05:43 +0200
+Message-ID: <20180111140543.7258-1-tuomas@tuxera.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1515348445-1403-2-git-send-email-amir73il@gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Tuomas Tynkkynen <tuomas@tuxera.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jan 07, 2018 at 08:07:19PM +0200, Amir Goldstein wrote:
-> usage:
->  open_by_handle -p -o <handles_file> <test_dir> [N]
->  open_by_handle -p -i <handles_file> <test_dir> [N]
-> 
-> This will be used to test decoding of file handles after various
-> file systems operations including mount cycle.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+This commit adds support for the 9p network file system, which is mainly
+used by QEMU for sharing a file system from the host to the guest VM.
 
-I found that it might be easier to review if the new test that takes use
-of this new function is included in the same patch, so reviewer could
-know how are these new functions being used without switching between
-different patches.
+To run xfstests on it, launch QEMU with e.g.:
 
-> ---
->  src/open_by_handle.c | 110 +++++++++++++++++++++++++++++++++++++++------------
->  1 file changed, 85 insertions(+), 25 deletions(-)
-> 
-> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
-> index dbc5b0f..f9dfefc 100644
-> --- a/src/open_by_handle.c
-> +++ b/src/open_by_handle.c
-> @@ -43,30 +43,36 @@ Examples:
+-virtfs local,path=$TMPDIR/p9-test,security_model=mapped-xattr,mount_tag=p9-test
+-virtfs local,path=$TMPDIR/p9-scratch,security_model=mapped-xattr,mount_tag=p9-scratch
 
-The usage info above the "Examples:" can be updated too.
+and inside the VM run xfstests with:
 
-"usage: open_by_handle [-cludmrwapk] <test_dir> [num_files]"
+export TEST_DEV=p9-test
+export SCRATCH_DEV=p9-scratch
+export PLAN9_MOUNT_OPTIONS="-o trans=virtio,version=9p2000.L,cache=loose,posixacl"
 
->  
->     open_by_handle -p <test_dir> [N]
->  
-> -3. Get file handles for existing test set, write data to files,
-> +3. Get file handles for existing test set and write them to a file.
-> +   Read file handles from file and open files by handle:
-> +
-> +   open_by_handle -p -o <handles_file> <test_dir> [N]
-> +   open_by_handle -p -i <handles_file> <test_dir> [N]
-> +
-> +4. Get file handles for existing test set, write data to files,
->     drop caches, open all files by handle, read and verify written
->     data, write new data to file:
->  
->     open_by_handle -rwa <test_dir> [N]
->  
-> -4. Get file handles for existing test set, unlink all test files,
-> +5. Get file handles for existing test set, unlink all test files,
->     remove test_dir, drop caches, try to open all files by handle
->     and expect ESTALE:
->  
->     open_by_handle -dp <test_dir> [N]
->  
-> -5. Get file handles for existing test set, keep open file handles for all
-> +6. Get file handles for existing test set, keep open file handles for all
->     test files, unlink all test files, drop caches and try to open all files
->     by handle (should work):
->  
->     open_by_handle -dk <test_dir> [N]
->  
-> -6. Get file handles for existing test set, rename all test files,
-> +7. Get file handles for existing test set, rename all test files,
->     drop caches, try to open all files by handle (should work):
->  
->     open_by_handle -m <test_dir> [N]
->  
-> -7. Get file handles for existing test set, hardlink all test files,
-> +8. Get file handles for existing test set, hardlink all test files,
->     then unlink the original files, drop caches and try to open all
->     files by handle (should work):
->  
-> @@ -103,7 +109,7 @@ struct handle {
->  
->  void usage(void)
->  {
-> -	fprintf(stderr, "usage: open_by_handle [-cludmrwapk] <test_dir> [num_files]\n");
-> +	fprintf(stderr, "usage: open_by_handle [-cludmrwapk] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
->  	fprintf(stderr, "\n");
->  	fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
->  	fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
-> @@ -116,6 +122,8 @@ void usage(void)
->  	fprintf(stderr, "open_by_handle -d <test_dir> [N] - unlink test files and hardlinks, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -m <test_dir> [N] - rename test files, drop caches and try to open by handle\n");
->  	fprintf(stderr, "open_by_handle -p <test_dir>     - create/delete and try to open by handle also test_dir itself\n");
-> +	fprintf(stderr, "open_by_handle -i <handles_file> <test_dir> [N] - read test files handles from file and try to open by handle\n");
-> +	fprintf(stderr, "open_by_handle -o <handles_file> <test_dir> [N] - get file handles of test files and write handles to file\n");
->  	exit(EXIT_FAILURE);
->  }
->  
-> @@ -131,15 +139,16 @@ int main(int argc, char **argv)
->  	char	*test_dir;
->  	char	*mount_dir;
->  	int	mount_fd, mount_id;
-> +	int	in_fd = 0, out_fd = 0;
->  	int	numfiles = 1;
->  	int	create = 0, delete = 0, nlink = 1, move = 0;
->  	int	rd = 0, wr = 0, wrafter = 0, parent = 0;
->  	int	keepopen = 0;
->  
-> -	if (argc < 2 || argc > 4)
-> +	if (argc < 2)
->  		usage();
->  
-> -	while ((c = getopt(argc, argv, "cludmrwapk")) != -1) {
-> +	while ((c = getopt(argc, argv, "cludmrwapki:o:")) != -1) {
->  		switch (c) {
->  		case 'c':
->  			create = 1;
-> @@ -176,13 +185,27 @@ int main(int argc, char **argv)
->  		case 'k':
->  			keepopen = 1;
->  			break;
-> +		case 'i':
-> +			in_fd = open(optarg, O_RDONLY);
-> +			if (in_fd < 0) {
-> +				perror(optarg);
-> +				return EXIT_FAILURE;
-> +			}
-> +			break;
-> +		case 'o':
-> +			out_fd = creat(optarg, 0644);
-> +			if (out_fd < 0) {
-> +				perror(optarg);
-> +				return EXIT_FAILURE;
-> +			}
-> +			break;
->  		default:
->  			fprintf(stderr, "illegal option '%s'\n", argv[optind]);
->  		case 'h':
->  			usage();
->  		}
->  	}
-> -        if (optind == argc || optind > 2)
-> +        if (optind == argc)
->              usage();
->  	test_dir = argv[optind++];
->  	if (optind < argc)
-> @@ -192,11 +215,14 @@ int main(int argc, char **argv)
->  		usage();
->  	}
->  
-> -	if (parent) {
-> +	if (parent && !in_fd) {
->  		strcpy(dname, test_dir);
->  		/*
->  		 * -p flag implies that test_dir is NOT a mount point,
->  		 * so its parent can be used as mount_fd for open_by_handle_at.
-> +		 * -i flag implies that test_dir IS a mount point, because we
-> +		 *  are testing open by handle of dir, which may have been
-> +		 *  deleted or renamed.
+Signed-off-by: Tuomas Tynkkynen <tuomas@tuxera.com>
+---
+v2: Support the PLAN9_MOUNT_OPTIONS variable.
+---
+ check         |  2 ++
+ common/attr   |  4 ++--
+ common/config |  9 +++++++++
+ common/rc     | 32 +++++++++++++++++++++++++++++++-
+ 4 files changed, 44 insertions(+), 3 deletions(-)
 
-I'm a bit confused by this comment, is test_dir a mount point if I
-specify both -i and -p? Does that mean -i would override -p regarding to
-test_dir being mount point or not?
+diff --git a/check b/check
+index f8db3cd6..6078b1ef 100755
+--- a/check
++++ b/check
+@@ -67,6 +67,7 @@ check options
+     -nfs                test NFS
+     -glusterfs                test GlusterFS
+     -cifs               test CIFS
++    -9p			test 9p
+     -overlay		test overlay
+     -pvfs2          test PVFS2
+     -tmpfs              test TMPFS
+@@ -265,6 +266,7 @@ while [ $# -gt 0 ]; do
+ 	-nfs)		FSTYP=nfs ;;
+ 	-glusterfs)	FSTYP=glusterfs ;;
+ 	-cifs)		FSTYP=cifs ;;
++	-9p)		FSTYP=9p ;;
+ 	-overlay)	FSTYP=overlay; export OVERLAY=true ;;
+ 	-pvfs2)		FSTYP=pvfs2 ;;
+ 	-tmpfs)		FSTYP=tmpfs ;;
+diff --git a/common/attr b/common/attr
+index 8a5c9eac..66b0227f 100644
+--- a/common/attr
++++ b/common/attr
+@@ -243,7 +243,7 @@ _sort_getfattr_output()
+ 
+ # set maximum total attr space based on fs type
+ case "$FSTYP" in
+-xfs|udf|pvfs2|ceph)
++xfs|udf|pvfs2|9p|ceph)
+ 	MAX_ATTRS=1000
+ 	;;
+ *)
+@@ -263,7 +263,7 @@ xfs|udf|btrfs)
+ pvfs2)
+ 	MAX_ATTRVAL_SIZE=8192
+ 	;;
+-ceph)
++9p|ceph)
+ 	MAX_ATTRVAL_SIZE=65536
+ 	;;
+ *)
+diff --git a/common/config b/common/config
+index d0fbfe55..5f40413d 100644
+--- a/common/config
++++ b/common/config
+@@ -272,6 +272,9 @@ fi
+ _mount_opts()
+ {
+ 	case $FSTYP in
++	9p)
++		export MOUNT_OPTIONS=$PLAN9_MOUNT_OPTIONS
++		;;
+ 	xfs)
+ 		export MOUNT_OPTIONS=$XFS_MOUNT_OPTIONS
+ 		;;
+@@ -327,6 +330,9 @@ _mount_opts()
+ _test_mount_opts()
+ {
+ 	case $FSTYP in
++	9p)
++		export TEST_FS_MOUNT_OPTS=$PLAN9_MOUNT_OPTIONS
++		;;
+ 	cifs)
+ 		export TEST_FS_MOUNT_OPTS=$CIFS_MOUNT_OPTIONS
+ 		;;
+@@ -459,6 +465,9 @@ _check_device()
+ 	fi
+ 
+ 	case "$FSTYP" in
++	9p)
++		# 9p mount tags are just plain strings, so anything is allowed
++		;;
+ 	overlay)
+ 		if [ ! -d "$dev" ]; then
+ 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+diff --git a/common/rc b/common/rc
+index 9216efdb..b0ec3f6f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -166,6 +166,8 @@ case "$FSTYP" in
+ 	 ;;
+     cifs)
+ 	 ;;
++    9p)
++	 ;;
+     ceph)
+ 	 ;;
+     glusterfs)
+@@ -595,6 +597,9 @@ _test_mkfs()
+     cifs)
+ 	# do nothing for cifs
+ 	;;
++    9p)
++	# do nothing for 9p
++	;;
+     ceph)
+ 	# do nothing for ceph
+ 	;;
+@@ -629,6 +634,9 @@ _mkfs_dev()
+     nfs*)
+ 	# do nothing for nfs
+ 	;;
++    9p)
++	# do nothing for 9p
++	;;
+     overlay)
+ 	# do nothing for overlay
+ 	;;
+@@ -693,7 +701,7 @@ _scratch_mkfs()
+ 	local mkfs_status
+ 
+ 	case $FSTYP in
+-	nfs*|cifs|ceph|overlay|glusterfs|pvfs2)
++	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
+ 		# unable to re-create this fstyp, just remove all files in
+ 		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+ 		# created in previous runs
+@@ -1465,6 +1473,14 @@ _require_scratch_nocheck()
+ 			_notrun "this test requires a valid \$SCRATCH_MNT"
+ 		fi
+ 		;;
++	9p)
++		if [ -z "$SCRATCH_DEV" ]; then
++			_notrun "this test requires a valid \$SCRATCH_DEV"
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++			_notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
++		;;
+ 	nfs*|ceph)
+ 		echo $SCRATCH_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$SCRATCH_DEV" -o "$?" != "0" ]; then
+@@ -1571,6 +1587,14 @@ _require_test()
+ 			_notrun "this test requires a valid \$TEST_DIR"
+ 		fi
+ 		;;
++	9p)
++		if [ -z "$TEST_DEV" ]; then
++			_notrun "this test requires a valid \$TEST_DEV"
++		fi
++		if [ ! -d "$TEST_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		;;
+ 	nfs*|ceph)
+ 		echo $TEST_DEV | grep -q ":/" > /dev/null 2>&1
+ 		if [ -z "$TEST_DEV" -o "$?" != "0" ]; then
+@@ -2530,6 +2554,9 @@ _check_test_fs()
+     cifs)
+ 	# no way to check consistency for cifs
+ 	;;
++    9p)
++	# no way to check consistency for 9p
++	;;
+     ceph)
+ 	# no way to check consistency for CephFS
+ 	;;
+@@ -2585,6 +2612,9 @@ _check_scratch_fs()
+     cifs)
+ 	# Don't know how to check a CIFS filesystem, yet.
+ 	;;
++    9p)
++	# no way to check consistency for 9p
++	;;
+     ceph)
+ 	# no way to check consistency for CephFS
+ 	;;
+-- 
+2.15.0
 
->  		 */
->  		mount_dir = dirname(dname);
->  		if (create)
-> @@ -241,15 +267,24 @@ int main(int argc, char **argv)
->  	/* sync to get the new inodes to hit the disk */
->  	sync();
->  
-> -	/* create the handles */
-> +	/* create/read the handles */
-
-This loop also write handles out, update the comment accordingly?
-
->  	for (i=0; i < numfiles; i++) {
->  		sprintf(fname, "%s/file%06d", test_dir, i);
-> -		handle[i].fh.handle_bytes = MAX_HANDLE_SZ;
-> -		ret = name_to_handle_at(AT_FDCWD, fname, &handle[i].fh, &mount_id, 0);
-> -		if (ret < 0) {
-> -			strcat(fname, ": name_to_handle");
-> -			perror(fname);
-> -			return EXIT_FAILURE;
-> +		if (in_fd) {
-> +			ret = read(in_fd, (char *)&handle[i], sizeof(*handle));
-> +			if (ret < sizeof(*handle)) {
-> +				strcat(fname, ": read handle");
-> +				perror(fname);
-> +				return EXIT_FAILURE;
-> +			}
-> +		} else {
-> +			handle[i].fh.handle_bytes = MAX_HANDLE_SZ;
-> +			ret = name_to_handle_at(AT_FDCWD, fname, &handle[i].fh, &mount_id, 0);
-> +			if (ret < 0) {
-> +				strcat(fname, ": name_to_handle");
-> +				perror(fname);
-> +				return EXIT_FAILURE;
-> +			}
->  		}
->  		if (keepopen) {
->  			/* Open without close to keep unlinked files around */
-> @@ -260,15 +295,40 @@ int main(int argc, char **argv)
->  				return EXIT_FAILURE;
->  			}
->  		}
-> +		if (out_fd) {
-> +			ret = write(out_fd, (char *)&handle[i], sizeof(*handle));
-> +			if (ret < sizeof(*handle)) {
-> +				strcat(fname, ": write handle");
-> +				perror(fname);
-
-A short write is not an error, so errno is 0 and error message can be
-confusing: "$file: write handle: Success"
-
-> +				return EXIT_FAILURE;
-> +			}
-> +		}
->  	}
->  
->  	if (parent) {
-> -		dir_handle.fh.handle_bytes = MAX_HANDLE_SZ;
-> -		ret = name_to_handle_at(AT_FDCWD, test_dir, &dir_handle.fh, &mount_id, 0);
-> -		if (ret < 0) {
-> -			strcat(dname, ": name_to_handle");
-> -			perror(dname);
-> -			return EXIT_FAILURE;
-> +		if (in_fd) {
-> +			ret = read(in_fd, (char *)&dir_handle, sizeof(*handle));
-> +			if (ret < sizeof(*handle)) {
-
-Same here, perror doesn't work with a short read.
-
-> +				strcat(dname, ": read handle");
-
-With both -i and -p specified, dname is not initialized, then error
-message is getting into:
-
-: read handle: Success
-
-> +				perror(dname);
-> +				return EXIT_FAILURE;
-> +			}
-> +		} else {
-> +			dir_handle.fh.handle_bytes = MAX_HANDLE_SZ;
-> +			ret = name_to_handle_at(AT_FDCWD, test_dir, &dir_handle.fh, &mount_id, 0);
-> +			if (ret < 0) {
-> +				strcat(dname, ": name_to_handle");
-> +				perror(dname);
-> +				return EXIT_FAILURE;
-> +			}
-> +		}
-> +		if (out_fd) {
-> +			ret = write(out_fd, (char *)&dir_handle, sizeof(*handle));
-> +			if (ret < sizeof(*handle)) {
-> +				strcat(dname, ": write handle");
-> +				perror(dname);
-
-Short write issue again.
-
-Thanks,
-Eryu
-
-> +				return EXIT_FAILURE;
-> +			}
->  		}
->  	}
->  
-> @@ -289,8 +349,8 @@ int main(int argc, char **argv)
->  		close(fd);
->  	}
->  
-> -	/* after creating test set only check that fs supports exportfs */
-> -	if (create)
-> +	/* If creating test set or saving files handles, we are done */
-> +	if (create || out_fd)
->  		return EXIT_SUCCESS;
->  
->  	/* hardlink the files */
-> -- 
-> 2.7.4
-> 
