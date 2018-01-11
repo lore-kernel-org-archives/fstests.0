@@ -1,75 +1,145 @@
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:43830 "EHLO
-        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934244AbeAKP7D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jan 2018 10:59:03 -0500
+Received: from aserp2130.oracle.com ([141.146.126.79]:53756 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932215AbeAKSMo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jan 2018 13:12:44 -0500
+Date: Thu, 11 Jan 2018 10:07:34 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs: Regression test for invalid sb_logsunit
+Message-ID: <20180111180734.GD1168@magnolia>
+References: <1515659108-2222-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <20180111115904.GL5123@eguan.usersys.redhat.com>
-References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
- <1515348445-1403-2-git-send-email-amir73il@gmail.com> <20180111115904.GL5123@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 11 Jan 2018 17:59:01 +0200
-Message-ID: <CAOQ4uxjxxMo=uQn93T3mpCy3_o-5_TKGc08ugqFYH5fk=3Cn2Q@mail.gmail.com>
-Subject: Re: [PATCH 1/7] open_by_handle: store and load file handles from file
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1515659108-2222-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: xiao yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 11, 2018 at 1:59 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Sun, Jan 07, 2018 at 08:07:19PM +0200, Amir Goldstein wrote:
->> usage:
->>  open_by_handle -p -o <handles_file> <test_dir> [N]
->>  open_by_handle -p -i <handles_file> <test_dir> [N]
->>
->> This will be used to test decoding of file handles after various
->> file systems operations including mount cycle.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->
-> I found that it might be easier to review if the new test that takes use
-> of this new function is included in the same patch, so reviewer could
-> know how are these new functions being used without switching between
-> different patches.
->
+On Thu, Jan 11, 2018 at 04:25:08PM +0800, xiao yang wrote:
+> If log stripe unit isn't a multiple of the fs blocksize and mounting,
+> the invalid sb_logsunit leads to crash as soon as we try to write to
+> the log.
+> 
+> Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  tests/xfs/437     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/437.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 76 insertions(+)
+>  create mode 100755 tests/xfs/437
+>  create mode 100644 tests/xfs/437.out
+> 
+> diff --git a/tests/xfs/437 b/tests/xfs/437
+> new file mode 100755
+> index 0000000..96cec25
+> --- /dev/null
+> +++ b/tests/xfs/437
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +# FS QA Test No. 437
+> +#
+> +# Regression test for commit:
+> +# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
+> +#
+> +# If log stripe unit isn't a multiple of the fs blocksize and mounting,
+> +# the invalid sb_logsunit leads to crash as soon as we try to write to
+> +# the log.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
+> +# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch
+> +
+> +rm -f "$seqres.full"
+> +
+> +# Format
+> +_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
+> +
+> +# Set logsunit to a value which is not a multiple of the fs blocksize
+> +blksz=$(_scratch_xfs_db -x -c "sb 0" -c "p blocksize")
 
-Eryu,
+_scratch_xfs_get_metadata_field ?
 
-Thanks for your comments. I will fix them later, but let me first address
-this meta comment, so maybe it will help you with review of the tests.
+(Or, _scratch_xfs_get_sb_field if Hou Tao's dquot unmount tests go in)
 
-I find that the comment about posting the new functionality along with the
-test would have been a good thing to do for most of the options I added
-so far. It could be a good option for this test as well.
-However, the -i -o options are quite generic in nature, so it should
-be fine to explain them without a test, only I probably did not explain well.
+> +_scratch_xfs_db -x -c "sb 0" -c "write logsunit $((blksz - 1))" \
+> +	>> $seqres.full 2>&1 || _notrun "Failed to set sb_logsunit"
 
-The basic flow of open_by_handle program is:
-- store file handle of parent and test files in memory array
-- perform operations on files
-- drop caches
-- open by file handles from array
-- perform tests on open files
+_scratch_xfs_set_metadata_field ?
 
--i -o options allow to perform name_to_handle and open_by_handle with
-2 different program invocations, so you don't need to rely on the program
-performing drop caches and you can test advances flows like:
-- encode files
-- cycle mount
-- decode files
+Otherwise this looks decent.
 
-In my use case, the new tests in generic/467 are:
-- ecnode parent and files
-- rename parent
-- decode parent and files
+--D
 
-- encode files
-- move files to new parent
-- decode files
-
-- ecnode parent and files
-- rename grandparent
-- decode parent and files
-
-Cheers,
-Amir.
+> +
+> +# Mount and writing log may trigger a crash
+> +if _scratch_mount >> $seqres.full 2>&1; then
+> +	for i in $(seq 1 1000); do
+> +		touch ${SCRATCH_MNT}/$i
+> +	done
+> +	_scratch_unmount
+> +fi
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/437.out b/tests/xfs/437.out
+> new file mode 100644
+> index 0000000..4dcb607
+> --- /dev/null
+> +++ b/tests/xfs/437.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 437
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index d230060..35d1b03 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -434,3 +434,4 @@
+>  434 auto quick clone fsr
+>  435 auto quick clone
+>  436 auto quick clone fsr
+> +437 auto quick log dangerous
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
