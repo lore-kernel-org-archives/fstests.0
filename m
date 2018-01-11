@@ -1,62 +1,89 @@
-Received: from mx2.suse.de ([195.135.220.15]:59160 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754413AbeAKJRy (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 Jan 2018 04:17:54 -0500
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2] generic/015: Change the test filesystem size to 101mb
-Date: Thu, 11 Jan 2018 11:17:47 +0200
-Message-Id: <1515662267-21518-1-git-send-email-nborisov@suse.com>
-In-Reply-To: <1515401010-26802-1-git-send-email-nborisov@suse.com>
-References: <1515401010-26802-1-git-send-email-nborisov@suse.com>
+Received: from szxga04-in.huawei.com ([45.249.212.190]:4167 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753600AbeAKJYZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Jan 2018 04:24:25 -0500
+Subject: Re: [PATCH v4 0/4] test for XFS umount hang caused by the pending
+ dquota log item in AIL
+References: <20180111064933.12088-1-houtao1@huawei.com>
+ <20180111080242.GI5123@eguan.usersys.redhat.com>
+From: Hou Tao <houtao1@huawei.com>
+Message-ID: <65b44353-ff8b-b7bf-900b-c4a7863dd428@huawei.com>
+Date: Thu, 11 Jan 2018 17:23:38 +0800
+MIME-Version: 1.0
+In-Reply-To: <20180111080242.GI5123@eguan.usersys.redhat.com>
+Content-Type: text/plain; charset="windows-1252"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+To: Eryu Guan <eguan@redhat.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-This test has been failing for btrfs for quite some time,
-at least since 4.7. There are 2 implementation details of btrfs that
-it exposes:
+Hi Eryu,
 
-1. Currently btrfs filesystem under 100mb are created in Mixed block
-group mode. Freespace accounting for it is not 100% accurate - I've
-observed consistent 1mb discrepancy between a newly created filesystem,
-then writing a file and deleting it and checking the free space.
+On 2018/1/11 16:02, Eryu Guan wrote:
+> On Thu, Jan 11, 2018 at 02:49:29PM +0800, Hou Tao wrote:
+>> Hi,
+>>
+>> This is the v4 patchset for testing the XFS umount hang problem caused by
+>> the pending dquota log item in AIL. The problem had been fixed by commit
+>> 373b058 ("xfs: Properly retry failed dquot items in case of error during
+>> buffer writeback"). The changes for v4 are appended in the commit log
+>> of each patches.
+>>
+>> Comments and questions are welcome.
+> 
+> The patches all look good, thanks a lot for the revision!
+> 
+>>
+>> Regards,
+>> Tao
+>>
+>> Hou Tao (4):
+>>   dmflakey: support multiple dm targets for a dm-flakey device
+>>   dmflakey: support error_writes feature for dm-flakey
+>>   xfs: test for umount hang caused by the pending dquota log item in AIL
+>>   common/rc: factor out _scratch_xfs_[get|set]_sb_field
+> 
+> I switched the order of the last two patches, i.e. refactor
+> _scratch_xfs_[get|set]_sb_field first then use the new helper in the new
+> test in the end, so we don't add new test then update it again in the
+> same patch set.
 
-2. BTRFS won't flush it's delayed allocation on file deletion if less
-than 32mb are deleted. On such files we need to perform sync (missing
-in the test) or wait until time elapses for transaction commit.
+Yes, it's better after the order switch and thanks for that.
 
-In order to avoid both of the aforementioned idiosyncrasies of the fs make
-the test filesystem 101mb. With this we achieve 2 things: 
+Regards,
+Tao
 
-1. Since the filesystem is larger we can create a file larger than 32mb, so 
-it's going to be flushed upon deletion and numbers acquired from df will be 
-accurate 
-2. We don't create the filesystem in mixed mode and also since the 1mb is less 
-than %1 of 101mb we will fall within the tolerance of 1%
-
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/generic/015 | 6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/015 b/tests/generic/015
-index 78f2b13..9dcdde9 100755
---- a/tests/generic/015
-+++ b/tests/generic/015
-@@ -53,7 +53,11 @@ _supported_os Linux
- _require_scratch
- _require_no_large_scratch_dev
- 
--_scratch_mkfs_sized `expr 50 \* 1024 \* 1024` >/dev/null 2>&1 \
-+# With filesystems less than 100mb btrfs is created in mixed mode
-+# which can lead to slight accounting errors of 1mb. Having the
-+# fs be at least 101 mb ensures those errors are within the error
-+# tolerance of 1%
-+_scratch_mkfs_sized `expr 101 \* 1024 \* 1024` >/dev/null 2>&1 \
-     || _fail "mkfs failed"
- _scratch_mount || _fail "mount failed"
- out=$SCRATCH_MNT/fillup.$$
--- 
-2.7.4
+> Thanks,
+> Eryu
+> 
+>>
+>>  common/dmflakey   |  31 +++++++++-
+>>  common/fuzzy      |  33 -----------
+>>  common/xfs        |  47 +++++++++++++++
+>>  tests/xfs/007     |   6 +-
+>>  tests/xfs/098     |   4 +-
+>>  tests/xfs/186     |   3 +-
+>>  tests/xfs/199     |  13 ++--
+>>  tests/xfs/307     |  11 +---
+>>  tests/xfs/308     |  11 +---
+>>  tests/xfs/339     |   6 +-
+>>  tests/xfs/340     |   2 +-
+>>  tests/xfs/999     | 174 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/xfs/999.out |   2 +
+>>  tests/xfs/group   |   1 +
+>>  14 files changed, 269 insertions(+), 75 deletions(-)
+>>  create mode 100755 tests/xfs/999
+>>  create mode 100644 tests/xfs/999.out
+>>
+>> -- 
+>> 2.9.5
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> .
+> 
 
