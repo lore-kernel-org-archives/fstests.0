@@ -1,57 +1,65 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:4162 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753916AbeAKGmU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 11 Jan 2018 01:42:20 -0500
-From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH v4 1/4] dmflakey: support multiple dm targets for a dm-flakey device
-Date: Thu, 11 Jan 2018 14:49:30 +0800
-Message-ID: <20180111064933.12088-2-houtao1@huawei.com>
-In-Reply-To: <20180111064933.12088-1-houtao1@huawei.com>
-References: <20180111064933.12088-1-houtao1@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:54100 "EHLO
+        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753948AbeAKG4J (ORCPT
+        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+        Thu, 11 Jan 2018 01:56:09 -0500
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH 1/5] fstests: filter: Introduce filter to filter out offset for xfs_io
+Date: Thu, 11 Jan 2018 14:55:57 +0800
+Message-Id: <20180111065601.5831-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, cmaiolino@redhat.com
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: dsterba@suse.cz
 List-ID: <fstests@vger.kernel.org>
 
-dm-flakey can be used to emulate IO write error, however, when
-we also need to prevent the IO error for a specific range of the
-block device (eg., the log region of a XFS), we need to specify
-multiple dm targets for the dm device.
+Some test cases (AFAIK, btrfs RAID recovery test cases) read out certain
+location to verify its data.
 
-Option --table can not accommodate the multiple dm targets case,
-so let dmsetup get the possible-multiple-targets table from
-standard input.
+Such read is mostly OK, but the golden output contains the on-disk
+offset, which can differ due to underlying chunk change.
+(This time is mkfs chunk layout change for btrfs)
 
-Signed-off-by: Hou Tao <houtao1@huawei.com>
+So introduce macro _filter_xfs_io_offset to filter out the offset part
+wrote 65536/65536 bytes at offset 136708096
+                       ^^^^^^^^^^^^^^^^^^^^
+And offset from "pread -v"
+08260000:  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa  ................
+^^^^^^^^^
+
+Reported-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
-v4: add comments for reading dm target table from standard input
----
- common/dmflakey | 7 +++++--
- 1 file changed, 5 insertions(+), 2 deletions(-)
+ common/filter | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
 
-diff --git a/common/dmflakey b/common/dmflakey
-index 4434307..e34fce8 100644
---- a/common/dmflakey
-+++ b/common/dmflakey
-@@ -77,11 +77,14 @@ _load_flakey_table()
- 	$DMSETUP_PROG suspend $suspend_opt flakey-test
- 	[ $? -ne 0 ] && _fatal "failed to suspend flakey-test"
- 
--	$DMSETUP_PROG load flakey-test --table "$table"
-+	# There may be multiple dm targets in the table, and these dm targets
-+	# will be joined by the newline ("\n"). Option --table can not cope with
-+	# the multiple-targets case, so get them by reading from standard input.
-+	echo -e "$table" | $DMSETUP_PROG load flakey-test
- 	[ $? -ne 0 ] && _fatal "failed to load table into flakey-test"
- 
- 	$DMSETUP_PROG resume flakey-test
--	[ $? -ne 0 ] && _fatal  "failed to resumeflakey-test"
-+	[ $? -ne 0 ] && _fatal  "failed to resume flakey-test"
+diff --git a/common/filter b/common/filter
+index 9c33efac..77afcbc4 100644
+--- a/common/filter
++++ b/common/filter
+@@ -226,6 +226,15 @@ _filter_xfs_io()
+     sed -e "s/[0-9/.]* [GMKiBbytes]*, [0-9]* ops\; [0-9/:. sec]* ([infa0-9/.]* [EPGMKiBbytes]*\/sec and [infa0-9/.]* ops\/sec)/XXX Bytes, X ops\; XX:XX:XX.X (XXX YYY\/sec and XXX ops\/sec)/"
  }
  
- # Silently drop all writes and unmount/remount to simulate a crash/power
++# Also filter out the offset part of xfs_io output
++# Some test cases may be affected by underlaying extent/chunk layout change,
++# so wipe out this part to avoid golden output difference
++_filter_xfs_io_offset()
++{
++    # filter out " at offset XXX" and offset of "pread -v"
++    sed -e "s/ at offset [0-9]*$//" -e "s/^[0-9a-f]\+:/XXXXXXXX:/"
++}
++
+ # stderr filter for xfs_io to handle change of error output format (e.g.
+ # pwrite64 -> pwrite).
+ _filter_xfs_io_error()
+@@ -277,7 +286,6 @@ _filter_xfs_io_pages_modified()
+ 	_filter_xfs_io_units_modified "Page" $PAGE_SIZE
+ }
+ 
+-
+ _filter_test_dir()
+ {
+ 	# TEST_DEV may be a prefix of TEST_DIR (e.g. /mnt, /mnt/ovl-mnt)
 -- 
-2.9.5
+2.15.1
 
