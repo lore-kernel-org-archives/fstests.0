@@ -1,12 +1,12 @@
-Received: from victor.provo.novell.com ([137.65.250.26]:44515 "EHLO
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:37213 "EHLO
         prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753978AbeAKG4Z (ORCPT
+        with ESMTP id S1753964AbeAKG4K (ORCPT
         <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Thu, 11 Jan 2018 01:56:25 -0500
+        Thu, 11 Jan 2018 01:56:10 -0500
 From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 4/5] fstests: btrfs/142: Filter out offset to handle mkfs chunk layout change
-Date: Thu, 11 Jan 2018 14:56:00 +0800
-Message-Id: <20180111065601.5831-4-wqu@suse.com>
+Subject: [PATCH 2/5] fstests: btrfs/140: Filter out offset to handle mkfs chunk layout change
+Date: Thu, 11 Jan 2018 14:55:58 +0800
+Message-Id: <20180111065601.5831-2-wqu@suse.com>
 In-Reply-To: <20180111065601.5831-1-wqu@suse.com>
 References: <20180111065601.5831-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
@@ -22,17 +22,17 @@ handle any chunk layout.
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- tests/btrfs/142     |  9 ++++---
- tests/btrfs/142.out | 70 ++++++++++++++++++++++++++---------------------------
+ tests/btrfs/140     |  9 ++++---
+ tests/btrfs/140.out | 70 ++++++++++++++++++++++++++---------------------------
  2 files changed, 41 insertions(+), 38 deletions(-)
 
-diff --git a/tests/btrfs/142 b/tests/btrfs/142
-index 5bd8b728..267bdfac 100755
---- a/tests/btrfs/142
-+++ b/tests/btrfs/142
-@@ -99,7 +99,8 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
+diff --git a/tests/btrfs/140 b/tests/btrfs/140
+index 985327a0..f3ff3500 100755
+--- a/tests/btrfs/140
++++ b/tests/btrfs/140
+@@ -78,7 +78,8 @@ _scratch_pool_mkfs $mkfs_opts >>$seqres.full 2>&1
  # chunk
- _scratch_mount -o nospace_cache,nodatasum
+ _scratch_mount -o nospace_cache
  
 -$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" | _filter_xfs_io
 +$XFS_IO_PROG -f -d -c "pwrite -S 0xaa -b 128K 0 128K" "$SCRATCH_MNT/foobar" |\
@@ -40,7 +40,7 @@ index 5bd8b728..267bdfac 100755
  
  # step 2, corrupt the first 64k of one copy (on SCRATCH_DEV which is the first
  # one in $SCRATCH_DEV_POOL
-@@ -110,7 +111,8 @@ logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | c
+@@ -89,7 +90,8 @@ logical_in_btrfs=`${FILEFRAG_PROG} -v $SCRATCH_MNT/foobar | _filter_filefrag | c
  physical_on_scratch=`get_physical ${logical_in_btrfs}`
  
  _scratch_unmount
@@ -48,24 +48,24 @@ index 5bd8b728..267bdfac 100755
 +$XFS_IO_PROG -d -c "pwrite -S 0xbb -b 64K $physical_on_scratch 64K" $SCRATCH_DEV |\
 +	_filter_xfs_io | _filter_xfs_io_offset
  
- _scratch_mount -o nospace_cache
+ _scratch_mount
  
-@@ -135,7 +137,8 @@ stop_fail
+@@ -109,7 +111,8 @@ done
  _scratch_unmount
  
  # check if the repair works
--$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
-+$XFS_IO_PROG -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV |\
+-$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV | _filter_xfs_io
++$XFS_IO_PROG -d -c "pread -v -b 512 $physical_on_scratch 512" $SCRATCH_DEV |\
 +	_filter_xfs_io | _filter_xfs_io_offset
  
  _scratch_dev_pool_put
  # success, all done
-diff --git a/tests/btrfs/142.out b/tests/btrfs/142.out
-index d8be7fbf..0f32ffbe 100644
---- a/tests/btrfs/142.out
-+++ b/tests/btrfs/142.out
+diff --git a/tests/btrfs/140.out b/tests/btrfs/140.out
+index c8565f53..f3fdf174 100644
+--- a/tests/btrfs/140.out
++++ b/tests/btrfs/140.out
 @@ -1,39 +1,39 @@
- QA output created by 142
+ QA output created by 140
 -wrote 131072/131072 bytes at offset 0
 +wrote 131072/131072 bytes
  XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
