@@ -1,18 +1,18 @@
-Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:33108 "EHLO
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:33112 "EHLO
         mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753433AbeAKDJF (ORCPT
+        by vger.kernel.org with ESMTP id S1753505AbeAKDJF (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 10 Jan 2018 22:09:05 -0500
 Received: from pps.filterd (m0109332.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0B393xn026574
-        for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:04 -0800
+        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0B393xp026574
+        for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:05 -0800
 Received: from mail.thefacebook.com ([199.201.64.23])
-        by mx0a-00082601.pphosted.com with ESMTP id 2fdymd80qb-2
+        by mx0a-00082601.pphosted.com with ESMTP id 2fdymd80qb-4
         (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:04 -0800
+        for <fstests@vger.kernel.org>; Wed, 10 Jan 2018 19:09:05 -0800
 From: Richard Wareing <rwareing@fb.com>
-Subject: [PATCH v3 1/3] xfs/realtime: Add require_no_realtime function
-Date: Wed, 10 Jan 2018 19:08:59 -0800
-Message-ID: <20180111030901.1961285-2-rwareing@fb.com>
+Subject: [PATCH v3 3/3] xfs/realtime: Fix direct invocations of xfs_repair
+Date: Wed, 10 Jan 2018 19:09:01 -0800
+Message-ID: <20180111030901.1961285-4-rwareing@fb.com>
 In-Reply-To: <20180111030901.1961285-1-rwareing@fb.com>
 References: <20180111030901.1961285-1-rwareing@fb.com>
 MIME-Version: 1.0
@@ -22,110 +22,54 @@ To: fstests@vger.kernel.org
 Cc: darrick.wong@oracle.com, eguan@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Some tests do not play well with realtime devices, in an effort to
-produce a stable set of test which exercise the realtime code paths
-we introduce a _require_no_realtime function to allow tests to opt
-out of realtime subvolume test runs.
+Fixes direct invocations of xfs_repair to add in -r option if required.
 
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 Signed-off-by: Richard Wareing <rwareing@fb.com>
 ---
 Changes since v2:
-* Fixed tests generic/409-411, _get_mount now honors $SCRATCH_OPTIONS
-* tests/xfs/202 reverted, the test does indeed work with larger test
-  device
-* Added comments explaining why _require_no_realtime was declared
+* Added check for USE_EXTERNAL in tests/xfs/291 & tests/xfs/070
+* Call xfs_repair via $XFS_REPAIR_PROG
 
 Changes since v1:
-* None
+* Fixed kill -9 in test xfs/070
 
- common/rc     | 18 ++++++++++++++++--
- tests/xfs/077 |  2 ++
- tests/xfs/189 |  1 +
- tests/xfs/284 |  2 ++
- 4 files changed, 21 insertions(+), 2 deletions(-)
+ tests/xfs/070 | 5 ++++-
+ tests/xfs/291 | 5 ++++-
+ 2 files changed, 8 insertions(+), 2 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 9216efd..f5fe739 100644
---- a/common/rc
-+++ b/common/rc
-@@ -198,8 +198,14 @@ _mount()
- _get_mount()
+diff --git a/tests/xfs/070 b/tests/xfs/070
+index 0ae6eff..0d81977 100755
+--- a/tests/xfs/070
++++ b/tests/xfs/070
+@@ -56,7 +56,10 @@ _cleanup()
+ _xfs_repair_noscan()
  {
- 	local mnt_point=${!#}
-+	local mnt_dev=${@:(-2):1}
-+        local scratch_opts=""
-+	if [ "$mnt_dev" == "$SCRATCH_DEV" ]; then
-+		_scratch_options mount
-+		scratch_opts="$SCRATCH_OPTIONS"
-+	fi
+ 	# invoke repair directly so we can kill the process if need be
+-	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
++	[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
++    rt_repair_opts="-r $SCRATCH_RTDEV"
++	$XFS_REPAIR_PROG $rt_repair_opts $SCRATCH_DEV 2>&1 |
++    tee -a $seqres.full > $tmp.repair &
+ 	repair_pid=$!
  
--	_mount $*
-+	_mount $scratch_opts $*
- 	if [ $? -eq 0 ]; then
- 		MOUNTED_POINT_STACK="$mnt_point $MOUNTED_POINT_STACK"
- 	else
-@@ -230,7 +236,7 @@ _clear_mount_stack()
+ 	# monitor progress for as long as it is running
+diff --git a/tests/xfs/291 b/tests/xfs/291
+index 3f5295c..3788e62 100755
+--- a/tests/xfs/291
++++ b/tests/xfs/291
+@@ -122,7 +122,10 @@ _xfs_check $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_check failed"
+ # Can xfs_metadump cope with this monster?
+ _scratch_metadump $tmp.metadump || _fail "xfs_metadump failed"
+ xfs_mdrestore $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
+-xfs_repair -f $tmp.img >> $seqres.full 2>&1 || _fail "xfs_repair of metadump failed"
++[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
++  rt_repair_opts="-r $SCRATCH_RTDEV"
++$XFS_REPAIR_PROG $rt_repair_opts -f $tmp.img >> $seqres.full 2>&1 || \
++  _fail "xfs_repair of metadump failed"
  
- _scratch_options()
- {
--    type=$1
-+    local type=$1
-     SCRATCH_OPTIONS=""
- 
-     if [ "$FSTYP" != "xfs" ]; then
-@@ -1737,6 +1743,14 @@ _require_realtime()
- 	_notrun "Realtime device required, skipped this test"
- }
- 
-+# This test requires that a realtime subvolume is not in use
-+#
-+_require_no_realtime()
-+{
-+    [ -n "$SCRATCH_RTDEV" ] && \
-+	_notrun "Test not compatible with realtime subvolumes, skipped this test"
-+}
-+
- # this test requires that a specified command (executable) exists
- # $1 - command, $2 - name for error message
- #
-diff --git a/tests/xfs/077 b/tests/xfs/077
-index eba4f08..6d5ac1a 100755
---- a/tests/xfs/077
-+++ b/tests/xfs/077
-@@ -50,6 +50,8 @@ _cleanup()
- 
- _supported_fs xfs
- _supported_os Linux
-+# xfs_copy does not support realtime devices
-+_require_no_realtime
- _require_scratch
- _require_xfs_crc
- _require_meta_uuid
-diff --git a/tests/xfs/189 b/tests/xfs/189
-index 636f6f0..699eb3c 100755
---- a/tests/xfs/189
-+++ b/tests/xfs/189
-@@ -236,6 +236,7 @@ _putback_scratch_fstab()
- _supported_fs xfs
- _supported_os Linux
- 
-+_require_no_realtime
- _require_scratch
- _require_noattr2
- 
-diff --git a/tests/xfs/284 b/tests/xfs/284
-index e3625fe..d0eb5bd 100755
---- a/tests/xfs/284
-+++ b/tests/xfs/284
-@@ -49,6 +49,8 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-+# xfs_copy does not support realtime devices
-+_require_no_realtime
- _require_test
- _require_scratch
- 
+ # Yes it can; success, all done
+ status=0
 -- 
 2.9.5
 
