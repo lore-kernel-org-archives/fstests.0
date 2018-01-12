@@ -1,164 +1,111 @@
-Received: from mx1.redhat.com ([209.132.183.28]:41588 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754087AbeALHtX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 Jan 2018 02:49:23 -0500
-Date: Fri, 12 Jan 2018 15:49:21 +0800
-From: Eryu Guan <eguan@redhat.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:58392 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754506AbeALIgX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 03:36:23 -0500
+Date: Fri, 12 Jan 2018 19:36:05 +1100
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH v2 2/2] xfs: Regression test for invalid sb_logsunit
-Message-ID: <20180112074921.GP5123@eguan.usersys.redhat.com>
+Message-ID: <20180112083605.GE27323@dastard>
 References: <20180111180734.GD1168@magnolia>
  <1515737783-2061-1-git-send-email-yangx.jy@cn.fujitsu.com>
  <1515737783-2061-2-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20180112074921.GP5123@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1515737783-2061-2-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20180112074921.GP5123@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: xiao yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: xiao yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 12, 2018 at 02:16:23PM +0800, xiao yang wrote:
-> If log stripe unit isn't a multiple of the fs blocksize and mounting,
-> the invalid sb_logsunit leads to crash as soon as we try to write to
-> the log.
+On Fri, Jan 12, 2018 at 03:49:21PM +0800, Eryu Guan wrote:
+> On Fri, Jan 12, 2018 at 02:16:23PM +0800, xiao yang wrote:
+> > If log stripe unit isn't a multiple of the fs blocksize and mounting,
+> > the invalid sb_logsunit leads to crash as soon as we try to write to
+> > the log.
+> > 
+> > Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
+> > ---
+> >  tests/xfs/437     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/437.out |  2 ++
+> >  tests/xfs/group   |  1 +
+> >  3 files changed, 76 insertions(+)
+> >  create mode 100755 tests/xfs/437
+> >  create mode 100644 tests/xfs/437.out
+> > 
+> > diff --git a/tests/xfs/437 b/tests/xfs/437
+> > new file mode 100755
+> > index 0000000..f2b84ad
+> > --- /dev/null
+> > +++ b/tests/xfs/437
+> > @@ -0,0 +1,73 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 437
+> > +#
+> > +# Regression test for commit:
+> > +# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
+> > +#
+> > +# If log stripe unit isn't a multiple of the fs blocksize and mounting,
+> > +# the invalid sb_logsunit leads to crash as soon as we try to write to
+> > +# the log.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
+> > +# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +
+> > +seq=`basename "$0"`
+> > +seqres="$RESULT_DIR/$seq"
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	rm -rf $tmp.*
+> > +}
+> > +
+> > +# get standard environment and checks
+> > +. ./common/rc
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_supported_fs xfs
+> > +_require_scratch
 > 
-> Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
-> ---
->  tests/xfs/437     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/437.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 76 insertions(+)
->  create mode 100755 tests/xfs/437
->  create mode 100644 tests/xfs/437.out
+> This test triggers ASSERT failure and warning on debug build, thus
+> failed _dmesg_check, I think we need _disable_dmesg_check (and some
+> comments) too.
 > 
-> diff --git a/tests/xfs/437 b/tests/xfs/437
-> new file mode 100755
-> index 0000000..f2b84ad
-> --- /dev/null
-> +++ b/tests/xfs/437
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# FS QA Test No. 437
-> +#
-> +# Regression test for commit:
-> +# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
-> +#
-> +# If log stripe unit isn't a multiple of the fs blocksize and mounting,
-> +# the invalid sb_logsunit leads to crash as soon as we try to write to
-> +# the log.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
-> +# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename "$0"`
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment and checks
-> +. ./common/rc
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scratch
+> [1809960.157615] XFS (sda6): log stripe unit 4095 bytes must be a multiple of block size
+> [1809960.159228] XFS (sda6): AAIEEE! Log failed size checks. Abort!
+> [1809960.160534] XFS: Assertion failed: 0, file: fs/xfs/xfs_log.c, line: 679
+> [1809960.162298] WARNING: CPU: 1 PID: 2186 at fs/xfs/xfs_message.c:105 asswarn+0x1e/0x30 [xfs]
 
-This test triggers ASSERT failure and warning on debug build, thus
-failed _dmesg_check, I think we need _disable_dmesg_check (and some
-comments) too.
+If it triggers debug asserts which have been put there to catch bugs
+in other utilities (like mkfs) on a current upstream debug kernel,
+then the test should not be part of the auto and quick groups.
 
-[1809960.157615] XFS (sda6): log stripe unit 4095 bytes must be a multiple of block size
-[1809960.159228] XFS (sda6): AAIEEE! Log failed size checks. Abort!
-[1809960.160534] XFS: Assertion failed: 0, file: fs/xfs/xfs_log.c, line: 679
-[1809960.162298] WARNING: CPU: 1 PID: 2186 at fs/xfs/xfs_message.c:105 asswarn+0x1e/0x30 [xfs]
+Cheers,
 
-> +
-> +rm -f "$seqres.full"
-> +
-> +# Format
-> +_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +# Set logsunit to a value which is not a multiple of the fs blocksize
-> +blksz=$(_scratch_xfs_get_sb_field blocksize)
-> +_scratch_xfs_set_sb_field logsunit $((blksz - 1)) >> $seqres.full 2>&1 \
-> +	|| _notrun "failed to set sb_logsunit"
-
-It seems xfs_db doesn't return non-zero on failure, so _notrun won'be be
-triggered, you may want to read the logsuint value again to see if it's
-set correctly.
-
-> +
-> +# Mount and writing log may trigger a crash
-> +if _scratch_mount >> $seqres.full 2>&1; then
-
-Better to mention that with the fix applied kernel refuses to mount, so
-we know a mount failure is expected.
-
-> +	for i in $(seq 1 1000); do
-> +		touch ${SCRATCH_MNT}/$i
-
-		echo > ${SCRATCH_MNT}/$i might be faster
-
-Thanks,
-Eryu
-
-> +	done
-> +	_scratch_unmount
-> +fi
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/437.out b/tests/xfs/437.out
-> new file mode 100644
-> index 0000000..4dcb607
-> --- /dev/null
-> +++ b/tests/xfs/437.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 437
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index d230060..35d1b03 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -434,3 +434,4 @@
->  434 auto quick clone fsr
->  435 auto quick clone
->  436 auto quick clone fsr
-> +437 auto quick log dangerous
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
