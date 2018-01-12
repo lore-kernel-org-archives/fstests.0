@@ -1,200 +1,67 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:4188 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933064AbeALL7s (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 Jan 2018 06:59:48 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v3 4/7] overlay: add fsck.overlay impure xattr test
-Date: Fri, 12 Jan 2018 20:05:30 +0800
-Message-ID: <20180112120533.6099-5-yi.zhang@huawei.com>
-In-Reply-To: <20180112120533.6099-1-yi.zhang@huawei.com>
-References: <20180112120533.6099-1-yi.zhang@huawei.com>
+Received: from mail-yb0-f196.google.com ([209.85.213.196]:40642 "EHLO
+        mail-yb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932797AbeALNHt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 08:07:49 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20180112115227.GR5123@eguan.usersys.redhat.com>
+References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
+ <20180111114335.GK5123@eguan.usersys.redhat.com> <CAOQ4uxhZ5LvJ375GF9XknTBBe9OcgYh8umiDt43Hk65QgFeUQQ@mail.gmail.com>
+ <20180112115227.GR5123@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 12 Jan 2018 15:07:47 +0200
+Message-ID: <CAOQ4uxjTdFbUGk3MpKjaydZ1bOEQUnjqHCT-Qbas5BHRFyVPzw@mail.gmail.com>
+Subject: Re: [PATCH 0/7] Overlayfs exportfs tests
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Add fsck.overlay test case to test it how to deal with impure
-xattr in underlying directories of overlayfs.
+On Fri, Jan 12, 2018 at 1:52 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Thu, Jan 11, 2018 at 01:52:02PM +0200, Amir Goldstein wrote:
+>> On Thu, Jan 11, 2018 at 1:43 PM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Sun, Jan 07, 2018 at 08:07:18PM +0200, Amir Goldstein wrote:
+>> >> Eryu,
+>> >>
+>> >> Following patches were used to test overlayfs NFS export.
+>> >>
+>> >> Patches 1-5 improve generic/exportfs tests, by adding test coverage
+>> >> of some directory file handle use cases.
+>> >
+>> > open_by_handle test is covering more and more cases, thanks! OTOH, it's
+>> > getting more and more complicated :)
+>>
+>> Yeh, sorry about that ;-)
+>>
+>> >
+>> > But from a quick scan, I think it's time to stop adding new sub-tests to
+>> > existing tests (maybe we should have done this since last time we added
+>> > new sub-tests to generic/467), because generic/467 is getting more
+>> > complex too and makes review harder.
+>>
+>> Probably a good idea, but please note that patch 4/7 is fixing a test that was
+>> not implemented correctly and test 5/7 adds a very minor variant.
+>
+> I've gone through the first 5 patches now. All look fine except the
+> comments to patch 1/7.
+>
+> I think we can add a new test that contains the last part of patch 4/7
+> ("Check non-stale file handles of renamed dirs") and patch 5/7. And
+> leave the "fix test" part in patch 4/7.
+>
+>> An option is to split the directory related tests (those that are fixed by 4/7)
+>> out of generic/467 and then fix them and add the new variant.
+>
+> This should be fine too, but I slightly tend to not move existing tests,
+> just add new cases to new tests.
+>
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
----
- tests/overlay/203     | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/203.out |   4 ++
- tests/overlay/group   |   1 +
- 3 files changed, 148 insertions(+)
- create mode 100755 tests/overlay/203
- create mode 100644 tests/overlay/203.out
+So what I think I will do is not change generic/467, but add a variant of
+generic/467 that tests open_by_handle after mount cycle that will use -i -o.
+I will try re-work patch 1/7 and maybe add more changes so open_by_handle
+becomes more of a tool to write file handle tests instead of a file handle
+test program that does all tests and just invoked from a tests script.
+If that doesn't work out, I'll just add more commentary to the patch ;-)
 
-diff --git a/tests/overlay/203 b/tests/overlay/203
-new file mode 100755
-index 0000000..82b224b
---- /dev/null
-+++ b/tests/overlay/203
-@@ -0,0 +1,143 @@
-+#! /bin/bash
-+# FS QA Test 203
-+#
-+# Test fsck.overlay how to deal with impure xattr in overlayfs.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2017 Huawei.  All Rights Reserved.
-+# Author: zhangyi (F) <yi.zhang@huawei.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+OVL_REDIRECT_XATTR="trusted.overlay.redirect"
-+OVL_IMPURE_XATTR="trusted.overlay.impure"
-+OVL_IMPURE_XATTR_VAL="y"
-+
-+# Create a redirect directory
-+make_redirect_dir()
-+{
-+	local target=$1
-+	local value=$2
-+
-+	mkdir -p $target
-+	$SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
-+}
-+
-+# Remove impure xattr
-+remove_impure()
-+{
-+	local target=$1
-+
-+	$SETFATTR_PROG -x $OVL_IMPURE_XATTR $target
-+}
-+
-+# Check impure xattr
-+check_impure()
-+{
-+	local target=$1
-+
-+	value=$($GETFATTR_PROG --absolute-names --only-values -n \
-+		$OVL_IMPURE_XATTR $target)
-+
-+	[[ $value == $OVL_IMPURE_XATTR_VAL ]] || echo "Missing impure xattr"
-+}
-+
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+
-+make_test_dirs()
-+{
-+	rm -rf $lowerdir $lowerdir2 $upperdir $workdir
-+	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
-+}
-+
-+# Test missing impure xattr in directory which has origin targets, should fix
-+echo "+ Missing impure"
-+make_test_dirs
-+mkdir $lowerdir/{testdir1,testdir2}
-+mkdir $upperdir/{testdir1,testdir2}
-+touch $lowerdir/testdir1/foo
-+mkdir $lowerdir/testdir2/subdir
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-+touch $SCRATCH_MNT/testdir1/foo
-+touch $SCRATCH_MNT/testdir2/subdir
-+$UMOUNT_PROG $SCRATCH_MNT
-+remove_impure $upperdir/testdir1
-+remove_impure $upperdir/testdir2
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_impure $upperdir/testdir1
-+check_impure $upperdir/testdir2
-+
-+# Test missing impure xattr in directory which has redirect directories,
-+# should fix
-+echo "+ Missing impure(2)"
-+make_test_dirs
-+mkdir $lowerdir/origin
-+make_redirect_dir $upperdir/testdir/subdir "/origin"
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_impure $upperdir/testdir
-+
-+# Test missing impure xattr in directory which has merge directories,
-+# should fix
-+echo "+ Missing impure(3)"
-+make_test_dirs
-+mkdir $lowerdir/testdir $upperdir/testdir
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	_fail "fsck should not fail"
-+check_impure $upperdir
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/overlay/203.out b/tests/overlay/203.out
-new file mode 100644
-index 0000000..dd81788
---- /dev/null
-+++ b/tests/overlay/203.out
-@@ -0,0 +1,4 @@
-+QA output created by 203
-++ Missing impure
-++ Missing impure(2)
-++ Missing impure(3)
-diff --git a/tests/overlay/group b/tests/overlay/group
-index e39b5e0..f99d89e 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -51,3 +51,4 @@
- 048 auto quick copyup hardlink
- 201 auto quick fsck
- 202 auto quick fsck
-+203 auto quick fsck
--- 
-2.9.5
-
+Thanks,
+Amir.
