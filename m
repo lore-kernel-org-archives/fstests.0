@@ -1,18 +1,20 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:34670 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752735AbeALEQV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jan 2018 23:16:21 -0500
-Received: from pps.filterd (m0109334.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0C4EFQu017818
-        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:21 -0800
+Received: from mx0b-00082601.pphosted.com ([67.231.153.30]:41248 "EHLO
+        mx0b-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1754005AbeALEQX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jan 2018 23:16:23 -0500
+Received: from pps.filterd (m0109332.ppops.net [127.0.0.1])
+        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0C4EGxW012250
+        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:23 -0800
 Received: from mail.thefacebook.com ([199.201.64.23])
-        by mx0a-00082601.pphosted.com with ESMTP id 2fejmxgp1e-1
+        by mx0a-00082601.pphosted.com with ESMTP id 2fegmv1705-4
         (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:21 -0800
+        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:22 -0800
 From: Richard Wareing <rwareing@fb.com>
-Subject: [PATCH v4 0/3] Fix/harden "quick" tests for realtime subvolumes
-Date: Thu, 11 Jan 2018 20:16:16 -0800
-Message-ID: <20180112041619.540900-1-rwareing@fb.com>
+Subject: [PATCH v4 1/3] xfs/realtime: Add require_no_realtime function
+Date: Thu, 11 Jan 2018 20:16:17 -0800
+Message-ID: <20180112041619.540900-2-rwareing@fb.com>
+In-Reply-To: <20180112041619.540900-1-rwareing@fb.com>
+References: <20180112041619.540900-1-rwareing@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -20,25 +22,115 @@ To: fstests@vger.kernel.org
 Cc: darrick.wong@oracle.com, eguan@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-See v3 cover letter, everything still applies.
+Some tests do not play well with realtime devices, in an effort to
+produce a stable set of test which exercise the realtime code paths
+we introduce a _require_no_realtime function to allow tests to opt
+out of realtime subvolume test runs.
 
-Richard Wareing (3):
-  xfs/realtime: Add require_no_realtime function
-  xfs/realtime: Default rtinherit=1, add _require_no_rtinherit function
-  xfs/realtime: Fix direct invocations of xfs_repair
+Signed-off-by: Richard Wareing <rwareing@fb.com>
+---
+Changes since v3:
+* Fixed formatting nit
+* Added USE_EXTERNAL test in _require_no_realtime
+* Bashism fix in _get_mount
 
- common/rc         | 28 ++++++++++++++++++++++++++--
- tests/generic/250 |  3 +++
- tests/generic/252 |  3 +++
- tests/generic/441 |  3 +++
- tests/xfs/070     |  5 ++++-
- tests/xfs/077     |  2 ++
- tests/xfs/170     |  1 +
- tests/xfs/189     |  1 +
- tests/xfs/284     |  2 ++
- tests/xfs/291     |  5 ++++-
- 10 files changed, 49 insertions(+), 4 deletions(-)
+Changes since v2:
+* Fixed tests generic/409-411, _get_mount now honors $SCRATCH_OPTIONS
+* tests/xfs/202 reverted, the test does indeed work with larger test
+  device
+* Added comments explaining why _require_no_realtime was declared
 
+Changes since v1:
+* None
+
+ common/rc     | 18 ++++++++++++++++--
+ tests/xfs/077 |  2 ++
+ tests/xfs/189 |  1 +
+ tests/xfs/284 |  2 ++
+ 4 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 9216efd..76f9d69 100644
+--- a/common/rc
++++ b/common/rc
+@@ -198,8 +198,14 @@ _mount()
+ _get_mount()
+ {
+ 	local mnt_point=${!#}
++	local mnt_dev=${@:(-2):1}
++	local scratch_opts=""
++	if [ "$mnt_dev" = "$SCRATCH_DEV" ]; then
++		_scratch_options mount
++		scratch_opts="$SCRATCH_OPTIONS"
++	fi
+ 
+-	_mount $*
++	_mount $scratch_opts $*
+ 	if [ $? -eq 0 ]; then
+ 		MOUNTED_POINT_STACK="$mnt_point $MOUNTED_POINT_STACK"
+ 	else
+@@ -230,7 +236,7 @@ _clear_mount_stack()
+ 
+ _scratch_options()
+ {
+-    type=$1
++    local type=$1
+     SCRATCH_OPTIONS=""
+ 
+     if [ "$FSTYP" != "xfs" ]; then
+@@ -1737,6 +1743,14 @@ _require_realtime()
+ 	_notrun "Realtime device required, skipped this test"
+ }
+ 
++# This test requires that a realtime subvolume is not in use
++#
++_require_no_realtime()
++{
++    [ "$USE_EXTERNAL" = "yes" ] && [ -n "$SCRATCH_RTDEV" ] && \
++	_notrun "Test not compatible with realtime subvolumes, skipped this test"
++}
++
+ # this test requires that a specified command (executable) exists
+ # $1 - command, $2 - name for error message
+ #
+diff --git a/tests/xfs/077 b/tests/xfs/077
+index eba4f08..6d5ac1a 100755
+--- a/tests/xfs/077
++++ b/tests/xfs/077
+@@ -50,6 +50,8 @@ _cleanup()
+ 
+ _supported_fs xfs
+ _supported_os Linux
++# xfs_copy does not support realtime devices
++_require_no_realtime
+ _require_scratch
+ _require_xfs_crc
+ _require_meta_uuid
+diff --git a/tests/xfs/189 b/tests/xfs/189
+index 636f6f0..699eb3c 100755
+--- a/tests/xfs/189
++++ b/tests/xfs/189
+@@ -236,6 +236,7 @@ _putback_scratch_fstab()
+ _supported_fs xfs
+ _supported_os Linux
+ 
++_require_no_realtime
+ _require_scratch
+ _require_noattr2
+ 
+diff --git a/tests/xfs/284 b/tests/xfs/284
+index e3625fe..d0eb5bd 100755
+--- a/tests/xfs/284
++++ b/tests/xfs/284
+@@ -49,6 +49,8 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs xfs
+ _supported_os Linux
++# xfs_copy does not support realtime devices
++_require_no_realtime
+ _require_test
+ _require_scratch
+ 
 -- 
 2.9.5
 
