@@ -1,11 +1,13 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:4193 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932993AbeALL7q (ORCPT <rfc822;fstests@vger.kernel.org>);
+Received: from szxga06-in.huawei.com ([45.249.212.32]:60811 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933055AbeALL7q (ORCPT <rfc822;fstests@vger.kernel.org>);
         Fri, 12 Jan 2018 06:59:46 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v3 0/7] overlay: add fsck.overlay basic tests
-Date: Fri, 12 Jan 2018 20:05:26 +0800
-Message-ID: <20180112120533.6099-1-yi.zhang@huawei.com>
+Subject: [PATCH v3 6/7] overlay/010: fix fs check failure
+Date: Fri, 12 Jan 2018 20:05:32 +0800
+Message-ID: <20180112120533.6099-7-yi.zhang@huawei.com>
+In-Reply-To: <20180112120533.6099-1-yi.zhang@huawei.com>
+References: <20180112120533.6099-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,66 +15,55 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi all:
+This test use ovl_lower.1/ovl_lower.2 and ovl_upper in scratch
+filesystem as underlying directories of overlay filesystem, but
+_check_overlay_scratch_fs() only check ovl_lower and ovl_upper
+directories. So whiteout "testdir" in ovl_upper becomes an orphan
+whiteout, which will lead to fsck.overlay check failure.
 
-Here is the third version of test cases for the upcoming fsck.overlay,
-corresponding to fsck.overlay v4 (will post to github repository soon).
-Test fsck.overlay check and fix inconsistency of whiteout and redirect/impure
-xattr.
+This patch change to invoke _overlay_check_dirs() to check real
+test dirs instead of pre-defined common dirs.
 
-Changes since v2:
-- Modify some minor suggestions from Amir and Vivek, and simplify code
-  in all three test cases.
-- Fix duplicate redirect xattr test in 202.
-- Add impure xattr test case of general merge directory in 'no impure'
-  parent directory.
-- Fix fs check failure in other overlay fs test cases. PS: The
-  multi-lowers problem in overlay/010 also appears in many other tests,
-  _require_scratch() will mis-check the pre-defined underlying dirs
-  (not the real test dirs). I think they also need to be modified as this
-  patch(06/07) does to check the correct dirs, and I can fix them if you
-  think necessary.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+ tests/overlay/010 | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-------
-
-Changes since v1:
-
-- Fix _check_scratch_fs hook.
-- Remove valid/invalid opaque xattr test.
-- Add whiteout test cases of valid/invalid whiteouts in opaque/redirect
-  parent directory.
-- Add impure xattr test.
-
-zhangyi (F) (7):
-  overlay: add filesystem check helper
-  overlay: add fsck.overlay whiteout test
-  overlay: add fsck.overlay redirect directory test
-  overlay: add fsck.overlay impure xattr test
-  overlay/003: fix fs check failure
-  overlay/010: fix fs check failure
-  overlay/019: fix fs check failure
-
- common/config         |   1 +
- common/overlay        |  80 +++++++++++++++++
- common/rc             |   4 +-
- tests/overlay/003     |   1 -
- tests/overlay/010     |  11 +--
- tests/overlay/019     |   2 +-
- tests/overlay/201     | 232 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/201.out |  10 +++
- tests/overlay/202     | 240 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/202.out |  10 +++
- tests/overlay/203     | 143 ++++++++++++++++++++++++++++++
- tests/overlay/203.out |   4 +
- tests/overlay/group   |   3 +
- 13 files changed, 732 insertions(+), 9 deletions(-)
- create mode 100755 tests/overlay/201
- create mode 100644 tests/overlay/201.out
- create mode 100755 tests/overlay/202
- create mode 100644 tests/overlay/202.out
- create mode 100755 tests/overlay/203
- create mode 100644 tests/overlay/203.out
-
+diff --git a/tests/overlay/010 b/tests/overlay/010
+index f55ebec..d6b7180 100755
+--- a/tests/overlay/010
++++ b/tests/overlay/010
+@@ -48,17 +48,17 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs overlay
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
+ 
+ # Need two lower dirs in this test, and we mount overlay ourselves,
+ # create upper and workdir as well
+-lowerdir1=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER.1
+-lowerdir2=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER.2
+-upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+-workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
++lowerdir1=$OVL_BASE_SCRATCH_MNT/lower1
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/work
+ mkdir -p $lowerdir1 $lowerdir2 $upperdir $workdir
+ 
+ # One lowerdir contains test dir and test files, the other contains whiteout
+@@ -70,6 +70,7 @@ mknod $lowerdir2/testdir/a c 0 0
+ _overlay_scratch_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
+ rm -rf $SCRATCH_MNT/testdir
+ 
++_overlay_check_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
+ # success, all done
+ echo "Silence is golden"
+ status=0
 -- 
-2.5.0
+2.9.5
 
