@@ -1,69 +1,47 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:58970 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934027AbeALQoD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 11:44:03 -0500
-Date: Fri, 12 Jan 2018 08:43:27 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 1/2] common/xfs: Check if write supports [-c|-d]
- option in xfs_db
-Message-ID: <20180112164327.GG5606@magnolia>
-References: <20180111180734.GD1168@magnolia>
- <1515737783-2061-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:39116 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S964998AbeALTKb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 14:10:31 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1515737783-2061-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20180112120533.6099-8-yi.zhang@huawei.com>
+References: <20180112120533.6099-1-yi.zhang@huawei.com> <20180112120533.6099-8-yi.zhang@huawei.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 12 Jan 2018 21:10:30 +0200
+Message-ID: <CAOQ4uxirV5426f+Rqo-W_Q3Fiyfi8ubBS9LweqWPs3PqG1T91w@mail.gmail.com>
+Subject: Re: [PATCH v3 7/7] overlay/019: fix fs check failure
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: xiao yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, eguan@redhat.com
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 12, 2018 at 02:16:22PM +0800, xiao yang wrote:
-> Make sure _scratch_xfs_set_metadata_field() can be used on an
-> old xfsprogs-dev(e.g. v3.1.1).
-> 
-> The "-d" option was introduced since xfsprogs-dev v4.7.0 by commit
-> 86769b3 ("xfs_db: allow recalculating CRCs on invalid metadata").
-> 
-> The special argument "--" is only used to end option-scanning
-> in getopt().  getopt() was introduced since xfsprogs-dev v3.2.3 by
-> commit c9f5e3d ("xfs_db: Allow writes of corrupted data")'.
-> 
-> Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
+On Fri, Jan 12, 2018 at 2:05 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> This is a stability test, fsstress will create a lot of orphan
+> whiteouts in lowerdir, which will lead to inconsistency of overlay
+> image and fs check failure. No need to check this manual craft
+> file system, so just skip fs check.
+>
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+
+Looks correct
+
 > ---
->  common/xfs | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 45b84a0..59d6dd3 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -658,8 +658,11 @@ _scratch_xfs_set_metadata_field()
->  	for arg in "$@"; do
->  		cmds+=("-c" "${arg}")
->  	done
-> -	_scratch_xfs_db -x "${cmds[@]}" -c "write -d ${key} -- ${value}"
-> -	echo
-> +
-> +	local wr_cmd="write"
-> +	_scratch_xfs_db -x -c "help write" | egrep -q "(-c|-d)" && value="-- $value"
-
-"${value}" at the end of this line, for consistency within the function?
-
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-> +	_scratch_xfs_db -x -c "help write" | egrep -q "(-d)" && wr_cmd="${wr_cmd} -d"
-> +	_scratch_xfs_db -x "${cmds[@]}" -c "${wr_cmd} ${key} ${value}"
->  }
->  
->  _scratch_xfs_get_sb_field()
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
+>  tests/overlay/019 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+>
+> diff --git a/tests/overlay/019 b/tests/overlay/019
+> index 3e2bc4e..575aaf7 100755
+> --- a/tests/overlay/019
+> +++ b/tests/overlay/019
+> @@ -46,7 +46,7 @@ rm -f $seqres.full
+>  # real QA test starts here
+>  _supported_fs overlay
+>  _supported_os Linux
+> -_require_scratch
+> +_require_scratch_nocheck
+>
+>  # Remove all files from previous tests
+>  _scratch_mkfs
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 2.9.5
+>
