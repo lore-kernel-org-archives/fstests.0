@@ -1,78 +1,97 @@
-Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:60594 "EHLO
-        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932860AbeALEQ5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jan 2018 23:16:57 -0500
-Received: from pps.filterd (m0044008.ppops.net [127.0.0.1])
-        by mx0a-00082601.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w0C4Dtns000857
-        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:57 -0800
-Received: from mail.thefacebook.com ([199.201.64.23])
-        by mx0a-00082601.pphosted.com with ESMTP id 2fem48rc16-2
-        (version=TLSv1 cipher=ECDHE-RSA-AES256-SHA bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 11 Jan 2018 20:16:57 -0800
-From: Richard Wareing <rwareing@fb.com>
-Subject: [PATCH v4 3/3] xfs/realtime: Fix direct invocations of xfs_repair
-Date: Thu, 11 Jan 2018 20:16:19 -0800
-Message-ID: <20180112041619.540900-4-rwareing@fb.com>
-In-Reply-To: <20180112041619.540900-1-rwareing@fb.com>
-References: <20180112041619.540900-1-rwareing@fb.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:1839 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751958AbeALGSH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 01:18:07 -0500
+From: xiao yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v2] syscalls/madvise09.c: Use custom mount point instead of /sys/fs/cgroup/memory
+Date: Fri, 12 Jan 2018 14:14:21 +0800
+Message-ID: <1515737662-1993-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20180111180734.GD1168@magnolia>
+References: <20180111180734.GD1168@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, eguan@redhat.com, linux-xfs@vger.kernel.org
+Cc: darrick.wong@oracle.com, eguan@redhat.com, xiao yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Fixes direct invocations of xfs_repair to add in -r option if required.
+1) on some distros(e.g. RHEL6), memory cgroup was supported and
+   mounted on /cgroup/memory by default, but the test was skipped
+   if /sys/fs/cgroup/memory did not exist.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-Signed-off-by: Richard Wareing <rwareing@fb.com>
+2) We got the following error if memory cgroup wasn't mounted
+   on /sys/fs/cgroup/memory:
+   ------------------------------------------------------------
+   safe_macros.c:169: BROK: madvise09.c:175: mkdir(/sys/fs/cgroup/memory/ltp_madvise09_16386/,0777) failed: EROFS
+   ------------------------------------------------------------
+
+We use custom mount point and mount memory cgroup on it manually
+to fix these issues.
+
+Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
 ---
-Changes since v3:
-* Formatting nits
+ testcases/kernel/syscalls/madvise/madvise09.c | 26 ++++++++++++++++++++++----
+ 1 file changed, 22 insertions(+), 4 deletions(-)
 
-Changes since v2:
-* Added check for USE_EXTERNAL in tests/xfs/291 & tests/xfs/070
-* Call xfs_repair via $XFS_REPAIR_PROG
-
-Changes since v1:
-* Fixed kill -9 in test xfs/070
-
- tests/xfs/070 | 5 ++++-
- tests/xfs/291 | 5 ++++-
- 2 files changed, 8 insertions(+), 2 deletions(-)
-
-diff --git a/tests/xfs/070 b/tests/xfs/070
-index 0ae6eff..81111d5 100755
---- a/tests/xfs/070
-+++ b/tests/xfs/070
-@@ -56,7 +56,10 @@ _cleanup()
- _xfs_repair_noscan()
+diff --git a/testcases/kernel/syscalls/madvise/madvise09.c b/testcases/kernel/syscalls/madvise/madvise09.c
+index f744405..25cf81f 100644
+--- a/testcases/kernel/syscalls/madvise/madvise09.c
++++ b/testcases/kernel/syscalls/madvise/madvise09.c
+@@ -53,12 +53,14 @@
+ #include <errno.h>
+ #include <stdio.h>
+ #include <ctype.h>
++#include <sys/mount.h>
+ 
+ #include "tst_test.h"
+ #include "lapi/mmap.h"
+ 
+-#define MEMCG_PATH "/sys/fs/cgroup/memory/"
++#define MEMCG_PATH "/dev/memcg_madvise09/"
+ 
++static int memcg_mounted;
+ static char cgroup_path[PATH_MAX];
+ static char tasks_path[PATH_MAX];
+ static char limit_in_bytes_path[PATH_MAX];
+@@ -277,6 +279,15 @@ static void cleanup(void)
  {
- 	# invoke repair directly so we can kill the process if need be
--	$XFS_REPAIR_PROG $SCRATCH_DEV 2>&1 | tee -a $seqres.full > $tmp.repair &
-+	[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
-+		rt_repair_opts="-r $SCRATCH_RTDEV"
-+	$XFS_REPAIR_PROG $rt_repair_opts $SCRATCH_DEV 2>&1 |
-+		tee -a $seqres.full > $tmp.repair &
- 	repair_pid=$!
+ 	if (cgroup_path[0] && !access(cgroup_path, F_OK))
+ 		rmdir(cgroup_path);
++
++	if (memcg_mounted) {
++		tst_res(TINFO, "Umount memory cgroup after testing");
++		SAFE_UMOUNT(MEMCG_PATH);
++		memcg_mounted = 0;
++	}
++
++	if (!access(MEMCG_PATH, F_OK) && rmdir(MEMCG_PATH))
++		tst_res(TWARN | TERRNO, "Rmdir %s failed", MEMCG_PATH);
+ }
  
- 	# monitor progress for as long as it is running
-diff --git a/tests/xfs/291 b/tests/xfs/291
-index 3f5295c..fd5c1f1 100755
---- a/tests/xfs/291
-+++ b/tests/xfs/291
-@@ -122,7 +122,10 @@ _xfs_check $SCRATCH_DEV >> $seqres.full 2>&1 || _fail "xfs_check failed"
- # Can xfs_metadump cope with this monster?
- _scratch_metadump $tmp.metadump || _fail "xfs_metadump failed"
- xfs_mdrestore $tmp.metadump $tmp.img || _fail "xfs_mdrestore failed"
--xfs_repair -f $tmp.img >> $seqres.full 2>&1 || _fail "xfs_repair of metadump failed"
-+[ "$USE_EXTERNAL" = yes ] && [ -n "$SCRATCH_RTDEV" ] && \
-+	rt_repair_opts="-r $SCRATCH_RTDEV"
-+$XFS_REPAIR_PROG $rt_repair_opts -f $tmp.img >> $seqres.full 2>&1 || \
-+	_fail "xfs_repair of metadump failed"
+ static void run(void)
+@@ -316,10 +327,17 @@ static void setup(void)
+ {
+ 	long int swap_total;
  
- # Yes it can; success, all done
- status=0
+-	if (access(MEMCG_PATH, F_OK)) {
+-		tst_brk(TCONF, "'" MEMCG_PATH
+-			"' not present, CONFIG_MEMCG missing?");
++	SAFE_MKDIR(MEMCG_PATH, 0777);
++
++	tst_res(TINFO, "Mount memory cgroup on %s", MEMCG_PATH);
++	if (mount("memcg", MEMCG_PATH, "cgroup", 0, "memory") == -1) {
++		if (errno == ENODEV) {
++			tst_brk(TCONF,
++				 "Memory cgroup was not configured in kernel");
++		}
++		tst_brk(TBROK | TERRNO, "Failed to mount memory cgroup");
+ 	}
++	memcg_mounted = 1;
+ 
+ 	if (!access(MEMCG_PATH "memory.memsw.limit_in_bytes", F_OK))
+ 		swap_accounting_enabled = 1;
 -- 
-2.9.5
+1.8.3.1
+
+
 
