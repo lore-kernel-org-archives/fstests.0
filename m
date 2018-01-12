@@ -1,73 +1,156 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33814 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754483AbeALLwb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 Jan 2018 06:52:31 -0500
-Date: Fri, 12 Jan 2018 19:52:27 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 0/7] Overlayfs exportfs tests
-Message-ID: <20180112115227.GR5123@eguan.usersys.redhat.com>
-References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
- <20180111114335.GK5123@eguan.usersys.redhat.com>
- <CAOQ4uxhZ5LvJ375GF9XknTBBe9OcgYh8umiDt43Hk65QgFeUQQ@mail.gmail.com>
+Received: from szxga04-in.huawei.com ([45.249.212.190]:4191 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932993AbeALL7m (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 12 Jan 2018 06:59:42 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [PATCH v3 1/7] overlay: add filesystem check helper
+Date: Fri, 12 Jan 2018 20:05:27 +0800
+Message-ID: <20180112120533.6099-2-yi.zhang@huawei.com>
+In-Reply-To: <20180112120533.6099-1-yi.zhang@huawei.com>
+References: <20180112120533.6099-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhZ5LvJ375GF9XknTBBe9OcgYh8umiDt43Hk65QgFeUQQ@mail.gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 11, 2018 at 01:52:02PM +0200, Amir Goldstein wrote:
-> On Thu, Jan 11, 2018 at 1:43 PM, Eryu Guan <eguan@redhat.com> wrote:
-> > On Sun, Jan 07, 2018 at 08:07:18PM +0200, Amir Goldstein wrote:
-> >> Eryu,
-> >>
-> >> Following patches were used to test overlayfs NFS export.
-> >>
-> >> Patches 1-5 improve generic/exportfs tests, by adding test coverage
-> >> of some directory file handle use cases.
-> >
-> > open_by_handle test is covering more and more cases, thanks! OTOH, it's
-> > getting more and more complicated :)
-> 
-> Yeh, sorry about that ;-)
-> 
-> >
-> > But from a quick scan, I think it's time to stop adding new sub-tests to
-> > existing tests (maybe we should have done this since last time we added
-> > new sub-tests to generic/467), because generic/467 is getting more
-> > complex too and makes review harder.
-> 
-> Probably a good idea, but please note that patch 4/7 is fixing a test that was
-> not implemented correctly and test 5/7 adds a very minor variant.
+Add filesystem check helpers for the upcoming fsck.overlay utility,
+and hook them to _check_test_fs and _check_scratch_fs. This helper
+works only if fsck.overlay exists.
 
-I've gone through the first 5 patches now. All look fine except the
-comments to patch 1/7.
+[ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
 
-I think we can add a new test that contains the last part of patch 4/7
-("Check non-stale file handles of renamed dirs") and patch 5/7. And
-leave the "fix test" part in patch 4/7.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config  |  1 +
+ common/overlay | 80 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc      |  4 +--
+ 3 files changed, 83 insertions(+), 2 deletions(-)
 
-> An option is to split the directory related tests (those that are fixed by 4/7)
-> out of generic/467 and then fix them and add the new variant.
+diff --git a/common/config b/common/config
+index d0fbfe5..0505b71 100644
+--- a/common/config
++++ b/common/config
+@@ -236,6 +236,7 @@ case "$HOSTOS" in
+         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
+ 	export E2FSCK_PROG="`set_prog_path e2fsck`"
+ 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
++	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
+         ;;
+ esac
+ 
+diff --git a/common/overlay b/common/overlay
+index 1da4ab1..e7f0e62 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -151,3 +151,83 @@ _require_scratch_overlay_feature()
+ 	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
+ 	_scratch_unmount
+ }
++
++_overlay_fsck_dirs()
++{
++	local lowerdir=$1
++	local upperdir=$2
++	local workdir=$3
++	local options=$4
++
++	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
++
++	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
++			   -o workdir=$workdir $options
++}
++
++_overlay_check_dirs()
++{
++	local lowerdir=$1
++	local upperdir=$2
++	local workdir=$3
++	local err=0
++
++	_overlay_fsck_dirs $* $FSCK_OPTIONS >>$tmp.fsck 2>&1
++	if [ $? -ne 0 ]; then
++		_log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
++		echo "*** fsck.overlay output ***"	>>$seqres.full
++		cat $tmp.fsck				>>$seqres.full
++		echo "*** end fsck.overlay output"	>>$seqres.full
++
++		echo "*** mount output ***"		>>$seqres.full
++		_mount					>>$seqres.full
++		echo "*** end mount output"		>>$seqres.full
++		err=1
++	fi
++	rm -f $tmp.fsck
++
++	if [ $err != 0 ]; then
++		status=1
++		if [ "$iam" != "check" ]; then
++			exit 1
++		fi
++		return 1
++	fi
++
++	return 0
++}
++
++_overlay_check_fs()
++{
++	local base_dev=$3
++	local base_mnt=$4
++
++	[ "$FSTYP" = overlay ] || return 0
++
++	# Base fs needs to be mounted to check overlay dirs
++	local mounted=""
++	[ -z "$base_dev" ] || mounted=`_is_mounted $base_dev`
++	[ -n "$mounted" ] || _overlay_base_mount $*
++
++	# No need to umount overlay for dir checks with default -n option
++	_overlay_check_dirs $base_mnt/$OVL_LOWER $base_mnt/$OVL_UPPER \
++			    $base_mnt/$OVL_WORK
++	local ret=$?
++
++	[ -n "$mounted" ] || _overlay_base_unmount "$base_dev" "$base_mnt"
++	return $ret
++}
++
++_check_overlay_test_fs()
++{
++	_overlay_check_fs OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
++		"$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
++		$TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
++}
++
++_check_overlay_scratch_fs()
++{
++	_overlay_check_fs OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
++		"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
++		$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
++}
+diff --git a/common/rc b/common/rc
+index 9216efd..a49f736 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2537,7 +2537,7 @@ _check_test_fs()
+ 	# no way to check consistency for GlusterFS
+ 	;;
+     overlay)
+-	# no way to check consistency for overlay
++	_check_overlay_test_fs
+ 	;;
+     pvfs2)
+ 	;;
+@@ -2592,7 +2592,7 @@ _check_scratch_fs()
+ 	# no way to check consistency for GlusterFS
+ 	;;
+     overlay)
+-	# no way to check consistency for overlay
++	_check_overlay_scratch_fs
+ 	;;
+     pvfs2)
+ 	;;
+-- 
+2.9.5
 
-This should be fine too, but I slightly tend to not move existing tests,
-just add new cases to new tests.
-
-BTW, thanks for the explaining in another reply, that did help.
-
-Thanks,
-Eryu
-
-> 
-> > Perhaps we can factor out some
-> > helper functions from generic/467 to common helpers and use them in new
-> > tests.
-> >
-> 
-> I don't think there is much to factor out, but we can add new tests
-> and clone the helpers. Let me know if you think differently after review.
-> 
-> Thanks,
-> Amir.
