@@ -1,323 +1,79 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:33220 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965168AbeALVcT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 16:32:19 -0500
-MIME-Version: 1.0
-In-Reply-To: <20180112120533.6099-4-yi.zhang@huawei.com>
-References: <20180112120533.6099-1-yi.zhang@huawei.com> <20180112120533.6099-4-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 12 Jan 2018 23:32:18 +0200
-Message-ID: <CAOQ4uxi+5FOgsDc55d=Xvhfsk7G6j26g=3uaiqUcvunfFa_X2A@mail.gmail.com>
-Subject: Re: [PATCH v3 3/7] overlay: add fsck.overlay redirect directory test
-Content-Type: text/plain; charset="UTF-8"
+Received: from userp2120.oracle.com ([156.151.31.85]:43794 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965201AbeAMCHh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Jan 2018 21:07:37 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] fstests: common/rc: fix device still mounted error with SCRATCH_DEV_POOL
+Date: Fri, 12 Jan 2018 18:04:59 -0700
+Message-Id: <20180113010459.24321-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 12, 2018 at 2:05 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Add fsck.overlay test case to test it how to deal with invalid/valid/
-> duplicate redirect xattr in underlying directories of overlayfs.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+One of btrfs tests, btrfs/011, uses SCRATCH_DEV_POOL and puts a non-SCRATCH_DEV
+device as the first one when doing mkfs, and this makes
+_require_scratch{_nocheck} fail to umount $SCRATCH_MNT since it checks mount
+point with SCRATCH_DEV only, and for sure it finds nothing to umount and the
+following tests complain about 'device still mounted' alike errors.
 
-Looks good, with some minor comments
+Introduce a helper to address this special case where both btrfs and scratch
+dev pool are in use.
 
-> ---
->  tests/overlay/202     | 240 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/202.out |  10 +++
->  tests/overlay/group   |   1 +
->  3 files changed, 251 insertions(+)
->  create mode 100755 tests/overlay/202
->  create mode 100644 tests/overlay/202.out
->
-> diff --git a/tests/overlay/202 b/tests/overlay/202
-> new file mode 100755
-> index 0000000..84a7bad
-> --- /dev/null
-> +++ b/tests/overlay/202
-> @@ -0,0 +1,240 @@
-> +#! /bin/bash
-> +# FS QA Test 202
-> +#
-> +# Test fsck.overlay how to deal with redirect xattr in overlayfs.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Huawei.  All Rights Reserved.
-> +# Author: zhangyi (F) <yi.zhang@huawei.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1        # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch
-> +_require_attrs
-> +_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +OVL_REDIRECT_XATTR="trusted.overlay.redirect"
-> +OVL_OPAQUE_XATTR="trusted.overlay.opaque"
-> +OVL_OPAQUE_XATTR_VAL="y"
-> +
-> +# Create a redirect directory
-> +make_redirect_dir()
-> +{
-> +       local target=$1
-> +       local value=$2
-> +
-> +       mkdir -p $target
-> +       $SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
-> +}
-> +
-> +# Check redirect xattr
-> +check_redirect()
-> +{
-> +       local target=$1
-> +       local expect=$2
-> +
-> +       value=$($GETFATTR_PROG --absolute-names --only-values -n \
-> +               $OVL_REDIRECT_XATTR $target)
-> +
-> +       [[ $value == $expect ]] || echo "Redirect xattr incorrect"
-> +}
-> +
-> +check_no_redirect()
-> +{
-> +       local target=$1
-> +
-> +       value=$($GETFATTR_PROG --absolute-names -d -m \
-> +               $OVL_REDIRECT_XATTR $target)
-> +
-> +       [[ -z "$value" ]] || echo "Redirect xattr not empty"
-> +}
-> +
-> +# Check opaque xattr
-> +check_opaque()
-> +{
-> +       local target=$1
-> +
-> +       value=$($GETFATTR_PROG --absolute-names --only-values -n \
-> +               $OVL_OPAQUE_XATTR $target)
-> +
-> +       [[ $value == $OVL_OPAQUE_XATTR_VAL ]] || echo "Opaque xattr incorrect"
-> +}
-> +
-> +# Check whiteout
-> +check_whiteout()
-> +{
-> +       local target=$1
-> +
-> +       target_type=`stat -c "%F:%t,%T" $target`
-> +
-> +       [[ $target_type == "character special file:0,0" ]] || \
-> +               echo "Whiteout missing"
-> +}
-> +
-> +# Create test directories
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +
-> +make_test_dirs()
-> +{
-> +       rm -rf $lowerdir $lowerdir2 $upperdir $workdir
-> +       mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
-> +}
-> +
-> +# Test invalid redirect xattr point to a nonexistent origin, should remove
-> +echo "+ Invalid redirect"
-> +make_test_dirs
-> +make_redirect_dir $upperdir/testdir "invalid"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_no_redirect $upperdir/testdir
-> +
-> +# Test invalid redirect xattr point to a file origin, should remove
-> +echo "+ Invalid redirect(2)"
-> +make_test_dirs
-> +touch $lowerdir/origin
-> +make_redirect_dir $upperdir/testdir "origin"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_no_redirect $upperdir/testdir
-> +
-> +# Test valid redirect xattr point to a directory origin in the same directory,
-> +# should not remove
-> +echo "+ Valid redirect"
-> +make_test_dirs
-> +mkdir $lowerdir/origin
-> +mknod $upperdir/origin c 0 0
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+---
+ common/rc | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
 
-I got spoiled from previous tests ;-) please use make_whiteout helper
-here as well.
+diff --git a/common/rc b/common/rc
+index 9216efd..eab1bb7 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1450,6 +1450,29 @@ _check_mounted_on()
+ 	return 0 # 0 = mounted as expected
+ }
+ 
++_check_scratch_dev_pool_mounted_on()
++{
++	local devname=$1
++	local dev=$2
++	local mntname=$3
++	local mnt=$4
++
++	local mount_rec=`findmnt -rncv -M $mnt -o SOURCE,TARGET`
++	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
++
++	# if it's mounted, make sure mount dev is one of the pool devices
++	for mount_dev in $SCRATCH_DEV_POOL; do
++		if [ "$mount_rec" == "$mount_dev $mnt" ]; then
++			return 0 # 0 = mounted as expected
++		fi
++	done
++
++	echo "$devname=$dev is mounted but not on $mntname=$mnt - aborting"
++	echo "Already mounted result:"
++	echo $mount_rec
++	return 2 # 2 == mounted on wrong mnt
++}
++
+ # this test needs a scratch partition - check we're ok & unmount it
+ # No post-test check of the device is required. e.g. the test intentionally
+ # finishes the test with the filesystem in a corrupt state
+@@ -1537,6 +1560,14 @@ _require_scratch_nocheck()
+     _check_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
+     local err=$?
+     [ $err -le 1 ] || exit 1
++
++    if [ $err -eq 1 -a "$FSTYP" == "btrfs" -a ! -z "$SCRATCH_DEV_POOL" ]
++    then
++	_check_scratch_dev_pool_mounted_on SCRATCH_DEV $SCRATCH_DEV SCRATCH_MNT $SCRATCH_MNT
++	err=$?
++	[ $err -le 1 ] || exit 1
++    fi
++
+     if [ $err -eq 0 ]
+     then
+         # if it's mounted, unmount it
+-- 
+2.5.0
 
-> +make_redirect_dir $upperdir/testdir "origin"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_redirect $upperdir/testdir "origin"
-> +
-> +# Test valid redirect xattr point to a directory origin in different directories
-> +# should not remove
-> +echo "+ Valid redirect(2)"
-> +make_test_dirs
-> +mkdir $lowerdir/origin
-> +mknod $upperdir/origin c 0 0
-> +make_redirect_dir $upperdir/testdir1/testdir2 "/origin"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_redirect $upperdir/testdir1/testdir2 "/origin"
-> +
-> +# Test valid redirect xattr but missing whiteout to cover lower target,
-> +# should fix whiteout
-> +echo "+ Missing whiteout"
-> +make_test_dirs
-> +mkdir $lowerdir/origin
-> +make_redirect_dir $upperdir/testdir "origin"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_redirect $upperdir/testdir "origin"
-> +check_whiteout $upperdir/origin
-> +
-> +# Test valid redirect xattrs exchanged by rename, should not remove
-> +echo "+ Valid redirect(3)"
-> +make_test_dirs
-> +mkdir $lowerdir/{testdir1,testdir2}
-> +make_redirect_dir $upperdir/testdir1 "testdir2"
-> +make_redirect_dir $upperdir/testdir2 "testdir1"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_redirect $upperdir/testdir1 "testdir2"
-> +check_redirect $upperdir/testdir2 "testdir1"
-> +
-> +# Test invalid redirect xattr with lower same name directory exists,
-> +# should remove invalid redirect xattr and set opaque in yes mode
-> +echo "+ Invalid redirect(3)"
-> +make_test_dirs
-> +mkdir $lowerdir/testdir
-> +make_redirect_dir $upperdir/testdir "invalid"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
-
-When using -y, better add a comment with the expected questions
-for whom Yes is the answer (even though one might deduce that from the
-expected results)
-
-> +       _fail "fsck should not fail"
-> +check_no_redirect $upperdir/testdir
-> +check_opaque $upperdir/testdir
-> +
-> +# Test duplicate redirect xattrs point to one origin, should fail in
-> +# auto mode, and should remove the duplicate one in yes mode
-
-Better say "either of the duplicates" for clarity
-
-> +echo "+ Duplicate redirect"
-> +make_test_dirs
-> +mkdir $lowerdir2/origin
-> +make_redirect_dir $lowerdir/testdir1 "origin"
-> +make_redirect_dir $lowerdir/testdir2 "origin"
-> +make_redirect_dir $upperdir/testdir3 "origin"
-> +
-> +_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
-> +       $seqres.full 2>&1 && _fail "fsck should fail"
-> +_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -y >> \
-> +       $seqres.full 2>&1 || _fail "fsck should not fail"
-> +redirect_1=`check_redirect $lowerdir/testdir1 "origin" 2>/dev/null`
-> +redirect_2=`check_redirect $lowerdir/testdir2 "origin" 2>/dev/null`
-> +[[ $redirect_1 == $redirect_2 ]] && echo "Redirect xattr incorrect"
-> +check_no_redirect $upperdir/testdir3
-> +
-> +# Test duplicate redirect xattr duplicate with merge directory, should
-> +# fail in auto mode, and should remove the redirect directory in yes mode
-> +echo "+ Duplicate redirect(2)"
-> +make_test_dirs
-> +mkdir $lowerdir/origin $upperdir/origin
-> +make_redirect_dir $upperdir/testdir "origin"
-> +
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 && \
-> +       _fail "fsck should fail"
-> +_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
-> +       _fail "fsck should not fail"
-> +check_no_redirect $upperdir/testdir
-
-Maybe also worth to have $lowerdir/testdir and check_opaque $upperdir/testdir
-in this case? or add another case?
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/overlay/202.out b/tests/overlay/202.out
-> new file mode 100644
-> index 0000000..8473336
-> --- /dev/null
-> +++ b/tests/overlay/202.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 202
-> ++ Invalid redirect
-> ++ Invalid redirect(2)
-> ++ Valid redirect
-> ++ Valid redirect(2)
-> ++ Missing whiteout
-> ++ Valid redirect(3)
-> ++ Invalid redirect(3)
-> ++ Duplicate redirect
-> ++ Duplicate redirect(2)
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 7c5fcbb..e39b5e0 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -50,3 +50,4 @@
->  047 auto quick copyup hardlink
->  048 auto quick copyup hardlink
->  201 auto quick fsck
-> +202 auto quick fsck
-> --
-> 2.9.5
->
