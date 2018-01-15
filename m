@@ -1,54 +1,44 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:36639 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751760AbeAOEN6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 14 Jan 2018 23:13:58 -0500
-Subject: Re: [PATCH v3 0/7] overlay: add fsck.overlay basic tests
-References: <20180112120533.6099-1-yi.zhang@huawei.com>
- <CAOQ4uxij64P9zOmkDR+XfEY2BC3GrMm3mihkoaM_bq41cFEqHw@mail.gmail.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <8df72a7a-14a0-55ba-b7e8-3e9e11c63429@huawei.com>
-Date: Mon, 15 Jan 2018 12:11:00 +0800
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxij64P9zOmkDR+XfEY2BC3GrMm3mihkoaM_bq41cFEqHw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Received: from victor.provo.novell.com ([137.65.250.26]:38770 "EHLO
+        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753502AbeAOE1g (ORCPT
+        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+        Sun, 14 Jan 2018 23:27:36 -0500
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] btrfs-progs: fsck: Continue check even if we find space cache problem
+Date: Mon, 15 Jan 2018 12:27:22 +0800
+Message-Id: <20180115042722.25435-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/1/13 3:19, Amir Goldstein Wrote:
-> On Fri, Jan 12, 2018 at 2:05 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
->> Hi all:
->>
->> Here is the third version of test cases for the upcoming fsck.overlay,
->> corresponding to fsck.overlay v4 (will post to github repository soon).
->> Test fsck.overlay check and fix inconsistency of whiteout and redirect/impure
->> xattr.
->>
->> Changes since v2:
->> - Modify some minor suggestions from Amir and Vivek, and simplify code
->>   in all three test cases.
->> - Fix duplicate redirect xattr test in 202.
->> - Add impure xattr test case of general merge directory in 'no impure'
->>   parent directory.
->> - Fix fs check failure in other overlay fs test cases. PS: The
->>   multi-lowers problem in overlay/010 also appears in many other tests,
->>   _require_scratch() will mis-check the pre-defined underlying dirs
->>   (not the real test dirs). I think they also need to be modified as this
->>   patch(06/07) does to check the correct dirs, and I can fix them if you
->>   think necessary.
-> 
-> Yes, please do.
-> Thinking out loud, we could use a helper _require_overlay_scratch_dirs
-> for tests that use _overlay_scratch_mount_dirs and not _scratch_mount.
-> That helper will actually be a wrapper to _require_scratch_nocheck, but
-> with a comment that explains why, because usually,
-> _require_scratch_nocheck means that test leaves filesystem corrupt
-> and that is not the case here.
-> 
-This makes sense, will do.
+Space cache itself is not a fatal part of btrfs (especially for v1 space
+cache), and if we find something wrong it can be caused by other more
+serious problem.
 
-Thanks,
-Yi.
+So continue to check more important trees even we found something wrong
+in free space cache.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ cmds-check.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/cmds-check.c b/cmds-check.c
+index 7fc30da83ea1..6083ac0dd032 100644
+--- a/cmds-check.c
++++ b/cmds-check.c
+@@ -15000,7 +15000,10 @@ int cmd_check(int argc, char **argv)
+ 			error("errors found in free space tree");
+ 		else
+ 			error("errors found in free space cache");
+-		goto out;
++		/*
++		 * Space cache problem is not fatal, and normally indicates more
++		 * serious problem, so continue check to expose the cause.
++		 */
+ 	}
+ 
+ 	/*
+-- 
+2.15.1
 
