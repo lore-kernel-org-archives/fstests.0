@@ -1,44 +1,44 @@
-Received: from victor.provo.novell.com ([137.65.250.26]:38770 "EHLO
-        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753502AbeAOE1g (ORCPT
-        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Sun, 14 Jan 2018 23:27:36 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH] btrfs-progs: fsck: Continue check even if we find space cache problem
-Date: Mon, 15 Jan 2018 12:27:22 +0800
-Message-Id: <20180115042722.25435-1-wqu@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54322 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932085AbeAOGWb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Jan 2018 01:22:31 -0500
+Date: Mon, 15 Jan 2018 14:22:28 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] fstests: common/rc: fix device still mounted error with
+ SCRATCH_DEV_POOL
+Message-ID: <20180115062228.GA3102@eguan.usersys.redhat.com>
+References: <20180113010459.24321-1-bo.li.liu@oracle.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180113010459.24321-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Liu Bo <bo.li.liu@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Space cache itself is not a fatal part of btrfs (especially for v1 space
-cache), and if we find something wrong it can be caused by other more
-serious problem.
+On Fri, Jan 12, 2018 at 06:04:59PM -0700, Liu Bo wrote:
+> One of btrfs tests, btrfs/011, uses SCRATCH_DEV_POOL and puts a non-SCRATCH_DEV
+> device as the first one when doing mkfs, and this makes
+> _require_scratch{_nocheck} fail to umount $SCRATCH_MNT since it checks mount
+> point with SCRATCH_DEV only, and for sure it finds nothing to umount and the
+> following tests complain about 'device still mounted' alike errors.
+> 
+> Introduce a helper to address this special case where both btrfs and scratch
+> dev pool are in use.
+> 
+> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
 
-So continue to check more important trees even we found something wrong
-in free space cache.
+Hmm, I didn't see this problem, I ran btrfs/011 then another tests that
+uses $SCRATCH_DEV, and the second test ran fine too. Can you please
+provide more details?
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- cmds-check.c | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+Anyway, I think we should fix btrfs/011 to either not use $SCRATCH_DEV
+in replace operations (AFAIK, other btrfs replace tests do this) or
+umount all devices before exit. And I noticed btrfs/011 does umount
+$SCRATCH_MNT at the end of workout(), so usually all should be fine
+(perhaps it would leave a device mounted if interrupted in the middle of
+test run, because _cleanup() doesn't do umount).
 
-diff --git a/cmds-check.c b/cmds-check.c
-index 7fc30da83ea1..6083ac0dd032 100644
---- a/cmds-check.c
-+++ b/cmds-check.c
-@@ -15000,7 +15000,10 @@ int cmd_check(int argc, char **argv)
- 			error("errors found in free space tree");
- 		else
- 			error("errors found in free space cache");
--		goto out;
-+		/*
-+		 * Space cache problem is not fatal, and normally indicates more
-+		 * serious problem, so continue check to expose the cause.
-+		 */
- 	}
- 
- 	/*
--- 
-2.15.1
-
+Thanks,
+Eryu
