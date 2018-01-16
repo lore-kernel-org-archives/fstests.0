@@ -1,11 +1,11 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:64244 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:6704 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750802AbeAPHa6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Jan 2018 02:30:58 -0500
+        with ESMTP id S1750716AbeAPHa5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Jan 2018 02:30:57 -0500
 From: xiao yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v4 3/3] xfs: Regression test for invalid sb_logsunit
-Date: Tue, 16 Jan 2018 15:26:57 +0800
-Message-ID: <1516087617-2077-3-git-send-email-yangx.jy@cn.fujitsu.com>
+Subject: [PATCH v4 2/3] common/filter: factor out expected XFS warnings for mount
+Date: Tue, 16 Jan 2018 15:26:56 +0800
+Message-ID: <1516087617-2077-2-git-send-email-yangx.jy@cn.fujitsu.com>
 In-Reply-To: <1516087617-2077-1-git-send-email-yangx.jy@cn.fujitsu.com>
 References: <20180116040254.GE3102@eguan.usersys.redhat.com>
  <1516087617-2077-1-git-send-email-yangx.jy@cn.fujitsu.com>
@@ -16,128 +16,80 @@ To: eguan@redhat.com
 Cc: david@fromorbit.com, bfoster@redhat.com, fstests@vger.kernel.org, darrick.wong@oracle.com, xiao yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-If log stripe unit isn't a multiple of the fs blocksize and mounting,
-the invalid sb_logsunit leads to crash as soon as we try to write to
-the log.
+1) Move filter_xfs_dmesg from xfs/098 to common/filter, and rename
+   it as _filter_assert_dmesg.
+
+2) Add _require_no_xfs_debug helper to skip xfs/098 if it is tested
+   on debug build.
 
 Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
 ---
- tests/xfs/439     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/439.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/xfs/439
- create mode 100644 tests/xfs/439.out
+ common/filter |  9 +++++++++
+ tests/xfs/098 | 18 ++++++------------
+ 2 files changed, 15 insertions(+), 12 deletions(-)
 
-diff --git a/tests/xfs/439 b/tests/xfs/439
-new file mode 100755
-index 0000000..5dfed1a
---- /dev/null
-+++ b/tests/xfs/439
-@@ -0,0 +1,86 @@
-+#! /bin/bash
-+# FS QA Test No. 439
-+#
-+# Regression test for commit:
-+# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
-+#
-+# If log stripe unit isn't a multiple of the fs blocksize and mounting,
-+# the invalid sb_logsunit leads to crash as soon as we try to write to
-+# the log.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/common/filter b/common/filter
+index 8e1fdb4..8f90b01 100644
+--- a/common/filter
++++ b/common/filter
+@@ -570,5 +570,14 @@ _filter_aiodio_dmesg()
+ 	    -e "s#$warn9#Intentional warnings in dio_complete#"
+ }
+ 
++# We generate assert WARNINGs on CONFIG_XFS_WARN build as expected and make
++# sure test doesn't fail because of these warnings. This is a helper for
++# _check_dmesg() to filter out them.
++_filter_assert_dmesg()
 +{
-+	rm -rf $tmp.*
++	local warn="WARNING:.*fs/xfs/xfs_message\.c:.*asswarn.*"
++	sed -e "s#$warn#Intentional warnings in asswarn#"
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
+ # make sure this script returns success
+ /bin/true
+diff --git a/tests/xfs/098 b/tests/xfs/098
+index 9bcd94b..f924b32 100755
+--- a/tests/xfs/098
++++ b/tests/xfs/098
+@@ -47,6 +47,9 @@ _cleanup()
+ _supported_fs xfs
+ _supported_os Linux
+ 
 +# We corrupt XFS on purpose, and debug built XFS would crash due to
 +# assert failure, so skip if we're testing on a debug built XFS
 +_require_no_xfs_debug
-+
-+rm -f "$seqres.full"
-+
-+# Format
-+_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+# Set logsunit to a value which is not a multiple of the fs blocksize
-+blksz=$(_scratch_xfs_get_sb_field blocksize)
-+_scratch_xfs_set_sb_field logsunit $((blksz - 1)) >> $seqres.full 2>&1
-+
-+# Check if logsunit is set correctly
-+lsunit=$(_scratch_xfs_get_sb_field logsunit)
-+[ $lsunit -ne $((blksz - 1)) ] && _notrun "failed to set sb_logsunit"
-+
-+# Mount and writing log may trigger a crash on buggy kernel
-+# The fix applied kernel refuses to mount, so a mount failure is
-+# expected
-+if _scratch_mount >> $seqres.full 2>&1; then
-+	for i in $(seq 1 1000); do
-+		echo > ${SCRATCH_MNT}/$i
-+	done
-+	_scratch_unmount
-+fi
-+
-+# Mount may trigger ASSERT failure and warnings on the fix applied
-+# kernel if logsunit is invalid on CONFIG_XFS_WARN build, so filter them.
+ _require_scratch
+ test -n "${FORCE_FUZZ}" || _require_scratch_xfs_crc
+ _require_attrs
+@@ -56,16 +59,6 @@ test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-n 8 -3"
+ 
+ rm -f $seqres.full
+ 
+-# If we corrupt log on a CONFIG_XFS_WARN build, there will be mount related
+-# WARNINGs in dmesg as expected.  We don't want to simply _disable_dmesg_check
+-# which could miss other potential bugs, so filter out the intentional WARNINGs,
+-# make sure test doesn't fail because of this warning and fails on other WARNINGs.
+-filter_xfs_dmesg()
+-{
+-	local warn="WARNING:.*fs/xfs/xfs_message\.c:.*asswarn.*"
+-	sed -e "s#$warn#Intentional warnings in asswarn#"
+-}
+-
+ TESTDIR="${SCRATCH_MNT}/scratchdir"
+ TESTFILE="${TESTDIR}/testfile"
+ 
+@@ -107,8 +100,9 @@ _scratch_mount 2>/dev/null && _fail "mount should not succeed"
+ echo "+ repair fs"
+ _repair_scratch_fs >> $seqres.full 2>&1
+ 
+-# mount may trigger related WARNINGs, so filter them.
+-_check_dmesg filter_xfs_dmesg
++# We may trigger mounted related WARNINGs if we corrupt log on a
++# CONFIG_XFS_WARN build, so filter them.
 +_check_dmesg _filter_assert_dmesg
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/439.out b/tests/xfs/439.out
-new file mode 100644
-index 0000000..9712295
---- /dev/null
-+++ b/tests/xfs/439.out
-@@ -0,0 +1,2 @@
-+QA output created by 439
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 04a63b7..0b281a8 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -436,3 +436,4 @@
- 436 auto quick clone fsr
- 437 auto quick other
- 438 auto quick quota dangerous
-+439 auto quick dangerous_fuzzers log
+ 
+ echo "+ mount image (2)"
+ _scratch_mount
 -- 
 1.8.3.1
 
