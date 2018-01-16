@@ -1,104 +1,144 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35650 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750750AbeAPOJQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 16 Jan 2018 09:09:16 -0500
-Date: Tue, 16 Jan 2018 09:09:14 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH v2 2/2] xfs: Regression test for invalid sb_logsunit
-Message-ID: <20180116140914.GB52829@bfoster.bfoster>
-References: <1515737783-2061-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <1515737783-2061-2-git-send-email-yangx.jy@cn.fujitsu.com>
- <20180112074921.GP5123@eguan.usersys.redhat.com>
- <20180112083605.GE27323@dastard>
- <20180112085005.GQ5123@eguan.usersys.redhat.com>
- <20180113022353.GH27323@dastard>
- <20180115124523.GB44369@bfoster.bfoster>
- <20180115210352.GY16421@dastard>
- <20180116040254.GE3102@eguan.usersys.redhat.com>
- <20180116085023.GH16421@dastard>
+Received: from mail-yw0-f177.google.com ([209.85.161.177]:44361 "EHLO
+        mail-yw0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750825AbeAPPJ0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Jan 2018 10:09:26 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180116085023.GH16421@dastard>
+In-Reply-To: <20180116110651.GK3102@eguan.usersys.redhat.com>
+References: <1515348445-1403-1-git-send-email-amir73il@gmail.com>
+ <1515348445-1403-7-git-send-email-amir73il@gmail.com> <20180116073831.GH3102@eguan.usersys.redhat.com>
+ <CAOQ4uxhTR70XdKm39r=TA_SktySHM=Y1qH4A0Eex37Own6k7Kw@mail.gmail.com> <20180116110651.GK3102@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 16 Jan 2018 17:09:24 +0200
+Message-ID: <CAOQ4uxhByAJsYiP=TStDd+-g70UrByRLu7_BXK_-GLN_M9PyHw@mail.gmail.com>
+Subject: Re: [PATCH 6/7] overlay: test encode/decode overlay file handles
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <eguan@redhat.com>, xiao yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org, darrick.wong@oracle.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jeff Layton <jlayton@poochiereds.net>, "J . Bruce Fields" <bfields@fieldses.org>, Miklos Szeredi <miklos@szeredi.hu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 16, 2018 at 07:50:23PM +1100, Dave Chinner wrote:
-> On Tue, Jan 16, 2018 at 12:02:54PM +0800, Eryu Guan wrote:
-> > On Tue, Jan 16, 2018 at 08:03:52AM +1100, Dave Chinner wrote:
-> > > On Mon, Jan 15, 2018 at 07:45:23AM -0500, Brian Foster wrote:
-> > > > On Sat, Jan 13, 2018 at 01:23:53PM +1100, Dave Chinner wrote:
-> > > > > That's the whole point of adding debug asserts in cases like this -
-> > > > > they are supposed to stop test execution in it's tracks and leave a
-> > > > > corpse to analyse. The auto group regression tests are not supposed
-> > > > > to take the machine down on normal test configs (i.e.
-> > > > > CONFIG_XFS_DEBUG=y).
-> > > > > 
-> > > > 
-> > > > FWIW, my understanding of the dangerous group has always been that it's
-> > > > for tests that when they trigger a regression, forcibly affect the
-> > > > entire system as such (lockup, hang, crash, etc.). IMO, a test that
-> > 
-> > I had the same understanding of dangerous group. And I recommended the
-> > usage of "-g auto -x dangerous" before[1], and Dave acknowledged this
-> > dangerous group usage[2] :)
-> > 
-> > [1] https://www.spinics.net/lists/linux-btrfs/msg57312.html
-> > [2] https://www.spinics.net/lists/linux-btrfs/msg57330.html
-> 
-> Context is important. The context that the above links were talking
-> about filtering the dangerous group was for older kernels that don't
-> have the fixes for the bugs that crash the kernel.
-> 
-> This particular test fails this auto group criteria in the case of
-> people using CONFIG_XFS_DEBUG=y:
-> 
-> "
->     - it passes on current upstream kernels, if it fails, it's
->       likely to be resolved in forseeable future [2]
-> "
-> 
-> It fails, and isn't likely to ever work, because the assert needs to
-> remain there to catch userspace tool screwups....
-> 
-> > > If we really want to test these "should not ever happen" conditions
-> > > that trigger asserts on debug kernels as "everyone always runs"
-> > > regression testing, then these need to _notrun on CONFIG_XFS_DEBUG=y
-> > > kernels.  fstests already knows that it's running on a debug kernel,
-> > > so adding a _requires_production_kernel check may be the way around
-> > > this being considered a dangerous test.
-> > 
-> > This reminds that we already have a _require_no_xfs_debug rule, as used
-> > in xfs/115, which is known to trigger ASSERT failure on debug build. So
-> > we can do the same in this new test.
-> 
-> Ok, good! And it appears to be addressing the same "intentional
-> corruption triggers failures" case as we are discussing here:
-> 
+On Tue, Jan 16, 2018 at 1:06 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Tue, Jan 16, 2018 at 12:53:38PM +0200, Amir Goldstein wrote:
+>> On Tue, Jan 16, 2018 at 9:38 AM, Eryu Guan <eguan@redhat.com> wrote:
+>> > On Sun, Jan 07, 2018 at 08:07:24PM +0200, Amir Goldstein wrote:
+>> >> - Check encode/write/decode/read content of lower/upper file handles
+>> >> - Check encode/decode/write/read content of lower/upper file handles
+>> >> - Check decode/read of unlinked lower/upper files and directories
+>> >> - Check decode/read of lower file handles after copy up, link and unlink
+>> >> - Check decode/read of lower file handles after rename of parent and self
+>> >
+>> > I'm wondering that if this should be split into multiple tests somehow,
+>> > e.g. tests on regular files, tests on dirs and tests on hardlinks? It
+>> > might be eaiser to review and debug when there're test failures. But I
+>> > have no strong preference on this.
+>> >
+>>
+>> I prefer not splitting the test, this is a classic test with sub-test cases.
+>> I may end up splitting the dir rename tests (open_by_handle -i/-o)
+>> to conform with a similar split that you requested in the generic test.
+>>
+>> >>
+>> >> This test does not cover connectable file handles of non-directories,
+>> >> because name_to_handle_at() syscall does not support requesting
+>> >> connectable file handles.
+>> >>
+>> >> This test covers only encode/decode of file handles for overlayfs
+>> >> configuration of lower and upper on the same fs.
+>> >>
+>> >> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> >> ---
+>> >>  tests/overlay/050     | 291 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>> >>  tests/overlay/050.out |  50 +++++++++
+>> >>  tests/overlay/group   |   1 +
+>> >>  3 files changed, 342 insertions(+)
+>> >>  create mode 100755 tests/overlay/050
+>> >>  create mode 100644 tests/overlay/050.out
+>> >
+>> > I ran the test on your ovl-nfs-export-v2 branch and saw failures like:
+>> >
+>> > --- tests/overlay/050.out       2018-01-16 14:51:11.350000000 +0800
+>> > +++ /root/xfstests/results//xfs_4k_crc/overlay/050.out.bad      2018-01-16 15:08:43.487000000 +0800
+>> > @@ -45,6 +45,9 @@
+>> >  test_file_handles SCRATCH_MNT/lowertestdir/subdir -p -o lower_subdir_file_handles
+>> >  test_file_handles SCRATCH_MNT -rp -i upper_file_handles
+>> >  test_file_handles SCRATCH_MNT -rp -i lower_file_handles
+>> > +open_by_handle() returned 116 incorrectly on a linked dir!
+>> >  test_file_handles SCRATCH_MNT -rp -i upper_subdir_file_handles
+>> >  test_file_handles SCRATCH_MNT -rp -i lower_subdir_file_handles
+>> > +open_by_handle() returned 116 incorrectly on a linked dir!
+>> >  test_file_handles SCRATCH_MNT/lowertestdir.new -rp -i lower_subdir_file_handles
+>> > +open_by_handle() returned 116 incorrectly on a linked dir!
+>> >
+>> > Are these failures expected?
+>> >
+>>
+>> No. not expected. I wonder which base fs did you test with?
+>> Did you have OVERLAY_FS_VERIFY=y in config or verify=on in MOUNT_OPTIONS?
+>> (Not that I know any of the above should matter)
+>
+> I didn't have OVERLAY_FS_VERIFY set in .config, but I did mount with "-o
+> verify=on", and underlying fs is xfs. Here is the screenshot:
+>
+> [root@bootp-73-5-205 xfstests]# OVERLAY_MOUNT_OPTIONS="-o verify=on" ./check -s xfs_4k_crc -overlay overlay/050
+> SECTION       -- xfs_4k_crc
+> RECREATING    -- overlay on /mnt/testarea/test
+> FSTYP         -- overlay
+> PLATFORM      -- Linux/x86_64 bootp-73-5-205 4.15.0-rc2.ovl+
+> MKFS_OPTIONS  -- -f -b size=4k -m crc=1 /mnt/testarea/scratch
+> MOUNT_OPTIONS -- -o verify=on /mnt/testarea/scratch /mnt/testarea/scratch/ovl-mnt
+>
+> overlay/050      - output mismatch (see /root/xfstests/results//xfs_4k_crc/overlay/050.out.bad)
+>     --- tests/overlay/050.out   2018-01-16 14:51:11.350000000 +0800
+>     +++ /root/xfstests/results//xfs_4k_crc/overlay/050.out.bad  2018-01-16 19:01:54.984000000 +0800
+>     @@ -45,6 +45,9 @@
+>      test_file_handles SCRATCH_MNT/lowertestdir/subdir -p -o lower_subdir_file_handles
+>      test_file_handles SCRATCH_MNT -rp -i upper_file_handles
+>      test_file_handles SCRATCH_MNT -rp -i lower_file_handles
+>     +open_by_handle() returned 116 incorrectly on a linked dir!
+>      test_file_handles SCRATCH_MNT -rp -i upper_subdir_file_handles
+>      test_file_handles SCRATCH_MNT -rp -i lower_subdir_file_handles
+>     +open_by_handle() returned 116 incorrectly on a linked dir!
+>     ...
+>     (Run 'diff -u tests/overlay/050.out /root/xfstests/results//xfs_4k_crc/overlay/050.out.bad'  to see the entire diff)
+> Ran: overlay/050
+> Failures: overlay/050
+> Failed 1 of 1 tests
+>
+> And I just tried with ext4 as underlying fs and got the same result.
+>
+>>
+>> Do you see any overlayfs warnings in dmesg?
+>
+> No, there's no warnings nor other useful information in dmesg, just
+> mount/umount xfs and drop caches messages.
+>
 
-My only suggestion (re: my previous comment) is to consider using a new
-check that looks at bug_on_assert when the knob is available for tests
-that are expected to generate asserts as such. The test stil has to
-filter the assert itself to cover the WARN=1 case, right?
+What happened here is quite nice.
+You do not have redirect_dir enabled by default and the test didn't
+enable it as well.
 
-> # we corrupt XFS on purpose, and debug built XFS would crash due to assert
-> # failure, so skip if we're testing on a debug built XFS
-> _require_no_xfs_debug
-> 
+Then this line in the test:
+# Copy up lower dir, index and rename
+mv $SCRATCH_MNT/lowertestdir $SCRATCH_MNT/lowertestdir.new/
 
-Only with CONFIG_XFS_ASSERT_FATAL=y! :)
+...doesn't fail, because mv gets -EXDEV and falls back to "recursive move":
+- Create new dir
+- Move files from old dir to new dir
+- Remove old file
 
-Brian
+When test later tries to decode the file handle encoded from old dir,
+old dir has been removed, so the 116 (ESTALE) error is correct for
+what happened here.
 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This error was detected thanks to the patch using the -i/-o options
+from "open_by_handle: store and load file handles from file"
+The earlier version of this directory rename test (like upstream generic/467)
+would not have detected this error because dir file handle was encoded
+after the mv command.
+
+The take aways are:
+1. Split the dir rename test cases to a separate test
+2. Require and enable redirect_dir feature in the dir rename test
+
+Thanks,
+Amir.
