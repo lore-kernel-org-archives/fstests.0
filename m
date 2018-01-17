@@ -1,54 +1,65 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:53044 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750796AbeAPVSC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Jan 2018 16:18:02 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH] Fstests: btrfs/027 unmount scratch device if test fails
-Date: Tue, 16 Jan 2018 13:10:18 -0700
-Message-Id: <20180116201018.2008-2-bo.li.liu@oracle.com>
+Received: from mga11.intel.com ([192.55.52.93]:51129 "EHLO mga11.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752791AbeAQXX5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jan 2018 18:23:57 -0500
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH 1/2] shared/272: don't use data journaling with DAX
+Date: Wed, 17 Jan 2018 16:23:50 -0700
+Message-Id: <20180117232351.19286-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, dave.jiang@intel.com
 List-ID: <fstests@vger.kernel.org>
 
-This test, btrfs/027, runs tests against different raid profiles
-in a loop, if one of them aborts, it also fails the following ones
-with errors like,
+shared/272 fails with kernels v4.15-rc1 and beyond when you are mounted
+with DAX:
 
-Test -m raid10 -d raid10
-ERROR: /dev/xxx is mounted
-Test -m raid5 -d raid5
-ERROR: /dev/xxx is mounted
-Test -m raid6 -d raid6
-ERROR: /dev/xxx is mounted
+shared/272	 [failed, exit status 1] - output mismatch (see
+/root/project/xfstests/results//shared/272.out.bad)
+    --- tests/shared/272.out	2015-12-05 13:12:17.038257578 -0700
+    +++ /root/project/xfstests/results//shared/272.out.bad	2018-01-17
+    15:37:18.581631116 -0700
+    @@ -1,3 +1,3 @@
+     QA output created by 272
+     Switch data journalling mode. Silence is golden.
+    -Check filesystem
+    +/usr/bin/chattr: Device or resource busy while setting flags on
+    /mnt/xfstests_scratch/file.1
+    ...
+    (Run 'diff -u tests/shared/272.out
+    /root/project/xfstests/results//shared/272.out.bad'  to see the entire
+    diff)
 
-_scratch_unmount is added to avoid the above.
+This is expected.  The following kernel commit:
 
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+commit e9072d859df3 ("ext4: prevent data corruption with journaling + DAX")
+
+makes "chattr +j", which is attempting to turn on data journaling, return
+-EBUSY if the ext4 DAX mount option is in use.  This was done to prevent
+the data corruption shown in xfstest ext4/030, added by this xfstests
+commit:
+
+commit 750a24e99e48 ("ext4: test for DAX + journaling corruption")
+
+So, just skip shared/272 if the DAX mount option is in use.
+
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 ---
- tests/btrfs/027 | 2 ++
- 1 file changed, 2 insertions(+)
+ tests/shared/272 | 1 +
+ 1 file changed, 1 insertion(+)
 
-diff --git a/tests/btrfs/027 b/tests/btrfs/027
-index 625a27f..689cd4c 100755
---- a/tests/btrfs/027
-+++ b/tests/btrfs/027
-@@ -95,6 +95,7 @@ run_test()
- 		$SCRATCH_MNT >>$seqres.full 2>&1
- 	if [ $? -ne 0 ]; then
- 		echo "btrfs replace failed"
-+		_scratch_unmount
- 		_spare_dev_put
- 		_scratch_dev_pool_put
- 		return
-@@ -102,6 +103,7 @@ run_test()
- 	$BTRFS_UTIL_PROG scrub start -B $SCRATCH_MNT >>$seqres.full 2>&1
- 	if [ $? -ne 0 ]; then
- 		echo "btrfs scrub failed"
-+		_scratch_unmount
- 		_spare_dev_put
- 		_scratch_dev_pool_put
- 		return
+diff --git a/tests/shared/272 b/tests/shared/272
+index 7023b657..0c9763df 100755
+--- a/tests/shared/272
++++ b/tests/shared/272
+@@ -83,6 +83,7 @@ chattr_opt: $chattr_opt" >>$seqres.full
+ _supported_fs ext3 ext4
+ _supported_os Linux
+ _require_scratch
++_exclude_scratch_mount_option dax
+ 
+ rm -f $seqres.full
+ _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
 -- 
-2.5.0
+2.14.3
 
