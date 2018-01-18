@@ -1,63 +1,67 @@
-Received: from mail-pf0-f179.google.com ([209.85.192.179]:35044 "EHLO
-        mail-pf0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752368AbeARSHb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 13:07:31 -0500
-Received: by mail-pf0-f179.google.com with SMTP id t12so15244051pfg.2
-        for <fstests@vger.kernel.org>; Thu, 18 Jan 2018 10:07:30 -0800 (PST)
-Date: Thu, 18 Jan 2018 10:07:28 -0800
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
-Message-ID: <20180118180728.GD10877@vader>
-References: <20180118010936.GA10649@vader>
- <20180118012831.GF6948@thunk.org>
- <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
+Received: from userp2130.oracle.com ([156.151.31.86]:34680 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932218AbeARSTh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 13:19:37 -0500
+Date: Thu, 18 Jan 2018 10:19:27 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v5 1/3] common/xfs: Check if write supports [-c|-d]
+ option in xfs_db
+Message-ID: <20180118181927.GH5606@magnolia>
+References: <20180118084645.GT3102@eguan.usersys.redhat.com>
+ <1516272595-3678-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
+In-Reply-To: <1516272595-3678-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: xiao yang <yangx.jy@cn.fujitsu.com>
+Cc: eguan@redhat.com, david@fromorbit.com, bfoster@redhat.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 18, 2018 at 01:21:25PM +0100, Jan Kara wrote:
-> On Wed 17-01-18 20:28:31, Theodore Ts'o wrote:
-> > On Wed, Jan 17, 2018 at 05:09:36PM -0800, Omar Sandoval wrote:
-> > > Hello,
-> > > 
-> > > If I run xfstests on ext4 with a kernel with CONFIG_QFMT_V2=n, the following
-> > > tests fail:
-> > > 
-> > > generic/082
-> > > generic/219
-> > > generic/230
-> > > generic/231
-> > > generic/232
-> > > generic/233
-> > > generic/234
-> > > generic/235
-> > > generic/244
-> > > generic/270
-> > > generic/382
-> > > 
-> > > Would it be possible to handle this case and skip the test instead?
-> > 
-> > I'd like to ask a different question, which is there a reason to
-> > support CONFIG_QFMT_V1 && !CONFIG_QFMT_V2?  Maybe we should just
-> > always enable CONFIG_QFMT_V2, and simplify the test matrix?
+On Thu, Jan 18, 2018 at 06:49:53PM +0800, xiao yang wrote:
+> Make sure _scratch_xfs_set_metadata_field() can be used on an
+> old xfsprogs-dev(e.g. v3.1.1).
 > 
-> Well, with ancient setups you could be using V1 quota format and then you
-> don't need CONFIG_QFMT_V2. So I don't see a great reason to force enabling
-> of CONFIG_QFMT_V2...
+> The "-d" option was introduced since xfsprogs-dev v4.7.0 by commit
+> 86769b3 ("xfs_db: allow recalculating CRCs on invalid metadata").
 > 
-> Omar's problem is actually that he had no quota format enabled so tools
-> failed miserably to enable quotas although xfstests thought quota should be
-> available. That could be viewed as a bug in _require_quota() macro in xfstests
-> but OTOH userspace has no way of knowing which quota formats are available
-> - it can only try to enable quota on a particular fs and that either fails
-> or not. So implementing proper _require_quota() macro would mean you have
-> to do full quota setup for some filesystem, try to enable quotas, and see if
-> that fails. Doable but frankly I'm not hugely interested in that for such a
-> cornercase...
+> The special argument "--" is only used to end option-scanning
+> in getopt().  getopt() was introduced since xfsprogs-dev v3.2.3 by
+> commit c9f5e3d ("xfs_db: Allow writes of corrupted data")'.
+> 
+> Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
 
-Yeah, I'll just disable these tests. Thanks, Jan and Ted.
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+> ---
+>  common/xfs | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 45b84a0..ab58364 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -658,8 +658,11 @@ _scratch_xfs_set_metadata_field()
+>  	for arg in "$@"; do
+>  		cmds+=("-c" "${arg}")
+>  	done
+> -	_scratch_xfs_db -x "${cmds[@]}" -c "write -d ${key} -- ${value}"
+> -	echo
+> +
+> +	local wr_cmd="write"
+> +	_scratch_xfs_db -x -c "help write" | egrep -q "(-c|-d)" && value="-- ${value}"
+> +	_scratch_xfs_db -x -c "help write" | egrep -q "(-d)" && wr_cmd="${wr_cmd} -d"
+> +	_scratch_xfs_db -x "${cmds[@]}" -c "${wr_cmd} ${key} ${value}"
+>  }
+>  
+>  _scratch_xfs_get_sb_field()
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
