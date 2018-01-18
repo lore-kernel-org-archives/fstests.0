@@ -1,163 +1,46 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:4662 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753501AbeARDxe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Jan 2018 22:53:34 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstest PATCH v4 1/7] overlay: add filesystem check helper
-Date: Thu, 18 Jan 2018 12:00:27 +0800
-Message-ID: <20180118040033.19555-2-yi.zhang@huawei.com>
-In-Reply-To: <20180118040033.19555-1-yi.zhang@huawei.com>
-References: <20180118040033.19555-1-yi.zhang@huawei.com>
+Received: from imap.thunk.org ([74.207.234.97]:59568 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753531AbeAREIY (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jan 2018 23:08:24 -0500
+Date: Wed, 17 Jan 2018 23:08:19 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
+Message-ID: <20180118040819.GI6948@thunk.org>
+References: <20180118010936.GA10649@vader>
+ <20180118012831.GF6948@thunk.org>
+ <20180118021610.GA10877@vader>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180118021610.GA10877@vader>
 Sender: fstests-owner@vger.kernel.org
-To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Add filesystem check helpers for the upcoming fsck.overlay utility,
-and hook them to _check_test_fs and _check_scratch_fs. This helper
-works only if fsck.overlay exists.
+On Wed, Jan 17, 2018 at 06:16:10PM -0800, Omar Sandoval wrote:
+> > I'd like to ask a different question, which is there a reason to
+> > support CONFIG_QFMT_V1 && !CONFIG_QFMT_V2?  Maybe we should just
+> > always enable CONFIG_QFMT_V2, and simplify the test matrix?
+> 
+> FWIW,
+> 
+> # CONFIG_QFMT_V1 is not set
+> # CONFIG_QFMT_V2 is not set
+> 
+> on this kernel.
 
-[ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
+Huh.... I don't think that's a valid kernel configuration at all.  Or
+rather, it's allowed by Kconfig, but it shouldn't be, since without
+any quota formats enabled, the quota code is completely useless, and
+you might as well not compile it in, as near as I can tell.
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
----
- common/config  |  1 +
- common/overlay | 88 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- common/rc      |  4 +--
- 3 files changed, 91 insertions(+), 2 deletions(-)
+Was this configuration one that you were deliberately using; and if
+so, what for?   Or was it one that was created accidentally?
 
-diff --git a/common/config b/common/config
-index d0fbfe5..0505b71 100644
---- a/common/config
-+++ b/common/config
-@@ -236,6 +236,7 @@ case "$HOSTOS" in
-         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
- 	export E2FSCK_PROG="`set_prog_path e2fsck`"
- 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
-+	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
-         ;;
- esac
- 
-diff --git a/common/overlay b/common/overlay
-index 1da4ab1..8c9528f 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -151,3 +151,91 @@ _require_scratch_overlay_feature()
- 	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
- 	_scratch_unmount
- }
-+
-+# Require the same scratch device as _require_scratch, but do not check
-+# the constants OVL_LOWER/OVL_UPPER/OVL_WORK dirs, should use together
-+# with optionally lower/upper/work dirs and check explicitly after test.
-+_require_overlay_scratch_dirs()
-+{
-+	_require_scratch_nocheck
-+}
-+
-+_overlay_fsck_dirs()
-+{
-+	local lowerdir=$1
-+	local upperdir=$2
-+	local workdir=$3
-+	local options=$4
-+
-+	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
-+
-+	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
-+			   -o workdir=$workdir $options
-+}
-+
-+_overlay_check_dirs()
-+{
-+	local lowerdir=$1
-+	local upperdir=$2
-+	local workdir=$3
-+	local err=0
-+
-+	_overlay_fsck_dirs $* $FSCK_OPTIONS >>$tmp.fsck 2>&1
-+	if [ $? -ne 0 ]; then
-+		_log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
-+		echo "*** fsck.overlay output ***"	>>$seqres.full
-+		cat $tmp.fsck				>>$seqres.full
-+		echo "*** end fsck.overlay output"	>>$seqres.full
-+
-+		echo "*** mount output ***"		>>$seqres.full
-+		_mount					>>$seqres.full
-+		echo "*** end mount output"		>>$seqres.full
-+		err=1
-+	fi
-+	rm -f $tmp.fsck
-+
-+	if [ $err != 0 ]; then
-+		status=1
-+		if [ "$iam" != "check" ]; then
-+			exit 1
-+		fi
-+		return 1
-+	fi
-+
-+	return 0
-+}
-+
-+_overlay_check_fs()
-+{
-+	local base_dev=$3
-+	local base_mnt=$4
-+
-+	[ "$FSTYP" = overlay ] || return 0
-+
-+	# Base fs needs to be mounted to check overlay dirs
-+	local mounted=""
-+	[ -z "$base_dev" ] || mounted=`_is_mounted $base_dev`
-+	[ -n "$mounted" ] || _overlay_base_mount $*
-+
-+	# No need to umount overlay for dir checks with default -n option
-+	_overlay_check_dirs $base_mnt/$OVL_LOWER $base_mnt/$OVL_UPPER \
-+			    $base_mnt/$OVL_WORK
-+	local ret=$?
-+
-+	[ -n "$mounted" ] || _overlay_base_unmount "$base_dev" "$base_mnt"
-+	return $ret
-+}
-+
-+_check_overlay_test_fs()
-+{
-+	_overlay_check_fs OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
-+		"$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
-+		$TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
-+}
-+
-+_check_overlay_scratch_fs()
-+{
-+	_overlay_check_fs OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
-+		"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
-+		$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
-+}
-diff --git a/common/rc b/common/rc
-index 9216efd..a49f736 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2537,7 +2537,7 @@ _check_test_fs()
- 	# no way to check consistency for GlusterFS
- 	;;
-     overlay)
--	# no way to check consistency for overlay
-+	_check_overlay_test_fs
- 	;;
-     pvfs2)
- 	;;
-@@ -2592,7 +2592,7 @@ _check_scratch_fs()
- 	# no way to check consistency for GlusterFS
- 	;;
-     overlay)
--	# no way to check consistency for overlay
-+	_check_overlay_scratch_fs
- 	;;
-     pvfs2)
- 	;;
--- 
-2.9.5
+In any case, ext4's quota feature has to have the V2 quota format
+enabled, or it's not going to work properly.  We should remove
+EXT4_FEATURE_RO_COMPAT_QUOTA from the list of supported features if
+CONFIG_QUOTA or CONFIG_QFMT_V2 are not set.
 
+					- Ted
