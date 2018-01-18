@@ -1,57 +1,35 @@
-Received: from mga11.intel.com ([192.55.52.93]:51129 "EHLO mga11.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753265AbeAQXX5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Jan 2018 18:23:57 -0500
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: [fstests PATCH 2/2] generic/347: dm-thin lacks DAX support
-Date: Wed, 17 Jan 2018 16:23:51 -0700
-Message-Id: <20180117232351.19286-2-ross.zwisler@linux.intel.com>
-In-Reply-To: <20180117232351.19286-1-ross.zwisler@linux.intel.com>
-References: <20180117232351.19286-1-ross.zwisler@linux.intel.com>
+Received: from mail-pf0-f174.google.com ([209.85.192.174]:34188 "EHLO
+        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752912AbeARBJj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 17 Jan 2018 20:09:39 -0500
+Received: by mail-pf0-f174.google.com with SMTP id e76so12907084pfk.1
+        for <fstests@vger.kernel.org>; Wed, 17 Jan 2018 17:09:39 -0800 (PST)
+Date: Wed, 17 Jan 2018 17:09:36 -0800
+From: Omar Sandoval <osandov@osandov.com>
+Subject: ext4 quota tests fail with CONFIG_QFMT_V2=n
+Message-ID: <20180118010936.GA10649@vader>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, dave.jiang@intel.com
+To: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-generic/347 currently fails when run in cojunction with the DAX mount
-option:
+Hello,
 
-generic/347 72s ... - output mismatch (see
-/root/project/xfstests/results//generic/347.out.bad)
-    --- tests/generic/347.out	2016-05-12 11:56:32.086618744 -0600
-    +++ /root/project/xfstests/results//generic/347.out.bad	2018-01-17
-    16:04:33.459348448 -0700
-    @@ -1,2 +1,3 @@
-     QA output created by 347
-    +mount: /mnt/xfstests_scratch: can't read superblock on
-    /dev/mapper/thin-vol.
-     === completed
-    ...
-    (Run 'diff -u tests/generic/347.out
-    /root/project/xfstests/results//generic/347.out.bad'  to see the entire
-    diff)
+If I run xfstests on ext4 with a kernel with CONFIG_QFMT_V2=n, the following
+tests fail:
 
-This is expected because the dm-thin target currently lacks DAX support.
+generic/082
+generic/219
+generic/230
+generic/231
+generic/232
+generic/233
+generic/234
+generic/235
+generic/244
+generic/270
+generic/382
 
-Just skip this test if we are using DAX.
-
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
----
- tests/generic/347 | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/tests/generic/347 b/tests/generic/347
-index 3adc6744..0c2dec98 100755
---- a/tests/generic/347
-+++ b/tests/generic/347
-@@ -72,6 +72,7 @@ _supported_fs generic
- _supported_os Linux
- _require_scratch_nocheck
- _require_dm_target thin-pool
-+_exclude_scratch_mount_option dax
- 
- _setup_thin
- _workout
--- 
-2.14.3
-
+Would it be possible to handle this case and skip the test instead?
