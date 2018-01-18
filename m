@@ -1,147 +1,54 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:64794 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753332AbeARK6m (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 05:58:42 -0500
-From: xiao yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v5 3/3] xfs: Regression test for invalid sb_logsunit
-Date: Thu, 18 Jan 2018 18:49:55 +0800
-Message-ID: <1516272595-3678-3-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <1516272595-3678-1-git-send-email-yangx.jy@cn.fujitsu.com>
-References: <20180118084645.GT3102@eguan.usersys.redhat.com>
- <1516272595-3678-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx2.suse.de ([195.135.220.15]:39532 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754656AbeARMIm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Jan 2018 07:08:42 -0500
+Date: Thu, 18 Jan 2018 13:08:41 +0100
+From: Jan Kara <jack@suse.cz>
+Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
+Message-ID: <20180118120841.fv7yevvraybbchr4@quack2.suse.cz>
+References: <20180118010936.GA10649@vader>
+ <20180118012831.GF6948@thunk.org>
+ <20180118021610.GA10877@vader>
+ <20180118040819.GI6948@thunk.org>
+ <20180118081713.GB10877@vader>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180118081713.GB10877@vader>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: david@fromorbit.com, bfoster@redhat.com, fstests@vger.kernel.org, darrick.wong@oracle.com, xiao yang <yangx.jy@cn.fujitsu.com>
+To: Omar Sandoval <osandov@osandov.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-If log stripe unit isn't a multiple of the fs blocksize and mounting,
-the invalid sb_logsunit leads to crash as soon as we try to write to
-the log.
+On Thu 18-01-18 00:17:13, Omar Sandoval wrote:
+> On Wed, Jan 17, 2018 at 11:08:19PM -0500, Theodore Ts'o wrote:
+> > On Wed, Jan 17, 2018 at 06:16:10PM -0800, Omar Sandoval wrote:
+> > > > I'd like to ask a different question, which is there a reason to
+> > > > support CONFIG_QFMT_V1 && !CONFIG_QFMT_V2?  Maybe we should just
+> > > > always enable CONFIG_QFMT_V2, and simplify the test matrix?
+> > > 
+> > > FWIW,
+> > > 
+> > > # CONFIG_QFMT_V1 is not set
+> > > # CONFIG_QFMT_V2 is not set
+> > > 
+> > > on this kernel.
+> > 
+> > Huh.... I don't think that's a valid kernel configuration at all.  Or
+> > rather, it's allowed by Kconfig, but it shouldn't be, since without
+> > any quota formats enabled, the quota code is completely useless, and
+> > you might as well not compile it in, as near as I can tell.
+> > 
+> > Was this configuration one that you were deliberately using; and if
+> > so, what for?   Or was it one that was created accidentally?
+> 
+> It's not intentional. I'm assuming what happened here is we disabled any
+> modules we weren't using, but CONFIG_QUOTA happened to stay on. Is it
+> also the case for XFS that quotas are useless without qfmt-v2?
 
-Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/439     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/439.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 91 insertions(+)
- create mode 100755 tests/xfs/439
- create mode 100644 tests/xfs/439.out
+No, they can be used without CONFIG_QFMT_V2 but also without CONFIG_QUOTA.
 
-diff --git a/tests/xfs/439 b/tests/xfs/439
-new file mode 100755
-index 0000000..02814ee
---- /dev/null
-+++ b/tests/xfs/439
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test No. 439
-+#
-+# Regression test for commit:
-+# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
-+#
-+# If log stripe unit isn't a multiple of the fs blocksize and mounting,
-+# the invalid sb_logsunit leads to crash as soon as we try to write to
-+# the log.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
-+# We corrupt XFS on purpose, and CONFIG_XFS_ASSERT_FATAL built XFS
-+# would crash due to assert failure, so skip if we're testing on a
-+# CONFIG_XFS_ASSERT_FATAL built XFS.
-+_require_no_xfs_bug_on_assert
-+
-+rm -f "$seqres.full"
-+
-+# Format
-+_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+# Set logsunit to a value which is not a multiple of the fs blocksize
-+blksz=$(_scratch_xfs_get_sb_field blocksize)
-+_scratch_xfs_set_sb_field logsunit $((blksz - 1)) >> $seqres.full 2>&1
-+
-+# Check if logsunit is set correctly
-+lsunit=$(_scratch_xfs_get_sb_field logsunit)
-+[ $lsunit -ne $((blksz - 1)) ] && _notrun "failed to set sb_logsunit"
-+
-+# Mount and writing log may trigger a crash on buggy kernel
-+# The fix applied kernel refuses to mount, so a mount failure is
-+# expected
-+if _scratch_mount >> $seqres.full 2>&1; then
-+	for i in $(seq 1 1000); do
-+		echo > ${SCRATCH_MNT}/$i
-+	done
-+	_scratch_unmount
-+fi
-+
-+# We may trigger assert related WARNINGs if we corrupt log on a
-+# CONFIG_XFS_WARN or CONFIG_XFS_DEBUG(without CONFIG_XFS_ASSERT_FATAL)
-+# build, so filter them.
-+_check_dmesg _filter_assert_dmesg
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/439.out b/tests/xfs/439.out
-new file mode 100644
-index 0000000..9712295
---- /dev/null
-+++ b/tests/xfs/439.out
-@@ -0,0 +1,2 @@
-+QA output created by 439
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 04a63b7..0b281a8 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -436,3 +436,4 @@
- 436 auto quick clone fsr
- 437 auto quick other
- 438 auto quick quota dangerous
-+439 auto quick dangerous_fuzzers log
+								Honza
 -- 
-1.8.3.1
-
-
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
