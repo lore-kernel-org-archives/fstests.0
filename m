@@ -1,149 +1,56 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4246 "EHLO huawei.com"
+Received: from szxga04-in.huawei.com ([45.249.212.190]:4655 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754130AbeARDoD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Jan 2018 22:44:03 -0500
+        id S1753279AbeARDxc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jan 2018 22:53:32 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [PATCH v4 3/5] fsck.overlay: add origin count
-Date: Thu, 18 Jan 2018 11:50:54 +0800
-Message-ID: <20180118035056.17358-4-yi.zhang@huawei.com>
-In-Reply-To: <20180118035056.17358-1-yi.zhang@huawei.com>
-References: <20180118035056.17358-1-yi.zhang@huawei.com>
+Subject: [xfstest PATCH v4 6/7] overlay: skip check for tests finished with corrupt filesystem
+Date: Thu, 18 Jan 2018 12:00:32 +0800
+Message-ID: <20180118040033.19555-7-yi.zhang@huawei.com>
+In-Reply-To: <20180118040033.19555-1-yi.zhang@huawei.com>
+References: <20180118040033.19555-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com, yizhang089@gmail.com
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Count origin targets in a directory in scan pass two, will be use
-for impure xattr check.
+No post-test check of the overlay dirs is required if case leaves
+corrupt filesystem after test. We shoud use _require_scratch_nocheck()
+instead of _require_scratch() in these cases.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- check.c | 22 ++++++++++++++++++++++
- lib.c   | 19 +++++++++++++++++++
- lib.h   |  9 ++++++++-
- 3 files changed, 49 insertions(+), 1 deletion(-)
+ tests/overlay/019 | 2 +-
+ tests/overlay/031 | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/check.c b/check.c
-index e5415c9..e46aea7 100644
---- a/check.c
-+++ b/check.c
-@@ -180,6 +180,13 @@ static inline bool ovl_is_redirect(int dirfd, const char *pathname)
- 	return exist;
- }
+diff --git a/tests/overlay/019 b/tests/overlay/019
+index 3e2bc4e..575aaf7 100755
+--- a/tests/overlay/019
++++ b/tests/overlay/019
+@@ -46,7 +46,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs overlay
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
  
-+static inline bool ovl_is_origin(int dirfd, const char *pathname)
-+{
-+	bool exist = false;
-+	get_xattr(dirfd, pathname, OVL_ORIGIN_XATTR, NULL, &exist);
-+	return exist;
-+}
-+
- static inline int ovl_ask_action(const char *description, const char *pathname,
- 				 int dirtype, int stack,
- 				 const char *question, int action)
-@@ -701,6 +708,20 @@ out:
- 	return ret;
- }
+ # Remove all files from previous tests
+ _scratch_mkfs
+diff --git a/tests/overlay/031 b/tests/overlay/031
+index 186b409..90a06af 100755
+--- a/tests/overlay/031
++++ b/tests/overlay/031
+@@ -67,7 +67,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs overlay
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
  
-+static int ovl_count_origin(struct scan_ctx *sctx)
-+{
-+	struct scan_dir_data *parent = sctx->dirdata;
-+
-+	if (!parent)
-+		return 0;
-+
-+	if (ovl_is_origin(sctx->dirfd, sctx->pathname))
-+		parent->origins++;
-+
-+	return 0;
-+}
-+
-+
- /*
-  * Scan Pass:
-  * -Pass one: Iterate through all directories, and check validity
-@@ -723,6 +744,7 @@ static struct scan_operations ovl_scan_ops[OVL_SCAN_PASS][2] = {
- 	{
- 		[OVL_UPPER] = {
- 			.whiteout = ovl_check_whiteout,
-+			.origin = ovl_count_origin,
- 		},
- 		[OVL_LOWER] = {
- 			.whiteout = ovl_check_whiteout,
-diff --git a/lib.c b/lib.c
-index 3d9185c..dff3426 100644
---- a/lib.c
-+++ b/lib.c
-@@ -219,6 +219,11 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
- 		switch (ftsent->fts_info) {
- 		case FTS_F:
- 			sctx->files++;
-+
-+			/* Check origin xattr */
-+			ret = scan_check_entry(sop->origin, sctx);
-+			if (ret)
-+			        goto out;
- 			break;
- 		case FTS_DEFAULT:
- 			/* Check whiteouts */
-@@ -233,6 +238,20 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
- 			ret = scan_check_entry(sop->redirect, sctx);
- 			if (ret)
- 				goto out;
-+
-+			/* Check origin xattr */
-+			ret = scan_check_entry(sop->origin, sctx);
-+			if (ret)
-+				goto out;
-+
-+			/* Save current dir data and create new one for subdir */
-+			ftsent->fts_pointer = sctx->dirdata;
-+			sctx->dirdata = smalloc(sizeof(struct scan_dir_data));
-+			break;
-+		case FTS_DP:
-+			/* Restore parent's dir data */
-+			free(sctx->dirdata);
-+			sctx->dirdata = ftsent->fts_pointer;
- 			break;
- 		case FTS_NS:
- 		case FTS_DNR:
-diff --git a/lib.h b/lib.h
-index 2245752..450a4cb 100644
---- a/lib.h
-+++ b/lib.h
-@@ -54,9 +54,14 @@
- /* Xattr */
- #define OVL_OPAQUE_XATTR	"trusted.overlay.opaque"
- #define OVL_REDIRECT_XATTR	"trusted.overlay.redirect"
-+#define OVL_ORIGIN_XATTR	"trusted.overlay.origin"
- 
- 
--/* Directories scan data struct */
-+/* Directories scan data structs */
-+struct scan_dir_data {
-+       int origins;		/* origin number in this directory (no iterate) */
-+};
-+
- struct scan_ctx {
- 	const char *dirname;	/* overlay base dir */
- 	int dirfd;		/* dir descriptor */
-@@ -73,12 +78,14 @@ struct scan_ctx {
- 	const char *pathname;	/* path relative to overlay root */
- 	const char *filename;	/* filename */
- 	struct stat *st;	/* file stat */
-+	struct scan_dir_data *dirdata;	/* parent dir data of current (could be null) */
- };
- 
- /* Directories scan callback operations struct */
- struct scan_operations {
- 	int (*whiteout)(struct scan_ctx *);
- 	int (*redirect)(struct scan_ctx *);
-+	int (*origin)(struct scan_ctx *);
- };
- 
- static inline void set_inconsistency(int *status)
+ # remove all files from previous runs
+ _scratch_mkfs
 -- 
 2.9.5
 
