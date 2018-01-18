@@ -1,52 +1,117 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:34577 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753195AbeARCQN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 17 Jan 2018 21:16:13 -0500
-Received: by mail-pg0-f66.google.com with SMTP id r19so6934969pgn.1
-        for <fstests@vger.kernel.org>; Wed, 17 Jan 2018 18:16:13 -0800 (PST)
-Date: Wed, 17 Jan 2018 18:16:10 -0800
-From: Omar Sandoval <osandov@osandov.com>
-Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
-Message-ID: <20180118021610.GA10877@vader>
-References: <20180118010936.GA10649@vader>
- <20180118012831.GF6948@thunk.org>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:53732 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754041AbeARDnx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jan 2018 22:43:53 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [PATCH v4 4/5] fsck.overlay: add merge and redirect subdir count
+Date: Thu, 18 Jan 2018 11:50:55 +0800
+Message-ID: <20180118035056.17358-5-yi.zhang@huawei.com>
+In-Reply-To: <20180118035056.17358-1-yi.zhang@huawei.com>
+References: <20180118035056.17358-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180118012831.GF6948@thunk.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Eryu Guan <eguan@redhat.com>
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com, yizhang089@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 17, 2018 at 08:28:31PM -0500, Theodore Ts'o wrote:
-> On Wed, Jan 17, 2018 at 05:09:36PM -0800, Omar Sandoval wrote:
-> > Hello,
-> > 
-> > If I run xfstests on ext4 with a kernel with CONFIG_QFMT_V2=n, the following
-> > tests fail:
-> > 
-> > generic/082
-> > generic/219
-> > generic/230
-> > generic/231
-> > generic/232
-> > generic/233
-> > generic/234
-> > generic/235
-> > generic/244
-> > generic/270
-> > generic/382
-> > 
-> > Would it be possible to handle this case and skip the test instead?
-> 
-> I'd like to ask a different question, which is there a reason to
-> support CONFIG_QFMT_V1 && !CONFIG_QFMT_V2?  Maybe we should just
-> always enable CONFIG_QFMT_V2, and simplify the test matrix?
+Count merge and redirect subdir in a directory in scan pass two,
+will be use for impure xattr check.
 
-FWIW,
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
+ check.c | 33 +++++++++++++++++++++++++++++++++
+ lib.c   |  4 ++++
+ lib.h   |  3 +++
+ 3 files changed, 40 insertions(+)
 
-# CONFIG_QFMT_V1 is not set
-# CONFIG_QFMT_V2 is not set
+diff --git a/check.c b/check.c
+index e46aea7..f0b3ff4 100644
+--- a/check.c
++++ b/check.c
+@@ -721,6 +721,38 @@ static int ovl_count_origin(struct scan_ctx *sctx)
+ 	return 0;
+ }
+ 
++static inline bool ovl_is_merge(int dirfd, const char *pathname,
++                               int dirtype, int stack)
++{
++	struct ovl_lookup_data od = {0};
++
++	if (ovl_is_opaque(dirfd, pathname))
++		return false;
++	if (ovl_lookup_lower(pathname, dirtype, stack, &od))
++		return false;
++	if (od.exist && is_dir(&od.st))
++		return true;
++
++	return false;
++}
++
++/* Count merge dir and redirect dir in a specified directory */
++static int ovl_count_unreal(struct scan_ctx *sctx)
++{
++	struct scan_dir_data *parent = sctx->dirdata;
++
++	if (!parent)
++		return 0;
++
++	if (ovl_is_redirect(sctx->dirfd, sctx->pathname))
++		parent->redirects++;
++	if (!ovl_is_origin(sctx->dirfd, sctx->pathname) &&
++	    ovl_is_merge(sctx->dirfd, sctx->pathname,
++			 sctx->dirtype, sctx->stack))
++		parent->mergedirs++;
++
++	return 0;
++}
+ 
+ /*
+  * Scan Pass:
+@@ -745,6 +777,7 @@ static struct scan_operations ovl_scan_ops[OVL_SCAN_PASS][2] = {
+ 		[OVL_UPPER] = {
+ 			.whiteout = ovl_check_whiteout,
+ 			.origin = ovl_count_origin,
++			.unreal = ovl_count_unreal,
+ 		},
+ 		[OVL_LOWER] = {
+ 			.whiteout = ovl_check_whiteout,
+diff --git a/lib.c b/lib.c
+index dff3426..03bd8eb 100644
+--- a/lib.c
++++ b/lib.c
+@@ -244,6 +244,10 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+ 			if (ret)
+ 				goto out;
+ 
++			ret = scan_check_entry(sop->unreal, sctx);
++			if (ret)
++				goto out;
++
+ 			/* Save current dir data and create new one for subdir */
+ 			ftsent->fts_pointer = sctx->dirdata;
+ 			sctx->dirdata = smalloc(sizeof(struct scan_dir_data));
+diff --git a/lib.h b/lib.h
+index 450a4cb..60e620e 100644
+--- a/lib.h
++++ b/lib.h
+@@ -60,6 +60,8 @@
+ /* Directories scan data structs */
+ struct scan_dir_data {
+        int origins;		/* origin number in this directory (no iterate) */
++       int mergedirs;		/* merge subdir number in this directory (no iterate) */
++       int redirects;		/* redirect subdir number in this directory (no iterate) */
+ };
+ 
+ struct scan_ctx {
+@@ -86,6 +88,7 @@ struct scan_operations {
+ 	int (*whiteout)(struct scan_ctx *);
+ 	int (*redirect)(struct scan_ctx *);
+ 	int (*origin)(struct scan_ctx *);
++	int (*unreal)(struct scan_ctx *);
+ };
+ 
+ static inline void set_inconsistency(int *status)
+-- 
+2.9.5
 
-on this kernel.
