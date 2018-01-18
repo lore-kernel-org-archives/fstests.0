@@ -1,54 +1,42 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:35452 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1756185AbeAROEC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 09:04:02 -0500
-Subject: Re: [PATCH] Fstests: btrfs/011 fix device mounted when tests aborts
-References: <20180116201018.2008-1-bo.li.liu@oracle.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <f925efb9-33af-f4da-f573-51ec02d97676@oracle.com>
-Date: Thu, 18 Jan 2018 22:05:05 +0800
+Received: from imap.thunk.org ([74.207.234.97]:33714 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932670AbeARQDZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Jan 2018 11:03:25 -0500
+Date: Thu, 18 Jan 2018 11:03:21 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
+Message-ID: <20180118160321.GA13944@thunk.org>
+References: <20180118010936.GA10649@vader>
+ <20180118012831.GF6948@thunk.org>
+ <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
 MIME-Version: 1.0
-In-Reply-To: <20180116201018.2008-1-bo.li.liu@oracle.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Liu Bo <bo.li.liu@oracle.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Jan 18, 2018 at 01:21:25PM +0100, Jan Kara wrote:
+> Omar's problem is actually that he had no quota format enabled so tools
+> failed miserably to enable quotas although xfstests thought quota should be
+> available. That could be viewed as a bug in _require_quota() macro in xfstests
+> but OTOH userspace has no way of knowing which quota formats are available
+> - it can only try to enable quota on a particular fs and that either fails
+> or not. So implementing proper _require_quota() macro would mean you have
+> to do full quota setup for some filesystem, try to enable quotas, and see if
+> that fails. Doable but frankly I'm not hugely interested in that for such a
+> cornercase...
 
+Yes, I'd much rather fix it in Kconfig.  The question I was asing is
+really whether we could start deprecating QFMT_V1 by requiring QFMT_V2
+and making QFMT_V1 the only optional format, and then changing the
+tools to strongly bias the user towards using V2 --- and maybe making
+it be impossible to create new QFMT_V1 format quota files at all at
+some point.
 
-On 01/17/2018 04:10 AM, Liu Bo wrote:
-> One of btrfs tests, btrfs/011, uses SCRATCH_DEV_POOL and puts a
-> non-SCRATCH_DEV device as the first one when doing mkfs, and this makes
-> _require_scratch{_nocheck} confused since it checks mount point with
-> SCRATCH_DEV only.
-> 
-> This adds _scratch_umount to cleanup() to umount SCRATCH_MNT by
-> 011 itself.
-> 
-> Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+It will take a while --- years no doubt --- but a journey of ten
+thousand miles starts with a single step, as the saying goes.
 
-Reviewed-by: Anand Jain <anand.jain@oracle.com>
-Tested-by: Anand Jain <anand.jain@oracle.com>
-
-Thanks, Anand
-
-> ---
->   tests/btrfs/011 | 1 +
->   1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/btrfs/011 b/tests/btrfs/011
-> index 28f1388..f4c5309 100755
-> --- a/tests/btrfs/011
-> +++ b/tests/btrfs/011
-> @@ -51,6 +51,7 @@ _cleanup()
->   	fi
->   	wait
->   	rm -f $tmp.tmp
-> +	_scratch_unmount > /dev/null 2>&1
->   }
->   trap "_cleanup; exit \$status" 0 1 2 3 15
->   
-> 
+					- Ted
