@@ -1,335 +1,107 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:37449 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752306AbeARIV3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 03:21:29 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:34182 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754852AbeARIoT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Jan 2018 03:44:19 -0500
+Date: Thu, 18 Jan 2018 16:44:18 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 2/2] xfs: Regression test for invalid sb_logsunit
+Message-ID: <20180118084418.GS3102@eguan.usersys.redhat.com>
+References: <1515737783-2061-2-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20180112074921.GP5123@eguan.usersys.redhat.com>
+ <20180112083605.GE27323@dastard>
+ <20180112085005.GQ5123@eguan.usersys.redhat.com>
+ <20180113022353.GH27323@dastard>
+ <20180115124523.GB44369@bfoster.bfoster>
+ <20180115210352.GY16421@dastard>
+ <20180116040254.GE3102@eguan.usersys.redhat.com>
+ <20180116085023.GH16421@dastard>
+ <20180116140914.GB52829@bfoster.bfoster>
 MIME-Version: 1.0
-In-Reply-To: <20180118040033.19555-8-yi.zhang@huawei.com>
-References: <20180118040033.19555-1-yi.zhang@huawei.com> <20180118040033.19555-8-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 18 Jan 2018 10:21:27 +0200
-Message-ID: <CAOQ4uxgzwboq9r+JSbHro0e63ABnnN2=QJYHecQAV5V2mbn11w@mail.gmail.com>
-Subject: Re: [xfstest PATCH v4 7/7] overlay: replace _require_scratch() in
- optionally dirs cases
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180116140914.GB52829@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: Brian Foster <bfoster@redhat.com>
+Cc: Dave Chinner <david@fromorbit.com>, xiao yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 18, 2018 at 6:00 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Replace _require_scratch() with _require_overlay_scratch_dirs() in
-> overlay test cases that use optionally lower/upper/work test dirs,
-> and check these dirs explicitly if necessary.
+On Tue, Jan 16, 2018 at 09:09:14AM -0500, Brian Foster wrote:
+> On Tue, Jan 16, 2018 at 07:50:23PM +1100, Dave Chinner wrote:
+> > On Tue, Jan 16, 2018 at 12:02:54PM +0800, Eryu Guan wrote:
+> > > On Tue, Jan 16, 2018 at 08:03:52AM +1100, Dave Chinner wrote:
+> > > > On Mon, Jan 15, 2018 at 07:45:23AM -0500, Brian Foster wrote:
+> > > > > On Sat, Jan 13, 2018 at 01:23:53PM +1100, Dave Chinner wrote:
+> > > > > > That's the whole point of adding debug asserts in cases like this -
+> > > > > > they are supposed to stop test execution in it's tracks and leave a
+> > > > > > corpse to analyse. The auto group regression tests are not supposed
+> > > > > > to take the machine down on normal test configs (i.e.
+> > > > > > CONFIG_XFS_DEBUG=y).
+> > > > > > 
+> > > > > 
+> > > > > FWIW, my understanding of the dangerous group has always been that it's
+> > > > > for tests that when they trigger a regression, forcibly affect the
+> > > > > entire system as such (lockup, hang, crash, etc.). IMO, a test that
+> > > 
+> > > I had the same understanding of dangerous group. And I recommended the
+> > > usage of "-g auto -x dangerous" before[1], and Dave acknowledged this
+> > > dangerous group usage[2] :)
+> > > 
+> > > [1] https://www.spinics.net/lists/linux-btrfs/msg57312.html
+> > > [2] https://www.spinics.net/lists/linux-btrfs/msg57330.html
+> > 
+> > Context is important. The context that the above links were talking
+> > about filtering the dangerous group was for older kernels that don't
+> > have the fixes for the bugs that crash the kernel.
+> > 
+> > This particular test fails this auto group criteria in the case of
+> > people using CONFIG_XFS_DEBUG=y:
+> > 
+> > "
+> >     - it passes on current upstream kernels, if it fails, it's
+> >       likely to be resolved in forseeable future [2]
+> > "
+> > 
+> > It fails, and isn't likely to ever work, because the assert needs to
+> > remain there to catch userspace tool screwups....
+> > 
+> > > > If we really want to test these "should not ever happen" conditions
+> > > > that trigger asserts on debug kernels as "everyone always runs"
+> > > > regression testing, then these need to _notrun on CONFIG_XFS_DEBUG=y
+> > > > kernels.  fstests already knows that it's running on a debug kernel,
+> > > > so adding a _requires_production_kernel check may be the way around
+> > > > this being considered a dangerous test.
+> > > 
+> > > This reminds that we already have a _require_no_xfs_debug rule, as used
+> > > in xfs/115, which is known to trigger ASSERT failure on debug build. So
+> > > we can do the same in this new test.
+> > 
+> > Ok, good! And it appears to be addressing the same "intentional
+> > corruption triggers failures" case as we are discussing here:
+> > 
+> 
+> My only suggestion (re: my previous comment) is to consider using a new
+> check that looks at bug_on_assert when the knob is available for tests
+> that are expected to generate asserts as such. The test stil has to
 
+Looks like we need a new _require_no_xfs_bug_on_assert, which looks at
+/sys/fs/xfs/debug/bug_on_assert value if it's available, and just calls
+_require_no_xfs_debug if it's not available.
 
-The description could be better.
-The rules should be simple:
-Tests that use _overlay_scratch_mount_dirs instead of _scratch_mount
-should use _require_overlay_scratch_dirs instead of _require_scratch.
-Those tests can optionally call _overlay_check_scratch_dirs at the end
-of the test or before _scratch_umount to umount $SCRATCH_MNT and
-run the checker.
+> filter the assert itself to cover the WARN=1 case, right?
 
-This patch should introduce two helpers:
-_require_overlay_scratch_dirs() and _overlay_check_scratch_dirs().
-The latter, unlike the internal helper _overlay_check_dirs() needs to umount
-$SCRATCH_MNT and/or make sure that base fs is mounted, like
-_overlay_check_fs() does. Note that the sanity checks in my patch that
-was the origin of your patch 1/7 did not require that overlay is unmounted.
-I guess fsck.overlay does not strictly requires that overlay is unmounted,
-but only that nobody accesses the mounted overlay, but its not nice to
-run fsck.overlay while overlay is mounted, which to my understanding, this is
-what happens with this patch. Didn't fsck.overlay complain about this?
+I think so (and to cover the bug_on_assert=0 case).
+
+> 
+> > # we corrupt XFS on purpose, and debug built XFS would crash due to assert
+> > # failure, so skip if we're testing on a debug built XFS
+> > _require_no_xfs_debug
+> > 
+> 
+> Only with CONFIG_XFS_ASSERT_FATAL=y! :)
+
+XFS_ASSERT_FATAL and _require_no_xfs_debug were introduced closely in
+time. XFS_ASSERT_FATAL was there first, and it was too new to be noticed
+when we then introduced _require_no_xfs_debug..
 
 Thanks,
-Amir.
-
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  tests/overlay/005 |  6 +++++-
->  tests/overlay/010 |  6 +++++-
->  tests/overlay/014 | 10 +++++++++-
->  tests/overlay/035 |  6 +++++-
->  tests/overlay/036 |  5 ++++-
->  tests/overlay/037 |  6 +++++-
->  tests/overlay/038 | 10 +++++++++-
->  tests/overlay/041 | 10 +++++++++-
->  tests/overlay/043 |  6 +++++-
->  tests/overlay/044 |  6 +++++-
->  10 files changed, 61 insertions(+), 10 deletions(-)
->
-> diff --git a/tests/overlay/005 b/tests/overlay/005
-> index 17992a3..58481d8 100755
-> --- a/tests/overlay/005
-> +++ b/tests/overlay/005
-> @@ -54,7 +54,7 @@ rm -f $seqres.full
->  # Modify as appropriate.
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_loop
->
->  # Remove all files from previous tests
-> @@ -102,6 +102,10 @@ $XFS_IO_PROG -f -c "o" ${SCRATCH_MNT}/test_file \
->  # unmount overlayfs
->  $UMOUNT_PROG $SCRATCH_MNT
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after test
-> +_overlay_check_dirs $lowerd $upperd $workd
-> +
->  # unmount undelying xfs, this tiggers panic if memleak happens
->  $UMOUNT_PROG ${OVL_BASE_SCRATCH_MNT}/uppermnt
->  $UMOUNT_PROG ${OVL_BASE_SCRATCH_MNT}/lowermnt
-> diff --git a/tests/overlay/010 b/tests/overlay/010
-> index f55ebec..b4a4ee8 100755
-> --- a/tests/overlay/010
-> +++ b/tests/overlay/010
-> @@ -48,7 +48,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->
->  # Remove all files from previous tests
->  _scratch_mkfs
-> @@ -70,6 +70,10 @@ mknod $lowerdir2/testdir/a c 0 0
->  _overlay_scratch_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
->  rm -rf $SCRATCH_MNT/testdir
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after test
-> +_overlay_check_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
-> +
->  # success, all done
->  echo "Silence is golden"
->  status=0
-> diff --git a/tests/overlay/014 b/tests/overlay/014
-> index 9f308d3..cc97c96 100755
-> --- a/tests/overlay/014
-> +++ b/tests/overlay/014
-> @@ -53,7 +53,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->
->  # Remove all files from previous tests
->  _scratch_mkfs
-> @@ -78,6 +78,10 @@ mkdir -p $SCRATCH_MNT/testdir/visibledir
->  # unmount overlayfs but not base fs
->  $UMOUNT_PROG $SCRATCH_MNT
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after each test
-> +_overlay_check_dirs $lowerdir1 $lowerdir2 $workdir2
-> +
->  # mount overlay again, with lowerdir1 and lowerdir2 as multiple lowerdirs,
->  # and create a new file in testdir, triggers copyup from lowerdir,
->  # copyup should not copy overlayfs private xattr
-> @@ -90,6 +94,10 @@ $UMOUNT_PROG $SCRATCH_MNT
->  _overlay_scratch_mount_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
->  ls $SCRATCH_MNT/testdir
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after each test
-> +_overlay_check_dirs "$lowerdir2:$lowerdir1" $upperdir $workdir
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/overlay/035 b/tests/overlay/035
-> index 0544774..96643ba 100755
-> --- a/tests/overlay/035
-> +++ b/tests/overlay/035
-> @@ -51,7 +51,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_chattr i
->
->  # Remove all files from previous tests
-> @@ -81,6 +81,10 @@ _overlay_scratch_mount_dirs $lowerdir2 $upperdir $workdir
->  touch $SCRATCH_MNT/bar 2>&1 | _filter_scratch
->  _scratch_remount rw 2>&1 | _filter_ro_mount
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after test
-> +_overlay_check_dirs $lowerdir2 $upperdir $workdir
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/overlay/036 b/tests/overlay/036
-> index e0c13ae..ca5adbd 100755
-> --- a/tests/overlay/036
-> +++ b/tests/overlay/036
-> @@ -69,7 +69,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_scratch_feature index
->
->  # Remove all files from previous tests
-> @@ -110,6 +110,9 @@ _overlay_mount_dirs $lowerdir2 $upperdir $workdir2 \
->  _overlay_mount_dirs $lowerdir2 $upperdir2 $workdir \
->             overlay3 $SCRATCH_MNT -oindex=on 2>&1 | _filter_busy_mount
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# but which will not lead to inconsistency after this mount test,
-> +# so do not check optionally dirs after test
->
->  # success, all done
->  status=0
-> diff --git a/tests/overlay/037 b/tests/overlay/037
-> index 6710dda..60290a1 100755
-> --- a/tests/overlay/037
-> +++ b/tests/overlay/037
-> @@ -55,7 +55,7 @@ rm -f $seqres.full
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_scratch_feature index
->
->  # Remove all files from previous tests
-> @@ -87,6 +87,10 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
->  # Mount overlay with original lowerdir, upperdir, workdir and index=on - expect success
->  _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -oindex=on
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# but which will not lead to inconsistency after this mount test,
-> +# so do not check optionally dirs after test
-> +
->  # success, all done
->  status=0
->  exit
-> diff --git a/tests/overlay/038 b/tests/overlay/038
-> index bd87156..6a0b0ba 100755
-> --- a/tests/overlay/038
-> +++ b/tests/overlay/038
-> @@ -46,7 +46,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_attrs
->  _require_test_program "t_dir_type"
->
-> @@ -161,6 +161,10 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  [[ $subdir_d == "subdir d" ]] || \
->         echo "Merged dir: Invalid d_ino reported for subdir"
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check after each test
-> +_check_scratch_fs
-> +
->  _scratch_unmount
->
->  # Verify pure lower residing in dir which has another lower layer
-> @@ -202,6 +206,10 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  [[ $subdir_d == "subdir d" ]] || \
->         echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after each test
-> +_overlay_check_dirs "$middir:$lowerdir" $upperdir $workdir
-> +
->  echo "Silence is golden"
->  status=0
->  exit
-> diff --git a/tests/overlay/041 b/tests/overlay/041
-> index 4152107..2775085 100755
-> --- a/tests/overlay/041
-> +++ b/tests/overlay/041
-> @@ -48,7 +48,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_test
->  _require_attrs
->  _require_test_program "t_dir_type"
-> @@ -167,6 +167,10 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  [[ $subdir_d == "subdir d" ]] || \
->         echo "Merged dir: Invalid d_ino reported for subdir"
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after each test
-> +_overlay_check_dirs $lowerdir $upperdir $workdir
-> +
->  _scratch_unmount
->
->  # Verify pure lower residing in dir which has another lower layer
-> @@ -208,6 +212,10 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  [[ $subdir_d == "subdir d" ]] || \
->         echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after each test
-> +_overlay_check_dirs $middir:$lowerdir $upperdir $workdir
-> +
->  echo "Silence is golden"
->  status=0
->  exit
-> diff --git a/tests/overlay/043 b/tests/overlay/043
-> index 858b6a9..e184e14 100755
-> --- a/tests/overlay/043
-> +++ b/tests/overlay/043
-> @@ -56,7 +56,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_test
->  _require_test_program "af_unix"
->  _require_test_program "t_dir_type"
-> @@ -155,6 +155,10 @@ _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir \
->  # Compare inode numbers before/after mount cycle
->  check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after test
-> +_overlay_check_dirs $lowerdir $upperdir $workdir
-> +
->  echo "Silence is golden"
->  status=0
->  exit
-> diff --git a/tests/overlay/044 b/tests/overlay/044
-> index 9c0ff04..70fe824 100755
-> --- a/tests/overlay/044
-> +++ b/tests/overlay/044
-> @@ -49,7 +49,7 @@ _cleanup()
->  # real QA test starts here
->  _supported_fs overlay
->  _supported_os Linux
-> -_require_scratch
-> +_require_overlay_scratch_dirs
->  _require_test
->  _require_scratch_feature index
->  _require_test_program "t_dir_type"
-> @@ -141,5 +141,9 @@ echo "== After write two =="
->  cat $FILES
->  check_ino_nlink $SCRATCH_MNT $tmp.after_one $tmp.after_two
->
-> +# We called _require_overlay_scratch_dirs instead of _require_scratch,
-> +# do check optionally dirs after test
-> +_overlay_check_dirs $lowerdir $upperdir $workdir
-> +
->  status=0
->  exit
-> --
-> 2.9.5
->
+Eryu
