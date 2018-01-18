@@ -1,71 +1,143 @@
-Received: from mx1.redhat.com ([209.132.183.28]:33642 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752184AbeAREXp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 17 Jan 2018 23:23:45 -0500
-Date: Thu, 18 Jan 2018 12:23:43 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [fstests PATCH 2/2] generic/347: dm-thin lacks DAX support
-Message-ID: <20180118042343.GQ3102@eguan.usersys.redhat.com>
-References: <20180117232351.19286-1-ross.zwisler@linux.intel.com>
- <20180117232351.19286-2-ross.zwisler@linux.intel.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:42942 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750931AbeARHNf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 02:13:35 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180117232351.19286-2-ross.zwisler@linux.intel.com>
+In-Reply-To: <20180118035056.17358-5-yi.zhang@huawei.com>
+References: <20180118035056.17358-1-yi.zhang@huawei.com> <20180118035056.17358-5-yi.zhang@huawei.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 18 Jan 2018 09:13:34 +0200
+Message-ID: <CAOQ4uxjcFGAGC-CRpQ8Stu1daXtHi8vkn701YSPNymVe2qfOUw@mail.gmail.com>
+Subject: Re: [PATCH v4 4/5] fsck.overlay: add merge and redirect subdir count
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-nvdimm@lists.01.org, dave.jiang@intel.com
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com, "zhangyi (F)" <yizhang089@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 17, 2018 at 04:23:51PM -0700, Ross Zwisler wrote:
-> generic/347 currently fails when run in cojunction with the DAX mount
-> option:
-> 
-> generic/347 72s ... - output mismatch (see
-> /root/project/xfstests/results//generic/347.out.bad)
->     --- tests/generic/347.out	2016-05-12 11:56:32.086618744 -0600
->     +++ /root/project/xfstests/results//generic/347.out.bad	2018-01-17
->     16:04:33.459348448 -0700
->     @@ -1,2 +1,3 @@
->      QA output created by 347
->     +mount: /mnt/xfstests_scratch: can't read superblock on
->     /dev/mapper/thin-vol.
->      === completed
->     ...
->     (Run 'diff -u tests/generic/347.out
->     /root/project/xfstests/results//generic/347.out.bad'  to see the entire
->     diff)
-> 
-> This is expected because the dm-thin target currently lacks DAX support.
-> 
-> Just skip this test if we are using DAX.
-> 
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+On Thu, Jan 18, 2018 at 5:50 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> Count merge and redirect subdir in a directory in scan pass two,
+> will be use for impure xattr check.
+>
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 > ---
->  tests/generic/347 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/347 b/tests/generic/347
-> index 3adc6744..0c2dec98 100755
-> --- a/tests/generic/347
-> +++ b/tests/generic/347
-> @@ -72,6 +72,7 @@ _supported_fs generic
->  _supported_os Linux
->  _require_scratch_nocheck
->  _require_dm_target thin-pool
-> +_exclude_scratch_mount_option dax
+>  check.c | 33 +++++++++++++++++++++++++++++++++
+>  lib.c   |  4 ++++
+>  lib.h   |  3 +++
+>  3 files changed, 40 insertions(+)
+>
+> diff --git a/check.c b/check.c
+> index e46aea7..f0b3ff4 100644
+> --- a/check.c
+> +++ b/check.c
+> @@ -721,6 +721,38 @@ static int ovl_count_origin(struct scan_ctx *sctx)
+>         return 0;
+>  }
+>
+> +static inline bool ovl_is_merge(int dirfd, const char *pathname,
+> +                               int dirtype, int stack)
+> +{
+> +       struct ovl_lookup_data od = {0};
+> +
+> +       if (ovl_is_opaque(dirfd, pathname))
+> +               return false;
+> +       if (ovl_lookup_lower(pathname, dirtype, stack, &od))
+> +               return false;
+> +       if (od.exist && is_dir(&od.st))
+> +               return true;
+> +
+> +       return false;
+> +}
+> +
+> +/* Count merge dir and redirect dir in a specified directory */
+> +static int ovl_count_unreal(struct scan_ctx *sctx)
 
-IMHO, it'd be better to put this in common/dmthin file, as what's done
-in common/dmerror or common/dmflakey (we grep for dax directly there,
-that's because they've been added before _exclude_scratch_mount_option
-was introduced), so all thinp tests are excluded from dax tests.
+I am amused by this name :)
+FYI, the legacy term used for a directory that is NOT a merge directory
+is "pure", such as "pure upper" or "pure lower".
 
-Thanks,
-Eryu
+Confusingly, the "impure dir" term is not exactly the opposite
+of the legacy "pure dir" term, but really is a shortcut for
+"dir that contains non pure entries".
+We could have called the xattr "impurities", but we (I) didn't.
 
->  
->  _setup_thin
->  _workout
-> -- 
-> 2.14.3
-> 
+So, basically, merge and redirect dir are "impurities",
+which make the parent dir "impure".
+
+See for example:
+void ovl_dentry_version_inc(struct dentry *dentry, bool impurity)
+
+'impurity' refers to merge/redirect children of parent,
+kind of like this scan function, so I propose either:
+ovl_count_impurities()
+OR
+ovl_count_impure()
+
+I realize that there is overlap in the term with ovl_count_origin(),
+which also counts impurities, but still..
+
+> +{
+> +       struct scan_dir_data *parent = sctx->dirdata;
+> +
+> +       if (!parent)
+> +               return 0;
+> +
+> +       if (ovl_is_redirect(sctx->dirfd, sctx->pathname))
+> +               parent->redirects++;
+> +       if (!ovl_is_origin(sctx->dirfd, sctx->pathname) &&
+> +           ovl_is_merge(sctx->dirfd, sctx->pathname,
+> +                        sctx->dirtype, sctx->stack))
+> +               parent->mergedirs++;
+> +
+> +       return 0;
+> +}
+>
+>  /*
+>   * Scan Pass:
+> @@ -745,6 +777,7 @@ static struct scan_operations ovl_scan_ops[OVL_SCAN_PASS][2] = {
+>                 [OVL_UPPER] = {
+>                         .whiteout = ovl_check_whiteout,
+>                         .origin = ovl_count_origin,
+> +                       .unreal = ovl_count_unreal,
+>                 },
+>                 [OVL_LOWER] = {
+>                         .whiteout = ovl_check_whiteout,
+> diff --git a/lib.c b/lib.c
+> index dff3426..03bd8eb 100644
+> --- a/lib.c
+> +++ b/lib.c
+> @@ -244,6 +244,10 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+>                         if (ret)
+>                                 goto out;
+>
+> +                       ret = scan_check_entry(sop->unreal, sctx);
+> +                       if (ret)
+> +                               goto out;
+> +
+>                         /* Save current dir data and create new one for subdir */
+>                         ftsent->fts_pointer = sctx->dirdata;
+>                         sctx->dirdata = smalloc(sizeof(struct scan_dir_data));
+> diff --git a/lib.h b/lib.h
+> index 450a4cb..60e620e 100644
+> --- a/lib.h
+> +++ b/lib.h
+> @@ -60,6 +60,8 @@
+>  /* Directories scan data structs */
+>  struct scan_dir_data {
+>         int origins;            /* origin number in this directory (no iterate) */
+> +       int mergedirs;          /* merge subdir number in this directory (no iterate) */
+> +       int redirects;          /* redirect subdir number in this directory (no iterate) */
+>  };
+>
+>  struct scan_ctx {
+> @@ -86,6 +88,7 @@ struct scan_operations {
+>         int (*whiteout)(struct scan_ctx *);
+>         int (*redirect)(struct scan_ctx *);
+>         int (*origin)(struct scan_ctx *);
+> +       int (*unreal)(struct scan_ctx *);
+>  };
+>
+>  static inline void set_inconsistency(int *status)
+> --
+> 2.9.5
+>
