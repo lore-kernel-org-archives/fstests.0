@@ -1,56 +1,58 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:38803 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932394AbeARXmh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Jan 2018 18:42:37 -0500
-Date: Fri, 19 Jan 2018 10:42:34 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] Replace obsolete symbols and macros, fix build with musl
- libc.
-Message-ID: <20180118234234.GK16421@dastard>
-References: <1516296058-8224-1-git-send-email-rostislav@tuxera.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:4259 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755220AbeASBaU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Jan 2018 20:30:20 -0500
+Subject: Re: [PATCH v4 4/5] fsck.overlay: add merge and redirect subdir count
+References: <20180118035056.17358-1-yi.zhang@huawei.com>
+ <20180118035056.17358-5-yi.zhang@huawei.com>
+ <CAOQ4uxjcFGAGC-CRpQ8Stu1daXtHi8vkn701YSPNymVe2qfOUw@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <ed9b1dab-2287-d22b-493b-41066ea385a2@huawei.com>
+Date: Fri, 19 Jan 2018 09:29:24 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1516296058-8224-1-git-send-email-rostislav@tuxera.com>
+In-Reply-To: <CAOQ4uxjcFGAGC-CRpQ8Stu1daXtHi8vkn701YSPNymVe2qfOUw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Rostislav Skudnov <rostislav@tuxera.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com, "zhangyi (F)" <yizhang089@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 18, 2018 at 05:20:58PM +0000, Rostislav Skudnov wrote:
-> This commit replaces some obsolete and non-standard data types, headers,
-> macros and symbols with standard and modern ones in order to allow
-> building xfstests with musl C library.
+On 2018/1/18 15:13, Amir Goldstein Wrote:
+> On Thu, Jan 18, 2018 at 5:50 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> +/* Count merge dir and redirect dir in a specified directory */
+>> +static int ovl_count_unreal(struct scan_ctx *sctx)
 > 
-> Replace all __[u]intNN_t types with standard [u]intNN_t. This has been
-> done with the following command:
-> sed -r -i 's/__(u?int[0-9]{2}_t)/\1/g' src/*.c ltp/*.c
+> I am amused by this name :)
+> FYI, the legacy term used for a directory that is NOT a merge directory
+> is "pure", such as "pure upper" or "pure lower".
 > 
-> doio, growfiles: Use standard signal name SIGCHLD instead of SIGCLD.
+> Confusingly, the "impure dir" term is not exactly the opposite
+> of the legacy "pure dir" term, but really is a shortcut for
+> "dir that contains non pure entries".
+> We could have called the xattr "impurities", but we (I) didn't.
 > 
-> fsstress: Include stddef.h for ptrdiff_t.
+> So, basically, merge and redirect dir are "impurities",
+> which make the parent dir "impure".
 > 
-> metaperf: Include linux/param.h for HZ macro.
+> See for example:
+> void ovl_dentry_version_inc(struct dentry *dentry, bool impurity)
 > 
-> dmiperf: Include sys/types.h for u_int32_t.
+> 'impurity' refers to merge/redirect children of parent,
+> kind of like this scan function, so I propose either:
+> ovl_count_impurities()
+> OR
+> ovl_count_impure()
 > 
-> getdevicesize: Include stdint.h for uint64_t.
-> 
-> t_mtab: Replace sys_siglist[] with strsignal().
-> 
-> fssum: Use bswap_64() instead of __bswap_64().
-> 
-> pwrite_mmap_blocked: Include standard header signal.h instead of
-> sys/signal.h.
+Ha, I've thouht it for a long time, but still cannot find a proper word.
+Because I think 'impure' may confuse with the meaning of directory with
+impure xattr. Now, the 'impurities' looks great, thanks! :)
 
-There's about 10 unrelated changes in this one patch. Can
-you split it up into one patch per unrelated change, with these
-one-line descriptions as the patch titles and the reason why the
-change is needed in th body of the commit description?
+> I realize that there is overlap in the term with ovl_count_origin(),
+> which also counts impurities, but still..
 
-Thanks!
+Right, origin target is also a kind of impurities, I will improve this.
 
--Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Yi.
+
