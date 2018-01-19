@@ -1,145 +1,83 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:50661 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751026AbeASFq4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Jan 2018 00:46:56 -0500
-From: xiao yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v6 3/3] xfs: Regression test for invalid sb_logsunit
-Date: Fri, 19 Jan 2018 13:38:06 +0800
-Message-ID: <1516340286-21331-2-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <1516340286-21331-1-git-send-email-yangx.jy@cn.fujitsu.com>
-References: <20180118182915.GI5606@magnolia>
- <1516340286-21331-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:54224 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751548AbeASIHz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 19 Jan 2018 03:07:55 -0500
+Date: Fri, 19 Jan 2018 16:07:53 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v4 2/3] xfs/realtime: Default rtinherit=1, add
+ _require_no_rtinherit function
+Message-ID: <20180119080753.GY3102@eguan.usersys.redhat.com>
+References: <20180112041619.540900-1-rwareing@fb.com>
+ <20180112041619.540900-3-rwareing@fb.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180112041619.540900-3-rwareing@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: darrick.wong@oracle.com, eguan@redhat.com
-Cc: david@fromorbit.com, bfoster@redhat.com, fstests@vger.kernel.org, xiao yang <yangx.jy@cn.fujitsu.com>
+To: Richard Wareing <rwareing@fb.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If log stripe unit isn't a multiple of the fs blocksize and mounting,
-the invalid sb_logsunit leads to crash as soon as we try to write to
-the log.
+On Thu, Jan 11, 2018 at 08:16:18PM -0800, Richard Wareing wrote:
+> To better exercise the data path code of realtime subvolumes, we will
+> set rtinherit=1 during mkfs calls.  For tests which this is not desired
+> we introduce a _require_no_rtinherit function to opt out of this
+> behavior.
+> 
+> Signed-off-by: Richard Wareing <rwareing@fb.com>
 
-Signed-off-by: xiao yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/439     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/439.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 89 insertions(+)
- create mode 100755 tests/xfs/439
- create mode 100644 tests/xfs/439.out
+BTW, generic/256 triggered xfs shutdown with rtdev enabled and
+MKFS_OPTIONS="-d rtinherit".
 
-diff --git a/tests/xfs/439 b/tests/xfs/439
-new file mode 100755
-index 0000000..dbf654a
---- /dev/null
-+++ b/tests/xfs/439
-@@ -0,0 +1,86 @@
-+#! /bin/bash
-+# FS QA Test No. 439
-+#
-+# Regression test for commit:
-+# 9c92ee2 ("xfs: validate sb_logsunit is a multiple of the fs blocksize")
-+#
-+# If log stripe unit isn't a multiple of the fs blocksize and mounting,
-+# the invalid sb_logsunit leads to crash as soon as we try to write to
-+# the log.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
-+# We corrupt XFS on purpose, and check if assert failures would crash system.
-+_require_no_xfs_bug_on_assert
-+
-+rm -f "$seqres.full"
-+
-+# Format
-+_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-+
-+# Set logsunit to a value which is not a multiple of the fs blocksize
-+blksz=$(_scratch_xfs_get_sb_field blocksize)
-+_scratch_xfs_set_sb_field logsunit $((blksz - 1)) >> $seqres.full 2>&1
-+
-+# Check if logsunit is set correctly
-+lsunit=$(_scratch_xfs_get_sb_field logsunit)
-+[ $lsunit -ne $((blksz - 1)) ] && _notrun "failed to set sb_logsunit"
-+
-+# Mount and writing log may trigger a crash on buggy kernel
-+# The fix applied kernel refuses to mount, so a mount failure is
-+# expected
-+if _scratch_mount >> $seqres.full 2>&1; then
-+	for i in $(seq 1 1000); do
-+		echo > ${SCRATCH_MNT}/$i
-+	done
-+	_scratch_unmount
-+fi
-+
-+# We may trigger assert related WARNINGs if we corrupt log on a
-+# CONFIG_XFS_WARN or CONFIG_XFS_DEBUG (CONFIG_XFS_ASSERT_FATAL is 
-+# disabled) build, so filter them.
-+_check_dmesg _filter_assert_dmesg
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/439.out b/tests/xfs/439.out
-new file mode 100644
-index 0000000..9712295
---- /dev/null
-+++ b/tests/xfs/439.out
-@@ -0,0 +1,2 @@
-+QA output created by 439
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 04a63b7..0b281a8 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -436,3 +436,4 @@
- 436 auto quick clone fsr
- 437 auto quick other
- 438 auto quick quota dangerous
-+439 auto quick dangerous_fuzzers log
--- 
-1.8.3.1
+Thanks,
+Eryu
 
-
-
+[59132.903870] XFS (vda6): _xfs_buf_find: Block out of range: block 0xc00000003fff0, EOFS 0x300000
+[59132.904675] WARNING: CPU: 3 PID: 1199 at fs/xfs/xfs_buf.c:590 _xfs_buf_find+0x3e8/0x520 [xfs]
+[59132.905352] Modules linked in: xfs dm_delay dm_thin_pool dm_persistent_data dm_bio_prison sd_mod sg dm_snapshot dm_bufio dm_flakey loop dm_mod ip6t_rpfilter ipt_REJECT nf_reject_ipv4 ip6t_REJECT nf_reject_ipv6 xt_conntrack ip_set nfnetlink ebtable_nat ebtable_broute bridge stp llc ip6table_nat nf_conntrack_ipv6 nf_defrag_ipv6 nf_nat_ipv6 ip6table_mangle ip6table_security ip6table_raw iptable_nat nf_conntrack_ipv4 nf_defrag_ipv4 nf_nat_ipv4 nf_nat nf_conntrack libcrc32c iptable_mangle iptable_security iptable_raw ebtable_filter ebtables ip6table_filter ip6_tables iptable_filter sunrpc btrfs xor zstd_decompress zstd_compress xxhash raid6_pq i2c_piix4 i2c_core virtio_balloon joydev pcspkr ip_tables ext4 mbcache jbd2 ata_generic pata_acpi virtio_net virtio_blk ata_piix libata virtio_pci virtio_ring virtio
+[59132.905607]  serio_raw floppy [last unloaded: scsi_debug]
+[59132.905607] CPU: 3 PID: 1199 Comm: xfs_io Tainted: G        W        4.15.0-rc6 #28
+[59132.905607] Hardware name: Red Hat KVM, BIOS 0.5.1 01/01/2007
+[59132.905607] RIP: 0010:_xfs_buf_find+0x3e8/0x520 [xfs]
+[59132.905607] RSP: 0018:ffff9eb8c1d83718 EFLAGS: 00010246
+[59132.905607] RAX: 0000000000000000 RBX: ffff9eb8c1d83878 RCX: 0000000000000000
+[59132.905607] RDX: ffff9eb8c1d83638 RSI: 000000000000000a RDI: ffffffffc0758ebb
+[59132.905607] RBP: 0000000000000001 R08: 0000000000000000 R09: 0000000000000021
+[59132.905607] R10: 0000000000000000 R11: 000000000000000a R12: ffff93846fb19b40
+[59132.905607] R13: ffff93846fb19b40 R14: 0000000000000001 R15: ffff9eb8c1d83878
+[59132.905607] FS:  00007f8cb01ea740(0000) GS:ffff93849fd80000(0000) knlGS:0000000000000000
+[59132.905607] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+[59132.905607] CR2: 00007f8caf9eefb8 CR3: 0000000215749000 CR4: 00000000000006e0
+[59132.905607] Call Trace:
+[59132.905607]  ? _cond_resched+0x15/0x30
+[59132.905607]  xfs_buf_get_map+0x23/0x260 [xfs]
+[59132.905607]  xfs_buf_read_map+0x29/0x180 [xfs]
+[59132.905607]  xfs_trans_read_buf_map+0xec/0x300 [xfs]
+[59132.905607]  xfs_rtbuf_get+0xf5/0x130 [xfs]
+[59132.905607]  xfs_rtcheck_range+0x10a/0x300 [xfs]
+[59132.905607]  xfs_rtallocate_extent_block+0x137/0x240 [xfs]
+[59132.905607]  xfs_rtallocate_extent_near+0x287/0x390 [xfs]
+[59132.905607]  ? up+0x12/0x46
+[59132.905607]  ? xfs_buf_rele+0x5b/0x390 [xfs]
+[59132.905607]  xfs_rtallocate_extent+0x121/0x1b0 [xfs]
+[59132.905607]  xfs_bmap_rtalloc+0x180/0x2b0 [xfs]
+[59132.905607]  xfs_bmapi_write+0x5dc/0xce0 [xfs]
+[59132.905607]  ? lookup_fast+0xcb/0x2b0
+[59132.905607]  xfs_alloc_file_space+0x15a/0x3a0 [xfs]
+[59132.905607]  ? account_entity_enqueue+0xc5/0xf0
+[59132.905607]  xfs_file_fallocate+0x1e2/0x330 [xfs]
+[59132.905607]  ? check_preempt_curr+0x74/0xa0
+[59132.905607]  ? wake_up_new_task+0x1c4/0x280
+[59132.905607]  vfs_fallocate+0x151/0x270
+[59132.905607]  SyS_fallocate+0x3f/0x60
+[59132.905607]  do_syscall_64+0x61/0x1a0
+[59132.905607]  entry_SYSCALL64_slow_path+0x25/0x25
+[59132.905607] RIP: 0033:0x7f8cafae47e0
+[59132.905607] RSP: 002b:00007ffd3ad5eb50 EFLAGS: 00000293 ORIG_RAX: 000000000000011d
+[59132.905607] RAX: ffffffffffffffda RBX: 000000000000011d RCX: 00007f8cafae47e0
+[59132.905607] RDX: 0000000000000000 RSI: 0000000000000000 RDI: 0000000000000003
+[59132.905607] RBP: 0000000001111130 R08: 0000000000000000 R09: 00000000011123e2
+[59132.905607] R10: 0000000010000000 R11: 0000000000000293 R12: 0000000000000000
+[59132.905607] R13: 00000000011127c0 R14: 0000000000000001 R15: 0000000000000000
+[59132.905607] Code: 48 89 de ff d0 49 8b 45 00 48 85 c0 75 e5 e9 57 ff ff ff 48 89 c1 48 c7 c2 c0 56 75 c0 48 c7 c6 80 c7 75 c0 31 c0 e8 68 89 01 00 <0f> ff 31 c0 e9 74 ff ff ff 39 ca 0f 82 56 fe ff ff 48 8b 4c 24
+[59132.905607] ---[ end trace 2525be156b26eb0c ]---
