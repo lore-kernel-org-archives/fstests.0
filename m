@@ -1,51 +1,60 @@
-Received: from mx2.suse.de ([195.135.220.15]:36741 "EHLO mx2.suse.de"
+Received: from mx2.mpynet.fi ([82.197.21.85]:54517 "EHLO mx2.mpynet.fi"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754799AbeASIqw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 Jan 2018 03:46:52 -0500
-Date: Fri, 19 Jan 2018 09:46:49 +0100
-From: Jan Kara <jack@suse.cz>
-Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
-Message-ID: <20180119084649.hnbh56v4kdkitplu@quack2.suse.cz>
-References: <20180118010936.GA10649@vader>
- <20180118012831.GF6948@thunk.org>
- <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
- <20180118160321.GA13944@thunk.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180118160321.GA13944@thunk.org>
+        id S1753570AbeASOmg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 19 Jan 2018 09:42:36 -0500
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Subject: Re: [PATCH] Replace obsolete symbols and macros, fix build with musl libc.
+From: Rostislav <rostislav@tuxera.com>
+In-Reply-To: <20180118234234.GK16421@dastard>
+Date: Fri, 19 Jan 2018 16:42:34 +0200
+Content-Transfer-Encoding: 7bit
+Message-ID: <B415BC70-4BDB-46EC-B36A-0249C6D5DC3A@tuxera.com>
+References: <1516296058-8224-1-git-send-email-rostislav@tuxera.com> <20180118234234.GK16421@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Jan Kara <jack@suse.cz>, Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu 18-01-18 11:03:21, Theodore Ts'o wrote:
-> On Thu, Jan 18, 2018 at 01:21:25PM +0100, Jan Kara wrote:
-> > Omar's problem is actually that he had no quota format enabled so tools
-> > failed miserably to enable quotas although xfstests thought quota should be
-> > available. That could be viewed as a bug in _require_quota() macro in xfstests
-> > but OTOH userspace has no way of knowing which quota formats are available
-> > - it can only try to enable quota on a particular fs and that either fails
-> > or not. So implementing proper _require_quota() macro would mean you have
-> > to do full quota setup for some filesystem, try to enable quotas, and see if
-> > that fails. Doable but frankly I'm not hugely interested in that for such a
-> > cornercase...
+
+> On Jan 19, 2018, at 1:42 AM, Dave Chinner <david@fromorbit.com> wrote:
 > 
-> Yes, I'd much rather fix it in Kconfig.  The question I was asing is
-> really whether we could start deprecating QFMT_V1 by requiring QFMT_V2
-> and making QFMT_V1 the only optional format, and then changing the
-> tools to strongly bias the user towards using V2 --- and maybe making
-> it be impossible to create new QFMT_V1 format quota files at all at
-> some point.
+> On Thu, Jan 18, 2018 at 05:20:58PM +0000, Rostislav Skudnov wrote:
+>> This commit replaces some obsolete and non-standard data types, headers,
+>> macros and symbols with standard and modern ones in order to allow
+>> building xfstests with musl C library.
+>> 
+>> Replace all __[u]intNN_t types with standard [u]intNN_t. This has been
+>> done with the following command:
+>> sed -r -i 's/__(u?int[0-9]{2}_t)/\1/g' src/*.c ltp/*.c
+>> 
+>> doio, growfiles: Use standard signal name SIGCHLD instead of SIGCLD.
+>> 
+>> fsstress: Include stddef.h for ptrdiff_t.
+>> 
+>> metaperf: Include linux/param.h for HZ macro.
+>> 
+>> dmiperf: Include sys/types.h for u_int32_t.
+>> 
+>> getdevicesize: Include stdint.h for uint64_t.
+>> 
+>> t_mtab: Replace sys_siglist[] with strsignal().
+>> 
+>> fssum: Use bswap_64() instead of __bswap_64().
+>> 
+>> pwrite_mmap_blocked: Include standard header signal.h instead of
+>> sys/signal.h.
+> 
+> There's about 10 unrelated changes in this one patch. Can
+> you split it up into one patch per unrelated change, with these
+> one-line descriptions as the patch titles and the reason why the
+> change is needed in th body of the commit description?
+Thanks for your feedback. I will prepare a new patch series as you suggest.
+> 
+> Thanks!
+> 
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
 
-E.g. OCFS2 has it's own quota format (it selects only CONFIG_QUOTA,
-CONFIG_QUOTA_TREE) so forcing QFMT_V2 would just add unused code. So I'm
-not much in favor of forcing a particular quota format in Kconfig. On
-userspace side V2 format is the default for a long time and I haven't seen
-any setup with V1 quota file for years. So I guess making it harder to
-create new V1 files and slowly deprecating the support is a good idea.
-
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
