@@ -1,60 +1,43 @@
-Received: from mx2.mpynet.fi ([82.197.21.85]:54517 "EHLO mx2.mpynet.fi"
+Received: from imap.thunk.org ([74.207.234.97]:38492 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753570AbeASOmg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 Jan 2018 09:42:36 -0500
-Content-Type: text/plain; charset="us-ascii"
-MIME-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
-Subject: Re: [PATCH] Replace obsolete symbols and macros, fix build with musl libc.
-From: Rostislav <rostislav@tuxera.com>
-In-Reply-To: <20180118234234.GK16421@dastard>
-Date: Fri, 19 Jan 2018 16:42:34 +0200
-Content-Transfer-Encoding: 7bit
-Message-ID: <B415BC70-4BDB-46EC-B36A-0249C6D5DC3A@tuxera.com>
-References: <1516296058-8224-1-git-send-email-rostislav@tuxera.com> <20180118234234.GK16421@dastard>
+        id S1755993AbeASRPF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 19 Jan 2018 12:15:05 -0500
+Date: Fri, 19 Jan 2018 12:14:57 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
+Message-ID: <20180119171457.GA31450@thunk.org>
+References: <20180118010936.GA10649@vader>
+ <20180118012831.GF6948@thunk.org>
+ <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
+ <20180118160321.GA13944@thunk.org>
+ <20180119084649.hnbh56v4kdkitplu@quack2.suse.cz>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180119084649.hnbh56v4kdkitplu@quack2.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Fri, Jan 19, 2018 at 09:46:49AM +0100, Jan Kara wrote:
+> 
+> E.g. OCFS2 has it's own quota format (it selects only CONFIG_QUOTA,
+> CONFIG_QUOTA_TREE) so forcing QFMT_V2 would just add unused code. So I'm
+> not much in favor of forcing a particular quota format in Kconfig. On
+> userspace side V2 format is the default for a long time and I haven't seen
+> any setup with V1 quota file for years. So I guess making it harder to
+> create new V1 files and slowly deprecating the support is a good idea.
 
-> On Jan 19, 2018, at 1:42 AM, Dave Chinner <david@fromorbit.com> wrote:
-> 
-> On Thu, Jan 18, 2018 at 05:20:58PM +0000, Rostislav Skudnov wrote:
->> This commit replaces some obsolete and non-standard data types, headers,
->> macros and symbols with standard and modern ones in order to allow
->> building xfstests with musl C library.
->> 
->> Replace all __[u]intNN_t types with standard [u]intNN_t. This has been
->> done with the following command:
->> sed -r -i 's/__(u?int[0-9]{2}_t)/\1/g' src/*.c ltp/*.c
->> 
->> doio, growfiles: Use standard signal name SIGCHLD instead of SIGCLD.
->> 
->> fsstress: Include stddef.h for ptrdiff_t.
->> 
->> metaperf: Include linux/param.h for HZ macro.
->> 
->> dmiperf: Include sys/types.h for u_int32_t.
->> 
->> getdevicesize: Include stdint.h for uint64_t.
->> 
->> t_mtab: Replace sys_siglist[] with strsignal().
->> 
->> fssum: Use bswap_64() instead of __bswap_64().
->> 
->> pwrite_mmap_blocked: Include standard header signal.h instead of
->> sys/signal.h.
-> 
-> There's about 10 unrelated changes in this one patch. Can
-> you split it up into one patch per unrelated change, with these
-> one-line descriptions as the patch titles and the reason why the
-> change is needed in th body of the commit description?
-Thanks for your feedback. I will prepare a new patch series as you suggest.
-> 
-> Thanks!
-> 
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
+Thanks, I didn't know that.  Given that both OCFS2 and XFS have their
+config option for quota, I wonder if it might not be a good idea for
+EXT4 to also add a CONFIG_EXT4_QUOTA which selects CONFIG_QUOTA,
+CONFIG_QUOTA_TREE, and QFMT_V2.
 
+The alternative would be to have ext4 silently disable support for the
+"quota" feature (since the built-in quota inodes have to be V2) if
+CONFIG_QFMT_V2 is not selected.
+
+I think the first option is superior; do you agree?
+
+  	    	  	    	      	     - Ted
