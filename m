@@ -1,43 +1,43 @@
-Received: from imap.thunk.org ([74.207.234.97]:38492 "EHLO imap.thunk.org"
+Received: from mail.kernel.org ([198.145.29.99]:48604 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755993AbeASRPF (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 Jan 2018 12:15:05 -0500
-Date: Fri, 19 Jan 2018 12:14:57 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: ext4 quota tests fail with CONFIG_QFMT_V2=n
-Message-ID: <20180119171457.GA31450@thunk.org>
-References: <20180118010936.GA10649@vader>
- <20180118012831.GF6948@thunk.org>
- <20180118122125.pxgqttayxu6msdgl@quack2.suse.cz>
- <20180118160321.GA13944@thunk.org>
- <20180119084649.hnbh56v4kdkitplu@quack2.suse.cz>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180119084649.hnbh56v4kdkitplu@quack2.suse.cz>
+        id S1750865AbeAUHYE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 21 Jan 2018 02:24:04 -0500
+From: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Subject: [PATCH 2/2] fstests: expunge tests when doing a dry run
+Date: Sat, 20 Jan 2018 23:24:01 -0800
+Message-Id: <20180121072401.1047-2-mcgrof@kernel.org>
+In-Reply-To: <20180121072401.1047-1-mcgrof@kernel.org>
+References: <20180121072401.1047-1-mcgrof@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, Eryu Guan <eguan@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, linux-kernel@vger.kernel.org, "Luis R. Rodriguez" <mcgrof@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 19, 2018 at 09:46:49AM +0100, Jan Kara wrote:
-> 
-> E.g. OCFS2 has it's own quota format (it selects only CONFIG_QUOTA,
-> CONFIG_QUOTA_TREE) so forcing QFMT_V2 would just add unused code. So I'm
-> not much in favor of forcing a particular quota format in Kconfig. On
-> userspace side V2 format is the default for a long time and I haven't seen
-> any setup with V1 quota file for years. So I guess making it harder to
-> create new V1 files and slowly deprecating the support is a good idea.
+Running ./check with -n will not execute tests, however
+when exclude files are used we still show them as if
+they are run. Test the exclude file prior to assuming
+we can run a test on a dry run.
 
-Thanks, I didn't know that.  Given that both OCFS2 and XFS have their
-config option for quota, I wonder if it might not be a good idea for
-EXT4 to also add a CONFIG_EXT4_QUOTA which selects CONFIG_QUOTA,
-CONFIG_QUOTA_TREE, and QFMT_V2.
+Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
+---
+ check | 4 ++++
+ 1 file changed, 4 insertions(+)
 
-The alternative would be to have ext4 silently disable support for the
-"quota" feature (since the built-in quota inodes have to be V2) if
-CONFIG_QFMT_V2 is not selected.
+diff --git a/check b/check
+index 0ba71d5d2005..43b8d6c3d127 100755
+--- a/check
++++ b/check
+@@ -666,6 +666,10 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	    echo -n "$seqnum"
+ 
+ 	    if $showme; then
++		_expunge_test $seqnum
++		if [ $? -eq 1 ]; then
++			continue
++		fi
+ 		echo
+ 		start=0
+ 		stop=0
+-- 
+2.15.0
 
-I think the first option is superior; do you agree?
-
-  	    	  	    	      	     - Ted
