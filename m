@@ -1,81 +1,43 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:41329 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751681AbeAWU6P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jan 2018 15:58:15 -0500
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:43913 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752656AbeAWU6Q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 23 Jan 2018 15:58:16 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 0/7] Overlayfs exportfs tests
-Date: Tue, 23 Jan 2018 22:59:05 +0200
-Message-Id: <1516741152-20345-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 1/7] open_by_handle: verify dir content only with -r flag
+Date: Tue, 23 Jan 2018 22:59:06 +0200
+Message-Id: <1516741152-20345-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1516741152-20345-1-git-send-email-amir73il@gmail.com>
+References: <1516741152-20345-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+Without -r flag file handles are opened, but file content is not read.
+Treat dir file hanldes, similarly. without -r flag, open dir file
+handle, but don't verify its content.
 
-This is the 2nd revision of test for overlayfs NFS export.
+This is going to be used by tests for which dir content is changed
+between encode and decode of dir file handle.
 
-Changes since v1:
-- Added new generic/exportfs test instead of changing existing test
-- Addressed review comments on open_by_handle [-i|-o] patch
-- Added the test that uses open_by_handle [-i|-o] in the same patch
-- Split new overlay/exportfs tests to four tests, a pair of tests
-  for samefs and a pair of tests for non-samefs configuration.
-- For each configuration, one test requires and enables redirect_dir
-  for directory rename test cases and both tests require and enable
-  nfs_export feature.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ src/open_by_handle.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-The new overlay tests don't run on upstream kernel and pass with
-my overlayfs NFS export V3 branch [1]. You may want to wait with
-merging those tests until overlayfs NFS support is merged.
-
-Merging patches 1-3 seems like a good idea to me regardless of
-overlayfs NFS export support.
-
-Thanks,
-Amir.
-
-[1] https://github.com/amir73il/linux/commits/ovl-nfs-export-v3
-
-Amir Goldstein (7):
-  open_by_handle: verify dir content only with -r flag
-  generic/exportfs: golden output is not silent
-  generic/exportfs: test decoding file handles after cycle mount
-  overlay: test encode/decode overlay file handles
-  overlay: test encode/decode of non-samefs overlay file handles
-  overlay: test encode/decode overlay file handles with renames
-  overlay: test encode/decode of non-samefs overlay file handles with
-    renames
-
- src/open_by_handle.c  | 143 ++++++++++++++++++++++------
- tests/generic/426     |   1 -
- tests/generic/426.out |   1 -
- tests/generic/467     |   1 -
- tests/generic/467.out |   1 -
- tests/generic/477     | 107 +++++++++++++++++++++
- tests/generic/477.out |   5 +
- tests/generic/group   |   1 +
- tests/overlay/050     | 237 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/050.out |  31 ++++++
- tests/overlay/051     | 254 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/051.out |  31 ++++++
- tests/overlay/052     | 183 ++++++++++++++++++++++++++++++++++++
- tests/overlay/052.out |  22 +++++
- tests/overlay/053     | 199 +++++++++++++++++++++++++++++++++++++++
- tests/overlay/053.out |  22 +++++
- tests/overlay/group   |   4 +
- 17 files changed, 1208 insertions(+), 35 deletions(-)
- create mode 100755 tests/generic/477
- create mode 100644 tests/generic/477.out
- create mode 100755 tests/overlay/050
- create mode 100644 tests/overlay/050.out
- create mode 100755 tests/overlay/051
- create mode 100644 tests/overlay/051.out
- create mode 100755 tests/overlay/052
- create mode 100644 tests/overlay/052.out
- create mode 100755 tests/overlay/053
- create mode 100644 tests/overlay/053.out
-
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index dbc5b0f..9c13b2a 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -412,7 +412,7 @@ int main(int argc, char **argv)
+ 			if (!nlink) {
+ 				printf("open_by_handle(%s) opened an unlinked dir!\n", dname);
+ 				return EXIT_FAILURE;
+-			} else {
++			} else if (rd) {
+ 				/*
+ 				 * Sanity check dir fd - expect to access orig file IFF
+ 				 * it was not unlinked nor renamed.
 -- 
 2.7.4
 
