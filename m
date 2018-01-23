@@ -1,57 +1,37 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4276 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751164AbeAWH0n (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Jan 2018 02:26:43 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v5 6/7] overlay: skip check for tests finished with corrupt filesystem
-Date: Tue, 23 Jan 2018 15:34:51 +0800
-Message-ID: <20180123073452.19074-7-yi.zhang@huawei.com>
-In-Reply-To: <20180123073452.19074-1-yi.zhang@huawei.com>
-References: <20180123073452.19074-1-yi.zhang@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.mpynet.fi ([82.197.21.84]:54250 "EHLO mx1.mpynet.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750907AbeAWHgR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Jan 2018 02:36:17 -0500
+Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0 (Mac OS X Mail 9.3 \(3124\))
+Subject: Re: [PATCH v2 6/8] fssum: Use bswap_64() instead of __bswap_64()
+From: Rostislav <rostislav@tuxera.com>
+In-Reply-To: <20180122202620.GF16776@infradead.org>
+Date: Tue, 23 Jan 2018 09:36:15 +0200
+Content-Transfer-Encoding: 8BIT
+Message-ID: <BDC32FA7-9CC0-42A2-9D59-43C9F7FAF5C4@tuxera.com>
+References: <1516636639-9107-1-git-send-email-rostislav@tuxera.com> <1516636639-9107-7-git-send-email-rostislav@tuxera.com> <20180122202620.GF16776@infradead.org>
 Sender: fstests-owner@vger.kernel.org
-To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-No post-test check of the overlay dirs is required if case leaves
-corrupt filesystem after test. We shoud use _require_scratch_nocheck()
-instead of _require_scratch() in these cases.
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/019 | 2 +-
- tests/overlay/031 | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+> On Jan 22, 2018, at 10:26 PM, Christoph Hellwig <hch@infradead.org> wrote:
+> 
+> On Mon, Jan 22, 2018 at 03:57:17PM +0000, Rostislav Skudnov wrote:
+>> Macros and functions starting with two underscores are usually internal
+>> and shouldn't be used by applications when a version without "__" is
+>> available.
+>> 
+>> Include byteswap.h explicitly since bswap_64() is defined there.
+> 
+> Shouldn't this use htobe64 instead?
 
-diff --git a/tests/overlay/019 b/tests/overlay/019
-index 3e2bc4e..575aaf7 100755
---- a/tests/overlay/019
-+++ b/tests/overlay/019
-@@ -46,7 +46,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs overlay
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
- 
- # Remove all files from previous tests
- _scratch_mkfs
-diff --git a/tests/overlay/031 b/tests/overlay/031
-index 186b409..90a06af 100755
---- a/tests/overlay/031
-+++ b/tests/overlay/031
-@@ -67,7 +67,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs overlay
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
- 
- # remove all files from previous runs
- _scratch_mkfs
--- 
-2.5.0
+Hello, Cristoph.
 
+Thanks for your feedback! We can of course use htobe64(), but the file
+src/fssum.c already defines htonll() in a way that takes endianness into
+account, and using htobe64() would be equivalent to htonll(). My strategy when
+writing this patch set was to make the least number of modifications required
+to build with musl libc.
