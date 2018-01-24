@@ -1,49 +1,55 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4725 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932960AbeAXKif (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Jan 2018 05:38:35 -0500
-Subject: Re: [xfstests PATCH v6 0/8] overlay: add fsck.overlay basic tests
-References: <20180124073344.31970-1-yi.zhang@huawei.com>
- <CAOQ4uxhU7k9SGmwA_vk9hiaYbW11oC1sSHiLtAxJgUBMRsJy8Q@mail.gmail.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <519307ad-2679-6fd8-242c-8384c87380c5@huawei.com>
-Date: Wed, 24 Jan 2018 18:37:59 +0800
+Received: from mx1.redhat.com ([209.132.183.28]:36484 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932953AbeAXKkZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Jan 2018 05:40:25 -0500
+Date: Wed, 24 Jan 2018 18:40:23 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 0/7] Overlayfs exportfs tests
+Message-ID: <20180124104023.GB18267@eguan.usersys.redhat.com>
+References: <1516741152-20345-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxhU7k9SGmwA_vk9hiaYbW11oC1sSHiLtAxJgUBMRsJy8Q@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1516741152-20345-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/1/24 17:41, Amir Goldstein Wrote:
-> On Wed, Jan 24, 2018 at 9:33 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
->> Hi All:
->>
->> Here is the sixth version of test cases for the fsck.overlay[1].
+On Tue, Jan 23, 2018 at 10:59:05PM +0200, Amir Goldstein wrote:
+> Eryu,
 > 
-> You know, I wanted to say this earlier.
-> This series is a mix of 2 independent series and I don't know if
-> it is best for you to post them together.
+> This is the 2nd revision of test for overlayfs NFS export.
 > 
-> The 3 tests added to overlay/fsck group only require the minimal
-> helper _overlay_fsck_dirs.
+> Changes since v1:
+> - Added new generic/exportfs test instead of changing existing test
+> - Addressed review comments on open_by_handle [-i|-o] patch
+> - Added the test that uses open_by_handle [-i|-o] in the same patch
+> - Split new overlay/exportfs tests to four tests, a pair of tests
+>   for samefs and a pair of tests for non-samefs configuration.
+> - For each configuration, one test requires and enables redirect_dir
+>   for directory rename test cases and both tests require and enable
+>   nfs_export feature.
 > 
-> The rest of the patches really do something very different than testing
-> overlay.fsck itself.
-> 
-> If you hadn't combined the 2 series together, the overlay/fsck series
-> would have completed review 2-3 revisions ago.
-> 
-> I'll leave it to you to decide if to post the next revision as one series
-> or two, but I think it would be better if you at least re-order the
-> patches so that the already reviewed overlay/fsck patches
-> with the simple _overlay_fsck_dirs helper are before the rest of
-> the patches.
-> 
-Sure, it's better to split into two independent series, will do.
+> The new overlay tests don't run on upstream kernel and pass with
+> my overlayfs NFS export V3 branch [1]. You may want to wait with
+> merging those tests until overlayfs NFS support is merged.
 
-Thanks,
-Yi.
+Yeah, I probably will wait and let the kernel patches go first. (And
+I'll go through the overlay specific patches later.)
 
+> 
+> Merging patches 1-3 seems like a good idea to me regardless of
+> overlayfs NFS export support.
+
+Patches 1-3 look good to me. One minor issue is that my compiler
+complained about "may be used uninitialized" on 'infile' and 'outfile'
+
+open_by_handle.c:350:12: warning: 'outfile' may be used uninitialized in this function [-Wmaybe-uninitialized]
+
+though I don't think we'll use them uninitialized in practice, I'd like
+to initialize them with NULL on commit.
+
+Thanks for the revision!
+
+Eryu
