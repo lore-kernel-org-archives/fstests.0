@@ -1,57 +1,47 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:38104 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932992AbeAXKsF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jan 2018 05:48:05 -0500
+Received: from szxga04-in.huawei.com ([45.249.212.190]:4691 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932953AbeAXKyO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Jan 2018 05:54:14 -0500
+Subject: Re: [xfstests PATCH v6 2/8] overlay: add filesystem check helper
+References: <20180124073344.31970-1-yi.zhang@huawei.com>
+ <20180124073344.31970-3-yi.zhang@huawei.com>
+ <CAOQ4uxjwrFDKn6iYTNLA02z-GvG-X+72Vs4TYs1sL0_8wiuksg@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <21bd824d-49cd-5749-ca1d-238154e321e7@huawei.com>
+Date: Wed, 24 Jan 2018 18:53:35 +0800
 MIME-Version: 1.0
-In-Reply-To: <20180124104023.GB18267@eguan.usersys.redhat.com>
-References: <1516741152-20345-1-git-send-email-amir73il@gmail.com> <20180124104023.GB18267@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 24 Jan 2018 12:48:04 +0200
-Message-ID: <CAOQ4uxhzafe6iYAvfXiGGVJ_SwaeT0FJO5j3mE8zCwS9nrrD5A@mail.gmail.com>
-Subject: Re: [PATCH v2 0/7] Overlayfs exportfs tests
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <CAOQ4uxjwrFDKn6iYTNLA02z-GvG-X+72Vs4TYs1sL0_8wiuksg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 24, 2018 at 12:40 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Tue, Jan 23, 2018 at 10:59:05PM +0200, Amir Goldstein wrote:
->> Eryu,
->>
->> This is the 2nd revision of test for overlayfs NFS export.
->>
->> Changes since v1:
->> - Added new generic/exportfs test instead of changing existing test
->> - Addressed review comments on open_by_handle [-i|-o] patch
->> - Added the test that uses open_by_handle [-i|-o] in the same patch
->> - Split new overlay/exportfs tests to four tests, a pair of tests
->>   for samefs and a pair of tests for non-samefs configuration.
->> - For each configuration, one test requires and enables redirect_dir
->>   for directory rename test cases and both tests require and enable
->>   nfs_export feature.
->>
->> The new overlay tests don't run on upstream kernel and pass with
->> my overlayfs NFS export V3 branch [1]. You may want to wait with
->> merging those tests until overlayfs NFS support is merged.
->
-> Yeah, I probably will wait and let the kernel patches go first. (And
-> I'll go through the overlay specific patches later.)
->
->>
->> Merging patches 1-3 seems like a good idea to me regardless of
->> overlayfs NFS export support.
->
-> Patches 1-3 look good to me. One minor issue is that my compiler
-> complained about "may be used uninitialized" on 'infile' and 'outfile'
->
-> open_by_handle.c:350:12: warning: 'outfile' may be used uninitialized in this function [-Wmaybe-uninitialized]
->
-> though I don't think we'll use them uninitialized in practice, I'd like
-> to initialize them with NULL on commit.
->
-
-That sounds good.
+On 2018/1/24 17:31, Amir Goldstein Write:
+> On Wed, Jan 24, 2018 at 9:33 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> +_overlay_check_fs()
+>> +{
+>> +       local ovl_mnt=$1
+>> +       local base_dev=$4
+>> +       local base_mnt=$5
+>> +       shift 1
+>> +
+>> +       [ "$FSTYP" = overlay ] || return 0
+>> +
+>> +       # Base fs needs to be mounted to check overlay dirs
+>> +       local base_mounted=""
+>> +       [ -z "$base_dev" ] || base_mounted=`_is_mounted $base_dev`
+> 
+> That looks like I have a bug in my original implementation of _overlay_check_fs
+> because $FSTYP" = overlay _is_mounted here will not actually find a mounted
+> base dev. Need to pass $OVL_BASE_FSTYP to your improved _is_mounted
+> helper.
+> No?
+> 
+Yes, we not found this bug becasue previous _is_mounted missing $FSTYP check,
+I will improve it as you suggested.
 
 Thanks,
-Amir.
+Yi.
+
