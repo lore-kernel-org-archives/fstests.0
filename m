@@ -1,43 +1,49 @@
-Received: from mail-yw0-f171.google.com ([209.85.161.171]:37156 "EHLO
-        mail-yw0-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932618AbeAXJlk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jan 2018 04:41:40 -0500
-MIME-Version: 1.0
-In-Reply-To: <20180124073344.31970-1-yi.zhang@huawei.com>
-References: <20180124073344.31970-1-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 24 Jan 2018 11:41:39 +0200
-Message-ID: <CAOQ4uxhU7k9SGmwA_vk9hiaYbW11oC1sSHiLtAxJgUBMRsJy8Q@mail.gmail.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:4725 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932960AbeAXKif (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Jan 2018 05:38:35 -0500
 Subject: Re: [xfstests PATCH v6 0/8] overlay: add fsck.overlay basic tests
-Content-Type: text/plain; charset="UTF-8"
+References: <20180124073344.31970-1-yi.zhang@huawei.com>
+ <CAOQ4uxhU7k9SGmwA_vk9hiaYbW11oC1sSHiLtAxJgUBMRsJy8Q@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <519307ad-2679-6fd8-242c-8384c87380c5@huawei.com>
+Date: Wed, 24 Jan 2018 18:37:59 +0800
+MIME-Version: 1.0
+In-Reply-To: <CAOQ4uxhU7k9SGmwA_vk9hiaYbW11oC1sSHiLtAxJgUBMRsJy8Q@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
+To: Amir Goldstein <amir73il@gmail.com>
 Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 24, 2018 at 9:33 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Hi All:
->
-> Here is the sixth version of test cases for the fsck.overlay[1].
-
-You know, I wanted to say this earlier.
-This series is a mix of 2 independent series and I don't know if
-it is best for you to post them together.
-
-The 3 tests added to overlay/fsck group only require the minimal
-helper _overlay_fsck_dirs.
-
-The rest of the patches really do something very different than testing
-overlay.fsck itself.
-
-If you hadn't combined the 2 series together, the overlay/fsck series
-would have completed review 2-3 revisions ago.
-
-I'll leave it to you to decide if to post the next revision as one series
-or two, but I think it would be better if you at least re-order the
-patches so that the already reviewed overlay/fsck patches
-with the simple _overlay_fsck_dirs helper are before the rest of
-the patches.
+On 2018/1/24 17:41, Amir Goldstein Wrote:
+> On Wed, Jan 24, 2018 at 9:33 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>> Hi All:
+>>
+>> Here is the sixth version of test cases for the fsck.overlay[1].
+> 
+> You know, I wanted to say this earlier.
+> This series is a mix of 2 independent series and I don't know if
+> it is best for you to post them together.
+> 
+> The 3 tests added to overlay/fsck group only require the minimal
+> helper _overlay_fsck_dirs.
+> 
+> The rest of the patches really do something very different than testing
+> overlay.fsck itself.
+> 
+> If you hadn't combined the 2 series together, the overlay/fsck series
+> would have completed review 2-3 revisions ago.
+> 
+> I'll leave it to you to decide if to post the next revision as one series
+> or two, but I think it would be better if you at least re-order the
+> patches so that the already reviewed overlay/fsck patches
+> with the simple _overlay_fsck_dirs helper are before the rest of
+> the patches.
+> 
+Sure, it's better to split into two independent series, will do.
 
 Thanks,
-Amir.
+Yi.
+
