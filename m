@@ -1,282 +1,400 @@
-Received: from mail-yw0-f181.google.com ([209.85.161.181]:34893 "EHLO
-        mail-yw0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934271AbeAXQkD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jan 2018 11:40:03 -0500
-MIME-Version: 1.0
-In-Reply-To: <1516741152-20345-8-git-send-email-amir73il@gmail.com>
-References: <1516741152-20345-1-git-send-email-amir73il@gmail.com> <1516741152-20345-8-git-send-email-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 24 Jan 2018 18:40:02 +0200
-Message-ID: <CAOQ4uxhJXCS=bBRBZUhgFJh70Qd3nap29LXioDSuiQv+pOoTiQ@mail.gmail.com>
-Subject: Re: [PATCH v2 7/7] overlay: test encode/decode of non-samefs overlay
- file handles with renames
-Content-Type: text/plain; charset="UTF-8"
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:43021 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932883AbeAXW6m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jan 2018 17:58:42 -0500
+Received: by mail-pf0-f193.google.com with SMTP id y26so4304071pfi.10
+        for <fstests@vger.kernel.org>; Wed, 24 Jan 2018 14:58:42 -0800 (PST)
+From: harshads <harshads@google.com>
+Subject: [PATCH v5] ext4: Ext4 online resize with bigalloc tests.
+Date: Wed, 24 Jan 2018 14:58:12 -0800
+Message-Id: <20180124225812.69852-1-harshads@google.com>
+In-Reply-To: <20180124063748.GA16904@eguan.usersys.redhat.com>
+References: <20180124063748.GA16904@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, harshads <harshads@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 23, 2018 at 10:59 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> This is a variant of overlay file handles with renames test for an
-> overlayfs that is composed of multiple lower layers not on the same
-> underlying fs.
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->  tests/overlay/053     | 199 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/053.out |  22 ++++++
->  tests/overlay/group   |   1 +
->  3 files changed, 222 insertions(+)
->  create mode 100755 tests/overlay/053
->  create mode 100644 tests/overlay/053.out
->
-> diff --git a/tests/overlay/053 b/tests/overlay/053
-> new file mode 100755
-> index 0000000..c22fc9f
-> --- /dev/null
-> +++ b/tests/overlay/053
-> @@ -0,0 +1,199 @@
-> +#! /bin/bash
-> +# FS QA Test No. 053
-> +#
-> +# Test encode/decode of non-samefs overlay file handles with renames
-> +#
-> +# This is a variant of overlay file handles with renames test for an
-> +# overlayfs that is composed of multiple lower layers not on the same
-> +# underlying fs.
-> +#
-> +# - Check decode/read of file handles after rename of parent
-> +# - Check decode/read of file handles after rename of grandparent
-> +# - Check decode/read of file handles after move to new parent
-> +# - Check encode/decode/read of file handles in non-upper overlay
-> +#
-> +# This test requires and enables overlayfs NFS export support and merge
-> +# dir rename support (redirect_dir).
-> +# NFS export support depends on and enables overlayfs index feature.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 CTERA Networks. All Rights Reserved.
-> +# Author: Amir Goldstein <amir73il@gmail.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +       # Cleanup overlay scratch mount that is holding base test mount
-> +       # to prevent _check_test_fs and _test_umount from failing before
-> +       # _check_scratch_fs _scratch_umount
-> +       $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_test
-> +_require_scratch
-> +_require_test_program "open_by_handle"
-> +_require_scratch_feature nfs_export
-> +_require_scratch_feature redirect_dir
-> +
-> +# Lower is on test partition
-> +lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
-> +# Upper/work are on scratch partition
-> +middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-> +upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-> +work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-> +
-> +NUMFILES=1
-> +
-> +# Create test dir and empty test files
-> +create_test_files()
-> +{
-> +       local dir=$1
-> +       local opt=$2
-> +
-> +       mkdir -p $dir
-> +       $here/src/open_by_handle -cp $opt $dir $NUMFILES
-> +}
-> +
-> +# Test encode/decode file handles on overlay mount
-> +test_file_handles()
-> +{
-> +       local dir=$1
-> +       shift
-> +
-> +       echo test_file_handles $dir $* | _filter_scratch | \
-> +                               sed -e "s,$tmp\.,,g"
-> +       $here/src/open_by_handle $* $dir $NUMFILES
-> +}
-> +
-> +# Re-create lower/middle/upper/work dirs
-> +create_dirs()
-> +{
-> +       # Create lower dir on test partition
-> +       rm -rf $lower
-> +       mkdir $lower
-> +
-> +       # Create middle/upper/work dirs on scratch partition
-> +       _scratch_mkfs
-> +}
-> +
-> +# Mount an overlay on $SCRATCH_MNT with lower layer on test partition
-> +# and middle and upper layer on scratch partition
-> +mount_dirs()
-> +{
-> +       _overlay_mount_dirs $middle:$lower $upper $work \
-> +               $OVERLAY_MOUNT_OPTIONS $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+Add tests to verify Ext4 online resizing feature with bigalloc feature
+enabled. We test various resizing scenarios with different cluster
+sizes.
 
-Found a bug in test when tested with NFS export disabled by default. should be:
+Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+---
+ tests/ext4/030     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/030.out | 172 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/group   |   1 +
+ 3 files changed, 344 insertions(+)
+ create mode 100755 tests/ext4/030
+ create mode 100644 tests/ext4/030.out
 
-+       _overlay_scratch_mount_dirs $middle:$lower $upper $work -o nfs_export=on
+diff --git a/tests/ext4/030 b/tests/ext4/030
+new file mode 100755
+index 00000000..1d42b514
+--- /dev/null
++++ b/tests/ext4/030
+@@ -0,0 +1,171 @@
++#! /bin/bash
++# FS QA Test ext4/030
++#
++# Ext4 online resize tests of small and crucial resizes with bigalloc
++# feature.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
++#
++# Author: Harshad Shirwadkar <harshads@google.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,	 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++BLK_SIZ=4096
++CLUSTER_SIZ=4096
++
++IMG_FILE=$SCRATCH_DIR/$seq.fs
++IMG_MNT=$SCRATCH_DIR/$seq.mnt
++
++## Num clusters to blocks.
++c2b()
++{
++	local clusters=$1
++	echo $(($clusters * $CLUSTER_SIZ / $BLK_SIZ))
++}
++
++_ext4_online_resize()
++{
++	## sizes are in number of blocks.
++	local original_size=$1
++	local final_size=$2
++	local check_if_supported=$([ "$3" = "1" ] && echo "1" || echo "0")
++
++	## Start with a clean image file.
++	echo "" > ${IMG_FILE}
++	echo "+++ truncate image file to $final_size" | \
++		tee -a $seqres.full
++	$XFS_IO_PROG -f -c "truncate $(($final_size * $BLK_SIZ))" ${IMG_FILE}
++	LOOP_DEVICE=`_create_loop_device $IMG_FILE || _fail "losetup failed"`
++
++	echo "+++ create fs on image file $original_size" | \
++		tee -a $seqres.full
++
++	${MKFS_PROG}.${FSTYP} -F -O bigalloc,resize_inode -C $CLUSTER_SIZ \
++		-b $BLK_SIZ ${LOOP_DEVICE} $original_size >> \
++		$seqres.full 2>&1 || _fail "mkfs failed"
++
++	echo "+++ mount image file" | tee -a $seqres.full
++	$MOUNT_PROG -t ${FSTYP} ${LOOP_DEVICE} ${IMG_MNT} > \
++		/dev/null 2>&1 || _fail "mount failed"
++
++	echo "+++ resize fs to $final_size" | tee -a $seqres.full
++
++	resize_output=$(resize2fs -f ${LOOP_DEVICE} $final_size 2>&1)
++	if [ $? -ne 0 ]; then
++		if [ $check_if_supported -eq 1 ]; then
++			echo $resize_output | \
++			grep "resize2fs: Operation not supported While checking for on-line resizing support" \
++				&& _notrun "online resizing not supported with bigalloc"
++		fi
++		_fail "resize failed"
++	fi
++	echo $resize_output >> $seqres.full
++	echo "+++ umount fs" | tee -a $seqres.full
++	$UMOUNT_PROG ${IMG_MNT}
++
++	echo "+++ check fs" | tee -a $seqres.full
++	_check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
++		_fail "fsck should not fail"
++	_destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
++}
++
++_cleanup()
++{
++	cd /
++	[ -n "$LOOP_DEVICE" ] && _destroy_loop_device $LOOP_DEVICE > /dev/null 2>&1
++	rm -f $tmp.*
++	$UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
++	rm -f ${IMG_FILE} > /dev/null 2>&1
++}
++
++# get standard environment and checks
++. ./common/rc
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++
++_require_loop
++_require_scratch
++# We use resize_inode to make sure that block group descriptor table
++# can be extended.
++_require_scratch_ext4_feature "bigalloc,resize_inode"
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++rm -f $seqres.full
++
++mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
++
++# Check if online resizing with bigalloc is supported by the kernel
++_ext4_online_resize 4096 8192 1
++
++## We perform resizing to various multiples of block group sizes to
++## ensure that we cover maximum edge cases in the kernel code.
++for CLUSTER_SIZ in 4096 16384 65536; do
++	echo "++ set cluster size to $CLUSTER_SIZ" | tee -a $seqres.full
++
++	##
++	## Extend last group tests
++	##
++
++	## Extending a 1/2 block group to a 2/3 block group.
++	_ext4_online_resize $(c2b 16384) $(c2b 24576)
++	## Extending a 2/3rd block group to one cluster less than a
++	## full block group.
++	_ext4_online_resize $(c2b 24576) $(c2b 32767)
++	## Extending a 2/3rd block group to a full block group.
++	_ext4_online_resize $(c2b 24576) $(c2b 32768)
++
++	##
++	## Extend last group and add more block groups.
++	##
++
++	## Extending a 2/3rd block group to 2 block groups.
++	_ext4_online_resize $(c2b 24576) $(c2b 65536)
++	## Extending a 2/3rd block group to 15 block groups and one
++	## cluster.
++	_ext4_online_resize $(c2b 24576) $(c2b 491521)
++	## Extending a 2/3rd block group to 15 and a half block groups.
++	_ext4_online_resize $(c2b 24576) $(c2b 507904)
++	## Extending a 2/3rd block group to 16 block groups.
++	_ext4_online_resize $(c2b 24576) $(c2b 524288)
++	## Extending a 2/3rd block group to 160 block groups.
++	_ext4_online_resize $(c2b 24576) $(c2b 5242880)
++
++	##
++	## Convert to meta_bg.
++	##
++
++	## Extending a 2/3rd block group to 1280 block groups.
++	_ext4_online_resize $(c2b 24576) $(c2b 41943040)
++done
++
++status=0
++exit
+diff --git a/tests/ext4/030.out b/tests/ext4/030.out
+new file mode 100644
+index 00000000..49304654
+--- /dev/null
++++ b/tests/ext4/030.out
+@@ -0,0 +1,172 @@
++QA output created by 030
+++++ truncate image file to 8192
+++++ create fs on image file 4096
+++++ mount image file
+++++ resize fs to 8192
+++++ umount fs
+++++ check fs
++++ set cluster size to 4096
+++++ truncate image file to 24576
+++++ create fs on image file 16384
+++++ mount image file
+++++ resize fs to 24576
+++++ umount fs
+++++ check fs
+++++ truncate image file to 32767
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 32767
+++++ umount fs
+++++ check fs
+++++ truncate image file to 32768
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 32768
+++++ umount fs
+++++ check fs
+++++ truncate image file to 65536
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 65536
+++++ umount fs
+++++ check fs
+++++ truncate image file to 491521
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 491521
+++++ umount fs
+++++ check fs
+++++ truncate image file to 507904
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 507904
+++++ umount fs
+++++ check fs
+++++ truncate image file to 524288
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 524288
+++++ umount fs
+++++ check fs
+++++ truncate image file to 5242880
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 5242880
+++++ umount fs
+++++ check fs
+++++ truncate image file to 41943040
+++++ create fs on image file 24576
+++++ mount image file
+++++ resize fs to 41943040
+++++ umount fs
+++++ check fs
++++ set cluster size to 16384
+++++ truncate image file to 98304
+++++ create fs on image file 65536
+++++ mount image file
+++++ resize fs to 98304
+++++ umount fs
+++++ check fs
+++++ truncate image file to 131068
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 131068
+++++ umount fs
+++++ check fs
+++++ truncate image file to 131072
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 131072
+++++ umount fs
+++++ check fs
+++++ truncate image file to 262144
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 262144
+++++ umount fs
+++++ check fs
+++++ truncate image file to 1966084
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 1966084
+++++ umount fs
+++++ check fs
+++++ truncate image file to 2031616
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 2031616
+++++ umount fs
+++++ check fs
+++++ truncate image file to 2097152
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 2097152
+++++ umount fs
+++++ check fs
+++++ truncate image file to 20971520
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 20971520
+++++ umount fs
+++++ check fs
+++++ truncate image file to 167772160
+++++ create fs on image file 98304
+++++ mount image file
+++++ resize fs to 167772160
+++++ umount fs
+++++ check fs
++++ set cluster size to 65536
+++++ truncate image file to 393216
+++++ create fs on image file 262144
+++++ mount image file
+++++ resize fs to 393216
+++++ umount fs
+++++ check fs
+++++ truncate image file to 524272
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 524272
+++++ umount fs
+++++ check fs
+++++ truncate image file to 524288
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 524288
+++++ umount fs
+++++ check fs
+++++ truncate image file to 1048576
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 1048576
+++++ umount fs
+++++ check fs
+++++ truncate image file to 7864336
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 7864336
+++++ umount fs
+++++ check fs
+++++ truncate image file to 8126464
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 8126464
+++++ umount fs
+++++ check fs
+++++ truncate image file to 8388608
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 8388608
+++++ umount fs
+++++ check fs
+++++ truncate image file to 83886080
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 83886080
+++++ umount fs
+++++ check fs
+++++ truncate image file to 671088640
+++++ create fs on image file 393216
+++++ mount image file
+++++ resize fs to 671088640
+++++ umount fs
+++++ check fs
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 257bb646..f29d3de6 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -32,6 +32,7 @@
+ 027 auto quick fsmap
+ 028 auto quick fsmap
+ 029 auto quick fsmap
++030 auto quick ioctl resize
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
+-- 
+2.16.0.rc1.238.g530d649a79-goog
 
-> +}
-> +
-> +# Unmount the overlay without unmounting base fs
-> +unmount_dirs()
-> +{
-> +       $UMOUNT_PROG $SCRATCH_MNT
-> +}
-> +
-> +# Check non-stale file handles of lower/upper moved files
-> +create_dirs
-> +create_test_files $upper/uppertestdir -w
-> +create_test_files $lower/lowertestdir -w
-> +mkdir -p $lower/lowertestdir.lo $lower/lowertestdir.up $upper/uppertestdir.lo $upper/uppertestdir.up
-> +mount_dirs
-> +# Check encode/decode/read of lower/upper file handles after move to new upper testdir
-> +test_file_handles $SCRATCH_MNT/uppertestdir -o $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT/lowertestdir -o $tmp.lower_file_handles
-> +mv $SCRATCH_MNT/uppertestdir/* $SCRATCH_MNT/uppertestdir.up/
-> +mv $SCRATCH_MNT/lowertestdir/* $SCRATCH_MNT/uppertestdir.lo/
-> +# Check open and read from stored file handles
-> +test_file_handles $SCRATCH_MNT -r -i $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT -r -i $tmp.lower_file_handles
-> +# Check encode/decode/read of lower/upper file handles after move to new merge testdir
-> +test_file_handles $SCRATCH_MNT/uppertestdir.up -o $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT/uppertestdir.lo -o $tmp.lower_file_handles
-> +mv $SCRATCH_MNT/uppertestdir.up/* $SCRATCH_MNT/lowertestdir.up/
-> +mv $SCRATCH_MNT/uppertestdir.lo/* $SCRATCH_MNT/lowertestdir.lo/
-> +# Check open and read from stored file handles
-> +test_file_handles $SCRATCH_MNT -r -i $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT -r -i $tmp.lower_file_handles
-> +unmount_dirs
-> +
-> +# Check non-stale file handles of lower/upper renamed dirs
-> +create_dirs
-> +create_test_files $upper/uppertestdir -w
-> +create_test_files $lower/lowertestdir -w
-> +create_test_files $upper/uppertestdir/subdir -w
-> +create_test_files $lower/lowertestdir/subdir -w
-> +mount_dirs
-> +# Check encode/decode/read of lower/upper file handles after rename of testdir
-> +test_file_handles $SCRATCH_MNT/uppertestdir -p -o $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT/lowertestdir -p -o $tmp.lower_file_handles
-> +# Check encode/decode/read of lower/upper file handles after rename of testdir's parent
-> +test_file_handles $SCRATCH_MNT/uppertestdir/subdir -p -o $tmp.upper_subdir_file_handles
-> +test_file_handles $SCRATCH_MNT/lowertestdir/subdir -p -o $tmp.lower_subdir_file_handles
-> +# Rename pure upper dir
-> +mv $SCRATCH_MNT/uppertestdir $SCRATCH_MNT/uppertestdir.new/
-> +# Copy up lower dir, index and rename
-> +mv $SCRATCH_MNT/lowertestdir $SCRATCH_MNT/lowertestdir.new/
-> +# Check open, read and readdir from stored file handles
-> +# (testdir argument is the mount point and NOT the dir
-> +#  we are trying to open by stored file handle)
-> +test_file_handles $SCRATCH_MNT -rp -i $tmp.upper_file_handles
-> +test_file_handles $SCRATCH_MNT -rp -i $tmp.lower_file_handles
-> +test_file_handles $SCRATCH_MNT -rp -i $tmp.upper_subdir_file_handles
-> +test_file_handles $SCRATCH_MNT -rp -i $tmp.lower_subdir_file_handles
-> +# Retry decoding lower subdir file handle when indexed testdir is in dcache
-> +# (providing renamed testdir argument pins the indexed testdir to dcache)
-> +test_file_handles $SCRATCH_MNT/lowertestdir.new -rp -i $tmp.lower_subdir_file_handles
-> +unmount_dirs
-> +
-> +# Check encode/decode/read of lower file handles on lower layers only r/o overlay.
-> +# For non-upper overlay mount, nfs_export requires disabling redirect_dir.
-> +$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +                       -o ro,redirect_dir=nofollow,lowerdir=$middle:$lower
-> +test_file_handles $SCRATCH_MNT/lowertestdir -rp
-> +test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-> +unmount_dirs
-> +
-> +# Check encode/decode/read of lower file handles on lower layers only r/o overlay
-> +# with non-indexed redirects from top lower layer to bottom lower layer.
-> +# Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
-> +# $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
-> +# directories.
-> +$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-> +               -o ro,redirect_dir=nofollow,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
-> +test_file_handles $SCRATCH_MNT -r
-> +test_file_handles $SCRATCH_MNT/subdir -rp
-> +unmount_dirs
-> +
-> +status=0
-> +exit
-> diff --git a/tests/overlay/053.out b/tests/overlay/053.out
-> new file mode 100644
-> index 0000000..c6f9de0
-> --- /dev/null
-> +++ b/tests/overlay/053.out
-> @@ -0,0 +1,22 @@
-> +QA output created by 053
-> +test_file_handles SCRATCH_MNT/uppertestdir -o upper_file_handles
-> +test_file_handles SCRATCH_MNT/lowertestdir -o lower_file_handles
-> +test_file_handles SCRATCH_MNT -r -i upper_file_handles
-> +test_file_handles SCRATCH_MNT -r -i lower_file_handles
-> +test_file_handles SCRATCH_MNT/uppertestdir.up -o upper_file_handles
-> +test_file_handles SCRATCH_MNT/uppertestdir.lo -o lower_file_handles
-> +test_file_handles SCRATCH_MNT -r -i upper_file_handles
-> +test_file_handles SCRATCH_MNT -r -i lower_file_handles
-> +test_file_handles SCRATCH_MNT/uppertestdir -p -o upper_file_handles
-> +test_file_handles SCRATCH_MNT/lowertestdir -p -o lower_file_handles
-> +test_file_handles SCRATCH_MNT/uppertestdir/subdir -p -o upper_subdir_file_handles
-> +test_file_handles SCRATCH_MNT/lowertestdir/subdir -p -o lower_subdir_file_handles
-> +test_file_handles SCRATCH_MNT -rp -i upper_file_handles
-> +test_file_handles SCRATCH_MNT -rp -i lower_file_handles
-> +test_file_handles SCRATCH_MNT -rp -i upper_subdir_file_handles
-> +test_file_handles SCRATCH_MNT -rp -i lower_subdir_file_handles
-> +test_file_handles SCRATCH_MNT/lowertestdir.new -rp -i lower_subdir_file_handles
-> +test_file_handles SCRATCH_MNT/lowertestdir -rp
-> +test_file_handles SCRATCH_MNT/lowertestdir/subdir -rp
-> +test_file_handles SCRATCH_MNT -r
-> +test_file_handles SCRATCH_MNT/subdir -rp
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 2f06a6b..060f367 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -52,3 +52,4 @@
->  050 auto quick copyup hardlink exportfs
->  051 auto quick copyup hardlink exportfs nonsamefs
->  052 auto quick copyup redirect exportfs
-> +053 auto quick copyup redirect exportfs nonsamefs
-> --
-> 2.7.4
->
