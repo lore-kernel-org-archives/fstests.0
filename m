@@ -1,178 +1,201 @@
-Received: from mx1.redhat.com ([209.132.183.28]:59556 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752206AbeAXGhu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Jan 2018 01:37:50 -0500
-Date: Wed, 24 Jan 2018 14:37:48 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v4] ext4: Ext4 online resize with bigalloc tests.
-Message-ID: <20180124063748.GA16904@eguan.usersys.redhat.com>
-References: <20180111070740.GE5123@eguan.usersys.redhat.com>
- <20180123215357.261381-1-harshads@google.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:47802 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932192AbeAXHZZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Jan 2018 02:25:25 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH v6 5/8] overlay: add fsck.overlay impure xattr test
+Date: Wed, 24 Jan 2018 15:33:41 +0800
+Message-ID: <20180124073344.31970-6-yi.zhang@huawei.com>
+In-Reply-To: <20180124073344.31970-1-yi.zhang@huawei.com>
+References: <20180124073344.31970-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180123215357.261381-1-harshads@google.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: harshads <harshads@google.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 23, 2018 at 01:53:57PM -0800, harshads wrote:
-> Add tests to verify Ext4 online resizing feature with bigalloc feature
-> enabled. We test various resizing scenarios with different cluster
-> sizes.
-> 
-> Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+Add fsck.overlay test case to test it how to deal with impure
+xattr in underlying directories of overlayfs.
 
-Looks good to me, thanks! Just two minor issues inline.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/203     | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/203.out |   4 ++
+ tests/overlay/group   |   1 +
+ 3 files changed, 148 insertions(+)
+ create mode 100755 tests/overlay/203
+ create mode 100644 tests/overlay/203.out
 
-> ---
->  tests/ext4/030     | 174 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/030.out | 172 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/group   |   1 +
->  3 files changed, 347 insertions(+)
->  create mode 100755 tests/ext4/030
->  create mode 100644 tests/ext4/030.out
-> 
-> diff --git a/tests/ext4/030 b/tests/ext4/030
-> new file mode 100755
-> index 00000000..9e91b96a
-> --- /dev/null
-> +++ b/tests/ext4/030
-> @@ -0,0 +1,174 @@
-> +#! /bin/bash
-> +# FS QA Test ext4/030
-> +#
-> +# Ext4 online resize tests of small and crucial resizes with bigalloc
-> +# feature.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-> +#
-> +# Author: Harshad Shirwadkar <harshads@google.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,	 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +BLK_SIZ=4096
-> +CLUSTER_SIZ=4096
-> +
-> +IMG_FILE=$SCRATCH_DIR/$seq.fs
-> +IMG_MNT=$SCRATCH_DIR/$seq.mnt
-> +
-> +## Num clusters to blocks.
-> +c2b()
-> +{
-> +	local clusters=$1
-> +	echo $(($clusters * $CLUSTER_SIZ / $BLK_SIZ))
-> +}
-> +
-> +_ext4_online_resize()
-> +{
-> +	## sizes are in number of blocks.
-> +	local original_size=$1
-> +	local final_size=$2
-> +
-> +	## Start with a clean image file.
-> +	echo "" > ${IMG_FILE}
-> +	echo "+++ truncate image file to $final_size" | \
-> +		tee -a $seqres.full
-> +	$XFS_IO_PROG -f -c "truncate $(($final_size * $BLK_SIZ))" ${IMG_FILE}
-> +	LOOP_DEVICE=`_create_loop_device $IMG_FILE || _fail "losetup failed"`
-> +
-> +	echo "+++ create fs on image file $original_size" | \
-> +		tee -a $seqres.full
-> +
-> +	${MKFS_PROG}.${FSTYP} -F -O bigalloc,resize_inode -C $CLUSTER_SIZ \
-> +		-b $BLK_SIZ ${LOOP_DEVICE} $original_size >> \
-> +		$seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +	echo "+++ mount image file" | tee -a $seqres.full
-> +	$MOUNT_PROG -t ${FSTYP} ${LOOP_DEVICE} ${IMG_MNT} > \
-> +		/dev/null 2>&1 || _fail "mount failed"
-> +
-> +	echo "+++ resize fs to $final_size" | tee -a $seqres.full
-> +
-> +	resize2fs -f ${LOOP_DEVICE} $final_size >> \
-> +		  $seqres.full 2>&1 || return 1
-> +
-> +	echo "+++ umount fs" | tee -a $seqres.full
-> +	$UMOUNT_PROG ${IMG_MNT}
-> +
-> +	echo "+++ check fs" | tee -a $seqres.full
-> +	_check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
-> +		_fail "fsck should not fail"
-> +	_destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
-> +}
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	[ -n "$LOOP_DEVICE" ] && _destroy_loop_device $LOOP_DEVICE > /dev/null 2>&1
-> +	rm -f $tmp.*
-> +	$UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
-> +	rm -f ${IMG_FILE} > /dev/null 2>&1
-> +}
-> +
-> +# get standard environment and checks
-> +. ./common/rc
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +
-> +_require_loop
-> +_require_scratch
-> +# We use resize_inode to make sure that block group descriptor table
-> +# can be extended.
-> +_require_scratch_ext4_feature "bigalloc,resize_inode,metadata_csum"
+diff --git a/tests/overlay/203 b/tests/overlay/203
+new file mode 100755
+index 0000000..75b2097
+--- /dev/null
++++ b/tests/overlay/203
+@@ -0,0 +1,143 @@
++#! /bin/bash
++# FS QA Test 203
++#
++# Test fsck.overlay how to deal with impure xattr in overlayfs.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Huawei.  All Rights Reserved.
++# Author: zhangyi (F) <yi.zhang@huawei.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_overlay_scratch_dirs
++_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
++
++# remove all files from previous tests
++_scratch_mkfs
++
++OVL_REDIRECT_XATTR="trusted.overlay.redirect"
++OVL_IMPURE_XATTR="trusted.overlay.impure"
++OVL_IMPURE_XATTR_VAL="y"
++
++# Create a redirect directory
++make_redirect_dir()
++{
++	local target=$1
++	local value=$2
++
++	mkdir -p $target
++	$SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
++}
++
++# Remove impure xattr
++remove_impure()
++{
++	local target=$1
++
++	$SETFATTR_PROG -x $OVL_IMPURE_XATTR $target
++}
++
++# Check impure xattr
++check_impure()
++{
++	local target=$1
++
++	value=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_IMPURE_XATTR $target)
++
++	[[ $value == $OVL_IMPURE_XATTR_VAL ]] || echo "Missing impure xattr"
++}
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++
++make_test_dirs()
++{
++	rm -rf $lowerdir $lowerdir2 $upperdir $workdir
++	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
++}
++
++# Test missing impure xattr in directory which has origin targets, should fix
++echo "+ Missing impure"
++make_test_dirs
++mkdir $lowerdir/{testdir1,testdir2}
++mkdir $upperdir/{testdir1,testdir2}
++touch $lowerdir/testdir1/foo
++mkdir $lowerdir/testdir2/subdir
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++touch $SCRATCH_MNT/testdir1/foo
++touch $SCRATCH_MNT/testdir2/subdir
++$UMOUNT_PROG $SCRATCH_MNT
++remove_impure $upperdir/testdir1
++remove_impure $upperdir/testdir2
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_impure $upperdir/testdir1
++check_impure $upperdir/testdir2
++
++# Test missing impure xattr in directory which has redirect directories,
++# should fix
++echo "+ Missing impure(2)"
++make_test_dirs
++mkdir $lowerdir/origin
++make_redirect_dir $upperdir/testdir/subdir "/origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_impure $upperdir/testdir
++
++# Test missing impure xattr in directory which has merge directories,
++# should fix
++echo "+ Missing impure(3)"
++make_test_dirs
++mkdir $lowerdir/testdir $upperdir/testdir
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_impure $upperdir
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/203.out b/tests/overlay/203.out
+new file mode 100644
+index 0000000..dd81788
+--- /dev/null
++++ b/tests/overlay/203.out
+@@ -0,0 +1,4 @@
++QA output created by 203
+++ Missing impure
+++ Missing impure(2)
+++ Missing impure(3)
+diff --git a/tests/overlay/group b/tests/overlay/group
+index e39b5e0..f99d89e 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -51,3 +51,4 @@
+ 048 auto quick copyup hardlink
+ 201 auto quick fsck
+ 202 auto quick fsck
++203 auto quick fsck
+-- 
+2.9.5
 
-What about metadata_csum? Seems it's not used in the actual resize test.
-Meant to delete it?
-
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +rm -f $seqres.full
-> +
-> +mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
-> +
-> +# Check if online resizing with bigalloc is supported by the kernel
-> +_ext4_online_resize 4096 8192 || \
-> +	_notrun "Kernel doesn't support online resizing with bigalloc"
-
-Hmm, how do we tell if it's a test failure or lack of kernel support?
-How about adding an extra argument to ext4_online_resize to indicate
-that this is a test run, so it checks resize2fs output to see if the
-failure is really due to lacking support in kernel. Otherwise we treat
-all resize2fs failures as bugs.
-
-e.g. resize2fs prints:
-"resize2fs: Operation not supported While checking for on-line resizing support"
-
-Thanks,
-Eryu
