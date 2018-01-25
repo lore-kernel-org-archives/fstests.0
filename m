@@ -1,151 +1,82 @@
-Received: from mail-yb0-f194.google.com ([209.85.213.194]:44539 "EHLO
-        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751081AbeAYIVS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Jan 2018 03:21:18 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:43630 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751295AbeAYJHS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 04:07:18 -0500
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 80E3013586
+        for <fstests@vger.kernel.org>; Thu, 25 Jan 2018 09:07:18 +0000 (UTC)
+Date: Thu, 25 Jan 2018 17:07:14 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] xfs/439: mkfs again to avoid corruption failure
+Message-ID: <20180125090714.GI18267@eguan.usersys.redhat.com>
+References: <20180125073918.22371-1-zlang@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20180125063949.12916-3-yi.zhang@huawei.com>
-References: <20180125063949.12916-1-yi.zhang@huawei.com> <20180125063949.12916-3-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 25 Jan 2018 10:21:17 +0200
-Message-ID: <CAOQ4uxia8y4xWwcx-6bvLxqv=E4i_oytZxQQ=VHDKCH0rCKpsg@mail.gmail.com>
-Subject: Re: [xfstests PATCH 2/5] overlay: hook filesystem check helper
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180125073918.22371-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 25, 2018 at 8:39 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Hook filesystem check helper to _check_test_fs and _check_scratch_fs for
-> constants underlying dirs of overlay filesystem, and introduce scratch
-> check helpers for optionally lower/upper/work dirs. These helpers works
-> only if fsck.overlay exists.
->
-> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  common/overlay | 120 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  common/rc      |   4 +-
->  2 files changed, 122 insertions(+), 2 deletions(-)
->
-> diff --git a/common/overlay b/common/overlay
-> index c19dabc..524976f 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -152,6 +152,14 @@ _require_scratch_overlay_feature()
->         _scratch_unmount
->  }
->
-> +# Require the same scratch device as _require_scratch, but do not check
-> +# the constants OVL_LOWER/OVL_UPPER/OVL_WORK dirs, should use together
-> +# with optionally lower/upper/work dirs and do check explicitly after test.
-> +_require_overlay_scratch_dirs()
-> +{
-> +       _require_scratch_nocheck
-> +}
-> +
->  # Helper function to check underlying dirs of overlay filesystem
->  _overlay_fsck_dirs()
->  {
-> @@ -165,3 +173,115 @@ _overlay_fsck_dirs()
->         $FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
->                            -o workdir=$workdir $options
->  }
-> +
-> +_overlay_check_dirs()
-> +{
-> +       local lowerdir=$1
-> +       local upperdir=$2
-> +       local workdir=$3
-> +       local err=0
-> +
-> +       _overlay_fsck_dirs $* $FSCK_OPTIONS >>$tmp.fsck 2>&1
-> +       if [ $? -ne 0 ]; then
-> +               _log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
-> +
-> +               echo "*** fsck.overlay output ***"      >>$seqres.full
-> +               cat $tmp.fsck                           >>$seqres.full
-> +               echo "*** end fsck.overlay output"      >>$seqres.full
-> +
-> +               echo "*** mount output ***"             >>$seqres.full
-> +               _mount                                  >>$seqres.full
-> +               echo "*** end mount output"             >>$seqres.full
-> +
-> +               err=1
-> +       fi
-> +       rm -f $tmp.fsck
-> +
-> +       return $err
-> +}
-> +
-> +# Check the same mnt/dev of _check_overlay_scratch_fs, but check optionally
-> +# lower/upper/work dirs of overlay filesystem, should use together with
-> +# _require_overlay_scratch_dirs
-> +_overlay_check_scratch_dirs()
-> +{
-> +       local lowerdir=$1
-> +       local upperdir=$2
-> +       local workdir=$3
-> +
-> +       # Need to umount overlay for scratch dir check
-> +       local ovl_mounted=`_is_mounted $SCRATCH_MNT`
-> +       [ -z "$ovl_mounted" ] || $UMOUNT_PROG $SCRATCH_MNT
-> +
-> +       _overlay_check_dirs $lowerdir $upperdir $workdir
-> +       local ret=$?
-> +
-> +       if [ $ret -eq 0 -a -n "$ovl_mounted" ]; then
-> +               # overlay was mounted, remount besides extra mount options
-> +               _overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+On Thu, Jan 25, 2018 at 03:39:18PM +0800, Zorro Lang wrote:
+> xfs/439 always fails on ppc64 as below:
+>   # ./check xfs/439
+>   ...
+>   ...
+>   xfs/439 2s ... 1s
+>   _check_xfs_filesystem: filesystem on /dev/sda5 is inconsistent (r)
+>   (see /var/lib/xfstests/results//xfs/439.full for details)
+>   Ran: xfs/439
+>   Failures: xfs/439
+>   Failed 1 of 1 tests
+> 
+>   # xfs_repair -n $SCRATCH_DEV
+>   ...
+>   ...
+>   Phase 6 - check inode connectivity...
+>           - traversing filesystem ...
+>           - traversal finished ...
+>           - moving disconnected inodes to lost+found ...
+>   Phase 7 - verify link counts...
+>   Maximum metadata LSN (1:2) is ahead of log (1:2).
+>   Would format log to cycle 4.
+>   No modify flag set, skipping filesystem flush and exiting.
+> 
+> It can't be fixed by log replay (scratch_mount), so mkfs again to
+> make sure the case won't be failed at the end.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-I think that 'shift 3' and passing $* to _overlay_scratch_mount_dirs
-would be good practice here.
-Especially, because extra mount options may affect fsck.overlay
-someday. Imagine that fsck.overlay ... -oindex=on may be used to
-verify consistency and rebuild index for hardlinks and -onfs_export=on may
-be used to specify consistency check and rebuild of index for all
-files and directories.
-
-> +               ret=$?
-> +       fi
-> +
-> +       return $ret
-> +}
-> +
-> +_overlay_check_fs()
-> +{
-> +       local ovl_mnt=$1
-> +       local base_dev=$4
-> +       local base_mnt=$5
-> +       shift 1
-
-This shift 1 is confusing. Should document that it aligns arguments for
-_overlay_base_mount. Probably would be nicer to shift right after assigning
-ovl_mnt and then assign $3/$4 to base_dev/mnt.
-
-Nice to review my own patch ;-)
-
-> +
-> +       [ "$FSTYP" = overlay ] || return 0
-> +
-> +       # Base fs needs to be mounted to check overlay dirs
-> +       local base_mounted=""
-> +       [ -z "$base_dev" ] || \
-> +               base_mounted=`_is_mounted $base_dev $OVL_BASE_FSTYP`
-
-Not that I am proposing to support -overlay run where FSTYP is not
-defined in config file, but how does this behave in such a case?
-Perhaps add || [ -z "$OVL_BASE_FSTYP" ] above?
-
-> +
-> +       if [ -z "$base_mounted" ]; then
-> +               _overlay_base_mount $*
-> +       else
-> +               # Need to umount overlay for dir check
-> +               local ovl_mounted=`_is_mounted $ovl_mnt`
-
-Define local outside if scope.
+I think we just need _require_scratch_nocheck to skip fsck after test.
 
 Thanks,
-Amir.
+Eryu
+
+> ---
+>  tests/xfs/439 | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/tests/xfs/439 b/tests/xfs/439
+> index 7be700cd..cb13a212 100755
+> --- a/tests/xfs/439
+> +++ b/tests/xfs/439
+> @@ -78,6 +78,9 @@ fi
+>  # or CONFIG_XFS_DEBUG (when bug_on_assert is disabled) build, so filter them.
+>  _check_dmesg _filter_assert_dmesg
+>  
+> +# mkfs again to avoid xfs corruption at the end of test
+> +_scratch_mkfs > /dev/null 2>&1
+> +
+>  echo "Silence is golden"
+>  
+>  # success, all done
+> -- 
+> 2.13.6
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
