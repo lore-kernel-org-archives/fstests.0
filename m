@@ -1,429 +1,334 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44856 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750734AbeAYFAV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Jan 2018 00:00:21 -0500
-Date: Thu, 25 Jan 2018 13:00:19 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH v5] ext4: Ext4 online resize with bigalloc tests.
-Message-ID: <20180125050019.GF18267@eguan.usersys.redhat.com>
-References: <20180124063748.GA16904@eguan.usersys.redhat.com>
- <20180124225812.69852-1-harshads@google.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:4727 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751196AbeAYG0A (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 01:26:00 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH 3/4] overlay: add fsck.overlay redirect directory test
+Date: Thu, 25 Jan 2018 14:34:12 +0800
+Message-ID: <20180125063413.8720-4-yi.zhang@huawei.com>
+In-Reply-To: <20180125063413.8720-1-yi.zhang@huawei.com>
+References: <20180125063413.8720-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180124225812.69852-1-harshads@google.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: harshads <harshads@google.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: eguan@redhat.com
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 24, 2018 at 02:58:12PM -0800, harshads wrote:
-> Add tests to verify Ext4 online resizing feature with bigalloc feature
-> enabled. We test various resizing scenarios with different cluster
-> sizes.
-> 
-> Signed-off-by: Harshad Shirwadkar <harshads@google.com>
+Add fsck.overlay test case to test it how to deal with invalid/valid/
+duplicate redirect xattr in underlying directories of overlayfs.
 
-Thanks for all the revisions! I made some minor edits and queued it for
-next release. Please see below.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/202     | 269 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/202.out |  11 +++
+ tests/overlay/group   |   1 +
+ 3 files changed, 281 insertions(+)
+ create mode 100755 tests/overlay/202
+ create mode 100644 tests/overlay/202.out
 
-> ---
->  tests/ext4/030     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/030.out | 172 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/group   |   1 +
->  3 files changed, 344 insertions(+)
->  create mode 100755 tests/ext4/030
->  create mode 100644 tests/ext4/030.out
-> 
-> diff --git a/tests/ext4/030 b/tests/ext4/030
-> new file mode 100755
-> index 00000000..1d42b514
-> --- /dev/null
-> +++ b/tests/ext4/030
-> @@ -0,0 +1,171 @@
-> +#! /bin/bash
-> +# FS QA Test ext4/030
-> +#
-> +# Ext4 online resize tests of small and crucial resizes with bigalloc
-> +# feature.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-> +#
-> +# Author: Harshad Shirwadkar <harshads@google.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,	 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +BLK_SIZ=4096
-> +CLUSTER_SIZ=4096
-> +
-> +IMG_FILE=$SCRATCH_DIR/$seq.fs
-> +IMG_MNT=$SCRATCH_DIR/$seq.mnt
-> +
-> +## Num clusters to blocks.
-> +c2b()
-> +{
-> +	local clusters=$1
-> +	echo $(($clusters * $CLUSTER_SIZ / $BLK_SIZ))
-> +}
-> +
-> +_ext4_online_resize()
+diff --git a/tests/overlay/202 b/tests/overlay/202
+new file mode 100755
+index 0000000..6de196b
+--- /dev/null
++++ b/tests/overlay/202
+@@ -0,0 +1,269 @@
++#! /bin/bash
++# FS QA Test 202
++#
++# Test fsck.overlay how to deal with redirect xattr in overlayfs.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2017 Huawei.  All Rights Reserved.
++# Author: zhangyi (F) <yi.zhang@huawei.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch_nocheck
++_require_attrs
++_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
++
++# remove all files from previous tests
++_scratch_mkfs
++
++OVL_REDIRECT_XATTR="trusted.overlay.redirect"
++OVL_OPAQUE_XATTR="trusted.overlay.opaque"
++OVL_OPAQUE_XATTR_VAL="y"
++
++# Create a redirect directory
++make_redirect_dir()
++{
++	local target=$1
++	local value=$2
++
++	mkdir -p $target
++	$SETFATTR_PROG -n $OVL_REDIRECT_XATTR -v $value $target
++}
++
++# Check redirect xattr
++check_redirect()
++{
++	local target=$1
++	local expect=$2
++
++	value=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_REDIRECT_XATTR $target)
++
++	[[ $value == $expect ]]	|| echo "Redirect xattr incorrect"
++}
++
++check_no_redirect()
++{
++	local target=$1
++
++	value=$($GETFATTR_PROG --absolute-names -d -m \
++		$OVL_REDIRECT_XATTR $target)
++
++	[[ -z "$value" ]] || echo "Redirect xattr not empty"
++}
++
++# Check opaque xattr
++check_opaque()
++{
++	local target=$1
++
++	value=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_OPAQUE_XATTR $target)
++
++	[[ $value == $OVL_OPAQUE_XATTR_VAL ]] || echo "Opaque xattr incorrect"
++}
++
++# Create a whiteout
++make_whiteout()
++{
++	for arg in $*
++	do
++		mknod $arg c 0 0
++	done
++}
++
++# Check whiteout
++check_whiteout()
++{
++	for arg in $*
++	do
++		local ttype=`stat -c "%F:%t,%T" $arg`
++
++		[[ $ttype == "character special file:0,0" ]] || \
++			echo "Valid whiteout removed incorrectly"
++	done
++}
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++
++make_test_dirs()
++{
++	rm -rf $lowerdir $lowerdir2 $upperdir $workdir
++	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
++}
++
++# Test invalid redirect xattr point to a nonexistent origin, should remove
++echo "+ Invalid redirect"
++make_test_dirs
++make_redirect_dir $upperdir/testdir "invalid"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_no_redirect $upperdir/testdir
++
++# Test invalid redirect xattr point to a file origin, should remove
++echo "+ Invalid redirect(2)"
++make_test_dirs
++touch $lowerdir/origin
++make_redirect_dir $upperdir/testdir "origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_no_redirect $upperdir/testdir
++
++# Test valid redirect xattr point to a directory origin in the same directory,
++# should not remove
++echo "+ Valid redirect"
++make_test_dirs
++mkdir $lowerdir/origin
++make_whiteout $upperdir/origin
++make_redirect_dir $upperdir/testdir "origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_redirect $upperdir/testdir "origin"
++
++# Test valid redirect xattr point to a directory origin in different directories
++# should not remove
++echo "+ Valid redirect(2)"
++make_test_dirs
++mkdir $lowerdir/origin
++make_whiteout $upperdir/origin
++make_redirect_dir $upperdir/testdir1/testdir2 "/origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_redirect $upperdir/testdir1/testdir2 "/origin"
++
++# Test valid redirect xattr but missing whiteout to cover lower target,
++# should fix whiteout
++echo "+ Missing whiteout"
++make_test_dirs
++mkdir $lowerdir/origin
++make_redirect_dir $upperdir/testdir "origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_redirect $upperdir/testdir "origin"
++check_whiteout $upperdir/origin
++
++# Test valid redirect xattrs exchanged by rename, should not remove
++echo "+ Valid redirect(3)"
++make_test_dirs
++mkdir $lowerdir/{testdir1,testdir2}
++make_redirect_dir $upperdir/testdir1 "testdir2"
++make_redirect_dir $upperdir/testdir2 "testdir1"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_redirect $upperdir/testdir1 "testdir2"
++check_redirect $upperdir/testdir2 "testdir1"
++
++# Test invalid redirect xattr with lower same name directory exists,
++# should remove invalid redirect xattr and set opaque in yes mode
++echo "+ Invalid redirect(3)"
++make_test_dirs
++mkdir $lowerdir/testdir
++make_redirect_dir $upperdir/testdir "invalid"
++
++# Question get yes answer: Should set opaque dir ?
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_no_redirect $upperdir/testdir
++check_opaque $upperdir/testdir
++
++# Test duplicate redirect xattrs point to one origin, should fail in
++# auto mode, and should remove either of the duplicates in yes mode
++echo "+ Duplicate redirect"
++make_test_dirs
++mkdir $lowerdir2/origin
++make_redirect_dir $lowerdir/testdir1 "origin"
++make_redirect_dir $lowerdir/testdir2 "origin"
++make_redirect_dir $upperdir/testdir3 "origin"
++
++_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
++	$seqres.full 2>&1 && _fail "fsck should fail"
++
++# Question get yes answer: Duplicate redirect directory, remove xattr ?
++_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -y >> \
++	$seqres.full 2>&1 || _fail "fsck should not fail"
++redirect_1=`check_redirect $lowerdir/testdir1 "origin" 2>/dev/null`
++redirect_2=`check_redirect $lowerdir/testdir2 "origin" 2>/dev/null`
++[[ $redirect_1 == $redirect_2 ]] && echo "Redirect xattr incorrect"
++check_no_redirect $upperdir/testdir3
++
++# Test duplicate redirect xattr duplicate with merge directory, should
++# fail in auto mode, and should remove the redirect xattr in yes mode
++echo "+ Duplicate redirect(2)"
++make_test_dirs
++mkdir $lowerdir/origin $upperdir/origin
++make_redirect_dir $upperdir/testdir "origin"
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 && \
++	_fail "fsck should fail"
++
++# Question get yes answer: Duplicate redirect directory, remove xattr ?
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_no_redirect $upperdir/testdir
++
++# Test duplicate redirect xattr with lower same name directory exists,
++# should remove the duplicate redirect xattr and set opaque in yes mode
++echo "+ Duplicate redirect(3)"
++make_test_dirs
++mkdir $lowerdir/{origin,testdir} $upperdir/origin
++make_redirect_dir $upperdir/testdir "invalid"
++
++# Question one get yes answer: Duplicate redirect directory, remove xattr?
++# Question two get yes answer: Should set opaque dir ?
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
++	_fail "fsck should not fail"
++check_no_redirect $upperdir/testdir
++check_opaque $upperdir/testdir
++
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/202.out b/tests/overlay/202.out
+new file mode 100644
+index 0000000..99d2b32
+--- /dev/null
++++ b/tests/overlay/202.out
+@@ -0,0 +1,11 @@
++QA output created by 202
+++ Invalid redirect
+++ Invalid redirect(2)
+++ Valid redirect
+++ Valid redirect(2)
+++ Missing whiteout
+++ Valid redirect(3)
+++ Invalid redirect(3)
+++ Duplicate redirect
+++ Duplicate redirect(2)
+++ Duplicate redirect(3)
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 7c5fcbb..e39b5e0 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -50,3 +50,4 @@
+ 047 auto quick copyup hardlink
+ 048 auto quick copyup hardlink
+ 201 auto quick fsck
++202 auto quick fsck
+-- 
+2.5.0
 
-I removed the leading underscore for local function.
-
-> +{
-> +	## sizes are in number of blocks.
-> +	local original_size=$1
-> +	local final_size=$2
-> +	local check_if_supported=$([ "$3" = "1" ] && echo "1" || echo "0")
-
-	local check_if_supported=${3:-0}
-
-> +
-> +	## Start with a clean image file.
-> +	echo "" > ${IMG_FILE}
-> +	echo "+++ truncate image file to $final_size" | \
-> +		tee -a $seqres.full
-> +	$XFS_IO_PROG -f -c "truncate $(($final_size * $BLK_SIZ))" ${IMG_FILE}
-> +	LOOP_DEVICE=`_create_loop_device $IMG_FILE || _fail "losetup failed"`
-
-No need to call _fail here, _create_loop_device already did that.
-
-> +
-> +	echo "+++ create fs on image file $original_size" | \
-> +		tee -a $seqres.full
-> +
-> +	${MKFS_PROG}.${FSTYP} -F -O bigalloc,resize_inode -C $CLUSTER_SIZ \
-> +		-b $BLK_SIZ ${LOOP_DEVICE} $original_size >> \
-> +		$seqres.full 2>&1 || _fail "mkfs failed"
-> +
-> +	echo "+++ mount image file" | tee -a $seqres.full
-> +	$MOUNT_PROG -t ${FSTYP} ${LOOP_DEVICE} ${IMG_MNT} > \
-> +		/dev/null 2>&1 || _fail "mount failed"
-> +
-> +	echo "+++ resize fs to $final_size" | tee -a $seqres.full
-> +
-> +	resize_output=$(resize2fs -f ${LOOP_DEVICE} $final_size 2>&1)
-
-I changed this to let resize2fs dump output to a tmp file, saving
-multi-line outputs into a variable would cause subtle problems that are
-hard to find/debug. e.g. echoing a such variable to a pipe without
-proper quotes would change the output in subtle ways, and we did hit
-such problems before.
-
-> +	if [ $? -ne 0 ]; then
-> +		if [ $check_if_supported -eq 1 ]; then
-> +			echo $resize_output | \
-> +			grep "resize2fs: Operation not supported While checking for on-line resizing support" \
-> +				&& _notrun "online resizing not supported with bigalloc"
-> +		fi
-> +		_fail "resize failed"
-> +	fi
-> +	echo $resize_output >> $seqres.full
-
-Then grep the tmp file and append it to $seqres.full.
-
-Thanks,
-Eryu
-
-> +	echo "+++ umount fs" | tee -a $seqres.full
-> +	$UMOUNT_PROG ${IMG_MNT}
-> +
-> +	echo "+++ check fs" | tee -a $seqres.full
-> +	_check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
-> +		_fail "fsck should not fail"
-> +	_destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
-> +}
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	[ -n "$LOOP_DEVICE" ] && _destroy_loop_device $LOOP_DEVICE > /dev/null 2>&1
-> +	rm -f $tmp.*
-> +	$UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
-> +	rm -f ${IMG_FILE} > /dev/null 2>&1
-> +}
-> +
-> +# get standard environment and checks
-> +. ./common/rc
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +
-> +_require_loop
-> +_require_scratch
-> +# We use resize_inode to make sure that block group descriptor table
-> +# can be extended.
-> +_require_scratch_ext4_feature "bigalloc,resize_inode"
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +rm -f $seqres.full
-> +
-> +mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
-> +
-> +# Check if online resizing with bigalloc is supported by the kernel
-> +_ext4_online_resize 4096 8192 1
-> +
-> +## We perform resizing to various multiples of block group sizes to
-> +## ensure that we cover maximum edge cases in the kernel code.
-> +for CLUSTER_SIZ in 4096 16384 65536; do
-> +	echo "++ set cluster size to $CLUSTER_SIZ" | tee -a $seqres.full
-> +
-> +	##
-> +	## Extend last group tests
-> +	##
-> +
-> +	## Extending a 1/2 block group to a 2/3 block group.
-> +	_ext4_online_resize $(c2b 16384) $(c2b 24576)
-> +	## Extending a 2/3rd block group to one cluster less than a
-> +	## full block group.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 32767)
-> +	## Extending a 2/3rd block group to a full block group.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 32768)
-> +
-> +	##
-> +	## Extend last group and add more block groups.
-> +	##
-> +
-> +	## Extending a 2/3rd block group to 2 block groups.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 65536)
-> +	## Extending a 2/3rd block group to 15 block groups and one
-> +	## cluster.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 491521)
-> +	## Extending a 2/3rd block group to 15 and a half block groups.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 507904)
-> +	## Extending a 2/3rd block group to 16 block groups.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 524288)
-> +	## Extending a 2/3rd block group to 160 block groups.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 5242880)
-> +
-> +	##
-> +	## Convert to meta_bg.
-> +	##
-> +
-> +	## Extending a 2/3rd block group to 1280 block groups.
-> +	_ext4_online_resize $(c2b 24576) $(c2b 41943040)
-> +done
-> +
-> +status=0
-> +exit
-> diff --git a/tests/ext4/030.out b/tests/ext4/030.out
-> new file mode 100644
-> index 00000000..49304654
-> --- /dev/null
-> +++ b/tests/ext4/030.out
-> @@ -0,0 +1,172 @@
-> +QA output created by 030
-> ++++ truncate image file to 8192
-> ++++ create fs on image file 4096
-> ++++ mount image file
-> ++++ resize fs to 8192
-> ++++ umount fs
-> ++++ check fs
-> +++ set cluster size to 4096
-> ++++ truncate image file to 24576
-> ++++ create fs on image file 16384
-> ++++ mount image file
-> ++++ resize fs to 24576
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 32767
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 32767
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 32768
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 32768
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 65536
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 65536
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 491521
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 491521
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 507904
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 507904
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 524288
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 524288
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 5242880
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 5242880
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 41943040
-> ++++ create fs on image file 24576
-> ++++ mount image file
-> ++++ resize fs to 41943040
-> ++++ umount fs
-> ++++ check fs
-> +++ set cluster size to 16384
-> ++++ truncate image file to 98304
-> ++++ create fs on image file 65536
-> ++++ mount image file
-> ++++ resize fs to 98304
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 131068
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 131068
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 131072
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 131072
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 262144
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 262144
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 1966084
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 1966084
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 2031616
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 2031616
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 2097152
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 2097152
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 20971520
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 20971520
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 167772160
-> ++++ create fs on image file 98304
-> ++++ mount image file
-> ++++ resize fs to 167772160
-> ++++ umount fs
-> ++++ check fs
-> +++ set cluster size to 65536
-> ++++ truncate image file to 393216
-> ++++ create fs on image file 262144
-> ++++ mount image file
-> ++++ resize fs to 393216
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 524272
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 524272
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 524288
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 524288
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 1048576
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 1048576
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 7864336
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 7864336
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 8126464
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 8126464
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 8388608
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 8388608
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 83886080
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 83886080
-> ++++ umount fs
-> ++++ check fs
-> ++++ truncate image file to 671088640
-> ++++ create fs on image file 393216
-> ++++ mount image file
-> ++++ resize fs to 671088640
-> ++++ umount fs
-> ++++ check fs
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index 257bb646..f29d3de6 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -32,6 +32,7 @@
->  027 auto quick fsmap
->  028 auto quick fsmap
->  029 auto quick fsmap
-> +030 auto quick ioctl resize
->  271 auto rw quick
->  301 aio auto ioctl rw stress defrag
->  302 aio auto ioctl rw stress defrag
-> -- 
-> 2.16.0.rc1.238.g530d649a79-goog
-> 
