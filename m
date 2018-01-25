@@ -1,65 +1,57 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:4729 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751191AbeAYG0D (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Jan 2018 01:26:03 -0500
+Received: from szxga07-in.huawei.com ([45.249.212.35]:58678 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751173AbeAYGbd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 01:31:33 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH 1/4] overlay: add filesystem check helper
-Date: Thu, 25 Jan 2018 14:34:10 +0800
-Message-ID: <20180125063413.8720-2-yi.zhang@huawei.com>
-In-Reply-To: <20180125063413.8720-1-yi.zhang@huawei.com>
-References: <20180125063413.8720-1-yi.zhang@huawei.com>
+Subject: [xfstests PATCH 4/5] overlay: skip check for tests finished with corrupt filesystem
+Date: Thu, 25 Jan 2018 14:39:48 +0800
+Message-ID: <20180125063949.12916-5-yi.zhang@huawei.com>
+In-Reply-To: <20180125063949.12916-1-yi.zhang@huawei.com>
+References: <20180125063949.12916-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add filesystem check helper for the upcoming fsck.overlay utility.
-This helper invoke fsck.overlay to check and optionally repair
-underlying directories of overlay filesystem.
+No post-test check of the overlay dirs is required if case leaves
+corrupt filesystem after test. We shoud use _require_scratch_nocheck()
+instead of _require_scratch() in these cases.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/config  |  1 +
- common/overlay | 14 ++++++++++++++
- 2 files changed, 15 insertions(+)
+ tests/overlay/019 | 2 +-
+ tests/overlay/031 | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/common/config b/common/config
-index 5f40413..71115bd 100644
---- a/common/config
-+++ b/common/config
-@@ -236,6 +236,7 @@ case "$HOSTOS" in
-         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
- 	export E2FSCK_PROG="`set_prog_path e2fsck`"
- 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
-+	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
-         ;;
- esac
+diff --git a/tests/overlay/019 b/tests/overlay/019
+index 3e2bc4e..575aaf7 100755
+--- a/tests/overlay/019
++++ b/tests/overlay/019
+@@ -46,7 +46,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs overlay
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
  
-diff --git a/common/overlay b/common/overlay
-index 1da4ab1..c19dabc 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -151,3 +151,17 @@ _require_scratch_overlay_feature()
- 	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
- 	_scratch_unmount
- }
-+
-+# Helper function to check underlying dirs of overlay filesystem
-+_overlay_fsck_dirs()
-+{
-+	local lowerdir=$1
-+	local upperdir=$2
-+	local workdir=$3
-+	local options=$4
-+
-+	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
-+
-+	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
-+			   -o workdir=$workdir $options
-+}
+ # Remove all files from previous tests
+ _scratch_mkfs
+diff --git a/tests/overlay/031 b/tests/overlay/031
+index 186b409..90a06af 100755
+--- a/tests/overlay/031
++++ b/tests/overlay/031
+@@ -67,7 +67,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ _supported_fs overlay
+ _supported_os Linux
+-_require_scratch
++_require_scratch_nocheck
+ 
+ # remove all files from previous runs
+ _scratch_mkfs
 -- 
 2.5.0
 
