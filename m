@@ -1,79 +1,49 @@
-Received: from mail-yb0-f193.google.com ([209.85.213.193]:45976 "EHLO
-        mail-yb0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751056AbeAYIDa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Jan 2018 03:03:30 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:58122 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751081AbeAYIR4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 03:17:56 -0500
+Date: Thu, 25 Jan 2018 16:17:53 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 4/5] xfs/24[356]: checking cow fork bmap requires
+ CONFIG_XFS_DEBUG=y
+Message-ID: <20180125081753.GH18267@eguan.usersys.redhat.com>
+References: <151683799705.17051.9987269343206294671.stgit@magnolia>
+ <151683802170.17051.13989603221322920472.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20180125063949.12916-2-yi.zhang@huawei.com>
-References: <20180125063949.12916-1-yi.zhang@huawei.com> <20180125063949.12916-2-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 25 Jan 2018 10:03:29 +0200
-Message-ID: <CAOQ4uxhB=MBYxZtPCA_Uq6FtPjFE1AvotfiBRegToreO3ikQPg@mail.gmail.com>
-Subject: Re: [xfstests PATCH 1/5] common/rc: improve mounted check helper
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <151683802170.17051.13989603221322920472.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, yangerkun@huawei.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 25, 2018 at 8:39 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Modify _is_mounted() to accept a dir and fstype as input, and check
-> whether this dir is a specified type of mount point. This patch also
-> fix the problem of invalid fstype check and remove invalid error
-> message.
-
-Which problem? How do you encounter this problem?
-
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
-
-
+On Wed, Jan 24, 2018 at 03:53:41PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> These tests requires XFS debugging functionality, so test for that.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  common/rc | 25 ++++++++++---------------
->  1 file changed, 10 insertions(+), 15 deletions(-)
->
-> diff --git a/common/rc b/common/rc
-> index 77a4eb4..ceb5d44 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2372,27 +2372,22 @@ _scratch_mkfs_richacl()
->         esac
->  }
->
-> -# check that a FS on a device is mounted
-> +# check that a FS on a device is mounted or a dir is a mount point
->  # if so, return mount point
->  #
->  _is_mounted()
->  {
-> -    if [ $# -ne 1 ]
-> -    then
-> -       echo "Usage: _is_mounted device" 1>&2
-> -       exit 1
-> -    fi
-> +       if [ $# -lt 1 ]; then
-> +               echo "Usage: _is_mounted <device|mountpoint> [fstype]" 1>&2
-> +               exit 1
-> +       fi
->
-> -    device=$1
-> +       local name=$1
-> +       local fstype=${2-$FSTYP}
->
-> -    if _mount | grep "$device " | $AWK_PROG -v pattern="type $FSTYP" '
-> -        pattern        { print $3 ; exit 0 }
-> -        END            { exit 1 }
-> -    '
-> -    then
-> -        echo "_is_mounted: $device is not a mounted $FSTYP FS"
-> -        exit 1
-> -    fi
-> +       _mount | grep "$name " | $AWK_PROG -v pattern="type $fstype" '
-> +               $0 ~ pattern    { print $3 }
-> +       '
->  }
->
->  # remount a FS to a new mode (ro or rw)
-> --
-> 2.5.0
->
+>  tests/xfs/243 |    2 ++
+>  tests/xfs/245 |    2 ++
+>  tests/xfs/246 |    2 ++
+>  3 files changed, 6 insertions(+)
+> 
+> 
+> diff --git a/tests/xfs/243 b/tests/xfs/243
+> index 0bb69c4..1e6ab5a 100755
+> --- a/tests/xfs/243
+> +++ b/tests/xfs/243
+> @@ -49,10 +49,12 @@ _cleanup()
+>  . ./common/rc
+>  . ./common/filter
+>  . ./common/reflink
+> +. ./common/xfs
+
+This file should be included already by common/rc based on $FSTYP, no
+need to source it again in test. I'd remove it from all three tests on
+commit.
+
+Thanks,
+Eryu
