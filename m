@@ -1,421 +1,429 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:52502 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932251AbeAXXxy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jan 2018 18:53:54 -0500
-Subject: [PATCH 5/5] xfs: regression tests for reflink quota bugs
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 24 Jan 2018 15:53:47 -0800
-Message-ID: <151683802784.17051.11994070942067598698.stgit@magnolia>
-In-Reply-To: <151683799705.17051.9987269343206294671.stgit@magnolia>
-References: <151683799705.17051.9987269343206294671.stgit@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:44856 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750734AbeAYFAV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 00:00:21 -0500
+Date: Thu, 25 Jan 2018 13:00:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v5] ext4: Ext4 online resize with bigalloc tests.
+Message-ID: <20180125050019.GF18267@eguan.usersys.redhat.com>
+References: <20180124063748.GA16904@eguan.usersys.redhat.com>
+ <20180124225812.69852-1-harshads@google.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180124225812.69852-1-harshads@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: harshads <harshads@google.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Jan 24, 2018 at 02:58:12PM -0800, harshads wrote:
+> Add tests to verify Ext4 online resizing feature with bigalloc feature
+> enabled. We test various resizing scenarios with different cluster
+> sizes.
+> 
+> Signed-off-by: Harshad Shirwadkar <harshads@google.com>
 
-Add three tests to look for quota bugs in xfs reflink.  The first
-test looks for problems when we have speculative cow reservations
-in memory, we chown the file, but the reservations don't move to
-the new owner.  The second test checks that we remembered to
-dqattach the inodes before performing reflink operations; and the
-third exercises reflink quota handling near enospc.
+Thanks for all the revisions! I made some minor edits and queued it for
+next release. Please see below.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/904     |   93 ++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/904.out |   17 ++++++++
- tests/xfs/905     |   88 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/905.out |   13 ++++++
- tests/xfs/906     |  111 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/906.out |    6 +++
- tests/xfs/group   |    3 +
- 7 files changed, 331 insertions(+)
- create mode 100755 tests/xfs/904
- create mode 100644 tests/xfs/904.out
- create mode 100755 tests/xfs/905
- create mode 100644 tests/xfs/905.out
- create mode 100755 tests/xfs/906
- create mode 100644 tests/xfs/906.out
+> ---
+>  tests/ext4/030     | 171 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/030.out | 172 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/group   |   1 +
+>  3 files changed, 344 insertions(+)
+>  create mode 100755 tests/ext4/030
+>  create mode 100644 tests/ext4/030.out
+> 
+> diff --git a/tests/ext4/030 b/tests/ext4/030
+> new file mode 100755
+> index 00000000..1d42b514
+> --- /dev/null
+> +++ b/tests/ext4/030
+> @@ -0,0 +1,171 @@
+> +#! /bin/bash
+> +# FS QA Test ext4/030
+> +#
+> +# Ext4 online resize tests of small and crucial resizes with bigalloc
+> +# feature.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
+> +#
+> +# Author: Harshad Shirwadkar <harshads@google.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,	 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +BLK_SIZ=4096
+> +CLUSTER_SIZ=4096
+> +
+> +IMG_FILE=$SCRATCH_DIR/$seq.fs
+> +IMG_MNT=$SCRATCH_DIR/$seq.mnt
+> +
+> +## Num clusters to blocks.
+> +c2b()
+> +{
+> +	local clusters=$1
+> +	echo $(($clusters * $CLUSTER_SIZ / $BLK_SIZ))
+> +}
+> +
+> +_ext4_online_resize()
 
+I removed the leading underscore for local function.
 
-diff --git a/tests/xfs/904 b/tests/xfs/904
-new file mode 100755
-index 0000000..ef78f1a
---- /dev/null
-+++ b/tests/xfs/904
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test No. 904
-+#
-+# Regression test for a quota accounting bug when changing the owner of
-+# a file that has CoW reservations and no dirty pages.  The reservations
-+# should shift over to the new owner, but they do not.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/reflink
-+. ./common/quota
-+. ./common/filter
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_quota
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_user
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount "-o usrquota,grpquota" >> "$seqres.full" 2>&1
-+
-+echo "Create files"
-+$XFS_IO_PROG -c "cowextsize 1m" $SCRATCH_MNT
-+touch $SCRATCH_MNT/a $SCRATCH_MNT/force_fsgqa
-+chown $qa_user $SCRATCH_MNT/a $SCRATCH_MNT/force_fsgqa
-+_pwrite_byte 0x58 0 64k $SCRATCH_MNT/a >> $seqres.full
-+$XFS_IO_PROG -c 'stat -r' $SCRATCH_MNT/a | grep stat.size >> $seqres.full
-+_report_quota_blocks "-u $SCRATCH_MNT"
-+
-+echo "Reflink and CoW"
-+_cp_reflink $SCRATCH_MNT/a $SCRATCH_MNT/b
-+_pwrite_byte 0x59 0 64k $SCRATCH_MNT/a >> $seqres.full
-+$XFS_IO_PROG -c 'stat -r' $SCRATCH_MNT/a | grep stat.size >> $seqres.full
-+_report_quota_blocks "-u $SCRATCH_MNT"
-+
-+echo "Sync"
-+sync
-+_report_quota_blocks "-u $SCRATCH_MNT"
-+
-+echo "Chown and check quota"
-+chown root $SCRATCH_MNT/a
-+$XFS_IO_PROG -c 'stat -r' $SCRATCH_MNT/a | grep stat.size >> $seqres.full
-+_report_quota_blocks "-u $SCRATCH_MNT"
-+
-+echo "Remount"
-+_scratch_unmount
-+_scratch_mount "-o usrquota,grpquota" >> "$seqres.full" 2>&1
-+$XFS_IO_PROG -c 'stat -r' $SCRATCH_MNT/a | grep stat.size >> $seqres.full
-+_report_quota_blocks "-u $SCRATCH_MNT"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/904.out b/tests/xfs/904.out
-new file mode 100644
-index 0000000..4c2f508
---- /dev/null
-+++ b/tests/xfs/904.out
-@@ -0,0 +1,17 @@
-+QA output created by 904
-+Format and mount
-+Create files
-+root 0 0 0
-+fsgqa 64 0 0
-+Reflink and CoW
-+root 0 0 0
-+fsgqa 1152 0 0
-+Sync
-+root 0 0 0
-+fsgqa 1088 0 0
-+Chown and check quota
-+root 1024 0 0
-+fsgqa 64 0 0
-+Remount
-+root 64 0 0
-+fsgqa 64 0 0
-diff --git a/tests/xfs/905 b/tests/xfs/905
-new file mode 100755
-index 0000000..a457c84
---- /dev/null
-+++ b/tests/xfs/905
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test No. 905
-+#
-+# Regression test for a quota accounting bug when reflinking across EOF
-+# of a file in which we forgot dq_attach.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/reflink
-+. ./common/quota
-+. ./common/filter
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_quota
-+_require_scratch_reflink
-+_require_cp_reflink
-+_require_user
-+
-+rm -f $seqres.full
-+
-+check_quota() {
-+	du_total="$(du -ksc $SCRATCH_MNT/a $SCRATCH_MNT/b | tail -n 1 | awk '{print $1}')"
-+	qu_total="$(_report_quota_blocks "-u $SCRATCH_MNT" | grep $qa_user | awk '{print $2}')"
-+	echo "du: $du_total; quota: $qu_total"
-+}
-+
-+echo "Format and mount (noquota)"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount "-o noquota" >> $seqres.full 2>&1
-+
-+echo "Create files"
-+_pwrite_byte 0x58 0 1m $SCRATCH_MNT/a >> $seqres.full
-+_pwrite_byte 0x58 0 1m $SCRATCH_MNT/b >> $seqres.full
-+chown $qa_user $SCRATCH_MNT/a $SCRATCH_MNT/b
-+check_quota 2>&1 | _filter_scratch
-+
-+echo "Mount (usrquota) and check quota"
-+_scratch_unmount
-+_scratch_mount "-o usrquota,grpquota" >> "$seqres.full" 2>&1
-+check_quota
-+
-+echo "Reflink and check quota again"
-+_reflink_range $SCRATCH_MNT/a 256k $SCRATCH_MNT/b 384k 128k >> $seqres.full
-+_reflink_range $SCRATCH_MNT/a 256k $SCRATCH_MNT/b 960k 128k >> $seqres.full
-+check_quota
-+
-+echo "Force quotacheck"
-+_check_quota_usage
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/905.out b/tests/xfs/905.out
-new file mode 100644
-index 0000000..fa95624
---- /dev/null
-+++ b/tests/xfs/905.out
-@@ -0,0 +1,13 @@
-+QA output created by 905
-+Format and mount (noquota)
-+Create files
-+repquota: Mountpoint (or device) SCRATCH_MNT not found or has no quota enabled.
-+repquota: Not all specified mountpoints are using quota.
-+du: 2048; quota: 
-+Mount (usrquota) and check quota
-+du: 2048; quota: 2048
-+Reflink and check quota again
-+du: 2112; quota: 2112
-+Force quotacheck
-+Comparing user usage
-+Comparing group usage
-diff --git a/tests/xfs/906 b/tests/xfs/906
-new file mode 100755
-index 0000000..17dcd2e
---- /dev/null
-+++ b/tests/xfs/906
-@@ -0,0 +1,111 @@
-+#! /bin/bash
-+# FS QA Test No. 906
-+#
-+# Force enable all XFS quotas, run fsstress until the fs runs out of
-+# space, and make sure the quotas are still correct when we're done.
-+# This is a general regression/stress test for numerous quota bugs with
-+# reflink and copy on write.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	$KILLALL_PROG -9 fsstress > /dev/null 2>&1
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/quota
-+. ./common/filter
-+. ./common/reflink
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_scratch_reflink
-+_require_quota
-+_require_command "$KILLALL_PROG" "killall"
-+
-+rm -f $seqres.full
-+
-+report_quota_blocks() {
-+	$XFS_QUOTA_PROG -x -c "report $1" $SCRATCH_MNT | \
-+			awk '{x += $2;} END { print(x); }'
-+}
-+
-+compare_quota_to_du() {
-+	test $1 -eq $2 || echo "$3 quota $2 blocks does not match du $1 blocks?"
-+}
-+
-+# Make sure the user/group/project quota block counts match the du output.
-+# This ensures that we did the quota accounting correctly and that we're
-+# accurately reporting cow preallocation blocks in stat.
-+check_quota_du_blocks() {
-+	sync
-+	$XFS_QUOTA_PROG -x -c 'report' $SCRATCH_MNT >> $seqres.full
-+	du_rep=$(du -ks $SCRATCH_MNT | awk '{print $1}')
-+	u_rep=$(report_quota_blocks -u)
-+	g_rep=$(report_quota_blocks -g)
-+	p_rep=$(report_quota_blocks -p)
-+
-+	compare_quota_to_du $du_rep $u_rep "user"
-+	compare_quota_to_du $du_rep $g_rep "group"
-+	compare_quota_to_du $du_rep $p_rep "project"
-+}
-+
-+echo "Format and fsstress"
-+
-+_qmount_option "usrquota,grpquota,prjquota"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+nr_cpus=$((LOAD_FACTOR * 4))
-+nr_ops=$((25000 * nr_cpus * TIME_FACTOR))
-+$FSSTRESS_PROG $FSSTRESS_AVOID -w -d $SCRATCH_MNT -n $nr_ops -p $nr_cpus >> $seqres.full
-+
-+echo "Check quota before remount"
-+check_quota_du_blocks
-+
-+# Clear out all the preallocations before we quotacheck.
-+# The count comparison in _check_quota_usage will be unhappy if we don't
-+# manage to clean out all the cow preallocations before the remount.
-+_scratch_unmount
-+_scratch_mount
-+
-+# Make sure the usage doesn't change after quotacheck.
-+echo "Check quota after remount"
-+_check_quota_usage
-+
-+check_quota_du_blocks
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/906.out b/tests/xfs/906.out
-new file mode 100644
-index 0000000..201daf3
---- /dev/null
-+++ b/tests/xfs/906.out
-@@ -0,0 +1,6 @@
-+QA output created by 906
-+Format and fsstress
-+Check quota before remount
-+Check quota after remount
-+Comparing user usage
-+Comparing group usage
-diff --git a/tests/xfs/group b/tests/xfs/group
-index cf81451..aa8b49f 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -437,3 +437,6 @@
- 437 auto quick other
- 438 auto quick quota dangerous
- 439 auto quick fuzzers log
-+904 auto quick clone quota
-+905 auto quick clone quota
-+906 auto quick clone quota
+> +{
+> +	## sizes are in number of blocks.
+> +	local original_size=$1
+> +	local final_size=$2
+> +	local check_if_supported=$([ "$3" = "1" ] && echo "1" || echo "0")
 
+	local check_if_supported=${3:-0}
+
+> +
+> +	## Start with a clean image file.
+> +	echo "" > ${IMG_FILE}
+> +	echo "+++ truncate image file to $final_size" | \
+> +		tee -a $seqres.full
+> +	$XFS_IO_PROG -f -c "truncate $(($final_size * $BLK_SIZ))" ${IMG_FILE}
+> +	LOOP_DEVICE=`_create_loop_device $IMG_FILE || _fail "losetup failed"`
+
+No need to call _fail here, _create_loop_device already did that.
+
+> +
+> +	echo "+++ create fs on image file $original_size" | \
+> +		tee -a $seqres.full
+> +
+> +	${MKFS_PROG}.${FSTYP} -F -O bigalloc,resize_inode -C $CLUSTER_SIZ \
+> +		-b $BLK_SIZ ${LOOP_DEVICE} $original_size >> \
+> +		$seqres.full 2>&1 || _fail "mkfs failed"
+> +
+> +	echo "+++ mount image file" | tee -a $seqres.full
+> +	$MOUNT_PROG -t ${FSTYP} ${LOOP_DEVICE} ${IMG_MNT} > \
+> +		/dev/null 2>&1 || _fail "mount failed"
+> +
+> +	echo "+++ resize fs to $final_size" | tee -a $seqres.full
+> +
+> +	resize_output=$(resize2fs -f ${LOOP_DEVICE} $final_size 2>&1)
+
+I changed this to let resize2fs dump output to a tmp file, saving
+multi-line outputs into a variable would cause subtle problems that are
+hard to find/debug. e.g. echoing a such variable to a pipe without
+proper quotes would change the output in subtle ways, and we did hit
+such problems before.
+
+> +	if [ $? -ne 0 ]; then
+> +		if [ $check_if_supported -eq 1 ]; then
+> +			echo $resize_output | \
+> +			grep "resize2fs: Operation not supported While checking for on-line resizing support" \
+> +				&& _notrun "online resizing not supported with bigalloc"
+> +		fi
+> +		_fail "resize failed"
+> +	fi
+> +	echo $resize_output >> $seqres.full
+
+Then grep the tmp file and append it to $seqres.full.
+
+Thanks,
+Eryu
+
+> +	echo "+++ umount fs" | tee -a $seqres.full
+> +	$UMOUNT_PROG ${IMG_MNT}
+> +
+> +	echo "+++ check fs" | tee -a $seqres.full
+> +	_check_generic_filesystem $LOOP_DEVICE >> $seqres.full 2>&1 || \
+> +		_fail "fsck should not fail"
+> +	_destroy_loop_device $LOOP_DEVICE && LOOP_DEVICE=
+> +}
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	[ -n "$LOOP_DEVICE" ] && _destroy_loop_device $LOOP_DEVICE > /dev/null 2>&1
+> +	rm -f $tmp.*
+> +	$UMOUNT_PROG ${IMG_MNT} > /dev/null 2>&1
+> +	rm -f ${IMG_FILE} > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment and checks
+> +. ./common/rc
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs ext4
+> +_supported_os Linux
+> +
+> +_require_loop
+> +_require_scratch
+> +# We use resize_inode to make sure that block group descriptor table
+> +# can be extended.
+> +_require_scratch_ext4_feature "bigalloc,resize_inode"
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +rm -f $seqres.full
+> +
+> +mkdir -p $IMG_MNT || _fail "cannot create loopback mount point"
+> +
+> +# Check if online resizing with bigalloc is supported by the kernel
+> +_ext4_online_resize 4096 8192 1
+> +
+> +## We perform resizing to various multiples of block group sizes to
+> +## ensure that we cover maximum edge cases in the kernel code.
+> +for CLUSTER_SIZ in 4096 16384 65536; do
+> +	echo "++ set cluster size to $CLUSTER_SIZ" | tee -a $seqres.full
+> +
+> +	##
+> +	## Extend last group tests
+> +	##
+> +
+> +	## Extending a 1/2 block group to a 2/3 block group.
+> +	_ext4_online_resize $(c2b 16384) $(c2b 24576)
+> +	## Extending a 2/3rd block group to one cluster less than a
+> +	## full block group.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 32767)
+> +	## Extending a 2/3rd block group to a full block group.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 32768)
+> +
+> +	##
+> +	## Extend last group and add more block groups.
+> +	##
+> +
+> +	## Extending a 2/3rd block group to 2 block groups.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 65536)
+> +	## Extending a 2/3rd block group to 15 block groups and one
+> +	## cluster.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 491521)
+> +	## Extending a 2/3rd block group to 15 and a half block groups.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 507904)
+> +	## Extending a 2/3rd block group to 16 block groups.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 524288)
+> +	## Extending a 2/3rd block group to 160 block groups.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 5242880)
+> +
+> +	##
+> +	## Convert to meta_bg.
+> +	##
+> +
+> +	## Extending a 2/3rd block group to 1280 block groups.
+> +	_ext4_online_resize $(c2b 24576) $(c2b 41943040)
+> +done
+> +
+> +status=0
+> +exit
+> diff --git a/tests/ext4/030.out b/tests/ext4/030.out
+> new file mode 100644
+> index 00000000..49304654
+> --- /dev/null
+> +++ b/tests/ext4/030.out
+> @@ -0,0 +1,172 @@
+> +QA output created by 030
+> ++++ truncate image file to 8192
+> ++++ create fs on image file 4096
+> ++++ mount image file
+> ++++ resize fs to 8192
+> ++++ umount fs
+> ++++ check fs
+> +++ set cluster size to 4096
+> ++++ truncate image file to 24576
+> ++++ create fs on image file 16384
+> ++++ mount image file
+> ++++ resize fs to 24576
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 32767
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 32767
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 32768
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 32768
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 65536
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 65536
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 491521
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 491521
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 507904
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 507904
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 524288
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 524288
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 5242880
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 5242880
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 41943040
+> ++++ create fs on image file 24576
+> ++++ mount image file
+> ++++ resize fs to 41943040
+> ++++ umount fs
+> ++++ check fs
+> +++ set cluster size to 16384
+> ++++ truncate image file to 98304
+> ++++ create fs on image file 65536
+> ++++ mount image file
+> ++++ resize fs to 98304
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 131068
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 131068
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 131072
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 131072
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 262144
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 262144
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 1966084
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 1966084
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 2031616
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 2031616
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 2097152
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 2097152
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 20971520
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 20971520
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 167772160
+> ++++ create fs on image file 98304
+> ++++ mount image file
+> ++++ resize fs to 167772160
+> ++++ umount fs
+> ++++ check fs
+> +++ set cluster size to 65536
+> ++++ truncate image file to 393216
+> ++++ create fs on image file 262144
+> ++++ mount image file
+> ++++ resize fs to 393216
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 524272
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 524272
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 524288
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 524288
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 1048576
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 1048576
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 7864336
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 7864336
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 8126464
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 8126464
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 8388608
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 8388608
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 83886080
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 83886080
+> ++++ umount fs
+> ++++ check fs
+> ++++ truncate image file to 671088640
+> ++++ create fs on image file 393216
+> ++++ mount image file
+> ++++ resize fs to 671088640
+> ++++ umount fs
+> ++++ check fs
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index 257bb646..f29d3de6 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -32,6 +32,7 @@
+>  027 auto quick fsmap
+>  028 auto quick fsmap
+>  029 auto quick fsmap
+> +030 auto quick ioctl resize
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress defrag
+>  302 aio auto ioctl rw stress defrag
+> -- 
+> 2.16.0.rc1.238.g530d649a79-goog
+> 
