@@ -1,68 +1,69 @@
-Received: from mx1.redhat.com ([209.132.183.28]:42016 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:47986 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751081AbeAYHjW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Jan 2018 02:39:22 -0500
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 672F972FE9
-        for <fstests@vger.kernel.org>; Thu, 25 Jan 2018 07:39:22 +0000 (UTC)
-Received: from dhcp-12-127.nay.redhat.com (unknown [10.66.12.127])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id A497B5D728
-        for <fstests@vger.kernel.org>; Thu, 25 Jan 2018 07:39:21 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/439: mkfs again to avoid corruption failure
-Date: Thu, 25 Jan 2018 15:39:18 +0800
-Message-Id: <20180125073918.22371-1-zlang@redhat.com>
+        id S1751223AbeAYH6r (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Jan 2018 02:58:47 -0500
+Date: Thu, 25 Jan 2018 15:58:45 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 3/5] generic/403: don't spew '$GETFATTR_PROG: Killed'
+ messages
+Message-ID: <20180125075845.GG18267@eguan.usersys.redhat.com>
+References: <151683799705.17051.9987269343206294671.stgit@magnolia>
+ <151683801556.17051.2037237512407215800.stgit@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <151683801556.17051.2037237512407215800.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs/439 always fails on ppc64 as below:
-  # ./check xfs/439
-  ...
-  ...
-  xfs/439 2s ... 1s
-  _check_xfs_filesystem: filesystem on /dev/sda5 is inconsistent (r)
-  (see /var/lib/xfstests/results//xfs/439.full for details)
-  Ran: xfs/439
-  Failures: xfs/439
-  Failed 1 of 1 tests
+On Wed, Jan 24, 2018 at 03:53:35PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Use a runfile presence check to control the background getfattr loop
+> instead of using kill -9.  This helps us to avoid the problem that
+> the controlling bash will print a process killed message, which wrecks
+> the golden output.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-  # xfs_repair -n $SCRATCH_DEV
-  ...
-  ...
-  Phase 6 - check inode connectivity...
-          - traversing filesystem ...
-          - traversal finished ...
-          - moving disconnected inodes to lost+found ...
-  Phase 7 - verify link counts...
-  Maximum metadata LSN (1:2) is ahead of log (1:2).
-  Would format log to cycle 4.
-  No modify flag set, skipping filesystem flush and exiting.
+I saw this failure in automatic fstests runs occasionally, but could
+never reproduce it manually. Thanks for fixing it!
 
-It can't be fixed by log replay (scratch_mount), so mkfs again to
-make sure the case won't be failed at the end.
+> ---
+>  tests/generic/403 |    6 ++++--
+>  1 file changed, 4 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/403 b/tests/generic/403
+> index 17897ff..18fd1e5 100755
+> --- a/tests/generic/403
+> +++ b/tests/generic/403
+> @@ -61,7 +61,9 @@ touch $SCRATCH_MNT/file
+>  $SETFATTR_PROG -n trusted.small -v a $SCRATCH_MNT/file
+>  
+>  # start a background getxattr loop for the existing xattr
+> -while [ true ]; do
+> +runfile="$tmp.getfattr"
+> +touch $runfile
+> +while [ -e $runfile ]; do
+>  	$GETFATTR_PROG --absolute-names -n trusted.small $SCRATCH_MNT/file \
+>  		> /dev/null || break
+>  done &
+> @@ -75,7 +77,7 @@ for i in $(seq 0 99); do
+>  	$SETFATTR_PROG -x trusted.big $SCRATCH_MNT/file
+>  done
+>  
+> -kill -9 $getfattr_pid > /dev/null 2>&1
+> +rm -rf $runfile
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/439 | 3 +++
- 1 file changed, 3 insertions(+)
+I changed it to 'rm -f $runfile', dropped '-r'.
 
-diff --git a/tests/xfs/439 b/tests/xfs/439
-index 7be700cd..cb13a212 100755
---- a/tests/xfs/439
-+++ b/tests/xfs/439
-@@ -78,6 +78,9 @@ fi
- # or CONFIG_XFS_DEBUG (when bug_on_assert is disabled) build, so filter them.
- _check_dmesg _filter_assert_dmesg
- 
-+# mkfs again to avoid xfs corruption at the end of test
-+_scratch_mkfs > /dev/null 2>&1
-+
- echo "Silence is golden"
- 
- # success, all done
--- 
-2.13.6
+Thanks,
+Eryu
 
+>  wait > /dev/null 2>&1
+>  
+>  echo Silence is golden
+> 
