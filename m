@@ -1,12 +1,12 @@
 Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:5695 "EHLO
         ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751608AbeA0Dwq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 26 Jan 2018 22:52:46 -0500
-Date: Thu, 25 Jan 2018 11:02:15 +1100
+        by vger.kernel.org with ESMTP id S1751647AbeA0Dwt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 26 Jan 2018 22:52:49 -0500
+Date: Sat, 27 Jan 2018 14:16:59 +1100
 From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH v2 4/8] metaperf: Include linux/param.h explicitly for HZ
  macro
-Message-ID: <20180125000215.qlbpu5i37luul6cl@destitution>
+Message-ID: <20180127031659.mtpdvi4t3bis22af@destitution>
 References: <1516636639-9107-1-git-send-email-rostislav@tuxera.com>
  <1516636639-9107-5-git-send-email-rostislav@tuxera.com>
  <20180122202406.GD16776@infradead.org>
@@ -39,9 +39,8 @@ On Wed, Jan 24, 2018 at 11:58:59AM +0800, Eryu Guan wrote:
 > 
 > I think we can remove src/metaperf.c too.
 
-I use metaperf (and dirperf) quite regularly when testing my
-patches, so I'd really like them to remin available on all my test
-machines that have fstests installed....
+FYI I use dirperf and metaperf for standalone ismoke testing of my
+kernel changes quite a lot...
 
 Cheers,
 
