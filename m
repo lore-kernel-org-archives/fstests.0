@@ -1,272 +1,56 @@
-Received: from mail-wm0-f66.google.com ([74.125.82.66]:35856 "EHLO
-        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751526AbeA1JVn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jan 2018 04:21:43 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 5/5] overlay: test encode/decode of non-samefs overlay file handles with renames
-Date: Sun, 28 Jan 2018 11:22:36 +0200
-Message-Id: <1517131356-8048-6-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1517131356-8048-1-git-send-email-amir73il@gmail.com>
-References: <1517131356-8048-1-git-send-email-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39648 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751524AbeA1Kqu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 28 Jan 2018 05:46:50 -0500
+Date: Sun, 28 Jan 2018 18:46:47 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH v2 4/8] metaperf: Include linux/param.h explicitly for HZ
+ macro
+Message-ID: <20180128104647.GO18267@eguan.usersys.redhat.com>
+References: <1516636639-9107-1-git-send-email-rostislav@tuxera.com>
+ <1516636639-9107-5-git-send-email-rostislav@tuxera.com>
+ <20180122202406.GD16776@infradead.org>
+ <20180124035859.GA30514@eguan.usersys.redhat.com>
+ <20180125000215.qlbpu5i37luul6cl@destitution>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180125000215.qlbpu5i37luul6cl@destitution>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Christoph Hellwig <hch@infradead.org>, Rostislav Skudnov <rostislav@tuxera.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is a variant of overlay file handles with renames test for an
-overlayfs that is composed of multiple lower layers not on the same
-underlying fs.
+On Thu, Jan 25, 2018 at 11:02:15AM +1100, Dave Chinner wrote:
+> On Wed, Jan 24, 2018 at 11:58:59AM +0800, Eryu Guan wrote:
+> > On Mon, Jan 22, 2018 at 12:24:06PM -0800, Christoph Hellwig wrote:
+> > > On Mon, Jan 22, 2018 at 03:57:15PM +0000, Rostislav Skudnov wrote:
+> > > > Glibc includes linux/param.h when we include sys/param.h, whereas musl
+> > > > libc does not do that. HZ is a Linux-specific macro, therefore include
+> > > > the header file that defines it explicitly.
+> > > > 
+> > > > Signed-off-by: Rostislav Skudnov <rostislav@tuxera.com>
+> > > 
+> > > Using HZ in userspace doesn't make any sense at all.  The kernel HZ
+> > > (as in the granulairy for jiffies) can vary between architectures
+> > > and even configurations.  I guess it wants a hard coded 100 here, but
+> > > someone will have to do a detailed analysis.
+> > 
+> > No one is using metaperf now, all the old benchmark infrastructure was
+> > removed by commit b020416d51ff ("xfstests: remove bench infrastructure")
+> > 
+> > I think we can remove src/metaperf.c too.
+> 
+> I use metaperf (and dirperf) quite regularly when testing my
+> patches, so I'd really like them to remin available on all my test
+> machines that have fstests installed....
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/053     | 198 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/053.out |  22 ++++++
- tests/overlay/group   |   1 +
- 3 files changed, 221 insertions(+)
- create mode 100755 tests/overlay/053
- create mode 100644 tests/overlay/053.out
+Thanks for the heads-up! Let's keep dmiperf.c and metaperf.c then.
 
-diff --git a/tests/overlay/053 b/tests/overlay/053
-new file mode 100755
-index 0000000..97ea0d5
---- /dev/null
-+++ b/tests/overlay/053
-@@ -0,0 +1,198 @@
-+#! /bin/bash
-+# FS QA Test No. 053
-+#
-+# Test encode/decode of non-samefs overlay file handles with renames
-+#
-+# This is a variant of overlay file handles with renames test for an
-+# overlayfs that is composed of multiple lower layers not on the same
-+# underlying fs.
-+#
-+# - Check decode/read of file handles after rename of parent
-+# - Check decode/read of file handles after rename of grandparent
-+# - Check decode/read of file handles after move to new parent
-+# - Check encode/decode/read of file handles in non-upper overlay
-+#
-+# This test requires and enables overlayfs NFS export support and merge
-+# dir rename support (redirect_dir).
-+# NFS export support depends on and enables overlayfs index feature.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	# Cleanup overlay scratch mount that is holding base test mount
-+	# to prevent _check_test_fs and _test_umount from failing before
-+	# _check_scratch_fs _scratch_umount
-+	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+
-+_supported_fs overlay
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_test_program "open_by_handle"
-+_require_scratch_features index nfs_export redirect_dir
-+
-+# Lower is on test partition
-+lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
-+# Upper/work are on scratch partition
-+middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
-+
-+NUMFILES=1
-+
-+# Create test dir and empty test files
-+create_test_files()
-+{
-+	local dir=$1
-+	local opt=$2
-+
-+	mkdir -p $dir
-+	$here/src/open_by_handle -cp $opt $dir $NUMFILES
-+}
-+
-+# Test encode/decode file handles on overlay mount
-+test_file_handles()
-+{
-+	local dir=$1
-+	shift
-+
-+	echo test_file_handles $dir $* | _filter_scratch | \
-+				sed -e "s,$tmp\.,,g"
-+	$here/src/open_by_handle $* $dir $NUMFILES
-+}
-+
-+# Re-create lower/middle/upper/work dirs
-+create_dirs()
-+{
-+	# Create lower dir on test partition
-+	rm -rf $lower
-+	mkdir $lower
-+
-+	# Create middle/upper/work dirs on scratch partition
-+	_scratch_mkfs
-+}
-+
-+# Mount an overlay on $SCRATCH_MNT with lower layer on test partition
-+# and middle and upper layer on scratch partition
-+mount_dirs()
-+{
-+	_overlay_scratch_mount_dirs $middle:$lower $upper $work \
-+				-o "index=on,nfs_export=on,redirect_dir=on"
-+}
-+
-+# Unmount the overlay without unmounting base fs
-+unmount_dirs()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+# Check non-stale file handles of lower/upper moved files
-+create_dirs
-+create_test_files $upper/uppertestdir -w
-+create_test_files $lower/lowertestdir -w
-+mkdir -p $lower/lowertestdir.lo $lower/lowertestdir.up $upper/uppertestdir.lo $upper/uppertestdir.up
-+mount_dirs
-+# Check encode/decode/read of lower/upper file handles after move to new upper testdir
-+test_file_handles $SCRATCH_MNT/uppertestdir -o $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT/lowertestdir -o $tmp.lower_file_handles
-+mv $SCRATCH_MNT/uppertestdir/* $SCRATCH_MNT/uppertestdir.up/
-+mv $SCRATCH_MNT/lowertestdir/* $SCRATCH_MNT/uppertestdir.lo/
-+# Check open and read from stored file handles
-+test_file_handles $SCRATCH_MNT -r -i $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT -r -i $tmp.lower_file_handles
-+# Check encode/decode/read of lower/upper file handles after move to new merge testdir
-+test_file_handles $SCRATCH_MNT/uppertestdir.up -o $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT/uppertestdir.lo -o $tmp.lower_file_handles
-+mv $SCRATCH_MNT/uppertestdir.up/* $SCRATCH_MNT/lowertestdir.up/
-+mv $SCRATCH_MNT/uppertestdir.lo/* $SCRATCH_MNT/lowertestdir.lo/
-+# Check open and read from stored file handles
-+test_file_handles $SCRATCH_MNT -r -i $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT -r -i $tmp.lower_file_handles
-+unmount_dirs
-+
-+# Check non-stale file handles of lower/upper renamed dirs
-+create_dirs
-+create_test_files $upper/uppertestdir -w
-+create_test_files $lower/lowertestdir -w
-+create_test_files $upper/uppertestdir/subdir -w
-+create_test_files $lower/lowertestdir/subdir -w
-+mount_dirs
-+# Check encode/decode/read of lower/upper file handles after rename of testdir
-+test_file_handles $SCRATCH_MNT/uppertestdir -p -o $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT/lowertestdir -p -o $tmp.lower_file_handles
-+# Check encode/decode/read of lower/upper file handles after rename of testdir's parent
-+test_file_handles $SCRATCH_MNT/uppertestdir/subdir -p -o $tmp.upper_subdir_file_handles
-+test_file_handles $SCRATCH_MNT/lowertestdir/subdir -p -o $tmp.lower_subdir_file_handles
-+# Rename pure upper dir
-+mv $SCRATCH_MNT/uppertestdir $SCRATCH_MNT/uppertestdir.new/
-+# Copy up lower dir, index and rename
-+mv $SCRATCH_MNT/lowertestdir $SCRATCH_MNT/lowertestdir.new/
-+# Check open, read and readdir from stored file handles
-+# (testdir argument is the mount point and NOT the dir
-+#  we are trying to open by stored file handle)
-+test_file_handles $SCRATCH_MNT -rp -i $tmp.upper_file_handles
-+test_file_handles $SCRATCH_MNT -rp -i $tmp.lower_file_handles
-+test_file_handles $SCRATCH_MNT -rp -i $tmp.upper_subdir_file_handles
-+test_file_handles $SCRATCH_MNT -rp -i $tmp.lower_subdir_file_handles
-+# Retry decoding lower subdir file handle when indexed testdir is in dcache
-+# (providing renamed testdir argument pins the indexed testdir to dcache)
-+test_file_handles $SCRATCH_MNT/lowertestdir.new -rp -i $tmp.lower_subdir_file_handles
-+unmount_dirs
-+
-+# Check encode/decode/read of lower file handles on lower layers only r/o overlay.
-+# For non-upper overlay mount, nfs_export requires disabling redirect_dir.
-+$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+			-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$middle:$lower
-+test_file_handles $SCRATCH_MNT/lowertestdir -rp
-+test_file_handles $SCRATCH_MNT/lowertestdir/subdir -rp
-+unmount_dirs
-+
-+# Check encode/decode/read of lower file handles on lower layers only r/o overlay
-+# with non-indexed redirects from top lower layer to bottom lower layer.
-+# Overlay lookup cannot follow the redirect from $upper/lowertestdir.new to
-+# $lower/lowertestdir. Instead, we mount an overlay subtree rooted at these
-+# directories.
-+$MOUNT_PROG -t overlay $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
-+		-o ro,redirect_dir=nofollow,nfs_export=on,lowerdir=$upper/lowertestdir.new:$lower/lowertestdir
-+test_file_handles $SCRATCH_MNT -r
-+test_file_handles $SCRATCH_MNT/subdir -rp
-+unmount_dirs
-+
-+status=0
-+exit
-diff --git a/tests/overlay/053.out b/tests/overlay/053.out
-new file mode 100644
-index 0000000..c6f9de0
---- /dev/null
-+++ b/tests/overlay/053.out
-@@ -0,0 +1,22 @@
-+QA output created by 053
-+test_file_handles SCRATCH_MNT/uppertestdir -o upper_file_handles
-+test_file_handles SCRATCH_MNT/lowertestdir -o lower_file_handles
-+test_file_handles SCRATCH_MNT -r -i upper_file_handles
-+test_file_handles SCRATCH_MNT -r -i lower_file_handles
-+test_file_handles SCRATCH_MNT/uppertestdir.up -o upper_file_handles
-+test_file_handles SCRATCH_MNT/uppertestdir.lo -o lower_file_handles
-+test_file_handles SCRATCH_MNT -r -i upper_file_handles
-+test_file_handles SCRATCH_MNT -r -i lower_file_handles
-+test_file_handles SCRATCH_MNT/uppertestdir -p -o upper_file_handles
-+test_file_handles SCRATCH_MNT/lowertestdir -p -o lower_file_handles
-+test_file_handles SCRATCH_MNT/uppertestdir/subdir -p -o upper_subdir_file_handles
-+test_file_handles SCRATCH_MNT/lowertestdir/subdir -p -o lower_subdir_file_handles
-+test_file_handles SCRATCH_MNT -rp -i upper_file_handles
-+test_file_handles SCRATCH_MNT -rp -i lower_file_handles
-+test_file_handles SCRATCH_MNT -rp -i upper_subdir_file_handles
-+test_file_handles SCRATCH_MNT -rp -i lower_subdir_file_handles
-+test_file_handles SCRATCH_MNT/lowertestdir.new -rp -i lower_subdir_file_handles
-+test_file_handles SCRATCH_MNT/lowertestdir -rp
-+test_file_handles SCRATCH_MNT/lowertestdir/subdir -rp
-+test_file_handles SCRATCH_MNT -r
-+test_file_handles SCRATCH_MNT/subdir -rp
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 07dcf52..ec0b711 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -53,3 +53,4 @@
- 050 auto quick copyup hardlink exportfs
- 051 auto quick copyup hardlink exportfs nonsamefs
- 052 auto quick copyup redirect exportfs
-+053 auto quick copyup redirect exportfs nonsamefs
--- 
-2.7.4
+I tend to take this patch as is for now to fix the build problem with
+musl libc first. I think the "using HZ in userspace problem" is another
+issue which can be fixed by a separate patch (if necessary and someone
+has interest).
 
+Thanks,
+Eryu
