@@ -1,11 +1,11 @@
-Received: from mail-wr0-f178.google.com ([209.85.128.178]:43843 "EHLO
-        mail-wr0-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753234AbeAaLn4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jan 2018 06:43:56 -0500
+Received: from mail-wm0-f45.google.com ([74.125.82.45]:40060 "EHLO
+        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753236AbeAaLn5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jan 2018 06:43:57 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 1/2] overlay: test overlay file handles of lower dir with non-indexed ancestor
-Date: Wed, 31 Jan 2018 13:44:54 +0200
-Message-Id: <1517399095-28512-2-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 2/2] overlay: test overlay file handle of dir with ancestor under lower redirect
+Date: Wed, 31 Jan 2018 13:44:55 +0200
+Message-Id: <1517399095-28512-3-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1517399095-28512-1-git-send-email-amir73il@gmail.com>
 References: <1517399095-28512-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -17,16 +17,14 @@ Overlayfs with nfs_export enabled, indexes all directories on copy up.
 Directory index is requires for decoding lower directory file handles
 in case ancestors have been renamed.
 
-When enabling nfs_export on an overlay that already has non-indexed
-merge dirs, the possibility of non-indexed ancestor rename requires
-special handling when encoding lower directory file handles.
+When enabling nfs_export on an overlay that has merge dirs with lower
+layer redirects, the possibility of ancestor rename requires special
+handling when encoding lower directory file handles from layer > 1.
 
-- Check encode/decode/read file handles of non-indexed merge dir
-- Check encode/decode/read file handles of dir with non-indexed parent
-- Check encode/decode/read file handles of dir with non-indexed grandparent
-- Check decode/read of file handles after rename of non-indexed merge dir
-- Check decode/read of file handles after rename of non-indexed parent
-- Check decode/read of file handles after rename of non-indexed grandparent
+- Check decode of lower dir with parent under lower redirect
+- Check decode of lower dir with grandparent under lower redirect
+- Check decode of lower dir after rename of lower redirected parent
+- Check decode of lower dir after rename of lower redirected grandparent
 
 This test requires and enables overlayfs NFS export support and merge
 dir rename support (redirect_dir).
@@ -34,38 +32,36 @@ NFS export support depends on and requires overlayfs index feature.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/054     | 162 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/054.out |  11 ++++
+ tests/overlay/055     | 170 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/055.out |  10 +++
  tests/overlay/group   |   1 +
- 3 files changed, 174 insertions(+)
- create mode 100755 tests/overlay/054
- create mode 100644 tests/overlay/054.out
+ 3 files changed, 181 insertions(+)
+ create mode 100755 tests/overlay/055
+ create mode 100644 tests/overlay/055.out
 
-diff --git a/tests/overlay/054 b/tests/overlay/054
+diff --git a/tests/overlay/055 b/tests/overlay/055
 new file mode 100755
-index 0000000..c788460
+index 0000000..70fe6ac
 --- /dev/null
-+++ b/tests/overlay/054
-@@ -0,0 +1,162 @@
++++ b/tests/overlay/055
+@@ -0,0 +1,170 @@
 +#! /bin/bash
-+# FS QA Test No. 054
++# FS QA Test No. 055
 +#
-+# Test encode/decode overlay file handle of dir with non-indexed ancestor
++# Test overlay file handle of dir with ancestor under lower redirect
 +#
 +# Overlayfs with nfs_export enabled, indexes all directories on copy up.
 +# Directory index is requires for decoding lower directory file handles
 +# in case ancestors have been renamed.
 +#
-+# When enabling nfs_export on an overlay that already has non-indexed
-+# merge dirs, the possibility of non-indexed ancestor rename requires
-+# special handling when encoding lower directory file handles.
++# When enabling nfs_export on an overlay that has merge dirs with lower
++# layer redirects, the possibility of ancestor rename requires special
++# handling when encoding lower directory file handles from layer > 1.
 +#
-+# - Check encode/decode/read file handles of non-indexed merge dir
-+# - Check encode/decode/read file handles of dir with non-indexed parent
-+# - Check encode/decode/read file handles of dir with non-indexed grandparent
-+# - Check decode/read of file handles after rename of non-indexed merge dir
-+# - Check decode/read of file handles after rename of non-indexed parent
-+# - Check decode/read of file handles after rename of non-indexed grandparent
++# - Check decode of lower dir with parent under lower redirect
++# - Check decode of lower dir with grandparent under lower redirect
++# - Check decode of lower dir after rename of lower redirected parent
++# - Check decode of lower dir after rename of lower redirected grandparent
 +#
 +# This test requires and enables overlayfs NFS export support and merge
 +# dir rename support (redirect_dir).
@@ -103,6 +99,10 @@ index 0000000..c788460
 +{
 +	cd /
 +	rm -f $tmp.*
++	# Cleanup overlay scratch mount that is holding base test mount
++	# to prevent _check_test_fs and _test_umount from failing before
++	# _check_scratch_fs _scratch_umount
++	$UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
 +}
 +
 +# get standard environment, filters and checks
@@ -113,15 +113,17 @@ index 0000000..c788460
 +
 +_supported_fs overlay
 +_supported_os Linux
++_require_test
 +_require_scratch
 +_require_test_program "open_by_handle"
 +# We need to require all features together, because nfs_export cannot
 +# be enabled when index is disabled
 +_require_scratch_overlay_features index nfs_export redirect_dir
 +
-+# All overlay dirs are on scratch partition
-+lower=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER.2
++# Lower is on test partition
++lower=$OVL_BASE_TEST_DIR/$OVL_LOWER-$seq
++# Upper/work are on scratch partition
++middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
 +upper=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
 +work=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
 +
@@ -151,14 +153,20 @@ index 0000000..c788460
 +# Re-create lower/middle/upper/work dirs
 +create_dirs()
 +{
++	# Create lower dir on test partition
++	rm -rf $lower
++	mkdir $lower
++
++	# Create middle/upper/work dirs on scratch partition
 +	_scratch_mkfs
-+	mkdir -p $middle
 +}
 +
-+# Mount an overlay on $SCRATCH_MNT with all layers on scratch partition
++# Mount an overlay on $SCRATCH_MNT with lower layer on test partition
++# and middle and upper layer on scratch partition
 +mount_dirs()
 +{
-+	_scratch_mount -o "index=on,nfs_export=on,redirect_dir=on"
++	_overlay_scratch_mount_dirs $middle:$lower $upper $work \
++				-o "index=on,nfs_export=on,redirect_dir=on"
 +}
 +
 +# Unmount the overlay without unmounting base fs
@@ -167,23 +175,21 @@ index 0000000..c788460
 +	$UMOUNT_PROG $SCRATCH_MNT
 +}
 +
-+# Check encode/decode/read file handles of dir with non-indexed ancestor
++# Check file handles of dir with ancestor under lower redirect
 +create_dirs
-+create_test_files $lower/merged -w
-+create_test_files $lower/merged/dir -w
-+create_test_files $lower/merged/dir/subdir -w
-+create_test_files $lower/merged/parent/child -w
-+# Create non-indexed merge dir
-+mkdir $upper/merged
++create_test_files $lower/origin -w
++create_test_files $lower/origin/dir -w
++create_test_files $lower/origin/dir/subdir -w
++create_test_files $lower/origin/parent/child -w
++# Create lower redirected merge dir
++mkdir $middle/merged
++setfattr -n "trusted.overlay.redirect" -v "origin" $middle/merged
 +mount_dirs
-+# Check encode/decode/read file handles of non-indexed merge dir
-+# This is expected to encode an upper file handle
-+test_file_handles $SCRATCH_MNT/merged -p -o $tmp.merged_file_handles
-+# Check encode/decode/read file handles of dir with non-indexed parent
++# Check encode/decode/read of lower dir with parent under lower redirect
 +# This is expected to copy up merged/dir and encode an upper file handle
 +test_file_handles $SCRATCH_MNT/merged/dir -p -o $tmp.dir_file_handles
 +test -d $upper/merged/dir || echo "merged/dir not copied up"
-+# Check encode/decode/read file handles of dir with non-indexed grandparent
++# Check encode/decode/read of lower dir with grandparent under lower redirect
 +# This is expected to encode a lower file handle
 +test_file_handles $SCRATCH_MNT/merged/dir/subdir -p -o $tmp.subdir_file_handles
 +test -d $upper/merged/dir/subdir && echo "merged/dir/subdir unexpected copy up"
@@ -192,49 +198,48 @@ index 0000000..c788460
 +test -d $upper/merged/parent || echo "merged/parent not copied up"
 +test -d $upper/merged/parent/child && echo "merged/parent/child unexpected copy up"
 +
-+# Rename non-indexed merge dir
++# Rename lower redirected merge dir
 +mv $SCRATCH_MNT/merged $SCRATCH_MNT/merged.new/
 +# Check open, read and readdir from stored file handles
 +# (testdir argument is the mount point and NOT the dir
 +#  we are trying to open by stored file handle)
-+test_file_handles $SCRATCH_MNT -rp -i $tmp.merged_file_handles
 +test_file_handles $SCRATCH_MNT -rp -i $tmp.dir_file_handles
 +test_file_handles $SCRATCH_MNT -rp -i $tmp.subdir_file_handles
 +test_file_handles $SCRATCH_MNT -rp -i $tmp.child_file_handles
 +# Retry decoding lower subdir file handles when indexed ancestor is in dcache
 +# (providing the ancestor dir argument pins the ancestor to dcache)
++test_file_handles $SCRATCH_MNT/merged.new/dir -rp -i $tmp.dir_file_handles
 +test_file_handles $SCRATCH_MNT/merged.new/dir -rp -i $tmp.subdir_file_handles
 +test_file_handles $SCRATCH_MNT/merged.new/parent -rp -i $tmp.child_file_handles
 +unmount_dirs
 +
 +status=0
 +exit
-diff --git a/tests/overlay/054.out b/tests/overlay/054.out
+diff --git a/tests/overlay/055.out b/tests/overlay/055.out
 new file mode 100644
-index 0000000..dd8fddf
+index 0000000..59acd29
 --- /dev/null
-+++ b/tests/overlay/054.out
-@@ -0,0 +1,11 @@
-+QA output created by 054
-+test_file_handles SCRATCH_MNT/merged -p -o merged_file_handles
++++ b/tests/overlay/055.out
+@@ -0,0 +1,10 @@
++QA output created by 055
 +test_file_handles SCRATCH_MNT/merged/dir -p -o dir_file_handles
 +test_file_handles SCRATCH_MNT/merged/dir/subdir -p -o subdir_file_handles
 +test_file_handles SCRATCH_MNT/merged/parent/child -p -o child_file_handles
-+test_file_handles SCRATCH_MNT -rp -i merged_file_handles
 +test_file_handles SCRATCH_MNT -rp -i dir_file_handles
 +test_file_handles SCRATCH_MNT -rp -i subdir_file_handles
 +test_file_handles SCRATCH_MNT -rp -i child_file_handles
++test_file_handles SCRATCH_MNT/merged.new/dir -rp -i dir_file_handles
 +test_file_handles SCRATCH_MNT/merged.new/dir -rp -i subdir_file_handles
 +test_file_handles SCRATCH_MNT/merged.new/parent -rp -i child_file_handles
 diff --git a/tests/overlay/group b/tests/overlay/group
-index ec0b711..4326a27 100644
+index 4326a27..40c1a05 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -54,3 +54,4 @@
- 051 auto quick copyup hardlink exportfs nonsamefs
+@@ -55,3 +55,4 @@
  052 auto quick copyup redirect exportfs
  053 auto quick copyup redirect exportfs nonsamefs
-+054 auto quick copyup redirect exportfs
+ 054 auto quick copyup redirect exportfs
++055 auto quick copyup redirect exportfs nonsamefs
 -- 
 2.7.4
 
