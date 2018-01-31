@@ -1,48 +1,59 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:47916 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751475AbeA3QQJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jan 2018 11:16:09 -0500
-Date: Tue, 30 Jan 2018 08:16:05 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/2] generic/307: Require ACL support
-Message-ID: <20180130161605.GB4844@magnolia>
-References: <1517320499-14714-1-git-send-email-rostislav@tuxera.com>
- <1517320499-14714-2-git-send-email-rostislav@tuxera.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:58647 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753090AbeAaKRp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Jan 2018 05:17:45 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH v2 0/4] overlay: add fsck.overlay basic tests
+Date: Wed, 31 Jan 2018 18:26:00 +0800
+Message-ID: <20180131102604.40701-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1517320499-14714-2-git-send-email-rostislav@tuxera.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Rostislav Skudnov <rostislav@tuxera.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com, fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 30, 2018 at 01:54:58PM +0000, Rostislav Skudnov wrote:
-> Signed-off-by: Rostislav Skudnov <rostislav@tuxera.com>
+Hi Eryu:
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+This is the test cases for the fsck.overlay[1] to test orphan whiteout,
+invalid/duplicate reiderct dirs, and the missing impure xattr. These
+works only when fsck.overlay exists. (These patchset split form origin
+patchset[2])
 
-> ---
->  tests/generic/307 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/307 b/tests/generic/307
-> index f5d0680..bbdc70f 100755
-> --- a/tests/generic/307
-> +++ b/tests/generic/307
-> @@ -51,6 +51,7 @@ testfile=$SCRATCH_MNT/testfile.$seq
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> +_require_acls
->  
->  echo "Silence is golden"
->  
-> -- 
-> 2.1.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+This revision have already handled all comments form Amir, please review.
+
+Thanks,
+Yi.
+
+[1] https://github.com/hisilicon/overlayfs-progs
+[2] https://www.spinics.net/lists/linux-unionfs/msg03988.html
+
+Changes since v1:
+- improve _overlay_fsck_dirs helper to accept more than one options.
+
+zhangyi (F) (4):
+  overlay: add filesystem check helper
+  overlay: add fsck.overlay whiteout test
+  overlay: add fsck.overlay redirect directory test
+  overlay: add fsck.overlay impure xattr test
+
+ common/config         |   1 +
+ common/overlay        |  14 +++
+ tests/overlay/201     | 232 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/201.out |  10 ++
+ tests/overlay/202     | 269 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/202.out |  11 +++
+ tests/overlay/203     | 143 +++++++++++++++++++++++++++
+ tests/overlay/203.out |   4 +
+ tests/overlay/group   |   3 +
+ 9 files changed, 687 insertions(+)
+ create mode 100755 tests/overlay/201
+ create mode 100644 tests/overlay/201.out
+ create mode 100755 tests/overlay/202
+ create mode 100644 tests/overlay/202.out
+ create mode 100755 tests/overlay/203
+ create mode 100644 tests/overlay/203.out
+
+-- 
+2.5.0
+
