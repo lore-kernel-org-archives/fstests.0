@@ -1,38 +1,65 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35660 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753345AbeAaKZ5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 Jan 2018 05:25:57 -0500
-Date: Wed, 31 Jan 2018 18:25:55 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [xfstests PATCH v2 0/4] overlay: add fsck.overlay basic tests
-Message-ID: <20180131102555.GH18267@eguan.usersys.redhat.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:58643 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752472AbeAaKRp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Jan 2018 05:17:45 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH v2 1/4] overlay: add filesystem check helper
+Date: Wed, 31 Jan 2018 18:26:01 +0800
+Message-ID: <20180131102604.40701-2-yi.zhang@huawei.com>
+In-Reply-To: <20180131102604.40701-1-yi.zhang@huawei.com>
 References: <20180131102604.40701-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180131102604.40701-1-yi.zhang@huawei.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: eguan@redhat.com, fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Yi,
+Add filesystem check helper for the upcoming fsck.overlay utility.
+This helper invoke fsck.overlay to check and optionally repair
+underlying directories of overlay filesystem.
 
-On Wed, Jan 31, 2018 at 06:26:00PM +0800, zhangyi (F) wrote:
-> Hi Eryu:
-> 
-> This is the test cases for the fsck.overlay[1] to test orphan whiteout,
-> invalid/duplicate reiderct dirs, and the missing impure xattr. These
-> works only when fsck.overlay exists. (These patchset split form origin
-> patchset[2])
-> 
-> This revision have already handled all comments form Amir, please review.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config  |  1 +
+ common/overlay | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
 
-Thanks for all the revisions and reviews from Amir! I'm sorry that I'm a
-bit absent from previous reviews, I kind of relying on Amir's reviews..
+diff --git a/common/config b/common/config
+index 5f40413..71115bd 100644
+--- a/common/config
++++ b/common/config
+@@ -236,6 +236,7 @@ case "$HOSTOS" in
+         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
+ 	export E2FSCK_PROG="`set_prog_path e2fsck`"
+ 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
++	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
+         ;;
+ esac
+ 
+diff --git a/common/overlay b/common/overlay
+index 1da4ab1..d741a7e 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -151,3 +151,17 @@ _require_scratch_overlay_feature()
+ 	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
+ 	_scratch_unmount
+ }
++
++# Helper function to check underlying dirs of overlay filesystem
++_overlay_fsck_dirs()
++{
++	local lowerdir=$1
++	local upperdir=$2
++	local workdir=$3
++	shift 3
++
++	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
++
++	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
++			   -o workdir=$workdir $*
++}
+-- 
+2.5.0
 
-I'll try to go through all the fsck.overlay backgrounds and tests as
-quickly as I can.
-
-Thanks,
-Eryu
