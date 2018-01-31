@@ -1,65 +1,53 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58643 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752472AbeAaKRp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 Jan 2018 05:17:45 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v2 1/4] overlay: add filesystem check helper
-Date: Wed, 31 Jan 2018 18:26:01 +0800
-Message-ID: <20180131102604.40701-2-yi.zhang@huawei.com>
-In-Reply-To: <20180131102604.40701-1-yi.zhang@huawei.com>
-References: <20180131102604.40701-1-yi.zhang@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:42941 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752097AbeAaLny (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jan 2018 06:43:54 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 0/2] Two more overlayfs exportfs tests
+Date: Wed, 31 Jan 2018 13:44:53 +0200
+Message-Id: <1517399095-28512-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add filesystem check helper for the upcoming fsck.overlay utility.
-This helper invoke fsck.overlay to check and optionally repair
-underlying directories of overlay filesystem.
+Eryu,
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
----
- common/config  |  1 +
- common/overlay | 14 ++++++++++++++
- 2 files changed, 15 insertions(+)
+The tests just keep on coming... sorry about the high paste ;-)
 
-diff --git a/common/config b/common/config
-index 5f40413..71115bd 100644
---- a/common/config
-+++ b/common/config
-@@ -236,6 +236,7 @@ case "$HOSTOS" in
-         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
- 	export E2FSCK_PROG="`set_prog_path e2fsck`"
- 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
-+	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
-         ;;
- esac
- 
-diff --git a/common/overlay b/common/overlay
-index 1da4ab1..d741a7e 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -151,3 +151,17 @@ _require_scratch_overlay_feature()
- 	        _notrun "${FSTYP} feature '${feature}' cannot be enabled on ${SCRATCH_DEV}"
- 	_scratch_unmount
- }
-+
-+# Helper function to check underlying dirs of overlay filesystem
-+_overlay_fsck_dirs()
-+{
-+	local lowerdir=$1
-+	local upperdir=$2
-+	local workdir=$3
-+	shift 3
-+
-+	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
-+
-+	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
-+			   -o workdir=$workdir $*
-+}
+The two new tests fail on overlayfs-next and pass with the patch
+I just posted ("ovl: check lower ancestry on encode of lower dir file
+handle").
+
+The first test failure is a failure to decode lower file handle after
+rename of a non-indexed merge ancestor.
+
+The second tests would have failed without commit 05e1f11816d7 ("ovl:
+copy up before encoding non-connectable dir file handle"). However,
+because the mentioned commit applies a strict rule to copy up on encode
+a lower dir on layer > 1, the test failure is just "unexpected copy up",
+and not a failure to decode.
+
+Thanks,
+Amir.
+
+Amir Goldstein (2):
+  overlay: test overlay file handles of lower dir with non-indexed
+    ancestor
+  overlay: test overlay file handle of dir with ancestor under lower
+    redirect
+
+ tests/overlay/054     | 162 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/054.out |  11 ++++
+ tests/overlay/055     | 170 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/055.out |  10 +++
+ tests/overlay/group   |   2 +
+ 5 files changed, 355 insertions(+)
+ create mode 100755 tests/overlay/054
+ create mode 100644 tests/overlay/054.out
+ create mode 100755 tests/overlay/055
+ create mode 100644 tests/overlay/055.out
+
 -- 
-2.5.0
+2.7.4
 
