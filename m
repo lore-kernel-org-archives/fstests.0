@@ -1,140 +1,67 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:35391 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751519AbeBAHeV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Feb 2018 02:34:21 -0500
+Received: from mail-qt0-f175.google.com ([209.85.216.175]:34765 "EHLO
+        mail-qt0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751857AbeBAOVn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Feb 2018 09:21:43 -0500
+Received: by mail-qt0-f175.google.com with SMTP id a27so26623579qtd.1
+        for <fstests@vger.kernel.org>; Thu, 01 Feb 2018 06:21:42 -0800 (PST)
+Date: Thu, 1 Feb 2018 09:21:40 -0500
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: Re: [LSF/MM TOPIC] Filesystem performance regression tests
+Message-ID: <20180201142139.5a53brni5rnjciyp@destiny>
+References: <CAOQ4uxi+L6Bhs_=aTvNemC9wBXHw0_bwwPixNzFcJoc8e79XsQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20180201072719.GI18267@eguan.usersys.redhat.com>
-References: <1517399095-28512-1-git-send-email-amir73il@gmail.com>
- <1517399095-28512-2-git-send-email-amir73il@gmail.com> <20180201072719.GI18267@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 1 Feb 2018 09:34:19 +0200
-Message-ID: <CAOQ4uxhqOQBGkmZOW03NY8ZU6u-LZc_QFBsP6c7FtLd-sL+eXg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] overlay: test overlay file handles of lower dir with
- non-indexed ancestor
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi+L6Bhs_=aTvNemC9wBXHw0_bwwPixNzFcJoc8e79XsQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: lsf-pc@lists.linux-foundation.org, Josef Bacik <jbacik@fb.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 1, 2018 at 9:27 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jan 31, 2018 at 01:44:54PM +0200, Amir Goldstein wrote:
->> Overlayfs with nfs_export enabled, indexes all directories on copy up.
->> Directory index is requires for decoding lower directory file handles
->> in case ancestors have been renamed.
->>
->> When enabling nfs_export on an overlay that already has non-indexed
->> merge dirs, the possibility of non-indexed ancestor rename requires
->> special handling when encoding lower directory file handles.
->>
->> - Check encode/decode/read file handles of non-indexed merge dir
->> - Check encode/decode/read file handles of dir with non-indexed parent
->> - Check encode/decode/read file handles of dir with non-indexed grandparent
->> - Check decode/read of file handles after rename of non-indexed merge dir
->> - Check decode/read of file handles after rename of non-indexed parent
->> - Check decode/read of file handles after rename of non-indexed grandparent
->>
->> This test requires and enables overlayfs NFS export support and merge
->> dir rename support (redirect_dir).
->> NFS export support depends on and requires overlayfs index feature.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  tests/overlay/054     | 162 ++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/overlay/054.out |  11 ++++
->>  tests/overlay/group   |   1 +
->>  3 files changed, 174 insertions(+)
->>  create mode 100755 tests/overlay/054
->>  create mode 100644 tests/overlay/054.out
->>
->> diff --git a/tests/overlay/054 b/tests/overlay/054
->> new file mode 100755
->> index 0000000..c788460
->> --- /dev/null
->> +++ b/tests/overlay/054
->> @@ -0,0 +1,162 @@
->> +#! /bin/bash
->> +# FS QA Test No. 054
->> +#
->> +# Test encode/decode overlay file handle of dir with non-indexed ancestor
->> +#
->> +# Overlayfs with nfs_export enabled, indexes all directories on copy up.
->> +# Directory index is requires for decoding lower directory file handles
->> +# in case ancestors have been renamed.
->> +#
->> +# When enabling nfs_export on an overlay that already has non-indexed
->> +# merge dirs, the possibility of non-indexed ancestor rename requires
->> +# special handling when encoding lower directory file handles.
->> +#
->> +# - Check encode/decode/read file handles of non-indexed merge dir
->> +# - Check encode/decode/read file handles of dir with non-indexed parent
->> +# - Check encode/decode/read file handles of dir with non-indexed grandparent
->> +# - Check decode/read of file handles after rename of non-indexed merge dir
->> +# - Check decode/read of file handles after rename of non-indexed parent
->> +# - Check decode/read of file handles after rename of non-indexed grandparent
->> +#
->> +# This test requires and enables overlayfs NFS export support and merge
->> +# dir rename support (redirect_dir).
->> +# NFS export support depends on and requires overlayfs index feature.
->> +#
->> +#-----------------------------------------------------------------------
->> +# Copyright (C) 2018 CTERA Networks. All Rights Reserved.
->> +# Author: Amir Goldstein <amir73il@gmail.com>
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1     # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +     cd /
->> +     rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# real QA test starts here
->> +
->> +_supported_fs overlay
->> +_supported_os Linux
->> +_require_scratch
->> +_require_test_program "open_by_handle"
->> +# We need to require all features together, because nfs_export cannot
->> +# be enabled when index is disabled
->> +_require_scratch_overlay_features index nfs_export redirect_dir
->> +
->> +# All overlay dirs are on scratch partition
->> +lower=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
->> +middle=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER.2
->
-> The middle dir doesn't seem to be used in this test. Can I just remove
-> it on commit?
->
+On Thu, Feb 01, 2018 at 08:50:21AM +0200, Amir Goldstein wrote:
+> Hi Josef and all,
+> 
+> I would like to be rude and solicit a talk from Josef on automated
+> performance regression testing (if he is planning to attend).
+> We know the guys at facebook are running some performance
+> regression tests for a while and Josef has just upstreamed
+> a nice taste on this infrastructure to xfstests:
+> https://marc.info/?l=fstests&m=150765617921864&w=2
+> 
+> But this is only the beginning... for community performance
+> regression tests to be useful there need to be not only people
+> running the tests, but also people running the tests on well known
+> machines and/or well known hardware configurations and maintain
+> long lived performance results db for those machines.
+> 
+> How can we utilize community resources to achieve that?
+> Can running performance regressions of gce-xfstests provide
+> anything close to stable results?
+> 
+> If performance regressions are integrated into 0-day kernel test
+> robot, that could be extremely beneficial to the community, but can
+> the robot guaranty to run the tests on dedicated machines or
+> VMs with dedicated resources?
+> 
+> Do we know of good examples to follow from automated regression
+> tests done for specific filesystem (Dave Chinner has referred to his
+> regression tests in one or two occasions)? for other kernel subsystems?
+> 
+> Putting up a regression test server for overlayfs is on my TODO list.
+> In the mean while, I have little to contribute from my experience, but
+> would love to sit in that talk.
+> 
 
-Ah yes. leftover from copying 052.
-Please do.
-
+I'm happy to talk about this stuff and how it could be improved.  I think
+integrating it into continuous testing is tricky.  With all of our performance
+stuff it's always A/B testing, because shit changes constantly.  I hate doing
+perf stuff in VM's because it's captive to whatever else the host is doing.
+xfstests is a good place for this stuff since we all have our own personal rigs
+that we control.  Could we extend xfstests to log our results publicly?  That
+would be cool, I would be fine with that.  My test box rarely changes, so if its
+just a matter of uploading some magic ID associated with my box, and then
+uploading results paired with that ID to be world viewed then that would be
+cool.  I'm sure we could find somebody willing to host such a thing for us.
 Thanks,
-Amir.
+
+Josef
