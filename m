@@ -1,127 +1,275 @@
-Received: from mail-pl0-f49.google.com ([209.85.160.49]:43660 "EHLO
-        mail-pl0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750888AbeBDNyX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Feb 2018 08:54:23 -0500
-Received: by mail-pl0-f49.google.com with SMTP id f4so9951219plr.10
-        for <fstests@vger.kernel.org>; Sun, 04 Feb 2018 05:54:23 -0800 (PST)
-Received: from localhost ([128.199.137.77])
-        by smtp.gmail.com with ESMTPSA id r29sm2355929pfb.40.2018.02.04.05.54.20
-        for <fstests@vger.kernel.org>
-        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
-        Sun, 04 Feb 2018 05:54:21 -0800 (PST)
-Message-ID: <5a77108d.1d5d620a.68406.557d@mx.google.com>
-From: Eryu Guan <guaneryu@gmail.com>
-Date: Sun, 04 Feb 2018 21:54:14 +0800
-Subject: [ANNOUNCE] fstests: master branch updated to 27f7ed634816
+Received: from mx1.redhat.com ([209.132.183.28]:55782 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752669AbeBELCW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 5 Feb 2018 06:02:22 -0500
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id CF11D49016
+        for <fstests@vger.kernel.org>; Mon,  5 Feb 2018 11:02:22 +0000 (UTC)
+Date: Mon, 5 Feb 2018 19:02:19 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/3] check: Add -F option to specify failing tests
+Message-ID: <20180205110219.GM18267@eguan.usersys.redhat.com>
+References: <20180203185737.21025-1-agruenba@redhat.com>
+ <20180203185737.21025-2-agruenba@redhat.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="2ykTgS2ssDBp"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---2ykTgS2ssDBp
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20180203185737.21025-2-agruenba@redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Sat, Feb 03, 2018 at 07:57:36PM +0100, Andreas Gruenbacher wrote:
+> Add a new -F option that takes a list of tests which are expected to
+> fail.  Adjust the output of the check script to indicate when a failure
+> is expected.  Summarize the number of actual vs.  expected passed and
+> failed tests at the end.
+> 
+> In addition, tests in this list which are prefixed with a dash are
+> skipped, so no separate -E list is necessary for tests which are known
+> to lock up.
+> 
+> This allows to use fstests for regression testing much more easily.  For
+> example, we have a list of around 30 tests that we currently expect to
+> fail, and two tests which lock up.
+> 
+> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 
-The master branch of the xfstests repository at:
+I've proposed a similar patch two years ago, and Dave nacked it as "The
+'known/unknown failure' parsing of the result output does not need to be
+done by check in xfstests; it should be done by a post-processing script
+that walks over the latest results file in $RESULTDIR"[1].
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+[1] https://patchwork.kernel.org/patch/8077361/
 
-have just been updated. This is mostly an overlay update. Thanks to Amir, along
-with some random bug fixes, we're having 7 new tests for overlay, and most of
-them are filehandle tests. Note that these new overlay filehandle tests require
-the new "nfs_export" feature, which hasn't been merged in upstream kernel yet,
-so these tests are _notrun currently (v4.15).
+But providing a mechanism that allows testers to specify a known issue
+list seems fine to me, just like the excluding tests mechanism (-X/-E
+options).
 
-New failures I've noticed:
-- overlay/049 fails with v4.15 kernel
+> ---
+>  check | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++----------------
+>  1 file changed, 73 insertions(+), 23 deletions(-)
+> 
+> diff --git a/check b/check
+> index 546683c5..f1bf75d6 100755
+> --- a/check
+> +++ b/check
+> @@ -25,9 +25,13 @@ needwrap=true
+>  needsum=true
+>  n_try=0
+>  try=""
+> -n_bad=0
+> +n_bad=0		# number of unexpected failures
+> +n_xbad=0	# number of expected failures
+> +n_xgood=0	# number of unexpected successes
+>  sum_bad=0
+>  bad=""
+> +xbad=""
+> +xgood=""
+>  n_notrun=0
+>  notrun=""
+>  interrupt=true
+> @@ -54,7 +58,7 @@ export DIFF_LENGTH=${DIFF_LENGTH:=10}
+>  # by default don't output timestamps
+>  timestamp=${TIMESTAMP:=false}
+>  
+> -rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.report.*
+> +rm -f $tmp.list $tmp.tmp $tmp.grep $here/$iam.out $tmp.xlist $tmp.xfail $tmp.report.*
+>  
+>  SRC_GROUPS="generic shared"
+>  export SRC_DIR="tests"
+> @@ -89,6 +93,7 @@ testlist options
+>      -x group[,group...]	exclude tests from these groups
+>      -X exclude_file	exclude individual tests
+>      -E external_file	exclude individual tests
+> +    -F external_file    tests expected to fail
+>      [testlist]		include tests matching names in testlist
+>  
+>  testlist argument is a list of tests in the form of <test dir>/<test name>.
+> @@ -108,7 +113,9 @@ for every test dir where this file is found, the listed test names are
+>  excluded from the list of tests to run from that test dir.
+>  
+>  external_file argument is a path to a single file containing a list of tests
+> -to exclude in the form of <test dir>/<test name>.
+> +in the form of <test dir>/<test name>.  For option -E, the listed tests are
+> +excluded.  For option -F, the listed tests are excluded if the test is
+> +preceded with a minus sign (-), and expected to fail otherwise.
+>  
+>  examples:
+>   check xfs/001
+> @@ -294,6 +301,13 @@ while [ $# -gt 0 ]; do
+>  			sed "s/#.*$//" "$xfile" >> $tmp.xlist
+>  	        fi
+>  		;;
+> +	-F)	xfile=$2; shift ;
+> +		if [ -f $xfile ]; then
+> +			x=`sed -e 's/\(^\|[ \t]\+\)#.*//; /^[ \t]*$/d' "$xfile"`
+> +			echo "$x" | sed -e "/^-/d" >> $tmp.xfail
+> +			echo "$x" | sed -ne "s/^-//p" >> $tmp.xlist
+> +		fi
+> +		;;
+>  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+>  	-S)	EXCLUDE_SECTION="$EXCLUDE_SECTION $2"; shift ;;
+>  	-l)	diff="diff" ;;
+> @@ -383,12 +397,16 @@ _wipe_counters()
+>  {
+>  	n_try="0"
+>  	n_bad="0"
+> +	n_xbad="0"
+> +	n_xgood="0"
+>  	n_notrun="0"
+> -	unset try notrun bad
+> +	unset try notrun bad xbad xgood
+>  }
+>  
+>  _wrapup()
+>  {
+> +	local msg=""
+> +
+>  	seq="check"
+>  	check="$RESULT_BASE/check"
+>  
+> @@ -436,26 +454,28 @@ _wrapup()
+>  			echo "Not run:$notrun" >>$check.log
+>  		fi
+>  
+> -		if [ ! -z "$n_bad" -a $n_bad != 0 ]; then
+> -			echo "Failures:$bad"
+> -			echo "Failed $n_bad of $n_try tests"
+> -			echo "Failures:$bad" >>$check.log
+> -			echo "Failed $n_bad of $n_try tests" >>$check.log
+> -			echo "Failures:$bad" >>$tmp.summary
+> -			echo "Failed $n_bad of $n_try tests" >>$tmp.summary
+> -		else
+> -			echo "Passed all $n_try tests"
+> -			echo "Passed all $n_try tests" >>$check.log
+> -			echo "Passed all $n_try tests" >>$tmp.summary
+> -		fi
+> -		echo "" >>$tmp.summary
+> +		[ $n_xbad -eq 0 ] ||
+> +		     msg="${msg}Expected failures:$xbad\n"
+> +		[ $n_bad -eq 0 ] ||
+> +		    msg="${msg}Unexpected failures:$bad\n"
+> +		[ $n_xgood -eq 0 ] ||
+> +		    msg="${msg}Unexpected successes:$xgood\n"
+> +		local n_xpassed=`expr $n_try - $n_xbad`
+> +		local n_passed=`expr $n_xpassed - $n_bad`
+> +		[ $n_passed -eq 0 -a $n_xpassed -eq 0 ] ||
+> +		    msg="${msg}Passed $n_passed tests ($n_xpassed expected)\n"
+> +		[ $n_bad -eq 0 -a $n_xbad -eq 0 ] ||
+> +		    msg="${msg}Failed `expr $n_bad + $n_xbad` tests ($n_xbad expected)\n"
+> +		printf "$msg"
+> +		printf "$msg" >>$check.log
+> +		printf "$msg\n" >>$tmp.summary
+
+This changes the test summary formats, I'm afraid there're some scripts
+that depend on current format like "Failures: ...". e.g.
+tools/compare-failures searches for "^Failures: " keyword.
+
+How about leaving existing summary information unchanged and just adding
+more info about expected/unexpected results?
+
+And I noticed that "Unexpected successes" are treated as failures
+(non-zero exit status), I'm not sure if that's appropriate, I'd take it
+as a pass with warnings.
 
 Thanks,
 Eryu
 
-The new head of the master branch is commit:
-
-27f7ed634816 overlay: test overlay file handle of dir with ancestor under lower redirect
-
-New commits:
-
-Amir Goldstein (12):
-      [aee21da0fd05] ovelray: drop explicit use of OVERLAY_MOUNT_OPTIONS
-      [7aa1d4bcd429] overlay/036: fix upper/lower dir mismatch
-      [8a2d6ed9fcd9] overlay: consider index dir with whiteouts clean
-      [2d9c37702515] overlay/017: require and enable redirect_dir
-      [1fa396719e77] overlay: add a test for multiple redirects to the same lower dir
-      [ea7ad43185ca] fstests: implement require of multiple overlayfs features
-      [a97f4505f252] overlay: test encode/decode overlay file handles
-      [1af8bac6c98c] overlay: test encode/decode of non-samefs overlay file handles
-      [c68eba8a2b5b] overlay: test encode/decode overlay file handles with renames
-      [c2e7f1d84228] overlay: test encode/decode of non-samefs overlay file handles with renames
-      [ce9707ccd089] overlay: test overlay file handles of lower dir with non-indexed ancestor
-      [27f7ed634816] overlay: test overlay file handle of dir with ancestor under lower redirect
-
-Rostislav Skudnov (2):
-      [e9dc7dc6cec6] generic/307: Require ACL support
-      [dc9f8c9ac02e] generic/{274,315}: Require falloc -k support
-
-
-Code Diffstat:
-
- common/overlay        |  27 +++++-
- common/rc             |   2 +-
- tests/generic/274     |   2 +-
- tests/generic/307     |   2 +
- tests/generic/315     |   2 +-
- tests/overlay/017     |   8 +-
- tests/overlay/033     |   8 +-
- tests/overlay/034     |   8 +-
- tests/overlay/036     |   4 +-
- tests/overlay/041     |   6 +-
- tests/overlay/043     |   6 +-
- tests/overlay/044     |   7 +-
- tests/overlay/048     |   4 +-
- tests/overlay/049     | 109 +++++++++++++++++++++
- tests/overlay/049.out |   2 +
- tests/overlay/050     | 239 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/050.out |  31 ++++++
- tests/overlay/051     | 256 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/051.out |  31 ++++++
- tests/overlay/052     | 184 ++++++++++++++++++++++++++++++++++++
- tests/overlay/052.out |  22 +++++
- tests/overlay/053     | 200 +++++++++++++++++++++++++++++++++++++++
- tests/overlay/053.out |  22 +++++
- tests/overlay/054     | 160 +++++++++++++++++++++++++++++++
- tests/overlay/054.out |  11 +++
- tests/overlay/055     | 170 +++++++++++++++++++++++++++++++++
- tests/overlay/055.out |  10 ++
- tests/overlay/group   |   9 +-
- 28 files changed, 1510 insertions(+), 32 deletions(-)
---
-Eryu Guan
-eguan@redhat.com
-
---2ykTgS2ssDBp
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJadw8kAAoJECZSqilcj+dj5fMP/jg6Sy0mkHV/utMZD5FXolqF
-XyV0dnCNzZptk5m9PYCMId3BUoNGTGEPzxXB4wAHXLqHD+WCARHDUJku9wh71IM5
-0JRxYJduCFuUSycuQv8YF0ERdNIIenPwk/snM4pmqSPW/uJI7SMPOynVO2MUeDFI
-iKxtZgIunrdoM8lUguqLfch8uRUPNAGgo4eSTH1KsSY1S6o/aOSrBtnvuDNWEQXs
-zGeaVj5PawiHkgpDmWfPtZm7BxCxbYnCNsbtTHDvU61ee5H//0rTwLX/rrTmbCDE
-nmIEfVKXMpAoHva/W/OESOlQniPu6OgB3x0s/99RJ/nJqWbbzPNWsYsWfdBTm2EQ
-rmcEwJwo8VAzy24OsmW0IqL2b/bdIbD56sFx2t4trcf2XVue0tCv+DoyAMmvVy9F
-kNvI4C36ndxxw5jq6a9TzO/u8NXqW9hk9sD4Ym5EWaVCTyc+BSi5lpCYCQMCjbEd
-j3cLxTMM1bZ9QKOGj7soJpirV4VMlE8vUGFF8Wo3OtOWn0+rm9n35CxieBJpHYuS
-7UImbGXfEzT7GYCuMOaASCIGO8JX622uf5lys0gwA9qe7yfgJiYS36+cHlL6DpJB
-1IhUKeToTsJCMJ8MA0nL8bXapNsaxqxOQVtsx2uMe/70c9rc6En7AinifJbowDJ0
-uXqD2yKx2UGO55ZAGQu+
-=/5fH
------END PGP SIGNATURE-----
-
---2ykTgS2ssDBp--
+>  		if $do_report; then
+>  			_make_section_report
+>  		fi
+>  		needwrap=false
+>  	fi
+>  
+> -	sum_bad=`expr $sum_bad + $n_bad`
+> +	sum_bad=`expr $sum_bad + $n_bad + $n_xgood`
+>  	_wipe_counters
+>  	rm -f /tmp/*.rawout /tmp/*.out /tmp/*.err /tmp/*.time
+>  	if ! $OPTIONS_HAVE_SECTIONS; then
+> @@ -697,6 +717,14 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  			continue
+>  		fi
+>  
+> +		# check if we expect failure
+> +		expect_failure=false
+> +		if [ -s $tmp.xfail ]; then
+> +			if grep $seqnum $tmp.xfail > /dev/null 2>&1 ; then
+> +				expect_failure=true
+> +			fi
+> +		fi
+> +
+>  		# slashes now in names, sed barfs on them so use grep
+>  		lasttime=`grep -w ^$seqnum $check.time | awk '// {print $2}'`
+>  		if [ "X$lasttime" != X ]; then
+> @@ -749,7 +777,11 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  		else
+>  		    if [ $sts -ne 0 ]
+>  		    then
+> -			err_msg="[failed, exit status $sts]"
+> +			if $expect_failure; then
+> +			    err_msg="[failed (expected), exit status $sts]"
+> +			else
+> +			    err_msg="[failed, exit status $sts]"
+> +			fi
+>  			echo -n " $err_msg"
+>  			err=true
+>  		    fi
+> @@ -773,7 +805,11 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  			    fi
+>  			    echo ""
+>  			else
+> -			    echo " - output mismatch (see $seqres.out.bad)"
+> +			    if $expect_failure; then
+> +				echo " - output mismatch (failure expected; see $seqres.out.bad)"
+> +			    else
+> +				echo " - output mismatch (see $seqres.out.bad)"
+> +			    fi
+>  			    mv $tmp.out $seqres.out.bad
+>  			    $diff $seq.out $seqres.out.bad | {
+>  				if test "$DIFF_LENGTH" -le 0; then
+> @@ -785,7 +821,11 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  						" to see the entire diff)"
+>  				fi; } | \
+>  				sed -e 's/^\(.\)/    \1/'
+> -			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+> +			    if $expect_failure; then
+> +				err_msg="output mismatch (failure expected; see $diff $seq.out $seqres.out.bad)"
+> +			    else
+> +				err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+> +			    fi
+>  			    err=true
+>  			fi
+>  		    fi
+> @@ -802,9 +842,19 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  	    #
+>  	    if $err
+>  	    then
+> -		bad="$bad $seqnum"
+> -		n_bad=`expr $n_bad + 1`
+> +		if $expect_failure; then
+> +		    xbad="$xbad $seqnum"
+> +		    n_xbad=`expr $n_xbad + 1`
+> +		else
+> +		    bad="$bad $seqnum"
+> +		    n_bad=`expr $n_bad + 1`
+> +		fi
+>  		tc_status="fail"
+> +	    else
+> +		if $expect_failure; then
+> +		    xgood="$xgood $seqnum"
+> +		    n_xgood=`expr $n_xgood + 1`
+> +		fi
+>  	    fi
+>  	    if $do_report; then
+>  		_make_testcase_report "$tc_status"
+> -- 
+> 2.14.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
