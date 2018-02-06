@@ -1,97 +1,182 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:45760 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752496AbeBFIvo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Feb 2018 03:51:44 -0500
-Received: by mail-yw0-f194.google.com with SMTP id b16so767757ywh.12
-        for <fstests@vger.kernel.org>; Tue, 06 Feb 2018 00:51:44 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20180206081154.GQ18267@eguan.usersys.redhat.com>
-References: <94286394-157a-421b-7f73-52f10529f23f@intel.com>
- <20180206035443.GN18267@eguan.usersys.redhat.com> <CAOQ4uxgFYZR6kEVjRcwFOdTN8q=m5L5fyQdhE4dT=dghC5vnMA@mail.gmail.com>
- <20180206081154.GQ18267@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 6 Feb 2018 10:51:43 +0200
-Message-ID: <CAOQ4uxhGGLposGsgJo8TrkMiDKZNQTyucxBviJgZ=fbLFWg3Ag@mail.gmail.com>
-Subject: Re: xfstests failures
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx1.redhat.com ([209.132.183.28]:43083 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753023AbeBFNKd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Feb 2018 08:10:33 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] tests/xfs: rmapbt swapext block reservation overrun test
+Date: Tue,  6 Feb 2018 08:10:32 -0500
+Message-Id: <20180206131032.62271-1-bfoster@redhat.com>
+In-Reply-To: <20180205174601.51574-1-bfoster@redhat.com>
+References: <20180205174601.51574-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Dave Jiang <dave.jiang@intel.com>, fstests <fstests@vger.kernel.org>, "Zwisler, Ross" <ross.zwisler@intel.com>, Andreas Gruenbacher <agruenba@redhat.com>
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 6, 2018 at 10:11 AM, Eryu Guan <eguan@redhat.com> wrote:
-> On Tue, Feb 06, 2018 at 08:45:24AM +0200, Amir Goldstein wrote:
->> On Tue, Feb 6, 2018 at 5:54 AM, Eryu Guan <eguan@redhat.com> wrote:
-[...]
->>
->> Eryu,
->>
->> This short thread has shown how much the information about failing tests is
->> not documented. And that the information is stored only in our
->> collective brain hive.
->>
->> For example, how many people out there are able to dig through the
->> list the find out
->> the following information about overlay test failures:
->> 016 - long standing known issue - time for a fix unknown
->> 041,42,43 - known issue - resolved by RFC "xino" patches -
->>                    time for merge unknown
->> 049 - mainline issue - resolved by today's overlayfs-next merge
->> 054,55 - new failing tests with today's mainline - fix patch posted
->>
->> I know even you did not have the correct information about 017
->> and thought it should have been failing...
->>
->> How about maintaining an "expunge" format file with all failing test in
->> the repository with comment like the above?
->
-> I'm fine with providing a mechanism to let fstests know which tests are
-> known failures, like what Andreas just proposed just 3 days ago
->
-> check: Add -F option to specify failing tests
-> https://www.spinics.net/lists/fstests/msg08901.html
->
->> We could have 2 files, one for long standing issues like 016,041,042,043
->> and one for temporary failures, like 054,055
->>
->> We can debate whether long standing issues should be in auto or not,
->> but it doesn't hurt to mark them with some group (e.g. "known") that will
->> point users at the expunge.known file for a reason and for easy way to
->> exclude those tests.
->
-> But I agreed with Dave[1] here that we should not maintain known
-> failures in fstests itself, because the list can vary based on testers'
-> configurations and hardware/software environments. I think the list
-> should be maintained by testers according to their test configs and
-> environments.
->
-> I know Dave and Josef discussed the idea of making perf results public
-> somewhere online in your "[LSF/MM TOPIC] Filesystem performance
-> regression tests" thread[2]. Perhaps each filesystem maintainer could
-> public their "official" results there too when the infrastructure is
-> available?
->
+The XFS rmapbt extent swap mechanism performs an extent by extent
+swap to ensure the rmapbt is rectified with the appropriate extent
+owner information after the operation. This implementation suffers
+from a corner case that requires extra reservation if the swap
+operation results in bouncing one of the associated inodes between
+extent and btree formats. When this corner case occurs, it results
+in a transaction block reservation overrun and possible corruption
+of the free space accounting.
 
-Hmm, yeh, maintaining failure information per configuration is a challenge.
-Creating a subset of tests that could be run on stable kernels/stable xfsprogs
-is another worthy yet controversial goal. I read that Linaro have started an
-effort to run LTP on stable kernels.
+This regression test provides coverage for this corner case. It
+creates two files with a large enough extent count to require btree
+format, regardless of inode size, and performs a sequence of extent
+swaps between them with a decreasing extent count until all extents
+are removed from the file(s). This ensures that one of the swaps
+covers the btree <-> extent fork format boundary case.
 
-But how about long standing issues. Maybe overlay/016 is the only
-example of a long standing issue?
-When I posted the test, over a year ago the commit message read
-"This issue is about to be fixed with a patch set by Miklos Szeredi"
-Said patch did not sit well with Al, but the issue is still at the top
-of the agenda
-and has just been discussed last week [1].
+This test reproduces fs corruption on rmapbt enabled filesystems
+running on kernels without the associated extent swap fix.
 
-How about a statement in the test _expect_failure that will automatically
-add the test to the -F list?
-Alternatively, or in addition to the statement we can add the list to
-"failing" group, so that the -F code can easily count the expected
-failures on run start.
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Thanks,
-Amir.
+This test reproduces one of the problems targeted to be fixed by the
+following patch series:
 
-[1] https://marc.info/?l=linux-unionfs&m=151707113630958&w=2
+  https://marc.info/?l=linux-xfs&m=151785278525201&w=2
+
+Also note that this test depends on currently unmerged xfs_io
+functionality. The associated functionality is posted for review here:
+
+  https://marc.info/?l=linux-xfs&m=151792224511355&w=2
+
+... and so this test should not be merged until/unless that
+functionality is reviewed. Thanks.
+
+Brian
+
+ tests/xfs/440     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/440.out |  2 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 100 insertions(+)
+ create mode 100755 tests/xfs/440
+ create mode 100644 tests/xfs/440.out
+
+diff --git a/tests/xfs/440 b/tests/xfs/440
+new file mode 100755
+index 00000000..c7667e08
+--- /dev/null
++++ b/tests/xfs/440
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# FS QA Test 440
++#
++# Regression test for the XFS rmapbt based extent swap algorithm. The extent
++# swap algorithm for rmapbt=1 filesystems unmaps/remaps individual extents to
++# rectify the rmapbt for each extent swapped between inodes. If one of the
++# inodes happens to straddle the extent <-> btree format boundary (which can
++# vary depending on inode size), the unmap/remap sequence can bounce the inodes
++# back and forth between formats many times during the swap. Since extent ->
++# btree format conversion requires a block allocation, this can consume more
++# blocks than expected, lead to block reservation overrun and free space
++# accounting inconsistency.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "swapext"
++
++_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
++_scratch_mount || _fail "mount failed"
++
++file1=$SCRATCH_MNT/file1
++file2=$SCRATCH_MNT/file2
++
++# The goal is run an extent swap where one of the associated files has the
++# minimum number of extents to remain in btree format. First, create a couple
++# files with large enough extent counts to ensure btree format on the largest
++# possible inode size filesystems.
++for i in $(seq 0 199); do
++	$XFS_IO_PROG -fc "falloc $((i * 8192)) 4k" $file1
++	$XFS_IO_PROG -fc "falloc $((i * 8192)) 4k" $file2
++done
++
++# Now run an extent swap at every possible extent count down to 0.  Depending
++# on filesystem geometry (i.e., inode size), one of these swaps will cover the
++# boundary case between extent and btree format.
++for i in $(seq 0 199); do
++	# punch one extent from the tmpfile and swap
++	$XFS_IO_PROG -c "fpunch $((i * 8192)) 4k" $file2
++	$XFS_IO_PROG -c "swapext $file2" $file1
++
++	# punch the same extent from the old fork (now in file2) to resync the
++	# extent counts and repeat
++	$XFS_IO_PROG -c "fpunch $((i * 8192)) 4k" $file2
++done
++
++# failure results in fs corruption and possible assert failure
++echo Silence is golden
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/440.out b/tests/xfs/440.out
+new file mode 100644
+index 00000000..fb8dc21f
+--- /dev/null
++++ b/tests/xfs/440.out
+@@ -0,0 +1,2 @@
++QA output created by 440
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index cf81451d..ae0c5fc8 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -437,3 +437,4 @@
+ 437 auto quick other
+ 438 auto quick quota dangerous
+ 439 auto quick fuzzers log
++440 auto quick ioctl
+-- 
+2.13.6
+
