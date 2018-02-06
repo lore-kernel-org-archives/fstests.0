@@ -1,182 +1,128 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43083 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:59368 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753023AbeBFNKd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 6 Feb 2018 08:10:33 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: [PATCH] tests/xfs: rmapbt swapext block reservation overrun test
-Date: Tue,  6 Feb 2018 08:10:32 -0500
-Message-Id: <20180206131032.62271-1-bfoster@redhat.com>
-In-Reply-To: <20180205174601.51574-1-bfoster@redhat.com>
-References: <20180205174601.51574-1-bfoster@redhat.com>
+        id S1752291AbeBFPWN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Feb 2018 10:22:13 -0500
+Date: Tue, 6 Feb 2018 23:21:58 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [xfstests PATCH v2 1/5] common/rc: improve mounted check helper
+Message-ID: <20180206152158.GR18267@eguan.usersys.redhat.com>
+References: <20180131102759.40997-1-yi.zhang@huawei.com>
+ <20180131102759.40997-2-yi.zhang@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180131102759.40997-2-yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org
-Cc: fstests@vger.kernel.org
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-The XFS rmapbt extent swap mechanism performs an extent by extent
-swap to ensure the rmapbt is rectified with the appropriate extent
-owner information after the operation. This implementation suffers
-from a corner case that requires extra reservation if the swap
-operation results in bouncing one of the associated inodes between
-extent and btree formats. When this corner case occurs, it results
-in a transaction block reservation overrun and possible corruption
-of the free space accounting.
+On Wed, Jan 31, 2018 at 06:27:55PM +0800, zhangyi (F) wrote:
+> Modify _is_mounted() to accept a dir and fstype as input, and check
+> whether this dir is a specified type of mount point.
+> 
+> This patch also fix the problem of missing fstype check:
+> 
+> For example:
+>   Base mounted filesystem:
+>     /dev/sda2 on /boot type ext4 (rw,relatime,data=ordered)
+> 
+>   FSTYPE=xfs
+>   mountpoint=`_is_mounted /dev/sda1`
+>   echo "$mountpoint"
+> 
+>   Output: /boot
+> 
+> This patch remove the useless error message, return empty if no
+> valid mount point.
+> 
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  common/rc | 25 ++++++++++---------------
+>  1 file changed, 10 insertions(+), 15 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 2e3a83a..3351f00 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2372,27 +2372,22 @@ _scratch_mkfs_richacl()
+>  	esac
+>  }
+>  
+> -# check that a FS on a device is mounted
+> +# check that a FS on a device is mounted or a dir is a mount point
 
-This regression test provides coverage for this corner case. It
-creates two files with a large enough extent count to require btree
-format, regardless of inode size, and performs a sequence of extent
-swaps between them with a decreasing extent count until all extents
-are removed from the file(s). This ensures that one of the swaps
-covers the btree <-> extent fork format boundary case.
+Hmm, I'm thinking about introducing a new _is_dir_mountpoint() function
+for overlay use, and rename _is_mounted to _is_dev_mounted, so we don't
+overload _is_mounted.
 
-This test reproduces fs corruption on rmapbt enabled filesystems
-running on kernels without the associated extent swap fix.
+Further, I think we could take use of findmnt instead of parsing the
+output from mount, which could be hard to do correctly. e.g.
 
-Signed-off-by: Brian Foster <bfoster@redhat.com>
----
+# check if the given device is mounted, if so, return mount point
+_is_dev_mounted()
+{
+	local dev=$1
+	local fstype=${2:-$FSTYP}
 
-This test reproduces one of the problems targeted to be fixed by the
-following patch series:
+	if [ $# -lt 1 ]; then
+		echo "Usage: _is_dev_mounted <device> [fstype]" >&2
+		exit 1
+	fi
+	findmnt -rncv -S $dev -t $fstype -o TARGET | head -1
+}
 
-  https://marc.info/?l=linux-xfs&m=151785278525201&w=2
+And similarly
 
-Also note that this test depends on currently unmerged xfs_io
-functionality. The associated functionality is posted for review here:
+# check if the given dir is a mount point, if so, return mount point
+_is_dir_mountpoint()
+{
+	local dir=$1
+	local fstype=${2:-$FSTYP}
+	...
+	findmnt -rncv -T $dir -t $fstype -o TARGET | head -1
+}
 
-  https://marc.info/?l=linux-xfs&m=151792224511355&w=2
+Note that I just slightly tested it, not sure if it'll work as expected
+fully. (And please introduce _is_dir_mountpoint along with its first
+usage, i.e. fold it to patch 2/5, if it works as expected.)
 
-... and so this test should not be merged until/unless that
-functionality is reviewed. Thanks.
+Thanks,
+Eryu
 
-Brian
-
- tests/xfs/440     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/440.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 100 insertions(+)
- create mode 100755 tests/xfs/440
- create mode 100644 tests/xfs/440.out
-
-diff --git a/tests/xfs/440 b/tests/xfs/440
-new file mode 100755
-index 00000000..c7667e08
---- /dev/null
-+++ b/tests/xfs/440
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# FS QA Test 440
-+#
-+# Regression test for the XFS rmapbt based extent swap algorithm. The extent
-+# swap algorithm for rmapbt=1 filesystems unmaps/remaps individual extents to
-+# rectify the rmapbt for each extent swapped between inodes. If one of the
-+# inodes happens to straddle the extent <-> btree format boundary (which can
-+# vary depending on inode size), the unmap/remap sequence can bounce the inodes
-+# back and forth between formats many times during the swap. Since extent ->
-+# btree format conversion requires a block allocation, this can consume more
-+# blocks than expected, lead to block reservation overrun and free space
-+# accounting inconsistency.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_xfs_io_command "swapext"
-+
-+_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount || _fail "mount failed"
-+
-+file1=$SCRATCH_MNT/file1
-+file2=$SCRATCH_MNT/file2
-+
-+# The goal is run an extent swap where one of the associated files has the
-+# minimum number of extents to remain in btree format. First, create a couple
-+# files with large enough extent counts to ensure btree format on the largest
-+# possible inode size filesystems.
-+for i in $(seq 0 199); do
-+	$XFS_IO_PROG -fc "falloc $((i * 8192)) 4k" $file1
-+	$XFS_IO_PROG -fc "falloc $((i * 8192)) 4k" $file2
-+done
-+
-+# Now run an extent swap at every possible extent count down to 0.  Depending
-+# on filesystem geometry (i.e., inode size), one of these swaps will cover the
-+# boundary case between extent and btree format.
-+for i in $(seq 0 199); do
-+	# punch one extent from the tmpfile and swap
-+	$XFS_IO_PROG -c "fpunch $((i * 8192)) 4k" $file2
-+	$XFS_IO_PROG -c "swapext $file2" $file1
-+
-+	# punch the same extent from the old fork (now in file2) to resync the
-+	# extent counts and repeat
-+	$XFS_IO_PROG -c "fpunch $((i * 8192)) 4k" $file2
-+done
-+
-+# failure results in fs corruption and possible assert failure
-+echo Silence is golden
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/440.out b/tests/xfs/440.out
-new file mode 100644
-index 00000000..fb8dc21f
---- /dev/null
-+++ b/tests/xfs/440.out
-@@ -0,0 +1,2 @@
-+QA output created by 440
-+Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index cf81451d..ae0c5fc8 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -437,3 +437,4 @@
- 437 auto quick other
- 438 auto quick quota dangerous
- 439 auto quick fuzzers log
-+440 auto quick ioctl
--- 
-2.13.6
-
+>  # if so, return mount point
+>  #
+>  _is_mounted()
+>  {
+> -    if [ $# -ne 1 ]
+> -    then
+> -	echo "Usage: _is_mounted device" 1>&2
+> -	exit 1
+> -    fi
+> +	if [ $# -lt 1 ]; then
+> +		echo "Usage: _is_mounted <device|mountpoint> [fstype]" 1>&2
+> +		exit 1
+> +	fi
+>  
+> -    device=$1
+> +	local name=$1
+> +	local fstype=${2-$FSTYP}
+>  
+> -    if _mount | grep "$device " | $AWK_PROG -v pattern="type $FSTYP" '
+> -        pattern        { print $3 ; exit 0 }
+> -        END            { exit 1 }
+> -    '
+> -    then
+> -        echo "_is_mounted: $device is not a mounted $FSTYP FS"
+> -        exit 1
+> -    fi
+> +	_mount | grep "$name " | $AWK_PROG -v pattern="type $fstype" '
+> +		$0 ~ pattern	{ print $3 }
+> +	'
+>  }
+>  
+>  # remount a FS to a new mode (ro or rw)
+> -- 
+> 2.5.0
+> 
