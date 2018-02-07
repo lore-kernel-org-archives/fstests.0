@@ -1,245 +1,168 @@
-Received: from mail-yw0-f173.google.com ([209.85.161.173]:35696 "EHLO
-        mail-yw0-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753293AbeBFUez (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Feb 2018 15:34:55 -0500
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:55400 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752848AbeBGEHV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Feb 2018 23:07:21 -0500
+Date: Wed, 7 Feb 2018 12:07:18 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH] tests/xfs: rmapbt swapext block reservation overrun test
+Message-ID: <20180207040718.GW18267@eguan.usersys.redhat.com>
+References: <20180205174601.51574-1-bfoster@redhat.com>
+ <20180206131032.62271-1-bfoster@redhat.com>
+ <20180206173023.GL4849@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20180206155325.GS18267@eguan.usersys.redhat.com>
-References: <20180131102759.40997-1-yi.zhang@huawei.com> <20180131102759.40997-3-yi.zhang@huawei.com>
- <20180206155325.GS18267@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 6 Feb 2018 22:34:54 +0200
-Message-ID: <CAOQ4uxgE+MVf9Jzz73xaC5YB+90f6nfTzH9ghzpObuKD0ZdgbA@mail.gmail.com>
-Subject: Re: [xfstests PATCH v2 2/5] overlay: hook filesystem check helper
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180206173023.GL4849@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: "zhangyi (F)" <yi.zhang@huawei.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Brian Foster <bfoster@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 6, 2018 at 5:53 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Jan 31, 2018 at 06:27:56PM +0800, zhangyi (F) wrote:
->> Hook filesystem check helper to _check_test_fs and _check_scratch_fs for
->> constants underlying dirs of overlay filesystem, and introduce scratch
->> check helpers for optionally lower/upper/work dirs. These helpers works
->> only if fsck.overlay exists.
->>
->> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
->>
->> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
->> ---
->>  common/overlay | 128 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  common/rc      |   4 +-
->>  2 files changed, 130 insertions(+), 2 deletions(-)
->>
->> diff --git a/common/overlay b/common/overlay
->> index d741a7e..0e45ddd 100644
->> --- a/common/overlay
->> +++ b/common/overlay
->> @@ -152,6 +152,14 @@ _require_scratch_overlay_feature()
->>       _scratch_unmount
->>  }
->>
->> +# Require the same scratch device as _require_scratch, but do not check
->> +# the constants OVL_LOWER/OVL_UPPER/OVL_WORK dirs, should use together
->> +# with optionally lower/upper/work dirs and do check explicitly after test.
->> +_require_overlay_scratch_dirs()
->> +{
->> +     _require_scratch_nocheck
->> +}
->> +
->
-> After looking at previous review comments, I know that this new function
-> was suggested by Amir, but I don't think we really need it, IMHO it just
-> adds another layer and complexity (sorry again on the late review..).
-> I'd just call _require_scratch_nocheck in tests with proper comments (as
-> we use multiple lower layers and the default _check_overlay_scratch_fs
-> just can't handle it).
->
->>  # Helper function to check underlying dirs of overlay filesystem
->>  _overlay_fsck_dirs()
->>  {
->> @@ -165,3 +173,123 @@ _overlay_fsck_dirs()
->>       $FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
->>                          -o workdir=$workdir $*
->>  }
->> +
->> +_overlay_check_dirs()
->> +{
->> +     local lowerdir=$1
->> +     local upperdir=$2
->> +     local workdir=$3
->> +     local err=0
->> +
->> +     _overlay_fsck_dirs $* $FSCK_OPTIONS >>$tmp.fsck 2>&1
->> +     if [ $? -ne 0 ]; then
->> +             _log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
->> +
->> +             echo "*** fsck.overlay output ***"      >>$seqres.full
->> +             cat $tmp.fsck                           >>$seqres.full
->> +             echo "*** end fsck.overlay output"      >>$seqres.full
->> +
->> +             echo "*** mount output ***"             >>$seqres.full
->> +             _mount                                  >>$seqres.full
->> +             echo "*** end mount output"             >>$seqres.full
->> +
->> +             err=1
->> +     fi
->> +     rm -f $tmp.fsck
->> +
->> +     return $err
->> +}
->> +
->> +# Check the same mnt/dev of _check_overlay_scratch_fs, but check optionally
->> +# lower/upper/work dirs of overlay filesystem, should use together with
->> +# _require_overlay_scratch_dirs
->
-> So the last sentence of above comments made me confused, why should we
-> use it together with _require_overlay_scratch_dirs and how? That's my
-> first impression reading these comments..
->
->> +_overlay_check_scratch_dirs()
->> +{
->> +     local lowerdir=$1
->> +     local upperdir=$2
->> +     local workdir=$3
->> +     shift 3
->> +
->> +     # Need to umount overlay for scratch dir check
->> +     local ovl_mounted=`_is_mounted $SCRATCH_MNT`
->> +     [ -z "$ovl_mounted" ] || $UMOUNT_PROG $SCRATCH_MNT
->> +
->> +     # Check dirs with extra overlay options
->> +     _overlay_check_dirs $lowerdir $upperdir $workdir $*
->> +     local ret=$?
->> +
->> +     if [ $ret -eq 0 -a -n "$ovl_mounted" ]; then
->> +             # overlay was mounted, remount with extra mount options
->> +             _overlay_scratch_mount_dirs $lowerdir $upperdir \
->> +                                         $workdir $*
->> +             ret=$?
->> +     fi
->> +
->> +     return $ret
->> +}
->> +
->> +_overlay_check_fs()
->> +{
->> +     # Aligns arguments for _overlay_base_mount
->> +     local ovl_mnt=$1
->> +     shift 1
->> +
->> +     local base_dev=$3
->> +     local base_mnt=$4
->
-> I think we need more comments on the arguments.
->
->> +
->> +     [ "$FSTYP" = overlay ] || return 0
->> +
->> +     # Base fs needs to be mounted to check overlay dirs
->> +     local base_fstype=""
->> +     local ovl_mounted=""
->> +
->> +     [ -z "$base_dev" ] || \
->> +             base_fstype=`_fs_type $base_dev`
->> +
->> +     # If base fstype is set, base fs is mounted, mount otherwise
->
-> This comment is not clear enough, I think it's better to explain why we
-> do things differently here not what we do in the code.
->
->> +     if [ -z "$base_fstype" ]; then
->
-> Need to check if "$base_dev" is empty or not, i.e. if we're using legacy
-> overlay setup or overlay with base devices:
->
->         if [ -n "$base_dev" -a -z "$base_fstype" ]; then
->
-> Otherwise we call into _overlay_base_mount wrongly here when testing
-> with legacy overlay setup, and check prints weired messages (because
-> $base_dev is empty):
->
-> ...
-> OVL_BASE_TEST_DEV=/mnt/ovl/test is mounted but not on OVL_BASE_TEST_DIR=-o - aborting
-> Already mounted result:
-> /mnt/ovl/test /mnt/testarea/test
-> overlay/006 1s ... 0s
-> OVL_BASE_SCRATCH_DEV=/mnt/ovl/scratch is mounted but not on OVL_BASE_SCRATCH_MNT=-o - aborting
-> Already mounted result:
-> /mnt/ovl/scratch /mnt/testarea/scratch
-> Ran: overlay/006
-> Passed all 1 tests
->
->> +             _overlay_base_mount $*
->> +     else
->> +             # Need to umount overlay for dir check
->> +             ovl_mounted=`_is_mounted $ovl_mnt`
->> +             [ -z "$ovl_mounted" ] || $UMOUNT_PROG $ovl_mnt
->> +     fi
->> +
->> +     _overlay_check_dirs $base_mnt/$OVL_LOWER $base_mnt/$OVL_UPPER \
->> +                         $base_mnt/$OVL_WORK
->> +     local ret=$?
->> +
->> +     if [ -z "$base_fstype" ]; then
->> +             _overlay_base_unmount "$base_dev" "$base_mnt"
->
-> Looks like we need to check $base_dev too here.
->
->> +     elif [ $ret -eq 0 -a -n "$ovl_mounted" ]; then
->> +             # overlay was mounted, remount besides extra mount options
->> +             _overlay_mount $base_mnt $ovl_mnt
->> +             ret=$?
->> +     fi
->> +
->> +     if [ $ret != 0 ]; then
->> +             status=1
->> +             if [ "$iam" != "check" ]; then
->> +                     exit 1
->> +             fi
->> +             return 1
->> +     fi
->> +
->> +     return 0
->> +}
->> +
->> +_check_overlay_test_fs()
->> +{
->> +     _overlay_check_fs "$TEST_DIR" \
->> +             OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
->> +             "$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
->> +             $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
->
-> Using $TEST_FS_MOUNT_OPTS doesn't look correct to me, the mount options
-> provided here are meant for mounting base test device, and
-> TEST_FS_MOUNT_OPTS is meant for mounting overlay. (I know that you're
-> copying from _overlay_base_test_mount(), and I think that's a bug in the
-> existing code.)
->
-> The problem is that both TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS should be
-> set to OVERLAY_MOUNT_OPTIONS if it's not empty. But currently only
-> MOUNT_OPTIONS is set in common/config::_mount_opts, TEST_FS_MOUNT_OPTS
-> isn't set in common/config::_test_mount_opts.
->
-> But, as mentioned above, this is a different issue, using
-> OVL_BASE_MOUNT_OPTIONS for both _check_overlay_test|scratch_fs should be
-> fine for now. But if you can fix the bug too in next version of this
-> patchset, it'd be great!
->
+On Tue, Feb 06, 2018 at 09:30:23AM -0800, Darrick J. Wong wrote:
+> On Tue, Feb 06, 2018 at 08:10:32AM -0500, Brian Foster wrote:
+> > The XFS rmapbt extent swap mechanism performs an extent by extent
+> > swap to ensure the rmapbt is rectified with the appropriate extent
+> > owner information after the operation. This implementation suffers
+> > from a corner case that requires extra reservation if the swap
+> > operation results in bouncing one of the associated inodes between
+> > extent and btree formats. When this corner case occurs, it results
+> > in a transaction block reservation overrun and possible corruption
+> > of the free space accounting.
+> > 
+> > This regression test provides coverage for this corner case. It
+> > creates two files with a large enough extent count to require btree
+> > format, regardless of inode size, and performs a sequence of extent
+> > swaps between them with a decreasing extent count until all extents
+> > are removed from the file(s). This ensures that one of the swaps
+> > covers the btree <-> extent fork format boundary case.
+> > 
+> > This test reproduces fs corruption on rmapbt enabled filesystems
+> > running on kernels without the associated extent swap fix.
+> > 
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> > 
+> > This test reproduces one of the problems targeted to be fixed by the
+> > following patch series:
+> > 
+> >   https://marc.info/?l=linux-xfs&m=151785278525201&w=2
+> > 
+> > Also note that this test depends on currently unmerged xfs_io
+> > functionality. The associated functionality is posted for review here:
+> > 
+> >   https://marc.info/?l=linux-xfs&m=151792224511355&w=2
+> > 
+> > ... and so this test should not be merged until/unless that
+> > functionality is reviewed. Thanks.
+> > 
+> > Brian
+> > 
+> >  tests/xfs/440     | 97 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/440.out |  2 ++
+> >  tests/xfs/group   |  1 +
+> >  3 files changed, 100 insertions(+)
+> >  create mode 100755 tests/xfs/440
+> >  create mode 100644 tests/xfs/440.out
+> > 
+> > diff --git a/tests/xfs/440 b/tests/xfs/440
+> > new file mode 100755
+> > index 00000000..c7667e08
+> > --- /dev/null
+> > +++ b/tests/xfs/440
+> > @@ -0,0 +1,97 @@
+> > +#! /bin/bash
+> > +# FS QA Test 440
+> > +#
+> > +# Regression test for the XFS rmapbt based extent swap algorithm. The extent
+> > +# swap algorithm for rmapbt=1 filesystems unmaps/remaps individual extents to
+> > +# rectify the rmapbt for each extent swapped between inodes. If one of the
+> > +# inodes happens to straddle the extent <-> btree format boundary (which can
+> > +# vary depending on inode size), the unmap/remap sequence can bounce the inodes
+> > +# back and forth between formats many times during the swap. Since extent ->
+> > +# btree format conversion requires a block allocation, this can consume more
+> > +# blocks than expected, lead to block reservation overrun and free space
+> > +# accounting inconsistency.
+> 
+> Yikes. :)
+> 
+> <slightly ot here>
+> 
+> TBH, I've long wondered a couple of things about the swapext code --
+> since the rmap version of it can swap extents between any kind of file,
+> does it still make sense to return -EINVAL if the donor file has more
+> extents than the source file?  And do we have a use case for allowing
+> extent swaps of parts of files?
+> 
+> <ok, back to the test>
+> 
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_xfs_io_command "falloc"
+> > +_require_xfs_io_command "fpunch"
+> > +_require_xfs_io_command "swapext"
+> > +
+> > +_scratch_mkfs >> $seqres.full 2>&1 || _fail "mkfs failed"
+> > +_scratch_mount || _fail "mount failed"
+> 
+> Before we encode too many _scratch_mount || _fail, can we get a decision
+> from the maintainer about whether or not _scratch_mount should just
+> _fail if the mount doesn't work, instead of each test having to
+> open-code this on its own?
+> 
+> I see that 53 of the 1221 mentions of _scratch_mount already do _fail...
 
-FWIW, I think your analysis is correct in the sense that the code
-looks bad and smells
-bad (my original code), but I am not sure there is an actual bug here
-(or in original code).
-You say that TEST_FS_MOUNT_OPTS is meant to mount overlay, but it is never used
-for mounting overlay. See the last section of README.overlay - it
-explains what the
-different mount options are used for in -overlay run.
-AFAICT, there is only a missing feature - not being able to configure
-different overlay
-mount options for scratch and test.
+Sorry for not responding to the check _scratch_mount status issue early.
+I'm fine with it overall, as more people are running into this problem
+and get annoyed by the implicit failures. I just wanted to think more
+about it and see what would be the better way to do this.
 
-Can you point to a bug?
+And Ted complained about not checking return status _scratch_mkfs and
+similar functions a month ago, I think we can fix them all together.
 
 Thanks,
-Amir.
+Eryu
