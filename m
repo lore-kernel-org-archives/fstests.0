@@ -1,64 +1,45 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:33234 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752361AbeBHQeG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Feb 2018 11:34:06 -0500
-Date: Thu, 8 Feb 2018 08:30:36 -0800
+Received: from aserp2120.oracle.com ([141.146.126.78]:43228 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751310AbeBHQ6c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Feb 2018 11:58:32 -0500
+Date: Thu, 8 Feb 2018 08:58:28 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 4/4] xfs/348: dir->symlink corruption must not be allowed
-Message-ID: <20180208163036.GI5433@magnolia>
-References: <151803835881.19313.17455678207236452557.stgit@magnolia>
- <151803838538.19313.18126711641830374635.stgit@magnolia>
- <20180208111117.GB18267@eguan.usersys.redhat.com>
+Subject: Re: [PATCH v2] tests/xfs: rmapbt swapext block reservation overrun
+ test
+Message-ID: <20180208165828.GK5433@magnolia>
+References: <20180208160429.17281-1-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180208111117.GB18267@eguan.usersys.redhat.com>
+In-Reply-To: <20180208160429.17281-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 08, 2018 at 07:11:17PM +0800, Eryu Guan wrote:
-> On Wed, Feb 07, 2018 at 01:19:45PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > A directory corrupted into a symlink will be caught by the upcoming
+On Thu, Feb 08, 2018 at 11:04:29AM -0500, Brian Foster wrote:
+> The XFS rmapbt extent swap mechanism performs an extent by extent
+> swap to ensure the rmapbt is rectified with the appropriate extent
+> owner information after the operation. This implementation suffers
+> from a corner case that requires extra reservation if the swap
+> operation results in bouncing one of the associated inodes between
+> extent and btree formats. When this corner case occurs, it results
+> in a transaction block reservation overrun and possible corruption
+> of the free space accounting.
 > 
-> Still "upcoming" or already landed upstream?
+> This regression test provides coverage for this corner case. It
+> creates two files with a large enough extent count to require btree
+> format, regardless of inode size, and performs a sequence of extent
+> swaps between them with a decreasing extent count until all extents
+> are removed from the file(s). This ensures that one of the swaps
+> covers the btree <-> extent fork format boundary case.
+> 
+> This test reproduces fs corruption on rmapbt enabled filesystems
+> running on kernels without the associated extent swap fix.
+> 
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
 
-Landed upstream finally. :)
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
 --D
-
-> > local format ifork verifiers.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> I was about to ping on this patch yesterday :)
-> 
-> Thanks,
-> Eryu
-> 
-> > ---
-> >  tests/xfs/348.out |    2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > 
-> > diff --git a/tests/xfs/348.out b/tests/xfs/348.out
-> > index f4a7a71..17d9be2 100644
-> > --- a/tests/xfs/348.out
-> > +++ b/tests/xfs/348.out
-> > @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
-> >  would have junked entry "DIR" in directory PARENT_INO
-> >  would have junked entry "EMPTY" in directory PARENT_INO
-> >  would have junked entry "FIFO" in directory PARENT_INO
-> > -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
-> > +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
-> >  stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
-> >  stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
-> >  stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
-> > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
