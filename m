@@ -1,48 +1,54 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:51455 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750736AbeBHDKm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Feb 2018 22:10:42 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v3 2/5] overlay: define common overlay xattr keys
-Date: Thu, 8 Feb 2018 11:19:10 +0800
-Message-ID: <20180208031913.14013-3-yi.zhang@huawei.com>
-In-Reply-To: <20180208031913.14013-1-yi.zhang@huawei.com>
-References: <20180208031913.14013-1-yi.zhang@huawei.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:58618 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751014AbeBHLLV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Feb 2018 06:11:21 -0500
+Date: Thu, 8 Feb 2018 19:11:17 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 4/4] xfs/348: dir->symlink corruption must not be allowed
+Message-ID: <20180208111117.GB18267@eguan.usersys.redhat.com>
+References: <151803835881.19313.17455678207236452557.stgit@magnolia>
+ <151803838538.19313.18126711641830374635.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <151803838538.19313.18126711641830374635.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Define common overlay xattr keys from Linux kernel for ovl tests use.
+On Wed, Feb 07, 2018 at 01:19:45PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> A directory corrupted into a symlink will be caught by the upcoming
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
----
- common/overlay | 10 ++++++++++
- 1 file changed, 10 insertions(+)
+Still "upcoming" or already landed upstream?
 
-diff --git a/common/overlay b/common/overlay
-index 16f13a8..9000432 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -3,6 +3,16 @@
- #
- . ./common/module
- 
-+# Export overlayfs xattrs and constant value
-+export OVL_XATTR_OPAQUE="trusted.overlay.opaque"
-+export OVL_XATTR_REDIRECT="trusted.overlay.redirect"
-+export OVL_XATTR_IMPURE="trusted.overlay.impure"
-+export OVL_XATTR_ORIGIN="trusted.overlay.origin"
-+export OVL_XATTR_NLINK="trusted.overlay.nlink"
-+export OVL_XATTR_UPPER="trusted.overlay.upper"
-+export OVL_XATTR_OPAQUE_VAL="y"
-+export OVL_XATTR_IMPURE_VAL="y"
-+
- # helper function to do the actual overlayfs mount operation
- _overlay_mount_dirs()
- {
--- 
-2.5.0
+> local format ifork verifiers.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
+I was about to ping on this patch yesterday :)
+
+Thanks,
+Eryu
+
+> ---
+>  tests/xfs/348.out |    2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> 
+> diff --git a/tests/xfs/348.out b/tests/xfs/348.out
+> index f4a7a71..17d9be2 100644
+> --- a/tests/xfs/348.out
+> +++ b/tests/xfs/348.out
+> @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
+>  would have junked entry "DIR" in directory PARENT_INO
+>  would have junked entry "EMPTY" in directory PARENT_INO
+>  would have junked entry "FIFO" in directory PARENT_INO
+> -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
+> +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
+>  stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
+>  stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
+>  stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
+> 
