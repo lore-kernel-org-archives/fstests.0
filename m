@@ -1,54 +1,66 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:58618 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:59300 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751014AbeBHLLV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 8 Feb 2018 06:11:21 -0500
-Date: Thu, 8 Feb 2018 19:11:17 +0800
+        id S1751878AbeBHMGm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Feb 2018 07:06:42 -0500
+Date: Thu, 8 Feb 2018 20:06:39 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 4/4] xfs/348: dir->symlink corruption must not be allowed
-Message-ID: <20180208111117.GB18267@eguan.usersys.redhat.com>
-References: <151803835881.19313.17455678207236452557.stgit@magnolia>
- <151803838538.19313.18126711641830374635.stgit@magnolia>
+Subject: Re: [xfstests PATCH v3 2/5] overlay: define common overlay xattr keys
+Message-ID: <20180208120639.GD18267@eguan.usersys.redhat.com>
+References: <20180208031913.14013-1-yi.zhang@huawei.com>
+ <20180208031913.14013-3-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <151803838538.19313.18126711641830374635.stgit@magnolia>
+In-Reply-To: <20180208031913.14013-3-yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 07, 2018 at 01:19:45PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Feb 08, 2018 at 11:19:10AM +0800, zhangyi (F) wrote:
+> Define common overlay xattr keys from Linux kernel for ovl tests use.
 > 
-> A directory corrupted into a symlink will be caught by the upcoming
-
-Still "upcoming" or already landed upstream?
-
-> local format ifork verifiers.
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> ---
+>  common/overlay | 10 ++++++++++
+>  1 file changed, 10 insertions(+)
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> diff --git a/common/overlay b/common/overlay
+> index 16f13a8..9000432 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -3,6 +3,16 @@
+>  #
+>  . ./common/module
+>  
+> +# Export overlayfs xattrs and constant value
+> +export OVL_XATTR_OPAQUE="trusted.overlay.opaque"
+> +export OVL_XATTR_REDIRECT="trusted.overlay.redirect"
+> +export OVL_XATTR_IMPURE="trusted.overlay.impure"
+> +export OVL_XATTR_ORIGIN="trusted.overlay.origin"
+> +export OVL_XATTR_NLINK="trusted.overlay.nlink"
+> +export OVL_XATTR_UPPER="trusted.overlay.upper"
+> +export OVL_XATTR_OPAQUE_VAL="y"
+> +export OVL_XATTR_IMPURE_VAL="y"
 
-I was about to ping on this patch yesterday :)
+Sorry, I was not clear enough in previous review. I mean putting the
+common xattr keys to common/overlay, but I don't think the <VAL>="y" is
+needed.
+
+I'll edit on commit to remove them from here and add them to tests where
+needed.
 
 Thanks,
 Eryu
 
-> ---
->  tests/xfs/348.out |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> +
+>  # helper function to do the actual overlayfs mount operation
+>  _overlay_mount_dirs()
+>  {
+> -- 
+> 2.5.0
 > 
-> 
-> diff --git a/tests/xfs/348.out b/tests/xfs/348.out
-> index f4a7a71..17d9be2 100644
-> --- a/tests/xfs/348.out
-> +++ b/tests/xfs/348.out
-> @@ -239,7 +239,7 @@ would have junked entry "DATA" in directory PARENT_INO
->  would have junked entry "DIR" in directory PARENT_INO
->  would have junked entry "EMPTY" in directory PARENT_INO
->  would have junked entry "FIFO" in directory PARENT_INO
-> -stat: 'SCRATCH_MNT/test/DIR' is a symbolic link
-> +stat: cannot stat 'SCRATCH_MNT/test/DIR': Structure needs cleaning
->  stat: 'SCRATCH_MNT/test/DATA' is a symbolic link
->  stat: cannot stat 'SCRATCH_MNT/test/EMPTY': Structure needs cleaning
->  stat: 'SCRATCH_MNT/test/SYMLINK' is a symbolic link
-> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
