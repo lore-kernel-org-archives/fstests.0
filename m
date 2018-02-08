@@ -1,43 +1,44 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:51473 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751123AbeBHDKo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Feb 2018 22:10:44 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v3 3/5] overlay: add fsck.overlay whiteout test
-Date: Thu, 8 Feb 2018 11:19:11 +0800
-Message-ID: <20180208031913.14013-4-yi.zhang@huawei.com>
-In-Reply-To: <20180208031913.14013-1-yi.zhang@huawei.com>
-References: <20180208031913.14013-1-yi.zhang@huawei.com>
+Received: from szxga06-in.huawei.com ([45.249.212.32]:51458 "EHLO huawei.com"
+ rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP id
+ S1751055AbeBHDKn (ORCPT <rfc822;fstests@vger.kernel.org>); Wed, 7 Feb 2018
+ 22:10:43 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+Message-ID: <20180208031913.14013-6-yi.zhang@huawei.com>
+Date: Wed, 7 Feb 2018 19:19:13 -0800 (PST)
+From: "zhangyi (F)" <yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
+Subject: [xfstests PATCH v3 5/5] overlay: add fsck.overlay impure xattr test
+References: <20180208031913.14013-1-yi.zhang@huawei.com>
+In-Reply-To: <20180208031913.14013-1-yi.zhang@huawei.com>
+Content-Type: text/plain; charset=ascii
+Content-Transfer-Encoding: 7bit
 To: eguan@redhat.com, fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add fsck.overlay test case to test it how to deal with orphan/valid
-whiteouts in underlying directories of overlayfs.
+Add fsck.overlay test case to test it how to deal with impure
+xattr in underlying directories of overlayfs.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/201     | 228 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/201.out |  10 +++
+ tests/overlay/203     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/203.out |   4 ++
  tests/overlay/group   |   1 +
- 3 files changed, 239 insertions(+)
- create mode 100755 tests/overlay/201
- create mode 100644 tests/overlay/201.out
+ 3 files changed, 146 insertions(+)
+ create mode 100755 tests/overlay/203
+ create mode 100644 tests/overlay/203.out
 
-diff --git a/tests/overlay/201 b/tests/overlay/201
+diff --git a/tests/overlay/203 b/tests/overlay/203
 new file mode 100755
-index 0000000..7c41a9b
+index 0000000..9f1ea79
 --- /dev/null
-+++ b/tests/overlay/201
-@@ -0,0 +1,228 @@
++++ b/tests/overlay/203
+@@ -0,0 +1,141 @@
 +#! /bin/bash
-+# FS QA Test 201
++# FS QA Test 203
 +#
-+# Test fsck.overlay how to deal with whiteouts in overlayfs.
++# Test fsck.overlay how to deal with impure xattr in overlayfs.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2018 Huawei.  All Rights Reserved.
@@ -91,34 +92,6 @@ index 0000000..7c41a9b
 +# remove all files from previous tests
 +_scratch_mkfs
 +
-+# Check whiteout
-+check_whiteout()
-+{
-+	for arg in $*; do
-+		local ttype=`stat -c "%F:%t,%T" $arg`
-+
-+		[[ "$ttype" == "character special file:0,0" ]] || \
-+			echo "Valid whiteout removed incorrectly"
-+	done
-+}
-+
-+# Create a whiteout
-+make_whiteout()
-+{
-+	for arg in $*; do
-+		mknod $arg c 0 0
-+	done
-+}
-+
-+# Create an opaque directory
-+make_opaque_dir()
-+{
-+	local target=$1
-+
-+	mkdir -p $target
-+	$SETFATTR_PROG -n $OVL_XATTR_OPAQUE -v $OVL_XATTR_OPAQUE_VAL $target
-+}
-+
 +# Create a redirect directory
 +make_redirect_dir()
 +{
@@ -127,6 +100,25 @@ index 0000000..7c41a9b
 +
 +	mkdir -p $target
 +	$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v $value $target
++}
++
++# Remove impure xattr
++remove_impure()
++{
++	local target=$1
++
++	$SETFATTR_PROG -x $OVL_XATTR_IMPURE $target
++}
++
++# Check impure xattr
++check_impure()
++{
++	local target=$1
++
++	value=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_XATTR_IMPURE $target)
++
++	[[ "$value" == "$OVL_XATTR_IMPURE_VAL" ]] || echo "Missing impure xattr"
 +}
 +
 +# Create test directories
@@ -141,152 +133,68 @@ index 0000000..7c41a9b
 +	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
 +}
 +
-+# Test orphan whiteout in lower and upper layer, should remove
-+echo "+ Orphan whiteout"
++# Test missing impure xattr in directory which has origin targets, should fix
++echo "+ Missing impure"
 +make_test_dirs
-+make_whiteout $lowerdir/foo $upperdir/{foo,bar}
++mkdir $lowerdir/{testdir1,testdir2}
++mkdir $upperdir/{testdir1,testdir2}
++touch $lowerdir/testdir1/foo
++mkdir $lowerdir/testdir2/subdir
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++touch $SCRATCH_MNT/testdir1/foo
++touch $SCRATCH_MNT/testdir2/subdir
++$UMOUNT_PROG $SCRATCH_MNT
++remove_impure $upperdir/testdir1
++remove_impure $upperdir/testdir2
 +
 +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
 +	echo "fsck should not fail"
-+ls $lowerdir
-+ls $upperdir
++check_impure $upperdir/testdir1
++check_impure $upperdir/testdir2
 +
-+# Test valid whiteout covering lower target, should not remove
-+echo "+ Valid whiteout"
-+make_test_dirs
-+touch $lowerdir2/{foo,bar}
-+make_whiteout $upperdir/foo $lowerdir/bar
-+
-+_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
-+	 $seqres.full 2>&1 || echo "fsck should not fail"
-+check_whiteout $upperdir/foo $lowerdir/bar
-+
-+# Test orphan whiteout in opaque directory, should remove
-+echo "+ Orphan whiteout(2)"
-+make_test_dirs
-+mkdir $lowerdir/testdir
-+touch $lowerdir/testdir/foo
-+make_opaque_dir $upperdir/testdir
-+make_whiteout $upperdir/testdir/foo
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+ls $upperdir/testdir
-+
-+# Test orphan whiteout whose parent path is not an merged directory,
-+# should remove
-+echo "+ Orphan whiteout(3)"
-+make_test_dirs
-+mkdir $lowerdir2/{testdir1,testdir2,testdir3}
-+touch $lowerdir2/{testdir1/foo,testdir2/foo,testdir3/foo}
-+mkdir $upperdir/{testdir1,testdir2,testdir3,testdir4}
-+touch $lowerdir/testdir1
-+make_whiteout $lowerdir/testdir2
-+make_opaque_dir $lowerdir/testdir3
-+make_whiteout $upperdir/{testdir1/foo,/testdir2/foo,testdir3/foo,testdir4/foo}
-+
-+_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
-+	$seqres.full 2>&1 || echo "fsck should not fail"
-+ls $upperdir/testdir1
-+ls $upperdir/testdir2
-+ls $upperdir/testdir3
-+ls $upperdir/testdir4
-+
-+# Test orphan whiteout in redirect directory, should remove
-+echo "+ Orphan whiteout(4)"
-+make_test_dirs
-+mkdir $lowerdir/{testdir,origin}
-+touch $lowerdir/testdir/foo
-+make_redirect_dir $upperdir/testdir "origin"
-+make_whiteout $upperdir/testdir/foo
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+ls $upperdir/testdir
-+
-+# Test valid whiteout in redirect directory cover file in lower
-+# redirect origin directory, should not remove
-+echo "+ Valid whiteout(2)"
++# Test missing impure xattr in directory which has redirect directories,
++# should fix
++echo "+ Missing impure(2)"
 +make_test_dirs
 +mkdir $lowerdir/origin
-+touch $lowerdir/origin/foo
-+make_redirect_dir $upperdir/testdir "origin"
-+make_whiteout $upperdir/testdir/foo
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_whiteout $upperdir/testdir/foo
-+
-+# Test valid whiteout covering lower target whose parent directory
-+# merge with a redirect directory in the middle layer, should not remove.
-+echo "+ Valid whiteout(3)"
-+make_test_dirs
-+mkdir -p $lowerdir2/origin/subdir
-+touch $lowerdir2/origin/subdir/foo
-+make_redirect_dir $lowerdir/testdir "origin"
-+mkdir -p $upperdir/testdir/subdir
-+make_whiteout $upperdir/testdir/subdir/foo
-+
-+_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p \
-+	>> $seqres.full 2>&1 || echo "fsck should not fail"
-+check_whiteout $upperdir/testdir/subdir/foo
-+
-+# Test invalid whiteout in opaque subdirectory in a redirect directory,
-+# should remove
-+echo "+ Orphan whiteout(5)"
-+make_test_dirs
-+mkdir -p $lowerdir/origin/subdir
-+touch $lowerdir/origin/subdir/foo
-+make_redirect_dir $upperdir/testdir "origin"
-+make_opaque_dir $upperdir/testdir/subdir
-+make_whiteout $upperdir/testdir/subdir/foo
-+
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+ls $upperdir/testdir/subdir
-+
-+# Test valid whiteout in reidrect subdirectory in a opaque directory
-+# covering lower target, should not remove
-+echo "+ Valid whiteout(4)"
-+make_test_dirs
-+mkdir $lowerdir/origin
-+touch $lowerdir/origin/foo
-+make_opaque_dir $upperdir/testdir
 +make_redirect_dir $upperdir/testdir/subdir "/origin"
-+make_whiteout $upperdir/testdir/subdir/foo
 +
 +_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+        echo "fsck should not fail"
-+check_whiteout $upperdir/testdir/subdir/foo
++	echo "fsck should not fail"
++check_impure $upperdir/testdir
++
++# Test missing impure xattr in directory which has merge directories,
++# should fix
++echo "+ Missing impure(3)"
++make_test_dirs
++mkdir $lowerdir/testdir $upperdir/testdir
++
++_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
++	echo "fsck should not fail"
++check_impure $upperdir
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/201.out b/tests/overlay/201.out
+diff --git a/tests/overlay/203.out b/tests/overlay/203.out
 new file mode 100644
-index 0000000..157bb85
+index 0000000..dd81788
 --- /dev/null
-+++ b/tests/overlay/201.out
-@@ -0,0 +1,10 @@
-+QA output created by 201
-++ Orphan whiteout
-++ Valid whiteout
-++ Orphan whiteout(2)
-++ Orphan whiteout(3)
-++ Orphan whiteout(4)
-++ Valid whiteout(2)
-++ Valid whiteout(3)
-++ Orphan whiteout(5)
-++ Valid whiteout(4)
++++ b/tests/overlay/203.out
+@@ -0,0 +1,4 @@
++QA output created by 203
+++ Missing impure
+++ Missing impure(2)
+++ Missing impure(3)
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 40c1a05..50e0d5b 100644
+index 7746514..e8f2d41 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -56,3 +56,4 @@
- 053 auto quick copyup redirect exportfs nonsamefs
- 054 auto quick copyup redirect exportfs
+@@ -58,3 +58,4 @@
  055 auto quick copyup redirect exportfs nonsamefs
-+201 auto quick fsck
+ 201 auto quick fsck
+ 202 auto quick fsck
++203 auto quick fsck
 -- 
 2.5.0
 
