@@ -1,116 +1,67 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:5210 "EHLO huawei.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:60286 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750847AbeBHMrY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 8 Feb 2018 07:47:24 -0500
-Subject: Re: [xfstests PATCH v2 2/5] overlay: hook filesystem check helper
-References: <20180131102759.40997-1-yi.zhang@huawei.com>
- <20180131102759.40997-3-yi.zhang@huawei.com>
- <20180206155325.GS18267@eguan.usersys.redhat.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <4ef2eeaa-ed7a-b643-614d-8cdc2d99dd41@huawei.com>
-Date: Thu, 8 Feb 2018 20:46:29 +0800
+        id S1751066AbeBHMvz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Feb 2018 07:51:55 -0500
+Date: Thu, 8 Feb 2018 20:51:52 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [PATCH 2/4] xfs: skip xfs_check in _check_xfs_filesystem
+Message-ID: <20180208125152.GE18267@eguan.usersys.redhat.com>
+References: <151803835881.19313.17455678207236452557.stgit@magnolia>
+ <151803837117.19313.3481001926133028039.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20180206155325.GS18267@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset="windows-1252"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <151803837117.19313.3481001926133028039.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/2/6 23:53, Eryu Guan Wrote:
-> On Wed, Jan 31, 2018 at 06:27:56PM +0800, zhangyi (F) wrote:
->> Hook filesystem check helper to _check_test_fs and _check_scratch_fs for
->> constants underlying dirs of overlay filesystem, and introduce scratch
->> check helpers for optionally lower/upper/work dirs. These helpers works
->> only if fsck.overlay exists.
->>
->> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
->>
-[..]
->> +_check_overlay_test_fs()
->> +{
->> +	_overlay_check_fs "$TEST_DIR" \
->> +		OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
->> +		"$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
->> +		$TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
+On Wed, Feb 07, 2018 at 01:19:31PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Using $TEST_FS_MOUNT_OPTS doesn't look correct to me, the mount options
-> provided here are meant for mounting base test device, and
-> TEST_FS_MOUNT_OPTS is meant for mounting overlay. (I know that you're
-> copying from _overlay_base_test_mount(), and I think that's a bug in the
-> existing code.)
+> xfs_check has been long obsolete, so stop running it automatically
+> after every test.  Tests that explicitly want xfs_check can call it
+> via _scratch_xfs_check or _xfs_check; that part doesn't go away.
 > 
-> The problem is that both TEST_FS_MOUNT_OPTS and MOUNT_OPTIONS should be
-> set to OVERLAY_MOUNT_OPTIONS if it's not empty. But currently only
-> MOUNT_OPTIONS is set in common/config::_mount_opts, TEST_FS_MOUNT_OPTS
-> isn't set in common/config::_test_mount_opts.
-> 
-Sorry, I was a little confuse that it conflict with comments in README.overlay.
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-IIUC, XXX_MOUNT_OPTIONS act as an "default mount options" when user not specify
-MOUNT_OPTIONS explicity, so we set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS to
-XXX_MOUNT_OPTIONS in _mount_opts and _test_mount_opts for other filesystems.
-
-But overlayfs is different, OVERLAY_MOUNT_OPTIONS is used for overlayfs mount
-options, so we first set OVL_BASE_MOUNT_OPTIONS to MOUNT_OPTIONS and then set
-MOUNT_OPTIONS to OVERLAY_MOUNT_OPTIONS. So MOUNT_OPTIONS=$OVERLAY_MOUNT_OPTIONS
-in _mount_opts is not correct? (It seem that it will not lead to mistack because
-"8df8ad0c overlay: fix _overlay_config_override of MOUNT_OPTIONS").
-
-Do you think we shoud use OVL_BASE_MOUNT_OPTIONS instead of OVERLAY_MOUNT_OPTIONS
-as "default mount options" and set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS in
-_mount_opts and _test_mount_opts if user not set either of them ?
+I'd like to see an ACK on this from XFS community.
 
 Thanks,
-Yi.
-> But, as mentioned above, this is a different issue, using
-> OVL_BASE_MOUNT_OPTIONS for both _check_overlay_test|scratch_fs should be
-> fine for now. But if you can fix the bug too in next version of this
-> patchset, it'd be great!
-> 
-> Thanks,
-> Eryu
-> 
->> +}
->> +
->> +_check_overlay_scratch_fs()
->> +{
->> +	_overlay_check_fs "$SCRATCH_MNT" \
->> +		OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
->> +		"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
->> +		$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
->> +}
->> diff --git a/common/rc b/common/rc
->> index 3351f00..7b84bb5 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -2585,7 +2585,7 @@ _check_test_fs()
->>  	# no way to check consistency for GlusterFS
->>  	;;
->>      overlay)
->> -	# no way to check consistency for overlay
->> +	_check_overlay_test_fs
->>  	;;
->>      pvfs2)
->>  	;;
->> @@ -2643,7 +2643,7 @@ _check_scratch_fs()
->>  	# no way to check consistency for GlusterFS
->>  	;;
->>      overlay)
->> -	# no way to check consistency for overlay
->> +	_check_overlay_scratch_fs
->>  	;;
->>      pvfs2)
->>  	;;
->> -- 
->> 2.5.0
->>
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-unionfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
-> .
-> 
+Eryu
 
+> ---
+>  common/xfs |   17 -----------------
+>  1 file changed, 17 deletions(-)
+> 
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 3dba40d..c63e5dc 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -386,23 +386,6 @@ _check_xfs_filesystem()
+>  		ok=0
+>  	fi
+>  
+> -	# xfs_check runs out of memory on large files, so even providing the test
+> -	# option (-t) to avoid indexing the free space trees doesn't make it pass on
+> -	# large filesystems. Avoid it.
+> -	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
+> -		_xfs_check $extra_log_options $device 2>&1 |\
+> -			_fix_malloc >$tmp.fs_check
+> -	fi
+> -	if [ -s $tmp.fs_check ]; then
+> -		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
+> -		echo "*** xfs_check output ***"		>>$seqres.full
+> -		cat $tmp.fs_check			>>$seqres.full
+> -		echo "*** end xfs_check output"		>>$seqres.full
+> -
+> -		xfs_metadump $device $seqres.check	>>$seqres.full 2>&1
+> -		ok=0
+> -	fi
+> -
+>  	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
+>  	if [ $? -ne 0 ]; then
+>  		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
+> 
