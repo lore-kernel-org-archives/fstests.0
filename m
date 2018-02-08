@@ -1,11 +1,13 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:51454 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:51457 "EHLO huawei.com"
         rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750767AbeBHDKm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1750807AbeBHDKm (ORCPT <rfc822;fstests@vger.kernel.org>);
         Wed, 7 Feb 2018 22:10:42 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v3 0/5] overlay: add fsck.overlay basic tests
-Date: Thu, 8 Feb 2018 11:19:08 +0800
-Message-ID: <20180208031913.14013-1-yi.zhang@huawei.com>
+Subject: [xfstests PATCH v3 1/5] overlay: add filesystem check helper
+Date: Thu, 8 Feb 2018 11:19:09 +0800
+Message-ID: <20180208031913.14013-2-yi.zhang@huawei.com>
+In-Reply-To: <20180208031913.14013-1-yi.zhang@huawei.com>
+References: <20180208031913.14013-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,59 +15,51 @@ To: eguan@redhat.com, fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu:
+Add filesystem check helper for the upcoming fsck.overlay utility.
+This helper invoke fsck.overlay to check and optionally repair
+underlying directories of overlay filesystem.
 
-This revision handle your comments in last iteration, please review.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config  |  1 +
+ common/overlay | 14 ++++++++++++++
+ 2 files changed, 15 insertions(+)
 
-Thanks,
-Yi.
-
-Changes since v2:
-- Move overlayfs xattrs constants to common/overlay.
-- Fix _require_attrs in 201 and 203.
-- Fix syntax error in string compare, and modify fsck error handle.
-- Modify some code style.
-
-Changes since v1:
-- improve _overlay_fsck_dirs helper to accept more than one options.
-
-----------
-
-Background:
-
-This is the test cases for the fsck.overlay[1] to test orphan whiteout,
-invalid/duplicate reiderct dirs, and the missing impure xattr. These
-works only when fsck.overlay exists. (These patchset split form origin
-patchset[2])
-
-[1] https://github.com/hisilicon/overlayfs-progs
-[2] https://www.spinics.net/lists/linux-unionfs/msg03988.html
-
-
-zhangyi (F) (5):
-  overlay: add filesystem check helper
-  overlay: define common overlay xattr keys
-  overlay: add fsck.overlay whiteout test
-  overlay: add fsck.overlay redirect directory test
-  overlay: add fsck.overlay impure xattr test
-
- common/config         |   1 +
- common/overlay        |  24 +++++
- tests/overlay/201     | 228 +++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/201.out |  10 ++
- tests/overlay/202     | 264 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/202.out |  11 +++
- tests/overlay/203     | 141 +++++++++++++++++++++++++++
- tests/overlay/203.out |   4 +
- tests/overlay/group   |   3 +
- 9 files changed, 686 insertions(+)
- create mode 100755 tests/overlay/201
- create mode 100644 tests/overlay/201.out
- create mode 100755 tests/overlay/202
- create mode 100644 tests/overlay/202.out
- create mode 100755 tests/overlay/203
- create mode 100644 tests/overlay/203.out
-
+diff --git a/common/config b/common/config
+index 5f40413..71115bd 100644
+--- a/common/config
++++ b/common/config
+@@ -236,6 +236,7 @@ case "$HOSTOS" in
+         export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
+ 	export E2FSCK_PROG="`set_prog_path e2fsck`"
+ 	export TUNE2FS_PROG="`set_prog_path tune2fs`"
++	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
+         ;;
+ esac
+ 
+diff --git a/common/overlay b/common/overlay
+index ad2f3be..16f13a8 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -168,3 +168,17 @@ _require_scratch_overlay_features()
+ 
+ 	_scratch_unmount
+ }
++
++# Helper function to check underlying dirs of overlay filesystem
++_overlay_fsck_dirs()
++{
++	local lowerdir=$1
++	local upperdir=$2
++	local workdir=$3
++	shift 3
++
++	[[ ! -x "$FSCK_OVERLAY_PROG" ]] && return 0
++
++	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
++			   -o workdir=$workdir $*
++}
 -- 
 2.5.0
 
