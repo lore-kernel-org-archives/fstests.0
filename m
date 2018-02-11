@@ -1,652 +1,124 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:43530 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751862AbeBKG7K (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 11 Feb 2018 01:59:10 -0500
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH v3] generic: add stress test for fanotify and inotify
-Date: Sun, 11 Feb 2018 14:59:04 +0800
-Message-Id: <1518332344-4772-1-git-send-email-xzhou@redhat.com>
-In-Reply-To: <CCAOQ4uxh2ZmEJi8gbiDRsYefV+XC20TNLjW9OFOZM0=j0_0yf+Q@mail.gmail.com>
-References: <CCAOQ4uxh2ZmEJi8gbiDRsYefV+XC20TNLjW9OFOZM0=j0_0yf+Q@mail.gmail.com>
+Received: from mail-pg0-f42.google.com ([74.125.83.42]:36464 "EHLO
+        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751077AbeBKQC2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Feb 2018 11:02:28 -0500
+Received: by mail-pg0-f42.google.com with SMTP id j9so4869748pgv.3
+        for <fstests@vger.kernel.org>; Sun, 11 Feb 2018 08:02:28 -0800 (PST)
+Received: from localhost ([128.199.137.77])
+        by smtp.gmail.com with ESMTPSA id 14sm23130317pfi.132.2018.02.11.08.02.25
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Sun, 11 Feb 2018 08:02:26 -0800 (PST)
+Message-ID: <5a806912.8e08620a.98999.5aec@mx.google.com>
+Date: Mon, 12 Feb 2018 00:02:19 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 03cc97346b1d
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="hDAV6qu06GWt"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: amir73il@gmail.com
-Cc: fstests@vger.kernel.org, miklos@szeredi.hu, jack@suse.cz, Xiong Zhou <xzhou@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Stress test for fanotify and inotify. Exercise fanotify and
-inotify user interfaces in loop while other stress tests going
-on in the watched test directory.
 
-Watching slab object inotify_inode_mark size, report fail
-it increases too fast. This may lead to a crash if OOM killer
-invoked. Fixed by this series:
+--hDAV6qu06GWt
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-ab97f87 fsnotify: convert fsnotify_mark.refcnt from atomic_t to ref..
-6685df3 fanotify: clean up CONFIG_FANOTIFY_ACCESS_PERMISSIONS ifdefs
-3427ce7 fsnotify: clean up fsnotify()
-f37650f fanotify: fix fsnotify_prepare_user_wait() failure
-9a31d7a fsnotify: fix pinning group in fsnotify_prepare_user_wait()
-0d6ec07 fsnotify: pin both inode and vfsmount mark
-24c2030 fsnotify: clean up fsnotify_prepare/finish_user_wait()
-7761daa fsnotify: convert fsnotify_group.refcnt from atomic_t to r..
-9cf90ce fsnotify: Protect bail out path of fsnotify_add_mark_locked()
+Hi all,
 
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
----
+The master branch of the xfstests repository at:
 
-Thanks for reviewing!
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-v3:
-  add wait in cleanup
-  add kernel commits fixed this issue in comments and commit msg
-  fix seq numbers
-  fix wording
-v2:
-  add to dangerous group
-  new fsnotify group
-  watch inotify_inode_mark slab instead of free memory
-  watch inotify_inode_mark slab increasing speed instead
-  reduce running time to 2m since we are watching the speed
-other than numbers
-  kill stress processes in cleanup
+have just been updated. This update mainly pulls in the fsck.overlay basic
+tests from zhangyi (F) (which require fsck.overlay binary), many thanks to Amir
+for reviewing these tests! There're also three new reflink vs quota tests from
+Darrick and one rmapbt swapext block test from Brian for XFS.
 
- .gitignore            |   1 +
- src/Makefile          |   3 +-
- src/fsnotify_stress.c | 339 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/478     | 192 ++++++++++++++++++++++++++++
- tests/generic/478.out |   2 +
- tests/generic/group   |   1 +
- 6 files changed, 537 insertions(+), 1 deletion(-)
- create mode 100644 src/fsnotify_stress.c
- create mode 100755 tests/generic/478
- create mode 100644 tests/generic/478.out
+I didn't see any new failures when running with latest Linus tree.
 
-diff --git a/.gitignore b/.gitignore
-index ee7eaed..ae01ed3 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -72,6 +72,7 @@
- /src/fill
- /src/fill2
- /src/fs_perms
-+/src/fsnotify_stress
- /src/fssum
- /src/fstest
- /src/fsync-err
-diff --git a/src/Makefile b/src/Makefile
-index b96b8cf..6b9f296 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -14,7 +14,8 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	t_mmap_writev t_truncate_cmtime dirhash_collide t_rename_overwrite \
- 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
- 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
--	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption
-+	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
-+	fsnotify_stress
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/fsnotify_stress.c b/src/fsnotify_stress.c
-new file mode 100644
-index 0000000..f113918
---- /dev/null
-+++ b/src/fsnotify_stress.c
-@@ -0,0 +1,339 @@
-+#ifndef _GNU_SOURCE
-+#define _GNU_SOURCE     /* Needed to get O_LARGEFILE definition */
-+#endif
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <limits.h>
-+#include <poll.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <sys/fanotify.h>
-+#include <unistd.h>
-+#include <string.h>
-+#include <sys/types.h>
-+#include <sys/stat.h>
-+#include <dirent.h>
-+#include <sys/inotify.h>
-+
-+static void handle_events(int fd)
-+{
-+	const struct fanotify_event_metadata *metadata;
-+	struct fanotify_event_metadata buf[200];
-+	ssize_t len;
-+	struct fanotify_response response;
-+
-+	/* Loop while events can be read from fanotify file descriptor */
-+	for(;;) {
-+		/* Read some events */
-+		len = read(fd, (void *) &buf, sizeof(buf));
-+		if (len == -1 && errno != EAGAIN) {
-+			perror("read");
-+			exit(EXIT_FAILURE);
-+		}
-+		/* Check if end of available data reached */
-+		if (len <= 0)
-+			break;
-+		/* Point to the first event in the buffer */
-+		metadata = buf;
-+		/* Loop over all events in the buffer */
-+		while (FAN_EVENT_OK(metadata, len)) {
-+			/* Check that run-time and compile-time structures match */
-+			if (metadata->vers != FANOTIFY_METADATA_VERSION) {
-+				fprintf(stderr,
-+				    "Mismatch of fanotify metadata version.\n");
-+				exit(EXIT_FAILURE);
-+			}
-+			if (metadata->fd >= 0) {
-+				/* Handle open permission event */
-+				if (metadata->mask & FAN_OPEN_PERM) {
-+					/* Allow file to be opened */
-+					response.fd = metadata->fd;
-+					response.response = FAN_ALLOW;
-+					write(fd, &response,
-+					    sizeof(struct fanotify_response));
-+				}
-+				/* Handle access permission event */
-+				if (metadata->mask & FAN_ACCESS_PERM) {
-+					/* Allow file to be accessed */
-+					response.fd = metadata->fd;
-+					response.response = FAN_ALLOW;
-+					write(fd, &response,
-+					    sizeof(struct fanotify_response));
-+				}
-+				/* Close the file descriptor of the event */
-+				close(metadata->fd);
-+			}
-+			/* Advance to next event */
-+			metadata = FAN_EVENT_NEXT(metadata, len);
-+		}
-+	}
-+}
-+
-+static int fanotify_watch(char *arg)
-+{
-+	int fd, poll_num;
-+	nfds_t nfds;
-+	struct pollfd fds[2];
-+
-+	/* Create the file descriptor for accessing the fanotify API */
-+	fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT | FAN_NONBLOCK,
-+					   O_RDONLY | O_LARGEFILE);
-+	if (fd == -1) {
-+		perror("fanotify_init");
-+		exit(EXIT_FAILURE);
-+	}
-+	/*
-+	 * Mark the mount for:
-+	 * - permission events before opening files
-+	 * - notification events after closing a write-enabled
-+	     file descriptor
-+	 */
-+	if (fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT,
-+			FAN_ACCESS | FAN_MODIFY | FAN_OPEN_PERM |
-+			FAN_CLOSE | FAN_OPEN | FAN_ACCESS_PERM |
-+			FAN_ONDIR | FAN_EVENT_ON_CHILD,
-+			-1, arg) == -1) {
-+		perror("fanotify_mark");
-+		exit(EXIT_FAILURE);
-+	}
-+	/* Prepare for polling */
-+	nfds = 1;
-+	/* Fanotify input */
-+	fds[0].fd = fd;
-+	fds[0].events = POLLIN;
-+	/* This is the loop to wait for incoming events */
-+	while (1) {
-+		poll_num = poll(fds, nfds, -1);
-+		if (poll_num == -1) {
-+			if (errno == EINTR)     /* Interrupted by a signal */
-+				continue;           /* Restart poll() */
-+			perror("poll");         /* Unexpected error */
-+			exit(EXIT_FAILURE);
-+		}
-+		if (poll_num > 0) {
-+			if (fds[0].revents & POLLIN) {
-+				/* Fanotify events are available */
-+				handle_events(fd);
-+			}
-+		}
-+	}
-+	exit(EXIT_SUCCESS);
-+}
-+
-+static int fanotify_flush_stress(char *arg)
-+{
-+	int fd;
-+
-+	/* Create the file descriptor for accessing the fanotify API */
-+	fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT | FAN_NONBLOCK,
-+					   O_RDONLY | O_LARGEFILE);
-+	if (fd == -1) {
-+		perror("fanotify_init");
-+		exit(EXIT_FAILURE);
-+	}
-+
-+	/* Loop marking all kinds of events and flush */
-+	while (1) {
-+		if (fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT,
-+			  FAN_ACCESS | FAN_MODIFY | FAN_OPEN_PERM | FAN_CLOSE |
-+			  FAN_OPEN | FAN_ACCESS_PERM | FAN_ONDIR |
-+			  FAN_EVENT_ON_CHILD, -1, arg) == -1)
-+			perror("fanotify_mark add");
-+
-+		if (fanotify_mark(fd, FAN_MARK_FLUSH | FAN_MARK_MOUNT,
-+						0, -1, arg) == -1)
-+			perror("fanotify_mark flush mount");
-+
-+		if (fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT,
-+			  FAN_ACCESS | FAN_MODIFY | FAN_OPEN_PERM | FAN_CLOSE |
-+			  FAN_OPEN | FAN_ACCESS_PERM | FAN_ONDIR |
-+			  FAN_EVENT_ON_CHILD, -1, arg) == -1)
-+			perror("fanotify_mark add");
-+
-+		if (fanotify_mark(fd, FAN_MARK_FLUSH, 0, -1, arg) == -1)
-+			perror("fanotify_mark flush");
-+	}
-+	close(fd);
-+	exit(EXIT_SUCCESS);
-+}
-+
-+static int fanotify_init_stress(char *arg)
-+{
-+	int fd;
-+
-+	while (1) {
-+		/* Create the file descriptor for accessing the fanotify API */
-+		fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT |
-+				FAN_NONBLOCK, O_RDONLY | O_LARGEFILE);
-+		if (fd == -1)
-+			perror("fanotify_init");
-+		if (fanotify_mark(fd, FAN_MARK_ADD | FAN_MARK_MOUNT,
-+				FAN_ACCESS | FAN_MODIFY | FAN_OPEN_PERM |
-+				FAN_CLOSE | FAN_OPEN | FAN_ACCESS_PERM |
-+				FAN_ONDIR | FAN_EVENT_ON_CHILD, -1,
-+				arg) == -1)
-+			perror("fanotify_mark");
-+		close(fd);
-+	}
-+	exit(EXIT_SUCCESS);
-+}
-+
-+static void add_mark(int fd, uint64_t mask, char *path)
-+{
-+	if (fanotify_mark(fd, FAN_MARK_ADD, mask, -1, path) == -1)
-+		perror("fanotify_mark add");
-+}
-+
-+static void remove_mark(int fd, uint64_t mask, char *path)
-+{
-+	if (fanotify_mark(fd, FAN_MARK_REMOVE, mask, -1, path) == -1)
-+		perror("fanotify_mark remove");
-+}
-+
-+static int fanotify_mark_stress(char *arg)
-+{
-+	int fd;
-+
-+	/* Create the file descriptor for accessing the fanotify API */
-+	fd = fanotify_init(FAN_CLOEXEC | FAN_CLASS_CONTENT | FAN_NONBLOCK,
-+					   O_RDONLY | O_LARGEFILE);
-+	if (fd == -1) {
-+		perror("fanotify_init");
-+		exit(EXIT_FAILURE);
-+	}
-+	/* Loop marking all kinds of events */
-+	while (1) {
-+		add_mark(fd, FAN_ACCESS, arg);
-+		remove_mark(fd, FAN_ACCESS, arg);
-+		add_mark(fd, FAN_MODIFY, arg);
-+		remove_mark(fd, FAN_MODIFY, arg);
-+		add_mark(fd, FAN_OPEN_PERM, arg);
-+		remove_mark(fd, FAN_OPEN_PERM, arg);
-+		add_mark(fd, FAN_CLOSE, arg);
-+		remove_mark(fd, FAN_CLOSE, arg);
-+		add_mark(fd, FAN_OPEN, arg);
-+		remove_mark(fd, FAN_OPEN, arg);
-+		add_mark(fd, FAN_ACCESS_PERM, arg);
-+		remove_mark(fd, FAN_ACCESS_PERM, arg);
-+		add_mark(fd, FAN_ONDIR, arg);
-+		remove_mark(fd, FAN_ONDIR, arg);
-+		add_mark(fd, FAN_EVENT_ON_CHILD, arg);
-+		remove_mark(fd, FAN_EVENT_ON_CHILD, arg);
-+	}
-+
-+	close(fd);
-+	exit(EXIT_SUCCESS);
-+}
-+
-+static int inotify_watch(char *arg)
-+{
-+	int notify_fd;
-+	int wd, ret;
-+	char *buf;
-+
-+	buf = malloc(sizeof(struct inotify_event) + NAME_MAX + 1);
-+	if (buf == NULL) {
-+		perror("malloc");
-+		return -1;
-+	}
-+
-+	notify_fd = inotify_init1(IN_CLOEXEC);
-+	if (notify_fd == -1) {
-+		perror("inotify_init1");
-+		return -1;
-+	}
-+
-+	wd = inotify_add_watch(notify_fd, arg,
-+		IN_ACCESS | IN_ATTRIB | IN_CLOSE_WRITE | IN_CLOSE_NOWRITE |
-+		IN_CREATE | IN_DELETE | IN_DELETE_SELF | IN_MODIFY |
-+		IN_MOVE_SELF | IN_MOVED_FROM | IN_MOVED_TO | IN_OPEN);
-+	if (wd < 0) {
-+		perror("inotify_add_watch");
-+		return -1;
-+	}
-+
-+	while ((ret = read(notify_fd, buf, NAME_MAX)) != -1) {
-+			;
-+	}
-+
-+	ret = inotify_rm_watch(notify_fd, wd);
-+	if (ret < 0)
-+		perror("inotify_rm_watch");
-+
-+	close(notify_fd);
-+	free(buf);
-+	return 0;
-+}
-+
-+static int inotify_add_rm_watch_stress(char *arg)
-+{
-+	int notify_fd;
-+	int wd, ret;
-+
-+	notify_fd = inotify_init1(IN_CLOEXEC);
-+	if (notify_fd == -1) {
-+		perror("inotify_init1");
-+		return -1;
-+	}
-+
-+	while (1) {
-+		wd = inotify_add_watch(notify_fd, arg,
-+			IN_ACCESS | IN_ATTRIB | IN_CLOSE_WRITE |
-+			IN_CLOSE_NOWRITE | IN_CREATE | IN_DELETE |
-+			IN_DELETE_SELF | IN_MODIFY | IN_MOVE_SELF |
-+			IN_MOVED_FROM | IN_MOVED_TO | IN_OPEN);
-+		if (wd < 0)
-+			perror("inotify_add_watch");
-+		ret = inotify_rm_watch(notify_fd, wd);
-+		if (ret < 0)
-+			perror("inotify_rm_watch");
-+	}
-+	close(notify_fd);
-+	return 0;
-+}
-+
-+static int inotify_init_stress(void)
-+{
-+	int notify_fd;
-+
-+	while (1) {
-+		notify_fd = inotify_init1(IN_CLOEXEC);
-+		if (notify_fd == -1)
-+			perror("inotify_init1");
-+		close(notify_fd);
-+	}
-+	return 0;
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	pid_t pid;
-+
-+	if (argc != 2) {
-+		fprintf(stderr, "Usage: %s testdir\n", argv[0]);
-+		exit(EXIT_FAILURE);
-+	}
-+
-+	if ((pid = fork()) == 0)
-+		fanotify_watch(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		fanotify_flush_stress(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		fanotify_init_stress(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		fanotify_mark_stress(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		inotify_watch(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		inotify_add_rm_watch_stress(argv[1]);
-+
-+	if ((pid = fork()) == 0)
-+		inotify_init_stress();
-+
-+	return 0;
-+}
-diff --git a/tests/generic/478 b/tests/generic/478
-new file mode 100755
-index 0000000..cd1890f
---- /dev/null
-+++ b/tests/generic/478
-@@ -0,0 +1,192 @@
-+#! /bin/bash
-+# FS QA Test 478
-+#
-+# Stress test for fanotify and inotify.
-+#
-+# Exercise fanotify and inotify interfaces in loop while
-+# other stress tests going on in the watched test directory.
-+#
-+# Watching slab object inotify_inode_mark size, report fail
-+# it increases too fast. This may lead to a crash if OOM killer
-+# invoked. Fixed by this series:
-+#
-+# ab97f87 fsnotify: convert fsnotify_mark.refcnt from atomic_t to re..
-+# 6685df3 fanotify: clean up CONFIG_FANOTIFY_ACCESS_PERMISSIONS ifdefs
-+# 3427ce7 fsnotify: clean up fsnotify()
-+# f37650f fanotify: fix fsnotify_prepare_user_wait() failure
-+# 9a31d7a fsnotify: fix pinning group in fsnotify_prepare_user_wait()
-+# 0d6ec07 fsnotify: pin both inode and vfsmount mark
-+# 24c2030 fsnotify: clean up fsnotify_prepare/finish_user_wait()
-+# 7761daa fsnotify: convert fsnotify_group.refcnt from atomic_t to ..
-+# 9cf90ce fsnotify: Protect bail out path of fsnotify_add_mark_locked()
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	touch $stopfile
-+	while killall fsnotify_stress fsstress > /dev/null 2>&1 ; do
-+		sleep 1
-+	done
-+	wait
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+stopfile=$tmp.stop
-+TIMEOUT=2m
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+function add_files ()
-+{
-+	local i=$((RANDOM))
-+
-+	touch $SCRATCH_MNT/f-$i
-+	ln -s $SCRATCH_MNT/f-$i $SCRATCH_MNT/f-$i-sym
-+	ln $SCRATCH_MNT/f-$i $SCRATCH_MNT/f-$i-hdl
-+	mkdir $SCRATCH_MNT/d-$i
-+	mknod $SCRATCH_MNT/c-$i c 1 2
-+	mknod $SCRATCH_MNT/b-$i b 1 2
-+}
-+
-+function mv_files ()
-+{
-+	local i
-+	for i in $SCRATCH_MNT/* ; do
-+		mv -f f-$i f-$i-rename
-+	done
-+}
-+
-+function read_files ()
-+{
-+	find $SCRATCH_MNT/
-+	cat $SCRATCH_MNT/f-*
-+	ls -R $SCRATCH_MNT/d-*
-+}
-+
-+function write_files ()
-+{
-+	local i
-+	for i in $SCRATCH_MNT/* ; do
-+		echo 1 > $i
-+		echo 2 >> $i
-+	done
-+}
-+
-+function rm_files ()
-+{
-+	local i
-+	for i in $SCRATCH_MNT/* ; do
-+		rm -rf $i
-+	done
-+}
-+
-+slab_cal_inotify_inode_mark()
-+{
-+	echo 3 > /proc/sys/vm/drop_caches
-+        local num_obj=$(cat /proc/slabinfo  | grep inotify_inode_mark | awk '{print $3}')
-+        local objsize=$(cat /proc/slabinfo  | grep inotify_inode_mark | awk '{print $4}')
-+        echo $(($num_obj * $objsize))
-+}
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# inotify_inode_mark slab size before test
-+iim_0=`slab_cal_inotify_inode_mark`
-+
-+NR_CPUS=$(grep -c processor /proc/cpuinfo)
-+[ $NR_CPUS -lt 4 ] && NR_CPUS=4
-+opts="-d $SCRATCH_MNT/ -p $NR_CPUS -n 50 -v -l 0 -c $FSSTRESS_AVOID"
-+$FSSTRESS_PROG $opts >> $seqres.full 2>&1 &
-+
-+rm -f $stopfile
-+for j in 1 2 ; do
-+
-+for i in `seq 1 $(($NR_CPUS/7 + 1))` ; do
-+	$here/src/fsnotify_stress $SCRATCH_MNT &
-+done
-+
-+# run read/write files operations
-+while [ ! -e $stopfile ]; do
-+	add_files > /dev/null 2>&1
-+done &
-+while [ ! -e $stopfile ]; do
-+	mv_files > /dev/null 2>&1
-+done &
-+while [ ! -e $stopfile ]; do
-+	read_files > /dev/null 2>&1
-+done &
-+while [ ! -e $stopfile ]; do
-+	write_files > /dev/null 2>&1
-+done &
-+while [ ! -e $stopfile ]; do
-+	rm_files > /dev/null 2>&1
-+done &
-+
-+done
-+
-+# stressing for $TIMEOUT
-+sleep $TIMEOUT
-+
-+# inotify_inode_mark slab size after test
-+iim_1=`slab_cal_inotify_inode_mark`
-+
-+# cleanup stress processes
-+touch $stopfile
-+while killall fsnotify_stress fsstress > /dev/null 2>&1 ; do
-+	sleep 1
-+done
-+
-+# wait _files functions done
-+wait
-+
-+echo $iim_0 $iim_1 $(($iim_1 - $iim_0)) >> $seqres.full
-+# If inotify_inode_mark slab size increases 1024 times of
-+# itself in 2m, something bad happens because it could end up
-+# invoking OOM killer, test fails.
-+if [ $iim_1 -gt $iim_0 ] &&
-+   [ $((iim_1-iim_0)) -gt $((1024*$iim_0)) ] ; then
-+	echo inotify_inode_mark slab memory leaked
-+fi
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/generic/478.out b/tests/generic/478.out
-new file mode 100644
-index 0000000..4e2107a
---- /dev/null
-+++ b/tests/generic/478.out
-@@ -0,0 +1,2 @@
-+QA output created by 478
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index cce03e9..8416957 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -480,3 +480,4 @@
- 475 shutdown auto log metadata
- 476 auto rw
- 477 auto quick exportfs
-+478 auto stress dangerous fsnotify
--- 
-1.8.3.1
+Thanks,
+Eryu
 
+The new head of the master branch is commit:
+
+03cc97346b1d xfs: rmapbt swapext block reservation overrun test
+
+New commits:
+
+Andreas Gruenbacher (2):
+      [ebfd5ba86ada] check: Fix exit status
+      [fe3aefba4d17] generic/270: Check for scratch mount success
+
+Brian Foster (1):
+      [03cc97346b1d] xfs: rmapbt swapext block reservation overrun test
+
+Darrick J. Wong (3):
+      [66f7b4c2ce14] xfs_scrub: remove -y parameter
+      [60ba1274f5d7] xfs/348: dir->symlink corruption must not be allowed
+      [f2d7e7573b34] xfs: regression tests for reflink quota bugs
+
+Eryu Guan (1):
+      [f03cfe78dac0] overlay: renumber tests after merge
+
+zhangyi (F) (5):
+      [ab5034f7beda] overlay: add filesystem check helper
+      [a79cd9e16141] overlay: define common overlay xattr keys
+      [5c1269a61f1d] overlay: add fsck.overlay whiteout test
+      [2934b530b8b7] overlay: add fsck.overlay redirect directory test
+      [a31eff7814f6] overlay: add fsck.overlay impure xattr test
+
+
+Code Diffstat:
+
+ check                 |   6 +-
+ common/config         |   1 +
+ common/fuzzy          |   2 +-
+ common/overlay        |  22 +++++
+ tests/generic/270     |   2 +-
+ tests/overlay/045     | 230 +++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/045.out |  10 ++
+ tests/overlay/046     | 266 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/046.out |  11 +++
+ tests/overlay/056     | 143 +++++++++++++++++++++++++++
+ tests/overlay/056.out |   4 +
+ tests/overlay/group   |   3 +
+ tests/xfs/286         |   4 +-
+ tests/xfs/348.out     |   2 +-
+ tests/xfs/440         |  93 ++++++++++++++++++
+ tests/xfs/440.out     |  17 ++++
+ tests/xfs/441         |  88 +++++++++++++++++
+ tests/xfs/441.out     |  13 +++
+ tests/xfs/442         | 119 ++++++++++++++++++++++
+ tests/xfs/442.out     |   6 ++
+ tests/xfs/443         | 106 ++++++++++++++++++++
+ tests/xfs/443.out     |   2 +
+ tests/xfs/group       |   4 +
+ 23 files changed, 1146 insertions(+), 8 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--hDAV6qu06GWt
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJagGiDAAoJECZSqilcj+djCGwQANjZu3Elr/rddpUpmtuIQYUZ
+9hTJQpK/KIkNLxEYZFk+2V/fxNUyCo//QRR9+b6zw/VboltCcbm3O5DIDHhLzYit
+nne9fzq7Y4PR1o6LMmOOLTjAh8Oj3wuN/NGkWMH0iqMV4MnoQgGzMA0A+fNUCZl4
+nnSrLImcOt6PaZ5hnO80GmowIXnRtDKmu1JLtf2vrlzRLKMX5NsGQKtLPY0OxpMA
+bXaMHYGqf8Km7Fm+aZ6o0JR/dSzcATyjR3QYbAsAC9cbc6Myb8pieh8Jbn8bChfV
+G+TTWgbllXyAUzL9l+rAhbLAmmaXt6Ccu58XcsKZN9AuXUTQ1JKRdhDqALha0qEy
+VD3WAAi9ACetW5aq8bGTI9cT9lxC3a0stqUiRBply7rS5dJBYh5wDx+ggFjGB7PN
+bWR0dJcwTXhqP4HrePlGiFqiP/hRW70Mq1OyL9UQTwnTw0GzeOUQeVPB6Z7DGH2m
+5dvGhepfaKHH3Cm26YjnNy18nXZLA4G4K0KJCkftJQMOt4uYrlh7o8f+8Lw89ZeE
+MRlt1DOAnEG16Q9w5fbAfT//bbtnQ/xyCWHcww3PoFumSJa5SsCUm5zIYoOVV/Fq
+88DUR7jTJC1Eyk+IEagM+1S6/phMEeZ2CTBa50ENWGsUTGgkhZ4G4Hk1j5Qgo1/F
+NDks9kfLU/2Ju4lBB+cV
+=Y75C
+-----END PGP SIGNATURE-----
+
+--hDAV6qu06GWt--
