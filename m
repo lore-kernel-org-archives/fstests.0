@@ -1,49 +1,71 @@
-Received: from mail-it0-f65.google.com ([209.85.214.65]:52876 "EHLO
-        mail-it0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964954AbeBMOPa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Feb 2018 09:15:30 -0500
-Received: by mail-it0-f65.google.com with SMTP id o13so11244930ito.2
-        for <fstests@vger.kernel.org>; Tue, 13 Feb 2018 06:15:29 -0800 (PST)
-MIME-Version: 1.0
-In-Reply-To: <20180213091203.22909-1-eguan@redhat.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:43378 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965783AbeBMXbp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Feb 2018 18:31:45 -0500
+Date: Tue, 13 Feb 2018 15:31:40 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/2] fstests: use _scratch_mount_nocheck where
+ appropriate in tests
+Message-ID: <20180213233140.GA5208@magnolia>
 References: <20180213091203.22909-1-eguan@redhat.com>
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Date: Tue, 13 Feb 2018 15:15:28 +0100
-Message-ID: <CAHc6FU5ersubjo5-F0k6-A2KWEWYyci54eRSeRSL67SUXCeg0g@mail.gmail.com>
-Subject: Re: [RFC PATCH 0/2] _fail test by default if _scratch_mount fails
-Content-Type: text/plain; charset="UTF-8"
+ <20180213091203.22909-3-eguan@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180213091203.22909-3-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, "Darrick J . Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
- On 13 February 2018 at 10:12, Eryu Guan <eguan@redhat.com> wrote:
-> Hi all,
->
-> This is an RFC patchset that follows Andreas Gruenbacher's recent post
-> "Failing scratch mounts"[1]. It changes _scratch_mount to call _fail on
-> mount failure by default, so that when the mount fails, the tests won't
-> write to the underlying filesystem and fail in implicit way, which
-> sometimes makes debugging harder to do.
->
-> Also introduce a new _scratch_mount_nocheck helper, which mount scratch
-> device and doesn't check the mount status, for tests that need to check
-> mount status themselves.
->
-> This two-patch patchset should really be one patch, but for easy review,
-> I split the patch into two pieces, the first patch introduce the new
-> _scratch_mount_nocheck helper and converts _scratch_mount usages in
-> common dir, the second patch converts all the tests (which can be
-> tedious).
->
-> I've tested it by running full '-g auto' tests against xfs/xfs with
-> reflink/ext4/btrfs and I didn't see any new failures.
->
-> (Note that I based this patchset against fstests release on Feb. 4th, so
-> I didn't convert the new tests release on Feb. 11th. And as this is an
-> RFC, I didn't write detailed commit log in each patch.)
+On Tue, Feb 13, 2018 at 05:12:03PM +0800, Eryu Guan wrote:
+> Also remove redundant status checks of _scratch_mount.
+> 
+> Signed-off-by: Eryu Guan <eguan@redhat.com>
+> ---
 
-These patches do fix the scratch mount problems I've been seeing on gfs2.
+<skipping to the generic and xfs tests>
 
-Thanks,
-Andreas
+> diff --git a/tests/generic/054 b/tests/generic/054
+> index 12f471a19090..84b8271a11bd 100755
+> --- a/tests/generic/054
+> +++ b/tests/generic/054
+> @@ -83,7 +83,7 @@ for s in sync nosync ; do
+>  
+>  	# mount the FS
+>  	_echofull "mount"
+> -	if ! _scratch_mount >>$seqres.full 2>&1; then
+> +	if ! _scratch_mount_nocheck >>$seqres.full 2>&1; then
+>  	    _echofull "mount failed: $MOUNT_OPTIONS"
+>  	    continue
+>  	fi
+> @@ -118,7 +118,7 @@ for s in sync nosync ; do
+>  	_print_logstate
+>  
+>  	_echofull "mount with replay"
+> -	_scratch_mount >>$seqres.full 2>&1 \
+> +	_scratch_mount_nocheck >>$seqres.full 2>&1 \
+>  	    || _fail "mount failed: $MOUNT_OPTIONS"
+
+nocheck || fail ??
+
+I wonder if the fail message should always spit out the mount options
+that were tried?
+
+> diff --git a/tests/generic/068 b/tests/generic/068
+> index bd12278cdd25..91b327866c54 100755
+> --- a/tests/generic/068
+> +++ b/tests/generic/068
+> @@ -62,7 +62,7 @@ echo "*** MKFS ***"                         >>$seqres.full
+>  echo ""                                     >>$seqres.full
+>  _scratch_mkfs                               >>$seqres.full 2>&1 \
+>      || _fail "mkfs failed"
+> -_scratch_mount                              >>$seqres.full 2>&1 \
+> +_scratch_mount_nocheck                      >>$seqres.full 2>&1 \
+>      || _fail "mount failed"
+
+Can this remain _scratch_mount, since we _fail anyway?
+
+(There are more of these scattered throughout.)
+
+--D
