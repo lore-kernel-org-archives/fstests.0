@@ -1,138 +1,159 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:33933 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933833AbeBMJ0c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Feb 2018 04:26:32 -0500
-MIME-Version: 1.0
-In-Reply-To: <20180213070832.43159-7-yi.zhang@huawei.com>
-References: <20180213070832.43159-1-yi.zhang@huawei.com> <20180213070832.43159-7-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 13 Feb 2018 11:26:30 +0200
-Message-ID: <CAOQ4uxg6kvt30dg0G=A-qwVH1QJUV4_fefkDQmXEK-dC4bfdHQ@mail.gmail.com>
-Subject: Re: [xfstests PATCH v3 6/6] overlay: correct test mount options
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:48440 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933797AbeBMJMU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Feb 2018 04:12:20 -0500
+From: Eryu Guan <eguan@redhat.com>
+Subject: [RFC PATCH 0/2] _fail test by default if _scratch_mount fails
+Date: Tue, 13 Feb 2018 17:12:01 +0800
+Message-Id: <20180213091203.22909-1-eguan@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: fstests@vger.kernel.org
+Cc: Andreas Gruenbacher <agruenba@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 13, 2018 at 9:08 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Current overlay's _test_mount functions mount base test filesystem
-> with TEST_FS_MOUNT_OPTS and mount test overlayfs with MOUNT_OPTIONS
-> instead of TEST_FS_MOUNT_OPTS. The TEST_FS_MOUNT_OPTS variable
-> should be used for test overlayfs like MOUNT_OPTIONS use for scratch
-> overlayfs.
->
-> This patch rename OVL_BASE_MOUNT_OPTIONS to
-> OVL_BASE_SCRATCH_MOUNT_OPTIONS and introduce an counterpart variable
-> OVL_BASE_TEST_MOUNT_OPTIONS for test base filesystem, and then use
-> TEST_FS_MOUNT_OPTS for test overlayfs. We also modify overlay mount
-> helpers to adapt mount options.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  common/config     | 17 +++++++++++++----
->  common/overlay    | 31 +++++++++++++++++++++++--------
->  tests/overlay/022 |  2 +-
->  tests/overlay/025 |  2 +-
->  tests/overlay/029 |  6 +++---
->  tests/overlay/036 | 20 ++++++++++----------
->  6 files changed, 51 insertions(+), 27 deletions(-)
->
-> diff --git a/common/config b/common/config
-> index 20f0e5f..fd04a16 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -346,6 +346,9 @@ _test_mount_opts()
->         glusterfs)
->                 export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
->                 ;;
-> +       overlay)
-> +               export TEST_FS_MOUNT_OPTS=$OVERLAY_MOUNT_OPTIONS
-> +               ;;
->         ext2|ext3|ext4|ext4dev)
->                 # acls & xattrs aren't turned on by default on older ext$FOO
->                 export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
-> @@ -546,16 +549,19 @@ _overlay_config_override()
->         # Store original base fs vars
->         export OVL_BASE_TEST_DEV="$TEST_DEV"
->         export OVL_BASE_TEST_DIR="$TEST_DIR"
-> -       # If config does not set MOUNT_OPTIONS, its value may be
-> -       # leftover from previous _overlay_config_override, so
-> +       # If config does not set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS, its
-> +       # value may be leftover from previous _overlay_config_override, so
->         # don't use that value for base fs mount
->         [ "$MOUNT_OPTIONS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset MOUNT_OPTIONS
-> -       export OVL_BASE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
-> +       export OVL_BASE_SCRATCH_MOUNT_OPTIONS="$MOUNT_OPTIONS"
-> +       [ "$TEST_FS_MOUNT_OPTS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset TEST_FS_MOUNT_OPTS
-> +       export OVL_BASE_TEST_MOUNT_OPTIONS="$TEST_FS_MOUNT_OPTS"
->
->         # Set TEST vars to overlay base and mount dirs inside base fs
->         export TEST_DEV="$OVL_BASE_TEST_DIR"
->         export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
->         export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
-> +       export TEST_FS_MOUNT_OPTS="$OVERLAY_MOUNT_OPTIONS"
->
->         [ -b "$SCRATCH_DEV" ] || return 0
->
-> @@ -580,7 +586,10 @@ _overlay_config_restore()
->         [ -z "$OVL_BASE_TEST_DIR" ] || export TEST_DIR=$OVL_BASE_TEST_DIR
->         [ -z "$OVL_BASE_SCRATCH_DEV" ] || export SCRATCH_DEV=$OVL_BASE_SCRATCH_DEV
->         [ -z "$OVL_BASE_SCRATCH_MNT" ] || export SCRATCH_MNT=$OVL_BASE_SCRATCH_MNT
-> -       [ -z "$OVL_BASE_MOUNT_OPTIONS" ] || export MOUNT_OPTIONS=$OVL_BASE_MOUNT_OPTIONS
-> +       [ -z "$OVL_BASE_SCRATCH_MOUNT_OPTIONS" ] || \
-> +               export MOUNT_OPTIONS=$OVL_BASE_SCRATCH_MOUNT_OPTIONS
-> +       [ -z "$OVL_BASE_TEST_MOUNT_OPTIONS" ] || \
-> +               export TEST_FS_MOUNT_OPTS=$OVL_BASE_TEST_MOUNT_OPTIONS
->  }
->
->  # Parse config section options. This function will parse all the configuration
-> diff --git a/common/overlay b/common/overlay
-> index 29f9bf8..058b025 100644
-> --- a/common/overlay
-> +++ b/common/overlay
-> @@ -20,7 +20,19 @@ _overlay_mount_dirs()
->         shift 3
->
->         $MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
-> -                   -o workdir=$workdir `_common_dev_mount_options $*`
-> +                   -o workdir=$workdir $*
-> +}
-> +
-> +# Mount overlayfs with optional dirs and mount point
-> +_overlay_mount_optional_dirs()
-> +{
-> +       local lowerdir=$1
-> +       local upperdir=$2
-> +       local workdir=$3
-> +       shift 3
-> +
-> +       _overlay_mount_dirs $lowerdir $upperdir $workdir \
-> +                           `_common_dev_mount_options $*`
->  }
->
+Hi all,
 
-Instead of changing the name of the helper and change all the tests
-that call it,
-factor out a "local" helper __overlay_mount_dirs_o() that takes all options
-from argument and keep the helper name _overlay_mount_dirs(), which the
-tests use, unchanged.
+This is an RFC patchset that follows Andreas Gruenbacher's recent post
+"Failing scratch mounts"[1]. It changes _scratch_mount to call _fail on
+mount failure by default, so that when the mount fails, the tests won't
+write to the underlying filesystem and fail in implicit way, which
+sometimes makes debugging harder to do.
 
-Then, the only user of the "local" helper __overlay_mount_dirs_o() will be
-the "local" helper _overlay_mount(), which you should also rename to
-__overlay_mount_o(), as it should not be used directly by tests.
+Also introduce a new _scratch_mount_nocheck helper, which mount scratch
+device and doesn't check the mount status, for tests that need to check
+mount status themselves.
 
-> # Mount with same options/mnt/dev of scratch mount, but optionally
-> @@ -33,7 +45,8 @@ _overlay_scratch_mount_dirs()
->        shift 3
->
->         _overlay_mount_dirs $lowerdir $upperdir $workdir \
-> -                               $* $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> +                           `_common_dev_mount_options $*` \
-> +                           $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
-> }
+This two-patch patchset should really be one patch, but for easy review,
+I split the patch into two pieces, the first patch introduce the new
+_scratch_mount_nocheck helper and converts _scratch_mount usages in
+common dir, the second patch converts all the tests (which can be
+tedious).
 
-This doesn't need to change either.
+I've tested it by running full '-g auto' tests against xfs/xfs with
+reflink/ext4/btrfs and I didn't see any new failures.
+
+(Note that I based this patchset against fstests release on Feb. 4th, so
+I didn't convert the new tests release on Feb. 11th. And as this is an
+RFC, I didn't write detailed commit log in each patch.)
 
 Thanks,
-Amir.
+Eryu
+
+[1] https://www.spinics.net/lists/fstests/msg08903.html
+
+Eryu Guan (2):
+  fstests: introduce _scratch_mount_nocheck
+  fstests: use _scratch_mount_nocheck where appropriate in tests
+
+ common/attr        |  2 +-
+ common/dmapi       |  4 ++--
+ common/dump        |  4 ++--
+ common/encrypt     |  2 +-
+ common/filestreams |  4 ++--
+ common/fuzzy       |  4 ++--
+ common/log         |  6 +++---
+ common/overlay     |  2 +-
+ common/punch       |  2 +-
+ common/quota       |  4 ++--
+ common/rc          | 38 ++++++++++++++++++++++----------------
+ common/xfs         | 12 ++++++------
+ tests/btrfs/004    |  6 +++---
+ tests/btrfs/007    |  4 ++--
+ tests/btrfs/009    |  2 +-
+ tests/btrfs/012    |  4 ++--
+ tests/btrfs/042    |  2 +-
+ tests/btrfs/057    |  2 +-
+ tests/btrfs/091    |  4 ++--
+ tests/btrfs/131    |  4 ++--
+ tests/btrfs/136    |  2 +-
+ tests/ext4/003     |  2 +-
+ tests/ext4/006     |  4 ++--
+ tests/ext4/007     |  2 +-
+ tests/ext4/008     |  2 +-
+ tests/ext4/011     |  4 ++--
+ tests/ext4/012     |  4 ++--
+ tests/ext4/024     |  2 +-
+ tests/ext4/025     |  2 +-
+ tests/ext4/305     |  2 +-
+ tests/ext4/306     |  2 +-
+ tests/generic/015  |  2 +-
+ tests/generic/019  |  4 ++--
+ tests/generic/050  | 10 +++++-----
+ tests/generic/052  |  4 ++--
+ tests/generic/053  |  2 +-
+ tests/generic/054  |  4 ++--
+ tests/generic/055  |  4 ++--
+ tests/generic/062  |  2 +-
+ tests/generic/064  |  2 +-
+ tests/generic/068  |  2 +-
+ tests/generic/069  |  2 +-
+ tests/generic/076  |  2 +-
+ tests/generic/077  |  2 +-
+ tests/generic/079  |  2 +-
+ tests/generic/082  |  4 ++--
+ tests/generic/083  |  2 +-
+ tests/generic/105  |  2 +-
+ tests/generic/117  |  2 +-
+ tests/generic/120  |  2 +-
+ tests/generic/169  |  2 +-
+ tests/generic/235  |  4 ++--
+ tests/generic/270  |  2 +-
+ tests/generic/294  |  2 +-
+ tests/generic/317  |  2 +-
+ tests/generic/318  |  2 +-
+ tests/generic/388  |  2 +-
+ tests/generic/390  |  2 +-
+ tests/generic/403  |  2 +-
+ tests/generic/466  |  2 +-
+ tests/shared/003   |  2 +-
+ tests/xfs/005      |  2 +-
+ tests/xfs/009      |  2 +-
+ tests/xfs/016      |  2 +-
+ tests/xfs/017      |  6 +++---
+ tests/xfs/019      |  2 +-
+ tests/xfs/021      |  3 +--
+ tests/xfs/034      |  2 +-
+ tests/xfs/041      |  4 ++--
+ tests/xfs/042      |  4 ++--
+ tests/xfs/044      |  4 ++--
+ tests/xfs/045      |  4 ++--
+ tests/xfs/057      |  2 +-
+ tests/xfs/067      |  2 +-
+ tests/xfs/072      |  2 +-
+ tests/xfs/073      |  2 +-
+ tests/xfs/075      |  4 ++--
+ tests/xfs/077      |  4 ++--
+ tests/xfs/079      |  2 +-
+ tests/xfs/083      |  6 +++---
+ tests/xfs/085      |  2 +-
+ tests/xfs/090      |  2 +-
+ tests/xfs/092      |  2 +-
+ tests/xfs/094      |  2 +-
+ tests/xfs/098      |  2 +-
+ tests/xfs/103      |  2 +-
+ tests/xfs/104      |  2 +-
+ tests/xfs/111      |  2 +-
+ tests/xfs/121      |  6 +++---
+ tests/xfs/130      |  2 +-
+ tests/xfs/137      |  4 ++--
+ tests/xfs/141      |  2 +-
+ tests/xfs/177      |  6 ++----
+ tests/xfs/181      |  2 +-
+ tests/xfs/183      |  3 +--
+ tests/xfs/189      | 14 +++++++-------
+ tests/xfs/263      |  2 +-
+ tests/xfs/270      |  4 ++--
+ tests/xfs/297      |  2 +-
+ tests/xfs/333      |  2 +-
+ tests/xfs/338      |  2 +-
+ tests/xfs/340      |  2 +-
+ tests/xfs/433      |  2 +-
+ tests/xfs/434      |  2 +-
+ tests/xfs/435      |  2 +-
+ tests/xfs/436      |  2 +-
+ tests/xfs/439      |  2 +-
+ 107 files changed, 180 insertions(+), 178 deletions(-)
+
+-- 
+2.14.3
+
