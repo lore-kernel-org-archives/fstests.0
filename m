@@ -1,408 +1,149 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:45456 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:46434 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933834AbeBMJMX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Feb 2018 04:12:23 -0500
+        id S934052AbeBMJsq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Feb 2018 04:48:46 -0500
+Date: Tue, 13 Feb 2018 17:48:42 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: [PATCH 1/2] fstests: introduce _scratch_mount_nocheck
-Date: Tue, 13 Feb 2018 17:12:02 +0800
-Message-Id: <20180213091203.22909-2-eguan@redhat.com>
-In-Reply-To: <20180213091203.22909-1-eguan@redhat.com>
-References: <20180213091203.22909-1-eguan@redhat.com>
+Subject: Re: [xfstests PATCH v3 6/6] overlay: correct test mount options
+Message-ID: <20180213094842.GJ18267@eguan.usersys.redhat.com>
+References: <20180213070832.43159-1-yi.zhang@huawei.com>
+ <20180213070832.43159-7-yi.zhang@huawei.com>
+ <CAOQ4uxg6kvt30dg0G=A-qwVH1QJUV4_fefkDQmXEK-dC4bfdHQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxg6kvt30dg0G=A-qwVH1QJUV4_fefkDQmXEK-dC4bfdHQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Andreas Gruenbacher <agruenba@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <eguan@redhat.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: "zhangyi (F)" <yi.zhang@huawei.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-_fail test by default if _scratch_mount failed and introduce
-_scratch_mount_nocheck for tests that need to check mount results
-themselves.
+On Tue, Feb 13, 2018 at 11:26:30AM +0200, Amir Goldstein wrote:
+> On Tue, Feb 13, 2018 at 9:08 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> > Current overlay's _test_mount functions mount base test filesystem
+> > with TEST_FS_MOUNT_OPTS and mount test overlayfs with MOUNT_OPTIONS
+> > instead of TEST_FS_MOUNT_OPTS. The TEST_FS_MOUNT_OPTS variable
+> > should be used for test overlayfs like MOUNT_OPTIONS use for scratch
+> > overlayfs.
+> >
+> > This patch rename OVL_BASE_MOUNT_OPTIONS to
+> > OVL_BASE_SCRATCH_MOUNT_OPTIONS and introduce an counterpart variable
+> > OVL_BASE_TEST_MOUNT_OPTIONS for test base filesystem, and then use
+> > TEST_FS_MOUNT_OPTS for test overlayfs. We also modify overlay mount
+> > helpers to adapt mount options.
+> >
+> > Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> > ---
+> >  common/config     | 17 +++++++++++++----
+> >  common/overlay    | 31 +++++++++++++++++++++++--------
+> >  tests/overlay/022 |  2 +-
+> >  tests/overlay/025 |  2 +-
+> >  tests/overlay/029 |  6 +++---
+> >  tests/overlay/036 | 20 ++++++++++----------
+> >  6 files changed, 51 insertions(+), 27 deletions(-)
+> >
+> > diff --git a/common/config b/common/config
+> > index 20f0e5f..fd04a16 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -346,6 +346,9 @@ _test_mount_opts()
+> >         glusterfs)
+> >                 export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
+> >                 ;;
+> > +       overlay)
+> > +               export TEST_FS_MOUNT_OPTS=$OVERLAY_MOUNT_OPTIONS
+> > +               ;;
+> >         ext2|ext3|ext4|ext4dev)
+> >                 # acls & xattrs aren't turned on by default on older ext$FOO
+> >                 export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+> > @@ -546,16 +549,19 @@ _overlay_config_override()
+> >         # Store original base fs vars
+> >         export OVL_BASE_TEST_DEV="$TEST_DEV"
+> >         export OVL_BASE_TEST_DIR="$TEST_DIR"
+> > -       # If config does not set MOUNT_OPTIONS, its value may be
+> > -       # leftover from previous _overlay_config_override, so
+> > +       # If config does not set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS, its
+> > +       # value may be leftover from previous _overlay_config_override, so
+> >         # don't use that value for base fs mount
+> >         [ "$MOUNT_OPTIONS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset MOUNT_OPTIONS
+> > -       export OVL_BASE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
+> > +       export OVL_BASE_SCRATCH_MOUNT_OPTIONS="$MOUNT_OPTIONS"
+> > +       [ "$TEST_FS_MOUNT_OPTS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset TEST_FS_MOUNT_OPTS
+> > +       export OVL_BASE_TEST_MOUNT_OPTIONS="$TEST_FS_MOUNT_OPTS"
+> >
+> >         # Set TEST vars to overlay base and mount dirs inside base fs
+> >         export TEST_DEV="$OVL_BASE_TEST_DIR"
+> >         export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+> >         export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
+> > +       export TEST_FS_MOUNT_OPTS="$OVERLAY_MOUNT_OPTIONS"
+> >
+> >         [ -b "$SCRATCH_DEV" ] || return 0
+> >
+> > @@ -580,7 +586,10 @@ _overlay_config_restore()
+> >         [ -z "$OVL_BASE_TEST_DIR" ] || export TEST_DIR=$OVL_BASE_TEST_DIR
+> >         [ -z "$OVL_BASE_SCRATCH_DEV" ] || export SCRATCH_DEV=$OVL_BASE_SCRATCH_DEV
+> >         [ -z "$OVL_BASE_SCRATCH_MNT" ] || export SCRATCH_MNT=$OVL_BASE_SCRATCH_MNT
+> > -       [ -z "$OVL_BASE_MOUNT_OPTIONS" ] || export MOUNT_OPTIONS=$OVL_BASE_MOUNT_OPTIONS
+> > +       [ -z "$OVL_BASE_SCRATCH_MOUNT_OPTIONS" ] || \
+> > +               export MOUNT_OPTIONS=$OVL_BASE_SCRATCH_MOUNT_OPTIONS
+> > +       [ -z "$OVL_BASE_TEST_MOUNT_OPTIONS" ] || \
+> > +               export TEST_FS_MOUNT_OPTS=$OVL_BASE_TEST_MOUNT_OPTIONS
+> >  }
+> >
+> >  # Parse config section options. This function will parse all the configuration
+> > diff --git a/common/overlay b/common/overlay
+> > index 29f9bf8..058b025 100644
+> > --- a/common/overlay
+> > +++ b/common/overlay
+> > @@ -20,7 +20,19 @@ _overlay_mount_dirs()
+> >         shift 3
+> >
+> >         $MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
+> > -                   -o workdir=$workdir `_common_dev_mount_options $*`
+> > +                   -o workdir=$workdir $*
+> > +}
+> > +
+> > +# Mount overlayfs with optional dirs and mount point
+> > +_overlay_mount_optional_dirs()
+> > +{
+> > +       local lowerdir=$1
+> > +       local upperdir=$2
+> > +       local workdir=$3
+> > +       shift 3
+> > +
+> > +       _overlay_mount_dirs $lowerdir $upperdir $workdir \
+> > +                           `_common_dev_mount_options $*`
+> >  }
+> >
+> 
+> Instead of changing the name of the helper and change all the tests
+> that call it,
+> factor out a "local" helper __overlay_mount_dirs_o() that takes all options
+> from argument and keep the helper name _overlay_mount_dirs(), which the
+> tests use, unchanged.
 
-Signed-off-by: Eryu Guan <eguan@redhat.com>
----
- common/attr        |  2 +-
- common/dmapi       |  4 ++--
- common/dump        |  4 ++--
- common/encrypt     |  2 +-
- common/filestreams |  4 ++--
- common/fuzzy       |  4 ++--
- common/log         |  6 +++---
- common/overlay     |  2 +-
- common/punch       |  2 +-
- common/quota       |  4 ++--
- common/rc          | 38 ++++++++++++++++++++++----------------
- common/xfs         | 12 ++++++------
- 12 files changed, 45 insertions(+), 39 deletions(-)
+Agreed, I just don't like the name __overlay_mount_dirs_o that much :)
+How about something like _do_overlay_mount_dirs?
 
-diff --git a/common/attr b/common/attr
-index 66b0227f721e..e83aadb803f7 100644
---- a/common/attr
-+++ b/common/attr
-@@ -229,7 +229,7 @@ _require_noattr2()
- {
- 	_scratch_mkfs_xfs > /dev/null 2>&1 \
- 		|| _fail "_scratch_mkfs_xfs failed on $SCRATCH_DEV"
--	_scratch_mount -o noattr2 > /dev/null 2>&1 \
-+	_scratch_mount_nocheck -o noattr2 > /dev/null 2>&1 \
- 		|| _notrun "noattr2 mount option not supported on $SCRATCH_DEV"
- 	_scratch_unmount
- }
-diff --git a/common/dmapi b/common/dmapi
-index c8a463a2cac0..af0faf504a3d 100644
---- a/common/dmapi
-+++ b/common/dmapi
-@@ -31,10 +31,10 @@ _dmapi_scratch_mount () {
-     if [ `echo "$MOUNT_OPTIONS" | grep -c dmapi` -gt 0 -o \
-         `echo "$MOUNT_OPTIONS" | grep -c dmi` -gt 0 ] ; then
-         #already got dmapi options set
--        _scratch_mount
-+        _scratch_mount_nocheck
-         dmapi_mount_result=$?
-     else
--        _scratch_mount "-o dmapi,mtpt=$SCRATCH_MNT"
-+        _scratch_mount_nocheck "-o dmapi,mtpt=$SCRATCH_MNT"
-         dmapi_mount_result=$?
-     fi
- 
-diff --git a/common/dump b/common/dump
-index 2b3cfa0f0607..7b9c10a25414 100644
---- a/common/dump
-+++ b/common/dump
-@@ -235,7 +235,7 @@ _wipe_fs()
-     _require_scratch
- 
-     _scratch_mkfs_xfs >>$seqres.full || _fail "mkfs failed"
--    _scratch_mount >>$seqres.full || _fail "mount failed"
-+    _scratch_mount >>$seqres.full
- }
- 
- #
-@@ -287,7 +287,7 @@ _stable_fs()
- {
-     _saveddir=`pwd`; cd /
-     _scratch_unmount >>$seqres.full || _fail "unmount failed"
--    _scratch_mount >>$seqres.full || _fail "mount failed"
-+    _scratch_mount >>$seqres.full
-     cd $_saveddir
- }
- 
-diff --git a/common/encrypt b/common/encrypt
-index 189c59ee9bbd..4c5fce75fe62 100644
---- a/common/encrypt
-+++ b/common/encrypt
-@@ -43,7 +43,7 @@ _require_scratch_encryption()
- 	# Try to mount the filesystem.  If this fails then either the kernel
- 	# isn't aware of encryption, or the mkfs options were not compatible
- 	# with encryption (e.g. ext4 with block size != PAGE_SIZE).
--	if ! _scratch_mount &>>$seqres.full; then
-+	if ! _scratch_mount_nocheck &>>$seqres.full; then
- 		_notrun "kernel is unaware of $FSTYP encryption feature," \
- 			"or mkfs options are not compatible with encryption"
- 	fi
-diff --git a/common/filestreams b/common/filestreams
-index f5441f5a82e9..a06020c8b3fb 100644
---- a/common/filestreams
-+++ b/common/filestreams
-@@ -111,11 +111,11 @@ _test_streams() {
- 
- 	if [ "$use_iflag" = "0" ]; then
- 		# mount using filestreams mount option
--		_scratch_mount "-o filestreams" \
-+		_scratch_mount_nocheck "-o filestreams" \
- 			|| _fail "filestreams mount failed"
- 	else
- 		# test will set inode flag
--		_scratch_mount || _fail "mount failed"
-+		_scratch_mount
- 	fi
- 
- 	cd $SCRATCH_MNT
-diff --git a/common/fuzzy b/common/fuzzy
-index b964fd8cb0fc..f5bd3f594666 100644
---- a/common/fuzzy
-+++ b/common/fuzzy
-@@ -200,7 +200,7 @@ __scratch_xfs_fuzz_field_test() {
- 
- 	# Try to catch the error with scrub
- 	echo "+ Try to catch the error"
--	_scratch_mount 2>&1
-+	_scratch_mount_nocheck 2>&1
- 	res=$?
- 	if [ $res -eq 0 ]; then
- 		# Try an online scrub unless we're fuzzing ag 0's sb,
-@@ -245,7 +245,7 @@ __scratch_xfs_fuzz_field_test() {
- 
- 	# See if scrub finds a clean fs
- 	echo "+ Make sure error is gone (online)"
--	_scratch_mount 2>&1
-+	_scratch_mount_nocheck 2>&1
- 	res=$?
- 	if [ $res -eq 0 ]; then
- 		# Try an online scrub unless we're fuzzing ag 0's sb,
-diff --git a/common/log b/common/log
-index bdb4ed684a08..2157b2848a69 100644
---- a/common/log
-+++ b/common/log
-@@ -370,7 +370,7 @@ _create_log()
- {
-     # mount the FS
-     _full "mount"
--    _scratch_mount >>$seqres.full 2>&1
-+    _scratch_mount_nocheck >>$seqres.full 2>&1
-     if [ $? -ne 0 ] ; then 
- 	_echofull "mount failed: $MOUNT_OPTIONS"
- 	return 1
-@@ -399,7 +399,7 @@ _create_log_sync()
- {
-     # mount the FS
-     _full " mount"
--    _scratch_mount >>$seqres.full 2>&1
-+    _scratch_mount_nocheck >>$seqres.full 2>&1
-     if [ $? -ne 0 ] ; then 
- 	_echofull "mount failed: $MOUNT_OPTIONS"
- 	return 1
-@@ -519,7 +519,7 @@ _require_v2log()
- 
-     # test out mount to see if it mounts a v2 log fs
-     export MOUNT_OPTIONS="-o logbsize=32k"
--    if ! _scratch_mount >>$seqres.full 2>&1; then
-+    if ! _scratch_mount_nocheck >>$seqres.full 2>&1; then
-         _notrun "mount/kernel does not support v2 logs"
-     fi
- 
-diff --git a/common/overlay b/common/overlay
-index a8b0e9369c86..054b759e1ce4 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -167,7 +167,7 @@ _require_scratch_overlay_features()
- 	done
- 
- 	_scratch_mkfs > /dev/null 2>&1
--	_scratch_mount -o $opts || \
-+	_scratch_mount_nocheck -o $opts || \
- 		_notrun "overlay options '$opts' cannot be enabled on ${SCRATCH_DEV}"
- 
- 	for feature in ${features[*]}; do
-diff --git a/common/punch b/common/punch
-index c4ed26192a22..42a7e97496b7 100644
---- a/common/punch
-+++ b/common/punch
-@@ -131,7 +131,7 @@ _test_punch() {
- 		_dmapi_scratch_mount
- 	else
- 		# only unresvsp punch type is used, just do a normal mount
--		_scratch_mount || _fail "mount failed"
-+		_scratch_mount
- 	fi
- 
- 	cd $SCRATCH_MNT
-diff --git a/common/quota b/common/quota
-index 2611c484ee35..c1f1436458c2 100644
---- a/common/quota
-+++ b/common/quota
-@@ -119,7 +119,7 @@ _scratch_enable_pquota()
- 	[ "$FSTYP" != "ext4" ] && return
- 
- 	tune2fs -O quota,project $SCRATCH_DEV >>$seqres.full 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 		|| _notrun "kernel doesn't support project feature on $FSTYP"
- 	_scratch_unmount
- }
-@@ -202,7 +202,7 @@ _choose_prid()
- _qmount()
- {
-     _scratch_unmount >/dev/null 2>&1
--    _scratch_mount || _fail "qmount failed"
-+    _scratch_mount_nocheck || _fail "qmount failed"
-     # xfs doesn't need these setups and quotacheck even fails on xfs
-     # redirect the output to $seqres.full for debug purpose and ignore results
-     if [ "$FSTYP" != "xfs" ]; then
-diff --git a/common/rc b/common/rc
-index b9dc0b9206db..ddfcbec65135 100644
---- a/common/rc
-+++ b/common/rc
-@@ -352,13 +352,18 @@ _supports_filetype()
- 	esac
- }
- 
-+_scratch_mount_nocheck()
-+{
-+	if [ "$FSTYP" == "overlay" ]; then
-+		_overlay_scratch_mount $*
-+		return $?
-+	fi
-+	_mount -t $FSTYP `_scratch_mount_options $*`
-+}
-+
- _scratch_mount()
- {
--    if [ "$FSTYP" == "overlay" ]; then
--        _overlay_scratch_mount $*
--        return $?
--    fi
--    _mount -t $FSTYP `_scratch_mount_options $*`
-+	_scratch_mount_nocheck $* || _fail "_scratch_mount failed"
- }
- 
- _scratch_unmount()
-@@ -397,7 +402,7 @@ _scratch_cycle_mount()
- 	opts="-o $opts"
-     fi
-     _scratch_unmount
--    _scratch_mount "$opts"
-+    _scratch_mount_nocheck "$opts" || _fail "_scratch_cycle_mount failed"
- }
- 
- _scratch_shutdown()
-@@ -524,7 +529,7 @@ _setup_large_ext4_fs()
- 
- 	# mount the filesystem and create 16TB - 4KB files until we consume
- 	# all the necessary space.
--	_scratch_mount 2>&1 >$tmp_dir/mnt.err
-+	_scratch_mount_nocheck 2>&1 >$tmp_dir/mnt.err
- 	local status=$?
- 	if [ $status -ne 0 ]; then
- 		echo "mount failed"
-@@ -1103,7 +1108,7 @@ _repair_scratch_fs()
- 	res=$?
- 	if [ "$res" -ne 0 ]; then
- 		echo "xfs_repair returns $res; replay log?"
--		_scratch_mount
-+		_scratch_mount_nocheck
- 		res=$?
- 		if [ "$res" -gt 0 ]; then
- 			echo "mount returns $res; zap log?"
-@@ -1872,7 +1877,7 @@ _require_scratch_ext4_crc()
- {
- 	_scratch_mkfs_ext4 >/dev/null 2>&1
- 	dumpe2fs -h $SCRATCH_DEV 2> /dev/null | grep -q metadata_csum || _notrun "metadata_csum not supported by this filesystem"
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 	   || _notrun "Kernel doesn't support metadata_csum feature"
- 	_scratch_unmount
- }
-@@ -1888,7 +1893,7 @@ _require_scratch_ext4_feature()
-     $MKFS_EXT4_PROG -F $MKFS_OPTIONS -O "$1" \
- 		    $SCRATCH_DEV 512m >/dev/null 2>&1 \
- 	|| _notrun "mkfs.ext4 doesn't support $1 feature"
--    _scratch_mount >/dev/null 2>&1 \
-+    _scratch_mount_nocheck >/dev/null 2>&1 \
- 	|| _notrun "Kernel doesn't support the ext4 feature(s): $1"
-     _scratch_unmount
- }
-@@ -2322,7 +2327,7 @@ _require_scratch_richacl_xfs()
- 	_scratch_mkfs_xfs_supported -m richacl=1 >/dev/null 2>&1 \
- 		|| _notrun "mkfs.xfs doesn't have richacl feature"
- 	_scratch_mkfs_xfs -m richacl=1 >/dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 		|| _notrun "kernel doesn't support richacl feature on $FSTYP"
- 	_scratch_unmount
- }
-@@ -2331,7 +2336,7 @@ _require_scratch_richacl_ext4()
- {
- 	_scratch_mkfs -O richacl >/dev/null 2>&1 \
- 		|| _notrun "can't mkfs $FSTYP with option -O richacl"
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 		|| _notrun "kernel doesn't support richacl feature on $FSTYP"
- 	_scratch_unmount
- }
-@@ -2993,7 +2998,7 @@ _require_scratch_shutdown()
- 	[ -x src/godown ] || _notrun "src/godown executable not found"
- 
- 	_scratch_mkfs > /dev/null 2>&1 || _notrun "_scratch_mkfs failed on $SCRATCH_DEV"
--	_scratch_mount || _notrun "_scratch_mount failed on $SCRATCH_MNT"
-+	_scratch_mount
- 
- 	if [ $FSTYP = "overlay" ]; then
- 		if [ -z $OVL_BASE_SCRATCH_DEV ]; then
-@@ -3019,7 +3024,8 @@ _require_scratch_dax()
- {
- 	_require_scratch
- 	_scratch_mkfs > /dev/null 2>&1
--	_scratch_mount -o dax
-+	_scratch_mount_nocheck -o dax || \
-+		_notrun "mount $SCRATCH_DEV with dax failed"
- 	# Check options to be sure. XFS ignores dax option
- 	# and goes on if dev underneath does not support dax.
- 	_fs_options $SCRATCH_DEV | grep -qw "dax" || \
-@@ -3030,7 +3036,7 @@ _require_scratch_dax()
- # Does norecovery support by this fs?
- _require_norecovery()
- {
--	_scratch_mount -o ro,norecovery || \
-+	_scratch_mount_nocheck -o ro,norecovery || \
- 		_notrun "$FSTYP does not support norecovery"
- 	_scratch_unmount
- }
-@@ -3229,7 +3235,7 @@ _require_atime()
- _require_relatime()
- {
-         _scratch_mkfs > /dev/null 2>&1
--        _scratch_mount -o relatime || \
-+        _scratch_mount_nocheck -o relatime || \
-                 _notrun "relatime not supported by the current kernel"
- 	_scratch_unmount
- }
-diff --git a/common/xfs b/common/xfs
-index 9b20b0380782..c6d8f0938ac9 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -18,7 +18,7 @@ _setup_large_xfs_fs()
- 	file_size=$(($file_size - $SCRATCH_DEV_EMPTY_SPACE))
- 
- 	# mount the filesystem, create the file, unmount it
--	_scratch_mount 2>&1 >$tmp_dir/mnt.err
-+	_scratch_mount_nocheck 2>&1 >$tmp_dir/mnt.err
- 	local status=$?
- 	if [ $status -ne 0 ]; then
- 		echo "mount failed"
-@@ -223,7 +223,7 @@ _require_xfs_mkfs_crc()
- _require_xfs_crc()
- {
- 	_scratch_mkfs_xfs -m crc=1 >/dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 	   || _notrun "Kernel doesn't support crc feature"
- 	_scratch_unmount
- }
-@@ -233,7 +233,7 @@ _require_xfs_crc()
- _require_scratch_xfs_crc()
- {
- 	_scratch_mkfs_xfs >/dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 	   || _notrun "Kernel doesn't support crc feature"
- 	xfs_info $SCRATCH_MNT | grep -q 'crc=1' || _notrun "crc feature not supported by this filesystem"
- 	_scratch_unmount
-@@ -252,7 +252,7 @@ _require_xfs_mkfs_finobt()
- _require_xfs_finobt()
- {
- 	_scratch_mkfs_xfs -m crc=1,finobt=1 >/dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 	   || _notrun "Kernel doesn't support finobt feature"
- 	_scratch_unmount
- }
-@@ -280,7 +280,7 @@ _require_xfs_sparse_inodes()
- 	_scratch_mkfs_xfs_supported -m crc=1 -i sparse > /dev/null 2>&1 \
- 		|| _notrun "mkfs.xfs does not support sparse inodes"
- 	_scratch_mkfs_xfs -m crc=1 -i sparse > /dev/null 2>&1
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 		|| _notrun "kernel does not support sparse inodes"
- 	_scratch_unmount
- }
-@@ -599,7 +599,7 @@ _require_meta_uuid()
- 
- 	_scratch_xfs_db -x -c "uuid generate" >/dev/null 2>&1
- 
--	_scratch_mount >/dev/null 2>&1 \
-+	_scratch_mount_nocheck >/dev/null 2>&1 \
- 	   || _notrun "Kernel doesn't support meta_uuid feature"
- 	_scratch_unmount
- }
--- 
-2.14.3
+Thanks,
+Eryu
 
+> 
+> Then, the only user of the "local" helper __overlay_mount_dirs_o() will be
+> the "local" helper _overlay_mount(), which you should also rename to
+> __overlay_mount_o(), as it should not be used directly by tests.
+> 
+> > # Mount with same options/mnt/dev of scratch mount, but optionally
+> > @@ -33,7 +45,8 @@ _overlay_scratch_mount_dirs()
+> >        shift 3
+> >
+> >         _overlay_mount_dirs $lowerdir $upperdir $workdir \
+> > -                               $* $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+> > +                           `_common_dev_mount_options $*` \
+> > +                           $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT
+> > }
+> 
+> This doesn't need to change either.
+> 
+> Thanks,
+> Amir.
