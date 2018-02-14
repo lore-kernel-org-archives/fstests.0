@@ -1,86 +1,79 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:57202 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:57574 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S966588AbeBNDVE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Feb 2018 22:21:04 -0500
-Date: Wed, 14 Feb 2018 11:21:01 +0800
+        id S966670AbeBNDau (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 13 Feb 2018 22:30:50 -0500
+Date: Wed, 14 Feb 2018 11:30:47 +0800
 From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH 2/2] fstests: use _scratch_mount_nocheck where
- appropriate in tests
-Message-ID: <20180214032101.GL18267@eguan.usersys.redhat.com>
+Subject: Re: [PATCH 1/2] fstests: introduce _scratch_mount_nocheck
+Message-ID: <20180214033047.GM18267@eguan.usersys.redhat.com>
 References: <20180213091203.22909-1-eguan@redhat.com>
- <20180213091203.22909-3-eguan@redhat.com>
- <20180213233140.GA5208@magnolia>
+ <20180213091203.22909-2-eguan@redhat.com>
+ <CAHc6FU5tmwRRCWt+6qY_Tqpr_f3=3CuvTFumhtVaoz9y_DE+MQ@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180213233140.GA5208@magnolia>
+In-Reply-To: <CAHc6FU5tmwRRCWt+6qY_Tqpr_f3=3CuvTFumhtVaoz9y_DE+MQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, Andreas Gruenbacher <agruenba@redhat.com>
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, "Darrick J . Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 13, 2018 at 03:31:40PM -0800, Darrick J. Wong wrote:
-> On Tue, Feb 13, 2018 at 05:12:03PM +0800, Eryu Guan wrote:
-> > Also remove redundant status checks of _scratch_mount.
-> > 
+On Tue, Feb 13, 2018 at 03:11:07PM +0100, Andreas Gruenbacher wrote:
+> On 13 February 2018 at 10:12, Eryu Guan <eguan@redhat.com> wrote:
+> > _fail test by default if _scratch_mount failed and introduce
+> > _scratch_mount_nocheck for tests that need to check mount results
+> > themselves.
+> >
 > > Signed-off-by: Eryu Guan <eguan@redhat.com>
 > > ---
-> 
-> <skipping to the generic and xfs tests>
-> 
-> > diff --git a/tests/generic/054 b/tests/generic/054
-> > index 12f471a19090..84b8271a11bd 100755
-> > --- a/tests/generic/054
-> > +++ b/tests/generic/054
-> > @@ -83,7 +83,7 @@ for s in sync nosync ; do
-> >  
-> >  	# mount the FS
-> >  	_echofull "mount"
-> > -	if ! _scratch_mount >>$seqres.full 2>&1; then
-> > +	if ! _scratch_mount_nocheck >>$seqres.full 2>&1; then
-> >  	    _echofull "mount failed: $MOUNT_OPTIONS"
-> >  	    continue
-> >  	fi
-> > @@ -118,7 +118,7 @@ for s in sync nosync ; do
-> >  	_print_logstate
-> >  
-> >  	_echofull "mount with replay"
-> > -	_scratch_mount >>$seqres.full 2>&1 \
-> > +	_scratch_mount_nocheck >>$seqres.full 2>&1 \
-> >  	    || _fail "mount failed: $MOUNT_OPTIONS"
-> 
-> nocheck || fail ??
-> 
-> I wonder if the fail message should always spit out the mount options
-> that were tried?
 
-Seems there's no need to do so in this case, as we know what
-$MOUNT_OPTIONS we're using. We could dump the specific mount options if
-the test uses non-default options and really cares about it, and this
-should be done case-by-case.
+[snip]
+
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -352,13 +352,18 @@ _supports_filetype()
+> >         esac
+> >  }
+> >
+> > +_scratch_mount_nocheck()
+> > +{
+> > +       if [ "$FSTYP" == "overlay" ]; then
+> > +               _overlay_scratch_mount $*
+> > +               return $?
+> > +       fi
+> > +       _mount -t $FSTYP `_scratch_mount_options $*`
+> > +}
+> > +
+> >  _scratch_mount()
+> >  {
+> > -    if [ "$FSTYP" == "overlay" ]; then
+> > -        _overlay_scratch_mount $*
+> > -        return $?
+> > -    fi
+> > -    _mount -t $FSTYP `_scratch_mount_options $*`
+> > +       _scratch_mount_nocheck $* || _fail "_scratch_mount failed"
+> 
+> I'd change that to "mount failed"; the name of the helper function
+> isn't very interesting.
+
+I think it'd be easier to know which mount fails, but sure, I have no
+strong preference on it.
 
 > 
-> > diff --git a/tests/generic/068 b/tests/generic/068
-> > index bd12278cdd25..91b327866c54 100755
-> > --- a/tests/generic/068
-> > +++ b/tests/generic/068
-> > @@ -62,7 +62,7 @@ echo "*** MKFS ***"                         >>$seqres.full
-> >  echo ""                                     >>$seqres.full
-> >  _scratch_mkfs                               >>$seqres.full 2>&1 \
-> >      || _fail "mkfs failed"
-> > -_scratch_mount                              >>$seqres.full 2>&1 \
-> > +_scratch_mount_nocheck                      >>$seqres.full 2>&1 \
-> >      || _fail "mount failed"
+> >  }
+> >
+> >  _scratch_unmount()
+> > @@ -397,7 +402,7 @@ _scratch_cycle_mount()
+> >         opts="-o $opts"
+> >      fi
+> >      _scratch_unmount
+> > -    _scratch_mount "$opts"
+> > +    _scratch_mount_nocheck "$opts" || _fail "_scratch_cycle_mount failed"
 > 
-> Can this remain _scratch_mount, since we _fail anyway?
-> 
-> (There are more of these scattered throughout.)
+> Same here, change to "cycle mount failed" or similar.
 
-Sure. I thought it'd be better to keep dumping mount error message to
-$seqres.full and keep the pretty format :) But seems that's not
-necessary, the error message would break golden image anyway.
+OK.
 
-I'll revisit the tests with similar patterns.
+And thanks for the testing feedback!
 
-Thanks,
 Eryu
