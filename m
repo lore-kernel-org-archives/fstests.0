@@ -1,103 +1,79 @@
-Received: from sandeen.net ([63.231.237.45]:53650 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1032282AbeBNQeK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Feb 2018 11:34:10 -0500
-Subject: Re: [PATCH 2/4] xfs: skip xfs_check in _check_xfs_filesystem
-References: <151803835881.19313.17455678207236452557.stgit@magnolia>
- <151803837117.19313.3481001926133028039.stgit@magnolia>
- <20180208125152.GE18267@eguan.usersys.redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <62eff3f5-b4fe-3c98-1cd2-c5b2b4ca4c70@sandeen.net>
-Date: Wed, 14 Feb 2018 10:34:09 -0600
+Received: from aserp2120.oracle.com ([141.146.126.78]:55810 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1032738AbeBNQph (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Feb 2018 11:45:37 -0500
+Date: Wed, 14 Feb 2018 08:45:32 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/015: enlarge the initial fs size
+Message-ID: <20180214164532.GH5217@magnolia>
+References: <20180104054626.14458-1-eguan@redhat.com>
+ <20180214152401.GO18267@eguan.usersys.redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20180208125152.GE18267@eguan.usersys.redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180214152401.GO18267@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, "Darrick J. Wong" <darrick.wong@oracle.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2/8/18 6:51 AM, Eryu Guan wrote:
-> On Wed, Feb 07, 2018 at 01:19:31PM -0800, Darrick J. Wong wrote:
->> From: Darrick J. Wong <darrick.wong@oracle.com>
->>
->> xfs_check has been long obsolete, so stop running it automatically
->> after every test.  Tests that explicitly want xfs_check can call it
->> via _scratch_xfs_check or _xfs_check; that part doesn't go away.
->>
->> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Feb 14, 2018 at 11:24:01PM +0800, Eryu Guan wrote:
+> On Thu, Jan 04, 2018 at 01:46:26PM +0800, Eryu Guan wrote:
+> > Kernel commit f59cf5c29919 ("xfs: remove "no-allocation"
+> > reservations for file creations") is known to cause earlier ENOSPC
+> > conditions, and xfs/015 is affected in the way that no new file/dir
+> > can be created in a newly created 16M XFS with both reflink and
+> > rmapbt enabled, thus xfs/015 fails due to the missing test dirs.
+> > 
+> > So enlarge the initial fs size to 32M that we're able to create new
+
+32M?  I thought this was a 64M -> 128M expansion?
+
+> > dir/file before growing the filesystem size.
+> > 
+> > Signed-off-by: Eryu Guan <eguan@redhat.com>
+
+I don't think this hurts anything, but otoh I couldn't reproduce the
+failure you're seeing on my setup.
+
+--D
+
 > 
-> I'd like to see an ACK on this from XFS community.
-
-So, I thought we still had a local implementation of xfs_check-via-xfs_db
-in xfstests as an intentional validation against xfs_repair:
-
-+# xfs_check script is planned to be deprecated. But, we want to
-+# be able to invoke "xfs_check" behavior in xfstests in order to
-+# maintain the current verification levels.
-+_xfs_check()
-
-IOWS, "xfs_check is obsolete" is true for users/admins, but I thought
-we were keeping it alive as a developer tool for now, and that it had
-a place in xfstests.  No?
-
-(But if it /is/ removed, wouldn't you kill off the _xfs_check() function as
-well, to truly nuke it from orbit?)
-
-Anyway, I don't think I understand the justification for this change;
-it was explicitly kept alive in xfstests since commit 
-
-	187bccd xfstests: Remove dependence of xfs_check script
-
-and "xfs_check is obsolete for admins" doesn't seem to be sufficient rationale.
-
-What do we gain or lose by removing this from _check_xfs_filesystem?
-
--Eric
-
-> Thanks,
+> ping on this patch.
+> 
 > Eryu
 > 
->> ---
->>  common/xfs |   17 -----------------
->>  1 file changed, 17 deletions(-)
->>
->>
->> diff --git a/common/xfs b/common/xfs
->> index 3dba40d..c63e5dc 100644
->> --- a/common/xfs
->> +++ b/common/xfs
->> @@ -386,23 +386,6 @@ _check_xfs_filesystem()
->>  		ok=0
->>  	fi
->>  
->> -	# xfs_check runs out of memory on large files, so even providing the test
->> -	# option (-t) to avoid indexing the free space trees doesn't make it pass on
->> -	# large filesystems. Avoid it.
-
-
->> -	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
->> -		_xfs_check $extra_log_options $device 2>&1 |\
->> -			_fix_malloc >$tmp.fs_check
->> -	fi
->> -	if [ -s $tmp.fs_check ]; then
->> -		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
->> -		echo "*** xfs_check output ***"		>>$seqres.full
->> -		cat $tmp.fs_check			>>$seqres.full
->> -		echo "*** end xfs_check output"		>>$seqres.full
->> -
->> -		xfs_metadump $device $seqres.check	>>$seqres.full 2>&1
->> -		ok=0
->> -	fi
->> -
->>  	$XFS_REPAIR_PROG -n $extra_options $extra_log_options $extra_rt_options $device >$tmp.repair 2>&1
->>  	if [ $? -ne 0 ]; then
->>  		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
->>
+> > ---
+> >  tests/xfs/015 | 6 +++---
+> >  1 file changed, 3 insertions(+), 3 deletions(-)
+> > 
+> > diff --git a/tests/xfs/015 b/tests/xfs/015
+> > index 2c57f7882308..4939bb92f6fc 100755
+> > --- a/tests/xfs/015
+> > +++ b/tests/xfs/015
+> > @@ -66,15 +66,15 @@ _supported_os Linux
+> >  
+> >  _require_scratch
+> >  
+> > -# need 64M space, don't make any assumption
+> > +# need 128M space, don't make any assumption
+> >  _scratch_mkfs >/dev/null 2>&1
+> >  _scratch_mount
+> > -_require_fs_space $SCRATCH_MNT 65536
+> > +_require_fs_space $SCRATCH_MNT 131072
+> >  _scratch_unmount
+> >  
+> >  rm -f $seqres.full
+> >  
+> > -_scratch_mkfs_sized $((16 * 1024 * 1024)) > $tmp.mkfs.raw
+> > +_scratch_mkfs_sized $((32 * 1024 * 1024)) > $tmp.mkfs.raw
+> >  cat $tmp.mkfs.raw | _filter_mkfs >$seqres.full 2>$tmp.mkfs
+> >  # get original data blocks number and agcount
+> >  . $tmp.mkfs
+> > -- 
+> > 2.14.3
+> > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> 
