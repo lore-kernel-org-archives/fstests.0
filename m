@@ -1,93 +1,90 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56794 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1755188AbeBOIdU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Feb 2018 03:33:20 -0500
-Date: Thu, 15 Feb 2018 16:33:17 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] xfs/015: enlarge the initial fs size
-Message-ID: <20180215083317.GQ18267@eguan.usersys.redhat.com>
-References: <20180104054626.14458-1-eguan@redhat.com>
- <20180214152401.GO18267@eguan.usersys.redhat.com>
- <20180214164532.GH5217@magnolia>
+Received: from mail-yw0-f179.google.com ([209.85.161.179]:40800 "EHLO
+        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755090AbeBOIdo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Feb 2018 03:33:44 -0500
+Received: by mail-yw0-f179.google.com with SMTP id y186so8737743ywf.7
+        for <fstests@vger.kernel.org>; Thu, 15 Feb 2018 00:33:44 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180214164532.GH5217@magnolia>
+In-Reply-To: <20180214150343.GN18267@eguan.usersys.redhat.com>
+References: <20180212053822.whuqpncgddzm3l6n@XZHOUW.usersys.redhat.com>
+ <1518414408-23149-1-git-send-email-xzhou@redhat.com> <20180214110331.ojgyabcta34lzo4s@quack2.suse.cz>
+ <CAOQ4uxhUv0Wy+v_i8mzhx5y7NA88VyULxWniJ-HXCLg_Pq7bUw@mail.gmail.com> <20180214150343.GN18267@eguan.usersys.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 15 Feb 2018 10:33:42 +0200
+Message-ID: <CAOQ4uxhNQ9aURKbkSTOBjXiAfrxJ61Jo0HAe0rLKh8i8OfW0hg@mail.gmail.com>
+Subject: Re: [PATCH v4] generic: add stress test for fanotify and inotify
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>
+Cc: Jan Kara <jack@suse.cz>, Xiong Zhou <xzhou@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 14, 2018 at 08:45:32AM -0800, Darrick J. Wong wrote:
-> On Wed, Feb 14, 2018 at 11:24:01PM +0800, Eryu Guan wrote:
-> > On Thu, Jan 04, 2018 at 01:46:26PM +0800, Eryu Guan wrote:
-> > > Kernel commit f59cf5c29919 ("xfs: remove "no-allocation"
-> > > reservations for file creations") is known to cause earlier ENOSPC
-> > > conditions, and xfs/015 is affected in the way that no new file/dir
-> > > can be created in a newly created 16M XFS with both reflink and
-> > > rmapbt enabled, thus xfs/015 fails due to the missing test dirs.
-> > > 
-> > > So enlarge the initial fs size to 32M that we're able to create new
-> 
-> 32M?  I thought this was a 64M -> 128M expansion?
+On Wed, Feb 14, 2018 at 5:03 PM, Eryu Guan <eguan@redhat.com> wrote:
+> On Wed, Feb 14, 2018 at 01:22:06PM +0200, Amir Goldstein wrote:
+>> On Wed, Feb 14, 2018 at 1:03 PM, Jan Kara <jack@suse.cz> wrote:
+>> > On Mon 12-02-18 13:46:48, Xiong Zhou wrote:
+>> >> Stress test for fanotify and inotify. Exercise fanotify and
+>> >> inotify user interfaces in loop while other stress tests going
+>> >> on in the watched test directory.
+>> >>
+>> >> Watching slab object inotify_inode_mark size, report fail
+>> >> it increases too fast. This may lead to a crash if OOM killer
+>> >> invoked.
+>> >>
+>> >> kernel commit related to the fixes in v4.15-rc1:
+>> >> 0d6ec07 fsnotify: pin both inode and vfsmount mark
+>> >>
+>> >> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+>> >
+>> > I'm sorry for chiming in so late but I was on vacation. Just one question:
+>> > Currently, all inotify and fanotify tests are part of LTP. Is there any
+>> > good reason for putting this particular test to fstests and not LTP?
+>> > Specifically I've refrained from putting notification framework tests to
+>> > fstests because there's practically no relation of it to implementation of
+>> > any particular filesystem. Also I'd prefer not to have fanotify / inotify
+>> > tests in two different frameworks...
+>> >
+>>
+>> I second that.
+>> Also, Eryu did not chime in yet (and Dave probably did not look closely),
+>> but I think fstests in general try to refrain from single purpose test
+>> programs such as fsnotify_stress.
+>
+> I have no problem with committing fsnotify tests in fstests, we do have
+> tests that exercise the vfs level infrastructure purely, e.g. the shared
+> subtree operations tests.
+>
+> But if both fanotify subsystem maintainer and main reviewer suggest
+> putting this test to LTP, I have no problem with that too :)
+>
 
-The final fs size (after growfs) is expanded from 64M to 128M, but we
-need the initial fs size (prior to growfs) to be 32M instead of 16M.
+Clarification:
+Although I am siding Jan on LTP being an appropriate place for this
+test I have no objection for merging this test to fstests and you can also
+add Reviewed-by: Amir Goldstein <amir73il@gmail.com> for v4.
 
-> 
-> > > dir/file before growing the filesystem size.
-> > > 
-> > > Signed-off-by: Eryu Guan <eguan@redhat.com>
-> 
-> I don't think this hurts anything, but otoh I couldn't reproduce the
-> failure you're seeing on my setup.
+Also, the statement that "there's practically no relation of [notification
+framework] to implementation of any particular filesystem" is not accurate.
+It would have been more accurate to say that the regression that this test
+checks for has no relation to any particular filesystem and therefore the
+test belongs to LTP, which tests the kernel inotify/fanotify syscalls.
 
-You need "both reflink and rmapbt enabled", I can still reproduce it
-with v4.16-rc1 kernel with MKFS_OPTIONS="-m reflink=1,rmapbt=1".
+As I wrote, I just posted 2 LTP inotify tests which are generic, but only fail
+on overlayfs: https://github.com/linux-test-project/ltp/pull/246.
+I would have preferred to write those tests as generic fsnotify tests for
+fstests and let the tests pass on all filesystems and fail on overlayfs.
 
-Thanks for reviewing!
+The reason I did not do that is because it would mean one of two things:
+1. Add 2 single purpose C programs to src - This is the standard practice in
+    LTP, but LTP provides a nice library to make the C test program minimal
+    and fstests does not.
+2. Write a multi purpose C program (e.g. fsnotify_expect) that could be
+    invoked from bash tests to verify expected events.
 
-Eryu
+Option #1 I ruled out.
+Option #2 is on my wish/TODO list.
+I envision feeding the output of fsstress into fsnotiy_expect.
+I am not aware of any test coverage for fsnotify that does something like that.
 
-> 
-> --D
-> 
-> > 
-> > ping on this patch.
-> > 
-> > Eryu
-> > 
-> > > ---
-> > >  tests/xfs/015 | 6 +++---
-> > >  1 file changed, 3 insertions(+), 3 deletions(-)
-> > > 
-> > > diff --git a/tests/xfs/015 b/tests/xfs/015
-> > > index 2c57f7882308..4939bb92f6fc 100755
-> > > --- a/tests/xfs/015
-> > > +++ b/tests/xfs/015
-> > > @@ -66,15 +66,15 @@ _supported_os Linux
-> > >  
-> > >  _require_scratch
-> > >  
-> > > -# need 64M space, don't make any assumption
-> > > +# need 128M space, don't make any assumption
-> > >  _scratch_mkfs >/dev/null 2>&1
-> > >  _scratch_mount
-> > > -_require_fs_space $SCRATCH_MNT 65536
-> > > +_require_fs_space $SCRATCH_MNT 131072
-> > >  _scratch_unmount
-> > >  
-> > >  rm -f $seqres.full
-> > >  
-> > > -_scratch_mkfs_sized $((16 * 1024 * 1024)) > $tmp.mkfs.raw
-> > > +_scratch_mkfs_sized $((32 * 1024 * 1024)) > $tmp.mkfs.raw
-> > >  cat $tmp.mkfs.raw | _filter_mkfs >$seqres.full 2>$tmp.mkfs
-> > >  # get original data blocks number and agcount
-> > >  . $tmp.mkfs
-> > > -- 
-> > > 2.14.3
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Thanks,
+Amir.
