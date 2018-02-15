@@ -1,90 +1,109 @@
-Received: from mail-yw0-f179.google.com ([209.85.161.179]:40800 "EHLO
-        mail-yw0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755090AbeBOIdo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Feb 2018 03:33:44 -0500
-Received: by mail-yw0-f179.google.com with SMTP id y186so8737743ywf.7
-        for <fstests@vger.kernel.org>; Thu, 15 Feb 2018 00:33:44 -0800 (PST)
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:58512 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755386AbeBOIj0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Feb 2018 03:39:26 -0500
+Date: Thu, 15 Feb 2018 16:39:22 +0800
+From: Eryu Guan <eguan@redhat.com>
+Subject: Re: [xfstests PATCH v3 0/6] overlay: add overlay filesystem dirs
+ check
+Message-ID: <20180215083922.GR18267@eguan.usersys.redhat.com>
+References: <20180213070832.43159-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-In-Reply-To: <20180214150343.GN18267@eguan.usersys.redhat.com>
-References: <20180212053822.whuqpncgddzm3l6n@XZHOUW.usersys.redhat.com>
- <1518414408-23149-1-git-send-email-xzhou@redhat.com> <20180214110331.ojgyabcta34lzo4s@quack2.suse.cz>
- <CAOQ4uxhUv0Wy+v_i8mzhx5y7NA88VyULxWniJ-HXCLg_Pq7bUw@mail.gmail.com> <20180214150343.GN18267@eguan.usersys.redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 15 Feb 2018 10:33:42 +0200
-Message-ID: <CAOQ4uxhNQ9aURKbkSTOBjXiAfrxJ61Jo0HAe0rLKh8i8OfW0hg@mail.gmail.com>
-Subject: Re: [PATCH v4] generic: add stress test for fanotify and inotify
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180213070832.43159-1-yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Jan Kara <jack@suse.cz>, Xiong Zhou <xzhou@redhat.com>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Dave Chinner <david@fromorbit.com>
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 14, 2018 at 5:03 PM, Eryu Guan <eguan@redhat.com> wrote:
-> On Wed, Feb 14, 2018 at 01:22:06PM +0200, Amir Goldstein wrote:
->> On Wed, Feb 14, 2018 at 1:03 PM, Jan Kara <jack@suse.cz> wrote:
->> > On Mon 12-02-18 13:46:48, Xiong Zhou wrote:
->> >> Stress test for fanotify and inotify. Exercise fanotify and
->> >> inotify user interfaces in loop while other stress tests going
->> >> on in the watched test directory.
->> >>
->> >> Watching slab object inotify_inode_mark size, report fail
->> >> it increases too fast. This may lead to a crash if OOM killer
->> >> invoked.
->> >>
->> >> kernel commit related to the fixes in v4.15-rc1:
->> >> 0d6ec07 fsnotify: pin both inode and vfsmount mark
->> >>
->> >> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
->> >
->> > I'm sorry for chiming in so late but I was on vacation. Just one question:
->> > Currently, all inotify and fanotify tests are part of LTP. Is there any
->> > good reason for putting this particular test to fstests and not LTP?
->> > Specifically I've refrained from putting notification framework tests to
->> > fstests because there's practically no relation of it to implementation of
->> > any particular filesystem. Also I'd prefer not to have fanotify / inotify
->> > tests in two different frameworks...
->> >
->>
->> I second that.
->> Also, Eryu did not chime in yet (and Dave probably did not look closely),
->> but I think fstests in general try to refrain from single purpose test
->> programs such as fsnotify_stress.
->
-> I have no problem with committing fsnotify tests in fstests, we do have
-> tests that exercise the vfs level infrastructure purely, e.g. the shared
-> subtree operations tests.
->
-> But if both fanotify subsystem maintainer and main reviewer suggest
-> putting this test to LTP, I have no problem with that too :)
->
+On Tue, Feb 13, 2018 at 03:08:26PM +0800, zhangyi (F) wrote:
+> Hi, Eryu:
+> 
+> I have handle all comments from last iterations and fix some mistakes, please
+> review.
+> 
+> Patch 1-5: hook overlay filesystem check and correct current test cases.
+> Patch 6: handle the test mount options issue, it add the counterpart of the
+>          scratch mount options.
 
-Clarification:
-Although I am siding Jan on LTP being an appropriate place for this
-test I have no objection for merging this test to fstests and you can also
-add Reviewed-by: Amir Goldstein <amir73il@gmail.com> for v4.
+Thanks for the new revision! It looks good overall, I tested with both
+legacy and new overlay configurations and both results look fine.
 
-Also, the statement that "there's practically no relation of [notification
-framework] to implementation of any particular filesystem" is not accurate.
-It would have been more accurate to say that the regression that this test
-checks for has no relation to any particular filesystem and therefore the
-test belongs to LTP, which tests the kernel inotify/fanotify syscalls.
-
-As I wrote, I just posted 2 LTP inotify tests which are generic, but only fail
-on overlayfs: https://github.com/linux-test-project/ltp/pull/246.
-I would have preferred to write those tests as generic fsnotify tests for
-fstests and let the tests pass on all filesystems and fail on overlayfs.
-
-The reason I did not do that is because it would mean one of two things:
-1. Add 2 single purpose C programs to src - This is the standard practice in
-    LTP, but LTP provides a nice library to make the C test program minimal
-    and fstests does not.
-2. Write a multi purpose C program (e.g. fsnotify_expect) that could be
-    invoked from bash tests to verify expected events.
-
-Option #1 I ruled out.
-Option #2 is on my wish/TODO list.
-I envision feeding the output of fsstress into fsnotiy_expect.
-I am not aware of any test coverage for fsnotify that does something like that.
+We only need a new version of patch 5 to address Amir's comments. Patch
+6 needs some work too, but I think that can be done separately if
+necessary.
 
 Thanks,
-Amir.
+Eryu
+
+> 
+> Thanks,
+> Yi.
+> 
+> Changes since v2:
+> - Rename _is_mounted to _is_dev_mounted and use findmnt instead of mount.
+> - Fix mistakes in patch 2/6 and introduce _is_dir_mountpoint helper, also
+>   introduce fsck options use for overlayfs.
+> - Add overlay/049 into patch 4/6 to skip fs check.
+> - Add nfs export cases into patch 5/6 to do correct dirs check.
+> - Add the "missing feature" of test mount options.
+> 
+> Changes since v1:
+> - Details comments in patch 1/5.
+> - Improve _overlay_check_scratch_dirs to accept extra options.
+> - Fix basic filesystem mounted check in _overlay_check_fs.
+> - Improve overlay/044 in patch 5/5 to add index=on option.
+> 
+> ----------
+> 
+> Background:
+> 
+> This patchset implement filesystem check for overlay filesystem, base on
+> my "overlay: add fsck.overlay basic tests" patchset and works only if
+> fsck.overlay[1] exists (otherwise not run).
+> 
+> [1] https://github.com/hisilicon/overlayfs-progs
+> 
+> zhangyi (F) (6):
+>   common/rc: improve dev mounted check helper
+>   overlay: hook filesystem check helper
+>   overlay/003: fix fs check failure
+>   overlay: skip check for tests finished with corrupt filesystem
+>   overlay: correct scratch dirs check
+>   overlay: correct test mount options
+> 
+>  README.overlay    |  10 +++-
+>  common/config     |  21 ++++++--
+>  common/overlay    | 152 +++++++++++++++++++++++++++++++++++++++++++++++++++---
+>  common/rc         |  47 +++++++++--------
+>  common/xfs        |   2 +-
+>  tests/overlay/003 |   1 -
+>  tests/overlay/005 |   7 ++-
+>  tests/overlay/010 |   7 ++-
+>  tests/overlay/014 |  10 +++-
+>  tests/overlay/019 |   2 +-
+>  tests/overlay/022 |   2 +-
+>  tests/overlay/025 |   2 +-
+>  tests/overlay/029 |   6 +--
+>  tests/overlay/031 |   2 +-
+>  tests/overlay/035 |   7 ++-
+>  tests/overlay/036 |  26 ++++++----
+>  tests/overlay/037 |   7 ++-
+>  tests/overlay/038 |  10 +++-
+>  tests/overlay/041 |  10 +++-
+>  tests/overlay/043 |   7 ++-
+>  tests/overlay/044 |   8 ++-
+>  tests/overlay/049 |   2 +-
+>  tests/overlay/051 |  19 ++++++-
+>  tests/overlay/053 |  15 +++++-
+>  tests/overlay/055 |  12 ++++-
+>  25 files changed, 328 insertions(+), 66 deletions(-)
+> 
+> -- 
+> 2.5.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
