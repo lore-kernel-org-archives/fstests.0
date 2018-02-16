@@ -1,59 +1,73 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:52784 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1423532AbeBOQjZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Feb 2018 11:39:25 -0500
-Date: Thu, 15 Feb 2018 08:39:17 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/015: enlarge the initial fs size
-Message-ID: <20180215163917.GA14582@magnolia>
-References: <20180104054626.14458-1-eguan@redhat.com>
- <20180214152401.GO18267@eguan.usersys.redhat.com>
- <20180214164532.GH5217@magnolia>
- <20180215083317.GQ18267@eguan.usersys.redhat.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:35520 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752984AbeBPAi0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Feb 2018 19:38:26 -0500
+Date: Fri, 16 Feb 2018 08:38:23 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH v4] generic: add stress test for fanotify and inotify
+Message-ID: <20180216003823.tzsjpmhsu42mj3tu@XZHOUW.usersys.redhat.com>
+References: <20180212053822.whuqpncgddzm3l6n@XZHOUW.usersys.redhat.com>
+ <1518414408-23149-1-git-send-email-xzhou@redhat.com>
+ <20180214110331.ojgyabcta34lzo4s@quack2.suse.cz>
+ <20180215004940.k7e4z5jpsbhin66n@XZHOUW.usersys.redhat.com>
+ <20180215092343.od4to3x7loklzqu6@quack2.suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180215083317.GQ18267@eguan.usersys.redhat.com>
+In-Reply-To: <20180215092343.od4to3x7loklzqu6@quack2.suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: Xiong Zhou <xzhou@redhat.com>, amir73il@gmail.com, fstests@vger.kernel.org, miklos@szeredi.hu, david@fromorbit.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 15, 2018 at 04:33:17PM +0800, Eryu Guan wrote:
-> On Wed, Feb 14, 2018 at 08:45:32AM -0800, Darrick J. Wong wrote:
-> > On Wed, Feb 14, 2018 at 11:24:01PM +0800, Eryu Guan wrote:
-> > > On Thu, Jan 04, 2018 at 01:46:26PM +0800, Eryu Guan wrote:
-> > > > Kernel commit f59cf5c29919 ("xfs: remove "no-allocation"
-> > > > reservations for file creations") is known to cause earlier ENOSPC
-> > > > conditions, and xfs/015 is affected in the way that no new file/dir
-> > > > can be created in a newly created 16M XFS with both reflink and
-> > > > rmapbt enabled, thus xfs/015 fails due to the missing test dirs.
+On Thu, Feb 15, 2018 at 10:23:43AM +0100, Jan Kara wrote:
+> On Thu 15-02-18 08:49:40, Xiong Zhou wrote:
+> > On Wed, Feb 14, 2018 at 12:03:31PM +0100, Jan Kara wrote:
+> > > On Mon 12-02-18 13:46:48, Xiong Zhou wrote:
+> > > > Stress test for fanotify and inotify. Exercise fanotify and
+> > > > inotify user interfaces in loop while other stress tests going
+> > > > on in the watched test directory.
 > > > > 
-> > > > So enlarge the initial fs size to 32M that we're able to create new
-> > 
-> > 32M?  I thought this was a 64M -> 128M expansion?
-> 
-> The final fs size (after growfs) is expanded from 64M to 128M, but we
-> need the initial fs size (prior to growfs) to be 32M instead of 16M.
-
-Ahh, ok.  The initial size is doubled (and the test still grows the fs
-4x), so we need to double the _require_space.
-
-> 
-> > 
-> > > > dir/file before growing the filesystem size.
+> > > > Watching slab object inotify_inode_mark size, report fail
+> > > > it increases too fast. This may lead to a crash if OOM killer
+> > > > invoked.
 > > > > 
-> > > > Signed-off-by: Eryu Guan <eguan@redhat.com>
+> > > > kernel commit related to the fixes in v4.15-rc1:
+> > > > 0d6ec07 fsnotify: pin both inode and vfsmount mark
+> > > > 
+> > > > Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+> > > 
+> > > I'm sorry for chiming in so late but I was on vacation. Just one question:
+> > > Currently, all inotify and fanotify tests are part of LTP. Is there any
+> > > good reason for putting this particular test to fstests and not LTP?
 > > 
-> > I don't think this hurts anything, but otoh I couldn't reproduce the
-> > failure you're seeing on my setup.
+> > It's handy to test with bash and c. fstests is more convenient to do that.
 > 
-> You need "both reflink and rmapbt enabled", I can still reproduce it
-> with v4.16-rc1 kernel with MKFS_OPTIONS="-m reflink=1,rmapbt=1".
+> Hum, I don't understand. You can just run the executables created by LTP.
+
+Like *_files functions and run fsstress in this patch. It's doable by c,
+just with more code.
+
+Thanks,
+Xiong
+
+> E.g.:
 > 
-> Thanks for reviewing!
-
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
+> jack@quack2:~/source/ltp> testcases/kernel/syscalls/inotify/inotify01 
+> inotify01    1  TPASS  :  get event: wd=1 mask=4 cookie=0 len=0
+> inotify01    2  TPASS  :  get event: wd=1 mask=20 cookie=0 len=0
+> inotify01    3  TPASS  :  get event: wd=1 mask=1 cookie=0 len=0
+> inotify01    4  TPASS  :  get event: wd=1 mask=10 cookie=0 len=0
+> inotify01    5  TPASS  :  get event: wd=1 mask=20 cookie=0 len=0
+> inotify01    6  TPASS  :  get event: wd=1 mask=2 cookie=0 len=0
+> inotify01    7  TPASS  :  get event: wd=1 mask=8 cookie=0 len=0
+> jack@quack2:~/source/ltp>
+> 
+> I don't see anything less handy than in fstests. I do agree that LTP is huge
+> so the initial step of downloading it and compiling takes longer than for
+> fstests but that's about it.
+> 
+> 								Honza
+> -- 
+> Jan Kara <jack@suse.com>
+> SUSE Labs, CR
