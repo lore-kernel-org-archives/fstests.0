@@ -1,87 +1,184 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:48352 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751810AbeBVC2E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Feb 2018 21:28:04 -0500
-Date: Wed, 21 Feb 2018 18:28:00 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/25[02]: increase filesystem size
-Message-ID: <20180222022800.GC14582@magnolia>
-References: <20180222003203.20231-1-david@fromorbit.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:5257 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751810AbeBVCpD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Feb 2018 21:45:03 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH v2] overlay: correct test mount options
+Date: Thu, 22 Feb 2018 10:54:13 +0800
+Message-ID: <20180222025413.31131-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180222003203.20231-1-david@fromorbit.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: eguan@redhat.com, fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 22, 2018 at 11:32:03AM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> On reflink+rmapbt XFs filesystems there isn't enough free space to
-> run this test on the 64MB filesystem image created. It notruns with
-> a curious error message - needs at least 0GB free:
-> 
-> generic/250             [10:01:57] [10:01:58] [not run]
->         generic/250 -- This test requires at least 0GB free on /mnt/scratch to run
+Current overlay's _test_mount functions mount base test filesystem
+with TEST_FS_MOUNT_OPTS and mount test overlayfs with MOUNT_OPTIONS
+instead of TEST_FS_MOUNT_OPTS. The TEST_FS_MOUNT_OPTS variable
+should be used for test overlayfs like MOUNT_OPTIONS use for scratch
+overlayfs.
 
-TBH I think someone ought to fix that to spit out MB if < 1024M, but
-that's a different patch.
+This patch rename OVL_BASE_MOUNT_OPTIONS to
+OVL_BASE_SCRATCH_MOUNT_OPTIONS and introduce an counterpart variable
+OVL_BASE_TEST_MOUNT_OPTIONS for test base filesystem, and then use
+TEST_FS_MOUNT_OPTS for test overlayfs. We also modify overlay mount
+helpers to adapt mount options.
 
-Worksforme,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+---
 
---D
+Changes since v1:
+- Rename _overlay_mount_dirs() to _do_overlay_mount_dirs() to do
+  the actual overlayfs mount operation, and introduce another
+  _overlay_mount_dirs() to mount optional overlayfs for tests use.
 
-> 
-> Fix this by increasing the size of the base filesystem image.
-> 
-> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/generic/250 | 6 +++---
->  tests/generic/252 | 5 +++--
->  2 files changed, 6 insertions(+), 5 deletions(-)
-> 
-> diff --git a/tests/generic/250 b/tests/generic/250
-> index a8fd97e31ff0..6b0f7e3126af 100755
-> --- a/tests/generic/250
-> +++ b/tests/generic/250
-> @@ -54,10 +54,10 @@ _require_no_rtinherit
->  
->  rm -f $seqres.full
->  
-> -
-> +fssize=$((100 * 1048576))
->  echo "Format and mount"
-> -$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
-> -_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
-> +_scratch_mkfs_sized $fssize > $seqres.full 2>&1
->  _dmerror_init
->  _dmerror_mount >> $seqres.full 2>&1
->  _dmerror_unmount
-> diff --git a/tests/generic/252 b/tests/generic/252
-> index b506d599f638..e102945d83b7 100755
-> --- a/tests/generic/252
-> +++ b/tests/generic/252
-> @@ -56,9 +56,10 @@ AIO_TEST="src/aio-dio-regress/aiocp"
->  rm -f $seqres.full
->  
->  
-> +fssize=$((100 * 1048576))
->  echo "Format and mount"
-> -$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
-> -_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
-> +$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
-> +_scratch_mkfs_sized $fssize > $seqres.full 2>&1
->  _dmerror_init
->  _dmerror_mount >> $seqres.full 2>&1
->  _dmerror_unmount
-> -- 
-> 2.16.1
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+---
+ common/config  | 17 +++++++++++++----
+ common/overlay | 32 +++++++++++++++++++++++---------
+ 2 files changed, 36 insertions(+), 13 deletions(-)
+
+diff --git a/common/config b/common/config
+index 20f0e5f..fd04a16 100644
+--- a/common/config
++++ b/common/config
+@@ -346,6 +346,9 @@ _test_mount_opts()
+ 	glusterfs)
+ 		export TEST_FS_MOUNT_OPTS=$GLUSTERFS_MOUNT_OPTIONS
+ 		;;
++	overlay)
++		export TEST_FS_MOUNT_OPTS=$OVERLAY_MOUNT_OPTIONS
++		;;
+ 	ext2|ext3|ext4|ext4dev)
+ 		# acls & xattrs aren't turned on by default on older ext$FOO
+ 		export TEST_FS_MOUNT_OPTS="-o acl,user_xattr $EXT_MOUNT_OPTIONS"
+@@ -546,16 +549,19 @@ _overlay_config_override()
+ 	# Store original base fs vars
+ 	export OVL_BASE_TEST_DEV="$TEST_DEV"
+ 	export OVL_BASE_TEST_DIR="$TEST_DIR"
+-	# If config does not set MOUNT_OPTIONS, its value may be
+-	# leftover from previous _overlay_config_override, so
++	# If config does not set MOUNT_OPTIONS and TEST_FS_MOUNT_OPTS, its
++	# value may be leftover from previous _overlay_config_override, so
+ 	# don't use that value for base fs mount
+ 	[ "$MOUNT_OPTIONS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset MOUNT_OPTIONS
+-	export OVL_BASE_MOUNT_OPTIONS="$MOUNT_OPTIONS"
++	export OVL_BASE_SCRATCH_MOUNT_OPTIONS="$MOUNT_OPTIONS"
++	[ "$TEST_FS_MOUNT_OPTS" != "$OVERLAY_MOUNT_OPTIONS" ] || unset TEST_FS_MOUNT_OPTS
++	export OVL_BASE_TEST_MOUNT_OPTIONS="$TEST_FS_MOUNT_OPTS"
+ 
+ 	# Set TEST vars to overlay base and mount dirs inside base fs
+ 	export TEST_DEV="$OVL_BASE_TEST_DIR"
+ 	export TEST_DIR="$OVL_BASE_TEST_DIR/$OVL_MNT"
+ 	export MOUNT_OPTIONS="$OVERLAY_MOUNT_OPTIONS"
++	export TEST_FS_MOUNT_OPTS="$OVERLAY_MOUNT_OPTIONS"
+ 
+ 	[ -b "$SCRATCH_DEV" ] || return 0
+ 
+@@ -580,7 +586,10 @@ _overlay_config_restore()
+ 	[ -z "$OVL_BASE_TEST_DIR" ] || export TEST_DIR=$OVL_BASE_TEST_DIR
+ 	[ -z "$OVL_BASE_SCRATCH_DEV" ] || export SCRATCH_DEV=$OVL_BASE_SCRATCH_DEV
+ 	[ -z "$OVL_BASE_SCRATCH_MNT" ] || export SCRATCH_MNT=$OVL_BASE_SCRATCH_MNT
+-	[ -z "$OVL_BASE_MOUNT_OPTIONS" ] || export MOUNT_OPTIONS=$OVL_BASE_MOUNT_OPTIONS
++	[ -z "$OVL_BASE_SCRATCH_MOUNT_OPTIONS" ] || \
++		export MOUNT_OPTIONS=$OVL_BASE_SCRATCH_MOUNT_OPTIONS
++	[ -z "$OVL_BASE_TEST_MOUNT_OPTIONS" ] || \
++		export TEST_FS_MOUNT_OPTS=$OVL_BASE_TEST_MOUNT_OPTIONS
+ }
+ 
+ # Parse config section options. This function will parse all the configuration
+diff --git a/common/overlay b/common/overlay
+index 29f9bf8..46a876b 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -12,7 +12,7 @@ export OVL_XATTR_NLINK="trusted.overlay.nlink"
+ export OVL_XATTR_UPPER="trusted.overlay.upper"
+ 
+ # helper function to do the actual overlayfs mount operation
+-_overlay_mount_dirs()
++_do_overlay_mount_dirs()
+ {
+ 	local lowerdir=$1
+ 	local upperdir=$2
+@@ -20,7 +20,19 @@ _overlay_mount_dirs()
+ 	shift 3
+ 
+ 	$MOUNT_PROG -t overlay -o lowerdir=$lowerdir -o upperdir=$upperdir \
+-		    -o workdir=$workdir `_common_dev_mount_options $*`
++		    -o workdir=$workdir $*
++}
++
++# Mount overlayfs with optional dirs and mount point
++_overlay_mount_dirs()
++{
++	local lowerdir=$1
++	local upperdir=$2
++	local workdir=$3
++	shift 3
++
++	_do_overlay_mount_dirs $lowerdir $upperdir $workdir \
++			       `_common_dev_mount_options $*`
+ }
+ 
+ # Mount with same options/mnt/dev of scratch mount, but optionally
+@@ -58,7 +70,7 @@ _overlay_mount()
+ 
+ 	_overlay_mkdirs $dir
+ 
+-	_overlay_mount_dirs $dir/$OVL_LOWER $dir/$OVL_UPPER $dir/$OVL_WORK \
++	_do_overlay_mount_dirs $dir/$OVL_LOWER $dir/$OVL_UPPER $dir/$OVL_WORK \
+ 				$* $dir $mnt
+ }
+ 
+@@ -86,26 +98,28 @@ _overlay_base_test_mount()
+ {
+ 	_overlay_base_mount OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
+ 			"$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
+-			$TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
++			$OVL_BASE_TEST_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+ }
+ 
+ _overlay_test_mount()
+ {
+ 	_overlay_base_test_mount && \
+-		_overlay_mount $OVL_BASE_TEST_DIR $TEST_DIR $*
++		_overlay_mount $OVL_BASE_TEST_DIR $TEST_DIR \
++			       $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $*
+ }
+ 
+ _overlay_base_scratch_mount()
+ {
+ 	_overlay_base_mount OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
+ 			"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
+-			$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
++			$OVL_BASE_SCRATCH_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+ }
+ 
+ _overlay_scratch_mount()
+ {
+ 	_overlay_base_scratch_mount && \
+-		_overlay_mount $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT $*
++		_overlay_mount $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT \
++			       `_common_dev_mount_options $*`
+ }
+ 
+ _overlay_base_unmount()
+@@ -305,7 +319,7 @@ _check_overlay_test_fs()
+ 	_overlay_check_fs "$TEST_DIR" \
+ 		OVL_BASE_TEST_DEV OVL_BASE_TEST_DIR \
+ 		"$OVL_BASE_TEST_DEV" "$OVL_BASE_TEST_DIR" \
+-		$TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS
++		$OVL_BASE_TEST_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+ }
+ 
+ _check_overlay_scratch_fs()
+@@ -313,5 +327,5 @@ _check_overlay_scratch_fs()
+ 	_overlay_check_fs "$SCRATCH_MNT" \
+ 		OVL_BASE_SCRATCH_DEV OVL_BASE_SCRATCH_MNT \
+ 		"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
+-		$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
++		$OVL_BASE_SCRATCH_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+ }
+-- 
+2.5.0
+
