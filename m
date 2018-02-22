@@ -1,76 +1,87 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:23994 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751312AbeBVAcc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Feb 2018 19:32:32 -0500
-Received: from discord.disaster.area ([192.168.1.111])
-        by dastard with esmtp (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1eoenr-0007JX-Tv
-        for fstests@vger.kernel.org; Thu, 22 Feb 2018 11:32:03 +1100
-Received: from dave by discord.disaster.area with local (Exim 4.90_1)
-        (envelope-from <david@fromorbit.com>)
-        id 1eoenr-0005H0-Ri
-        for fstests@vger.kernel.org; Thu, 22 Feb 2018 11:32:03 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] generic/25[02]: increase filesystem size
-Date: Thu, 22 Feb 2018 11:32:03 +1100
-Message-Id: <20180222003203.20231-1-david@fromorbit.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:5256 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751762AbeBVCJ0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Feb 2018 21:09:26 -0500
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH v4 0/5] overlay: add overlay filesystem dirs check
+Date: Thu, 22 Feb 2018 10:18:29 +0800
+Message-ID: <20180222021834.26145-1-yi.zhang@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: eguan@redhat.com, fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+Hi Eryu and Amir:
 
-On reflink+rmapbt XFs filesystems there isn't enough free space to
-run this test on the 64MB filesystem image created. It notruns with
-a curious error message - needs at least 0GB free:
+Sorry for the late, I have handle comments from last iteration in patch
+{5,6}/6, patch 6/6 will post separately later, please review.
 
-generic/250             [10:01:57] [10:01:58] [not run]
-        generic/250 -- This test requires at least 0GB free on /mnt/scratch to run
+Thanks,
+Yi.
 
-Fix this by increasing the size of the base filesystem image.
+Changes since v3:
+- Move overlay checker after _unmount in overlay/{038,041}, and embed
+  checker into unmount_dirs() in overlay/{051,053,055}.
+- split out patch "overlay: correct test mount options"
 
-Signed-Off-By: Dave Chinner <dchinner@redhat.com>
----
- tests/generic/250 | 6 +++---
- tests/generic/252 | 5 +++--
- 2 files changed, 6 insertions(+), 5 deletions(-)
+Changes since v2:
+- Rename _is_mounted to _is_dev_mounted and use findmnt instead of mount.
+- Fix mistakes in patch 2/6 and introduce _is_dir_mountpoint helper, also
+  introduce fsck options use for overlayfs.
+- Add overlay/049 into patch 4/6 to skip fs check.
+- Add nfs export cases into patch 5/6 to do correct dirs check.
+- Add the "missing feature" of test mount options.
 
-diff --git a/tests/generic/250 b/tests/generic/250
-index a8fd97e31ff0..6b0f7e3126af 100755
---- a/tests/generic/250
-+++ b/tests/generic/250
-@@ -54,10 +54,10 @@ _require_no_rtinherit
- 
- rm -f $seqres.full
- 
--
-+fssize=$((100 * 1048576))
- echo "Format and mount"
--$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
--_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
-+_scratch_mkfs_sized $fssize > $seqres.full 2>&1
- _dmerror_init
- _dmerror_mount >> $seqres.full 2>&1
- _dmerror_unmount
-diff --git a/tests/generic/252 b/tests/generic/252
-index b506d599f638..e102945d83b7 100755
---- a/tests/generic/252
-+++ b/tests/generic/252
-@@ -56,9 +56,10 @@ AIO_TEST="src/aio-dio-regress/aiocp"
- rm -f $seqres.full
- 
- 
-+fssize=$((100 * 1048576))
- echo "Format and mount"
--$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
--_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
-+$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
-+_scratch_mkfs_sized $fssize > $seqres.full 2>&1
- _dmerror_init
- _dmerror_mount >> $seqres.full 2>&1
- _dmerror_unmount
+Changes since v1:
+- Details comments in patch 1/5.
+- Improve _overlay_check_scratch_dirs to accept extra options.
+- Fix basic filesystem mounted check in _overlay_check_fs.
+- Improve overlay/044 in patch 5/5 to add index=on option.
+
+----------
+
+Background:
+
+This patchset implement filesystem check for overlay filesystem, base on
+my "overlay: add fsck.overlay basic tests" patchset and works only if
+fsck.overlay[1] exists (otherwise not run).
+
+[1] https://github.com/hisilicon/overlayfs-progs
+
+
+zhangyi (F) (5):
+  common/rc: improve dev mounted check helper
+  overlay: hook filesystem check helper
+  overlay/003: fix fs check failure
+  overlay: skip check for tests finished with corrupt filesystem
+  overlay: correct scratch dirs check
+
+ README.overlay    |  10 ++++-
+ common/config     |   4 ++
+ common/overlay    | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ common/rc         |  47 +++++++++++---------
+ common/xfs        |   2 +-
+ tests/overlay/003 |   1 -
+ tests/overlay/005 |   7 ++-
+ tests/overlay/010 |   7 ++-
+ tests/overlay/014 |  10 ++++-
+ tests/overlay/019 |   2 +-
+ tests/overlay/031 |   2 +-
+ tests/overlay/035 |   7 ++-
+ tests/overlay/036 |   6 ++-
+ tests/overlay/037 |   7 ++-
+ tests/overlay/038 |  10 ++++-
+ tests/overlay/041 |  10 ++++-
+ tests/overlay/043 |   7 ++-
+ tests/overlay/044 |   8 +++-
+ tests/overlay/049 |   2 +-
+ tests/overlay/051 |  10 ++++-
+ tests/overlay/053 |  10 ++++-
+ tests/overlay/055 |  10 ++++-
+ 22 files changed, 260 insertions(+), 44 deletions(-)
+
 -- 
-2.16.1
+2.5.0
 
