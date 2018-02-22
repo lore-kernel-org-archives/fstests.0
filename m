@@ -1,11 +1,13 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:5256 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751762AbeBVCJ0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Feb 2018 21:09:26 -0500
+Received: from szxga06-in.huawei.com ([45.249.212.32]:46963 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751762AbeBVCJb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Feb 2018 21:09:31 -0500
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v4 0/5] overlay: add overlay filesystem dirs check
-Date: Thu, 22 Feb 2018 10:18:29 +0800
-Message-ID: <20180222021834.26145-1-yi.zhang@huawei.com>
+Subject: [xfstests PATCH v4 3/5] overlay/003: fix fs check failure
+Date: Thu, 22 Feb 2018 10:18:32 +0800
+Message-ID: <20180222021834.26145-4-yi.zhang@huawei.com>
+In-Reply-To: <20180222021834.26145-1-yi.zhang@huawei.com>
+References: <20180222021834.26145-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,75 +15,29 @@ To: eguan@redhat.com, fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu and Amir:
+_check_overlay_scratch_fs() will check lowerdir of overlay filesystem,
+this case remove this directory after test will lead to check failure,
+and it is not really necessary to remove this directory, so keep this
+directory.
 
-Sorry for the late, I have handle comments from last iteration in patch
-{5,6}/6, patch 6/6 will post separately later, please review.
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/003 | 1 -
+ 1 file changed, 1 deletion(-)
 
-Thanks,
-Yi.
-
-Changes since v3:
-- Move overlay checker after _unmount in overlay/{038,041}, and embed
-  checker into unmount_dirs() in overlay/{051,053,055}.
-- split out patch "overlay: correct test mount options"
-
-Changes since v2:
-- Rename _is_mounted to _is_dev_mounted and use findmnt instead of mount.
-- Fix mistakes in patch 2/6 and introduce _is_dir_mountpoint helper, also
-  introduce fsck options use for overlayfs.
-- Add overlay/049 into patch 4/6 to skip fs check.
-- Add nfs export cases into patch 5/6 to do correct dirs check.
-- Add the "missing feature" of test mount options.
-
-Changes since v1:
-- Details comments in patch 1/5.
-- Improve _overlay_check_scratch_dirs to accept extra options.
-- Fix basic filesystem mounted check in _overlay_check_fs.
-- Improve overlay/044 in patch 5/5 to add index=on option.
-
-----------
-
-Background:
-
-This patchset implement filesystem check for overlay filesystem, base on
-my "overlay: add fsck.overlay basic tests" patchset and works only if
-fsck.overlay[1] exists (otherwise not run).
-
-[1] https://github.com/hisilicon/overlayfs-progs
-
-
-zhangyi (F) (5):
-  common/rc: improve dev mounted check helper
-  overlay: hook filesystem check helper
-  overlay/003: fix fs check failure
-  overlay: skip check for tests finished with corrupt filesystem
-  overlay: correct scratch dirs check
-
- README.overlay    |  10 ++++-
- common/config     |   4 ++
- common/overlay    | 125 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- common/rc         |  47 +++++++++++---------
- common/xfs        |   2 +-
- tests/overlay/003 |   1 -
- tests/overlay/005 |   7 ++-
- tests/overlay/010 |   7 ++-
- tests/overlay/014 |  10 ++++-
- tests/overlay/019 |   2 +-
- tests/overlay/031 |   2 +-
- tests/overlay/035 |   7 ++-
- tests/overlay/036 |   6 ++-
- tests/overlay/037 |   7 ++-
- tests/overlay/038 |  10 ++++-
- tests/overlay/041 |  10 ++++-
- tests/overlay/043 |   7 ++-
- tests/overlay/044 |   8 +++-
- tests/overlay/049 |   2 +-
- tests/overlay/051 |  10 ++++-
- tests/overlay/053 |  10 ++++-
- tests/overlay/055 |  10 ++++-
- 22 files changed, 260 insertions(+), 44 deletions(-)
-
+diff --git a/tests/overlay/003 b/tests/overlay/003
+index f980edb..154531e 100755
+--- a/tests/overlay/003
++++ b/tests/overlay/003
+@@ -92,7 +92,6 @@ ls ${SCRATCH_MNT}/
+ # unmount overlayfs but not base fs
+ $UMOUNT_PROG $SCRATCH_MNT
+ 
+-rm -rf $lowerdir
+ echo "Silence is golden"
+ # success, all done
+ status=0
 -- 
 2.5.0
 
