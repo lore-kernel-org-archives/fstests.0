@@ -1,111 +1,76 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:44236 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751640AbeBUKzX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 21 Feb 2018 05:55:23 -0500
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id B257C406E808
-        for <fstests@vger.kernel.org>; Wed, 21 Feb 2018 10:55:22 +0000 (UTC)
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] fsx: Fix -P errors
-Date: Wed, 21 Feb 2018 11:55:20 +0100
-Message-Id: <20180221105520.1810-1-agruenba@redhat.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:23994 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751312AbeBVAcc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Feb 2018 19:32:32 -0500
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1eoenr-0007JX-Tv
+        for fstests@vger.kernel.org; Thu, 22 Feb 2018 11:32:03 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.90_1)
+        (envelope-from <david@fromorbit.com>)
+        id 1eoenr-0005H0-Ri
+        for fstests@vger.kernel.org; Thu, 22 Feb 2018 11:32:03 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] generic/25[02]: increase filesystem size
+Date: Thu, 22 Feb 2018 11:32:03 +1100
+Message-Id: <20180222003203.20231-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Andreas Gruenbacher <agruenba@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-When -P is used, report the correct *.fsxgood filename in report_failure
-and fix the default *.fsxops filename.
----
- ltp/fsx.c | 31 +++++++++++++++----------------
- 1 file changed, 15 insertions(+), 16 deletions(-)
+From: Dave Chinner <dchinner@redhat.com>
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 9c358f27..ac9e9291 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -121,6 +121,7 @@ char	*bname;				/* basename of our test file */
- char	*logdev;			/* -i flag */
- char	*logid;				/* -j flag */
- char	dname[1024];			/* -P flag */
-+char	goodfile[1024];
- int	dirpath = 0;			/* -P flag */
- int	fd;				/* fd for our test file */
+On reflink+rmapbt XFs filesystems there isn't enough free space to
+run this test on the 64MB filesystem image created. It notruns with
+a curious error message - needs at least 0GB free:
+
+generic/250             [10:01:57] [10:01:58] [not run]
+        generic/250 -- This test requires at least 0GB free on /mnt/scratch to run
+
+Fix this by increasing the size of the base filesystem image.
+
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+---
+ tests/generic/250 | 6 +++---
+ tests/generic/252 | 5 +++--
+ 2 files changed, 6 insertions(+), 5 deletions(-)
+
+diff --git a/tests/generic/250 b/tests/generic/250
+index a8fd97e31ff0..6b0f7e3126af 100755
+--- a/tests/generic/250
++++ b/tests/generic/250
+@@ -54,10 +54,10 @@ _require_no_rtinherit
  
-@@ -510,8 +511,8 @@ report_failure(int status)
- 		if (good_buf) {
- 			save_buffer(good_buf, file_size, fsxgoodfd);
- 			prt("Correct content saved for comparison\n");
--			prt("(maybe hexdump \"%s\" vs \"%s.fsxgood\")\n",
--			    fname, fname);
-+			prt("(maybe hexdump \"%s\" vs \"%s\")\n",
-+			    fname, goodfile);
- 		}
- 		close(fsxgoodfd);
- 	}
-@@ -1864,12 +1865,10 @@ main(int argc, char **argv)
- {
- 	int	i, style, ch;
- 	char	*endp, *tmp;
--	char goodfile[1024];
- 	char logfile[1024];
- 	struct stat statbuf;
- 	int o_flags = O_RDWR|O_CREAT|O_TRUNC;
+ rm -f $seqres.full
  
--	goodfile[0] = 0;
- 	logfile[0] = 0;
- 	dname[0] = 0;
- 
-@@ -2027,10 +2026,6 @@ main(int argc, char **argv)
- 			strncpy(dname, optarg, sizeof(dname));
- 			strcat(dname, "/");
- 			dirpath = strlen(dname);
 -
--			strncpy(goodfile, dname, sizeof(goodfile));
--			strncpy(logfile, dname, sizeof(logfile));
--			strncpy(opsfile, dname, sizeof(logfile));
- 			break;
-                 case 'R':
-                         mapped_reads = 0;
-@@ -2124,24 +2119,28 @@ main(int argc, char **argv)
- 		}
- 	}
- #endif
--	strncat(goodfile, dirpath ? bname : fname, 256);
--	strcat (goodfile, ".fsxgood");
-+
-+	if (dirpath) {
-+		snprintf(goodfile, sizeof(goodfile), "%s%s.fsxgood", dname, bname);
-+		snprintf(logfile, sizeof(logfile), "%s%s.fsxlog", dname, bname);
-+		if (!*opsfile)
-+			snprintf(opsfile, sizeof(opsfile), "%s%s.fsxops", dname, bname);
-+	} else {
-+		snprintf(goodfile, sizeof(goodfile), "%s.fsxgood", fname);
-+		snprintf(logfile, sizeof(logfile), "%s.fsxlog", fname);
-+		if (!*opsfile)
-+			snprintf(opsfile, sizeof(opsfile), "%s.fsxops", fname);
-+	}
- 	fsxgoodfd = open(goodfile, O_RDWR|O_CREAT|O_TRUNC, 0666);
- 	if (fsxgoodfd < 0) {
- 		prterr(goodfile);
- 		exit(92);
- 	}
--	strncat(logfile, dirpath ? bname : fname, 256);
--	strcat (logfile, ".fsxlog");
- 	fsxlogf = fopen(logfile, "w");
- 	if (fsxlogf == NULL) {
- 		prterr(logfile);
- 		exit(93);
- 	}
--	if (!*opsfile) {
--		strncat(opsfile, dirpath ? bname : fname, 256);
--		strcat(opsfile, ".fsxops");
--	}
- 	unlink(opsfile);
++fssize=$((100 * 1048576))
+ echo "Format and mount"
+-$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
+-_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
++$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
++_scratch_mkfs_sized $fssize > $seqres.full 2>&1
+ _dmerror_init
+ _dmerror_mount >> $seqres.full 2>&1
+ _dmerror_unmount
+diff --git a/tests/generic/252 b/tests/generic/252
+index b506d599f638..e102945d83b7 100755
+--- a/tests/generic/252
++++ b/tests/generic/252
+@@ -56,9 +56,10 @@ AIO_TEST="src/aio-dio-regress/aiocp"
+ rm -f $seqres.full
  
- 	if (replayops) {
+ 
++fssize=$((100 * 1048576))
+ echo "Format and mount"
+-$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $((64 * 1048576))" $SCRATCH_DEV >> $seqres.full
+-_scratch_mkfs_sized $((64 * 1048576)) > $seqres.full 2>&1
++$XFS_IO_PROG -d -c "pwrite -S 0x69 -b 1048576 0 $fssize" $SCRATCH_DEV >> $seqres.full
++_scratch_mkfs_sized $fssize > $seqres.full 2>&1
+ _dmerror_init
+ _dmerror_mount >> $seqres.full 2>&1
+ _dmerror_unmount
 -- 
-2.14.3
+2.16.1
 
