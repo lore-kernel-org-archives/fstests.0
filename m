@@ -1,44 +1,90 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:60672 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752407AbeBVGCO (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Feb 2018 01:02:14 -0500
-Date: Thu, 22 Feb 2018 14:02:12 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] fstests: _fail test by default when _scratch_mount fails
-Message-ID: <20180222060212.GU18267@eguan.usersys.redhat.com>
-References: <20180218124457.28597-1-eguan@redhat.com>
- <CAHc6FU46AetuDG42ymogfPwz2j5j60Fw=urxd14wcfyaWb+9fw@mail.gmail.com>
+Received: from szxga06-in.huawei.com ([45.249.212.32]:38028 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750725AbeBVG3N (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Feb 2018 01:29:13 -0500
+Subject: Re: [xfstests PATCH v4 2/5] overlay: hook filesystem check helper
+References: <20180222021834.26145-1-yi.zhang@huawei.com>
+ <20180222021834.26145-3-yi.zhang@huawei.com>
+ <CAOQ4uxhH3ZLO6zehBY=U3guSvrZc_-bmBK1-2wQMZ+NMqVsX+A@mail.gmail.com>
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Message-ID: <1396234c-0cc1-2f4e-8187-dae7ae452c21@huawei.com>
+Date: Thu, 22 Feb 2018 14:27:26 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAHc6FU46AetuDG42ymogfPwz2j5j60Fw=urxd14wcfyaWb+9fw@mail.gmail.com>
+In-Reply-To: <CAOQ4uxhH3ZLO6zehBY=U3guSvrZc_-bmBK1-2wQMZ+NMqVsX+A@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, "Darrick J . Wong" <darrick.wong@oracle.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>, fstests@vger.kernel.org, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 21, 2018 at 11:27:01AM +0100, Andreas Gruenbacher wrote:
-> On 18 February 2018 at 13:44, Eryu Guan <eguan@redhat.com> wrote:
-> > Previously _scratch_mount didn't check the mount status and most
-> > tests continue to run even if the mount failed (unless test checks
-> > for the mount status explicitly). This would result in running tests
-> > on the underlying filesystem (usually rootfs) and implicit test
-> > failures, and such failures can be annoying and are usually hard to
-> > debug.
-> >
-> > Now _fail test by default if _scratch_mount failed and introduce
-> > _try_scratch_mount for tests that need to check mount results
-> > themselves. Also introduce a new _try_scratch_mount helper that does
-> > scratch mount without checking mount status for tests that do the
-> > check themselves.
+On 2018/2/22 11:26, Amir Goldstein Wrote:
+> Zhangyi,
 > 
-> The message above doesn't look quite right, but the patch looks good.
-
-Ah, I'll fix that up.
-
+> Sorry for dropping lists because replying from mobile. Feel free to add back.
 > 
-> Reviewed-by: Andreas Gruenbacher <agruenba@redhat.com>
+> 
+> 
+> On Feb 22, 2018 3:09 AM, "zhangyi (F)" <yi.zhang@huawei.com <mailto:yi.zhang@huawei.com>> wrote:
+> 
+>     Hook filesystem check helper to _check_test_fs and _check_scratch_fs for
+>     constants underlying dirs of overlay filesystem, and introduce scratch
+>     check helpers for optionally lower/upper/work dirs. These helpers works
+>     only if fsck.overlay exists.
+> 
+>     This patch introduce OVERLAY_FSCK_OPTIONS use for check overlayfs like
+>     OVERLAY_MOUNT_OPTIONS, and also introduce a mount point check helper in
+>     common/rc to detect a dir is a mount point or not.
+> 
+>     [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
+> 
+>     Signed-off-by: zhangyi (F) <yi.zhang@huawei.com <mailto:yi.zhang@huawei.com>>
+>     ---
+>      README.overlay |  10 ++++-
+>      common/config  |   4 ++
+>      common/overlay | 125 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>      common/rc      |  18 ++++++++-
+>      4 files changed, 153 insertions(+), 4 deletions(-)
+> 
+>     diff --git a/README.overlay b/README.overlay
+>     index dfb8234..9feaa6a 100644
+>     --- a/README.overlay
+>     +++ b/README.overlay
+>     @@ -22,6 +22,10 @@ the base fs should be pre-formatted before starting the -overlay run.
+>      An easy way to accomplish this is by running './check <some test>' once,
+>      before running './check -overlay'.
+> 
+>     +'./check -overlay' support check overlay test and scratch dirs,
+>     +OVERLAY_FSCK_OPTIONS should be set instead of FSCK_OPTIONS if fsck
+>     +options need to given directly.
+>     +
+>      Because of the lack of mkfs support, multi-section config files are only
+>      partly supported with './check -overlay'. Only multi-section files that
+>      do not change FSTYP and MKFS_OPTIONS can be safely used with -overlay.
+>     @@ -40,7 +44,9 @@ run overlay tests on the same base fs, but with different mount options:
+>       MOUNT_OPTIONS="-o pquota"
+>       TEST_FS_MOUNT_OPTS="-o noatime"
+>       OVERLAY_MOUNT_OPTIONS="-o redirect_dir=off"
+>     + OVERLAY_FSCK_OPTIONS="-n"
+> 
+> 
+> I may have missed this before but was under the impression that -n was the fsck option by default for post test fs check.
+> 
+> I believe that's how it usually is with fstests.
+>
+Yes, you are right, -n is the default option. Current OVERLAY_FSCK_OPTIONS is
+used to avoid getting the base filesystem's FSCK_OPTIONS in multi sections config
+case, becasue we cannot distinguish between leftover FSCK_OPTIONS and user specified
+FSCK_OPTIONS, so introduce OVERLAY_FSCK_OPTIONS and set -n to default as example.
 
-Thanks for review!
+> In this example you can set fsck options same as mount options to indicate that for tests that use scratch_mount and test_mount with no extra arguments, fsck should verify there are no redirects in overlay.
+> 
+> Of course that would mean that you will have to mark more tests with require_scratch_nocheck, but you can do that later when fsck.overlay actually supports the -o arguments.
+> 
+Agree, we can do it after fsck.overlay can handle extra -o options.
 
-Eryu
+Thanks,
+Yi.
+
+
+
