@@ -1,123 +1,359 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:48492 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750821AbeBVSev (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Feb 2018 13:34:51 -0500
-Date: Thu, 22 Feb 2018 10:34:45 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 6/8] fsstress: implement the clonerange/deduperange
- ioctls
-Message-ID: <20180222183445.GG9827@magnolia>
-References: <151314499003.18893.8687182548758898133.stgit@magnolia>
- <151314503583.18893.15475795025536691678.stgit@magnolia>
- <20171215020731.GM6896@magnolia>
- <20180222160614.t2afwtdsouxliqie@hermes.olymp>
- <20180222172741.GD9827@magnolia>
- <20180222181731.jlddocrjlaaauaf3@hermes.olymp>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180222181731.jlddocrjlaaauaf3@hermes.olymp>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:57537 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751330AbeBWBQv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Feb 2018 20:16:51 -0500
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1ep1yT-0000Mk-32
+        for fstests@vger.kernel.org; Fri, 23 Feb 2018 12:16:33 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.90_1)
+        (envelope-from <david@fromorbit.com>)
+        id 1ep1yS-0007Wj-VX
+        for fstests@vger.kernel.org; Fri, 23 Feb 2018 12:16:33 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] check: fail tests if check/dmesg are not clean
+Date: Fri, 23 Feb 2018 12:16:32 +1100
+Message-Id: <20180223011632.28893-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: eguan@redhat.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 22, 2018 at 06:17:31PM +0000, Luis Henriques wrote:
-> On Thu, Feb 22, 2018 at 09:27:41AM -0800, Darrick J. Wong wrote:
-> > On Thu, Feb 22, 2018 at 04:06:14PM +0000, Luis Henriques wrote:
-> > > On Thu, Dec 14, 2017 at 06:07:31PM -0800, Darrick J. Wong wrote:
-> > > 
-> > > <snip>
-> > > 
-> > > > +void
-> > > > +clonerange_f(
-> > > > +	int			opno,
-> > > > +	long			r)
-> > > > +{
-> > > 
-> > > <snip>
-> > > 
-> > > > +	/* Calculate offsets */
-> > > > +	len = (random() % FILELEN_MAX) + 1;
-> > > > +	len &= ~(stat1.st_blksize - 1);
-> > > > +	if (len == 0)
-> > > > +		len = stat1.st_blksize;
-> > > > +	if (len > stat1.st_size)
-> > > > +		len = stat1.st_size;
-> > > > +
-> > > > +	lr = ((__int64_t)random() << 32) + random();
-> > > > +	if (stat1.st_size == len)
-> > > > +		off1 = 0;
-> > > > +	else
-> > > > +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
-> > > > +	off1 %= maxfsize;
-> > > > +	off1 &= ~(stat1.st_blksize - 1);
-> > > > +
-> > > > +	/*
-> > > > +	 * If srcfile == destfile, randomly generate destination ranges
-> > > > +	 * until we find one that doesn't overlap the source range.
-> > > > +	 */
-> > > > +	do {
-> > > > +		lr = ((__int64_t)random() << 32) + random();
-> > > > +		off2 = (off64_t)(lr % MIN(stat2.st_size + (1024 * 1024), MAXFSIZE));
-> > > > +		off2 %= maxfsize;
-> > > > +		off2 &= ~(stat2.st_blksize - 1);
-> > > > +	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
-> > > 
-> > > I started seeing hangs in generic/013 on cephfs.  After spending some
-> > > time looking, I found that this loops forever.  And the reason seems to
-> > > be that stat1.st_blksize is too big for this filesystem (4M) -- when
-> > > doing:
-> > 
-> > "Too big for this filesystem"?
-> > 
-> > Uh... maybe you'd better start by giving me more stat buffer info --
-> > what's st_size?
-> > 
-> > > 	off1 &= ~(stat1.st_blksize - 1);
-> > 
-> > These bits round the start offset down to block granularity, since clone
-> > range implementations generally require that the ranges align to block
-> > boundaries.
-> > 
-> > (Though AFAICT ceph doesn't support clone range anyway...)
-> > 
-> > So reading between the lines, is the problem here that ceph advertises a
-> > blocksize of 4M and fsstress calls clonerange_f with files that are
-> > smaller than 4M in size, so the only possible offsets with a 4M
-> > blocksize are zero and that's why we end up looping forever?
-> 
-> Brilliantly described!  That is *exactly* what I'm seeing and failed to
-> describe.  I guess I could use FSSTRESS_AVOID to work around this issue,
-> but there are probably better options.
+From: Dave Chinner <dchinner@redhat.com>
 
-Better to patch fsstress.c against this bug. :)
+Currently a test passes even if it leaves a corrupt filesystem
+behind, or a splat in the system logs that should not be there.
+Rework the check code to consider these as test failures so they can
+be accounted and tracked correctly. This also allows us to include
+the post-test filesystem checking in the test runtime - that is
+currently not accounted to the test, either, so the real runtime of
+each test is not accurately reflected in the time stats being
+reported.
 
-Does the following patch help?
+This requires a complete reworking of the main test check loop. It's
+a bunch of spaghetti at the moment because it has post test
+reporting code preventing use from using continue when a test is
+done. Move that post test reporting to the start of the next loop
+iteration and clean up the code to use continues where appropriate.
 
---D
+Also, for cases where we haven't run the test or it's already been
+marked as failed, don't bother running the filesystem/dmesg checks
+for failure as we're already going to report the test as failed.
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 935f5de..e107099 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -2222,6 +2222,7 @@ clonerange_f(
- 	off64_t			lr;
- 	off64_t			off1;
- 	off64_t			off2;
-+	off64_t			max_off2;
- 	size_t			len;
- 	int			v1;
- 	int			v2;
-@@ -2305,9 +2306,10 @@ clonerange_f(
- 	 * If srcfile == destfile, randomly generate destination ranges
- 	 * until we find one that doesn't overlap the source range.
- 	 */
-+	max_off2 = MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE);
- 	do {
- 		lr = ((int64_t)random() << 32) + random();
--		off2 = (off64_t)(lr % MIN(stat2.st_size + (1024 * 1024), MAXFSIZE));
-+		off2 = (off64_t)(lr % max_off2);
- 		off2 %= maxfsize;
- 		off2 &= ~(stat2.st_blksize - 1);
- 	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
+This touches almost all of the loop, so get rid of the remaining
+4 space indents inside the loop while moving all this code around.
+
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+---
+ check | 250 +++++++++++++++++++++++++++++++++++-------------------------------
+ 1 file changed, 132 insertions(+), 118 deletions(-)
+
+diff --git a/check b/check
+index 05eb2835918b..db43fb03963b 100755
+--- a/check
++++ b/check
+@@ -631,78 +631,96 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	seqres="$check"
+ 	_check_test_fs
+ 
+-	for seq in $list
+-	do
+-	    err=false
+-	    err_msg=""
+-	    if [ ! -f $seq ]; then
+-	        # Try to get full name in case the user supplied only seq id
+-	        # and the test has a name. A bit of hassle to find really
+-	        # the test and not its sample output or helping files.
+-	        bname=$(basename $seq)
+-	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
+-	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
+-	                END { print shortest }')
+-	        if [ -f $full_seq ] \
+-	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
+-	            seq=$full_seq
+-	        fi
+-	    fi
++	err=false
++	first_test=true
++	for seq in $list ; do
++		# Run report for previous test!
++		if $err ; then
++			bad="$bad $seqnum"
++			n_bad=`expr $n_bad + 1`
++			tc_status="fail"
++		fi
++		if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
++			_make_testcase_report "$tc_status"
++		fi
++		first_test=false
++
++		err=false
++		err_msg=""
++		if [ ! -f $seq ]; then
++			# Try to get full name in case the user supplied only
++			# seq id and the test has a name. A bit of hassle to
++			# find really the test and not its sample output or
++			# helping files.
++			bname=$(basename $seq)
++			full_seq=$(find $(dirname $seq) -name $bname* -executable |
++				awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
++				     END { print shortest }')
++			if [ -f $full_seq ] && \
++			   [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
++				seq=$full_seq
++			fi
++		fi
+ 
+-	    # the filename for the test and the name output are different.
+-	    # we don't include the tests/ directory in the name output.
+-	    export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+-
+-	    # Similarly, the result directory needs to replace the tests/
+-	    # part of the test location.
+-	    group=`dirname $seq`
+-	    if $OPTIONS_HAVE_SECTIONS; then
+-		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
+-		REPORT_DIR="$RESULT_BASE/$section"
+-	    else
+-		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
+-		REPORT_DIR="$RESULT_BASE"
+-	    fi
+-	    seqres="$REPORT_DIR/$seqnum"
++		# the filename for the test and the name output are different.
++		# we don't include the tests/ directory in the name output.
++		export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+ 
+-	    mkdir -p $RESULT_DIR
++		# Similarly, the result directory needs to replace the tests/
++		# part of the test location.
++		group=`dirname $seq`
++		if $OPTIONS_HAVE_SECTIONS; then
++			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
++			REPORT_DIR="$RESULT_BASE/$section"
++		else
++			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
++			REPORT_DIR="$RESULT_BASE"
++		fi
++		seqres="$REPORT_DIR/$seqnum"
+ 
+-	    echo -n "$seqnum"
++		mkdir -p $RESULT_DIR
++		echo -n "$seqnum"
+ 
+-	    if $showme; then
+-		_expunge_test $seqnum
+-		if [ $? -eq 1 ]; then
++		if $showme; then
++			_expunge_test $seqnum
++			if [ $? -eq 1 ]; then
++			    tc_status="expunge"
++			    continue
++			fi
++			echo
++			start=0
++			stop=0
++			tc_status="list"
++			n_notrun=`expr $n_notrun + 1`
+ 			continue
+ 		fi
+-		echo
+-		start=0
+-		stop=0
+-		n_notrun=`expr $n_notrun + 1`
+-		if $do_report; then
+-			_make_testcase_report "list"
++
++		tc_status="pass"
++		if [ ! -f $seq ]; then
++			echo " - no such test?"
++			continue
+ 		fi
+-		continue
+-	    fi
+-	    tc_status="pass"
+-	    if [ ! -f $seq ]; then
+-		echo " - no such test?"
+-	    else
++
+ 		# really going to try and run this one
+-		#
+ 		rm -f $seqres.out.bad
+ 
+ 		# check if we really should run it
+ 		_expunge_test $seqnum
+ 		if [ $? -eq 1 ]; then
++			tc_status="expunge"
+ 			continue
+ 		fi
+ 
++		# record that we really tried to run this test.
++		try="$try $seqnum"
++		n_try=`expr $n_try + 1`
++
+ 		# slashes now in names, sed barfs on them so use grep
+ 		lasttime=`grep -w ^$seqnum $check.time | awk '// {print $2}'`
+ 		if [ "X$lasttime" != X ]; then
+ 			echo -n " ${lasttime}s ..."
+ 		else
+-			echo -n "	"	# prettier output with timestamps.
++			echo -n "	" # prettier output with timestamps.
+ 		fi
+ 		rm -f core $seqres.notrun
+ 
+@@ -724,90 +742,86 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			./$seq >$tmp.out 2>&1
+ 			sts=$?
+ 		fi
+-		$timestamp && _timestamp
+-		stop=`_wallclock`
+ 
+-		if [ -f core ]
+-		then
+-		    err_msg="[dumped core]"
+-		    echo -n " $err_msg"
+-		    mv core $RESULT_BASE/$seqnum.core
+-		    err=true
++		if [ -f core ]; then
++			err_msg="[dumped core]"
++			echo -n " $err_msg"
++			mv core $RESULT_BASE/$seqnum.core
++			err=true
+ 		fi
+ 
+-		if [ -f $seqres.notrun ]
+-		then
+-		    $timestamp || echo -n " [not run] "
+-		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
+-		    cat $seqres.notrun
+-		    notrun="$notrun $seqnum"
+-		    n_notrun=`expr $n_notrun + 1`
+-		    tc_status="notrun"
+-		else
+-		    if [ $sts -ne 0 ]
+-		    then
++		if [ -f $seqres.notrun ]; then
++			$timestamp && _timestamp
++			stop=`_wallclock`
++			$timestamp || echo -n " [not run] "
++			$timestamp && echo " [not run]" && \
++				      echo -n "	$seqnum -- "
++			cat $seqres.notrun
++			notrun="$notrun $seqnum"
++			n_notrun=`expr $n_notrun + 1`
++			tc_status="notrun"
++			continue;
++		fi
++
++		if [ $sts -ne 0 ]; then
+ 			err_msg="[failed, exit status $sts]"
+ 			echo -n " $err_msg"
+ 			err=true
+-		    fi
+-		    if [ ! -f $seq.out ]
+-		    then
++		else
++			# the test apparently passed, so check for corruption
++			# and log messages that shouldn't be there.
++			_check_filesystems
++			_check_dmesg || err=true
++			_check_kmemleak || err=true
++		fi
++
++		# test ends after all checks are done.
++		$timestamp && _timestamp
++		stop=`_wallclock`
++
++		if [ ! -f $seq.out ]; then
+ 			_dump_err "no qualified output"
+ 			err=true
+-		    else
+-
+-			# coreutils 8.16+ changed quote formats in error messages from
+-			# `foo' to 'foo'. Filter old versions to match the new version.
+-			sed -i "s/\`/\'/g" $tmp.out
+-			if diff $seq.out $tmp.out >/dev/null 2>&1
+-			then
+-			    if $err
+-			    then
+-				:
+-			    else
++			continue;
++		fi
++		# coreutils 8.16+ changed quote formats in error messages
++		# from `foo' to 'foo'. Filter old versions to match the new
++		# version.
++		sed -i "s/\`/\'/g" $tmp.out
++		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
++			if ! $err ; then
+ 				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+ 				echo -n " `expr $stop - $start`s"
+-			    fi
+-			    echo ""
+-			else
+-			    echo " - output mismatch (see $seqres.out.bad)"
+-			    mv $tmp.out $seqres.out.bad
+-			    $diff $seq.out $seqres.out.bad | {
+-				if test "$DIFF_LENGTH" -le 0; then
+-					cat
+-				else
+-					head -n "$DIFF_LENGTH"
+-					echo "..."
+-					echo "(Run '$diff $seq.out $seqres.out.bad'" \
+-						" to see the entire diff)"
+-				fi; } | \
+-				sed -e 's/^\(.\)/    \1/'
+-			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+-			    err=true
+ 			fi
+-		    fi
+-		    try="$try $seqnum"
+-		    n_try=`expr $n_try + 1`
+-		    _check_filesystems
+-		    _check_dmesg || err=true
+-		    _check_kmemleak || err=true
+-		fi
++			echo ""
++		else
++			echo " - output mismatch (see $seqres.out.bad)"
++			mv $tmp.out $seqres.out.bad
++			$diff $seq.out $seqres.out.bad | {
++			if test "$DIFF_LENGTH" -le 0; then
++				cat
++			else
++				head -n "$DIFF_LENGTH"
++				echo "..."
++				echo "(Run '$diff $seq.out $seqres.out.bad'" \
++					" to see the entire diff)"
++			fi; } | sed -e 's/^\(.\)/    \1/'
+ 
+-	    fi
++			err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
++			err=true
++		fi
++	done
+ 
+-	    # come here for each test, except when $showme is true
+-	    #
+-	    if $err
+-	    then
++	# make sure we record the status of the last test we ran.
++	if $err ; then
+ 		bad="$bad $seqnum"
+ 		n_bad=`expr $n_bad + 1`
+ 		tc_status="fail"
+-	    fi
+-	    if $do_report; then
++	fi
++	if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
+ 		_make_testcase_report "$tc_status"
+-	    fi
+-	    seq="after_$seqnum"
+-	done
++	fi
++
+ 	sect_stop=`_wallclock`
+ 	interrupt=false
+ 	_wrapup
+-- 
+2.16.1
+
