@@ -1,11 +1,11 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:35771 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750935AbeBWLyU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Feb 2018 06:54:20 -0500
+Received: from szxga05-in.huawei.com ([45.249.212.191]:5262 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750798AbeBWLwA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Feb 2018 06:52:00 -0500
 From: yangerkun <yangerkun@huawei.com>
-Subject: [xfstests PATCH] overlay: add origin test for fsck.overlay
-Date: Fri, 23 Feb 2018 20:03:25 +0800
-Message-ID: <20180223120325.33255-1-yangerkun@huawei.com>
+Subject: [PATCH] fsck.overlay: add ovl_check_origin helper
+Date: Fri, 23 Feb 2018 20:01:06 +0800
+Message-ID: <20180223120106.32921-1-yangerkun@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,245 +13,337 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, eguan@redhat.com, yi.zhang@huawei.com, miaoxie@huawei.com, zhaohongjiang@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add fsck.overlay test case to test it how to deal with origin xattr
-in file or dir of overlayfs.
+For origin xattr, use fid in ovl_fh to consume file_handle, and use
+open_by_handle_at to check validity of the origin ovl_fh. In auto mode,
+the invalid origin xattr will remove automatic.
 
 Signed-off-by: yangerkun <yangerkun@huawei.com>
 ---
- tests/overlay/057     | 200 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/057.out |   6 ++
- tests/overlay/group   |   1 +
- 3 files changed, 207 insertions(+)
- create mode 100644 tests/overlay/057
- create mode 100644 tests/overlay/057.out
+ check.c     | 135 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-
+ lib.c       |  10 +++++
+ lib.h       |   4 +-
+ overlayfs.c |  23 +++++++++++
+ overlayfs.h |  33 +++++++++++++++
+ 5 files changed, 202 insertions(+), 3 deletions(-)
 
-diff --git a/tests/overlay/057 b/tests/overlay/057
-new file mode 100644
-index 00000000..c2299c4f
---- /dev/null
-+++ b/tests/overlay/057
-@@ -0,0 +1,200 @@
-+#! /bin/bash
-+# FS QA Test 057
-+#
-+# Test fsck.overlay how to deal with origin xattr in overlayfs.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Huawei.  All Rights Reserved.
-+
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
+diff --git a/check.c b/check.c
+index e109620..50c4585 100644
+--- a/check.c
++++ b/check.c
+@@ -24,6 +24,7 @@
+ 
+ #include <stdlib.h>
+ #include <stdio.h>
++#include <stddef.h>
+ #include <string.h>
+ #include <errno.h>
+ #include <unistd.h>
+@@ -169,11 +170,42 @@ static int ovl_get_redirect(int dirfd, const char *pathname,
+ 	return 0;
+ }
+ 
++/*
++ * Get the origin file handle with the pathname, then check the validity of member
++ * in ovl_fh.
++ */
++static int ovl_get_fh(int dirfd, const char *pathname,
++		      struct ovl_fh **fh, bool *invalid)
 +{
-+	cd /
-+	rm -f $tmp.*
++	char *og = NULL;
++	ssize_t ret;
++
++	ret = get_xattr(dirfd, pathname, OVL_ORIGIN_XATTR, &og, NULL);
++	if (ret <= 0)
++		return ret;
++
++	ret = ovl_check_fh_len((struct ovl_fh *)og, ret);
++	if (ret) {
++		free(og);
++		if (ret == -EINVAL)
++			*invalid = true;
++	} else {
++		*fh = (struct ovl_fh *)og;
++	}
++
++	return 0;
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+#remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test start here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_attrs
-+_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+create_origin()
+ static inline int ovl_remove_redirect(int dirfd, const char *pathname)
+ {
+ 	return remove_xattr(dirfd, pathname, OVL_REDIRECT_XATTR);
+ }
+ 
++static inline int ovl_remove_origin(int dirfd, const char *pathname)
 +{
-+	local lowerdir=$1
-+	local upperdir=$2
-+	local workdir=$3
-+
-+	mkdir $lowerdir/testdir
-+	touch $lowerdir/testfile
-+
-+	_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-+
-+	# Copy up files and directory
-+	touch $SCRATCH_MNT/{testdir,testfile}
-+	$UMOUNT_PROG $SCRATCH_MNT
++	return remove_xattr(dirfd, pathname, OVL_ORIGIN_XATTR);
 +}
 +
-+# Get the origin xattr of file or dir, maybe null
-+get_origin()
+ static inline int ovl_create_whiteout(int dirfd, const char *pathname)
+ {
+ 	if (mknodat(dirfd, pathname, S_IFCHR | WHITEOUT_MOD, makedev(0, 0))) {
+@@ -758,6 +790,97 @@ out:
+ }
+ 
+ /*
++ * Get origin file handle stored in the xattr, check it's invalid
++ * or not. In auto-mode, invalid origin xattr will be removed directly.
++ */
++static int ovl_check_origin(struct scan_ctx *sctx)
 +{
-+	local target=$1
-+	local value
++	struct ovl_fh *fh = NULL;
++	struct file_handle *fhp = NULL;
++	struct stat stat;
++	bool invalid = false;
++	int i;
++	int ret;
++	int fid_len;
++	int fd;
 +
-+	value=`$GETFATTR_PROG --absolute-names --only-values -n \
-+		$OVL_XATTR_ORIGIN $target 2>&1`
-+	[ $? -eq 1 ] && return 1
++	/* Get origin */
++	ret = ovl_get_fh(sctx->dirfd, sctx->pathname, &fh, &invalid);
++	if (ret < 0)
++		return -1;
 +
-+	if [ -n "$value" ]
-+	then
-+		value=`echo $value | base64`
-+		echo "0s"${value}
-+	else
-+		echo ""
-+	fi
-+	return 0
++	/* Cannot get ovl_fh, maybe not set or unrecognized */
++	if (!fh && !invalid)
++		return 0;
++
++	print_debug(_("File or dir \"%s\" has origin\n"), sctx->pathname);
++	sctx->t_origins++;
++
++	/* ovl_fh is invalid */
++	if (invalid)
++		goto remove;
++
++	/* Origin file in last lower dir? */
++	if (sctx->dirtype == OVL_LOWER && sctx->stack == lower_num -1)
++		goto remove;
++
++	fid_len = fh->len - offsetof(struct ovl_fh, fid);
++	fhp = smalloc(sizeof(struct file_handle) + fid_len);
++	fhp->handle_bytes = fh->len - offsetof(struct ovl_fh, fid);
++	fhp->handle_type = fh->type;
++	memcpy(fhp->f_handle, fh->fid, fid_len);
++
++	/* Scan lower directories to check origin xattr's validity */
++	i = sctx->dirtype == OVL_UPPER ? 0 : sctx->stack + 1;
++	for (; i < lower_num; i++) {
++		fd = open_by_handle_at(lowerfd[i], fhp, O_RDONLY);
++
++		if (fd == -1) {
++			if (errno == ESTALE || errno == ENOENT)
++				continue;
++
++			print_err(_("Error open_by_handle_at %s:%s\n"),
++				    sctx->pathname, strerror(errno));
++			ret = -1;
++			goto out;
++		}
++
++		ret = fstat(fd, &stat);
++		if (ret) {
++			print_err(_("Cannot fstat origin file in %s of %s:%s\n"),
++				    lowerdir[i], sctx->pathname, strerror(errno));
++			goto out2;
++		}
++
++		if (stat.st_mode != sctx->st->st_mode)
++			goto remove;
++
++		goto out2;
++	}
++
++remove:
++	sctx->i_origins++;
++
++	/* Remove origin xattr or ask user */
++	if (!ovl_ask_action("Invalid origin xattr", sctx->pathname, sctx->dirtype,
++			    sctx->stack, "Remove origin", 1))
++		goto out;
++
++	ret = ovl_remove_origin(sctx->dirfd, sctx->pathname);
++	if (ret)
++		goto out;
++
++	sctx->i_origins--;
++	sctx->t_origins--;
++out2:
++	close(fd);
++out:
++	free(fhp);
++	free(fh);
++	return ret;
 +}
 +
-+set_origin()
++/*
+  * If a directory has origin target and redirect/merge subdirectories in it,
+  * it may contain copied up targets. In order to avoid 'd_ino' change after
+  * lower target copy-up or rename (which will create a new inode),
+@@ -870,9 +993,11 @@ static struct scan_operations ovl_scan_ops[OVL_SCAN_PASS][2] = {
+ 			.whiteout = ovl_check_whiteout,
+ 			.impurity = ovl_count_impurity,
+ 			.impure = ovl_check_impure,
++			.origin = ovl_check_origin,
+ 		},
+ 		[OVL_LOWER] = {
+ 			.whiteout = ovl_check_whiteout,
++			.origin = ovl_check_origin,
+ 		},
+ 	}/* Pass Two */
+ };
+@@ -892,11 +1017,12 @@ static void ovl_scan_report(struct scan_ctx *sctx)
+ {
+ 	if (flags & FL_VERBOSE) {
+ 		print_info(_("Scan %d directories, %d files, "
+-			     "%d/%d whiteouts, %d/%d redirect dirs "
+-			     "%d missing impure\n"),
++			     "%d/%d whiteouts, %d/%d redirect dirs, "
++			     "%d/%d origins, %d missing impure\n"),
+ 			     sctx->directories, sctx->files,
+ 			     sctx->i_whiteouts, sctx->t_whiteouts,
+ 			     sctx->i_redirects, sctx->t_redirects,
++			     sctx->i_origins, sctx->t_origins,
+ 			     sctx->m_impure);
+ 	}
+ }
+@@ -916,6 +1042,11 @@ static void ovl_scan_check(struct scan_ctx *sctx)
+ 			     sctx->i_redirects);
+ 		incons = true;
+ 	}
++	if (sctx->i_origins) {
++		print_info(_("Invalid origins %d left!\n"),
++			     sctx->i_origins);
++		incons = true;
++	}
+ 	if (sctx->m_impure) {
+ 		print_info(_("Directories %d missing impure xattr!\n"),
+ 			     sctx->m_impure);
+diff --git a/lib.c b/lib.c
+index 4d9536a..2aee0dc 100644
+--- a/lib.c
++++ b/lib.c
+@@ -244,6 +244,11 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+ 			ret = scan_check_entry(sop->impurity, sctx);
+ 			if (ret)
+ 			        goto out;
++
++			/* Check origins */
++			ret = scan_check_entry(sop->origin, sctx);
++			if (ret)
++				goto out;
+ 			break;
+ 		case FTS_DEFAULT:
+ 			/* Check whiteouts */
+@@ -264,6 +269,11 @@ int scan_dir(struct scan_ctx *sctx, struct scan_operations *sop)
+ 			if (ret)
+ 				goto out;
+ 
++			/* Check origins */
++			ret = scan_check_entry(sop->origin, sctx);
++			if (ret)
++				goto out;
++
+ 			/* Save current dir data and create new one for subdir */
+ 			ftsent->fts_pointer = sctx->dirdata;
+ 			sctx->dirdata = smalloc(sizeof(struct scan_dir_data));
+diff --git a/lib.h b/lib.h
+index 880a8c3..5f7fdaa 100644
+--- a/lib.h
++++ b/lib.h
+@@ -71,7 +71,9 @@ struct scan_ctx {
+ 	int i_whiteouts;	/* invalid whiteouts */
+ 	int t_redirects;	/* total redirect dirs */
+ 	int i_redirects;	/* invalid redirect dirs */
+-	int m_impure;		/* missing inpure dirs */
++	int t_origins;		/* total origins */
++	int i_origins;		/* invalid origins */
++	int m_impure;		/* missing impure dirs */
+ 
+ 	const char *pathname;	/* path relative to overlay root */
+ 	const char *filename;	/* filename */
+diff --git a/overlayfs.c b/overlayfs.c
+index 93b4cad..c2f0840 100644
+--- a/overlayfs.c
++++ b/overlayfs.c
+@@ -19,6 +19,8 @@
+  */
+ 
+ #include <stddef.h>
++#include <errno.h>
++#include "overlayfs.h"
+ 
+ /*
+  * Split directories to individual one.
+@@ -70,3 +72,24 @@ char *ovl_next_opt(char **s)
+ 	*s = NULL;
+ 	return sbegin;
+ }
++
++/*
++ * Check the validity of ovl_fh.
++ */
++int ovl_check_fh_len(struct ovl_fh *fh, int fh_len)
 +{
-+	local target=$1
-+	local value=$2
++	if (fh_len < sizeof(struct ovl_fh) || fh_len < fh->len)
++		return -EINVAL;
 +
-+	if [ -n "$value" ]
-+	then
-+		$SETFATTR_PROG -n $OVL_XATTR_ORIGIN -v $value $target
-+	else
-+		$SETFATTR_PROG -n $OVL_XATTR_ORIGIN $target
-+	fi
++	if (fh->magic != OVL_FH_MAGIC)
++		return -EINVAL;
++
++	if (fh->version > OVL_FH_VERSION || fh->flags & ~OVL_FH_FLAG_ALL)
++		return -ENODATA;
++
++	if (!(fh->flags & OVL_FH_FLAG_ANY_ENDIAN) &&
++	    (fh->flags & OVL_FH_FLAG_BIG_ENDIAN) != OVL_FH_FLAG_CPU_ENDIAN)
++		return -ENODATA;
++
++	return 0;
 +}
+diff --git a/overlayfs.h b/overlayfs.h
+index e3798aa..9913912 100644
+--- a/overlayfs.h
++++ b/overlayfs.h
+@@ -42,7 +42,40 @@
+ #define OVL_ORIGIN_XATTR	"trusted.overlay.origin"
+ #define OVL_IMPURE_XATTR	"trusted.overlay.impure"
+ 
++#define OVL_FH_VERSION 0
++#define OVL_FH_MAGIC 0xfb
 +
-+# Value of origin equals to the expect value?(1 : equal, 0 : not equal)
-+check_origin()
-+{
-+	local target=$1
-+	local expres=$2
-+	local expect=$3
-+	local origin
++#define OVL_FH_FLAG_BIG_ENDIAN (1 << 0)
++#define OVL_FH_FLAG_ANY_ENDIAN (1 << 1)
++#define OVL_FH_FLAG_PATH_UPPER (1 << 2)
++#define OVL_FH_FLAG_ALL (OVL_FH_FLAG_BIG_ENDIAN | OVL_FH_FLAG_ANY_ENDIAN | \
++			OVL_FH_FLAG_PATH_UPPER)
++#include <endian.h>
++#if __BYTE_ORDER == __LITTLE_ENDIAN
++#define OVL_FH_FLAG_CPU_ENDIAN 0
++#elif __BYTE_ORDER == __BIG_ENDIAN
++#define OVL_FH_FLAG_CPU_ENDIAN  OVL_FH_FLAG_BIG_ENDIAN
++#else
++#error Endianness not defined
++#endif
 +
-+	origin=`get_origin $target`
-+	if [ $? -eq 1 ]
-+	then
-+		[ $expect -eq 0 ] || echo "Missing origin xattr"
-+	else
-+		[ "$origin" == "$expres" ] && ( [ $expect -eq 1 ] \
-+			|| echo "Invalid origin xattr" )
-+	fi
-+}
++#include <stdint.h>
++typedef struct {
++	uint8_t b[16];
++}uuid_t;
 +
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
++struct ovl_fh {
++	uint8_t version;
++	uint8_t magic;
++	uint8_t len;
++	uint8_t flags;
++	uint8_t type;
++	uuid_t uuid;
++	uint8_t fid[0];
++};
 +
-+make_test_dirs()
-+{
-+	rm -rf $lowerdir $lowerdir2 $upperdir  $workdir
-+	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
-+}
-+
-+# Test valid origin xattr created when copyup, should not remove
-+make_test_dirs
-+echo "valid origin"
-+create_origin $lowerdir $upperdir $workdir
-+origin1=`get_origin $upperdir/testdir`
-+origin2=`get_origin $upperdir/testfile`
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_origin $upperdir/testdir "$origin1" 1
-+check_origin $upperdir/testfile "$origin2" 1
-+
-+# Test invalid origin xattr point to a missing lower target, should remove
-+make_test_dirs
-+echo "invalid origin"
-+create_origin $lowerdir $upperdir $workdir
-+rm -rf $lowerdir/{testfile,testdir}
-+origin1=`get_origin $upperdir/testdir`
-+origin2=`get_origin $upperdir/testfile`
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_origin $upperdir/testdir "$origin1" 0
-+check_origin $upperdir/testfile "$origin2" 0
-+
-+# Test invalid origin xattr when there is no lower layer, should remove
-+make_test_dirs
-+echo "invalid origin(2)"
-+create_origin $lowerdir2 $lowerdir $workdir
-+origin1=`get_origin $lowerdir/testdir`
-+origin2=`get_origin $lowerdir/testfile`
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_origin $lowerdir/testdir "$origin1" 0
-+check_origin $lowerdir/testfile "$origin2" 0
-+
-+# Test invalid origin xattr which value of origin has changed, should remove
-+make_test_dirs
-+echo "invalid origin(3)"
-+create_origin $lowerdir $upperdir $workdir
-+origin=`get_origin $upperdir/testdir`
-+set_origin $upperdir/testdir $"origin"${origin}
-+origin=`get_origin $upperdir/testfile`
-+set_origin $upperdir/testfile $"origin"${origin}
-+origin1=`get_origin $upperdir/testdir`
-+origin2=`get_origin $upperdir/testfile`
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_origin $upperdir/testdir "$origin1" 0
-+check_origin $upperdir/testfile "$origin2" 0
-+
-+# Test valid origin xattr which the value is NULL
-+make_test_dirs
-+echo "valid origin(2)"
-+create_origin $lowerdir $upperdir $workdir
-+set_origin $upperdir/testdir ""
-+set_origin $upperdir/testfile ""
-+origin1=`get_origin $upperdir/testdir`
-+origin2=`get_origin $upperdir/testfile`
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
-+	echo "fsck should not fail"
-+check_origin $upperdir/testdir "$origin1" 1
-+check_origin $upperdir/testfile "$origin2" 1
-+
-+# sucess, all done
-+status=0
-+exit
-diff --git a/tests/overlay/057.out b/tests/overlay/057.out
-new file mode 100644
-index 00000000..7c375880
---- /dev/null
-+++ b/tests/overlay/057.out
-@@ -0,0 +1,6 @@
-+QA output created by 057
-+valid origin
-+invalid origin
-+invalid origin(2)
-+invalid origin(3)
-+valid origin(2)
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 65f1fe63..b595a003 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -59,3 +59,4 @@
- 054 auto quick copyup redirect exportfs
- 055 auto quick copyup redirect exportfs nonsamefs
- 056 auto quick fsck
-+057 auto quick fsck
+ unsigned int ovl_split_lowerdirs(char *lower);
+ char *ovl_next_opt(char **s);
++int ovl_check_fh_len(struct ovl_fh *fh, int fh_len);
+ 
+ #endif /* OVL_OVERLAYFS_H */
 -- 
 2.13.6
 
