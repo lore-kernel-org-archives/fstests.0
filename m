@@ -1,51 +1,44 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56284 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751340AbeBWEea (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Feb 2018 23:34:30 -0500
-Date: Fri, 23 Feb 2018 12:34:27 +0800
-From: Eryu Guan <eguan@redhat.com>
-Subject: Re: [PATCH] check: fail tests if check/dmesg are not clean
-Message-ID: <20180223043427.GW18267@eguan.usersys.redhat.com>
-References: <20180223011632.28893-1-david@fromorbit.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:39677 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751296AbeBWE41 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Feb 2018 23:56:27 -0500
+Date: Fri, 23 Feb 2018 15:56:25 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common/xfs: Initialise OPTIND for getopts calls
+Message-ID: <20180223045625.GA30854@dastard>
+References: <20180223035454.1406-1-david@fromorbit.com>
+ <20180223042928.GV18267@eguan.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180223011632.28893-1-david@fromorbit.com>
+In-Reply-To: <20180223042928.GV18267@eguan.usersys.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
+To: Eryu Guan <eguan@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 23, 2018 at 12:16:32PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Fri, Feb 23, 2018 at 12:29:28PM +0800, Eryu Guan wrote:
+> On Fri, Feb 23, 2018 at 02:54:54PM +1100, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > According to the bash man page:
+> > 
+> > 	OPTIND is initialized to 1 each time the shell or a shell
+> > 	script is invoked.
+> > 
+> > This doesn't appear to be true - in tests scripts with no other
+> > getopts calls, I'm seeing the getopts loop in _xfs_check to fail
+> > to parse input parameters correctly. Tracing shows the parameters
+> > are being passed to _xfs_check correctly, but on occassion getopts
+> > simply doesn't see the,
 > 
-> Currently a test passes even if it leaves a corrupt filesystem
-> behind, or a splat in the system logs that should not be there.
-> Rework the check code to consider these as test failures so they can
-> be accounted and tracked correctly. This also allows us to include
-> the post-test filesystem checking in the test runtime - that is
-> currently not accounted to the test, either, so the real runtime of
-> each test is not accurately reflected in the time stats being
-> reported.
-> 
-> This requires a complete reworking of the main test check loop. It's
-> a bunch of spaghetti at the moment because it has post test
-> reporting code preventing use from using continue when a test is
-> done. Move that post test reporting to the start of the next loop
-> iteration and clean up the code to use continues where appropriate.
-> 
-> Also, for cases where we haven't run the test or it's already been
-> marked as failed, don't bother running the filesystem/dmesg checks
-> for failure as we're already going to report the test as failed.
-> 
-> This touches almost all of the loop, so get rid of the remaining
-> 4 space indents inside the loop while moving all this code around.
-> 
-> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+> Hmm, unfinished sentence here?
 
-Thanks for the rework! It needs careful testing and most probably won't
-catch this week's update. I'll take it in next week if I see no problems
-in testing.
+Typo. "simply doesn't see them."
 
-Thanks,
-Eryu
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
