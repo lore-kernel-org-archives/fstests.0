@@ -1,359 +1,107 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:57537 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751330AbeBWBQv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Feb 2018 20:16:51 -0500
+Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:53827
+        "EHLO ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750995AbeBWDy6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Feb 2018 22:54:58 -0500
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1ep1yT-0000Mk-32
-        for fstests@vger.kernel.org; Fri, 23 Feb 2018 12:16:33 +1100
+        id 1ep4Rj-0000Z3-26
+        for fstests@vger.kernel.org; Fri, 23 Feb 2018 14:54:55 +1100
 Received: from dave by discord.disaster.area with local (Exim 4.90_1)
         (envelope-from <david@fromorbit.com>)
-        id 1ep1yS-0007Wj-VX
-        for fstests@vger.kernel.org; Fri, 23 Feb 2018 12:16:33 +1100
+        id 1ep4Ri-0000NN-Un
+        for fstests@vger.kernel.org; Fri, 23 Feb 2018 14:54:55 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] check: fail tests if check/dmesg are not clean
-Date: Fri, 23 Feb 2018 12:16:32 +1100
-Message-Id: <20180223011632.28893-1-david@fromorbit.com>
+Subject: [PATCH] common/xfs: Initialise OPTIND for getopts calls
+Date: Fri, 23 Feb 2018 14:54:54 +1100
+Message-Id: <20180223035454.1406-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Currently a test passes even if it leaves a corrupt filesystem
-behind, or a splat in the system logs that should not be there.
-Rework the check code to consider these as test failures so they can
-be accounted and tracked correctly. This also allows us to include
-the post-test filesystem checking in the test runtime - that is
-currently not accounted to the test, either, so the real runtime of
-each test is not accurately reflected in the time stats being
-reported.
+According to the bash man page:
 
-This requires a complete reworking of the main test check loop. It's
-a bunch of spaghetti at the moment because it has post test
-reporting code preventing use from using continue when a test is
-done. Move that post test reporting to the start of the next loop
-iteration and clean up the code to use continues where appropriate.
+	OPTIND is initialized to 1 each time the shell or a shell
+	script is invoked.
 
-Also, for cases where we haven't run the test or it's already been
-marked as failed, don't bother running the filesystem/dmesg checks
-for failure as we're already going to report the test as failed.
+This doesn't appear to be true - in tests scripts with no other
+getopts calls, I'm seeing the getopts loop in _xfs_check to fail
+to parse input parameters correctly. Tracing shows the parameters
+are being passed to _xfs_check correctly, but on occassion getopts
+simply doesn't see the,
 
-This touches almost all of the loop, so get rid of the remaining
-4 space indents inside the loop while moving all this code around.
+Hence when running tests with both external log and real time
+devices, tests are failing at random because xfs_check is
+mis-parsing the parameters passed to it and not configuring the
+external log correctly:
+
+_check_xfs_filesystem: filesystem on /dev/sdg is inconsistent (c)
+*** xfs_check output ***
+aborting - no external log specified for FS with an external log
+*** end xfs_check output
+
+Fix this by ensuring OPTIND is correctly initialised before using
+getopts. Do it for all places that call getopts that don't already
+set OPTIND=1 before starting their parsing loop.
 
 Signed-Off-By: Dave Chinner <dchinner@redhat.com>
 ---
- check | 250 +++++++++++++++++++++++++++++++++++-------------------------------
- 1 file changed, 132 insertions(+), 118 deletions(-)
+ common/xfs        | 1 +
+ tests/generic/074 | 1 +
+ tests/generic/075 | 1 +
+ tests/generic/112 | 1 +
+ 4 files changed, 4 insertions(+)
 
-diff --git a/check b/check
-index 05eb2835918b..db43fb03963b 100755
---- a/check
-+++ b/check
-@@ -631,78 +631,96 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 	seqres="$check"
- 	_check_test_fs
+diff --git a/common/xfs b/common/xfs
+index 2cb77778831a..2aff1b3bcb5c 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -119,6 +119,7 @@ _xfs_check()
+ 	DBOPTS=" "
+ 	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
  
--	for seq in $list
--	do
--	    err=false
--	    err_msg=""
--	    if [ ! -f $seq ]; then
--	        # Try to get full name in case the user supplied only seq id
--	        # and the test has a name. A bit of hassle to find really
--	        # the test and not its sample output or helping files.
--	        bname=$(basename $seq)
--	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
--	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
--	                END { print shortest }')
--	        if [ -f $full_seq ] \
--	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
--	            seq=$full_seq
--	        fi
--	    fi
-+	err=false
-+	first_test=true
-+	for seq in $list ; do
-+		# Run report for previous test!
-+		if $err ; then
-+			bad="$bad $seqnum"
-+			n_bad=`expr $n_bad + 1`
-+			tc_status="fail"
-+		fi
-+		if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
-+			_make_testcase_report "$tc_status"
-+		fi
-+		first_test=false
-+
-+		err=false
-+		err_msg=""
-+		if [ ! -f $seq ]; then
-+			# Try to get full name in case the user supplied only
-+			# seq id and the test has a name. A bit of hassle to
-+			# find really the test and not its sample output or
-+			# helping files.
-+			bname=$(basename $seq)
-+			full_seq=$(find $(dirname $seq) -name $bname* -executable |
-+				awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
-+				     END { print shortest }')
-+			if [ -f $full_seq ] && \
-+			   [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
-+				seq=$full_seq
-+			fi
-+		fi
++	OPTIND=1
+ 	while getopts "b:fi:l:stvV" c; do
+ 		case $c in
+ 			s) OPTS=$OPTS"-s ";;
+diff --git a/tests/generic/074 b/tests/generic/074
+index 5f205b509eb6..d39f9a3d4309 100755
+--- a/tests/generic/074
++++ b/tests/generic/074
+@@ -87,6 +87,7 @@ _usage()
  
--	    # the filename for the test and the name output are different.
--	    # we don't include the tests/ directory in the name output.
--	    export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
--
--	    # Similarly, the result directory needs to replace the tests/
--	    # part of the test location.
--	    group=`dirname $seq`
--	    if $OPTIONS_HAVE_SECTIONS; then
--		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
--		REPORT_DIR="$RESULT_BASE/$section"
--	    else
--		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
--		REPORT_DIR="$RESULT_BASE"
--	    fi
--	    seqres="$REPORT_DIR/$seqnum"
-+		# the filename for the test and the name output are different.
-+		# we don't include the tests/ directory in the name output.
-+		export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+ _process_args()
+ {
++    OPTIND=1
+     while getopts "f:l:n:?" c $@
+     do
+         case $c
+diff --git a/tests/generic/075 b/tests/generic/075
+index 321c72177618..e9dd4a5c5dcd 100755
+--- a/tests/generic/075
++++ b/tests/generic/075
+@@ -98,6 +98,7 @@ _usage()
  
--	    mkdir -p $RESULT_DIR
-+		# Similarly, the result directory needs to replace the tests/
-+		# part of the test location.
-+		group=`dirname $seq`
-+		if $OPTIONS_HAVE_SECTIONS; then
-+			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
-+			REPORT_DIR="$RESULT_BASE/$section"
-+		else
-+			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
-+			REPORT_DIR="$RESULT_BASE"
-+		fi
-+		seqres="$REPORT_DIR/$seqnum"
+ _process_args()
+ {
++    OPTIND=1
+     while getopts "l:n:N:?" c $@
+     do
+         case $c
+diff --git a/tests/generic/112 b/tests/generic/112
+index 0ab1c8c87907..5ab1cb3ad4ca 100755
+--- a/tests/generic/112
++++ b/tests/generic/112
+@@ -94,6 +94,7 @@ _usage()
  
--	    echo -n "$seqnum"
-+		mkdir -p $RESULT_DIR
-+		echo -n "$seqnum"
- 
--	    if $showme; then
--		_expunge_test $seqnum
--		if [ $? -eq 1 ]; then
-+		if $showme; then
-+			_expunge_test $seqnum
-+			if [ $? -eq 1 ]; then
-+			    tc_status="expunge"
-+			    continue
-+			fi
-+			echo
-+			start=0
-+			stop=0
-+			tc_status="list"
-+			n_notrun=`expr $n_notrun + 1`
- 			continue
- 		fi
--		echo
--		start=0
--		stop=0
--		n_notrun=`expr $n_notrun + 1`
--		if $do_report; then
--			_make_testcase_report "list"
-+
-+		tc_status="pass"
-+		if [ ! -f $seq ]; then
-+			echo " - no such test?"
-+			continue
- 		fi
--		continue
--	    fi
--	    tc_status="pass"
--	    if [ ! -f $seq ]; then
--		echo " - no such test?"
--	    else
-+
- 		# really going to try and run this one
--		#
- 		rm -f $seqres.out.bad
- 
- 		# check if we really should run it
- 		_expunge_test $seqnum
- 		if [ $? -eq 1 ]; then
-+			tc_status="expunge"
- 			continue
- 		fi
- 
-+		# record that we really tried to run this test.
-+		try="$try $seqnum"
-+		n_try=`expr $n_try + 1`
-+
- 		# slashes now in names, sed barfs on them so use grep
- 		lasttime=`grep -w ^$seqnum $check.time | awk '// {print $2}'`
- 		if [ "X$lasttime" != X ]; then
- 			echo -n " ${lasttime}s ..."
- 		else
--			echo -n "	"	# prettier output with timestamps.
-+			echo -n "	" # prettier output with timestamps.
- 		fi
- 		rm -f core $seqres.notrun
- 
-@@ -724,90 +742,86 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			./$seq >$tmp.out 2>&1
- 			sts=$?
- 		fi
--		$timestamp && _timestamp
--		stop=`_wallclock`
- 
--		if [ -f core ]
--		then
--		    err_msg="[dumped core]"
--		    echo -n " $err_msg"
--		    mv core $RESULT_BASE/$seqnum.core
--		    err=true
-+		if [ -f core ]; then
-+			err_msg="[dumped core]"
-+			echo -n " $err_msg"
-+			mv core $RESULT_BASE/$seqnum.core
-+			err=true
- 		fi
- 
--		if [ -f $seqres.notrun ]
--		then
--		    $timestamp || echo -n " [not run] "
--		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
--		    cat $seqres.notrun
--		    notrun="$notrun $seqnum"
--		    n_notrun=`expr $n_notrun + 1`
--		    tc_status="notrun"
--		else
--		    if [ $sts -ne 0 ]
--		    then
-+		if [ -f $seqres.notrun ]; then
-+			$timestamp && _timestamp
-+			stop=`_wallclock`
-+			$timestamp || echo -n " [not run] "
-+			$timestamp && echo " [not run]" && \
-+				      echo -n "	$seqnum -- "
-+			cat $seqres.notrun
-+			notrun="$notrun $seqnum"
-+			n_notrun=`expr $n_notrun + 1`
-+			tc_status="notrun"
-+			continue;
-+		fi
-+
-+		if [ $sts -ne 0 ]; then
- 			err_msg="[failed, exit status $sts]"
- 			echo -n " $err_msg"
- 			err=true
--		    fi
--		    if [ ! -f $seq.out ]
--		    then
-+		else
-+			# the test apparently passed, so check for corruption
-+			# and log messages that shouldn't be there.
-+			_check_filesystems
-+			_check_dmesg || err=true
-+			_check_kmemleak || err=true
-+		fi
-+
-+		# test ends after all checks are done.
-+		$timestamp && _timestamp
-+		stop=`_wallclock`
-+
-+		if [ ! -f $seq.out ]; then
- 			_dump_err "no qualified output"
- 			err=true
--		    else
--
--			# coreutils 8.16+ changed quote formats in error messages from
--			# `foo' to 'foo'. Filter old versions to match the new version.
--			sed -i "s/\`/\'/g" $tmp.out
--			if diff $seq.out $tmp.out >/dev/null 2>&1
--			then
--			    if $err
--			    then
--				:
--			    else
-+			continue;
-+		fi
-+		# coreutils 8.16+ changed quote formats in error messages
-+		# from `foo' to 'foo'. Filter old versions to match the new
-+		# version.
-+		sed -i "s/\`/\'/g" $tmp.out
-+		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
-+			if ! $err ; then
- 				echo "$seqnum `expr $stop - $start`" >>$tmp.time
- 				echo -n " `expr $stop - $start`s"
--			    fi
--			    echo ""
--			else
--			    echo " - output mismatch (see $seqres.out.bad)"
--			    mv $tmp.out $seqres.out.bad
--			    $diff $seq.out $seqres.out.bad | {
--				if test "$DIFF_LENGTH" -le 0; then
--					cat
--				else
--					head -n "$DIFF_LENGTH"
--					echo "..."
--					echo "(Run '$diff $seq.out $seqres.out.bad'" \
--						" to see the entire diff)"
--				fi; } | \
--				sed -e 's/^\(.\)/    \1/'
--			    err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
--			    err=true
- 			fi
--		    fi
--		    try="$try $seqnum"
--		    n_try=`expr $n_try + 1`
--		    _check_filesystems
--		    _check_dmesg || err=true
--		    _check_kmemleak || err=true
--		fi
-+			echo ""
-+		else
-+			echo " - output mismatch (see $seqres.out.bad)"
-+			mv $tmp.out $seqres.out.bad
-+			$diff $seq.out $seqres.out.bad | {
-+			if test "$DIFF_LENGTH" -le 0; then
-+				cat
-+			else
-+				head -n "$DIFF_LENGTH"
-+				echo "..."
-+				echo "(Run '$diff $seq.out $seqres.out.bad'" \
-+					" to see the entire diff)"
-+			fi; } | sed -e 's/^\(.\)/    \1/'
- 
--	    fi
-+			err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
-+			err=true
-+		fi
-+	done
- 
--	    # come here for each test, except when $showme is true
--	    #
--	    if $err
--	    then
-+	# make sure we record the status of the last test we ran.
-+	if $err ; then
- 		bad="$bad $seqnum"
- 		n_bad=`expr $n_bad + 1`
- 		tc_status="fail"
--	    fi
--	    if $do_report; then
-+	fi
-+	if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
- 		_make_testcase_report "$tc_status"
--	    fi
--	    seq="after_$seqnum"
--	done
-+	fi
-+
- 	sect_stop=`_wallclock`
- 	interrupt=false
- 	_wrapup
+ _process_args()
+ {
++    OPTIND=1
+     while getopts "l:n:N:?" c $@
+     do
+         case $c
 -- 
 2.16.1
 
