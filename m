@@ -1,170 +1,184 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:38721 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750748AbeBZHHx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 26 Feb 2018 02:07:53 -0500
-MIME-Version: 1.0
-In-Reply-To: <7921d87b-daaa-e436-8464-9ab1203fd8f7@huawei.com>
-References: <20180223120106.32921-1-yangerkun@huawei.com> <CAOQ4uxj7Bg5vjoCtke=R1D3aG73rNRg_hKJofkJWk0vjfcxyMw@mail.gmail.com>
- <733feaf3-0885-b57d-674d-2ebcb963484a@huawei.com> <CAOQ4uxg3G=V7+eGMt8snHf0TFgfrYO2BLdyKPHUHqy=aQh=fKw@mail.gmail.com>
- <7921d87b-daaa-e436-8464-9ab1203fd8f7@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 26 Feb 2018 09:07:52 +0200
-Message-ID: <CAOQ4uxgo=xZbqiqp=BA0+4RTKQZFqErowdmTiVQqTcsmgM59mw@mail.gmail.com>
-Subject: Re: [PATCH] fsck.overlay: add ovl_check_origin helper
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:44719 "EHLO
+        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750882AbeBZHbc (ORCPT
+        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+        Mon, 26 Feb 2018 02:31:32 -0500
+From: Qu Wenruo <wqu@suse.com>
+Subject: [RFC PATCH] fstests: Check if a fs can survive random (emulated) power loss
+Date: Mon, 26 Feb 2018 15:31:11 +0800
+Message-Id: <20180226073111.3066-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: yangerkun <yangerkun@huawei.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <eguan@redhat.com>, Miao Xie <miaoxie@huawei.com>, zhaohongjiang@huawei.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 26, 2018 at 4:10 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> On 2018/2/25 2:46, Amir Goldstein wrote:
->> On Sat, Feb 24, 2018 at 11:36 AM, yangerkun <yangerkun@huawei.com> wrote=
-:
-[...]
+This test case is originally designed to expose unexpected corruption
+for btrfs, where there are several reports about btrfs serious metadata
+corruption after power loss.
 
->>>> I suggest at least the following safely checks on start of fsck.overla=
-y:
->>>> - Check if index dir exists in workdir
->>>> - Check if upperdir root has an unrecognized origin xattr format
->>>> - Check if index dir root has an unrecognized origin xattr format
->>>>
->>>> If any of the checks above is positive, fsck.overlay should issue a
->>>> warning
->>>> and refuse to fix fielsystem. Running with -n -f is allowed.
->>>> See if index dir exists, then removing origin xattr can corrupt the in=
-dex.
->>>> When fsck.overlay gains the knowledge about checking and fixing index,
->>>> user would opt-in to checking an overlayfs with index by -o index=3Don
->>>
->>>
->>> When compile the kernel, we can choose the default config about overlay=
-,
->>> which user won't get. So, user may choose the fault arguments like
->>> "fsck.overlay -olower..." while index xattr is on when there is really
->>> overlayfs. Other filesystems can get xattr from superblock in disk, but=
- we
->>> cannot use this way in overlay. So, how to deal with this=EF=BC=9F
->>>
->>>
->>
->> The kernel default options for overlayfs mount really does not matter fo=
-r
->> fsck.overlay. The only thing that matters is to detect whether the layer=
-s
->> were *ever* mounted by a kernel which enabled features that fsck.overlay
->> does not support.
->>
->> The current state of fsck.overlay is:
->> - supports redirect feature
->> - does not support any other feature including upstream features index a=
-nd
->> nfs_export and future features like metacopy.
->>
->> A filesystem repair tool should NOT fix the filesystem if it detects on-=
-disk
->> format that it does not recognize.
->>
->> That means among other things for overlayfs that if an xattr if found on=
- any
->> file by the name of trusted.overlay.<something> and <something> is not a
->> an expected name, then fsck.overlay should shout that it does not
->> recognize the on-disk format (print out the unrecognized xattr name) and
->> refuse to continue.
->>
->> The problem with overlayfs compares to traditional filesystems is the la=
-ck
->> of "feature bits" in the "super block", so there is no O(1) test for uns=
-upported
->> features, but they still can be detected.
->>
->> Contrary to the example above, there is a simple O(1) test to check if
->> overlayfs was mounted with index feature enabled - the existence of a
->> non empty $workdir/index dir is de-facto a "feature bit" and until fsck.=
-overlay
->> knows how to verify and fix overlayfs without corrupting the index it sh=
-ould
->> refuse to fix an overlay filesystem with an index.
->>
->
-> Maybe we can store "feature bit" in upper root xattr or somewhere else in=
- workdir
-> after we implement mkfs.overlay, and classify them into compat and incomp=
-at
-> features, we can use old fsck.overlay to fix the filesystem if there is n=
-o
-> unrecognized incompat feature.
->
+The test case itself will trigger heavy fsstress for the fs, and use
+dm-flakey to emulate power loss by dropping all later writes.
 
-Yes, we could and probably should.
+For btrfs, it should be completely fine, as long as superblock write
+(FUA write) finishes atomically, since with metadata CoW, superblock
+either points to old trees or new tress, the fs should be as atomic as
+superblock.
 
-A "feature set" as xattr was proposed by Miklos when introducing
-redirect_dir [1].
-and then I proposed a different implementation of "feature set" when introd=
-ucing
-index feature [2].
+For journal based filesystems, each metadata update should be journaled,
+so metadata operation is as atomic as journal updates.
 
-The biggest problem with these implementation is that old kernel doesn't kn=
-ow
-about the incompat features.
-For this problem, fsck.overlay is at least a partial solution, because
-it will be possible
-for user to run fsck.overlay to "sanitize" an overlayfs for mount with
-old kernel, for
-example:
-fsck.overlay -o redirect_dir=3Doff,index=3Doff  (*)
-could be used to sanitize overlayfs for mount on kernel < v4.10.
+It does show that XFS is doing the best work among the tested
+filesystems (Btrfs, XFS, ext4), no kernel nor xfs_repair problem at all.
 
-(*) Another option is to follow mkfs.ext4/tune2fs standard of -O
-^redirect_dir,^index.
+For btrfs, although btrfs check doesn't report any problem, kernel
+reports some data checksum error, which is a little unexpected as data
+is CoWed by default, which should be as atomic as superblock.
+(Unfortunately, still not the exact problem I'm chasing for)
 
-IMO, now that fsck.overlayfs has materialized, thanks to you,
-it is a good time to set the feature set format in stone and implement it i=
-n
-kernel and fsck (hint hint, if you post I will review...)
+For EXT4, kernel is fine, but later e2fsck reports problem, which may
+indicates there is still something to be improved.
 
-> Before this, the index dir can be treated as a kind of "unrecognized inco=
-mpat
-> feature", so the "simple O(1) test" can works well, but how can we handle
-> another incompat feature tomorrow? Should we implement mkfs.overlay befor=
-e the
-> first release version of fsck.overlay?
->
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/generic/479     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/479.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 112 insertions(+)
+ create mode 100755 tests/generic/479
+ create mode 100644 tests/generic/479.out
 
-I wouldn't say that we need to implement mkfs.overlay, but we *do*
-need to define
-the feature set on-disk format and fsck.overlay *does* have to check
-the incomapt
-features from the very first release and new kernel *should* check and set =
-the
-"feature bits".
-I am in favor of something similar to [1], but with
-3 sets of features: compat,incompat,rocompat.
+diff --git a/tests/generic/479 b/tests/generic/479
+new file mode 100755
+index 00000000..ab530231
+--- /dev/null
++++ b/tests/generic/479
+@@ -0,0 +1,109 @@
++#! /bin/bash
++# FS QA Test 479
++#
++# Test if a filesystem can survive emulated powerloss.
++#
++# No matter what the solution a filesystem uses (journal or CoW),
++# it should survive unexpected powerloss, without major metadata
++# corruption.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 SuSE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	ps -e | grep fsstress > /dev/null 2>&1
++	while [ $? -eq 0 ]; do
++		$KILLALL_PROG -KILL fsstress > /dev/null 2>&1
++		wait > /dev/null 2>&1
++		ps -e | grep fsstress > /dev/null 2>&1
++	done
++	_unmount_flakey &> /dev/null
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_command "$KILLALL_PROG" "killall"
++
++runtime=$(($TIME_FACTOR * 15))
++loops=$(($LOAD_FACTOR * 4))
++
++for i in $(seq -w $loops); do
++	echo "=== Loop $i: $(date) ===" >> $seqres.full
++
++	_scratch_mkfs >/dev/null 2>&1
++	_init_flakey
++	_mount_flakey
++
++	($FSSTRESS_PROG $FSSTRESS_AVOID -w -d $SCRATCH_MNT -n 1000000 \
++		-p 100 >> $seqres.full &) > /dev/null 2>&1
++
++	sleep $runtime
++
++	# Here we only want to drop all write, don't need to umount the fs
++	_load_flakey_table $FLAKEY_DROP_WRITES
++
++	ps -e | grep fsstress > /dev/null 2>&1
++	while [ $? -eq 0 ]; do
++		$KILLALL_PROG -KILL fsstress > /dev/null 2>&1
++		wait > /dev/null 2>&1
++		ps -e | grep fsstress > /dev/null 2>&1
++	done
++
++	_unmount_flakey
++	_cleanup_flakey
++
++	# Mount the fs to do proper log replay for journal based fs
++	# so later check won't report annoying dirty log and only
++	# report real problem.
++	_scratch_mount
++	_scratch_unmount
++
++	_check_scratch_fs
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/479.out b/tests/generic/479.out
+new file mode 100644
+index 00000000..290f18b3
+--- /dev/null
++++ b/tests/generic/479.out
+@@ -0,0 +1,2 @@
++QA output created by 479
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 1e808865..5ce3db1d 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -481,3 +481,4 @@
+ 476 auto rw
+ 477 auto quick exportfs
+ 478 auto quick
++479 auto
+-- 
+2.15.1
 
-If I am not missing anything, upstream overlayfs now supports 4 on-disk for=
-mat
-features that were not supported in the first upstream release (v3.18):
-incomapt: redirect_dir
-rocompat: index,nfs_export
-compat: constant_ino (i.e. origin+impure xattr)
-
-redirect_dir can be detected only by scanning all dirs.
-constant_ino can be detected only by scanning all files. It's not really th=
-at
-important to cleanup a compat feature that the first version of fsck suppor=
-ts,
-but its not hard to implement it either.
-index can be detected by checking index dir exists (or not empty).
-nfs_export can be detected by checking if index dir contains whiteout
-and directory entries.
-
-IMO we should not merge another incompat feature like metacopy before
-defining the feature set format and setting the incompat "feature bit" on
-first mount with metacopy enabled.
-
-Thanks,
-Amir.
-
-[1] https://marc.info/?l=3Dlinux-unionfs&m=3D147739471816673&w=3D2
-[2] https://marc.info/?l=3Dlinux-unionfs&m=3D150885903123037&w=3D2
