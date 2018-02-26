@@ -1,165 +1,98 @@
-Received: from mout.gmx.net ([212.227.15.15]:41617 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750941AbeBZIud (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 26 Feb 2018 03:50:33 -0500
-Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
- power loss
-References: <20180226073111.3066-1-wqu@suse.com>
- <CAOQ4uxhsvGVH19HZE6b1exnFt3pB6qwLr=PUkjpXeq12F9sNJQ@mail.gmail.com>
- <a127175a-50bc-e2e2-9426-02d5d25a4b10@gmx.com>
- <CAOQ4uxhXmoaJbJVCUk-9VXipTxuYhmTHAh89bWZ1xrWUUd76GA@mail.gmail.com>
- <5c46dfaa-296e-4882-5205-13a2a6739d79@gmx.com>
- <CAOQ4uxgJ=eKMLwQ05HcK6Rk2znx_Q5ujv77NFJr86ksXTC9Qtw@mail.gmail.com>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <bea53ec3-1795-4744-97f8-ac86d133e166@gmx.com>
-Date: Mon, 26 Feb 2018 16:50:20 +0800
+Received: from mail-pl0-f54.google.com ([209.85.160.54]:43830 "EHLO
+        mail-pl0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751877AbeBZKKq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Feb 2018 05:10:46 -0500
+Received: by mail-pl0-f54.google.com with SMTP id f23so8992449plr.10
+        for <fstests@vger.kernel.org>; Mon, 26 Feb 2018 02:10:46 -0800 (PST)
+Date: Mon, 26 Feb 2018 18:10:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] check: fail tests if check/dmesg are not clean
+Message-ID: <20180226101033.GA3767@localhost.localdomain>
+References: <20180223011632.28893-1-david@fromorbit.com>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgJ=eKMLwQ05HcK6Rk2znx_Q5ujv77NFJr86ksXTC9Qtw@mail.gmail.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="0N0bcH78MbpGxBsNx4ICfyA1HEgrofCKB"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180223011632.28893-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---0N0bcH78MbpGxBsNx4ICfyA1HEgrofCKB
-Content-Type: multipart/mixed; boundary="zUDk41nEsTwGyh66r10ot2xntowCI8LD2";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>,
- Linux Btrfs <linux-btrfs@vger.kernel.org>,
- linux-xfs <linux-xfs@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>,
- Josef Bacik <josef@toxicpanda.com>
-Message-ID: <bea53ec3-1795-4744-97f8-ac86d133e166@gmx.com>
-Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
- power loss
-References: <20180226073111.3066-1-wqu@suse.com>
- <CAOQ4uxhsvGVH19HZE6b1exnFt3pB6qwLr=PUkjpXeq12F9sNJQ@mail.gmail.com>
- <a127175a-50bc-e2e2-9426-02d5d25a4b10@gmx.com>
- <CAOQ4uxhXmoaJbJVCUk-9VXipTxuYhmTHAh89bWZ1xrWUUd76GA@mail.gmail.com>
- <5c46dfaa-296e-4882-5205-13a2a6739d79@gmx.com>
- <CAOQ4uxgJ=eKMLwQ05HcK6Rk2znx_Q5ujv77NFJr86ksXTC9Qtw@mail.gmail.com>
-In-Reply-To: <CAOQ4uxgJ=eKMLwQ05HcK6Rk2znx_Q5ujv77NFJr86ksXTC9Qtw@mail.gmail.com>
+Hi Dave,
 
---zUDk41nEsTwGyh66r10ot2xntowCI8LD2
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+On Fri, Feb 23, 2018 at 12:16:32PM +1100, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> Currently a test passes even if it leaves a corrupt filesystem
+> behind, or a splat in the system logs that should not be there.
+> Rework the check code to consider these as test failures so they can
+> be accounted and tracked correctly. This also allows us to include
+> the post-test filesystem checking in the test runtime - that is
+> currently not accounted to the test, either, so the real runtime of
+> each test is not accurately reflected in the time stats being
+> reported.
+> 
+> This requires a complete reworking of the main test check loop. It's
+> a bunch of spaghetti at the moment because it has post test
+> reporting code preventing use from using continue when a test is
+> done. Move that post test reporting to the start of the next loop
+> iteration and clean up the code to use continues where appropriate.
+> 
+> Also, for cases where we haven't run the test or it's already been
+> marked as failed, don't bother running the filesystem/dmesg checks
+> for failure as we're already going to report the test as failed.
+> 
+> This touches almost all of the loop, so get rid of the remaining
+> 4 space indents inside the loop while moving all this code around.
+> 
+> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+> ---
+>  check | 250 +++++++++++++++++++++++++++++++++++-------------------------------
+>  1 file changed, 132 insertions(+), 118 deletions(-)
+> 
 
+[snip]
 
+> @@ -724,90 +742,86 @@ for section in $HOST_OPTIONS_SECTIONS; do
 
-On 2018=E5=B9=B402=E6=9C=8826=E6=97=A5 16:45, Amir Goldstein wrote:
-> On Mon, Feb 26, 2018 at 10:41 AM, Qu Wenruo <quwenruo.btrfs@gmx.com> wr=
-ote:
->>
->>
->> On 2018=E5=B9=B402=E6=9C=8826=E6=97=A5 16:33, Amir Goldstein wrote:
->>> On Mon, Feb 26, 2018 at 10:20 AM, Qu Wenruo <quwenruo.btrfs@gmx.com> =
-wrote:
->>>>
->>>>
->>>> On 2018=E5=B9=B402=E6=9C=8826=E6=97=A5 16:15, Amir Goldstein wrote:
->>>>> On Mon, Feb 26, 2018 at 9:31 AM, Qu Wenruo <wqu@suse.com> wrote:
->>>>>> This test case is originally designed to expose unexpected corrupt=
-ion
->>>>>> for btrfs, where there are several reports about btrfs serious met=
-adata
->>>>>> corruption after power loss.
->>>>>>
->>>>>> The test case itself will trigger heavy fsstress for the fs, and u=
-se
->>>>>> dm-flakey to emulate power loss by dropping all later writes.
->>>>>>
->>>>>
->>>>> Come on... dm-flakey is so 2016
->>>>> You should take Josef's fsstress+log-writes test and bring it to fs=
-tests:
->>>>> https://github.com/josefbacik/log-writes
->>>>>
->>>>> By doing that you will gain two very important features from the te=
-st:
->>>>>
->>>>> 1. Problems will be discovered much faster, because the test can ru=
-n fsck
->>>>>     after every single block write has been replayed instead of jus=
-t at random
->>>>>     times like in your test
->>>>
->>>> That's what exactly I want!!!
->>>>
->>>> Great thanks for this one! I would definitely look into this.
->>>> (Although the initial commit is even older than 2016)
->>>>
->>>
->>> Please note that Josef's replay-individual-faster.sh script runs fsck=
+Patch doesn't apply starting from this hunk.
 
->>> every 1000 writes (i.e. --check 1000), so you can play with this argu=
-ment
->>> in your test. Can also run --fsck every --check fua or --check flush,=
- which
->>> may be more indicative of real world problems. not sure.
->>>
->>>>
->>>> But the test itself could already expose something on EXT4, it still=
+Applying: check: fail tests if check/dmesg are not clean
+error: patch failed: check:724
 
->>>> makes some sense for ext4 developers as a verification test case.
->>>>
->>>
->>> Please take a look at generic/456
->>> When generic/455 found a reproduciable problem in ext4,
->>> I created a specific test without any randomness to pin point the
->>> problem found (using dm-flakey).
->>> If the problem you found is reproduciable, then it will be easy for y=
-ou
->>> to create a similar "bisected" test.
->>
->> Yep, it's definitely needed for a pin-point test case, but I'm also
->> wondering if a random, stress test could also help.
->>
->> Test case with plain fsstress is already super helpful to expose some
->> bugs, such stress test won't hurt.
->>
->=20
->=20
-> Yes, but the same stress test with dm-log-writes instead of dm-flakey
-> will be as useful and much more, so no reason to merge the less useful
-> stress test.
+>  			./$seq >$tmp.out 2>&1
 
-OK, I'll try to use dm-log to enhance the test case.
+This context doesn't look right, it should be
+
+			./$seq >$tmp.rawout 2>&1
+
+>  			sts=$?
+>  		fi
+> -		$timestamp && _timestamp
+> -		stop=`_wallclock`
+
+And there're two more lines below the two removed lines:
+
+                _fix_malloc <$tmp.rawout >$tmp.out                                                                                                                                             
+                rm -f $tmp.rawout
+
+And the code has been this way since 2015, so it's not likely some
+random conflicts caused by recent patches.
+
+$ git blame -L 724,734 check
+7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 724)                   ./$seq >$tmp.rawout 2>&1
+7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 725)                   sts=$?
+7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 726)           fi
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 727)           $timestamp && _timestamp
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 728)           stop=`_wallclock`
+774f4dd775340 (Tomas Racek     2013-09-19 16:20:37 +0000 729) 
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 730)           _fix_malloc <$tmp.rawout >$tmp.out
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 731)           rm -f $tmp.rawout
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 732) 
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 733)           if [ -f core ]
+bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 734)           then
+
+Do you have some local patches applied?
 
 Thanks,
-Qu
-
->=20
-> Thanks,
-> Amir.
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-
---zUDk41nEsTwGyh66r10ot2xntowCI8LD2--
-
---0N0bcH78MbpGxBsNx4ICfyA1HEgrofCKB
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlqTyk0XHHF1d2VucnVv
-LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qhbBAf+MUHb/RvTxDUOE5gvtVBni6+D
-ntukB8iLQZPdJR+kPnspPAYD1BRVx1HSENQqnhjxhppr/FwfohJdOSpRMj7+cxmc
-C6fRGXXqVO9pvRa1E1VvYtnEdB5n8sjBXzp1r6U1j7HO3fdQ+QnVkVyW6H8FGcBy
-CKaVduJVHrbI4hoOy8obWHRDkqwT4Zexs+sBAllen8ieIEkXh5ONND36j4d30tPx
-88mP97DDaDReRy4qbNC/hcH22jr3O0h+69RU4UAslkur72/RX0Q2f39qWd9ltPv7
-2NSAC0zr3O5W4vwUFDn1eEOM+zObW9XyaA27uyNI2+5MDgPacvoDrgze6lXo1w==
-=o/y0
------END PGP SIGNATURE-----
-
---0N0bcH78MbpGxBsNx4ICfyA1HEgrofCKB--
+Eryu
