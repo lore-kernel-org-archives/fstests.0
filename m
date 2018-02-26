@@ -1,98 +1,164 @@
-Received: from mail-pl0-f54.google.com ([209.85.160.54]:43830 "EHLO
-        mail-pl0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751877AbeBZKKq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 26 Feb 2018 05:10:46 -0500
-Received: by mail-pl0-f54.google.com with SMTP id f23so8992449plr.10
-        for <fstests@vger.kernel.org>; Mon, 26 Feb 2018 02:10:46 -0800 (PST)
-Date: Mon, 26 Feb 2018 18:10:33 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] check: fail tests if check/dmesg are not clean
-Message-ID: <20180226101033.GA3767@localhost.localdomain>
-References: <20180223011632.28893-1-david@fromorbit.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50060 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1753170AbeBZNCU (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 26 Feb 2018 08:02:20 -0500
+Date: Mon, 26 Feb 2018 08:02:12 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] xfs/444: test log replay after XFS_IOC_SWAPEXT
+Message-ID: <20180226130212.GA51394@bfoster.bfoster>
+References: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180223011632.28893-1-david@fromorbit.com>
+In-Reply-To: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
-
-On Fri, Feb 23, 2018 at 12:16:32PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Fri, Feb 23, 2018 at 12:33:41PM -0600, Eric Sandeen wrote:
+> This is a mashup of xfs/042 and some of the log replay tests;
+> it checks whether the log can be replayed if we crash immediately
+> after an xfs_fsr / XFS_IOC_SWAPEXT.
 > 
-> Currently a test passes even if it leaves a corrupt filesystem
-> behind, or a splat in the system logs that should not be there.
-> Rework the check code to consider these as test failures so they can
-> be accounted and tracked correctly. This also allows us to include
-> the post-test filesystem checking in the test runtime - that is
-> currently not accounted to the test, either, so the real runtime of
-> each test is not accurately reflected in the time stats being
-> reported.
+> Hint: it can't.  It fails because the temporary donor inode has
+> been deleted and has invalid mode 0 when we try to replay its
+> swapext operation.  Kernel patches to fix it will follow soon.
 > 
-> This requires a complete reworking of the main test check loop. It's
-> a bunch of spaghetti at the moment because it has post test
-> reporting code preventing use from using continue when a test is
-> done. Move that post test reporting to the start of the next loop
-> iteration and clean up the code to use continues where appropriate.
-> 
-> Also, for cases where we haven't run the test or it's already been
-> marked as failed, don't bother running the filesystem/dmesg checks
-> for failure as we're already going to report the test as failed.
-> 
-> This touches almost all of the loop, so get rid of the remaining
-> 4 space indents inside the loop while moving all this code around.
-> 
-> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
->  check | 250 +++++++++++++++++++++++++++++++++++-------------------------------
->  1 file changed, 132 insertions(+), 118 deletions(-)
 > 
+> diff --git a/tests/xfs/444 b/tests/xfs/444
+> new file mode 100755
+> index 0000000..e88438a
+> --- /dev/null
+> +++ b/tests/xfs/444
+> @@ -0,0 +1,144 @@
+...
+> +# Test performs several operations to produce a badly fragmented file, then
+> +# create enough contiguous free space for xfs_fsr to defragment the fragmented
+> +# file:
+> +#
+> +# - create fs with 3 minimum sized (16Mb) allocation groups
+> +# - create 16x1MB contiguous files which will become large free space extents
+> +#   when deleted
+> +# - put a small "space" between each of the 16 contiuguous files to ensure we
+> +#   have separated free space extents
+> +# - fill the remaining free space with a "fill file"
+> +# - mount/unmount/fill remaining free space with a pad file
+> +# - punch alternate single block holes in the the "fill file" to create
+> +#   fragmented free space.
+> +# - use fill2 to generate a very large fragmented file
+> +# - delete the 16 large contiguous files created initially
+> +# - run xfs_fsr on the filesystem
+> +# - check checksums for remaining files
+> +
 
-[snip]
+Without having dug into the core issue, I wonder whether this sequence
+could be simplified a bit by using 'xfs_io -c swapext' followed by a
+shutdown?
 
-> @@ -724,90 +742,86 @@ for section in $HOST_OPTIONS_SECTIONS; do
+Brian
 
-Patch doesn't apply starting from this hunk.
-
-Applying: check: fail tests if check/dmesg are not clean
-error: patch failed: check:724
-
->  			./$seq >$tmp.out 2>&1
-
-This context doesn't look right, it should be
-
-			./$seq >$tmp.rawout 2>&1
-
->  			sts=$?
->  		fi
-> -		$timestamp && _timestamp
-> -		stop=`_wallclock`
-
-And there're two more lines below the two removed lines:
-
-                _fix_malloc <$tmp.rawout >$tmp.out                                                                                                                                             
-                rm -f $tmp.rawout
-
-And the code has been this way since 2015, so it's not likely some
-random conflicts caused by recent patches.
-
-$ git blame -L 724,734 check
-7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 724)                   ./$seq >$tmp.rawout 2>&1
-7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 725)                   sts=$?
-7fd308513c0ae (Jan Tulak       2015-08-04 14:10:49 +1000 726)           fi
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 727)           $timestamp && _timestamp
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 728)           stop=`_wallclock`
-774f4dd775340 (Tomas Racek     2013-09-19 16:20:37 +0000 729) 
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 730)           _fix_malloc <$tmp.rawout >$tmp.out
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 731)           rm -f $tmp.rawout
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 732) 
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 733)           if [ -f core ]
-bf4445942d2ba (Lukas Czerner   2014-04-04 17:17:53 +1100 734)           then
-
-Do you have some local patches applied?
-
-Thanks,
-Eryu
+> +rm -f $seqres.full
+> +_do_die_on_error=message_only
+> +
+> +echo -n "Make a 48 megabyte filesystem on SCRATCH_DEV and mount... "
+> +_scratch_mkfs_xfs -dsize=48m,agcount=3 2>&1 >/dev/null || _fail "mkfs failed"
+> +_scratch_mount || _fail "mount failed" 
+> +
+> +echo "done"
+> +
+> +echo -n "Reserve 16 1Mb unfragmented regions... "
+> +for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+> +do
+> +	_do "$XFS_IO_PROG -f -c \"resvsp 0 1m\" $SCRATCH_MNT/hole$i"
+> +	_do "$XFS_IO_PROG -f -c \"resvsp 0 4k\" $SCRATCH_MNT/space$i"
+> +	_do "xfs_bmap -vp $SCRATCH_MNT/hole$i"
+> +done
+> +echo "done" 
+> +
+> +# set up filesystem
+> +echo -n "Fill filesystem with fill file... "
+> +for i in `seq 0 1 31`; do
+> +	_do "$XFS_IO_PROG -f -c \"falloc ${i}m 1m\" $SCRATCH_MNT/fill"
+> +done
+> +_do "xfs_bmap -vp $SCRATCH_MNT/fill"
+> +echo "done"
+> +# flush the filesystem - make sure there is no space "lost" to pre-allocation
+> +_do "_scratch_unmount"
+> +_do "_scratch_mount"
+> +echo -n "Use up any further available space... "
+> +_do "$XFS_IO_PROG -f -c \"falloc 0 1m\" $SCRATCH_MNT/pad"
+> +echo "done"
+> +
+> +# create fragmented file
+> +#_do "Delete every second file" "_cull_files"
+> +echo -n "Punch every second 4k block... "
+> +for i in `seq 0 8 32768`; do
+> +	# This generates excessive output that significantly slows down the
+> +	# test. It's not necessary for debug, so just bin it.
+> +	$XFS_IO_PROG -f -c "unresvsp ${i}k 4k" $SCRATCH_MNT/fill \
+> +								> /dev/null 2>&1
+> +done
+> +_do "xfs_bmap -vp $SCRATCH_MNT/fill"
+> +_do "sum $SCRATCH_MNT/fill >$tmp.fillsum1"
+> +echo "done"
+> +
+> +echo -n "Create one very large file... "
+> +_do "src/fill2 -d nbytes=16000000,file=$SCRATCH_MNT/fragmented"
+> +echo "done"
+> +_do "xfs_bmap -v $SCRATCH_MNT/fragmented"
+> +_do "sum $SCRATCH_MNT/fragmented >$tmp.sum1"
+> +_do "Remove other files" "rm -rf $SCRATCH_MNT/{pad,hole*}"
+> +
+> +# defragment
+> +_do "Run xfs_fsr on filesystem" "$XFS_FSR_PROG -v $SCRATCH_MNT/fragmented"
+> +_do "xfs_bmap -v $SCRATCH_MNT/fragmented"
+> +
+> +echo "godown"
+> +src/godown -v -f $SCRATCH_MNT >> $seqres.full
+> +
+> +echo "unmount"
+> +_scratch_unmount
+> +
+> +echo "mount with replay"
+> +_scratch_mount $mnt >>$seqres.full 2>&1 \
+> +    || _fail "mount failed: $mnt $MOUNT_OPTIONS"
+> +
+> +# success, all done
+> +echo "xfs_fsr tests passed."
+> +status=0 ; exit
+> diff --git a/tests/xfs/444.out b/tests/xfs/444.out
+> new file mode 100644
+> index 0000000..a0e7cd5
+> --- /dev/null
+> +++ b/tests/xfs/444.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 444
+> +Make a 48 megabyte filesystem on SCRATCH_DEV and mount... done
+> +Reserve 16 1Mb unfragmented regions... done
+> +Fill filesystem with fill file... done
+> +Use up any further available space... done
+> +Punch every second 4k block... done
+> +Create one very large file... done
+> +Remove other files... done
+> +Run xfs_fsr on filesystem... done
+> +godown
+> +unmount
+> +mount with replay
+> +xfs_fsr tests passed.
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index e2397fe..85033b5 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -441,3 +441,4 @@
+>  441 auto quick clone quota
+>  442 auto stress clone quota
+>  443 auto quick ioctl fsr
+> +444 auto quick fsr log
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
