@@ -1,164 +1,152 @@
-Received: from mx1.redhat.com ([209.132.183.28]:50060 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1753170AbeBZNCU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 26 Feb 2018 08:02:20 -0500
-Date: Mon, 26 Feb 2018 08:02:12 -0500
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs/444: test log replay after XFS_IOC_SWAPEXT
-Message-ID: <20180226130212.GA51394@bfoster.bfoster>
-References: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
+Received: from mail-pl0-f52.google.com ([209.85.160.52]:42582 "EHLO
+        mail-pl0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753501AbeBZOvN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 26 Feb 2018 09:51:13 -0500
+Date: Mon, 26 Feb 2018 22:51:01 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [xfstests PATCH v4 2/5] overlay: hook filesystem check helper
+Message-ID: <20180226145101.GB6209@localhost.localdomain>
+References: <20180222021834.26145-1-yi.zhang@huawei.com>
+ <20180222021834.26145-3-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
+In-Reply-To: <20180222021834.26145-3-yi.zhang@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests <fstests@vger.kernel.org>
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: eguan@redhat.com, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Feb 23, 2018 at 12:33:41PM -0600, Eric Sandeen wrote:
-> This is a mashup of xfs/042 and some of the log replay tests;
-> it checks whether the log can be replayed if we crash immediately
-> after an xfs_fsr / XFS_IOC_SWAPEXT.
+Hi zhangyi,
+
+I was testing v4 patchset with various overlay configs and results all
+look good, thanks! But I found more minor issues that can be improved.
+
+On Thu, Feb 22, 2018 at 10:18:31AM +0800, zhangyi (F) wrote:
+> Hook filesystem check helper to _check_test_fs and _check_scratch_fs for
+> constants underlying dirs of overlay filesystem, and introduce scratch
+
+"for constants underlying..." looks confusing, do you mean
+
+... for checking consistency of underlying dirs of overlay filesystem
+
+?
+
+> check helpers for optionally lower/upper/work dirs. These helpers works
+
+I'm not sure I understand what "optionally" means here..
+
+> only if fsck.overlay exists.
 > 
-> Hint: it can't.  It fails because the temporary donor inode has
-> been deleted and has invalid mode 0 when we try to replay its
-> swapext operation.  Kernel patches to fix it will follow soon.
+> This patch introduce OVERLAY_FSCK_OPTIONS use for check overlayfs like
+> OVERLAY_MOUNT_OPTIONS, and also introduce a mount point check helper in
+> common/rc to detect a dir is a mount point or not.
 > 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
+> 
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 > ---
+>  README.overlay |  10 ++++-
+>  common/config  |   4 ++
+>  common/overlay | 125 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  common/rc      |  18 ++++++++-
+>  4 files changed, 153 insertions(+), 4 deletions(-)
 > 
-> diff --git a/tests/xfs/444 b/tests/xfs/444
-> new file mode 100755
-> index 0000000..e88438a
-> --- /dev/null
-> +++ b/tests/xfs/444
-> @@ -0,0 +1,144 @@
-...
-> +# Test performs several operations to produce a badly fragmented file, then
-> +# create enough contiguous free space for xfs_fsr to defragment the fragmented
-> +# file:
-> +#
-> +# - create fs with 3 minimum sized (16Mb) allocation groups
-> +# - create 16x1MB contiguous files which will become large free space extents
-> +#   when deleted
-> +# - put a small "space" between each of the 16 contiuguous files to ensure we
-> +#   have separated free space extents
-> +# - fill the remaining free space with a "fill file"
-> +# - mount/unmount/fill remaining free space with a pad file
-> +# - punch alternate single block holes in the the "fill file" to create
-> +#   fragmented free space.
-> +# - use fill2 to generate a very large fragmented file
-> +# - delete the 16 large contiguous files created initially
-> +# - run xfs_fsr on the filesystem
-> +# - check checksums for remaining files
+> diff --git a/README.overlay b/README.overlay
+> index dfb8234..9feaa6a 100644
+> --- a/README.overlay
+> +++ b/README.overlay
+> @@ -22,6 +22,10 @@ the base fs should be pre-formatted before starting the -overlay run.
+>  An easy way to accomplish this is by running './check <some test>' once,
+>  before running './check -overlay'.
+>  
+> +'./check -overlay' support check overlay test and scratch dirs,
+> +OVERLAY_FSCK_OPTIONS should be set instead of FSCK_OPTIONS if fsck
+> +options need to given directly.
 > +
+>  Because of the lack of mkfs support, multi-section config files are only
+>  partly supported with './check -overlay'. Only multi-section files that
+>  do not change FSTYP and MKFS_OPTIONS can be safely used with -overlay.
+> @@ -40,7 +44,9 @@ run overlay tests on the same base fs, but with different mount options:
+>   MOUNT_OPTIONS="-o pquota"
+>   TEST_FS_MOUNT_OPTS="-o noatime"
+>   OVERLAY_MOUNT_OPTIONS="-o redirect_dir=off"
+> + OVERLAY_FSCK_OPTIONS="-n"
+>  
+>  In the example above, MOUNT_OPTIONS will be used to mount the base scratch fs,
+> -TEST_FS_MOUNT_OPTS will be used to mount the base test fs and
+> -OVERLAY_MOUNT_OPTIONS will be used to mount both test and scratch overlays.
+> +TEST_FS_MOUNT_OPTS will be used to mount the base test fs,
+> +OVERLAY_MOUNT_OPTIONS will be used to mount both test and scratch overlay and
+> +OVERLAY_FSCK_OPTIONS will be used to check both test and scratch overlay.
+> diff --git a/common/config b/common/config
+> index 71115bd..20f0e5f 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -566,6 +566,10 @@ _overlay_config_override()
+>  	# Set SCRATCH vars to overlay base and mount dirs inside base fs
+>  	export SCRATCH_DEV="$OVL_BASE_SCRATCH_MNT"
+>  	export SCRATCH_MNT="$OVL_BASE_SCRATCH_MNT/$OVL_MNT"
+> +
+> +	# Set fsck options, use default if user not set directly.
+> +	export FSCK_OPTIONS="$OVERLAY_FSCK_OPTIONS"
+> +	[ -z "$FSCK_OPTIONS" ] && _fsck_opts
+>  }
+>  
+>  _overlay_config_restore()
+> diff --git a/common/overlay b/common/overlay
+> index a8b0e93..29f9bf8 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -190,3 +190,128 @@ _overlay_fsck_dirs()
+>  	$FSCK_OVERLAY_PROG -o lowerdir=$lowerdir -o upperdir=$upperdir \
+>  			   -o workdir=$workdir $*
+>  }
+> +
+> +_overlay_check_dirs()
+> +{
+> +	local lowerdir=$1
+> +	local upperdir=$2
+> +	local workdir=$3
+> +	local err=0
+> +
+> +	_overlay_fsck_dirs $* $FSCK_OPTIONS >>$tmp.fsck 2>&1
+> +	if [ $? -ne 0 ]; then
+> +		_log_err "_overlay_check_fs: overlayfs on $lowerdir,$upperdir,$workdir is inconsistent"
+> +
+> +		echo "*** fsck.overlay output ***"	>>$seqres.full
+> +		cat $tmp.fsck				>>$seqres.full
+> +		echo "*** end fsck.overlay output"	>>$seqres.full
+> +
+> +		echo "*** mount output ***"		>>$seqres.full
+> +		_mount					>>$seqres.full
+> +		echo "*** end mount output"		>>$seqres.full
+> +
+> +		err=1
+> +	fi
+> +	rm -f $tmp.fsck
+> +
+> +	return $err
+> +}
+> +
+> +# Check the same mnt/dev of _check_overlay_scratch_fs, but check
+> +# optionally lower/upper/work dirs of overlay filesystem, such as
+> +# multiple lower layers.
 
-Without having dug into the core issue, I wonder whether this sequence
-could be simplified a bit by using 'xfs_io -c swapext' followed by a
-shutdown?
+These comments look confusing to me too. I think you mean
+_overlay_check_scratch_dirs is similar to _check_overlay_scratch_fs, but
+it needs lower/upper/work dirs provided as arguments, it's useful for
+non-default setups such as multiple lower layers.
 
-Brian
+> +_overlay_check_scratch_dirs()
 
-> +rm -f $seqres.full
-> +_do_die_on_error=message_only
-> +
-> +echo -n "Make a 48 megabyte filesystem on SCRATCH_DEV and mount... "
-> +_scratch_mkfs_xfs -dsize=48m,agcount=3 2>&1 >/dev/null || _fail "mkfs failed"
-> +_scratch_mount || _fail "mount failed" 
-> +
-> +echo "done"
-> +
-> +echo -n "Reserve 16 1Mb unfragmented regions... "
-> +for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-> +do
-> +	_do "$XFS_IO_PROG -f -c \"resvsp 0 1m\" $SCRATCH_MNT/hole$i"
-> +	_do "$XFS_IO_PROG -f -c \"resvsp 0 4k\" $SCRATCH_MNT/space$i"
-> +	_do "xfs_bmap -vp $SCRATCH_MNT/hole$i"
-> +done
-> +echo "done" 
-> +
-> +# set up filesystem
-> +echo -n "Fill filesystem with fill file... "
-> +for i in `seq 0 1 31`; do
-> +	_do "$XFS_IO_PROG -f -c \"falloc ${i}m 1m\" $SCRATCH_MNT/fill"
-> +done
-> +_do "xfs_bmap -vp $SCRATCH_MNT/fill"
-> +echo "done"
-> +# flush the filesystem - make sure there is no space "lost" to pre-allocation
-> +_do "_scratch_unmount"
-> +_do "_scratch_mount"
-> +echo -n "Use up any further available space... "
-> +_do "$XFS_IO_PROG -f -c \"falloc 0 1m\" $SCRATCH_MNT/pad"
-> +echo "done"
-> +
-> +# create fragmented file
-> +#_do "Delete every second file" "_cull_files"
-> +echo -n "Punch every second 4k block... "
-> +for i in `seq 0 8 32768`; do
-> +	# This generates excessive output that significantly slows down the
-> +	# test. It's not necessary for debug, so just bin it.
-> +	$XFS_IO_PROG -f -c "unresvsp ${i}k 4k" $SCRATCH_MNT/fill \
-> +								> /dev/null 2>&1
-> +done
-> +_do "xfs_bmap -vp $SCRATCH_MNT/fill"
-> +_do "sum $SCRATCH_MNT/fill >$tmp.fillsum1"
-> +echo "done"
-> +
-> +echo -n "Create one very large file... "
-> +_do "src/fill2 -d nbytes=16000000,file=$SCRATCH_MNT/fragmented"
-> +echo "done"
-> +_do "xfs_bmap -v $SCRATCH_MNT/fragmented"
-> +_do "sum $SCRATCH_MNT/fragmented >$tmp.sum1"
-> +_do "Remove other files" "rm -rf $SCRATCH_MNT/{pad,hole*}"
-> +
-> +# defragment
-> +_do "Run xfs_fsr on filesystem" "$XFS_FSR_PROG -v $SCRATCH_MNT/fragmented"
-> +_do "xfs_bmap -v $SCRATCH_MNT/fragmented"
-> +
-> +echo "godown"
-> +src/godown -v -f $SCRATCH_MNT >> $seqres.full
-> +
-> +echo "unmount"
-> +_scratch_unmount
-> +
-> +echo "mount with replay"
-> +_scratch_mount $mnt >>$seqres.full 2>&1 \
-> +    || _fail "mount failed: $mnt $MOUNT_OPTIONS"
-> +
-> +# success, all done
-> +echo "xfs_fsr tests passed."
-> +status=0 ; exit
-> diff --git a/tests/xfs/444.out b/tests/xfs/444.out
-> new file mode 100644
-> index 0000000..a0e7cd5
-> --- /dev/null
-> +++ b/tests/xfs/444.out
-> @@ -0,0 +1,13 @@
-> +QA output created by 444
-> +Make a 48 megabyte filesystem on SCRATCH_DEV and mount... done
-> +Reserve 16 1Mb unfragmented regions... done
-> +Fill filesystem with fill file... done
-> +Use up any further available space... done
-> +Punch every second 4k block... done
-> +Create one very large file... done
-> +Remove other files... done
-> +Run xfs_fsr on filesystem... done
-> +godown
-> +unmount
-> +mount with replay
-> +xfs_fsr tests passed.
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index e2397fe..85033b5 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -441,3 +441,4 @@
->  441 auto quick clone quota
->  442 auto stress clone quota
->  443 auto quick ioctl fsr
-> +444 auto quick fsr log
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+I don't think we need it either (sorry I missed it in previous reviews),
+just call _overlay_check_dirs directly with proper arguments in patch
+5/5 (and umount first if necessary). We already have many helpers for
+checking overlayfs, this one just makes it more confusing.
+
+(At least this helper should be introduced in patch 5/5, along with its
+first usage.)
+
+Thanks,
+Eryu
