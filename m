@@ -1,92 +1,269 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:5694 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1030213AbeCAMEo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Mar 2018 07:04:44 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v5 0/5] overlay: add overlay filesystem dirs check
-Date: Thu, 1 Mar 2018 20:13:42 +0800
-Message-ID: <20180301121347.5824-1-yi.zhang@huawei.com>
+Received: from mout.gmx.net ([212.227.17.22]:37605 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S966774AbeCAJZ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Mar 2018 04:25:58 -0500
+Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
+ power loss
+References: <20180301053821.18718-1-wqu@suse.com>
+ <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <ed8aec54-8b90-61cd-74c2-e8a1556849f6@gmx.com>
+Date: Thu, 1 Mar 2018 17:25:37 +0800
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6"
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>
+Cc: fstests <fstests@vger.kernel.org>, dm-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu and Amir:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6
+Content-Type: multipart/mixed; boundary="WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>
+Cc: fstests <fstests@vger.kernel.org>, dm-devel@redhat.com
+Message-ID: <ed8aec54-8b90-61cd-74c2-e8a1556849f6@gmx.com>
+Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
+ power loss
+References: <20180301053821.18718-1-wqu@suse.com>
+ <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
 
-I have handle comments from last iteration in patch {2,5}/5, please
-review.
+--WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
+
+
+
+On 2018=E5=B9=B403=E6=9C=8801=E6=97=A5 16:39, Amir Goldstein wrote:
+> On Thu, Mar 1, 2018 at 7:38 AM, Qu Wenruo <wqu@suse.com> wrote:
+>> This test case is originally designed to expose unexpected corruption
+>> for btrfs, where there are several reports about btrfs serious metadat=
+a
+>> corruption after power loss.
+>>
+>> The test case itself will trigger heavy fsstress for the fs, and use
+>> dm-flakey to emulate power loss by dropping all later writes.
+>=20
+> So you are re-posting the test with dm-flakey or converting it to
+> dm-log-writes??
+
+Working on the scripts to allow us to do --find and then replay.
+
+Since for xfs and ext4, their fsck would report false alerts just for
+dirty journal.
+
+I'm adding new macro to locate next flush and replay to it, then mount
+it RW before we call fsck.
+
+Or do we have options for those fscks to skip dirty journal?
 
 Thanks,
-Yi.
+Qu
 
-Changes since v4:
-- Clarify comments in patch 2/5, and move _overlay_check_scratch_dirs
-  helper to patch 5/5.
-- Modify input arguments of _overlay_fsck_dirs in _overlay_check_dirs.
-- Modify OVL_FSCK_OPTIONS example in README.overlay.
+>=20
+>>
+>> For btrfs, it should be completely fine, as long as superblock write
+>> (FUA write) finishes atomically, since with metadata CoW, superblock
+>> either points to old trees or new tress, the fs should be as atomic as=
 
-Changes since v3:
-- Move overlay checker after _unmount in overlay/{038,041}, and embed
-  checker into unmount_dirs() in overlay/{051,053,055}.
-- split out patch "overlay: correct test mount options"
+>> superblock.
+>>
+>> For journal based filesystems, each metadata update should be journale=
+d,
+>> so metadata operation is as atomic as journal updates.
+>>
+>> It does show that XFS is doing the best work among the tested
+>> filesystems (Btrfs, XFS, ext4), no kernel nor xfs_repair problem at al=
+l.
+>>
+>> For btrfs, although btrfs check doesn't report any problem, kernel
+>> reports some data checksum error, which is a little unexpected as data=
 
-Changes since v2:
-- Rename _is_mounted to _is_dev_mounted and use findmnt instead of mount.
-- Fix mistakes in patch 2/6 and introduce _is_dir_mountpoint helper, also
-  introduce fsck options use for overlayfs.
-- Add overlay/049 into patch 4/6 to skip fs check.
-- Add nfs export cases into patch 5/6 to do correct dirs check.
-- Add the "missing feature" of test mount options.
+>> is CoWed by default, which should be as atomic as superblock.
+>> (Unfortunately, still not the exact problem I'm chasing for)
+>>
+>> For EXT4, kernel is fine, but later e2fsck reports problem, which may
+>> indicates there is still something to be improved.
+>>
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>>  tests/generic/479     | 109 +++++++++++++++++++++++++++++++++++++++++=
++++++++++
+>>  tests/generic/479.out |   2 +
+>>  tests/generic/group   |   1 +
+>>  3 files changed, 112 insertions(+)
+>>  create mode 100755 tests/generic/479
+>>  create mode 100644 tests/generic/479.out
+>>
+>> diff --git a/tests/generic/479 b/tests/generic/479
+>> new file mode 100755
+>> index 00000000..ab530231
+>> --- /dev/null
+>> +++ b/tests/generic/479
+>> @@ -0,0 +1,109 @@
+>> +#! /bin/bash
+>> +# FS QA Test 479
+>> +#
+>> +# Test if a filesystem can survive emulated powerloss.
+>> +#
+>> +# No matter what the solution a filesystem uses (journal or CoW),
+>> +# it should survive unexpected powerloss, without major metadata
+>> +# corruption.
+>> +#
+>> +#--------------------------------------------------------------------=
+---
+>> +# Copyright (c) 2018 SuSE.  All Rights Reserved.
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation=
+,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#--------------------------------------------------------------------=
+---
+>> +#
+>> +
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=3D`pwd`
+>> +tmp=3D/tmp/$$
+>> +status=3D1       # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +       ps -e | grep fsstress > /dev/null 2>&1
+>> +       while [ $? -eq 0 ]; do
+>> +               $KILLALL_PROG -KILL fsstress > /dev/null 2>&1
+>> +               wait > /dev/null 2>&1
+>> +               ps -e | grep fsstress > /dev/null 2>&1
+>> +       done
+>> +       _unmount_flakey &> /dev/null
+>> +       _cleanup_flakey
+>> +       cd /
+>> +       rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/dmflakey
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_dm_target flakey
+>> +_require_command "$KILLALL_PROG" "killall"
+>> +
+>> +runtime=3D$(($TIME_FACTOR * 15))
+>> +loops=3D$(($LOAD_FACTOR * 4))
+>> +
+>> +for i in $(seq -w $loops); do
+>> +       echo "=3D=3D=3D Loop $i: $(date) =3D=3D=3D" >> $seqres.full
+>> +
+>> +       _scratch_mkfs >/dev/null 2>&1
+>> +       _init_flakey
+>> +       _mount_flakey
+>> +
+>> +       ($FSSTRESS_PROG $FSSTRESS_AVOID -w -d $SCRATCH_MNT -n 1000000 =
+\
+>> +               -p 100 >> $seqres.full &) > /dev/null 2>&1
+>> +
+>> +       sleep $runtime
+>> +
+>> +       # Here we only want to drop all write, don't need to umount th=
+e fs
+>> +       _load_flakey_table $FLAKEY_DROP_WRITES
+>> +
+>> +       ps -e | grep fsstress > /dev/null 2>&1
+>> +       while [ $? -eq 0 ]; do
+>> +               $KILLALL_PROG -KILL fsstress > /dev/null 2>&1
+>> +               wait > /dev/null 2>&1
+>> +               ps -e | grep fsstress > /dev/null 2>&1
+>> +       done
+>> +
+>> +       _unmount_flakey
+>> +       _cleanup_flakey
+>> +
+>> +       # Mount the fs to do proper log replay for journal based fs
+>> +       # so later check won't report annoying dirty log and only
+>> +       # report real problem.
+>> +       _scratch_mount
+>> +       _scratch_unmount
+>> +
+>> +       _check_scratch_fs
+>> +done
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/generic/479.out b/tests/generic/479.out
+>> new file mode 100644
+>> index 00000000..290f18b3
+>> --- /dev/null
+>> +++ b/tests/generic/479.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 479
+>> +Silence is golden
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index 1e808865..5ce3db1d 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -481,3 +481,4 @@
+>>  476 auto rw
+>>  477 auto quick exportfs
+>>  478 auto quick
+>> +479 auto
+>=20
+> + stress
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
 
-Changes since v1:
-- Details comments in patch 1/5.
-- Improve _overlay_check_scratch_dirs to accept extra options.
-- Fix basic filesystem mounted check in _overlay_check_fs.
-- Improve overlay/044 in patch 5/5 to add index=on option.
 
-----------
+--WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF--
 
-Background:
+--5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
 
-This patchset implement filesystem check for overlay filesystem, base on
-my "overlay: add fsck.overlay basic tests" patchset and works only if
-fsck.overlay[1] exists (otherwise not run).
+-----BEGIN PGP SIGNATURE-----
 
-[1] https://github.com/hisilicon/overlayfs-progs
+iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlqXxxEXHHF1d2VucnVv
+LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qhLFwgAoX2jkuE9iHfJ2f2W2UCkd6KE
+3zDpVt8RvOqf8cMVSrzlQ3mOeJU6fdSlr+IKOfAj3dMHWIzLKUmJ4cY95q2T+gRw
+Up1ZfE9/5oAZiNXyNHzaGynSnYCyI/e/yh6VLbGryh6GCUUhjH/owwq2klWNlmCt
+N5wllKC8+euwYc66iRbvlADWz7190/bYCMtdd8p1t80OA97VykOfSnnxAwbZRjYO
+/WtxFS0jbXpwrEs0WigbNf5acGMQmneuesEbCo9+MOz1+bi88grYbsFes6eIpcMB
+IUdbx5UH2BbnSnIpszhh1lq9CI4hIeNuXdNLZFL0qqEfE/pAxluEzaQXKnsgog==
+=h1Dh
+-----END PGP SIGNATURE-----
 
-zhangyi (F) (5):
-  common/rc: improve dev mounted check helper
-  overlay: hook filesystem check helper
-  overlay/003: fix fs check failure
-  overlay: skip check for tests finished with corrupt filesystem
-  overlay: correct scratch dirs check
-
- README.overlay    |  10 ++++-
- common/config     |   4 ++
- common/overlay    | 128 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- common/rc         |  47 +++++++++++---------
- common/xfs        |   2 +-
- tests/overlay/003 |   1 -
- tests/overlay/005 |   7 ++-
- tests/overlay/010 |   7 ++-
- tests/overlay/014 |  10 ++++-
- tests/overlay/019 |   2 +-
- tests/overlay/031 |   2 +-
- tests/overlay/035 |   7 ++-
- tests/overlay/036 |   6 ++-
- tests/overlay/037 |   7 ++-
- tests/overlay/038 |  10 ++++-
- tests/overlay/041 |  10 ++++-
- tests/overlay/043 |   7 ++-
- tests/overlay/044 |   8 +++-
- tests/overlay/049 |   2 +-
- tests/overlay/051 |  10 ++++-
- tests/overlay/053 |  10 ++++-
- tests/overlay/055 |  10 ++++-
- 22 files changed, 263 insertions(+), 44 deletions(-)
-
--- 
-2.5.0
-
+--5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6--
