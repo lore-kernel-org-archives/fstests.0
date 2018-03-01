@@ -1,39 +1,39 @@
-Received: from mout.gmx.net ([212.227.17.22]:37605 "EHLO mout.gmx.net"
+Received: from mout.gmx.net ([212.227.17.22]:44021 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S966774AbeCAJZ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Mar 2018 04:25:58 -0500
+        id S966856AbeCAJ1m (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Mar 2018 04:27:42 -0500
 Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
  power loss
 References: <20180301053821.18718-1-wqu@suse.com>
  <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
 From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <ed8aec54-8b90-61cd-74c2-e8a1556849f6@gmx.com>
-Date: Thu, 1 Mar 2018 17:25:37 +0800
+Message-ID: <faa18087-771f-17e5-3ac9-a346630806e2@gmx.com>
+Date: Thu, 1 Mar 2018 17:27:23 +0800
 MIME-Version: 1.0
 In-Reply-To: <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
 Content-Type: multipart/signed; micalg=pgp-sha256;
  protocol="application/pgp-signature";
- boundary="5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6"
+ boundary="GIb6OBJSsceTRrPv8BB3PFYqZJTaF1UoH"
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>
 Cc: fstests <fstests@vger.kernel.org>, dm-devel@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
 This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6
-Content-Type: multipart/mixed; boundary="WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF";
+--GIb6OBJSsceTRrPv8BB3PFYqZJTaF1UoH
+Content-Type: multipart/mixed; boundary="7hI6ksVpBifFS4GyFKAZFUqWVAqtI9FOw";
  protected-headers="v1"
 From: Qu Wenruo <quwenruo.btrfs@gmx.com>
 To: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>
 Cc: fstests <fstests@vger.kernel.org>, dm-devel@redhat.com
-Message-ID: <ed8aec54-8b90-61cd-74c2-e8a1556849f6@gmx.com>
+Message-ID: <faa18087-771f-17e5-3ac9-a346630806e2@gmx.com>
 Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
  power loss
 References: <20180301053821.18718-1-wqu@suse.com>
  <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
 In-Reply-To: <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
 
---WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF
+--7hI6ksVpBifFS4GyFKAZFUqWVAqtI9FOw
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: quoted-printable
@@ -53,15 +53,10 @@ a
 > So you are re-posting the test with dm-flakey or converting it to
 > dm-log-writes??
 
-Working on the scripts to allow us to do --find and then replay.
+Sorry, I just noticed the date right now.
 
-Since for xfs and ext4, their fsck would report false alerts just for
-dirty journal.
-
-I'm adding new macro to locate next flush and replay to it, then mount
-it RW before we call fsck.
-
-Or do we have options for those fscks to skip dirty journal?
+I was formatting the patch to the wrong place with old patches.
+Please ignore this patch.
 
 Thanks,
 Qu
@@ -247,23 +242,23 @@ e fs
 >=20
 
 
---WV2cCVP3u0c2RfySAafw2X7sqBEsgG3AF--
+--7hI6ksVpBifFS4GyFKAZFUqWVAqtI9FOw--
 
---5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6
+--GIb6OBJSsceTRrPv8BB3PFYqZJTaF1UoH
 Content-Type: application/pgp-signature; name="signature.asc"
 Content-Description: OpenPGP digital signature
 Content-Disposition: attachment; filename="signature.asc"
 
 -----BEGIN PGP SIGNATURE-----
 
-iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlqXxxEXHHF1d2VucnVv
-LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qhLFwgAoX2jkuE9iHfJ2f2W2UCkd6KE
-3zDpVt8RvOqf8cMVSrzlQ3mOeJU6fdSlr+IKOfAj3dMHWIzLKUmJ4cY95q2T+gRw
-Up1ZfE9/5oAZiNXyNHzaGynSnYCyI/e/yh6VLbGryh6GCUUhjH/owwq2klWNlmCt
-N5wllKC8+euwYc66iRbvlADWz7190/bYCMtdd8p1t80OA97VykOfSnnxAwbZRjYO
-/WtxFS0jbXpwrEs0WigbNf5acGMQmneuesEbCo9+MOz1+bi88grYbsFes6eIpcMB
-IUdbx5UH2BbnSnIpszhh1lq9CI4hIeNuXdNLZFL0qqEfE/pAxluEzaQXKnsgog==
-=h1Dh
+iQFLBAEBCAA1FiEELd9y5aWlW6idqkLhwj2R86El/qgFAlqXx3sXHHF1d2VucnVv
+LmJ0cmZzQGdteC5jb20ACgkQwj2R86El/qjPkgf9HNkZavuT3kJe4vI4BT1r6rza
+pqHZZcctAKBbcAUnpEX0LLYQAhFsz5n1SyuHgvMZm07E1nFNXv/jOCMjg2XimkOn
+f5gXa/EgLV7Zkef+Wj2XvJljf/CcV2q2QJzgwMt1JT2+N1j4noGo+u9wwUuq7NyO
+m0W/x+AUEMHCL3bjGjtOGcTXQ9aKjEaFogOLKTpGdiupTg9RwyOsOSU6LPo94ISn
+eV0mt4rnx7G2v78ZMS5EGBawnVby9p08HL4S3Xl2zgZsyl3W5paTeOfYSVR5nCHH
+U5NndlrBegIFQoqT2ozYUIeMgICVH9s5+YIhxge43lnY6azcxLDQ9h0lFEumdw==
+=mQIE
 -----END PGP SIGNATURE-----
 
---5xYKpnsQZTmT9TECMVxvVvi1tpmAqPVV6--
+--GIb6OBJSsceTRrPv8BB3PFYqZJTaF1UoH--
