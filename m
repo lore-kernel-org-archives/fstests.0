@@ -1,67 +1,106 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:32992 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030496AbeCANSF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Mar 2018 08:18:05 -0500
-Date: Thu, 1 Mar 2018 21:17:49 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [xfstests PATCH v5 2/5] overlay: hook filesystem check helper
-Message-ID: <20180301131749.GA30836@localhost.localdomain>
-References: <20180301121347.5824-1-yi.zhang@huawei.com>
- <20180301121347.5824-3-yi.zhang@huawei.com>
- <CAOQ4uxhAsV6-ENGrSrHNE+Ho8_N8+msGbWy8vBCkZXmeEabTYQ@mail.gmail.com>
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:39207 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030347AbeCAMu2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Mar 2018 07:50:28 -0500
+Received: by mail-yw0-f193.google.com with SMTP id l24so2021140ywk.6
+        for <fstests@vger.kernel.org>; Thu, 01 Mar 2018 04:50:28 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxhAsV6-ENGrSrHNE+Ho8_N8+msGbWy8vBCkZXmeEabTYQ@mail.gmail.com>
+In-Reply-To: <0abab816-a2a4-82bf-e43e-37535f1228a8@gmx.com>
+References: <20180301053821.18718-1-wqu@suse.com> <CAOQ4uxgUm-YnFG=M6YaMKqAvr+CewerL3d4S2V6WSwKKu13ebA@mail.gmail.com>
+ <ed8aec54-8b90-61cd-74c2-e8a1556849f6@gmx.com> <CAOQ4uxhy7iU71dB9aTFx+aeMowNoi0QMVT2GDUM81R_CTZxxsA@mail.gmail.com>
+ <0abab816-a2a4-82bf-e43e-37535f1228a8@gmx.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 1 Mar 2018 14:50:27 +0200
+Message-ID: <CAOQ4uxgw=MmrTW-1CG=RHWY65Ej1pb_rF6G5wRC1J6B5jLRpTw@mail.gmail.com>
+Subject: Re: [RFC PATCH] fstests: Check if a fs can survive random (emulated)
+ power loss
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: "zhangyi (F)" <yi.zhang@huawei.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>, dm-devel@redhat.com, Josef Bacik <josef@toxicpanda.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 01, 2018 at 03:03:55PM +0200, Amir Goldstein wrote:
-> On Thu, Mar 1, 2018 at 2:13 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> > Hook filesystem check helper to _check_test_fs and _check_scratch_fs
-> > for checking consistency of underlying dirs of overlay filesystem.
-> > These helpers works only if fsck.overlay exists.
-> >
-> > This patch introduce OVERLAY_FSCK_OPTIONS use for check overlayfs like
-> > OVERLAY_MOUNT_OPTIONS, and also introduce a mount point check helper in
-> > common/rc to detect a dir is a mount point or not.
-> >
-> > [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
-> >
-> > Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> > ---
-> >  README.overlay | 10 ++++--
-> >  common/config  |  4 +++
-> >  common/overlay | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  common/rc      | 18 +++++++++--
-> >  4 files changed, 127 insertions(+), 4 deletions(-)
-> >
-> > diff --git a/README.overlay b/README.overlay
-> > index dfb8234..3cbefab 100644
-> > --- a/README.overlay
-> > +++ b/README.overlay
-> > @@ -22,6 +22,10 @@ the base fs should be pre-formatted before starting the -overlay run.
-> >  An easy way to accomplish this is by running './check <some test>' once,
-> >  before running './check -overlay'.
-> >
-> > +'./check -overlay' support check overlay test and scratch dirs,
-> > +OVERLAY_FSCK_OPTIONS should be set instead of FSCK_OPTIONS if fsck
-> > +options need to given directly.
-> > +
-> >  Because of the lack of mkfs support, multi-section config files are only
-> >  partly supported with './check -overlay'. Only multi-section files that
-> >  do not change FSTYP and MKFS_OPTIONS can be safely used with -overlay.
-> > @@ -40,7 +44,9 @@ run overlay tests on the same base fs, but with different mount options:
-> >   MOUNT_OPTIONS="-o pquota"
-> >   TEST_FS_MOUNT_OPTS="-o noatime"
-> >   OVERLAY_MOUNT_OPTIONS="-o redirect_dir=off"
-> > + OVERLAY_FSCK_OPTIONS="-n redirect_dir=off"
-> 
-> typo for the phony options. I believe it is going to be:  "-n -o
-> redirect_dir=off"
+On Thu, Mar 1, 2018 at 1:48 PM, Qu Wenruo <quwenruo.btrfs@gmx.com> wrote:
+>
+>
+> On 2018=E5=B9=B403=E6=9C=8801=E6=97=A5 19:15, Amir Goldstein wrote:
+>> On Thu, Mar 1, 2018 at 11:25 AM, Qu Wenruo <quwenruo.btrfs@gmx.com> wrot=
+e:
+>>>
+>>>
+>>> On 2018=E5=B9=B403=E6=9C=8801=E6=97=A5 16:39, Amir Goldstein wrote:
+>>>> On Thu, Mar 1, 2018 at 7:38 AM, Qu Wenruo <wqu@suse.com> wrote:
+>>>>> This test case is originally designed to expose unexpected corruption
+>>>>> for btrfs, where there are several reports about btrfs serious metada=
+ta
+>>>>> corruption after power loss.
+>>>>>
+>>>>> The test case itself will trigger heavy fsstress for the fs, and use
+>>>>> dm-flakey to emulate power loss by dropping all later writes.
+>>>>
+>>>> So you are re-posting the test with dm-flakey or converting it to
+>>>> dm-log-writes??
+>>>
+>>> Working on the scripts to allow us to do --find and then replay.
+>>>
+>>> Since for xfs and ext4, their fsck would report false alerts just for
+>>> dirty journal.
+>>>
+>>> I'm adding new macro to locate next flush and replay to it, then mount
+>>> it RW before we call fsck.
+>>>
+>>> Or do we have options for those fscks to skip dirty journal?
+>>>
+>>
+>> No, you are much better off doing mount/umount before fsck.
+>> Even though e2fsck can replay a journal, it does that much slower
+>> then the kernel does.
+>>
+>> But why do you need to teach --find to find next flush?
+>> You could use a helper script to run every fua with --fsck --check fua.
+>> Granted, for fstests context, I agree that --find next fua may look
+>> nicer, so I have no objection to this implementation.
+>
+> The point is, in my opinion fua is not the worst case we need to test.
+> Only flush could leads us to the worst case we really need to test.
+>
+> In btrfs' case, if we finished flush, but without fua, we have a super
+> block points to all old trees, but all new trees are already written to
+> disk.
+>
+> In that flush entry, we could reach to the worst case scenario to verify
+> all btrfs tricks are working all together to get a completely sane btrfs
+> (even all data should be correct).
+>
+> This should also apply to journal based filesystems (if I understand the
+> journal thing correctly), even when all journals written but superblock
+> not updated, we should be completely fine.
+> (Although for journal, we may need to reach fua entry instead of flush?)
+>
+> And the other reason why we need to find next flush/fua manually is,
+> mount will write new data, and we need to replay all the sequence until
+> next flush/fua.
+>
 
-I can fix it on commit. Thanks for review!
+OK. but Josef addressed this in his script using dm snapshots, rather
+than replaying each time. I guess this is the reason the script is called
+replay-individual-faster.sh. You don't have to do the same, but I expect
+the test would run faster if you learn from experience of Josef.
 
-Eryu
+>
+> And finally the reason about why need manually mount is, we need to
+> workaround e2fsck/xfs_repair, so that they won't report dirty journal as
+> error. If we have extra options to disable such behavior, I'm completely
+> OK with current --check flush/fua --fsck method.
+> (BTW, for my btrfs testing, --check flush --fsck is completely good
+> enough, to exposed possible free space cache related problems)
+>
+
+What I was suggesting as an alternative is --fsck ./replay-fsck-wrapper.sh
+where the wrapper script does the needed mount/umount and if you
+also use dm snapshot for the mounted volume you can continue to replay
+from the same point and don't need to replay from the start.
+
+Cheers,
+Amir.
