@@ -1,71 +1,45 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:36867 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1030213AbeCAMEl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 1 Mar 2018 07:04:41 -0500
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [xfstests PATCH v5 4/5] overlay: skip check for tests finished with corrupt filesystem
-Date: Thu, 1 Mar 2018 20:13:46 +0800
-Message-ID: <20180301121347.5824-5-yi.zhang@huawei.com>
-In-Reply-To: <20180301121347.5824-1-yi.zhang@huawei.com>
-References: <20180301121347.5824-1-yi.zhang@huawei.com>
+Received: from szxga04-in.huawei.com ([45.249.212.190]:5696 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1426154AbeCBKIZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 2 Mar 2018 05:08:25 -0500
+From: Sheng Yong <shengyong1@huawei.com>
+Subject: [PATCH] test-appliance: fix lack of "-o" in F2FS_MOUNT_OPTIONS
+Date: Fri, 2 Mar 2018 18:08:05 +0800
+Message-ID: <20180302100805.22863-1-shengyong1@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: jaegeuk@kernel.org, yuchao0@huawei.com, ebiggers@google.com, tytso@mit.edu
+Cc: linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-No post-test check of the overlay dirs is required if case leaves
-corrupt filesystem after test. We shoud use _require_scratch_nocheck()
-instead of _require_scratch() in these cases.
+If F2FS_MOUNT_OPTIONS is set, while MNTOPTS is not set, "-o" is
+missing in F2FS_MOUNT_OPTIONS. As a result, mount filesystem
+will fail.
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Sheng Yong <shengyong1@huawei.com>
 ---
- tests/overlay/019 | 2 +-
- tests/overlay/031 | 2 +-
- tests/overlay/049 | 2 +-
- 3 files changed, 3 insertions(+), 3 deletions(-)
+ kvm-xfstests/test-appliance/files/root/fs/f2fs/config | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/tests/overlay/019 b/tests/overlay/019
-index 3e2bc4e..575aaf7 100755
---- a/tests/overlay/019
-+++ b/tests/overlay/019
-@@ -46,7 +46,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs overlay
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
+index 45fb2dd..14d5d6e 100644
+--- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
++++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
+@@ -30,9 +30,12 @@ function setup_mount_opts()
+ 	if test -n "$F2FS_MOUNT_OPTIONS" ; then
+ 	    export F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
+ 	else
+-	    export F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
++	    export F2FS_MOUNT_OPTIONS="$MNTOPTS"
+ 	fi
+     fi
++    if test -n "$F2FS_MOUNT_OPTIONS" ; then
++        export F2FS_MOUNT_OPTIONS="-o $F2FS_MOUNT_OPTIONS"
++    fi
+ }
  
- # Remove all files from previous tests
- _scratch_mkfs
-diff --git a/tests/overlay/031 b/tests/overlay/031
-index 186b409..90a06af 100755
---- a/tests/overlay/031
-+++ b/tests/overlay/031
-@@ -67,7 +67,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs overlay
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
- 
- # remove all files from previous runs
- _scratch_mkfs
-diff --git a/tests/overlay/049 b/tests/overlay/049
-index ef00138..1dafc46 100755
---- a/tests/overlay/049
-+++ b/tests/overlay/049
-@@ -72,7 +72,7 @@ rm -f $seqres.full
- # real QA test starts here
- _supported_fs overlay
- _supported_os Linux
--_require_scratch
-+_require_scratch_nocheck
- _require_scratch_feature redirect_dir
- 
- # remove all files from previous runs
+ function get_mkfs_opts()
 -- 
-2.5.0
+2.14.1
 
