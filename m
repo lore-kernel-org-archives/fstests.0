@@ -1,45 +1,46 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:5696 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1426154AbeCBKIZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 2 Mar 2018 05:08:25 -0500
-From: Sheng Yong <shengyong1@huawei.com>
-Subject: [PATCH] test-appliance: fix lack of "-o" in F2FS_MOUNT_OPTIONS
-Date: Fri, 2 Mar 2018 18:08:05 +0800
-Message-ID: <20180302100805.22863-1-shengyong1@huawei.com>
+Received: from mx2.suse.de ([195.135.220.15]:35319 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750907AbeCFLGe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Mar 2018 06:06:34 -0500
+Subject: Re: [PATCH 3/3] fstests: btrfs: Add test case to check v1 space cache
+ corruption
+References: <20180306081555.3242-1-wqu@suse.com>
+ <20180306081555.3242-3-wqu@suse.com>
+ <CAL3q7H5_1WiGZKEzFGBQRsA9prJ-uMUn2+TKBWHyKOGha4nLDQ@mail.gmail.com>
+ <b859c3d8-1eae-98fa-3ae8-7ed017299ce2@gmx.com>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <b62c7d8b-fd12-9093-6fc2-6f9284880971@suse.com>
+Date: Tue, 6 Mar 2018 13:06:32 +0200
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <b859c3d8-1eae-98fa-3ae8-7ed017299ce2@gmx.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: jaegeuk@kernel.org, yuchao0@huawei.com, ebiggers@google.com, tytso@mit.edu
-Cc: linux-f2fs-devel@lists.sourceforge.net, fstests@vger.kernel.org
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>, fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, dsterba@suse.cz, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-If F2FS_MOUNT_OPTIONS is set, while MNTOPTS is not set, "-o" is
-missing in F2FS_MOUNT_OPTIONS. As a result, mount filesystem
-will fail.
 
-Signed-off-by: Sheng Yong <shengyong1@huawei.com>
----
- kvm-xfstests/test-appliance/files/root/fs/f2fs/config | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
 
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-index 45fb2dd..14d5d6e 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-@@ -30,9 +30,12 @@ function setup_mount_opts()
- 	if test -n "$F2FS_MOUNT_OPTIONS" ; then
- 	    export F2FS_MOUNT_OPTIONS="$F2FS_MOUNT_OPTIONS,$MNTOPTS"
- 	else
--	    export F2FS_MOUNT_OPTIONS="-o $MNTOPTS"
-+	    export F2FS_MOUNT_OPTIONS="$MNTOPTS"
- 	fi
-     fi
-+    if test -n "$F2FS_MOUNT_OPTIONS" ; then
-+        export F2FS_MOUNT_OPTIONS="-o $F2FS_MOUNT_OPTIONS"
-+    fi
- }
- 
- function get_mkfs_opts()
--- 
-2.14.1
+On  6.03.2018 12:53, Qu Wenruo wrote:
+> 
+> 
+[snip]
 
+> It breaks the rule that we shouldn't have the hole in file extents.
+> 
+> IIRC Nikolay is trying to use inode_lock_shared() to solve this race.
+> 
+
+Unfortunately the inode_lock_shared approach is a no go since Filipe
+objected to it quite adamantly. After discussion that happened in that
+thread I can say I'm almost convinced that the pair of READDIO_LOCK and
+setsize *do* provide necessary consistency for the DIO case. However at
+the moment there is a memory barrier missing.
+
+But I think the DIO case is unrelated to the issue you are discussing
+here, no ?
+
+
+[snip]
