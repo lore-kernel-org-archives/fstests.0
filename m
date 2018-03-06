@@ -1,51 +1,163 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:56943 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751090AbeCGIah (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 7 Mar 2018 03:30:37 -0500
-From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: [PATCH] fstests: btrfs/146: make sure hit all stripes in the case of compression
-Date: Wed, 7 Mar 2018 16:30:28 +0800
-Message-ID: <20180307083028.3625-1-lufq.fnst@cn.fujitsu.com>
+Received: from mail-yw0-f193.google.com ([209.85.161.193]:41294 "EHLO
+        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752861AbeCFIfl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Mar 2018 03:35:41 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20180306081555.3242-1-wqu@suse.com>
+References: <20180306081555.3242-1-wqu@suse.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 6 Mar 2018 10:35:40 +0200
+Message-ID: <CAOQ4uxj0OYnSi3Ok69FB7_fBT_5g-hO+pcEvd5uiN5kNOsuuFQ@mail.gmail.com>
+Subject: Re: [PATCH 1/3] fstests: log-writes: Add support to output human
+ readable flags
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Qu Wenruo <wqu@suse.com>
+Cc: Linux Btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, dsterba@suse.cz
 List-ID: <fstests@vger.kernel.org>
 
-In the case of compression, each 128K input data chunk will be compressed
-to 4K (because of the characters written are duplicate). Therefore we have
-to write (128K * 16) to make sure every stripe can be hit.
+On Tue, Mar 6, 2018 at 10:15 AM, Qu Wenruo <wqu@suse.com> wrote:
+> Also change the flag numeric output to hex.
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
+>  1 file changed, 63 insertions(+), 7 deletions(-)
+>
+> diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+> index 09391574..66fad350 100644
+> --- a/src/log-writes/log-writes.c
+> +++ b/src/log-writes/log-writes.c
+> @@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
+>         return 0;
+>  }
+>
+> +#define DEFINE_LOG_FLAGS_STR_ENTRY(x)  \
+> +       {LOG_##x##_FLAG, #x}
+> +
+> +struct flags_to_str_entry {
+> +       u64 flags;
+> +       const char *str;
+> +} log_flags_table[] = {
+> +       DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
+> +       DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
+> +       DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
+> +       DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
+> +};
+> +
+> +#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
+> +#define LOG_FLAGS_BUF_SIZE     128
+> +/*
+> + * Convert numeric flags to human readable flags.
+> + * @flags:     numeric flags
+> + * @buf:       output buffer for human readable string.
+> + *             must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
+> + *             the string
+> + */
+> +static void entry_flags_to_str(u64 flags, char *buf)
+> +{
+> +       int empty = 1;
+> +       int left_len;
+> +       int i;
+> +
+> +       buf[0] = '\0';
+> +       for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
+> +               if (flags & log_flags_table[i].flags) {
+> +                       if (!empty)
+> +                               strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
+> +                       empty = 0;
+> +                       strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
+> +                       flags &= ~log_flags_table[i].flags;
+> +               }
+> +       }
+> +       if (flags) {
+> +               if (!empty)
+> +                       strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
+> +               empty = 0;
+> +               left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
+> +                                                       LOG_FLAGS_BUF_SIZE);
+> +               if (left_len > 0)
+> +                       snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
+> +                                left_len, "UNKNOWN.%llu", flags);
 
-Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
----
- tests/btrfs/146 | 11 +++++++++--
- 1 file changed, 9 insertions(+), 2 deletions(-)
+Missed a spot - %llx
 
-diff --git a/tests/btrfs/146 b/tests/btrfs/146
-index 7071c128..b5d17c49 100755
---- a/tests/btrfs/146
-+++ b/tests/btrfs/146
-@@ -74,9 +74,16 @@ _scratch_pool_mkfs "-d raid0 -m raid1" > $seqres.full 2>&1
- _scratch_mount
- 
- # How much do we need to write? We need to hit all of the stripes. btrfs uses
--# a fixed 64k stripesize, so write enough to hit each one
-+# a fixed 64k stripesize, so write enough to hit each one. In the case of
-+# compression, each 128K input data chunk will be compressed to 4K (because of
-+# the characters written are duplicate). Therefore we have to write (128K * 16)
-+# to make sure every stripe can be hit.
- number_of_devices=`echo $SCRATCH_DEV_POOL | wc -w`
--write_kb=$(($number_of_devices * 64))
-+if ! echo $MOUNT_OPTIONS | grep -qoP 'compress=\K(?!no)\w+'; then
-+	write_kb=$(($number_of_devices * 64))
-+else
-+	write_kb=$(($number_of_devices * 2048))
-+fi
- _require_fs_space $SCRATCH_MNT $write_kb
- 
- testfile=$SCRATCH_MNT/fsync-err-test
--- 
-2.14.3
-
-
-
+> +       }
+> +       if (empty)
+> +               strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
+> +}
+> +
+>  /*
+>   * @log: the log we are replaying.
+>   * @entry: entry to be replayed.
+> @@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+>         size_t read_size = read_data ? log->sectorsize :
+>                 sizeof(struct log_write_entry);
+>         char *buf;
+> +       char flags_buf[LOG_FLAGS_BUF_SIZE];
+>         ssize_t ret;
+>         off_t offset;
+>         int skip = 0;
+> @@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+>                 log->cur_pos += read_size;
+>         }
+>
+> +       flags = le64_to_cpu(entry->flags);
+> +       entry_flags_to_str(flags, flags_buf);
+>         skip = log_should_skip(log, entry);
+>         if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
+> -               printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
+> +               printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
+>                        skip ? "skipping" : "replaying",
+>                        (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+>                        (unsigned long long)le64_to_cpu(entry->sector),
+>                        (unsigned long long)size,
+> -                      (unsigned long long)le64_to_cpu(entry->flags));
+> +                      (unsigned long long)flags, flags_buf);
+>         }
+>         if (!size)
+>                 return 0;
+>
+> -       flags = le64_to_cpu(entry->flags);
+>         if (flags & LOG_DISCARD_FLAG)
+>                 return log_discard(log, entry);
+>
+> @@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
+>                         return -1;
+>                 }
+>                 if (log_writes_verbose > 1)
+> -                       printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
+> +                       printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
+>                                (int)i, log->cur_pos / log->sectorsize,
+>                                (unsigned long long)le64_to_cpu(entry.sector),
+>                                (unsigned long long)le64_to_cpu(entry.nr_sectors),
+> @@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
+>         size_t read_size = read_data ? log->sectorsize :
+>                 sizeof(struct log_write_entry);
+>         u64 flags;
+> +       char flags_buf[LOG_FLAGS_BUF_SIZE];
+>         ssize_t ret;
+>
+>         if (log->cur_entry >= log->nr_entries)
+> @@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
+>         } else {
+>                 log->cur_pos += read_size;
+>         }
+> +       flags = le64_to_cpu(entry->flags);
+> +       entry_flags_to_str(flags, flags_buf);
+>         if (log_writes_verbose > 1)
+> -               printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
+> +               printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
+>                        (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+>                        (unsigned long long)le64_to_cpu(entry->sector),
+>                        (unsigned long long)le64_to_cpu(entry->nr_sectors),
+> -                      (unsigned long long)le64_to_cpu(entry->flags));
+> +                      (unsigned long long)flags, flags_buf);
+>
+> -       flags = le64_to_cpu(entry->flags);
+>         read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
+>         if (!read_size || (flags & LOG_DISCARD_FLAG))
+>                 return 0;
+> --
+> 2.15.1
+>
