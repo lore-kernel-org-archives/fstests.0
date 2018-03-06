@@ -1,155 +1,437 @@
-Received: from victor.provo.novell.com ([137.65.250.26]:35941 "EHLO
-        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750730AbeCFIQK (ORCPT
-        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Tue, 6 Mar 2018 03:16:10 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 1/3] fstests: log-writes: Add support to output human readable flags
-Date: Tue,  6 Mar 2018 16:15:53 +0800
-Message-Id: <20180306081555.3242-1-wqu@suse.com>
+Received: from mail-ua0-f195.google.com ([209.85.217.195]:45983 "EHLO
+        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753245AbeCFMZc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 6 Mar 2018 07:25:32 -0500
+MIME-Version: 1.0
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <ad265a98-f5e1-3eb8-1002-1868bbc07f94@gmx.com>
+References: <20180306081555.3242-1-wqu@suse.com> <20180306081555.3242-3-wqu@suse.com>
+ <CAL3q7H5_1WiGZKEzFGBQRsA9prJ-uMUn2+TKBWHyKOGha4nLDQ@mail.gmail.com> <ad265a98-f5e1-3eb8-1002-1868bbc07f94@gmx.com>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Tue, 6 Mar 2018 12:25:30 +0000
+Message-ID: <CAL3q7H65C1n0hGKQfOhi+5VYgpGizdch6t5G2QVXZ4+G3yH3hg@mail.gmail.com>
+Subject: Re: [PATCH 3/3] fstests: btrfs: Add test case to check v1 space cache corruption
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: dsterba@suse.cz, amir73il@gmail.com
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: Qu Wenruo <wqu@suse.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, dsterba@suse.cz, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Also change the flag numeric output to hex.
+On Tue, Mar 6, 2018 at 12:07 PM, Qu Wenruo <quwenruo.btrfs@gmx.com> wrote:
+>
+>
+> On 2018=E5=B9=B403=E6=9C=8806=E6=97=A5 18:12, Filipe Manana wrote:
+>> On Tue, Mar 6, 2018 at 8:15 AM, Qu Wenruo <wqu@suse.com> wrote:
+>>> There are some btrfs corruption report in mail list for a while,
+>>
+>> There have been for years (well, since ever) many reports of different
+>> types of corruptions.
+>> Which kind of corruption are you referring to?
+>>
+>>> although such corruption is pretty rare and almost impossible to
+>>> reproduce, with dm-log-writes we found it's highly related to v1 space
+>>> cache.
+>>>
+>>> Unlike journal based filesystems, btrfs completely rely on metadata CoW
+>>> to protect itself from power loss.
+>>> Which needs extent allocator to avoid allocate extents on existing
+>>> extent range.
+>>> Btrfs also uses free space cache to speed up such allocation.
+>>>
+>>> However there is a problem, v1 space cache is not protected by data CoW=
+,
+>>> and can be corrupted during power loss.
+>>> So btrfs do extra check on free space cache, verifying its own in-file =
+csum,
+>>> generation and free space recorded in cache and extent tree.
+>>>
+>>> The problem is, under heavy concurrency, v1 space cache can be corrupte=
+d
+>>> even under normal operations without power loss.
+>>
+>> How?
+>>
+>>> And we believe corrupted space cache can break btrfs metadata CoW and
+>>> leads to the rare corruption in next power loss.
+>>
+>> Which kind of corruption?
+>>
+>>>
+>>> The most obvious symptom will be difference in free space:
+>>>
+>>> This will be caught by kernel, but such check is quite weak, and if
+>>> the net free space change is 0 in one transaction, the corrupted
+>>> cache can be loaded by kernel.
+>>
+>> How can that happen? The only case I'm aware of, explained below,
+>> always leads to a difference (space cache has less free space then
+>> what we actually have if we check the extent tree).
+>>
+>>>
+>>> In this case, btrfs check would report things like :
+>>> ------
+>>> block group 298844160 has wrong amount of free space
+>>> failed to load free space cache for block group 298844160
+>>> ------
+>>
+>> This is normal, but not very common, due to tiny races that exists
+>> between committing a transaction (writing the free space caches) and
+>> running dellaloc for example (since reserving an extent while running
+>> dealloc doesn't joing/start a transaction).
+>
+> Well, at least I didn't find any place to release space unprotected by
+> trans handler, so free space of cache can only be less or equal to real
+> free space.
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 63 insertions(+), 7 deletions(-)
+Well, that what I said before. For that particular race I mentioned,
+which is the only one I can remember of always existing, the only
+inconsistency that can happen is that the cache has less free extents
+than what you can find by scanning the extent tree. If the
+inconsistency was not detected at cache loading time, we would only
+leak extents, but never double allocate them.
 
-diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-index 09391574..66fad350 100644
---- a/src/log-writes/log-writes.c
-+++ b/src/log-writes/log-writes.c
-@@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
- 	return 0;
- }
- 
-+#define DEFINE_LOG_FLAGS_STR_ENTRY(x)	\
-+	{LOG_##x##_FLAG, #x}
-+
-+struct flags_to_str_entry {
-+	u64 flags;
-+	const char *str;
-+} log_flags_table[] = {
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
-+};
-+
-+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-+#define LOG_FLAGS_BUF_SIZE	128
-+/*
-+ * Convert numeric flags to human readable flags.
-+ * @flags:	numeric flags
-+ * @buf:	output buffer for human readable string.
-+ * 		must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
-+ * 		the string
-+ */
-+static void entry_flags_to_str(u64 flags, char *buf)
-+{
-+	int empty = 1;
-+	int left_len;
-+	int i;
-+
-+	buf[0] = '\0';
-+	for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
-+		if (flags & log_flags_table[i].flags) {
-+			if (!empty)
-+				strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+			empty = 0;
-+			strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
-+			flags &= ~log_flags_table[i].flags;
-+		}
-+	}
-+	if (flags) {
-+		if (!empty)
-+			strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+		empty = 0;
-+		left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
-+						        LOG_FLAGS_BUF_SIZE);
-+		if (left_len > 0)
-+			snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
-+				 left_len, "UNKNOWN.%llu", flags);
-+	}
-+	if (empty)
-+		strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
-+}
-+
- /*
-  * @log: the log we are replaying.
-  * @entry: entry to be replayed.
-@@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	char *buf;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 	off_t offset;
- 	int skip = 0;
-@@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 		log->cur_pos += read_size;
- 	}
- 
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	skip = log_should_skip(log, entry);
- 	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
--		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
-+		printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
- 		       skip ? "skipping" : "replaying",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)size,
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 	}
- 	if (!size)
- 		return 0;
- 
--	flags = le64_to_cpu(entry->flags);
- 	if (flags & LOG_DISCARD_FLAG)
- 		return log_discard(log, entry);
- 
-@@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
- 			return -1;
- 		}
- 		if (log_writes_verbose > 1)
--			printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+			printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
- 			       (int)i, log->cur_pos / log->sectorsize,
- 			       (unsigned long long)le64_to_cpu(entry.sector),
- 			       (unsigned long long)le64_to_cpu(entry.nr_sectors),
-@@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	u64 flags;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 
- 	if (log->cur_entry >= log->nr_entries)
-@@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	} else {
- 		log->cur_pos += read_size;
- 	}
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	if (log_writes_verbose > 1)
--		printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+		printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)le64_to_cpu(entry->nr_sectors),
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 
--	flags = le64_to_cpu(entry->flags);
- 	read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
- 	if (!read_size || (flags & LOG_DISCARD_FLAG))
- 		return 0;
--- 
-2.15.1
+>
+> So in that case, corrupted cache will never pass the free space check so
+> it will never be loaded.
+>
+> Another dead end unfortunately.
+>
+> Thanks,
+> Qu
+>>
+>>>
+>>> But considering the test case are using notreelog, btrfs won't do
+>>> sub-transaction commit which doesn't increase generation, each
+>>> transaction should be consistent, and nothing should be reported at all=
+.
+>>>
+>>> Further more, we can even found corrupted file extents like:
+>>> ------
+>>> root 5 inode 261 errors 100, file extent discount
+>>> Found file extent holes:
+>>>         start: 962560, len: 32768
+>>> ERROR: errors found in fs roots
+>>
+>> Why do you think that's a corruption? Does it cause data loss or any
+>> user visible issue?
+>>
+>> Having file extent holes not inserted happens when mixing buffered and
+>> direct IO writes to a file (and fsstress does that), for example:
+>>
+>> create file
+>> buffered write at offset 0, length 64K
+>> direct IO write at offset at offset 64K, length 4K
+>> transaction commit
+>> power loss
+>> after this we got a missing 64K hole extent at offset 0 (at
+>> btrfs_file_write_iter we only add hole extents if the start offset is
+>> greater then the current i_size)
+>>
+>> But this does not cause any problem for the user or the fs itself, and
+>> it's supposed to be like that in the NO_HOLES mode which one day
+>> (probably) will be the default mode.
+>>
+>>> ------
+>>>
+>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>>> ---
+>>>  common/dmlogwrites  |  72 +++++++++++++++++++++++++++
+>>>  tests/btrfs/159     | 141 ++++++++++++++++++++++++++++++++++++++++++++=
+++++++++
+>>>  tests/btrfs/159.out |   2 +
+>>>  tests/btrfs/group   |   1 +
+>>>  4 files changed, 216 insertions(+)
+>>>  create mode 100755 tests/btrfs/159
+>>>  create mode 100644 tests/btrfs/159.out
+>>>
+>>> diff --git a/common/dmlogwrites b/common/dmlogwrites
+>>> index 467b872e..54e7e242 100644
+>>> --- a/common/dmlogwrites
+>>> +++ b/common/dmlogwrites
+>>> @@ -126,3 +126,75 @@ _log_writes_cleanup()
+>>>         $UDEV_SETTLE_PROG >/dev/null 2>&1
+>>>         _log_writes_remove
+>>>  }
+>>> +
+>>> +# Convert log writes mark to entry number
+>>> +# Result entry number is output to stdout, could be empty if not found
+>>> +_log_writes_mark_to_entry_number()
+>>> +{
+>>> +       local _mark=3D$1
+>>> +       local ret
+>>> +
+>>> +       [ -z "$_mark" ] && _fail \
+>>> +               "mark must be given for _log_writes_mark_to_entry_numbe=
+r"
+>>> +
+>>> +       ret=3D$($here/src/log-writes/replay-log --find --log $LOGWRITES=
+_DEV \
+>>> +               --end-mark $_mark 2> /dev/null)
+>>> +       [ -z "$ret" ] && return
+>>> +       ret=3D$(echo "$ret" | cut -f1 -d\@)
+>>> +       echo "mark $_mark has entry number $ret" >> $seqres.full
+>>> +       echo "$ret"
+>>> +}
+>>> +
+>>> +# Find next fua write entry number
+>>> +# Result entry number is output to stdout, could be empty if not found
+>>> +_log_writes_find_next_fua()
+>>> +{
+>>> +       local _start_entry=3D$1
+>>> +       local ret
+>>> +
+>>> +       if [ -z "$_start_entry" ]; then
+>>> +               ret=3D$($here/src/log-writes/replay-log --find --log $L=
+OGWRITES_DEV \
+>>> +                       --next-fua 2> /dev/null)
+>>> +       else
+>>> +               ret=3D$($here/src/log-writes/replay-log --find --log $L=
+OGWRITES_DEV \
+>>> +                       --next-fua --start-entry $_start_entry 2> /dev/=
+null)
+>>> +       fi
+>>> +       [ -z "$ret" ] && return
+>>> +
+>>> +       ret=3D$(echo "$ret" | cut -f1 -d\@)
+>>> +       echo "next fua is entry number $ret" >> $seqres.full
+>>> +       echo "$ret"
+>>> +}
+>>> +
+>>> +# Replay log range to specified entry
+>>> +# $1:  End entry. The last entry will *NOT* be replayed
+>>> +# $2:  Start entry. If not specified, start from the first entry.
+>>> +_log_writes_replay_log_entry_range()
+>>> +{
+>>> +       local _end=3D$1
+>>> +       local _start=3D$2
+>>> +
+>>> +       [ -z "$_end" ] && _fail \
+>>> +       "end entry must be specified for _log_writes_replay_log_entry_r=
+ange"
+>>> +
+>>> +       if [[ "$_start" && "$_start" -gt "$_end" ]]; then
+>>> +               _fail \
+>>> +               "wrong parameter order for _log_writes_replay_log_entry=
+_range:start=3D$_start end=3D$_end"
+>>> +       fi
+>>> +
+>>> +       # Original replay-log won't replay the last entry. So increase =
+entry
+>>> +       # number here to ensure the end entry to be replayed
+>>> +       if [ -z "$_start" ]; then
+>>> +               echo "=3D=3D=3D replay to $_end =3D=3D=3D" >> $seqres.f=
+ull
+>>> +               $here/src/log-writes/replay-log --log $LOGWRITES_DEV \
+>>> +                       --replay $SCRATCH_DEV --limit $_end -v \
+>>> +                       >> $seqres.full 2>&1
+>>> +       else
+>>> +               echo "=3D=3D=3D replay from $_start to $_end =3D=3D=3D"=
+ >> $seqres.full
+>>> +               $here/src/log-writes/replay-log --log $LOGWRITES_DEV \
+>>> +                       --replay $SCRATCH_DEV --start-entry $_start \
+>>> +                       --limit $(($_end - $_start)) -v \
+>>> +                       >> $seqres.full 2>&1
+>>> +       fi
+>>> +       [ $? -ne 0 ] && _fail "replay failed"
+>>> +}
+>>> diff --git a/tests/btrfs/159 b/tests/btrfs/159
+>>> new file mode 100755
+>>> index 00000000..5113d526
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/159
+>>> @@ -0,0 +1,141 @@
+>>> +#! /bin/bash
+>>> +# FS QA Test 159
+>>> +#
+>>> +# Test case for btrfs v1 space cache corruption
+>>> +#
+>>> +# Btrfs has some unexpected corruption after power loss, during the
+>>> +# investigation, the problem leads to v1 space cache corruption, which
+>>> +# could be loaded by kernel without detection.
+>>> +#
+>>> +# Kernel has 3 detection for corrupted space cache, checksum, generati=
+on
+>>> +# and free space, however the last one is a weak one. If in the one tr=
+ansaction
+>>> +# no net space change it can be loaded by kernel and break up metadata=
+ CoW,
+>>> +# leading serious corruption.
+>>> +#
+>>> +#---------------------------------------------------------------------=
+--
+>>> +# Copyright (c) SUSE.  All Rights Reserved.
+>>> +#
+>>> +# This program is free software; you can redistribute it and/or
+>>> +# modify it under the terms of the GNU General Public License as
+>>> +# published by the Free Software Foundation.
+>>> +#
+>>> +# This program is distributed in the hope that it would be useful,
+>>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>>> +# GNU General Public License for more details.
+>>> +#
+>>> +# You should have received a copy of the GNU General Public License
+>>> +# along with this program; if not, write the Free Software Foundation,
+>>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>>> +#---------------------------------------------------------------------=
+--
+>>> +#
+>>> +
+>>> +seq=3D`basename $0`
+>>> +seqres=3D$RESULT_DIR/$seq
+>>> +echo "QA output created by $seq"
+>>> +
+>>> +here=3D`pwd`
+>>> +tmp=3D/tmp/$$
+>>> +status=3D1       # failure is the default!
+>>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>>> +
+>>> +_cleanup()
+>>> +{
+>>> +       cd /
+>>> +       rm -f $tmp.*
+>>> +       _log_writes_cleanup
+>>> +}
+>>> +
+>>> +# get standard environment, filters and checks
+>>> +. ./common/rc
+>>> +. ./common/dmlogwrites
+>>> +. ./common/filter
+>>> +
+>>> +# remove previous $seqres.full before test
+>>> +rm -f $seqres.full
+>>> +
+>>> +# Small workload is enough to trigger the problem
+>>> +workload=3D$(( 512 * $LOAD_FACTOR ))
+>>> +nr_threads=3D$(($($here/src/feature -o) * $LOAD_FACTOR))
+>>> +
+>>> +# Modify as appropriate.
+>>> +_supported_fs btrfs
+>>> +_supported_os Linux
+>>> +_require_log_writes
+>>> +_require_scratch
+>>> +
+>>> +_log_writes_init
+>>> +_log_writes_mkfs >> $seqres.full 2>&1
+>>> +
+>>> +# Here we don't want to create space cache yet
+>>> +_log_writes_mount -o nospace_cache
+>>> +
+>>> +# The SINGLE profile data chunk created by mkfs is too small (8M) so b=
+trfs
+>>> +# won't create space cache for it.
+>>> +# We need a data chunk large enough so btrfs create space cache for it=
+ and
+>>> +# store the cache in itself.
+>>> +_run_btrfs_util_prog balance start --full-balance "$SCRATCH_MNT"
+>>> +
+>>> +_log_writes_unmount
+>>> +_log_writes_mark mkfs
+>>> +
+>>> +# Disable tree log, so btrfs will always do full transaction commit
+>>> +# It's OK to use tree log, but it will cause extra super block update =
+which
+>>> +# doesn't increase generation.
+>>> +_log_writes_mount -o space_cache=3Dv1,notreelog
+>>> +run_check $FSSTRESS_PROG -w -n $workload -p $nr_threads -d $SCRATCH_MN=
+T \
+>>> +       $FSSTRESS_AVOID > /dev/null 2>&1
+>>> +_log_writes_unmount
+>>> +
+>>> +_log_writes_remove
+>>> +# Here we manually iterate through the log entries, as we need extra c=
+heck
+>>> +# on the output of btrfs check. And we could have detailed replay log =
+in
+>>> +# $seqres.full
+>>> +prev=3D$(_log_writes_mark_to_entry_number mkfs)
+>>> +if [ -z "$prev" ]; then
+>>> +       _fail "failed to locate log writes mark 'mkfs'"
+>>> +fi
+>>> +
+>>> +# Here we only checks the result *AFTER* FUA writes, and no tree log, =
+so
+>>> +# everything should be valid.
+>>> +cur=3D$(_log_writes_find_next_fua $prev)
+>>> +[ -z "$cur" ] && _fail "failed to locate next fua write"
+>>> +
+>>> +# log-replay will not replay the last item, so manually increase it by=
+ one
+>>> +cur=3D$(($cur + 1))
+>>> +
+>>> +_log_writes_replay_log_entry_range $prev >> $seqres.full 2>&1
+>>> +while [ ! -z "$cur" ]; do
+>>> +       _log_writes_replay_log_entry_range $cur $prev
+>>> +       # Catch the btrfs check output into temp file, as we need to
+>>> +       # grep the output to find the cache corruption
+>>> +       $BTRFS_UTIL_PROG check --check-data-csum $SCRATCH_DEV &> $tmp.f=
+sck
+>>> +
+>>> +       # Cache passed generation,csum and free space check but corrupt=
+ed
+>>> +       # will be reported as error
+>>> +       if [ $? -ne 0 ]; then
+>>> +               cat $tmp.fsck >> $seqres.full
+>>> +               _fail "btrfs check found corruption"
+>>> +       fi
+>>> +
+>>> +       # Mount option has ruled out any possible factors affect space =
+cache
+>>> +       # And we are at the FUA writes, no generation related problem s=
+hould
+>>> +       # happen anyway
+>>> +       if grep -q -e 'failed to load free space cache' $tmp.fsck; then
+>>> +               cat $tmp.fsck >> $seqres.full
+>>> +               _fail "btrfs check found invalid space cache"
+>>> +       fi
+>>> +
+>>> +       prev=3D$cur
+>>> +       cur=3D$(_log_writes_find_next_fua $prev)
+>>> +       [ -z $cur ] && break
+>>> +
+>>> +       # Same as above
+>>> +       cur=3D$(($cur + 1))
+>>> +done
+>>> +
+>>> +echo "Silence is golden"
+>>> +
+>>> +# success, all done
+>>> +status=3D0
+>>> +exit
+>>> diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+>>> new file mode 100644
+>>> index 00000000..e569e60c
+>>> --- /dev/null
+>>> +++ b/tests/btrfs/159.out
+>>> @@ -0,0 +1,2 @@
+>>> +QA output created by 159
+>>> +Silence is golden
+>>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>>> index 8007e07e..bc83db94 100644
+>>> --- a/tests/btrfs/group
+>>> +++ b/tests/btrfs/group
+>>> @@ -161,3 +161,4 @@
+>>>  156 auto quick trim
+>>>  157 auto quick raid
+>>>  158 auto quick raid scrub
+>>> +159 auto
+>>> --
+>>> 2.15.1
+>>>
+>>> --
+>>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>>> the body of a message to majordomo@vger.kernel.org
+>>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>>
+>>
+>>
+>
 
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
