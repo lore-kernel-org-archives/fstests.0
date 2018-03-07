@@ -1,160 +1,135 @@
-Received: from victor.provo.novell.com ([137.65.250.26]:58167 "EHLO
-        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750825AbeCFIvl (ORCPT
-        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Tue, 6 Mar 2018 03:51:41 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH v2 1/3] fstests: log-writes: Add support to output human readable flags
-Date: Tue,  6 Mar 2018 16:51:31 +0800
-Message-Id: <20180306085131.6118-1-wqu@suse.com>
-In-Reply-To: <20180306081555.3242-1-wqu@suse.com>
-References: <20180306081555.3242-1-wqu@suse.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:53242 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754771AbeCHBCj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Mar 2018 20:02:39 -0500
+From: Liu Bo <bo.li.liu@oracle.com>
+Subject: [PATCH] fstests: test regression of -EEXIST on creating new file after log replay
+Date: Wed,  7 Mar 2018 16:59:10 -0700
+Message-Id: <20180307235910.12313-1-bo.li.liu@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: dsterba@suse.cz, amir73il@gmail.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Also change the flag numeric output to hex.
+The regression is introduced to btrfs in linux v4.4 and it refuses to create
+new files after log replay by returning -EEXIST.
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-v2:
-  Also output unknown flags in hex
----
- src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 63 insertions(+), 7 deletions(-)
+Although the problem is on btrfs only, there is no btrfs stuff in terms of
+test, so this makes it generic.
 
-diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-index 09391574..a872429d 100644
---- a/src/log-writes/log-writes.c
-+++ b/src/log-writes/log-writes.c
-@@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
- 	return 0;
- }
- 
-+#define DEFINE_LOG_FLAGS_STR_ENTRY(x)	\
-+	{LOG_##x##_FLAG, #x}
+The kernel fix is
+  Btrfs: fix unexpected -EEXIST when creating new inode
+
+Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
+---
+ tests/generic/481     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/481.out |  5 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 81 insertions(+)
+ create mode 100755 tests/generic/481
+ create mode 100644 tests/generic/481.out
+
+diff --git a/tests/generic/481 b/tests/generic/481
+new file mode 100755
+index 0000000..8d8bb2b
+--- /dev/null
++++ b/tests/generic/481
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# FSQA Test No. 481
++#
++# Reproduce a regression of btrfs that leads to -EEXIST on creating new files
++# after log replay.
++#
++# The kernel fix is
++#   Btrfs: fix unexpected -EEXIST when creating new inode
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2018 Oracle. All Rights Reserved.
++# Author: Bo Liu <bo.li.liu@oracle.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+struct flags_to_str_entry {
-+	u64 flags;
-+	const char *str;
-+} log_flags_table[] = {
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
-+};
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-+#define LOG_FLAGS_BUF_SIZE	128
-+/*
-+ * Convert numeric flags to human readable flags.
-+ * @flags:	numeric flags
-+ * @buf:	output buffer for human readable string.
-+ * 		must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
-+ * 		the string
-+ */
-+static void entry_flags_to_str(u64 flags, char *buf)
++_cleanup()
 +{
-+	int empty = 1;
-+	int left_len;
-+	int i;
-+
-+	buf[0] = '\0';
-+	for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
-+		if (flags & log_flags_table[i].flags) {
-+			if (!empty)
-+				strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+			empty = 0;
-+			strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
-+			flags &= ~log_flags_table[i].flags;
-+		}
-+	}
-+	if (flags) {
-+		if (!empty)
-+			strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+		empty = 0;
-+		left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
-+						        LOG_FLAGS_BUF_SIZE);
-+		if (left_len > 0)
-+			snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
-+				 left_len, "UNKNOWN.0x%llx", flags);
-+	}
-+	if (empty)
-+		strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
 +}
 +
- /*
-  * @log: the log we are replaying.
-  * @entry: entry to be replayed.
-@@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	char *buf;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 	off_t offset;
- 	int skip = 0;
-@@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 		log->cur_pos += read_size;
- 	}
- 
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	skip = log_should_skip(log, entry);
- 	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
--		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
-+		printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
- 		       skip ? "skipping" : "replaying",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)size,
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 	}
- 	if (!size)
- 		return 0;
- 
--	flags = le64_to_cpu(entry->flags);
- 	if (flags & LOG_DISCARD_FLAG)
- 		return log_discard(log, entry);
- 
-@@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
- 			return -1;
- 		}
- 		if (log_writes_verbose > 1)
--			printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+			printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
- 			       (int)i, log->cur_pos / log->sectorsize,
- 			       (unsigned long long)le64_to_cpu(entry.sector),
- 			       (unsigned long long)le64_to_cpu(entry.nr_sectors),
-@@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	u64 flags;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 
- 	if (log->cur_entry >= log->nr_entries)
-@@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	} else {
- 		log->cur_pos += read_size;
- 	}
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	if (log_writes_verbose > 1)
--		printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+		printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)le64_to_cpu(entry->nr_sectors),
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 
--	flags = le64_to_cpu(entry->flags);
- 	read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
- 	if (!read_size || (flags & LOG_DISCARD_FLAG))
- 		return 0;
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_init_flakey
++_mount_flakey
++
++# create a file and keep it in write ahead log
++$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# fail this filesystem so that remount can replay the write ahead log
++_flakey_drop_and_remount
++
++# see if we can create a new file successfully
++touch $SCRATCH_MNT/bar
++
++_unmount_flakey
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/generic/481.out b/tests/generic/481.out
+new file mode 100644
+index 0000000..66a6345
+--- /dev/null
++++ b/tests/generic/481.out
+@@ -0,0 +1,5 @@
++QA output created by 481
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++touch: cannot touch '/mnt/scratch/bar': File exists
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index ea2056b..05f60f2 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -483,3 +483,4 @@
+ 478 auto quick
+ 479 auto quick metadata
+ 480 auto quick metadata
++481 auto quick
 -- 
-2.15.1
+2.5.0
 
