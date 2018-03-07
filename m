@@ -1,163 +1,81 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:41294 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752861AbeCFIfl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 6 Mar 2018 03:35:41 -0500
+Received: from mail-ua0-f195.google.com ([209.85.217.195]:41456 "EHLO
+        mail-ua0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933280AbeCGNHs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Mar 2018 08:07:48 -0500
 MIME-Version: 1.0
-In-Reply-To: <20180306081555.3242-1-wqu@suse.com>
-References: <20180306081555.3242-1-wqu@suse.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 6 Mar 2018 10:35:40 +0200
-Message-ID: <CAOQ4uxj0OYnSi3Ok69FB7_fBT_5g-hO+pcEvd5uiN5kNOsuuFQ@mail.gmail.com>
-Subject: Re: [PATCH 1/3] fstests: log-writes: Add support to output human
- readable flags
+Reply-To: fdmanana@gmail.com
+In-Reply-To: <20180307070747.GG30836@localhost.localdomain>
+References: <20180306070231.16880-1-lufq.fnst@cn.fujitsu.com> <20180307070747.GG30836@localhost.localdomain>
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Wed, 7 Mar 2018 13:07:46 +0000
+Message-ID: <CAL3q7H4XkGUnEx4jw0QkvnpoUTHesW83691pi+3ZGDMCDooqSQ@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs/004: increase the buffer size of
+ logical-resolve to the maximum value 64K
 Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: Linux Btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, dsterba@suse.cz
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Lu Fengqi <lufq.fnst@cn.fujitsu.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 6, 2018 at 10:15 AM, Qu Wenruo <wqu@suse.com> wrote:
-> Also change the flag numeric output to hex.
+On Wed, Mar 7, 2018 at 7:07 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Tue, Mar 06, 2018 at 03:02:31PM +0800, Lu Fengqi wrote:
+>> Because of commit e76e13ce8c0b ("fsstress: implement the
+>> clonerange/deduperange ioctls"), dedupe makes the number of references t=
+o
+>> the same extent item increase so much that the default 4K buffer of
+>> logical-resolve is no longer sufficient.
+>>
+>> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 >
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
->  1 file changed, 63 insertions(+), 7 deletions(-)
->
-> diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-> index 09391574..66fad350 100644
-> --- a/src/log-writes/log-writes.c
-> +++ b/src/log-writes/log-writes.c
-> @@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
->         return 0;
->  }
->
-> +#define DEFINE_LOG_FLAGS_STR_ENTRY(x)  \
-> +       {LOG_##x##_FLAG, #x}
-> +
-> +struct flags_to_str_entry {
-> +       u64 flags;
-> +       const char *str;
-> +} log_flags_table[] = {
-> +       DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
-> +       DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
-> +       DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
-> +       DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
-> +};
-> +
-> +#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-> +#define LOG_FLAGS_BUF_SIZE     128
-> +/*
-> + * Convert numeric flags to human readable flags.
-> + * @flags:     numeric flags
-> + * @buf:       output buffer for human readable string.
-> + *             must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
-> + *             the string
-> + */
-> +static void entry_flags_to_str(u64 flags, char *buf)
-> +{
-> +       int empty = 1;
-> +       int left_len;
-> +       int i;
-> +
-> +       buf[0] = '\0';
-> +       for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
-> +               if (flags & log_flags_table[i].flags) {
-> +                       if (!empty)
-> +                               strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-> +                       empty = 0;
-> +                       strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
-> +                       flags &= ~log_flags_table[i].flags;
-> +               }
-> +       }
-> +       if (flags) {
-> +               if (!empty)
-> +                       strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-> +               empty = 0;
-> +               left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
-> +                                                       LOG_FLAGS_BUF_SIZE);
-> +               if (left_len > 0)
-> +                       snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
-> +                                left_len, "UNKNOWN.%llu", flags);
+> This looks fine to me. But I'd like an explicit ack from btrfs
+> developers.
 
-Missed a spot - %llx
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-> +       }
-> +       if (empty)
-> +               strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
-> +}
-> +
->  /*
->   * @log: the log we are replaying.
->   * @entry: entry to be replayed.
-> @@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
->         size_t read_size = read_data ? log->sectorsize :
->                 sizeof(struct log_write_entry);
->         char *buf;
-> +       char flags_buf[LOG_FLAGS_BUF_SIZE];
->         ssize_t ret;
->         off_t offset;
->         int skip = 0;
-> @@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
->                 log->cur_pos += read_size;
->         }
+Looks good to me.
+
 >
-> +       flags = le64_to_cpu(entry->flags);
-> +       entry_flags_to_str(flags, flags_buf);
->         skip = log_should_skip(log, entry);
->         if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
-> -               printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
-> +               printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
->                        skip ? "skipping" : "replaying",
->                        (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
->                        (unsigned long long)le64_to_cpu(entry->sector),
->                        (unsigned long long)size,
-> -                      (unsigned long long)le64_to_cpu(entry->flags));
-> +                      (unsigned long long)flags, flags_buf);
->         }
->         if (!size)
->                 return 0;
+> Thanks,
+> Eryu
 >
-> -       flags = le64_to_cpu(entry->flags);
->         if (flags & LOG_DISCARD_FLAG)
->                 return log_discard(log, entry);
->
-> @@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
->                         return -1;
->                 }
->                 if (log_writes_verbose > 1)
-> -                       printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-> +                       printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
->                                (int)i, log->cur_pos / log->sectorsize,
->                                (unsigned long long)le64_to_cpu(entry.sector),
->                                (unsigned long long)le64_to_cpu(entry.nr_sectors),
-> @@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
->         size_t read_size = read_data ? log->sectorsize :
->                 sizeof(struct log_write_entry);
->         u64 flags;
-> +       char flags_buf[LOG_FLAGS_BUF_SIZE];
->         ssize_t ret;
->
->         if (log->cur_entry >= log->nr_entries)
-> @@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
->         } else {
->                 log->cur_pos += read_size;
->         }
-> +       flags = le64_to_cpu(entry->flags);
-> +       entry_flags_to_str(flags, flags_buf);
->         if (log_writes_verbose > 1)
-> -               printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-> +               printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
->                        (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
->                        (unsigned long long)le64_to_cpu(entry->sector),
->                        (unsigned long long)le64_to_cpu(entry->nr_sectors),
-> -                      (unsigned long long)le64_to_cpu(entry->flags));
-> +                      (unsigned long long)flags, flags_buf);
->
-> -       flags = le64_to_cpu(entry->flags);
->         read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
->         if (!read_size || (flags & LOG_DISCARD_FLAG))
->                 return 0;
+>> ---
+>>  tests/btrfs/004 | 2 +-
+>>  1 file changed, 1 insertion(+), 1 deletion(-)
+>>
+>> diff --git a/tests/btrfs/004 b/tests/btrfs/004
+>> index de583cc355d4..0d2efb91dba7 100755
+>> --- a/tests/btrfs/004
+>> +++ b/tests/btrfs/004
+>> @@ -103,7 +103,7 @@ _btrfs_inspect_addr()
+>>       expect_addr=3D$3
+>>       expect_inum=3D$4
+>>       file=3D$5
+>> -     cmd=3D"$BTRFS_UTIL_PROG inspect-internal logical-resolve -P $addr =
+$mp"
+>> +     cmd=3D"$BTRFS_UTIL_PROG inspect-internal logical-resolve -s 65536 =
+-P $addr $mp"
+>>       echo "# $cmd" >> $seqres.full
+>>       out=3D`$cmd`
+>>       echo "$out" >> $seqres.full
+>> --
+>> 2.16.2
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
 > --
-> 2.15.1
->
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
