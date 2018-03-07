@@ -1,59 +1,59 @@
-Received: from victor.provo.novell.com ([137.65.250.26]:34347 "EHLO
-        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750769AbeCFIQK (ORCPT
-        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Tue, 6 Mar 2018 03:16:10 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 2/3] fstests: log-writes: Add support for METADATA flag
-Date: Tue,  6 Mar 2018 16:15:54 +0800
-Message-Id: <20180306081555.3242-2-wqu@suse.com>
-In-Reply-To: <20180306081555.3242-1-wqu@suse.com>
-References: <20180306081555.3242-1-wqu@suse.com>
+Received: from mail-io0-f194.google.com ([209.85.223.194]:33561 "EHLO
+        mail-io0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751067AbeCGHHy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Mar 2018 02:07:54 -0500
+Date: Wed, 7 Mar 2018 15:07:47 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] fstests: btrfs/004: increase the buffer size of
+ logical-resolve to the maximum value 64K
+Message-ID: <20180307070747.GG30836@localhost.localdomain>
+References: <20180306070231.16880-1-lufq.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180306070231.16880-1-lufq.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: dsterba@suse.cz, amir73il@gmail.com
+To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- src/log-writes/log-writes.c | 3 ++-
- src/log-writes/log-writes.h | 9 +++++----
- 2 files changed, 7 insertions(+), 5 deletions(-)
+On Tue, Mar 06, 2018 at 03:02:31PM +0800, Lu Fengqi wrote:
+> Because of commit e76e13ce8c0b ("fsstress: implement the
+> clonerange/deduperange ioctls"), dedupe makes the number of references to
+> the same extent item increase so much that the default 4K buffer of
+> logical-resolve is no longer sufficient.
+> 
+> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 
-diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-index 66fad350..d755194a 100644
---- a/src/log-writes/log-writes.c
-+++ b/src/log-writes/log-writes.c
-@@ -130,7 +130,8 @@ struct flags_to_str_entry {
- 	DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
- 	DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
- 	DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
--	DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
-+	DEFINE_LOG_FLAGS_STR_ENTRY(MARK),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(METADATA)
- };
- 
- #define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
-index 35ca3583..75fb8ac0 100644
---- a/src/log-writes/log-writes.h
-+++ b/src/log-writes/log-writes.h
-@@ -20,10 +20,11 @@ typedef __u32 u32;
- /*
-  * Constants copied from kernel file drivers/md/dm-log-writes.c
-  */
--#define LOG_FLUSH_FLAG (1 << 0)
--#define LOG_FUA_FLAG (1 << 1)
--#define LOG_DISCARD_FLAG (1 << 2)
--#define LOG_MARK_FLAG (1 << 3)
-+#define LOG_FLUSH_FLAG		(1 << 0)
-+#define LOG_FUA_FLAG		(1 << 1)
-+#define LOG_DISCARD_FLAG	(1 << 2)
-+#define LOG_MARK_FLAG		(1 << 3)
-+#define LOG_METADATA_FLAG	(1 << 4)
- 
- #define WRITE_LOG_VERSION 1
- #define WRITE_LOG_MAGIC 0x6a736677736872
--- 
-2.15.1
+This looks fine to me. But I'd like an explicit ack from btrfs
+developers.
 
+Thanks,
+Eryu
+
+> ---
+>  tests/btrfs/004 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/btrfs/004 b/tests/btrfs/004
+> index de583cc355d4..0d2efb91dba7 100755
+> --- a/tests/btrfs/004
+> +++ b/tests/btrfs/004
+> @@ -103,7 +103,7 @@ _btrfs_inspect_addr()
+>  	expect_addr=$3
+>  	expect_inum=$4
+>  	file=$5
+> -	cmd="$BTRFS_UTIL_PROG inspect-internal logical-resolve -P $addr $mp"
+> +	cmd="$BTRFS_UTIL_PROG inspect-internal logical-resolve -s 65536 -P $addr $mp"
+>  	echo "# $cmd" >> $seqres.full
+>  	out=`$cmd`
+>  	echo "$out" >> $seqres.full
+> -- 
+> 2.16.2
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
