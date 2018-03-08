@@ -1,14 +1,14 @@
-Received: from mail-vk0-f66.google.com ([209.85.213.66]:46621 "EHLO
-        mail-vk0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750983AbeCHKHf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Mar 2018 05:07:35 -0500
+Received: from mail-ua0-f196.google.com ([209.85.217.196]:34340 "EHLO
+        mail-ua0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935643AbeCHKxM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Mar 2018 05:53:12 -0500
 MIME-Version: 1.0
 Reply-To: fdmanana@gmail.com
 In-Reply-To: <20180307235910.12313-1-bo.li.liu@oracle.com>
 References: <20180307235910.12313-1-bo.li.liu@oracle.com>
 From: Filipe Manana <fdmanana@gmail.com>
-Date: Thu, 8 Mar 2018 10:07:33 +0000
-Message-ID: <CAL3q7H70wYaBEZgWxcko-3qVfGfG8aFNym5=2Wb8xcszcb3YaA@mail.gmail.com>
+Date: Thu, 8 Mar 2018 10:53:11 +0000
+Message-ID: <CAL3q7H5NXC2ZD+wzesvxkf=3KWDmb5apfkio=Ov1vnCBsNxJNw@mail.gmail.com>
 Subject: Re: [PATCH] fstests: test regression of -EEXIST on creating new file
  after log replay
 Content-Type: text/plain; charset="UTF-8"
@@ -110,17 +110,6 @@ files
 > +# create a file and keep it in write ahead log
 > +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/foo | _filter_x=
 fs_io
-
-What's the point of writing data to the file if we later don't check
-that the data is there (and the file size is 4K)?
-To trigger the bug in btrfs, it was also not needed to write data to
-the file in the first place.
-
-Other then that looks good.
-Thanks for doing this.
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
 > +
 > +# fail this filesystem so that remount can replay the write ahead log
 > +_flakey_drop_and_remount
@@ -144,6 +133,11 @@ Reviewed-by: Filipe Manana <fdmanana@suse.com>
 > +wrote 4096/4096 bytes at offset 0
 > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 > +touch: cannot touch '/mnt/scratch/bar': File exists
+
+I missed this before, but this error from 'touch' is not supposed to happen=
+.
+So this golden output is for the buggy, unpatched btrfs.
+
 > +Silence is golden
 > diff --git a/tests/generic/group b/tests/generic/group
 > index ea2056b..05f60f2 100644
