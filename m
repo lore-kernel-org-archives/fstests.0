@@ -1,138 +1,76 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:47388 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751135AbeCKBJG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 10 Mar 2018 20:09:06 -0500
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: [PATCH v2] fstests: test regression of -EEXIST on creating new file after log replay
-Date: Sat, 10 Mar 2018 16:56:04 -0700
-Message-Id: <20180310235604.3206-1-bo.li.liu@oracle.com>
-In-Reply-To: <20180307235910.12313-1-bo.li.liu@oracle.com>
-References: <20180307235910.12313-1-bo.li.liu@oracle.com>
+Received: from mail-pg0-f42.google.com ([74.125.83.42]:40886 "EHLO
+        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932087AbeCKH4i (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Mar 2018 03:56:38 -0400
+Received: by mail-pg0-f42.google.com with SMTP id g8so5248364pgv.7
+        for <fstests@vger.kernel.org>; Sat, 10 Mar 2018 23:56:38 -0800 (PST)
+Message-ID: <5aa4e135.4661650a.80f89.0f70@mx.google.com>
+Date: Sun, 11 Mar 2018 15:56:31 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 640e4f6d7ae3
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="pCAEBjHLK8ZD"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The regression is introduced to btrfs in linux v4.4 and it refuses to create
-new files after log replay by returning -EEXIST.
 
-Although the problem is on btrfs only, there is no btrfs stuff in terms of
-test, so this makes it generic.
+--pCAEBjHLK8ZD
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-The kernel fix is
-  Btrfs: fix unexpected -EEXIST when creating new inode
+Hi all,
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
----
-v2: - Remove failed message from 481.out
-    - Drop the unnecessary write in creating a file
+The master branch of the xfstests repository at:
 
- tests/generic/481     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/481.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 78 insertions(+)
- create mode 100755 tests/generic/481
- create mode 100644 tests/generic/481.out
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-diff --git a/tests/generic/481 b/tests/generic/481
-new file mode 100755
-index 0000000..6a7e9dd
---- /dev/null
-+++ b/tests/generic/481
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# FSQA Test No. 481
-+#
-+# Reproduce a regression of btrfs that leads to -EEXIST on creating new files
-+# after log replay.
-+#
-+# The kernel fix is
-+#   Btrfs: fix unexpected -EEXIST when creating new inode
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2018 Oracle. All Rights Reserved.
-+# Author: Bo Liu <bo.li.liu@oracle.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_init_flakey
-+_mount_flakey
-+
-+# create a file and keep it in write ahead log
-+$XFS_IO_PROG -f -c "fsync" $SCRATCH_MNT/foo
-+
-+# fail this filesystem so that remount can replay the write ahead log
-+_flakey_drop_and_remount
-+
-+# see if we can create a new file successfully
-+touch $SCRATCH_MNT/bar
-+
-+_unmount_flakey
-+
-+echo "Silence is golden"
-+
-+status=0
-+exit
-diff --git a/tests/generic/481.out b/tests/generic/481.out
-new file mode 100644
-index 0000000..206e116
---- /dev/null
-+++ b/tests/generic/481.out
-@@ -0,0 +1,2 @@
-+QA output created by 481
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index ea2056b..05f60f2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -483,3 +483,4 @@
- 478 auto quick
- 479 auto quick metadata
- 480 auto quick metadata
-+481 auto quick
--- 
-2.5.0
+have just been updated. This update only contains two minor fixes for btrfs
+cases, thanks to Lu Fengqi's patches and Filipe Manana's review!
 
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+640e4f6d7ae3 btrfs/146: make sure hit all stripes in the case of compression
+
+New commits:
+
+Lu Fengqi (2):
+      [34369fb21cc2] btrfs/004: increase the buffer size of logical-resolve to the maximum value 64K
+      [640e4f6d7ae3] btrfs/146: make sure hit all stripes in the case of compression
+
+
+Code Diffstat:
+
+ tests/btrfs/004 | 2 +-
+ tests/btrfs/146 | 9 ++++++---
+ 2 files changed, 7 insertions(+), 4 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--pCAEBjHLK8ZD
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJapN9hAAoJECZSqilcj+djwd0P/ikejAUYHUo4y+7L4tNR2TY6
+Tx0R7qn6OC9Q1Lifn1mmiXSKzNi8m0+UCyE2rnNu2L1h/3C8Dskdjgc0n5FruyN5
+/kiaME7tiQDTkaO7l8WZR4mrkd+O5k3pr/mwBmiIIqkiDPvM/v/ofBIjR2iUM4ni
+9pUtw6wJv5XdBBgzkS3XxZ5conS/IO7y90pgxD1pn27UFm1BWimim9PijpxzgSio
+2prvcrtzxf137KRXZ7i4fMj30wcnpub7dbfsQr/8hW/zrQoXgoloZJde44Slb5d8
+fkJS9ojRJzOnQXhfW44kmv/vvFUn5ZhbOpNRdxJICpXPrNEMji1/xDiq/Qfj77M5
+huLYg6K6F2NJAS/Nk7qZfK+VICCO+tgfRJ+lUPdH5k93bkUDUn4Zgcsv5cRxz+Xd
+TZAYs0f9+lDSzgu8ufdQMNas7kF2WFHTP5DtmY1XF837iYvTraFOgumDVXFDxyE9
+UeFWAUJb/+baJOPPlFu7WUvLbWovN7/TZMpoalCPm8x58iNwJaVBL0hMCerFVdqi
+puswntTV3vQaovRok/N3LhQ0tHKYnYWiSE4zqnxSpLP47kv8XqrNBbXbs65QFHFl
+dDCtTlzXzIvoHxDJaq8FXpT2/52QL91lqGV8touUn8BrcmxUTg7YxIlb/WhmCtRH
+HzikkuYDNB8FphwnHB3O
+=uPFO
+-----END PGP SIGNATURE-----
+
+--pCAEBjHLK8ZD--
