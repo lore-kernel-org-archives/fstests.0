@@ -1,76 +1,102 @@
-Received: from mail-pg0-f42.google.com ([74.125.83.42]:40886 "EHLO
-        mail-pg0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932087AbeCKH4i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Mar 2018 03:56:38 -0400
-Received: by mail-pg0-f42.google.com with SMTP id g8so5248364pgv.7
-        for <fstests@vger.kernel.org>; Sat, 10 Mar 2018 23:56:38 -0800 (PST)
-Message-ID: <5aa4e135.4661650a.80f89.0f70@mx.google.com>
-Date: Sun, 11 Mar 2018 15:56:31 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 640e4f6d7ae3
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:44040 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932087AbeCKIMG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Mar 2018 04:12:06 -0400
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="pCAEBjHLK8ZD"
-Content-Disposition: inline
+In-Reply-To: <f3d16204-701d-6aad-4f07-0f3824ae0bcc@huawei.com>
+References: <20180301121347.5824-1-yi.zhang@huawei.com> <20180301121347.5824-3-yi.zhang@huawei.com>
+ <CAOQ4uxhAsV6-ENGrSrHNE+Ho8_N8+msGbWy8vBCkZXmeEabTYQ@mail.gmail.com> <f3d16204-701d-6aad-4f07-0f3824ae0bcc@huawei.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 11 Mar 2018 10:12:04 +0200
+Message-ID: <CAOQ4uxgNHx2Vc=CNvrmYEPfQpG0jzFsit_Z7t7GNkE6ZWWp+GQ@mail.gmail.com>
+Subject: Re: [xfstests PATCH v5 2/5] overlay: hook filesystem check helper
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: "zhangyi (F)" <yi.zhang@huawei.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Mar 1, 2018 at 3:11 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+> On 2018/3/1 21:03, Amir Goldstein Wrote:
+>> On Thu, Mar 1, 2018 at 2:13 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
+>>> Hook filesystem check helper to _check_test_fs and _check_scratch_fs
+>>> for checking consistency of underlying dirs of overlay filesystem.
+>>> These helpers works only if fsck.overlay exists.
+>>>
+>>> This patch introduce OVERLAY_FSCK_OPTIONS use for check overlayfs like
+>>> OVERLAY_MOUNT_OPTIONS, and also introduce a mount point check helper in
+>>> common/rc to detect a dir is a mount point or not.
+>>>
+>>> [ _check_test_fs/_check_scratch_fs part picked from Amir's patch, thanks ]
+>>>
+>>> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+>>> ---
+>>>  README.overlay | 10 ++++--
+>>>  common/config  |  4 +++
+>>>  common/overlay | 99 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>>  common/rc      | 18 +++++++++--
+>>>  4 files changed, 127 insertions(+), 4 deletions(-)
+>>>
+>>> diff --git a/README.overlay b/README.overlay
+>>> index dfb8234..3cbefab 100644
+>>> --- a/README.overlay
+>>> +++ b/README.overlay
+>>> @@ -22,6 +22,10 @@ the base fs should be pre-formatted before starting the -overlay run.
+>>>  An easy way to accomplish this is by running './check <some test>' once,
+>>>  before running './check -overlay'.
+>>>
+>>> +'./check -overlay' support check overlay test and scratch dirs,
+>>> +OVERLAY_FSCK_OPTIONS should be set instead of FSCK_OPTIONS if fsck
+>>> +options need to given directly.
+>>> +
+>>>  Because of the lack of mkfs support, multi-section config files are only
+>>>  partly supported with './check -overlay'. Only multi-section files that
+>>>  do not change FSTYP and MKFS_OPTIONS can be safely used with -overlay.
+>>> @@ -40,7 +44,9 @@ run overlay tests on the same base fs, but with different mount options:
+>>>   MOUNT_OPTIONS="-o pquota"
+>>>   TEST_FS_MOUNT_OPTS="-o noatime"
+>>>   OVERLAY_MOUNT_OPTIONS="-o redirect_dir=off"
+>>> + OVERLAY_FSCK_OPTIONS="-n redirect_dir=off"
+>>
+>> typo for the phony options. I believe it is going to be:  "-n -o
+>> redirect_dir=off"
+>
+> Oh, sorry for the mistake, it is "-n -o redirect_dir=off"
+>
 
---pCAEBjHLK8ZD
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Zhangyi,
 
-Hi all,
+One thing that has occurred to me now, which should be fixed before
+first release
+is that fsck.overlay should return an error for unknown/unsupported options
+(e.g. fsck.overlay -o blah doesn't complain).
+If this doesn't happen for first release then in the future we will
+not be able to
+write test scripts to check if installed fsck.overlay version supports
+feature X.
 
-The master branch of the xfstests repository at:
+About the possible meaning of <feature>=on/off and the meaning of <defaults>
+in the context of fsck.overlay, I think it is worth a separate
+discussion, but the
+way I see it:
+- When fsck.overlay *supports* a <feature> it should be able to detect if that
+  <feature> was ever enabled on overlay (e.g. known xattr exists or
+index dir exists).
+- When fsck.overlay detects an unknown <feature> it should abort
+- -o <feature>=off means wipe all traces of <feature> from overlay and fix if
+  necessary (e.g. make a copy of redirect dir before removing
+redirect_dir xattr)
+- -o <feature>=on means bring overlay to a "feature consistent state",
+as if feature
+  was enabled from day 1 (e.g. index all copies up lower hardlinks)
+- If <feature>=[on/off] is not specified, then if <feature> is not
+detected, it should
+  not be explicitly enabled and if feature is detected it should be
+made consistent
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+That last rule is certainly debatable, so maybe best if we leave that
+decision to
+admin via default policy configuration file.
 
-have just been updated. This update only contains two minor fixes for btrfs
-cases, thanks to Lu Fengqi's patches and Filipe Manana's review!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-640e4f6d7ae3 btrfs/146: make sure hit all stripes in the case of compression
-
-New commits:
-
-Lu Fengqi (2):
-      [34369fb21cc2] btrfs/004: increase the buffer size of logical-resolve to the maximum value 64K
-      [640e4f6d7ae3] btrfs/146: make sure hit all stripes in the case of compression
-
-
-Code Diffstat:
-
- tests/btrfs/004 | 2 +-
- tests/btrfs/146 | 9 ++++++---
- 2 files changed, 7 insertions(+), 4 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---pCAEBjHLK8ZD
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJapN9hAAoJECZSqilcj+djwd0P/ikejAUYHUo4y+7L4tNR2TY6
-Tx0R7qn6OC9Q1Lifn1mmiXSKzNi8m0+UCyE2rnNu2L1h/3C8Dskdjgc0n5FruyN5
-/kiaME7tiQDTkaO7l8WZR4mrkd+O5k3pr/mwBmiIIqkiDPvM/v/ofBIjR2iUM4ni
-9pUtw6wJv5XdBBgzkS3XxZ5conS/IO7y90pgxD1pn27UFm1BWimim9PijpxzgSio
-2prvcrtzxf137KRXZ7i4fMj30wcnpub7dbfsQr/8hW/zrQoXgoloZJde44Slb5d8
-fkJS9ojRJzOnQXhfW44kmv/vvFUn5ZhbOpNRdxJICpXPrNEMji1/xDiq/Qfj77M5
-huLYg6K6F2NJAS/Nk7qZfK+VICCO+tgfRJ+lUPdH5k93bkUDUn4Zgcsv5cRxz+Xd
-TZAYs0f9+lDSzgu8ufdQMNas7kF2WFHTP5DtmY1XF837iYvTraFOgumDVXFDxyE9
-UeFWAUJb/+baJOPPlFu7WUvLbWovN7/TZMpoalCPm8x58iNwJaVBL0hMCerFVdqi
-puswntTV3vQaovRok/N3LhQ0tHKYnYWiSE4zqnxSpLP47kv8XqrNBbXbs65QFHFl
-dDCtTlzXzIvoHxDJaq8FXpT2/52QL91lqGV8touUn8BrcmxUTg7YxIlb/WhmCtRH
-HzikkuYDNB8FphwnHB3O
-=uPFO
------END PGP SIGNATURE-----
-
---pCAEBjHLK8ZD--
+Cheers,
+Amir.
