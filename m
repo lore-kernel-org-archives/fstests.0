@@ -1,73 +1,158 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49280 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932439AbeCLQjw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Mar 2018 12:39:52 -0400
-Date: Mon, 12 Mar 2018 09:37:10 -0600
-From: Liu Bo <bo.li.liu@oracle.com>
-Subject: Re: [PATCH v2] fstests: test regression of -EEXIST on creating new
- file after log replay
-Message-ID: <20180312153710.GA25561@dhcp-10-211-47-181.usdhcp.oraclecorp.com>
-Reply-To: bo.li.liu@oracle.com
-References: <20180307235910.12313-1-bo.li.liu@oracle.com>
- <20180310235604.3206-1-bo.li.liu@oracle.com>
- <20180312112826.GK30836@localhost.localdomain>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:45328 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S932231AbeCLRqK (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Mar 2018 13:46:10 -0400
+Date: Mon, 12 Mar 2018 13:46:07 -0400
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH] xfstest: overlay: Absolute redirect should be followed even
+ if ancestor is opaque
+Message-ID: <20180312174607.GC2718@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180312112826.GK30836@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: eguan@redhat.com, fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 12, 2018 at 07:28:26PM +0800, Eryu Guan wrote:
-> On Sat, Mar 10, 2018 at 04:56:04PM -0700, Liu Bo wrote:
-> > The regression is introduced to btrfs in linux v4.4 and it refuses to create
-> > new files after log replay by returning -EEXIST.
-> > 
-> > Although the problem is on btrfs only, there is no btrfs stuff in terms of
-> > test, so this makes it generic.
-> > 
-> > The kernel fix is
-> >   Btrfs: fix unexpected -EEXIST when creating new inode
-> > 
-> > Reviewed-by: Filipe Manana <fdmanana@suse.com>
-> > Signed-off-by: Liu Bo <bo.li.liu@oracle.com>
-...
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	_cleanup_flakey
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/dmflakey
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_dm_target flakey
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> 
-> I added a "_require_metadata_journaling $SCRATCH_DEV" here, otherwise
-> test fails with ext2, which doesn't have journal.
+Typically, when following absolute redirect, if an opauqe dentry is
+found, lookup in further lower directories is stopped. But if a
+child dentry has another absolute redirect, then lookup in further
+lower layers should continue.
 
-Ah OK, that makes sense.
+Say, following is example setup.
+upper:  /redirect (redirect=/a/b/c)
+lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
+lower0: /a/b/d/foo
 
-Thanks,
+"redirect" directory in upper should merge with lower1:/a/b/c/ and
+lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
 
--liubo
+This example and kernel fix has come from Amir Goldstein. I am just putting
+a test for it to make sure its not broken down the line.
+
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+---
+ tests/overlay/057     |   97 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/057.out |    2 +
+ tests/overlay/group   |    1 
+ 3 files changed, 100 insertions(+)
+
+Index: xfstests-dev/tests/overlay/057
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/057	2018-03-12 13:28:02.274818432 -0400
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# FS QA Test No. 057
++#
++# Test absolute redirect is followed even if ancestor is opaque
++#
++# Typically, when following absolute redirect, if an opauqe dentry is
++# found, lookup in further lower directories is stopped. But if a
++# child dentry has another absolute redirect, then lookup in further
++# lower layers should continue.
++#
++# Say, following is example setup.
++# upper:  /redirect (redirect=/a/b/c)
++# lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
++# lower0: /a/b/d/foo
++#
++# "redirect" directory in upper should merge with lower1:/a/b/c/ and
++# lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
++# Author: Vivek Goyal <vgoyal@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch_nocheck
++_require_scratch_overlay_features redirect_dir
++
++# remove all files from previous tests
++_scratch_mkfs
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
++
++make_test_dirs()
++{
++	rm -rf $lowerdir $lowerdir2 $upperdir $workdir $workdir2
++        mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
++}
++
++make_test_dirs
++mkdir -p $lowerdir/origin
++touch $lowerdir/origin/foo
++_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2
++mkdir $SCRATCH_MNT/pure
++mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
++$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir
++mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
++$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir
++ls $SCRATCH_MNT/redirect/
++
++# success, all done
++status=0
++exit
+Index: xfstests-dev/tests/overlay/group
+===================================================================
+--- xfstests-dev.orig/tests/overlay/group	2018-02-28 15:27:29.981693615 -0500
++++ xfstests-dev/tests/overlay/group	2018-03-12 09:31:45.692818432 -0400
+@@ -59,3 +59,4 @@
+ 054 auto quick copyup redirect exportfs
+ 055 auto quick copyup redirect exportfs nonsamefs
+ 056 auto quick fsck
++057 auto quick redirect
+Index: xfstests-dev/tests/overlay/057.out
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/057.out	2018-03-12 13:09:42.061818432 -0400
+@@ -0,0 +1,2 @@
++QA output created by 057
++foo
