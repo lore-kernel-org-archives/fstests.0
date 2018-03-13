@@ -1,166 +1,266 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:36442 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751089AbeCMPSX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 13 Mar 2018 11:18:23 -0400
-Date: Tue, 13 Mar 2018 11:18:22 -0400
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: Re: [PATCH V2] xfstest: overlay: Absolute redirect should be
- followed even if ancestor is opaque
-Message-ID: <20180313151822.GA18454@redhat.com>
-References: <20180313150552.GC2982@redhat.com>
+Received: from mail-ua0-f174.google.com ([209.85.217.174]:35618 "EHLO
+        mail-ua0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932608AbeCMQ5X (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Mar 2018 12:57:23 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180313150552.GC2982@redhat.com>
+In-Reply-To: <20180313042126.GB18129@dastard>
+References: <CA+EzBbCtp9wKC=KeN+N1iZDa2+TsWxVho3aUkeXJXguVswkChA@mail.gmail.com>
+ <20180313042126.GB18129@dastard>
+From: Jayashree Mohan <jayashree2912@gmail.com>
+Date: Tue, 13 Mar 2018 11:57:21 -0500
+Message-ID: <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
+Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>
-Cc: linux-unionfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 13, 2018 at 11:05:52AM -0400, Vivek Goyal wrote:
-> Typically, when following absolute redirect, if an opauqe dentry is
-> found, lookup in further lower directories is stopped. But if a
-> child dentry has another absolute redirect, then lookup in further
-> lower layers should continue.
-> 
-> Say, following is example setup.
-> upper:  /redirect (redirect=/a/b/c)
-> lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-> lower0: /a/b/d/foo
-> 
-> "redirect" directory in upper should merge with lower1:/a/b/c/ and
-> lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
-> 
-> This example and kernel fix has come from Amir Goldstein. I am just putting
-> a test for it to make sure its not broken down the line.
-> 
-> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+Hi Dave,
 
-Oops forgot to add Amir's Reviewed by in previous version.
+Thanks for the response. CrashMonkey assumes the following behavior of
+disk cache. Let me know if any of this sounds unreasonable.
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Whenever the underlying storage device has an associated cache, the IO
+is marked completed the moment it reaches the disk cache. This does
+not guarantee that the disk cache would persist them in the same
+order, unless there is a Flush/FUA. The order of completed writes as
+seen by the user could be A, B, C, *Flush* D, E. However the disk
+cache could write these back to the persistent storage in the order
+say B, A, C, E, D. The only invariant it ensures is that writing in an
+order like  A, C, E, B, D is
+not possible because, writes A,B,C have to strictly happen before D
+and E. However you cannot ensure that (A, B, C) is written to the
+persistent storage in the same order.
 
-Vivek
+CrashMonkey reorders bios in conformance to the guarantees provided by
+disk cache; we do not make any extra assumptions and we respect the
+barrier operations.
 
-> ---
->  tests/overlay/057     |   91 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/057.out |    2 +
->  tests/overlay/group   |    1 
->  3 files changed, 94 insertions(+)
-> 
-> Index: xfstests-dev/tests/overlay/057
-> ===================================================================
-> --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/057	2018-03-13 10:37:43.321123202 -0400
-> @@ -0,0 +1,91 @@
-> +#! /bin/bash
-> +# FS QA Test No. 057
-> +#
-> +# Test absolute redirect is followed even if ancestor is opaque
-> +#
-> +# Typically, when following absolute redirect, if an opauqe dentry is
-> +# found, lookup in further lower directories is stopped. But if a
-> +# child dentry has another absolute redirect, then lookup in further
-> +# lower layers should continue.
-> +#
-> +# Say, following is example setup.
-> +# upper:  /redirect (redirect=/a/b/c)
-> +# lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-> +# lower0: /a/b/d/foo
-> +#
-> +# "redirect" directory in upper should merge with lower1:/a/b/c/ and
-> +# lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-> +# Author: Vivek Goyal <vgoyal@redhat.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch_nocheck
-> +_require_scratch_overlay_features redirect_dir
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# Create test directories
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-> +
-> +mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-> +mkdir -p $lowerdir/origin
-> +touch $lowerdir/origin/foo
-> +_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on
-> +mkdir $SCRATCH_MNT/pure
-> +mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-> +mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-> +ls $SCRATCH_MNT/redirect/
-> +
-> +# success, all done
-> +status=0
-> +exit
-> Index: xfstests-dev/tests/overlay/group
-> ===================================================================
-> --- xfstests-dev.orig/tests/overlay/group	2018-02-28 15:27:29.981693615 -0500
-> +++ xfstests-dev/tests/overlay/group	2018-03-12 09:31:45.692818432 -0400
-> @@ -59,3 +59,4 @@
->  054 auto quick copyup redirect exportfs
->  055 auto quick copyup redirect exportfs nonsamefs
->  056 auto quick fsck
-> +057 auto quick redirect
-> Index: xfstests-dev/tests/overlay/057.out
-> ===================================================================
-> --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/057.out	2018-03-12 13:09:42.061818432 -0400
-> @@ -0,0 +1,2 @@
-> +QA output created by 057
-> +foo
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-unionfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+On Mon, Mar 12, 2018 at 11:21 PM, Dave Chinner <david@fromorbit.com> wrote:
+> On Mon, Mar 12, 2018 at 09:15:25PM -0500, Jayashree Mohan wrote:
+>> Hi,
+>>
+>> We've encountered what seems to be a crash consistency bug in
+>> xfs(kernel 4.15) due to the interaction between delayed allocated
+>> write and an unaligned fallocate(zero range) : Fallocate_zero_range is
+>> not persisted even when followed by a fsync - thereby leading to a
+>> loss of fsynced metadata operation on a file.
+>>
+>> Say we create a disk image with known data and quick format it.
+>> 1. Now write 65K of data to a new file
+>> 2. Zero out a part of the above file using falloc_zero_range (60K+128)
+>> - (60K+128+4096) - an unaligned block
+>> 3. fsync the above file
+>> 4. Crash
+>
+> So, effectively:
+>
+> $ xfs_io -xft -c "pwrite 0 65k" \
+>         -c "fzero $((60 * 1024 + 128)) 4k" \
+>         -c fsync \
+>         -c "shutdown"
+>         /mnt/scratch/testfile
+> $
+
+Yes, this is the right translation of our workload.
+
+>>
+>> If we crash after the fsync, and allow reordering of the block IOs
+>> between two flush/fua commands using Crashmonkey[1], then we can end
+>> up not persisting the zero_range command in step 2 above, even if we
+>> crashed after a fsync.
+>
+> Sorry, but what do you mean by "reordering of the block IOs"?
+
+CrashMonkey reorders IOs between two barrier operations just like the
+disk cache would do, while respecting the guarantees provided by disk
+cache; CrashMonkey will never re order bios across barriers.
+
+>> This workload was inspired from xfstest/generic_042, which tests for
+>> stale data exposure using aligned fallocate commands. It's worth
+>> noting that f2fs and btrfs passes our test clean - irrespective of the
+>> order of bios, user data is intact and fzero operation is correctly persisted.
+>>
+>> To reproduce this bug using CrashMonkey, simply run :
+>> ./c_harness -f /dev/sda -d /dev/cow_ram0 -t xfs -e 102400 -s 1000 -v
+>> tests/generic_042/generic_042_fzero_unaligned.so
+>>
+>> and take a look at the <timestamp>-generic_042_fzero_unaligned.log
+>> created in the build directory. This file has the list of block IOs
+>> issued during the workload and the permutation of bios that lead to
+>> this bug. You can also verify using blktrace that CrashMonkey only
+>> reorders bios between two barrier operations(thereby such a crash
+>> state could be encountered due to reordering blocks at the storage
+>> stack). Note that tools like dm-log-writes cannot capture this bug
+>> because this arises due to reordering blocks between barrier
+>> operations.
+>>
+>> Possible reason for this bug :
+>> On closely inspecting the reason for this bug, we discovered that the
+>> problem lies in updating a data block twice, without a barrier
+>> operation between the two updates.
+>
+> There's nothing wrong with doing that if the filesystem has waited
+> for completion of the first IOs before doing subsequent operations
+> on the block.
+>
+>> The blktrace for the above
+>> mentioned workload shows that sector 280 is updated twice - probably
+>> first due to the write and later due to the fzero operation.
+>
+> WHy is that happening? The trace I have from the above xfs_io
+> command is this:
+>
+>   8,96   2      613     0.081499295  3635  Q  WS 280 + 16 [xfs_io]
+>   8,96   2      617     0.081982168     0  C  WS 280 + 16 [0]
+>   8,96   2      618     0.082033206  3635  Q   R 280 + 8 [xfs_io]
+>   8,96   2      622     0.082420539     0  C   R 280 + 8 [0]
+>   8,96   2      623     0.082475920  3635  Q   R 288 + 8 [xfs_io]
+>   8,96   2      627     0.082988642     0  C   R 288 + 8 [0]
+>   8,96   2      628     0.083050032  3635  Q  WS 160 + 136 [xfs_io]
+>   8,96   2      632     0.084414651     0  C  WS 160 + 136 [0]
+>   8,96   2      633     0.084469733  3635  Q FWFSM 20971632 + 8 [xfs_io]
+>   8,96   2      636     0.107483279     0  C WFSM 20971632 + 8 [0]
+>   8,96   2      637     0.107485345     0  C WFSM 20971632 [0]
+
+
+1. 8,96   2      617     0.081982168     0  C  WS 280 + 16 [0]
+2. 8,96   2      632     0.084414651     0  C  WS 160 + 136 [0]
+3. 8,96   2      636     0.107483279     0  C WFSM 20971632 + 8 [0]
+
+Again, though (2) is a single bio in your case, we notice that this
+sequential IO updates sector 280 too. By the previous discussion about
+disk cache, it is very well possible that (2) is ordered before (1),
+which gives rise to the bug we mentioned.
+
+
+> Which shows serialised IO dispatch and completion of the IO, and no
+> double write. You've only shown queueing of writes, which doesn't
+> tell me about completion order which is what really matters.
+>
+> In more detail.
+>
+> 1. zero-range forces a data flush to occur and then waits for it
+> to complete.
+>
+> ....
+>   xfs_file_fallocate
+>     xfs_zero_file_space(60-68k)
+>       xfs_free_file_space
+>         xfs_flush_unmap_range()
+>           filemap_write_and_wait_range()
+> xfs_writepage:        pgoff 0xf000 size 0x10400
+> xfs_writepage:        pgoff 0x10000 size 0x10400
+>   8,96   2      613     0.081499295  3635  Q  WS 280 + 16 [xfs_io]
+>   8,96   2      617     0.081982168     0  C  WS 280 + 16 [0]
+>           truncate_pagecache_range()
+> xfs_invalidatepage:   pgoff 0xf000 size 0x10400
+> xfs_releasepage:      pgoff 0xf000 size 0x10400
+> xfs_invalidatepage:   pgoff 0x10000 size 0x10400
+> xfs_releasepage:      pgoff 0x10000 size 0x10400
+>         xfs_zero_range()
+>   8,96   2      618     0.082033206  3635  Q   R 280 + 8 [xfs_io]
+>   8,96   2      622     0.082420539     0  C   R 280 + 8 [0]
+>   8,96   2      623     0.082475920  3635  Q   R 288 + 8 [xfs_io]
+>   8,96   2      627     0.082988642     0  C   R 288 + 8 [0]
+>     xfs_alloc_file_space()
+> xfs_map_blocks_found:   startoff 0x0 startblock 68 blockcount 0x30
+>         <nothing to allocate!>
+> .....
+>
+> After the fzero command, we then run fsync:
+>
+> xfs_file_fsync()
+>   filemap_write_and_wait_range()
+> xfs_writepage:        pgoff 0x0 size 0x10400
+> ....
+> xfs_writepage:        pgoff 0x10000 size 0x10400
+>   8,96   2      628     0.083050032  3635  Q  WS 160 + 136 [xfs_io]
+>   8,96   2      632     0.084414651     0  C  WS 160 + 136 [0]
+> <data writeback complete>
+>   xfs_log_force_lsn()
+> xfs_buf_submit:       flags WRITE|NO_IOACCT|ASYNC|SYNCIO|FUA|FLUSH|PAGES
+>   8,96   2      633     0.084469733  3635  Q FWFSM 20971632 + 8 [xfs_io]
+>   8,96   2      636     0.107483279     0  C WFSM 20971632 + 8 [0]
+>   8,96   2      637     0.107485345     0  C WFSM 20971632 [0]
+>
+> And that's the log force. That's all correct and expected behaviour
+> for pwrite, fzero and fsync. And when I dump the data in the file
+> after unmount/mount (because the shutdown stops all IO from the
+> filesytem), I get:
+>
+> 000000 146715 146715 146715 146715 146715 146715 146715 146715
+>
+> 00f080 000000 000000 000000 000000 000000 000000 000000 000000
+> *
+> 010080 146715 146715 146715 146715 146715 146715 146715 146715
+> *
+> 010400
+>
+> exactly the right data in the file.
+>
+>> However
+>> notice that there is no barrier between the two updates, and using
+>> Crashmonkey we see the above mentioned bug when these two updates to
+>> the same block are reordered. Essentially, a reordering here means
+>> fzero goes through first, and is later overwritten by the delayed
+>> allocated write.
+>
+>>  0.000179069  7104  Q  WS 280 + 16 [c_harness]
+>>  0.000594994  7104  Q   R 280 + 8 [c_harness]
+>>  0.000598216  7104  Q   R 288 + 8 [c_harness]
+>>  0.000620552  7104  Q  WS 160 + 120 [c_harness]
+>>  0.000653742  7104  Q  WS 280 + 16 [c_harness]
+>
+> So this is where there's a difference. Note the write in my case:
+>
+> 0.083050032  3635  Q  WS 160 + 136 [xfs_io]
+>
+> It's a single IO - for some reason the kernel you are running has
+> split it into two IOs, but that doesn't make it wrong or invalid -
+> it's not indicative of a bug in any way.
+>
+> What's wrong here is your assumption that you can reorder it around
+> the previous IO to those blocks.  That's *simply not possible*
+> because the filesystem has waited for completion of each IO before
+> issuing the next. The IO serialisation is being done at the
+> filesystem level, not the IO level, and so CrashMonkey is
+> effectively breaking the completion ordering guarantees storage
+> hardware provides us with.
+>
+>>  0.000733154  7104  Q FWFSM 102466 + 3 [c_harness]
+>
+> IOWs, once this pre-flush is completed, the data on disk is supposed
+> to be that of the latter write because that one was received by the
+> storage well after the first one was completed. Reordering a later
+> IO in front of an already completed dependent IO (read or write!) is
+> simply not allowed.
+
+*Received by the storage* means, received at the disk cache. I agree
+the fzero write went to disk cache after pwrite was marked completed.
+But this does not ensure pwrite data goes to the dpersistent storage
+from the disk cache before fzero.
+
+>> This seems to be a bug, as it is not persisting the metadata operation
+>> even in the presence of fsync.
+>>
+>> Let me know if I am missing some detail here.
+>
+> Filesystem IO ordering in the linux stack is not based on
+> block/request level flush barriers. i.e. there's no such thing as
+> "IO barriers" anymore. Filesystem IO ordering is based on a
+> completion-to-dispatch serialisation model at the filesystem level,
+> and that cannot be observed by looking at block layer traces....
+>
+> This really looks like a crashmonkey bug, not a filesystem problem...
+
+
+CrashMonkey therefore respects the guarantees provided by the disk
+cache, and assumes nothing more than that. I hope this provides more
+clarity on what
+CrashMonkey is trying to do, and why we think it is reasonable to do so.
+
+
+Thanks,
+Jayashree
