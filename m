@@ -1,173 +1,81 @@
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:45908 "EHLO
-        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751405AbeCNUTL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 14 Mar 2018 16:19:11 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:42734 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750779AbeCNVS4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Mar 2018 17:18:56 -0400
+Date: Wed, 14 Mar 2018 14:18:51 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: generic/127 failure on xfs with hacked fsx
+Message-ID: <20180314211851.GW4865@magnolia>
+References: <CAJfpegs=RenwFojwAze_y7WF3hwiNu-+5qDw_wyT=o0M063HkQ@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20180314131618.GA1001@redhat.com>
-References: <20180314131618.GA1001@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 14 Mar 2018 22:19:10 +0200
-Message-ID: <CAOQ4uxixBkkDECGjb7u0AMVdjD9HcpZ3+DAKD8eP5PfkQm8Qew@mail.gmail.com>
-Subject: Re: [PATCH V3] xfstest: overlay: Absolute redirect should be followed
- even if ancestor is opaque
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAJfpegs=RenwFojwAze_y7WF3hwiNu-+5qDw_wyT=o0M063HkQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>
+To: Miklos Szeredi <miklos@szeredi.hu>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 14, 2018 at 3:16 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> Typically, when following absolute redirect, if an opauqe dentry is
-> found, lookup in further lower directories is stopped. But if a
-> child dentry has another absolute redirect, then lookup in further
-> lower layers should continue.
->
-> Say, following is example setup.
-> upper:  /redirect (redirect=/a/b/c)
-> lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-> lower0: /a/b/d/foo
->
-> "redirect" directory in upper should merge with lower1:/a/b/c/ and
-> lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
->
-> This example and kernel fix has come from Amir Goldstein. I am just putting
-> a test for it to make sure its not broken down the line.
->
-> v3: Took care of more comments from amir.
->     - Added some comments.
->     - Added _overlay_check_scratch_dirs call.
->
-> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+On Wed, Mar 14, 2018 at 04:50:02PM +0100, Miklos Szeredi wrote:
+> While testing overlayfs I found something which appears to be an
+> unwanted side effect of xfs_release().
+> 
+> Apply the attached patch to xfstests and run generic/127.
+> 
+> Result is:
+> 
+>     +ltp/fsx -q -l 262144 -o 65536 -S 191110531 -N 100000 fsx_std_mmap
+>     +Mapped Read: non-zero data past EOF (0x8aa1) page offset 0xaa2 is 0xa091
+>     +LOG DUMP (70315 total operations):
+> 
+> Thanks,
+> Miklos
 
-Thanks,
+Hmm.... so I applied this and ran generic/127 on xfs:
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 magnolia-mtr00 4.16.0-rc5-xfsx
+MKFS_OPTIONS  -- -f -m reflink=1,rmapbt=1, -i sparse=1, /dev/pmem4
+MOUNT_OPTIONS -- -o usrquota,grpquota,prjquota, /dev/sda /opt
 
+generic/127      53s
+Ran: generic/127
+Passed all 1 tests
+
+Reran a couple of times without seeing any problems, so what am
+I missing?  Are you running xfstests atop overlayfs atop xfs?
+
+/me confused. :/
+
+--D
 
 > ---
->  tests/overlay/057     |  100 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/057.out |    2 +
->  tests/overlay/group   |    1
->  3 files changed, 103 insertions(+)
->
-> Index: xfstests-dev/tests/overlay/057
-> ===================================================================
-> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/057      2018-03-14 09:10:00.577179042 -0400
-> @@ -0,0 +1,100 @@
-> +#! /bin/bash
-> +# FS QA Test No. 057
-> +#
-> +# Test absolute redirect is followed even if ancestor is opaque
-> +#
-> +# Typically, when following absolute redirect, if an opauqe dentry is
-> +# found, lookup in further lower directories is stopped. But if a
-> +# child dentry has another absolute redirect, then lookup in further
-> +# lower layers should continue.
-> +#
-> +# Say, following is example setup.
-> +# upper:  /redirect (redirect=/a/b/c)
-> +# lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-> +# lower0: /a/b/d/foo
-> +#
-> +# "redirect" directory in upper should merge with lower1:/a/b/c/ and
-> +# lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-> +# Author: Vivek Goyal <vgoyal@redhat.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
+>  ltp/fsx.c |    9 +++++++++
+>  1 file changed, 9 insertions(+)
+> 
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -647,6 +647,14 @@ check_trunc_hack(void)
+>  	}
+>  }
+>  
+> +static void openclose(int fd)
 > +{
-> +       cd /
-> +       rm -f $tmp.*
+> +	char path[32];
+> +
+> +	sprintf(path, "/proc/self/fd/%i", fd);
+> +	close(open(path, O_RDONLY));
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +# We use non-default scratch underlying overlay dirs, we need to check
-> +# them explicity after test.
-> +_require_scratch_nocheck
-> +_require_scratch_overlay_features redirect_dir
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# Create test directories
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-> +
-> +mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-> +mkdir -p $lowerdir/origin
-> +touch $lowerdir/origin/foo
-> +_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on
-> +
-> +# Create opaque parent with absolute redirect child in middle layer
-> +mkdir $SCRATCH_MNT/pure
-> +mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-> +mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
-> +
-> +# Verify that redirects are followed after mount cycle
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-> +ls $SCRATCH_MNT/redirect/
-> +
-> +# check overlayfs
-> +_overlay_check_scratch_dirs "$lowerdir2:$lowerdir" $upperdir $workdir -o redirect_dir=on
-> +
-> +# success, all done
-> +status=0
-> +exit
-> Index: xfstests-dev/tests/overlay/group
-> ===================================================================
-> --- xfstests-dev.orig/tests/overlay/group       2018-02-28 15:27:29.981693615 -0500
-> +++ xfstests-dev/tests/overlay/group    2018-03-12 09:31:45.692818432 -0400
-> @@ -59,3 +59,4 @@
->  054 auto quick copyup redirect exportfs
->  055 auto quick copyup redirect exportfs nonsamefs
->  056 auto quick fsck
-> +057 auto quick redirect
-> Index: xfstests-dev/tests/overlay/057.out
-> ===================================================================
-> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/057.out  2018-03-12 13:09:42.061818432 -0400
-> @@ -0,0 +1,2 @@
-> +QA output created by 057
-> +foo
+>  void
+>  doflush(unsigned offset, unsigned size)
+>  {
+> @@ -799,6 +807,7 @@ domapread(unsigned offset, unsigned size
+>  	        prterr("domapread: mmap");
+>  		report_failure(190);
+>  	}
+> +	openclose(fd);
+>  	memcpy(temp_buf, p + pg_offset, size);
+>  
+>  	check_eofpage("Read", offset, p, size);
+
