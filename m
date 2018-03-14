@@ -1,50 +1,51 @@
-Received: from mx2.suse.de ([195.135.220.15]:36728 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751381AbeCNOsp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Mar 2018 10:48:45 -0400
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] generic/015: Issue sync after deleting the fillup file
-Date: Wed, 14 Mar 2018 16:48:37 +0200
-Message-Id: <1521038917-20863-1-git-send-email-nborisov@suse.com>
+Received: from mail-oi0-f45.google.com ([209.85.218.45]:45798 "EHLO
+        mail-oi0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752270AbeCNPuE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 14 Mar 2018 11:50:04 -0400
+Received: by mail-oi0-f45.google.com with SMTP id j79so3063699oib.12
+        for <fstests@vger.kernel.org>; Wed, 14 Mar 2018 08:50:04 -0700 (PDT)
+MIME-Version: 1.0
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Wed, 14 Mar 2018 16:50:02 +0100
+Message-ID: <CAJfpegs=RenwFojwAze_y7WF3hwiNu-+5qDw_wyT=o0M063HkQ@mail.gmail.com>
+Subject: generic/127 failure on xfs with hacked fsx
+Content-Type: multipart/mixed; boundary="001a113df09011f45e0567615496"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Cc: Nikolay Borisov <nborisov@suse.com>
+To: "Darrick J . Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs <linux-xfs@vger.kernel.org>, linux-fsdevel@vger.kernel.org, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-This test fails on btrfs due to the presence of delayed processing
-of file deletes if the file is smaller than 32mb. Initially commit
-97575acd7495b412435d06229a6d94ed9a814ada tried to fix a similar
-failure by bumping the size of the filesystem. However that change
-had a knock-on effect in that the scratch filesystem created is
-larger than 100mb and thus not created in mixed mode. This in turn
-causes the fs to have only 20mb for file data (rest is taken by DUP
-metadata). Naturally, this leads to file freeing taking up to
-"transaction commit interval" (default 30 s) time to properly account
-the freed space.
+--001a113df09011f45e0567615496
+Content-Type: text/plain; charset="UTF-8"
 
-Not standards define when unlink operations should be accounted so
-btrfs is well within its right to be implemented in that way. So
-to avoid this edge case just issue a sync before taking the 2nd
-free space reading.
+While testing overlayfs I found something which appears to be an
+unwanted side effect of xfs_release().
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
- tests/generic/015 | 2 ++
- 1 file changed, 2 insertions(+)
+Apply the attached patch to xfstests and run generic/127.
 
-diff --git a/tests/generic/015 b/tests/generic/015
-index bdae86dd..cb7252b9 100755
---- a/tests/generic/015
-+++ b/tests/generic/015
-@@ -115,6 +115,8 @@ fi
- 
- echo "check free space:"
- 
-+sync
-+
- free2=`_free`
- if [ -z "$free2" ]
- then
--- 
-2.12.3
+Result is:
 
+    +ltp/fsx -q -l 262144 -o 65536 -S 191110531 -N 100000 fsx_std_mmap
+    +Mapped Read: non-zero data past EOF (0x8aa1) page offset 0xaa2 is 0xa091
+    +LOG DUMP (70315 total operations):
+
+Thanks,
+Miklos
+
+--001a113df09011f45e0567615496
+Content-Type: text/x-patch; charset="US-ASCII"; name="fsx-trigger-xfs-bug.patch"
+Content-Disposition: attachment; filename="fsx-trigger-xfs-bug.patch"
+Content-Transfer-Encoding: base64
+X-Attachment-Id: f_jer9gzjz0
+
+LS0tCiBsdHAvZnN4LmMgfCAgICA5ICsrKysrKysrKwogMSBmaWxlIGNoYW5nZWQsIDkgaW5zZXJ0
+aW9ucygrKQoKLS0tIGEvbHRwL2ZzeC5jCisrKyBiL2x0cC9mc3guYwpAQCAtNjQ3LDYgKzY0Nywx
+NCBAQCBjaGVja190cnVuY19oYWNrKHZvaWQpCiAJfQogfQogCitzdGF0aWMgdm9pZCBvcGVuY2xv
+c2UoaW50IGZkKQoreworCWNoYXIgcGF0aFszMl07CisKKwlzcHJpbnRmKHBhdGgsICIvcHJvYy9z
+ZWxmL2ZkLyVpIiwgZmQpOworCWNsb3NlKG9wZW4ocGF0aCwgT19SRE9OTFkpKTsKK30KKwogdm9p
+ZAogZG9mbHVzaCh1bnNpZ25lZCBvZmZzZXQsIHVuc2lnbmVkIHNpemUpCiB7CkBAIC03OTksNiAr
+ODA3LDcgQEAgZG9tYXByZWFkKHVuc2lnbmVkIG9mZnNldCwgdW5zaWduZWQgc2l6ZQogCSAgICAg
+ICAgcHJ0ZXJyKCJkb21hcHJlYWQ6IG1tYXAiKTsKIAkJcmVwb3J0X2ZhaWx1cmUoMTkwKTsKIAl9
+CisJb3BlbmNsb3NlKGZkKTsKIAltZW1jcHkodGVtcF9idWYsIHAgKyBwZ19vZmZzZXQsIHNpemUp
+OwogCiAJY2hlY2tfZW9mcGFnZSgiUmVhZCIsIG9mZnNldCwgcCwgc2l6ZSk7Cg==
+--001a113df09011f45e0567615496--
