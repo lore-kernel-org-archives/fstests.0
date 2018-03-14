@@ -1,165 +1,147 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:54950 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:47730 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751488AbeCNNQT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 14 Mar 2018 09:16:19 -0400
-Date: Wed, 14 Mar 2018 09:16:18 -0400
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: [PATCH V3] xfstest: overlay: Absolute redirect should be followed
- even if ancestor is opaque
-Message-ID: <20180314131618.GA1001@redhat.com>
+        id S1751302AbeCNNRD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 14 Mar 2018 09:17:03 -0400
+Date: Wed, 14 Mar 2018 14:16:59 +0100
+From: Lukas Czerner <lczerner@redhat.com>
+Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
+Message-ID: <20180314131659.wnmt5zxfhrfsld7n@rh_laptop>
+References: <CA+EzBbCtp9wKC=KeN+N1iZDa2+TsWxVho3aUkeXJXguVswkChA@mail.gmail.com>
+ <20180313042126.GB18129@dastard>
+ <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
+ <20180313224522.GZ7000@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20180313224522.GZ7000@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: eguan@redhat.com, fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>
-Cc: linux-unionfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Typically, when following absolute redirect, if an opauqe dentry is
-found, lookup in further lower directories is stopped. But if a
-child dentry has another absolute redirect, then lookup in further
-lower layers should continue.
+On Wed, Mar 14, 2018 at 09:45:22AM +1100, Dave Chinner wrote:
+> On Tue, Mar 13, 2018 at 11:57:21AM -0500, Jayashree Mohan wrote:
+> > Hi Dave,
+> > 
+> > Thanks for the response. CrashMonkey assumes the following behavior of
+> > disk cache. Let me know if any of this sounds unreasonable.
+> > 
+> > Whenever the underlying storage device has an associated cache, the IO
+> > is marked completed the moment it reaches the disk cache. This does
+> > not guarantee that the disk cache would persist them in the same
+> > order, unless there is a Flush/FUA. The order of completed writes as
+> > seen by the user could be A, B, C, *Flush* D, E. However the disk
+> > cache could write these back to the persistent storage in the order
+> > say B, A, C, E, D. The only invariant it ensures is that writing in an
+> > order like  A, C, E, B, D is
+> > not possible because, writes A,B,C have to strictly happen before D
+> > and E. However you cannot ensure that (A, B, C) is written to the
+> > persistent storage in the same order.
+> > 
+> > CrashMonkey reorders bios in conformance to the guarantees provided by
+> > disk cache; we do not make any extra assumptions and we respect the
+> > barrier operations.
+> 
+> I think your model is wrong. caches do not randomly re-order
+> completed IO operations to the *same LBA*. When a block is overwritten
+> the cache contains the overwrite data and the previous data is
+> discarded. THe previous data may be on disk, but it's no longer in
+> the cache.
+> 
+> e.g. take a dependent filesystem read-modify-write cycle (I'm
+> choosing this because that's the problem this fzero/fsync
+> "bug" is apparently demonstrating) where we write data to disk,
+> invalidate the kernel cache, read the data back off disk, zero it
+> in memory, then write it back to disk, all in the one LBA:
+> 
+> 	<flush>
+> 	write A to disk, invalidate kernel cache
+> 	......
+> 	read A from disk into kernel cache
+> 	A' = <modify A>
+> 	write A' to disk
+> 	......
+> 	<flush>
+> 
+> The disk cache model you are describing allows writes
+> to be reordered anywhere in the flush window regardless of their
+> inter-IO completion dependencies. Hence you're allowing temporally
+> ordered filesystem IO to the same LBA be reorded like so:
+> 
+> 
+> 	<flush>
+> 	......
+> 	write A'
+> 	......
+> 	read A
+> 	A' = <modify A>
+> 	......
+> 	write A
+> 	......
+> 	<flush>
+> 
+> This violates causality. it's simply *not possible for the disk
+> cache to contain A' before either "write A", "read A" or the
+> in-memory modification of A has been completed by the OS. Hence
+> there is no way for a crash situation to have the disk cache or the
+> physical storage medium to contain corruption that indicates it
+> stored A' on disk before stored A.
+> 
+> > CrashMonkey therefore respects the guarantees provided by the disk
+> > cache, and assumes nothing more than that. I hope this provides more
+> > clarity on what
+> > CrashMonkey is trying to do, and why we think it is reasonable to do so.
+> 
+> It clearly demonstrates to me where CrashMonkey is broken and needs
+> fixing - it needs to respect the ordering of temporally separate IO
+> to the same LBA and not violate causality. Simulators that assume
+> time travel is possible are not useful to us.
+> 
+> Cheers,
 
-Say, following is example setup.
-upper:  /redirect (redirect=/a/b/c)
-lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-lower0: /a/b/d/foo
+Hi Dave,
 
-"redirect" directory in upper should merge with lower1:/a/b/c/ and
-lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
+just FYI the 042 xfstest does fail on xfs with what I think is stale
+data exposure. It might not be related at all to what crashmonkey is
+reporting but there is something wrong nevertheless.
 
-This example and kernel fix has come from Amir Goldstein. I am just putting
-a test for it to make sure its not broken down the line.
+SECTION       -- ext4
+RECREATING    -- xfs on /dev/vdc1
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 rhel7 4.16.0-rc5+
+MKFS_OPTIONS  -- -f -f /dev/vdb1
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/vdb1 /mnt/test1
 
-v3: Took care of more comments from amir.
-    - Added some comments.
-    - Added _overlay_check_scratch_dirs call.
+generic/042	 - output mismatch (see /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad)
+    --- tests/generic/042.out	2018-03-14 05:56:38.619124060 -0400
+    +++ /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad	2018-03-14 09:14:54.825969765 -0400
+    @@ -5,6 +5,16 @@
+     fpunch
+     wrote 65536/65536 bytes at offset 0
+     XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+    +0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+    +*
+    +000f000 0000 0000 0000 0000 0000 0000 0000 0000
+    +*
+    ...
+    (Run 'diff -u tests/generic/042.out /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad'  to see the entire diff)
+Ran: generic/042
+Failures: generic/042
+Failed 1 of 1 tests
 
-Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
----
- tests/overlay/057     |  100 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/057.out |    2 +
- tests/overlay/group   |    1 
- 3 files changed, 103 insertions(+)
 
-Index: xfstests-dev/tests/overlay/057
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/057	2018-03-14 09:10:00.577179042 -0400
-@@ -0,0 +1,100 @@
-+#! /bin/bash
-+# FS QA Test No. 057
-+#
-+# Test absolute redirect is followed even if ancestor is opaque
-+#
-+# Typically, when following absolute redirect, if an opauqe dentry is
-+# found, lookup in further lower directories is stopped. But if a
-+# child dentry has another absolute redirect, then lookup in further
-+# lower layers should continue.
-+#
-+# Say, following is example setup.
-+# upper:  /redirect (redirect=/a/b/c)
-+# lower1: /a/[b]/c       ([b] is opaque) (c has absolute redirect=/a/b/d/)
-+# lower0: /a/b/d/foo
-+#
-+# "redirect" directory in upper should merge with lower1:/a/b/c/ and
-+# lower0:/a/b/d/, despite lower1:/a/b/ being opaque.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-+# Author: Vivek Goyal <vgoyal@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicity after test.
-+_require_scratch_nocheck
-+_require_scratch_overlay_features redirect_dir
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+
-+mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-+mkdir -p $lowerdir/origin
-+touch $lowerdir/origin/foo
-+_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on
-+
-+# Create opaque parent with absolute redirect child in middle layer
-+mkdir $SCRATCH_MNT/pure
-+mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
-+$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-+mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
-+
-+# Verify that redirects are followed after mount cycle
-+$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
-+ls $SCRATCH_MNT/redirect/
-+
-+# check overlayfs
-+_overlay_check_scratch_dirs "$lowerdir2:$lowerdir" $upperdir $workdir -o redirect_dir=on
-+
-+# success, all done
-+status=0
-+exit
-Index: xfstests-dev/tests/overlay/group
-===================================================================
---- xfstests-dev.orig/tests/overlay/group	2018-02-28 15:27:29.981693615 -0500
-+++ xfstests-dev/tests/overlay/group	2018-03-12 09:31:45.692818432 -0400
-@@ -59,3 +59,4 @@
- 054 auto quick copyup redirect exportfs
- 055 auto quick copyup redirect exportfs nonsamefs
- 056 auto quick fsck
-+057 auto quick redirect
-Index: xfstests-dev/tests/overlay/057.out
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/057.out	2018-03-12 13:09:42.061818432 -0400
-@@ -0,0 +1,2 @@
-+QA output created by 057
-+foo
+ext4 fails as well, however it looks to be a problem with the test
+itself where it is expecting the file to remain of a zero length which
+it might not be the case.
+
+-Lukas
+
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
