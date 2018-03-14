@@ -1,103 +1,155 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:43473 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932222AbeCMWpe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 13 Mar 2018 18:45:34 -0400
-Date: Wed, 14 Mar 2018 09:45:22 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
-Message-ID: <20180313224522.GZ7000@dastard>
-References: <CA+EzBbCtp9wKC=KeN+N1iZDa2+TsWxVho3aUkeXJXguVswkChA@mail.gmail.com>
- <20180313042126.GB18129@dastard>
- <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
+Received: from prv3-mh.provo.novell.com ([137.65.250.26]:49945 "EHLO
+        prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751228AbeCNJC7 (ORCPT
+        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+        Wed, 14 Mar 2018 05:02:59 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH 1/3] fstests: log-writes: Add support to output human readable flags
+Date: Wed, 14 Mar 2018 17:02:28 +0800
+Message-Id: <20180314090230.25055-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jayashree Mohan <jayashree2912@gmail.com>
-Cc: linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 13, 2018 at 11:57:21AM -0500, Jayashree Mohan wrote:
-> Hi Dave,
-> 
-> Thanks for the response. CrashMonkey assumes the following behavior of
-> disk cache. Let me know if any of this sounds unreasonable.
-> 
-> Whenever the underlying storage device has an associated cache, the IO
-> is marked completed the moment it reaches the disk cache. This does
-> not guarantee that the disk cache would persist them in the same
-> order, unless there is a Flush/FUA. The order of completed writes as
-> seen by the user could be A, B, C, *Flush* D, E. However the disk
-> cache could write these back to the persistent storage in the order
-> say B, A, C, E, D. The only invariant it ensures is that writing in an
-> order like  A, C, E, B, D is
-> not possible because, writes A,B,C have to strictly happen before D
-> and E. However you cannot ensure that (A, B, C) is written to the
-> persistent storage in the same order.
-> 
-> CrashMonkey reorders bios in conformance to the guarantees provided by
-> disk cache; we do not make any extra assumptions and we respect the
-> barrier operations.
+Also change the flag numeric output to hex.
 
-I think your model is wrong. caches do not randomly re-order
-completed IO operations to the *same LBA*. When a block is overwritten
-the cache contains the overwrite data and the previous data is
-discarded. THe previous data may be on disk, but it's no longer in
-the cache.
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
+ 1 file changed, 63 insertions(+), 7 deletions(-)
 
-e.g. take a dependent filesystem read-modify-write cycle (I'm
-choosing this because that's the problem this fzero/fsync
-"bug" is apparently demonstrating) where we write data to disk,
-invalidate the kernel cache, read the data back off disk, zero it
-in memory, then write it back to disk, all in the one LBA:
-
-	<flush>
-	write A to disk, invalidate kernel cache
-	......
-	read A from disk into kernel cache
-	A' = <modify A>
-	write A' to disk
-	......
-	<flush>
-
-The disk cache model you are describing allows writes
-to be reordered anywhere in the flush window regardless of their
-inter-IO completion dependencies. Hence you're allowing temporally
-ordered filesystem IO to the same LBA be reorded like so:
-
-
-	<flush>
-	......
-	write A'
-	......
-	read A
-	A' = <modify A>
-	......
-	write A
-	......
-	<flush>
-
-This violates causality. it's simply *not possible for the disk
-cache to contain A' before either "write A", "read A" or the
-in-memory modification of A has been completed by the OS. Hence
-there is no way for a crash situation to have the disk cache or the
-physical storage medium to contain corruption that indicates it
-stored A' on disk before stored A.
-
-> CrashMonkey therefore respects the guarantees provided by the disk
-> cache, and assumes nothing more than that. I hope this provides more
-> clarity on what
-> CrashMonkey is trying to do, and why we think it is reasonable to do so.
-
-It clearly demonstrates to me where CrashMonkey is broken and needs
-fixing - it needs to respect the ordering of temporally separate IO
-to the same LBA and not violate causality. Simulators that assume
-time travel is possible are not useful to us.
-
-Cheers,
-
-Dave.
+diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+index 09391574..a872429d 100644
+--- a/src/log-writes/log-writes.c
++++ b/src/log-writes/log-writes.c
+@@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
+ 	return 0;
+ }
+ 
++#define DEFINE_LOG_FLAGS_STR_ENTRY(x)	\
++	{LOG_##x##_FLAG, #x}
++
++struct flags_to_str_entry {
++	u64 flags;
++	const char *str;
++} log_flags_table[] = {
++	DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
++	DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
++	DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
++	DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
++};
++
++#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
++#define LOG_FLAGS_BUF_SIZE	128
++/*
++ * Convert numeric flags to human readable flags.
++ * @flags:	numeric flags
++ * @buf:	output buffer for human readable string.
++ * 		must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
++ * 		the string
++ */
++static void entry_flags_to_str(u64 flags, char *buf)
++{
++	int empty = 1;
++	int left_len;
++	int i;
++
++	buf[0] = '\0';
++	for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
++		if (flags & log_flags_table[i].flags) {
++			if (!empty)
++				strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
++			empty = 0;
++			strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
++			flags &= ~log_flags_table[i].flags;
++		}
++	}
++	if (flags) {
++		if (!empty)
++			strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
++		empty = 0;
++		left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
++						        LOG_FLAGS_BUF_SIZE);
++		if (left_len > 0)
++			snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
++				 left_len, "UNKNOWN.0x%llx", flags);
++	}
++	if (empty)
++		strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
++}
++
+ /*
+  * @log: the log we are replaying.
+  * @entry: entry to be replayed.
+@@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 	size_t read_size = read_data ? log->sectorsize :
+ 		sizeof(struct log_write_entry);
+ 	char *buf;
++	char flags_buf[LOG_FLAGS_BUF_SIZE];
+ 	ssize_t ret;
+ 	off_t offset;
+ 	int skip = 0;
+@@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
+ 		log->cur_pos += read_size;
+ 	}
+ 
++	flags = le64_to_cpu(entry->flags);
++	entry_flags_to_str(flags, flags_buf);
+ 	skip = log_should_skip(log, entry);
+ 	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
+-		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
++		printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
+ 		       skip ? "skipping" : "replaying",
+ 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+ 		       (unsigned long long)le64_to_cpu(entry->sector),
+ 		       (unsigned long long)size,
+-		       (unsigned long long)le64_to_cpu(entry->flags));
++		       (unsigned long long)flags, flags_buf);
+ 	}
+ 	if (!size)
+ 		return 0;
+ 
+-	flags = le64_to_cpu(entry->flags);
+ 	if (flags & LOG_DISCARD_FLAG)
+ 		return log_discard(log, entry);
+ 
+@@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
+ 			return -1;
+ 		}
+ 		if (log_writes_verbose > 1)
+-			printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
++			printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
+ 			       (int)i, log->cur_pos / log->sectorsize,
+ 			       (unsigned long long)le64_to_cpu(entry.sector),
+ 			       (unsigned long long)le64_to_cpu(entry.nr_sectors),
+@@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
+ 	size_t read_size = read_data ? log->sectorsize :
+ 		sizeof(struct log_write_entry);
+ 	u64 flags;
++	char flags_buf[LOG_FLAGS_BUF_SIZE];
+ 	ssize_t ret;
+ 
+ 	if (log->cur_entry >= log->nr_entries)
+@@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
+ 	} else {
+ 		log->cur_pos += read_size;
+ 	}
++	flags = le64_to_cpu(entry->flags);
++	entry_flags_to_str(flags, flags_buf);
+ 	if (log_writes_verbose > 1)
+-		printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
++		printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
+ 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
+ 		       (unsigned long long)le64_to_cpu(entry->sector),
+ 		       (unsigned long long)le64_to_cpu(entry->nr_sectors),
+-		       (unsigned long long)le64_to_cpu(entry->flags));
++		       (unsigned long long)flags, flags_buf);
+ 
+-	flags = le64_to_cpu(entry->flags);
+ 	read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
+ 	if (!read_size || (flags & LOG_DISCARD_FLAG))
+ 		return 0;
 -- 
-Dave Chinner
-david@fromorbit.com
+2.15.1
+
