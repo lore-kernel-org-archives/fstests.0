@@ -1,155 +1,312 @@
-Received: from prv3-mh.provo.novell.com ([137.65.250.26]:49945 "EHLO
+Received: from victor.provo.novell.com ([137.65.250.26]:47378 "EHLO
         prv3-mh.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751228AbeCNJC7 (ORCPT
+        with ESMTP id S1751430AbeCNJDA (ORCPT
         <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
-        Wed, 14 Mar 2018 05:02:59 -0400
+        Wed, 14 Mar 2018 05:03:00 -0400
 From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH 1/3] fstests: log-writes: Add support to output human readable flags
-Date: Wed, 14 Mar 2018 17:02:28 +0800
-Message-Id: <20180314090230.25055-1-wqu@suse.com>
+Subject: [PATCH RFC 3/3] fstests: generic: Check the fs after each FUA writes
+Date: Wed, 14 Mar 2018 17:02:30 +0800
+Message-Id: <20180314090230.25055-3-wqu@suse.com>
+In-Reply-To: <20180314090230.25055-1-wqu@suse.com>
+References: <20180314090230.25055-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-Also change the flag numeric output to hex.
+Basic test case which triggers fsstress with dm-log-writes, and then
+check the fs after each FUA writes.
+With needed infrastructure and special handlers for journal based fs.
 
 Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- src/log-writes/log-writes.c | 70 ++++++++++++++++++++++++++++++++++++++++-----
- 1 file changed, 63 insertions(+), 7 deletions(-)
+In my test, xfs and btrfs survives while ext4 would report error during fsck.
 
-diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-index 09391574..a872429d 100644
---- a/src/log-writes/log-writes.c
-+++ b/src/log-writes/log-writes.c
-@@ -120,6 +120,58 @@ int log_discard(struct log *log, struct log_write_entry *entry)
- 	return 0;
+My current biggest concern is, we abuse $TEST_DEV and mkfs on it all by
+ourselves. Not sure if it's allowed.
+---
+ common/dmlogwrites    | 119 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/481     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/481.out |   2 +
+ tests/generic/group   |   1 +
+ 4 files changed, 246 insertions(+)
+ create mode 100755 tests/generic/481
+ create mode 100644 tests/generic/481.out
+
+diff --git a/common/dmlogwrites b/common/dmlogwrites
+index 467b872e..258f5887 100644
+--- a/common/dmlogwrites
++++ b/common/dmlogwrites
+@@ -126,3 +126,122 @@ _log_writes_cleanup()
+ 	$UDEV_SETTLE_PROG >/dev/null 2>&1
+ 	_log_writes_remove
  }
- 
-+#define DEFINE_LOG_FLAGS_STR_ENTRY(x)	\
-+	{LOG_##x##_FLAG, #x}
 +
-+struct flags_to_str_entry {
-+	u64 flags;
-+	const char *str;
-+} log_flags_table[] = {
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FLUSH),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(FUA),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(DISCARD),
-+	DEFINE_LOG_FLAGS_STR_ENTRY(MARK)
-+};
-+
-+#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0]))
-+#define LOG_FLAGS_BUF_SIZE	128
-+/*
-+ * Convert numeric flags to human readable flags.
-+ * @flags:	numeric flags
-+ * @buf:	output buffer for human readable string.
-+ * 		must have enough space (LOG_FLAGS_BUF_SIZE) to contain all
-+ * 		the string
-+ */
-+static void entry_flags_to_str(u64 flags, char *buf)
++# Convert log writes mark to entry number
++# Result entry number is output to stdout, could be empty if not found
++_log_writes_mark_to_entry_number()
 +{
-+	int empty = 1;
-+	int left_len;
-+	int i;
++	local _mark=$1
++	local ret
 +
-+	buf[0] = '\0';
-+	for (i = 0; i < ARRAY_SIZE(log_flags_table); i++) {
-+		if (flags & log_flags_table[i].flags) {
-+			if (!empty)
-+				strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+			empty = 0;
-+			strncat(buf, log_flags_table[i].str, LOG_FLAGS_BUF_SIZE);
-+			flags &= ~log_flags_table[i].flags;
-+		}
-+	}
-+	if (flags) {
-+		if (!empty)
-+			strncat(buf, "|", LOG_FLAGS_BUF_SIZE);
-+		empty = 0;
-+		left_len = LOG_FLAGS_BUF_SIZE - strnlen(buf,
-+						        LOG_FLAGS_BUF_SIZE);
-+		if (left_len > 0)
-+			snprintf(buf + strnlen(buf, LOG_FLAGS_BUF_SIZE),
-+				 left_len, "UNKNOWN.0x%llx", flags);
-+	}
-+	if (empty)
-+		strncpy(buf, "NONE", LOG_FLAGS_BUF_SIZE);
++	[ -z "$_mark" ] && _fatal \
++		"mark must be given for _log_writes_mark_to_entry_number"
++
++	ret=$($here/src/log-writes/replay-log --find --log $LOGWRITES_DEV \
++		--end-mark $_mark 2> /dev/null)
++	[ -z "$ret" ] && return
++	ret=$(echo "$ret" | cut -f1 -d\@)
++	echo "mark $_mark has entry number $ret" >> $seqres.full
++	echo "$ret"
 +}
 +
- /*
-  * @log: the log we are replaying.
-  * @entry: entry to be replayed.
-@@ -179,6 +231,7 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	char *buf;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 	off_t offset;
- 	int skip = 0;
-@@ -210,19 +263,20 @@ int log_replay_next_entry(struct log *log, struct log_write_entry *entry,
- 		log->cur_pos += read_size;
- 	}
- 
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	skip = log_should_skip(log, entry);
- 	if (log_writes_verbose > 1 || (log_writes_verbose && !skip)) {
--		printf("%s %d@%llu: sector %llu, size %llu, flags %llu\n",
-+		printf("%s %d@%llu: sector %llu, size %llu, flags 0x%llx(%s)\n",
- 		       skip ? "skipping" : "replaying",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)size,
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 	}
- 	if (!size)
- 		return 0;
- 
--	flags = le64_to_cpu(entry->flags);
- 	if (flags & LOG_DISCARD_FLAG)
- 		return log_discard(log, entry);
- 
-@@ -301,7 +355,7 @@ int log_seek_entry(struct log *log, u64 entry_num)
- 			return -1;
- 		}
- 		if (log_writes_verbose > 1)
--			printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+			printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx\n",
- 			       (int)i, log->cur_pos / log->sectorsize,
- 			       (unsigned long long)le64_to_cpu(entry.sector),
- 			       (unsigned long long)le64_to_cpu(entry.nr_sectors),
-@@ -339,6 +393,7 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	size_t read_size = read_data ? log->sectorsize :
- 		sizeof(struct log_write_entry);
- 	u64 flags;
-+	char flags_buf[LOG_FLAGS_BUF_SIZE];
- 	ssize_t ret;
- 
- 	if (log->cur_entry >= log->nr_entries)
-@@ -366,14 +421,15 @@ int log_seek_next_entry(struct log *log, struct log_write_entry *entry,
- 	} else {
- 		log->cur_pos += read_size;
- 	}
-+	flags = le64_to_cpu(entry->flags);
-+	entry_flags_to_str(flags, flags_buf);
- 	if (log_writes_verbose > 1)
--		printf("seek entry %d@%llu: %llu, size %llu, flags %llu\n",
-+		printf("seek entry %d@%llu: %llu, size %llu, flags 0x%llx(%s)\n",
- 		       (int)log->cur_entry - 1, log->cur_pos / log->sectorsize,
- 		       (unsigned long long)le64_to_cpu(entry->sector),
- 		       (unsigned long long)le64_to_cpu(entry->nr_sectors),
--		       (unsigned long long)le64_to_cpu(entry->flags));
-+		       (unsigned long long)flags, flags_buf);
- 
--	flags = le64_to_cpu(entry->flags);
- 	read_size = le64_to_cpu(entry->nr_sectors) * log->sectorsize;
- 	if (!read_size || (flags & LOG_DISCARD_FLAG))
- 		return 0;
++# Find next fua write entry number
++# Result entry number is output to stdout, could be empty if not found
++_log_writes_find_next_fua()
++{
++	local _start_entry=$1
++	local ret
++
++	[ -z "$_start_entry" ] && _start_entry=0
++	ret=$($here/src/log-writes/replay-log --find --log $LOGWRITES_DEV \
++	      --next-fua --start-entry $_start_entry 2> /dev/null)
++	[ -z "$ret" ] && return
++
++	ret=$(echo "$ret" | cut -f1 -d\@)
++	echo "next fua is entry number $ret" >> $seqres.full
++	echo "$ret"
++}
++
++# Replay log range to specified entry
++# $1:	End entry. The entry with this number *WILL* be replayed
++# $2:	Start entry. If not specified, start from the first entry.
++# $3:	Verbose. If set to 'y' do verbose output
++_log_writes_replay_log_entry_range()
++{
++	local _end=$1
++	local _start=$2
++	local _verbose=$3
++
++	[ -z "$_end" ] && _fatal \
++	"end entry must be specified for _log_writes_replay_log_entry_range"
++
++	[ "x$verbose" == "xy" ] && _verbose="-v"
++	[ -z "$_start" ] && _start=0
++	[ "$_start" -gt "$_end" ] && _fatal \
++		"wrong parameter order for _log_writes_replay_log_entry_range:start=$_start end=$_end"
++
++	# To ensure we replay the last entry, for _start == 0 case,
++	# we need to manually increase the end entry number to ensure
++	# it's played
++	echo "=== replay from $_start to $_end ===" >> $seqres.full
++	$here/src/log-writes/replay-log --log $LOGWRITES_DEV \
++		--replay $SCRATCH_DEV --start-entry $_start \
++		--limit $(($_end - $_start + 1)) $_verbose \
++		>> $seqres.full 2>&1
++	[ $? -ne 0 ] && _fatal "replay failed"
++}
++
++_log_writes_cleanup_snapshot()
++{
++	$UDEV_SETTLE_PROG > /dev/null 2>&1
++	$DMSETUP_PROG remove "$DMLOGWRITES_SNAPSHOT_NAME" > /dev/null 2>&1
++	$DMSETUP_PROG remove "$DMLOGWRITES_ORIGIN_NAME" > /dev/null 2>&1
++}
++
++# Helper to create snapshot of a the replayed device
++# Useful for journal based filesystem such as XFS and Ext4 to replay
++# their journal without touching the replay device, so that we can
++# continue replaying other than replay from the beginning.
++# $1:	Snapshot device
++_log_writes_create_snapshot()
++{
++	_require_dm_target snapshot
++
++	local snapshot_dev=$1
++	local cow_base=""
++
++	[ -z "$snapshot_dev" ] && _fatal \
++		"@device must be specified for _log_writes_create_snapshot"
++	local size=$(blockdev --getsz $SCRATCH_DEV)
++	[ -z "$size" ] && _fatal \
++		"failed to get device size for _log_writes_create_snapshot"
++
++	_log_writes_cleanup_snapshot
++
++	DMLOGWRITES_ORIGIN_NAME="log-writes-origin"
++	DMLOGWRITES_SNAPSHOT_NAME="log-writes-snapshot"
++	DMLOGWRITES_ORIGIN_TABLE="0 $size snapshot-origin $SCRATCH_DEV"
++	DMLOGWRITES_SNAPSHOT_TABLE="0 $size snapshot /dev/mapper/$DMLOGWRITES_ORIGIN_NAME $snapshot_dev N 512"
++
++	$UDEV_SETTLE_PROG >/dev/null 2>&1
++	$DMSETUP_PROG create $DMLOGWRITES_ORIGIN_NAME --table "$DMLOGWRITES_ORIGIN_TABLE" ||\
++		_fatal "failed to create snapshot-origin of log writes target"
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
++	$UDEV_SETTLE_PROG >/dev/null 2>&1
++	$DMSETUP_PROG create $DMLOGWRITES_SNAPSHOT_NAME --table "$DMLOGWRITES_SNAPSHOT_TABLE" ||\
++		_fatal "failed to create snapshot of log writes target"
++	$DMSETUP_PROG mknodes > /dev/null 2>&1
++}
++
++_log_writes_mount_snapshot()
++{
++	_scratch_options mount
++	$MOUNT_PROG -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
++		"/dev/mapper/$DMLOGWRITES_SNAPSHOT_NAME" $SCRATCH_MNT
++}
++
++_log_writes_unmount_snapshot()
++{
++	$UMOUNT_PROG $SCRATCH_MNT
++}
++
+diff --git a/tests/generic/481 b/tests/generic/481
+new file mode 100755
+index 00000000..3985493d
+--- /dev/null
++++ b/tests/generic/481
+@@ -0,0 +1,124 @@
++#! /bin/bash
++# FS QA Test 481
++#
++# Test filesystem consistency after each FUA operation
++#
++# Will do log replay and check the filesystem.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 SuSE.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	$KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
++	_log_writes_cleanup_snapshot &> /dev/null
++	_log_writes_cleanup &> /dev/null
++
++	# We use $TEST_DEV as snapshot COW device, which can't be
++	# mounted/recognized as normal fs, need to recreate it
++	# or fstest will complain about it
++	_mkfs_dev $TEST_DEV > /dev/null 2>&1
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmlogwrites
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++
++_require_command "$KILLALL_PROG" killall
++# Use $TEST_DEV as snapshot CoW device
++_require_test
++# Use $SCRATCH_DEV as replay device
++_require_scratch
++# and we need extra device as log device
++_require_log_writes
++
++
++workload=$(( 512 * $LOAD_FACTOR ))
++nr_threads=$(($($here/src/feature -o) * $LOAD_FACTOR))
++
++_test_unmount
++_log_writes_init
++_log_writes_mkfs >> $seqres.full 2>&1
++_log_writes_mark mkfs
++
++_log_writes_mount
++run_check $FSSTRESS_PROG -w -n $workload -p $nr_threads -d $SCRATCH_MNT \
++	$FSSTRESS_AVOID > /dev/null 2>&1
++_log_writes_unmount
++
++_log_writes_remove
++prev=$(_log_writes_mark_to_entry_number mkfs)
++[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
++cur=$(_log_writes_find_next_fua $prev)
++[ -z "$cur" ] && _fail "failed to locate next FUA write"
++
++_log_writes_replay_log_entry_range $prev
++while [ ! -z "$cur" ]; do
++	_log_writes_replay_log_entry_range $cur $prev >> $seqres.full
++
++	echo "=== Replay to entry number $cur ===" >> $seqres.full
++	# Here we need extra mount to replay the log, mainly for journal based
++	# fs, as their fsck will report dirty log as error. So do snapshot
++	# to replay, so we can still continue replaying
++	_log_writes_create_snapshot $TEST_DEV
++	_log_writes_mount_snapshot
++	_log_writes_unmount_snapshot
++	_check_generic_filesystem "/dev/mapper/$DMLOGWRITES_SNAPSHOT_NAME"
++	if [ $? -ne 0 ]; then
++		_log_writes_replay_log_entry_range $cur $prev y >> $seqres.full
++		_fail "error found in fsck after log replay"
++	fi
++	_log_writes_cleanup_snapshot
++
++	prev=$cur
++	cur=$(_log_writes_find_next_fua $(($cur + 1)))
++	[ -z "$cur" ] && break
++done
++_log_writes_cleanup_snapshot
++_log_writes_cleanup
++
++# mkfs before ending the test case, or $TEST_DEV doesn't contain any
++# valid fs
++_mkfs_dev $TEST_DEV
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/481.out b/tests/generic/481.out
+new file mode 100644
+index 00000000..206e1163
+--- /dev/null
++++ b/tests/generic/481.out
+@@ -0,0 +1,2 @@
++QA output created by 481
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index ea2056b1..1de053a6 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -483,3 +483,4 @@
+ 478 auto quick
+ 479 auto quick metadata
+ 480 auto quick metadata
++481 auto
 -- 
 2.15.1
 
