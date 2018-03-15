@@ -1,14 +1,14 @@
-Received: from mx2.suse.de ([195.135.220.15]:54842 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:54961 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751466AbeCOVxU (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Mar 2018 17:53:20 -0400
+        id S1751877AbeCOVzB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Mar 2018 17:55:01 -0400
 From: jeffm@suse.com
 Subject: [PATCH 0/4] fstests: GDBM detection cleanup
-Date: Thu, 15 Mar 2018 17:53:12 -0400
-Message-Id: <20180315215316.8160-1-jeffm@suse.com>
+Date: Thu, 15 Mar 2018 17:54:51 -0400
+Message-Id: <20180315215455.8245-1-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: xfstests list <fstests@vger.kernel.org>
-Cc: Jeff Mahoney <jeffm@suse.com>, Luis Rodriguez <mcgrof@suse.com>, Eryu Guan <eguan@redhat.com>
+Cc: Luis Rodriguez <mcgrof@suse.com>, Eryu Guan <eguan@redhat.com>, Jeff Mahoney <jeffm@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
 From: Jeff Mahoney <jeffm@suse.com>
