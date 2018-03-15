@@ -1,11 +1,11 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:6424 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751600AbeCOKGu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Mar 2018 06:06:50 -0400
-Date: Thu, 15 Mar 2018 21:06:46 +1100
-From: Dave Chinner <david@fromorbit.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:34112 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751638AbeCOKcL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 15 Mar 2018 06:32:11 -0400
+Date: Thu, 15 Mar 2018 11:32:07 +0100
+From: Lukas Czerner <lczerner@redhat.com>
 Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
-Message-ID: <20180315100646.GE7000@dastard>
+Message-ID: <20180315103207.scrm5e4cvkj26m4k@rh_laptop>
 References: <CA+EzBbCtp9wKC=KeN+N1iZDa2+TsWxVho3aUkeXJXguVswkChA@mail.gmail.com>
  <20180313042126.GB18129@dastard>
  <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
@@ -15,95 +15,119 @@ References: <CA+EzBbCtp9wKC=KeN+N1iZDa2+TsWxVho3aUkeXJXguVswkChA@mail.gmail.com>
  <20180314135752.5a2vmjr7cuavusiw@rh_laptop>
  <20180314212441.GC7000@dastard>
  <20180315061557.5jajfodpkjdmcrld@rh_laptop>
+ <20180315100646.GE7000@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180315061557.5jajfodpkjdmcrld@rh_laptop>
+In-Reply-To: <20180315100646.GE7000@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Lukas Czerner <lczerner@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
 Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 15, 2018 at 07:15:57AM +0100, Lukas Czerner wrote:
-> On Thu, Mar 15, 2018 at 08:24:41AM +1100, Dave Chinner wrote:
-> > On Wed, Mar 14, 2018 at 02:57:52PM +0100, Lukas Czerner wrote:
-> > > On Thu, Mar 15, 2018 at 12:32:58AM +1100, Dave Chinner wrote:
-> > > > On Wed, Mar 14, 2018 at 02:16:59PM +0100, Lukas Czerner wrote:
-> > > > > just FYI the 042 xfstest does fail on xfs with what I think is stale
-> > > > > data exposure. It might not be related at all to what crashmonkey is
-> > > > > reporting but there is something wrong nevertheless.
+On Thu, Mar 15, 2018 at 09:06:46PM +1100, Dave Chinner wrote:
+> On Thu, Mar 15, 2018 at 07:15:57AM +0100, Lukas Czerner wrote:
+> > On Thu, Mar 15, 2018 at 08:24:41AM +1100, Dave Chinner wrote:
+> > > On Wed, Mar 14, 2018 at 02:57:52PM +0100, Lukas Czerner wrote:
+> > > > On Thu, Mar 15, 2018 at 12:32:58AM +1100, Dave Chinner wrote:
+> > > > > On Wed, Mar 14, 2018 at 02:16:59PM +0100, Lukas Czerner wrote:
+> > > > > > just FYI the 042 xfstest does fail on xfs with what I think is stale
+> > > > > > data exposure. It might not be related at all to what crashmonkey is
+> > > > > > reporting but there is something wrong nevertheless.
+> > > > > 
+> > > > > generic/042 is unreliable and certain operations result in a
+> > > > > non-zero length file because of metadata commits/writeback that
+> > > > > occur as a result of the fallocate operations. It got removed from
+> > > > > the auto group because it isn't a reliable test about 3 years ago:
 > > > > 
-> > > > generic/042 is unreliable and certain operations result in a
-> > > > non-zero length file because of metadata commits/writeback that
-> > > > occur as a result of the fallocate operations. It got removed from
-> > > > the auto group because it isn't a reliable test about 3 years ago:
+> > > > Sure, I just that it clearly exposes stale data on xfs. That is, the
+> > > > resulting file contains data that was previously written to the
+> > > > underlying image file to catch the exposure. I am aware of the non-zero
+> > > > length file problem, that's not what I am pointing out though.
 > > > 
-> > > Sure, I just that it clearly exposes stale data on xfs. That is, the
-> > > resulting file contains data that was previously written to the
-> > > underlying image file to catch the exposure. I am aware of the non-zero
-> > > length file problem, that's not what I am pointing out though.
+> > > What setup are you testing on? I haven't seen it fail in some time.
+> > > Here, on emulated pmem:
 > > 
-> > What setup are you testing on? I haven't seen it fail in some time.
-> > Here, on emulated pmem:
+> > Virtual machine with Virtio devices backed by a linear lvs consisting of
+> > SCSI drives, all local.
+> > 
+> > > 
+> > > SECTION       -- xfs
+> > > FSTYP         -- xfs (debug)
+> > > PLATFORM      -- Linux/x86_64 test4 4.16.0-rc5-dgc
+> > > MKFS_OPTIONS  -- -f -m rmapbt=1,reflink=1 -i sparse=1 /dev/pmem1
+> > > MOUNT_OPTIONS -- /dev/pmem1 /mnt/scratch
+> > > 
+> > > xfs/042 10s ... 14s
+> > 
+> > We are talking about generic/042. xfs/042 is very much a different
+> > test.
 > 
-> Virtual machine with Virtio devices backed by a linear lvs consisting of
-> SCSI drives, all local.
+> Ugh copy-n-paste fail. Sorry.
+> 
+> I was looking at the right test, just running the wrong one.
+> 
+> Anyway, what makes you think this:
 > 
 > > 
 > > SECTION       -- xfs
-> > FSTYP         -- xfs (debug)
-> > PLATFORM      -- Linux/x86_64 test4 4.16.0-rc5-dgc
-> > MKFS_OPTIONS  -- -f -m rmapbt=1,reflink=1 -i sparse=1 /dev/pmem1
-> > MOUNT_OPTIONS -- /dev/pmem1 /mnt/scratch
+> > RECREATING    -- xfs on /dev/vdc1
+> > FSTYP         -- xfs (non-debug)
+> > PLATFORM      -- Linux/x86_64 rhel7 4.16.0-rc5+
+> > MKFS_OPTIONS  -- -f -f /dev/vdb1
+> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/vdb1 /mnt/test1
 > > 
-> > xfs/042 10s ... 14s
+> > generic/042	 - output mismatch (see /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad)
+> >     --- tests/generic/042.out	2018-03-14 05:56:38.619124060 -0400
+> >     +++ /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad	2018-03-15 02:15:02.872113819 -0400
+> >     @@ -5,6 +5,16 @@
+> >      fpunch
+> >      wrote 65536/65536 bytes at offset 0
+> >      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> >     +0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
+> >     +*
+> >     +000f000 0000 0000 0000 0000 0000 0000 0000 0000
+> >     +*
 > 
-> We are talking about generic/042. xfs/042 is very much a different
-> test.
+> exposes stale data? The command is:
+> 
+> $XFS_IO_PROG -f -c "pwrite -S 1 0 64k" -c "$cmd 60k 4k" $file
+> 
+> i.e. We wrote bytes from 0 to 64k, then punched from 60k to 64k. if
+> the file is 64k in length, then it should contain either all "cdcd"
+> pattern, or there should be "cdcd" data except for the range from
+> 60k to 64k where there should be zeros.
 
-Ugh copy-n-paste fail. Sorry.
+And where the "cdcd" data is comming from ? Not from the
 
-I was looking at the right test, just running the wrong one.
+"pwrite -S 1 0 64k"
 
-Anyway, what makes you think this:
+that's producing "0101".
+
+(from man xfs_io)
+ -S  used  to set the (repeated) fill pattern which is used when
+     the data to write is not coming from a file.  The default buffer
+     fill pattern value is 0xcdcdcdcd.
+
+
+It's comming from
+
+$XFS_IO_PROG -f -c "truncate 0" -c "pwrite 0 25M" $img
+_mkfs_dev $img
+
+so it does expose data written to the device prior the mkfs.
+
+-Lukas
 
 > 
-> SECTION       -- xfs
-> RECREATING    -- xfs on /dev/vdc1
-> FSTYP         -- xfs (non-debug)
-> PLATFORM      -- Linux/x86_64 rhel7 4.16.0-rc5+
-> MKFS_OPTIONS  -- -f -f /dev/vdb1
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/vdb1 /mnt/test1
+> The later is exactly what the diff output is say - "cdcd" data from
+> 0-60k, zeros from 60 to 64k. So there's no stale data exposure
+> occurring here (those bugs got fixed!), it's just the test output is
+> unreliable and does not match the golden output.
 > 
-> generic/042	 - output mismatch (see /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad)
->     --- tests/generic/042.out	2018-03-14 05:56:38.619124060 -0400
->     +++ /root/Projects/xfstests-dev/results//ext4/generic/042.out.bad	2018-03-15 02:15:02.872113819 -0400
->     @@ -5,6 +5,16 @@
->      fpunch
->      wrote 65536/65536 bytes at offset 0
->      XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
->     +0000000 cdcd cdcd cdcd cdcd cdcd cdcd cdcd cdcd
->     +*
->     +000f000 0000 0000 0000 0000 0000 0000 0000 0000
->     +*
-
-exposes stale data? The command is:
-
-$XFS_IO_PROG -f -c "pwrite -S 1 0 64k" -c "$cmd 60k 4k" $file
-
-i.e. We wrote bytes from 0 to 64k, then punched from 60k to 64k. if
-the file is 64k in length, then it should contain either all "cdcd"
-pattern, or there should be "cdcd" data except for the range from
-60k to 64k where there should be zeros.
-
-The later is exactly what the diff output is say - "cdcd" data from
-0-60k, zeros from 60 to 64k. So there's no stale data exposure
-occurring here (those bugs got fixed!), it's just the test output is
-unreliable and does not match the golden output.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
