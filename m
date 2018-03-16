@@ -1,61 +1,60 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:34342 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752802AbeCPAVW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Mar 2018 20:21:22 -0400
-Date: Fri, 16 Mar 2018 11:19:55 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
-Message-ID: <20180316001955.GN18129@dastard>
-References: <20180313042126.GB18129@dastard>
- <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
- <20180313224522.GZ7000@dastard>
- <20180314131659.wnmt5zxfhrfsld7n@rh_laptop>
- <20180314133258.GB7000@dastard>
- <20180314135752.5a2vmjr7cuavusiw@rh_laptop>
- <20180314212441.GC7000@dastard>
- <20180315061557.5jajfodpkjdmcrld@rh_laptop>
- <20180315100646.GE7000@dastard>
- <20180315103207.scrm5e4cvkj26m4k@rh_laptop>
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:45367 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932752AbeCPC4A (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Mar 2018 22:56:00 -0400
+Date: Fri, 16 Mar 2018 10:55:54 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH V3] xfstest: overlay: Absolute redirect should be
+ followed even if ancestor is opaque
+Message-ID: <20180316025554.GM30836@localhost.localdomain>
+References: <20180314131618.GA1001@redhat.com>
+ <20180316025320.GL30836@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180315103207.scrm5e4cvkj26m4k@rh_laptop>
+In-Reply-To: <20180316025320.GL30836@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Lukas Czerner <lczerner@redhat.com>
-Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, linux-unionfs@vger.kernel.org, Miklos Szeredi <miklos@szeredi.hu>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 15, 2018 at 11:32:07AM +0100, Lukas Czerner wrote:
+On Fri, Mar 16, 2018 at 10:53:20AM +0800, Eryu Guan wrote:
+
+> > +# Create opaque parent with absolute redirect child in middle layer
+> > +mkdir $SCRATCH_MNT/pure
+> > +mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
+> > +$UMOUNT_PROG $SCRATCH_MNT
+> > +_overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
+> > +mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
 > 
-> And where the "cdcd" data is comming from ? Not from the
-> 
-> "pwrite -S 1 0 64k"
-> 
-> that's producing "0101".
+> I think we'd better do a "ls $SCRATCH_MNT/redirect/" here too, right
+> after the rename and before mount cycle, to make sure 'foo' is there as
+> well. I can add it on commit (and change the .out file too) if this
+> change looks OK to you.
 
-Ah, too much context switching. Makes me look like the village
-idiot...
+Something like this:
 
-Ok, I just spent some time looking at this in detail (event traces,
-etc) and it is indeed as the test describes - an whole delalloc
-extent allocation on partial overwrite. THe partial overwrite is
-triggered by the fpunch/fzero code, and it appears the delalloc
-converison is not paying attention to the start offset of the
-writeback:
+git a/tests/overlay/057 b/tests/overlay/057
+index 10b46bfa8cff..d54024e98bcd 100644
+--- a/tests/overlay/057
++++ b/tests/overlay/057
+@@ -86,6 +86,8 @@ mv $SCRATCH_MNT/origin $SCRATCH_MNT/pure/redirect
+ $UMOUNT_PROG $SCRATCH_MNT
+ _overlay_scratch_mount_dirs $lowerdir2:$lowerdir $upperdir $workdir -o redirect_dir=on
+ mv $SCRATCH_MNT/pure/redirect $SCRATCH_MNT/redirect
++# Verify that redirects are followed
++ls $SCRATCH_MNT/redirect/
+ 
+ # Verify that redirects are followed after mount cycle
+ $UMOUNT_PROG $SCRATCH_MNT
+diff --git a/tests/overlay/057.out b/tests/overlay/057.out
+index 750830212460..b3b4017d32ae 100644
+--- a/tests/overlay/057.out
++++ b/tests/overlay/057.out
+@@ -1,2 +1,3 @@
+ QA output created by 057
+ foo
++foo
 
-xfs_writepage:        dev 7:0 ino 0x7603 pgoff 0xf000 size 0x10000 delalloc 1
-.....
-xfs_alloc_near_greater: dev 7:0 agno 0 agbno 3784 minlen 16 maxlen 16
-.....
-xfs_write_extent:     dev 7:0 ino 0x7603 offset 0 block 3784 count 16 flag 0
-
-IOWs, as I've said from the start (based on the test description)
-this has nothing to do with the corruption issue CrashMonkey is
-creating.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Eryu
