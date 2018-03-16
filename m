@@ -1,135 +1,61 @@
-Received: from mx2.suse.de ([195.135.220.15]:54977 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752575AbeCOVzG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Mar 2018 17:55:06 -0400
-From: jeffm@suse.com
-Subject: [PATCH 3/4] build: clean up AC_PACKAGE_WANT_GDBM
-Date: Thu, 15 Mar 2018 17:54:54 -0400
-Message-Id: <20180315215455.8245-4-jeffm@suse.com>
-In-Reply-To: <20180315215455.8245-1-jeffm@suse.com>
-References: <20180315215455.8245-1-jeffm@suse.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:34342 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752802AbeCPAVW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Mar 2018 20:21:22 -0400
+Date: Fri, 16 Mar 2018 11:19:55 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: XFS crash consistency bug : Loss of fsynced metadata operation
+Message-ID: <20180316001955.GN18129@dastard>
+References: <20180313042126.GB18129@dastard>
+ <CA+EzBbC9yQyxqiPOTCymrbL=cW-KZq2b8hunf7KEpiNZ9f3s4Q@mail.gmail.com>
+ <20180313224522.GZ7000@dastard>
+ <20180314131659.wnmt5zxfhrfsld7n@rh_laptop>
+ <20180314133258.GB7000@dastard>
+ <20180314135752.5a2vmjr7cuavusiw@rh_laptop>
+ <20180314212441.GC7000@dastard>
+ <20180315061557.5jajfodpkjdmcrld@rh_laptop>
+ <20180315100646.GE7000@dastard>
+ <20180315103207.scrm5e4cvkj26m4k@rh_laptop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180315103207.scrm5e4cvkj26m4k@rh_laptop>
 Sender: fstests-owner@vger.kernel.org
-To: xfstests list <fstests@vger.kernel.org>
-Cc: Luis Rodriguez <mcgrof@suse.com>, Eryu Guan <eguan@redhat.com>, Jeff Mahoney <jeffm@suse.com>
+To: Lukas Czerner <lczerner@redhat.com>
+Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-xfs@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Ashlie Martinez <ashmrtn@utexas.edu>, fstests@vger.kernel.org, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Mahoney <jeffm@suse.com>
+On Thu, Mar 15, 2018 at 11:32:07AM +0100, Lukas Czerner wrote:
+> 
+> And where the "cdcd" data is comming from ? Not from the
+> 
+> "pwrite -S 1 0 64k"
+> 
+> that's producing "0101".
 
-The AC_PACKAGE_WANT_GDBM macro is not easily read.  It's not doing anything
-particularly complex other than working through a set of alternatives
-for headers and libraries.
+Ah, too much context switching. Makes me look like the village
+idiot...
 
-This patch cleans it up to be more readable.  We also only attempt to
-check in libgdbm_compat if the checks in libgdbm fail.
+Ok, I just spent some time looking at this in detail (event traces,
+etc) and it is indeed as the test describes - an whole delalloc
+extent allocation on partial overwrite. THe partial overwrite is
+triggered by the fpunch/fzero code, and it appears the delalloc
+converison is not paying attention to the start offset of the
+writeback:
 
-Signed-off-by: Jeff Mahoney <jeffm@suse.com>
----
- m4/package_gdbmdev.m4 | 87 ++++++++++++++++++++++++++++++++-------------------
- 1 file changed, 55 insertions(+), 32 deletions(-)
+xfs_writepage:        dev 7:0 ino 0x7603 pgoff 0xf000 size 0x10000 delalloc 1
+.....
+xfs_alloc_near_greater: dev 7:0 agno 0 agbno 3784 minlen 16 maxlen 16
+.....
+xfs_write_extent:     dev 7:0 ino 0x7603 offset 0 block 3784 count 16 flag 0
 
-diff --git a/m4/package_gdbmdev.m4 b/m4/package_gdbmdev.m4
-index 3e5f33d0..922cbcbc 100644
---- a/m4/package_gdbmdev.m4
-+++ b/m4/package_gdbmdev.m4
-@@ -1,43 +1,66 @@
- AC_DEFUN([AC_PACKAGE_WANT_GDBM],
--  [ AC_CHECK_HEADER(gdbm-ndbm.h, [ gdbm_ndbm=true; have_db=true ], [ gdbm_ndbm=false; have_db=false ])
-+  [
-+    have_db=
-+    AC_CHECK_HEADER(gdbm-ndbm.h,
-+      [
-+	have_db=true
-+        AC_DEFINE(HAVE_GDBM_NDBM_H, [1],
-+		  [Define to 1 if you have the <gdbm-ndbm.h> header file.])
-+      ])
- 
--    if test $gdbm_ndbm = true; then
--        AC_DEFINE(HAVE_GDBM_NDBM_H, [1], [Define to 1 if you have the <gdbm-ndbm.h> header file.])
--    else
--        AS_UNSET([ac_cv_header_gdbm_ndbm_h])
--        AC_CHECK_HEADER(gdbm/ndbm.h, [ gdbm_ndbm_=true; have_db=true ], [ gdbm_ndbm_=false; have_db=false ])
--        if test $gdbm_ndbm_ = true; then
--            AC_DEFINE(HAVE_GDBM_NDBM_H_, [1], [Define to 1 if you have the <gdbm/ndbm.h> header file.])
--        else
--            AC_CHECK_HEADER(gdbm.h, [ gdbm_ndbm_=true; have_db=true ], [ gdbm_ndbm_=false; have_db=false ])
--            AC_CHECK_HEADER(ndbm.h, [ ndbm_=true ], [ ndbm_=false ])
--                if test $gdbm_ndbm_ = true; then
--                    if test $ndbm_ = true; then
--                        AC_DEFINE(HAVE_GDBM_H, [1], [Define to 1 if you have both <gdbm.h> and <ndbm.h> header files.])
--                    fi
--                fi
--        fi
-+    if test -z "$have_db"; then
-+      dnl gdbm-ndbm.h and gdbm/ndbm.h map to the same autoconf internal
-+      dnl variable.  We need to clear it or this test will be skipped
-+      dnl and the cached result from first test will be used.
-+      AS_UNSET([ac_cv_header_gdbm_ndbm_h])
-+      AC_CHECK_HEADER(gdbm/ndbm.h,
-+	[
-+	  have_db=true
-+	  AC_DEFINE(HAVE_GDBM_NDBM_H_, [1],
-+		    [Define to 1 if you have the <gdbm/ndbm.h> header file.])
-+	])
-     fi
- 
--    found=false
--    libgdbm=""
-+    if test -z "$have_db"; then
-+      AC_CHECK_HEADER(gdbm.h,
-+	[
-+	  have_db=true
-+	  gdbm_ndbm_=true
-+	], [
-+	  have_db=false
-+	  gdbm_ndbm_=false
-+	])
-+      AC_CHECK_HEADER(ndbm.h,
-+	[
-+	  ndbm_=true
-+	], [
-+	  ndbm_=false
-+	])
-+	if test $gdbm_ndbm_ = true; then
-+	  if test $ndbm_ = true; then
-+	    AC_DEFINE(HAVE_GDBM_H, [1],
-+		      [Define to 1 if you have both <gdbm.h> and <ndbm.h> header files.])
-+	  fi
-+	fi
-+    fi
- 
--    if test $have_db = true; then
--      AC_CHECK_LIB(gdbm,dbm_open,found=true,found=false)
--      AC_CHECK_LIB(gdbm,dbm_fetch,,found=false)
--      AC_CHECK_LIB(gdbm,dbm_store,,found=false)
--      AC_CHECK_LIB(gdbm,dbm_close,,found=false)
-+    if test "$have_db" = true; then
-+      found=false
-+      AC_CHECK_LIB(gdbm, dbm_open, found=true, found=false)
-+      AC_CHECK_LIB(gdbm, dbm_fetch,, found=false)
-+      AC_CHECK_LIB(gdbm, dbm_store,, found=false)
-+      AC_CHECK_LIB(gdbm, dbm_close,, found=false)
- 
--      if test $found = true; then
--        libgdbm="${libgdbm} -lgdbm"
-+      if test "$found" = true; then
-+        libgdbm="-lgdbm"
-       else
--	AC_CHECK_LIB(gdbm_compat,dbm_open,found=true,found=false,-lgdbm)
--	AC_CHECK_LIB(gdbm_compat,dbm_fetch,,found=false,-lgdbm)
--	AC_CHECK_LIB(gdbm_compat,dbm_store,,found=false,-lgdbm)
--	AC_CHECK_LIB(gdbm_compat,dbm_close,,found="false",-lgdbm)
-+	AC_CHECK_LIB(gdbm_compat, dbm_open, found=true, found=false, -lgdbm)
-+	AC_CHECK_LIB(gdbm_compat, dbm_fetch,, found=false, -lgdbm)
-+	AC_CHECK_LIB(gdbm_compat, dbm_store,, found=false, -lgdbm)
-+	AC_CHECK_LIB(gdbm_compat, dbm_close,, found="no", -lgdbm)
- 
--	if test $found = true ; then
--	  libgdbm="${libgdbm} -lgdbm_compat -lgdbm"
-+	if test "$found" = "true"; then
-+	  libgdbm="-lgdbm_compat -lgdbm"
- 	fi
-       fi
-     fi
+IOWs, as I've said from the start (based on the test description)
+this has nothing to do with the corruption issue CrashMonkey is
+creating.
+
+Cheers,
+
+Dave.
 -- 
-2.15.1
-
+Dave Chinner
+david@fromorbit.com
