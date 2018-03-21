@@ -1,205 +1,105 @@
-Received: from mail-yw0-f170.google.com ([209.85.161.170]:40099 "EHLO
-        mail-yw0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751768AbeCUMWb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Mar 2018 08:22:31 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:37838 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752156AbeCUMaR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 21 Mar 2018 08:30:17 -0400
+Date: Wed, 21 Mar 2018 08:30:12 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH v2] xfs: test agfl reset on bad list wrapping
+Message-ID: <20180321123011.GA11127@bfoster.bfoster>
+References: <20180321031746.GF4866@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20180321080125.30404-3-wqu@suse.com>
-References: <20180321080125.30404-1-wqu@suse.com> <20180321080125.30404-3-wqu@suse.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 21 Mar 2018 14:22:29 +0200
-Message-ID: <CAOQ4uxidqwrKvVZSPysY_Rz6=pmBNr4G6F=oA+1Qn+=NEYn85g@mail.gmail.com>
-Subject: Re: [PATCH 3/3] fstests: generic: Check the fs after each FUA writes
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180321031746.GF4866@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: Linux Btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, linux-xfs@vger.kernel.org, david@fromorbit.com, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 21, 2018 at 10:01 AM, Qu Wenruo <wqu@suse.com> wrote:
-> Basic test case which triggers fsstress with dm-log-writes, and then
-> check the fs after each FUA writes.
-> With needed infrastructure and special handlers for journal based fs.
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+On Tue, Mar 20, 2018 at 08:17:46PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> From the kernel patch that this test examines ("xfs: detect agfl count
+> corruption and reset agfl"):
+> 
+> "The struct xfs_agfl v5 header was originally introduced with
+> unexpected padding that caused the AGFL to operate with one less
+> slot than intended. The header has since been packed, but the fix
+> left an incompatibility for users who upgrade from an old kernel
+> with the unpacked header to a newer kernel with the packed header
+> while the AGFL happens to wrap around the end. The newer kernel
+> recognizes one extra slot at the physical end of the AGFL that the
+> previous kernel did not. The new kernel will eventually attempt to
+> allocate a block from that slot, which contains invalid data, and
+> cause a crash.
+> 
+> "This condition can be detected by comparing the active range of the
+> AGFL to the count. While this detects a padding mismatch, it can
+> also trigger false positives for unrelated flcount corruption. Since
+> we cannot distinguish a size mismatch due to padding from unrelated
+> corruption, we can't trust the AGFL enough to simply repopulate the
+> empty slot.
+> 
+> "Instead, avoid unnecessarily complex detection logic and and use a
+> solution that can handle any form of flcount corruption that slips
+> through read verifiers: distrust the entire AGFL and reset it to an
+> empty state. Any valid blocks within the AGFL are intentionally
+> leaked. This requires xfs_repair to rectify (which was already
+> necessary based on the state the AGFL was found in). The reset
+> mitigates the side effect of the padding mismatch problem from a
+> filesystem crash to a free space accounting inconsistency."
+> 
+> This test exercises the reset code by mutating a fresh filesystem to
+> contain an agfl with various list configurations of correctly wrapped,
+> incorrectly wrapped, not wrapped, and actually corrupt free lists; then
+> checks the success of the reset operation by fragmenting the free space
+> btrees to exercise the agfl.  Kernels without this reset fix will shut
+> down the filesystem with corruption errors.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
-> Unfortunately, neither xfs nor ext4 survies this test for even single
-> success, while btrfs survives.
-> (Although not what I want, I'm just trying my luck
-> to reproduce a serious btrfs corruption situation)
->
-> Although btrfs may be the fastest fs for the test, since it has fixed
-> small amount of write in mkfs and almost nothing to replay, it still
-> takes about 240s~300s to finish (the same level using snapshot).
->
-> It would take longer time for ext4 for its large amount of write during
-> mkfs, if it can survive the test in the first space.
->
-> As a comparison, btrfs takes about 5 seconds to replay log, mount,
-> unmount and run fsck at the end of the test.
-> But for ext4, it already takes about 5 seconds to do the same thing
-> before triggering fsck error.
->
-> Fsck fail for ext4:
-> _check_generic_filesystem: filesystem on /dev/mapper/test-scratch1 is inconsistent
-> *** fsck.ext4 output ***
-> fsck from util-linux 2.31.1
-> e2fsck 1.43.8 (1-Jan-2018)
-> Pass 1: Checking inodes, blocks, and sizes
-> Inode 131076 extent tree (at level 1) could be shorter.  Fix? no
->
-> Inode 131262, i_size is 0, should be 258048.  Fix? no
->
-> Pass 2: Checking directory structure
-> Pass 3: Checking directory connectivity
-> Pass 4: Checking reference counts
-> Pass 5: Checking group summary information
->
-> For xfs:
-> _check_xfs_filesystem: filesystem on /dev/mapper/test-scratch1 is inconsistent (r)
-> *** xfs_repair -n output ***
-> Phase 1 - find and verify superblock...
-> Phase 2 - using internal log
->         - zero log...
->         - scan filesystem freespace and inode maps...
->         - found root inode chunk
-> Phase 3 - for each AG...
->         - scan (but don't clear) agi unlinked lists...
->         - process known inodes and perform inode discovery...
->         - agno = 0
->         - agno = 1
->         - agno = 2
-> bad symlink header ino 8409190, file block 0, disk block 1051147
-> problem with symbolic link in inode 8409190
-> would have cleared inode 8409190
->         - agno = 3
->         - process newly discovered inodes...
-> Phase 4 - check for duplicate blocks...
->         - setting up duplicate extent list...
->         - check for inodes claiming duplicate blocks...
->         - agno = 0
->         - agno = 1
->         - agno = 3
->         - agno = 2
-> entry "lb" in shortform directory 8409188 references free inode 8409190
-> would have junked entry "lb" in directory inode 8409188
-> bad symlink header ino 8409190, file block 0, disk block 1051147
-> problem with symbolic link in inode 8409190
-> would have cleared inode 8409190
-> No modify flag set, skipping phase 5
-> Phase 6 - check inode connectivity...
->         - traversing filesystem ...
-> entry "lb" in shortform directory inode 8409188 points to free inode 8409190
-> would junk entry
->         - traversal finished ...
->         - moving disconnected inodes to lost+found ...
-> Phase 7 - verify link counts...
-> Maximum metadata LSN (1:396) is ahead of log (1:63).
-> Would format log to cycle 4.
-> No modify flag set, skipping filesystem flush and exiting.
->
-> And special note for XFS guys, I also hit an XFS internal metadata
-> warning during journal replay:
-> [ 7901.423659] XFS (dm-4): Starting recovery (logdev: internal)
-> [ 7901.577511] XFS (dm-4): Metadata corruption detected at xfs_dinode_verify+0x467/0x570 [xfs], inode 0x805067 dinode
-> [ 7901.580529] XFS (dm-4): Unmount and run xfs_repair
-> [ 7901.581901] XFS (dm-4): First 128 bytes of corrupted metadata buffer:
-> [ 7901.583205] 00000000b8963f41: 49 4e a1 ff 03 02 00 00 00 00 00 00 00 00 00 00  IN..............
-> [ 7901.584659] 00000000f35a50e0: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-> [ 7901.586075] 00000000386eea9e: 5a b2 0e 69 0a f3 43 27 5a b2 0e 69 0a f3 43 27  Z..i..C'Z..i..C'
-> [ 7901.587561] 00000000ac636661: 5a b2 0e 69 0d 92 bc 00 00 00 00 00 00 00 00 00  Z..i............
-> [ 7901.588969] 00000000d75f9093: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................
-> [ 7901.590475] 00000000d2af5688: 00 00 00 02 00 00 00 00 00 00 00 00 84 d7 6a e9  ..............j.
-> [ 7901.591907] 00000000e8dd8211: ff ff ff ff 34 93 a9 3a 00 00 00 00 00 00 00 04  ....4..:........
-> [ 7901.593319] 00000000b7610e4e: 00 00 00 01 00 00 00 45 00 00 00 00 00 00 00 00  .......E........
->
-> ---
->  common/dmlogwrites    |  56 +++++++++++++++++++++++++++
->  tests/generic/481     | 104 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/481.out |   2 +
->  tests/generic/group   |   1 +
->  4 files changed, 163 insertions(+)
->  create mode 100755 tests/generic/481
->  create mode 100644 tests/generic/481.out
->
-> diff --git a/common/dmlogwrites b/common/dmlogwrites
-> index 467b872e..bf643a77 100644
-> --- a/common/dmlogwrites
-> +++ b/common/dmlogwrites
-> @@ -126,3 +126,59 @@ _log_writes_cleanup()
->         $UDEV_SETTLE_PROG >/dev/null 2>&1
->         _log_writes_remove
+>  common/rc         |    6 +
+>  tests/xfs/709     |  254 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/709.out |   13 +++
+>  tests/xfs/group   |    1 
+>  4 files changed, 274 insertions(+)
+>  create mode 100755 tests/xfs/709
+>  create mode 100644 tests/xfs/709.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 2c29d55..8f048f1 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3440,6 +3440,12 @@ _get_device_size()
+>  	grep `_short_dev $1` /proc/partitions | awk '{print $3}'
 >  }
-> +
-> +# Convert log writes mark to entry number
-> +# Result entry number is output to stdout, could be empty if not found
-> +_log_writes_mark_to_entry_number()
-> +{
-> +       local mark=$1
-> +       local ret
-> +
-> +       [ -z "$mark" ] && _fatal \
-> +               "mark must be given for _log_writes_mark_to_entry_number"
-> +
-> +       ret=$($here/src/log-writes/replay-log --find --log $LOGWRITES_DEV \
-> +               --end-mark $mark 2> /dev/null)
-> +       [ -z "$ret" ] && return
-> +       ret=$(echo "$ret" | cut -f1 -d\@)
-> +       echo "mark $mark has entry number $ret" >> $seqres.full
-> +       echo "$ret"
+>  
+> +# check dmesg log for a specific string
+> +_check_dmesg_for() {
+> +	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
+> +		tac | egrep -q "$1"
 > +}
 > +
-> +# Find next fua write entry number
-> +# Result entry number is output to stdout, could be empty if not found
-> +_log_writes_find_next_fua()
-> +{
-> +       local start_entry=$1
-> +       local ret
-> +
-> +       [ -z "$start_entry" ] && start_entry=0
-> +       ret=$($here/src/log-writes/replay-log --find --log $LOGWRITES_DEV \
-> +             --next-fua --start-entry $start_entry 2> /dev/null)
-> +       [ -z "$ret" ] && return
-> +
-> +       # Result should be something like "1024@offset" where 1024 is the
-> +       # entry number we need
-> +       ret=$(echo "$ret" | cut -f1 -d\@)
-> +       echo "next fua is entry number $ret" >> $seqres.full
-> +       echo "$ret"
-> +}
-> +
-> +# Replay log range to specified entry
-> +# $1:  End entry. The entry with this number *WILL* be replayed
-> +_log_writes_replay_log_range()
-> +{
-> +       local end=$1
-> +
-> +       [ -z "$end" ] && _fail \
-> +       "end entry must be specified for _log_writes_replay_log_range"
-> +
-> +       # To ensure we replay the last entry,
-> +       # we need to manually increase the end entry number to ensure
-> +       # it's played
-> +       echo "=== replay to $end ===" >> $seqres.full
-> +       $here/src/log-writes/replay-log --log $LOGWRITES_DEV \
-> +               --replay $SCRATCH_DEV --limit $(($end + 1)) \
-> +               >> $seqres.full 2>&1
-> +       [ $? -ne 0 ] && _fail "replay failed"
-> +}
-> diff --git a/tests/generic/481 b/tests/generic/481
+>  # check dmesg log for WARNING/Oops/etc.
+>  _check_dmesg()
+>  {
+> diff --git a/tests/xfs/709 b/tests/xfs/709
 > new file mode 100755
-> index 00000000..148347fe
+> index 0000000..f2c51bf
 > --- /dev/null
-> +++ b/tests/generic/481
-> @@ -0,0 +1,104 @@
+> +++ b/tests/xfs/709
+> @@ -0,0 +1,254 @@
 > +#! /bin/bash
-> +# FS QA Test 481
+> +# FS QA Test No. 709
 > +#
-> +# Test filesystem consistency after each FUA operation
-> +#
-> +# Will do log replay and check the filesystem.
+> +# Make sure XFS can fix a v5 AGFL that wraps over the last block.
+> +# Refer to commit 96f859d52bcb ("libxfs: pack the agfl header structure so
+> +# XFS_AGFL_SIZE is correct") for details on the original on-disk format error
+> +# and the patch "xfs: detect agfl count corruption and reset agfl") for details
+> +# about the fix.
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 SuSE.  All Rights Reserved.
+> +# Copyright (c) 2018 Oracle, Inc.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -213,6 +113,7 @@ On Wed, Mar 21, 2018 at 10:01 AM, Qu Wenruo <wqu@suse.com> wrote:
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
 > +#-----------------------------------------------------------------------
 > +#
 > +
@@ -222,103 +123,265 @@ On Wed, Mar 21, 2018 at 10:01 AM, Qu Wenruo <wqu@suse.com> wrote:
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +status=1
+> +trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +       cd /
-> +       $KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
-> +       _log_writes_cleanup &> /dev/null
-> +       rm -f $tmp.*
+> +	cd /
+> +	rm -f $tmp.*
 > +}
+> +
+> +rm -f $seqres.full
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/dmlogwrites
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
 > +
 > +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
+> +_supported_fs xfs
 > +_supported_os Linux
 > +
-> +_require_command "$KILLALL_PROG" killall
-> +# Use $SCRATCH_DEV as replay device
 > +_require_scratch
-> +# and we need extra device as log device
-> +_require_log_writes
+> +_require_test_program "punch-alternating"
 > +
+> +# This is only a v5 filesystem problem
+> +_require_scratch_xfs_crc
 > +
-> +nr_cpus=$("$here/src/feature" -o)
-> +fsstress_args=$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 512 -p $nr_cpus \
-> +               $FSSTRESS_AVOID)
+> +mount_loop() {
+> +	if ! _try_scratch_mount >> $seqres.full 2>&1; then
+> +		echo "scratch mount failed" >> $seqres.full
+> +		return
+> +	fi
 > +
-> +_test_unmount
-> +_log_writes_init
-> +_log_writes_mkfs >> $seqres.full 2>&1
-> +_log_writes_mark mkfs
-> +
-> +_log_writes_mount
-> +$FSSTRESS_PROG $fsstress_args > /dev/null 2>&1
+> +	# Trigger agfl fixing by fragmenting free space
+> +	rm -rf $SCRATCH_MNT/a
+> +	dd if=/dev/zero of=$SCRATCH_MNT/a bs=8192k >> $seqres.full 2>&1
 
-You should run fsstress with run_check() so output will go to $seqres.full
-this way if you are able to catch a bug, you can take the random seed
-from fsstress output and repeat the same event sequence, which
-doesn't guaranty, but can increase the chances of reproducing the bug.
+Cutting this down from filling the fs to a single 8m fallocate reduces
+the test from ~36s to ~22s for me and still effectively triggers agfl
+allocations.
 
+> +	test -e $SCRATCH_MNT/a && ./src/punch-alternating $SCRATCH_MNT/a
+> +	rm -rf $SCRATCH_MNT/a
+> +
+> +	_scratch_unmount 2>&1 | _filter_scratch
+> +}
+> +
+> +dump_ag0() {
+> +	_scratch_xfs_db -c 'sb 0' -c 'p' -c 'agf 0' -c 'p' -c 'agfl 0' -c 'p'
+> +}
+> +
+> +runtest() {
+> +	cmd="$1"
+> +
+> +	# Format filesystem
+> +	echo "TEST $cmd" | tee /dev/ttyprintk
+> +	echo "TEST $cmd" >> $seqres.full
+> +	_scratch_unmount >> /dev/null 2>&1
 
-> +_log_writes_unmount
+Still superfluous?
+
+Brian
+
+> +	_scratch_mkfs_sized $((32 * 1048576)) >> $seqres.full
 > +
-> +_log_writes_remove
-> +prev=$(_log_writes_mark_to_entry_number mkfs)
-> +[ -z "$prev" ] && _fail "failed to locate entry mark 'mkfs'"
-> +cur=$(_log_writes_find_next_fua $prev)
-> +[ -z "$cur" ] && _fail "failed to locate next FUA write"
+> +	# Record what was here before
+> +	echo "FS BEFORE" >> $seqres.full
+> +	dump_ag0 > $tmp.before
+> +	cat $tmp.before >> $seqres.full
 > +
-> +while [ ! -z "$cur" ]; do
-> +       _log_writes_replay_log_range $cur >> $seqres.full
+> +	sectsize=$(_scratch_xfs_get_metadata_field "sectsize" "sb 0")
+> +	flfirst=$(_scratch_xfs_get_metadata_field "flfirst" "agf 0")
+> +	fllast=$(_scratch_xfs_get_metadata_field "fllast" "agf 0")
+> +	flcount=$(_scratch_xfs_get_metadata_field "flcount" "agf 0")
 > +
-> +       # Here we need extra mount to replay the log, mainly for journal based
-> +       # fs, as their fsck will report dirty log as error.
-> +       # We don't care to preserve any data on $SCRATCH_DEV, as we can replay
-> +       # back to the point we need, and in fact sometimes creating/deleting
-> +       # snapshots repeatedly can be slower than replaying the log.
-> +       _scratch_mount
-> +       _scratch_unmount
-> +       _check_scratch_fs
+> +	# Due to a padding bug in the original v5 struct xfs_agfl,
+> +	# XFS_AGFL_SIZE could be 36 on 32-bit or 40 on 64-bit.  On a system
+> +	# with 512b sectors, this means that the AGFL length could be
+> +	# ((512 - 36) / 4) = 119 entries on 32-bit or ((512 - 40) / 4) = 118
+> +	# entries on 64-bit.
+> +	#
+> +	# We now have code to figure out if the AGFL list wraps incorrectly
+> +	# according to the kernel's agfl size and fix it by resetting the agfl
+> +	# to zero length.  Mutate ag 0's agfl to be in various configurations
+> +	# and see if we can trigger the reset.
+> +	#
+> +	# Don't hardcode the numbers, calculate them.
 > +
-> +       prev=$cur
-> +       cur=$(_log_writes_find_next_fua $(($cur + 1)))
-> +       [ -z "$cur" ] && break
-> +done
+> +	# Have to have at least three agfl items to test full wrap
+> +	test "$flcount" -ge 3 || _notrun "insufficient agfl flcount"
 > +
-> +echo "Silence is golden"
+> +	# mkfs should be able to make us a nice neat flfirst < fllast setup
+> +	test "$flfirst" -lt "$fllast" || _notrun "fresh agfl already wrapped?"
 > +
-> +# success, all done
+> +	bad_agfl_size=$(( (sectsize - 40) / 4 ))
+> +	good_agfl_size=$(( (sectsize - 36) / 4 ))
+> +	agfl_size=
+> +	case "$1" in
+> +	"fix_end")	# fllast points to the end w/ 40-byte padding
+> +		new_flfirst=$(( bad_agfl_size - flcount ))
+> +		agfl_size=$bad_agfl_size;;
+> +	"fix_start")	# flfirst points to the end w/ 40-byte padding
+> +		new_flfirst=$(( bad_agfl_size - 1))
+> +		agfl_size=$bad_agfl_size;;
+> +	"fix_wrap")	# list wraps around end w/ 40-byte padding
+> +		new_flfirst=$(( bad_agfl_size - (flcount / 2) ))
+> +		agfl_size=$bad_agfl_size;;
+> +	"start_zero")	# flfirst points to the start
+> +		new_flfirst=0
+> +		agfl_size=$good_agfl_size;;
+> +	"good_end")	# fllast points to the end w/ 36-byte padding
+> +		new_flfirst=$(( good_agfl_size - flcount ))
+> +		agfl_size=$good_agfl_size;;
+> +	"good_start")	# flfirst points to the end w/ 36-byte padding
+> +		new_flfirst=$(( good_agfl_size - 1 ))
+> +		agfl_size=$good_agfl_size;;
+> +	"good_wrap")	# list wraps around end w/ 36-byte padding
+> +		new_flfirst=$(( good_agfl_size - (flcount / 2) ))
+> +		agfl_size=$good_agfl_size;;
+> +	"bad_start")	# flfirst points off the end
+> +		new_flfirst=$good_agfl_size
+> +		agfl_size=$good_agfl_size;;
+> +	"no_move")	# whatever mkfs formats (flfirst points to start)
+> +		new_flfirst=$flfirst
+> +		agfl_size=$good_agfl_size;;
+> +	"simple_move")	# move list arbitrarily
+> +		new_flfirst=$((fllast + 1))
+> +		agfl_size=$good_agfl_size;;
+> +	*)
+> +		_fail "Internal test error";;
+> +	esac
+> +	new_fllast=$(( (new_flfirst + flcount - 1) % agfl_size ))
+> +
+> +	# Log what we're doing...
+> +	cat >> $seqres.full << ENDL
+> +sector size: $sectsize
+> +bad_agfl_size: $bad_agfl_size [0 - $((bad_agfl_size - 1))]
+> +good_agfl_size: $good_agfl_size [0 - $((good_agfl_size - 1))]
+> +agfl_size: $agfl_size
+> +flfirst: $flfirst
+> +fllast: $fllast
+> +flcount: $flcount
+> +new_flfirst: $new_flfirst
+> +new_fllast: $new_fllast
+> +ENDL
+> +
+> +	# Remap the agfl blocks
+> +	echo "$((good_agfl_size - 1)) 0xffffffff" > $tmp.remap
+> +	seq "$flfirst" "$fllast" | while read f; do
+> +		list_pos=$((f - flfirst))
+> +		dest_pos=$(( (new_flfirst + list_pos) % agfl_size ))
+> +		bno=$(_scratch_xfs_get_metadata_field "bno[$f]" "agfl 0")
+> +		echo "$dest_pos $bno" >> $tmp.remap
+> +	done
+> +
+> +	cat $tmp.remap | while read dest_pos bno junk; do
+> +		_scratch_xfs_set_metadata_field "bno[$dest_pos]" "$bno" \
+> +				"agfl 0" >> $seqres.full
+> +	done
+> +
+> +	# Set new flfirst/fllast
+> +	_scratch_xfs_set_metadata_field "fllast" "$new_fllast" \
+> +			"agf 0" >> $seqres.full
+> +	_scratch_xfs_set_metadata_field "flfirst" "$new_flfirst" \
+> +			"agf 0" >> $seqres.full
+> +
+> +	echo "FS AFTER" >> $seqres.full
+> +	dump_ag0 > $tmp.corrupt 2> /dev/null
+> +	diff -u $tmp.before $tmp.corrupt >> $seqres.full
+> +
+> +	# Mount and see what happens
+> +	mount_loop
+> +
+> +	# Did we end up with a non-wrapped list?
+> +	flfirst=$(_scratch_xfs_get_metadata_field "flfirst" "agf 0" 2>/dev/null)
+> +	fllast=$(_scratch_xfs_get_metadata_field "fllast" "agf 0" 2>/dev/null)
+> +	echo "flfirst=${flfirst} fllast=${fllast}" >> $seqres.full
+> +	if [ "${flfirst}" -ge "$((good_agfl_size - 1))" ]; then
+> +		echo "ASSERT flfirst < good_agfl_size - 1" | tee -a $seqres.full
+> +	fi
+> +	if [ "${fllast}" -ge "$((good_agfl_size - 1))" ]; then
+> +		echo "ASSERT fllast < good_agfl_size - 1" | tee -a $seqres.full
+> +	fi
+> +	if [ "${flfirst}" -ge "${fllast}" ]; then
+> +		echo "ASSERT flfirst < fllast" | tee -a $seqres.full
+> +	fi
+> +
+> +	echo "FS MOUNTLOOP" >> $seqres.full
+> +	dump_ag0 > $tmp.mountloop 2> /dev/null
+> +	diff -u $tmp.corrupt $tmp.mountloop >> $seqres.full
+> +
+> +	# Let's see what repair thinks
+> +	echo "REPAIR" >> $seqres.full
+> +	_scratch_xfs_repair >> $seqres.full 2>&1
+> +
+> +	echo "FS REPAIR" >> $seqres.full
+> +	dump_ag0 > $tmp.repair 2> /dev/null
+> +	diff -u $tmp.mountloop $tmp.repair >> $seqres.full
+> +
+> +	# Exercise the filesystem again to make sure there aren't any lasting
+> +	# ill effects from either the agfl reset or the recommended subsequent
+> +	# repair run.
+> +	mount_loop
+> +
+> +	echo "FS REMOUNT" >> $seqres.full
+> +	dump_ag0 > $tmp.remount 2> /dev/null
+> +	diff -u $tmp.repair $tmp.remount >> $seqres.full
+> +}
+> +
+> +runtest fix_end
+> +runtest fix_start
+> +runtest fix_wrap
+> +runtest start_zero
+> +runtest good_end
+> +runtest good_start
+> +runtest good_wrap
+> +runtest bad_start
+> +runtest no_move
+> +runtest simple_move
+> +
+> +# Did we get the kernel warning too?
+> +warn_str='WARNING: Reset corrupted AGFL'
+> +_check_dmesg_for "${warn_str}" || echo "Missing dmesg string \"${warn_str}\"."
+> +
+> +# Now run the regular dmesg check, filtering out the agfl warning
+> +filter_agfl_reset_printk() {
+> +	grep -v "${warn_str}"
+> +}
+> +_check_dmesg filter_agfl_reset_printk
+> +
 > +status=0
-> +exit
-> diff --git a/tests/generic/481.out b/tests/generic/481.out
+> +exit 0
+> diff --git a/tests/xfs/709.out b/tests/xfs/709.out
 > new file mode 100644
-> index 00000000..206e1163
+> index 0000000..f1fa9a3
 > --- /dev/null
-> +++ b/tests/generic/481.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 481
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index ea2056b1..c4cc800a 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -483,3 +483,4 @@
->  478 auto quick
->  479 auto quick metadata
->  480 auto quick metadata
-> +481 auto replay
+> +++ b/tests/xfs/709.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 709
+> +TEST fix_end
+> +TEST fix_start
+> +TEST fix_wrap
+> +TEST start_zero
+> +TEST good_end
+> +TEST good_start
+> +TEST good_wrap
+> +TEST bad_start
+> +ASSERT flfirst < good_agfl_size - 1
+> +ASSERT flfirst < fllast
+> +TEST no_move
+> +TEST simple_move
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index e2397fe..472120e 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -441,3 +441,4 @@
+>  441 auto quick clone quota
+>  442 auto stress clone quota
+>  443 auto quick ioctl fsr
+> +709 auto quick
 > --
-> 2.15.1
->
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
