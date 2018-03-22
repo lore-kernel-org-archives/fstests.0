@@ -1,13 +1,11 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:52608 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:52609 "EHLO huawei.com"
         rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752816AbeCVL3b (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1752916AbeCVL3b (ORCPT <rfc822;fstests@vger.kernel.org>);
         Thu, 22 Mar 2018 07:29:31 -0400
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [RFC PATCH 2/2] overlay: test mount operation with supported features and enabled feature mount options
-Date: Thu, 22 Mar 2018 19:38:34 +0800
-Message-ID: <20180322113834.48168-2-yi.zhang@huawei.com>
-In-Reply-To: <20180322113834.48168-1-yi.zhang@huawei.com>
-References: <20180322113834.48168-1-yi.zhang@huawei.com>
+Subject: [RFC PATCH 1/2] overlay: test mount operation if overlay has unkown feature set
+Date: Thu, 22 Mar 2018 19:38:33 +0800
+Message-ID: <20180322113834.48168-1-yi.zhang@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -15,51 +13,62 @@ To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 Cc: miklos@szeredi.hu, amir73il@gmail.com, guaneryu@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Test overlay mount operation which has supported feature set, and
-test mount operation with feature mount options:
-- Check overlay mount with enabled redirect_dir/index/nfs_export
-  mount options
-- Check overlay mount with supported redirect_dir/index/nfs_export
-  feature on the upper root dir
-- Check overlay mount with supported redirect_dir/index/nfs_export
-  feature on the lower root dir only
+Test mount operation if the underlying root dir have unknown
+feature set:
+- Check unknown compat/ro_compat/incompat feature on the
+  upper root dir
+- Check unknown compat/ro_compat/incompat feature on the
+  lower root dir which used to be the upper root dir
 
-Mount operation should succeed if supported features is detected on
-the underlying root dir. One feature should be set on the upper
-root dir if user give the enabled mount option or the same feature
-is detected on the lower root dir.
+Mount operation should fail if unknown incompat feature is
+detected on the underlying root dir, and read-write mount should
+fail if unknown ro_compat feature is detected on the underlying
+root dir, and mount should succeed otherwise.
 
 Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
- tests/overlay/059     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/059.out |   2 +
+ common/overlay        |   3 +
+ tests/overlay/058     | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/058.out |   2 +
  tests/overlay/group   |   1 +
- 3 files changed, 143 insertions(+)
- create mode 100755 tests/overlay/059
- create mode 100644 tests/overlay/059.out
+ 4 files changed, 179 insertions(+)
+ create mode 100755 tests/overlay/058
+ create mode 100644 tests/overlay/058.out
 
-diff --git a/tests/overlay/059 b/tests/overlay/059
+diff --git a/common/overlay b/common/overlay
+index 441827b8..431fb847 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -10,6 +10,9 @@ export OVL_XATTR_IMPURE="trusted.overlay.impure"
+ export OVL_XATTR_ORIGIN="trusted.overlay.origin"
+ export OVL_XATTR_NLINK="trusted.overlay.nlink"
+ export OVL_XATTR_UPPER="trusted.overlay.upper"
++export OVL_XATTR_FEATURE_COMPAT="trusted.overlay.feature_compat"
++export OVL_XATTR_FEATURE_RO_COMPAT="trusted.overlay.feature_ro_compat"
++export OVL_XATTR_FEATURE_INCOMPAT="trusted.overlay.feature_incompat"
+ 
+ # helper function to do the actual overlayfs mount operation
+ _overlay_mount_dirs()
+diff --git a/tests/overlay/058 b/tests/overlay/058
 new file mode 100755
-index 00000000..cec20d4a
+index 00000000..6f88730e
 --- /dev/null
-+++ b/tests/overlay/059
-@@ -0,0 +1,140 @@
++++ b/tests/overlay/058
+@@ -0,0 +1,173 @@
 +#! /bin/bash
-+# FS QA Test 059
++# FS QA Test 058
 +#
-+# Test overlay mount operation which has supported feature set, and
-+# test mount operation with feature mount options:
-+# - Check overlay mount with enabled redirect_dir/index/nfs_export
-+#   mount options
-+# - Check overlay mount with supported redirect_dir/index/nfs_export
-+#   feature on the upper root dir
-+# - Check overlay mount with supported redirect_dir/index/nfs_export
-+#   feature on the lower root dir only
++# Test mount operation if the underlying root dir have unknown
++# feature set:
++# - Check unknown compat/ro_compat/incompat feature on the
++#   upper root dir
++# - Check unknown compat/ro_compat/incompat feature on the
++#   lower root dir which used to be the upper root dir
 +#
-+# Mount operation should succeed if supported features is detected on
-+# the underlying root dir. One feature should be set on the upper
-+# root dir if user give the enabled mount option or the same feature
-+# is detected on the lower root dir.
++# Mount operation should fail if unknown incompat feature is
++# detected on the underlying root dir, and read-write mount should
++# fail if unknown ro_compat feature is detected on the underlying
++# root dir, and mount should succeed otherwise.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (C) 2018 Huawei.  All Rights Reserved.
@@ -106,101 +115,136 @@ index 00000000..cec20d4a
 +# real QA test starts here
 +_supported_fs overlay
 +_supported_os Linux
-+# Use non-default scratch underlying overlay dirs, we need to check
-+# them explicity after test.
 +_require_scratch_nocheck
-+_require_scratch_overlay_features redirect_dir index nfs_export
 +
 +# Remove all files from previous tests
 +_scratch_mkfs
 +
-+# Check compat/ro_compat/incompat features on the underlying root dir
-+check_feature()
++# Set compat/ro_compat/incompat features to the underlying root dir
++set_feature()
 +{
 +	local compat_type=$1
-+	local expect=$2
++	local feature=$2
 +	local target=$3
 +
-+	feature=$($GETFATTR_PROG --absolute-names --only-values -n \
-+			$compat_type $target)
-+
-+	[[ "$feature" =~ "$expect" ]] || echo "Feature xattr incorrect"
++	$SETFATTR_PROG -n $compat_type -v $feature $target
 +}
 +
-+# Create lowerdir, multiple upperdirs and workdirs
++# Define lowerdir, middledir, upperdir and workdir
 +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+upperdir1=$OVL_BASE_SCRATCH_MNT/upper1
-+upperdir2=$OVL_BASE_SCRATCH_MNT/upper2
-+workdir1=$OVL_BASE_SCRATCH_MNT/work1
-+workdir2=$OVL_BASE_SCRATCH_MNT/work2
++middledir=$OVL_BASE_SCRATCH_MNT/middle
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/work
 +
-+mkdir -p $lowerdir $upperdir1 $upperdir2 $workdir1 $workdir2
++make_test_dir()
++{
++	rm -rf $lowerdir $middledir $upperdir $workdir
++	mkdir -p $lowerdir $middledir $upperdir $workdir
++}
 +
-+# Mount overlay with enabled redirect_dir, index and nfs_export mount
-+# options, expect to set corresponding feature in upper root dir
-+_overlay_scratch_mount_dirs $lowerdir $upperdir1 $workdir1 \
-+			-o "redirect_dir=on,index=on,nfs_export=on"
++# Mount overlay with unknown compat feature, expect success
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_COMPAT "unknown" $upperdir
++
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro && \
++		$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir && \
++		$UMOUNT_PROG $SCRATCH_MNT
++
++
++# Mount overlay with unknown ro_rompat feature, expect success
++# on read-only mount, expect failure on read-write mount
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_RO_COMPAT "unknown" $upperdir
++
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir &>> $seqres.full && \
++		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro
++_scratch_remount rw &>> $seqres.full && echo "Remount should fail"
 +$UMOUNT_PROG $SCRATCH_MNT
 +
-+check_feature $OVL_XATTR_FEATURE_RO_COMPAT "index" $upperdir1
-+check_feature $OVL_XATTR_FEATURE_RO_COMPAT "nfs_export" $upperdir1
-+check_feature $OVL_XATTR_FEATURE_INCOMPAT "redirect_dir" $upperdir1
 +
-+# check overlayfs
-+_overlay_check_scratch_dirs $lowerdir $upperdir1 $workdir1 \
-+			-o "edirect_dir=on,index=on,nfs_export=on"
++# Mount overlay with unknown inrompat feature, expect failure
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_INCOMPAT "unknown" $upperdir
 +
-+# Mount again without mount options, expect success
-+_overlay_scratch_mount_dirs $lowerdir $upperdir1 $workdir1
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir &>> $seqres.full && \
++		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro &>> $seqres.full && \
++		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
++
++
++# Mount overlay with unknown compat feature on the lower layer which
++# used to be the upper layer, expect success
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_COMPAT "unknown" $middledir
++
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro && \
++		$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir && \
++		$UMOUNT_PROG $SCRATCH_MNT
++
++$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
++		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT && \
++		$UMOUNT_PROG $SCRATCH_MNT
++
++
++# Mount overlay with unknown ro_compat feature on the lower layer
++# which used to be the upper layer, expect success on read-only
++# mount, and expect failure on read-write mount
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_RO_COMPAT "unknown" $middledir
++
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir \
++		&>> $seqres.full && echo "Mount should fail" && \
++		$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro
++_scratch_remount rw &>> $seqres.full && echo "Remount should fail"
 +$UMOUNT_PROG $SCRATCH_MNT
 +
-+# check overlayfs again
-+_overlay_check_scratch_dirs $lowerdir $upperdir1 $workdir1
++$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
++		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT && \
++		$UMOUNT_PROG $SCRATCH_MNT
 +
 +
-+# Move down all layers and mount overlay with disabled redirect_dir,
-+# index and nfs_export mount options. Now, the overlay have redirect_dir,
-+# index and nfs_export features on the lower layer, expect mount success
-+# and set all these features on the upper root dir.
-+_overlay_scratch_mount_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2 \
-+			-o "redirect_dir=off,index=off,nfs_export=off"
-+$UMOUNT_PROG $SCRATCH_MNT
++# Mount overlay with unknown incompat feature on the lower layer
++# which used to be the upper layer, expect failure
++make_test_dir
++set_feature $OVL_XATTR_FEATURE_INCOMPAT "unknown" $middledir
 +
-+check_feature $OVL_XATTR_FEATURE_RO_COMPAT "index" $upperdir2
-+check_feature $OVL_XATTR_FEATURE_RO_COMPAT "nfs_export" $upperdir2
-+check_feature $OVL_XATTR_FEATURE_INCOMPAT "redirect_dir" $upperdir2
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir \
++		&>> $seqres.full && echo "Mount should fail" && \
++		$UMOUNT_PROG $SCRATCH_MNT
++_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro \
++		&>> $seqres.full && echo "Mount should fail" && \
++		$UMOUNT_PROG $SCRATCH_MNT
 +
-+# check overlayfs
-+_overlay_check_scratch_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
-+
-+# Mount again without mount options, expect success
-+_overlay_scratch_mount_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+# check overlayfs again
-+_overlay_check_scratch_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
++$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
++		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT &>> $seqres.full && \
++		echo "Mount should fail" && \
++		$UMOUNT_PROG $SCRATCH_MNT
 +
 +# success, all done
 +echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/overlay/059.out b/tests/overlay/059.out
+diff --git a/tests/overlay/058.out b/tests/overlay/058.out
 new file mode 100644
-index 00000000..36ebeea0
+index 00000000..fb5ca60b
 --- /dev/null
-+++ b/tests/overlay/059.out
++++ b/tests/overlay/058.out
 @@ -0,0 +1,2 @@
-+QA output created by 059
++QA output created by 058
 +Silence is golden
 diff --git a/tests/overlay/group b/tests/overlay/group
-index 605a9f56..77a24dd5 100644
+index c49ae3aa..605a9f56 100644
 --- a/tests/overlay/group
 +++ b/tests/overlay/group
-@@ -61,3 +61,4 @@
+@@ -60,3 +60,4 @@
+ 055 auto quick copyup redirect exportfs nonsamefs
  056 auto quick fsck
  057 auto quick redirect
- 058 auto quick feature
-+059 auto quick feature
++058 auto quick feature
 -- 
 2.13.6
 
