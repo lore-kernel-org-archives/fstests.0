@@ -1,250 +1,70 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:52609 "EHLO huawei.com"
-        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752916AbeCVL3b (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Mar 2018 07:29:31 -0400
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Subject: [RFC PATCH 1/2] overlay: test mount operation if overlay has unkown feature set
-Date: Thu, 22 Mar 2018 19:38:33 +0800
-Message-ID: <20180322113834.48168-1-yi.zhang@huawei.com>
+Received: from mx1.redhat.com ([209.132.183.28]:57816 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751771AbeCVUJz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Mar 2018 16:09:55 -0400
+Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 111FAC04BD38
+        for <fstests@vger.kernel.org>; Thu, 22 Mar 2018 20:09:55 +0000 (UTC)
+Received: from [IPv6:::1] (ovpn04.gateway.prod.ext.phx2.redhat.com [10.5.9.4])
+        by smtp.corp.redhat.com (Postfix) with ESMTPS id C6F6D5D757
+        for <fstests@vger.kernel.org>; Thu, 22 Mar 2018 20:09:54 +0000 (UTC)
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] xfs/278: mkfs with v4 format
+Message-ID: <bde6f5a1-1107-9c03-402d-486bfbdcbd35@redhat.com>
+Date: Thu, 22 Mar 2018 15:09:53 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: miklos@szeredi.hu, amir73il@gmail.com, guaneryu@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Test mount operation if the underlying root dir have unknown
-feature set:
-- Check unknown compat/ro_compat/incompat feature on the
-  upper root dir
-- Check unknown compat/ro_compat/incompat feature on the
-  lower root dir which used to be the upper root dir
+This test had silently stopped working when mkfs.xfs switched
+to v5 supers by default, and changed inode sizes:
 
-Mount operation should fail if unknown incompat feature is
-detected on the underlying root dir, and read-write mount should
-fail if unknown ro_compat feature is detected on the underlying
-root dir, and mount should succeed otherwise.
+> field u not found
+> parsing error
+> field u not found
+> parsing error
 
-Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+...
+
+Switch back to the original behavior by turning off crcs,
+and catch such failures if they crop up again by looking
+for xfs_db errors in $seqres.full.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- common/overlay        |   3 +
- tests/overlay/058     | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/058.out |   2 +
- tests/overlay/group   |   1 +
- 4 files changed, 179 insertions(+)
- create mode 100755 tests/overlay/058
- create mode 100644 tests/overlay/058.out
 
-diff --git a/common/overlay b/common/overlay
-index 441827b8..431fb847 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -10,6 +10,9 @@ export OVL_XATTR_IMPURE="trusted.overlay.impure"
- export OVL_XATTR_ORIGIN="trusted.overlay.origin"
- export OVL_XATTR_NLINK="trusted.overlay.nlink"
- export OVL_XATTR_UPPER="trusted.overlay.upper"
-+export OVL_XATTR_FEATURE_COMPAT="trusted.overlay.feature_compat"
-+export OVL_XATTR_FEATURE_RO_COMPAT="trusted.overlay.feature_ro_compat"
-+export OVL_XATTR_FEATURE_INCOMPAT="trusted.overlay.feature_incompat"
+(is it horrific to grep $seqres.full?  xfs_db doesn't exit
+with failure in this case :( )
+
+and now this causes repair to fail on a verifier error, but
+I just sent an xfsprogs patch to fix that as well.
+
+diff --git a/tests/xfs/278 b/tests/xfs/278
+index b94ee9c..c0e09c7 100755
+--- a/tests/xfs/278
++++ b/tests/xfs/278
+@@ -48,7 +48,7 @@ _supported_os Linux
+ _require_scratch
  
- # helper function to do the actual overlayfs mount operation
- _overlay_mount_dirs()
-diff --git a/tests/overlay/058 b/tests/overlay/058
-new file mode 100755
-index 00000000..6f88730e
---- /dev/null
-+++ b/tests/overlay/058
-@@ -0,0 +1,173 @@
-+#! /bin/bash
-+# FS QA Test 058
-+#
-+# Test mount operation if the underlying root dir have unknown
-+# feature set:
-+# - Check unknown compat/ro_compat/incompat feature on the
-+#   upper root dir
-+# - Check unknown compat/ro_compat/incompat feature on the
-+#   lower root dir which used to be the upper root dir
-+#
-+# Mount operation should fail if unknown incompat feature is
-+# detected on the underlying root dir, and read-write mount should
-+# fail if unknown ro_compat feature is detected on the underlying
-+# root dir, and mount should succeed otherwise.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 Huawei.  All Rights Reserved.
-+# Author: zhangyi (F) <yi.zhang@huawei.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
+ rm -f $seqres.full
+-_scratch_mkfs >$seqres.full 2>&1
++_scratch_mkfs -m crc=0 -n ftype=0 >$seqres.full 2>&1
+ _scratch_mount
+ 
+ mkdir -p $SCRATCH_MNT/dir/subdir
+@@ -73,6 +73,8 @@ _scratch_xfs_db -x -c "inode $DIR_INO" -c "write core.nlinkv2 0"  >> $seqres.ful
+ _scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
+ _scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
+ 
++grep -q "not found\|parsing error" $seqres.full && _fail "xfs_db commands failed"
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch_nocheck
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Set compat/ro_compat/incompat features to the underlying root dir
-+set_feature()
-+{
-+	local compat_type=$1
-+	local feature=$2
-+	local target=$3
-+
-+	$SETFATTR_PROG -n $compat_type -v $feature $target
-+}
-+
-+# Define lowerdir, middledir, upperdir and workdir
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+middledir=$OVL_BASE_SCRATCH_MNT/middle
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/work
-+
-+make_test_dir()
-+{
-+	rm -rf $lowerdir $middledir $upperdir $workdir
-+	mkdir -p $lowerdir $middledir $upperdir $workdir
-+}
-+
-+# Mount overlay with unknown compat feature, expect success
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_COMPAT "unknown" $upperdir
-+
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Mount overlay with unknown ro_rompat feature, expect success
-+# on read-only mount, expect failure on read-write mount
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_RO_COMPAT "unknown" $upperdir
-+
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir &>> $seqres.full && \
-+		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro
-+_scratch_remount rw &>> $seqres.full && echo "Remount should fail"
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Mount overlay with unknown inrompat feature, expect failure
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_INCOMPAT "unknown" $upperdir
-+
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir &>> $seqres.full && \
-+		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o ro &>> $seqres.full && \
-+		echo "Mount should fail" && $UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Mount overlay with unknown compat feature on the lower layer which
-+# used to be the upper layer, expect success
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_COMPAT "unknown" $middledir
-+
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
-+		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Mount overlay with unknown ro_compat feature on the lower layer
-+# which used to be the upper layer, expect success on read-only
-+# mount, and expect failure on read-write mount
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_RO_COMPAT "unknown" $middledir
-+
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir \
-+		&>> $seqres.full && echo "Mount should fail" && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro
-+_scratch_remount rw &>> $seqres.full && echo "Remount should fail"
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
-+		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+
-+# Mount overlay with unknown incompat feature on the lower layer
-+# which used to be the upper layer, expect failure
-+make_test_dir
-+set_feature $OVL_XATTR_FEATURE_INCOMPAT "unknown" $middledir
-+
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir \
-+		&>> $seqres.full && echo "Mount should fail" && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+_overlay_scratch_mount_dirs "$middledir:$lowerdir" $upperdir $workdir -o ro \
-+		&>> $seqres.full && echo "Mount should fail" && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+$MOUNT_PROG -t overlay -o"lowerdir=$middledir:$lowerdir" \
-+		$OVL_BASE_SCRATCH_MNT $SCRATCH_MNT &>> $seqres.full && \
-+		echo "Mount should fail" && \
-+		$UMOUNT_PROG $SCRATCH_MNT
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/058.out b/tests/overlay/058.out
-new file mode 100644
-index 00000000..fb5ca60b
---- /dev/null
-+++ b/tests/overlay/058.out
-@@ -0,0 +1,2 @@
-+QA output created by 058
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index c49ae3aa..605a9f56 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -60,3 +60,4 @@
- 055 auto quick copyup redirect exportfs nonsamefs
- 056 auto quick fsck
- 057 auto quick redirect
-+058 auto quick feature
--- 
-2.13.6
+ echo "===== BEGIN of xfs_repair =====" >> $seqres.full
+ echo "" >>$seqres.full
+ 
 
