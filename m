@@ -1,11 +1,12 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:48750 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751632AbeCWQye (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:54:34 -0400
-Subject: [PATCH 1/4] common/xfs: don't call xfs_scrub on a block device
+Received: from aserp2120.oracle.com ([141.146.126.78]:44884 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751632AbeCWQyk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:54:40 -0400
+Subject: [PATCH 2/4] common/xfs: fix various problems with
+ _supports_xfs_scrub
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 23 Mar 2018 09:54:28 -0700
-Message-ID: <152182406876.14523.11145092318388572094.stgit@magnolia>
+Date: Fri, 23 Mar 2018 09:54:35 -0700
+Message-ID: <152182407507.14523.13692488779696151853.stgit@magnolia>
 In-Reply-To: <152182406249.14523.2186010254497227366.stgit@magnolia>
 References: <152182406249.14523.2186010254497227366.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,26 +19,36 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-xfs_scrub takes an xfs mountpoint as its argument, not a block device.
-Therefore, fix _check_xfs_filesystem to call it correctly.
+The _supports_xfs_scrub helper is called with a mountpoint (a working
+mountpoint is required for scrub) and a block device (used to detect
+norecovery mounts).  If either of these conditions aren't satisfied we
+should return failure status to the caller, not unilaterally decide to
+bail out of the test.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/xfs |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/xfs |    8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
 
 
 diff --git a/common/xfs b/common/xfs
-index 5dbd81e..1d98ba1 100644
+index 1d98ba1..3b71e02 100644
 --- a/common/xfs
 +++ b/common/xfs
-@@ -358,7 +358,7 @@ _check_xfs_filesystem()
- 	# Run online scrub if we can.
- 	mntpt="$(_is_dev_mounted $device)"
- 	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
--		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device > $tmp.scrub 2>&1
-+		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $mntpt > $tmp.scrub 2>&1
- 		if [ $? -ne 0 ]; then
- 			_log_err "_check_xfs_filesystem: filesystem on $device failed scrub"
- 			echo "*** xfs_scrub $scrubflag -v -d -n output ***" >> $seqres.full
+@@ -305,9 +305,13 @@ _supports_xfs_scrub()
+ 	local mountpoint="$1"
+ 	local device="$2"
+ 
+-	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
++	if [ -z "$device" ] || [ -z "$mountpoint" ]; then
+ 		echo "Usage: _supports_xfs_scrub mountpoint device"
+-		exit 1
++		return 1
++	fi
++
++	if [ ! -b "$device" ] || [ ! -e "$mountpoint" ]; then
++		return 1
+ 	fi
+ 
+ 	test "$FSTYP" = "xfs" || return 1
 
