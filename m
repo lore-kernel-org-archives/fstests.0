@@ -1,217 +1,272 @@
-Received: from mail-yw0-f180.google.com ([209.85.161.180]:43781 "EHLO
-        mail-yw0-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754124AbeCWLsh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 07:48:37 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:48748 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752640AbeCWN40 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Mar 2018 09:56:26 -0400
+Date: Fri, 23 Mar 2018 09:56:21 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH V2] xfstests: add a simple cgroup2 writeback test
+Message-ID: <20180323135621.GC22357@bfoster.bfoster>
+References: <f58e67c9a4ec8cb4e0c4e96865e3a44aebaf46a2.1521752027.git.shli@fb.com>
 MIME-Version: 1.0
-In-Reply-To: <20180322113834.48168-2-yi.zhang@huawei.com>
-References: <20180322113834.48168-1-yi.zhang@huawei.com> <20180322113834.48168-2-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 23 Mar 2018 14:48:35 +0300
-Message-ID: <CAOQ4uxj9XJ12hY7PvEz4zX8jBdX2RxDOdrK3HcG-7iUA+4WEdA@mail.gmail.com>
-Subject: Re: [RFC PATCH 2/2] overlay: test mount operation with supported
- features and enabled feature mount options
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <f58e67c9a4ec8cb4e0c4e96865e3a44aebaf46a2.1521752027.git.shli@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: Shaohua Li <shli@kernel.org>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Kernel-team@fb.com, Shaohua Li <shli@fb.com>, Eryu Guan <eguan@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 22, 2018 at 1:38 PM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Test overlay mount operation which has supported feature set, and
-> test mount operation with feature mount options:
-> - Check overlay mount with enabled redirect_dir/index/nfs_export
->   mount options
-> - Check overlay mount with supported redirect_dir/index/nfs_export
->   feature on the upper root dir
-> - Check overlay mount with supported redirect_dir/index/nfs_export
->   feature on the lower root dir only
->
-> Mount operation should succeed if supported features is detected on
-> the underlying root dir. One feature should be set on the upper
-> root dir if user give the enabled mount option or the same feature
-> is detected on the lower root dir.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+On Thu, Mar 22, 2018 at 02:13:23PM -0700, Shaohua Li wrote:
+> From: Shaohua Li <shli@fb.com>
+> 
+> If filesystem supports cgroup2 writeback, the writeback IO should belong
+> to the cgroup which writes the file. To verify this, we set a write
+> bandwidth limit for a cgroup using block-throttling, the writeback IO
+> should be throttled according to the write bandwidth.
+> 
+> Thanks Dave Chinner's idea to use syncfs to wait for writeback
+> completion.
+> 
+> Cc: Eryu Guan <eguan@redhat.com>
+> Signed-off-by: Shaohua Li <shli@fb.com>
 > ---
->  tests/overlay/059     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/059.out |   2 +
->  tests/overlay/group   |   1 +
->  3 files changed, 143 insertions(+)
->  create mode 100755 tests/overlay/059
->  create mode 100644 tests/overlay/059.out
->
-> diff --git a/tests/overlay/059 b/tests/overlay/059
-> new file mode 100755
-> index 00000000..cec20d4a
+
+Thanks for sending this. Firstly, this test isn't passing for me on
+ext4. It should, right? I'm running 4.16.0-0.rc6.git2.1.fc29.x86_64 with
+cgroup_no_v1=all, set CGROUP2_PATH=/sys/fs/cgroup/unified and my scratch
+device is an LVM volume.
+
+# diff -u tests/generic/482.out
+# /root/xfstests-dev/results//generic/482.out.bad
+--- tests/generic/482.out       2018-03-23 08:54:51.321808466 -0400
++++ /root/xfstests-dev/results//generic/482.out.bad     2018-03-23
+09:25:55.359769041 -0400
+@@ -1,3 +1,4 @@
+ QA output created by 482
+ Disk speed is ok, start throttled writeback test
+-Throttled writeback runtime is in range
++Throttled writeback runtime has value of 11
++Throttled writeback runtime is NOT in range 90 .. 110
+
+A few more comments...
+
+>  common/cgroup2        | 15 +++++++++++
+>  common/rc             | 14 ++++++++--
+>  tests/generic/482     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/482.out |  3 +++
+>  tests/generic/group   |  1 +
+>  5 files changed, 104 insertions(+), 2 deletions(-)
+>  create mode 100644 common/cgroup2
+>  create mode 100755 tests/generic/482
+>  create mode 100644 tests/generic/482.out
+> 
+> diff --git a/common/cgroup2 b/common/cgroup2
+> new file mode 100644
+> index 00000000..f89825e2
 > --- /dev/null
-> +++ b/tests/overlay/059
-> @@ -0,0 +1,140 @@
-> +#! /bin/bash
-> +# FS QA Test 059
-> +#
-> +# Test overlay mount operation which has supported feature set, and
-> +# test mount operation with feature mount options:
-> +# - Check overlay mount with enabled redirect_dir/index/nfs_export
-> +#   mount options
-> +# - Check overlay mount with supported redirect_dir/index/nfs_export
-> +#   feature on the upper root dir
-> +# - Check overlay mount with supported redirect_dir/index/nfs_export
-> +#   feature on the lower root dir only
-> +#
-> +# Mount operation should succeed if supported features is detected on
-> +# the underlying root dir. One feature should be set on the upper
-> +# root dir if user give the enabled mount option or the same feature
-> +# is detected on the lower root dir.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 Huawei.  All Rights Reserved.
-> +# Author: zhangyi (F) <yi.zhang@huawei.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
+> +++ b/common/cgroup2
+> @@ -0,0 +1,15 @@
+> +# cgroup2 specific common functions
 > +
+> +export CGROUP2_PATH="${CGROUP2_PATH:-/sys/fs/cgroup}"
+> +
+> +_require_cgroup2()
+> +{
+> +	if [ ! -f "${CGROUP2_PATH}/cgroup.subtree_control" ]; then
+> +		_notrun "Test requires cgroup2 enabled"
+> +	fi
+> +	if [[ ! $(cat ${CGROUP2_PATH}/cgroup.controllers) =~ $1 ]]; then
+> +		_notrun "Cgroup2 doesn't support $1 controller $1"
+> +	fi
+> +}
+> +
+> +/bin/true
+> diff --git a/common/rc b/common/rc
+> index 93176749..e93674f9 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3613,14 +3613,24 @@ _short_dev()
+>  	echo `basename $(_real_dev $1)`
+>  }
+>  
+> -_sysfs_dev()
+> +#blk-throttling requires minor is 0
+
+Why (more on this below)?
+
+> +_get_dev_devt()
+>  {
+>  	local _dev=`_real_dev $1`
+>  	local _maj=$(stat -c%t $_dev | tr [:lower:] [:upper:])
+>  	local _min=$(stat -c%T $_dev | tr [:lower:] [:upper:])
+>  	_maj=$(echo "ibase=16; $_maj" | bc)
+>  	_min=$(echo "ibase=16; $_min" | bc)
+> -	echo /sys/dev/block/$_maj:$_min
+> +	if [ $2 ]; then
+> +		echo $_maj:0
+> +	else
+> +		echo $_maj:$_min
+> +	fi
+> +}
+> +
+> +_sysfs_dev()
+> +{
+> +	echo /sys/dev/block/$(_get_dev_devt $1 false)
+>  }
+>  
+>  # Get the minimum block size of a file.  Usually this is the
+> diff --git a/tests/generic/482 b/tests/generic/482
+> new file mode 100755
+> index 00000000..1f3cbc97
+> --- /dev/null
+> +++ b/tests/generic/482
+> @@ -0,0 +1,73 @@
+> +#! /bin/bash
+> +
+
+The test should have a header with license and a brief description of
+what it's doing. The description helps give somebody an idea of what's
+wrong if the test fails and we have to refer to this years down the
+road. For example, this should explain that this is explicitly testing
+cgroup aware writeback support. That means that it requires specific
+filesystem support, block I/O throttling is not enough, etc.
+
+That also begs the question of how to handle filesystems that do not
+implement cgroup aware writeback. XFS doesn't atm (though hopefully that
+changes with your kernel patch), and I'm not sure that should
+necessarily result in a test failure. I don't believe we have any
+specific way to check at runtime..? Perhaps we should just opt-in to
+specific fs' once they support it and do a _notrun for anything else..?
+
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/attr
+> +. ./common/cgroup2
 > +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +# Use non-default scratch underlying overlay dirs, we need to check
-> +# them explicity after test.
-> +_require_scratch_nocheck
-> +_require_scratch_overlay_features redirect_dir index nfs_export
-> +
-> +# Remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# Check compat/ro_compat/incompat features on the underlying root dir
-> +check_feature()
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +cgname=`mktemp -du ${CGROUP2_PATH}/test.XXXXXX`
+> +_cleanup()
 > +{
-> +       local compat_type=$1
-> +       local expect=$2
-> +       local target=$3
-> +
-> +       feature=$($GETFATTR_PROG --absolute-names --only-values -n \
-> +                       $compat_type $target)
-> +
-> +       [[ "$feature" =~ "$expect" ]] || echo "Feature xattr incorrect"
+> +	cd /
+> +	sync
+> +	rmdir $cgname
 > +}
 > +
-> +# Create lowerdir, multiple upperdirs and workdirs
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +upperdir1=$OVL_BASE_SCRATCH_MNT/upper1
-> +upperdir2=$OVL_BASE_SCRATCH_MNT/upper2
-> +workdir1=$OVL_BASE_SCRATCH_MNT/work1
-> +workdir2=$OVL_BASE_SCRATCH_MNT/work2
+> +# real QA test starts here
 > +
-> +mkdir -p $lowerdir $upperdir1 $upperdir2 $workdir1 $workdir2
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_cgroup2 io
+> +_require_xfs_io_command syncfs
 > +
-> +# Mount overlay with enabled redirect_dir, index and nfs_export mount
-> +# options, expect to set corresponding feature in upper root dir
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir1 $workdir1 \
-> +                       -o "redirect_dir=on,index=on,nfs_export=on"
-> +$UMOUNT_PROG $SCRATCH_MNT
+> +# Setup Filesystem
+> +_scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
 > +
-> +check_feature $OVL_XATTR_FEATURE_RO_COMPAT "index" $upperdir1
-> +check_feature $OVL_XATTR_FEATURE_RO_COMPAT "nfs_export" $upperdir1
-> +check_feature $OVL_XATTR_FEATURE_INCOMPAT "redirect_dir" $upperdir1
+> +_scratch_mount || _fail "mount failed"
 > +
-> +# check overlayfs
-> +_overlay_check_scratch_dirs $lowerdir $upperdir1 $workdir1 \
-> +                       -o "edirect_dir=on,index=on,nfs_export=on"
+> +test_speed()
+> +{
+> +	start=$(date +%s)
+> +	$XFS_IO_PROG -f -d -c "pwrite -b 1m 0 500m" "$SCRATCH_MNT/image" \
+> +		> /dev/null 2>&1
+> +	echo $(($(date +%s) - $start))
+> +}
+> +time=$(test_speed)
+> +
+> +if [ $time -gt 25 ]; then
+> +	_notrun "Disk is too slow, make sure disk can do 20MB/s at least"
+> +fi
+> +
+> +echo "Disk speed is ok, start throttled writeback test"
+> +
 
-Typo "edirect_dir"
+Could use some comments..
+
+# create a cgroup with a 5MB/s I/O limit
+
+> +echo +io > ${CGROUP2_PATH}/cgroup.subtree_control
+> +mkdir $cgname
+> +echo "$(_get_dev_devt $SCRATCH_DEV true) wbps=$((5*1024*1024))" > $cgname/io.max
+
+FWIW, the test passes on ext4 for me if I hardcode this to use 253:3 for
+my scratch device (rather than 253:0). What device were you using that
+required a minor of 0?
 
 > +
-> +# Mount again without mount options, expect success
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir1 $workdir1
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +# check overlayfs again
-> +_overlay_check_scratch_dirs $lowerdir $upperdir1 $workdir1
-> +
-> +
-> +# Move down all layers and mount overlay with disabled redirect_dir,
-> +# index and nfs_export mount options. Now, the overlay have redirect_dir,
-> +# index and nfs_export features on the lower layer, expect mount success
-> +# and set all these features on the upper root dir.
+> +run_writeback()
+> +{
+> +    start=$(date +%s)
+> +    $XFS_IO_PROG -f -c "pwrite 0 500m" -c "syncfs" "$SCRATCH_MNT/image2" \
+> +        > /dev/null 2>&1
 
-This logic is questionable - user states that he doesn't want index and
-index feature gets enabled. I will elaborate on the kernel patch.
+Comment with the reason this needs to be syncfs?
 
-> +_overlay_scratch_mount_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2 \
-> +                       -o "redirect_dir=off,index=off,nfs_export=off"
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +check_feature $OVL_XATTR_FEATURE_RO_COMPAT "index" $upperdir2
-> +check_feature $OVL_XATTR_FEATURE_RO_COMPAT "nfs_export" $upperdir2
-> +check_feature $OVL_XATTR_FEATURE_INCOMPAT "redirect_dir" $upperdir2
-> +
-> +# check overlayfs
-> +_overlay_check_scratch_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
-> +
-> +# Mount again without mount options, expect success
-> +_overlay_scratch_mount_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
-> +$UMOUNT_PROG $SCRATCH_MNT
-> +
-> +# check overlayfs again
-> +_overlay_check_scratch_dirs "$upperdir1:$lowerdir" $upperdir2 $workdir2
+> +    echo $(($(date +%s) - $start))
+> +}
+
+It's cleaner and more consistent to define helper functions all in one
+place above. That makes it easier to follow the actual test logic. I'd
+also suggest to rename this to test_writeback().
+
+> +time=$(
+> +echo $BASHPID > $cgname/cgroup.procs;
+
+Is it necessary to include the above line within the $()? If so, please
+document it with a comment. Otherwise it might be cleaner to run it
+separately.
+
+Also could use another comment before this hunk:
+
+# perform buffered writes charged to the cgroup and verify writeback
+# honors the I/O throttle
+
+> +run_writeback
+> +)
+> +_within_tolerance "Throttled writeback runtime" $time 100 10% -v
 > +
 > +# success, all done
-> +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/overlay/059.out b/tests/overlay/059.out
+> diff --git a/tests/generic/482.out b/tests/generic/482.out
 > new file mode 100644
-> index 00000000..36ebeea0
+> index 00000000..4d1b40a8
 > --- /dev/null
-> +++ b/tests/overlay/059.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 059
-> +Silence is golden
-> diff --git a/tests/overlay/group b/tests/overlay/group
-> index 605a9f56..77a24dd5 100644
-> --- a/tests/overlay/group
-> +++ b/tests/overlay/group
-> @@ -61,3 +61,4 @@
->  056 auto quick fsck
->  057 auto quick redirect
->  058 auto quick feature
-> +059 auto quick feature
+> +++ b/tests/generic/482.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 482
+> +Disk speed is ok, start throttled writeback test
+> +Throttled writeback runtime is in range
+> diff --git a/tests/generic/group b/tests/generic/group
+> index e8676062..f707838c 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -484,3 +484,4 @@
+>  479 auto quick metadata
+>  480 auto quick metadata
+>  481 auto quick log metadata
+> +482 auto cgroup writeback
 
-I would add mount group.
+cgroup makes sense, but I'm not sure about writeback. It seems like
+duplication at least since both groups are new. Use the rw group
+perhaps? Eh, I'll defer to Eryu's opinion on what group(s) are most
+appropriate.
 
-Thanks,
-Amir.
+Brian
+
+> -- 
+> 2.14.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
