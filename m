@@ -1,272 +1,253 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48748 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752640AbeCWN40 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Mar 2018 09:56:26 -0400
-Date: Fri, 23 Mar 2018 09:56:21 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH V2] xfstests: add a simple cgroup2 writeback test
-Message-ID: <20180323135621.GC22357@bfoster.bfoster>
-References: <f58e67c9a4ec8cb4e0c4e96865e3a44aebaf46a2.1521752027.git.shli@fb.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:58558 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751907AbeCWQIZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:08:25 -0400
+Date: Fri, 23 Mar 2018 09:08:17 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v3] xfs: test agfl reset on bad list wrapping
+Message-ID: <20180323160817.GJ4818@magnolia>
+References: <20180321165716.GB4818@magnolia>
+ <20180323052540.GZ30836@localhost.localdomain>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <f58e67c9a4ec8cb4e0c4e96865e3a44aebaf46a2.1521752027.git.shli@fb.com>
+In-Reply-To: <20180323052540.GZ30836@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: Shaohua Li <shli@kernel.org>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, Kernel-team@fb.com, Shaohua Li <shli@fb.com>, Eryu Guan <eguan@redhat.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Brian Foster <bfoster@redhat.com>, linux-xfs@vger.kernel.org, david@fromorbit.com, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 22, 2018 at 02:13:23PM -0700, Shaohua Li wrote:
-> From: Shaohua Li <shli@fb.com>
+On Fri, Mar 23, 2018 at 01:26:06PM +0800, Eryu Guan wrote:
+> On Wed, Mar 21, 2018 at 09:57:16AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > From the kernel patch that this test examines ("xfs: detect agfl count
+> > corruption and reset agfl"):
+> > 
+> > "The struct xfs_agfl v5 header was originally introduced with
+> > unexpected padding that caused the AGFL to operate with one less
+> > slot than intended. The header has since been packed, but the fix
+> > left an incompatibility for users who upgrade from an old kernel
+> > with the unpacked header to a newer kernel with the packed header
+> > while the AGFL happens to wrap around the end. The newer kernel
+> > recognizes one extra slot at the physical end of the AGFL that the
+> > previous kernel did not. The new kernel will eventually attempt to
+> > allocate a block from that slot, which contains invalid data, and
+> > cause a crash.
+> > 
+> > "This condition can be detected by comparing the active range of the
+> > AGFL to the count. While this detects a padding mismatch, it can
+> > also trigger false positives for unrelated flcount corruption. Since
+> > we cannot distinguish a size mismatch due to padding from unrelated
+> > corruption, we can't trust the AGFL enough to simply repopulate the
+> > empty slot.
+> > 
+> > "Instead, avoid unnecessarily complex detection logic and and use a
+> > solution that can handle any form of flcount corruption that slips
+> > through read verifiers: distrust the entire AGFL and reset it to an
+> > empty state. Any valid blocks within the AGFL are intentionally
+> > leaked. This requires xfs_repair to rectify (which was already
+> > necessary based on the state the AGFL was found in). The reset
+> > mitigates the side effect of the padding mismatch problem from a
+> > filesystem crash to a free space accounting inconsistency."
+> > 
+> > This test exercises the reset code by mutating a fresh filesystem to
+> > contain an agfl with various list configurations of correctly wrapped,
+> > incorrectly wrapped, not wrapped, and actually corrupt free lists; then
+> > checks the success of the reset operation by fragmenting the free space
+> > btrees to exercise the agfl.  Kernels without this reset fix will shut
+> > down the filesystem with corruption errors.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> > v3: use fallocate instead of dd write, more factoring of common code
+> > v2: remove unncessary umounts, refactor long lines into helpers
+> > ---
+> >  common/rc         |   23 ++++-
+> >  tests/xfs/709     |  258 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/709.out |   13 +++
+> >  tests/xfs/group   |    1 
+> >  4 files changed, 293 insertions(+), 2 deletions(-)
+> >  create mode 100755 tests/xfs/709
+> >  create mode 100644 tests/xfs/709.out
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 2c29d55..f7eb72d 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -3440,6 +3440,26 @@ _get_device_size()
+> >  	grep `_short_dev $1` /proc/partitions | awk '{print $3}'
+> >  }
+> >  
+> > +# Make sure we actually have dmesg checking set up.
+> > +_require_check_dmesg() {
+> > +	test -w /dev/kmsg || \
+> > +		_notrun "Test requires writable /dev/kmsg."
+> > +}
+> > +
+> > +# Return the dmesg log since the start of this test.  Caller must ensure that
+> > +# /dev/kmsg was writable when the test was started so that we can find the
+> > +# beginning of this test's log messages; _require_check_dmesg does this.
+> > +_dmesg_since_test_start() {
+> > +	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
+> > +		tac
+> > +}
+> > +
+> > +# check dmesg log for a specific string, subject to the same requirements as
+> > +# _dmesg_since_test_start.
+> > +_check_dmesg_for() {
+> > +	_dmesg_since_test_start | egrep -q "$1"
+> > +}
+> > +
+> >  # check dmesg log for WARNING/Oops/etc.
+> >  _check_dmesg()
+> >  {
+> > @@ -3455,8 +3475,7 @@ _check_dmesg()
+> >  
+> >  	# search the dmesg log of last run of $seqnum for possible failures
+> >  	# use sed \cregexpc address type, since $seqnum contains "/"
 > 
-> If filesystem supports cgroup2 writeback, the writeback IO should belong
-> to the cgroup which writes the file. To verify this, we set a write
-> bandwidth limit for a cgroup using block-throttling, the writeback IO
-> should be throttled according to the write bandwidth.
+> The comments about sed usage probably should go to
+> _dmesg_since_test_start() too.
+
+Ok
+
+> > -	dmesg | tac | sed -ne "0,\#run fstests $seqnum at $date_time#p" | \
+> > -		tac | $filter >$seqres.dmesg
+> > +	_dmesg_since_test_start | $filter >$seqres.dmesg
+> >  	egrep -q -e "kernel BUG at" \
+> >  	     -e "WARNING:" \
+> >  	     -e "BUG:" \
+> > diff --git a/tests/xfs/709 b/tests/xfs/709
+> > new file mode 100755
+> > index 0000000..78cefe5
+> > --- /dev/null
+> > +++ b/tests/xfs/709
+> > @@ -0,0 +1,258 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. 709
+> > +#
+> > +# Make sure XFS can fix a v5 AGFL that wraps over the last block.
+> > +# Refer to commit 96f859d52bcb ("libxfs: pack the agfl header structure so
+> > +# XFS_AGFL_SIZE is correct") for details on the original on-disk format error
+> > +# and the patch "xfs: detect agfl count corruption and reset agfl") for details
+> > +# about the fix.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2018 Oracle, Inc.
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +#
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1
+> > +trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# real QA test starts here
+> > +_supported_fs xfs
+> > +_supported_os Linux
+> > +
+> > +_require_check_dmesg
+> > +_require_scratch
+> > +_require_test_program "punch-alternating"
+> > +
+> > +# This is only a v5 filesystem problem
+> > +_require_scratch_xfs_crc
+> > +
+> > +mount_loop() {
+> > +	if ! _try_scratch_mount >> $seqres.full 2>&1; then
+> > +		echo "scratch mount failed" >> $seqres.full
+> > +		return
+> > +	fi
+> > +
+> > +	# Trigger agfl fixing by fragmenting free space enough to cause
+> > +	# a bnobt split
+> > +	blksz=$(_get_file_block_size ${SCRATCH_MNT})
+> > +	bno_maxrecs=$(( blksz / 8 ))
+> > +	filesz=$((bno_maxrecs * 3 * blksz))
+> > +	rm -rf $SCRATCH_MNT/a
+> > +	$XFS_IO_PROG -f -c "falloc 0 $filesz" $SCRATCH_MNT/a
 > 
-> Thanks Dave Chinner's idea to use syncfs to wait for writeback
-> completion.
+> And I noticed test failure with patch "xfs: detect agfl count corruption
+> and reset agfl" applied on top of 4.16-rc5 kernel. Looks like we should
+> dump xfs_io output to $seqres.full, as in v2 patch
 > 
-> Cc: Eryu Guan <eguan@redhat.com>
-> Signed-off-by: Shaohua Li <shli@fb.com>
-> ---
+> dd if=/dev/zero of=$SCRATCH_MNT/a bs=8192k >> $seqres.full 2>&1
 
-Thanks for sending this. Firstly, this test isn't passing for me on
-ext4. It should, right? I'm running 4.16.0-0.rc6.git2.1.fc29.x86_64 with
-cgroup_no_v1=all, set CGROUP2_PATH=/sys/fs/cgroup/unified and my scratch
-device is an LVM volume.
+Yep.
 
-# diff -u tests/generic/482.out
-# /root/xfstests-dev/results//generic/482.out.bad
---- tests/generic/482.out       2018-03-23 08:54:51.321808466 -0400
-+++ /root/xfstests-dev/results//generic/482.out.bad     2018-03-23
-09:25:55.359769041 -0400
-@@ -1,3 +1,4 @@
- QA output created by 482
- Disk speed is ok, start throttled writeback test
--Throttled writeback runtime is in range
-+Throttled writeback runtime has value of 11
-+Throttled writeback runtime is NOT in range 90 .. 110
+In the bad_start case the fs checks every agfl and refuses to mount...
+if your kernel has CONFIG_XFS_DEBUG=y.
 
-A few more comments...
-
->  common/cgroup2        | 15 +++++++++++
->  common/rc             | 14 ++++++++--
->  tests/generic/482     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/482.out |  3 +++
->  tests/generic/group   |  1 +
->  5 files changed, 104 insertions(+), 2 deletions(-)
->  create mode 100644 common/cgroup2
->  create mode 100755 tests/generic/482
->  create mode 100644 tests/generic/482.out
+> --- tests/xfs/709.out   2018-03-23 12:45:16.831011711 +0800
+> +++ /root/workspace/xfstests/results//xfs_4k_crc/xfs/709.out.bad        2018-03-23 13:12:10.083980820 +0800
+> @@ -7,6 +7,7 @@
+>  TEST good_start
+>  TEST good_wrap
+>  TEST bad_start
+> +fallocate: Structure needs cleaning
+>  ASSERT flfirst < good_agfl_size - 1
+>  ASSERT flfirst < fllast
+>  TEST no_move
 > 
-> diff --git a/common/cgroup2 b/common/cgroup2
-> new file mode 100644
-> index 00000000..f89825e2
-> --- /dev/null
-> +++ b/common/cgroup2
-> @@ -0,0 +1,15 @@
-> +# cgroup2 specific common functions
-> +
-> +export CGROUP2_PATH="${CGROUP2_PATH:-/sys/fs/cgroup}"
-> +
-> +_require_cgroup2()
-> +{
-> +	if [ ! -f "${CGROUP2_PATH}/cgroup.subtree_control" ]; then
-> +		_notrun "Test requires cgroup2 enabled"
-> +	fi
-> +	if [[ ! $(cat ${CGROUP2_PATH}/cgroup.controllers) =~ $1 ]]; then
-> +		_notrun "Cgroup2 doesn't support $1 controller $1"
-> +	fi
-> +}
-> +
-> +/bin/true
-> diff --git a/common/rc b/common/rc
-> index 93176749..e93674f9 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3613,14 +3613,24 @@ _short_dev()
->  	echo `basename $(_real_dev $1)`
->  }
->  
-> -_sysfs_dev()
-> +#blk-throttling requires minor is 0
-
-Why (more on this below)?
-
-> +_get_dev_devt()
->  {
->  	local _dev=`_real_dev $1`
->  	local _maj=$(stat -c%t $_dev | tr [:lower:] [:upper:])
->  	local _min=$(stat -c%T $_dev | tr [:lower:] [:upper:])
->  	_maj=$(echo "ibase=16; $_maj" | bc)
->  	_min=$(echo "ibase=16; $_min" | bc)
-> -	echo /sys/dev/block/$_maj:$_min
-> +	if [ $2 ]; then
-> +		echo $_maj:0
-> +	else
-> +		echo $_maj:$_min
-> +	fi
-> +}
-> +
-> +_sysfs_dev()
-> +{
-> +	echo /sys/dev/block/$(_get_dev_devt $1 false)
->  }
->  
->  # Get the minimum block size of a file.  Usually this is the
-> diff --git a/tests/generic/482 b/tests/generic/482
-> new file mode 100755
-> index 00000000..1f3cbc97
-> --- /dev/null
-> +++ b/tests/generic/482
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +
-
-The test should have a header with license and a brief description of
-what it's doing. The description helps give somebody an idea of what's
-wrong if the test fails and we have to refer to this years down the
-road. For example, this should explain that this is explicitly testing
-cgroup aware writeback support. That means that it requires specific
-filesystem support, block I/O throttling is not enough, etc.
-
-That also begs the question of how to handle filesystems that do not
-implement cgroup aware writeback. XFS doesn't atm (though hopefully that
-changes with your kernel patch), and I'm not sure that should
-necessarily result in a test failure. I don't believe we have any
-specific way to check at runtime..? Perhaps we should just opt-in to
-specific fs' once they support it and do a _notrun for anything else..?
-
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/cgroup2
-> +
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +cgname=`mktemp -du ${CGROUP2_PATH}/test.XXXXXX`
-> +_cleanup()
-> +{
-> +	cd /
-> +	sync
-> +	rmdir $cgname
-> +}
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_cgroup2 io
-> +_require_xfs_io_command syncfs
-> +
-> +# Setup Filesystem
-> +_scratch_mkfs >/dev/null 2>&1 || _fail "mkfs failed"
-> +
-> +_scratch_mount || _fail "mount failed"
-> +
-> +test_speed()
-> +{
-> +	start=$(date +%s)
-> +	$XFS_IO_PROG -f -d -c "pwrite -b 1m 0 500m" "$SCRATCH_MNT/image" \
-> +		> /dev/null 2>&1
-> +	echo $(($(date +%s) - $start))
-> +}
-> +time=$(test_speed)
-> +
-> +if [ $time -gt 25 ]; then
-> +	_notrun "Disk is too slow, make sure disk can do 20MB/s at least"
-> +fi
-> +
-> +echo "Disk speed is ok, start throttled writeback test"
-> +
-
-Could use some comments..
-
-# create a cgroup with a 5MB/s I/O limit
-
-> +echo +io > ${CGROUP2_PATH}/cgroup.subtree_control
-> +mkdir $cgname
-> +echo "$(_get_dev_devt $SCRATCH_DEV true) wbps=$((5*1024*1024))" > $cgname/io.max
-
-FWIW, the test passes on ext4 for me if I hardcode this to use 253:3 for
-my scratch device (rather than 253:0). What device were you using that
-required a minor of 0?
-
-> +
-> +run_writeback()
-> +{
-> +    start=$(date +%s)
-> +    $XFS_IO_PROG -f -c "pwrite 0 500m" -c "syncfs" "$SCRATCH_MNT/image2" \
-> +        > /dev/null 2>&1
-
-Comment with the reason this needs to be syncfs?
-
-> +    echo $(($(date +%s) - $start))
-> +}
-
-It's cleaner and more consistent to define helper functions all in one
-place above. That makes it easier to follow the actual test logic. I'd
-also suggest to rename this to test_writeback().
-
-> +time=$(
-> +echo $BASHPID > $cgname/cgroup.procs;
-
-Is it necessary to include the above line within the $()? If so, please
-document it with a comment. Otherwise it might be cleaner to run it
-separately.
-
-Also could use another comment before this hunk:
-
-# perform buffered writes charged to the cgroup and verify writeback
-# honors the I/O throttle
-
-> +run_writeback
-> +)
-> +_within_tolerance "Throttled writeback runtime" $time 100 10% -v
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/482.out b/tests/generic/482.out
-> new file mode 100644
-> index 00000000..4d1b40a8
-> --- /dev/null
-> +++ b/tests/generic/482.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 482
-> +Disk speed is ok, start throttled writeback test
-> +Throttled writeback runtime is in range
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e8676062..f707838c 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -484,3 +484,4 @@
->  479 auto quick metadata
->  480 auto quick metadata
->  481 auto quick log metadata
-> +482 auto cgroup writeback
-
-cgroup makes sense, but I'm not sure about writeback. It seems like
-duplication at least since both groups are new. Use the rw group
-perhaps? Eh, I'll defer to Eryu's opinion on what group(s) are most
-appropriate.
-
-Brian
-
-> -- 
-> 2.14.1
+> > +	test -e $SCRATCH_MNT/a && ./src/punch-alternating $SCRATCH_MNT/a
+> > +	rm -rf $SCRATCH_MNT/a
+> > +
+> > +	_scratch_unmount 2>&1 | _filter_scratch
+> > +}
+> > +
+> > +dump_ag0() {
+> > +	_scratch_xfs_db -c 'sb 0' -c 'p' -c 'agf 0' -c 'p' -c 'agfl 0' -c 'p'
+> > +}
+> > +
+> > +runtest() {
+> > +	cmd="$1"
+> > +
+> > +	# Format filesystem
+> > +	echo "TEST $cmd" | tee /dev/ttyprintk
 > 
+> What's the purpose of writing to /dev/ttyprintk? I don't see how it's
+> used in the test.
+
+It makes it easy to tell which kernel messages came from which runtest()
+invocation so that we can tell if a particular agfl mutation test
+actually triggered the fixup.
+
+--D
+
+> Thanks,
+> Eryu
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
