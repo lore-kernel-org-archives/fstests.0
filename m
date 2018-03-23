@@ -1,11 +1,13 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:44742 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751632AbeCWQy1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:54:27 -0400
-Subject: [PATCH 0/4] misc. fstests changes
+Received: from userp2120.oracle.com ([156.151.31.85]:48750 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751632AbeCWQye (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:54:34 -0400
+Subject: [PATCH 1/4] common/xfs: don't call xfs_scrub on a block device
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 23 Mar 2018 09:54:22 -0700
-Message-ID: <152182406249.14523.2186010254497227366.stgit@magnolia>
+Date: Fri, 23 Mar 2018 09:54:28 -0700
+Message-ID: <152182406876.14523.11145092318388572094.stgit@magnolia>
+In-Reply-To: <152182406249.14523.2186010254497227366.stgit@magnolia>
+References: <152182406249.14523.2186010254497227366.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,12 +16,28 @@ To: eguan@linux.alibaba.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Here's a few test changes.  The first two fix some xfs_scrub call sites
-to match the cli arguments that we've settled on for 4.15.  The third
-patch is the latest revision of the agfl wrapping zapping fixer, and the
-fourth patch teaches xfs/278 to deal with v5 inode field names when
-constructing a disconnected directory.
+xfs_scrub takes an xfs mountpoint as its argument, not a block device.
+Therefore, fix _check_xfs_filesystem to call it correctly.
 
---D
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/xfs |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+
+diff --git a/common/xfs b/common/xfs
+index 5dbd81e..1d98ba1 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -358,7 +358,7 @@ _check_xfs_filesystem()
+ 	# Run online scrub if we can.
+ 	mntpt="$(_is_dev_mounted $device)"
+ 	if [ -n "$mntpt" ] && _supports_xfs_scrub "$mntpt" "$device"; then
+-		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $device > $tmp.scrub 2>&1
++		"$XFS_SCRUB_PROG" $scrubflag -v -d -n $mntpt > $tmp.scrub 2>&1
+ 		if [ $? -ne 0 ]; then
+ 			_log_err "_check_xfs_filesystem: filesystem on $device failed scrub"
+ 			echo "*** xfs_scrub $scrubflag -v -d -n output ***" >> $seqres.full
+
