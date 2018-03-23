@@ -1,92 +1,41 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56290 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751699AbeCWCto (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 22 Mar 2018 22:49:44 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 0824D406E8A4
-        for <fstests@vger.kernel.org>; Fri, 23 Mar 2018 02:49:44 +0000 (UTC)
-From: Xiong Zhou <xzhou@redhat.com>
-Subject: [PATCH] generic/478: fix potential test blocking
-Date: Fri, 23 Mar 2018 10:49:37 +0800
-Message-Id: <1521773377-19814-1-git-send-email-xzhou@redhat.com>
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:44541 "EHLO
+        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751909AbeCWDat (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Mar 2018 23:30:49 -0400
+Received: by mail-pl0-f65.google.com with SMTP id 9-v6so6672117ple.11
+        for <fstests@vger.kernel.org>; Thu, 22 Mar 2018 20:30:49 -0700 (PDT)
+Date: Fri, 23 Mar 2018 11:30:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 0/4] fstests: GDBM detection cleanup
+Message-ID: <20180323033033.GX30836@localhost.localdomain>
+References: <20180315215455.8245-1-jeffm@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180315215455.8245-1-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiong Zhou <xzhou@redhat.com>
+To: jeffm@suse.com
+Cc: xfstests list <fstests@vger.kernel.org>, Luis Rodriguez <mcgrof@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Reduce semtimedop timeout to 5s, 15s is too long if something
-get tangled up. Add retry counting to getlk routine, infinite
-loop is dangerous. If something goes wrong unexpextedly, test
-is blocked wasting time.
+On Thu, Mar 15, 2018 at 05:54:51PM -0400, jeffm@suse.com wrote:
+> From: Jeff Mahoney <jeffm@suse.com>
+> 
+> Commit 2353022 (build: update AC_PACKAGE_WANT_GDBM() and src/dbtest.c
+> to build) fixed building on newer SUSE systems but broke older ones.  Where
+> we used to skip building src/dbtest on SLES systems, now we'd fail
+> to build on SLES11.  The reason was that we were now detecting
+> ndbm.h but also including gdbm.h, which doesn't work on older systems due
+> to both defining the datum type.  It turns out that no system needs
+> gdbm.h at all.
+> 
+> This series cleans up the macros and fixes detection for all systems that
+> only have /usr/include/ndbm.h.
 
-Signed-off-by: Xiong Zhou <xzhou@redhat.com>
----
+Thanks for the fixes and cleanups! I tested them on Fedora 27, RHEL7 and
+Debian stretch, with/without gdbm devel package installed, all worked
+fine. But I don't have SUSE systems by hand, I assume you've tested them
+successfully.
 
-We are hitting this when testing on cifs samba 2.0.
-
- src/t_ofd_locks.c | 15 +++++++++------
- 1 file changed, 9 insertions(+), 6 deletions(-)
-
-diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
-index d578cd7..454b2ce 100644
---- a/src/t_ofd_locks.c
-+++ b/src/t_ofd_locks.c
-@@ -317,14 +317,14 @@ int main(int argc, char **argv)
- 		sop.sem_num = 0;
- 		sop.sem_op = 1;
- 		sop.sem_flg = 0;
--		ts.tv_sec = 15;
-+		ts.tv_sec = 5;
- 		ts.tv_nsec = 0;
- 		if (semtimedop(semid, &sop, 1, &ts) == -1)
- 			err_exit("inc sem0 2", errno);
- 		sop.sem_num = 1;
- 		sop.sem_op = 1;
- 		sop.sem_flg = 0;
--		ts.tv_sec = 15;
-+		ts.tv_sec = 5;
- 		ts.tv_nsec = 0;
- 		if (semtimedop(semid, &sop, 1, &ts) == -1)
- 			err_exit("inc sem1 2", errno);
-@@ -376,7 +376,7 @@ int main(int argc, char **argv)
- 		sop.sem_num = 1;
- 		sop.sem_op = 0;
- 		sop.sem_flg = 0;
--		ts.tv_sec = 15;
-+		ts.tv_sec = 5;
- 		ts.tv_nsec = 0;
- 		if (semtimedop(semid, &sop, 1, &ts) == -1)
- 			err_exit("wait sem1 0", errno);
-@@ -391,13 +391,16 @@ int main(int argc, char **argv)
- 	/* getlck */
- 	if (lock_cmd == 0) {
- 		/* wait sem created and initialized */
-+		retry = 5;
- 		do {
- 			semid = semget(semkey, 2, 0);
- 			if (semid != -1)
- 				break;
--			if (errno == ENOENT)
-+			if (errno == ENOENT && retry) {
-+				sleep(1);
-+				retry--;
- 				continue;
--			else
-+			} else
- 				err_exit("getlk_semget", errno);
- 		} while (1);
- 		do {
-@@ -410,7 +413,7 @@ int main(int argc, char **argv)
- 		sop.sem_num = 0;
- 		sop.sem_op = 0;
- 		sop.sem_flg = 0;
--		ts.tv_sec = 15;
-+		ts.tv_sec = 5;
- 		ts.tv_nsec = 0;
- 		if (semtimedop(semid, &sop, 1, &ts) == -1)
- 			err_exit("wait sem0 0", errno);
--- 
-1.8.3.1
-
+Thanks,
+Eryu
