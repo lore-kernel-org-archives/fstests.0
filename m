@@ -1,91 +1,92 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:42804 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751666AbeCWCQH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Mar 2018 22:16:07 -0400
-Received: by mail-pg0-f68.google.com with SMTP id f10so3873304pgs.9
-        for <fstests@vger.kernel.org>; Thu, 22 Mar 2018 19:16:07 -0700 (PDT)
-Date: Fri, 23 Mar 2018 10:16:00 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs/278: mkfs with v4 format
-Message-ID: <20180323021600.GW30836@localhost.localdomain>
-References: <bde6f5a1-1107-9c03-402d-486bfbdcbd35@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <bde6f5a1-1107-9c03-402d-486bfbdcbd35@redhat.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56290 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751699AbeCWCto (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 22 Mar 2018 22:49:44 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 0824D406E8A4
+        for <fstests@vger.kernel.org>; Fri, 23 Mar 2018 02:49:44 +0000 (UTC)
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH] generic/478: fix potential test blocking
+Date: Fri, 23 Mar 2018 10:49:37 +0800
+Message-Id: <1521773377-19814-1-git-send-email-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Xiong Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 22, 2018 at 03:09:53PM -0500, Eric Sandeen wrote:
-> This test had silently stopped working when mkfs.xfs switched
-> to v5 supers by default, and changed inode sizes:
-> 
-> > field u not found
-> > parsing error
-> > field u not found
-> > parsing error
-> 
-> ...
-> 
-> Switch back to the original behavior by turning off crcs,
-> and catch such failures if they crop up again by looking
-> for xfs_db errors in $seqres.full.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
-> (is it horrific to grep $seqres.full?  xfs_db doesn't exit
-> with failure in this case :( )
+Reduce semtimedop timeout to 5s, 15s is too long if something
+get tangled up. Add retry counting to getlk routine, infinite
+loop is dangerous. If something goes wrong unexpextedly, test
+is blocked wasting time.
 
-I think that's fine, at least xfs/083 and ext4/006 do grep it :)
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+---
 
-Or we can redirect xfs_db output to a $tmp.xfs_db file and grep it, and
-append the file content to $seqres.full if necessary, so that we just
-grep what we care about, not the full $seqres.full file.
+We are hitting this when testing on cifs samba 2.0.
 
-> 
-> and now this causes repair to fail on a verifier error, but
-> I just sent an xfsprogs patch to fix that as well.
-> 
-> diff --git a/tests/xfs/278 b/tests/xfs/278
-> index b94ee9c..c0e09c7 100755
-> --- a/tests/xfs/278
-> +++ b/tests/xfs/278
-> @@ -48,7 +48,7 @@ _supported_os Linux
->  _require_scratch
->  
->  rm -f $seqres.full
-> -_scratch_mkfs >$seqres.full 2>&1
-> +_scratch_mkfs -m crc=0 -n ftype=0 >$seqres.full 2>&1
+ src/t_ofd_locks.c | 15 +++++++++------
+ 1 file changed, 9 insertions(+), 6 deletions(-)
 
-At first I thought this might lose test coverage with v5 filesystem, but
-after looking at the xfsprogs commit that fixed the original bug (commit
-198b747f2553 ("repair: properly mark lost+found inode as used")), it
-seems like that both v4 and v5 go to the same code path, and we won't
-lose test coverage.
+diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
+index d578cd7..454b2ce 100644
+--- a/src/t_ofd_locks.c
++++ b/src/t_ofd_locks.c
+@@ -317,14 +317,14 @@ int main(int argc, char **argv)
+ 		sop.sem_num = 0;
+ 		sop.sem_op = 1;
+ 		sop.sem_flg = 0;
+-		ts.tv_sec = 15;
++		ts.tv_sec = 5;
+ 		ts.tv_nsec = 0;
+ 		if (semtimedop(semid, &sop, 1, &ts) == -1)
+ 			err_exit("inc sem0 2", errno);
+ 		sop.sem_num = 1;
+ 		sop.sem_op = 1;
+ 		sop.sem_flg = 0;
+-		ts.tv_sec = 15;
++		ts.tv_sec = 5;
+ 		ts.tv_nsec = 0;
+ 		if (semtimedop(semid, &sop, 1, &ts) == -1)
+ 			err_exit("inc sem1 2", errno);
+@@ -376,7 +376,7 @@ int main(int argc, char **argv)
+ 		sop.sem_num = 1;
+ 		sop.sem_op = 0;
+ 		sop.sem_flg = 0;
+-		ts.tv_sec = 15;
++		ts.tv_sec = 5;
+ 		ts.tv_nsec = 0;
+ 		if (semtimedop(semid, &sop, 1, &ts) == -1)
+ 			err_exit("wait sem1 0", errno);
+@@ -391,13 +391,16 @@ int main(int argc, char **argv)
+ 	/* getlck */
+ 	if (lock_cmd == 0) {
+ 		/* wait sem created and initialized */
++		retry = 5;
+ 		do {
+ 			semid = semget(semkey, 2, 0);
+ 			if (semid != -1)
+ 				break;
+-			if (errno == ENOENT)
++			if (errno == ENOENT && retry) {
++				sleep(1);
++				retry--;
+ 				continue;
+-			else
++			} else
+ 				err_exit("getlk_semget", errno);
+ 		} while (1);
+ 		do {
+@@ -410,7 +413,7 @@ int main(int argc, char **argv)
+ 		sop.sem_num = 0;
+ 		sop.sem_op = 0;
+ 		sop.sem_flg = 0;
+-		ts.tv_sec = 15;
++		ts.tv_sec = 5;
+ 		ts.tv_nsec = 0;
+ 		if (semtimedop(semid, &sop, 1, &ts) == -1)
+ 			err_exit("wait sem0 0", errno);
+-- 
+1.8.3.1
 
-If this is the case, I think it's worth mentioning it in commit log too.
-Otherwise looks fine to me.
-
-Thanks,
-Eryu
-
->  _scratch_mount
->  
->  mkdir -p $SCRATCH_MNT/dir/subdir
-> @@ -73,6 +73,8 @@ _scratch_xfs_db -x -c "inode $DIR_INO" -c "write core.nlinkv2 0"  >> $seqres.ful
->  _scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
->  _scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
->  
-> +grep -q "not found\|parsing error" $seqres.full && _fail "xfs_db commands failed"
-> +
->  echo "===== BEGIN of xfs_repair =====" >> $seqres.full
->  echo "" >>$seqres.full
->  
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
