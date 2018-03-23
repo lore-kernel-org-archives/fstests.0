@@ -1,83 +1,72 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:50440 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751632AbeCWQyw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Mar 2018 12:54:52 -0400
-Subject: [PATCH 4/4] xfs/278: find sfdir inode field prefix
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Fri, 23 Mar 2018 09:54:47 -0700
-Message-ID: <152182408764.14523.16193613645363841396.stgit@magnolia>
-In-Reply-To: <152182406249.14523.2186010254497227366.stgit@magnolia>
-References: <152182406249.14523.2186010254497227366.stgit@magnolia>
+Received: from sandeen.net ([63.231.237.45]:60778 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751699AbeCWSra (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Mar 2018 14:47:30 -0400
+Subject: Re: [PATCH] xfs/444: test log replay after XFS_IOC_SWAPEXT
+References: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
+ <20180226130212.GA51394@bfoster.bfoster>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <d7759432-3fea-438b-ab0e-023caf414a35@sandeen.net>
+Date: Fri, 23 Mar 2018 13:47:29 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20180226130212.GA51394@bfoster.bfoster>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: eguan@linux.alibaba.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On 2/26/18 7:02 AM, Brian Foster wrote:
+> On Fri, Feb 23, 2018 at 12:33:41PM -0600, Eric Sandeen wrote:
+>> This is a mashup of xfs/042 and some of the log replay tests;
+>> it checks whether the log can be replayed if we crash immediately
+>> after an xfs_fsr / XFS_IOC_SWAPEXT.
+>>
+>> Hint: it can't.  It fails because the temporary donor inode has
+>> been deleted and has invalid mode 0 when we try to replay its
+>> swapext operation.  Kernel patches to fix it will follow soon.
+>>
+>> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+>> ---
+>>
+>> diff --git a/tests/xfs/444 b/tests/xfs/444
+>> new file mode 100755
+>> index 0000000..e88438a
+>> --- /dev/null
+>> +++ b/tests/xfs/444
+>> @@ -0,0 +1,144 @@
+> ...
+>> +# Test performs several operations to produce a badly fragmented file, then
+>> +# create enough contiguous free space for xfs_fsr to defragment the fragmented
+>> +# file:
+>> +#
+>> +# - create fs with 3 minimum sized (16Mb) allocation groups
+>> +# - create 16x1MB contiguous files which will become large free space extents
+>> +#   when deleted
+>> +# - put a small "space" between each of the 16 contiuguous files to ensure we
+>> +#   have separated free space extents
+>> +# - fill the remaining free space with a "fill file"
+>> +# - mount/unmount/fill remaining free space with a pad file
+>> +# - punch alternate single block holes in the the "fill file" to create
+>> +#   fragmented free space.
+>> +# - use fill2 to generate a very large fragmented file
+>> +# - delete the 16 large contiguous files created initially
+>> +# - run xfs_fsr on the filesystem
+>> +# - check checksums for remaining files
+>> +
+> Without having dug into the core issue, I wonder whether this sequence
+> could be simplified a bit by using 'xfs_io -c swapext' followed by a
+> shutdown?
 
-Use the xfs set/get metadata field helpers to detect the correct sfdir
-field name prefix on v4-v5 filesystems.  This enables us to test inode
-link count corrections on a (deliberately) disconnected directory.
+It probably would - given that it's a longstanding problem, I wonder if requiring
+bleeding-edge xfsprogs to test/demonstrate it is wise, though.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/278 |   38 ++++++++++++++++++++++++++++++--------
- 1 file changed, 30 insertions(+), 8 deletions(-)
+Tell you what, I'll try to rewrite the test so it uses swapext if available, else
+falls back to the heavy-weight fsr run?
 
-
-diff --git a/tests/xfs/278 b/tests/xfs/278
-index b94ee9c..47012a3 100755
---- a/tests/xfs/278
-+++ b/tests/xfs/278
-@@ -61,17 +61,39 @@ _scratch_unmount
+-Eric
  
- echo "Silence is goodness..."
- 
-+get_sfdir_prefix() {
-+	local dir_ino="$1"
-+
-+	for prefix in "u.sfdir3" "u.sfdir2" "u3.sfdir3"; do
-+		if [ -n "$(_scratch_xfs_get_metadata_field \
-+				"${prefix}.hdr.parent.i4" \
-+				"inode ${dir_ino}")" ]; then
-+			echo "${prefix}"
-+			return 0
-+		fi
-+	done
-+	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
-+	return 1
-+}
-+set_ifield() {
-+	_scratch_xfs_set_metadata_field "$1" 0 "inode $2" >> $seqres.full
-+}
-+
-+sfdir_prefix="$(get_sfdir_prefix "$DIR_INO" || \
-+	_fail "Cannot determine sfdir prefix")"
-+
- # Corrupt DIR
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].inumber.i4 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].name 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].offset 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.list[0].namelen 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $DIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
-+
-+set_ifield "${sfdir_prefix}.list[0].inumber.i4" "$DIR_INO"
-+set_ifield "${sfdir_prefix}.list[0].name" "$DIR_INO"
-+set_ifield "${sfdir_prefix}.list[0].offset" "$DIR_INO"
-+set_ifield "${sfdir_prefix}.list[0].namelen" "$DIR_INO"
-+set_ifield "${sfdir_prefix}.hdr.parent.i4" "$DIR_INO"
-+set_ifield "core.nlinkv2" "$DIR_INO"
- 
- # Corrupt SUBDIR
--_scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write u.sfdir2.hdr.parent.i4 0"  >> $seqres.full
--_scratch_xfs_db -x -c "inode $SUBDIR_INO" -c "write core.nlinkv2 0"  >> $seqres.full
-+set_ifield "${sfdir_prefix}.hdr.parent.i4" "$SUBDIR_INO"
-+set_ifield "core.nlinkv2" "$SUBDIR_INO"
- 
- echo "===== BEGIN of xfs_repair =====" >> $seqres.full
- echo "" >>$seqres.full
-
+> Brian
+> 
