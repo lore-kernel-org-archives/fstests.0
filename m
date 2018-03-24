@@ -1,71 +1,43 @@
-Received: from sandeen.net ([63.231.237.45]:52898 "EHLO sandeen.net"
+Received: from imap.thunk.org ([74.207.234.97]:52186 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751504AbeCWWrg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Mar 2018 18:47:36 -0400
-Subject: Re: [PATCH] xfs/444: test log replay after XFS_IOC_SWAPEXT
-References: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
- <20180226130212.GA51394@bfoster.bfoster>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <38c23c96-0eef-bab2-5c56-566e3ef850d1@sandeen.net>
-Date: Fri, 23 Mar 2018 17:47:35 -0500
+        id S1751531AbeCXCdb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 23 Mar 2018 22:33:31 -0400
+Date: Fri, 23 Mar 2018 22:33:28 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: [xfstests-bld PATCH] test-appliance: use --auto-deconfigure when
+ installing extra packages
+Message-ID: <20180324023328.GA730@thunk.org>
+References: <20180306013209.30082-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20180226130212.GA51394@bfoster.bfoster>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180306013209.30082-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2/26/18 7:02 AM, Brian Foster wrote:
-> On Fri, Feb 23, 2018 at 12:33:41PM -0600, Eric Sandeen wrote:
->> This is a mashup of xfs/042 and some of the log replay tests;
->> it checks whether the log can be replayed if we crash immediately
->> after an xfs_fsr / XFS_IOC_SWAPEXT.
->>
->> Hint: it can't.  It fails because the temporary donor inode has
->> been deleted and has invalid mode 0 when we try to replay its
->> swapext operation.  Kernel patches to fix it will follow soon.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>
->> diff --git a/tests/xfs/444 b/tests/xfs/444
->> new file mode 100755
->> index 0000000..e88438a
->> --- /dev/null
->> +++ b/tests/xfs/444
->> @@ -0,0 +1,144 @@
-> ...
->> +# Test performs several operations to produce a badly fragmented file, then
->> +# create enough contiguous free space for xfs_fsr to defragment the fragmented
->> +# file:
->> +#
->> +# - create fs with 3 minimum sized (16Mb) allocation groups
->> +# - create 16x1MB contiguous files which will become large free space extents
->> +#   when deleted
->> +# - put a small "space" between each of the 16 contiuguous files to ensure we
->> +#   have separated free space extents
->> +# - fill the remaining free space with a "fill file"
->> +# - mount/unmount/fill remaining free space with a pad file
->> +# - punch alternate single block holes in the the "fill file" to create
->> +#   fragmented free space.
->> +# - use fill2 to generate a very large fragmented file
->> +# - delete the 16 large contiguous files created initially
->> +# - run xfs_fsr on the filesystem
->> +# - check checksums for remaining files
->> +
+On Mon, Mar 05, 2018 at 05:32:09PM -0800, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Without having dug into the core issue, I wonder whether this sequence
-> could be simplified a bit by using 'xfs_io -c swapext' followed by a
-> shutdown?
+> Trying to build the KVM or GCE test appliances with Debian packages
+> built from the latest e2fsprogs git tree placed into the
+> test-appliance/debs/ directory fails because of the recent renamings
+> from libcomerr2 to libcom-err2 and e2fslibs to libext2fs2, e.g.:
+> 
+>     dpkg: regarding .../libcom-err2_1.44.0~rc2-1_amd64.deb containing libcom-err2:amd64:
+>      libcom-err2 breaks libcomerr2 (<< 1.43.9-1~)
+>       libcomerr2:amd64 (version 1.43.4-2) is present and installed.
+> 
+>     dpkg: error processing archive /run/libcom-err2_1.44.0~rc2-1_amd64.deb (--install):
+>      installing libcom-err2:amd64 would break libcomerr2:amd64, and
+>      deconfiguration is not permitted (--auto-deconfigure might help)
+> 
+> Add the --auto-deconfigure argument to make it work.  I'm not sure it's
+> the best solution, but it works.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-I haven't been able to beat xfs_io into submission here; it requires unlinking
-as well, and even after patching & adding an unlink into the mix:
+Applied, thanks.
 
-xfs_io -x -c "open -f mnt/file1" -c "pwrite 0 4k" -c close -c "open -f mnt/file2" -c "pwrite 0 4k" -c unlink -c "swapext mnt/file1" -c "shutdown -f"
-
-I can't seem to make this reproduce.  Not sure why.  I'd rather just stick with the proven reproducer.
-
--Eric
+					- Ted
