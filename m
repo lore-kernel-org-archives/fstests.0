@@ -1,43 +1,55 @@
-Received: from imap.thunk.org ([74.207.234.97]:52186 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751531AbeCXCdb (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 23 Mar 2018 22:33:31 -0400
-Date: Fri, 23 Mar 2018 22:33:28 -0400
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: [xfstests-bld PATCH] test-appliance: use --auto-deconfigure when
- installing extra packages
-Message-ID: <20180324023328.GA730@thunk.org>
-References: <20180306013209.30082-1-ebiggers3@gmail.com>
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:55794 "EHLO
+ mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org with
+ ESMTP id S1750832AbeCYIBk (ORCPT <rfc822;fstests@vger.kernel.org>); Sun, 25
+ Mar 2018 04:01:40 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180306013209.30082-1-ebiggers3@gmail.com>
+Message-ID: <1521964975-14680-1-git-send-email-amir73il@gmail.com>
+Date: Sun, 25 Mar 2018 08:02:55 +0000 (UTC)
+From: Amir Goldstein <amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers3@gmail.com>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+Subject: [PATCH] overlay/[054,055]: Document the fix commit
+Content-Type: text/plain; charset=ascii
+Content-Transfer-Encoding: 7bit
+To: Eryu Guan <eguan@redhat.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 05, 2018 at 05:32:09PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Trying to build the KVM or GCE test appliances with Debian packages
-> built from the latest e2fsprogs git tree placed into the
-> test-appliance/debs/ directory fails because of the recent renamings
-> from libcomerr2 to libcom-err2 and e2fslibs to libext2fs2, e.g.:
-> 
->     dpkg: regarding .../libcom-err2_1.44.0~rc2-1_amd64.deb containing libcom-err2:amd64:
->      libcom-err2 breaks libcomerr2 (<< 1.43.9-1~)
->       libcomerr2:amd64 (version 1.43.4-2) is present and installed.
-> 
->     dpkg: error processing archive /run/libcom-err2_1.44.0~rc2-1_amd64.deb (--install):
->      installing libcom-err2:amd64 would break libcomerr2:amd64, and
->      deconfiguration is not permitted (--auto-deconfigure might help)
-> 
-> Add the --auto-deconfigure argument to make it work.  I'm not sure it's
-> the best solution, but it works.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+This fix was merged for v4.16-rc5.
 
-Applied, thanks.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/overlay/054 | 3 +++
+ tests/overlay/055 | 3 +++
+ 2 files changed, 6 insertions(+)
 
-					- Ted
+diff --git a/tests/overlay/054 b/tests/overlay/054
+index f7ade96..a1011e4 100755
+--- a/tests/overlay/054
++++ b/tests/overlay/054
+@@ -22,6 +22,9 @@
+ # dir rename support (redirect_dir).
+ # NFS export support depends on and requires overlayfs index feature.
+ #
++# Regression test for kernel commit 2ca3c148a062 ("ovl: check lower ancestry
++# on encode of lower dir file handle")
++#
+ #-----------------------------------------------------------------------
+ # Copyright (C) 2018 CTERA Networks. All Rights Reserved.
+ # Author: Amir Goldstein <amir73il@gmail.com>
+diff --git a/tests/overlay/055 b/tests/overlay/055
+index 02da6ef..0bb9039 100755
+--- a/tests/overlay/055
++++ b/tests/overlay/055
+@@ -20,6 +20,9 @@
+ # dir rename support (redirect_dir).
+ # NFS export support depends on and requires overlayfs index feature.
+ #
++# Regression test for kernel commit 2ca3c148a062 ("ovl: check lower ancestry
++# on encode of lower dir file handle")
++#
+ #-----------------------------------------------------------------------
+ # Copyright (C) 2018 CTERA Networks. All Rights Reserved.
+ # Author: Amir Goldstein <amir73il@gmail.com>
+-- 
+2.7.4
+
