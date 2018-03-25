@@ -1,49 +1,145 @@
-Received: from mail-wr0-f193.google.com ([209.85.128.193]:43306 "EHLO
-        mail-wr0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753286AbeCYOv6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 25 Mar 2018 10:51:58 -0400
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:33037 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753321AbeCYOv7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Mar 2018 10:51:59 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 0/3] Yet another overlayfs exportfs test
-Date: Sun, 25 Mar 2018 17:53:08 +0300
-Message-Id: <1521989591-9496-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 1/3] open_by_handle: add -n option to suppress drop caches
+Date: Sun, 25 Mar 2018 17:53:09 +0300
+Message-Id: <1521989591-9496-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1521989591-9496-1-git-send-email-amir73il@gmail.com>
+References: <1521989591-9496-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+By default, open_by_handle drops inode and page caches before trying
+to open by file handles. Add an option to suppress drop caches for
+testing open by handle with warm caches.
 
-This test should pass on upstream kernel.
-It provides test coverage for a state of inode/dentry cache that
-was not covered by previous tests.
-I had to extend open_by_handle again to reproduce the uncovered
-cache state.
+Usage: open_by_handle -n <test_dir> [N]
 
-Miklos,
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ src/open_by_handle.c | 41 +++++++++++++++++++++++++----------------
+ 1 file changed, 25 insertions(+), 16 deletions(-)
 
-I used tracing on index lookup with this test to verify correctness
-of ("ovl: lookup in inode cache first when decoding lower file handle").
-With your review fix, index lookup is called for non-dir after mount
-cycle, but not called after opening by file handle again, when the
-diconnected dentries are still in cache.
-
-Thanks,
-Amir.
-
-Amir Goldstein (3):
-  open_by_handle: add -n option to suppress drop caches
-  open_by_handle: add -s option to sleep and keep files open by handle
-  overlay: test decoding overlay file handles with warm/cold dentry
-    cache
-
- src/open_by_handle.c  |  57 ++++++++++++++-------
- tests/overlay/058     | 137 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/058.out |   9 ++++
- tests/overlay/group   |   1 +
- 4 files changed, 186 insertions(+), 18 deletions(-)
- create mode 100755 tests/overlay/058
- create mode 100644 tests/overlay/058.out
-
+diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+index 78f7ef7..d3beb78 100644
+--- a/src/open_by_handle.c
++++ b/src/open_by_handle.c
+@@ -27,7 +27,7 @@
+ 
+ /*
+ 
+-usage: open_by_handle [-cludmrwapk] [<-i|-o> <handles_file>] <test_dir> [num_files]
++usage: open_by_handle [-cludmrwapknh] [<-i|-o> <handles_file>] <test_dir> [num_files]
+ 
+ Examples:
+ 
+@@ -43,36 +43,39 @@ Examples:
+ 
+    open_by_handle -p <test_dir> [N]
+ 
+-3. Get file handles for existing test set and write them to a file.
+-   Read file handles from file and open files by handle:
++3. Get file handles for existing test set and write them to a file:
+ 
+    open_by_handle -p -o <handles_file> <test_dir> [N]
+-   open_by_handle -p -i <handles_file> <test_dir> [N]
+ 
+-4. Get file handles for existing test set, write data to files,
++4. Read file handles from file and open files by handle without
++   dropping caches beforehand:
++
++   open_by_handle -np -i <handles_file> <test_dir> [N]
++
++5. Get file handles for existing test set, write data to files,
+    drop caches, open all files by handle, read and verify written
+    data, write new data to file:
+ 
+    open_by_handle -rwa <test_dir> [N]
+ 
+-5. Get file handles for existing test set, unlink all test files,
++6. Get file handles for existing test set, unlink all test files,
+    remove test_dir, drop caches, try to open all files by handle
+    and expect ESTALE:
+ 
+    open_by_handle -dp <test_dir> [N]
+ 
+-6. Get file handles for existing test set, keep open file handles for all
++7. Get file handles for existing test set, keep open file handles for all
+    test files, unlink all test files, drop caches and try to open all files
+    by handle (should work):
+ 
+    open_by_handle -dk <test_dir> [N]
+ 
+-7. Get file handles for existing test set, rename all test files,
++8. Get file handles for existing test set, rename all test files,
+    drop caches, try to open all files by handle (should work):
+ 
+    open_by_handle -m <test_dir> [N]
+ 
+-8. Get file handles for existing test set, hardlink all test files,
++9. Get file handles for existing test set, hardlink all test files,
+    then unlink the original files, drop caches and try to open all
+    files by handle (should work):
+ 
+@@ -109,10 +112,11 @@ struct handle {
+ 
+ void usage(void)
+ {
+-	fprintf(stderr, "usage: open_by_handle [-cludmrwapk] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
++	fprintf(stderr, "usage: open_by_handle [-cludmrwapknh] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
+ 	fprintf(stderr, "\n");
+ 	fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
+ 	fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
++	fprintf(stderr, "open_by_handle -n <test_dir> [N] - get file handles of test files and try to open by handle without drop caches\n");
+ 	fprintf(stderr, "open_by_handle -k <test_dir> [N] - get file handles of files that are kept open, drop caches and try to open by handle\n");
+ 	fprintf(stderr, "open_by_handle -w <test_dir> [N] - write data to test files before open by handle\n");
+ 	fprintf(stderr, "open_by_handle -r <test_dir> [N] - read data from test files after open by handle and verify written data\n");
+@@ -144,12 +148,12 @@ int main(int argc, char **argv)
+ 	int	numfiles = 1;
+ 	int	create = 0, delete = 0, nlink = 1, move = 0;
+ 	int	rd = 0, wr = 0, wrafter = 0, parent = 0;
+-	int	keepopen = 0;
++	int	keepopen = 0, drop_caches = 1;
+ 
+ 	if (argc < 2)
+ 		usage();
+ 
+-	while ((c = getopt(argc, argv, "cludmrwapki:o:")) != -1) {
++	while ((c = getopt(argc, argv, "cludmrwapknhi:o:")) != -1) {
+ 		switch (c) {
+ 		case 'c':
+ 			create = 1;
+@@ -186,6 +190,9 @@ int main(int argc, char **argv)
+ 		case 'k':
+ 			keepopen = 1;
+ 			break;
++		case 'n':
++			drop_caches = 0;
++			break;
+ 		case 'i':
+ 			infile = optarg;
+ 			in_fd = open(infile, O_RDONLY);
+@@ -438,10 +445,12 @@ int main(int argc, char **argv)
+ 	 * buftarg page cache is emptied so that the inode cluster has to be
+ 	 * fetched from disk again for the open_by_handle() call.
+ 	 */
+-	ret = system("echo 3 > /proc/sys/vm/drop_caches");
+-	if (ret < 0) {
+-		perror("drop_caches");
+-		return EXIT_FAILURE;
++	if (drop_caches) {
++		ret = system("echo 3 > /proc/sys/vm/drop_caches");
++		if (ret < 0) {
++			perror("drop_caches");
++			return EXIT_FAILURE;
++		}
+ 	}
+ 
+ 	/*
 -- 
 2.7.4
 
