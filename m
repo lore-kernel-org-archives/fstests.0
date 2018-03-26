@@ -1,98 +1,161 @@
-Received: from mx1.redhat.com ([209.132.183.28]:46200 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:57788 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751087AbeCZMc3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 26 Mar 2018 08:32:29 -0400
-Date: Mon, 26 Mar 2018 08:32:28 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] xfs/444: test log replay after XFS_IOC_SWAPEXT
-Message-ID: <20180326123228.GC34912@bfoster.bfoster>
-References: <9227d8db-faf6-5c19-239b-074c7f5cfc00@sandeen.net>
- <20180226130212.GA51394@bfoster.bfoster>
- <38c23c96-0eef-bab2-5c56-566e3ef850d1@sandeen.net>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <38c23c96-0eef-bab2-5c56-566e3ef850d1@sandeen.net>
+        id S1751121AbeC0IeF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Mar 2018 04:34:05 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: test btrfs fsync after hole punching with no-holes mode
+Date: Mon, 26 Mar 2018 23:59:21 +0100
+Message-Id: <20180326225921.10096-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 23, 2018 at 05:47:35PM -0500, Eric Sandeen wrote:
-> On 2/26/18 7:02 AM, Brian Foster wrote:
-> > On Fri, Feb 23, 2018 at 12:33:41PM -0600, Eric Sandeen wrote:
-> >> This is a mashup of xfs/042 and some of the log replay tests;
-> >> it checks whether the log can be replayed if we crash immediately
-> >> after an xfs_fsr / XFS_IOC_SWAPEXT.
-> >>
-> >> Hint: it can't.  It fails because the temporary donor inode has
-> >> been deleted and has invalid mode 0 when we try to replay its
-> >> swapext operation.  Kernel patches to fix it will follow soon.
-> >>
-> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >> ---
-> >>
-> >> diff --git a/tests/xfs/444 b/tests/xfs/444
-> >> new file mode 100755
-> >> index 0000000..e88438a
-> >> --- /dev/null
-> >> +++ b/tests/xfs/444
-> >> @@ -0,0 +1,144 @@
-> > ...
-> >> +# Test performs several operations to produce a badly fragmented file, then
-> >> +# create enough contiguous free space for xfs_fsr to defragment the fragmented
-> >> +# file:
-> >> +#
-> >> +# - create fs with 3 minimum sized (16Mb) allocation groups
-> >> +# - create 16x1MB contiguous files which will become large free space extents
-> >> +#   when deleted
-> >> +# - put a small "space" between each of the 16 contiuguous files to ensure we
-> >> +#   have separated free space extents
-> >> +# - fill the remaining free space with a "fill file"
-> >> +# - mount/unmount/fill remaining free space with a pad file
-> >> +# - punch alternate single block holes in the the "fill file" to create
-> >> +#   fragmented free space.
-> >> +# - use fill2 to generate a very large fragmented file
-> >> +# - delete the 16 large contiguous files created initially
-> >> +# - run xfs_fsr on the filesystem
-> >> +# - check checksums for remaining files
-> >> +
-> > 
-> > Without having dug into the core issue, I wonder whether this sequence
-> > could be simplified a bit by using 'xfs_io -c swapext' followed by a
-> > shutdown?
-> 
-> I haven't been able to beat xfs_io into submission here; it requires unlinking
-> as well, and even after patching & adding an unlink into the mix:
-> 
-> xfs_io -x -c "open -f mnt/file1" -c "pwrite 0 4k" -c close -c "open -f mnt/file2" -c "pwrite 0 4k" -c unlink -c "swapext mnt/file1" -c "shutdown -f"
-> 
-> I can't seem to make this reproduce.  Not sure why.  I'd rather just stick with the proven reproducer.
-> 
+From: Filipe Manana <fdmanana@suse.com>
 
-swapext owner changes required btree format inodes. I don't think a
-single 4k write is going to be enough. Indeed, if I do something like
-the following:
+Test that when we have the no-holes mode enabled and a specific metadata
+layout, if we punch a hole and fsync the file, at replay time the whole
+hole was preserved.
 
-	xfs_io -fc "falloc 0 100m" /mnt/file1
-	xfs_io -fc "falloc 0 100m" /mnt/file2
-	xfstests-dev/src/punch-alternating /mnt/file1
-	xfstests-dev/src/punch-alternating /mnt/file2
-	xfs_io -c "swapext /mnt/file1" /mnt/file2
-	rm -f /mnt/file1
-	xfs_io -xc "shutdown -f" /mnt/
+This issue is fixed by the following btrfs patch for the linux kernel:
 
-I see this on a subsequent mount:
+  "Btrfs: fix fsync after hole punching when using no-holes feature"
 
-	# umount  /mnt ; mount /dev/test/scratch /mnt 
-	mount: /mnt: mount(2) system call failed: Structure needs cleaning.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/159     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/159.out |   5 +++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/btrfs/159
+ create mode 100644 tests/btrfs/159.out
 
-(which I haven't actually confirmed is the original problem).
+diff --git a/tests/btrfs/159 b/tests/btrfs/159
+new file mode 100755
+index 00000000..6083975a
+--- /dev/null
++++ b/tests/btrfs/159
+@@ -0,0 +1,100 @@
++#! /bin/bash
++# FSQA Test No. 159
++#
++# Test that when we have the no-holes mode enabled and a specific metadata
++# layout, if we punch a hole and fsync the file, at replay time the whole
++# hole was preserved.
++#
++#-----------------------------------------------------------------------
++#
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++# Author: Filipe Manana <fdmanana@suse.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++_require_xfs_io_command "fpunch"
++
++rm -f $seqres.full
++
++# We create the filesystem with a node size of 64Kb because we need to create a
++# specific metadata layout in order to trigger the bug we are testing. At the
++# moment the node size can not be smaller then the system's page size, so given
++# that the largest possible page size is 64Kb and by default the node size is
++# set to the system's page size value, we explictly create a filesystem with a
++# 64Kb node size.
++_scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test file with 831 extents of 256Kb each. Before each extent, there
++# is a 256Kb hole (except for the first extent, which starts at offset 0). This
++# creates two leafs in the filesystem tree, with the extent at offset 216530944
++# being the last item in the first leaf and the extent at offset 217055232 being
++# the first item in the second leaf.
++for ((i = 0; i <= 831; i++)); do
++	offset=$((i * 2 * 256 * 1024))
++	$XFS_IO_PROG -f -c "pwrite -S 0xab -b 256K $offset 256K" \
++		$SCRATCH_MNT/foobar >/dev/null
++done
++
++# Now persist everything done so far.
++sync
++
++# Now punch a hole that covers part of the extent at offset 216530944.
++$XFS_IO_PROG -c "fpunch $((216530944 + 128 * 1024 - 4000)) 256K" \
++	     -c "fsync" \
++	     $SCRATCH_MNT/foobar
++
++echo "File digest before power failure:"
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++# Simulate a power failure and mount the filesystem to check that replaying the
++# fsync log/journal succeeds and our test file has the expected content.
++_flakey_drop_and_remount
++
++echo "File digest after power failure and log replay:"
++md5sum $SCRATCH_MNT/foobar | _filter_scratch
++
++_unmount_flakey
++_cleanup_flakey
++
++status=0
++exit
+diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+new file mode 100644
+index 00000000..3317e516
+--- /dev/null
++++ b/tests/btrfs/159.out
+@@ -0,0 +1,5 @@
++QA output created by 159
++File digest before power failure:
++c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
++File digest after power failure and log replay:
++c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 8007e07e..ba766f6b 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -161,3 +161,4 @@
+ 156 auto quick trim
+ 157 auto quick raid
+ 158 auto quick raid scrub
++159 auto quick
+-- 
+2.11.0
 
-Brian
-
-> -Eric
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
