@@ -1,211 +1,200 @@
-Received: from mout.gmx.net ([212.227.17.20]:51189 "EHLO mout.gmx.net"
+Received: from mail.kernel.org ([198.145.29.99]:56656 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750703AbeC1Gzi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 28 Mar 2018 02:55:38 -0400
-Subject: Re: [PATCH v2 3/3] fstests: generic: Check the fs after each FUA
- writes
-References: <20180328044023.22078-1-wqu@suse.com>
- <20180328044023.22078-3-wqu@suse.com>
- <CAOQ4uxj5ff5-AhoACxZGG+ZeHRh0Qr_=uPqyzMUv5h934dicuQ@mail.gmail.com>
- <2956631d-3843-aaf6-8d75-3a2028fea88b@gmx.com>
- <20180328061945.GF30836@localhost.localdomain>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <2b349e90-c406-2f0d-04a7-66bc66a645c8@gmx.com>
-Date: Wed, 28 Mar 2018 14:55:22 +0800
+        id S1752447AbeC1IsT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 28 Mar 2018 04:48:19 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180328061945.GF30836@localhost.localdomain>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="Z9yK1icynYpknIDT768rsLcFEHAzc3iEJ"
+In-Reply-To: <20180328021753.GE30836@localhost.localdomain>
+References: <20180326225921.10096-1-fdmanana@kernel.org> <20180328021753.GE30836@localhost.localdomain>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 28 Mar 2018 09:48:17 +0100
+Message-ID: <CAL3q7H4FqvoVs69mfWFh1M=8bDZ5FSHcq0KKg+g0C5HcjLuXwg@mail.gmail.com>
+Subject: Re: [PATCH] fstests: test btrfs fsync after hole punching with
+ no-holes mode
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>, Linux Btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+Cc: fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---Z9yK1icynYpknIDT768rsLcFEHAzc3iEJ
-Content-Type: multipart/mixed; boundary="NX1AihsqT5ZVmUqncDgNoPrG1r9u3Mzye";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, Qu Wenruo <wqu@suse.com>,
- Linux Btrfs <linux-btrfs@vger.kernel.org>, fstests
- <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>,
- Ext4 <linux-ext4@vger.kernel.org>
-Message-ID: <2b349e90-c406-2f0d-04a7-66bc66a645c8@gmx.com>
-Subject: Re: [PATCH v2 3/3] fstests: generic: Check the fs after each FUA
- writes
-References: <20180328044023.22078-1-wqu@suse.com>
- <20180328044023.22078-3-wqu@suse.com>
- <CAOQ4uxj5ff5-AhoACxZGG+ZeHRh0Qr_=uPqyzMUv5h934dicuQ@mail.gmail.com>
- <2956631d-3843-aaf6-8d75-3a2028fea88b@gmx.com>
- <20180328061945.GF30836@localhost.localdomain>
-In-Reply-To: <20180328061945.GF30836@localhost.localdomain>
-
---NX1AihsqT5ZVmUqncDgNoPrG1r9u3Mzye
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 2018=E5=B9=B403=E6=9C=8828=E6=97=A5 14:19, Eryu Guan wrote:
-> On Wed, Mar 28, 2018 at 01:51:44PM +0800, Qu Wenruo wrote:
+On Wed, Mar 28, 2018 at 3:17 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Mon, Mar 26, 2018 at 11:59:21PM +0100, fdmanana@kernel.org wrote:
+>> From: Filipe Manana <fdmanana@suse.com>
 >>
+>> Test that when we have the no-holes mode enabled and a specific metadata
+>> layout, if we punch a hole and fsync the file, at replay time the whole
+>> hole was preserved.
 >>
->> On 2018=E5=B9=B403=E6=9C=8828=E6=97=A5 13:04, Amir Goldstein wrote:
->>> On Wed, Mar 28, 2018 at 7:40 AM, Qu Wenruo <wqu@suse.com> wrote:
->>>> Basic test case which triggers fsstress with dm-log-writes, and then=
+>> This issue is fixed by the following btrfs patch for the linux kernel:
+>>
+>>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+>
+> I'd expect a test failure with 4.16-rc6 kernel, as the mentioned fix
+> above is not there. But test always passes for me. Did I miss anything?
+> btrfs-progs version is btrfs-progs-4.11.1-3.fc27.
 
->>>> check the fs after each FUA writes.
->>>> With needed infrastructure and special handlers for journal based fs=
-=2E
->>>>
->>>> Signed-off-by: Qu Wenruo <wqu@suse.com>
->>>> ---
->>>> changelog:
->>>> v2:
->>>>   Use proper "SUSE Linux Products GmbH" instead of "SuSE"
->>>>   Get rid of dm-snapshot which is pretty slow if we're creating and
->>>>   deleting snapshots repeatedly.
->>>>   (Maybe LVM thin provision would be much better, but current replay=
+It should fail on any kernel, with any btrfs-progs version (which
+should be irrelevant).
+Somehow on your system we are not getting the specific metadata layout
+needed to trigger the issue.
 
->>>>    solution is good so far, and no slower than dm-snapshot)
->>>>   Add back run_check so that we can get the seed.
->>>> ---
->>>> Unfortunately, neither xfs nor ext4 survies this test for even singl=
-e
->>>> success, while btrfs survives.
->>>> (Although not what I want, I'm just trying my luck
->>>> to reproduce a serious btrfs corruption situation)
->>>>
->>>> Although btrfs may be the fastest fs for the test, since it has fixe=
-d
->>>> small amount of write in mkfs and almost nothing to replay, it still=
+Can you apply the following patch on top of the test and provide the
+result 159.full file?
 
->>>> takes about 240s~300s to finish (the same level using snapshot).
->>>>
->>>> It would take longer time for ext4 for its large amount of write dur=
-ing
->>>> mkfs, if it can survive the test in the first space.
->>>
->>> Hmm, how much time would the total test would take if you don't fail
->>> it on fsck? I am asking because it may be possible to improve this wi=
-th
->>> only a single snapshot after mkfs.
->>
->> The only fs which can pass the test right now is btrfs, so other
->> estimation is mostly based on guess.
->>
->>>
->>> Anyway, if total test run time is expected to be under 10min I wouldn=
-'t
->>> bother with this optimization, at least not right now. IMO it is more=
+https://friendpaste.com/6xAuLeN4xl1AGjO9Qc5I8L
 
->>> important to get the test out there to get the corruption bugs floati=
-ng.
->>
->> I'd say from current status, if XFS doesn't fail, it would definitely
->> finish in 10min.
->> For EXT4 I'm not pretty sure.
->                                                                        =
-                                                                         =
-                                              =20
-> 10min might be a bit long, 5min would be good enough. I may need to
-> adjust the fsstress "-n" param based on test results when I got some
-> time, hopefully this week..
->=20
-> And I noticed that fsstress "-p" is based on nr_cpus, I'd like to cap i=
-t
-> with a max allowed number, so test won't run for too long on hosts with=
+So that I can see what metadata layout you are getting.
+Thanks!
 
-> hundreds of cpus. It could always be scaled with _scale_fsstress_args.
->=20
-> +nr_cpus=3D$("$here/src/feature" -o)
-> +fsstress_args=3D$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 512 -p $n=
-r_cpus \
-> +               $FSSTRESS_AVOID)
-
-This makes sense.
-
-(I used to think 4 cores was enough and now mainstream desktop is push 8
-cores)
-
-Thanks,
-Qu
-
->=20
+>
 >>
->> I'd like to  keep current test case as simple as possible right now, a=
-nd
->> for later enhancement, I have several different ideas:
->=20
-> Please make new tests then :)
->=20
+>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>> ---
+>>  tests/btrfs/159     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/159.out |   5 +++
+>>  tests/btrfs/group   |   1 +
+>>  3 files changed, 106 insertions(+)
+>>  create mode 100755 tests/btrfs/159
+>>  create mode 100644 tests/btrfs/159.out
 >>
->> 1) Reflink fs + loopback
->>    Yep, use btrfs/xfs as base filesystem and create copy using reflink=
-,
->>    then use such files as loopback device.
->>    The good thing is, AFAIK btrfs/xfs reflink is really fast.
->>    Much much faster than dm-snapshot or even LVM thin.
->>
->>    The much much smaller block size (4K default) makes CoW overhead
->>    (LVM thin is 64K, not sure about dm-snapshot though).
->>
->>    The problem is, such setup needs extra mount point and can be a
->>    little hard to setup, and we're introducing another layer of fs,
->>    if the fs itself has some hidden bug, it would screw up the test
->>    case.
->>
->> 2) LVM thin provision
->>    LVM thin provision looks much like btrfs/xfs for block level, and
->>    smaller default block size (64K vs original 2M) makes CoW overhead
->>    smaller.
->>
->>    I'm currently testing this method, the good thing is it's a little
->>    easier to setup and we can use single mount point.
->>
->> Anyway, with proper and efficient snapshot ability implemented, I will=
-
->> definitely convert this test case, and add Flush test case.
->>
->> Thanks for your review too,
->> Qu
->>
->>>
->>> Thanks for working on this!
->>> You can add
->>> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
->=20
-> Thank you both!
->=20
+>> diff --git a/tests/btrfs/159 b/tests/btrfs/159
+>> new file mode 100755
+>> index 00000000..6083975a
+>> --- /dev/null
+>> +++ b/tests/btrfs/159
+>> @@ -0,0 +1,100 @@
+>> +#! /bin/bash
+>> +# FSQA Test No. 159
+>> +#
+>> +# Test that when we have the no-holes mode enabled and a specific metadata
+>> +# layout, if we punch a hole and fsync the file, at replay time the whole
+>> +# hole was preserved.
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
+>> +# Author: Filipe Manana <fdmanana@suse.com>
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +tmp=/tmp/$$
+>> +status=1     # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +     _cleanup_flakey
+>> +     cd /
+>> +     rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/dmflakey
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>                  ^^^^^^^ btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_dm_target flakey
+>> +_require_xfs_io_command "fpunch"
+>> +
+>> +rm -f $seqres.full
+>> +
+>> +# We create the filesystem with a node size of 64Kb because we need to create a
+>> +# specific metadata layout in order to trigger the bug we are testing. At the
+>> +# moment the node size can not be smaller then the system's page size, so given
+>> +# that the largest possible page size is 64Kb and by default the node size is
+>> +# set to the system's page size value, we explictly create a filesystem with a
+>> +# 64Kb node size.
+>> +_scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
+>> +_require_metadata_journaling $SCRATCH_DEV
+>> +_init_flakey
+>> +_mount_flakey
+>> +
+>> +# Create our test file with 831 extents of 256Kb each. Before each extent, there
+>
+> I think it's 832 extents in total? As the index starts with 0.
+>
+> Otherwise looks good to me.
+>
+> Thanks,
 > Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-
---NX1AihsqT5ZVmUqncDgNoPrG1r9u3Mzye--
-
---Z9yK1icynYpknIDT768rsLcFEHAzc3iEJ
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlq7PFsACgkQwj2R86El
-/qhjGgf5ASuBLxGdGSEJ0KTG68199sFrwvpFzmQWOuacj9f7ceiwxBFOYA4pbP+B
-8xsUH8LCaLl23ikBDqFYR1VVXnwx6tHI2tlpMV9Xqh0coR5+VdveWkctvwJsyNhG
-QW18/gZdhBeT75aa65IuF3RwjcLq56RGXcK9RtVI/V4+Rd5VOgVdwU5UuXYZdmgr
-TsxWi/RXHU0xajfjpj1sCY+fC0OEW581UyMO1rXy7d0eBArBQK+4L3nJ2wWvvkDl
-PfiTqUqxvLC5SmxUojubEVJVUAYFofj1qhWqDGvpcPPgkQNTHdtRu6PtxI2xF3zI
-chGCn8MrS+ln+9ImcVHX+en4+8GgMA==
-=sV9b
------END PGP SIGNATURE-----
-
---Z9yK1icynYpknIDT768rsLcFEHAzc3iEJ--
+>
+>> +# is a 256Kb hole (except for the first extent, which starts at offset 0). This
+>> +# creates two leafs in the filesystem tree, with the extent at offset 216530944
+>> +# being the last item in the first leaf and the extent at offset 217055232 being
+>> +# the first item in the second leaf.
+>> +for ((i = 0; i <= 831; i++)); do
+>> +     offset=$((i * 2 * 256 * 1024))
+>> +     $XFS_IO_PROG -f -c "pwrite -S 0xab -b 256K $offset 256K" \
+>> +             $SCRATCH_MNT/foobar >/dev/null
+>> +done
+>> +
+>> +# Now persist everything done so far.
+>> +sync
+>> +
+>> +# Now punch a hole that covers part of the extent at offset 216530944.
+>> +$XFS_IO_PROG -c "fpunch $((216530944 + 128 * 1024 - 4000)) 256K" \
+>> +          -c "fsync" \
+>> +          $SCRATCH_MNT/foobar
+>> +
+>> +echo "File digest before power failure:"
+>> +md5sum $SCRATCH_MNT/foobar | _filter_scratch
+>> +
+>> +# Simulate a power failure and mount the filesystem to check that replaying the
+>> +# fsync log/journal succeeds and our test file has the expected content.
+>> +_flakey_drop_and_remount
+>> +
+>> +echo "File digest after power failure and log replay:"
+>> +md5sum $SCRATCH_MNT/foobar | _filter_scratch
+>> +
+>> +_unmount_flakey
+>> +_cleanup_flakey
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+>> new file mode 100644
+>> index 00000000..3317e516
+>> --- /dev/null
+>> +++ b/tests/btrfs/159.out
+>> @@ -0,0 +1,5 @@
+>> +QA output created by 159
+>> +File digest before power failure:
+>> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+>> +File digest after power failure and log replay:
+>> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index 8007e07e..ba766f6b 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -161,3 +161,4 @@
+>>  156 auto quick trim
+>>  157 auto quick raid
+>>  158 auto quick raid scrub
+>> +159 auto quick
+>> --
+>> 2.11.0
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
