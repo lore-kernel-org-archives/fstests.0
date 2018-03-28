@@ -1,55 +1,67 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:38758 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752733AbeC1BUn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Mar 2018 21:20:43 -0400
-Date: Wed, 28 Mar 2018 09:20:35 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] xfs: test agfl reset on bad list wrapping
-Message-ID: <20180328012035.GD30836@localhost.localdomain>
-References: <20180321165716.GB4818@magnolia>
- <20180323052540.GZ30836@localhost.localdomain>
- <20180323160817.GJ4818@magnolia>
- <20180326012253.GC30836@localhost.localdomain>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:48976 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752679AbeC1CMm (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 27 Mar 2018 22:12:42 -0400
+Date: Wed, 28 Mar 2018 10:12:40 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: Is there something wrong about the commit log of tools/nextid ?
+Message-ID: <20180328021240.GM4684@dhcp12-143.nay.redhat.com>
+References: <20180327101531.GL4684@dhcp12-143.nay.redhat.com>
+ <20180327163226.GA11581@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180326012253.GC30836@localhost.localdomain>
+In-Reply-To: <20180327163226.GA11581@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Brian Foster <bfoster@redhat.com>
-Cc: linux-xfs@vger.kernel.org, david@fromorbit.com, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: guaneryu@gmail.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 26, 2018 at 09:22:53AM +0800, Eryu Guan wrote:
-> On Fri, Mar 23, 2018 at 09:08:17AM -0700, Darrick J. Wong wrote:
-> > > > +
-> > > > +	# Format filesystem
-> > > > +	echo "TEST $cmd" | tee /dev/ttyprintk
-> > > 
-> > > What's the purpose of writing to /dev/ttyprintk? I don't see how it's
-> > > used in the test.
+On Tue, Mar 27, 2018 at 09:32:26AM -0700, Darrick J. Wong wrote:
+> On Tue, Mar 27, 2018 at 06:15:31PM +0800, Zorro Lang wrote:
+> > Hi,
 > > 
-> > It makes it easy to tell which kernel messages came from which runtest()
-> > invocation so that we can tell if a particular agfl mutation test
-> > actually triggered the fixup.
+> > Recently I always find this message when I do:
+> > 
+> > # git status
+> > On branch master                               
+> > Your branch is up-to-date with 'origin/master'.                                                
+> > 
+> > Changes not staged for commit:                 
+> >   (use "git add <file>..." to update what will be committed)                                   
+> >   (use "git checkout -- <file>..." to discard changes in working directory)                    
+> > 
+> >         typechange: tools/nextid
+> > 
+> > Even git pull to latest commit, this problem is still there.
+> > If I did `git blame tools/nextid`, I can't see the commit message
+> > about this file. If I did `git checkout -- tools/nextid`, then
+> > `git blame tools/nextid` shows:
+> > 
+> >   208422233 (Darrick J. Wong 2015-12-21 18:07:52 +1100 1) sort-group
+> > 
+> > Only this one line. I don't know what happened to this file, is there
+> > something wrong when merge or push it?
 > 
-> This could fail the test if /dev/ttyprintk doesn't exist. It seems
+> It's supposed to be a symbolic link, hence the one-line git blame after
+> you git checkout.
 
-Correction, it doesn't fail the test, but creates a new /dev/ttyprintk
-file.. but still, I think this should be addressed.
+Thanks, yes, I notice that it's a symbolic link now. I just don't know why
+I need to do git checkout after a normal git pull. I didn't change anything
+before git pull.
 
-Rather than that, the test runs good for me, it fails with 4.16-rc7
-kernel and passes with the mentioned patch applied.
+Anyway, I can't reproduce this issue after git checkout that file. If no
+one hit this issue too, please ignore my issue :)
 
-Brian, would you please help review the new version of this patch in
-patchset "[PATCH 0/4] misc. fstests changes" (patch 3/4) as well? I
-really like a Reviewed-by tag from someone who knows all the details of
-the test and the fix :) Thanks a lot!
+Thanks again,
+Zorro
 
-Eryu
-
-> writing to /dev/kmsg works could tell us the same information, and we've
-> already made sure /dev/kmsg is writable by _require_check_dmesg. IMHO
-> /dev/kmsg might be a better choice here.
 > 
-> Thanks,
-> Eryu
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
