@@ -1,225 +1,118 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:52316 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751179AbeC2K06 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 06:26:58 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH typo-fixed] fstests: btrfs: 159 superblock corruption test case
-Date: Thu, 29 Mar 2018 18:28:48 +0800
-Message-Id: <20180329102848.12669-1-anand.jain@oracle.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:47096 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751008AbeC2L7l (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 07:59:41 -0400
+MIME-Version: 1.0
+In-Reply-To: <20180329033039.GI30836@localhost.localdomain>
+References: <1521989591-9496-1-git-send-email-amir73il@gmail.com>
+ <1521989591-9496-3-git-send-email-amir73il@gmail.com> <20180329033039.GI30836@localhost.localdomain>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 29 Mar 2018 14:59:40 +0300
+Message-ID: <CAOQ4uxjs2hxCbn5bfZF8-0PEzUUbbRMkxLN-=2h0yK30F8wXiw@mail.gmail.com>
+Subject: Re: [PATCH 2/3] open_by_handle: add -s option to sleep and keep files
+ open by handle
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Verify if the superblock corruption is handled correctly.
+On Thu, Mar 29, 2018 at 6:30 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Sun, Mar 25, 2018 at 05:53:10PM +0300, Amir Goldstein wrote:
+>> This feature is needed for tests that need to open file by handle and
+>> then perform operations while that file is open. This will be used by
+>> an overlay test to keep disconnected dentries in dcache.
+>>
+>> Usage: open_by_handle -s <test_dir>
+>>
+>> On success, the program will run until it gets a terminating signal.
+>>
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+>>  src/open_by_handle.c | 28 ++++++++++++++++++++--------
+>>  1 file changed, 20 insertions(+), 8 deletions(-)
+>>
+>> diff --git a/src/open_by_handle.c b/src/open_by_handle.c
+>> index d3beb78..e4bd29b 100644
+>> --- a/src/open_by_handle.c
+>> +++ b/src/open_by_handle.c
+>> @@ -27,7 +27,7 @@
+>>
+>>  /*
+>>
+>> -usage: open_by_handle [-cludmrwapknh] [<-i|-o> <handles_file>] <test_dir> [num_files]
+>> +usage: open_by_handle [-cludmrwapknhs] [<-i|-o> <handles_file>] <test_dir> [num_files]
+>>
+>>  Examples:
+>>
+>> @@ -48,9 +48,9 @@ Examples:
+>>     open_by_handle -p -o <handles_file> <test_dir> [N]
+>>
+>>  4. Read file handles from file and open files by handle without
+>> -   dropping caches beforehand:
+>> +   dropping caches beforehand. Sleep afterhand to keep files open:
+>>
+>> -   open_by_handle -np -i <handles_file> <test_dir> [N]
+>> +   open_by_handle -nps -i <handles_file> <test_dir> [N]
+>>
+>>  5. Get file handles for existing test set, write data to files,
+>>     drop caches, open all files by handle, read and verify written
+>> @@ -112,7 +112,7 @@ struct handle {
+>>
+>>  void usage(void)
+>>  {
+>> -     fprintf(stderr, "usage: open_by_handle [-cludmrwapknh] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
+>> +     fprintf(stderr, "usage: open_by_handle [-cludmrwapknhs] [<-i|-o> <handles_file>] <test_dir> [num_files]\n");
+>>       fprintf(stderr, "\n");
+>>       fprintf(stderr, "open_by_handle -c <test_dir> [N] - create N test files under test_dir, try to get file handles and exit\n");
+>>       fprintf(stderr, "open_by_handle    <test_dir> [N] - get file handles of test files, drop caches and try to open by handle\n");
+>> @@ -128,6 +128,7 @@ void usage(void)
+>>       fprintf(stderr, "open_by_handle -p <test_dir>     - create/delete and try to open by handle also test_dir itself\n");
+>>       fprintf(stderr, "open_by_handle -i <handles_file> <test_dir> [N] - read test files handles from file and try to open by handle\n");
+>>       fprintf(stderr, "open_by_handle -o <handles_file> <test_dir> [N] - get file handles of test files and write handles to file\n");
+>> +     fprintf(stderr, "open_by_handle -s <test_dir> [N] - wait in sleep loop after opening files by handle to keep them open\n");
+>>       exit(EXIT_FAILURE);
+>>  }
+>>
+>> @@ -148,12 +149,12 @@ int main(int argc, char **argv)
+>>       int     numfiles = 1;
+>>       int     create = 0, delete = 0, nlink = 1, move = 0;
+>>       int     rd = 0, wr = 0, wrafter = 0, parent = 0;
+>> -     int     keepopen = 0, drop_caches = 1;
+>> +     int     keepopen = 0, drop_caches = 1, sleep_loop = 0;
+>>
+>>       if (argc < 2)
+>>               usage();
+>>
+>> -     while ((c = getopt(argc, argv, "cludmrwapknhi:o:")) != -1) {
+>> +     while ((c = getopt(argc, argv, "cludmrwapknhi:o:s")) != -1) {
+>>               switch (c) {
+>>               case 'c':
+>>                       create = 1;
+>> @@ -209,6 +210,9 @@ int main(int argc, char **argv)
+>>                               return EXIT_FAILURE;
+>>                       }
+>>                       break;
+>> +             case 's':
+>> +                     sleep_loop = 1;
+>> +                     break;
+>>               default:
+>>                       fprintf(stderr, "illegal option '%s'\n", argv[optind]);
+>>               case 'h':
+>> @@ -308,6 +312,7 @@ int main(int argc, char **argv)
+>>                               fprintf(stderr, "failed reading file handle #%d from '%s'\n", i, infile);
+>>                               return EXIT_FAILURE;
+>>                       }
+>> +                     continue;
+>
+> With this 'continue', it seems we can't keep file open when reading file
+> handles from a file?
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/159     | 142 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/159.out |  35 +++++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 178 insertions(+)
- create mode 100755 tests/btrfs/159
- create mode 100644 tests/btrfs/159.out
+It's a leftover - I was thinking to reuse the meaning of -k -i for
+this functionality
+but decided to go with a new flag.
 
-diff --git a/tests/btrfs/159 b/tests/btrfs/159
-new file mode 100755
-index 000000000000..f42ba4b777e7
---- /dev/null
-+++ b/tests/btrfs/159
-@@ -0,0 +1,142 @@
-+#! /bin/bash
-+# FS QA Test 159
-+#
-+# Test if the superblock corruption is handled correctly.
-+#   - Check and validate superblock csum in mount and scan context
-+#   - Check and validate superblock for all disks in the fs
-+#   - Make sure if the copies are really a copy of the primary superblock
-+#
-+#---------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+# Author: Anand Jain <anand.jain@oracle.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#---------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+status=1	# failure is the default!
-+
-+_cleanup()
-+{
-+	_scratch_dev_pool_put
-+}
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/module
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 2
-+_require_loadable_fs_module "btrfs"
-+_require_command "$WIPEFS_PROG" wipefs
-+
-+_scratch_dev_pool_get 2
-+
-+MNT_OPT=$(echo $MOUNT_OPTIONS | cut -d" " -f2-)
-+DEV_GOOD=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+DEV_BAD=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+
-+wipe()
-+{
-+	$WIPEFS_PROG -a $DEV_GOOD > /dev/null 2>&1
-+	$WIPEFS_PROG -a $DEV_BAD > /dev/null 2>&1
-+}
-+
-+# If copy1 fsid does not match with primary fail the scan thus the mount as well
-+check_copy1_fsid()
-+{
-+	local bytenr=67108864
-+	echo -e "\\ncheck_copy1_fsid\\n{" | tee -a $seqres.full
-+
-+	wipe
-+	$MKFS_BTRFS_PROG -fq $DEV_GOOD
-+	$MKFS_BTRFS_PROG -fq $DEV_BAD
-+	_reload_fs_module "btrfs"
-+
-+	dd status=none of=$DEV_BAD if=$DEV_GOOD ibs=1 obs=1 skip=$bytenr seek=$bytenr count=4K|\
-+		tee -a $seqres.full
-+
-+	_mount -o $MNT_OPT $DEV_BAD $SCRATCH_MNT 2>&1 | _filter_scratch_pool
-+
-+	echo -e "good\\n}" | tee -a $seqres.full
-+}
-+
-+# As in Linux kernel 4.16 if the primary is corrupted mount will fail.
-+# Which might change in the long run.
-+check_primary()
-+{
-+	local bytenr=65536
-+	echo -e "\\ncheck_primary\\n{" | tee -a $seqres.full
-+
-+	wipe
-+	_scratch_pool_mkfs "-mraid1 -draid1"
-+	_reload_fs_module "btrfs"
-+
-+	#To corrupt a disk block, read in hex, write in dec
-+	od -j$bytenr -N1 -An -x $DEV_BAD |\
-+		dd status=none of=$DEV_BAD ibs=1 obs=1 seek=$bytenr count=1|\
-+		tee -a $seqres.full
-+	_mount -o $MNT_OPT,device=$DEV_GOOD $DEV_BAD $SCRATCH_MNT 2>&1 | _filter_scratch_pool
-+
-+	echo -e "good\\n}" | tee -a $seqres.full
-+}
-+
-+# If copy1 or copy2 is corrupted we still should be able to mount
-+check_copy1()
-+{
-+	local bytenr=67108864
-+	echo -e "\\ncheck_copy1\\n{" | tee -a $seqres.full
-+
-+	wipe
-+	_scratch_pool_mkfs "-mraid1 -draid1"
-+	_reload_fs_module "btrfs"
-+
-+	#corrupt the disk block bytenr, read in hex, write in dec
-+	od -j$bytenr -N1 -An -x $DEV_BAD |\
-+		dd status=none of=$DEV_BAD ibs=1 obs=1 seek=$bytenr count=1|\
-+		tee -a $seqres.full
-+	_mount -o $MNT_OPT,device=$DEV_GOOD $DEV_BAD $SCRATCH_MNT 2>&1 | _filter_scratch_pool
-+
-+	echo -e "good\\n}" | tee -a $seqres.full
-+
-+	_scratch_unmount
-+}
-+
-+check_copy1_fsid
-+
-+check_primary
-+check_copy1
-+
-+echo -e "\\nReverse the good and bad device"
-+# Generally devid 1 is used to read tree at the mount time, now reverse the
-+# devid on which the corrupt superblock will reside.
-+dev_tmp=$DEV_GOOD
-+DEV_GOOD=$DEV_BAD
-+DEV_BAD=$dev_tmp
-+check_primary
-+check_copy1
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
-new file mode 100644
-index 000000000000..f8f776f28870
---- /dev/null
-+++ b/tests/btrfs/159.out
-@@ -0,0 +1,35 @@
-+QA output created by 159
-+
-+check_copy1_fsid
-+{
-+mount: wrong fs type, bad option, bad superblock on SCRATCH_DEV,
-+       missing codepage or helper program, or other error
-+
-+       In some cases useful info is found in syslog - try
-+       dmesg | tail or so.
-+good
-+}
-+
-+check_primary
-+{
-+mount: mount SCRATCH_DEV on /scratch failed: Structure needs cleaning
-+good
-+}
-+
-+check_copy1
-+{
-+good
-+}
-+
-+Reverse the good and bad device
-+
-+check_primary
-+{
-+mount: mount SCRATCH_DEV on /scratch failed: Structure needs cleaning
-+good
-+}
-+
-+check_copy1
-+{
-+good
-+}
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 8007e07e9cbd..ba766f6b84f8 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -161,3 +161,4 @@
- 156 auto quick trim
- 157 auto quick raid
- 158 auto quick raid scrub
-+159 auto quick
--- 
-2.7.0
+With fix in v2.
 
+Thanks,
+Amir.
