@@ -1,45 +1,91 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44056 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:60498 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750979AbeC2P12 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 29 Mar 2018 11:27:28 -0400
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 6098095657
-        for <fstests@vger.kernel.org>; Thu, 29 Mar 2018 15:27:28 +0000 (UTC)
+        id S1751099AbeC2Pek (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 29 Mar 2018 11:34:40 -0400
 From: Benjamin Coddington <bcodding@redhat.com>
-Subject: [PATCH] common/rc: improve checks for YP/NIS
-Date: Thu, 29 Mar 2018 11:27:25 -0400
-Message-Id: <034cdb8e88cf9b333843da73f361b7cfbbcb5f66.1522336962.git.bcodding@redhat.com>
+Subject: [PATCH xfstests] generic/035: Override output for NFS testing
+Date: Thu, 29 Mar 2018 11:34:39 -0400
+Message-Id: <e82df2bc4db926b051307ba4066d77b616c79b0c.1522337478.git.bcodding@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: smayhew@redhat.com
+Cc: Scott Mayhew <smayhew@redhat.com>, Anna Schumaker <Anna.Schumaker@Netapp.com>, Chuck Lever <chuck.lever@oracle.com>, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-At the 2018 spring NFS BAT, we have a number of systems that return a valid
-string from `domainaname`, but don't have the ypcat binary.  If we don't have
-the yp-tools package installed, we're not going to be able to use ypcat, so
-check for it and bail out.
+We'd like to run generic tests for NFS, but often have slightly different
+output for our results.  One instance is that for the NFS client the
+removal of an open file or directory is handled differently than for a
+local filesystem.  We can expect nlink to be 1 for files, and to receive
+-ESTALE for operations on deleted directories, isn't that silly?
+
+Override the default output when FSTYP == "nfs".
 
 Signed-off-by: Benjamin Coddington <bcodding@redhat.com>
 ---
- common/rc | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ .gitignore                                 | 1 +
+ tests/generic/035                          | 3 +++
+ tests/generic/035.cfg                      | 1 +
+ tests/generic/{035.out => 035.out.default} | 0
+ tests/generic/035.out.nfs                  | 5 +++++
+ 5 files changed, 10 insertions(+)
+ create mode 100644 tests/generic/035.cfg
+ rename tests/generic/{035.out => 035.out.default} (100%)
+ create mode 100644 tests/generic/035.out.nfs
 
-diff --git a/common/rc b/common/rc
-index 931767498f62..1b52fb3609c1 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2023,7 +2023,8 @@ _yp_active()
- {
- 	local dn
- 	dn=$(domainname 2>/dev/null)
--	test -n "${dn}" -a "${dn}" != "(none)" -a "${dn}" != "localdomain"
-+	ypcat=$(type -P ypcat)
-+	test -n "${dn}" -a "${dn}" != "(none)" -a "${dn}" != "localdomain" -a -n "${ypcat}"
- 	echo $?
- }
+diff --git a/.gitignore b/.gitignore
+index 368d11c84a66..b2419862aff9 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -246,6 +246,7 @@
+ /tests/xfs/033.out
+ /tests/xfs/071.out
+ /tests/xfs/096.out
++/tests/generic/035.out
  
+ # cscope files
+ cscope.*
+diff --git a/tests/generic/035 b/tests/generic/035
+index 443ddd57bfc0..37423f32dddd 100755
+--- a/tests/generic/035
++++ b/tests/generic/035
+@@ -21,6 +21,7 @@
+ #-----------------------------------------------------------------------
+ #
+ 
++seqfull=$0
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+@@ -44,6 +45,8 @@ _supported_os Linux
+ 
+ _require_test
+ 
++_link_out_file $FSTYP
++
+ # real QA test starts here
+ 
+ rename_dir=$TEST_DIR/$$
+diff --git a/tests/generic/035.cfg b/tests/generic/035.cfg
+new file mode 100644
+index 000000000000..d02b0ce907d4
+--- /dev/null
++++ b/tests/generic/035.cfg
+@@ -0,0 +1 @@
++nfs: nfs
+diff --git a/tests/generic/035.out b/tests/generic/035.out.default
+similarity index 100%
+rename from tests/generic/035.out
+rename to tests/generic/035.out.default
+diff --git a/tests/generic/035.out.nfs b/tests/generic/035.out.nfs
+new file mode 100644
+index 000000000000..6359197f1d04
+--- /dev/null
++++ b/tests/generic/035.out.nfs
+@@ -0,0 +1,5 @@
++QA output created by 035
++overwriting regular file:
++nlink is 1, should be 0
++overwriting directory:
++t_rename_overwrite: fstat(3): Stale file handle
 -- 
 2.9.3
 
