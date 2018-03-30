@@ -1,102 +1,81 @@
-Received: from mail-vk0-f46.google.com ([209.85.213.46]:34428 "EHLO
-        mail-vk0-f46.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751325AbeC2Szn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 14:55:43 -0400
-MIME-Version: 1.0
-In-Reply-To: <CAL3q7H7f8gVSitTudAopognpru9LRtoTJfm+8D-N0SYtiWeZpA@mail.gmail.com>
-References: <20180326225921.10096-1-fdmanana@kernel.org> <20180328021753.GE30836@localhost.localdomain>
- <CAL3q7H4FqvoVs69mfWFh1M=8bDZ5FSHcq0KKg+g0C5HcjLuXwg@mail.gmail.com>
- <20180328103358.GG30836@localhost.localdomain> <CAL3q7H7f8gVSitTudAopognpru9LRtoTJfm+8D-N0SYtiWeZpA@mail.gmail.com>
-From: Jayashree Mohan <jayashree2912@gmail.com>
-Date: Thu, 29 Mar 2018 13:55:42 -0500
-Message-ID: <CA+EzBbBOZ3vtTPHMXCfU5ONADc1Hn-Ur3OTRpR4Vn+Qwa1u3aA@mail.gmail.com>
+Received: from mail-pg0-f50.google.com ([74.125.83.50]:40327 "EHLO
+        mail-pg0-f50.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751865AbeC3A6U (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 20:58:20 -0400
+Date: Fri, 30 Mar 2018 08:58:13 +0800
+From: Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [PATCH] fstests: test btrfs fsync after hole punching with
  no-holes mode
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20180330005813.GL30836@localhost.localdomain>
+References: <20180326225921.10096-1-fdmanana@kernel.org>
+ <20180328021753.GE30836@localhost.localdomain>
+ <CAL3q7H4FqvoVs69mfWFh1M=8bDZ5FSHcq0KKg+g0C5HcjLuXwg@mail.gmail.com>
+ <20180328103358.GG30836@localhost.localdomain>
+ <CAL3q7H7f8gVSitTudAopognpru9LRtoTJfm+8D-N0SYtiWeZpA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H7f8gVSitTudAopognpru9LRtoTJfm+8D-N0SYtiWeZpA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Filipe Manana <fdmanana@kernel.org>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+Cc: fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Filipe,
-
-I tried running the xfstest above on kernel 4.15.0 and I haven't been
-able to hit the bug. The xfstest passes clean for me. I compared the
-btrfs-debug-tree in my case with the one attached by Eryu, and I see I
-do not have any xattr as he does. However, for every run of the
-xfstest, the extent tree info that I get from btrfs-debug-tree has
-varying number of items in the first leaf node. (I have attached two
-dump files for your reference.)
-
-I also tried changing the offset at which fpunch is performed to match
-the offset of the last extent in the first leaf of the extent tree -
-however the md5 before and after crash was the same.
-
-Could you give more details on this?
-
-https://friendpaste.com/1wVAz7hG0U5SgYtZavbJhL
-https://friendpaste.com/1wVAz7hG0U5SgYtZavxALg
-
-Thanks,
-Jayashree Mohan
-
-
-
-On Thu, Mar 29, 2018 at 8:45 AM, Filipe Manana <fdmanana@kernel.org> wrote:
+On Thu, Mar 29, 2018 at 02:45:26PM +0100, Filipe Manana wrote:
 > On Wed, Mar 28, 2018 at 11:33 AM, Eryu Guan <guaneryu@gmail.com> wrote:
->> On Wed, Mar 28, 2018 at 09:48:17AM +0100, Filipe Manana wrote:
->>> On Wed, Mar 28, 2018 at 3:17 AM, Eryu Guan <guaneryu@gmail.com> wrote:
->>> > On Mon, Mar 26, 2018 at 11:59:21PM +0100, fdmanana@kernel.org wrote:
->>> >> From: Filipe Manana <fdmanana@suse.com>
->>> >>
->>> >> Test that when we have the no-holes mode enabled and a specific metadata
->>> >> layout, if we punch a hole and fsync the file, at replay time the whole
->>> >> hole was preserved.
->>> >>
->>> >> This issue is fixed by the following btrfs patch for the linux kernel:
->>> >>
->>> >>   "Btrfs: fix fsync after hole punching when using no-holes feature"
->>> >
->>> > I'd expect a test failure with 4.16-rc6 kernel, as the mentioned fix
->>> > above is not there. But test always passes for me. Did I miss anything?
->>> > btrfs-progs version is btrfs-progs-4.11.1-3.fc27.
->>>
->>> It should fail on any kernel, with any btrfs-progs version (which
->>> should be irrelevant).
->>> Somehow on your system we are not getting the specific metadata layout
->>> needed to trigger the issue.
->>>
->>> Can you apply the following patch on top of the test and provide the
->>> result 159.full file?
->>>
->>> https://friendpaste.com/6xAuLeN4xl1AGjO9Qc5I8L
->>>
->>> So that I can see what metadata layout you are getting.
->>> Thanks!
->>
->> Sure, please see attachment.
->
+> > On Wed, Mar 28, 2018 at 09:48:17AM +0100, Filipe Manana wrote:
+> >> On Wed, Mar 28, 2018 at 3:17 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> >> > On Mon, Mar 26, 2018 at 11:59:21PM +0100, fdmanana@kernel.org wrote:
+> >> >> From: Filipe Manana <fdmanana@suse.com>
+> >> >>
+> >> >> Test that when we have the no-holes mode enabled and a specific metadata
+> >> >> layout, if we punch a hole and fsync the file, at replay time the whole
+> >> >> hole was preserved.
+> >> >>
+> >> >> This issue is fixed by the following btrfs patch for the linux kernel:
+> >> >>
+> >> >>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+> >> >
+> >> > I'd expect a test failure with 4.16-rc6 kernel, as the mentioned fix
+> >> > above is not there. But test always passes for me. Did I miss anything?
+> >> > btrfs-progs version is btrfs-progs-4.11.1-3.fc27.
+> >>
+> >> It should fail on any kernel, with any btrfs-progs version (which
+> >> should be irrelevant).
+> >> Somehow on your system we are not getting the specific metadata layout
+> >> needed to trigger the issue.
+> >>
+> >> Can you apply the following patch on top of the test and provide the
+> >> result 159.full file?
+> >>
+> >> https://friendpaste.com/6xAuLeN4xl1AGjO9Qc5I8L
+> >>
+> >> So that I can see what metadata layout you are getting.
+> >> Thanks!
+> >
+> > Sure, please see attachment.
+> 
 > Thanks!
 > So you indeed get a different metadata layout, and that is because you
 > have SELinux enabled which causes some xattr to be added to the test
 > file (foobar):
->
+> 
 >         item 6 key (257 XATTR_ITEM 3817753667) itemoff 64932 itemsize 83
 >                 location key (0 UNKNOWN.0 0) type XATTR
 >                 transid 7 data_len 37 name_len 16
 >                 name: security.selinux
 >                 data unconfined_u:object_r:unlabeled_t:s0
->
+> 
 > I can make the test work with and without selinux enabled (by punching
 > holes on a few extents that are candidates to be at leaf boundaries).
 > Is it worth it? (I assume most people run the tests without selinux)
->
-> thanks
->
->>
->> Thanks,
->> Eryu
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+Yes, please make it work with selinux if possible (but if that requires
+too much complexity, we can give it a second thought).
+
+I'm not sure about others, but I run fstests with selinux almost all the
+time, because Fedora/RHEL distros have selinux on by default :) so are
+all other people using Fedora/RHEL/Centos as test hosts, I guess.
+
+Thanks,
+Eryu
