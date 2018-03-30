@@ -1,107 +1,116 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:39511 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751191AbeC3BBu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 21:01:50 -0400
-Received: by mail-pg0-f66.google.com with SMTP id b9so4142318pgf.6
-        for <fstests@vger.kernel.org>; Thu, 29 Mar 2018 18:01:50 -0700 (PDT)
-From: Eric Biggers <ebiggers@google.com>
-Subject: [xfstests-bld PATCH] android-xfstests: support f2fs
-Date: Thu, 29 Mar 2018 18:00:50 -0700
-Message-Id: <20180330010050.64034-1-ebiggers@google.com>
+Received: from out30-130.freemail.mail.aliyun.com ([115.124.30.130]:49771 "EHLO
+        out30-130.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751893AbeC3CKw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Mar 2018 22:10:52 -0400
+From: Eryu Guan <eguan@linux.alibaba.com>
+Subject: [PATCH 2/2] test-appliance: add virtfs/9p test configs
+Date: Fri, 30 Mar 2018 10:10:40 +0800
+Message-Id: <20180330021040.23748-2-eguan@linux.alibaba.com>
+In-Reply-To: <20180330021040.23748-1-eguan@linux.alibaba.com>
+References: <20180330021040.23748-1-eguan@linux.alibaba.com>
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, Eryu Guan <eguan@linux.alibaba.com>
 List-ID: <fstests@vger.kernel.org>
 
-Make android-setup-partitions use 'blkid' to detect the type of the
-userdata filesystem, and if it is f2fs calculate its size using fields
-from the f2fs superblock.
+Currently virtfs/9p has only one default config file, with tests in
+clone group excluded.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
 ---
- .../test-appliance/android-setup-partitions   | 55 +++++++++++++++++--
- 1 file changed, 50 insertions(+), 5 deletions(-)
+ .../test-appliance/files/root/fs/9p/cfg/all.list   |  1 +
+ .../test-appliance/files/root/fs/9p/cfg/default    |  7 +++
+ .../test-appliance/files/root/fs/9p/config         | 50 ++++++++++++++++++++++
+ .../test-appliance/files/root/fs/9p/exclude-opt    |  1 +
+ 4 files changed, 59 insertions(+)
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/9p/cfg/all.list
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/9p/cfg/default
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/9p/config
+ create mode 100644 kvm-xfstests/test-appliance/files/root/fs/9p/exclude-opt
 
-diff --git a/kvm-xfstests/test-appliance/android-setup-partitions b/kvm-xfstests/test-appliance/android-setup-partitions
-index 61cd001..8d38303 100755
---- a/kvm-xfstests/test-appliance/android-setup-partitions
-+++ b/kvm-xfstests/test-appliance/android-setup-partitions
-@@ -209,6 +209,49 @@ all_partitions_present()
-     return 0
- }
- 
-+# Extract a little-endian binary field from a file or device.
-+extract_binval()
-+{
-+    local file="$1"
-+    local offset="$2"
-+    local size="$3"
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/all.list b/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/all.list
+new file mode 100644
+index 000000000000..4ad96d51599f
+--- /dev/null
++++ b/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/all.list
+@@ -0,0 +1 @@
++default
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/default b/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/default
+new file mode 100644
+index 000000000000..b7d1801b6b04
+--- /dev/null
++++ b/kvm-xfstests/test-appliance/files/root/fs/9p/cfg/default
+@@ -0,0 +1,7 @@
++export TEST_DEV=9ptest
++export TEST_DIR=/mnt/test
++export SCRATCH_DEV=9pscratch
++export SCRATCH_MNT=/mnt/scratch
++export PLAN9_MOUNT_OPTIONS="-o trans=virtio,version=9p2000.L,posixacl"
++TESTNAME="9pfs"
++mkdir -p /mnt/test /mnt/scratch
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/9p/config b/kvm-xfstests/test-appliance/files/root/fs/9p/config
+new file mode 100644
+index 000000000000..ebd0d349be63
+--- /dev/null
++++ b/kvm-xfstests/test-appliance/files/root/fs/9p/config
+@@ -0,0 +1,50 @@
++#
++# Configuration file for 9pfs
++#
 +
-+    od "$file" -j $offset -N $size -t x$size -A none --endian=little \
-+	| sed 's/^[[:space:]]*/0x/'
++DEFAULT_MKFS_OPTIONS=""
++
++function check_filesystem()
++{
++	return 0
 +}
 +
-+# Get the size of the filesystem on the specified device.
-+get_fs_size()
++function format_filesystem()
 +{
-+    local device="$1" fstype="$2"
++	return 0
++}
 +
-+    case "$fstype" in
-+    ext4)
-+	dumpe2fs -h "$device" 2>/dev/null | \
-+	    awk '/^Block count:/{blockcount=$3}
-+		 /^Block size:/{blocksize=$3}
-+		  END { print blockcount * blocksize }'
-+	;;
-+    f2fs)
-+	local super_offset=1024
-+	local magic log_blocksize block_count
-+
-+	# see 'struct f2fs_super_block'
-+	magic=$(extract_binval "$device" $super_offset 4)
-+	log_blocksize=$(extract_binval "$device" $(( super_offset + 16 )) 4)
-+	block_count=$(extract_binval "$device" $(( super_offset + 36 )) 8)
-+
-+	if (( magic != 0xF2F52010 )); then
-+	    die "f2fs superblock not found on \"$device\""
++function setup_mount_opts()
++{
++	if test -z "$PLAN9_MOUNT_OPTIONS" ; then
++		export PLAN9_MOUNT_OPTIONS="-o trans=virtio,version=9p2000.L,posixacl"
 +	fi
-+	echo $(( block_count * (1 << log_blocksize) ))
-+	;;
-+    *)
-+	die "unsupported filesystem type \"$fstype\" on \"$device\""
-+	;;
-+    esac
++	if test -n "$MNTOPTS" ; then
++		export PLAN9_MOUNT_OPTIONS="$PLAN9_MOUNT_OPTIONS,$MNTOPTS"
++	fi
 +}
 +
- # Transiently shrink the userdata partition, as viewed by the kernel, if it's
- # not fully used by the filesystem on it.
- #
-@@ -219,11 +262,10 @@ all_partitions_present()
- # the end of the filesystem.
- shrink_userdata_partition()
- {
--    local fs_size=$(dumpe2fs -h $USERDATA_FS_DEV 2>/dev/null | \
--	    awk '/^Block count:/{blockcount=$3}
--		 /^Block size:/{blocksize=$3}
--		  END { print blockcount * blocksize }')
--    local part_size=$(get_partition_size $USERDATA_RAW_DEV)
-+    local fs_size part_size
++function get_mkfs_opts()
++{
++	return 0
++}
 +
-+    fs_size=$(get_fs_size "$USERDATA_FS_DEV" "$USERDATA_FS_TYPE")
-+    part_size=$(get_partition_size "$USERDATA_RAW_DEV")
- 
-     if (( fs_size <= 0 )); then
- 	die "unable to determine size of userdata filesystem"
-@@ -337,6 +379,9 @@ else
-     USERDATA_FS_DEV=$USERDATA_RAW_DEV
- fi
- 
-+# Type of the userdata filesystem, e.g. ext4 or f2fs
-+USERDATA_FS_TYPE=$(blkid -s TYPE -o value "$USERDATA_FS_DEV")
++function show_mkfs_opts()
++{
++	return 0
++}
 +
- if ! all_partitions_present ; then
-     # Free up as much space as we can, then create the partitions.
-     shrink_userdata_partition
++function show_mount_opts()
++{
++	echo PLAN9_MOUNT_OPTIONS: "$PLAN9_MOUNT_OPTIONS"
++}
++
++function test_name_alias()
++{
++	echo "$1"
++}
++
++function reset_vars()
++{
++	unset PLAN9_MOUNT_OPTIONS
++}
+diff --git a/kvm-xfstests/test-appliance/files/root/fs/9p/exclude-opt b/kvm-xfstests/test-appliance/files/root/fs/9p/exclude-opt
+new file mode 100644
+index 000000000000..b29665746f8c
+--- /dev/null
++++ b/kvm-xfstests/test-appliance/files/root/fs/9p/exclude-opt
+@@ -0,0 +1 @@
++-x clone
 -- 
-2.17.0.rc1.321.gba9d0f2565-goog
+2.14.3
 
