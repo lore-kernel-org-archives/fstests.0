@@ -1,105 +1,124 @@
-Received: from mout.gmx.net ([212.227.15.19]:53789 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754969AbeDCI66 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 3 Apr 2018 04:58:58 -0400
-Subject: Re: [PATCH] btrfs-progs: let mkfs return nozero value on thin
- provision device
-References: <20180403083945.13485-1-suy.fnst@cn.fujitsu.com>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <17aa9205-f930-9d20-1d2f-8f03341fd440@gmx.com>
-Date: Tue, 3 Apr 2018 16:58:36 +0800
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:35580 "EHLO
+        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750826AbeDCJDZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Apr 2018 05:03:25 -0400
+Date: Tue, 3 Apr 2018 17:03:17 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH xfstests] generic/035: Override output for NFS testing
+Message-ID: <20180403090317.GM30836@localhost.localdomain>
+References: <e82df2bc4db926b051307ba4066d77b616c79b0c.1522337478.git.bcodding@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20180403083945.13485-1-suy.fnst@cn.fujitsu.com>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="KBobigo9kghjbadXw6FbnjoEVrGa9fyEq"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <e82df2bc4db926b051307ba4066d77b616c79b0c.1522337478.git.bcodding@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Su Yue <suy.fnst@cn.fujitsu.com>, linux-btrfs@vger.kernel.org
-Cc: fstests@vger.kernel.org
+To: Benjamin Coddington <bcodding@redhat.com>
+Cc: fstests@vger.kernel.org, Scott Mayhew <smayhew@redhat.com>, Anna Schumaker <Anna.Schumaker@Netapp.com>, Chuck Lever <chuck.lever@oracle.com>, linux-nfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---KBobigo9kghjbadXw6FbnjoEVrGa9fyEq
-Content-Type: multipart/mixed; boundary="yYyj3JxNt6KAN96XHjfOzcshp6Jml4etr";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: Su Yue <suy.fnst@cn.fujitsu.com>, linux-btrfs@vger.kernel.org
-Cc: fstests@vger.kernel.org
-Message-ID: <17aa9205-f930-9d20-1d2f-8f03341fd440@gmx.com>
-Subject: Re: [PATCH] btrfs-progs: let mkfs return nozero value on thin
- provision device
-References: <20180403083945.13485-1-suy.fnst@cn.fujitsu.com>
-In-Reply-To: <20180403083945.13485-1-suy.fnst@cn.fujitsu.com>
+On Thu, Mar 29, 2018 at 11:34:39AM -0400, Benjamin Coddington wrote:
+> We'd like to run generic tests for NFS, but often have slightly different
+> output for our results.  One instance is that for the NFS client the
+> removal of an open file or directory is handled differently than for a
+> local filesystem.  We can expect nlink to be 1 for files, and to receive
+> -ESTALE for operations on deleted directories, isn't that silly?
+> 
+> Override the default output when FSTYP == "nfs".
+> 
+> Signed-off-by: Benjamin Coddington <bcodding@redhat.com>
 
---yYyj3JxNt6KAN96XHjfOzcshp6Jml4etr
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
-
-
-
-On 2018=E5=B9=B404=E6=9C=8803=E6=97=A5 16:39, Su Yue wrote:
-> when mkfs.btrfs on a thin provision device which has very small
-> backing size and big virtual size, all code works well in
-> mkfs.btrfs until close_ctree() is called.
-> close_ctree() fails to sync device due to small backing size
-> while closing devices.
-> However, mkfs returns 0 in such situation which causes failure of
-> xfstests generic/405.
->=20
-> So, let mkfs returns nonzero value if previous steps succeeded but
-> close_ctree() failed.
-> Then xfstests generic/405 passes now.
->=20
-> Signed-off-by: Su Yue <suy.fnst@cn.fujitsu.com>
-
-Reviewed-by: Qu Wenruo <wqu@suse.com>
-
-Thanks,
-Qu
+Thanks for the patch!
 
 > ---
->  mkfs/main.c | 6 ++++++
->  1 file changed, 6 insertions(+)
->=20
-> diff --git a/mkfs/main.c b/mkfs/main.c
-> index 5a717f701cd5..9f7f2396df8f 100644
-> --- a/mkfs/main.c
-> +++ b/mkfs/main.c
-> @@ -1285,6 +1285,12 @@ out:
->  		}
->  	}
-> =20
-> +	if (!ret && close_ret) {
-> +		ret =3D close_ret;
-> +		error("failed to close ctree, the filesystem may be inconsistent: %d=
-",
-> +		      ret);
-> +	}
+>  .gitignore                                 | 1 +
+>  tests/generic/035                          | 3 +++
+>  tests/generic/035.cfg                      | 1 +
+>  tests/generic/{035.out => 035.out.default} | 0
+>  tests/generic/035.out.nfs                  | 5 +++++
+>  5 files changed, 10 insertions(+)
+>  create mode 100644 tests/generic/035.cfg
+>  rename tests/generic/{035.out => 035.out.default} (100%)
+>  create mode 100644 tests/generic/035.out.nfs
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 368d11c84a66..b2419862aff9 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -246,6 +246,7 @@
+>  /tests/xfs/033.out
+>  /tests/xfs/071.out
+>  /tests/xfs/096.out
+> +/tests/generic/035.out
+>  
+>  # cscope files
+>  cscope.*
+> diff --git a/tests/generic/035 b/tests/generic/035
+> index 443ddd57bfc0..37423f32dddd 100755
+> --- a/tests/generic/035
+> +++ b/tests/generic/035
+> @@ -21,6 +21,7 @@
+>  #-----------------------------------------------------------------------
+>  #
+>  
+> +seqfull=$0
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+> @@ -44,6 +45,8 @@ _supported_os Linux
+>  
+>  _require_test
+>  
+> +_link_out_file $FSTYP
 > +
->  	btrfs_close_all_devices();
->  	free(label);
-> =20
->=20
 
+We usually _link_out_file according to the features enabled at mkfs
+time, so linking a .out file based on $FSTYP makes me wonder if it's
+really a 'generic' test then.
 
---yYyj3JxNt6KAN96XHjfOzcshp6Jml4etr--
+So I think we could 'edit' the output for NFS a bit, e.g.
 
---KBobigo9kghjbadXw6FbnjoEVrGa9fyEq
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+-src/t_rename_overwrite $file1 $file2
++# comments about why we special-case nfs here
++src/t_rename_overwrite $file1 $file2 >$tmp.file 2>&1
++if [ "$FSTYP" = "nfs" ]; then
++       sed -i '/nlink is 1/d' $tmp.file
++fi
++cat $tmp.file
 
------BEGIN PGP SIGNATURE-----
+Similar 'edit' can be done to the dir case too.
 
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlrDQjwACgkQwj2R86El
-/qjaYggAmY1CVd8maHc0CR0pQnSAwDiwyLAtSfOv/+HGFQRKfhIYMLQNh0LquyKU
-pVYjnOu9H8oJBYJ6//gtz1ltBO5iswfEcMDBfVNPp4c3YpafFTt5556X2I4ty/xW
-6FpD3BmBwGqoWGtVMchnuRUg3PH+QMuYbsiEHJmYMBYgzII9McC9dTHuO+0BzgYm
-kNl9er5jCMMTUpAYIxHqdYOg2SWlWv58KxcIe178pehaoxdSO5kmOvflRspstN9U
-eb0N+g2NygWIxtjPR+EZk8t6nyfp+mVqIvOp425obtwUFlLsWultcS8DkZEOVrOa
-dtOWEd1G10tdHPPi/+cWrLvQAjxXrg==
-=pxGA
------END PGP SIGNATURE-----
+Thanks,
+Eryu
 
---KBobigo9kghjbadXw6FbnjoEVrGa9fyEq--
+>  # real QA test starts here
+>  
+>  rename_dir=$TEST_DIR/$$
+> diff --git a/tests/generic/035.cfg b/tests/generic/035.cfg
+> new file mode 100644
+> index 000000000000..d02b0ce907d4
+> --- /dev/null
+> +++ b/tests/generic/035.cfg
+> @@ -0,0 +1 @@
+> +nfs: nfs
+> diff --git a/tests/generic/035.out b/tests/generic/035.out.default
+> similarity index 100%
+> rename from tests/generic/035.out
+> rename to tests/generic/035.out.default
+> diff --git a/tests/generic/035.out.nfs b/tests/generic/035.out.nfs
+> new file mode 100644
+> index 000000000000..6359197f1d04
+> --- /dev/null
+> +++ b/tests/generic/035.out.nfs
+> @@ -0,0 +1,5 @@
+> +QA output created by 035
+> +overwriting regular file:
+> +nlink is 1, should be 0
+> +overwriting directory:
+> +t_rename_overwrite: fstat(3): Stale file handle
+> -- 
+> 2.9.3
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
