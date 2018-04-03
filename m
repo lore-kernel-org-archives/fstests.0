@@ -1,38 +1,257 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:51920 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56304 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932112AbeDCMgg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 3 Apr 2018 08:36:36 -0400
-From: "Benjamin Coddington" <bcodding@redhat.com>
-Subject: Re: [PATCH xfstests] generic/035: Override output for NFS testing
-Date: Tue, 03 Apr 2018 08:36:35 -0400
-Message-ID: <5987BE75-EB3E-48CA-8968-92EBC962435C@redhat.com>
-In-Reply-To: <20180403122531.GA30598@infradead.org>
-References: <e82df2bc4db926b051307ba4066d77b616c79b0c.1522337478.git.bcodding@redhat.com>
- <20180403094540.GA2254@infradead.org>
- <DA98114C-755B-4DA2-B188-3C6E27A44E93@redhat.com>
- <20180403122531.GA30598@infradead.org>
+        id S1751223AbeDCOEF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 3 Apr 2018 10:04:05 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id D12544022909
+        for <fstests@vger.kernel.org>; Tue,  3 Apr 2018 14:04:04 +0000 (UTC)
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: [PATCH] generic: test record locks across execve
+Date: Tue,  3 Apr 2018 22:03:45 +0800
+Message-Id: <1522764225-17798-1-git-send-email-xzhou@redhat.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=y
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: fstests@vger.kernel.org, Scott Mayhew <smayhew@redhat.com>, Anna Schumaker <Anna.Schumaker@Netapp.com>, Chuck Lever <chuck.lever@oracle.com>, linux-nfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
+Cc: Xiong Zhou <xzhou@redhat.com>, berrange@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On 3 Apr 2018, at 8:25, Christoph Hellwig wrote:
+According to fcntl(2) man page, record locks are preserved across
+an execve(2). This is a regression case for this.
 
-> On Tue, Apr 03, 2018 at 08:10:36AM -0400, Benjamin Coddington wrote:
->> No, having nlink == 1 is not a bug and we should expect that behavior, the
->> same with the -ESTALE return for a directory.  This is true, at least, for
->> the linux client.
->
-> In terms of Linux semantics is plain and simple is a bug.  It is an
-> expected bug in NFS, but that doesn't make it correct.
+Signed-off-by: Xiong Zhou <xzhou@redhat.com>
+---
 
-Ok yes.  I'd still like to test for it, since it's possible we can get this
-wrong.  Maybe a better approach is to copy this one to an NFS-only test,
-with the expected buggy output, and then everything in generic/ can go back
-to not having any output overrides.
+Thanks Daniel for the report and reproducer!
+Jeff Layton is fixing this in kernel upstream.
 
-That keeps us from setting a precedent that any generic/ tests may be
-papered over, rather than expected to fail for a particular file system.
+ .gitignore            |  1 +
+ src/Makefile          |  2 +-
+ src/t_locks_execve.c  | 86 +++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+ tests/generic/482     | 70 +++++++++++++++++++++++++++++++++++++++++
+ tests/generic/482.out |  2 ++
+ tests/generic/group   |  1 +
+ 6 files changed, 161 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_locks_execve.c
+ create mode 100755 tests/generic/482
+ create mode 100644 tests/generic/482.out
 
-Ben
+diff --git a/.gitignore b/.gitignore
+index 368d11c..192ca35 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -121,6 +121,7 @@
+ /src/t_getcwd
+ /src/t_holes
+ /src/t_immutable
++/src/t_locks_execve
+ /src/t_mmap_cow_race
+ /src/t_mmap_dio
+ /src/t_mmap_fallocate
+diff --git a/src/Makefile b/src/Makefile
+index 0d3feae..6ca5636 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -15,7 +15,7 @@ TARGETS =3D dirstress fill fill2 getpagesize holes lsta=
+t64 \
+ 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+ 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+-	t_ofd_locks
++	t_ofd_locks t_locks_execve
+=20
+ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_r=
+eader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
+new file mode 100644
+index 0000000..a93c6ca
+--- /dev/null
++++ b/src/t_locks_execve.c
+@@ -0,0 +1,86 @@
++#ifndef _GNU_SOURCE
++#define _GNU_SOURCE
++#endif
++#include <stdio.h>
++#include <fcntl.h>
++#include <stdlib.h>
++#include <string.h>
++#include <errno.h>
++#include <pthread.h>
++#include <unistd.h>
++#include <sys/wait.h>
++
++static void err_exit(char *op, int errn)
++{
++	fprintf(stderr, "%s: %s\n", op, strerror(errn));
++	exit(errn);
++}
++
++void *thread_fn(void *arg)
++{
++	/* execve will release threads */
++	while(1) sleep(1);
++	return NULL;
++}
++
++static void checklock(int fd)
++{
++	pid_t child =3D fork();
++	if (child < 0)
++		err_exit("fork", errno);
++	if (child =3D=3D 0) {
++		struct flock fl =3D {
++			.l_type =3D F_WRLCK,
++			.l_whence =3D SEEK_SET,
++			.l_start =3D 0,
++			.l_len =3D 1,
++		};
++
++		if (fcntl(fd, F_GETLK, &fl) < 0)
++			err_exit("getlk", errno);
++
++		if (fl.l_type =3D=3D F_UNLCK)
++			printf("Lock released\n");
++		exit(0);
++	}
++	waitpid(child, NULL, 0);
++}
++
++int main(int argc, char **argv) {
++
++	int fd;
++	/* passing fd in argv[2] in execve */
++	if (argc =3D=3D 3) {
++		fd =3D atoi(argv[2]);
++		checklock(fd);
++		exit(0);
++	}
++
++	fd =3D open(argv[1], O_WRONLY|O_CREAT, 0755);
++	if (fd < 0)
++		err_exit("open", errno);
++	struct flock fl =3D {
++		.l_type =3D F_WRLCK,
++		.l_whence =3D SEEK_SET,
++		.l_start =3D 0,
++		.l_len =3D 1,
++	};
++	if (fcntl(fd, F_SETLK, &fl) < 0)
++		err_exit("setlk", errno);
++
++	pthread_t th;
++	pthread_create(&th, NULL, thread_fn, &fd);
++
++	int flags;
++	if ((flags =3D fcntl(fd, F_GETFD)) < 0)
++		err_exit("getfd", errno);
++	flags &=3D ~FD_CLOEXEC;
++	if (fcntl(fd, F_SETFD, flags) < 0)
++		err_exit("setfd", errno);
++
++	char fdstr[10];
++	snprintf(fdstr, sizeof(fdstr), "%d", fd);
++	char *newargv[] =3D { argv[0], argv[1], fdstr, NULL };
++	execve(argv[0], newargv, NULL);
++	return 0;
++}
+diff --git a/tests/generic/482 b/tests/generic/482
+new file mode 100755
+index 0000000..f7cb251
+--- /dev/null
++++ b/tests/generic/482
+@@ -0,0 +1,70 @@
++#! /bin/bash
++# FS QA Test 482
++#
++# This is testing
++#
++#  "Record locks are not inherited by a child created via fork(2),
++#   but are preserved across an execve(2)."
++#
++# from fcntl(2) man page.
++#
++# Author: "Daniel P. Berrang=C3=A9" <berrange@redhat.com>
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 RedHat Inc.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_test
++
++# prepare a 4k testfile in TEST_DIR
++$XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
++	$TEST_DIR/t_lock_execve_file >> $seqres.full 2>&1
++
++# run test programe
++$here/src/t_locks_execve $TEST_DIR/t_lock_execve_file
++
++# success, all done
++echo "Silence is golden"
++status=3D0
++exit
+diff --git a/tests/generic/482.out b/tests/generic/482.out
+new file mode 100644
+index 0000000..f5e17c8
+--- /dev/null
++++ b/tests/generic/482.out
+@@ -0,0 +1,2 @@
++QA output created by 482
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index e867606..0bf3c1f 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -484,3 +484,4 @@
+ 479 auto quick metadata
+ 480 auto quick metadata
+ 481 auto quick log metadata
++482 auto lock quick
+--=20
+1.8.3.1
+
