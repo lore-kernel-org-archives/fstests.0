@@ -1,55 +1,58 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:37079 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751874AbeDEVWE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 5 Apr 2018 17:22:04 -0400
-Received: by mail-pl0-f67.google.com with SMTP id v5-v6so19086702plo.4
-        for <fstests@vger.kernel.org>; Thu, 05 Apr 2018 14:22:04 -0700 (PDT)
+Received: from mail-pl0-f66.google.com ([209.85.160.66]:41517 "EHLO
+        mail-pl0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752611AbeDEWVF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 5 Apr 2018 18:21:05 -0400
+Received: by mail-pl0-f66.google.com with SMTP id bj1-v6so18850391plb.8
+        for <fstests@vger.kernel.org>; Thu, 05 Apr 2018 15:21:04 -0700 (PDT)
 From: Eric Biggers <ebiggers@google.com>
-Subject: [xfstests-bld PATCH] util/get-config: stop sourcing deprecated config files
-Date: Thu,  5 Apr 2018 14:20:10 -0700
-Message-Id: <20180405212010.132258-1-ebiggers@google.com>
+Subject: [PATCH] common/config: support f2fs-tools v1.9 and later
+Date: Thu,  5 Apr 2018 15:19:01 -0700
+Message-Id: <20180405221901.41861-1-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: fstests@vger.kernel.org
+Cc: linux-f2fs-devel@lists.sourceforge.net, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-Stop sourcing configs from the deprecated locations $KVM_CONFIG or
-kvm-xfstests/config.custom, in preference to the locations in
-~/.config/.  kvm-xfstests and gce-xfstests have been warning when
-sourcing from the deprecated locations for almost a year now, so it's
-unlikely that anyone is using them anymore.
+Pass the -f option to mkfs.f2fs when it appears to support it.  This is
+required by f2fs-tools v1.9 and later in order to format the filesystem
+even when an existing filesystem is detected.  But earlier versions did
+not accept this option.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- kvm-xfstests/util/get-config | 15 ---------------
- 1 file changed, 15 deletions(-)
+ common/config | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/kvm-xfstests/util/get-config b/kvm-xfstests/util/get-config
-index 4baf494..894bf3b 100644
---- a/kvm-xfstests/util/get-config
-+++ b/kvm-xfstests/util/get-config
-@@ -48,21 +48,6 @@ then
- 	rm "$tmpfile"
- 	unset tmpfile
- fi
--
- if test -n "$GCE_ACCOUNT" -a -f "$DIR/config-$GCE_ACCOUNT" ; then
-     . "$DIR/config-$GCE_ACCOUNT"
--elif test -f $DIR/config.custom ; then
--# Else, source kvm-xfstests/config.custom if present (deprecated)
--    echo -e 1>&2 "Warning: use of kvm-xfstests/config.custom is deprecated." \
--	    "Move your settings\n         into ~/.config/kvm-xfstests," \
--	    "~/.config/gce-xfstests,\n         ~/.config/android-xfstests," \
--	    "and/or ~/.config/xfstests-common"
--    . $DIR/config.custom
--fi
--
--# Source $KVM_CONFIG if present (deprecated)
--if test -n "$KVM_CONFIG" -a -f "$KVM_CONFIG"; then
--    echo -e 1>&2 "Warning: use of \$KVM_CONFIG is deprecated." \
--	    "Move your settings into\n         ~/.config/kvm-xfstests"
--    . $KVM_CONFIG
- fi
+diff --git a/common/config b/common/config
+index 20f0e5f3..7c046a78 100644
+--- a/common/config
++++ b/common/config
+@@ -94,10 +94,11 @@ set_prog_path()
+ 	type -P $1
+ }
+ 
+-# Handle mkfs.btrfs which does (or does not) require -f to overwrite
+-set_btrfs_mkfs_prog_path_with_opts()
++# Handle mkfs.$fstyp which does (or does not) require -f to overwrite
++set_mkfs_prog_path_with_opts()
+ {
+-	p=`set_prog_path mkfs.btrfs`
++	local fstyp=$1
++	local p=`set_prog_path mkfs.$fstyp`
+ 	if [ "$p" != "" ] && grep -q 'force overwrite' $p; then
+ 		echo "$p -f"
+ 	else
+@@ -223,8 +224,8 @@ case "$HOSTOS" in
+         export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
+         export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
+         export MKFS_UDF_PROG="`set_prog_path mkudffs`"
+-        export MKFS_BTRFS_PROG="`set_btrfs_mkfs_prog_path_with_opts`"
+-        export MKFS_F2FS_PROG="`set_prog_path mkfs.f2fs`"
++        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
++        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
+         export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
+         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
+         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
 -- 
 2.17.0.484.g0c8726318c-goog
 
