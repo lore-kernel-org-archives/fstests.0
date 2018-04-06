@@ -1,43 +1,31 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:46616 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753510AbeDEWWb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 5 Apr 2018 18:22:31 -0400
-Received: by mail-pl0-f67.google.com with SMTP id 59-v6so18589095plc.13
-        for <fstests@vger.kernel.org>; Thu, 05 Apr 2018 15:22:31 -0700 (PDT)
-From: Eric Biggers <ebiggers@google.com>
-Subject: [xfstests-bld PATCH] test-appliance: support f2fs-tools v1.9 and later
-Date: Thu,  5 Apr 2018 15:21:41 -0700
-Message-Id: <20180405222141.42376-1-ebiggers@google.com>
+Received: from imap.thunk.org ([74.207.234.97]:38222 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751298AbeDFCNW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Apr 2018 22:13:22 -0400
+Date: Thu, 5 Apr 2018 22:13:20 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: [xfstests-bld PATCH] util/parse_cli: use getopt to parse the
+ options
+Message-ID: <20180406021320.GB7345@thunk.org>
+References: <20180405210644.128564-1-ebiggers@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180405210644.128564-1-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Eric Biggers <ebiggers@google.com>
+To: Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Pass the -f option to mkfs.f2fs when it appears to support it.  This is
-required by f2fs-tools v1.9 and later in order to format the filesystem
-even when an existing filesystem is detected.  But earlier versions did
-not accept this option.
+On Thu, Apr 05, 2018 at 02:06:44PM -0700, Eric Biggers wrote:
+> Use getopt to parse the options rather than the custom code that
+> iterates through $@.  This fixes many anomalies, such as long options
+> being accepted in the form '--opt ARG' but not '--opt=ARG'.
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/test-appliance/files/root/fs/f2fs/config | 4 ++++
- 1 file changed, 4 insertions(+)
+getopt is in util-linux, which implies that if there is anyone trying
+to launch gce-xfstests from MacOS, it won't work any more with this
+commit.  I don't *think* this is a problem, and if so a workaround is
+to use Cloud Shell[1], but if this change will break anyone, please
+speak now....
 
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-index 45fb2dd..0efcb76 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-@@ -20,6 +20,10 @@ function format_filesystem()
-     local dev="$1"
-     local opts="$2"
- 
-+    if grep -q 'force overwrite' /sbin/mkfs.f2fs; then
-+	# f2fs-tools v1.9+
-+	opts+=" -f"
-+    fi
-     /sbin/mkfs.f2fs -q $opts "$dev"
-     return $?
- }
--- 
-2.17.0.484.g0c8726318c-goog
-
+						- Ted
