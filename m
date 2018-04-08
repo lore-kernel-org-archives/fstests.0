@@ -1,90 +1,221 @@
-Received: from mail-pl0-f54.google.com ([209.85.160.54]:43379 "EHLO
-        mail-pl0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750891AbeDHIG1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Apr 2018 04:06:27 -0400
-Received: by mail-pl0-f54.google.com with SMTP id a39-v6so3249803pla.10
-        for <fstests@vger.kernel.org>; Sun, 08 Apr 2018 01:06:27 -0700 (PDT)
-Message-ID: <5ac9cd81.caa0620a.d20bb.d992@mx.google.com>
-Date: Sun, 08 Apr 2018 16:06:20 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 4cabd42a78d2
+Received: from mail.kernel.org ([198.145.29.99]:44170 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751402AbeDHIq1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 8 Apr 2018 04:46:27 -0400
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="MPfVkKkpva5o"
-Content-Disposition: inline
+In-Reply-To: <20180408074647.GC2932@desktop>
+References: <20180326225921.10096-1-fdmanana@kernel.org> <20180328115530.15563-1-fdmanana@kernel.org>
+ <20180408074647.GC2932@desktop>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Sun, 8 Apr 2018 09:46:24 +0100
+Message-ID: <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: test btrfs fsync after hole punching with
+ no-holes mode
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Sun, Apr 8, 2018 at 8:46 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Wed, Mar 28, 2018 at 12:55:30PM +0100, fdmanana@kernel.org wrote:
+>> From: Filipe Manana <fdmanana@suse.com>
+>>
+>> Test that when we have the no-holes mode enabled and a specific metadata
+>> layout, if we punch a hole and fsync the file, at replay time the whole
+>> hole was preserved.
+>>
+>> This issue is fixed by the following btrfs patch for the linux kernel:
+>>
+>>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+>>
+>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>> ---
+>>
+>> V2: Made the test work when selinux is enabled, and made it use direct IO
+>>     writes to ensure 256K extents.
+>
+> Test fails with selinux enabled now on unpatched kernel. But I found
+> that, in my release testing, test still fails when testing with current
+> Linus tree (HEAD is 642e7fd23353, without selinux this time), which
+> should contain the mentioned fix. Does that mean the bug is not fully
+> fixed?
 
---MPfVkKkpva5o
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+The bug is fully fixed. But HEAD 642e7fd23353 does not contain the
+fix. The current  linus' master has it.
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update mainly pulls in the new log-writes test
-from Qu Wenruo, which checks for fs consistency after each FUA write using
-dm-logwrites. Please note that the new test (generic/482) fails on XFS and ext4
-sometimes, not sure if it's a filesystem issue or a dm-logwrites issue yet.
-
-New failures I've noticed in this update
-- generic/482 sometimes fails on XFS and ext4, please see above 
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-4cabd42a78d2 generic: Check the fs after each FUA writes
-
-New commits:
-
-Benjamin Coddington (1):
-      [43374a62325e] common/rc: improve checks for YP/NIS
-
-Qu Wenruo (3):
-      [00b6ad8f265e] log-writes: Add support to output human readable flags
-      [5311ba16c6e8] log-writes: Add support for METADATA flag
-      [4cabd42a78d2] generic: Check the fs after each FUA writes
-
-
-Code Diffstat:
-
- common/dmlogwrites          |  56 +++++++++++++++++++++++
- common/rc                   |   3 +-
- src/log-writes/log-writes.c |  71 ++++++++++++++++++++++++++---
- src/log-writes/log-writes.h |   9 ++--
- tests/generic/482           | 108 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/482.out       |   2 +
- tests/generic/group         |   1 +
- 7 files changed, 238 insertions(+), 12 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---MPfVkKkpva5o
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJaycuNAAoJECZSqilcj+djywUP/RPrH21spUWkcLS9jO5m7G/T
-baCx6FI9OH9tUqu7evoQ+W/ssF9Xiwz8K82dd42p8SnOWFfkRuulGGaCICabO/Lz
-U3shLusbEN2KLA8o8wVyF2ledOsMap4O+3Iw0gPw/11ojKxBerTZWM/4LDmCgbRH
-91zzM+dOdqxeG3Mhb/xGIjvukVmY4thZe+x1jsc/nNGmge/DgHZ/ZcjCO9PAV5TH
-V2lG6jiBevXDRDqPYYB/GGOVAblnB9HuItLt/yIgGBYT0lOE4RtpEnci9/e4KHYx
-uvVrFd2wTSozycszvtHwix/Bx8eATB74B3OL5EpCGFy+c/ErskHoapGT8xqLur7V
-LBu/VbD5LKk6kHBWreQBm019bQhmYuw1RU0yfGfJV3jinU6+SGWh2gxCcYbWJ3SJ
-Q8qhx92vXbBDpiHOcDAAWIJaS+AcIfWd40foZIlEGRP0+ZqzNFO2HXdhCblToR01
-rWCsZ+Ko7xz3HJiOUe0eQ9HAWzoOZehdyTM7YUhQD6T/qhSItq8rbcE9PKI5ZvGf
-ZaCCEEgWowFiXnYTux2suZUcHRvQU+oxii6UAoGAppDRRgF0dkWz1NjFG+scBtl0
-yBTecVKghAkJTIr6IONLDXcbSvOPkPlMPfU/VGpQDZ1v9uybZqj0y+NqjzKiFZpa
-7j+oi0Vy6a7Yj1I1KFRq
-=9MlA
------END PGP SIGNATURE-----
-
---MPfVkKkpva5o--
+>
+> --- tests/btrfs/159.out 2018-04-03 18:25:41.566105514 -0700
+> +++ /root/xfstests/results//btrfs/159.out.bad   2018-04-08 00:28:26.921968949 -0700
+> @@ -6,4 +6,4 @@
+>  File digest before power failure:
+>  c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+>  File digest after power failure and log replay:
+> -c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+> +c84746bbd1b97420f076d417a6a7d81c  SCRATCH_MNT/foobar
+>
+> I'll drop this patch for now.
+>
+> Thanks,
+> Eryu
+>
+>>
+>>  tests/btrfs/159     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/btrfs/159.out |   9 ++++
+>>  tests/btrfs/group   |   1 +
+>>  3 files changed, 125 insertions(+)
+>>  create mode 100755 tests/btrfs/159
+>>  create mode 100644 tests/btrfs/159.out
+>>
+>> diff --git a/tests/btrfs/159 b/tests/btrfs/159
+>> new file mode 100755
+>> index 00000000..eb667692
+>> --- /dev/null
+>> +++ b/tests/btrfs/159
+>> @@ -0,0 +1,115 @@
+>> +#! /bin/bash
+>> +# FSQA Test No. 159
+>> +#
+>> +# Test that when we have the no-holes mode enabled and a specific metadata
+>> +# layout, if we punch a hole and fsync the file, at replay time the whole
+>> +# hole was preserved.
+>> +#
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
+>> +# Author: Filipe Manana <fdmanana@suse.com>
+>> +#
+>> +# This program is free software; you can redistribute it and/or
+>> +# modify it under the terms of the GNU General Public License as
+>> +# published by the Free Software Foundation.
+>> +#
+>> +# This program is distributed in the hope that it would be useful,
+>> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+>> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+>> +# GNU General Public License for more details.
+>> +#
+>> +# You should have received a copy of the GNU General Public License
+>> +# along with this program; if not, write the Free Software Foundation,
+>> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+>> +#-----------------------------------------------------------------------
+>> +#
+>> +
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +tmp=/tmp/$$
+>> +status=1     # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +     _cleanup_flakey
+>> +     cd /
+>> +     rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +. ./common/dmflakey
+>> +
+>> +# real QA test starts here
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_dm_target flakey
+>> +_require_xfs_io_command "fpunch"
+>> +_require_odirect
+>> +
+>> +rm -f $seqres.full
+>> +
+>> +run_test()
+>> +{
+>> +     local punch_offset=$1
+>> +
+>> +     # We create the filesystem with a node size of 64Kb because we need to
+>> +     # create a specific metadata layout in order to trigger the bug we are
+>> +     # testing. At the moment the node size can not be smaller then the
+>> +     # system's page size, so given that the largest possible page size is
+>> +     # 64Kb and by default the node size is set to the system's page size
+>> +     # value, we explicitly create a filesystem with a 64Kb node size.
+>> +     _scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
+>> +     _require_metadata_journaling $SCRATCH_DEV
+>> +     _init_flakey
+>> +     _mount_flakey
+>> +
+>> +     # Create our test file with 832 extents of 256Kb each. Before each
+>> +     # extent, there is a 256Kb hole (except for the first extent, which
+>> +     # starts at offset 0). This creates two leafs in the filesystem tree.
+>> +     # We use direct IO to ensure we get exactly 256K extents (with buffered
+>> +     # IO we can get writeback triggered at any time and therefore get
+>> +     # extents smaller than 256K).
+>> +     for ((i = 0; i <= 831; i++)); do
+>> +             local offset=$((i * 2 * 256 * 1024))
+>> +             $XFS_IO_PROG -f -d -c "pwrite -S 0xab -b 256K $offset 256K" \
+>> +                     $SCRATCH_MNT/foobar >/dev/null
+>> +     done
+>> +
+>> +     # Make sure everything done so far is durably persisted.
+>> +     sync
+>> +
+>> +     # Now punch a hole that covers part of the extent at offset
+>> +     # "$punch_offset".
+>> +     # We want to punch a hole that starts in the middle of the last extent
+>> +     # item in the first leaf. On a system without selinux enabled that is
+>> +     # the extent that starts at offset 216530944, while on a system with it
+>> +     # enabled it is the extent that starts at offset 216006656 (because
+>> +     # selinux causes a xattr item to be added to our test file).
+>> +     $XFS_IO_PROG -c "fpunch $((punch_offset + 128 * 1024 - 4000)) 256K" \
+>> +                  -c "fsync" \
+>> +                  $SCRATCH_MNT/foobar
+>> +
+>> +     echo "File digest before power failure:"
+>> +     md5sum $SCRATCH_MNT/foobar | _filter_scratch
+>> +     # Simulate a power failure and mount the filesystem to check that
+>> +     # replaying the fsync log/journal succeeds and our test file has the
+>> +     # expected content.
+>> +     _flakey_drop_and_remount
+>> +     echo "File digest after power failure and log replay:"
+>> +     md5sum $SCRATCH_MNT/foobar | _filter_scratch
+>> +
+>> +     _unmount_flakey
+>> +     _cleanup_flakey
+>> +}
+>> +
+>> +run_test 216006656
+>> +run_test 216530944
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+>> new file mode 100644
+>> index 00000000..a4be9182
+>> --- /dev/null
+>> +++ b/tests/btrfs/159.out
+>> @@ -0,0 +1,9 @@
+>> +QA output created by 159
+>> +File digest before power failure:
+>> +f049865ed45b1991dc9a299b47d51dbf  SCRATCH_MNT/foobar
+>> +File digest after power failure and log replay:
+>> +f049865ed45b1991dc9a299b47d51dbf  SCRATCH_MNT/foobar
+>> +File digest before power failure:
+>> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+>> +File digest after power failure and log replay:
+>> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index 8007e07e..ba766f6b 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -161,3 +161,4 @@
+>>  156 auto quick trim
+>>  157 auto quick raid
+>>  158 auto quick raid scrub
+>> +159 auto quick
+>> --
+>> 2.11.0
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
