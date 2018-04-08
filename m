@@ -1,84 +1,95 @@
-Received: from mail.kernel.org ([198.145.29.99]:44170 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:44408 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751402AbeDHIq1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 8 Apr 2018 04:46:27 -0400
+        id S1751783AbeDHIxj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 8 Apr 2018 04:53:39 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180408074647.GC2932@desktop>
-References: <20180326225921.10096-1-fdmanana@kernel.org> <20180328115530.15563-1-fdmanana@kernel.org>
- <20180408074647.GC2932@desktop>
+In-Reply-To: <20180408020754.GA2932@desktop>
+References: <20180405215614.611-1-fdmanana@kernel.org> <20180408020754.GA2932@desktop>
 From: Filipe Manana <fdmanana@kernel.org>
-Date: Sun, 8 Apr 2018 09:46:24 +0100
-Message-ID: <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
-Subject: Re: [PATCH v2] fstests: test btrfs fsync after hole punching with
- no-holes mode
+Date: Sun, 8 Apr 2018 09:53:37 +0100
+Message-ID: <CAL3q7H771MPDma10zG8tDktNXcme3pnFd7zTyLDctE+4BnE7kQ@mail.gmail.com>
+Subject: Re: [PATCH] fstests: generic test for fsync after fallocate
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 8, 2018 at 8:46 AM, Eryu Guan <guaneryu@gmail.com> wrote:
-> On Wed, Mar 28, 2018 at 12:55:30PM +0100, fdmanana@kernel.org wrote:
+On Sun, Apr 8, 2018 at 3:07 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Thu, Apr 05, 2018 at 10:56:14PM +0100, fdmanana@kernel.org wrote:
 >> From: Filipe Manana <fdmanana@suse.com>
 >>
->> Test that when we have the no-holes mode enabled and a specific metadata
->> layout, if we punch a hole and fsync the file, at replay time the whole
->> hole was preserved.
+>> Test that fsync operations preserve extents allocated with fallocate(2)
+>> that are placed beyond a file's size.
 >>
->> This issue is fixed by the following btrfs patch for the linux kernel:
+>> This test is motivated by a bug found in btrfs where unwritten extents
+>> beyond the inode's i_size were not preserved after a fsync and power
+>> failure. The btrfs bug is fixed by the following patch for the linux
+>> kernel:
 >>
->>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+>>  "Btrfs: fix loss of prealloc extents past i_size after fsync log replay"
 >>
 >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->> ---
->>
->> V2: Made the test work when selinux is enabled, and made it use direct IO
->>     writes to ensure 256K extents.
 >
-> Test fails with selinux enabled now on unpatched kernel. But I found
-> that, in my release testing, test still fails when testing with current
-> Linus tree (HEAD is 642e7fd23353, without selinux this time), which
-> should contain the mentioned fix. Does that mean the bug is not fully
-> fixed?
+> Hmm, xfs fails this test, while ext4 passes.
+>
+> # diff -u tests/generic/483.out /root/workspace/xfstests/results//xfs_4k_crc/generic/483.out.bad
+> --- tests/generic/483.out       2018-04-07 23:35:00.555555511 +0800
+> +++ /root/workspace/xfstests/results//xfs_4k_crc/generic/483.out.bad    2018-04-07 23:39:48.780659707 +0800
+> @@ -6,5 +6,5 @@
+>  0: [0..511]: data
+>  1: [512..2559]: unwritten
+>  File baz fiemap:
+> -0: [0..511]: data
+> -1: [512..6143]: unwritten
+> +0: [0..895]: data
+> +1: [896..6143]: unwritten
+>
+> I'm not sure what the problem is yet, but IMHO controlling on-disk
+> layout of a file from userspace is hard and should be avoided if
+> possible.
 
-The bug is fully fixed. But HEAD 642e7fd23353 does not contain the
-fix. The current  linus' master has it.
+Well, both ext4 and f2fs give the same result, which makes sense, if
+userspace has only written to the first 256K of the file, only blocks
+0..511 should be reported as written.
+However xfs decides to report more than that was written (448K), seems
+like a bug to me.
+The goal of fallocate(), specifically here, is precisely to create
+unwritten extents beyond eof.
 
 >
-> --- tests/btrfs/159.out 2018-04-03 18:25:41.566105514 -0700
-> +++ /root/xfstests/results//btrfs/159.out.bad   2018-04-08 00:28:26.921968949 -0700
-> @@ -6,4 +6,4 @@
->  File digest before power failure:
->  c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
->  File digest after power failure and log replay:
-> -c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
-> +c84746bbd1b97420f076d417a6a7d81c  SCRATCH_MNT/foobar
->
-> I'll drop this patch for now.
+> Why not dumping md5sum to .out file like other dmflakey tests? I've
+> checked the md5sum of all the three test files, and they're the same on
+> xfs as on ext4, so the files are not corrupted on xfs.
+
+Nop, that won't work. Because userspace can't read extents beyond eof.
+That would make unpatched btrfs succeed the test (or any fs with
+similar bug persisting prealloc extents beyond eof).
+Without fiemap, how can one check that unwritten extents beyond eof exist?
+
 >
 > Thanks,
 > Eryu
 >
+>> ---
+>>  tests/generic/482     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/482.out |  10 +++++
+>>  tests/generic/group   |   1 +
+>>  3 files changed, 129 insertions(+)
+>>  create mode 100755 tests/generic/482
+>>  create mode 100644 tests/generic/482.out
 >>
->>  tests/btrfs/159     | 115 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/btrfs/159.out |   9 ++++
->>  tests/btrfs/group   |   1 +
->>  3 files changed, 125 insertions(+)
->>  create mode 100755 tests/btrfs/159
->>  create mode 100644 tests/btrfs/159.out
->>
->> diff --git a/tests/btrfs/159 b/tests/btrfs/159
+>> diff --git a/tests/generic/482 b/tests/generic/482
 >> new file mode 100755
->> index 00000000..eb667692
+>> index 00000000..43bbc913
 >> --- /dev/null
->> +++ b/tests/btrfs/159
->> @@ -0,0 +1,115 @@
+>> +++ b/tests/generic/482
+>> @@ -0,0 +1,118 @@
 >> +#! /bin/bash
->> +# FSQA Test No. 159
+>> +# FSQA Test No. 482
 >> +#
->> +# Test that when we have the no-holes mode enabled and a specific metadata
->> +# layout, if we punch a hole and fsync the file, at replay time the whole
->> +# hole was preserved.
+>> +# Test that fsync operations preserve extents allocated with fallocate(2) that
+>> +# are placed beyond a file's size.
 >> +#
 >> +#-----------------------------------------------------------------------
 >> +#
@@ -118,100 +129,105 @@ fix. The current  linus' master has it.
 >> +. ./common/rc
 >> +. ./common/filter
 >> +. ./common/dmflakey
+>> +. ./common/punch
 >> +
 >> +# real QA test starts here
->> +_supported_fs btrfs
+>> +_supported_fs generic
 >> +_supported_os Linux
 >> +_require_scratch
 >> +_require_dm_target flakey
->> +_require_xfs_io_command "fpunch"
->> +_require_odirect
+>> +_require_xfs_io_command "falloc" "-k"
+>> +_require_xfs_io_command "fiemap"
 >> +
 >> +rm -f $seqres.full
 >> +
->> +run_test()
->> +{
->> +     local punch_offset=$1
+>> +_scratch_mkfs >>$seqres.full 2>&1
+>> +_require_metadata_journaling $SCRATCH_DEV
+>> +_init_flakey
+>> +_mount_flakey
 >> +
->> +     # We create the filesystem with a node size of 64Kb because we need to
->> +     # create a specific metadata layout in order to trigger the bug we are
->> +     # testing. At the moment the node size can not be smaller then the
->> +     # system's page size, so given that the largest possible page size is
->> +     # 64Kb and by default the node size is set to the system's page size
->> +     # value, we explicitly create a filesystem with a 64Kb node size.
->> +     _scratch_mkfs -O no-holes -n $((64 * 1024)) >>$seqres.full 2>&1
->> +     _require_metadata_journaling $SCRATCH_DEV
->> +     _init_flakey
->> +     _mount_flakey
+>> +# Create our test files.
+>> +$XFS_IO_PROG -f -c "pwrite -S 0xea 0 256K" $SCRATCH_MNT/foo >/dev/null
 >> +
->> +     # Create our test file with 832 extents of 256Kb each. Before each
->> +     # extent, there is a 256Kb hole (except for the first extent, which
->> +     # starts at offset 0). This creates two leafs in the filesystem tree.
->> +     # We use direct IO to ensure we get exactly 256K extents (with buffered
->> +     # IO we can get writeback triggered at any time and therefore get
->> +     # extents smaller than 256K).
->> +     for ((i = 0; i <= 831; i++)); do
->> +             local offset=$((i * 2 * 256 * 1024))
->> +             $XFS_IO_PROG -f -d -c "pwrite -S 0xab -b 256K $offset 256K" \
->> +                     $SCRATCH_MNT/foobar >/dev/null
->> +     done
+>> +# Create a file with many extents. We later want to shrink truncate it and
+>> +# add a prealloc extent beyond its new size.
+>> +for ((i = 1; i <= 500; i++)); do
+>> +     offset=$(((i - 1) * 4 * 1024))
+>> +     $XFS_IO_PROG -f -s -c "pwrite -S 0xcf $offset 4K" \
+>> +             $SCRATCH_MNT/bar >/dev/null
+>> +done
 >> +
->> +     # Make sure everything done so far is durably persisted.
->> +     sync
+>> +# A file which already has a prealloc extent beyond its size.
+>> +# The fsync done on it is motivated by differences in the btrfs implementation
+>> +# of fsync (first fsync has different logic from subsequent fsyncs).
+>> +$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 256K" \
+>> +          -c "falloc -k 256K 768K" \
+>> +          -c "fsync" \
+>> +          $SCRATCH_MNT/baz >/dev/null
 >> +
->> +     # Now punch a hole that covers part of the extent at offset
->> +     # "$punch_offset".
->> +     # We want to punch a hole that starts in the middle of the last extent
->> +     # item in the first leaf. On a system without selinux enabled that is
->> +     # the extent that starts at offset 216530944, while on a system with it
->> +     # enabled it is the extent that starts at offset 216006656 (because
->> +     # selinux causes a xattr item to be added to our test file).
->> +     $XFS_IO_PROG -c "fpunch $((punch_offset + 128 * 1024 - 4000)) 256K" \
->> +                  -c "fsync" \
->> +                  $SCRATCH_MNT/foobar
+>> +# Make sure everything done so far is durably persisted.
+>> +sync
 >> +
->> +     echo "File digest before power failure:"
->> +     md5sum $SCRATCH_MNT/foobar | _filter_scratch
->> +     # Simulate a power failure and mount the filesystem to check that
->> +     # replaying the fsync log/journal succeeds and our test file has the
->> +     # expected content.
->> +     _flakey_drop_and_remount
->> +     echo "File digest after power failure and log replay:"
->> +     md5sum $SCRATCH_MNT/foobar | _filter_scratch
+>> +# Allocate an extent beyond the size of the first test file and fsync it.
+>> +$XFS_IO_PROG -c "falloc -k 256K 1M"\
+>> +          -c "fsync" \
+>> +          $SCRATCH_MNT/foo
 >> +
->> +     _unmount_flakey
->> +     _cleanup_flakey
->> +}
+>> +# Do a shrinking truncate of our test file, add a prealloc extent to it after
+>> +# its new size and fsync it.
+>> +$XFS_IO_PROG -c "truncate 256K" \
+>> +          -c "falloc -k 256K 1M"\
+>> +          -c "fsync" \
+>> +          $SCRATCH_MNT/bar
 >> +
->> +run_test 216006656
->> +run_test 216530944
+>> +# Allocate another extent beyond the size of file baz.
+>> +$XFS_IO_PROG -c "falloc -k 1M 2M"\
+>> +          -c "fsync" \
+>> +          $SCRATCH_MNT/baz
+>> +
+>> +# Simulate a power failure and mount the filesystem to check that the extents
+>> +# previously allocated were not lost.
+>> +_flakey_drop_and_remount
+>> +
+>> +echo "File foo fiemap:"
+>> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap
+>> +
+>> +echo "File bar fiemap:"
+>> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/bar | _filter_fiemap
+>> +
+>> +echo "File baz fiemap:"
+>> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/baz | _filter_fiemap
+>> +
+>> +_unmount_flakey
+>> +_cleanup_flakey
 >> +
 >> +status=0
 >> +exit
->> diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+>> diff --git a/tests/generic/482.out b/tests/generic/482.out
 >> new file mode 100644
->> index 00000000..a4be9182
+>> index 00000000..7e3ed139
 >> --- /dev/null
->> +++ b/tests/btrfs/159.out
->> @@ -0,0 +1,9 @@
->> +QA output created by 159
->> +File digest before power failure:
->> +f049865ed45b1991dc9a299b47d51dbf  SCRATCH_MNT/foobar
->> +File digest after power failure and log replay:
->> +f049865ed45b1991dc9a299b47d51dbf  SCRATCH_MNT/foobar
->> +File digest before power failure:
->> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
->> +File digest after power failure and log replay:
->> +c5c0a13588a639529c979c57c336f441  SCRATCH_MNT/foobar
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 8007e07e..ba766f6b 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -161,3 +161,4 @@
->>  156 auto quick trim
->>  157 auto quick raid
->>  158 auto quick raid scrub
->> +159 auto quick
+>> +++ b/tests/generic/482.out
+>> @@ -0,0 +1,10 @@
+>> +QA output created by 482
+>> +File foo fiemap:
+>> +0: [0..511]: data
+>> +1: [512..2559]: unwritten
+>> +File bar fiemap:
+>> +0: [0..511]: data
+>> +1: [512..2559]: unwritten
+>> +File baz fiemap:
+>> +0: [0..511]: data
+>> +1: [512..6143]: unwritten
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index e8676062..58ac1f00 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -484,3 +484,4 @@
+>>  479 auto quick metadata
+>>  480 auto quick metadata
+>>  481 auto quick log metadata
+>> +482 auto quick log metadata
 >> --
 >> 2.11.0
 >>
