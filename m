@@ -1,204 +1,53 @@
-Received: from mail.kernel.org ([198.145.29.99]:35828 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750759AbeDIM3z (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 9 Apr 2018 08:29:55 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v2] fstests: generic test for fsync after fallocate
-Date: Fri,  6 Apr 2018 14:59:15 +0100
-Message-Id: <20180406135915.17619-1-fdmanana@kernel.org>
-In-Reply-To: <20180405215614.611-1-fdmanana@kernel.org>
-References: <20180405215614.611-1-fdmanana@kernel.org>
+Received: from mail-pl0-f67.google.com ([209.85.160.67]:39075 "EHLO
+        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750982AbeDINGD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Apr 2018 09:06:03 -0400
+Date: Mon, 9 Apr 2018 21:05:55 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] fstests: test btrfs fsync after hole punching with
+ no-holes mode
+Message-ID: <20180409130555.GD2932@desktop>
+References: <20180326225921.10096-1-fdmanana@kernel.org>
+ <20180328115530.15563-1-fdmanana@kernel.org>
+ <20180408074647.GC2932@desktop>
+ <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Sun, Apr 08, 2018 at 09:46:24AM +0100, Filipe Manana wrote:
+> On Sun, Apr 8, 2018 at 8:46 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+> > On Wed, Mar 28, 2018 at 12:55:30PM +0100, fdmanana@kernel.org wrote:
+> >> From: Filipe Manana <fdmanana@suse.com>
+> >>
+> >> Test that when we have the no-holes mode enabled and a specific metadata
+> >> layout, if we punch a hole and fsync the file, at replay time the whole
+> >> hole was preserved.
+> >>
+> >> This issue is fixed by the following btrfs patch for the linux kernel:
+> >>
+> >>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+> >>
+> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> >> ---
+> >>
+> >> V2: Made the test work when selinux is enabled, and made it use direct IO
+> >>     writes to ensure 256K extents.
+> >
+> > Test fails with selinux enabled now on unpatched kernel. But I found
+> > that, in my release testing, test still fails when testing with current
+> > Linus tree (HEAD is 642e7fd23353, without selinux this time), which
+> > should contain the mentioned fix. Does that mean the bug is not fully
+> > fixed?
+> 
+> The bug is fully fixed. But HEAD 642e7fd23353 does not contain the
+> fix. The current  linus' master has it.
 
-Test that fsync operations preserve extents allocated with fallocate(2)
-that are placed beyond a file's size.
+I'll double check.. Thanks for the heads-up!
 
-This test is motivated by a bug found in btrfs where unwritten extents
-beyond the inode's i_size were not preserved after a fsync and power
-failure. The btrfs bug is fixed by the following patch for the linux
-kernel:
-
- "Btrfs: fix loss of prealloc extents past i_size after fsync log replay"
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: Use different fiemap filter to not relly on written vs unwritten
-    differences in extents beyond eof, since has xfs a specific but
-    valid behaviour. Also check file sizes after the power failure
-    since the new fiemap filter now merges written and unwritten
-    extents.
-
- tests/generic/482     | 124 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/482.out |  13 ++++++
- tests/generic/group   |   1 +
- 3 files changed, 138 insertions(+)
- create mode 100755 tests/generic/482
- create mode 100644 tests/generic/482.out
-
-diff --git a/tests/generic/482 b/tests/generic/482
-new file mode 100755
-index 00000000..a1947693
---- /dev/null
-+++ b/tests/generic/482
-@@ -0,0 +1,124 @@
-+#! /bin/bash
-+# FSQA Test No. 482
-+#
-+# Test that fsync operations preserve extents allocated with fallocate(2) that
-+# are placed beyond a file's size.
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+. ./common/punch
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_xfs_io_command "falloc" "-k"
-+_require_xfs_io_command "fiemap"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create our test files.
-+$XFS_IO_PROG -f -c "pwrite -S 0xea 0 256K" $SCRATCH_MNT/foo >/dev/null
-+
-+# Create a file with many extents. We later want to shrink truncate it and
-+# add a prealloc extent beyond its new size.
-+for ((i = 1; i <= 500; i++)); do
-+	offset=$(((i - 1) * 4 * 1024))
-+	$XFS_IO_PROG -f -s -c "pwrite -S 0xcf $offset 4K" \
-+		$SCRATCH_MNT/bar >/dev/null
-+done
-+
-+# A file which already has a prealloc extent beyond its size.
-+# The fsync done on it is motivated by differences in the btrfs implementation
-+# of fsync (first fsync has different logic from subsequent fsyncs).
-+$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 256K" \
-+	     -c "falloc -k 256K 768K" \
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/baz >/dev/null
-+
-+# Make sure everything done so far is durably persisted.
-+sync
-+
-+# Allocate an extent beyond the size of the first test file and fsync it.
-+$XFS_IO_PROG -c "falloc -k 256K 1M"\
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/foo
-+
-+# Do a shrinking truncate of our test file, add a prealloc extent to it after
-+# its new size and fsync it.
-+$XFS_IO_PROG -c "truncate 256K" \
-+	     -c "falloc -k 256K 1M"\
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/bar
-+
-+# Allocate another extent beyond the size of file baz.
-+$XFS_IO_PROG -c "falloc -k 1M 2M"\
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/baz
-+
-+# Simulate a power failure and mount the filesystem to check that the extents
-+# previously allocated were not lost and the file sizes are correct.
-+_flakey_drop_and_remount
-+
-+echo "File foo fiemap:"
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_hole_fiemap
-+echo "File foo size:"
-+stat --format %s $SCRATCH_MNT/foo
-+
-+echo "File bar fiemap:"
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/bar | _filter_hole_fiemap
-+echo "File bar size:"
-+stat --format %s $SCRATCH_MNT/bar
-+
-+echo "File baz fiemap:"
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/baz | _filter_hole_fiemap
-+echo "File baz size:"
-+stat --format %s $SCRATCH_MNT/baz
-+
-+_unmount_flakey
-+_cleanup_flakey
-+
-+status=0
-+exit
-diff --git a/tests/generic/482.out b/tests/generic/482.out
-new file mode 100644
-index 00000000..4848894f
---- /dev/null
-+++ b/tests/generic/482.out
-@@ -0,0 +1,13 @@
-+QA output created by 482
-+File foo fiemap:
-+0: [0..2559]: extent
-+File foo size:
-+262144
-+File bar fiemap:
-+0: [0..2559]: extent
-+File bar size:
-+262144
-+File baz fiemap:
-+0: [0..6143]: extent
-+File baz size:
-+262144
-diff --git a/tests/generic/group b/tests/generic/group
-index e8676062..58ac1f00 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -484,3 +484,4 @@
- 479 auto quick metadata
- 480 auto quick metadata
- 481 auto quick log metadata
-+482 auto quick log metadata
--- 
-2.11.0
-
+Eryu
