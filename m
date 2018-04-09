@@ -1,237 +1,90 @@
-Received: from mail.kernel.org ([198.145.29.99]:44408 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751783AbeDHIxj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 8 Apr 2018 04:53:39 -0400
+Received: from szxga06-in.huawei.com ([45.249.212.32]:54773 "EHLO huawei.com"
+        rhost-flags-OK-FAIL-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1755945AbeDICdq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 8 Apr 2018 22:33:46 -0400
+Subject: Re: [PATCH] common/config: support f2fs-tools v1.9 and later
+References: <20180405221901.41861-1-ebiggers@google.com>
+ <20180407152952.GP30836@localhost.localdomain>
+From: Chao Yu <yuchao0@huawei.com>
+Message-ID: <21e04a3c-9099-609f-9581-a50465ec4c50@huawei.com>
+Date: Mon, 9 Apr 2018 10:33:40 +0800
 MIME-Version: 1.0
-In-Reply-To: <20180408020754.GA2932@desktop>
-References: <20180405215614.611-1-fdmanana@kernel.org> <20180408020754.GA2932@desktop>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sun, 8 Apr 2018 09:53:37 +0100
-Message-ID: <CAL3q7H771MPDma10zG8tDktNXcme3pnFd7zTyLDctE+4BnE7kQ@mail.gmail.com>
-Subject: Re: [PATCH] fstests: generic test for fsync after fallocate
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20180407152952.GP30836@localhost.localdomain>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <guaneryu@gmail.com>, Eric Biggers <ebiggers@google.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 8, 2018 at 3:07 AM, Eryu Guan <guaneryu@gmail.com> wrote:
-> On Thu, Apr 05, 2018 at 10:56:14PM +0100, fdmanana@kernel.org wrote:
->> From: Filipe Manana <fdmanana@suse.com>
+On 2018/4/7 23:29, Eryu Guan wrote:
+> On Thu, Apr 05, 2018 at 03:19:01PM -0700, Eric Biggers wrote:
+>> Pass the -f option to mkfs.f2fs when it appears to support it.  This is
+>> required by f2fs-tools v1.9 and later in order to format the filesystem
+>> even when an existing filesystem is detected.  But earlier versions did
+>> not accept this option.
 >>
->> Test that fsync operations preserve extents allocated with fallocate(2)
->> that are placed beyond a file's size.
+>> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> 
+> Looks fine to me, but I'd like an ACK from f2fs developers.
+
+Acked-by: Chao Yu <yuchao0@huawei.com>
+
+Thanks,
+
+> 
+>> ---
+>>  common/config | 11 ++++++-----
+>>  1 file changed, 6 insertions(+), 5 deletions(-)
 >>
->> This test is motivated by a bug found in btrfs where unwritten extents
->> beyond the inode's i_size were not preserved after a fsync and power
->> failure. The btrfs bug is fixed by the following patch for the linux
->> kernel:
->>
->>  "Btrfs: fix loss of prealloc extents past i_size after fsync log replay"
->>
->> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->
-> Hmm, xfs fails this test, while ext4 passes.
->
-> # diff -u tests/generic/483.out /root/workspace/xfstests/results//xfs_4k_crc/generic/483.out.bad
-> --- tests/generic/483.out       2018-04-07 23:35:00.555555511 +0800
-> +++ /root/workspace/xfstests/results//xfs_4k_crc/generic/483.out.bad    2018-04-07 23:39:48.780659707 +0800
-> @@ -6,5 +6,5 @@
->  0: [0..511]: data
->  1: [512..2559]: unwritten
->  File baz fiemap:
-> -0: [0..511]: data
-> -1: [512..6143]: unwritten
-> +0: [0..895]: data
-> +1: [896..6143]: unwritten
->
-> I'm not sure what the problem is yet, but IMHO controlling on-disk
-> layout of a file from userspace is hard and should be avoided if
-> possible.
-
-Well, both ext4 and f2fs give the same result, which makes sense, if
-userspace has only written to the first 256K of the file, only blocks
-0..511 should be reported as written.
-However xfs decides to report more than that was written (448K), seems
-like a bug to me.
-The goal of fallocate(), specifically here, is precisely to create
-unwritten extents beyond eof.
-
->
-> Why not dumping md5sum to .out file like other dmflakey tests? I've
-> checked the md5sum of all the three test files, and they're the same on
-> xfs as on ext4, so the files are not corrupted on xfs.
-
-Nop, that won't work. Because userspace can't read extents beyond eof.
-That would make unpatched btrfs succeed the test (or any fs with
-similar bug persisting prealloc extents beyond eof).
-Without fiemap, how can one check that unwritten extents beyond eof exist?
-
->
+>> diff --git a/common/config b/common/config
+>> index 20f0e5f3..7c046a78 100644
+>> --- a/common/config
+>> +++ b/common/config
+>> @@ -94,10 +94,11 @@ set_prog_path()
+>>  	type -P $1
+>>  }
+>>  
+>> -# Handle mkfs.btrfs which does (or does not) require -f to overwrite
+>> -set_btrfs_mkfs_prog_path_with_opts()
+>> +# Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+>> +set_mkfs_prog_path_with_opts()
+>>  {
+>> -	p=`set_prog_path mkfs.btrfs`
+>> +	local fstyp=$1
+>> +	local p=`set_prog_path mkfs.$fstyp`
+>>  	if [ "$p" != "" ] && grep -q 'force overwrite' $p; then
+> 
+> Also grep the "$p -h" output instead of the binary file?
+> 
 > Thanks,
 > Eryu
->
->> ---
->>  tests/generic/482     | 118 ++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/generic/482.out |  10 +++++
->>  tests/generic/group   |   1 +
->>  3 files changed, 129 insertions(+)
->>  create mode 100755 tests/generic/482
->>  create mode 100644 tests/generic/482.out
->>
->> diff --git a/tests/generic/482 b/tests/generic/482
->> new file mode 100755
->> index 00000000..43bbc913
->> --- /dev/null
->> +++ b/tests/generic/482
->> @@ -0,0 +1,118 @@
->> +#! /bin/bash
->> +# FSQA Test No. 482
->> +#
->> +# Test that fsync operations preserve extents allocated with fallocate(2) that
->> +# are placed beyond a file's size.
->> +#
->> +#-----------------------------------------------------------------------
->> +#
->> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
->> +# Author: Filipe Manana <fdmanana@suse.com>
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#-----------------------------------------------------------------------
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +tmp=/tmp/$$
->> +status=1     # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +     _cleanup_flakey
->> +     cd /
->> +     rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +. ./common/dmflakey
->> +. ./common/punch
->> +
->> +# real QA test starts here
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_scratch
->> +_require_dm_target flakey
->> +_require_xfs_io_command "falloc" "-k"
->> +_require_xfs_io_command "fiemap"
->> +
->> +rm -f $seqres.full
->> +
->> +_scratch_mkfs >>$seqres.full 2>&1
->> +_require_metadata_journaling $SCRATCH_DEV
->> +_init_flakey
->> +_mount_flakey
->> +
->> +# Create our test files.
->> +$XFS_IO_PROG -f -c "pwrite -S 0xea 0 256K" $SCRATCH_MNT/foo >/dev/null
->> +
->> +# Create a file with many extents. We later want to shrink truncate it and
->> +# add a prealloc extent beyond its new size.
->> +for ((i = 1; i <= 500; i++)); do
->> +     offset=$(((i - 1) * 4 * 1024))
->> +     $XFS_IO_PROG -f -s -c "pwrite -S 0xcf $offset 4K" \
->> +             $SCRATCH_MNT/bar >/dev/null
->> +done
->> +
->> +# A file which already has a prealloc extent beyond its size.
->> +# The fsync done on it is motivated by differences in the btrfs implementation
->> +# of fsync (first fsync has different logic from subsequent fsyncs).
->> +$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 256K" \
->> +          -c "falloc -k 256K 768K" \
->> +          -c "fsync" \
->> +          $SCRATCH_MNT/baz >/dev/null
->> +
->> +# Make sure everything done so far is durably persisted.
->> +sync
->> +
->> +# Allocate an extent beyond the size of the first test file and fsync it.
->> +$XFS_IO_PROG -c "falloc -k 256K 1M"\
->> +          -c "fsync" \
->> +          $SCRATCH_MNT/foo
->> +
->> +# Do a shrinking truncate of our test file, add a prealloc extent to it after
->> +# its new size and fsync it.
->> +$XFS_IO_PROG -c "truncate 256K" \
->> +          -c "falloc -k 256K 1M"\
->> +          -c "fsync" \
->> +          $SCRATCH_MNT/bar
->> +
->> +# Allocate another extent beyond the size of file baz.
->> +$XFS_IO_PROG -c "falloc -k 1M 2M"\
->> +          -c "fsync" \
->> +          $SCRATCH_MNT/baz
->> +
->> +# Simulate a power failure and mount the filesystem to check that the extents
->> +# previously allocated were not lost.
->> +_flakey_drop_and_remount
->> +
->> +echo "File foo fiemap:"
->> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foo | _filter_fiemap
->> +
->> +echo "File bar fiemap:"
->> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/bar | _filter_fiemap
->> +
->> +echo "File baz fiemap:"
->> +$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/baz | _filter_fiemap
->> +
->> +_unmount_flakey
->> +_cleanup_flakey
->> +
->> +status=0
->> +exit
->> diff --git a/tests/generic/482.out b/tests/generic/482.out
->> new file mode 100644
->> index 00000000..7e3ed139
->> --- /dev/null
->> +++ b/tests/generic/482.out
->> @@ -0,0 +1,10 @@
->> +QA output created by 482
->> +File foo fiemap:
->> +0: [0..511]: data
->> +1: [512..2559]: unwritten
->> +File bar fiemap:
->> +0: [0..511]: data
->> +1: [512..2559]: unwritten
->> +File baz fiemap:
->> +0: [0..511]: data
->> +1: [512..6143]: unwritten
->> diff --git a/tests/generic/group b/tests/generic/group
->> index e8676062..58ac1f00 100644
->> --- a/tests/generic/group
->> +++ b/tests/generic/group
->> @@ -484,3 +484,4 @@
->>  479 auto quick metadata
->>  480 auto quick metadata
->>  481 auto quick log metadata
->> +482 auto quick log metadata
->> --
->> 2.11.0
+> 
+>>  		echo "$p -f"
+>>  	else
+>> @@ -223,8 +224,8 @@ case "$HOSTOS" in
+>>          export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
+>>          export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
+>>          export MKFS_UDF_PROG="`set_prog_path mkudffs`"
+>> -        export MKFS_BTRFS_PROG="`set_btrfs_mkfs_prog_path_with_opts`"
+>> -        export MKFS_F2FS_PROG="`set_prog_path mkfs.f2fs`"
+>> +        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
+>> +        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
+>>          export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
+>>          export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
+>>          export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
+>> -- 
+>> 2.17.0.484.g0c8726318c-goog
 >>
 >> --
 >> To unsubscribe from this list: send the line "unsubscribe fstests" in
 >> the body of a message to majordomo@vger.kernel.org
 >> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> 
+> 
+
