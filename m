@@ -1,48 +1,47 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:50986 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753040AbeDKQIN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 11 Apr 2018 12:08:13 -0400
-Date: Wed, 11 Apr 2018 09:08:09 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] xfs/187: fix ftype brokenness
-Message-ID: <20180411160809.GA13697@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:41944 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752068AbeDKXrn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Apr 2018 19:47:43 -0400
+Received: by mail-pf0-f194.google.com with SMTP id a2so2017839pff.8
+        for <fstests@vger.kernel.org>; Wed, 11 Apr 2018 16:47:43 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH 2/2] generic/427: used mixed mode for Btrfs
+Date: Wed, 11 Apr 2018 16:47:30 -0700
+Message-Id: <5273be80b04afae67e5ff2137e713924c7bfc0ff.1523490276.git.osandov@fb.com>
+In-Reply-To: <d928f86c748db034ca4efd849e01c5c2bf805199.1523490276.git.osandov@fb.com>
+References: <d928f86c748db034ca4efd849e01c5c2bf805199.1523490276.git.osandov@fb.com>
+In-Reply-To: <d928f86c748db034ca4efd849e01c5c2bf805199.1523490276.git.osandov@fb.com>
+References: <d928f86c748db034ca4efd849e01c5c2bf805199.1523490276.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
+Cc: kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+From: Omar Sandoval <osandov@fb.com>
 
-This test requires XFS_SB_VERSION_MOREBITSBIT to be zero.  ftype (which
-is now enabled by default) causes this to be set, so detect it in mkfs
-and disable it.
+This test creates a 256 MB filesystem and then writes a 200 MB file.
+With separate data and metadata, Btrfs will run out of data space since
+it needs to allocate some metadata space. Use mixed mode, which is the
+recommendation for smaller filesystems.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
- tests/xfs/187 |   10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ tests/generic/427 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/tests/xfs/187 b/tests/xfs/187
-index 07ef3ae..e1a8ce9 100755
---- a/tests/xfs/187
-+++ b/tests/xfs/187
-@@ -70,8 +70,14 @@ export MOUNT_OPTIONS=""
- # lazysb, attr2 and other feature bits are held in features2 and will require
- # morebitsbit on So test with lazysb and without it to see if the morebitsbit is
- # okay etc. If the mkfs defaults change, these need to change as well.
--export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
--export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-+MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
-+MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-+
-+# Detect ftype
-+if _scratch_mkfs --help 2>&1 | grep -q "ftype="; then
-+	MKFS_NO_LAZY="$MKFS_NO_LAZY -n ftype=0"
-+	MKFS_LAZY="$MKFS_LAZY -n ftype=0"
-+fi
+diff --git a/tests/generic/427 b/tests/generic/427
+index 9cde5f50..b2cb4526 100755
+--- a/tests/generic/427
++++ b/tests/generic/427
+@@ -55,6 +55,8 @@ _require_test_program "feature"
+ _require_aiodio aio-dio-eof-race
  
- # Make sure that when we think we are testing with morebits off
- # that we really are.
+ # limit the filesystem size, to save the time of filling filesystem
++# Btrfs needs to use mixed mode for such a small filesystem
++[ "$FSTYP" = "btrfs" ] && MKFS_OPTIONS="$MKFS_OPTIONS -M"
+ _scratch_mkfs_sized $((256 * 1024 * 1024)) >>$seqres.full 2>&1
+ _scratch_mount
+ 
+-- 
+2.17.0
+
