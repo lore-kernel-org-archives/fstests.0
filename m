@@ -1,60 +1,62 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:39180 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750867AbeDMGOS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 02:14:18 -0400
-Received: by mail-pg0-f65.google.com with SMTP id b9so1473472pgf.6
-        for <fstests@vger.kernel.org>; Thu, 12 Apr 2018 23:14:17 -0700 (PDT)
-Date: Fri, 13 Apr 2018 14:14:08 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs/187: fix ftype brokenness
-Message-ID: <20180413061408.GH2932@desktop>
-References: <20180411160809.GA13697@magnolia>
+Received: from newman.cs.utexas.edu ([128.83.139.110]:33204 "EHLO
+        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750940AbeDMM5y (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 08:57:54 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180411160809.GA13697@magnolia>
+Reply-To: vijay@cs.utexas.edu
+In-Reply-To: <CAOQ4uxhK6DQxTdipX2SP2t1960PrRt66+k3FVxQqwTBs-67cQA@mail.gmail.com>
+References: <CA+EzBbCbRsZ=2qkBYjGVZQAVmUz34ky8vDOB7HxqRCrgymzysQ@mail.gmail.com>
+ <CAOQ4uxhK6DQxTdipX2SP2t1960PrRt66+k3FVxQqwTBs-67cQA@mail.gmail.com>
+From: Vijay Chidambaram <vijay@cs.utexas.edu>
+Date: Fri, 13 Apr 2018 07:57:07 -0500
+Message-ID: <CAPaz=E+b3-qO-G6ur0bGnocOwo+E8MhXwNSRVmQ7WuF1Pw=HMQ@mail.gmail.com>
+Subject: Re: Symlink not persisted even after fsync
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 11, 2018 at 09:08:09AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> This test requires XFS_SB_VERSION_MOREBITSBIT to be zero.  ftype (which
-> is now enabled by default) causes this to be set, so detect it in mkfs
-> and disable it.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/187 |   10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/tests/xfs/187 b/tests/xfs/187
-> index 07ef3ae..e1a8ce9 100755
-> --- a/tests/xfs/187
-> +++ b/tests/xfs/187
-> @@ -70,8 +70,14 @@ export MOUNT_OPTIONS=""
->  # lazysb, attr2 and other feature bits are held in features2 and will require
->  # morebitsbit on So test with lazysb and without it to see if the morebitsbit is
->  # okay etc. If the mkfs defaults change, these need to change as well.
-> -export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
-> -export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-> +MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
-> +MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
-> +
-> +# Detect ftype
+Hi Amir,
 
-I'd put the reason of detecting ftype support in comments here. I can
-fix it on commit.
+Thanks for the reply!
+
+On Fri, Apr 13, 2018 at 12:52 AM, Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> Not a bug.
+>
+> From man 2 fsync:
+>
+> "Calling  fsync() does not necessarily ensure that the entry in the
+>  directory containing the file has also reached disk.  For that an
+>  explicit fsync() on a file descriptor for the directory is also needed."
+
+Are we understanding this right:
+
+ext4 and xfs fsync the parent directory if a sym link file is
+fsync-ed. But btrfs does not. Is this what we are seeing?
+
+I agree that fsync of a file does not mean fsync of its directory
+entry, but it seems odd to do it for regular files and not for sym
+links. We do not see this behavior if we use a regular file instead of
+a sym link file.
+
+> There is a reason why this behavior is not being reproduces in
+> ext4/xfs, but you should be able to reproduce a similar issue
+> like this:
+>
+>
+> 1. symlink (foo, bar.tmp)
+> 2. open bar.tmp
+> 3. fsync bar.tmp
+> 4. rename(bar.tmp, bar)
+> 5. fsync bar
+> ----crash here----
+
+I'm guessing xfs/ext4 detect the symlink-fsync pattern and fsync the
+parent dir in our workload, but would miss it because of the rename in
+the workload you provided?
 
 Thanks,
-Eryu
-
-> +if _scratch_mkfs --help 2>&1 | grep -q "ftype="; then
-> +	MKFS_NO_LAZY="$MKFS_NO_LAZY -n ftype=0"
-> +	MKFS_LAZY="$MKFS_LAZY -n ftype=0"
-> +fi
->  
->  # Make sure that when we think we are testing with morebits off
->  # that we really are.
+Vijay Chidambaram
+http://www.cs.utexas.edu/~vijay/
