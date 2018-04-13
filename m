@@ -1,71 +1,59 @@
-Received: from mail-pl0-f68.google.com ([209.85.160.68]:43777 "EHLO
-        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750808AbeDMEnm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 00:43:42 -0400
-Date: Fri, 13 Apr 2018 12:43:35 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] fstests: btrfs/159 superblock corruption test case
-Message-ID: <20180413044335.GG2932@desktop>
-References: <20180329102848.12669-1-anand.jain@oracle.com>
- <20180409052830.4772-1-anand.jain@oracle.com>
+Received: from mail-yb0-f176.google.com ([209.85.213.176]:34174 "EHLO
+        mail-yb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750851AbeDMFwU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 01:52:20 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180409052830.4772-1-anand.jain@oracle.com>
+In-Reply-To: <CA+EzBbCbRsZ=2qkBYjGVZQAVmUz34ky8vDOB7HxqRCrgymzysQ@mail.gmail.com>
+References: <CA+EzBbCbRsZ=2qkBYjGVZQAVmUz34ky8vDOB7HxqRCrgymzysQ@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 13 Apr 2018 08:52:19 +0300
+Message-ID: <CAOQ4uxhK6DQxTdipX2SP2t1960PrRt66+k3FVxQqwTBs-67cQA@mail.gmail.com>
+Subject: Re: Symlink not persisted even after fsync
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Jayashree Mohan <jayashree2912@gmail.com>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 09, 2018 at 01:28:30PM +0800, Anand Jain wrote:
-> Verify if the superblock corruption is handled correctly.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v2->v3:
->  Provide the disk to be corrupted as an arg, instead of swapping the devices,
->   so drop mount_opt_minus_args().
->  159.out slightly changed.
-> v1->v2:
->  $subject slightly changed
->  Added more info about the test-case
->  Keep the stuff from the ./new btrfs
->  Add mount_opt_minus_args() to get the options (if) set at the config file
->  Move DEV_GOOD & DEV_BAD to where it starts to use
->  To help debugging added run_check where possible
->  Remove {} in the out file
->  Use _filter_error_mount for mount fail cases other than -EINVAL
-> 
->  tests/btrfs/159     | 149 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/159.out |  21 ++++++++
->  tests/btrfs/group   |   1 +
->  3 files changed, 171 insertions(+)
->  create mode 100755 tests/btrfs/159
->  create mode 100644 tests/btrfs/159.out
-> 
-> diff --git a/tests/btrfs/159 b/tests/btrfs/159
-> new file mode 100755
-> index 000000000000..c3a50b58b0b9
-> --- /dev/null
-> +++ b/tests/btrfs/159
-> @@ -0,0 +1,149 @@
-> +#! /bin/bash
-> +# FS QA Test 159
-> +#
-> +# Test if the superblock corruption is handled correctly:
-> +# 	- Test fsid miss-match (csum ok) between primary and copy superblock
-> +#	Fixed by the ML patch:
-> +#	btrfs: check if the fsid in the primary sb and copy sb are same
-> +# 	- Test if the mount fails if the primary superblock csum is
-> +#		corrupted on any disk
-> +# 	- Test if the mount does not fail if the copy1 sb csum is corrupted
-> +#	Fixed by the ML patches:
-> +#	btrfs: verify superblock checksum during scan
-> +#	btrfs: verify checksum for all devices in mount context
+On Thu, Apr 12, 2018 at 8:51 PM, Jayashree Mohan
+<jayashree2912@gmail.com> wrote:
+> Hi,
+>
+> We came across what seems to be a crash consistency bug on btrfs and
+> f2fs. When we create a symlink for a file and fsync the symlink, on
+> recovery from crash, the fsync-ed file is missing.
+>
+> You can reproduce this behaviour using this minimal workload :
+>
+> 1. symlink (foo, bar)
+> 2. open bar
+> 3. fsync bar
+> ----crash here----
+>
+> When we recover, we find that file bar is missing. This behaviour
+> seems unexpected as the fsynced file is lost on a crash. ext4 and xfs
+> correctly recovers file bar. This seems like a bug. If not, could you
+> explain why?
+>
 
-Do you have a tree that I can pull from? I want to make sure the test
-does pass on patched kernel, but the patchset doesn't apply on v4.16
-kernel.
+Not a bug.
+
+>From man 2 fsync:
+
+"Calling  fsync() does not necessarily ensure that the entry in the
+ directory containing the file has also reached disk.  For that an
+ explicit fsync() on a file descriptor for the directory is also needed."
+
+There is a reason why this behavior is not being reproduces in
+ext4/xfs, but you should be able to reproduce a similar issue
+like this:
+
+1. symlink (foo, bar.tmp)
+2. open bar.tmp
+3. fsync bar.tmp
+4. rename(bar.tmp, bar)
+5. fsync bar
+----crash here----
 
 Thanks,
-Eryu
+Amir.
