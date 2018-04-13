@@ -1,59 +1,60 @@
-Received: from mail-yb0-f176.google.com ([209.85.213.176]:34174 "EHLO
-        mail-yb0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750851AbeDMFwU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 01:52:20 -0400
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:39180 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750867AbeDMGOS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Apr 2018 02:14:18 -0400
+Received: by mail-pg0-f65.google.com with SMTP id b9so1473472pgf.6
+        for <fstests@vger.kernel.org>; Thu, 12 Apr 2018 23:14:17 -0700 (PDT)
+Date: Fri, 13 Apr 2018 14:14:08 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] xfs/187: fix ftype brokenness
+Message-ID: <20180413061408.GH2932@desktop>
+References: <20180411160809.GA13697@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <CA+EzBbCbRsZ=2qkBYjGVZQAVmUz34ky8vDOB7HxqRCrgymzysQ@mail.gmail.com>
-References: <CA+EzBbCbRsZ=2qkBYjGVZQAVmUz34ky8vDOB7HxqRCrgymzysQ@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 13 Apr 2018 08:52:19 +0300
-Message-ID: <CAOQ4uxhK6DQxTdipX2SP2t1960PrRt66+k3FVxQqwTBs-67cQA@mail.gmail.com>
-Subject: Re: Symlink not persisted even after fsync
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180411160809.GA13697@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Jayashree Mohan <jayashree2912@gmail.com>
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 12, 2018 at 8:51 PM, Jayashree Mohan
-<jayashree2912@gmail.com> wrote:
-> Hi,
->
-> We came across what seems to be a crash consistency bug on btrfs and
-> f2fs. When we create a symlink for a file and fsync the symlink, on
-> recovery from crash, the fsync-ed file is missing.
->
-> You can reproduce this behaviour using this minimal workload :
->
-> 1. symlink (foo, bar)
-> 2. open bar
-> 3. fsync bar
-> ----crash here----
->
-> When we recover, we find that file bar is missing. This behaviour
-> seems unexpected as the fsynced file is lost on a crash. ext4 and xfs
-> correctly recovers file bar. This seems like a bug. If not, could you
-> explain why?
->
+On Wed, Apr 11, 2018 at 09:08:09AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> This test requires XFS_SB_VERSION_MOREBITSBIT to be zero.  ftype (which
+> is now enabled by default) causes this to be set, so detect it in mkfs
+> and disable it.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/187 |   10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/tests/xfs/187 b/tests/xfs/187
+> index 07ef3ae..e1a8ce9 100755
+> --- a/tests/xfs/187
+> +++ b/tests/xfs/187
+> @@ -70,8 +70,14 @@ export MOUNT_OPTIONS=""
+>  # lazysb, attr2 and other feature bits are held in features2 and will require
+>  # morebitsbit on So test with lazysb and without it to see if the morebitsbit is
+>  # okay etc. If the mkfs defaults change, these need to change as well.
+> -export MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
+> -export MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
+> +MKFS_NO_LAZY="-m crc=0 -l lazy-count=0 -i projid32bit=0"
+> +MKFS_LAZY="-m crc=0 -l lazy-count=1 -i projid32bit=0"
+> +
+> +# Detect ftype
 
-Not a bug.
-
->From man 2 fsync:
-
-"Calling  fsync() does not necessarily ensure that the entry in the
- directory containing the file has also reached disk.  For that an
- explicit fsync() on a file descriptor for the directory is also needed."
-
-There is a reason why this behavior is not being reproduces in
-ext4/xfs, but you should be able to reproduce a similar issue
-like this:
-
-1. symlink (foo, bar.tmp)
-2. open bar.tmp
-3. fsync bar.tmp
-4. rename(bar.tmp, bar)
-5. fsync bar
-----crash here----
+I'd put the reason of detecting ftype support in comments here. I can
+fix it on commit.
 
 Thanks,
-Amir.
+Eryu
+
+> +if _scratch_mkfs --help 2>&1 | grep -q "ftype="; then
+> +	MKFS_NO_LAZY="$MKFS_NO_LAZY -n ftype=0"
+> +	MKFS_LAZY="$MKFS_LAZY -n ftype=0"
+> +fi
+>  
+>  # Make sure that when we think we are testing with morebits off
+>  # that we really are.
