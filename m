@@ -1,75 +1,77 @@
-Received: from imap.thunk.org ([74.207.234.97]:44244 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751205AbeDPFwv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 16 Apr 2018 01:52:51 -0400
-Date: Mon, 16 Apr 2018 01:52:31 -0400
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: Symlink not persisted even after fsync
-Message-ID: <20180416055231.GB22870@thunk.org>
-References: <CAPaz=E+-baGSWhL3nD-8X4jn6rKdn2AVGLeqWh3EY5Nh-RodRA@mail.gmail.com>
- <CAOQ4uxhRoAnxr36Cy1pov+ExnNJ8Y+inmUc7chD77ONPt=u9qw@mail.gmail.com>
- <CA+EzBbCFURDs77xiL3ECf7+4irrywbmD1HdsUSUYE_oeonbo8A@mail.gmail.com>
- <20180414012017.GF5572@dastard>
- <CAPaz=EJrOc7dBE+gBf=Gx0W-4_q0GwTrRhchquPveWs-m-Djeg@mail.gmail.com>
- <20180414215529.GG5572@dastard>
- <20180415011735.GB21830@thunk.org>
- <CAHWVdUXAyyeTGNXrtTTc+tUbA3t9TUjJPSF=M4Cetj4+d1w3eQ@mail.gmail.com>
- <20180415141338.GA22870@thunk.org>
- <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
+Received: from mail-pl0-f42.google.com ([209.85.160.42]:38384 "EHLO
+        mail-pl0-f42.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753199AbeDPGAM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 02:00:12 -0400
+Received: by mail-pl0-f42.google.com with SMTP id c7-v6so9420306plr.5
+        for <fstests@vger.kernel.org>; Sun, 15 Apr 2018 23:00:12 -0700 (PDT)
+Date: Mon, 16 Apr 2018 14:00:05 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] xfs/444: add check for xfs_db write bno array
+Message-ID: <20180416060005.GJ2932@desktop>
+References: <1523527230-6394-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+ <20180412120952.GM729@dastard>
+ <20180412130038.GE2932@desktop>
+ <20180412230035.GB5572@dastard>
+ <20180413043612.GF2932@desktop>
+ <20180413134210.GD5572@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
+In-Reply-To: <20180413134210.GD5572@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Vijay Chidambaram <vijay@cs.utexas.edu>
-Cc: Dave Chinner <david@fromorbit.com>, Jayashree Mohan <jayashree2912@gmail.com>, Amir Goldstein <amir73il@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net
+To: Dave Chinner <david@fromorbit.com>
+Cc: yang xu <xuyang.jy@cn.fujitsu.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 15, 2018 at 07:10:52PM -0500, Vijay Chidambaram wrote:
+On Fri, Apr 13, 2018 at 11:42:10PM +1000, Dave Chinner wrote:
+> On Fri, Apr 13, 2018 at 12:36:12PM +0800, Eryu Guan wrote:
+> > > > But this issue looks like a bug in xfsprogs to me, not a missing feature
+> > > > in xfsprogs on RHEL7, so I tend to fail the test instead of adding a new
+> > > > _require rule & _notrun the test. And in this case, IMHO, I don't think
+> > > > it's necessary to do any update to the test, just leave the test as it
+> > > > is and file a new bug in Red Hat bugzilla.
+> > > 
+> > > ... this isn't a RHEL specific issue - it's an xfsprogs version
+> > > issue.  i.e.  any older distro that has a binary with a broken
+> > > "write array" command will fail this test. None of them are going to
+> > > get updated xfsprogs packages, so like having an old mkfs.xfs
+> > > binary, this test should run conditionally on having a version of
+> > > xfs_db that actually works correctly....
+> > 
+> > But I still think it's a pure bug in xfsprogs, not xfsprogs version
+> > issue nor a behavior change in xfsprogs, as we did support "write via
+> > array indexing", just that it was broken in a certain case, and commit
+> > 4222d000ed3b fixed that bug. We should expose bugs by letting the test
+> > fail, not paper over it by _notrun the test. 
 > 
-> I don't think this is what the paper's ext3-fast does. All the paper
-> says is if you have a file system where the fsync of a file persisted
-> only data related to that file, it would increase performance.
-> ext3-fast is the name given to such a file system. Note that we do not
-> present a design of ext3-fast or analyze it in any detail. In fact, we
-> explicitly say "The ext3-fast file system (derived from inferences
-> provided by ALICE) seems interesting for application safety, though
-> further investigation is required into the validity of its design."
+> Yes, it's a bug in xfsprogs. But it's a bug in a diagnostic
+> utility that is only used by test infrastructure and XFS
+> developers.
 
-Well, says that it's based on ext3's data=journal "Abstract Persistent
-Model".  It's true that a design was not proposed --- but if you
-don't propose a design, how do you know what the performance is or
-whether it's even practical?  That's one of those things I find
-extremely distasteful in the paper.  Sure, I can model a faster than
-light interstellar engine ala Star Trek's Warp Drive --- and I can
-talk about it having, say, better performance than a reaction drive.
-But it doesn't tell us anything useful about whether it can be built,
-or whether it's even useful to dream about it.
+OK, I got your point now, it's a bug in a diagnostic tool that is only
+used by XFS developers as a test infrastructure, so we can treat it as a
+infrastructure dependency as all other _require rules. I think that
+makes sense in this case. Thanks for the explanation!
 
-To me, that part of the paper, really read as, "watch as I wave my
-hands around widely, that they never leave the ends of my arms!"
+yang xu, would you mind sending a v2 patch as Dave suggested? Thanks!
 
-> Thanks! As I mentioned before, this is useful. I have a follow-up
-> question. Consider the following workload:
+Eryu
+
 > 
->  creat foo
->  link (foo, A/bar)
->  fsync(foo)
->  crash
+> Yes, it's ialso fixed in recent version of xfsprogs, but you know
+> very well that we test distros that have ancient xfsprogs and will
+> never have this issue fixed in them. We use detectiona nd notrun to
+> avoid tests they should not run all the time, and I don't see how
+> this is any different.
 > 
-> In this case, after the file system recovers, do we expect foo's link
-> count to be 2 or 1? I would say 2, but POSIX is silent on this, so
-> thought I would confirm. The tricky part here is we are not calling
-> fsync() on directory A.
+> I really don't understand why you are pushing back on this - why
+> should this specific infrastructure deficiency cause test failures,
+> when all the existing infrastructure support checks cause tests to
+> notrun rather than fail?
 > 
-> In this case, its not a symlink; its a hard link, so I would say the
-> link count for foo should be 2. But btrfs and F2FS show link count of
-> 1 after a crash.
-
-Well, is the link count accurate?  That is to say, does A/bar exist?
-I would think that the requirement that the file system be self
-consistent is the most important consideration.
-
-Cheers,
-
-							- Ted
+> Cheers,
+> 
+> Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
