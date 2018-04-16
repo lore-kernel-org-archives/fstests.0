@@ -1,50 +1,82 @@
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:34304 "EHLO
-        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753326AbeDPKlq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 06:41:46 -0400
-Received: by mail-wr0-f195.google.com with SMTP id d19so24586324wre.1
-        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 03:41:46 -0700 (PDT)
+Received: from mail-wr0-f196.google.com ([209.85.128.196]:39779 "EHLO
+        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753326AbeDPKls (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 06:41:48 -0400
+Received: by mail-wr0-f196.google.com with SMTP id q6so12483629wrd.6
+        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 03:41:47 -0700 (PDT)
 From: Miklos Szeredi <mszeredi@redhat.com>
-Subject: [PATCH 1/2] overlay/40: clean up properly after setting immutable
-Date: Mon, 16 Apr 2018 12:41:40 +0200
-Message-Id: <20180416104141.17134-1-mszeredi@redhat.com>
+Subject: [PATCH 2/2] overlay/013: do not expect failure
+Date: Mon, 16 Apr 2018 12:41:41 +0200
+Message-Id: <20180416104141.17134-2-mszeredi@redhat.com>
+In-Reply-To: <20180416104141.17134-1-mszeredi@redhat.com>
+References: <20180416104141.17134-1-mszeredi@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Test program expects only immutable on lower layer (test failure), but does
-not expect the immutable file to be on the upper layer.  The later case is
-actually what *should* happen, except overlayfs didn't properly implement
-this case yet (but is now in the works).
+Current test expects test_lower to fail with:
+
+  truncate(test_lower) should have failed
+
+While it is sort of okay to fail like that (the above expectation basically
+acknowledges this weirdness in the overlayfs implementation), it is by no
+means the only correct behavior: it is also correct for the test to
+succeed (i.e. truncation fails with ETXTBSY).
+
+So add an option to t_truncate_self.c that allows both success and failure,
+but obviously not SIGSEGV, which is what a we'd get in a real failure mode.
 
 Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 ---
- tests/overlay/040 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ src/t_truncate_self.c | 3 +++
+ tests/overlay/013     | 3 ++-
+ tests/overlay/013.out | 2 +-
+ 3 files changed, 6 insertions(+), 2 deletions(-)
 
-diff --git a/tests/overlay/040 b/tests/overlay/040
-index 369fef3c3a47..4fff7570c2c6 100755
---- a/tests/overlay/040
-+++ b/tests/overlay/040
-@@ -41,7 +41,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- _cleanup()
- {
- 	cd /
--	$CHATTR_PROG -i $lowerdir/foo
-+	$CHATTR_PROG -i $lowerdir/foo > /dev/null 2>&1
-+	$CHATTR_PROG -i $upperdir/foo > /dev/null 2>&1
- 	rm -f $tmp.*
- }
+diff --git a/src/t_truncate_self.c b/src/t_truncate_self.c
+index 3f1c8e6fde80..a11f7d5a7d48 100644
+--- a/src/t_truncate_self.c
++++ b/src/t_truncate_self.c
+@@ -1,4 +1,5 @@
+ #include <stdio.h>
++#include <string.h>
+ #include <errno.h>
+ #include <unistd.h>
+ #include <libgen.h>
+@@ -10,6 +11,8 @@ int main(int argc, char *argv[])
  
-@@ -63,6 +64,7 @@ _scratch_mkfs
+ 	ret = truncate(argv[0], 4096);
+ 	if (ret != -1) {
++		if (argc == 2 && strcmp(argv[1], "--may-succeed") == 0)
++			return 0;
+ 		fprintf(stderr, "truncate(%s) should have failed\n",
+ 			progname);
+ 		return 1;
+diff --git a/tests/overlay/013 b/tests/overlay/013
+index de0fc26a1c88..8ff438d8f4f6 100755
+--- a/tests/overlay/013
++++ b/tests/overlay/013
+@@ -65,9 +65,10 @@ _scratch_mount
  
- # prepare lower test file
- lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
- mkdir -p $lowerdir
- touch $lowerdir/foo
+ # run test program from lower and upper dir
+ # test programs truncate themselfs, all should fail with ETXTBSY
+-$SCRATCH_MNT/test_lower
++$SCRATCH_MNT/test_lower --may-succeed
+ $SCRATCH_MNT/test_upper
  
+ # success, all done
++echo "Silence is golden"
+ status=0
+ exit
+diff --git a/tests/overlay/013.out b/tests/overlay/013.out
+index b2c7cc7e2cac..3e66423b5467 100644
+--- a/tests/overlay/013.out
++++ b/tests/overlay/013.out
+@@ -1,2 +1,2 @@
+ QA output created by 013
+-truncate(test_lower) should have failed
++Silence is golden
 -- 
 2.14.3
 
