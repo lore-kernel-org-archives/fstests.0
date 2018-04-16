@@ -1,82 +1,56 @@
-Received: from mail-wr0-f196.google.com ([209.85.128.196]:39779 "EHLO
-        mail-wr0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753326AbeDPKls (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 06:41:48 -0400
-Received: by mail-wr0-f196.google.com with SMTP id q6so12483629wrd.6
-        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 03:41:47 -0700 (PDT)
-From: Miklos Szeredi <mszeredi@redhat.com>
-Subject: [PATCH 2/2] overlay/013: do not expect failure
-Date: Mon, 16 Apr 2018 12:41:41 +0200
-Message-Id: <20180416104141.17134-2-mszeredi@redhat.com>
-In-Reply-To: <20180416104141.17134-1-mszeredi@redhat.com>
-References: <20180416104141.17134-1-mszeredi@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:39254 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750946AbeDPL3B (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 16 Apr 2018 07:29:01 -0400
+MIME-Version: 1.0
+In-Reply-To: <20180409130555.GD2932@desktop>
+References: <20180326225921.10096-1-fdmanana@kernel.org> <20180328115530.15563-1-fdmanana@kernel.org>
+ <20180408074647.GC2932@desktop> <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
+ <20180409130555.GD2932@desktop>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Mon, 16 Apr 2018 12:28:59 +0100
+Message-ID: <CAL3q7H6tBnRaH3Y5L8ucPKkHjVCm4fHNzUV8v_XTwwUeeR1oQg@mail.gmail.com>
+Subject: Re: [PATCH v2] fstests: test btrfs fsync after hole punching with
+ no-holes mode
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-unionfs@vger.kernel.org, Eryu Guan <eguan@redhat.com>, Amir Goldstein <amir73il@gmail.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Current test expects test_lower to fail with:
+On Mon, Apr 9, 2018 at 2:05 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Sun, Apr 08, 2018 at 09:46:24AM +0100, Filipe Manana wrote:
+>> On Sun, Apr 8, 2018 at 8:46 AM, Eryu Guan <guaneryu@gmail.com> wrote:
+>> > On Wed, Mar 28, 2018 at 12:55:30PM +0100, fdmanana@kernel.org wrote:
+>> >> From: Filipe Manana <fdmanana@suse.com>
+>> >>
+>> >> Test that when we have the no-holes mode enabled and a specific metadata
+>> >> layout, if we punch a hole and fsync the file, at replay time the whole
+>> >> hole was preserved.
+>> >>
+>> >> This issue is fixed by the following btrfs patch for the linux kernel:
+>> >>
+>> >>   "Btrfs: fix fsync after hole punching when using no-holes feature"
+>> >>
+>> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+>> >> ---
+>> >>
+>> >> V2: Made the test work when selinux is enabled, and made it use direct IO
+>> >>     writes to ensure 256K extents.
+>> >
+>> > Test fails with selinux enabled now on unpatched kernel. But I found
+>> > that, in my release testing, test still fails when testing with current
+>> > Linus tree (HEAD is 642e7fd23353, without selinux this time), which
+>> > should contain the mentioned fix. Does that mean the bug is not fully
+>> > fixed?
+>>
+>> The bug is fully fixed. But HEAD 642e7fd23353 does not contain the
+>> fix. The current  linus' master has it.
+>
+> I'll double check.. Thanks for the heads-up!
 
-  truncate(test_lower) should have failed
+Hi Eryu, any reason this didn't go in the last update?
+Thanks.
 
-While it is sort of okay to fail like that (the above expectation basically
-acknowledges this weirdness in the overlayfs implementation), it is by no
-means the only correct behavior: it is also correct for the test to
-succeed (i.e. truncation fails with ETXTBSY).
-
-So add an option to t_truncate_self.c that allows both success and failure,
-but obviously not SIGSEGV, which is what a we'd get in a real failure mode.
-
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
----
- src/t_truncate_self.c | 3 +++
- tests/overlay/013     | 3 ++-
- tests/overlay/013.out | 2 +-
- 3 files changed, 6 insertions(+), 2 deletions(-)
-
-diff --git a/src/t_truncate_self.c b/src/t_truncate_self.c
-index 3f1c8e6fde80..a11f7d5a7d48 100644
---- a/src/t_truncate_self.c
-+++ b/src/t_truncate_self.c
-@@ -1,4 +1,5 @@
- #include <stdio.h>
-+#include <string.h>
- #include <errno.h>
- #include <unistd.h>
- #include <libgen.h>
-@@ -10,6 +11,8 @@ int main(int argc, char *argv[])
- 
- 	ret = truncate(argv[0], 4096);
- 	if (ret != -1) {
-+		if (argc == 2 && strcmp(argv[1], "--may-succeed") == 0)
-+			return 0;
- 		fprintf(stderr, "truncate(%s) should have failed\n",
- 			progname);
- 		return 1;
-diff --git a/tests/overlay/013 b/tests/overlay/013
-index de0fc26a1c88..8ff438d8f4f6 100755
---- a/tests/overlay/013
-+++ b/tests/overlay/013
-@@ -65,9 +65,10 @@ _scratch_mount
- 
- # run test program from lower and upper dir
- # test programs truncate themselfs, all should fail with ETXTBSY
--$SCRATCH_MNT/test_lower
-+$SCRATCH_MNT/test_lower --may-succeed
- $SCRATCH_MNT/test_upper
- 
- # success, all done
-+echo "Silence is golden"
- status=0
- exit
-diff --git a/tests/overlay/013.out b/tests/overlay/013.out
-index b2c7cc7e2cac..3e66423b5467 100644
---- a/tests/overlay/013.out
-+++ b/tests/overlay/013.out
-@@ -1,2 +1,2 @@
- QA output created by 013
--truncate(test_lower) should have failed
-+Silence is golden
--- 
-2.14.3
-
+>
+> Eryu
