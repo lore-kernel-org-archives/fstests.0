@@ -1,44 +1,73 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:56643 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:31873 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1751893AbeDPG1h (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 02:27:37 -0400
-From: "Xu, Yang" <xuyang.jy@cn.fujitsu.com>
-Subject: Re: [PATCH] xfs/444: add check for xfs_db write bno array
-Date: Mon, 16 Apr 2018 06:27:38 +0000
-Message-ID: <CB712E87BDAB7C41913DE4CFF4203A7B6A09474C@G08CNEXMBPEKD01.g08.fujitsu.local>
-Content-Language: zh-CN
-Content-Type: text/plain; charset="gb2312"
-Content-Transfer-Encoding: base64
+        with ESMTP id S1754191AbeDPJIC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 05:08:02 -0400
+From: yang xu <xuyang.jy@cn.fujitsu.com>
+Subject: [PATCH v2] common/xfs: Add require_xfs_db_write_array function
+Date: Mon, 16 Apr 2018 17:07:35 +0800
+Message-ID: <1523869655-20309-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+In-Reply-To: <20180416060005.GJ2932@desktop>
+References: <20180416060005.GJ2932@desktop>
 MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>
+To: guaneryu@gmail.com
+Cc: david@fromorbit.com, fstests@vger.kernel.org, yang xu <xuyang.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-DQpPbiBGcmksIEFwciAxMywgMjAxOCBhdCAxMTo0MjoxMFBNICsxMDAwLCBE
-YXZlIENoaW5uZXIgd3JvdGU6DQo+IE9uIEZyaSwgQXByIDEzLCAyMDE4IGF0
-IDEyOjM2OjEyUE0gKzA4MDAsIEVyeXUgR3VhbiB3cm90ZToNCj4gT0ssIEkg
-Z290IHlvdXIgcG9pbnQgbm93LCBpdCdzIGEgYnVnIGluIGEgZGlhZ25vc3Rp
-YyB0b29sIHRoYXQgaXMgb25seSB1c2VkIGJ5IFhGUyBkZXZlbG9wZXJzIGFz
-IGEgdGVzdCBpbmZyYXN0cnVjdHVyZSwgc28gd2UgY2FuDQo+IHRyZWF0IGl0
-IGFzIGEgaW5mcmFzdHJ1Y3R1cmUgZGVwZW5kZW5jeSBhcyBhbGwgb3RoZXIg
-X3JlcXVpcmUgcnVsZXMuIEkgdGhpbmsgdGhhdCBtYWtlcyBzZW5zZSBpbiB0
-aGlzIGNhc2UuIFRoYW5rcyBmb3IgDQo+IHRoZSBleHBsYW5hdGlvbiENCg0K
-PiB5YW5nIHh1LCB3b3VsZCB5b3UgbWluZCBzZW5kaW5nIGEgdjIgcGF0Y2gg
-YXMgRGF2ZSBzdWdnZXN0ZWQ/IFRoYW5rcyENCg0KPiBFcnl1DQpIaSBFcnl1
-DQpJIHdpbGwgc2VuZCBhIHYyIHBhdGNoIGFzIERhdmUgc3VnZ2VzdGVkLg0K
-DQpUaGFua3MgDQpZYW5nIFh1DQoNCj4gDQo+IFllcywgaXQncyBpYWxzbyBm
-aXhlZCBpbiByZWNlbnQgdmVyc2lvbiBvZiB4ZnNwcm9ncywgYnV0IHlvdSBr
-bm93IHZlcnkgDQo+IHdlbGwgdGhhdCB3ZSB0ZXN0IGRpc3Ryb3MgdGhhdCBo
-YXZlIGFuY2llbnQgeGZzcHJvZ3MgYW5kIHdpbGwgbmV2ZXIgDQo+IGhhdmUg
-dGhpcyBpc3N1ZSBmaXhlZCBpbiB0aGVtLiBXZSB1c2UgZGV0ZWN0aW9uYSBu
-ZCBub3RydW4gdG8gYXZvaWQgDQo+IHRlc3RzIHRoZXkgc2hvdWxkIG5vdCBy
-dW4gYWxsIHRoZSB0aW1lLCBhbmQgSSBkb24ndCBzZWUgaG93IHRoaXMgaXMg
-DQo+IGFueSBkaWZmZXJlbnQuDQo+IA0KPiBJIHJlYWxseSBkb24ndCB1bmRl
-cnN0YW5kIHdoeSB5b3UgYXJlIHB1c2hpbmcgYmFjayBvbiB0aGlzIC0gd2h5
-IA0KPiBzaG91bGQgdGhpcyBzcGVjaWZpYyBpbmZyYXN0cnVjdHVyZSBkZWZp
-Y2llbmN5IGNhdXNlIHRlc3QgZmFpbHVyZXMsIA0KPiB3aGVuIGFsbCB0aGUg
-ZXhpc3RpbmcgaW5mcmFzdHJ1Y3R1cmUgc3VwcG9ydCBjaGVja3MgY2F1c2Ug
-dGVzdHMgdG8gDQo+IG5vdHJ1biByYXRoZXIgdGhhbiBmYWlsPw0KPiANCj4g
-Q2hlZXJzLA0KPiANCj4gRGF2ZS4NCj4gLS0NCj4gRGF2ZSBDaGlubmVyDQo+
-IGRhdmlkQGZyb21vcmJpdC5jb20NCg0KDQoKCg==
+xfsprogs commit 4222d000ed("db: write via array indexing doesn't
+work") fixes a bug that xfs_db write can't support array indexing.
+This function will check whether the bug is fixed on the current
+xfsprogs.
+
+xfs/444 applies the function, and skips if this bug exists.
+
+Signed-off-by: yang xu <xuyang.jy@cn.fujitsu.com>
+---
+ common/xfs    | 18 ++++++++++++++++++
+ tests/xfs/444 |  1 +
+ 2 files changed, 19 insertions(+)
+
+diff --git a/common/xfs b/common/xfs
+index 3169f87..c4611a1 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -701,3 +701,21 @@ _scratch_xfs_set_sb_field()
+ {
+ 	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
+ }
++
++#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
++#xfs_db command to write a specific AGFL index doesn't work.
++_require_xfs_db_write_array()
++{
++	_scratch_xfs_set_metadata_field "bno[32]" "78" "agfl 0" >/dev/null 2>&1
++
++	# Before xfsprogs commit 0ebbf1d58898 ("db: limit AGFL bno
++	# arrayi printing), When asking for a single agfl entry,
++	# the result outputs the entire remainder of the array
++	# starting at the given index.
++	# It is difficult to extract single entry values.
++	# So filter useless information.
++	bno_value=$(_scratch_xfs_get_metadata_field "bno[32]" \
++		"agfl 0" |sed -e 's/ .*$//g' | sed -e 's/^.*://g')
++
++	[ "${bno_value}" != "78" ] && _notrun "xfs_db write can't support array"
++}
+diff --git a/tests/xfs/444 b/tests/xfs/444
+index 141be52..9700422 100755
+--- a/tests/xfs/444
++++ b/tests/xfs/444
+@@ -54,6 +54,7 @@ _supported_os Linux
+ _require_check_dmesg
+ _require_scratch
+ _require_test_program "punch-alternating"
++_require_xfs_db_write_array
+ 
+ # This is only a v5 filesystem problem
+ _require_scratch_xfs_crc
+-- 
+1.8.3.1
+
+
+
