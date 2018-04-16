@@ -1,14 +1,14 @@
-Received: from mail-yw0-f176.google.com ([209.85.161.176]:47093 "EHLO
-        mail-yw0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751183AbeDPP1U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 11:27:20 -0400
+Received: from mail-yb0-f196.google.com ([209.85.213.196]:38129 "EHLO
+        mail-yb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753022AbeDPP1v (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 11:27:51 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180416104141.17134-1-mszeredi@redhat.com>
-References: <20180416104141.17134-1-mszeredi@redhat.com>
+In-Reply-To: <20180416104141.17134-2-mszeredi@redhat.com>
+References: <20180416104141.17134-1-mszeredi@redhat.com> <20180416104141.17134-2-mszeredi@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 16 Apr 2018 18:27:19 +0300
-Message-ID: <CAOQ4uxjtcKFvKq2orqTKQtW0VMb5hJKc8-7AATOY=GP5XGvZfg@mail.gmail.com>
-Subject: Re: [PATCH 1/2] overlay/40: clean up properly after setting immutable
+Date: Mon, 16 Apr 2018 18:27:49 +0300
+Message-ID: <CAOQ4uxhz4ON6HbTuv+0jdMLRtEAeDgB15bBwMLGkdSkE9Sxb1g@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay/013: do not expect failure
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Miklos Szeredi <mszeredi@redhat.com>
@@ -16,10 +16,17 @@ Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 On Mon, Apr 16, 2018 at 1:41 PM, Miklos Szeredi <mszeredi@redhat.com> wrote:
-> Test program expects only immutable on lower layer (test failure), but does
-> not expect the immutable file to be on the upper layer.  The later case is
-> actually what *should* happen, except overlayfs didn't properly implement
-> this case yet (but is now in the works).
+> Current test expects test_lower to fail with:
+>
+>   truncate(test_lower) should have failed
+>
+> While it is sort of okay to fail like that (the above expectation basically
+> acknowledges this weirdness in the overlayfs implementation), it is by no
+> means the only correct behavior: it is also correct for the test to
+> succeed (i.e. truncation fails with ETXTBSY).
+>
+> So add an option to t_truncate_self.c that allows both success and failure,
+> but obviously not SIGSEGV, which is what a we'd get in a real failure mode.
 >
 > Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 
