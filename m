@@ -1,66 +1,58 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:32993 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753848AbeDPMfu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 08:35:50 -0400
-Date: Mon, 16 Apr 2018 20:35:43 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] fstests: test btrfs fsync after hole punching with
- no-holes mode
-Message-ID: <20180416123543.GK2932@desktop>
-References: <20180326225921.10096-1-fdmanana@kernel.org>
- <20180328115530.15563-1-fdmanana@kernel.org>
- <20180408074647.GC2932@desktop>
- <CAL3q7H5WDP5U-=OcQkRc-+5fD5mNpgscSyqc=M678Tdn8FBHUg@mail.gmail.com>
- <20180409130555.GD2932@desktop>
- <CAL3q7H6tBnRaH3Y5L8ucPKkHjVCm4fHNzUV8v_XTwwUeeR1oQg@mail.gmail.com>
+Received: from u164.east.ru ([195.170.63.164]:17070 "EHLO u164.east.ru"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750996AbeDPOOW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 16 Apr 2018 10:14:22 -0400
+Date: Mon, 16 Apr 2018 17:04:30 +0300
+From: Anatoly Pugachev <matorola@gmail.com>
+Subject: [PATCH] README requirements for debian sid to enable build of
+ src/dbtest.c
+Message-ID: <20180416140430.af246b2midlzetty@yogzotot>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H6tBnRaH3Y5L8ucPKkHjVCm4fHNzUV8v_XTwwUeeR1oQg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 16, 2018 at 12:28:59PM +0100, Filipe Manana wrote:
-> On Mon, Apr 9, 2018 at 2:05 PM, Eryu Guan <guaneryu@gmail.com> wrote:
-> > On Sun, Apr 08, 2018 at 09:46:24AM +0100, Filipe Manana wrote:
-> >> On Sun, Apr 8, 2018 at 8:46 AM, Eryu Guan <guaneryu@gmail.com> wrote:
-> >> > On Wed, Mar 28, 2018 at 12:55:30PM +0100, fdmanana@kernel.org wrote:
-> >> >> From: Filipe Manana <fdmanana@suse.com>
-> >> >>
-> >> >> Test that when we have the no-holes mode enabled and a specific metadata
-> >> >> layout, if we punch a hole and fsync the file, at replay time the whole
-> >> >> hole was preserved.
-> >> >>
-> >> >> This issue is fixed by the following btrfs patch for the linux kernel:
-> >> >>
-> >> >>   "Btrfs: fix fsync after hole punching when using no-holes feature"
-> >> >>
-> >> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> >> >> ---
-> >> >>
-> >> >> V2: Made the test work when selinux is enabled, and made it use direct IO
-> >> >>     writes to ensure 256K extents.
-> >> >
-> >> > Test fails with selinux enabled now on unpatched kernel. But I found
-> >> > that, in my release testing, test still fails when testing with current
-> >> > Linus tree (HEAD is 642e7fd23353, without selinux this time), which
-> >> > should contain the mentioned fix. Does that mean the bug is not fully
-> >> > fixed?
-> >>
-> >> The bug is fully fixed. But HEAD 642e7fd23353 does not contain the
-> >> fix. The current  linus' master has it.
-> >
-> > I'll double check.. Thanks for the heads-up!
-> 
-> Hi Eryu, any reason this didn't go in the last update?
-> Thanks.
+Hello!
 
-Sorry, I thought I queued it for last update, but actually I queued
-"generic: test for fsync after fallocate" not this one (and I double
-checked that test not this one..). I'll give it another try and queue it
-for next update if all look well.
+Please apply the following trivial patch to enable building of src/dbtest.c on
+debian sid. Without installing mentioned below devel package, xfstests could
+not be built, complaining:
 
-Thanks,
-Eryu
+xfstests-dev$ make
+Building include
+Building lib
+Building ltp
+Building src
+    [CC]    dbtest
+dbtest.c:28:5: error: expected '=', ',', ';', 'asm' or '__attribute__' before '!' token
+ bozo!
+     ^
+dbtest.c:41:3: warning: data definition has no type or storage class
+ } myDB;
+   ^~~~
+dbtest.c:41:3: warning: type defaults to 'int' in declaration of 'myDB' [-Wimplicit-int]
+
+Thanks.
+
+Signed-off-by: Anatoly Pugachev <matorola@gmail.com>
+---
+ README | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/README b/README
+index 50c68afa..8b7849bc 100644
+--- a/README
++++ b/README
+@@ -7,8 +7,8 @@ _______________________
+   For example, for Ubuntu:
+        sudo apt-get install xfslibs-dev uuid-dev libtool-bin \
+        e2fsprogs automake gcc libuuid1 quota attr libattr1-dev make \
+-       libacl1-dev libaio-dev xfsprogs libgdbm-dev gawk fio dbench \
+-       uuid-runtime python sqlite3
++       libacl1-dev libaio-dev xfsprogs libgdbm-dev libgdbm-compat-dev \
++       gawk fio dbench uuid-runtime python sqlite3
+   For Fedora, RHEL, or CentOS:
+        yum install acl attr automake bc dbench dump e2fsprogs fio \
+        gawk gcc indent libtool lvm2 make psmisc quota sed \
