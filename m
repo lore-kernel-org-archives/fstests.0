@@ -1,41 +1,47 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:42154 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751002AbeDPWGp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 18:06:45 -0400
-Received: by mail-pf0-f193.google.com with SMTP id o16so11168297pfk.9
-        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 15:06:45 -0700 (PDT)
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:40775 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751002AbeDPWIF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 18:08:05 -0400
+Received: by mail-pg0-f65.google.com with SMTP id e9so3355818pgr.7
+        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 15:08:05 -0700 (PDT)
+Date: Mon, 16 Apr 2018 15:08:03 -0700
 From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [xfstests-bld PATCH] test-appliance: detect 'mkfs.f2fs -f' support by grepping help output
-Date: Mon, 16 Apr 2018 15:06:21 -0700
-Message-Id: <20180416220621.196700-1-ebiggers3@gmail.com>
+Subject: Re: [xfstests-bld PATCH] gen-image: fix running in a foreign build
+ chroot
+Message-ID: <20180416220803.GC10051@gmail.com>
+References: <20180404001421.81698-1-ebiggers@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180404001421.81698-1-ebiggers@google.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Theodore Y . Ts'o" <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eric Biggers <ebiggers@google.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Tue, Apr 03, 2018 at 05:14:21PM -0700, Eric Biggers wrote:
+> Building an android-xfstests test appliance on x86_64 with the
+> documented command (e.g. './do-all --chroot=stretch-arm64 --out-tar') no
+> longer works.  The problem is that when the gen-image script is run in a
+> foreign build chroot, it incorrectly considers the root_fs's chroot to
+> be a "native" chroot and doesn't copy the needed /usr/bin/qemu-*-static
+> binary into it.  This is because both 'uname -m' and 'dpkg
+> --print-architecture' will return the same architecture (the foreign
+> one), so is_native_chroot() returns true.
+> 
+> This did used to work, but I think it stopped working with 5c76a88c0e57
+> ("test-appliance: improve image generation for chroot tar files")
+> because previously it was using 'fakechroot' which doesn't actually
+> change the real root directory, so the /usr/bin directory stayed the
+> same from the kernel's perspective.  But now it uses real chroot.
+> 
+> Fix this by detecting a foreign build chroot by instead mounting
+> binfmt_misc and checking whether there is an entry for qemu-$(uname -m).
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  kvm-xfstests/test-appliance/gen-image | 58 +++++++++++++++------------
+>  1 file changed, 32 insertions(+), 26 deletions(-)
+> 
 
-Grep the help output rather than the binary itself.  This matches the
-detection method that was implemented in xfstests common/config.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- kvm-xfstests/test-appliance/files/root/fs/f2fs/config | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-index 0efcb76..b0c2196 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-@@ -20,7 +20,7 @@ function format_filesystem()
-     local dev="$1"
-     local opts="$2"
- 
--    if grep -q 'force overwrite' /sbin/mkfs.f2fs; then
-+    if /sbin/mkfs.f2fs --help |& grep -q "[[:space:]]-f[[:space:]|]"; then
- 	# f2fs-tools v1.9+
- 	opts+=" -f"
-     fi
--- 
-2.17.0.484.g0c8726318c-goog
-
+Ping.
