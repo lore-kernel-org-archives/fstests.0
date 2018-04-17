@@ -1,29 +1,42 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:56178 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751147AbeDQG6A (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 02:58:00 -0400
-Date: Mon, 16 Apr 2018 23:58:00 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] xfs: cap the length of deduplication requests
-Message-ID: <20180417065800.GA2857@infradead.org>
-References: <20180417051918.GD5203@magnolia>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:58384 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751187AbeDQOlC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Apr 2018 10:41:02 -0400
+Date: Tue, 17 Apr 2018 22:40:59 +0800
+From: Xiong Zhou <xzhou@redhat.com>
+Subject: ioctl FIBMAP for dax gone in v4.17-rc1
+Message-ID: <20180417144059.nwbbynhgq3k3i63q@XZHOUW.usersys.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180417051918.GD5203@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: linux-fsdevel@vger.kernel.org
+Cc: linux-nvdimm@lists.01.org, fstests@vger.kernel.org, sandeen@sandeen.net
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 16, 2018 at 10:19:18PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Since deduplication potentially has to read in all the pages in both
-> files in order to compare the contents, cap the deduplication request
-> length at MAX_RW_COUNT (roughly 2GB) so that we have /some/ upper bound
-> on the request length and can't just lock up the kernel forever.  Found
-> by running generic/304 after commit 1ddae54555b62 ("common/rc: add
-> missing 'local' keywords").
 
-Looks fine.  btrfs limits to 16MB, I guess we don't want to go that low?
+Hi,
+
+FIBMAP ioctl call to file in pmem dax mountpoint, both xfs
+and ext4, starts to fail on v4.17-rc1 Linus tree.
+
++fibmap: Invalid argument
+
+Pass on v4.16.
+Pass on non-dax mountpoint.
+
+We got these in v4.17-rc1:
+6e2608d xfs, dax: introduce xfs_dax_aops
+fb094c9 ext2, dax: introduce ext2_dax_aops
+5f0663b ext4, dax: introduce ext4_dax_aops
+
+And we don't have ->bmap call in these aops, which may lead
+to the ioctl call failure.
+
+Do we have any plan of adding/supporting it ?
+
+xfstests generic/223 covers this issue. If we are not going
+to support this call for dax, we need to fix the testcase.
+
+Thanks,
+Xiong
