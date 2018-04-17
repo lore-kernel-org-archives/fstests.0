@@ -1,145 +1,52 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:60554 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750738AbeDQEGy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 00:06:54 -0400
-Date: Mon, 16 Apr 2018 21:06:41 -0700
+Received: from aserp2120.oracle.com ([141.146.126.78]:33766 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751147AbeDQFTW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 01:19:22 -0400
+Date: Mon, 16 Apr 2018 22:19:18 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] common/xfs: Add require_xfs_db_write_array function
-Message-ID: <20180417040641.GA5210@magnolia>
-References: <20180416060005.GJ2932@desktop>
- <1523869655-20309-1-git-send-email-xuyang.jy@cn.fujitsu.com>
- <20180416172249.GA5201@magnolia>
- <5AD5721C.10709@cn.fujitsu.com>
+Subject: [PATCH] xfs: cap the length of deduplication requests
+Message-ID: <20180417051918.GD5203@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5AD5721C.10709@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: "xuyang.jy" <xuyang.jy@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, david@fromorbit.com, fstests@vger.kernel.org
+To: xfs <linux-xfs@vger.kernel.org>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 17, 2018 at 12:03:40PM +0800, xuyang.jy wrote:
-> on 2018/4/17 1:22, Darrick J. Wong write:
-> 
-> >On Mon, Apr 16, 2018 at 05:07:35PM +0800, yang xu wrote:
-> >>xfsprogs commit 4222d000ed("db: write via array indexing doesn't
-> >>work") fixes a bug that xfs_db write can't support array indexing.
-> >>This function will check whether the bug is fixed on the current
-> >>xfsprogs.
-> >>
-> >>xfs/444 applies the function, and skips if this bug exists.
-> >>
-> >>Signed-off-by: yang xu<xuyang.jy@cn.fujitsu.com>
-> >>---
-> >>  common/xfs    | 18 ++++++++++++++++++
-> >>  tests/xfs/444 |  1 +
-> >>  2 files changed, 19 insertions(+)
-> >>
-> >>diff --git a/common/xfs b/common/xfs
-> >>index 3169f87..c4611a1 100644
-> >>--- a/common/xfs
-> >>+++ b/common/xfs
-> >>@@ -701,3 +701,21 @@ _scratch_xfs_set_sb_field()
-> >>  {
-> >>  	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
-> >>  }
-> >>+
-> >>+#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
-> >>+#xfs_db command to write a specific AGFL index doesn't work.
-> >>+_require_xfs_db_write_array()
-> >>+{
-> >>+	_scratch_xfs_set_metadata_field "bno[32]" "78" "agfl 0">/dev/null 2>&1
-> >This is going to fail randomly unless the caller previously called
-> >_require_scratch to make sure that there's some kind of xfs fs image
-> >sitting on the scratch device (and that there even is a scratch device).
-> >Please document that requirement.  Alternately, consider formatting a xfs
-> >image file in $TEST_DIR and poking that with xfs_db so you don't have to
-> >deal with formatting and cleaning up the scratch device.
-> Hi Darrick
-> 
-> We want to create a xfs image file in /tmp/ and use it, as below:
-> 
-> [root@RHEL7U5Alpha_CLIENT xfstests-dev]# git diff common/xfs
-> diff --git a/common/xfs b/common/xfs
-> index 3169f87..39702f7 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -701,3 +701,19 @@ _scratch_xfs_set_sb_field()
->  {      	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
->  }
-> +
-> +#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
-> +##xfs_db command to write a specific AGFL index doesn't work.
-> +_require_xfs_db_write_array()
-> +{
-> +       local supported=0
-> +
-> +       touch /tmp/$$.img
-> +       $MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=512m>/dev/null 2>&1
-> +       $XFS_DB_PROG -x -c "agfl 0" -c "write bno[32] 78" /tmp/$$.img \
-> +>/dev/null 2>&1
-> +       $XFS_DB_PROG -x -c "agfl 0" -c "print bno[32]" /tmp/$$.img \
-> +               | grep -q "bno\[32\] = 78"&&  supported=1
-> +       rm -f /tmp/$$.img
-> +       [ $supported -eq 0 ]&&  _notrun "xfs_db write can't support array"
-> +}
-> [root@RHEL7U5Alpha_CLIENT xfstests-dev]#
-> 
-> How about this modification?
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-$TEST_DIR/$seqres.img, not /tmp/$$.img
+Since deduplication potentially has to read in all the pages in both
+files in order to compare the contents, cap the deduplication request
+length at MAX_RW_COUNT (roughly 2GB) so that we have /some/ upper bound
+on the request length and can't just lock up the kernel forever.  Found
+by running generic/304 after commit 1ddae54555b62 ("common/rc: add
+missing 'local' keywords").
 
-Don't assume anything's writable (and big enough for fs images) if it
-isn't under $TEST_DIR or $SCRATCH_MNT.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ fs/xfs/xfs_file.c |    9 +++++++++
+ 1 file changed, 9 insertions(+)
 
---D
-
-> 
-> >>+
-> >>+	# Before xfsprogs commit 0ebbf1d58898 ("db: limit AGFL bno
-> >>+	# arrayi printing), When asking for a single agfl entry,
-> >>+	# the result outputs the entire remainder of the array
-> >>+	# starting at the given index.
-> >>+	# It is difficult to extract single entry values.
-> >>+	# So filter useless information.
-> >>+	bno_value=$(_scratch_xfs_get_metadata_field "bno[32]" \
-> >>+		"agfl 0" |sed -e 's/ .*$//g' | sed -e 's/^.*://g')
-> >>+
-> >>+	[ "${bno_value}" != "78" ]&&  _notrun "xfs_db write can't support array"
-> >It seems like a bad idea to leave a potentially corrupt scratch fs lying
-> >around after this helper exits.
-> Agreed.  I will use a temp xfs image file.
-> 
-> Thanks
-> Yang Xu
-> 
-> >--D
-> >
-> >>+}
-> >>diff --git a/tests/xfs/444 b/tests/xfs/444
-> >>index 141be52..9700422 100755
-> >>--- a/tests/xfs/444
-> >>+++ b/tests/xfs/444
-> >>@@ -54,6 +54,7 @@ _supported_os Linux
-> >>  _require_check_dmesg
-> >>  _require_scratch
-> >>  _require_test_program "punch-alternating"
-> >>+_require_xfs_db_write_array
-> >>
-> >>  # This is only a v5 filesystem problem
-> >>  _require_scratch_xfs_crc
-> >>-- 
-> >>1.8.3.1
-> >>
-> >>
-> >>
-> >>--
-> >>To unsubscribe from this list: send the line "unsubscribe fstests" in
-> >>the body of a message tomajordomo@vger.kernel.org
-> >>More majordomo info athttp://vger.kernel.org/majordomo-info.html
-> >.
-> >
-> 
-> 
-> 
+diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
+index 299aee4..9fd9dd7 100644
+--- a/fs/xfs/xfs_file.c
++++ b/fs/xfs/xfs_file.c
+@@ -876,8 +876,17 @@ xfs_file_dedupe_range(
+ 	struct file	*dst_file,
+ 	u64		dst_loff)
+ {
++	struct inode	*srci = file_inode(src_file);
++	u64		max_dedupe;
+ 	int		error;
+ 
++	/*
++	 * Since we have to read all these pages in to compare them, cut
++	 * it off at MAX_RW_COUNT rounded down to the nearest block.
++	 */
++	max_dedupe = MAX_RW_COUNT & ~(i_blocksize(srci) - 1);
++	if (len > max_dedupe)
++		len = max_dedupe;
+ 	error = xfs_reflink_remap_range(src_file, loff, dst_file, dst_loff,
+ 				     len, true);
+ 	if (error)
