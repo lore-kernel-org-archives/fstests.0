@@ -1,46 +1,72 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:42464 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750821AbeDQFUj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 01:20:39 -0400
-Date: Mon, 16 Apr 2018 22:20:35 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] generic/304: only dedupe the last 64k of the single byte file
-Message-ID: <20180417052035.GC5201@magnolia>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:26883 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751191AbeDQGMD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 02:12:03 -0400
+From: yang xu <xuyang.jy@cn.fujitsu.com>
+Subject: [PATCH v3] common/xfs: Add require_xfs_db_write_array function
+Date: Tue, 17 Apr 2018 14:11:40 +0800
+Message-ID: <1523945500-10819-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+In-Reply-To: <20180417040641.GA5210@magnolia>
+References: <20180417040641.GA5210@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: darrick.wong@oracle.com
+Cc: guaneryu@gmail.com, david@fromorbit.com, fstests@vger.kernel.org, yang xu <xuyang.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+xfsprogs commit 4222d00("db: write via array indexing doesn't
+work") fixes a bug that xfs_db write can't support array indexing.
+This function will check whether the bug is fixed on the current
+xfsprogs.
 
-Commit 1ddae54555b62 ("common/rc: add missing 'local' keywords") exposed
-a long-hidden bug in generic/304 -- previously we'd set len to 8EiB, but
-_pwrite_byte reset it to 1 because the helper clumsily polluted the
-caller's variable namespace.  Now that's fixed, but we send an 8EiB
-dedupe request to the kernel, which on XFS locks up the kernel while
-doing this.  The point of this test is to demonstrate that one cannot
-dedupe the last byte of a (2^63-1) byte file (that's the way the
-interface has behaved historically), so start at 64k below that instead
-of offset zero.
+xfs/444 applies the function, and skips if this bug exists.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: yang xu <xuyang.jy@cn.fujitsu.com>
 ---
- tests/generic/304 |    2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/xfs    | 17 +++++++++++++++++
+ tests/xfs/444 |  1 +
+ 2 files changed, 18 insertions(+)
 
-diff --git a/tests/generic/304 b/tests/generic/304
-index 6c36a68..ff8ddf8 100755
---- a/tests/generic/304
-+++ b/tests/generic/304
-@@ -63,7 +63,7 @@ _pwrite_byte 0x61 $bigoff 1 $testdir/file3 >> $seqres.full
- _pwrite_byte 0x61 1048575 1 $testdir/file2 >> $seqres.full
+diff --git a/common/xfs b/common/xfs
+index 3169f87..0b59994 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -701,3 +701,20 @@ _scratch_xfs_set_sb_field()
+ {
+ 	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
+ }
++
++#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
++##xfs_db command to write a specific AGFL index doesn't work.
++_require_xfs_db_write_array()
++{
++	local supported=0
++
++	_require_test
++	touch $TEST_DIR/$seq.img
++	$MKFS_XFS_PROG -d file,name=$TEST_DIR/$seq.img,size=512m >/dev/null 2>&1
++	$XFS_DB_PROG -x -c "agfl 0" -c "write bno[32] 78" $TEST_DIR/$seq.img \
++		>/dev/null 2>&1
++	$XFS_DB_PROG -x -c "agfl 0" -c "print bno[32]" $TEST_DIR/$seq.img \
++		| grep -q "bno\[32\] = 78" && supported=1
++	rm -f $TEST_DIR/$seq.img
++	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
++}
+diff --git a/tests/xfs/444 b/tests/xfs/444
+index 141be52..9700422 100755
+--- a/tests/xfs/444
++++ b/tests/xfs/444
+@@ -54,6 +54,7 @@ _supported_os Linux
+ _require_check_dmesg
+ _require_scratch
+ _require_test_program "punch-alternating"
++_require_xfs_db_write_array
  
- echo "Dedupe large single byte file"
--_dedupe_range $testdir/file1 0 $testdir/file3 0 $len \
-+_dedupe_range $testdir/file1 $bigoff_64k $testdir/file3 $bigoff_64k 65536 \
- 	2>&1 >> $seqres.full | _filter_dedupe_error
- 
- echo "Dedupe large empty file"
+ # This is only a v5 filesystem problem
+ _require_scratch_xfs_crc
+-- 
+1.8.3.1
+
+
+
