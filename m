@@ -1,103 +1,207 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:51101 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750972AbeDQAPF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 20:15:05 -0400
-Date: Tue, 17 Apr 2018 10:07:36 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: Symlink not persisted even after fsync
-Message-ID: <20180417000736.GI23861@dastard>
-References: <CAPaz=E+-baGSWhL3nD-8X4jn6rKdn2AVGLeqWh3EY5Nh-RodRA@mail.gmail.com>
- <CAOQ4uxhRoAnxr36Cy1pov+ExnNJ8Y+inmUc7chD77ONPt=u9qw@mail.gmail.com>
- <CA+EzBbCFURDs77xiL3ECf7+4irrywbmD1HdsUSUYE_oeonbo8A@mail.gmail.com>
- <20180414012017.GF5572@dastard>
- <CAPaz=EJrOc7dBE+gBf=Gx0W-4_q0GwTrRhchquPveWs-m-Djeg@mail.gmail.com>
- <20180414215529.GG5572@dastard>
- <20180415011735.GB21830@thunk.org>
- <CAHWVdUXAyyeTGNXrtTTc+tUbA3t9TUjJPSF=M4Cetj4+d1w3eQ@mail.gmail.com>
- <20180415141338.GA22870@thunk.org>
- <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:60790 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750972AbeDQAet (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 20:34:49 -0400
+Date: Mon, 16 Apr 2018 17:34:44 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] generic: test exceeding max file size via INSERT_RANGE
+Message-ID: <20180417003444.GB5201@magnolia>
+References: <20180416212435.203505-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
+In-Reply-To: <20180416212435.203505-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Vijay Chidambaram <vijay@cs.utexas.edu>
-Cc: "Theodore Y. Ts'o" <tytso@mit.edu>, Jayashree Mohan <jayashree2912@gmail.com>, Amir Goldstein <amir73il@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 15, 2018 at 07:10:52PM -0500, Vijay Chidambaram wrote:
-> Thanks! As I mentioned before, this is useful. I have a follow-up
-> question. Consider the following workload:
+On Mon, Apr 16, 2018 at 02:24:35PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
->  creat foo
->  link (foo, A/bar)
->  fsync(foo)
->  crash
+> Note: this test will fail on ext4 and xfs until the fixes are applied.
+
+Oooh, a regression test!  Yay!
+
+> -----8<-----
 > 
-> In this case, after the file system recovers, do we expect foo's link
-> count to be 2 or 1? 
+> Test how the "insert range" fallocate operation interacts with the
+> maximum file size (s_maxbytes).
+> 
+> - Shift extents past the max file size (exposes an ext4 bug).
+> - Increase i_size past the max file size (exposes an xfs bug).
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  tests/generic/484     | 115 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/484.out |   4 ++
+>  tests/generic/group   |   1 +
+>  3 files changed, 120 insertions(+)
+>  create mode 100755 tests/generic/484
+>  create mode 100644 tests/generic/484.out
+> 
+> diff --git a/tests/generic/484 b/tests/generic/484
+> new file mode 100755
+> index 00000000..7b40b3c3
+> --- /dev/null
+> +++ b/tests/generic/484
+> @@ -0,0 +1,115 @@
+> +#! /bin/bash
+> +# FS QA Test No. 484
+> +#
+> +# Regression test for:
+> +#    ???????????? ("ext4: prevent right-shifting extents beyond EXT_MAX_BLOCKS")
+> +#    ???????????? ("xfs: prevent creating negative-sized file via INSERT_RANGE")
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Google, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $testfile
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_math
+> +_require_xfs_io_command "falloc" "-k"
+> +_require_xfs_io_command "finsert"
+> +_require_xfs_io_command "truncate"
+> +
+> +# Get the maximum size of a file in $TEST_DIR (s_maxbytes).  On ext4 this will
+> +# be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
+> +get_max_file_size()
+> +{
+> +	local testfile=$TEST_DIR/maxfilesize.$seq
+> +	local l=0
+> +	local r=9223372036854775807 # LLONG_MAX
+> +
+> +	rm -f $testfile
+> +	while (( l < r )); do
+> +		# Use _math() to avoid signed integer overflow.
+> +		local m=$(_math "($l + $r + 1) / 2")
+> +		if $XFS_IO_PROG -f -c "truncate $m" $testfile \
+> +			|& grep -q 'File too large'
+> +		then
+> +			r=$(( m - 1 ))
+> +		else
+> +			l=$m
+> +		fi
+> +	done
+> +	echo $l
+> +}
 
-So, strictly ordered behaviour:
+This will also be useful for generic/30[34], but I'll convert those
+after this lands.
 
-create foo:
-	- creates dirent in inode B and new inode A in an atomic
-	  transaction sequence #1
+> +
+> +block_size=$(_get_block_size $TEST_DIR)
 
-link foo -> A/bar
-	- creates dirent in inode C and bumps inode A link count in
-	  an atomic transaction seqeunce #2.
+_get_file_block_size, for filesystems whose minimum file mapping size is
+larger than a filesystem block.
 
-fsync foo
-	- looks at inode A, sees it's "last modification" sequence
-	  counter as #2
-	- flushes all transactions up to and including #2 to the
-	  journal.
+(Currently this is theoretical because the only fs that does that is
+ocfs2, and ocfs2 doesn't know about INSERT_RANGE.)
 
-See the dependency chain? Both the inodes and dirents in the create
-operation and the link operation are chained to the inode foo via
-the atomic transactions. Hence when we flush foo, we also flush the
-dependent changes because of the change atomicity requirements....
+> +max_file_size=$(get_max_file_size)
+> +max_blocks=$((max_file_size / block_size))
+> +testfile=$TEST_DIR/testfile.$seq
+> +
+> +echo "# With KEEP_SIZE"
+> +rm -f "$testfile"
+> +
+> +# Add an extent at the beginning of the file.  With ext4, this is needed to
+> +# reproduce the bug where the extents appear out of order later.
+> +$XFS_IO_PROG -f -c "falloc 0 $((2 * block_size))" "$testfile"
+> +
+> +# Add an extent just below s_maxbytes, without changing i_size (i.e. with -k).
+> +# The out-of-order extents bug can't be reproduced if i_size is changed, because
+> +# then the range insertion fails due to the new i_size being > s_maxbytes.
+> +$XFS_IO_PROG -c "falloc -k $(( (max_blocks - 1) * $block_size )) $block_size" \
+> +	"$testfile"
+> +
+> +# Insert an extent at the beginning of the file.  With the ext4 bug, this caused
+> +# the logical block number of the extent just below s_maxbytes to wrap around,
+> +# causing the extents to get out of order, causing corruption detected by
+> +# e2fsck.  With the fix, the range insertion fails with EINVAL.  Though, with
+> +# xfs and f2fs the insertion succeeds, resulting in extents beyond s_maxbytes,
+> +# but there is no wraparound -- which is arguably okay.  So we allow either
+> +# behavior and just rely on fsck detecting if something went wrong.
+> +$XFS_IO_PROG -c "finsert 0 $((2 * block_size))" "$testfile" &>>$seqres.full
+> +
+> +# Also do the same test, but with changing i_size (i.e. without -k).  The
+> +# insertion should fail with EFBIG.  This exposed an XFS bug where i_size + len
+> +# underwent signed overflow, resulting in a negative-sized file.
+> +echo "# Without KEEP_SIZE"
+> +rm -f "$testfile"
+> +$XFS_IO_PROG -f -c "falloc 0 $((2 * block_size))" "$testfile"
+> +$XFS_IO_PROG -c "falloc $(( (max_blocks - 1) * $block_size )) $block_size" \
+> +	"$testfile"
+> +$XFS_IO_PROG -c "finsert 0 $((2 * block_size))" "$testfile"
 
-> I would say 2,
+Heh. :)
 
-Correct, for strict ordering. But....
+/me goes to try patch + test.
 
-> but POSIX is silent on this,
+--D
 
-Well, it's not silent, POSIX explicitly allows for fsync() to do
-nothing and report success. Hence we can't really look to POSIX to
-define how fsync() should behave.
-
-> so
-> thought I would confirm. The tricky part here is we are not calling
-> fsync() on directory A.
-
-Right. But directory A has a dependent change linked to foo. If we
-fsync() foo, we are persisting the link count change in that file,
-and hence all the other changes related to that link count change
-must also be flushed. Similarly, all the cahnges related to the
-creation on foo must be flushed, too.
-
-> In this case, its not a symlink; its a hard link, so I would say the
-> link count for foo should be 2.
-
-Right - that's the "reference counted object dependency" I refered
-to. i.e. it's a bi-direction atomic dependency - either we show both
-the new dirent and the link count change, or we show neither of
-them.  Hence fsync on one object implies that we are also persisting
-the related changes in the other object, too.
-
-> But btrfs and F2FS show link count of
-> 1 after a crash.
-
-That may be valid if the dirent A/bar does not exist after recovery,
-but it also means fsync() hasn't actually guaranteed inode changes
-made prior to the fsync to be persistent on disk. i.e. that's a
-violation of ordered metadata semantics and probably a bug.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/484.out b/tests/generic/484.out
+> new file mode 100644
+> index 00000000..4def4fc0
+> --- /dev/null
+> +++ b/tests/generic/484.out
+> @@ -0,0 +1,4 @@
+> +QA output created by 484
+> +# With KEEP_SIZE
+> +# Without KEEP_SIZE
+> +fallocate: File too large
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ea8e51b3..3f93dc4d 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -486,3 +486,4 @@
+>  481 auto quick log metadata
+>  482 auto metadata replay
+>  483 auto quick log metadata
+> +484 auto quick insert
+> -- 
+> 2.17.0.484.g0c8726318c-goog
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
