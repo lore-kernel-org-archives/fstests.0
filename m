@@ -1,98 +1,145 @@
-Received: from newman.cs.utexas.edu ([128.83.139.110]:40126 "EHLO
-        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751270AbeDQC5Z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 22:57:25 -0400
+Received: from aserp2130.oracle.com ([141.146.126.79]:60554 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750738AbeDQEGy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 00:06:54 -0400
+Date: Mon, 16 Apr 2018 21:06:41 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] common/xfs: Add require_xfs_db_write_array function
+Message-ID: <20180417040641.GA5210@magnolia>
+References: <20180416060005.GJ2932@desktop>
+ <1523869655-20309-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+ <20180416172249.GA5201@magnolia>
+ <5AD5721C.10709@cn.fujitsu.com>
 MIME-Version: 1.0
-Reply-To: vijay@cs.utexas.edu
-In-Reply-To: <20180417000736.GI23861@dastard>
-References: <CAPaz=E+-baGSWhL3nD-8X4jn6rKdn2AVGLeqWh3EY5Nh-RodRA@mail.gmail.com>
- <CAOQ4uxhRoAnxr36Cy1pov+ExnNJ8Y+inmUc7chD77ONPt=u9qw@mail.gmail.com>
- <CA+EzBbCFURDs77xiL3ECf7+4irrywbmD1HdsUSUYE_oeonbo8A@mail.gmail.com>
- <20180414012017.GF5572@dastard> <CAPaz=EJrOc7dBE+gBf=Gx0W-4_q0GwTrRhchquPveWs-m-Djeg@mail.gmail.com>
- <20180414215529.GG5572@dastard> <20180415011735.GB21830@thunk.org>
- <CAHWVdUXAyyeTGNXrtTTc+tUbA3t9TUjJPSF=M4Cetj4+d1w3eQ@mail.gmail.com>
- <20180415141338.GA22870@thunk.org> <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
- <20180417000736.GI23861@dastard>
-From: Vijay Chidambaram <vijay@cs.utexas.edu>
-Date: Mon, 16 Apr 2018 21:56:36 -0500
-Message-ID: <CAPaz=ELss9aV71StqYLzjRuHNpkQ=WmWWrcUwd2igydkjCrh9g@mail.gmail.com>
-Subject: Re: Symlink not persisted even after fsync
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5AD5721C.10709@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: "Theodore Y. Ts'o" <tytso@mit.edu>, Jayashree Mohan <jayashree2912@gmail.com>, Amir Goldstein <amir73il@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net
+To: "xuyang.jy" <xuyang.jy@cn.fujitsu.com>
+Cc: guaneryu@gmail.com, david@fromorbit.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 16, 2018 at 7:07 PM, Dave Chinner <david@fromorbit.com> wrote:
-> On Sun, Apr 15, 2018 at 07:10:52PM -0500, Vijay Chidambaram wrote:
->> Thanks! As I mentioned before, this is useful. I have a follow-up
->> question. Consider the following workload:
->>
->>  creat foo
->>  link (foo, A/bar)
->>  fsync(foo)
->>  crash
->>
->> In this case, after the file system recovers, do we expect foo's link
->> count to be 2 or 1?
->
-> So, strictly ordered behaviour:
->
-> create foo:
->         - creates dirent in inode B and new inode A in an atomic
->           transaction sequence #1
->
-> link foo -> A/bar
->         - creates dirent in inode C and bumps inode A link count in
->           an atomic transaction seqeunce #2.
->
-> fsync foo
->         - looks at inode A, sees it's "last modification" sequence
->           counter as #2
->         - flushes all transactions up to and including #2 to the
->           journal.
->
-> See the dependency chain? Both the inodes and dirents in the create
-> operation and the link operation are chained to the inode foo via
-> the atomic transactions. Hence when we flush foo, we also flush the
-> dependent changes because of the change atomicity requirements....
->
->> I would say 2,
->
-> Correct, for strict ordering. But....
->
->> but POSIX is silent on this,
->
-> Well, it's not silent, POSIX explicitly allows for fsync() to do
-> nothing and report success. Hence we can't really look to POSIX to
-> define how fsync() should behave.
->
->> so
->> thought I would confirm. The tricky part here is we are not calling
->> fsync() on directory A.
->
-> Right. But directory A has a dependent change linked to foo. If we
-> fsync() foo, we are persisting the link count change in that file,
-> and hence all the other changes related to that link count change
-> must also be flushed. Similarly, all the cahnges related to the
-> creation on foo must be flushed, too.
->
->> In this case, its not a symlink; its a hard link, so I would say the
->> link count for foo should be 2.
->
-> Right - that's the "reference counted object dependency" I refered
-> to. i.e. it's a bi-direction atomic dependency - either we show both
-> the new dirent and the link count change, or we show neither of
-> them.  Hence fsync on one object implies that we are also persisting
-> the related changes in the other object, too.
->
->> But btrfs and F2FS show link count of
->> 1 after a crash.
->
-> That may be valid if the dirent A/bar does not exist after recovery,
-> but it also means fsync() hasn't actually guaranteed inode changes
-> made prior to the fsync to be persistent on disk. i.e. that's a
-> violation of ordered metadata semantics and probably a bug.
+On Tue, Apr 17, 2018 at 12:03:40PM +0800, xuyang.jy wrote:
+> on 2018/4/17 1:22, Darrick J. Wong write:
+> 
+> >On Mon, Apr 16, 2018 at 05:07:35PM +0800, yang xu wrote:
+> >>xfsprogs commit 4222d000ed("db: write via array indexing doesn't
+> >>work") fixes a bug that xfs_db write can't support array indexing.
+> >>This function will check whether the bug is fixed on the current
+> >>xfsprogs.
+> >>
+> >>xfs/444 applies the function, and skips if this bug exists.
+> >>
+> >>Signed-off-by: yang xu<xuyang.jy@cn.fujitsu.com>
+> >>---
+> >>  common/xfs    | 18 ++++++++++++++++++
+> >>  tests/xfs/444 |  1 +
+> >>  2 files changed, 19 insertions(+)
+> >>
+> >>diff --git a/common/xfs b/common/xfs
+> >>index 3169f87..c4611a1 100644
+> >>--- a/common/xfs
+> >>+++ b/common/xfs
+> >>@@ -701,3 +701,21 @@ _scratch_xfs_set_sb_field()
+> >>  {
+> >>  	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
+> >>  }
+> >>+
+> >>+#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
+> >>+#xfs_db command to write a specific AGFL index doesn't work.
+> >>+_require_xfs_db_write_array()
+> >>+{
+> >>+	_scratch_xfs_set_metadata_field "bno[32]" "78" "agfl 0">/dev/null 2>&1
+> >This is going to fail randomly unless the caller previously called
+> >_require_scratch to make sure that there's some kind of xfs fs image
+> >sitting on the scratch device (and that there even is a scratch device).
+> >Please document that requirement.  Alternately, consider formatting a xfs
+> >image file in $TEST_DIR and poking that with xfs_db so you don't have to
+> >deal with formatting and cleaning up the scratch device.
+> Hi Darrick
+> 
+> We want to create a xfs image file in /tmp/ and use it, as below:
+> 
+> [root@RHEL7U5Alpha_CLIENT xfstests-dev]# git diff common/xfs
+> diff --git a/common/xfs b/common/xfs
+> index 3169f87..39702f7 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -701,3 +701,19 @@ _scratch_xfs_set_sb_field()
+>  {      	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
+>  }
+> +
+> +#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
+> +##xfs_db command to write a specific AGFL index doesn't work.
+> +_require_xfs_db_write_array()
+> +{
+> +       local supported=0
+> +
+> +       touch /tmp/$$.img
+> +       $MKFS_XFS_PROG -d file,name=/tmp/$$.img,size=512m>/dev/null 2>&1
+> +       $XFS_DB_PROG -x -c "agfl 0" -c "write bno[32] 78" /tmp/$$.img \
+> +>/dev/null 2>&1
+> +       $XFS_DB_PROG -x -c "agfl 0" -c "print bno[32]" /tmp/$$.img \
+> +               | grep -q "bno\[32\] = 78"&&  supported=1
+> +       rm -f /tmp/$$.img
+> +       [ $supported -eq 0 ]&&  _notrun "xfs_db write can't support array"
+> +}
+> [root@RHEL7U5Alpha_CLIENT xfstests-dev]#
+> 
+> How about this modification?
 
-Great, this matches our understanding perfectly. We have separately
-posted to the btrfs mailing list to confirm it is a bug. Thanks!
+$TEST_DIR/$seqres.img, not /tmp/$$.img
+
+Don't assume anything's writable (and big enough for fs images) if it
+isn't under $TEST_DIR or $SCRATCH_MNT.
+
+--D
+
+> 
+> >>+
+> >>+	# Before xfsprogs commit 0ebbf1d58898 ("db: limit AGFL bno
+> >>+	# arrayi printing), When asking for a single agfl entry,
+> >>+	# the result outputs the entire remainder of the array
+> >>+	# starting at the given index.
+> >>+	# It is difficult to extract single entry values.
+> >>+	# So filter useless information.
+> >>+	bno_value=$(_scratch_xfs_get_metadata_field "bno[32]" \
+> >>+		"agfl 0" |sed -e 's/ .*$//g' | sed -e 's/^.*://g')
+> >>+
+> >>+	[ "${bno_value}" != "78" ]&&  _notrun "xfs_db write can't support array"
+> >It seems like a bad idea to leave a potentially corrupt scratch fs lying
+> >around after this helper exits.
+> Agreed.  I will use a temp xfs image file.
+> 
+> Thanks
+> Yang Xu
+> 
+> >--D
+> >
+> >>+}
+> >>diff --git a/tests/xfs/444 b/tests/xfs/444
+> >>index 141be52..9700422 100755
+> >>--- a/tests/xfs/444
+> >>+++ b/tests/xfs/444
+> >>@@ -54,6 +54,7 @@ _supported_os Linux
+> >>  _require_check_dmesg
+> >>  _require_scratch
+> >>  _require_test_program "punch-alternating"
+> >>+_require_xfs_db_write_array
+> >>
+> >>  # This is only a v5 filesystem problem
+> >>  _require_scratch_xfs_crc
+> >>-- 
+> >>1.8.3.1
+> >>
+> >>
+> >>
+> >>--
+> >>To unsubscribe from this list: send the line "unsubscribe fstests" in
+> >>the body of a message tomajordomo@vger.kernel.org
+> >>More majordomo info athttp://vger.kernel.org/majordomo-info.html
+> >.
+> >
+> 
+> 
+> 
