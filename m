@@ -1,50 +1,103 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:46775 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751002AbeDPWIk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 18:08:40 -0400
-Received: by mail-pl0-f67.google.com with SMTP id 59-v6so10789843plc.13
-        for <fstests@vger.kernel.org>; Mon, 16 Apr 2018 15:08:39 -0700 (PDT)
-Date: Mon, 16 Apr 2018 15:08:37 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: [xfstests-bld PATCH] gen-image: exclude packages for other
- architectures
-Message-ID: <20180416220837.GD10051@gmail.com>
-References: <20180404001512.81876-1-ebiggers@google.com>
+Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:51101 "EHLO
+        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750972AbeDQAPF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Apr 2018 20:15:05 -0400
+Date: Tue, 17 Apr 2018 10:07:36 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Symlink not persisted even after fsync
+Message-ID: <20180417000736.GI23861@dastard>
+References: <CAPaz=E+-baGSWhL3nD-8X4jn6rKdn2AVGLeqWh3EY5Nh-RodRA@mail.gmail.com>
+ <CAOQ4uxhRoAnxr36Cy1pov+ExnNJ8Y+inmUc7chD77ONPt=u9qw@mail.gmail.com>
+ <CA+EzBbCFURDs77xiL3ECf7+4irrywbmD1HdsUSUYE_oeonbo8A@mail.gmail.com>
+ <20180414012017.GF5572@dastard>
+ <CAPaz=EJrOc7dBE+gBf=Gx0W-4_q0GwTrRhchquPveWs-m-Djeg@mail.gmail.com>
+ <20180414215529.GG5572@dastard>
+ <20180415011735.GB21830@thunk.org>
+ <CAHWVdUXAyyeTGNXrtTTc+tUbA3t9TUjJPSF=M4Cetj4+d1w3eQ@mail.gmail.com>
+ <20180415141338.GA22870@thunk.org>
+ <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180404001512.81876-1-ebiggers@google.com>
+In-Reply-To: <CAPaz=ELkYavvWYuMg=t+L_nSZ7fZ8CkaZr-qfGVN3QfydbOh7w@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
+To: Vijay Chidambaram <vijay@cs.utexas.edu>
+Cc: "Theodore Y. Ts'o" <tytso@mit.edu>, Jayashree Mohan <jayashree2912@gmail.com>, Amir Goldstein <amir73il@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 03, 2018 at 05:15:12PM -0700, Eric Biggers wrote:
-> Now that gen-image is run with '-e', it fails if the debs/ directory
-> contains packages for multiple architectures.  Fix it by installing just
-> the packages for the needed architecture or for "all" architectures.
+On Sun, Apr 15, 2018 at 07:10:52PM -0500, Vijay Chidambaram wrote:
+> Thanks! As I mentioned before, this is useful. I have a follow-up
+> question. Consider the following workload:
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  kvm-xfstests/test-appliance/gen-image | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  creat foo
+>  link (foo, A/bar)
+>  fsync(foo)
+>  crash
 > 
-> diff --git a/kvm-xfstests/test-appliance/gen-image b/kvm-xfstests/test-appliance/gen-image
-> index 8d4bebb..2755cb5 100755
-> --- a/kvm-xfstests/test-appliance/gen-image
-> +++ b/kvm-xfstests/test-appliance/gen-image
-> @@ -283,7 +283,8 @@ if test -f "backport-packages-$SUITE" ; then
->      fi
->      rm -rf "$ROOTDIR/debootstrap"
->  fi
-> -DEBS=$(find debs -name \*.deb)
-> +DEBIAN_ARCH="$(dpkg --print-architecture)"
-> +DEBS="$(find debs -name "*_${DEBIAN_ARCH}.deb" -o -name "*_all.deb")"
->  if test -n "$DEBS"
->  then
->      run_in_chroot "dpkg --ignore-depends=e2fsprogs --auto-deconfigure -i $(echo $DEBS)"
-> -- 
-> 2.17.0.484.g0c8726318c-goog
-> 
+> In this case, after the file system recovers, do we expect foo's link
+> count to be 2 or 1? 
 
-Ping.
+So, strictly ordered behaviour:
+
+create foo:
+	- creates dirent in inode B and new inode A in an atomic
+	  transaction sequence #1
+
+link foo -> A/bar
+	- creates dirent in inode C and bumps inode A link count in
+	  an atomic transaction seqeunce #2.
+
+fsync foo
+	- looks at inode A, sees it's "last modification" sequence
+	  counter as #2
+	- flushes all transactions up to and including #2 to the
+	  journal.
+
+See the dependency chain? Both the inodes and dirents in the create
+operation and the link operation are chained to the inode foo via
+the atomic transactions. Hence when we flush foo, we also flush the
+dependent changes because of the change atomicity requirements....
+
+> I would say 2,
+
+Correct, for strict ordering. But....
+
+> but POSIX is silent on this,
+
+Well, it's not silent, POSIX explicitly allows for fsync() to do
+nothing and report success. Hence we can't really look to POSIX to
+define how fsync() should behave.
+
+> so
+> thought I would confirm. The tricky part here is we are not calling
+> fsync() on directory A.
+
+Right. But directory A has a dependent change linked to foo. If we
+fsync() foo, we are persisting the link count change in that file,
+and hence all the other changes related to that link count change
+must also be flushed. Similarly, all the cahnges related to the
+creation on foo must be flushed, too.
+
+> In this case, its not a symlink; its a hard link, so I would say the
+> link count for foo should be 2.
+
+Right - that's the "reference counted object dependency" I refered
+to. i.e. it's a bi-direction atomic dependency - either we show both
+the new dirent and the link count change, or we show neither of
+them.  Hence fsync on one object implies that we are also persisting
+the related changes in the other object, too.
+
+> But btrfs and F2FS show link count of
+> 1 after a crash.
+
+That may be valid if the dirent A/bar does not exist after recovery,
+but it also means fsync() hasn't actually guaranteed inode changes
+made prior to the fsync to be persistent on disk. i.e. that's a
+violation of ordered metadata semantics and probably a bug.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
