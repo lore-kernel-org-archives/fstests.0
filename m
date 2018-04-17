@@ -1,82 +1,85 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:54206 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752730AbeDQRu5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 13:50:57 -0400
-Date: Tue, 17 Apr 2018 10:50:07 -0700
+Received: from userp2120.oracle.com ([156.151.31.85]:54124 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751157AbeDQR70 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 13:59:26 -0400
+Date: Tue, 17 Apr 2018 10:59:17 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: ioctl FIBMAP for dax gone in v4.17-rc1
-Message-ID: <20180417175007.GB5210@magnolia>
-References: <20180417144059.nwbbynhgq3k3i63q@XZHOUW.usersys.redhat.com>
- <20180417161056.GA24257@infradead.org>
- <CAPcyv4i05nP=wmOMwKFbdwqBrYXpcPBCmR4g2b4w8vOZaCBEnQ@mail.gmail.com>
- <20180417165756.GC24738@magnolia>
- <BE1492A6-DF52-428C-A3CE-E91F0ACC0ADA@dilger.ca>
+Subject: Re: [PATCH v3] common/xfs: Add require_xfs_db_write_array function
+Message-ID: <20180417175917.GD5201@magnolia>
+References: <20180417040641.GA5210@magnolia>
+ <1523945500-10819-1-git-send-email-xuyang.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <BE1492A6-DF52-428C-A3CE-E91F0ACC0ADA@dilger.ca>
+In-Reply-To: <1523945500-10819-1-git-send-email-xuyang.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Andreas Dilger <adilger@dilger.ca>
-Cc: Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@infradead.org>, Xiong Zhou <xzhou@redhat.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>
+To: yang xu <xuyang.jy@cn.fujitsu.com>
+Cc: guaneryu@gmail.com, david@fromorbit.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 17, 2018 at 11:40:00AM -0600, Andreas Dilger wrote:
-> On Apr 17, 2018, at 10:57 AM, Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> > 
-> > On Tue, Apr 17, 2018 at 09:53:47AM -0700, Dan Williams wrote:
-> >> On Tue, Apr 17, 2018 at 9:10 AM, Christoph Hellwig <hch@infradead.org> wrote:
-> >>> On Tue, Apr 17, 2018 at 10:40:59PM +0800, Xiong Zhou wrote:
-> >>>> We got these in v4.17-rc1:
-> >>>> 6e2608d xfs, dax: introduce xfs_dax_aops
-> >>>> fb094c9 ext2, dax: introduce ext2_dax_aops
-> >>>> 5f0663b ext4, dax: introduce ext4_dax_aops
-> >>>> 
-> >>>> And we don't have ->bmap call in these aops, which may lead
-> >>>> to the ioctl call failure.
-> >>>> 
-> >>>> Do we have any plan of adding/supporting it ?
-> >>>> 
-> >>>> xfstests generic/223 covers this issue. If we are not going
-> >>>> to support this call for dax, we need to fix the testcase.
-> >>> 
-> >>> Not supporting ->bmap is a good thing as it is hightly dangerous.
-> >> 
-> >> I take this to mean "don't fix, it is another casualty of dax being
-> >> experimental and it won't be coming back". I can get on board with
-> >> that.
-> >> 
-> >> Otherwise, I was about to send a series adding bmap to {xfs,ext2,ext4}_dax_ops.
-> > 
-> > Frankly I'd rather see the swapfile code learn how to iomap and then we
-> > can get rid of bmap in xfs entirely.
+On Tue, Apr 17, 2018 at 02:11:40PM +0800, yang xu wrote:
+> xfsprogs commit 4222d00("db: write via array indexing doesn't
+> work") fixes a bug that xfs_db write can't support array indexing.
+> This function will check whether the bug is fixed on the current
+> xfsprogs.
 > 
-> Is anyone still using LILO to boot?  It needed FIBMAP support to map the
-> kernel image for booting.  I don't know if Grub needs FIBMAP support for
-> the early boot stages or not (it has minimal filesystem support in the
-> later stages), but it would be a shame if it wasn't possible to boot an
-> all-NVRAM system as a result of a missing ->bmap() method.  Alternately,
-> convince the Grub folks to use FIEMAP if that is available...
+> xfs/444 applies the function, and skips if this bug exists.
+> 
+> Signed-off-by: yang xu <xuyang.jy@cn.fujitsu.com>
+> ---
+>  common/xfs    | 17 +++++++++++++++++
+>  tests/xfs/444 |  1 +
+>  2 files changed, 18 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 3169f87..0b59994 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -701,3 +701,20 @@ _scratch_xfs_set_sb_field()
+>  {
+>  	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
+>  }
+> +
+> +#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
+> +##xfs_db command to write a specific AGFL index doesn't work.
+> +_require_xfs_db_write_array()
+> +{
+> +	local supported=0
+> +
+> +	_require_test
+> +	touch $TEST_DIR/$seq.img
+> +	$MKFS_XFS_PROG -d file,name=$TEST_DIR/$seq.img,size=512m >/dev/null 2>&1
+> +	$XFS_DB_PROG -x -c "agfl 0" -c "write bno[32] 78" $TEST_DIR/$seq.img \
+> +		>/dev/null 2>&1
+> +	$XFS_DB_PROG -x -c "agfl 0" -c "print bno[32]" $TEST_DIR/$seq.img \
+> +		| grep -q "bno\[32\] = 78" && supported=1
+> +	rm -f $TEST_DIR/$seq.img
+> +	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
+> +}
+> diff --git a/tests/xfs/444 b/tests/xfs/444
+> index 141be52..9700422 100755
+> --- a/tests/xfs/444
+> +++ b/tests/xfs/444
+> @@ -54,6 +54,7 @@ _supported_os Linux
+>  _require_check_dmesg
+>  _require_scratch
+>  _require_test_program "punch-alternating"
+> +_require_xfs_db_write_array
 
-grub2 usually uses its own fs drivers (for better or for worse) to read
-the fs.  The blockchaining mode tries FIEMAP and falls back to FIBMAP if
-not available.
-
-syslinux does FIEMAP w/ FIBMAP fallback.
-
-lilo & elilo still use FIBMAP only, but lilo hasn't seen a release since
-2015 and elilo 2013.  I prefer not to add FIBMAP support in XFS-DAX for
-the singular case of booting off pmem via lilo.
-
-(Sorry Dave...)
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
 --D
 
+>  
+>  # This is only a v5 filesystem problem
+>  _require_scratch_xfs_crc
+> -- 
+> 1.8.3.1
 > 
-> Cheers, Andreas
 > 
 > 
-> 
-> 
-> 
-
-
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
