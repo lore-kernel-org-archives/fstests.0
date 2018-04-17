@@ -1,52 +1,30 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:52724 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752580AbeDQPpH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 11:45:07 -0400
-Date: Tue, 17 Apr 2018 08:44:50 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: cap the length of deduplication requests
-Message-ID: <20180417154450.GB24738@magnolia>
-References: <20180417051918.GD5203@magnolia>
- <20180417065800.GA2857@infradead.org>
+Received: from imap.thunk.org ([74.207.234.97]:51528 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1755077AbeDQQIl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Apr 2018 12:08:41 -0400
+Date: Tue, 17 Apr 2018 12:08:38 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: [xfstests-bld PATCH] test-appliance: detect 'mkfs.f2fs -f'
+ support by grepping help output
+Message-ID: <20180417160838.GA22382@thunk.org>
+References: <20180416220621.196700-1-ebiggers3@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180417065800.GA2857@infradead.org>
+In-Reply-To: <20180416220621.196700-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Eric Biggers <ebiggers3@gmail.com>
+Cc: fstests@vger.kernel.org, Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 16, 2018 at 11:58:00PM -0700, Christoph Hellwig wrote:
-> On Mon, Apr 16, 2018 at 10:19:18PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Since deduplication potentially has to read in all the pages in both
-> > files in order to compare the contents, cap the deduplication request
-> > length at MAX_RW_COUNT (roughly 2GB) so that we have /some/ upper bound
-> > on the request length and can't just lock up the kernel forever.  Found
-> > by running generic/304 after commit 1ddae54555b62 ("common/rc: add
-> > missing 'local' keywords").
+On Mon, Apr 16, 2018 at 03:06:21PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Looks fine.  btrfs limits to 16MB, I guess we don't want to go that low?
+> Grep the help output rather than the binary itself.  This matches the
+> detection method that was implemented in xfstests common/config.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-I've wondered about that -- the btrfs developers opine that you're
-unlikely to hit a 16+ MB extent that can be deduplicated, but seeing as
-the usage model seems to be "copy files onto fs, let dedupe program
-target files in the background", I have my doubts.
+Applied, thanks.
 
-Specifically, most of the usage models I envision are backup programs
-wanting to dedupe files that are almost but not quite the same; and VM
-farms.  The cross-host VM migration tools I've seen tend to copy the
-image as fast as possible to minimize transition time and worry about
-whether or not there are shared blocks later.
-
-OTOH I do worry a little about the prospect of doing 4GB of IO per
-kernel call, so maybe this should be (MAX_RW_COUNT/2)?.
-
---D
-
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					- Ted
