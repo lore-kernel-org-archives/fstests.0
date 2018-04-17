@@ -1,85 +1,35 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:54124 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751157AbeDQR70 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Apr 2018 13:59:26 -0400
-Date: Tue, 17 Apr 2018 10:59:17 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v3] common/xfs: Add require_xfs_db_write_array function
-Message-ID: <20180417175917.GD5201@magnolia>
-References: <20180417040641.GA5210@magnolia>
- <1523945500-10819-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+Received: from imap.thunk.org ([74.207.234.97]:53636 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751882AbeDQXfN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Apr 2018 19:35:13 -0400
+Date: Tue, 17 Apr 2018 19:34:59 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: ioctl FIBMAP for dax gone in v4.17-rc1
+Message-ID: <20180417233459.GB23194@thunk.org>
+References: <20180417144059.nwbbynhgq3k3i63q@XZHOUW.usersys.redhat.com>
+ <20180417161056.GA24257@infradead.org>
+ <CAPcyv4i05nP=wmOMwKFbdwqBrYXpcPBCmR4g2b4w8vOZaCBEnQ@mail.gmail.com>
+ <20180417165756.GC24738@magnolia>
+ <BE1492A6-DF52-428C-A3CE-E91F0ACC0ADA@dilger.ca>
+ <20180417175007.GB5210@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1523945500-10819-1-git-send-email-xuyang.jy@cn.fujitsu.com>
+In-Reply-To: <20180417175007.GB5210@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: yang xu <xuyang.jy@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, david@fromorbit.com, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Andreas Dilger <adilger@dilger.ca>, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@infradead.org>, Xiong Zhou <xzhou@redhat.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Eric Sandeen <sandeen@sandeen.net>, fstests <fstests@vger.kernel.org>, linux-nvdimm <linux-nvdimm@lists.01.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 17, 2018 at 02:11:40PM +0800, yang xu wrote:
-> xfsprogs commit 4222d00("db: write via array indexing doesn't
-> work") fixes a bug that xfs_db write can't support array indexing.
-> This function will check whether the bug is fixed on the current
-> xfsprogs.
+On Tue, Apr 17, 2018 at 10:50:07AM -0700, Darrick J. Wong wrote:
+> syslinux does FIEMAP w/ FIBMAP fallback.
 > 
-> xfs/444 applies the function, and skips if this bug exists.
-> 
-> Signed-off-by: yang xu <xuyang.jy@cn.fujitsu.com>
-> ---
->  common/xfs    | 17 +++++++++++++++++
->  tests/xfs/444 |  1 +
->  2 files changed, 18 insertions(+)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index 3169f87..0b59994 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -701,3 +701,20 @@ _scratch_xfs_set_sb_field()
->  {
->  	_scratch_xfs_set_metadata_field "$1" "$2" "sb 0"
->  }
-> +
-> +#Before xfsprogs commit 4222d000ed("db: write via array indexing doesn't work"),
-> +##xfs_db command to write a specific AGFL index doesn't work.
-> +_require_xfs_db_write_array()
-> +{
-> +	local supported=0
-> +
-> +	_require_test
-> +	touch $TEST_DIR/$seq.img
-> +	$MKFS_XFS_PROG -d file,name=$TEST_DIR/$seq.img,size=512m >/dev/null 2>&1
-> +	$XFS_DB_PROG -x -c "agfl 0" -c "write bno[32] 78" $TEST_DIR/$seq.img \
-> +		>/dev/null 2>&1
-> +	$XFS_DB_PROG -x -c "agfl 0" -c "print bno[32]" $TEST_DIR/$seq.img \
-> +		| grep -q "bno\[32\] = 78" && supported=1
-> +	rm -f $TEST_DIR/$seq.img
-> +	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
-> +}
-> diff --git a/tests/xfs/444 b/tests/xfs/444
-> index 141be52..9700422 100755
-> --- a/tests/xfs/444
-> +++ b/tests/xfs/444
-> @@ -54,6 +54,7 @@ _supported_os Linux
->  _require_check_dmesg
->  _require_scratch
->  _require_test_program "punch-alternating"
-> +_require_xfs_db_write_array
+> lilo & elilo still use FIBMAP only, but lilo hasn't seen a release since
+> 2015 and elilo 2013.  I prefer not to add FIBMAP support in XFS-DAX for
+> the singular case of booting off pmem via lilo.
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+It shouldn't be that hard to write a userspace emulation layer which
+exports a FIBMAP-like functional interface but gets the information
+from the kernel using the FIMAP ioctl....
 
---D
-
->  
->  # This is only a v5 filesystem problem
->  _require_scratch_xfs_crc
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+					- Ted
