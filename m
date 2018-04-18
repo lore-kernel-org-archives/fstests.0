@@ -1,11 +1,11 @@
-Received: from mail-wr0-f195.google.com ([209.85.128.195]:42841 "EHLO
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:42832 "EHLO
         mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753788AbeDROPm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 18 Apr 2018 10:15:42 -0400
+        with ESMTP id S1753412AbeDROPk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Apr 2018 10:15:40 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] overlay/04{1,3,4}: enable xino feature
-Date: Wed, 18 Apr 2018 17:16:58 +0300
-Message-Id: <1524061018-20413-3-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 1/2] common/rc: factor out _require_scratch_fs_option
+Date: Wed, 18 Apr 2018 17:16:57 +0300
+Message-Id: <1524061018-20413-2-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1524061018-20413-1-git-send-email-amir73il@gmail.com>
 References: <1524061018-20413-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,134 +13,63 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-These tests check for constant inode number on copy up with nonsamefs
-layer configuration. This problem is fixes only when opting-in with the
-xino=on mount option, so let the tests enable the mount option on new
-kernels and notrun on old kernels.
+Factor out _require_scratch_fs_option and _check_scratch_fs_option
+from the helper _require_scratch_dax.
+Those are generic helpers to test if mount option is supported and
+if mount option was enabled.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/041 | 15 +++++++++++----
- tests/overlay/043 | 13 ++++++++++---
- tests/overlay/044 | 15 +++++++++++----
- 3 files changed, 32 insertions(+), 11 deletions(-)
+ common/rc | 29 ++++++++++++++++++++++-------
+ 1 file changed, 22 insertions(+), 7 deletions(-)
 
-diff --git a/tests/overlay/041 b/tests/overlay/041
-index 4e72348..9de61f7 100755
---- a/tests/overlay/041
-+++ b/tests/overlay/041
-@@ -70,7 +70,14 @@ _scratch_mkfs
- upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
- workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+diff --git a/common/rc b/common/rc
+index 622afd6..23c3978 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3036,20 +3036,35 @@ _require_scratch_shutdown()
+ 	_scratch_unmount
+ }
  
--_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-+# enabling xino in this test requires that base filesystem inode numbers will
-+# not use bit 63 in inode number of the test files, because bit 63 is used by
-+# overlayfs to indicate the layer. Let's just assume that this is true for all
-+# tested filesystems and if we are wrong, the test may fail
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on ||
-+	_notrun "mount overlay with xino failed"
-+_check_scratch_fs_option "xino" || \
-+	_notrun "faild to enable xino"
+-# Does dax mount option work on this dev/fs?
+-_require_scratch_dax()
++_check_scratch_fs_option()
++{
++	local opt=$1
++
++	_fs_options $SCRATCH_DEV | grep -qw "$opt"
++}
++
++# Does mount option work on this dev/fs?
++_require_scratch_fs_option()
+ {
++	local opt=$1
++
+ 	_require_scratch
+ 	_scratch_mkfs > /dev/null 2>&1
+-	_try_scratch_mount -o dax || \
+-		_notrun "mount $SCRATCH_DEV with dax failed"
+-	# Check options to be sure. XFS ignores dax option
++	_try_scratch_mount -o "$opt" || \
++		_notrun "mount $SCRATCH_DEV with $opt failed"
++	# Check options to be sure. For example, XFS ignores dax option
+ 	# and goes on if dev underneath does not support dax.
+-	_fs_options $SCRATCH_DEV | grep -qw "dax" || \
+-		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
++	_check_scratch_fs_option "$opt" || \
++		_notrun "$SCRATCH_DEV $FSTYP does not support -o $opt"
+ 	_scratch_unmount
+ }
  
- test_dir=$SCRATCH_MNT/test_dir/
- 
-@@ -171,7 +178,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
- _scratch_unmount
- 
- # check overlayfs
--_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
-+_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o xino=on
- 
- # Verify pure lower residing in dir which has another lower layer
- middir=$OVL_BASE_TEST_DIR/$seq-ovl-mid
-@@ -189,7 +196,7 @@ _scratch_mkfs
- upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
- workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
- 
--_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
-+_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir -o xino=on
- 
- # Copy up test_dir
- touch $test_dir/test_file
-@@ -212,7 +219,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
- 	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
- 
- # check overlayfs
--_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir
-+_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir -o xino=on
- 
- echo "Silence is golden"
- status=0
-diff --git a/tests/overlay/043 b/tests/overlay/043
-index 46df686..66771c0 100755
---- a/tests/overlay/043
-+++ b/tests/overlay/043
-@@ -83,7 +83,14 @@ _scratch_mkfs >>$seqres.full 2>&1
- upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
- workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
- 
--_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-+# enabling xino in this test requires that base filesystem inode numbers will
-+# not use bit 63 in inode number of the test files, because bit 63 is used by
-+# overlayfs to indicate the layer. Let's just assume that this is true for all
-+# tested filesystems and if we are wrong, the test may fail
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on || \
-+	_notrun "mount overlay with xino failed"
-+_check_scratch_fs_option "xino" || \
-+	_notrun "faild to enable xino"
- 
- FILES="dir file symlink chrdev blkdev fifo socket"
- 
-@@ -150,13 +157,13 @@ check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
- 
- # Verify that the inode numbers survive a mount cycle
- $UMOUNT_PROG $SCRATCH_MNT
--_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on
- 
- # Compare inode numbers before/after mount cycle
- check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
- 
- # check overlayfs
--_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
-+_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o xino=on
- 
- echo "Silence is golden"
- status=0
-diff --git a/tests/overlay/044 b/tests/overlay/044
-index 2ab3035..0e74128 100755
---- a/tests/overlay/044
-+++ b/tests/overlay/044
-@@ -99,8 +99,15 @@ _scratch_mkfs >>$seqres.full 2>&1
- upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
- workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
- 
--# Enable overlay index feature to prevent breaking hardlinks on copy up
--_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on
-+# Enable overlay index feature to prevent breaking hardlinks on copy up.
-+# enabling xino in this test requires that base filesystem inode numbers will
-+# not use bit 63 in inode number of the test files, because bit 63 is used by
-+# overlayfs to indicate the layer. Let's just assume that this is true for all
-+# tested filesystems and if we are wrong, the test may fail
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on,xino=on || \
-+	_notrun "mount overlay with xino failed"
-+_check_scratch_fs_option "xino" || \
-+	_notrun "faild to enable xino"
- 
- rm -f $tmp.*
- 
-@@ -124,8 +131,8 @@ check_ino_nlink $SCRATCH_MNT $tmp.before $tmp.after_one
- 
- # Verify that the hardlinks survive a mount cycle
- $UMOUNT_PROG $SCRATCH_MNT
--_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o index=on
--_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on
-+_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o index=on,xino=on
-+_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on,xino=on
- 
- echo "== After mount cycle =="
- cat $FILES
++# Does dax mount option work on this dev/fs?
++_require_scratch_dax()
++{
++	_require_scratch_fs_option "dax"
++}
++
+ # Does norecovery support by this fs?
+ _require_norecovery()
+ {
 -- 
 2.7.4
 
