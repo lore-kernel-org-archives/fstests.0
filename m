@@ -1,78 +1,95 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:33209 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752725AbeDSUwC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 19 Apr 2018 16:52:02 -0400
-Received: by mail-pl0-f67.google.com with SMTP id w12-v6so3953049plp.0
-        for <fstests@vger.kernel.org>; Thu, 19 Apr 2018 13:52:02 -0700 (PDT)
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: [xfstests-bld PATCH 2/2] test-appliance: add 'encrypt' config for f2fs
-Date: Thu, 19 Apr 2018 13:50:20 -0700
-Message-Id: <20180419205020.16868-2-ebiggers3@gmail.com>
-In-Reply-To: <20180419205020.16868-1-ebiggers3@gmail.com>
-References: <20180419205020.16868-1-ebiggers3@gmail.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:14119 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1754100AbeDTDTH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 19 Apr 2018 23:19:07 -0400
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (unknown [10.167.33.85])
+        by cn.fujitsu.com (Postfix) with ESMTP id E18DB4D0EFD1
+        for <fstests@vger.kernel.org>; Fri, 20 Apr 2018 11:19:03 +0800 (CST)
+From: lst <leist.fnst@cn.fujitsu.com>
+Subject: the test xfs/191 need update now
+Message-ID: <3b7d4e57-e66a-0b93-9592-30964cebe5d3@cn.fujitsu.com>
+Date: Thu, 19 Apr 2018 19:19:11 -0400
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Eric Biggers <ebiggers@google.com>
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+hi
+I have some question about xfs/191.
+It seems the usage of mkfs.xfs is update, but the test xfs/191 didn't=20
+update timely.
+For example: tests/xfs/191-input-validation
+line 265:=C2=A0 do_mkfs_pass -n log=3D15 $SCRATCH_DEV
+it will execute
+ =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 /usr/sbin/mkfs.xfs -f -N -n log=3D15 $SCR=
+ATCH_DEV
+but there is no option "-n log" now.
+---------------------------------------------------------
+# /usr/sbin/mkfs.xfs -f -N -n log=3D15 /dev/vdd
+unknown option -n log=3D15
+Usage: mkfs.xfs
+/* blocksize */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-b size=3Dnum]
+/* metadata */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-m=20
+crc=3D0|1,finobt=3D0|1,uuid=3Dxxx,rmapbt=3D0|1,reflink=3D0|1]
+/* data subvol */=C2=A0=C2=A0=C2=A0 [-d agcount=3Dn,agsize=3Dn,file,name=3D=
+xxx,size=3Dnum,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 (sunit=3Dvalue,swidth=3Dvalue|su=3Dnum,sw=3Dnum|noalign),
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 sectsize=3Dnum
+/* force overwrite */=C2=A0=C2=A0=C2=A0 [-f]
+/* inode size */=C2=A0=C2=A0=C2=A0 [-i log=3Dn|perblock=3Dn|size=3Dnum,ma=
+xpct=3Dn,attr=3D0|1|2,
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 projid32bit=3D0|1,sparse=3D0|1]
+/* no discard */=C2=A0=C2=A0=C2=A0 [-K]
+/* log subvol */=C2=A0=C2=A0=C2=A0 [-l agnum=3Dn,internal,size=3Dnum,logd=
+ev=3Dxxx,version=3Dn
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=
+=A0 sunit=3Dvalue|su=3Dnum,sectsize=3Dnum,lazy-count=3D0|1]
+/* label */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-L label (maximum 12 ch=
+aracters)]
+/* naming */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-n size=3Dnum,version=3D=
+2|ci,ftype=3D0|1]
+/* no-op info only */=C2=A0=C2=A0=C2=A0 [-N]
+/* prototype file */=C2=A0=C2=A0=C2=A0 [-p fname]
+/* quiet */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-q]
+/* realtime subvol */=C2=A0=C2=A0=C2=A0 [-r extsize=3Dnum,size=3Dnum,rtde=
+v=3Dxxx]
+/* sectorsize */=C2=A0=C2=A0=C2=A0 [-s size=3Dnum]
+/* version */=C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 [-V]
+ =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 =C2=A0=C2=A0=C2=A0 devicename
+<devicename> is required unless -d name=3Dxxx is given.
+<num> is xxx (bytes), xxxs (sectors), xxxb (fs blocks), xxxk (xxx KiB),
+ =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 xxxm (xxx MiB), xxxg (xxx GiB), xxxt (xxx=
+ TiB) or xxxp (xxx PiB).
+<value> is xxx (512 byte blocks).
+---------------------------------------------------------
+And also have other cases which were expected fail but pass now.
+Here I paste 10 cases which reprot error at my environment.
+-------------------
+do_mkfs_fail -n size=3D2b $SCRATCH_DEV
+do_mkfs_fail -d agsize=3D8192b $SCRATCH_DEV
+do_mkfs_fail -d agsize=3D65536s $SCRATCH_DEV
+do_mkfs_fail -d sunit=3D0,swidth=3D64 $SCRATCH_DEV
+do_mkfs_fail -d su=3D0,sw=3D64 $SCRATCH_DEV
+do_mkfs_fail -d su=3D4096s,sw=3D64 $SCRATCH_DEV
+do_mkfs_fail -d su=3D4096b,sw=3D64 $SCRATCH_DEV
+do_mkfs_fail -l su=3D10b $SCRATCH_DEV
+do_mkfs_pass -n log=3D15 $SCRATCH_DEV
+do_mkfs_pass -i log=3D10 $SCRATCH_DEV
+-------------------
 
-Allow testing f2fs using the test_dummy_encryption mount option,
-available with f2fs in kernel 4.17 and later.  E.g.,
+Can you update this case according to the current version of mkfs.xfs?
 
-    gce-xfstests -c f2fs/encrypt -g auto
 
-This is the f2fs equivalent of ext4/encrypt.
+thanks,
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- .../test-appliance/files/root/fs/f2fs/cfg/all.list   |  1 +
- .../test-appliance/files/root/fs/f2fs/cfg/encrypt    |  5 +++++
- .../test-appliance/files/root/fs/f2fs/config         | 12 ++++++++++++
- 3 files changed, 18 insertions(+)
- create mode 100644 kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/encrypt
+ =C2=A0=C2=A0=C2=A0=C2=A0 Shaoting Lei
 
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/all.list b/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/all.list
-index 4ad96d5..bc796ff 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/all.list
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/all.list
-@@ -1 +1,2 @@
- default
-+encrypt
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/encrypt b/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/encrypt
-new file mode 100644
-index 0000000..0e4e8ab
---- /dev/null
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/cfg/encrypt
-@@ -0,0 +1,5 @@
-+SIZE=small
-+export MKFS_OPTIONS="-O encrypt"
-+export F2FS_MOUNT_OPTIONS="test_dummy_encryption"
-+REQUIRE_FEATURE=encryption
-+TESTNAME="F2FS encryption"
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-index 94c402b..3857d5d 100644
---- a/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-+++ b/kvm-xfstests/test-appliance/files/root/fs/f2fs/config
-@@ -33,6 +33,18 @@ function setup_mount_opts()
-     if test -n "$MNTOPTS" ; then
- 	F2FS_MOUNT_OPTIONS+="${F2FS_MOUNT_OPTIONS:+,}$MNTOPTS"
-     fi
-+    if echo ",$F2FS_MOUNT_OPTIONS," | grep -q ',test_dummy_encryption,'; then
-+	local mode='\x00\x00\x00\x00'
-+	local raw="$(printf ""\\\\x%02x"" $(seq 0 63))"
-+	if lscpu | grep "Byte Order" | grep -q Little ; then
-+	    local size='\x40\x00\x00\x00'
-+	else
-+	    local size='\x00\x00\x00\x40'
-+	fi
-+	local key="${mode}${raw}${size}"
-+	keyctl new_session >& /dev/null
-+	echo -n -e "${key}" | keyctl padd logon fscrypt:4242424242424242 @s >& /dev/null
-+    fi
-     export F2FS_MOUNT_OPTIONS="${F2FS_MOUNT_OPTIONS:+-o }$F2FS_MOUNT_OPTIONS"
- }
- 
--- 
-2.17.0.484.g0c8726318c-goog
+
+
 
