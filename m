@@ -1,62 +1,38 @@
-Received: from mail-ua0-f179.google.com ([209.85.217.179]:36347 "EHLO
-        mail-ua0-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753077AbeDURX7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 21 Apr 2018 13:23:59 -0400
+Received: from mail-yb0-f193.google.com ([209.85.213.193]:41446 "EHLO
+        mail-yb0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753025AbeDVC5d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 21 Apr 2018 22:57:33 -0400
 MIME-Version: 1.0
-In-Reply-To: <CA+EzBbC6TfWzsx9Uk8CXT4R89_5QD=tJEyg5wKw=wYVngrtNjg@mail.gmail.com>
-References: <CA+EzBbC6TfWzsx9Uk8CXT4R89_5QD=tJEyg5wKw=wYVngrtNjg@mail.gmail.com>
-From: Jayashree Mohan <jayashree2912@gmail.com>
-Date: Sat, 21 Apr 2018 12:23:58 -0500
-Message-ID: <CA+EzBbAqPjSEkJBgs7PYrwbcxvF4pr35ZsidJqpLaRyHSbscNw@mail.gmail.com>
-Subject: Re: Directory entry not persisted on a fsync
+In-Reply-To: <20180418025755.GN24738@magnolia>
+References: <20180417051918.GD5203@magnolia> <20180418025755.GN24738@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 22 Apr 2018 05:57:32 +0300
+Message-ID: <CAOQ4uxguonNyKB=M7mhNouOhbhar3voLjneeSZDY3xooePPnjg@mail.gmail.com>
+Subject: Re: [PATCH v2] xfs: cap the length of deduplication requests
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Cc: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>, Filipe Manana <fdmanana@kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+On Wed, Apr 18, 2018 at 5:57 AM, Darrick J. Wong
+<darrick.wong@oracle.com> wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+>
+> Since deduplication potentially has to read in all the pages in both
+> files in order to compare the contents, cap the deduplication request
+> length at MAX_RW_COUNT/2 (roughly 1GB) so that we have /some/ upper bound
+> on the request length and can't just lock up the kernel forever.  Found
+> by running generic/304 after commit 1ddae54555b62a ("common/rc: add
+> missing 'local' keywords").
+>
 
-A gentle reminder on the above behavior on btrfs : Even on fsync-ing
-the directory, its entries are not persisted. Could you let us know
-your thoughts on this?
+With this patch generic/304 doesn't soft lock the kernel, but it doesn't
+seem 'quick' at all. I stopped waiting after 5 minutes. Is that expected?
+If so, best get the test out of the quick group.
+
+Can you shed some light on how the "missing 'local' keywords" change
+exposed this behavior?
 
 Thanks,
-Jayashree Mohan
-
-
-
-On Fri, Apr 20, 2018 at 1:05 PM, Jayashree Mohan
-<jayashree2912@gmail.com> wrote:
-> Hi,
->
-> We came across a scenario where inspite of fsync-ing the directory,
-> the entry was not persisted - the file created under this directory
-> was lost.
->
-> Consider the following workload :
->
-> 1. creat test/foo
-> 2. mkdir test/A
-> 3. creat test/A/foo
-> 4. fsync test/A/foo
-> 5. fsync test
-> -----crash-----
->
-> When we recover after the crash, the contents in the directory are as follows:
-> dir test:
->     A
->
-> dir test/A:
->     foo
->
-> Notice that file foo that was created in step 1 above, is lost inspite
-> of calling a fsync on its parent directory. On all other
-> filesystems(ext4, xfs, and f2fs), we see file foo persisted in the
-> test directory. We expect directory entries to be persisted when the
-> directory inode is fsynced right? Losing file foo doesn't seem to be
-> the right behavior.
->
->
-> Thanks,
-> Jayashree Mohan
+Amir.
