@@ -1,54 +1,49 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:45786 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751247AbeDWFky (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 23 Apr 2018 01:40:54 -0400
-Date: Sun, 22 Apr 2018 22:40:48 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] common/rc: move rm out from if block to always delete
- kmemleak temp file
-Message-ID: <20180423054048.GA26261@magnolia>
-References: <8a5faeaa-e053-ab1b-4712-edec8d32fd93@jp.fujitsu.com>
+Received: from mail-ot0-f181.google.com ([74.125.82.181]:43604 "EHLO
+        mail-ot0-f181.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755016AbeDWNiA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 23 Apr 2018 09:38:00 -0400
+Received: by mail-ot0-f181.google.com with SMTP id y10-v6so4204097otg.10
+        for <fstests@vger.kernel.org>; Mon, 23 Apr 2018 06:38:00 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <8a5faeaa-e053-ab1b-4712-edec8d32fd93@jp.fujitsu.com>
+In-Reply-To: <CAOQ4uxg=aQpHWFEz4M+Kz9gOtu6XJd8rGw1oa4zrtyMZ+T7ogQ@mail.gmail.com>
+References: <1524061018-20413-1-git-send-email-amir73il@gmail.com>
+ <CAJfpegsQ01V9Jyboy+9W9eahMDNM7nggLHFkbD=13hNhX+Du0g@mail.gmail.com> <CAOQ4uxg=aQpHWFEz4M+Kz9gOtu6XJd8rGw1oa4zrtyMZ+T7ogQ@mail.gmail.com>
+From: Miklos Szeredi <miklos@szeredi.hu>
+Date: Mon, 23 Apr 2018 15:37:58 +0200
+Message-ID: <CAJfpegsKYh5hWofQxO5gVCLL3PoAGSaVEF8O+K72tk+TBjEJwQ@mail.gmail.com>
+Subject: Re: [PATCH 0/2] Fix failing overlay nonsamefs fstests
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <eguan@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 23, 2018 at 02:23:14PM +0900, Misono Tomohiro wrote:
-> Otherwise, *.kmemleak.tmp may remain in result folder if kmemleak is on.
-> 
-> Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
+On Wed, Apr 18, 2018 at 4:30 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+> On Wed, Apr 18, 2018 at 5:23 PM, Miklos Szeredi <miklos@szeredi.hu> wrote:
+>> On Wed, Apr 18, 2018 at 4:16 PM, Amir Goldstein <amir73il@gmail.com> wrote:
+>>
+>>> FYI, Miklos has a patch set in review to fix the last of the
+>>> non-standard behavior tracking test that is still failing (overlay/016).
+>>> After that patch set is merged, all overlay tests will be expected to
+>>> pass on master - new era ;-)
+>>
+>> Oh, we can write new tests that don't pass ;)
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Another one:
 
---D
+fstat() returns incorrect st_ctime after unlink of a lower file/directory.
 
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 366489bb..0c3359fd 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3515,8 +3515,8 @@ EXPERIMENTAL kmemleak reported some memory leaks!  Due to the way kmemleak
->  works, the leak might be from an earlier test, or something totally unrelated.
->  ENDL
->  		cat "$leak_file.tmp" >> "$leak_file"
-> -		rm -rf "$leak_file.tmp"
->  	fi
-> +	rm -rf "$leak_file.tmp"
->  	echo "clear" > "$kern_knob"
->  }
->  
-> -- 
-> 2.14.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Alternative fixes:
+
+1) take some attributes from whiteout
+
+2) metacopy up to tmpfile
+
+But first of all, we need a test case that fails, otherwise there's no
+motivation to do the fix ;)
+
+I'm wondering, would it make sense to manually add "rotation points"
+to plain xfstest test cases?
+
+Thanks,
+Miklos
