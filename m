@@ -1,229 +1,115 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:35504 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750842AbeDXQGe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Apr 2018 12:06:34 -0400
-Date: Tue, 24 Apr 2018 09:06:30 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic: test XATTR_REPLACE doesn't take the fs down
-Message-ID: <20180424160630.GB26261@magnolia>
-References: <20180418003236.GE5201@magnolia>
- <20180418042457.GF5201@magnolia>
- <20180424120859.GD11384@desktop>
+Received: from mx2.suse.de ([195.135.220.15]:48407 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751216AbeDXSD1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 24 Apr 2018 14:03:27 -0400
+Subject: Re: [PATCH] check: annotate good and expunged tests in results
+References: <20180412213838.28929-1-jeffm@suse.com>
+ <20180424093646.GA11384@desktop>
+From: Jeff Mahoney <jeffm@suse.com>
+Message-ID: <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
+Date: Tue, 24 Apr 2018 14:03:24 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180424120859.GD11384@desktop>
+In-Reply-To: <20180424093646.GA11384@desktop>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: kanda.motohiro@gmail.com, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Cc: fstests@vger.kernel.org, mcgrof@suse.com, nborisov@suse.com, fdmanana@suse.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 24, 2018 at 08:08:59PM +0800, Eryu Guan wrote:
-> On Tue, Apr 17, 2018 at 09:24:57PM -0700, Darrick J. Wong wrote:
-> > [cc xfs/fstests lists]
-> > 
-> > On Tue, Apr 17, 2018 at 05:32:36PM -0700, Darrick J. Wong wrote:
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > Kanda Motohiro reported that expanding a tiny xattr into a large xattr
-> > > fails on XFS because we remove the tiny xattr from a shortform fork and
-> > > then try to re-add it after converting the fork to extents format having
-> > > not removed the ATTR_REPLACE flag.  This fails because the attr is no
-> > > longer present, causing a fs shutdown.
-> > > 
-> > > Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=199119
-> > > Reported-by: kanda.motohiro@gmail.com
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+On 4/24/18 5:36 AM, Eryu Guan wrote:
+> On Thu, Apr 12, 2018 at 05:38:38PM -0400, jeffm@suse.com wrote:
+>> From: Jeff Mahoney <jeffm@suse.com>
 > 
-> Some minor issues below, but I think I can fix them all on commit.
-> 
-> > > ---
-> > >  src/Makefile            |    3 +-
-> > >  src/attr_replace_test.c |   47 +++++++++++++++++++++++++++++++++++
-> 
-> Need a .gitignore entry for it.
+> [Sorry for the late review..]
 
-Ok.  Assuming you meant a .gitignore entry for src/attr_replace_test,
-not the source file itself.
+Thanks for the review just the same.
 
-> > >  tests/generic/706       |   64 +++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/706.out   |    2 +
-> > >  tests/generic/group     |    1 +
-> > >  5 files changed, 116 insertions(+), 1 deletion(-)
-> > >  create mode 100644 src/attr_replace_test.c
-> > >  create mode 100755 tests/generic/706
-> > >  create mode 100644 tests/generic/706.out
-> > > 
-> > > diff --git a/src/Makefile b/src/Makefile
-> > > index 0d3feae..162e529 100644
-> > > --- a/src/Makefile
-> > > +++ b/src/Makefile
-> > > @@ -25,7 +25,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> > >  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
-> > >  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
-> > >  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
-> > > -	dio-invalidate-cache stat_test t_encrypted_d_revalidate
-> > > +	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
-> > > +	attr_replace_test
-> > >  
-> > >  SUBDIRS = log-writes perf
-> > >  
-> > > diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-> > > new file mode 100644
-> > > index 0000000..583ca17
-> > > --- /dev/null
-> > > +++ b/src/attr_replace_test.c
-> > > @@ -0,0 +1,47 @@
-> > > +// setattr.c by kanda.motohiro@gmail.com
-> > > +// xfs extended attribute corruption bug reproducer
-> > > +#include <stdio.h>
-> > > +#include <string.h>
-> > > +#include <fcntl.h>
-> > > +#include <errno.h>
-> > > +#include <stdlib.h>
-> > > +#include <unistd.h>
-> > > +#include <sys/types.h>
-> > > +#include <sys/xattr.h>
-> > > +
-> > > +#define die() do { perror(""); \
-> > > +fprintf(stderr, "error=%d at line %d\n", errno, __LINE__); \
-> > > +exit(1); } while (0)
-> > > +
-> > > +int main(int argc, char *argv[])
-> > > +{
-> > > +	int ret;
-> > > +	int fd;
-> > > +	char *path = "/mnt/xfs/hello";
+>> Currently, we only create results files when a test has failed or was
+>> supposed to run but some dependency wasn't met causing it not to run.
+>> Short of saving the summary at the end of the run, there's no way to tell
+>> which tests passed or which tests weren't run due to being excluded.
+>>
+>> This patch moves successful test results to $seqres.out.good to annotate
+>> good results.  It also adds tests excluded by group to the $tmp.xlist file
+>> and adds annotations for every test excluded.  When a test is expunged
 > 
-> I'd like not assign default path to "/mnt/xfs/hello", just in case we
-> forget the testfile argument and test runs against /mnt/xfs/hello
-> accidently and test passes silently.
+> I can see that annotating tests excluded by group is helpful, but I
+> don't think we need $seqres.out.good, passed tests are already shown by
+> check, and $seqres.out.good is same as the golden image, it looks
+> redundant.
 
-Ok, please get rid of it then. :)
-
-> > > +	char *name = "user.world";
-> > > +	char value[2048];
-> > > +	size_t size = sizeof(value);
-> > > +
-> > > +	if (argc == 2)
-> > > +		path = argv[1];
+The contents are redundant, but the purpose of the file existing isn't.
+My goal is to be able to point a script at the results directory for a
+test run and autogenerate a table of results and/or compare them to
+known results.  Right now, there's no way to tell whether a test was run
+at all, only that it failed or was skipped due to some missing
+dependency.  The expunge changes handle the explicitly skipped cases,
+but without the .good files, there's nothing indicating a test actually
+ran or when it last did.  The contents don't have to be the output.  If
+you can think of something more useful there (or if we just create an
+empty file), that's fine too.
+>> -# takes the list of tests to run in $tmp.list, and removes the tests passed to
+>> -# the function from that list.
+>> +# takes the list of tests to run in $tmp.list and adds them to the excluded
+>> +# test list, annotated with the group that excluded each one
 > 
-> I'll make sure argc == 2, and error out if not.
+> The comments don't seem quite right, the new behavior doesn't take tests
+> from $tmp.list, it just edits the $tmp.xlist file for later use.
+
+Right.  I missed updating the comment after changing the behavior.
+
+>>  trim_test_list()
+>>  {
+>> +	group=$1
+> 
+> Please declare local variable as 'local' when possible.
 
 Ok.
 
-> Thanks,
-> Eryu
+> When using config section, e.g. ./check -s <sec_name>, and FSTYP is
+> different in new section, check will do _prepare_test_list again, so
+> tests selected by "-x <xgroup>" will be listed twice in $tmp.xlist file,
+> as a result, I see duplicated group names in the annotate message, e.g.
 > 
-> > > +
-> > > +	fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-> > > +	if (fd < 0) die();
-> > > +
-> > > +	// First, create a small xattr.
-> > > +	memset(value, '0', 1);
-> > > +	ret = fsetxattr(fd, name, value, 1, XATTR_CREATE);
-> > > +	if (ret < 0) die();
-> > > +	close(fd);
-> > > +
-> > > +	fd = open(path, O_RDWR);
-> > > +	if (fd < 0) die();
-> > > +
-> > > +	// Then, replace it with bigger one, forcing short form to leaf conversion.
-> > > +	memset(value, '1', sizeof(value));
-> > > +	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
-> > > +	if (ret < 0) die();
-> > > +	close(fd);
-> > > +
-> > > +	return 0;
-> > > +}
-> > > diff --git a/tests/generic/706 b/tests/generic/706
-> > > new file mode 100755
-> > > index 0000000..4d8f180
-> > > --- /dev/null
-> > > +++ b/tests/generic/706
-> > > @@ -0,0 +1,64 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test No. 706
-> > > +#
-> > > +# Ensure that we can XATTR_REPLACE a tiny attr into a large attr.
-> > > +# Kanda Motohiro <kanda.motohiro@gmail.com> reports that XATTR_REPLACE'ing
-> > > +# a single-byte attr with a 2048-byte attr causes a fs shutdown because we
-> > > +# remove the shortform attr, convert the attr fork to long format, and then
-> > > +# try to re-add the attr having not cleared ATTR_REPLACE.
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2018 Oracle.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $testfile
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/attr
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_test_program "attr_replace_test"
-> > > +_require_attrs
-> > > +_require_scratch
-> > > +
-> > > +rm -f $seqres.full
-> > > +_scratch_mkfs >>$seqres.full 2>&1
-> > > +_scratch_mount >>$seqres.full 2>&1
-> > > +
-> > > +./src/attr_replace_test $SCRATCH_MNT/hello
-> > > +$ATTR_PROG -l $SCRATCH_MNT/hello | _filter_scratch
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/706.out b/tests/generic/706.out
-> > > new file mode 100644
-> > > index 0000000..1c654c1
-> > > --- /dev/null
-> > > +++ b/tests/generic/706.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 706
-> > > +Attribute "world" has a 2048 byte value for SCRATCH_MNT/hello
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 3f93dc4..fc05315 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -487,3 +487,4 @@
-> > >  482 auto metadata replay
-> > >  483 auto quick log metadata
-> > >  484 auto quick insert
-> > > +706 auto quick attr
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> generic/458        [expunged] group metadata metadata
+> 
+> I think we should move above "-X/-E" handlings to _prepare_test_list,
+> only assign variable "xfile" here (use a new variable for -E option,
+> perhaps). So that we could simply remove $tmp.xlist before calling
+> _prepare_test_list again, and it could exclude all specified tests only
+> once. Maybe as patch 1/2 in a patchset.
+
+Ok, that's easy enough to do.
+
+>>  	        fi
+>>  		;;
+>>  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+>> @@ -491,11 +483,17 @@ _check_filesystems()
+>>  _expunge_test()
+>>  {
+>>  	local TEST_ID="$1"
+>> +	local OUTPUT="$2"
+> 
+> OUTPUT is not used.
+
+Ack.
+
+>> @@ -770,6 +774,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>>  			    else
+>>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+>>  				echo -n " `expr $stop - $start`s"
+>> +				mv $tmp.out $seqres.out.good
+> 
+> As said above, I don't think it's that useful.
+
+It doesn't need to be the contents of the output, but I'd like it to be
+*something* and moving a file that already exists is as easy as creating
+a new one.
+
+-Jeff
+
+-- 
+Jeff Mahoney
+SUSE Labs
