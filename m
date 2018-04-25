@@ -1,174 +1,263 @@
-Received: from newman.cs.utexas.edu ([128.83.139.110]:35612 "EHLO
-        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751161AbeDYDKe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 24 Apr 2018 23:10:34 -0400
-Received: from mail-yw0-f172.google.com (mail-yw0-f172.google.com [209.85.161.172])
-        (authenticated bits=0)
-        by newman.cs.utexas.edu (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id w3P3AXbQ010298
-        (version=TLSv1/SSLv3 cipher=AES128-GCM-SHA256 bits=128 verify=NOT)
-        for <fstests@vger.kernel.org>; Tue, 24 Apr 2018 22:10:33 -0500
-Received: by mail-yw0-f172.google.com with SMTP id g16-v6so2755150ywk.0
-        for <fstests@vger.kernel.org>; Tue, 24 Apr 2018 20:10:33 -0700 (PDT)
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:36602 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751150AbeDYDOf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Apr 2018 23:14:35 -0400
+Date: Wed, 25 Apr 2018 11:14:20 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic: test XATTR_REPLACE doesn't take the fs down
+Message-ID: <20180425031420.GE11384@desktop>
+References: <20180418003236.GE5201@magnolia>
+ <20180418042457.GF5201@magnolia>
+ <20180424120859.GD11384@desktop>
+ <20180424160630.GB26261@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <CAJCQCtT7S9Qb-m3-7EXJPwtMT9nuUJjDykHi915KU+fc4fB-aQ@mail.gmail.com>
-References: <CA+EzBbC7rmYsKjy_+rkwJLK-bmU51q+a4rnezvOoZYyJ8kWGqg@mail.gmail.com>
- <CAJCQCtT7S9Qb-m3-7EXJPwtMT9nuUJjDykHi915KU+fc4fB-aQ@mail.gmail.com>
-From: Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Date: Tue, 24 Apr 2018 22:10:27 -0500
-Message-ID: <CAHWVdUXV+=sqc2deerQj1nhLfOpEvE6=O5jYFjxa+ZJwOxqbPg@mail.gmail.com>
-Subject: Re: Inconsistent behavior of fsync in btrfs
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180424160630.GB26261@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Chris Murphy <lists@colorremedies.com>
-Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: kanda.motohiro@gmail.com, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Chris,
+On Tue, Apr 24, 2018 at 09:06:30AM -0700, Darrick J. Wong wrote:
+> On Tue, Apr 24, 2018 at 08:08:59PM +0800, Eryu Guan wrote:
+> > On Tue, Apr 17, 2018 at 09:24:57PM -0700, Darrick J. Wong wrote:
+> > > [cc xfs/fstests lists]
+> > > 
+> > > On Tue, Apr 17, 2018 at 05:32:36PM -0700, Darrick J. Wong wrote:
+> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > 
+> > > > Kanda Motohiro reported that expanding a tiny xattr into a large xattr
+> > > > fails on XFS because we remove the tiny xattr from a shortform fork and
+> > > > then try to re-add it after converting the fork to extents format having
+> > > > not removed the ATTR_REPLACE flag.  This fails because the attr is no
+> > > > longer present, causing a fs shutdown.
+> > > > 
+> > > > Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=199119
+> > > > Reported-by: kanda.motohiro@gmail.com
+> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Some minor issues below, but I think I can fix them all on commit.
+> > 
+> > > > ---
+> > > >  src/Makefile            |    3 +-
+> > > >  src/attr_replace_test.c |   47 +++++++++++++++++++++++++++++++++++
+> > 
+> > Need a .gitignore entry for it.
+> 
+> Ok.  Assuming you meant a .gitignore entry for src/attr_replace_test,
+> not the source file itself.
 
-We are using software we developed called CrashMonkey [1]. It
-simulates the state on storage after a crash (taking into accounts
-FLUSH and FUA flags). Talk slides on how it works can be found here
-[2].
+Correct, I meant the entry for binary file :)
 
-It is similar to dm-log-writes if you have used that in the past.
+And I found another problem in the test, it fails on 1k/2k block size
+extN filesystems, because 2k xattr doesn't fit in single block.. e.g.
 
-[1] https://github.com/utsaslab/crashmonkey
-[2] http://www.cs.utexas.edu/~vijay/papers/hotstorage17-crashmonkey-slides.pdf
+    -Attribute "world" has a 2048 byte value for SCRATCH_MNT/hello
+    +No space left on device
+    +error=22 at line 46
+    +Attribute "world" has a 1 byte value for
+
+We probably need to check the block size of SCRATCH_DEV and _notrun if
+it's smaller than 4k.
+
+Or require ea_inode feature when block size < 4k? Note that this test
+does fail on ext4 with ea_inode feature enabled (so add ext4 list to
+cc). e.g.
+
+    ...
+    Pass 4: Checking reference counts
+    Extended attribute inode 13 ref count is 0, should be 1. Fix? no
+    ...
+
+I think it's easier to _notrun if block size < 4k in this generic test
+and introduce a new ext4-specific test that excrises the ea_inode
+feature.
+
+What do you and/or other ext4 developers think?
 
 Thanks,
-Vijay Chidambaram
+Eryu
 
-On Tue, Apr 24, 2018 at 10:07 PM, Chris Murphy <lists@colorremedies.com> wrote:
->
->
->
-> On Tue, Apr 24, 2018 at 8:35 PM, Jayashree Mohan <jayashree2912@gmail.com> wrote:
->>
->> Hi,
->>
->> While investigating crash consistency bugs on btrfs, we came across
->> workloads that demonstrate inconsistent behavior of fsync.
->>
->> Consider the following workload where fsync on the directory did not persist it.
->>
->> Workload 1:
->>
->> mkdir A
->> Sync
->> rename (A, B)
->> creat B/foo
->> fsync B/foo
->> fsync B
->> ---crash---
->>
->> In this case, the directory B as well as file B/foo are missing.
->> What's more worrying is that, on recovery from crash, we expect the
->> contents of directory to be
->>
->> Dir A : should not exist
->> Dir B :
->>     foo
->>
->> But instead, what we see is that:
->> Dir A :
->>     foo
->> Dir B : doesn't exist
->>
->>
->> This state is acceptable if we had created the file foo in dir A and
->> then renamed the directory - in that case it would mean the rename did
->> not persist. However what we see here is that, a file created in
->> directory B falsely appears in A, which is incorrect.
->>
->> However, if we did not persist the initial create of directory A, i.e
->>
->> Workload 2:
->>
->> mkdir A
->> rename (A, B)
->> creat B/foo
->> fsync B/foo
->> fsync B
->> ---crash---
->>
->> the directory B and its entry both get persisted in this case.
->>
->> Is this something to do with the directory entry A being already
->> present in the FS/subvolume tree and then the changes to the directory
->> inode going into the fsync log?
->>
->> We do not clearly understand the reason for such inconsistent
->> behavior, but it does seem incorrect.
->>
->> Consider another case where we found inconsistent behavior in the way
->> fsync is handled.
->>
->> Workload 3:
->>
->> mkdir A
->> mkdir B
->> creat A/foo
->> link (A/foo, B/foo)
->> fsync A/foo
->> fsync B/foo
->> ---crash---
->>
->> In this case,  file A/foo is persisted, but inspite of an explicit
->> fsync on B/foo, the file goes missing.
->>
->> Workload 4:
->>
->> mkdir A
->> mkdir B
->> creat A/foo
->> link (A/foo, B/foo)
->> fsync B/foo
->> fsync A/foo
->> ---crash---
->>
->> Note that, the only difference between workload 3 and 4 is the order
->> of fsync on files A/foo and B/foo. In this case, the file B/foo is
->> persisted, but A/foo is missing.
->>
->> What we interpret from the above workloads is that, the second fsync
->> is behaving like a no-op, and in either cases, only the file that is
->> fsynced first gets persisted. If we insert a sleep(45) between the two
->> fsyncs in the workloads above, we see both the files A/foo and B/foo
->> being persisted.
->>
->> No matter how many more links we create and fsync, only the first
->> fsync persists the file, i.e for example,
->>
->> Workload 5:
->>
->> mkdir A
->> mkdir B
->> mkdir C
->> creat A/foo
->> link (A/foo, B/foo)
->> link (A/foo, C/foo)
->> fsync B/foo
->> fsync A/foo
->> fsync C/foo
->> ---crash---
->>
->> Only file B/foo gets persisted, and both A/foo and C/foo are missing.
->>
->> This seems like inconsistent behavior as only the first fsync persists
->> the file, while all others don't seem to. Do you agree if this is
->> indeed incorrect and needs fixing?
->>
->> All the above tests pass on ext4 and xfs.
->>
->> Please let us know what you feel about such inconsistency.
->>
->
-> I don't have answer to your question, but I'm curious exactly how you simulate a crash? For my own really rudimentary testing I've been doing crazy things like:
->
-> # grub-mkconfig -o /boot/efi && echo b > /proc/sysrq-trigger
->
-> And seeing what makes it to disk - or not. And I'm finding a some non-determinstic results are possible even in a VM which is a bit confusing. I'm sure with real hardware I'd find even more inconsistency.
->
->
-> --
-> Chris Murphy
+> 
+> > > >  tests/generic/706       |   64 +++++++++++++++++++++++++++++++++++++++++++++++
+> > > >  tests/generic/706.out   |    2 +
+> > > >  tests/generic/group     |    1 +
+> > > >  5 files changed, 116 insertions(+), 1 deletion(-)
+> > > >  create mode 100644 src/attr_replace_test.c
+> > > >  create mode 100755 tests/generic/706
+> > > >  create mode 100644 tests/generic/706.out
+> > > > 
+> > > > diff --git a/src/Makefile b/src/Makefile
+> > > > index 0d3feae..162e529 100644
+> > > > --- a/src/Makefile
+> > > > +++ b/src/Makefile
+> > > > @@ -25,7 +25,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> > > >  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+> > > >  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+> > > >  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+> > > > -	dio-invalidate-cache stat_test t_encrypted_d_revalidate
+> > > > +	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> > > > +	attr_replace_test
+> > > >  
+> > > >  SUBDIRS = log-writes perf
+> > > >  
+> > > > diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+> > > > new file mode 100644
+> > > > index 0000000..583ca17
+> > > > --- /dev/null
+> > > > +++ b/src/attr_replace_test.c
+> > > > @@ -0,0 +1,47 @@
+> > > > +// setattr.c by kanda.motohiro@gmail.com
+> > > > +// xfs extended attribute corruption bug reproducer
+> > > > +#include <stdio.h>
+> > > > +#include <string.h>
+> > > > +#include <fcntl.h>
+> > > > +#include <errno.h>
+> > > > +#include <stdlib.h>
+> > > > +#include <unistd.h>
+> > > > +#include <sys/types.h>
+> > > > +#include <sys/xattr.h>
+> > > > +
+> > > > +#define die() do { perror(""); \
+> > > > +fprintf(stderr, "error=%d at line %d\n", errno, __LINE__); \
+> > > > +exit(1); } while (0)
+> > > > +
+> > > > +int main(int argc, char *argv[])
+> > > > +{
+> > > > +	int ret;
+> > > > +	int fd;
+> > > > +	char *path = "/mnt/xfs/hello";
+> > 
+> > I'd like not assign default path to "/mnt/xfs/hello", just in case we
+> > forget the testfile argument and test runs against /mnt/xfs/hello
+> > accidently and test passes silently.
+> 
+> Ok, please get rid of it then. :)
+> 
+> > > > +	char *name = "user.world";
+> > > > +	char value[2048];
+> > > > +	size_t size = sizeof(value);
+> > > > +
+> > > > +	if (argc == 2)
+> > > > +		path = argv[1];
+> > 
+> > I'll make sure argc == 2, and error out if not.
+> 
+> Ok.
+> 
+> > Thanks,
+> > Eryu
+> > 
+> > > > +
+> > > > +	fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+> > > > +	if (fd < 0) die();
+> > > > +
+> > > > +	// First, create a small xattr.
+> > > > +	memset(value, '0', 1);
+> > > > +	ret = fsetxattr(fd, name, value, 1, XATTR_CREATE);
+> > > > +	if (ret < 0) die();
+> > > > +	close(fd);
+> > > > +
+> > > > +	fd = open(path, O_RDWR);
+> > > > +	if (fd < 0) die();
+> > > > +
+> > > > +	// Then, replace it with bigger one, forcing short form to leaf conversion.
+> > > > +	memset(value, '1', sizeof(value));
+> > > > +	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
+> > > > +	if (ret < 0) die();
+> > > > +	close(fd);
+> > > > +
+> > > > +	return 0;
+> > > > +}
+> > > > diff --git a/tests/generic/706 b/tests/generic/706
+> > > > new file mode 100755
+> > > > index 0000000..4d8f180
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/706
+> > > > @@ -0,0 +1,64 @@
+> > > > +#! /bin/bash
+> > > > +# FS QA Test No. 706
+> > > > +#
+> > > > +# Ensure that we can XATTR_REPLACE a tiny attr into a large attr.
+> > > > +# Kanda Motohiro <kanda.motohiro@gmail.com> reports that XATTR_REPLACE'ing
+> > > > +# a single-byte attr with a 2048-byte attr causes a fs shutdown because we
+> > > > +# remove the shortform attr, convert the attr fork to long format, and then
+> > > > +# try to re-add the attr having not cleared ATTR_REPLACE.
+> > > > +#
+> > > > +#-----------------------------------------------------------------------
+> > > > +# Copyright (c) 2018 Oracle.  All Rights Reserved.
+> > > > +#
+> > > > +# This program is free software; you can redistribute it and/or
+> > > > +# modify it under the terms of the GNU General Public License as
+> > > > +# published by the Free Software Foundation.
+> > > > +#
+> > > > +# This program is distributed in the hope that it would be useful,
+> > > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > > +# GNU General Public License for more details.
+> > > > +#
+> > > > +# You should have received a copy of the GNU General Public License
+> > > > +# along with this program; if not, write the Free Software Foundation,
+> > > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > > +#
+> > > > +#-----------------------------------------------------------------------
+> > > > +
+> > > > +seq=`basename $0`
+> > > > +seqres=$RESULT_DIR/$seq
+> > > > +echo "QA output created by $seq"
+> > > > +
+> > > > +status=1	# failure is the default!
+> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > +
+> > > > +_cleanup()
+> > > > +{
+> > > > +	cd /
+> > > > +	rm -f $testfile
+> > > > +}
+> > > > +
+> > > > +# get standard environment, filters and checks
+> > > > +. ./common/rc
+> > > > +. ./common/filter
+> > > > +. ./common/attr
+> > > > +
+> > > > +# remove previous $seqres.full before test
+> > > > +rm -f $seqres.full
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs generic
+> > > > +_supported_os Linux
+> > > > +_require_test_program "attr_replace_test"
+> > > > +_require_attrs
+> > > > +_require_scratch
+> > > > +
+> > > > +rm -f $seqres.full
+> > > > +_scratch_mkfs >>$seqres.full 2>&1
+> > > > +_scratch_mount >>$seqres.full 2>&1
+> > > > +
+> > > > +./src/attr_replace_test $SCRATCH_MNT/hello
+> > > > +$ATTR_PROG -l $SCRATCH_MNT/hello | _filter_scratch
+> > > > +
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/generic/706.out b/tests/generic/706.out
+> > > > new file mode 100644
+> > > > index 0000000..1c654c1
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/706.out
+> > > > @@ -0,0 +1,2 @@
+> > > > +QA output created by 706
+> > > > +Attribute "world" has a 2048 byte value for SCRATCH_MNT/hello
+> > > > diff --git a/tests/generic/group b/tests/generic/group
+> > > > index 3f93dc4..fc05315 100644
+> > > > --- a/tests/generic/group
+> > > > +++ b/tests/generic/group
+> > > > @@ -487,3 +487,4 @@
+> > > >  482 auto metadata replay
+> > > >  483 auto quick log metadata
+> > > >  484 auto quick insert
+> > > > +706 auto quick attr
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
