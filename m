@@ -1,115 +1,136 @@
-Received: from mx2.suse.de ([195.135.220.15]:48407 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751216AbeDXSD1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 24 Apr 2018 14:03:27 -0400
-Subject: Re: [PATCH] check: annotate good and expunged tests in results
-References: <20180412213838.28929-1-jeffm@suse.com>
- <20180424093646.GA11384@desktop>
-From: Jeff Mahoney <jeffm@suse.com>
-Message-ID: <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
-Date: Tue, 24 Apr 2018 14:03:24 -0400
+Received: from mail-vk0-f49.google.com ([209.85.213.49]:43944 "EHLO
+        mail-vk0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750841AbeDYCfu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 24 Apr 2018 22:35:50 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180424093646.GA11384@desktop>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+From: Jayashree Mohan <jayashree2912@gmail.com>
+Date: Tue, 24 Apr 2018 21:35:48 -0500
+Message-ID: <CA+EzBbC7rmYsKjy_+rkwJLK-bmU51q+a4rnezvOoZYyJ8kWGqg@mail.gmail.com>
+Subject: Inconsistent behavior of fsync in btrfs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, mcgrof@suse.com, nborisov@suse.com, fdmanana@suse.com
+To: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Cc: Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On 4/24/18 5:36 AM, Eryu Guan wrote:
-> On Thu, Apr 12, 2018 at 05:38:38PM -0400, jeffm@suse.com wrote:
->> From: Jeff Mahoney <jeffm@suse.com>
-> 
-> [Sorry for the late review..]
+Hi,
 
-Thanks for the review just the same.
+While investigating crash consistency bugs on btrfs, we came across
+workloads that demonstrate inconsistent behavior of fsync.
 
->> Currently, we only create results files when a test has failed or was
->> supposed to run but some dependency wasn't met causing it not to run.
->> Short of saving the summary at the end of the run, there's no way to tell
->> which tests passed or which tests weren't run due to being excluded.
->>
->> This patch moves successful test results to $seqres.out.good to annotate
->> good results.  It also adds tests excluded by group to the $tmp.xlist file
->> and adds annotations for every test excluded.  When a test is expunged
-> 
-> I can see that annotating tests excluded by group is helpful, but I
-> don't think we need $seqres.out.good, passed tests are already shown by
-> check, and $seqres.out.good is same as the golden image, it looks
-> redundant.
+Consider the following workload where fsync on the directory did not persist it.
 
-The contents are redundant, but the purpose of the file existing isn't.
-My goal is to be able to point a script at the results directory for a
-test run and autogenerate a table of results and/or compare them to
-known results.  Right now, there's no way to tell whether a test was run
-at all, only that it failed or was skipped due to some missing
-dependency.  The expunge changes handle the explicitly skipped cases,
-but without the .good files, there's nothing indicating a test actually
-ran or when it last did.  The contents don't have to be the output.  If
-you can think of something more useful there (or if we just create an
-empty file), that's fine too.
->> -# takes the list of tests to run in $tmp.list, and removes the tests passed to
->> -# the function from that list.
->> +# takes the list of tests to run in $tmp.list and adds them to the excluded
->> +# test list, annotated with the group that excluded each one
-> 
-> The comments don't seem quite right, the new behavior doesn't take tests
-> from $tmp.list, it just edits the $tmp.xlist file for later use.
+Workload 1:
 
-Right.  I missed updating the comment after changing the behavior.
+mkdir A
+Sync
+rename (A, B)
+creat B/foo
+fsync B/foo
+fsync B
+---crash---
 
->>  trim_test_list()
->>  {
->> +	group=$1
-> 
-> Please declare local variable as 'local' when possible.
+In this case, the directory B as well as file B/foo are missing.
+What's more worrying is that, on recovery from crash, we expect the
+contents of directory to be
 
-Ok.
+Dir A : should not exist
+Dir B :
+    foo
 
-> When using config section, e.g. ./check -s <sec_name>, and FSTYP is
-> different in new section, check will do _prepare_test_list again, so
-> tests selected by "-x <xgroup>" will be listed twice in $tmp.xlist file,
-> as a result, I see duplicated group names in the annotate message, e.g.
-> 
-> generic/458        [expunged] group metadata metadata
-> 
-> I think we should move above "-X/-E" handlings to _prepare_test_list,
-> only assign variable "xfile" here (use a new variable for -E option,
-> perhaps). So that we could simply remove $tmp.xlist before calling
-> _prepare_test_list again, and it could exclude all specified tests only
-> once. Maybe as patch 1/2 in a patchset.
+But instead, what we see is that:
+Dir A :
+    foo
+Dir B : doesn't exist
 
-Ok, that's easy enough to do.
 
->>  	        fi
->>  		;;
->>  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
->> @@ -491,11 +483,17 @@ _check_filesystems()
->>  _expunge_test()
->>  {
->>  	local TEST_ID="$1"
->> +	local OUTPUT="$2"
-> 
-> OUTPUT is not used.
+This state is acceptable if we had created the file foo in dir A and
+then renamed the directory - in that case it would mean the rename did
+not persist. However what we see here is that, a file created in
+directory B falsely appears in A, which is incorrect.
 
-Ack.
+However, if we did not persist the initial create of directory A, i.e
 
->> @@ -770,6 +774,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
->>  			    else
->>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
->>  				echo -n " `expr $stop - $start`s"
->> +				mv $tmp.out $seqres.out.good
-> 
-> As said above, I don't think it's that useful.
+Workload 2:
 
-It doesn't need to be the contents of the output, but I'd like it to be
-*something* and moving a file that already exists is as easy as creating
-a new one.
+mkdir A
+rename (A, B)
+creat B/foo
+fsync B/foo
+fsync B
+---crash---
 
--Jeff
+the directory B and its entry both get persisted in this case.
 
--- 
-Jeff Mahoney
-SUSE Labs
+Is this something to do with the directory entry A being already
+present in the FS/subvolume tree and then the changes to the directory
+inode going into the fsync log?
+
+We do not clearly understand the reason for such inconsistent
+behavior, but it does seem incorrect.
+
+Consider another case where we found inconsistent behavior in the way
+fsync is handled.
+
+Workload 3:
+
+mkdir A
+mkdir B
+creat A/foo
+link (A/foo, B/foo)
+fsync A/foo
+fsync B/foo
+---crash---
+
+In this case,  file A/foo is persisted, but inspite of an explicit
+fsync on B/foo, the file goes missing.
+
+Workload 4:
+
+mkdir A
+mkdir B
+creat A/foo
+link (A/foo, B/foo)
+fsync B/foo
+fsync A/foo
+---crash---
+
+Note that, the only difference between workload 3 and 4 is the order
+of fsync on files A/foo and B/foo. In this case, the file B/foo is
+persisted, but A/foo is missing.
+
+What we interpret from the above workloads is that, the second fsync
+is behaving like a no-op, and in either cases, only the file that is
+fsynced first gets persisted. If we insert a sleep(45) between the two
+fsyncs in the workloads above, we see both the files A/foo and B/foo
+being persisted.
+
+No matter how many more links we create and fsync, only the first
+fsync persists the file, i.e for example,
+
+Workload 5:
+
+mkdir A
+mkdir B
+mkdir C
+creat A/foo
+link (A/foo, B/foo)
+link (A/foo, C/foo)
+fsync B/foo
+fsync A/foo
+fsync C/foo
+---crash---
+
+Only file B/foo gets persisted, and both A/foo and C/foo are missing.
+
+This seems like inconsistent behavior as only the first fsync persists
+the file, while all others don't seem to. Do you agree if this is
+indeed incorrect and needs fixing?
+
+All the above tests pass on ext4 and xfs.
+
+Please let us know what you feel about such inconsistency.
+
+
+Thanks,
+Jayashree Mohan
