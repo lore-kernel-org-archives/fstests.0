@@ -1,94 +1,148 @@
-Received: from mail-ua0-f170.google.com ([209.85.217.170]:40848 "EHLO
-        mail-ua0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752868AbeDYNx1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Apr 2018 09:53:27 -0400
-Received: by mail-ua0-f170.google.com with SMTP id g9so660885uak.7
-        for <fstests@vger.kernel.org>; Wed, 25 Apr 2018 06:53:27 -0700 (PDT)
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:44164 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754949AbeDYPc2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Apr 2018 11:32:28 -0400
 MIME-Version: 1.0
-In-Reply-To: <CAFk8rvbzwUyiT0Ey1TkVKAJ6TKoFRgb72z8DwjYaYzATCSEG_A@mail.gmail.com>
-References: <CA+EzBbC7rmYsKjy_+rkwJLK-bmU51q+a4rnezvOoZYyJ8kWGqg@mail.gmail.com>
- <CAJCQCtT7S9Qb-m3-7EXJPwtMT9nuUJjDykHi915KU+fc4fB-aQ@mail.gmail.com>
- <CAHWVdUXeDs+M1HeyiPxLbQHhw8BCW2SXeOGf69Er4_EQP4tgDA@mail.gmail.com> <CAFk8rvbzwUyiT0Ey1TkVKAJ6TKoFRgb72z8DwjYaYzATCSEG_A@mail.gmail.com>
-From: Ashlie Martinez <ashmrtn@utexas.edu>
-Date: Wed, 25 Apr 2018 08:53:26 -0500
-Message-ID: <CAFk8rvaX2dYMVDTkBMOuPZ5vP5pdMkb3aBx5Nq2gRCXFciFFUA@mail.gmail.com>
-Subject: Re: Inconsistent behavior of fsync in btrfs
+In-Reply-To: <20180425054807.GG11384@desktop>
+References: <1524061018-20413-1-git-send-email-amir73il@gmail.com>
+ <1524061018-20413-3-git-send-email-amir73il@gmail.com> <20180425054807.GG11384@desktop>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 25 Apr 2018 08:32:26 -0700
+Message-ID: <CAOQ4uxj9WQXMCaHWeogrXuhz1Zr8=+APEZtHUabFau49vb6yzw@mail.gmail.com>
+Subject: Re: [PATCH 2/2] overlay/04{1,3,4}: enable xino feature
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Cc: Chris Murphy <lists@colorremedies.com>, Jayashree Mohan <jayashree2912@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 25, 2018 at 7:36 AM, Ashlie Martinez <ashmrtn@utexas.edu> wrote:
-> I don't really know all that much about the btrfs code, but I was
-> digging around to try and find the cause of this. Given the fact that
-> inserting a sleep between the fsyncs gives correct behavior, do you
-> think the issue could be related to how btrfs determines whether or
-> not to log a change to an inode? I found some code in
-> btrfs_log_inode_parent() (part of the fsync path for both files and
-> directories) that appears to check if the inode being fsync-ed is
-> already in the log and, if it is, returns BTRFS_NO_LOG_SYNC [1]. Since
-> in both cases we saw issues where the same inode was either changed
-> parent directories (rename) or was present in multiple directories
-> (hard link), it seems plausible that this could be the problem. Do you
-> have any thoughts on this?
->
-> [1] https://www.google.com/url?q=https://elixir.bootlin.com/linux/v4.16-rc7/source/fs/btrfs/tree-log.c%23L5563&sa=D&source=hangouts&ust=1524702498584000&usg=AFQjCNE_KadcgkZ7xiIhLOzQCFQoet8Lqw
->
-> Thanks,
-> Ashlie
->
-> On Tue, Apr 24, 2018 at 10:16 PM, Vijaychidambaram Velayudhan Pillai
-> <vijay@cs.utexas.edu> wrote:
->> Hi Chris,
+On Tue, Apr 24, 2018 at 10:48 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Wed, Apr 18, 2018 at 05:16:58PM +0300, Amir Goldstein wrote:
+>> These tests check for constant inode number on copy up with nonsamefs
+>> layer configuration. This problem is fixes only when opting-in with the
+>> xino=on mount option, so let the tests enable the mount option on new
+>> kernels and notrun on old kernels.
 >>
->> On Tue, Apr 24, 2018 at 10:07 PM, Chris Murphy <lists@colorremedies.com> wrote:
->>> I don't have answer to your question,
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+>>  tests/overlay/041 | 15 +++++++++++----
+>>  tests/overlay/043 | 13 ++++++++++---
+>>  tests/overlay/044 | 15 +++++++++++----
+>>  3 files changed, 32 insertions(+), 11 deletions(-)
+>>
+>> diff --git a/tests/overlay/041 b/tests/overlay/041
+>> index 4e72348..9de61f7 100755
+>> --- a/tests/overlay/041
+>> +++ b/tests/overlay/041
+>> @@ -70,7 +70,14 @@ _scratch_mkfs
+>>  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+>>  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+>>
+>> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+>> +# enabling xino in this test requires that base filesystem inode numbers will
+>> +# not use bit 63 in inode number of the test files, because bit 63 is used by
+>> +# overlayfs to indicate the layer. Let's just assume that this is true for all
+>> +# tested filesystems and if we are wrong, the test may fail
+>> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on ||
+>> +     _notrun "mount overlay with xino failed"
+>> +_check_scratch_fs_option "xino" || \
+>> +     _notrun "faild to enable xino"
+>>
+>>  test_dir=$SCRATCH_MNT/test_dir/
+>>
+>> @@ -171,7 +178,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
+>>  _scratch_unmount
+>>
+>>  # check overlayfs
+>> -_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
+>> +_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o xino=on
+>>
+>>  # Verify pure lower residing in dir which has another lower layer
+>>  middir=$OVL_BASE_TEST_DIR/$seq-ovl-mid
+>> @@ -189,7 +196,7 @@ _scratch_mkfs
+>>  upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
+>>  workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
+>>
+>> -_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
+>> +_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir -o xino=on
+>>
+>>  # Copy up test_dir
+>>  touch $test_dir/test_file
+>> @@ -212,7 +219,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
+>>       echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
+>>
+>>  # check overlayfs
+>> -_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir
+>> +_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir -o xino=on
+>
+> 041 fails the fsck.overlay check, but I think that's a different issue.
 
-Sending inline just to make sure I get a response (sorry if this is spam):
+Right. Will look into that.
 
-I don't really know all that much about the btrfs code, but I was
-digging around to try and find the cause of this. Given the fact that
-inserting a sleep between the fsyncs gives correct behavior, do you
-think the issue could be related to how btrfs determines whether or
-not to log a change to an inode? I found some code in
-btrfs_log_inode_parent() (part of the fsync path for both files and
-directories) that appears to check if the inode being fsync-ed is
-already in the log and, if it is, returns BTRFS_NO_LOG_SYNC [1]. Since
-in both cases we saw issues where the same inode was either changed
-parent directories (rename) or was present in multiple directories
-(hard link), it seems plausible that this could be the problem. Do you
-have any thoughts on this?
+>
+> *** fsck.overlay output ***
+> fsck.overlay:[Error]: Faile to resolve upperdir:/mnt/scratch/ovl-upper:No such file or directory
+> Please specify correct lowerdirs and upperdir!
+>
+> Usage:
+>         fsck.overlay [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>] [-pnyvhV]
+>
+> Options:
+> -o,                       specify underlying directories of overlayfs
+>                           multiple lower directories use ':' as separator
+> -p,                       automatic repair (no questions)
+> -n,                       make no changes to the filesystem
+> -y,                       assume "yes" to all questions
+> -v, --verbose             print more messages of overlayfs
+> -h, --help                display this usage of overlayfs
+> -V, --version             display version information
+> *** end fsck.overlay output
+>
+>>
+>>  echo "Silence is golden"
+>>  status=0
+>> diff --git a/tests/overlay/043 b/tests/overlay/043
+>> index 46df686..66771c0 100755
+>> --- a/tests/overlay/043
+>> +++ b/tests/overlay/043
+>> @@ -83,7 +83,14 @@ _scratch_mkfs >>$seqres.full 2>&1
+>>  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+>>  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+>>
+>> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
+>> +# enabling xino in this test requires that base filesystem inode numbers will
+>> +# not use bit 63 in inode number of the test files, because bit 63 is used by
+>> +# overlayfs to indicate the layer. Let's just assume that this is true for all
+>> +# tested filesystems and if we are wrong, the test may fail
+>> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on || \
+>> +     _notrun "mount overlay with xino failed"
+>> +_check_scratch_fs_option "xino" || \
+>> +     _notrun "faild to enable xino"
+>
+> 043 still fails for me, kernel is v4.17-rc2
+>
+> [root@fedoravm xfstests]# diff -u tests/overlay/043.out /root/workspace/xfstests/results//xfs_4k/overlay/043.out.bad
+> --- tests/overlay/043.out       2018-02-25 15:15:00.135387405 +0800
+> +++ /root/workspace/xfstests/results//xfs_4k/overlay/043.out.bad        2018-04-25 13:44:24.378262790 +0800
+> @@ -1,2 +1,11 @@
+>  QA output created by 043
+> +--- /tmp/29215.after_copyup    2018-04-25 13:44:23.888271267 +0800
+> ++++ /tmp/29215.after_move      2018-04-25 13:44:24.115267339 +0800
+> +@@ -1,4 +1,4 @@
+> +-9223372036888371331 dir
+> ++50333121 dir
+> + 9223372036871553155 file
+> + 9223372036871553156 symlink
+> + 9223372036871553157 chrdev
+> +dir not found by ino 9223372036888371331 (from /tmp/29215.after_copyup)
+>  Silence is golden
+>
+> I used ext4 as underlying filesystem, but xfs failed too.
 
-[1] https://www.google.com/url?q=https://elixir.bootlin.com/linux/v4.16-rc7/source/fs/btrfs/tree-log.c%23L5563&sa=D&source=hangouts&ust=1524702498584000&usg=AFQjCNE_KadcgkZ7xiIhLOzQCFQoet8Lqw
+
+It's a test bug. missing _require_scratch_feature redirect_dir
+Like was added to the original 017 test.
+Will send a patch.
 
 Thanks,
-Ashlie
-
-
- but I'm curious exactly how you
->>> simulate a crash? For my own really rudimentary testing I've been doing
->>> crazy things like:
->>>
->>> # grub-mkconfig -o /boot/efi && echo b > /proc/sysrq-trigger
->>>
->>> And seeing what makes it to disk - or not. And I'm finding a some
->>> non-determinstic results are possible even in a VM which is a bit confusing.
->>> I'm sure with real hardware I'd find even more inconsistency.
->>
->> We are using software we developed called CrashMonkey [1]. It
->> simulates the state on storage after a crash (taking into accounts
->> FLUSH and FUA flags). Talk slides on how it works can be found here
->> [2].
->>
->> It is similar to dm-log-writes if you have used that in the past.
->>
->> [1] https://github.com/utsaslab/crashmonkey
->> [2] http://www.cs.utexas.edu/~vijay/papers/hotstorage17-crashmonkey-slides.pdf
->>
->> Thanks,
->> Vijay Chidambaram
->> --
->> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Amir.
