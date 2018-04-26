@@ -1,11 +1,11 @@
-Received: from mail-io0-f193.google.com ([209.85.223.193]:41374 "EHLO
-        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751396AbeDZFwG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 01:52:06 -0400
+Received: from mail-io0-f195.google.com ([209.85.223.195]:34210 "EHLO
+        mail-io0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752756AbeDZFwH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 01:52:07 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/4] overlay/041: fix call to _overlay_check_scratch_dirs
-Date: Wed, 25 Apr 2018 23:53:25 -0600
-Message-Id: <1524722007-30891-3-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 3/4] overlay/043: require and enable redirect_dir
+Date: Wed, 25 Apr 2018 23:53:26 -0600
+Message-Id: <1524722007-30891-4-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 References: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,40 +13,53 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_overlay_check_scratch_dirs needs to base scratch fs to be mounted,
-so only unmount overlay before check.
-
-Remove redundant definition of upperdir/workdir path, which also
-uses hardcoded path instead of the config vars OVL_UPPER/OVL_WORK.
+This test renames a merge directory so it needs to enable
+redirect_dir feature, which is not enabled by default.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/041 | 5 +----
- 1 file changed, 1 insertion(+), 4 deletions(-)
+ tests/overlay/043 | 9 ++++++---
+ 1 file changed, 6 insertions(+), 3 deletions(-)
 
-diff --git a/tests/overlay/041 b/tests/overlay/041
-index 4e72348..f3be746 100755
---- a/tests/overlay/041
-+++ b/tests/overlay/041
-@@ -168,7 +168,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
- [[ $subdir_d == "subdir d" ]] || \
- 	echo "Merged dir: Invalid d_ino reported for subdir"
+diff --git a/tests/overlay/043 b/tests/overlay/043
+index 46df686..f70ee7f 100755
+--- a/tests/overlay/043
++++ b/tests/overlay/043
+@@ -62,6 +62,8 @@ _require_scratch_nocheck
+ _require_test
+ _require_test_program "af_unix"
+ _require_test_program "t_dir_type"
++# Require redirect_dir for renaming a merge directory
++_require_scratch_feature redirect_dir
  
--_scratch_unmount
-+$UMOUNT_PROG $SCRATCH_MNT
+ rm -f $seqres.full
+ 
+@@ -83,7 +85,8 @@ _scratch_mkfs >>$seqres.full 2>&1
+ upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
+ workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
+ 
+-_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++# Enable redirect_dir for renaming a merge directory
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
+ 
+ FILES="dir file symlink chrdev blkdev fifo socket"
+ 
+@@ -150,13 +153,13 @@ check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
+ 
+ # Verify that the inode numbers survive a mount cycle
+ $UMOUNT_PROG $SCRATCH_MNT
+-_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
++_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
+ 
+ # Compare inode numbers before/after mount cycle
+ check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
  
  # check overlayfs
- _overlay_check_scratch_dirs $lowerdir $upperdir $workdir
-@@ -186,9 +186,6 @@ mkdir -p $lowerdir/test_dir/pure_lower_dir/subdir
+-_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
++_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
  
- _scratch_mkfs
- 
--upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
--workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
--
- _overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
- 
- # Copy up test_dir
+ echo "Silence is golden"
+ status=0
 -- 
 2.7.4
 
