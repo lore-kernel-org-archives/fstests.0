@@ -1,11 +1,11 @@
-Received: from mail-io0-f182.google.com ([209.85.223.182]:37422 "EHLO
-        mail-io0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752785AbeDZFwF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 01:52:05 -0400
+Received: from mail-io0-f193.google.com ([209.85.223.193]:41374 "EHLO
+        mail-io0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751396AbeDZFwG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 01:52:06 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 1/4] common/rc: factor out _require_scratch_fs_option
-Date: Wed, 25 Apr 2018 23:53:24 -0600
-Message-Id: <1524722007-30891-2-git-send-email-amir73il@gmail.com>
+Subject: [PATCH v2 2/4] overlay/041: fix call to _overlay_check_scratch_dirs
+Date: Wed, 25 Apr 2018 23:53:25 -0600
+Message-Id: <1524722007-30891-3-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 References: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,63 +13,40 @@ To: Eryu Guan <eguan@redhat.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Factor out _require_scratch_fs_option and _check_scratch_fs_option
-from the helper _require_scratch_dax.
-Those are generic helpers to test if mount option is supported and
-if mount option was enabled.
+_overlay_check_scratch_dirs needs to base scratch fs to be mounted,
+so only unmount overlay before check.
+
+Remove redundant definition of upperdir/workdir path, which also
+uses hardcoded path instead of the config vars OVL_UPPER/OVL_WORK.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/rc | 29 ++++++++++++++++++++++-------
- 1 file changed, 22 insertions(+), 7 deletions(-)
+ tests/overlay/041 | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 366489b..78bc59d 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3036,20 +3036,35 @@ _require_scratch_shutdown()
- 	_scratch_unmount
- }
+diff --git a/tests/overlay/041 b/tests/overlay/041
+index 4e72348..f3be746 100755
+--- a/tests/overlay/041
++++ b/tests/overlay/041
+@@ -168,7 +168,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
+ [[ $subdir_d == "subdir d" ]] || \
+ 	echo "Merged dir: Invalid d_ino reported for subdir"
  
--# Does dax mount option work on this dev/fs?
--_require_scratch_dax()
-+_check_scratch_fs_option()
-+{
-+	local opt=$1
-+
-+	_fs_options $SCRATCH_DEV | grep -qw "$opt"
-+}
-+
-+# Does mount option work on this dev/fs?
-+_require_scratch_fs_option()
- {
-+	local opt=$1
-+
- 	_require_scratch
- 	_scratch_mkfs > /dev/null 2>&1
--	_try_scratch_mount -o dax || \
--		_notrun "mount $SCRATCH_DEV with dax failed"
--	# Check options to be sure. XFS ignores dax option
-+	_try_scratch_mount -o "$opt" || \
-+		_notrun "mount $SCRATCH_DEV with $opt failed"
-+	# Check options to be sure. For example, XFS ignores dax option
- 	# and goes on if dev underneath does not support dax.
--	_fs_options $SCRATCH_DEV | grep -qw "dax" || \
--		_notrun "$SCRATCH_DEV $FSTYP does not support -o dax"
-+	_check_scratch_fs_option "$opt" || \
-+		_notrun "$SCRATCH_DEV $FSTYP does not support -o $opt"
- 	_scratch_unmount
- }
+-_scratch_unmount
++$UMOUNT_PROG $SCRATCH_MNT
  
-+# Does dax mount option work on this dev/fs?
-+_require_scratch_dax()
-+{
-+	_require_scratch_fs_option "dax"
-+}
-+
- # Does norecovery support by this fs?
- _require_norecovery()
- {
+ # check overlayfs
+ _overlay_check_scratch_dirs $lowerdir $upperdir $workdir
+@@ -186,9 +186,6 @@ mkdir -p $lowerdir/test_dir/pure_lower_dir/subdir
+ 
+ _scratch_mkfs
+ 
+-upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
+-workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
+-
+ _overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
+ 
+ # Copy up test_dir
 -- 
 2.7.4
 
