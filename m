@@ -1,148 +1,252 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:44164 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754949AbeDYPc2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 25 Apr 2018 11:32:28 -0400
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:43712 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750868AbeDZBzC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 25 Apr 2018 21:55:02 -0400
+Date: Thu, 26 Apr 2018 09:54:56 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] tests/xfs: filestream allocator inode use-after-free test
+Message-ID: <20180426015456.GH11384@desktop>
+References: <20180406141815.6472-1-bfoster@redhat.com>
+ <20180425032221.GF11384@desktop>
+ <20180425115340.GA3879@bfoster.bfoster>
 MIME-Version: 1.0
-In-Reply-To: <20180425054807.GG11384@desktop>
-References: <1524061018-20413-1-git-send-email-amir73il@gmail.com>
- <1524061018-20413-3-git-send-email-amir73il@gmail.com> <20180425054807.GG11384@desktop>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 25 Apr 2018 08:32:26 -0700
-Message-ID: <CAOQ4uxj9WQXMCaHWeogrXuhz1Zr8=+APEZtHUabFau49vb6yzw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] overlay/04{1,3,4}: enable xino feature
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180425115340.GA3879@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 24, 2018 at 10:48 PM, Eryu Guan <guaneryu@gmail.com> wrote:
-> On Wed, Apr 18, 2018 at 05:16:58PM +0300, Amir Goldstein wrote:
->> These tests check for constant inode number on copy up with nonsamefs
->> layer configuration. This problem is fixes only when opting-in with the
->> xino=on mount option, so let the tests enable the mount option on new
->> kernels and notrun on old kernels.
->>
->> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->> ---
->>  tests/overlay/041 | 15 +++++++++++----
->>  tests/overlay/043 | 13 ++++++++++---
->>  tests/overlay/044 | 15 +++++++++++----
->>  3 files changed, 32 insertions(+), 11 deletions(-)
->>
->> diff --git a/tests/overlay/041 b/tests/overlay/041
->> index 4e72348..9de61f7 100755
->> --- a/tests/overlay/041
->> +++ b/tests/overlay/041
->> @@ -70,7 +70,14 @@ _scratch_mkfs
->>  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
->>  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
->>
->> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
->> +# enabling xino in this test requires that base filesystem inode numbers will
->> +# not use bit 63 in inode number of the test files, because bit 63 is used by
->> +# overlayfs to indicate the layer. Let's just assume that this is true for all
->> +# tested filesystems and if we are wrong, the test may fail
->> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on ||
->> +     _notrun "mount overlay with xino failed"
->> +_check_scratch_fs_option "xino" || \
->> +     _notrun "faild to enable xino"
->>
->>  test_dir=$SCRATCH_MNT/test_dir/
->>
->> @@ -171,7 +178,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->>  _scratch_unmount
->>
->>  # check overlayfs
->> -_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
->> +_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o xino=on
->>
->>  # Verify pure lower residing in dir which has another lower layer
->>  middir=$OVL_BASE_TEST_DIR/$seq-ovl-mid
->> @@ -189,7 +196,7 @@ _scratch_mkfs
->>  upperdir=$OVL_BASE_SCRATCH_MNT/ovl-upper
->>  workdir=$OVL_BASE_SCRATCH_MNT/ovl-work
->>
->> -_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
->> +_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir -o xino=on
->>
->>  # Copy up test_dir
->>  touch $test_dir/test_file
->> @@ -212,7 +219,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->>       echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
->>
->>  # check overlayfs
->> -_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir
->> +_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir -o xino=on
->
-> 041 fails the fsck.overlay check, but I think that's a different issue.
+On Wed, Apr 25, 2018 at 07:53:41AM -0400, Brian Foster wrote:
+> On Wed, Apr 25, 2018 at 11:22:21AM +0800, Eryu Guan wrote:
+> > On Fri, Apr 06, 2018 at 10:18:15AM -0400, Brian Foster wrote:
+> > > The XFS filestreams allocator caches dir inode -> agno mappings in
+> > > an MRU mechanism that holds elements in memory for an amount of time
+> > > and then cleans up expired elements in the background. The elements
+> > > typically held inode pointers without holding a reference to the
+> > > associated inode. This means that if the inode is reclaimed before
+> > > an expired entry is cleaned up, the MRU reaper can access freed
+> > > memory and cause a panic.
+> > > 
+> > > Test for this problem by performing continuous filestreams
+> > > allocations under short-lived parent directory inodes. This will
+> > > produce KASAN use-after-free splats if enabled during the test.
+> > > 
+> > > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > > ---
+> > > 
+> > > This test reproduces the problem described in this[1] thread. It's
+> > > XFS-specific because of the filestream option and specific geometry used
+> > > to format the scratch device.
+> > > 
+> > > Brian
+> > > 
+> > > [1] https://marc.info/?l=linux-xfs&m=152293031029161&w=2
+> > 
+> > From above thread, it seems that we don't need the kernel change
+> > anymore, and the test itself would trigger dmesg check failure when
+> > testing on kernel with kasan enabled, right?
+> > 
+> 
+> Yep...
+> 
+> > But I've looped the test for 200 times and it all passed without
+> > triggering any KASAN warnings, kernel is v4.17-rc2.
+> > 
+> 
+> The kernel fix ended up being a patch from Christoph. It looks like it
+> made it into v4.17-rc1 as commit 7fcd3efa1e ("xfs: remove filestream
+> item xfs_inode reference"). Could you perhaps try an older kernel or one
+> with that patch reverted?
 
-Right. Will look into that.
+Sure, I'll try reverting that patch.
 
->
-> *** fsck.overlay output ***
-> fsck.overlay:[Error]: Faile to resolve upperdir:/mnt/scratch/ovl-upper:No such file or directory
-> Please specify correct lowerdirs and upperdir!
->
-> Usage:
->         fsck.overlay [-o lowerdir=<lowers>,upperdir=<upper>,workdir=<work>] [-pnyvhV]
->
-> Options:
-> -o,                       specify underlying directories of overlayfs
->                           multiple lower directories use ':' as separator
-> -p,                       automatic repair (no questions)
-> -n,                       make no changes to the filesystem
-> -y,                       assume "yes" to all questions
-> -v, --verbose             print more messages of overlayfs
-> -h, --help                display this usage of overlayfs
-> -V, --version             display version information
-> *** end fsck.overlay output
->
->>
->>  echo "Silence is golden"
->>  status=0
->> diff --git a/tests/overlay/043 b/tests/overlay/043
->> index 46df686..66771c0 100755
->> --- a/tests/overlay/043
->> +++ b/tests/overlay/043
->> @@ -83,7 +83,14 @@ _scratch_mkfs >>$seqres.full 2>&1
->>  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
->>  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
->>
->> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
->> +# enabling xino in this test requires that base filesystem inode numbers will
->> +# not use bit 63 in inode number of the test files, because bit 63 is used by
->> +# overlayfs to indicate the layer. Let's just assume that this is true for all
->> +# tested filesystems and if we are wrong, the test may fail
->> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on || \
->> +     _notrun "mount overlay with xino failed"
->> +_check_scratch_fs_option "xino" || \
->> +     _notrun "faild to enable xino"
->
-> 043 still fails for me, kernel is v4.17-rc2
->
-> [root@fedoravm xfstests]# diff -u tests/overlay/043.out /root/workspace/xfstests/results//xfs_4k/overlay/043.out.bad
-> --- tests/overlay/043.out       2018-02-25 15:15:00.135387405 +0800
-> +++ /root/workspace/xfstests/results//xfs_4k/overlay/043.out.bad        2018-04-25 13:44:24.378262790 +0800
-> @@ -1,2 +1,11 @@
->  QA output created by 043
-> +--- /tmp/29215.after_copyup    2018-04-25 13:44:23.888271267 +0800
-> ++++ /tmp/29215.after_move      2018-04-25 13:44:24.115267339 +0800
-> +@@ -1,4 +1,4 @@
-> +-9223372036888371331 dir
-> ++50333121 dir
-> + 9223372036871553155 file
-> + 9223372036871553156 symlink
-> + 9223372036871553157 chrdev
-> +dir not found by ino 9223372036888371331 (from /tmp/29215.after_copyup)
->  Silence is golden
->
-> I used ext4 as underlying filesystem, but xfs failed too.
+> 
+> > > 
+> > >  tests/xfs/445     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/445.out |   2 +
+> > >  tests/xfs/group   |   1 +
+> > >  3 files changed, 114 insertions(+)
+> > >  create mode 100755 tests/xfs/445
+> > >  create mode 100644 tests/xfs/445.out
+> > > 
+> > > diff --git a/tests/xfs/445 b/tests/xfs/445
+> > > new file mode 100755
+> > > index 00000000..331a7dd4
+> > > --- /dev/null
+> > > +++ b/tests/xfs/445
+> > > @@ -0,0 +1,111 @@
+> > > +#! /bin/bash
+> > > +# FS QA Test 445
+> > > +#
+> > > +# Test the XFS filestreams allocator for use-after-free inode access. The
+> > > +# filestreams allocator uses the MRU and historically kept around unreferenced
+> > > +# inode pointers in each element. These pointers could outlive the inodes they
+> > > +# referred to and thus lead to access of freed or reused memory when the MRU
+> > > +# element was reaped. Test for this problem by performing filestream allocations
+> > > +# against short-lived parent directory inodes.
+> > > +#
+> > > +# Note that some form of kernel debug mechanism for use-after-free detection
+> > > +# (i.e., KASAN) is required for this test to reproduce the original problem.
+> > > +# This is because XFS uses a kmem cache for xfs_inode objects which means that
+> > > +# the backing pages for freed inodes may still reside in the cache with the
+> > > +# freed inodes in a partially initialized state.
+> > > +#
+> > > +#-----------------------------------------------------------------------
+> > > +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> > > +#
+> > > +# This program is free software; you can redistribute it and/or
+> > > +# modify it under the terms of the GNU General Public License as
+> > > +# published by the Free Software Foundation.
+> > > +#
+> > > +# This program is distributed in the hope that it would be useful,
+> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > +# GNU General Public License for more details.
+> > > +#
+> > > +# You should have received a copy of the GNU General Public License
+> > > +# along with this program; if not, write the Free Software Foundation,
+> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > +#-----------------------------------------------------------------------
+> > > +#
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +. ./common/filestreams
+> > > +
+> > > +# remove previous $seqres.full before test
+> > > +rm -f $seqres.full
+> > > +
+> > > +# real QA test starts here
+> > > +drop_caches()
+> > > +{
+> > > +	while [ true ]; do
+> > > +		echo 2 > /proc/sys/vm/drop_caches
+> > > +		sleep 1
+> > > +	done
+> > > +}
+> > > +
+> > > +# Modify as appropriate.
+> > > +_supported_fs generic
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +
+> > > +# check for filestreams and min device size
+> > > +_check_filestreams_support || _notrun "filestreams not available"
+> > > +devsize=`blockdev --getsize64 $SCRATCH_DEV`
+> > 
+> > There're a few other tests follow the same pattern in getting device
+> > size, seems it's time to make it a helper function :)
+> > 
+> 
+> TBH I wasn't quite sure this was necessary with a 2GB requirement, but I
+> figured it couldn't hurt just in case. A helper seems fine.. are you
 
+Agreed.
 
-It's a test bug. missing _require_scratch_feature redirect_dir
-Like was added to the original 017 test.
-Will send a patch.
+> thinking something like _require_scratch_size() perhaps?
+
+Yeah, that sounds good to me. BTW, I just noticed that there's already a
+_get_device_size() helper, which was introduced by me almost 4 years
+ago.., but it queries /proc/partitions, looks like we can reuse/rewrite
+it somehow.
 
 Thanks,
-Amir.
+Eryu
+
+> 
+> > > +[ $devsize -gt $((2 * 1024 * 1024 * 1024)) ] || _notrun "scratch dev too small"
+> > > +
+> > > +# use small AGs for frequent stream switching
+> > > +_scratch_mkfs_xfs -d agsize=20m,size=2g >> $seqres.full 2>&1 ||
+> > > +	_fail "mkfs failed"
+> > > +_scratch_mount "-o filestreams" || _fail "mount failed"
+> > 
+> > No need to _fail on _scratch_mount failure, it's the default behavior
+> > now, since commit 69eb6281a9d3 ("fstests: _fail test by default when
+> > _scratch_mount fails").
+> > 
+> 
+> Ah, right. I'll drop that, thanks!
+> 
+> Brian
+> 
+> > Thanks,
+> > Eryu
+> > 
+> > > +
+> > > +# start background inode reclaim
+> > > +drop_caches &
+> > > +pid=$!
+> > > +
+> > > +# Stress the filestreams allocator via continuous allocation to a file under
+> > > +# different parent dirs. Remove the old dirs as the file is moved so the MRU
+> > > +# references point to an unlinked inode by the time they are removed. If the
+> > > +# old dir inodes are reclaimed and associated memory reused, MRU cleanup can
+> > > +# access the inode after it's been freed.
+> > > +dir=$SCRATCH_MNT
+> > > +for i in $(seq 0 90); do
+> > > +	mkdir -p $dir/$i
+> > > +	$XFS_IO_PROG -fc "falloc $(($i * 20))m 20m" $dir/$i/file
+> > > +
+> > > +	mkdir -p $dir/$((i + 1))
+> > > +	mv $dir/$i/file $dir/$((i + 1))/file
+> > > +	rmdir $dir/$i
+> > > +
+> > > +	# throttle to ensure this loop sees several cache reclaims
+> > > +	sleep 0.1
+> > > +done
+> > > +
+> > > +kill $pid 2> /dev/null
+> > > +wait $pid 2> /dev/null
+> > > +
+> > > +echo Silence is golden
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/xfs/445.out b/tests/xfs/445.out
+> > > new file mode 100644
+> > > index 00000000..44e55d20
+> > > --- /dev/null
+> > > +++ b/tests/xfs/445.out
+> > > @@ -0,0 +1,2 @@
+> > > +QA output created by 445
+> > > +Silence is golden
+> > > diff --git a/tests/xfs/group b/tests/xfs/group
+> > > index 831f2cfa..2a7dec6f 100644
+> > > --- a/tests/xfs/group
+> > > +++ b/tests/xfs/group
+> > > @@ -442,3 +442,4 @@
+> > >  442 auto stress clone quota
+> > >  443 auto quick ioctl fsr
+> > >  444 auto quick
+> > > +445 auto filestreams
+> > > -- 
+> > > 2.13.6
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
