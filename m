@@ -1,132 +1,105 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:33368 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751348AbeD0LYB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 07:24:01 -0400
-Received: by mail-pg0-f65.google.com with SMTP id i194-v6so1356765pgd.0
-        for <fstests@vger.kernel.org>; Fri, 27 Apr 2018 04:24:01 -0700 (PDT)
-Date: Fri, 27 Apr 2018 19:23:56 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] check: annotate good and expunged tests in results
-Message-ID: <20180427112356.GP11384@desktop>
-References: <20180412213838.28929-1-jeffm@suse.com>
- <20180424093646.GA11384@desktop>
- <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
+Received: from mx1.redhat.com ([209.132.183.28]:43186 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1757459AbeD0L0k (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Apr 2018 07:26:40 -0400
+Date: Fri, 27 Apr 2018 07:26:38 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH v2] tests/xfs: filestream allocator inode use-after-free
+ test
+Message-ID: <20180427112638.GA9120@bfoster.bfoster>
+References: <20180426120444.3620-1-bfoster@redhat.com>
+ <20180427020458.GJ11384@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
+In-Reply-To: <20180427020458.GJ11384@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Mahoney <jeffm@suse.com>
-Cc: fstests@vger.kernel.org, mcgrof@suse.com, nborisov@suse.com, fdmanana@suse.com
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 24, 2018 at 02:03:24PM -0400, Jeff Mahoney wrote:
-> On 4/24/18 5:36 AM, Eryu Guan wrote:
-> > On Thu, Apr 12, 2018 at 05:38:38PM -0400, jeffm@suse.com wrote:
-> >> From: Jeff Mahoney <jeffm@suse.com>
+On Fri, Apr 27, 2018 at 10:04:58AM +0800, Eryu Guan wrote:
+> On Thu, Apr 26, 2018 at 08:04:44AM -0400, Brian Foster wrote:
+> > The XFS filestreams allocator caches dir inode -> agno mappings in
+> > an MRU mechanism that holds elements in memory for an amount of time
+> > and then cleans up expired elements in the background. The elements
+> > typically held inode pointers without holding a reference to the
+> > associated inode. This means that if the inode is reclaimed before
+> > an expired entry is cleaned up, the MRU reaper can access freed
+> > memory and cause a panic.
 > > 
-> > [Sorry for the late review..]
-> 
-> Thanks for the review just the same.
-> 
-> >> Currently, we only create results files when a test has failed or was
-> >> supposed to run but some dependency wasn't met causing it not to run.
-> >> Short of saving the summary at the end of the run, there's no way to tell
-> >> which tests passed or which tests weren't run due to being excluded.
-> >>
-> >> This patch moves successful test results to $seqres.out.good to annotate
-> >> good results.  It also adds tests excluded by group to the $tmp.xlist file
-> >> and adds annotations for every test excluded.  When a test is expunged
+> > Test for this problem by performing continuous filestreams
+> > allocations under short-lived parent directory inodes. This will
+> > produce KASAN use-after-free splats if enabled during the test.
 > > 
-> > I can see that annotating tests excluded by group is helpful, but I
-> > don't think we need $seqres.out.good, passed tests are already shown by
-> > check, and $seqres.out.good is same as the golden image, it looks
-> > redundant.
+> > Signed-off-by: Brian Foster <bfoster@redhat.com>
+> > ---
+> > 
+> > v2:
+> > - Drop unnecessary _scratch_mount error check.
+> > - Create and use helper for min. scratch dev size.
+> > v1: https://marc.info/?l=fstests&m=152302430125453&w=2
+> > 
+> >  common/rc         |  10 +++++
+> >  tests/xfs/445     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/445.out |   2 +
+> >  tests/xfs/group   |   1 +
+> >  4 files changed, 122 insertions(+)
+> >  create mode 100755 tests/xfs/445
+> >  create mode 100644 tests/xfs/445.out
+> > 
+> > diff --git a/common/rc b/common/rc
+> > index 366489bb..ab15eca1 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -1600,6 +1600,16 @@ _require_scratch()
+> >  	touch ${RESULT_DIR}/require_scratch
+> >  }
+> >  
+> > +# require a scratch dev of a minimum size (in kb)
+> > +_require_scratch_size()
+> > +{
+> > +	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
+> > +
+> > +	_require_scratch
+> > +	devsize=`_get_device_size $SCRATCH_DEV`
 > 
-> The contents are redundant, but the purpose of the file existing isn't.
-> My goal is to be able to point a script at the results directory for a
-> test run and autogenerate a table of results and/or compare them to
-> known results.  Right now, there's no way to tell whether a test was run
+> I made it a 'local' variable.
+> 
 
-But the test run & pass info is already available from the check output
-and the test result summary at the end of check. Is that sufficient for
-you? Also, we already have mechanism to generate a test report in xunit
-format, i.e. ./check -R xunit -g auto, which includes results for passed
-& failed & notrun tests.
+Ok.
 
-My concern is that saving .good files consume more and more space over
-time, and they don't provide any additional information (even with empty
-files that don't require much space).
+> [snip]
+> 
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index 831f2cfa..2a7dec6f 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -442,3 +442,4 @@
+> >  442 auto stress clone quota
+> >  443 auto quick ioctl fsr
+> >  444 auto quick
+> > +445 auto filestreams
+> 
+> It looks like a 'quick' test too, it runs for around 15s on my test vm.
+> Will add 'quick' group on commit.
+> 
 
-Thanks,
-Eryu
+Sounds good to me, thanks!
 
-> at all, only that it failed or was skipped due to some missing
-> dependency.  The expunge changes handle the explicitly skipped cases,
-> but without the .good files, there's nothing indicating a test actually
-> ran or when it last did.  The contents don't have to be the output.  If
-> you can think of something more useful there (or if we just create an
-> empty file), that's fine too.
-> >> -# takes the list of tests to run in $tmp.list, and removes the tests passed to
-> >> -# the function from that list.
-> >> +# takes the list of tests to run in $tmp.list and adds them to the excluded
-> >> +# test list, annotated with the group that excluded each one
+Brian
+
+> Thanks,
+> Eryu
+> 
+> > -- 
+> > 2.13.6
 > > 
-> > The comments don't seem quite right, the new behavior doesn't take tests
-> > from $tmp.list, it just edits the $tmp.xlist file for later use.
-> 
-> Right.  I missed updating the comment after changing the behavior.
-> 
-> >>  trim_test_list()
-> >>  {
-> >> +	group=$1
-> > 
-> > Please declare local variable as 'local' when possible.
-> 
-> Ok.
-> 
-> > When using config section, e.g. ./check -s <sec_name>, and FSTYP is
-> > different in new section, check will do _prepare_test_list again, so
-> > tests selected by "-x <xgroup>" will be listed twice in $tmp.xlist file,
-> > as a result, I see duplicated group names in the annotate message, e.g.
-> > 
-> > generic/458        [expunged] group metadata metadata
-> > 
-> > I think we should move above "-X/-E" handlings to _prepare_test_list,
-> > only assign variable "xfile" here (use a new variable for -E option,
-> > perhaps). So that we could simply remove $tmp.xlist before calling
-> > _prepare_test_list again, and it could exclude all specified tests only
-> > once. Maybe as patch 1/2 in a patchset.
-> 
-> Ok, that's easy enough to do.
-> 
-> >>  	        fi
-> >>  		;;
-> >>  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
-> >> @@ -491,11 +483,17 @@ _check_filesystems()
-> >>  _expunge_test()
-> >>  {
-> >>  	local TEST_ID="$1"
-> >> +	local OUTPUT="$2"
-> > 
-> > OUTPUT is not used.
-> 
-> Ack.
-> 
-> >> @@ -770,6 +774,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-> >>  			    else
-> >>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
-> >>  				echo -n " `expr $stop - $start`s"
-> >> +				mv $tmp.out $seqres.out.good
-> > 
-> > As said above, I don't think it's that useful.
-> 
-> It doesn't need to be the contents of the output, but I'd like it to be
-> *something* and moving a file that already exists is as easy as creating
-> a new one.
-> 
-> -Jeff
-> 
-> -- 
-> Jeff Mahoney
-> SUSE Labs
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
