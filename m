@@ -1,69 +1,78 @@
-Received: from mail.kernel.org ([198.145.29.99]:56772 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1758975AbeD0RU0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Apr 2018 13:20:26 -0400
-Message-ID: <1524849624.4206.7.camel@kernel.org>
-Subject: Re: [PATCH] generic: test for seeing unseen fsync errors on newly
- open files
-From: Jeff Layton <jlayton@kernel.org>
-Date: Fri, 27 Apr 2018 13:20:24 -0400
-In-Reply-To: <20180427165830.xekrvdv2my6nxjsr@alap3.anarazel.de>
-References: <20180427163833.21882-1-jlayton@kernel.org>
-         <20180427165830.xekrvdv2my6nxjsr@alap3.anarazel.de>
-Content-Type: text/plain; charset="UTF-8"
-Mime-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Received: from mx0a-00082601.pphosted.com ([67.231.145.42]:33018 "EHLO
+        mx0a-00082601.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751727AbeD0Rd5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 13:33:57 -0400
+From: Chris Mason <clm@fb.com>
+Subject: Re: Inconsistent behavior of fsync in btrfs
+Date: Fri, 27 Apr 2018 11:33:29 -0600
+Message-ID: <1A75793D-6487-4EE6-9F4D-AD538D7283CA@fb.com>
+In-Reply-To: <20180427160740.GD21272@twin.jikos.cz>
+References: <CA+EzBbC7rmYsKjy_+rkwJLK-bmU51q+a4rnezvOoZYyJ8kWGqg@mail.gmail.com>
+ <34B2B717-B12D-44F4-B0D0-E3D606BBEFA6@fb.com>
+ <CA+EzBbBaZjcdHi4O4W8LZ2JvpYhN_hFGvktaeFYRfSygW3sK7A@mail.gmail.com>
+ <20180427160740.GD21272@twin.jikos.cz>
+MIME-Version: 1.0
+Content-Type: text/plain; format=flowed; markup=markdown
 Sender: fstests-owner@vger.kernel.org
-To: Andres Freund <andres@anarazel.de>
-Cc: fstests@vger.kernel.org, eguan@redhat.com, willy@infradead.org, david@fromorbit.com
+To: David Sterba <dsterba@suse.cz>
+Cc: Jayashree Mohan <jayashree2912@gmail.com>, linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Filipe Manana <fdmanana@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, 2018-04-27 at 09:58 -0700, Andres Freund wrote:
-> Hi,
-> 
-> On 2018-04-27 12:38:33 -0400, Jeff Layton wrote:
-> > This is motivated by some rather odd behavior done by the PostgreSQL
-> > project. The main database writers will offload the fsync calls to a
-> > separate process, which can open files after a writeback error has
-> > already occurred.
-> 
-> ;)
-> 
-> 
-> > +	ret = pwrite(fd1, buf, bufsize, 0);
-> > +	if (ret < 0) {
-> > +		printf("Second write on fd1 failed: %m\n");
-> > +		return 1;
-> > +	}
-> > +
-> > +	/* Ensure writeback occurs, but don't scrape the error */
-> > +	sync();
-> 
-> It might be a good idea to also add a second version of this that
-> additionally evicts inodes after the sync? I think that should be
-> simulatable with "echo 2 > /proc/sys/vm/drop_caches" or such? That'd
-> obviously fail for now...
-> 
+On 27 Apr 2018, at 10:07, David Sterba wrote:
 
-We could. In this test, I'm explicitly holding the fd1 open it while we
-open fd2 after the sync to ensure that it sticks around in the cache.
+> On Thu, Apr 26, 2018 at 07:59:23PM -0500, Jayashree Mohan wrote:
+>> Thanks for the response. We are using a tool we developed called
+>> CrashMonkey[1] to run crash consistency tests and generate the bug
+>> reports above. We'd be happy to guide you through setting up
+>> CrashMonkey and getting these bugs reproduced. However, if you want 
+>> to
+>> be able to reproduce them with your current setup (xfstest +
+>> dm-flakey), I have the workload scripts attached to the end of the
+>> mail which might make your task simpler.
+>>
+>> Interestingly we seem to have found another bug that breaks rename
+>> atomicity and results in a previously fsynced file missing.
+>>
+>> Workload:
+>> 1. mkdir A
+>> 2. creat A/bar (*)
+>> 3. fsync A/bar
+>> 4. mkdir B
+>> 5. creat B/bar
+>> 6. rename B/bar A/bar
+>> 7. creat A/foo
+>> 8. fsync A/foo
+>> 9. fsync A
+>> --- crash---
+>>
+>> When we recover from the crash, we see that file A/bar goes missing.
+>> If the rename did not persist, we expect to see A/bar(*) created in
+>> step 2 above, or if the rename indeed persisted, we still expect file
+>> A/bar to be present.
+>
+> I'm no fsync expert and the lack of standard or well defined behaviour
+> (mentioned elsewhere) leads me to question, on what do you base your
+> expectations? Not only for this report, but in general during your
+> testing.
+>
+> Comparing various filesystems will show that at best it's 
+> implementation
+> defined and everybody has their own reasons for doing it one way or
+> another, or request fsync at particular time etc.
+>
+> We have a manual page in section 5 that contains general topics of
+> btrfs, so documenting the fsync specifics would be good.
 
-TBH: I'm a little leery of keeping inodes with errors on them in the
-cache as it seems like an open-ended commitment. We may not be able to
-keep them forever and may eventually have to eliminate some in order to
-make forward progress.
+My goal for the fsync tree log was to make it just do the right thing 
+most of the time.  We mostly got there, thanks to a ton of fixes and 
+test cases from Filipe.
 
-If we do go that route, we may very well need drop_caches to purge
-those inodes as well, to give admins a way to clear such inodes
-globally without having to explicitly open+fsync them.
+fsync(some file) -- all the names for this file will exist, without 
+having to fsync the directory.
 
-In any case, I'd prefer to wait until we at least have a proposed patch
-for that piece before we go adding tests for it.
+fsync(some dir) -- ugh, don't fsync the directory.  But if you do, all 
+the files/subdirs will exist, and unlinks will be done and renames will 
+be included.  This is slow and may require a full FS commit, which is 
+why we don't want dirs fsunk.
 
-> Thanks for the test,
-> 
-> Andres Freund
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-chris
