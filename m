@@ -1,174 +1,261 @@
-Received: from mail-pg0-f67.google.com ([74.125.83.67]:39346 "EHLO
-        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751626AbeD0CnI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 22:43:08 -0400
-Date: Fri, 27 Apr 2018 10:43:04 +0800
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:36489 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750892AbeD0Ek1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 00:40:27 -0400
+Date: Fri, 27 Apr 2018 12:40:10 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 4/4] overlay/04{1,3,4}: enable xino feature
-Message-ID: <20180427024304.GL11384@desktop>
-References: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
- <1524722007-30891-5-git-send-email-amir73il@gmail.com>
+Subject: Re: [PATCH] btrfs: Add test that checks rmdir(2) can delete a
+ subvolume
+Message-ID: <20180427044010.GM11384@desktop>
+References: <2f99b131-7eb5-df33-12b9-f05a1468a710@jp.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1524722007-30891-5-git-send-email-amir73il@gmail.com>
+In-Reply-To: <2f99b131-7eb5-df33-12b9-f05a1468a710@jp.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
+Cc: fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 25, 2018 at 11:53:27PM -0600, Amir Goldstein wrote:
-> These tests check for constant inode number on copy up with nonsamefs
-> layer configuration. This problem is fixes only when opting-in with the
-> xino=on mount option, so let the tests enable the mount option on new
-> kernels and notrun on old kernels.
+On Thu, Apr 19, 2018 at 04:23:35PM +0900, Misono Tomohiro wrote:
+> Add btrfs test that checks "rmdir" or "rm -r" command can delete a
+> subvolume like an ordinary drectory.
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> This behavior has been restricted long time but becomes allowed by
+> following patch in the kernel:
+>   btrfs: Allow rmdir(2) to delete an empty subvolume
+> 
+> Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
+
+Looks fine to me overall from fstests' perspective of view, some minor
+issues inline.
+
+But I'd like a Reviewed-by tag from btrfs developers too.
+
 > ---
->  tests/overlay/041 | 16 ++++++++++++----
->  tests/overlay/043 | 16 ++++++++++++----
->  tests/overlay/044 | 16 ++++++++++++----
->  3 files changed, 36 insertions(+), 12 deletions(-)
+>  tests/btrfs/159     | 140 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/159.out |   2 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 143 insertions(+)
+>  create mode 100755 tests/btrfs/159
+>  create mode 100644 tests/btrfs/159.out
 > 
-> diff --git a/tests/overlay/041 b/tests/overlay/041
-> index f3be746..78f8179 100755
-> --- a/tests/overlay/041
-> +++ b/tests/overlay/041
-> @@ -70,7 +70,15 @@ _scratch_mkfs
->  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
->  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
->  
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir
-> +# Enabling xino in this test requires that base filesystem inode numbers will
-> +# not use bit 63 in inode number of the test files, because bit 63 is used by
-> +# overlayfs to indicate the layer. Let's just assume that this is true for all
-> +# tested filesystems and if we are wrong, the test may fail.
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o xino=on ||
-> +	_notrun "mount overlay with xino failed"
+> diff --git a/tests/btrfs/159 b/tests/btrfs/159
+> new file mode 100755
+> index 00000000..2d830502
+> --- /dev/null
+> +++ b/tests/btrfs/159
+> @@ -0,0 +1,140 @@
+> +#! /bin/bash
+> +# FS QA Test btrfs/159
+> +#
+> +# QA test that checks rmdir(2) works for subvolumes like ordinary directories.
+> +#
+> +# This behavior has been restricted long time but becomes allowed by following
+> +# patch in the kernel:
+> +#   btrfs: Allow rmdir(2) to delete an empty subvolume
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Fujitsu. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +_create_subvol()
 
-The _notrun message seems to indicate there's a failure (I can see that
-it's copied from _require_scratch_dax), which may confuse users. I can
-change it to something like below on commit, if you have better messages
-please advise :)
+There's no need to name these local helper functions with the leading
+underscore.
 
-	_notrun "cannot mount overlay with xino=on option"
+> +{
+> +	$BTRFS_UTIL_PROG subvolume create $1 2>&1 | \
+> +		_filter_scratch >> $seqres.full
 
-> +# Not using _check_scratch_fs_option because it uses grep -w
-> +_fs_options $SCRATCH_DEV | grep -q "xino=on" || \
-> +	_notrun "failed to enable xino"
+No need to do _filter_scratch if the output won't go to stdout/stderr,
+it's fine or even recommended to not filter the output when dumping them
+to $seqres.full for debug purpose.
 
-	_notrun "cannot enable xino feature"
+There're a few other places that _filter_scratch can be dropped.
+
+> +}
+> +
+> +_create_snapshot()
+> +{
+> +	$BTRFS_UTIL_PROG subvolume snapshot $@ 2>&1 | \
+> +		_filter_scratch >> $seqres.full
+> +}
+> +
+> +_rmdir_subvol()
+> +{
+> +	rmdir $1 2>&1 | _filter_scratch
+
+I notice that we don't expect any output from the test script ("Silence
+is golden" in .out file), so I don't think it's necessary to do
+redirection and filter here, just do "rmdir $1" and any error message
+would break golden image and fail the test.
+
+> +	return ${PIPESTATUS[0]}
+
+If you only care about the return value, just dump the rmdir output to
+$seqres.full or /dev/null.
+
+> +}
+> +
+> +_rm_r_subvol() {
+> +	rm -r $1 2>&1 | _filter_scratch
+> +	return ${PIPESTATUS[0]}
+
+Same here.
+
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/btrfs
+
+No need to source common/btrfs, it's already sourced by common/rc based
+on current $FSTYP.
+
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +# Check that an empty subvolume can be deleted by rmdir
+> +_create_subvol $SCRATCH_MNT/sub1
+> +_rmdir_subvol $SCRATCH_MNT/sub1
+> +
+> +# Check that non-empty subvolume cannot be deleted by rmdir
+> +_create_subvol $SCRATCH_MNT/sub2
+> +touch $SCRATCH_MNT/sub2/file
+> +_rmdir_subvol $SCRATCH_MNT/sub2 >> $seqres.full && \
+> +	_fail "rmdir should fail for non-empty subvolume"
+
+Just echo the error message, instead of exiting the test, test could
+continue. Or even simpler, don't rely on the return status of
+_rmdir_subvol, just put any expected output from _rmdir_subvol to .out
+file, e.g.
+
+_rmdir_subvol $SCRATCH_MNT/sub2 | _filter_scratch
+
+So that, again, any failure message could break the golden image and
+fail the test.
+
+> +rm $SCRATCH_MNT/sub2/file
+> +_rmdir_subvol $SCRATCH_MNT/sub2
+> +
+> +# Check that read-only empty subvolume can be deleted by rmdir
+> +_create_subvol $SCRATCH_MNT/sub3
+> +_create_snapshot -r $SCRATCH_MNT/sub3 $SCRATCH_MNT/snap
+> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sub3 ro true 2>&1 | \
+> +	_filter_scratch >> $seqres.full
+> +_rmdir_subvol $SCRATCH_MNT/sub3
+> +_rmdir_subvol $SCRATCH_MNT/snap
+> +
+> +# Check that the default subvolume cannot be deleted by rmdir
+> +_create_subvol $SCRATCH_MNT/sub4
+> +subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT sub4)
+> +$BTRFS_UTIL_PROG subvolume set-default $subvolid $SCRATCH_MNT 2>&1 | \
+> +	_filter_scratch >> $seqres.full
+> +_rmdir_subvol $SCRATCH_MNT/sub4 >> $seqres.full && \
+> +	_fail "rmdir should fail for the default subvolume"
+
+Same here.
+
+> +
+> +# Check that subvolume stub (created by snapshot) can be deleted by rmdir
+> +# (Note: this has been always allowed)
+> +_create_subvol $SCRATCH_MNT/sub5
+> +_create_subvol $SCRATCH_MNT/sub5/sub6
+> +_create_snapshot $SCRATCH_MNT/sub5 $SCRATCH_MNT/snap2
+> +rmdir $SCRATCH_MNT/snap2/sub6
+> +
+> +# Check that rm -r works for both non-snapshot subvolume and snapshot
+> +_create_subvol $SCRATCH_MNT/sub7
+> +mkdir $SCRATCH_MNT/sub7/dir
+> +_create_subvol $SCRATCH_MNT/sub7/dir/sub8
+> +touch $SCRATCH_MNT/sub7/dir/sub8/file
+> +
+> +_create_snapshot $SCRATCH_MNT/sub7 $SCRATCH_MNT/snap3
+> +_create_snapshot -r $SCRATCH_MNT/sub7 $SCRATCH_MNT/snap4
+> +
+> +_rm_r_subvol $SCRATCH_MNT/sub7
+> +_rm_r_subvol $SCRATCH_MNT/snap3
+> +_rm_r_subvol $SCRATCH_MNT/snap4 >> $seqres.full && \
+> +	_fail "rm -r should fail for non-empty readonly subvolume"
+
+Same here.
 
 Thanks,
 Eryu
 
->  
->  test_dir=$SCRATCH_MNT/test_dir/
->  
-> @@ -171,7 +179,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  $UMOUNT_PROG $SCRATCH_MNT
->  
->  # check overlayfs
-> -_overlay_check_scratch_dirs $lowerdir $upperdir $workdir
-> +_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o xino=on
->  
->  # Verify pure lower residing in dir which has another lower layer
->  middir=$OVL_BASE_TEST_DIR/$seq-ovl-mid
-> @@ -186,7 +194,7 @@ mkdir -p $lowerdir/test_dir/pure_lower_dir/subdir
->  
->  _scratch_mkfs
->  
-> -_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir
-> +_overlay_scratch_mount_dirs $middir:$lowerdir $upperdir $workdir -o xino=on
->  
->  # Copy up test_dir
->  touch $test_dir/test_file
-> @@ -209,7 +217,7 @@ subdir_d=$($here/src/t_dir_type $pure_lower_dir $pure_lower_subdir_st_ino)
->  	echo "Pure lower in dir which has another lower layer: Invalid d_ino reported for subdir"
->  
->  # check overlayfs
-> -_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir
-> +_overlay_check_scratch_dirs "$middir:$lowerdir" $upperdir $workdir -o xino=on
->  
->  echo "Silence is golden"
->  status=0
-> diff --git a/tests/overlay/043 b/tests/overlay/043
-> index f70ee7f..c865b51 100755
-> --- a/tests/overlay/043
-> +++ b/tests/overlay/043
-> @@ -85,8 +85,16 @@ _scratch_mkfs >>$seqres.full 2>&1
->  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
->  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
->  
-> -# Enable redirect_dir for renaming a merge directory
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
-> +# Enable redirect_dir for renaming a merge directory.
-> +# Enabling xino in this test requires that base filesystem inode numbers will
-> +# not use bit 63 in inode number of the test files, because bit 63 is used by
-> +# overlayfs to indicate the layer. Let's just assume that this is true for all
-> +# tested filesystems and if we are wrong, the test may fail.
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on,xino=on || \
-> +	_notrun "mount overlay with xino failed"
-> +# Not using _check_scratch_fs_option because it uses grep -w
-> +_fs_options $SCRATCH_DEV | grep -q "xino=on" || \
-> +	_notrun "failed to enable xino"
->  
->  FILES="dir file symlink chrdev blkdev fifo socket"
->  
-> @@ -153,13 +161,13 @@ check_inode_numbers $testdir $tmp.after_copyup $tmp.after_move
->  
->  # Verify that the inode numbers survive a mount cycle
->  $UMOUNT_PROG $SCRATCH_MNT
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o redirect_dir=on,xino=on
->  
->  # Compare inode numbers before/after mount cycle
->  check_inode_numbers $testdir $tmp.after_move $tmp.after_cycle
->  
->  # check overlayfs
-> -_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o redirect_dir=on
-> +_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o redirect_dir=on,xino=on
->  
->  echo "Silence is golden"
->  status=0
-> diff --git a/tests/overlay/044 b/tests/overlay/044
-> index 2ab3035..bcc30ac 100755
-> --- a/tests/overlay/044
-> +++ b/tests/overlay/044
-> @@ -99,8 +99,16 @@ _scratch_mkfs >>$seqres.full 2>&1
->  upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
->  workdir=$OVL_BASE_SCRATCH_MNT/$OVL_WORK
->  
-> -# Enable overlay index feature to prevent breaking hardlinks on copy up
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on
-> +# Enable overlay index feature to prevent breaking hardlinks on copy up.
-> +# Enabling xino in this test requires that base filesystem inode numbers will
-> +# not use bit 63 in inode number of the test files, because bit 63 is used by
-> +# overlayfs to indicate the layer. Let's just assume that this is true for all
-> +# tested filesystems and if we are wrong, the test may fail.
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on,xino=on || \
-> +	_notrun "mount overlay with xino failed"
-> +# Not using _check_scratch_fs_option because it uses grep -w
-> +_fs_options $SCRATCH_DEV | grep -q "xino=on" || \
-> +	_notrun "failed to enable xino"
->  
->  rm -f $tmp.*
->  
-> @@ -124,8 +132,8 @@ check_ino_nlink $SCRATCH_MNT $tmp.before $tmp.after_one
->  
->  # Verify that the hardlinks survive a mount cycle
->  $UMOUNT_PROG $SCRATCH_MNT
-> -_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o index=on
-> -_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on
-> +_overlay_check_scratch_dirs $lowerdir $upperdir $workdir -o index=on,xino=on
-> +_overlay_scratch_mount_dirs $lowerdir $upperdir $workdir -o index=on,xino=on
->  
->  echo "== After mount cycle =="
->  cat $FILES
+> +
+> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap4 ro false 2>&1 | \
+> +	_filter_scratch >> $seqres.full
+> +_rm_r_subvol $SCRATCH_MNT/snap4
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/159.out b/tests/btrfs/159.out
+> new file mode 100644
+> index 00000000..e569e60c
+> --- /dev/null
+> +++ b/tests/btrfs/159.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 159
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 8007e07e..6a288285 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -161,3 +161,4 @@
+>  156 auto quick trim
+>  157 auto quick raid
+>  158 auto quick raid scrub
+> +159 auto quick subvol
 > -- 
-> 2.7.4
+> 2.14.3
+> 
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-unionfs" in
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
