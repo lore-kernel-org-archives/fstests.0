@@ -1,74 +1,216 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:37473 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932353AbeD0Ih4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 04:37:56 -0400
-Date: Fri, 27 Apr 2018 16:37:51 +0800
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:40047 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932282AbeD0JnU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 05:43:20 -0400
+Received: by mail-pg0-f66.google.com with SMTP id l2-v6so1156895pgc.7
+        for <fstests@vger.kernel.org>; Fri, 27 Apr 2018 02:43:20 -0700 (PDT)
+Date: Fri, 27 Apr 2018 17:43:16 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] btrfs: Add test that checks rmdir(2) can delete a
- subvolume
-Message-ID: <20180427083751.GN11384@desktop>
-References: <a7ba61de-3bbc-92fd-68db-2521f4bc8545@jp.fujitsu.com>
+Subject: Re: [PATCH v2] generic: test record locks across execve
+Message-ID: <20180427094316.GO11384@desktop>
+References: <20180422104212.GA3333@desktop>
+ <20180423024248.28132-1-xzhou@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <a7ba61de-3bbc-92fd-68db-2521f4bc8545@jp.fujitsu.com>
+In-Reply-To: <20180423024248.28132-1-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
-Cc: fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: Xiong Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, berrange@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 27, 2018 at 05:02:45PM +0900, Misono Tomohiro wrote:
-> Add btrfs test that checks "rmdir" or "rm -r" command can delete a
-> subvolume like an ordinary drectory.
-> 
-> This behavior has been restricted long time but becomes allowed by
-> following patch in the kernel:
->   btrfs: Allow rmdir(2) to delete an empty subvolume
-> 
-> Signed-off-by: Tomohiro Misono <misono.tomohiro@jp.fujitsu.com>
+On Mon, Apr 23, 2018 at 10:42:48AM +0800, Xiong Zhou wrote:
+> According to fcntl(2) man page, record locks are preserved across
+> an execve(2). This is a regression case for this.
 
-Looks good to me, thanks! But still, I'd like to see a Reviewed-by tag
-from btrfs developers.
+After looking at the kernel patch, this commit log doesn't look accurate
+to me. The bug only happens if the process that calls execve(2) is a
+multithread process. And this case only excrises this particular case.
 
-Thanks,
-Eryu
+Please put more background information in commit log and the test
+description, this helps reviewers to understand the problem you're going
+to test. I find that the commit log from Jeff Layton's patch seems good
+enough:
 
+"
+POSIX mandates that open fds and their associated file locks should be
+preserved across an execve. This works, unless the process is
+multithreaded at the time that execve is called.
+
+In that case, we'll end up unsharing the files_struct but the locks will
+still have their fl_owner set to the address of the old one. Eventually,
+when the other threads die and the last reference to the old
+files_struct is put, any POSIX locks get torn down since it looks like
+a close occurred on them.
+
+The result is that all of your open files will be intact with none of
+the locks you held before execve.
+"
+
+This also answers my previous question: why do we need an idle thread,
+IMHO, "spawning thread is necessary to reproduce the issue" doesn't
+really answer the question. But with above description it's fine to have
+such comments in the code.
+
+>=20
+> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
 > ---
-> v1 -> v2
->   - rebase to current master
->   - remove underscore from local function
->   - remove source common/btrfs
->   - remove unnecessary _filter_scratch and echo messages when fail
-> 
-> As I will take a whole week vacation next week, my replay will be late.
-> Thanks,
-> Tomohiro Misono
-> 
-> 
->  tests/btrfs/160     | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/160.out |   2 +
->  tests/btrfs/group   |   1 +
->  3 files changed, 144 insertions(+)
->  create mode 100755 tests/btrfs/160
->  create mode 100644 tests/btrfs/160.out
-> 
-> diff --git a/tests/btrfs/160 b/tests/btrfs/160
-> new file mode 100755
-> index 00000000..86d2dca7
+> v2:
+>   Do not fork when checking lock after execve;
+>   More comments and some minor fixes.
+>=20
+> Thanks Eryu for the review!
+> Jeff Layton's patch for this issue has not landed Linus tree.
+>=20
+>  .gitignore            |  1 +
+>  src/Makefile          |  2 +-
+>  src/t_locks_execve.c  | 73 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/484     | 73 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/484.out |  2 ++
+>  tests/generic/group   |  1 +
+>  6 files changed, 151 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_locks_execve.c
+>  create mode 100755 tests/generic/484
+>  create mode 100644 tests/generic/484.out
+>=20
+> diff --git a/.gitignore b/.gitignore
+> index 368d11c8..192ca35e 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -121,6 +121,7 @@
+>  /src/t_getcwd
+>  /src/t_holes
+>  /src/t_immutable
+> +/src/t_locks_execve
+>  /src/t_mmap_cow_race
+>  /src/t_mmap_dio
+>  /src/t_mmap_fallocate
+> diff --git a/src/Makefile b/src/Makefile
+> index 0d3feae1..6ca56366 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -15,7 +15,7 @@ TARGETS =3D dirstress fill fill2 getpagesize holes ls=
+tat64 \
+>  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+>  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+>  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+> -	t_ofd_locks
+> +	t_ofd_locks t_locks_execve
+> =20
+>  LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preallo_rw_pattern=
+_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
+> new file mode 100644
+> index 00000000..dae4506d
 > --- /dev/null
-> +++ b/tests/btrfs/160
-> @@ -0,0 +1,141 @@
+> +++ b/src/t_locks_execve.c
+> @@ -0,0 +1,73 @@
+> +#ifndef _GNU_SOURCE
+> +#define _GNU_SOURCE
+> +#endif
+> +#include <stdio.h>
+> +#include <fcntl.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <errno.h>
+> +#include <pthread.h>
+> +#include <unistd.h>
+> +#include <sys/wait.h>
+> +
+> +static void err_exit(char *op, int errn)
+> +{
+> +	fprintf(stderr, "%s: %s\n", op, strerror(errn));
+> +	exit(errn);
+> +}
+> +
+> +void *thread_fn(void *arg)
+> +{
+> +	/* execve will release threads */
+> +	while(1) sleep(1);
+> +	return NULL;
+> +}
+> +
+> +struct flock fl =3D {
+> +	.l_type =3D F_WRLCK,
+> +	.l_whence =3D SEEK_SET,
+> +	.l_start =3D 0,
+> +	.l_len =3D 1,
+> +};
+> +
+> +static void checklock(int fd)
+> +{
+> +	if (fcntl(fd, F_GETLK, &fl) < 0)
+> +		err_exit("getlk", errno);
+> +	if (fl.l_type =3D=3D F_UNLCK) {
+> +		printf("The write lock got released during execve\n");
+> +		exit(1);
+> +	}
+> +	exit(0);
+> +}
+> +
+> +int main(int argc, char **argv)
+> +{
+> +	int fd, flags;
+> +	char fdstr[10];
+> +	char *newargv[] =3D { argv[0], argv[1], fdstr, NULL };
+
+We could add new line to make the code more readable, e.g. right here.
+
+> +	/* passing fd in argv[2] in execve */
+> +	if (argc =3D=3D 3) {
+> +		fd =3D atoi(argv[2]);
+> +		checklock(fd);
+> +		exit(0);
+> +	}
+
+And here :)
+
+> +	fd =3D open(argv[1], O_WRONLY|O_CREAT, 0755);
+> +	if (fd < 0)
+> +		err_exit("open", errno);
+> +	if (fcntl(fd, F_SETLK, &fl) < 0)
+> +		err_exit("setlk", errno);
+> +
+> +	/* spawning thread is necessary to reproduce the issue */
+> +	pthread_t th;
+> +	pthread_create(&th, NULL, thread_fn, &fd);
+> +
+> +	if ((flags =3D fcntl(fd, F_GETFD)) < 0)
+> +		err_exit("getfd", errno);
+> +	flags &=3D ~FD_CLOEXEC;
+> +	if (fcntl(fd, F_SETFD, flags) < 0)
+> +		err_exit("setfd", errno);
+> +	snprintf(fdstr, sizeof(fdstr), "%d", fd);
+> +	execve(argv[0], newargv, NULL);
+> +	return 0;
+> +}
+> diff --git a/tests/generic/484 b/tests/generic/484
+> new file mode 100755
+> index 00000000..76ebf1fd
+> --- /dev/null
+> +++ b/tests/generic/484
+> @@ -0,0 +1,73 @@
 > +#! /bin/bash
-> +# FS QA Test btrfs/159
+> +# FS QA Test 484
 > +#
-> +# QA test that checks rmdir(2) works for subvolumes like ordinary directories.
+> +# This is testing
 > +#
-> +# This behavior has been restricted long time but becomes allowed by following
-> +# patch in the kernel:
-> +#   btrfs: Allow rmdir(2) to delete an empty subvolume
+> +#  "Record locks are not inherited by a child created via fork(2),
+> +#   but are preserved across an execve(2)."
 > +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 Fujitsu. All Rights Reserved.
+> +# from fcntl(2) man page.
+> +#
+> +# Fixed by patch from Jeff Layton:
+> +# locks: change POSIX lock ownership on execve when files_struct is di=
+splaced
+> +#
+> +# Author: "Daniel P. Berrang=C3=A9" <berrange@redhat.com>
+> +#
+> +#---------------------------------------------------------------------=
+--
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -82,41 +224,23 @@ Eryu
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
+> +#---------------------------------------------------------------------=
+--
 > +#
 > +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
 > +	cd /
 > +	rm -f $tmp.*
-> +}
-> +
-> +create_subvol()
-> +{
-> +	$BTRFS_UTIL_PROG subvolume create $1 >> $seqres.full 2>&1
-> +}
-> +
-> +create_snapshot()
-> +{
-> +	$BTRFS_UTIL_PROG subvolume snapshot $@ >> $seqres.full 2>&1
-> +}
-> +
-> +rmdir_subvol()
-> +{
-> +	rmdir $1 >> $seqres.full 2>&1
-> +}
-> +
-> +rm_r_subvol() {
-> +	rm -r $1 >> $seqres.full 2>&1
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -129,98 +253,48 @@ Eryu
 > +# real QA test starts here
 > +
 > +# Modify as appropriate.
-> +_supported_fs btrfs
+> +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch
+> +_require_test
 > +
-> +_scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
-> +_scratch_mount
+> +# prepare a 4k testfile in TEST_DIR
+> +$XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
+> +	$TEST_DIR/t_lock_execve_file >> $seqres.full 2>&1
 > +
-> +# Check that an empty subvolume can be deleted by rmdir
-> +create_subvol $SCRATCH_MNT/sub1
-> +rmdir_subvol $SCRATCH_MNT/sub1 || \
-> +	echo "rmdir should delete an empty subvolume"
-> +
-> +# Check that non-empty subvolume cannot be deleted by rmdir
-> +create_subvol $SCRATCH_MNT/sub2
-> +touch $SCRATCH_MNT/sub2/file
-> +rmdir_subvol $SCRATCH_MNT/sub2 && \
-> +	echo "rmdir should fail for non-empty subvolume"
-> +rm $SCRATCH_MNT/sub2/file
-> +rmdir_subvol $SCRATCH_MNT/sub2 || \
-> +	echo "rmdir should delete an empty subvolume"
-> +
-> +# Check that read-only empty subvolume can be deleted by rmdir
-> +create_subvol $SCRATCH_MNT/sub3
-> +create_snapshot -r $SCRATCH_MNT/sub3 $SCRATCH_MNT/snap
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sub3 ro true >> $seqres.full 2>&1
-> +rmdir_subvol $SCRATCH_MNT/sub3 || \
-> +	echo "rmdir should delete an empty subvolume"
-> +rmdir_subvol $SCRATCH_MNT/snap || \
-> +	echo "rmdir should delete a readonly empty subvolume"
-> +
-> +# Check that the default subvolume cannot be deleted by rmdir
-> +create_subvol $SCRATCH_MNT/sub4
-> +subvolid=$(_btrfs_get_subvolid $SCRATCH_MNT sub4)
-> +$BTRFS_UTIL_PROG subvolume set-default $subvolid $SCRATCH_MNT \
-> +	>> $seqres.full 2>&1
-> +rmdir_subvol $SCRATCH_MNT/sub4 && \
-> +	echo "rmdir should fail for the default subvolume"
-> +
-> +# Check that subvolume stub (created by snapshot) can be deleted by rmdir
-> +# (Note: this has been always allowed)
-> +create_subvol $SCRATCH_MNT/sub5
-> +create_subvol $SCRATCH_MNT/sub5/sub6
-> +create_snapshot $SCRATCH_MNT/sub5 $SCRATCH_MNT/snap2
-> +rmdir $SCRATCH_MNT/snap2/sub6 || \
-> +	echo "rmdir should delete a subvolume stub (ino number == 2)"
-> +
-> +# Check that rm -r works for both non-snapshot subvolume and snapshot
-> +create_subvol $SCRATCH_MNT/sub7
-> +mkdir $SCRATCH_MNT/sub7/dir
-> +create_subvol $SCRATCH_MNT/sub7/dir/sub8
-> +touch $SCRATCH_MNT/sub7/dir/sub8/file
-> +
-> +create_snapshot $SCRATCH_MNT/sub7 $SCRATCH_MNT/snap3
-> +create_snapshot -r $SCRATCH_MNT/sub7 $SCRATCH_MNT/snap4
-> +
-> +rm_r_subvol $SCRATCH_MNT/sub7 || \
-> +	echo "rm -r should delete subvolumes recursively"
-> +rm_r_subvol $SCRATCH_MNT/snap3 || \
-> +	echo "rm -r should delete subvolumes recursively"
-> +rm_r_subvol $SCRATCH_MNT/snap4 && \
-> +	echo "rm -r should fail for non-empty readonly subvolume"
-> +
-> +$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap4 ro false >> $seqres.full 2>&1
-> +rm_r_subvol $SCRATCH_MNT/snap4 || \
-> +	echo "rm -r should delete subvolumes recursively"
+> +# run test programe
+
+Unnecessary comment.
+
+> +$here/src/t_locks_execve $TEST_DIR/t_lock_execve_file
+
+I can fix the commit log and test description and the code style issue
+on commit, no need to resend.
+
+Thanks,
+Eryu
+
 > +
 > +# success, all done
 > +echo "Silence is golden"
-> +status=0
+> +status=3D0
 > +exit
-> diff --git a/tests/btrfs/160.out b/tests/btrfs/160.out
+> diff --git a/tests/generic/484.out b/tests/generic/484.out
 > new file mode 100644
-> index 00000000..abad21f9
+> index 00000000..94f2f0bd
 > --- /dev/null
-> +++ b/tests/btrfs/160.out
+> +++ b/tests/generic/484.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 160
+> +QA output created by 484
 > +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index ba766f6b..ff362dd2 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -162,3 +162,4 @@
->  157 auto quick raid
->  158 auto quick raid scrub
->  159 auto quick
-> +160 auto quick subvol
-> -- 
-> 2.14.3
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> diff --git a/tests/generic/group b/tests/generic/group
+> index ea8e51b3..798321f9 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -486,3 +486,4 @@
+>  481 auto quick log metadata
+>  482 auto metadata replay
+>  483 auto quick log metadata
+> +484 auto lock quick
+> --=20
+> 2.17.0.252.gfe0a9ea
+>=20
