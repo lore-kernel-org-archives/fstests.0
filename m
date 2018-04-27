@@ -1,300 +1,132 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:40047 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932282AbeD0JnU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 05:43:20 -0400
-Received: by mail-pg0-f66.google.com with SMTP id l2-v6so1156895pgc.7
-        for <fstests@vger.kernel.org>; Fri, 27 Apr 2018 02:43:20 -0700 (PDT)
-Date: Fri, 27 Apr 2018 17:43:16 +0800
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:33368 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751348AbeD0LYB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 07:24:01 -0400
+Received: by mail-pg0-f65.google.com with SMTP id i194-v6so1356765pgd.0
+        for <fstests@vger.kernel.org>; Fri, 27 Apr 2018 04:24:01 -0700 (PDT)
+Date: Fri, 27 Apr 2018 19:23:56 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] generic: test record locks across execve
-Message-ID: <20180427094316.GO11384@desktop>
-References: <20180422104212.GA3333@desktop>
- <20180423024248.28132-1-xzhou@redhat.com>
+Subject: Re: [PATCH] check: annotate good and expunged tests in results
+Message-ID: <20180427112356.GP11384@desktop>
+References: <20180412213838.28929-1-jeffm@suse.com>
+ <20180424093646.GA11384@desktop>
+ <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180423024248.28132-1-xzhou@redhat.com>
+In-Reply-To: <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Xiong Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, berrange@redhat.com
+To: Jeff Mahoney <jeffm@suse.com>
+Cc: fstests@vger.kernel.org, mcgrof@suse.com, nborisov@suse.com, fdmanana@suse.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 23, 2018 at 10:42:48AM +0800, Xiong Zhou wrote:
-> According to fcntl(2) man page, record locks are preserved across
-> an execve(2). This is a regression case for this.
+On Tue, Apr 24, 2018 at 02:03:24PM -0400, Jeff Mahoney wrote:
+> On 4/24/18 5:36 AM, Eryu Guan wrote:
+> > On Thu, Apr 12, 2018 at 05:38:38PM -0400, jeffm@suse.com wrote:
+> >> From: Jeff Mahoney <jeffm@suse.com>
+> > 
+> > [Sorry for the late review..]
+> 
+> Thanks for the review just the same.
+> 
+> >> Currently, we only create results files when a test has failed or was
+> >> supposed to run but some dependency wasn't met causing it not to run.
+> >> Short of saving the summary at the end of the run, there's no way to tell
+> >> which tests passed or which tests weren't run due to being excluded.
+> >>
+> >> This patch moves successful test results to $seqres.out.good to annotate
+> >> good results.  It also adds tests excluded by group to the $tmp.xlist file
+> >> and adds annotations for every test excluded.  When a test is expunged
+> > 
+> > I can see that annotating tests excluded by group is helpful, but I
+> > don't think we need $seqres.out.good, passed tests are already shown by
+> > check, and $seqres.out.good is same as the golden image, it looks
+> > redundant.
+> 
+> The contents are redundant, but the purpose of the file existing isn't.
+> My goal is to be able to point a script at the results directory for a
+> test run and autogenerate a table of results and/or compare them to
+> known results.  Right now, there's no way to tell whether a test was run
 
-After looking at the kernel patch, this commit log doesn't look accurate
-to me. The bug only happens if the process that calls execve(2) is a
-multithread process. And this case only excrises this particular case.
+But the test run & pass info is already available from the check output
+and the test result summary at the end of check. Is that sufficient for
+you? Also, we already have mechanism to generate a test report in xunit
+format, i.e. ./check -R xunit -g auto, which includes results for passed
+& failed & notrun tests.
 
-Please put more background information in commit log and the test
-description, this helps reviewers to understand the problem you're going
-to test. I find that the commit log from Jeff Layton's patch seems good
-enough:
-
-"
-POSIX mandates that open fds and their associated file locks should be
-preserved across an execve. This works, unless the process is
-multithreaded at the time that execve is called.
-
-In that case, we'll end up unsharing the files_struct but the locks will
-still have their fl_owner set to the address of the old one. Eventually,
-when the other threads die and the last reference to the old
-files_struct is put, any POSIX locks get torn down since it looks like
-a close occurred on them.
-
-The result is that all of your open files will be intact with none of
-the locks you held before execve.
-"
-
-This also answers my previous question: why do we need an idle thread,
-IMHO, "spawning thread is necessary to reproduce the issue" doesn't
-really answer the question. But with above description it's fine to have
-such comments in the code.
-
->=20
-> Signed-off-by: Xiong Zhou <xzhou@redhat.com>
-> ---
-> v2:
->   Do not fork when checking lock after execve;
->   More comments and some minor fixes.
->=20
-> Thanks Eryu for the review!
-> Jeff Layton's patch for this issue has not landed Linus tree.
->=20
->  .gitignore            |  1 +
->  src/Makefile          |  2 +-
->  src/t_locks_execve.c  | 73 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/484     | 73 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/484.out |  2 ++
->  tests/generic/group   |  1 +
->  6 files changed, 151 insertions(+), 1 deletion(-)
->  create mode 100644 src/t_locks_execve.c
->  create mode 100755 tests/generic/484
->  create mode 100644 tests/generic/484.out
->=20
-> diff --git a/.gitignore b/.gitignore
-> index 368d11c8..192ca35e 100644
-> --- a/.gitignore
-> +++ b/.gitignore
-> @@ -121,6 +121,7 @@
->  /src/t_getcwd
->  /src/t_holes
->  /src/t_immutable
-> +/src/t_locks_execve
->  /src/t_mmap_cow_race
->  /src/t_mmap_dio
->  /src/t_mmap_fallocate
-> diff --git a/src/Makefile b/src/Makefile
-> index 0d3feae1..6ca56366 100644
-> --- a/src/Makefile
-> +++ b/src/Makefile
-> @@ -15,7 +15,7 @@ TARGETS =3D dirstress fill fill2 getpagesize holes ls=
-tat64 \
->  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
->  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
->  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
-> -	t_ofd_locks
-> +	t_ofd_locks t_locks_execve
-> =20
->  LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize preallo_rw_pattern=
-_reader \
->  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-> diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
-> new file mode 100644
-> index 00000000..dae4506d
-> --- /dev/null
-> +++ b/src/t_locks_execve.c
-> @@ -0,0 +1,73 @@
-> +#ifndef _GNU_SOURCE
-> +#define _GNU_SOURCE
-> +#endif
-> +#include <stdio.h>
-> +#include <fcntl.h>
-> +#include <stdlib.h>
-> +#include <string.h>
-> +#include <errno.h>
-> +#include <pthread.h>
-> +#include <unistd.h>
-> +#include <sys/wait.h>
-> +
-> +static void err_exit(char *op, int errn)
-> +{
-> +	fprintf(stderr, "%s: %s\n", op, strerror(errn));
-> +	exit(errn);
-> +}
-> +
-> +void *thread_fn(void *arg)
-> +{
-> +	/* execve will release threads */
-> +	while(1) sleep(1);
-> +	return NULL;
-> +}
-> +
-> +struct flock fl =3D {
-> +	.l_type =3D F_WRLCK,
-> +	.l_whence =3D SEEK_SET,
-> +	.l_start =3D 0,
-> +	.l_len =3D 1,
-> +};
-> +
-> +static void checklock(int fd)
-> +{
-> +	if (fcntl(fd, F_GETLK, &fl) < 0)
-> +		err_exit("getlk", errno);
-> +	if (fl.l_type =3D=3D F_UNLCK) {
-> +		printf("The write lock got released during execve\n");
-> +		exit(1);
-> +	}
-> +	exit(0);
-> +}
-> +
-> +int main(int argc, char **argv)
-> +{
-> +	int fd, flags;
-> +	char fdstr[10];
-> +	char *newargv[] =3D { argv[0], argv[1], fdstr, NULL };
-
-We could add new line to make the code more readable, e.g. right here.
-
-> +	/* passing fd in argv[2] in execve */
-> +	if (argc =3D=3D 3) {
-> +		fd =3D atoi(argv[2]);
-> +		checklock(fd);
-> +		exit(0);
-> +	}
-
-And here :)
-
-> +	fd =3D open(argv[1], O_WRONLY|O_CREAT, 0755);
-> +	if (fd < 0)
-> +		err_exit("open", errno);
-> +	if (fcntl(fd, F_SETLK, &fl) < 0)
-> +		err_exit("setlk", errno);
-> +
-> +	/* spawning thread is necessary to reproduce the issue */
-> +	pthread_t th;
-> +	pthread_create(&th, NULL, thread_fn, &fd);
-> +
-> +	if ((flags =3D fcntl(fd, F_GETFD)) < 0)
-> +		err_exit("getfd", errno);
-> +	flags &=3D ~FD_CLOEXEC;
-> +	if (fcntl(fd, F_SETFD, flags) < 0)
-> +		err_exit("setfd", errno);
-> +	snprintf(fdstr, sizeof(fdstr), "%d", fd);
-> +	execve(argv[0], newargv, NULL);
-> +	return 0;
-> +}
-> diff --git a/tests/generic/484 b/tests/generic/484
-> new file mode 100755
-> index 00000000..76ebf1fd
-> --- /dev/null
-> +++ b/tests/generic/484
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# FS QA Test 484
-> +#
-> +# This is testing
-> +#
-> +#  "Record locks are not inherited by a child created via fork(2),
-> +#   but are preserved across an execve(2)."
-> +#
-> +# from fcntl(2) man page.
-> +#
-> +# Fixed by patch from Jeff Layton:
-> +# locks: change POSIX lock ownership on execve when files_struct is di=
-splaced
-> +#
-> +# Author: "Daniel P. Berrang=C3=A9" <berrange@redhat.com>
-> +#
-> +#---------------------------------------------------------------------=
---
-> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#---------------------------------------------------------------------=
---
-> +#
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_test
-> +
-> +# prepare a 4k testfile in TEST_DIR
-> +$XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
-> +	$TEST_DIR/t_lock_execve_file >> $seqres.full 2>&1
-> +
-> +# run test programe
-
-Unnecessary comment.
-
-> +$here/src/t_locks_execve $TEST_DIR/t_lock_execve_file
-
-I can fix the commit log and test description and the code style issue
-on commit, no need to resend.
+My concern is that saving .good files consume more and more space over
+time, and they don't provide any additional information (even with empty
+files that don't require much space).
 
 Thanks,
 Eryu
 
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/generic/484.out b/tests/generic/484.out
-> new file mode 100644
-> index 00000000..94f2f0bd
-> --- /dev/null
-> +++ b/tests/generic/484.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 484
-> +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index ea8e51b3..798321f9 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -486,3 +486,4 @@
->  481 auto quick log metadata
->  482 auto metadata replay
->  483 auto quick log metadata
-> +484 auto lock quick
-> --=20
-> 2.17.0.252.gfe0a9ea
->=20
+> at all, only that it failed or was skipped due to some missing
+> dependency.  The expunge changes handle the explicitly skipped cases,
+> but without the .good files, there's nothing indicating a test actually
+> ran or when it last did.  The contents don't have to be the output.  If
+> you can think of something more useful there (or if we just create an
+> empty file), that's fine too.
+> >> -# takes the list of tests to run in $tmp.list, and removes the tests passed to
+> >> -# the function from that list.
+> >> +# takes the list of tests to run in $tmp.list and adds them to the excluded
+> >> +# test list, annotated with the group that excluded each one
+> > 
+> > The comments don't seem quite right, the new behavior doesn't take tests
+> > from $tmp.list, it just edits the $tmp.xlist file for later use.
+> 
+> Right.  I missed updating the comment after changing the behavior.
+> 
+> >>  trim_test_list()
+> >>  {
+> >> +	group=$1
+> > 
+> > Please declare local variable as 'local' when possible.
+> 
+> Ok.
+> 
+> > When using config section, e.g. ./check -s <sec_name>, and FSTYP is
+> > different in new section, check will do _prepare_test_list again, so
+> > tests selected by "-x <xgroup>" will be listed twice in $tmp.xlist file,
+> > as a result, I see duplicated group names in the annotate message, e.g.
+> > 
+> > generic/458        [expunged] group metadata metadata
+> > 
+> > I think we should move above "-X/-E" handlings to _prepare_test_list,
+> > only assign variable "xfile" here (use a new variable for -E option,
+> > perhaps). So that we could simply remove $tmp.xlist before calling
+> > _prepare_test_list again, and it could exclude all specified tests only
+> > once. Maybe as patch 1/2 in a patchset.
+> 
+> Ok, that's easy enough to do.
+> 
+> >>  	        fi
+> >>  		;;
+> >>  	-s)	RUN_SECTION="$RUN_SECTION $2"; shift ;;
+> >> @@ -491,11 +483,17 @@ _check_filesystems()
+> >>  _expunge_test()
+> >>  {
+> >>  	local TEST_ID="$1"
+> >> +	local OUTPUT="$2"
+> > 
+> > OUTPUT is not used.
+> 
+> Ack.
+> 
+> >> @@ -770,6 +774,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> >>  			    else
+> >>  				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+> >>  				echo -n " `expr $stop - $start`s"
+> >> +				mv $tmp.out $seqres.out.good
+> > 
+> > As said above, I don't think it's that useful.
+> 
+> It doesn't need to be the contents of the output, but I'd like it to be
+> *something* and moving a file that already exists is as easy as creating
+> a new one.
+> 
+> -Jeff
+> 
+> -- 
+> Jeff Mahoney
+> SUSE Labs
