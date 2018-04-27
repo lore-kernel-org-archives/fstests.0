@@ -1,91 +1,68 @@
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:33622 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1757225AbeD0CFD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 22:05:03 -0400
-Received: by mail-pf0-f195.google.com with SMTP id f15so293924pfn.0
-        for <fstests@vger.kernel.org>; Thu, 26 Apr 2018 19:05:03 -0700 (PDT)
-Date: Fri, 27 Apr 2018 10:04:58 +0800
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:44771 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753312AbeD0Cbz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 26 Apr 2018 22:31:55 -0400
+Date: Fri, 27 Apr 2018 10:31:50 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] tests/xfs: filestream allocator inode use-after-free
- test
-Message-ID: <20180427020458.GJ11384@desktop>
-References: <20180426120444.3620-1-bfoster@redhat.com>
+Subject: Re: [PATCH v2 0/4] Fix failing overlay nonsamefs fstests
+Message-ID: <20180427023150.GK11384@desktop>
+References: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180426120444.3620-1-bfoster@redhat.com>
+In-Reply-To: <1524722007-30891-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 26, 2018 at 08:04:44AM -0400, Brian Foster wrote:
-> The XFS filestreams allocator caches dir inode -> agno mappings in
-> an MRU mechanism that holds elements in memory for an amount of time
-> and then cleans up expired elements in the background. The elements
-> typically held inode pointers without holding a reference to the
-> associated inode. This means that if the inode is reclaimed before
-> an expired entry is cleaned up, the MRU reaper can access freed
-> memory and cause a panic.
+On Wed, Apr 25, 2018 at 11:53:23PM -0600, Amir Goldstein wrote:
+> Eryu,
 > 
-> Test for this problem by performing continuous filestreams
-> allocations under short-lived parent directory inodes. This will
-> produce KASAN use-after-free splats if enabled during the test.
-> 
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
-> ---
-> 
-> v2:
-> - Drop unnecessary _scratch_mount error check.
-> - Create and use helper for min. scratch dev size.
-> v1: https://marc.info/?l=fstests&m=152302430125453&w=2
-> 
->  common/rc         |  10 +++++
->  tests/xfs/445     | 109 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/445.out |   2 +
->  tests/xfs/group   |   1 +
->  4 files changed, 122 insertions(+)
->  create mode 100755 tests/xfs/445
->  create mode 100644 tests/xfs/445.out
-> 
-> diff --git a/common/rc b/common/rc
-> index 366489bb..ab15eca1 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1600,6 +1600,16 @@ _require_scratch()
->  	touch ${RESULT_DIR}/require_scratch
->  }
->  
-> +# require a scratch dev of a minimum size (in kb)
-> +_require_scratch_size()
-> +{
-> +	[ $# -eq 1 ] || _fail "_require_scratch_size: expected size param"
-> +
-> +	_require_scratch
-> +	devsize=`_get_device_size $SCRATCH_DEV`
+> xino feature was introduced in kernel v4.17-rc1 to fix constant inode
+> numbers on non samefs setup. This patch set converts the relevant tests
+> to notrun instead of failing on old kernels and opts-in for xino with
+> new kernels.
 
-I made it a 'local' variable.
+overlay/04{1,3,4} all passed for me on v4.17-rc2 now, thanks! Looking
+forward to passing all the overlay tests :)
 
-[snip]
+> 
+> The first patch is a re-factoring of helpers from v1 patches I ended
+> not using in v2 patches, but seems useful, so you may take it or leave
+> it out as you wish.
 
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 831f2cfa..2a7dec6f 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -442,3 +442,4 @@
->  442 auto stress clone quota
->  443 auto quick ioctl fsr
->  444 auto quick
-> +445 auto filestreams
-
-It looks like a 'quick' test too, it runs for around 15s on my test vm.
-Will add 'quick' group on commit.
+I'd drop it for now, and fix the corresponding comments in patch 4/4.
 
 Thanks,
 Eryu
 
+P.S.
+I'm not using eguan@redhat.com anymore, please use guaneryu@gmail.com :)
+
+> 
+> Thanks,
+> Amir.
+> 
+> Changes since v1:
+> - Fix fsck run failure in 041
+> - Fix missing redirect_dir requirement in 043
+> - Fix check for xino enabled
+> 
+> Amir Goldstein (4):
+>   common/rc: factor out _require_scratch_fs_option
+>   overlay/041: fix call to _overlay_check_scratch_dirs
+>   overlay/043: require and enable redirect_dir
+>   overlay/04{1,3,4}: enable xino feature
+> 
+>  common/rc         | 29 ++++++++++++++++++++++-------
+>  tests/overlay/041 | 21 +++++++++++++--------
+>  tests/overlay/043 | 17 ++++++++++++++---
+>  tests/overlay/044 | 16 ++++++++++++----
+>  4 files changed, 61 insertions(+), 22 deletions(-)
+> 
 > -- 
-> 2.13.6
+> 2.7.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
