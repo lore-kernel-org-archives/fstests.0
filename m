@@ -1,45 +1,42 @@
-Received: from mail-pf0-f193.google.com ([209.85.192.193]:35747 "EHLO
-        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1759307AbeD1CgH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 22:36:07 -0400
-Date: Sat, 28 Apr 2018 10:36:03 +0800
+Received: from mail-pg0-f47.google.com ([74.125.83.47]:43057 "EHLO
+        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1759215AbeD1Cpt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 27 Apr 2018 22:45:49 -0400
+Received: by mail-pg0-f47.google.com with SMTP id k11-v6so1684683pgo.10
+        for <fstests@vger.kernel.org>; Fri, 27 Apr 2018 19:45:49 -0700 (PDT)
+Date: Sat, 28 Apr 2018 10:45:45 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] btrfs: Add test that checks rmdir(2) can delete a
- subvolume
-Message-ID: <20180428023603.GQ11384@desktop>
-References: <a7ba61de-3bbc-92fd-68db-2521f4bc8545@jp.fujitsu.com>
- <20180427162635.GF21272@twin.jikos.cz>
+Subject: Re: [PATCH] check: annotate good and expunged tests in results
+Message-ID: <20180428024545.GR11384@desktop>
+References: <20180412213838.28929-1-jeffm@suse.com>
+ <20180424093646.GA11384@desktop>
+ <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
+ <20180427112356.GP11384@desktop>
+ <20180427170009.GT27853@wotan.suse.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180427162635.GF21272@twin.jikos.cz>
+In-Reply-To: <20180427170009.GT27853@wotan.suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz, Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>, fstests@vger.kernel.org, linux-btrfs <linux-btrfs@vger.kernel.org>
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
+Cc: Jeff Mahoney <jeffm@suse.com>, fstests@vger.kernel.org, nborisov@suse.com, fdmanana@suse.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Apr 27, 2018 at 06:26:35PM +0200, David Sterba wrote:
-> On Fri, Apr 27, 2018 at 05:02:45PM +0900, Misono Tomohiro wrote:
-> > Add btrfs test that checks "rmdir" or "rm -r" command can delete a
-> > subvolume like an ordinary drectory.
+On Fri, Apr 27, 2018 at 05:00:09PM +0000, Luis R. Rodriguez wrote:
+> On Fri, Apr 27, 2018 at 07:23:56PM +0800, Eryu Guan wrote:
 > > 
-> > This behavior has been restricted long time but becomes allowed by
-> > following patch in the kernel:
-> >   btrfs: Allow rmdir(2) to delete an empty subvolume
+> > But the test run & pass info is already available from the check output
+> > and the test result summary at the end of check. Is that sufficient for
+> > you? Also, we already have mechanism to generate a test report in xunit
+> > format, i.e. ./check -R xunit -g auto, which includes results for passed
+> > & failed & notrun tests.
 > 
-> AFAICS this test will fail on older kernels, eg. stable versions, but
-> this is not a bug that needs to be fixed by backporting patches. The
-> usual way is to use the expunges, but as this is a feature coverage, I
-> think the test should detect if the kernel has the feature at all.
-> Similar to the fallocate modes etc.
+> Do we have a way to parse the results *after* a run? For instance,
+> if you forgot -R xunit ?
 
-Agreed, if the change is treated as a behavior change not a bug on old
-kernels, we probably need a way to detect the case and _notrun if kernel
-doesn't support it.
+There's a tools/compare-failures script that takes the outputs of check
+as inputs and compares the results. But, TBH, I never run it after
+reviewing it.. Perhaps it could be enhanced somehow.
 
-> 
-> For the test itself, the scenarios look sufficient, so
-> Reviewed-by: David Sterba <dsterba@suse.com>
-
-Thanks for the review!
-
+Thanks,
 Eryu
