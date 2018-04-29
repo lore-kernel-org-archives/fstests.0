@@ -1,165 +1,112 @@
-Received: from mail.kernel.org ([198.145.29.99]:42756 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751698AbeD1XGa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 28 Apr 2018 19:06:30 -0400
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [PATCH v3] generic: test for seeing unseen fsync errors on newly open files
-Date: Sat, 28 Apr 2018 19:06:27 -0400
-Message-Id: <20180428230627.16791-1-jlayton@kernel.org>
-In-Reply-To: <20180428145937.6804-1-jlayton@kernel.org>
-References: <20180428145937.6804-1-jlayton@kernel.org>
+Received: from mail-pf0-f176.google.com ([209.85.192.176]:42508 "EHLO
+        mail-pf0-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753033AbeD2Mo0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 29 Apr 2018 08:44:26 -0400
+Received: by mail-pf0-f176.google.com with SMTP id a11so4741502pfn.9
+        for <fstests@vger.kernel.org>; Sun, 29 Apr 2018 05:44:26 -0700 (PDT)
+Message-ID: <5ae5be28.8900620a.fc088.abaf@mx.google.com>
+Date: Sun, 29 Apr 2018 20:44:19 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 7bc26faa6b52
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="HjaAx8CcFJHP"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, eguan@redhat.com
-Cc: willy@infradead.org, andres@anarazel.de, david@fromorbit.com, amir73il@gmail.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Layton <jlayton@redhat.com>
 
-This adds a regression test for the following kernel patch:
+--HjaAx8CcFJHP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-    errseq: Always report a writeback error once
+Hi all,
 
-This is motivated by some rather odd behavior done by the PostgreSQL
-project. The main database writers will offload the fsync calls to a
-separate process, which can open files after a writeback error has
-already occurred.
+The master branch of the xfstests repository at:
 
-This used to work with older kernels that reported the error to only
-one fd, but with the errseq_t changes we lost the ability to see
-errors that occurred before the open. The above patch restores that
-behavior.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/999     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  5 +++
- tests/generic/group   |  1 +
- 3 files changed, 101 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
+have just been updated. This is a normal update that contains two new tests and
+some cleanups for overlay and btrfs.
 
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 000000000000..b816fd3bb423
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# FS QA Test No. XXX
-+#
-+# Open a file several times, write to it, fsync on all fds and make sure that
-+# they all return 0. Change the device to start throwing errors. Write again
-+# on all fds and fsync on all fds. Ensure that we get errors on all of them.
-+# Then fsync on all one last time and verify that all return 0.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018, Jeff Layton <jlayton@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.* $testdir
-+	_dmerror_cleanup
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_nocheck
-+# This test uses "dm" without taking into account the data could be on
-+# realtime subvolume, thus the test will fail with rtinherit=1
-+_require_no_rtinherit
-+
-+_require_dm_target error
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_dmerror_init
-+_dmerror_mount
-+
-+datalen=65536
-+_require_fs_space $SCRATCH_MNT $datalen
-+
-+# use fd 5 to hold file open
-+testfile=$SCRATCH_MNT/fsync-open-after-err
-+exec 5>$testfile
-+
-+# write some data to file and fsync it out
-+$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c fsync $testfile
-+
-+# flip device to non-working mode
-+_dmerror_load_error_table
-+
-+# rewrite the data, call sync to ensure it's written back w/o scraping error
-+$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c sync $testfile
-+
-+# heal the device error
-+_dmerror_load_working_table
-+
-+# open again and call fsync
-+echo "The following fsync should fail with EIO:"
-+$XFS_IO_PROG -c fsync $testfile
-+echo "done"
-+
-+# close file
-+exec 5>&-
-+
-+# success, all done
-+_dmerror_unmount
-+_dmerror_cleanup
-+
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 000000000000..38d2d7f6495f
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,5 @@
-+QA output created by 999
-+Format and mount
-+The following fsync should fail with EIO:
-+fsync: Input/output error
-+done
-diff --git a/tests/generic/group b/tests/generic/group
-index ea8e51b35e79..48f491a5c32b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -486,3 +486,4 @@
- 481 auto quick log metadata
- 482 auto metadata replay
- 483 auto quick log metadata
-+999 auto quick
--- 
-2.14.3
+And I've gone through all the review backlogs in the last few days, but I might
+miss patches, so if you still have patches posted for more than 5 days and got
+no reviews, please just resend.
 
+New failures I've noticed in this update:
+- generic/484 fails with latest Linus tree (v4.17-rc2) on all filesystems, the
+  fix is still in review
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+7bc26faa6b52 generic: test record locks across execve in multithread process
+
+New commits:
+
+Amir Goldstein (3):
+      [e9f768ef0ebb] overlay/041: fix call to _overlay_check_scratch_dirs
+      [e97ef0145ce0] overlay/043: require and enable redirect_dir
+      [9b1ff558f734] overlay/04{1,3,4}: enable xino feature
+
+Anand Jain (3):
+      [7c8651be0a1e] btrfs/130: fix Invalid argument
+      [e46a9aa0bef7] btrfs/130: make it workable on small systems
+      [a6f6336df750] btrfs/011: cleanup the functions
+
+Brian Foster (1):
+      [91481af94986] xfs: filestream allocator inode use-after-free test
+
+Misono Tomohiro (1):
+      [d3977ca35aaf] common/rc: move rm out from if block to always delete kmemleak temp file
+
+Xiong Zhou (1):
+      [7bc26faa6b52] generic: test record locks across execve in multithread process
+
+
+Code Diffstat:
+
+ .gitignore            |   1 +
+ common/rc             |  12 ++-
+ src/Makefile          |   2 +-
+ src/t_locks_execve.c  |  77 ++++++++++++++++++++
+ tests/btrfs/011       | 197 ++++++++++++++++----------------------------------
+ tests/btrfs/130       |   9 ++-
+ tests/generic/484     |  65 +++++++++++++++++
+ tests/generic/484.out |   2 +
+ tests/generic/group   |   1 +
+ tests/overlay/041     |  20 +++--
+ tests/overlay/043     |  16 +++-
+ tests/overlay/044     |  15 +++-
+ tests/xfs/445         | 109 ++++++++++++++++++++++++++++
+ tests/xfs/445.out     |   2 +
+ tests/xfs/group       |   1 +
+ 15 files changed, 375 insertions(+), 154 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--HjaAx8CcFJHP
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJa5b4CAAoJECZSqilcj+djTgYP/jTjB2LEQPb3T87Vl9wFf2kJ
+j7fbSgXW+Mi3qy2v7IN1ggfY6CR+oSMZMfdS7GGDAjm94nfoBusay3Y9DIdgOPUk
+5Wbb3xCdhEROwE8/9+0VVFHuLfkW6BqKViCg+tl0JFtQy7dEvxfyVMihK8qIpLuu
+tIeN6+ITMCDbv4d5W6NmDywoMo93pT2DmREyQWdIsyzSyiv1HlKTKUiwHdyzw6Hi
+V4uWSiJCNscUDQkHgKIz3AWsrOqAvEP0N0wFo2FQkllf9QNR3t+MsIz0NkB++ZwM
+9dpEvHTuK+SqhcGZgiOJMpf5Vziza+TE7MzG0K/dPI/2TffaN5eZTeQ4Ld2l1Yxb
+uKQOi1gi2grGh4OJOsEzrS/8scTLe3IqP+iUFB9nY5ve9GnVIIYlUhJeNkfayvAZ
+YpoKgCRRWfmzYZeNvUbk3B1D/chB3QSw+2lrBh14AU9GphpUW+5tHIxdbB6SXK1B
+MkNxXG0oLPH3pd7YIdHZR7I7YYiCPLsAgU8Qi8Inob84+Gel3f/4z6FFth8MwKkT
+bYURjGD85EG3k7A2UKoRcV5p5KXC5UIC6xbPpLLzgdcP4PxdiebMT7K/iqO4nH2k
+JWNUnJZGVf5peK4RD0oECJDMm7LXvTtbGwCS+iHDi+nKwesd3CNzDPY7k7euPgxb
+GYtsPc/LlYkb5hRkXrwf
+=gMsc
+-----END PGP SIGNATURE-----
+
+--HjaAx8CcFJHP--
