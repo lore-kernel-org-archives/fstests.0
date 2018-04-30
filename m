@@ -1,73 +1,56 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51574 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751195AbeD3VnT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 30 Apr 2018 17:43:19 -0400
-From: Eric Sandeen <sandeen@redhat.com>
-Subject: [PATCH] test online label ioctl
-Message-ID: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
-Date: Mon, 30 Apr 2018 16:43:18 -0500
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Received: from mail-pf0-f177.google.com ([209.85.192.177]:37074 "EHLO
+        mail-pf0-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755266AbeD3WR4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Apr 2018 18:17:56 -0400
+Received: by mail-pf0-f177.google.com with SMTP id e9so3819456pfi.4
+        for <fstests@vger.kernel.org>; Mon, 30 Apr 2018 15:17:56 -0700 (PDT)
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: [PATCH v2] generic: test exceeding max file size via INSERT_RANGE
+Date: Mon, 30 Apr 2018 15:17:01 -0700
+Message-Id: <20180430221701.150680-1-ebiggers3@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Eric Biggers <ebiggers@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-This tests the online label ioctl that btrfs has, which has been
-recently proposed for XFS.
+From: Eric Biggers <ebiggers@google.com>
 
-To run, it requires an updated xfs_io with the label command and a
-filesystem that supports it
+Test how the "insert range" fallocate operation interacts with the
+maximum file size (s_maxbytes).
 
-A slight change here to _require_xfs_io_command as well, so that tests
-which simply fail with "Inappropriate ioctl" can be caught in the
-common case.
+- Shift extents past the max file size (exposes an ext4 bug).
+- Increase i_size past the max file size (exposes an xfs bug).
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
 
-this passes on btrfs, _notruns on xfs/ext4 of yore, and passes
-on xfs w/ my online label patchset (as long as xfs_io has the new
-capability)
+Changed since v1:
+    - Use _get_file_block_size() instead of _get_block_size()
+    - Add commit IDs
+    - Change test number
 
-diff --git a/common/rc b/common/rc
-index 9ffab7f..c53a721 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2158,6 +2158,9 @@ _require_xfs_io_command()
- 		echo $testio | grep -q "Inappropriate ioctl" && \
- 			_notrun "xfs_io $command support is missing"
- 		;;
-+	"label")
-+		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
-+		;;
- 	"open")
- 		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
- 		# a new -C flag was introduced to execute one shot commands.
-@@ -2196,7 +2199,7 @@ _require_xfs_io_command()
- 	rm -f $testfile 2>&1 > /dev/null
- 	echo $testio | grep -q "not found" && \
- 		_notrun "xfs_io $command support is missing"
--	echo $testio | grep -q "Operation not supported" && \
-+	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
- 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
- 	echo $testio | grep -q "Invalid" && \
- 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+ tests/generic/485     | 115 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/485.out |   4 ++
+ tests/generic/group   |   1 +
+ 3 files changed, 120 insertions(+)
+ create mode 100755 tests/generic/485
+ create mode 100644 tests/generic/485.out
+
 diff --git a/tests/generic/485 b/tests/generic/485
 new file mode 100755
-index 0000000..79902c2
+index 00000000..5ee9f8c3
 --- /dev/null
 +++ b/tests/generic/485
-@@ -0,0 +1,99 @@
+@@ -0,0 +1,115 @@
 +#! /bin/bash
-+# FS QA Test 485
++# FS QA Test No. 485
 +#
-+# Test the online filesystem label set/get ioctls
++# Regression test for:
++#    349fa7d6e193 ("ext4: prevent right-shifting extents beyond EXT_MAX_BLOCKS")
++#    7d83fb14258b ("xfs: prevent creating negative-sized file via INSERT_RANGE")
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-+# Author: Eric Sandeen <sandeen@redhat.com>
++# Copyright (c) 2018 Google, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -82,21 +65,18 @@ index 0000000..79902c2
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
-+#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
-+tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -f $tmp.*
++	rm -f $testfile
 +}
 +
 +# get standard environment, filters and checks
@@ -107,80 +87,95 @@ index 0000000..79902c2
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "label"
++_require_test
++_require_math
++_require_xfs_io_command "falloc" "-k"
++_require_xfs_io_command "finsert"
++_require_xfs_io_command "truncate"
 +
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
++# Get the maximum size of a file in $TEST_DIR (s_maxbytes).  On ext4 this will
++# be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
++get_max_file_size()
++{
++	local testfile=$TEST_DIR/maxfilesize.$seq
++	local l=0
++	local r=9223372036854775807 # LLONG_MAX
 +
-+# Make sure we can set & clear the label
-+$XFS_IO_PROG -c "label label.$seq" $SCRATCH_MNT
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
++	rm -f $testfile
++	while (( l < r )); do
++		# Use _math() to avoid signed integer overflow.
++		local m=$(_math "($l + $r + 1) / 2")
++		if $XFS_IO_PROG -f -c "truncate $m" $testfile \
++			|& grep -q 'File too large'
++		then
++			r=$(( m - 1 ))
++		else
++			l=$m
++		fi
++	done
++	echo $l
++}
 +
-+# And that userspace can see it now, while mounted
-+blkid -s LABEL $SCRATCH_DEV | _filter_scratch
++block_size=$(_get_file_block_size $TEST_DIR)
++max_file_size=$(get_max_file_size)
++max_blocks=$((max_file_size / block_size))
++testfile=$TEST_DIR/testfile.$seq
 +
-+# And that the it is still there when it's unmounted
-+_scratch_unmount
-+blkid -s LABEL $SCRATCH_DEV | _filter_scratch
++echo "# With KEEP_SIZE"
++rm -f "$testfile"
 +
-+# And that it persists after a remount
-+_scratch_mount
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
++# Add an extent at the beginning of the file.  With ext4, this is needed to
++# reproduce the bug where the extents appear out of order later.
++$XFS_IO_PROG -f -c "falloc 0 $((2 * block_size))" "$testfile"
 +
-+# And that a too-long label is rejected, beyond the interface max:
-+LABEL=$(perl -e "print 'l' x 257;")
-+$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++# Add an extent just below s_maxbytes, without changing i_size (i.e. with -k).
++# The out-of-order extents bug can't be reproduced if i_size is changed, because
++# then the range insertion fails due to the new i_size being > s_maxbytes.
++$XFS_IO_PROG -c "falloc -k $(( (max_blocks - 1) * $block_size )) $block_size" \
++	"$testfile"
 +
-+# And that it succeeds right at the filesystem max:
-+case $FSTYP in
-+xfs)
-+	MAXLEN=12;
-+	;;
-+btrfs)
-+	MAXLEN=256
-+	;;
-+*)
-+	MAXLEN=256
-+	echo "Your filesystem supports online label, please add max length"
-+	;;
-+esac
-+LABEL=$(perl -e "print 'o' x $MAXLEN;")
-+$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
++# Insert an extent at the beginning of the file.  With the ext4 bug, this caused
++# the logical block number of the extent just below s_maxbytes to wrap around,
++# causing the extents to get out of order, causing corruption detected by
++# e2fsck.  With the fix, the range insertion fails with EINVAL.  Though, with
++# xfs and f2fs the insertion succeeds, resulting in extents beyond s_maxbytes,
++# but there is no wraparound -- which is arguably okay.  So we allow either
++# behavior and just rely on fsck detecting if something went wrong.
++$XFS_IO_PROG -c "finsert 0 $((2 * block_size))" "$testfile" &>>$seqres.full
 +
-+# And that it fails just past the filesystem max:
-+let TOOLONG=MAXLEN+1
-+LABEL=$(perl -e "print 'o' x $TOOLONG;")
-+$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++# Also do the same test, but with changing i_size (i.e. without -k).  The
++# insertion should fail with EFBIG.  This exposed an XFS bug where i_size + len
++# underwent signed overflow, resulting in a negative-sized file.
++echo "# Without KEEP_SIZE"
++rm -f "$testfile"
++$XFS_IO_PROG -f -c "falloc 0 $((2 * block_size))" "$testfile"
++$XFS_IO_PROG -c "falloc $(( (max_blocks - 1) * $block_size )) $block_size" \
++	"$testfile"
++$XFS_IO_PROG -c "finsert 0 $((2 * block_size))" "$testfile"
 +
-+# success, all done
 +status=0
 +exit
 diff --git a/tests/generic/485.out b/tests/generic/485.out
 new file mode 100644
-index 0000000..bc54684
+index 00000000..9c51ec68
 --- /dev/null
 +++ b/tests/generic/485.out
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,4 @@
 +QA output created by 485
-+label = "label.485"
-+label = "label.485"
-+SCRATCH_DEV: LABEL="label.485" 
-+SCRATCH_DEV: LABEL="label.485" 
-+label = "label.485"
-+label: Invalid argument
-+label = "MAXLABEL"
-+label: Invalid argument
++# With KEEP_SIZE
++# Without KEEP_SIZE
++fallocate: File too large
 diff --git a/tests/generic/group b/tests/generic/group
-index 19be926..cf6ac49 100644
+index 19be9267..d04b203d 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
 @@ -487,3 +487,4 @@
  482 auto metadata replay
  483 auto quick log metadata
  484 auto quick
-+485 auto quick
++485 auto quick insert
+-- 
+2.17.0.441.gb46fe60e1d-goog
 
