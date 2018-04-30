@@ -1,56 +1,186 @@
-Received: from mx2.suse.de ([195.135.220.15]:48775 "EHLO mx2.suse.de"
+Received: from mx1.redhat.com ([209.132.183.28]:51574 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1754871AbeD3UsN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 30 Apr 2018 16:48:13 -0400
-Subject: Re: [PATCH] check: annotate good and expunged tests in results
-References: <20180412213838.28929-1-jeffm@suse.com>
- <20180424093646.GA11384@desktop>
- <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com>
- <20180427112356.GP11384@desktop> <20180427170009.GT27853@wotan.suse.de>
- <20180428024545.GR11384@desktop>
-From: Jeff Mahoney <jeffm@suse.com>
-Message-ID: <33a80b8a-fe26-faee-9704-d1bb2c933a3a@suse.com>
-Date: Mon, 30 Apr 2018 16:48:08 -0400
+        id S1751195AbeD3VnT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Apr 2018 17:43:19 -0400
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH] test online label ioctl
+Message-ID: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
+Date: Mon, 30 Apr 2018 16:43:18 -0500
 MIME-Version: 1.0
-In-Reply-To: <20180428024545.GR11384@desktop>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>, "Luis R. Rodriguez" <mcgrof@kernel.org>
-Cc: fstests@vger.kernel.org, nborisov@suse.com, fdmanana@suse.com
+To: fstests <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 4/27/18 10:45 PM, Eryu Guan wrote:
-> On Fri, Apr 27, 2018 at 05:00:09PM +0000, Luis R. Rodriguez wrote:
->> On Fri, Apr 27, 2018 at 07:23:56PM +0800, Eryu Guan wrote:
->>>
->>> But the test run & pass info is already available from the check output
->>> and the test result summary at the end of check. Is that sufficient for
->>> you? Also, we already have mechanism to generate a test report in xunit
->>> format, i.e. ./check -R xunit -g auto, which includes results for passed
->>> & failed & notrun tests.
->>
->> Do we have a way to parse the results *after* a run? For instance,
->> if you forgot -R xunit ?
-> 
-> There's a tools/compare-failures script that takes the outputs of check
-> as inputs and compares the results. But, TBH, I never run it after
-> reviewing it.. Perhaps it could be enhanced somehow.
+This tests the online label ioctl that btrfs has, which has been
+recently proposed for XFS.
 
-Yeah, that takes check output.  Without capturing it at runtime, it
-can't compare anything.
+To run, it requires an updated xfs_io with the label command and a
+filesystem that supports it
 
-The XML report may do most of what I want provided we can enable it by
-default and write it someplace safe rather than clean it up
-automatically when the test run is interrupted.
+A slight change here to _require_xfs_io_command as well, so that tests
+which simply fail with "Inappropriate ioctl" can be caught in the
+common case.
 
-I already have test code that extends it to output expunged tests and to
-add an explicit <pass/> element.  It saves the timestamps already, so
-that's a plus.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
--Jeff
+this passes on btrfs, _notruns on xfs/ext4 of yore, and passes
+on xfs w/ my online label patchset (as long as xfs_io has the new
+capability)
 
--- 
-Jeff Mahoney
-SUSE Labs
+diff --git a/common/rc b/common/rc
+index 9ffab7f..c53a721 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2158,6 +2158,9 @@ _require_xfs_io_command()
+ 		echo $testio | grep -q "Inappropriate ioctl" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
++	"label")
++		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
++		;;
+ 	"open")
+ 		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
+ 		# a new -C flag was introduced to execute one shot commands.
+@@ -2196,7 +2199,7 @@ _require_xfs_io_command()
+ 	rm -f $testfile 2>&1 > /dev/null
+ 	echo $testio | grep -q "not found" && \
+ 		_notrun "xfs_io $command support is missing"
+-	echo $testio | grep -q "Operation not supported" && \
++	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+ 	echo $testio | grep -q "Invalid" && \
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+diff --git a/tests/generic/485 b/tests/generic/485
+new file mode 100755
+index 0000000..79902c2
+--- /dev/null
++++ b/tests/generic/485
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# FS QA Test 485
++#
++# Test the online filesystem label set/get ioctls
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++# Author: Eric Sandeen <sandeen@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "label"
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++# Make sure we can set & clear the label
++$XFS_IO_PROG -c "label label.$seq" $SCRATCH_MNT
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that userspace can see it now, while mounted
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch
++
++# And that the it is still there when it's unmounted
++_scratch_unmount
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch
++
++# And that it persists after a remount
++_scratch_mount
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that a too-long label is rejected, beyond the interface max:
++LABEL=$(perl -e "print 'l' x 257;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++
++# And that it succeeds right at the filesystem max:
++case $FSTYP in
++xfs)
++	MAXLEN=12;
++	;;
++btrfs)
++	MAXLEN=256
++	;;
++*)
++	MAXLEN=256
++	echo "Your filesystem supports online label, please add max length"
++	;;
++esac
++LABEL=$(perl -e "print 'o' x $MAXLEN;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
++
++# And that it fails just past the filesystem max:
++let TOOLONG=MAXLEN+1
++LABEL=$(perl -e "print 'o' x $TOOLONG;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/485.out b/tests/generic/485.out
+new file mode 100644
+index 0000000..bc54684
+--- /dev/null
++++ b/tests/generic/485.out
+@@ -0,0 +1,9 @@
++QA output created by 485
++label = "label.485"
++label = "label.485"
++SCRATCH_DEV: LABEL="label.485" 
++SCRATCH_DEV: LABEL="label.485" 
++label = "label.485"
++label: Invalid argument
++label = "MAXLABEL"
++label: Invalid argument
+diff --git a/tests/generic/group b/tests/generic/group
+index 19be926..cf6ac49 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -487,3 +487,4 @@
+ 482 auto metadata replay
+ 483 auto quick log metadata
+ 484 auto quick
++485 auto quick
+
