@@ -1,11 +1,12 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:33544 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:33600 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753851AbeEAPjm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:39:42 -0400
-Subject: [PATCH 3/9] generic/45[34]: add unicode directional override checks
+        with ESMTP id S1754749AbeEAPjs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:39:48 -0400
+Subject: [PATCH 4/9] generic/45[34]: check unicode names only if xfs_scrub
+ linked against libicu
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 01 May 2018 08:39:39 -0700
-Message-ID: <152518917904.23023.222758648230658600.stgit@magnolia>
+Date: Tue, 01 May 2018 08:39:45 -0700
+Message-ID: <152518918522.23023.14015169259875311012.stgit@magnolia>
 In-Reply-To: <152518916007.23023.4793255395982876953.stgit@magnolia>
 References: <152518916007.23023.4793255395982876953.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,64 +19,70 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Try injecting a Unicode directional override character in the middle of
-a name to see if the fs can handle it / xfs_scrub will complain.
+Since we've rewriting the xfs_scrub Unicode name scanner to use libicu
+to detect potential spoof names, change our check for unicode-enabled
+name scanning xfs_scrub to look for libicu instead of libunistring,
+adjust the golden output to reflect the new library's detection
+capabilities and make sure we get all the scrub output by invoking with
+-v.
+
+Note that this requires xfsprogs 4.16 or newer; since xfs_scrub is (for
+now) an experimental program, we don't care about breaking backwards
+compatibility.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/453 |    7 +++++++
- tests/generic/454 |    7 +++++++
- 2 files changed, 14 insertions(+)
+ tests/generic/453 |    5 ++---
+ tests/generic/454 |    5 ++---
+ 2 files changed, 4 insertions(+), 6 deletions(-)
 
 
 diff --git a/tests/generic/453 b/tests/generic/453
-index 424412e9..f2cd81fb 100755
+index f2cd81fb..6cb2a296 100755
 --- a/tests/generic/453
 +++ b/tests/generic/453
-@@ -112,6 +112,10 @@ setf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt
- # Line draw characters, because why not?
- setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
+@@ -158,7 +158,7 @@ check_xfs_scrub() {
  
-+# unicode rtl widgets too...
-+setf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
-+setf "mootxt.png" "Harvey"
-+
- ls -la $testdir >> $seqres.full
+ 	# We only care if xfs_scrub has unicode string support...
+ 	if ! type ldd > /dev/null 2>&1 || \
+-	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libunistring; then
++	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
+ 		return 1
+ 	fi
  
- echo "Test files"
-@@ -135,6 +139,9 @@ testf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.tx
+@@ -166,9 +166,8 @@ check_xfs_scrub() {
+ }
  
- testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
- 
-+testf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
-+testf "mootxt.png" "Harvey"
-+
- echo "Uniqueness of inodes?"
- stat -c '%i' "${testdir}/"* | sort | uniq -c | while read nr inum; do
- 	if [ "${nr}" -gt 1 ]; then
+ if check_xfs_scrub; then
+-	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
++	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
+ 	echo "${output}" | grep -q "french_" || echo "No complaints about french e accent?"
+-	echo "${output}" | grep -q "chinese_" || echo "No complaints about chinese width-different?"
+ 	echo "${output}" | grep -q "greek_" || echo "No complaints about greek letter mess?"
+ 	echo "${output}" | grep -q "arabic_" || echo "No complaints about arabic expanded string?"
+ 	echo "Actual xfs_scrub output:" >> $seqres.full
 diff --git a/tests/generic/454 b/tests/generic/454
-index 24727ab3..c6530290 100755
+index c6530290..ec4fb997 100755
 --- a/tests/generic/454
 +++ b/tests/generic/454
-@@ -110,6 +110,10 @@ setf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.txt
- # Line draw characters, because why not?
- setf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
+@@ -154,7 +154,7 @@ check_xfs_scrub() {
  
-+# unicode rtl widgets too...
-+setf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
-+setf "mootxt.png" "Harvey"
-+
- $GETFATTR_PROG --absolute-names -d "${testfile}" >> $seqres.full
+ 	# We only care if xfs_scrub has unicode string support...
+ 	if ! type ldd > /dev/null 2>&1 || \
+-	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libunistring; then
++	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
+ 		return 1
+ 	fi
  
- echo "Test files"
-@@ -133,6 +137,9 @@ testf "emoji_\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89\xf0\x9f\xa6\x92.tx
+@@ -162,9 +162,8 @@ check_xfs_scrub() {
+ }
  
- testf "\x6c\x69\x6e\x65\x64\x72\x61\x77\x5f\x0a\xe2\x95\x94\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x97\x0a\xe2\x95\x91\x20\x6d\x65\x74\x61\x74\x61\x62\x6c\x65\x20\xe2\x95\x91\x0a\xe2\x95\x9f\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x94\x80\xe2\x95\xa2\x0a\xe2\x95\x91\x20\x5f\x5f\x69\x6e\x64\x65\x78\x20\x20\x20\xe2\x95\x91\x0a\xe2\x95\x9a\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x90\xe2\x95\x9d\x0a.txt" "ugly box because we can"
- 
-+testf "moo\xe2\x80\xaegnp.txt" "Well say hello,"
-+testf "mootxt.png" "Harvey"
-+
- echo "Uniqueness of keys?"
- crazy_keys="$($GETFATTR_PROG --absolute-names -d "${testfile}" | egrep -c '(french_|chinese_|greek_|arabic_|urk)')"
- expected_keys=11
+ if check_xfs_scrub; then
+-	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
++	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
+ 	echo "${output}" | grep -q "french_" || echo "No complaints about french e accent?"
+-	echo "${output}" | grep -q "chinese_" || echo "No complaints about chinese width-different?"
+ 	echo "${output}" | grep -q "greek_" || echo "No complaints about greek letter mess?"
+ 	echo "${output}" | grep -q "arabic_" || echo "No complaints about arabic expanded string?"
+ 	echo "Actual xfs_scrub output:" >> $seqres.full
 
