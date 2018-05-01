@@ -1,12 +1,11 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:46606 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753851AbeEAPkI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:40:08 -0400
-Subject: [PATCH 7/9] xfs/422: add fsstress to the freeze-and-rmap-repair
- race test
+Received: from userp2120.oracle.com ([156.151.31.85]:33872 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753851AbeEAPkP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:40:15 -0400
+Subject: [PATCH 8/9] xfs: checkbashisms in all script files
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 01 May 2018 08:40:03 -0700
-Message-ID: <152518920390.23023.633707441886698447.stgit@magnolia>
+Date: Tue, 01 May 2018 08:40:10 -0700
+Message-ID: <152518921090.23023.14958881774088486712.stgit@magnolia>
 In-Reply-To: <152518916007.23023.4793255395982876953.stgit@magnolia>
 References: <152518916007.23023.4793255395982876953.stgit@magnolia>
 MIME-Version: 1.0
@@ -14,67 +13,95 @@ Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, sandeen@sandeen.net, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Add fsstress to the pile of things that we race with rmap repair to
-ensure that the rmap repair isolates the filesystem correctly while it
-is doing its repairs.
+Find all the /bin/sh scripts in xfsprogs and check for bashisms.
 
+Cc: sandeen@sandeen.net
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/422 |   19 ++++++++++++++++++-
- 1 file changed, 18 insertions(+), 1 deletion(-)
+ tests/xfs/711     |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/711.out |    1 +
+ tests/xfs/group   |    1 +
+ 3 files changed, 53 insertions(+)
+ create mode 100755 tests/xfs/711
+ create mode 100644 tests/xfs/711.out
 
 
-diff --git a/tests/xfs/422 b/tests/xfs/422
-index a8fa5d5a..b2db713c 100755
---- a/tests/xfs/422
-+++ b/tests/xfs/422
-@@ -51,6 +51,8 @@ _supported_fs xfs
- _require_xfs_scratch_rmapbt
- _require_xfs_io_command "scrub"
- _require_xfs_io_error_injection "force_repair"
-+_require_command "$KILLALL_PROG" killall
-+_require_command "$FSSTRESS_PROG" fsstress
- 
- echo "Format and populate"
- _scratch_mkfs > "$seqres.full" 2>&1
-@@ -89,18 +91,33 @@ repair_loop() {
- 		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
- 	done
- }
-+stress_loop() {
-+	end="$1"
+diff --git a/tests/xfs/711 b/tests/xfs/711
+new file mode 100755
+index 00000000..d3dc3cd4
+--- /dev/null
++++ b/tests/xfs/711
+@@ -0,0 +1,51 @@
++#! /bin/bash
++# FS QA Test No. 711
++#
++# checkbashisms on all /bin/sh scripts.  This is a maintainer script.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Oracle, Inc.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#
++#-----------------------------------------------------------------------
++#
 +
-+	FSSTRESS_ARGS=$(_scale_fsstress_args -p 4 -d $SCRATCH_MNT -n 2000 $FSSTRESS_AVOID)
-+	while [ "$(date +%s)" -lt $end ]; do
-+		$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full
-+	done
-+}
- $XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
- 
- start=$(date +%s)
- end=$((start + (30 * TIME_FACTOR) ))
- 
- echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-+stress_loop $end &
- freeze_loop $end &
- repair_loop $end &
- 
--while [ "$(date +%s)" -lt $end ]; do
-+# Wait until 2 seconds after the loops should have finished...
-+while [ "$(date +%s)" -lt $((end + 2)) ]; do
- 	sleep 1
- done
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+# ...and clean up after the loops in case they didn't do it themselves.
-+$KILLALL_PROG -TERM xfs_io fsstress >> $seqres.full 2>&1
-+$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
 +
- echo "Loop finished at $(date)" >> $seqres.full
- echo "Test done"
- 
++# get standard environment
++. ./common/rc
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
++_require_command "$CHECKBASHISMS_PROG" checkbashisms
++
++test -z "$WORKAREA" && _notrun "Can't find xfsprogs source"
++
++rm -f $seqres.full
++
++find $WORKAREA -name 'xfs*.sh' -print0 | xargs -0 grep '^#!/bin/sh' | sed -e 's/:.*$//g' | while read f; do
++	$CHECKBASHISMS_PROG $f
++done
++
++status=0
+diff --git a/tests/xfs/711.out b/tests/xfs/711.out
+new file mode 100644
+index 00000000..52ff4745
+--- /dev/null
++++ b/tests/xfs/711.out
+@@ -0,0 +1 @@
++QA output created by 711
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 39e259e8..b7da3fba 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -443,3 +443,4 @@
+ 443 auto quick ioctl fsr
+ 444 auto quick
+ 445 auto quick filestreams
++711 auto quick
 
