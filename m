@@ -1,12 +1,12 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:33718 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755402AbeEAPkB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:40:01 -0400
-Subject: [PATCH 6/9] generic/453: test creation of malicious directory
- entries
+Received: from aserp2120.oracle.com ([141.146.126.78]:46606 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753851AbeEAPkI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 1 May 2018 11:40:08 -0400
+Subject: [PATCH 7/9] xfs/422: add fsstress to the freeze-and-rmap-repair
+ race test
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 01 May 2018 08:39:57 -0700
-Message-ID: <152518919767.23023.15585535417009112941.stgit@magnolia>
+Date: Tue, 01 May 2018 08:40:03 -0700
+Message-ID: <152518920390.23023.633707441886698447.stgit@magnolia>
 In-Reply-To: <152518916007.23023.4793255395982876953.stgit@magnolia>
 References: <152518916007.23023.4793255395982876953.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,80 +19,62 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Create malicious . and .. entries (you didn't see the zero-width
-joiners at the end, did you?) in a directory to see if scrub will pick
-them up.
+Add fsstress to the pile of things that we race with rmap repair to
+ensure that the rmap repair isolates the filesystem correctly while it
+is doing its repairs.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/453 |   34 ++++++++++++++++++++++++++++++++++
- 1 file changed, 34 insertions(+)
+ tests/xfs/422 |   19 ++++++++++++++++++-
+ 1 file changed, 18 insertions(+), 1 deletion(-)
 
 
-diff --git a/tests/generic/453 b/tests/generic/453
-index 91d163ca..8841f581 100755
---- a/tests/generic/453
-+++ b/tests/generic/453
-@@ -62,6 +62,15 @@ setf() {
- 	echo "Storing ${key} ($(hexbytes "${key}")) -> ${value}" >> $seqres.full
- }
+diff --git a/tests/xfs/422 b/tests/xfs/422
+index a8fa5d5a..b2db713c 100755
+--- a/tests/xfs/422
++++ b/tests/xfs/422
+@@ -51,6 +51,8 @@ _supported_fs xfs
+ _require_xfs_scratch_rmapbt
+ _require_xfs_io_command "scrub"
+ _require_xfs_io_error_injection "force_repair"
++_require_command "$KILLALL_PROG" killall
++_require_command "$FSSTRESS_PROG" fsstress
  
-+setd() {
-+	key="$(echo -e "$1")"
-+	value="$2"
+ echo "Format and populate"
+ _scratch_mkfs > "$seqres.full" 2>&1
+@@ -89,18 +91,33 @@ repair_loop() {
+ 		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
+ 	done
+ }
++stress_loop() {
++	end="$1"
 +
-+	mkdir -p "${testdir}/${key}"
-+	echo "${value}" > "${testdir}/${key}/value"
-+	echo "Storing ${key} ($(hexbytes "${key}")) -> ${value}" >> $seqres.full
++	FSSTRESS_ARGS=$(_scale_fsstress_args -p 4 -d $SCRATCH_MNT -n 2000 $FSSTRESS_AVOID)
++	while [ "$(date +%s)" -lt $end ]; do
++		$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full
++	done
 +}
-+
- testf() {
- 	key="$(echo -e "$1")"
- 	value="$2"
-@@ -80,6 +89,24 @@ testf() {
- 	fi
- }
+ $XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
  
-+testd() {
-+	key="$(echo -e "$1")"
-+	value="$2"
-+	fname="${testdir}/${key}/value"
-+
-+	echo "Testing ${key} ($(hexbytes "${key}")) -> ${value}" >> $seqres.full
-+
-+	if [ ! -e "${fname}" ]; then
-+		echo "Key ${key} does not exist for ${value} test??"
-+		return
-+	fi
-+
-+	actual_value="$(cat "${fname}")"
-+	if [ "${actual_value}" != "${value}" ]; then
-+		echo "Key ${key} has value ${value}, expected ${actual_value}."
-+	fi
-+}
-+
- filter_scrub() {
- 	grep 'Unicode' | sed -e 's/^.*Duplicate/Duplicate/g'
- }
-@@ -143,6 +170,10 @@ setf "zerojoin_moo\xe2\x80\x8dcow.txt" "zero width joiners"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- setf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
+ start=$(date +%s)
+ end=$((start + (30 * TIME_FACTOR) ))
  
-+# fake dotdot entry
-+setd ".\xe2\x80\x8d" "zero width joiners in dot entry"
-+setd "..\xe2\x80\x8d" "zero width joiners in dotdot entry"
-+
- ls -la $testdir >> $seqres.full
+ echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
++stress_loop $end &
+ freeze_loop $end &
+ repair_loop $end &
  
- echo "Test files"
-@@ -190,6 +221,9 @@ testf "zerojoin_moo\xe2\x80\x8dcow.txt" "zero width joiners"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.txt" "combining marks"
- testf "combmark_\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.txt" "combining marks"
- 
-+testd ".\xe2\x80\x8d" "zero width joiners in dot entry"
-+testd "..\xe2\x80\x8d" "zero width joiners in dotdot entry"
+-while [ "$(date +%s)" -lt $end ]; do
++# Wait until 2 seconds after the loops should have finished...
++while [ "$(date +%s)" -lt $((end + 2)) ]; do
+ 	sleep 1
+ done
 +
- echo "Uniqueness of inodes?"
- stat -c '%i' "${testdir}/"* | sort | uniq -c | while read nr inum; do
- 	if [ "${nr}" -gt 1 ]; then
++# ...and clean up after the loops in case they didn't do it themselves.
++$KILLALL_PROG -TERM xfs_io fsstress >> $seqres.full 2>&1
++$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
++
+ echo "Loop finished at $(date)" >> $seqres.full
+ echo "Test done"
+ 
 
