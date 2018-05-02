@@ -1,69 +1,183 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:45788 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751078AbeEBFu4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 01:50:56 -0400
-Received: by mail-pf0-f194.google.com with SMTP id c10so10825556pfi.12
-        for <fstests@vger.kernel.org>; Tue, 01 May 2018 22:50:56 -0700 (PDT)
-Date: Wed, 2 May 2018 13:50:51 +0800
+Received: from mail-pf0-f193.google.com ([209.85.192.193]:37675 "EHLO
+        mail-pf0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751116AbeEBHda (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 03:33:30 -0400
+Date: Wed, 2 May 2018 15:33:25 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] generic: test for seeing unseen fsync errors on newly
- open files
-Message-ID: <20180502055051.GA29084@desktop>
-References: <20180428145937.6804-1-jlayton@kernel.org>
- <20180428230627.16791-1-jlayton@kernel.org>
+Subject: Re: [PATCH 1/9] generic: test XATTR_REPLACE doesn't take the fs down
+Message-ID: <20180502073325.GB29084@desktop>
+References: <152518916007.23023.4793255395982876953.stgit@magnolia>
+ <152518916637.23023.9591675479884571356.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180428230627.16791-1-jlayton@kernel.org>
+In-Reply-To: <152518916637.23023.9591675479884571356.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests@vger.kernel.org, willy@infradead.org, andres@anarazel.de, david@fromorbit.com, amir73il@gmail.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, kanda.motohiro@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Apr 28, 2018 at 07:06:27PM -0400, Jeff Layton wrote:
-> From: Jeff Layton <jlayton@redhat.com>
+On Tue, May 01, 2018 at 08:39:26AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> This adds a regression test for the following kernel patch:
+> Kanda Motohiro reported that expanding a tiny xattr into a large xattr
+> fails on XFS because we remove the tiny xattr from a shortform fork and
+> then try to re-add it after converting the fork to extents format having
+> not removed the ATTR_REPLACE flag.  This fails because the attr is no
+> longer present, causing a fs shutdown.
 > 
->     errseq: Always report a writeback error once
-> 
-> This is motivated by some rather odd behavior done by the PostgreSQL
-> project. The main database writers will offload the fsync calls to a
-> separate process, which can open files after a writeback error has
-> already occurred.
-> 
-> This used to work with older kernels that reported the error to only
-> one fd, but with the errseq_t changes we lost the ability to see
-> errors that occurred before the open. The above patch restores that
-> behavior.
-> 
-> Signed-off-by: Jeff Layton <jlayton@redhat.com>
-> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> Bugzilla: https://bugzilla.kernel.org/show_bug.cgi?id=199119
+> Reported-by: kanda.motohiro@gmail.com
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+Thanks for the revision! Because I found more issues in v1 than I
+expected, so I drop the patch from last fstests update. I should have
+made that clear..
+
 > ---
->  tests/generic/999     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/999.out |  5 +++
->  tests/generic/group   |  1 +
->  3 files changed, 101 insertions(+)
->  create mode 100755 tests/generic/999
->  create mode 100644 tests/generic/999.out
+>  .gitignore              |    1 +
+>  src/Makefile            |    3 +-
+>  src/attr_replace_test.c |   60 +++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/706       |   68 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/706.out   |    2 +
+>  tests/generic/group     |    1 +
+>  6 files changed, 134 insertions(+), 1 deletion(-)
+>  create mode 100644 src/attr_replace_test.c
+>  create mode 100755 tests/generic/706
+>  create mode 100644 tests/generic/706.out
 > 
-> diff --git a/tests/generic/999 b/tests/generic/999
-> new file mode 100755
-> index 000000000000..b816fd3bb423
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 192ca35e..af9743f9 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -53,6 +53,7 @@
+>  /src/append_reader
+>  /src/append_writer
+>  /src/attr-list-by-handle-cursor-test
+> +/src/attr_replace_test
+
+Seems this should be put before attr-list-by-handle-cursor-test,
+according to the result of sort.
+
+>  /src/bstat
+>  /src/bulkstat_unlink_test
+>  /src/bulkstat_unlink_test_modified
+> diff --git a/src/Makefile b/src/Makefile
+> index 6ca56366..c42d3bb1 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -25,7 +25,8 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec cloner \
+>  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+>  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+> -	dio-invalidate-cache stat_test t_encrypted_d_revalidate
+> +	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> +	attr_replace_test
+>  
+>  SUBDIRS = log-writes perf
+>  
+> diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+> new file mode 100644
+> index 00000000..c870d165
 > --- /dev/null
-> +++ b/tests/generic/999
-> @@ -0,0 +1,95 @@
+> +++ b/src/attr_replace_test.c
+> @@ -0,0 +1,60 @@
+> +// setattr.c by kanda.motohiro@gmail.com
+> +// xfs extended attribute corruption bug reproducer
+> +#include <stdio.h>
+> +#include <string.h>
+> +#include <fcntl.h>
+> +#include <errno.h>
+> +#include <stdlib.h>
+> +#include <unistd.h>
+> +#include <sys/types.h>
+> +#include <sys/xattr.h>
+> +#include <sys/stat.h>
+> +
+> +#define die() do { perror(""); \
+> +fprintf(stderr, "error=%d at line %d\n", errno, __LINE__); \
+> +exit(1); } while (0)
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	int ret;
+> +	int fd;
+> +	char *path;
+> +	char *name = "user.world";
+> +	char *value;
+> +	struct stat sbuf;
+> +	size_t size = sizeof(value);
+> +
+> +	if (argc != 2) die();
+
+die() doesn't seem like the right thing to do (and some other places),
+it'll print something like:
+
+Success
+error=0 at line NN
+
+I'd define a new "fail()" macro and use it where appropriate.
+
++#define fail(...) do { \
++fprintf(stderr, __VA_ARGS__); exit (1); \
++} while (0)
+
+I can fix the minor issues on commit, for real this time :)
+
+Thanks,
+Eryu
+
+> +	path = argv[1];
+> +
+> +	fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+> +	if (fd < 0) die();
+> +
+> +	/*
+> +	 * The value should be 3/4 the size of a fs block to ensure that we
+> +	 * get to extents format.
+> +	 */
+> +	ret = fstat(fd, &sbuf);
+> +	if (ret < 0) die();
+> +	size = sbuf.st_blksize * 3 / 4;
+> +	if (!size) die();
+> +	value = malloc(size);
+> +	if (!value) die();
+> +
+> +	// First, create a small xattr.
+> +	memset(value, '0', 1);
+> +	ret = fsetxattr(fd, name, value, 1, XATTR_CREATE);
+> +	if (ret < 0) die();
+> +	close(fd);
+> +
+> +	fd = open(path, O_RDWR);
+> +	if (fd < 0) die();
+> +
+> +	// Then, replace it with bigger one, forcing short form to leaf conversion.
+> +	memset(value, '1', size);
+> +	ret = fsetxattr(fd, name, value, size, XATTR_REPLACE);
+> +	if (ret < 0) die();
+> +	close(fd);
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/generic/706 b/tests/generic/706
+> new file mode 100755
+> index 00000000..9f98c3b1
+> --- /dev/null
+> +++ b/tests/generic/706
+> @@ -0,0 +1,68 @@
 > +#! /bin/bash
-> +# FS QA Test No. XXX
-                    ^^^ Need a test number here :)
+> +# FS QA Test No. 706
 > +#
-> +# Open a file several times, write to it, fsync on all fds and make sure that
-> +# they all return 0. Change the device to start throwing errors. Write again
-> +# on all fds and fsync on all fds. Ensure that we get errors on all of them.
-> +# Then fsync on all one last time and verify that all return 0.
+> +# Ensure that we can XATTR_REPLACE a tiny attr into a large attr.
+> +# Kanda Motohiro <kanda.motohiro@gmail.com> reports that XATTR_REPLACE'ing
+> +# a single-byte attr with a 2048-byte attr causes a fs shutdown because we
+> +# remove the shortform attr, convert the attr fork to long format, and then
+> +# try to re-add the attr having not cleared ATTR_REPLACE.
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018, Jeff Layton <jlayton@redhat.com>
+> +# Copyright (c) 2018 Oracle.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -77,126 +191,65 @@ On Sat, Apr 28, 2018 at 07:06:27PM -0400, Jeff Layton wrote:
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
 > +#-----------------------------------------------------------------------
 > +
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
 > +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
+> +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
 > +	cd /
-> +	rm -rf $tmp.* $testdir
-> +	_dmerror_cleanup
+> +	rm -f $testfile
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/dmerror
+> +. ./common/attr
 > +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_scratch_nocheck
-> +# This test uses "dm" without taking into account the data could be on
-> +# realtime subvolume, thus the test will fail with rtinherit=1
-> +_require_no_rtinherit
-> +
-> +_require_dm_target error
-> +
+> +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
-> +echo "Format and mount"
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_dmerror_init
-> +_dmerror_mount
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test_program "attr_replace_test"
+> +_require_attrs
+> +_require_scratch
 > +
-> +datalen=65536
-> +_require_fs_space $SCRATCH_MNT $datalen
+> +rm -f $seqres.full
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount >>$seqres.full 2>&1
 > +
-> +# use fd 5 to hold file open
-> +testfile=$SCRATCH_MNT/fsync-open-after-err
-> +exec 5>$testfile
+> +filter_attr_output() {
+> +	_filter_scratch | sed -e 's/has a [0-9]* byte value/has a NNNN byte value/g'
+> +}
 > +
-> +# write some data to file and fsync it out
-> +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c fsync $testfile
-> +
-> +# flip device to non-working mode
-> +_dmerror_load_error_table
-> +
-> +# rewrite the data, call sync to ensure it's written back w/o scraping error
-> +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c sync $testfile
-> +
-> +# heal the device error
-> +_dmerror_load_working_table
-> +
-> +# open again and call fsync
-> +echo "The following fsync should fail with EIO:"
-> +$XFS_IO_PROG -c fsync $testfile
-> +echo "done"
-                                                                                                                                                                                               
-I built latest Linus tree, which should contain the mentioned fix, and I                                                                                                                       
-saw different results on xfs, ext4 and btrfs.                                                                                                                                                  
-                                                                                                                                                                                               
-XFS fails the test as:                                                                                                                                                                         
-    -fsync: Input/output error                                                                                                                                                                 
-    +/mnt/scratch/fsync-open-after-err: Input/output error                                                                                                                                     
-                                                                                                                                                                                               
-While btrfs fails as:                                                                                                                                                                          
-    -fsync: Input/output error                                                                                                                                                                 
-    +/mnt/scratch/fsync-open-after-err: Read-only file system                                                                                                                                  
-                                                                                                                                                                                               
-And both XFS and btrfs behave in the same way no matter I have the fix                                                                                                                         
-applied or not (tested on v4.16 kernel and v4.17-rc3+ kernel).                                                                                                                                 
-                                                                                                                                                                                               
-Only ext4 passes the test with v4.17-rc3+ kernel, and fails on v4.16                                                                                                                           
-kernel as expected:                                                                                                                                                                            
-    -fsync: Input/output error                                                                                                                                                                 
-                                                                                                                                                                                               
-Could you please take a look?                                                                                                                                                                  
-                                                                                                                                                                                               
-Thanks,                                                                                                                                                                                        
-Eryu
-
-> +
-> +# close file
-> +exec 5>&-
-> +
-> +# success, all done
-> +_dmerror_unmount
-> +_dmerror_cleanup
+> +./src/attr_replace_test $SCRATCH_MNT/hello
+> +$ATTR_PROG -l $SCRATCH_MNT/hello | filter_attr_output
 > +
 > +status=0
 > +exit
-> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> diff --git a/tests/generic/706.out b/tests/generic/706.out
 > new file mode 100644
-> index 000000000000..38d2d7f6495f
+> index 00000000..61c8419a
 > --- /dev/null
-> +++ b/tests/generic/999.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 999
-> +Format and mount
-> +The following fsync should fail with EIO:
-> +fsync: Input/output error
-> +done
+> +++ b/tests/generic/706.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 706
+> +Attribute "world" has a NNNN byte value for SCRATCH_MNT/hello
 > diff --git a/tests/generic/group b/tests/generic/group
-> index ea8e51b35e79..48f491a5c32b 100644
+> index 19be9267..54a85ea0 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -486,3 +486,4 @@
->  481 auto quick log metadata
+> @@ -487,3 +487,4 @@
 >  482 auto metadata replay
 >  483 auto quick log metadata
-> +999 auto quick
-> -- 
-> 2.14.3
+>  484 auto quick
+> +706 auto quick attr
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
