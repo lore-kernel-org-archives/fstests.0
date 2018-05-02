@@ -1,93 +1,120 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:38483 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751019AbeEBIoG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 04:44:06 -0400
-Date: Wed, 2 May 2018 16:44:01 +0800
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:37228 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750849AbeEBIzI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 04:55:08 -0400
+Date: Wed, 2 May 2018 16:55:03 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 7/9] xfs/422: add fsstress to the freeze-and-rmap-repair
- race test
-Message-ID: <20180502084401.GD29084@desktop>
+Subject: Re: [PATCH 8/9] xfs: checkbashisms in all script files
+Message-ID: <20180502085503.GE29084@desktop>
 References: <152518916007.23023.4793255395982876953.stgit@magnolia>
- <152518920390.23023.633707441886698447.stgit@magnolia>
+ <152518921090.23023.14958881774088486712.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <152518920390.23023.633707441886698447.stgit@magnolia>
+In-Reply-To: <152518921090.23023.14958881774088486712.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, sandeen@sandeen.net, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 01, 2018 at 08:40:03AM -0700, Darrick J. Wong wrote:
+On Tue, May 01, 2018 at 08:40:10AM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Add fsstress to the pile of things that we race with rmap repair to
-> ensure that the rmap repair isolates the filesystem correctly while it
-> is doing its repairs.
+> Find all the /bin/sh scripts in xfsprogs and check for bashisms.
 > 
+> Cc: sandeen@sandeen.net
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+Looks fine to me, but I'd like a review from Eric too, as it's a
+"maintainer script" :)
+
 > ---
->  tests/xfs/422 |   19 ++++++++++++++++++-
->  1 file changed, 18 insertions(+), 1 deletion(-)
+>  tests/xfs/711     |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/711.out |    1 +
+>  tests/xfs/group   |    1 +
+>  3 files changed, 53 insertions(+)
+>  create mode 100755 tests/xfs/711
+>  create mode 100644 tests/xfs/711.out
 > 
 > 
-> diff --git a/tests/xfs/422 b/tests/xfs/422
-> index a8fa5d5a..b2db713c 100755
-> --- a/tests/xfs/422
-> +++ b/tests/xfs/422
-> @@ -51,6 +51,8 @@ _supported_fs xfs
->  _require_xfs_scratch_rmapbt
->  _require_xfs_io_command "scrub"
->  _require_xfs_io_error_injection "force_repair"
-> +_require_command "$KILLALL_PROG" killall
-> +_require_command "$FSSTRESS_PROG" fsstress
+> diff --git a/tests/xfs/711 b/tests/xfs/711
+> new file mode 100755
+> index 00000000..d3dc3cd4
+> --- /dev/null
+> +++ b/tests/xfs/711
+> @@ -0,0 +1,51 @@
+> +#! /bin/bash
+> +# FS QA Test No. 711
+> +#
+> +# checkbashisms on all /bin/sh scripts.  This is a maintainer script.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Oracle, Inc.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> +
+> +# get standard environment
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
+> +_require_command "$CHECKBASHISMS_PROG" checkbashisms
+> +
+> +test -z "$WORKAREA" && _notrun "Can't find xfsprogs source"
+> +
+> +rm -f $seqres.full
+> +
+> +find $WORKAREA -name 'xfs*.sh' -print0 | xargs -0 grep '^#!/bin/sh' | sed -e 's/:.*$//g' | while read f; do
 
-This is not needed, as we already have
-
-export FSSTRESS_PROG="./ltp/fsstress"                                                                                                                                                          
-[ ! -x $FSSTRESS_PROG ] && _fatal "fsstress not found or executable"
-
-in common/config. I can remove it on commit.
+Do we care about spaces between "#!" and "/bin/sh"? i.e. "#! /bin/sh",
+sometimes there can be space(s).
 
 Thanks,
 Eryu
 
->  
->  echo "Format and populate"
->  _scratch_mkfs > "$seqres.full" 2>&1
-> @@ -89,18 +91,33 @@ repair_loop() {
->  		$XFS_IO_PROG -x -c 'repair rmapbt 0' -c 'repair rmapbt 1' $SCRATCH_MNT 2>&1 | filter_output
->  	done
->  }
-> +stress_loop() {
-> +	end="$1"
+> +	$CHECKBASHISMS_PROG $f
+> +done
 > +
-> +	FSSTRESS_ARGS=$(_scale_fsstress_args -p 4 -d $SCRATCH_MNT -n 2000 $FSSTRESS_AVOID)
-> +	while [ "$(date +%s)" -lt $end ]; do
-> +		$FSSTRESS_PROG $FSSTRESS_ARGS >> $seqres.full
-> +	done
-> +}
->  $XFS_IO_PROG -x -c 'inject force_repair' $SCRATCH_MNT
->  
->  start=$(date +%s)
->  end=$((start + (30 * TIME_FACTOR) ))
->  
->  echo "Loop started at $(date --date="@${start}"), ending at $(date --date="@${end}")" >> $seqres.full
-> +stress_loop $end &
->  freeze_loop $end &
->  repair_loop $end &
->  
-> -while [ "$(date +%s)" -lt $end ]; do
-> +# Wait until 2 seconds after the loops should have finished...
-> +while [ "$(date +%s)" -lt $((end + 2)) ]; do
->  	sleep 1
->  done
-> +
-> +# ...and clean up after the loops in case they didn't do it themselves.
-> +$KILLALL_PROG -TERM xfs_io fsstress >> $seqres.full 2>&1
-> +$XFS_IO_PROG -x -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
-> +
->  echo "Loop finished at $(date)" >> $seqres.full
->  echo "Test done"
->  
+> +status=0
+> diff --git a/tests/xfs/711.out b/tests/xfs/711.out
+> new file mode 100644
+> index 00000000..52ff4745
+> --- /dev/null
+> +++ b/tests/xfs/711.out
+> @@ -0,0 +1 @@
+> +QA output created by 711
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 39e259e8..b7da3fba 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -443,3 +443,4 @@
+>  443 auto quick ioctl fsr
+>  444 auto quick
+>  445 auto quick filestreams
+> +711 auto quick
 > 
