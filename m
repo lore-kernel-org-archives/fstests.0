@@ -1,108 +1,73 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:51274 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751535AbeEBPDx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 11:03:53 -0400
-Date: Wed, 2 May 2018 08:03:48 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 8/9] xfs: checkbashisms in all script files
-Message-ID: <20180502150348.GU4127@magnolia>
-References: <152518916007.23023.4793255395982876953.stgit@magnolia>
- <152518921090.23023.14958881774088486712.stgit@magnolia>
+Received: from mail-wm0-f68.google.com ([74.125.82.68]:50839 "EHLO
+        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752420AbeEBPaP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 11:30:15 -0400
+Received: by mail-wm0-f68.google.com with SMTP id t11so23590551wmt.0
+        for <fstests@vger.kernel.org>; Wed, 02 May 2018 08:30:14 -0700 (PDT)
+Date: Wed, 2 May 2018 17:30:10 +0200
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH v2] xfs: cap the length of deduplication requests
+Message-ID: <20180502153010.qcnxef3wpojlbria@odin.usersys.redhat.com>
+References: <20180417051918.GD5203@magnolia>
+ <20180418025755.GN24738@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <152518921090.23023.14958881774088486712.stgit@magnolia>
+In-Reply-To: <20180418025755.GN24738@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: sandeen@sandeen.net
-Cc: linux-xfs@vger.kernel.org, guaneryu@gmail.com, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Tue, Apr 17, 2018 at 07:57:55PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Since deduplication potentially has to read in all the pages in both
+> files in order to compare the contents, cap the deduplication request
+> length at MAX_RW_COUNT/2 (roughly 1GB) so that we have /some/ upper bound
+> on the request length and can't just lock up the kernel forever.  Found
+> by running generic/304 after commit 1ddae54555b62a ("common/rc: add
+> missing 'local' keywords").
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Find all the /bin/sh scripts in xfsprogs and check for bashisms.
+Looks good,
 
-Cc: sandeen@sandeen.net
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: fix find and regex we look for
----
- tests/xfs/711     |   51 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/711.out |    1 +
- tests/xfs/group   |    1 +
- 3 files changed, 53 insertions(+)
- create mode 100755 tests/xfs/711
- create mode 100644 tests/xfs/711.out
+Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
 
-diff --git a/tests/xfs/711 b/tests/xfs/711
-new file mode 100755
-index 00000000..d15f3b9d
---- /dev/null
-+++ b/tests/xfs/711
-@@ -0,0 +1,51 @@
-+#! /bin/bash
-+# FS QA Test No. 711
-+#
-+# checkbashisms on all /bin/sh scripts.  This is a maintainer script.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle, Inc.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+# get standard environment
-+. ./common/rc
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
-+_require_command "$CHECKBASHISMS_PROG" checkbashisms
-+
-+test -z "$WORKAREA" && _notrun "Can't find xfsprogs source"
-+
-+rm -f $seqres.full
-+
-+find $WORKAREA -type f -name 'xfs*.sh' -print0 | xargs -0 grep '^#!.*/bin/sh' | sed -e 's/:.*$//g' | while read f; do
-+	$CHECKBASHISMS_PROG $f
-+done
-+
-+status=0
-diff --git a/tests/xfs/711.out b/tests/xfs/711.out
-new file mode 100644
-index 00000000..52ff4745
---- /dev/null
-+++ b/tests/xfs/711.out
-@@ -0,0 +1 @@
-+QA output created by 711
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 39e259e8..b7da3fba 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -443,3 +443,4 @@
- 443 auto quick ioctl fsr
- 444 auto quick
- 445 auto quick filestreams
-+711 auto quick
+> ---
+> v2: halve the amount so that we do MAX_RW_COUNT IO max
+> ---
+>  fs/xfs/xfs_file.c |   10 ++++++++++
+>  1 file changed, 10 insertions(+)
+> 
+> diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
+> index 299aee4..9cafad4 100644
+> --- a/fs/xfs/xfs_file.c
+> +++ b/fs/xfs/xfs_file.c
+> @@ -876,8 +876,18 @@ xfs_file_dedupe_range(
+>  	struct file	*dst_file,
+>  	u64		dst_loff)
+>  {
+> +	struct inode	*srci = file_inode(src_file);
+> +	u64		max_dedupe;
+>  	int		error;
+>  
+> +	/*
+> +	 * Since we have to read all these pages in to compare them, cut
+> +	 * it off at MAX_RW_COUNT/2 rounded down to the nearest block.
+> +	 * That means we won't do more than MAX_RW_COUNT IO per request.
+> +	 */
+> +	max_dedupe = (MAX_RW_COUNT >> 1) & ~(i_blocksize(srci) - 1);
+> +	if (len > max_dedupe)
+> +		len = max_dedupe;
+>  	error = xfs_reflink_remap_range(src_file, loff, dst_file, dst_loff,
+>  				     len, true);
+>  	if (error)
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+-- 
+Carlos
