@@ -1,411 +1,261 @@
-Received: from imap.thunk.org ([74.207.234.97]:56346 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751765AbeECFHd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 May 2018 01:07:33 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] Use the original install-sh file from SGI
-Date: Thu,  3 May 2018 01:07:28 -0400
-Message-Id: <20180503050728.25779-1-tytso@mit.edu>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:45636 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751308AbeECJWo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 May 2018 05:22:44 -0400
+Received: by mail-yw0-f194.google.com with SMTP id g9-v6so5438842ywb.12
+        for <fstests@vger.kernel.org>; Thu, 03 May 2018 02:22:43 -0700 (PDT)
+MIME-Version: 1.0
+In-Reply-To: <20180503034340.GA20908@thunk.org>
+References: <20180503034340.GA20908@thunk.org>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 3 May 2018 12:22:42 +0300
+Message-ID: <CAOQ4uxjEAhDteK7iZF0KLq-oFi+nO9LbUe0F+5eLTOo59=hTLQ@mail.gmail.com>
+Subject: Re: [PATCH] common: add support for the "local" file system type
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: "Theodore Y. Ts'o" <tytso@mit.edu>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-The install-sh file is much more efficient than the libtool version
-(50% faster wall clock time; much more than that when running in a
-qemu emulation build environment).  There doesn't seem to be any real
-need for the libtool version, so bring back the original install-sh
-script.
+On Thu, May 3, 2018 at 6:43 AM, Theodore Y. Ts'o <tytso@mit.edu> wrote:
+[...]
+> From 8b40b28866dca119d0c807c31ae48f153ec2dc53 Mon Sep 17 00:00:00 2001
+> From: Theodore Ts'o <tytso@mit.edu>
+> Date: Sat, 17 Sep 2016 19:08:18 -0400
+> Subject: [PATCH] common: add support for the "local" file system type
+>
+> It is sometimes useful to be able to test the local file system
+> provided in a restricted execution environment (such as that which is
+> provided by Docker, for example) where it is not possible to mount and
+> unmount the file system under test.
+>
+> To support this test case, add support for a new file system type
+> called "local".  The TEST_DEV and SCRATCH_DEV should be have a
+> non-block device format (e.g., local:/test or local:/scratch), and the
+> TEST_DIR and SCRATCH_MNT directories should be pre-existing
+> directories provided by the execution environment.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
+Ted,
 
-A very large amount of time when running "make install" in a build
-chroot using qemu emulation, such as constructed by running "sudo
-setup-buildchroot --arch-armhf" using the script found here[1] is in
-running the install-sh provided by libtool, which is amazing bloated
-and forks a crazy number of processes to do something very simple.
+This looks like a very useful feature, but I suspect that some bits of the
+patch may be a bit too specific to your use case (see below) - I may be wrong.
+I bet there is a large variety of out of tree xfstests patches named
+"Add support for XXX fs" that could be avoided with this feature.
 
-As near as I can tell there is zero benefit in using the install-sh
-provided by libtool, so restore the version that SGI originally used.
+The ultimate proof would be to demonstrate the usefulness of the feature
+to more than a single use case - how about FUSE passthrough example?
+Perhaps FSTYP=user would be more descriptive in general to the use
+case at hand, because 'local' is usually the counter of 'remote',
+but I'm fine with FSTYP=local.
 
-[1] https://github.com/tytso/xfstests-bld/blob/master/setup-buildchroot
+Another way to "market" the feature is FSTYP=generic, which is the
+prototype of all other filesystems. Naturally, it only runs tests under
+tests/generic (as FSTYP=local does) and any test that requires an
+operation that has no generic implementation is notrun.
 
 
- .gitignore |   1 -
- install-sh | 351 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 351 insertions(+), 1 deletion(-)
- create mode 100755 install-sh
+>
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  common/rc | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---
+>  1 file changed, 70 insertions(+), 3 deletions(-)
+>
+> diff --git a/common/rc b/common/rc
+> index 9ffab7fd..d5cb0fe4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -351,6 +351,18 @@ _supports_filetype()
+>         esac
+>  }
+>
+> +_local_validate_mount_opt()
+> +{
+> +    case "$*" in
+> +       ro|ro,*|*,ro) _notrun "ro mount option not supported" ;;
+> +       *nosuid*) _notrun "nosuid mount option not supported" ;;
+> +       *noatime*) _notrun "noatime mount option not supported" ;;
+> +       *relatime*) _notrun "relatime mount option not supported" ;;
+> +       *diratime*) _notrun "diratime mount option not supported" ;;
+> +       *strictatime*) _notrun "strictatime mount option not supported" ;;
+> +    esac
+> +}
 
-diff --git a/.gitignore b/.gitignore
-index 192ca35e..dfd3da7d 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -24,7 +24,6 @@
- 
- # libtool
- /libtool
--/install-sh
- /ltmain.sh
- 
- # build system
-diff --git a/install-sh b/install-sh
-new file mode 100755
-index 00000000..9fa706d9
---- /dev/null
-+++ b/install-sh
-@@ -0,0 +1,351 @@
-+#! /bin/bash
-+#
-+# Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
-+#
-+# This script emulates bsd install and also recognises
-+# two environment variables, with the following semantics :-
-+#
-+# $DIST_MANIFEST - if set, the name of the file to append manifest
-+#                  information in the following format:
-+#                  File     :  f mode owner group src target
-+#                  Directory:  d mode owner group target
-+#                  Symlink  :  l linkval target
-+#
-+# $DIST_ROOT     - if set, prepend to target
-+#
-+# The sematics of all combinations of these two variables
-+# are as follows:
-+#
-+# $DIST_MANIFEST?  $DIST_ROOT? |   Copy?  Append Manifest?
-+# -----------------------------+--------------------------
-+#       not set       not set  |    yes        no
-+#       not set       set      |    yes        no
-+#       set           not set  |    no         yes
-+#       set           set      |    yes        yes
-+#
-+_usage() {
-+    echo "Usage: $prog [-o owner] [-g group] [-m mode] -d directory"
-+    echo "or     $prog [-D] [-o owner] [-g group] [-m mode] file directory/file"
-+    echo "or     $prog [-o owner] [-g group] [-m mode] file [file ...] directory"
-+    echo "or     $prog -S file target  (creates \"target\" symlink)"
-+    echo "or     $prog -T lt_arg [-o owner] [-g group] [-m mode] libtool.lai directory"
-+    echo ""
-+    echo "The \$DIST_MANIFEST and \$DIST_ROOT environment variables affect the"
-+    echo "behaviour of this command - see comments in the script."
-+    echo "The -D flag is only available for the second usage, and causes"
-+    echo "the target directory to be created before installing the file."
-+    echo ""
-+    exit 1
-+}
-+
-+_chown ()
-+{
-+    _st=255
-+    if [ $# -eq 3 ] ; then
-+	chown $1:$2 $3
-+	_st=$?
-+	if [ $_st -ne 0 ] ; then
-+	    if [ $REAL_UID != '0' ] ; then
-+		if [ ! -f $DIST_ROOT/.chown.quiet ] ; then
-+		    echo '==============================================='
-+		    echo Ownership of files under ${DIST_ROOT:-/}
-+		    echo cannot be changed
-+		    echo '==============================================='
-+		    if [ -n "$DIST_ROOT" ] ; then
-+			touch $DIST_ROOT/.chown.quiet
-+		    fi
-+		fi
-+	       _st=0
-+	    fi
-+	fi
-+    fi
-+
-+    return $_st
-+}
-+
-+
-+_manifest ()
-+{
-+    echo $* | sed -e 's/\/\//\//g' >>${DIST_MANIFEST:-/dev/null}
-+}
-+
-+prog=`basename $0`
-+HERE=`pwd`
-+dflag=false
-+Dflag=false
-+Sflag=false
-+Tflag=false
-+DIRMODE=755
-+FILEMODE=644
-+OWNER=`id -u`
-+GROUP=`id -g`
-+REAL_UID=$OWNER
-+
-+# default is to install and don't append manifest
-+INSTALL=true
-+MANIFEST=:
-+
-+: ${DIST_ROOT:=${DESTDIR}}
-+
-+[ -n "$DIST_MANIFEST" -a -z "$DIST_ROOT" ] && INSTALL=false
-+[ -n "$DIST_MANIFEST" ] && MANIFEST="_manifest"
-+
-+[ $# -eq 0 ] && _usage
-+
-+if $INSTALL
-+then
-+    CP=cp; LN=ln; MKDIR=mkdir; CHMOD=chmod; CHOWN=_chown
-+else
-+    CP=true; LN=true; MKDIR=true; CHMOD=true; CHOWN=true
-+fi
-+
-+[ -n "$DIST_ROOT" -a $REAL_UID -ne 0 ] && CHOWN=true
-+
-+while getopts "Dcm:d:S:o:g:T:" c $*
-+do
-+   case $c in
-+   c)
-+	;;
-+   g)
-+	GROUP=$OPTARG
-+	;;
-+   o)
-+	OWNER=$OPTARG
-+	;;
-+   m)
-+	DIRMODE=`expr $OPTARG`
-+	FILEMODE=$DIRMODE
-+	;;
-+   D)
-+	Dflag=true
-+	;;
-+   S)
-+	symlink=$OPTARG
-+	Sflag=true
-+	;;
-+   d)
-+	dir=$DIST_ROOT/$OPTARG
-+	dflag=true
-+	;;
-+   T)
-+	lt_install=$OPTARG
-+	Tflag=true
-+	;;
-+   *)
-+   	_usage
-+	;;
-+   esac
-+done
-+
-+shift `expr $OPTIND - 1`
-+
-+status=0
-+if $dflag
-+then
-+    #
-+    # first usage
-+    #
-+    $MKDIR -p $dir
-+    status=$?
-+    if [ $status -eq 0 ]
-+    then
-+	$CHMOD $DIRMODE $dir
-+	status=$?
-+    fi
-+    if [ $status -eq 0 ]
-+    then
-+	$CHOWN $OWNER $GROUP $dir
-+	status=$?
-+    fi
-+    $MANIFEST d $DIRMODE $OWNER $GROUP ${dir#$DIST_ROOT}
-+elif $Sflag
-+then
-+    #
-+    # fourth usage (symlink)
-+    #
-+    if [ $# -ne 1 ]
-+    then
-+    	_usage
-+    else
-+    	target=$DIST_ROOT/$1
-+    fi
-+    $LN -s -f $symlink $target
-+    status=$?
-+    $MANIFEST l $symlink ${target#$DIST_ROOT}
-+elif $Tflag
-+then
-+    #
-+    # -T (install libs built by libtool)
-+    #
-+    if [ $# -ne 2 ]
-+    then
-+	_usage
-+    else
-+	libtool_lai=$1
-+	# source the libtool variables
-+	if [ ! -f $libtool_lai ]
-+	then
-+		echo "$prog: Unable to find libtool library file $libtool_lai"
-+		exit 2
-+	fi
-+	. ./$libtool_lai
-+	target=$DIST_ROOT/$2
-+    fi
-+    case $lt_install in
-+    so_dot_version)
-+	# Loop until we find libfoo.so.x.y.z, then break out.
-+	for solib in $library_names
-+	do
-+		# does it have enough parts?  libfoo.so.x.y.z == 5
-+		cnt=`echo "$solib" | sed -e 's/\./ /g' | wc -w`
-+		if [ $cnt -eq 5 ]
-+		then
-+			install_name=$target/$solib
-+			$CP $solib $install_name
-+			status=$?
-+			$MANIFEST f $FILEMODE $OWNER $GROUP $HERE/$solib ${install_name#$DIST_ROOT}
-+			break
-+		fi
-+	done
-+	;;
-+
-+    so_*)
-+	case $lt_install in
-+	so_dot_current)
-+		# ln -s libfoo.so.x.y.z to libfoo.so.x
-+		from_parts=5  # libfoo.so.x.y.z
-+		to_parts=3    # libfoo.so.x
-+		;;
-+	so_base)
-+		# ln -s libfoo.so.x to libfoo.so
-+		from_parts=3  # libfoo.so.x
-+		to_parts=2    # libfoo.so
-+		;;
-+	*)
-+		echo "$prog: -T $lt_install invalid"
-+		exit 2
-+		;;
-+	esac
-+
-+	# Loop until we find the names, then break out.
-+	for solib in $library_names
-+	do
-+		# does it have enough parts?
-+		cnt=`echo "$solib" | sed -e 's/\./ /g' | wc -w`
-+		if [ $cnt -eq $from_parts ]
-+		then
-+			from_name=$solib
-+		elif [ $cnt -eq $to_parts ]
-+		then
-+			to_name=$solib
-+		fi
-+
-+		if [ -n "$from_name" ] && [ -n "$to_name" ]
-+		then
-+			install_name=$target/$to_name
-+			$LN -s -f $from_name $install_name
-+			status=$?
-+			$MANIFEST l $from_name ${install_name#$DIST_ROOT}
-+			break
-+		fi
-+	done
-+	;;
-+    old_lib)
-+	install_name=$target/$old_library
-+	$CP $old_library $install_name
-+	status=$?
-+	$MANIFEST f $FILEMODE $OWNER $GROUP $HERE/$old_library ${install_name#$DIST_ROOT}
-+	;;
-+    *)
-+	echo "$prog: -T $lt_install invalid"
-+	exit 2
-+	;;
-+    esac
-+
-+    case $lt_install in
-+    old_lib|so_dot_version)
-+	if [ $status -eq 0 ]
-+	then
-+		$CHMOD $FILEMODE $install_name
-+		$CHOWN $OWNER $GROUP $install_name
-+	fi
-+	;;
-+    esac
-+
-+else
-+    list=""
-+    dir=""
-+    if [ $# -eq 2 ]
-+    then
-+	#
-+	# second usage
-+	#
-+	f=$1
-+	dir=$DIST_ROOT/$2
-+	if $Dflag
-+	then
-+	    mkdir -p `dirname $dir`
-+	fi
-+	$CP $f $dir
-+	status=$?
-+	if [ $status -eq 0 ]
-+	then
-+	    if [ -f $dir/$f ]
-+	    then
-+		$CHMOD $FILEMODE $dir/$f
-+		status=$?
-+		if [ $status -eq 0 ]
-+		then
-+		    $CHOWN $OWNER $GROUP $dir/$f
-+		    status=$?
-+		fi
-+		$MANIFEST f $FILEMODE $OWNER $GROUP $HERE/$f ${dir#$DIST_ROOT}/$f
-+	    else
-+		$CHMOD $FILEMODE $dir
-+		status=$?
-+		if [ $status -eq 0 ]
-+		then
-+		    $CHOWN $OWNER $GROUP $dir
-+		    status=$?
-+		fi
-+		$MANIFEST f $FILEMODE $OWNER $GROUP $HERE/$dir ${dir#$DIST_ROOT}
-+	    fi
-+	fi
-+    else
-+	#
-+	# third usage
-+	#
-+	n=1
-+	while [ $# -gt 0 ]
-+	do
-+	    if [ $# -gt 1 ]
-+	    then
-+		list="$list $1"
-+	    else
-+		dir=$DIST_ROOT/$1
-+	    fi
-+	    shift
-+	done
-+
-+	# echo DIR=$dir list=\"$list\"
-+	for f in $list
-+	do
-+	    $CP $f $dir
-+	    status=$?
-+	    if [ $status -eq 0 ]
-+	    then
-+		$CHMOD $FILEMODE $dir/$f
-+		status=$?
-+		if [ $status -eq 0 ]
-+		then
-+		    $CHOWN $OWNER $GROUP $dir/$f
-+		    status=$?
-+		fi
-+		$MANIFEST f $FILEMODE $OWNER $GROUP $HERE/$f ${dir#$DIST_ROOT}/$f
-+	    fi
-+	    [ $status -ne 0 ] && break
-+	done
-+    fi
-+fi
-+
-+exit $status
--- 
-2.16.1.72.g5be1f00a9a
+Why specifically these mount options? Is this really generic?
 
+> +
+>  # mount scratch device with given options but don't check mount status
+>  _try_scratch_mount()
+>  {
+> @@ -376,6 +388,9 @@ _scratch_unmount()
+>         btrfs)
+>                 $UMOUNT_PROG $SCRATCH_MNT
+>                 ;;
+> +       local)
+> +                rm -rf $SCRATCH_MNT/*
+> +                ;;
+
+_scratch_mkfs already does that. Why does it make sense in _scratch_unmount?
+
+>         *)
+>                 $UMOUNT_PROG $SCRATCH_DEV
+>                 ;;
+> @@ -386,6 +401,10 @@ _scratch_remount()
+>  {
+>      local opts="$1"
+>
+> +    if [ "$FSTYP" = "local" ]; then
+> +       _local_validate_mount_opt "$*"
+> +       return 0;
+> +    fi
+
+It makes more sense to me to _require_scratch_remount
+for tests that need to remount in the beginning of tests - yeh
+that's a bit more work.
+
+>      if test -n "$opts"; then
+>         mount -o "remount,$opts" $SCRATCH_MNT
+>      fi
+> @@ -395,7 +414,7 @@ _scratch_cycle_mount()
+>  {
+>      local opts="$1"
+>
+> -    if [ "$FSTYP" = tmpfs ]; then
+> +    if [ "$FSTYP" = "tmpfs" -o "$FSTYP" = "local" ] ; then
+>         _scratch_remount "$opts"
+
+That seems like cheating - seems better to implement
+and use _require_scratch_cycle_mount
+
+>         return
+>      fi
+> @@ -429,6 +448,10 @@ _test_mount()
+>          _overlay_test_mount $*
+>          return $?
+>      fi
+> +    if [ "$FSTYP" == "local" ]; then
+> +        mkdir -p $TEST_DIR
+> +       return $?
+> +    fi
+
+What is the desired logic here? can you add a comment?
+Seems to me that we need to verify there is something mounted
+at $TEST_DIR. no?
+
+>      _test_options mount
+>      _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+>  }
+> @@ -437,7 +460,7 @@ _test_unmount()
+>  {
+>         if [ "$FSTYP" == "overlay" ]; then
+>                 _overlay_test_unmount
+> -       else
+> +       elif [ "$FSTYP" != "local" ]; then
+>                 $UMOUNT_PROG $TEST_DEV
+>         fi
+>  }
+> @@ -723,7 +746,7 @@ _scratch_mkfs()
+>         local mkfs_status
+>
+>         case $FSTYP in
+> -       nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
+> +       nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|local)
+>                 # unable to re-create this fstyp, just remove all files in
+>                 # $SCRATCH_MNT to avoid EEXIST caused by the leftover files
+>                 # created in previous runs
+> @@ -1465,6 +1488,10 @@ _check_mounted_on()
+>         local mnt=$4
+>         local type=$5
+>
+> +       if [ "$FSTYP" == "local" ]; then
+> +               return 0
+> +       fi
+> +
+
+Shouldn't we check that "something" is mounted on $mnt?
+
+>         # find $dev as the source, and print result in "$dev $mnt" format
+>         local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
+>         [ -n "$mount_rec" ] || return 1 # 1 = not mounted
+> @@ -1562,6 +1589,13 @@ _require_scratch_nocheck()
+>                         _notrun "this test requires a valid \$SCRATCH_MNT"
+>                 fi
+>                 ;;
+> +       local)
+> +               if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
+> +               then
+> +                   _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
+> +               fi
+> +               return 0
+> +               ;;
+>         *)
+>                  if [ -z "$SCRATCH_DEV" -o "`_is_block_dev "$SCRATCH_DEV"`" = "" ]
+>                  then
+> @@ -1683,6 +1717,13 @@ _require_test()
+>                         _notrun "this test requires a valid \$TEST_DIR"
+>                 fi
+>                 ;;
+> +       local)
+> +               if [ -z "$TEST_DEV" -o ! -d "$TEST_DIR" ];
+> +               then
+> +                   _notrun "this test requires a valid \$TEST_DIR and unique $TEST_DEV"
+> +               fi
+> +               return 0
+> +               ;;
+>         *)
+>                  if [ -z "$TEST_DEV" ] || [ "`_is_block_dev "$TEST_DEV"`" = "" ]
+>                  then
+> @@ -2438,6 +2479,10 @@ _remount()
+>      local device=$1
+>      local mode=$2
+>
+> +    if [ "$FSTYP" == "local" ] ; then
+> +       return 0
+> +    fi
+> +
+>      if ! mount -o remount,$mode $device
+>      then
+>          echo "_remount: failed to remount filesystem on $device as $mode"
+> @@ -2483,6 +2528,10 @@ _mount_or_remount_rw()
+>         local device=$2
+>         local mountpoint=$3
+>
+> +       if [ "$FSTYP" == "local" ] ; then
+> +           return 0
+> +       fi
+> +
+>         if [ $USE_REMOUNT -eq 0 ]; then
+>                 if [ "$FSTYP" != "overlay" ]; then
+>                         _mount -t $FSTYP $mount_opts $device $mountpoint
+> @@ -2636,6 +2685,9 @@ _check_test_fs()
+>      ubifs)
+>         # there is no fsck program for ubifs yet
+>         ;;
+> +    local)
+> +       # no way to check consistency for local
+> +       ;;
+>      *)
+>         _check_generic_filesystem $TEST_DEV
+>         ;;
+> @@ -2691,6 +2743,9 @@ _check_scratch_fs()
+>      ubifs)
+>         # there is no fsck program for ubifs yet
+>         ;;
+> +    local)
+> +       # no way to check consistency for local
+> +       ;;
+>      *)
+>         _check_generic_filesystem $device
+>         ;;
+> @@ -3003,6 +3058,9 @@ _require_fio()
+>  # Does freeze work on this fs?
+>  _require_freeze()
+>  {
+> +       if [ "$FSTYP" == "local" ]; then
+> +               _notrun "local does not support freeze"
+
+When users read this warning they may be confused,
+same for shutdown/dax/morecovery.
+Something like "user defined fs does not support freeze"
+
+Thanks,
+Amir.
