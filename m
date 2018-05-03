@@ -1,73 +1,68 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:50839 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752420AbeEBPaP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 11:30:15 -0400
-Received: by mail-wm0-f68.google.com with SMTP id t11so23590551wmt.0
-        for <fstests@vger.kernel.org>; Wed, 02 May 2018 08:30:14 -0700 (PDT)
-Date: Wed, 2 May 2018 17:30:10 +0200
-From: Carlos Maiolino <cmaiolino@redhat.com>
-Subject: Re: [PATCH v2] xfs: cap the length of deduplication requests
-Message-ID: <20180502153010.qcnxef3wpojlbria@odin.usersys.redhat.com>
-References: <20180417051918.GD5203@magnolia>
- <20180418025755.GN24738@magnolia>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:46079 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751745AbeECBP1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 2 May 2018 21:15:27 -0400
+Date: Thu, 3 May 2018 09:15:22 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 2/9] xfs/439: repair corrupted filesystem afterwards
+Message-ID: <20180503011522.GA8373@desktop>
+References: <152518916007.23023.4793255395982876953.stgit@magnolia>
+ <152518917279.23023.13530280927017959292.stgit@magnolia>
+ <20180502075145.GC29084@desktop>
+ <20180502145442.GR4127@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180418025755.GN24738@magnolia>
+In-Reply-To: <20180502145442.GR4127@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 17, 2018 at 07:57:55PM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, May 02, 2018 at 07:54:42AM -0700, Darrick J. Wong wrote:
+> On Wed, May 02, 2018 at 03:51:45PM +0800, Eryu Guan wrote:
+> > On Tue, May 01, 2018 at 08:39:32AM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > After we mess with logsunit and test that we can't mount the fs, repair
+> > > the filesystem to make sure that repair can deal with it.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  tests/xfs/439 |    1 +
+> > >  1 file changed, 1 insertion(+)
+> > > 
+> > > 
+> > > diff --git a/tests/xfs/439 b/tests/xfs/439
+> > > index 215c4b90..9d5f6892 100755
+> > > --- a/tests/xfs/439
+> > > +++ b/tests/xfs/439
+> > > @@ -79,6 +79,7 @@ fi
+> > >  _check_dmesg _filter_assert_dmesg
+> > >  
+> > >  echo "Silence is golden"
+> > > +_scratch_xfs_repair >> $seqres.full 2>&1
+> > 
+> > But how should we check if repair does fix the corruption? I tried
+> > adding a "scratch_mount" after the repair and expected a success mount.
+> > But that mount also failed, and repair didn't report anything wrong in
+> > $seqres.full. Looks like the corruption was not detected nor repaired.
+> > 
+> > [ 8278.679149] XFS (dm-1): Mounting V5 Filesystem
+> > [ 8278.679743] XFS (dm-1): log stripe unit 4095 bytes must be a multiple of block size
+> > [ 8278.680583] XFS (dm-1): AAIEEE! Log failed size checks. Abort!
+> > [ 8278.681817] XFS (dm-1): log mount failed
+> > 
+> > Note that I was using latest for-next branch of xfsprogs.
 > 
-> Since deduplication potentially has to read in all the pages in both
-> files in order to compare the contents, cap the deduplication request
-> length at MAX_RW_COUNT/2 (roughly 1GB) so that we have /some/ upper bound
-> on the request length and can't just lock up the kernel forever.  Found
-> by running generic/304 after commit 1ddae54555b62a ("common/rc: add
-> missing 'local' keywords").
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Aha!  This depends on "xfs_repair: validate some of the log space
+> information" which is still out for review for xfs_repair 4.17.  We can
+> drop this for now.  I'll add a _scratch_mount at the end before I
+> resubmit this patch.
 
-Looks good,
+Then the test would start to fail because of the newly added
+_scratch_mount test on systems that have old xfs_repair. I think it's
+better to add a new regression test for that xfs_repair fix.
 
-Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
-
-> ---
-> v2: halve the amount so that we do MAX_RW_COUNT IO max
-> ---
->  fs/xfs/xfs_file.c |   10 ++++++++++
->  1 file changed, 10 insertions(+)
-> 
-> diff --git a/fs/xfs/xfs_file.c b/fs/xfs/xfs_file.c
-> index 299aee4..9cafad4 100644
-> --- a/fs/xfs/xfs_file.c
-> +++ b/fs/xfs/xfs_file.c
-> @@ -876,8 +876,18 @@ xfs_file_dedupe_range(
->  	struct file	*dst_file,
->  	u64		dst_loff)
->  {
-> +	struct inode	*srci = file_inode(src_file);
-> +	u64		max_dedupe;
->  	int		error;
->  
-> +	/*
-> +	 * Since we have to read all these pages in to compare them, cut
-> +	 * it off at MAX_RW_COUNT/2 rounded down to the nearest block.
-> +	 * That means we won't do more than MAX_RW_COUNT IO per request.
-> +	 */
-> +	max_dedupe = (MAX_RW_COUNT >> 1) & ~(i_blocksize(srci) - 1);
-> +	if (len > max_dedupe)
-> +		len = max_dedupe;
->  	error = xfs_reflink_remap_range(src_file, loff, dst_file, dst_loff,
->  				     len, true);
->  	if (error)
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
-
--- 
-Carlos
+Thanks,
+Eryu
