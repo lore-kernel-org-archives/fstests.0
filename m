@@ -1,166 +1,130 @@
-Received: from mail-wm0-f45.google.com ([74.125.82.45]:37674 "EHLO
-        mail-wm0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751592AbeEDJkN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 May 2018 05:40:13 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] overlay: test multiple origin references to the same lower file
-Date: Fri,  4 May 2018 12:41:31 +0300
-Message-Id: <1525426891-6121-3-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1525426891-6121-1-git-send-email-amir73il@gmail.com>
-References: <1525426891-6121-1-git-send-email-amir73il@gmail.com>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:35971 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750820AbeEDO62 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 May 2018 10:58:28 -0400
+Received: by mail-pg0-f68.google.com with SMTP id z129-v6so11447566pgz.3
+        for <fstests@vger.kernel.org>; Fri, 04 May 2018 07:58:27 -0700 (PDT)
+Date: Fri, 4 May 2018 22:58:22 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] check: run auto test group by default
+Message-ID: <20180504145822.GC8373@desktop>
+References: <20180504000509.2498-1-david@fromorbit.com>
+ <20180504035039.GC4116@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180504035039.GC4116@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>
-Cc: Vivek Goyal <vgoyal@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, willy@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-Multiple origin references to the same lower file from upper files that
-are not hardlinks will falsely return the same st_ino/st_dev for two
-different overlay files and will cause 'diff' to falsely report that
-content of files is the same when it is not.
+On Thu, May 03, 2018 at 08:50:39PM -0700, Darrick J. Wong wrote:
+> On Fri, May 04, 2018 at 10:05:09AM +1000, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > Everyone who starts using fstests runs "check" without parameters,
+> > and then has problems with it running dangerous tests. most people
+> > just want fstests to act as a regression test suite, not a fuzzer or
+> > exercise known crash conditions. Hence make the default behaviour to
+> > be "run the auto group" rather than "run every test".
+> > 
+> > To enable people to run all tests easily (if they really want to)
+> > add a special group keyword named "all". This wildcard will trigger
+> > selecting all the tests in fstests as per the original "check
+> > without parameters" behaviour.
+> > 
+> > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+> > ---
+> >  check | 34 +++++++++++++++++++++-------------
+> >  1 file changed, 21 insertions(+), 13 deletions(-)
+> > 
+> > diff --git a/check b/check
+> > index 84a35e6724ab..170004d4b2a2 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -102,6 +102,8 @@ a test file name match pattern (e.g. xfs/*).
+> >  group argument is either a name of a tests group to collect from all
+> >  the test dirs (e.g. quick) or a name of a tests group to collect from
+> >  a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
+> > +If you want to run all the tests in teh test suite, use "-g all" to specify all
+> 
+> ...the test suite... (unless you really mean the rock band :P)
 
-This test checks that overlayfs detects and fails lookup of a multiply
-referenced origin.
+Fixed on commit.
 
-The check for multiply referenced origin was a by-product of kernel
-commit 31747eda41ef ("ovl: hash directory inodes for fsnotify")
+> 
+> Looks ok otherwise,
+> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/059     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/059.out |   2 +
- tests/overlay/group   |   1 +
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/overlay/059
- create mode 100644 tests/overlay/059.out
+Thanks.
 
-diff --git a/tests/overlay/059 b/tests/overlay/059
-new file mode 100755
-index 0000000..5ac2b1b
---- /dev/null
-+++ b/tests/overlay/059
-@@ -0,0 +1,105 @@
-+#! /bin/bash
-+# FS QA Test 059
-+#
-+# Test multiple origin references to the same lower file.
-+#
-+# Multiple origin references to the same lower file from upper files that
-+# are not hardlinks will falsely return the same st_ino/st_dev for two
-+# different overlay files and will cause 'diff' to falsely report that
-+# content of files is the same when it is not.
-+#
-+# This test checks that overlayfs detects and fails lookup of a multiply
-+# referenced origin.
-+#
-+# The check for multiply referenced origin was a by-product of kernel
-+# commit 31747eda41ef ("ovl: hash directory inodes for fsnotify")
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# Rename lower file to create copy up with origin xattr
-+create_origin_ref()
-+{
-+	local ref=$1
-+
-+	touch $lowerdir/origin
-+
-+	# Enabling redirect_dir may seem irrelevant to rename of non-dir,
-+	# but with upcoming 'metacopy' feature, redirects will be set also
-+	# on non-dir and may also create multiple redirects.
-+	_scratch_mount -o redirect_dir=on
-+	mv $SCRATCH_MNT/origin $SCRATCH_MNT/$ref
-+
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_scratch_feature redirect_dir
-+
-+# remove all files from previous runs
-+_scratch_mkfs
-+
-+upperdir=$OVL_BASE_SCRATCH_MNT/$OVL_UPPER
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+
-+# Create copied up file with origin xattr
-+create_origin_ref ref1
-+# Duplicate the copied up file
-+cp -a $upperdir/ref1 $upperdir/ref2
-+
-+# Diverge the content of the two copies of file
-+# and the content of two copies of redirected dir
-+echo right >> $upperdir/ref1
-+echo wrong >> $upperdir/ref2
-+
-+_scratch_mount -o redirect_dir=on
-+
-+# If both copies of file use the same st_dev/st_ino in overlay
-+# diff won't detect that their content differs
-+diff -q $SCRATCH_MNT/ref1 $SCRATCH_MNT/ref2 &>/dev/null && \
-+	echo "diff on duplicated upper files doesn't know right from wrong!"
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/overlay/059.out b/tests/overlay/059.out
-new file mode 100644
-index 0000000..36ebeea
---- /dev/null
-+++ b/tests/overlay/059.out
-@@ -0,0 +1,2 @@
-+QA output created by 059
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 359ed42..40445a0 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -61,3 +61,4 @@
- 056 auto quick fsck
- 057 auto quick redirect
- 058 auto quick exportfs
-+059 auto quick copyup
--- 
-2.7.4
+Eryu
 
+> 
+> --D
+> 
+> > +groups.
+> >  
+> >  exclude_file argument refers to a name of a file inside each test directory.
+> >  for every test dir where this file is found, the listed test names are
+> > @@ -220,22 +222,24 @@ _prepare_test_list()
+> >  	fi
+> >  
+> >  	# Specified groups to include
+> > -	for group in $GROUP_LIST; do
+> > -		list=$(get_group_list $group)
+> > -		if [ -z "$list" ]; then
+> > -			echo "Group \"$group\" is empty or not defined?"
+> > -			exit 1
+> > -		fi
+> > +	# Note that the CLI processing adds a leading space to the first group
+> > +	# parameter, so we have to catch that here checking for "all"
+> > +	if ! $have_test_arg && [ "$GROUP_LIST" == " all" ]; then
+> > +		# no test numbers, do everything
+> > +		get_all_tests
+> > +	else
+> > +		for group in $GROUP_LIST; do
+> > +			list=$(get_group_list $group)
+> > +			if [ -z "$list" ]; then
+> > +				echo "Group \"$group\" is empty or not defined?"
+> > +				exit 1
+> > +			fi
+> >  
+> > -		for t in $list; do
+> > -			grep -s "^$t\$" $tmp.list >/dev/null || \
+> > +			for t in $list; do
+> > +				grep -s "^$t\$" $tmp.list >/dev/null || \
+> >  							echo "$t" >>$tmp.list
+> > +			done
+> >  		done
+> > -	done
+> > -
+> > -	if ! $have_test_arg && [ -z "$GROUP_LIST" ]; then
+> > -		# no test numbers, do everything
+> > -		get_all_tests
+> >  	fi
+> >  
+> >  	# Specified groups to exclude
+> > @@ -364,6 +368,10 @@ if $have_test_arg; then
+> >  
+> >  		shift
+> >  	done
+> > +elif [ -z "$GROUP_LIST" ]; then
+> > +	# default group list is the auto group. If any other group or test is
+> > +	# specified, we use that instead.
+> > +	GROUP_LIST="auto"
+> >  fi
+> >  
+> >  # we need common/rc
+> > -- 
+> > 2.17.0
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
