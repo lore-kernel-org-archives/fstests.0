@@ -1,130 +1,96 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:35971 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750820AbeEDO62 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 4 May 2018 10:58:28 -0400
-Received: by mail-pg0-f68.google.com with SMTP id z129-v6so11447566pgz.3
-        for <fstests@vger.kernel.org>; Fri, 04 May 2018 07:58:27 -0700 (PDT)
-Date: Fri, 4 May 2018 22:58:22 +0800
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:38038 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750707AbeEDPMg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 May 2018 11:12:36 -0400
+Received: by mail-pf0-f195.google.com with SMTP id o76so17672199pfi.5
+        for <fstests@vger.kernel.org>; Fri, 04 May 2018 08:12:36 -0700 (PDT)
+Date: Fri, 4 May 2018 23:12:32 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] check: run auto test group by default
-Message-ID: <20180504145822.GC8373@desktop>
-References: <20180504000509.2498-1-david@fromorbit.com>
- <20180504035039.GC4116@magnolia>
+Subject: Re: [PATCH] Use the original install-sh file from SGI
+Message-ID: <20180504151232.GD8373@desktop>
+References: <20180503050728.25779-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180504035039.GC4116@magnolia>
+In-Reply-To: <20180503050728.25779-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, willy@infradead.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 03, 2018 at 08:50:39PM -0700, Darrick J. Wong wrote:
-> On Fri, May 04, 2018 at 10:05:09AM +1000, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Everyone who starts using fstests runs "check" without parameters,
-> > and then has problems with it running dangerous tests. most people
-> > just want fstests to act as a regression test suite, not a fuzzer or
-> > exercise known crash conditions. Hence make the default behaviour to
-> > be "run the auto group" rather than "run every test".
-> > 
-> > To enable people to run all tests easily (if they really want to)
-> > add a special group keyword named "all". This wildcard will trigger
-> > selecting all the tests in fstests as per the original "check
-> > without parameters" behaviour.
-> > 
-> > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  check | 34 +++++++++++++++++++++-------------
-> >  1 file changed, 21 insertions(+), 13 deletions(-)
-> > 
-> > diff --git a/check b/check
-> > index 84a35e6724ab..170004d4b2a2 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -102,6 +102,8 @@ a test file name match pattern (e.g. xfs/*).
-> >  group argument is either a name of a tests group to collect from all
-> >  the test dirs (e.g. quick) or a name of a tests group to collect from
-> >  a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
-> > +If you want to run all the tests in teh test suite, use "-g all" to specify all
+On Thu, May 03, 2018 at 01:07:28AM -0400, Theodore Ts'o wrote:
+> The install-sh file is much more efficient than the libtool version
+> (50% faster wall clock time; much more than that when running in a
+> qemu emulation build environment).  There doesn't seem to be any real
+> need for the libtool version, so bring back the original install-sh
+> script.
 > 
-> ...the test suite... (unless you really mean the rock band :P)
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+> 
+> A very large amount of time when running "make install" in a build
+> chroot using qemu emulation, such as constructed by running "sudo
+> setup-buildchroot --arch-armhf" using the script found here[1] is in
+> running the install-sh provided by libtool, which is amazing bloated
+> and forks a crazy number of processes to do something very simple.
+> 
+> As near as I can tell there is zero benefit in using the install-sh
+> provided by libtool, so restore the version that SGI originally used.
 
-Fixed on commit.
+This saves me 8s on 'make install' (23s -> 15s).
+
+But one problem with this is that after every 'make', install-sh is
+overwritten & modified by 'libtoolize -cfi', and git diff complains
+about the change.
+
+I think we could follow what xfsprogs does on this, that puts install-sh
+in include dir and copy it from there after it's overwritten by
+libtoolize.
 
 > 
-> Looks ok otherwise,
-> Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+> [1] https://github.com/tytso/xfstests-bld/blob/master/setup-buildchroot
+> 
+> 
+>  .gitignore |   1 -
+>  install-sh | 351 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  2 files changed, 351 insertions(+), 1 deletion(-)
+>  create mode 100755 install-sh
+> 
+> diff --git a/.gitignore b/.gitignore
+> index 192ca35e..dfd3da7d 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -24,7 +24,6 @@
+>  
+>  # libtool
+>  /libtool
+> -/install-sh
 
-Thanks.
+Then we don't need this change.
 
+So the patch would be like:
+
+diff --git a/Makefile b/Makefile
+index d97385f90142..1064984573be 100644
+--- a/Makefile
++++ b/Makefile
+@@ -80,6 +80,7 @@ endif
+ 
+ configure: configure.ac
+        libtoolize -cfi
++       cp include/install-sh .
+        aclocal -I m4
+        autoheader
+        autoconf
+diff --git a/include/install-sh b/include/install-sh
+new file mode 100755
+index 000000000000..06d8aa9b6b9c
+--- /dev/null
++++ b/include/install-sh
+<new file content here>
+
+This looks like a straightforward change, I can fix it on commit if the
+change looks sane to you.
+
+Thanks,
 Eryu
-
-> 
-> --D
-> 
-> > +groups.
-> >  
-> >  exclude_file argument refers to a name of a file inside each test directory.
-> >  for every test dir where this file is found, the listed test names are
-> > @@ -220,22 +222,24 @@ _prepare_test_list()
-> >  	fi
-> >  
-> >  	# Specified groups to include
-> > -	for group in $GROUP_LIST; do
-> > -		list=$(get_group_list $group)
-> > -		if [ -z "$list" ]; then
-> > -			echo "Group \"$group\" is empty or not defined?"
-> > -			exit 1
-> > -		fi
-> > +	# Note that the CLI processing adds a leading space to the first group
-> > +	# parameter, so we have to catch that here checking for "all"
-> > +	if ! $have_test_arg && [ "$GROUP_LIST" == " all" ]; then
-> > +		# no test numbers, do everything
-> > +		get_all_tests
-> > +	else
-> > +		for group in $GROUP_LIST; do
-> > +			list=$(get_group_list $group)
-> > +			if [ -z "$list" ]; then
-> > +				echo "Group \"$group\" is empty or not defined?"
-> > +				exit 1
-> > +			fi
-> >  
-> > -		for t in $list; do
-> > -			grep -s "^$t\$" $tmp.list >/dev/null || \
-> > +			for t in $list; do
-> > +				grep -s "^$t\$" $tmp.list >/dev/null || \
-> >  							echo "$t" >>$tmp.list
-> > +			done
-> >  		done
-> > -	done
-> > -
-> > -	if ! $have_test_arg && [ -z "$GROUP_LIST" ]; then
-> > -		# no test numbers, do everything
-> > -		get_all_tests
-> >  	fi
-> >  
-> >  	# Specified groups to exclude
-> > @@ -364,6 +368,10 @@ if $have_test_arg; then
-> >  
-> >  		shift
-> >  	done
-> > +elif [ -z "$GROUP_LIST" ]; then
-> > +	# default group list is the auto group. If any other group or test is
-> > +	# specified, we use that instead.
-> > +	GROUP_LIST="auto"
-> >  fi
-> >  
-> >  # we need common/rc
-> > -- 
-> > 2.17.0
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
