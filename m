@@ -1,23 +1,22 @@
-Received: from sandeen.net ([63.231.237.45]:38898 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751262AbeEDDNH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 3 May 2018 23:13:07 -0400
+Received: from aserp2130.oracle.com ([141.146.126.79]:57426 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751326AbeEDDu5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 3 May 2018 23:50:57 -0400
+Date: Thu, 3 May 2018 20:50:39 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH] check: run auto test group by default
+Message-ID: <20180504035039.GC4116@magnolia>
 References: <20180504000509.2498-1-david@fromorbit.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <656d33c0-a0ac-4a9a-9696-931cc750b914@sandeen.net>
-Date: Thu, 3 May 2018 22:13:05 -0500
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20180504000509.2498-1-david@fromorbit.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
-Cc: willy@infradead.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, willy@infradead.org
 List-ID: <fstests@vger.kernel.org>
 
-On 5/3/18 7:05 PM, Dave Chinner wrote:
+On Fri, May 04, 2018 at 10:05:09AM +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
 > Everyone who starts using fstests runs "check" without parameters,
@@ -32,14 +31,6 @@ On 5/3/18 7:05 PM, Dave Chinner wrote:
 > without parameters" behaviour.
 > 
 > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-
-I haven't tested but I assume you have ;) and this looks OK to me.
-
-I agree that this makes things much more friendly to the new user,
-thanks.
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
 > ---
 >  check | 34 +++++++++++++++++++++-------------
 >  1 file changed, 21 insertions(+), 13 deletions(-)
@@ -53,6 +44,14 @@ Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 >  the test dirs (e.g. quick) or a name of a tests group to collect from
 >  a specific tests dir in the form of <test dir>/<group name> (e.g. xfs/quick).
 > +If you want to run all the tests in teh test suite, use "-g all" to specify all
+
+...the test suite... (unless you really mean the rock band :P)
+
+Looks ok otherwise,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
 > +groups.
 >  
 >  exclude_file argument refers to a name of a file inside each test directory.
@@ -106,4 +105,10 @@ Reviewed-by: Eric Sandeen <sandeen@redhat.com>
 >  fi
 >  
 >  # we need common/rc
+> -- 
+> 2.17.0
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
