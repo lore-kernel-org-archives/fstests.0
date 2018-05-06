@@ -1,141 +1,197 @@
-Received: from mail-pg0-f51.google.com ([74.125.83.51]:33620 "EHLO
-        mail-pg0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751252AbeEFONp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 May 2018 10:13:45 -0400
-Received: by mail-pg0-f51.google.com with SMTP id i194-v6so18448523pgd.0
-        for <fstests@vger.kernel.org>; Sun, 06 May 2018 07:13:45 -0700 (PDT)
-Message-ID: <5aef0d98.4e21620a.be12e.c614@mx.google.com>
-Date: Sun, 06 May 2018 22:13:39 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 00e3549c659c
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="CvQAG2IXMWMk"
-Content-Disposition: inline
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:29198 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751854AbeEFWpg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 6 May 2018 18:45:36 -0400
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1fFSPL-0000Ui-4R
+        for fstests@vger.kernel.org; Mon, 07 May 2018 08:45:31 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.91)
+        (envelope-from <david@fromorbit.com>)
+        id 1fFSPL-0000AX-3B
+        for fstests@vger.kernel.org; Mon, 07 May 2018 08:45:31 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] fstests: remove old electric fence support
+Date: Mon,  7 May 2018 08:45:31 +1000
+Message-Id: <20180506224531.584-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+From: Dave Chinner <dchinner@redhat.com>
 
---CvQAG2IXMWMk
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Just not used anymore.
 
-Hi all,
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+---
+ check         |  7 ++-----
+ common/log    |  1 -
+ common/rc     | 23 +----------------------
+ common/xfs    |  9 ++++-----
+ soak          |  6 +++---
+ tools/auto-qa |  1 -
+ 6 files changed, 10 insertions(+), 37 deletions(-)
 
-The master branch of the xfstests repository at:
+diff --git a/check b/check
+index ee840115a14c..96198ac4714e 100755
+--- a/check
++++ b/check
+@@ -725,19 +725,16 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			touch ${RESULT_DIR}/check_dmesg
+ 		fi
+ 		if [ "$DUMP_OUTPUT" = true ]; then
+-			./$seq 2>&1 | tee $tmp.rawout
++			./$seq 2>&1 | tee $tmp.out
+ 			# Because $? would get tee's return code
+ 			sts=${PIPESTATUS[0]}
+ 		else
+-			./$seq >$tmp.rawout 2>&1
++			./$seq >$tmp.out 2>&1
+ 			sts=$?
+ 		fi
+ 		$timestamp && _timestamp
+ 		stop=`_wallclock`
+ 
+-		_fix_malloc <$tmp.rawout >$tmp.out
+-		rm -f $tmp.rawout
+-
+ 		if [ -f core ]
+ 		then
+ 		    _err_msg="[dumped core]"
+diff --git a/common/log b/common/log
+index b48f6abade77..7a0a5f1f3b16 100644
+--- a/common/log
++++ b/common/log
+@@ -107,7 +107,6 @@ BEGIN {
+ 
+ _filter_logprint()
+ {
+-    _fix_malloc |\
+     sed '
+         s/ver:[0-9]/ver:<VERS>/;
+         s/version [0-9] format [0-9]/version <VERS> format <FORMAT>/;
+diff --git a/common/rc b/common/rc
+index 9ffab7fd0907..ee677e7dc6b2 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1169,27 +1169,6 @@ _get_pids_by_name()
+ 	-e "/[0-9]:[0-9][0-9]  *$1 /s/ .*//p"
+ }
+ 
+-# fix malloc libs output
+-#
+-_fix_malloc()
+-{
+-    # filter out the Electric Fence notice
+-    $PERL_PROG -e '
+-        while (<>) {
+-            if (defined $o && /^\s+Electric Fence/) {
+-                chomp($o);
+-                print "$o";
+-                undef $o;
+-                next;
+-            }
+-            print $o if (defined $o);
+-
+-            $o=$_;
+-        }
+-        print $o if (defined $o);
+-    '
+-}
+-
+ #
+ # _df_device : get an IRIX style df line for a given device
+ #
+@@ -1372,7 +1351,7 @@ _do()
+     (eval "echo '---' \"$cmd\"") >>$seqres.full
+     (eval "$cmd") >$tmp._out 2>&1
+     local ret=$?
+-    cat $tmp._out | _fix_malloc >>$seqres.full
++    cat $tmp._out >>$seqres.full
+     rm -f $tmp._out
+     if [ $# -eq 2 ]; then
+ 	if [ $ret -eq 0 ]; then
+diff --git a/common/xfs b/common/xfs
+index e0bc3f43d3c5..92223513d561 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -393,8 +393,7 @@ _check_xfs_filesystem()
+ 	# option (-t) to avoid indexing the free space trees doesn't make it pass on
+ 	# large filesystems. Avoid it.
+ 	if [ "$LARGE_SCRATCH_DEV" != yes ]; then
+-		_xfs_check $extra_log_options $device 2>&1 |\
+-			_fix_malloc >$tmp.fs_check
++		_xfs_check $extra_log_options $device 2>&1 > $tmp.fs_check
+ 	fi
+ 	if [ -s $tmp.fs_check ]; then
+ 		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (c)"
+@@ -409,7 +408,7 @@ _check_xfs_filesystem()
+ 	if [ $? -ne 0 ]; then
+ 		_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (r)"
+ 		echo "*** xfs_repair -n output ***"	>>$seqres.full
+-		cat $tmp.repair | _fix_malloc		>>$seqres.full
++		cat $tmp.repair				>>$seqres.full
+ 		echo "*** end xfs_repair output"	>>$seqres.full
+ 
+ 		ok=0
+@@ -422,7 +421,7 @@ _check_xfs_filesystem()
+ 		if [ $? -ne 0 ]; then
+ 			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild)"
+ 			echo "*** xfs_repair output ***"	>>$seqres.full
+-			cat $tmp.repair | _fix_malloc		>>$seqres.full
++			cat $tmp.repair				>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
+ 
+ 			ok=0
+@@ -433,7 +432,7 @@ _check_xfs_filesystem()
+ 		if [ $? -ne 0 ]; then
+ 			_log_err "_check_xfs_filesystem: filesystem on $device is inconsistent (rebuild-reverify)"
+ 			echo "*** xfs_repair -n output ***"	>>$seqres.full
+-			cat $tmp.repair | _fix_malloc		>>$seqres.full
++			cat $tmp.repair				>>$seqres.full
+ 			echo "*** end xfs_repair output"	>>$seqres.full
+ 
+ 			ok=0
+diff --git a/soak b/soak
+index ec4fbb53ba1b..26b345a3e4a9 100755
+--- a/soak
++++ b/soak
+@@ -85,11 +85,11 @@ _log "***     (`date`)"
+ _log "    *** init"
+ _log "        *** unmounting scratch device"
+ 
+-_scratch_unmount 2>&1 |  _fix_malloc >>$FULL
++_scratch_unmount 2>&1 >>$FULL
+ 
+ _log "        *** clean scratch device"
+ 
+-mkfs_xfs -f $SCRATCH_DEV 2>&1 |  _fix_malloc >>$FULL \
++mkfs_xfs -f $SCRATCH_DEV 2>&1 >>$FULL \
+                         || _fail "            !!! failed to mkfs SCRATCH_DEV"
+ 
+ pass=1
+@@ -124,7 +124,7 @@ do
+     
+     _log "        *** stress"
+     ltp/fsstress -d $SCRATCH_MNT/soak_test -p $proc -n $stress $FSSTRESS_AVOID 2>&1 | \
+-        _fix_malloc >>$FULL
++        >>$FULL
+ 
+     _log "        *** unmounting scratch device"
+ 
+diff --git a/tools/auto-qa b/tools/auto-qa
+index 8d8f5ef9fbf2..b81b0b5960c2 100755
+--- a/tools/auto-qa
++++ b/tools/auto-qa
+@@ -340,7 +340,6 @@ do
+ 		[ -d $WORKAREA/$pkg ] || continue
+ 		cd $WORKAREA/$pkg
+ 
+-		# use e-fence - but this will only take effect on configure
+ 		make configure 2>&1 \
+ 			|| _fail "	    !!! configure $pkg failed"
+ 		make default 2>&1 \
+-- 
+2.17.0
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Notably, the default behavior of a pure './check' has
-been changed in this update, it now runs tests only in 'auto' group by default,
-instead of all tests. But you could still use './check -g auto' as usual to run
-'auto' tests.
-
-There're also two new generic tests and some random test fixes & improvements.
-The two new tests both should not fail on latest Linus tree (v4.17-rc3+).
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-00e3549c659c xfs/132: remove duplicate test
-
-New commits:
-
-Amir Goldstein (1):
-      [00e3549c659c] xfs/132: remove duplicate test
-
-Darrick J. Wong (7):
-      [38cdd5be450e] generic: test XATTR_REPLACE doesn't take the fs down
-      [524a7061a1f4] generic/45[34]: add unicode directional override checks
-      [2daf94ec9143] generic/45[34]: check unicode names only if xfs_scrub linked against libicu
-      [2426366fc31f] generic/45[34]: test unicode confusables
-      [d2603933ebc5] generic/453: test creation of malicious directory entries
-      [e2fd1a080ece] xfs/422: add fsstress to the freeze-and-rmap-repair race test
-      [0828657542ea] xfs: fix blocktrash fuzzers
-
-Dave Chinner (2):
-      [b4c032f1bd30] check: run auto test group by default
-      [60af5cc1e243] README: document the new default run mode
-
-Eric Biggers (1):
-      [d0f42b253010] generic: test exceeding max file size via INSERT_RANGE
-
-Jeff Layton (1):
-      [0c2896508f44] src/fsync-err: don't truncate files on second open
-
-Theodore Ts'o (1):
-      [da7916f72206] build: Use the original install-sh file from SGI
-
-
-Code Diffstat:
-
- .gitignore              |   1 +
- Makefile                |   1 +
- README                  |  38 +++---
- check                   |  34 +++--
- include/install-sh      | 351 ++++++++++++++++++++++++++++++++++++++++++++++++
- src/Makefile            |   3 +-
- src/attr_replace_test.c |  67 +++++++++
- src/fsync-err.c         |   8 +-
- tests/generic/453       | 100 +++++++++++++-
- tests/generic/454       |  66 ++++++++-
- tests/generic/485       | 115 ++++++++++++++++
- tests/generic/485.out   |   4 +
- tests/generic/486       |  71 ++++++++++
- tests/generic/486.out   |   2 +
- tests/generic/group     |   2 +
- tests/xfs/086           |  15 ++-
- tests/xfs/087           |  19 +--
- tests/xfs/088           |  15 ++-
- tests/xfs/089           |  15 ++-
- tests/xfs/091           |  15 ++-
- tests/xfs/093           |  19 +--
- tests/xfs/097           |  19 +--
- tests/xfs/099           |  11 +-
- tests/xfs/100           |  11 +-
- tests/xfs/101           |  11 +-
- tests/xfs/102           |  11 +-
- tests/xfs/105           |  11 +-
- tests/xfs/112           |  11 +-
- tests/xfs/113           |  11 +-
- tests/xfs/117           |  25 ++--
- tests/xfs/120           |  17 +--
- tests/xfs/123           |   7 +-
- tests/xfs/124           |   9 +-
- tests/xfs/125           |   9 +-
- tests/xfs/126           |   9 +-
- tests/xfs/132           | 126 -----------------
- tests/xfs/132.out       |  12 --
- tests/xfs/235           |  11 +-
- tests/xfs/337           |  11 +-
- tests/xfs/422           |  18 ++-
- tests/xfs/group         |   1 -
- 41 files changed, 996 insertions(+), 316 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---CvQAG2IXMWMk
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJa7wBpAAoJECZSqilcj+djTtAP/0dZOdkhvwBtP7uUmidFKxNT
-ZlEHECb2wR/iKtDbS7ijQEhcTQlkmrCVK3svkJBCp+wiWUeuOAOHrtviZCIN56Pj
-Nk6ESErTwEBvyBAUtrfcQH7CLWs3opXRTM4Fj9hFVcrLBD3JJ9wvbrPEPhclKvXa
-WkdbUyMRvmlR/QD3v0H+0dlVUe09dFCFWld/sYjUj8LYrtcnmSTioMjjPez5Dv4n
-4PpxDjHOvGAHyEPIIUphq7+3OkkqbKJSgVIfBqzKkT977p1IQY6/TnzXaCob4OCC
-vgENrvJchOAFhqs83GSJNhdZ6kJXnI2SczdnQ5m2o2gPh+2/S0dkHRBLDxSM01Lp
-RfXjCUwEucfNlG9L8uTH5VpIKdvYEkmCH9jgF/a1tzBEZdQa3KfIk7DrKjkqPYX1
-FaSn5qjmVIJug6vMVxM1meb0Ykymxy8kWQNw2TuyWM77UFf80ZbyGvD5u8ckJ+7g
-X0BBv4PXGvZcZROeOfsgryi4rUWH+spg3n2ofkzmSUkIiPWQJLP+cZJcHZ91Fgjb
-7JluTXWFo4enXwQz9YSy/OrgpLO2+ulMlDWcBwixqHLk2ZxXomm+TN8HSj5VXWuQ
-1rkwDwEJPsEC8Xwt2NEeByvuhH3zQAGmFP7zSQZESyVKUoCcAxcg2tXphl45kD6I
-OKmLe/4L99EefRz6qnRE
-=7HzV
------END PGP SIGNATURE-----
-
---CvQAG2IXMWMk--
