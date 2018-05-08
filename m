@@ -1,49 +1,43 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:53936 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932606AbeEHQyL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 May 2018 12:54:11 -0400
-Subject: [PATCH 2/2] generic: test swapfile creation, activation,
- and deactivation
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 08 May 2018 09:54:06 -0700
-Message-ID: <152579844608.18959.5745995713836937294.stgit@magnolia>
-In-Reply-To: <152579843989.18959.14108003206856326245.stgit@magnolia>
-References: <152579843989.18959.14108003206856326245.stgit@magnolia>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:34024 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1752068AbeEHRiN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 8 May 2018 13:38:13 -0400
+Date: Tue, 8 May 2018 13:38:12 -0400
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH] xfstest: overlay: Add tests for overlay metadata only copy
+ up feature
+Message-ID: <20180508173812.GH3501@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc: Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Add tests for proposed metadata only copy up feature in overlayfs.
 
-Test swapfile activation and deactivation.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
 ---
- tests/generic/708     |  152 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/708.out |   10 +++
- tests/generic/group   |    1 
- 3 files changed, 163 insertions(+)
- create mode 100755 tests/generic/708
- create mode 100644 tests/generic/708.out
+ common/overlay        |    1 
+ tests/overlay/059     |  281 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/059.out |   42 +++++++
+ tests/overlay/group   |    1 
+ 4 files changed, 325 insertions(+)
 
-
-diff --git a/tests/generic/708 b/tests/generic/708
-new file mode 100755
-index 00000000..48feeb25
---- /dev/null
-+++ b/tests/generic/708
-@@ -0,0 +1,152 @@
+Index: xfstests-dev/tests/overlay/059
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/059	2018-05-08 13:32:13.828919038 -0400
+@@ -0,0 +1,281 @@
 +#! /bin/bash
-+# FS QA Test No. 708
++# FS QA Test No. 059
 +#
-+# Test various swapfile activation oddities.
++# Test metadata only copy up functionality.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
++# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
++# Author: Vivek Goyal <vgoyal@redhat.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -57,20 +51,22 @@ index 00000000..48feeb25
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
 +#-----------------------------------------------------------------------
++#
 +
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
++here=`pwd`
++tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -f $testfile
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
@@ -81,137 +77,305 @@ index 00000000..48feeb25
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs generic
++_supported_fs overlay
 +_supported_os Linux
-+_require_scratch_swapfile
++# We use non-default scratch underlying overlay dirs, we need to check
++# them explicity after test.
++_require_scratch_nocheck
++_require_scratch_overlay_features redirect_dir
 +
-+rm -f $seqres.full
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount >>$seqres.full 2>&1
++# remove all files from previous tests
++_scratch_mkfs
 +
-+swapfile=$SCRATCH_MNT/swap
-+len=$((2 * 1048576))
++# File size on lower
++lowername="lowerfile"
++lowerlink="lowerfile-link"
++lowersize="16384"
++lowerdata="lower"
 +
-+swapfile_cycle() {
-+	local swapfile="$1"
++udirname="pureupper"
++ufile="upperfile"
 +
-+	mkswap $swapfile >> $seqres.full
-+	filefrag -v $swapfile >> $seqres.full
-+	swapon $swapfile 2>&1 | _filter_scratch
-+	swapon -v --bytes >> $seqres.full
-+	swapoff $swapfile 2>> $seeqres.full
-+	rm -f $swapfile
++# Check metacopy xattr
++check_metacopy()
++{
++        local target=$1 exist=$2
++	local out_f target_f
++	local msg
++
++        out_f=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_XATTR_METACOPY $target 2>&1 | _filter_scratch)
++
++	if [ "$exist" == "y" ];then
++		[ "$out_f" == "" ] && return
++		echo "Metacopy xattr does not exist on ${target}. stdout=$out_f"
++		return
++	fi
++
++	if [ "$out_f" == "" ];then
++		echo "Metacopy xattr exists on ${target} unexpectedly."
++		return
++	fi
++
++	target_f=`echo $target | _filter_scratch`
++	msg="$target_f: trusted.overlay.metacopy: No such attribute"
++
++	[ "$out_f" == "$msg" ] && return
++
++	echo "Error while checking xattr on ${target}. stdout=$out"
 +}
 +
-+test_can_falloc_swap() {
-+	local test_swapfile=$TEST_DIR/swapfile
++# Check redirect xattr
++check_redirect()
++{
++	local target=$1
++	local expect=$2
 +
-+	echo "can we fallocate swap?"
-+	$XFS_IO_PROG -f -c "falloc 0 64k" $test_swapfile
-+	test -f $test_swapfile || return 1
-+	mkswap $test_swapfile
-+	swapon $test_swapfile
-+	res=$?
-+	swapoff $test_swapfile
-+	rm -f $test_swapfile
-+	return $res
++	value=$($GETFATTR_PROG --absolute-names --only-values -n \
++		$OVL_XATTR_REDIRECT $target)
++
++	[[ "$value" == "$expect" ]] || echo "Redirect xattr incorrect. Expected=\"$expect\", actual=\"$value\""
 +}
 +
-+unset can_falloc_swap
-+test_can_falloc_swap >> $seqres.full 2>&1 && can_falloc_swap=yes
-+page_size=$(get_page_size)
++# Check size
++check_size()
++{
++	local target=$1 expected_size=$2
++	local size nr_blocks blocksize stat_data
 +
-+# Create a sparse swap file
-+echo "sparse swap" | tee -a $seqres.full
-+$XFS_IO_PROG -f -c "truncate $len" $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
++	stat_data=$(stat -c "%s %b %B" $target)
++	size=`echo $stat_data | cut -d " " -f1`
++	nr_blocks=`echo $stat_data | cut -d " " -f2`
++	blocksize=`echo $stat_data | cut -d " " -f3`
 +
-+# Create a regular swap file
-+echo "regular swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
++	[ "$size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $size"
 +
-+# Create a fallocated swap file
-+echo "fallocate swap" | tee -a $seqres.full
-+if [ "$can_falloc_swap" = "yes" ]; then
-+	$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-+	swapfile_cycle $swapfile
-+fi
++	size=$(( $nr_blocks * $blocksize ))
 +
-+# Create a swap file with a little too much junk on the end
-+echo "too long swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len + 3)) $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
++	[ "$size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is ${size}. nr_blocks=$nr_blocks blocksize=$blocksize"
++}
 +
-+# Create a swap file with a large discontiguous range(?)
-+echo "large discontig swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len * 2)) $swapfile >> $seqres.full
-+old_sz="$(stat -c '%s' $swapfile)"
-+$XFS_IO_PROG -c "fcollapse $((len / 2)) $len" $swapfile >> $seqres.full 2>&1
-+new_sz="$(stat -c '%s' $swapfile)"
-+if [ $old_sz -gt $new_sz ]; then
-+	swapfile_cycle $swapfile
-+fi
-+rm -f $swapfile
++check_contents()
++{
++	local target=$1 expected=$2
++	local actual target_f
 +
-+# Create a swap file with a small discontiguous range(?)
-+echo "small discontig swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len + 1024)) $swapfile >> $seqres.full
-+old_sz="$(stat -c '%s' $swapfile)"
-+$XFS_IO_PROG -c "fcollapse 66560 1024" $swapfile >> $seqres.full 2>&1
-+new_sz="$(stat -c '%s' $swapfile)"
-+if [ $old_sz -gt $new_sz ]; then
-+	swapfile_cycle $swapfile
-+fi
-+rm -f $swapfile
++	target_f=`echo $target | _filter_scratch`
 +
-+# Create a fallocated swap file and touch every other $PAGE_SIZE to create
-+# a mess of written/unwritten extent records
-+echo "mixed swap" | tee -a $seqres.full
-+if [ "$can_falloc_swap" = "yes" ]; then
-+	$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-+	seq $page_size $((page_size * 2)) $len | while read offset; do
-+		_pwrite_byte 0x58 $offset 1 $swapfile >> $seqres.full
-+	done
-+	swapfile_cycle $swapfile
-+fi
++	read actual<$target
 +
-+# Create a ridiculously small swap file; mkswap says the minimum is 40k.
-+# However, each swap file must be at least two pages long.
-+echo "tiny swap" | tee -a $seqres.full
-+tiny_len=40960
-+min_swap_size=$((page_size * 2))
-+if [ "$min_swap_size" -gt "$tiny_len" ]; then
-+	tiny_len=$min_swap_size
-+fi
-+_pwrite_byte 0x58 0 $tiny_len $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
++	[ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
++}
 +
++check_file_properties()
++{
++	local target=$1 expected_size=$2 expected_content=$3
++
++	check_size $target $expected_size
++	check_contents $target $expected_content
++}
++
++mount_overlay()
++{
++	local _lowerdir=$1
++
++	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on
++}
++
++umount_overlay()
++{
++	$UMOUNT_PROG $SCRATCH_MNT
++}
++
++# Assumes it is called with overlay mounted.
++test_common()
++{
++	local _lowerdir=$1 _target=$2 _size=$3 _data="$4" _redirect=$5
++
++	echo "check properties of metadata copied up file"
++	check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
++
++	# Do a mount cycle and check size and contents again.
++	echo "Unmount and Mount again"
++	umount_overlay
++	mount_overlay $_lowerdir
++	echo "check properties of metadata copied up file"
++	check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
++
++	# Make sure copied up file is a metacopy file.
++	umount_overlay
++	check_metacopy $upperdir/$_target "y"
++	[ -n "$_redirect" ] && check_redirect $upperdir/$_target "$_redirect"
++
++	# Trigger data copy up and check absence of metacopy xattr.
++	mount_overlay $_lowerdir
++	$XFS_IO_PROG -c "open -a $SCRATCH_MNT/$_target"
++	echo "check properties of data copied up file"
++	check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
++	umount_overlay
++	check_metacopy $upperdir/$_target "n"
++}
++
++create_basic_files()
++{
++	_scratch_mkfs
++	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
++	mkdir -p $upperdir/$udirname
++	echo "$lowerdata" > $lowerdir/$lowername
++	chmod 600 $lowerdir/$lowername
++	# Create a file of size lowersize.
++	$XFS_IO_PROG -c "falloc 0 $lowersize" $lowerdir/$lowername
++}
++
++create_lower_link()
++{
++	ln $lowerdir/$lowername $lowerdir/$lowerlink
++}
++
++prepare_midlayer()
++{
++	_scratch_mkfs
++	create_basic_files
++	# Create midlayer
++	_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on,index=on,metacopy=on
++	# Trigger a metacopy
++	chmod 400 $SCRATCH_MNT/$lowername
++	umount_overlay
++}
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
++
++# Test simple metacopy
++create_basic_files
++
++# Make sure metacopy feature is supported by kernel, otherwise do not
++# run test.
++mount_overlay $lowerdir || _notrun "mount overlay with metacopy failed"
++umount_overlay
++
++# Tests start here
++echo "== Check Simple Metacopy =="
++mount_overlay $lowerdir
++chmod 400 $SCRATCH_MNT/$lowername
++test_common $lowerdir $lowername $lowersize "$lowerdata"
++
++# Test midlayer metacopy
++echo -e "\n== Check Midlayer Metacopy =="
++prepare_midlayer
++mount_overlay "$lowerdir2:$lowerdir"
++chmod 400 $SCRATCH_MNT/$lowername
++test_common "$lowerdir2:$lowerdir" $lowername $lowersize "$lowerdata"
++
++# Test Rename Redirect
++echo -e "\n== Check Rename Redirect =="
++create_basic_files
++mount_overlay $lowerdir
++mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
++test_common $lowerdir $ufile $lowersize "$lowerdata" "$lowername"
++
++# Test midlayer rename redirect
++echo -e "\n== Check Midlayer Rename Redirect =="
++prepare_midlayer
++mount_overlay "$lowerdir2:$lowerdir"
++mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
++test_common "$lowerdir2:$lowerdir" $ufile $lowersize "$lowerdata" "$lowername"
++
++# Test Link Redirect
++echo -e "\n== Check Link Redirect =="
++create_basic_files
++mount_overlay $lowerdir
++ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
++test_common $lowerdir $udirname/$ufile $lowersize "$lowerdata" "/$lowername"
++
++# Test midlayer link redirect
++echo -e "\n== Check Midlayer Link Redirect =="
++prepare_midlayer
++mount_overlay "$lowerdir2:$lowerdir"
++ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
++test_common "$lowerdir2:$lowerdir" $udirname/$ufile $lowersize "$lowerdata" \
++		"/$lowername"
++
++# Test lower link file gets absolute redirect upon rename
++echo -e "\n== Check Lower Link Rename Absolute Redirect =="
++create_basic_files
++create_lower_link
++mount_overlay $lowerdir
++mv $SCRATCH_MNT/$lowerlink $SCRATCH_MNT/$ufile
++test_common $lowerdir $ufile $lowersize "$lowerdata" "/$lowerlink"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/708.out b/tests/generic/708.out
-new file mode 100644
-index 00000000..d6199b99
---- /dev/null
-+++ b/tests/generic/708.out
-@@ -0,0 +1,10 @@
-+QA output created by 708
-+sparse swap
-+swapon: SCRATCH_MNT/swap: skipping - it appears to have holes.
-+regular swap
-+fallocate swap
-+too long swap
-+large discontig swap
-+small discontig swap
-+mixed swap
-+tiny swap
-diff --git a/tests/generic/group b/tests/generic/group
-index 505383f7..9f3a933e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -489,3 +489,4 @@
- 484 auto quick
- 485 auto quick insert
- 486 auto quick attr
-+708 auto quick swapfile
-
+Index: xfstests-dev/common/overlay
+===================================================================
+--- xfstests-dev.orig/common/overlay	2018-05-08 13:31:59.492919038 -0400
++++ xfstests-dev/common/overlay	2018-05-08 13:32:13.828919038 -0400
+@@ -10,6 +10,7 @@ export OVL_XATTR_IMPURE="trusted.overlay
+ export OVL_XATTR_ORIGIN="trusted.overlay.origin"
+ export OVL_XATTR_NLINK="trusted.overlay.nlink"
+ export OVL_XATTR_UPPER="trusted.overlay.upper"
++export OVL_XATTR_METACOPY="trusted.overlay.metacopy"
+ 
+ # helper function to do the actual overlayfs mount operation
+ _overlay_mount_dirs()
+Index: xfstests-dev/tests/overlay/059.out
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/059.out	2018-05-08 13:32:13.829919038 -0400
+@@ -0,0 +1,42 @@
++QA output created by 059
++== Check Simple Metacopy ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Midlayer Metacopy ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Rename Redirect ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Midlayer Rename Redirect ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Link Redirect ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Midlayer Link Redirect ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
++
++== Check Lower Link Rename Absolute Redirect ==
++check properties of metadata copied up file
++Unmount and Mount again
++check properties of metadata copied up file
++check properties of data copied up file
+Index: xfstests-dev/tests/overlay/group
+===================================================================
+--- xfstests-dev.orig/tests/overlay/group	2018-05-08 13:31:59.492919038 -0400
++++ xfstests-dev/tests/overlay/group	2018-05-08 13:32:13.829919038 -0400
+@@ -61,3 +61,4 @@
+ 056 auto quick fsck
+ 057 auto quick redirect
+ 058 auto quick exportfs
++059 auto quick
