@@ -1,167 +1,220 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:35313 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753627AbeEHAzU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 May 2018 20:55:20 -0400
-Received: by mail-pf0-f194.google.com with SMTP id x9so3946404pfm.2
-        for <fstests@vger.kernel.org>; Mon, 07 May 2018 17:55:19 -0700 (PDT)
-Date: Tue, 8 May 2018 08:55:15 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH V2] xfs: test inobt/on disk free state mismatches
-Message-ID: <20180508005515.GH8373@desktop>
-References: <20180506225352.4415-1-david@fromorbit.com>
- <20180507230551.GJ10363@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180507230551.GJ10363@dastard>
+Received: from mail.kernel.org ([198.145.29.99]:39160 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754995AbeEHMqa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 8 May 2018 08:46:30 -0400
+Message-ID: <26f3c1c78d4ee94af5ef51af5c88fa25247efb90.camel@kernel.org>
+Subject: Re: [PATCH v3] generic: test for seeing unseen fsync errors on
+ newly open files
+From: Jeff Layton <jlayton@kernel.org>
+Date: Tue, 08 May 2018 08:46:27 -0400
+In-Reply-To: <20180502055051.GA29084@desktop>
+References: <20180428145937.6804-1-jlayton@kernel.org>
+         <20180428230627.16791-1-jlayton@kernel.org>
+         <20180502055051.GA29084@desktop>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, willy@infradead.org, andres@anarazel.de, david@fromorbit.com, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 08, 2018 at 09:05:51AM +1000, Dave Chinner wrote:
+On Wed, 2018-05-02 at 13:50 +0800, Eryu Guan wrote:
+> On Sat, Apr 28, 2018 at 07:06:27PM -0400, Jeff Layton wrote:
+> > From: Jeff Layton <jlayton@redhat.com>
+> > 
+> > This adds a regression test for the following kernel patch:
+> > 
+> >     errseq: Always report a writeback error once
+> > 
+> > This is motivated by some rather odd behavior done by the PostgreSQL
+> > project. The main database writers will offload the fsync calls to a
+> > separate process, which can open files after a writeback error has
+> > already occurred.
+> > 
+> > This used to work with older kernels that reported the error to only
+> > one fd, but with the errseq_t changes we lost the ability to see
+> > errors that occurred before the open. The above patch restores that
+> > behavior.
+> > 
+> > Signed-off-by: Jeff Layton <jlayton@redhat.com>
+> > Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >  tests/generic/999     | 95 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/999.out |  5 +++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 101 insertions(+)
+> >  create mode 100755 tests/generic/999
+> >  create mode 100644 tests/generic/999.out
+> > 
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 000000000000..b816fd3bb423
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,95 @@
+> > +#! /bin/bash
+> > +# FS QA Test No. XXX
 > 
-> From: Dave Chinner <dchinner@redhat.com>
+>                     ^^^ Need a test number here :)
+> > +#
+> > +# Open a file several times, write to it, fsync on all fds and make sure that
+> > +# they all return 0. Change the device to start throwing errors. Write again
+> > +# on all fds and fsync on all fds. Ensure that we get errors on all of them.
+> > +# Then fsync on all one last time and verify that all return 0.
+> > +#
+> > +#-----------------------------------------------------------------------
+> > +# Copyright (c) 2018, Jeff Layton <jlayton@redhat.com>
+> > +#
+> > +# This program is free software; you can redistribute it and/or
+> > +# modify it under the terms of the GNU General Public License as
+> > +# published by the Free Software Foundation.
+> > +#
+> > +# This program is distributed in the hope that it would be useful,
+> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > +# GNU General Public License for more details.
+> > +#
+> > +# You should have received a copy of the GNU General Public License
+> > +# along with this program; if not, write the Free Software Foundation,
+> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > +#-----------------------------------------------------------------------
+> > +
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -rf $tmp.* $testdir
+> > +	_dmerror_cleanup
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/dmerror
+> > +
+> > +# real QA test starts here
+> > +_supported_os Linux
+> > +_require_scratch_nocheck
+> > +# This test uses "dm" without taking into account the data could be on
+> > +# realtime subvolume, thus the test will fail with rtinherit=1
+> > +_require_no_rtinherit
+> > +
+> > +_require_dm_target error
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +echo "Format and mount"
+> > +_scratch_mkfs > $seqres.full 2>&1
+> > +_dmerror_init
+> > +_dmerror_mount
+> > +
+> > +datalen=65536
+> > +_require_fs_space $SCRATCH_MNT $datalen
+> > +
+> > +# use fd 5 to hold file open
+> > +testfile=$SCRATCH_MNT/fsync-open-after-err
+> > +exec 5>$testfile
+> > +
+> > +# write some data to file and fsync it out
+> > +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c fsync $testfile
+> > +
+> > +# flip device to non-working mode
+> > +_dmerror_load_error_table
+> > +
+> > +# rewrite the data, call sync to ensure it's written back w/o scraping error
+> > +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c sync $testfile
+> > +
+> > +# heal the device error
+> > +_dmerror_load_working_table
+> > +
+> > +# open again and call fsync
+> > +echo "The following fsync should fail with EIO:"
+> > +$XFS_IO_PROG -c fsync $testfile
+> > +echo "done"
 > 
-> Fuzzing has recently uncovered a couple of conditions where we don't
-> detect corruptions that reallocate already allocated inodes. This
-> test exercises those cases, and checks that we shut down the
-> filesystem appropriately when such a corruption occurs.
+>                                                                                                                                                                                                
+> I built latest Linus tree, which should contain the mentioned fix, and I                                                                                                                       
+> saw different results on xfs, ext4 and btrfs.                                                                                                                                                  
+>                                                                                                                                                                                                
+> XFS fails the test as:                                                                                                                                                                         
+>     -fsync: Input/output error                                                                                                                                                                 
+>     +/mnt/scratch/fsync-open-after-err: Input/output error
+
+I think I see the problem. I was testing this with a logdev. I think
+we'll need a _require_logdev directive in the test. I'll send a v4 in a
+bit with that and some other corrections.
+
+>                                                                                                                                      
+>                                                                                                                                                                                                
+> While btrfs fails as:                                                                                                                                                                          
+>     -fsync: Input/output error                                                                                                                                                                 
+>     +/mnt/scratch/fsync-open-after-err: Read-only file system
+>                                                              
+
+I think btrfs will require a specialized testcase (like we did for some
+of the earlier tests in this area). I'll send a separate patch for that
+one.
+
+>                                                                      
+>                                                                                                                                                                                                
+> And both XFS and btrfs behave in the same way no matter I have the fix                                                                                                                         
+> applied or not (tested on v4.16 kernel and v4.17-rc3+ kernel).                                                                                                                                 
+>                                                                                                                                                                                                
+> Only ext4 passes the test with v4.17-rc3+ kernel, and fails on v4.16                                                                                                                           
+> kernel as expected:                                                                                                                                                                            
+>     -fsync: Input/output error                                                                                                                                                                 
+>                                                                                                                                                                                                
+> Could you please take a look?                                                                                                                                                                  
+>                                                                                                                                                                                                
+> Thanks,                                                                                                                                                                                        
+> Eryu
 > 
-> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> ---
-> V2:
-> - fix method of calling xfs_db to use correct helpers.
-> 
->  tests/{shared/003 => xfs/450} | 41 ++++++++++++++++++++++-------------------
->  tests/xfs/450.out             | 26 ++++++++++++++++++++++++++
->  tests/xfs/group               |  1 +
+> > +
+> > +# close file
+> > +exec 5>&-
+> > +
+> > +# success, all done
+> > +_dmerror_unmount
+> > +_dmerror_cleanup
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > new file mode 100644
+> > index 000000000000..38d2d7f6495f
+> > --- /dev/null
+> > +++ b/tests/generic/999.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by 999
+> > +Format and mount
+> > +The following fsync should fail with EIO:
+> > +fsync: Input/output error
+> > +done
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index ea8e51b35e79..48f491a5c32b 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -486,3 +486,4 @@
+> >  481 auto quick log metadata
+> >  482 auto metadata replay
+> >  483 auto quick log metadata
+> > +999 auto quick
+> > -- 
+> > 2.14.3
+> > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
 
-Messed up with shared/003?
-
->  3 files changed, 49 insertions(+), 19 deletions(-)
-> 
-> diff --git a/tests/shared/003 b/tests/xfs/450
-> similarity index 59%
-> copy from tests/shared/003
-> copy to tests/xfs/450
-> index 9a9956cf44de..267089738574 100755
-> --- a/tests/shared/003
-> +++ b/tests/xfs/450
-> @@ -1,15 +1,10 @@
->  #! /bin/bash
-> -# FS QA Test 003
-> +# FS QA Test 450
->  #
-> -# Test mount a needs_recovery partition with noload option.
-> -# ext4 used to Oops until part of this commit:
-> -#
-> -# 744692d ext4: use ext4_get_block_write in buffer write
-> -#
-> -# Also test on ext2/3.
-> +# Catch inobt/on disk inode free state mismatches on V4 filesystems
->  #
->  #-----------------------------------------------------------------------
-> -# Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
-> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
->  #
->  # This program is free software; you can redistribute it and/or
->  # modify it under the terms of the GNU General Public License as
-> @@ -45,25 +40,33 @@ _cleanup()
->  . ./common/rc
->  . ./common/filter
->  
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
->  # real QA test starts here
-> -_supported_fs ext2 ext3 ext4
-> +
-> +_supported_fs xfs
->  _supported_os Linux
->  
-> -# nofsck as we modify sb via debugfs
-> +# we intentionally corrupt the filesystem, so don't check it after the test
->  _require_scratch_nocheck
->  
-> -# remove previous $seqres.full before test
-> -rm -f $seqres.full
-> -echo "Silence is golden"
-> +# on success, we'll get a shutdown filesystem with a really noisy log message
-> +# due to transaction cancellation.  Hence we don't want to check dmesg here.
-> +_disable_dmesg_check
-> +
-> +_require_xfs_mkfs_crc
-> +_scratch_mkfs -m crc=0 > $seqres.full 2>&1
-
-Looks like we can drop _require_xfs_mkfs_crc anyway, as
-_scratch_mkfs_xfs will remove any metadata options if the mkfs.xfs
-binary doesn't support it (done by _scratch_mkfs_xfs_opts).
-
-Thanks,
-Eryu
-
->  
-> -_scratch_mkfs >>$seqres.full 2>&1
-> +# corrupt an inode in the root inode chunk
-> +root_ino=$(_scratch_xfs_get_metadata_field 'rootino' 'sb 0')
-> +corrupt_ino=$((root_ino + 15))
-> +_scratch_xfs_set_metadata_field 'core.mode' 0100644 "inode $corrupt_ino"
->  
-> -# set needs_recovery feature bit
-> -debugfs -w -R "feature +needs_recovery" $SCRATCH_DEV \
-> -	>>$seqres.full 2>&1
-> +_scratch_mount
->  
-> -# mount with noload option
-> -_try_scratch_mount "-o noload" >>$seqres.full 2>&1
-> +# The corrupt inode should be tripped over during these initial file creates.
-> +touch $SCRATCH_MNT/file{0,1,2,3,4,5}{0,1,2,3,4,5} 2>&1 | _filter_scratch
->  
->  # success, all done
->  status=0
-> diff --git a/tests/xfs/450.out b/tests/xfs/450.out
-> new file mode 100644
-> index 000000000000..379a8d6f6ec9
-> --- /dev/null
-> +++ b/tests/xfs/450.out
-> @@ -0,0 +1,26 @@
-> +QA output created by 450
-> +core.mode = 0100644
-> +touch: cannot touch 'SCRATCH_MNT/file20': Structure needs cleaning
-> +touch: cannot touch 'SCRATCH_MNT/file21': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file22': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file23': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file24': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file25': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file30': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file31': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file32': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file33': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file34': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file35': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file40': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file41': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file42': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file43': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file44': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file45': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file50': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file51': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file52': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file53': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file54': Input/output error
-> +touch: cannot touch 'SCRATCH_MNT/file55': Input/output error
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index d62345fc8f96..2a7f5eb68e82 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -442,3 +442,4 @@
->  443 auto quick ioctl fsr
->  444 auto quick
->  445 auto quick filestreams
-> +450 auto quick
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+-- 
+Jeff Layton <jlayton@kernel.org>
