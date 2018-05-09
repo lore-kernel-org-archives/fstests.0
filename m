@@ -1,57 +1,41 @@
-Received: from mail-yb0-f175.google.com ([209.85.213.175]:36879 "EHLO
-        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965034AbeEIQUO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 May 2018 12:20:14 -0400
+Received: from mail-yw0-f182.google.com ([209.85.161.182]:35805 "EHLO
+        mail-yw0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965034AbeEIQWt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 May 2018 12:22:49 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180509153917.GI8373@desktop>
-References: <1525426891-6121-1-git-send-email-amir73il@gmail.com> <20180509153917.GI8373@desktop>
+In-Reply-To: <20180509152705.GA10101@redhat.com>
+References: <20180509152705.GA10101@redhat.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 9 May 2018 19:20:13 +0300
-Message-ID: <CAOQ4uxjj1MCCvEpG-p2vr8iAsMesmUFEadM0bdCePGC9GN150g@mail.gmail.com>
-Subject: Re: [PATCH 0/2] Another overlay test for online inconsistency detection
+Date: Wed, 9 May 2018 19:22:48 +0300
+Message-ID: <CAOQ4uxgRb0T6nWou7uasOF+QGEHRMa1C5wD4AsJABJDXK+yNhQ@mail.gmail.com>
+Subject: Re: [PATCH V2] xfstest: overlay: Add tests for overlay metadata only
+ copy up feature
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Vivek Goyal <vgoyal@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 9, 2018 at 6:39 PM, Eryu Guan <guaneryu@gmail.com> wrote:
-> On Fri, May 04, 2018 at 12:41:29PM +0300, Amir Goldstein wrote:
->> Eryu,
->>
->> Originally, I wrote overlay/049 to test online inconcsistency detection
->> feature, which I wrote as a sub feature of NFS export, so the initial
->> version of the test required and eanbled NFS export.
->>
->> Then, at some point, the test started to pass without NFS export enabled,
->> which was a by-product of another fix for inotify I did around the same
->> time. So the test got merged without requiring NFS export, but with said
->> fix commit on next branch.
->>
->> On a recent discussion with Vivek, I realized that there was another
->> "by-product" inconsistency detection introduced by the same fix commit
->> and not covered by overlay/049.
->>
->> The variant overlay/059 checks for this case of malformed multiply
->> referenced origin files. I wrote the test to support upcoming 'metacopy'
->> feature by Vivek, so it requires and enables redirect_dir, which is
->> harmless otherwise.
->>
->> I tested overlay/059 on several old kernels. The results are:
->> - notrun on kernel < v4.10, before "redirect_dir" feature
->> - pass on kernels < v4.12, before "origin" was introduced
->> - fail on kernels < v4.16, before the fix commit
->> - pass on newer kernels
+On Wed, May 9, 2018 at 6:27 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> Hi,
 >
-> Thanks a lot for the detailed background information and test status!
+> Please find attached the V2 of the patch. Took care of Amir's comments
+> from previous version.
 >
-> BTW, I noticed that you still send patches to address eguan@redhat.com,
-> I'm not using thaa address anymore, please send to guaneryu@gmail.com
-> instead :)
+> Add tests for metadata only copy up feature.
 >
+> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
 
-Right. Forgot to update my scripts.
-Should be good now.
+Looks good.
+
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+
+Just a note to Eryu -
+
+You may want to hold on to this test until metacopy is merged
+or at least staged on Miklos' next branch.
+
+Up to you.
 
 Thanks,
 Amir.
