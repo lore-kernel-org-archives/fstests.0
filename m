@@ -1,108 +1,57 @@
-Received: from mx1.redhat.com ([209.132.183.28]:34482 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965232AbeEIQSH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 May 2018 12:18:07 -0400
-Subject: Re: [PATCH] test online label ioctl
-References: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
- <20180509154931.GJ8373@desktop>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <96efb2d0-3cb0-ba1b-35c4-8e6e3df388ac@redhat.com>
-Date: Wed, 9 May 2018 11:18:06 -0500
+Received: from mail-yb0-f175.google.com ([209.85.213.175]:36879 "EHLO
+        mail-yb0-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965034AbeEIQUO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 May 2018 12:20:14 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180509154931.GJ8373@desktop>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20180509153917.GI8373@desktop>
+References: <1525426891-6121-1-git-send-email-amir73il@gmail.com> <20180509153917.GI8373@desktop>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 9 May 2018 19:20:13 +0300
+Message-ID: <CAOQ4uxjj1MCCvEpG-p2vr8iAsMesmUFEadM0bdCePGC9GN150g@mail.gmail.com>
+Subject: Re: [PATCH 0/2] Another overlay test for online inconsistency detection
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+Cc: Vivek Goyal <vgoyal@redhat.com>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 5/9/18 10:49 AM, Eryu Guan wrote:
-> On Mon, Apr 30, 2018 at 04:43:18PM -0500, Eric Sandeen wrote:
->> This tests the online label ioctl that btrfs has, which has been
->> recently proposed for XFS.
+On Wed, May 9, 2018 at 6:39 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Fri, May 04, 2018 at 12:41:29PM +0300, Amir Goldstein wrote:
+>> Eryu,
 >>
->> To run, it requires an updated xfs_io with the label command and a
->> filesystem that supports it
+>> Originally, I wrote overlay/049 to test online inconcsistency detection
+>> feature, which I wrote as a sub feature of NFS export, so the initial
+>> version of the test required and eanbled NFS export.
 >>
->> A slight change here to _require_xfs_io_command as well, so that tests
->> which simply fail with "Inappropriate ioctl" can be caught in the
->> common case.
+>> Then, at some point, the test started to pass without NFS export enabled,
+>> which was a by-product of another fix for inotify I did around the same
+>> time. So the test got merged without requiring NFS export, but with said
+>> fix commit on next branch.
 >>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
+>> On a recent discussion with Vivek, I realized that there was another
+>> "by-product" inconsistency detection introduced by the same fix commit
+>> and not covered by overlay/049.
 >>
+>> The variant overlay/059 checks for this case of malformed multiply
+>> referenced origin files. I wrote the test to support upcoming 'metacopy'
+>> feature by Vivek, so it requires and enables redirect_dir, which is
+>> harmless otherwise.
+>>
+>> I tested overlay/059 on several old kernels. The results are:
+>> - notrun on kernel < v4.10, before "redirect_dir" feature
+>> - pass on kernels < v4.12, before "origin" was introduced
+>> - fail on kernels < v4.16, before the fix commit
+>> - pass on newer kernels
+>
+> Thanks a lot for the detailed background information and test status!
+>
+> BTW, I noticed that you still send patches to address eguan@redhat.com,
+> I'm not using thaa address anymore, please send to guaneryu@gmail.com
+> instead :)
+>
 
-...
+Right. Forgot to update my scripts.
+Should be good now.
 
->> +# And that it succeeds right at the filesystem max:
->> +case $FSTYP in
->> +xfs)
->> +	MAXLEN=12;
->> +	;;
->> +btrfs)
->> +	MAXLEN=256
-> 
-> Seems this should be 255, otherwise I got failure like:
-> 
-> -label = "MAXLABEL"
-> +label: Invalid argument
-> 
-> and MAXLEN=255 makes the test pass with btrfs.
-
-You are correct, I missed that they exclude the trailing
-null from the length.  (Sorry, thought I tested this :( )
-
->> +	;;
->> +*)
->> +	MAXLEN=256
->> +	echo "Your filesystem supports online label, please add max length"
-> 
-> Perhaps we can introduce a new helper similar to _require_acl_get_max()
-> and _notrun the test if current $FSTYP doesn't define a maxlen on
-> filesystem label?
-
-Ok, sure.
-
->> +	;;
->> +esac
->> +LABEL=$(perl -e "print 'o' x $MAXLEN;")
->> +$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
->> +
->> +# And that it fails just past the filesystem max:
->> +let TOOLONG=MAXLEN+1
->> +LABEL=$(perl -e "print 'o' x $TOOLONG;")
->> +$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/generic/485.out b/tests/generic/485.out
->> new file mode 100644
->> index 0000000..bc54684
->> --- /dev/null
->> +++ b/tests/generic/485.out
->> @@ -0,0 +1,9 @@
->> +QA output created by 485
->> +label = "label.485"
->> +label = "label.485"
->> +SCRATCH_DEV: LABEL="label.485" 
->> +SCRATCH_DEV: LABEL="label.485" 
-> 
-> There're trailing whitespaces in above two lines, I thought they're the
-> output from xfs_io label command at first, but actually I have to remove
-> the spaces to make test pass.
-
-It might need a filter, this is output from blkid; it might have changed.
-I noticed the whitespace as well but IIRC it works here.
-
-Will look into these and fix stuff up.
-
-Thanks!
--Eric
-
-> Thanks,
-> Eryu
-> 
-
+Thanks,
+Amir.
