@@ -1,45 +1,64 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:35411 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755867AbeEHSYZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 8 May 2018 14:24:25 -0400
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:10718 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S934638AbeEIM6a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 May 2018 08:58:30 -0400
+Subject: Re: [PATCH] btrfs: add test for seeing unseen fsync errors on newly
+ open files
+References: <20180508125657.10045-1-jlayton@kernel.org>
+From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Message-ID: <ee4f2765-0d4d-19a3-2cbe-6e7ad8892fdd@cn.fujitsu.com>
+Date: Wed, 9 May 2018 20:58:20 +0800
 MIME-Version: 1.0
-In-Reply-To: <20180508173812.GH3501@redhat.com>
-References: <20180508173812.GH3501@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 8 May 2018 21:24:23 +0300
-Message-ID: <CAOQ4uxjw0U9f-tN9SuKh-kmsFGZ6SdYorM=h6RNDawQXEcZQeQ@mail.gmail.com>
-Subject: Re: [PATCH] xfstest: overlay: Add tests for overlay metadata only
- copy up feature
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20180508125657.10045-1-jlayton@kernel.org>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>
+To: Jeff Layton <jlayton@kernel.org>, guaneryu@gmail.com
+Cc: fstests@vger.kernel.org, willy@infradead.org, andres@anarazel.de, david@fromorbit.com, amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 8, 2018 at 8:38 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> Add tests for proposed metadata only copy up feature in overlayfs.
->
-> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+On 05/08/2018 08:56 PM, Jeff Layton wrote:
+> From: Jeff Layton <jlayton@redhat.com>
+> 
+> This adds a regression test for the following kernel patch:
+> 
+>      errseq: Always report a writeback error once
+> 
+> This is motivated by some rather odd behavior done by the PostgreSQL
+> project. The main database writers will offload the fsync calls to a
+> separate process, which can open files after a writeback error has
+> already occurred.
+> 
+> This used to work with older kernels that reported the error to only
+> one fd, but with the errseq_t changes we lost the ability to see
+> errors that occurred before the open. The above patch restores that
+> behavior.
+> 
+> Signed-off-by: Jeff Layton <jlayton@redhat.com>
 > ---
->  common/overlay        |    1
->  tests/overlay/059     |  281 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/059.out |   42 +++++++
->  tests/overlay/group   |    1
->  4 files changed, 325 insertions(+)
->
-> Index: xfstests-dev/tests/overlay/059
-> ===================================================================
-> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/059      2018-05-08 13:32:13.828919038 -0400
-> @@ -0,0 +1,281 @@
+>   tests/btrfs/999     | 110 ++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/999.out |   5 ++
+>   tests/btrfs/group   |   1 +
+>   3 files changed, 116 insertions(+)
+>   create mode 100755 tests/btrfs/999
+>   create mode 100644 tests/btrfs/999.out
+> 
+> diff --git a/tests/btrfs/999 b/tests/btrfs/999
+> new file mode 100755
+> index 000000000000..0f68942a91da
+> --- /dev/null
+> +++ b/tests/btrfs/999
+> @@ -0,0 +1,110 @@
 > +#! /bin/bash
-> +# FS QA Test No. 059
+> +# FS QA Test No. 999
 > +#
-> +# Test metadata only copy up functionality.
+> +# Open a file and write to it and fsync. Then flip the data device to throw
+> +# errors, write to it again and call sync. Close the file, reopen it and
+> +# then call fsync on it. Is the error reported?
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-> +# Author: Vivek Goyal <vgoyal@redhat.com>
+> +# Copyright (c) 2018, Jeff Layton <jlayton@redhat.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -54,7 +73,6 @@ On Tue, May 8, 2018 at 8:38 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 > +#-----------------------------------------------------------------------
-> +#
 > +
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -62,337 +80,123 @@ On Tue, May 8, 2018 at 8:38 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1       # failure is the default!
+> +status=1    # failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +       cd /
-> +       rm -f $tmp.*
+> +	cd /
+> +	rm -rf $tmp.* $testdir
+> +	_dmerror_cleanup
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
+> +. ./common/dmerror
 > +
 > +# real QA test starts here
-> +_supported_fs overlay
 > +_supported_os Linux
-> +# We use non-default scratch underlying overlay dirs, we need to check
-> +# them explicity after test.
-> +_require_scratch_nocheck
-> +_require_scratch_overlay_features redirect_dir
+> +_supported_fs btrfs
+> +# This test uses "dm" without taking into account the data could be on
+> +# realtime subvolume, thus the test will fail with rtinherit=1
+> +_require_no_rtinherit
+> +_require_scratch_dev_pool
+> +
+> +_require_dm_target error
+> +
+> +rm -f $seqres.full
+> +
+> +# bring up dmerror device
+> +_scratch_unmount
 
-_require_scratch_overlay_features index redirect_dir metacopy
+# diff -u tests/btrfs/999.out results/btrfs/999.out.bad
+--- tests/btrfs/999.out 2018-05-09 13:01:21.605173303 +0800
++++ results/btrfs/999.out.bad 2018-05-09 20:50:46.721383569 +0800
+@@ -1,4 +1,5 @@
+  QA output created by 999
++umount: /mnt/scratch: not mounted.
+  Format and mount
+  The following fsync should fail with EIO:
+  fsync: Input/output error
 
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# File size on lower
-> +lowername="lowerfile"
-> +lowerlink="lowerfile-link"
-> +lowersize="16384"
-> +lowerdata="lower"
-> +
-> +udirname="pureupper"
-> +ufile="upperfile"
-> +
-> +# Check metacopy xattr
-> +check_metacopy()
-> +{
-> +        local target=$1 exist=$2
-> +       local out_f target_f
-> +       local msg
-> +
-> +        out_f=$($GETFATTR_PROG --absolute-names --only-values -n \
-> +               $OVL_XATTR_METACOPY $target 2>&1 | _filter_scratch)
-> +
-> +       if [ "$exist" == "y" ];then
-> +               [ "$out_f" == "" ] && return
-> +               echo "Metacopy xattr does not exist on ${target}. stdout=$out_f"
-> +               return
-> +       fi
-> +
-> +       if [ "$out_f" == "" ];then
-> +               echo "Metacopy xattr exists on ${target} unexpectedly."
-> +               return
-> +       fi
-> +
-> +       target_f=`echo $target | _filter_scratch`
-> +       msg="$target_f: trusted.overlay.metacopy: No such attribute"
-> +
-> +       [ "$out_f" == "$msg" ] && return
-> +
-> +       echo "Error while checking xattr on ${target}. stdout=$out"
-> +}
-> +
-> +# Check redirect xattr
-> +check_redirect()
-> +{
-> +       local target=$1
-> +       local expect=$2
-> +
-> +       value=$($GETFATTR_PROG --absolute-names --only-values -n \
-> +               $OVL_XATTR_REDIRECT $target)
-> +
-> +       [[ "$value" == "$expect" ]] || echo "Redirect xattr incorrect. Expected=\"$expect\", actual=\"$value\""
-> +}
-> +
-> +# Check size
-> +check_size()
-> +{
-> +       local target=$1 expected_size=$2
-> +       local size nr_blocks blocksize stat_data
-> +
-> +       stat_data=$(stat -c "%s %b %B" $target)
-> +       size=`echo $stat_data | cut -d " " -f1`
-> +       nr_blocks=`echo $stat_data | cut -d " " -f2`
-> +       blocksize=`echo $stat_data | cut -d " " -f3`
-> +
-> +       [ "$size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $size"
-> +
-> +       size=$(( $nr_blocks * $blocksize ))
-> +
-> +       [ "$size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is ${size}. nr_blocks=$nr_blocks blocksize=$blocksize"
-> +}
-> +
-> +check_contents()
-> +{
-> +       local target=$1 expected=$2
-> +       local actual target_f
-> +
-> +       target_f=`echo $target | _filter_scratch`
-> +
-> +       read actual<$target
-> +
-> +       [ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
-> +}
-> +
-> +check_file_properties()
-> +{
-> +       local target=$1 expected_size=$2 expected_content=$3
-> +
-> +       check_size $target $expected_size
-> +       check_contents $target $expected_content
-> +}
-> +
-> +mount_overlay()
-> +{
-> +       local _lowerdir=$1
-> +
-> +       _overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on
-> +}
-> +
-> +umount_overlay()
-> +{
-> +       $UMOUNT_PROG $SCRATCH_MNT
-> +}
-> +
-> +# Assumes it is called with overlay mounted.
-> +test_common()
-> +{
-> +       local _lowerdir=$1 _target=$2 _size=$3 _data="$4" _redirect=$5
-> +
-> +       echo "check properties of metadata copied up file"
-> +       check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
-> +
-> +       # Do a mount cycle and check size and contents again.
-> +       echo "Unmount and Mount again"
-> +       umount_overlay
-> +       mount_overlay $_lowerdir
-> +       echo "check properties of metadata copied up file"
-> +       check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
-> +
-> +       # Make sure copied up file is a metacopy file.
-> +       umount_overlay
-> +       check_metacopy $upperdir/$_target "y"
-> +       [ -n "$_redirect" ] && check_redirect $upperdir/$_target "$_redirect"
-> +
+The above _require_scratch_dev_pool has already umounted the scratch.
 
-Please check that upper file has no content before data copy up
-and that it has content after data copy up.
+-- 
+Thanks,
+Lu
 
-> +       # Trigger data copy up and check absence of metacopy xattr.
-> +       mount_overlay $_lowerdir
-> +       $XFS_IO_PROG -c "open -a $SCRATCH_MNT/$_target"
-> +       echo "check properties of data copied up file"
-> +       check_file_properties $SCRATCH_MNT/$_target $_size "$_data"
-> +       umount_overlay
-> +       check_metacopy $upperdir/$_target "n"
-> +}
+> +_dmerror_init
 > +
-> +create_basic_files()
-> +{
-> +       _scratch_mkfs
-> +       mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-> +       mkdir -p $upperdir/$udirname
-> +       echo "$lowerdata" > $lowerdir/$lowername
-> +       chmod 600 $lowerdir/$lowername
-> +       # Create a file of size lowersize.
-> +       $XFS_IO_PROG -c "falloc 0 $lowersize" $lowerdir/$lowername
-> +}
+> +# Replace first device with error-test device
+> +old_SCRATCH_DEV=$SCRATCH_DEV
+> +SCRATCH_DEV_POOL=`echo $SCRATCH_DEV_POOL | perl -pe "s#$SCRATCH_DEV#$DMERROR_DEV#"`
+> +SCRATCH_DEV=$DMERROR_DEV
 > +
-> +create_lower_link()
-> +{
-> +       ln $lowerdir/$lowername $lowerdir/$lowerlink
-> +}
+> +echo "Format and mount"
+> +_scratch_pool_mkfs "-d raid0 -m raid1" > $seqres.full 2>&1
+> +_scratch_mount
 > +
-> +prepare_midlayer()
-> +{
-> +       _scratch_mkfs
-> +       create_basic_files
-> +       # Create midlayer
-> +       _overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on,index=on,metacopy=on
-> +       # Trigger a metacopy
-> +       chmod 400 $SCRATCH_MNT/$lowername
-> +       umount_overlay
-> +}
+> +# How much do we need to write? We need to hit all of the stripes. btrfs uses a
+> +# fixed 64k stripesize, so write enough to hit each one. In the case of
+> +# compression, each 128K input data chunk will be compressed to 4K (because of
+> +# the characters written are duplicate). Therefore we have to write
+> +# (128K * 16) = 2048K to make sure every stripe can be hit.
+> +number_of_devices=`echo $SCRATCH_DEV_POOL | wc -w`
+> +write_kb=$(($number_of_devices * 2048))
+> +_require_fs_space $SCRATCH_MNT $write_kb
+> +datalen=$((($write_kb * 1024)-1))
 > +
-> +# Create test directories
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
+> +# use fd 5 to hold file open
+> +testfile=$SCRATCH_MNT/fsync-open-after-err
+> +exec 5>$testfile
 > +
-> +# Test simple metacopy
-> +create_basic_files
+> +# write some data to file and fsync it out
+> +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c fsync $testfile
 > +
-> +# Make sure metacopy feature is supported by kernel, otherwise do not
-> +# run test.
-> +mount_overlay $lowerdir || _notrun "mount overlay with metacopy failed"
-
-You don't need that here if you require the metacopy feature above.
-
-> +umount_overlay
+> +# flip device to non-working mode
+> +_dmerror_load_error_table
 > +
-> +# Tests start here
-> +echo "== Check Simple Metacopy =="
-> +mount_overlay $lowerdir
-> +chmod 400 $SCRATCH_MNT/$lowername
-> +test_common $lowerdir $lowername $lowersize "$lowerdata"
+> +# rewrite the data, call sync to ensure it's written back w/o scraping error
+> +$XFS_IO_PROG -c "pwrite -q 0 $datalen" -c sync $testfile
 > +
-> +# Test midlayer metacopy
-> +echo -e "\n== Check Midlayer Metacopy =="
-> +prepare_midlayer
-> +mount_overlay "$lowerdir2:$lowerdir"
-> +chmod 400 $SCRATCH_MNT/$lowername
-> +test_common "$lowerdir2:$lowerdir" $lowername $lowersize "$lowerdata"
+> +# heal the device error
+> +_dmerror_load_working_table
 > +
-> +# Test Rename Redirect
-> +echo -e "\n== Check Rename Redirect =="
-> +create_basic_files
-> +mount_overlay $lowerdir
-> +mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
-> +test_common $lowerdir $ufile $lowersize "$lowerdata" "$lowername"
+> +# open again and call fsync
+> +echo "The following fsync should fail with EIO:"
+> +$XFS_IO_PROG -c fsync $testfile
+> +echo "done"
 > +
-> +# Test midlayer rename redirect
-> +echo -e "\n== Check Midlayer Rename Redirect =="
-> +prepare_midlayer
-> +mount_overlay "$lowerdir2:$lowerdir"
-> +mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
-> +test_common "$lowerdir2:$lowerdir" $ufile $lowersize "$lowerdata" "$lowername"
-> +
-> +# Test Link Redirect
-> +echo -e "\n== Check Link Redirect =="
-> +create_basic_files
-> +mount_overlay $lowerdir
-> +ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
-> +test_common $lowerdir $udirname/$ufile $lowersize "$lowerdata" "/$lowername"
-> +
-> +# Test midlayer link redirect
-> +echo -e "\n== Check Midlayer Link Redirect =="
-> +prepare_midlayer
-> +mount_overlay "$lowerdir2:$lowerdir"
-> +ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
-> +test_common "$lowerdir2:$lowerdir" $udirname/$ufile $lowersize "$lowerdata" \
-> +               "/$lowername"
-> +
-> +# Test lower link file gets absolute redirect upon rename
-> +echo -e "\n== Check Lower Link Rename Absolute Redirect =="
-> +create_basic_files
-> +create_lower_link
-> +mount_overlay $lowerdir
-> +mv $SCRATCH_MNT/$lowerlink $SCRATCH_MNT/$ufile
-> +test_common $lowerdir $ufile $lowersize "$lowerdata" "/$lowerlink"
+> +# close file
+> +exec 5>&-
 > +
 > +# success, all done
+> +_dmerror_unmount
+> +_dmerror_cleanup
+> +
 > +status=0
 > +exit
-> Index: xfstests-dev/common/overlay
-> ===================================================================
-> --- xfstests-dev.orig/common/overlay    2018-05-08 13:31:59.492919038 -0400
-> +++ xfstests-dev/common/overlay 2018-05-08 13:32:13.828919038 -0400
-> @@ -10,6 +10,7 @@ export OVL_XATTR_IMPURE="trusted.overlay
->  export OVL_XATTR_ORIGIN="trusted.overlay.origin"
->  export OVL_XATTR_NLINK="trusted.overlay.nlink"
->  export OVL_XATTR_UPPER="trusted.overlay.upper"
-> +export OVL_XATTR_METACOPY="trusted.overlay.metacopy"
->
->  # helper function to do the actual overlayfs mount operation
->  _overlay_mount_dirs()
-> Index: xfstests-dev/tests/overlay/059.out
-> ===================================================================
-> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/059.out  2018-05-08 13:32:13.829919038 -0400
-> @@ -0,0 +1,42 @@
-> +QA output created by 059
-> +== Check Simple Metacopy ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Midlayer Metacopy ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Rename Redirect ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Midlayer Rename Redirect ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Link Redirect ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Midlayer Link Redirect ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> +
-> +== Check Lower Link Rename Absolute Redirect ==
-> +check properties of metadata copied up file
-> +Unmount and Mount again
-> +check properties of metadata copied up file
-> +check properties of data copied up file
-> Index: xfstests-dev/tests/overlay/group
-> ===================================================================
-> --- xfstests-dev.orig/tests/overlay/group       2018-05-08 13:31:59.492919038 -0400
-> +++ xfstests-dev/tests/overlay/group    2018-05-08 13:32:13.829919038 -0400
-> @@ -61,3 +61,4 @@
->  056 auto quick fsck
->  057 auto quick redirect
->  058 auto quick exportfs
-> +059 auto quick
+> diff --git a/tests/btrfs/999.out b/tests/btrfs/999.out
+> new file mode 100644
+> index 000000000000..38d2d7f6495f
+> --- /dev/null
+> +++ b/tests/btrfs/999.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 999
+> +Format and mount
+> +The following fsync should fail with EIO:
+> +fsync: Input/output error
+> +done
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index ba766f6b84f8..8550f87a2305 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -162,3 +162,4 @@
+>   157 auto quick raid
+>   158 auto quick raid scrub
+>   159 auto quick
+> +999 auto quick
+> 
 
-Let's start a metacopy test group.
 
-Thanks,
-Amir.
