@@ -1,167 +1,128 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:39362 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S965034AbeEIQXI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 May 2018 12:23:08 -0400
-Date: Wed, 9 May 2018 09:22:48 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: limit xfs_growfs size if test with --large-fs
-Message-ID: <20180509162248.GT11261@magnolia>
-References: <20180427082254.25524-1-zlang@redhat.com>
- <20180509160214.GK8373@desktop>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180509160214.GK8373@desktop>
+Received: from mail-pl0-f47.google.com ([209.85.160.47]:41220 "EHLO
+        mail-pl0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751313AbeEJGWB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 May 2018 02:22:01 -0400
+Received: by mail-pl0-f47.google.com with SMTP id az12-v6so691043plb.8
+        for <fstests@vger.kernel.org>; Wed, 09 May 2018 23:22:01 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH] btrfs: test ENOSPC caused by many orphan items
+Date: Wed,  9 May 2018 23:21:55 -0700
+Message-Id: <f6e37bbc4505f578176232a48cde99a9a3b7bb70.1525932731.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
+Cc: kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 10, 2018 at 12:02:14AM +0800, Eryu Guan wrote:
-> [cc linux-xfs list for xfs test]
-> 
-> On Fri, Apr 27, 2018 at 04:22:54PM +0800, Zorro Lang wrote:
-> > When test on large SCRATCH_DEV, grow a small XFS to huge size is a
-> > horrible thing (e.g grow 128m to 500T). So add a helper named
-> > _scratch_xfs_growfs_limited() to do below things:
-> > 
-> > 1) If --large-fs is used, limit growfs size.
-> > 2) If a limit size parameter is specified, make sure growfs won't
-> > beyond this size.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> 
-> Sorry for the late review..
-> 
-> This looks fine to me, but I'd like to let XFS developers to take a look
-> too, I'm not sure if "10 times larger" is a sane default value.
-> 
-> BTW, the subject doesn't quite describe what the patch does:
-> 
-> "xfs: limit xfs_growfs size if test with --large-fs"
-> 
-> The patch also limits the growfs size based on the user-specified fs
-> size.
+From: Omar Sandoval <osandov@fb.com>
 
-Agreed.
+Btrfs has a bug where we can prematurely ENOSPC if we have lots of
+orphaned files, i.e., deleted files which are still open. Add a test
+which repeatedly creates and deletes a file while keeping all of the
+file descriptors open. This should succeed but doesn't on Btrfs without
+the fix.
 
-> > ---
-> >  common/xfs    | 34 ++++++++++++++++++++++++++++++++++
-> >  tests/xfs/002 |  2 +-
-> >  tests/xfs/127 |  2 +-
-> >  tests/xfs/233 |  2 +-
-> >  4 files changed, 37 insertions(+), 3 deletions(-)
-> > 
-> > diff --git a/common/xfs b/common/xfs
-> > index e0bc3f43..6200297c 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -721,3 +721,37 @@ _require_xfs_db_write_array()
-> >  	rm -f $TEST_DIR/$seq.img
-> >  	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
-> >  }
-> > +
-> > +# If test on large device or a limit size is specified, this helper make sure
-> > +# xfs_growfs won't beyond this limit (try to grow 10 times current fs size by
-> > +# default).
-> > +#   usage: _scratch_xfs_growfs_limited [size_by_byte]
-> > +_scratch_xfs_growfs_limited()
-> 
-> I think we could just name it as _scratch_xfs_growfs().
+Signed-off-by: Omar Sandoval <osandov@fb.com>
+---
+ tests/generic/479     |  0
+ tests/generic/487     | 65 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/487.out |  2 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 68 insertions(+)
+ mode change 100644 => 100755 tests/generic/479
+ create mode 100755 tests/generic/487
+ create mode 100644 tests/generic/487.out
 
-And tweak the documentation to make its behavior clearer:
+diff --git a/tests/generic/479 b/tests/generic/479
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/487 b/tests/generic/487
+new file mode 100755
+index 00000000..66379cf0
+--- /dev/null
++++ b/tests/generic/487
+@@ -0,0 +1,65 @@
++#! /bin/bash
++# FS QA Test 487
++#
++# Test having many file descriptors referring to deleted files open. Regression
++# test for patch "Btrfs: fix ENOSPC caused by orphan items reservations".
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Omar Sandoval.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
++_scratch_mount
++
++test_file="$SCRATCH_MNT/$seq"
++
++(
++ulimit -n $((16 * 1024))
++# ~10000 files on a 1 GB filesystem should be no problem.
++for ((i = 1000; i < 10000; i++)); do
++	eval "exec $i<> \"$test_file\"" && rm "$test_file" || break
++done
++)
++
++echo "Silence is golden"
++
++status=0
++exit
+diff --git a/tests/generic/487.out b/tests/generic/487.out
+new file mode 100644
+index 00000000..5f31fd97
+--- /dev/null
++++ b/tests/generic/487.out
+@@ -0,0 +1,2 @@
++QA output created by 487
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 505383f7..93581257 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -489,3 +489,4 @@
+ 484 auto quick
+ 485 auto quick insert
+ 486 auto quick attr
++487 auto quick
+-- 
+2.17.0
 
-"Grows the mounted scratch filesystem.
-
-"If max_size_in_bytes is specified, the filesystem will not be grown
-larger than that size.  Otherwise, if LARGE_SCRATCH_DEV == yes, the
-filesystem will not be grown larger than 10x the current size.  If
-max_size_in_bytes is not specified and LARGE_SCRATCH_DEV != yes, the
-scratch filesystem will be expanded to fit the scratch device."
-
-Assuming that's the intended behavior.
-
---D
-
-> 
-> Thanks,
-> Eryu
-> 
-> > +{
-> > +
-> > +	local limit_size="$1"
-> > +	local option=""
-> > +
-> > +	if [ "$LARGE_SCRATCH_DEV" = "yes" -o -n "$limit_size" ]; then
-> > +		local tmp=`mktemp -u`
-> > +		xfs_info $SCRATCH_MNT | _filter_mkfs > /dev/null 2>$tmp.info
-> > +		. $tmp.info
-> > +		rm -f $tmp.info
-> > +
-> > +		local fs_size=$((dbsize * dblocks))
-> > +		local dev_size_kb=`_get_device_size $SCRATCH_DEV`
-> > +
-> > +		# default limit_size is 10 times current fs size.
-> > +		if [ -z "$limit_size" ]; then
-> > +			limit_size=$((fs_size * 10))
-> > +		fi
-> > +		# don't limit growfs size if device size is smaller
-> > +		if [ $((dev_size_kb * 1024)) -gt $limit_size ]; then
-> > +			option="-D $((limit_size / dbsize))"
-> > +		else
-> > +			option=""
-> > +		fi
-> > +	fi
-> > +
-> > +	$XFS_GROWFS_PROG $option $SCRATCH_MNT
-> > +}
-> > diff --git a/tests/xfs/002 b/tests/xfs/002
-> > index 741117be..42d2e2d7 100755
-> > --- a/tests/xfs/002
-> > +++ b/tests/xfs/002
-> > @@ -68,7 +68,7 @@ _scratch_xfs_db -x -c "sb 2" -c "type data" -c "write fill 0xff 224 4"
-> >  _scratch_mount
-> >  
-> >  # This should pass
-> > -$XFS_GROWFS_PROG $SCRATCH_MNT >> $seqres.full 2>&1 || _fail "growfs failed"
-> > +_scratch_xfs_growfs_limited >> $seqres.full 2>&1 || _fail "growfs failed"
-> >  
-> >  # success, all done
-> >  status=0
-> > diff --git a/tests/xfs/127 b/tests/xfs/127
-> > index 9df99904..c05fcee9 100755
-> > --- a/tests/xfs/127
-> > +++ b/tests/xfs/127
-> > @@ -61,7 +61,7 @@ _cp_reflink $testdir/original $testdir/copy1
-> >  _cp_reflink $testdir/copy1 $testdir/copy2
-> >  
-> >  echo "Grow fs"
-> > -$XFS_GROWFS_PROG $SCRATCH_MNT 2>&1 |  _filter_growfs >> $seqres.full
-> > +_scratch_xfs_growfs_limited 2>&1 | _filter_growfs >> $seqres.full
-> >  _scratch_cycle_mount
-> >  
-> >  echo "Create more reflink copies"
-> > diff --git a/tests/xfs/233 b/tests/xfs/233
-> > index e61c444d..a0dd42e7 100755
-> > --- a/tests/xfs/233
-> > +++ b/tests/xfs/233
-> > @@ -59,7 +59,7 @@ cp -p $testdir/original $testdir/copy1
-> >  cp -p $testdir/copy1 $testdir/copy2
-> >  
-> >  echo "Grow fs"
-> > -$XFS_GROWFS_PROG $SCRATCH_MNT 2>&1 |  _filter_growfs >> $seqres.full
-> > +_scratch_xfs_growfs_limited 2>&1 |  _filter_growfs >> $seqres.full
-> >  _scratch_cycle_mount
-> >  
-> >  echo "Create more copies"
-> > -- 
-> > 2.14.3
-> > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
