@@ -1,54 +1,138 @@
-Received: from mail-pl0-f47.google.com ([209.85.160.47]:41220 "EHLO
-        mail-pl0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751313AbeEJGWB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 May 2018 02:22:01 -0400
-Received: by mail-pl0-f47.google.com with SMTP id az12-v6so691043plb.8
-        for <fstests@vger.kernel.org>; Wed, 09 May 2018 23:22:01 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH] btrfs: test ENOSPC caused by many orphan items
-Date: Wed,  9 May 2018 23:21:55 -0700
-Message-Id: <f6e37bbc4505f578176232a48cde99a9a3b7bb70.1525932731.git.osandov@fb.com>
+Received: from mx2.suse.de ([195.135.220.15]:57104 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S966135AbeEJPls (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 10 May 2018 11:41:48 -0400
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] ext4/309: Add SEEK_DATA tests for offsets in the middle of holes
+Date: Thu, 10 May 2018 17:41:39 +0200
+Message-Id: <20180510154139.4823-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
-Cc: kernel-team@fb.com
+To: fstests@vger.kernel.org
+Cc: Jeff Mahoney <jeffm@suse.com>, linux-ext4@vger.kernel.org, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+ext4 had a bug for files with indirect extents where it wrongly reported
+a size of a hole in some cases and thus SEEK_DATA implementation could
+skip some data in a file. Test for that. The problem is fixed by patch
+"ext4: Fix hole length detection in ext4_ind_map_blocks()".
 
-Btrfs has a bug where we can prematurely ENOSPC if we have lots of
-orphaned files, i.e., deleted files which are still open. Add a test
-which repeatedly creates and deletes a file while keeping all of the
-file descriptors open. This should succeed but doesn't on Btrfs without
-the fix.
-
-Signed-off-by: Omar Sandoval <osandov@fb.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- tests/generic/479     |  0
- tests/generic/487     | 65 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/487.out |  2 ++
- tests/generic/group   |  1 +
- 4 files changed, 68 insertions(+)
- mode change 100644 => 100755 tests/generic/479
- create mode 100755 tests/generic/487
- create mode 100644 tests/generic/487.out
+ src/seek_sanity_test.c | 71 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/309         | 56 +++++++++++++++++++++++++++++++++++++++
+ tests/ext4/309.out     |  1 +
+ tests/ext4/group       |  1 +
+ 4 files changed, 129 insertions(+)
+ create mode 100755 tests/ext4/309
+ create mode 100644 tests/ext4/309.out
 
-diff --git a/tests/generic/479 b/tests/generic/479
-old mode 100644
-new mode 100755
-diff --git a/tests/generic/487 b/tests/generic/487
+Note that I'm adding new tests to a common test program src/seek_sanity_test
+but I only use them from ext4 specific test as the offsets are pretty ext4
+specific and so I don't see any use in making this run for all other
+filesystems. If people think it should be done differently, please speak up.
+
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index e82cb1f78671..9245464400e8 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -274,6 +274,75 @@ out:
+ 	return ret;
+ }
+ 
++/*
++ * Make sure hole size is properly reported when starting in the middle of a
++ * hole in ext? doubly indirect tree
++ */
++static int test20(int fd, int testnum)
++{
++	int ret = -1;
++	char *buf = NULL;
++	loff_t bufsz, filsz;
++
++	bufsz = alloc_size;
++	buf = do_malloc(bufsz);
++	if (!buf)
++		goto out;
++	memset(buf, 'a', bufsz);
++
++	/* Magic size in the middle of ext[23] triple indirect tree */
++	filsz = (12 + bufsz / 4 + 8 * bufsz / 4 * bufsz / 4 + 2 * bufsz / 4 + 5) * bufsz;
++	ret = do_pwrite(fd, buf, bufsz, filsz - bufsz);
++	if (ret)
++		goto out;
++
++	/* Offset inside ext[23] indirect block */
++	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 14 * bufsz, filsz - bufsz);
++	/* Offset inside ext[23] doubly indirect block */
++	ret += do_lseek(testnum, 2, fd, filsz, SEEK_DATA, (12 + 2 * bufsz / 4) * bufsz, filsz - bufsz);
++	/* Offsets inside ext[23] triply indirect block */
++	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA,
++		(12 + bufsz / 4 + bufsz / 4 * bufsz / 4 + 3 * bufsz / 4 + 5) * bufsz, filsz - bufsz);
++	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA,
++		(12 + bufsz / 4 + 7 * bufsz / 4 * bufsz / 4 + 5 * bufsz / 4) * bufsz, filsz - bufsz);
++	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA,
++		(12 + bufsz / 4 + 8 * bufsz / 4 * bufsz / 4 + bufsz / 4 + 11) * bufsz, filsz - bufsz);
++out:
++	if (buf)
++		free(buf);
++	return ret;
++}
++/*
++ * Make sure hole size is properly reported when starting in the middle of a
++ * hole in ext? indirect tree
++ */
++static int test19(int fd, int testnum)
++{
++	int ret = -1;
++	char *buf = NULL;
++	int bufsz, filsz;
++
++	bufsz = alloc_size;
++	buf = do_malloc(bufsz);
++	if (!buf)
++		goto out;
++	memset(buf, 'a', bufsz);
++
++	/* Magic size just beyond ext[23] indirect tree size */
++	filsz = (12 + bufsz / 4 + 1) * bufsz;
++	ret = do_pwrite(fd, buf, bufsz, filsz - bufsz);
++	if (ret)
++		goto out;
++
++	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, bufsz, filsz - bufsz);
++	ret += do_lseek(testnum, 2, fd, filsz, SEEK_DATA, 12*bufsz, filsz - bufsz);
++	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA, (12 + bufsz / 4 - 8)*bufsz, filsz - bufsz);
++out:
++	if (buf)
++		free(buf);
++	return ret;
++}
++
+ /* Make sure we get ENXIO if we pass in a negative offset. */
+ static int test18(int fd, int testnum)
+ {
+@@ -982,6 +1051,8 @@ struct testrec seek_tests[] = {
+        { 16, test16, "Test file with unwritten extents, non-contiguous dirty pages" },
+        { 17, test17, "Test file with unwritten extents, data-hole-data inside page" },
+        { 18, test18, "Test file with negative SEEK_{HOLE,DATA} offsets" },
++       { 19, test19, "Test file SEEK_DATA from middle of a large hole" },
++       { 20, test20, "Test file SEEK_DATA from middle of a huge hole" },
+ };
+ 
+ static int run_test(struct testrec *tr)
+diff --git a/tests/ext4/309 b/tests/ext4/309
 new file mode 100755
-index 00000000..66379cf0
+index 000000000000..ef56503db0f9
 --- /dev/null
-+++ b/tests/generic/487
-@@ -0,0 +1,65 @@
++++ b/tests/ext4/309
+@@ -0,0 +1,56 @@
 +#! /bin/bash
-+# FS QA Test 487
++# FS QA Test No. 309
 +#
-+# Test having many file descriptors referring to deleted files open. Regression
-+# test for patch "Btrfs: fix ENOSPC caused by orphan items reservations".
++# SEEK_DATA sanity tests.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Omar Sandoval.  All Rights Reserved.
++# Copyright (c) 2018 SUSE.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -70,59 +154,50 @@ index 00000000..66379cf0
 +echo "QA output created by $seq"
 +
 +here=`pwd`
-+tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
++# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+rm -f $seqres.full
-+
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch
 +
-+_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
-+_scratch_mount
++_require_test
++_require_seek_data_hole
 +
-+test_file="$SCRATCH_MNT/$seq"
++BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
 +
-+(
-+ulimit -n $((16 * 1024))
-+# ~10000 files on a 1 GB filesystem should be no problem.
-+for ((i = 1000; i < 10000; i++)); do
-+	eval "exec $i<> \"$test_file\"" && rm "$test_file" || break
-+done
-+)
++_require_test_program "seek_sanity_test"
 +
-+echo "Silence is golden"
++_cleanup()
++{
++	eval "rm -f $BASE_TEST_FILE.*"
++}
 +
++$here/src/seek_sanity_test -s 19 -e 20 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++	_fail "seek sanity check failed!"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/487.out b/tests/generic/487.out
+diff --git a/tests/ext4/309.out b/tests/ext4/309.out
 new file mode 100644
-index 00000000..5f31fd97
+index 000000000000..2b6375844df5
 --- /dev/null
-+++ b/tests/generic/487.out
-@@ -0,0 +1,2 @@
-+QA output created by 487
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 505383f7..93581257 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -489,3 +489,4 @@
- 484 auto quick
- 485 auto quick insert
- 486 auto quick attr
-+487 auto quick
++++ b/tests/ext4/309.out
+@@ -0,0 +1 @@
++QA output created by 309
+diff --git a/tests/ext4/group b/tests/ext4/group
+index 5bd15f82b3be..74f8273f5667 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -44,3 +44,4 @@
+ 306 auto rw resize quick
+ 307 auto ioctl rw defrag
+ 308 auto ioctl rw prealloc quick defrag
++309 auto quick
 -- 
-2.17.0
+2.13.6
 
