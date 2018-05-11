@@ -1,135 +1,197 @@
-Received: from mail-yb0-f194.google.com ([209.85.213.194]:42535 "EHLO
-        mail-yb0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750858AbeEKFmA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 May 2018 01:42:00 -0400
+Received: from mail-wm0-f52.google.com ([74.125.82.52]:38692 "EHLO
+        mail-wm0-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752174AbeEKIi6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 May 2018 04:38:58 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180511021152.10803-1-david@fromorbit.com>
-References: <20180511021152.10803-1-david@fromorbit.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 11 May 2018 08:41:58 +0300
-Message-ID: <CAOQ4uxh+D_1jEJquR5uyv2-AQpnNyZ9iiXFSqW6eSMmcPDi7Jw@mail.gmail.com>
-Subject: Re: [PATCH] xfs: test mount vs superblock shrinker races
+From: Anatoly Pugachev <matorola@gmail.com>
+Date: Fri, 11 May 2018 11:38:56 +0300
+Message-ID: <CADxRZqzKAHpGJGPZqh9uAfz7664y-aWhXOKsgnPCfetqSAZ4+g@mail.gmail.com>
+Subject: xfstests (git) results for sparc64
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: fstests <fstests@vger.kernel.org>
+Cc: Sparc kernel list <sparclinux@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 11, 2018 at 5:11 AM, Dave Chinner <david@fromorbit.com> wrote:
-> From: Dave Chinner <dchinner@redhat.com>
->
-> Test case for superblock shrinkers running while the filesystem is
-> being set up and/or torn down and tripping over inconsistent state.
->
-> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/xfs/451     | 72 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/451.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 75 insertions(+)
->  create mode 100755 tests/xfs/451
->  create mode 100644 tests/xfs/451.out
->
-> diff --git a/tests/xfs/451 b/tests/xfs/451
-> new file mode 100755
-> index 000000000000..d8a4a5b93bf3
-> --- /dev/null
-> +++ b/tests/xfs/451
-> @@ -0,0 +1,72 @@
-> +#! /bin/bash
-> +# FS QA Test 451
-> +#
-> +# Exercise mount vs superblock shrinker races.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +       echo 0 > /sys/fs/xfs/debug/mount_delay
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +_supported_fs xfs
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +_require_xfs_sysfs debug/mount_delay
-> +
-> +echo "Silence is golden"
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +$XFS_IO_PROG -fxc "pwrite 0 4k" -c fsync \
-> +               -c "shutdown" $SCRATCH_MNT/foo 2>&1 > /dev_null
-> +
-> +_scratch_unmount
-> +
-> +echo 30 > /sys/fs/xfs/debug/mount_delay
-> +_scratch_mount
-> +echo 0 > /sys/fs/xfs/debug/mount_delay
-> +_scratch_unmount
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/451.out b/tests/xfs/451.out
-> new file mode 100644
-> index 000000000000..db924411b72f
-> --- /dev/null
-> +++ b/tests/xfs/451.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 451
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 2a7f5eb68e82..72f65b6aff0a 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -443,3 +443,4 @@
->  444 auto quick
->  445 auto quick filestreams
->  450 auto quick
-> +451 auto mount
+Hello!
 
-Isn't it dangerous for the time being? Your fix commit message says you got
-reports of OOPS.
-Not sure what should be the authoritative condition to remove dangerous
-point kernel release with a fix??
+Run a testsuite for xfs filesystem on sparc64 hardware with
+xfsprogs-v4.16.0-rc1 (in PATH).
 
-Thanks,
-Amir.
+machine is linux sparc64 debian unstable/sid :
+
+Linux ttip 4.17.0-rc4-00038-g008464a9360e #705 SMP Thu May 10 11:15:17
+MSK 2018 sparc64 GNU/Linux
+
+root@ttip:/1/mator/xfstests-dev# git desc
+v1.1.0-2114-g00e3549c
+
+results:
+
+Not run: generic/009 generic/038 generic/260 generic/288 generic/362
+generic/363 generic/364 generic/365 generic/366 generic/367
+generic/368 generic/369 generic/370 generic/395 generic/396
+generic/397 generic/398 generic/399 generic/402 generic/413
+generic/419 generic/421 generic/429 generic/435 generic/440
+generic/455 generic/457 generic/462 generic/470 generic/471
+generic/482 shared/001 shared/003 shared/004 shared/272 shared/289
+xfs/016 xfs/035 xfs/040 xfs/044 xfs/090 xfs/094 xfs/096 xfs/114
+xfs/115 xfs/122 xfs/131 xfs/148 xfs/149 xfs/186 xfs/187 xfs/189
+xfs/197 xfs/233 xfs/234 xfs/236 xfs/244 xfs/260 xfs/271 xfs/272
+xfs/274 xfs/275 xfs/276 xfs/277 xfs/287 xfs/300 xfs/310 xfs/314
+xfs/317 xfs/322 xfs/329 xfs/331 xfs/332 xfs/333 xfs/334 xfs/335
+xfs/336 xfs/338 xfs/339 xfs/340 xfs/341 xfs/342 xfs/343 xfs/419
+xfs/434 xfs/435 xfs/436 xfs/437 xfs/439
+Failures: generic/068 generic/484 xfs/191-input-validation xfs/263 xfs/442
+Failed 5 of 683 tests
+
+generic/068 and xfs/442 is a random failures, on the second run they passed ok.
+
+generic/483 7s ... 11s
+generic/484      - output mismatch (see
+/1/mator/xfstests-dev/results//generic/484.out.bad)
+    --- tests/generic/484.out   2018-05-10 14:35:44.038023164 +0300
+    +++ /1/mator/xfstests-dev/results//generic/484.out.bad
+2018-05-11 10:16:30.380662717 +0300
+    @@ -1,2 +1,3 @@
+     QA output created by 484
+    +record lock is not preserved across execve(2)
+     Silence is golden
+    ...
+    (Run 'diff -u tests/generic/484.out
+/1/mator/xfstests-dev/results//generic/484.out.bad'  to see the entire
+diff)
+generic/485 1s ... 2s
+...
+xfs/190 1s ... 1s
+xfs/191-input-validation 16s ... - output mismatch (see
+/1/mator/xfstests-dev/results//xfs/191-input-validation.out.bad)
+    --- tests/xfs/191-input-validation.out      2016-09-24
+11:51:48.422898232 +0300
+    +++ /1/mator/xfstests-dev/results//xfs/191-input-validation.out.bad
+2018-05-11 10:28:13.351578553 +0300
+    @@ -1,2 +1,12 @@
+     QA output created by 191-input-validation
+     silence is golden
+    +pass -n size=2b /dev/vdiske1
+    +pass -d agsize=8192b /dev/vdiske1
+    +pass -d agsize=65536s /dev/vdiske1
+    +pass -d sunit=0,swidth=64 /dev/vdiske1
+    +pass -d su=0,sw=64 /dev/vdiske1
+    ...
+    (Run 'diff -u tests/xfs/191-input-validation.out
+/1/mator/xfstests-dev/results//xfs/191-input-validation.out.bad'  to
+see the entire diff)
+xfs/192 4s ... 5s
+...
+xfs/261 1s ... 1s
+xfs/263 7s ... - output mismatch (see
+/1/mator/xfstests-dev/results//xfs/263.out.bad)
+    --- tests/xfs/263.out       2017-02-23 13:00:44.458740721 +0300
+    +++ /1/mator/xfstests-dev/results//xfs/263.out.bad  2018-05-11
+10:32:06.271819545 +0300
+    @@ -1,5 +1,7 @@
+     QA output created by 263
+     ==== NO CRC ====
+    +specified blocksize 4096 is less than device physical sector size 8192
+    +switching to logical sector size 512
+     == Options: rw ==
+     == Options: usrquota,rw ==
+     User quota state on SCRATCH_MNT (SCRATCH_DEV)
+    ...
+    (Run 'diff -u tests/xfs/263.out
+/1/mator/xfstests-dev/results//xfs/263.out.bad'  to see the entire
+diff)
+xfs/264 12s ... 11s
+
+
+
+root@ttip:/1/mator/xfstests-dev# diff -u tests/generic/484.out
+/1/mator/xfstests-dev/results//generic/484.out.bad
+--- tests/generic/484.out       2018-05-10 14:35:44.038023164 +0300
++++ /1/mator/xfstests-dev/results//generic/484.out.bad  2018-05-11
+10:16:30.380662717 +0300
+@@ -1,2 +1,3 @@
+ QA output created by 484
++record lock is not preserved across execve(2)
+ Silence is golden
+root@ttip:/1/mator/xfstests-dev#
+
+
+root@ttip:/1/mator/xfstests-dev# diff -u
+tests/xfs/191-input-validation.out
+/1/mator/xfstests-dev/results//xfs/191-input-validation.out.bad
+--- tests/xfs/191-input-validation.out  2016-09-24 11:51:48.422898232 +0300
++++ /1/mator/xfstests-dev/results//xfs/191-input-validation.out.bad
+ 2018-05-11 10:28:13.351578553 +0300
+@@ -1,2 +1,12 @@
+ QA output created by 191-input-validation
+ silence is golden
++pass -n size=2b /dev/vdiske1
++pass -d agsize=8192b /dev/vdiske1
++pass -d agsize=65536s /dev/vdiske1
++pass -d sunit=0,swidth=64 /dev/vdiske1
++pass -d su=0,sw=64 /dev/vdiske1
++pass -d su=4096s,sw=64 /dev/vdiske1
++pass -d su=4096b,sw=64 /dev/vdiske1
++pass -l su=10b /dev/vdiske1
++fail -n log=15 /dev/vdiske1
++fail -i log=10 /dev/vdiske1
+root@ttip:/1/mator/xfstests-dev#
+
+
+
+root@ttip:/1/mator/xfstests-dev# diff -u tests/xfs/263.out
+/1/mator/xfstests-dev/results//xfs/263.out.bad
+--- tests/xfs/263.out   2017-02-23 13:00:44.458740721 +0300
++++ /1/mator/xfstests-dev/results//xfs/263.out.bad      2018-05-11
+10:32:06.271819545 +0300
+@@ -1,5 +1,7 @@
+ QA output created by 263
+ ==== NO CRC ====
++specified blocksize 4096 is less than device physical sector size 8192
++switching to logical sector size 512
+ == Options: rw ==
+ == Options: usrquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+@@ -84,6 +86,8 @@
+ == Options: grpquota,prjquota,rw ==
+ == Options: usrquota,grpquota,prjquota,rw ==
+ ==== CRC ====
++specified blocksize 4096 is less than device physical sector size 8192
++switching to logical sector size 512
+ == Options: rw ==
+ == Options: usrquota,rw ==
+ User quota state on SCRATCH_MNT (SCRATCH_DEV)
+root@ttip:/1/mator/xfstests-dev#
+
+
+config details for xfstests-dev below :
+
+
+root@ttip:/1/mator/xfstests-dev# cat local.config
+export TEST_DIR=/1/testvol
+export TEST_DEV=/dev/vdiskb1
+export SCRATCH_MNT=/1/scratch
+export SCRATCH_DEV="/dev/vdiske1"
+export SCRATCH_LOGDEV="/dev/loop0"
+export MKFS_OPTIONS="-m reflink=1"
+
+/dev/loop0 is on ramdisk / tmpfs:
+
+root@ttip:/1/mator/xfstests-dev# losetup
+NAME       SIZELIMIT OFFSET AUTOCLEAR RO BACK-FILE      DIO LOG-SEC
+/dev/loop0         0      0         0  0 /ramdisk/file0   0     512
+
+root@ttip:/1/mator/xfstests-dev# findmnt /ramdisk/
+TARGET   SOURCE FSTYPE OPTIONS
+/ramdisk tmpfs  tmpfs  rw,relatime,size=32505856k
+
+root@ttip:/1/mator/xfstests-dev# lsblk -si | egrep "NAME|loop0|vdisk(b|e)"
+NAME         MAJ:MIN RM   SIZE RO TYPE MOUNTPOINT
+loop0          7:0    0    20G  0 loop
+vdiskb1      254:9    0    30G  0 part
+`-vdiskb     254:8    0    30G  0 disk
+vdiske1      254:33   0    30G  0 part
+`-vdiske     254:32   0    30G  0 disk
+root@ttip:/1/mator/xfstests-dev#
