@@ -1,51 +1,64 @@
-Received: from mail.kernel.org ([198.145.29.99]:58446 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750746AbeEKPns (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 11 May 2018 11:43:48 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: generic test for fsync of file with xattrs
-Date: Fri, 11 May 2018 16:43:43 +0100
-Message-Id: <20180511154343.12960-1-fdmanana@kernel.org>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:48318 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750746AbeEKQLd (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 11 May 2018 12:11:33 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 603EF818A6B3
+        for <fstests@vger.kernel.org>; Fri, 11 May 2018 16:11:33 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-12-190.pek2.redhat.com [10.72.12.190])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 75E282166BAD
+        for <fstests@vger.kernel.org>; Fri, 11 May 2018 16:11:32 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] xfs: test inode allocation state missmatch corruption
+Date: Sat, 12 May 2018 00:11:27 +0800
+Message-Id: <20180511161127.15158-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+There's a situation where the directory structure and the inobt
+thinks the inode is free, but the inode on disk thinks it is still
+in use. XFS should detect it and prevent the kernel from oopsing
+on lookup.
 
-Test that xattrs are not lost after calling fsync multiple times with a
-filesystem commit in between the fsync calls.
-
-This test is motivated by a bug found in btrfs which is fixed by a patch
-for the linux kernel titled:
-
-  Btrfs: fix xattr loss after power failure
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/generic/487     | 86 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/487.out | 11 +++++++
- tests/generic/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/generic/487
- create mode 100644 tests/generic/487.out
 
-diff --git a/tests/generic/487 b/tests/generic/487
+Hi,
+
+V2 did below changes:
+1) Fix Copyright
+2) Use 'convert' command of xfs_db to get agino from inode number.
+
+V1 and related reply as below:
+https://marc.info/?l=fstests&m=152229518811044&w=2
+
+Thanks,
+Zorro
+
+ tests/xfs/999     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 117 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
 new file mode 100755
-index 00000000..328b5378
+index 00000000..be26420a
 --- /dev/null
-+++ b/tests/generic/487
-@@ -0,0 +1,86 @@
++++ b/tests/xfs/999
+@@ -0,0 +1,114 @@
 +#! /bin/bash
-+# FSQA Test No. 487
++# FS QA Test No. 999
 +#
-+# Test that xattrs are not lost after calling fsync multiple times with a
-+# filesystem commit in between the fsync calls.
++# Test a corruption when the directory structure and the inobt thinks the inode
++# is free, but the inode on disk thinks it is still in use.
 +#
 +#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-+# Author: Filipe Manana <fdmanana@suse.com>
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -65,13 +78,14 @@ index 00000000..328b5378
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	_cleanup_flakey
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -79,75 +93,95 @@ index 00000000..328b5378
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/dmflakey
-+. ./common/attr
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+_require_attrs
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
++# real QA test starts here
 +
-+touch $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.xa1 -v qwerty $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.xa2 -v 'hello world' $SCRATCH_MNT/foobar
-+$SETFATTR_PROG -n user.xa3 -v test $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++_require_no_xfs_bug_on_assert
 +
-+# Call sync to commit all fileystem metadata.
-+sync
++_filter_dmesg()
++{
++	local warn1="Internal error xfs_trans_cancel.*fs/xfs/xfs_trans\.c.*"
++	local warn2="WARNING:.*fs/xfs/xfs_message\.c:.*assfail.*"
 +
-+$XFS_IO_PROG -c "pwrite -S 0xea 0 64K" \
-+	     -c "fsync" \
-+	     $SCRATCH_MNT/foobar >>$seqres.full
++	sed -e "s#$warn1#Intentional error in xfs_trans_cancel#" \
++	    -e "s#$warn2#Intentional warnings in assfail#"
++}
 +
-+# Simulate a power failure and mount the filesystem to check that the xattrs
-+# were not lost and neither was the data we wrote.
-+_flakey_drop_and_remount
-+echo "File xattrs after power failure:"
-+$GETFATTR_PROG --absolute-names --dump $SCRATCH_MNT/foobar | _filter_scratch
-+echo "File data after power failure:"
-+od -t x1 $SCRATCH_MNT/foobar
++# Use crc=0, due to this crash is only possible on v4 XFS or v5 XFS mounted
++# with the ikeep mount option. For all other V5 XFS, this problem cannot
++# occur because we don't read inodes we are allocating from disk - we simply
++# overwrite them with the new inode information.
++_scratch_mkfs_xfs -m crc=0 >> $seqres.full 2>&1
++blksz=$(_scratch_xfs_get_sb_field blocksize)
++agcount=$(_scratch_xfs_get_sb_field agcount)
 +
-+_unmount_flakey
-+_cleanup_flakey
++_scratch_mount
++# Create a directory for later allocation in same AG (AG 0, due to this's an
++# empty XFS for now)
++mkdir $SCRATCH_MNT/dir
 +
++# Allocate 1 block for testfile
++$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/testfile >> $seqres.full
++inum=`stat -c %i $SCRATCH_MNT/dir/testfile`
++_scratch_unmount
++
++# Find the AG which contains testfile
++agi=`_scratch_xfs_db -c "convert inode $inum agno" | sed -e 's/^.*(\([0-9]*\).*$/\1/g'`
++
++# Due to we only allocate 1 block for testfile, and this's the only one data
++# block we use. So we use single level inobt, So the ${agi}->root->recs[1]
++# should be the only one record points the chunk which contains testfile's
++# inode.
++# An exmaple of inode record is as below:
++#   recs[1] = [startino,freecount,free] 1:[1024,59,0xffffffffffffffe0]
++freecount=$(_scratch_xfs_get_metadata_field "recs[1].freecount" \
++					    "agi $agi" "addr root")
++fmask=$(_scratch_xfs_get_metadata_field "recs[1].free" "agi $agi" "addr root")
++
++# fmask shift right 1 bit, and freecount++, to mark testfile inode as free in
++# inobt. (But the inode itself isn't freed, it still has allocated block)
++freecount="$((freecount + 1))"
++fmask="$((fmask / 2))"
++_scratch_xfs_set_metadata_field "recs[1].freecount" "$freecount" \
++				"agi $agi" "addr root" >/dev/null
++_scratch_xfs_set_metadata_field "recs[1].free" "$fmask" \
++				"agi $agi" "addr root" >/dev/null
++
++# Mount again and create a new inode cover that inode we just 'freed' from inobt
++_scratch_mount
++$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/newfile 2>&1 | \
++	grep -i "Structure needs cleaning" | _filter_scratch
++
++# filter a intentional internal errors
++_check_dmesg _filter_dmesg
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/487.out b/tests/generic/487.out
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
 new file mode 100644
-index 00000000..44a119f8
+index 00000000..cb8d9e34
 --- /dev/null
-+++ b/tests/generic/487.out
-@@ -0,0 +1,11 @@
-+QA output created by 487
-+File xattrs after power failure:
-+# file: SCRATCH_MNT/foobar
-+user.xa1="qwerty"
-+user.xa2="hello world"
-+user.xa3="test"
-+
-+File data after power failure:
-+0000000 ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea
-+*
-+0200000
-diff --git a/tests/generic/group b/tests/generic/group
-index 505383f7..c8f51ec2 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -489,3 +489,4 @@
- 484 auto quick
- 485 auto quick insert
- 486 auto quick attr
-+487 auto quick attr
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++SCRATCH_MNT/dir/newfile: Structure needs cleaning
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 32bf4f71..ec3cca62 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -442,3 +442,4 @@
+ 443 auto quick ioctl fsr
+ 444 auto quick
+ 445 auto quick filestreams
++999 auto quick
 -- 
-2.11.0
+2.14.3
 
