@@ -1,187 +1,76 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:48318 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750746AbeEKQLd (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 11 May 2018 12:11:33 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 603EF818A6B3
-        for <fstests@vger.kernel.org>; Fri, 11 May 2018 16:11:33 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-190.pek2.redhat.com [10.72.12.190])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 75E282166BAD
-        for <fstests@vger.kernel.org>; Fri, 11 May 2018 16:11:32 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] xfs: test inode allocation state missmatch corruption
-Date: Sat, 12 May 2018 00:11:27 +0800
-Message-Id: <20180511161127.15158-1-zlang@redhat.com>
+Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:41446 "EHLO
+        ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751217AbeEKX3N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 May 2018 19:29:13 -0400
+Date: Sat, 12 May 2018 09:29:10 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs: limit xfs_growfs size if test with --large-fs
+Message-ID: <20180511232910.GY23861@dastard>
+References: <20180427082254.25524-1-zlang@redhat.com>
+ <20180510221859.GS10363@dastard>
+ <20180511034150.GF1963@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180511034150.GF1963@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.org, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-There's a situation where the directory structure and the inobt
-thinks the inode is free, but the inode on disk thinks it is still
-in use. XFS should detect it and prevent the kernel from oopsing
-on lookup.
+On Fri, May 11, 2018 at 11:41:50AM +0800, Zorro Lang wrote:
+> On Fri, May 11, 2018 at 08:18:59AM +1000, Dave Chinner wrote:
+> > On Fri, Apr 27, 2018 at 04:22:54PM +0800, Zorro Lang wrote:
+> > > When test on large SCRATCH_DEV, grow a small XFS to huge size is a
+> > > horrible thing (e.g grow 128m to 500T). So add a helper named
+> > > _scratch_xfs_growfs_limited() to do below things:
+> > > 
+> > > 1) If --large-fs is used, limit growfs size.
+> > > 2) If a limit size parameter is specified, make sure growfs won't
+> > > beyond this size.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > 
+> > I think I originally just didn't run growfs tests like this on large
+> > filesystems. i.e. require_no_largefs....
+> 
+> Hmm... Sorry, am I facing different review-points from 3 different XFS maintainers? ...
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+I'm not a maintainer, I'm just the guy who added this functionality
+to xfstests originally. Deciding what is to be done needs to start
+from an understanding of the criteria I used for skipping tests on
+large devices.  In this case, I never intended to have multiple
+order magnitude growfs tests run on large scratch devices.
 
-Hi,
+When I added large device support, I tried to avoid tests that we
+already had substantial coverage for. i.e. if inreasing the space
+used by the test doesn't increase test coverage but only increased
+test runtime, then I skipped it.  In this case, we already test
+small to large size growfs via loopback devices on small scratch
+devices (e.g. xfs/078), so doing it on extremely large scratch
+devices doesn't reallycover any new code or error conditions.
 
-V2 did below changes:
-1) Fix Copyright
-2) Use 'convert' command of xfs_db to get agino from inode number.
+Hence, based on my original criteria for deciding what tests to run
+on large filesystems, I would have skipped this test if it caused
+excessive runtime. I was testing on sparse devices on SSDs, so seek
+times for growfs did not impact performance, hence I probably didn't
+skip it...
 
-V1 and related reply as below:
-https://marc.info/?l=fstests&m=152229518811044&w=2
+> Dave: require_no_largefs is better.
+> Darrick: nearly ack this patch.
+> Eric: 
+> 2018-04-27 04:03 < sandeen> [15:01]  <zoro> [00:55:47] I think maybe use _require_no_large_scratch_dev for xfs/002 will be better. Grow a 128M XFS to large size is 'horrible'
+> 2018-04-27 04:03 < sandeen> just limit growfs to something smaller.
+> 
+> What should I do next?
 
-Thanks,
-Zorro
+Make your own decision about how best to proceed based on the
+feedback you've received. Or ask the fstests maintainer to decide
+what is best....  :P
 
- tests/xfs/999     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/999.out |   2 +
- tests/xfs/group   |   1 +
- 3 files changed, 117 insertions(+)
- create mode 100755 tests/xfs/999
- create mode 100644 tests/xfs/999.out
+Cheers,
 
-diff --git a/tests/xfs/999 b/tests/xfs/999
-new file mode 100755
-index 00000000..be26420a
---- /dev/null
-+++ b/tests/xfs/999
-@@ -0,0 +1,114 @@
-+#! /bin/bash
-+# FS QA Test No. 999
-+#
-+# Test a corruption when the directory structure and the inobt thinks the inode
-+# is free, but the inode on disk thinks it is still in use.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_no_xfs_bug_on_assert
-+
-+_filter_dmesg()
-+{
-+	local warn1="Internal error xfs_trans_cancel.*fs/xfs/xfs_trans\.c.*"
-+	local warn2="WARNING:.*fs/xfs/xfs_message\.c:.*assfail.*"
-+
-+	sed -e "s#$warn1#Intentional error in xfs_trans_cancel#" \
-+	    -e "s#$warn2#Intentional warnings in assfail#"
-+}
-+
-+# Use crc=0, due to this crash is only possible on v4 XFS or v5 XFS mounted
-+# with the ikeep mount option. For all other V5 XFS, this problem cannot
-+# occur because we don't read inodes we are allocating from disk - we simply
-+# overwrite them with the new inode information.
-+_scratch_mkfs_xfs -m crc=0 >> $seqres.full 2>&1
-+blksz=$(_scratch_xfs_get_sb_field blocksize)
-+agcount=$(_scratch_xfs_get_sb_field agcount)
-+
-+_scratch_mount
-+# Create a directory for later allocation in same AG (AG 0, due to this's an
-+# empty XFS for now)
-+mkdir $SCRATCH_MNT/dir
-+
-+# Allocate 1 block for testfile
-+$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/testfile >> $seqres.full
-+inum=`stat -c %i $SCRATCH_MNT/dir/testfile`
-+_scratch_unmount
-+
-+# Find the AG which contains testfile
-+agi=`_scratch_xfs_db -c "convert inode $inum agno" | sed -e 's/^.*(\([0-9]*\).*$/\1/g'`
-+
-+# Due to we only allocate 1 block for testfile, and this's the only one data
-+# block we use. So we use single level inobt, So the ${agi}->root->recs[1]
-+# should be the only one record points the chunk which contains testfile's
-+# inode.
-+# An exmaple of inode record is as below:
-+#   recs[1] = [startino,freecount,free] 1:[1024,59,0xffffffffffffffe0]
-+freecount=$(_scratch_xfs_get_metadata_field "recs[1].freecount" \
-+					    "agi $agi" "addr root")
-+fmask=$(_scratch_xfs_get_metadata_field "recs[1].free" "agi $agi" "addr root")
-+
-+# fmask shift right 1 bit, and freecount++, to mark testfile inode as free in
-+# inobt. (But the inode itself isn't freed, it still has allocated block)
-+freecount="$((freecount + 1))"
-+fmask="$((fmask / 2))"
-+_scratch_xfs_set_metadata_field "recs[1].freecount" "$freecount" \
-+				"agi $agi" "addr root" >/dev/null
-+_scratch_xfs_set_metadata_field "recs[1].free" "$fmask" \
-+				"agi $agi" "addr root" >/dev/null
-+
-+# Mount again and create a new inode cover that inode we just 'freed' from inobt
-+_scratch_mount
-+$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/newfile 2>&1 | \
-+	grep -i "Structure needs cleaning" | _filter_scratch
-+
-+# filter a intentional internal errors
-+_check_dmesg _filter_dmesg
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-new file mode 100644
-index 00000000..cb8d9e34
---- /dev/null
-+++ b/tests/xfs/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+SCRATCH_MNT/dir/newfile: Structure needs cleaning
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 32bf4f71..ec3cca62 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -442,3 +442,4 @@
- 443 auto quick ioctl fsr
- 444 auto quick
- 445 auto quick filestreams
-+999 auto quick
+Dave.
 -- 
-2.14.3
-
+Dave Chinner
+david@fromorbit.com
