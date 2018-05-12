@@ -1,313 +1,238 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:44960 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750722AbeELIm2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 12 May 2018 04:42:28 -0400
-Received: by mail-pl0-f67.google.com with SMTP id e6-v6so4564300plt.11
-        for <fstests@vger.kernel.org>; Sat, 12 May 2018 01:42:28 -0700 (PDT)
-Date: Sat, 12 May 2018 16:42:23 +0800
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:37773 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750749AbeELJaP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 12 May 2018 05:30:15 -0400
+Date: Sat, 12 May 2018 17:30:09 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common: add support for the "local" file system type
-Message-ID: <20180512084223.GQ8373@desktop>
-References: <20180503034340.GA20908@thunk.org>
+Subject: Re: [PATCH 2/2] generic: test swapfile creation, activation, and
+ deactivation
+Message-ID: <20180512092858.GR8373@desktop>
+References: <152579843989.18959.14108003206856326245.stgit@magnolia>
+ <152579844608.18959.5745995713836937294.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180503034340.GA20908@thunk.org>
+In-Reply-To: <152579844608.18959.5745995713836937294.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Ted,
-
-On Wed, May 02, 2018 at 11:43:40PM -0400, Theodore Y. Ts'o wrote:
-
-[snip the background details]
-
-> From 8b40b28866dca119d0c807c31ae48f153ec2dc53 Mon Sep 17 00:00:00 2001
-> From: Theodore Ts'o <tytso@mit.edu>
-> Date: Sat, 17 Sep 2016 19:08:18 -0400
-> Subject: [PATCH] common: add support for the "local" file system type
+On Tue, May 08, 2018 at 09:54:06AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> It is sometimes useful to be able to test the local file system
-> provided in a restricted execution environment (such as that which is
-> provided by Docker, for example) where it is not possible to mount and
-> unmount the file system under test.
+> Test swapfile activation and deactivation.
 > 
-> To support this test case, add support for a new file system type
-> called "local".  The TEST_DEV and SCRATCH_DEV should be have a
-> non-block device format (e.g., local:/test or local:/scratch), and the
-> TEST_DIR and SCRATCH_MNT directories should be pre-existing
-> directories provided by the execution environment.
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-
-I tested the patch with XFS and ext4 as the mounted underlying
-filesystem for multiple rounds and found some more issues (in addition
-to previous review comments) that need to be addressed. I'll reply
-inline.
-
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  common/rc | 73 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++---
->  1 file changed, 70 insertions(+), 3 deletions(-)
-
-I think we need a new "-local" option in './check' to do some initial
-setups, e.g. FSTYP=local, as other fs types that can't be retrieved by
-running blkid on $TEST_DEV.
-
-Also need some documentations in README to describe "local"'s use case
-and mention that TEST_DEV and SCRATCH_DEV should be have a non-block
-device format.
-
+>  tests/generic/708     |  152 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/708.out |   10 +++
+>  tests/generic/group   |    1 
+>  3 files changed, 163 insertions(+)
+>  create mode 100755 tests/generic/708
+>  create mode 100644 tests/generic/708.out
 > 
-> diff --git a/common/rc b/common/rc
-> index 9ffab7fd..d5cb0fe4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -351,6 +351,18 @@ _supports_filetype()
->  	esac
->  }
->  
-> +_local_validate_mount_opt()
+> 
+> diff --git a/tests/generic/708 b/tests/generic/708
+> new file mode 100755
+> index 00000000..48feeb25
+> --- /dev/null
+> +++ b/tests/generic/708
+> @@ -0,0 +1,152 @@
+> +#! /bin/bash
+> +# FS QA Test No. 708
+> +#
+> +# Test various swapfile activation oddities.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Oracle.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
 > +{
-> +    case "$*" in
-> +	ro|ro,*|*,ro) _notrun "ro mount option not supported" ;;
-> +	*nosuid*) _notrun "nosuid mount option not supported" ;;
-> +	*noatime*) _notrun "noatime mount option not supported" ;;
-> +	*relatime*) _notrun "relatime mount option not supported" ;;
-> +	*diratime*) _notrun "diratime mount option not supported" ;;
-> +	*strictatime*) _notrun "strictatime mount option not supported" ;;
-> +    esac
+> +	cd /
+> +	rm -f $testfile
 > +}
 > +
->  # mount scratch device with given options but don't check mount status
->  _try_scratch_mount()
->  {
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch_swapfile
+> +
+> +rm -f $seqres.full
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount >>$seqres.full 2>&1
+> +
+> +swapfile=$SCRATCH_MNT/swap
+> +len=$((2 * 1048576))
+> +
+> +swapfile_cycle() {
+> +	local swapfile="$1"
+> +
+> +	mkswap $swapfile >> $seqres.full
+> +	filefrag -v $swapfile >> $seqres.full
+> +	swapon $swapfile 2>&1 | _filter_scratch
+> +	swapon -v --bytes >> $seqres.full
+> +	swapoff $swapfile 2>> $seeqres.full
+> +	rm -f $swapfile
+> +}
+> +
+> +test_can_falloc_swap() {
+> +	local test_swapfile=$TEST_DIR/swapfile
+> +
+> +	echo "can we fallocate swap?"
+> +	$XFS_IO_PROG -f -c "falloc 0 64k" $test_swapfile
 
-We need to add a check for "local" in _try_scratch_mount() to let it do
-nothing for "local" too, otherwise 'FSTYP=local ./check' won't run for
-me, as _scratch_mount() failed and exit the test in 'check' line 629.
+mkswap(8) says "mkswap refuses areas smaller than 10 pages", so I
+suspect 64k won't work for hosts with larger page size, e.g. ppc64, even
+if the kernel supports swapfile on fallocated file. But I don't have the
+hardware to actually try it..
 
-(Note that the exit on _scratch_mount() failure behavior was introduced
-by commit 69eb6281a9d3 ("fstests: _fail test by default when
-_scratch_mount fails"))
+> +	test -f $test_swapfile || return 1
+> +	mkswap $test_swapfile
+> +	swapon $test_swapfile
+> +	res=$?
+> +	swapoff $test_swapfile
+> +	rm -f $test_swapfile
+> +	return $res
+> +}
 
-> @@ -376,6 +388,9 @@ _scratch_unmount()
->  	btrfs)
->  		$UMOUNT_PROG $SCRATCH_MNT
->  		;;
-> +	local)
-> +                rm -rf $SCRATCH_MNT/*
-> +                ;;
+When 'test_can_falloc_swap' returns non-zero, how could we tell if it's
+because the kernel doesn't support swap on fallocate file or it's a
+regression bug in the swap on fallocate file code?
 
-As noted in previous review, we could just return for 'local' in
-_scratch_unmount(), _scratch_mkfs() already removed all the files there.
 
->  	*)
->  		$UMOUNT_PROG $SCRATCH_DEV
->  		;;
-> @@ -386,6 +401,10 @@ _scratch_remount()
->  {
->      local opts="$1"
->  
-> +    if [ "$FSTYP" = "local" ]; then
-> +	_local_validate_mount_opt "$*"
-> +	return 0;
-> +    fi
-
-I found that there're more places that need to do
-_local_validate_mount_opt, e.g. in _try_scratch_mount() and _test_mount,
-otherwise tests that use _try_scratch_mount to do the remount would
-fail, like generic/294.
-
->      if test -n "$opts"; then
->  	mount -o "remount,$opts" $SCRATCH_MNT
->      fi
-> @@ -395,7 +414,7 @@ _scratch_cycle_mount()
->  {
->      local opts="$1"
->  
-> -    if [ "$FSTYP" = tmpfs ]; then
-> +    if [ "$FSTYP" = "tmpfs" -o "$FSTYP" = "local" ] ; then
->  	_scratch_remount "$opts"
->  	return
->      fi
-> @@ -429,6 +448,10 @@ _test_mount()
->          _overlay_test_mount $*
->          return $?
->      fi
-> +    if [ "$FSTYP" == "local" ]; then
-> +        mkdir -p $TEST_DIR
-
-Probably need _local_validate_mount_opt here as mentioned above.
-
-And there're some tests or functions that call umount on $SCRATCH_MNT
-directly, which would cause the underlying filesystem to be umounted if
-it can be umounted (thouth this is not an intended use case for "local",
-I think it's better to fix them too). e.g.
-
-generic/034 generic/330 and generic/332 need to use _scratch_unmount
-instead of a bare umount.
-
-All the "$UMOUNT_PROG $SCRATCH_MNT"s in dm device helper functions, we
-need to change them to umount the actual device, e.g. $FLAKEY_DEV
-
-generic/108 needs to umount $SCSI_DEBUG_DEV in _cleanup()
-
-Similarly, generic/459 needs to umount the lvm snapshot device
-/dev/mapper/$vgname-$snapname
+And the kernel patch says "This enables XFS to support fallocate'd swap
+files and swap files on realtime devices." So xfs/419 would start to
+fail when the patch lands in upstream?
 
 Thanks,
 Eryu
 
-> +	return $?
-> +    fi
->      _test_options mount
->      _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
->  }
-> @@ -437,7 +460,7 @@ _test_unmount()
->  {
->  	if [ "$FSTYP" == "overlay" ]; then
->  		_overlay_test_unmount
-> -	else
-> +	elif [ "$FSTYP" != "local" ]; then
->  		$UMOUNT_PROG $TEST_DEV
->  	fi
->  }
-> @@ -723,7 +746,7 @@ _scratch_mkfs()
->  	local mkfs_status
->  
->  	case $FSTYP in
-> -	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p)
-> +	nfs*|cifs|ceph|overlay|glusterfs|pvfs2|9p|local)
->  		# unable to re-create this fstyp, just remove all files in
->  		# $SCRATCH_MNT to avoid EEXIST caused by the leftover files
->  		# created in previous runs
-> @@ -1465,6 +1488,10 @@ _check_mounted_on()
->  	local mnt=$4
->  	local type=$5
->  
-> +	if [ "$FSTYP" == "local" ]; then
-> +		return 0
-> +	fi
 > +
->  	# find $dev as the source, and print result in "$dev $mnt" format
->  	local mount_rec=`findmnt -rncv -S $dev -o SOURCE,TARGET`
->  	[ -n "$mount_rec" ] || return 1 # 1 = not mounted
-> @@ -1562,6 +1589,13 @@ _require_scratch_nocheck()
->  			_notrun "this test requires a valid \$SCRATCH_MNT"
->  		fi
->  		;;
-> +	local)
-> +		if [ -z "$SCRATCH_DEV" -o ! -d "$SCRATCH_MNT" ];
-> +		then
-> +		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
-> +		fi
-> +		return 0
-> +		;;
->  	*)
->  		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev "$SCRATCH_DEV"`" = "" ]
->  		 then
-> @@ -1683,6 +1717,13 @@ _require_test()
->  			_notrun "this test requires a valid \$TEST_DIR"
->  		fi
->  		;;
-> +	local)
-> +		if [ -z "$TEST_DEV" -o ! -d "$TEST_DIR" ];
-> +		then
-> +		    _notrun "this test requires a valid \$TEST_DIR and unique $TEST_DEV"
-> +		fi
-> +		return 0
-> +		;;
->  	*)
->  		 if [ -z "$TEST_DEV" ] || [ "`_is_block_dev "$TEST_DEV"`" = "" ]
->  		 then
-> @@ -2438,6 +2479,10 @@ _remount()
->      local device=$1
->      local mode=$2
->  
-> +    if [ "$FSTYP" == "local" ] ; then
-> +       return 0
-> +    fi
+> +unset can_falloc_swap
+> +test_can_falloc_swap >> $seqres.full 2>&1 && can_falloc_swap=yes
+> +page_size=$(get_page_size)
 > +
->      if ! mount -o remount,$mode $device
->      then
->          echo "_remount: failed to remount filesystem on $device as $mode"
-> @@ -2483,6 +2528,10 @@ _mount_or_remount_rw()
->  	local device=$2
->  	local mountpoint=$3
->  
-> +	if [ "$FSTYP" == "local" ] ; then
-> +	    return 0
-> +	fi
+> +# Create a sparse swap file
+> +echo "sparse swap" | tee -a $seqres.full
+> +$XFS_IO_PROG -f -c "truncate $len" $swapfile >> $seqres.full
+> +swapfile_cycle $swapfile
 > +
->  	if [ $USE_REMOUNT -eq 0 ]; then
->  		if [ "$FSTYP" != "overlay" ]; then
->  			_mount -t $FSTYP $mount_opts $device $mountpoint
-> @@ -2636,6 +2685,9 @@ _check_test_fs()
->      ubifs)
->  	# there is no fsck program for ubifs yet
->  	;;
-> +    local)
-> +	# no way to check consistency for local
-> +	;;
->      *)
->  	_check_generic_filesystem $TEST_DEV
->  	;;
-> @@ -2691,6 +2743,9 @@ _check_scratch_fs()
->      ubifs)
->  	# there is no fsck program for ubifs yet
->  	;;
-> +    local)
-> +	# no way to check consistency for local
-> +	;;
->      *)
->  	_check_generic_filesystem $device
->  	;;
-> @@ -3003,6 +3058,9 @@ _require_fio()
->  # Does freeze work on this fs?
->  _require_freeze()
->  {
-> +	if [ "$FSTYP" == "local" ]; then
-> +		_notrun "local does not support freeze"
-> +	fi
->  	xfs_freeze -f "$TEST_DIR" >/dev/null 2>&1
->  	local result=$?
->  	xfs_freeze -u "$TEST_DIR" >/dev/null 2>&1
-> @@ -3024,6 +3082,9 @@ _require_scratch_shutdown()
->  {
->  	[ -x src/godown ] || _notrun "src/godown executable not found"
->  
-> +	if [ "$FSTYP" == "local" ]; then
-> +		_notrun "local does not support shutdown"
-> +	fi
->  	_scratch_mkfs > /dev/null 2>&1 || _notrun "_scratch_mkfs failed on $SCRATCH_DEV"
->  	_scratch_mount
->  
-> @@ -3049,6 +3110,9 @@ _require_scratch_shutdown()
->  # Does dax mount option work on this dev/fs?
->  _require_scratch_dax()
->  {
-> +	if [ "$FSTYP" == "local" ]; then
-> +		_notrun "local does not support dax"
-> +	fi
->  	_require_scratch
->  	_scratch_mkfs > /dev/null 2>&1
->  	_try_scratch_mount -o dax || \
-> @@ -3063,6 +3127,9 @@ _require_scratch_dax()
->  # Does norecovery support by this fs?
->  _require_norecovery()
->  {
-> +	if [ "$FSTYP" == "local" ]; then
-> +		_notrun "local does not support norecovery"
-> +	fi
->  	_try_scratch_mount -o ro,norecovery || \
->  		_notrun "$FSTYP does not support norecovery"
->  	_scratch_unmount
-> -- 
-> 2.16.1.72.g5be1f00a9a
+> +# Create a regular swap file
+> +echo "regular swap" | tee -a $seqres.full
+> +_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
+> +swapfile_cycle $swapfile
+> +
+> +# Create a fallocated swap file
+> +echo "fallocate swap" | tee -a $seqres.full
+> +if [ "$can_falloc_swap" = "yes" ]; then
+> +	$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
+> +	swapfile_cycle $swapfile
+> +fi
+> +
+> +# Create a swap file with a little too much junk on the end
+> +echo "too long swap" | tee -a $seqres.full
+> +_pwrite_byte 0x58 0 $((len + 3)) $swapfile >> $seqres.full
+> +swapfile_cycle $swapfile
+> +
+> +# Create a swap file with a large discontiguous range(?)
+> +echo "large discontig swap" | tee -a $seqres.full
+> +_pwrite_byte 0x58 0 $((len * 2)) $swapfile >> $seqres.full
+> +old_sz="$(stat -c '%s' $swapfile)"
+> +$XFS_IO_PROG -c "fcollapse $((len / 2)) $len" $swapfile >> $seqres.full 2>&1
+> +new_sz="$(stat -c '%s' $swapfile)"
+> +if [ $old_sz -gt $new_sz ]; then
+> +	swapfile_cycle $swapfile
+> +fi
+> +rm -f $swapfile
+> +
+> +# Create a swap file with a small discontiguous range(?)
+> +echo "small discontig swap" | tee -a $seqres.full
+> +_pwrite_byte 0x58 0 $((len + 1024)) $swapfile >> $seqres.full
+> +old_sz="$(stat -c '%s' $swapfile)"
+> +$XFS_IO_PROG -c "fcollapse 66560 1024" $swapfile >> $seqres.full 2>&1
+> +new_sz="$(stat -c '%s' $swapfile)"
+> +if [ $old_sz -gt $new_sz ]; then
+> +	swapfile_cycle $swapfile
+> +fi
+> +rm -f $swapfile
+> +
+> +# Create a fallocated swap file and touch every other $PAGE_SIZE to create
+> +# a mess of written/unwritten extent records
+> +echo "mixed swap" | tee -a $seqres.full
+> +if [ "$can_falloc_swap" = "yes" ]; then
+> +	$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
+> +	seq $page_size $((page_size * 2)) $len | while read offset; do
+> +		_pwrite_byte 0x58 $offset 1 $swapfile >> $seqres.full
+> +	done
+> +	swapfile_cycle $swapfile
+> +fi
+> +
+> +# Create a ridiculously small swap file; mkswap says the minimum is 40k.
+> +# However, each swap file must be at least two pages long.
+> +echo "tiny swap" | tee -a $seqres.full
+> +tiny_len=40960
+> +min_swap_size=$((page_size * 2))
+> +if [ "$min_swap_size" -gt "$tiny_len" ]; then
+> +	tiny_len=$min_swap_size
+> +fi
+> +_pwrite_byte 0x58 0 $tiny_len $swapfile >> $seqres.full
+> +swapfile_cycle $swapfile
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/708.out b/tests/generic/708.out
+> new file mode 100644
+> index 00000000..d6199b99
+> --- /dev/null
+> +++ b/tests/generic/708.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 708
+> +sparse swap
+> +swapon: SCRATCH_MNT/swap: skipping - it appears to have holes.
+> +regular swap
+> +fallocate swap
+> +too long swap
+> +large discontig swap
+> +small discontig swap
+> +mixed swap
+> +tiny swap
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 505383f7..9f3a933e 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -489,3 +489,4 @@
+>  484 auto quick
+>  485 auto quick insert
+>  486 auto quick attr
+> +708 auto quick swapfile
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
