@@ -1,35 +1,44 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:39498 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751901AbeEMQCe (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 13 May 2018 12:02:34 -0400
-Received: by mail-wm0-f65.google.com with SMTP id f8-v6so10910152wmc.4
-        for <fstests@vger.kernel.org>; Sun, 13 May 2018 09:02:33 -0700 (PDT)
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:40413 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751780AbeENFsa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 May 2018 01:48:30 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] generic/484: add missing _require_test_program
-Date: Sun, 13 May 2018 19:03:59 +0300
-Message-Id: <1526227439-20517-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 0/3] ext4 freeze regression test
+Date: Mon, 14 May 2018 08:49:48 +0300
+Message-Id: <1526276991-23897-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/484 | 1 +
- 1 file changed, 1 insertion(+)
+Eryu,
 
-diff --git a/tests/generic/484 b/tests/generic/484
-index 1c2cd96..cb55414 100755
---- a/tests/generic/484
-+++ b/tests/generic/484
-@@ -52,6 +52,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_test
-+_require_test_program "t_locks_execve"
- 
- # prepare a 4k testfile in TEST_DIR
- $XFS_IO_PROG -f -c "pwrite -S 0xFF 0 4096" \
+This is a regression test for a fix waiting in Ted's dev branch
+preceded by two minor cleanups.
+
+FYI, at the moment, all _require_freeze tests fail with lockdep enabled
+because of DEBUG_RWSEMS:
+https://marc.info/?l=linux-fsdevel&m=152622016219975&w=2
+
+Thanks,
+Amir.
+
+Amir Goldstein (3):
+  generic/459: use xfs_freeze instead of fsfreeze
+  fstests: define and use TIMEOUT_PROG
+  generic: test first read with freeze right after mount
+
+ common/config         |  1 +
+ tests/generic/297     |  4 +--
+ tests/generic/298     |  4 +--
+ tests/generic/459     |  6 ++---
+ tests/generic/488     | 75 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/488.out |  2 ++
+ tests/generic/group   |  1 +
+ 7 files changed, 86 insertions(+), 7 deletions(-)
+ create mode 100755 tests/generic/488
+ create mode 100644 tests/generic/488.out
+
 -- 
 2.7.4
 
