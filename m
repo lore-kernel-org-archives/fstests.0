@@ -1,75 +1,78 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:36716 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1752302AbeENOmA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 14 May 2018 10:42:00 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id BC0A4402290A
-        for <fstests@vger.kernel.org>; Mon, 14 May 2018 14:41:59 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-160.pek2.redhat.com [10.72.12.160])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C29392024CA9
-        for <fstests@vger.kernel.org>; Mon, 14 May 2018 14:41:58 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] xfs: skip growfs test on large device
-Date: Mon, 14 May 2018 22:41:53 +0800
-Message-Id: <20180514144153.14638-1-zlang@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:43692 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752059AbeENRD6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 May 2018 13:03:58 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 8057AAE17
+        for <fstests@vger.kernel.org>; Mon, 14 May 2018 17:03:57 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH 2/3] generic/382: Fix test when report uses /etc/passwd
+Date: Mon, 14 May 2018 19:03:50 +0200
+Message-Id: <20180514170351.13737-3-jack@suse.cz>
+In-Reply-To: <20180514170351.13737-1-jack@suse.cz>
+References: <20180514170351.13737-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-When test on large SCRATCH_DEV, grow a small XFS to huge size is a
-horrible thing (e.g grow 128M to 500T). So skip this kind of tests
-if LARGE_SCRATCH_DEV is yes.
+On older kernels xfs_quota uses /etc/passwd to report quota entries. In
+such case all-zero lines disturb its output and the test fails. Fix the
+problem by ignoring all-zero lines in quota report.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
+ common/filter     | 8 ++++++++
+ tests/generic/382 | 6 +++---
+ 2 files changed, 11 insertions(+), 3 deletions(-)
 
-V3 drops all _scratch_xfs_growfs related code. Turn to use
-_require_no_large_scratch_dev.
-
-
- tests/xfs/002 | 1 +
- tests/xfs/127 | 1 +
- tests/xfs/233 | 1 +
- 3 files changed, 3 insertions(+)
-
-diff --git a/tests/xfs/002 b/tests/xfs/002
-index 741117be..a6114748 100755
---- a/tests/xfs/002
-+++ b/tests/xfs/002
-@@ -51,6 +51,7 @@ _cleanup()
- _supported_fs xfs
- _supported_os Linux
- _require_scratch_nocheck
-+_require_no_large_scratch_dev
+diff --git a/common/filter b/common/filter
+index 53874a08f5e3..037799e5cd19 100644
+--- a/common/filter
++++ b/common/filter
+@@ -344,6 +344,14 @@ _filter_project_quota()
+ 	_filter_quota | grep -v "^\#0 \|^(null) "
+ }
  
- # So we can explicitly turn it _off_:
- _require_xfs_mkfs_crc
-diff --git a/tests/xfs/127 b/tests/xfs/127
-index 9df99904..60597fbf 100755
---- a/tests/xfs/127
-+++ b/tests/xfs/127
-@@ -45,6 +45,7 @@ _cleanup()
- _supported_os Linux
- _supported_fs xfs
- _require_scratch_reflink
-+_require_no_large_scratch_dev
- _require_cp_reflink
++_filter_quota_report()
++{
++	# When xfs_quota uses /etc/passwd for reporting, it may report lines
++	# full of zeros. Ignore them.
++	grep -v -E '^[^ ]+ +0 +0 +0 +00 +\[--------\] +0 +0 +0 +00 +\[--------\]' |
++	grep -v -E '^[^ ]+ +0 +0 +0 +00 +\[--------\]$'
++}
++
+ # Account for different "ln" failure messages
+ _filter_ln()
+ {
+diff --git a/tests/generic/382 b/tests/generic/382
+index 33326ffa4d1b..02b98a9ef027 100755
+--- a/tests/generic/382
++++ b/tests/generic/382
+@@ -79,12 +79,12 @@ do_test()
+ 	$XFS_QUOTA_PROG -x -c "limit bsoft=20M bhard=20M isoft=20 ihard=20 $type -d" $SCRATCH_MNT
+ 	$XFS_QUOTA_PROG -x -c "limit bsoft=40M bhard=40M isoft=40 ihard=40 $type fsgqa" $SCRATCH_MNT
+ 	echo "$qname blocks and inode limit"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
  
- echo "Format and mount"
-diff --git a/tests/xfs/233 b/tests/xfs/233
-index e61c444d..b20dd4f1 100755
---- a/tests/xfs/233
-+++ b/tests/xfs/233
-@@ -44,6 +44,7 @@ _cleanup()
- _supported_os Linux
- _supported_fs xfs
- _require_xfs_scratch_rmapbt
-+_require_no_large_scratch_dev
+ 	## blocks default quota test ##
+ 	_user_do "$XFS_IO_PROG -f -c \"pwrite 0 30M\" -c \"fsync\" $SCRATCH_MNT/data" | _filter_xfs_io
+ 	echo "$qname blocks quota after write 30M data"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
  
- echo "Format and mount"
- _scratch_mkfs_sized $((2 * 4096 * 4096)) > $seqres.full 2>&1
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ 
+@@ -95,7 +95,7 @@ do_test()
+ 	sync
+ 
+ 	echo "$qname inode quota after creating 30 inodes"
+-	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_spaces
++	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
+ 
+ 	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+ }
 -- 
-2.14.3
+2.13.6
 
