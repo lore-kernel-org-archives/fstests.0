@@ -1,63 +1,149 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:31944 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752077AbeENXBg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 14 May 2018 19:01:36 -0400
-Date: Tue, 15 May 2018 09:01:30 +1000
+Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:46399 "EHLO
+        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752078AbeENXMC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 May 2018 19:12:02 -0400
+Date: Tue, 15 May 2018 09:11:01 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/3] generic/459: use xfs_freeze instead of fsfreeze
-Message-ID: <20180514230130.GD23861@dastard>
-References: <1526276991-23897-1-git-send-email-amir73il@gmail.com>
- <1526276991-23897-2-git-send-email-amir73il@gmail.com>
+Subject: Re: [PATCH V2] test online label ioctl
+Message-ID: <20180514231100.GE23861@dastard>
+References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1526276991-23897-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 14, 2018 at 08:49:49AM +0300, Amir Goldstein wrote:
-> This is what all other tests use as well as _require_freeze
+On Mon, May 14, 2018 at 12:09:16PM -0500, Eric Sandeen wrote:
+> This tests the online label ioctl that btrfs has, which has been
+> recently proposed for XFS.
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> To run, it requires an updated xfs_io with the label command and a
+> filesystem that supports it
+> 
+> A slight change here to _require_xfs_io_command as well, so that tests
+> which simply fail with "Inappropriate ioctl" can be caught in the
+> common case.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
->  tests/generic/459 | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
 > 
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index e755cf7..22b8e62 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -113,7 +113,7 @@ $XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
->  # extended. It is expected, and is only used so xfsaild is triggered to
->  # flush AIL items, other filesystems usually get remounted as read-only during
->  # the above write process.
-> -fsfreeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
-> +xfs_freeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
->  freezeid=$!
+> (urgh send as proper new thread, sorry)
+> 
+> This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
+> on xfs w/ my online label patchset (as long as xfs_io has the new
+> capability)
+> 
+> V2: Add a max label length helper
+>     Set the proper btrfs max label length o_O oops
+>     Filter trailing whitespace from blkid output
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index 9ffab7fd..88a99cff 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2158,6 +2158,9 @@ _require_xfs_io_command()
+>  		echo $testio | grep -q "Inappropriate ioctl" && \
+>  			_notrun "xfs_io $command support is missing"
+>  		;;
+> +	"label")
+> +		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
+> +		;;
+>  	"open")
+>  		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
+>  		# a new -C flag was introduced to execute one shot commands.
+> @@ -2196,7 +2199,7 @@ _require_xfs_io_command()
+>  	rm -f $testfile 2>&1 > /dev/null
+>  	echo $testio | grep -q "not found" && \
+>  		_notrun "xfs_io $command support is missing"
+> -	echo $testio | grep -q "Operation not supported" && \
+> +	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
+>  		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+>  	echo $testio | grep -q "Invalid" && \
+>  		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+> @@ -3802,6 +3805,31 @@ _require_scratch_feature()
+>  	esac
+>  }
 >  
->  # Wait enough so xfsaild can run
-> @@ -132,7 +132,7 @@ ret=$?
->  #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
->  #	  without getting stuck.
->  if [ $ret -ne 0 ]; then
-> -	# fsfreeze failed, filesystem should reject further writes and remount
-> +	# freeze failed, filesystem should reject further writes and remount
->  	# as readonly. Sometimes the previous write process won't trigger
->  	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
->  	# filesystems see the metadata I/O error.
-> @@ -148,7 +148,7 @@ if [ $ret -ne 0 ]; then
->  else
->  	# Try to thaw the filesystem, and complete test if if succeed.
->  	# NOTE: This will hang on affected XFS filesystems.
-> -	fsfreeze -u $SCRATCH_MNT >>$seqres.full 2>&1
-> +	xfs_freeze -u $SCRATCH_MNT >>$seqres.full 2>&1
->  	echo "Test OK"
->  fi
+> +# The maximum filesystem label length, not including terminating NULL
+> +_label_get_max()
+> +{
+> +	case $FSTYP in
+> +	xfs)
+> +		MAXLEN=12
+> +		;;
+> +	btrfs)
+> +		MAXLEN=255
+> +		;;
+> +	*)
+> +		MAXLEN=0
 
-Shouldn't these all be converted to XFS_FREEZE_PROG w/ a setup call
-to export XFS_FREEZE_PROG="`set_prog_path xfs_freeze`"?
+Why not just _notrun here?
+
+> +		;;
+> +	esac
+> +
+> +	echo $MAXLEN
+> +}
+> +
+> +_require_label_get_max()
+> +{
+> +	if [ $(_label_get_max) -eq 0 ]; then
+> +		_notrun "$FSTYP does not define maximum label length"
+> +	fi
+
+And this check can go away?
+
+Also, shouldn't it be _require_online_label_change() ? And then
+maybe you can move the xfs_io label command check inside it?
+
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_io_command "label"
+> +_require_label_get_max
+> +
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +# Make sure we can set & clear the label
+> +$XFS_IO_PROG -c "label label.$seq" $SCRATCH_MNT
+> +$XFS_IO_PROG -c "label" $SCRATCH_MNT
+> +
+> +# And that userspace can see it now, while mounted
+> +# NB: some blkid has trailing whitespace, filter it out here
+> +blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
+> +
+> +# And that the it is still there when it's unmounted
+> +_scratch_unmount
+> +blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
+
+Ok, so "LABEL" here is a special blkid match token....
+
+> +# And that it persists after a remount
+> +_scratch_mount
+> +$XFS_IO_PROG -c "label" $SCRATCH_MNT
+> +
+> +# And that a too-long label is rejected, beyond the interface max:
+> +LABEL=$(perl -e "print 'l' x 257;")
+
+And now you use it as a variable. Nasty and confusing. Using lower
+case for local variables is the norm, right? I thought we were only
+supposed to use upper case for global test harness variables...
+
+But even making it "label" is problematic:
+
+> +$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
+
+because "label" is an xfs_io command. Perhaps call it "fs_label"?
 
 Cheers,
 
