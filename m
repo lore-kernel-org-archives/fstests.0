@@ -1,66 +1,220 @@
-Received: from mx2.suse.de ([195.135.220.15]:43690 "EHLO mx2.suse.de"
+Received: from sandeen.net ([63.231.237.45]:52162 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752557AbeENRD6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 14 May 2018 13:03:58 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 7DE6AACB0
-        for <fstests@vger.kernel.org>; Mon, 14 May 2018 17:03:57 +0000 (UTC)
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 1/3] common/quota: Make project quota handling work for ext2 & ext3
-Date: Mon, 14 May 2018 19:03:49 +0200
-Message-Id: <20180514170351.13737-2-jack@suse.cz>
-In-Reply-To: <20180514170351.13737-1-jack@suse.cz>
-References: <20180514170351.13737-1-jack@suse.cz>
+        id S1752768AbeENRGq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 May 2018 13:06:46 -0400
+Subject: Re: [PATCH] test online label ioctl
+References: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <a542f523-7887-67fc-2082-e4426969fee4@sandeen.net>
+Date: Mon, 14 May 2018 12:06:45 -0500
+MIME-Version: 1.0
+In-Reply-To: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Project quota can work for ext2 & ext3 the same way as for ext4. Handle
-them properly as currently the tests just fail because of unknown
-prjquota mount option. After this patch, tests will be "not run" because
-ext4 driver refuses to use project quota mount options for "old" fs
-types.
+This tests the online label ioctl that btrfs has, which has been
+recently proposed for XFS.
 
-Signed-off-by: Jan Kara <jack@suse.cz>
+To run, it requires an updated xfs_io with the label command and a
+filesystem that supports it
+
+A slight change here to _require_xfs_io_command as well, so that tests
+which simply fail with "Inappropriate ioctl" can be caught in the
+common case.
+
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
- common/quota | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/common/quota b/common/quota
-index f8e037995ad4..2b99521df43d 100644
---- a/common/quota
-+++ b/common/quota
-@@ -90,9 +90,9 @@ _require_xfs_quota_foreign()
- _require_prjquota()
- {
-     [ -n "$1" ] && _dev="$1" || _dev="$TEST_DEV"
--    if [ "$FSTYP" == "ext4" ]; then
-+    if [[ "$FSTYP" == ext[234] ]]; then
- 	dumpe2fs -h $_dev 2>&1 | grep -qw project || \
--		_notrun "Project quota not available on this ext4"
-+		_notrun "Project quota not available on this $FSTYP"
-     fi
-     src/feature -P $_dev
-     [ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
-@@ -116,7 +116,7 @@ _require_getnextquota()
- # prior to mount.  This is a relatively new feature ...
- _scratch_enable_pquota()
- {
--	[ "$FSTYP" != "ext4" ] && return
-+	[[ "$FSTYP" != ext[234] ]] && return
+This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
+on xfs w/ my online label patchset (as long as xfs_io has the new
+capability)
+
+V2: Add a max label length helper
+    Set the proper btrfs max label length o_O oops
+    Filter trailing whitespace from blkid output
+
+
+diff --git a/common/rc b/common/rc
+index 9ffab7fd..88a99cff 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2158,6 +2158,9 @@ _require_xfs_io_command()
+ 		echo $testio | grep -q "Inappropriate ioctl" && \
+ 			_notrun "xfs_io $command support is missing"
+ 		;;
++	"label")
++		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
++		;;
+ 	"open")
+ 		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
+ 		# a new -C flag was introduced to execute one shot commands.
+@@ -2196,7 +2199,7 @@ _require_xfs_io_command()
+ 	rm -f $testfile 2>&1 > /dev/null
+ 	echo $testio | grep -q "not found" && \
+ 		_notrun "xfs_io $command support is missing"
+-	echo $testio | grep -q "Operation not supported" && \
++	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+ 	echo $testio | grep -q "Invalid" && \
+ 		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+@@ -3802,6 +3805,31 @@ _require_scratch_feature()
+ 	esac
+ }
  
- 	tune2fs -O quota,project $SCRATCH_DEV >>$seqres.full 2>&1
- 	_try_scratch_mount >/dev/null 2>&1 \
-@@ -242,7 +242,7 @@ _qmount_option()
++# The maximum filesystem label length, not including terminating NULL
++_label_get_max()
++{
++	case $FSTYP in
++	xfs)
++		MAXLEN=12
++		;;
++	btrfs)
++		MAXLEN=255
++		;;
++	*)
++		MAXLEN=0
++		;;
++	esac
++
++	echo $MAXLEN
++}
++
++_require_label_get_max()
++{
++	if [ $(_label_get_max) -eq 0 ]; then
++		_notrun "$FSTYP does not define maximum label length"
++	fi
++}
++
+ init_rc
  
- 	# ext4 doesn't _do_ "-o pquota/prjquota" because reasons
- 	# Switch it to "quota" to enable mkfs-time pquota
--	if [ "$FSTYP" == "ext4" ]; then
-+	if [[ "$FSTYP" == ext[234] ]]; then
- 		OPTS=`echo $OPTS \
- 		| sed	-e 's/\bpquota/quota/g'	\
- 			-e 's/prjquota/quota/g'`
--- 
-2.13.6
+ ################################################################################
+diff --git a/tests/generic/479 b/tests/generic/479
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/485 b/tests/generic/485
+new file mode 100755
+index 00000000..941afd3d
+--- /dev/null
++++ b/tests/generic/485
+@@ -0,0 +1,90 @@
++#! /bin/bash
++# FS QA Test 485
++#
++# Test the online filesystem label set/get ioctls
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++# Author: Eric Sandeen <sandeen@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "label"
++_require_label_get_max
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++# Make sure we can set & clear the label
++$XFS_IO_PROG -c "label label.$seq" $SCRATCH_MNT
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that userspace can see it now, while mounted
++# NB: some blkid has trailing whitespace, filter it out here
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
++
++# And that the it is still there when it's unmounted
++_scratch_unmount
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
++
++# And that it persists after a remount
++_scratch_mount
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that a too-long label is rejected, beyond the interface max:
++LABEL=$(perl -e "print 'l' x 257;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++
++# And it succeeds right at the filesystem max:
++MAXLEN=$(_label_get_max)
++LABEL=$(perl -e "print 'o' x $MAXLEN;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
++
++# And that it fails past the filesystem max:
++let TOOLONG=MAXLEN+1
++LABEL=$(perl -e "print 'o' x $TOOLONG;")
++$XFS_IO_PROG -c "label $LABEL" $SCRATCH_MNT
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/485.out b/tests/generic/485.out
+new file mode 100644
+index 00000000..24efca8c
+--- /dev/null
++++ b/tests/generic/485.out
+@@ -0,0 +1,9 @@
++QA output created by 485
++label = "label.485"
++label = "label.485"
++SCRATCH_DEV: LABEL="label.485"
++SCRATCH_DEV: LABEL="label.485"
++label = "label.485"
++label: Invalid argument
++label = "MAXLABEL"
++label: Invalid argument
+diff --git a/tests/generic/group b/tests/generic/group
+index 19be9267..9ac5bbd1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -487,3 +487,4 @@
+ 482 auto metadata replay
+ 483 auto quick log metadata
+ 484 auto quick
++485 auto quick
+
 
