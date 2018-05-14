@@ -1,19 +1,17 @@
-Received: from sandeen.net ([63.231.237.45]:52162 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:42270 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752768AbeENRGq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 14 May 2018 13:06:46 -0400
-Subject: Re: [PATCH] test online label ioctl
-References: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <a542f523-7887-67fc-2082-e4426969fee4@sandeen.net>
-Date: Mon, 14 May 2018 12:06:45 -0500
+        id S1752385AbeENRJS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 14 May 2018 13:09:18 -0400
+From: Eric Sandeen <sandeen@redhat.com>
+Subject: [PATCH V2] test online label ioctl
+Message-ID: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
+Date: Mon, 14 May 2018 12:09:16 -0500
 MIME-Version: 1.0
-In-Reply-To: <fd1e2651-099f-8acd-da4d-a67c1e45cd07@redhat.com>
 Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 This tests the online label ioctl that btrfs has, which has been
@@ -28,6 +26,8 @@ common case.
 
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
+
+(urgh send as proper new thread, sorry)
 
 This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
 on xfs w/ my online label patchset (as long as xfs_io has the new
