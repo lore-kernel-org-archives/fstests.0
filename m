@@ -1,114 +1,66 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:50443 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1750952AbeEOE3a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 May 2018 00:29:30 -0400
-Date: Tue, 15 May 2018 14:29:23 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH V2] test online label ioctl
-Message-ID: <20180515042923.GD10363@dastard>
-References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
- <20180514231100.GE23861@dastard>
- <d4dea5fc-9f68-604d-92ec-c9cd2510db52@sandeen.net>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:33847 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752129AbeEOFZv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 15 May 2018 01:25:51 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <d4dea5fc-9f68-604d-92ec-c9cd2510db52@sandeen.net>
+In-Reply-To: <20180514230130.GD23861@dastard>
+References: <1526276991-23897-1-git-send-email-amir73il@gmail.com>
+ <1526276991-23897-2-git-send-email-amir73il@gmail.com> <20180514230130.GD23861@dastard>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 15 May 2018 08:25:49 +0300
+Message-ID: <CAOQ4uxgEF7cHmb05AxFJyHaV1zWC+Zk08dDNPepfhZ0Foz31Hg@mail.gmail.com>
+Subject: Re: [PATCH 1/3] generic/459: use xfs_freeze instead of fsfreeze
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 14, 2018 at 06:26:07PM -0500, Eric Sandeen wrote:
-> On 5/14/18 6:11 PM, Dave Chinner wrote:
-> > On Mon, May 14, 2018 at 12:09:16PM -0500, Eric Sandeen wrote:
-> >> This tests the online label ioctl that btrfs has, which has been
-> >> recently proposed for XFS.
-> >>
-> >> To run, it requires an updated xfs_io with the label command and a
-> >> filesystem that supports it
-> >>
-> >> A slight change here to _require_xfs_io_command as well, so that tests
-> >> which simply fail with "Inappropriate ioctl" can be caught in the
-> >> common case.
-> >>
-> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >> ---
-> 
-> <snip>
->  
-> >> +# The maximum filesystem label length, not including terminating NULL
-> >> +_label_get_max()
-> >> +{
-> >> +	case $FSTYP in
-> >> +	xfs)
-> >> +		MAXLEN=12
-> >> +		;;
-> >> +	btrfs)
-> >> +		MAXLEN=255
-> >> +		;;
-> >> +	*)
-> >> +		MAXLEN=0
-> > 
-> > Why not just _notrun here?
-> 
-> do we want to go through the other steps only to get here and notrun
-> halfway through?
-> 
-> >> +		;;
-> >> +	esac
-> >> +
-> >> +	echo $MAXLEN
-> >> +}
-> >> +
-> >> +_require_label_get_max()
-> >> +{
-> >> +	if [ $(_label_get_max) -eq 0 ]; then
-> >> +		_notrun "$FSTYP does not define maximum label length"
-> >> +	fi
-> > 
-> > And this check can go away?
-> 
-> We'd like to know if all the validations in this can complete before we
-> get started, right?  That's why I did it this way.
+On Tue, May 15, 2018 at 2:01 AM, Dave Chinner <david@fromorbit.com> wrote:
+> On Mon, May 14, 2018 at 08:49:49AM +0300, Amir Goldstein wrote:
+>> This is what all other tests use as well as _require_freeze
+>>
+>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>> ---
+>>  tests/generic/459 | 6 +++---
+>>  1 file changed, 3 insertions(+), 3 deletions(-)
+>>
+>> diff --git a/tests/generic/459 b/tests/generic/459
+>> index e755cf7..22b8e62 100755
+>> --- a/tests/generic/459
+>> +++ b/tests/generic/459
+>> @@ -113,7 +113,7 @@ $XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
+>>  # extended. It is expected, and is only used so xfsaild is triggered to
+>>  # flush AIL items, other filesystems usually get remounted as read-only during
+>>  # the above write process.
+>> -fsfreeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
+>> +xfs_freeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
+>>  freezeid=$!
+>>
+>>  # Wait enough so xfsaild can run
+>> @@ -132,7 +132,7 @@ ret=$?
+>>  #    - The filesystem stays in Read-Write mode, but can be frozen/thawed
+>>  #      without getting stuck.
+>>  if [ $ret -ne 0 ]; then
+>> -     # fsfreeze failed, filesystem should reject further writes and remount
+>> +     # freeze failed, filesystem should reject further writes and remount
+>>       # as readonly. Sometimes the previous write process won't trigger
+>>       # ro-remount, e.g. on ext3/4, do additional touch here to make sure
+>>       # filesystems see the metadata I/O error.
+>> @@ -148,7 +148,7 @@ if [ $ret -ne 0 ]; then
+>>  else
+>>       # Try to thaw the filesystem, and complete test if if succeed.
+>>       # NOTE: This will hang on affected XFS filesystems.
+>> -     fsfreeze -u $SCRATCH_MNT >>$seqres.full 2>&1
+>> +     xfs_freeze -u $SCRATCH_MNT >>$seqres.full 2>&1
+>>       echo "Test OK"
+>>  fi
+>
+> Shouldn't these all be converted to XFS_FREEZE_PROG w/ a setup call
+> to export XFS_FREEZE_PROG="`set_prog_path xfs_freeze`"?
+>
 
-Sure, just trying to be a bit defensive as people often forget
-_requires directives when writing new tests....
+Yeh, I suppose I can take this one as part of the "freeze" cleanup.
 
-> > Also, shouldn't it be _require_online_label_change() ? And then
-> > maybe you can move the xfs_io label command check inside it?
-> 
-> Well, we want to know a lot of things:
-> 
-> 1) can the kernel code for this filesystem support online label
-> 2) does xfs_io support the label command
-> 3) does this test know the maximum label length to test for this fs
-> 
-> the above stuff is for 3)
-
-What I was suggesting was doing all of these in one function similar
-to _require_xfs_sparse_inodes, _require_meta_uuid, etc:
-
-_require_online_label_change()
-{
-	# need xfs_io support
-	_require_xfs_io_command "label"
-
-	# need fstests knowledge of label size
-	[ $(_label_get_max) -eq 0 ] && _notrun "$FSTYP does not define maximum label length"
-
-	# need kernel support
-	$XFS_IO_PROG -c label $TEST_DIR > /dev/null 2>&1
-	[ $? -ne 0 ] && _notrun "Kernel does not support FS_IOC_GETLABEL"
-}
-
-Which also means that the label_f command in xfs_io needs to set the
-exitcode to non-zero when the ioctl fails so that xfs_io returns
-non-zero on failure...
-
-Cheers,
-
-Dave.
-
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Amir.
