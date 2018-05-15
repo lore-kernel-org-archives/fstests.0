@@ -1,80 +1,222 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:43025 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752568AbeEONuF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 15 May 2018 09:50:05 -0400
+Received: from sandeen.net ([63.231.237.45]:57902 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1752425AbeEOPWj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 15 May 2018 11:22:39 -0400
+Subject: [PATCH V3] test online label ioctl
+References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <d65893a4-c6d8-1d85-4650-e63d04e8366a@sandeen.net>
+Date: Tue, 15 May 2018 10:22:37 -0500
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgEF7cHmb05AxFJyHaV1zWC+Zk08dDNPepfhZ0Foz31Hg@mail.gmail.com>
-References: <1526276991-23897-1-git-send-email-amir73il@gmail.com>
- <1526276991-23897-2-git-send-email-amir73il@gmail.com> <20180514230130.GD23861@dastard>
- <CAOQ4uxgEF7cHmb05AxFJyHaV1zWC+Zk08dDNPepfhZ0Foz31Hg@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 15 May 2018 16:50:04 +0300
-Message-ID: <CAOQ4uxikFp-GsuhmPHud4QtKrSdojBNAnDB6yOfrG-11GU_jRw@mail.gmail.com>
-Subject: Re: [PATCH 1/3] generic/459: use xfs_freeze instead of fsfreeze
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 15, 2018 at 8:25 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Tue, May 15, 2018 at 2:01 AM, Dave Chinner <david@fromorbit.com> wrote:
->> On Mon, May 14, 2018 at 08:49:49AM +0300, Amir Goldstein wrote:
->>> This is what all other tests use as well as _require_freeze
->>>
->>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->>> ---
-[...]
->>
->> Shouldn't these all be converted to XFS_FREEZE_PROG w/ a setup call
->> to export XFS_FREEZE_PROG="`set_prog_path xfs_freeze`"?
->>
->
-> Yeh, I suppose I can take this one as part of the "freeze" cleanup.
->
+This tests the online label ioctl that btrfs has, which has been
+recently proposed for XFS.
 
-I looked again and xfs_freeze pattern repeats itself quite often with
-other xfs_* progs, so I guess I'll leave that cleanup for another time...
+To run, it requires an updated xfs_io with the label command and a
+filesystem that supports it
 
-Thanks,
-Amir.
+A slight change here to _require_xfs_io_command as well, so that tests
+which simply fail with "Inappropriate ioctl" can be caught in the
+common case.
 
-$ git grep -v '^[[:space:]]*[#;]' tests/*/???| grep -v echo > all
-$ (cd /usr/sbin; ls xfs_*) > xfsprogs
-$ for p in `cat xfsprogs`; do echo $p; grep -w $p all | wc -l; done
-xfs_admin
-1
-xfs_bmap
-24
-xfs_copy
-9
-xfs_db
-35
-xfs_estimate
-0
-xfs_freeze
-17
-xfs_fsr
-15
-xfs_growfs
-3
-xfs_info
-31
-xfs_io
-17
-xfs_logprint
-0
-xfs_mdrestore
-7
-xfs_metadump
-1
-xfs_mkfile
-1
-xfs_ncheck
-0
-xfs_quota
-43
-xfs_rtcp
-0
-xfs_spaceman
-0
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
+
+(urgh send as proper new thread, sorry)
+
+This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
+on xfs w/ my online label patchset (as long as xfs_io has the new
+capability)
+
+V2: Add a max label length helper
+     Set the proper btrfs max label length o_O oops
+     Filter trailing whitespace from blkid output
+
+V3: lowercase local vars, simplify max label len function
+
+
+
+diff --git a/common/rc b/common/rc
+index ffe53236..333cfb82 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2144,6 +2144,9 @@ _require_xfs_io_command()
+  		echo $testio | grep -q "Inappropriate ioctl" && \
+  			_notrun "xfs_io $command support is missing"
+  		;;
++	"label")
++		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
++		;;
+  	"open")
+  		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
+  		# a new -C flag was introduced to execute one shot commands.
+@@ -2182,7 +2185,7 @@ _require_xfs_io_command()
+  	rm -f $testfile 2>&1 > /dev/null
+  	echo $testio | grep -q "not found" && \
+  		_notrun "xfs_io $command support is missing"
+-	echo $testio | grep -q "Operation not supported" && \
++	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
+  		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
+  	echo $testio | grep -q "Invalid" && \
+  		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
+@@ -3788,6 +3791,29 @@ _require_scratch_feature()
+  	esac
+  }
+  
++# The maximum filesystem label length, /not/ including terminating NULL
++_label_get_max()
++{
++	case $FSTYP in
++	xfs)
++		echo 12
++		;;
++	btrfs)
++		echo 255
++		;;
++	*)
++		_notrun "$FSTYP does not define maximum label length"
++		;;
++	esac
++}
++
++# Helper to check above early in a script
++_require_label_get_max()
++{
++	# Just call _label_get_max which will notrun if appropriate
++	dummy=$(_label_get_max)
++}
++
+  init_rc
+  
+  ################################################################################
+diff --git a/tests/generic/479 b/tests/generic/479
+old mode 100644
+new mode 100755
+diff --git a/tests/generic/488 b/tests/generic/488
+new file mode 100755
+index 00000000..9521c5ba
+--- /dev/null
++++ b/tests/generic/488
+@@ -0,0 +1,90 @@
++#! /bin/bash
++# FS QA Test 488
++#
++# Test the online filesystem label set/get ioctls
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++# Author: Eric Sandeen <sandeen@redhat.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "label"
++_require_label_get_max
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++# Make sure we can set & clear the label
++$XFS_IO_PROG -c "label label.$seq" $SCRATCH_MNT
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that userspace can see it now, while mounted
++# NB: some blkid has trailing whitespace, filter it out here
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
++
++# And that the it is still there when it's unmounted
++_scratch_unmount
++blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
++
++# And that it persists after a remount
++_scratch_mount
++$XFS_IO_PROG -c "label" $SCRATCH_MNT
++
++# And that a too-long label is rejected, beyond the interface max:
++fs_label=$(perl -e "print 'l' x 257;")
++$XFS_IO_PROG -c "label $fs_label" $SCRATCH_MNT
++
++# And it succeeds right at the filesystem max:
++max_label_len=$(_label_get_max)
++fs_label=$(perl -e "print 'o' x $max_label_len;")
++$XFS_IO_PROG -c "label $fs_label" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
++
++# And that it fails past the filesystem max:
++let toolong_label_len=max_label_len+1
++fs_label=$(perl -e "print 'o' x $toolong_label_len;")
++$XFS_IO_PROG -c "label $fs_label " $SCRATCH_MNT
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/488.out b/tests/generic/488.out
+new file mode 100644
+index 00000000..3c70a15f
+--- /dev/null
++++ b/tests/generic/488.out
+@@ -0,0 +1,9 @@
++QA output created by 488
++label = "label.488"
++label = "label.488"
++SCRATCH_DEV: LABEL="label.488"
++SCRATCH_DEV: LABEL="label.488"
++label = "label.488"
++label: Invalid argument
++label = "MAXLABEL"
++label: Invalid argument
+diff --git a/tests/generic/group b/tests/generic/group
+index dc637c96..6266213e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -490,3 +490,4 @@
+  485 auto quick insert
+  486 auto quick attr
+  487 auto quick
++488 auto quick
+
