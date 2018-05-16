@@ -1,286 +1,112 @@
-Received: from mail-pl0-f65.google.com ([209.85.160.65]:38627 "EHLO
-        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750847AbeEPQ5M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 12:57:12 -0400
-Received: by mail-pl0-f65.google.com with SMTP id c11-v6so774465plr.5
-        for <fstests@vger.kernel.org>; Wed, 16 May 2018 09:57:12 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 4/4] generic: test invalid swap file activation
-Date: Wed, 16 May 2018 09:57:00 -0700
-Message-Id: <25d894d6f810b4c4552d13e56ab7bb63e749f48f.1526489529.git.osandov@fb.com>
-In-Reply-To: <cover.1526489529.git.osandov@fb.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:43530 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750786AbeEPTja (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 15:39:30 -0400
+Date: Wed, 16 May 2018 12:39:13 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 1/4] generic: enable swapfile tests on Btrfs
+Message-ID: <20180516193913.GB4910@magnolia>
 References: <cover.1526489529.git.osandov@fb.com>
-In-Reply-To: <cover.1526489529.git.osandov@fb.com>
-References: <cover.1526489529.git.osandov@fb.com>
+ <c05e3925acae64cb82c411452159f41610aeec7f.1526489529.git.osandov@fb.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <c05e3925acae64cb82c411452159f41610aeec7f.1526489529.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, kernel-team@fb.com
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+On Wed, May 16, 2018 at 09:56:57AM -0700, Omar Sandoval wrote:
+> From: Omar Sandoval <osandov@fb.com>
+> 
+> Commit 8c96cfbfe530 ("generic/35[67]: disable swapfile tests on Btrfs")
+> disabled the swapfile tests on Btrfs because it did not support
+> swapfiles at the time. Now that we're adding support, we want these
+> tests to run, but they don't. _require_scratch_swapfile always fails for
+> Btrfs because swapfiles on Btrfs must be set to nocow. After fixing
+> that, generic/356 and generic/357 fail for the same reason. After fixing
+> _that_, both tests still fail because we don't allow reflinking a
+> non-checksummed extent (which nocow implies) to a checksummed extent. Do
+> the chattrs everywhere, which gets these tests running on kernels
+> supporting Btrfs swapfiles.
+> 
+> Signed-off-by: Omar Sandoval <osandov@fb.com>
+> ---
+>  common/rc         | 3 +++
+>  tests/generic/356 | 6 +++++-
+>  tests/generic/357 | 6 +++++-
+>  3 files changed, 13 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index ffe53236..5405f7d0 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2233,6 +2233,9 @@ _require_scratch_swapfile()
+>  	# Minimum size for mkswap is 10 pages
+>  	local size=$(($(get_page_size) * 10))
+>  
+> +	touch "$SCRATCH_MNT/swap"
+> +	chmod 0600 "$SCRATCH_MNT/swap"
+> +	chattr +C "$SCRATCH_MNT/swap" >/dev/null 2>&1
+>  	_pwrite_byte 0x61 0 "$size" "$SCRATCH_MNT/swap" >/dev/null 2>&1
+>  	mkswap "$SCRATCH_MNT/swap" >/dev/null 2>&1
+>  	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+> diff --git a/tests/generic/356 b/tests/generic/356
+> index 51eeb652..09c146a9 100755
+> --- a/tests/generic/356
+> +++ b/tests/generic/356
+> @@ -59,7 +59,11 @@ blocks=160
+>  blksz=65536
+>  
+>  echo "Initialize file"
+> -echo >> $seqres.full
+> +touch "$testdir/file1"
+> +chmod 0600 "$testdir/file1"
+> +chattr +C "$testdir/file1" >/dev/null 2>&1
+> +touch "$testdir/file2"
+> +chattr +C "$testdir/file2" >/dev/null 2>&1
+>  _pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
+>  mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
+>  swapon $testdir/file1
+> diff --git a/tests/generic/357 b/tests/generic/357
+> index 0dd0c10f..742f37d1 100755
+> --- a/tests/generic/357
+> +++ b/tests/generic/357
+> @@ -59,7 +59,11 @@ blocks=160
+>  blksz=65536
+>  
+>  echo "Initialize file"
+> -echo >> $seqres.full
+> +touch "$testdir/file1"
+> +chmod 0600 "$testdir/file1"
+> +chattr +C "$testdir/file1" >/dev/null 2>&1
+> +touch "$testdir/file2"
+> +chattr +C "$testdir/file2" >/dev/null 2>&1
+>  _pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
+>  mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
 
-Swap files cannot have holes, and they must be at least two pages.
-swapon(8) and mkswap(8) have stricter restrictions, so add versions of
-those commands without any restrictions.
+Should this get refactored into a _format_swapfile or something, rather
+than open coding this everywhere?
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
- .gitignore            |  2 ++
- src/Makefile          |  2 +-
- src/mkswap.c          | 83 +++++++++++++++++++++++++++++++++++++++++++
- src/swapon.c          | 24 +++++++++++++
- tests/generic/490     | 75 ++++++++++++++++++++++++++++++++++++++
- tests/generic/490.out |  5 +++
- 6 files changed, 190 insertions(+), 1 deletion(-)
- create mode 100644 src/mkswap.c
- create mode 100644 src/swapon.c
- create mode 100755 tests/generic/490
- create mode 100644 tests/generic/490.out
+_format_swapfile() {
+	local fname=$1
+	local sz=$2
 
-diff --git a/.gitignore b/.gitignore
-index 53029e24..efc73a7c 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -92,6 +92,7 @@
- /src/lstat64
- /src/makeextents
- /src/metaperf
-+/src/mkswap
- /src/mmapcat
- /src/multi_open_unlink
- /src/nametest
-@@ -111,6 +112,7 @@
- /src/seek_sanity_test
- /src/stale_handle
- /src/stat_test
-+/src/swapon
- /src/t_access_root
- /src/t_dir_offset
- /src/t_dir_offset2
-diff --git a/src/Makefile b/src/Makefile
-index c42d3bb1..01fe99ef 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -26,7 +26,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
- 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
- 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
--	attr_replace_test
-+	attr_replace_test swapon mkswap
- 
- SUBDIRS = log-writes perf
- 
-diff --git a/src/mkswap.c b/src/mkswap.c
-new file mode 100644
-index 00000000..d0bce2bd
---- /dev/null
-+++ b/src/mkswap.c
-@@ -0,0 +1,83 @@
-+/* mkswap(8) without any sanity checks */
-+
-+#include <stdint.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <unistd.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+
-+struct swap_header {
-+	char		bootbits[1024];
-+	uint32_t	version;
-+	uint32_t	last_page;
-+	uint32_t	nr_badpages;
-+	unsigned char	sws_uuid[16];
-+	unsigned char	sws_volume[16];
-+	uint32_t	padding[117];
-+	uint32_t	badpages[1];
-+};
-+
-+int main(int argc, char **argv)
-+{
-+	struct swap_header *hdr;
-+	FILE *file;
-+	struct stat st;
-+	long page_size;
-+	int ret;
-+
-+	if (argc != 2) {
-+		fprintf(stderr, "usage: %s PATH\n", argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	page_size = sysconf(_SC_PAGESIZE);
-+	if (page_size == -1) {
-+		perror("sysconf");
-+		return EXIT_FAILURE;
-+	}
-+
-+	hdr = calloc(1, page_size);
-+	if (!hdr) {
-+		perror("calloc");
-+		return EXIT_FAILURE;
-+	}
-+
-+	file = fopen(argv[1], "r+");
-+	if (!file) {
-+		perror("fopen");
-+		free(hdr);
-+		return EXIT_FAILURE;
-+	}
-+
-+	ret = fstat(fileno(file), &st);
-+	if (ret) {
-+		perror("fstat");
-+		free(hdr);
-+		fclose(file);
-+		return EXIT_FAILURE;
-+	}
-+
-+	hdr->version = 1;
-+	hdr->last_page = st.st_size / page_size - 1;
-+	memset(&hdr->sws_uuid, 0x99, sizeof(hdr->sws_uuid));
-+	memcpy((char *)hdr + page_size - 10, "SWAPSPACE2", 10);
-+
-+	if (fwrite(hdr, page_size, 1, file) != 1) {
-+		perror("fwrite");
-+		free(hdr);
-+		fclose(file);
-+		return EXIT_FAILURE;
-+	}
-+
-+	if (fclose(file) == EOF) {
-+		perror("fwrite");
-+		free(hdr);
-+		return EXIT_FAILURE;
-+	}
-+
-+	free(hdr);
-+
-+	return EXIT_SUCCESS;
-+}
-diff --git a/src/swapon.c b/src/swapon.c
-new file mode 100644
-index 00000000..0cb7108a
---- /dev/null
-+++ b/src/swapon.c
-@@ -0,0 +1,24 @@
-+/* swapon(8) without any sanity checks; simply calls swapon(2) directly. */
-+
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <unistd.h>
-+#include <sys/swap.h>
-+
-+int main(int argc, char **argv)
-+{
-+	int ret;
-+
-+	if (argc != 2) {
-+		fprintf(stderr, "usage: %s PATH\n", argv[0]);
-+		return EXIT_FAILURE;
-+	}
-+
-+	ret = swapon(argv[1], 0);
-+	if (ret) {
-+		perror("swapon");
-+		return EXIT_FAILURE;
-+	}
-+
-+	return EXIT_SUCCESS;
-+}
-diff --git a/tests/generic/490 b/tests/generic/490
-new file mode 100755
-index 00000000..eb502e24
---- /dev/null
-+++ b/tests/generic/490
-@@ -0,0 +1,75 @@
-+#! /bin/bash
-+# FS QA Test 490
-+#
-+# Test invalid swap files.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Facebook.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_swapfile
-+_require_test_program mkswap
-+_require_test_program swapon
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+
-+echo "File with holes"
-+touch "$SCRATCH_MNT/swap"
-+$CHATTR_PROG +C "$SCRATCH_MNT/swap"
-+chmod 0600 "$SCRATCH_MNT/swap"
-+$XFS_IO_PROG -c "truncate $(($(get_page_size) * 10))" "$SCRATCH_MNT/swap"
-+"$here/src/mkswap" "$SCRATCH_MNT/swap"
-+"$here/src/swapon" "$SCRATCH_MNT/swap"
-+swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
-+
-+echo "Empty swap file (only swap header)"
-+rm -f "$SCRATCH_MNT/swap"
-+touch "$SCRATCH_MNT/swap"
-+$CHATTR_PROG +C "$SCRATCH_MNT/swap"
-+chmod 0600 "$SCRATCH_MNT/swap"
-+_pwrite_byte 0x61 0 $(get_page_size) "$SCRATCH_MNT/swap" >> $seqres.full
-+"$here/src/mkswap" "$SCRATCH_MNT/swap"
-+"$here/src/swapon" "$SCRATCH_MNT/swap"
-+swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
-+
-+status=0
-+exit
-diff --git a/tests/generic/490.out b/tests/generic/490.out
-new file mode 100644
-index 00000000..96226c64
---- /dev/null
-+++ b/tests/generic/490.out
-@@ -0,0 +1,5 @@
-+QA output created by 490
-+File with holes
-+swapon: Invalid argument
-+Empty swap file (only swap header)
-+swapon: Invalid argument
--- 
-2.17.0
+	touch $fname
+	chmod 0600 $fname
+	chattr +C $fname > /dev/null 2>&1
+	_pwrite_byte 0x61 0 $sz $fname >> $seqres.full
+	mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $fname >> $seqres.full
+}
 
+--D
+
+>  _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
+> -- 
+> 2.17.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
