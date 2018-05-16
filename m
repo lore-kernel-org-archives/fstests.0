@@ -1,77 +1,58 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:22082 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752101AbeEPILo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 04:11:44 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/486: print correct errno
-Date: Wed, 16 May 2018 16:00:04 +0800
-Message-ID: <1526457604-10060-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:33002 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750846AbeEPOmS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 May 2018 10:42:18 -0400
+Subject: Re: [PATCH V3] test online label ioctl
+References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
+ <d65893a4-c6d8-1d85-4650-e63d04e8366a@sandeen.net>
+ <20180516005139.GI10363@dastard>
+From: Eric Sandeen <sandeen@redhat.com>
+Message-ID: <505eba27-476e-2bb7-9d72-11d64d31e6c3@redhat.com>
+Date: Wed, 16 May 2018 09:42:17 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20180516005139.GI10363@dastard>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: libc-alpha-help@sourceware.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Dave Chinner <david@fromorbit.com>, Eric Sandeen <sandeen@sandeen.net>
+Cc: fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On glibc v2.12 or v2.17, running generic/486 with XFS got wrong
-EINVAL instead of ENODATA:
-----------------------------------------------------------------
-QA output created by 486
-No data available
-error=22 at line 63
-----------------------------------------------------------------
+On 5/15/18 7:51 PM, Dave Chinner wrote:
+> On Tue, May 15, 2018 at 10:22:37AM -0500, Eric Sandeen wrote:
+>> This tests the online label ioctl that btrfs has, which has been
+>> recently proposed for XFS.
+>>
+>> To run, it requires an updated xfs_io with the label command and a
+>> filesystem that supports it
+>>
+>> A slight change here to _require_xfs_io_command as well, so that tests
+>> which simply fail with "Inappropriate ioctl" can be caught in the
+>> common case.
+>>
+>> Signed-off-by: Eric Sandeen<sandeen@redhat.com>
+>> ---
+>>
+>> (urgh send as proper new thread, sorry)
+>>
+>> This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
+>> on xfs w/ my online label patchset (as long as xfs_io has the new
+>> capability)
+>>
+>> V2: Add a max label length helper
+>>      Set the proper btrfs max label length o_O oops
+>>      Filter trailing whitespace from blkid output
+>>
+>> V3: lowercase local vars, simplify max label len function
+> Looks good now, but I wondered about one thing the test doesn't
+> cover: can you clear the label by setting it to a null string?
+> i.e you check max length bounds, but don't check empty string
+> behaviour...
 
-We want to save the correct errno and print it after calling perror().
+hohum, yes.  I'll fix that, which will also require a change to xfs_io
+to be able to set a null string.
 
-It seems that only calling perror() didn't change the errno, but calling
-perror() and redirecting the output of perror() to a file set errno to
-EINVAL.
+Will send a V3 in a bit.
 
-For example, running the special test.c to reproduce the issue:
-------------------------------------------------------------
-#include <errno.h>
-#include <unistd.h>
-#include <stdio.h>
-
-int main(void)
-{
-        close(-1);
-        printf("errno %d before\n", errno);
-        perror("");
-        printf("errno %d after\n", errno);
-}
-------------------------------------------------------------
-# gcc -o test test.c
-# ./test
-# ./test 2>log
-
-fdopen() called by perror() in glibc seems to set errno to EINVAL
-in some cases(e.g. the access mode of stderr is O_WRONLY). I am not
-sure whether this is a perror bug in glibc or not.
-
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- src/attr_replace_test.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
-
-diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-index 23adc07..e9a08cc 100644
---- a/src/attr_replace_test.c
-+++ b/src/attr_replace_test.c
-@@ -10,8 +10,9 @@
- #include <sys/xattr.h>
- #include <sys/stat.h>
- 
--#define die() do { perror(""); \
--fprintf(stderr, "error=%d at line %d\n", errno, __LINE__); \
-+#define die() do { int real_errno = errno; \
-+perror(""); \
-+fprintf(stderr, "error=%d at line %d\n", real_errno, __LINE__); \
- exit(1); } while (0)
- 
- #define fail(...) do { \
--- 
-1.8.3.1
-
-
-
+-Eric
