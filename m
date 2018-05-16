@@ -1,13 +1,13 @@
-Received: from mail-pg0-f47.google.com ([74.125.83.47]:43324 "EHLO
-        mail-pg0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750775AbeEPQ5J (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 12:57:09 -0400
-Received: by mail-pg0-f47.google.com with SMTP id p8-v6so538597pgq.10
-        for <fstests@vger.kernel.org>; Wed, 16 May 2018 09:57:09 -0700 (PDT)
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:38627 "EHLO
+        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750847AbeEPQ5M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 12:57:12 -0400
+Received: by mail-pl0-f65.google.com with SMTP id c11-v6so774465plr.5
+        for <fstests@vger.kernel.org>; Wed, 16 May 2018 09:57:12 -0700 (PDT)
 From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 2/4] generic: add test for dedupe on an active swapfile
-Date: Wed, 16 May 2018 09:56:58 -0700
-Message-Id: <a13554c661cd30b94821a078483bf7b31e32d74b.1526489529.git.osandov@fb.com>
+Subject: [PATCH 4/4] generic: test invalid swap file activation
+Date: Wed, 16 May 2018 09:57:00 -0700
+Message-Id: <25d894d6f810b4c4552d13e56ab7bb63e749f48f.1526489529.git.osandov@fb.com>
 In-Reply-To: <cover.1526489529.git.osandov@fb.com>
 References: <cover.1526489529.git.osandov@fb.com>
 In-Reply-To: <cover.1526489529.git.osandov@fb.com>
@@ -19,28 +19,186 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Omar Sandoval <osandov@fb.com>
 
-Similar to generic/356 that makes sure we can't reflink an active
-swapfile.
+Swap files cannot have holes, and they must be at least two pages.
+swapon(8) and mkswap(8) have stricter restrictions, so add versions of
+those commands without any restrictions.
 
 Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
- tests/generic/488     | 78 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/488.out |  7 ++++
- tests/generic/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/generic/488
- create mode 100644 tests/generic/488.out
+ .gitignore            |  2 ++
+ src/Makefile          |  2 +-
+ src/mkswap.c          | 83 +++++++++++++++++++++++++++++++++++++++++++
+ src/swapon.c          | 24 +++++++++++++
+ tests/generic/490     | 75 ++++++++++++++++++++++++++++++++++++++
+ tests/generic/490.out |  5 +++
+ 6 files changed, 190 insertions(+), 1 deletion(-)
+ create mode 100644 src/mkswap.c
+ create mode 100644 src/swapon.c
+ create mode 100755 tests/generic/490
+ create mode 100644 tests/generic/490.out
 
-diff --git a/tests/generic/488 b/tests/generic/488
-new file mode 100755
-index 00000000..6e05048c
+diff --git a/.gitignore b/.gitignore
+index 53029e24..efc73a7c 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -92,6 +92,7 @@
+ /src/lstat64
+ /src/makeextents
+ /src/metaperf
++/src/mkswap
+ /src/mmapcat
+ /src/multi_open_unlink
+ /src/nametest
+@@ -111,6 +112,7 @@
+ /src/seek_sanity_test
+ /src/stale_handle
+ /src/stat_test
++/src/swapon
+ /src/t_access_root
+ /src/t_dir_offset
+ /src/t_dir_offset2
+diff --git a/src/Makefile b/src/Makefile
+index c42d3bb1..01fe99ef 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -26,7 +26,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+-	attr_replace_test
++	attr_replace_test swapon mkswap
+ 
+ SUBDIRS = log-writes perf
+ 
+diff --git a/src/mkswap.c b/src/mkswap.c
+new file mode 100644
+index 00000000..d0bce2bd
 --- /dev/null
-+++ b/tests/generic/488
-@@ -0,0 +1,78 @@
++++ b/src/mkswap.c
+@@ -0,0 +1,83 @@
++/* mkswap(8) without any sanity checks */
++
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++
++struct swap_header {
++	char		bootbits[1024];
++	uint32_t	version;
++	uint32_t	last_page;
++	uint32_t	nr_badpages;
++	unsigned char	sws_uuid[16];
++	unsigned char	sws_volume[16];
++	uint32_t	padding[117];
++	uint32_t	badpages[1];
++};
++
++int main(int argc, char **argv)
++{
++	struct swap_header *hdr;
++	FILE *file;
++	struct stat st;
++	long page_size;
++	int ret;
++
++	if (argc != 2) {
++		fprintf(stderr, "usage: %s PATH\n", argv[0]);
++		return EXIT_FAILURE;
++	}
++
++	page_size = sysconf(_SC_PAGESIZE);
++	if (page_size == -1) {
++		perror("sysconf");
++		return EXIT_FAILURE;
++	}
++
++	hdr = calloc(1, page_size);
++	if (!hdr) {
++		perror("calloc");
++		return EXIT_FAILURE;
++	}
++
++	file = fopen(argv[1], "r+");
++	if (!file) {
++		perror("fopen");
++		free(hdr);
++		return EXIT_FAILURE;
++	}
++
++	ret = fstat(fileno(file), &st);
++	if (ret) {
++		perror("fstat");
++		free(hdr);
++		fclose(file);
++		return EXIT_FAILURE;
++	}
++
++	hdr->version = 1;
++	hdr->last_page = st.st_size / page_size - 1;
++	memset(&hdr->sws_uuid, 0x99, sizeof(hdr->sws_uuid));
++	memcpy((char *)hdr + page_size - 10, "SWAPSPACE2", 10);
++
++	if (fwrite(hdr, page_size, 1, file) != 1) {
++		perror("fwrite");
++		free(hdr);
++		fclose(file);
++		return EXIT_FAILURE;
++	}
++
++	if (fclose(file) == EOF) {
++		perror("fwrite");
++		free(hdr);
++		return EXIT_FAILURE;
++	}
++
++	free(hdr);
++
++	return EXIT_SUCCESS;
++}
+diff --git a/src/swapon.c b/src/swapon.c
+new file mode 100644
+index 00000000..0cb7108a
+--- /dev/null
++++ b/src/swapon.c
+@@ -0,0 +1,24 @@
++/* swapon(8) without any sanity checks; simply calls swapon(2) directly. */
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <sys/swap.h>
++
++int main(int argc, char **argv)
++{
++	int ret;
++
++	if (argc != 2) {
++		fprintf(stderr, "usage: %s PATH\n", argv[0]);
++		return EXIT_FAILURE;
++	}
++
++	ret = swapon(argv[1], 0);
++	if (ret) {
++		perror("swapon");
++		return EXIT_FAILURE;
++	}
++
++	return EXIT_SUCCESS;
++}
+diff --git a/tests/generic/490 b/tests/generic/490
+new file mode 100755
+index 00000000..eb502e24
+--- /dev/null
++++ b/tests/generic/490
+@@ -0,0 +1,75 @@
 +#! /bin/bash
-+# FS QA Test 488
++# FS QA Test 490
 +#
-+# Check that we can't dedupe a swapfile.
++# Test invalid swap files.
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2018 Facebook.  All Rights Reserved.
@@ -75,68 +233,54 @@ index 00000000..6e05048c
 +	rm -f $tmp.*
 +}
 +
++# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/reflink
 +
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch_dedupe
++_require_scratch_swapfile
++_require_test_program mkswap
++_require_test_program swapon
 +
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
 +
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
++echo "File with holes"
++touch "$SCRATCH_MNT/swap"
++$CHATTR_PROG +C "$SCRATCH_MNT/swap"
++chmod 0600 "$SCRATCH_MNT/swap"
++$XFS_IO_PROG -c "truncate $(($(get_page_size) * 10))" "$SCRATCH_MNT/swap"
++"$here/src/mkswap" "$SCRATCH_MNT/swap"
++"$here/src/swapon" "$SCRATCH_MNT/swap"
++swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
 +
-+blocks=160
-+blksz=65536
-+
-+echo "Initialize file"
-+touch "$testdir/file1"
-+chmod 0600 "$testdir/file1"
-+chattr +C "$testdir/file1" >/dev/null 2>&1
-+touch "$testdir/file2"
-+chattr +C "$testdir/file2" >/dev/null 2>&1
-+_pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
-+mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
-+swapon $testdir/file1
-+
-+echo "Try to dedupe"
-+cp $testdir/file1 $testdir/file2
-+_dedupe_range $testdir/file1 0 $testdir/file2 0 $((blocks * blksz))
-+_dedupe_range $testdir/file2 0 $testdir/file1 0 $((blocks * blksz))
-+
-+echo "Tear it down"
-+swapoff $testdir/file1
++echo "Empty swap file (only swap header)"
++rm -f "$SCRATCH_MNT/swap"
++touch "$SCRATCH_MNT/swap"
++$CHATTR_PROG +C "$SCRATCH_MNT/swap"
++chmod 0600 "$SCRATCH_MNT/swap"
++_pwrite_byte 0x61 0 $(get_page_size) "$SCRATCH_MNT/swap" >> $seqres.full
++"$here/src/mkswap" "$SCRATCH_MNT/swap"
++"$here/src/swapon" "$SCRATCH_MNT/swap"
++swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
 +
 +status=0
 +exit
-diff --git a/tests/generic/488.out b/tests/generic/488.out
+diff --git a/tests/generic/490.out b/tests/generic/490.out
 new file mode 100644
-index 00000000..e5a195d1
+index 00000000..96226c64
 --- /dev/null
-+++ b/tests/generic/488.out
-@@ -0,0 +1,7 @@
-+QA output created by 488
-+Format and mount
-+Initialize file
-+Try to dedupe
-+XFS_IOC_FILE_EXTENT_SAME: Text file busy
-+XFS_IOC_FILE_EXTENT_SAME: Text file busy
-+Tear it down
-diff --git a/tests/generic/group b/tests/generic/group
-index dc637c96..6266213e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -490,3 +490,4 @@
- 485 auto quick insert
- 486 auto quick attr
- 487 auto quick
-+488 auto quick
++++ b/tests/generic/490.out
+@@ -0,0 +1,5 @@
++QA output created by 490
++File with holes
++swapon: Invalid argument
++Empty swap file (only swap header)
++swapon: Invalid argument
 -- 
 2.17.0
 
