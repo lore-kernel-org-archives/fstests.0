@@ -1,112 +1,61 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:43530 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750786AbeEPTja (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 15:39:30 -0400
-Date: Wed, 16 May 2018 12:39:13 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/4] generic: enable swapfile tests on Btrfs
-Message-ID: <20180516193913.GB4910@magnolia>
-References: <cover.1526489529.git.osandov@fb.com>
- <c05e3925acae64cb82c411452159f41610aeec7f.1526489529.git.osandov@fb.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <c05e3925acae64cb82c411452159f41610aeec7f.1526489529.git.osandov@fb.com>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:38922 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751017AbeEPUiz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 16:38:55 -0400
+Received: by mail-pg0-f66.google.com with SMTP id e1-v6so786527pga.6
+        for <fstests@vger.kernel.org>; Wed, 16 May 2018 13:38:55 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v2 0/5] xfstests: generic swap file tests
+Date: Wed, 16 May 2018 13:38:44 -0700
+Message-Id: <cover.1526503000.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>
-Cc: fstests@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>, kernel-team@fb.com
+To: fstests@vger.kernel.org
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 16, 2018 at 09:56:57AM -0700, Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
-> 
-> Commit 8c96cfbfe530 ("generic/35[67]: disable swapfile tests on Btrfs")
-> disabled the swapfile tests on Btrfs because it did not support
-> swapfiles at the time. Now that we're adding support, we want these
-> tests to run, but they don't. _require_scratch_swapfile always fails for
-> Btrfs because swapfiles on Btrfs must be set to nocow. After fixing
-> that, generic/356 and generic/357 fail for the same reason. After fixing
-> _that_, both tests still fail because we don't allow reflinking a
-> non-checksummed extent (which nocow implies) to a checksummed extent. Do
-> the chattrs everywhere, which gets these tests running on kernels
-> supporting Btrfs swapfiles.
-> 
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
->  common/rc         | 3 +++
->  tests/generic/356 | 6 +++++-
->  tests/generic/357 | 6 +++++-
->  3 files changed, 13 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index ffe53236..5405f7d0 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2233,6 +2233,9 @@ _require_scratch_swapfile()
->  	# Minimum size for mkswap is 10 pages
->  	local size=$(($(get_page_size) * 10))
->  
-> +	touch "$SCRATCH_MNT/swap"
-> +	chmod 0600 "$SCRATCH_MNT/swap"
-> +	chattr +C "$SCRATCH_MNT/swap" >/dev/null 2>&1
->  	_pwrite_byte 0x61 0 "$size" "$SCRATCH_MNT/swap" >/dev/null 2>&1
->  	mkswap "$SCRATCH_MNT/swap" >/dev/null 2>&1
->  	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
-> diff --git a/tests/generic/356 b/tests/generic/356
-> index 51eeb652..09c146a9 100755
-> --- a/tests/generic/356
-> +++ b/tests/generic/356
-> @@ -59,7 +59,11 @@ blocks=160
->  blksz=65536
->  
->  echo "Initialize file"
-> -echo >> $seqres.full
-> +touch "$testdir/file1"
-> +chmod 0600 "$testdir/file1"
-> +chattr +C "$testdir/file1" >/dev/null 2>&1
-> +touch "$testdir/file2"
-> +chattr +C "$testdir/file2" >/dev/null 2>&1
->  _pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
->  mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
->  swapon $testdir/file1
-> diff --git a/tests/generic/357 b/tests/generic/357
-> index 0dd0c10f..742f37d1 100755
-> --- a/tests/generic/357
-> +++ b/tests/generic/357
-> @@ -59,7 +59,11 @@ blocks=160
->  blksz=65536
->  
->  echo "Initialize file"
-> -echo >> $seqres.full
-> +touch "$testdir/file1"
-> +chmod 0600 "$testdir/file1"
-> +chattr +C "$testdir/file1" >/dev/null 2>&1
-> +touch "$testdir/file2"
-> +chattr +C "$testdir/file2" >/dev/null 2>&1
->  _pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
->  mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
+From: Omar Sandoval <osandov@fb.com>
 
-Should this get refactored into a _format_swapfile or something, rather
-than open coding this everywhere?
+Changes since v1:
 
-_format_swapfile() {
-	local fname=$1
-	local sz=$2
+- Add patch 1 to create a group for swap
+- Add a helper for formatting a swap file instead of open coding
+  everywhere
+- Use $CHATTR_PROG instead of chattr in a few places that I forgot
 
-	touch $fname
-	chmod 0600 $fname
-	chattr +C $fname > /dev/null 2>&1
-	_pwrite_byte 0x61 0 $sz $fname >> $seqres.full
-	mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $fname >> $seqres.full
-}
+Thanks!
 
---D
+Omar Sandoval (5):
+  xfstests: create swap group
+  generic: enable swapfile tests on Btrfs
+  generic: add test for dedupe on an active swapfile
+  generic: add test for truncate/fpunch of an active swapfile
+  generic: test invalid swap file activation
 
->  _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
-> -- 
-> 2.17.0
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+ .gitignore            |  2 ++
+ common/rc             | 15 ++++++--
+ src/Makefile          |  2 +-
+ src/mkswap.c          | 83 +++++++++++++++++++++++++++++++++++++++++++
+ src/swapon.c          | 24 +++++++++++++
+ tests/generic/356     |  7 ++--
+ tests/generic/357     |  6 ++--
+ tests/generic/488     | 76 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/488.out |  7 ++++
+ tests/generic/489     | 73 +++++++++++++++++++++++++++++++++++++
+ tests/generic/489.out |  8 +++++
+ tests/generic/490     | 77 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/490.out |  5 +++
+ tests/generic/group   |  7 ++--
+ tests/xfs/group       |  2 +-
+ 15 files changed, 381 insertions(+), 13 deletions(-)
+ create mode 100644 src/mkswap.c
+ create mode 100644 src/swapon.c
+ create mode 100755 tests/generic/488
+ create mode 100644 tests/generic/488.out
+ create mode 100755 tests/generic/489
+ create mode 100644 tests/generic/489.out
+ create mode 100755 tests/generic/490
+ create mode 100644 tests/generic/490.out
+
+-- 
+2.17.0
+
