@@ -1,114 +1,45 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:34183 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751259AbeEPUi6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 16:38:58 -0400
-Received: by mail-pf0-f194.google.com with SMTP id a14-v6so935892pfi.1
-        for <fstests@vger.kernel.org>; Wed, 16 May 2018 13:38:58 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v2 2/5] generic: enable swapfile tests on Btrfs
-Date: Wed, 16 May 2018 13:38:46 -0700
-Message-Id: <80a5002310ab7f06efd9fed76cf268673e631335.1526503000.git.osandov@fb.com>
-In-Reply-To: <cover.1526503000.git.osandov@fb.com>
-References: <cover.1526503000.git.osandov@fb.com>
-In-Reply-To: <cover.1526503000.git.osandov@fb.com>
-References: <cover.1526503000.git.osandov@fb.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:23004 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751332AbeEQBrv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 21:47:51 -0400
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] generic/486: Get rid of the redundant error=%d printing
+Date: Thu, 17 May 2018 09:36:10 +0800
+Message-ID: <1526520970-17213-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <20180516152714.GA4910@magnolia>
+References: <20180516152714.GA4910@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com
+To: darrick.wong@oracle.com
+Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+1) Without the fix, perror() can indicate the actual error(ENODATA).
+2) After calling perror() and redirecting the output of perror()
+   to a file, errno seems to be set to EINVAL unexpectedly.
+   See the following mail for detailed info:
+   https://www.spinics.net/lists/fstests/msg09675.html
 
-Commit 8c96cfbfe530 ("generic/35[67]: disable swapfile tests on Btrfs")
-disabled the swapfile tests on Btrfs because it did not support
-swapfiles at the time. Now that we're adding support, we want these
-tests to run, but they don't. _require_scratch_swapfile always fails for
-Btrfs because swapfiles on Btrfs must be set to nocow. After fixing
-that, generic/356 and generic/357 fail for the same reason. After fixing
-_that_, both tests still fail because we don't allow reflinking a
-non-checksummed extent (which nocow implies) to a checksummed extent.
-Add a helper for formatting a swap file which does the chattr, and
-chattr the second file, which gets these tests running on kernels
-supporting Btrfs swapfiles.
-
-Signed-off-by: Omar Sandoval <osandov@fb.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- common/rc         | 15 ++++++++++++---
- tests/generic/356 |  7 ++++---
- tests/generic/357 |  6 +++---
- 3 files changed, 19 insertions(+), 9 deletions(-)
+ src/attr_replace_test.c | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/common/rc b/common/rc
-index ffe53236..814b8b5c 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2222,6 +2222,17 @@ _require_odirect()
- 	rm -f $testfile 2>&1 > /dev/null
- }
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index 23adc07..33fa74d 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -11,7 +11,6 @@
+ #include <sys/stat.h>
  
-+_format_swapfile() {
-+	local fname="$1"
-+	local sz="$2"
-+
-+	touch "$fname"
-+	chmod 0600 "$fname"
-+	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
-+	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
-+	mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c "$fname" >> $seqres.full
-+}
-+
- # Check that the filesystem supports swapfiles
- _require_scratch_swapfile()
- {
-@@ -2231,10 +2242,8 @@ _require_scratch_swapfile()
- 	_scratch_mount
+ #define die() do { perror(""); \
+-fprintf(stderr, "error=%d at line %d\n", errno, __LINE__); \
+ exit(1); } while (0)
  
- 	# Minimum size for mkswap is 10 pages
--	local size=$(($(get_page_size) * 10))
-+	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
- 
--	_pwrite_byte 0x61 0 "$size" "$SCRATCH_MNT/swap" >/dev/null 2>&1
--	mkswap "$SCRATCH_MNT/swap" >/dev/null 2>&1
- 	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
- 		_scratch_unmount
- 		_notrun "swapfiles are not supported"
-diff --git a/tests/generic/356 b/tests/generic/356
-index 51eeb652..b4a38f84 100755
---- a/tests/generic/356
-+++ b/tests/generic/356
-@@ -59,11 +59,12 @@ blocks=160
- blksz=65536
- 
- echo "Initialize file"
--echo >> $seqres.full
--_pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
--mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
-+_format_swapfile "$testdir/file1" $((blocks * blksz))
- swapon $testdir/file1
- 
-+touch "$testdir/file2"
-+$CHATTR_PROG +C "$testdir/file2" >/dev/null 2>&1
-+
- echo "Try to reflink"
- _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
- 
-diff --git a/tests/generic/357 b/tests/generic/357
-index 0dd0c10f..9a83a283 100755
---- a/tests/generic/357
-+++ b/tests/generic/357
-@@ -59,9 +59,9 @@ blocks=160
- blksz=65536
- 
- echo "Initialize file"
--echo >> $seqres.full
--_pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
--mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
-+_format_swapfile "$testdir/file1" $((blocks * blksz))
-+touch "$testdir/file2"
-+$CHATTR_PROG +C "$testdir/file2" >/dev/null 2>&1
- _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
- 
- echo "Try to swapon"
+ #define fail(...) do { \
 -- 
-2.17.0
+1.8.3.1
+
+
 
