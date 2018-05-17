@@ -1,69 +1,98 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:43131 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751457AbeEQCg0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 22:36:26 -0400
-Date: Thu, 17 May 2018 10:36:20 +0800
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:36237 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751259AbeEQCmz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 May 2018 22:42:55 -0400
+Received: by mail-pg0-f68.google.com with SMTP id z70-v6so1146250pgz.3
+        for <fstests@vger.kernel.org>; Wed, 16 May 2018 19:42:55 -0700 (PDT)
+Date: Thu, 17 May 2018 10:42:50 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 1/3] generic/459: use xfs_freeze instead of fsfreeze
-Message-ID: <20180517023620.GC29080@desktop.hz.ali.com>
-References: <1526276991-23897-1-git-send-email-amir73il@gmail.com>
- <1526276991-23897-2-git-send-email-amir73il@gmail.com>
+Subject: Re: [PATCH 2/3] generic/382: Fix test when report uses /etc/passwd
+Message-ID: <20180517024250.GD29080@desktop.hz.ali.com>
+References: <20180514170351.13737-1-jack@suse.cz>
+ <20180514170351.13737-3-jack@suse.cz>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1526276991-23897-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <20180514170351.13737-3-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: Jan Kara <jack@suse.cz>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 14, 2018 at 08:49:49AM +0300, Amir Goldstein wrote:
-> This is what all other tests use as well as _require_freeze
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+On Mon, May 14, 2018 at 07:03:50PM +0200, Jan Kara wrote:
+> On older kernels xfs_quota uses /etc/passwd to report quota entries. In
+> such case all-zero lines disturb its output and the test fails. Fix the
+> problem by ignoring all-zero lines in quota report.
 
-I'll drop this patch for now per discussion but take the other two
-patches, the XFS_FREEZE_PROG conversion is not urgent and could wait I
-think :)
+I notice that generic/381 does quota report in a similar way as in
+generic/382, is 381 affected by the same problem? If only generic/382 is
+affected, we could move the filter from common/filter to the test
+itself.
+
+BTW, I'm curious what kernel behaves in this way, what distribution are
+you using that reproduces this failure? I want to try it myself too.
 
 Thanks,
 Eryu
 
+> 
+> Signed-off-by: Jan Kara <jack@suse.cz>
 > ---
->  tests/generic/459 | 6 +++---
->  1 file changed, 3 insertions(+), 3 deletions(-)
+>  common/filter     | 8 ++++++++
+>  tests/generic/382 | 6 +++---
+>  2 files changed, 11 insertions(+), 3 deletions(-)
 > 
-> diff --git a/tests/generic/459 b/tests/generic/459
-> index e755cf7..22b8e62 100755
-> --- a/tests/generic/459
-> +++ b/tests/generic/459
-> @@ -113,7 +113,7 @@ $XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
->  # extended. It is expected, and is only used so xfsaild is triggered to
->  # flush AIL items, other filesystems usually get remounted as read-only during
->  # the above write process.
-> -fsfreeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
-> +xfs_freeze -f $SCRATCH_MNT >>$seqres.full 2>&1 &
->  freezeid=$!
+> diff --git a/common/filter b/common/filter
+> index 53874a08f5e3..037799e5cd19 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -344,6 +344,14 @@ _filter_project_quota()
+>  	_filter_quota | grep -v "^\#0 \|^(null) "
+>  }
 >  
->  # Wait enough so xfsaild can run
-> @@ -132,7 +132,7 @@ ret=$?
->  #	- The filesystem stays in Read-Write mode, but can be frozen/thawed
->  #	  without getting stuck.
->  if [ $ret -ne 0 ]; then
-> -	# fsfreeze failed, filesystem should reject further writes and remount
-> +	# freeze failed, filesystem should reject further writes and remount
->  	# as readonly. Sometimes the previous write process won't trigger
->  	# ro-remount, e.g. on ext3/4, do additional touch here to make sure
->  	# filesystems see the metadata I/O error.
-> @@ -148,7 +148,7 @@ if [ $ret -ne 0 ]; then
->  else
->  	# Try to thaw the filesystem, and complete test if if succeed.
->  	# NOTE: This will hang on affected XFS filesystems.
-> -	fsfreeze -u $SCRATCH_MNT >>$seqres.full 2>&1
-> +	xfs_freeze -u $SCRATCH_MNT >>$seqres.full 2>&1
->  	echo "Test OK"
->  fi
+> +_filter_quota_report()
+> +{
+> +	# When xfs_quota uses /etc/passwd for reporting, it may report lines
+> +	# full of zeros. Ignore them.
+> +	grep -v -E '^[^ ]+ +0 +0 +0 +00 +\[--------\] +0 +0 +0 +00 +\[--------\]' |
+> +	grep -v -E '^[^ ]+ +0 +0 +0 +00 +\[--------\]$'
+> +}
+> +
+>  # Account for different "ln" failure messages
+>  _filter_ln()
+>  {
+> diff --git a/tests/generic/382 b/tests/generic/382
+> index 33326ffa4d1b..02b98a9ef027 100755
+> --- a/tests/generic/382
+> +++ b/tests/generic/382
+> @@ -79,12 +79,12 @@ do_test()
+>  	$XFS_QUOTA_PROG -x -c "limit bsoft=20M bhard=20M isoft=20 ihard=20 $type -d" $SCRATCH_MNT
+>  	$XFS_QUOTA_PROG -x -c "limit bsoft=40M bhard=40M isoft=40 ihard=40 $type fsgqa" $SCRATCH_MNT
+>  	echo "$qname blocks and inode limit"
+> -	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+> +	$XFS_QUOTA_PROG -x -c "report $type -N -bi" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
 >  
+>  	## blocks default quota test ##
+>  	_user_do "$XFS_IO_PROG -f -c \"pwrite 0 30M\" -c \"fsync\" $SCRATCH_MNT/data" | _filter_xfs_io
+>  	echo "$qname blocks quota after write 30M data"
+> -	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+> +	$XFS_QUOTA_PROG -x -c "report $type -N -b" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
+>  
+>  	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+>  
+> @@ -95,7 +95,7 @@ do_test()
+>  	sync
+>  
+>  	echo "$qname inode quota after creating 30 inodes"
+> -	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_spaces
+> +	$XFS_QUOTA_PROG -x -c "report $type -N -i" $SCRATCH_MNT | grep -v ^root | _filter_quota_report | _filter_spaces
+>  
+>  	rm -f ${SCRATCH_MNT}/* >/dev/null 2>&1
+>  }
 > -- 
-> 2.7.4
+> 2.13.6
 > 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
