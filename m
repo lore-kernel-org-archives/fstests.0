@@ -1,19 +1,19 @@
-Received: from sandeen.net ([63.231.237.45]:46918 "EHLO sandeen.net"
+Received: from sandeen.net ([63.231.237.45]:47090 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752346AbeEQP21 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 May 2018 11:28:27 -0400
-Subject: [PATCH V4] test online label ioctl
+        id S1751543AbeEQPa6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 17 May 2018 11:30:58 -0400
+Subject: [PATCH V3] test online label ioctl
 References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
 From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <f912f4ae-20b1-d19e-3b38-317b9ef46a6d@sandeen.net>
-Date: Thu, 17 May 2018 10:28:26 -0500
+Message-ID: <c8da61a1-a13f-8f72-5b4c-9baf390c04b5@sandeen.net>
+Date: Thu, 17 May 2018 10:23:54 -0500
 MIME-Version: 1.0
 In-Reply-To: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
+To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 This tests the online label ioctl that btrfs has, which has been
@@ -29,8 +29,6 @@ common case.
 Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 ---
 
-Now with new and improved sequential V4 versioning!
-
 This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
 on xfs w/ my online label patchset (as long as xfs_io has the new
 capability)
@@ -39,9 +37,8 @@ V2: Add a max label length helper
      Set the proper btrfs max label length o_O oops
      Filter trailing whitespace from blkid output
 
-V3: lowercase local vars, simplify max label len function
+V3: use/test new -s / -c options to set and clear
 
-V4: use/test new -s / -c options to set and clear
 
 diff --git a/common/rc b/common/rc
 index ffe53236..333cfb82 100644
@@ -225,7 +222,4 @@ index dc637c96..6266213e 100644
   486 auto quick attr
   487 auto quick
 +488 auto quick
-
-
-
 
