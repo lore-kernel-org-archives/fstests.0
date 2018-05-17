@@ -1,225 +1,168 @@
-Received: from sandeen.net ([63.231.237.45]:47090 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751543AbeEQPa6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 May 2018 11:30:58 -0400
-Subject: [PATCH V3] test online label ioctl
-References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <c8da61a1-a13f-8f72-5b4c-9baf390c04b5@sandeen.net>
-Date: Thu, 17 May 2018 10:23:54 -0500
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:45996 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1751047AbeEQPpT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 17 May 2018 11:45:19 -0400
+Date: Thu, 17 May 2018 23:45:17 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: Problems about xfstests g/475
+Message-ID: <20180517154517.GC4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+References: <20180517090304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+ <20180517143057.GC4910@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180517143057.GC4910@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This tests the online label ioctl that btrfs has, which has been
-recently proposed for XFS.
+On Thu, May 17, 2018 at 07:30:57AM -0700, Darrick J. Wong wrote:
+> On Thu, May 17, 2018 at 05:03:04PM +0800, Zorro Lang wrote:
+> > Hi Darrick,
+> > 
+> > Sorry to trouble you, generic/475 rarely trigger an error[1] (test
+> > on 4.16 kernel)
+> > 
+> > I checked the case, from the xfstests code below:
+> > 
+> > _dmerror_load_error_table()
+> > {
+> >         suspend_opt="--nolockfs"
+> > 
+> >         if [ "$1" = "lockfs" ]; then
+> >                 suspend_opt=""
+> >         elif [ -n "$*" ]; then
+> >                 suspend_opt="$*"
+> >         fi
+> > 
+> >         $DMSETUP_PROG suspend $suspend_opt error-test
+> >         [ $? -ne 0 ] && _fail  "dmsetup suspend failed"
+> > 
+> >         $DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
+> >         [ $? -ne 0 ] && _fail "dmsetup failed to load error table"
+> > 
+> >         $DMSETUP_PROG resume error-test
+> >         [ $? -ne 0 ] && _fail  "dmsetup resume failed"
+> > }
+> > 
+> > _dmerror_load_error_table() use "--nolockfs" by default. But g/475 call
+> > _dmerror_load_error_table without any argument, so it doesn't do the
+> > things as it describes on comment -- "Loading error table without --nolockfs
+> > option".
+> > 
+> > I'm confused, what is your expected test? Is this "--nolockfs" thing
+> > cause this error[1]?
 
-To run, it requires an updated xfs_io with the label command and a
-filesystem that supports it
+Thanks for your quick reply!
 
-A slight change here to _require_xfs_io_command as well, so that tests
-which simply fail with "Inappropriate ioctl" can be caught in the
-common case.
+Can you confirm if
 
-Signed-off-by: Eric Sandeen <sandeen@redhat.com>
----
+  _dmerror_load_error_table "lockfs"
+  ...
+  _dmerror_load_working_table "lockfs"
 
-This passes on btrfs, _notruns on xfs/ext4 of yore, and passes
-on xfs w/ my online label patchset (as long as xfs_io has the new
-capability)
+is what you really want to run in g/475?
 
-V2: Add a max label length helper
-     Set the proper btrfs max label length o_O oops
-     Filter trailing whitespace from blkid output
+> > 
+> > Thanks,
+> > Zorro
+> > 
+> > 
+> > [1]
+> > meta-data=/dev/sda3              isize=512    agcount=4, agsize=1966080 blks
+> >          =                       sectsz=512   attr=2, projid32bit=1
+> >          =                       crc=1        finobt=1, sparse=0, rmapbt=0, reflink=0
+> > data     =                       bsize=2048   blocks=7864320, imaxpct=25
+> >          =                       sunit=0      swidth=0 blks
+> > naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+> > log      =internal log           bsize=2048   blocks=5120, version=2
+> >          =                       sectsz=512   sunit=0 blks, lazy-count=1
+> > realtime =none                   extsz=4096   blocks=0, rtextents=0
+> > seed = 1525927899
+> > ...
+> > ...
+> > seed = 1525744142
+> > mount failed
+> > _check_xfs_filesystem: filesystem on /dev/sda3 has dirty log
+> 
+> Uh, I guess log recovery failed.  What did dmesg capture?
 
-V3: use/test new -s / -c options to set and clear
+The whole g/475 dmesg output as below:
+https://paste.fedoraproject.org/paste/Y8SDgGmw6CRLhEI4kRVCrQ
 
 
-diff --git a/common/rc b/common/rc
-index ffe53236..333cfb82 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2144,6 +2144,9 @@ _require_xfs_io_command()
-  		echo $testio | grep -q "Inappropriate ioctl" && \
-  			_notrun "xfs_io $command support is missing"
-  		;;
-+	"label")
-+		testio=`$XFS_IO_PROG -c "label" $TEST_DIR 2>&1`
-+		;;
-  	"open")
-  		# -c "open $f" is broken in xfs_io <= 4.8. Along with the fix,
-  		# a new -C flag was introduced to execute one shot commands.
-@@ -2182,7 +2185,7 @@ _require_xfs_io_command()
-  	rm -f $testfile 2>&1 > /dev/null
-  	echo $testio | grep -q "not found" && \
-  		_notrun "xfs_io $command support is missing"
--	echo $testio | grep -q "Operation not supported" && \
-+	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
-  		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
-  	echo $testio | grep -q "Invalid" && \
-  		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
-@@ -3788,6 +3791,29 @@ _require_scratch_feature()
-  	esac
-  }
-  
-+# The maximum filesystem label length, /not/ including terminating NULL
-+_label_get_max()
-+{
-+	case $FSTYP in
-+	xfs)
-+		echo 12
-+		;;
-+	btrfs)
-+		echo 255
-+		;;
-+	*)
-+		_notrun "$FSTYP does not define maximum label length"
-+		;;
-+	esac
-+}
-+
-+# Helper to check above early in a script
-+_require_label_get_max()
-+{
-+	# Just call _label_get_max which will notrun if appropriate
-+	dummy=$(_label_get_max)
-+}
-+
-  init_rc
-  
-  ################################################################################
-diff --git a/tests/generic/488 b/tests/generic/488
-new file mode 100755
-index 00000000..3616522d
---- /dev/null
-+++ b/tests/generic/488
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# FS QA Test 488
-+#
-+# Test the online filesystem label set/get ioctls
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-+# Author: Eric Sandeen <sandeen@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "label"
-+_require_label_get_max
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+# Make sure we can set & clear the label
-+$XFS_IO_PROG -c "label -s label.$seq" $SCRATCH_MNT
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
-+
-+$XFS_IO_PROG -c "label -c" $SCRATCH_MNT
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
-+
-+# And that userspace can see it now, while mounted
-+# NB: some blkid has trailing whitespace, filter it out here
-+$XFS_IO_PROG -c "label -s label.$seq" $SCRATCH_MNT
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
-+blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
-+
-+# And that the it is still there when it's unmounted
-+_scratch_unmount
-+blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g"
-+
-+# And that it persists after a remount
-+_scratch_mount
-+$XFS_IO_PROG -c "label" $SCRATCH_MNT
-+
-+# And that a too-long label is rejected, beyond the interface max:
-+fs_label=$(perl -e "print 'l' x 257;")
-+$XFS_IO_PROG -c "label -s $fs_label" $SCRATCH_MNT
-+
-+# And it succeeds right at the filesystem max:
-+max_label_len=$(_label_get_max)
-+fs_label=$(perl -e "print 'o' x $max_label_len;")
-+$XFS_IO_PROG -c "label -s $fs_label" $SCRATCH_MNT | sed -e 's/o\+/MAXLABEL/'
-+
-+# And that it fails past the filesystem max:
-+let toolong_label_len=max_label_len+1
-+fs_label=$(perl -e "print 'o' x $toolong_label_len;")
-+$XFS_IO_PROG -c "label -s $fs_label " $SCRATCH_MNT
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/488.out b/tests/generic/488.out
-new file mode 100644
-index 00000000..70691af4
---- /dev/null
-+++ b/tests/generic/488.out
-@@ -0,0 +1,13 @@
-+QA output created by 488
-+label = "label.488"
-+label = "label.488"
-+label = ""
-+label = ""
-+label = "label.488"
-+label = "label.488"
-+SCRATCH_DEV: LABEL="label.488"
-+SCRATCH_DEV: LABEL="label.488"
-+label = "label.488"
-+label: Invalid argument
-+label = "MAXLABEL"
-+label: Invalid argument
-diff --git a/tests/generic/group b/tests/generic/group
-index dc637c96..6266213e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -490,3 +490,4 @@
-  485 auto quick insert
-  486 auto quick attr
-  487 auto quick
-+488 auto quick
+The last round test's dmesg output is:
 
+[ 8201.588313] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf04fcc len 64 error 5 
+[ 8201.590504] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf00025 len 64 error 5 
+[ 8201.596839] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
+[ 8201.597039] XFS (dm-0): Log I/O Error Detected.  Shutting down filesystem 
+[ 8201.605368] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
+[ 8201.607232] buffer_io_error: 17 callbacks suppressed 
+[ 8201.607235] Buffer I/O error on dev dm-0, logical block 31457152, async page read 
+[ 8201.607241] Buffer I/O error on dev dm-0, logical block 31457153, async page read 
+[ 8201.607244] Buffer I/O error on dev dm-0, logical block 31457154, async page read 
+[ 8201.607248] Buffer I/O error on dev dm-0, logical block 31457155, async page read 
+[ 8201.607251] Buffer I/O error on dev dm-0, logical block 31457156, async page read 
+[ 8201.607254] Buffer I/O error on dev dm-0, logical block 31457157, async page read 
+[ 8201.607257] Buffer I/O error on dev dm-0, logical block 31457158, async page read 
+[ 8201.607261] Buffer I/O error on dev dm-0, logical block 31457159, async page read 
+[ 8201.617451] XFS (dm-0): Please umount the filesystem and rectify the problem(s) 
+[ 8201.617467] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf05000 len 64 error 5 
+[ 8201.717710] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
+[ 8201.769082] XFS (dm-0): Unmounting Filesystem 
+[ 8201.901650] XFS (dm-0): Mounting V5 Filesystem 
+[ 8201.919089] XFS (dm-0): Log inconsistent or not a log (last==0, first!=1) 
+[ 8201.925942] XFS (dm-0): empty log check failed 
+[ 8201.930451] XFS (dm-0): log mount/recovery failed: error -22 
+[ 8201.936260] XFS (dm-0): log mount failed 
+[ 8202.245329] XFS (sda2): Unmounting Filesystem 
+[ 8205.664753] XFS (sda2): Mounting V5 Filesystem 
+[ 8205.727620] XFS (sda2): Ending clean mount 
+[ 8206.112965] XFS (sda3): Mounting V5 Filesystem 
+[ 8206.199215] XFS (sda3): Ending clean mount 
+[ 8206.292347] XFS (sda2): Unmounting Filesystem 
+[ 8207.996053] XFS (sda2): Mounting V5 Filesystem 
+[ 8208.061478] XFS (sda2): Ending clean mount 
+
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > *** xfs_logprint -t output ***
+> > Log inconsistent or not a log (last==0, first!=1)
+> > empty log check failed
+> > xfs_logprint: failed to find head and tail, error: 22
+> > xfs_logprint:
+> >     data device: 0x803
+> >     log device: 0x803 daddr: 15728660 length: 20480
+> > 
+> > *** end xfs_logprint output
+> > _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (c)
+> > *** xfs_check output ***
+> > Log inconsistent or not a log (last==0, first!=1)
+> > empty log check failed
+> > xlog_is_dirty: cannot find log head/tail (xlog_find_tail=22)
+> > 
+> > ERROR: cannot find log head/tail, run xfs_repair
+> > *** end xfs_check output
+> > _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (r)
+> > *** xfs_repair -n output ***
+> > Phase 1 - find and verify superblock...
+> > Phase 2 - using internal log
+> >         - zero log...
+> > Log inconsistent or not a log (last==0, first!=1)
+> > empty log check failed
+> > zero_log: cannot find log head/tail (xlog_find_tail=22)
+> > *** end xfs_repair output
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
