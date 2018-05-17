@@ -1,88 +1,109 @@
-Received: from mx2.suse.de ([195.135.220.15]:53052 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1752464AbeEQLU6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 May 2018 07:20:58 -0400
-Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 9B56EAC94
-        for <fstests@vger.kernel.org>; Thu, 17 May 2018 11:20:56 +0000 (UTC)
-From: David Sterba <dsterba@suse.com>
-Subject: [PATCH] common/btrfs: add helper to detect dump-tree or btrfs-debug-tree
-Date: Thu, 17 May 2018 13:18:14 +0200
-Message-Id: <20180517111814.19652-1-dsterba@suse.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:50868 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752415AbeEQObI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 May 2018 10:31:08 -0400
+Date: Thu, 17 May 2018 07:30:57 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: Problems about xfstests g/475
+Message-ID: <20180517143057.GC4910@magnolia>
+References: <20180517090304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180517090304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: David Sterba <dsterba@suse.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The command btrfs-debug-tree is obsolete and was removed in btrfs-progs
-version 4.16.1.  The same functionality available as 'btrfs
-inspect-internal dump-tree', let's detect which one can be used.  Test
-btrfs/085 otherwise fails with btrfs-progs 4.16.1+.
+On Thu, May 17, 2018 at 05:03:04PM +0800, Zorro Lang wrote:
+> Hi Darrick,
+> 
+> Sorry to trouble you, generic/475 rarely trigger an error[1] (test
+> on 4.16 kernel)
+> 
+> I checked the case, from the xfstests code below:
+> 
+> _dmerror_load_error_table()
+> {
+>         suspend_opt="--nolockfs"
+> 
+>         if [ "$1" = "lockfs" ]; then
+>                 suspend_opt=""
+>         elif [ -n "$*" ]; then
+>                 suspend_opt="$*"
+>         fi
+> 
+>         $DMSETUP_PROG suspend $suspend_opt error-test
+>         [ $? -ne 0 ] && _fail  "dmsetup suspend failed"
+> 
+>         $DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
+>         [ $? -ne 0 ] && _fail "dmsetup failed to load error table"
+> 
+>         $DMSETUP_PROG resume error-test
+>         [ $? -ne 0 ] && _fail  "dmsetup resume failed"
+> }
+> 
+> _dmerror_load_error_table() use "--nolockfs" by default. But g/475 call
+> _dmerror_load_error_table without any argument, so it doesn't do the
+> things as it describes on comment -- "Loading error table without --nolockfs
+> option".
+> 
+> I'm confused, what is your expected test? Is this "--nolockfs" thing
+> cause this error[1]?
+> 
+> Thanks,
+> Zorro
+> 
+> 
+> [1]
+> meta-data=/dev/sda3              isize=512    agcount=4, agsize=1966080 blks
+>          =                       sectsz=512   attr=2, projid32bit=1
+>          =                       crc=1        finobt=1, sparse=0, rmapbt=0, reflink=0
+> data     =                       bsize=2048   blocks=7864320, imaxpct=25
+>          =                       sunit=0      swidth=0 blks
+> naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
+> log      =internal log           bsize=2048   blocks=5120, version=2
+>          =                       sectsz=512   sunit=0 blks, lazy-count=1
+> realtime =none                   extsz=4096   blocks=0, rtextents=0
+> seed = 1525927899
+> ...
+> ...
+> seed = 1525744142
+> mount failed
+> _check_xfs_filesystem: filesystem on /dev/sda3 has dirty log
 
-Signed-off-by: David Sterba <dsterba@suse.com>
----
- common/btrfs    | 11 +++++++++++
- common/config   |  1 +
- tests/btrfs/085 |  6 ++----
- 3 files changed, 14 insertions(+), 4 deletions(-)
+Uh, I guess log recovery failed.  What did dmesg capture?
 
-diff --git a/common/btrfs b/common/btrfs
-index 79c687f73376..dd02a1c1589d 100644
---- a/common/btrfs
-+++ b/common/btrfs
-@@ -59,6 +59,17 @@ _require_btrfs_dump_super()
- 	fi
- }
- 
-+_require_btrfs_dump_tree()
-+{
-+	if [ ! -x "$BTRFS_DUMP_TREE_PROG" ]; then
-+		_require_command "$BTRFS_UTIL_PROG" btrfs
-+		if ! $BTRFS_UTIL_PROG inspect-internal dump-tree --help >& /dev/null; then
-+			_notrun "Missing btrfs-debug-tree or inspect-internal dump-tree"
-+		fi
-+		BTRFS_DUMP_TREE_PROG="$BTRFS_UTIL_PROG inspect-internal dump-tree"
-+	fi
-+}
-+
- _run_btrfs_util_prog()
- {
- 	run_check $BTRFS_UTIL_PROG $*
-diff --git a/common/config b/common/config
-index cc3180694e26..d121af4ee254 100644
---- a/common/config
-+++ b/common/config
-@@ -233,6 +233,7 @@ case "$HOSTOS" in
-         export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
-         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
-         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
-+        export BTRFS_DUMP_TREE_PROG="`set_prog_path btrfs-debug-tree`"
- 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-         export MKFS_NFS_PROG="false"
-diff --git a/tests/btrfs/085 b/tests/btrfs/085
-index 804899724cba..d81bef76b471 100755
---- a/tests/btrfs/085
-+++ b/tests/btrfs/085
-@@ -55,16 +55,14 @@ _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- _require_dm_target flakey
--
--BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
--_require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
-+_require_btrfs_dump_tree
- 
- rm -f $seqres.full
- 
- has_orphan_item()
- {
- 	INO=$1
--	if $BTRFS_DEBUG_TREE_PROG $SCRATCH_DEV | \
-+	if $BTRFS_DUMP_TREE_PROG $SCRATCH_DEV | \
- 		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
- 		return 0
- 	fi
--- 
-2.16.2
+--D
 
+> *** xfs_logprint -t output ***
+> Log inconsistent or not a log (last==0, first!=1)
+> empty log check failed
+> xfs_logprint: failed to find head and tail, error: 22
+> xfs_logprint:
+>     data device: 0x803
+>     log device: 0x803 daddr: 15728660 length: 20480
+> 
+> *** end xfs_logprint output
+> _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (c)
+> *** xfs_check output ***
+> Log inconsistent or not a log (last==0, first!=1)
+> empty log check failed
+> xlog_is_dirty: cannot find log head/tail (xlog_find_tail=22)
+> 
+> ERROR: cannot find log head/tail, run xfs_repair
+> *** end xfs_check output
+> _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (r)
+> *** xfs_repair -n output ***
+> Phase 1 - find and verify superblock...
+> Phase 2 - using internal log
+>         - zero log...
+> Log inconsistent or not a log (last==0, first!=1)
+> empty log check failed
+> zero_log: cannot find log head/tail (xlog_find_tail=22)
+> *** end xfs_repair output
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
