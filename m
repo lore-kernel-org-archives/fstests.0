@@ -1,98 +1,88 @@
-Received: from mx2.suse.de ([195.135.220.15]:47191 "EHLO mx2.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:53052 "EHLO mx2.suse.de"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751274AbeEQKGM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 May 2018 06:06:12 -0400
-Date: Thu, 17 May 2018 12:06:11 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 2/3] generic/382: Fix test when report uses /etc/passwd
-Message-ID: <20180517100611.4wzbvxsswqah4qsi@quack2.suse.cz>
-References: <20180514170351.13737-1-jack@suse.cz>
- <20180514170351.13737-3-jack@suse.cz>
- <20180517024250.GD29080@desktop.hz.ali.com>
- <20180517091836.ep4pydgqpg6cihgy@quack2.suse.cz>
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="mgavp3rnvnsapbdn"
-Content-Disposition: inline
-In-Reply-To: <20180517091836.ep4pydgqpg6cihgy@quack2.suse.cz>
+        id S1752464AbeEQLU6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 17 May 2018 07:20:58 -0400
+Received: from relay2.suse.de (charybdis-ext.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 9B56EAC94
+        for <fstests@vger.kernel.org>; Thu, 17 May 2018 11:20:56 +0000 (UTC)
+From: David Sterba <dsterba@suse.com>
+Subject: [PATCH] common/btrfs: add helper to detect dump-tree or btrfs-debug-tree
+Date: Thu, 17 May 2018 13:18:14 +0200
+Message-Id: <20180517111814.19652-1-dsterba@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: David Sterba <dsterba@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+The command btrfs-debug-tree is obsolete and was removed in btrfs-progs
+version 4.16.1.  The same functionality available as 'btrfs
+inspect-internal dump-tree', let's detect which one can be used.  Test
+btrfs/085 otherwise fails with btrfs-progs 4.16.1+.
 
---mgavp3rnvnsapbdn
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-
-On Thu 17-05-18 11:18:36, Jan Kara wrote:
-> On Thu 17-05-18 10:42:50, Eryu Guan wrote:
-> > On Mon, May 14, 2018 at 07:03:50PM +0200, Jan Kara wrote:
-> > > On older kernels xfs_quota uses /etc/passwd to report quota entries. In
-> > > such case all-zero lines disturb its output and the test fails. Fix the
-> > > problem by ignoring all-zero lines in quota report.
-> > 
-> > I notice that generic/381 does quota report in a similar way as in
-> > generic/382, is 381 affected by the same problem? If only generic/382 is
-> > affected, we could move the filter from common/filter to the test
-> > itself.
-> 
-> Yes, that test is affected as well. I just didn't notice because on my
-> system I don't have user 123456-fsgqa (SLE/openSUSE don't allow you to
-> create user with such name and I didn't bother to force-create it by
-> manually editting passwd). I'll send a patch to update that test to use the
-> filter as well if you're otherwise fine with this approach.
-
-Attached is a patch for generic/381.
-
-								Honza
-
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
-
---mgavp3rnvnsapbdn
-Content-Type: text/x-patch; charset=us-ascii
-Content-Disposition: attachment; filename="0001-generic-381-Fix-test-when-report-uses-etc-passwd.patch"
-
->From b3ee82ef8a81ed4ab41ad840ff55acd458654b58 Mon Sep 17 00:00:00 2001
-From: Jan Kara <jack@suse.cz>
-Date: Thu, 17 May 2018 11:27:21 +0200
-Subject: [PATCH] generic/381: Fix test when report uses /etc/passwd
-
-On older kernels xfs_quota uses /etc/passwd to report quota entries. In
-such case all-zero lines disturb its output and the test fails. Fix the
-problem by ignoring all-zero lines in quota report.
-
-Reported-by: Eryu Guan <guaneryu@gmail.com>
-Signed-off-by: Jan Kara <jack@suse.cz>
+Signed-off-by: David Sterba <dsterba@suse.com>
 ---
- tests/generic/381 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ common/btrfs    | 11 +++++++++++
+ common/config   |  1 +
+ tests/btrfs/085 |  6 ++----
+ 3 files changed, 14 insertions(+), 4 deletions(-)
 
-diff --git a/tests/generic/381 b/tests/generic/381
-index 006f0d879638..72adbee66848 100755
---- a/tests/generic/381
-+++ b/tests/generic/381
-@@ -67,7 +67,7 @@ $XFS_QUOTA_PROG -x -c "limit -u bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT
- echo "=== quota command output ==="
- $XFS_QUOTA_PROG -c "quota -u -b -N -v 123456-fsgqa" $SCRATCH_MNT | _filter_quota
- echo "=== report command output ==="
--$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota
-+$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota_report | _filter_quota
+diff --git a/common/btrfs b/common/btrfs
+index 79c687f73376..dd02a1c1589d 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -59,6 +59,17 @@ _require_btrfs_dump_super()
+ 	fi
+ }
  
- # group test
- echo "== group test =="
-@@ -75,7 +75,7 @@ $XFS_QUOTA_PROG -x -c "limit -g bsoft=100m bhard=200m 123456-fsgqa" $SCRATCH_MNT
- echo "=== quota command output ==="
- $XFS_QUOTA_PROG -c "quota -g -b -N -v 123456-fsgqa" $SCRATCH_MNT | _filter_quota
- echo "=== report command output ==="
--$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota
-+$XFS_QUOTA_PROG -x -c "report -u -b -N" $SCRATCH_MNT | grep -v "^root " | _filter_quota_report | _filter_quota
++_require_btrfs_dump_tree()
++{
++	if [ ! -x "$BTRFS_DUMP_TREE_PROG" ]; then
++		_require_command "$BTRFS_UTIL_PROG" btrfs
++		if ! $BTRFS_UTIL_PROG inspect-internal dump-tree --help >& /dev/null; then
++			_notrun "Missing btrfs-debug-tree or inspect-internal dump-tree"
++		fi
++		BTRFS_DUMP_TREE_PROG="$BTRFS_UTIL_PROG inspect-internal dump-tree"
++	fi
++}
++
+ _run_btrfs_util_prog()
+ {
+ 	run_check $BTRFS_UTIL_PROG $*
+diff --git a/common/config b/common/config
+index cc3180694e26..d121af4ee254 100644
+--- a/common/config
++++ b/common/config
+@@ -233,6 +233,7 @@ case "$HOSTOS" in
+         export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
+         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
+         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
++        export BTRFS_DUMP_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+ 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
+         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
+         export MKFS_NFS_PROG="false"
+diff --git a/tests/btrfs/085 b/tests/btrfs/085
+index 804899724cba..d81bef76b471 100755
+--- a/tests/btrfs/085
++++ b/tests/btrfs/085
+@@ -55,16 +55,14 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_dm_target flakey
+-
+-BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+-_require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
++_require_btrfs_dump_tree
  
- # success, all done
- status=0
+ rm -f $seqres.full
+ 
+ has_orphan_item()
+ {
+ 	INO=$1
+-	if $BTRFS_DEBUG_TREE_PROG $SCRATCH_DEV | \
++	if $BTRFS_DUMP_TREE_PROG $SCRATCH_DEV | \
+ 		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
+ 		return 0
+ 	fi
 -- 
-2.13.6
+2.16.2
 
-
---mgavp3rnvnsapbdn--
