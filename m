@@ -1,49 +1,41 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:21411 "EHLO
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:29967 "EHLO
         ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751281AbeERECE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 May 2018 00:02:04 -0400
-Date: Fri, 18 May 2018 14:02:02 +1000
+        by vger.kernel.org with ESMTP id S1750782AbeEREDn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 18 May 2018 00:03:43 -0400
+Date: Fri, 18 May 2018 14:03:41 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/3] generic/382: Fix test when report uses /etc/passwd
-Message-ID: <20180518040202.GJ23861@dastard>
-References: <20180514170351.13737-1-jack@suse.cz>
- <20180514170351.13737-3-jack@suse.cz>
- <20180517024250.GD29080@desktop.hz.ali.com>
- <20180517091836.ep4pydgqpg6cihgy@quack2.suse.cz>
+Subject: Re: [PATCH V4] test online label ioctl
+Message-ID: <20180518040341.GK23861@dastard>
+References: <2a743318-585d-9eb1-5430-2b07246348ab@redhat.com>
+ <f912f4ae-20b1-d19e-3b38-317b9ef46a6d@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180517091836.ep4pydgqpg6cihgy@quack2.suse.cz>
+In-Reply-To: <f912f4ae-20b1-d19e-3b38-317b9ef46a6d@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, "linux-btrfs@vger.kernel.org" <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 17, 2018 at 11:18:36AM +0200, Jan Kara wrote:
-> On Thu 17-05-18 10:42:50, Eryu Guan wrote:
-> > On Mon, May 14, 2018 at 07:03:50PM +0200, Jan Kara wrote:
-> > > On older kernels xfs_quota uses /etc/passwd to report quota entries. In
-> > > such case all-zero lines disturb its output and the test fails. Fix the
-> > > problem by ignoring all-zero lines in quota report.
-> > 
-> > I notice that generic/381 does quota report in a similar way as in
-> > generic/382, is 381 affected by the same problem? If only generic/382 is
-> > affected, we could move the filter from common/filter to the test
-> > itself.
+On Thu, May 17, 2018 at 10:28:26AM -0500, Eric Sandeen wrote:
+> This tests the online label ioctl that btrfs has, which has been
+> recently proposed for XFS.
 > 
-> Yes, that test is affected as well. I just didn't notice because on my
-> system I don't have user 123456-fsgqa (SLE/openSUSE don't allow you to
-> create user with such name and I didn't bother to force-create it by
-> manually editting passwd). I'll send a patch to update that test to use the
-> filter as well if you're otherwise fine with this approach.
+> To run, it requires an updated xfs_io with the label command and a
+> filesystem that supports it
+> 
+> A slight change here to _require_xfs_io_command as well, so that tests
+> which simply fail with "Inappropriate ioctl" can be caught in the
+> common case.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+> 
+> Now with new and improved sequential V4 versioning!
 
-Perhaps it would also be worthwhile to send a patch to allow an
-alternate username for quota testing (e.g. fstests-user) and probe
-which one to use at startup?
+Looks good now.
 
-Cheers,
-
-Dave.
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
 -- 
 Dave Chinner
 david@fromorbit.com
