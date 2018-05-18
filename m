@@ -1,150 +1,139 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:33852 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750788AbeERF0J (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 18 May 2018 01:26:09 -0400
-Date: Fri, 18 May 2018 13:26:07 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2] xfs: test inode allocation state missmatch corruption
-Message-ID: <20180518052607.GE4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
-References: <20180511161127.15158-1-zlang@redhat.com>
- <20180511233239.GZ23861@dastard>
- <20180516081832.GA4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180518035939.GI23861@dastard>
+Received: from mx2.suse.de ([195.135.220.15]:38165 "EHLO mx2.suse.de"
+ rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP id S1751458AbeERICz
+ (ORCPT <rfc822;fstests@vger.kernel.org>); Fri, 18 May 2018 04:02:55 -0400
+Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254]) by
+ mx2.suse.de (Postfix) with ESMTP id D4244AEA1 for <fstests@vger.kernel.org>;
+ Fri, 18 May 2018 08:02:53 +0000 (UTC)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180518035939.GI23861@dastard>
+Message-ID: <20180518080239.31492-1-jack@suse.cz>
+Date: Fri, 18 May 2018 01:02:39 -0700 (PDT)
+From: Jan Kara <jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+Subject: [PATCH] Handle missing [gs]etcap tools
+Content-Type: text/plain; charset=ascii
+Content-Transfer-Encoding: 7bit
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 18, 2018 at 01:59:39PM +1000, Dave Chinner wrote:
-> On Wed, May 16, 2018 at 04:18:32PM +0800, Zorro Lang wrote:
-> > On Sat, May 12, 2018 at 09:32:39AM +1000, Dave Chinner wrote:
-> > > On Sat, May 12, 2018 at 12:11:27AM +0800, Zorro Lang wrote:
-> > > > There's a situation where the directory structure and the inobt
-> > > > thinks the inode is free, but the inode on disk thinks it is still
-> > > > in use. XFS should detect it and prevent the kernel from oopsing
-> > > > on lookup.
-> > > 
-> > > Isn't this testing the same thing that I recently posted "xfs: test
-> > > inobt/on disk free state mismatches" for?
-> > 
-> > Hi Dave,
-> > 
-> > Last week I replied you that we wrote test case for same bug. But I just found
-> > I can't reproduce any bugs on rhel-7.4 kernel and upstream 4.16 kernel by
-> > your case [1], is there anything I misunderstood?
-> > 
-> > But the case which I wrote for this bug [3] can trigger failures [2]. Even
-> > ignore that dmesg error (which I don't know if it's related with this bug),
-> > it still can trigger an error. And this error can't be triggered after merged
-> > your patch.
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > 
-> > [1]
-> > # ./check xfs/132
-> > FSTYP         -- xfs (non-debug)
-> > PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 4.16.7-200.fc27.x86_64
-> > MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/fedora-scratchdev
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/fedora-scratchdev /mnt/scratch
-> > 
-> > xfs/132  3s
-> > Ran: xfs/132
-> > Passed all 1 tests
-> 
-> What did it dump in dmesg? It may be that the filesystem shut down
-> because of a cascading failure, but I never ran the test on
-> non-debug builds so I've got no idea what behaviour to expect there.
-> Whoever runs xfstests without debug being enabled?  :)
-> 
-> I may be that you need KASAN turned on to catch the failure - this
-> version of the test corrupts dentry cache memory and KASAN was
-> reliably catching that on unfixed kernels. Memory corruption may not
-> be immeidately visible on non-debug kernels - it's guaranteed to
-> kill the machine sooner or later, though.
-> 
-> > [2]
-> > # ./check xfs/999                                          
-> > FSTYP         -- xfs (non-debug)               
-> > PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 4.16.7-200.fc27.x86_64+debug                      
-> > MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/fedora-scratchdev                                  
-> > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/fedora-scratchdev /mnt/scratch
-> > 
-> > xfs/999 4s ... - output mismatch (see /root/git/xfstests-zlang/results//xfs/999.out.bad)
-> >     --- tests/xfs/999.out       2018-05-11 11:12:21.129590901 -0400
-> >     +++ /root/git/xfstests-zlang/results//xfs/999.out.bad       2018-05-16 04:04:39.958393813 -0400
-> >     @@ -1,2 +1,2 @@
-> >      QA output created by 999
-> >     -SCRATCH_MNT/dir/newfile: Structure needs cleaning
-> >     +_check_dmesg: something found in dmesg (see /root/git/xfstests-zlang/results//xfs/999.dmesg)
-> >     ...
-> >     (Run 'diff -u tests/xfs/999.out /root/git/xfstests-zlang/results//xfs/999.out.bad'  to see the entire diff)
-> > 
-> > Ran: xfs/999                                   
-> > Failures: xfs/999                              
-> > Failed 1 of 1 tests
-> > 
-> > # dmesg
-> > [ 1160.076247] ------------[ cut here ]------------
-> > [ 1160.081403] kernel BUG at lib/list_debug.c:31!
-> > [ 1160.086399] invalid opcode: 0000 [#1] SMP PTI
-> > [ 1160.091274] Modules linked in: sunrpc intel_rapl sb_edac x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm irqbypass crct10dif_pclmul crc32_pclmul ghash_clmulni_intel intel_cstate igb intel_uncore ptp iTCO_wdt iTCO_vendor_support pps_core intel_rapl_perf wmi tpm_tis ipmi_ssif tpm_tis_core cdc_ether usbnet mii tpm i2c_i801 ipmi_si ipmi_devintf lpc_ich ipmi_msghandler shpchp ioatdma dca xfs libcrc32c mgag200 i2c_algo_bit drm_kms_helper ttm drm crc32c_intel megaraid_sas
-> > [ 1160.138576] CPU: 21 PID: 2746 Comm: xfs_io Not tainted 4.16.7-200.fc27.x86_64+debug #1
-> > [ 1160.147412] Hardware name: IBM System x3650 M4 -[7915ON3]-/00J6520, BIOS -[VVE124AUS-1.30]- 11/21/2012
-> > [ 1160.157809] RIP: 0010:__list_add_valid+0x61/0x70
-> > [ 1160.162963] RSP: 0018:ffffb9a28709b970 EFLAGS: 00010282
-> > [ 1160.168796] RAX: 0000000000000058 RBX: ffff8c6da4a7da30 RCX: 0000000000000000
-> > [ 1160.176760] RDX: 0000000000000000 RSI: ffff8c6db71d6c48 RDI: ffff8c6db71d6c48
-> > [ 1160.184723] RBP: ffff8c6db1fe3000 R08: 0000000000000001 R09: 0000000000000000
-> > [ 1160.192687] R10: ffffb9a28709b8f0 R11: 0000000000000000 R12: ffff8c6da4a7dc10
-> > [ 1160.200651] R13: ffff8c6da4a7dc10 R14: ffff8c6db1fe3a88 R15: ffff8c6daff70360
-> > [ 1160.208616] FS:  00007f5911fad840(0000) GS:ffff8c6db7000000(0000) knlGS:0000000000000000
-> > [ 1160.217646] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-> > [ 1160.224058] CR2: 0000564ff49e3290 CR3: 0000000467b92001 CR4: 00000000000606e0
-> > [ 1160.232023] Call Trace:
-> > [ 1160.234756]  inode_sb_list_add+0x47/0x80
-> > [ 1160.239200]  xfs_setup_inode+0x28/0x160 [xfs]
-> > [ 1160.244093]  xfs_ialloc+0x30d/0x520 [xfs]
-> > [ 1160.248600]  xfs_dir_ialloc+0x74/0x240 [xfs]
-> 
-> So this has allocated an inode that is already cached in memory,
-> which is a different symptom of the same problem. 
-> 
-> i.e. there are two fixes for the problem. The initial cold-cache
-> test fixes were in commit ee457001ed6c ("xfs: catch inode allocation
-> state mismatch corruption"). The hot cache fixes were in
-> commit afca6c5b2595 ("xfs: validate cached inodes
-> are free when allocated"), and the commit message says:
-> 
-> 	We recently fixed a similar inode allocation issue caused by
-> 	inobt record corruption problem in xfs_iget_cache_miss() in
-> 	commit ee457001ed6c ("xfs: catch inode allocation state
-> 	mismatch corruption"). This change adds similar checks to
-> 	the cache-hit path to catch it, and turns the reproducer
-> 	into a corruption shutdown situation.
-> 
-> IOWs, the tests are exercising the same corruption, just through
-> different code paths. So it would seem that we need both tests...
+Add proper requires for getcap and setcap tools to tests that need them.
+Also define standard variables GETCAP_PROG and SETCAP_PROG.
 
-Many thanks for your explanation. I'll send the case to be reviewed
-again.
+Signed-off-by: Jan Kara <jack@suse.cz>
+---
+ common/config     |  2 ++
+ tests/generic/093 | 10 ++++++----
+ tests/generic/270 |  6 ++----
+ tests/xfs/296     |  8 +++++---
+ 4 files changed, 15 insertions(+), 11 deletions(-)
 
-Thanks,
-Zorro
+diff --git a/common/config b/common/config
+index cc3180694e26..4ea141809d4c 100644
+--- a/common/config
++++ b/common/config
+@@ -204,6 +204,8 @@ export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
+ export THIN_CHECK_PROG="$(set_prog_path thin_check)"
+ export PYTHON2_PROG="`set_prog_path python2`"
+ export SQLITE3_PROG="`set_prog_path sqlite3`"
++export SETCAP_PROG="`set_prog_path setcap`"
++export GETCAP_PROG="`set_prog_path getcap`"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/tests/generic/093 b/tests/generic/093
+index 197e6722f22c..e70273bca7f2 100755
+--- a/tests/generic/093
++++ b/tests/generic/093
+@@ -54,6 +54,8 @@ _require_test
+ _require_attrs
+ _require_user
+ _require_test_program "writemod"
++_require_command "$SETCAP_PROG" "setcap"
++_require_command "$GETCAP_PROG" "getcap"
+ 
+ rm -f $seqres.full
+ 
+@@ -65,15 +67,15 @@ rm -f $file
+ touch $file
+ 
+ echo "**** Verifying that appending to file clears capabilities ****"
+-setcap cap_chown+ep $file
+-getcap $file | filefilter
++$SETCAP_PROG cap_chown+ep $file
++$GETCAP_PROG $file | filefilter
+ echo data1 >> $file
+ cat $file
+-getcap $file | filefilter
++$GETCAP_PROG $file | filefilter
+ echo
+ 
+ echo "**** Verifying that appending to file doesn't clear other xattrs ****"
+-setcap cap_chown+ep $file
++$SETCAP_PROG cap_chown+ep $file
+ $SETFATTR_PROG -n trusted.name -v value $file
+ echo data2 >> $file
+ cat $file
+diff --git a/tests/generic/270 b/tests/generic/270
+index f5026ba0cd30..d597ab494286 100755
+--- a/tests/generic/270
++++ b/tests/generic/270
+@@ -51,10 +51,7 @@ _workout()
+ 	echo "fsstress $args" >> $seqres.full
+ 	# Grant chown capability 
+ 	cp $FSSTRESS_PROG  $tmp.fsstress.bin
+-	if [ "`whereis setcap`" == "setcap:" ]; then
+-            _notrun "setcap not installed."
+-	fi
+-	setcap cap_chown=epi  $tmp.fsstress.bin
++	$SETCAP_PROG cap_chown=epi  $tmp.fsstress.bin
+ 
+ 	(su $qa_user -c "$tmp.fsstress.bin $args" &) > /dev/null 2>&1
+ 	pid=$!
+@@ -80,6 +77,7 @@ _require_quota
+ _require_user
+ _require_scratch
+ _require_command "$KILLALL_PROG" killall
++_require_command "$SETCAP_PROG" setcap
+ 
+ rm -f $seqres.full
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+diff --git a/tests/xfs/296 b/tests/xfs/296
+index 610c2ec426c6..8baf97abdd7e 100755
+--- a/tests/xfs/296
++++ b/tests/xfs/296
+@@ -47,6 +47,8 @@ _cleanup()
+ _supported_fs xfs
+ _supported_os Linux
+ _require_scratch
++_require_command "$SETCAP_PROG" setcap
++_require_command "$GETCAP_PROG" getcap
+ 
+ rm -f $seqres.full
+ 
+@@ -57,12 +59,12 @@ echo test > $dump_dir/testfile
+ # Set a generic xattr
+ setfattr -n user.name -v value $dump_dir/testfile
+ # Now set the cap (which is also an xattr)
+-setcap cap_setgid,cap_setuid+ep $dump_dir/testfile
++$SETCAP_PROG cap_setgid,cap_setuid+ep $dump_dir/testfile
+ # And make sure they are there on the source
+ echo "Checking for xattr on source file"
+ getfattr --absolute-names -m user.name $dump_dir/testfile | _dir_filter
+ echo "Checking for capability on source file"
+-getcap $dump_dir/testfile | _dir_filter
++$GETCAP_PROG $dump_dir/testfile | _dir_filter
+ getfattr --absolute-names -m security.capability $dump_dir/testfile | _dir_filter
+ 
+ _do_dump_file -f $tmp.df.0
+@@ -75,7 +77,7 @@ _diff_compare
+ echo "Checking for xattr on restored file"
+ getfattr --absolute-names -m user.name $restore_dir/$dump_sdir/testfile | _dir_filter
+ echo "Checking for capability on restored file"
+-getcap $restore_dir/$dump_sdir/testfile | _dir_filter
++$GETCAP_PROG $restore_dir/$dump_sdir/testfile | _dir_filter
+ getfattr --absolute-names -m security.capability $restore_dir/$dump_sdir/testfile | _dir_filter
+ 
+ status=0
+-- 
+2.13.6
 
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
