@@ -1,200 +1,137 @@
-Received: from mx1.redhat.com ([209.132.183.28]:60394 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751649AbeEQSV5 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 17 May 2018 14:21:57 -0400
-Date: Fri, 18 May 2018 02:21:55 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: Problems about xfstests g/475
-Message-ID: <20180517182155.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
-References: <20180517090304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180517143057.GC4910@magnolia>
- <20180517154517.GC4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180517171211.GF4910@magnolia>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:23675 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751524AbeERD7m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 17 May 2018 23:59:42 -0400
+Date: Fri, 18 May 2018 13:59:39 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] xfs: test inode allocation state missmatch corruption
+Message-ID: <20180518035939.GI23861@dastard>
+References: <20180511161127.15158-1-zlang@redhat.com>
+ <20180511233239.GZ23861@dastard>
+ <20180516081832.GA4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180517171211.GF4910@magnolia>
+In-Reply-To: <20180516081832.GA4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
+To: Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 17, 2018 at 10:12:11AM -0700, Darrick J. Wong wrote:
-> On Thu, May 17, 2018 at 11:45:17PM +0800, Zorro Lang wrote:
-> > On Thu, May 17, 2018 at 07:30:57AM -0700, Darrick J. Wong wrote:
-> > > On Thu, May 17, 2018 at 05:03:04PM +0800, Zorro Lang wrote:
-> > > > Hi Darrick,
-> > > > 
-> > > > Sorry to trouble you, generic/475 rarely trigger an error[1] (test
-> > > > on 4.16 kernel)
-> > > > 
-> > > > I checked the case, from the xfstests code below:
-> > > > 
-> > > > _dmerror_load_error_table()
-> > > > {
-> > > >         suspend_opt="--nolockfs"
-> > > > 
-> > > >         if [ "$1" = "lockfs" ]; then
-> > > >                 suspend_opt=""
-> > > >         elif [ -n "$*" ]; then
-> > > >                 suspend_opt="$*"
-> > > >         fi
-> > > > 
-> > > >         $DMSETUP_PROG suspend $suspend_opt error-test
-> > > >         [ $? -ne 0 ] && _fail  "dmsetup suspend failed"
-> > > > 
-> > > >         $DMSETUP_PROG load error-test --table "$DMERROR_TABLE"
-> > > >         [ $? -ne 0 ] && _fail "dmsetup failed to load error table"
-> > > > 
-> > > >         $DMSETUP_PROG resume error-test
-> > > >         [ $? -ne 0 ] && _fail  "dmsetup resume failed"
-> > > > }
-> > > > 
-> > > > _dmerror_load_error_table() use "--nolockfs" by default. But g/475 call
-> > > > _dmerror_load_error_table without any argument, so it doesn't do the
-> > > > things as it describes on comment -- "Loading error table without --nolockfs
-> > > > option".
-> > > > 
-> > > > I'm confused, what is your expected test? Is this "--nolockfs" thing
-> > > > cause this error[1]?
+On Wed, May 16, 2018 at 04:18:32PM +0800, Zorro Lang wrote:
+> On Sat, May 12, 2018 at 09:32:39AM +1000, Dave Chinner wrote:
+> > On Sat, May 12, 2018 at 12:11:27AM +0800, Zorro Lang wrote:
+> > > There's a situation where the directory structure and the inobt
+> > > thinks the inode is free, but the inode on disk thinks it is still
+> > > in use. XFS should detect it and prevent the kernel from oopsing
+> > > on lookup.
 > > 
-> > Thanks for your quick reply!
-> > 
-> > Can you confirm if
-> > 
-> >   _dmerror_load_error_table "lockfs"
-> >   ...
-> >   _dmerror_load_working_table "lockfs"
-> > 
-> > is what you really want to run in g/475?
+> > Isn't this testing the same thing that I recently posted "xfs: test
+> > inobt/on disk free state mismatches" for?
 > 
-> The test simulates sudden disk disconnection by switching in dm-error
-> without freezing or otherwise quiescing the filesystem, so passing
-> --nolockfs to dmsetup is the correct behavior.
+> Hi Dave,
 > 
-> Calling _dmerror_load_error_table without 'lockfs' gets us the
-> --nolockfs behavior (which confuses me every time I look at this),
-> so the test is correct as written.  The comment for that hunk of code is
-> atrociously incorrect and hard to understand, so I will rewrite it.
+> Last week I replied you that we wrote test case for same bug. But I just found
+> I can't reproduce any bugs on rhel-7.4 kernel and upstream 4.16 kernel by
+> your case [1], is there anything I misunderstood?
+> 
+> But the case which I wrote for this bug [3] can trigger failures [2]. Even
+> ignore that dmesg error (which I don't know if it's related with this bug),
+> it still can trigger an error. And this error can't be triggered after merged
+> your patch.
+> 
+> Thanks,
+> Zorro
+> 
+> 
+> [1]
+> # ./check xfs/132
+> FSTYP         -- xfs (non-debug)
+> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 4.16.7-200.fc27.x86_64
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/fedora-scratchdev
+> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/fedora-scratchdev /mnt/scratch
+> 
+> xfs/132  3s
+> Ran: xfs/132
+> Passed all 1 tests
 
-Thanks for your kind explanation :)
+What did it dump in dmesg? It may be that the filesystem shut down
+because of a cascading failure, but I never ran the test on
+non-debug builds so I've got no idea what behaviour to expect there.
+Whoever runs xfstests without debug being enabled?  :)
 
-> 
-> It would seem that you've uncovered a log replay bug in xfs. :)
+I may be that you need KASAN turned on to catch the failure - this
+version of the test corrupts dentry cache memory and KASAN was
+reliably catching that on unfixed kernels. Memory corruption may not
+be immeidately visible on non-debug kernels - it's guaranteed to
+kill the machine sooner or later, though.
 
-Thanks,
-Zorro
+> [2]
+> # ./check xfs/999                                          
+> FSTYP         -- xfs (non-debug)               
+> PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 4.16.7-200.fc27.x86_64+debug                      
+> MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/fedora-scratchdev                                  
+> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/fedora-scratchdev /mnt/scratch
+> 
+> xfs/999 4s ... - output mismatch (see /root/git/xfstests-zlang/results//xfs/999.out.bad)
+>     --- tests/xfs/999.out       2018-05-11 11:12:21.129590901 -0400
+>     +++ /root/git/xfstests-zlang/results//xfs/999.out.bad       2018-05-16 04:04:39.958393813 -0400
+>     @@ -1,2 +1,2 @@
+>      QA output created by 999
+>     -SCRATCH_MNT/dir/newfile: Structure needs cleaning
+>     +_check_dmesg: something found in dmesg (see /root/git/xfstests-zlang/results//xfs/999.dmesg)
+>     ...
+>     (Run 'diff -u tests/xfs/999.out /root/git/xfstests-zlang/results//xfs/999.out.bad'  to see the entire diff)
+> 
+> Ran: xfs/999                                   
+> Failures: xfs/999                              
+> Failed 1 of 1 tests
+> 
+> # dmesg
+> [ 1160.076247] ------------[ cut here ]------------
+> [ 1160.081403] kernel BUG at lib/list_debug.c:31!
+> [ 1160.086399] invalid opcode: 0000 [#1] SMP PTI
+> [ 1160.091274] Modules linked in: sunrpc intel_rapl sb_edac x86_pkg_temp_thermal intel_powerclamp coretemp kvm_intel kvm irqbypass crct10dif_pclmul crc32_pclmul ghash_clmulni_intel intel_cstate igb intel_uncore ptp iTCO_wdt iTCO_vendor_support pps_core intel_rapl_perf wmi tpm_tis ipmi_ssif tpm_tis_core cdc_ether usbnet mii tpm i2c_i801 ipmi_si ipmi_devintf lpc_ich ipmi_msghandler shpchp ioatdma dca xfs libcrc32c mgag200 i2c_algo_bit drm_kms_helper ttm drm crc32c_intel megaraid_sas
+> [ 1160.138576] CPU: 21 PID: 2746 Comm: xfs_io Not tainted 4.16.7-200.fc27.x86_64+debug #1
+> [ 1160.147412] Hardware name: IBM System x3650 M4 -[7915ON3]-/00J6520, BIOS -[VVE124AUS-1.30]- 11/21/2012
+> [ 1160.157809] RIP: 0010:__list_add_valid+0x61/0x70
+> [ 1160.162963] RSP: 0018:ffffb9a28709b970 EFLAGS: 00010282
+> [ 1160.168796] RAX: 0000000000000058 RBX: ffff8c6da4a7da30 RCX: 0000000000000000
+> [ 1160.176760] RDX: 0000000000000000 RSI: ffff8c6db71d6c48 RDI: ffff8c6db71d6c48
+> [ 1160.184723] RBP: ffff8c6db1fe3000 R08: 0000000000000001 R09: 0000000000000000
+> [ 1160.192687] R10: ffffb9a28709b8f0 R11: 0000000000000000 R12: ffff8c6da4a7dc10
+> [ 1160.200651] R13: ffff8c6da4a7dc10 R14: ffff8c6db1fe3a88 R15: ffff8c6daff70360
+> [ 1160.208616] FS:  00007f5911fad840(0000) GS:ffff8c6db7000000(0000) knlGS:0000000000000000
+> [ 1160.217646] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
+> [ 1160.224058] CR2: 0000564ff49e3290 CR3: 0000000467b92001 CR4: 00000000000606e0
+> [ 1160.232023] Call Trace:
+> [ 1160.234756]  inode_sb_list_add+0x47/0x80
+> [ 1160.239200]  xfs_setup_inode+0x28/0x160 [xfs]
+> [ 1160.244093]  xfs_ialloc+0x30d/0x520 [xfs]
+> [ 1160.248600]  xfs_dir_ialloc+0x74/0x240 [xfs]
 
-> 
-> --D
-> 
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > > 
-> > > > [1]
-> > > > meta-data=/dev/sda3              isize=512    agcount=4, agsize=1966080 blks
-> > > >          =                       sectsz=512   attr=2, projid32bit=1
-> > > >          =                       crc=1        finobt=1, sparse=0, rmapbt=0, reflink=0
-> > > > data     =                       bsize=2048   blocks=7864320, imaxpct=25
-> > > >          =                       sunit=0      swidth=0 blks
-> > > > naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-> > > > log      =internal log           bsize=2048   blocks=5120, version=2
-> > > >          =                       sectsz=512   sunit=0 blks, lazy-count=1
-> > > > realtime =none                   extsz=4096   blocks=0, rtextents=0
-> > > > seed = 1525927899
-> > > > ...
-> > > > ...
-> > > > seed = 1525744142
-> > > > mount failed
-> > > > _check_xfs_filesystem: filesystem on /dev/sda3 has dirty log
-> > > 
-> > > Uh, I guess log recovery failed.  What did dmesg capture?
-> > 
-> > The whole g/475 dmesg output as below:
-> > https://paste.fedoraproject.org/paste/Y8SDgGmw6CRLhEI4kRVCrQ
-> > 
-> > 
-> > The last round test's dmesg output is:
-> > 
-> > [ 8201.588313] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf04fcc len 64 error 5 
-> > [ 8201.590504] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf00025 len 64 error 5 
-> > [ 8201.596839] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
-> > [ 8201.597039] XFS (dm-0): Log I/O Error Detected.  Shutting down filesystem 
-> > [ 8201.605368] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
-> > [ 8201.607232] buffer_io_error: 17 callbacks suppressed 
-> > [ 8201.607235] Buffer I/O error on dev dm-0, logical block 31457152, async page read 
-> > [ 8201.607241] Buffer I/O error on dev dm-0, logical block 31457153, async page read 
-> > [ 8201.607244] Buffer I/O error on dev dm-0, logical block 31457154, async page read 
-> > [ 8201.607248] Buffer I/O error on dev dm-0, logical block 31457155, async page read 
-> > [ 8201.607251] Buffer I/O error on dev dm-0, logical block 31457156, async page read 
-> > [ 8201.607254] Buffer I/O error on dev dm-0, logical block 31457157, async page read 
-> > [ 8201.607257] Buffer I/O error on dev dm-0, logical block 31457158, async page read 
-> > [ 8201.607261] Buffer I/O error on dev dm-0, logical block 31457159, async page read 
-> > [ 8201.617451] XFS (dm-0): Please umount the filesystem and rectify the problem(s) 
-> > [ 8201.617467] XFS (dm-0): metadata I/O error in "xlog_iodone" at daddr 0xf05000 len 64 error 5 
-> > [ 8201.717710] XFS (dm-0): xfs_do_force_shutdown(0x2) called from line 1262 of file fs/xfs/xfs_log.c.  Return address = 00000000755f7a21 
-> > [ 8201.769082] XFS (dm-0): Unmounting Filesystem 
-> > [ 8201.901650] XFS (dm-0): Mounting V5 Filesystem 
-> > [ 8201.919089] XFS (dm-0): Log inconsistent or not a log (last==0, first!=1) 
-> > [ 8201.925942] XFS (dm-0): empty log check failed 
-> > [ 8201.930451] XFS (dm-0): log mount/recovery failed: error -22 
-> > [ 8201.936260] XFS (dm-0): log mount failed 
-> > [ 8202.245329] XFS (sda2): Unmounting Filesystem 
-> > [ 8205.664753] XFS (sda2): Mounting V5 Filesystem 
-> > [ 8205.727620] XFS (sda2): Ending clean mount 
-> > [ 8206.112965] XFS (sda3): Mounting V5 Filesystem 
-> > [ 8206.199215] XFS (sda3): Ending clean mount 
-> > [ 8206.292347] XFS (sda2): Unmounting Filesystem 
-> > [ 8207.996053] XFS (sda2): Mounting V5 Filesystem 
-> > [ 8208.061478] XFS (sda2): Ending clean mount 
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > *** xfs_logprint -t output ***
-> > > > Log inconsistent or not a log (last==0, first!=1)
-> > > > empty log check failed
-> > > > xfs_logprint: failed to find head and tail, error: 22
-> > > > xfs_logprint:
-> > > >     data device: 0x803
-> > > >     log device: 0x803 daddr: 15728660 length: 20480
-> > > > 
-> > > > *** end xfs_logprint output
-> > > > _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (c)
-> > > > *** xfs_check output ***
-> > > > Log inconsistent or not a log (last==0, first!=1)
-> > > > empty log check failed
-> > > > xlog_is_dirty: cannot find log head/tail (xlog_find_tail=22)
-> > > > 
-> > > > ERROR: cannot find log head/tail, run xfs_repair
-> > > > *** end xfs_check output
-> > > > _check_xfs_filesystem: filesystem on /dev/sda3 is inconsistent (r)
-> > > > *** xfs_repair -n output ***
-> > > > Phase 1 - find and verify superblock...
-> > > > Phase 2 - using internal log
-> > > >         - zero log...
-> > > > Log inconsistent or not a log (last==0, first!=1)
-> > > > empty log check failed
-> > > > zero_log: cannot find log head/tail (xlog_find_tail=22)
-> > > > *** end xfs_repair output
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+So this has allocated an inode that is already cached in memory,
+which is a different symptom of the same problem. 
+
+i.e. there are two fixes for the problem. The initial cold-cache
+test fixes were in commit ee457001ed6c ("xfs: catch inode allocation
+state mismatch corruption"). The hot cache fixes were in
+commit afca6c5b2595 ("xfs: validate cached inodes
+are free when allocated"), and the commit message says:
+
+	We recently fixed a similar inode allocation issue caused by
+	inobt record corruption problem in xfs_iget_cache_miss() in
+	commit ee457001ed6c ("xfs: catch inode allocation state
+	mismatch corruption"). This change adds similar checks to
+	the cache-hit path to catch it, and turns the reproducer
+	into a corruption shutdown situation.
+
+IOWs, the tests are exercising the same corruption, just through
+different code paths. So it would seem that we need both tests...
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
