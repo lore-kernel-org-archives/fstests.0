@@ -1,139 +1,53 @@
-Received: from mx2.suse.de ([195.135.220.15]:38165 "EHLO mx2.suse.de"
- rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP id S1751458AbeERICz
- (ORCPT <rfc822;fstests@vger.kernel.org>); Fri, 18 May 2018 04:02:55 -0400
-Received: from relay1.suse.de (charybdis-ext.suse.de [195.135.220.254]) by
- mx2.suse.de (Postfix) with ESMTP id D4244AEA1 for <fstests@vger.kernel.org>;
- Fri, 18 May 2018 08:02:53 +0000 (UTC)
-MIME-Version: 1.0
-Message-ID: <20180518080239.31492-1-jack@suse.cz>
-Date: Fri, 18 May 2018 01:02:39 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:44493 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751304AbeERJHs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 18 May 2018 05:07:48 -0400
+Date: Fri, 18 May 2018 11:07:47 +0200
 From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 2/3] generic/382: Fix test when report uses /etc/passwd
+Message-ID: <20180518090747.ab2amxubvshtldvt@quack2.suse.cz>
+References: <20180514170351.13737-1-jack@suse.cz>
+ <20180514170351.13737-3-jack@suse.cz>
+ <20180517024250.GD29080@desktop.hz.ali.com>
+ <20180517091836.ep4pydgqpg6cihgy@quack2.suse.cz>
+ <20180518040202.GJ23861@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180518040202.GJ23861@dastard>
 Sender: fstests-owner@vger.kernel.org
-Subject: [PATCH] Handle missing [gs]etcap tools
-Content-Type: text/plain; charset=ascii
-Content-Transfer-Encoding: 7bit
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jan Kara <jack@suse.cz>, Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add proper requires for getcap and setcap tools to tests that need them.
-Also define standard variables GETCAP_PROG and SETCAP_PROG.
+On Fri 18-05-18 14:02:02, Dave Chinner wrote:
+> On Thu, May 17, 2018 at 11:18:36AM +0200, Jan Kara wrote:
+> > On Thu 17-05-18 10:42:50, Eryu Guan wrote:
+> > > On Mon, May 14, 2018 at 07:03:50PM +0200, Jan Kara wrote:
+> > > > On older kernels xfs_quota uses /etc/passwd to report quota entries. In
+> > > > such case all-zero lines disturb its output and the test fails. Fix the
+> > > > problem by ignoring all-zero lines in quota report.
+> > > 
+> > > I notice that generic/381 does quota report in a similar way as in
+> > > generic/382, is 381 affected by the same problem? If only generic/382 is
+> > > affected, we could move the filter from common/filter to the test
+> > > itself.
+> > 
+> > Yes, that test is affected as well. I just didn't notice because on my
+> > system I don't have user 123456-fsgqa (SLE/openSUSE don't allow you to
+> > create user with such name and I didn't bother to force-create it by
+> > manually editting passwd). I'll send a patch to update that test to use the
+> > filter as well if you're otherwise fine with this approach.
+> 
+> Perhaps it would also be worthwhile to send a patch to allow an
+> alternate username for quota testing (e.g. fstests-user) and probe
+> which one to use at startup?
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- common/config     |  2 ++
- tests/generic/093 | 10 ++++++----
- tests/generic/270 |  6 ++----
- tests/xfs/296     |  8 +++++---
- 4 files changed, 15 insertions(+), 11 deletions(-)
+Well, we usually use the fsgqa user and that is fine. Just this specific
+test wants a username starting with digits and that's why it uses such a
+weird name.
 
-diff --git a/common/config b/common/config
-index cc3180694e26..4ea141809d4c 100644
---- a/common/config
-+++ b/common/config
-@@ -204,6 +204,8 @@ export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
- export THIN_CHECK_PROG="$(set_prog_path thin_check)"
- export PYTHON2_PROG="`set_prog_path python2`"
- export SQLITE3_PROG="`set_prog_path sqlite3`"
-+export SETCAP_PROG="`set_prog_path setcap`"
-+export GETCAP_PROG="`set_prog_path getcap`"
- 
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
-diff --git a/tests/generic/093 b/tests/generic/093
-index 197e6722f22c..e70273bca7f2 100755
---- a/tests/generic/093
-+++ b/tests/generic/093
-@@ -54,6 +54,8 @@ _require_test
- _require_attrs
- _require_user
- _require_test_program "writemod"
-+_require_command "$SETCAP_PROG" "setcap"
-+_require_command "$GETCAP_PROG" "getcap"
- 
- rm -f $seqres.full
- 
-@@ -65,15 +67,15 @@ rm -f $file
- touch $file
- 
- echo "**** Verifying that appending to file clears capabilities ****"
--setcap cap_chown+ep $file
--getcap $file | filefilter
-+$SETCAP_PROG cap_chown+ep $file
-+$GETCAP_PROG $file | filefilter
- echo data1 >> $file
- cat $file
--getcap $file | filefilter
-+$GETCAP_PROG $file | filefilter
- echo
- 
- echo "**** Verifying that appending to file doesn't clear other xattrs ****"
--setcap cap_chown+ep $file
-+$SETCAP_PROG cap_chown+ep $file
- $SETFATTR_PROG -n trusted.name -v value $file
- echo data2 >> $file
- cat $file
-diff --git a/tests/generic/270 b/tests/generic/270
-index f5026ba0cd30..d597ab494286 100755
---- a/tests/generic/270
-+++ b/tests/generic/270
-@@ -51,10 +51,7 @@ _workout()
- 	echo "fsstress $args" >> $seqres.full
- 	# Grant chown capability 
- 	cp $FSSTRESS_PROG  $tmp.fsstress.bin
--	if [ "`whereis setcap`" == "setcap:" ]; then
--            _notrun "setcap not installed."
--	fi
--	setcap cap_chown=epi  $tmp.fsstress.bin
-+	$SETCAP_PROG cap_chown=epi  $tmp.fsstress.bin
- 
- 	(su $qa_user -c "$tmp.fsstress.bin $args" &) > /dev/null 2>&1
- 	pid=$!
-@@ -80,6 +77,7 @@ _require_quota
- _require_user
- _require_scratch
- _require_command "$KILLALL_PROG" killall
-+_require_command "$SETCAP_PROG" setcap
- 
- rm -f $seqres.full
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
-diff --git a/tests/xfs/296 b/tests/xfs/296
-index 610c2ec426c6..8baf97abdd7e 100755
---- a/tests/xfs/296
-+++ b/tests/xfs/296
-@@ -47,6 +47,8 @@ _cleanup()
- _supported_fs xfs
- _supported_os Linux
- _require_scratch
-+_require_command "$SETCAP_PROG" setcap
-+_require_command "$GETCAP_PROG" getcap
- 
- rm -f $seqres.full
- 
-@@ -57,12 +59,12 @@ echo test > $dump_dir/testfile
- # Set a generic xattr
- setfattr -n user.name -v value $dump_dir/testfile
- # Now set the cap (which is also an xattr)
--setcap cap_setgid,cap_setuid+ep $dump_dir/testfile
-+$SETCAP_PROG cap_setgid,cap_setuid+ep $dump_dir/testfile
- # And make sure they are there on the source
- echo "Checking for xattr on source file"
- getfattr --absolute-names -m user.name $dump_dir/testfile | _dir_filter
- echo "Checking for capability on source file"
--getcap $dump_dir/testfile | _dir_filter
-+$GETCAP_PROG $dump_dir/testfile | _dir_filter
- getfattr --absolute-names -m security.capability $dump_dir/testfile | _dir_filter
- 
- _do_dump_file -f $tmp.df.0
-@@ -75,7 +77,7 @@ _diff_compare
- echo "Checking for xattr on restored file"
- getfattr --absolute-names -m user.name $restore_dir/$dump_sdir/testfile | _dir_filter
- echo "Checking for capability on restored file"
--getcap $restore_dir/$dump_sdir/testfile | _dir_filter
-+$GETCAP_PROG $restore_dir/$dump_sdir/testfile | _dir_filter
- getfattr --absolute-names -m security.capability $restore_dir/$dump_sdir/testfile | _dir_filter
- 
- status=0
+								Honza
 -- 
-2.13.6
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
