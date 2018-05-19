@@ -1,58 +1,64 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:49652 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751323AbeESCR7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 18 May 2018 22:17:59 -0400
-Date: Fri, 18 May 2018 19:17:58 -0700
-From: Matthew Wilcox <willy@infradead.org>
-Subject: Re: commit b4678df184b causing xfstests regressions
-Message-ID: <20180519021758.GA28858@bombadil.infradead.org>
-References: <20180518225037.GA26206@thunk.org>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:60032 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750713AbeESEn7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 19 May 2018 00:43:59 -0400
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (unknown [10.167.33.85])
+        by cn.fujitsu.com (Postfix) with ESMTP id 4022241B31E4
+        for <fstests@vger.kernel.org>; Sat, 19 May 2018 12:43:53 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/132: umount scratch device after finishing test
+Date: Sat, 19 May 2018 12:32:24 +0800
+Message-ID: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180518225037.GA26206@thunk.org>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: "Theodore Y. Ts'o" <tytso@mit.edu>
-Cc: linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 18, 2018 at 06:50:37PM -0400, Theodore Y. Ts'o wrote:
-> Hi Matthew,
-> 
-> Commit b4678df184b: "errseq: Always report a writeback error once"
-> appears to be causing xfstests regressions.  For ext4, running
-> "gce-xfstests -c 4k -g auto" will result in reliable shared/298
-> failures which go away if I revert b4678df184b.
+xfs/132 and xfs/133 running together got the following error:
+------------------------------------------------------------
+...
+xfs/132 1s ... 1s
+xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
+...
+QA output created by 133
+-Format and mount
+-Corrupt filesystem
+-Remount, try to append
+-Write did not succeed (ok).
++SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
++Already mounted result:
++/dev/sda11 /mnt/xfstests/scratch
+...
+------------------------------------------------------------
 
-Thanks; I'll take a look.  Monday is a holiday in Canada, so it may be
-Tuesday before I get to it.
+xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
+by umount scratch device.  Subsequent xfs/133 got a wrong canonical mount point
+path(i.e. SCRATCH_MNT='common/config: SCRATCH_MNT (/mnt/xfstests/scratch) is not a
+directory') for $SCRATCH_DEV when calling _canonicalize_mountpoint in common/config,
+and finally led to the failure of _check_mounted_on.
 
-> Darrick has also reported occasional generic/047 failures, which I
-> have seen at least once as well.  I believe two are linked, because
-> after instrumenting mke2fs in shared/298, the failure is happening
-> after creating a new 300 MB file:
-> 
-> dd if=/dev/zero of=$img_file bs=1M count=300 &> /dev/null
-> 
-> creating a new loop device
-> 
-> loop_dev=$(_create_loop_device $img_file)
-> 
-> ... and then run mke2fs on that loop device.
-> 
-> The instrumentation of mke2fs shows that the first fsync() on
-> /dev/loop0 (in lib/ext2fs/closefs.c) which is failing with EIO.
-> 
-> I haven't had a chance to really drill down on it, but I think what is
-> going on is there is some former test which exercises an error path
-> (using dm_error, or some such), and somehow the errseq_t for the loop
-> device isn't getting reset, or the inode for the underlying backing
-> file, had an unitialized errseq_t.
-> 
-> Can you take a closer look at this?
-> 
-> Thanks,
-> 
-> 					- Ted
-> 
-> 
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/xfs/132 | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/tests/xfs/132 b/tests/xfs/132
+index 6bb03e7..960096f 100755
+--- a/tests/xfs/132
++++ b/tests/xfs/132
+@@ -68,6 +68,8 @@ _scratch_mount
+ # The corrupt inode should be tripped over during these initial file creates.
+ touch $SCRATCH_MNT/file{0,1,2,3,4,5}{0,1,2,3,4,5} 2>&1 | _filter_scratch
+ 
++_scratch_unmount
++
+ # success, all done
+ status=0
+ exit
+-- 
+1.8.3.1
+
+
+
