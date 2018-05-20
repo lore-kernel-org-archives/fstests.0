@@ -1,35 +1,38 @@
-Received: from imap.thunk.org ([74.207.234.97]:59044 "EHLO imap.thunk.org"
+Received: from imap.thunk.org ([74.207.234.97]:59090 "EHLO imap.thunk.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751029AbeETR5u (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 20 May 2018 13:57:50 -0400
-Date: Sun, 20 May 2018 13:57:41 -0400
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] fs: clear writeback errors in inode_init_always
-Message-ID: <20180520175741.GA5072@thunk.org>
-References: <20180518225037.GA26206@thunk.org>
- <630faadb74f608aa5a42649b81657e8b62d46bc3.camel@kernel.org>
- <20180519152700.GB4507@magnolia>
- <20180519231944.GB23448@thunk.org>
- <fa3b4dec3452aa5696b8657ef509891908901d95.camel@kernel.org>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <fa3b4dec3452aa5696b8657ef509891908901d95.camel@kernel.org>
+        id S1751292AbeETSpc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 20 May 2018 14:45:32 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] generic: fix cleanup function for test 490
+Date: Sun, 20 May 2018 14:45:17 -0400
+Message-Id: <20180520184517.8826-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Matthew Wilcox <willy@infradead.org>, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: jack@suse.cz, guaneryu@gmail.com, Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, May 20, 2018 at 07:45:31AM -0400, Jeff Layton wrote:
-> 
-> I poked at this a bit this morning and found that if I ran generic/361
-> twice in a row that I'd see a failure similar to what you were seeing.
-> This patch seems to fix it for me.
-> 
-> Ted, could you test this against your reproducer? If this works for you
-> I'll plan to flesh out the patch description and get this into -next and
-> eventually to Linus before the next release.
+generic/490 fails because cleanup tries to delete . and .. since $tmp
+is left unset, and so "rm -f $tmp.*" does nothing useful.  Instead
+delete temp files created by seek_sanity_test.
 
-Yup, this fixes shared/298 for me.   Many thanks!!
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ tests/generic/490 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-						- Ted
+diff --git a/tests/generic/490 b/tests/generic/490
+index b5042c2e..c0335ca0 100755
+--- a/tests/generic/490
++++ b/tests/generic/490
+@@ -49,7 +49,7 @@ _require_test_program "seek_sanity_test"
+ _cleanup()
+ {
+ 	cd /
+-	rm -f $tmp.*
++	rm -f $base_test_file*
+ }
+ 
+ $here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
+-- 
+2.16.1.72.g5be1f00a9a
+
