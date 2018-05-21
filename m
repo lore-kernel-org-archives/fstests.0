@@ -1,22 +1,30 @@
-Received: from mail-pg0-f68.google.com ([74.125.83.68]:41910 "EHLO
-        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750883AbeEUHud (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 03:50:33 -0400
-Received: by mail-pg0-f68.google.com with SMTP id d14-v6so2415496pgv.8
-        for <fstests@vger.kernel.org>; Mon, 21 May 2018 00:50:33 -0700 (PDT)
-Date: Mon, 21 May 2018 15:50:27 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common/rc: add the function _require_noatime
-Message-ID: <20180521075027.GL29080@desktop.hz.ali.com>
-References: <1526641829-9893-1-git-send-email-xifeng@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:35510 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750923AbeEUIuk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 May 2018 04:50:40 -0400
+Date: Mon, 21 May 2018 04:50:39 -0400 (EDT)
+From: Xiaoli Feng <xifeng@redhat.com>
+Message-ID: <2039299000.2955896.1526892639579.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20180521075027.GL29080@desktop.hz.ali.com>
+References: <1526641829-9893-1-git-send-email-xifeng@redhat.com> <20180521075027.GL29080@desktop.hz.ali.com>
+Subject: Fwd: [PATCH] common/rc: add the function _require_noatime
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1526641829-9893-1-git-send-email-xifeng@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: XiaoLi Feng <xifeng@redhat.com>
-Cc: fstests@vger.kernel.org
+To: guaneryu@gmail.com
+Cc: linux-cifs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
+
+
+[add linux-cifs@vger.kernel.org to cc list]
+
+----- Forwarded Message -----
+From: "Eryu Guan" <guaneryu@gmail.com>
+To: "XiaoLi Feng" <xifeng@redhat.com>
+Cc: fstests@vger.kernel.org
+Sent: Monday, May 21, 2018 3:50:27 PM
+Subject: Re: [PATCH] common/rc: add the function _require_noatime
 
 [add linux-cifs@vger.kernel.org to cc list]
 
@@ -95,3 +103,7 @@ Eryu
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+--
+To unsubscribe from this list: send the line "unsubscribe fstests" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
