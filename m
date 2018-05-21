@@ -1,80 +1,61 @@
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:43324 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751178AbeEUJjd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 05:39:33 -0400
-Date: Mon, 21 May 2018 17:39:28 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs: pass extra params to _scratch_mkfs_xfs_opts in
- _scratch_mkfs_xfs
-Message-ID: <20180521093928.GN29080@desktop.hz.ali.com>
-References: <20180511030559.26502-1-guaneryu@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180511030559.26502-1-guaneryu@gmail.com>
+Received: from mail.kernel.org ([198.145.29.99]:40216 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1751719AbeEULUI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 May 2018 07:20:08 -0400
+Message-ID: <a11668bbe2050c8b5fb8f27b8b301ba8a78e6a97.camel@kernel.org>
+Subject: Re: [PATCH] fs: clear writeback errors in inode_init_always
+From: Jeff Layton <jlayton@kernel.org>
+Date: Mon, 21 May 2018 07:20:05 -0400
+In-Reply-To: <20180520194124.GB5072@thunk.org>
+References: <20180518225037.GA26206@thunk.org>
+         <630faadb74f608aa5a42649b81657e8b62d46bc3.camel@kernel.org>
+         <20180519152700.GB4507@magnolia> <20180519231944.GB23448@thunk.org>
+         <fa3b4dec3452aa5696b8657ef509891908901d95.camel@kernel.org>
+         <20180520125843.GA25612@bombadil.infradead.org>
+         <20180520162954.GA5250@thunk.org>
+         <20180520192009.GA22365@bombadil.infradead.org>
+         <20180520194124.GB5072@thunk.org>
+Content-Type: text/plain; charset="UTF-8"
+Mime-Version: 1.0
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Dave Chinner <david@fromorbit.com>, linux-xfs@vger.kernel.org, zlang@redhat.com
+To: "Theodore Y. Ts'o" <tytso@mit.edu>, Matthew Wilcox <willy@infradead.org>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, xfs <linux-xfs@vger.kernel.org>, linux-block <linux-block@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 11, 2018 at 11:05:59AM +0800, Eryu Guan wrote:
-> One of _scratch_mkfs_xfs_opts()'s job is to remove any metadata
-> related mkfs options if mkfs.xfs binary doesn't support them, so
-> that tests that pass metadata mkfs options to _scratch_mkfs, e.g.
-> "_scratch_mkfs -m crc=0" won't break with old mkfs.xfs.
+On Sun, 2018-05-20 at 15:41 -0400, Theodore Y. Ts'o wrote:
+> On Sun, May 20, 2018 at 12:20:09PM -0700, Matthew Wilcox wrote:
+> > Oh!  I misunderstood.  I thought that bd_inode->i_mapping pointed to
+> > lo_backing_file->f_mapping.
+> > 
+> > So how about this to preserve the error _in the file with the error_?
+> > 
+> > 	if (bdev) {
+> > 		bdput(bdev);
+> > 		invalidate_bdev(bdev);
+> > +		filp->f_mapping->wb_err = bdev->bd_inode->i_mapping->wb_err;
+> > +		bdev->bd_inode->i_mapping->wb_err = 0;
+> > 	}
+> > 	set_capacity(lo->lo_disk, 0);
+> > 	loop_sysfs_exit(lo);
 > 
-> But commit 596a068bf130 ("fstests: teach _scratch_mkfs to handle
-> mkfs option conflicts") broke this, because it didn't pass any mkfs
-> options to _scratch_mkfs_xfs_opts(). So fix it.
+> I don't think it's necessary.  wb_err on the underlying file would
+> have already been set when the error was set.  So if someone tried
+> calling fsync(2) on the underlying file, it would have collected the
+> error already.  Re-setting the error when we detach the loop device
+> doesn't seem to make any sense.
 > 
-> Also declare a variable as 'local' and fix a typo.
-> 
-> Reported-by: Dave Chinner <dchinner@redhat.com>
-> Signed-off-by: Eryu Guan <guaneryu@gmail.com>
 
-Ping on this patch, Zorro's new test would depend on this fix, it's
-great if it could get some reviews.
+(cc'ing linux-block)
 
-Thanks,
-Eryu
+Yes, the error would have been set on the original file already. As long
+as lo_req_flush or __loop_update_dio weren't called before we detach the
+device, it should still be possible to call fsync on the original fd and
+get back the error.
 
-> ---
->  common/xfs | 8 ++++----
->  1 file changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index e0bc3f43d3c5..498f45e64b6d 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -46,9 +46,9 @@ _setup_large_xfs_fs()
->  
->  _scratch_mkfs_xfs_opts()
->  {
-> -	mkfs_opts=$*
-> +	local mkfs_opts=$*
->  
-> -	# remove metadata related mkfs options if mkfs.xfs doesn't them
-> +	# remove metadata related mkfs options if mkfs.xfs doesn't support them
->  	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
->  		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
->  	fi
-> @@ -79,14 +79,14 @@ _scratch_mkfs_xfs_supported()
->  
->  _scratch_mkfs_xfs()
->  {
-> -	local mkfs_cmd="`_scratch_mkfs_xfs_opts`"
-> +	local mkfs_cmd="`_scratch_mkfs_xfs_opts $*`"
->  	local mkfs_filter="sed -e '/less than device physical sector/d' \
->  			       -e '/switching to logical sector/d' \
->  			       -e '/Default configuration/d'"
->  	local tmp=`mktemp -u`
->  	local mkfs_status
->  
-> -	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
-> +	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" 2>$tmp.mkfserr 1>$tmp.mkfsstd
->  	mkfs_status=$?
->  
->  
-> -- 
-> 2.17.0
-> 
+As a side note, it looks like __loop_update_dio will discard an error
+from vfs_fsync, so certain ioctls against a loop device can cause errors
+to be lost. It seems like those ought to get propagated to userland or
+to the blockdev's mapping somehow.
+-- 
+Jeff Layton <jlayton@kernel.org>
