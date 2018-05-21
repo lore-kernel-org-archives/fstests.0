@@ -1,83 +1,97 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:42775 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750898AbeEUHp7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 03:45:59 -0400
-Message-ID: <5B027930.4050203@cn.fujitsu.com>
-Date: Mon, 21 May 2018 15:45:52 +0800
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:41910 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750883AbeEUHud (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 03:50:33 -0400
+Received: by mail-pg0-f68.google.com with SMTP id d14-v6so2415496pgv.8
+        for <fstests@vger.kernel.org>; Mon, 21 May 2018 00:50:33 -0700 (PDT)
+Date: Mon, 21 May 2018 15:50:27 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] common/rc: add the function _require_noatime
+Message-ID: <20180521075027.GL29080@desktop.hz.ali.com>
+References: <1526641829-9893-1-git-send-email-xifeng@redhat.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH] xfs/132: umount scratch device after finishing test
-References: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com> <20180521023631.GN10363@dastard>
-In-Reply-To: <20180521023631.GN10363@dastard>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1526641829-9893-1-git-send-email-xifeng@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
+To: XiaoLi Feng <xifeng@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/05/21 10:36, Dave Chinner wrote:
-> On Sat, May 19, 2018 at 12:32:24PM +0800, Xiao Yang wrote:
->> xfs/132 and xfs/133 running together got the following error:
->> ------------------------------------------------------------
->> ...
->> xfs/132 1s ... 1s
->> xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
->> ...
->> QA output created by 133
->> -Format and mount
->> -Corrupt filesystem
->> -Remount, try to append
->> -Write did not succeed (ok).
->> +SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
->> +Already mounted result:
->> +/dev/sda11 /mnt/xfstests/scratch
->> ...
->> ------------------------------------------------------------
->>
->> xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
->> by umount scratch device.
-> AFAIK, we don't have to unmount the scratch device when a test
-> finishes - the test harness is supposed to do that and make sure
-> that it is in the correct state for the next test to run.
->
-> It seems that somewhere along the line this got broken. - I'm
-> guessing the fact that this test also says "don't check the scratch
-> device" the test harness is failing to unmount it because it's not
-> running _check_scratch_device. I'm guessing that it should at least
-> run _scratch_unmount....
-Hi Dave,
+[add linux-cifs@vger.kernel.org to cc list]
 
-Could we just make the test harness call _scratch_unmount after running every test, as below:
---------------------------------------------------------------
-diff --git a/check b/check
-index 96198ac..63ece67 100755
---- a/check
-+++ b/check
-@@ -815,6 +815,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-                 _make_testcase_report "$tc_status"
-             fi
-             seq="after_$seqnum"
-+           _scratch_unmount 2>  /dev/null
-         done
-         sect_stop=`_wallclock`
-         interrupt=false
-@@ -823,7 +824,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
-         echo
+On Fri, May 18, 2018 at 07:10:29PM +0800, Xiaoli Feng wrote:
+> From: xiaoli feng <xifeng@redhat.com>
+> 
+> In the generic/120, it will make the test not-pass if the filesystem
+> mounts failed with noatime. Now change this result to norun. The
+> filesystem cifs doesn't support noatime. Just make the test norun
+> until it supports noatime.
+> 
+> Signed-off-by: xiaoli feng <xifeng@redhat.com>
+> ---
+>  common/rc         | 8 +++++++-
+>  tests/generic/120 | 7 +------
+>  2 files changed, 8 insertions(+), 7 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index ffe5323..9c45f1b 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3244,7 +3244,13 @@ _require_atime()
+>  	_exclude_scratch_mount_option "noatime"
+>  	if [ "$FSTYP" == "nfs" ]; then
+>  		_notrun "atime related mount options have no effect on NFS"
+> -	fi
 
-         _test_unmount 2>  /dev/null
--       _scratch_unmount 2>  /dev/null
-  done
+I'm not sure what's the expected behavior from CIFS on atime/noatime, so
+I added linux-cifs list for input.
 
-  interrupt=false
----------------------------------------------------------------
+If CIFS behaves similarly to NFS, looks like that you could simply add
+another check for cifs in _require_atime(), as what we already do for
+nfs, so all tests that _require_atime() will _notrun on cifs.
+
+> +}
+> +
+> +_require_noatime()
+> +{
+> +	_exclude_scratch_mount_option "atime"
+> +	 _try_scratch_mount -o noatime || \
+> +                _notrun "noatime not supported by the current tested filesystem"
+>  }
+>  
+>  _require_relatime()
+> diff --git a/tests/generic/120 b/tests/generic/120
+> index 1180c10..ddd61b3 100755
+> --- a/tests/generic/120
+> +++ b/tests/generic/120
+> @@ -60,12 +60,7 @@ _compare_access_times()
+>  
+>  }
+>  
+> -if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
+> -then
+> -    cat $tmp.out
+> -    echo "!!! mount failed"
+> -    exit
+> -fi
+> +_require_noatime
+
+Anyway, failing the test when "noatime" mount fails is one of the
+purposes of the test, and it shouldn't be removed, as we've already made
+sure current FSTYP supports atime/noatime (by _require rules), so a
+noatime mount failure indicates a bug in the filesystem.
 
 Thanks,
-Xiao Yang
+Eryu
 
-> Cheers,
->
-> Dave.
-
-
-
+>  
+>  #executable file
+>  echo "*** copying file ***"
+> -- 
+> 1.8.3.1
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
