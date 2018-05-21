@@ -1,44 +1,89 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:59009 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751559AbeEUWd1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 18:33:27 -0400
-Date: Tue, 22 May 2018 08:32:52 +1000
+Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:7311 "EHLO
+        ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751192AbeEUWqo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 18:46:44 -0400
+Date: Tue, 22 May 2018 08:46:41 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs: pass extra params to _scratch_mkfs_xfs_opts in
- _scratch_mkfs_xfs
-Message-ID: <20180521223252.GQ23861@dastard>
-References: <20180511030559.26502-1-guaneryu@gmail.com>
+Subject: Re: [PATCH] xfs/132: umount scratch device after finishing test
+Message-ID: <20180521224641.GR23861@dastard>
+References: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20180521023631.GN10363@dastard>
+ <5B027930.4050203@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180511030559.26502-1-guaneryu@gmail.com>
+In-Reply-To: <5B027930.4050203@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 11, 2018 at 11:05:59AM +0800, Eryu Guan wrote:
-> One of _scratch_mkfs_xfs_opts()'s job is to remove any metadata
-> related mkfs options if mkfs.xfs binary doesn't support them, so
-> that tests that pass metadata mkfs options to _scratch_mkfs, e.g.
-> "_scratch_mkfs -m crc=0" won't break with old mkfs.xfs.
+On Mon, May 21, 2018 at 03:45:52PM +0800, Xiao Yang wrote:
+> On 2018/05/21 10:36, Dave Chinner wrote:
+> >On Sat, May 19, 2018 at 12:32:24PM +0800, Xiao Yang wrote:
+> >>xfs/132 and xfs/133 running together got the following error:
+> >>------------------------------------------------------------
+> >>...
+> >>xfs/132 1s ... 1s
+> >>xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
+> >>...
+> >>QA output created by 133
+> >>-Format and mount
+> >>-Corrupt filesystem
+> >>-Remount, try to append
+> >>-Write did not succeed (ok).
+> >>+SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
+> >>+Already mounted result:
+> >>+/dev/sda11 /mnt/xfstests/scratch
+> >>...
+> >>------------------------------------------------------------
+> >>
+> >>xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
+> >>by umount scratch device.
+> >AFAIK, we don't have to unmount the scratch device when a test
+> >finishes - the test harness is supposed to do that and make sure
+> >that it is in the correct state for the next test to run.
+> >
+> >It seems that somewhere along the line this got broken. - I'm
+> >guessing the fact that this test also says "don't check the scratch
+> >device" the test harness is failing to unmount it because it's not
+> >running _check_scratch_device. I'm guessing that it should at least
+> >run _scratch_unmount....
+> Hi Dave,
 > 
-> But commit 596a068bf130 ("fstests: teach _scratch_mkfs to handle
-> mkfs option conflicts") broke this, because it didn't pass any mkfs
-> options to _scratch_mkfs_xfs_opts(). So fix it.
+> Could we just make the test harness call _scratch_unmount after running every test, as below:
+> --------------------------------------------------------------
+> diff --git a/check b/check
+> index 96198ac..63ece67 100755
+> --- a/check
+> +++ b/check
+> @@ -815,6 +815,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>                 _make_testcase_report "$tc_status"
+>             fi
+>             seq="after_$seqnum"
+> +           _scratch_unmount 2>  /dev/null
+>         done
+>         sect_stop=`_wallclock`
+>         interrupt=false
+
+Sort of. The problem is in _check_filesystem, though, where it does
+nothing when _require_scratch_nocheck() is used. It needs to cycle
+the mount in this case, and then the main loop doesn't need to be
+touched...
+
+> @@ -823,7 +824,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>         echo
 > 
-> Also declare a variable as 'local' and fix a typo.
-> 
-> Reported-by: Dave Chinner <dchinner@redhat.com>
-> Signed-off-by: Eryu Guan <guaneryu@gmail.com>
+>         _test_unmount 2>  /dev/null
+> -       _scratch_unmount 2>  /dev/null
+>  done
 
-Looks fine.
+This needs to remain - this is the final unmount of the devices
+after all tests run.
 
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Cheers,
 
-(sorry for missing this when you opsted it first time)
-
--Dave.
+Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
