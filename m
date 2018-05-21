@@ -1,17 +1,36 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:51506 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750859AbeEUWxD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 21 May 2018 18:53:03 -0400
+Received: from mx1.redhat.com ([209.132.183.28]:54162 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750942AbeEUWy4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 May 2018 18:54:56 -0400
+Date: Mon, 21 May 2018 18:54:55 -0400 (EDT)
 From: Ronnie Sahlberg <lsahlber@redhat.com>
-Subject: [PATCH] cifs: Add README.cifs, example configs and blacklist files
-Date: Thu, 17 May 2018 13:55:53 +1000
-Message-Id: <20180517035553.18859-2-lsahlber@redhat.com>
-In-Reply-To: <20180517035553.18859-1-lsahlber@redhat.com>
-References: <20180517035553.18859-1-lsahlber@redhat.com>
+Message-ID: <1511841748.3255064.1526943295585.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20180517035553.18859-2-lsahlber@redhat.com>
+References: <20180517035553.18859-1-lsahlber@redhat.com> <20180517035553.18859-2-lsahlber@redhat.com>
+Subject: Re: [PATCH] cifs: Add README.cifs, example configs and blacklist
+ files
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests <fstests@vger.kernel.org>
 Cc: Steve French <smfrench@gmail.com>
 List-ID: <fstests@vger.kernel.org>
+
+Please ignore this patch.  It is residuals from before I got git-send-email setup correctly.
+The real patch is "[PATCH] cifs: Add README.cifs"
+
+Sorry,
+Ronnie Sahlberg
+
+
+
+----- Original Message -----
+From: "Ronnie Sahlberg" <lsahlber@redhat.com>
+To: "fstests" <fstests@vger.kernel.org>
+Cc: "Steve French" <smfrench@gmail.com>
+Sent: Thursday, 17 May, 2018 1:55:53 PM
+Subject: [PATCH] cifs: Add README.cifs, example configs and blacklist files
 
 This is an initial patch to provide quickstart instructions for
 how to use xfstest for CIFS.
@@ -297,3 +316,7 @@ index 00000000..01e4e1b6
 -- 
 2.13.3
 
+--
+To unsubscribe from this list: send the line "unsubscribe fstests" in
+the body of a message to majordomo@vger.kernel.org
+More majordomo info at  http://vger.kernel.org/majordomo-info.html
