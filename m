@@ -1,82 +1,83 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:48663 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:42775 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750962AbeEUFxf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 01:53:35 -0400
+        with ESMTP id S1750898AbeEUHp7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 03:45:59 -0400
+Message-ID: <5B027930.4050203@cn.fujitsu.com>
+Date: Mon, 21 May 2018 15:45:52 +0800
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/484: Need another process to check record locks
-Date: Mon, 21 May 2018 13:42:00 +0800
-Message-ID: <1526881320-10983-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Subject: Re: [PATCH] xfs/132: umount scratch device after finishing test
+References: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com> <20180521023631.GN10363@dastard>
+In-Reply-To: <20180521023631.GN10363@dastard>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, xzhou@redhat.com, jlayton@poochiereds.net, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-1) According to fcntl(2) manpage, A single process always gets F_UNLCK in
-   the l_type field when using fcntl(F_GETLK) to acquire the existing lock
-   set by itself because it could convert the existing lock to a new lock
-   unconditionally.  So we need another process to check if the lock exists.
+On 2018/05/21 10:36, Dave Chinner wrote:
+> On Sat, May 19, 2018 at 12:32:24PM +0800, Xiao Yang wrote:
+>> xfs/132 and xfs/133 running together got the following error:
+>> ------------------------------------------------------------
+>> ...
+>> xfs/132 1s ... 1s
+>> xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
+>> ...
+>> QA output created by 133
+>> -Format and mount
+>> -Corrupt filesystem
+>> -Remount, try to append
+>> -Write did not succeed (ok).
+>> +SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
+>> +Already mounted result:
+>> +/dev/sda11 /mnt/xfstests/scratch
+>> ...
+>> ------------------------------------------------------------
+>>
+>> xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
+>> by umount scratch device.
+> AFAIK, we don't have to unmount the scratch device when a test
+> finishes - the test harness is supposed to do that and make sure
+> that it is in the correct state for the next test to run.
+>
+> It seems that somewhere along the line this got broken. - I'm
+> guessing the fact that this test also says "don't check the scratch
+> device" the test harness is failing to unmount it because it's not
+> running _check_scratch_device. I'm guessing that it should at least
+> run _scratch_unmount....
+Hi Dave,
 
-2) Remove redundant exit(0).
+Could we just make the test harness call _scratch_unmount after running every test, as below:
+--------------------------------------------------------------
+diff --git a/check b/check
+index 96198ac..63ece67 100755
+--- a/check
++++ b/check
+@@ -815,6 +815,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+                 _make_testcase_report "$tc_status"
+             fi
+             seq="after_$seqnum"
++           _scratch_unmount 2>  /dev/null
+         done
+         sect_stop=`_wallclock`
+         interrupt=false
+@@ -823,7 +824,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
+         echo
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- src/t_locks_execve.c | 24 ++++++++++++++++++------
- 1 file changed, 18 insertions(+), 6 deletions(-)
+         _test_unmount 2>  /dev/null
+-       _scratch_unmount 2>  /dev/null
+  done
 
-diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
-index 9ad2dc3..d99d7de 100644
---- a/src/t_locks_execve.c
-+++ b/src/t_locks_execve.c
-@@ -8,6 +8,7 @@
- #include <errno.h>
- #include <pthread.h>
- #include <unistd.h>
-+#include <sys/types.h>
- #include <sys/wait.h>
- 
- static void err_exit(char *op, int errn)
-@@ -32,12 +33,24 @@ struct flock fl = {
- 
- static void checklock(int fd)
- {
--	if (fcntl(fd, F_GETLK, &fl) < 0)
--		err_exit("getlk", errno);
--	if (fl.l_type == F_UNLCK) {
--		printf("record lock is not preserved across execve(2)\n");
--		exit(1);
-+	pid_t pid;
-+
-+	pid = fork();
-+	if (pid < 0)
-+		err_exit("fork", errno);
-+
-+	if (!pid) {
-+		if (fcntl(fd, F_GETLK, &fl) < 0)
-+			err_exit("getlk", errno);
-+		if (fl.l_type == F_UNLCK) {
-+			printf("record lock is not preserved across execve(2)\n");
-+			exit(1);
-+		}
-+		exit(0);
- 	}
-+
-+	waitpid(pid, NULL, 0);
-+
- 	exit(0);
- }
- 
-@@ -52,7 +65,6 @@ int main(int argc, char **argv)
- 	if (argc == 3) {
- 		fd = atoi(argv[2]);
- 		checklock(fd);
--		exit(0);
- 	}
- 
- 	fd = open(argv[1], O_WRONLY|O_CREAT, 0755);
--- 
-1.8.3.1
+  interrupt=false
+---------------------------------------------------------------
+
+Thanks,
+Xiao Yang
+
+> Cheers,
+>
+> Dave.
 
 
 
