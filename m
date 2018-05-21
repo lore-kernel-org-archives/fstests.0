@@ -1,109 +1,219 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35510 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750923AbeEUIuk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 21 May 2018 04:50:40 -0400
-Date: Mon, 21 May 2018 04:50:39 -0400 (EDT)
-From: Xiaoli Feng <xifeng@redhat.com>
-Message-ID: <2039299000.2955896.1526892639579.JavaMail.zimbra@redhat.com>
-In-Reply-To: <20180521075027.GL29080@desktop.hz.ali.com>
-References: <1526641829-9893-1-git-send-email-xifeng@redhat.com> <20180521075027.GL29080@desktop.hz.ali.com>
-Subject: Fwd: [PATCH] common/rc: add the function _require_noatime
+Received: from mail-pf0-f196.google.com ([209.85.192.196]:42791 "EHLO
+        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751087AbeEUJER (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 05:04:17 -0400
+Date: Mon, 21 May 2018 17:04:11 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] xfs: test inode allocation state missmatch corruption
+Message-ID: <20180521090411.GM29080@desktop.hz.ali.com>
+References: <20180521015857.7339-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180521015857.7339-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-cifs@vger.kernel.org, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-[add linux-cifs@vger.kernel.org to cc list]
-
------ Forwarded Message -----
-From: "Eryu Guan" <guaneryu@gmail.com>
-To: "XiaoLi Feng" <xifeng@redhat.com>
-Cc: fstests@vger.kernel.org
-Sent: Monday, May 21, 2018 3:50:27 PM
-Subject: Re: [PATCH] common/rc: add the function _require_noatime
-
-[add linux-cifs@vger.kernel.org to cc list]
-
-On Fri, May 18, 2018 at 07:10:29PM +0800, Xiaoli Feng wrote:
-> From: xiaoli feng <xifeng@redhat.com>
+On Mon, May 21, 2018 at 09:58:57AM +0800, Zorro Lang wrote:
+> There's a situation where the directory structure and the inobt
+> thinks the inode is free, but the inode on disk thinks it is still
+> in use. XFS should detect it and prevent the kernel from oopsing
+> on lookup.
 > 
-> In the generic/120, it will make the test not-pass if the filesystem
-> mounts failed with noatime. Now change this result to norun. The
-> filesystem cifs doesn't support noatime. Just make the test norun
-> until it supports noatime.
-> 
-> Signed-off-by: xiaoli feng <xifeng@redhat.com>
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+
+Looks fine to me overall, reviews from xfs list would be good.
+
+(Add linux-xfs to cc list, and please add fs-specific list to cc when
+submitting fs-specific patches in future.)
+
 > ---
->  common/rc         | 8 +++++++-
->  tests/generic/120 | 7 +------
->  2 files changed, 8 insertions(+), 7 deletions(-)
 > 
-> diff --git a/common/rc b/common/rc
-> index ffe5323..9c45f1b 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3244,7 +3244,13 @@ _require_atime()
->  	_exclude_scratch_mount_option "noatime"
->  	if [ "$FSTYP" == "nfs" ]; then
->  		_notrun "atime related mount options have no effect on NFS"
-> -	fi
+> Hi,
+> 
+> Re-send this case due to we can use it to test different code
+> paths, refer to:
+> https://marc.info/?l=fstests&m=152662117205960&w=2
 
-I'm not sure what's the expected behavior from CIFS on atime/noatime, so
-I added linux-cifs list for input.
+Would be good to include some information on this, e.g. it's testing the
+same problem as in xfs/132, but by different code path.
 
-If CIFS behaves similarly to NFS, looks like that you could simply add
-another check for cifs in _require_atime(), as what we already do for
-nfs, so all tests that _require_atime() will _notrun on cifs.
+And the fix is already in upstream, it'd be good to mention the fix in
+commit log and/or test description too.
 
+> 
+> V2 did below changes:
+> 1) Fix Copyright
+> 2) Use 'convert' command of xfs_db to get agino from inode number.
+> 
+> V1 and related reply as below:
+> https://marc.info/?l=fstests&m=152229518811044&w=2
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/xfs/999     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/999.out |   2 +
+>  tests/xfs/group   |   1 +
+>  3 files changed, 117 insertions(+)
+>  create mode 100755 tests/xfs/999
+>  create mode 100644 tests/xfs/999.out
+> 
+> diff --git a/tests/xfs/999 b/tests/xfs/999
+> new file mode 100755
+> index 00000000..be26420a
+> --- /dev/null
+> +++ b/tests/xfs/999
+> @@ -0,0 +1,114 @@
+> +#! /bin/bash
+> +# FS QA Test No. 999
+> +#
+> +# Test a corruption when the directory structure and the inobt thinks the inode
+> +# is free, but the inode on disk thinks it is still in use.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
 > +}
 > +
-> +_require_noatime()
-> +{
-> +	_exclude_scratch_mount_option "atime"
-> +	 _try_scratch_mount -o noatime || \
-> +                _notrun "noatime not supported by the current tested filesystem"
->  }
->  
->  _require_relatime()
-> diff --git a/tests/generic/120 b/tests/generic/120
-> index 1180c10..ddd61b3 100755
-> --- a/tests/generic/120
-> +++ b/tests/generic/120
-> @@ -60,12 +60,7 @@ _compare_access_times()
->  
->  }
->  
-> -if ! _try_scratch_mount "-o noatime" >$tmp.out 2>&1
-> -then
-> -    cat $tmp.out
-> -    echo "!!! mount failed"
-> -    exit
-> -fi
-> +_require_noatime
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +_require_no_xfs_bug_on_assert
+> +
+> +_filter_dmesg()
 
-Anyway, failing the test when "noatime" mount fails is one of the
-purposes of the test, and it shouldn't be removed, as we've already made
-sure current FSTYP supports atime/noatime (by _require rules), so a
-noatime mount failure indicates a bug in the filesystem.
+No need name local functions with leading underscore.
+
+> +{
+> +	local warn1="Internal error xfs_trans_cancel.*fs/xfs/xfs_trans\.c.*"
+> +	local warn2="WARNING:.*fs/xfs/xfs_message\.c:.*assfail.*"
+> +
+> +	sed -e "s#$warn1#Intentional error in xfs_trans_cancel#" \
+> +	    -e "s#$warn2#Intentional warnings in assfail#"
+> +}
+> +
+> +# Use crc=0, due to this crash is only possible on v4 XFS or v5 XFS mounted
+> +# with the ikeep mount option. For all other V5 XFS, this problem cannot
+> +# occur because we don't read inodes we are allocating from disk - we simply
+> +# overwrite them with the new inode information.
+> +_scratch_mkfs_xfs -m crc=0 >> $seqres.full 2>&1
+
+This depends on a recent fix from me for _scratch_mkfs_xfs_opts(),
+otherwise older mkfs.xfs that doesn't support metadata would fail the
+mkfs (or use _require_xfs_mkfs_crc as in xfs/132). I'll ping that patch
+for review.
 
 Thanks,
 Eryu
 
->  
->  #executable file
->  echo "*** copying file ***"
+> +blksz=$(_scratch_xfs_get_sb_field blocksize)
+> +agcount=$(_scratch_xfs_get_sb_field agcount)
+> +
+> +_scratch_mount
+> +# Create a directory for later allocation in same AG (AG 0, due to this's an
+> +# empty XFS for now)
+> +mkdir $SCRATCH_MNT/dir
+> +
+> +# Allocate 1 block for testfile
+> +$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/testfile >> $seqres.full
+> +inum=`stat -c %i $SCRATCH_MNT/dir/testfile`
+> +_scratch_unmount
+> +
+> +# Find the AG which contains testfile
+> +agi=`_scratch_xfs_db -c "convert inode $inum agno" | sed -e 's/^.*(\([0-9]*\).*$/\1/g'`
+> +
+> +# Due to we only allocate 1 block for testfile, and this's the only one data
+> +# block we use. So we use single level inobt, So the ${agi}->root->recs[1]
+> +# should be the only one record points the chunk which contains testfile's
+> +# inode.
+> +# An exmaple of inode record is as below:
+> +#   recs[1] = [startino,freecount,free] 1:[1024,59,0xffffffffffffffe0]
+> +freecount=$(_scratch_xfs_get_metadata_field "recs[1].freecount" \
+> +					    "agi $agi" "addr root")
+> +fmask=$(_scratch_xfs_get_metadata_field "recs[1].free" "agi $agi" "addr root")
+> +
+> +# fmask shift right 1 bit, and freecount++, to mark testfile inode as free in
+> +# inobt. (But the inode itself isn't freed, it still has allocated block)
+> +freecount="$((freecount + 1))"
+> +fmask="$((fmask / 2))"
+> +_scratch_xfs_set_metadata_field "recs[1].freecount" "$freecount" \
+> +				"agi $agi" "addr root" >/dev/null
+> +_scratch_xfs_set_metadata_field "recs[1].free" "$fmask" \
+> +				"agi $agi" "addr root" >/dev/null
+> +
+> +# Mount again and create a new inode cover that inode we just 'freed' from inobt
+> +_scratch_mount
+> +$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/newfile 2>&1 | \
+> +	grep -i "Structure needs cleaning" | _filter_scratch
+> +
+> +# filter a intentional internal errors
+> +_check_dmesg _filter_dmesg
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+> new file mode 100644
+> index 00000000..cb8d9e34
+> --- /dev/null
+> +++ b/tests/xfs/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +SCRATCH_MNT/dir/newfile: Structure needs cleaning
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 32bf4f71..ec3cca62 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -442,3 +442,4 @@
+>  443 auto quick ioctl fsr
+>  444 auto quick
+>  445 auto quick filestreams
+> +999 auto quick
 > -- 
-> 1.8.3.1
+> 2.14.3
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
---
-To unsubscribe from this list: send the line "unsubscribe fstests" in
-the body of a message to majordomo@vger.kernel.org
-More majordomo info at  http://vger.kernel.org/majordomo-info.html
