@@ -1,85 +1,48 @@
-Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:7311 "EHLO
-        ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751192AbeEUWqo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 18:46:44 -0400
-Date: Tue, 22 May 2018 08:46:41 +1000
+Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:31864
+        "EHLO ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1750977AbeEUWuY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 18:50:24 -0400
+Date: Tue, 22 May 2018 08:50:21 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs/132: umount scratch device after finishing test
-Message-ID: <20180521224641.GR23861@dastard>
-References: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20180521023631.GN10363@dastard>
- <5B027930.4050203@cn.fujitsu.com>
+Subject: Re: [PATCH v2] xfs: test inode allocation state missmatch corruption
+Message-ID: <20180521225021.GS23861@dastard>
+References: <20180521015857.7339-1-zlang@redhat.com>
+ <20180521090411.GM29080@desktop.hz.ali.com>
+ <20180521155530.GH4910@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5B027930.4050203@cn.fujitsu.com>
+In-Reply-To: <20180521155530.GH4910@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 21, 2018 at 03:45:52PM +0800, Xiao Yang wrote:
-> On 2018/05/21 10:36, Dave Chinner wrote:
-> >On Sat, May 19, 2018 at 12:32:24PM +0800, Xiao Yang wrote:
-> >>xfs/132 and xfs/133 running together got the following error:
-> >>------------------------------------------------------------
-> >>...
-> >>xfs/132 1s ... 1s
-> >>xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
-> >>...
-> >>QA output created by 133
-> >>-Format and mount
-> >>-Corrupt filesystem
-> >>-Remount, try to append
-> >>-Write did not succeed (ok).
-> >>+SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
-> >>+Already mounted result:
-> >>+/dev/sda11 /mnt/xfstests/scratch
-> >>...
-> >>------------------------------------------------------------
-> >>
-> >>xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
-> >>by umount scratch device.
-> >AFAIK, we don't have to unmount the scratch device when a test
-> >finishes - the test harness is supposed to do that and make sure
-> >that it is in the correct state for the next test to run.
-> >
-> >It seems that somewhere along the line this got broken. - I'm
-> >guessing the fact that this test also says "don't check the scratch
-> >device" the test harness is failing to unmount it because it's not
-> >running _check_scratch_device. I'm guessing that it should at least
-> >run _scratch_unmount....
-> Hi Dave,
+On Mon, May 21, 2018 at 08:55:30AM -0700, Darrick J. Wong wrote:
+> On Mon, May 21, 2018 at 05:04:11PM +0800, Eryu Guan wrote:
+> > On Mon, May 21, 2018 at 09:58:57AM +0800, Zorro Lang wrote:
+> > > +$XFS_IO_PROG -fc 'pwrite 0 $blksz' -c fsync $SCRATCH_MNT/dir/newfile 2>&1 | \
+> > > +	grep -i "Structure needs cleaning" | _filter_scratch
+> > > +
+> > > +# filter a intentional internal errors
+> > > +_check_dmesg _filter_dmesg
+> > > +
+> > > +# success, all done
+> > > +status=0
 > 
-> Could we just make the test harness call _scratch_unmount after running every test, as below:
-> --------------------------------------------------------------
-> diff --git a/check b/check
-> index 96198ac..63ece67 100755
-> --- a/check
-> +++ b/check
-> @@ -815,6 +815,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
->                 _make_testcase_report "$tc_status"
->             fi
->             seq="after_$seqnum"
-> +           _scratch_unmount 2>  /dev/null
->         done
->         sect_stop=`_wallclock`
->         interrupt=false
+> Does this test leave the scratch fs mounted but shut down if the kernel
+> hasn't been patched?  The _require_scratch_nocheck means that the broken
+> fs doesn't get scraped off the system and subsequent tests can go all
+> wacky when operations on $SCRATCH_MNT error out...
 
-Sort of. The problem is in _check_filesystem, though, where it does
-nothing when _require_scratch_nocheck() is used. It needs to cycle
-the mount in this case, and then the main loop doesn't need to be
-touched...
+There's another discussion going on about fix this because xfs/132
+triggers the same issue (it's a problem with _check_filesystem() not
+cycling the mount after the test when _require_scratch_nocheck() is
+used).
 
-> @@ -823,7 +824,6 @@ for section in $HOST_OPTIONS_SECTIONS; do
->         echo
-> 
->         _test_unmount 2>  /dev/null
-> -       _scratch_unmount 2>  /dev/null
->  done
-
-This needs to remain - this is the final unmount of the devices
-after all tests run.
+I didn't see it here in testing because there was no test run after
+the new test I proposed. Same here - its xfs/999, and no test is run
+after it so this sort of thing isn't noticed.
 
 Cheers,
 
