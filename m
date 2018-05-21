@@ -1,60 +1,109 @@
-Received: from mail-pl0-f67.google.com ([209.85.160.67]:41487 "EHLO
-        mail-pl0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752624AbeEUCyE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 20 May 2018 22:54:04 -0400
-Received: by mail-pl0-f67.google.com with SMTP id az12-v6so7896242plb.8
-        for <fstests@vger.kernel.org>; Sun, 20 May 2018 19:54:04 -0700 (PDT)
-Date: Mon, 21 May 2018 10:54:00 +0800
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:37505 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750986AbeEUDEf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 20 May 2018 23:04:35 -0400
+Received: by mail-pf0-f194.google.com with SMTP id e9-v6so6365920pfi.4
+        for <fstests@vger.kernel.org>; Sun, 20 May 2018 20:04:35 -0700 (PDT)
+Date: Mon, 21 May 2018 11:04:31 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic: fix cleanup function for test 490
-Message-ID: <20180521025400.GJ29080@desktop.hz.ali.com>
-References: <20180520184517.8826-1-tytso@mit.edu>
- <20180521024144.GO10363@dastard>
+Subject: Re: [PATCH] common/btrfs: add helper to detect dump-tree or
+ btrfs-debug-tree
+Message-ID: <20180521030431.GK29080@desktop.hz.ali.com>
+References: <20180517111814.19652-1-dsterba@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180521024144.GO10363@dastard>
+In-Reply-To: <20180517111814.19652-1-dsterba@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, jack@suse.cz
+To: David Sterba <dsterba@suse.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 21, 2018 at 12:41:44PM +1000, Dave Chinner wrote:
-> On Sun, May 20, 2018 at 02:45:17PM -0400, Theodore Ts'o wrote:
-> > generic/490 fails because cleanup tries to delete . and .. since $tmp
-> > is left unset, and so "rm -f $tmp.*" does nothing useful.  Instead
-> > delete temp files created by seek_sanity_test.
-> > 
-> > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > ---
-> >  tests/generic/490 | 2 +-
-> >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > 
-> > diff --git a/tests/generic/490 b/tests/generic/490
-> > index b5042c2e..c0335ca0 100755
-> > --- a/tests/generic/490
-> > +++ b/tests/generic/490
-> > @@ -49,7 +49,7 @@ _require_test_program "seek_sanity_test"
-> >  _cleanup()
-> >  {
-> >  	cd /
-> > -	rm -f $tmp.*
-> > +	rm -f $base_test_file*
-> >  }
-> >  
-> >  $here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
+On Thu, May 17, 2018 at 01:18:14PM +0200, David Sterba wrote:
+> The command btrfs-debug-tree is obsolete and was removed in btrfs-progs
+> version 4.16.1.  The same functionality available as 'btrfs
+> inspect-internal dump-tree', let's detect which one can be used.  Test
+> btrfs/085 otherwise fails with btrfs-progs 4.16.1+.
 > 
-> This is wrong. $tmp must always be set in a test, as the
-> infrastructure uses it. Failing to set $tmp will result in stray
-> files being spewed around the place by the test and not cleaned up.
-> Hence the "rm -f $tmp.*" line must stay, the normal tmp=/tmp/$$ line
-> added to the test preamble, and then you can remove the base test
-> file...
+> Signed-off-by: David Sterba <dsterba@suse.com>
+> ---
+>  common/btrfs    | 11 +++++++++++
+>  common/config   |  1 +
+>  tests/btrfs/085 |  6 ++----
+>  3 files changed, 14 insertions(+), 4 deletions(-)
+> 
+> diff --git a/common/btrfs b/common/btrfs
+> index 79c687f73376..dd02a1c1589d 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -59,6 +59,17 @@ _require_btrfs_dump_super()
+>  	fi
+>  }
+>  
+> +_require_btrfs_dump_tree()
+> +{
+> +	if [ ! -x "$BTRFS_DUMP_TREE_PROG" ]; then
+> +		_require_command "$BTRFS_UTIL_PROG" btrfs
+> +		if ! $BTRFS_UTIL_PROG inspect-internal dump-tree --help >& /dev/null; then
+> +			_notrun "Missing btrfs-debug-tree or inspect-internal dump-tree"
+> +		fi
 
-Yeah, I wanted to point that out too. So always using the './new' script
-is the recommended way to write new test, it already puts all the common
-setups (including the 'tmp=/tmp/$$' definition and 'rm -f $tmp.*'
-cleanup) in the test template.
+Looks like this part could be replaced by a simple
+
+_require_btrfs_command inspect-internal dump-tree
+
+And _require_btrfs_dump_super() could also take use of the same
+_require_btrfs_command rule.
 
 Thanks,
 Eryu
+
+> +		BTRFS_DUMP_TREE_PROG="$BTRFS_UTIL_PROG inspect-internal dump-tree"
+> +	fi
+> +}
+> +
+>  _run_btrfs_util_prog()
+>  {
+>  	run_check $BTRFS_UTIL_PROG $*
+> diff --git a/common/config b/common/config
+> index cc3180694e26..d121af4ee254 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -233,6 +233,7 @@ case "$HOSTOS" in
+>          export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
+>          export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
+>          export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
+> +        export BTRFS_DUMP_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+>  	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
+>          export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
+>          export MKFS_NFS_PROG="false"
+> diff --git a/tests/btrfs/085 b/tests/btrfs/085
+> index 804899724cba..d81bef76b471 100755
+> --- a/tests/btrfs/085
+> +++ b/tests/btrfs/085
+> @@ -55,16 +55,14 @@ _supported_fs btrfs
+>  _supported_os Linux
+>  _require_scratch
+>  _require_dm_target flakey
+> -
+> -BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
+> -_require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
+> +_require_btrfs_dump_tree
+>  
+>  rm -f $seqres.full
+>  
+>  has_orphan_item()
+>  {
+>  	INO=$1
+> -	if $BTRFS_DEBUG_TREE_PROG $SCRATCH_DEV | \
+> +	if $BTRFS_DUMP_TREE_PROG $SCRATCH_DEV | \
+>  		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
+>  		return 0
+>  	fi
+> -- 
+> 2.16.2
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
