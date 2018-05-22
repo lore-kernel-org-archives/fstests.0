@@ -1,117 +1,115 @@
-Received: from mail-pl0-f68.google.com ([209.85.160.68]:38533 "EHLO
-        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751601AbeEVCge (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 22:36:34 -0400
-Received: by mail-pl0-f68.google.com with SMTP id c11-v6so9940550plr.5
-        for <fstests@vger.kernel.org>; Mon, 21 May 2018 19:36:34 -0700 (PDT)
-Date: Tue, 22 May 2018 10:36:29 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] cifs: Add README.cifs
-Message-ID: <20180522023629.GP29080@desktop.hz.ali.com>
-References: <20180521225247.17811-1-lsahlber@redhat.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:31532 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751601AbeEVCst (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 21 May 2018 22:48:49 -0400
+Message-ID: <5B03850B.4070104@cn.fujitsu.com>
+Date: Tue, 22 May 2018 10:48:43 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180521225247.17811-1-lsahlber@redhat.com>
+Subject: Re: [PATCH] generic/484: Need another process to check record locks
+References: <1526881320-10983-1-git-send-email-yangx.jy@cn.fujitsu.com> <20180522023607.erii7fuiblwczmzz@XZHOUW.usersys.redhat.com>
+In-Reply-To: <20180522023607.erii7fuiblwczmzz@XZHOUW.usersys.redhat.com>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Steve French <smfrench@gmail.com>
+To: Xiong Murphy Zhou <xzhou@redhat.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, jlayton@poochiereds.net
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 22, 2018 at 08:52:47AM +1000, Ronnie Sahlberg wrote:
-> This is a patch to provide quickstart instructions for how to use xfstest
-> for CIFS.
-> 
-> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
-> ---
->  README.cifs | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 61 insertions(+)
->  create mode 100644 README.cifs
-> 
-> diff --git a/README.cifs b/README.cifs
-> new file mode 100644
-> index 00000000..92efd24d
-> --- /dev/null
-> +++ b/README.cifs
-> @@ -0,0 +1,61 @@
-> +This describes how to get up and running using xfstests for the CIFS filesystem.
-> +
-> +There are additional information on testing cifs with xfstest on the samba
-> +wiki : https://wiki.samba.org/index.php/Xfstesting-cifs
+On 2018/05/22 10:36, Xiong Murphy Zhou wrote:
+> On Mon, May 21, 2018 at 01:42:00PM +0800, Xiao Yang wrote:
+>> 1) According to fcntl(2) manpage, A single process always gets F_UNLCK in
+>>     the l_type field when using fcntl(F_GETLK) to acquire the existing lock
+>>     set by itself because it could convert the existing lock to a new lock
+>>     unconditionally.  So we need another process to check if the lock exists.
+> I used to do that, eventaully I deleted it because we don't need
+> to check in another process in this case.
+Hi Xiong,
 
-Thanks for the documentation! But I think we could simply add a pointer
-to above wiki link in the "Running tests" section in README file, as the
-wiki page contains all the specific information for running fstests on
-CIFS (especially the config template link, the excluded test lists),
-which, IMHO, should be maintained on the wiki not fstests.
+Even if the fix patch[1] has been applied, you always gets F_UNLCK without another process.
 
-> +
-> +
-> +
-> +Quick Setup
-> +===========
-> +
-> +local.config
-> +------------
-> +Xfstests needs two cifs shares. One normal share and one scratch share.
-> +The data on the scratch share will be destroyed so set this up as a dedicate
-> +share on your server and do not store anything important in it.
-> +
-> +The first thing we need is to set up some stanzas for different smb dialects.
-> +These dialects can then be selected using the -s command line option making
-> +it a convenient way to pick a specific version of smb to test.
-> +
-> +Download the example configuration and name it local.config:
-> +
-> +  wget https://wiki.samba.org/images/9/99/Xfstests.local.config.txt \
-> +      -O local.config
-> +
-> +Update local.config and change SERVER, SHARE, SCRATCH, USERNAME, PASSWORD to
-> +match your shares.
-> +
-> +Create the /mnt/test and /mnt/share mountpoints.
-> +
-> +
-> +Exclusion files
-> +---------------
-> +Some tests do not yet work for SMB and some tests take very long so we may want
-> +to skip them. In CIFS we do this using exclusion files.
-> +
-> +Download the exclusion files for smb3 and for very slow tests:
-> +
-> +  wget https://wiki.samba.org/images/9/99/Xfstests.exclude.very-slow.txt \
+According to fcntl(2) manpage:
+F_GETLK
+	On  input  to this call, lock describes a lock we would like to place on the file.
+	If the lock could be placed, fcntl() does not actually place it, but returns F_UNLCK
+	in the l_type field of lock and leaves the other fields of the structure unchanged.
 
-BTW, this link gives me a 404 error, so the same link in the wiki page.
+A single process can always place a new lock on the file and return F_UNLCK because the existing
+lock is set by itself.
+
+[1] https://www.spinics.net/lists/linux-fsdevel/msg123144.html
 
 Thanks,
-Eryu
+Xiao Yang
 
-> +      -O tests/cifs/exclude.very-slow
-> +  wget https://wiki.samba.org/images/d/d9/Xfstests.exclude.known-broken-smb3.txt
-> +      -O tests/cifs/exclude.known-broken-smb3
-> +
-> +
-> +Running full set of tests
-> +=========================
-> +With some luck you should be ready to run your first xfstest now.
-> +
-> +When runnig the "full" set of tests there are multiple tests that are
-> +known to fail. Reasons can be that they just don't map well to cifs,
-> +we are missing features in cifs or there are bugs that needs to be fixed.
-> +
-> +For regression testing is useful to run all the tests that are known to work.
-> +We can acheive this per protocol version using exclude files and filter
-> +out the known broken tests.
-> +
-> +SMB3
-> +----
-> +
-> +    sudo ./check -s smb3 -E tests/cifs/exclude.known-broken-smb3 \
-> +        -E tests/cifs/exclude.very-slow
-> -- 
-> 2.13.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks,
+> Xiong
+>
+>> 2) Remove redundant exit(0).
+>>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   src/t_locks_execve.c | 24 ++++++++++++++++++------
+>>   1 file changed, 18 insertions(+), 6 deletions(-)
+>>
+>> diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
+>> index 9ad2dc3..d99d7de 100644
+>> --- a/src/t_locks_execve.c
+>> +++ b/src/t_locks_execve.c
+>> @@ -8,6 +8,7 @@
+>>   #include<errno.h>
+>>   #include<pthread.h>
+>>   #include<unistd.h>
+>> +#include<sys/types.h>
+>>   #include<sys/wait.h>
+>>
+>>   static void err_exit(char *op, int errn)
+>> @@ -32,12 +33,24 @@ struct flock fl = {
+>>
+>>   static void checklock(int fd)
+>>   {
+>> -	if (fcntl(fd, F_GETLK,&fl)<  0)
+>> -		err_exit("getlk", errno);
+>> -	if (fl.l_type == F_UNLCK) {
+>> -		printf("record lock is not preserved across execve(2)\n");
+>> -		exit(1);
+>> +	pid_t pid;
+>> +
+>> +	pid = fork();
+>> +	if (pid<  0)
+>> +		err_exit("fork", errno);
+>> +
+>> +	if (!pid) {
+>> +		if (fcntl(fd, F_GETLK,&fl)<  0)
+>> +			err_exit("getlk", errno);
+>> +		if (fl.l_type == F_UNLCK) {
+>> +			printf("record lock is not preserved across execve(2)\n");
+>> +			exit(1);
+>> +		}
+>> +		exit(0);
+>>   	}
+>> +
+>> +	waitpid(pid, NULL, 0);
+>> +
+>>   	exit(0);
+>>   }
+>>
+>> @@ -52,7 +65,6 @@ int main(int argc, char **argv)
+>>   	if (argc == 3) {
+>>   		fd = atoi(argv[2]);
+>>   		checklock(fd);
+>> -		exit(0);
+>>   	}
+>>
+>>   	fd = open(argv[1], O_WRONLY|O_CREAT, 0755);
+>> -- 
+>> 1.8.3.1
+>>
+>>
+>>
+>
+> .
+>
+
+
+
