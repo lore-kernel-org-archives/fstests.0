@@ -1,13 +1,13 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:46329 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753477AbeEVXeP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 19:34:15 -0400
-Received: by mail-pg0-f65.google.com with SMTP id a3-v6so3597117pgt.13
-        for <fstests@vger.kernel.org>; Tue, 22 May 2018 16:34:15 -0700 (PDT)
+Received: from mail-pf0-f174.google.com ([209.85.192.174]:37726 "EHLO
+        mail-pf0-f174.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753490AbeEVXeR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 19:34:17 -0400
+Received: by mail-pf0-f174.google.com with SMTP id e9-v6so9520683pfi.4
+        for <fstests@vger.kernel.org>; Tue, 22 May 2018 16:34:16 -0700 (PDT)
 From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v3 2/5] generic: enable swapfile tests on Btrfs
-Date: Tue, 22 May 2018 16:33:57 -0700
-Message-Id: <b689e90c648a2d4694f18307c5f4e2b506b63d92.1527031843.git.osandov@fb.com>
+Subject: [PATCH v3 3/5] generic: add test for dedupe on an active swapfile
+Date: Tue, 22 May 2018 16:33:58 -0700
+Message-Id: <0f7d8ca0b6f63711eccc51bd2a5aab1aa448e3f6.1527031843.git.osandov@fb.com>
 In-Reply-To: <cover.1527031843.git.osandov@fb.com>
 References: <cover.1527031843.git.osandov@fb.com>
 In-Reply-To: <cover.1527031843.git.osandov@fb.com>
@@ -19,98 +19,122 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Omar Sandoval <osandov@fb.com>
 
-Commit 8c96cfbfe530 ("generic/35[67]: disable swapfile tests on Btrfs")
-disabled the swapfile tests on Btrfs because it did not support
-swapfiles at the time. Now that we're adding support, we want these
-tests to run, but they don't. _require_scratch_swapfile always fails for
-Btrfs because swapfiles on Btrfs must be set to nocow. After fixing
-that, generic/356 and generic/357 fail for the same reason. After fixing
-_that_, both tests still fail because we don't allow reflinking a
-non-checksummed extent (which nocow implies) to a checksummed extent.
-Add a helper for formatting a swap file which does the chattr, and
-chattr the second file, which gets these tests running on kernels
-supporting Btrfs swapfiles.
+Similar to the reflink test generic/356, but makes sure we can't dedupe
+an active swapfile.
 
 Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
- common/rc         | 17 ++++++++++++++---
- tests/generic/356 |  7 ++++---
- tests/generic/357 |  6 +++---
- 3 files changed, 21 insertions(+), 9 deletions(-)
+ tests/generic/492     | 76 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/492.out |  7 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 84 insertions(+)
+ create mode 100755 tests/generic/492
+ create mode 100644 tests/generic/492.out
 
-diff --git a/common/rc b/common/rc
-index ffe53236..0ef3d3fe 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2222,6 +2222,19 @@ _require_odirect()
- 	rm -f $testfile 2>&1 > /dev/null
- }
- 
-+_format_swapfile() {
-+	local fname="$1"
-+	local sz="$2"
+diff --git a/tests/generic/492 b/tests/generic/492
+new file mode 100755
+index 00000000..54a2553d
+--- /dev/null
++++ b/tests/generic/492
+@@ -0,0 +1,76 @@
++#! /bin/bash
++# FS QA Test 492
++#
++# Check that we can't dedupe a swapfile.
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Facebook.  All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
 +
-+	rm -f "$fname"
-+	touch "$fname"
-+	chmod 0600 "$fname"
-+	# Swap files must be nocow on Btrfs.
-+	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
-+	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
-+	mkswap "$fname" >> $seqres.full
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
 +}
 +
- # Check that the filesystem supports swapfiles
- _require_scratch_swapfile()
- {
-@@ -2231,10 +2244,8 @@ _require_scratch_swapfile()
- 	_scratch_mount
- 
- 	# Minimum size for mkswap is 10 pages
--	local size=$(($(get_page_size) * 10))
-+	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
- 
--	_pwrite_byte 0x61 0 "$size" "$SCRATCH_MNT/swap" >/dev/null 2>&1
--	mkswap "$SCRATCH_MNT/swap" >/dev/null 2>&1
- 	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
- 		_scratch_unmount
- 		_notrun "swapfiles are not supported"
-diff --git a/tests/generic/356 b/tests/generic/356
-index 51eeb652..b4a38f84 100755
---- a/tests/generic/356
-+++ b/tests/generic/356
-@@ -59,11 +59,12 @@ blocks=160
- blksz=65536
- 
- echo "Initialize file"
--echo >> $seqres.full
--_pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
--mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch_swapfile
++_require_scratch_dedupe
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir="$SCRATCH_MNT/test-$seq"
++mkdir "$testdir"
++
++blocks=160
++blksz=65536
++
++echo "Initialize file"
 +_format_swapfile "$testdir/file1" $((blocks * blksz))
- swapon $testdir/file1
- 
++swapon "$testdir/file1"
++
 +touch "$testdir/file2"
 +$CHATTR_PROG +C "$testdir/file2" >/dev/null 2>&1
 +
- echo "Try to reflink"
- _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
- 
-diff --git a/tests/generic/357 b/tests/generic/357
-index 0dd0c10f..9a83a283 100755
---- a/tests/generic/357
-+++ b/tests/generic/357
-@@ -59,9 +59,9 @@ blocks=160
- blksz=65536
- 
- echo "Initialize file"
--echo >> $seqres.full
--_pwrite_byte 0x61 0 $((blocks * blksz)) $testdir/file1 >> $seqres.full
--mkswap -U 27376b42-ff65-42ca-919f-6c9b62292a5c $testdir/file1 >> $seqres.full
-+_format_swapfile "$testdir/file1" $((blocks * blksz))
-+touch "$testdir/file2"
-+$CHATTR_PROG +C "$testdir/file2" >/dev/null 2>&1
- _cp_reflink $testdir/file1 $testdir/file2 2>&1 | _filter_scratch
- 
- echo "Try to swapon"
++echo "Try to dedupe"
++cp "$testdir/file1" "$testdir/file2"
++_dedupe_range "$testdir/file1" 0 "$testdir/file2" 0 $((blocks * blksz))
++_dedupe_range "$testdir/file2" 0 "$testdir/file1" 0 $((blocks * blksz))
++
++echo "Tear it down"
++swapoff "$testdir/file1"
++
++status=0
++exit
+diff --git a/tests/generic/492.out b/tests/generic/492.out
+new file mode 100644
+index 00000000..e1f3cc69
+--- /dev/null
++++ b/tests/generic/492.out
+@@ -0,0 +1,7 @@
++QA output created by 492
++Format and mount
++Initialize file
++Try to dedupe
++XFS_IOC_FILE_EXTENT_SAME: Text file busy
++XFS_IOC_FILE_EXTENT_SAME: Text file busy
++Tear it down
+diff --git a/tests/generic/group b/tests/generic/group
+index 111e42e7..dc5adf04 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -494,3 +494,4 @@
+ 489 auto quick attr
+ 490 auto quick rw
+ 491 auto quick freeze mount
++492 auto quick swap
 -- 
 2.17.0
 
