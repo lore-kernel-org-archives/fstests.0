@@ -1,76 +1,60 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:26045 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753253AbeEVWOJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 18:14:09 -0400
-Date: Wed, 23 May 2018 08:14:07 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v3] check: Make the test harness unmount fs when
- finishing a test
-Message-ID: <20180522221407.GX10363@dastard>
-References: <1526969013-16134-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <1526982599-8914-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1526982599-8914-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:38922 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753251AbeEVXeN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 19:34:13 -0400
+Received: by mail-pg0-f67.google.com with SMTP id e1-v6so8534600pga.6
+        for <fstests@vger.kernel.org>; Tue, 22 May 2018 16:34:13 -0700 (PDT)
+From: Omar Sandoval <osandov@osandov.com>
+Subject: [PATCH v3 0/5] xfstests: generic swap file tests
+Date: Tue, 22 May 2018 16:33:55 -0700
+Message-Id: <cover.1527031843.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com
+To: fstests@vger.kernel.org
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 22, 2018 at 05:49:59PM +0800, Xiao Yang wrote:
-> Finishing xfs/132 left a shutdown scratch fs and the test harness didn't
-> unmount the fs(because we told it not to check the fs) so the test harness
-> called by subsequent xfs/133 tried to "test -d $SCRATCH_MNT" and received
-> the IO error from the dead fs.
-> 
-> i.e. Running xfs/132 and xfs/133 together got the following error:
-> ------------------------------------------------------------
-> ...
-> xfs/132 1s ... 1s
-> xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
-> ...
-> QA output created by 133
-> -Format and mount
-> -Corrupt filesystem
-> -Remount, try to append
-> -Write did not succeed (ok).
-> +SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
-> +Already mounted result:
-> +/dev/sda11 /mnt/xfstests/scratch
-> ...
-> ------------------------------------------------------------
-> 
-> Even if we don't check fs, the test harness is supposed to unmount fs and
-> return an initial state before running the next test.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  check | 4 ++++
->  1 file changed, 4 insertions(+)
-> 
-> diff --git a/check b/check
-> index 96198ac..f6fb352 100755
-> --- a/check
-> +++ b/check
-> @@ -489,10 +489,14 @@ _check_filesystems()
->  	if [ -f ${RESULT_DIR}/require_test ]; then
->  		_check_test_fs || err=true
->  		rm -f ${RESULT_DIR}/require_test*
-> +	else
-> +		_test_unmount 2> /dev/null
->  	fi
->  	if [ -f ${RESULT_DIR}/require_scratch ]; then
->  		_check_scratch_fs || err=true
->  		rm -f ${RESULT_DIR}/require_scratch*
-> +	else
-> +		_scratch_unmount 2> /dev/null
->  	fi
->  }
+From: Omar Sandoval <osandov@fb.com>
 
-Looks good! Thanks for fixing this up, Xiao.
+Changes since v2:
 
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
+- Remove file before formatting in _format_swapfile
+- Comment on chattr in _format_swapfile
+- Remove unnecessary label
+- Fix typo in commit message of patch 3
+- Redirect chattr +C output in patch 5 to fix XFS failures
+
+Omar Sandoval (5):
+  xfstests: create swap group
+  generic: enable swapfile tests on Btrfs
+  generic: add test for dedupe on an active swapfile
+  generic: add test for truncate/fpunch of an active swapfile
+  generic: test invalid swap file activation
+
+ .gitignore            |  2 ++
+ common/rc             | 17 +++++++--
+ src/Makefile          |  2 +-
+ src/mkswap.c          | 83 +++++++++++++++++++++++++++++++++++++++++++
+ src/swapon.c          | 24 +++++++++++++
+ tests/generic/356     |  7 ++--
+ tests/generic/357     |  6 ++--
+ tests/generic/492     | 76 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/492.out |  7 ++++
+ tests/generic/493     | 73 +++++++++++++++++++++++++++++++++++++
+ tests/generic/493.out |  8 +++++
+ tests/generic/494     | 77 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/494.out |  5 +++
+ tests/generic/group   |  7 ++--
+ tests/xfs/group       |  2 +-
+ 15 files changed, 383 insertions(+), 13 deletions(-)
+ create mode 100644 src/mkswap.c
+ create mode 100644 src/swapon.c
+ create mode 100755 tests/generic/492
+ create mode 100644 tests/generic/492.out
+ create mode 100755 tests/generic/493
+ create mode 100644 tests/generic/493.out
+ create mode 100755 tests/generic/494
+ create mode 100644 tests/generic/494.out
+
 -- 
-Dave Chinner
-david@fromorbit.com
+2.17.0
+
