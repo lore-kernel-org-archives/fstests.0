@@ -1,94 +1,107 @@
-Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:53538 "EHLO
-        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751419AbeEVFOV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 01:14:21 -0400
-Date: Tue, 22 May 2018 15:12:10 +1000
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:27345 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751060AbeEVFTU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 01:19:20 -0400
+Date: Tue, 22 May 2018 15:19:16 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] cifs: Add README.cifs
-Message-ID: <20180522051210.GS10363@dastard>
-References: <20180521225247.17811-1-lsahlber@redhat.com>
+Subject: Re: [PATCH] xfs/132: umount scratch device after finishing test
+Message-ID: <20180522051916.GT10363@dastard>
+References: <1526704344-19615-1-git-send-email-yangx.jy@cn.fujitsu.com>
+ <20180521023631.GN10363@dastard>
+ <5B027930.4050203@cn.fujitsu.com>
+ <20180521224641.GR23861@dastard>
+ <5B039746.1000309@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180521225247.17811-1-lsahlber@redhat.com>
+In-Reply-To: <5B039746.1000309@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Steve French <smfrench@gmail.com>
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 22, 2018 at 08:52:47AM +1000, Ronnie Sahlberg wrote:
-> This is a patch to provide quickstart instructions for how to use xfstest
-> for CIFS.
+On Tue, May 22, 2018 at 12:06:30PM +0800, Xiao Yang wrote:
+> On 2018/05/22 6:46, Dave Chinner wrote:
+> >On Mon, May 21, 2018 at 03:45:52PM +0800, Xiao Yang wrote:
+> >>On 2018/05/21 10:36, Dave Chinner wrote:
+> >>>On Sat, May 19, 2018 at 12:32:24PM +0800, Xiao Yang wrote:
+> >>>>xfs/132 and xfs/133 running together got the following error:
+> >>>>------------------------------------------------------------
+> >>>>...
+> >>>>xfs/132 1s ... 1s
+> >>>>xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
+> >>>>...
+> >>>>QA output created by 133
+> >>>>-Format and mount
+> >>>>-Corrupt filesystem
+> >>>>-Remount, try to append
+> >>>>-Write did not succeed (ok).
+> >>>>+SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
+> >>>>+Already mounted result:
+> >>>>+/dev/sda11 /mnt/xfstests/scratch
+> >>>>...
+> >>>>------------------------------------------------------------
+> >>>>
+> >>>>xfs/132 led to XFS shutdown due to the corrupted inode, but it didn't rectify XFS
+> >>>>by umount scratch device.
+> >>>AFAIK, we don't have to unmount the scratch device when a test
+> >>>finishes - the test harness is supposed to do that and make sure
+> >>>that it is in the correct state for the next test to run.
+> >>>
+> >>>It seems that somewhere along the line this got broken. - I'm
+> >>>guessing the fact that this test also says "don't check the scratch
+> >>>device" the test harness is failing to unmount it because it's not
+> >>>running _check_scratch_device. I'm guessing that it should at least
+> >>>run _scratch_unmount....
+> >>Hi Dave,
+> >>
+> >>Could we just make the test harness call _scratch_unmount after running every test, as below:
+> >>--------------------------------------------------------------
+> >>diff --git a/check b/check
+> >>index 96198ac..63ece67 100755
+> >>--- a/check
+> >>+++ b/check
+> >>@@ -815,6 +815,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> >>                 _make_testcase_report "$tc_status"
+> >>             fi
+> >>             seq="after_$seqnum"
+> >>+           _scratch_unmount 2>   /dev/null
+> >>         done
+> >>         sect_stop=`_wallclock`
+> >>         interrupt=false
+> >Sort of. The problem is in _check_filesystem, though, where it does
+> >nothing when _require_scratch_nocheck() is used. It needs to cycle
+> >the mount in this case, and then the main loop doesn't need to be
+> >touched...
+> Hi Dave,
 > 
-> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
-> ---
->  README.cifs | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 61 insertions(+)
->  create mode 100644 README.cifs
-> 
-> diff --git a/README.cifs b/README.cifs
-> new file mode 100644
-> index 00000000..92efd24d
-> --- /dev/null
-> +++ b/README.cifs
-> @@ -0,0 +1,61 @@
-> +This describes how to get up and running using xfstests for the CIFS filesystem.
-> +
-> +There are additional information on testing cifs with xfstest on the samba
-> +wiki : https://wiki.samba.org/index.php/Xfstesting-cifs
-> +
-> +
-> +
-> +Quick Setup
-> +===========
-> +
-> +local.config
-> +------------
-> +Xfstests needs two cifs shares. One normal share and one scratch share.
-> +The data on the scratch share will be destroyed so set this up as a dedicate
-> +share on your server and do not store anything important in it.
-> +
-> +The first thing we need is to set up some stanzas for different smb dialects.
-> +These dialects can then be selected using the -s command line option making
-> +it a convenient way to pick a specific version of smb to test.
-> +
-> +Download the example configuration and name it local.config:
-> +
-> +  wget https://wiki.samba.org/images/9/99/Xfstests.local.config.txt \
-> +      -O local.config
+> What about cycling the mount when _require_scratch_nocheck() or _notrun is called?
+> --------------------------------------------------------------------
+> diff --git a/check b/check
+> index 96198ac..ea94524 100755
+> --- a/check
+> +++ b/check
+> @@ -489,10 +489,14 @@ _check_filesystems()
+>         if [ -f ${RESULT_DIR}/require_test ]; then
+>                 _check_test_fs || err=true
+>                 rm -f ${RESULT_DIR}/require_test*
+> +       else
+> +               _test_cycle_mount
+>         fi
+>         if [ -f ${RESULT_DIR}/require_scratch ]; then
+>                 _check_scratch_fs || err=true
+>                 rm -f ${RESULT_DIR}/require_scratch*
+> +       else
+> +               _scratch_cycle_mount
+>         fi
+>  }
+> --------------------------------------------------------------------
 
-We actually have example config files in configs/ already. So
-why not just add a "example.cifs.config" file in there?
-
-
-> +Update local.config and change SERVER, SHARE, SCRATCH, USERNAME, PASSWORD to
-> +match your shares.
-> +
-> +Create the /mnt/test and /mnt/share mountpoints.
-> +
-> +
-> +Exclusion files
-> +---------------
-> +Some tests do not yet work for SMB and some tests take very long so we may want
-> +to skip them. In CIFS we do this using exclusion files.
-> +
-> +Download the exclusion files for smb3 and for very slow tests:
-> +
-> +  wget https://wiki.samba.org/images/9/99/Xfstests.exclude.very-slow.txt \
-> +      -O tests/cifs/exclude.very-slow
-> +  wget https://wiki.samba.org/images/d/d9/Xfstests.exclude.known-broken-smb3.txt
-> +      -O tests/cifs/exclude.known-broken-smb3
-
-I'd prefer we don't deep link to files like this - it's too easy for
-them to get broken (e.g. by a wiki upgrade and re-org). Can you
-refer to obtaining them from the "Using xfstests with CIFS" page
-linked above instead?
-
-Also, it would be better to refer to tests that are not compatible
-with CIFS to call them "incompatible" instead of "broken". Broken
-implies there's something wrong with the tests, and that's not the
-case here. The first impression of "oh, there's lots of broken
-tests in xfstests" is not correct, nor is it a good one.
+I would just unmount them. _require_test will mount the test device
+if it's unmounted, and _require_scratch unmounts it if it is
+mounted. Hence there is no real need to mount it again here,
+especially as trying to mount a corrupt scratch device can throw
+errors...
 
 Cheers,
 
