@@ -1,125 +1,100 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:35362 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1751343AbeEVN5a (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 22 May 2018 09:57:30 -0400
-Date: Tue, 22 May 2018 21:57:28 +0800
-From: Xiong Murphy Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH] generic/484: Need another process to check record locks
-Message-ID: <20180522135728.ht76pvembgm4q72g@XZHOUW.usersys.redhat.com>
-References: <1526881320-10983-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20180522023607.erii7fuiblwczmzz@XZHOUW.usersys.redhat.com>
- <5B03850B.4070104@cn.fujitsu.com>
+Received: from aserp2120.oracle.com ([141.146.126.78]:50362 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751196AbeEVOil (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 10:38:41 -0400
+Date: Tue, 22 May 2018 07:37:59 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2] fs: clear writeback errors in inode_init_always
+Message-ID: <20180522143759.GK4910@magnolia>
+References: <20180518225037.GA26206@thunk.org>
+ <630faadb74f608aa5a42649b81657e8b62d46bc3.camel@kernel.org>
+ <20180519152700.GB4507@magnolia>
+ <20180522040631.GD14384@magnolia>
+ <20180522121400.GB3751@bfoster.bfoster>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5B03850B.4070104@cn.fujitsu.com>
+In-Reply-To: <20180522121400.GB3751@bfoster.bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: Xiong Murphy Zhou <xzhou@redhat.com>, fstests@vger.kernel.org, guaneryu@gmail.com, jlayton@poochiereds.net
+To: Brian Foster <bfoster@redhat.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, Matthew Wilcox <willy@infradead.org>, linux-fsdevel@vger.kernel.org, fstests@vger.kernel.org, Jeff Layton <jlayton@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 22, 2018 at 10:48:43AM +0800, Xiao Yang wrote:
-> On 2018/05/22 10:36, Xiong Murphy Zhou wrote:
-> > On Mon, May 21, 2018 at 01:42:00PM +0800, Xiao Yang wrote:
-> > > 1) According to fcntl(2) manpage, A single process always gets F_UNLCK in
-> > >     the l_type field when using fcntl(F_GETLK) to acquire the existing lock
-> > >     set by itself because it could convert the existing lock to a new lock
-> > >     unconditionally.  So we need another process to check if the lock exists.
-> > I used to do that, eventaully I deleted it because we don't need
-> > to check in another process in this case.
-> Hi Xiong,
-> 
-> Even if the fix patch[1] has been applied, you always gets F_UNLCK without another process.
-> 
-> According to fcntl(2) manpage:
-> F_GETLK
-> 	On  input  to this call, lock describes a lock we would like to place on the file.
-> 	If the lock could be placed, fcntl() does not actually place it, but returns F_UNLCK
-> 	in the l_type field of lock and leaves the other fields of the structure unchanged.
-> 
-> A single process can always place a new lock on the file and return F_UNLCK because the existing
-> lock is set by itself.
-
-You are right. My bad. It was included in my initial post.
-
-Ack for the patch.
-
-Xiong
-
-> 
-> [1] https://www.spinics.net/lists/linux-fsdevel/msg123144.html
-> 
-> Thanks,
-> Xiao Yang
-> 
-> > Thanks,
-> > Xiong
+On Tue, May 22, 2018 at 08:14:01AM -0400, Brian Foster wrote:
+> On Mon, May 21, 2018 at 09:06:31PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
 > > 
-> > > 2) Remove redundant exit(0).
-> > > 
-> > > Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
-> > > ---
-> > >   src/t_locks_execve.c | 24 ++++++++++++++++++------
-> > >   1 file changed, 18 insertions(+), 6 deletions(-)
-> > > 
-> > > diff --git a/src/t_locks_execve.c b/src/t_locks_execve.c
-> > > index 9ad2dc3..d99d7de 100644
-> > > --- a/src/t_locks_execve.c
-> > > +++ b/src/t_locks_execve.c
-> > > @@ -8,6 +8,7 @@
-> > >   #include<errno.h>
-> > >   #include<pthread.h>
-> > >   #include<unistd.h>
-> > > +#include<sys/types.h>
-> > >   #include<sys/wait.h>
-> > > 
-> > >   static void err_exit(char *op, int errn)
-> > > @@ -32,12 +33,24 @@ struct flock fl = {
-> > > 
-> > >   static void checklock(int fd)
-> > >   {
-> > > -	if (fcntl(fd, F_GETLK,&fl)<  0)
-> > > -		err_exit("getlk", errno);
-> > > -	if (fl.l_type == F_UNLCK) {
-> > > -		printf("record lock is not preserved across execve(2)\n");
-> > > -		exit(1);
-> > > +	pid_t pid;
-> > > +
-> > > +	pid = fork();
-> > > +	if (pid<  0)
-> > > +		err_exit("fork", errno);
-> > > +
-> > > +	if (!pid) {
-> > > +		if (fcntl(fd, F_GETLK,&fl)<  0)
-> > > +			err_exit("getlk", errno);
-> > > +		if (fl.l_type == F_UNLCK) {
-> > > +			printf("record lock is not preserved across execve(2)\n");
-> > > +			exit(1);
-> > > +		}
-> > > +		exit(0);
-> > >   	}
-> > > +
-> > > +	waitpid(pid, NULL, 0);
-> > > +
-> > >   	exit(0);
-> > >   }
-> > > 
-> > > @@ -52,7 +65,6 @@ int main(int argc, char **argv)
-> > >   	if (argc == 3) {
-> > >   		fd = atoi(argv[2]);
-> > >   		checklock(fd);
-> > > -		exit(0);
-> > >   	}
-> > > 
-> > >   	fd = open(argv[1], O_WRONLY|O_CREAT, 0755);
-> > > -- 
-> > > 1.8.3.1
-> > > 
-> > > 
-> > > 
+> > In inode_init_always(), we clear the inode mapping flags, which clears
+> > any retained error (AS_EIO, AS_ENOSPC) bits.  Unfortunately, we do not
+> > also clear wb_err, which means that old mapping errors can leak through
+> > to new inodes.
 > > 
-> > .
+> > This is crucial for the XFS inode allocation path because we recycle old
+> > in-core inodes and we do not want error state from an old file to leak
+> > into the new file.  This bug was discovered by running generic/036 and
+> > generic/047 in a loop and noticing that the EIOs generated by the
+> > collision of direct and buffered writes in generic/036 would survive the
+> > remount between 036 and 047, and get reported to the fsyncs (on
+> > different files!) in generic/047.
 > > 
+> > Since we're changing the semantics of inode_init_always, we must also
+> > change xfs_reinit_inode to retain the writeback error state when we go
+> > to recover an inode that has been torn down in the vfs but not yet
+> > disposed of by XFS.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> > v2: retain AS_EIO/AS_ENOSPC across xfs inode reinit
+> > ---
+> >  fs/inode.c          |    1 +
+> >  fs/xfs/xfs_icache.c |    9 +++++++++
+> >  2 files changed, 10 insertions(+)
+> > 
+> ...
+> > diff --git a/fs/xfs/xfs_icache.c b/fs/xfs/xfs_icache.c
+> > index 164350d91efc..d01f9544ff01 100644
+> > --- a/fs/xfs/xfs_icache.c
+> > +++ b/fs/xfs/xfs_icache.c
+> > @@ -298,6 +298,10 @@ xfs_reinit_inode(
+> >  	uint64_t	version = inode_peek_iversion(inode);
+> >  	umode_t		mode = inode->i_mode;
+> >  	dev_t		dev = inode->i_rdev;
+> > +	errseq_t	old_err = inode->i_mapping->wb_err;
+> > +	bool		as_eio = test_bit(AS_EIO, &inode->i_mapping->flags);
+> > +	bool		as_enospc = test_bit(AS_ENOSPC,
+> > +					     &inode->i_mapping->flags);
+> >  
+> >  	error = inode_init_always(mp->m_super, inode);
+> >  
+> > @@ -306,6 +310,11 @@ xfs_reinit_inode(
+> >  	inode_set_iversion_queried(inode, version);
+> >  	inode->i_mode = mode;
+> >  	inode->i_rdev = dev;
+> > +	inode->i_mapping->wb_err = old_err;
+> > +	if (as_eio)
+> > +		set_bit(AS_EIO, &inode->i_mapping->flags);
+> > +	if (as_enospc)
+> > +		set_bit(AS_ENOSPC, &inode->i_mapping->flags);
 > 
+> I'm wondering how safe this is. Can't the associated on-disk inode have
+> been unlinked and reallocated anew across this kind of reinit of the
+> in-core ip?
+
+Oops, yeah, xfs_ialloc ought to clear those error states unconditionally
+when allocating a new on-disk inode.
+
+--D
+
+> Brian
 > 
-> 
+> >  	return error;
+> >  }
+> >  
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
