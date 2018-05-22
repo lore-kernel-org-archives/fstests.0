@@ -1,74 +1,80 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:64210 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751575AbeEVIA4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 04:00:56 -0400
-Date: Tue, 22 May 2018 18:00:36 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] check: fail tests if check/dmesg are not clean
-Message-ID: <20180522080035.GU10363@dastard>
-References: <20180506224634.1425-1-david@fromorbit.com>
- <20180512125108.GS8373@desktop>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:42293 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1751160AbeEVJ5b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 05:57:31 -0400
+Message-ID: <5B03E985.2070501@cn.fujitsu.com>
+Date: Tue, 22 May 2018 17:57:25 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180512125108.GS8373@desktop>
+Subject: Re: [PATCH v2] check: Make the test harness unmount fs when finishing
+ a test
+References: <20180522051916.GT10363@dastard> <1526969013-16134-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <1526969013-16134-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: david@fromorbit.com, fstests@vger.kernel.org, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, May 12, 2018 at 08:51:08PM +0800, Eryu Guan wrote:
-> On Mon, May 07, 2018 at 08:46:34AM +1000, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Currently a test passes even if it leaves a corrupt filesystem
-> > behind, or a splat in the system logs that should not be there.
-> 
-> It seems that test does fail when post-test fsck fails or dmesg check
-> reports failure, but just after the test runtime being recorded &
-> reported, which makes the test looks like a PASS.
+On 2018/05/22 14:03, Xiao Yang wrote:
+> Finishing xfs/132 left a shutdown scratch fs and the test harness didn't
+> unmount the fs(because we told it not to check the fs) so the test harness
+> called by subsequent xfs/133 tried to "test -d $SCRATCH_MNT" and received
+> the IO error from the dead fs.
+>
+> i.e. Running xfs/132 and xfs/133 together got the following error:
+> ------------------------------------------------------------
+> ...
+> xfs/132 1s ... 1s
+> xfs/133 1s ... [failed, exit status 1] - output mismatch (see /var/lib/xfstests/results//xfs/133.out.bad)
+> ...
+> QA output created by 133
+> -Format and mount
+> -Corrupt filesystem
+> -Remount, try to append
+> -Write did not succeed (ok).
+> +SCRATCH_DEV=/dev/sda11 is mounted but not on SCRATCH_MNT=common/config: - aborting
+> +Already mounted result:
+> +/dev/sda11 /mnt/xfstests/scratch
+> ...
+> ------------------------------------------------------------
+>
+> Even if we don't check fs, the test harness is supposed to unmount fs and
+> return an initial state before running the next test.
+>
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> ---
+>  check | 4 ++++
+>  1 file changed, 4 insertions(+)
+>
+> diff --git a/check b/check
+> index 96198ac..a0d5364 100755
+> --- a/check
+> +++ b/check
+> @@ -489,10 +489,14 @@ _check_filesystems()
+>  	if [ -f ${RESULT_DIR}/require_test ]; then
+>  		_check_test_fs || err=true
+>  		rm -f ${RESULT_DIR}/require_test*
+> +	else
+> +		_test_unmount
+>  	fi
+>  	if [ -f ${RESULT_DIR}/require_scratch ]; then
+>  		_check_scratch_fs || err=true
+>  		rm -f ${RESULT_DIR}/require_scratch*
+> +	else
+> +		_scratch_unmount
+Hi,
 
-Yup, that's exactly what I said - the test fails, but the reporting
-indicates the test passed before it reports failure.
+Sorry, some tests have unmounted them inside, so drop the stderr from
+umount.
+The v3 patch is coming. :-(
 
-And because these failures match the "test pass" signature, my results
-post-processing script was saying these tests passed, not had a
-"post-test failure". The post-test failure messages don't mention
-the test directly, either, so it's a bit of a wart when it comes to
-processing the output for regression test comparisons...
+Thanks,
+Xiao Yang
+>  	fi
+>  }
+>  
 
-Hence I thought I'd fix it so they didn't look like a test pass.
 
-> But the test summary
-> does report it as a failure, e.g. (I added "echo BUG: > /dev/kmsg" to
-> generic/444 manually)
 
-Right, but I don't look at those for comparing run-to-run regression
-test results - having a timestamp that is wildly different is a
-regression that needs investigation, too, even though we are only
-looking at correctness in the test harness...
-
-> generic/443 0s ... 0s
-> generic/444 0s ... 0s
-> _check_dmesg: something found in dmesg (see /root/workspace/xfstests/results//xfs_2k_crc/generic/444.dmesg)
-> generic/445 0s ... 0s
-> Ran: generic/443 generic/444 generic/445
-> Failures: generic/444
-> Failed 1 of 3 tests
-> 
-> And the return value of check is also non-zero.
-
-Yes, that is also true, but it is also not useful to tell me what
-test out of the 700+ I've just run failed.
-
-> But the whole rework looks good! Just need to reword the patch summary
-> and description?
-
-Ok.
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
