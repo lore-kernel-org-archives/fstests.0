@@ -1,137 +1,45 @@
-Received: from mail-pf0-f182.google.com ([209.85.192.182]:35897 "EHLO
-        mail-pf0-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753507AbeEVXeS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 19:34:18 -0400
-Received: by mail-pf0-f182.google.com with SMTP id w129-v6so9512575pfd.3
-        for <fstests@vger.kernel.org>; Tue, 22 May 2018 16:34:18 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH v3 4/5] generic: add test for truncate/fpunch of an active swapfile
-Date: Tue, 22 May 2018 16:33:59 -0700
-Message-Id: <e96a2f6d01ece8a59b8aa4b066cfd44eb8de1355.1527031843.git.osandov@fb.com>
-In-Reply-To: <cover.1527031843.git.osandov@fb.com>
-References: <cover.1527031843.git.osandov@fb.com>
-In-Reply-To: <cover.1527031843.git.osandov@fb.com>
-References: <cover.1527031843.git.osandov@fb.com>
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:41375 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753819AbeEWCBd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 May 2018 22:01:33 -0400
+Date: Wed, 23 May 2018 10:01:29 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] xfs: pass extra params to _scratch_mkfs_xfs_opts in
+ _scratch_mkfs_xfs
+Message-ID: <20180523020129.GT29080@desktop.hz.ali.com>
+References: <20180511030559.26502-1-guaneryu@gmail.com>
+ <20180521223252.GQ23861@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180521223252.GQ23861@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, linux-btrfs@vger.kernel.org, linux-xfs@vger.kernel.org, kernel-team@fb.com
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+On Tue, May 22, 2018 at 08:32:52AM +1000, Dave Chinner wrote:
+> On Fri, May 11, 2018 at 11:05:59AM +0800, Eryu Guan wrote:
+> > One of _scratch_mkfs_xfs_opts()'s job is to remove any metadata
+> > related mkfs options if mkfs.xfs binary doesn't support them, so
+> > that tests that pass metadata mkfs options to _scratch_mkfs, e.g.
+> > "_scratch_mkfs -m crc=0" won't break with old mkfs.xfs.
+> > 
+> > But commit 596a068bf130 ("fstests: teach _scratch_mkfs to handle
+> > mkfs option conflicts") broke this, because it didn't pass any mkfs
+> > options to _scratch_mkfs_xfs_opts(). So fix it.
+> > 
+> > Also declare a variable as 'local' and fix a typo.
+> > 
+> > Reported-by: Dave Chinner <dchinner@redhat.com>
+> > Signed-off-by: Eryu Guan <guaneryu@gmail.com>
+> 
+> Looks fine.
+> 
+> Reviewed-by: Dave Chinner <dchinner@redhat.com>
+> 
+> (sorry for missing this when you opsted it first time)
 
-These should not be allowed.
+Thanks for the review!
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
- tests/generic/493     | 73 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/493.out |  8 +++++
- tests/generic/group   |  1 +
- 3 files changed, 82 insertions(+)
- create mode 100755 tests/generic/493
- create mode 100644 tests/generic/493.out
-
-diff --git a/tests/generic/493 b/tests/generic/493
-new file mode 100755
-index 00000000..eba62dcb
---- /dev/null
-+++ b/tests/generic/493
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# FS QA Test 493
-+#
-+# Test truncation/hole punching of an active swapfile.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Facebook.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+. ./common/rc
-+. ./common/filter
-+
-+rm -f $seqres.full
-+
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_swapfile
-+_require_xfs_io_command "fpunch"
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir="$SCRATCH_MNT/test-$seq"
-+mkdir "$testdir"
-+
-+blocks=160
-+blksz=65536
-+
-+echo "Initialize file"
-+_format_swapfile "$testdir/file1" $((blocks * blksz))
-+swapon "$testdir/file1"
-+
-+echo "Try to truncate"
-+$XFS_IO_PROG -c "truncate $blksz" "$testdir/file1"
-+
-+echo "Try to punch hole"
-+$XFS_IO_PROG -c "fpunch $blksz $((2 * blksz))" "$testdir/file1"
-+
-+echo "Tear it down"
-+swapoff "$testdir/file1"
-+
-+status=0
-+exit
-diff --git a/tests/generic/493.out b/tests/generic/493.out
-new file mode 100644
-index 00000000..929a76b6
---- /dev/null
-+++ b/tests/generic/493.out
-@@ -0,0 +1,8 @@
-+QA output created by 493
-+Format and mount
-+Initialize file
-+Try to truncate
-+ftruncate: Text file busy
-+Try to punch hole
-+fallocate: Text file busy
-+Tear it down
-diff --git a/tests/generic/group b/tests/generic/group
-index dc5adf04..9778930a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -495,3 +495,4 @@
- 490 auto quick rw
- 491 auto quick freeze mount
- 492 auto quick swap
-+493 auto quick swap
--- 
-2.17.0
-
+Eryu
