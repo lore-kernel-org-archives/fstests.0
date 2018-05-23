@@ -1,60 +1,84 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:39905 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932540AbeEWKqf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 23 May 2018 06:46:35 -0400
-Date: Wed, 23 May 2018 18:46:29 +0800
+Received: from mail-pl0-f68.google.com ([209.85.160.68]:45154 "EHLO
+        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932312AbeEWKuv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 23 May 2018 06:50:51 -0400
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs: pass extra params to _scratch_mkfs_xfs_opts in
- _scratch_mkfs_xfs
-Message-ID: <20180523104629.GU29080@desktop.hz.ali.com>
-References: <20180511030559.26502-1-guaneryu@gmail.com>
- <20180521223252.GQ23861@dastard>
- <20180523020129.GT29080@desktop.hz.ali.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180523020129.GT29080@desktop.hz.ali.com>
+Subject: [PATCH v2] xfs: remove meta mkfs options correctly in _scratch_mkfs_xfs
+Date: Wed, 23 May 2018 18:50:35 +0800
+Message-Id: <20180523105035.8157-1-guaneryu@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 23, 2018 at 10:01:29AM +0800, Eryu Guan wrote:
-> On Tue, May 22, 2018 at 08:32:52AM +1000, Dave Chinner wrote:
-> > On Fri, May 11, 2018 at 11:05:59AM +0800, Eryu Guan wrote:
-> > > One of _scratch_mkfs_xfs_opts()'s job is to remove any metadata
-> > > related mkfs options if mkfs.xfs binary doesn't support them, so
-> > > that tests that pass metadata mkfs options to _scratch_mkfs, e.g.
-> > > "_scratch_mkfs -m crc=0" won't break with old mkfs.xfs.
-> > > 
-> > > But commit 596a068bf130 ("fstests: teach _scratch_mkfs to handle
-> > > mkfs option conflicts") broke this, because it didn't pass any mkfs
-> > > options to _scratch_mkfs_xfs_opts(). So fix it.
-> > > 
-> > > Also declare a variable as 'local' and fix a typo.
-> > > 
-> > > Reported-by: Dave Chinner <dchinner@redhat.com>
-> > > Signed-off-by: Eryu Guan <guaneryu@gmail.com>
-> > 
-> > Looks fine.
-> > 
-> > Reviewed-by: Dave Chinner <dchinner@redhat.com>
-> > 
-> > (sorry for missing this when you opsted it first time)
-> 
-> Thanks for the review!
-> 
-> Eryu
+Prior to commit 596a068bf130 ("fstests: teach _scratch_mkfs to handle
+mkfs option conflicts"), one of _scratch_mkfs_xfs_opts()'s job is to
+remove any metadata related mkfs options if mkfs.xfs binary doesn't
+support them, so that tests that pass metadada mkfs options to
+_scratch_mkfs, e.g. "_scratch_mkfs -m crc=0" won't break with old
+mkfs.xfs.
 
-This turns out to be broken when specifying "-m crc=0/1" in MKFS_OPTIONS
-explicitly and test has its own extra "-m crc=0/1" option (e.g. xfs/001,
-mkfs fails and test uses SCRATCH_DEV created from previous test), as we
-have "-m" option specified multiple times, and _scratch_do_mkfs() won't
-try mkfs for a second time because $extra_mkfs_options is empty, which
-is because I didn't pass "extra_mkfs_options" as extra options but
-"mkfs_cmd".
+But commit 596a068bf130 broke this, because it didn't pass any mkfs
+options to _scratch_mkfs_xfs_opts(). Fix it by introducing a new helper
+_xfs_mkfs_remove_meta_opts() to remove any meta related mkfs options if
+necessary, and moving that function out of _scratch_mkfs_xfs_opts().
 
-I wrote a v2 patch and will send it out soon.
+Reported-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Eryu Guan <guaneryu@gmail.com>
+---
+v2:
+- treat "extra options" as extra options, so move remove-meta-opts function
+  out of _scratch_mkfs_xfs_opts() to a new helper _xfs_mkfs_remove_meta_opts
 
-Thanks,
-Eryu
+ common/xfs | 20 ++++++++++++--------
+ 1 file changed, 12 insertions(+), 8 deletions(-)
+
+diff --git a/common/xfs b/common/xfs
+index 92223513d561..1385c8c7e57b 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -44,18 +44,20 @@ _setup_large_xfs_fs()
+ 	return 0
+ }
+ 
+-_scratch_mkfs_xfs_opts()
++# remove metadata related mkfs options if mkfs.xfs doesn't support them
++_xfs_mkfs_remove_meta_opts()
+ {
+-	mkfs_opts=$*
+-
+-	# remove metadata related mkfs options if mkfs.xfs doesn't them
++	local mkfs_opts="$*"
+ 	if [ -n "$XFS_MKFS_HAS_NO_META_SUPPORT" ]; then
+-		mkfs_opts=`echo $mkfs_opts | sed "s/-m\s\+\S\+//g"`
++		mkfs_opts=`echo $* | sed "s/-m\s\+\S\+//g"`
+ 	fi
++	echo "$mkfs_opts"
++}
+ 
++_scratch_mkfs_xfs_opts()
++{
+ 	_scratch_options mkfs
+-
+-	echo "$MKFS_XFS_PROG $SCRATCH_OPTIONS $mkfs_opts"
++	echo "$MKFS_XFS_PROG $SCRATCH_OPTIONS"
+ }
+ 
+ 
+@@ -83,10 +85,12 @@ _scratch_mkfs_xfs()
+ 	local mkfs_filter="sed -e '/less than device physical sector/d' \
+ 			       -e '/switching to logical sector/d' \
+ 			       -e '/Default configuration/d'"
++	local extra_mkfs_opts="`_xfs_mkfs_remove_meta_opts $*`"
+ 	local tmp=`mktemp -u`
+ 	local mkfs_status
+ 
+-	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
++	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" "$extra_mkfs_opts" \
++		2>$tmp.mkfserr 1>$tmp.mkfsstd
+ 	mkfs_status=$?
+ 
+ 
+-- 
+2.17.0
+
