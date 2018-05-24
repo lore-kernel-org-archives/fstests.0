@@ -1,132 +1,212 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:48880 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1030730AbeEXQJf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 May 2018 12:09:35 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] fstests: btrfs: add seed sprout functionality test
-Date: Fri, 25 May 2018 00:11:59 +0800
-Message-Id: <20180524161159.17239-1-anand.jain@oracle.com>
+Received: from mx2.suse.de ([195.135.220.15]:58925 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1034329AbeEXSbC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 24 May 2018 14:31:02 -0400
+Received: from relay1.suse.de (charybdis-ext-too.suse.de [195.135.220.254])
+        by mx2.suse.de (Postfix) with ESMTP id 06CB0AF16
+        for <fstests@vger.kernel.org>; Thu, 24 May 2018 18:31:01 +0000 (UTC)
+From: Jan Kara <jack@suse.cz>
+Subject: [PATCH] Make ./new work for non-root user
+Date: Thu, 24 May 2018 20:30:55 +0200
+Message-Id: <20180524183055.16031-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-Create a seed device and add the sprout device to it.
+Currently 'new' script sources common/config which tries to find mkfs
+and fails if not found (which is likely for non-root user). This is
+inconvenient as development usually does not happen as root. In fact the
+vast majority of setup in common/config and common/rc is not necessary
+for 'new'. Split out the necessary bits into new common/config-base and
+use it in 'new'. Cleanup common/rc and common/config now that it's only
+used from 'check'.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+Signed-off-by: Jan Kara <jack@suse.cz>
 ---
- common/config       |  1 +
- tests/btrfs/161     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/161.out |  2 ++
- tests/btrfs/group   |  1 +
- 4 files changed, 73 insertions(+)
- create mode 100755 tests/btrfs/161
- create mode 100644 tests/btrfs/161.out
+ check              | 16 +++++-----------
+ common/config      | 16 ++--------------
+ common/config-base | 21 +++++++++++++++++++++
+ common/rc          | 27 ++-------------------------
+ new                |  2 +-
+ 5 files changed, 31 insertions(+), 51 deletions(-)
+ create mode 100644 common/config-base
 
+diff --git a/check b/check
+index 96198ac4714e..4c6e8285bc16 100755
+--- a/check
++++ b/check
+@@ -331,10 +331,11 @@ while [ $# -gt 0 ]; do
+ 	shift
+ done
+ 
+-# we need common/config, source it after processing args, overlay needs FSTYP
+-# set before sourcing common/config
+-if ! . ./common/config; then
+-	echo "$iam: failed to source common/config"
++# we need common/rc, that also sources common/config. We need to source it
++# after processing args, overlay needs FSTYP set before sourcing common/config
++if ! . ./common/rc
++then
++	echo "check: failed to source common/rc"
+ 	exit 1
+ fi
+ 
+@@ -374,13 +375,6 @@ elif [ -z "$GROUP_LIST" ]; then
+ 	GROUP_LIST="auto"
+ fi
+ 
+-# we need common/rc
+-if ! . ./common/rc
+-then
+-    echo "check: failed to source common/rc"
+-    exit 1
+-fi
+-
+ if [ `id -u` -ne 0 ]
+ then
+     echo "check: QA must be run as root"
 diff --git a/common/config b/common/config
-index af360cefc804..f0735cb0153d 100644
+index af360cefc804..fa07a6799824 100644
 --- a/common/config
 +++ b/common/config
-@@ -235,6 +235,7 @@ case "$HOSTOS" in
-         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
-         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
- 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-+	export BTRFS_TUNE_PROG="`set_prog_path btrfstune`"
-         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-         export MKFS_NFS_PROG="false"
-         export MKFS_CIFS_PROG="false"
-diff --git a/tests/btrfs/161 b/tests/btrfs/161
-new file mode 100755
-index 000000000000..2ed06f0bb3c8
+@@ -47,6 +47,8 @@
+ #   validity or mountedness.
+ #
+ 
++. common/config-base
++
+ # all tests should use a common language setting to prevent golden
+ # output mismatches.
+ export LANG=C
+@@ -88,12 +90,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+ 
+ export RECREATE_TEST_DEV=false
+ 
+-# $1 = prog to look for
+-set_prog_path()
+-{
+-	type -P $1
+-}
+-
+ # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
+ set_mkfs_prog_path_with_opts()
+ {
+@@ -132,9 +128,6 @@ export FSSTRESS_PROG="./ltp/fsstress"
+ export PERL_PROG="`set_prog_path perl`"
+ [ "$PERL_PROG" = "" ] && _fatal "perl not found"
+ 
+-export AWK_PROG="`set_prog_path awk`"
+-[ "$AWK_PROG" = "" ] && _fatal "awk not found"
+-
+ export SED_PROG="`set_prog_path sed`"
+ [ "$SED_PROG" = "" ] && _fatal "sed not found"
+ 
+@@ -271,11 +264,6 @@ fi
+ rm -f /tmp/crc_check.img
+ export XFS_MKFS_HAS_NO_META_SUPPORT
+ 
+-# new doesn't need config file parsed, we can stop here
+-if [ "$iam" == "new" ]; then
+-	return 0
+-fi
+-
+ _mount_opts()
+ {
+ 	case $FSTYP in
+diff --git a/common/config-base b/common/config-base
+new file mode 100644
+index 000000000000..5d8a858160af
 --- /dev/null
-+++ b/tests/btrfs/161
-@@ -0,0 +1,69 @@
-+#! /bin/bash
-+# FS QA Test 161 seed sprout functionality test
-+#
-+#  Create a seed device, mount it and add a new device to create a
-+#  sprout filesystem.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+# Author: Anand Jain <anand.jain@oracle.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
++++ b/common/config-base
+@@ -0,0 +1,21 @@
++##/bin/bash
 +
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++# Valid test names start with 3 digits "NNN":
++#  "[0-9]\{3\}"
++# followed by an optional "-":
++#  "-\?"
++# followed by an optional combination of alphanumeric and "-" chars:
++#  "[[:alnum:]-]*"
++# e.g. 999-the-mark-of-fstests
++#
++VALID_TEST_ID="[0-9]\{3\}"
++VALID_TEST_NAME="$VALID_TEST_ID-\?[[:alnum:]-]*"
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
++# $1 = prog to look for
++set_prog_path()
 +{
-+	cd /
-+	rm -f $tmp.*
++	type -P $1
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 2
-+
-+_scratch_dev_pool_get 2
-+
-+DEV_SEED=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+DEV_SPROUT=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+
-+_mkfs_dev $DEV_SEED
-+$BTRFS_TUNE_PROG -S 1 $DEV_SEED
-+_scratch_mount >> $seqres.full 2>&1
-+_run_btrfs_util_prog device add -f $DEV_SPROUT $SCRATCH_MNT
-+_scratch_unmount
-+_scratch_dev_pool_put
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
-new file mode 100644
-index 000000000000..1752a2433702
---- /dev/null
-+++ b/tests/btrfs/161.out
-@@ -0,0 +1,2 @@
-+QA output created by 161
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f04ee8d5297c..fe83631f0f33 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -163,3 +163,4 @@
- 158 auto quick raid scrub
- 159 auto quick
- 160 auto quick
-+161 auto quick
++export AWK_PROG="`set_prog_path awk`"
++[ "$AWK_PROG" = "" ] && _fatal "awk not found"
+diff --git a/common/rc b/common/rc
+index ffe5323603eb..7368e2e12988 100644
+--- a/common/rc
++++ b/common/rc
+@@ -20,18 +20,9 @@
+ #  Mountain View, CA 94043, USA, or: http://www.sgi.com
+ #-----------------------------------------------------------------------
+ 
+-BC=$(which bc 2> /dev/null) || BC=
++. common/config
+ 
+-# Valid test names start with 3 digits "NNN":
+-#  "[0-9]\{3\}"
+-# followed by an optional "-":
+-#  "-\?"
+-# followed by an optional combination of alphanumeric and "-" chars:
+-#  "[[:alnum:]-]*"
+-# e.g. 999-the-mark-of-fstests
+-#
+-VALID_TEST_ID="[0-9]\{3\}"
+-VALID_TEST_NAME="$VALID_TEST_ID-\?[[:alnum:]-]*"
++BC=$(which bc 2> /dev/null) || BC=
+ 
+ # Some tests are not relevant or functional when testing XFS realtime
+ # subvolumes along with the rtinherit=1 mkfs option.  In these cases,
+@@ -110,16 +101,6 @@ _ls_l()
+ 	ls -l $* | sed "s/\(^[-rwxdlbcpsStT]*\)\. /\1 /" | grep -v 'lost+found'
+ }
+ 
+-# we need common/config
+-if [ "$iam" != "check" ]
+-then
+-    if ! . ./common/config
+-        then
+-        echo "$iam: failed to source common/config"
+-        exit 1
+-    fi
+-fi
+-
+ _dump_err()
+ {
+     _err_msg="$*"
+@@ -3560,10 +3541,6 @@ _disable_dmesg_check()
+ 
+ init_rc()
+ {
+-	if [ "$iam" == new ]
+-	then
+-		return
+-	fi
+ 	# make some further configuration checks here
+ 	if [ "$TEST_DEV" = ""  ]
+ 	then
+diff --git a/new b/new
+index 4eacccd3bf8b..2b322b2fdfb3 100755
+--- a/new
++++ b/new
+@@ -23,7 +23,7 @@
+ 
+ # generic initialization
+ iam=new
+-. ./common/rc
++. ./common/config-base
+ 
+ trap "rm -f /tmp/$$.; exit" 0 1 2 3 15
+ 
 -- 
-2.15.0
+2.13.6
 
