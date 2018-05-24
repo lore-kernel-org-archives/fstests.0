@@ -1,57 +1,55 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:55484 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S966542AbeEXJnx (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 May 2018 05:43:53 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs: Regression test for vulnerable directory integrity check
-Date: Thu, 24 May 2018 17:32:12 +0800
-Message-ID: <1527154332-13234-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from aserp2120.oracle.com ([141.146.126.78]:48880 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030730AbeEXQJf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 May 2018 12:09:35 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] fstests: btrfs: add seed sprout functionality test
+Date: Fri, 25 May 2018 00:11:59 +0800
+Message-Id: <20180524161159.17239-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, darrick.wong@oracle.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If a malicious XFS contains a block+ format directory wherein the
-directory inode's core.mode is corrupted, and there are subdirectories
-of the corrupted directory, an attempt to traverse up the directory
-tree by running xfs_scrub will crash the kernel in __xfs_dir3_data_check.
+Create a seed device and add the sprout device to it.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/xfs/448     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/448.out |  2 ++
- tests/xfs/group   |  1 +
- 3 files changed, 93 insertions(+)
- create mode 100755 tests/xfs/448
- create mode 100644 tests/xfs/448.out
+ common/config       |  1 +
+ tests/btrfs/161     | 69 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/161.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 4 files changed, 73 insertions(+)
+ create mode 100755 tests/btrfs/161
+ create mode 100644 tests/btrfs/161.out
 
-diff --git a/tests/xfs/448 b/tests/xfs/448
+diff --git a/common/config b/common/config
+index af360cefc804..f0735cb0153d 100644
+--- a/common/config
++++ b/common/config
+@@ -235,6 +235,7 @@ case "$HOSTOS" in
+         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
+         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
+ 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
++	export BTRFS_TUNE_PROG="`set_prog_path btrfstune`"
+         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
+         export MKFS_NFS_PROG="false"
+         export MKFS_CIFS_PROG="false"
+diff --git a/tests/btrfs/161 b/tests/btrfs/161
 new file mode 100755
-index 0000000..bc151a4
+index 000000000000..2ed06f0bb3c8
 --- /dev/null
-+++ b/tests/xfs/448
-@@ -0,0 +1,90 @@
++++ b/tests/btrfs/161
+@@ -0,0 +1,69 @@
 +#! /bin/bash
-+# FS QA Test No. 448
++# FS QA Test 161 seed sprout functionality test
 +#
-+# Regression test for commit:
-+# 46c5973 ("xfs: harden directory integrity checks some more")
-+#
-+# If a malicious XFS contains a block+ format directory wherein
-+# the directory inode's core.mode is corrupted, and there are
-+# subdirectories of the corrupted directory, an attempt to traverse
-+# up the directory tree by running xfs_scrub will crash the
-+# kernel in __xfs_dir3_data_check.
-+#
-+# Notice:
-+# we should have non fatal asserts configured, because assert
-+# failures triggered by the intentional corrupt would crash system.
++#  Create a seed device, mount it and add a new device to create a
++#  sprout filesystem.
 +#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
-+# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
++# Copyright (c) 2018 Oracle.  All Rights Reserved.
++# Author: Anand Jain <anand.jain@oracle.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -66,82 +64,69 @@ index 0000000..bc151a4
 +# along with this program; if not, write the Free Software Foundation,
 +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 +#-----------------------------------------------------------------------
++#
 +
-+seq=`basename "$0"`
-+seqres="$RESULT_DIR/$seq"
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1    # failure is the default!
++status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	rm -rf $tmp.*
++	cd /
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/populate
-+. ./common/fuzzy
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
 +# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
 +_supported_os Linux
-+_supported_fs xfs
-+_require_scratch
-+_require_scrub
-+_require_scratch_nocheck
-+# Corrupt XFS on purpose, and skip if assert failures would crash system.
-+_require_no_xfs_bug_on_assert
++_require_scratch_dev_pool 2
 +
-+rm -f "$seqres.full"
++_scratch_dev_pool_get 2
 +
-+# Format and mount
-+_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
-+_scratch_mount
++DEV_SEED=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
++DEV_SPROUT=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
 +
-+# Create a block+(e.g. leaf) format directory
-+dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
-+__populate_create_dir "${SCRATCH_MNT}/dir_leaf" "$((dblksz / 12))"
-+dino=$(stat -c "%i" "${SCRATCH_MNT}/dir_leaf")
-+
-+# Corrupt the directory inode's core.mode
++_mkfs_dev $DEV_SEED
++$BTRFS_TUNE_PROG -S 1 $DEV_SEED
++_scratch_mount >> $seqres.full 2>&1
++_run_btrfs_util_prog device add -f $DEV_SPROUT $SCRATCH_MNT
 +_scratch_unmount
-+setmode="0100755"
-+_scratch_xfs_set_metadata_field "core.mode" "$setmode" "inode $dino" >> $seqres.full
-+getmode=$(_scratch_xfs_get_metadata_field "core.mode" "inode $dino")
-+[ "$getmode" != "$setmode" ] && _notrun "failed to set core.mode"
-+
-+# Check a mounted XFS (online)
-+_scratch_mount
-+$XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full 2>&1
++_scratch_dev_pool_put
 +
 +echo "Silence is golden"
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/xfs/448.out b/tests/xfs/448.out
+diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
 new file mode 100644
-index 0000000..b6f0a53
+index 000000000000..1752a2433702
 --- /dev/null
-+++ b/tests/xfs/448.out
++++ b/tests/btrfs/161.out
 @@ -0,0 +1,2 @@
-+QA output created by 448
++QA output created by 161
 +Silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 51326d9..dd39d08 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -445,3 +445,4 @@
- 445 auto quick filestreams
- 446 auto quick
- 447 auto mount
-+448 auto quick fuzzers
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index f04ee8d5297c..fe83631f0f33 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -163,3 +163,4 @@
+ 158 auto quick raid scrub
+ 159 auto quick
+ 160 auto quick
++161 auto quick
 -- 
-1.8.3.1
-
-
+2.15.0
 
