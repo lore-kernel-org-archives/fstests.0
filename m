@@ -1,71 +1,176 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:44044 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S967305AbeEYRgG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 25 May 2018 13:36:06 -0400
-Date: Fri, 25 May 2018 12:36:03 -0500
-From: "Bill O'Donnell" <billodo@redhat.com>
-Subject: Re: [PATCH] xfs/206: filter/fix for minor geometry reporting changes
-Message-ID: <20180525173603.GA23002@redhat.com>
-References: <a359b1fc-6f31-4a9b-08e5-ed62078cdce8@sandeen.net>
+Received: from mail-pl0-f41.google.com ([209.85.160.41]:39482 "EHLO
+        mail-pl0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1030408AbeEYWdD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 May 2018 18:33:03 -0400
+Received: by mail-pl0-f41.google.com with SMTP id f1-v6so3450175plt.6
+        for <fstests@vger.kernel.org>; Fri, 25 May 2018 15:33:03 -0700 (PDT)
+Date: Fri, 25 May 2018 15:33:00 -0700
+From: Eric Biggers <ebiggers3@gmail.com>
+Subject: Re: Widespread test setup template problems (was Re: [PATCH]
+ generic: fix cleanup function for test 490)
+Message-ID: <20180525223300.GB199878@gmail.com>
+References: <20180520184517.8826-1-tytso@mit.edu>
+ <20180521024144.GO10363@dastard>
+ <20180521025400.GJ29080@desktop.hz.ali.com>
+ <20180525002914.GA10363@dastard>
+ <20180525005940.GB10363@dastard>
+ <20180525012335.GC10363@dastard>
+ <20180525041759.GA5915@sol.localdomain>
+ <20180525062530.GG10363@dastard>
+ <CAOQ4uxgeq5f0_BQKoYQgJEGum4HQvP5bNopYamrXN+gs0Rou-Q@mail.gmail.com>
+ <20180525084519.GH10363@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <a359b1fc-6f31-4a9b-08e5-ed62078cdce8@sandeen.net>
+In-Reply-To: <20180525084519.GH10363@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: fstests <fstests@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, Jan Kara <jack@suse.cz>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 25, 2018 at 09:00:59AM -0500, Eric Sandeen wrote:
-> The pending common geometry printing function has removed the fiddly
-> little differences between the various utilities, so now we'll need
-> to accommodate that in xfs/206, which looks at mkfs & growfs output.
+On Fri, May 25, 2018 at 06:45:19PM +1000, Dave Chinner wrote:
+> On Fri, May 25, 2018 at 11:06:23AM +0300, Amir Goldstein wrote:
+> > On Fri, May 25, 2018 at 9:25 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > > On Thu, May 24, 2018 at 09:17:59PM -0700, Eric Biggers wrote:
+> > >> On Fri, May 25, 2018 at 11:23:36AM +1000, Dave Chinner wrote:
+> > >> > Abstracting it out would look like the patch below. That, and moving
+> > >> > to SPDX tags for the licensing text, will greatly clean up the test
+> > >> > setup preamble. It will also draw a line in the sand for new tests -
+> > >> > if they don't match the new setup preamble, they don't pass
+> > >> > review...
+> > >> >
+> > >> > Thoughts?
+> > >> >
+> > >>
+> > >> I agree with adding a common test preamble.  The current boilerplate is way too
+> > >> verbose and easy to get wrong.  Even if technically you are supposed to use the
+> > >> 'new' script which does it right... the fact that you need to generate the code
+> > >> using a script at all, instead of being able to write something simple and
+> > >> obviously correct, is problematic.
+> > >
+> > > Using code to write code is a much more efficient way of generating
+> > > new code than having people copy-and-waste. The problem is that
+> > > people still copy and paste, despite the documentation saying "don't
+> > > do that, use the script" and the script being fast and easy to use.
+> > >
+> > > The moral of the story: no matter what we do, people will not follow
+> > > the rules and they'll do whatever they damn well want.
+> > >
+> > 
+> > As a frequent copy&paste offender, I welcome this change very much.
+> > Keep in mind that it is a very common practice in xfstests to create
+> > a variant of an existing test, so copy & pasting will likely not stop.
 > 
-> all now print "internal log" vs. just "internal"
-> ascii-ci now always has a "," after it
+> My thoughts exactly :P
 > 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
+> > >> > -here=\`pwd\`
+> > >> > -tmp=/tmp/\$\$
+> > >> > -status=1   # failure is the default!
+> > >> > -trap "_cleanup; exit \\\$status" 0 1 2 3 15
+> > >> > -
+> > >> > -_cleanup()
+> > >> > -{
+> > >> > -   cd /
+> > >> > -   rm -f \$tmp.*
+> > >> > -}
+> > >> > -
+> > >> > -# get standard environment, filters and checks
+> > >> > -. ./common/rc
+> > >> > -. ./common/filter
+> > >> > +# test exit cleanup goes here
+> > >> > +local_cleanup() { true }
+> > >>
+> > >> Did you consider defining the no-op local_cleanup() in the common preamble, and
+> > >> having tests override it if needed by redefining local_cleanup()?
+> > >
+> > > Yes.
+> > >
+> > 
+> > Maybe just cleanup() for local cleanup as is the convention in all the tests
+> > that _funcs() are global and funcs() are local.
+> 
+> Yup, I wrote then deleted in my last reply that I've renamed it to
+> just "cleanup().
+> 
+> > 
+> > Did you notice that your patch left an overriding _cleanup() function
+> > in generic/001
+> > that does not call local_cleanup(), but that does do local cleanups.
+> 
+> Yup - I didn't change any of the code in that test as I was just
+> demonstrating the sort of cleanup needed. generic/001 uses _cleanup
+> as a local function called between two different parts of the test,
+> not as an error trap, so more work is needed to fix it completely.
+> 
+> > I don't think that is what you intended do to.  Also, as an
+> > example you picked the only test that actually calls _cleanup() at
+> > start of test as well - not that it matters much, but the cleanup
+> > and handling of $TEST_DIR/$$ is quite bizarre and needs to be
+> > killed, so you may want to pick another poster child ;-)
+> 
+> I'm not going to fix every problem that this specific test has - I
+> want to fix the wider, more general problem first.  I just picked it
+> as an example for an initial RFC, not because it is a complete,
+> fully working patch ready for inclusion. There's 800+ plus
+> files that need work as part of this cleanup, so I want to make sure
+> the cleanup I'm going to do is acceptable before spending any time
+> on it.
+> 
+> 
+> > BTW, there are only 3 other tests that call _cleanup directly, but they
+> > do it just before calling exit... (generic/{124,127,236}).
+> > 
+> > >> Or
+> > >> alternatively, the preamble could use use 'type -t' to check if local_cleanup is
+> > >> defined before calling it.
+> > >
+> > > Didn't know that trick, but it has the same problem as above.
+> > >
+> > >> Either is slightly error prone as a typo in the
+> > >> function name may go unnoticed, but it would save boilerplate from most tests.
+> > >
+> > > Yup, far too likely to have people do their own/wrong thing because
+> > > we know they won't/don't follow documented instructions for creating
+> > > new tests.
+> > >
+> > >> > +# remove previous $seqres.full before test
+> > >> > +rm -f $seqres.full
+> > >>
+> > >> Why can't the $seqres.full removal be done in the common preamble?
+> > >
+> > > Because it's common during test failure debugging to comment out the
+> > > removal of this file. I do it all the time, and I'm sure other
+> > > people do too.
+> > >
+> > 
+> > IDGI, this is removing the full log of previous test run.
+> > Why is it useful to comment it out?
+> 
+> Because when you have a test that doesn't fail every time and you
+> run it in a loop, you don't know which of the test runs is going to
+> fail, and often you get different failure signatures. Collecting
+> them all is easy this way - I've been using xfstests this way for the
+> last 15 years and I see no reason to make this harder to acheive.
+> 
+> > And if it is useful, better control keeping old log with env var and
+> > still keep the default code in setup_test, e.g.:
+> > KEEP_FULL_LOG=1 ./check ...
+> 
+> I don't like magic env settings that nobody (including me) will
+> remember or use and so will just bit rot. I'm trying to remove
+> technical debt from xfstests, not add more.
+> 
 
-Reviewed-by: Bill O'Donnell <billodo@redhat.com>
+It could alternatively be an option passed to setup_test upon sourcing, so for
+your debugging workflow you would just replace
 
-> 
-> diff --git a/tests/xfs/206 b/tests/xfs/206
-> index 01782b7b..d5edf1ae 100755
-> --- a/tests/xfs/206
-> +++ b/tests/xfs/206
-> @@ -73,13 +73,16 @@ echo "=== truncate file ==="
->  dd if=/dev/zero of=$tmpfile bs=1 seek=19998630180864 count=1 >/dev/null 2>&1 \
->  	|| _fail "!!! failed to truncate loopback file to correct size"
-> +# mkfs/growfs output has changed slightly over the years, this distills
-> +# it down to a common set of output parameters we care about
->  mkfs_filter()
->  {
->  	sed -e 's/meta-data=[^ ]*/meta-data=FILE/' \
->  	    -e 's/ *isize=[0-9]* / isize=N /' \
->  	    -e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
-> +	    -e "s/internal log/internal    /" \
->  	    -e "s/, projid32bit=[0-9]//" \
-> -	    -e "s/ ftype=[0-9]//" \
-> +	    -e "s/,\? ftype=[0-9]//" \
->  	    -e "/.*reflink=/d" \
->  	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
->  	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
-> diff --git a/tests/xfs/206.out b/tests/xfs/206.out
-> index 2db839d0..be335600 100644
-> --- a/tests/xfs/206.out
-> +++ b/tests/xfs/206.out
-> @@ -6,7 +6,7 @@ meta-data=FILE isize=N    agcount=52, agsize=76288719 blks
->  data     =                       bsize=4096   blocks=3905982455, imaxpct=5
->           =                       sunit=0      swidth=0 blks
->  naming   =version 2              bsize=4096   ascii-ci=0
-> -log      =internal log           bsize=4096   blocks=XXXXX, version=2
-> +log      =internal               bsize=4096   blocks=XXXXX, version=2
->           =                       sectsz=512   sunit=0 blks
->  realtime =none                   extsz=4096   blocks=0, rtextents=0
->  === xfs_growfs ===
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+. common/setup_test
+
+with
+
+. common/setup_test --keep-full-log
+
+Having the same boilerplate copy-and-pasted in 800 places solely for the purpose
+of being able to comment it out is very ugly.
+
+- Eric
