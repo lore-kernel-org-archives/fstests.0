@@ -1,211 +1,162 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33320 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750811AbeEYESC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 May 2018 00:18:02 -0400
-Received: by mail-pf0-f194.google.com with SMTP id a20-v6so1933412pfo.0
-        for <fstests@vger.kernel.org>; Thu, 24 May 2018 21:18:02 -0700 (PDT)
-Date: Thu, 24 May 2018 21:17:59 -0700
-From: Eric Biggers <ebiggers3@gmail.com>
-Subject: Re: Widespread test setup template problems (was Re: [PATCH]
- generic: fix cleanup function for test 490)
-Message-ID: <20180525041759.GA5915@sol.localdomain>
-References: <20180520184517.8826-1-tytso@mit.edu>
- <20180521024144.GO10363@dastard>
- <20180521025400.GJ29080@desktop.hz.ali.com>
- <20180525002914.GA10363@dastard>
- <20180525005940.GB10363@dastard>
- <20180525012335.GC10363@dastard>
+Received: from userp2130.oracle.com ([156.151.31.86]:38280 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1750964AbeEYEhs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 25 May 2018 00:37:48 -0400
+Date: Thu, 24 May 2018 21:37:32 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs: Regression test for vulnerable directory integrity
+ check
+Message-ID: <20180525043732.GL12940@magnolia>
+References: <1527154332-13234-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180525012335.GC10363@dastard>
+In-Reply-To: <1527154332-13234-1-git-send-email-yangx.jy@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, jack@suse.cz
+To: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
-
-On Fri, May 25, 2018 at 11:23:36AM +1000, Dave Chinner wrote:
-> On Fri, May 25, 2018 at 10:59:40AM +1000, Dave Chinner wrote:
-> > On Fri, May 25, 2018 at 10:29:14AM +1000, Dave Chinner wrote:
-> > > On Mon, May 21, 2018 at 10:54:00AM +0800, Eryu Guan wrote:
-> > > > On Mon, May 21, 2018 at 12:41:44PM +1000, Dave Chinner wrote:
-> > > > > On Sun, May 20, 2018 at 02:45:17PM -0400, Theodore Ts'o wrote:
-> > > > > > generic/490 fails because cleanup tries to delete . and .. since $tmp
-> > > > > > is left unset, and so "rm -f $tmp.*" does nothing useful.  Instead
-> > > > > > delete temp files created by seek_sanity_test.
-> > > > > > 
-> > > > > > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > > > > > ---
-> > > > > >  tests/generic/490 | 2 +-
-> > > > > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > > > > 
-> > > > > > diff --git a/tests/generic/490 b/tests/generic/490
-> > > > > > index b5042c2e..c0335ca0 100755
-> > > > > > --- a/tests/generic/490
-> > > > > > +++ b/tests/generic/490
-> > > > > > @@ -49,7 +49,7 @@ _require_test_program "seek_sanity_test"
-> > > > > >  _cleanup()
-> > > > > >  {
-> > > > > >  	cd /
-> > > > > > -	rm -f $tmp.*
-> > > > > > +	rm -f $base_test_file*
-> > > > > >  }
-> > > > > >  
-> > > > > >  $here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
-> > > > > 
-> > > > > This is wrong. $tmp must always be set in a test, as the
-> > > > > infrastructure uses it. Failing to set $tmp will result in stray
-> > > > > files being spewed around the place by the test and not cleaned up.
-> > > > > Hence the "rm -f $tmp.*" line must stay, the normal tmp=/tmp/$$ line
-> > > > > added to the test preamble, and then you can remove the base test
-> > > > > file...
-> > > > 
-> > > > Yeah, I wanted to point that out too. So always using the './new' script
-> > > > is the recommended way to write new test, it already puts all the common
-> > > > setups (including the 'tmp=/tmp/$$' definition and 'rm -f $tmp.*'
-> > > > cleanup) in the test template.
-> > > 
-> > > Is there a fix committed for this yet? This bug causes the test to
-> > > run rm -f .* in the root directory of the machine....
-> > 
-> > BTW, in looking at what was missing from the test setup template in
-> > this test, I noticed that it was also missing the setup of $here,
-> > removal of $seqres.full, etc
-> > 
-> > SO I checked on how many tests fail to set $here, which is used in
-> > the common/rc test infrastructure:
-> > 
-> > $ git grep -l 'here=`pwd`' tests/ > t.t
-> > $ ls -1 tests/*/*[0-9] |grep -v out > tt.t
-> > $ diff -u t.t tt.t |grep ^+ |wc -l
-> > 137
-> > $
-> > 
-> > And, well, this is potentially very dangerous:
-> > 
-> > $ git grep -l 'tmp=/tmp/\$\$' tests/ > t.t
-> > $ ls -1 tests/*/*[0-9] |grep -v out > tt.t
-> > $ diff -u t.t tt.t |grep ^+ |wc -l
-> > 49
-> > $
-> > 
-> > A bunch of test use different tmp setups (e.g. mktemp -d, some put
-> > them in $TEST_DIR) but many omit it completely. They really all
-> > should use the same base location.
-> > 
-> > IOWs there's 137 tests that have $here incorrectly/not set up, and
-> > 49 tests that don't initialise $tmp like they are supposed to. A
-> > large number of these are relatively new tests, and the setup of
-> > this variable is done by the "new" test script.
-> > 
-> > So why are so many new tests missing stuff that the 'new' template
-> > sets up? Do we have a copy-n-paste process problem?  Should we
-> > abstract out this test setup preamble so people don't keep screwing
-> > it up?
+On Thu, May 24, 2018 at 05:32:12PM +0800, Xiao Yang wrote:
+> If a malicious XFS contains a block+ format directory wherein the
+> directory inode's core.mode is corrupted, and there are subdirectories
+> of the corrupted directory, an attempt to traverse up the directory
+> tree by running xfs_scrub will crash the kernel in __xfs_dir3_data_check.
 > 
-> Abstracting it out would look like the patch below. That, and moving
-> to SPDX tags for the licensing text, will greatly clean up the test
-> setup preamble. It will also draw a line in the sand for new tests -
-> if they don't match the new setup preamble, they don't pass
-> review...
-> 
-> Thoughts?
-> 
-
-I agree with adding a common test preamble.  The current boilerplate is way too
-verbose and easy to get wrong.  Even if technically you are supposed to use the
-'new' script which does it right... the fact that you need to generate the code
-using a script at all, instead of being able to write something simple and
-obviously correct, is problematic.
-
-> fstests: generic test setup preamble
-> 
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> So many tests chop random bits out of the mandaotry test setup
-> preamble which leads to subtle problems and stray files being dumped
-> all over the place. Create a common test preamble with hooks for
-> local cleanup functions so we can prevent this in future.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> 
+> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 > ---
->  common/setup_test | 22 ++++++++++++++++++++++
->  new               | 24 ++++--------------------
->  tests/generic/001 | 19 +++++++------------
->  3 files changed, 33 insertions(+), 32 deletions(-)
+>  tests/xfs/448     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/448.out |  2 ++
+>  tests/xfs/group   |  1 +
+>  3 files changed, 93 insertions(+)
+>  create mode 100755 tests/xfs/448
+>  create mode 100644 tests/xfs/448.out
 > 
-> diff --git a/common/setup_test b/common/setup_test
-> new file mode 100644
-> index 000000000000..6359ab53a8d9
+> diff --git a/tests/xfs/448 b/tests/xfs/448
+> new file mode 100755
+> index 0000000..bc151a4
 > --- /dev/null
-> +++ b/common/setup_test
-> @@ -0,0 +1,22 @@
-> +# common test setup preamble
-> +# test specific cleanup is done via the local_cleanup() function now.
+> +++ b/tests/xfs/448
+> @@ -0,0 +1,90 @@
+> +#! /bin/bash
+> +# FS QA Test No. 448
 > +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
+> +# Regression test for commit:
+> +# 46c5973 ("xfs: harden directory integrity checks some more")
+> +#
+> +# If a malicious XFS contains a block+ format directory wherein
+> +# the directory inode's core.mode is corrupted, and there are
+> +# subdirectories of the corrupted directory, an attempt to traverse
+> +# up the directory tree by running xfs_scrub will crash the
+> +# kernel in __xfs_dir3_data_check.
+> +#
+> +# Notice:
+> +# we should have non fatal asserts configured, because assert
+> +# failures triggered by the intentional corrupt would crash system.
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
+> +# Author: Xiao Yang <yangx.jy@cn.fujitsu.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +
+> +seq=`basename "$0"`
+> +seqres="$RESULT_DIR/$seq"
 > +echo "QA output created by $seq"
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1	# failure is the default!
+> +status=1    # failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +    local_cleanup
-> +    cd /
-> +    rm -f $tmp.*
+> +	rm -rf $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> diff --git a/new b/new
-> index 4eacccd3bf8b..5e7f6a3c4198 100755
-> --- a/new
-> +++ b/new
-> @@ -181,31 +181,15 @@ cat <<End-of-File >$tdir/$id
->  #-----------------------------------------------------------------------
->  #
->  
-> -seq=\`basename \$0\`
-> -seqres=\$RESULT_DIR/\$seq
-> -echo "QA output created by \$seq"
-> +. common/setup_test
->  
-> -here=\`pwd\`
-> -tmp=/tmp/\$\$
-> -status=1	# failure is the default!
-> -trap "_cleanup; exit \\\$status" 0 1 2 3 15
-> -
-> -_cleanup()
-> -{
-> -	cd /
-> -	rm -f \$tmp.*
-> -}
-> -
-> -# get standard environment, filters and checks
-> -. ./common/rc
-> -. ./common/filter
-> +# test exit cleanup goes here
-> +local_cleanup() { true }
+> +. ./common/populate
+> +. ./common/fuzzy
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs xfs
+> +_require_scratch
+> +_require_scrub
+> +_require_scratch_nocheck
+> +# Corrupt XFS on purpose, and skip if assert failures would crash system.
+> +_require_no_xfs_bug_on_assert
+> +
+> +rm -f "$seqres.full"
+> +
+> +# Format and mount
+> +_scratch_mkfs > $seqres.full 2>&1 || _fail "mkfs failed"
+> +_scratch_mount
+> +
+> +# Create a block+(e.g. leaf) format directory
+> +dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+> +__populate_create_dir "${SCRATCH_MNT}/dir_leaf" "$((dblksz / 12))"
+> +dino=$(stat -c "%i" "${SCRATCH_MNT}/dir_leaf")
+> +
+> +# Corrupt the directory inode's core.mode
+> +_scratch_unmount
+> +setmode="0100755"
+> +_scratch_xfs_set_metadata_field "core.mode" "$setmode" "inode $dino" >> $seqres.full
+> +getmode=$(_scratch_xfs_get_metadata_field "core.mode" "inode $dino")
+> +[ "$getmode" != "$setmode" ] && _notrun "failed to set core.mode"
 
-Did you consider defining the no-op local_cleanup() in the common preamble, and
-having tests override it if needed by redefining local_cleanup()?  Or
-alternatively, the preamble could use use 'type -t' to check if local_cleanup is
-defined before calling it.  Either is slightly error prone as a typo in the
-function name may go unnoticed, but it would save boilerplate from most tests.
+When does the set fail?  And isn't that a _fail()ure?
 
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
+> +
+> +# Check a mounted XFS (online)
+> +_scratch_mount
+> +$XFS_SCRUB_PROG -d -T -v -n $SCRATCH_MNT >> $seqres.full 2>&1
 
-Why can't the $seqres.full removal be done in the common preamble?
+I don't think you want to rely on xfs_scrub at this point if you can
+avoid it--scrub is totally experimental and can be deconfigured from the
+kernel.  Can you poke the directory using regular commands (like ls) to
+trigger the assert?
 
-Thanks,
+--D
 
-- Eric
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/xfs/448.out b/tests/xfs/448.out
+> new file mode 100644
+> index 0000000..b6f0a53
+> --- /dev/null
+> +++ b/tests/xfs/448.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 448
+> +Silence is golden
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index 51326d9..dd39d08 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -445,3 +445,4 @@
+>  445 auto quick filestreams
+>  446 auto quick
+>  447 auto mount
+> +448 auto quick fuzzers
+> -- 
+> 1.8.3.1
+> 
+> 
+> 
