@@ -1,116 +1,67 @@
-Received: from mail-yw0-f196.google.com ([209.85.161.196]:34011 "EHLO
-        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S964806AbeEYI6t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 25 May 2018 04:58:49 -0400
-Received: by mail-yw0-f196.google.com with SMTP id x27-v6so1493130ywj.1
-        for <fstests@vger.kernel.org>; Fri, 25 May 2018 01:58:48 -0700 (PDT)
+Received: from sandeen.net ([63.231.237.45]:54142 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S934496AbeEYOBA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 25 May 2018 10:01:00 -0400
+Received: from [10.0.0.4] (erlite [10.0.0.1])
+        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
+        (No client certificate requested)
+        by sandeen.net (Postfix) with ESMTPSA id C8D094872EA
+        for <fstests@vger.kernel.org>; Fri, 25 May 2018 09:00:43 -0500 (CDT)
+From: Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH] xfs/206: filter/fix for minor geometry reporting changes
+Message-ID: <a359b1fc-6f31-4a9b-08e5-ed62078cdce8@sandeen.net>
+Date: Fri, 25 May 2018 09:00:59 -0500
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxgbyd1FgF9GsjEwhf+KC-CMd=1QK-F=tevBpq5YByW=Zg@mail.gmail.com>
-References: <1504104706-11965-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxh8av5H87SHdFw92BDTvCtYgd9chS2Nfv5fA4=upoqRfA@mail.gmail.com>
- <20170830152326.vil3fhsrecp2ccql@destiny> <CAOQ4uxjE20+vY4OPWM3Z=FU-+4oC1KrYtJ5e7-rQDW4xx5t4RA@mail.gmail.com>
- <20170830185512.7q5mnh5ja6o4mpds@destiny> <CAOQ4uxipsvjjMF6YRJbN62tBrPNWOFjHztoDJ7CrsFfjNxRQBQ@mail.gmail.com>
- <CAOQ4uxjt-zZ7_iE7ZYUcp8qWYUH=aDLSum70Dmbnth-5smFQ+A@mail.gmail.com>
- <20170831134320.lnyu4jibsm3amuk7@destiny> <CAOQ4uxhgOYDfRxZ74RNd=omOMHxF2MgP+wLe0O6HO7+emnrMfA@mail.gmail.com>
- <20170831205403.2tene34ccvw55yo7@destiny> <CAOQ4uxgbyd1FgF9GsjEwhf+KC-CMd=1QK-F=tevBpq5YByW=Zg@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 25 May 2018 11:58:47 +0300
-Message-ID: <CAOQ4uxidRqSetJNaweT9XecDANO+k6ecgFQX4c3gVsLpXd6-Yw@mail.gmail.com>
-Subject: Re: [PATCH v2 00/14] Crash consistency xfstest using dm-log-writes
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <josef@toxicpanda.com>
-Cc: fstests <fstests@vger.kernel.org>, Theodore Tso <tytso@mit.edu>, Eryu Guan <eguan@redhat.com>
+To: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 1, 2017 at 9:52 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> [CC list, Ted]
->
-> On Thu, Aug 31, 2017 at 11:54 PM, Josef Bacik <josef@toxicpanda.com> wrote:
->> On Thu, Aug 31, 2017 at 05:02:46PM +0300, Amir Goldstein wrote:
->>> On Thu, Aug 31, 2017 at 4:43 PM, Josef Bacik <josef@toxicpanda.com> wrote:
->>> > On Thu, Aug 31, 2017 at 03:48:44PM +0300, Amir Goldstein wrote:
->>> >>
->>> >> Josef,
->>> >>
->>> >> I am at lost with these log corruptions.
->>> >> I see log entry bios submitted and log_end_io report success,
->>> >> but then in the log I see old data on disk where that entry should be.
->>> >> This happens quite randomly and I assume it also happens on
->>> >> logged data, because tests sometime fail on checksum on ext4.
->>> >>
->>> >> Mean while I added some more log entry sanity checks and debug
->>> >> prints to replay-log to debug the corruption:
->>> >> https://github.com/amir73il/xfstests/commit/bb946deb0dc285867be394613ddb19ce281392cc
->>> >>
->>> >> This only happens to me when running in kvm, so maybe something
->>> >> with the virtio devices is fishy.
->>> >>
->>> >> Anyway, I ran out of time to work on this for now, so if you have
->>> >> any ideas and/or time to test this issue, let me know.
->>> >>
->>> >
-> ...
->>>
->>
->> Alright I tested it and it's working fine for me.  I'm creating three lv's and
->> then doing
->>
->> -drive file=/dev/mapper/whatever,format=raw,cache=none,if=virtio,aio=native
->>
->> And I get /dev/vd[bcd] which I use for my test/scratch/log dev and it works out
->> fine.  What is your -drive option line and I'll duplicate what you are doing.
->> Thanks,
->>
->
-> I am using Ted's kvm-xfstests, so this is the qemu command line:
-> https://github.com/tytso/xfstests-bld/blob/master/kvm-xfstests/kvm-xfstests#L104
->
-> The only difference in -drive command is no aio=native.
-> BINGO! when I add aio-native there are no more log corruptions :)
-> Please try to use aio=threads to see if you also get log corruptions.
->
-> Thing is we cannot change kvm-xfstests to always use aio=native because
-> it is not recommended for sparse images:
-> https://access.redhat.com/articles/41313
-> I will try to work something out so that kvm-xfstest will use aio=native
-> when using the recommended (by not default) LV setup.
->
-> However, why would aio=threads cause log corruption?
-> Does it indicate a bug in kvm-qemu or in dm-log-writes??
->
-> Did you try to use kvm-xfstests? its quite convenient to deploy in masses,
-> so I think it would be ideal to integrate crash tests with.
-> It also helps unifying the environment between us fs developers
-> when a bug can not be reproduced on another system. see:
-> https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-xfstests.md
->
-> Anyway, if you do end up using kvm-xfstests, you'l need this
-> small patch to automatically define the log-writes device:
->
-> --- a/kvm-xfstests/test-appliance/files/root/runtests.sh
-> +++ b/kvm-xfstests/test-appliance/files/root/runtests.sh
-> @@ -269,9 +269,11 @@ do
->             if test "$SIZE" = "large" ; then
->                 export SCRATCH_DEV=$LG_SCR_DEV
->                 export SCRATCH_MNT=$LG_SCR_MNT
-> +               export LOGWRITES_DEV=$SM_SCR_DEV
->             else
->                 export SCRATCH_DEV=$SM_SCR_DEV
->                 export SCRATCH_MNT=$SM_SCR_MNT
-> +               export LOGWRITES_DEV=$LG_SCR_DEV
->             fi
->         fi
->
-> kvm-xfstests defined 2 sets of test/scratch a small and a large set
-> and uses only one of those sets depending on command line,
-> so I use the "other" scratch as the log writes device.
->
+The pending common geometry printing function has removed the fiddly
+little differences between the various utilities, so now we'll need
+to accommodate that in xfs/206, which looks at mkfs & growfs output.
 
-Ted,
+all now print "internal log" vs. just "internal"
+ascii-ci now always has a "," after it
 
-I just realized that I am still carrying this patch, so please pull:
-https://github.com/tytso/xfstests-bld/pull/8
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Thanks,
-Amir.
+diff --git a/tests/xfs/206 b/tests/xfs/206
+index 01782b7b..d5edf1ae 100755
+--- a/tests/xfs/206
++++ b/tests/xfs/206
+@@ -73,13 +73,16 @@ echo "=== truncate file ==="
+  dd if=/dev/zero of=$tmpfile bs=1 seek=19998630180864 count=1 >/dev/null 2>&1 \
+  	|| _fail "!!! failed to truncate loopback file to correct size"
+  
++# mkfs/growfs output has changed slightly over the years, this distills
++# it down to a common set of output parameters we care about
+  mkfs_filter()
+  {
+  	sed -e 's/meta-data=[^ ]*/meta-data=FILE/' \
+  	    -e 's/ *isize=[0-9]* / isize=N /' \
+  	    -e "s/\(^log.*blocks=\)\([0-9]*,\)/\1XXXXX,/" \
++	    -e "s/internal log/internal    /" \
+  	    -e "s/, projid32bit=[0-9]//" \
+-	    -e "s/ ftype=[0-9]//" \
++	    -e "s/,\? ftype=[0-9]//" \
+  	    -e "/.*reflink=/d" \
+  	    -e "s/\(sectsz\)\(=[0-9]* *\)/\1=512   /" \
+  	    -e "s/\(sunit=\)\([0-9]* blks,\)/\10 blks,/" \
+diff --git a/tests/xfs/206.out b/tests/xfs/206.out
+index 2db839d0..be335600 100644
+--- a/tests/xfs/206.out
++++ b/tests/xfs/206.out
+@@ -6,7 +6,7 @@ meta-data=FILE isize=N    agcount=52, agsize=76288719 blks
+  data     =                       bsize=4096   blocks=3905982455, imaxpct=5
+           =                       sunit=0      swidth=0 blks
+  naming   =version 2              bsize=4096   ascii-ci=0
+-log      =internal log           bsize=4096   blocks=XXXXX, version=2
++log      =internal               bsize=4096   blocks=XXXXX, version=2
+           =                       sectsz=512   sunit=0 blks
+  realtime =none                   extsz=4096   blocks=0, rtextents=0
+  === xfs_growfs ===
+
