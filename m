@@ -1,260 +1,132 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:39319 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S936362AbeE0MiT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 May 2018 08:38:19 -0400
-Received: by mail-pf0-f194.google.com with SMTP id a22-v6so4590118pfn.6
-        for <fstests@vger.kernel.org>; Sun, 27 May 2018 05:38:19 -0700 (PDT)
-Date: Sun, 27 May 2018 20:38:09 +0800
+Received: from mail-pg0-f67.google.com ([74.125.83.67]:36380 "EHLO
+        mail-pg0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S936343AbeE0Mt3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 May 2018 08:49:29 -0400
+Received: by mail-pg0-f67.google.com with SMTP id u7-v6so4153651pgp.3
+        for <fstests@vger.kernel.org>; Sun, 27 May 2018 05:49:29 -0700 (PDT)
+Date: Sun, 27 May 2018 20:49:23 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: Widespread test setup template problems (was Re: [PATCH]
- generic: fix cleanup function for test 490)
-Message-ID: <20180527123809.GA6581@desktop>
-References: <20180520184517.8826-1-tytso@mit.edu>
- <20180521024144.GO10363@dastard>
- <20180521025400.GJ29080@desktop.hz.ali.com>
- <20180525002914.GA10363@dastard>
- <20180525005940.GB10363@dastard>
- <20180525012335.GC10363@dastard>
+Subject: Re: [PATCH V2] check: fail tests if check/dmesg are not clean
+Message-ID: <20180527124923.GB6581@desktop>
+References: <20180522234756.21055-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180525012335.GC10363@dastard>
+In-Reply-To: <20180522234756.21055-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, jack@suse.cz
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 25, 2018 at 11:23:36AM +1000, Dave Chinner wrote:
-> On Fri, May 25, 2018 at 10:59:40AM +1000, Dave Chinner wrote:
-> > On Fri, May 25, 2018 at 10:29:14AM +1000, Dave Chinner wrote:
-> > > On Mon, May 21, 2018 at 10:54:00AM +0800, Eryu Guan wrote:
-> > > > On Mon, May 21, 2018 at 12:41:44PM +1000, Dave Chinner wrote:
-> > > > > On Sun, May 20, 2018 at 02:45:17PM -0400, Theodore Ts'o wrote:
-> > > > > > generic/490 fails because cleanup tries to delete . and .. since $tmp
-> > > > > > is left unset, and so "rm -f $tmp.*" does nothing useful.  Instead
-> > > > > > delete temp files created by seek_sanity_test.
-> > > > > > 
-> > > > > > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> > > > > > ---
-> > > > > >  tests/generic/490 | 2 +-
-> > > > > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > > > > 
-> > > > > > diff --git a/tests/generic/490 b/tests/generic/490
-> > > > > > index b5042c2e..c0335ca0 100755
-> > > > > > --- a/tests/generic/490
-> > > > > > +++ b/tests/generic/490
-> > > > > > @@ -49,7 +49,7 @@ _require_test_program "seek_sanity_test"
-> > > > > >  _cleanup()
-> > > > > >  {
-> > > > > >  	cd /
-> > > > > > -	rm -f $tmp.*
-> > > > > > +	rm -f $base_test_file*
-> > > > > >  }
-> > > > > >  
-> > > > > >  $here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
-> > > > > 
-> > > > > This is wrong. $tmp must always be set in a test, as the
-> > > > > infrastructure uses it. Failing to set $tmp will result in stray
-> > > > > files being spewed around the place by the test and not cleaned up.
-> > > > > Hence the "rm -f $tmp.*" line must stay, the normal tmp=/tmp/$$ line
-> > > > > added to the test preamble, and then you can remove the base test
-> > > > > file...
-> > > > 
-> > > > Yeah, I wanted to point that out too. So always using the './new' script
-> > > > is the recommended way to write new test, it already puts all the common
-> > > > setups (including the 'tmp=/tmp/$$' definition and 'rm -f $tmp.*'
-> > > > cleanup) in the test template.
-> > > 
-> > > Is there a fix committed for this yet? This bug causes the test to
-> > > run rm -f .* in the root directory of the machine....
-> > 
-> > BTW, in looking at what was missing from the test setup template in
-> > this test, I noticed that it was also missing the setup of $here,
-> > removal of $seqres.full, etc
-> > 
-> > SO I checked on how many tests fail to set $here, which is used in
-> > the common/rc test infrastructure:
-> > 
-> > $ git grep -l 'here=`pwd`' tests/ > t.t
-> > $ ls -1 tests/*/*[0-9] |grep -v out > tt.t
-> > $ diff -u t.t tt.t |grep ^+ |wc -l
-> > 137
-> > $
-> > 
-> > And, well, this is potentially very dangerous:
-> > 
-> > $ git grep -l 'tmp=/tmp/\$\$' tests/ > t.t
-> > $ ls -1 tests/*/*[0-9] |grep -v out > tt.t
-> > $ diff -u t.t tt.t |grep ^+ |wc -l
-> > 49
-> > $
-> > 
-> > A bunch of test use different tmp setups (e.g. mktemp -d, some put
-> > them in $TEST_DIR) but many omit it completely. They really all
-> > should use the same base location.
-> > 
-> > IOWs there's 137 tests that have $here incorrectly/not set up, and
-> > 49 tests that don't initialise $tmp like they are supposed to. A
-> > large number of these are relatively new tests, and the setup of
-> > this variable is done by the "new" test script.
-> > 
-> > So why are so many new tests missing stuff that the 'new' template
-> > sets up? Do we have a copy-n-paste process problem?  Should we
-> > abstract out this test setup preamble so people don't keep screwing
-> > it up?
-
-That's my bad, sorry. I didn't spend much review bandwidth on test setup
-preamble but focused more on test correctness.
-
-> 
-> Abstracting it out would look like the patch below. That, and moving
-> to SPDX tags for the licensing text, will greatly clean up the test
-> setup preamble. It will also draw a line in the sand for new tests -
-> if they don't match the new setup preamble, they don't pass
-> review...
-
-I did post a patch, maybe a year ago, that went through all tests and
-setup $tmp correctly (but not $here), and IIRC Amir suggested a similar
-solution to your RFC patch. But that discussion only resulted in commit
-81aa85deac1f ("fstests: remove tmp files properly") in the end.
-
-> 
-> Thoughts?
-
-I have no problem with going to that direction, the common setup
-preamble also makes review easier, I don't have to search for "tmp" and
-"here" etc but just common/setup_test.
-
-Thanks a lot for doing it!
-
-Eryu
-
-> 
-> -Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
-> 
-> fstests: generic test setup preamble
-> 
+On Wed, May 23, 2018 at 09:47:56AM +1000, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> So many tests chop random bits out of the mandaotry test setup
-> preamble which leads to subtle problems and stray files being dumped
-> all over the place. Create a common test preamble with hooks for
-> local cleanup functions so we can prevent this in future.
+> Currently a test appears to pass even if it leaves a corrupt
+> filesystem behind, or a splat in the system logs that should not be
+> there. While the test is internally tracked as failed (and the
+> summary reports it as failed) the per-test output exits with a
+> success and so emits a completion time before the post-test checks
+> are run by the test harness.  Rework the check code to report
+> post-test check failures as specific test failures rather than as
+> separate failure line items in the overall harness output.
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> Reworking where we emit the errors this also allows us to include
+> the post-test filesystem checking in the test runtime. This is
+> currently not accounted to the test and can be substantial. Hence
+> the real elapsed time of each test is not accurately reflected in
+> the time stats being reported and so regressions in filesystem
+> checking performance go unnoticed.
 > 
+> Changing the output reporting requires a complete reworking of the
+> main test check loop. It's a bunch of spaghetti at the moment
+> because it has post test reporting code at the end of the loop which
+> must run regardless of the test result.  By moving the post test
+> reporting to the start of the next loop iteration, we can clean up
+> the code substantially by using continue directives where
+> appropriate.
+> 
+> Also, for cases where we haven't run the test or it's already been
+> marked as failed, don't bother running the filesystem/dmesg checks
+> for failure as we're already going to report the test as failed.
+> 
+> This touches almost all of the loop, so get rid of the remaining
+> 4 space indents inside the loop while moving all this code around.
+> 
+> Signed-Off-By: Dave Chinner <dchinner@redhat.com>
 > ---
->  common/setup_test | 22 ++++++++++++++++++++++
->  new               | 24 ++++--------------------
->  tests/generic/001 | 19 +++++++------------
->  3 files changed, 33 insertions(+), 32 deletions(-)
+>  check     | 258 ++++++++++++++++++++++++++++--------------------------
+>  common/rc |   6 ++
+>  2 files changed, 142 insertions(+), 122 deletions(-)
 > 
-> diff --git a/common/setup_test b/common/setup_test
-> new file mode 100644
-> index 000000000000..6359ab53a8d9
-> --- /dev/null
-> +++ b/common/setup_test
-> @@ -0,0 +1,22 @@
-> +# common test setup preamble
-> +# test specific cleanup is done via the local_cleanup() function now.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
+> diff --git a/check b/check
+> index 96198ac4714e..ab0b5696dbb3 100755
+> --- a/check
+> +++ b/check
+> @@ -38,10 +38,12 @@ randomize=false
+>  export here=`pwd`
+>  xfile=""
+>  brief_test_summary=false
+> -_err_msg=""
+>  do_report=false
+>  DUMP_OUTPUT=false
+>  
+> +# This is a global variable used to pass test failure text to reporting gunk
+> +err_msg=""
+
+Should be "_err_msg", i.e. with leading underscore?
+
 > +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    local_cleanup
-> +    cd /
-> +    rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> diff --git a/new b/new
-> index 4eacccd3bf8b..5e7f6a3c4198 100755
-> --- a/new
-> +++ b/new
-> @@ -181,31 +181,15 @@ cat <<End-of-File >$tdir/$id
->  #-----------------------------------------------------------------------
->  #
+>  # start the initialisation work now
+>  iam=check
 >  
-> -seq=\`basename \$0\`
-> -seqres=\$RESULT_DIR/\$seq
-> -echo "QA output created by \$seq"
-> +. common/setup_test
+> @@ -639,78 +641,95 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>  	seqres="$check"
+>  	_check_test_fs
 >  
-> -here=\`pwd\`
-> -tmp=/tmp/\$\$
-> -status=1	# failure is the default!
-> -trap "_cleanup; exit \\\$status" 0 1 2 3 15
-> -
-> -_cleanup()
-> -{
-> -	cd /
-> -	rm -f \$tmp.*
-> -}
-> -
-> -# get standard environment, filters and checks
-> -. ./common/rc
-> -. ./common/filter
-> +# test exit cleanup goes here
-> +local_cleanup() { true }
->  
->  # remove previous \$seqres.full before test
->  rm -f \$seqres.full
->  
-> -# real QA test starts here
-> -
-> -# Modify as appropriate.
-> +# include test specific environments here
->  _supported_fs generic
->  _supported_os Linux
->  _require_test
-> diff --git a/tests/generic/001 b/tests/generic/001
-> index 0edd41f1e2cc..e1dd2e3202e3 100755
-> --- a/tests/generic/001
-> +++ b/tests/generic/001
-> @@ -31,25 +31,20 @@
->  #-----------------------------------------------------------------------
->  #
->  
-> -seq=`basename $0`
-> -seqres=$RESULT_DIR/$seq
-> -echo "QA output created by $seq"
-> +. common/setup_test
->  
-> -# get standard environment, filters and checks
-> -. ./common/rc
-> -. ./common/filter
-> +# test exit cleanup goes here
-> +local_cleanup() { true }
->  
-> -tmp=/tmp/$$
-> -here=`pwd`
-> -status=1
-> -done_cleanup=false
-> -trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
->  
-> -# real QA test starts here
-> +# include test specific environments here
->  _supported_fs generic
->  _supported_os Linux
->  _require_test
->  
-> +done_cleanup=false
->  verbose=true
->  verify=$here/verify_fill
->  
+> -	for seq in $list
+> -	do
+> -	    err=false
+> -	    _err_msg=""
+> -	    if [ ! -f $seq ]; then
+> -	        # Try to get full name in case the user supplied only seq id
+> -	        # and the test has a name. A bit of hassle to find really
+> -	        # the test and not its sample output or helping files.
+> -	        bname=$(basename $seq)
+> -	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
+> -	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
+> -	                END { print shortest }')
+> -	        if [ -f $full_seq ] \
+> -	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
+> -	            seq=$full_seq
+> -	        fi
+> -	    fi
+> +	err=false
+> +	first_test=true
+> +	for seq in $list ; do
+> +		# Run report for previous test!
+> +		if $err ; then
+> +			bad="$bad $seqnum"
+> +			n_bad=`expr $n_bad + 1`
+> +			tc_status="fail"
+> +		fi
+> +		if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
+
+This check (and the one at the end of this loop) doesn't work as
+expected. Because $do_report is a true/false command, and "-a" and the
+following expressions are all treated as command line arguments to
+true/false, which got ignored by true/false.  That means above check
+only depends on the value of $do_report, and results in something like
+below in xUnit report file
+
+        <testcase classname="xfstests.xfs_4k_reflink" name="xfs/293" time="-">
+                <failure message="Unknown ret_state=" type="TestFail"/>
+        </testcase>
+
+if $do_report && ! $first_test && [ "$tc_status" != "expunge"; then
+	_make_testcase_report "$tc_status"
+fi
+
+This check should work as expected.
+
+Thanks,
+Eryu
