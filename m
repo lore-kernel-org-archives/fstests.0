@@ -1,275 +1,403 @@
-Received: from mail-pl0-f68.google.com ([209.85.160.68]:38960 "EHLO
-        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934778AbeE1Qfs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 12:35:48 -0400
-Date: Tue, 29 May 2018 00:35:41 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] ext4: Test for s_inodes_count overflow during fs resize
-Message-ID: <20180528163541.GD6581@desktop>
-References: <20180524183140.16125-1-jack@suse.cz>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180524183140.16125-1-jack@suse.cz>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:29142 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S934027AbeE1XHk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 19:07:40 -0400
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1fNREn-0007kQ-N4
+        for fstests@vger.kernel.org; Tue, 29 May 2018 09:07:37 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.91)
+        (envelope-from <david@fromorbit.com>)
+        id 1fNREn-0006aI-IY
+        for fstests@vger.kernel.org; Tue, 29 May 2018 09:07:37 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH V3] check: fail tests if check/dmesg are not clean
+Date: Tue, 29 May 2018 09:07:37 +1000
+Message-Id: <20180528230737.25270-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 24, 2018 at 08:31:40PM +0200, Jan Kara wrote:
-> Test for overflow of s_inodes_count during filesystem resizing.
-> 
-> Signed-off-by: Jan Kara <jack@suse.cz>
-> ---
->  common/config      |   1 +
->  common/rc          |   7 ++++
->  tests/ext4/033     | 118 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/033.out |   6 +++
->  tests/ext4/group   |   1 +
->  5 files changed, 133 insertions(+)
->  create mode 100755 tests/ext4/033
->  create mode 100644 tests/ext4/033.out
-> 
-> diff --git a/common/config b/common/config
-> index fa07a6799824..659ebeed3ffc 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -170,6 +170,7 @@ export INDENT_PROG="`set_prog_path indent`"
->  export XFS_COPY_PROG="`set_prog_path xfs_copy`"
->  export FSTRIM_PROG="`set_prog_path fstrim`"
->  export DUMPE2FS_PROG="`set_prog_path dumpe2fs`"
-> +export RESIZE2FS_PROG="`set_prog_path resize2fs`"
->  export FIO_PROG="`set_prog_path fio`"
->  export FILEFRAG_PROG="`set_prog_path filefrag`"
->  export E4DEFRAG_PROG="`set_prog_path e4defrag`"
-> diff --git a/common/rc b/common/rc
-> index 7368e2e12988..b8aad429e153 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3176,6 +3176,13 @@ _require_dumpe2fs()
->  	fi
->  }
->  
-> +_require_resize2fs()
-> +{
-> +	if [ -z "$RESIZE2FS_PROG" ]; then
-> +		_notrun "This test requires resize2fs utility."
-> +	fi
-> +}
-> +
+From: Dave Chinner <dchinner@redhat.com>
 
-I think this could simply be done by
+Currently a test appears to pass even if it leaves a corrupt
+filesystem behind, or a splat in the system logs that should not be
+there. While the test is internally tracked as failed (and the
+summary reports it as failed) the per-test output exits with a
+success and so emits a completion time before the post-test checks
+are run by the test harness.  Rework the check code to report
+post-test check failures as specific test failures rather than as
+separate failure line items in the overall harness output.
 
-_require_command "$RESIZE2FS_PROG" resize2fs
+Reworking where we emit the errors this also allows us to include
+the post-test filesystem checking in the test runtime. This is
+currently not accounted to the test and can be substantial. Hence
+the real elapsed time of each test is not accurately reflected in
+the time stats being reported and so regressions in filesystem
+checking performance go unnoticed.
 
-in the test.
+Changing the output reporting requires a complete reworking of the
+main test check loop. It's a bunch of spaghetti at the moment
+because it has post test reporting code at the end of the loop which
+must run regardless of the test result.  By moving the post test
+reporting to the start of the next loop iteration, we can clean up
+the code substantially by using continue directives where
+appropriate.
 
-And this could be added to other existing resize2fs tests too, e.g.
-ext4/010, ext4/032 and ext4/306, and convert 'resize2fs' to
-'$RESIZE2FS_PROG', in a follow-up patch.
+Also, for cases where we haven't run the test or it's already been
+marked as failed, don't bother running the filesystem/dmesg checks
+for failure as we're already going to report the test as failed.
 
->  _require_ugid_map()
->  {
->  	if [ ! -e /proc/self/uid_map ]; then
-> diff --git a/tests/ext4/033 b/tests/ext4/033
-> new file mode 100755
-> index 000000000000..66760182e80f
-> --- /dev/null
-> +++ b/tests/ext4/033
-> @@ -0,0 +1,118 @@
-> +#! /bin/bash
-> +# FS QA Test 033
-> +#
-> +# Test s_inodes_count overflow for huge filesystems. This bug was fixed
-> +# by commit "ext4: Forbid overflowing inode count when resizing".
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 Jan Kara, SUSE.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	_dmhugedisk_cleanup
-> +	# Recreate scratch so that _check_filesystems() does not complain
-> +	_scratch_mkfs >/dev/null 2>&1
+This touches almost all of the loop, so get rid of the remaining
+4 space indents inside the loop while moving all this code around.
 
-This could be done by calling _require_scratch_nocheck, instead of
-_require_scratch.
+Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+---
+ check     | 260 +++++++++++++++++++++++++++++-------------------------
+ common/rc |   6 ++
+ 2 files changed, 144 insertions(+), 122 deletions(-)
 
-But I'm not sure why it's expected to leave a corrupted fs behind after?
+diff --git a/check b/check
+index f6fb352bcbb9..0cdf95e9f5e7 100755
+--- a/check
++++ b/check
+@@ -38,10 +38,12 @@ randomize=false
+ export here=`pwd`
+ xfile=""
+ brief_test_summary=false
+-_err_msg=""
+ do_report=false
+ DUMP_OUTPUT=false
+ 
++# This is a global variable used to pass test failure text to reporting gunk
++_err_msg=""
++
+ # start the initialisation work now
+ iam=check
+ 
+@@ -643,78 +645,97 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 	seqres="$check"
+ 	_check_test_fs
+ 
+-	for seq in $list
+-	do
+-	    err=false
+-	    _err_msg=""
+-	    if [ ! -f $seq ]; then
+-	        # Try to get full name in case the user supplied only seq id
+-	        # and the test has a name. A bit of hassle to find really
+-	        # the test and not its sample output or helping files.
+-	        bname=$(basename $seq)
+-	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
+-	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
+-	                END { print shortest }')
+-	        if [ -f $full_seq ] \
+-	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
+-	            seq=$full_seq
+-	        fi
+-	    fi
++	err=false
++	first_test=true
++	for seq in $list ; do
++		# Run report for previous test!
++		if $err ; then
++			bad="$bad $seqnum"
++			n_bad=`expr $n_bad + 1`
++			tc_status="fail"
++		fi
++		if $do_report && ! $first_test ; then
++			if [ $tc_status != "expunge" ] ; then
++				_make_testcase_report "$tc_status"
++			fi
++		fi
++		first_test=false
++
++		err=false
++		if [ ! -f $seq ]; then
++			# Try to get full name in case the user supplied only
++			# seq id and the test has a name. A bit of hassle to
++			# find really the test and not its sample output or
++			# helping files.
++			bname=$(basename $seq)
++			full_seq=$(find $(dirname $seq) -name $bname* -executable |
++				awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
++				     END { print shortest }')
++			if [ -f $full_seq ] && \
++			   [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
++				seq=$full_seq
++			fi
++		fi
+ 
+-	    # the filename for the test and the name output are different.
+-	    # we don't include the tests/ directory in the name output.
+-	    export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+-
+-	    # Similarly, the result directory needs to replace the tests/
+-	    # part of the test location.
+-	    group=`dirname $seq`
+-	    if $OPTIONS_HAVE_SECTIONS; then
+-		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
+-		REPORT_DIR="$RESULT_BASE/$section"
+-	    else
+-		export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
+-		REPORT_DIR="$RESULT_BASE"
+-	    fi
+-	    seqres="$REPORT_DIR/$seqnum"
++		# the filename for the test and the name output are different.
++		# we don't include the tests/ directory in the name output.
++		export seqnum=`echo $seq | sed -e "s;$SRC_DIR/;;"`
+ 
+-	    mkdir -p $RESULT_DIR
++		# Similarly, the result directory needs to replace the tests/
++		# part of the test location.
++		group=`dirname $seq`
++		if $OPTIONS_HAVE_SECTIONS; then
++			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;${RESULT_BASE}/$section;"`
++			REPORT_DIR="$RESULT_BASE/$section"
++		else
++			export RESULT_DIR=`echo $group | sed -e "s;$SRC_DIR;$RESULT_BASE;"`
++			REPORT_DIR="$RESULT_BASE"
++		fi
++		seqres="$REPORT_DIR/$seqnum"
+ 
+-	    echo -n "$seqnum"
++		mkdir -p $RESULT_DIR
++		echo -n "$seqnum"
+ 
+-	    if $showme; then
+-		_expunge_test $seqnum
+-		if [ $? -eq 1 ]; then
++		if $showme; then
++			_expunge_test $seqnum
++			if [ $? -eq 1 ]; then
++			    tc_status="expunge"
++			    continue
++			fi
++			echo
++			start=0
++			stop=0
++			tc_status="list"
++			n_notrun=`expr $n_notrun + 1`
+ 			continue
+ 		fi
+-		echo
+-		start=0
+-		stop=0
+-		n_notrun=`expr $n_notrun + 1`
+-		if $do_report; then
+-			_make_testcase_report "list"
++
++		tc_status="pass"
++		if [ ! -f $seq ]; then
++			echo " - no such test?"
++			continue
+ 		fi
+-		continue
+-	    fi
+-	    tc_status="pass"
+-	    if [ ! -f $seq ]; then
+-		echo " - no such test?"
+-	    else
++
+ 		# really going to try and run this one
+-		#
+ 		rm -f $seqres.out.bad
+ 
+ 		# check if we really should run it
+ 		_expunge_test $seqnum
+ 		if [ $? -eq 1 ]; then
++			tc_status="expunge"
+ 			continue
+ 		fi
+ 
++		# record that we really tried to run this test.
++		try="$try $seqnum"
++		n_try=`expr $n_try + 1`
++
+ 		# slashes now in names, sed barfs on them so use grep
+ 		lasttime=`grep -w ^$seqnum $check.time | awk '// {print $2}'`
+ 		if [ "X$lasttime" != X ]; then
+-			echo -n " ${lasttime}s ..."
++			echo -n " ${lasttime}s ... "
+ 		else
+-			echo -n "	"	# prettier output with timestamps.
++			echo -n "	" # prettier output with timestamps.
+ 		fi
+ 		rm -f core $seqres.notrun
+ 
+@@ -736,90 +757,85 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			./$seq >$tmp.out 2>&1
+ 			sts=$?
+ 		fi
+-		$timestamp && _timestamp
+-		stop=`_wallclock`
+ 
+-		if [ -f core ]
+-		then
+-		    _err_msg="[dumped core]"
+-		    echo -n " $_err_msg"
+-		    mv core $RESULT_BASE/$seqnum.core
+-		    err=true
++		if [ -f core ]; then
++			_dump_err_cont "[dumped core]"
++			mv core $RESULT_BASE/$seqnum.core
++			err=true
+ 		fi
+ 
+-		if [ -f $seqres.notrun ]
+-		then
+-		    $timestamp || echo -n " [not run] "
+-		    $timestamp && echo " [not run]" && echo -n "	$seqnum -- "
+-		    cat $seqres.notrun
+-		    notrun="$notrun $seqnum"
+-		    n_notrun=`expr $n_notrun + 1`
+-		    tc_status="notrun"
+-		else
+-		    if [ $sts -ne 0 ]
+-		    then
+-			_err_msg="[failed, exit status $sts]"
+-			echo -n " $_err_msg"
++		if [ -f $seqres.notrun ]; then
++			$timestamp && _timestamp
++			stop=`_wallclock`
++			$timestamp || echo -n "[not run] "
++			$timestamp && echo " [not run]" && \
++				      echo -n "	$seqnum -- "
++			cat $seqres.notrun
++			notrun="$notrun $seqnum"
++			n_notrun=`expr $n_notrun + 1`
++			tc_status="notrun"
++			continue;
++		fi
++
++		if [ $sts -ne 0 ]; then
++			_dump_err_cont "[failed, exit status $sts]"
++			_test_unmount 2> /dev/null
++			_scratch_unmount 2> /dev/null
+ 			err=true
+-		    fi
+-		    if [ ! -f $seq.out ]
+-		    then
++		else
++			# the test apparently passed, so check for corruption
++			# and log messages that shouldn't be there.
++			_check_filesystems
++			_check_dmesg || err=true
++			_check_kmemleak || err=true
++		fi
++
++		# test ends after all checks are done.
++		$timestamp && _timestamp
++		stop=`_wallclock`
++
++		if [ ! -f $seq.out ]; then
+ 			_dump_err "no qualified output"
+ 			err=true
+-		    else
+-
+-			# coreutils 8.16+ changed quote formats in error messages from
+-			# `foo' to 'foo'. Filter old versions to match the new version.
+-			sed -i "s/\`/\'/g" $tmp.out
+-			if diff $seq.out $tmp.out >/dev/null 2>&1
+-			then
+-			    if $err
+-			    then
+-				:
+-			    else
++			continue;
++		fi
++
++		# coreutils 8.16+ changed quote formats in error messages
++		# from `foo' to 'foo'. Filter old versions to match the new
++		# version.
++		sed -i "s/\`/\'/g" $tmp.out
++		if diff $seq.out $tmp.out >/dev/null 2>&1 ; then
++			if ! $err ; then
+ 				echo "$seqnum `expr $stop - $start`" >>$tmp.time
+ 				echo -n " `expr $stop - $start`s"
+-			    fi
+-			    echo ""
+-			else
+-			    echo " - output mismatch (see $seqres.out.bad)"
+-			    mv $tmp.out $seqres.out.bad
+-			    $diff $seq.out $seqres.out.bad | {
+-				if test "$DIFF_LENGTH" -le 0; then
+-					cat
+-				else
+-					head -n "$DIFF_LENGTH"
+-					echo "..."
+-					echo "(Run '$diff $seq.out $seqres.out.bad'" \
+-						" to see the entire diff)"
+-				fi; } | \
+-				sed -e 's/^\(.\)/    \1/'
+-			    _err_msg="output mismatch (see $diff $seq.out $seqres.out.bad)"
+-			    err=true
+ 			fi
+-		    fi
+-		    try="$try $seqnum"
+-		    n_try=`expr $n_try + 1`
+-		    _check_filesystems
+-		    _check_dmesg || err=true
+-		    _check_kmemleak || err=true
++			echo ""
++		else
++			_dump_err "- output mismatch (see $seqres.out.bad)"
++			mv $tmp.out $seqres.out.bad
++			$diff $seq.out $seqres.out.bad | {
++			if test "$DIFF_LENGTH" -le 0; then
++				cat
++			else
++				head -n "$DIFF_LENGTH"
++				echo "..."
++				echo "(Run '$diff $seq.out $seqres.out.bad'" \
++					" to see the entire diff)"
++			fi; } | sed -e 's/^\(.\)/    \1/'
++			err=true
+ 		fi
++	done
+ 
+-	    fi
+-
+-	    # come here for each test, except when $showme is true
+-	    #
+-	    if $err
+-	    then
++	# make sure we record the status of the last test we ran.
++	if $err ; then
+ 		bad="$bad $seqnum"
+ 		n_bad=`expr $n_bad + 1`
+ 		tc_status="fail"
+-	    fi
+-	    if $do_report; then
++	fi
++	if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
+ 		_make_testcase_report "$tc_status"
+-	    fi
+-	    seq="after_$seqnum"
+-	done
++	fi
++
+ 	sect_stop=`_wallclock`
+ 	interrupt=false
+ 	_wrapup
+diff --git a/common/rc b/common/rc
+index 52b128982e98..68aad24bfa7c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -126,6 +126,12 @@ _dump_err()
+     echo "$_err_msg"
+ }
+ 
++_dump_err_cont()
++{
++    _err_msg="$*"
++    echo -n "$_err_msg"
++}
++
+ _dump_err2()
+ {
+     _err_msg="$*"
+-- 
+2.17.0
 
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmhugedisk
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +_require_scratch
-> +_require_dmhugedisk
-> +_require_dumpe2fs
-> +_require_resize2fs
-> +
-> +# Figure out block size
-> +echo "Figure out block size"
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_mount >> $seqres.full
-> +
-> +testdir=$SCRATCH_MNT/test-$seq
-> +blksz="$(_get_block_size $SCRATCH_MNT)"
-> +
-> +umount $SCRATCH_MNT
-
-_scratch_unmount
-
-> +
-> +INODES_PER_GROUP=$((blksz*8))
-> +GROUP_BLOCKS=$((blksz*8))
-> +
-> +# Number of groups to overflow s_inodes_count
-> +LIMIT_GROUPS=$(((1<<32)/INODES_PER_GROUP))
-
-Use lower case for local variables?
-
-> +
-> +# Create device huge enough so that overflowing inode count is possible
-> +echo "Format huge device"
-> +_dmhugedisk_init $(((LIMIT_GROUPS + 16)*GROUP_BLOCKS*(blksz/512)))
-
-I think we need to require a minimum size on SCRATCH_DEV too, otherwise
-I got mkfs failure when testing with 1k block size on a 10G SCRATCH_DEV,
-the backing device didn't have enough space to store the metadata.
-
-After assigning a 25G device to SCRATCH_DEV, mkfs with 1k block size
-passed, but test still failed in the end, I'm not sure what's going
-wrong this time..
-
---- tests/ext4/033.out  2018-05-28 22:12:56.234867728 +0800
-+++ /root/workspace/xfstests/results//ext4_1k/ext4/033.out.bad
-2018-05-29 00:20:56.907283189 +0800
-@@ -3,4 +3,4 @@
- Format huge device
- Resizing to inode limit + 1...
- Resizing to max group count...
--Resizing device size...
-+Resizing failed!
-
-And dmesg showed:
-
-[166934.718495] run fstests ext4/033 at 2018-05-29 00:07:04
-[166937.651454] EXT4-fs (dm-2): mounted filesystem with ordered data mode. Opts: acl,user_xattr
-[167629.640111] EXT4-fs (dm-11): mounted filesystem with ordered data mode. Opts: (null)
-[167632.068897] EXT4-fs (dm-11): resizing filesystem from 4294836224 to 4294967296 blocks
-[167632.069900] EXT4-fs warning (device dm-11): ext4_resize_fs:1937: resize would cause inodes_count overflow
-[167765.672787] EXT4-fs (dm-11): resizing filesystem from 4294836224 to 4294959104 blocks
-[167765.673573] EXT4-fs error (device dm-11): ext4_resize_fs:1950: comm resize2fs: resize_inode and meta_bg enabled simultaneously
-[167766.005282] EXT4-fs warning (device dm-11): ext4_resize_begin:45: There are errors in the filesystem, so online resizing is not allowed
-
-Tests with 2k/4k block sizes all passed.
-
-Thanks,
-Eryu
-
-> +
-> +# Start with small fs
-> +GROUP_COUNT=$((LIMIT_GROUPS-16))
-> +_mkfs_dev -N $((GROUP_COUNT*INODES_PER_GROUP)) -b $blksz \
-> +	$DMHUGEDISK_DEV $((GROUP_COUNT*GROUP_BLOCKS))
-> +
-> +_mount $DMHUGEDISK_DEV $SCRATCH_MNT
-> +
-> +echo "Initial fs dump" >> $seqres.full
-> +$DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> +
-> +# This should fail, s_inodes_count would just overflow!
-> +echo "Resizing to inode limit + 1..."
-> +$RESIZE2FS_PROG $DMHUGEDISK_DEV $((LIMIT_GROUPS*GROUP_BLOCKS)) >> $seqres.full 2>&1
-> +if [ $? -eq 0 ]; then
-> +	echo "Resizing succeeded but it should fail!"
-> +	exit
-> +fi
-> +
-> +# This should succeed, we are maxing out inodes
-> +echo "Resizing to max group count..."
-> +$RESIZE2FS_PROG $DMHUGEDISK_DEV $(((LIMIT_GROUPS-1)*GROUP_BLOCKS)) >> $seqres.full 2>&1
-> +if [ $? -ne 0 ]; then
-> +	echo "Resizing failed!"
-> +	exit
-> +fi
-> +
-> +echo "Fs dump after resize" >> $seqres.full
-> +$DUMPE2FS_PROG -h $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> +
-> +# This should fail, s_inodes_count would overflow by quite a bit!
-> +echo "Resizing device size..."
-> +$RESIZE2FS_PROG $DMHUGEDISK_DEV >> $seqres.full 2>&1
-> +if [ $? -eq 0 ]; then
-> +	echo "Resizing succeeded but it should fail!"
-> +	exit
-> +fi
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/ext4/033.out b/tests/ext4/033.out
-> new file mode 100644
-> index 000000000000..3b7c748c6994
-> --- /dev/null
-> +++ b/tests/ext4/033.out
-> @@ -0,0 +1,6 @@
-> +QA output created by 033
-> +Figure out block size
-> +Format huge device
-> +Resizing to inode limit + 1...
-> +Resizing to max group count...
-> +Resizing device size...
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index 5bd15f82b3be..b850f568e674 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -35,6 +35,7 @@
->  030 auto quick dax
->  031 auto quick dax
->  032 auto quick ioctl resize
-> +033 auto ioctl resize
->  271 auto rw quick
->  301 aio auto ioctl rw stress defrag
->  302 aio auto ioctl rw stress defrag
-> -- 
-> 2.13.6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
