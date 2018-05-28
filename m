@@ -1,173 +1,64 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:35328 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754529AbeE1JtT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 05:49:19 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2 4/4] fstests: btrfs: seed device delete test
-Date: Mon, 28 May 2018 17:51:48 +0800
-Message-Id: <20180528095148.30828-5-anand.jain@oracle.com>
-In-Reply-To: <20180528095148.30828-1-anand.jain@oracle.com>
-References: <20180528095148.30828-1-anand.jain@oracle.com>
+Received: from mx2.suse.de ([195.135.220.15]:49767 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933484AbeE1QNt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 28 May 2018 12:13:49 -0400
+Date: Mon, 28 May 2018 11:37:58 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] Make ./new work for non-root user
+Message-ID: <20180528093758.va5pnwchjrgmb3sf@quack2.suse.cz>
+References: <20180524183055.16031-1-jack@suse.cz>
+ <20180525013034.GD10363@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180525013034.GD10363@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test case to verify that a seed device can be deleted
+On Fri 25-05-18 11:30:34, Dave Chinner wrote:
+> On Thu, May 24, 2018 at 08:30:55PM +0200, Jan Kara wrote:
+> > Currently 'new' script sources common/config which tries to find mkfs
+> > and fails if not found (which is likely for non-root user). This is
+> > inconvenient as development usually does not happen as root. In fact the
+> > vast majority of setup in common/config and common/rc is not necessary
+> > for 'new'. Split out the necessary bits into new common/config-base and
+> > use it in 'new'. Cleanup common/rc and common/config now that it's only
+> > used from 'check'.
+> > 
+> > Signed-off-by: Jan Kara <jack@suse.cz>
+> ....
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -20,18 +20,9 @@
+> >  #  Mountain View, CA 94043, USA, or: http://www.sgi.com
+> >  #-----------------------------------------------------------------------
+> >  
+> > -BC=$(which bc 2> /dev/null) || BC=
+> > +. common/config
+> 
+> Doesn't this means we now include common/config in every test setup
+> routine, even though the environment it sets up is inherited from
+> the check function.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/164     | 114 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/164.out |   9 +++++
- tests/btrfs/group   |   1 +
- 3 files changed, 124 insertions(+)
- create mode 100755 tests/btrfs/164
- create mode 100644 tests/btrfs/164.out
+What you describe was happening already in the past AFAICT. The test gets
+executed as "./$seq" so only exported variables are inherited.  Thus 'iam'
+variable is not set when executing the test and therefore common/rc was
+already including common/config. Also including common/config in each test
+is even required to get functions declared there. Am I missing something?
 
-diff --git a/tests/btrfs/164 b/tests/btrfs/164
-new file mode 100755
-index 000000000000..31f7f1f72d5e
---- /dev/null
-+++ b/tests/btrfs/164
-@@ -0,0 +1,114 @@
-+#! /bin/bash
-+# FS QA Test 164 seed device delete test
-+#
-+# Test case to verify that a seed device can be deleted
-+#
-+# Steps:
-+# Create a seed device
-+# Create a sprout device
-+# Remount RW
-+# Run device delete on the seed device
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+# Author: Anand Jain <anand.jain@oracle.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/module
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_loadable_fs_module "btrfs"
-+_require_scratch_dev_pool 2
-+_scratch_dev_pool_get 2
-+
-+DEV_SEED=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+DEV_SPROUT=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+
-+create_seed()
-+{
-+	_mkfs_dev $DEV_SEED
-+	run_check _mount $DEV_SEED $SCRATCH_MNT
-+	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 256K" $SCRATCH_MNT/foobar >\
-+		/dev/null
-+	echo -- gloden --
-+	od -x $SCRATCH_MNT/foobar
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	_scratch_unmount
-+	$BTRFS_TUNE_PROG -S 1 $DEV_SEED
-+	run_check _mount $DEV_SEED $SCRATCH_MNT
-+}
-+
-+add_sprout()
-+{
-+	_run_btrfs_util_prog device add -f $DEV_SPROUT $SCRATCH_MNT
-+	run_check mount -o rw,remount $DEV_SEED $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+}
-+
-+delete_seed()
-+{
-+	_run_btrfs_util_prog device delete $DEV_SEED $SCRATCH_MNT
-+	_scratch_unmount
-+	_reload_fs_module "btrfs"
-+	run_check _mount $DEV_SPROUT $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	echo -- sprout --
-+	od -x $SCRATCH_MNT/foobar
-+	_scratch_unmount
-+}
-+
-+seed_is_mountable()
-+{
-+	run_check _mount $DEV_SEED $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	_scratch_unmount
-+}
-+
-+create_seed
-+add_sprout
-+delete_seed
-+
-+seed_is_mountable
-+
-+_scratch_dev_pool_put
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/164.out b/tests/btrfs/164.out
-new file mode 100644
-index 000000000000..c073b7a88ae1
---- /dev/null
-+++ b/tests/btrfs/164.out
-@@ -0,0 +1,9 @@
-+QA output created by 164
-+-- gloden --
-+0000000 abab abab abab abab abab abab abab abab
-+*
-+1000000
-+-- sprout --
-+0000000 abab abab abab abab abab abab abab abab
-+*
-+1000000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 2b7b0caf407e..d3639ba8dbfe 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -166,3 +166,4 @@
- 161 auto quick
- 162 auto quick
- 163 auto quick
-+164 auto quick
+> If so, that's going to add significantly to the individual test
+> startup time (which already takes a significant fraction of a
+> second) and this happens hundreds of times over an auto run instead
+> of only once when we start the test run. It seems wrong to be doing
+> this over and over again unecessarily....
+
+I agree but it's not a new problem introduced by my patch. I've just kept
+the current status and tried to make the initialization less confusing.
+
+								Honza
+
 -- 
-2.7.0
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
