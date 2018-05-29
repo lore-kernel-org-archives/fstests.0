@@ -1,78 +1,91 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33996 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S934078AbeE2Nsz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 09:48:55 -0400
-Date: Tue, 29 May 2018 21:48:48 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 1/4] fstests: btrfs: add seed sprout functionality test
-Message-ID: <20180529134848.GF6581@desktop>
-References: <20180528095148.30828-1-anand.jain@oracle.com>
- <20180528095148.30828-2-anand.jain@oracle.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:52496 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935454AbeE2PIK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 11:08:10 -0400
+Date: Tue, 29 May 2018 08:07:59 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfstests/shared: dedup integrity test by duperemove
+Message-ID: <20180529150759.GC30110@magnolia>
+References: <20180528045427.11159-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180528095148.30828-2-anand.jain@oracle.com>
+In-Reply-To: <20180528045427.11159-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 28, 2018 at 05:51:45PM +0800, Anand Jain wrote:
-> Create a seed device and add the sprout device to it.
+On Mon, May 28, 2018 at 12:54:27PM +0800, Zorro Lang wrote:
+> Duperemove is a tool for finding duplicated extents and submitting
+> them for deduplication, and it supports XFS. This case trys to
+> verify the integrity of XFS after running duperemove.
 > 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-
-This series looks fine to me from fstests' point of view, there're just
-some really minor common issues.
-
-But I'd like some reviews from other btrfs folks.
-
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
-> v1->v2: Use functions to do the respective operations. Add data
-> verification.
 > 
->  common/config       |  1 +
->  tests/btrfs/161     | 90 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/161.out |  9 ++++++
->  tests/btrfs/group   |  1 +
->  4 files changed, 101 insertions(+)
->  create mode 100755 tests/btrfs/161
->  create mode 100644 tests/btrfs/161.out
+> Hi,
+> 
+> There's not many softwares support XFS dedup now, duperemove is a rare one.
+> So I write this case by using duperemove.
+> 
+> I use fsstress to make many files and data randomly, I don't know if there're
+> better things I can use? Because fsstress only write '0xff' into files, maybe
+> I should add an option to make fsstress can write random character?
+
+Heh.  But you probably don't want totally random contents because then
+dupremove doesn't do much.
+
+> 
+> Please tell me, if you have better ideas:)
+> 
+> PS: This case test passed on XFS(with reflink=1) and btrfs. And the duperemove
+> can reclaim some space in the test, see below:
+> 
+>   Before duperemove
+>     Filesystem                 1K-blocks    Used Available Use% Mounted on
+>     /dev/mapper/xxxx-xfscratch 31441920K 583692K 30858228K   2% /mnt/scratch
+> 
+>   After duperemove
+>     Filesystem                 1K-blocks    Used Available Use% Mounted on
+>     /dev/mapper/xxxx-xfscratch 31441920K 345728K 31096192K   2% /mnt/scratch
+> 
+> Thanks,
+> Zorro
+> 
+>  common/config        |  1 +
+>  tests/shared/008     | 88 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/shared/008.out |  2 ++
+>  tests/shared/group   |  1 +
+>  4 files changed, 92 insertions(+)
+>  create mode 100755 tests/shared/008
+>  create mode 100644 tests/shared/008.out
 > 
 > diff --git a/common/config b/common/config
-> index af360cefc804..f0735cb0153d 100644
+> index 02c378a9..def559c1 100644
 > --- a/common/config
 > +++ b/common/config
-> @@ -235,6 +235,7 @@ case "$HOSTOS" in
->          export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
->          export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
->  	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-> +	export BTRFS_TUNE_PROG="`set_prog_path btrfstune`"
->          export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
->          export MKFS_NFS_PROG="false"
->          export MKFS_CIFS_PROG="false"
-> diff --git a/tests/btrfs/161 b/tests/btrfs/161
+> @@ -207,6 +207,7 @@ export SQLITE3_PROG="`set_prog_path sqlite3`"
+>  export TIMEOUT_PROG="`set_prog_path timeout`"
+>  export SETCAP_PROG="`set_prog_path setcap`"
+>  export GETCAP_PROG="`set_prog_path getcap`"
+> +export DUPEREMOVE_PROG="`set_prog_path duperemove`"
+>  
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/tests/shared/008 b/tests/shared/008
 > new file mode 100755
-> index 000000000000..009e95354e85
+> index 00000000..dace5429
 > --- /dev/null
-> +++ b/tests/btrfs/161
-> @@ -0,0 +1,90 @@
+> +++ b/tests/shared/008
+> @@ -0,0 +1,88 @@
 > +#! /bin/bash
-> +# FS QA Test 161 seed sprout functionality test
-
-It'd be good to put the all test descriptions below the test seq number,
-as all other tests do.
-
+> +# FS QA Test 008
 > +#
-> +#  Create a seed device, mount it and, add a new device to create a
-> +#  sprout filesystem.
+> +# Dedup integrity test by duperemove
 > +#
 > +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 Oracle.  All Rights Reserved.
-> +# Author: Anand Jain <anand.jain@oracle.com>
-
-The author info is not needed.
-
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -107,90 +120,90 @@ The author info is not needed.
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
+> +. ./common/reflink
 > +
 > +# remove previous $seqres.full before test
 > +rm -f $seqres.full
 > +
 > +# real QA test starts here
 > +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
+> +# duperemove only supports btrfs and xfs (with reflink feature).
+> +# Add other filesystems if it supports more later.
+> +_supported_fs xfs btrfs
 > +_supported_os Linux
-> +_require_scratch_dev_pool 2
 
-_require_command "$BTRFS_TUNE_PROG" btrfstune
+_require_command "$DUPEREMOVE_PROG" duperemove ?
 
-> +
-> +_scratch_dev_pool_get 2
-> +
-> +DEV_SEED=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-> +DEV_SPROUT=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
+> +_require_scratch_reflink
 
-Better to use lower case for local variables.
-
-Thanks,
-Eryu
+_require_scratch_dedupe
 
 > +
-> +create_seed()
-> +{
-> +	_mkfs_dev $DEV_SEED
-> +	run_check _mount $DEV_SEED $SCRATCH_MNT
-> +	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 256K" $SCRATCH_MNT/foobar >\
-> +		/dev/null
-> +	echo -- golden --
-> +	od -x $SCRATCH_MNT/foobar
-> +	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-> +	_scratch_unmount
-> +	$BTRFS_TUNE_PROG -S 1 $DEV_SEED
-> +	run_check _mount $DEV_SEED $SCRATCH_MNT
-> +}
+> +[ "$DUPEREMOVE_PROG" = "" ] && _notrun "duperemove not found"
+> +_scratch_mkfs > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
 > +
-> +create_sprout()
-> +{
-> +	_run_btrfs_util_prog device add -f $DEV_SPROUT $SCRATCH_MNT
-> +	_scratch_unmount
-> +	run_check _mount $DEV_SPROUT $SCRATCH_MNT
-> +	echo -- sprout --
-> +	od -x $SCRATCH_MNT/foobar
-> +	_scratch_unmount
-> +}
+> +testdir=$SCRATCH_MNT/test-$seq
+> +mkdir $testdir
 > +
-> +create_seed
-> +create_sprout
+> +fsstress_opts="-w -r -f mknod=0"
+> +# Create some files and make a duplicate
+> +$FSSTRESS_PROG $fsstress_opts -d $testdir \
+> +	       -n $((500 * LOAD_FACTOR)) -p 10 >/dev/null 2>&1
+> +duptestdir=${testdir}.dup
+> +cp -a $testdir $duptestdir
 > +
-> +_scratch_dev_pool_put
+> +# Make some difference in two directories
+> +$FSSTRESS_PROG $fsstress_opts -d $testdir -n 200 -p 5 >/dev/null 2>&1
+> +$FSSTRESS_PROG $fsstress_opts -d $duptestdir -n 200 -p 5 >/dev/null 2>&1
+> +
+> +# Record all files' md5 checksum
+> +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
+> +find $duptestdir -type f -exec md5sum {} \; > $TEST_DIR/dup${seq}md5.sum
+> +
+> +# Dedup
+> +echo "== Duperemove output ==" >> $seqres.full
+> +$DUPEREMOVE_PROG -dr $SCRATCH_MNT/ >>$seqres.full 2>&1
+> +
+> +# Verify all files' integrity
+> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> +md5sum -c --quiet $TEST_DIR/dup${seq}md5.sum
+
+Can we _scratch_mount_cycle and md5sum -c again so that we test that the
+pagecache contents don't mutate and a fresh read from the disk also
+doesn't show mutations?
+
+--D
+
+> +
+> +echo "Silence is golden"
 > +
 > +status=0
 > +exit
-> diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+> diff --git a/tests/shared/008.out b/tests/shared/008.out
 > new file mode 100644
-> index 000000000000..363b8217f45c
+> index 00000000..dd68d5a4
 > --- /dev/null
-> +++ b/tests/btrfs/161.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 161
-> +-- golden --
-> +0000000 abab abab abab abab abab abab abab abab
-> +*
-> +1000000
-> +-- sprout --
-> +0000000 abab abab abab abab abab abab abab abab
-> +*
-> +1000000
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index f04ee8d5297c..fe83631f0f33 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -163,3 +163,4 @@
->  158 auto quick raid scrub
->  159 auto quick
->  160 auto quick
-> +161 auto quick
+> +++ b/tests/shared/008.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 008
+> +Silence is golden
+> diff --git a/tests/shared/group b/tests/shared/group
+> index b3663a03..de7fe79f 100644
+> --- a/tests/shared/group
+> +++ b/tests/shared/group
+> @@ -10,6 +10,7 @@
+>  005 dangerous_fuzzers
+>  006 auto enospc
+>  007 dangerous_fuzzers
+> +008 auto quick dedupe
+>  032 mkfs auto quick
+>  272 auto enospc rw
+>  289 auto quick
 > -- 
-> 2.7.0
+> 2.14.3
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
