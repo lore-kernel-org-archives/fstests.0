@@ -1,56 +1,59 @@
-Received: from mx2.suse.de ([195.135.220.15]:39104 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S936967AbeE2Q4G (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 May 2018 12:56:06 -0400
-Received: from relay1.suse.de (charybdis-ext-too.suse.de [195.135.220.254])
-        by mx2.suse.de (Postfix) with ESMTP id 49797AD69
-        for <fstests@vger.kernel.org>; Tue, 29 May 2018 16:56:05 +0000 (UTC)
-From: Jan Kara <jack@suse.cz>
-Subject: [PATCH 1/6] dmhugedisk: Allow specifying of chunk size
-Date: Tue, 29 May 2018 18:55:56 +0200
-Message-Id: <20180529165601.32133-2-jack@suse.cz>
-In-Reply-To: <20180529165601.32133-1-jack@suse.cz>
-References: <20180529165601.32133-1-jack@suse.cz>
+Received: from mail-yb0-f195.google.com ([209.85.213.195]:44422 "EHLO
+        mail-yb0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S965095AbeE2RIE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 13:08:04 -0400
+MIME-Version: 1.0
+In-Reply-To: <20180511104156.GO8373@desktop>
+References: <20180509152705.GA10101@redhat.com> <CAOQ4uxgRb0T6nWou7uasOF+QGEHRMa1C5wD4AsJABJDXK+yNhQ@mail.gmail.com>
+ <20180511104156.GO8373@desktop>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 29 May 2018 20:08:03 +0300
+Message-ID: <CAOQ4uxhDGKVdhqW_PU0RFzcysHO4XCeEHy0iHz-kgFUja-2nLA@mail.gmail.com>
+Subject: Re: [PATCH V2] xfstest: overlay: Add tests for overlay metadata only
+ copy up feature
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Ext4 will want to use dmhugedisk infrastructure for testing resize bugs.
-Ext4 fs images are rather sparse (especially with smaller block sizes) so
-the current chunk size of 512 sectors leads to large space consumption.
-Allow test to specify chunk size.
+On Fri, May 11, 2018 at 1:41 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+> On Wed, May 09, 2018 at 07:22:48PM +0300, Amir Goldstein wrote:
+>> On Wed, May 9, 2018 at 6:27 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+>> > Hi,
+>> >
+>> > Please find attached the V2 of the patch. Took care of Amir's comments
+>> > from previous version.
+>> >
+>> > Add tests for metadata only copy up feature.
+>> >
+>> > Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+>>
+>> Looks good.
+>>
+>> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+>
+> Thanks for the review!
+>
+>>
+>> Just a note to Eryu -
+>>
+>> You may want to hold on to this test until metacopy is merged
+>> or at least staged on Miklos' next branch.
+>
+> I'd wait for the patches hit Miklos' tree.
+>
 
-Signed-off-by: Jan Kara <jack@suse.cz>
----
- common/dmhugedisk | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Vivek,
 
-diff --git a/common/dmhugedisk b/common/dmhugedisk
-index 4d3b63fcfcca..733b10cd2292 100644
---- a/common/dmhugedisk
-+++ b/common/dmhugedisk
-@@ -31,6 +31,11 @@ _dmhugedisk_init()
- {
- 	test -z "$1" && _fatal "must specify sector count to _dmhugedisk_init"
- 	local dm_backing_dev=$SCRATCH_DEV
-+	local chunk_size="$2"
-+
-+	if [ -z "$chunk_size" ]; then
-+		chunk_size=512
-+	fi
- 
- 	$DMSETUP_PROG remove huge-test > /dev/null 2>&1
- 	$DMSETUP_PROG remove huge-test-zero > /dev/null 2>&1
-@@ -41,7 +46,7 @@ _dmhugedisk_init()
- 	DMHUGEDISK_DEV='/dev/mapper/huge-test'
- 
- 	DMHUGEDISK_ZERO_TABLE="0 $blk_dev_size zero"
--	DMHUGEDISK_DEV_TABLE="0 $blk_dev_size snapshot $DMHUGEDISK_ZERO $SCRATCH_DEV N 512"
-+	DMHUGEDISK_DEV_TABLE="0 $blk_dev_size snapshot $DMHUGEDISK_ZERO $SCRATCH_DEV N $chunk_size"
- 
- 	$DMSETUP_PROG create huge-test-zero --table "$DMHUGEDISK_ZERO_TABLE" || \
- 		_fatal "failed to create dm huge zero device"
--- 
-2.13.6
+This test seems to fail with overlayfs-next on check_file_blocks().
+With ext4 underneath, blocks count is bigger than expected by 8 sectors.
+With xfs+reflink the blocks check also fails with different actual nr of blocks.
 
+I think it is generally unreliable to try to compute nr of blocks
+and fail the test if actual is different than computed.
+Maybe just check that overlay nr blocks is as the actual lower nr of
+blocks.
+
+Thanks,
+Amir.
