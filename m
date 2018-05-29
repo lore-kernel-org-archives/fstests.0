@@ -1,51 +1,104 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:46645 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S935386AbeE2CBh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 22:01:37 -0400
-Date: Tue, 29 May 2018 12:01:27 +1000
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:28315 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932498AbeE2CpC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 22:45:02 -0400
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1fNUd9-0007xL-TL
+        for fstests@vger.kernel.org; Tue, 29 May 2018 12:44:59 +1000
+Date: Tue, 29 May 2018 12:44:59 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] Make ./new work for non-root user
-Message-ID: <20180529020127.GJ23861@dastard>
-References: <20180524183055.16031-1-jack@suse.cz>
- <20180529013914.GI23861@dastard>
+Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
+Message-ID: <20180529024459.GK23861@dastard>
+References: <20180529004752.8243-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180529013914.GI23861@dastard>
+In-Reply-To: <20180529004752.8243-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 29, 2018 at 11:39:14AM +1000, Dave Chinner wrote:
-> Second go....
+On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
+> Hi folks,
 > 
-> On Thu, May 24, 2018 at 08:30:55PM +0200, Jan Kara wrote:
-> > Currently 'new' script sources common/config which tries to find mkfs
-> > and fails if not found (which is likely for non-root user). This is
-> > inconvenient as development usually does not happen as root. In fact the
-> > vast majority of setup in common/config and common/rc is not necessary
-> > for 'new'. Split out the necessary bits into new common/config-base and
-> > use it in 'new'. Cleanup common/rc and common/config now that it's only
-> > used from 'check'.
+> To reduce boilerplate text in each test, I'm proposing the following
+> two sets of modifications:
 > 
-> FWIW, common/config is also called from setup.
-.....
-> > @@ -88,12 +90,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
-> >  
-> >  export RECREATE_TEST_DEV=false
-> >  
-> > -# $1 = prog to look for
-> > -set_prog_path()
-> > -{
-> > -	type -P $1
-> > -}
+> 	1. set tests up using a common include file; and
+> 	2. switch tests over to using SPDX license tags
 > 
-> Can we just get rid of set_prog_path() and replace it with direct
-> calls to $(type -P foo) as an initial patch? This goes away at that
-> point, because new can then just use a locally coded version....
+> The first patch is simply moving all the common per-test setup code
+> the test harness requires into a common file that all tests then
+> include. This is code that nobody should ever need to change for any
+> given test and pulling it out of the tests themselves removes the
+> temptation for anyone to "optimise" the test setup code. There are a
+> large number of tests where the setup code has been "optimised" and,
+> as such, the common code that relies on the per-test setup may be
+> compromised.
+> 
+> The other advantage of doing this is that tree-wide test setup
+> changes now become much simpler to do, as it will not require
+> touching every test in the tree. This will substanitally reduce the
+> burden of improving the test infrastructure.
+> 
+> This patch modifies a couple of tests to demonstrate how the tests
+> themselves will end up looking - they still have a cleanup()
+> function called on test exit, and the status variable is still
+> treated the same way. However, tests now only need to clean up stuff
+> created within the test, so it much cleaner.
+> 
+> The second patch touches licensing, so please consider this one
+> carefully. It introduces SPDX license tags to the xfstests codebase,
+> and defines the tags and licenses they refer to in the LICENSES/
+> directory. At present, I have only created a GPL-2.0 license tag,
+> and replaced all the GPL v2.0 license texts in the root
+> and common/ directories with SPDX tags. I also converted the same
+> two tests I touched in the first patch to convert them, so you can
+> see exactly what tests will look like after this.
+> 
+> I'll go throw how I've converted these files, so people can comment
+> on the process and the decisions I've made.
+> 
+> 	1. Baseline assumption: unless otherwise specifically
+> 	mentioned, the code is licensed under a GPL v2.0 license
+> 
+> 	2. If the file has a GPL license blurb, replace it with
+> 	a "SPDX-License-Identifier: GPL-2.0" tag.
+> 
+> 	3. If the file has no GPL license blurb, add a new
+> 	"SPDX-License-Identifier: GPL-2.0" tag.
+> 
+> 	3. If the file has a "Copyright ..." line, preserve it after
+> 	the SPDX tag.
+> 
+> 	4. Remove author and other lines in the header with email
+> 	addresses in them - we have the author history in the git
+> 	repository. Git blame can tell us exactly who wrote what
+> 	code and hence we don't need it in the code itself.
+> 
+> Most (possibly all?) of the code under tests/ has GPL license blurbs
+> - they'll all get converted by this same process. It's a bit murkier
+> when it comes to src/ and ltp/, as this code has varied history. For
+> these directories, the first pass I make will for code that has
+> explicit GPL licenses. Every other file will need to be looked at
+> on a case by case basis and done as time permits...
+> 
+> Please note that I'm not trying to change the license on any of the
+> code, just change the way it is documented to reduce boilerplate
+> code. If I've made any changes that modify the license of any
+> specific code, then I've made a mistake and I need to fix that.
+> Please point out anywhere you think my actions have not been clear
+> and obvious.
+> 
+> Once we have some consensus on how we want to proceed, I'll do the
+> grunt work and co-ordinate with Eryu on minimising the number of
+> times I have to rebase a patchset that is going to touch around 1500
+> files...
 
-Something like this?
+FWIW, most of the license grunt work will be scripted. The awk
+script below replaces a standard format test header with a SPDX
+version....
 
 Cheers,
 
@@ -54,297 +107,39 @@ Dave.
 Dave Chinner
 david@fromorbit.com
 
-fstests: get rid of set_prog_path
+/^#\![ ]*\/bin\/bash/ {
+	print $0
+	print "# SPDX-License-Identifier: GPL-2.0"
+	hdr = 1
+	ignore = 0
+	str=""
+	next
+}
+/^#[\-]{40}/ {
+	if (hdr == 1 && ignore == 0) {
+		ignore = 1
+		hdr = 0
+	} else {
+		ignore = 0
+	}
+	next
+}
+/^#[ ]*Copyright/ {
+	print $0 "\n#"
+	print str
+	str=""
+	next
+}
 
-From: Dave Chinner <dchinner@redhat.com>
+// {
+	if (ignore != 0)
+		next
+	if (str == "")
+		str = $0
+	else
+		str = str "\n" $0
+}
 
-It's just a one line wrapper that adds complexity, remove it. Move
-the couple of calls in tests to common/config, but leave the xfsdump
-setup in place and just convert it.
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- common/config   | 170 +++++++++++++++++++++++++++-----------------------------
- common/dump     |   6 +-
- tests/btrfs/085 |   2 -
- tests/xfs/446   |   1 -
- 4 files changed, 86 insertions(+), 93 deletions(-)
-
-diff --git a/common/config b/common/config
-index 1cf402eee1dc..ef774b8d552b 100644
---- a/common/config
-+++ b/common/config
-@@ -88,17 +88,11 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
- 
- export RECREATE_TEST_DEV=false
- 
--# $1 = prog to look for
--set_prog_path()
--{
--	type -P $1
--}
--
- # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
- set_mkfs_prog_path_with_opts()
- {
- 	local fstyp=$1
--	local p=`set_prog_path mkfs.$fstyp`
-+	local p=$(type -P mkfs.$fstyp)
- 
- 	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
- 	# matter since it also prints the help when an invalid option is given.
-@@ -117,105 +111,106 @@ _fatal()
-     exit 1
- }
- 
--export MKFS_PROG="`set_prog_path mkfs`"
-+export MKFS_PROG=$(type -P mkfs)
- [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
- 
--export MOUNT_PROG="`set_prog_path mount`"
-+export MOUNT_PROG=$(type -P mount)
- [ "$MOUNT_PROG" = "" ] && _fatal "mount not found"
- 
--export UMOUNT_PROG="`set_prog_path umount`"
-+export UMOUNT_PROG=$(type -P umount)
- [ "$UMOUNT_PROG" = "" ] && _fatal "umount not found"
- 
- export FSSTRESS_PROG="./ltp/fsstress"
- [ ! -x $FSSTRESS_PROG ] && _fatal "fsstress not found or executable"
- 
--export PERL_PROG="`set_prog_path perl`"
-+export PERL_PROG=$(type -P perl)
- [ "$PERL_PROG" = "" ] && _fatal "perl not found"
- 
--export AWK_PROG="`set_prog_path awk`"
-+export AWK_PROG=$(type -P awk)
- [ "$AWK_PROG" = "" ] && _fatal "awk not found"
- 
--export SED_PROG="`set_prog_path sed`"
-+export SED_PROG=$(type -P sed)
- [ "$SED_PROG" = "" ] && _fatal "sed not found"
- 
--export BC_PROG="`set_prog_path bc`"
-+export BC_PROG=$(type -P bc)
- [ "$BC_PROG" = "" ] && _fatal "bc not found"
- 
- export PS_ALL_FLAGS="-ef"
- 
--export DF_PROG="`set_prog_path df`"
-+export DF_PROG=$(type -P df)
- [ "$DF_PROG" = "" ] && _fatal "df not found"
- [ "$HOSTOS" = "Linux" ] && export DF_PROG="$DF_PROG -T -P"
- 
--export XFS_IO_PROG="`set_prog_path xfs_io`"
-+export XFS_IO_PROG=$(type -P xfs_io)
- [ "$XFS_IO_PROG" = "" ] && _fatal "xfs_io not found"
- 
--export XFS_LOGPRINT_PROG="`set_prog_path xfs_logprint`"
--export XFS_REPAIR_PROG="`set_prog_path xfs_repair`"
--export XFS_DB_PROG="`set_prog_path xfs_db`"
--export XFS_GROWFS_PROG=`set_prog_path xfs_growfs`
--export XFS_SPACEMAN_PROG="`set_prog_path xfs_spaceman`"
--export XFS_SCRUB_PROG="`set_prog_path xfs_scrub`"
--export XFS_PARALLEL_REPAIR_PROG="`set_prog_path xfs_prepair`"
--export XFS_PARALLEL_REPAIR64_PROG="`set_prog_path xfs_prepair64`"
--export __XFSDUMP_PROG="`set_prog_path xfsdump`"
-+export XFS_LOGPRINT_PROG=$(type -P xfs_logprint)
-+export XFS_REPAIR_PROG=$(type -P xfs_repair)
-+export XFS_DB_PROG=$(type -P xfs_db)
-+export XFS_GROWFS_PROG=$(type -P xfs_growfs)
-+export XFS_SPACEMAN_PROG=$(type -P xfs_spaceman)
-+export XFS_SCRUB_PROG=$(type -P xfs_scrub)
-+export XFS_PARALLEL_REPAIR_PROG=$(type -P xfs_prepair)
-+export XFS_PARALLEL_REPAIR64_PROG=$(type -P xfs_prepair64)
-+export __XFSDUMP_PROG=$(type -P xfsdump)
- if [ -n "$__XFSDUMP_PROG" ]; then
- 	export XFSDUMP_PROG="$__XFSDUMP_PROG -e"
- else
- 	export XFSDUMP_PROG=""
- fi
--export XFSRESTORE_PROG="`set_prog_path xfsrestore`"
--export XFSINVUTIL_PROG="`set_prog_path xfsinvutil`"
--export GETFATTR_PROG="`set_prog_path getfattr`"
--export SETFATTR_PROG="`set_prog_path setfattr`"
--export CHACL_PROG="`set_prog_path chacl`"
--export ATTR_PROG="`set_prog_path attr`"
--export QUOTA_PROG="`set_prog_path quota`"
--export XFS_QUOTA_PROG="`set_prog_path xfs_quota`"
--export KILLALL_PROG="`set_prog_path killall`"
--export INDENT_PROG="`set_prog_path indent`"
--export XFS_COPY_PROG="`set_prog_path xfs_copy`"
--export FSTRIM_PROG="`set_prog_path fstrim`"
--export DUMPE2FS_PROG="`set_prog_path dumpe2fs`"
--export FIO_PROG="`set_prog_path fio`"
--export FILEFRAG_PROG="`set_prog_path filefrag`"
--export E4DEFRAG_PROG="`set_prog_path e4defrag`"
--export LOGGER_PROG="`set_prog_path logger`"
--export DBENCH_PROG="`set_prog_path dbench`"
--export DMSETUP_PROG="`set_prog_path dmsetup`"
--export WIPEFS_PROG="`set_prog_path wipefs`"
--export DUMP_PROG="`set_prog_path dump`"
--export RESTORE_PROG="`set_prog_path restore`"
--export LVM_PROG="`set_prog_path lvm`"
--export CHATTR_PROG="`set_prog_path chattr`"
--export DEBUGFS_PROG="`set_prog_path debugfs`"
--export UUIDGEN_PROG="`set_prog_path uuidgen`"
--export GETRICHACL_PROG="`set_prog_path getrichacl`"
--export SETRICHACL_PROG="`set_prog_path setrichacl`"
--export KEYCTL_PROG="`set_prog_path keyctl`"
--export XZ_PROG="`set_prog_path xz`"
--export FLOCK_PROG="`set_prog_path flock`"
--export LDD_PROG="`set_prog_path ldd`"
--export TIMEOUT_PROG="`set_prog_path timeout`"
--export MAN_PROG="`set_prog_path man`"
--export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
--export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
--export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
--export THIN_CHECK_PROG="$(set_prog_path thin_check)"
--export PYTHON2_PROG="`set_prog_path python2`"
--export SQLITE3_PROG="`set_prog_path sqlite3`"
--export TIMEOUT_PROG="`set_prog_path timeout`"
--export SETCAP_PROG="`set_prog_path setcap`"
--export GETCAP_PROG="`set_prog_path getcap`"
-+export XFSRESTORE_PROG=$(type -P xfsrestore)
-+export XFSINVUTIL_PROG=$(type -P xfsinvutil)
-+export GETFATTR_PROG=$(type -P getfattr)
-+export SETFATTR_PROG=$(type -P setfattr)
-+export CHACL_PROG=$(type -P chacl)
-+export ATTR_PROG=$(type -P attr)
-+export QUOTA_PROG=$(type -P quota)
-+export XFS_QUOTA_PROG=$(type -P xfs_quota)
-+export KILLALL_PROG=$(type -P killall)
-+export INDENT_PROG=$(type -P indent)
-+export XFS_COPY_PROG=$(type -P xfs_copy)
-+export FSTRIM_PROG=$(type -P fstrim)
-+export DUMPE2FS_PROG=$(type -P dumpe2fs)
-+export FIO_PROG=$(type -P fio)
-+export FILEFRAG_PROG=$(type -P filefrag)
-+export E4DEFRAG_PROG=$(type -P e4defrag)
-+export LOGGER_PROG=$(type -P logger)
-+export DBENCH_PROG=$(type -P dbench)
-+export DMSETUP_PROG=$(type -P dmsetup)
-+export WIPEFS_PROG=$(type -P wipefs)
-+export DUMP_PROG=$(type -P dump)
-+export RESTORE_PROG=$(type -P restore)
-+export LVM_PROG=$(type -P lvm)
-+export CHATTR_PROG=$(type -P chattr)
-+export DEBUGFS_PROG=$(type -P debugfs)
-+export UUIDGEN_PROG=$(type -P uuidgen)
-+export GETRICHACL_PROG=$(type -P getrichacl)
-+export SETRICHACL_PROG=$(type -P setrichacl)
-+export KEYCTL_PROG=$(type -P keyctl)
-+export XZ_PROG=$(type -P xz)
-+export FLOCK_PROG=$(type -P flock)
-+export LDD_PROG=$(type -P ldd)
-+export TIMEOUT_PROG=$(type -P timeout)
-+export MAN_PROG=$(type -P man)
-+export NFS4_SETFACL_PROG=$(type -P nfs4_setfacl)
-+export NFS4_GETFACL_PROG=$(type -P nfs4_getfacl)
-+export UBIUPDATEVOL_PROG=$(type -P ubiupdatevol)
-+export THIN_CHECK_PROG=$(type -P thin_check)
-+export PYTHON2_PROG=$(type -P python2)
-+export SQLITE3_PROG=$(type -P sqlite3)
-+export TIMEOUT_PROG=$(type -P timeout)
-+export SETCAP_PROG=$(type -P setcap)
-+export GETCAP_PROG=$(type -P getcap)
-+export CHECKBASHISMS_PROG=$(type -P checkbashisms)
- 
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
- # But if neither one is available, just set it to "sleep 1" to wait for lv to
- # be settled
--UDEV_SETTLE_PROG="`set_prog_path udevadm`"
-+UDEV_SETTLE_PROG=$(type -P udevadm)
- if [ "$UDEV_SETTLE_PROG" == "" ]; then
- 	# try udevsettle command
--	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
-+	UDEV_SETTLE_PROG=$(type -P udevsettle)
- else
- 	# udevadm is available, add 'settle' as subcommand
- 	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
-@@ -228,23 +223,24 @@ export UDEV_SETTLE_PROG
- 
- case "$HOSTOS" in
-     Linux)
--        export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
--        export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
--        export MKFS_UDF_PROG="`set_prog_path mkudffs`"
--        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
--        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
--        export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
--        export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
--        export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
--	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
--        export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
--        export MKFS_NFS_PROG="false"
--        export MKFS_CIFS_PROG="false"
--        export MKFS_OVERLAY_PROG="false"
--        export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
--	export E2FSCK_PROG="`set_prog_path e2fsck`"
--	export TUNE2FS_PROG="`set_prog_path tune2fs`"
--	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
-+	export MKFS_XFS_PROG=$(type -P mkfs.xfs)
-+	export MKFS_EXT4_PROG=$(type -P mkfs.ext4)
-+	export MKFS_UDF_PROG=$(type -P mkudffs)
-+	export MKFS_BTRFS_PROG=$(type -P btrfs)
-+	export MKFS_F2FS_PROG=$(type -P f2fs)
-+	export DUMP_F2FS_PROG=$(type -P dump.f2fs)
-+	export BTRFS_UTIL_PROG=$(type -P btrfs)
-+	export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
-+	export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
-+	export BTRFS_DEBUG_TREE_PROG=$(type -P btrfs-debug-tree)
-+	export XFS_FSR_PROG=$(type -P xfs_fsr)
-+	export MKFS_NFS_PROG="false"
-+	export MKFS_CIFS_PROG="false"
-+	export MKFS_OVERLAY_PROG="false"
-+	export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
-+	export E2FSCK_PROG=$(type -P e2fsck)
-+	export TUNE2FS_PROG=$(type -P tune2fs)
-+	export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
-         ;;
- esac
- 
-diff --git a/common/dump b/common/dump
-index 7b9c10a25414..8a0ba1096d6a 100644
---- a/common/dump
-+++ b/common/dump
-@@ -29,10 +29,10 @@ if [ -n "$DEBUGDUMP" ]; then
- 
- 	# Use dump/restore in qa directory (copy them here) for debugging
- 	export PATH="$here:$PATH"
--	export __XFSDUMP_PROG="`set_prog_path xfsdump`"
-+	export __XFSDUMP_PROG=$(type -P xfsdump)
- 	export XFSDUMP_PROG="$__XFSDUMP_PROG -e"
--	export XFSRESTORE_PROG="`set_prog_path xfsrestore`"
--	export XFSINVUTIL_PROG="`set_prog_path xfsinvutil`"
-+	export XFSRESTORE_PROG=$(type -P xfsrestore)
-+	export XFSINVUTIL_PROG=$(type -P xfsinvutil)
- 	[ -x $here/xfsdump ]    && echo "Using xfstests' xfsdump for debug"
- 	[ -x $here/xfsrestore ] && echo "Using xfstests' xfsrestore for debug"
- 	[ -x $here/xfsinvutil ] && echo "Using xfstests' xfsinvutil for debug"
-diff --git a/tests/btrfs/085 b/tests/btrfs/085
-index 804899724cba..a1edc28341da 100755
---- a/tests/btrfs/085
-+++ b/tests/btrfs/085
-@@ -55,8 +55,6 @@ _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- _require_dm_target flakey
--
--BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
- _require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
- 
- rm -f $seqres.full
-diff --git a/tests/xfs/446 b/tests/xfs/446
-index 752c6a7de827..ac74723f471f 100755
---- a/tests/xfs/446
-+++ b/tests/xfs/446
-@@ -37,7 +37,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
--export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
- _require_command "$CHECKBASHISMS_PROG" checkbashisms
- 
- test -z "$WORKAREA" && _notrun "Can't find xfsprogs source"
+END {
+	print str
+}
