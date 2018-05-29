@@ -1,253 +1,116 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:36374 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935486AbeE2Qaj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 12:30:39 -0400
-Date: Tue, 29 May 2018 09:30:23 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfstests/shared: dedup integrity test by duperemove
-Message-ID: <20180529163023.GF30110@magnolia>
-References: <20180528045427.11159-1-zlang@redhat.com>
- <20180529150759.GC30110@magnolia>
- <20180529161304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:37933 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S936494AbeE2QgF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 May 2018 12:36:05 -0400
+Date: Tue, 29 May 2018 18:36:04 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] Make ./new work for non-root user
+Message-ID: <20180529163604.sfzx3337gybgjqfi@quack2.suse.cz>
+References: <20180524183055.16031-1-jack@suse.cz>
+ <20180529013914.GI23861@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180529161304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+In-Reply-To: <20180529013914.GI23861@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 30, 2018 at 12:13:04AM +0800, Zorro Lang wrote:
-> On Tue, May 29, 2018 at 08:07:59AM -0700, Darrick J. Wong wrote:
-> > On Mon, May 28, 2018 at 12:54:27PM +0800, Zorro Lang wrote:
-> > > Duperemove is a tool for finding duplicated extents and submitting
-> > > them for deduplication, and it supports XFS. This case trys to
-> > > verify the integrity of XFS after running duperemove.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > There's not many softwares support XFS dedup now, duperemove is a rare one.
-> > > So I write this case by using duperemove.
-> > > 
-> > > I use fsstress to make many files and data randomly, I don't know if there're
-> > > better things I can use? Because fsstress only write '0xff' into files, maybe
-> > > I should add an option to make fsstress can write random character?
-> > 
-> > Heh.  But you probably don't want totally random contents because then
-> > dupremove doesn't do much.
+On Tue 29-05-18 11:39:14, Dave Chinner wrote:
+> On Thu, May 24, 2018 at 08:30:55PM +0200, Jan Kara wrote:
+> > Currently 'new' script sources common/config which tries to find mkfs
+> > and fails if not found (which is likely for non-root user). This is
+> > inconvenient as development usually does not happen as root. In fact the
+> > vast majority of setup in common/config and common/rc is not necessary
+> > for 'new'. Split out the necessary bits into new common/config-base and
+> > use it in 'new'. Cleanup common/rc and common/config now that it's only
+> > used from 'check'.
 > 
-> No matter how random contents I get, I will copy once :)
+> FWIW, common/config is also called from setup.
 
-I suppose so.  Once fsstress pokes reflink enough there ought to be a
-fair number of easy targets for dedupe... on the other hand I think it's
-a useful test for "literally everything in this fs is identical, dedupe
-everything" :)
+Fixed up.
 
-> > 
-> > > 
-> > > Please tell me, if you have better ideas:)
-> > > 
-> > > PS: This case test passed on XFS(with reflink=1) and btrfs. And the duperemove
-> > > can reclaim some space in the test, see below:
-> > > 
-> > >   Before duperemove
-> > >     Filesystem                 1K-blocks    Used Available Use% Mounted on
-> > >     /dev/mapper/xxxx-xfscratch 31441920K 583692K 30858228K   2% /mnt/scratch
-> > > 
-> > >   After duperemove
-> > >     Filesystem                 1K-blocks    Used Available Use% Mounted on
-> > >     /dev/mapper/xxxx-xfscratch 31441920K 345728K 31096192K   2% /mnt/scratch
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  common/config        |  1 +
-> > >  tests/shared/008     | 88 ++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/shared/008.out |  2 ++
-> > >  tests/shared/group   |  1 +
-> > >  4 files changed, 92 insertions(+)
-> > >  create mode 100755 tests/shared/008
-> > >  create mode 100644 tests/shared/008.out
-> > > 
-> > > diff --git a/common/config b/common/config
-> > > index 02c378a9..def559c1 100644
-> > > --- a/common/config
-> > > +++ b/common/config
-> > > @@ -207,6 +207,7 @@ export SQLITE3_PROG="`set_prog_path sqlite3`"
-> > >  export TIMEOUT_PROG="`set_prog_path timeout`"
-> > >  export SETCAP_PROG="`set_prog_path setcap`"
-> > >  export GETCAP_PROG="`set_prog_path getcap`"
-> > > +export DUPEREMOVE_PROG="`set_prog_path duperemove`"
-> > >  
-> > >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
-> > >  # newer systems have udevadm command but older systems like RHEL5 don't.
-> > > diff --git a/tests/shared/008 b/tests/shared/008
-> > > new file mode 100755
-> > > index 00000000..dace5429
-> > > --- /dev/null
-> > > +++ b/tests/shared/008
-> > > @@ -0,0 +1,88 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 008
-> > > +#
-> > > +# Dedup integrity test by duperemove
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/reflink
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# duperemove only supports btrfs and xfs (with reflink feature).
-> > > +# Add other filesystems if it supports more later.
-> > > +_supported_fs xfs btrfs
-> > > +_supported_os Linux
-> > 
-> > _require_command "$DUPEREMOVE_PROG" duperemove ?
+> > diff --git a/check b/check
+> > index 96198ac4714e..4c6e8285bc16 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -331,10 +331,11 @@ while [ $# -gt 0 ]; do
+> >  	shift
+> >  done
+> >  
+> > -# we need common/config, source it after processing args, overlay needs FSTYP
+> > -# set before sourcing common/config
+> > -if ! . ./common/config; then
+> > -	echo "$iam: failed to source common/config"
+> > +# we need common/rc, that also sources common/config. We need to source it
+> > +# after processing args, overlay needs FSTYP set before sourcing common/config
+> > +if ! . ./common/rc
+> > +then
+> > +	echo "check: failed to source common/rc"
+> >  	exit 1
+> >  fi
 > 
-> Yes, it would be better to use this template, not check
-> [ "$DUPEREMOVE_PROG" = "" ].
-> 
-> > 
-> > > +_require_scratch_reflink
-> > 
-> > _require_scratch_dedupe
-> 
-> Yes, I should check XFS_IOC_FILE_EXTENT_SAME, not XFS_IOC_CLONE*.
-> 
-> > 
-> > > +
-> > > +[ "$DUPEREMOVE_PROG" = "" ] && _notrun "duperemove not found"
-> > > +_scratch_mkfs > $seqres.full 2>&1
-> > > +_scratch_mount >> $seqres.full 2>&1
-> > > +
-> > > +testdir=$SCRATCH_MNT/test-$seq
-> > > +mkdir $testdir
-> > > +
-> > > +fsstress_opts="-w -r -f mknod=0"
-> > > +# Create some files and make a duplicate
-> > > +$FSSTRESS_PROG $fsstress_opts -d $testdir \
-> > > +	       -n $((500 * LOAD_FACTOR)) -p 10 >/dev/null 2>&1
-> > > +duptestdir=${testdir}.dup
-> > > +cp -a $testdir $duptestdir
-> > > +
-> > > +# Make some difference in two directories
-> > > +$FSSTRESS_PROG $fsstress_opts -d $testdir -n 200 -p 5 >/dev/null 2>&1
-> > > +$FSSTRESS_PROG $fsstress_opts -d $duptestdir -n 200 -p 5 >/dev/null 2>&1
-> > > +
-> > > +# Record all files' md5 checksum
-> > > +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
-> > > +find $duptestdir -type f -exec md5sum {} \; > $TEST_DIR/dup${seq}md5.sum
-> > > +
-> > > +# Dedup
-> > > +echo "== Duperemove output ==" >> $seqres.full
-> > > +$DUPEREMOVE_PROG -dr $SCRATCH_MNT/ >>$seqres.full 2>&1
-> > > +
-> > > +# Verify all files' integrity
-> > > +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
-> > > +md5sum -c --quiet $TEST_DIR/dup${seq}md5.sum
-> > 
-> > Can we _scratch_mount_cycle and md5sum -c again so that we test that the
-> > pagecache contents don't mutate and a fresh read from the disk also
-> > doesn't show mutations?
-> 
-> If so, is the md5sum data safe? Should I do cycle_mount before get md5 checksum?
-> What 'fresh read' do you mean, from above duperemove processes? Or you hope to
-> read all files once before cycle_mount?
+> Can we keep the existing formatting of "if foo ; then", please?
 
-Since this is dedupe, the md5sum should never change.  The existing
-md5sum -c check makes sure that the dedupe operation doesn't
-mishandle/corrupt the page cache such that it suddenly starts returning
-incorrect contents; and the post-cycle md5sum -c check I propose would
-flush the page cache and make sure that the on-disk contents also have
-not changed.
+Will do.
 
---D
-
-> Thanks,
-> Zorro
+> > diff --git a/common/config b/common/config
+> > index af360cefc804..fa07a6799824 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -47,6 +47,8 @@
+> >  #   validity or mountedness.
+> >  #
+> >  
+> > +. common/config-base
+> > +
+> >  # all tests should use a common language setting to prevent golden
+> >  # output mismatches.
+> >  export LANG=C
+> > @@ -88,12 +90,6 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
+> >  
+> >  export RECREATE_TEST_DEV=false
+> >  
+> > -# $1 = prog to look for
+> > -set_prog_path()
+> > -{
+> > -	type -P $1
+> > -}
 > 
-> > 
-> > --D
-> > 
-> > > +
-> > > +echo "Silence is golden"
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/shared/008.out b/tests/shared/008.out
-> > > new file mode 100644
-> > > index 00000000..dd68d5a4
-> > > --- /dev/null
-> > > +++ b/tests/shared/008.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 008
-> > > +Silence is golden
-> > > diff --git a/tests/shared/group b/tests/shared/group
-> > > index b3663a03..de7fe79f 100644
-> > > --- a/tests/shared/group
-> > > +++ b/tests/shared/group
-> > > @@ -10,6 +10,7 @@
-> > >  005 dangerous_fuzzers
-> > >  006 auto enospc
-> > >  007 dangerous_fuzzers
-> > > +008 auto quick dedupe
-> > >  032 mkfs auto quick
-> > >  272 auto enospc rw
-> > >  289 auto quick
-> > > -- 
-> > > 2.14.3
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Can we just get rid of set_prog_path() and replace it with direct
+> calls to $(type -P foo) as an initial patch? This goes away at that
+> point, because new can then just use a locally coded version....
+
+I've added your patch to the series. Thanks!
+
+> > --- /dev/null
+> > +++ b/common/config-base
+> > @@ -0,0 +1,21 @@
+> > +##/bin/bash
+> > +
+> > +# Valid test names start with 3 digits "NNN":
+> > +#  "[0-9]\{3\}"
+> > +# followed by an optional "-":
+> > +#  "-\?"
+> > +# followed by an optional combination of alphanumeric and "-" chars:
+> > +#  "[[:alnum:]-]*"
+> > +# e.g. 999-the-mark-of-fstests
+> > +#
+> > +VALID_TEST_ID="[0-9]\{3\}"
+> > +VALID_TEST_NAME="$VALID_TEST_ID-\?[[:alnum:]-]*"
+> 
+> This, then, is really the only thing shared between check and new,
+> right? So perhaps rename the file to common/test_names so it doesn't
+> get confused with stuff to do with configuration?
+
+OK, there's also the AWK_PROG thing but I've decided to just have that
+directly in 'new'. There's not much to break there.
+
+Thanks for review!
+
+								Honza
+
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
