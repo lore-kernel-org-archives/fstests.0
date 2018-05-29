@@ -1,160 +1,93 @@
-Received: from imap.thunk.org ([74.207.234.97]:41712 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S965311AbeE2TBc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 May 2018 15:01:32 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] fstests: update the punch, collapse, insert, and zero groups
-Date: Tue, 29 May 2018 15:01:28 -0400
-Message-Id: <20180529190128.20807-1-tytso@mit.edu>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:36040 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S965614AbeE2TLe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 May 2018 15:11:34 -0400
+Date: Tue, 29 May 2018 15:11:33 -0400
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: Re: [PATCH V2] xfstest: overlay: Add tests for overlay metadata only
+ copy up feature
+Message-ID: <20180529191133.GA13363@redhat.com>
+References: <20180509152705.GA10101@redhat.com>
+ <CAOQ4uxgRb0T6nWou7uasOF+QGEHRMa1C5wD4AsJABJDXK+yNhQ@mail.gmail.com>
+ <20180511104156.GO8373@desktop>
+ <CAOQ4uxhDGKVdhqW_PU0RFzcysHO4XCeEHy0iHz-kgFUja-2nLA@mail.gmail.com>
+ <20180529185241.GB3774@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180529185241.GB3774@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Update the group files to annotate those tests which have a
-_require_xfs_io_command for punch, collapse, insert, and zero.  This
-makes it easier to exclude tests that use one of these fallocate
-commands.  Or if you want to specifically test for those fallocate
-commands you can do this.
+On Tue, May 29, 2018 at 02:52:41PM -0400, Vivek Goyal wrote:
+> On Tue, May 29, 2018 at 08:08:03PM +0300, Amir Goldstein wrote:
+> > On Fri, May 11, 2018 at 1:41 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+> > > On Wed, May 09, 2018 at 07:22:48PM +0300, Amir Goldstein wrote:
+> > >> On Wed, May 9, 2018 at 6:27 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
+> > >> > Hi,
+> > >> >
+> > >> > Please find attached the V2 of the patch. Took care of Amir's comments
+> > >> > from previous version.
+> > >> >
+> > >> > Add tests for metadata only copy up feature.
+> > >> >
+> > >> > Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+> > >>
+> > >> Looks good.
+> > >>
+> > >> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> > >
+> > > Thanks for the review!
+> > >
+> > >>
+> > >> Just a note to Eryu -
+> > >>
+> > >> You may want to hold on to this test until metacopy is merged
+> > >> or at least staged on Miklos' next branch.
+> > >
+> > > I'd wait for the patches hit Miklos' tree.
+> > >
+> > 
+> > Vivek,
+> > 
+> > This test seems to fail with overlayfs-next on check_file_blocks().
+> > With ext4 underneath, blocks count is bigger than expected by 8 sectors.
+> > With xfs+reflink the blocks check also fails with different actual nr of blocks.
+> > 
+> > I think it is generally unreliable to try to compute nr of blocks
+> > and fail the test if actual is different than computed.
+> > Maybe just check that overlay nr blocks is as the actual lower nr of
+> > blocks.
+> 
+> Hi Amir,
+> 
+> Ok, I will change test to only make sure lower blocks are same as overlay
+> blocks for metacopy file.
+> 
+> But something strange is happening on ext4. I create a file and do stat
+> on that it reports 40 blocks. After sleeping for 10 seconds, it reports
+> 32 blocks on same file. Is this expected? I run following bash script
+> on ext4 and I can reproduce the issue. Is this a bug in ext4?
 
-I maintain an out-of-tree xfstests patch which uses an XFS_IO_AVOID
-environment variable to suppress running tests that use punch,
-collapse, insert, etc.  This was rejected because of the claim that it
-could be done using groups.  The reason why I still keep it as an
-out-of-tree patch is because I was sure that when people added or
-remove tests, they would forget to update the groups file with these
-groups.
+Adding "xfs_io -c "fsync" $ext4file" after file creation fixes the
+anomaly.
 
-This commit is a demonstration of why my reason for keeping support
-for XFS_IO_AVOID as an out-of-tree patch was prescient.  :-)
+Vivek
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- tests/btrfs/group   |  4 ++--
- tests/generic/group | 10 +++++-----
- tests/xfs/group     | 12 ++++++------
- 3 files changed, 13 insertions(+), 13 deletions(-)
-
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f04ee8d5..487f3e10 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -110,7 +110,7 @@
- 105 auto quick send
- 106 auto quick clone compress
- 107 auto quick prealloc
--108 auto quick send clone punch
-+108 auto quick send clone punch collapse
- 109 auto quick send clone compress
- 110 auto quick send
- 111 auto quick send
-@@ -161,5 +161,5 @@
- 156 auto quick trim
- 157 auto quick raid
- 158 auto quick raid scrub
--159 auto quick
-+159 auto quick collapse
- 160 auto quick
-diff --git a/tests/generic/group b/tests/generic/group
-index d0d42e97..349a66a6 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -350,7 +350,7 @@
- 345 auto
- 346 auto quick rw
- 347 auto quick rw thin
--348 auto quick metadata
-+348 auto quick metadata insert
- 349 blockdev rw zero
- 350 blockdev rw punch
- 351 blockdev rw punch collapse insert zero
-@@ -394,7 +394,7 @@
- 389 auto quick acl
- 390 auto freeze stress
- 391 auto quick rw
--392 shutdown auto quick metadata
-+392 shutdown auto quick metadata punch
- 393 auto quick rw
- 394 auto quick
- 395 auto quick encrypt
-@@ -448,7 +448,7 @@
- 443 auto quick rw
- 444 auto quick acl
- 445 auto quick rw
--446 auto quick rw
-+446 auto quick rw punch
- 447 auto clone
- 448 auto quick rw
- 449 auto quick acl enospc
-@@ -460,7 +460,7 @@
- 455 auto log replay
- 456 auto quick metadata
- 457 auto log replay clone
--458 auto quick clone
-+458 auto quick clone collapse zero
- 459 auto thin
- 460 auto quick rw
- 461 auto shutdown stress
-@@ -495,7 +495,7 @@
- 491 auto quick freeze mount
- 492 auto quick
- 493 auto quick swap
--494 auto quick swap
-+494 auto quick swap punch
- 495 auto quick swap
- 900 auto quick verity
- 901 auto quick verity
-diff --git a/tests/xfs/group b/tests/xfs/group
-index e5fd1c6d..2319f58f 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -111,7 +111,7 @@
- 111 ioctl
- 112 fuzzers
- 113 fuzzers
--114 auto quick clone rmap
-+114 auto quick clone rmap collapse insert
- 115 auto quick fuzzers
- 116 quota auto quick
- 117 fuzzers
-@@ -329,7 +329,7 @@
- 329 auto quick clone fsr
- 330 auto quick clone fsr quota
- 331 auto quick rmap clone
--332 auto quick rmap clone
-+332 auto quick rmap clone collapse punch insert zero
- 333 auto quick rmap
- 334 auto quick rmap
- 335 auto rmap
-@@ -340,7 +340,7 @@
- 340 auto quick rmap
- 341 auto quick rmap
- 342 auto quick rmap
--343 auto quick rmap
-+343 auto quick rmap collapse punch insert zero
- 344 auto quick clone
- 345 auto quick clone
- 346 auto quick clone
-@@ -417,8 +417,8 @@
- 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 418 dangerous_fuzzers dangerous_scrub dangerous_repair
- 419 auto quick swap
--420 auto quick clone dedupe
--421 auto quick clone dedupe
-+420 auto quick clone dedupe punch
-+421 auto quick clone dedupe punch
- 422 dangerous_scrub dangerous_online_repair
- 423 dangerous_scrub
- 424 auto quick db
-@@ -440,7 +440,7 @@
- 440 auto quick clone quota
- 441 auto quick clone quota
- 442 auto stress clone quota
--443 auto quick ioctl fsr
-+443 auto quick ioctl fsr punch
- 444 auto quick
- 445 auto quick filestreams
- 446 auto quick
--- 
-2.16.1.72.g5be1f00a9a
-
+> 
+> Vivek
+> 
+> !/bin/bash
+> ext4file="/mnt/test-ext4/testfile.txt"
+> 
+> 
+> rm $ext4file >> /dev/null 2>&1
+> echo "hello" >> $ext4file
+> chmod 600 $ext4file
+> xfs_io -c "falloc 0 16384" $ext4file
+> stat $ext4file
+> sleep 10
+> stat $ext4file
+> 
