@@ -1,138 +1,164 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49286 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754449AbeE2Fxf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 01:53:35 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] fstests: introduce btrfs/volume group
-Date: Tue, 29 May 2018 13:56:12 +0800
-Message-Id: <20180529055612.24576-1-anand.jain@oracle.com>
+Received: from mx2.suse.de ([195.135.220.15]:35094 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933565AbeE2MjD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 May 2018 08:39:03 -0400
+Date: Tue, 29 May 2018 14:39:02 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH] ext4: Test for s_inodes_count overflow during fs resize
+Message-ID: <20180529123902.gua35zqb6d3f32b4@quack2.suse.cz>
+References: <20180524183140.16125-1-jack@suse.cz>
+ <20180528163541.GD6581@desktop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180528163541.GD6581@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-The btrfs/volume group represent a set of btrfs test-cases, which
-shall intend to verify the relevant btrfs volume operations.
+On Tue 29-05-18 00:35:41, Eryu Guan wrote:
+> On Thu, May 24, 2018 at 08:31:40PM +0200, Jan Kara wrote:
+> > Test for overflow of s_inodes_count during filesystem resizing.
+> > 
+> > Signed-off-by: Jan Kara <jack@suse.cz>
+> > ---
+> >  common/config      |   1 +
+> >  common/rc          |   7 ++++
+> >  tests/ext4/033     | 118 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/033.out |   6 +++
+> >  tests/ext4/group   |   1 +
+> >  5 files changed, 133 insertions(+)
+> >  create mode 100755 tests/ext4/033
+> >  create mode 100644 tests/ext4/033.out
+> > 
+> > diff --git a/common/config b/common/config
+> > index fa07a6799824..659ebeed3ffc 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -170,6 +170,7 @@ export INDENT_PROG="`set_prog_path indent`"
+> >  export XFS_COPY_PROG="`set_prog_path xfs_copy`"
+> >  export FSTRIM_PROG="`set_prog_path fstrim`"
+> >  export DUMPE2FS_PROG="`set_prog_path dumpe2fs`"
+> > +export RESIZE2FS_PROG="`set_prog_path resize2fs`"
+> >  export FIO_PROG="`set_prog_path fio`"
+> >  export FILEFRAG_PROG="`set_prog_path filefrag`"
+> >  export E4DEFRAG_PROG="`set_prog_path e4defrag`"
+> > diff --git a/common/rc b/common/rc
+> > index 7368e2e12988..b8aad429e153 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -3176,6 +3176,13 @@ _require_dumpe2fs()
+> >  	fi
+> >  }
+> >  
+> > +_require_resize2fs()
+> > +{
+> > +	if [ -z "$RESIZE2FS_PROG" ]; then
+> > +		_notrun "This test requires resize2fs utility."
+> > +	fi
+> > +}
+> > +
+> 
+> I think this could simply be done by
+> 
+> _require_command "$RESIZE2FS_PROG" resize2fs
+> 
+> in the test.
 
-Under this new group all the existing btrfs/replace group would
-come under, and also the device operations test cases which does
-not have any group as of now. This group is helpful to verify
-the btrfs volume related changes.
+Yes, will do.
 
-Run as
-  ./check -g btrfs/volume
+> And this could be added to other existing resize2fs tests too, e.g.
+> ext4/010, ext4/032 and ext4/306, and convert 'resize2fs' to
+> '$RESIZE2FS_PROG', in a follow-up patch.
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/group | 40 ++++++++++++++++++++--------------------
- 1 file changed, 20 insertions(+), 20 deletions(-)
+Yeah, I've noticed as well. Will create a patch for that.
 
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d3639ba8dbfe..03de3d11cfa1 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -5,15 +5,15 @@
- #
- 001 auto quick subvol snapshot
- 002 auto snapshot
--003 auto replace
-+003 auto replace volume
- 004 auto rw metadata
- 005 auto defrag
--006 auto quick
-+006 auto quick volume
- 007 auto quick rw metadata send
- 008 auto quick send
- 009 auto quick subvol
- 010 auto
--011 auto replace
-+011 auto replace volume
- 012 auto convert
- 013 auto quick balance
- 014 auto balance
-@@ -22,14 +22,14 @@
- 017 auto quick qgroup
- 018 auto quick subvol
- 019 auto quick send
--020 auto quick replace
-+020 auto quick replace volume
- 021 auto quick balance defrag
- 022 auto qgroup limit
- 023 auto
- 024 auto quick compress
- 025 auto quick send clone
- 026 auto quick compress prealloc
--027 auto replace
-+027 auto replace volume
- 028 auto qgroup balance
- 029 auto quick clone
- 030 auto quick send
-@@ -66,14 +66,14 @@
- 061 auto balance scrub
- 062 auto balance defrag compress
- 063 auto balance remount compress
--064 auto balance replace
--065 auto subvol replace
-+064 auto balance replace volume
-+065 auto subvol replace volume
- 066 auto subvol scrub
- 067 auto subvol defrag compress
- 068 auto subvol remount compress
--069 auto replace scrub
--070 auto replace defrag compress
--071 auto replace remount compress
-+069 auto replace scrub volume
-+070 auto replace defrag compress volume
-+071 auto replace remount compress volume
- 072 auto scrub defrag compress
- 073 auto scrub remount compress
- 074 auto defrag remount compress
-@@ -102,8 +102,8 @@
- 097 auto quick send clone
- 098 auto quick metadata clone
- 099 auto quick qgroup limit
--100 auto replace
--101 auto replace
-+100 auto replace volume
-+101 auto replace volume
- 102 auto quick metadata enospc
- 103 auto quick clone compress
- 104 auto qgroup
-@@ -126,8 +126,8 @@
- 121 auto quick snapshot qgroup
- 122 auto quick snapshot qgroup
- 123 auto quick qgroup
--124 auto replace
--125 auto replace
-+124 auto replace volume
-+125 auto replace volume
- 126 auto quick qgroup limit
- 127 auto quick send
- 128 auto quick send
-@@ -153,17 +153,17 @@
- 148 auto quick rw
- 149 auto quick send compress
- 150 auto quick dangerous
--151 auto quick
-+151 auto quick volume
- 152 auto quick metadata qgroup send
- 153 auto quick qgroup limit
--154 auto quick
-+154 auto quick volume
- 155 auto quick send
- 156 auto quick trim
- 157 auto quick raid
- 158 auto quick raid scrub
- 159 auto quick
- 160 auto quick
--161 auto quick
--162 auto quick
--163 auto quick
--164 auto quick
-+161 auto quick volume
-+162 auto quick volume
-+163 auto quick volume
-+164 auto quick volume
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	_dmhugedisk_cleanup
+> > +	# Recreate scratch so that _check_filesystems() does not complain
+> > +	_scratch_mkfs >/dev/null 2>&1
+> 
+> This could be done by calling _require_scratch_nocheck, instead of
+> _require_scratch.
+
+Thanks, I'll fixup xfs/310 as well (that's where I've copied this from ;).
+
+> But I'm not sure why it's expected to leave a corrupted fs behind after?
+
+Because SCRATCH_DEV is used as a DM backing store, it is not a valid
+filesystem...
+
+> > +testdir=$SCRATCH_MNT/test-$seq
+> > +blksz="$(_get_block_size $SCRATCH_MNT)"
+> > +
+> > +umount $SCRATCH_MNT
+> 
+> _scratch_unmount
+
+Will fix in xfs/310 as well.
+
+> > +
+> > +INODES_PER_GROUP=$((blksz*8))
+> > +GROUP_BLOCKS=$((blksz*8))
+> > +
+> > +# Number of groups to overflow s_inodes_count
+> > +LIMIT_GROUPS=$(((1<<32)/INODES_PER_GROUP))
+> 
+> Use lower case for local variables?
+
+OK.
+
+> > +
+> > +# Create device huge enough so that overflowing inode count is possible
+> > +echo "Format huge device"
+> > +_dmhugedisk_init $(((LIMIT_GROUPS + 16)*GROUP_BLOCKS*(blksz/512)))
+> 
+> I think we need to require a minimum size on SCRATCH_DEV too, otherwise
+> I got mkfs failure when testing with 1k block size on a 10G SCRATCH_DEV,
+> the backing device didn't have enough space to store the metadata.
+> 
+> After assigning a 25G device to SCRATCH_DEV, mkfs with 1k block size
+> passed, but test still failed in the end, I'm not sure what's going
+> wrong this time..
+> 
+> --- tests/ext4/033.out  2018-05-28 22:12:56.234867728 +0800
+> +++ /root/workspace/xfstests/results//ext4_1k/ext4/033.out.bad
+> 2018-05-29 00:20:56.907283189 +0800
+> @@ -3,4 +3,4 @@
+>  Format huge device
+>  Resizing to inode limit + 1...
+>  Resizing to max group count...
+> -Resizing device size...
+> +Resizing failed!
+> 
+> And dmesg showed:
+> 
+> [166934.718495] run fstests ext4/033 at 2018-05-29 00:07:04
+> [166937.651454] EXT4-fs (dm-2): mounted filesystem with ordered data mode. Opts: acl,user_xattr
+> [167629.640111] EXT4-fs (dm-11): mounted filesystem with ordered data mode. Opts: (null)
+> [167632.068897] EXT4-fs (dm-11): resizing filesystem from 4294836224 to 4294967296 blocks
+> [167632.069900] EXT4-fs warning (device dm-11): ext4_resize_fs:1937: resize would cause inodes_count overflow
+> [167765.672787] EXT4-fs (dm-11): resizing filesystem from 4294836224 to 4294959104 blocks
+> [167765.673573] EXT4-fs error (device dm-11): ext4_resize_fs:1950: comm resize2fs: resize_inode and meta_bg enabled simultaneously
+> [167766.005282] EXT4-fs warning (device dm-11): ext4_resize_begin:45: There are errors in the filesystem, so online resizing is not allowed
+> 
+> Tests with 2k/4k block sizes all passed.
+
+Weird, I don't see why 1k should be any different. Let me check. Thanks for
+review and testing!
+
+								Honza
 -- 
-2.15.0
-
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
