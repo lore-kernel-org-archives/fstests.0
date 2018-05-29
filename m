@@ -1,279 +1,101 @@
 Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:17207 "EHLO
         ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1755808AbeE2Ar7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 20:47:59 -0400
+        by vger.kernel.org with ESMTP id S1755848AbeE2AsA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 20:48:00 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fNSns-0007pc-Rw
+        id 1fNSns-0007pb-RB
         for fstests@vger.kernel.org; Tue, 29 May 2018 10:47:56 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fNSns-0002Uw-Qu
+        id 1fNSns-0002Uu-QE
         for fstests@vger.kernel.org; Tue, 29 May 2018 10:47:56 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 1/2] fstests: generic test setup preamble
-Date: Tue, 29 May 2018 10:47:51 +1000
-Message-Id: <20180529004752.8243-2-david@fromorbit.com>
-In-Reply-To: <20180529004752.8243-1-david@fromorbit.com>
-References: <20180529004752.8243-1-david@fromorbit.com>
+Subject: [RFC PATCH 0/2] fstests: boiler plate reductions
+Date: Tue, 29 May 2018 10:47:50 +1000
+Message-Id: <20180529004752.8243-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+Hi folks,
 
-So many tests chop random bits out of the mandaotry test setup
-preamble which leads to subtle problems and stray files being dumped
-all over the place. Create a common test preamble with hooks for
-local cleanup functions so we can prevent this in future.
+To reduce boilerplate text in each test, I'm proposing the following
+two sets of modifications:
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- common/setup_test     | 23 +++++++++++++++++++++++
- new                   | 24 ++++--------------------
- soak                  | 19 +++++++------------
- tests/generic/001     | 42 ++++++++----------------------------------
- tests/generic/001.out |  2 --
- tests/xfs/001         | 41 +++++++----------------------------------
- 6 files changed, 49 insertions(+), 102 deletions(-)
- create mode 100644 common/setup_test
+	1. set tests up using a common include file; and
+	2. switch tests over to using SPDX license tags
 
-diff --git a/common/setup_test b/common/setup_test
-new file mode 100644
-index 000000000000..0e22452b4f6e
---- /dev/null
-+++ b/common/setup_test
-@@ -0,0 +1,23 @@
-+# common test setup preamble
-+# test specific cleanup is done via the cleanup() function now.
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup_test; exit \$status" 0 1 2 3 15
-+
-+_cleanup_test()
-+{
-+	# call local test cleanup function first, then cleanup tmp files
-+	cleanup
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-diff --git a/new b/new
-index 4eacccd3bf8b..5e7f6a3c4198 100755
---- a/new
-+++ b/new
-@@ -181,31 +181,15 @@ cat <<End-of-File >$tdir/$id
- #-----------------------------------------------------------------------
- #
- 
--seq=\`basename \$0\`
--seqres=\$RESULT_DIR/\$seq
--echo "QA output created by \$seq"
-+. common/setup_test
- 
--here=\`pwd\`
--tmp=/tmp/\$\$
--status=1	# failure is the default!
--trap "_cleanup; exit \\\$status" 0 1 2 3 15
--
--_cleanup()
--{
--	cd /
--	rm -f \$tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# test exit cleanup goes here
-+local_cleanup() { true }
- 
- # remove previous \$seqres.full before test
- rm -f \$seqres.full
- 
--# real QA test starts here
--
--# Modify as appropriate.
-+# include test specific environments here
- _supported_fs generic
- _supported_os Linux
- _require_test
-diff --git a/soak b/soak
-index 26b345a3e4a9..8fd0b9043329 100755
---- a/soak
-+++ b/soak
-@@ -18,21 +18,16 @@
- #-----------------------------------------------------------------------
- #
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+. common/setup_test
- 
--tmp=/tmp/$$
--seq=soak
--status=1	# failure is the default!
--
--_cleanup()
--{
--    echo "        *** umount"
--    _scratch_unmount >/dev/null 2>&1
-+# test exit cleanup goes here
-+cleanup() {
-+	echo "        *** umount"
-+	_scratch_unmount >/dev/null 2>&1
- }
- 
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
- ROOT="."
- LOG="$ROOT/soak.log"
-diff --git a/tests/generic/001 b/tests/generic/001
-index 0edd41f1e2cc..f86dc5a85d5d 100755
---- a/tests/generic/001
-+++ b/tests/generic/001
-@@ -31,21 +31,17 @@
- #-----------------------------------------------------------------------
- #
- 
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# test exit cleanup goes here
-+cleanup() {
-+	rm -rf $TEST_DIR/$$
-+}
- 
--tmp=/tmp/$$
--here=`pwd`
--status=1
--done_cleanup=false
--trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs generic
- _supported_os Linux
- _require_test
-@@ -276,28 +272,6 @@ _check()
-     $verbose && echo
- }
- 
--_cleanup()
--{
--    # cleanup
--    #
--    if $done_cleanup
--    then
--	:
--    elif [ $status -eq 0 ]
--    then
--	$verbose && echo "cleanup"
--	cd /
--	rm -rf $TEST_DIR/$$
--	done_cleanup=true
--    fi
--}
--
--rm -f $seqres.full
--status=0
--_cleanup
--status=1
--done_cleanup=false
--
- _setup
- 
- # do the test
-diff --git a/tests/generic/001.out b/tests/generic/001.out
-index e843a586cac2..4df5c4ca419b 100644
---- a/tests/generic/001.out
-+++ b/tests/generic/001.out
-@@ -1,9 +1,7 @@
- QA output created by 001
--cleanup
- setup ....................................
- iter 1 chain ... check ....................................
- iter 2 chain ... check ....................................
- iter 3 chain ... check ....................................
- iter 4 chain ... check ....................................
- iter 5 chain ... check ....................................
--cleanup
-diff --git a/tests/xfs/001 b/tests/xfs/001
-index 2c205f064e2e..1b5a1020e173 100755
---- a/tests/xfs/001
-+++ b/tests/xfs/001
-@@ -23,44 +23,17 @@
- #-----------------------------------------------------------------------
- #
- 
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    rm -f $tmp.*
-+# test exit cleanup goes here
-+cleanup() {
-+	rm -rf $TEST_DIR/$$
- }
- 
--_do_bit_test()
--{
--	field="$1"
--	bits="$2"
--
--	echo "testing $field with $bits bits"
--	_scratch_xfs_db -x -c "inode $FILE_INO" -c "write $field 0"
--	num=1
--	for n in `seq 0 1 $bits`; do
--		_scratch_xfs_db -x -c "inode $FILE_INO" \
--			  -c "write $field $num"
--		let num=$num*2
--	done
--	echo
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--
--# real QA test starts here
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# Modify as appropriate.
-+# include test specific environments here
- _supported_fs xfs
- _supported_os Linux
- _require_scratch_nocheck
--- 
-2.17.0
+The first patch is simply moving all the common per-test setup code
+the test harness requires into a common file that all tests then
+include. This is code that nobody should ever need to change for any
+given test and pulling it out of the tests themselves removes the
+temptation for anyone to "optimise" the test setup code. There are a
+large number of tests where the setup code has been "optimised" and,
+as such, the common code that relies on the per-test setup may be
+compromised.
+
+The other advantage of doing this is that tree-wide test setup
+changes now become much simpler to do, as it will not require
+touching every test in the tree. This will substanitally reduce the
+burden of improving the test infrastructure.
+
+This patch modifies a couple of tests to demonstrate how the tests
+themselves will end up looking - they still have a cleanup()
+function called on test exit, and the status variable is still
+treated the same way. However, tests now only need to clean up stuff
+created within the test, so it much cleaner.
+
+The second patch touches licensing, so please consider this one
+carefully. It introduces SPDX license tags to the xfstests codebase,
+and defines the tags and licenses they refer to in the LICENSES/
+directory. At present, I have only created a GPL-2.0 license tag,
+and replaced all the GPL v2.0 license texts in the root
+and common/ directories with SPDX tags. I also converted the same
+two tests I touched in the first patch to convert them, so you can
+see exactly what tests will look like after this.
+
+I'll go throw how I've converted these files, so people can comment
+on the process and the decisions I've made.
+
+	1. Baseline assumption: unless otherwise specifically
+	mentioned, the code is licensed under a GPL v2.0 license
+
+	2. If the file has a GPL license blurb, replace it with
+	a "SPDX-License-Identifier: GPL-2.0" tag.
+
+	3. If the file has no GPL license blurb, add a new
+	"SPDX-License-Identifier: GPL-2.0" tag.
+
+	3. If the file has a "Copyright ..." line, preserve it after
+	the SPDX tag.
+
+	4. Remove author and other lines in the header with email
+	addresses in them - we have the author history in the git
+	repository. Git blame can tell us exactly who wrote what
+	code and hence we don't need it in the code itself.
+
+Most (possibly all?) of the code under tests/ has GPL license blurbs
+- they'll all get converted by this same process. It's a bit murkier
+when it comes to src/ and ltp/, as this code has varied history. For
+these directories, the first pass I make will for code that has
+explicit GPL licenses. Every other file will need to be looked at
+on a case by case basis and done as time permits...
+
+Please note that I'm not trying to change the license on any of the
+code, just change the way it is documented to reduce boilerplate
+code. If I've made any changes that modify the license of any
+specific code, then I've made a mistake and I need to fix that.
+Please point out anywhere you think my actions have not been clear
+and obvious.
+
+Once we have some consensus on how we want to proceed, I'll do the
+grunt work and co-ordinate with Eryu on minimising the number of
+times I have to rebase a patchset that is going to touch around 1500
+files...
+
+Cheers,
+
+Dave.
 
