@@ -1,145 +1,138 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:28315 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S932498AbeE2CpC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 28 May 2018 22:45:02 -0400
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1fNUd9-0007xL-TL
-        for fstests@vger.kernel.org; Tue, 29 May 2018 12:44:59 +1000
-Date: Tue, 29 May 2018 12:44:59 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
-Message-ID: <20180529024459.GK23861@dastard>
-References: <20180529004752.8243-1-david@fromorbit.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180529004752.8243-1-david@fromorbit.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:49286 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754449AbeE2Fxf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 01:53:35 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] fstests: introduce btrfs/volume group
+Date: Tue, 29 May 2018 13:56:12 +0800
+Message-Id: <20180529055612.24576-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
-> Hi folks,
-> 
-> To reduce boilerplate text in each test, I'm proposing the following
-> two sets of modifications:
-> 
-> 	1. set tests up using a common include file; and
-> 	2. switch tests over to using SPDX license tags
-> 
-> The first patch is simply moving all the common per-test setup code
-> the test harness requires into a common file that all tests then
-> include. This is code that nobody should ever need to change for any
-> given test and pulling it out of the tests themselves removes the
-> temptation for anyone to "optimise" the test setup code. There are a
-> large number of tests where the setup code has been "optimised" and,
-> as such, the common code that relies on the per-test setup may be
-> compromised.
-> 
-> The other advantage of doing this is that tree-wide test setup
-> changes now become much simpler to do, as it will not require
-> touching every test in the tree. This will substanitally reduce the
-> burden of improving the test infrastructure.
-> 
-> This patch modifies a couple of tests to demonstrate how the tests
-> themselves will end up looking - they still have a cleanup()
-> function called on test exit, and the status variable is still
-> treated the same way. However, tests now only need to clean up stuff
-> created within the test, so it much cleaner.
-> 
-> The second patch touches licensing, so please consider this one
-> carefully. It introduces SPDX license tags to the xfstests codebase,
-> and defines the tags and licenses they refer to in the LICENSES/
-> directory. At present, I have only created a GPL-2.0 license tag,
-> and replaced all the GPL v2.0 license texts in the root
-> and common/ directories with SPDX tags. I also converted the same
-> two tests I touched in the first patch to convert them, so you can
-> see exactly what tests will look like after this.
-> 
-> I'll go throw how I've converted these files, so people can comment
-> on the process and the decisions I've made.
-> 
-> 	1. Baseline assumption: unless otherwise specifically
-> 	mentioned, the code is licensed under a GPL v2.0 license
-> 
-> 	2. If the file has a GPL license blurb, replace it with
-> 	a "SPDX-License-Identifier: GPL-2.0" tag.
-> 
-> 	3. If the file has no GPL license blurb, add a new
-> 	"SPDX-License-Identifier: GPL-2.0" tag.
-> 
-> 	3. If the file has a "Copyright ..." line, preserve it after
-> 	the SPDX tag.
-> 
-> 	4. Remove author and other lines in the header with email
-> 	addresses in them - we have the author history in the git
-> 	repository. Git blame can tell us exactly who wrote what
-> 	code and hence we don't need it in the code itself.
-> 
-> Most (possibly all?) of the code under tests/ has GPL license blurbs
-> - they'll all get converted by this same process. It's a bit murkier
-> when it comes to src/ and ltp/, as this code has varied history. For
-> these directories, the first pass I make will for code that has
-> explicit GPL licenses. Every other file will need to be looked at
-> on a case by case basis and done as time permits...
-> 
-> Please note that I'm not trying to change the license on any of the
-> code, just change the way it is documented to reduce boilerplate
-> code. If I've made any changes that modify the license of any
-> specific code, then I've made a mistake and I need to fix that.
-> Please point out anywhere you think my actions have not been clear
-> and obvious.
-> 
-> Once we have some consensus on how we want to proceed, I'll do the
-> grunt work and co-ordinate with Eryu on minimising the number of
-> times I have to rebase a patchset that is going to touch around 1500
-> files...
+The btrfs/volume group represent a set of btrfs test-cases, which
+shall intend to verify the relevant btrfs volume operations.
 
-FWIW, most of the license grunt work will be scripted. The awk
-script below replaces a standard format test header with a SPDX
-version....
+Under this new group all the existing btrfs/replace group would
+come under, and also the device operations test cases which does
+not have any group as of now. This group is helpful to verify
+the btrfs volume related changes.
 
-Cheers,
+Run as
+  ./check -g btrfs/volume
 
-Dave.
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/btrfs/group | 40 ++++++++++++++++++++--------------------
+ 1 file changed, 20 insertions(+), 20 deletions(-)
+
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index d3639ba8dbfe..03de3d11cfa1 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -5,15 +5,15 @@
+ #
+ 001 auto quick subvol snapshot
+ 002 auto snapshot
+-003 auto replace
++003 auto replace volume
+ 004 auto rw metadata
+ 005 auto defrag
+-006 auto quick
++006 auto quick volume
+ 007 auto quick rw metadata send
+ 008 auto quick send
+ 009 auto quick subvol
+ 010 auto
+-011 auto replace
++011 auto replace volume
+ 012 auto convert
+ 013 auto quick balance
+ 014 auto balance
+@@ -22,14 +22,14 @@
+ 017 auto quick qgroup
+ 018 auto quick subvol
+ 019 auto quick send
+-020 auto quick replace
++020 auto quick replace volume
+ 021 auto quick balance defrag
+ 022 auto qgroup limit
+ 023 auto
+ 024 auto quick compress
+ 025 auto quick send clone
+ 026 auto quick compress prealloc
+-027 auto replace
++027 auto replace volume
+ 028 auto qgroup balance
+ 029 auto quick clone
+ 030 auto quick send
+@@ -66,14 +66,14 @@
+ 061 auto balance scrub
+ 062 auto balance defrag compress
+ 063 auto balance remount compress
+-064 auto balance replace
+-065 auto subvol replace
++064 auto balance replace volume
++065 auto subvol replace volume
+ 066 auto subvol scrub
+ 067 auto subvol defrag compress
+ 068 auto subvol remount compress
+-069 auto replace scrub
+-070 auto replace defrag compress
+-071 auto replace remount compress
++069 auto replace scrub volume
++070 auto replace defrag compress volume
++071 auto replace remount compress volume
+ 072 auto scrub defrag compress
+ 073 auto scrub remount compress
+ 074 auto defrag remount compress
+@@ -102,8 +102,8 @@
+ 097 auto quick send clone
+ 098 auto quick metadata clone
+ 099 auto quick qgroup limit
+-100 auto replace
+-101 auto replace
++100 auto replace volume
++101 auto replace volume
+ 102 auto quick metadata enospc
+ 103 auto quick clone compress
+ 104 auto qgroup
+@@ -126,8 +126,8 @@
+ 121 auto quick snapshot qgroup
+ 122 auto quick snapshot qgroup
+ 123 auto quick qgroup
+-124 auto replace
+-125 auto replace
++124 auto replace volume
++125 auto replace volume
+ 126 auto quick qgroup limit
+ 127 auto quick send
+ 128 auto quick send
+@@ -153,17 +153,17 @@
+ 148 auto quick rw
+ 149 auto quick send compress
+ 150 auto quick dangerous
+-151 auto quick
++151 auto quick volume
+ 152 auto quick metadata qgroup send
+ 153 auto quick qgroup limit
+-154 auto quick
++154 auto quick volume
+ 155 auto quick send
+ 156 auto quick trim
+ 157 auto quick raid
+ 158 auto quick raid scrub
+ 159 auto quick
+ 160 auto quick
+-161 auto quick
+-162 auto quick
+-163 auto quick
+-164 auto quick
++161 auto quick volume
++162 auto quick volume
++163 auto quick volume
++164 auto quick volume
 -- 
-Dave Chinner
-david@fromorbit.com
+2.15.0
 
-/^#\![ ]*\/bin\/bash/ {
-	print $0
-	print "# SPDX-License-Identifier: GPL-2.0"
-	hdr = 1
-	ignore = 0
-	str=""
-	next
-}
-/^#[\-]{40}/ {
-	if (hdr == 1 && ignore == 0) {
-		ignore = 1
-		hdr = 0
-	} else {
-		ignore = 0
-	}
-	next
-}
-/^#[ ]*Copyright/ {
-	print $0 "\n#"
-	print str
-	str=""
-	next
-}
-
-// {
-	if (ignore != 0)
-		next
-	if (str == "")
-		str = $0
-	else
-		str = str "\n" $0
-}
-
-END {
-	print str
-}
