@@ -1,391 +1,341 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:47298 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S966012AbeE2TlJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 May 2018 15:41:09 -0400
-Date: Tue, 29 May 2018 15:41:08 -0400
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: [PATCH V3] xfstest: overlay: Add tests for overlay metadata only
- copy up feature
-Message-ID: <20180529194108.GB13363@redhat.com>
+Received: from aserp2120.oracle.com ([141.146.126.78]:56540 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933907AbeE2VMe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 May 2018 17:12:34 -0400
+Date: Tue, 29 May 2018 14:12:15 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfstests/shared: dedup integrity test by duperemove
+Message-ID: <20180529211215.GH30110@magnolia>
+References: <20180528045427.11159-1-zlang@redhat.com>
+ <20180529150759.GC30110@magnolia>
+ <20180529161304.GB4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+ <20180529163023.GF30110@magnolia>
+ <20180529171344.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+ <20180529174238.GN4910@magnolia>
+ <20180529185049.GF4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20180529185049.GF4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
-Cc: Amir Goldstein <amir73il@gmail.com>, miklos@szeredi.hu, guaneryu@gmail.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+On Wed, May 30, 2018 at 02:50:49AM +0800, Zorro Lang wrote:
+> On Tue, May 29, 2018 at 10:42:38AM -0700, Darrick J. Wong wrote:
+> > On Wed, May 30, 2018 at 01:13:45AM +0800, Zorro Lang wrote:
+> > > On Tue, May 29, 2018 at 09:30:23AM -0700, Darrick J. Wong wrote:
+> > > > On Wed, May 30, 2018 at 12:13:04AM +0800, Zorro Lang wrote:
+> > > > > On Tue, May 29, 2018 at 08:07:59AM -0700, Darrick J. Wong wrote:
+> > > > > > On Mon, May 28, 2018 at 12:54:27PM +0800, Zorro Lang wrote:
+> > > > > > > Duperemove is a tool for finding duplicated extents and submitting
+> > > > > > > them for deduplication, and it supports XFS. This case trys to
+> > > > > > > verify the integrity of XFS after running duperemove.
+> > > > > > > 
+> > > > > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > > > > ---
+> > > > > > > 
+> > > > > > > Hi,
+> > > > > > > 
+> > > > > > > There's not many softwares support XFS dedup now, duperemove is a rare one.
+> > > > > > > So I write this case by using duperemove.
+> > > > > > > 
+> > > > > > > I use fsstress to make many files and data randomly, I don't know if there're
+> > > > > > > better things I can use? Because fsstress only write '0xff' into files, maybe
+> > > > > > > I should add an option to make fsstress can write random character?
+> > > > > > 
+> > > > > > Heh.  But you probably don't want totally random contents because then
+> > > > > > dupremove doesn't do much.
+> > > > > 
+> > > > > No matter how random contents I get, I will copy once :)
+> > > > 
+> > > > I suppose so.  Once fsstress pokes reflink enough there ought to be a
+> > > > fair number of easy targets for dedupe... on the other hand I think it's
+> > > > a useful test for "literally everything in this fs is identical, dedupe
+> > > > everything" :)
+> > > 
+> > > Do you mean dd (with same char) a big file to fill the whole scratch_dev, then
+> > > dedupe?
+> > 
+> > I was mostly thinking one test where the entire fs is dedupable (because
+> > we only ever write 0xff or whatever), and a second one where we make
+> > duperemove hunt for things.
+> 
+> Sorry, could you show me an example (some commands)? I can't entirely understand
+> the things you're describing.
+> 
+> I tried to duperemove on a big file:
+> # xfs_io -c "pwrite -S 0xff 0 30g" /mnt/scratch/file
+> # df -h /mnt/scratch
+> /dev/mapper/xxxx-xfscratch   30G   30G   20K 100% /mnt/scratch
+> # duperemove -dr --dedupe-options=same  /mnt/scratch/
+> # df -h /mnt/scratch
+> /dev/mapper/xxxx-xfscratch   30G  251M   30G   1% /mnt/scratch
+> 
+> Is this make sense to you? Or you was trying to tell me more.
 
-Find attached V3 of the patch. It now works on top of ext4 as well as
-xfs with reflink enabled. I removed some of nr_block checks which could
-not be guaranteed.
+I was only trying to say that the current fsstress.c semantics (where we
+memset buffers with (nameseq++ % 0xff) already creates a lot of
+dedupe-able file data, so the current behavior is fine; and that if you
+switched to filling the write buffer with random data then duperemove
+wouldn't do much of anything.
 
-Add tests for metadata only copy up feature.
+> > 
+> > > Hmm... how about iteration test as below?
+> > > 
+> > > # fsstress -d $mnt/dir0 ...
+> > > # for ((i=1; i<100; i++));do
+> > >     cp -a dir$((i-1)) dir$i
+> > >     find $dir$i -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum$i
+> > >     duperemove -dr $mnt/
+> > >     md5sum -c $TEST_DIR/${seq}md5.sum$i
+> > >   done
+> > > # scratch_cycle_mount
+> > > # for ((i=1; i<100; i++));do
+> > >     md5sum -c $TEST_DIR/${seq}md5.sum$i
+> > >   done
+> > > 
+> > > But this will cost lots of test time. For save time, need to reduce files count
+> > > and size.
+> > 
+> > Constrict the fs size?
+> 
+> No, reduce the size of $mnt/dir0, to save cp and duperemove running time.
 
-Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
----
- common/overlay        |    1 
- tests/overlay/060     |  285 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/060.out |   42 +++++++
- tests/overlay/group   |    1 
- 4 files changed, 329 insertions(+)
+ok.
 
-Index: xfstests-dev/tests/overlay/060
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/060	2018-05-29 15:34:52.430714715 -0400
-@@ -0,0 +1,285 @@
-+#! /bin/bash
-+# FS QA Test No. 060
-+#
-+# Test metadata only copy up functionality.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-+# Author: Vivek Goyal <vgoyal@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+# We use non-default scratch underlying overlay dirs, we need to check
-+# them explicity after test.
-+_require_scratch_nocheck
-+_require_scratch_overlay_features index redirect_dir metacopy
-+
-+# remove all files from previous tests
-+_scratch_mkfs
-+
-+# File size on lower
-+lowername="lowerfile"
-+lowerlink="lowerfile-link"
-+lowerdata="lower"
-+lowerblocks="32"
-+lowersize=$(( $lowerblocks * 512 ))
-+
-+udirname="pureupper"
-+ufile="upperfile"
-+
-+# Check metacopy xattr
-+check_metacopy()
-+{
-+        local target=$1 exist=$2
-+	local out_f target_f
-+	local msg
-+
-+        out_f=$($GETFATTR_PROG --absolute-names --only-values -n \
-+		$OVL_XATTR_METACOPY $target 2>&1 | _filter_scratch)
-+
-+	if [ "$exist" == "y" ];then
-+		[ "$out_f" == "" ] && return
-+		echo "Metacopy xattr does not exist on ${target}. stdout=$out_f"
-+		return
-+	fi
-+
-+	if [ "$out_f" == "" ];then
-+		echo "Metacopy xattr exists on ${target} unexpectedly."
-+		return
-+	fi
-+
-+	target_f=`echo $target | _filter_scratch`
-+	msg="$target_f: trusted.overlay.metacopy: No such attribute"
-+
-+	[ "$out_f" == "$msg" ] && return
-+
-+	echo "Error while checking xattr on ${target}. stdout=$out"
-+}
-+
-+# Check redirect xattr
-+check_redirect()
-+{
-+	local target=$1
-+	local expect=$2
-+
-+	value=$($GETFATTR_PROG --absolute-names --only-values -n \
-+		$OVL_XATTR_REDIRECT $target)
-+
-+	[[ "$value" == "$expect" ]] || echo "Redirect xattr incorrect. Expected=\"$expect\", actual=\"$value\""
-+}
-+
-+# Check size
-+check_file_size()
-+{
-+	local target=$1 expected_size=$2 actual_size
-+
-+	actual_size=$(stat -c "%s" $target)
-+
-+	[ "$actual_size" == "$expected_size" ] || echo "Expected file size $expected_size but actual size is $actual_size"
-+}
-+
-+check_file_blocks()
-+{
-+	local target=$1 expected_blocks=$2 nr_blocks
-+
-+	nr_blocks=$(stat -c "%b" $target)
-+
-+	[ "$nr_blocks" == "$expected_blocks" ] || echo "Expected $expected_blocks blocks but actual number of blocks is ${nr_blocks}."
-+}
-+
-+check_file_contents()
-+{
-+	local target=$1 expected=$2
-+	local actual target_f
-+
-+	target_f=`echo $target | _filter_scratch`
-+
-+	read actual<$target
-+
-+	[ "$actual" == "$expected" ] || echo "Expected file $target_f contents to be \"$expected\" but actual contents are \"$actual\""
-+}
-+
-+check_file_size_contents()
-+{
-+	local target=$1 expected_size=$2 expected_content=$3
-+
-+	check_file_size $target $expected_size
-+	check_file_contents $target $expected_content
-+}
-+
-+mount_overlay()
-+{
-+	local _lowerdir=$1
-+
-+	_overlay_scratch_mount_dirs "$_lowerdir" $upperdir $workdir -o redirect_dir=on,index=on,metacopy=on
-+}
-+
-+umount_overlay()
-+{
-+	$UMOUNT_PROG $SCRATCH_MNT
-+}
-+
-+# Assumes it is called with overlay mounted.
-+test_common()
-+{
-+	local _lowerdir=$1 _target=$2 _size=$3 _blocks=$4 _data="$5"
-+	local _redirect=$6
-+
-+	echo "check properties of metadata copied up file"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
-+
-+	# Do a mount cycle and check size and contents again.
-+	echo "Unmount and Mount again"
-+	umount_overlay
-+	mount_overlay $_lowerdir
-+	echo "check properties of metadata copied up file"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	check_file_blocks $SCRATCH_MNT/$_target $_blocks
-+
-+	# Make sure copied up file is a metacopy file.
-+	umount_overlay
-+	check_metacopy $upperdir/$_target "y"
-+	check_file_size_contents $upperdir/$_target $_size ""
-+	[ -n "$_redirect" ] && check_redirect $upperdir/$_target "$_redirect"
-+
-+	# Trigger data copy up and check absence of metacopy xattr.
-+	mount_overlay $_lowerdir
-+	$XFS_IO_PROG -c "open -a $SCRATCH_MNT/$_target"
-+	echo "check properties of data copied up file"
-+	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
-+	umount_overlay
-+	check_metacopy $upperdir/$_target "n"
-+	check_file_size_contents $upperdir/$_target $_size "$_data"
-+}
-+
-+create_basic_files()
-+{
-+	_scratch_mkfs
-+	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir $workdir2
-+	mkdir -p $upperdir/$udirname
-+	echo "$lowerdata" > $lowerdir/$lowername
-+	chmod 600 $lowerdir/$lowername
-+	# Create a file of size lowersize.
-+	$XFS_IO_PROG -c "falloc 0 $lowersize" $lowerdir/$lowername
-+	$XFS_IO_PROG -c "fsync" $lowerdir/$lowername
-+}
-+
-+create_lower_link()
-+{
-+	ln $lowerdir/$lowername $lowerdir/$lowerlink
-+}
-+
-+prepare_midlayer()
-+{
-+	_scratch_mkfs
-+	create_basic_files
-+	# Create midlayer
-+	_overlay_scratch_mount_dirs $lowerdir $lowerdir2 $workdir2 -o redirect_dir=on,index=on,metacopy=on
-+	# Trigger a metacopy
-+	chmod 400 $SCRATCH_MNT/$lowername
-+	umount_overlay
-+}
-+
-+# Create test directories
-+lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-+lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-+upperdir=$OVL_BASE_SCRATCH_MNT/upper
-+workdir=$OVL_BASE_SCRATCH_MNT/workdir
-+workdir2=$OVL_BASE_SCRATCH_MNT/workdir2
-+
-+# Tests start here
-+echo "== Check Simple Metacopy =="
-+create_basic_files
-+mount_overlay $lowerdir
-+chmod 400 $SCRATCH_MNT/$lowername
-+test_common $lowerdir $lowername $lowersize $lowerblocks "$lowerdata"
-+
-+# Test midlayer metacopy
-+echo -e "\n== Check Midlayer Metacopy =="
-+prepare_midlayer
-+mount_overlay "$lowerdir2:$lowerdir"
-+chmod 400 $SCRATCH_MNT/$lowername
-+test_common "$lowerdir2:$lowerdir" $lowername $lowersize $lowerblocks \
-+		"$lowerdata"
-+
-+# Test Rename Redirect
-+echo -e "\n== Check Rename Redirect =="
-+create_basic_files
-+mount_overlay $lowerdir
-+mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
-+test_common $lowerdir $ufile $lowersize $lowerblocks "$lowerdata" "$lowername"
-+
-+# Test midlayer rename redirect
-+echo -e "\n== Check Midlayer Rename Redirect =="
-+prepare_midlayer
-+mount_overlay "$lowerdir2:$lowerdir"
-+mv $SCRATCH_MNT/$lowername $SCRATCH_MNT/$ufile
-+test_common "$lowerdir2:$lowerdir" $ufile $lowersize $lowerblocks "$lowerdata" \
-+		"$lowername"
-+
-+# Test Link Redirect
-+echo -e "\n== Check Link Redirect =="
-+create_basic_files
-+mount_overlay $lowerdir
-+ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
-+test_common $lowerdir $udirname/$ufile $lowersize $lowerblocks "$lowerdata" \
-+		"/$lowername"
-+
-+# Test midlayer link redirect
-+echo -e "\n== Check Midlayer Link Redirect =="
-+prepare_midlayer
-+mount_overlay "$lowerdir2:$lowerdir"
-+ln $SCRATCH_MNT/$lowername $SCRATCH_MNT/$udirname/$ufile
-+test_common "$lowerdir2:$lowerdir" $udirname/$ufile $lowersize $lowerblocks \
-+		"$lowerdata" "/$lowername"
-+
-+# Test lower link file gets absolute redirect upon rename
-+echo -e "\n== Check Lower Link Rename Absolute Redirect =="
-+create_basic_files
-+create_lower_link
-+mount_overlay $lowerdir
-+mv $SCRATCH_MNT/$lowerlink $SCRATCH_MNT/$ufile
-+test_common $lowerdir $ufile $lowersize $lowerblocks "$lowerdata" "/$lowerlink"
-+
-+# success, all done
-+status=0
-+exit
-Index: xfstests-dev/common/overlay
-===================================================================
---- xfstests-dev.orig/common/overlay	2018-05-29 15:34:50.772714715 -0400
-+++ xfstests-dev/common/overlay	2018-05-29 15:34:52.431714715 -0400
-@@ -10,6 +10,7 @@ export OVL_XATTR_IMPURE="trusted.overlay
- export OVL_XATTR_ORIGIN="trusted.overlay.origin"
- export OVL_XATTR_NLINK="trusted.overlay.nlink"
- export OVL_XATTR_UPPER="trusted.overlay.upper"
-+export OVL_XATTR_METACOPY="trusted.overlay.metacopy"
- 
- # helper function to do the actual overlayfs mount operation
- _overlay_mount_dirs()
-Index: xfstests-dev/tests/overlay/060.out
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/060.out	2018-05-29 15:34:52.431714715 -0400
-@@ -0,0 +1,42 @@
-+QA output created by 060
-+== Check Simple Metacopy ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Midlayer Metacopy ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Rename Redirect ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Midlayer Rename Redirect ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Link Redirect ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Midlayer Link Redirect ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-+
-+== Check Lower Link Rename Absolute Redirect ==
-+check properties of metadata copied up file
-+Unmount and Mount again
-+check properties of metadata copied up file
-+check properties of data copied up file
-Index: xfstests-dev/tests/overlay/group
-===================================================================
---- xfstests-dev.orig/tests/overlay/group	2018-05-29 15:34:52.432714715 -0400
-+++ xfstests-dev/tests/overlay/group	2018-05-29 15:35:13.736714715 -0400
-@@ -62,3 +62,4 @@
- 057 auto quick redirect
- 058 auto quick exportfs
- 059 auto quick copyup
-+060 auto quick metacopy
+--D
+
+> > 
+> > > Hmm... if we have different dedupe test ways, maybe we can write not only one
+> > > cases.
+> > > 
+> > > > 
+> > > > > > 
+> > > > > > > 
+> > > > > > > Please tell me, if you have better ideas:)
+> > > > > > > 
+> > > > > > > PS: This case test passed on XFS(with reflink=1) and btrfs. And the duperemove
+> > > > > > > can reclaim some space in the test, see below:
+> > > > > > > 
+> > > > > > >   Before duperemove
+> > > > > > >     Filesystem                 1K-blocks    Used Available Use% Mounted on
+> > > > > > >     /dev/mapper/xxxx-xfscratch 31441920K 583692K 30858228K   2% /mnt/scratch
+> > > > > > > 
+> > > > > > >   After duperemove
+> > > > > > >     Filesystem                 1K-blocks    Used Available Use% Mounted on
+> > > > > > >     /dev/mapper/xxxx-xfscratch 31441920K 345728K 31096192K   2% /mnt/scratch
+> > > > > > > 
+> > > > > > > Thanks,
+> > > > > > > Zorro
+> > > > > > > 
+> > > > > > >  common/config        |  1 +
+> > > > > > >  tests/shared/008     | 88 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+> > > > > > >  tests/shared/008.out |  2 ++
+> > > > > > >  tests/shared/group   |  1 +
+> > > > > > >  4 files changed, 92 insertions(+)
+> > > > > > >  create mode 100755 tests/shared/008
+> > > > > > >  create mode 100644 tests/shared/008.out
+> > > > > > > 
+> > > > > > > diff --git a/common/config b/common/config
+> > > > > > > index 02c378a9..def559c1 100644
+> > > > > > > --- a/common/config
+> > > > > > > +++ b/common/config
+> > > > > > > @@ -207,6 +207,7 @@ export SQLITE3_PROG="`set_prog_path sqlite3`"
+> > > > > > >  export TIMEOUT_PROG="`set_prog_path timeout`"
+> > > > > > >  export SETCAP_PROG="`set_prog_path setcap`"
+> > > > > > >  export GETCAP_PROG="`set_prog_path getcap`"
+> > > > > > > +export DUPEREMOVE_PROG="`set_prog_path duperemove`"
+> > > > > > >  
+> > > > > > >  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+> > > > > > >  # newer systems have udevadm command but older systems like RHEL5 don't.
+> > > > > > > diff --git a/tests/shared/008 b/tests/shared/008
+> > > > > > > new file mode 100755
+> > > > > > > index 00000000..dace5429
+> > > > > > > --- /dev/null
+> > > > > > > +++ b/tests/shared/008
+> > > > > > > @@ -0,0 +1,88 @@
+> > > > > > > +#! /bin/bash
+> > > > > > > +# FS QA Test 008
+> > > > > > > +#
+> > > > > > > +# Dedup integrity test by duperemove
+> > > > > > > +#
+> > > > > > > +#-----------------------------------------------------------------------
+> > > > > > > +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> > > > > > > +#
+> > > > > > > +# This program is free software; you can redistribute it and/or
+> > > > > > > +# modify it under the terms of the GNU General Public License as
+> > > > > > > +# published by the Free Software Foundation.
+> > > > > > > +#
+> > > > > > > +# This program is distributed in the hope that it would be useful,
+> > > > > > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> > > > > > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> > > > > > > +# GNU General Public License for more details.
+> > > > > > > +#
+> > > > > > > +# You should have received a copy of the GNU General Public License
+> > > > > > > +# along with this program; if not, write the Free Software Foundation,
+> > > > > > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> > > > > > > +#-----------------------------------------------------------------------
+> > > > > > > +#
+> > > > > > > +
+> > > > > > > +seq=`basename $0`
+> > > > > > > +seqres=$RESULT_DIR/$seq
+> > > > > > > +echo "QA output created by $seq"
+> > > > > > > +
+> > > > > > > +here=`pwd`
+> > > > > > > +tmp=/tmp/$$
+> > > > > > > +status=1	# failure is the default!
+> > > > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > > > > +
+> > > > > > > +_cleanup()
+> > > > > > > +{
+> > > > > > > +	cd /
+> > > > > > > +	rm -f $tmp.*
+> > > > > > > +}
+> > > > > > > +
+> > > > > > > +# get standard environment, filters and checks
+> > > > > > > +. ./common/rc
+> > > > > > > +. ./common/filter
+> > > > > > > +. ./common/reflink
+> > > > > > > +
+> > > > > > > +# remove previous $seqres.full before test
+> > > > > > > +rm -f $seqres.full
+> > > > > > > +
+> > > > > > > +# real QA test starts here
+> > > > > > > +
+> > > > > > > +# duperemove only supports btrfs and xfs (with reflink feature).
+> > > > > > > +# Add other filesystems if it supports more later.
+> > > > > > > +_supported_fs xfs btrfs
+> > > > > > > +_supported_os Linux
+> > > > > > 
+> > > > > > _require_command "$DUPEREMOVE_PROG" duperemove ?
+> > > > > 
+> > > > > Yes, it would be better to use this template, not check
+> > > > > [ "$DUPEREMOVE_PROG" = "" ].
+> > > > > 
+> > > > > > 
+> > > > > > > +_require_scratch_reflink
+> > > > > > 
+> > > > > > _require_scratch_dedupe
+> > > > > 
+> > > > > Yes, I should check XFS_IOC_FILE_EXTENT_SAME, not XFS_IOC_CLONE*.
+> > > > > 
+> > > > > > 
+> > > > > > > +
+> > > > > > > +[ "$DUPEREMOVE_PROG" = "" ] && _notrun "duperemove not found"
+> > > > > > > +_scratch_mkfs > $seqres.full 2>&1
+> > > > > > > +_scratch_mount >> $seqres.full 2>&1
+> > > > > > > +
+> > > > > > > +testdir=$SCRATCH_MNT/test-$seq
+> > > > > > > +mkdir $testdir
+> > > > > > > +
+> > > > > > > +fsstress_opts="-w -r -f mknod=0"
+> > > > > > > +# Create some files and make a duplicate
+> > > > > > > +$FSSTRESS_PROG $fsstress_opts -d $testdir \
+> > > > > > > +	       -n $((500 * LOAD_FACTOR)) -p 10 >/dev/null 2>&1
+> > > > > > > +duptestdir=${testdir}.dup
+> > > > > > > +cp -a $testdir $duptestdir
+> > > > > > > +
+> > > > > > > +# Make some difference in two directories
+> > > > > > > +$FSSTRESS_PROG $fsstress_opts -d $testdir -n 200 -p 5 >/dev/null 2>&1
+> > > > > > > +$FSSTRESS_PROG $fsstress_opts -d $duptestdir -n 200 -p 5 >/dev/null 2>&1
+> > > > > > > +
+> > > > > > > +# Record all files' md5 checksum
+> > > > > > > +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
+> > > > > > > +find $duptestdir -type f -exec md5sum {} \; > $TEST_DIR/dup${seq}md5.sum
+> > > > > > > +
+> > > > > > > +# Dedup
+> > > > > > > +echo "== Duperemove output ==" >> $seqres.full
+> > > > > > > +$DUPEREMOVE_PROG -dr $SCRATCH_MNT/ >>$seqres.full 2>&1
+> > > > > > > +
+> > > > > > > +# Verify all files' integrity
+> > > > > > > +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> > > > > > > +md5sum -c --quiet $TEST_DIR/dup${seq}md5.sum
+> > > > > > 
+> > > > > > Can we _scratch_mount_cycle and md5sum -c again so that we test that the
+> > > > > > pagecache contents don't mutate and a fresh read from the disk also
+> > > > > > doesn't show mutations?
+> > > > > 
+> > > > > If so, is the md5sum data safe? Should I do cycle_mount before get md5 checksum?
+> > > > > What 'fresh read' do you mean, from above duperemove processes? Or you hope to
+> > > > > read all files once before cycle_mount?
+> > > > 
+> > > > Since this is dedupe, the md5sum should never change.  The existing
+> > > > md5sum -c check makes sure that the dedupe operation doesn't
+> > > > mishandle/corrupt the page cache such that it suddenly starts returning
+> > > > incorrect contents; and the post-cycle md5sum -c check I propose would
+> > > > flush the page cache and make sure that the on-disk contents also have
+> > > > not changed.
+> > > 
+> > > Make sense, I'll do a cycle_mount and md5sum -c check again.
+> > 
+> > Ok.
+> > 
+> > --D
+> > 
+> > > > 
+> > > > --D
+> > > > 
+> > > > > Thanks,
+> > > > > Zorro
+> > > > > 
+> > > > > > 
+> > > > > > --D
+> > > > > > 
+> > > > > > > +
+> > > > > > > +echo "Silence is golden"
+> > > > > > > +
+> > > > > > > +status=0
+> > > > > > > +exit
+> > > > > > > diff --git a/tests/shared/008.out b/tests/shared/008.out
+> > > > > > > new file mode 100644
+> > > > > > > index 00000000..dd68d5a4
+> > > > > > > --- /dev/null
+> > > > > > > +++ b/tests/shared/008.out
+> > > > > > > @@ -0,0 +1,2 @@
+> > > > > > > +QA output created by 008
+> > > > > > > +Silence is golden
+> > > > > > > diff --git a/tests/shared/group b/tests/shared/group
+> > > > > > > index b3663a03..de7fe79f 100644
+> > > > > > > --- a/tests/shared/group
+> > > > > > > +++ b/tests/shared/group
+> > > > > > > @@ -10,6 +10,7 @@
+> > > > > > >  005 dangerous_fuzzers
+> > > > > > >  006 auto enospc
+> > > > > > >  007 dangerous_fuzzers
+> > > > > > > +008 auto quick dedupe
+> > > > > > >  032 mkfs auto quick
+> > > > > > >  272 auto enospc rw
+> > > > > > >  289 auto quick
+> > > > > > > -- 
+> > > > > > > 2.14.3
+> > > > > > > 
+> > > > > > > --
+> > > > > > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > > > --
+> > > > > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > > --
+> > > > > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > > > > the body of a message to majordomo@vger.kernel.org
+> > > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
