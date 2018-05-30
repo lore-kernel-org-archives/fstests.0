@@ -1,169 +1,83 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:53440 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751517AbeE3O44 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 May 2018 10:56:56 -0400
-Date: Wed, 30 May 2018 07:56:30 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] xfs: Regression test for vulnerable directory
- integrity check
-Message-ID: <20180530145630.GP4910@magnolia>
-References: <20180530065843.GG6581@desktop>
- <1527670423-2795-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mail-yw0-f194.google.com ([209.85.161.194]:46756 "EHLO
+        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932076AbeE3Tbo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 May 2018 15:31:44 -0400
+Received: by mail-yw0-f194.google.com with SMTP id v197-v6so5087858ywc.13
+        for <fstests@vger.kernel.org>; Wed, 30 May 2018 12:31:43 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1527670423-2795-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <1527646267-2257-1-git-send-email-xuhuan.fnst@cn.fujitsu.com>
+References: <1527646267-2257-1-git-send-email-xuhuan.fnst@cn.fujitsu.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 30 May 2018 22:31:42 +0300
+Message-ID: <CAOQ4uxjU_bJ+5cNwcr96G=K6R_PWSWtaCU4P-Kv0vNLORAX23w@mail.gmail.com>
+Subject: Re: [PATCH] fix generic 401 on fs without filesystem support
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, fstests@vger.kernel.org
+To: Huan Xu <xuhuan.fnst@cn.fujitsu.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 30, 2018 at 04:53:43PM +0800, Xiao Yang wrote:
-> If a malicious XFS contains a block+ format directory wherein the
-> directory inode's core.mode is corrupted, and there are subdirectories
-> of the corrupted directory, an attempt to traverse up the directory
-> tree by running xfs_scrub will crash the kernel in __xfs_dir3_data_check.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-
-Looks good,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
+On Wed, May 30, 2018 at 5:11 AM, Huan Xu <xuhuan.fnst@cn.fujitsu.com> wrote:
+> From: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+>
+> in generic 401 when test on fs without filesystem support
+> list DT_UNKNOWN file . and .. , then list all file without
+> . and ..
+>
+> following  is test result on nfs
+>
+> generic/401     QA output created by 401
+> . d
+> .. d
+>  - output mismatch (see /var/lib/xfstests/results//generic/401.out.bad)
+>     --- tests/generic/401.out   2018-05-22 04:22:11.641999979 -0400
+>     +++ /var/lib/xfstests/results//generic/401.out.bad  2018-05-28 23:22:42.312999931 -0400
+>     @@ -1,9 +1,3 @@
+>      QA output created by 401
+>      . d
+>      .. d
+>     -b b
+>     -c c
+>     -d d
+>     -f f
 > ---
->  tests/xfs/448     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/448.out |  2 ++
->  tests/xfs/group   |  1 +
->  3 files changed, 99 insertions(+)
->  create mode 100755 tests/xfs/448
->  create mode 100644 tests/xfs/448.out
-> 
-> diff --git a/tests/xfs/448 b/tests/xfs/448
-> new file mode 100755
-> index 0000000..9ea9295
-> --- /dev/null
-> +++ b/tests/xfs/448
-> @@ -0,0 +1,96 @@
-> +#! /bin/bash
-> +# FS QA Test No. 448
-> +#
-> +# Regression test for commit:
-> +# 46c59736d809 ("xfs: harden directory integrity checks some more")
-> +#
-> +# If a malicious XFS contains a block+ format directory wherein
-> +# the directory inode's core.mode is corrupted, and there are
-> +# subdirectories of the corrupted directory, an attempt to traverse
-> +# up the directory tree by running xfs_scrub will crash the
-> +# kernel in __xfs_dir3_data_check.
-> +#
-> +# Notice:
-> +# we should have non fatal asserts configured, because assert
-> +# failures triggered by the intentional corrupt would crash system.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 FUJITSU LIMITED. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +
-> +seq=`basename "$0"`
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/populate
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_scratch_nocheck
-> +_require_xfs_io_command "scrub"
-> +# Corrupt XFS on purpose, and skip if assert failures would crash system.
-> +_require_no_xfs_bug_on_assert
-> +
-> +rm -f "$seqres.full"
-> +
-> +# Format and mount
-> +_scratch_mkfs | _filter_mkfs > $seqres.full 2> $tmp.mkfs || _fail "mkfs failed"
-> +_scratch_mount
-> +
-> +# Get directory block size
-> +. $tmp.mkfs
-> +
-> +# Create a block+(e.g. leaf) format directory
-> +__populate_create_dir "${SCRATCH_MNT}/dir_leaf" "$((dirbsize / 12))"
-> +
-> +# Get the block+ directory inode and a subdirectory inode of it
-> +subdino=$(stat -c "%i" "$(find ${SCRATCH_MNT}/dir_leaf/* -type d | head -1)")
-> +dino=$(stat -c "%i" "${SCRATCH_MNT}/dir_leaf")
-> +
-> +# Get the subdirectory's generation number
-> +_scratch_unmount
-> +subdgen=$(_scratch_xfs_get_metadata_field "core.gen" "inode $subdino")
-> +
-> +# Corrupt the directory inode's core.mode
-> +setmode="0100755"
-> +_scratch_xfs_set_metadata_field "core.mode" "$setmode" "inode $dino" >> $seqres.full
-> +getmode=$(_scratch_xfs_get_metadata_field "core.mode" "inode $dino")
-> +[ "$getmode" != "$setmode" ] && _fail "failed to set core.mode"
-> +
-> +# Scrub parent directory in subdirectory (online)
-> +_scratch_mount
-> +$XFS_IO_PROG -x -c "scrub parent $subdino $subdgen" ${SCRATCH_MNT} >> $seqres.full
-> +
-> +echo "Silence is golden"
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/448.out b/tests/xfs/448.out
-> new file mode 100644
-> index 0000000..b6f0a53
-> --- /dev/null
-> +++ b/tests/xfs/448.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 448
-> +Silence is golden
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 51326d9..dd39d08 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -445,3 +445,4 @@
->  445 auto quick filestreams
->  446 auto quick
->  447 auto mount
-> +448 auto quick fuzzers
-> -- 
-> 1.8.3.1
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>  tests/generic/401 | 4 ++--
+>  1 file changed, 2 insertions(+), 2 deletions(-)
+>
+> diff --git a/tests/generic/401 b/tests/generic/401
+> index 74f2bea5..26938864 100755
+> --- a/tests/generic/401
+> +++ b/tests/generic/401
+> @@ -86,8 +86,8 @@ else
+>         # print fake dir file type for . and .. if they are DT_UNKNOWN
+>         src/t_dir_type $testdir u | grep -F '.' | \
+>                 awk '{ print $1, "d" }' | sort
+> -       # list unknown files and print filename as fake file type
+> -       src/t_dir_type $testdir u | grep -vF '.' | \
+> +       # list all files without . and .. and print filename as fake file type
+> +       src/t_dir_type $testdir | grep -vF '.' | \
+>                 awk '{ print $1, $1 }' | sort
+>  fi
+>
+
+This makes the test pass by definition for unsupported dir type -
+it tests that the names of files in the directory is the files we created -
+nothing more.
+
+Its fine that you want to make NFS not fail this test, but what do you
+want to test? Look at the header comment - it says what the test does
+for xfs/ext4 and dir type feature is disabled and this change is breaking
+those verifications.
+
+The way I see it there are 2 options:
+1. implement _require_filetype and notrun this test at all if file type is
+not supported. Basically that's the result of your patch, but it reports
+pass instead of notrun.
+2. change the verification of not supported case to allow for either
+DT_UNKNOWN or the expected type
+
+I personally don't object to the easier option #1, but options #2 gives
+better test coverage.
+
+Thanks,
+Amir.
