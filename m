@@ -1,12 +1,14 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:53452 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932618AbeE3Ewu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 May 2018 00:52:50 -0400
-Date: Tue, 29 May 2018 21:52:32 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Received: from mail-pl0-f66.google.com ([209.85.160.66]:34093 "EHLO
+        mail-pl0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S937187AbeE3G6s (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 30 May 2018 02:58:48 -0400
+Received: by mail-pl0-f66.google.com with SMTP id ay10-v6so10504379plb.1
+        for <fstests@vger.kernel.org>; Tue, 29 May 2018 23:58:48 -0700 (PDT)
+Date: Wed, 30 May 2018 14:58:43 +0800
+From: Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [PATCH] xfs: Regression test for vulnerable directory integrity
  check
-Message-ID: <20180530045232.GV12940@magnolia>
+Message-ID: <20180530065843.GG6581@desktop>
 References: <1527154332-13234-1-git-send-email-yangx.jy@cn.fujitsu.com>
  <20180525043732.GL12940@magnolia>
  <5B07AE42.2010808@cn.fujitsu.com>
@@ -18,13 +20,16 @@ Content-Disposition: inline
 In-Reply-To: <5B0E22DA.4040602@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
 To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, fstests@vger.kernel.org
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > Hi Eryu,
 > 
 > Do you have any better ways to trigger the assert?
+
+Sorry, I've no better ideas here..
+
 > 
 > On 2018/05/30 1:53, Darrick J. Wong wrote:
 > > On Fri, May 25, 2018 at 02:33:38PM +0800, Xiao Yang wrote:
@@ -55,6 +60,9 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +#
 > > > > > +# Regression test for commit:
 > > > > > +# 46c5973 ("xfs: harden directory integrity checks some more")
+
+It'd be better to reference the commit with 12-digits commit id.
+
 > > > > > +#
 > > > > > +# If a malicious XFS contains a block+ format directory wherein
 > > > > > +# the directory inode's core.mode is corrupted, and there are
@@ -69,6 +77,9 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +#-----------------------------------------------------------------------
 > > > > > +# Copyright (c) 2018 FUJITSU.  All Rights Reserved.
 > > > > > +# Author: Xiao Yang<yangx.jy@cn.fujitsu.com>
+
+Author not needed.
+
 > > > > > +#
 > > > > > +# This program is free software; you can redistribute it and/or
 > > > > > +# modify it under the terms of the GNU General Public License as
@@ -96,6 +107,10 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +_cleanup()
 > > > > > +{
 > > > > > +	rm -rf $tmp.*
+
+Please follow the 'new' template in _cleanup(), and add any cleanup
+steps specific to the test.
+
 > > > > > +}
 > > > > > +
 > > > > > +# get standard environment, filters and checks
@@ -108,6 +123,9 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +_supported_os Linux
 > > > > > +_supported_fs xfs
 > > > > > +_require_scratch
+
+_require_scratch_nocheck below is sufficient.
+
 > > > > > +_require_scrub
 > > > > > +_require_scratch_nocheck
 > > > > > +# Corrupt XFS on purpose, and skip if assert failures would crash system.
@@ -121,6 +139,16 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +
 > > > > > +# Create a block+(e.g. leaf) format directory
 > > > > > +dblksz="$(xfs_info "${SCRATCH_MNT}" | grep naming.*bsize | sed -e 's/^.*bsize=//g' -e 's/\([0-9]*\).*$/\1/g')"
+
+I think we can update _filter_mkfs to print out bsize for naming section
+too and get the size by sourcing filter output, e.g.
+
+_scratch_mkfs > $seqres.full 2> $tmp.mkfs || _fail "mkfs failed"
+...
+# get directory block size
+. $tmp.mkfs
+...
+
 > > > > > +__populate_create_dir "${SCRATCH_MNT}/dir_leaf" "$((dblksz / 12))"
 > > > > > +dino=$(stat -c "%i" "${SCRATCH_MNT}/dir_leaf")
 > > > > > +
@@ -131,6 +159,12 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > > > > +getmode=$(_scratch_xfs_get_metadata_field "core.mode" "inode $dino")
 > > > > > +[ "$getmode" != "$setmode" ]&&   _notrun "failed to set core.mode"
 > > > > When does the set fail?  And isn't that a _fail()ure?
+
+Yeah, looks like a _fail to me.
+
+Thanks,
+Eryu
+
 > > > Hi Darrick,
 > > > 
 > > > The set never failed on my enviroment, and i just ensure set succeeded.
@@ -158,18 +192,7 @@ On Wed, May 30, 2018 at 12:04:42PM +0800, Xiao Yang wrote:
 > > better suggestions.
 > I tried the find command, but failed to trigger the assert.
 > If nobody has a better way, can we still use xfs_scrub command in the test?
-
-Sure.  To be fair, scrub had a silly bug in it that made this easy to
-trip over + test for. :)
-
-Though you might consider the simpler:
-
-$XFS_IO_PROG -c 'scrub parent' /path/to/the/child/file
-
-since we're not going to change xfs_io unless we absolutely have to.
-
---D
-
+> 
 > Thanks,
 > Xiao Yang
 > > --D
