@@ -1,83 +1,124 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:46756 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932076AbeE3Tbo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 30 May 2018 15:31:44 -0400
-Received: by mail-yw0-f194.google.com with SMTP id v197-v6so5087858ywc.13
-        for <fstests@vger.kernel.org>; Wed, 30 May 2018 12:31:43 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:55350 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S932637AbeEaDS0 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 30 May 2018 23:18:26 -0400
+Date: Wed, 30 May 2018 23:18:25 -0400 (EDT)
+From: Xiaoli Feng <xifeng@redhat.com>
+Message-ID: <1911058726.5701908.1527736705893.JavaMail.zimbra@redhat.com>
+In-Reply-To: <529728696.4429280.1527550001433.JavaMail.zimbra@redhat.com>
+References: <1526959436-7170-1-git-send-email-xifeng@redhat.com> <20180527125058.GC6581@desktop> <246296494.4735384.1527489656588.JavaMail.zimbra@redhat.com> <529728696.4429280.1527550001433.JavaMail.zimbra@redhat.com>
+Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
 MIME-Version: 1.0
-In-Reply-To: <1527646267-2257-1-git-send-email-xuhuan.fnst@cn.fujitsu.com>
-References: <1527646267-2257-1-git-send-email-xuhuan.fnst@cn.fujitsu.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 30 May 2018 22:31:42 +0300
-Message-ID: <CAOQ4uxjU_bJ+5cNwcr96G=K6R_PWSWtaCU4P-Kv0vNLORAX23w@mail.gmail.com>
-Subject: Re: [PATCH] fix generic 401 on fs without filesystem support
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Huan Xu <xuhuan.fnst@cn.fujitsu.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Ronnie Sahlberg <lsahlber@redhat.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org, linux-cifs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 30, 2018 at 5:11 AM, Huan Xu <xuhuan.fnst@cn.fujitsu.com> wrote:
-> From: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
->
-> in generic 401 when test on fs without filesystem support
-> list DT_UNKNOWN file . and .. , then list all file without
-> . and ..
->
-> following  is test result on nfs
->
-> generic/401     QA output created by 401
-> . d
-> .. d
->  - output mismatch (see /var/lib/xfstests/results//generic/401.out.bad)
->     --- tests/generic/401.out   2018-05-22 04:22:11.641999979 -0400
->     +++ /var/lib/xfstests/results//generic/401.out.bad  2018-05-28 23:22:42.312999931 -0400
->     @@ -1,9 +1,3 @@
->      QA output created by 401
->      . d
->      .. d
->     -b b
->     -c c
->     -d d
->     -f f
-> ---
->  tests/generic/401 | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/tests/generic/401 b/tests/generic/401
-> index 74f2bea5..26938864 100755
-> --- a/tests/generic/401
-> +++ b/tests/generic/401
-> @@ -86,8 +86,8 @@ else
->         # print fake dir file type for . and .. if they are DT_UNKNOWN
->         src/t_dir_type $testdir u | grep -F '.' | \
->                 awk '{ print $1, "d" }' | sort
-> -       # list unknown files and print filename as fake file type
-> -       src/t_dir_type $testdir u | grep -vF '.' | \
-> +       # list all files without . and .. and print filename as fake file type
-> +       src/t_dir_type $testdir | grep -vF '.' | \
->                 awk '{ print $1, $1 }' | sort
->  fi
->
 
-This makes the test pass by definition for unsupported dir type -
-it tests that the names of files in the directory is the files we created -
-nothing more.
+Thanks a lot, Ronnie.
 
-Its fine that you want to make NFS not fail this test, but what do you
-want to test? Look at the header comment - it says what the test does
-for xfs/ext4 and dir type feature is disabled and this change is breaking
-those verifications.
-
-The way I see it there are 2 options:
-1. implement _require_filetype and notrun this test at all if file type is
-not supported. Basically that's the result of your patch, but it reports
-pass instead of notrun.
-2. change the verification of not supported case to allow for either
-DT_UNKNOWN or the expected type
-
-I personally don't object to the easier option #1, but options #2 gives
-better test coverage.
-
-Thanks,
-Amir.
+----- Original Message -----
+> From: "Ronnie Sahlberg" <lsahlber@redhat.com>
+> To: "Xiaoli Feng" <xifeng@redhat.com>
+> Cc: "Eryu Guan" <guaneryu@gmail.com>, fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+> Sent: Tuesday, May 29, 2018 7:26:41 AM
+> Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
+> 
+> Hi Xiaoli,
+> 
+> I think it is fine to skip the atime tests for CIFS.
+> 
+> The behaviour of atime/noatime for cifs is basically noatime always.
+> When we read from the server the server will update the atime independently
+> of
+> cisf.ko but then any further reads that we do from cache will never push any
+> updates
+> to the server.
+> 
+> Ronnie
+> 
+> 
+> 
+> ----- Original Message -----
+> > From: "Xiaoli Feng" <xifeng@redhat.com>
+> > To: "Eryu Guan" <guaneryu@gmail.com>, "Leif Sahlberg" <lsahlber@redhat.com>
+> > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+> > Sent: Monday, 28 May, 2018 4:40:56 PM
+> > Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
+> > 
+> > 
+> > Add Ronnie to to list.
+> > 
+> > Hello Ronnie,
+> >   what's the expected behavior from CIFS on atime/noatime? We want to skip
+> >   the
+> > atime related tests on cifs for xfstests just like nfs. But not sure if
+> > it's
+> > correct. What do you think about it?
+> > 
+> > Thanks.
+> > 
+> > ----- Original Message -----
+> > > From: "Eryu Guan" <guaneryu@gmail.com>
+> > > To: "XiaoLi Feng" <xifeng@redhat.com>
+> > > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+> > > Sent: Sunday, May 27, 2018 8:50:58 PM
+> > > Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
+> > > 
+> > > On Tue, May 22, 2018 at 11:23:56AM +0800, Xiaoli Feng wrote:
+> > > > From: xiaoli feng <xifeng@redhat.com>
+> > > > 
+> > > > The atime related mount options have no effect on cifs mounts
+> > > > now or in the future. So skip these tests on CIFS.
+> > > > 
+> > > > Signed-off-by: xiaoli feng <xifeng@redhat.com>
+> > > 
+> > > Looks fine to me. But I really need an ACK from cifs folks.
+> > > 
+> > > > ---
+> > > >  common/rc | 2 ++
+> > > >  1 file changed, 2 insertions(+)
+> > > > 
+> > > > diff --git a/common/rc b/common/rc
+> > > > index ffe5323..d3af55f 100644
+> > > > --- a/common/rc
+> > > > +++ b/common/rc
+> > > > @@ -3244,6 +3244,8 @@ _require_atime()
+> > > >  	_exclude_scratch_mount_option "noatime"
+> > > >  	if [ "$FSTYP" == "nfs" ]; then
+> > > >  		_notrun "atime related mount options have no effect on NFS"
+> > > > +	elif [ "$FSTYP" == "cifs" ]; then
+> > > > +		_notrun "atime related mount options have no effect on CIFS"
+> > > 
+> > > Or just change the check to a case-switch on $FSTYP?
+> > 
+> > Ok, I will change it on the next commit.
+> > Thanks!
+> > 
+> > > 
+> > > Thanks,
+> > > Eryu
+> > > 
+> > > >  	fi
+> > > >  }
+> > > >  
+> > > > --
+> > > > 1.8.3.1
+> > > > 
+> > > > --
+> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > > the body of a message to majordomo@vger.kernel.org
+> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > > 
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > 
+> 
