@@ -1,124 +1,51 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55350 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S932637AbeEaDS0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 30 May 2018 23:18:26 -0400
-Date: Wed, 30 May 2018 23:18:25 -0400 (EDT)
-From: Xiaoli Feng <xifeng@redhat.com>
-Message-ID: <1911058726.5701908.1527736705893.JavaMail.zimbra@redhat.com>
-In-Reply-To: <529728696.4429280.1527550001433.JavaMail.zimbra@redhat.com>
-References: <1526959436-7170-1-git-send-email-xifeng@redhat.com> <20180527125058.GC6581@desktop> <246296494.4735384.1527489656588.JavaMail.zimbra@redhat.com> <529728696.4429280.1527550001433.JavaMail.zimbra@redhat.com>
-Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:59580 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1750949AbeEaEKT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 31 May 2018 00:10:19 -0400
+From: XiaoLi Feng <xifeng@redhat.com>
+Subject: [PATCH v3] common/rc: skip atime related tests on CIFS
+Date: Thu, 31 May 2018 12:10:14 +0800
+Message-Id: <1527739814-30451-1-git-send-email-xifeng@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-cifs@vger.kernel.org, xiaoli feng <xifeng@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: xiaoli feng <xifeng@redhat.com>
 
-Thanks a lot, Ronnie.
+>From the feedback of cifs developer, the behaviour of atime/noatime
+for cifs is basically noatime always. So the atime related mount
+options have no effect on cifs mounts. And Skip these tests on CIFS.
 
------ Original Message -----
-> From: "Ronnie Sahlberg" <lsahlber@redhat.com>
-> To: "Xiaoli Feng" <xifeng@redhat.com>
-> Cc: "Eryu Guan" <guaneryu@gmail.com>, fstests@vger.kernel.org, linux-cifs@vger.kernel.org
-> Sent: Tuesday, May 29, 2018 7:26:41 AM
-> Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
-> 
-> Hi Xiaoli,
-> 
-> I think it is fine to skip the atime tests for CIFS.
-> 
-> The behaviour of atime/noatime for cifs is basically noatime always.
-> When we read from the server the server will update the atime independently
-> of
-> cisf.ko but then any further reads that we do from cache will never push any
-> updates
-> to the server.
-> 
-> Ronnie
-> 
-> 
-> 
-> ----- Original Message -----
-> > From: "Xiaoli Feng" <xifeng@redhat.com>
-> > To: "Eryu Guan" <guaneryu@gmail.com>, "Leif Sahlberg" <lsahlber@redhat.com>
-> > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
-> > Sent: Monday, 28 May, 2018 4:40:56 PM
-> > Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
-> > 
-> > 
-> > Add Ronnie to to list.
-> > 
-> > Hello Ronnie,
-> >   what's the expected behavior from CIFS on atime/noatime? We want to skip
-> >   the
-> > atime related tests on cifs for xfstests just like nfs. But not sure if
-> > it's
-> > correct. What do you think about it?
-> > 
-> > Thanks.
-> > 
-> > ----- Original Message -----
-> > > From: "Eryu Guan" <guaneryu@gmail.com>
-> > > To: "XiaoLi Feng" <xifeng@redhat.com>
-> > > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
-> > > Sent: Sunday, May 27, 2018 8:50:58 PM
-> > > Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
-> > > 
-> > > On Tue, May 22, 2018 at 11:23:56AM +0800, Xiaoli Feng wrote:
-> > > > From: xiaoli feng <xifeng@redhat.com>
-> > > > 
-> > > > The atime related mount options have no effect on cifs mounts
-> > > > now or in the future. So skip these tests on CIFS.
-> > > > 
-> > > > Signed-off-by: xiaoli feng <xifeng@redhat.com>
-> > > 
-> > > Looks fine to me. But I really need an ACK from cifs folks.
-> > > 
-> > > > ---
-> > > >  common/rc | 2 ++
-> > > >  1 file changed, 2 insertions(+)
-> > > > 
-> > > > diff --git a/common/rc b/common/rc
-> > > > index ffe5323..d3af55f 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -3244,6 +3244,8 @@ _require_atime()
-> > > >  	_exclude_scratch_mount_option "noatime"
-> > > >  	if [ "$FSTYP" == "nfs" ]; then
-> > > >  		_notrun "atime related mount options have no effect on NFS"
-> > > > +	elif [ "$FSTYP" == "cifs" ]; then
-> > > > +		_notrun "atime related mount options have no effect on CIFS"
-> > > 
-> > > Or just change the check to a case-switch on $FSTYP?
-> > 
-> > Ok, I will change it on the next commit.
-> > Thanks!
-> > 
-> > > 
-> > > Thanks,
-> > > Eryu
-> > > 
-> > > >  	fi
-> > > >  }
-> > > >  
-> > > > --
-> > > > 1.8.3.1
-> > > > 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > 
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > 
-> 
+Signed-off-by: xiaoli feng <xifeng@redhat.com>
+---
+ common/rc | 13 ++++++++++---
+ 1 file changed, 10 insertions(+), 3 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index ffe5323..0295b30 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3242,9 +3242,16 @@ _exclude_scratch_mount_option()
+ _require_atime()
+ {
+ 	_exclude_scratch_mount_option "noatime"
+-	if [ "$FSTYP" == "nfs" ]; then
+-		_notrun "atime related mount options have no effect on NFS"
+-	fi
++	case $FSTYP
++	in
++		nfs)
++			_notrun "atime related mount options have no effect on NFS"
++		;;
++		cifs)
++			_notrun "atime related mount options have no effect on CIFS"
++		;;
++	esac
++
+ }
+ 
+ _require_relatime()
+-- 
+1.8.3.1
+
