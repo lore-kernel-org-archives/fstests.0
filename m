@@ -1,171 +1,179 @@
-Received: from mail.kernel.org ([198.145.29.99]:45046 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1755414AbeEaPC0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 31 May 2018 11:02:26 -0400
-From: Jeff Layton <jlayton@kernel.org>
-Subject: [fstests PATCH] generic: test reporting of wb errors via syncfs
-Date: Thu, 31 May 2018 11:02:24 -0400
-Message-Id: <20180531150224.24933-1-jlayton@kernel.org>
-In-Reply-To: <20180531112945.8629-1-jlayton@kernel.org>
-References: <20180531112945.8629-1-jlayton@kernel.org>
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:41226 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1755423AbeEaPVq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 May 2018 11:21:46 -0400
+Received: by mail-pg0-f66.google.com with SMTP id d14-v6so9871692pgv.8
+        for <fstests@vger.kernel.org>; Thu, 31 May 2018 08:21:46 -0700 (PDT)
+Date: Thu, 31 May 2018 23:21:38 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] fstests: update the punch, collapse, insert, and zero
+ groups
+Message-ID: <20180531152138.GH6581@desktop>
+References: <20180529190128.20807-1-tytso@mit.edu>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180529190128.20807-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-fsdevel@vger.kernel.org, willy@infradead.org, andres@anarazel.de, cmaiolino@redhat.com, linux-kernel@vger.kernel.org, viro@ZenIV.linux.org.uk
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Jeff Layton <jlayton@redhat.com>
+On Tue, May 29, 2018 at 03:01:28PM -0400, Theodore Ts'o wrote:
+> Update the group files to annotate those tests which have a
+> _require_xfs_io_command for punch, collapse, insert, and zero.  This
+> makes it easier to exclude tests that use one of these fallocate
+> commands.  Or if you want to specifically test for those fallocate
+> commands you can do this.
+> 
+> I maintain an out-of-tree xfstests patch which uses an XFS_IO_AVOID
+> environment variable to suppress running tests that use punch,
+> collapse, insert, etc.  This was rejected because of the claim that it
+> could be done using groups.  The reason why I still keep it as an
+> out-of-tree patch is because I was sure that when people added or
+> remove tests, they would forget to update the groups file with these
+> groups.
 
-Add a test for new syncfs error reporting behavior. When an inode fails
-to be written back, ensure that we report an error to a subsequent call
-to syncfs().
+I'll also pay more attention on this.
 
-Because we don't want to grow struct file in order to support this, we
-only do this if the file was opened with O_PATH flag.
+Thanks,
+Eryu
 
-Signed-off-by: Jeff Layton <jlayton@redhat.com>
----
- tests/generic/999     | 99 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |  8 ++++
- tests/generic/group   |  1 +
- 3 files changed, 108 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-This is the companion testcase patch to this series:
-
-    [PATCH v2 0/5] vfs: allow syncfs to return an error when inode writeback fails
-
-We probably don't want to merge this until it's clear that treating
-syncfs differently on an O_PATH open is OK.
-
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 000000000000..e468d0108ce5
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# FS QA Test No. 999
-+#
-+# Open a file and write to it and fsync. Then, flip the data device to throw
-+# errors, write to it again and do an fdatasync. Then open an O_PATH fd on the
-+# same file and call syncfs against it and ensure that an error is reported,
-+# then call syncfs again and ensure that no error is reported. Finally, repeat
-+# the open and syncfs and ensure that there is no error reported.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018, Jeff Layton <jlayton@redhat.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmerror_cleanup
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmerror
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_xfs_io_command 'open' '-P'
-+_require_scratch_nocheck
-+# This test uses "dm" without taking into account the data could be on
-+# realtime subvolume, thus the test will fail with rtinherit=1
-+_require_no_rtinherit
-+_require_dm_target error
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_dmerror_init
-+_dmerror_mount
-+
-+datalen=65536
-+_require_fs_space $SCRATCH_MNT $datalen
-+
-+# use fd 5 to hold file open
-+testfile=$SCRATCH_MNT/syncfs-reports-errors
-+exec 5>$testfile
-+
-+# write some data to file and fsync it out
-+$XFS_IO_PROG -c "pwrite -W -q 0 $datalen" $testfile
-+
-+# flip device to non-working mode
-+_dmerror_load_error_table
-+
-+# rewrite the data, and do fdatasync
-+$XFS_IO_PROG -c "pwrite -w -q 0 $datalen" $testfile
-+
-+# heal the device error
-+_dmerror_load_working_table
-+
-+# open again and call syncfs twice
-+echo "One of the following syncfs calls should fail with EIO:"
-+$XFS_IO_PROG -P -c syncfs -c syncfs $testfile
-+echo "done"
-+
-+echo "This syncfs call should succeed:"
-+$XFS_IO_PROG -P -c syncfs $testfile
-+echo "done"
-+
-+# close file
-+exec 5>&-
-+
-+# success, all done
-+_dmerror_cleanup
-+
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 000000000000..950a2ba42503
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,8 @@
-+QA output created by 999
-+Format and mount
-+fdatasync: Input/output error
-+One of the following syncfs calls should fail with EIO:
-+syncfs: Input/output error
-+done
-+This syncfs call should succeed:
-+done
-diff --git a/tests/generic/group b/tests/generic/group
-index 752ee35ed3f7..e35491f69e97 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -497,3 +497,4 @@
- 493 auto quick swap
- 494 auto quick swap
- 495 auto quick swap
-+999 auto quick
--- 
-2.17.0
-
+> 
+> This commit is a demonstration of why my reason for keeping support
+> for XFS_IO_AVOID as an out-of-tree patch was prescient.  :-)
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+>  tests/btrfs/group   |  4 ++--
+>  tests/generic/group | 10 +++++-----
+>  tests/xfs/group     | 12 ++++++------
+>  3 files changed, 13 insertions(+), 13 deletions(-)
+> 
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index f04ee8d5..487f3e10 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -110,7 +110,7 @@
+>  105 auto quick send
+>  106 auto quick clone compress
+>  107 auto quick prealloc
+> -108 auto quick send clone punch
+> +108 auto quick send clone punch collapse
+>  109 auto quick send clone compress
+>  110 auto quick send
+>  111 auto quick send
+> @@ -161,5 +161,5 @@
+>  156 auto quick trim
+>  157 auto quick raid
+>  158 auto quick raid scrub
+> -159 auto quick
+> +159 auto quick collapse
+>  160 auto quick
+> diff --git a/tests/generic/group b/tests/generic/group
+> index d0d42e97..349a66a6 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -350,7 +350,7 @@
+>  345 auto
+>  346 auto quick rw
+>  347 auto quick rw thin
+> -348 auto quick metadata
+> +348 auto quick metadata insert
+>  349 blockdev rw zero
+>  350 blockdev rw punch
+>  351 blockdev rw punch collapse insert zero
+> @@ -394,7 +394,7 @@
+>  389 auto quick acl
+>  390 auto freeze stress
+>  391 auto quick rw
+> -392 shutdown auto quick metadata
+> +392 shutdown auto quick metadata punch
+>  393 auto quick rw
+>  394 auto quick
+>  395 auto quick encrypt
+> @@ -448,7 +448,7 @@
+>  443 auto quick rw
+>  444 auto quick acl
+>  445 auto quick rw
+> -446 auto quick rw
+> +446 auto quick rw punch
+>  447 auto clone
+>  448 auto quick rw
+>  449 auto quick acl enospc
+> @@ -460,7 +460,7 @@
+>  455 auto log replay
+>  456 auto quick metadata
+>  457 auto log replay clone
+> -458 auto quick clone
+> +458 auto quick clone collapse zero
+>  459 auto thin
+>  460 auto quick rw
+>  461 auto shutdown stress
+> @@ -495,7 +495,7 @@
+>  491 auto quick freeze mount
+>  492 auto quick
+>  493 auto quick swap
+> -494 auto quick swap
+> +494 auto quick swap punch
+>  495 auto quick swap
+>  900 auto quick verity
+>  901 auto quick verity
+> diff --git a/tests/xfs/group b/tests/xfs/group
+> index e5fd1c6d..2319f58f 100644
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -111,7 +111,7 @@
+>  111 ioctl
+>  112 fuzzers
+>  113 fuzzers
+> -114 auto quick clone rmap
+> +114 auto quick clone rmap collapse insert
+>  115 auto quick fuzzers
+>  116 quota auto quick
+>  117 fuzzers
+> @@ -329,7 +329,7 @@
+>  329 auto quick clone fsr
+>  330 auto quick clone fsr quota
+>  331 auto quick rmap clone
+> -332 auto quick rmap clone
+> +332 auto quick rmap clone collapse punch insert zero
+>  333 auto quick rmap
+>  334 auto quick rmap
+>  335 auto rmap
+> @@ -340,7 +340,7 @@
+>  340 auto quick rmap
+>  341 auto quick rmap
+>  342 auto quick rmap
+> -343 auto quick rmap
+> +343 auto quick rmap collapse punch insert zero
+>  344 auto quick clone
+>  345 auto quick clone
+>  346 auto quick clone
+> @@ -417,8 +417,8 @@
+>  417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
+>  418 dangerous_fuzzers dangerous_scrub dangerous_repair
+>  419 auto quick swap
+> -420 auto quick clone dedupe
+> -421 auto quick clone dedupe
+> +420 auto quick clone dedupe punch
+> +421 auto quick clone dedupe punch
+>  422 dangerous_scrub dangerous_online_repair
+>  423 dangerous_scrub
+>  424 auto quick db
+> @@ -440,7 +440,7 @@
+>  440 auto quick clone quota
+>  441 auto quick clone quota
+>  442 auto stress clone quota
+> -443 auto quick ioctl fsr
+> +443 auto quick ioctl fsr punch
+>  444 auto quick
+>  445 auto quick filestreams
+>  446 auto quick
+> -- 
+> 2.16.1.72.g5be1f00a9a
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
