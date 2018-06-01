@@ -1,179 +1,152 @@
-Received: from mail-pg0-f66.google.com ([74.125.83.66]:41226 "EHLO
-        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1755423AbeEaPVq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 31 May 2018 11:21:46 -0400
-Received: by mail-pg0-f66.google.com with SMTP id d14-v6so9871692pgv.8
-        for <fstests@vger.kernel.org>; Thu, 31 May 2018 08:21:46 -0700 (PDT)
-Date: Thu, 31 May 2018 23:21:38 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] fstests: update the punch, collapse, insert, and zero
- groups
-Message-ID: <20180531152138.GH6581@desktop>
-References: <20180529190128.20807-1-tytso@mit.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180529190128.20807-1-tytso@mit.edu>
+Received: from mx2.suse.de ([195.135.220.15]:37588 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750715AbeFABew (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 31 May 2018 21:34:52 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: btrfs: Test if btrfs will corrupt nodatasum compressed extent when replacing device
+Date: Fri,  1 Jun 2018 09:34:48 +0800
+Message-Id: <20180601013448.22450-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 29, 2018 at 03:01:28PM -0400, Theodore Ts'o wrote:
-> Update the group files to annotate those tests which have a
-> _require_xfs_io_command for punch, collapse, insert, and zero.  This
-> makes it easier to exclude tests that use one of these fallocate
-> commands.  Or if you want to specifically test for those fallocate
-> commands you can do this.
-> 
-> I maintain an out-of-tree xfstests patch which uses an XFS_IO_AVOID
-> environment variable to suppress running tests that use punch,
-> collapse, insert, etc.  This was rejected because of the claim that it
-> could be done using groups.  The reason why I still keep it as an
-> out-of-tree patch is because I was sure that when people added or
-> remove tests, they would forget to update the groups file with these
-> groups.
+This is a long existing bug (from 2012) but exposed by a reporter
+recently, that when compressed extent without data csum get written to
+device-replace target device, the written data is in fact uncompressed data
+other than the original compressed data.
 
-I'll also pay more attention on this.
+And since btrfs still consider the data is compressed and will try to read it
+as compressed, it can cause read error.
 
-Thanks,
-Eryu
+The root cause is located, and one RFC patch already sent to fix it,
+titled "[PATCH RFC] btrfs: scrub: Don't use inode pages for device replace".
+(The RFC is only for the extra possible way to fix the bug, the fix
+itself should work without problem)
 
-> 
-> This commit is a demonstration of why my reason for keeping support
-> for XFS_IO_AVOID as an out-of-tree patch was prescient.  :-)
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
-> ---
->  tests/btrfs/group   |  4 ++--
->  tests/generic/group | 10 +++++-----
->  tests/xfs/group     | 12 ++++++------
->  3 files changed, 13 insertions(+), 13 deletions(-)
-> 
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index f04ee8d5..487f3e10 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -110,7 +110,7 @@
->  105 auto quick send
->  106 auto quick clone compress
->  107 auto quick prealloc
-> -108 auto quick send clone punch
-> +108 auto quick send clone punch collapse
->  109 auto quick send clone compress
->  110 auto quick send
->  111 auto quick send
-> @@ -161,5 +161,5 @@
->  156 auto quick trim
->  157 auto quick raid
->  158 auto quick raid scrub
-> -159 auto quick
-> +159 auto quick collapse
->  160 auto quick
-> diff --git a/tests/generic/group b/tests/generic/group
-> index d0d42e97..349a66a6 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -350,7 +350,7 @@
->  345 auto
->  346 auto quick rw
->  347 auto quick rw thin
-> -348 auto quick metadata
-> +348 auto quick metadata insert
->  349 blockdev rw zero
->  350 blockdev rw punch
->  351 blockdev rw punch collapse insert zero
-> @@ -394,7 +394,7 @@
->  389 auto quick acl
->  390 auto freeze stress
->  391 auto quick rw
-> -392 shutdown auto quick metadata
-> +392 shutdown auto quick metadata punch
->  393 auto quick rw
->  394 auto quick
->  395 auto quick encrypt
-> @@ -448,7 +448,7 @@
->  443 auto quick rw
->  444 auto quick acl
->  445 auto quick rw
-> -446 auto quick rw
-> +446 auto quick rw punch
->  447 auto clone
->  448 auto quick rw
->  449 auto quick acl enospc
-> @@ -460,7 +460,7 @@
->  455 auto log replay
->  456 auto quick metadata
->  457 auto log replay clone
-> -458 auto quick clone
-> +458 auto quick clone collapse zero
->  459 auto thin
->  460 auto quick rw
->  461 auto shutdown stress
-> @@ -495,7 +495,7 @@
->  491 auto quick freeze mount
->  492 auto quick
->  493 auto quick swap
-> -494 auto quick swap
-> +494 auto quick swap punch
->  495 auto quick swap
->  900 auto quick verity
->  901 auto quick verity
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index e5fd1c6d..2319f58f 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -111,7 +111,7 @@
->  111 ioctl
->  112 fuzzers
->  113 fuzzers
-> -114 auto quick clone rmap
-> +114 auto quick clone rmap collapse insert
->  115 auto quick fuzzers
->  116 quota auto quick
->  117 fuzzers
-> @@ -329,7 +329,7 @@
->  329 auto quick clone fsr
->  330 auto quick clone fsr quota
->  331 auto quick rmap clone
-> -332 auto quick rmap clone
-> +332 auto quick rmap clone collapse punch insert zero
->  333 auto quick rmap
->  334 auto quick rmap
->  335 auto rmap
-> @@ -340,7 +340,7 @@
->  340 auto quick rmap
->  341 auto quick rmap
->  342 auto quick rmap
-> -343 auto quick rmap
-> +343 auto quick rmap collapse punch insert zero
->  344 auto quick clone
->  345 auto quick clone
->  346 auto quick clone
-> @@ -417,8 +417,8 @@
->  417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
->  418 dangerous_fuzzers dangerous_scrub dangerous_repair
->  419 auto quick swap
-> -420 auto quick clone dedupe
-> -421 auto quick clone dedupe
-> +420 auto quick clone dedupe punch
-> +421 auto quick clone dedupe punch
->  422 dangerous_scrub dangerous_online_repair
->  423 dangerous_scrub
->  424 auto quick db
-> @@ -440,7 +440,7 @@
->  440 auto quick clone quota
->  441 auto quick clone quota
->  442 auto stress clone quota
-> -443 auto quick ioctl fsr
-> +443 auto quick ioctl fsr punch
->  444 auto quick
->  445 auto quick filestreams
->  446 auto quick
-> -- 
-> 2.16.1.72.g5be1f00a9a
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Reported-by: James Harvey <jamespharvey20@gmail.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/161.out |  2 +
+ tests/btrfs/group   |  1 +
+ 3 files changed, 94 insertions(+)
+ create mode 100755 tests/btrfs/161
+ create mode 100644 tests/btrfs/161.out
+
+diff --git a/tests/btrfs/161 b/tests/btrfs/161
+new file mode 100755
+index 00000000..d4a2b474
+--- /dev/null
++++ b/tests/btrfs/161
+@@ -0,0 +1,91 @@
++#! /bin/bash
++# FS QA Test 161
++#
++# Test if btrfs will corrupt compressed data extent without data csum
++# by replacing it with uncompressed data, when doing replacing device.
++#
++# This could be fixed by the following RFC patch:
++# "[PATCH RFC] btrfs: scrub: Don't use inode pages for device replace"
++#
++#-----------------------------------------------------------------------
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++#
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch_dev_pool 2
++_require_scratch_dev_pool_equal_size
++
++
++_scratch_dev_pool_get 1
++_spare_dev_get
++_scratch_pool_mkfs >> $seqres.full 2>&1
++
++# Create nodatasum inode
++_scratch_mount "-o nodatasum"
++touch $SCRATCH_MNT/nodatasum_file
++_scratch_remount "datasum,compress"
++_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
++
++# Write the compressed data back to disk
++sync
++
++# Replace the device
++_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
++
++_scratch_unmount
++
++_mount $SPARE_DEV $SCRATCH_MNT
++
++# Since now the compressed extent contains *UNCOMPRESSED* data, reading it will
++# easily trigger a EIO error
++cat $SCRATCH_MNT/nodatasum_file > /dev/null
++
++_scratch_unmount
++_spare_dev_put
++_scratch_dev_pool_put
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+new file mode 100644
+index 00000000..1752a243
+--- /dev/null
++++ b/tests/btrfs/161.out
+@@ -0,0 +1,2 @@
++QA output created by 161
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index f04ee8d5..f900b3d0 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -163,3 +163,4 @@
+ 158 auto quick raid scrub
+ 159 auto quick
+ 160 auto quick
++161 auto quick replace
+-- 
+2.17.0
+
