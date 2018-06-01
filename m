@@ -1,128 +1,63 @@
-Received: from mail-yb0-f193.google.com ([209.85.213.193]:44286 "EHLO
-        mail-yb0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1750807AbeFAIej (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 04:34:39 -0400
-MIME-Version: 1.0
-In-Reply-To: <20180529194108.GB13363@redhat.com>
-References: <20180529194108.GB13363@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 1 Jun 2018 11:34:38 +0300
-Message-ID: <CAOQ4uxgjbK=XHy0E0n94KoLhkxEbNU-YFz05mHYaiQTuXPmiRQ@mail.gmail.com>
-Subject: Re: [PATCH V3] xfstest: overlay: Add tests for overlay metadata only
- copy up feature
-Content-Type: text/plain; charset="UTF-8"
+Received: from smtp2.provo.novell.com ([137.65.250.81]:59110 "EHLO
+        smtp2.provo.novell.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751168AbeFAIil (ORCPT
+        <rfc822;groupwise-fstests@vger.kernel.org:0:0>);
+        Fri, 1 Jun 2018 04:38:41 -0400
+From: Yong Sun <yosun@suse.com>
+Subject: [PATCH] xfstests/btrfs: adapt ppc64le node size at least 65536
+Date: Fri,  1 Jun 2018 16:37:27 +0800
+Message-Id: <20180601083727.13709-1-yosun@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Eryu Guan <guaneryu@gmail.com>
+To: fstests@vger.kernel.org
+Cc: yosun <yosun@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 29, 2018 at 10:41 PM, Vivek Goyal <vgoyal@redhat.com> wrote:
-> Hi,
->
-> Find attached V3 of the patch. It now works on top of ext4 as well as
-> xfs with reflink enabled.
+From: yosun <yosun@suse.com>
 
-I can confirm that.
+node size(leaf size) in ppc64le at least 65536, so mkfs with --nodesize smaller than that number will cause a fail on 057 and 122.
 
-> I removed some of nr_block checks which could
-> not be guaranteed.
->
-> Add tests for metadata only copy up feature.
->
-> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+Signed-off-by: Yong Sun <yosun@suse.com>
+---
+ tests/btrfs/057 | 6 ++++++
+ tests/btrfs/122 | 8 +++++++-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
 
-You may add
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+diff --git a/tests/btrfs/057 b/tests/btrfs/057
+index a834b763..69d096fb 100755
+--- a/tests/btrfs/057
++++ b/tests/btrfs/057
+@@ -48,6 +48,12 @@ _require_scratch
+ 
+ rm -f $seqres.full
+ 
++# the nodesize in ppc64le is at least 65536, it will mismatch output
++HARDWARE_PLATFORM=`uname -i`
++if [ "$HARDWARE_PLATFORM" = "ppc64le" ]; then
++        _notrun "Not supported on ppc64le with nodesize > 4096"
++fi
++
+ # use small leaf size to get higher btree height.
+ run_check _scratch_mkfs "-b 1g --nodesize 4096"
+ 
+diff --git a/tests/btrfs/122 b/tests/btrfs/122
+index 213a27f8..50003ad0 100755
+--- a/tests/btrfs/122
++++ b/tests/btrfs/122
+@@ -55,7 +55,13 @@ rm -f $seqres.full
+ 
+ # Force a small leaf size to make it easier to blow out our root
+ # subvolume tree
+-_scratch_mkfs "--nodesize 16384" >/dev/null
++# Exception: leaf size at least 65536 in ppc64le
++HARDWARE_PLATFORM=`uname -i`
++if [ "$HARDWARE_PLATFORM" = "ppc64le" ]; then
++        _scratch_mkfs "--nodesize 65536" >/dev/null
++else
++        _scratch_mkfs "--nodesize 16384" >/dev/null
++fi
+ _scratch_mount
+ _run_btrfs_util_prog quota enable $SCRATCH_MNT
+ 
+-- 
+2.13.6
 
-Once one last comment is addressed
-
-> ---
->  common/overlay        |    1
->  tests/overlay/060     |  285 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/060.out |   42 +++++++
->  tests/overlay/group   |    1
->  4 files changed, 329 insertions(+)
->
-> Index: xfstests-dev/tests/overlay/060
-> ===================================================================
-> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
-> +++ xfstests-dev/tests/overlay/060      2018-05-29 15:34:52.430714715 -0400
-> @@ -0,0 +1,285 @@
-> +#! /bin/bash
-> +# FS QA Test No. 060
-> +#
-> +# Test metadata only copy up functionality.
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 Red Hat, Inc. All Rights Reserved.
-> +# Author: Vivek Goyal <vgoyal@redhat.com>
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +# We use non-default scratch underlying overlay dirs, we need to check
-> +# them explicity after test.
-> +_require_scratch_nocheck
-> +_require_scratch_overlay_features index redirect_dir metacopy
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# File size on lower
-> +lowername="lowerfile"
-> +lowerlink="lowerfile-link"
-> +lowerdata="lower"
-> +lowerblocks="32"
-> +lowersize=$(( $lowerblocks * 512 ))
-> +
-
-Although the test passes now on ext4/xfs, my comment remains -
-it makes no sense for this test to calculate expected nr of blocks
-instead of using actual lower file blocks.
-
-While fallocate $size guaranties that resulting file size is $size
-you cannot say the same about $blocks. There is no guarantie
-that file systems will use $size / 512 blocks to store size$.
-file systems can and do allocate more blocks for e.g. xattr and
-other file metadata. There is really no reason for this test to
-make the assumption about $blocks however probable it may be.
-
-Thanks,
-Amir.
