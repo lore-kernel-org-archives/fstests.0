@@ -1,11 +1,11 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:56940 "EHLO
+Received: from aserp2130.oracle.com ([141.146.126.79]:57048 "EHLO
         aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752486AbeFAPyy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 11:54:54 -0400
+        with ESMTP id S1753040AbeFAPzC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 11:55:02 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v3 1/4] fstests: btrfs: add seed sprout functionality test
-Date: Fri,  1 Jun 2018 23:57:23 +0800
-Message-Id: <20180601155726.21308-2-anand.jain@oracle.com>
+Subject: [PATCH v3 4/4] fstests: btrfs: seed device delete test
+Date: Fri,  1 Jun 2018 23:57:26 +0800
+Message-Id: <20180601155726.21308-5-anand.jain@oracle.com>
 In-Reply-To: <20180601155726.21308-1-anand.jain@oracle.com>
 References: <20180601155726.21308-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,7 +13,7 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Create a seed device and add the sprout device to it.
+Test case to verify that a seed device can be deleted
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
@@ -21,42 +21,29 @@ v2->v3: New line for the test subject
         Drop author name
         add _require_command "$BTRFS_TUNE_PROG" btrfstune
 	rename to small letters for the local variables
-v1->v2: Use functions to do the respective operations. Add data
-verification.
+v2: Born
 
- common/config       |  1 +
- tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/161.out |  9 ++++++
- tests/btrfs/group   |  1 +
- 4 files changed, 102 insertions(+)
- create mode 100755 tests/btrfs/161
- create mode 100644 tests/btrfs/161.out
+ tests/btrfs/164     | 111 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/164.out |   9 +++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 121 insertions(+)
+ create mode 100755 tests/btrfs/164
+ create mode 100644 tests/btrfs/164.out
 
-diff --git a/common/config b/common/config
-index af360cefc804..f0735cb0153d 100644
---- a/common/config
-+++ b/common/config
-@@ -235,6 +235,7 @@ case "$HOSTOS" in
-         export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
-         export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
- 	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-+	export BTRFS_TUNE_PROG="`set_prog_path btrfstune`"
-         export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-         export MKFS_NFS_PROG="false"
-         export MKFS_CIFS_PROG="false"
-diff --git a/tests/btrfs/161 b/tests/btrfs/161
+diff --git a/tests/btrfs/164 b/tests/btrfs/164
 new file mode 100755
-index 000000000000..623747f36dc6
+index 000000000000..ec70c371cdc1
 --- /dev/null
-+++ b/tests/btrfs/161
-@@ -0,0 +1,91 @@
++++ b/tests/btrfs/164
+@@ -0,0 +1,111 @@
 +#! /bin/bash
-+# FS QA Test 161
++# FS QA Test 164 seed device delete test
 +#
-+# seed sprout functionality test
-+#  Create a seed device, mount it and, add a new device to create a
-+#  sprout filesystem.
-+#
++# Test case to verify that a seed device can be deleted
++#  Create a seed device
++#  Create a sprout device
++#  Remount RW
++#  Run device delete on the seed device
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2018 Oracle.  All Rights Reserved.
 +#
@@ -92,7 +79,7 @@ index 000000000000..623747f36dc6
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/filter
++. ./common/module
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -102,7 +89,7 @@ index 000000000000..623747f36dc6
 +# Modify as appropriate.
 +_supported_fs btrfs
 +_supported_os Linux
-+_require_command "$BTRFS_TUNE_PROG" btrfstune
++_require_loadable_fs_module "btrfs"
 +_require_scratch_dev_pool 2
 +
 +_scratch_dev_pool_get 2
@@ -116,7 +103,7 @@ index 000000000000..623747f36dc6
 +	run_check _mount $dev_seed $SCRATCH_MNT
 +	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 256K" $SCRATCH_MNT/foobar >\
 +		/dev/null
-+	echo -- golden --
++	echo -- gloden --
 +	od -x $SCRATCH_MNT/foobar
 +	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
 +	_scratch_unmount
@@ -124,31 +111,50 @@ index 000000000000..623747f36dc6
 +	run_check _mount $dev_seed $SCRATCH_MNT
 +}
 +
-+create_sprout()
++add_sprout()
 +{
 +	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
++	run_check mount -o rw,remount $dev_seed $SCRATCH_MNT
++	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
++}
++
++delete_seed()
++{
++	_run_btrfs_util_prog device delete $dev_seed $SCRATCH_MNT
 +	_scratch_unmount
++	_reload_fs_module "btrfs"
 +	run_check _mount $dev_sprout $SCRATCH_MNT
++	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
 +	echo -- sprout --
 +	od -x $SCRATCH_MNT/foobar
 +	_scratch_unmount
 +}
 +
++seed_is_mountable()
++{
++	run_check _mount $dev_seed $SCRATCH_MNT
++	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
++	_scratch_unmount
++}
++
 +create_seed
-+create_sprout
++add_sprout
++delete_seed
++
++seed_is_mountable
 +
 +_scratch_dev_pool_put
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+diff --git a/tests/btrfs/164.out b/tests/btrfs/164.out
 new file mode 100644
-index 000000000000..363b8217f45c
+index 000000000000..c073b7a88ae1
 --- /dev/null
-+++ b/tests/btrfs/161.out
++++ b/tests/btrfs/164.out
 @@ -0,0 +1,9 @@
-+QA output created by 161
-+-- golden --
++QA output created by 164
++-- gloden --
 +0000000 abab abab abab abab abab abab abab abab
 +*
 +1000000
@@ -157,14 +163,14 @@ index 000000000000..363b8217f45c
 +*
 +1000000
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f04ee8d5297c..fe83631f0f33 100644
+index 2b7b0caf407e..d3639ba8dbfe 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -163,3 +163,4 @@
- 158 auto quick raid scrub
- 159 auto quick
- 160 auto quick
-+161 auto quick
+@@ -166,3 +166,4 @@
+ 161 auto quick
+ 162 auto quick
+ 163 auto quick
++164 auto quick
 -- 
 2.7.0
 
