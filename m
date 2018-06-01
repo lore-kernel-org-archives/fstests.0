@@ -1,62 +1,42 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:33772 "EHLO mx1.redhat.com"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:33776 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1750934AbeFAIHl (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 1 Jun 2018 04:07:41 -0400
+        id S1750973AbeFAIHt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 1 Jun 2018 04:07:49 -0400
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 1/3] xfstests: dedupe a single big file and verify integrity
-Date: Fri,  1 Jun 2018 16:07:31 +0800
-Message-Id: <20180601080733.20703-1-zlang@redhat.com>
+Subject: [PATCH 2/3] xfstests: iterate dedupe integrity test
+Date: Fri,  1 Jun 2018 16:07:32 +0800
+Message-Id: <20180601080733.20703-2-zlang@redhat.com>
+In-Reply-To: <20180601080733.20703-1-zlang@redhat.com>
+References: <20180601080733.20703-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Duperemove is a tool for finding duplicated extents and submitting
-them for deduplication, and it supports XFS. This case trys to
-verify the integrity of XFS after running duperemove.
+This case does dedupe on a dir, then copy the dir to next dir. Dedupe
+the next dir again, then copy this dir to next again, and dedupe
+again ... At the end, verify the data in the last dir is still same
+with the first one.
 
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
-Hi,
+ tests/shared/009     | 114 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/shared/009.out |   4 ++
+ tests/shared/group   |   1 +
+ 3 files changed, 119 insertions(+)
+ create mode 100755 tests/shared/009
+ create mode 100644 tests/shared/009.out
 
-The V1 should be:
-https://www.spinics.net/lists/linux-xfs/msg18982.html
-
-This time I send 3 cases at same time.
-
-Thanks,
-Zorro
-
- common/config        |  1 +
- tests/shared/008     | 79 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/shared/008.out |  3 ++
- tests/shared/group   |  1 +
- 4 files changed, 84 insertions(+)
- create mode 100755 tests/shared/008
- create mode 100644 tests/shared/008.out
-
-diff --git a/common/config b/common/config
-index 02c378a9..def559c1 100644
---- a/common/config
-+++ b/common/config
-@@ -207,6 +207,7 @@ export SQLITE3_PROG="`set_prog_path sqlite3`"
- export TIMEOUT_PROG="`set_prog_path timeout`"
- export SETCAP_PROG="`set_prog_path setcap`"
- export GETCAP_PROG="`set_prog_path getcap`"
-+export DUPEREMOVE_PROG="`set_prog_path duperemove`"
- 
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
-diff --git a/tests/shared/008 b/tests/shared/008
+diff --git a/tests/shared/009 b/tests/shared/009
 new file mode 100755
-index 00000000..74362807
+index 00000000..f1f9215f
 --- /dev/null
-+++ b/tests/shared/008
-@@ -0,0 +1,79 @@
++++ b/tests/shared/009
+@@ -0,0 +1,114 @@
 +#! /bin/bash
-+# FS QA Test 008
++# FS QA Test 009
 +#
-+# Dedupe a single big file and verify integrity
++# Iterate dedupe integrity test
 +#
 +#-----------------------------------------------------------------------
 +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
@@ -99,6 +79,8 @@ index 00000000..74362807
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
++# real QA test starts here
++
 +# duperemove only supports btrfs and xfs (with reflink feature).
 +# Add other filesystems if it supports more later.
 +_supported_fs xfs btrfs
@@ -106,50 +88,84 @@ index 00000000..74362807
 +_require_scratch_dedupe
 +_require_command "$DUPEREMOVE_PROG" duperemove
 +
-+fssize=$((2 * 1024 * 1024 * 1024))
-+_scratch_mkfs_sized $fssize > $seqres.full 2>&1
++_scratch_mkfs > $seqres.full 2>&1
 +_scratch_mount >> $seqres.full 2>&1
 +
-+# fill the fs with a big file has same contents
-+$XFS_IO_PROG -f -c "pwrite -S 0x55 0 $fssize" $SCRATCH_MNT/${seq}.file \
-+	>> $seqres.full 2>&1
-+md5sum $SCRATCH_MNT/${seq}.file > $TEST_DIR/${seq}md5.sum
++function iterate_dedup_verify()
++{
++	local src=$srcdir
++	local dest=$dupdir/1
 +
-+echo "= before cycle mount ="
-+# Dedupe with 1M blocksize
-+$DUPEREMOVE_PROG -dr --dedupe-options=same -b 1048576 $SCRATCH_MNT/ >>$seqres.full 2>&1
-+# Verify integrity
-+md5sum -c --quiet $TEST_DIR/${seq}md5.sum
-+# Dedupe with 64k blocksize
-+$DUPEREMOVE_PROG -dr --dedupe-options=same -b 65536 $SCRATCH_MNT/ >>$seqres.full 2>&1
-+# Verify integrity again
-+md5sum -c --quiet $TEST_DIR/${seq}md5.sum
++	for ((index = 1; index <= times; index++))
++	do
++		cp -a $src $dest
++		find $dest -type f -exec md5sum {} \; \
++			> $md5file$index
++		# Too many output, so only save error output
++		$DUPEREMOVE_PROG -dr --dedupe-options=same $dupdir \
++			>/dev/null 2>$seqres.full
++		md5sum -c --quiet $md5file$index
++		src=$dest
++		dest=$dupdir/$((index + 1))
++	done
++}
 +
-+# umount and mount again, verify pagecache contents don't mutate
++srcdir=$SCRATCH_MNT/src
++dupdir=$SCRATCH_MNT/dup
++mkdir $srcdir $dupdir
++
++md5file=$TEST_DIR/${seq}md5.sum
++
++fsstress_opts="-w -r -f mknod=0"
++# Create some files to be original data
++$FSSTRESS_PROG $fsstress_opts -d $srcdir \
++	       -n 200 -p $((5 * LOAD_FACTOR)) >/dev/null 2>&1
++
++# Calculate how many test cycles will be run
++src_size=`du -ks $srcdir | awk '{print $1}'`
++free_size=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $4}'`
++times=$((free_size / src_size))
++if [ $times -gt $((10 * TIME_FACTOR)) ]; then
++	times=$((10 * TIME_FACTOR))
++fi
++
++echo "= Do dedup and verify ="
++iterate_dedup_verify
++
++# Use the last checksum file to verify the original data
++sed -e s#dup/$times#src#g $md5file$times > $md5file
++echo "= Backwords verify ="
++md5sum -c --quiet $md5file
++
++# read from the disk also doesn't show mutations.
 +_scratch_cycle_mount
-+echo "= after cycle mount ="
-+md5sum -c --quiet $TEST_DIR/${seq}md5.sum
++echo "= Verify after cycle mount ="
++for ((index = 1; index <= times; index++))
++do
++	md5sum -c --quiet $md5file$index
++done
 +
 +status=0
 +exit
-diff --git a/tests/shared/008.out b/tests/shared/008.out
+diff --git a/tests/shared/009.out b/tests/shared/009.out
 new file mode 100644
-index 00000000..f29d478f
+index 00000000..44a78ba3
 --- /dev/null
-+++ b/tests/shared/008.out
-@@ -0,0 +1,3 @@
-+QA output created by 008
-+= before cycle mount =
-+= after cycle mount =
++++ b/tests/shared/009.out
+@@ -0,0 +1,4 @@
++QA output created by 009
++= Do dedup and verify =
++= Backwords verify =
++= Verify after cycle mount =
 diff --git a/tests/shared/group b/tests/shared/group
-index b3663a03..de7fe79f 100644
+index de7fe79f..2255844b 100644
 --- a/tests/shared/group
 +++ b/tests/shared/group
-@@ -10,6 +10,7 @@
- 005 dangerous_fuzzers
+@@ -11,6 +11,7 @@
  006 auto enospc
  007 dangerous_fuzzers
-+008 auto quick dedupe
+ 008 auto quick dedupe
++009 auto dedupe
  032 mkfs auto quick
  272 auto enospc rw
  289 auto quick
