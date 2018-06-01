@@ -1,11 +1,11 @@
-Received: from mail-wm0-f65.google.com ([74.125.82.65]:52311 "EHLO
-        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751555AbeFAKmv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 06:42:51 -0400
+Received: from mail-wm0-f67.google.com ([74.125.82.67]:34255 "EHLO
+        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751390AbeFAKmt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 06:42:49 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] overlay/016: split into two tests
-Date: Fri,  1 Jun 2018 13:44:17 +0300
-Message-Id: <1527849857-22951-3-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 1/2] overlay: nicer report when features are not supported
+Date: Fri,  1 Jun 2018 13:44:16 +0300
+Message-Id: <1527849857-22951-2-git-send-email-amir73il@gmail.com>
 In-Reply-To: <1527849857-22951-1-git-send-email-amir73il@gmail.com>
 References: <1527849857-22951-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,184 +13,52 @@ To: Eryu Guan <guaneryu@gmail.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-overlay/016 tests two cases of ro/rw fd data inconsistecies -
-one using pread and one using mmap read (i.e. mread).
+Commit ea7ad43 ("fstests: implement require of multiple overlayfs
+features") changed the message when tests are not run due to missing
+overlayfs feature.
 
-The first case will pass as soon as stacked overlay operations
-patch set is merged. The second case requires enabling a new opt-in
-feature "copy_up_shared" in order to pass.
+Restore the check for existing module param before trying to mount
+which restores the old message format, e.g.:
 
-Instead of changing the entire test from fail to notrun, split
-the two cases into two tests and require the new feature only
-for the new test.
-
-This way, the new test will change from notrun to pass with
-stacked overlay operations and the old test will change from
-fail to pass.
+[not run] feature 'metacopy' not supported by overlay
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- tests/overlay/016     | 14 ---------
- tests/overlay/016.out |  3 --
- tests/overlay/061     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/061.out |  4 +++
- tests/overlay/group   |  1 +
- 5 files changed, 90 insertions(+), 17 deletions(-)
- create mode 100755 tests/overlay/061
- create mode 100644 tests/overlay/061.out
+ common/overlay | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
-diff --git a/tests/overlay/016 b/tests/overlay/016
-index 86a7d28..08a2f98 100755
---- a/tests/overlay/016
-+++ b/tests/overlay/016
-@@ -66,7 +66,6 @@ _scratch_mount
+diff --git a/common/overlay b/common/overlay
+index e99e64f..b526f24 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -140,9 +140,6 @@ __check_scratch_overlay_feature()
+ 	# configurable from Kconfig (the build default), by module
+ 	# parameter (the system default) and per mount by mount
+ 	# option ${feature}=[on|off].
+-	#
+-	# If the module parameter does not exist then there is no
+-	# point in checking the mount option.
+ 	local default=`_get_fs_module_param ${feature}`
+ 	[ "$default" = Y ] || [ "$default" = N ] || \
+ 		_notrun "feature '${feature}' not supported by ${FSTYP}"
+@@ -164,12 +161,16 @@ _require_scratch_overlay_features()
+ 	local opts="rw"
  
+ 	for feature in ${features[*]}; do
++		# If the module parameter does not exist then there is no
++		# point in checking the mount option.
++		_get_fs_module_param ${feature} > /dev/null 2>&1 || \
++			_notrun "feature '${feature}' not supported by overlay"
+ 		opts+=",${feature}=on"
+ 	done
  
- #
--# case #1:
- # open file for read (rofd)
- # open file for write (rwfd)
- # write to rwfd
-@@ -79,18 +78,5 @@ $XFS_IO_PROG -r $SCRATCH_MNT/foo \
- 	-C "pread -v 0 16" \
- | _filter_xfs_io | _filter_scratch
+ 	_scratch_mkfs > /dev/null 2>&1
+ 	_try_scratch_mount -o $opts || \
+-		_notrun "overlay options '$opts' cannot be enabled on ${SCRATCH_DEV}"
++	        _notrun "overlay features '${features[*]}' cannot be enabled on ${SCRATCH_DEV}"
  
--#
--# case #2:
--# mmap MAP_SHARED|PROT_READ of rofd
--# write to rwfd
--# read from mapped memory
--#
--$XFS_IO_PROG -r $SCRATCH_MNT/bar \
--	-C "mmap -r 0 16" \
--	-C "open $SCRATCH_MNT/bar" \
--	-C "pwrite -S 0x61 0 16" \
--	-C "mread -v 0 16" \
--| _filter_xfs_io | _filter_scratch
--
- status=0
- exit
-diff --git a/tests/overlay/016.out b/tests/overlay/016.out
-index a28aaa6..02b2ae2 100644
---- a/tests/overlay/016.out
-+++ b/tests/overlay/016.out
-@@ -6,6 +6,3 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
- 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
- read 16/16 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 16/16 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
-diff --git a/tests/overlay/061 b/tests/overlay/061
-new file mode 100755
-index 0000000..1b248df
---- /dev/null
-+++ b/tests/overlay/061
-@@ -0,0 +1,85 @@
-+#! /bin/bash
-+# FSQA Test No. 061
-+#
-+# Test ro/rw fd data inconsistecies
-+#
-+# This is a variant of test overlay/016 with mread instead of pread.
-+# This test requires and enables copy_up_shared feature.
-+#
-+# This simple test demonstrates a known issue with overlayfs:
-+# - process A opens file F for read + mmap
-+# - process B writes new data to file F
-+# - process A reads old data from mapped memory
-+#
-+#-----------------------------------------------------------------------
-+#
-+# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
-+# Author: Amir Goldstein <amir73il@gmail.com>
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_scratch_feature copy_up_shared
-+_require_xfs_io_command "open"
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+
-+# Create our test files.
-+lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
-+mkdir -p $lowerdir
-+echo "This is old news" > $lowerdir/foo
-+echo "This is old news" > $lowerdir/bar
-+
-+_scratch_mount -o copy_up_shared=on
-+
-+
-+#
-+# mmap MAP_SHARED|PROT_READ of rofd
-+# write to rwfd
-+# read from mapped memory
-+#
-+$XFS_IO_PROG -r $SCRATCH_MNT/bar \
-+	-C "mmap -r 0 16" \
-+	-C "open $SCRATCH_MNT/bar" \
-+	-C "pwrite -S 0x61 0 16" \
-+	-C "mread -v 0 16" \
-+| _filter_xfs_io | _filter_scratch
-+
-+status=0
-+exit
-diff --git a/tests/overlay/061.out b/tests/overlay/061.out
-new file mode 100644
-index 0000000..0662721
---- /dev/null
-+++ b/tests/overlay/061.out
-@@ -0,0 +1,4 @@
-+QA output created by 061
-+wrote 16/16 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
-diff --git a/tests/overlay/group b/tests/overlay/group
-index b73d7e9..ccc71f3 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -63,3 +63,4 @@
- 058 auto quick exportfs
- 059 auto quick copyup
- 060 auto quick metacopy
-+061 auto quick copyup
+ 	for feature in ${features[*]}; do
+ 		__check_scratch_overlay_feature ${feature}
 -- 
 2.7.4
 
