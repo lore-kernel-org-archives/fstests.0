@@ -1,51 +1,117 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:42768 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752960AbeFAPy7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 1 Jun 2018 11:54:59 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v3 3/4] fstests: btrfs: seed device replace test
-Date: Fri,  1 Jun 2018 23:57:25 +0800
-Message-Id: <20180601155726.21308-4-anand.jain@oracle.com>
-In-Reply-To: <20180601155726.21308-1-anand.jain@oracle.com>
-References: <20180601155726.21308-1-anand.jain@oracle.com>
+Received: from mail-wr0-f194.google.com ([209.85.128.194]:44249 "EHLO
+        mail-wr0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751342AbeFBSux (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 2 Jun 2018 14:50:53 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 2/2] overlay/016: split into two tests
+Date: Sat,  2 Jun 2018 21:52:19 +0300
+Message-Id: <1527965539-30607-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Test case to verify that a seed device can be replaced
+overlay/016 tests two cases of ro/rw fd data inconsistecies -
+one using pread and one using mmap read (i.e. mread).
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+The first case will pass as soon as stacked overlay operations
+patch set is merged. The second case requires enabling a new opt-in
+feature "copy_up_shared" in order to pass.
+
+Instead of changing the entire test from fail to notrun, split
+the two cases into two tests and require the new feature only
+for the new test.
+
+This way, the new test will change from notrun to pass with
+stacked overlay operations and the old test will change from
+fail to pass.
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
-v2->v3: New line for the test subject
-        Drop author name
-        add _require_command "$BTRFS_TUNE_PROG" btrfstune
-	rename to small letters for the local variables
-v2: Born
 
- tests/btrfs/163     | 112 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/163.out |   9 +++++
- tests/btrfs/group   |   1 +
- 3 files changed, 122 insertions(+)
- create mode 100755 tests/btrfs/163
- create mode 100644 tests/btrfs/163.out
+Changes from v1:
+- Remove unused file bar and use only foo (Vivek)
 
-diff --git a/tests/btrfs/163 b/tests/btrfs/163
+ tests/overlay/016     | 15 ---------
+ tests/overlay/016.out |  3 --
+ tests/overlay/061     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/061.out |  4 +++
+ tests/overlay/group   |  1 +
+ 5 files changed, 89 insertions(+), 18 deletions(-)
+ create mode 100755 tests/overlay/061
+ create mode 100644 tests/overlay/061.out
+
+diff --git a/tests/overlay/016 b/tests/overlay/016
+index 86a7d28..06d1101 100755
+--- a/tests/overlay/016
++++ b/tests/overlay/016
+@@ -60,13 +60,11 @@ _scratch_mkfs >>$seqres.full 2>&1
+ lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
+ mkdir -p $lowerdir
+ echo "This is old news" > $lowerdir/foo
+-echo "This is old news" > $lowerdir/bar
+ 
+ _scratch_mount
+ 
+ 
+ #
+-# case #1:
+ # open file for read (rofd)
+ # open file for write (rwfd)
+ # write to rwfd
+@@ -79,18 +77,5 @@ $XFS_IO_PROG -r $SCRATCH_MNT/foo \
+ 	-C "pread -v 0 16" \
+ | _filter_xfs_io | _filter_scratch
+ 
+-#
+-# case #2:
+-# mmap MAP_SHARED|PROT_READ of rofd
+-# write to rwfd
+-# read from mapped memory
+-#
+-$XFS_IO_PROG -r $SCRATCH_MNT/bar \
+-	-C "mmap -r 0 16" \
+-	-C "open $SCRATCH_MNT/bar" \
+-	-C "pwrite -S 0x61 0 16" \
+-	-C "mread -v 0 16" \
+-| _filter_xfs_io | _filter_scratch
+-
+ status=0
+ exit
+diff --git a/tests/overlay/016.out b/tests/overlay/016.out
+index a28aaa6..02b2ae2 100644
+--- a/tests/overlay/016.out
++++ b/tests/overlay/016.out
+@@ -6,6 +6,3 @@ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+ read 16/16 bytes at offset 0
+ XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-wrote 16/16 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+-00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+diff --git a/tests/overlay/061 b/tests/overlay/061
 new file mode 100755
-index 000000000000..d5926c53c466
+index 0000000..2324e48
 --- /dev/null
-+++ b/tests/btrfs/163
-@@ -0,0 +1,112 @@
++++ b/tests/overlay/061
+@@ -0,0 +1,84 @@
 +#! /bin/bash
-+# FS QA Test 163
++# FSQA Test No. 061
 +#
-+# Test case to verify that a seed device can be replaced
-+#  Create a seed device
-+#  Create a sprout device
-+#  Remount RW
-+#  Run device replace on the seed device
++# Test ro/rw fd data inconsistecies
++#
++# This is a variant of test overlay/016 with mread instead of pread.
++# This test requires and enables copy_up_shared feature.
++#
++# This simple test demonstrates a known issue with overlayfs:
++# - process A opens file F for read + mmap
++# - process B writes new data to file F
++# - process A reads old data from mapped memory
++#
 +#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
++#
++# Copyright (C) 2016 CTERA Networks. All Rights Reserved.
++# Author: Amir Goldstein <amir73il@gmail.com>
 +#
 +# This program is free software; you can redistribute it and/or
 +# modify it under the terms of the GNU General Public License as
@@ -66,7 +132,6 @@ index 000000000000..d5926c53c466
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -80,98 +145,59 @@ index 000000000000..d5926c53c466
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/filter.btrfs
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs overlay
 +_supported_os Linux
-+_require_command "$BTRFS_TUNE_PROG" btrfstune
-+_require_scratch_dev_pool 3
++_require_scratch
++_require_scratch_feature copy_up_shared
++_require_xfs_io_command "open"
 +
-+_scratch_dev_pool_get 3
++rm -f $seqres.full
 +
-+dev_seed=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+dev_sprout=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+dev_replace_tgt=$(echo $SCRATCH_DEV_POOL | awk '{print $3}')
++_scratch_mkfs >>$seqres.full 2>&1
 +
-+create_seed()
-+{
-+	_mkfs_dev $dev_seed
-+	run_check _mount $dev_seed $SCRATCH_MNT
-+	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 256K" $SCRATCH_MNT/foobar >\
-+		/dev/null
-+	echo -- gloden --
-+	od -x $SCRATCH_MNT/foobar
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	_scratch_unmount
-+	$BTRFS_TUNE_PROG -S 1 $dev_seed
-+	run_check _mount $dev_seed $SCRATCH_MNT
-+}
++# Create our test files.
++lowerdir=$OVL_BASE_SCRATCH_MNT/$OVL_LOWER
++mkdir -p $lowerdir
++echo "This is old news" > $lowerdir/foo
 +
-+add_sprout()
-+{
-+	_run_btrfs_util_prog device add -f $dev_sprout $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+}
++_scratch_mount -o copy_up_shared=on
 +
-+replace_seed()
-+{
-+	_run_btrfs_util_prog replace start -fB $dev_seed $dev_replace_tgt $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	_scratch_unmount
-+	run_check _mount $dev_replace_tgt $SCRATCH_MNT
-+	echo -- sprout --
-+	od -x $SCRATCH_MNT/foobar
-+	_scratch_unmount
 +
-+}
-+
-+seed_is_mountable()
-+{
-+	run_check _mount $dev_seed $SCRATCH_MNT
-+	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
-+	_scratch_unmount
-+}
-+
-+create_seed
-+add_sprout
-+replace_seed
-+
-+seed_is_mountable
-+
-+_scratch_dev_pool_put
++#
++# mmap MAP_SHARED|PROT_READ of rofd
++# write to rwfd
++# read from mapped memory
++#
++$XFS_IO_PROG -r $SCRATCH_MNT/foo \
++	-C "mmap -r 0 16" \
++	-C "open $SCRATCH_MNT/foo" \
++	-C "pwrite -S 0x61 0 16" \
++	-C "mread -v 0 16" \
++| _filter_xfs_io | _filter_scratch
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/163.out b/tests/btrfs/163.out
+diff --git a/tests/overlay/061.out b/tests/overlay/061.out
 new file mode 100644
-index 000000000000..50f46da6df86
+index 0000000..0662721
 --- /dev/null
-+++ b/tests/btrfs/163.out
-@@ -0,0 +1,9 @@
-+QA output created by 163
-+-- gloden --
-+0000000 abab abab abab abab abab abab abab abab
-+*
-+1000000
-+-- sprout --
-+0000000 abab abab abab abab abab abab abab abab
-+*
-+1000000
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index cdc8ad32036e..2b7b0caf407e 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -165,3 +165,4 @@
- 160 auto quick
- 161 auto quick
- 162 auto quick
-+163 auto quick
++++ b/tests/overlay/061.out
+@@ -0,0 +1,4 @@
++QA output created by 061
++wrote 16/16 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
+diff --git a/tests/overlay/group b/tests/overlay/group
+index b73d7e9..ccc71f3 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -63,3 +63,4 @@
+ 058 auto quick exportfs
+ 059 auto quick copyup
+ 060 auto quick metacopy
++061 auto quick copyup
 -- 
-2.7.0
+2.7.4
 
