@@ -1,332 +1,136 @@
-Received: from mail-pl0-f41.google.com ([209.85.160.41]:34725 "EHLO
-        mail-pl0-f41.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751228AbeFCOVZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 10:21:25 -0400
-Received: by mail-pl0-f41.google.com with SMTP id g20-v6so252895plq.1
-        for <fstests@vger.kernel.org>; Sun, 03 Jun 2018 07:21:25 -0700 (PDT)
-Date: Sun, 3 Jun 2018 22:21:17 +0800
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:33231 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751243AbeFCOwO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 10:52:14 -0400
+Received: by mail-pf0-f194.google.com with SMTP id b17-v6so3144621pfi.0
+        for <fstests@vger.kernel.org>; Sun, 03 Jun 2018 07:52:14 -0700 (PDT)
+Message-ID: <5b14009c.1c69fb81.3b61c.ca85@mx.google.com>
+Date: Sun, 03 Jun 2018 22:52:07 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 1/2] fstests: get rid of set_prog_path
-Message-ID: <20180603142117.GM6581@desktop>
-References: <20180529165119.31961-1-jack@suse.cz>
+Subject: [ANNOUNCE] fstests: master branch updated to 5dff991a5264
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="1hy7vOq7ZYi8"
 Content-Disposition: inline
-In-Reply-To: <20180529165119.31961-1-jack@suse.cz>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 29, 2018 at 06:51:18PM +0200, Jan Kara wrote:
-> From: Dave Chinner <david@fromorbit.com>
-> 
-> It's just a one line wrapper that adds complexity, remove it. Move
-> the couple of calls in tests to common/config, but leave the xfsdump
-> setup in place and just convert it.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> Signed-off-by: Jan Kara <jack@suse.cz>
-> ---
->  common/config   | 169 +++++++++++++++++++++++++++-----------------------------
->  common/dump     |   6 +-
->  tests/btrfs/085 |   2 -
->  tests/xfs/446   |   1 -
->  4 files changed, 85 insertions(+), 93 deletions(-)
-> 
-> diff --git a/common/config b/common/config
-> index 02c378a96fa2..ccfb066ebe95 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -88,17 +88,11 @@ export LOCAL_CONFIGURE_OPTIONS=${LOCAL_CONFIGURE_OPTIONS:=--enable-readline=yes}
->  
->  export RECREATE_TEST_DEV=false
->  
-> -# $1 = prog to look for
-> -set_prog_path()
-> -{
-> -	type -P $1
-> -}
-> -
->  # Handle mkfs.$fstyp which does (or does not) require -f to overwrite
->  set_mkfs_prog_path_with_opts()
->  {
->  	local fstyp=$1
-> -	local p=`set_prog_path mkfs.$fstyp`
-> +	local p=$(type -P mkfs.$fstyp)
->  
->  	# Note: mkfs.f2fs doesn't support the --help option yet, but it doesn't
->  	# matter since it also prints the help when an invalid option is given.
-> @@ -117,105 +111,105 @@ _fatal()
->      exit 1
->  }
->  
-> -export MKFS_PROG="`set_prog_path mkfs`"
-> +export MKFS_PROG="$(type -P mkfs)"
->  [ "$MKFS_PROG" = "" ] && _fatal "mkfs not found"
->  
-> -export MOUNT_PROG="`set_prog_path mount`"
-> +export MOUNT_PROG="$(type -P mount)"
->  [ "$MOUNT_PROG" = "" ] && _fatal "mount not found"
->  
-> -export UMOUNT_PROG="`set_prog_path umount`"
-> +export UMOUNT_PROG="$(type -P umount)"
->  [ "$UMOUNT_PROG" = "" ] && _fatal "umount not found"
->  
->  export FSSTRESS_PROG="./ltp/fsstress"
->  [ ! -x $FSSTRESS_PROG ] && _fatal "fsstress not found or executable"
->  
-> -export PERL_PROG="`set_prog_path perl`"
-> +export PERL_PROG="$(type -P perl)"
->  [ "$PERL_PROG" = "" ] && _fatal "perl not found"
->  
-> -export AWK_PROG="`set_prog_path awk`"
-> +export AWK_PROG="$(type -P awk)"
->  [ "$AWK_PROG" = "" ] && _fatal "awk not found"
->  
-> -export SED_PROG="`set_prog_path sed`"
-> +export SED_PROG="$(type -P sed)"
->  [ "$SED_PROG" = "" ] && _fatal "sed not found"
->  
-> -export BC_PROG="`set_prog_path bc`"
-> +export BC_PROG="$(type -P bc)"
->  [ "$BC_PROG" = "" ] && _fatal "bc not found"
->  
->  export PS_ALL_FLAGS="-ef"
->  
-> -export DF_PROG="`set_prog_path df`"
-> +export DF_PROG="$(type -P df)"
->  [ "$DF_PROG" = "" ] && _fatal "df not found"
->  [ "$HOSTOS" = "Linux" ] && export DF_PROG="$DF_PROG -T -P"
->  
-> -export XFS_IO_PROG="`set_prog_path xfs_io`"
-> +export XFS_IO_PROG="$(type -P xfs_io)"
->  [ "$XFS_IO_PROG" = "" ] && _fatal "xfs_io not found"
->  
-> -export XFS_LOGPRINT_PROG="`set_prog_path xfs_logprint`"
-> -export XFS_REPAIR_PROG="`set_prog_path xfs_repair`"
-> -export XFS_DB_PROG="`set_prog_path xfs_db`"
-> -export XFS_GROWFS_PROG=`set_prog_path xfs_growfs`
-> -export XFS_SPACEMAN_PROG="`set_prog_path xfs_spaceman`"
-> -export XFS_SCRUB_PROG="`set_prog_path xfs_scrub`"
-> -export XFS_PARALLEL_REPAIR_PROG="`set_prog_path xfs_prepair`"
-> -export XFS_PARALLEL_REPAIR64_PROG="`set_prog_path xfs_prepair64`"
-> -export __XFSDUMP_PROG="`set_prog_path xfsdump`"
-> +export XFS_LOGPRINT_PROG="$(type -P xfs_logprint)"
-> +export XFS_REPAIR_PROG="$(type -P xfs_repair)"
-> +export XFS_DB_PROG="$(type -P xfs_db)"
-> +export XFS_GROWFS_PROG=$(type -P xfs_growfs)
-> +export XFS_SPACEMAN_PROG="$(type -P xfs_spaceman)"
-> +export XFS_SCRUB_PROG="$(type -P xfs_scrub)"
-> +export XFS_PARALLEL_REPAIR_PROG="$(type -P xfs_prepair)"
-> +export XFS_PARALLEL_REPAIR64_PROG="$(type -P xfs_prepair64)"
-> +export __XFSDUMP_PROG="$(type -P xfsdump)"
->  if [ -n "$__XFSDUMP_PROG" ]; then
->  	export XFSDUMP_PROG="$__XFSDUMP_PROG -e"
->  else
->  	export XFSDUMP_PROG=""
->  fi
-> -export XFSRESTORE_PROG="`set_prog_path xfsrestore`"
-> -export XFSINVUTIL_PROG="`set_prog_path xfsinvutil`"
-> -export GETFATTR_PROG="`set_prog_path getfattr`"
-> -export SETFATTR_PROG="`set_prog_path setfattr`"
-> -export CHACL_PROG="`set_prog_path chacl`"
-> -export ATTR_PROG="`set_prog_path attr`"
-> -export QUOTA_PROG="`set_prog_path quota`"
-> -export XFS_QUOTA_PROG="`set_prog_path xfs_quota`"
-> -export KILLALL_PROG="`set_prog_path killall`"
-> -export INDENT_PROG="`set_prog_path indent`"
-> -export XFS_COPY_PROG="`set_prog_path xfs_copy`"
-> -export FSTRIM_PROG="`set_prog_path fstrim`"
-> -export DUMPE2FS_PROG="`set_prog_path dumpe2fs`"
-> -export FIO_PROG="`set_prog_path fio`"
-> -export FILEFRAG_PROG="`set_prog_path filefrag`"
-> -export E4DEFRAG_PROG="`set_prog_path e4defrag`"
-> -export LOGGER_PROG="`set_prog_path logger`"
-> -export DBENCH_PROG="`set_prog_path dbench`"
-> -export DMSETUP_PROG="`set_prog_path dmsetup`"
-> -export WIPEFS_PROG="`set_prog_path wipefs`"
-> -export DUMP_PROG="`set_prog_path dump`"
-> -export RESTORE_PROG="`set_prog_path restore`"
-> -export LVM_PROG="`set_prog_path lvm`"
-> -export CHATTR_PROG="`set_prog_path chattr`"
-> -export DEBUGFS_PROG="`set_prog_path debugfs`"
-> -export UUIDGEN_PROG="`set_prog_path uuidgen`"
-> -export GETRICHACL_PROG="`set_prog_path getrichacl`"
-> -export SETRICHACL_PROG="`set_prog_path setrichacl`"
-> -export KEYCTL_PROG="`set_prog_path keyctl`"
-> -export XZ_PROG="`set_prog_path xz`"
-> -export FLOCK_PROG="`set_prog_path flock`"
-> -export LDD_PROG="`set_prog_path ldd`"
-> -export TIMEOUT_PROG="`set_prog_path timeout`"
-> -export MAN_PROG="`set_prog_path man`"
-> -export NFS4_SETFACL_PROG="`set_prog_path nfs4_setfacl`"
-> -export NFS4_GETFACL_PROG="`set_prog_path nfs4_getfacl`"
-> -export UBIUPDATEVOL_PROG="`set_prog_path ubiupdatevol`"
-> -export THIN_CHECK_PROG="$(set_prog_path thin_check)"
-> -export PYTHON2_PROG="`set_prog_path python2`"
-> -export SQLITE3_PROG="`set_prog_path sqlite3`"
-> -export TIMEOUT_PROG="`set_prog_path timeout`"
-> -export SETCAP_PROG="`set_prog_path setcap`"
-> -export GETCAP_PROG="`set_prog_path getcap`"
-> +export XFSRESTORE_PROG="$(type -P xfsrestore)"
-> +export XFSINVUTIL_PROG="$(type -P xfsinvutil)"
-> +export GETFATTR_PROG="$(type -P getfattr)"
-> +export SETFATTR_PROG="$(type -P setfattr)"
-> +export CHACL_PROG="$(type -P chacl)"
-> +export ATTR_PROG="$(type -P attr)"
-> +export QUOTA_PROG="$(type -P quota)"
-> +export XFS_QUOTA_PROG="$(type -P xfs_quota)"
-> +export KILLALL_PROG="$(type -P killall)"
-> +export INDENT_PROG="$(type -P indent)"
-> +export XFS_COPY_PROG="$(type -P xfs_copy)"
-> +export FSTRIM_PROG="$(type -P fstrim)"
-> +export DUMPE2FS_PROG="$(type -P dumpe2fs)"
-> +export FIO_PROG="$(type -P fio)"
-> +export FILEFRAG_PROG="$(type -P filefrag)"
-> +export E4DEFRAG_PROG="$(type -P e4defrag)"
-> +export LOGGER_PROG="$(type -P logger)"
-> +export DBENCH_PROG="$(type -P dbench)"
-> +export DMSETUP_PROG="$(type -P dmsetup)"
-> +export WIPEFS_PROG="$(type -P wipefs)"
-> +export DUMP_PROG="$(type -P dump)"
-> +export RESTORE_PROG="$(type -P restore)"
-> +export LVM_PROG="$(type -P lvm)"
-> +export CHATTR_PROG="$(type -P chattr)"
-> +export DEBUGFS_PROG="$(type -P debugfs)"
-> +export UUIDGEN_PROG="$(type -P uuidgen)"
-> +export GETRICHACL_PROG="$(type -P getrichacl)"
-> +export SETRICHACL_PROG="$(type -P setrichacl)"
-> +export KEYCTL_PROG="$(type -P keyctl)"
-> +export XZ_PROG="$(type -P xz)"
-> +export FLOCK_PROG="$(type -P flock)"
-> +export LDD_PROG="$(type -P ldd)"
-> +export TIMEOUT_PROG="$(type -P timeout)"
-> +export MAN_PROG="$(type -P man)"
-> +export NFS4_SETFACL_PROG="$(type -P nfs4_setfacl)"
-> +export NFS4_GETFACL_PROG="$(type -P nfs4_getfacl)"
-> +export UBIUPDATEVOL_PROG="$(type -P ubiupdatevol)"
-> +export THIN_CHECK_PROG="$(type -P thin_check)"
-> +export PYTHON2_PROG="$(type -P python2)"
-> +export SQLITE3_PROG="$(type -P sqlite3)"
-> +export TIMEOUT_PROG="$(type -P timeout)"
-> +export SETCAP_PROG="$(type -P setcap)"
-> +export GETCAP_PROG="$(type -P getcap)"
->  
->  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->  # newer systems have udevadm command but older systems like RHEL5 don't.
->  # But if neither one is available, just set it to "sleep 1" to wait for lv to
->  # be settled
-> -UDEV_SETTLE_PROG="`set_prog_path udevadm`"
-> +UDEV_SETTLE_PROG="$(type -P udevadm)"
->  if [ "$UDEV_SETTLE_PROG" == "" ]; then
->  	# try udevsettle command
-> -	UDEV_SETTLE_PROG="`set_prog_path udevsettle`"
-> +	UDEV_SETTLE_PROG="$(type -P udevsettle)"
->  else
->  	# udevadm is available, add 'settle' as subcommand
->  	UDEV_SETTLE_PROG="$UDEV_SETTLE_PROG settle"
-> @@ -228,23 +222,24 @@ export UDEV_SETTLE_PROG
->  
->  case "$HOSTOS" in
->      Linux)
-> -        export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
-> -        export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
-> -        export MKFS_UDF_PROG="`set_prog_path mkudffs`"
-> -        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
-> -        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
 
-We should keep above two setups, set_mkfs_prog_path_with_opts does extra
-work than set_prog_path.
+--1hy7vOq7ZYi8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> -        export DUMP_F2FS_PROG="`set_prog_path dump.f2fs`"
-> -        export BTRFS_UTIL_PROG="`set_prog_path btrfs`"
-> -        export BTRFS_SHOW_SUPER_PROG="`set_prog_path btrfs-show-super`"
-> -	export BTRFS_CONVERT_PROG="`set_prog_path btrfs-convert`"
-> -        export XFS_FSR_PROG="`set_prog_path xfs_fsr`"
-> -        export MKFS_NFS_PROG="false"
-> -        export MKFS_CIFS_PROG="false"
-> -        export MKFS_OVERLAY_PROG="false"
-> -        export MKFS_REISER4_PROG="`set_prog_path mkfs.reiser4`"
-> -	export E2FSCK_PROG="`set_prog_path e2fsck`"
-> -	export TUNE2FS_PROG="`set_prog_path tune2fs`"
-> -	export FSCK_OVERLAY_PROG="`set_prog_path fsck.overlay`"
-> +	export MKFS_XFS_PROG=$(type -P mkfs.xfs)
-> +	export MKFS_EXT4_PROG=$(type -P mkfs.ext4)
-> +	export MKFS_UDF_PROG=$(type -P mkudffs)
-> +	export MKFS_BTRFS_PROG=$(type -P btrfs)
-> +	export MKFS_F2FS_PROG=$(type -P f2fs)
-> +	export DUMP_F2FS_PROG=$(type -P dump.f2fs)
-> +	export BTRFS_UTIL_PROG=$(type -P btrfs)
-> +	export BTRFS_SHOW_SUPER_PROG=$(type -P btrfs-show-super)
-> +	export BTRFS_CONVERT_PROG=$(type -P btrfs-convert)
-> +	export BTRFS_DEBUG_TREE_PROG=$(type -P btrfs-debug-tree)
-> +	export XFS_FSR_PROG=$(type -P xfs_fsr)
-> +	export MKFS_NFS_PROG="false"
-> +	export MKFS_CIFS_PROG="false"
-> +	export MKFS_OVERLAY_PROG="false"
-> +	export MKFS_REISER4_PROG=$(type -P mkfs.reiser4)
-> +	export E2FSCK_PROG=$(type -P e2fsck)
-> +	export TUNE2FS_PROG=$(type -P tune2fs)
-> +	export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
->          ;;
->  esac
->  
-> diff --git a/common/dump b/common/dump
-> index 7b9c10a25414..8a0ba1096d6a 100644
-> --- a/common/dump
-> +++ b/common/dump
-> @@ -29,10 +29,10 @@ if [ -n "$DEBUGDUMP" ]; then
->  
->  	# Use dump/restore in qa directory (copy them here) for debugging
->  	export PATH="$here:$PATH"
-> -	export __XFSDUMP_PROG="`set_prog_path xfsdump`"
-> +	export __XFSDUMP_PROG=$(type -P xfsdump)
->  	export XFSDUMP_PROG="$__XFSDUMP_PROG -e"
-> -	export XFSRESTORE_PROG="`set_prog_path xfsrestore`"
-> -	export XFSINVUTIL_PROG="`set_prog_path xfsinvutil`"
-> +	export XFSRESTORE_PROG=$(type -P xfsrestore)
-> +	export XFSINVUTIL_PROG=$(type -P xfsinvutil)
->  	[ -x $here/xfsdump ]    && echo "Using xfstests' xfsdump for debug"
->  	[ -x $here/xfsrestore ] && echo "Using xfstests' xfsrestore for debug"
->  	[ -x $here/xfsinvutil ] && echo "Using xfstests' xfsinvutil for debug"
-> diff --git a/tests/btrfs/085 b/tests/btrfs/085
-> index 804899724cba..a1edc28341da 100755
-> --- a/tests/btrfs/085
-> +++ b/tests/btrfs/085
-> @@ -55,8 +55,6 @@ _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch
->  _require_dm_target flakey
-> -
-> -BTRFS_DEBUG_TREE_PROG="`set_prog_path btrfs-debug-tree`"
->  _require_command "$BTRFS_DEBUG_TREE_PROG" btrfs-debug-tree
->  
->  rm -f $seqres.full
-> diff --git a/tests/xfs/446 b/tests/xfs/446
-> index 752c6a7de827..ac74723f471f 100755
-> --- a/tests/xfs/446
-> +++ b/tests/xfs/446
-> @@ -37,7 +37,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
->  # real QA test starts here
->  _supported_fs xfs
->  _supported_os Linux
-> -export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
+Hi all,
 
-This is removed but not added in common/config file.
+The master branch of the xfstests repository at:
 
-I fixed both issues on commit.
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a large update as well, we have 4 new btrfs
+seed device tests and one new ext4 resize test and one new overlay
+metadata-only copyup test. There're also several bug-fixes and cleanups.
+
+New faiilures I've noticed in this update:
+- ext4/033 fails on current Linus tree, the fix should be in ext4 tree already,
+  but please note that some e2fsprogs patches are needed to fix the test
+  failure with 1k block size ext4 even with the kernel patch applied
 
 Thanks,
 Eryu
 
->  _require_command "$CHECKBASHISMS_PROG" checkbashisms
->  
->  test -z "$WORKAREA" && _notrun "Can't find xfsprogs source"
-> -- 
-> 2.13.6
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The new head of the master branch is commit:
+
+5dff991a5264 overlay: Add tests for overlay metadata only copy up feature
+
+New commits:
+
+Anand Jain (5):
+      [549016e8205b] btrfs: add seed sprout functionality test
+      [0eb4d0944665] btrfs: nested seed device test
+      [a281d39579a4] btrfs: seed device replace test
+      [f3a33a9dda1e] btrfs: seed device delete test
+      [144c8463d38b] btrfs: introduce btrfs/volume group
+
+Dave Chinner (1):
+      [c4f104cdf420] fstests: get rid of set_prog_path
+
+Jan Kara (7):
+      [141bd37a3685] fstests: Make ./new work for non-root user
+      [828f12b965d9] dmhugedisk: Allow specifying of chunk size
+      [678c3f477d0d] ext4: Test for s_inodes_count overflow during fs resize
+      [90b383e215ba] xfs/310: Cleanup
+      [042fcd24dbbe] ext4/032: Fix up resize2fs usage
+      [5a111436bb88] ext4/010: Fixup resize2fs and dumpe2fs usage
+      [41b082680737] ext4/306: Fixup resize2fs usage
+
+Mark Fasheh (1):
+      [2f194e4e820e] generic/009: don't run for btrfs if PAGE_SIZE > 4096
+
+Theodore Ts'o (1):
+      [72ec5e2ff70c] fstests: update the punch, collapse, insert, and zero groups
+
+Vivek Goyal (1):
+      [5dff991a5264] overlay: Add tests for overlay metadata only copy up feature
+
+
+Code Diffstat:
+
+ check                 |  15 +--
+ common/config         | 179 +++++++++++++++----------------
+ common/dmhugedisk     |   7 +-
+ common/dump           |   6 +-
+ common/overlay        |   1 +
+ common/rc             |  27 +----
+ common/test_names     |  12 +++
+ new                   |   5 +-
+ tests/btrfs/085       |   2 -
+ tests/btrfs/161       |  91 ++++++++++++++++
+ tests/btrfs/161.out   |   9 ++
+ tests/btrfs/162       | 103 ++++++++++++++++++
+ tests/btrfs/162.out   |   9 ++
+ tests/btrfs/163       | 112 +++++++++++++++++++
+ tests/btrfs/163.out   |   9 ++
+ tests/btrfs/164       | 111 +++++++++++++++++++
+ tests/btrfs/164.out   |   9 ++
+ tests/btrfs/group     |  40 +++----
+ tests/ext4/010        |  10 +-
+ tests/ext4/032        |   3 +-
+ tests/ext4/033        | 123 +++++++++++++++++++++
+ tests/ext4/033.out    |   6 ++
+ tests/ext4/306        |   3 +-
+ tests/ext4/group      |   1 +
+ tests/generic/009     |   8 +-
+ tests/generic/group   |  10 +-
+ tests/overlay/060     | 289 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/060.out |  42 ++++++++
+ tests/overlay/group   |   1 +
+ tests/xfs/310         |   6 +-
+ tests/xfs/446         |   1 -
+ tests/xfs/group       |  12 +--
+ 32 files changed, 1083 insertions(+), 179 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--1hy7vOq7ZYi8
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJbFABEAAoJECZSqilcj+djNuMP/RT7T5ftR0j2RuLiAi7JCT7T
+JVxDTWPFHPLU92XVKQn6THCPxPaki2ixjkEXDVDzM2+gXjoTm0uG0tP++GSST80Q
+ue71NHc0+F4WdgVTRi98tHu0V+aiDiev7bSfBhzIbuadJ/qyw6OtZ7hA187AekLe
+R69i6S+MvY1G/jLIGV0yHP3fJy3tDkBHYT0s4qfGjiCVNQimpB4gmMQ3/j423YZz
+FYiJKMcC8Vjy+o0WjzzrF6UmTP1al8T9peWe9BrGij8xgDcoUzgdlzcaYikQycqw
+B9UeEQ7fYlMrImH+oYDYUdAwhnmIkROKuqPqeKt/Suhfqm5Ybufip/C1BoooP8+7
+d0QRXW1wqvEy7xCxLMJm6cbXmCWvOc+ufUJM401Wk04cz8+h6E63ambofpAaQIIp
+qtJJ8v1cQbnsZ+mZsg15pX9Pdb0JFW8NaPMwFeQHPiapYd2wROk9On1pyIekyd6p
+OXPF5rRLLOvH8DiYmyfB37ouN22HPB9G0ZZrVsSNPvELTNoqA0CHYGkDN8khBqzj
+lyjNh+9uPzvB75KX/ZsJq6STpy8XmOH08cIhH9lDPoNUHnekFFk6lrCPmrR0zYiO
+RvG/nI729/DSyN2rDoMTzcqPjAzO+aqIv+iesuadxT9BL7pyRDY9Nwa5t+IIwTwj
+SoW8D5WRGFQhZ/3iiNG8
+=C354
+-----END PGP SIGNATURE-----
+
+--1hy7vOq7ZYi8--
