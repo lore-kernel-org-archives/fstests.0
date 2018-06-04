@@ -1,66 +1,152 @@
-Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:22018 "EHLO
+Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:62621 "EHLO
         ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751150AbeFDDAt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 23:00:49 -0400
-Date: Mon, 4 Jun 2018 13:00:47 +1000
+        by vger.kernel.org with ESMTP id S1751169AbeFDDF2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 23:05:28 -0400
+Date: Mon, 4 Jun 2018 13:05:25 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
-Message-ID: <20180604030047.GE10972@dastard>
-References: <20180529004752.8243-1-david@fromorbit.com>
- <20180603135107.GK6581@desktop>
- <20180604025035.GC10972@dastard>
+Subject: Re: [PATCH V3] check: fail tests if check/dmesg are not clean
+Message-ID: <20180604030525.GF10972@dastard>
+References: <20180528230737.25270-1-david@fromorbit.com>
+ <20180603131251.GI6581@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180604025035.GC10972@dastard>
+In-Reply-To: <20180603131251.GI6581@desktop>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 04, 2018 at 12:50:36PM +1000, Dave Chinner wrote:
-> On Sun, Jun 03, 2018 at 09:51:07PM +0800, Eryu Guan wrote:
-> > On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
-> > > Most (possibly all?) of the code under tests/ has GPL license blurbs
-> > > - they'll all get converted by this same process. It's a bit murkier
-> > > when it comes to src/ and ltp/, as this code has varied history. For
-> > > these directories, the first pass I make will for code that has
-> > > explicit GPL licenses. Every other file will need to be looked at
-> > > on a case by case basis and done as time permits...
-> > > 
-> > > Please note that I'm not trying to change the license on any of the
-> > > code, just change the way it is documented to reduce boilerplate
-> > > code. If I've made any changes that modify the license of any
-> > > specific code, then I've made a mistake and I need to fix that.
-> > > Please point out anywhere you think my actions have not been clear
-> > > and obvious.
-> > > 
-> > > Once we have some consensus on how we want to proceed, I'll do the
-> > > grunt work and co-ordinate with Eryu on minimising the number of
-> > > times I have to rebase a patchset that is going to touch around 1500
-> > > files...
+On Sun, Jun 03, 2018 at 09:12:51PM +0800, Eryu Guan wrote:
+> On Tue, May 29, 2018 at 09:07:37AM +1000, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
 > > 
-> > How would you like to proceed with a minimum number of rebasing times? I
-> > think that most rebase work would come from new tests that being added
-> > during the whole process, I think I could do
+> > Currently a test appears to pass even if it leaves a corrupt
+> > filesystem behind, or a splat in the system logs that should not be
+> > there. While the test is internally tracked as failed (and the
+> > summary reports it as failed) the per-test output exits with a
+> > success and so emits a completion time before the post-test checks
+> > are run by the test harness.  Rework the check code to report
+> > post-test check failures as specific test failures rather than as
+> > separate failure line items in the overall harness output.
 > > 
-> > 1) simply suspend adding new tests until the whole work is done, or
-> > 2) convert new tests myself if there're just a few of them
+> > Reworking where we emit the errors this also allows us to include
+> > the post-test filesystem checking in the test runtime. This is
+> > currently not accounted to the test and can be substantial. Hence
+> > the real elapsed time of each test is not accurately reflected in
+> > the time stats being reported and so regressions in filesystem
+> > checking performance go unnoticed.
+> > 
+> > Changing the output reporting requires a complete reworking of the
+> > main test check loop. It's a bunch of spaghetti at the moment
+> > because it has post test reporting code at the end of the loop which
+> > must run regardless of the test result.  By moving the post test
+> > reporting to the start of the next loop iteration, we can clean up
+> > the code substantially by using continue directives where
+> > appropriate.
+> > 
+> > Also, for cases where we haven't run the test or it's already been
+> > marked as failed, don't bother running the filesystem/dmesg checks
+> > for failure as we're already going to report the test as failed.
+> > 
+> > This touches almost all of the loop, so get rid of the remaining
+> > 4 space indents inside the loop while moving all this code around.
+> > 
+> > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
 > 
-> Easiest thing to do would be for me to convert the tree immediately
-> before you send out an update. e.g. do your update, send me a note,
-> I'll run the conversion scripts and send you a pull request based on
-> the tree you've finished updating....
+> I hit some other errors when testing the xUnit report result, please see
+> below. (Sorry for not finding it in previous review..)
+> 
+> > ---
+> >  check     | 260 +++++++++++++++++++++++++++++-------------------------
+> >  common/rc |   6 ++
+> >  2 files changed, 144 insertions(+), 122 deletions(-)
+> > 
+> > diff --git a/check b/check
+> > index f6fb352bcbb9..0cdf95e9f5e7 100755
+> > --- a/check
+> > +++ b/check
+> > @@ -38,10 +38,12 @@ randomize=false
+> >  export here=`pwd`
+> >  xfile=""
+> >  brief_test_summary=false
+> > -_err_msg=""
+> >  do_report=false
+> >  DUMP_OUTPUT=false
+> >  
+> > +# This is a global variable used to pass test failure text to reporting gunk
+> > +_err_msg=""
+> > +
+> >  # start the initialisation work now
+> >  iam=check
+> >  
+> > @@ -643,78 +645,97 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> >  	seqres="$check"
+> >  	_check_test_fs
+> >  
+> > -	for seq in $list
+> > -	do
+> > -	    err=false
+> > -	    _err_msg=""
+> > -	    if [ ! -f $seq ]; then
+> > -	        # Try to get full name in case the user supplied only seq id
+> > -	        # and the test has a name. A bit of hassle to find really
+> > -	        # the test and not its sample output or helping files.
+> > -	        bname=$(basename $seq)
+> > -	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
+> > -	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
+> > -	                END { print shortest }')
+> > -	        if [ -f $full_seq ] \
+> > -	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
+> > -	            seq=$full_seq
+> > -	        fi
+> > -	    fi
+> > +	err=false
+> > +	first_test=true
+> > +	for seq in $list ; do
+> > +		# Run report for previous test!
+> > +		if $err ; then
+> > +			bad="$bad $seqnum"
+> > +			n_bad=`expr $n_bad + 1`
+> > +			tc_status="fail"
+> > +		fi
+> > +		if $do_report && ! $first_test ; then
+> > +			if [ $tc_status != "expunge" ] ; then
+> > +				_make_testcase_report "$tc_status"
+> > +			fi
+> 
+> This report is based on $seq variable, so when the test is _notrun (thus
+> "continue" in the for loop), it's reporting the wrong test seq name, it
+> should report the previous test seq not current. I saw reports like:
+> 
+>         <testcase classname="xfstests.xfs_4k_reflink" name="generic/403" time="1">
+>                 <skipped message="no kernel support for y2038 sysfs switch" />
+>         </testcase>
+>         <testcase classname="xfstests.xfs_4k_reflink" name="generic/403" time="2">
+> 
+> Note that both results reported test name as "generic/403", but the
+> first one should really be "generic/402".
+> 
+> I appended a fix patch in the end, if it looks fine I can fold the fix
+> into this patch.
+> 
+> ...
+> <snip>
+> ...
+> > +	if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
+> >  		_make_testcase_report "$tc_status"
+> > -	    fi
+> > -	    seq="after_$seqnum"
+> > -	done
+> > +	fi
+> > +
+> 
+> This if check should be fixed too as above one.
 
-That said - this works for the licensing changes, because that's
-easily scripted. The setup template stuff is going to be a longer
-process because it's not so easily scripted. Let's get the license
-change sorted first, then I'll worry about the setup template
-updates...
+Yup, your patch looks good.
 
-Cheers,
+Reviewed-by: Dave Chinner <dchinner@redhat.com>
 
-Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
