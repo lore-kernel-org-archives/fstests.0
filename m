@@ -1,152 +1,53 @@
-Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:62621 "EHLO
+Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:55916 "EHLO
         ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1751169AbeFDDF2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 23:05:28 -0400
-Date: Mon, 4 Jun 2018 13:05:25 +1000
+        by vger.kernel.org with ESMTP id S1751169AbeFDDJS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 23:09:18 -0400
+Date: Mon, 4 Jun 2018 13:09:09 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH V3] check: fail tests if check/dmesg are not clean
-Message-ID: <20180604030525.GF10972@dastard>
-References: <20180528230737.25270-1-david@fromorbit.com>
- <20180603131251.GI6581@desktop>
+Subject: Re: [PATCH] xfstests/btrfs: adapt ppc64le node size at least 65536
+Message-ID: <20180604030909.GG10972@dastard>
+References: <20180601083727.13709-1-yosun@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180603131251.GI6581@desktop>
+In-Reply-To: <20180601083727.13709-1-yosun@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
+To: Yong Sun <yosun@suse.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 03, 2018 at 09:12:51PM +0800, Eryu Guan wrote:
-> On Tue, May 29, 2018 at 09:07:37AM +1000, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > Currently a test appears to pass even if it leaves a corrupt
-> > filesystem behind, or a splat in the system logs that should not be
-> > there. While the test is internally tracked as failed (and the
-> > summary reports it as failed) the per-test output exits with a
-> > success and so emits a completion time before the post-test checks
-> > are run by the test harness.  Rework the check code to report
-> > post-test check failures as specific test failures rather than as
-> > separate failure line items in the overall harness output.
-> > 
-> > Reworking where we emit the errors this also allows us to include
-> > the post-test filesystem checking in the test runtime. This is
-> > currently not accounted to the test and can be substantial. Hence
-> > the real elapsed time of each test is not accurately reflected in
-> > the time stats being reported and so regressions in filesystem
-> > checking performance go unnoticed.
-> > 
-> > Changing the output reporting requires a complete reworking of the
-> > main test check loop. It's a bunch of spaghetti at the moment
-> > because it has post test reporting code at the end of the loop which
-> > must run regardless of the test result.  By moving the post test
-> > reporting to the start of the next loop iteration, we can clean up
-> > the code substantially by using continue directives where
-> > appropriate.
-> > 
-> > Also, for cases where we haven't run the test or it's already been
-> > marked as failed, don't bother running the filesystem/dmesg checks
-> > for failure as we're already going to report the test as failed.
-> > 
-> > This touches almost all of the loop, so get rid of the remaining
-> > 4 space indents inside the loop while moving all this code around.
-> > 
-> > Signed-Off-By: Dave Chinner <dchinner@redhat.com>
+On Fri, Jun 01, 2018 at 04:37:27PM +0800, Yong Sun wrote:
+> From: yosun <yosun@suse.com>
 > 
-> I hit some other errors when testing the xUnit report result, please see
-> below. (Sorry for not finding it in previous review..)
+> node size(leaf size) in ppc64le at least 65536, so mkfs with --nodesize smaller than that number will cause a fail on 057 and 122.
 > 
-> > ---
-> >  check     | 260 +++++++++++++++++++++++++++++-------------------------
-> >  common/rc |   6 ++
-> >  2 files changed, 144 insertions(+), 122 deletions(-)
-> > 
-> > diff --git a/check b/check
-> > index f6fb352bcbb9..0cdf95e9f5e7 100755
-> > --- a/check
-> > +++ b/check
-> > @@ -38,10 +38,12 @@ randomize=false
-> >  export here=`pwd`
-> >  xfile=""
-> >  brief_test_summary=false
-> > -_err_msg=""
-> >  do_report=false
-> >  DUMP_OUTPUT=false
-> >  
-> > +# This is a global variable used to pass test failure text to reporting gunk
-> > +_err_msg=""
-> > +
-> >  # start the initialisation work now
-> >  iam=check
-> >  
-> > @@ -643,78 +645,97 @@ for section in $HOST_OPTIONS_SECTIONS; do
-> >  	seqres="$check"
-> >  	_check_test_fs
-> >  
-> > -	for seq in $list
-> > -	do
-> > -	    err=false
-> > -	    _err_msg=""
-> > -	    if [ ! -f $seq ]; then
-> > -	        # Try to get full name in case the user supplied only seq id
-> > -	        # and the test has a name. A bit of hassle to find really
-> > -	        # the test and not its sample output or helping files.
-> > -	        bname=$(basename $seq)
-> > -	        full_seq=$(find $(dirname $seq) -name $bname* -executable |
-> > -	            awk '(NR == 1 || length < length(shortest)) { shortest = $0 }\
-> > -	                END { print shortest }')
-> > -	        if [ -f $full_seq ] \
-> > -	            && [ x$(echo $bname | grep -o "^$VALID_TEST_ID") != x ]; then
-> > -	            seq=$full_seq
-> > -	        fi
-> > -	    fi
-> > +	err=false
-> > +	first_test=true
-> > +	for seq in $list ; do
-> > +		# Run report for previous test!
-> > +		if $err ; then
-> > +			bad="$bad $seqnum"
-> > +			n_bad=`expr $n_bad + 1`
-> > +			tc_status="fail"
-> > +		fi
-> > +		if $do_report && ! $first_test ; then
-> > +			if [ $tc_status != "expunge" ] ; then
-> > +				_make_testcase_report "$tc_status"
-> > +			fi
+> Signed-off-by: Yong Sun <yosun@suse.com>
+> ---
+>  tests/btrfs/057 | 6 ++++++
+>  tests/btrfs/122 | 8 +++++++-
+>  2 files changed, 13 insertions(+), 1 deletion(-)
 > 
-> This report is based on $seq variable, so when the test is _notrun (thus
-> "continue" in the for loop), it's reporting the wrong test seq name, it
-> should report the previous test seq not current. I saw reports like:
-> 
->         <testcase classname="xfstests.xfs_4k_reflink" name="generic/403" time="1">
->                 <skipped message="no kernel support for y2038 sysfs switch" />
->         </testcase>
->         <testcase classname="xfstests.xfs_4k_reflink" name="generic/403" time="2">
-> 
-> Note that both results reported test name as "generic/403", but the
-> first one should really be "generic/402".
-> 
-> I appended a fix patch in the end, if it looks fine I can fold the fix
-> into this patch.
-> 
-> ...
-> <snip>
-> ...
-> > +	if $do_report -a ! $first_test -a $tc_status != "expunge" ; then
-> >  		_make_testcase_report "$tc_status"
-> > -	    fi
-> > -	    seq="after_$seqnum"
-> > -	done
-> > +	fi
-> > +
-> 
-> This if check should be fixed too as above one.
+> diff --git a/tests/btrfs/057 b/tests/btrfs/057
+> index a834b763..69d096fb 100755
+> --- a/tests/btrfs/057
+> +++ b/tests/btrfs/057
+> @@ -48,6 +48,12 @@ _require_scratch
+>  
+>  rm -f $seqres.full
+>  
+> +# the nodesize in ppc64le is at least 65536, it will mismatch output
+> +HARDWARE_PLATFORM=`uname -i`
+> +if [ "$HARDWARE_PLATFORM" = "ppc64le" ]; then
+> +        _notrun "Not supported on ppc64le with nodesize > 4096"
+> +fi
 
-Yup, your patch looks good.
+Why doesn't ppc64le support node sizes smaller than 64K? What makes
+it different to any other hardware? i.e. we should be checking for
+the thing that prevents node sizes <64k, not the hardware platform.
 
-Reviewed-by: Dave Chinner <dchinner@redhat.com>
+Cheers,
 
+Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
