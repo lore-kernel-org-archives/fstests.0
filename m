@@ -1,188 +1,119 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:52864 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751132AbeFCW5O (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 18:57:14 -0400
-Date: Sun, 3 Jun 2018 15:56:55 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] xfs: Regression test for vulnerable directory
- integrity check
-Message-ID: <20180603225655.GY12940@magnolia>
-References: <20180530065843.GG6581@desktop>
- <1527670423-2795-1-git-send-email-yangx.jy@cn.fujitsu.com>
- <20180603133718.GJ6581@desktop>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:22808 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751373AbeFDCuj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Jun 2018 22:50:39 -0400
+Date: Mon, 4 Jun 2018 12:50:36 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
+Message-ID: <20180604025035.GC10972@dastard>
+References: <20180529004752.8243-1-david@fromorbit.com>
+ <20180603135107.GK6581@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180603133718.GJ6581@desktop>
+In-Reply-To: <20180603135107.GK6581@desktop>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>, fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 03, 2018 at 09:37:18PM +0800, Eryu Guan wrote:
-> On Wed, May 30, 2018 at 04:53:43PM +0800, Xiao Yang wrote:
-> > If a malicious XFS contains a block+ format directory wherein the
-> > directory inode's core.mode is corrupted, and there are subdirectories
-> > of the corrupted directory, an attempt to traverse up the directory
-> > tree by running xfs_scrub will crash the kernel in __xfs_dir3_data_check.
+On Sun, Jun 03, 2018 at 09:51:07PM +0800, Eryu Guan wrote:
+> On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
+> > Hi folks,
 > > 
-> > Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> 
-> Thanks for the update!
-> 
-> > ---
-> >  tests/xfs/448     | 96 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/448.out |  2 ++
-> >  tests/xfs/group   |  1 +
-> >  3 files changed, 99 insertions(+)
-> >  create mode 100755 tests/xfs/448
-> >  create mode 100644 tests/xfs/448.out
+> > To reduce boilerplate text in each test, I'm proposing the following
+> > two sets of modifications:
 > > 
-> > diff --git a/tests/xfs/448 b/tests/xfs/448
-> > new file mode 100755
-> > index 0000000..9ea9295
-> > --- /dev/null
-> > +++ b/tests/xfs/448
-> > @@ -0,0 +1,96 @@
-> > +#! /bin/bash
-> > +# FS QA Test No. 448
-> > +#
-> > +# Regression test for commit:
-> > +# 46c59736d809 ("xfs: harden directory integrity checks some more")
-> 
-> But I couldn't triger the test failre (kernel crash?) with this commit
-> reverted, with either v1 nor v2 patch. I was testing with 4.17-rc5 based
-> kernel, could you please take a look?
-> 
-> > +#
-> > +# If a malicious XFS contains a block+ format directory wherein
-> > +# the directory inode's core.mode is corrupted, and there are
-> > +# subdirectories of the corrupted directory, an attempt to traverse
-> > +# up the directory tree by running xfs_scrub will crash the
-> > +# kernel in __xfs_dir3_data_check.
-> > +#
-> > +# Notice:
-> > +# we should have non fatal asserts configured, because assert
-> > +# failures triggered by the intentional corrupt would crash system.
-> > +#
-> > +#-----------------------------------------------------------------------
-> > +# Copyright (c) 2018 FUJITSU LIMITED. All Rights Reserved.
-> > +#
-> > +# This program is free software; you can redistribute it and/or
-> > +# modify it under the terms of the GNU General Public License as
-> > +# published by the Free Software Foundation.
-> > +#
-> > +# This program is distributed in the hope that it would be useful,
-> > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > +# GNU General Public License for more details.
-> > +#
-> > +# You should have received a copy of the GNU General Public License
-> > +# along with this program; if not, write the Free Software Foundation,
-> > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > +#-----------------------------------------------------------------------
-> > +
-> > +seq=`basename "$0"`
-> > +seqres="$RESULT_DIR/$seq"
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1    # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -rf $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/populate
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_supported_fs xfs
-> > +_require_scratch_nocheck
-> > +_require_xfs_io_command "scrub"
-> > +# Corrupt XFS on purpose, and skip if assert failures would crash system.
-> > +_require_no_xfs_bug_on_assert
-> > +
-> > +rm -f "$seqres.full"
-> > +
-> > +# Format and mount
-> > +_scratch_mkfs | _filter_mkfs > $seqres.full 2> $tmp.mkfs || _fail "mkfs failed"
-> > +_scratch_mount
-> > +
-> > +# Get directory block size
-> > +. $tmp.mkfs
-> > +
-> > +# Create a block+(e.g. leaf) format directory
-> > +__populate_create_dir "${SCRATCH_MNT}/dir_leaf" "$((dirbsize / 12))"
-> > +
-> > +# Get the block+ directory inode and a subdirectory inode of it
-> > +subdino=$(stat -c "%i" "$(find ${SCRATCH_MNT}/dir_leaf/* -type d | head -1)")
-> > +dino=$(stat -c "%i" "${SCRATCH_MNT}/dir_leaf")
-> > +
-> > +# Get the subdirectory's generation number
-> > +_scratch_unmount
-> > +subdgen=$(_scratch_xfs_get_metadata_field "core.gen" "inode $subdino")
-> > +
-> > +# Corrupt the directory inode's core.mode
-> > +setmode="0100755"
-> > +_scratch_xfs_set_metadata_field "core.mode" "$setmode" "inode $dino" >> $seqres.full
-> > +getmode=$(_scratch_xfs_get_metadata_field "core.mode" "inode $dino")
-> > +[ "$getmode" != "$setmode" ] && _fail "failed to set core.mode"
-> > +
-> > +# Scrub parent directory in subdirectory (online)
-> > +_scratch_mount
-> > +$XFS_IO_PROG -x -c "scrub parent $subdino $subdgen" ${SCRATCH_MNT} >> $seqres.full
-> 
-> And I always see "+scrub: Inappropriate ioctl for device" here with this
-> v2 patch.
-
-Your kernel probably needs CONFIG_XFS_ONLINE_SCRUB=y
-
-This test probably needs:
-
-. ./config/fuzzy
-_supports_xfs_scrub || _fail "scrub not supported"
-
-(or make a _requires_xfs_scrub_enabled helper to encapsulate that?)
-
---D
-
-> 
-> Thanks,
-> Eryu
-> 
-> > +
-> > +echo "Silence is golden"
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/448.out b/tests/xfs/448.out
-> > new file mode 100644
-> > index 0000000..b6f0a53
-> > --- /dev/null
-> > +++ b/tests/xfs/448.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 448
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 51326d9..dd39d08 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -445,3 +445,4 @@
-> >  445 auto quick filestreams
-> >  446 auto quick
-> >  447 auto mount
-> > +448 auto quick fuzzers
-> > -- 
-> > 1.8.3.1
+> > 	1. set tests up using a common include file; and
+> > 	2. switch tests over to using SPDX license tags
 > > 
+> > The first patch is simply moving all the common per-test setup code
+> > the test harness requires into a common file that all tests then
+> > include. This is code that nobody should ever need to change for any
+> > given test and pulling it out of the tests themselves removes the
+> > temptation for anyone to "optimise" the test setup code. There are a
+> > large number of tests where the setup code has been "optimised" and,
+> > as such, the common code that relies on the per-test setup may be
+> > compromised.
 > > 
+> > The other advantage of doing this is that tree-wide test setup
+> > changes now become much simpler to do, as it will not require
+> > touching every test in the tree. This will substanitally reduce the
+> > burden of improving the test infrastructure.
 > > 
+> > This patch modifies a couple of tests to demonstrate how the tests
+> > themselves will end up looking - they still have a cleanup()
+> > function called on test exit, and the status variable is still
+> > treated the same way. However, tests now only need to clean up stuff
+> > created within the test, so it much cleaner.
+> > 
+> > The second patch touches licensing, so please consider this one
+> > carefully. It introduces SPDX license tags to the xfstests codebase,
+> > and defines the tags and licenses they refer to in the LICENSES/
+> > directory. At present, I have only created a GPL-2.0 license tag,
+> > and replaced all the GPL v2.0 license texts in the root
+> > and common/ directories with SPDX tags. I also converted the same
+> > two tests I touched in the first patch to convert them, so you can
+> > see exactly what tests will look like after this.
+> > 
+> > I'll go throw how I've converted these files, so people can comment
+> > on the process and the decisions I've made.
+> > 
+> > 	1. Baseline assumption: unless otherwise specifically
+> > 	mentioned, the code is licensed under a GPL v2.0 license
+> > 
+> > 	2. If the file has a GPL license blurb, replace it with
+> > 	a "SPDX-License-Identifier: GPL-2.0" tag.
+> > 
+> > 	3. If the file has no GPL license blurb, add a new
+> > 	"SPDX-License-Identifier: GPL-2.0" tag.
+> > 
+> > 	3. If the file has a "Copyright ..." line, preserve it after
+> > 	the SPDX tag.
+> > 
+> > 	4. Remove author and other lines in the header with email
+> > 	addresses in them - we have the author history in the git
+> > 	repository. Git blame can tell us exactly who wrote what
+> > 	code and hence we don't need it in the code itself.
+> 
+> I'm not a license expert, but this process looks sane to me, thanks a
+> lot for doing this!
+> 
+> > 
+> > Most (possibly all?) of the code under tests/ has GPL license blurbs
+> > - they'll all get converted by this same process. It's a bit murkier
+> > when it comes to src/ and ltp/, as this code has varied history. For
+> > these directories, the first pass I make will for code that has
+> > explicit GPL licenses. Every other file will need to be looked at
+> > on a case by case basis and done as time permits...
+> > 
+> > Please note that I'm not trying to change the license on any of the
+> > code, just change the way it is documented to reduce boilerplate
+> > code. If I've made any changes that modify the license of any
+> > specific code, then I've made a mistake and I need to fix that.
+> > Please point out anywhere you think my actions have not been clear
+> > and obvious.
+> > 
+> > Once we have some consensus on how we want to proceed, I'll do the
+> > grunt work and co-ordinate with Eryu on minimising the number of
+> > times I have to rebase a patchset that is going to touch around 1500
+> > files...
+> 
+> How would you like to proceed with a minimum number of rebasing times? I
+> think that most rebase work would come from new tests that being added
+> during the whole process, I think I could do
+> 
+> 1) simply suspend adding new tests until the whole work is done, or
+> 2) convert new tests myself if there're just a few of them
+
+Easiest thing to do would be for me to convert the tree immediately
+before you send out an update. e.g. do your update, send me a note,
+I'll run the conversion scripts and send you a pull request based on
+the tree you've finished updating....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
