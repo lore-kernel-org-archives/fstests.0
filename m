@@ -1,49 +1,29 @@
-Received: from mail-yw0-f194.google.com ([209.85.161.194]:38897 "EHLO
-        mail-yw0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751625AbeFEMKA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jun 2018 08:10:00 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:46800 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751748AbeFEQmy (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jun 2018 12:42:54 -0400
+Subject: [PATCH 0/6] fstests: fixes and new tests
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Tue, 05 Jun 2018 09:42:50 -0700
+Message-ID: <152821697018.24976.12939094615403004592.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <1527965539-30607-1-git-send-email-amir73il@gmail.com>
-References: <1527965539-30607-1-git-send-email-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 5 Jun 2018 15:09:59 +0300
-Message-ID: <CAOQ4uxiw12OvPxtyzZgyoKNKW69J0=VTRTM3CMa4mxBQLj5c3g@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] overlay/016: split into two tests
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Jun 2, 2018 at 9:52 PM, Amir Goldstein <amir73il@gmail.com> wrote:
-> overlay/016 tests two cases of ro/rw fd data inconsistecies -
-> one using pread and one using mmap read (i.e. mread).
->
-> The first case will pass as soon as stacked overlay operations
-> patch set is merged. The second case requires enabling a new opt-in
-> feature "copy_up_shared" in order to pass.
->
-> Instead of changing the entire test from fail to notrun, split
-> the two cases into two tests and require the new feature only
-> for the new test.
->
-> This way, the new test will change from notrun to pass with
-> stacked overlay operations and the old test will change from
-> fail to pass.
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
+Hi all,
 
-Eryu,
+The first three patches in this series fix some fstests regressions that
+I've observed over the last couple of weeks.
 
-Please hold back on this patch - there seems to be a push back
-on the "copy_up_shared" feature.
-It may end up making sense to do the split anyway because
-case #1 may be resolved in this merge cycle and case #2 only
-later on, but let's wait to see what gets merged first and then decide.
+After that are new swapfile tests that check the swapfile activation
+code on various weird twists on swapfile format.
 
-No problem with merging the cleanup patch
-"overlay: nicer report when features are not supported"
+The final two tests parameterize xfs_info calls like any other helper
+program and make sure that in xfsprogs 4.17, fs geometry printing is
+consistent across the xfs utilities.
 
-Thanks,
-Amir.
+--D
