@@ -1,120 +1,50 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:25179 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752479AbeFFCD0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jun 2018 22:03:26 -0400
-Subject: Re: [PATCH v3] generic/401: fix test in case of no filetype support
-References: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
-From: xuhuan <xuhuan.fnst@cn.fujitsu.com>
-Message-ID: <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
-Date: Wed, 6 Jun 2018 10:02:37 +0800
+Received: from mx2.suse.de ([195.135.220.15]:43705 "EHLO mx2.suse.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1750808AbeFFIzg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 6 Jun 2018 04:55:36 -0400
+Date: Wed, 6 Jun 2018 10:55:35 +0200
+From: Jan Kara <jack@suse.cz>
+Subject: Re: [PATCH 1/2] fstests: get rid of set_prog_path
+Message-ID: <20180606085535.zcc76ec5sv3xnm4w@quack2.suse.cz>
+References: <20180529165119.31961-1-jack@suse.cz>
+ <20180603142117.GM6581@desktop>
 MIME-Version: 1.0
-In-Reply-To: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180603142117.GM6581@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Dave Chinner <dchinner@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi
+On Sun 03-06-18 22:21:17, Eryu Guan wrote:
+> On Tue, May 29, 2018 at 06:51:18PM +0200, Jan Kara wrote:
+> > -        export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
+> > -        export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
+> > -        export MKFS_UDF_PROG="`set_prog_path mkudffs`"
+> > -        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
+> > -        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
+> 
+> We should keep above two setups, set_mkfs_prog_path_with_opts does extra
+> work than set_prog_path.
+>
+> > diff --git a/tests/xfs/446 b/tests/xfs/446
+> > index 752c6a7de827..ac74723f471f 100755
+> > --- a/tests/xfs/446
+> > +++ b/tests/xfs/446
+> > @@ -37,7 +37,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+> >  # real QA test starts here
+> >  _supported_fs xfs
+> >  _supported_os Linux
+> > -export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
+> 
+> This is removed but not added in common/config file.
+> 
+> I fixed both issues on commit.
 
-I have tested it passed on nfs.
+Good spottings. Thanks for fixing them up!
 
-thanks.
-
-On 06/05/18 16:08, Amir Goldstein wrote:
-> Xu Huan reported that this test fails on nfs in some setup.
-> Apparently, the assumptions made about xfs/ext* do not hold
-> for nfs.
->
-> Relax the verification of filetype not supported case to
-> allow either DT_UNKNOWN or actual file type on all files and
-> not only on special dir entires "." and "..".
->
-> Convert the unknown d_type replacement code from awk to bash
-> so it is a bit more readable and flexible.
-Tested-by:Xu Huan <xuhuan.fnst@cn.fujitsu.com>
-> Reported-by: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
->
-> Xu,
->
-> Please check if this patch fixes your problem.
-> I prefer to keep the test coverage of unsupported case.
->
-> I tested with xfs/ext4 with/without filetype support.
->
-> Thanks,
-> Amir.
->
->  tests/generic/401 | 42 ++++++++++++++++++++----------------------
->  1 file changed, 20 insertions(+), 22 deletions(-)
->
-> diff --git a/tests/generic/401 b/tests/generic/401
-> index 74f2bea..34ce76e 100755
-> --- a/tests/generic/401
-> +++ b/tests/generic/401
-> @@ -4,14 +4,13 @@
->  # Test filetype feature
->  #
->  # This test does NOT require that file system support the d_type feature.
-> -# It verifies that either all file types are reported as DT_UNKNOWN
-> -# or all file types are reported correctly.
-> +# It verifies that file types are reported as either DT_UNKNOWN or as
-> +# the actual file type. For example, special dir entries . and .. MAY be
-> +# reported as DT_UNKNOWN IF filetype feature is disabled (ext4), but MAY
-> +# also be reported as DT_DIR in this case (xfs).
->  #
->  # For fs for which we know how to test the filetype feature (xfs|ext*)
->  # verify getting DT_UNKNOWN IFF feature is disabled.
-> -# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
-> -# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
-> -# case (xfs).
->  #
->  #-----------------------------------------------------------------------
->  #
-> @@ -73,23 +72,22 @@ mknod $testdir/c c 1 1
->  mknod $testdir/b b 1 1
->  mknod $testdir/p p
->  
-> -# Test d_type of . and ..
-> -# it must be DT_DIR on fs with filetype support and it could be
-> -# either DR_DIR or DT_UNKNOWN on fs without filetype support
-> -src/t_dir_type $testdir d | grep -F '.' | sort
-> -
-> -# Test that either all file types are unknown or all are correct
-> -if _supports_filetype $SCRATCH_MNT; then
-> -	# print real file types
-> -	src/t_dir_type $testdir | grep -vF '.' | sort
-> -else
-> -	# print fake dir file type for . and .. if they are DT_UNKNOWN
-> -	src/t_dir_type $testdir u | grep -F '.' | \
-> -		awk '{ print $1, "d" }' | sort
-> -	# list unknown files and print filename as fake file type
-> -	src/t_dir_type $testdir u | grep -vF '.' | \
-> -		awk '{ print $1, $1 }' | sort
-> -fi
-> +# Test d_type of test files - it must be the actual file type on fs
-> +# with filetype support and it could be either the actual file type
-> +# or DT_UNKNOWN on fs without filetype support
-> +ftype=
-> +_supports_filetype $SCRATCH_MNT && ftype=1
-> +src/t_dir_type $testdir | \
-> +while read name type; do
-> +	if [ "$ftype" != 1 -a "$type" = u ]; then
-> +		if [ "$name" = "." -o "$name" = ".." ]; then
-> +			type=d
-> +		else
-> +			type=$name
-> +		fi
-> +	fi
-> +	echo $name $type
-> +done | sort
->  
->  status=0
->  exit
-
-
-
+								Honza
+-- 
+Jan Kara <jack@suse.com>
+SUSE Labs, CR
