@@ -1,195 +1,120 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:49070 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751748AbeFEQni (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jun 2018 12:43:38 -0400
-Subject: [PATCH 6/6] xfs: make sure pretty printed geometry output matches
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 05 Jun 2018 09:43:33 -0700
-Message-ID: <152821701376.24976.4940261016750526905.stgit@magnolia>
-In-Reply-To: <152821697018.24976.12939094615403004592.stgit@magnolia>
-References: <152821697018.24976.12939094615403004592.stgit@magnolia>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:25179 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1752479AbeFFCD0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Jun 2018 22:03:26 -0400
+Subject: Re: [PATCH v3] generic/401: fix test in case of no filetype support
+References: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
+From: xuhuan <xuhuan.fnst@cn.fujitsu.com>
+Message-ID: <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
+Date: Wed, 6 Jun 2018 10:02:37 +0800
 MIME-Version: 1.0
+In-Reply-To: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Hi
 
-Make sure that all of our commands that can print geometry information
-all print the /same/ information.
+I have tested it passed on nfs.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/xfs        |   41 +++++++++++++++++++++++++
- tests/xfs/710     |   88 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/710.out |    2 +
- tests/xfs/group   |    1 +
- 4 files changed, 132 insertions(+)
- create mode 100755 tests/xfs/710
- create mode 100644 tests/xfs/710.out
+thanks.
+
+On 06/05/18 16:08, Amir Goldstein wrote:
+> Xu Huan reported that this test fails on nfs in some setup.
+> Apparently, the assumptions made about xfs/ext* do not hold
+> for nfs.
+>
+> Relax the verification of filetype not supported case to
+> allow either DT_UNKNOWN or actual file type on all files and
+> not only on special dir entires "." and "..".
+>
+> Convert the unknown d_type replacement code from awk to bash
+> so it is a bit more readable and flexible.
+Tested-by:Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+> Reported-by: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>
+> Xu,
+>
+> Please check if this patch fixes your problem.
+> I prefer to keep the test coverage of unsupported case.
+>
+> I tested with xfs/ext4 with/without filetype support.
+>
+> Thanks,
+> Amir.
+>
+>  tests/generic/401 | 42 ++++++++++++++++++++----------------------
+>  1 file changed, 20 insertions(+), 22 deletions(-)
+>
+> diff --git a/tests/generic/401 b/tests/generic/401
+> index 74f2bea..34ce76e 100755
+> --- a/tests/generic/401
+> +++ b/tests/generic/401
+> @@ -4,14 +4,13 @@
+>  # Test filetype feature
+>  #
+>  # This test does NOT require that file system support the d_type feature.
+> -# It verifies that either all file types are reported as DT_UNKNOWN
+> -# or all file types are reported correctly.
+> +# It verifies that file types are reported as either DT_UNKNOWN or as
+> +# the actual file type. For example, special dir entries . and .. MAY be
+> +# reported as DT_UNKNOWN IF filetype feature is disabled (ext4), but MAY
+> +# also be reported as DT_DIR in this case (xfs).
+>  #
+>  # For fs for which we know how to test the filetype feature (xfs|ext*)
+>  # verify getting DT_UNKNOWN IFF feature is disabled.
+> -# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
+> -# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
+> -# case (xfs).
+>  #
+>  #-----------------------------------------------------------------------
+>  #
+> @@ -73,23 +72,22 @@ mknod $testdir/c c 1 1
+>  mknod $testdir/b b 1 1
+>  mknod $testdir/p p
+>  
+> -# Test d_type of . and ..
+> -# it must be DT_DIR on fs with filetype support and it could be
+> -# either DR_DIR or DT_UNKNOWN on fs without filetype support
+> -src/t_dir_type $testdir d | grep -F '.' | sort
+> -
+> -# Test that either all file types are unknown or all are correct
+> -if _supports_filetype $SCRATCH_MNT; then
+> -	# print real file types
+> -	src/t_dir_type $testdir | grep -vF '.' | sort
+> -else
+> -	# print fake dir file type for . and .. if they are DT_UNKNOWN
+> -	src/t_dir_type $testdir u | grep -F '.' | \
+> -		awk '{ print $1, "d" }' | sort
+> -	# list unknown files and print filename as fake file type
+> -	src/t_dir_type $testdir u | grep -vF '.' | \
+> -		awk '{ print $1, $1 }' | sort
+> -fi
+> +# Test d_type of test files - it must be the actual file type on fs
+> +# with filetype support and it could be either the actual file type
+> +# or DT_UNKNOWN on fs without filetype support
+> +ftype=
+> +_supports_filetype $SCRATCH_MNT && ftype=1
+> +src/t_dir_type $testdir | \
+> +while read name type; do
+> +	if [ "$ftype" != 1 -a "$type" = u ]; then
+> +		if [ "$name" = "." -o "$name" = ".." ]; then
+> +			type=d
+> +		else
+> +			type=$name
+> +		fi
+> +	fi
+> +	echo $name $type
+> +done | sort
+>  
+>  status=0
+>  exit
 
 
-diff --git a/common/xfs b/common/xfs
-index 3e34b118..bc35cd87 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -710,3 +710,44 @@ _require_xfs_db_write_array()
- 	rm -f $TEST_DIR/$seq.img
- 	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
- }
-+
-+_require_xfs_spaceman_command()
-+{
-+	if [ -z "$1" ]
-+	then
-+		echo "Usage: _require_xfs_spaceman_command command [switch]" 1>&2
-+		exit 1
-+	fi
-+	local command=$1
-+	shift
-+	local param="$*"
-+	local param_checked=0
-+	local opts=""
-+
-+	_require_command "$XFS_SPACEMAN_PROG" "xfs_spaceman"
-+
-+	testfile=$TEST_DIR/$$.xfs_spaceman
-+	case $command in
-+	*)
-+		testio=`$XFS_SPACEMAN_PROG -c "help $command" $TEST_DIR 2>&1`
-+	esac
-+
-+	rm -f $testfile 2>&1 > /dev/null
-+	echo $testio | grep -q "not found" && \
-+		_notrun "xfs_spaceman $command support is missing"
-+	echo $testio | grep -q "Operation not supported" && \
-+		_notrun "xfs_spaceman $command failed (old kernel/wrong fs?)"
-+	echo $testio | grep -q "Invalid" && \
-+		_notrun "xfs_spaceman $command failed (old kernel/wrong fs/bad args?)"
-+	echo $testio | grep -q "foreign file active" && \
-+		_notrun "xfs_spaceman $command not supported on $FSTYP"
-+	echo $testio | grep -q "Function not implemented" && \
-+		_notrun "xfs_spaceman $command support is missing (missing syscall?)"
-+
-+	[ -n "$param" ] || return
-+
-+	if [ $param_checked -eq 0 ]; then
-+		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
-+			_notrun "xfs_spaceman $command doesn't support $param"
-+	fi
-+}
-diff --git a/tests/xfs/710 b/tests/xfs/710
-new file mode 100755
-index 00000000..b03d4836
---- /dev/null
-+++ b/tests/xfs/710
-@@ -0,0 +1,88 @@
-+#! /bin/bash
-+# FS QA Test No. 710
-+#
-+# Make sure pretty printed XFS geometry is the same across all programs.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle, Inc.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1
-+trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+rm -f $seqres.full
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/xfs
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+
-+_require_scratch_nocheck
-+
-+# Geometry printing wasn't unified until xfs_spaceman grew an 'info'
-+# command, so skip this test if there is no spaceman or it doesn't
-+# know what 'info' is.
-+_require_xfs_spaceman_command "info"
-+_require_command "$XFS_DB_PROG" xfs_db
-+_require_command "$XFS_GROWFS_PROG" xfs_growfs
-+_require_command "$XFS_INFO_PROG" xfs_info
-+
-+_scratch_mkfs > $tmp.mkfs
-+echo MKFS >> $seqres.full
-+cat $tmp.mkfs >> $seqres.full
-+
-+_scratch_xfs_db -c "info" > $tmp.dbinfo
-+echo DB >> $seqres.full
-+cat $tmp.dbinfo >> $seqres.full
-+diff -u $tmp.mkfs $tmp.dbinfo
-+
-+_scratch_mount
-+
-+$XFS_SPACEMAN_PROG -c "info" $SCRATCH_MNT > $tmp.spaceman
-+echo SPACEMAN >> $seqres.full
-+cat $tmp.spaceman >> $seqres.full
-+diff -u $tmp.mkfs $tmp.spaceman
-+
-+$XFS_GROWFS_PROG -n $SCRATCH_MNT > $tmp.growfs
-+echo GROWFS >> $seqres.full
-+cat $tmp.growfs >> $seqres.full
-+diff -u $tmp.mkfs $tmp.growfs
-+
-+$XFS_INFO_PROG $SCRATCH_MNT > $tmp.info
-+echo INFO >> $seqres.full
-+cat $tmp.info >> $seqres.full
-+diff -u $tmp.mkfs $tmp.info
-+
-+echo "Silence is golden."
-+status=0
-+exit 0
-diff --git a/tests/xfs/710.out b/tests/xfs/710.out
-new file mode 100644
-index 00000000..ae2659d5
---- /dev/null
-+++ b/tests/xfs/710.out
-@@ -0,0 +1,2 @@
-+QA output created by 710
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 2319f58f..9dd30ae0 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -445,3 +445,4 @@
- 445 auto quick filestreams
- 446 auto quick
- 447 auto mount
-+710 auto quick
 
