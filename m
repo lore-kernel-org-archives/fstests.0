@@ -1,263 +1,186 @@
-Received: from mout.gmx.net ([212.227.17.22]:47721 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1751974AbeFGG6f (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 7 Jun 2018 02:58:35 -0400
-Subject: Re: [PATCH] fstests: btrfs: Test if btrfs will corrupt nodatasum
- compressed extent when replacing device
-References: <20180601013448.22450-1-wqu@suse.com>
- <20180607062122.GD2861@desktop>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <bd581e60-2454-1f25-2c73-241dcf118118@gmx.com>
-Date: Thu, 7 Jun 2018 14:58:21 +0800
+Received: from mail-pg0-f66.google.com ([74.125.83.66]:38109 "EHLO
+        mail-pg0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932102AbeFGINj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 04:13:39 -0400
+Date: Thu, 7 Jun 2018 16:13:32 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 1/3] xfstests: dedupe a single big file and verify
+ integrity
+Message-ID: <20180607081332.GE2861@desktop>
+References: <20180601080733.20703-1-zlang@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20180607062122.GD2861@desktop>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="VaXIpiUj0QkQtmm06cJDRnRNv6oMuR7Bn"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180601080733.20703-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---VaXIpiUj0QkQtmm06cJDRnRNv6oMuR7Bn
-Content-Type: multipart/mixed; boundary="G67NvlH7HfnPdUsERHE5ITidEMW2efeyX";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: Eryu Guan <guaneryu@gmail.com>, Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Message-ID: <bd581e60-2454-1f25-2c73-241dcf118118@gmx.com>
-Subject: Re: [PATCH] fstests: btrfs: Test if btrfs will corrupt nodatasum
- compressed extent when replacing device
-References: <20180601013448.22450-1-wqu@suse.com>
- <20180607062122.GD2861@desktop>
-In-Reply-To: <20180607062122.GD2861@desktop>
+On Fri, Jun 01, 2018 at 04:07:31PM +0800, Zorro Lang wrote:
+> Duperemove is a tool for finding duplicated extents and submitting
+> them for deduplication, and it supports XFS. This case trys to
+> verify the integrity of XFS after running duperemove.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> Hi,
+> 
+> The V1 should be:
+> https://www.spinics.net/lists/linux-xfs/msg18982.html
+> 
+> This time I send 3 cases at same time.
+> 
+> Thanks,
+> Zorro
+> 
+>  common/config        |  1 +
+>  tests/shared/008     | 79 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/shared/008.out |  3 ++
+>  tests/shared/group   |  1 +
+>  4 files changed, 84 insertions(+)
+>  create mode 100755 tests/shared/008
+>  create mode 100644 tests/shared/008.out
+> 
+> diff --git a/common/config b/common/config
+> index 02c378a9..def559c1 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -207,6 +207,7 @@ export SQLITE3_PROG="`set_prog_path sqlite3`"
+>  export TIMEOUT_PROG="`set_prog_path timeout`"
+>  export SETCAP_PROG="`set_prog_path setcap`"
+>  export GETCAP_PROG="`set_prog_path getcap`"
+> +export DUPEREMOVE_PROG="`set_prog_path duperemove`"
+>  
+>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+>  # newer systems have udevadm command but older systems like RHEL5 don't.
+> diff --git a/tests/shared/008 b/tests/shared/008
+> new file mode 100755
+> index 00000000..74362807
+> --- /dev/null
+> +++ b/tests/shared/008
+> @@ -0,0 +1,79 @@
+> +#! /bin/bash
+> +# FS QA Test 008
+> +#
+> +# Dedupe a single big file and verify integrity
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# duperemove only supports btrfs and xfs (with reflink feature).
+> +# Add other filesystems if it supports more later.
+> +_supported_fs xfs btrfs
 
---G67NvlH7HfnPdUsERHE5ITidEMW2efeyX
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+I'm wondering if this could be moved to generic. duperemove only
+supports btrfs and xfs, is that because only btrfs and xfs support
+reflink, or is there some other reason in duperemove itself?
 
+If it's the former case, it's fine to move test to generic, as
+_require_scratch_dedupe serves as a guard; if it's the latter case, I
+think shared test is a good match.
 
+> +_supported_os Linux
+> +_require_scratch_dedupe
+> +_require_command "$DUPEREMOVE_PROG" duperemove
+> +
+> +fssize=$((2 * 1024 * 1024 * 1024))
+> +_scratch_mkfs_sized $fssize > $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +# fill the fs with a big file has same contents
+> +$XFS_IO_PROG -f -c "pwrite -S 0x55 0 $fssize" $SCRATCH_MNT/${seq}.file \
+> +	>> $seqres.full 2>&1
+> +md5sum $SCRATCH_MNT/${seq}.file > $TEST_DIR/${seq}md5.sum
 
-On 2018=E5=B9=B406=E6=9C=8807=E6=97=A5 14:21, Eryu Guan wrote:
-> On Fri, Jun 01, 2018 at 09:34:48AM +0800, Qu Wenruo wrote:
->> This is a long existing bug (from 2012) but exposed by a reporter
->> recently, that when compressed extent without data csum get written to=
+Dump md5sum to $tmp? e.g. $tmp.md5sum
 
->> device-replace target device, the written data is in fact uncompressed=
- data
->> other than the original compressed data.
->>
->> And since btrfs still consider the data is compressed and will try to =
-read it
->> as compressed, it can cause read error.
->>
->> The root cause is located, and one RFC patch already sent to fix it,
->> titled "[PATCH RFC] btrfs: scrub: Don't use inode pages for device rep=
-lace".
->> (The RFC is only for the extra possible way to fix the bug, the fix
->> itself should work without problem)
->>
->> Reported-by: James Harvey <jamespharvey20@gmail.com>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->=20
-> Looks fine to me overall, some minor issues inline. But I'd really like=
-
-> an explicit ACK from btrfs folks.
->=20
->> ---
->>  tests/btrfs/161     | 91 ++++++++++++++++++++++++++++++++++++++++++++=
-+
->>  tests/btrfs/161.out |  2 +
->>  tests/btrfs/group   |  1 +
->>  3 files changed, 94 insertions(+)
->>  create mode 100755 tests/btrfs/161
->>  create mode 100644 tests/btrfs/161.out
->>
->> diff --git a/tests/btrfs/161 b/tests/btrfs/161
->> new file mode 100755
->> index 00000000..d4a2b474
->> --- /dev/null
->> +++ b/tests/btrfs/161
->> @@ -0,0 +1,91 @@
->> +#! /bin/bash
->> +# FS QA Test 161
->> +#
->> +# Test if btrfs will corrupt compressed data extent without data csum=
-
->> +# by replacing it with uncompressed data, when doing replacing device=
-=2E
->> +#
->> +# This could be fixed by the following RFC patch:
->> +# "[PATCH RFC] btrfs: scrub: Don't use inode pages for device replace=
-"
->> +#
->> +#--------------------------------------------------------------------=
----
->> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
->> +#
->> +# This program is free software; you can redistribute it and/or
->> +# modify it under the terms of the GNU General Public License as
->> +# published by the Free Software Foundation.
->> +#
->> +# This program is distributed in the hope that it would be useful,
->> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
->> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
->> +# GNU General Public License for more details.
->> +#
->> +# You should have received a copy of the GNU General Public License
->> +# along with this program; if not, write the Free Software Foundation=
-,
->> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
->> +#--------------------------------------------------------------------=
----
->> +#
->> +
->> +seq=3D`basename $0`
->> +seqres=3D$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=3D`pwd`
->> +tmp=3D/tmp/$$
->> +status=3D1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_test
->=20
-> This is not needed, there's no point running fsck on $TEST_DEV after
-> test when it's not used at all.
-
-Forgot to remove that line.
-
->=20
->> +_require_scratch_dev_pool 2
->> +_require_scratch_dev_pool_equal_size
->> +
->> +
->> +_scratch_dev_pool_get 1
->> +_spare_dev_get
->> +_scratch_pool_mkfs >> $seqres.full 2>&1
->> +
->> +# Create nodatasum inode
->> +_scratch_mount "-o nodatasum"
->> +touch $SCRATCH_MNT/nodatasum_file
->> +_scratch_remount "datasum,compress"
->> +_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
->> +
->> +# Write the compressed data back to disk
->> +sync
->> +
->> +# Replace the device
->> +_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
->> +
->> +_scratch_unmount
->> +
->> +_mount $SPARE_DEV $SCRATCH_MNT
->=20
-> Better to explain the cycle mount with comments.
-
-It's used to drop the page cache so that next read will fetch data from
-disk other than using the cache.
-
-I'll add the comment in the next version.
-
->=20
->> +
->> +# Since now the compressed extent contains *UNCOMPRESSED* data, readi=
-ng it will
->> +# easily trigger a EIO error
->> +cat $SCRATCH_MNT/nodatasum_file > /dev/null
->> +
->> +_scratch_unmount
->> +_spare_dev_put
->> +_scratch_dev_pool_put
->> +
->> +echo "Silence is golden"
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
->> new file mode 100644
->> index 00000000..1752a243
->> --- /dev/null
->> +++ b/tests/btrfs/161.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 161
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index f04ee8d5..f900b3d0 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -163,3 +163,4 @@
->>  158 auto quick raid scrub
->>  159 auto quick
->>  160 auto quick
->> +161 auto quick replace
->=20
-> Anand introduced a new 'volume' group in commit 144c8463d38b ("btrfs:
-> introduce btrfs/volume group"), all 'replace' tests should be in
-> 'volume' group now.
-
-Makes sense.
+The other two tests have similar issues.
 
 Thanks,
-Qu
+Eryu
 
->=20
-> Thanks,
-> Eryu
->=20
->> --=20
->> 2.17.0
->>
->> --
->> To unsubscribe from this list: send the line "unsubscribe fstests" in
->> the body of a message to majordomo@vger.kernel.org
->> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> +
+> +echo "= before cycle mount ="
+> +# Dedupe with 1M blocksize
+> +$DUPEREMOVE_PROG -dr --dedupe-options=same -b 1048576 $SCRATCH_MNT/ >>$seqres.full 2>&1
+> +# Verify integrity
+> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> +# Dedupe with 64k blocksize
+> +$DUPEREMOVE_PROG -dr --dedupe-options=same -b 65536 $SCRATCH_MNT/ >>$seqres.full 2>&1
+> +# Verify integrity again
+> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> +
+> +# umount and mount again, verify pagecache contents don't mutate
+> +_scratch_cycle_mount
+> +echo "= after cycle mount ="
+> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> +
+> +status=0
+> +exit
+> diff --git a/tests/shared/008.out b/tests/shared/008.out
+> new file mode 100644
+> index 00000000..f29d478f
+> --- /dev/null
+> +++ b/tests/shared/008.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 008
+> += before cycle mount =
+> += after cycle mount =
+> diff --git a/tests/shared/group b/tests/shared/group
+> index b3663a03..de7fe79f 100644
+> --- a/tests/shared/group
+> +++ b/tests/shared/group
+> @@ -10,6 +10,7 @@
+>  005 dangerous_fuzzers
+>  006 auto enospc
+>  007 dangerous_fuzzers
+> +008 auto quick dedupe
+>  032 mkfs auto quick
+>  272 auto enospc rw
+>  289 auto quick
+> -- 
+> 2.14.3
+> 
 > --
-> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" =
-in
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
->=20
-
-
---G67NvlH7HfnPdUsERHE5ITidEMW2efeyX--
-
---VaXIpiUj0QkQtmm06cJDRnRNv6oMuR7Bn
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlsY140ACgkQwj2R86El
-/qgdgQf9Emv952UYrkS9ikN7VMgEekn9FN1W5HxLnmHAE09D+u3jQKu8L/qlFi44
-skO1J5BlJr97DgYbbzz+FvneZBwRKJ2rZbInHX7PJnTxvi6bNK8nBBd4abr3bYqD
-OeKMR1fMlPo7OoZkD95r3MVJKSuc2RJ7B8dXRVSdim74jgj2X2RBB8fExmeyWBMn
-/1sk9az8+WYgqAP/xWVrmpTEsHdUVXLoiLlZqo4Z+nSki3Fq3c9sgOvGwUgOZlKc
-3sXvWoVBwtJYVxwgLzZaVl1y2j+pOc+xjd5Ekun3+HzdD0/JDWwsWLsrcNM3NQFC
-XZprALS4xWJFSQTlkiU56iFu4pUxgA==
-=qsf7
------END PGP SIGNATURE-----
-
---VaXIpiUj0QkQtmm06cJDRnRNv6oMuR7Bn--
