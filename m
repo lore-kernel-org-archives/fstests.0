@@ -1,155 +1,183 @@
-Received: from mail-pl0-f49.google.com ([209.85.160.49]:45903 "EHLO
-        mail-pl0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752519AbeFGFkE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 01:40:04 -0400
-Date: Thu, 7 Jun 2018 13:39:57 +0800
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:40337 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751372AbeFGGV3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 02:21:29 -0400
+Date: Thu, 7 Jun 2018 14:21:22 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
-Message-ID: <20180607053957.GC2861@desktop>
-References: <1526959436-7170-1-git-send-email-xifeng@redhat.com>
- <20180527125058.GC6581@desktop>
- <246296494.4735384.1527489656588.JavaMail.zimbra@redhat.com>
- <529728696.4429280.1527550001433.JavaMail.zimbra@redhat.com>
- <CAH2r5msb92E2e7gePY01qBPP4fJ0CKcEsnKLdnL1Ms8cUaQ4sA@mail.gmail.com>
+Subject: Re: [PATCH] fstests: btrfs: Test if btrfs will corrupt nodatasum
+ compressed extent when replacing device
+Message-ID: <20180607062122.GD2861@desktop>
+References: <20180601013448.22450-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAH2r5msb92E2e7gePY01qBPP4fJ0CKcEsnKLdnL1Ms8cUaQ4sA@mail.gmail.com>
+In-Reply-To: <20180601013448.22450-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Steve French <smfrench@gmail.com>, Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: Xiaoli Feng <xifeng@redhat.com>, fstests@vger.kernel.org, linux-cifs@vger.kernel.org
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 28, 2018 at 11:11:02PM -0500, Steve French wrote:
-> Agreed but I do want to follow up with Ronnie on loosely related questi=
-on of
-> how cifs and NFS and similar filesystems parse no op mount options like=
- noatime
+On Fri, Jun 01, 2018 at 09:34:48AM +0800, Qu Wenruo wrote:
+> This is a long existing bug (from 2012) but exposed by a reporter
+> recently, that when compressed extent without data csum get written to
+> device-replace target device, the written data is in fact uncompressed data
+> other than the original compressed data.
+> 
+> And since btrfs still consider the data is compressed and will try to read it
+> as compressed, it can cause read error.
+> 
+> The root cause is located, and one RFC patch already sent to fix it,
+> titled "[PATCH RFC] btrfs: scrub: Don't use inode pages for device replace".
+> (The RFC is only for the extra possible way to fix the bug, the fix
+> itself should work without problem)
+> 
+> Reported-by: James Harvey <jamespharvey20@gmail.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
 
-I take this as an ACK then, please let me know if you didn't really mean
-that :)
+Looks fine to me overall, some minor issues inline. But I'd really like
+an explicit ACK from btrfs folks.
 
-Thank you both for review!
+> ---
+>  tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/161.out |  2 +
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 94 insertions(+)
+>  create mode 100755 tests/btrfs/161
+>  create mode 100644 tests/btrfs/161.out
+> 
+> diff --git a/tests/btrfs/161 b/tests/btrfs/161
+> new file mode 100755
+> index 00000000..d4a2b474
+> --- /dev/null
+> +++ b/tests/btrfs/161
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# FS QA Test 161
+> +#
+> +# Test if btrfs will corrupt compressed data extent without data csum
+> +# by replacing it with uncompressed data, when doing replacing device.
+> +#
+> +# This could be fixed by the following RFC patch:
+> +# "[PATCH RFC] btrfs: scrub: Don't use inode pages for device replace"
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_test
 
+This is not needed, there's no point running fsck on $TEST_DEV after
+test when it's not used at all.
+
+> +_require_scratch_dev_pool 2
+> +_require_scratch_dev_pool_equal_size
+> +
+> +
+> +_scratch_dev_pool_get 1
+> +_spare_dev_get
+> +_scratch_pool_mkfs >> $seqres.full 2>&1
+> +
+> +# Create nodatasum inode
+> +_scratch_mount "-o nodatasum"
+> +touch $SCRATCH_MNT/nodatasum_file
+> +_scratch_remount "datasum,compress"
+> +_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
+> +
+> +# Write the compressed data back to disk
+> +sync
+> +
+> +# Replace the device
+> +_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
+> +
+> +_scratch_unmount
+> +
+> +_mount $SPARE_DEV $SCRATCH_MNT
+
+Better to explain the cycle mount with comments.
+
+> +
+> +# Since now the compressed extent contains *UNCOMPRESSED* data, reading it will
+> +# easily trigger a EIO error
+> +cat $SCRATCH_MNT/nodatasum_file > /dev/null
+> +
+> +_scratch_unmount
+> +_spare_dev_put
+> +_scratch_dev_pool_put
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+> new file mode 100644
+> index 00000000..1752a243
+> --- /dev/null
+> +++ b/tests/btrfs/161.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 161
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index f04ee8d5..f900b3d0 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -163,3 +163,4 @@
+>  158 auto quick raid scrub
+>  159 auto quick
+>  160 auto quick
+> +161 auto quick replace
+
+Anand introduced a new 'volume' group in commit 144c8463d38b ("btrfs:
+introduce btrfs/volume group"), all 'replace' tests should be in
+'volume' group now.
+
+Thanks,
 Eryu
 
->=20
-> On Mon, May 28, 2018, 22:55 Ronnie Sahlberg <lsahlber@redhat.com> wrote=
-:
->=20
->     Hi Xiaoli,
->=20
->     I think it is fine to skip the atime tests for CIFS.
->=20
->     The behaviour of atime/noatime for cifs is basically noatime always.
->     When we read from the server the server will update the atime indep=
-endently
->     of
->     cisf.ko but then any further reads that we do from cache will never=
- push
->     any updates
->     to the server.
->=20
->     Ronnie
->=20
->     ----- Original Message -----
->     > From: "Xiaoli Feng" <xifeng@redhat.com>
->     > To: "Eryu Guan" <guaneryu@gmail.com>, "Leif Sahlberg" <
->     lsahlber@redhat.com>
->     > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
->     > Sent: Monday, 28 May, 2018 4:40:56 PM
->     > Subject: Re: [PATCH] common/rc: skip atime related tests on CIFS
->     >
->     > Add Ronnie to to list.
->     >
->     > Hello Ronnie,
->     >=C2=A0 =C2=A0what's the expected behavior from CIFS on atime/noati=
-me? We want to
->     skip
->     >=C2=A0 =C2=A0the
->     > atime related tests on cifs for xfstests just like nfs. But not s=
-ure if
->     it's
->     > correct. What do you think about it?
->     >
->     > Thanks.
->     >
->     > ----- Original Message -----
->     > > From: "Eryu Guan" <guaneryu@gmail.com>
->     > > To: "XiaoLi Feng" <xifeng@redhat.com>
->     > > Cc: fstests@vger.kernel.org, linux-cifs@vger.kernel.org
->     > > Sent: Sunday, May 27, 2018 8:50:58 PM
->     > > Subject: Re: [PATCH] common/rc: skip atime related tests on CIF=
-S
->     > >
->     > > On Tue, May 22, 2018 at 11:23:56AM +0800, Xiaoli Feng wrote:
->     > > > From: xiaoli feng <xifeng@redhat.com>
->     > > >
->     > > > The atime related mount options have no effect on cifs mounts
->     > > > now or in the future. So skip these tests on CIFS.
->     > > >
->     > > > Signed-off-by: xiaoli feng <xifeng@redhat.com>
->     > >
->     > > Looks fine to me. But I really need an ACK from cifs folks.
->     > >
->     > > > ---
->     > > >=C2=A0 common/rc | 2 ++
->     > > >=C2=A0 1 file changed, 2 insertions(+)
->     > > >
->     > > > diff --git a/common/rc b/common/rc
->     > > > index ffe5323..d3af55f 100644
->     > > > --- a/common/rc
->     > > > +++ b/common/rc
->     > > > @@ -3244,6 +3244,8 @@ _require_atime()
->     > > >=C2=A0 =C2=A0_exclude_scratch_mount_option "noatime"
->     > > >=C2=A0 =C2=A0if [ "$FSTYP" =3D=3D "nfs" ]; then
->     > > >=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0_notrun "atime relate=
-d mount options have no effect on NFS"
->     > > > + elif [ "$FSTYP" =3D=3D "cifs" ]; then
->     > > > +=C2=A0 =C2=A0 =C2=A0 =C2=A0 =C2=A0_notrun "atime related mou=
-nt options have no effect on
->     CIFS"
->     > >
->     > > Or just change the check to a case-switch on $FSTYP?
->     >
->     > Ok, I will change it on the next commit.
->     > Thanks!
->     >
->     > >
->     > > Thanks,
->     > > Eryu
->     > >
->     > > >=C2=A0 =C2=A0fi
->     > > >=C2=A0 }
->     > > >=C2=A0
->     > > > --
->     > > > 1.8.3.1
->     > > >
->     > > > --
->     > > > To unsubscribe from this list: send the line "unsubscribe fst=
-ests" in
->     > > > the body of a message to majordomo@vger.kernel.org
->     > > > More majordomo info at=C2=A0 http://vger.kernel.org/majordomo=
--info.html
->     > > --
->     > > To unsubscribe from this list: send the line "unsubscribe fstes=
-ts" in
->     > > the body of a message to majordomo@vger.kernel.org
->     > > More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-i=
-nfo.html
->     > >
->     > --
->     > To unsubscribe from this list: send the line "unsubscribe fstests=
-" in
->     > the body of a message to majordomo@vger.kernel.org
->     > More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-inf=
-o.html
->     >
->     --
->     To unsubscribe from this list: send the line "unsubscribe linux-cif=
-s" in
->     the body of a message to majordomo@vger.kernel.org
->     More majordomo info at=C2=A0 http://vger.kernel.org/majordomo-info.=
-html
->=20
+> -- 
+> 2.17.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
