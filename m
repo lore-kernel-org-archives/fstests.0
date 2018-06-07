@@ -1,89 +1,131 @@
-Received: from mail-pl0-f65.google.com ([209.85.160.65]:43719 "EHLO
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:40684 "EHLO
         mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751681AbeFGJwP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 05:52:15 -0400
-Received: by mail-pl0-f65.google.com with SMTP id c41-v6so5793964plj.10
-        for <fstests@vger.kernel.org>; Thu, 07 Jun 2018 02:52:15 -0700 (PDT)
-Date: Thu, 7 Jun 2018 17:52:07 +0800
+        with ESMTP id S1753149AbeFGLNz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 07:13:55 -0400
+Received: by mail-pl0-f65.google.com with SMTP id t12-v6so5922451plo.7
+        for <fstests@vger.kernel.org>; Thu, 07 Jun 2018 04:13:54 -0700 (PDT)
+Date: Thu, 7 Jun 2018 19:13:48 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common/rc: Fix mismatched output from standard mkswap
-Message-ID: <20180607095207.GH2861@desktop>
-References: <1528190505-20483-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Subject: Re: [PATCH v3] generic/401: fix test in case of no filetype support
+Message-ID: <20180607111348.GI2861@desktop>
+References: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
+ <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1528190505-20483-1-git-send-email-yangx.jy@cn.fujitsu.com>
+In-Reply-To: <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, osandov@fb.com
+To: xuhuan <xuhuan.fnst@cn.fujitsu.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 05, 2018 at 05:21:45PM +0800, Xiao Yang wrote:
-> Running generic/495 with EXT4 on RHEL6 got the following output:
-> ----------------------------------------------------------------
-> ...
-> +mkswap: /mnt/xfstests/scratch/swap: warning: don't erase bootbits sectors
-> +        on whole disk. Use -f to force.
-> +mkswap: unable to relabel /mnt/xfstests/scratch/swap to system_u:object_r:swapfile_t:s0: Operation not supported
-> ...
-> ----------------------------------------------------------------
+On Wed, Jun 06, 2018 at 10:02:37AM +0800, xuhuan wrote:
+> Hi
 > 
-> Before commit c1f1b30 of util-linux, mkswap didn't zap bootbits sectors
-> and printed a warning until force option(i.e. -f) was given, so we add
-> the force option.
-> 
-> Before commit d97dc0e of util-linux, mkswap failed to relabel SELinux
-> labeling when the underlying filesystem didn't support it.  We avoid
-> default fs-wide context set in xfstests by mounting manually.
-> 
-> Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
-> ---
->  common/rc | 4 ++--
->  1 file changed, 2 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 9273ff7..6a20454 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2216,7 +2216,7 @@ _format_swapfile() {
->  	# Swap files must be nocow on Btrfs.
->  	$CHATTR_PROG +C "$fname" > /dev/null 2>&1
->  	_pwrite_byte 0x61 0 "$sz" "$fname" >> $seqres.full
-> -	mkswap "$fname" >> $seqres.full
-> +	mkswap -f "$fname" >> $seqres.full
->  }
+> I have tested it passed on nfs.
 
-This part looks fine.
-
->  
->  # Check that the filesystem supports swapfiles
-> @@ -2225,7 +2225,7 @@ _require_scratch_swapfile()
->  	_require_scratch
->  
->  	_scratch_mkfs >/dev/null
-> -	_scratch_mount
-> +	_mount $SCRATCH_DEV $SCRATCH_MNT
-
-But this breaks test on overlay, it fails to mount overlayfs.
-
-And I manually revert d97dc0e and build mkswap from util-linux, and test
-with ext4, but I didn't reproduce the failure. It seems it only happens
-when underlying filesystem doesn't support extend attr? (I don't have a
-RHEL6 env by hand..).
+What version of NFS are you testing? And what's your kernel version? I
+couldn't reproduce the test failure on NFS (tried v4.[012] and v3) with
+v4.17-rc5 kernel. Just want to make sure I didn't miss anything.
 
 Thanks,
 Eryu
 
-
->  
->  	# Minimum size for mkswap is 10 pages
->  	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-> -- 
-> 1.8.3.1
+> 
+> thanks.
+> 
+> On 06/05/18 16:08, Amir Goldstein wrote:
+> > Xu Huan reported that this test fails on nfs in some setup.
+> > Apparently, the assumptions made about xfs/ext* do not hold
+> > for nfs.
+> >
+> > Relax the verification of filetype not supported case to
+> > allow either DT_UNKNOWN or actual file type on all files and
+> > not only on special dir entires "." and "..".
+> >
+> > Convert the unknown d_type replacement code from awk to bash
+> > so it is a bit more readable and flexible.
+> Tested-by:Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+> > Reported-by: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > ---
+> >
+> > Xu,
+> >
+> > Please check if this patch fixes your problem.
+> > I prefer to keep the test coverage of unsupported case.
+> >
+> > I tested with xfs/ext4 with/without filetype support.
+> >
+> > Thanks,
+> > Amir.
+> >
+> >  tests/generic/401 | 42 ++++++++++++++++++++----------------------
+> >  1 file changed, 20 insertions(+), 22 deletions(-)
+> >
+> > diff --git a/tests/generic/401 b/tests/generic/401
+> > index 74f2bea..34ce76e 100755
+> > --- a/tests/generic/401
+> > +++ b/tests/generic/401
+> > @@ -4,14 +4,13 @@
+> >  # Test filetype feature
+> >  #
+> >  # This test does NOT require that file system support the d_type feature.
+> > -# It verifies that either all file types are reported as DT_UNKNOWN
+> > -# or all file types are reported correctly.
+> > +# It verifies that file types are reported as either DT_UNKNOWN or as
+> > +# the actual file type. For example, special dir entries . and .. MAY be
+> > +# reported as DT_UNKNOWN IF filetype feature is disabled (ext4), but MAY
+> > +# also be reported as DT_DIR in this case (xfs).
+> >  #
+> >  # For fs for which we know how to test the filetype feature (xfs|ext*)
+> >  # verify getting DT_UNKNOWN IFF feature is disabled.
+> > -# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
+> > -# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
+> > -# case (xfs).
+> >  #
+> >  #-----------------------------------------------------------------------
+> >  #
+> > @@ -73,23 +72,22 @@ mknod $testdir/c c 1 1
+> >  mknod $testdir/b b 1 1
+> >  mknod $testdir/p p
+> >  
+> > -# Test d_type of . and ..
+> > -# it must be DT_DIR on fs with filetype support and it could be
+> > -# either DR_DIR or DT_UNKNOWN on fs without filetype support
+> > -src/t_dir_type $testdir d | grep -F '.' | sort
+> > -
+> > -# Test that either all file types are unknown or all are correct
+> > -if _supports_filetype $SCRATCH_MNT; then
+> > -	# print real file types
+> > -	src/t_dir_type $testdir | grep -vF '.' | sort
+> > -else
+> > -	# print fake dir file type for . and .. if they are DT_UNKNOWN
+> > -	src/t_dir_type $testdir u | grep -F '.' | \
+> > -		awk '{ print $1, "d" }' | sort
+> > -	# list unknown files and print filename as fake file type
+> > -	src/t_dir_type $testdir u | grep -vF '.' | \
+> > -		awk '{ print $1, $1 }' | sort
+> > -fi
+> > +# Test d_type of test files - it must be the actual file type on fs
+> > +# with filetype support and it could be either the actual file type
+> > +# or DT_UNKNOWN on fs without filetype support
+> > +ftype=
+> > +_supports_filetype $SCRATCH_MNT && ftype=1
+> > +src/t_dir_type $testdir | \
+> > +while read name type; do
+> > +	if [ "$ftype" != 1 -a "$type" = u ]; then
+> > +		if [ "$name" = "." -o "$name" = ".." ]; then
+> > +			type=d
+> > +		else
+> > +			type=$name
+> > +		fi
+> > +	fi
+> > +	echo $name $type
+> > +done | sort
+> >  
+> >  status=0
+> >  exit
 > 
 > 
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
