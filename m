@@ -1,50 +1,72 @@
-Received: from mx2.suse.de ([195.135.220.15]:43705 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750808AbeFFIzg (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 6 Jun 2018 04:55:36 -0400
-Date: Wed, 6 Jun 2018 10:55:35 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH 1/2] fstests: get rid of set_prog_path
-Message-ID: <20180606085535.zcc76ec5sv3xnm4w@quack2.suse.cz>
-References: <20180529165119.31961-1-jack@suse.cz>
- <20180603142117.GM6581@desktop>
+Received: from mail-pl0-f47.google.com ([209.85.160.47]:40342 "EHLO
+        mail-pl0-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751122AbeFGFaa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 01:30:30 -0400
+Received: by mail-pl0-f47.google.com with SMTP id t12-v6so5309685plo.7
+        for <fstests@vger.kernel.org>; Wed, 06 Jun 2018 22:30:30 -0700 (PDT)
+Date: Thu, 7 Jun 2018 13:30:23 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
+Message-ID: <20180607053023.GA2861@desktop>
+References: <20180529004752.8243-1-david@fromorbit.com>
+ <20180603135107.GK6581@desktop>
+ <20180604025035.GC10972@dastard>
+ <20180604030047.GE10972@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180603142117.GM6581@desktop>
+In-Reply-To: <20180604030047.GE10972@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Jan Kara <jack@suse.cz>, fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Dave Chinner <dchinner@redhat.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun 03-06-18 22:21:17, Eryu Guan wrote:
-> On Tue, May 29, 2018 at 06:51:18PM +0200, Jan Kara wrote:
-> > -        export MKFS_XFS_PROG="`set_prog_path mkfs.xfs`"
-> > -        export MKFS_EXT4_PROG="`set_prog_path mkfs.ext4`"
-> > -        export MKFS_UDF_PROG="`set_prog_path mkudffs`"
-> > -        export MKFS_BTRFS_PROG="`set_mkfs_prog_path_with_opts btrfs`"
-> > -        export MKFS_F2FS_PROG="`set_mkfs_prog_path_with_opts f2fs`"
-> 
-> We should keep above two setups, set_mkfs_prog_path_with_opts does extra
-> work than set_prog_path.
->
-> > diff --git a/tests/xfs/446 b/tests/xfs/446
-> > index 752c6a7de827..ac74723f471f 100755
-> > --- a/tests/xfs/446
-> > +++ b/tests/xfs/446
-> > @@ -37,7 +37,6 @@ trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-> >  # real QA test starts here
-> >  _supported_fs xfs
-> >  _supported_os Linux
-> > -export CHECKBASHISMS_PROG="`set_prog_path checkbashisms`"
-> 
-> This is removed but not added in common/config file.
-> 
-> I fixed both issues on commit.
+On Mon, Jun 04, 2018 at 01:00:47PM +1000, Dave Chinner wrote:
+> On Mon, Jun 04, 2018 at 12:50:36PM +1000, Dave Chinner wrote:
+> > On Sun, Jun 03, 2018 at 09:51:07PM +0800, Eryu Guan wrote:
+> > > On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
+> > > > Most (possibly all?) of the code under tests/ has GPL license blurbs
+> > > > - they'll all get converted by this same process. It's a bit murkier
+> > > > when it comes to src/ and ltp/, as this code has varied history. For
+> > > > these directories, the first pass I make will for code that has
+> > > > explicit GPL licenses. Every other file will need to be looked at
+> > > > on a case by case basis and done as time permits...
+> > > > 
+> > > > Please note that I'm not trying to change the license on any of the
+> > > > code, just change the way it is documented to reduce boilerplate
+> > > > code. If I've made any changes that modify the license of any
+> > > > specific code, then I've made a mistake and I need to fix that.
+> > > > Please point out anywhere you think my actions have not been clear
+> > > > and obvious.
+> > > > 
+> > > > Once we have some consensus on how we want to proceed, I'll do the
+> > > > grunt work and co-ordinate with Eryu on minimising the number of
+> > > > times I have to rebase a patchset that is going to touch around 1500
+> > > > files...
+> > > 
+> > > How would you like to proceed with a minimum number of rebasing times? I
+> > > think that most rebase work would come from new tests that being added
+> > > during the whole process, I think I could do
+> > > 
+> > > 1) simply suspend adding new tests until the whole work is done, or
+> > > 2) convert new tests myself if there're just a few of them
+> > 
+> > Easiest thing to do would be for me to convert the tree immediately
+> > before you send out an update. e.g. do your update, send me a note,
+> > I'll run the conversion scripts and send you a pull request based on
+> > the tree you've finished updating....
 
-Good spottings. Thanks for fixing them up!
+I'll push new updates to my github tree and send you the repo address
+and branch name. Hopefully I'll get it done on Friday afternoon so the
+conversion won't take your weekend time.
 
-								Honza
--- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+> 
+> That said - this works for the licensing changes, because that's
+> easily scripted. The setup template stuff is going to be a longer
+> process because it's not so easily scripted. Let's get the license
+> change sorted first, then I'll worry about the setup template
+> updates...
+
+Sounds good, thanks!
+
+Eryu
