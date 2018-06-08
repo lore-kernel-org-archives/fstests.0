@@ -1,159 +1,84 @@
-Received: from mx2.suse.de ([195.135.220.15]:58651 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750823AbeFHGR1 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 8 Jun 2018 02:17:27 -0400
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH v2] fstests: btrfs: Test if btrfs will corrupt nodatasum compressed extent when replacing device
-Date: Fri,  8 Jun 2018 14:17:23 +0800
-Message-Id: <20180608061723.5276-1-wqu@suse.com>
+Received: from mail-pl0-f65.google.com ([209.85.160.65]:39032 "EHLO
+        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751133AbeFHGRw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 02:17:52 -0400
+Received: by mail-pl0-f65.google.com with SMTP id f1-v6so7664959plt.6
+        for <fstests@vger.kernel.org>; Thu, 07 Jun 2018 23:17:52 -0700 (PDT)
+Date: Fri, 8 Jun 2018 14:17:45 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
+Message-ID: <20180608061745.GD1103@desktop>
+References: <20180529004752.8243-1-david@fromorbit.com>
+ <20180603135107.GK6581@desktop>
+ <20180604025035.GC10972@dastard>
+ <20180604030047.GE10972@dastard>
+ <20180607053023.GA2861@desktop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180607053023.GA2861@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is a long existing bug (from 2012) but exposed by a reporter
-recently, that when compressed extent without data csum get written to
-device-replace target device, the written data is in fact uncompressed data
-other than the original compressed data.
+Hi Dave,
 
-And since btrfs still consider the data is compressed and will try to read it
-as compressed, it can cause read error.
+On Thu, Jun 07, 2018 at 01:30:23PM +0800, Eryu Guan wrote:
+> On Mon, Jun 04, 2018 at 01:00:47PM +1000, Dave Chinner wrote:
+> > On Mon, Jun 04, 2018 at 12:50:36PM +1000, Dave Chinner wrote:
+> > > On Sun, Jun 03, 2018 at 09:51:07PM +0800, Eryu Guan wrote:
+> > > > On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
+> > > > > Most (possibly all?) of the code under tests/ has GPL license blurbs
+> > > > > - they'll all get converted by this same process. It's a bit murkier
+> > > > > when it comes to src/ and ltp/, as this code has varied history. For
+> > > > > these directories, the first pass I make will for code that has
+> > > > > explicit GPL licenses. Every other file will need to be looked at
+> > > > > on a case by case basis and done as time permits...
+> > > > > 
+> > > > > Please note that I'm not trying to change the license on any of the
+> > > > > code, just change the way it is documented to reduce boilerplate
+> > > > > code. If I've made any changes that modify the license of any
+> > > > > specific code, then I've made a mistake and I need to fix that.
+> > > > > Please point out anywhere you think my actions have not been clear
+> > > > > and obvious.
+> > > > > 
+> > > > > Once we have some consensus on how we want to proceed, I'll do the
+> > > > > grunt work and co-ordinate with Eryu on minimising the number of
+> > > > > times I have to rebase a patchset that is going to touch around 1500
+> > > > > files...
+> > > > 
+> > > > How would you like to proceed with a minimum number of rebasing times? I
+> > > > think that most rebase work would come from new tests that being added
+> > > > during the whole process, I think I could do
+> > > > 
+> > > > 1) simply suspend adding new tests until the whole work is done, or
+> > > > 2) convert new tests myself if there're just a few of them
+> > > 
+> > > Easiest thing to do would be for me to convert the tree immediately
+> > > before you send out an update. e.g. do your update, send me a note,
+> > > I'll run the conversion scripts and send you a pull request based on
+> > > the tree you've finished updating....
+> 
+> I'll push new updates to my github tree and send you the repo address
+> and branch name. Hopefully I'll get it done on Friday afternoon so the
+> conversion won't take your weekend time.
 
-The root cause is located, and one RFC patch already sent to fix it,
-titled "[PATCH] btrfs: scrub: Don't use inode pages for device replace".
-(The RFC is only for the extra possible way to fix the bug, the fix
-itself should work without problem)
+I've put the updates in my github tree, please get it from
 
-Reported-by: James Harvey <jamespharvey20@gmail.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-changelog:
-v2:
-  Now the fix patch is no longer RFC.
-  Remove _require_test as we don't really touch it.
-  Add comment on the mount cycle.
-  Add the test to group 'volume'.
----
- tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/161.out |  2 +
- tests/btrfs/group   |  1 +
- 3 files changed, 94 insertions(+)
- create mode 100755 tests/btrfs/161
- create mode 100644 tests/btrfs/161.out
+	https://github.com/guaneryu/xfstests.git for-dave
 
-diff --git a/tests/btrfs/161 b/tests/btrfs/161
-new file mode 100755
-index 00000000..ce1b0e04
---- /dev/null
-+++ b/tests/btrfs/161
-@@ -0,0 +1,91 @@
-+#! /bin/bash
-+# FS QA Test 161
-+#
-+# Test if btrfs will corrupt compressed data extent without data csum
-+# by replacing it with uncompressed data, when doing replacing device.
-+#
-+# This could be fixed by the following RFC patch:
-+# "[PATCH] btrfs: scrub: Don't use inode pages for device replace"
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#-----------------------------------------------------------------------
-+#
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch_dev_pool 2
-+_require_scratch_dev_pool_equal_size
-+
-+
-+_scratch_dev_pool_get 1
-+_spare_dev_get
-+_scratch_pool_mkfs >> $seqres.full 2>&1
-+
-+# Create nodatasum inode
-+_scratch_mount "-o nodatasum"
-+touch $SCRATCH_MNT/nodatasum_file
-+_scratch_remount "datasum,compress"
-+_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
-+
-+# Write the compressed data back to disk
-+sync
-+
-+# Replace the device
-+_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
-+
-+# Unmount to drop all cache so next read will read from disk
-+_scratch_unmount
-+_mount $SPARE_DEV $SCRATCH_MNT
-+
-+# Now the EXTENT_DATA item still marks the extent as compressed,
-+# but the on-disk data is uncompressed, thus reading it as compressed
-+# will definitely cause EIO.
-+cat $SCRATCH_MNT/nodatasum_file > /dev/null
-+
-+_scratch_unmount
-+_spare_dev_put
-+_scratch_dev_pool_put
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
-new file mode 100644
-index 00000000..1752a243
---- /dev/null
-+++ b/tests/btrfs/161.out
-@@ -0,0 +1,2 @@
-+QA output created by 161
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index f04ee8d5..9195b368 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -163,3 +163,4 @@
- 158 auto quick raid scrub
- 159 auto quick
- 160 auto quick
-+161 auto quick replace volume
--- 
-2.17.0
+Thanks,
+Eryu
 
+> 
+> > 
+> > That said - this works for the licensing changes, because that's
+> > easily scripted. The setup template stuff is going to be a longer
+> > process because it's not so easily scripted. Let's get the license
+> > change sorted first, then I'll worry about the setup template
+> > updates...
+> 
+> Sounds good, thanks!
+> 
+> Eryu
