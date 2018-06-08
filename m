@@ -1,379 +1,110 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:42292 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933283AbeFGPRO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Jun 2018 11:17:14 -0400
-Date: Thu, 7 Jun 2018 08:17:10 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 4/6] generic: test swapfile creation, activation, and
- deactivation
-Message-ID: <20180607151710.GI25007@magnolia>
-References: <152821697018.24976.12939094615403004592.stgit@magnolia>
- <152821700095.24976.18190247208329715145.stgit@magnolia>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:41885 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750773AbeFHEHF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 00:07:05 -0400
+Message-ID: <5B1A00E0.9050402@cn.fujitsu.com>
+Date: Fri, 8 Jun 2018 12:06:56 +0800
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <152821700095.24976.18190247208329715145.stgit@magnolia>
+Subject: Re: [PATCH] common/rc: Fix mismatched output from standard mkswap
+References: <1528190505-20483-1-git-send-email-yangx.jy@cn.fujitsu.com> <20180607095207.GH2861@desktop>
+In-Reply-To: <20180607095207.GH2861@desktop>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, osandov@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On 2018/06/07 17:52, Eryu Guan wrote:
+> On Tue, Jun 05, 2018 at 05:21:45PM +0800, Xiao Yang wrote:
+>> Running generic/495 with EXT4 on RHEL6 got the following output:
+>> ----------------------------------------------------------------
+>> ...
+>> +mkswap: /mnt/xfstests/scratch/swap: warning: don't erase bootbits sectors
+>> +        on whole disk. Use -f to force.
+>> +mkswap: unable to relabel /mnt/xfstests/scratch/swap to system_u:object_r:swapfile_t:s0: Operation not supported
+>> ...
+>> ----------------------------------------------------------------
+>>
+>> Before commit c1f1b30 of util-linux, mkswap didn't zap bootbits sectors
+>> and printed a warning until force option(i.e. -f) was given, so we add
+>> the force option.
+>>
+>> Before commit d97dc0e of util-linux, mkswap failed to relabel SELinux
+>> labeling when the underlying filesystem didn't support it.  We avoid
+>> default fs-wide context set in xfstests by mounting manually.
+>>
+>> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
+>> ---
+>>   common/rc | 4 ++--
+>>   1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index 9273ff7..6a20454 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -2216,7 +2216,7 @@ _format_swapfile() {
+>>   	# Swap files must be nocow on Btrfs.
+>>   	$CHATTR_PROG +C "$fname">  /dev/null 2>&1
+>>   	_pwrite_byte 0x61 0 "$sz" "$fname">>  $seqres.full
+>> -	mkswap "$fname">>  $seqres.full
+>> +	mkswap -f "$fname">>  $seqres.full
+>>   }
+> This part looks fine.
+>
+>>
+>>   # Check that the filesystem supports swapfiles
+>> @@ -2225,7 +2225,7 @@ _require_scratch_swapfile()
+>>   	_require_scratch
+>>
+>>   	_scratch_mkfs>/dev/null
+>> -	_scratch_mount
+>> +	_mount $SCRATCH_DEV $SCRATCH_MNT
+Hi Eryu,
+> But this breaks test on overlay, it fails to mount overlayfs.
+Sorry, i fogot the especial overlay.
+> And I manually revert d97dc0e and build mkswap from util-linux, and test
+> with ext4, but I didn't reproduce the failure. It seems it only happens
+> when underlying filesystem doesn't support extend attr? (I don't have a
+> RHEL6 env by hand..).
+Do you build mkswap with ./configure --with-selinux?  We probablely need 
+HAVE_LIBSELINUX
+macro.  We also make the status of SELinux Permissive/enforcing.
 
-Test swapfile activation and deactivation.
+I reverted d97dc0e and built mkswap from util-linux, and produced the 
+error with ext4/xfs on
+v4.15-rc7 and v4.16.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: fix duplicated test hunks and other bugs
----
- tests/generic/708     |   90 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/708.out |    4 ++
- tests/generic/709     |   93 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/709.out |    3 ++
- tests/generic/710     |   96 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/710.out |    3 ++
- tests/generic/group   |    3 ++
- 7 files changed, 292 insertions(+)
- create mode 100755 tests/generic/708
- create mode 100644 tests/generic/708.out
- create mode 100755 tests/generic/709
- create mode 100644 tests/generic/709.out
- create mode 100755 tests/generic/710
- create mode 100644 tests/generic/710.out
+I seems that kernel cannot change the value of security.selinux if it 
+has been initialized by
+mount -o context=xxx.
 
-diff --git a/tests/generic/708 b/tests/generic/708
-new file mode 100755
-index 00000000..8018143e
---- /dev/null
-+++ b/tests/generic/708
-@@ -0,0 +1,90 @@
-+#! /bin/bash
-+# FS QA Test No. 708
-+#
-+# Test various swapfile activation oddities.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	swapoff $swapfile 2> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_swapfile
-+_require_test_program mkswap
-+_require_test_program swapon
-+
-+rm -f $seqres.full
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount >>$seqres.full 2>&1
-+
-+swapfile=$SCRATCH_MNT/swap
-+len=$((2 * 1048576))
-+page_size=$(get_page_size)
-+
-+swapfile_cycle() {
-+	local swapfile="$1"
-+
-+	$CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
-+	"$here/src/mkswap" $swapfile >> $seqres.full
-+	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
-+	swapoff $swapfile 2>> $seeqres.full
-+	rm -f $swapfile
-+}
-+
-+# Create a regular swap file
-+echo "regular swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
-+
-+# Create a swap file with a little too much junk on the end
-+echo "too long swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len + 3)) $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
-+
-+# Create a ridiculously small swap file.  Each swap file must have at least
-+# two pages after the header page.
-+echo "tiny swap" | tee -a $seqres.full
-+tiny_len=$((page_size * 3))
-+_pwrite_byte 0x58 0 $tiny_len $swapfile >> $seqres.full
-+swapfile_cycle $swapfile
-+
-+status=0
-+exit
-diff --git a/tests/generic/708.out b/tests/generic/708.out
-new file mode 100644
-index 00000000..d68df3a2
---- /dev/null
-+++ b/tests/generic/708.out
-@@ -0,0 +1,4 @@
-+QA output created by 708
-+regular swap
-+too long swap
-+tiny swap
-diff --git a/tests/generic/709 b/tests/generic/709
-new file mode 100755
-index 00000000..27fb922c
---- /dev/null
-+++ b/tests/generic/709
-@@ -0,0 +1,93 @@
-+#! /bin/bash
-+# FS QA Test No. 709
-+#
-+# Test various swapfile activation oddities on filesystems that support
-+# fallocated swapfiles.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	swapoff $swapfile 2> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_swapfile
-+_require_test_program mkswap
-+_require_test_program swapon
-+_require_xfs_io_command "falloc"
-+
-+rm -f $seqres.full
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount >>$seqres.full 2>&1
-+
-+swapfile=$SCRATCH_MNT/swap
-+len=$((2 * 1048576))
-+page_size=$(get_page_size)
-+
-+swapfile_cycle() {
-+	local swapfile="$1"
-+
-+	$CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
-+	"$here/src/mkswap" $swapfile >> $seqres.full
-+	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
-+	swapoff $swapfile 2>> $seeqres.full
-+	rm -f $swapfile
-+}
-+
-+# Create a fallocated swap file
-+echo "fallocate swap" | tee -a $seqres.full
-+$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-+$CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
-+"$here/src/mkswap" $swapfile
-+"$here/src/swapon" $swapfile >> $seqres.full 2>&1 || \
-+	_notrun "fallocated swap not supported here"
-+swapoff $swapfile
-+
-+# Create a fallocated swap file and touch every other $PAGE_SIZE to create
-+# a mess of written/unwritten extent records
-+echo "mixed swap" | tee -a $seqres.full
-+$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-+seq $page_size $((page_size * 2)) $len | while read offset; do
-+	_pwrite_byte 0x58 $offset 1 $swapfile >> $seqres.full
-+done
-+swapfile_cycle $swapfile
-+
-+status=0
-+exit
-diff --git a/tests/generic/709.out b/tests/generic/709.out
-new file mode 100644
-index 00000000..90ba38ae
---- /dev/null
-+++ b/tests/generic/709.out
-@@ -0,0 +1,3 @@
-+QA output created by 709
-+fallocate swap
-+mixed swap
-diff --git a/tests/generic/710 b/tests/generic/710
-new file mode 100755
-index 00000000..782156e3
---- /dev/null
-+++ b/tests/generic/710
-@@ -0,0 +1,96 @@
-+#! /bin/bash
-+# FS QA Test No. 710
-+#
-+# Test various swapfile activation oddities, having used fcollapse to
-+# create discontiguous ranges in the file.
-+#
-+#-----------------------------------------------------------------------
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# This program is free software; you can redistribute it and/or
-+# modify it under the terms of the GNU General Public License as
-+# published by the Free Software Foundation.
-+#
-+# This program is distributed in the hope that it would be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program; if not, write the Free Software Foundation,
-+# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-+#
-+#-----------------------------------------------------------------------
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	swapoff $swapfile 2> /dev/null
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_swapfile
-+_require_test_program mkswap
-+_require_test_program swapon
-+_require_xfs_io_command "fcollapse"
-+
-+rm -f $seqres.full
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount >>$seqres.full 2>&1
-+
-+swapfile=$SCRATCH_MNT/swap
-+len=$((2 * 1048576))
-+page_size=$(get_page_size)
-+
-+swapfile_cycle() {
-+	local swapfile="$1"
-+
-+	"$here/src/mkswap" $swapfile >> $seqres.full
-+	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
-+	swapoff $swapfile 2>> $seeqres.full
-+	rm -f $swapfile
-+}
-+
-+# Create a swap file with a large discontiguous range(?)
-+echo "large discontig swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len * 2)) $swapfile >> $seqres.full
-+old_sz="$(stat -c '%s' $swapfile)"
-+$XFS_IO_PROG -c "fcollapse $((len / 2)) $len" $swapfile >> $seqres.full 2>&1
-+new_sz="$(stat -c '%s' $swapfile)"
-+if [ $old_sz -gt $new_sz ]; then
-+	swapfile_cycle $swapfile
-+fi
-+rm -f $swapfile
-+
-+# Create a swap file with a small discontiguous range(?)
-+echo "small discontig swap" | tee -a $seqres.full
-+_pwrite_byte 0x58 0 $((len + 1024)) $swapfile >> $seqres.full
-+old_sz="$(stat -c '%s' $swapfile)"
-+$XFS_IO_PROG -c "fcollapse 66560 1024" $swapfile >> $seqres.full 2>&1
-+new_sz="$(stat -c '%s' $swapfile)"
-+if [ $old_sz -gt $new_sz ]; then
-+	swapfile_cycle $swapfile
-+fi
-+rm -f $swapfile
-+
-+status=0
-+exit
-diff --git a/tests/generic/710.out b/tests/generic/710.out
-new file mode 100644
-index 00000000..ba1f8e40
---- /dev/null
-+++ b/tests/generic/710.out
-@@ -0,0 +1,3 @@
-+QA output created by 710
-+large discontig swap
-+small discontig swap
-diff --git a/tests/generic/group b/tests/generic/group
-index 4339c64c..6d747450 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -497,3 +497,6 @@
- 493 auto quick swap
- 494 auto quick swap punch
- 495 auto quick swap
-+708 auto quick swap
-+709 auto quick swap
-+710 auto quick swap collapse
+Thanks,
+Xiao Yang
+> Thanks,
+> Eryu
+>
+>
+>>
+>>   	# Minimum size for mkswap is 10 pages
+>>   	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
+>> -- 
+>> 1.8.3.1
+>>
+>>
+>>
+>> --
+>> To unsubscribe from this list: send the line "unsubscribe fstests" in
+>> the body of a message to majordomo@vger.kernel.org
+>> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
+>
+
+
+
