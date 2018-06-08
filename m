@@ -1,84 +1,154 @@
-Received: from mail-pl0-f65.google.com ([209.85.160.65]:39032 "EHLO
-        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751133AbeFHGRw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 02:17:52 -0400
-Received: by mail-pl0-f65.google.com with SMTP id f1-v6so7664959plt.6
-        for <fstests@vger.kernel.org>; Thu, 07 Jun 2018 23:17:52 -0700 (PDT)
-Date: Fri, 8 Jun 2018 14:17:45 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [RFC PATCH 0/2] fstests: boiler plate reductions
-Message-ID: <20180608061745.GD1103@desktop>
-References: <20180529004752.8243-1-david@fromorbit.com>
- <20180603135107.GK6581@desktop>
- <20180604025035.GC10972@dastard>
- <20180604030047.GE10972@dastard>
- <20180607053023.GA2861@desktop>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:12564 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1750945AbeFHJVn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 05:21:43 -0400
+Subject: Re: [PATCH v3] generic/401: fix test in case of no filetype support
+References: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
+ <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
+ <20180607111348.GI2861@desktop>
+ <CAOQ4uxhzMjjwfRcLJp25P4Y1g0nbBo-jqw05+=3WGTJsuV1pKw@mail.gmail.com>
+From: xuhuan <xuhuan.fnst@cn.fujitsu.com>
+Message-ID: <bd56d59d-6048-c138-576b-2f74854061e4@cn.fujitsu.com>
+Date: Fri, 8 Jun 2018 17:20:48 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180607053023.GA2861@desktop>
+In-Reply-To: <CAOQ4uxhzMjjwfRcLJp25P4Y1g0nbBo-jqw05+=3WGTJsuV1pKw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Dave,
 
-On Thu, Jun 07, 2018 at 01:30:23PM +0800, Eryu Guan wrote:
-> On Mon, Jun 04, 2018 at 01:00:47PM +1000, Dave Chinner wrote:
-> > On Mon, Jun 04, 2018 at 12:50:36PM +1000, Dave Chinner wrote:
-> > > On Sun, Jun 03, 2018 at 09:51:07PM +0800, Eryu Guan wrote:
-> > > > On Tue, May 29, 2018 at 10:47:50AM +1000, Dave Chinner wrote:
-> > > > > Most (possibly all?) of the code under tests/ has GPL license blurbs
-> > > > > - they'll all get converted by this same process. It's a bit murkier
-> > > > > when it comes to src/ and ltp/, as this code has varied history. For
-> > > > > these directories, the first pass I make will for code that has
-> > > > > explicit GPL licenses. Every other file will need to be looked at
-> > > > > on a case by case basis and done as time permits...
-> > > > > 
-> > > > > Please note that I'm not trying to change the license on any of the
-> > > > > code, just change the way it is documented to reduce boilerplate
-> > > > > code. If I've made any changes that modify the license of any
-> > > > > specific code, then I've made a mistake and I need to fix that.
-> > > > > Please point out anywhere you think my actions have not been clear
-> > > > > and obvious.
-> > > > > 
-> > > > > Once we have some consensus on how we want to proceed, I'll do the
-> > > > > grunt work and co-ordinate with Eryu on minimising the number of
-> > > > > times I have to rebase a patchset that is going to touch around 1500
-> > > > > files...
-> > > > 
-> > > > How would you like to proceed with a minimum number of rebasing times? I
-> > > > think that most rebase work would come from new tests that being added
-> > > > during the whole process, I think I could do
-> > > > 
-> > > > 1) simply suspend adding new tests until the whole work is done, or
-> > > > 2) convert new tests myself if there're just a few of them
-> > > 
-> > > Easiest thing to do would be for me to convert the tree immediately
-> > > before you send out an update. e.g. do your update, send me a note,
-> > > I'll run the conversion scripts and send you a pull request based on
-> > > the tree you've finished updating....
-> 
-> I'll push new updates to my github tree and send you the repo address
-> and branch name. Hopefully I'll get it done on Friday afternoon so the
-> conversion won't take your weekend time.
 
-I've put the updates in my github tree, please get it from
+On 06/07/18 19:29, Amir Goldstein wrote:
+> On Thu, Jun 7, 2018 at 2:13 PM, Eryu Guan <guaneryu@gmail.com> wrote:
+>> On Wed, Jun 06, 2018 at 10:02:37AM +0800, xuhuan wrote:
+>>> Hi
+>>>
+>>> I have tested it passed on nfs.
+>> What version of NFS are you testing? And what's your kernel version? I
+>> couldn't reproduce the test failure on NFS (tried v4.[012] and v3) with
+>> v4.17-rc5 kernel. Just want to make sure I didn't miss anything.
+>>
+The FAIL occured on RHEL7.5GA,NFSv4,v4.1,v4.2.
+I try it with the v4.16.11 kernel,it also couldn't be reproduced.
+Sorry for that,It seems to be a known problem.I'm searching that patch.
 
-	https://github.com/guaneryu/xfstests.git for-dave
+Thanks.
+Xu
+> That may have to do with the filesystem being exported or with
+> readdirplus configuration of the export.
+> After Overlayfs export was implemented, there was a bug in overlayfs
+> that I fixed causing NFS v3 to not export d_type correctly.
+> This was due to mismatch of i_ino and d_ino in the exported fs.
+>
+>> Thanks,
+>> Eryu
+>>
+>>> thanks.
+>>>
+>>> On 06/05/18 16:08, Amir Goldstein wrote:
+>>>> Xu Huan reported that this test fails on nfs in some setup.
+>>>> Apparently, the assumptions made about xfs/ext* do not hold
+>>>> for nfs.
+>>>>
+>>>> Relax the verification of filetype not supported case to
+>>>> allow either DT_UNKNOWN or actual file type on all files and
+>>>> not only on special dir entires "." and "..".
+>>>>
+>>>> Convert the unknown d_type replacement code from awk to bash
+>>>> so it is a bit more readable and flexible.
+>>> Tested-by:Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+>>>> Reported-by: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
+>>>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>>>> ---
+>>>>
+>>>> Xu,
+>>>>
+>>>> Please check if this patch fixes your problem.
+>>>> I prefer to keep the test coverage of unsupported case.
+>>>>
+>>>> I tested with xfs/ext4 with/without filetype support.
+>>>>
+>>>> Thanks,
+>>>> Amir.
+>>>>
+>>>>  tests/generic/401 | 42 ++++++++++++++++++++----------------------
+>>>>  1 file changed, 20 insertions(+), 22 deletions(-)
+>>>>
+>>>> diff --git a/tests/generic/401 b/tests/generic/401
+>>>> index 74f2bea..34ce76e 100755
+>>>> --- a/tests/generic/401
+>>>> +++ b/tests/generic/401
+>>>> @@ -4,14 +4,13 @@
+>>>>  # Test filetype feature
+>>>>  #
+>>>>  # This test does NOT require that file system support the d_type feature.
+>>>> -# It verifies that either all file types are reported as DT_UNKNOWN
+>>>> -# or all file types are reported correctly.
+>>>> +# It verifies that file types are reported as either DT_UNKNOWN or as
+>>>> +# the actual file type. For example, special dir entries . and .. MAY be
+>>>> +# reported as DT_UNKNOWN IF filetype feature is disabled (ext4), but MAY
+>>>> +# also be reported as DT_DIR in this case (xfs).
+>>>>  #
+>>>>  # For fs for which we know how to test the filetype feature (xfs|ext*)
+>>>>  # verify getting DT_UNKNOWN IFF feature is disabled.
+>>>> -# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
+>>>> -# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
+>>>> -# case (xfs).
+>>>>  #
+>>>>  #-----------------------------------------------------------------------
+>>>>  #
+>>>> @@ -73,23 +72,22 @@ mknod $testdir/c c 1 1
+>>>>  mknod $testdir/b b 1 1
+>>>>  mknod $testdir/p p
+>>>>
+>>>> -# Test d_type of . and ..
+>>>> -# it must be DT_DIR on fs with filetype support and it could be
+>>>> -# either DR_DIR or DT_UNKNOWN on fs without filetype support
+>>>> -src/t_dir_type $testdir d | grep -F '.' | sort
+>>>> -
+>>>> -# Test that either all file types are unknown or all are correct
+>>>> -if _supports_filetype $SCRATCH_MNT; then
+>>>> -   # print real file types
+>>>> -   src/t_dir_type $testdir | grep -vF '.' | sort
+>>>> -else
+>>>> -   # print fake dir file type for . and .. if they are DT_UNKNOWN
+>>>> -   src/t_dir_type $testdir u | grep -F '.' | \
+>>>> -           awk '{ print $1, "d" }' | sort
+>>>> -   # list unknown files and print filename as fake file type
+>>>> -   src/t_dir_type $testdir u | grep -vF '.' | \
+>>>> -           awk '{ print $1, $1 }' | sort
+>>>> -fi
+>>>> +# Test d_type of test files - it must be the actual file type on fs
+>>>> +# with filetype support and it could be either the actual file type
+>>>> +# or DT_UNKNOWN on fs without filetype support
+>>>> +ftype=
+>>>> +_supports_filetype $SCRATCH_MNT && ftype=1
+>>>> +src/t_dir_type $testdir | \
+>>>> +while read name type; do
+>>>> +   if [ "$ftype" != 1 -a "$type" = u ]; then
+>>>> +           if [ "$name" = "." -o "$name" = ".." ]; then
+>>>> +                   type=d
+>>>> +           else
+>>>> +                   type=$name
+>>>> +           fi
+>>>> +   fi
+>>>> +   echo $name $type
+>>>> +done | sort
+>>>>
+>>>>  status=0
+>>>>  exit
+>>>
+>>>
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>
+>
 
-Thanks,
-Eryu
 
-> 
-> > 
-> > That said - this works for the licensing changes, because that's
-> > easily scripted. The setup template stuff is going to be a longer
-> > process because it's not so easily scripted. Let's get the license
-> > change sorted first, then I'll worry about the setup template
-> > updates...
-> 
-> Sounds good, thanks!
-> 
-> Eryu
+
