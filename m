@@ -1,154 +1,94 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:12564 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1750945AbeFHJVn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 05:21:43 -0400
-Subject: Re: [PATCH v3] generic/401: fix test in case of no filetype support
-References: <1528186130-22854-1-git-send-email-amir73il@gmail.com>
- <c6dee1d1-f737-c60d-865b-b4b08e43b6d2@cn.fujitsu.com>
- <20180607111348.GI2861@desktop>
- <CAOQ4uxhzMjjwfRcLJp25P4Y1g0nbBo-jqw05+=3WGTJsuV1pKw@mail.gmail.com>
-From: xuhuan <xuhuan.fnst@cn.fujitsu.com>
-Message-ID: <bd56d59d-6048-c138-576b-2f74854061e4@cn.fujitsu.com>
-Date: Fri, 8 Jun 2018 17:20:48 +0800
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxhzMjjwfRcLJp25P4Y1g0nbBo-jqw05+=3WGTJsuV1pKw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-Content-Language: en-US
+Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:59326 "EHLO
+        ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1751905AbeFIBzq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 8 Jun 2018 21:55:46 -0400
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1fRT6V-0007Y2-OV
+        for fstests@vger.kernel.org; Sat, 09 Jun 2018 11:55:43 +1000
+Received: from dave by discord.disaster.area with local (Exim 4.91)
+        (envelope-from <david@fromorbit.com>)
+        id 1fRT6V-0005Br-N8
+        for fstests@vger.kernel.org; Sat, 09 Jun 2018 11:55:43 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH 3/9] fstests: convert new test template to SPDX tags
+Date: Sat,  9 Jun 2018 11:55:34 +1000
+Message-Id: <20180609015540.19385-4-david@fromorbit.com>
+In-Reply-To: <20180609015540.19385-1-david@fromorbit.com>
+References: <20180609015540.19385-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+From: Dave Chinner <dchinner@redhat.com>
 
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
+---
+ new | 41 +++++------------------------------------
+ 1 file changed, 5 insertions(+), 36 deletions(-)
 
-On 06/07/18 19:29, Amir Goldstein wrote:
-> On Thu, Jun 7, 2018 at 2:13 PM, Eryu Guan <guaneryu@gmail.com> wrote:
->> On Wed, Jun 06, 2018 at 10:02:37AM +0800, xuhuan wrote:
->>> Hi
->>>
->>> I have tested it passed on nfs.
->> What version of NFS are you testing? And what's your kernel version? I
->> couldn't reproduce the test failure on NFS (tried v4.[012] and v3) with
->> v4.17-rc5 kernel. Just want to make sure I didn't miss anything.
->>
-The FAIL occured on RHEL7.5GA,NFSv4,v4.1,v4.2.
-I try it with the v4.16.11 kernel,it also couldn't be reproduced.
-Sorry for that,It seems to be a known problem.I'm searching that patch.
-
-Thanks.
-Xu
-> That may have to do with the filesystem being exported or with
-> readdirplus configuration of the export.
-> After Overlayfs export was implemented, there was a bug in overlayfs
-> that I fixed causing NFS v3 to not export d_type correctly.
-> This was due to mismatch of i_ino and d_ino in the exported fs.
->
->> Thanks,
->> Eryu
->>
->>> thanks.
->>>
->>> On 06/05/18 16:08, Amir Goldstein wrote:
->>>> Xu Huan reported that this test fails on nfs in some setup.
->>>> Apparently, the assumptions made about xfs/ext* do not hold
->>>> for nfs.
->>>>
->>>> Relax the verification of filetype not supported case to
->>>> allow either DT_UNKNOWN or actual file type on all files and
->>>> not only on special dir entires "." and "..".
->>>>
->>>> Convert the unknown d_type replacement code from awk to bash
->>>> so it is a bit more readable and flexible.
->>> Tested-by:Xu Huan <xuhuan.fnst@cn.fujitsu.com>
->>>> Reported-by: Xu Huan <xuhuan.fnst@cn.fujitsu.com>
->>>> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->>>> ---
->>>>
->>>> Xu,
->>>>
->>>> Please check if this patch fixes your problem.
->>>> I prefer to keep the test coverage of unsupported case.
->>>>
->>>> I tested with xfs/ext4 with/without filetype support.
->>>>
->>>> Thanks,
->>>> Amir.
->>>>
->>>>  tests/generic/401 | 42 ++++++++++++++++++++----------------------
->>>>  1 file changed, 20 insertions(+), 22 deletions(-)
->>>>
->>>> diff --git a/tests/generic/401 b/tests/generic/401
->>>> index 74f2bea..34ce76e 100755
->>>> --- a/tests/generic/401
->>>> +++ b/tests/generic/401
->>>> @@ -4,14 +4,13 @@
->>>>  # Test filetype feature
->>>>  #
->>>>  # This test does NOT require that file system support the d_type feature.
->>>> -# It verifies that either all file types are reported as DT_UNKNOWN
->>>> -# or all file types are reported correctly.
->>>> +# It verifies that file types are reported as either DT_UNKNOWN or as
->>>> +# the actual file type. For example, special dir entries . and .. MAY be
->>>> +# reported as DT_UNKNOWN IF filetype feature is disabled (ext4), but MAY
->>>> +# also be reported as DT_DIR in this case (xfs).
->>>>  #
->>>>  # For fs for which we know how to test the filetype feature (xfs|ext*)
->>>>  # verify getting DT_UNKNOWN IFF feature is disabled.
->>>> -# Special dir entries . and .. MAY be reported as DT_UNKNOWN IF filetype
->>>> -# feature is disabled (ext4), but MAY also be reported as DT_DIR in this
->>>> -# case (xfs).
->>>>  #
->>>>  #-----------------------------------------------------------------------
->>>>  #
->>>> @@ -73,23 +72,22 @@ mknod $testdir/c c 1 1
->>>>  mknod $testdir/b b 1 1
->>>>  mknod $testdir/p p
->>>>
->>>> -# Test d_type of . and ..
->>>> -# it must be DT_DIR on fs with filetype support and it could be
->>>> -# either DR_DIR or DT_UNKNOWN on fs without filetype support
->>>> -src/t_dir_type $testdir d | grep -F '.' | sort
->>>> -
->>>> -# Test that either all file types are unknown or all are correct
->>>> -if _supports_filetype $SCRATCH_MNT; then
->>>> -   # print real file types
->>>> -   src/t_dir_type $testdir | grep -vF '.' | sort
->>>> -else
->>>> -   # print fake dir file type for . and .. if they are DT_UNKNOWN
->>>> -   src/t_dir_type $testdir u | grep -F '.' | \
->>>> -           awk '{ print $1, "d" }' | sort
->>>> -   # list unknown files and print filename as fake file type
->>>> -   src/t_dir_type $testdir u | grep -vF '.' | \
->>>> -           awk '{ print $1, $1 }' | sort
->>>> -fi
->>>> +# Test d_type of test files - it must be the actual file type on fs
->>>> +# with filetype support and it could be either the actual file type
->>>> +# or DT_UNKNOWN on fs without filetype support
->>>> +ftype=
->>>> +_supports_filetype $SCRATCH_MNT && ftype=1
->>>> +src/t_dir_type $testdir | \
->>>> +while read name type; do
->>>> +   if [ "$ftype" != 1 -a "$type" = u ]; then
->>>> +           if [ "$name" = "." -o "$name" = ".." ]; then
->>>> +                   type=d
->>>> +           else
->>>> +                   type=$name
->>>> +           fi
->>>> +   fi
->>>> +   echo $name $type
->>>> +done | sort
->>>>
->>>>  status=0
->>>>  exit
->>>
->>>
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
->
->
-
-
+diff --git a/new b/new
+index 112a63d5b9f8..2bb8ce5055c1 100755
+--- a/new
++++ b/new
+@@ -1,22 +1,6 @@
+ #! /bin/bash
+-#
+-#-----------------------------------------------------------------------
+-#  Copyright (c) 2000-2005 Silicon Graphics, Inc.  All Rights Reserved.
+-#
+-# This program is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License as
+-# published by the Free Software Foundation.
+-#
+-# This program is distributed in the hope that it would be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write the Free Software Foundation,
+-# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-#
+-#-----------------------------------------------------------------------
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2000-2005 Silicon Graphics, Inc.  All Rights Reserved.
+ #
+ # Make a new test
+ #
+@@ -162,28 +146,13 @@ year=`date +%Y`
+ 
+ cat <<End-of-File >$tdir/$id
+ #! /bin/bash
+-# FS QA Test $id
+-#
+-# what am I here for?
+-#
+-#-----------------------------------------------------------------------
++# SPDX-License-Identifier: GPL-2.0
+ # Copyright (c) $year YOUR NAME HERE.  All Rights Reserved.
+ #
+-# This program is free software; you can redistribute it and/or
+-# modify it under the terms of the GNU General Public License as
+-# published by the Free Software Foundation.
+-#
+-# This program is distributed in the hope that it would be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
++# FS QA Test $id
+ #
+-# You should have received a copy of the GNU General Public License
+-# along with this program; if not, write the Free Software Foundation,
+-# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+-#-----------------------------------------------------------------------
++# what am I here for?
+ #
+-
+ seq=\`basename \$0\`
+ seqres=\$RESULT_DIR/\$seq
+ echo "QA output created by \$seq"
+-- 
+2.17.0
 
