@@ -1,66 +1,133 @@
-Received: from mail-wm0-f49.google.com ([74.125.82.49]:40331 "EHLO
-        mail-wm0-f49.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754039AbeFKIP2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Jun 2018 04:15:28 -0400
-Received: by mail-wm0-f49.google.com with SMTP id n5-v6so14580188wmc.5
-        for <fstests@vger.kernel.org>; Mon, 11 Jun 2018 01:15:27 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] test-appliance: add noftype configs for ext2/ext4/xfs
-Date: Mon, 11 Jun 2018 11:16:58 +0300
-Message-Id: <1528705018-28604-1-git-send-email-amir73il@gmail.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:38194 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1754073AbeFKJKs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 11 Jun 2018 05:10:48 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfs/170: increase agsize for bigger internal log size
+Date: Mon, 11 Jun 2018 17:10:40 +0800
+Message-Id: <20180611091040.31495-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+xfs/170 always fails on xfs with "-m rmapbt=1,reflink=1", because
+XFS need bigger internal log size if rmapbt and reflink are both
+enabled.
+
+One line of xfs/170 as below:
+
+  _test_streams 8 16 4 8 3 0 0
+
+Refer to common/filestreams, we can see xfs/170 trys to create a
+128M XFS (agcount=8, agsize=16M), then each stream writes
+24M (8 * 3M files), and there're 4 streams.
+
+So the case expects each stream takes 2 AGs, 4 streams takes
+different 8 AGs just enough. But internal log will break this
+balance. For example:
+
+"mkfs.xfs -f -b size=4k -m rmapbt=1,reflink=1 $dev" will take 3075
+4k blocks (12M) by default:
+  meta-data=/dev/mapper/xxxx-xfscratch isize=512    agcount=8, agsize=4096 blks
+  ...
+  log      =internal               bsize=4096   blocks=3075, version=2
+           =                       sectsz=512   sunit=0 blks, lazy-count=1
+  ...
+
+And the internal log is in the 4th AG:
+  # xfs_logprint: /dev/mapper/xxxx-xfscratch
+  xfs_logprint:
+      data device: 0xfd03
+      log device: 0xfd03 daddr: 131120 length: 24600
+  # xfs_db -c "convert daddr 131120 agno" /dev/mapper/xxxx-xfscratch
+  0x4 (4)
+
+Then if one stream write data into AG-1 at first, then turn to AG-4
+after fill 16M agsize. But AG-4 has 12M space for log section, so
+only 4M free space for data. Then this stream have to turn to the
+next AG after fill the 4M space. All these as below:
+
+  # xfs_bmap -vp stream2-dir/*
+  stream2-dir/frame-1:
+   EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+     0: [0..6143]:       32960..39103      1 (192..6335)       6144 000000
+  ...
+  ...
+  stream2-dir/frame-5:
+   EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+     0: [0..6143]:       57536..63679      1 (24768..30911)    6144 000000
+  stream2-dir/frame-6:
+   EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+     0: [0..6143]:       155776..161919    4 (24704..30847)    6144 000000
+  stream2-dir/frame-7:
+   EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+     0: [0..6143]:       170088..176231    5 (6248..12391)     6144 000000
+  stream2-dir/frame-8:
+   EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+     0: [0..6143]:       176232..182375    5 (12392..18535)    6144 000000
+
+Later _test_streams maybe takes AG-5 again, and cause two streams use
+AG-5. To avoid this failure, increase the agsize from 16M to 22M,
+others stay the same, each stream still writes 2 AGs. Even internal
+log takes some space from someone AG, left space should be enough to
+write (24 - 22)=2M data.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
+ tests/xfs/170     | 9 ++++-----
+ tests/xfs/170.out | 8 ++++----
+ 2 files changed, 8 insertions(+), 9 deletions(-)
 
-Ted,
-
-These config files were used for testing generic/401
-and other ftype related tests.
-
-Thanks,
-Amir.
-
- kvm-xfstests/test-appliance/files/root/fs/ext2/cfg/noftype | 4 ++++
- kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/noftype | 4 ++++
- kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/noftype  | 3 +++
- 3 files changed, 11 insertions(+)
- create mode 100644 kvm-xfstests/test-appliance/files/root/fs/ext2/cfg/noftype
- create mode 100644 kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/noftype
- create mode 100644 kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/noftype
-
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext2/cfg/noftype b/kvm-xfstests/test-appliance/files/root/fs/ext2/cfg/noftype
-new file mode 100644
-index 0000000..31ab387
---- /dev/null
-+++ b/kvm-xfstests/test-appliance/files/root/fs/ext2/cfg/noftype
-@@ -0,0 +1,4 @@
-+SIZE=small
-+export MKFS_OPTIONS="-O ^filetype"
-+export EXT_MOUNT_OPTIONS=""
-+TESTNAME="Ext2 no filetype"
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/noftype b/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/noftype
-new file mode 100644
-index 0000000..03cd96f
---- /dev/null
-+++ b/kvm-xfstests/test-appliance/files/root/fs/ext4/cfg/noftype
-@@ -0,0 +1,4 @@
-+SIZE=small
-+export MKFS_OPTIONS="-O ^filetype"
-+export EXT_MOUNT_OPTIONS=""
-+TESTNAME="Ext4 no filetype"
-diff --git a/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/noftype b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/noftype
-new file mode 100644
-index 0000000..0bf0446
---- /dev/null
-+++ b/kvm-xfstests/test-appliance/files/root/fs/xfs/cfg/noftype
-@@ -0,0 +1,3 @@
-+SIZE=small
-+export XFS_MKFS_OPTIONS="-m crc=0 -n ftype=0"
-+TESTNAME="XFS noftype"
+diff --git a/tests/xfs/170 b/tests/xfs/170
+index f82df69d..eb26764a 100755
+--- a/tests/xfs/170
++++ b/tests/xfs/170
+@@ -42,11 +42,10 @@ _check_filestreams_support || _notrun "filestreams not available"
+ _set_stream_timeout_centisecs 3000
+ 
+ # test streams does a mkfs and mount
+-_test_streams 8 16 4 8 3 0 0
+-_test_streams 8 16 4 8 3 1 0
+-_test_streams 8 16 4 8 3 0 1
+-_test_streams 8 16 4 8 3 1 1
++_test_streams 8 22 4 8 3 0 0
++_test_streams 8 22 4 8 3 1 0
++_test_streams 8 22 4 8 3 0 1
++_test_streams 8 22 4 8 3 1 1
+ 
+ status=0
+ exit
+-
+diff --git a/tests/xfs/170.out b/tests/xfs/170.out
+index a1339cec..e71515e9 100644
+--- a/tests/xfs/170.out
++++ b/tests/xfs/170.out
+@@ -1,20 +1,20 @@
+ QA output created by 170
+-# testing 8 16 4 8 3 0 0 ....
++# testing 8 22 4 8 3 0 0 ....
+ # streaming
+ # sync AGs...
+ # checking stream AGs...
+ + passed, streams are in seperate AGs
+-# testing 8 16 4 8 3 1 0 ....
++# testing 8 22 4 8 3 1 0 ....
+ # streaming
+ # sync AGs...
+ # checking stream AGs...
+ + passed, streams are in seperate AGs
+-# testing 8 16 4 8 3 0 1 ....
++# testing 8 22 4 8 3 0 1 ....
+ # streaming
+ # sync AGs...
+ # checking stream AGs...
+ + passed, streams are in seperate AGs
+-# testing 8 16 4 8 3 1 1 ....
++# testing 8 22 4 8 3 1 1 ....
+ # streaming
+ # sync AGs...
+ # checking stream AGs...
 -- 
-2.7.4
+2.14.4
 
