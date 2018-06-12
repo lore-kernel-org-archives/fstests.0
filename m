@@ -1,47 +1,48 @@
-Received: from imap.thunk.org ([74.207.234.97]:58952 "EHLO imap.thunk.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934724AbeFLBlq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 11 Jun 2018 21:41:46 -0400
-Date: Mon, 11 Jun 2018 21:41:40 -0400
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] get-versions: fix typo in fsverity.ver
-Message-ID: <20180612014140.GA4436@thunk.org>
-References: <1528719237-1278-1-git-send-email-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1528719237-1278-1-git-send-email-amir73il@gmail.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:49172 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1753801AbeFLGJM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 Jun 2018 02:09:12 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 3C8E0401EF07
+        for <fstests@vger.kernel.org>; Tue, 12 Jun 2018 06:09:12 +0000 (UTC)
+Received: from dhcp-12-229.nay.redhat.com (unknown [10.66.12.229])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 52F081134CA8
+        for <fstests@vger.kernel.org>; Tue, 12 Jun 2018 06:09:11 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] common: improve regex in _check_dmesg
+Date: Tue, 12 Jun 2018 14:09:06 +0800
+Message-Id: <20180612060906.17078-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 11, 2018 at 03:13:57PM +0300, Amir Goldstein wrote:
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+A dmesg output as below cause all cases fail:
 
-Applied, thanks.
+[  508.002072] EDAC DEBUG: ie31200_check: MC0
 
-> BTW, why are fsverity and ima-evm-utils required and not
-> optional repos?
+Due to it matches `egrep -e "BUG:"` in _check_dmesg. But it's not
+a real BUG output, so use "\bBUG:" to avoid this mistake.
 
-My general rule of thumb has been to include everything needed for
-xfstests on kvm-xfstests and gce-xfstest, but not things needed for
-android-xfstests.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-The fsverity and ima-evm-utils git repos don't technically meet that
-definition yet, but there are patches for tests for fsverity that
-would require fsverity.  I've been investigating ways of allow IMA to
-use fsverity, so that's why I had included it, but it's certainly much
-more of a pre-emptive inclusion compared to fsverity.
+diff --git a/common/rc b/common/rc
+index b595a6e0..1945066c 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3460,7 +3460,7 @@ _check_dmesg()
+ 	_dmesg_since_test_start | $filter >$seqres.dmesg
+ 	egrep -q -e "kernel BUG at" \
+ 	     -e "WARNING:" \
+-	     -e "BUG:" \
++	     -e "\bBUG:" \
+ 	     -e "Oops:" \
+ 	     -e "possible recursive locking detected" \
+ 	     -e "Internal error" \
+-- 
+2.14.4
 
-Part of it is that adding optional repos means I have to test the
-build and test appliance generation with and without the repo, so it's
-a tiny bit more work/complexity, and I decided to be lazy / keep
-things simple.
-
-If the inclusion of ima-evm-utils is annoying, we could look at making
-it be optional.
-
-Cheers,
-
-						- Ted
