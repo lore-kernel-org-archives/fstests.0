@@ -1,137 +1,187 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:56516 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935719AbeFMWvC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Jun 2018 18:51:02 -0400
-Date: Wed, 13 Jun 2018 15:50:57 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] generic/223: port t_stripealign to FIEMAP
-Message-ID: <20180613225057.GB9432@magnolia>
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:42245 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751560AbeFNFal (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Jun 2018 01:30:41 -0400
+Date: Thu, 14 Jun 2018 13:30:34 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs: Test if btrfs will corrupt nodatasum
+ compressed extent when replacing device
+Message-ID: <20180614053034.GD2780@desktop>
+References: <20180608061723.5276-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20180608061723.5276-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, Ross Zwisler <ross.zwisler@linux.intel.com>
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Fri, Jun 08, 2018 at 02:17:23PM +0800, Qu Wenruo wrote:
+> This is a long existing bug (from 2012) but exposed by a reporter
+> recently, that when compressed extent without data csum get written to
+> device-replace target device, the written data is in fact uncompressed data
+> other than the original compressed data.
+> 
+> And since btrfs still consider the data is compressed and will try to read it
+> as compressed, it can cause read error.
+> 
+> The root cause is located, and one RFC patch already sent to fix it,
+> titled "[PATCH] btrfs: scrub: Don't use inode pages for device replace".
+> (The RFC is only for the extra possible way to fix the bug, the fix
+> itself should work without problem)
+> 
+> Reported-by: James Harvey <jamespharvey20@gmail.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> changelog:
+> v2:
+>   Now the fix patch is no longer RFC.
+>   Remove _require_test as we don't really touch it.
+>   Add comment on the mount cycle.
+>   Add the test to group 'volume'.
 
-Since XFS has deprecated FIBMAP on FSDAX filesystems, we can't use
-FIBMAP to verify stripe alignment anymore.  FIEMAP has existed for quite
-some time now, so port it to use that instead, and only fall back to
-FIBMAP if FIEMAP doesn't exist.
+Thanks for the revision! But again, I'd like to get some explicit
+reviews from btrfs folks.
 
-Tested-by: ross.zwisler@linux.intel.com
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- src/t_stripealign.c |   72 +++++++++++++++++++++++++++++++++++++++++++--------
- 1 file changed, 61 insertions(+), 11 deletions(-)
+> ---
+>  tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/161.out |  2 +
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 94 insertions(+)
+>  create mode 100755 tests/btrfs/161
+>  create mode 100644 tests/btrfs/161.out
+> 
+> diff --git a/tests/btrfs/161 b/tests/btrfs/161
+> new file mode 100755
+> index 00000000..ce1b0e04
+> --- /dev/null
+> +++ b/tests/btrfs/161
+> @@ -0,0 +1,91 @@
+> +#! /bin/bash
+> +# FS QA Test 161
+> +#
+> +# Test if btrfs will corrupt compressed data extent without data csum
+> +# by replacing it with uncompressed data, when doing replacing device.
+> +#
+> +# This could be fixed by the following RFC patch:
+                                          ^^^^ can be dropped?
 
-diff --git a/src/t_stripealign.c b/src/t_stripealign.c
-index 05ed36b5..690f743a 100644
---- a/src/t_stripealign.c
-+++ b/src/t_stripealign.c
-@@ -17,8 +17,13 @@
- #include <fcntl.h>
- #include <stdio.h>
- #include <sys/ioctl.h>
-+#include <linux/fiemap.h>
-+#include <linux/fs.h>
- 
--#define FIBMAP          _IO(0x00, 1)    /* bmap access */
-+#define FIEMAP_EXTENT_ACCEPTABLE	(FIEMAP_EXTENT_LAST | \
-+		FIEMAP_EXTENT_DATA_ENCRYPTED | FIEMAP_EXTENT_ENCODED | \
-+		FIEMAP_EXTENT_UNWRITTEN | FIEMAP_EXTENT_MERGED | \
-+		FIEMAP_EXTENT_SHARED)
- 
- /*
-  * If only filename given, print first block.
-@@ -28,11 +33,14 @@
- 
- int main(int argc, char ** argv)
- {
--	int	fd;
--	int	ret;
--	int	sunit = 0;	/* in blocks */
--	char	*filename;
--	unsigned int	block = 0;
-+	struct stat		sb;
-+	struct fiemap		*fie;
-+	struct fiemap_extent	*fe;
-+	int			fd;
-+	int			ret;
-+	int			sunit = 0;	/* in blocks */
-+	char			*filename;
-+	unsigned long long	block;
- 
-         if (argc < 3) {
-                 printf("Usage: %s <filename> <sunit in blocks>\n", argv[0]);
-@@ -48,21 +56,63 @@ int main(int argc, char ** argv)
-                 return 1;
-         }
- 
--	ret = ioctl(fd, FIBMAP, &block);
--	if (ret < 0) {
-+	ret = fstat(fd, &sb);
-+	if (ret) {
-+		perror(filename);
- 		close(fd);
--		perror("fibmap");
- 		return 1;
- 	}
- 
--	close(fd);
-+	fie = calloc(1, sizeof(struct fiemap) + sizeof(struct fiemap_extent));
-+	if (!fie) {
-+		close(fd);
-+		perror("malloc");
-+		return 1;
-+	}
-+	fie->fm_length = 1;
-+	fie->fm_flags = FIEMAP_FLAG_SYNC;
-+	fie->fm_extent_count = 1;
-+
-+	ret = ioctl(fd, FS_IOC_FIEMAP, fie);
-+	if (ret < 0) {
-+		unsigned int	bmap = 0;
-+
-+		ret = ioctl(fd, FIBMAP, &bmap);
-+		if (ret < 0) {
-+			perror("fibmap");
-+			free(fie);
-+			close(fd);
-+			return 1;
-+		}
-+		block = bmap;
-+		goto check;
-+	}
- 
-+
-+	if (fie->fm_mapped_extents != 1) {
-+		printf("%s: no extents?\n", filename);
-+		free(fie);
-+		close(fd);
-+		return 1;
-+	}
-+	fe = &fie->fm_extents[0];
-+	if (fe->fe_flags & ~FIEMAP_EXTENT_ACCEPTABLE) {
-+		printf("%s: bad flags 0x%x\n", filename, fe->fe_flags);
-+		free(fie);
-+		close(fd);
-+		return 1;
-+	}
-+
-+	block = fie->fm_extents[0].fe_physical / sb.st_blksize;
-+check:
- 	if (block % sunit) {
--		printf("%s: Start block %u not multiple of sunit %u\n",
-+		printf("%s: Start block %llu not multiple of sunit %u\n",
- 			filename, block, sunit);
- 		return 1;
- 	} else
- 		printf("%s: well-aligned\n", filename);
-+	free(fie);
-+	close(fd);
- 
- 	return 0;
- }
+Thanks,
+Eryu
+
+P.S.
+*IF* you're going to send v3, could you please follow the new test
+template (create new test with './new btrfs' would do the work) and
+rebase against latest master? That'd be easier for me to apply the
+patch, but I'm also fine with taking it as-is (after we get Reviewed-by
+tag), I can convert the test and re-number it on commit as always.
+
+> +# "[PATCH] btrfs: scrub: Don't use inode pages for device replace"
+> +#
+> +#-----------------------------------------------------------------------
+> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#-----------------------------------------------------------------------
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +_require_scratch_dev_pool_equal_size
+> +
+> +
+> +_scratch_dev_pool_get 1
+> +_spare_dev_get
+> +_scratch_pool_mkfs >> $seqres.full 2>&1
+> +
+> +# Create nodatasum inode
+> +_scratch_mount "-o nodatasum"
+> +touch $SCRATCH_MNT/nodatasum_file
+> +_scratch_remount "datasum,compress"
+> +_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
+> +
+> +# Write the compressed data back to disk
+> +sync
+> +
+> +# Replace the device
+> +_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
+> +
+> +# Unmount to drop all cache so next read will read from disk
+> +_scratch_unmount
+> +_mount $SPARE_DEV $SCRATCH_MNT
+> +
+> +# Now the EXTENT_DATA item still marks the extent as compressed,
+> +# but the on-disk data is uncompressed, thus reading it as compressed
+> +# will definitely cause EIO.
+> +cat $SCRATCH_MNT/nodatasum_file > /dev/null
+> +
+> +_scratch_unmount
+> +_spare_dev_put
+> +_scratch_dev_pool_put
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
+> new file mode 100644
+> index 00000000..1752a243
+> --- /dev/null
+> +++ b/tests/btrfs/161.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 161
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index f04ee8d5..9195b368 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -163,3 +163,4 @@
+>  158 auto quick raid scrub
+>  159 auto quick
+>  160 auto quick
+> +161 auto quick replace volume
+> -- 
+> 2.17.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
