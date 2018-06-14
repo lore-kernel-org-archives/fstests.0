@@ -1,185 +1,148 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:42245 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751560AbeFNFal (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 14 Jun 2018 01:30:41 -0400
-Date: Thu, 14 Jun 2018 13:30:34 +0800
+Received: from mail-pl0-f66.google.com ([209.85.160.66]:32882 "EHLO
+        mail-pl0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752671AbeFNFfU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 14 Jun 2018 01:35:20 -0400
+Date: Thu, 14 Jun 2018 13:35:12 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs: Test if btrfs will corrupt nodatasum
- compressed extent when replacing device
-Message-ID: <20180614053034.GD2780@desktop>
-References: <20180608061723.5276-1-wqu@suse.com>
+Subject: Re: [PATCH] xfs/170: increase agsize for bigger internal log size
+Message-ID: <20180614053512.GE2780@desktop>
+References: <20180611091040.31495-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180608061723.5276-1-wqu@suse.com>
+In-Reply-To: <20180611091040.31495-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 08, 2018 at 02:17:23PM +0800, Qu Wenruo wrote:
-> This is a long existing bug (from 2012) but exposed by a reporter
-> recently, that when compressed extent without data csum get written to
-> device-replace target device, the written data is in fact uncompressed data
-> other than the original compressed data.
+On Mon, Jun 11, 2018 at 05:10:40PM +0800, Zorro Lang wrote:
+> xfs/170 always fails on xfs with "-m rmapbt=1,reflink=1", because
+> XFS need bigger internal log size if rmapbt and reflink are both
+> enabled.
 > 
-> And since btrfs still consider the data is compressed and will try to read it
-> as compressed, it can cause read error.
+> One line of xfs/170 as below:
 > 
-> The root cause is located, and one RFC patch already sent to fix it,
-> titled "[PATCH] btrfs: scrub: Don't use inode pages for device replace".
-> (The RFC is only for the extra possible way to fix the bug, the fix
-> itself should work without problem)
+>   _test_streams 8 16 4 8 3 0 0
 > 
-> Reported-by: James Harvey <jamespharvey20@gmail.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> changelog:
-> v2:
->   Now the fix patch is no longer RFC.
->   Remove _require_test as we don't really touch it.
->   Add comment on the mount cycle.
->   Add the test to group 'volume'.
+> Refer to common/filestreams, we can see xfs/170 trys to create a
+> 128M XFS (agcount=8, agsize=16M), then each stream writes
+> 24M (8 * 3M files), and there're 4 streams.
+> 
+> So the case expects each stream takes 2 AGs, 4 streams takes
+> different 8 AGs just enough. But internal log will break this
+> balance. For example:
+> 
+> "mkfs.xfs -f -b size=4k -m rmapbt=1,reflink=1 $dev" will take 3075
+> 4k blocks (12M) by default:
+>   meta-data=/dev/mapper/xxxx-xfscratch isize=512    agcount=8, agsize=4096 blks
+>   ...
+>   log      =internal               bsize=4096   blocks=3075, version=2
+>            =                       sectsz=512   sunit=0 blks, lazy-count=1
+>   ...
+> 
+> And the internal log is in the 4th AG:
+>   # xfs_logprint: /dev/mapper/xxxx-xfscratch
+>   xfs_logprint:
+>       data device: 0xfd03
+>       log device: 0xfd03 daddr: 131120 length: 24600
+>   # xfs_db -c "convert daddr 131120 agno" /dev/mapper/xxxx-xfscratch
+>   0x4 (4)
+> 
+> Then if one stream write data into AG-1 at first, then turn to AG-4
+> after fill 16M agsize. But AG-4 has 12M space for log section, so
+> only 4M free space for data. Then this stream have to turn to the
+> next AG after fill the 4M space. All these as below:
+> 
+>   # xfs_bmap -vp stream2-dir/*
+>   stream2-dir/frame-1:
+>    EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+>      0: [0..6143]:       32960..39103      1 (192..6335)       6144 000000
+>   ...
+>   ...
+>   stream2-dir/frame-5:
+>    EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+>      0: [0..6143]:       57536..63679      1 (24768..30911)    6144 000000
+>   stream2-dir/frame-6:
+>    EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+>      0: [0..6143]:       155776..161919    4 (24704..30847)    6144 000000
+>   stream2-dir/frame-7:
+>    EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+>      0: [0..6143]:       170088..176231    5 (6248..12391)     6144 000000
+>   stream2-dir/frame-8:
+>    EXT: FILE-OFFSET      BLOCK-RANGE      AG AG-OFFSET        TOTAL FLAGS
+>      0: [0..6143]:       176232..182375    5 (12392..18535)    6144 000000
+> 
+> Later _test_streams maybe takes AG-5 again, and cause two streams use
+> AG-5. To avoid this failure, increase the agsize from 16M to 22M,
+> others stay the same, each stream still writes 2 AGs. Even internal
+> log takes some space from someone AG, left space should be enough to
+> write (24 - 22)=2M data.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Thanks for the revision! But again, I'd like to get some explicit
-reviews from btrfs folks.
+I may need some helps from xfs folks to review this patch :)
 
-> ---
->  tests/btrfs/161     | 91 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/161.out |  2 +
->  tests/btrfs/group   |  1 +
->  3 files changed, 94 insertions(+)
->  create mode 100755 tests/btrfs/161
->  create mode 100644 tests/btrfs/161.out
-> 
-> diff --git a/tests/btrfs/161 b/tests/btrfs/161
-> new file mode 100755
-> index 00000000..ce1b0e04
-> --- /dev/null
-> +++ b/tests/btrfs/161
-> @@ -0,0 +1,91 @@
-> +#! /bin/bash
-> +# FS QA Test 161
-> +#
-> +# Test if btrfs will corrupt compressed data extent without data csum
-> +# by replacing it with uncompressed data, when doing replacing device.
-> +#
-> +# This could be fixed by the following RFC patch:
-                                          ^^^^ can be dropped?
+Thanks a lot!
 
-Thanks,
 Eryu
 
-P.S.
-*IF* you're going to send v3, could you please follow the new test
-template (create new test with './new btrfs' would do the work) and
-rebase against latest master? That'd be easier for me to apply the
-patch, but I'm also fine with taking it as-is (after we get Reviewed-by
-tag), I can convert the test and re-number it on commit as always.
-
-> +# "[PATCH] btrfs: scrub: Don't use inode pages for device replace"
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dev_pool 2
-> +_require_scratch_dev_pool_equal_size
-> +
-> +
-> +_scratch_dev_pool_get 1
-> +_spare_dev_get
-> +_scratch_pool_mkfs >> $seqres.full 2>&1
-> +
-> +# Create nodatasum inode
-> +_scratch_mount "-o nodatasum"
-> +touch $SCRATCH_MNT/nodatasum_file
-> +_scratch_remount "datasum,compress"
-> +_pwrite_byte 0xcd 0 128K $SCRATCH_MNT/nodatasum_file > /dev/null
-> +
-> +# Write the compressed data back to disk
-> +sync
-> +
-> +# Replace the device
-> +_run_btrfs_util_prog replace start -Bf 1 $SPARE_DEV $SCRATCH_MNT
-> +
-> +# Unmount to drop all cache so next read will read from disk
-> +_scratch_unmount
-> +_mount $SPARE_DEV $SCRATCH_MNT
-> +
-> +# Now the EXTENT_DATA item still marks the extent as compressed,
-> +# but the on-disk data is uncompressed, thus reading it as compressed
-> +# will definitely cause EIO.
-> +cat $SCRATCH_MNT/nodatasum_file > /dev/null
-> +
-> +_scratch_unmount
-> +_spare_dev_put
-> +_scratch_dev_pool_put
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/161.out b/tests/btrfs/161.out
-> new file mode 100644
-> index 00000000..1752a243
-> --- /dev/null
-> +++ b/tests/btrfs/161.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 161
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index f04ee8d5..9195b368 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -163,3 +163,4 @@
->  158 auto quick raid scrub
->  159 auto quick
->  160 auto quick
-> +161 auto quick replace volume
+> ---
+>  tests/xfs/170     | 9 ++++-----
+>  tests/xfs/170.out | 8 ++++----
+>  2 files changed, 8 insertions(+), 9 deletions(-)
+> 
+> diff --git a/tests/xfs/170 b/tests/xfs/170
+> index f82df69d..eb26764a 100755
+> --- a/tests/xfs/170
+> +++ b/tests/xfs/170
+> @@ -42,11 +42,10 @@ _check_filestreams_support || _notrun "filestreams not available"
+>  _set_stream_timeout_centisecs 3000
+>  
+>  # test streams does a mkfs and mount
+> -_test_streams 8 16 4 8 3 0 0
+> -_test_streams 8 16 4 8 3 1 0
+> -_test_streams 8 16 4 8 3 0 1
+> -_test_streams 8 16 4 8 3 1 1
+> +_test_streams 8 22 4 8 3 0 0
+> +_test_streams 8 22 4 8 3 1 0
+> +_test_streams 8 22 4 8 3 0 1
+> +_test_streams 8 22 4 8 3 1 1
+>  
+>  status=0
+>  exit
+> -
+> diff --git a/tests/xfs/170.out b/tests/xfs/170.out
+> index a1339cec..e71515e9 100644
+> --- a/tests/xfs/170.out
+> +++ b/tests/xfs/170.out
+> @@ -1,20 +1,20 @@
+>  QA output created by 170
+> -# testing 8 16 4 8 3 0 0 ....
+> +# testing 8 22 4 8 3 0 0 ....
+>  # streaming
+>  # sync AGs...
+>  # checking stream AGs...
+>  + passed, streams are in seperate AGs
+> -# testing 8 16 4 8 3 1 0 ....
+> +# testing 8 22 4 8 3 1 0 ....
+>  # streaming
+>  # sync AGs...
+>  # checking stream AGs...
+>  + passed, streams are in seperate AGs
+> -# testing 8 16 4 8 3 0 1 ....
+> +# testing 8 22 4 8 3 0 1 ....
+>  # streaming
+>  # sync AGs...
+>  # checking stream AGs...
+>  + passed, streams are in seperate AGs
+> -# testing 8 16 4 8 3 1 1 ....
+> +# testing 8 22 4 8 3 1 1 ....
+>  # streaming
+>  # sync AGs...
+>  # checking stream AGs...
 > -- 
-> 2.17.0
+> 2.14.4
 > 
 > --
 > To unsubscribe from this list: send the line "unsubscribe fstests" in
