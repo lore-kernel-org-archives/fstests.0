@@ -1,83 +1,111 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54938 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:57052 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S934957AbeFRRoj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 18 Jun 2018 13:44:39 -0400
+        id S934957AbeFRRol (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 Jun 2018 13:44:41 -0400
 From: Marco Benatto <mbenatto@redhat.com>
-Subject: [PATCH 1/2] common/xfs: Add _scratch_get_sfdir_prefix function
-Date: Mon, 18 Jun 2018 14:44:32 -0300
-Message-Id: <20180618174433.3069-1-mbenatto@redhat.com>
+Subject: [PATCH 2/2] xfstests: Test root inode parent pointer repairing
+Date: Mon, 18 Jun 2018 14:44:33 -0300
+Message-Id: <20180618174433.3069-2-mbenatto@redhat.com>
+In-Reply-To: <20180618174433.3069-1-mbenatto@redhat.com>
+References: <20180618174433.3069-1-mbenatto@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-xfs@vger.kernel.org, mbenatto@redhat.com, darrick.wong@oracle.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-Move get_sfdir_prefix function from xfs/278 to commom/xfs
-and rename it to _scratch_get_sfdir_prefix so it can be
-used in other xfs tests.
+Recently we found out xfs_repair were not repairing
+root inode parent pointer when root inode is on short-form
+and parent points to an invalid inode number (refer to:
+"xfs_repair: Fix root inode's parent when it's bogus for sf
+directory" on xfs-devel list).
 
-This commit also changes xfs/278 to make use of
-_scratch_get_sfdir_prefix instead previous one.
+This test checks if xfs_repair successfully repair the
+filesystem in the scenario mentioned before.
 
 Signed-off-by: Marco Benatto <mbenatto@redhat.com>
 ---
- common/xfs    | 15 +++++++++++++++
- tests/xfs/278 | 16 +---------------
- 2 files changed, 16 insertions(+), 15 deletions(-)
+ tests/xfs/450     | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/450.out |  1 +
+ tests/xfs/group   |  1 +
+ 3 files changed, 55 insertions(+)
+ create mode 100755 tests/xfs/450
+ create mode 100644 tests/xfs/450.out
 
-diff --git a/common/xfs b/common/xfs
-index 55cfa94..ecf54bb 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -760,3 +760,18 @@ _require_xfs_spaceman_command()
- 			_notrun "xfs_spaceman $command doesn't support $param"
- 	fi
- }
+diff --git a/tests/xfs/450 b/tests/xfs/450
+new file mode 100755
+index 0000000..dc7f244
+--- /dev/null
++++ b/tests/xfs/450
+@@ -0,0 +1,53 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 450
++#
++# Make sure xfs_repair can repair root inode parent's pointer
++# when it contains a bogus ino when it's using shot form directory
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
 +
-+_scratch_get_sfdir_prefix() {
-+	local dir_ino="$1"
++status=1	# failure is the default!
 +
-+	for prefix in "u.sfdir3" "u.sfdir2" "u3.sfdir3"; do
-+		if [ -n "$(_scratch_xfs_get_metadata_field \
-+				"${prefix}.hdr.parent.i4" \
-+				"inode ${dir_ino}")" ]; then
-+			echo "${prefix}"
-+			return 0
-+		fi
-+	done
-+	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
-+	return 1
-+}
-diff --git a/tests/xfs/278 b/tests/xfs/278
-index 3d2a846..c208e61 100755
---- a/tests/xfs/278
-+++ b/tests/xfs/278
-@@ -46,25 +46,11 @@ _scratch_unmount
- 
- echo "Silence is goodness..."
- 
--get_sfdir_prefix() {
--	local dir_ino="$1"
--
--	for prefix in "u.sfdir3" "u.sfdir2" "u3.sfdir3"; do
--		if [ -n "$(_scratch_xfs_get_metadata_field \
--				"${prefix}.hdr.parent.i4" \
--				"inode ${dir_ino}")" ]; then
--			echo "${prefix}"
--			return 0
--		fi
--	done
--	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
--	return 1
--}
- set_ifield() {
- 	_scratch_xfs_set_metadata_field "$1" 0 "inode $2" >> $seqres.full
- }
- 
--sfdir_prefix="$(get_sfdir_prefix "$DIR_INO" || \
-+sfdir_prefix="$(_scratch_get_sfdir_prefix "$DIR_INO" || \
- 	_fail "Cannot determine sfdir prefix")"
- 
- # Corrupt DIR
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++
++
++_scratch_mkfs >> /dev/null 2>&1
++
++rootino=$(_scratch_xfs_get_metadata_field 'rootino' 'sb 0')
++
++prefix=$(_scratch_get_sfdir_prefix ${rootino} || \
++		_fail "Cannot determine sfdir prefix")
++
++
++# Corrupt root inode parent pointer
++_scratch_xfs_set_metadata_field "${prefix}.hdr.parent.i4" 0 "inode ${rootino}"\
++								>> $seqres.full
++
++_scratch_xfs_repair >> $seqres.full 2>&1
++
++_scratch_xfs_repair -n >> $seqres.full 2>&1
++
++if [ $? -eq 1 ]
++then
++	_fail "xfs_repair failed to repair filesystem"
++fi
++
++echo "OK"
++status=0
++exit
+diff --git a/tests/xfs/450.out b/tests/xfs/450.out
+new file mode 100644
+index 0000000..d86bac9
+--- /dev/null
++++ b/tests/xfs/450.out
+@@ -0,0 +1 @@
++OK
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 932ab90..3a1db0b 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -447,3 +447,4 @@
+ 447 auto mount
+ 448 auto quick fuzzers
+ 449 auto quick
++450 auto quick
 -- 
 2.9.5
 
