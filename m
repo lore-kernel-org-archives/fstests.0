@@ -1,119 +1,99 @@
-Received: from mail-lf0-f67.google.com ([209.85.215.67]:43330 "EHLO
-        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935127AbeFRRpt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jun 2018 13:45:49 -0400
-Received: by mail-lf0-f67.google.com with SMTP id x13-v6so10518798lff.10
-        for <fstests@vger.kernel.org>; Mon, 18 Jun 2018 10:45:49 -0700 (PDT)
+Received: from userp2120.oracle.com ([156.151.31.85]:54750 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S935857AbeFRTLt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jun 2018 15:11:49 -0400
+Date: Mon, 18 Jun 2018 12:11:33 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 1/2] common/xfs: Add _scratch_get_sfdir_prefix function
+Message-ID: <20180618191133.GG8128@magnolia>
+References: <20180618174433.3069-1-mbenatto@redhat.com>
 MIME-Version: 1.0
-In-Reply-To: <20180615212140.GE9432@magnolia>
-References: <20180615211448.7341-1-mbenatto@redhat.com> <20180615212140.GE9432@magnolia>
-From: Marco Benatto <mbenatto@redhat.com>
-Date: Mon, 18 Jun 2018 14:45:47 -0300
-Message-ID: <CAOGQQ2_DZC809Zffv=nfKTp1cS=o8ADn80-=tcazKQqX-EHA8w@mail.gmail.com>
-Subject: Re: [PATCH] xfstests: Teste root inode parent pointer repairing
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180618174433.3069-1-mbenatto@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Marco Benatto <mbenatto@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 15, 2018 at 6:21 PM, Darrick J. Wong
-<darrick.wong@oracle.com> wrote:
-> On Fri, Jun 15, 2018 at 06:14:48PM -0300, Marco Benatto wrote:
->> Recently we found out xfs_repair were not repairing
->> root inode parent pointer when root inode is on short-form
->> and parent points to an invalid inode number (refer to:
->> "xfs_repair: Fix root inode's parent when it's bogus for sf
->> directory" on xfs-devel list).
->>
->> This test checks if xfs_repair successfully repair the
->> filesystem in the scenario mentioned before.
->>
->> Signed-off-by: Marco Benatto <mbenatto@redhat.com>
->> ---
->>  tests/xfs/450     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
->>  tests/xfs/450.out |  1 +
->>  tests/xfs/group   |  1 +
->>  3 files changed, 67 insertions(+)
->>  create mode 100755 tests/xfs/450
->>  create mode 100644 tests/xfs/450.out
->>
->> diff --git a/tests/xfs/450 b/tests/xfs/450
->> new file mode 100755
->> index 0000000..7e33431
->> --- /dev/null
->> +++ b/tests/xfs/450
->> @@ -0,0 +1,65 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
->> +#
->> +# FS QA Test 450
->> +#
->> +# Make sure xfs_repair can repair root inode parent's pointer
->> +# when it contains a bogus ino when it's using shot form directory
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +
->> +status=1     # failure is the default!
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs xfs
->> +_supported_os Linux
->> +_require_scratch
->> +
->> +
->> +_scratch_mkfs >> /dev/null 2>&1
->> +
->> +# Check on-disk format version
->> +ver=$($XFS_DB_PROG -c 'sb 0' -c 'addr rootino' -c 'p core.version' $SCRATCH_DEV |
->> +             awk '{print$3}')
->> +
->> +case $ver in
->> +     2)
->> +             prefix="u.sfdir2"
->> +             ;;
->> +     3)
->> +             prefix="u3.sfdir3"
->> +             ;;
->> +     *)
->> +             _notrun "can't modify this disk format"
->> +             ;;
->> +esac
->
-> Please hoist get_sfdir_prefix out of xfs/278...
->
->> +
->> +_scratch_xfs_db -x -c 'sb 0' \
->> +                                     -c 'addr rootino' \
->> +                                     -c "write ${prefix}.hdr.parent.i4 0" >> /$seqres.full 2>&1 \
->> +                             || _fail "xfs_db command failed"
->
-> _scratch_xfs_set_metadata_field
->
->> +
->> +_scratch_xfs_repair >> $seqres.full 2>&1
->> +
->> +_scratch_xfs_repair -n >> $seqres.full 2>&1
->> +
->> +if [ $? -eq 1 ]
->> +then
->> +     _fail "xfs_repair failed to repair filesystem"
->> +else
->
-> No need for the 'else'; _fail will exit the test.
->
-> --D
->
+On Mon, Jun 18, 2018 at 02:44:32PM -0300, Marco Benatto wrote:
+> Move get_sfdir_prefix function from xfs/278 to commom/xfs
+> and rename it to _scratch_get_sfdir_prefix so it can be
+> used in other xfs tests.
+> 
+> This commit also changes xfs/278 to make use of
+> _scratch_get_sfdir_prefix instead previous one.
+> 
+> Signed-off-by: Marco Benatto <mbenatto@redhat.com>
 
-Thanks for this review. I just sent out new patches covering this points
+Looks ok,
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
+> ---
+>  common/xfs    | 15 +++++++++++++++
+>  tests/xfs/278 | 16 +---------------
+>  2 files changed, 16 insertions(+), 15 deletions(-)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index 55cfa94..ecf54bb 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -760,3 +760,18 @@ _require_xfs_spaceman_command()
+>  			_notrun "xfs_spaceman $command doesn't support $param"
+>  	fi
+>  }
+> +
+> +_scratch_get_sfdir_prefix() {
+> +	local dir_ino="$1"
+> +
+> +	for prefix in "u.sfdir3" "u.sfdir2" "u3.sfdir3"; do
+> +		if [ -n "$(_scratch_xfs_get_metadata_field \
+> +				"${prefix}.hdr.parent.i4" \
+> +				"inode ${dir_ino}")" ]; then
+> +			echo "${prefix}"
+> +			return 0
+> +		fi
+> +	done
+> +	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
+> +	return 1
+> +}
+> diff --git a/tests/xfs/278 b/tests/xfs/278
+> index 3d2a846..c208e61 100755
+> --- a/tests/xfs/278
+> +++ b/tests/xfs/278
+> @@ -46,25 +46,11 @@ _scratch_unmount
+>  
+>  echo "Silence is goodness..."
+>  
+> -get_sfdir_prefix() {
+> -	local dir_ino="$1"
+> -
+> -	for prefix in "u.sfdir3" "u.sfdir2" "u3.sfdir3"; do
+> -		if [ -n "$(_scratch_xfs_get_metadata_field \
+> -				"${prefix}.hdr.parent.i4" \
+> -				"inode ${dir_ino}")" ]; then
+> -			echo "${prefix}"
+> -			return 0
+> -		fi
+> -	done
+> -	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
+> -	return 1
+> -}
+>  set_ifield() {
+>  	_scratch_xfs_set_metadata_field "$1" 0 "inode $2" >> $seqres.full
+>  }
+>  
+> -sfdir_prefix="$(get_sfdir_prefix "$DIR_INO" || \
+> +sfdir_prefix="$(_scratch_get_sfdir_prefix "$DIR_INO" || \
+>  	_fail "Cannot determine sfdir prefix")"
+>  
+>  # Corrupt DIR
+> -- 
+> 2.9.5
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
