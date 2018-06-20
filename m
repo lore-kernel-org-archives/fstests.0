@@ -1,66 +1,55 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:41956 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754144AbeFTQ0Q (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jun 2018 12:26:16 -0400
-Date: Wed, 20 Jun 2018 09:26:01 -0700
+Received: from aserp2120.oracle.com ([141.146.126.78]:50146 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754161AbeFTQaU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jun 2018 12:30:20 -0400
+Date: Wed, 20 Jun 2018 09:30:01 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 2/3] xfstests: iterate dedupe integrity test
-Message-ID: <20180620162601.GB4841@magnolia>
+Subject: Re: [PATCH v2 3/3] xfstests: dedupe with random io race test
+Message-ID: <20180620163001.GC4841@magnolia>
 References: <20180620084114.25648-1-zlang@redhat.com>
- <20180620084114.25648-2-zlang@redhat.com>
+ <20180620084114.25648-3-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180620084114.25648-2-zlang@redhat.com>
+In-Reply-To: <20180620084114.25648-3-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 20, 2018 at 04:41:13PM +0800, Zorro Lang wrote:
-> This case does dedupe on a dir, then copy the dir to next dir. Dedupe
-> the next dir again, then copy this dir to next again, and dedupe
-> again ... At the end, verify the data in the last dir is still same
-> with the first one.
+On Wed, Jun 20, 2018 at 04:41:14PM +0800, Zorro Lang wrote:
+> Run several duperemove processes with fsstress on same directory at
+> same time. Make sure the race won't break the fs or kernel.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
-
-Same SPDX comment as before but otherwise looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
 > ---
 > 
 > V2 did below changes:
-> 1) Added more description at the case beginning
-> 2) Changed $TEST_DIR/${seq}md5.sum to $tmp.md5sum
-> 3) Changed for ...;do format
-> 4) Remove "-f mknod=0" fsstress option
-> 5) Added some noise (by fsstress) in each test round.
+> 1) do sleep 1 after kill processes
+> 2) change SLEEP_TIME to sleep_time
+> 3) add the case to stress group
 > 
 > Thanks,
 > Zorro
 > 
->  tests/shared/009     | 119 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/shared/009.out |   4 ++
+>  tests/shared/010     | 111 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/shared/010.out |   2 +
 >  tests/shared/group   |   1 +
->  3 files changed, 124 insertions(+)
->  create mode 100755 tests/shared/009
->  create mode 100644 tests/shared/009.out
+>  3 files changed, 114 insertions(+)
+>  create mode 100755 tests/shared/010
+>  create mode 100644 tests/shared/010.out
 > 
-> diff --git a/tests/shared/009 b/tests/shared/009
+> diff --git a/tests/shared/010 b/tests/shared/010
 > new file mode 100755
-> index 00000000..5ed9faee
+> index 00000000..c449c247
 > --- /dev/null
-> +++ b/tests/shared/009
-> @@ -0,0 +1,119 @@
+> +++ b/tests/shared/010
+> @@ -0,0 +1,111 @@
 > +#! /bin/bash
-> +# FS QA Test 009
+> +# FS QA Test 010
 > +#
-> +# Iterate dedupe integrity test. Copy an original data0 several
-> +# times (d0 -> d1, d1 -> d2, ... dn-1 -> dn), dedupe dataN everytime
-> +# before copy. At last, verify dataN same with data0.
+> +# Dedup & random I/O race test, do multi-threads fsstress and dedupe on
+> +# same directory/files
 > +#
 > +#-----------------------------------------------------------------------
 > +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
@@ -93,6 +82,7 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 > +{
 > +	cd /
 > +	rm -f $tmp.*
+> +	kill_all_stress
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -111,88 +101,93 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 > +_supported_os Linux
 > +_require_scratch_dedupe
 > +_require_command "$DUPEREMOVE_PROG" duperemove
+> +_require_command "$KILLALL_PROG" killall
 > +
 > +_scratch_mkfs > $seqres.full 2>&1
 > +_scratch_mount >> $seqres.full 2>&1
 > +
-> +function iterate_dedup_verify()
+> +function kill_all_stress()
 > +{
-> +	local src=$srcdir
-> +	local dest=$dupdir/1
+> +	local f=1
+> +	local d=1
 > +
-> +	for ((index = 1; index <= times; index++)); do
-> +		cp -a $src $dest
-> +		find $dest -type f -exec md5sum {} \; \
-> +			> $md5file$index
-> +		# Make some noise
-> +		$FSSTRESS_PROG $fsstress_opts -d $noisedir \
-> +			       -n 200 -p $((5 * LOAD_FACTOR)) >/dev/null 2>&1
-> +		# Too many output, so only save error output
-> +		$DUPEREMOVE_PROG -dr --dedupe-options=same $dupdir \
-> +			>/dev/null 2>$seqres.full
-> +		md5sum -c --quiet $md5file$index
-> +		src=$dest
-> +		dest=$dupdir/$((index + 1))
+> +	# kill the bash process which loop run duperemove
+> +	if [ -n "$loop_dedup_pid" ]; then
+> +		kill $loop_dedup_pid > /dev/null 2>&1
+> +		wait $loop_dedup_pid > /dev/null 2>&1
+> +		loop_dedup_pid=""
+> +	fi
+> +
+> +	# Make sure all fsstress and duperemove processes get killed
+> +	while [ $((f + d)) -ne 0 ]; do
+> +		$KILLALL_PROG -q $FSSTRESS_PROG > /dev/null 2>&1
+> +		$KILLALL_PROG -q $DUPEREMOVE_PROG > /dev/null 2>&1
+> +		sleep 1
+> +		f=`ps -eLf | grep $FSSTRESS_PROG | grep -v "grep" | wc -l`
+> +		d=`ps -eLf | grep $DUPEREMOVE_PROG | grep -v "grep" | wc -l`
 > +	done
 > +}
 > +
-> +srcdir=$SCRATCH_MNT/src
-> +dupdir=$SCRATCH_MNT/dup
-> +noisedir=$dupdir/noise
-> +mkdir $srcdir $dupdir
-> +mkdir $dupdir/noise
+> +sleep_time=$((50 * TIME_FACTOR))
 > +
-> +md5file=${tmp}.md5sum
-> +
-> +fsstress_opts="-w -r"
-> +# Create some files to be original data
-> +$FSSTRESS_PROG $fsstress_opts -d $srcdir \
-> +	       -n 500 -p $((5 * LOAD_FACTOR)) >/dev/null 2>&1
-> +
-> +# Calculate how many test cycles will be run
-> +src_size=`du -ks $srcdir | awk '{print $1}'`
-> +free_size=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $4}'`
-> +times=$((free_size / src_size))
-> +if [ $times -gt $((4 * TIME_FACTOR)) ]; then
-> +	times=$((4 * TIME_FACTOR))
-> +fi
-> +
-> +echo "= Do dedup and verify ="
-> +iterate_dedup_verify
-> +
-> +# Use the last checksum file to verify the original data
-> +sed -e s#dup/$times#src#g $md5file$times > $md5file
-> +echo "= Backwords verify ="
-> +md5sum -c --quiet $md5file
-> +
-> +# read from the disk also doesn't show mutations.
-> +_scratch_cycle_mount
-> +echo "= Verify after cycle mount ="
-> +for ((index = 1; index <= times; index++)); do
-> +	md5sum -c --quiet $md5file$index
+> +# Start fsstress
+> +fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
+> +$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
+> +loop_dedup_pid=""
+> +# Start several dedupe processes on same directory
+> +for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
+> +	while true; do
+> +		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/ \
+> +			>>$seqres.full 2>&1
+
+/me wonders why not just touch $TEST_DIR/run, have this loop do:
+
+while test -e $TEST_DIR/run; do
+	duperemove...
+done
+
+and then rm -f $TEST_DIR/run to end the loop?  Then you don't need the
+complex machinery to shut down the bash loop and kill the fsstress and
+duperemove processes.
+
+Otherwise looks decent,
+
+--D
+
+> +	done &
+> +	loop_dedup_pid="$! $loop_dedup_pid"
 > +done
 > +
+> +# End the test after $sleep_time seconds
+> +sleep $sleep_time
+> +kill_all_stress
+> +
+> +# umount and mount again, verify pagecache contents don't mutate and a fresh
+> +# read from the disk also doesn't show mutations.
+> +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
+> +_scratch_cycle_mount
+> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
+> +
+> +echo "Silence is golden"
 > +status=0
 > +exit
-> diff --git a/tests/shared/009.out b/tests/shared/009.out
+> diff --git a/tests/shared/010.out b/tests/shared/010.out
 > new file mode 100644
-> index 00000000..44a78ba3
+> index 00000000..1d83a8d6
 > --- /dev/null
-> +++ b/tests/shared/009.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 009
-> += Do dedup and verify =
-> += Backwords verify =
-> += Verify after cycle mount =
+> +++ b/tests/shared/010.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 010
+> +Silence is golden
 > diff --git a/tests/shared/group b/tests/shared/group
-> index 49ffa8dd..9c484794 100644
+> index 9c484794..094da27d 100644
 > --- a/tests/shared/group
 > +++ b/tests/shared/group
-> @@ -11,6 +11,7 @@
->  006 auto enospc
+> @@ -12,6 +12,7 @@
 >  007 dangerous_fuzzers
 >  008 auto stress dedupe
-> +009 auto stress dedupe
+>  009 auto stress dedupe
+> +010 auto stress dedupe
 >  032 mkfs auto quick
 >  272 auto enospc rw
 >  289 auto quick
