@@ -1,200 +1,126 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:50146 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754161AbeFTQaU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jun 2018 12:30:20 -0400
-Date: Wed, 20 Jun 2018 09:30:01 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2 3/3] xfstests: dedupe with random io race test
-Message-ID: <20180620163001.GC4841@magnolia>
-References: <20180620084114.25648-1-zlang@redhat.com>
- <20180620084114.25648-3-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180620084114.25648-3-zlang@redhat.com>
+Received: from mga06.intel.com ([134.134.136.31]:60827 "EHLO mga06.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1754059AbeFTWvv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 20 Jun 2018 18:51:51 -0400
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: [fstests PATCH 1/2] src/: fix up mmap() error checking
+Date: Wed, 20 Jun 2018 16:51:46 -0600
+Message-Id: <20180620225147.12151-1-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 20, 2018 at 04:41:14PM +0800, Zorro Lang wrote:
-> Run several duperemove processes with fsstress on same directory at
-> same time. Make sure the race won't break the fs or kernel.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> V2 did below changes:
-> 1) do sleep 1 after kill processes
-> 2) change SLEEP_TIME to sleep_time
-> 3) add the case to stress group
-> 
-> Thanks,
-> Zorro
-> 
->  tests/shared/010     | 111 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/shared/010.out |   2 +
->  tests/shared/group   |   1 +
->  3 files changed, 114 insertions(+)
->  create mode 100755 tests/shared/010
->  create mode 100644 tests/shared/010.out
-> 
-> diff --git a/tests/shared/010 b/tests/shared/010
-> new file mode 100755
-> index 00000000..c449c247
-> --- /dev/null
-> +++ b/tests/shared/010
-> @@ -0,0 +1,111 @@
-> +#! /bin/bash
-> +# FS QA Test 010
-> +#
-> +# Dedup & random I/O race test, do multi-threads fsstress and dedupe on
-> +# same directory/files
-> +#
-> +#-----------------------------------------------------------------------
-> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# This program is free software; you can redistribute it and/or
-> +# modify it under the terms of the GNU General Public License as
-> +# published by the Free Software Foundation.
-> +#
-> +# This program is distributed in the hope that it would be useful,
-> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> +# GNU General Public License for more details.
-> +#
-> +# You should have received a copy of the GNU General Public License
-> +# along with this program; if not, write the Free Software Foundation,
-> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#-----------------------------------------------------------------------
-> +#
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	kill_all_stress
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# duperemove only supports btrfs and xfs (with reflink feature).
-> +# Add other filesystems if it supports more later.
-> +_supported_fs xfs btrfs
-> +_supported_os Linux
-> +_require_scratch_dedupe
-> +_require_command "$DUPEREMOVE_PROG" duperemove
-> +_require_command "$KILLALL_PROG" killall
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +function kill_all_stress()
-> +{
-> +	local f=1
-> +	local d=1
-> +
-> +	# kill the bash process which loop run duperemove
-> +	if [ -n "$loop_dedup_pid" ]; then
-> +		kill $loop_dedup_pid > /dev/null 2>&1
-> +		wait $loop_dedup_pid > /dev/null 2>&1
-> +		loop_dedup_pid=""
-> +	fi
-> +
-> +	# Make sure all fsstress and duperemove processes get killed
-> +	while [ $((f + d)) -ne 0 ]; do
-> +		$KILLALL_PROG -q $FSSTRESS_PROG > /dev/null 2>&1
-> +		$KILLALL_PROG -q $DUPEREMOVE_PROG > /dev/null 2>&1
-> +		sleep 1
-> +		f=`ps -eLf | grep $FSSTRESS_PROG | grep -v "grep" | wc -l`
-> +		d=`ps -eLf | grep $DUPEREMOVE_PROG | grep -v "grep" | wc -l`
-> +	done
-> +}
-> +
-> +sleep_time=$((50 * TIME_FACTOR))
-> +
-> +# Start fsstress
-> +fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
-> +$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
-> +loop_dedup_pid=""
-> +# Start several dedupe processes on same directory
-> +for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
-> +	while true; do
-> +		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/ \
-> +			>>$seqres.full 2>&1
+I noticed that in some of my C tests in src/ I was incorrectly checking for
+mmap() failure by looking for NULL instead of MAP_FAILED.  Fix those and
+clean up some places where we were testing against -1 (the actual value of
+MAP_FAILED) which was manually being cast to a pointer.
 
-/me wonders why not just touch $TEST_DIR/run, have this loop do:
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+---
+ src/aio-dio-regress/aio-io-setup-with-nonwritable-context-pointer.c | 2 +-
+ src/fstest.c                                                        | 2 +-
+ src/t_ext4_dax_inline_corruption.c                                  | 4 ++--
+ src/t_ext4_dax_journal_corruption.c                                 | 4 ++--
+ src/t_mmap_stale_pmd.c                                              | 2 ++
+ src/t_mmap_writev.c                                                 | 2 +-
+ 6 files changed, 9 insertions(+), 7 deletions(-)
 
-while test -e $TEST_DIR/run; do
-	duperemove...
-done
+diff --git a/src/aio-dio-regress/aio-io-setup-with-nonwritable-context-pointer.c b/src/aio-dio-regress/aio-io-setup-with-nonwritable-context-pointer.c
+index 092cbb42..af381177 100644
+--- a/src/aio-dio-regress/aio-io-setup-with-nonwritable-context-pointer.c
++++ b/src/aio-dio-regress/aio-io-setup-with-nonwritable-context-pointer.c
+@@ -40,7 +40,7 @@ main(int __attribute__((unused)) argc, char **argv)
+ 	void *addr;
+ 
+ 	addr = mmap(NULL, 4096, PROT_READ, MAP_SHARED|MAP_ANONYMOUS, 0, 0);
+-	if (!addr) {
++	if (addr == MAP_FAILED) {
+ 		perror("mmap");
+ 		exit(1);
+ 	}
+diff --git a/src/fstest.c b/src/fstest.c
+index f7e2d3eb..e4b9e081 100644
+--- a/src/fstest.c
++++ b/src/fstest.c
+@@ -138,7 +138,7 @@ bozo!
+ 			exit(1);
+ 		}
+ 		p = mmap(NULL, file_size, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+-		if (p == (char *)-1) {
++		if (p == MAP_FAILED) {
+ 			perror("mmap");
+ 			exit(1);
+ 		}
+diff --git a/src/t_ext4_dax_inline_corruption.c b/src/t_ext4_dax_inline_corruption.c
+index 4b7d8938..b52bcc0d 100644
+--- a/src/t_ext4_dax_inline_corruption.c
++++ b/src/t_ext4_dax_inline_corruption.c
+@@ -37,14 +37,14 @@ int main(int argc, char *argv[])
+ 		err_exit("fd");
+ 
+ 	data = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+-	if (!data)
++	if (data == MAP_FAILED)
+ 		err_exit("mmap data");
+ 
+ 	/* this fallocate turns off inline data and turns on DAX */
+ 	fallocate(fd, 0, 0, PAGE(2));
+ 
+ 	dax_data = mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+-	if (!dax_data)
++	if (dax_data == MAP_FAILED)
+ 		err_exit("mmap dax_data");
+ 
+ 	/*
+diff --git a/src/t_ext4_dax_journal_corruption.c b/src/t_ext4_dax_journal_corruption.c
+index 18a2acdc..fccef8f5 100644
+--- a/src/t_ext4_dax_journal_corruption.c
++++ b/src/t_ext4_dax_journal_corruption.c
+@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
+ 	fallocate(fd, 0, 0, len);
+ 
+ 	dax_data = mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+-	if (!dax_data)
++	if (dax_data == MAP_FAILED)
+ 		err_exit("mmap dax_data");
+ 
+ 	/*
+@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
+ 	chattr_cmd(chattr, "+j", file);
+ 
+ 	data = mmap(NULL, len, PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+-	if (!data)
++	if (data == MAP_FAILED)
+ 		err_exit("mmap data");
+ 
+ 	/*
+diff --git a/src/t_mmap_stale_pmd.c b/src/t_mmap_stale_pmd.c
+index b4472227..6a52201c 100644
+--- a/src/t_mmap_stale_pmd.c
++++ b/src/t_mmap_stale_pmd.c
+@@ -41,6 +41,8 @@ int main(int argc, char *argv[])
+ 	ftruncate(fd, MiB(4));
+ 
+ 	data = mmap(NULL, MiB(2), PROT_READ, MAP_SHARED, fd, MiB(2));
++	if (data == MAP_FAILED)
++		err_exit("mmap");
+ 
+ 	/*
+ 	 * This faults in a 2MiB zero page to satisfy the read.
+diff --git a/src/t_mmap_writev.c b/src/t_mmap_writev.c
+index e5ca08ab..43acc15f 100644
+--- a/src/t_mmap_writev.c
++++ b/src/t_mmap_writev.c
+@@ -51,7 +51,7 @@ int main(int argc, char **argv)
+ 	if (fd==-1) {perror("open");exit(1);}
+ 
+ 	base = mmap(NULL,16384,PROT_READ,MAP_SHARED,fd,0);
+-	if  (base == (void *)-1) { perror("mmap");exit(1); }
++	if  (base == MAP_FAILED) { perror("mmap");exit(1); }
+ 
+ 	unlink(new_file);
+ 
+-- 
+2.14.4
 
-and then rm -f $TEST_DIR/run to end the loop?  Then you don't need the
-complex machinery to shut down the bash loop and kill the fsstress and
-duperemove processes.
-
-Otherwise looks decent,
-
---D
-
-> +	done &
-> +	loop_dedup_pid="$! $loop_dedup_pid"
-> +done
-> +
-> +# End the test after $sleep_time seconds
-> +sleep $sleep_time
-> +kill_all_stress
-> +
-> +# umount and mount again, verify pagecache contents don't mutate and a fresh
-> +# read from the disk also doesn't show mutations.
-> +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
-> +_scratch_cycle_mount
-> +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/shared/010.out b/tests/shared/010.out
-> new file mode 100644
-> index 00000000..1d83a8d6
-> --- /dev/null
-> +++ b/tests/shared/010.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 010
-> +Silence is golden
-> diff --git a/tests/shared/group b/tests/shared/group
-> index 9c484794..094da27d 100644
-> --- a/tests/shared/group
-> +++ b/tests/shared/group
-> @@ -12,6 +12,7 @@
->  007 dangerous_fuzzers
->  008 auto stress dedupe
->  009 auto stress dedupe
-> +010 auto stress dedupe
->  032 mkfs auto quick
->  272 auto enospc rw
->  289 auto quick
-> -- 
-> 2.14.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
