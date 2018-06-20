@@ -1,11 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:34806 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S935732AbeFRT0v (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Jun 2018 15:26:51 -0400
-Date: Mon, 18 Jun 2018 12:26:35 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:23397 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752784AbeFTBsz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jun 2018 21:48:55 -0400
+Date: Wed, 20 Jun 2018 11:48:52 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH 2/2] xfstests: Test root inode parent pointer repairing
-Message-ID: <20180618192635.GH8128@magnolia>
+Message-ID: <20180620014852.GA13748@dastard>
 References: <20180618174433.3069-1-mbenatto@redhat.com>
  <20180618174433.3069-2-mbenatto@redhat.com>
 MIME-Version: 1.0
@@ -14,7 +14,7 @@ Content-Disposition: inline
 In-Reply-To: <20180618174433.3069-2-mbenatto@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Marco Benatto <mbenatto@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, sandeen@redhat.com
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
 On Mon, Jun 18, 2018 at 02:44:33PM -0300, Marco Benatto wrote:
@@ -28,12 +28,6 @@ On Mon, Jun 18, 2018 at 02:44:33PM -0300, Marco Benatto wrote:
 > filesystem in the scenario mentioned before.
 > 
 > Signed-off-by: Marco Benatto <mbenatto@redhat.com>
-
-Looks ok, I think...
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
 > ---
 >  tests/xfs/450     | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 >  tests/xfs/450.out |  1 +
@@ -97,30 +91,34 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 > +then
 > +	_fail "xfs_repair failed to repair filesystem"
 > +fi
+
+Isn't this last "filesystem is not corrupt" check run by the harness
+via _check_scratch_fs()?
+
+(Also, "if [ .. ]; then" is the preferred fstests style)
+
 > +
 > +echo "OK"
-> +status=0
-> +exit
-> diff --git a/tests/xfs/450.out b/tests/xfs/450.out
-> new file mode 100644
-> index 0000000..d86bac9
-> --- /dev/null
-> +++ b/tests/xfs/450.out
-> @@ -0,0 +1 @@
-> +OK
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 932ab90..3a1db0b 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
+
+There's no test output, so the normal thing to do is this after
+setting up the test:
+
+echo "Silence is golden"
+
+We do that early on so that when something goes wrong the bad output
+file immediately tells you that no output was expected.
+
 > @@ -447,3 +447,4 @@
 >  447 auto mount
 >  448 auto quick fuzzers
 >  449 auto quick
 > +450 auto quick
-> -- 
-> 2.9.5
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+also  the metadata and repair groups should be added here.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
