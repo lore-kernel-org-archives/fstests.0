@@ -1,20 +1,20 @@
-Received: from ipmail01.adl2.internode.on.net ([150.101.137.133]:49495 "EHLO
+Received: from ipmail01.adl2.internode.on.net ([150.101.137.133]:18833 "EHLO
         ipmail01.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752784AbeFTCEZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jun 2018 22:04:25 -0400
+        by vger.kernel.org with ESMTP id S1754161AbeFTCE0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Jun 2018 22:04:26 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fVSTr-0006Px-6l
+        id 1fVSTr-0006Py-7Q
         for fstests@vger.kernel.org; Wed, 20 Jun 2018 12:04:19 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fVSTr-0003te-5p
+        id 1fVSTr-0003th-6V
         for fstests@vger.kernel.org; Wed, 20 Jun 2018 12:04:19 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 2/6] include/: spdx license conversion
-Date: Wed, 20 Jun 2018 12:04:13 +1000
-Message-Id: <20180620020417.14581-3-david@fromorbit.com>
+Subject: [PATCH 3/6] lib/: spdx license conversion
+Date: Wed, 20 Jun 2018 12:04:14 +1000
+Message-Id: <20180620020417.14581-4-david@fromorbit.com>
 In-Reply-To: <20180620020417.14581-1-david@fromorbit.com>
 References: <20180620020417.14581-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -23,72 +23,41 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Mostly scripted like all the others, manually added tags to
-Makefile and build/config input files.
+Scripted like all the others, manually added tags to
+Makefile, touchups required for random.c
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- include/Makefile           |  2 +-
- include/builddefs.in       |  2 +-
- include/buildmacros        |  2 +-
- include/buildrules         |  2 +-
- include/dataascii.h        | 14 +-------------
- include/file_lock.h        | 14 +-------------
- include/forker.h           | 14 +-------------
- include/install-sh         |  1 +
- include/open_flags.h       | 14 +-------------
- include/pattern.h          | 14 +-------------
- include/random_range.h     | 14 +-------------
- include/str_to_bytes.h     | 14 +-------------
- include/string_to_tokens.h | 14 +-------------
- include/tlibio.h           | 14 +-------------
- include/write_log.h        | 14 +-------------
- 15 files changed, 15 insertions(+), 134 deletions(-)
+ lib/Makefile           |  2 +-
+ lib/dataascii.c        | 14 +-------------
+ lib/databin.c          | 14 +-------------
+ lib/datapid.c          | 14 +-------------
+ lib/file_lock.c        | 14 +-------------
+ lib/forker.c           | 14 +-------------
+ lib/open_flags.c       | 14 +-------------
+ lib/pattern.c          | 14 +-------------
+ lib/random.c           | 22 +++-------------------
+ lib/random_range.c     | 14 +-------------
+ lib/str_to_bytes.c     | 14 +-------------
+ lib/string_to_tokens.c | 14 +-------------
+ lib/tlibio.c           | 14 +-------------
+ lib/write_log.c        | 14 +-------------
+ 14 files changed, 16 insertions(+), 176 deletions(-)
 
-diff --git a/include/Makefile b/include/Makefile
-index 8e2b42fd1898..a95be1356071 100644
---- a/include/Makefile
-+++ b/include/Makefile
-@@ -1,4 +1,4 @@
--#
-+# SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2000-2003 Silicon Graphics, Inc.  All Rights Reserved.
- #
- 
-diff --git a/include/builddefs.in b/include/builddefs.in
-index cb52b99a39a8..fb8e912b10a2 100644
---- a/include/builddefs.in
-+++ b/include/builddefs.in
+diff --git a/lib/Makefile b/lib/Makefile
+index c7348ce15f1c..53540ca705f7 100644
+--- a/lib/Makefile
++++ b/lib/Makefile
 @@ -1,4 +1,4 @@
 -#
 +# SPDX-License-Identifier: GPL-2.0
  # Copyright (c) 2003 Silicon Graphics, Inc.  All Rights Reserved.
  #
- # @configure_input@
-diff --git a/include/buildmacros b/include/buildmacros
-index b80b534ca607..60874842412b 100644
---- a/include/buildmacros
-+++ b/include/buildmacros
-@@ -1,4 +1,4 @@
--#
-+# SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2002-2003 Silicon Graphics, Inc.  All Rights Reserved.
- #
  
-diff --git a/include/buildrules b/include/buildrules
-index 76b755e88fdf..bf187662f66f 100644
---- a/include/buildrules
-+++ b/include/buildrules
-@@ -1,4 +1,4 @@
--#
-+# SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 1999, 2001-2003 Silicon Graphics, Inc.  All Rights Reserved.
- #
- ifndef _BUILDRULES_INCLUDED_
-diff --git a/include/dataascii.h b/include/dataascii.h
-index 3f87578a3915..50a73dcc4264 100644
---- a/include/dataascii.h
-+++ b/include/dataascii.h
+diff --git a/lib/dataascii.c b/lib/dataascii.c
+index 1225a2353b57..e2509f8d5bc0 100644
+--- a/lib/dataascii.c
++++ b/lib/dataascii.c
 @@ -1,19 +1,7 @@
 +// SPDX-License-Identifier: GPL-2.0
  /*
@@ -108,12 +77,12 @@ index 3f87578a3915..50a73dcc4264 100644
 - * along with this program; if not, write the Free Software Foundation,
 - * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
- #ifndef _DATAASCII_H_
- #define _DATAASCII_H_
-diff --git a/include/file_lock.h b/include/file_lock.h
-index 1d7ce56a5589..179f2ab4ff08 100644
---- a/include/file_lock.h
-+++ b/include/file_lock.h
+ #include <stdio.h>
+ #include <string.h>
+diff --git a/lib/databin.c b/lib/databin.c
+index 3d2da0c9fe9c..8a36dff31efb 100644
+--- a/lib/databin.c
++++ b/lib/databin.c
 @@ -1,19 +1,7 @@
 +// SPDX-License-Identifier: GPL-2.0
  /*
@@ -133,12 +102,12 @@ index 1d7ce56a5589..179f2ab4ff08 100644
 - * along with this program; if not, write the Free Software Foundation,
 - * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
- #ifndef _FILE_LOCK_H_
- #define _FILE_LOCK_H_
-diff --git a/include/forker.h b/include/forker.h
-index f573dcb0103d..913a23e9f9ca 100644
---- a/include/forker.h
-+++ b/include/forker.h
+ #include <stdio.h>
+ #include <sys/param.h>
+diff --git a/lib/datapid.c b/lib/datapid.c
+index 2e53ad559601..15af887167e4 100644
+--- a/lib/datapid.c
++++ b/lib/datapid.c
 @@ -1,19 +1,7 @@
 +// SPDX-License-Identifier: GPL-2.0
  /*
@@ -158,173 +127,12 @@ index f573dcb0103d..913a23e9f9ca 100644
 - * along with this program; if not, write the Free Software Foundation,
 - * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
- #ifndef _FORKER_H_
- #define _FORKER_H_
-diff --git a/include/install-sh b/include/install-sh
-index 06d8aa9b6b9c..a19cbe3181cb 100755
---- a/include/install-sh
-+++ b/include/install-sh
-@@ -1,5 +1,6 @@
- #! /bin/bash
- #
-+# SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2000-2001 Silicon Graphics, Inc.  All Rights Reserved.
- #
- # This script emulates bsd install and also recognises
-diff --git a/include/open_flags.h b/include/open_flags.h
-index f5e0e1546115..4526769c5e30 100644
---- a/include/open_flags.h
-+++ b/include/open_flags.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- #ifndef _OPEN_FLAGS_H_
- #define _OPEN_FLAGS_H_
-diff --git a/include/pattern.h b/include/pattern.h
-index d19294a5b9e1..c41ae9f5b2a1 100644
---- a/include/pattern.h
-+++ b/include/pattern.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- #ifndef _PATTERN_H_
- #define _PATTERN_H_
-diff --git a/include/random_range.h b/include/random_range.h
-index 44dbc9b8a56f..b47aef9ef619 100644
---- a/include/random_range.h
-+++ b/include/random_range.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- #ifndef _RANDOM_RANGE_H_
- #define _RANDOM_RANGE_H_
-diff --git a/include/str_to_bytes.h b/include/str_to_bytes.h
-index e2b6226eb516..ae27bc571430 100644
---- a/include/str_to_bytes.h
-+++ b/include/str_to_bytes.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- #ifndef _STR_TO_BYTES_
- #define _STR_TO_BYTES_
-diff --git a/include/string_to_tokens.h b/include/string_to_tokens.h
-index 59b9ccf023aa..795ae7921d73 100644
---- a/include/string_to_tokens.h
-+++ b/include/string_to_tokens.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
- #ifndef _STRING_TO_TOKENS_H_
- #define _STRING_TO_TOKENS_H_
-diff --git a/include/tlibio.h b/include/tlibio.h
-index bf85cc5933da..12649cf54603 100644
---- a/include/tlibio.h
-+++ b/include/tlibio.h
-@@ -1,19 +1,7 @@
-+// SPDX-License-Identifier: GPL-2.0
- /*
-  * Copyright (c) 2000 Silicon Graphics, Inc.
-  * All Rights Reserved.
-- *
-- * This program is free software; you can redistribute it and/or
-- * modify it under the terms of the GNU General Public License as
-- * published by the Free Software Foundation.
-- *
-- * This program is distributed in the hope that it would be useful,
-- * but WITHOUT ANY WARRANTY; without even the implied warranty of
-- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-- * GNU General Public License for more details.
-- *
-- * You should have received a copy of the GNU General Public License
-- * along with this program; if not, write the Free Software Foundation,
-- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-  */
+ /************
  
- #define LIO_IO_SYNC             00001   /* read/write */
-diff --git a/include/write_log.h b/include/write_log.h
-index 4a6eaced2435..025ebac024fa 100644
---- a/include/write_log.h
-+++ b/include/write_log.h
+diff --git a/lib/file_lock.c b/lib/file_lock.c
+index 920adf340834..f0791489c771 100644
+--- a/lib/file_lock.c
++++ b/lib/file_lock.c
 @@ -1,19 +1,7 @@
 +// SPDX-License-Identifier: GPL-2.0
  /*
@@ -344,8 +152,240 @@ index 4a6eaced2435..025ebac024fa 100644
 - * along with this program; if not, write the Free Software Foundation,
 - * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   */
- #ifndef _WRITE_LOG_H_
- #define _WRITE_LOG_H_
+ #include <sys/types.h>
+ #include <sys/stat.h>
+diff --git a/lib/forker.c b/lib/forker.c
+index a5b786417cd0..63d8fcdba8d0 100644
+--- a/lib/forker.c
++++ b/lib/forker.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ /**************************************************************
+  *
+diff --git a/lib/open_flags.c b/lib/open_flags.c
+index 389ea6b99e60..98b857df87c9 100644
+--- a/lib/open_flags.c
++++ b/lib/open_flags.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ /**************************************************************
+  *
+diff --git a/lib/pattern.c b/lib/pattern.c
+index 247f861e82da..d622b93552f4 100644
+--- a/lib/pattern.c
++++ b/lib/pattern.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ #include <string.h>
+ #include "pattern.h"
+diff --git a/lib/random.c b/lib/random.c
+index eb23cd96879f..d5c81be817c8 100644
+--- a/lib/random.c
++++ b/lib/random.c
+@@ -1,24 +1,8 @@
+-/**************************************************************************
+- *
++// SPDX-License-Identifier: GPL-2.0+
++/*
+  * random.c -- pseudo random number generator
+  * Copyright (C) 1994  Chris Wallace (csw@bruce.cs.monash.edu.au)
+- *
+- * This program is free software; you can redistribute it and/or modify
+- * it under the terms of the GNU General Public License as published by
+- * the Free Software Foundation; either version 2 of the License, or
+- * (at your option) any later version.
+- *
+- * This program is distributed in the hope that it will be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write to the Free Software
+- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+- *
+- *
+- **************************************************************************/
++ */
+ 
+ #include <sys/types.h>
+ 
+diff --git a/lib/random_range.c b/lib/random_range.c
+index 2e8dacbffcc8..3fa01f0ddffd 100644
+--- a/lib/random_range.c
++++ b/lib/random_range.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ #include <stdio.h>
+ #include <stdlib.h>
+diff --git a/lib/str_to_bytes.c b/lib/str_to_bytes.c
+index ef5d4fd93403..2f6b2b92e3fc 100644
+--- a/lib/str_to_bytes.c
++++ b/lib/str_to_bytes.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ #include <stdio.h>
+ #include <sys/param.h>
+diff --git a/lib/string_to_tokens.c b/lib/string_to_tokens.c
+index 76b563661418..08df9fcc0a3b 100644
+--- a/lib/string_to_tokens.c
++++ b/lib/string_to_tokens.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ /**********************************************************
+  * 
+diff --git a/lib/tlibio.c b/lib/tlibio.c
+index 9b1b890272a5..f7259734af97 100644
+--- a/lib/tlibio.c
++++ b/lib/tlibio.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ /*
+  *
+diff --git a/lib/write_log.c b/lib/write_log.c
+index 3bfa8c7b3091..cdc72593b9dc 100644
+--- a/lib/write_log.c
++++ b/lib/write_log.c
+@@ -1,19 +1,7 @@
++// SPDX-License-Identifier: GPL-2.0
+ /*
+  * Copyright (c) 2000 Silicon Graphics, Inc.
+  * All Rights Reserved.
+- *
+- * This program is free software; you can redistribute it and/or
+- * modify it under the terms of the GNU General Public License as
+- * published by the Free Software Foundation.
+- *
+- * This program is distributed in the hope that it would be useful,
+- * but WITHOUT ANY WARRANTY; without even the implied warranty of
+- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+- * GNU General Public License for more details.
+- *
+- * You should have received a copy of the GNU General Public License
+- * along with this program; if not, write the Free Software Foundation,
+- * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+ /*
+  * This module contains code for logging writes to files, and for
 -- 
 2.17.0
 
