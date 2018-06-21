@@ -1,229 +1,397 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:44170 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754059AbeFUCVA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 20 Jun 2018 22:21:00 -0400
-Date: Thu, 21 Jun 2018 10:20:57 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2 3/3] xfstests: dedupe with random io race test
-Message-ID: <20180621022057.GR4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
-References: <20180620084114.25648-1-zlang@redhat.com>
- <20180620084114.25648-3-zlang@redhat.com>
- <20180620163001.GC4841@magnolia>
- <20180621015843.GJ2780@desktop>
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:37660 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754138AbeFUCkj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Jun 2018 22:40:39 -0400
+Date: Thu, 21 Jun 2018 10:40:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [fstests PATCH 2/2] generic/999: test DAX DMA vs
+ truncate/hole-punch
+Message-ID: <20180621024033.GK2780@desktop>
+References: <20180620225147.12151-1-ross.zwisler@linux.intel.com>
+ <20180620225147.12151-2-ross.zwisler@linux.intel.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180621015843.GJ2780@desktop>
+In-Reply-To: <20180620225147.12151-2-ross.zwisler@linux.intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Ross Zwisler <ross.zwisler@linux.intel.com>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 21, 2018 at 09:58:43AM +0800, Eryu Guan wrote:
-> On Wed, Jun 20, 2018 at 09:30:01AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jun 20, 2018 at 04:41:14PM +0800, Zorro Lang wrote:
-> > > Run several duperemove processes with fsstress on same directory at
-> > > same time. Make sure the race won't break the fs or kernel.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > V2 did below changes:
-> > > 1) do sleep 1 after kill processes
-> > > 2) change SLEEP_TIME to sleep_time
-> > > 3) add the case to stress group
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  tests/shared/010     | 111 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/shared/010.out |   2 +
-> > >  tests/shared/group   |   1 +
-> > >  3 files changed, 114 insertions(+)
-> > >  create mode 100755 tests/shared/010
-> > >  create mode 100644 tests/shared/010.out
-> > > 
-> > > diff --git a/tests/shared/010 b/tests/shared/010
-> > > new file mode 100755
-> > > index 00000000..c449c247
-> > > --- /dev/null
-> > > +++ b/tests/shared/010
-> > > @@ -0,0 +1,111 @@
-> > > +#! /bin/bash
-> > > +# FS QA Test 010
-> > > +#
-> > > +# Dedup & random I/O race test, do multi-threads fsstress and dedupe on
-> > > +# same directory/files
-> > > +#
-> > > +#-----------------------------------------------------------------------
-> > > +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-> > > +#
-> > > +# This program is free software; you can redistribute it and/or
-> > > +# modify it under the terms of the GNU General Public License as
-> > > +# published by the Free Software Foundation.
-> > > +#
-> > > +# This program is distributed in the hope that it would be useful,
-> > > +# but WITHOUT ANY WARRANTY; without even the implied warranty of
-> > > +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-> > > +# GNU General Public License for more details.
-> > > +#
-> > > +# You should have received a copy of the GNU General Public License
-> > > +# along with this program; if not, write the Free Software Foundation,
-> > > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> > > +#-----------------------------------------------------------------------
-> > > +#
-> > > +
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	rm -f $tmp.*
-> > > +	kill_all_stress
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/reflink
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +
-> > > +# duperemove only supports btrfs and xfs (with reflink feature).
-> > > +# Add other filesystems if it supports more later.
-> > > +_supported_fs xfs btrfs
-> > > +_supported_os Linux
-> > > +_require_scratch_dedupe
-> > > +_require_command "$DUPEREMOVE_PROG" duperemove
-> > > +_require_command "$KILLALL_PROG" killall
-> > > +
-> > > +_scratch_mkfs > $seqres.full 2>&1
-> > > +_scratch_mount >> $seqres.full 2>&1
-> > > +
-> > > +function kill_all_stress()
-> > > +{
-> > > +	local f=1
-> > > +	local d=1
-> > > +
-> > > +	# kill the bash process which loop run duperemove
-> > > +	if [ -n "$loop_dedup_pid" ]; then
-> > > +		kill $loop_dedup_pid > /dev/null 2>&1
-> > > +		wait $loop_dedup_pid > /dev/null 2>&1
-> > > +		loop_dedup_pid=""
-> > > +	fi
-> > > +
-> > > +	# Make sure all fsstress and duperemove processes get killed
-> > > +	while [ $((f + d)) -ne 0 ]; do
-> > > +		$KILLALL_PROG -q $FSSTRESS_PROG > /dev/null 2>&1
-> > > +		$KILLALL_PROG -q $DUPEREMOVE_PROG > /dev/null 2>&1
-> > > +		sleep 1
-> > > +		f=`ps -eLf | grep $FSSTRESS_PROG | grep -v "grep" | wc -l`
-> > > +		d=`ps -eLf | grep $DUPEREMOVE_PROG | grep -v "grep" | wc -l`
-> > > +	done
-> > > +}
-> > > +
-> > > +sleep_time=$((50 * TIME_FACTOR))
-> > > +
-> > > +# Start fsstress
-> > > +fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
-> > > +$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
-> > > +loop_dedup_pid=""
-> > > +# Start several dedupe processes on same directory
-> > > +for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
-> > > +	while true; do
-> > > +		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/ \
-> > > +			>>$seqres.full 2>&1
-> > 
-> > /me wonders why not just touch $TEST_DIR/run, have this loop do:
-> > 
-> > while test -e $TEST_DIR/run; do
-> > 	duperemove...
-> > done
-
-Thanks for your suggestion :)
-
-> > 
-> > and then rm -f $TEST_DIR/run to end the loop?  Then you don't need the
-> > complex machinery to shut down the bash loop and kill the fsstress and
-> > duperemove processes.
+On Wed, Jun 20, 2018 at 04:51:47PM -0600, Ross Zwisler wrote:
+> This adds a regression test for the following series:
 > 
-> Yeah, this looks cleaner to me.
+> https://lists.01.org/pipermail/linux-nvdimm/2018-June/016431.html
 > 
-> Zorro, could you please take a look and update the test as Darrick
-> suggested? Also, you could update the fstests repo and use new 'new'
-> script to generate new test template which has correct SPDX tag :)
+> which added synchronization between DAX DMA in ext4 and
+> truncate/hole-punch.  The intention of the test is to test those specific
+> changes, but it runs fine both with XFS and without DAX, so I've put it in
+> the generic tests instead of ext4 and not restricted it to only DAX
+> configurations.
+> 
+> When run with v4.18-rc1 + DAX + ext4, this test will hit the following
+> WARN_ON_ONCE() in dax_disassociate_entry():
+> 
+> 	WARN_ON_ONCE(trunc && page_ref_count(page) > 1);
+> 
+> If you change this to a WARN_ON() instead, you can see that each of the
+> four paths being exercised in this test hits that condition many times in
+> the one second that the subtest is being run.
+> 
+> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 
-Sure, I'll do that. /me is going to google what is SPDX ...
+I haven't tested it yet, just a few quick comments below.
+
+> ---
+>  .gitignore             |   1 +
+>  src/Makefile           |   2 +-
+>  src/t_mmap_collision.c | 208 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999      |  50 ++++++++++++
+>  tests/generic/999.out  |   2 +
+>  tests/generic/group    |   1 +
+>  6 files changed, 263 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_mmap_collision.c
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/.gitignore b/.gitignore
+> index efc73a7c..936955e0 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -126,6 +126,7 @@
+>  /src/t_immutable
+>  /src/t_locks_execve
+>  /src/t_mmap_cow_race
+> +/src/t_mmap_collision
+
+Looks like this should go before t_mmap_cow_race?
+
+>  /src/t_mmap_dio
+>  /src/t_mmap_fallocate
+>  /src/t_mmap_stale_pmd
+> diff --git a/src/Makefile b/src/Makefile
+> index b06b7e25..2dbe5e7e 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -15,7 +15,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+>  	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+>  	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+>  	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+> -	t_ofd_locks t_locks_execve
+> +	t_ofd_locks t_locks_execve t_mmap_collision
+>  
+>  LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+> diff --git a/src/t_mmap_collision.c b/src/t_mmap_collision.c
+> new file mode 100644
+> index 00000000..f652e913
+> --- /dev/null
+> +++ b/src/t_mmap_collision.c
+> @@ -0,0 +1,208 @@
+
+Please add copyright and licence statements to c file too, use the new
+SPDX tag :)
+
+(Refer to Dave's pending patch "src/: spdx license conversion" in
+patchset "fstests: SPDX license conversion round 2").
+
+> +#include <errno.h>
+> +#include <fcntl.h>
+> +#include <pthread.h>
+> +#include <stdbool.h>
+> +#include <stdio.h>
+> +#include <stdlib.h>
+> +#include <string.h>
+> +#include <sys/mman.h>
+> +#include <sys/stat.h>
+> +#include <sys/types.h>
+> +#include <unistd.h>
+> +
+> +#define PAGE(a) ((a)*0x1000)
+> +#define FILE_SIZE PAGE(4)
+> +
+> +void *dax_data;
+> +int nodax_fd;
+> +int dax_fd;
+> +bool done;
+> +
+> +#define err_exit(op)                                                          \
+> +{                                                                             \
+> +	fprintf(stderr, "%s %s: %s\n", __func__, op, strerror(errno));        \
+> +	exit(1);                                                              \
+> +}                                                                             \
+> +
+> +void punch_hole_fn(void *ptr)
+> +{
+> +	ssize_t read;
+> +	int rc;
+> +
+> +	while (!done) {
+> +		read = 0;
+> +
+> +		do {
+> +			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
+> +					read);
+> +			if (rc > 0)
+> +				read += rc;
+> +		} while (rc > 0);
+> +
+> +		if (read != FILE_SIZE || rc != 0)
+> +			err_exit("pread");
+> +
+> +		rc = fallocate(dax_fd,
+> +				FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
+> +				0, FILE_SIZE);
+> +		if (rc < 0)
+> +			err_exit("fallocate");
+> +
+> +		usleep(rand() % 1000);
+> +	}
+> +}
+> +
+> +void zero_range_fn(void *ptr)
+> +{
+> +	ssize_t read;
+> +	int rc;
+> +
+> +	while (!done) {
+> +		read = 0;
+> +
+> +		do {
+> +			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
+> +					read);
+> +			if (rc > 0)
+> +				read += rc;
+> +		} while (rc > 0);
+> +
+> +		if (read != FILE_SIZE || rc != 0)
+> +			err_exit("pread");
+> +
+> +		rc = fallocate(dax_fd,
+> +				FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
+> +				0, FILE_SIZE);
+> +		if (rc < 0)
+> +			err_exit("fallocate");
+> +
+> +		usleep(rand() % 1000);
+> +	}
+> +}
+> +
+> +void truncate_down_fn(void *ptr)
+> +{
+> +	ssize_t read;
+> +	int rc;
+> +
+> +	while (!done) {
+> +		read = 0;
+> +
+> +		if (ftruncate(dax_fd, 0) < 0)
+> +			err_exit("ftruncate");
+> +		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
+> +			err_exit("fallocate");
+> +
+> +		do {
+> +			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
+> +					read);
+> +			if (rc > 0)
+> +				read += rc;
+> +		} while (rc > 0);
+> +
+> +		/*
+> +		 * For this test we ignore errors from pread().  These errors
+> +		 * can happen if we try and read while the other thread has
+> +		 * made the file size 0.
+> +		 */
+> +
+> +		usleep(rand() % 1000);
+> +	}
+> +}
+> +
+> +void collapse_range_fn(void *ptr)
+> +{
+> +	ssize_t read;
+> +	int rc;
+> +
+> +	while (!done) {
+> +		read = 0;
+> +
+> +		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
+> +			err_exit("fallocate 1");
+> +		if (fallocate(dax_fd, FALLOC_FL_COLLAPSE_RANGE, 0, PAGE(1)) < 0)
+> +			err_exit("fallocate 2");
+> +		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
+> +			err_exit("fallocate 3");
+> +
+> +		do {
+> +			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
+> +					read);
+> +			if (rc > 0)
+> +				read += rc;
+> +		} while (rc > 0);
+> +
+> +		/* For this test we ignore errors from pread. */
+> +
+> +		usleep(rand() % 1000);
+> +	}
+> +}
+> +
+> +void run_test(void (*test_fn)(void *))
+> +{
+> +	const int NUM_THREADS = 2;
+> +	pthread_t worker_thread[NUM_THREADS];
+> +	int i;
+> +
+> +	done = 0;
+> +	for (i = 0; i < NUM_THREADS; i++)
+> +		pthread_create(&worker_thread[i], NULL, (void*)test_fn, NULL);
+> +
+> +	sleep(1);
+> +	done = 1;
+> +
+> +	for (i = 0; i < NUM_THREADS; i++)
+> +		pthread_join(worker_thread[i], NULL);
+> +}
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	int err;
+> +
+> +	if (argc != 3) {
+> +		printf("Usage: %s <dax file> <non-dax file>\n",
+> +				basename(argv[0]));
+> +		exit(0);
+> +	}
+> +
+> +	dax_fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
+> +	if (dax_fd < 0)
+> +		err_exit("dax_fd open");
+> +
+> +	nodax_fd = open(argv[2], O_RDWR|O_CREAT|O_DIRECT, S_IRUSR|S_IWUSR);
+> +	if (nodax_fd < 0)
+> +		err_exit("nodax_fd open");
+> +
+> +	if (ftruncate(dax_fd, 0) < 0)
+> +		err_exit("dax_fd ftruncate");
+> +	if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
+> +		err_exit("dax_fd fallocate");
+> +
+> +	if (ftruncate(nodax_fd, 0) < 0)
+> +		err_exit("nodax_fd ftruncate");
+> +	if (fallocate(nodax_fd, 0, 0, FILE_SIZE) < 0)
+> +		err_exit("nodax_fd fallocate");
+> +
+> +	dax_data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED,
+> +			dax_fd, 0);
+> +	if (dax_data == MAP_FAILED)
+> +		err_exit("mmap");
+> +
+> +	run_test(&punch_hole_fn);
+> +	run_test(&zero_range_fn);
+> +	run_test(&truncate_down_fn);
+> +	run_test(&collapse_range_fn);
+
+Check for FALLOC_FL_* definition and compile
+(punch_hole|zero_range|collapse_range)_fn out if the needed flag is not
+defined?
+
+> +
+> +	if (munmap(dax_data, FILE_SIZE) != 0)
+> +		err_exit("munmap");
+> +
+> +	err = close(dax_fd);
+> +	if (err < 0)
+> +		err_exit("dax_fd close");
+> +
+> +	err = close(nodax_fd);
+> +	if (err < 0)
+> +		err_exit("nodax_fd close");
+> +
+> +	return 0;
+> +}
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..8f488cb5
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,50 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Intel Corporation.  All Rights Reserved.
+> +#
+> +# FS QA Test generic/999
+> +#
+> +# This is a regression test for kernel patch:
+> +#   ext4: handle layout changes to pinned DAX mapping
+> +# created by Ross Zwisler <ross.zwisler@linux.intel.com>
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_test_program "t_mmap_collision"
+
+_require_xfs_io_command "fpunch"
+_require_xfs_io_command "fcollapse"
+_require_xfs_io_command "fzero"
+
+> +
+> +# turn off DAX on our scratch device so we can get normal O_DIRECT behavior
+> +export MOUNT_OPTIONS=""
+> +_scratch_unmount >> $seqres.full 2>&1
+> +_scratch_mount >> $seqres.full 2>&1
+> +
+> +# real QA test starts here
+> +$here/src/t_mmap_collision $TEST_DIR/testfile $SCRATCH_MNT/testfile
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..3b276ca8
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 999
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 83a6fdab..793f71ed 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -501,3 +501,4 @@
+>  496 auto quick swap
+>  497 auto quick swap collapse
+>  498 auto quick log
+> +999 auto quick dax
+
+Also need "punch collapse zero" groups.
 
 Thanks,
-Zorro
+Eryu
 
+> -- 
+> 2.14.4
 > 
-> > 
-> > Otherwise looks decent,
-> 
-> Thanks for reviewing!
-> 
-> Eryu
-> 
-> > 
-> > --D
-> > 
-> > > +	done &
-> > > +	loop_dedup_pid="$! $loop_dedup_pid"
-> > > +done
-> > > +
-> > > +# End the test after $sleep_time seconds
-> > > +sleep $sleep_time
-> > > +kill_all_stress
-> > > +
-> > > +# umount and mount again, verify pagecache contents don't mutate and a fresh
-> > > +# read from the disk also doesn't show mutations.
-> > > +find $testdir -type f -exec md5sum {} \; > $TEST_DIR/${seq}md5.sum
-> > > +_scratch_cycle_mount
-> > > +md5sum -c --quiet $TEST_DIR/${seq}md5.sum
-> > > +
-> > > +echo "Silence is golden"
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/shared/010.out b/tests/shared/010.out
-> > > new file mode 100644
-> > > index 00000000..1d83a8d6
-> > > --- /dev/null
-> > > +++ b/tests/shared/010.out
-> > > @@ -0,0 +1,2 @@
-> > > +QA output created by 010
-> > > +Silence is golden
-> > > diff --git a/tests/shared/group b/tests/shared/group
-> > > index 9c484794..094da27d 100644
-> > > --- a/tests/shared/group
-> > > +++ b/tests/shared/group
-> > > @@ -12,6 +12,7 @@
-> > >  007 dangerous_fuzzers
-> > >  008 auto stress dedupe
-> > >  009 auto stress dedupe
-> > > +010 auto stress dedupe
-> > >  032 mkfs auto quick
-> > >  272 auto enospc rw
-> > >  289 auto quick
-> > > -- 
-> > > 2.14.4
-> > > 
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
