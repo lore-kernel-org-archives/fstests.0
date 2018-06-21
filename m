@@ -1,12 +1,11 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:51902 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754012AbeFUScs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jun 2018 14:32:48 -0400
-Subject: [PATCH 2/4] xfs: regression test for rmapbt fdblocks accounting
- problems
+Received: from userp2130.oracle.com ([156.151.31.86]:41168 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1754012AbeFUScx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jun 2018 14:32:53 -0400
+Subject: [PATCH 3/4] generic: mread past eof shows nonzero contents
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 21 Jun 2018 11:32:42 -0700
-Message-ID: <152960596196.26479.13083497192197135552.stgit@magnolia>
+Date: Thu, 21 Jun 2018 11:32:49 -0700
+Message-ID: <152960596951.26479.121617216998011751.stgit@magnolia>
 In-Reply-To: <152960594943.26479.1457883867468749220.stgit@magnolia>
 References: <152960594943.26479.1457883867468749220.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,44 +18,38 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-In "xfs: fix fdblocks accounting w/ RMAPBT per-AG reservation", we fixed
-the per-ag reservation code so that we always decrease fdblocks by the
-reserved size because rmapbt blocks are counted as free space.
-
-The primary symptom of this bug is that if the rmapbt has expanded since
-mount time, the disk block counters reported via statfs will change
-across a remount.  Therefore, we exercise this as a regression test.
+Certain sequences of generic/127 invocations complain about being able
+to mread nonzero contents past eof.  Replicate that here as a regression
+test.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/712     |   62 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/712.out |    1 +
- tests/xfs/group   |    1 +
- 3 files changed, 64 insertions(+)
- create mode 100755 tests/xfs/712
- create mode 100644 tests/xfs/712.out
+ tests/generic/708     |   54 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/708.out |    2 ++
+ tests/generic/group   |    1 +
+ 3 files changed, 57 insertions(+)
+ create mode 100755 tests/generic/708
+ create mode 100644 tests/generic/708.out
 
 
-diff --git a/tests/xfs/712 b/tests/xfs/712
+diff --git a/tests/generic/708 b/tests/generic/708
 new file mode 100755
-index 00000000..f90c7ec9
+index 00000000..d380053f
 --- /dev/null
-+++ b/tests/xfs/712
-@@ -0,0 +1,62 @@
++++ b/tests/generic/708
+@@ -0,0 +1,54 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All rights reserved.
++# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
 +#
-+# FS QA Test No. 712
++# FS QA Test No. 708
 +#
-+# Make sure that the statfs b_avail counter doesn't change across remount
-+# after the rmapbt has grown in size.
++# Test a specific sequence of fsx operations that causes an mmap read past
++# eof to return nonzero contents.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -69,56 +62,51 @@ index 00000000..f90c7ec9
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/filter
-+
-+# remove previous \$seqres.full before test
-+rm -f $seqres.full
 +
 +# real QA test starts here
++_supported_fs generic
 +_supported_os Linux
-+_supported_fs xfs
-+_require_test_program "punch-alternating"
-+_require_xfs_scratch_rmapbt
++_require_scratch
 +
-+_scratch_mkfs >> $seqres.full
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# Make sure we allocate a big enough file such that punching out every other
-+# block will cause the rmapbt to expand by at least one block.
-+blksz=$(_get_file_block_size $SCRATCH_MNT)
-+nr_rmap_per_rmapbt=$(( (blksz - 56) / 24))
-+blks=$(( (nr_rmap_per_rmapbt + 2) * 2))
-+$XFS_IO_PROG -f -c "falloc 0 $((blks * blksz))" $SCRATCH_MNT/a >> $seqres.full
-+./src/punch-alternating $SCRATCH_MNT/a
++cat >> $tmp.fsxops << ENDL
++fallocate 0x77e2 0x5f06 0x269a2 keep_size
++mapwrite 0x2e7fc 0x42ba 0x3f989
++write 0x67a9 0x714e 0x3f989
++write 0x39f96 0x185a 0x3f989
++collapse_range 0x36000 0x8000 0x3f989
++mapread 0x74c0 0x1bb3 0x3e2d0
++truncate 0x0 0x8aa2 0x3e2d0
++zero_range 0x1265 0x783d 0x8aa2
++mapread 0x7bd8 0xeca 0x8aa2
++ENDL
 +
-+# Do the stat counters change across the remount?
-+before=$(stat -f -c '%b %f' $SCRATCH_MNT)
-+_scratch_cycle_mount
-+after=$(stat -f -c '%b %f' $SCRATCH_MNT)
++victim=$SCRATCH_MNT/a
++touch $victim
++$here/ltp/fsx --replay-ops $tmp.fsxops $victim > $tmp.output || cat $tmp.output
 +
-+if [ "${before}" != "${after}" ]; then
-+	echo "counters changed: ${before} ${after}"
-+	echo "before: ${before}" >> $seqres.full
-+	echo "after: ${after}" >> $seqres.full
-+fi
-+
-+# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/xfs/712.out b/tests/xfs/712.out
+diff --git a/tests/generic/708.out b/tests/generic/708.out
 new file mode 100644
-index 00000000..4e900419
+index 00000000..33c478ad
 --- /dev/null
-+++ b/tests/xfs/712.out
-@@ -0,0 +1 @@
-+QA output created by 712
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 932ab909..2f1c8467 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -447,3 +447,4 @@
- 447 auto mount
- 448 auto quick fuzzers
- 449 auto quick
-+712 auto quick rmap
++++ b/tests/generic/708.out
+@@ -0,0 +1,2 @@
++QA output created by 708
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 83a6fdab..1a1a0a6e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -501,3 +501,4 @@
+ 496 auto quick swap
+ 497 auto quick swap collapse
+ 498 auto quick log
++708 auto quick rw collapse
 
