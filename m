@@ -1,31 +1,37 @@
-Received: from mx2.suse.de ([195.135.220.15]:58377 "EHLO mx2.suse.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1750981AbeFUHLt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 21 Jun 2018 03:11:49 -0400
+Received: from mail-pl0-f68.google.com ([209.85.160.68]:42619 "EHLO
+        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932435AbeFUI5e (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jun 2018 04:57:34 -0400
+Date: Thu, 21 Jun 2018 16:57:28 +0800
+From: Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [PATCH] fstests: btrfs/085: replace btrfs-debug-tree with btrfs
  inspect-internal dump-tree
+Message-ID: <20180621085728.GL2780@desktop>
 References: <20180621070422.25236-1-lufq.fnst@cn.fujitsu.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <473ce802-e95b-994b-09da-c9fda44af80c@suse.com>
-Date: Thu, 21 Jun 2018 10:11:47 +0300
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20180621070422.25236-1-lufq.fnst@cn.fujitsu.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 21.06.2018 10:04, Lu Fengqi wrote:
+On Thu, Jun 21, 2018 at 03:04:22PM +0800, Lu Fengqi wrote:
 > Since btrfs-dump-tree has been removed from btrfs-progs, use btrfs
 > inspect-internal dump-tree instead of btrfs-dump-tree.
 > 
 > Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 
-Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+Then there's no user of $BTRFS_DEBUG_TREE_PROG, I think we could remove
+the definition too in common/config
+
+	export BTRFS_DEBUG_TREE_PROG=$(type -P btrfs-debug-tree)
+
+I'll remove it on commit.
+
+Thanks,
+Eryu
 
 > ---
 >  tests/btrfs/085 | 4 ++--
@@ -52,4 +58,12 @@ Reviewed-by: Nikolay Borisov <nborisov@suse.com>
 >  		grep -q "key (ORPHAN ORPHAN_ITEM $INO)"; then
 >  		return 0
 >  	fi
+> -- 
+> 2.17.1
 > 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
