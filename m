@@ -1,128 +1,121 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:50070 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751210AbeFVGkq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jun 2018 02:40:46 -0400
-Date: Thu, 21 Jun 2018 23:40:42 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 2/4] xfs: regression test for rmapbt fdblocks accounting
- problems
-Message-ID: <20180622064042.GO4838@magnolia>
-References: <152960594943.26479.1457883867468749220.stgit@magnolia>
- <152960596196.26479.13083497192197135552.stgit@magnolia>
+Received: from mail-lf0-f67.google.com ([209.85.215.67]:37053 "EHLO
+        mail-lf0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751998AbeFVPR6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Jun 2018 11:17:58 -0400
+Received: by mail-lf0-f67.google.com with SMTP id g21-v6so9251978lfb.4
+        for <fstests@vger.kernel.org>; Fri, 22 Jun 2018 08:17:57 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <152960596196.26479.13083497192197135552.stgit@magnolia>
+In-Reply-To: <20180622035424.GD13748@dastard>
+References: <20180618174433.3069-1-mbenatto@redhat.com> <20180618174433.3069-2-mbenatto@redhat.com>
+ <20180622023735.GN2780@desktop> <9b44c744-6abd-35d2-e3ec-1f8a1a8ea710@redhat.com>
+ <20180622035424.GD13748@dastard>
+From: Marco Benatto <mbenatto@redhat.com>
+Date: Fri, 22 Jun 2018 12:17:56 -0300
+Message-ID: <CAOGQQ2-_pgiPKPRoxHudZaoyAngd8+NW17oJDG+5N-e2R51m2g@mail.gmail.com>
+Subject: Re: [PATCH 2/2] xfstests: Test root inode parent pointer repairing
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eric Sandeen <sandeen@redhat.com>, Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Hi Eryuy et al,
 
-In "xfs: fix fdblocks accounting w/ RMAPBT per-AG reservation", we fixed
-the per-ag reservation code so that we always decrease fdblocks by the
-reserved size because rmapbt blocks are counted as free space.
+firstly thanks for the reviews.
 
-The primary symptom of this bug is that if the rmapbt has expanded since
-mount time, the disk block counters reported via statfs will change
-across a remount.  Therefore, we exercise this as a regression test.
+OK, I'll resend just the test itself (without the one which hoist the
+helper function for sfdir format).
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: add silence is golden message
----
- tests/xfs/712     |   64 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/712.out |    2 ++
- tests/xfs/group   |    1 +
- 3 files changed, 67 insertions(+)
- create mode 100755 tests/xfs/712
- create mode 100644 tests/xfs/712.out
 
-diff --git a/tests/xfs/712 b/tests/xfs/712
-new file mode 100755
-index 00000000..ab2342ef
---- /dev/null
-+++ b/tests/xfs/712
-@@ -0,0 +1,64 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All rights reserved.
-+#
-+# FS QA Test No. 712
-+#
-+# Make sure that the statfs b_avail counter doesn't change across remount
-+# after the rmapbt has grown in size.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous \$seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_test_program "punch-alternating"
-+_require_xfs_scratch_rmapbt
-+
-+_scratch_mkfs >> $seqres.full
-+_scratch_mount
-+
-+# Make sure we allocate a big enough file such that punching out every other
-+# block will cause the rmapbt to expand by at least one block.
-+blksz=$(_get_file_block_size $SCRATCH_MNT)
-+nr_rmap_per_rmapbt=$(( (blksz - 56) / 24))
-+blks=$(( (nr_rmap_per_rmapbt + 2) * 2))
-+$XFS_IO_PROG -f -c "falloc 0 $((blks * blksz))" $SCRATCH_MNT/a >> $seqres.full
-+./src/punch-alternating $SCRATCH_MNT/a
-+
-+# Do the stat counters change across the remount?
-+before=$(stat -f -c '%b %f' $SCRATCH_MNT)
-+_scratch_cycle_mount
-+after=$(stat -f -c '%b %f' $SCRATCH_MNT)
-+
-+if [ "${before}" != "${after}" ]; then
-+	echo "counters changed: ${before} ${after}"
-+	echo "before: ${before}" >> $seqres.full
-+	echo "after: ${after}" >> $seqres.full
-+fi
-+
-+echo "Silence is golden."
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/712.out b/tests/xfs/712.out
-new file mode 100644
-index 00000000..33a76b21
---- /dev/null
-+++ b/tests/xfs/712.out
-@@ -0,0 +1,2 @@
-+QA output created by 712
-+Silence is golden.
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 932ab909..2f1c8467 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -447,3 +447,4 @@
- 447 auto mount
- 448 auto quick fuzzers
- 449 auto quick
-+712 auto quick rmap
+Given Eric's and Dave's updates, should I re-include the common
+definitions even those being unused within
+this test scope?
+
+If those are used by helpers or any other flow on xfstest I do agree
+with Eric and Dave about hoist it.
+
+Thanks,
+
+
+On Fri, Jun 22, 2018 at 12:54 AM, Dave Chinner <david@fromorbit.com> wrot=
+e:
+> On Thu, Jun 21, 2018 at 09:58:25PM -0500, Eric Sandeen wrote:
+>> On 6/21/18 9:37 PM, Eryu Guan wrote:
+>> > On Mon, Jun 18, 2018 at 02:44:33PM -0300, Marco Benatto wrote:
+>> >> Recently we found out xfs_repair were not repairing
+>> >> root inode parent pointer when root inode is on short-form
+>> >> and parent points to an invalid inode number (refer to:
+>> >> "xfs_repair: Fix root inode's parent when it's bogus for sf
+>> >> directory" on xfs-devel list).
+>> >>
+>> >> This test checks if xfs_repair successfully repair the
+>> >> filesystem in the scenario mentioned before.
+>> >>
+>> >> Signed-off-by: Marco Benatto <mbenatto@redhat.com>
+>> >> ---
+>> >>  tests/xfs/450     | 53 +++++++++++++++++++++++++++++++++++++++++++=
+++++++++++
+>> >>  tests/xfs/450.out |  1 +
+>> >>  tests/xfs/group   |  1 +
+>> >>  3 files changed, 55 insertions(+)
+>> >>  create mode 100755 tests/xfs/450
+>> >>  create mode 100644 tests/xfs/450.out
+>> >>
+>> >> diff --git a/tests/xfs/450 b/tests/xfs/450
+>> >> new file mode 100755
+>> >> index 0000000..dc7f244
+>> >> --- /dev/null
+>> >> +++ b/tests/xfs/450
+>> >> @@ -0,0 +1,53 @@
+>> >> +#! /bin/bash
+>> >> +# SPDX-License-Identifier: GPL-2.0
+>> >> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+>> >> +#
+>> >> +# FS QA Test 450
+>> >> +#
+>> >> +# Make sure xfs_repair can repair root inode parent's pointer
+>> >> +# when it contains a bogus ino when it's using shot form directory
+>> >> +#
+>> >> +seq=3D`basename $0`
+>> >> +seqres=3D$RESULT_DIR/$seq
+>> >> +
+>> >> +status=3D1  # failure is the default!
+>> >
+>> > Apart from Dave's comments, there're some common definitions missing
+>> > too, e.g. 'tmp' and 'here', please use './new xfs' to generate new t=
+est
+>> > template.
+>>
+>> Eryu, I think I suggested that Marco could remove the "tmp" definition
+>> because it's not used in the script.  Is there some reason to keep it?
+>> The script did start out with a "./new xfs" generation template.
+>>
+>> Oh, I bet some helpers depend on it... sorry, my mistake.  Oops.
+>>
+>> (though maybe tmp should just get hoisted to the harness and
+>> not be required in every script, but I digress ...)
+>
+> You mean like I proposed a couple of weeks ago along with the
+> spdx license tag updates?
+>
+> https://www.spinics.net/lists/fstests/msg09849.html
+>
+> that's next on my list of "Big cleanups for fstests To Do" list.
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
+
+
+
+--=20
+Marco Benatto
+Senior Software Maintenance Engineer | Red Hat Brasil
+T: +55 11 35246161 | M: +55 41 9 88504051
+Av. Brigadeiro Faria Lima 3900, 8=C2=B0 Andar. S=C3=A3o Paulo, Brasil. RE=
+D HAT |
+TRIED. TESTED. TRUSTED. Saiba porque em redhat.com
