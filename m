@@ -1,30 +1,66 @@
-Received: from mail-pf0-f194.google.com ([209.85.192.194]:33053 "EHLO
-        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933129AbeFVC2o (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jun 2018 22:28:44 -0400
-Date: Fri, 22 Jun 2018 10:28:38 +0800
+Received: from mail-pl0-f68.google.com ([209.85.160.68]:39701 "EHLO
+        mail-pl0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933905AbeFVChl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Jun 2018 22:37:41 -0400
+Date: Fri, 22 Jun 2018 10:37:35 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [fstests PATCH 1/2] src/: fix up mmap() error checking
-Message-ID: <20180622022838.GM2780@desktop>
-References: <20180620225147.12151-1-ross.zwisler@linux.intel.com>
+Subject: Re: [PATCH 2/2] xfstests: Test root inode parent pointer repairing
+Message-ID: <20180622023735.GN2780@desktop>
+References: <20180618174433.3069-1-mbenatto@redhat.com>
+ <20180618174433.3069-2-mbenatto@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180620225147.12151-1-ross.zwisler@linux.intel.com>
+In-Reply-To: <20180618174433.3069-2-mbenatto@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ross Zwisler <ross.zwisler@linux.intel.com>
-Cc: fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org
+To: Marco Benatto <mbenatto@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, darrick.wong@oracle.com, sandeen@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 20, 2018 at 04:51:46PM -0600, Ross Zwisler wrote:
-> I noticed that in some of my C tests in src/ I was incorrectly checking for
-> mmap() failure by looking for NULL instead of MAP_FAILED.  Fix those and
-> clean up some places where we were testing against -1 (the actual value of
-> MAP_FAILED) which was manually being cast to a pointer.
+On Mon, Jun 18, 2018 at 02:44:33PM -0300, Marco Benatto wrote:
+> Recently we found out xfs_repair were not repairing
+> root inode parent pointer when root inode is on short-form
+> and parent points to an invalid inode number (refer to:
+> "xfs_repair: Fix root inode's parent when it's bogus for sf
+> directory" on xfs-devel list).
 > 
-> Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> This test checks if xfs_repair successfully repair the
+> filesystem in the scenario mentioned before.
+> 
+> Signed-off-by: Marco Benatto <mbenatto@redhat.com>
+> ---
+>  tests/xfs/450     | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/450.out |  1 +
+>  tests/xfs/group   |  1 +
+>  3 files changed, 55 insertions(+)
+>  create mode 100755 tests/xfs/450
+>  create mode 100644 tests/xfs/450.out
+> 
+> diff --git a/tests/xfs/450 b/tests/xfs/450
+> new file mode 100755
+> index 0000000..dc7f244
+> --- /dev/null
+> +++ b/tests/xfs/450
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 450
+> +#
+> +# Make sure xfs_repair can repair root inode parent's pointer
+> +# when it contains a bogus ino when it's using shot form directory
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +
+> +status=1	# failure is the default!
 
-BTW, I've applied this patch, no need to resend it in v2.
+Apart from Dave's comments, there're some common definitions missing
+too, e.g. 'tmp' and 'here', please use './new xfs' to generate new test
+template.
+
+BTW, I've applied the first patch, no need to resend it in v2.
 
 Thanks,
 Eryu
