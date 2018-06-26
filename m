@@ -1,46 +1,59 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:29619 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S934839AbeFZLme (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jun 2018 07:42:34 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/085: Call $UDEV_SETTLE_PROG before "dmsetup remove"
-Date: Tue, 26 Jun 2018 18:59:10 +0800
-Message-ID: <1530010750-16516-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-qt0-f170.google.com ([209.85.216.170]:33522 "EHLO
+        mail-qt0-f170.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752608AbeFZRIB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Jun 2018 13:08:01 -0400
+Received: by mail-qt0-f170.google.com with SMTP id l10-v6so15837567qtj.0
+        for <fstests@vger.kernel.org>; Tue, 26 Jun 2018 10:08:00 -0700 (PDT)
+Received: from localhost ([107.15.81.208])
+        by smtp.gmail.com with ESMTPSA id q5-v6sm909527qtq.66.2018.06.26.10.07.59
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Tue, 26 Jun 2018 10:07:59 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH] fstests: add SPDX license comments for src/log-writes/*
+Date: Tue, 26 Jun 2018 13:07:58 -0400
+Message-Id: <20180626170758.3348-1-josef@toxicpanda.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-cleanup_dmdev() may fail to remove dm device because of EBUSY
-and cause subsequent tests to fail.  Make sure dm device is
-fully settled before removing it.
+I apparently never bothered to put copyright or license info with this
+code, just tag it as GPL 2 and I'll fix the upstream stuff as well.
 
-PS: I am not sure whether calling "dmsetup remove --retry" is
-better or not.
-
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- tests/generic/085 | 3 +++
- 1 file changed, 3 insertions(+)
+ src/log-writes/log-writes.c | 1 +
+ src/log-writes/log-writes.h | 1 +
+ src/log-writes/replay-log.c | 1 +
+ 3 files changed, 3 insertions(+)
 
-diff --git a/tests/generic/085 b/tests/generic/085
-index bed1e0d..bdc4dba 100755
---- a/tests/generic/085
-+++ b/tests/generic/085
-@@ -32,6 +32,9 @@ cleanup_dmdev()
- 	$DMSETUP_PROG resume $lvdev >/dev/null 2>&1
- 	$UMOUNT_PROG $lvdev >/dev/null 2>&1
+diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
+index 5dc22c244cea..aa53473974d9 100644
+--- a/src/log-writes/log-writes.c
++++ b/src/log-writes/log-writes.c
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0
+ #include <linux/fs.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
+index 75fb8ac0bf79..b9f571ac3b23 100644
+--- a/src/log-writes/log-writes.h
++++ b/src/log-writes/log-writes.h
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0
+ #ifndef _LOG_WRITES_H_
+ #define _LOG_WRITES_H_
  
-+	# wait for device to be fully settled so that
-+	# 'dmsetup remove' doesn't fail due to EBUSY
-+	$UDEV_SETTLE_PROG >/dev/null 2>&1
- 	$DMSETUP_PROG remove $node >>$seqres.full 2>&1
- 	$DMSETUP_PROG mknodes >/dev/null 2>&1
- }
+diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+index 8457937578d5..c16df40e5741 100644
+--- a/src/log-writes/replay-log.c
++++ b/src/log-writes/replay-log.c
+@@ -1,3 +1,4 @@
++// SPDX-License-Identifier: GPL-2.0
+ #include <stdio.h>
+ #include <unistd.h>
+ #include <getopt.h>
 -- 
-1.8.3.1
-
-
+2.14.3
 
