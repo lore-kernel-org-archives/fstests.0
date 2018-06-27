@@ -1,107 +1,57 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:37700 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S965299AbeF0RAH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Jun 2018 13:00:07 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs: test bad character in xfs_db field list selector string
-Date: Thu, 28 Jun 2018 00:59:57 +0800
-Message-Id: <20180627165957.12892-1-zlang@redhat.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:56593 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752578AbeF0WIp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 18:08:45 -0400
+Date: Thu, 28 Jun 2018 08:07:59 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 3/8] shared: use new test setup preamble
+Message-ID: <20180627220759.GJ19934@dastard>
+References: <20180627082103.9662-1-david@fromorbit.com>
+ <20180627082103.9662-4-david@fromorbit.com>
+ <CAOQ4uxj90rifsdgi67aMnqGzzX5P+oNQz_kRnpF73+wTjuq9kA@mail.gmail.com>
+ <20180627142745.GH19934@dastard>
+ <CAOQ4uxjhy1yiodyCJYnyYFmN2LOGLyeD41t_HD4rX5C0GTN1yA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjhy1yiodyCJYnyYFmN2LOGLyeD41t_HD4rX5C0GTN1yA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Bad characters likes tailing asterisk, slash or quote in xfs_db
-field string can trigger a xfs_db crash. This bug has been fixed
-by xfsprogs "945e47e2 xfs_db: fix crash when field list selector
-string has trailing slash".
+On Wed, Jun 27, 2018 at 05:43:06PM +0300, Amir Goldstein wrote:
+> On Wed, Jun 27, 2018 at 5:27 PM, Dave Chinner <david@fromorbit.com> wrote:
+> > On Wed, Jun 27, 2018 at 01:56:29PM +0300, Amir Goldstein wrote:
+> >> On Wed, Jun 27, 2018 at 11:20 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > Because the test is creating image files in $tmp, and we've had
+> > problems in the past with tests running the root filesystems out of
+> > space because they put too much shit in /tmp or dump crap in $here.
+> > TEST_DIR is supposed to be used at the work dir for things like this
+> > - we're trying to exercises the filesystem we are testing, not the
+> > root filesystem that hosts the fstests installation.
+> >
+> 
+> I see. It might be better though to make this fix in a separate patch
+> and keeping the conversion patch to the minimal change I suggested.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/450     | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/450.out |  7 +++++++
- tests/xfs/group   |  1 +
- 3 files changed, 57 insertions(+)
- create mode 100755 tests/xfs/450
- create mode 100644 tests/xfs/450.out
+We can't make the conversion patch as you suggested because it's
+/doesn't fix the broken usage of $tmp/. That's the intent of this
+whole conversion - to fix these bugs by converting to common setup
+code. So we need to fix the bugs as we convert them, not slap a
+band-aid over them and then have to come back and fix them later (if
+we remember which of the many, many tests need fixing!).
 
-diff --git a/tests/xfs/450 b/tests/xfs/450
-new file mode 100755
-index 00000000..73b0cad8
---- /dev/null
-+++ b/tests/xfs/450
-@@ -0,0 +1,49 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 450
-+#
-+# Test xfs_db by bad character in field list selector string. The issue
-+# has been fixed by xfsprogs 945e47e2.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# Modify as appropriate.
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs_xfs >> $seqres.full 2>&1
-+inum=`_scratch_xfs_get_metadata_field rootino "sb 0"`
-+
-+echo "= check bad character * ="
-+_scratch_xfs_db -c "inode $inum" -c "print core.*"
-+echo "= check bad character trailing slash ="
-+_scratch_xfs_db -c "inode $inum" -c "print core.\\"
-+echo "= check missing closing quote ="
-+_scratch_xfs_db -c "inode $inum" -c "print core.\""
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/450.out b/tests/xfs/450.out
-new file mode 100644
-index 00000000..dab51786
---- /dev/null
-+++ b/tests/xfs/450.out
-@@ -0,0 +1,7 @@
-+QA output created by 450
-+= check bad character * =
-+bad character in field *
-+= check bad character trailing slash =
-+bad character in field \
-+= check missing closing quote =
-+missing closing quote 
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 932ab909..4d8e0b30 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -447,3 +447,4 @@
- 447 auto mount
- 448 auto quick fuzzers
- 449 auto quick
-+450 auto db
+Again, lets not ake this conversion harder than it needs to be by
+trying to split hairs over how individual bugs are fixed. There are
+/hundreds of bugs/ that need to be fixed during this conversion
+- the cost of separating them out is prohibitive, and it makes no
+sense to add more change management time and overhead to an
+already resource intensive conversion process.
+
+Cheers,
+
+Dave.
 -- 
-2.14.4
-
+Dave Chinner
+david@fromorbit.com
