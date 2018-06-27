@@ -1,70 +1,88 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:46391 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1752969AbeF0EwH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 00:52:07 -0400
-Received: by mail-pg0-f65.google.com with SMTP id q14-v6so372871pgt.13
-        for <fstests@vger.kernel.org>; Tue, 26 Jun 2018 21:52:06 -0700 (PDT)
-Date: Wed, 27 Jun 2018 12:52:01 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] fstests: add SPDX license comments for src/log-writes/*
-Message-ID: <20180627045201.GQ2780@desktop>
-References: <20180626170758.3348-1-josef@toxicpanda.com>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:18119 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1752385AbeF0HmW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 03:42:22 -0400
+Date: Wed, 27 Jun 2018 17:42:19 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfstests: fix install target using sudo
+Message-ID: <20180627074219.GK13748@dastard>
+References: <20180626210834.24220-1-mcgrof@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180626170758.3348-1-josef@toxicpanda.com>
+In-Reply-To: <20180626210834.24220-1-mcgrof@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Josef Bacik <josef@toxicpanda.com>
+To: "Luis R. Rodriguez" <mcgrof@kernel.org>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 26, 2018 at 01:07:58PM -0400, Josef Bacik wrote:
-> I apparently never bothered to put copyright or license info with this
-> code, just tag it as GPL 2 and I'll fix the upstream stuff as well.
+On Tue, Jun 26, 2018 at 02:08:34PM -0700, Luis R. Rodriguez wrote:
+> If you install with:
 > 
-> Signed-off-by: Josef Bacik <josef@toxicpanda.com>
+> 	sudo make install
+> 
+> Depending on the system, you may see /var/lib/xfstests/tests/ is empty.
+> This is because $(PWD) can expand to be empty on certain systems and so the
+> wildcard finds nothing.
 
-Thanks for completing the license!
+When and why?
 
-Eryu
+I'm guessing it's because the environment variable PWD is not
+exported by the shell that make is being run in?  /bin/sh, /bin/bash
+and /bin/dash should always set PWD in the environment, so maybe
+you're using a different shell that doesn't set PWD correctly?
 
+> PWD is only used on one target, the tests/*/ dir install target.
+> 
+> We can fix this by using $(CURDIR) however that does not suffice as we
+> are also using the $(wildcard) and that needs its own careful expansion.
+
+$(CURDIR) is documented as an being the current absolute path, so
+AFAICT there's nothing to be careful about in terms of expansion.
+What are you trying to avoid here?
+
+> This issue is observed on both Fedora and OpenSUSE, but not on Debian.
+
+This really smells more of a shell/environment issue, not a distro
+issue.
+
+> Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
 > ---
->  src/log-writes/log-writes.c | 1 +
->  src/log-writes/log-writes.h | 1 +
->  src/log-writes/replay-log.c | 1 +
->  3 files changed, 3 insertions(+)
+>  tests/Makefile | 3 ++-
+>  1 file changed, 2 insertions(+), 1 deletion(-)
 > 
-> diff --git a/src/log-writes/log-writes.c b/src/log-writes/log-writes.c
-> index 5dc22c244cea..aa53473974d9 100644
-> --- a/src/log-writes/log-writes.c
-> +++ b/src/log-writes/log-writes.c
-> @@ -1,3 +1,4 @@
-> +// SPDX-License-Identifier: GPL-2.0
->  #include <linux/fs.h>
->  #include <sys/types.h>
->  #include <sys/stat.h>
-> diff --git a/src/log-writes/log-writes.h b/src/log-writes/log-writes.h
-> index 75fb8ac0bf79..b9f571ac3b23 100644
-> --- a/src/log-writes/log-writes.h
-> +++ b/src/log-writes/log-writes.h
-> @@ -1,3 +1,4 @@
-> +// SPDX-License-Identifier: GPL-2.0
->  #ifndef _LOG_WRITES_H_
->  #define _LOG_WRITES_H_
+> diff --git a/tests/Makefile b/tests/Makefile
+> index 2611b3b845f5..084135da0487 100644
+> --- a/tests/Makefile
+> +++ b/tests/Makefile
+> @@ -5,7 +5,8 @@
+>  TOPDIR = ..
+>  include $(TOPDIR)/include/builddefs
 >  
-> diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
-> index 8457937578d5..c16df40e5741 100644
-> --- a/src/log-writes/replay-log.c
-> +++ b/src/log-writes/replay-log.c
-> @@ -1,3 +1,4 @@
-> +// SPDX-License-Identifier: GPL-2.0
->  #include <stdio.h>
->  #include <unistd.h>
->  #include <getopt.h>
-> -- 
-> 2.14.3
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> -TESTS_SUBDIRS = $(sort $(dir $(wildcard $(PWD)/$(TESTS_DIR)/[a-z]*/)))
+> +TEST_DIR = $(dir $(CURDIR)/$(TESTS_DIR))
+
+I think this is wrong - you're creating an invalid path:
+
+curdir/tests_dir is /home/dave/src/xfstests-dev/tests/tests
+dir curdir/tests_dir is /home/dave/src/xfstests-dev/tests/
+
+then using $(dir <path>) command to truncate away the invalid
+path segment, resulting in the original path $(CURDIR) gave you.
+
+In fact, $(CURDIR) is basically what the current code intends - I
+didn't know this existed because it's not obviously searchable (i.e.
+not a CWD or PWD variant) so I hacked around it with environment
+variables.
+
+So AFAICT, the change the needs to be made here is:
+
+-TESTS_SUBDIRS = $(sort $(dir $(wildcard $(PWD)/$(TESTS_DIR)/[a-z]*/)))
++TESTS_SUBDIRS = $(sort $(dir $(wildcard $(CURDIR)/[a-z]*/)))
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
