@@ -1,36 +1,53 @@
-Received: from mx2.suse.de ([195.135.220.15]:60976 "EHLO mx2.suse.de"
+Received: from mail.kernel.org ([198.145.29.99]:41816 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S964786AbeF0QDP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Jun 2018 12:03:15 -0400
-Date: Wed, 27 Jun 2018 18:03:13 +0200
+        id S934246AbeF0QD5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 27 Jun 2018 12:03:57 -0400
 From: "Luis R. Rodriguez" <mcgrof@kernel.org>
-Subject: Re: [PATCH] xfstests: fix install target using sudo
-Message-ID: <20180627160313.GB5527@wotan.suse.de>
-References: <20180626210834.24220-1-mcgrof@kernel.org>
- <20180627074219.GK13748@dastard>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180627074219.GK13748@dastard>
+Subject: [PATCH v2] xfstests: fix install target using sudo
+Date: Wed, 27 Jun 2018 09:03:55 -0700
+Message-Id: <20180627160355.10348-1-mcgrof@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: "Luis R. Rodriguez" <mcgrof@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 27, 2018 at 05:42:19PM +1000, Dave Chinner wrote:
-> On Tue, Jun 26, 2018 at 02:08:34PM -0700, Luis R. Rodriguez wrote:
-> 
-> In fact, $(CURDIR) is basically what the current code intends - I
-> didn't know this existed because it's not obviously searchable (i.e.
-> not a CWD or PWD variant) so I hacked around it with environment
-> variables.
-> 
-> So AFAICT, the change the needs to be made here is:
-> 
-> -TESTS_SUBDIRS = $(sort $(dir $(wildcard $(PWD)/$(TESTS_DIR)/[a-z]*/)))
-> +TESTS_SUBDIRS = $(sort $(dir $(wildcard $(CURDIR)/[a-z]*/)))
+If you install with:
 
-You are right, I botched my test with it and used CURDIR with TEST_DIR,
-removing it as you did works. Will send a v2.
+	sudo make install
 
-  Luis
+Depending on the system, you may see that /var/lib/xfstests/ installed
+properly but /var/lib/xfstests/tests/ is empty and so your install
+really is broken and not functional. Finding out what went wrong is
+not obvious.
+
+The issue is caused due to the fact that $(PWD) is used nad if sudo is used
+this can be empty on some systems.
+
+PWD is only used on one target on the xfstests build system, the
+tests/*/ dir install target.
+
+We can fix this by using $(CURDIR) instead.
+
+This issue is observed on both Fedora and OpenSUSE, but not on Debian.
+
+Signed-off-by: Luis R. Rodriguez <mcgrof@kernel.org>
+---
+ tests/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/Makefile b/tests/Makefile
+index 2611b3b845f5..11164e9ec130 100644
+--- a/tests/Makefile
++++ b/tests/Makefile
+@@ -5,7 +5,7 @@
+ TOPDIR = ..
+ include $(TOPDIR)/include/builddefs
+ 
+-TESTS_SUBDIRS = $(sort $(dir $(wildcard $(PWD)/$(TESTS_DIR)/[a-z]*/)))
++TESTS_SUBDIRS = $(sort $(dir $(wildcard $(CURDIR)/[a-z]*/)))
+ 
+ include $(BUILDRULES)
+ 
+-- 
+2.16.3
+
