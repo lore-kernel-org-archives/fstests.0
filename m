@@ -1,20 +1,20 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:14599 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:9706 "EHLO
         ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752125AbeF0IVP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:15 -0400
+        by vger.kernel.org with ESMTP id S1752575AbeF0IVQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:16 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-00083H-2f
+        id 1fY5hL-00083O-5L
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-0002iz-1c
+        id 1fY5hL-0002j8-4D
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 4/8] generic: convert some tests to new setup preamble
-Date: Wed, 27 Jun 2018 18:20:59 +1000
-Message-Id: <20180627082103.9662-5-david@fromorbit.com>
+Subject: [PATCH 7/8] overlay: convert some tests to new setup preamble
+Date: Wed, 27 Jun 2018 18:21:02 +1000
+Message-Id: <20180627082103.9662-8-david@fromorbit.com>
 In-Reply-To: <20180627082103.9662-1-david@fromorbit.com>
 References: <20180627082103.9662-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -27,152 +27,217 @@ Small initial batch to demonstrate conversion.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/generic/001 | 49 +++++++++++++++++------------------------------
- tests/generic/002 | 25 +++++++-----------------
- tests/generic/003 | 30 ++++++++---------------------
- tests/generic/004 | 32 +++++++++----------------------
- tests/generic/005 | 44 ++++++++++++++++--------------------------
- tests/generic/006 | 34 ++++++++++++--------------------
- tests/generic/007 | 29 ++++++++--------------------
- tests/generic/008 | 27 +++++++++-----------------
- tests/generic/009 | 28 +++++++++------------------
- 9 files changed, 97 insertions(+), 201 deletions(-)
+ tests/overlay/001 | 26 +++++---------------------
+ tests/overlay/002 | 26 +++++---------------------
+ tests/overlay/003 | 31 +++++++------------------------
+ tests/overlay/004 | 26 +++++---------------------
+ tests/overlay/005 | 32 ++++++++------------------------
+ tests/overlay/006 | 27 ++++++---------------------
+ tests/overlay/007 | 26 ++++++--------------------
+ tests/overlay/008 | 27 ++++++---------------------
+ tests/overlay/009 | 29 ++++++++---------------------
+ 9 files changed, 56 insertions(+), 194 deletions(-)
 
-diff --git a/tests/generic/001 b/tests/generic/001
-index 046e54e374a4..58ef45ed7102 100755
---- a/tests/generic/001
-+++ b/tests/generic/001
-@@ -15,25 +15,29 @@
- # config has one line per file with filename and byte size, else use
- # the default one below.
+diff --git a/tests/overlay/001 b/tests/overlay/001
+index ade7a73a6cb2..4f2131ac0b49 100755
+--- a/tests/overlay/001
++++ b/tests/overlay/001
+@@ -9,29 +9,15 @@
+ # Kernel commit 0480334fa604 ("ovl: use O_LARGEFILE in ovl_copy_up()")
+ # fixed bug when copying up large file from lower dir.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
 +. common/setup_test
  
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# test exit cleanup goes here
-+cleanup() {
-+    if $done_cleanup ; then
-+	:
-+    elif [ $status -eq 0 ]; then
-+	$verbose && echo "cleanup"
-+	cd /
-+	rm -rf $TEST_DIR/$$
-+	done_cleanup=true
-+    fi
-+}
- 
--tmp=/tmp/$$
 -here=`pwd`
--status=1
--done_cleanup=false
--trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs generic
- _supported_os Linux
- _require_test
- 
-+done_cleanup=false
- verbose=true
- verify=$here/verify_fill
- 
-@@ -260,25 +264,9 @@ _check()
-     $verbose && echo
- }
- 
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
 -_cleanup()
 -{
--    # cleanup
--    #
--    if $done_cleanup
--    then
--	:
--    elif [ $status -eq 0 ]
--    then
--	$verbose && echo "cleanup"
 -	cd /
--	rm -rf $TEST_DIR/$$
--	done_cleanup=true
--    fi
+-	rm -f $tmp.*
 -}
 -
- rm -f $seqres.full
- status=0
--_cleanup
-+cleanup
- status=1
- done_cleanup=false
- 
-@@ -299,5 +287,4 @@ do
-     fi
- done
- 
--status=0
--exit
-+_success
-diff --git a/tests/generic/002 b/tests/generic/002
-index 8242ea907c1b..9943a077fe6b 100755
---- a/tests/generic/002
-+++ b/tests/generic/002
-@@ -6,31 +6,20 @@
- #
- # simple inode link count test for a regular file
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
 +# test exit cleanup goes here
 +cleanup() { :; }
  
--tmp=/tmp/$$
--here=`pwd`
--status=0	# success is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
- 
--_cleanup()
--{
--    rm -f $tmp.*
--}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
  
 -# real QA test starts here
 +# include test specific environments here
- _supported_fs generic
+ _supported_fs overlay
  _supported_os Linux
- _require_test
- 
--rm -f $seqres.full
--
- echo "Silence is goodness ..."
- 
- # ensure target directory exists
-@@ -62,4 +51,4 @@ do
+ _require_scratch
+@@ -60,6 +46,4 @@ for f in $SCRATCH_MNT/*; do
+ 	$XFS_IO_PROG -c "open" $f >>$seqres.full
  done
  
- # success, all done
+-# success, all done
+-status=0
 -exit
 +_success
-diff --git a/tests/generic/003 b/tests/generic/003
-index 767d70593c3f..d928b9392686 100755
---- a/tests/generic/003
-+++ b/tests/generic/003
-@@ -9,34 +9,22 @@
- # never updated on read-only subvolumes. (Regression test for bug fixed
- # with commit 93fd63c2f001ca6797c6b15b696a484b165b4800)
+diff --git a/tests/overlay/002 b/tests/overlay/002
+index dd96cf0d3ab4..c677db1c6ffe 100755
+--- a/tests/overlay/002
++++ b/tests/overlay/002
+@@ -11,29 +11,15 @@
+ # memory access) when the lower or upper directory belonged to a btrfs file
+ # system.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+@@ -52,6 +38,4 @@ _scratch_mount
+ # This should work and not result in a crash.
+ $XFS_IO_PROG -c "pwrite 0 64k" -c "fsync" $SCRATCH_MNT/foobar | _filter_xfs_io
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/003 b/tests/overlay/003
+index 878ecbe7e974..5f753546242d 100755
+--- a/tests/overlay/003
++++ b/tests/overlay/003
+@@ -12,35 +12,21 @@
+ # prevents mounting overlayfs like this since v4.6-rc1.
+ # No harm to keep this test as a sanity check.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# real QA test starts here
+-
+-# Modify as appropriate.
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+ 
++echo "Silence is golden"
++
+ # Remove all files from previous tests
+ _scratch_mkfs
+ 
+@@ -77,7 +63,4 @@ ls ${SCRATCH_MNT}/
+ # unmount overlayfs but not base fs
+ $UMOUNT_PROG $SCRATCH_MNT
+ 
+-echo "Silence is golden"
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/004 b/tests/overlay/004
+index 216df203fe50..03115bb8ffd8 100755
+--- a/tests/overlay/004
++++ b/tests/overlay/004
+@@ -6,29 +6,15 @@
+ #
+ # Test file copy up on overlayfs by changing mode bits.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# Modify as appropriate.
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+@@ -78,6 +64,4 @@ $UMOUNT_PROG $SCRATCH_MNT
+ stat -c %a ${upperdir}/attr_file1
+ ls ${upperdir}/
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/005 b/tests/overlay/005
+index 902eda18c8fe..13733c8ee50d 100755
+--- a/tests/overlay/005
++++ b/tests/overlay/005
+@@ -8,35 +8,20 @@
+ # when unmount the underlying fs.
+ # Kernel commit ab79efab0 fixed this issue.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -185,289 +250,57 @@ index 767d70593c3f..d928b9392686 100755
 -
 -_cleanup()
 -{
--    cd /
--    rm -rf $tmp.*
--}
+-	cd /
+-	rm -f $tmp.*
 +. common/setup_test
++
++# test exit cleanup goes here
++cleanup() {
+ 	_destroy_loop_device $fs_loop_dev
+ 	_destroy_loop_device $upper_loop_dev
+ 	rm -f $lower_img
+ 	rm -f $upper_img
+ }
  
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
-+# test exit cleanup goes here
-+cleanup() { :; }
+-
+ # remove previous $seqres.full before test
+ rm -f $seqres.full
  
 -# real QA test starts here
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
+-
+-# Modify as appropriate.
 +# include test specific environments here
- _supported_fs generic
+ _supported_fs overlay
  _supported_os Linux
- _require_scratch
- _require_atime
- _require_relatime
+ # Use non-default scratch underlying overlay dirs, we need to check
+@@ -44,6 +29,8 @@ _supported_os Linux
+ _require_scratch_nocheck
+ _require_loop
  
--rm -f $seqres.full
 +echo "Silence is golden"
++
+ # Remove all files from previous tests
+ _scratch_mkfs
  
- _stat() {
- 	stat -c "%x;%y;%z" $1
-@@ -189,6 +177,4 @@ _compare_stat_times NNN "$file3_stat_before_ro_mount" \
+@@ -96,7 +83,4 @@ _overlay_check_scratch_dirs $lowerd $upperd $workd
+ $UMOUNT_PROG ${OVL_BASE_SCRATCH_MNT}/uppermnt
+ $UMOUNT_PROG ${OVL_BASE_SCRATCH_MNT}/lowermnt
  
- # success, all done
- _scratch_unmount
+-# success, all done
 -echo "Silence is golden"
 -status=0
 -exit
 +_success
-diff --git a/tests/generic/004 b/tests/generic/004
-index 156d68aee19f..a4d3d5d9d32e 100755
---- a/tests/generic/004
-+++ b/tests/generic/004
-@@ -6,35 +6,23 @@
- #
- # Test O_TMPFILE opens, and linking them back into the namespace.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    rm -f ${testfile}
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() {
-+	rm -f ${testfile}
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs generic
- _supported_os Linux
--
- _require_test
- _require_xfs_io_command "-T"
- _require_xfs_io_command "flink"
- 
--rm -f $seqres.full
--
- testfile="${TEST_DIR}/tst-tmpfile-flink"
- 
- # test creating a r/w tmpfile, do I/O and link it into the namespace
-@@ -49,6 +37,4 @@ rm ${testfile}
- # test creating a r/o tmpfile.  Should fail
- $XFS_IO_PROG -Tr ${TEST_DIR} -c "close" 2>&1 | _filter_test_dir
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/generic/005 b/tests/generic/005
-index 118fca20ed5d..ceff4117319e 100755
---- a/tests/generic/005
-+++ b/tests/generic/005
-@@ -9,28 +9,29 @@
- #
- # Note: On Linux, ELOOP limit used to be 32 but changed to 8, and lately
- # its become 5.  Who knows what it might be next.
--# 
-+#
- # What we are looking for here is: no panic due to blowing the stack;
- # and that the ELOOP error code is returned at some point (the actual
- # limit point is unimportant, just checking that we do hit it).
--# 
--
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+#
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=0	# success is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() {
-+    rm -f $TEST_DIR/symlink_{0,1,2,3,4}{0,1,2,3,4,5,6,7,8,9}
-+    rm -f $TEST_DIR/symlink_self empty_file
- 
--_cleanup()
--{
--    cd $TEST_DIR
--    rm -f symlink_{0,1,2,3,4}{0,1,2,3,4,5,6,7,8,9} symlink_self empty_file
--    cd /
- }
- 
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_test_symlinks
-+
- _touch()
- {
-     touch $@ 2>&1 | grep -q 'Too many levels of symbolic links'
-@@ -41,17 +42,6 @@ _touch()
-     fi
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--
--# real QA test starts here
--_supported_fs generic
--_require_test
--_require_test_symlinks
--
--_supported_os Linux
--
- cd $TEST_DIR
- 
- o=empty_file
-@@ -72,4 +62,4 @@ echo "*** touch recusive symlinks"
- echo ""
- _touch symlink_self
- 
--exit
-+_success
-diff --git a/tests/generic/006 b/tests/generic/006
-index ba99324a5846..9511aeb0b026 100755
---- a/tests/generic/006
-+++ b/tests/generic/006
-@@ -6,22 +6,21 @@
- #
- # permname
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=0	# success is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    rm -f $tmp.*
-+# test exit cleanup goes here
-+cleanup() {
-     rm -rf $TEST_DIR/permname.$$
- }
- 
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+
- _count()
- {
-     $AWK_PROG '
-@@ -31,15 +30,6 @@ _count()
-     '
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--
--# real QA test starts here
--_supported_fs generic
--_supported_os Linux
--_require_test
--
- mkdir $TEST_DIR/permname.$$
- 
- echo ""
-@@ -58,4 +48,4 @@ cd $TEST_DIR/permname.$$/b
- $here/src/permname -c 4 -l 6 -p 4 || echo "permname returned $?"
- find . | _count
- 
--exit
-+_success
-diff --git a/tests/generic/007 b/tests/generic/007
-index 9780e12e9e69..7a40418cdd56 100755
---- a/tests/generic/007
-+++ b/tests/generic/007
-@@ -9,32 +9,21 @@
- # and checks that error codes make sense with its
- # memory of the files created.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=0	# success is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    rm -f $tmp.*
--    rm -rf $TEST_DIR/$seq
-+# test exit cleanup goes here
-+cleanup() {
-+	rm -rf $TEST_DIR/$seq
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs generic
- _supported_os Linux
- _require_test
- 
--status=1 # default failure 
- sourcefile=$tmp.nametest
- seed=1
- iterations=100000
-@@ -53,6 +42,4 @@ mkdir $TEST_DIR/$seq
- cd $TEST_DIR/$seq
- $here/src/nametest -l $sourcefile -s $seed -i $iterations -z
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/generic/008 b/tests/generic/008
-index 7d86c602a241..386c59d2e106 100755
---- a/tests/generic/008
-+++ b/tests/generic/008
-@@ -9,25 +9,18 @@
- # Primarily tests page boundries and boundries that are
- #  off-by-one to ensure we're only tossing what's expected
+diff --git a/tests/overlay/006 b/tests/overlay/006
+index 72aa451a3c0b..ab48d70c36e7 100755
+--- a/tests/overlay/006
++++ b/tests/overlay/006
+@@ -10,28 +10,15 @@
+ # Upstream commit 45d117389696 ("ovl: ignore lower entries when checking purity
+ # of non-directory entries") fixed the issue
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -477,86 +310,180 @@ index 7d86c602a241..386c59d2e106 100755
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
--trap "exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/punch
+-trap "_cleanup; exit \$status" 0 1 2 3 15
 -
--# real QA test starts here
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# Modify as appropriate.
-+# include test specific environments here
-+. ./common/punch
-+_supported_fs generic
- _supported_os Linux
--
- _require_xfs_io_command "fzero"
- _require_test
- 
-@@ -38,6 +31,4 @@ _test_block_boundaries 2048 fzero _filter_xfs_io_unique $testfile
- _test_block_boundaries 4096 fzero _filter_xfs_io_unique $testfile
- _test_block_boundaries 65536 fzero _filter_xfs_io_unique $testfile
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/generic/009 b/tests/generic/009
-index fa6ef4664c66..124e502b23f0 100755
---- a/tests/generic/009
-+++ b/tests/generic/009
-@@ -6,32 +6,22 @@
- #
- # Test fallocate FALLOC_FL_ZERO_RANGE
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
 -_cleanup()
 -{
--    rm -f $tmp.*
+-	cd /
+-	rm -f $tmp.*
 -}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--trap "_cleanup ; exit \$status" 0 1 2 3 15
 -
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
-+# include test specific environments here
- . ./common/punch
--
++# test exit cleanup goes here
++cleanup() { :; }
+ 
++# remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
 -# real QA test starts here
-+_supported_fs generic
++# include test specific environments here
+ _supported_fs overlay
  _supported_os Linux
-+_require_test
- _require_xfs_io_command "fzero"
- _require_xfs_io_command "fiemap"
- _require_xfs_io_command "falloc"
--_require_test
+ _require_scratch
+@@ -57,6 +44,4 @@ rm $SCRATCH_MNT/uppertestdir/lowertestfile
+ # no file no whiteout file in upptestdir
+ ls $SCRATCH_MNT/uppertestdir
  
- testfile=$TEST_DIR/009.$$
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/007 b/tests/overlay/007
+index 5dffc83276bb..1f9366dd8ed4 100755
+--- a/tests/overlay/007
++++ b/tests/overlay/007
+@@ -9,29 +9,17 @@
+ # Upstream commit ce9113bbcbf4 ("ovl: fix getcwd() failure after unsuccessful
+ # rmdir") fixed this issue
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
  
-@@ -61,4 +51,4 @@ _test_generic_punch -k falloc fzero fzero fiemap _filter_fiemap $testfile
- # Delayed allocation multi zero range tests
- _test_generic_punch -d -k falloc fzero fzero fiemap _filter_fiemap $testfile
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
++# test exit cleanup goes here
++cleanup() {
+ 	rm -rf $TEST_DIR/$seq
+ }
  
--status=0 ; exit
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-
++# remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_test
+@@ -46,6 +34,4 @@ rmdir ../$seq >>$seqres.full 2>&1
+ # getcwd should return the correct current dir
+ pwd | _filter_test_dir
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/008 b/tests/overlay/008
+index 29fa509bd8cf..a12bc792ee08 100755
+--- a/tests/overlay/008
++++ b/tests/overlay/008
+@@ -10,28 +10,15 @@
+ # This upstream kernel patch fixed the issue
+ # d0e13f5 ovl: fix uid/gid when creating over whiteout
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
++# remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+@@ -65,6 +52,4 @@ rm -f $SCRATCH_MNT/testfile
+ _user_do "mkdir $SCRATCH_MNT/testfile"
+ stat -c %U:%G-%F $SCRATCH_MNT/testfile
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/overlay/009 b/tests/overlay/009
+index 7fe25f2da172..d9e37313bbe8 100755
+--- a/tests/overlay/009
++++ b/tests/overlay/009
+@@ -9,32 +9,21 @@
+ # This is fixed by kernel commit named as
+ # ovl: fix dentry leak for default_permissions
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	cd /
+-	rm -f $tmp.*
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
++# remove previous $seqres.full before test
+ rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs overlay
+ _supported_os Linux
+ _require_scratch
+ 
++echo "Silence is golden"
++
+ # Remove all files from previous tests
+ _scratch_mkfs
+ 
+@@ -48,6 +37,4 @@ _scratch_mount -o default_permissions
+ cat $SCRATCH_MNT/testfile
+ 
+ # overlay will be unmounted by test harness and kernel BUG if dentry leaked
+-echo "Silence is golden"
+-status=0
+-exit
 +_success
 -- 
 2.17.0
