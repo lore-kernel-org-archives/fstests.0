@@ -1,73 +1,117 @@
-Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:20139 "EHLO
-        ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S934583AbeF0ODM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 10:03:12 -0400
-Date: Thu, 28 Jun 2018 00:03:09 +1000
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:2247 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S933879AbeF0O1s (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 10:27:48 -0400
+Date: Thu, 28 Jun 2018 00:27:45 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/8] tests: convert various test dirs to setup preamble
-Message-ID: <20180627140309.GG19934@dastard>
+Subject: Re: [PATCH 3/8] shared: use new test setup preamble
+Message-ID: <20180627142745.GH19934@dastard>
 References: <20180627082103.9662-1-david@fromorbit.com>
- <20180627082103.9662-3-david@fromorbit.com>
- <CAOQ4uxgxt8LTCaN-7OS+Qp=npponARGYGfqco0xgaZ4oN5uf8w@mail.gmail.com>
+ <20180627082103.9662-4-david@fromorbit.com>
+ <CAOQ4uxj90rifsdgi67aMnqGzzX5P+oNQz_kRnpF73+wTjuq9kA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgxt8LTCaN-7OS+Qp=npponARGYGfqco0xgaZ4oN5uf8w@mail.gmail.com>
+In-Reply-To: <CAOQ4uxj90rifsdgi67aMnqGzzX5P+oNQz_kRnpF73+wTjuq9kA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
 Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 27, 2018 at 01:34:07PM +0300, Amir Goldstein wrote:
+On Wed, Jun 27, 2018 at 01:56:29PM +0300, Amir Goldstein wrote:
 > On Wed, Jun 27, 2018 at 11:20 AM, Dave Chinner <david@fromorbit.com> wrote:
 > > From: Dave Chinner <dchinner@redhat.com>
-> >
-> > Convert all the test dirs with a very small number of tests in one
-> > go.
 > >
 > > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > > ---
 > [...]
-> 
-> > -rm -f $seqres.full
-> > +echo "Silence is golden"
-> > +
-> > +fio_config=$tmp.fio
-> > +fio_results=$tmp.json
+> > diff --git a/tests/shared/298 b/tests/shared/298
+> > index e7b7b233de45..fc2d090a2f66 100755
+> > --- a/tests/shared/298
+> > +++ b/tests/shared/298
+> > @@ -6,15 +6,22 @@
+> >  #
+> >  # Test that filesystem sends discard requests only on free blocks
+> >  #
+> > -seq=`basename $0`
+> > -seqres=$RESULT_DIR/$seq
+> > -echo "QA output created by $seq"
+> > +. common/setup_test
 > >
-> >  _size=$((16 * $LOAD_FACTOR))
-> >  cat >$fio_config <<EOF
-> > @@ -60,5 +56,5 @@ $FIO_PROG --output-format=json --output=$fio_results $fio_config
-> >  _scratch_unmount
-> >  cat $fio_results >> $seqres.full
-> >  _fio_results_compare $seq $fio_results
-> > -echo "Silence is golden"
-> > -status=0; exit
-> > +
-> > +_success
+> > -status=1       # failure is the default!
+> > -trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +# test exit cleanup goes here
+> > +cleanup() {
+> > +       $UMOUNT_PROG $loop_dev &> /dev/null
+> > +       _destroy_loop_device $loop_dev
+> > +       if [ $status -eq 0 ]; then
+> > +               rm $img_file
+> > +               rm -rf $workdir
+> > +       fi
+> > +}
+> >
+> > -. ./common/rc
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> >
+> > +# include test specific environments here
+> >  _supported_fs ext4 xfs
+> >  _supported_os Linux
+> >  _require_test
+> > @@ -24,15 +31,8 @@ _require_xfs_io_command "fiemap"
+> >  _require_fs_space $TEST_DIR 307200
+> >  [ "$FSTYP" = "ext4" ] && _require_dumpe2fs
+> >
+> > -_cleanup()
+> > -{
+> > -       $UMOUNT_PROG $loop_dev &> /dev/null
+> > -       _destroy_loop_device $loop_dev
+> > -       if [ $status -eq 0 ]; then
+> > -               rm -rf $tmp
+> > -               rm $img_file
+> > -       fi
+> > -}
+> > +workdir=$TEST_DIR/$$
+> > +mkdir -p $workdir
 > 
-> I realize that without status=0 test will not pass, but it always
-> annoys me that echo "Silence is golden" before the end of the test.
+> :-/ I don't like this s/tmp/workdir conversion and don't like the idea
+> of having to do the same thing for 16 btrfs tests + 1 generic test.
 
-That's because it's supposed to be at the start of the test,
-documenting the fact that any output from the test is expected to
-cause it to fail. That's generally important to know before you get
-ot the last line of the test code....
+Too bad, we're going to have to do that.
 
-> How about _success_silent to further reduce the boilerplate echo
-> "Silence is golden"?
+> IIUC, you changed the test from using tmpdir under $here to
+> tmpdir under $TEST_DIR.
 
-No.  Removing "silence is golden" (and all the variations that have
-crept in over the years) and replacing them with
-_success_silent can be mostly scripted once everything
-has first been converted to call _success. IMO that's a relatively easy followup
-patchset, and it's precisely what this initial conversion is supposed to
-enable us to do. i.e. make codebase wide setup/completion
-maintenance much easier to perform.
+Yes, because the usages of $tmp in this test (and all those other
+ones, too) is completely broken.  You do realise that $here points
+at the xfstests source directory, and so tests like this are dumping
+crap in the source dir you run xfstests out of?
 
-So let's not make the hard part of converting 1260 tests to common
-setup infrastructure any harder than it already is going to be by
-adding lots of other random cleanups into it as well.....
+That's the sort of crap I'm trying to get rid of by moving to a
+common setup - no test should *ever* be writing to $here. They
+write temporary files the test needs to either /tmp
+(i.e. $tmp) or TEST_DIR. Redfining $tmp to whatever you want
+breaks assumptions in the infrastructure, and that's precisely the
+problems I'm trying to fix.
+
+And that means we've got to do the hard work of fixing the crappy
+tests that have accumulated over the years. The btrfs stuff is
+simple to fix - there's 15+ years of technical debt in the old xfs
+and generic tests that I'm going to have to wade through to make
+this conversion work. I don't like having to do this but if we want
+to make things better then we have to fix them.
+
+> Why not change it to tmpdir under /tmp?
+> Only change you will need to do is:
+> -tmp=`mktemp -d`
+> +mkdir -p $tmp
+
+Because the test is creating image files in $tmp, and we've had
+problems in the past with tests running the root filesystems out of
+space because they put too much shit in /tmp or dump crap in $here.
+TEST_DIR is supposed to be used at the work dir for things like this
+- we're trying to exercises the filesystem we are testing, not the
+root filesystem that hosts the fstests installation.
 
 Cheers,
 
