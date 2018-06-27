@@ -1,14 +1,14 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:45803 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:23178 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1752035AbeF0KTH (ORCPT
+        with ESMTP id S1753296AbeF0KTH (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 06:19:07 -0400
 Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-        by cn.fujitsu.com (Postfix) with ESMTP id 590C04B3EF17
-        for <fstests@vger.kernel.org>; Wed, 27 Jun 2018 18:19:00 +0800 (CST)
+        by cn.fujitsu.com (Postfix) with ESMTP id 4C63748029E8
+        for <fstests@vger.kernel.org>; Wed, 27 Jun 2018 18:18:59 +0800 (CST)
 From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: [PATCH 3/3] build: remove <attr/xattr.h> check
-Date: Wed, 27 Jun 2018 18:18:54 +0800
-Message-ID: <20180627101854.13158-4-lufq.fnst@cn.fujitsu.com>
+Subject: [PATCH v2 1/3] fsstress: remove include <attr/xattr.h>
+Date: Wed, 27 Jun 2018 18:18:52 +0800
+Message-ID: <20180627101854.13158-2-lufq.fnst@cn.fujitsu.com>
 In-Reply-To: <20180627101854.13158-1-lufq.fnst@cn.fujitsu.com>
 References: <20180627101854.13158-1-lufq.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
@@ -17,46 +17,31 @@ Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Since fsstress and src/t_immutable don't need attr/xattr.h, just remove
-<attr/xattr.h> check.
+Since commit de6d86177ff8 ("QA test updates - fixes for pquota, extsize,
+fsstress, and ensure mount options passed through to test_dev. Merge of
+master-melb:xfs-cmds:24763a by kenmcd.") remove llistxattr from
+fsstress, xattr.h is useless.
 
 Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 ---
- configure.ac          |  1 -
- m4/package_attrdev.m4 | 11 -----------
- 2 files changed, 12 deletions(-)
+v2: remove useless xattr.h
+ ltp/fsstress.c | 3 ---
+ 1 file changed, 3 deletions(-)
 
-diff --git a/configure.ac b/configure.ac
-index 57092f1c484b..63ea032dc564 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -51,7 +51,6 @@ AC_PACKAGE_NEED_XFSCTL_MACRO
- AC_PACKAGE_NEED_XFS_HANDLE_H
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 1bffa115bf2d..edbb3f2f8fb9 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -10,9 +10,6 @@
+ #include <stddef.h>
+ #include "global.h"
  
- AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
--AC_PACKAGE_NEED_ATTR_XATTR_H
- AC_PACKAGE_NEED_ATTRIBUTES_H
- AC_PACKAGE_WANT_ATTRLIST_LIBATTR
- AC_PACKAGE_NEED_GETXATTR_LIBATTR
-diff --git a/m4/package_attrdev.m4 b/m4/package_attrdev.m4
-index 12251ceb63c3..6bf21b1799e5 100644
---- a/m4/package_attrdev.m4
-+++ b/m4/package_attrdev.m4
-@@ -1,14 +1,3 @@
--AC_DEFUN([AC_PACKAGE_NEED_ATTR_XATTR_H],
--  [ AC_CHECK_HEADERS([attr/xattr.h])
--    if test "$ac_cv_header_attr_xattr_h" != "yes"; then
--        echo
--        echo 'FATAL ERROR: attr/xattr.h does not exist.'
--        echo 'Install the extended attributes (attr) development package.'
--        echo 'Alternatively, run "make install-dev" from the attr source.'
--        exit 1
--    fi
--  ])
--
- AC_DEFUN([AC_PACKAGE_NEED_ATTR_ERROR_H],
-   [ AC_CHECK_HEADERS([attr/error_context.h])
-     if test "$ac_cv_header_attr_error_context_h" != "yes"; then
+-#ifdef HAVE_ATTR_XATTR_H
+-#include <attr/xattr.h>
+-#endif
+ #ifdef HAVE_ATTR_ATTRIBUTES_H
+ #include <attr/attributes.h>
+ #endif
 -- 
 2.18.0
 
