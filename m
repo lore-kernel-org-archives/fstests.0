@@ -1,116 +1,81 @@
-Received: from mail.kernel.org ([198.145.29.99]:49098 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933915AbeF0O37 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Jun 2018 10:29:59 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: test power failure on btrfs while qgroups rescan is in progress
-Date: Wed, 27 Jun 2018 00:43:27 +0100
-Message-Id: <20180626234327.15691-1-fdmanana@kernel.org>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:26224 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S932907AbeF0OeQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 10:34:16 -0400
+Date: Thu, 28 Jun 2018 00:34:13 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 5/8] btrfs: convert some tests to new setup preamble
+Message-ID: <20180627143413.GI19934@dastard>
+References: <20180627082103.9662-1-david@fromorbit.com>
+ <20180627082103.9662-6-david@fromorbit.com>
+ <CAOQ4uxi7NP-NpK38CnBB=epxhq6Ykt+V-hSwOtAJuac7Gwt3og@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxi7NP-NpK38CnBB=epxhq6Ykt+V-hSwOtAJuac7Gwt3og@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Wed, Jun 27, 2018 at 02:30:13PM +0300, Amir Goldstein wrote:
+> On Wed, Jun 27, 2018 at 11:21 AM, Dave Chinner <david@fromorbit.com> wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> >
+> > Small initial batch to demonstrate conversion.
+> >
+> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > ---
+> [...]
+> > diff --git a/tests/btrfs/007 b/tests/btrfs/007
+> > index 09f2f011bc77..50ead03acf31 100755
+> > --- a/tests/btrfs/007
+> > +++ b/tests/btrfs/007
+> > @@ -9,37 +9,23 @@
+> >  # (incr) and send both snapshots to a temp file. Remake the file
+> >  # system and receive from the files. Check both states with fssum.
+> >  #
+> > -# creator
+> > -owner=list.btrfs@jan-o-sch.net
+> > +. common/setup_test
+> >
+> > -seq=`basename $0`
+> > -seqres=$RESULT_DIR/$seq
+> > -echo "QA output created by $seq"
+> > +# test exit cleanup goes here
+> > +cleanup() { :; }
+> >
+> > -tmp=`mktemp -d`
+> > -status=1
+> > -
+> > -_cleanup()
+> > -{
+> > -       echo "*** unmount"
+> > -       _scratch_unmount 2>/dev/null
+> > -       rm -f $tmp.*
+> > -}
+> 
+> Bug in existing test - it does not cleanup $tmp.
 
-Test that if a power failure happens on a filesystem with quotas (qgroups)
-enabled while the quota rescan kernel thread is running, we will be able
-to mount the filesystem after the power failure.
+Yup, because it creates a non-standard $tmp but then uses code that
+assumes that tmp is the standard name prefix definition, not a
+directory.  This is exactly the sort of bug I'm trying to eradicate.
 
-This test is motivated by a recent regression introduced in the linux
-kernel's 4.18 merge window and is fixed by a patch with the title:
+And, FWIW, because the test is only using tmp files, it doesn't need
+to use TEST_DIR to store them so no need for a working directory to
+be defined.
 
-  "Btrfs: fix mount failure when qgroup rescan is in progress"
+> cleanup() { rm -rf $tmp }
+> 
+> -tmp=`mktemp -d`
+> +mkdir -p $tmp
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/166     | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/166.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 60 insertions(+)
- create mode 100755 tests/btrfs/166
- create mode 100644 tests/btrfs/166.out
+Again, no. $tmp is not a directory and there's infrastructure that
+assumes it is not a directory.
 
-diff --git a/tests/btrfs/166 b/tests/btrfs/166
-new file mode 100755
-index 00000000..c74b0861
---- /dev/null
-+++ b/tests/btrfs/166
-@@ -0,0 +1,57 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FSQA Test No. 166
-+#
-+# Test that if a power failure happens on a filesystem with quotas (qgroups)
-+# enabled while the quota rescan kernel thread is running, we will be able
-+# to mount the filesystem after the power failure.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs  >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Enable qgroups on the filesystem. This will start the qgroup rescan kernel
-+# thread.
-+_run_btrfs_util_prog quota enable $SCRATCH_MNT
-+
-+# Simulate a power failure, while the qgroup rescan kernel thread is running,
-+# and then mount the filesystem to check that mounting the filesystem does not
-+# fail.
-+_flakey_drop_and_remount
-+
-+_unmount_flakey
-+_cleanup_flakey
-+
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/166.out b/tests/btrfs/166.out
-new file mode 100644
-index 00000000..1b1db1f8
---- /dev/null
-+++ b/tests/btrfs/166.out
-@@ -0,0 +1,2 @@
-+QA output created by 166
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 9988cedd..e68aa1b7 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -168,3 +168,4 @@
- 163 auto quick volume
- 164 auto quick volume
- 165 auto quick subvol
-+166 auto quick qgroup
+Cheers,
+
+Dave.
 -- 
-2.11.0
-
+Dave Chinner
+david@fromorbit.com
