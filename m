@@ -1,20 +1,20 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:9706 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:2669 "EHLO
         ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753259AbeF0IVN (ORCPT
+        by vger.kernel.org with ESMTP id S1753262AbeF0IVN (ORCPT
         <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:13 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-00083G-1n
+        id 1fY5hL-00083K-4R
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-0002iw-0j
+        id 1fY5hL-0002j5-3J
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 3/8] shared: use new test setup preamble
-Date: Wed, 27 Jun 2018 18:20:58 +1000
-Message-Id: <20180627082103.9662-4-david@fromorbit.com>
+Subject: [PATCH 6/8] ext4: convert some tests to new setup preamble
+Date: Wed, 27 Jun 2018 18:21:01 +1000
+Message-Id: <20180627082103.9662-7-david@fromorbit.com>
 In-Reply-To: <20180627082103.9662-1-david@fromorbit.com>
 References: <20180627082103.9662-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -23,33 +23,196 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
+Small initial batch to demonstrate conversion.
+
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/shared/001 | 33 ++++++++++-----------------------
- tests/shared/002 | 40 ++++++++++++++--------------------------
- tests/shared/003 | 35 ++++++++++-------------------------
- tests/shared/004 | 27 +++++++--------------------
- tests/shared/005 | 30 ++++++++----------------------
- tests/shared/006 | 35 +++++++++++------------------------
- tests/shared/007 | 30 +++++++++---------------------
- tests/shared/032 | 26 +++++++++-----------------
- tests/shared/272 | 34 ++++++++++++++--------------------
- tests/shared/289 | 31 +++++++------------------------
- tests/shared/298 | 48 ++++++++++++++++++++++--------------------------
- 11 files changed, 121 insertions(+), 248 deletions(-)
+ tests/ext4/001 | 26 +++++++-------------------
+ tests/ext4/002 | 41 +++++++++++++----------------------------
+ tests/ext4/003 | 25 +++++++------------------
+ tests/ext4/004 | 46 ++++++++++++++++------------------------------
+ tests/ext4/005 | 29 +++++++----------------------
+ tests/ext4/006 | 38 +++++++++++++-------------------------
+ tests/ext4/007 | 34 ++++++++++------------------------
+ tests/ext4/008 | 28 +++++++---------------------
+ tests/ext4/009 | 34 ++++++++++------------------------
+ 9 files changed, 90 insertions(+), 211 deletions(-)
 
-diff --git a/tests/shared/001 b/tests/shared/001
-index bde6e1987d90..80caa30e7f71 100755
---- a/tests/shared/001
-+++ b/tests/shared/001
-@@ -9,31 +9,19 @@
+diff --git a/tests/ext4/001 b/tests/ext4/001
+index bf2d16b42b3c..deba9128d833 100755
+--- a/tests/ext4/001
++++ b/tests/ext4/001
+@@ -6,28 +6,16 @@
  #
- # 721e3eb ext4: lock i_mutex when truncating orphan inodes
+ # Test fallocate FALLOC_FL_ZERO_RANGE
+ #
+-seqfull=$0
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-_cleanup()
+-{
+-    rm -f $tmp.*
+-}
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-trap "_cleanup ; exit \$status" 0 1 2 3 15
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# include test specific environments here
+ . ./common/punch
+-
+-# real QA test starts here
+ _supported_fs ext4
+ _supported_os Linux
+ _require_xfs_io_command "fzero"
+@@ -50,4 +38,4 @@ _test_generic_punch -k falloc fzero fzero fiemap _filter_fiemap $testfile
+ # Delayed allocation multi zero range tests
+ _test_generic_punch -d -k falloc fzero fzero fiemap _filter_fiemap $testfile
+ 
+-status=0 ; exit
++_success
+diff --git a/tests/ext4/002 b/tests/ext4/002
+index c4fb3bde8ce1..c1324dc04609 100755
+--- a/tests/ext4/002
++++ b/tests/ext4/002
+@@ -26,26 +26,24 @@
+ #
+ # Ref: http://thread.gmane.org/gmane.comp.file-systems.ext4/20682
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1        # failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
++_supported_fs ext4
++_supported_os Linux
++_require_xfs_io_command "falloc"
++_require_test
+ 
+ # Test specific macros.
+ BIT_NOT_SET=0   # inode flag - 0x400000 bit is not set.
+ BIT_SET=1       # inode flag - 0x400000 bit is set.
+ 
+-# Generic test cleanup function.
+-_cleanup()
+-{
+-  cd /
+-  rm -f $tmp.*
+-}
 -
+ # Ext4 uses the EOFBLOCKS_FL bit when fallocating blocks with KEEP_SIZE
+ # enabled. The only time this bit should be set is when extending the allocated
+ # blocks further than what the i_size represents. In the situations wherein the
+@@ -97,18 +95,6 @@ _check_ext4_eof_flag()
+   fi
+ }
+ 
+-# Get standard environment, filters and checks.
+-. ./common/rc
+-. ./common/filter
+-
+-# Prerequisites for the test run.
+-_supported_fs ext4
+-_supported_os Linux
+-_require_xfs_io_command "falloc"
+-_require_test
+-
+-# Real QA test starts here.
+-rm -f $seqres.full
+ 
+ # Remove any leftover files from last run.
+ rm -f ${TEST_DIR}/test_?
+@@ -162,5 +148,4 @@ ${XFS_IO_PROG} -f -d                    \
+     ${TEST_DIR}/test_6 | _filter_xfs_io_unique
+ _check_ext4_eof_flag test_6 ${BIT_NOT_SET}
+ 
+-status=0
+-exit ${status}
++_success
+diff --git a/tests/ext4/003 b/tests/ext4/003
+index 19fe4b4c1f7d..7e5dfca9468e 100755
+--- a/tests/ext4/003
++++ b/tests/ext4/003
+@@ -8,30 +8,20 @@
+ # b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
+ # This testcase checks whether this bug has been fixed.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-_cleanup()
+-{
+-    _scratch_unmount
+-}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs ext4
+ _supported_os Linux
+-
+ _require_scratch
+ _require_scratch_ext4_feature "bigalloc"
+ 
+-rm -f $seqres.full
+-
+ $MKFS_EXT4_PROG -F -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
+ 	>> $seqres.full 2>&1
+ _scratch_mount
+@@ -39,5 +29,4 @@ _scratch_mount
+ $XFS_IO_PROG -f -c "pwrite 0 256m -b 1M" $SCRATCH_MNT/testfile 2>&1 | \
+ 	_filter_xfs_io
+ 
+-status=0
+-exit
++_success
+diff --git a/tests/ext4/004 b/tests/ext4/004
+index e34aaa517b61..775afed4bc2c 100755
+--- a/tests/ext4/004
++++ b/tests/ext4/004
+@@ -6,26 +6,26 @@
+ #
+ # Test "dump | restore"(as opposed to a tape)
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
@@ -59,69 +222,11 @@ index bde6e1987d90..80caa30e7f71 100755
 -{
 -	cd /
 -	rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--
--# real QA test starts here
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
- _supported_fs ext2 ext3 ext4
- _supported_os Linux
- _require_scratch
- 
--rm -f $seqres.full
- echo "Silence is golden"
- 
- _scratch_mkfs_sized $((16*1024*1024)) >>$seqres.full 2>&1
-@@ -52,5 +40,4 @@ debugfs -w -R "set_super_value last_orphan $inode" $SCRATCH_DEV \
- # mount again to truncate orphan inode, _check_dmesg will catch the WARNING
- _scratch_mount
- 
--status=0
--exit
-+_success
-diff --git a/tests/shared/002 b/tests/shared/002
-index 30ece3370601..ac7352bffc44 100755
---- a/tests/shared/002
-+++ b/tests/shared/002
-@@ -10,43 +10,32 @@
- # fsync log/journal is replayed, the xattrs still exist and with the correct
- # values.
- #
-+# We create a lot of xattrs for a single file. Only btrfs and xfs are currently
-+# able to store such a large mount of xattrs per file, other filesystems such
-+# as ext3/4 and f2fs for example, fail with ENOSPC even if we attempt to add
-+# less than 1000 xattrs with very small values.
-+#
- # This test is motivated by a bug found in btrfs.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--
--_cleanup()
--{
 +# test exit cleanup goes here
 +cleanup() {
- 	_cleanup_flakey
--	rm -f $tmp.*
+ 	# remove the generated data, which is much and meaningless.
+ 	rm -rf $restore_dir
  }
--trap "_cleanup; exit \$status" 0 1 2 3 15
  
 -# get standard environment, filters and checks
 -. ./common/rc
@@ -130,51 +235,64 @@ index 30ece3370601..ac7352bffc44 100755
 +rm -f $seqres.full
 +
 +# include test specific environments here
- . ./common/dmflakey
- . ./common/attr
--
--# real QA test starts here
--
--# We create a lot of xattrs for a single file. Only btrfs and xfs are currently
--# able to store such a large mount of xattrs per file, other filesystems such
--# as ext3/4 and f2fs for example, fail with ENOSPC even if we attempt to add
--# less than 1000 xattrs with very small values.
--_supported_fs btrfs xfs
- _supported_os Linux
-+_supported_fs btrfs xfs
- _require_scratch
- _require_dm_target flakey
- _require_attrs
++_supported_fs ext4
++_supported_os Linux
++_require_test
++_require_scratch
++_require_command "$DUMP_PROG" dump
++_require_command "$RESTORE_PROG" restore
++
++echo "Silence is golden"
  
--rm -f $seqres.full
+ dump_dir=$SCRATCH_MNT/dump_restore_dir
+ restore_dir=$TEST_DIR/dump_restore_dir
+@@ -49,19 +49,6 @@ workout()
+ 	rm -rf restoresymtable
+ }
+ 
+-# real QA test starts here
+-_supported_fs ext4
+-_supported_os Linux
 -
- _scratch_mkfs >> $seqres.full 2>&1
- _require_metadata_journaling $SCRATCH_DEV
- _init_flakey
-@@ -94,5 +83,4 @@ for ((i = 1; i <= $num_xattrs; i++)); do
- 	echo
- done
+-_require_test
+-_require_scratch
+-
+-_require_command "$DUMP_PROG" dump
+-_require_command "$RESTORE_PROG" restore
+-
+-rm -f $seqres.full
+-echo "Silence is golden"
+-
+ _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
+ _scratch_mount
+ rm -rf $restore_dir $TEST_DIR/restoresymtable
+@@ -69,5 +56,4 @@ rm -rf $restore_dir $TEST_DIR/restoresymtable
+ workout
+ diff -r $dump_dir $restore_dir
  
 -status=0
 -exit
 +_success
-diff --git a/tests/shared/003 b/tests/shared/003
-index 761b9691d4cc..23501b274101 100755
---- a/tests/shared/003
-+++ b/tests/shared/003
-@@ -11,34 +11,21 @@
- #
- # Also test on ext2/3.
+diff --git a/tests/ext4/005 b/tests/ext4/005
+index db37c2eaa51e..a1e3f08eb1f4 100755
+--- a/tests/ext4/005
++++ b/tests/ext4/005
+@@ -11,33 +11,20 @@
+ # ext4: be more strict when migrating to non-extent based file
+ # ext4: correctly migrate a file with a hole at the beginning
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
--
++. common/setup_test
+ 
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
--
++# test exit cleanup goes here
++cleanup() { :; }
+ 
 -_cleanup()
 -{
 -	cd /
@@ -184,146 +302,164 @@ index 761b9691d4cc..23501b274101 100755
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
--
--# real QA test starts here
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
-+
+ 
+-# real QA test starts here
 +# include test specific environments here
- _supported_fs ext2 ext3 ext4
+ _supported_fs ext4
  _supported_os Linux
+ _require_scratch
+ _require_command "$CHATTR_PROG" chattr
  
- # nofsck as we modify sb via debugfs
- _require_scratch_nocheck
- 
--# remove previous $seqres.full before test
 -rm -f $seqres.full
+-
  echo "Silence is golden"
  
  _scratch_mkfs >>$seqres.full 2>&1
-@@ -50,6 +37,4 @@ debugfs -w -R "feature +needs_recovery" $SCRATCH_DEV \
- # mount with noload option
- _try_scratch_mount "-o noload" >>$seqres.full 2>&1
+@@ -63,6 +50,4 @@ $CHATTR_PROG -e $testfile >>$seqres.full 2>&1
+ # results in i_blocks corruption
+ $XFS_IO_PROG -c "pwrite 0 4k" $testfile >>$seqres.full 2>&1
  
 -# success, all done
 -status=0
 -exit
 +_success
-diff --git a/tests/shared/004 b/tests/shared/004
-index 3021c85d51eb..d5fe835ea8a3 100755
---- a/tests/shared/004
-+++ b/tests/shared/004
-@@ -7,31 +7,20 @@
- # Regression test for commit:
- # c9eb13a ext4: fix hang when processing corrupted orphaned inode list
+diff --git a/tests/ext4/006 b/tests/ext4/006
+index 63e42f58906f..3881090efa51 100755
+--- a/tests/ext4/006
++++ b/tests/ext4/006
+@@ -8,40 +8,30 @@
+ # the kernel reacts, how e2fsck fares in fixing the mess, and then
+ # try more kernel accesses to see if it really fixed things.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
-+. common/setup_test
- 
+-
+-here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
+-
 -_cleanup()
 -{
--	cd /
--	rm -f $tmp.*
+-    cd /
+-    #rm -f $tmp.*
 -}
--
--# get standard environment, filters and checks
--. ./common/rc
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() { :; }
++
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
  
--# real QA test starts here
+-# get standard environment, filters and checks
 +# include test specific environments here
- _supported_fs ext2 ext3 ext4
+ . ./common/rc
+ . ./common/filter
+ . ./common/attr
+ . ./common/populate
+ . ./common/fuzzy
+-
+-if [ ! -x "$(which e2fuzz)" ]; then
+-	_notrun "Couldn't find e2fuzz"
+-fi
+-
+-# real QA test starts here
+ _supported_fs ext4
  _supported_os Linux
+-
  _require_scratch
- _require_command "$DEBUGFS_PROG" debugfs
+ _require_attrs
+ _require_populate_commands
  
--# remove previous $seqres.full before test
++if [ ! -x "$(which e2fuzz)" ]; then
++	_notrun "Couldn't find e2fuzz"
++fi
++
+ repair_scratch() {
+ 	fsck_pass="$1"
+ 
+@@ -75,7 +65,6 @@ repair_scratch() {
+ 	return 1
+ }
+ 
 -rm -f $seqres.full
- echo "Silence is golden"
+ echo "See interesting results in $seqres.full" | sed -e "s,$RESULT_DIR,RESULT_DIR,g"
+ SRCDIR=`pwd`
+ test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-b 32 -v"
+@@ -144,5 +133,4 @@ if [ "$(wc -l < "$ROUND2_LOG")" -ne 8 ]; then
+ fi
+ echo "finished fuzzing" | tee -a "$seqres.full"
  
- # Although the bug only happens when last_orphan is set to 5
-@@ -44,6 +33,4 @@ for i in {1..10}; do
- 	_scratch_unmount
- done
- 
--# success, all done
 -status=0
 -exit
 +_success
-diff --git a/tests/shared/005 b/tests/shared/005
-index 67940dd0d0fc..e9df81a67ce8 100755
---- a/tests/shared/005
-+++ b/tests/shared/005
-@@ -13,33 +13,21 @@
- # So, create this malformed inode and try a buffered append to make
- # sure we catch this situation.
+diff --git a/tests/ext4/007 b/tests/ext4/007
+index b7f7c6ce517e..be81135b18fa 100755
+--- a/tests/ext4/007
++++ b/tests/ext4/007
+@@ -7,35 +7,22 @@
+ # Create and populate an ext4 filesystem, corrupt the primary superblock, then
+ # see how the kernel and e2fsck deal with it.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
-+. common/setup_test
- 
--PIDS=""
+-
+-here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
+-
 -_cleanup()
 -{
--	rm -f $tmp.*
+-    cd /
+-    #rm -f $tmp.*
 -}
 -
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
+-. ./common/attr
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() { :; }
++
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
  
 -# real QA test starts here
--_supported_os Linux
 +# include test specific environments here
- _supported_fs ext2 ext3 ext4
-+_supported_os Linux
- _require_scratch_nocheck
- _disable_dmesg_check
- _require_command "$DEBUGFS_PROG"
++. ./common/attr
+ _supported_fs ext4
+ _supported_os Linux
+-
+ _require_scratch
+ test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
+ _require_attrs
  
 -rm -f $seqres.full
--
- echo "Format and mount"
- _scratch_mkfs  >> $seqres.full 2>&1
- _scratch_mount
-@@ -60,6 +48,4 @@ _scratch_mount
- dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
- sync
+ TESTDIR="${SCRATCH_MNT}/scratchdir"
+ TESTFILE="${TESTDIR}/testfile"
  
--# success, all done
+@@ -103,5 +90,4 @@ umount "${SCRATCH_MNT}"
+ echo "+ check fs (2)"
+ e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
+ 
 -status=0
 -exit
 +_success
-diff --git a/tests/shared/006 b/tests/shared/006
-index aa65e9a29e7b..d7a8cd9c6b6b 100755
---- a/tests/shared/006
-+++ b/tests/shared/006
-@@ -9,20 +9,18 @@
- # Also a regression test for xfsprogs commit
- # d586858 xfs_repair: fix sibling pointer tests in verify_dir2_path()
+diff --git a/tests/ext4/008 b/tests/ext4/008
+index c553760dd333..6f35511bd366 100755
+--- a/tests/ext4/008
++++ b/tests/ext4/008
+@@ -7,35 +7,22 @@
+ # Create and populate an ext4 filesystem, corrupt a group descriptor, then
+ # see how the kernel and e2fsck deal with it.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -340,360 +476,89 @@ index aa65e9a29e7b..d7a8cd9c6b6b 100755
 -_cleanup()
 -{
 -    cd /
--    rm -f $tmp.*
+-    #rm -f $tmp.*
 -}
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs ext4 ext3 ext2 xfs
-+_supported_os Linux
-+_require_scratch
- 
- create_file()
- {
-@@ -37,17 +35,7 @@ create_file()
- 	done
- }
  
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
- 
--# real QA test starts here
--_supported_fs ext4 ext3 ext2 xfs
--_supported_os Linux
--
--_require_scratch
--
--rm -f $seqres.full
- echo "Silence is golden"
- 
- _scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
-@@ -77,5 +65,4 @@ rm -rf $SCRATCH_MNT/testdir
- echo "Inode status after deleting all test files" >>$seqres.full
- $DF_PROG -i $SCRATCH_MNT >>$seqres.full
- 
--status=0
--exit
-+_success
-diff --git a/tests/shared/007 b/tests/shared/007
-index 65cb5273b6a0..a552c1aba3aa 100755
---- a/tests/shared/007
-+++ b/tests/shared/007
-@@ -13,32 +13,22 @@
- # So, create this malformed inode and try a dio append to make sure we
- # catch this situation.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--PIDS=""
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--	rm -f $tmp.*
--}
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
--_supported_os Linux
 +# include test specific environments here
- _supported_fs ext2 ext3 ext4
-+_supported_os Linux
- _require_scratch_nocheck
- _disable_dmesg_check
- _require_command "$DEBUGFS_PROG"
- 
--rm -f $seqres.full
-+PIDS=""
- 
- echo "Format and mount"
- _scratch_mkfs  >> $seqres.full 2>&1
-@@ -62,6 +52,4 @@ _scratch_mount
- dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
- sync
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/shared/032 b/tests/shared/032
-index 3b0263b2ce78..ef0dc936b31e 100755
---- a/tests/shared/032
-+++ b/tests/shared/032
-@@ -6,34 +6,28 @@
- #
- # cross check mkfs detection of foreign filesystems
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
--rm -f $seqres.full
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
+ . ./common/attr
+-
 -# real QA test starts here
-+# include test specific environments here
- _supported_fs xfs btrfs
+ _supported_fs ext4
  _supported_os Linux
 -
- _require_scratch_nocheck
- _require_no_large_scratch_dev
+ _require_scratch
+ test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
+ _require_attrs
  
-+echo "Silence is golden."
-+
- # mkfs.btrfs did not have overwrite detection at first
- if [ "$FSTYP" == "btrfs" ]; then
- 	grep -q 'force overwrite' `echo $MKFS_BTRFS_PROG | awk '{print $1}'` || \
- 		_notrun "Installed mkfs.btrfs does not support -f option"
- fi
- 
--echo "Silence is golden."
- for fs in `echo ${MKFS_PROG}.* | sed -e "s:${MKFS_PROG}.::g"`
- do
- 	preop=""	# for special input needs
-@@ -75,6 +69,4 @@ do
- 	fi
- done
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/shared/272 b/tests/shared/272
-index b94dfc3c3d87..5c694308ae6b 100755
---- a/tests/shared/272
-+++ b/tests/shared/272
-@@ -6,21 +6,23 @@
- #
- # Test data journaling flag switch for a single file  
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs ext3 ext4
-+_supported_os Linux
-+_require_scratch
-+_exclude_scratch_mount_option dax
- 
- # ext3 and ext4 don't support direct IO in journalling mode
- write_opt_list="iflag=noatime conv=notrunc conv=fsync"
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
- _workout()
- {
- 	echo "Switch data journalling mode. Silence is golden."
-@@ -32,7 +34,6 @@ _workout()
- 		idx=$((idx + 1))
- 		for chattr_opt in $chattr_opt_list
- 		do
--		    
- 			echo "OP write_opt: $write_opt 4M, \
- chattr_opt: $chattr_opt" >>$seqres.full
- 			dd if=/dev/zero of=$SCRATCH_MNT/file.$idx \
-@@ -63,13 +64,6 @@ chattr_opt: $chattr_opt" >>$seqres.full
- 	done
- }
- 
--# real QA test starts here
--_supported_fs ext3 ext4
--_supported_os Linux
--_require_scratch
--_exclude_scratch_mount_option dax
--
 -rm -f $seqres.full
- _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount
+ TESTDIR="${SCRATCH_MNT}/scratchdir"
+ TESTFILE="${TESTDIR}/testfile"
  
-@@ -86,5 +80,5 @@ if ! _scratch_unmount; then
- 	exit
- fi
- echo "Check filesystem"
+@@ -84,5 +71,4 @@ umount "${SCRATCH_MNT}"
+ echo "+ check fs (2)"
+ e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
+ 
 -status=0
 -exit
-+
 +_success
-diff --git a/tests/shared/289 b/tests/shared/289
-index 94b644302b2d..7466fc2726f2 100755
---- a/tests/shared/289
-+++ b/tests/shared/289
-@@ -6,34 +6,19 @@
- #
- # Test overhead & df output for extN filesystems
+diff --git a/tests/ext4/009 b/tests/ext4/009
+index 9a2cd0f3c669..94da5e91900a 100755
+--- a/tests/ext4/009
++++ b/tests/ext4/009
+@@ -7,36 +7,23 @@
+ # Create and populate an ext4 filesystem, corrupt a block bitmap, then
+ # see how the kernel and e2fsck deal with it.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
-+. common/setup_test
- 
+-
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
+-
 -_cleanup()
 -{
 -    cd /
--    rm -f $tmp.*
+-    #rm -f $tmp.*
 -}
 -
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
--
--# real QA test starts here
+-. ./common/attr
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() { :; }
++
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
  
--# Modify as appropriate.
+-# real QA test starts here
 +# include test specific environments here
- _supported_fs ext2 ext3 ext4
++. ./common/attr
+ _supported_fs ext4
  _supported_os Linux
+-
+ _require_xfs_io_command "falloc"
  _require_scratch
+ test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
+ _require_attrs
  
 -rm -f $seqres.full
--
- _scratch_mkfs >> $seqres.full 2>&1
+ TESTDIR="${SCRATCH_MNT}/scratchdir"
+ TESTFILE="${TESTDIR}/testfile"
  
- # Get the honest truth about block counts straight from metadata on disk
-@@ -79,6 +64,4 @@ _within_tolerance "minix f_blocks" $MINIX_F_BLOCKS $TOTAL_BLOCKS 0 -v
- # bsd should be within ... we'll say 1% for some slop
- _within_tolerance "bsd f_blocks" $BSD_F_BLOCKS $(($TOTAL_BLOCKS-$OVERHEAD)) 1% -v
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/shared/298 b/tests/shared/298
-index e7b7b233de45..fc2d090a2f66 100755
---- a/tests/shared/298
-+++ b/tests/shared/298
-@@ -6,15 +6,22 @@
- #
- # Test that filesystem sends discard requests only on free blocks
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() {
-+	$UMOUNT_PROG $loop_dev &> /dev/null
-+	_destroy_loop_device $loop_dev
-+	if [ $status -eq 0 ]; then
-+		rm $img_file
-+		rm -rf $workdir
-+	fi
-+}
- 
--. ./common/rc
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
-+# include test specific environments here
- _supported_fs ext4 xfs
- _supported_os Linux
- _require_test
-@@ -24,15 +31,8 @@ _require_xfs_io_command "fiemap"
- _require_fs_space $TEST_DIR 307200
- [ "$FSTYP" = "ext4" ] && _require_dumpe2fs
- 
--_cleanup()
--{
--	$UMOUNT_PROG $loop_dev &> /dev/null
--	_destroy_loop_device $loop_dev
--	if [ $status -eq 0 ]; then
--		rm -rf $tmp
--		rm $img_file
--	fi
--}
-+workdir=$TEST_DIR/$$
-+mkdir -p $workdir
- 
- get_holes()
- {
-@@ -70,7 +70,7 @@ merge_ranges()
- 	file1=$1
- 	file2=$2
- 
--	tmp_file=$tmp/sectors.tmp
-+	tmp_file=$workdir/sectors.tmp
- 
- 	cat $file1 $file2 | sort -n > $tmp_file
- 
-@@ -101,19 +101,16 @@ merge_ranges()
- 	rm $tmp_file
- }
- 
--here=`pwd`
--tmp=`mktemp -d`
--
- img_file=$TEST_DIR/$$.fs
- dd if=/dev/zero of=$img_file bs=1M count=300 &> /dev/null
- 
- loop_dev=$(_create_loop_device $img_file)
--loop_mnt=$tmp/loop_mnt
-+loop_mnt=$workdir/loop_mnt
- 
--fiemap_ref="$tmp/reference"
--fiemap_after="$tmp/after"
--free_sectors="$tmp/free_sectors"
--merged_sectors="$tmp/merged_free_sectors"
-+fiemap_ref="$workdir/reference"
-+fiemap_after="$workdir/after"
-+free_sectors="$workdir/free_sectors"
-+merged_sectors="$workdir/merged_free_sectors"
- 
- mkdir $loop_mnt
- 
-@@ -173,5 +170,4 @@ while read line; do
- done < $fiemap_after
- echo "done."
+@@ -94,5 +81,4 @@ umount "${SCRATCH_MNT}"
+ echo "+ check fs (2)"
+ e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
  
 -status=0
 -exit
