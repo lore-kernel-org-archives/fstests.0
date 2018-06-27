@@ -1,20 +1,20 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:2669 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:14599 "EHLO
         ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1753262AbeF0IVN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:13 -0400
+        by vger.kernel.org with ESMTP id S1752125AbeF0IVP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:15 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-00083K-4R
+        id 1fY5hL-00083H-2f
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-0002j5-3J
+        id 1fY5hL-0002iz-1c
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 6/8] ext4: convert some tests to new setup preamble
-Date: Wed, 27 Jun 2018 18:21:01 +1000
-Message-Id: <20180627082103.9662-7-david@fromorbit.com>
+Subject: [PATCH 4/8] generic: convert some tests to new setup preamble
+Date: Wed, 27 Jun 2018 18:20:59 +1000
+Message-Id: <20180627082103.9662-5-david@fromorbit.com>
 In-Reply-To: <20180627082103.9662-1-david@fromorbit.com>
 References: <20180627082103.9662-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -27,26 +27,494 @@ Small initial batch to demonstrate conversion.
 
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/ext4/001 | 26 +++++++-------------------
- tests/ext4/002 | 41 +++++++++++++----------------------------
- tests/ext4/003 | 25 +++++++------------------
- tests/ext4/004 | 46 ++++++++++++++++------------------------------
- tests/ext4/005 | 29 +++++++----------------------
- tests/ext4/006 | 38 +++++++++++++-------------------------
- tests/ext4/007 | 34 ++++++++++------------------------
- tests/ext4/008 | 28 +++++++---------------------
- tests/ext4/009 | 34 ++++++++++------------------------
- 9 files changed, 90 insertions(+), 211 deletions(-)
+ tests/generic/001 | 49 +++++++++++++++++------------------------------
+ tests/generic/002 | 25 +++++++-----------------
+ tests/generic/003 | 30 ++++++++---------------------
+ tests/generic/004 | 32 +++++++++----------------------
+ tests/generic/005 | 44 ++++++++++++++++--------------------------
+ tests/generic/006 | 34 ++++++++++++--------------------
+ tests/generic/007 | 29 ++++++++--------------------
+ tests/generic/008 | 27 +++++++++-----------------
+ tests/generic/009 | 28 +++++++++------------------
+ 9 files changed, 97 insertions(+), 201 deletions(-)
 
-diff --git a/tests/ext4/001 b/tests/ext4/001
-index bf2d16b42b3c..deba9128d833 100755
---- a/tests/ext4/001
-+++ b/tests/ext4/001
-@@ -6,28 +6,16 @@
+diff --git a/tests/generic/001 b/tests/generic/001
+index 046e54e374a4..58ef45ed7102 100755
+--- a/tests/generic/001
++++ b/tests/generic/001
+@@ -15,25 +15,29 @@
+ # config has one line per file with filename and byte size, else use
+ # the default one below.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() {
++    if $done_cleanup ; then
++	:
++    elif [ $status -eq 0 ]; then
++	$verbose && echo "cleanup"
++	cd /
++	rm -rf $TEST_DIR/$$
++	done_cleanup=true
++    fi
++}
+ 
+-tmp=/tmp/$$
+-here=`pwd`
+-status=1
+-done_cleanup=false
+-trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
+ 
++done_cleanup=false
+ verbose=true
+ verify=$here/verify_fill
+ 
+@@ -260,25 +264,9 @@ _check()
+     $verbose && echo
+ }
+ 
+-_cleanup()
+-{
+-    # cleanup
+-    #
+-    if $done_cleanup
+-    then
+-	:
+-    elif [ $status -eq 0 ]
+-    then
+-	$verbose && echo "cleanup"
+-	cd /
+-	rm -rf $TEST_DIR/$$
+-	done_cleanup=true
+-    fi
+-}
+-
+ rm -f $seqres.full
+ status=0
+-_cleanup
++cleanup
+ status=1
+ done_cleanup=false
+ 
+@@ -299,5 +287,4 @@ do
+     fi
+ done
+ 
+-status=0
+-exit
++_success
+diff --git a/tests/generic/002 b/tests/generic/002
+index 8242ea907c1b..9943a077fe6b 100755
+--- a/tests/generic/002
++++ b/tests/generic/002
+@@ -6,31 +6,20 @@
+ #
+ # simple inode link count test for a regular file
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-tmp=/tmp/$$
+-here=`pwd`
+-status=0	# success is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
+-_cleanup()
+-{
+-    rm -f $tmp.*
+-}
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
+ 
+-rm -f $seqres.full
+-
+ echo "Silence is goodness ..."
+ 
+ # ensure target directory exists
+@@ -62,4 +51,4 @@ do
+ done
+ 
+ # success, all done
+-exit
++_success
+diff --git a/tests/generic/003 b/tests/generic/003
+index 767d70593c3f..d928b9392686 100755
+--- a/tests/generic/003
++++ b/tests/generic/003
+@@ -9,34 +9,22 @@
+ # never updated on read-only subvolumes. (Regression test for bug fixed
+ # with commit 93fd63c2f001ca6797c6b15b696a484b165b4800)
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
+-
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    cd /
+-    rm -rf $tmp.*
+-}
++. common/setup_test
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-# real QA test starts here
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
++# include test specific environments here
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch
+ _require_atime
+ _require_relatime
+ 
+-rm -f $seqres.full
++echo "Silence is golden"
+ 
+ _stat() {
+ 	stat -c "%x;%y;%z" $1
+@@ -189,6 +177,4 @@ _compare_stat_times NNN "$file3_stat_before_ro_mount" \
+ 
+ # success, all done
+ _scratch_unmount
+-echo "Silence is golden"
+-status=0
+-exit
++_success
+diff --git a/tests/generic/004 b/tests/generic/004
+index 156d68aee19f..a4d3d5d9d32e 100755
+--- a/tests/generic/004
++++ b/tests/generic/004
+@@ -6,35 +6,23 @@
+ #
+ # Test O_TMPFILE opens, and linking them back into the namespace.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
+-
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    cd /
+-    rm -f ${testfile}
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() {
++	rm -f ${testfile}
+ }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs generic
+ _supported_os Linux
+-
+ _require_test
+ _require_xfs_io_command "-T"
+ _require_xfs_io_command "flink"
+ 
+-rm -f $seqres.full
+-
+ testfile="${TEST_DIR}/tst-tmpfile-flink"
+ 
+ # test creating a r/w tmpfile, do I/O and link it into the namespace
+@@ -49,6 +37,4 @@ rm ${testfile}
+ # test creating a r/o tmpfile.  Should fail
+ $XFS_IO_PROG -Tr ${TEST_DIR} -c "close" 2>&1 | _filter_test_dir
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/generic/005 b/tests/generic/005
+index 118fca20ed5d..ceff4117319e 100755
+--- a/tests/generic/005
++++ b/tests/generic/005
+@@ -9,28 +9,29 @@
+ #
+ # Note: On Linux, ELOOP limit used to be 32 but changed to 8, and lately
+ # its become 5.  Who knows what it might be next.
+-# 
++#
+ # What we are looking for here is: no panic due to blowing the stack;
+ # and that the ELOOP error code is returned at some point (the actual
+ # limit point is unimportant, just checking that we do hit it).
+-# 
+-
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++#
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=0	# success is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() {
++    rm -f $TEST_DIR/symlink_{0,1,2,3,4}{0,1,2,3,4,5,6,7,8,9}
++    rm -f $TEST_DIR/symlink_self empty_file
+ 
+-_cleanup()
+-{
+-    cd $TEST_DIR
+-    rm -f symlink_{0,1,2,3,4}{0,1,2,3,4,5,6,7,8,9} symlink_self empty_file
+-    cd /
+ }
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_test_symlinks
++
+ _touch()
+ {
+     touch $@ 2>&1 | grep -q 'Too many levels of symbolic links'
+@@ -41,17 +42,6 @@ _touch()
+     fi
+ }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-
+-# real QA test starts here
+-_supported_fs generic
+-_require_test
+-_require_test_symlinks
+-
+-_supported_os Linux
+-
+ cd $TEST_DIR
+ 
+ o=empty_file
+@@ -72,4 +62,4 @@ echo "*** touch recusive symlinks"
+ echo ""
+ _touch symlink_self
+ 
+-exit
++_success
+diff --git a/tests/generic/006 b/tests/generic/006
+index ba99324a5846..9511aeb0b026 100755
+--- a/tests/generic/006
++++ b/tests/generic/006
+@@ -6,22 +6,21 @@
+ #
+ # permname
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=0	# success is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    cd /
+-    rm -f $tmp.*
++# test exit cleanup goes here
++cleanup() {
+     rm -rf $TEST_DIR/permname.$$
+ }
+ 
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
++_supported_fs generic
++_supported_os Linux
++_require_test
++
+ _count()
+ {
+     $AWK_PROG '
+@@ -31,15 +30,6 @@ _count()
+     '
+ }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-
+-# real QA test starts here
+-_supported_fs generic
+-_supported_os Linux
+-_require_test
+-
+ mkdir $TEST_DIR/permname.$$
+ 
+ echo ""
+@@ -58,4 +48,4 @@ cd $TEST_DIR/permname.$$/b
+ $here/src/permname -c 4 -l 6 -p 4 || echo "permname returned $?"
+ find . | _count
+ 
+-exit
++_success
+diff --git a/tests/generic/007 b/tests/generic/007
+index 9780e12e9e69..7a40418cdd56 100755
+--- a/tests/generic/007
++++ b/tests/generic/007
+@@ -9,32 +9,21 @@
+ # and checks that error codes make sense with its
+ # memory of the files created.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=0	# success is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-    cd /
+-    rm -f $tmp.*
+-    rm -rf $TEST_DIR/$seq
++# test exit cleanup goes here
++cleanup() {
++	rm -rf $TEST_DIR/$seq
+ }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs generic
+ _supported_os Linux
+ _require_test
+ 
+-status=1 # default failure 
+ sourcefile=$tmp.nametest
+ seed=1
+ iterations=100000
+@@ -53,6 +42,4 @@ mkdir $TEST_DIR/$seq
+ cd $TEST_DIR/$seq
+ $here/src/nametest -l $sourcefile -s $seed -i $iterations -z
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/generic/008 b/tests/generic/008
+index 7d86c602a241..386c59d2e106 100755
+--- a/tests/generic/008
++++ b/tests/generic/008
+@@ -9,25 +9,18 @@
+ # Primarily tests page boundries and boundries that are
+ #  off-by-one to ensure we're only tossing what's expected
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+-. ./common/punch
+-
+-# real QA test starts here
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# Modify as appropriate.
++# include test specific environments here
++. ./common/punch
++_supported_fs generic
+ _supported_os Linux
+-
+ _require_xfs_io_command "fzero"
+ _require_test
+ 
+@@ -38,6 +31,4 @@ _test_block_boundaries 2048 fzero _filter_xfs_io_unique $testfile
+ _test_block_boundaries 4096 fzero _filter_xfs_io_unique $testfile
+ _test_block_boundaries 65536 fzero _filter_xfs_io_unique $testfile
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/generic/009 b/tests/generic/009
+index fa6ef4664c66..124e502b23f0 100755
+--- a/tests/generic/009
++++ b/tests/generic/009
+@@ -6,32 +6,22 @@
  #
  # Test fallocate FALLOC_FL_ZERO_RANGE
  #
--seqfull=$0
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
@@ -74,494 +542,21 @@ index bf2d16b42b3c..deba9128d833 100755
  . ./common/punch
 -
 -# real QA test starts here
- _supported_fs ext4
++_supported_fs generic
  _supported_os Linux
++_require_test
  _require_xfs_io_command "fzero"
-@@ -50,4 +38,4 @@ _test_generic_punch -k falloc fzero fzero fiemap _filter_fiemap $testfile
+ _require_xfs_io_command "fiemap"
+ _require_xfs_io_command "falloc"
+-_require_test
+ 
+ testfile=$TEST_DIR/009.$$
+ 
+@@ -61,4 +51,4 @@ _test_generic_punch -k falloc fzero fzero fiemap _filter_fiemap $testfile
  # Delayed allocation multi zero range tests
  _test_generic_punch -d -k falloc fzero fzero fiemap _filter_fiemap $testfile
  
 -status=0 ; exit
-+_success
-diff --git a/tests/ext4/002 b/tests/ext4/002
-index c4fb3bde8ce1..c1324dc04609 100755
---- a/tests/ext4/002
-+++ b/tests/ext4/002
-@@ -26,26 +26,24 @@
- #
- # Ref: http://thread.gmane.org/gmane.comp.file-systems.ext4/20682
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1        # failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs ext4
-+_supported_os Linux
-+_require_xfs_io_command "falloc"
-+_require_test
- 
- # Test specific macros.
- BIT_NOT_SET=0   # inode flag - 0x400000 bit is not set.
- BIT_SET=1       # inode flag - 0x400000 bit is set.
- 
--# Generic test cleanup function.
--_cleanup()
--{
--  cd /
--  rm -f $tmp.*
--}
--
- # Ext4 uses the EOFBLOCKS_FL bit when fallocating blocks with KEEP_SIZE
- # enabled. The only time this bit should be set is when extending the allocated
- # blocks further than what the i_size represents. In the situations wherein the
-@@ -97,18 +95,6 @@ _check_ext4_eof_flag()
-   fi
- }
- 
--# Get standard environment, filters and checks.
--. ./common/rc
--. ./common/filter
--
--# Prerequisites for the test run.
--_supported_fs ext4
--_supported_os Linux
--_require_xfs_io_command "falloc"
--_require_test
--
--# Real QA test starts here.
--rm -f $seqres.full
- 
- # Remove any leftover files from last run.
- rm -f ${TEST_DIR}/test_?
-@@ -162,5 +148,4 @@ ${XFS_IO_PROG} -f -d                    \
-     ${TEST_DIR}/test_6 | _filter_xfs_io_unique
- _check_ext4_eof_flag test_6 ${BIT_NOT_SET}
- 
--status=0
--exit ${status}
-+_success
-diff --git a/tests/ext4/003 b/tests/ext4/003
-index 19fe4b4c1f7d..7e5dfca9468e 100755
---- a/tests/ext4/003
-+++ b/tests/ext4/003
-@@ -8,30 +8,20 @@
- # b5b6077 ext4: fix wrong assert in ext4_mb_normalize_request()
- # This testcase checks whether this bug has been fixed.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--    _scratch_unmount
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs ext4
- _supported_os Linux
--
- _require_scratch
- _require_scratch_ext4_feature "bigalloc"
- 
--rm -f $seqres.full
--
- $MKFS_EXT4_PROG -F -O bigalloc -C 65536  -g 256 $SCRATCH_DEV 512m \
- 	>> $seqres.full 2>&1
- _scratch_mount
-@@ -39,5 +29,4 @@ _scratch_mount
- $XFS_IO_PROG -f -c "pwrite 0 256m -b 1M" $SCRATCH_MNT/testfile 2>&1 | \
- 	_filter_xfs_io
- 
--status=0
--exit
-+_success
-diff --git a/tests/ext4/004 b/tests/ext4/004
-index e34aaa517b61..775afed4bc2c 100755
---- a/tests/ext4/004
-+++ b/tests/ext4/004
-@@ -6,26 +6,26 @@
- #
- # Test "dump | restore"(as opposed to a tape)
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--	cd /
--	rm -f $tmp.*
-+# test exit cleanup goes here
-+cleanup() {
- 	# remove the generated data, which is much and meaningless.
- 	rm -rf $restore_dir
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+_supported_fs ext4
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_command "$DUMP_PROG" dump
-+_require_command "$RESTORE_PROG" restore
-+
-+echo "Silence is golden"
- 
- dump_dir=$SCRATCH_MNT/dump_restore_dir
- restore_dir=$TEST_DIR/dump_restore_dir
-@@ -49,19 +49,6 @@ workout()
- 	rm -rf restoresymtable
- }
- 
--# real QA test starts here
--_supported_fs ext4
--_supported_os Linux
--
--_require_test
--_require_scratch
--
--_require_command "$DUMP_PROG" dump
--_require_command "$RESTORE_PROG" restore
--
--rm -f $seqres.full
--echo "Silence is golden"
--
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
- _scratch_mount
- rm -rf $restore_dir $TEST_DIR/restoresymtable
-@@ -69,5 +56,4 @@ rm -rf $restore_dir $TEST_DIR/restoresymtable
- workout
- diff -r $dump_dir $restore_dir
- 
--status=0
--exit
-+_success
-diff --git a/tests/ext4/005 b/tests/ext4/005
-index db37c2eaa51e..a1e3f08eb1f4 100755
---- a/tests/ext4/005
-+++ b/tests/ext4/005
-@@ -11,33 +11,20 @@
- # ext4: be more strict when migrating to non-extent based file
- # ext4: correctly migrate a file with a hole at the beginning
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--	cd /
--	rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs ext4
- _supported_os Linux
- _require_scratch
- _require_command "$CHATTR_PROG" chattr
- 
--rm -f $seqres.full
--
- echo "Silence is golden"
- 
- _scratch_mkfs >>$seqres.full 2>&1
-@@ -63,6 +50,4 @@ $CHATTR_PROG -e $testfile >>$seqres.full 2>&1
- # results in i_blocks corruption
- $XFS_IO_PROG -c "pwrite 0 4k" $testfile >>$seqres.full 2>&1
- 
--# success, all done
--status=0
--exit
-+_success
-diff --git a/tests/ext4/006 b/tests/ext4/006
-index 63e42f58906f..3881090efa51 100755
---- a/tests/ext4/006
-+++ b/tests/ext4/006
-@@ -8,40 +8,30 @@
- # the kernel reacts, how e2fsck fares in fixing the mess, and then
- # try more kernel accesses to see if it really fixed things.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    #rm -f $tmp.*
--}
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# get standard environment, filters and checks
-+# include test specific environments here
- . ./common/rc
- . ./common/filter
- . ./common/attr
- . ./common/populate
- . ./common/fuzzy
--
--if [ ! -x "$(which e2fuzz)" ]; then
--	_notrun "Couldn't find e2fuzz"
--fi
--
--# real QA test starts here
- _supported_fs ext4
- _supported_os Linux
--
- _require_scratch
- _require_attrs
- _require_populate_commands
- 
-+if [ ! -x "$(which e2fuzz)" ]; then
-+	_notrun "Couldn't find e2fuzz"
-+fi
-+
- repair_scratch() {
- 	fsck_pass="$1"
- 
-@@ -75,7 +65,6 @@ repair_scratch() {
- 	return 1
- }
- 
--rm -f $seqres.full
- echo "See interesting results in $seqres.full" | sed -e "s,$RESULT_DIR,RESULT_DIR,g"
- SRCDIR=`pwd`
- test -z "${FUZZ_ARGS}" && FUZZ_ARGS="-b 32 -v"
-@@ -144,5 +133,4 @@ if [ "$(wc -l < "$ROUND2_LOG")" -ne 8 ]; then
- fi
- echo "finished fuzzing" | tee -a "$seqres.full"
- 
--status=0
--exit
-+_success
-diff --git a/tests/ext4/007 b/tests/ext4/007
-index b7f7c6ce517e..be81135b18fa 100755
---- a/tests/ext4/007
-+++ b/tests/ext4/007
-@@ -7,35 +7,22 @@
- # Create and populate an ext4 filesystem, corrupt the primary superblock, then
- # see how the kernel and e2fsck deal with it.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    #rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/attr
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
-+. ./common/attr
- _supported_fs ext4
- _supported_os Linux
--
- _require_scratch
- test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
- _require_attrs
- 
--rm -f $seqres.full
- TESTDIR="${SCRATCH_MNT}/scratchdir"
- TESTFILE="${TESTDIR}/testfile"
- 
-@@ -103,5 +90,4 @@ umount "${SCRATCH_MNT}"
- echo "+ check fs (2)"
- e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
- 
--status=0
--exit
-+_success
-diff --git a/tests/ext4/008 b/tests/ext4/008
-index c553760dd333..6f35511bd366 100755
---- a/tests/ext4/008
-+++ b/tests/ext4/008
-@@ -7,35 +7,22 @@
- # Create and populate an ext4 filesystem, corrupt a group descriptor, then
- # see how the kernel and e2fsck deal with it.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--    cd /
--    #rm -f $tmp.*
--}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# include test specific environments here
- . ./common/attr
--
--# real QA test starts here
- _supported_fs ext4
- _supported_os Linux
--
- _require_scratch
- test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
- _require_attrs
- 
--rm -f $seqres.full
- TESTDIR="${SCRATCH_MNT}/scratchdir"
- TESTFILE="${TESTDIR}/testfile"
- 
-@@ -84,5 +71,4 @@ umount "${SCRATCH_MNT}"
- echo "+ check fs (2)"
- e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
- 
--status=0
--exit
-+_success
-diff --git a/tests/ext4/009 b/tests/ext4/009
-index 9a2cd0f3c669..94da5e91900a 100755
---- a/tests/ext4/009
-+++ b/tests/ext4/009
-@@ -7,36 +7,23 @@
- # Create and populate an ext4 filesystem, corrupt a block bitmap, then
- # see how the kernel and e2fsck deal with it.
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
--
--_cleanup()
--{
--    cd /
--    #rm -f $tmp.*
--}
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/attr
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() { :; }
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
-+. ./common/attr
- _supported_fs ext4
- _supported_os Linux
--
- _require_xfs_io_command "falloc"
- _require_scratch
- test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
- _require_attrs
- 
--rm -f $seqres.full
- TESTDIR="${SCRATCH_MNT}/scratchdir"
- TESTFILE="${TESTDIR}/testfile"
- 
-@@ -94,5 +81,4 @@ umount "${SCRATCH_MNT}"
- echo "+ check fs (2)"
- e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
- 
--status=0
--exit
 +_success
 -- 
 2.17.0
