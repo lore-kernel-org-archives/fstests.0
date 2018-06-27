@@ -1,20 +1,20 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:14599 "EHLO
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:9706 "EHLO
         ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1752575AbeF0IVM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:12 -0400
+        by vger.kernel.org with ESMTP id S1753259AbeF0IVN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 04:21:13 -0400
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-00083I-3Y
+        id 1fY5hL-00083G-1n
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1fY5hL-0002j2-2T
+        id 1fY5hL-0002iw-0j
         for fstests@vger.kernel.org; Wed, 27 Jun 2018 18:21:07 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 5/8] btrfs: convert some tests to new setup preamble
-Date: Wed, 27 Jun 2018 18:21:00 +1000
-Message-Id: <20180627082103.9662-6-david@fromorbit.com>
+Subject: [PATCH 3/8] shared: use new test setup preamble
+Date: Wed, 27 Jun 2018 18:20:58 +1000
+Message-Id: <20180627082103.9662-4-david@fromorbit.com>
 In-Reply-To: <20180627082103.9662-1-david@fromorbit.com>
 References: <20180627082103.9662-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
@@ -23,122 +23,28 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Dave Chinner <dchinner@redhat.com>
 
-Small initial batch to demonstrate conversion.
-
 Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- tests/btrfs/001 | 25 ++++++----------------
- tests/btrfs/002 | 28 ++++++++----------------
- tests/btrfs/003 | 41 ++++++++++++++---------------------
- tests/btrfs/004 | 24 ++++++---------------
- tests/btrfs/005 | 51 +++++++++++++++++--------------------------
- tests/btrfs/006 | 30 ++++++--------------------
- tests/btrfs/007 | 57 +++++++++++++++++++------------------------------
- tests/btrfs/008 | 30 +++++++++-----------------
- tests/btrfs/009 | 29 +++++++------------------
- 9 files changed, 105 insertions(+), 210 deletions(-)
+ tests/shared/001 | 33 ++++++++++-----------------------
+ tests/shared/002 | 40 ++++++++++++++--------------------------
+ tests/shared/003 | 35 ++++++++++-------------------------
+ tests/shared/004 | 27 +++++++--------------------
+ tests/shared/005 | 30 ++++++++----------------------
+ tests/shared/006 | 35 +++++++++++------------------------
+ tests/shared/007 | 30 +++++++++---------------------
+ tests/shared/032 | 26 +++++++++-----------------
+ tests/shared/272 | 34 ++++++++++++++--------------------
+ tests/shared/289 | 31 +++++++------------------------
+ tests/shared/298 | 48 ++++++++++++++++++++++--------------------------
+ 11 files changed, 121 insertions(+), 248 deletions(-)
 
-diff --git a/tests/btrfs/001 b/tests/btrfs/001
-index b13a2470a0ed..771971135937 100755
---- a/tests/btrfs/001
-+++ b/tests/btrfs/001
-@@ -6,27 +6,16 @@
+diff --git a/tests/shared/001 b/tests/shared/001
+index bde6e1987d90..80caa30e7f71 100755
+--- a/tests/shared/001
++++ b/tests/shared/001
+@@ -9,31 +9,19 @@
  #
- # Test btrfs's subvolume and snapshot support
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--    rm -f $tmp.*
--}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--trap "_cleanup ; exit \$status" 0 1 2 3 15
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# include test specific environments here
- . ./common/filter.btrfs
--
--# real QA test starts here
- _supported_fs btrfs
- _supported_os Linux
- _require_scratch
-@@ -90,4 +79,4 @@ _scratch_cycle_mount
- echo "List root dir"
- ls $SCRATCH_MNT
- 
--status=0 ; exit
-+_success
-diff --git a/tests/btrfs/002 b/tests/btrfs/002
-index 87e21c02f68c..5d6b106bc090 100755
---- a/tests/btrfs/002
-+++ b/tests/btrfs/002
-@@ -6,29 +6,21 @@
- #
- # Extented btrfs snapshot test cases
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
--status=1	# failure is the default!
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--    rm -f $tmp.*
--}
--
--trap "_cleanup ; exit \$status" 0 1 2 3 15
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
-+# include test specific environments here
- _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- 
-+echo "Silence is golden"
-+
- _scratch_mkfs > /dev/null 2>&1 || _fail "mkfs failed"
- _scratch_mount
- 
-@@ -169,6 +161,4 @@ _save_checksum $SNAPNAME $tmp.$tname.sum
- _verify_checksum $SNAPNAME $tmp.$tname.sum
- 
- _scratch_unmount || _fail "unmount failed"
--
--echo "Silence is golden"
--status=0; exit
-+_success
-diff --git a/tests/btrfs/003 b/tests/btrfs/003
-index 22aa57aad0b9..dac7ed919711 100755
---- a/tests/btrfs/003
-+++ b/tests/btrfs/003
-@@ -6,31 +6,20 @@
- #
- # btrfs vol tests
+ # 721e3eb ext4: lock i_mutex when truncating orphan inodes
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -147,64 +53,57 @@ index 22aa57aad0b9..dac7ed919711 100755
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
--dev_removed=0
--removed_dev_htl=""
 -trap "_cleanup; exit \$status" 0 1 2 3 15
 -
 -_cleanup()
 -{
--    cd /
--    rm -f $tmp.*
--    if [ $dev_removed == 1 ]; then
--	_scratch_unmount
--	_devmgt_add "${removed_dev_htl}"
--    fi
-+. common/setup_test
-+
-+# test exit cleanup goes here
-+cleanup() {
-+	if [ $dev_removed == 1 ]; then
-+		_scratch_unmount
-+		_devmgt_add "${removed_dev_htl}"
-+	fi
- }
- 
+-	cd /
+-	rm -f $tmp.*
+-}
+-
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
+-
+-# real QA test starts here
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() { :; }
++
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
- 
++
 +# include test specific environments here
- _supported_fs btrfs
+ _supported_fs ext2 ext3 ext4
  _supported_os Linux
  _require_scratch
-@@ -38,7 +27,10 @@ _require_scratch_dev_pool 4
- _require_deletable_scratch_dev_pool
- _require_command "$WIPEFS_PROG" wipefs
  
 -rm -f $seqres.full
-+echo "Silence is golden"
-+
-+dev_removed=0
-+removed_dev_htl=""
+ echo "Silence is golden"
  
- # Test cases related to raid in btrfs
- _test_raid0()
-@@ -172,5 +164,4 @@ _test_add
- _test_replace
- _test_remove
+ _scratch_mkfs_sized $((16*1024*1024)) >>$seqres.full 2>&1
+@@ -52,5 +40,4 @@ debugfs -w -R "set_super_value last_orphan $inode" $SCRATCH_DEV \
+ # mount again to truncate orphan inode, _check_dmesg will catch the WARNING
+ _scratch_mount
  
--echo "Silence is golden"
--status=0; exit
+-status=0
+-exit
 +_success
-diff --git a/tests/btrfs/004 b/tests/btrfs/004
-index 3f61a8f46140..99dd1f768d81 100755
---- a/tests/btrfs/004
-+++ b/tests/btrfs/004
-@@ -9,28 +9,18 @@
- # run filefrag to get the extent mapping and follow the backrefs.
- # We check to end up back at the original file with the correct offset.
+diff --git a/tests/shared/002 b/tests/shared/002
+index 30ece3370601..ac7352bffc44 100755
+--- a/tests/shared/002
++++ b/tests/shared/002
+@@ -10,43 +10,32 @@
+ # fsync log/journal is replayed, the xattrs still exist and with the correct
+ # values.
+ #
++# We create a lot of xattrs for a single file. Only btrfs and xfs are currently
++# able to store such a large mount of xattrs per file, other filesystems such
++# as ext3/4 and f2fs for example, fail with ENOSPC even if we attempt to add
++# less than 1000 xattrs with very small values.
++#
+ # This test is motivated by a bug found in btrfs.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -213,15 +112,13 @@ index 3f61a8f46140..99dd1f768d81 100755
  
 -here=`pwd`
 -tmp=/tmp/$$
--status=1
--noise_pid=0
+-status=1	# failure is the default!
 -
 -_cleanup()
 -{
 +# test exit cleanup goes here
 +cleanup() {
- 	rm $tmp.running
- 	wait
+ 	_cleanup_flakey
 -	rm -f $tmp.*
  }
 -trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -231,178 +128,166 @@ index 3f61a8f46140..99dd1f768d81 100755
 -. ./common/filter
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
- 
--# real QA test starts here
++
 +# include test specific environments here
- _supported_fs btrfs
+ . ./common/dmflakey
+ . ./common/attr
+-
+-# real QA test starts here
+-
+-# We create a lot of xattrs for a single file. Only btrfs and xfs are currently
+-# able to store such a large mount of xattrs per file, other filesystems such
+-# as ext3/4 and f2fs for example, fail with ENOSPC even if we attempt to add
+-# less than 1000 xattrs with very small values.
+-_supported_fs btrfs xfs
  _supported_os Linux
++_supported_fs btrfs xfs
  _require_scratch
-@@ -39,7 +29,7 @@ _require_btrfs_command inspect-internal logical-resolve
- _require_btrfs_command inspect-internal inode-resolve
- _require_command "$FILEFRAG_PROG" filefrag
+ _require_dm_target flakey
+ _require_attrs
  
 -rm -f $seqres.full
-+noise_pid=0
- 
- FILEFRAG_FILTER='
- 	if (/blocks? of (\d+) bytes/) {
-diff --git a/tests/btrfs/005 b/tests/btrfs/005
-index 15af46783298..4cebb57fbaba 100755
---- a/tests/btrfs/005
-+++ b/tests/btrfs/005
-@@ -6,22 +6,26 @@
- #
- # Btrfs Online defragmentation tests
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
--here="`pwd`"
--tmp=/tmp/$$
--cnt=119
--filesize=48000
-+. common/setup_test
- 
--status=1	# failure is the default!
--trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
--_cleanup()
--{
--    cd /
--    rm -f $tmp.*
--}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# include test specific environments here
-+. ./common/defrag
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+_require_defrag
-+
-+cnt=119
-+filesize=48000
- 
- _create_file()
- {
-@@ -111,22 +115,6 @@ _rundefrag()
- 	_check_scratch_fs
- }
- 
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
--. ./common/defrag
 -
--# real QA test starts here
--_supported_fs btrfs
--_supported_os Linux
--_require_scratch
--
--rm -f $seqres.full
--
--_scratch_mkfs >/dev/null 2>&1
--_scratch_mount
--_require_defrag
--
- echo "defrag object | defragment range | defragment compress"
- echo "a single file | default | off"
- _rundefrag 1 1 1
-@@ -155,5 +143,4 @@ _rundefrag 2 1 1
- echo "a filesystem | default | off"
- _rundefrag 3 1 1
+ _scratch_mkfs >> $seqres.full 2>&1
+ _require_metadata_journaling $SCRATCH_DEV
+ _init_flakey
+@@ -94,5 +83,4 @@ for ((i = 1; i <= $num_xattrs; i++)); do
+ 	echo
+ done
  
 -status=0
 -exit
 +_success
-diff --git a/tests/btrfs/006 b/tests/btrfs/006
-index 3edbb25a72a8..8eed1a2a1221 100755
---- a/tests/btrfs/006
-+++ b/tests/btrfs/006
-@@ -7,35 +7,21 @@
- # run basic btrfs information commands in various ways
- # sanity tests: filesystem show, label, sync, and device stats
+diff --git a/tests/shared/003 b/tests/shared/003
+index 761b9691d4cc..23501b274101 100755
+--- a/tests/shared/003
++++ b/tests/shared/003
+@@ -11,34 +11,21 @@
+ #
+ # Also test on ext2/3.
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
--echo "== QA output created by $seq"
-+. common/setup_test
- 
+-echo "QA output created by $seq"
+-
 -here=`pwd`
 -tmp=/tmp/$$
 -status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
-+# test exit cleanup goes here
-+cleanup() { :; }
- 
+-
 -_cleanup()
 -{
--    cd /
--    rm -f $tmp.*
+-	cd /
+-	rm -f $tmp.*
 -}
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
+-
 -# get standard environment, filters and checks
 -. ./common/rc
-+# include test specific environments here
- . ./common/filter.btrfs
+-. ./common/filter
 -
 -# real QA test starts here
--
--# Modify as appropriate.
- _supported_fs btrfs
++. common/setup_test
++
++# test exit cleanup goes here
++cleanup() { :; }
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
+ _supported_fs ext2 ext3 ext4
  _supported_os Linux
- _require_scratch
- _require_scratch_dev_pool
  
+ # nofsck as we modify sb via debugfs
+ _require_scratch_nocheck
+ 
+-# remove previous $seqres.full before test
 -rm -f $seqres.full
--
- FIRST_POOL_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
- LAST_POOL_DEV=`echo $SCRATCH_DEV_POOL | awk '{print $NF}'`
- TOTAL_DEVS=`echo $SCRATCH_DEV_POOL | wc -w`
-@@ -83,6 +69,4 @@ $BTRFS_UTIL_PROG device stats $LAST_POOL_DEV | \
-     sed -e "s,$LAST_POOL_DEV,LAST_POOL_DEV,g" | \
-     _filter_spaces
+ echo "Silence is golden"
+ 
+ _scratch_mkfs >>$seqres.full 2>&1
+@@ -50,6 +37,4 @@ debugfs -w -R "feature +needs_recovery" $SCRATCH_DEV \
+ # mount with noload option
+ _try_scratch_mount "-o noload" >>$seqres.full 2>&1
  
 -# success, all done
 -status=0
 -exit
 +_success
-diff --git a/tests/btrfs/007 b/tests/btrfs/007
-index 09f2f011bc77..50ead03acf31 100755
---- a/tests/btrfs/007
-+++ b/tests/btrfs/007
-@@ -9,37 +9,23 @@
- # (incr) and send both snapshots to a temp file. Remake the file
- # system and receive from the files. Check both states with fssum.
+diff --git a/tests/shared/004 b/tests/shared/004
+index 3021c85d51eb..d5fe835ea8a3 100755
+--- a/tests/shared/004
++++ b/tests/shared/004
+@@ -7,31 +7,20 @@
+ # Regression test for commit:
+ # c9eb13a ext4: fix hang when processing corrupted orphaned inode list
  #
--# creator
--owner=list.btrfs@jan-o-sch.net
-+. common/setup_test
- 
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
 -echo "QA output created by $seq"
++. common/setup_test
+ 
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
 +# test exit cleanup goes here
 +cleanup() { :; }
  
--tmp=`mktemp -d`
--status=1
--
 -_cleanup()
 -{
--	echo "*** unmount"
--	_scratch_unmount 2>/dev/null
+-	cd /
 -	rm -f $tmp.*
 -}
+-
+-# get standard environment, filters and checks
+-. ./common/rc
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs ext2 ext3 ext4
+ _supported_os Linux
+ _require_scratch
+ _require_command "$DEBUGFS_PROG" debugfs
+ 
+-# remove previous $seqres.full before test
+-rm -f $seqres.full
+ echo "Silence is golden"
+ 
+ # Although the bug only happens when last_orphan is set to 5
+@@ -44,6 +33,4 @@ for i in {1..10}; do
+ 	_scratch_unmount
+ done
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/shared/005 b/tests/shared/005
+index 67940dd0d0fc..e9df81a67ce8 100755
+--- a/tests/shared/005
++++ b/tests/shared/005
+@@ -13,33 +13,21 @@
+ # So, create this malformed inode and try a buffered append to make
+ # sure we catch this situation.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-PIDS=""
+-tmp=/tmp/$$
+-status=1	# failure is the default!
 -trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-_cleanup()
+-{
+-	rm -f $tmp.*
+-}
 -
 -# get standard environment, filters and checks
 -. ./common/rc
@@ -411,80 +296,270 @@ index 09f2f011bc77..50ead03acf31 100755
 +rm -f $seqres.full
  
 -# real QA test starts here
+-_supported_os Linux
 +# include test specific environments here
-+_supported_fs generic
+ _supported_fs ext2 ext3 ext4
 +_supported_os Linux
- _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- _require_fssum
- _require_seek_data_hole
+ _require_scratch_nocheck
+ _disable_dmesg_check
+ _require_command "$DEBUGFS_PROG"
  
 -rm -f $seqres.full
 -
- workout()
+ echo "Format and mount"
+ _scratch_mkfs  >> $seqres.full 2>&1
+ _scratch_mount
+@@ -60,6 +48,4 @@ _scratch_mount
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/shared/006 b/tests/shared/006
+index aa65e9a29e7b..d7a8cd9c6b6b 100755
+--- a/tests/shared/006
++++ b/tests/shared/006
+@@ -9,20 +9,18 @@
+ # Also a regression test for xfsprogs commit
+ # d586858 xfs_repair: fix sibling pointer tests in verify_dir2_path()
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-_cleanup()
+-{
+-    cd /
+-    rm -f $tmp.*
+-}
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
++_supported_fs ext4 ext3 ext2 xfs
++_supported_os Linux
++_require_scratch
+ 
+ create_file()
  {
- 	fsz=$1
-@@ -57,18 +43,18 @@ workout()
- 
- 	_run_btrfs_util_prog subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr
- 
--	echo "# $BTRFS_UTIL_PROG send $SCRATCH_MNT/base > $tmp/base.snap" \
-+	echo "# $BTRFS_UTIL_PROG send $SCRATCH_MNT/base > $tmp.base.snap" \
- 		>> $seqres.full
--	$BTRFS_UTIL_PROG send $SCRATCH_MNT/base > $tmp/base.snap 2>> $seqres.full \
-+	$BTRFS_UTIL_PROG send $SCRATCH_MNT/base > $tmp.base.snap 2>> $seqres.full \
- 		|| _fail "failed: '$@'"
- 	echo "# $BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base\
--		$SCRATCH_MNT/incr > $tmp/incr.snap" >> $seqres.full
-+		$SCRATCH_MNT/incr > $tmp.incr.snap" >> $seqres.full
- 	$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base \
--		$SCRATCH_MNT/incr > $tmp/incr.snap 2>> $seqres.full \
-+		$SCRATCH_MNT/incr > $tmp.incr.snap 2>> $seqres.full \
- 		|| _fail "failed: '$@'"
- 
--	run_check $FSSUM_PROG -A -f -w $tmp/base.fssum $SCRATCH_MNT/base
--	run_check $FSSUM_PROG -A -f -w $tmp/incr.fssum -x $SCRATCH_MNT/incr/base \
-+	run_check $FSSUM_PROG -A -f -w $tmp.base.fssum $SCRATCH_MNT/base
-+	run_check $FSSUM_PROG -A -f -w $tmp.incr.fssum -x $SCRATCH_MNT/incr/base \
- 		$SCRATCH_MNT/incr
- 
- 	_scratch_unmount >/dev/null 2>&1
-@@ -78,11 +64,11 @@ workout()
- 		|| _fail "size=$fsz mkfs failed"
- 	_scratch_mount "-o noatime"
- 
--	_run_btrfs_util_prog receive $SCRATCH_MNT < $tmp/base.snap
--	run_check $FSSUM_PROG -r $tmp/base.fssum $SCRATCH_MNT/base
-+	_run_btrfs_util_prog receive $SCRATCH_MNT < $tmp.base.snap
-+	run_check $FSSUM_PROG -r $tmp.base.fssum $SCRATCH_MNT/base
- 
--	_run_btrfs_util_prog receive $SCRATCH_MNT < $tmp/incr.snap
--	run_check $FSSUM_PROG -r $tmp/incr.fssum $SCRATCH_MNT/incr
-+	_run_btrfs_util_prog receive $SCRATCH_MNT < $tmp.incr.snap
-+	run_check $FSSUM_PROG -r $tmp.incr.fssum $SCRATCH_MNT/incr
+@@ -37,17 +35,7 @@ create_file()
+ 	done
  }
  
- echo "*** test send / receive"
-@@ -91,7 +77,8 @@ fssize=`expr 2000 \* 1024 \* 1024`
- ops=200
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
  
- workout $fssize $ops
+-# real QA test starts here
+-_supported_fs ext4 ext3 ext2 xfs
+-_supported_os Linux
 -
-+echo "*** unmount"
-+_scratch_unmount 2>/dev/null
- echo "*** done"
+-_require_scratch
+-
+-rm -f $seqres.full
+ echo "Silence is golden"
+ 
+ _scratch_mkfs_sized $((1024 * 1024 * 1024)) >>$seqres.full 2>&1
+@@ -77,5 +65,4 @@ rm -rf $SCRATCH_MNT/testdir
+ echo "Inode status after deleting all test files" >>$seqres.full
+ $DF_PROG -i $SCRATCH_MNT >>$seqres.full
+ 
+-status=0
+-exit
++_success
+diff --git a/tests/shared/007 b/tests/shared/007
+index 65cb5273b6a0..a552c1aba3aa 100755
+--- a/tests/shared/007
++++ b/tests/shared/007
+@@ -13,32 +13,22 @@
+ # So, create this malformed inode and try a dio append to make sure we
+ # catch this situation.
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-PIDS=""
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
+-
+-_cleanup()
+-{
+-	rm -f $tmp.*
+-}
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
+-_supported_os Linux
++# include test specific environments here
+ _supported_fs ext2 ext3 ext4
++_supported_os Linux
+ _require_scratch_nocheck
+ _disable_dmesg_check
+ _require_command "$DEBUGFS_PROG"
+ 
+-rm -f $seqres.full
++PIDS=""
+ 
+ echo "Format and mount"
+ _scratch_mkfs  >> $seqres.full 2>&1
+@@ -62,6 +52,4 @@ _scratch_mount
+ dd if=/dev/zero of=$testdir/a bs=512 count=1 oflag=direct,append conv=notrunc >> $seqres.full 2>&1 || echo "Write did not succeed (ok)."
+ sync
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/shared/032 b/tests/shared/032
+index 3b0263b2ce78..ef0dc936b31e 100755
+--- a/tests/shared/032
++++ b/tests/shared/032
+@@ -6,34 +6,28 @@
+ #
+ # cross check mkfs detection of foreign filesystems
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
+-rm -f $seqres.full
++# test exit cleanup goes here
++cleanup() { :; }
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
+-# real QA test starts here
++# include test specific environments here
+ _supported_fs xfs btrfs
+ _supported_os Linux
+-
+ _require_scratch_nocheck
+ _require_no_large_scratch_dev
+ 
++echo "Silence is golden."
++
+ # mkfs.btrfs did not have overwrite detection at first
+ if [ "$FSTYP" == "btrfs" ]; then
+ 	grep -q 'force overwrite' `echo $MKFS_BTRFS_PROG | awk '{print $1}'` || \
+ 		_notrun "Installed mkfs.btrfs does not support -f option"
+ fi
+ 
+-echo "Silence is golden."
+ for fs in `echo ${MKFS_PROG}.* | sed -e "s:${MKFS_PROG}.::g"`
+ do
+ 	preop=""	# for special input needs
+@@ -75,6 +69,4 @@ do
+ 	fi
+ done
+ 
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/shared/272 b/tests/shared/272
+index b94dfc3c3d87..5c694308ae6b 100755
+--- a/tests/shared/272
++++ b/tests/shared/272
+@@ -6,21 +6,23 @@
+ #
+ # Test data journaling flag switch for a single file  
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-here=`pwd`
+-tmp=/tmp/$$
+-status=1	# failure is the default!
+-trap "rm -f $tmp.*; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() { :; }
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# include test specific environments here
++_supported_fs ext3 ext4
++_supported_os Linux
++_require_scratch
++_exclude_scratch_mount_option dax
+ 
+ # ext3 and ext4 don't support direct IO in journalling mode
+ write_opt_list="iflag=noatime conv=notrunc conv=fsync"
+ 
+-# get standard environment, filters and checks
+-. ./common/rc
+-. ./common/filter
+ _workout()
+ {
+ 	echo "Switch data journalling mode. Silence is golden."
+@@ -32,7 +34,6 @@ _workout()
+ 		idx=$((idx + 1))
+ 		for chattr_opt in $chattr_opt_list
+ 		do
+-		    
+ 			echo "OP write_opt: $write_opt 4M, \
+ chattr_opt: $chattr_opt" >>$seqres.full
+ 			dd if=/dev/zero of=$SCRATCH_MNT/file.$idx \
+@@ -63,13 +64,6 @@ chattr_opt: $chattr_opt" >>$seqres.full
+ 	done
+ }
+ 
+-# real QA test starts here
+-_supported_fs ext3 ext4
+-_supported_os Linux
+-_require_scratch
+-_exclude_scratch_mount_option dax
+-
+-rm -f $seqres.full
+ _scratch_mkfs_sized $((64 * 1024 * 1024)) >> $seqres.full 2>&1
+ _scratch_mount
+ 
+@@ -86,5 +80,5 @@ if ! _scratch_unmount; then
+ 	exit
+ fi
+ echo "Check filesystem"
 -status=0
 -exit
 +
 +_success
-diff --git a/tests/btrfs/008 b/tests/btrfs/008
-index e7609de47580..288f6b97fdc0 100755
---- a/tests/btrfs/008
-+++ b/tests/btrfs/008
-@@ -6,37 +6,27 @@
+diff --git a/tests/shared/289 b/tests/shared/289
+index 94b644302b2d..7466fc2726f2 100755
+--- a/tests/shared/289
++++ b/tests/shared/289
+@@ -6,34 +6,19 @@
  #
- # btrfs send ENOENT regression test, from a user report on linux-btrfs
+ # Test overhead & df output for extN filesystems
  #
 -seq=`basename $0`
 -seqres=$RESULT_DIR/$seq
@@ -493,106 +568,135 @@ index e7609de47580..288f6b97fdc0 100755
  
 -here=`pwd`
 -tmp=/tmp/$$
--tmp_dir=send_temp_$seq
--
 -status=1	# failure is the default!
--
--_cleanup()
--{
-+# test exit cleanup goes here
-+cleanup() {
- 	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send/snapshots/backup2 > /dev/null 2>&1
- 	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send/snapshots/backup3 > /dev/null 2>&1
- 	$BTRFS_UTIL_PROG subvolume delete $TEST_DIR/$tmp_dir/send > /dev/null 2>&1
- 	rm -rf $TEST_DIR/$tmp_dir
--	rm -f $tmp.*
- }
- 
--trap "_cleanup ; exit \$status" 0 1 2 3 15
--
--# get standard environment, filters and checks
--. ./common/rc
--. ./common/filter
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
- 
--# real QA test starts here
-+# include test specific environments here
- _supported_fs btrfs
- _supported_os Linux
- _require_test
- _require_scratch
- 
-+echo "Silence is golden"
-+
- _scratch_mkfs > /dev/null 2>&1
- 
- #receive needs to be able to setxattrs, including the selinux context, if we use
-@@ -46,6 +36,7 @@ export SELINUX_MOUNT_OPTIONS=""
- 
- _scratch_mount
- 
-+tmp_dir=send_temp_$seq
- mkdir $TEST_DIR/$tmp_dir
- $BTRFS_UTIL_PROG subvolume create $TEST_DIR/$tmp_dir/send \
- 	> $seqres.full 2>&1 || _fail "failed subvol create"
-@@ -66,5 +57,4 @@ $BTRFS_UTIL_PROG send -f $TEST_DIR/$tmp_dir/blah $work_dir/snapshots/backup3 \
- $BTRFS_UTIL_PROG receive -vvvv -f $TEST_DIR/$tmp_dir/blah $SCRATCH_MNT \
- 	>> $seqres.full 2>&1 || _fail "receive failed"
- 
--echo "Silence is golden"
--status=0 ; exit
-+_success
-diff --git a/tests/btrfs/009 b/tests/btrfs/009
-index 8b6e864f3ea8..3c11ba94921f 100755
---- a/tests/btrfs/009
-+++ b/tests/btrfs/009
-@@ -6,32 +6,20 @@
- #
- # Regression test to make sure we can't delete the default subvol
- #
--seq=`basename $0`
--seqres=$RESULT_DIR/$seq
--echo "QA output created by $seq"
-+. common/setup_test
- 
--here=`pwd`
--tmp=/tmp/$$
+-trap "_cleanup; exit \$status" 0 1 2 3 15
 +# test exit cleanup goes here
 +cleanup() { :; }
  
--status=1	# failure is the default!
--
 -_cleanup()
 -{
--	rm -f $tmp.*
+-    cd /
+-    rm -f $tmp.*
 -}
--
--trap "_cleanup ; exit \$status" 0 1 2 3 15
 -
 -# get standard environment, filters and checks
 -. ./common/rc
 -. ./common/filter
+-
+-# real QA test starts here
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
  
--# real QA test starts here
+-# Modify as appropriate.
 +# include test specific environments here
- _supported_fs btrfs
+ _supported_fs ext2 ext3 ext4
  _supported_os Linux
  _require_scratch
  
 -rm -f $seqres.full
-+echo "Silence is golden"
+-
+ _scratch_mkfs >> $seqres.full 2>&1
  
- _scratch_mkfs > /dev/null 2>&1
- _scratch_mount
-@@ -45,5 +33,4 @@ $BTRFS_UTIL_PROG subvolume delete $SCRATCH_MNT/newvol >> $seqres.full 2>&1
- _scratch_unmount
- _try_scratch_mount || _fail "mount should have succeeded"
+ # Get the honest truth about block counts straight from metadata on disk
+@@ -79,6 +64,4 @@ _within_tolerance "minix f_blocks" $MINIX_F_BLOCKS $TOTAL_BLOCKS 0 -v
+ # bsd should be within ... we'll say 1% for some slop
+ _within_tolerance "bsd f_blocks" $BSD_F_BLOCKS $(($TOTAL_BLOCKS-$OVERHEAD)) 1% -v
  
--echo "Silence is golden"
--status=0 ; exit
+-# success, all done
+-status=0
+-exit
++_success
+diff --git a/tests/shared/298 b/tests/shared/298
+index e7b7b233de45..fc2d090a2f66 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -6,15 +6,22 @@
+ #
+ # Test that filesystem sends discard requests only on free blocks
+ #
+-seq=`basename $0`
+-seqres=$RESULT_DIR/$seq
+-echo "QA output created by $seq"
++. common/setup_test
+ 
+-status=1	# failure is the default!
+-trap "_cleanup; exit \$status" 0 1 2 3 15
++# test exit cleanup goes here
++cleanup() {
++	$UMOUNT_PROG $loop_dev &> /dev/null
++	_destroy_loop_device $loop_dev
++	if [ $status -eq 0 ]; then
++		rm $img_file
++		rm -rf $workdir
++	fi
++}
+ 
+-. ./common/rc
++# remove previous $seqres.full before test
++rm -f $seqres.full
+ 
++# include test specific environments here
+ _supported_fs ext4 xfs
+ _supported_os Linux
+ _require_test
+@@ -24,15 +31,8 @@ _require_xfs_io_command "fiemap"
+ _require_fs_space $TEST_DIR 307200
+ [ "$FSTYP" = "ext4" ] && _require_dumpe2fs
+ 
+-_cleanup()
+-{
+-	$UMOUNT_PROG $loop_dev &> /dev/null
+-	_destroy_loop_device $loop_dev
+-	if [ $status -eq 0 ]; then
+-		rm -rf $tmp
+-		rm $img_file
+-	fi
+-}
++workdir=$TEST_DIR/$$
++mkdir -p $workdir
+ 
+ get_holes()
+ {
+@@ -70,7 +70,7 @@ merge_ranges()
+ 	file1=$1
+ 	file2=$2
+ 
+-	tmp_file=$tmp/sectors.tmp
++	tmp_file=$workdir/sectors.tmp
+ 
+ 	cat $file1 $file2 | sort -n > $tmp_file
+ 
+@@ -101,19 +101,16 @@ merge_ranges()
+ 	rm $tmp_file
+ }
+ 
+-here=`pwd`
+-tmp=`mktemp -d`
+-
+ img_file=$TEST_DIR/$$.fs
+ dd if=/dev/zero of=$img_file bs=1M count=300 &> /dev/null
+ 
+ loop_dev=$(_create_loop_device $img_file)
+-loop_mnt=$tmp/loop_mnt
++loop_mnt=$workdir/loop_mnt
+ 
+-fiemap_ref="$tmp/reference"
+-fiemap_after="$tmp/after"
+-free_sectors="$tmp/free_sectors"
+-merged_sectors="$tmp/merged_free_sectors"
++fiemap_ref="$workdir/reference"
++fiemap_after="$workdir/after"
++free_sectors="$workdir/free_sectors"
++merged_sectors="$workdir/merged_free_sectors"
+ 
+ mkdir $loop_mnt
+ 
+@@ -173,5 +170,4 @@ while read line; do
+ done < $fiemap_after
+ echo "done."
+ 
+-status=0
+-exit
 +_success
 -- 
 2.17.0
