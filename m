@@ -1,49 +1,85 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:23178 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1753296AbeF0KTH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 06:19:07 -0400
-Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
-        by cn.fujitsu.com (Postfix) with ESMTP id 4C63748029E8
-        for <fstests@vger.kernel.org>; Wed, 27 Jun 2018 18:18:59 +0800 (CST)
-From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: [PATCH v2 1/3] fsstress: remove include <attr/xattr.h>
-Date: Wed, 27 Jun 2018 18:18:52 +0800
-Message-ID: <20180627101854.13158-2-lufq.fnst@cn.fujitsu.com>
-In-Reply-To: <20180627101854.13158-1-lufq.fnst@cn.fujitsu.com>
-References: <20180627101854.13158-1-lufq.fnst@cn.fujitsu.com>
+Received: from mail-yw0-f196.google.com ([209.85.161.196]:33777 "EHLO
+        mail-yw0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933627AbeF0K4a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Jun 2018 06:56:30 -0400
+Received: by mail-yw0-f196.google.com with SMTP id u124-v6so541554ywg.0
+        for <fstests@vger.kernel.org>; Wed, 27 Jun 2018 03:56:30 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20180627082103.9662-4-david@fromorbit.com>
+References: <20180627082103.9662-1-david@fromorbit.com> <20180627082103.9662-4-david@fromorbit.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 27 Jun 2018 13:56:29 +0300
+Message-ID: <CAOQ4uxj90rifsdgi67aMnqGzzX5P+oNQz_kRnpF73+wTjuq9kA@mail.gmail.com>
+Subject: Re: [PATCH 3/8] shared: use new test setup preamble
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Since commit de6d86177ff8 ("QA test updates - fixes for pquota, extsize,
-fsstress, and ensure mount options passed through to test_dev. Merge of
-master-melb:xfs-cmds:24763a by kenmcd.") remove llistxattr from
-fsstress, xattr.h is useless.
+On Wed, Jun 27, 2018 at 11:20 AM, Dave Chinner <david@fromorbit.com> wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+>
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+[...]
+> diff --git a/tests/shared/298 b/tests/shared/298
+> index e7b7b233de45..fc2d090a2f66 100755
+> --- a/tests/shared/298
+> +++ b/tests/shared/298
+> @@ -6,15 +6,22 @@
+>  #
+>  # Test that filesystem sends discard requests only on free blocks
+>  #
+> -seq=`basename $0`
+> -seqres=$RESULT_DIR/$seq
+> -echo "QA output created by $seq"
+> +. common/setup_test
+>
+> -status=1       # failure is the default!
+> -trap "_cleanup; exit \$status" 0 1 2 3 15
+> +# test exit cleanup goes here
+> +cleanup() {
+> +       $UMOUNT_PROG $loop_dev &> /dev/null
+> +       _destroy_loop_device $loop_dev
+> +       if [ $status -eq 0 ]; then
+> +               rm $img_file
+> +               rm -rf $workdir
+> +       fi
+> +}
+>
+> -. ./common/rc
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+>
+> +# include test specific environments here
+>  _supported_fs ext4 xfs
+>  _supported_os Linux
+>  _require_test
+> @@ -24,15 +31,8 @@ _require_xfs_io_command "fiemap"
+>  _require_fs_space $TEST_DIR 307200
+>  [ "$FSTYP" = "ext4" ] && _require_dumpe2fs
+>
+> -_cleanup()
+> -{
+> -       $UMOUNT_PROG $loop_dev &> /dev/null
+> -       _destroy_loop_device $loop_dev
+> -       if [ $status -eq 0 ]; then
+> -               rm -rf $tmp
+> -               rm $img_file
+> -       fi
+> -}
+> +workdir=$TEST_DIR/$$
+> +mkdir -p $workdir
 
-Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
----
-v2: remove useless xattr.h
- ltp/fsstress.c | 3 ---
- 1 file changed, 3 deletions(-)
+:-/ I don't like this s/tmp/workdir conversion and don't like the idea
+of having to do the same thing for 16 btrfs tests + 1 generic test.
+IIUC, you changed the test from using tmpdir under $here to
+tmpdir under $TEST_DIR. Why not change it to tmpdir under /tmp?
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 1bffa115bf2d..edbb3f2f8fb9 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -10,9 +10,6 @@
- #include <stddef.h>
- #include "global.h"
- 
--#ifdef HAVE_ATTR_XATTR_H
--#include <attr/xattr.h>
--#endif
- #ifdef HAVE_ATTR_ATTRIBUTES_H
- #include <attr/attributes.h>
- #endif
--- 
-2.18.0
+Only change you will need to do is:
+-tmp=`mktemp -d`
++mkdir -p $tmp
 
-
-
+Thanks,
+Amir.
