@@ -1,175 +1,51 @@
-Received: from mail-pl0-f51.google.com ([209.85.160.51]:44555 "EHLO
-        mail-pl0-f51.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1751072AbeF1Eae (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Jun 2018 00:30:34 -0400
-Date: Thu, 28 Jun 2018 12:30:28 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3 3/3] xfstests: dedupe with random io race test
-Message-ID: <20180628043028.GS2780@desktop>
-References: <20180623180029.24497-1-zlang@redhat.com>
- <20180623180029.24497-3-zlang@redhat.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:50866 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751316AbeF1EbU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Jun 2018 00:31:20 -0400
+Date: Wed, 27 Jun 2018 21:31:16 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 4/4] xfs: fuzz every field of every structure and test
+ kernel crashes
+Message-ID: <20180628043116.GF5711@magnolia>
+References: <152960594943.26479.1457883867468749220.stgit@magnolia>
+ <152960597579.26479.1694478608504574104.stgit@magnolia>
+ <20180628031027.GR2780@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180623180029.24497-3-zlang@redhat.com>
+In-Reply-To: <20180628031027.GR2780@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 24, 2018 at 02:00:29AM +0800, Zorro Lang wrote:
-> Run several duperemove processes with fsstress on same directory at
-> same time. Make sure the race won't break the fs or kernel.
+On Thu, Jun 28, 2018 at 11:10:27AM +0800, Eryu Guan wrote:
+> On Thu, Jun 21, 2018 at 11:32:55AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Fuzz every field of every structure and then try to write the
+> > filesystem, to see how many of these writes can crash the kernel.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
+> Almost all the tests here are failing in similar ways with v4.18-rc1
+> kernel and latest xfsprogs from for-next branch, e.g. xfs/1423 fails as
 > 
-> V3 did below changes:
-> 1) Use $TEST_DIR/${seq}-running file to loop run duperemove.
-> 2) Change kill_all_stress function
-> 3) Change $TEST_DIR/${seq}md5.sum to ${tmp}.md5sum
+>     +re-repair failed (1) with diskdq.magic = zeroes.
+>     +re-repair failed (1) with diskdq.magic = ones.
+>     +re-repair failed (1) with diskdq.magic = firstbit.
+>     +re-repair failed (1) with diskdq.magic = middlebit.
 > 
+> Seems like we should skip re-repair in the "none" repair mode too in
+> __scratch_xfs_fuzz_field_test?
+
+Err, yep.  I'll go fix that up too. :)
+
+--D
+
 > Thanks,
-> Zorro
-> 
->  tests/shared/010     | 94 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/shared/010.out |  2 ++
->  tests/shared/group   |  1 +
->  3 files changed, 97 insertions(+)
->  create mode 100755 tests/shared/010
->  create mode 100644 tests/shared/010.out
-> 
-> diff --git a/tests/shared/010 b/tests/shared/010
-> new file mode 100755
-> index 00000000..3cf50ddd
-> --- /dev/null
-> +++ b/tests/shared/010
-> @@ -0,0 +1,94 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 010
-> +#
-> +# Dedup & random I/O race test, do multi-threads fsstress and dedupe on
-> +# same directory/files
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +	end_test
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# duperemove only supports btrfs and xfs (with reflink feature).
-> +# Add other filesystems if it supports more later.
-> +_supported_fs xfs btrfs
-> +_supported_os Linux
-> +_require_scratch_dedupe
-> +_require_command "$DUPEREMOVE_PROG" duperemove
-> +_require_command "$KILLALL_PROG" killall
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount >> $seqres.full 2>&1
-> +
-> +function end_test()
-> +{
-> +	local f=1
-> +
-> +	# stop duperemove running
-> +	if [ -e $dupe_run ]; then
-> +		rm -f $dupe_run
-> +		wait $dedup_pids
-> +	fi
-> +
-> +	# Make sure all fsstress get killed
-> +	while [ $f -ne 0 ]; do
-> +		$KILLALL_PROG -q $FSSTRESS_PROG > /dev/null 2>&1
-> +		sleep 1
-> +		f=`ps -eLf | grep $FSSTRESS_PROG | grep -v "grep" | wc -l`
-> +	done
-> +}
-> +
-> +sleep_time=$((50 * TIME_FACTOR))
-> +
-> +# Start fsstress
-> +fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
-> +$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
-> +dedup_pids=""
-> +dupe_run=$TEST_DIR/${seq}-running
-> +# Start several dedupe processes on same directory
-> +touch $dupe_run
-> +for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
-> +	while [ -e $dupe_run ]; do
-> +		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/
-
-This needs a "\" at the end of line, otherwise the output all go to
-stdout then breaks golden image. I fixed it on commit.
-
-Thanks,
-Eryu
-
-> +			>>$seqres.full 2>&1
-> +	done &
-> +	dedup_pids="$! $dedup_pids"
-> +done
-> +
-> +# End the test after $sleep_time seconds
-> +sleep $sleep_time
-> +end_test
-> +
-> +# umount and mount again, verify pagecache contents don't mutate and a fresh
-> +# read from the disk also doesn't show mutations.
-> +find $testdir -type f -exec md5sum {} \; > ${tmp}.md5sum
-> +_scratch_cycle_mount
-> +md5sum -c --quiet ${tmp}.md5sum
-> +
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/shared/010.out b/tests/shared/010.out
-> new file mode 100644
-> index 00000000..1d83a8d6
-> --- /dev/null
-> +++ b/tests/shared/010.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 010
-> +Silence is golden
-> diff --git a/tests/shared/group b/tests/shared/group
-> index 9c484794..094da27d 100644
-> --- a/tests/shared/group
-> +++ b/tests/shared/group
-> @@ -12,6 +12,7 @@
->  007 dangerous_fuzzers
->  008 auto stress dedupe
->  009 auto stress dedupe
-> +010 auto stress dedupe
->  032 mkfs auto quick
->  272 auto enospc rw
->  289 auto quick
-> -- 
-> 2.14.4
-> 
+> Eryu
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
