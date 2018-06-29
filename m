@@ -1,173 +1,339 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:36844 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S932312AbeF2Q5s (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 29 Jun 2018 12:57:48 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] generic: test dm-thin running out of data space vs concurrent discard
-Date: Sat, 30 Jun 2018 00:57:38 +0800
-Message-Id: <20180629165738.8106-1-zlang@redhat.com>
+Received: from mail-qk0-f193.google.com ([209.85.220.193]:40157 "EHLO
+        mail-qk0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S934711AbeF2TV1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Jun 2018 15:21:27 -0400
+Received: by mail-qk0-f193.google.com with SMTP id b129-v6so5533698qke.7
+        for <fstests@vger.kernel.org>; Fri, 29 Jun 2018 12:21:26 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH] fstests: add generic/499, a cgroup io.latency test
+Date: Fri, 29 Jun 2018 15:21:24 -0400
+Message-Id: <20180629192124.22505-1-josef@toxicpanda.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-If a user constructs a test that loops repeatedly over below steps
-on dm-thin, block allocation can fail due to discards not having
-completed yet (Fixed by a685557 dm thin: handle running out of data
-space vs concurrent discard):
-1) fill thin device via filesystem file
-2) remove file
-3) fstrim
+The infrastructure is fairly straightforward, just some helpers to
+verify cgroup2 is mounted and to setup a cgroup for our test.  The fio
+json script just uses the existing library to print out a value for a
+given key in a fio json output file.
 
-And this maybe cause a deadlock (fast device likes ramdisk can help
-a lot) when racing a fstrim with a filesystem (XFS) shutdown. (Fixed
-by 8c81dd46ef3c Force log to disk before reading the AGF during a
-fstrim)
+The test itself runs a fio job outside of a cgroup by itself to
+establish the baseline performance of the job.  Then we setup two
+cgroups, one protected with io.latency and one that is not, and run the
+same job with 2 threads doing the same workload, one in the protected
+group and one in the unprotected group.  We are trying to verify that
+io.latency does the protection properly.
 
-This case can reproduce both two bugs if they're not fixed. If only
-the dm-thin bug is fixed, then the test will pass. If only the fs
-bug is fixed, then the test will fail. If both of bugs aren't fixed,
-the test will hang.
+I tested this with my kernel that has io.latency enabled, as well as
+with and without all the various features turned off so hopefully it
+fails gracefully for people who don't have the pre-requisites.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
+NOTE: You need io.latency, which can only be found in my blk-iolatency branches
+in my btrfs-next tree on kernel.org.  You also need the fio master branch
+because I had to fix fio to work with cgroup2 and spit out the right numbers for
+us to verify.
 
-Hi,
-
-If both of two bugs aren't fixed, a loop device base on tmpfs can help
-reproduce the XFS deadlock:
-1) mount -t tmpfs tmpfs /tmp
-2) dd if=/dev/zero of=/tmp/test.img bs=1M count=100
-3) losetup /dev/loop0 /tmp/test.img
-4) use /dev/loop0 to be SCRATCH_DEV, run this case. The test will hang there.
-
-Ramdisk can help trigger the race. Maybe NVME device can help too. But it's
-hard to reproduce on general disk.
-
-If the XFS bug is fixed, above steps can reproduce dm-thin bug, the test
-will fail.
-
-Unfortunately, if the dm-thin bug is fixed, then this case can't reproduce
-the XFS bug singly.
-
-Thanks,
-Zorro
-
- tests/generic/499     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/499.out |  2 ++
- tests/generic/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/generic/499
+ common/cgroup             |  42 +++++++++++++
+ common/config             |   1 +
+ common/perf               |  10 +++
+ src/perf/fio-key-value.py |  28 +++++++++
+ tests/generic/499         | 151 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/499.out     |   2 +
+ tests/generic/group       |   1 +
+ 7 files changed, 235 insertions(+)
+ create mode 100644 common/cgroup
+ create mode 100644 src/perf/fio-key-value.py
+ create mode 100644 tests/generic/499
  create mode 100644 tests/generic/499.out
 
+diff --git a/common/cgroup b/common/cgroup
+new file mode 100644
+index 000000000000..d74d402976a7
+--- /dev/null
++++ b/common/cgroup
+@@ -0,0 +1,42 @@
++##/bin/bash
++# SPDX-License-Identifier: GPL-2.0
++#
++# common functions for setting up cgroups for tasks
++
++_cgroup2_base_dir()
++{
++	grep cgroup2 /proc/mounts | awk '{ print $2 }'
++}
++
++_cleanup_cgroup2()
++{
++	_dir=$(_cgroup2_base_dir)/xfstest
++	for i in $(find ${_dir} -type d | tac)
++	do
++		rmdir $i
++	done
++}
++
++_require_cgroup2()
++{
++	grep -q 'cgroup2' /proc/mounts || _notrun "This test requires cgroup2"
++}
++
++_require_cgroup2_controller_file()
++{
++	_require_cgroup2
++
++	_controller=$1
++	_file=$2
++	_dir=$(_cgroup2_base_dir)
++
++	grep -q ${_controller} ${_dir}/cgroup.controllers || \
++		_notrun "No support for ${_controller} cgroup controller"
++
++	mkdir ${_dir}/xfstest
++	echo "+${_controller}" > ${_dir}/cgroup.subtree_control
++	if [ ! -f ${_dir}/xfstest/${_file} ]; then
++		_cleanup_cgroup2
++		_notrun "Cgroup file ${_file} doesn't exist"
++	fi
++}
+diff --git a/common/config b/common/config
+index a127e98fba2d..d9284ccdf4c7 100644
+--- a/common/config
++++ b/common/config
+@@ -192,6 +192,7 @@ export SETCAP_PROG="$(type -P setcap)"
+ export GETCAP_PROG="$(type -P getcap)"
+ export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
+ export XFS_INFO_PROG="$(type -P xfs_info)"
++export TIME_PROG="$(type -P time)"
+ 
+ # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
+ # newer systems have udevadm command but older systems like RHEL5 don't.
+diff --git a/common/perf b/common/perf
+index 8b4c9bef8a8d..56034b00a410 100644
+--- a/common/perf
++++ b/common/perf
+@@ -38,3 +38,13 @@ _fio_results_compare()
+ 		-c $PERF_CONFIGNAME -d $RESULT_BASE/fio-results.db \
+ 		-n $_testname $_resultfile
+ }
++
++_fio_results_key()
++{
++	_job=$1
++	_key=$2
++	_resultfile=$3
++
++	$PYTHON2_PROG $here/src/perf/fio-key-value.py -k $_key -j $_job \
++		$_resultfile
++}
+diff --git a/src/perf/fio-key-value.py b/src/perf/fio-key-value.py
+new file mode 100644
+index 000000000000..208e9a453a19
+--- /dev/null
++++ b/src/perf/fio-key-value.py
+@@ -0,0 +1,28 @@
++# SPDX-License-Identifier: GPL-2.0
++
++import FioResultDecoder
++import json
++import argparse
++import sys
++import platform
++
++parser = argparse.ArgumentParser()
++parser.add_argument('-j', '--jobname', type=str,
++                    help="The jobname we want our key from.",
++                    required=True)
++parser.add_argument('-k', '--key', type=str,
++                    help="The key we want the value of", required=True)
++parser.add_argument('result', type=str,
++                    help="The result file read")
++args = parser.parse_args()
++
++json_data = open(args.result)
++data = json.load(json_data, cls=FioResultDecoder.FioResultDecoder)
++
++for job in data['jobs']:
++    if job['jobname'] == args.jobname:
++        if args.key not in job:
++            print('')
++        else:
++            print("{}".format(job[args.key]))
++        break
 diff --git a/tests/generic/499 b/tests/generic/499
-new file mode 100755
-index 00000000..24adfc3a
+new file mode 100644
+index 000000000000..c50fe3c8db36
 --- /dev/null
 +++ b/tests/generic/499
-@@ -0,0 +1,85 @@
+@@ -0,0 +1,151 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
 +#
-+# FS QA Test 499
++# FS QA Test No. 499
 +#
-+# Race test running out of data space with concurrent discard operation on
-+# dm-thin.
-+#
-+# If a user constructs a test that loops repeatedly over below steps on
-+# dm-thin, block allocation can fail due to discards not having completed
-+# yet (Fixed by a685557 dm thin: handle running out of data space vs
-+# concurrent discard):
-+# 1) fill thin device via filesystem file
-+# 2) remove file
-+# 3) fstrim
-+#
-+# And this maybe cause a deadlock when racing a fstrim with a filesystem
-+# (XFS) shutdown. (Fixed by 8c81dd46ef3c Force log to disk before reading
-+# the AGF during a fstrim)
-+#
++# Test that verifies the io.latency controller is doing something resembling
++# what it's supposed to be doing.
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
-+here=`pwd`
 +tmp=/tmp/$$
++fio_config_single=$tmp-single.fio
++fio_config_double=$tmp-double.fio
++fio_results=$tmp.json
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
++	_cleanup_cgroup2
 +	cd /
 +	rm -f $tmp.*
-+	_dmthin_cleanup
++}
++
++_cgroup_run()
++{
++	$FIO_PROG --output-format=json --output=$2 $3
++	echo "$1 finished" >> $seqres.full
++	cat /sys/fs/cgroup/xfstest/fast/io.stat >> $seqres.full
++	cat /sys/fs/cgroup/xfstest/slow/io.stat >> $seqres.full
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/dmthin
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
++. ./common/cgroup
++. ./common/perf
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+_require_scratch_nocheck
-+_require_dm_target thin-pool
++_require_scratch
++_require_cgroup2_controller_file io io.latency
++_require_fio_results
 +
-+# Create a thin pool and a *slightly smaller* thin volume, it's helpful
-+# to reproduce the bug
-+BACKING_SIZE=$((50 * 1024 * 1024 / 512))	# 50M
-+VIRTUAL_SIZE=$((BACKING_SIZE + 1024))		# 50M + 1k
-+CLUSTER_SIZE=$((64 * 1024 / 512))		# 64K
++rm -f $seqres.full
 +
-+_dmthin_init $BACKING_SIZE $VIRTUAL_SIZE $CLUSTER_SIZE 0
-+_dmthin_set_fail
-+_mkfs_dev $DMTHIN_VOL_DEV
-+_dmthin_mount
++# This is the basic test so we have a baseline for this box
++cat >$fio_config_single << EOF
++[fast]
++directory=${SCRATCH_MNT}
++direct=1
++allrandrepeat=1
++readwrite=randrw
++size=4G
++ioengine=libaio
++iodepth=1024
++fallocate=none
++EOF
 +
-+# There're two bugs at here, one is dm-thin bug, the other is filesystem
-+# (XFS especially) bug. The dm-thin bug can't handle running out of data
-+# space with concurrent discard well. Then the dm-thin bug cause fs unmount
-+# hang when racing a fstrim with a filesystem shutdown.
-+#
-+# If both of two bugs haven't been fixed, below test maybe cause deadlock.
-+# Else if the fs bug has been fixed, but the dm-thin bug hasn't. below test
-+# will cause the test fail (no deadlock).
-+# Else the test will pass.
-+for ((i=0; i<100; i++)); do
-+	$XFS_IO_PROG -f -c "pwrite -b 64k 0 100M" \
-+		$SCRATCH_MNT/testfile &>/dev/null
-+	rm -f $SCRATCH_MNT/testfile
-+	$FSTRIM_PROG $SCRATCH_MNT
-+done
++# This runs one thread in a high priority group, another in a low priority
++# group.
++cat >$fio_config_double << EOF
++[global]
++directory=${SCRATCH_MNT}
++direct=1
++allrandrepeat=1
++readwrite=randrw
++size=4G
++ioengine=libaio
++iodepth=1024
++fallocate=none
 +
-+_dmthin_check_fs
-+_dmthin_cleanup
++[fast]
++cgroup=xfstest/fast
++
++[slow]
++cgroup=xfstest/slow
++EOF
++
++_require_fio $fio_config_double
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# We want to make sure the scratch device is large enough that we don't incur
++# ENOSPC related slowdowns
++_size=$((16 * 4 * 1024 * 1024))
++_require_fs_space $SCRATCH_MNT $_size
++
++# We run the test once so we have an idea of how fast this workload will go with
++# nobody else doing IO on the device.
++$FIO_PROG --output-format=json --output=${fio_results} $fio_config_single
++
++_scratch_unmount
++
++# Grab the time the job took
++_time_taken=$(_fio_results_key fast job_runtime $fio_results)
++[ "${_time_taken}" = "" ] && _notrun "fio doesn't report job_runtime"
++
++echo "normal time taken ${_time_taken}" >> $seqres.full
++
++# File system internals are going to affect us a bit here, so we need to be a
++# little fuzzy about our thresholds.  First we need to make sure our fast group
++# isn't affected too much, and 15% gives us a little bit of wiggle room.  But if
++# we just so happen to be pretty fast and 2 tasks running at the same time with
++# equal weight happens to finish in this threshold we need to have a second
++# higher threshold to make sure that the slow task was indeed throttled.  So set
++# a 50% threshold that the slow group must exceed to make sure we did actually
++# throttle the slow group
++_fast_thresh=$((${_time_taken} + ${_time_taken} * 15 / 100))
++_slow_thresh=$((${_time_taken} + ${_time_taken} * 50 / 100))
++echo "fast threshold time is ${_fast_thresh}" >> $seqres.full
++echo "slow threshold time is ${_slow_thresh}" >> $seqres.full
++
++# Create the cgroup files
++_dir=$(_cgroup2_base_dir)/xfstest
++echo "+io" > ${_dir}/cgroup.subtree_control
++mkdir ${_dir}/fast
++mkdir ${_dir}/slow
++
++# We set the target to 1usec because we could have a fast device that is capable
++# of remarkable IO latencies that would skew the test.  It needs to be low
++# enough that we do actually throttle the slow group, otherwise this test will
++# make no sense.
++_major=$((0x$(stat -c "%t" ${SCRATCH_DEV})))
++_minor=$((0x$(stat -c "%T" ${SCRATCH_DEV})))
++echo "${_major}:${_minor} target=1" > ${_dir}/fast/io.latency
++[ $? -ne 0 ] && _fatal "Failed to set our latency target"
++
++# Start from a clean slate
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++$FIO_PROG --output-format=json --output=${fio_results} ${fio_config_double}
++
++_scratch_unmount
++
++# Pull the times for both jobs
++_fast_time=$(_fio_results_key fast job_runtime $fio_results)
++echo "Fast time ${_fast_time}" >> $seqres.full
++_slow_time=$(_fio_results_key slow job_runtime $fio_results)
++echo "Slow time ${_slow_time}" >> $seqres.full
++
++[ ${_fast_thresh} -lt ${_fast_time} ] && \
++	_fatal "Too much of a performance drop for the protected workload"
++[ ${_slow_thresh} -gt ${_slow_time} ] && \
++	_fatal "The slow group does not appear to have been throttled"
 +
 +echo "Silence is golden"
-+
-+# success, all done
 +status=0
 +exit
 diff --git a/tests/generic/499.out b/tests/generic/499.out
 new file mode 100644
-index 00000000..c363e684
+index 000000000000..c363e6848f82
 --- /dev/null
 +++ b/tests/generic/499.out
 @@ -0,0 +1,2 @@
 +QA output created by 499
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 83a6fdab..bbeac4af 100644
+index 83a6fdab7880..c685c3e65c18 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
 @@ -501,3 +501,4 @@
  496 auto quick swap
  497 auto quick swap collapse
  498 auto quick log
-+499 auto thin trim
++499 auto
 -- 
-2.14.4
+2.14.3
 
