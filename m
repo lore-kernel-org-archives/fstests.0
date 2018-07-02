@@ -1,103 +1,112 @@
-Received: from mail-pg0-f65.google.com ([74.125.83.65]:38609 "EHLO
-        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753665AbeGBITB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jul 2018 04:19:01 -0400
-Received: by mail-pg0-f65.google.com with SMTP id c9-v6so6797254pgf.5
-        for <fstests@vger.kernel.org>; Mon, 02 Jul 2018 01:19:01 -0700 (PDT)
-Date: Mon, 2 Jul 2018 16:18:56 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] build: fix possibly undefined macro:
- AC_PACKAGE_NEED_GETXATTR_LIBATTR
-Message-ID: <20180702081856.GZ2780@desktop>
-References: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
+Received: from mail-wr0-f195.google.com ([209.85.128.195]:36375 "EHLO
+        mail-wr0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752756AbeGBJ1P (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jul 2018 05:27:15 -0400
+Received: by mail-wr0-f195.google.com with SMTP id f16-v6so14772186wrm.3
+        for <fstests@vger.kernel.org>; Mon, 02 Jul 2018 02:27:15 -0700 (PDT)
+Date: Mon, 2 Jul 2018 11:27:11 +0200
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH] generic: test dm-thin running out of data space vs
+ concurrent discard
+Message-ID: <20180702092711.budxkovx2ncpehhp@odin.usersys.redhat.com>
+References: <20180629165738.8106-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
+In-Reply-To: <20180629165738.8106-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, zlang@redhat.com, yangx.jy@cn.fujitsu.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 02, 2018 at 03:00:01PM +0800, Lu Fengqi wrote:
-> Because the macro AC_PACKAGE_NEED_GETXATTR_LIBATTR was removed by
-> the following commit specified by fixes tag, we also need remove
-> AC_PACKAGE_NEED_GETXATTR_LIBATTR from configure.ac.
+On Sat, Jun 30, 2018 at 12:57:38AM +0800, Zorro Lang wrote:
+> If a user constructs a test that loops repeatedly over below steps
+> on dm-thin, block allocation can fail due to discards not having
+> completed yet (Fixed by a685557 dm thin: handle running out of data
+> space vs concurrent discard):
+> 1) fill thin device via filesystem file
+> 2) remove file
+> 3) fstrim
 > 
-> In addition, the libattr will not be set, after the macro was be
-> removed. This cause gcc can't link the libattr for fsstress correctly.
-> The macro AC_PACKAGE_NEED_ATTRGET_LIBATTR has been obsoleted, so change
-> it to AC_PACKAGE_NEED_ATTRSET_LIBATTR and add it to configure.ac. It can
-> help me check libattr and set libattr variable.
+> And this maybe cause a deadlock (fast device likes ramdisk can help
+> a lot) when racing a fstrim with a filesystem (XFS) shutdown. (Fixed
+> by 8c81dd46ef3c Force log to disk before reading the AGF during a
+> fstrim)
 > 
-> Fixes: 42b851446ff1 ("build: remove <attr/xattr.h> check")
-> Reported-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+> This case can reproduce both two bugs if they're not fixed. If only
+> the dm-thin bug is fixed, then the test will pass. If only the fs
+> bug is fixed, then the test will fail. If both of bugs aren't fixed,
+> the test will hang.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 > ---
-> Hi, Eryu
 > 
-> I apologize for the previous patch about the build infrastructure that
-> caused the master branch to not be compiled.
-
-That's my fault, I didn't test the latest patch but a stale one, your
-original patch worked fine. Sorry about that!
-
+> Hi,
 > 
-> Spoiler:
-> Regarding the following deprecated functions, I want to replace them
-> with the glibc version. And, I will carefully confirm the correctness
-> before send patches. Any suggestions?
-> 
-> fsstress.c:762:2: warning: 'attr_list' is deprecated: Use listxattr or
-> llistxattr instead [-Wdeprecated-declarations]
-> fsstress.c:781:2: warning: 'attr_remove' is deprecated: Use removexattr
-> or lremovexattr instead [-Wdeprecated-declarations]
-> fsstress.c:801:2: warning: 'attr_set' is deprecated: Use setxattr or
-> lsetxattr instead [-Wdeprecated-declarations]
+> If both of two bugs aren't fixed, a loop device base on tmpfs can help
+> reproduce the XFS deadlock:
+> 1) mount -t tmpfs tmpfs /tmp
+> 2) dd if=/dev/zero of=/tmp/test.img bs=1M count=100
+> 3) losetup /dev/loop0 /tmp/test.img
+> 4) use /dev/loop0 to be SCRATCH_DEV, run this case. The test will hang there.
 
-IMHO, replacing the deprecated attr functions looks fine to me. But I'm
-not sure if there's any historical reason behind this.
+Particularly, I could never reproduce this bug on spindles or SSDs, and I
+believe many (if not most) people run xfstests on commodity hardware, not on
+very fast disks, and the test doesn't reproduce the bug 100% of the times when
+running on slow disks, so, unless the default for the test is to run it using
+ramdisks, the test is useless IMHO.
 
 > 
->  configure.ac          | 2 +-
->  m4/package_attrdev.m4 | 4 ++--
->  2 files changed, 3 insertions(+), 3 deletions(-)
+> Ramdisk can help trigger the race. Maybe NVME device can help too. But it's
+> hard to reproduce on general disk.
 > 
-> diff --git a/configure.ac b/configure.ac
-> index 63ea032dc564..aede4f59a060 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -53,7 +53,7 @@ AC_PACKAGE_NEED_XFS_HANDLE_H
->  AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
->  AC_PACKAGE_NEED_ATTRIBUTES_H
->  AC_PACKAGE_WANT_ATTRLIST_LIBATTR
-> -AC_PACKAGE_NEED_GETXATTR_LIBATTR
-> +AC_PACKAGE_NEED_ATTRSET_LIBATTR
->  
->  AC_PACKAGE_NEED_SYS_ACL_H
->  AC_PACKAGE_NEED_ACL_LIBACL_H
-> diff --git a/m4/package_attrdev.m4 b/m4/package_attrdev.m4
-> index 9a82f241de3a..d994cfc23c25 100644
-> --- a/m4/package_attrdev.m4
-> +++ b/m4/package_attrdev.m4
-> @@ -26,8 +26,8 @@ AC_DEFUN([AC_PACKAGE_WANT_ATTRLIST_LIBATTR],
->      AC_SUBST(have_attr_list)
->    ])
->  
-> -AC_DEFUN([AC_PACKAGE_NEED_ATTRGET_LIBATTR],
-> -  [ AC_CHECK_LIB(attr, attr_get,, [
-> +AC_DEFUN([AC_PACKAGE_NEED_ATTRSET_LIBATTR],
-> +  [ AC_CHECK_LIB(attr, attr_set,, [
 
-Looks fine to me as a hotfix. Thanks!
+I didn't test it on NVME, so I can't tell =/
 
-Eryu
+> If the XFS bug is fixed, above steps can reproduce dm-thin bug, the test
+> will fail.
+> 
+> Unfortunately, if the dm-thin bug is fixed, then this case can't reproduce
+> the XFS bug singly.
+> 
+> Thanks,
+> Zorro
+> 
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 499
+> +#
+> +# Race test running out of data space with concurrent discard operation on
+> +# dm-thin.
+> +#
+> +# If a user constructs a test that loops repeatedly over below steps on
+> +# dm-thin, block allocation can fail due to discards not having completed
+> +# yet (Fixed by a685557 dm thin: handle running out of data space vs
+> +# concurrent discard):
+> +# 1) fill thin device via filesystem file
+> +# 2) remove file
+> +# 3) fstrim
+> +#
+> +# And this maybe cause a deadlock when racing a fstrim with a filesystem
+> +# (XFS) shutdown. (Fixed by 8c81dd46ef3c Force log to disk before reading
+> +# the AGF during a fstrim)
+> +
 
->          echo
->          echo 'FATAL ERROR: could not find a valid Extended Attributes library.'
->          echo 'Install the extended attributes (attr) development package.'
-> -- 
-> 2.18.0
-> 
-> 
-> 
+
+> +# There're two bugs at here, one is dm-thin bug, the other is filesystem
+> +# (XFS especially) bug. The dm-thin bug can't handle running out of data
+> +# space with concurrent discard well. Then the dm-thin bug cause fs unmount
+> +# hang when racing a fstrim with a filesystem shutdown.
+> +#
+> +# If both of two bugs haven't been fixed, below test maybe cause deadlock.
+> +# Else if the fs bug has been fixed, but the dm-thin bug hasn't. below test
+> +# will cause the test fail (no deadlock).
+> +# Else the test will pass.
+
+The test looks mostly ok, despite the fact I believe this should run on a
+ramdisk by default (or not run, if $SCRATCH_DEV is not a ramdisk)
+
+-- 
+Carlos
