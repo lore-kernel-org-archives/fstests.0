@@ -1,119 +1,103 @@
-Received: from mail-wm0-f68.google.com ([74.125.82.68]:34874 "EHLO
-        mail-wm0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753183AbeGBIS0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jul 2018 04:18:26 -0400
-Received: by mail-wm0-f68.google.com with SMTP id z137-v6so7721962wmc.0
-        for <fstests@vger.kernel.org>; Mon, 02 Jul 2018 01:18:25 -0700 (PDT)
+Received: from mail-pg0-f65.google.com ([74.125.83.65]:38609 "EHLO
+        mail-pg0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753665AbeGBITB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 2 Jul 2018 04:19:01 -0400
+Received: by mail-pg0-f65.google.com with SMTP id c9-v6so6797254pgf.5
+        for <fstests@vger.kernel.org>; Mon, 02 Jul 2018 01:19:01 -0700 (PDT)
+Date: Mon, 2 Jul 2018 16:18:56 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] build: fix possibly undefined macro:
+ AC_PACKAGE_NEED_GETXATTR_LIBATTR
+Message-ID: <20180702081856.GZ2780@desktop>
+References: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-References: <5b38d22b.1c69fb81.4b6b6.8ebb@mx.google.com> <20180702022054.GU4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <CALS+E5C6RZgyb7+1ZBg6B=GVMfs=M-rEP7MZJc6+WsdMBsCgWg@mail.gmail.com>
- <20180702071957.GY2780@desktop> <CAOQ4uxhbOq_J1RL=iKhmcWqfo=Fz5CJXqHmeakw-vqMfUqCoag@mail.gmail.com>
-In-Reply-To: <CAOQ4uxhbOq_J1RL=iKhmcWqfo=Fz5CJXqHmeakw-vqMfUqCoag@mail.gmail.com>
-From: Lu Fengqi <curiouslfq@gmail.com>
-Date: Mon, 2 Jul 2018 16:18:12 +0800
-Message-ID: <CALS+E5CyXe3S5kjd61-eefj8xAzzogX7g5xx5-pN67V0jLQzZw@mail.gmail.com>
-Subject: Re: [ANNOUNCE] fstests: master branch updated to 42b851446ff1
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: amir73il@gmail.com
-Cc: guaneryu@gmail.com, zlang@redhat.com, fstests@vger.kernel.org
+To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, zlang@redhat.com, yangx.jy@cn.fujitsu.com
 List-ID: <fstests@vger.kernel.org>
 
-Amir Goldstein <amir73il@gmail.com> =E4=BA=8E2018=E5=B9=B47=E6=9C=882=E6=97=
-=A5=E5=91=A8=E4=B8=80 =E4=B8=8B=E5=8D=883:27=E5=86=99=E9=81=93=EF=BC=9A
->
-> On Mon, Jul 2, 2018 at 10:19 AM, Eryu Guan <guaneryu@gmail.com> wrote:
-> > On Mon, Jul 02, 2018 at 10:42:19AM +0800, Lu Fengqi wrote:
-> >> Zorro Lang <zlang@redhat.com> =E4=BA=8E2018=E5=B9=B47=E6=9C=882=E6=97=
-=A5=E5=91=A8=E4=B8=80 =E4=B8=8A=E5=8D=8810:25=E5=86=99=E9=81=93=EF=BC=9A
-> >> >
-> >> > On Sun, Jul 01, 2018 at 09:07:51PM +0800, Eryu Guan wrote:
-> >> > > Hi all,
-> >> > >
-> >> > > The master branch of the xfstests repository at:
-> >> > >
-> >> > >       git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> >> > >
-> >> > > have just been updated. This update contains 8 new tests mainly fo=
-r xfs and
-> >> > > btrfs, but they all should pass with latest Linus tree. Others are=
- random
-> >> > > updates including license update to src/log-writes/* and fixes to =
-build
-> >> > > infrastructure.
-> >> > >
-> >> > > Thanks,
-> >> > > Eryu
-> >> > >
-> >> > > The new head of the master branch is commit:
-> >> > >
-> >> > > 42b851446ff1 build: remove <attr/xattr.h> check
-> >> > >
-> >> > > New commits:
-> >> > >
-> >> > > Darrick J. Wong (2):
-> >> > >       [e04c7b7e3021] xfs/365: fuzz inobt in ag 1
-> >> > >       [494b07e34015] xfs: regression test for rmapbt fdblocks acco=
-unting problems
-> >> > >
-> >> > > Filipe Manana (1):
-> >> > >       [89ee377df5f2] btrfs: test power failure while qgroups resca=
-n is in progress
-> >> > >
-> >> > > Josef Bacik (1):
-> >> > >       [a0f89557ca46] fstests: add SPDX license comments for src/lo=
-g-writes/*
-> >> > >
-> >> > > Lu Fengqi (3):
-> >> > >       [d61c29d32fab] fsstress: remove include <attr/xattr.h>
-> >> > >       [652fda3ee172] src/t_immutable: use sys/xattr.h instead of a=
-ttr/xattr.h
-> >> > >       [42b851446ff1] build: remove <attr/xattr.h> check
-> >> >
-> >> > The current xfstests-dev always fails on building time:
-> >> >
-> >> > configure.ac:56: error: possibly undefined macro: AC_PACKAGE_NEED_GE=
-TXATTR_LIBATTR
-> >> >       If this token and others are legitimate, please use m4_pattern=
-_allow.
-> >> >       See the Autoconf documentation.
-> >> > make: *** [configure] Error 1
-> >> >
-> >> > After reverting "[42b851446ff1] build: remove <attr/xattr.h> check",=
- everything
-> >> > goes well.
-> >> >
-> >> > Is there following fix about this? Or did I do something wrong?
-> >
-> > That's weird, I didn't see compiling errors in my release testing on an=
-y
-> > of the three distros I tested (CentOS7.4, Debian sid and Fedora 28). Bu=
-t
-> > now I did see the errors..
-> >
->
-> My experience is that 'make' failed but 'make clean; make' did fine.
->
-The btrfs-progs have the following targets to check build infrastructure,
-may we create the similar target for xfstests?
+On Mon, Jul 02, 2018 at 03:00:01PM +0800, Lu Fengqi wrote:
+> Because the macro AC_PACKAGE_NEED_GETXATTR_LIBATTR was removed by
+> the following commit specified by fixes tag, we also need remove
+> AC_PACKAGE_NEED_GETXATTR_LIBATTR from configure.ac.
+> 
+> In addition, the libattr will not be set, after the macro was be
+> removed. This cause gcc can't link the libattr for fsstress correctly.
+> The macro AC_PACKAGE_NEED_ATTRGET_LIBATTR has been obsoleted, so change
+> it to AC_PACKAGE_NEED_ATTRSET_LIBATTR and add it to configure.ac. It can
+> help me check libattr and set libattr variable.
+> 
+> Fixes: 42b851446ff1 ("build: remove <attr/xattr.h> check")
+> Reported-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+> ---
+> Hi, Eryu
+> 
+> I apologize for the previous patch about the build infrastructure that
+> caused the master branch to not be compiled.
 
-test-build: test-build-pre test-build-real
+That's my fault, I didn't test the latest patch but a stale one, your
+original patch worked fine. Sorry about that!
 
-test-build-pre:
-        $(MAKE) $(MAKEOPTS) clean-all
-        ./autogen.sh
-        ./configure
+> 
+> Spoiler:
+> Regarding the following deprecated functions, I want to replace them
+> with the glibc version. And, I will carefully confirm the correctness
+> before send patches. Any suggestions?
+> 
+> fsstress.c:762:2: warning: 'attr_list' is deprecated: Use listxattr or
+> llistxattr instead [-Wdeprecated-declarations]
+> fsstress.c:781:2: warning: 'attr_remove' is deprecated: Use removexattr
+> or lremovexattr instead [-Wdeprecated-declarations]
+> fsstress.c:801:2: warning: 'attr_set' is deprecated: Use setxattr or
+> lsetxattr instead [-Wdeprecated-declarations]
 
-test-build-real:
-        $(MAKE) $(MAKEOPTS) library-test
-        -$(MAKE) $(MAKEOPTS) library-test.static
-        $(MAKE) $(MAKEOPTS) -j 8 all
-        -$(MAKE) $(MAKEOPTS) -j 8 static
-        $(MAKE) $(MAKEOPTS) -j 8 $(progs_extra)
--------------------------------------------------------------
-Thanks,
-Lu
+IMHO, replacing the deprecated attr functions looks fine to me. But I'm
+not sure if there's any historical reason behind this.
 
-> Thanks,
-> Amir.
+> 
+>  configure.ac          | 2 +-
+>  m4/package_attrdev.m4 | 4 ++--
+>  2 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/configure.ac b/configure.ac
+> index 63ea032dc564..aede4f59a060 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -53,7 +53,7 @@ AC_PACKAGE_NEED_XFS_HANDLE_H
+>  AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
+>  AC_PACKAGE_NEED_ATTRIBUTES_H
+>  AC_PACKAGE_WANT_ATTRLIST_LIBATTR
+> -AC_PACKAGE_NEED_GETXATTR_LIBATTR
+> +AC_PACKAGE_NEED_ATTRSET_LIBATTR
+>  
+>  AC_PACKAGE_NEED_SYS_ACL_H
+>  AC_PACKAGE_NEED_ACL_LIBACL_H
+> diff --git a/m4/package_attrdev.m4 b/m4/package_attrdev.m4
+> index 9a82f241de3a..d994cfc23c25 100644
+> --- a/m4/package_attrdev.m4
+> +++ b/m4/package_attrdev.m4
+> @@ -26,8 +26,8 @@ AC_DEFUN([AC_PACKAGE_WANT_ATTRLIST_LIBATTR],
+>      AC_SUBST(have_attr_list)
+>    ])
+>  
+> -AC_DEFUN([AC_PACKAGE_NEED_ATTRGET_LIBATTR],
+> -  [ AC_CHECK_LIB(attr, attr_get,, [
+> +AC_DEFUN([AC_PACKAGE_NEED_ATTRSET_LIBATTR],
+> +  [ AC_CHECK_LIB(attr, attr_set,, [
+
+Looks fine to me as a hotfix. Thanks!
+
+Eryu
+
+>          echo
+>          echo 'FATAL ERROR: could not find a valid Extended Attributes library.'
+>          echo 'Install the extended attributes (attr) development package.'
+> -- 
+> 2.18.0
+> 
+> 
+> 
