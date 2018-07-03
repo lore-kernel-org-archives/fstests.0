@@ -1,119 +1,104 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49310 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1754422AbeGCIot (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jul 2018 04:44:49 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] fstests: btrfs/168 verify device ready after device delete
-Date: Tue,  3 Jul 2018 16:47:53 +0800
-Message-Id: <20180703084753.21116-1-anand.jain@oracle.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:60570 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753076AbeGCWU7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jul 2018 18:20:59 -0400
+Date: Tue, 3 Jul 2018 15:20:39 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] build: fix possibly undefined macro:
+ AC_PACKAGE_NEED_GETXATTR_LIBATTR
+Message-ID: <20180703222039.GB5703@magnolia>
+References: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, zlang@redhat.com, yangx.jy@cn.fujitsu.com
 List-ID: <fstests@vger.kernel.org>
 
-This test case verifies if the device ready return success after the
-device delete.
+On Mon, Jul 02, 2018 at 03:00:01PM +0800, Lu Fengqi wrote:
+> Because the macro AC_PACKAGE_NEED_GETXATTR_LIBATTR was removed by
+> the following commit specified by fixes tag, we also need remove
+> AC_PACKAGE_NEED_GETXATTR_LIBATTR from configure.ac.
+> 
+> In addition, the libattr will not be set, after the macro was be
+> removed. This cause gcc can't link the libattr for fsstress correctly.
+> The macro AC_PACKAGE_NEED_ATTRGET_LIBATTR has been obsoleted, so change
+> it to AC_PACKAGE_NEED_ATTRSET_LIBATTR and add it to configure.ac. It can
+> help me check libattr and set libattr variable.
+> 
+> Fixes: 42b851446ff1 ("build: remove <attr/xattr.h> check")
+> Reported-by: Zorro Lang <zlang@redhat.com>
+> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+> ---
+> Hi, Eryu
+> 
+> I apologize for the previous patch about the build infrastructure that
+> caused the master branch to not be compiled.
+> 
+> Spoiler:
+> Regarding the following deprecated functions, I want to replace them
+> with the glibc version. And, I will carefully confirm the correctness
+> before send patches. Any suggestions?
+> 
+> fsstress.c:762:2: warning: 'attr_list' is deprecated: Use listxattr or
+> llistxattr instead [-Wdeprecated-declarations]
+> fsstress.c:781:2: warning: 'attr_remove' is deprecated: Use removexattr
+> or lremovexattr instead [-Wdeprecated-declarations]
+> fsstress.c:801:2: warning: 'attr_set' is deprecated: Use setxattr or
+> lsetxattr instead [-Wdeprecated-declarations]
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
- tests/btrfs/168     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/168.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 71 insertions(+)
- create mode 100755 tests/btrfs/168
- create mode 100644 tests/btrfs/168.out
+/me has no idea about this but his Ubuntu 18.04 build of xfstest master
+failed with:
 
-diff --git a/tests/btrfs/168 b/tests/btrfs/168
-new file mode 100755
-index 000000000000..cb5b8eb4b5a8
---- /dev/null
-+++ b/tests/btrfs/168
-@@ -0,0 +1,68 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 Oracle. All Rights Reserved.
-+#
-+# FS QA Test 168
-+#
-+# Test if btrfs is still reported ready after the device delete
-+#
-+# This could be fixed by the following kernel commit:
-+#  btrfs: fix missing superblock update in the device delete commit transaction
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_command "$BTRFS_TUNE_PROG" btrfstune
-+_require_scratch_dev_pool 2
-+
-+_scratch_dev_pool_get 2
-+dev_1=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+dev_2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-+
-+# normal delete device and then check for ready
-+run_check _scratch_pool_mkfs "-d single -m single"
-+_scratch_mount
-+run_check $BTRFS_UTIL_PROG device delete $dev_1 $SCRATCH_MNT
-+run_check $BTRFS_UTIL_PROG device ready $dev_2
-+
-+_scratch_unmount
-+# delete a seed device and then check for ready
-+run_check $BTRFS_TUNE_PROG -S 1 $dev_2
-+run_check _mount $dev_2 $SCRATCH_MNT
-+_run_btrfs_util_prog device add -f $dev_1 $SCRATCH_MNT
-+run_check mount -o rw,remount $dev_1 $SCRATCH_MNT
-+run_check $BTRFS_UTIL_PROG device delete $dev_2 $SCRATCH_MNT
-+run_check $BTRFS_UTIL_PROG device ready $dev_1
-+
-+_scratch_unmount
-+_scratch_dev_pool_put
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/168.out b/tests/btrfs/168.out
-new file mode 100644
-index 000000000000..893a41d859c8
---- /dev/null
-+++ b/tests/btrfs/168.out
-@@ -0,0 +1,2 @@
-+QA output created by 168
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 5cff3bd6cc03..7bc3ea457992 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -170,3 +170,4 @@
- 165 auto quick subvol
- 166 auto quick qgroup
- 167 auto quick replace volume
-+168 auto quick volume
--- 
-2.15.0
+gcc: error: libattr@: No such file or directory
 
+This fixes it, so I guess
+Tested-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
+
+> 
+>  configure.ac          | 2 +-
+>  m4/package_attrdev.m4 | 4 ++--
+>  2 files changed, 3 insertions(+), 3 deletions(-)
+> 
+> diff --git a/configure.ac b/configure.ac
+> index 63ea032dc564..aede4f59a060 100644
+> --- a/configure.ac
+> +++ b/configure.ac
+> @@ -53,7 +53,7 @@ AC_PACKAGE_NEED_XFS_HANDLE_H
+>  AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
+>  AC_PACKAGE_NEED_ATTRIBUTES_H
+>  AC_PACKAGE_WANT_ATTRLIST_LIBATTR
+> -AC_PACKAGE_NEED_GETXATTR_LIBATTR
+> +AC_PACKAGE_NEED_ATTRSET_LIBATTR
+>  
+>  AC_PACKAGE_NEED_SYS_ACL_H
+>  AC_PACKAGE_NEED_ACL_LIBACL_H
+> diff --git a/m4/package_attrdev.m4 b/m4/package_attrdev.m4
+> index 9a82f241de3a..d994cfc23c25 100644
+> --- a/m4/package_attrdev.m4
+> +++ b/m4/package_attrdev.m4
+> @@ -26,8 +26,8 @@ AC_DEFUN([AC_PACKAGE_WANT_ATTRLIST_LIBATTR],
+>      AC_SUBST(have_attr_list)
+>    ])
+>  
+> -AC_DEFUN([AC_PACKAGE_NEED_ATTRGET_LIBATTR],
+> -  [ AC_CHECK_LIB(attr, attr_get,, [
+> +AC_DEFUN([AC_PACKAGE_NEED_ATTRSET_LIBATTR],
+> +  [ AC_CHECK_LIB(attr, attr_set,, [
+>          echo
+>          echo 'FATAL ERROR: could not find a valid Extended Attributes library.'
+>          echo 'Install the extended attributes (attr) development package.'
+> -- 
+> 2.18.0
+> 
+> 
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
