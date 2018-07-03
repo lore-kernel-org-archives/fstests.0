@@ -1,104 +1,48 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:60570 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1753076AbeGCWU7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jul 2018 18:20:59 -0400
-Date: Tue, 3 Jul 2018 15:20:39 -0700
+Received: from aserp2120.oracle.com ([141.146.126.78]:60474 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1753164AbeGCWWs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Jul 2018 18:22:48 -0400
+Date: Tue, 3 Jul 2018 15:22:43 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] build: fix possibly undefined macro:
- AC_PACKAGE_NEED_GETXATTR_LIBATTR
-Message-ID: <20180703222039.GB5703@magnolia>
-References: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
+Subject: Re: [PATCH 4/4] xfs: fuzz every field of every structure and test
+ kernel crashes
+Message-ID: <20180703222243.GE5724@magnolia>
+References: <152960594943.26479.1457883867468749220.stgit@magnolia>
+ <152960597579.26479.1694478608504574104.stgit@magnolia>
+ <20180628031027.GR2780@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180702070001.1973-1-lufq.fnst@cn.fujitsu.com>
+In-Reply-To: <20180628031027.GR2780@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, zlang@redhat.com, yangx.jy@cn.fujitsu.com
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 02, 2018 at 03:00:01PM +0800, Lu Fengqi wrote:
-> Because the macro AC_PACKAGE_NEED_GETXATTR_LIBATTR was removed by
-> the following commit specified by fixes tag, we also need remove
-> AC_PACKAGE_NEED_GETXATTR_LIBATTR from configure.ac.
+On Thu, Jun 28, 2018 at 11:10:27AM +0800, Eryu Guan wrote:
+> On Thu, Jun 21, 2018 at 11:32:55AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Fuzz every field of every structure and then try to write the
+> > filesystem, to see how many of these writes can crash the kernel.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> In addition, the libattr will not be set, after the macro was be
-> removed. This cause gcc can't link the libattr for fsstress correctly.
-> The macro AC_PACKAGE_NEED_ATTRGET_LIBATTR has been obsoleted, so change
-> it to AC_PACKAGE_NEED_ATTRSET_LIBATTR and add it to configure.ac. It can
-> help me check libattr and set libattr variable.
+> Almost all the tests here are failing in similar ways with v4.18-rc1
+> kernel and latest xfsprogs from for-next branch, e.g. xfs/1423 fails as
 > 
-> Fixes: 42b851446ff1 ("build: remove <attr/xattr.h> check")
-> Reported-by: Zorro Lang <zlang@redhat.com>
-> Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-> ---
-> Hi, Eryu
+>     +re-repair failed (1) with diskdq.magic = zeroes.
+>     +re-repair failed (1) with diskdq.magic = ones.
+>     +re-repair failed (1) with diskdq.magic = firstbit.
+>     +re-repair failed (1) with diskdq.magic = middlebit.
 > 
-> I apologize for the previous patch about the build infrastructure that
-> caused the master branch to not be compiled.
-> 
-> Spoiler:
-> Regarding the following deprecated functions, I want to replace them
-> with the glibc version. And, I will carefully confirm the correctness
-> before send patches. Any suggestions?
-> 
-> fsstress.c:762:2: warning: 'attr_list' is deprecated: Use listxattr or
-> llistxattr instead [-Wdeprecated-declarations]
-> fsstress.c:781:2: warning: 'attr_remove' is deprecated: Use removexattr
-> or lremovexattr instead [-Wdeprecated-declarations]
-> fsstress.c:801:2: warning: 'attr_set' is deprecated: Use setxattr or
-> lsetxattr instead [-Wdeprecated-declarations]
+> Seems like we should skip re-repair in the "none" repair mode too in
+> __scratch_xfs_fuzz_field_test?
 
-/me has no idea about this but his Ubuntu 18.04 build of xfstest master
-failed with:
-
-gcc: error: libattr@: No such file or directory
-
-This fixes it, so I guess
-Tested-by: Darrick J. Wong <darrick.wong@oracle.com>
+Makes sense, will fix & resubmit.
 
 --D
 
-
 > 
->  configure.ac          | 2 +-
->  m4/package_attrdev.m4 | 4 ++--
->  2 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/configure.ac b/configure.ac
-> index 63ea032dc564..aede4f59a060 100644
-> --- a/configure.ac
-> +++ b/configure.ac
-> @@ -53,7 +53,7 @@ AC_PACKAGE_NEED_XFS_HANDLE_H
->  AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE
->  AC_PACKAGE_NEED_ATTRIBUTES_H
->  AC_PACKAGE_WANT_ATTRLIST_LIBATTR
-> -AC_PACKAGE_NEED_GETXATTR_LIBATTR
-> +AC_PACKAGE_NEED_ATTRSET_LIBATTR
->  
->  AC_PACKAGE_NEED_SYS_ACL_H
->  AC_PACKAGE_NEED_ACL_LIBACL_H
-> diff --git a/m4/package_attrdev.m4 b/m4/package_attrdev.m4
-> index 9a82f241de3a..d994cfc23c25 100644
-> --- a/m4/package_attrdev.m4
-> +++ b/m4/package_attrdev.m4
-> @@ -26,8 +26,8 @@ AC_DEFUN([AC_PACKAGE_WANT_ATTRLIST_LIBATTR],
->      AC_SUBST(have_attr_list)
->    ])
->  
-> -AC_DEFUN([AC_PACKAGE_NEED_ATTRGET_LIBATTR],
-> -  [ AC_CHECK_LIB(attr, attr_get,, [
-> +AC_DEFUN([AC_PACKAGE_NEED_ATTRSET_LIBATTR],
-> +  [ AC_CHECK_LIB(attr, attr_set,, [
->          echo
->          echo 'FATAL ERROR: could not find a valid Extended Attributes library.'
->          echo 'Install the extended attributes (attr) development package.'
-> -- 
-> 2.18.0
-> 
-> 
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> Thanks,
+> Eryu
