@@ -1,127 +1,196 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:49386 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932439AbeGDEvD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jul 2018 00:51:03 -0400
-Subject: [PATCH 2/7] misc: force the exact quota options coded into the test
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 03 Jul 2018 21:51:00 -0700
-Message-ID: <153067986006.28393.12507727179398690195.stgit@magnolia>
-In-Reply-To: <153067984748.28393.1595618163831671652.stgit@magnolia>
-References: <153067984748.28393.1595618163831671652.stgit@magnolia>
+Received: from mail-pg0-f68.google.com ([74.125.83.68]:39195 "EHLO
+        mail-pg0-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1752819AbeGDNEh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jul 2018 09:04:37 -0400
+Date: Wed, 4 Jul 2018 21:04:30 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic: test dm-thin running out of data space vs
+ concurrent discard
+Message-ID: <20180704130430.GA2780@desktop>
+References: <20180629165738.8106-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180629165738.8106-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Sat, Jun 30, 2018 at 12:57:38AM +0800, Zorro Lang wrote:
+> If a user constructs a test that loops repeatedly over below steps
+> on dm-thin, block allocation can fail due to discards not having
+> completed yet (Fixed by a685557 dm thin: handle running out of data
+> space vs concurrent discard):
+> 1) fill thin device via filesystem file
+> 2) remove file
+> 3) fstrim
+> 
+> And this maybe cause a deadlock (fast device likes ramdisk can help
+> a lot) when racing a fstrim with a filesystem (XFS) shutdown. (Fixed
+> by 8c81dd46ef3c Force log to disk before reading the AGF during a
+> fstrim)
+> 
+> This case can reproduce both two bugs if they're not fixed. If only
+> the dm-thin bug is fixed, then the test will pass. If only the fs
+> bug is fixed, then the test will fail. If both of bugs aren't fixed,
+> the test will hang.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> If both of two bugs aren't fixed, a loop device base on tmpfs can help
+> reproduce the XFS deadlock:
+> 1) mount -t tmpfs tmpfs /tmp
+> 2) dd if=/dev/zero of=/tmp/test.img bs=1M count=100
+> 3) losetup /dev/loop0 /tmp/test.img
+> 4) use /dev/loop0 to be SCRATCH_DEV, run this case. The test will hang there.
+> 
+> Ramdisk can help trigger the race. Maybe NVME device can help too. But it's
+> hard to reproduce on general disk.
+> 
+> If the XFS bug is fixed, above steps can reproduce dm-thin bug, the test
+> will fail.
+> 
+> Unfortunately, if the dm-thin bug is fixed, then this case can't reproduce
+> the XFS bug singly.
+> 
+> Thanks,
+> Zorro
+> 
+>  tests/generic/499     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/499.out |  2 ++
+>  tests/generic/group   |  1 +
+>  3 files changed, 88 insertions(+)
+>  create mode 100755 tests/generic/499
+>  create mode 100644 tests/generic/499.out
+> 
+> diff --git a/tests/generic/499 b/tests/generic/499
+> new file mode 100755
+> index 00000000..24adfc3a
+> --- /dev/null
+> +++ b/tests/generic/499
+> @@ -0,0 +1,85 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 499
+> +#
+> +# Race test running out of data space with concurrent discard operation on
+> +# dm-thin.
+> +#
+> +# If a user constructs a test that loops repeatedly over below steps on
+> +# dm-thin, block allocation can fail due to discards not having completed
+> +# yet (Fixed by a685557 dm thin: handle running out of data space vs
+> +# concurrent discard):
+> +# 1) fill thin device via filesystem file
+> +# 2) remove file
+> +# 3) fstrim
+> +#
+> +# And this maybe cause a deadlock when racing a fstrim with a filesystem
+> +# (XFS) shutdown. (Fixed by 8c81dd46ef3c Force log to disk before reading
+> +# the AGF during a fstrim)
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	_dmthin_cleanup
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/dmthin
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +_require_dm_target thin-pool
 
-Several tests require setting exactly the quota mount options that are
-encoded in the test.  Unfortunately, quota mount options set by the user
-in MOUNT_OPTIONS can turn on other quota types, which causes the golden
-outputs to be off for various reasons (quota report output, behavior
-changes, etc.)
+Need _require_command "$FSTRIM_PROG" fstrim
 
-So use _qmount_option to delete all the quota mount options in these
-tests so that the test itself can run with exactly the config for which
-it was written.
+> +
+> +# Create a thin pool and a *slightly smaller* thin volume, it's helpful
+> +# to reproduce the bug
+> +BACKING_SIZE=$((50 * 1024 * 1024 / 512))	# 50M
+> +VIRTUAL_SIZE=$((BACKING_SIZE + 1024))		# 50M + 1k
+> +CLUSTER_SIZE=$((64 * 1024 / 512))		# 64K
+> +
+> +_dmthin_init $BACKING_SIZE $VIRTUAL_SIZE $CLUSTER_SIZE 0
+> +_dmthin_set_fail
+> +_mkfs_dev $DMTHIN_VOL_DEV
+> +_dmthin_mount
+> +
+> +# There're two bugs at here, one is dm-thin bug, the other is filesystem
+> +# (XFS especially) bug. The dm-thin bug can't handle running out of data
+> +# space with concurrent discard well. Then the dm-thin bug cause fs unmount
+> +# hang when racing a fstrim with a filesystem shutdown.
+> +#
+> +# If both of two bugs haven't been fixed, below test maybe cause deadlock.
+> +# Else if the fs bug has been fixed, but the dm-thin bug hasn't. below test
+> +# will cause the test fail (no deadlock).
+> +# Else the test will pass.
+> +for ((i=0; i<100; i++)); do
+> +	$XFS_IO_PROG -f -c "pwrite -b 64k 0 100M" \
+> +		$SCRATCH_MNT/testfile &>/dev/null
+> +	rm -f $SCRATCH_MNT/testfile
+> +	$FSTRIM_PROG $SCRATCH_MNT
+> +done
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/generic/230 |    3 +++
- tests/xfs/075     |    4 ++++
- tests/xfs/116     |    3 +++
- tests/xfs/132     |    5 +++++
- tests/xfs/220     |    3 +++
- 5 files changed, 18 insertions(+)
+I think it's fine to run this test on non-ramdisk devices, even though
+it's hard to reproduce the bug there, as it's good to have more test
+coverage. But is it really need looping for 100 times? Test time could
+be reduced if we could run for less loops.
 
+Thanks,
+Eryu
 
-diff --git a/tests/generic/230 b/tests/generic/230
-index bc8c1ad0..a7ab67f7 100755
---- a/tests/generic/230
-+++ b/tests/generic/230
-@@ -99,6 +99,9 @@ rm -f $seqres.full
- 
- grace=2
- 
-+# Test only the quota type specified in each _scratch_mount clause below.
-+_qmount_option 'defaults'
-+
- _scratch_mkfs >> $seqres.full 2>&1
- _scratch_mount "-o usrquota,grpquota"
- quotacheck -u -g $SCRATCH_MNT 2>/dev/null
-diff --git a/tests/xfs/075 b/tests/xfs/075
-index caf612bb..dee01462 100755
---- a/tests/xfs/075
-+++ b/tests/xfs/075
-@@ -25,12 +25,16 @@ _cleanup()
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/quota
- 
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
- _require_scratch
- 
-+# norecovery mounts do not succeed with quotas eanbled, so shut them off
-+_qmount_option "defaults"
-+
- echo "Silence is golden"
- _scratch_mkfs_sized $((512 * 1024 * 1024)) >$seqres.full
- 
-diff --git a/tests/xfs/116 b/tests/xfs/116
-index 6887d7e5..4422eb50 100755
---- a/tests/xfs/116
-+++ b/tests/xfs/116
-@@ -36,6 +36,9 @@ _supported_os Linux
- _require_scratch
- _require_xfs_quota
- 
-+# Only mount with the quota options we specify below
-+_qmount_option "defaults"
-+
- _scratch_mkfs >/dev/null 2>&1
- _scratch_mount "-o uquota"
- _scratch_unmount
-diff --git a/tests/xfs/132 b/tests/xfs/132
-index c5fe8b5a..a421f727 100755
---- a/tests/xfs/132
-+++ b/tests/xfs/132
-@@ -24,6 +24,7 @@ _cleanup()
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-+. ./common/quota
- 
- # remove previous $seqres.full before test
- rm -f $seqres.full
-@@ -43,6 +44,10 @@ _disable_dmesg_check
- _require_xfs_mkfs_crc
- _scratch_mkfs -m crc=0 > $seqres.full 2>&1
- 
-+# The files that EIO in the golden output changes if we have quotas enabled
-+# so leave it off.
-+_qmount_option "defaults"
-+
- # corrupt an inode in the root inode chunk
- root_ino=$(_scratch_xfs_get_metadata_field 'rootino' 'sb 0')
- corrupt_ino=$((root_ino + 15))
-diff --git a/tests/xfs/220 b/tests/xfs/220
-index 227d5452..61319c9d 100755
---- a/tests/xfs/220
-+++ b/tests/xfs/220
-@@ -36,6 +36,9 @@ _supported_os Linux
- _require_scratch
- _require_quota
- 
-+# Only mount with the specific quota options mentioned below
-+_qmount_option "defaults"
-+
- echo "Silence is golden."
- 
- # create scratch filesystem
-
+> +
+> +_dmthin_check_fs
+> +_dmthin_cleanup
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/499.out b/tests/generic/499.out
+> new file mode 100644
+> index 00000000..c363e684
+> --- /dev/null
+> +++ b/tests/generic/499.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 499
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 83a6fdab..bbeac4af 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -501,3 +501,4 @@
+>  496 auto quick swap
+>  497 auto quick swap collapse
+>  498 auto quick log
+> +499 auto thin trim
+> -- 
+> 2.14.4
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
