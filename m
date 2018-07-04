@@ -1,12 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:42536 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S932346AbeGDEu5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jul 2018 00:50:57 -0400
-Subject: [PATCH 1/7] generic/{279,
- 28[1-3]}: hide SIGBUS reporting from golden output
+Received: from userp2130.oracle.com ([156.151.31.86]:49432 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932270AbeGDEvK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Jul 2018 00:51:10 -0400
+Subject: [PATCH 3/7] xfs/001: update to handle v5 filesystems
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 03 Jul 2018 21:50:53 -0700
-Message-ID: <153067985383.28393.15559670747546571392.stgit@magnolia>
+Date: Tue, 03 Jul 2018 21:51:06 -0700
+Message-ID: <153067986635.28393.2430588973298698151.stgit@magnolia>
 In-Reply-To: <153067984748.28393.1595618163831671652.stgit@magnolia>
 References: <153067984748.28393.1595618163831671652.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,102 +18,76 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-These four tests check that mmap'd cow writes fail when the filesystem
-goes down.  For regular filesystems the msync reports EIO, but if quotas
-are enabled on xfs the write itself terminates xfs_io with a SIGBUS.  We
-don't care how the write fails, so don't let the SIGBUS report escape to
-the golden output.
+xfs/001 fuzzes various extent fields using xfs_db.  There's nothing in
+it that's specific to v4 filesystems, so upgrade the test to be able to
+handle v5 filesystems.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/279 |    6 ++++++
- tests/generic/281 |    6 ++++++
- tests/generic/282 |    9 ++++++++-
- tests/generic/283 |   14 ++++++++++----
- 4 files changed, 30 insertions(+), 5 deletions(-)
+ common/xfs    |   15 +++++++++++++++
+ tests/xfs/001 |   18 ++++++++++++------
+ 2 files changed, 27 insertions(+), 6 deletions(-)
 
 
-diff --git a/tests/generic/279 b/tests/generic/279
-index 1355c641..af699144 100755
---- a/tests/generic/279
-+++ b/tests/generic/279
-@@ -66,8 +66,14 @@ md5sum $testdir/file2 | _filter_scratch
- echo "CoW and unmount"
- sync
- _dmerror_load_error_table
-+# Insulate ourselves against bash reporting the SIGBUS when we try to modify
-+# the metadata.
-+cat > $tmp.run << ENDL
-+ulimit -c 0
- $XFS_IO_PROG -f -c "mmap -rw 0 $filesize" -c "mwrite -S 0x63 0 $filesize" \
- 	-c "msync -s 0 $filesize" $testdir/file2 >> $seqres.full 2>&1
-+ENDL
-+bash $tmp.run 2> /dev/null
- _dmerror_load_working_table
- _dmerror_unmount
- _dmerror_mount
-diff --git a/tests/generic/281 b/tests/generic/281
-index 75c4b39a..75deab7c 100755
---- a/tests/generic/281
-+++ b/tests/generic/281
-@@ -66,8 +66,14 @@ md5sum $testdir/file2 | _filter_scratch
- echo "CoW and unmount"
- sync
- _dmerror_load_error_table
-+# Insulate ourselves against bash reporting the SIGBUS when we try to modify
-+# the metadata.
-+cat > $tmp.run << ENDL
-+ulimit -c 0
- $XFS_IO_PROG -f -c "mmap -rw 0 $filesize" -c "mwrite -S 0x63 0 $filesize" \
- 	-c "msync -s 0 $filesize" $testdir/file2 >> $seqres.full 2>&1
-+ENDL
-+bash $tmp.run 2> /dev/null
+diff --git a/common/xfs b/common/xfs
+index 9a785b88..5b632df1 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -765,3 +765,18 @@ _scratch_get_sfdir_prefix() {
+ 	_scratch_xfs_db -c "inode ${dir_ino}" -c 'p' >> $seqres.full
+ 	return 1
+ }
++
++_scratch_get_bmx_prefix() {
++	local ino="$1"
++
++	for prefix in "u3.bmx" "u.bmx"; do
++		if [ -n "$(_scratch_xfs_get_metadata_field \
++				"${prefix}[0].startblock" \
++				"inode ${ino}")" ]; then
++			echo "${prefix}"
++			return 0
++		fi
++	done
++	_scratch_xfs_db -c "inode ${ino}" -c 'p' >> $seqres.full
++	return 1
++}
+diff --git a/tests/xfs/001 b/tests/xfs/001
+index ac86c3b1..6ad3aba8 100755
+--- a/tests/xfs/001
++++ b/tests/xfs/001
+@@ -49,9 +49,8 @@ _do_bit_test()
+ _supported_fs xfs
+ _supported_os Linux
+ _require_scratch_nocheck
+-_require_xfs_mkfs_crc
  
- echo "Clean up the mess"
- _dmerror_unmount
-diff --git a/tests/generic/282 b/tests/generic/282
-index aea7ce58..44ffe278 100755
---- a/tests/generic/282
-+++ b/tests/generic/282
-@@ -66,7 +66,14 @@ md5sum $testdir/file2 | _filter_scratch
- echo "CoW and unmount"
- sync
- _dmerror_load_error_table
--$XFS_IO_PROG -f -c "mmap -rw 0 $filesize" -c "mwrite -S 0x63 0 $filesize" $testdir/file2 >> $seqres.full 2>&1
-+# Insulate ourselves against bash reporting the SIGBUS when we try to modify
-+# the metadata.
-+cat > $tmp.run << ENDL
-+ulimit -c 0
-+$XFS_IO_PROG -f -c "mmap -rw 0 $filesize" \
-+	-c "mwrite -S 0x63 0 $filesize" $testdir/file2 >> $seqres.full 2>&1
-+ENDL
-+bash $tmp.run 2> /dev/null
- _dmerror_load_working_table
- rm -rf $testdir/file2 >> $seqres.full 2>&1
- _dmerror_unmount
-diff --git a/tests/generic/283 b/tests/generic/283
-index 79caddb5..84a1666a 100755
---- a/tests/generic/283
-+++ b/tests/generic/283
-@@ -67,10 +67,16 @@ md5sum $testdir/file2 | _filter_scratch
- echo "CoW and unmount"
- sync
- _dmerror_load_error_table
--urk=$($XFS_IO_PROG -f -c "mmap -rw 0 $filesize" -c "mwrite -S 0x63 0 $filesize" \
--	-c "msync -s 0 $filesize" $testdir/file2 2>&1)
--echo $urk >> $seqres.full
--echo "$urk" | grep -q "error" || _fail "mwrite did not fail"
-+# Insulate ourselves against bash reporting the SIGBUS when we try to modify
-+# the metadata.
-+cat > $tmp.run << ENDL
-+ulimit -c 0
-+$XFS_IO_PROG -f -c "mmap -rw 0 $filesize" -c "mwrite -S 0x63 0 $filesize" \
-+	-c "msync -s 0 $filesize" $testdir/file2 2>&1
-+ENDL
-+bash $tmp.run > $tmp.output 2>&1
-+cat $tmp.output >> $seqres.full
-+grep -q error $tmp.output || _fail "mwrite did not fail"
- _dmerror_load_working_table
+-_scratch_mkfs -m crc=0 >/dev/null 2>&1
++_scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
  
- echo "Rewrite"
+ # create the test file
+@@ -68,11 +67,18 @@ BMBT_STARTOFF_BITLEN=54
+ BMBT_STARTBLOCK_BITLEN=52
+ BMBT_BLOCKCOUNT_BITLEN=21
+ 
++prefix=$(_scratch_get_bmx_prefix $FILE_INO)
++test -n "$prefix" || _fail "could not find bmx prefix from inode $FILE_INO"
++
++filter_output() {
++	sed -e "s/${prefix}/u.bmx/g"
++}
++
+ # test setting the BMBT entries from 0 to past the valid number.
+-_do_bit_test "u.bmx[0].extentflag" $BMBT_EXNTFLAG_BITLEN
+-_do_bit_test "u.bmx[0].startoff" $BMBT_STARTOFF_BITLEN
+-_do_bit_test "u.bmx[0].startblock" $BMBT_STARTBLOCK_BITLEN
+-_do_bit_test "u.bmx[0].blockcount" $BMBT_BLOCKCOUNT_BITLEN
++_do_bit_test "${prefix}[0].extentflag" $BMBT_EXNTFLAG_BITLEN | filter_output
++_do_bit_test "${prefix}[0].startoff" $BMBT_STARTOFF_BITLEN | filter_output
++_do_bit_test "${prefix}[0].startblock" $BMBT_STARTBLOCK_BITLEN | filter_output
++_do_bit_test "${prefix}[0].blockcount" $BMBT_BLOCKCOUNT_BITLEN | filter_output
+ # test setting the 32 bit generation number
+ _scratch_xfs_db -x -c "inode $FILE_INO" -c "write core.gen 0x5a"
+ _scratch_xfs_db -x -c "inode $FILE_INO" -c "write core.gen 0xa5"
 
