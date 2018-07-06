@@ -1,67 +1,45 @@
-Received: from sandeen.net ([63.231.237.45]:54896 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933054AbeGFOuL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Jul 2018 10:50:11 -0400
-Subject: Re: [PATCH] xfs: skip copy fs test on large device
-References: <20180706060728.6606-1-zlang@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <ab00ab99-117b-353b-7f47-eeb127f298ad@sandeen.net>
-Date: Fri, 6 Jul 2018 09:50:09 -0500
-MIME-Version: 1.0
-In-Reply-To: <20180706060728.6606-1-zlang@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:44544 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S933057AbeGFPhj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 6 Jul 2018 11:37:39 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A89693466F
+        for <fstests@vger.kernel.org>; Fri,  6 Jul 2018 15:37:38 +0000 (UTC)
+Received: from coeurl.usersys.redhat.com (ovpn-120-167.rdu2.redhat.com [10.10.120.167])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 9CE122026D68
+        for <fstests@vger.kernel.org>; Fri,  6 Jul 2018 15:37:38 +0000 (UTC)
+From: Scott Mayhew <smayhew@redhat.com>
+Subject: [PATCH] nfs/001: ignore the header in nfs4_getfacl output
+Date: Fri,  6 Jul 2018 11:37:38 -0400
+Message-Id: <20180706153738.958-1-smayhew@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 7/6/18 1:07 AM, Zorro Lang wrote:
-> When test on large SCRATCH_DEV, copy a huge size XFS to TEST_DIR
-> will fill the TEST_DIR soon, and xfs_copy process will be blocked
-> there. Due to copy LARGE_SCRATCH_DEV won't add any more test
-> coverage, so skip this kind of tests if LARGE_SCRATCH_DEV is yes.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+nfs4-acl-tools commit 6630629bb661 ("nfs4_getfacl: Add support to
+accept more paths") added a header to the nfs4_getfacl output.  Make
+sure the test is only counting the number of ACEs.
 
-Seems reasonable.
+Signed-off-by: Scott Mayhew <smayhew@redhat.com>
+---
+ tests/nfs/001 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+diff --git a/tests/nfs/001 b/tests/nfs/001
+index d7a79cb0..23d5c98c 100755
+--- a/tests/nfs/001
++++ b/tests/nfs/001
+@@ -55,7 +55,7 @@ $NFS4_SETFACL_PROG -S $acltest.list $acltest.file
+ 
+ # Dump ACL, expect correct number of ACE entries
+ $NFS4_GETFACL_PROG $acltest.file >>$seqres.full 2>&1
+-$NFS4_GETFACL_PROG $acltest.file | wc -l
++$NFS4_GETFACL_PROG $acltest.file | grep -c "^A"
+ 
+ # success, all done
+ status=0
+-- 
+2.14.4
 
-> ---
-> 
-> Refer to "a82e9464 xfs: skip growfs test on large device", xfs_copy a
-> huge size XFS will be blocked, so skip this kind of tests too.
-> 
-> Thanks,
-> Zorro
-> 
->  tests/xfs/077 | 1 +
->  tests/xfs/284 | 1 +
->  2 files changed, 2 insertions(+)
-> 
-> diff --git a/tests/xfs/077 b/tests/xfs/077
-> index 3eaa5ffd..02bcc9f7 100755
-> --- a/tests/xfs/077
-> +++ b/tests/xfs/077
-> @@ -38,6 +38,7 @@ _supported_os Linux
->  # xfs_copy does not support realtime devices
->  _require_no_realtime
->  _require_scratch
-> +_require_no_large_scratch_dev
->  _require_xfs_crc
->  _require_meta_uuid
->  
-> diff --git a/tests/xfs/284 b/tests/xfs/284
-> index fc51af0e..07f71031 100755
-> --- a/tests/xfs/284
-> +++ b/tests/xfs/284
-> @@ -38,6 +38,7 @@ _supported_os Linux
->  _require_no_realtime
->  _require_test
->  _require_scratch
-> +_require_no_large_scratch_dev
->  
->  function filter_mounted()
->  {
-> 
