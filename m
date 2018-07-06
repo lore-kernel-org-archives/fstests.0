@@ -1,65 +1,57 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:39848 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1753653AbeGFGHh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 6 Jul 2018 02:07:37 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.rdu2.redhat.com [10.11.54.5])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 80AF0401DEAB
-        for <fstests@vger.kernel.org>; Fri,  6 Jul 2018 06:07:36 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-128.pek2.redhat.com [10.72.12.128])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 690127C20
-        for <fstests@vger.kernel.org>; Fri,  6 Jul 2018 06:07:35 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs: skip copy fs test on large device
-Date: Fri,  6 Jul 2018 14:07:28 +0800
-Message-Id: <20180706060728.6606-1-zlang@redhat.com>
+Received: from mail-pf0-f194.google.com ([209.85.192.194]:38947 "EHLO
+        mail-pf0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1751862AbeGFGI0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 6 Jul 2018 02:08:26 -0400
+Date: Fri, 6 Jul 2018 14:08:20 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 2/2] xfs: fuzz every field of every structure and test
+ kernel crashes
+Message-ID: <20180706060820.GE2780@desktop>
+References: <153067982461.28315.11621030236927888645.stgit@magnolia>
+ <153067983717.28315.16483133462251633709.stgit@magnolia>
+ <20180706043109.GC2780@desktop>
+ <20180706050805.GT32415@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180706050805.GT32415@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When test on large SCRATCH_DEV, copy a huge size XFS to TEST_DIR
-will fill the TEST_DIR soon, and xfs_copy process will be blocked
-there. Due to copy LARGE_SCRATCH_DEV won't add any more test
-coverage, so skip this kind of tests if LARGE_SCRATCH_DEV is yes.
+On Thu, Jul 05, 2018 at 10:08:05PM -0700, Darrick J. Wong wrote:
+> On Fri, Jul 06, 2018 at 12:31:09PM +0800, Eryu Guan wrote:
+> > On Tue, Jul 03, 2018 at 09:50:37PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > Fuzz every field of every structure and then try to write the
+> > > filesystem, to see how many of these writes can crash the kernel.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > The "re-repair" failures are gone, but I still see some test failures
+> > like (xfs/1398 for example)
+> > 
+> > +re-mount failed (32) with magic = zeroes.
+> > +re-mount failed (32) with magic = ones.
+> > ...
+> > 
+> > Looks like the re-mount is expected to fail as we skipped all the repair work.
+> 
+> Yeah, these tests are going to throw a /lot/ of errors as we try to see
+> if we can get the kernel to blow up on deliberately garbage filesystems.
+> They're not expected to pass ever, except in the sense that the kernel
+> doesn't just crash. :)
+> 
+> > Also, there're _check_dmesg failures too (they were buried among other
+> > failures so I didn't notice them in last review), like this "Internal
+> > error" from xfs/1397
+> 
+> But yeah, I will add _check_dmesg to all of the tests before the next
+> submission (unless you commit it before then).
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
-
-Refer to "a82e9464 xfs: skip growfs test on large device", xfs_copy a
-huge size XFS will be blocked, so skip this kind of tests too.
+I'll wait for re-submission :)
 
 Thanks,
-Zorro
-
- tests/xfs/077 | 1 +
- tests/xfs/284 | 1 +
- 2 files changed, 2 insertions(+)
-
-diff --git a/tests/xfs/077 b/tests/xfs/077
-index 3eaa5ffd..02bcc9f7 100755
---- a/tests/xfs/077
-+++ b/tests/xfs/077
-@@ -38,6 +38,7 @@ _supported_os Linux
- # xfs_copy does not support realtime devices
- _require_no_realtime
- _require_scratch
-+_require_no_large_scratch_dev
- _require_xfs_crc
- _require_meta_uuid
- 
-diff --git a/tests/xfs/284 b/tests/xfs/284
-index fc51af0e..07f71031 100755
---- a/tests/xfs/284
-+++ b/tests/xfs/284
-@@ -38,6 +38,7 @@ _supported_os Linux
- _require_no_realtime
- _require_test
- _require_scratch
-+_require_no_large_scratch_dev
- 
- function filter_mounted()
- {
--- 
-2.14.4
-
+Eryu
