@@ -1,171 +1,173 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:56290 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1754253AbeGGRAJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 7 Jul 2018 13:00:09 -0400
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v2] generic: test dm-thin running out of data space vs concurrent discard
-Date: Sun,  8 Jul 2018 00:59:57 +0800
-Message-Id: <20180707165957.14734-1-zlang@redhat.com>
+Received: from mail-pl0-f45.google.com ([209.85.160.45]:41637 "EHLO
+        mail-pl0-f45.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S932757AbeGHNac (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Jul 2018 09:30:32 -0400
+Received: by mail-pl0-f45.google.com with SMTP id w8-v6so4833757ply.8
+        for <fstests@vger.kernel.org>; Sun, 08 Jul 2018 06:30:32 -0700 (PDT)
+Message-ID: <5b4211f6.1c69fb81.a1632.43a6@mx.google.com>
+Date: Sun, 08 Jul 2018 21:30:26 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 0804dc173618
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="J1vGGdE0cT9h"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If a user constructs a test that loops repeatedly over below steps
-on dm-thin, block allocation can fail due to discards not having
-completed yet (Fixed by a685557 dm thin: handle running out of data
-space vs concurrent discard):
-1) fill thin device via filesystem file
-2) remove file
-3) fstrim
 
-And this maybe cause a deadlock (fast device likes ramdisk can help
-a lot) when racing a fstrim with a filesystem (XFS) shutdown. (Fixed
-by 8c81dd46ef3c Force log to disk before reading the AGF during a
-fstrim)
+--J1vGGdE0cT9h
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-This case can reproduce both two bugs if they're not fixed. If only
-the dm-thin bug is fixed, then the test will pass. If only the fs
-bug is fixed, then the test will fail. If both of bugs aren't fixed,
-the test will hang.
+Hi all,
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+The master branch of the xfstests repository at:
 
-Hi,
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-V1 as below:
-https://marc.info/?l=linux-xfs&m=153070947925942&w=2
-
-V2 did below changes:
-1) Use _require_batched_discard to check $FSTRIM_PROG is exist,
-   and SCRATCH_DEV supports discard.
-2) Reduce the looping times from 100 to 20.
+have just been updated. This update mainly pulls in another pile of xfs fuzz
+tests from Darrick and fixes a build failure introduced in last release. My
+apology again for breaking the build without noticing it in release testing,
+and thanks to Lu Fengqi's fix!
 
 Thanks,
-Zorro
+Eryu
 
- tests/generic/499     | 91 +++++++++++++++++++++++++++++++++++++++++++++++++++
+The new head of the master branch is commit:
+
+0804dc173618 xfs: fuzz every field of every structure and test kernel crashes
+
+New commits:
+
+Darrick J. Wong (2):
+      [a125b86c8632] generic: mread past eof shows nonzero contents
+      [0804dc173618] xfs: fuzz every field of every structure and test kernel crashes
+
+Liu Yiding (1):
+      [4d2a860d0434] xfs/262: remove -y parameter
+
+Lu Fengqi (1):
+      [9b846275d61a] build: fix undefined macro: AC_PACKAGE_NEED_GETXATTR_LIBATTR
+
+Scott Mayhew (1):
+      [0f849ea13f95] nfs/001: ignore the header in nfs4_getfacl output
+
+Zorro Lang (1):
+      [9374c74733fe] xfs: skip copy fs test on large device
+
+
+Code Diffstat:
+
+ common/fuzzy          | 54 +++++++++++++++++++++++++++---------------------
+ configure.ac          |  2 +-
+ m4/package_attrdev.m4 |  4 ++--
+ tests/generic/499     | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/generic/499.out |  2 ++
  tests/generic/group   |  1 +
- 3 files changed, 94 insertions(+)
- create mode 100755 tests/generic/499
- create mode 100644 tests/generic/499.out
+ tests/nfs/001         |  2 +-
+ tests/xfs/077         |  1 +
+ tests/xfs/262         |  2 +-
+ tests/xfs/284         |  1 +
+ tests/xfs/453         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/453.out     |  4 ++++
+ tests/xfs/454         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/454.out     |  4 ++++
+ tests/xfs/455         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/455.out     |  6 ++++++
+ tests/xfs/456         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/456.out     |  4 ++++
+ tests/xfs/457         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/457.out     |  4 ++++
+ tests/xfs/458         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/458.out     |  4 ++++
+ tests/xfs/459         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/459.out     |  4 ++++
+ tests/xfs/460         | 46 +++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/460.out     |  4 ++++
+ tests/xfs/461         | 47 ++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/461.out     |  4 ++++
+ tests/xfs/462         | 47 ++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/462.out     |  4 ++++
+ tests/xfs/463         | 47 ++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/463.out     |  4 ++++
+ tests/xfs/464         | 48 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/464.out     |  4 ++++
+ tests/xfs/465         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/465.out     |  5 +++++
+ tests/xfs/466         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/466.out     |  5 +++++
+ tests/xfs/467         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/467.out     |  5 +++++
+ tests/xfs/468         | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/468.out     |  5 +++++
+ tests/xfs/469         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/469.out     |  5 +++++
+ tests/xfs/470         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/470.out     |  5 +++++
+ tests/xfs/471         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/471.out     |  5 +++++
+ tests/xfs/472         | 52 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/472.out     |  5 +++++
+ tests/xfs/473         | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/473.out     |  5 +++++
+ tests/xfs/474         | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/474.out     |  5 +++++
+ tests/xfs/475         | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/475.out     |  5 +++++
+ tests/xfs/476         | 53 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/476.out     |  5 +++++
+ tests/xfs/477         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/477.out     |  5 +++++
+ tests/xfs/478         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/478.out     |  5 +++++
+ tests/xfs/479         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/479.out     |  5 +++++
+ tests/xfs/480         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/480.out     |  5 +++++
+ tests/xfs/481         | 50 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/481.out     |  4 ++++
+ tests/xfs/482         | 48 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/482.out     |  4 ++++
+ tests/xfs/483         | 48 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/483.out     |  4 ++++
+ tests/xfs/484         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/484.out     |  5 +++++
+ tests/xfs/485         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/485.out     |  5 +++++
+ tests/xfs/486         | 51 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/486.out     |  5 +++++
+ tests/xfs/487         | 49 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/487.out     |  4 ++++
+ tests/xfs/488         | 49 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/488.out     |  4 ++++
+ tests/xfs/489         | 49 +++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/489.out     |  4 ++++
+ tests/xfs/group       | 37 +++++++++++++++++++++++++++++++++
+ 85 files changed, 2139 insertions(+), 28 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
 
-diff --git a/tests/generic/499 b/tests/generic/499
-new file mode 100755
-index 00000000..6075509f
---- /dev/null
-+++ b/tests/generic/499
-@@ -0,0 +1,91 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 499
-+#
-+# Race test running out of data space with concurrent discard operation on
-+# dm-thin.
-+#
-+# If a user constructs a test that loops repeatedly over below steps on
-+# dm-thin, block allocation can fail due to discards not having completed
-+# yet (Fixed by a685557 dm thin: handle running out of data space vs
-+# concurrent discard):
-+# 1) fill thin device via filesystem file
-+# 2) remove file
-+# 3) fstrim
-+#
-+# And this maybe cause a deadlock when racing a fstrim with a filesystem
-+# (XFS) shutdown. (Fixed by 8c81dd46ef3c Force log to disk before reading
-+# the AGF during a fstrim)
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	_dmthin_cleanup
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/dmthin
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_dm_target thin-pool
-+
-+# Require underlying device support discard
-+_scratch_mkfs
-+_scratch_mount
-+_require_batched_discard $SCRATCH_MNT
-+_scratch_unmount
-+
-+# Create a thin pool and a *slightly smaller* thin volume, it's helpful
-+# to reproduce the bug
-+BACKING_SIZE=$((50 * 1024 * 1024 / 512))	# 50M
-+VIRTUAL_SIZE=$((BACKING_SIZE + 1024))		# 50M + 1k
-+CLUSTER_SIZE=$((64 * 1024 / 512))		# 64K
-+
-+_dmthin_init $BACKING_SIZE $VIRTUAL_SIZE $CLUSTER_SIZE 0
-+_dmthin_set_fail
-+_mkfs_dev $DMTHIN_VOL_DEV
-+_dmthin_mount
-+
-+# There're two bugs at here, one is dm-thin bug, the other is filesystem
-+# (XFS especially) bug. The dm-thin bug can't handle running out of data
-+# space with concurrent discard well. Then the dm-thin bug cause fs unmount
-+# hang when racing a fstrim with a filesystem shutdown.
-+#
-+# If both of two bugs haven't been fixed, below test maybe cause deadlock.
-+# Else if the fs bug has been fixed, but the dm-thin bug hasn't. below test
-+# will cause the test fail (no deadlock).
-+# Else the test will pass.
-+for ((i=0; i<20; i++)); do
-+	$XFS_IO_PROG -f -c "pwrite -b 64k 0 100M" \
-+		$SCRATCH_MNT/testfile &>/dev/null
-+	rm -f $SCRATCH_MNT/testfile
-+	$FSTRIM_PROG $SCRATCH_MNT
-+done
-+
-+_dmthin_check_fs
-+_dmthin_cleanup
-+
-+echo "Silence is golden"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/499.out b/tests/generic/499.out
-new file mode 100644
-index 00000000..c363e684
---- /dev/null
-+++ b/tests/generic/499.out
-@@ -0,0 +1,2 @@
-+QA output created by 499
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 83a6fdab..bbeac4af 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -501,3 +501,4 @@
- 496 auto quick swap
- 497 auto quick swap collapse
- 498 auto quick log
-+499 auto thin trim
--- 
-2.14.4
+--J1vGGdE0cT9h
+Content-Type: application/pgp-signature; name="signature.asc"
 
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJbQhFFAAoJECZSqilcj+dj0/8QAIRX0G+bvemIc/loPLlETKf7
+Kdd9lOX/Crd+bw1Q5Fp4oloufZXP9EfIX4zd+0WsNgVnEdTUKR2dPjEtokptp6Nd
+jbj/aH1JDhgpU42/FFpifv18oLXBXBA1+maZlu54A+JW2FsB3Mo7cOMLJjf9W4Sp
+r0MNex+LmTOfypm0NbRfn2WdAm6H/QYDVuUlrmbIu6CG3QblVunCqdfpa7e+kbsr
+ehm3BYldHyQUEda5q5B6ipUROPUcnyUgzWUVY5oiB9LibEKRLYqs6tsO2k0VZQZ/
+gMK+n2W27nBGyj4UESgTW3HoHII2hYShfLmsIMg+undoKQt+V4GszNt3tR7oPpwn
+ReQW4SzChK0aFPa3e2YSMVD/2c3q7exWqLkRQGDmxKV2akmb3ecvXtd8YRyBTedb
+20VR7t2oJxYYT8M32aqR4/BJw7XDn9Fd1aMORgu39x/y+zK9yFnH59aurEkjXVhy
+GbNkxjwdtmCTG+F8S3csjbK035jjSLqRWWTMUqFoW1AjkJu9zQx0DutJEIbyUY20
+fayKMv3DeA3zmh7qsLPIktau1i/KNogiSphCjoHsyX3C8zb6hPvm0u2/sgi5Wey+
+8hLlVmU5Va5tbXfiC6DwOMuD4IrH+B/agd46r6HZp8vbv4XJEKQ+7LNmfUx3urna
+kNIyOp+3a9ti4Vd41HL5
+=kIWH
+-----END PGP SIGNATURE-----
+
+--J1vGGdE0cT9h--
