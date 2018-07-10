@@ -1,84 +1,96 @@
-Received: from sandeen.net ([63.231.237.45]:39448 "EHLO sandeen.net"
+Received: from mga11.intel.com ([192.55.52.93]:39077 "EHLO mga11.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S933631AbeGJOnr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Jul 2018 10:43:47 -0400
-From: Eric Sandeen <sandeen@sandeen.net>
-Subject: [PATCH] common/xfs: remove bad xfs_repair -t option
-References: <20180710094129.1052-1-zlang@redhat.com>
-Message-ID: <57d1a12b-dfaf-834a-a74e-3654624af336@sandeen.net>
-Date: Tue, 10 Jul 2018 09:43:46 -0500
+        id S1732344AbeGJVQn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 10 Jul 2018 17:16:43 -0400
+Date: Tue, 10 Jul 2018 15:15:19 -0600
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Subject: Re: [fstests PATCH 2/2] generic/999: test DAX DMA vs
+ truncate/hole-punch
+Message-ID: <20180710211519.GA25279@linux.intel.com>
+References: <20180620225147.12151-1-ross.zwisler@linux.intel.com>
+ <20180620225147.12151-2-ross.zwisler@linux.intel.com>
+ <20180621024033.GK2780@desktop>
 MIME-Version: 1.0
-In-Reply-To: <20180710094129.1052-1-zlang@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180621024033.GK2780@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
-Cc: linux-xfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Dave Chinner <david@fromorbit.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, Jeff Moyer <jmoyer@redhat.com>, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Thu, Jun 21, 2018 at 10:40:33AM +0800, Eryu Guan wrote:
+> On Wed, Jun 20, 2018 at 04:51:47PM -0600, Ross Zwisler wrote:
+<>
 
+> > diff --git a/tests/generic/999 b/tests/generic/999
+> > new file mode 100755
+> > index 00000000..8f488cb5
+> > --- /dev/null
+> > +++ b/tests/generic/999
+> > @@ -0,0 +1,50 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2018 Intel Corporation.  All Rights Reserved.
+> > +#
+> > +# FS QA Test generic/999
+> > +#
+> > +# This is a regression test for kernel patch:
+> > +#   ext4: handle layout changes to pinned DAX mapping
+> > +# created by Ross Zwisler <ross.zwisler@linux.intel.com>
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_test
+> > +_require_test_program "t_mmap_collision"
+> 
+> _require_xfs_io_command "fpunch"
+> _require_xfs_io_command "fcollapse"
+> _require_xfs_io_command "fzero"
 
-On 7/10/18 4:41 AM, Zorro Lang wrote:
-> The xfs_repair "-t" option shouldn't be used alone. An interval must
-> follow the -t option, or xfs_repair will report errors. And only
-> modify reporting interval is useless, if we don't enable ag_stride.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
+I don't think I need these because I don't actually require this functionality
+from xfs_io.  I did try and use xfs_io for this test, but the way the
+threading needs to work I ended up having to write my own C program.  So,
+even if xfs_io happens to be old and without fpunch, for example, as long as
+fallocate can use FALLC_FL_PUNCH_HOLE I think the test should do the right
+thing.
 
-I agree, -t looks like it should only have been used for xfs_check.
-This seems to go back a long way in history [1], but I think it has always
-been broken.
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index 83a6fdab..793f71ed 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -501,3 +501,4 @@
+> >  496 auto quick swap
+> >  497 auto quick swap collapse
+> >  498 auto quick log
+> > +999 auto quick dax
+> 
+> Also need "punch collapse zero" groups.
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+I'm assuming I should still add my test to these 3 groups, even though I'm not
+getting this functionality via xfs_io?
 
-
-[1] commit 6c6ba523c29d78a009d237e2a019d65beb5fced8
-Author: fsgqa <fsgqa>
-Date:   Fri Aug 29 06:04:54 2003 +0000
-
-    QA updates to enable simplified large filesystem testing
-
-> Hi,
-> 
-> I don't know why we must need the -t option for xfs_repair, I can't
-> find any description to explain it. But I can find an explanation
-> about why we use "-t" for _xfs_check.
-> 
->   # xfs_check runs out of memory on large files, so even providing the test
->   # option (-t) to avoid indexing the free space trees doesn't make it pass on
->   # large filesystems. Avoid it.
-> 
-> The -t option for xfs_repair is totally different with it for
-> xfs_check, maybe -m option is more useful if we think about the
-> memory size.
-> 
-> And the -t option need to work with -o ag_stride together. I'd like
-> to remove the "-t" option directly, due to I really don't know why
-> we need it, or how to give it a proper number.
-> 
-> If the original author knows why we need it, and can give me some
-> suggestions, please help.
-> 
-> Thanks,
-> Zorro
-> 
->  common/xfs | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/common/xfs b/common/xfs
-> index ecf54bbf..61a3c2d9 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -193,7 +193,6 @@ _scratch_xfs_repair()
->  		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
->  	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
->  		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
-> -	[ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
->  	$XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
->  }
->  
-> 
-
-
+Thank you for the review, I'll address the rest of your comments in v2.
