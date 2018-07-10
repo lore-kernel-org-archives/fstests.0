@@ -1,36 +1,45 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:45668 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S933353AbeGJOn1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jul 2018 10:43:27 -0400
-Date: Tue, 10 Jul 2018 07:43:11 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] common/xfs: remove bad xfs_repair -t option
-Message-ID: <20180710144311.GY32415@magnolia>
+Received: from sandeen.net ([63.231.237.45]:39448 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S933631AbeGJOnr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 10 Jul 2018 10:43:47 -0400
+From: Eric Sandeen <sandeen@sandeen.net>
+Subject: [PATCH] common/xfs: remove bad xfs_repair -t option
 References: <20180710094129.1052-1-zlang@redhat.com>
+Message-ID: <57d1a12b-dfaf-834a-a74e-3654624af336@sandeen.net>
+Date: Tue, 10 Jul 2018 09:43:46 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
 In-Reply-To: <20180710094129.1052-1-zlang@redhat.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 10, 2018 at 05:41:29PM +0800, Zorro Lang wrote:
+
+
+On 7/10/18 4:41 AM, Zorro Lang wrote:
 > The xfs_repair "-t" option shouldn't be used alone. An interval must
 > follow the -t option, or xfs_repair will report errors. And only
 > modify reporting interval is useless, if we don't enable ag_stride.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
-
-Makes sense to me, at least given the getopt arg ("t:") in xfs_repair.c.
-
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
 > ---
-> 
+
+I agree, -t looks like it should only have been used for xfs_check.
+This seems to go back a long way in history [1], but I think it has always
+been broken.
+
+Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+
+
+[1] commit 6c6ba523c29d78a009d237e2a019d65beb5fced8
+Author: fsgqa <fsgqa>
+Date:   Fri Aug 29 06:04:54 2003 +0000
+
+    QA updates to enable simplified large filesystem testing
+
 > Hi,
 > 
 > I don't know why we must need the -t option for xfs_repair, I can't
@@ -70,10 +79,6 @@ Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 >  	$XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
 >  }
 >  
-> -- 
-> 2.14.4
 > 
-> --
-> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
