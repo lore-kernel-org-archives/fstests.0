@@ -1,77 +1,79 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:33382 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S933145AbeGJNic (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Jul 2018 09:38:32 -0400
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.rdu2.redhat.com [10.11.54.4])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 0825840AC6DF
-        for <fstests@vger.kernel.org>; Tue, 10 Jul 2018 13:38:32 +0000 (UTC)
-Date: Tue, 10 Jul 2018 15:38:29 +0200
-From: Lukas Czerner <lczerner@redhat.com>
-Subject: Re: [PATCH v2] generic/499: filter fsx stderr output
-Message-ID: <20180710133829.tjpwdjvdyk7osqvz@localhost.localdomain>
-References: <20180710125243.4956-1-zlang@redhat.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:45668 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S933353AbeGJOn1 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 10 Jul 2018 10:43:27 -0400
+Date: Tue, 10 Jul 2018 07:43:11 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] common/xfs: remove bad xfs_repair -t option
+Message-ID: <20180710144311.GY32415@magnolia>
+References: <20180710094129.1052-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180710125243.4956-1-zlang@redhat.com>
+In-Reply-To: <20180710094129.1052-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 10, 2018 at 08:52:43PM +0800, Zorro Lang wrote:
-> On some old kernel which supports COLLAPSE_RANGE and ZERO_RANGE,
-> but doesn't support INSERT_RANGE, this case alway fails as:
-> 
->    QA output created by 499
->   +main: filesystem does not support fallocate mode FALLOC_FL_INSERT_RANGE, disabling!
->    Silence is golden
-> 
-> fsx print one more line to break the golden image.
-> 
-> To fix this issue, redirect both fsx stdout and stderr to a file,
-> then check the return value.
-
-Looks good, thanks.
-
-Reviewed-by: Lukas Czerner <lczerner@redhat.com>
-
+On Tue, Jul 10, 2018 at 05:41:29PM +0800, Zorro Lang wrote:
+> The xfs_repair "-t" option shouldn't be used alone. An interval must
+> follow the -t option, or xfs_repair will report errors. And only
+> modify reporting interval is useless, if we don't enable ag_stride.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
+
+Makes sense to me, at least given the getopt arg ("t:") in xfs_repair.c.
+
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
 > ---
 > 
 > Hi,
 > 
-> V1 as below (thanks Lukas):
-> https://marc.info/?l=fstests&m=153122545923371&w=2
+> I don't know why we must need the -t option for xfs_repair, I can't
+> find any description to explain it. But I can find an explanation
+> about why we use "-t" for _xfs_check.
 > 
-> V2 use "2>&1" to instead of "-I".
+>   # xfs_check runs out of memory on large files, so even providing the test
+>   # option (-t) to avoid indexing the free space trees doesn't make it pass on
+>   # large filesystems. Avoid it.
+> 
+> The -t option for xfs_repair is totally different with it for
+> xfs_check, maybe -m option is more useful if we think about the
+> memory size.
+> 
+> And the -t option need to work with -o ag_stride together. I'd like
+> to remove the "-t" option directly, due to I really don't know why
+> we need it, or how to give it a proper number.
+> 
+> If the original author knows why we need it, and can give me some
+> suggestions, please help.
 > 
 > Thanks,
 > Zorro
 > 
->  tests/generic/499 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  common/xfs | 1 -
+>  1 file changed, 1 deletion(-)
 > 
-> diff --git a/tests/generic/499 b/tests/generic/499
-> index 99d6d308..773eab2e 100755
-> --- a/tests/generic/499
-> +++ b/tests/generic/499
-> @@ -50,7 +50,7 @@ ENDL
+> diff --git a/common/xfs b/common/xfs
+> index ecf54bbf..61a3c2d9 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -193,7 +193,6 @@ _scratch_xfs_repair()
+>  		SCRATCH_OPTIONS="-l$SCRATCH_LOGDEV"
+>  	[ "$USE_EXTERNAL" = yes -a ! -z "$SCRATCH_RTDEV" ] && \
+>  		SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -r$SCRATCH_RTDEV"
+> -	[ "$LARGE_SCRATCH_DEV" = yes ] && SCRATCH_OPTIONS=$SCRATCH_OPTIONS" -t"
+>  	$XFS_REPAIR_PROG $SCRATCH_OPTIONS $* $SCRATCH_DEV
+>  }
 >  
->  victim=$SCRATCH_MNT/a
->  touch $victim
-> -$here/ltp/fsx --replay-ops $tmp.fsxops $victim > $tmp.output || cat $tmp.output
-> +$here/ltp/fsx --replay-ops $tmp.fsxops $victim > $tmp.output 2>&1 || cat $tmp.output
->  
->  echo "Silence is golden"
->  status=0
 > -- 
 > 2.14.4
 > 
 > --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
 > the body of a message to majordomo@vger.kernel.org
 > More majordomo info at  http://vger.kernel.org/majordomo-info.html
