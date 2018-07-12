@@ -1,11 +1,13 @@
-Received: from mail.kernel.org ([198.145.29.99]:41862 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:42526 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726535AbeGLJsA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 12 Jul 2018 05:48:00 -0400
+        id S1726530AbeGLJxD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Jul 2018 05:53:03 -0400
 From: fdmanana@kernel.org
-Subject: [PATCH] generic: add test for fsync after cloning file range
-Date: Thu, 12 Jul 2018 01:33:10 +0100
-Message-Id: <20180712003310.16260-1-fdmanana@kernel.org>
+Subject: [PATCH v2] generic: add test for fsync after cloning file range
+Date: Thu, 12 Jul 2018 01:38:11 +0100
+Message-Id: <20180712003811.16506-1-fdmanana@kernel.org>
+In-Reply-To: <20180712003310.16260-1-fdmanana@kernel.org>
+References: <20180712003310.16260-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
@@ -21,10 +23,13 @@ filesystem, no file data was lost or corrupted.
 This test is motivated by a bug found in btrfs, which is fixed by a patch
 for the linux kernel titled:
 
-  "Btrfs: file data corruption after cloning a range and fsync"
+  "Btrfs: fix file data corruption after cloning a range and fsync"
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
+
+V2: Fixed title of referenced btrfs patch.
+
  tests/generic/500     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/generic/500.out |  5 ++++
  tests/generic/group   |  1 +
