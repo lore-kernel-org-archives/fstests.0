@@ -1,49 +1,192 @@
-Received: from mail-pl0-f54.google.com ([209.85.160.54]:35268 "EHLO
-        mail-pl0-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1731871AbeGMVPy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jul 2018 17:15:54 -0400
-Date: Fri, 13 Jul 2018 13:59:31 -0700
-From: "Luis R. Chamberlain" <mcgrof@kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:49126 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1731639AbeGMVUV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 13 Jul 2018 17:20:21 -0400
 Subject: Re: [ANN] oscheck: wrapper for fstests check.sh - tracking and
  working with baselines
-Message-ID: <20180713205931.GC3620@garbanzo.do-not-panic.com>
 References: <CAB=NE6UjcBgQhoQvZoWKXnPWoHVNMbeYdyGfYsHdgeA=L1M4wQ@mail.gmail.com>
- <20180713205154.GA8782@bombadil.infradead.org>
+ <CAOQ4uxgd+Z2ADUXdLk3odP9F6KOsrE4HfRpg-1dpP9HS-zbi=Q@mail.gmail.com>
+ <20180713164420.GA3620@garbanzo.do-not-panic.com>
+ <e4485816-9c42-c798-0a80-ece79948ae0c@suse.com>
+ <20180713205038.GB3620@garbanzo.do-not-panic.com>
+From: Jeff Mahoney <jeffm@suse.com>
+Message-ID: <dc2c2b79-6124-4673-301b-47429b29119e@suse.com>
+Date: Fri, 13 Jul 2018 17:03:56 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180713205154.GA8782@bombadil.infradead.org>
+In-Reply-To: <20180713205038.GB3620@garbanzo.do-not-panic.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="F5y12eML0CtX7t4dagcNDdPEZV8qmXsw9"
 Sender: fstests-owner@vger.kernel.org
-To: Matthew Wilcox <willy@infradead.org>
-Cc: "Luis R. Chamberlain" <mcgrof@kernel.org>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>, Sasha Levin <Alexander.Levin@microsoft.com>, Sasha Levin <levinsasha928@gmail.com>, Valentin Rothberg <valentinrothberg@gmail.com>, Ross Zwisler <ross.zwisler@linux.intel.com>
+To: "Luis R. Chamberlain" <mcgrof@kernel.org>
+Cc: Amir Goldstein <amir73il@gmail.com>, Linux FS Devel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Sasha Levin <Alexander.Levin@microsoft.com>, Sasha Levin <levinsasha928@gmail.com>, Valentin Rothberg <valentinrothberg@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 13, 2018 at 01:51:54PM -0700, Matthew Wilcox wrote:
-> On Thu, Jul 12, 2018 at 07:43:08PM -0700, Luis R. Chamberlain wrote:
-> > Note that while I used this for XFS, it should be easy to add support
-> > for other filesystems, should folks wish to do something similar for
-> > their filesystems. The current XFS sections being tested are as
-> > follows, please let me know if we should consider extending this
-> > further:
-> 
-> I think we need an xfs_dax section too.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--F5y12eML0CtX7t4dagcNDdPEZV8qmXsw9
+Content-Type: multipart/mixed; boundary="APSXahQ7MLNfcLDz1ko3Bhj1hojdXM8n0";
+ protected-headers="v1"
+From: Jeff Mahoney <jeffm@suse.com>
+To: "Luis R. Chamberlain" <mcgrof@kernel.org>
+Cc: Amir Goldstein <amir73il@gmail.com>,
+ Linux FS Devel <linux-fsdevel@vger.kernel.org>,
+ xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>,
+ Sasha Levin <Alexander.Levin@microsoft.com>,
+ Sasha Levin <levinsasha928@gmail.com>,
+ Valentin Rothberg <valentinrothberg@gmail.com>
+Message-ID: <dc2c2b79-6124-4673-301b-47429b29119e@suse.com>
+Subject: Re: [ANN] oscheck: wrapper for fstests check.sh - tracking and
+ working with baselines
+References: <CAB=NE6UjcBgQhoQvZoWKXnPWoHVNMbeYdyGfYsHdgeA=L1M4wQ@mail.gmail.com>
+ <CAOQ4uxgd+Z2ADUXdLk3odP9F6KOsrE4HfRpg-1dpP9HS-zbi=Q@mail.gmail.com>
+ <20180713164420.GA3620@garbanzo.do-not-panic.com>
+ <e4485816-9c42-c798-0a80-ece79948ae0c@suse.com>
+ <20180713205038.GB3620@garbanzo.do-not-panic.com>
+In-Reply-To: <20180713205038.GB3620@garbanzo.do-not-panic.com>
 
-Indeed! Thanks for reminding me about that.
+--APSXahQ7MLNfcLDz1ko3Bhj1hojdXM8n0
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-> It's still ridiculously hard
-> to set up a DAX test environment though. 
+On 7/13/18 4:50 PM, Luis R. Chamberlain wrote:
+> On Fri, Jul 13, 2018 at 04:40:39PM -0400, Jeff Mahoney wrote:
+>> On 7/13/18 12:44 PM, Luis R. Chamberlain wrote:
+>>> On Fri, Jul 13, 2018 at 11:39:55AM +0300, Amir Goldstein wrote:
+>>>> On Fri, Jul 13, 2018 at 5:43 AM, Luis R. Chamberlain <mcgrof@kernel.=
+org> wrote:
+>>>>> I had volunteered at the last LSF/MM to help with the stable work f=
+or
+>>>>> XFS. To help with this, as part of this year's SUSE Hackweek, I've
+>>>>> first generalized my own set of scripts to help track a baseline of=
 
-I was under the impression we actually need real hardware for that,
-if you git grep for XXX you will see a section to add DAX is there
-but I skipped those tests as I thought we needed real hardware
-for it.
+>>>>> results from fstests [0], and extended it to be able to easily ramp=
+ up
+>>>>> with fstests on different distributions, and I've also created a
+>>>>> respective baseline of results against these distributions as a
+>>>>> further example of how these scripts and wrapper framework can be u=
+sed
+>>>>
+>>>> Hi Luis!
+>>>>
+>>>> Thanks a lot for doing this work!
+>>>>
+>>>> Will take me some time to try it out, but see some questions below..=
+=2E
+>>>>
+>>>>> [1]. The distributions currently supported are:
+>>>>>
+>>>>>   * Debian testing
+>>>>>   * OpenSUSE Leap 15.0
+>>>>>   * Fedora 28
+>>>>>
+>>>>> The stable work starts with creating a baseline for v4.17.3. The
+>>>>> results are visible as a result of expunge files which categorize t=
+he
+>>>>> failures for the different sections tested.
+>>>>
+>>>> So the only "bad" indication is a test failure?
+>>>
+>>> That is correct to a certain degree, ie, if xfsprogs / the kernel
+>>> config could run it we can assume it passed.
+>>>
+>>>> How about indication about a test that started to pass since baselin=
+e?
+>>>
+>>> Indeed, that is desirable.
+>>>
+>>> We have a few options. One is share the entire results directory for
+>>> a release / section, however this is rather big. For instance for a
+>>> full v4.17.3 run this is about 292 MiB alone. I don't think this
+>>> scales. IMHO lgogs should only be supplied onto bug reports, not this=
 
-> The best I've been able to
-> do is now merged into Kent's ktest -- but you're not based on that,
-> so I'll try and get your ostest set up to work with DAX.  Or maybe Ross
-> can do it since he's actually been able to get 2MB pages working and I
-> still haven't :-(
+>>> framework.
+>>>
+>>> The other option is to use -R xunit to generate the report in the
+>>> specified unit. I have not yet run this, or tried it, however IIRC
+>>> it does record success runs? Does it also keep logs? Hopefully not.  =
+I'm
+>>> assuming it does not as of yet. I should note if one hits CTRL-C in t=
+he
+>>> middle one does not get the results. An alternative was being worked =
+on
+>>> by Jeff which would sprinkle IIRC .ok files for tests which succeed,
+>>> then you could just scrape the results directory to determine which
+>>> tests did pass -- but you run into the same size problem as above.
+>>
+>> Eryu didn't like that idea, so I abandoned it.  What I have now is a -=
+R
+>> files mode that creates a bunch of files with the goal of just archivi=
+ng
+>> the results for later comparison or import into a results db.
+>>
+>> For each test, there are:
+>> $seq.result.start.txt - start timestamp
+>> $seq.result.stop.txt - stop timestamp
+>> $seq.result.result.txt - simple result: pass/fail/expunged/notrun
+>> $seq.result.detail.txt - contains the contents of $seq.notrun/$seq.exp=
+unged
+>> $seq.result.{dmesg,kmemleak,full,check}.txt - contains the contents of=
 
-Patches and new sections to cover more ground indeed are appreciated!
+>> the corresponding files
+>=20
+> This is sexy, it also gives the person interpretting the results to
+> opt-in or not for the actuall full log of the output. You pick and
+> choose what info you want.
+>=20
+> This is indeed nice.
+>=20
+>> As an aside, IIRC, -R xunit doesn't catch all kinds of failures.  Also=
+,
+>> as you mentioned, if it's interrupted, all results are lost.  This mak=
+es
+>> it difficult to identify test failures that crashed or hung the test s=
+ystem.
+>=20
+> OK so indeed not my preference.
+>=20
+>> I have some basic scripts that parse the output and generate an HTML
+>> report/table (and it does do what Amir asks WRT tests that started pas=
+sing).
+>=20
+> These scripts, are they for parsing your new -R files output?
 
-  Luis
+Yep.
+
+> I take it the patches are still being worked on?
+
+Yeah.  They just need a bit of review and cleaning up and I can post them=
+=2E
+
+-Jeff
+
+--=20
+Jeff Mahoney
+SUSE Labs
+
+
+--APSXahQ7MLNfcLDz1ko3Bhj1hojdXM8n0--
+
+--F5y12eML0CtX7t4dagcNDdPEZV8qmXsw9
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAEBCAAdFiEE8wzgbmZ74SnKPwtDHntLYyF55bIFAltJE7wACgkQHntLYyF5
+5bLbsxAAjnwiKVplua5e0hps7ORA0p5PD29zFIDPqcosKrvPCIozAGM1Z1k66YW2
+G96+JX7fOumJ5wVAhhDkaMzwNJJJtGVf6FI26gNm0rTK229pjntkpT9T+YY7ajsD
+1Inteef6bWMg+3eyGp0uo0BbLdldtOJYE+C6+dqmTiV/ROPlXvUl9bTklTrDNSRd
+sb7nJSZSrVOnJpNVK4rIvoV4Z+Y9HwKUbxsmZvlmF9ATV0nghbUrRt/cv2pSZhtF
+yqoKsNDiSAN41vCYP+e+yz3tKnFbV2EH2zjgb5mgKzKNHDE0UGZkeBIUn3B2OqN0
+UH3V/BEwRRAyHweq7YcESbEInLpGJzIZJv1Sc/hS+Alptu9qxdZPjmh+Wb6ToBqT
+0zCka+fo905uhrjC4XheaWwCowiEkuvITW3ajk34EyjU3vjvn2ctEFiJahkPN8CU
+BS6bbiLY2RVYoDb6yvleIa0jeb7iGvZUbaez2w+qZBH9WNbsLh1buIqwHcnG17oV
+3LM3EYrQetULBYIjBVjMKIYLGnvzm2a+sZf77U5lBCQz937NN09P8k0d5e82x3lB
+dqdnKF6b5NxfkT0F8yWBSuJ+kSSM9CazxdMEoLtHesix0za6FF8DqL87C3VUHhBF
+AMxLpl4iwRjHbc5ww3ElADIJTs1uOPEVqygnmXX56LjBv/L2kk4=
+=AePA
+-----END PGP SIGNATURE-----
+
+--F5y12eML0CtX7t4dagcNDdPEZV8qmXsw9--
