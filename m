@@ -1,94 +1,83 @@
-Received: from mail-pl0-f65.google.com ([209.85.160.65]:46700 "EHLO
-        mail-pl0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726171AbeGMGwl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jul 2018 02:52:41 -0400
-Received: by mail-pl0-f65.google.com with SMTP id 30-v6so11755081pld.13
-        for <fstests@vger.kernel.org>; Thu, 12 Jul 2018 23:39:30 -0700 (PDT)
-Date: Fri, 13 Jul 2018 14:39:25 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/062: filter redundant output by getfattr
-Message-ID: <20180713063925.GA2830@desktop>
-References: <20180712155926.21722-1-zlang@redhat.com>
+Received: from mail-yb0-f196.google.com ([209.85.213.196]:34017 "EHLO
+        mail-yb0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725908AbeGMIxf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 13 Jul 2018 04:53:35 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180712155926.21722-1-zlang@redhat.com>
+In-Reply-To: <CAB=NE6UjcBgQhoQvZoWKXnPWoHVNMbeYdyGfYsHdgeA=L1M4wQ@mail.gmail.com>
+References: <CAB=NE6UjcBgQhoQvZoWKXnPWoHVNMbeYdyGfYsHdgeA=L1M4wQ@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 13 Jul 2018 11:39:55 +0300
+Message-ID: <CAOQ4uxgd+Z2ADUXdLk3odP9F6KOsrE4HfRpg-1dpP9HS-zbi=Q@mail.gmail.com>
+Subject: Re: [ANN] oscheck: wrapper for fstests check.sh - tracking and
+ working with baselines
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: "Luis R. Chamberlain" <mcgrof@kernel.org>
+Cc: Linux FS Devel <linux-fsdevel@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Sasha Levin <Alexander.Levin@microsoft.com>, Sasha Levin <levinsasha928@gmail.com>, Valentin Rothberg <valentinrothberg@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 12, 2018 at 11:59:26PM +0800, Zorro Lang wrote:
-> When getfattr dumps values of all extended attributes (-d option),
-> it doesn't print empty extended attributes. e.g: user.name. But
-> from attr-2.4.48 this behavior is changed,  new getfattr prints
-> user.name="".
-> 
-> The {=""} will break the golden image, so filter the redundant =""
-> at the end if it has.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> This's a bad news. Latest attr package attr-2.4.48 changed his
-> behavior as above. And this's different with attr-2.4.47.
-> 
-> With old attr:
-> # setfattr -h -n user.name testfile
-> # getfattr -d -n user.name testfile                                                                                                                                     
-> # file: testfile                               
-> user.name
-> 
-> With new attr:
-> # setfattr -h -n user.name testfile
-> # getfattr -d -n user.name testfile                                                                                                                                     
-> # file: testfile                               
-> user.name=""
-> 
-> Note: -d option is necessary
-> 
-> This little difference will break golden image. So this's the problem.
-> If you have better idea than this patch, please tell me.
-> 
-> Thanks,
-> Zorro
-> 
-> 
->  tests/generic/062 | 6 +++++-
->  1 file changed, 5 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/062 b/tests/generic/062
-> index df67960d..4fc2dc46 100755
-> --- a/tests/generic/062
-> +++ b/tests/generic/062
-> @@ -29,9 +29,13 @@ _cleanup()
->  }
->  trap "_cleanup; exit \$status" 0 1 2 3 15
->  
-> +# When getfattr dump values of all extended attributes, it print empty attr
-> +# as user.name before, but new getfattr print it as user.name="". For match
-> +# the golden image, filter the redundant ="" at the end.
->  getfattr()
->  {
-> -    $GETFATTR_PROG --absolute-names -dh $@ 2>&1 | _filter_scratch
-> +    $GETFATTR_PROG --absolute-names -dh $@ 2>&1 | _filter_scratch | \
-> +	sed -e 's/=\"\"//'
->  }
+On Fri, Jul 13, 2018 at 5:43 AM, Luis R. Chamberlain <mcgrof@kernel.org> wrote:
+> I had volunteered at the last LSF/MM to help with the stable work for
+> XFS. To help with this, as part of this year's SUSE Hackweek, I've
+> first generalized my own set of scripts to help track a baseline of
+> results from fstests [0], and extended it to be able to easily ramp up
+> with fstests on different distributions, and I've also created a
+> respective baseline of results against these distributions as a
+> further example of how these scripts and wrapper framework can be used
 
-This should really be done by a new helper function that hides all the
-details, so future tests could just take use of the helper.
+Hi Luis!
+
+Thanks a lot for doing this work!
+
+Will take me some time to try it out, but see some questions below...
+
+> [1]. The distributions currently supported are:
+>
+>   * Debian testing
+>   * OpenSUSE Leap 15.0
+>   * Fedora 28
+>
+> The stable work starts with creating a baseline for v4.17.3. The
+> results are visible as a result of expunge files which categorize the
+> failures for the different sections tested.
+
+So the only "bad" indication is a test failure?
+How about indication about a test that started to pass since baseline?
+Tested that started to notrun since baseline?
+Are we interested in those?
+
+> Other than careful manual
+> inspection of each stable candidate patch, one of the goals will also
+> be to ensure such stable patches do not regress the baseline. Work is
+> currently underway to review the first set of stable candidate patches
+> for v4.17.3, if they both pass review and do not regress the
+> established baseline, I'll proceed to post the patches for further
+> evaluation from the community.
+>
+> Note that while I used this for XFS, it should be easy to add support
+> for other filesystems, should folks wish to do something similar for
+> their filesystems. The current XFS sections being tested are as
+> follows, please let me know if we should consider extending this
+> further:
+>
+> # Matches what we expect to be default on the latests xfsprogs
+> [xfs]
+> MKFS_OPTIONS='-f -m crc=1,reflink=0,rmapbt=0, -i sparse=0'
+> USE_EXTERNAL=no
+> FSTYP=xfs
+
+Please add a LOGWRITES_DEV to all "internal log" configs.
+This is needed to utilize the (relatively) new crash consistency tests
+(a.k.a. generic/replay) which caught a few nasty bugs.
+Fun fact: the fix for stable 4.4 almost got missed, because your system
+was not around ;-)
+https://marc.info/?l=linux-xfs&m=152852844615666&w=2
+
+I've used a 10GB LOGWRITES_DEV, which seems to be enough
+for the current tests.
+I don't think that the dmlogwrite tests play well with external logdev,
+so we could probably reuse the same device for LOGWRITES_DEV
+for configs that don't use SCRATCH_LOGDEV.
 
 Thanks,
-Eryu
-
->  
->  setfattr()
-> -- 
-> 2.14.4
-> 
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+Amir.
