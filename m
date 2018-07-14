@@ -1,146 +1,141 @@
-Received: from mail-pf0-f195.google.com ([209.85.192.195]:43082 "EHLO
-        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726252AbeGNKhn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 14 Jul 2018 06:37:43 -0400
-Date: Sat, 14 Jul 2018 18:14:47 +0800
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:36446 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726365AbeGNMAW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 14 Jul 2018 08:00:22 -0400
+Date: Sat, 14 Jul 2018 19:41:28 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 2/7] misc: force the exact quota options coded into the
- test
-Message-ID: <20180714101447.GC2830@desktop>
+Subject: Re: [PATCH 4/7] xfs: filter out mount options that don't work on v4
+ filesystems
+Message-ID: <20180714114128.GD2830@desktop>
 References: <153067984748.28393.1595618163831671652.stgit@magnolia>
- <153067986006.28393.12507727179398690195.stgit@magnolia>
+ <153067987261.28393.13229691209356951536.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <153067986006.28393.12507727179398690195.stgit@magnolia>
+In-Reply-To: <153067987261.28393.13229691209356951536.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 03, 2018 at 09:51:00PM -0700, Darrick J. Wong wrote:
+On Tue, Jul 03, 2018 at 09:51:12PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Several tests require setting exactly the quota mount options that are
-> encoded in the test.  Unfortunately, quota mount options set by the user
-> in MOUNT_OPTIONS can turn on other quota types, which causes the golden
-> outputs to be off for various reasons (quota report output, behavior
-> changes, etc.)
-> 
-> So use _qmount_option to delete all the quota mount options in these
-> tests so that the test itself can run with exactly the config for which
-> it was written.
+> A few tests require v4 filesystems and enforce this by disabling crc's
+> in the _scratch_mkfs call.  However, if the user specified MOUNT_OPTIONS
+> that only work with v5 filesystems, these tests fail.  Filter out
+> incompatible mount options that don't work on v4, such as simultaneous
+> group/project quota.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/generic/230 |    3 +++
->  tests/xfs/075     |    4 ++++
->  tests/xfs/116     |    3 +++
->  tests/xfs/132     |    5 +++++
->  tests/xfs/220     |    3 +++
->  5 files changed, 18 insertions(+)
+>  common/xfs    |   23 +++++++++++++++++++++++
+>  tests/xfs/002 |    2 ++
+>  tests/xfs/194 |    2 ++
+>  tests/xfs/199 |    2 ++
+>  4 files changed, 29 insertions(+)
 > 
 > 
-> diff --git a/tests/generic/230 b/tests/generic/230
-> index bc8c1ad0..a7ab67f7 100755
-> --- a/tests/generic/230
-> +++ b/tests/generic/230
-> @@ -99,6 +99,9 @@ rm -f $seqres.full
->  
->  grace=2
->  
-> +# Test only the quota type specified in each _scratch_mount clause below.
-> +_qmount_option 'defaults'
+> diff --git a/common/xfs b/common/xfs
+> index 5b632df1..33d819d7 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -780,3 +780,26 @@ _scratch_get_bmx_prefix() {
+>  	_scratch_xfs_db -c "inode ${ino}" -c 'p' >> $seqres.full
+>  	return 1
+>  }
 > +
+> +#
+> +# Ensures that we don't pass any mount options incompatible with XFS v4
+> +#
+> +_filter_xfsv4_mount_options()
 
-IMHO, instead of converting all user defined quota related options to
-'defaults' then mount with _scratch_mount, it's better to convert them
-to what we want and mount with _qmount, i.e.
+"_filter" usually indicates a filter function that gets input from a
+pipe, e.g. <some cmd> | _filter_scratch, but this helper doesn't follow
+the convention. It'd better to rename it to ... I don't know, just
+_xfsv4_mount_options?
 
-_qmount_option "usrquota,grpquota"
-_qmount
+> +{
+> +	local gquota=0
+> +	local pquota=0
+> +
+> +	# Can't have group and project quotas in XFS v4
+> +	echo "$MOUNT_OPTIONS" | egrep -q "(gquota|grpquota|grpjquota=|gqnoenforce)" && gquota=1
+> +	echo "$MOUNT_OPTIONS" | egrep -q "(\bpquota|prjquota|pqnoenforce)" && pquota=1
+> +
+> +	if [ $gquota -gt 0 ] && [ $pquota -gt 0 ]; then
+> +		export MOUNT_OPTIONS=$(echo $MOUNT_OPTIONS \
+> +			| sed   -e 's/gquota/QUOTA/g'      \
+> +				-e 's/grpquota/QUOTA/g'    \
+> +				-e 's/grpjquota=[^, ]/QUOTA/g' \
+> +				-e 's/gqnoenforce/QUOTA/g' \
+> +				-e "s/QUOTA/defaults/g")
+> +	fi
+> +	echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
+> +}
+> diff --git a/tests/xfs/002 b/tests/xfs/002
+> index bd1c0a7a..f987575c 100755
+> --- a/tests/xfs/002
+> +++ b/tests/xfs/002
+> @@ -45,6 +45,8 @@ rm -f $seqres.full
+>  
+>  _scratch_mkfs_xfs -m crc=0 -d size=128m >> $seqres.full 2>&1 || _fail "mkfs failed"
+>  
+> +_filter_xfsv4_mount_options
 
-This is the standard process for quota tests.
+Hmm, this way future test writers have to remember to add a
+_filter_xfsv4_mount_options call everytime after making a v4 xfs. It's
+so easy to get lost and hard to maintain.
 
->  _scratch_mkfs >> $seqres.full 2>&1
->  _scratch_mount "-o usrquota,grpquota"
->  quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+How about make _scratch_mkfs_xfs do the work automatically if it finds
+the newly created fs is a v4 xfs?
 
-Also, with _qmount we could remove all these quotacheck and quotaon.
+
+And I went through all tests that have explicit "-m crc=0" mkfs option,
+and I found that there're some other tests need fix too.
+
+xfs/045, it doesn't fail, but the test expects a mount failure anyway,
+just that it's caused by quota options now.
+
+xfs/132, it fails to mount xfs and needs the fix. But it still fails
+even after the fix, but that's a different issue.
+
+xfs/300, the test itself passes, it just causes subsequent
+_scratch_mount to fail in _check_xfs_filesystem(). I think we could just
+umount $SCRATCH_DEV explicitly after test, so _check_xfs_filesystem()
+won't try to mount it again.
 
 Thanks,
 Eryu
 
-> diff --git a/tests/xfs/075 b/tests/xfs/075
-> index caf612bb..dee01462 100755
-> --- a/tests/xfs/075
-> +++ b/tests/xfs/075
-> @@ -25,12 +25,16 @@ _cleanup()
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/quota
+> +
+>  # Scribble past a couple V4 secondary superblocks to populate sb_crc
+>  # (We can't write to the structure member because it doesn't exist
+>  # on a v4 superblock, so we use the data type & "write fill")
+> diff --git a/tests/xfs/194 b/tests/xfs/194
+> index 6c1eddba..09a3840d 100755
+> --- a/tests/xfs/194
+> +++ b/tests/xfs/194
+> @@ -74,6 +74,8 @@ _require_scratch
+>  unset MKFS_OPTIONS
+>  unset XFS_MKFS_OPTIONS
 >  
->  # real QA test starts here
->  _supported_fs xfs
->  _supported_os Linux
+> +_filter_xfsv4_mount_options
+> +
+>  # we need 512 byte block size, so crc's are turned off
+>  _scratch_mkfs_xfs -m crc=0 -b size=$blksize >/dev/null 2>&1
+>  _scratch_mount
+> diff --git a/tests/xfs/199 b/tests/xfs/199
+> index dd909b09..54fe54fe 100755
+> --- a/tests/xfs/199
+> +++ b/tests/xfs/199
+> @@ -34,6 +34,8 @@ _supported_os Linux
+>  
 >  _require_scratch
 >  
-> +# norecovery mounts do not succeed with quotas eanbled, so shut them off
-> +_qmount_option "defaults"
+> +_filter_xfsv4_mount_options
 > +
->  echo "Silence is golden"
->  _scratch_mkfs_sized $((512 * 1024 * 1024)) >$seqres.full
->  
-> diff --git a/tests/xfs/116 b/tests/xfs/116
-> index 6887d7e5..4422eb50 100755
-> --- a/tests/xfs/116
-> +++ b/tests/xfs/116
-> @@ -36,6 +36,9 @@ _supported_os Linux
->  _require_scratch
->  _require_xfs_quota
->  
-> +# Only mount with the quota options we specify below
-> +_qmount_option "defaults"
-> +
->  _scratch_mkfs >/dev/null 2>&1
->  _scratch_mount "-o uquota"
->  _scratch_unmount
-> diff --git a/tests/xfs/132 b/tests/xfs/132
-> index c5fe8b5a..a421f727 100755
-> --- a/tests/xfs/132
-> +++ b/tests/xfs/132
-> @@ -24,6 +24,7 @@ _cleanup()
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/quota
->  
->  # remove previous $seqres.full before test
->  rm -f $seqres.full
-> @@ -43,6 +44,10 @@ _disable_dmesg_check
->  _require_xfs_mkfs_crc
->  _scratch_mkfs -m crc=0 > $seqres.full 2>&1
->  
-> +# The files that EIO in the golden output changes if we have quotas enabled
-> +# so leave it off.
-> +_qmount_option "defaults"
-> +
->  # corrupt an inode in the root inode chunk
->  root_ino=$(_scratch_xfs_get_metadata_field 'rootino' 'sb 0')
->  corrupt_ino=$((root_ino + 15))
-> diff --git a/tests/xfs/220 b/tests/xfs/220
-> index 227d5452..61319c9d 100755
-> --- a/tests/xfs/220
-> +++ b/tests/xfs/220
-> @@ -36,6 +36,9 @@ _supported_os Linux
->  _require_scratch
->  _require_quota
->  
-> +# Only mount with the specific quota options mentioned below
-> +_qmount_option "defaults"
-> +
->  echo "Silence is golden."
->  
->  # create scratch filesystem
+>  # clear any mkfs options so that we can directly specify the options we need to
+>  # be able to test the features bitmask behaviour correctly.
+>  MKFS_OPTIONS=
 > 
