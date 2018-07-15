@@ -1,206 +1,108 @@
-Received: from mail-pf0-f196.google.com ([209.85.192.196]:41258 "EHLO
-        mail-pf0-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725942AbeGOHdL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Jul 2018 03:33:11 -0400
-Received: by mail-pf0-f196.google.com with SMTP id c21-v6so20165393pfn.8
-        for <fstests@vger.kernel.org>; Sun, 15 Jul 2018 00:11:16 -0700 (PDT)
-Date: Sun, 15 Jul 2018 15:11:10 +0800
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:37830 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726485AbeGOQ51 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Jul 2018 12:57:27 -0400
+Received: by mail-pf0-f195.google.com with SMTP id a26-v6so3036426pfo.4
+        for <fstests@vger.kernel.org>; Sun, 15 Jul 2018 09:33:58 -0700 (PDT)
+Message-ID: <5b4b7774.1c69fb81.5107.5f58@mx.google.com>
+Date: Mon, 16 Jul 2018 00:33:52 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: xfstests can't be installed by running make install
-Message-ID: <20180715071110.GH2830@desktop>
-References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180711163921.GI2780@desktop>
- <20180715054320.GZ2234@dastard>
+Subject: [ANNOUNCE] fstests: master branch updated to 08ec45b0b131
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="1N7xlkrjihV4"
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
-In-Reply-To: <20180715054320.GZ2234@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jul 15, 2018 at 03:43:20PM +1000, Dave Chinner wrote:
-> On Thu, Jul 12, 2018 at 12:39:21AM +0800, Eryu Guan wrote:
-> > On Wed, Jul 11, 2018 at 10:33:14PM +0800, Zorro Lang wrote:
-> > > Hi,
-> > >=20
-> > > xfstests can't be installed now, if I run "make install", it fails as=
- [1].
-> > > I don't what has been changed, and I'm not really so familar with the=
-se
-> > > building things ... Is there anyone knows what's wrong with it? I tes=
-ted
-> > > on Fedora 28 with GNU Make 4.2.1.
-> > >=20
-> > > Thanks,
-> > > Zorro
-> > >=20
-> > > [1]
-> > > # git pull
-> > > Already up to date.
-> > > # make
-> > > # make install
-> > > Building include
-> > > Building lib
-> > > Building ltp
-> > > Building src
-> > > Building log-writes
-> > > Building perf
-> > > Building aio-dio-regress
-> > > Building m4
-> > > Building common                               =20
-> > > Building tests
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C include install
-> > > gmake[1]: Nothing to be done for 'install'.
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C lib install
-> > > gmake[1]: Nothing to be done for 'install'.
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C ltp install
-> > > ../install-sh -o root -g root -m 755 -d /var/lib/xfstests/ltp
-> > > /bin/sh ../libtool --quiet --mode=3Dinstall ../install-sh -o root -g =
-root -m 755 doio fsstress fsx growfiles iogen aio-stress /var/lib/xfstests/=
-ltp
-> > > ../install-sh -o root -g root -m 755 rwtest.sh /var/lib/xfstests/ltp
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C src install             =
-             =20
-> > > Building log-writes
-> > > Building perf
-> > > Building aio-dio-regress
-> > > /usr/bin/gmake -C log-writes install
-> > > ../../install-sh -o root -g root -m 755 -d /var/lib/xfstests/src/log-=
-writes
-> > > ../../install-sh -o root -g root -m 755 replay-log /var/lib/xfstests/=
-src/log-writes
-> > > /usr/bin/gmake -C perf install
-> > > ../../install-sh -o root -g root -m 755 -d /var/lib/xfstests/src/perf
-> > > ../../install-sh -o root -g root -m 755 ResultData.py fio-insert-and-=
-compare.py FioResultDecoder.py FioCompare.py generate-schema.py fio-results=
-=2Esql /var/lib/xfstests/src/perf
-> > > /usr/bin/gmake -C aio-dio-regress install
-> > > ../../install-sh -o root -g root -m 755 -d /var/lib/xfstests/src/aio-=
-dio-regress
-> > > ../../install-sh -o root -g root -m 755 aio-dio-fcntl-race aio-dio-su=
-bblock-eof-read aio-dio-append-write-read-race aio-dio-invalidate-readahead=
- aio-dio-hole-filling-race aio-free-ring-with-bogus-nr-pages aio-last-ref-h=
-eld-by-io aio-dio-cycle-write aio-dio-extend-stat aio-io-setup-with-nonwrit=
-able-context-pointer aio-dio-invalidate-failure aiodio_sparse2 aiocp aio-di=
-o-cow-race aio-dio-eof-race /var/lib/xfstests/src/aio-dio-regress
-> > > ../install-sh -o root -g root -m 755 -d /var/lib/xfstests/src
-> > > /bin/sh ../libtool --quiet --mode=3Dinstall ../install-sh -o root -g =
-root -m 755 dirstress fill fill2 getpagesize holes lstat64 nametest permnam=
-e randholes runas truncfile usemem mmapcat append_reader append_writer dirp=
-erf metaperf devzero feature alloc fault fstest t_access_root godown resvte=
-st writemod writev_on_pagefault makeextents itrash rename multi_open_unlink=
- dmiperf unwritten_sync genhashnames t_holes t_mmap_writev t_truncate_cmtim=
-e dirhash_collide t_rename_overwrite holetest t_truncate_self t_mmap_dio af=
-_unix t_mmap_stale_pmd t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_wr=
-ite_ro t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption t_ofd_loc=
-ks t_locks_execve xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_read=
-er preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest locktest =
-unwritten_mmap bulkstat_unlink_test bulkstat_unlink_test_modified t_dir_off=
-set t_futimens t_immutable stale_handle pwrite_mmap_blocked t_dir_offset2 s=
-eek_sanity_test seek_copy_test t_readdir_1 t_readdir_2 fsync-tester nsexec =
-cloner renameat2 t_getcwd e4compact test-nextquota punch-alternating attr-l=
-ist-by-handle-cursor-test listxattr dio-interleaved t_dir_type dio-invalida=
-te-cache stat_test t_encrypted_d_revalidate attr_replace_test swapon mkswap=
- fiemap-tester t_stripealign open_by_handle dbtest fssum /var/lib/xfstests/=
-src
-> > > /bin/sh ../libtool --quiet --mode=3Dinstall ../install-sh -o root -g =
-root -m 755 dmerror fill2attr fill2fs fill2fs_check scaleread.sh /var/lib/x=
-fstests/src
-> > > /bin/sh ../libtool --quiet --mode=3Dinstall ../install-sh -o root -g =
-root -m 644 dumpfile /var/lib/xfstests/src
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C m4 install
-> > > gmake[1]: Nothing to be done for 'install'.
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C common install
-> > > ../install-sh -o root -g root -m 755 -d /var/lib/xfstests/common
-> > > ../install-sh -o root -g root -m 644 * /var/lib/xfstests/common
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C tests install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > /usr/bin/gmake --no-print-directory Q=3D@ -C /home/git/xfstests-dev/t=
-ests/ install
-> > > ......
-> > > ......
-> > > (again and again and again ....)
-> >=20
-> > This looks like a bug of make to me.
-> >=20
-> > TESTS_SUBDIRS =3D $(sort $(dir $(wildcard $(CURDIR)/[a-z]*/)))
->=20
-> Is this a regression because of commit 103258a566b4 ("build: fix
-> install target using sudo")?
 
-No, it fails even with that commit reverted.
+--1N7xlkrjihV4
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
->=20
-> > The "wildcard" part is supposed to find all subdirs in tests dir, e.g.
-> > "tests/ext4 tests/generic tests/xfs ...", files shouldn't be included.
-> > So we get subdir list and go into each subdir and do install there.
-> >=20
-> > But the same "wildcard" expression returns files too on fedora 28, e.g.
-> > "tests/Makefile tests/ext4 tests/generic tests/xfs ...", as a result,
->=20
-> Should *never* return tests/Makefile, because that does not match
-> the [a-z]* regex - it's a lowercase first character match, not
-> uppercase. And the *only* things that should be in tests/ is the
-> Makefile and all the test subdirs, so it shouldn't be matching the
-> wrong thing. i.e. how are we getting tests/ as a result in the
-> TESTS_SUBDIRS set?
+Hi all,
 
-That's why I think it's a bug of make. I did the following test on
-Fedora 28 with make-4.2.1-6.fc28.x86_64.
+The master branch of the xfstests repository at:
 
-[root@fedoravm tmp]# rpm -q make
-make-4.2.1-6.fc28.x86_64
-[root@fedoravm tmp]# pwd
-/root/tmp
-[root@fedoravm tmp]# ls -l
-total 4
--rw-r--r--. 1 root root 206 Jul 15 14:58 Makefile
-drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
-[root@fedoravm tmp]# cat Makefile=20
-STRING1 =3D $(wildcard $(CURDIR)/[a-z]*/)
-STRING2 =3D $(wildcard ./[a-z]*/)
-default:
-        @echo STRING1=3D"$(STRING1)"
-        @echo STRING2=3D"$(STRING2)"
-[root@fedoravm tmp]# make
-STRING1=3D/root/tmp/testdir/ /root/tmp/Makefile
-STRING2=3D./testdir/ ./Makefile
-[root@fedoravm tmp]#
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-So 'Makefile' is matched and returned (and the usa ofCURDIR doesn't
-matter), and that explains why we have "tests/" in TESTS_SUBDIRS.
-
-The same test on RHEL7.4 works all as expected, 'Makefile' didn't match
-the pattern.
-
->=20
-> > "tests/" is included in subdirs again, and we go to "tests/" to do
-> > install there again and enter a infinite loop.
->=20
-> Again, is this a regression? If so, we need to understand why using
-> $(CURDIR) is returning different results from $(PWD)/$(TESTS_DIR)/
->=20
-> > I can workaround the problem by appending a dot, i.e.
->=20
-> At this point, this seems more like hacking a bandaid over whatever
-> problem is occurring rather than trying to solve/understand why this
-> is now happening.
-
-Agreed, I just expressed the fact that adding an ending dot could change
-the behavior, I didn't think it's a proper fix until we know exactly
-what causes it.
+have just been updated. This update pulls in two new generic tests from Filipe
+and Zorro and several quota fixes from Darrick. Also we're reaching the 500th
+generic test milestone!
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+08ec45b0b131 src/: add license and copyright info to files
+
+New commits:
+
+Darrick J. Wong (5):
+      [beae6dead91f] generic/{279, 28[1-3]}: hide SIGBUS reporting from golden output
+      [75337edb8cda] xfs/001: update to handle v5 filesystems
+      [b3cf8b72334f] xfs/288: update for v5 filesystem support in xfs_db
+      [26cfcac29506] generic/338: don't check fs after crashing it
+      [76b5a9d535eb] common: filter out quota regeneration messages
+
+Filipe Manana (1):
+      [fcc3f3b9c392] generic: add test for fsync after cloning file range
+
+Ross Zwisler (1):
+      [08ec45b0b131] src/: add license and copyright info to files
+
+Zorro Lang (3):
+      [1b5cd501190e] generic/499: filter fsx stderr output
+      [94fa25ded894] common/xfs: remove bad xfs_repair -t option
+      [2c14233d9175] generic: test dm-thin running out of data space vs concurrent discard
+
+
+Code Diffstat:
+
+ common/repair                       |  1 +
+ common/xfs                          | 16 ++++++-
+ src/t_ext4_dax_inline_corruption.c  |  2 +
+ src/t_ext4_dax_journal_corruption.c |  2 +
+ src/t_mmap_cow_race.c               |  2 +
+ src/t_mmap_stale_pmd.c              |  2 +
+ tests/generic/279                   |  6 +++
+ tests/generic/281                   |  6 +++
+ tests/generic/282                   |  9 +++-
+ tests/generic/283                   | 14 ++++--
+ tests/generic/338                   |  2 +-
+ tests/generic/499                   |  2 +-
+ tests/generic/500                   | 92 +++++++++++++++++++++++++++++++++++++
+ tests/generic/500.out               |  2 +
+ tests/generic/501                   | 70 ++++++++++++++++++++++++++++
+ tests/generic/501.out               |  5 ++
+ tests/generic/group                 |  2 +
+ tests/xfs/001                       | 18 +++++---
+ tests/xfs/288                       |  8 +---
+ 19 files changed, 240 insertions(+), 21 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--1N7xlkrjihV4
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJbS3cBAAoJECZSqilcj+djVisQAKqp7/YrYKUjjXQY6AZSX73A
+2EcQI9wQzSHuIyljhMnPhABdsL8K4imZASTW3xDffjRxowg6losoefIJsP5tUU69
+q0ntxzPb6YfdG3wIk9sVcmr8MIinc6vL3rzPwbbooz7notspl7WK6pZmsyR15UdN
++D7oEAFhk9Dk7xCMmy9Tw8oXZM8Tm3CiVNoBiEL8j/Eyfs7ClbADF5gJNbjL/nNV
+KLup3v7017WsTs80Qln0ediuSMSqQ+kgRXm0foQIDZ208bGEh7DXUtGfxsBjCfo6
+Fioe3/bVFB1yr//I9cqNmdE/CWVq5RIJogvigBZ0b0wmZTyKaajo+RWxZaFClQg1
+T7eNGH2S+aKux/udN7QEvXCRoCrhrK9xz4qVGxtWbYZ2BjGOGDwQW2G+Gs+OKPn0
+475RmdI9IfJ73bDsDn19S4KwYfr/T3/iVquWqk8mNHF/wf8UHmNhAPv3kxPs7Zqd
+KM3CKs4H1LmUE9PT43E58xDepU4zWBW7w1Dr4v5aRS1JNGdfMlsAuz6Eb3WFwEcp
+YcMApdDEjLhnS/kDiGoHn+jrn6j+w2/P9uSzrU5CoOPliYqJkU68AZHIXMFGW7Jk
+h/KeMP/4pNCgWCxKTFwqCaiKEFte4mazYyxVDvusmYSVgMGnb19pFDap21+gKOrM
+BVzHXBZ9/b32xo/t2xok
+=2JMp
+-----END PGP SIGNATURE-----
+
+--1N7xlkrjihV4--
