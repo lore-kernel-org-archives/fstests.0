@@ -1,94 +1,138 @@
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:43694 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725722AbeGQECp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Jul 2018 00:02:45 -0400
-Received: by mail-pg1-f195.google.com with SMTP id v13-v6so8347009pgr.10
-        for <fstests@vger.kernel.org>; Mon, 16 Jul 2018 20:32:19 -0700 (PDT)
-Date: Tue, 17 Jul 2018 11:32:14 +0800
+Received: from mail-pf0-f195.google.com ([209.85.192.195]:44250 "EHLO
+        mail-pf0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727038AbeGQFtz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 17 Jul 2018 01:49:55 -0400
+Date: Tue, 17 Jul 2018 13:19:03 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: xfstests can't be installed by running make install
-Message-ID: <20180717033214.GJ2830@desktop>
-References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180711163921.GI2780@desktop>
- <20180715054320.GZ2234@dastard>
- <20180715071110.GH2830@desktop>
- <20180716073051.GH4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
+Subject: Re: [PATCH v2] fstests: btrfs/168 verify device ready after device
+ delete
+Message-ID: <20180717051903.GK2830@desktop>
+References: <20180703084753.21116-1-anand.jain@oracle.com>
+ <20180706060137.1672-1-anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
+In-Reply-To: <20180706060137.1672-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Paul Smith <psmith@gnu.org>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, bug-make@gnu.org
+To: linux-btrfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, Anand Jain <anand.jain@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jul 16, 2018 at 07:48:26AM -0400, Paul Smith wrote:
-> On Mon, 2018-07-16 at 15:30 +0800, Zorro Lang wrote:
-> > > [root@fedoravm tmp]# ls -l
-> > > total 4
-> > > -rw-r--r--. 1 root root 206 Jul 15 14:58 Makefile
-> > > drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
-> > > [root@fedoravm tmp]# cat Makefile 
-> > > STRING1 = $(wildcard $(CURDIR)/[a-z]*/)
-> > > STRING2 = $(wildcard ./[a-z]*/)
-> > > default:
-> > >          @echo STRING1="$(STRING1)"
-> > >          @echo STRING2="$(STRING2)"
-> > > [root@fedoravm tmp]# make
-> > > STRING1=/root/tmp/testdir/ /root/tmp/Makefile
-> > > STRING2=./testdir/ ./Makefile
-> > > [root@fedoravm tmp]#
+On Fri, Jul 06, 2018 at 02:01:37PM +0800, Anand Jain wrote:
+> This test case verifies if the device ready return success after the
+> device delete.
 > 
-> GNU make uses the system libc version of the glob(3) and fnmatch(3)
-> functions to implement its wildcard function on any system which
-> provides GNU libc.
-> 
-> So, if there's a change which introduces a problem with wildcard it is
-> more likely to be related to the GNU libc implementation of glob() or
-> fnmatch().
-> 
-> Unless you've somehow compiled GNU make to use its internal version of
-> GNU glob()/fnmatch() instead of the system version.
-> 
-> I filed a bug about this with GNU libc a long time ago, and it was
-> apparently fixed in GNU libc 2.19 in 2014.  So, I'm not sure why you've
-> just started seeing it now.
-> 
-> https://sourceware.org/bugzilla/show_bug.cgi?id=10278
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
-This problem here doesn't seem the same as the bug above, Fedora 28 has
-glibc-2.27, which contains the fix for above bug, and the bug is about
-trailing "/". But the problem here is we're asking for all lower case
-filenames but wildcard returns upper case names too. e.g.
+Need some helps from btrfs folks to see if it's a valid test. Thanks!
 
-[root@fedoravm tmp]# pwd
-/root/tmp
-[root@fedoravm tmp]# ls -l
-total 4
--rw-r--r--. 1 root root   0 Jul 17 10:51 aaa
--rw-r--r--. 1 root root   0 Jul 17 10:51 AAA
--rw-r--r--. 1 root root 273 Jul 17 10:50 Makefile
-drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
-[root@fedoravm tmp]# cat Makefile
-STRING1 = $(wildcard $(CURDIR)/[a-z]*/)
-STRING2 = $(wildcard ./[a-z]*/)
-STRING3 = $(wildcard $(CURDIR)/[a-z]*/.)
-STRING4 = $(wildcard $(CURDIR)/[a-z]*)
-default:
-        @echo STRING1="$(STRING1)"
-        @echo STRING2="$(STRING2)"
-        @echo STRING3="$(STRING3)"
-        @echo STRING4="$(STRING4)"
-[root@fedoravm tmp]# make
-STRING1=/root/tmp/aaa /root/tmp/AAA /root/tmp/testdir/ /root/tmp/Makefile
-STRING2=./aaa ./AAA ./testdir/ ./Makefile
-STRING3=/root/tmp/testdir/.
-STRING4=/root/tmp/aaa /root/tmp/AAA /root/tmp/testdir /root/tmp/Makefile
-[root@fedoravm tmp]#
-
-STRING4 is asking for all lower file names, but both "AAA" and
-"Makefile" are returned.
-
-Thanks,
 Eryu
+
+> ---
+> v1->v2: use _run_btrfs_util_prog instead of open coding it.
+> 
+>  tests/btrfs/168     | 68 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/168.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 71 insertions(+)
+>  create mode 100755 tests/btrfs/168
+>  create mode 100644 tests/btrfs/168.out
+> 
+> diff --git a/tests/btrfs/168 b/tests/btrfs/168
+> new file mode 100755
+> index 000000000000..0d3e99839209
+> --- /dev/null
+> +++ b/tests/btrfs/168
+> @@ -0,0 +1,68 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2018 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 168
+> +#
+> +# Test if btrfs is still reported ready after the device delete
+> +#
+> +# This could be fixed by the following kernel commit:
+> +#  btrfs: fix missing superblock update in the device delete commit transaction
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_command "$BTRFS_TUNE_PROG" btrfstune
+> +_require_scratch_dev_pool 2
+> +
+> +_scratch_dev_pool_get 2
+> +dev_1=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
+> +dev_2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
+> +
+> +# normal delete device and then check for ready
+> +run_check _scratch_pool_mkfs "-d single -m single"
+> +_scratch_mount
+> +_run_btrfs_util_prog device delete $dev_1 $SCRATCH_MNT
+> +_run_btrfs_util_prog device ready $dev_2
+> +
+> +_scratch_unmount
+> +# delete a seed device and then check for ready
+> +run_check $BTRFS_TUNE_PROG -S 1 $dev_2
+> +run_check _mount $dev_2 $SCRATCH_MNT
+> +_run_btrfs_util_prog device add -f $dev_1 $SCRATCH_MNT
+> +run_check mount -o rw,remount $dev_1 $SCRATCH_MNT
+> +_run_btrfs_util_prog device delete $dev_2 $SCRATCH_MNT
+> +_run_btrfs_util_prog device ready $dev_1
+> +
+> +_scratch_unmount
+> +_scratch_dev_pool_put
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/168.out b/tests/btrfs/168.out
+> new file mode 100644
+> index 000000000000..893a41d859c8
+> --- /dev/null
+> +++ b/tests/btrfs/168.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 168
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 5cff3bd6cc03..7bc3ea457992 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -170,3 +170,4 @@
+>  165 auto quick subvol
+>  166 auto quick qgroup
+>  167 auto quick replace volume
+> +168 auto quick volume
+> -- 
+> 2.15.0
+> 
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
