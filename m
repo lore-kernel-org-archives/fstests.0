@@ -1,112 +1,78 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:40676 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727350AbeGQG2v (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 17 Jul 2018 02:28:51 -0400
-Date: Tue, 17 Jul 2018 13:57:54 +0800
-From: Zorro Lang <zlang@redhat.com>
+Received: from albireo.enyo.de ([5.158.152.32]:49142 "EHLO albireo.enyo.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729754AbeGQUz5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Jul 2018 16:55:57 -0400
+From: Florian Weimer <fw@deneb.enyo.de>
 Subject: Re: xfstests can't be installed by running make install
-Message-ID: <20180717055754.GJ4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180711163921.GI2780@desktop>
- <20180715054320.GZ2234@dastard>
- <20180715071110.GH2830@desktop>
- <20180717052408.GZ19934@dastard>
+        <20180711163921.GI2780@desktop> <20180715054320.GZ2234@dastard>
+        <20180715071110.GH2830@desktop>
+        <20180716073051.GH4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+        <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
+        <20180717033214.GJ2830@desktop>
+Date: Tue, 17 Jul 2018 22:15:47 +0200
+Message-ID: <87muupipos.fsf@mid.deneb.enyo.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180717052408.GZ19934@dastard>
+Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org, psmith@gnu.org, bug-make@gnu.org
+Content-Transfer-Encoding: quoted-printable
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Paul Smith <psmith@gnu.org>, Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, bug-make@gnu.org, Jim Meyering <meyering@fb.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 17, 2018 at 03:24:08PM +1000, Dave Chinner wrote:
-> On Sun, Jul 15, 2018 at 03:11:10PM +0800, Eryu Guan wrote:
-> > On Sun, Jul 15, 2018 at 03:43:20PM +1000, Dave Chinner wrote:
-> > > On Thu, Jul 12, 2018 at 12:39:21AM +0800, Eryu Guan wrote:
-> > > > The "wildcard" part is supposed to find all subdirs in tests dir, e.g.
-> > > > "tests/ext4 tests/generic tests/xfs ...", files shouldn't be included.
-> > > > So we get subdir list and go into each subdir and do install there.
-> > > > 
-> > > > But the same "wildcard" expression returns files too on fedora 28, e.g.
-> > > > "tests/Makefile tests/ext4 tests/generic tests/xfs ...", as a result,
-> > > 
-> > > Should *never* return tests/Makefile, because that does not match
-> > > the [a-z]* regex - it's a lowercase first character match, not
-> > > uppercase. And the *only* things that should be in tests/ is the
-> > > Makefile and all the test subdirs, so it shouldn't be matching the
-> > > wrong thing. i.e. how are we getting tests/ as a result in the
-> > > TESTS_SUBDIRS set?
-> > 
-> > That's why I think it's a bug of make. I did the following test on
-> > Fedora 28 with make-4.2.1-6.fc28.x86_64.
-> > 
-> > [root@fedoravm tmp]# rpm -q make
-> > make-4.2.1-6.fc28.x86_64
-> > [root@fedoravm tmp]# pwd
-> > /root/tmp
-> > [root@fedoravm tmp]# ls -l
-> > total 4
-> > -rw-r--r--. 1 root root 206 Jul 15 14:58 Makefile
-> > drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
-> > [root@fedoravm tmp]# cat Makefile 
-> > STRING1 = $(wildcard $(CURDIR)/[a-z]*/)
-> > STRING2 = $(wildcard ./[a-z]*/)
-> > default:
-> >         @echo STRING1="$(STRING1)"
-> >         @echo STRING2="$(STRING2)"
-> > [root@fedoravm tmp]# make
-> > STRING1=/root/tmp/testdir/ /root/tmp/Makefile
-> > STRING2=./testdir/ ./Makefile
-> > [root@fedoravm tmp]#
-> 
-> So make 4.2.1 on fedora 28 has broken regex matching?
-> 
-> I just ran this on a debian based test machine:
-> 
-> $ make --version
-> GNU Make 4.1
-> ....
-> $ make
-> STRING1=/home/dave/tmp_make/testdir/
-> STRING2=./testdir/
-> $
-> 
-> That works, but it's old. I just upgraded it to the lastest unstable
-> package (4.2.1-1.1), which also upgraded glibc to 2.27-5. Looks like
-> the make version matches fedora 28, but:
-> 
-> $ make --version
-> GNU Make 4.2.1
-> ....
-> $ make
-> STRING1=/home/dave/tmp_make/testdir/
-> STRING2=./testdir/
-> $
-> 
-> the regex behaves correctly. So this looks like it might be
-> something isolated to the fedora 28 distro package build or glibc
-> version?
+* Eryu Guan:
 
->From my testing:
-1) make-4.2.1-4 built by glibc-2.26 works fine with glibc-2.26-27.
-2) make-4.2.1-7 built by glibc-2.27 reproduce this bug with glibc-2.27-30.
-3) make-4.2.1-4 built by glibc-2.26 reproduce this bug with glibc-2.27-30.
-   Downgrade make forcibly by:
-   # rpm -e --nodeps make
-   # yum install make-4.2.1-4.xxx.rpm
+> This problem here doesn't seem the same as the bug above, Fedora 28 has
+> glibc-2.27, which contains the fix for above bug, and the bug is about
+> trailing "/". But the problem here is we're asking for all lower case
+> filenames but wildcard returns upper case names too. e.g.
+>
+> [root@fedoravm tmp]# pwd
+> /root/tmp
+> [root@fedoravm tmp]# ls -l
+> total 4
+> -rw-r--r--. 1 root root   0 Jul 17 10:51 aaa
+> -rw-r--r--. 1 root root   0 Jul 17 10:51 AAA
+> -rw-r--r--. 1 root root 273 Jul 17 10:50 Makefile
+> drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
+> [root@fedoravm tmp]# cat Makefile
+> STRING1 =3D $(wildcard $(CURDIR)/[a-z]*/)
+> STRING2 =3D $(wildcard ./[a-z]*/)
+> STRING3 =3D $(wildcard $(CURDIR)/[a-z]*/.)
+> STRING4 =3D $(wildcard $(CURDIR)/[a-z]*)
+> default:
+>         @echo STRING1=3D"$(STRING1)"
+>         @echo STRING2=3D"$(STRING2)"
+>         @echo STRING3=3D"$(STRING3)"
+>         @echo STRING4=3D"$(STRING4)"
+> [root@fedoravm tmp]# make
+> STRING1=3D/root/tmp/aaa /root/tmp/AAA /root/tmp/testdir/ /root/tmp/Make=
+file
+> STRING2=3D./aaa ./AAA ./testdir/ ./Makefile
+> STRING3=3D/root/tmp/testdir/.
+> STRING4=3D/root/tmp/aaa /root/tmp/AAA /root/tmp/testdir /root/tmp/Makef=
+ile
+> [root@fedoravm tmp]#
+>
+> STRING4 is asking for all lower file names, but both "AAA" and
+> "Makefile" are returned.
 
-Thanks,
-Zorro
+This is related to this glibc bug:
 
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+  https://sourceware.org/bugzilla/show_bug.cgi?id=3D23393
+
+The bug mentions the regular expression [0-9], but it also affects
+patterns like [a-z].  I have not yet looked at fnmatch and glob in
+detail, but based on the report here (and a quick test with =E2=80=9Cecho
+[a-z]*=E2=80=9D), they are affected by the same issue.
+
+This is ultimately caused by a locale data update which was backported
+into Fedora 28 (glibc 2.27) and its derivatives.  Upstream glibc only
+has this change for version 2.28 (not yet released).  It's currently
+not considered a release blocker, if it's even considered a bug at
+all.
+
+I dimly recall earlier discussions regarding this matter quite some
+time ago, perhaps in the POSIX context.  GNU grep appears to have a
+workaround for [0-9], but not [a-z].  Cc:ing Jim Meyering in case he
+has any insights.
