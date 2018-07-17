@@ -1,75 +1,133 @@
-Received: from mga04.intel.com ([192.55.52.120]:13509 "EHLO mga04.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727184AbeGPQfz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 16 Jul 2018 12:35:55 -0400
-Date: Mon, 16 Jul 2018 10:07:49 -0600
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
-Subject: Re: [fstests PATCH v2 2/2] generic/999: test DAX DMA vs
- truncate/hole-punch
-Message-ID: <20180716160749.GB2287@linux.intel.com>
-References: <20180710220942.21074-1-ross.zwisler@linux.intel.com>
- <20180710220942.21074-3-ross.zwisler@linux.intel.com>
- <20180714014105.GY2234@dastard>
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:37830 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729867AbeGQDcg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 16 Jul 2018 23:32:36 -0400
+Received: by mail-pg1-f196.google.com with SMTP id n7-v6so1435083pgq.4
+        for <fstests@vger.kernel.org>; Mon, 16 Jul 2018 20:02:16 -0700 (PDT)
+Date: Tue, 17 Jul 2018 11:02:11 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/062: filter redundant output by getfattr
+Message-ID: <20180717030211.GI2830@desktop>
+References: <20180712155926.21722-1-zlang@redhat.com>
+ <20180713063925.GA2830@desktop>
+ <20180716081243.GI4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180714014105.GY2234@dastard>
+In-Reply-To: <20180716081243.GI4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>, Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, linux-ext4@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Jul 14, 2018 at 11:41:05AM +1000, Dave Chinner wrote:
-> On Tue, Jul 10, 2018 at 04:09:42PM -0600, Ross Zwisler wrote:
-> > This adds a regression test for the following series:
+On Mon, Jul 16, 2018 at 04:12:43PM +0800, Zorro Lang wrote:
+> On Fri, Jul 13, 2018 at 02:39:25PM +0800, Eryu Guan wrote:
+> > On Thu, Jul 12, 2018 at 11:59:26PM +0800, Zorro Lang wrote:
+> > > When getfattr dumps values of all extended attributes (-d option),
+> > > it doesn't print empty extended attributes. e.g: user.name. But
+> > > from attr-2.4.48 this behavior is changed,  new getfattr prints
+> > > user.name="".
+> > > 
+> > > The {=""} will break the golden image, so filter the redundant =""
+> > > at the end if it has.
+> > > 
+> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > ---
+> > > 
+> > > Hi,
+> > > 
+> > > This's a bad news. Latest attr package attr-2.4.48 changed his
+> > > behavior as above. And this's different with attr-2.4.47.
+> > > 
+> > > With old attr:
+> > > # setfattr -h -n user.name testfile
+> > > # getfattr -d -n user.name testfile                                                                                                                                     
+> > > # file: testfile                               
+> > > user.name
+> > > 
+> > > With new attr:
+> > > # setfattr -h -n user.name testfile
+> > > # getfattr -d -n user.name testfile                                                                                                                                     
+> > > # file: testfile                               
+> > > user.name=""
+> > > 
+> > > Note: -d option is necessary
+> > > 
+> > > This little difference will break golden image. So this's the problem.
+> > > If you have better idea than this patch, please tell me.
+> > > 
+> > > Thanks,
+> > > Zorro
+> > > 
+> > > 
+> > >  tests/generic/062 | 6 +++++-
+> > >  1 file changed, 5 insertions(+), 1 deletion(-)
+> > > 
+> > > diff --git a/tests/generic/062 b/tests/generic/062
+> > > index df67960d..4fc2dc46 100755
+> > > --- a/tests/generic/062
+> > > +++ b/tests/generic/062
+> > > @@ -29,9 +29,13 @@ _cleanup()
+> > >  }
+> > >  trap "_cleanup; exit \$status" 0 1 2 3 15
+> > >  
+> > > +# When getfattr dump values of all extended attributes, it print empty attr
+> > > +# as user.name before, but new getfattr print it as user.name="". For match
+> > > +# the golden image, filter the redundant ="" at the end.
+> > >  getfattr()
+> > >  {
+> > > -    $GETFATTR_PROG --absolute-names -dh $@ 2>&1 | _filter_scratch
+> > > +    $GETFATTR_PROG --absolute-names -dh $@ 2>&1 | _filter_scratch | \
+> > > +	sed -e 's/=\"\"//'
+> > >  }
 > > 
-> > https://lists.01.org/pipermail/linux-nvdimm/2018-July/016842.html
-> > 
-> > which adds synchronization between DAX DMA in ext4 and truncate/hole-punch.
-> > The intention of the test is to test those specific changes, but it runs
-> > fine both with XFS and without DAX so I've put it in the generic tests
-> > instead of ext4 and not restricted it to only DAX configurations.
-> > 
-> > When run with v4.18-rc4 + DAX + ext4, this test will hit the following
-> > WARN_ON_ONCE() in dax_disassociate_entry():
-> > 
-> > 	WARN_ON_ONCE(trunc && page_ref_count(page) > 1);
-> > 
-> > If you change this to a WARN_ON() instead, you can see that each of the
-> > four paths being exercised in this test hits that condition many times in
-> > the one second that the subtest is being run.
-> > 
-> > Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+> > This should really be done by a new helper function that hides all the
+> > details, so future tests could just take use of the helper.
 > 
-> just a FWIW:
-> 
-> > +int main(int argc, char *argv[])
-> > +{
-> > +	int err;
-> > +
-> > +	if (argc != 3) {
-> > +		printf("Usage: %s <dax file> <non-dax file>\n",
-> > +				basename(argv[0]));
-> > +		exit(0);
-> > +	}
-> 
-> This is an example of why we should be supporting per-inode DAX
-> enablement in all filesystems, not a global mount option....
-> 
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_test
-> > +_require_test_program "t_mmap_collision"
-> > +
-> > +# To get the failure we turn off DAX on our SCRATCH_MNT so we can get O_DIRECT
-> > +# behavior.  We will continue to use unmodified mount options for the test
-> > +# TEST_DIR.  The failures fixed by the above mentioned kernel patch trigger
-> > +# when those mount options include "-o dax", but the test runs fine without
-> > +# that option so we don't require it.
-> > +export MOUNT_OPTIONS=""
-> > +_scratch_unmount >> $seqres.full 2>&1
-> > +_scratch_mount >> $seqres.full 2>&1
-> 
-> And then all this crap would go away....
+> OK. So how about a common function named _getfattr in common/attr, to instead
+> of all $GETFATTR_PROG (or just g/062).
 
-Yep, I totally agree. :)
+_getfattr() is fine, converting all existing bare getfattr calls would
+be good.
+
+Thanks!
+
+Eryu
+
+> 
+> Or a a common function named _filter_getfattr, to filter some $GETFATTR_PROG
+> output if a case need it.
+> 
+> _getfattr()
+> {
+> 	$GETFATTR_PROG $@ 2>&1 | _filter_testdir_and_scratch | \
+> 		sed -e 's/=\"\"//'
+> }
+> 
+> Or
+> 
+> _filter_getfattr()
+> {
+> 	_filter_testdir_and_scratch | sed -e 's/=\"\"//'
+> }
+> 
+> Thanks,
+> Zorro
+> 
+> > 
+> > Thanks,
+> > Eryu
+> > 
+> > >  
+> > >  setfattr()
+> > > -- 
+> > > 2.14.4
+> > > 
+> > > --
+> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > > the body of a message to majordomo@vger.kernel.org
+> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
