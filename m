@@ -1,112 +1,100 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54814 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726402AbeGRK5B (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 18 Jul 2018 06:57:01 -0400
-Date: Wed, 18 Jul 2018 18:19:46 +0800
-From: Zorro Lang <zlang@redhat.com>
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:41198 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730079AbeGRLdm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 18 Jul 2018 07:33:42 -0400
+Received: by mail-wr1-f66.google.com with SMTP id j5-v6so4200225wrr.8
+        for <fstests@vger.kernel.org>; Wed, 18 Jul 2018 03:56:21 -0700 (PDT)
+Received: from localhost.localdomain ([2a02:2f0e:d600:a900:9a62:91ee:f856:744c])
+        by smtp.gmail.com with ESMTPSA id f18-v6sm4073183wrt.64.2018.07.18.03.56.20
+        for <fstests@vger.kernel.org>
+        (version=TLS1_2 cipher=ECDHE-RSA-CHACHA20-POLY1305 bits=256/256);
+        Wed, 18 Jul 2018 03:56:20 -0700 (PDT)
+Message-ID: <41c031e69d26666a90221ae0e851581e.f3034ea4@sentimentalizes>
+Date: Wed, 18 Jul 2018 13:56:17 +0300
+From: spagoveanu@gmail.com
 Subject: Re: xfstests can't be installed by running make install
-Message-ID: <20180718101946.GU4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
-References: <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
- <20180717033214.GJ2830@desktop>
- <87muupipos.fsf@mid.deneb.enyo.de>
- <20180718031515.GK4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180718034749.GL4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180718040540.GM4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <87601dhyga.fsf@mid.deneb.enyo.de>
- <20180718083126.GP4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <87pnzlexrm.fsf@mid.deneb.enyo.de>
- <20180718101205.GT4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+ <20180711163921.GI2780@desktop>
+ <20180715054320.GZ2234@dastard>
+ <20180715071110.GH2830@desktop>
+ <20180716073051.GH4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+ <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180718101205.GT4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+In-Reply-To: <ab20c4fcdf86e002d1b348f3cfa96333ed519cd8.camel@gnu.org>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: guaneryu@gmail.com, david@fromorbit.com
-Cc: fstests@vger.kernel.org, Paul Smith <psmith@gnu.org>, bug-make@gnu.org, Jim Meyering <meyering@fb.com>, fw@deneb.enyo.de
+To: Paul Smith <psmith@gnu.org>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, guaneryu@gmail.com, bug-make@gnu.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 18, 2018 at 06:12:05PM +0800, Zorro Lang wrote:
-> On Wed, Jul 18, 2018 at 10:47:09AM +0200, Florian Weimer wrote:
-> > * Zorro Lang:
-> >=20
-> > > On Wed, Jul 18, 2018 at 08:04:05AM +0200, Florian Weimer wrote:
-> > >> * Zorro Lang:
-> > >>=20
-> > >> >> > > This is related to this glibc bug:
-> > >> >> > >=20
-> > >> >> > >   https://sourceware.org/bugzilla/show_bug.cgi?id=3D23393
-> > >> >>=20
-> > >>=20
-> > >> > A stranger thing is:
-> > >> > egrep [A-Z] match ABCD and bcd, but not match 'a'...
-> > >>=20
-> > >> That's the same issue as [0-9] not matching =EF=BC=99.
-> > >>=20
-> > >> > I already can't understand the new rules ...
-> > >>=20
-> > >> The range operator matches characters according to their collation
-> > >> weight, and sincce the weight of 'a' is less than the weight of 'A=
-',
-> > >> 'a' is not included in the [A-Z] range.
-> > >
-> > > How to define/calculate the *weight* in your context? Why you say t=
-he
-> > > weight of 'a' is less than the weight of 'A'
-> >=20
-> > This is a concept from POSIX collation, based on a locale definition:
-> >=20
-> > I hope this link is reasonably stable:
-> >=20
-> > <http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap07.h=
-tml#tag_07_03_02>
-> >=20
-> > Basically, collation is in alternative way of sorting strings,
-> > different from codepoint order, and it is specifically designed to
-> > take cultural conventions into account.  Traditionally, most regular
-> > expression range expression such as [a-z] follow collation order,
-> > although this is not required by POSIX for non-C/non-POSIX locales.
-> >=20
-> > >> This could be fixed by including all characters with the same prim=
-ary
-> > >> weight as the endpoints (so that [=C4=81-=E1=BA=91] and [a-z] woul=
-d end up being
-> > >> the same).  It makes the behavior more logical, but it doesn't fix
-> > >> existing scripts.
-> > >
-> > > We find that the $LANG will affect how glibc deal with the wildcard.
-> > > We all test on LANG=3Den_US.UTF=3D8, but if I set export LANG=3DC, =
-then
-> > > [a-z] and [A-Z] are all as expected, and xfstests make install work=
-s.
-> >=20
-> > Right, this is expected: POSIX requires the behavior you need for the
-> > "C" locale.
->=20
-> I was trying to change all these things to [:digit:], [:lower:], [:uppe=
-r:],
-> [:alpha:] and [:alnum:]. But there're many, and the worse thing is ther=
-e're
-> many things like [1-9], [3-8], [1-9a-f], [0-9a-f-] etc...
->=20
-> So I have to stop, and think about if there's a better way? How about w=
-e
-> fix the Makefile issue by change [a-z] to [[:lower:]], then export LANG=
-=3DC
-> in xfstests/check file, and recommand export it in local.file?
->=20
-> Please tell me, if you have better idea.
+On Mon, Jul 16, 2018 at 07:48:26AM -0400, Paul Smith wrote:
+> On Mon, 2018-07-16 at 15:30 +0800, Zorro Lang wrote:
+> > > [root@fedoravm tmp]# ls -l
+> > > total 4
+> > > -rw-r--r--. 1 root root 206 Jul 15 14:58 Makefile
+> > > drwxr-xr-x. 1 root root   0 Jul 15 14:59 testdir
+> > > [root@fedoravm tmp]# cat Makefile 
+> > > STRING1 = $(wildcard $(CURDIR)/[a-z]*/)
+> > > STRING2 = $(wildcard ./[a-z]*/)
+> > > default:
+> > >          @echo STRING1="$(STRING1)"
+> > >          @echo STRING2="$(STRING2)"
+> > > [root@fedoravm tmp]# make
+> > > STRING1=/root/tmp/testdir/ /root/tmp/Makefile
+> > > STRING2=./testdir/ ./Makefile
 
-Another way maybe we can define SED_PROG=3D"LC_ALL=3DC sed",
-GREP_PROG=3D"LC_ALL=3DC grep" etc ... But Makefile still need to be fixed
-singly.
+This is the same bug I've reported (with a working fix) in
 
+http://lists.gnu.org/archive/html/bug-make/2018-06/msg00009.html
 
->=20
-> Thanks so much,
-> Zorro
->=20
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+The '[a-z] matching uppercase chars because of LC_COLLATE' aggravating
+"feature" is a red herring here; './[a-z]*/' shouldn't match 'makefile'
+either; it should only match directories.
+
+> > > [root@fedoravm tmp]#
+> 
+> GNU make uses the system libc version of the glob(3) and fnmatch(3)
+> functions to implement its wildcard function on any system which
+> provides GNU libc.
+> 
+> So, if there's a change which introduces a problem with wildcard it is
+> more likely to be related to the GNU libc implementation of glob() or
+> fnmatch().
+
+There is a bug in glibc's glob() implementation. Here is a simple test
+case that's doing the exactly same things gnu make is doing to trigger it
+(use the GLOB_ALTDIRFUNC extension mechanism and set dirent.d_type
+to DT_UNKNOWN). The bug can also be triggered without GLOB_ALTDIRFUNC
+by using a filesystem without support for the d_type field (eg. minix fs).
+
+$ cc -Wall -O2 glob_onlydir.c -o glob_onlydir
+$ mkdir -p test/dir
+$ touch test/file
+$ ./glob_onlydir 'test/*'
+test/dir
+test/file
+$ cat glob_onlydir.c
+#include <stdio.h>
+#include <glob.h>
+#include <dirent.h>
+#include <sys/stat.h>
+static void *my_readdir(void *v){
+	struct dirent *d = readdir(v);
+	if(d) d->d_type = DT_UNKNOWN;
+	return d;
+}
+int main(int ac, char **av){
+	int i, j;
+	glob_t g = {0};
+	g.gl_opendir = (void*(*)(const char*))opendir;
+	g.gl_closedir = (void(*)(void*))closedir;
+	g.gl_stat = (int(*)(const char*, void*))stat;
+	g.gl_lstat = (int(*)(const char*, void*))lstat;
+	g.gl_readdir = my_readdir;
+	for(i = 1; i < ac; i++)
+		if(glob(av[i], GLOB_ONLYDIR|GLOB_ALTDIRFUNC, 0, &g) == 0)
+			for(j = 0; j < g.gl_pathc; j++)
+				printf("%s\n", g.gl_pathv[j]);
+	return 0;
+}
