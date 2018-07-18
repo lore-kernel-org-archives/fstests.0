@@ -1,11 +1,11 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:45111 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729907AbeGQXdV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 17 Jul 2018 19:33:21 -0400
-Date: Wed, 18 Jul 2018 08:58:01 +1000
-From: Dave Chinner <david@fromorbit.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:50884 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1731138AbeGRDu7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 17 Jul 2018 23:50:59 -0400
+Date: Wed, 18 Jul 2018 11:15:15 +0800
+From: Zorro Lang <zlang@redhat.com>
 Subject: Re: xfstests can't be installed by running make install
-Message-ID: <20180717225801.GA19934@dastard>
+Message-ID: <20180718031515.GK4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
 References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
  <20180711163921.GI2780@desktop>
  <20180715054320.GZ2234@dastard>
@@ -15,13 +15,13 @@ References: <20180711143314.GD4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
  <20180717033214.GJ2830@desktop>
  <87muupipos.fsf@mid.deneb.enyo.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=gb2312
 Content-Disposition: inline
 In-Reply-To: <87muupipos.fsf@mid.deneb.enyo.de>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Florian Weimer <fw@deneb.enyo.de>
-Cc: Eryu Guan <guaneryu@gmail.com>, Paul Smith <psmith@gnu.org>, Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org, bug-make@gnu.org, Jim Meyering <meyering@fb.com>
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <guaneryu@gmail.com>, Paul Smith <psmith@gnu.org>, bug-make@gnu.org, Jim Meyering <meyering@fb.com>, david@fromorbit.com, fw@deneb.enyo.de
 List-ID: <fstests@vger.kernel.org>
 
 On Tue, Jul 17, 2018 at 10:15:47PM +0200, Florian Weimer wrote:
@@ -70,26 +70,33 @@ efile
 >=20
 > The bug mentions the regular expression [0-9], but it also affects
 > patterns like [a-z].  I have not yet looked at fnmatch and glob in
-> detail, but based on the report here (and a quick test with =E2=80=9Cec=
-ho
-> [a-z]*=E2=80=9D), they are affected by the same issue.
+> detail, but based on the report here (and a quick test with =A1=B0echo
+> [a-z]*=A1=B1), they are affected by the same issue.
 >=20
 > This is ultimately caused by a locale data update which was backported
 > into Fedora 28 (glibc 2.27) and its derivatives.  Upstream glibc only
 > has this change for version 2.28 (not yet released).  It's currently
 > not considered a release blocker, if it's even considered a bug at
 > all.
+>=20
+> I dimly recall earlier discussions regarding this matter quite some
+> time ago, perhaps in the POSIX context.  GNU grep appears to have a
+> workaround for [0-9], but not [a-z].  Cc:ing Jim Meyering in case he
+> has any insights.
 
-So what you are saying (i.e. "not a bug") is that we should expect
-widespread regex breakage in custom scripts when distros roll out
-glibc 2.28 because it will break assumptions people have coded into
-their scripts and custom code for the past 20+ years?
+JFYI:
 
-That sounds like fun. :/
+I reported this bug to glibc bugzilla too, and I got some responses
+as below:
+https://sourceware.org/bugzilla/show_bug.cgi?id=3D23420#c1
 
-Cheers,
+Hmm... is Fedora glibc much different with upstream ... Need more
+investigate.
 
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Zorro
+
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
