@@ -1,55 +1,353 @@
-Received: from mail.kernel.org ([198.145.29.99]:57690 "EHLO mail.kernel.org"
+Received: from mga06.intel.com ([134.134.136.31]:41675 "EHLO mga06.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387918AbeGWJLJ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 23 Jul 2018 05:11:09 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] btrfs: test send with snapshots that have files deleted while open
-Date: Mon, 23 Jul 2018 09:11:03 +0100
-Message-Id: <20180723081103.4959-1-fdmanana@kernel.org>
+        id S2389373AbeG0Wgi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 27 Jul 2018 18:36:38 -0400
+From: Ross Zwisler <zwisler@kernel.org>
+Subject: [fstests PATCH v3] generic/999: test DAX DMA vs truncate/hole-punch
+Date: Fri, 27 Jul 2018 15:12:52 -0600
+Message-Id: <20180727211252.14895-1-zwisler@kernel.org>
+in-reply-to: <20180714125307.GF2830@desktop>>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, linux-ext4@vger.kernel.org
+Cc: Ross Zwisler <ross.zwisler@linux.intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+From: Ross Zwisler <ross.zwisler@linux.intel.com>
 
-Test that we are able to do send operations when one of the source
-snapshots (or subvolume) has a file that is deleted while there is still
-a open file descriptor for that file.
+This adds a regression test for the following series:
 
-This test is motivated by a bug found in btrfs which is fixed by a patch
-for the linux kernel titled:
+https://lists.01.org/pipermail/linux-nvdimm/2018-July/016842.html
 
-  "Btrfs: fix send failure when root has deleted files still open"
+which adds synchronization between DAX DMA in ext4 and truncate/hole-punch.
+The intention of the test is to test those specific changes, but it runs
+fine both with XFS and without DAX so I've put it in the generic tests
+instead of ext4 and not restricted it to only DAX configurations.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+When run with v4.18-rc6 + DAX + ext4, this test will hit the following
+WARN_ON_ONCE() in dax_disassociate_entry():
+
+	WARN_ON_ONCE(trunc && page_ref_count(page) > 1);
+
+If you change this to a WARN_ON() instead, you can see that each of the
+four paths being exercised in this test hits that condition many times in
+the one second that the subtest is being run.
+
+Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
 ---
- tests/btrfs/168     | 136 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/168.out |  13 +++++
- tests/btrfs/group   |   1 +
- 3 files changed, 150 insertions(+)
- create mode 100755 tests/btrfs/168
- create mode 100644 tests/btrfs/168.out
 
-diff --git a/tests/btrfs/168 b/tests/btrfs/168
-new file mode 100755
-index 00000000..9a159d61
+Changes since v2:
+ - Added detailed description to tests/generic/999 explaining the purpose
+   of the test (Eryu).
+
+ - Added _require_xfs_io_command for falloc, fpunch, fcollapse and fzero
+   to account for filesystems that don't support these commands (Eryu).
+
+ - Incorporated other feedback from Eryu.  Thanks, Eryu, for the review.
+
+---
+ .gitignore             |   1 +
+ src/Makefile           |   2 +-
+ src/t_mmap_collision.c | 235 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999      |  64 ++++++++++++++
+ tests/generic/999.out  |   2 +
+ tests/generic/group    |   1 +
+ 6 files changed, 304 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_mmap_collision.c
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/.gitignore b/.gitignore
+index efc73a7c..ea1aac8a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -125,6 +125,7 @@
+ /src/t_holes
+ /src/t_immutable
+ /src/t_locks_execve
++/src/t_mmap_collision
+ /src/t_mmap_cow_race
+ /src/t_mmap_dio
+ /src/t_mmap_fallocate
+diff --git a/src/Makefile b/src/Makefile
+index 9e971bcc..41826585 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -16,7 +16,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
+ 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
+ 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
+ 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
+-	t_ofd_locks t_locks_execve
++	t_ofd_locks t_locks_execve t_mmap_collision
+ 
+ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
+diff --git a/src/t_mmap_collision.c b/src/t_mmap_collision.c
+new file mode 100644
+index 00000000..d547bc05
 --- /dev/null
-+++ b/tests/btrfs/168
-@@ -0,0 +1,136 @@
++++ b/src/t_mmap_collision.c
+@@ -0,0 +1,235 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Copyright (c) 2018 Intel Corporation.
++ *
++ * As of kernel version 4.18-rc6 Linux has an issue with ext4+DAX where DMA
++ * and direct I/O operations aren't synchronized with respect to operations
++ * which can change the block mappings of an inode.  This means that we can
++ * schedule an I/O for an inode and have the block mapping for that inode
++ * change before the I/O is actually complete.  So, blocks which were once
++ * allocated to a given inode and then freed could still have I/O operations
++ * happening to them.  If these blocks have also been reallocated to a
++ * different inode, this interaction can lead to data corruption.
++ *
++ * This test exercises four of the paths in ext4 which hit this issue.
++ */
++#include <errno.h>
++#include <fcntl.h>
++#include <pthread.h>
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/mman.h>
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <unistd.h>
++
++#define PAGE(a) ((a)*0x1000)
++#define FILE_SIZE PAGE(4)
++
++void *dax_data;
++int nodax_fd;
++int dax_fd;
++bool done;
++
++#define err_exit(op)                                                          \
++{                                                                             \
++	fprintf(stderr, "%s %s: %s\n", __func__, op, strerror(errno));        \
++	exit(1);                                                              \
++}
++
++#if defined(FALLOC_FL_PUNCH_HOLE) && defined(FALLOC_FL_KEEP_SIZE)
++void punch_hole_fn(void *ptr)
++{
++	ssize_t read;
++	int rc;
++
++	while (!done) {
++		read = 0;
++
++		do {
++			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
++					read);
++			if (rc > 0)
++				read += rc;
++		} while (rc > 0);
++
++		if (read != FILE_SIZE || rc != 0)
++			err_exit("pread");
++
++		rc = fallocate(dax_fd,
++				FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
++				0, FILE_SIZE);
++		if (rc < 0)
++			err_exit("fallocate");
++
++		usleep(rand() % 1000);
++	}
++}
++#else
++void punch_hole_fn(void *ptr) { }
++#endif
++
++#if defined(FALLOC_FL_ZERO_RANGE) && defined(FALLOC_FL_KEEP_SIZE)
++void zero_range_fn(void *ptr)
++{
++	ssize_t read;
++	int rc;
++
++	while (!done) {
++		read = 0;
++
++		do {
++			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
++					read);
++			if (rc > 0)
++				read += rc;
++		} while (rc > 0);
++
++		if (read != FILE_SIZE || rc != 0)
++			err_exit("pread");
++
++		rc = fallocate(dax_fd,
++				FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
++				0, FILE_SIZE);
++		if (rc < 0)
++			err_exit("fallocate");
++
++		usleep(rand() % 1000);
++	}
++}
++#else
++void zero_range_fn(void *ptr) { }
++#endif
++
++void truncate_down_fn(void *ptr)
++{
++	ssize_t read;
++	int rc;
++
++	while (!done) {
++		read = 0;
++
++		if (ftruncate(dax_fd, 0) < 0)
++			err_exit("ftruncate");
++		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
++			err_exit("fallocate");
++
++		do {
++			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
++					read);
++			if (rc > 0)
++				read += rc;
++		} while (rc > 0);
++
++		/*
++		 * For this test we ignore errors from pread().  These errors
++		 * can happen if we try and read while the other thread has
++		 * made the file size 0.
++		 */
++
++		usleep(rand() % 1000);
++	}
++}
++
++#ifdef FALLOC_FL_COLLAPSE_RANGE
++void collapse_range_fn(void *ptr)
++{
++	ssize_t read;
++	int rc;
++
++	while (!done) {
++		read = 0;
++
++		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
++			err_exit("fallocate 1");
++		if (fallocate(dax_fd, FALLOC_FL_COLLAPSE_RANGE, 0, PAGE(1)) < 0)
++			err_exit("fallocate 2");
++		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
++			err_exit("fallocate 3");
++
++		do {
++			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
++					read);
++			if (rc > 0)
++				read += rc;
++		} while (rc > 0);
++
++		/* For this test we ignore errors from pread. */
++
++		usleep(rand() % 1000);
++	}
++}
++#else
++void collapse_range_fn(void *ptr) { }
++#endif
++
++void run_test(void (*test_fn)(void *))
++{
++	const int NUM_THREADS = 2;
++	pthread_t worker_thread[NUM_THREADS];
++	int i;
++
++	done = 0;
++	for (i = 0; i < NUM_THREADS; i++)
++		pthread_create(&worker_thread[i], NULL, (void*)test_fn, NULL);
++
++	sleep(1);
++	done = 1;
++
++	for (i = 0; i < NUM_THREADS; i++)
++		pthread_join(worker_thread[i], NULL);
++}
++
++int main(int argc, char *argv[])
++{
++	int err;
++
++	if (argc != 3) {
++		printf("Usage: %s <dax file> <non-dax file>\n",
++				basename(argv[0]));
++		exit(0);
++	}
++
++	dax_fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
++	if (dax_fd < 0)
++		err_exit("dax_fd open");
++
++	nodax_fd = open(argv[2], O_RDWR|O_CREAT|O_DIRECT, S_IRUSR|S_IWUSR);
++	if (nodax_fd < 0)
++		err_exit("nodax_fd open");
++
++	if (ftruncate(dax_fd, 0) < 0)
++		err_exit("dax_fd ftruncate");
++	if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
++		err_exit("dax_fd fallocate");
++
++	if (ftruncate(nodax_fd, 0) < 0)
++		err_exit("nodax_fd ftruncate");
++	if (fallocate(nodax_fd, 0, 0, FILE_SIZE) < 0)
++		err_exit("nodax_fd fallocate");
++
++	dax_data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED,
++			dax_fd, 0);
++	if (dax_data == MAP_FAILED)
++		err_exit("mmap");
++
++	run_test(&punch_hole_fn);
++	run_test(&zero_range_fn);
++	run_test(&truncate_down_fn);
++	run_test(&collapse_range_fn);
++
++	if (munmap(dax_data, FILE_SIZE) != 0)
++		err_exit("munmap");
++
++	err = close(dax_fd);
++	if (err < 0)
++		err_exit("dax_fd close");
++
++	err = close(nodax_fd);
++	if (err < 0)
++		err_exit("nodax_fd close");
++
++	return 0;
++}
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..0681b075
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,64 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++# Copyright (c) 2018 Intel Corporation.  All Rights Reserved.
 +#
-+# FS QA Test No. 168
++# FS QA Test generic/999
 +#
-+# Test that we are able to do send operations when one of the source snapshots
-+# (or subvolume) has a file that is deleted while there is still a open file
-+# descriptor for that file.
++# This is a regression test for kernel patch:
++#   ext4: handle layout changes to pinned DAX mapping
 +#
++# This test exercises each of the DAX paths in ext4 which remove blocks from
++# an inode's block map.  This includes things like hole punch, truncate down,
++# etc.  This test was written to regression test errors seen with an ext4 +
++# DAX setup, but the test runs fine with or without DAX and with XFS so we
++# don't require the DAX mount option or a specific filesystem for the test.
++
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -58,149 +356,59 @@ index 00000000..9a159d61
 +{
 +	cd /
 +	rm -f $tmp.*
-+	rm -fr $send_files_dir
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs btrfs
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# Modify as appropriate.
++_supported_fs generic
 +_supported_os Linux
 +_require_test
 +_require_scratch
-+_require_btrfs_command "property"
-+_require_fssum
++_require_test_program "t_mmap_collision"
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "fcollapse"
++_require_xfs_io_command "fzero"
 +
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
++_scratch_mkfs >> $seqres.full 2>&1
++# To get the failure we turn off DAX on our SCRATCH_MNT so we can get O_DIRECT
++# behavior.  We will continue to use unmodified mount options for the test
++# TEST_DIR.  The failures fixed by the above mentioned kernel patch trigger
++# when those mount options include "-o dax", but the test runs fine without
++# that option so we don't require it.
++export MOUNT_OPTIONS=""
++_scratch_mount >> $seqres.full 2>&1
 +
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
++# real QA test starts here
++$here/src/t_mmap_collision $TEST_DIR/testfile $SCRATCH_MNT/testfile
 +
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+# Create a subvolume used for first full send test and used to create two
-+# snapshots for the incremental send test.
-+$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/sv1 | _filter_scratch
-+
-+# Create some test files.
-+$XFS_IO_PROG -f -c "pwrite -S 0xf1 0 64K" $SCRATCH_MNT/sv1/foo >>$seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0x7b 0 90K" $SCRATCH_MNT/sv1/bar >>$seqres.full
-+$XFS_IO_PROG -f -c "pwrite -S 0xea 0 256K" $SCRATCH_MNT/sv1/baz >>$seqres.full
-+
-+# Flush the previous buffered writes, since setting a subvolume to RO mode
-+# does not do it and we want to check if the data is correctly transmitted by
-+# the send operations.
-+sync
-+
-+# Keep an open file descriptor on file bar.
-+exec 73<$SCRATCH_MNT/sv1/bar
-+
-+# While the file descriptor is open, delete the file, set the subvolume to
-+# read-only mode and see if a full send operation succeeds.
-+unlink $SCRATCH_MNT/sv1/bar
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro true
-+$FSSUM_PROG -A -f -w $send_files_dir/sv1.fssum $SCRATCH_MNT/sv1
-+$BTRFS_UTIL_PROG send -f $send_files_dir/sv1.send $SCRATCH_MNT/sv1 2>&1 \
-+	| _filter_scratch
-+
-+# Now that the we did the full send, close the file descriptor and set the
-+# subvolume back to read-write mode.
-+exec 73>&-
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv1 ro false
-+
-+# Now try an incremental send operation while there's an open file descriptor
-+# for a file that was deleted from the send snapshot (while it was in read-write
-+# mode).
-+
-+# Create a snapshot of the subvolume, to be used later as the parent snapshot
-+# for an incremental send operation.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1 $SCRATCH_MNT/snap1 \
-+	| _filter_scratch
-+
-+# First do a full send of this snapshot.
-+$FSSUM_PROG -A -f -w $send_files_dir/snap1.fssum $SCRATCH_MNT/snap1
-+$BTRFS_UTIL_PROG send -f $send_files_dir/snap1.send $SCRATCH_MNT/snap1 2>&1 \
-+	| _filter_scratch
-+
-+# Modify file baz, to check that the incremental send operation does not miss
-+# that this file has changed.
-+$XFS_IO_PROG -c "pwrite -S 0x19 4K 8K" $SCRATCH_MNT/sv1/baz >>$seqres.full
-+
-+# Create a second snapshot of the subvolume, to be used later as the send
-+# snapshot of an incremental send operation.
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT/sv1 $SCRATCH_MNT/snap2 \
-+	| _filter_scratch
-+
-+# Temporarily turn the second snapshot to read-write mode and then open a file
-+# descriptor on its foo file.
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro false
-+exec 73<$SCRATCH_MNT/snap2/foo
-+
-+# Delete the foo file from the second snapshot while holding the file descriptor
-+# open.
-+unlink $SCRATCH_MNT/snap2/foo
-+
-+# Set the second snapshot back to RO mode, so that we can use it for the
-+# incremental send operation.
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT/snap2 ro true
-+
-+# Do the incremental send while there's an open file descriptor on file foo from
-+# the second snapshot.
-+$FSSUM_PROG -A -f -w $send_files_dir/snap2.fssum $SCRATCH_MNT/snap2
-+$BTRFS_UTIL_PROG send -f $send_files_dir/snap2.send -p $SCRATCH_MNT/snap1 \
-+	$SCRATCH_MNT/snap2 2>&1 | _filter_scratch
-+
-+# Now that the incremental send is done close the file descriptor on snap2/foo.
-+exec 73>&-
-+
-+# Recreate the filesystem using the send streams and check all files exist,
-+# except for the ones we deleted while holding an open file descriptor on them,
-+# and with correct data and metadata (size, timestamps, ownership, permissions).
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/sv1.send $SCRATCH_MNT
-+$FSSUM_PROG -r $send_files_dir/sv1.fssum $SCRATCH_MNT/sv1
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/snap1.send $SCRATCH_MNT
-+$FSSUM_PROG -r $send_files_dir/snap1.fssum $SCRATCH_MNT/snap1
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/snap2.send $SCRATCH_MNT
-+$FSSUM_PROG -r $send_files_dir/snap2.fssum $SCRATCH_MNT/snap2
-+
++# success, all done
++echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/btrfs/168.out b/tests/btrfs/168.out
+diff --git a/tests/generic/999.out b/tests/generic/999.out
 new file mode 100644
-index 00000000..6cfce8cd
+index 00000000..3b276ca8
 --- /dev/null
-+++ b/tests/btrfs/168.out
-@@ -0,0 +1,13 @@
-+QA output created by 168
-+Create subvolume 'SCRATCH_MNT/sv1'
-+At subvol SCRATCH_MNT/sv1
-+Create a readonly snapshot of 'SCRATCH_MNT/sv1' in 'SCRATCH_MNT/snap1'
-+At subvol SCRATCH_MNT/snap1
-+Create a readonly snapshot of 'SCRATCH_MNT/sv1' in 'SCRATCH_MNT/snap2'
-+At subvol SCRATCH_MNT/snap2
-+At subvol sv1
-+OK
-+At subvol snap1
-+OK
-+At snapshot snap2
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 5cff3bd6..5b132651 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -170,3 +170,4 @@
- 165 auto quick subvol
- 166 auto quick qgroup
- 167 auto quick replace volume
-+168 auto quick send
++++ b/tests/generic/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index d0b7dcf6..92016cf4 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -505,3 +505,4 @@
+ 500 auto thin trim
+ 501 auto quick clone log
+ 502 auto quick log
++999 auto quick dax punch collapse zero
 -- 
-2.11.0
+2.14.4
 
