@@ -1,355 +1,55 @@
-Received: from mga06.intel.com ([134.134.136.31]:41675 "EHLO mga06.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2389373AbeG0Wgi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 27 Jul 2018 18:36:38 -0400
-From: Ross Zwisler <zwisler@kernel.org>
-Subject: [fstests PATCH v3] generic/999: test DAX DMA vs truncate/hole-punch
-Date: Fri, 27 Jul 2018 15:12:52 -0600
-Message-Id: <20180727211252.14895-1-zwisler@kernel.org>
-in-reply-to: <20180714125307.GF2830@desktop>>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:10170 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726749AbeG1J4I (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 28 Jul 2018 05:56:08 -0400
+From: "zhangyi (F)" <yi.zhang@huawei.com>
+Subject: [xfstests PATCH 3/3] overlay: add fsck.overlay exception tests
+Date: Sat, 28 Jul 2018 16:42:42 +0800
+Message-ID: <20180728084242.33918-4-yi.zhang@huawei.com>
+In-Reply-To: <20180728084242.33918-1-yi.zhang@huawei.com>
+References: <20180728084242.33918-1-yi.zhang@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, Dave Chinner <david@fromorbit.com>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Christoph Hellwig <hch@lst.de>, linux-nvdimm@lists.01.org, linux-ext4@vger.kernel.org
-Cc: Ross Zwisler <ross.zwisler@linux.intel.com>
+To: guaneryu@gmail.com, fstests@vger.kernel.org
+Cc: linux-unionfs@vger.kernel.org, miklos@szeredi.hu, amir73il@gmail.com, yi.zhang@huawei.com, miaoxie@huawei.com, yangerkun@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Ross Zwisler <ross.zwisler@linux.intel.com>
+Introduce some exception test cases for fsck.overlay which runs on
+invalid/unnormal underlying dirs or invalid input parameters to test
+exception handling processes.
 
-This adds a regression test for the following series:
-
-https://lists.01.org/pipermail/linux-nvdimm/2018-July/016842.html
-
-which adds synchronization between DAX DMA in ext4 and truncate/hole-punch.
-The intention of the test is to test those specific changes, but it runs
-fine both with XFS and without DAX so I've put it in the generic tests
-instead of ext4 and not restricted it to only DAX configurations.
-
-When run with v4.18-rc6 + DAX + ext4, this test will hit the following
-WARN_ON_ONCE() in dax_disassociate_entry():
-
-	WARN_ON_ONCE(trunc && page_ref_count(page) > 1);
-
-If you change this to a WARN_ON() instead, you can see that each of the
-four paths being exercised in this test hits that condition many times in
-the one second that the subtest is being run.
-
-Signed-off-by: Ross Zwisler <ross.zwisler@linux.intel.com>
+Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 ---
+ tests/overlay/062     | 236 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/062.out |  10 +++
+ tests/overlay/group   |   1 +
+ 3 files changed, 247 insertions(+)
+ create mode 100755 tests/overlay/062
+ create mode 100644 tests/overlay/062.out
 
-Changes since v2:
- - Added detailed description to tests/generic/999 explaining the purpose
-   of the test (Eryu).
-
- - Added _require_xfs_io_command for falloc, fpunch, fcollapse and fzero
-   to account for filesystems that don't support these commands (Eryu).
-
- - Incorporated other feedback from Eryu.  Thanks, Eryu, for the review.
-
----
- .gitignore             |   1 +
- src/Makefile           |   2 +-
- src/t_mmap_collision.c | 235 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999      |  64 ++++++++++++++
- tests/generic/999.out  |   2 +
- tests/generic/group    |   1 +
- 6 files changed, 304 insertions(+), 1 deletion(-)
- create mode 100644 src/t_mmap_collision.c
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
-
-diff --git a/.gitignore b/.gitignore
-index efc73a7c..ea1aac8a 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -125,6 +125,7 @@
- /src/t_holes
- /src/t_immutable
- /src/t_locks_execve
-+/src/t_mmap_collision
- /src/t_mmap_cow_race
- /src/t_mmap_dio
- /src/t_mmap_fallocate
-diff --git a/src/Makefile b/src/Makefile
-index 9e971bcc..41826585 100644
---- a/src/Makefile
-+++ b/src/Makefile
-@@ -16,7 +16,7 @@ TARGETS = dirstress fill fill2 getpagesize holes lstat64 \
- 	holetest t_truncate_self t_mmap_dio af_unix t_mmap_stale_pmd \
- 	t_mmap_cow_race t_mmap_fallocate fsync-err t_mmap_write_ro \
- 	t_ext4_dax_journal_corruption t_ext4_dax_inline_corruption \
--	t_ofd_locks t_locks_execve
-+	t_ofd_locks t_locks_execve t_mmap_collision
- 
- LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
- 	preallo_rw_pattern_writer ftrunc trunc fs_perms testx looptest \
-diff --git a/src/t_mmap_collision.c b/src/t_mmap_collision.c
-new file mode 100644
-index 00000000..d547bc05
---- /dev/null
-+++ b/src/t_mmap_collision.c
-@@ -0,0 +1,235 @@
-+// SPDX-License-Identifier: GPL-2.0
-+/*
-+ * Copyright (c) 2018 Intel Corporation.
-+ *
-+ * As of kernel version 4.18-rc6 Linux has an issue with ext4+DAX where DMA
-+ * and direct I/O operations aren't synchronized with respect to operations
-+ * which can change the block mappings of an inode.  This means that we can
-+ * schedule an I/O for an inode and have the block mapping for that inode
-+ * change before the I/O is actually complete.  So, blocks which were once
-+ * allocated to a given inode and then freed could still have I/O operations
-+ * happening to them.  If these blocks have also been reallocated to a
-+ * different inode, this interaction can lead to data corruption.
-+ *
-+ * This test exercises four of the paths in ext4 which hit this issue.
-+ */
-+#include <errno.h>
-+#include <fcntl.h>
-+#include <pthread.h>
-+#include <stdbool.h>
-+#include <stdio.h>
-+#include <stdlib.h>
-+#include <string.h>
-+#include <sys/mman.h>
-+#include <sys/stat.h>
-+#include <sys/types.h>
-+#include <unistd.h>
-+
-+#define PAGE(a) ((a)*0x1000)
-+#define FILE_SIZE PAGE(4)
-+
-+void *dax_data;
-+int nodax_fd;
-+int dax_fd;
-+bool done;
-+
-+#define err_exit(op)                                                          \
-+{                                                                             \
-+	fprintf(stderr, "%s %s: %s\n", __func__, op, strerror(errno));        \
-+	exit(1);                                                              \
-+}
-+
-+#if defined(FALLOC_FL_PUNCH_HOLE) && defined(FALLOC_FL_KEEP_SIZE)
-+void punch_hole_fn(void *ptr)
-+{
-+	ssize_t read;
-+	int rc;
-+
-+	while (!done) {
-+		read = 0;
-+
-+		do {
-+			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-+					read);
-+			if (rc > 0)
-+				read += rc;
-+		} while (rc > 0);
-+
-+		if (read != FILE_SIZE || rc != 0)
-+			err_exit("pread");
-+
-+		rc = fallocate(dax_fd,
-+				FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-+				0, FILE_SIZE);
-+		if (rc < 0)
-+			err_exit("fallocate");
-+
-+		usleep(rand() % 1000);
-+	}
-+}
-+#else
-+void punch_hole_fn(void *ptr) { }
-+#endif
-+
-+#if defined(FALLOC_FL_ZERO_RANGE) && defined(FALLOC_FL_KEEP_SIZE)
-+void zero_range_fn(void *ptr)
-+{
-+	ssize_t read;
-+	int rc;
-+
-+	while (!done) {
-+		read = 0;
-+
-+		do {
-+			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-+					read);
-+			if (rc > 0)
-+				read += rc;
-+		} while (rc > 0);
-+
-+		if (read != FILE_SIZE || rc != 0)
-+			err_exit("pread");
-+
-+		rc = fallocate(dax_fd,
-+				FALLOC_FL_ZERO_RANGE | FALLOC_FL_KEEP_SIZE,
-+				0, FILE_SIZE);
-+		if (rc < 0)
-+			err_exit("fallocate");
-+
-+		usleep(rand() % 1000);
-+	}
-+}
-+#else
-+void zero_range_fn(void *ptr) { }
-+#endif
-+
-+void truncate_down_fn(void *ptr)
-+{
-+	ssize_t read;
-+	int rc;
-+
-+	while (!done) {
-+		read = 0;
-+
-+		if (ftruncate(dax_fd, 0) < 0)
-+			err_exit("ftruncate");
-+		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-+			err_exit("fallocate");
-+
-+		do {
-+			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-+					read);
-+			if (rc > 0)
-+				read += rc;
-+		} while (rc > 0);
-+
-+		/*
-+		 * For this test we ignore errors from pread().  These errors
-+		 * can happen if we try and read while the other thread has
-+		 * made the file size 0.
-+		 */
-+
-+		usleep(rand() % 1000);
-+	}
-+}
-+
-+#ifdef FALLOC_FL_COLLAPSE_RANGE
-+void collapse_range_fn(void *ptr)
-+{
-+	ssize_t read;
-+	int rc;
-+
-+	while (!done) {
-+		read = 0;
-+
-+		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-+			err_exit("fallocate 1");
-+		if (fallocate(dax_fd, FALLOC_FL_COLLAPSE_RANGE, 0, PAGE(1)) < 0)
-+			err_exit("fallocate 2");
-+		if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-+			err_exit("fallocate 3");
-+
-+		do {
-+			rc = pread(nodax_fd, dax_data + read, FILE_SIZE - read,
-+					read);
-+			if (rc > 0)
-+				read += rc;
-+		} while (rc > 0);
-+
-+		/* For this test we ignore errors from pread. */
-+
-+		usleep(rand() % 1000);
-+	}
-+}
-+#else
-+void collapse_range_fn(void *ptr) { }
-+#endif
-+
-+void run_test(void (*test_fn)(void *))
-+{
-+	const int NUM_THREADS = 2;
-+	pthread_t worker_thread[NUM_THREADS];
-+	int i;
-+
-+	done = 0;
-+	for (i = 0; i < NUM_THREADS; i++)
-+		pthread_create(&worker_thread[i], NULL, (void*)test_fn, NULL);
-+
-+	sleep(1);
-+	done = 1;
-+
-+	for (i = 0; i < NUM_THREADS; i++)
-+		pthread_join(worker_thread[i], NULL);
-+}
-+
-+int main(int argc, char *argv[])
-+{
-+	int err;
-+
-+	if (argc != 3) {
-+		printf("Usage: %s <dax file> <non-dax file>\n",
-+				basename(argv[0]));
-+		exit(0);
-+	}
-+
-+	dax_fd = open(argv[1], O_RDWR|O_CREAT, S_IRUSR|S_IWUSR);
-+	if (dax_fd < 0)
-+		err_exit("dax_fd open");
-+
-+	nodax_fd = open(argv[2], O_RDWR|O_CREAT|O_DIRECT, S_IRUSR|S_IWUSR);
-+	if (nodax_fd < 0)
-+		err_exit("nodax_fd open");
-+
-+	if (ftruncate(dax_fd, 0) < 0)
-+		err_exit("dax_fd ftruncate");
-+	if (fallocate(dax_fd, 0, 0, FILE_SIZE) < 0)
-+		err_exit("dax_fd fallocate");
-+
-+	if (ftruncate(nodax_fd, 0) < 0)
-+		err_exit("nodax_fd ftruncate");
-+	if (fallocate(nodax_fd, 0, 0, FILE_SIZE) < 0)
-+		err_exit("nodax_fd fallocate");
-+
-+	dax_data = mmap(NULL, FILE_SIZE, PROT_READ|PROT_WRITE, MAP_SHARED,
-+			dax_fd, 0);
-+	if (dax_data == MAP_FAILED)
-+		err_exit("mmap");
-+
-+	run_test(&punch_hole_fn);
-+	run_test(&zero_range_fn);
-+	run_test(&truncate_down_fn);
-+	run_test(&collapse_range_fn);
-+
-+	if (munmap(dax_data, FILE_SIZE) != 0)
-+		err_exit("munmap");
-+
-+	err = close(dax_fd);
-+	if (err < 0)
-+		err_exit("dax_fd close");
-+
-+	err = close(nodax_fd);
-+	if (err < 0)
-+		err_exit("nodax_fd close");
-+
-+	return 0;
-+}
-diff --git a/tests/generic/999 b/tests/generic/999
+diff --git a/tests/overlay/062 b/tests/overlay/062
 new file mode 100755
-index 00000000..0681b075
+index 0000000..31f856d
 --- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,64 @@
++++ b/tests/overlay/062
+@@ -0,0 +1,236 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Intel Corporation.  All Rights Reserved.
++# Copyright (c) 2018 Huawei.  All Rights Reserved.
 +#
-+# FS QA Test generic/999
++# FS QA Test No. 062
 +#
-+# This is a regression test for kernel patch:
-+#   ext4: handle layout changes to pinned DAX mapping
++# Exception test: test fsck.overlay runs on invalid underlying
++# dirs or with invalid input options.
 +#
-+# This test exercises each of the DAX paths in ext4 which remove blocks from
-+# an inode's block map.  This includes things like hole punch, truncate down,
-+# etc.  This test was written to regression test errors seen with an ext4 +
-+# DAX setup, but the test runs fine with or without DAX and with XFS so we
-+# don't require the DAX mount option or a specific filesystem for the test.
-+
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1        # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
@@ -361,54 +61,240 @@ index 00000000..0681b075
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/attr
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_scratch
-+_require_test_program "t_mmap_collision"
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "fzero"
-+
-+_scratch_mkfs >> $seqres.full 2>&1
-+# To get the failure we turn off DAX on our SCRATCH_MNT so we can get O_DIRECT
-+# behavior.  We will continue to use unmodified mount options for the test
-+# TEST_DIR.  The failures fixed by the above mentioned kernel patch trigger
-+# when those mount options include "-o dax", but the test runs fine without
-+# that option so we don't require it.
-+export MOUNT_OPTIONS=""
-+_scratch_mount >> $seqres.full 2>&1
-+
 +# real QA test starts here
-+$here/src/t_mmap_collision $TEST_DIR/testfile $SCRATCH_MNT/testfile
++_supported_fs overlay
++_supported_os Linux
++_require_scratch_nocheck
++_require_attrs
++_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
++_require_chattr i
++
++# remove all files from previous tests
++_scratch_mkfs
++
++# Create a whiteout
++make_whiteout()
++{
++	for arg in $*; do
++		mknod $arg c 0 0
++	done
++}
++
++# Create a redirect directory
++make_redirect_dir()
++{
++	local target=$1
++	local value=$2
++
++	mkdir -p $target
++	$SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v $value $target
++}
++
++# Run fsck.overlay and check return value
++run_fsck()
++{
++	local expect=$1
++	local lowerdir=$2
++	local upperdir=$3
++	local workdir=$4
++	shift 4
++
++	[[ -n $lowerdir ]] && idirs=$(echo -n "-o lowerdir=$lowerdir")
++	[[ -n $upperdir ]] && idirs=$(echo -n "$idirs -o upperdir=$upperdir")
++	[[ -n $workdir ]] && idirs=$(echo -n "$idirs -o workdir=$workdir")
++
++	$FSCK_OVERLAY_PROG $idirs $* >> $seqres.full 2>&1
++	fsck_ret=$?
++
++	[[ "$fsck_ret" == "$expect" ]] || \
++		echo "fsck return unexpected:$expect,$fsck_ret"
++}
++
++# Create test directories
++lowerdir=$OVL_BASE_SCRATCH_MNT/lower
++lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
++upperdir=$OVL_BASE_SCRATCH_MNT/upper
++workdir=$OVL_BASE_SCRATCH_MNT/workdir
++
++make_test_dirs()
++{
++	rm -rf $lowerdir $lowerdir2 $upperdir $workdir
++	mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
++}
++
++# Test incomplete underlying dirs, should fail
++echo "+ Invalid input"
++make_test_dirs
++
++none_dir=""
++
++run_fsck $FSCK_USAGE $lowerdir $none_dir $none_dir
++run_fsck $FSCK_USAGE $lowerdir $upperdir $none_dir
++run_fsck $FSCK_USAGE $none_dir $upperdir $workdir
++
++
++# Test invalid underlying dirs, should fail
++echo "+ Invalid input(2)"
++make_test_dirs
++
++invalid_dir=$OVL_BASE_SCRATCH_MNT/invalid_dir
++
++run_fsck $FSCK_ERROR $lowerdir $upperdir $invalid_dir
++run_fsck $FSCK_ERROR $lowerdir $invalid_dir $workdir
++run_fsck $FSCK_ERROR $invalid_dir $upperdir $workdir
++
++
++# Test conflict input options, should fail
++echo "+ Invalid input(3)"
++make_test_dirs
++
++run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -pn
++run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -yn
++run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -py
++run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -pyn
++
++
++# Test upperdir and lowerdir belong to different base filesystems, should fail
++echo "+ Invalid workdir"
++make_test_dirs
++
++test_workdir=$OVL_BASE_TEST_DIR/work
++mkdir -p $test_workdir
++run_fsck $FSCK_ERROR $lowerdir $upperdir $test_workdir
++rm -rf $test_workdir
++
++
++# Test upperdir is subdir of workdir and vice versa, should fail
++echo "+ Invalid workdir(2)"
++make_test_dirs
++
++test_workdir=$upperdir/work
++test_upperdir=$workdir/upper
++mkdir -p $test_workdir $test_upperdir
++
++run_fsck $FSCK_ERROR $lowerdir $upperdir $test_workdir
++run_fsck $FSCK_ERROR $lowerdir $test_upperdir $workdir
++
++
++# Test upper layer is read-only, should fail in "!no" mode, and should
++# return the real consistent result in "no" mode.
++echo "+ Upper read-only"
++make_test_dirs
++
++test_lowerdir=$OVL_BASE_TEST_DIR/lower
++mkdir -p $test_lowerdir
++
++# Let upper layer read-only
++$MOUNT_PROG -o remount,ro $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
++# Refuse to check read-only upper layer
++run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir
++run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir -p
++run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir -y
++# Allow to use "no" mode scan read-only upper layer
++run_fsck $FSCK_OK $test_lowerdir $upperdir $workdir -n
++$MOUNT_PROG -o remount,rw $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
++
++# Make a simple inconsistency on the upper layer and expect return failure
++make_whiteout $upperdir/invalid
++$MOUNT_PROG -o remount,ro $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
++run_fsck $FSCK_UNCORRECTED $test_lowerdir $upperdir $workdir -n
++$MOUNT_PROG -o remount,rw $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
++rm -rf $test_lowerdir
++
++
++# Test lower layer is read-only, should sacn each layer and return
++# the real consistent result.
++echo "+ Lower read-only"
++make_test_dirs
++
++test_lowerdir=$OVL_BASE_TEST_DIR/lower
++mkdir -p $test_lowerdir
++
++# Let lower layer read-only
++$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
++# Allow check read-only lower layers in all modes
++run_fsck $FSCK_OK $test_lowerdir $upperdir $workdir -p
++$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
++
++# Make a simple inconsistency on the read-only lower layer and expect
++# return failure.
++make_whiteout $test_lowerdir/invalid
++$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
++run_fsck $FSCK_UNCORRECTED $test_lowerdir $upperdir $workdir -p
++$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
++rm -rf $test_lowerdir
++
++
++# Test one of the lower layers is read-only, should sacn each layer and
++# return the real consistent result.
++echo "+ Lower read-only(2)"
++make_test_dirs
++
++test_lowerdir=$OVL_BASE_TEST_DIR/lower
++mkdir -p $test_lowerdir
++
++# Let lower layer read-only
++$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
++# Make a simple inconsistency on the bottom read-write lower layer
++# and expect return success (consistent middle read-only layer should
++# not affect the result).
++make_whiteout $lowerdir2/invalid
++run_fsck $FSCK_NONDESTRUCT $test_lowerdir:$lowerdir2 $upperdir $workdir -p
++$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
++
++# Make a simple inconsistency on the middle read-only lower layer
++# and expect return failure.
++make_whiteout $test_lowerdir/invalid
++$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
++run_fsck $FSCK_UNCORRECTED $test_lowerdir:$lowerdir2 $upperdir $workdir -p
++$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
++rm -rf $test_lowerdir
++
++
++# Test encounter error when try to fix some inconsistency, should fail
++echo "+ Encounter error"
++make_test_dirs
++
++# Make a simple inconsistency and set immutable flag to simulate fix error
++make_redirect_dir $upperdir/testdir "invalid"
++
++$CHATTR_PROG +i $upperdir/testdir
++run_fsck $(($FSCK_UNCORRECTED+$FSCK_ERROR)) $lowerdir $upperdir $workdir -p
++$CHATTR_PROG -i $upperdir/testdir
 +
 +# success, all done
-+echo "Silence is golden"
 +status=0
 +exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
+diff --git a/tests/overlay/062.out b/tests/overlay/062.out
 new file mode 100644
-index 00000000..3b276ca8
+index 0000000..021b74f
 --- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,2 @@
-+QA output created by 999
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index d0b7dcf6..92016cf4 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -505,3 +505,4 @@
- 500 auto thin trim
- 501 auto quick clone log
- 502 auto quick log
-+999 auto quick dax punch collapse zero
++++ b/tests/overlay/062.out
+@@ -0,0 +1,10 @@
++QA output created by 062
+++ Invalid input
+++ Invalid input(2)
+++ Invalid input(3)
+++ Invalid workdir
+++ Invalid workdir(2)
+++ Upper read-only
+++ Lower read-only
+++ Lower read-only(2)
+++ Encounter error
+diff --git a/tests/overlay/group b/tests/overlay/group
+index 7d13271..37c0b03 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -64,3 +64,4 @@
+ 059 auto quick copyup
+ 060 auto quick metacopy
+ 061 auto stress fsck
++062 auto quick fsck
 -- 
-2.14.4
+2.5.0
 
