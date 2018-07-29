@@ -1,88 +1,58 @@
-Received: from mail-pg1-f173.google.com ([209.85.215.173]:40710 "EHLO
-        mail-pg1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726302AbeG2Odm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 29 Jul 2018 10:33:42 -0400
-Received: by mail-pg1-f173.google.com with SMTP id x5-v6so5739465pgp.7
-        for <fstests@vger.kernel.org>; Sun, 29 Jul 2018 06:03:18 -0700 (PDT)
-Message-ID: <5b5dbb15.1c69fb81.1fd91.cce3@mx.google.com>
-Date: Sun, 29 Jul 2018 21:03:13 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to d2f9bf265f14
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="r2pCZOVfdiNB"
-Content-Disposition: inline
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:57372 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726606AbeG2Pvh (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 29 Jul 2018 11:51:37 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfs/288: use -d option of xfs_db write command for v5 XFS
+Date: Sun, 29 Jul 2018 22:20:53 +0800
+Message-Id: <20180729142053.4240-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+The commit b3cf8b72334fd35ef961869506e5a72ab398bc82 update xfs/288
+to support v5 filesystem testing. That commit thought xfs_db write
+command can work well with -d option on V5 XFS. But the truth is
+the case doesn't use that option.
 
---r2pCZOVfdiNB
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+So turn to use _scratch_xfs_set_metadata_field, it will help to use
+proper options for xfs_db write command.
 
-Hi all,
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-The master branch of the xfstests repository at:
+Hi,
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Missing '-d' option is a case issue. But from this issue, we found another
+bug of xfsprogs. On current upstream, this case will test pass on v5 XFS,
+even there's not '-d' option for write command.
 
-have just been updated. It's been a quiet week again, there're only two new
-tests in the update, one is for btrfs and another is a generic one.
-
-New failures I've noticed:
-- btrfs/168 fails with current Linus tree
+That's a bug, we'll fix it later. For now, I'd like to fix this case
+issue at first.
 
 Thanks,
-Eryu
+Zorro
 
-The new head of the master branch is commit:
+ tests/xfs/288 | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
 
-d2f9bf265f14 generic: test DAX DMA vs truncate/hole-punch
+diff --git a/tests/xfs/288 b/tests/xfs/288
+index bccdb6fc..f4165b6c 100755
+--- a/tests/xfs/288
++++ b/tests/xfs/288
+@@ -56,9 +56,8 @@ $SETFATTR_PROG -n "user.testattr${seq}" \
+ 
+ _scratch_unmount
+ # manually corrupt the XFS, by set the header count of attr to 0
+-_scratch_xfs_db -x -c "inode $inum" \
+-		   -c "ablock 0" \
+-		   -c "write hdr.count 0" >> $seqres.full
++_scratch_xfs_set_metadata_field "hdr.count" "0" \
++				"inode $inum" "ablock 0" >> $seqres.full
+ 
+ # make sure xfs_repair can find above corruption. If it can't, that
+ # means we need to fix this bug on current xfs_repair
+-- 
+2.14.4
 
-New commits:
-
-Filipe Manana (1):
-      [6eab1aafe259] btrfs: test send with snapshots that have files deleted while open
-
-Ross Zwisler (1):
-      [d2f9bf265f14] generic: test DAX DMA vs truncate/hole-punch
-
-
-Code Diffstat:
-
- .gitignore             |   1 +
- src/Makefile           |   2 +-
- src/t_mmap_collision.c | 235 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/168        | 136 ++++++++++++++++++++++++++++
- tests/btrfs/168.out    |  13 +++
- tests/btrfs/group      |   1 +
- tests/generic/503      |  64 ++++++++++++++
- tests/generic/503.out  |   2 +
- tests/generic/group    |   1 +
- 9 files changed, 454 insertions(+), 1 deletion(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---r2pCZOVfdiNB
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbXbq1AAoJECZSqilcj+dj92AP/0aYLK3Bl+GTqQAGe1hC42pZ
-8B1R9SYXuBWJ4TbnBFwlNjRvSXIlPKdUldNdI59spyr8jQmY7+ITqLZ7qsFmkp4+
-NrBdFiedD1469MWy+vaZ54GTkCpJmcwEZ/zAUSn42atrXpDf0pD7vovErLz6eeiA
-KQJd8hucVrdziEidnbf47MSSW5MWKdKZWZ2JrTXGcnCLa7hMehExZmg9hmJoaMMW
-aUCiPXoT4++YpE+KtwzwR6mK1k6du+BbvZXbMVnPIlrQ0xEerizE1WUTMn3ORdeg
-c31G0au+qaZNn6acL/P5ADznfrPAp24dvT6c2aexG02zn/TbEbntE2VOdmlUzp2W
-T2tfpAYUXzvtcBrbWquNr7S/5ozrHaDBQJqqXNLaXq2ZxNv5Jq6feg5ZUAzNjAUf
-xWkXReX26tLC8aLsv9Aafg80TM241T6iIgaEXvnCZr3xa9jfxk2g9+Zhmgc9PRr+
-PsD+rNiKBQvz24cWa0wng+7lTYVG0lPw/OCBOB/MEp8+ZJA5e5isXMSa1GLV332B
-Iu9GWrj+SIO8chvfthsFqlVcxLJRee+xxVpQ952PIyMWJwvo+7kdqlKxjlPhKR7M
-xx+MYdSKarAWlOPWUrJOtXKyUGKd+lAkA8jRIze27ZVdO6FEfyVZUniiVJAkbrg7
-/9YMz2hVGd8A+B6nLcQw
-=MEe8
------END PGP SIGNATURE-----
-
---r2pCZOVfdiNB--
