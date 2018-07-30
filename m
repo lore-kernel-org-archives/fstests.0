@@ -1,102 +1,191 @@
-Received: from mail-yw0-f195.google.com ([209.85.161.195]:37670 "EHLO
-        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726344AbeG3H5w (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jul 2018 03:57:52 -0400
-MIME-Version: 1.0
-In-Reply-To: <20180728084242.33918-3-yi.zhang@huawei.com>
-References: <20180728084242.33918-1-yi.zhang@huawei.com> <20180728084242.33918-3-yi.zhang@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 30 Jul 2018 09:24:26 +0300
-Message-ID: <CAOQ4uxgqPXZLWMT2gOd9vLDtqA3c6Ma5gfhrFkjONJ6HXHfHZQ@mail.gmail.com>
-Subject: Re: [xfstests PATCH 2/3] overlay: add fsck.overlay stress test
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:40412 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726366AbeG3Itj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Jul 2018 04:49:39 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v4] xfs: test inode allocation state missmatch corruption
+Date: Mon, 30 Jul 2018 15:15:51 +0800
+Message-Id: <20180730071551.24735-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Jul 28, 2018 at 11:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Introduce a test case for fsck.overlay which runs on the underlying
-> directories created by fsstress (contain a lot of fs objects) to
-> find potential stability issue.
->
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> ---
->  tests/overlay/061     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/061.out |  2 ++
->  tests/overlay/group   |  1 +
->  3 files changed, 84 insertions(+)
->  create mode 100755 tests/overlay/061
->  create mode 100644 tests/overlay/061.out
->
-> diff --git a/tests/overlay/061 b/tests/overlay/061
-> new file mode 100755
-> index 0000000..b66b36a
-> --- /dev/null
-> +++ b/tests/overlay/061
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Huawei.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 061
-> +#
-> +# Stress test: test fsck.overlay running on the underlying dirs
-> +# which were created by fsstress.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1        # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs overlay
-> +_supported_os Linux
-> +_require_scratch_nocheck
-> +_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-> +
-> +# remove all files from previous tests
-> +_scratch_mkfs
-> +
-> +# Create an underlying layer which contain a lot of random objects
-> +create_layer()
-> +{
-> +       for dir in $*; do
-> +               $FSSTRESS_PROG -s 42 -d $dir -z \
-> +                       -f creat=20 -f link=10 -f mkdir=20 -f mknod=10 \
-> +                       -f rename=10 -f setxattr=10 -f symlink=10 -f write=10 \
-> +                       -p 4 -n 500 -l50 > /dev/null 2>&1 &
-> +       done
-> +}
+There's a situation where the directory structure and the inobt
+thinks the inode is free, but the inode on disk thinks it is still
+in use. XFS should detect it and prevent the kernel from oopsing
+on lookup.
 
-There is one main difference between this test and overlay/019 -
-this test is not sensitive to timing issues and therefore:
-1. You gain nothing from running several fsstress processes in parallel
-2. You loose something from using a constant ransom seed (-s 42)
-current code gives you all layers exactly the same and also
-the same for every invocation of test run, which is not what you want.
-I think what you want is to use a random seed and record that seed along
-with the output of fsstress in $seqres.full so that when test test does catch
-a problem with fsck with some random files, you will be able to reproduce
-the same layers from the full test output.
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+
+Hi,
+
+Sorry, it's been long time since I last sent v3 of this case... For bringing
+your memory, please check below link:
+V3 review history: https://marc.info/?t=152986575600003&r=1&w=2
+V2 review history: https://marc.info/?t=152605514200002&r=1&w=2
+
+As Darrick suggested to cover v5 filesystems testing last time, I did below
+changes:
+1) Remove "-m crc=0" mkfs option, but add "-m finobt=0"
+2) Use "ikeep" mount option if test on V5.
+3) Remove a useless dmesg filter from filter_dmesg()
+4) Use _require_no_xfs_debug
+5) Use _require_xfs_mkfs_finobt
+
+About the problem:
+  "Does this test leave the scratch fs mounted but shut down if the kernel hasn't been patched?"
+I have to say "yes, it does". I have no idea about how we deal with this issue,
+feel free to remind me if I missed some discussion:)
 
 Thanks,
-Amir.
+Zorro
+
+
+ tests/xfs/999     | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/999.out |   2 +
+ tests/xfs/group   |   1 +
+ 3 files changed, 116 insertions(+)
+ create mode 100755 tests/xfs/999
+ create mode 100644 tests/xfs/999.out
+
+diff --git a/tests/xfs/999 b/tests/xfs/999
+new file mode 100755
+index 00000000..785a84d0
+--- /dev/null
++++ b/tests/xfs/999
+@@ -0,0 +1,113 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Test a corruption when the directory structure and the inobt thinks the inode
++# is free, but the inode on disk thinks it is still in use.
++#
++# This case test same bug (upstream linux commit ee457001ed6c) as xfs/132, but
++# through different code path.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++_require_xfs_mkfs_finobt
++
++# Skip the verifier "xfs_check_agi_freecount()" which verify the number of free
++# inodes in the AGI is correct, when XFS_DEBUG is enabled
++_require_no_xfs_debug
++
++filter_dmesg()
++{
++	local warn1="Internal error xfs_trans_cancel.*fs/xfs/xfs_trans\.c.*"
++
++	sed -e "s#$warn1#Intentional error in xfs_trans_cancel#"
++}
++
++# If enable free inode B+tree, this case will fail on xfs_dialloc_ag_update_inobt,
++# that's not what we want to test. Due to finobt feature is not necessary for this
++# test, so disable it directly.
++_scratch_mkfs_xfs -m finobt=0 | _filter_mkfs 2>$tmp.mkfs >> $seqres.full
++
++# On V5 filesystem, this case can't trigger bug because it doesn't read inodes
++# we are allocating from disk - it simply overwrites them with new inode
++# information. So use ikeep mount option to stop that.
++source $tmp.mkfs
++mount_opt=""
++if [ $_fs_has_crcs -eq 1 ]; then
++	mount_opt="-o ikeep"
++fi
++
++blksz=$(_scratch_xfs_get_sb_field blocksize)
++agcount=$(_scratch_xfs_get_sb_field agcount)
++
++_scratch_mount $mount_opt
++# Create a directory for later allocation in same AG (AG 0, due to this's an
++# empty XFS for now)
++mkdir $SCRATCH_MNT/dir
++
++# Allocate 1 block for testfile
++$XFS_IO_PROG -fc "pwrite 0 $blksz" -c fsync $SCRATCH_MNT/dir/testfile >> $seqres.full
++inum=`stat -c %i $SCRATCH_MNT/dir/testfile`
++_scratch_unmount
++
++# Find the AG which contains testfile
++agi=`_scratch_xfs_db -c "convert inode $inum agno" | sed -e 's/^.*(\([0-9]*\).*$/\1/g'`
++
++# Due to we only allocate 1 block for testfile, and this's the only one data
++# block we use. So we use single level inobt, So the ${agi}->root->recs[1]
++# should be the only one record points the chunk which contains testfile's
++# inode.
++# An exmaple of inode record is as below:
++#   recs[1] = [startino,freecount,free] 1:[1024,59,0xffffffffffffffe0]
++freecount=$(_scratch_xfs_get_metadata_field "recs[1].freecount" \
++					    "agi $agi" "addr root")
++fmask=$(_scratch_xfs_get_metadata_field "recs[1].free" "agi $agi" "addr root")
++
++# fmask shift right 1 bit, and freecount++, to mark testfile inode as free in
++# inobt. (But the inode itself isn't freed, it still has allocated block)
++freecount="$((freecount + 1))"
++fmask="$((fmask / 2))"
++_scratch_xfs_set_metadata_field "recs[1].freecount" "$freecount" \
++				"agi $agi" "addr root" >/dev/null
++_scratch_xfs_set_metadata_field "recs[1].free" "$fmask" \
++				"agi $agi" "addr root" >/dev/null
++
++# Mount again and create a new inode cover that inode we just 'freed' from inobt
++_scratch_mount $mount_opt
++$XFS_IO_PROG -fc "pwrite 0 $blksz" -c fsync $SCRATCH_MNT/dir/newfile 2>&1 | \
++	grep -i "Structure needs cleaning" | _filter_scratch
++
++# filter a intentional internal errors
++_check_dmesg filter_dmesg
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/999.out b/tests/xfs/999.out
+new file mode 100644
+index 00000000..cb8d9e34
+--- /dev/null
++++ b/tests/xfs/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++SCRATCH_MNT/dir/newfile: Structure needs cleaning
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 976a12c2..f9178d3b 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -487,3 +487,4 @@
+ 487 dangerous_fuzzers dangerous_norepair
+ 488 dangerous_fuzzers dangerous_norepair
+ 489 dangerous_fuzzers dangerous_norepair
++999 auto quick
+-- 
+2.14.4
+
