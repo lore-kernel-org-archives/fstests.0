@@ -1,149 +1,153 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:44114 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726685AbeG3Mbo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 30 Jul 2018 08:31:44 -0400
-Subject: Re: [xfstests PATCH 1/3] overlay: correct fsck.overlay exit code
-References: <20180728084242.33918-1-yi.zhang@huawei.com>
- <20180728084242.33918-2-yi.zhang@huawei.com>
- <CAOQ4uxjLi2VaP_3YiUkLfgkwXfOtnoXYNM1X6RCPW0AkhvwQDw@mail.gmail.com>
-From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <315c458e-43b9-7062-02e6-b28f0380e47e@huawei.com>
-Date: Mon, 30 Jul 2018 18:57:06 +0800
-MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxjLi2VaP_3YiUkLfgkwXfOtnoXYNM1X6RCPW0AkhvwQDw@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Received: from mail.kernel.org ([198.145.29.99]:52364 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726935AbeG3NO5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 30 Jul 2018 09:14:57 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs: test send with prealloc extent beyond EOF and hole punching
+Date: Mon, 30 Jul 2018 12:40:17 +0100
+Message-Id: <20180730114017.5237-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, yangerkun <yangerkun@huawei.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/7/30 13:38, Amir Goldstein Wrote:
-> On Sat, Jul 28, 2018 at 11:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
->> fsck.overlay should return correct exit code to show the file system
->> status after fsck, instead of return 0 means consistency and !0 means
->> inconsistency or something bad happened.
->>
->> Fix the following three exit code after running fsck.overlay:
->>
->> - Return FSCK_OK if the input file system is consistent,
->> - Return FSCK_NONDESTRUCT if the file system inconsistent errors
->>   corrected,
->> - Return FSCK_UNCORRECTED if the file system still have inconsistent
->>   errors.
->>
->> This patch also correct the input underlying dirs for some "valid" test
->> cases, avoid return unexpected exit code which caused by other unrelated
->> inconsistency.
-> 
-> ... and also adds more test coverage (impure dir) ..
-> too many changes at once.
-> Please separate the exit code change from the rest of the changes.
-> 
+From: Filipe Manana <fdmanana@suse.com>
 
-This patch doesn't add impure dir test coverage, it just set impure xattr
-to the parent dir of similuated redirect dir to prevent fsck.overlay return
-FSCK_NONDESTRUCT instead of FSCK_OK, because the previous "valid" test
-case is not "valid" enough, it lose the impure xattr which will be fixed
-by fsck.overlay (that is not the case want to cover).
+Test that an incremental send operation produces correct results if a file
+that has a prealloc (unwritten) extent beyond its EOF gets a hole punched
+in a section of that prealloc extent.
 
-I can still separate it from the exit code change if you want.
+This test is motivated by a bug found in btrfs which is fixed by a patch
+for the linux kernel titled:
 
-> Usually, Eryu doesn't like adding coverage to existing test, but since
-> there are "not so many" testers of fsck.overlay, maybe he can make an
-> exception, but you do need to declare this change in commit message.
-> 
->>
->> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
->> ---
->>  common/config     | 10 +++++++++
->>  tests/overlay/045 | 59 +++++++++++++++++++++++++++++++++-------------------
->>  tests/overlay/046 | 62 ++++++++++++++++++++++++++++++++++---------------------
->>  tests/overlay/056 | 22 ++++++++++++++------
->>  4 files changed, 102 insertions(+), 51 deletions(-)
->>
->> diff --git a/common/config b/common/config
->> index 2f1f272..6e83fca 100644
->> --- a/common/config
->> +++ b/common/config
->> @@ -194,6 +194,16 @@ export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
->>  export XFS_INFO_PROG="$(type -P xfs_info)"
->>  export DUPEREMOVE_PROG="$(type -P duperemove)"
->>
->> +# Export exit code used by fsck-type programs
->> +export FSCK_OK=0
->> +export FSCK_NONDESTRUCT=1
->> +export FSCK_REBOOT=2
->> +export FSCK_UNCORRECTED=4
->> +export FSCK_ERROR=8
->> +export FSCK_USAGE=16
->> +export FSCK_CANCELED=32
->> +export FSCK_LIBRARY=128
->> +
-> 
-> While this is common to e2fsck, I don't think it is "common" enough,
-> so maybe keep those values in a less central file (i.e. common/fsck)
-> and name e2fsprogs and fsck.overlayfs (other?) specifically.
-> 
+ "Btrfs: send, fix incorrect file layout after hole punching beyond eof"
 
-IIUC, current e2fsprogs related codes in xfstests do not use these exit
-code at all. Keep these into common/overlay now and put them into
-common/fsck if e2fsprogs want to use it the future ?
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/169     | 83 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/169.out | 13 +++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 97 insertions(+)
+ create mode 100755 tests/btrfs/169
+ create mode 100644 tests/btrfs/169.out
 
->>  # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
->>  # newer systems have udevadm command but older systems like RHEL5 don't.
->>  # But if neither one is available, just set it to "sleep 1" to wait for lv to
->> diff --git a/tests/overlay/045 b/tests/overlay/045
->> index acc7087..04db626 100755
->> --- a/tests/overlay/045
->> +++ b/tests/overlay/045
->> @@ -37,6 +37,7 @@ _require_attrs
->>  _require_command "$FSCK_OVERLAY_PROG" fsck.overlay
->>
->>  OVL_XATTR_OPAQUE_VAL=y
->> +OVL_XATTR_IMPURE_VAL=y
->>
->>  # remove all files from previous tests
->>  _scratch_mkfs
->> @@ -69,6 +70,15 @@ make_opaque_dir()
->>         $SETFATTR_PROG -n $OVL_XATTR_OPAQUE -v $OVL_XATTR_OPAQUE_VAL $target
->>  }
->>
->> +# Create impure directories
->> +make_impure_dir()
->> +{
->> +       for dir in $*; do
->> +               mkdir -p $dir
->> +               $SETFATTR_PROG -n $OVL_XATTR_IMPURE -v $OVL_XATTR_IMPURE_VAL $dir
->> +       done
->> +}
->> +
->>  # Create a redirect directory
->>  make_redirect_dir()
->>  {
->> @@ -79,6 +89,19 @@ make_redirect_dir()
->>         $SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v $value $target
->>  }
->>
->> +# Run fsck.overlay and check return value
->> +run_fsck()
->> +{
->> +       local expect=$1
->> +       shift 1
->> +
->> +       _overlay_fsck_dirs $* >> $seqres.full 2>&1
->> +       fsck_ret=$?
->> +
->> +       [[ "$fsck_ret" == "$expect" ]] || \
->> +               echo "fsck return unexpected:$expect,$fsck_ret"
->> +}
->> +
-> 
-> This helper repeats in every overlay/fsck test.
-> Move it to be a common function?
-> 
-Will do.
-
-Thanks,
-Yi.
+diff --git a/tests/btrfs/169 b/tests/btrfs/169
+new file mode 100755
+index 00000000..80eb5ab3
+--- /dev/null
++++ b/tests/btrfs/169
+@@ -0,0 +1,83 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 169
++#
++# Test that an incremental send operation produces correct results if a file
++# that has a prealloc (unwritten) extent beyond its EOF gets a hole punched
++# in a section of that prealloc extent.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -fr $send_files_dir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "falloc" "-k"
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with a prealloc extent of 4Mb starting at offset 0,
++# then write 1Mb of data into offset 0.
++$XFS_IO_PROG -f -c "falloc -k 0 4M" \
++	     -c "pwrite -S 0xea 0 1M" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 2>&1 \
++	| _filter_scratch
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/snap1 2>&1 \
++    | _filter_scratch
++
++# Now punch a hole starting at an offset that corresponds to the file's current
++# size (1Mb) and ends at an offset smaller then the end offset of the prealloc
++# extent we allocated earlier (3Mb < 4Mb).
++$XFS_IO_PROG -c "fpunch 1M 2M" $SCRATCH_MNT/foobar
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 2>&1 \
++	| _filter_scratch
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/snap1 -f $send_files_dir/2.snap \
++		 $SCRATCH_MNT/snap2 2>&1 | _filter_scratch
++
++echo "File digest in the original filesystem:"
++md5sum $SCRATCH_MNT/snap2/foobar | _filter_scratch
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same file content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++echo "File digest in the new filesystem:"
++md5sum $SCRATCH_MNT/snap2/foobar | _filter_scratch
++
++status=0
++exit
+diff --git a/tests/btrfs/169.out b/tests/btrfs/169.out
+new file mode 100644
+index 00000000..ba77bf0a
+--- /dev/null
++++ b/tests/btrfs/169.out
+@@ -0,0 +1,13 @@
++QA output created by 169
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
++At subvol SCRATCH_MNT/snap1
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
++At subvol SCRATCH_MNT/snap2
++File digest in the original filesystem:
++d31659e82e87798acd4669a1e0a19d4f  SCRATCH_MNT/snap2/foobar
++At subvol snap1
++At snapshot snap2
++File digest in the new filesystem:
++d31659e82e87798acd4669a1e0a19d4f  SCRATCH_MNT/snap2/foobar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 5b132651..b616c73d 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -171,3 +171,4 @@
+ 166 auto quick qgroup
+ 167 auto quick replace volume
+ 168 auto quick send
++169 auto quick send
+-- 
+2.11.0
 
