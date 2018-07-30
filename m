@@ -1,14 +1,14 @@
-Received: from mail-yw0-f193.google.com ([209.85.161.193]:40964 "EHLO
-        mail-yw0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726087AbeG3HnC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jul 2018 03:43:02 -0400
+Received: from mail-yw0-f195.google.com ([209.85.161.195]:37670 "EHLO
+        mail-yw0-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726344AbeG3H5w (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 30 Jul 2018 03:57:52 -0400
 MIME-Version: 1.0
-In-Reply-To: <20180728084242.33918-4-yi.zhang@huawei.com>
-References: <20180728084242.33918-1-yi.zhang@huawei.com> <20180728084242.33918-4-yi.zhang@huawei.com>
+In-Reply-To: <20180728084242.33918-3-yi.zhang@huawei.com>
+References: <20180728084242.33918-1-yi.zhang@huawei.com> <20180728084242.33918-3-yi.zhang@huawei.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 30 Jul 2018 09:09:39 +0300
-Message-ID: <CAOQ4uxgojCyMJTzwMN8e8LT44Yq7kEgrG+O1qJ6AbhOCQBeBHg@mail.gmail.com>
-Subject: Re: [xfstests PATCH 3/3] overlay: add fsck.overlay exception tests
+Date: Mon, 30 Jul 2018 09:24:26 +0300
+Message-ID: <CAOQ4uxgqPXZLWMT2gOd9vLDtqA3c6Ma5gfhrFkjONJ6HXHfHZQ@mail.gmail.com>
+Subject: Re: [xfstests PATCH 2/3] overlay: add fsck.overlay stress test
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: "zhangyi (F)" <yi.zhang@huawei.com>
@@ -16,33 +16,33 @@ Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs
 List-ID: <fstests@vger.kernel.org>
 
 On Sat, Jul 28, 2018 at 11:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
-> Introduce some exception test cases for fsck.overlay which runs on
-> invalid/unnormal underlying dirs or invalid input parameters to test
-> exception handling processes.
+> Introduce a test case for fsck.overlay which runs on the underlying
+> directories created by fsstress (contain a lot of fs objects) to
+> find potential stability issue.
 >
 > Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
 > ---
->  tests/overlay/062     | 236 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/overlay/062.out |  10 +++
->  tests/overlay/group   |   1 +
->  3 files changed, 247 insertions(+)
->  create mode 100755 tests/overlay/062
->  create mode 100644 tests/overlay/062.out
+>  tests/overlay/061     | 81 +++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/061.out |  2 ++
+>  tests/overlay/group   |  1 +
+>  3 files changed, 84 insertions(+)
+>  create mode 100755 tests/overlay/061
+>  create mode 100644 tests/overlay/061.out
 >
-> diff --git a/tests/overlay/062 b/tests/overlay/062
+> diff --git a/tests/overlay/061 b/tests/overlay/061
 > new file mode 100755
-> index 0000000..31f856d
+> index 0000000..b66b36a
 > --- /dev/null
-> +++ b/tests/overlay/062
-> @@ -0,0 +1,236 @@
+> +++ b/tests/overlay/061
+> @@ -0,0 +1,81 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
 > +# Copyright (c) 2018 Huawei.  All Rights Reserved.
 > +#
-> +# FS QA Test No. 062
+> +# FS QA Test No. 061
 > +#
-> +# Exception test: test fsck.overlay runs on invalid underlying
-> +# dirs or with invalid input options.
+> +# Stress test: test fsck.overlay running on the underlying dirs
+> +# which were created by fsstress.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -71,211 +71,32 @@ On Sat, Jul 28, 2018 at 11:42 AM, zhangyi (F) <yi.zhang@huawei.com> wrote:
 > +_supported_fs overlay
 > +_supported_os Linux
 > +_require_scratch_nocheck
-> +_require_attrs
 > +_require_command "$FSCK_OVERLAY_PROG" fsck.overlay
-> +_require_chattr i
 > +
 > +# remove all files from previous tests
 > +_scratch_mkfs
 > +
-> +# Create a whiteout
-> +make_whiteout()
+> +# Create an underlying layer which contain a lot of random objects
+> +create_layer()
 > +{
-> +       for arg in $*; do
-> +               mknod $arg c 0 0
+> +       for dir in $*; do
+> +               $FSSTRESS_PROG -s 42 -d $dir -z \
+> +                       -f creat=20 -f link=10 -f mkdir=20 -f mknod=10 \
+> +                       -f rename=10 -f setxattr=10 -f symlink=10 -f write=10 \
+> +                       -p 4 -n 500 -l50 > /dev/null 2>&1 &
 > +       done
 > +}
-> +
-> +# Create a redirect directory
-> +make_redirect_dir()
-> +{
-> +       local target=$1
-> +       local value=$2
-> +
-> +       mkdir -p $target
-> +       $SETFATTR_PROG -n $OVL_XATTR_REDIRECT -v $value $target
-> +}
-> +
-> +# Run fsck.overlay and check return value
-> +run_fsck()
-> +{
-> +       local expect=$1
-> +       local lowerdir=$2
-> +       local upperdir=$3
-> +       local workdir=$4
-> +       shift 4
-> +
-> +       [[ -n $lowerdir ]] && idirs=$(echo -n "-o lowerdir=$lowerdir")
-> +       [[ -n $upperdir ]] && idirs=$(echo -n "$idirs -o upperdir=$upperdir")
-> +       [[ -n $workdir ]] && idirs=$(echo -n "$idirs -o workdir=$workdir")
-> +
-> +       $FSCK_OVERLAY_PROG $idirs $* >> $seqres.full 2>&1
-> +       fsck_ret=$?
-> +
-> +       [[ "$fsck_ret" == "$expect" ]] || \
-> +               echo "fsck return unexpected:$expect,$fsck_ret"
-> +}
-> +
-> +# Create test directories
-> +lowerdir=$OVL_BASE_SCRATCH_MNT/lower
-> +lowerdir2=$OVL_BASE_SCRATCH_MNT/lower2
-> +upperdir=$OVL_BASE_SCRATCH_MNT/upper
-> +workdir=$OVL_BASE_SCRATCH_MNT/workdir
-> +
-> +make_test_dirs()
-> +{
-> +       rm -rf $lowerdir $lowerdir2 $upperdir $workdir
-> +       mkdir -p $lowerdir $lowerdir2 $upperdir $workdir
-> +}
-> +
-> +# Test incomplete underlying dirs, should fail
-> +echo "+ Invalid input"
-> +make_test_dirs
-> +
-> +none_dir=""
-> +
-> +run_fsck $FSCK_USAGE $lowerdir $none_dir $none_dir
-> +run_fsck $FSCK_USAGE $lowerdir $upperdir $none_dir
-> +run_fsck $FSCK_USAGE $none_dir $upperdir $workdir
 
-Unless you use "$none_dir", 2 cases above are the same.
-
-> +
-> +
-> +# Test invalid underlying dirs, should fail
-> +echo "+ Invalid input(2)"
-> +make_test_dirs
-> +
-> +invalid_dir=$OVL_BASE_SCRATCH_MNT/invalid_dir
-> +
-> +run_fsck $FSCK_ERROR $lowerdir $upperdir $invalid_dir
-> +run_fsck $FSCK_ERROR $lowerdir $invalid_dir $workdir
-> +run_fsck $FSCK_ERROR $invalid_dir $upperdir $workdir
-> +
-> +
-> +# Test conflict input options, should fail
-> +echo "+ Invalid input(3)"
-> +make_test_dirs
-> +
-> +run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -pn
-> +run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -yn
-> +run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -py
-> +run_fsck $FSCK_USAGE $lowerdir $upperdir $workdir -pyn
-> +
-> +
-> +# Test upperdir and lowerdir belong to different base filesystems, should fail
-
-You mean upper and work.
-
-> +echo "+ Invalid workdir"
-> +make_test_dirs
-> +
-> +test_workdir=$OVL_BASE_TEST_DIR/work
-> +mkdir -p $test_workdir
-> +run_fsck $FSCK_ERROR $lowerdir $upperdir $test_workdir
-> +rm -rf $test_workdir
-> +
-> +
-> +# Test upperdir is subdir of workdir and vice versa, should fail
-> +echo "+ Invalid workdir(2)"
-> +make_test_dirs
-> +
-> +test_workdir=$upperdir/work
-> +test_upperdir=$workdir/upper
-> +mkdir -p $test_workdir $test_upperdir
-> +
-> +run_fsck $FSCK_ERROR $lowerdir $upperdir $test_workdir
-> +run_fsck $FSCK_ERROR $lowerdir $test_upperdir $workdir
-> +
-> +
-> +# Test upper layer is read-only, should fail in "!no" mode, and should
-> +# return the real consistent result in "no" mode.
-> +echo "+ Upper read-only"
-> +make_test_dirs
-> +
-> +test_lowerdir=$OVL_BASE_TEST_DIR/lower
-> +mkdir -p $test_lowerdir
-> +
-> +# Let upper layer read-only
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
-> +# Refuse to check read-only upper layer
-> +run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir
-> +run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir -p
-> +run_fsck $FSCK_ERROR $test_lowerdir $upperdir $workdir -y
-> +# Allow to use "no" mode scan read-only upper layer
-> +run_fsck $FSCK_OK $test_lowerdir $upperdir $workdir -n
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
-> +
-> +# Make a simple inconsistency on the upper layer and expect return failure
-> +make_whiteout $upperdir/invalid
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
-> +run_fsck $FSCK_UNCORRECTED $test_lowerdir $upperdir $workdir -n
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_SCRATCH_MNT > /dev/null 2>&1
-> +rm -rf $test_lowerdir
-> +
-> +
-> +# Test lower layer is read-only, should sacn each layer and return
-> +# the real consistent result.
-> +echo "+ Lower read-only"
-> +make_test_dirs
-> +
-> +test_lowerdir=$OVL_BASE_TEST_DIR/lower
-> +mkdir -p $test_lowerdir
-> +
-> +# Let lower layer read-only
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +# Allow check read-only lower layers in all modes
-> +run_fsck $FSCK_OK $test_lowerdir $upperdir $workdir -p
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +
-> +# Make a simple inconsistency on the read-only lower layer and expect
-> +# return failure.
-> +make_whiteout $test_lowerdir/invalid
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +run_fsck $FSCK_UNCORRECTED $test_lowerdir $upperdir $workdir -p
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +rm -rf $test_lowerdir
-> +
-> +
-> +# Test one of the lower layers is read-only, should sacn each layer and
-> +# return the real consistent result.
-> +echo "+ Lower read-only(2)"
-> +make_test_dirs
-> +
-> +test_lowerdir=$OVL_BASE_TEST_DIR/lower
-> +mkdir -p $test_lowerdir
-> +
-> +# Let lower layer read-only
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +# Make a simple inconsistency on the bottom read-write lower layer
-> +# and expect return success (consistent middle read-only layer should
-> +# not affect the result).
-> +make_whiteout $lowerdir2/invalid
-> +run_fsck $FSCK_NONDESTRUCT $test_lowerdir:$lowerdir2 $upperdir $workdir -p
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +
-> +# Make a simple inconsistency on the middle read-only lower layer
-> +# and expect return failure.
-> +make_whiteout $test_lowerdir/invalid
-> +$MOUNT_PROG -o remount,ro $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +run_fsck $FSCK_UNCORRECTED $test_lowerdir:$lowerdir2 $upperdir $workdir -p
-> +$MOUNT_PROG -o remount,rw $OVL_BASE_TEST_DIR > /dev/null 2>&1
-> +rm -rf $test_lowerdir
-> +
-> +
-> +# Test encounter error when try to fix some inconsistency, should fail
-> +echo "+ Encounter error"
-> +make_test_dirs
-> +
-> +# Make a simple inconsistency and set immutable flag to simulate fix error
-> +make_redirect_dir $upperdir/testdir "invalid"
-> +
-> +$CHATTR_PROG +i $upperdir/testdir
-> +run_fsck $(($FSCK_UNCORRECTED+$FSCK_ERROR)) $lowerdir $upperdir $workdir -p
-> +$CHATTR_PROG -i $upperdir/testdir
-> +
-
-Please clear immutable flag also in cleanup().
+There is one main difference between this test and overlay/019 -
+this test is not sensitive to timing issues and therefore:
+1. You gain nothing from running several fsstress processes in parallel
+2. You loose something from using a constant ransom seed (-s 42)
+current code gives you all layers exactly the same and also
+the same for every invocation of test run, which is not what you want.
+I think what you want is to use a random seed and record that seed along
+with the output of fsstress in $seqres.full so that when test test does catch
+a problem with fsck with some random files, you will be able to reproduce
+the same layers from the full test output.
 
 Thanks,
 Amir.
