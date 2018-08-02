@@ -1,157 +1,185 @@
-Received: from mx3-rdu2.redhat.com ([66.187.233.73]:34450 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726683AbeHBJA3 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 2 Aug 2018 05:00:29 -0400
-Date: Thu, 2 Aug 2018 15:10:40 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2 2/2] xfs/288: _notrun if xfs_db can't write values
- into dir or attr
-Message-ID: <20180802071039.GT4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
-References: <20180731054119.13539-1-zlang@redhat.com>
- <20180731054119.13539-2-zlang@redhat.com>
- <20180802004634.GB4211@magnolia>
- <20180802014941.GS4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
- <20180802051452.GO30972@magnolia>
+Received: from aserp2120.oracle.com ([141.146.126.78]:54460 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727152AbeHBTz4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 2 Aug 2018 15:55:56 -0400
+Date: Thu, 2 Aug 2018 11:03:35 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] xfs: check for COW overflows in i_delayed_blks
+Message-ID: <20180802180335.GS30972@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180802051452.GO30972@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, yangx.jy@cn.fujitsu.com
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 01, 2018 at 10:14:52PM -0700, Darrick J. Wong wrote:
-> On Thu, Aug 02, 2018 at 09:49:41AM +0800, Zorro Lang wrote:
-> > On Wed, Aug 01, 2018 at 05:46:34PM -0700, Darrick J. Wong wrote:
-> > > On Tue, Jul 31, 2018 at 01:41:19PM +0800, Zorro Lang wrote:
-> > > > Commit b3cf8b72334fd35ef961869506e5a72ab398bc82 help xfs/288 to
-> > > > support v5 filesystems testing, but there're still some old
-> > > > distributions don't support xfs_db write '-d' option, or can't
-> > > > write values into dir/attr of v5 filesystems.
-> > > > 
-> > > > For compatible with older versions, skip this test on v5 xfs
-> > > > if xfs_db write can't write v5 XFS dir/attr.
-> > > > 
-> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > ---
-> > > > 
-> > > > Hi,
-> > > > 
-> > > > Xiao found v1 can't work well on xfsprogs-4.9, due to 'write -d' can't
-> > > > write vaules into dir/attr of v5 filesystems before xfsprogs-4.13.
-> > > > 
-> > > > Only check "if write command has -d option" is not enough. So I write
-> > > > a function _require_xfs_db_write_da() to make sure current xfs_db
-> > > > can write dir/attr (not only on v5, but especially for v5).
-> > > > 
-> > > > Thanks,
-> > > > Zorro
-> > > > 
-> > > >  common/xfs    | 28 ++++++++++++++++++++++++++++
-> > > >  tests/xfs/288 |  1 +
-> > > >  2 files changed, 29 insertions(+)
-> > > > 
-> > > > diff --git a/common/xfs b/common/xfs
-> > > > index d971b4a8..95dcfd59 100644
-> > > > --- a/common/xfs
-> > > > +++ b/common/xfs
-> > > > @@ -720,6 +720,34 @@ _require_xfs_db_write_array()
-> > > >  	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
-> > > >  }
-> > > >  
-> > > > +# Before xfsprogs commit 89baf918(xfs_db: write values into dir/attr blocks and
-> > > > +# recalculate CRCs), xfs_db write command can't write invalid data into dir/attr
-> > > > +# field of v5 filesystems. For some cases need to write dir/attr (especially crc
-> > > > +# enabled), use this _require at first.
-> > > > +_require_xfs_db_write_da()
-> > > > +{
-> > > > +	local inum
-> > > > +	local count
-> > > > +
-> > > > +	_require_scratch
-> > > > +
-> > > > +	_scratch_mkfs > /dev/null 2>&1
-> > > > +	_scratch_mount
-> > > > +	mkdir $SCRATCH_MNT/$seq.dir
-> > > > +	inum=$(stat -c '%i' $SCRATCH_MNT/$seq.dir)
-> > > > +	$SETFATTR_PROG -n "user.testda" \
-> > > > +		       -v "$(perl -e "print 'v' x 65536;")" \
-> > > > +		       $SCRATCH_MNT/$seq.dir
-> > > > +	_scratch_unmount
-> > > > +	_scratch_xfs_set_metadata_field "hdr.count" "0" \
-> > > 
-> > > Just FYI an upcoming change to the attr block verifier in 4.19 will
-> > > break this because it rejects hdr.count == 0.  Can you please set this
-> > > to 1 instead of 0?
-> > > 
-> > > > +					"inode $inum" "ablock 0" >/dev/null 2>&1
-> > > > +	count=$(_scratch_xfs_get_metadata_field "hdr.count" \
-> > > > +						"inode $inum" "ablock 0")
-> > > > +	if [ "$count" != "0" ]; then
-> > > 
-> > > And update the test here?
-> > 
-> > Sure, I can change the 0 to 1. BTW, does it affect xfs/288? Because xfs/288 set
-> > hdr.count to 0 too.
-> 
-> IIUC, xfs/288 deliberately sets hdr.count to 0 to test how the code
-> handles the (corrupt) attr header, so that use is fine.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Hmm... sorry I'm confused now, can you show me the patch which will
-"rejects hdr.count == 0"?
+With the new copy on write functionality it's possible to reserve so
+much COW space for a file that we end up overflowing i_delayed_blks.
+The only user-visible effect of this is to cause totally wrong i_blocks
+output in stat, so check for that.
 
-xfs/288 trys to check how xfs_repair deal with hdr.count=0. If
-"write (-d) hdr.count 0" will be rejected directly, that's another issue.
-If it won't affect xfs_db "write", why I can't write 0 in this patch?
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/907     |  125 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/907.out |    7 +++
+ tests/xfs/group   |    1 
+ 3 files changed, 133 insertions(+)
+ create mode 100755 tests/xfs/907
+ create mode 100644 tests/xfs/907.out
 
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> > > 
-> > > --D
-> > > 
-> > > > +		_notrun "xfs_db write can't write values into dir/attr blocks"
-> > > > +	fi
-> > > > +}
-> > > > +
-> > > >  _require_xfs_spaceman_command()
-> > > >  {
-> > > >  	if [ -z "$1" ]; then
-> > > > diff --git a/tests/xfs/288 b/tests/xfs/288
-> > > > index f4165b6c..e9589fd5 100755
-> > > > --- a/tests/xfs/288
-> > > > +++ b/tests/xfs/288
-> > > > @@ -35,6 +35,7 @@ _supported_fs xfs
-> > > >  _supported_os Linux
-> > > >  _require_scratch
-> > > >  _require_attrs
-> > > > +_require_xfs_db_write_da
-> > > >  
-> > > >  # get block size ($dbsize) from the mkfs output
-> > > >  _scratch_mkfs_xfs 2>/dev/null | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > > -- 
-> > > > 2.14.4
-> > > > 
-> > > > --
-> > > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > > the body of a message to majordomo@vger.kernel.org
-> > > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > > --
-> > > To unsubscribe from this list: send the line "unsubscribe fstests" in
-> > > the body of a message to majordomo@vger.kernel.org
-> > > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> > --
-> > To unsubscribe from this list: send the line "unsubscribe linux-xfs" in
-> > the body of a message to majordomo@vger.kernel.org
-> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
-> --
-> To unsubscribe from this list: send the line "unsubscribe fstests" in
-> the body of a message to majordomo@vger.kernel.org
-> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+diff --git a/tests/xfs/907 b/tests/xfs/907
+new file mode 100755
+index 00000000..86c3448d
+--- /dev/null
++++ b/tests/xfs/907
+@@ -0,0 +1,125 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 907
++#
++# Try to overflow i_delayed_blks by setting the largest cowextsize hint
++# possible, creating a sparse file with a single byte every cowextsize bytes,
++# reflinking it, and retouching every written byte to see if we can create
++# enough speculative COW reservations to overflow i_delayed_blks.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
++
++_cleanup()
++{
++	cd /
++	umount $loop_mount > /dev/null 2>&1
++	rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_reflink
++_require_loop
++_require_xfs_debug
++
++echo "Format and mount"
++_scratch_mkfs > "$seqres.full" 2>&1
++_scratch_mount
++_require_fs_space $SCRATCH_MNT 2400000	# 100T fs requires ~2.4GB of space
++
++loop_file=$SCRATCH_MNT/a.img
++loop_mount=$SCRATCH_MNT/a
++truncate -s 100T $loop_file
++$MKFS_XFS_PROG $MKFS_OPTIONS -f $loop_file >> $seqres.full
++mkdir $loop_mount
++mount -o loop -t xfs $loop_file $loop_mount
++
++echo "Create crazy huge file"
++touch "${loop_mount}/a"
++blksz="$(stat -f -c '%S' "${loop_mount}")"
++MAXEXTLEN=2097151	# cowextsize can't be more than MAXEXTLEN
++extsize="$(( ((2 ** 32) - 1) / blksz ))"
++test "${extsize}" -gt "${MAXEXTLEN}" && extsize="${MAXEXTLEN}"
++extsize_bytes="$(( extsize * blksz ))"
++
++# Set the largest cowextsize we can
++$XFS_IO_PROG -c "cowextsize ${extsize_bytes}" "${loop_mount}/a"
++set_cowextsize="$($XFS_IO_PROG -c 'cowextsize' "${loop_mount}/a" | sed -e 's/^.\([0-9]*\).*$/\1/g')"
++test "${set_cowextsize}" -eq 0 && _fail "could not set cowextsize?"
++
++statB="$(stat -c '%B' "${loop_mount}/a")"
++
++# Write a single byte every cowextsize bytes so that we minimize the space
++# required to create maximally sized cow reservations
++nr="$(( ((2 ** 32) / extsize) + 100 ))"
++seq 0 "${nr}" | tac | while read n; do
++	off="$((n * extsize * blksz))"
++	$XFS_IO_PROG -c "pwrite ${off} 1" "${loop_mount}/a" > /dev/null
++done
++
++echo "Reflink crazy huge file"
++cp --reflink=always "${loop_mount}/a" "${loop_mount}/b"
++
++echo "COW crazy huge file"
++# Try to create enough maximally sized cow reservations to overflow
++# i_delayed_blks
++seq 0 "${nr}" | tac | while read n; do
++	off="$((n * extsize * blksz))"
++	$XFS_IO_PROG -c "pwrite ${off} 1" "${loop_mount}/a" > /dev/null
++done
++
++echo "Check crazy huge file"
++blocks="$(stat -c '%b' "${loop_mount}/a")"
++fsblocks="$((blocks * statB / blksz))"
++
++# Make sure we got enough COW reservations to overflow a 32-bit counter.
++$XFS_IO_PROG -c 'bmap -clpv' "${loop_mount}/a" > $tmp.extents
++echo "COW EXTENT STATE" >> $seqres.full
++cat $tmp.extents >> $seqres.full
++cat > $tmp.awk << ENDL
++{
++	if (\$3 == "delalloc") {
++		x += \$4;
++	} else if (\$3 == "hole") {
++		;
++	} else {
++		x += \$6;
++	}
++}
++END {
++	printf("%d\\n", x / ($blksz / 512));
++}
++ENDL
++cat $tmp.awk >> $seqres.full
++cowblocks="$(awk -f $tmp.awk $tmp.extents)"
++echo "cowblocks is ${cowblocks}" >> $seqres.full
++if [ "${cowblocks}" -lt "$((2 ** 32))" ]; then
++	echo "cowblocks (${cowblocks}) should be more than 2^32!"
++fi
++
++# And finally, see if i_delayed_blks overflowed.
++echo "stat blocks is ${fsblocks}" >> $seqres.full
++if [ "${fsblocks}" -lt "$((2 ** 32))" ]; then
++	echo "stat blocks (${fsblocks}) should be more than 2^32!"
++fi
++
++echo "Test done"
++umount $loop_mount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/907.out b/tests/xfs/907.out
+new file mode 100644
+index 00000000..9778d5ed
+--- /dev/null
++++ b/tests/xfs/907.out
+@@ -0,0 +1,7 @@
++QA output created by 907
++Format and mount
++Create crazy huge file
++Reflink crazy huge file
++COW crazy huge file
++Check crazy huge file
++Test done
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 280b1ba1..1142a45e 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -501,3 +501,4 @@
+ 723 auto quick fuzz
+ 724 auto quick fuzz
+ 903 mount auto quick stress
++907 clone
