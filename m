@@ -1,91 +1,81 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:36616 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726204AbeHEQTs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 5 Aug 2018 12:19:48 -0400
-Received: by mail-pf1-f196.google.com with SMTP id b11-v6so5564391pfo.3
-        for <fstests@vger.kernel.org>; Sun, 05 Aug 2018 07:15:04 -0700 (PDT)
-Message-ID: <5b670667.1c69fb81.5d828.b965@mx.google.com>
-Date: Sun, 05 Aug 2018 22:14:57 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 3a64a884c440
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:39745 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726870AbeHFCjY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 5 Aug 2018 22:39:24 -0400
+Date: Mon, 6 Aug 2018 10:32:51 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2 2/2] xfs/288: _notrun if xfs_db can't write values
+ into dir or attr
+Message-ID: <20180806003251.GB7395@dastard>
+References: <20180731054119.13539-1-zlang@redhat.com>
+ <20180731054119.13539-2-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="TTbpG4Qfp1u3"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---TTbpG4Qfp1u3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20180731054119.13539-2-zlang@redhat.com>
+Sender: fstests-owner@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, yangx.jy@cn.fujitsu.com
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Tue, Jul 31, 2018 at 01:41:19PM +0800, Zorro Lang wrote:
+> Commit b3cf8b72334fd35ef961869506e5a72ab398bc82 help xfs/288 to
+> support v5 filesystems testing, but there're still some old
+> distributions don't support xfs_db write '-d' option, or can't
+> write values into dir/attr of v5 filesystems.
+> 
+> For compatible with older versions, skip this test on v5 xfs
+> if xfs_db write can't write v5 XFS dir/attr.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+> 
+> Hi,
+> 
+> Xiao found v1 can't work well on xfsprogs-4.9, due to 'write -d' can't
+> write vaules into dir/attr of v5 filesystems before xfsprogs-4.13.
+> 
+> Only check "if write command has -d option" is not enough. So I write
+> a function _require_xfs_db_write_da() to make sure current xfs_db
+> can write dir/attr (not only on v5, but especially for v5).
+> 
+> Thanks,
+> Zorro
+> 
+>  common/xfs    | 28 ++++++++++++++++++++++++++++
+>  tests/xfs/288 |  1 +
+>  2 files changed, 29 insertions(+)
+> 
+> diff --git a/common/xfs b/common/xfs
+> index d971b4a8..95dcfd59 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -720,6 +720,34 @@ _require_xfs_db_write_array()
+>  	[ $supported -eq 0 ] && _notrun "xfs_db write can't support array"
+>  }
+>  
+> +# Before xfsprogs commit 89baf918(xfs_db: write values into dir/attr blocks and
+> +# recalculate CRCs), xfs_db write command can't write invalid data into dir/attr
+> +# field of v5 filesystems. For some cases need to write dir/attr (especially crc
+> +# enabled), use this _require at first.
+> +_require_xfs_db_write_da()
+> +{
+> +	local inum
+> +	local count
+> +
+> +	_require_scratch
 
-The master branch of the xfstests repository at:
+Hiding this inside a another requires rule is kinda nasty. If the
+test already used _require_scratch_nocheck, this will now cause the
+test to check the scratch device at the end of the test.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+And vice-versa - if you use _require_scratch_nocheck here, it will
+break tests that have already called _require_scratch....
 
-have just been updated. This update is focusing on xfs and btrfs, each has a
-new case and a bug fix. Many thanks to contributors and reviewers!
+Cheers,
 
-New failure I've noticed in this update:
-- btrfs/169 fails on current Linus tree
+Dave.
 
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-3a64a884c440 xfs: test inode allocation state missmatch corruption
-
-New commits:
-
-Filipe Manana (1):
-      [df949b94f055] btrfs: test send with prealloc extent beyond EOF and hole punching
-
-Misono Tomohiro (1):
-      [631dd76a3148] btrfs/057: Update test case to keep subvolume in any kernel version
-
-Zorro Lang (2):
-      [c911bcb568a9] xfs/288: use -d option of xfs_db write command for v5 XFS
-      [3a64a884c440] xfs: test inode allocation state missmatch corruption
-
-
-Code Diffstat:
-
- tests/btrfs/057     |   5 ++-
- tests/btrfs/169     |  83 ++++++++++++++++++++++++++++++++++++++
- tests/btrfs/169.out |  13 ++++++
- tests/btrfs/group   |   1 +
- tests/xfs/288       |   5 +--
- tests/xfs/490       | 113 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/490.out   |   2 +
- tests/xfs/group     |   1 +
- 8 files changed, 218 insertions(+), 5 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---TTbpG4Qfp1u3
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbZwYQAAoJECZSqilcj+djhLAP/j5lyEnU+C9VTZLJpIxBqSo5
-RQnrXOwimo+GN2E3PSqDHjsrlLPOk0F2mclK9KA4O8AwWhmlVjRznGq8/EiNe+RG
-aZS48sW0oP37EK7FmedsEvyXQMSXb6eTWuBF0rmjkgnN4zphPRbuoNxCQDc+H86l
-KVHgkZfnQFfNDDHYQCCUpMyxb31qCt//juELlRVTgr0FFmRQl9t8fAl/XhMJhrCL
-+2PsHLk5VNabhgRUUzyuxiJvwzn1zgJDgpvq2cFLmz2oxz95xuQOHR60ERuLu61i
-6XY2LQKBP0cw7d4EHt1VZD2aY/xKpMoRj5g57PbgmA80hl4BoOunDjmaNYQ9jfWV
-TCyqck8AcT7kjFwK8FHLznCr5+1fvq9eOoYua0xps7Ech77gJr7jjghCC2nzRwKp
-7/Klda8tXFpOdWmULnAxbyskA79FtuwZ9yp6XV9G83cI7VSgEqwecIL7HeC6UOYr
-M7sea1GHemjSD8qE+tE+jco1UT8qXb8VZrs/vaEndr9gxZYJ8PX+0dvWMldNlldi
-mkYCAquvv9BfihJOKKxCYvzgRxgKbt7TVsOuCQHh/YvQMM60eGEU3spRb2WaDzBN
-STdkkJ6gqUC/hPUojUDQbxslcEgfJviykbnzK7cbHy3otagnY+5ZrufJP8M2W/ft
-LngpNXvth/Zo6vbEFs5z
-=54iX
------END PGP SIGNATURE-----
-
---TTbpG4Qfp1u3--
+-- 
+Dave Chinner
+david@fromorbit.com
