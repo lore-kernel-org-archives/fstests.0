@@ -1,53 +1,56 @@
-Received: from mx2.suse.de ([195.135.220.15]:49384 "EHLO mx1.suse.de"
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:39818 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727371AbeHIKJW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 9 Aug 2018 06:09:22 -0400
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH] fstests: btrfs: Add test for corrupted orphan qgroup numbers
-Date: Thu,  9 Aug 2018 15:45:40 +0800
-Message-Id: <20180809074540.2588-1-wqu@suse.com>
+        id S1727601AbeHIKRn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 9 Aug 2018 06:17:43 -0400
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.rdu2.redhat.com [10.11.54.6])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 6C5797B2B1
+        for <fstests@vger.kernel.org>; Thu,  9 Aug 2018 07:54:06 +0000 (UTC)
+From: Xiong Murphy Zhou <xzhou@redhat.com>
+Subject: [PATCH] generic: add test for checking /proc/locks after exec and flock
+Date: Thu,  9 Aug 2018 15:53:53 +0800
+Message-Id: <20180809075353.31514-1-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiong Murphy Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This bug is exposed by populating a high level qgroup, and then make it
-orphan (high level qgroup without child) with old qgroup numbers, and
-finally do rescan.
+Regression test case for kernel patch:
+    fs/lock: show locks info owned by dead/invisible processes
 
-Normally rescan should zero out all qgroups' accounting number, but due
-to a kernel bug which won't mark orphan qgroups dirty, their on-disk
-data is not updated, thus old numbers remain and cause qgroup
-corruption.
+Open new fd by exec shell built-in, then require exclusive lock
+by flock(1) command. Checking /proc/locks for the lock info.
 
-Fixed by the following kernel patch:
-"btrfs: qgroup: Dirty all qgroups before rescan"
+This patchset post by Konstantin Khorenko <khorenko@virtuozzo.com>
+has not been merged v4.18-rc8.
 
-Reported-by: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
-Signed-off-by: Qu Wenruo <wqu@suse.com>
+Signed-off-by: Xiong Murphy Zhou <xzhou@redhat.com>
 ---
- tests/btrfs/170     | 82 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/170.out |  3 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 86 insertions(+)
- create mode 100755 tests/btrfs/170
- create mode 100644 tests/btrfs/170.out
+ tests/generic/504     | 58 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/504.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 61 insertions(+)
+ create mode 100755 tests/generic/504
+ create mode 100644 tests/generic/504.out
 
-diff --git a/tests/btrfs/170 b/tests/btrfs/170
+diff --git a/tests/generic/504 b/tests/generic/504
 new file mode 100755
-index 000000000000..bcf8b5c0e4f3
+index 00000000..b77f1d60
 --- /dev/null
-+++ b/tests/btrfs/170
-@@ -0,0 +1,82 @@
++++ b/tests/generic/504
+@@ -0,0 +1,58 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 SUSE Linux Products GmbH.  All Rights Reserved.
++# Copyright (c) 2018 RedHat Inc.  All Rights Reserved.
 +#
-+# FS QA Test 170
++# FS QA Test 504
 +#
-+# Test if btrfs can clear orphan (high level qgroup without child) qgroup's
-+# accounting numbers during rescan.
-+# Fixed by the following kernel patch:
-+# "btrfs: qgroup: Dirty all qgroups before rescan"
++# Regression test case for kernel patch:
++#     fs/lock: show locks info owned by dead/invisible processes
++#
++# Open new fd by exec shell built-in, then require exclusive lock
++# by flock(1) command. Checking /proc/locks for the lock info.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -74,70 +77,44 @@ index 000000000000..bcf8b5c0e4f3
 +# real QA test starts here
 +
 +# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
++_require_test
 +
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
++# Create test file and find its inode NO.
++touch $TEST_DIR/flock_testfile
++tf_inode=$(stat -c %i $TEST_DIR/flock_testfile)
++echo inode $tf_inode >> $seqres.full
 +
++# Create new fd by exec and lock.
++exec 9> $TEST_DIR/flock_testfile
++flock -x 9
++cat /proc/locks >> $seqres.full
 +
-+# Populate the fs
-+_run_btrfs_util_prog subvolume create "$SCRATCH_MNT/subvol"
-+_pwrite_byte 0xcdcd 0 1M "$SCRATCH_MNT/subvol/file1" | _filter_xfs_io > /dev/null
-+
-+# Ensure that file reach disk, so it will also appear in snapshot
-+sync
-+_run_btrfs_util_prog subvolume snapshot "$SCRATCH_MNT/subvol" "$SCRATCH_MNT/snapshot"
-+
-+
-+_run_btrfs_util_prog quota enable "$SCRATCH_MNT"
-+_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
-+
-+# Create high level qgroup
-+_run_btrfs_util_prog qgroup create 1/0 "$SCRATCH_MNT"
-+
-+# Don't use _run_btrfs_util_prog here, as it can return 1 to info user
-+# that qgroup is marked inconsistent, this is a bug in btrfs-progs, but
-+# to ensure it will work, we just ignore the return value.
-+$BTRFS_UTIL_PROG qgroup assign "$SCRATCH_MNT/snapshot" 1/0 "$SCRATCH_MNT"
-+
-+# Above assign will mark qgroup inconsistent due to the shared extents
-+# between subvol/snapshot/high level qgroup, do rescan here
-+_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
-+
-+# Now remove the qgroup relationship and make 1/0 orphan
-+# Due to the shared extent outside of 1/0, we will mark qgroup inconsistent
-+# and keep the number of qgroup 1/0
-+$BTRFS_UTIL_PROG qgroup remove "$SCRATCH_MNT/snapshot" 1/0 "$SCRATCH_MNT"
-+
-+# Above removal also marks qgroup inconsistent, rescan again
-+_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
-+
-+# After the test, btrfs check will verify qgroup numbers to catch any
-+# corruption.
++# Checking
++grep -qw $tf_inode /proc/locks || echo "lock info not found"
 +
 +# success, all done
 +status=0
++echo "Silence is golden"
 +exit
-diff --git a/tests/btrfs/170.out b/tests/btrfs/170.out
+diff --git a/tests/generic/504.out b/tests/generic/504.out
 new file mode 100644
-index 000000000000..9002199e48ed
+index 00000000..d46394b8
 --- /dev/null
-+++ b/tests/btrfs/170.out
-@@ -0,0 +1,3 @@
-+QA output created by 170
-+WARNING: quotas may be inconsistent, rescan needed
-+WARNING: quotas may be inconsistent, rescan needed
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index b616c73d09bf..339c977135c0 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -172,3 +172,4 @@
- 167 auto quick replace volume
- 168 auto quick send
- 169 auto quick send
-+170 auto quick qgroup
++++ b/tests/generic/504.out
+@@ -0,0 +1,2 @@
++QA output created by 504
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 79a5705a..55155de8 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -506,3 +506,4 @@
+ 501 auto quick clone log
+ 502 auto quick log
+ 503 auto quick dax punch collapse zero
++504 auto quick locks
 -- 
-2.18.0
+2.17.0.252.gfe0a9ea
 
