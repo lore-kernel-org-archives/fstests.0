@@ -1,109 +1,143 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:33264 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726542AbeHHHyb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 Aug 2018 03:54:31 -0400
-Received: from G08CNEXCHPEKD03.g08.fujitsu.local (unknown [10.167.33.85])
-        by cn.fujitsu.com (Postfix) with ESMTP id 51B274B6ADFF
-        for <fstests@vger.kernel.org>; Wed,  8 Aug 2018 13:36:28 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] src/aiocp.c: Fix buffer alignment
-Date: Thu, 9 Aug 2018 12:57:07 +0800
-Message-ID: <1533790627-7733-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx2.suse.de ([195.135.220.15]:49384 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727371AbeHIKJW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 9 Aug 2018 06:09:22 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: btrfs: Add test for corrupted orphan qgroup numbers
+Date: Thu,  9 Aug 2018 15:45:40 +0800
+Message-Id: <20180809074540.2588-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In generic/252, aiocp with DIRECT will fail and return EINVAL on
-4096 sector size block device, because the default 512 alignment
-defined in aiocp is not aligned with 4096.
+This bug is exposed by populating a high level qgroup, and then make it
+orphan (high level qgroup without child) with old qgroup numbers, and
+finally do rescan.
 
-Please see the following error:
-----------------------------------------------------------
-read missing bytes expect 8388608 got -22
-----------------------------------------------------------
+Normally rescan should zero out all qgroups' accounting number, but due
+to a kernel bug which won't mark orphan qgroups dirty, their on-disk
+data is not updated, thus old numbers remain and cause qgroup
+corruption.
 
-aiocp with DIRECT should set a proper alignment if -a option is not
-specified.
+Fixed by the following kernel patch:
+"btrfs: qgroup: Dirty all qgroups before rescan"
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Reported-by: Misono Tomohiro <misono.tomohiro@jp.fujitsu.com>
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- src/aio-dio-regress/aiocp.c | 30 ++++++++++++++++++++++++++++++
- 1 file changed, 30 insertions(+)
+ tests/btrfs/170     | 82 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/170.out |  3 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/btrfs/170
+ create mode 100644 tests/btrfs/170.out
 
-diff --git a/src/aio-dio-regress/aiocp.c b/src/aio-dio-regress/aiocp.c
-index 7e71cc5..57e9d35 100644
---- a/src/aio-dio-regress/aiocp.c
-+++ b/src/aio-dio-regress/aiocp.c
-@@ -40,6 +40,8 @@
- #include <errno.h>
- #include <stdlib.h>
- #include <sys/select.h>
-+#include <sys/ioctl.h>
-+#include <sys/mount.h>
- 
- #include <libaio.h>
- 
-@@ -69,6 +71,28 @@ int alignment = 512;		/* buffer alignment */
- 
- struct timeval delay;		/* delay between i/o */
- 
-+static int get_sector_size(void)
+diff --git a/tests/btrfs/170 b/tests/btrfs/170
+new file mode 100755
+index 000000000000..bcf8b5c0e4f3
+--- /dev/null
++++ b/tests/btrfs/170
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 SUSE Linux Products GmbH.  All Rights Reserved.
++#
++# FS QA Test 170
++#
++# Test if btrfs can clear orphan (high level qgroup without child) qgroup's
++# accounting numbers during rescan.
++# Fixed by the following kernel patch:
++# "btrfs: qgroup: Dirty all qgroups before rescan"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
 +{
-+	int fd, ret;
-+	int sector_size;
-+	char *name;
-+
-+	name = getenv("TEST_DEV");
-+	if (!name)
-+		return alignment;
-+
-+	fd = open(name, O_RDONLY);
-+	if (fd < 0)
-+		return alignment;
-+
-+	ret = ioctl(fd, BLKSSZGET, &sector_size);
-+	close(fd);
-+	if (ret < 0)
-+		return alignment;
-+
-+	return sector_size;
++	cd /
++	rm -f $tmp.*
 +}
 +
- int init_iocb(int n, int iosize)
- {
- 	void *buf;
-@@ -259,6 +283,7 @@ int main(int argc, char *const *argv)
- 	int c;
- 	extern char *optarg;
- 	extern int optind, opterr, optopt;
-+	int aligned = 0;
- 
- 	while ((c = getopt(argc, argv, "a:b:df:n:s:wzD:")) != -1) {
- 		char *endp;
-@@ -268,6 +293,7 @@ int main(int argc, char *const *argv)
- 			alignment = strtol(optarg, &endp, 0);
- 			alignment = (long)scale_by_kmg((long long)alignment,
- 							*endp);
-+			aligned = 1;
- 			break;
- 		case 'f':	/* use these open flags */
- 			if (strcmp(optarg, "LARGEFILE") == 0 ||
-@@ -334,6 +360,10 @@ int main(int argc, char *const *argv)
-     srcname = "junkdata";
-     dstname = "ff2";
- #endif
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
 +
-+	if (!aligned && (source_open_flag & O_DIRECT))
-+		alignment = get_sector_size();
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
- 	if (!zero) {
- #ifndef DEBUG
- 	       	if ((srcfd = open(srcname = *argv, source_open_flag)) < 0) {
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++
++_scratch_mkfs > /dev/null 2>&1
++_scratch_mount
++
++
++# Populate the fs
++_run_btrfs_util_prog subvolume create "$SCRATCH_MNT/subvol"
++_pwrite_byte 0xcdcd 0 1M "$SCRATCH_MNT/subvol/file1" | _filter_xfs_io > /dev/null
++
++# Ensure that file reach disk, so it will also appear in snapshot
++sync
++_run_btrfs_util_prog subvolume snapshot "$SCRATCH_MNT/subvol" "$SCRATCH_MNT/snapshot"
++
++
++_run_btrfs_util_prog quota enable "$SCRATCH_MNT"
++_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
++
++# Create high level qgroup
++_run_btrfs_util_prog qgroup create 1/0 "$SCRATCH_MNT"
++
++# Don't use _run_btrfs_util_prog here, as it can return 1 to info user
++# that qgroup is marked inconsistent, this is a bug in btrfs-progs, but
++# to ensure it will work, we just ignore the return value.
++$BTRFS_UTIL_PROG qgroup assign "$SCRATCH_MNT/snapshot" 1/0 "$SCRATCH_MNT"
++
++# Above assign will mark qgroup inconsistent due to the shared extents
++# between subvol/snapshot/high level qgroup, do rescan here
++_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
++
++# Now remove the qgroup relationship and make 1/0 orphan
++# Due to the shared extent outside of 1/0, we will mark qgroup inconsistent
++# and keep the number of qgroup 1/0
++$BTRFS_UTIL_PROG qgroup remove "$SCRATCH_MNT/snapshot" 1/0 "$SCRATCH_MNT"
++
++# Above removal also marks qgroup inconsistent, rescan again
++_run_btrfs_util_prog quota rescan -w "$SCRATCH_MNT"
++
++# After the test, btrfs check will verify qgroup numbers to catch any
++# corruption.
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/170.out b/tests/btrfs/170.out
+new file mode 100644
+index 000000000000..9002199e48ed
+--- /dev/null
++++ b/tests/btrfs/170.out
+@@ -0,0 +1,3 @@
++QA output created by 170
++WARNING: quotas may be inconsistent, rescan needed
++WARNING: quotas may be inconsistent, rescan needed
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b616c73d09bf..339c977135c0 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -172,3 +172,4 @@
+ 167 auto quick replace volume
+ 168 auto quick send
+ 169 auto quick send
++170 auto quick qgroup
 -- 
-1.8.3.1
-
-
+2.18.0
 
