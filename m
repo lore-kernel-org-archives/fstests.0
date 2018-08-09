@@ -1,63 +1,109 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:62418 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:33264 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727429AbeHGOuS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 Aug 2018 10:50:18 -0400
-Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
-        by cn.fujitsu.com (Postfix) with ESMTP id 8BA944B41EE4
-        for <fstests@vger.kernel.org>; Tue,  7 Aug 2018 20:35:58 +0800 (CST)
-From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
-Subject: [PATCH] src/stat_test: fix undefined reference to `xfstests_statx'
-Date: Tue, 7 Aug 2018 20:35:51 +0800
-Message-ID: <20180807123551.5744-1-lufq.fnst@cn.fujitsu.com>
+        with ESMTP id S1726542AbeHHHyb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 Aug 2018 03:54:31 -0400
+Received: from G08CNEXCHPEKD03.g08.fujitsu.local (unknown [10.167.33.85])
+        by cn.fujitsu.com (Postfix) with ESMTP id 51B274B6ADFF
+        for <fstests@vger.kernel.org>; Wed,  8 Aug 2018 13:36:28 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] src/aiocp.c: Fix buffer alignment
+Date: Thu, 9 Aug 2018 12:57:07 +0800
+Message-ID: <1533790627-7733-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-Since glibc 2.28 has added the statx function after commit fd70af45528d
-("Add the statx function"), stat_test.c will include
-/usr/include/bits/statx.h eventually by "include <sys/stat.h>". That causes
-the STATX_TYPE has already been defined before include "status.h", then
-xfstests_statx will not be defined.
+In generic/252, aiocp with DIRECT will fail and return EINVAL on
+4096 sector size block device, because the default 512 alignment
+defined in aiocp is not aligned with 4096.
 
-So make fails with the following error message:
+Please see the following error:
+----------------------------------------------------------
+read missing bytes expect 8388608 got -22
+----------------------------------------------------------
 
-/usr/bin/ld: /tmp/cc2Isfch.o: in function `main':
-/home/luke/workspace/xfstests-dev/src/stat_test.c:690: undefined reference to `xfstests_statx'
-/usr/bin/ld: /tmp/cc2Isfch.o: in function `get_reference':
-/home/luke/workspace/xfstests-dev/src/stat_test.c:301: undefined reference to `xfstests_statx'
-/usr/bin/ld: /tmp/cc2Isfch.o: in function `main':
-/home/luke/workspace/xfstests-dev/src/stat_test.c:642: undefined reference to `xfstests_statx'
+aiocp with DIRECT should set a proper alignment if -a option is not
+specified.
 
-Just move out the definition of xfstests_statx between "#ifndef STATX_TYPE"
-and "#endif /* STATX_TYPE */".
-
-Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
 ---
- src/statx.h | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ src/aio-dio-regress/aiocp.c | 30 ++++++++++++++++++++++++++++++
+ 1 file changed, 30 insertions(+)
 
-diff --git a/src/statx.h b/src/statx.h
-index 5d58208a94e6..3f239d791dfe 100644
---- a/src/statx.h
-+++ b/src/statx.h
-@@ -159,6 +159,7 @@ struct statx {
- #define STATX_ATTR_ENCRYPTED		0x00000800 /* [I] File requires key to decrypt in fs */
+diff --git a/src/aio-dio-regress/aiocp.c b/src/aio-dio-regress/aiocp.c
+index 7e71cc5..57e9d35 100644
+--- a/src/aio-dio-regress/aiocp.c
++++ b/src/aio-dio-regress/aiocp.c
+@@ -40,6 +40,8 @@
+ #include <errno.h>
+ #include <stdlib.h>
+ #include <sys/select.h>
++#include <sys/ioctl.h>
++#include <sys/mount.h>
  
- #define STATX_ATTR_AUTOMOUNT		0x00001000 /* Dir: Automount trigger */
-+#endif /* STATX_TYPE */
+ #include <libaio.h>
  
- static inline
- int xfstests_statx(int dfd, const char *filename, unsigned flags,
-@@ -172,5 +173,4 @@ int xfstests_statx(int dfd, const char *filename, unsigned flags,
+@@ -69,6 +71,28 @@ int alignment = 512;		/* buffer alignment */
+ 
+ struct timeval delay;		/* delay between i/o */
+ 
++static int get_sector_size(void)
++{
++	int fd, ret;
++	int sector_size;
++	char *name;
++
++	name = getenv("TEST_DEV");
++	if (!name)
++		return alignment;
++
++	fd = open(name, O_RDONLY);
++	if (fd < 0)
++		return alignment;
++
++	ret = ioctl(fd, BLKSSZGET, &sector_size);
++	close(fd);
++	if (ret < 0)
++		return alignment;
++
++	return sector_size;
++}
++
+ int init_iocb(int n, int iosize)
+ {
+ 	void *buf;
+@@ -259,6 +283,7 @@ int main(int argc, char *const *argv)
+ 	int c;
+ 	extern char *optarg;
+ 	extern int optind, opterr, optopt;
++	int aligned = 0;
+ 
+ 	while ((c = getopt(argc, argv, "a:b:df:n:s:wzD:")) != -1) {
+ 		char *endp;
+@@ -268,6 +293,7 @@ int main(int argc, char *const *argv)
+ 			alignment = strtol(optarg, &endp, 0);
+ 			alignment = (long)scale_by_kmg((long long)alignment,
+ 							*endp);
++			aligned = 1;
+ 			break;
+ 		case 'f':	/* use these open flags */
+ 			if (strcmp(optarg, "LARGEFILE") == 0 ||
+@@ -334,6 +360,10 @@ int main(int argc, char *const *argv)
+     srcname = "junkdata";
+     dstname = "ff2";
  #endif
- }
- 
--#endif /* STATX_TYPE */
- #endif /* STATX_H */
++
++	if (!aligned && (source_open_flag & O_DIRECT))
++		alignment = get_sector_size();
++
+ 	if (!zero) {
+ #ifndef DEBUG
+ 	       	if ((srcfd = open(srcname = *argv, source_open_flag)) < 0) {
 -- 
-2.18.0
+1.8.3.1
 
 
 
