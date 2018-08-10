@@ -1,56 +1,112 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55034 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726894AbeHJCnj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 9 Aug 2018 22:43:39 -0400
-Subject: Re: [PATCH] generic/228: fix restoration of kernel.core_pattern
- sysctl
-References: <83cc171697f79477991c501939dcda146aa7ba3b.1533850682.git.osandov@fb.com>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <c2927c55-432d-414d-9b66-f00448447fa6@redhat.com>
-Date: Thu, 9 Aug 2018 19:16:20 -0500
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:51972 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725724AbeHJEbG (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 10 Aug 2018 00:31:06 -0400
+Date: Fri, 10 Aug 2018 10:03:24 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] src/statx: fix undefined reference to xfstests_statx
+Message-ID: <20180810020324.GW4893@hp-dl360g9-06.rhts.eng.pek2.redhat.com>
+References: <20180809152132.4965-1-zlang@redhat.com>
+ <CAL3q7H5WKBZxpbB+BEWZYVKQ7QVfcqH_578rU2mK2y6v+=a++w@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <83cc171697f79477991c501939dcda146aa7ba3b.1533850682.git.osandov@fb.com>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <CAL3q7H5WKBZxpbB+BEWZYVKQ7QVfcqH_578rU2mK2y6v+=a++w@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org
-Cc: kernel-team@fb.com
+Content-Transfer-Encoding: quoted-printable
+To: Filipe Manana <fdmanana@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, dhowells@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On 8/9/18 4:40 PM, Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
-> 
-> generic/228 changes kernel.core_pattern, so it saves it beforehand in
-> order to restore it. However, it adds an extra space in the process:
-> 
-> $ echo \"$(sysctl kernel.core_pattern | awk -F = '{print $NF}')\"
-> " |/usr/lib/systemd/systemd-coredump %P %u %g %s %t %c %h %e"
-> 
-> Instead of using awk, just use sysctl -n to only print the value.
+On Thu, Aug 09, 2018 at 06:07:54PM +0100, Filipe Manana wrote:
+> On Thu, Aug 9, 2018 at 4:21 PM, Zorro Lang <zlang@redhat.com> wrote:
+> > xfstests build fails after glibc updated to 2.28:
+> >
+> >   /tmp/cc3s96Dw.o: In function `main':
+> >   /root/xfstests-dev/src/stat_test.c:690: undefined reference to `xfs=
+tests_statx'
+> >   /tmp/cc3s96Dw.o: In function `get_reference':
+> >   /root/xfstests-dev/src/stat_test.c:301: undefined reference to `xfs=
+tests_statx'
+> >   /tmp/cc3s96Dw.o: In function `main':
+> >   /root/xfstests-dev/src/stat_test.c:642: undefined reference to `xfs=
+tests_statx'
+> >   collect2: error: ld returned 1 exit status
+> >   gmake[2]: *** [Makefile:82: stat_test] Error 1
+> >   gmake[1]: *** [include/buildrules:31: src] Error 2
+> >   make: *** [Makefile:53: default] Error 2
+> >
+> > Due to glibc-headers-2.28 defines struct statx and all related
+> > things, include STATX_TYPE. But xfstests src/statx.h won't build
+> > xfstests_statx() function STATX_TYPE has been defined, that doesn't
+> > make sense.
+> >
+> > If all statx things has been defined by glibc, we can skip xfstests
+> > internal statx definition, but xfstests_statx() function is still
+> > needed, because it's called by other programs.
+> >
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+>=20
+> Lu sent the same fix 2 days ago:
+>=20
+> https://patchwork.kernel.org/patch/10558653/
 
-Oh, was that my fault?  Seems like something that would be my fault.
-It'd have worked w/o "-F =" too but yours is better as long as sysctl -n
-isn't new?  Works on my old RHEL6 box.  :)
+OK, Great :)
 
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+Thanks,
+Zorro
 
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
->  tests/generic/228 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/228 b/tests/generic/228
-> index fd022313..16178c33 100755
-> --- a/tests/generic/228
-> +++ b/tests/generic/228
-> @@ -45,7 +45,7 @@ avail=`df -P $TEST_DIR | awk 'END {print $4}'`
->  [ "$avail" -ge 104000 ] || _notrun "Test device is too small ($avail KiB)"
->  
->  # Suppress core dumped messages
-> -core_pattern=`sysctl kernel.core_pattern | awk -F = '{print $NF}'`
-> +core_pattern=`sysctl -n kernel.core_pattern`
->  ulimit_c=`ulimit -c`
->  sysctl -w kernel.core_pattern=core &>/dev/null
->  ulimit -c 0
-> 
+>=20
+>=20
+> > ---
+> >
+> > CC David Howells <dhowells@redhat.com>, the original author of src/st=
+atx.h.
+> > For this change won't break his original design.
+> >
+> > Thanks,
+> > Zorro
+> >
+> >  src/statx.h | 3 ++-
+> >  1 file changed, 2 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/src/statx.h b/src/statx.h
+> > index 5d58208a..f6aaafd6 100644
+> > --- a/src/statx.h
+> > +++ b/src/statx.h
+> > @@ -160,6 +160,8 @@ struct statx {
+> >
+> >  #define STATX_ATTR_AUTOMOUNT           0x00001000 /* Dir: Automount =
+trigger */
+> >
+> > +#endif /* STATX_TYPE */
+> > +
+> >  static inline
+> >  int xfstests_statx(int dfd, const char *filename, unsigned flags,
+> >                    unsigned int mask, struct statx *buffer)
+> > @@ -172,5 +174,4 @@ int xfstests_statx(int dfd, const char *filename,=
+ unsigned flags,
+> >  #endif
+> >  }
+> >
+> > -#endif /* STATX_TYPE */
+> >  #endif /* STATX_H */
+> > --
+> > 2.14.4
+> >
+> > --
+> > To unsubscribe from this list: send the line "unsubscribe fstests" in
+> > the body of a message to majordomo@vger.kernel.org
+> > More majordomo info at  http://vger.kernel.org/majordomo-info.html
+>=20
+>=20
+>=20
+> --=20
+> Filipe David Manana,
+>=20
+> =E2=80=9CWhether you think you can, or you think you can't =E2=80=94 yo=
+u're right.=E2=80=9D
+> --
+> To unsubscribe from this list: send the line "unsubscribe fstests" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
