@@ -1,145 +1,78 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:16965 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727952AbeHPDCI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 15 Aug 2018 23:02:08 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH v2] src/aiocp.c: Fix buffer alignment
-Date: Wed, 15 Aug 2018 13:41:45 +0800
-Message-ID: <1534311705-14286-1-git-send-email-yangx.jy@cn.fujitsu.com>
-In-Reply-To: <20180812150836.GE2791@desktop>
-References: <20180812150836.GE2791@desktop>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:40884 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1731269AbeHPKVu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 16 Aug 2018 06:21:50 -0400
+Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w7G7OU7c084126
+        for <fstests@vger.kernel.org>; Thu, 16 Aug 2018 03:25:21 -0400
+Received: from e34.co.us.ibm.com (e34.co.us.ibm.com [32.97.110.152])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2kw2y2m7wv-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Thu, 16 Aug 2018 03:25:20 -0400
+Received: from localhost
+        by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Thu, 16 Aug 2018 01:25:20 -0600
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH 00/16] Fix tests to work on non-4k block sized fs instances
+Date: Thu, 16 Aug 2018 12:56:30 +0530
+Message-Id: <20180816072646.14490-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: fstests@vger.kernel.org, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com
 List-ID: <fstests@vger.kernel.org>
 
-In generic/252, aiocp with DIRECT will fail and return EINVAL on
-4096 sector size block device, because the default 512 alignment
-defined in aiocp is not aligned with 4096.
+This patchset fixes tests (mostly XFS specific ones) to work on
+variable block size. These patches now use the output of "od" utility
+to verify the contents of the test files instead of the md5sum
+utility.
 
-Please see the following error:
-----------------------------------------------------------
-read missing bytes expect 8388608 got -22
-----------------------------------------------------------
+The patchset modifies _filter_fiemap() filter function to optionally
+print the file offset range in block size units.
 
-We use '-a' option to specify a proper alignment size in all tests
-that call aiocp with DIRECT.
+Chandan Rajendra (16):
+  Fix xfs/009 to work with 64k block size
+  xfs/050: Fix "Push past soft inode limit" case
+  Fix xfs/050 to work with 64k block size
+  Fix xfs/074 to work with 64k block size
+  Fix xfs/127 to work with 64k block size
+  Fix xfs/139 to work with 64k block size
+  Fix xfs/140 to work with 64k block size
+  Fix xfs/190 to work with 64k block size
+  Fix xfs/299 to work with 64k block size
+  xfs/325: Inject free_extent error after CoW operation
+  Fix generic/102 to work with 64k block size
+  Fix generic/172 to work with 64k block size
+  Filter fiemap output by FS block size
+  Fix generic/177 to work with 64k block size
+  Fix generic/230 to work with 64k block size
+  Fix generic/235 to work with 64k block size
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/generic/252 | 3 ++-
- tests/generic/329 | 3 ++-
- tests/generic/330 | 3 ++-
- tests/xfs/237     | 3 ++-
- tests/xfs/239     | 3 ++-
- 5 files changed, 10 insertions(+), 5 deletions(-)
+ common/punch          | 19 ++++++++---
+ tests/generic/102     |  4 +--
+ tests/generic/102.out | 20 +++++------
+ tests/generic/172     |  4 +--
+ tests/generic/177     | 20 ++++++-----
+ tests/generic/177.out | 23 ++++++++-----
+ tests/generic/230     | 24 ++++++++------
+ tests/generic/230.out | 16 ++++-----
+ tests/generic/235     |  2 +-
+ tests/generic/235.out |  4 +--
+ tests/xfs/009         | 92 ++++++++++++++++++++++++++++++++++++++++++---------
+ tests/xfs/009.out     | 66 ++++++++++++++++++------------------
+ tests/xfs/050         | 23 ++++++++-----
+ tests/xfs/050.out     | 60 ++++++++++++++++-----------------
+ tests/xfs/074         | 23 ++++++++++---
+ tests/xfs/127         |  2 +-
+ tests/xfs/139         | 12 +++----
+ tests/xfs/139.out     |  8 +++--
+ tests/xfs/140         |  9 ++---
+ tests/xfs/190         | 44 +++++++++++++++++++-----
+ tests/xfs/299         | 23 ++++++++-----
+ tests/xfs/299.out     | 60 ++++++++++++++++-----------------
+ tests/xfs/325         |  5 +--
+ tests/xfs/325.out     |  2 +-
+ 24 files changed, 355 insertions(+), 210 deletions(-)
 
-diff --git a/tests/generic/252 b/tests/generic/252
-index 9e7f442..991bbe3 100755
---- a/tests/generic/252
-+++ b/tests/generic/252
-@@ -59,6 +59,7 @@ nr=640
- bufnr=128
- filesize=$((blksz * nr))
- bufsize=$((blksz * bufnr))
-+alignment=`_min_dio_alignment $TEST_DEV`
- 
- _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 5 / 4))
- 
-@@ -75,7 +76,7 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
- $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
- sync
- _dmerror_load_error_table
--$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
-+$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
- _dmerror_load_working_table
- _dmerror_unmount
- _dmerror_mount
-diff --git a/tests/generic/329 b/tests/generic/329
-index c68d94a..c618c2a 100755
---- a/tests/generic/329
-+++ b/tests/generic/329
-@@ -51,6 +51,7 @@ nr=640
- bufnr=128
- filesize=$((blksz * nr))
- bufsize=$((blksz * bufnr))
-+alignment=`_min_dio_alignment $TEST_DEV`
- 
- _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 3 * 5 / 4))
- 
-@@ -69,7 +70,7 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
- $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
- sync
- _dmerror_load_error_table
--$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
-+$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
- _dmerror_load_working_table
- _dmerror_unmount
- _dmerror_mount
-diff --git a/tests/generic/330 b/tests/generic/330
-index 334ac3c..7183d4c 100755
---- a/tests/generic/330
-+++ b/tests/generic/330
-@@ -47,6 +47,7 @@ nr=640
- bufnr=128
- filesize=$((blksz * nr))
- bufsize=$((blksz * bufnr))
-+alignment=`_min_dio_alignment $TEST_DEV`
- 
- _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 3 * 5 / 4))
- 
-@@ -63,7 +64,7 @@ echo "CoW and unmount"
- $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
- sync
- $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
--$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
-+$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
- _scratch_cycle_mount
- 
- echo "Compare files"
-diff --git a/tests/xfs/237 b/tests/xfs/237
-index 286fd68..94855f5 100755
---- a/tests/xfs/237
-+++ b/tests/xfs/237
-@@ -53,6 +53,7 @@ nr=640
- bufnr=128
- filesize=$((blksz * nr))
- bufsize=$((blksz * bufnr))
-+alignment=`_min_dio_alignment $TEST_DEV`
- 
- _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 3 * 5 / 4))
- 
-@@ -72,7 +73,7 @@ $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
- $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
- sync
- _dmerror_load_error_table
--$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
-+$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
- _dmerror_load_working_table
- _dmerror_unmount
- _dmerror_mount
-diff --git a/tests/xfs/239 b/tests/xfs/239
-index 6a13319..afe0d56 100755
---- a/tests/xfs/239
-+++ b/tests/xfs/239
-@@ -51,6 +51,7 @@ filesize=$((blksz * nr))
- bufsize=$((blksz * bufnr))
- filesize=$filesize
- bufsize=$bufsize
-+alignment=`_min_dio_alignment $TEST_DEV`
- 
- _require_fs_space $SCRATCH_MNT $((filesize / 1024 * 3 * 5 / 4))
- 
-@@ -68,7 +69,7 @@ echo "CoW and unmount"
- $XFS_IO_PROG -f -c "pwrite -S 0x63 $bufsize 1" $testdir/file2 >> $seqres.full
- sync
- $XFS_IO_PROG -f -c "pwrite -S 0x63 -b $bufsize 0 $filesize" $TEST_DIR/moo >> $seqres.full
--$AIO_TEST -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
-+$AIO_TEST -a $alignment -f DIRECT -b $bufsize $TEST_DIR/moo $testdir/file2 >> $seqres.full
- _scratch_cycle_mount
- 
- echo "Compare files"
 -- 
-1.8.3.1
+2.9.5
