@@ -1,84 +1,177 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:35946 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727206AbeHPMtG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 16 Aug 2018 08:49:06 -0400
-Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w7G9hpQ5122912
-        for <fstests@vger.kernel.org>; Thu, 16 Aug 2018 05:51:42 -0400
-Received: from e36.co.us.ibm.com (e36.co.us.ibm.com [32.97.110.154])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2kw6p48sc2-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 16 Aug 2018 05:51:42 -0400
-Received: from localhost
-        by e36.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Thu, 16 Aug 2018 03:51:41 -0600
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH RESEND] Fix xfs/190 to work with 64k block size
-Date: Thu, 16 Aug 2018 15:23:34 +0530
-In-Reply-To: <20180816072646.14490-1-chandan@linux.vnet.ibm.com>
-References: <20180816072646.14490-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180816095334.21846-1-chandan@linux.vnet.ibm.com>
+Received: from mail.kernel.org ([198.145.29.99]:49552 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726336AbeHQLmA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 Aug 2018 07:42:00 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] generic: test for deduplication between different files
+Date: Fri, 17 Aug 2018 09:39:24 +0100
+Message-Id: <20180817083924.16916-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit describes "file hole" ranges in multiples of block sizes
-rather than using constants.
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Test that deduplication of an entire file that has a size that is not
+aligned to the filesystem's block size into a different file does not
+corrupt the destination's file data.
+
+This test is motivated by a bug found in Btrfs which is fixed by the
+following patch for the linux kernel:
+
+  "Btrfs: fix data corruption when deduplicating between different files"
+
+XFS also fails this test, at least as of linux kernel 4.18-rc7, exactly
+with the same corruption as in Btrfs - some bytes of a block get replaced
+with zeroes after the deduplication.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changelog:
-Removed the license header that was accidently added during Git rebase.
+ tests/generic/505     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/505.out | 33 ++++++++++++++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 118 insertions(+)
+ create mode 100755 tests/generic/505
+ create mode 100644 tests/generic/505.out
 
- tests/xfs/190 | 26 +++++++++++++++++---------
- 1 file changed, 17 insertions(+), 9 deletions(-)
-
-diff --git a/tests/xfs/190 b/tests/xfs/190
-index 3275e29..917b594 100755
---- a/tests/xfs/190
-+++ b/tests/xfs/190
-@@ -10,13 +10,6 @@
- #
- # PV 985792
- #
--#This is the list of holes to punch in the file limited to $filesize
--#NOTE holes cannot overlap or this script will fail.
--holes="4096:4096 303104:4096 1048576:512 1051648:8192 1065984:8192 1085440:7168"
--#filesize in MB
--filesize=10
--#Name of file to perform the test on
--filename=test-190
- 
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -38,9 +31,24 @@ _supported_os Linux
- _require_scratch
- _scratch_mkfs_xfs >/dev/null 2>&1
- _scratch_mount
--fsblocksize=`$XFS_INFO_PROG $SCRATCH_MNT|sed 's/=/ /g'|awk '/^data / { print $3 }'`
- 
--dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
-+fsblocksize=$(_get_block_size $TEST_DIR)
+diff --git a/tests/generic/505 b/tests/generic/505
+new file mode 100755
+index 00000000..5ee232a2
+--- /dev/null
++++ b/tests/generic/505
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 505
++#
++# Test that deduplication of an entire file that has a size that is not aligned
++# to the filesystem's block size into a different file does not corrupt the
++# destination's file data.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+#This is the list of holes to punch in the file limited to $filesize
-+#NOTE holes cannot overlap or this script will fail.
-+holes="$fsblocksize:$fsblocksize \
-+$(($fsblocksize * 74)):$fsblocksize \
-+$(($fsblocksize * 256)):$(($fsblocksize / 8)) \
-+$(echo scale=0\;$fsblocksize \* 256 \+ $fsblocksize \* 3 \/ 4 | bc):$(($fsblocksize * 2)) \
-+$(echo scale=0\;$fsblocksize \* 260 \+ $fsblocksize \* 1 \/ 4 | bc):$(($fsblocksize * 2)) \
-+$(($fsblocksize * 265)):$(echo scale=0\;$fsblocksize \+ $fsblocksize \* 3 \/ 4 | bc)"
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
 +
-+#filesize
-+filesize=$(($fsblocksize * 2560))
-+#Name of file to perform the test on
-+filename=test-190
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
 +
-+$XFS_IO_PROG -f -c "pwrite 0 $(($fsblocksize * 2560))" $SCRATCH_MNT/$filename >> $seqres.full 2>&1
- 
- # run DMAPI test using verbose output
- echo Punching holes in file
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_dedupe
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# The first byte with a value of 0xae starts at an offset (2518890) which is not
++# a multiple of the block size.
++$XFS_IO_PROG -f \
++	-c "pwrite -S 0x6b 0 2518890" \
++	-c "pwrite -S 0xae 2518890 102398" \
++	$SCRATCH_MNT/foo | _filter_xfs_io
++
++# Create a second file with a length not aligned to the block size, whose bytes
++# all have the value 0x6b, so that its extent(s) can be deduplicated with the
++# first file.
++$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 557771" $SCRATCH_MNT/bar | _filter_xfs_io
++
++# The file is filled with bytes having the value 0x6b from offset 0 to offset
++# 2518889 and with the value 0xae from offset 2518890 to offset 2621287.
++echo "File content before deduplication:"
++od -t x1 $SCRATCH_MNT/foo
++
++# Now deduplicate the entire second file into a range of the first file that
++# also has all bytes with the value 0x6b. The destination range's end offset
++# must not be aligned to the block size and must be less then the offset of
++# the first byte with the value 0xae (byte at offset 2518890).
++$XFS_IO_PROG -c "dedupe $SCRATCH_MNT/bar 0 1957888 557771" $SCRATCH_MNT/foo \
++	| _filter_xfs_io
++
++# The bytes in the range starting at offset 2515659 (end of the deduplication
++# range) and ending at offset 2519040 (start offset rounded up to the block
++# size) must all have the value 0xae (and not replaced with 0x00 values).
++# In other words, we should have exactly the same data we had before we asked
++# for deduplication.
++echo "File content after deduplication and before unmounting:"
++od -t x1 $SCRATCH_MNT/foo
++
++# Unmount the filesystem and mount it again. This guarantees any file data in
++# the page cache is dropped.
++_scratch_cycle_mount
++
++# The bytes in the range starting at offset 2515659 (end of the deduplication
++# range) and ending at offset 2519040 (start offset rounded up to the block
++# size) must all have the value 0xae (and not replaced with 0x00 values).
++# In other words, we should have exactly the same data we had before we asked
++# for deduplication.
++echo "File content after unmounting:"
++od -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/505.out b/tests/generic/505.out
+new file mode 100644
+index 00000000..7556b9fb
+--- /dev/null
++++ b/tests/generic/505.out
+@@ -0,0 +1,33 @@
++QA output created by 505
++wrote 2518890/2518890 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 102398/102398 bytes at offset 2518890
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 557771/557771 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content before deduplication:
++0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
++*
++11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
++11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
++*
++11777540 ae ae ae ae ae ae ae ae
++11777550
++deduped 557771/557771 bytes at offset 1957888
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after deduplication and before unmounting:
++0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
++*
++11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
++11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
++*
++11777540 ae ae ae ae ae ae ae ae
++11777550
++File content after unmounting:
++0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
++*
++11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
++11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
++*
++11777540 ae ae ae ae ae ae ae ae
++11777550
+diff --git a/tests/generic/group b/tests/generic/group
+index 55155de8..2ff1bd7e 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -507,3 +507,4 @@
+ 502 auto quick log
+ 503 auto quick dax punch collapse zero
+ 504 auto quick locks
++505 auto quick clone dedupe
 -- 
-2.9.5
+2.11.0
