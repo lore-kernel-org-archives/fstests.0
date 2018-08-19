@@ -1,132 +1,88 @@
-Received: from mail-pl0-f66.google.com ([209.85.160.66]:44496 "EHLO
-        mail-pl0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726598AbeHSTbb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Aug 2018 15:31:31 -0400
-Date: Mon, 20 Aug 2018 00:19:26 +0800
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:40907 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726589AbeHSTbp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Aug 2018 15:31:45 -0400
+Received: by mail-pf1-f194.google.com with SMTP id e13-v6so5570607pff.7
+        for <fstests@vger.kernel.org>; Sun, 19 Aug 2018 09:19:46 -0700 (PDT)
+Message-ID: <5b7998a1.1c69fb81.17213.1de9@mx.google.com>
+Date: Mon, 20 Aug 2018 00:19:40 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic: test for deduplication between different files
-Message-ID: <20180819161926.GH2791@desktop>
-References: <20180817083924.16916-1-fdmanana@kernel.org>
- <20180819140759.GG2791@desktop>
- <CAL3q7H7igoFqM+5sKUCVia_TK4Q9nR+4Ys7WuZ3eW1OiYY5_gA@mail.gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 84fdfc5d8a1c
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="iHdpEDzGqjOg"
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H7igoFqM+5sKUCVia_TK4Q9nR+4Ys7WuZ3eW1OiYY5_gA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Aug 19, 2018 at 04:41:31PM +0100, Filipe Manana wrote:
-> On Sun, Aug 19, 2018 at 3:07 PM, Eryu Guan <guaneryu@gmail.com> wrote:
-> > On Fri, Aug 17, 2018 at 09:39:24AM +0100, fdmanana@kernel.org wrote:
-> >> From: Filipe Manana <fdmanana@suse.com>
-> >>
-> >> Test that deduplication of an entire file that has a size that is not
-> >> aligned to the filesystem's block size into a different file does not
-> >> corrupt the destination's file data.
-> >>
-> >> This test is motivated by a bug found in Btrfs which is fixed by the
-> >> following patch for the linux kernel:
-> >>
-> >>   "Btrfs: fix data corruption when deduplicating between different files"
-> >>
-> >> XFS also fails this test, at least as of linux kernel 4.18-rc7, exactly
-> >> with the same corruption as in Btrfs - some bytes of a block get replaced
-> >> with zeroes after the deduplication.
-> >>
-> >> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> >> ---
-> >>  tests/generic/505     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >>  tests/generic/505.out | 33 ++++++++++++++++++++
-> >>  tests/generic/group   |  1 +
-> >>  3 files changed, 118 insertions(+)
-> >>  create mode 100755 tests/generic/505
-> >>  create mode 100644 tests/generic/505.out
-> >>
-> >> diff --git a/tests/generic/505 b/tests/generic/505
-> >> new file mode 100755
-> >> index 00000000..5ee232a2
-> >> --- /dev/null
-> >> +++ b/tests/generic/505
-> >> @@ -0,0 +1,84 @@
-> >> +#! /bin/bash
-> >> +# SPDX-License-Identifier: GPL-2.0
-> >> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-> >> +#
-> >> +# FS QA Test No. 505
-> >> +#
-> >> +# Test that deduplication of an entire file that has a size that is not aligned
-> >> +# to the filesystem's block size into a different file does not corrupt the
-> >> +# destination's file data.
-> >> +#
-> >> +seq=`basename $0`
-> >> +seqres=$RESULT_DIR/$seq
-> >> +echo "QA output created by $seq"
-> >> +tmp=/tmp/$$
-> >> +status=1     # failure is the default!
-> >> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> >> +
-> >> +_cleanup()
-> >> +{
-> >> +     cd /
-> >> +     rm -f $tmp.*
-> >> +}
-> >> +
-> >> +# get standard environment, filters and checks
-> >> +. ./common/rc
-> >> +. ./common/filter
-> >> +. ./common/reflink
-> >> +
-> >> +# real QA test starts here
-> >> +_supported_fs generic
-> >> +_supported_os Linux
-> >> +_require_scratch_dedupe
-> >> +
-> >> +rm -f $seqres.full
-> >> +
-> >> +_scratch_mkfs >>$seqres.full 2>&1
-> >> +_scratch_mount
-> >> +
-> >> +# The first byte with a value of 0xae starts at an offset (2518890) which is not
-> >> +# a multiple of the block size.
-> >> +$XFS_IO_PROG -f \
-> >> +     -c "pwrite -S 0x6b 0 2518890" \
-> >> +     -c "pwrite -S 0xae 2518890 102398" \
-> >> +     $SCRATCH_MNT/foo | _filter_xfs_io
-> >> +
-> >> +# Create a second file with a length not aligned to the block size, whose bytes
-> >> +# all have the value 0x6b, so that its extent(s) can be deduplicated with the
-> >> +# first file.
-> >> +$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 557771" $SCRATCH_MNT/bar | _filter_xfs_io
-> >> +
-> >> +# The file is filled with bytes having the value 0x6b from offset 0 to offset
-> >> +# 2518889 and with the value 0xae from offset 2518890 to offset 2621287.
-> >> +echo "File content before deduplication:"
-> >> +od -t x1 $SCRATCH_MNT/foo
-> >> +
-> >> +# Now deduplicate the entire second file into a range of the first file that
-> >> +# also has all bytes with the value 0x6b. The destination range's end offset
-> >> +# must not be aligned to the block size and must be less then the offset of
-> >> +# the first byte with the value 0xae (byte at offset 2518890).
-> >> +$XFS_IO_PROG -c "dedupe $SCRATCH_MNT/bar 0 1957888 557771" $SCRATCH_MNT/foo \
-> >> +     | _filter_xfs_io
-> >> +
-> >> +# The bytes in the range starting at offset 2515659 (end of the deduplication
-> >> +# range) and ending at offset 2519040 (start offset rounded up to the block
-> >> +# size) must all have the value 0xae (and not replaced with 0x00 values).
-> >
-> > This doesn't seem right to me, range [2515659, 2518890) should be 0x6b
-> > not 0xae, while range [2518890, 2519040) indeed should contain 0xae.
-> 
-> Yes, indeed. My mistake (got it right in the comment before the first
-> call to "od").
-> Can you fix it up (if there's nothing else to fix), or do you need me
-> to send a new version?
 
-Sure, I can fix it on commit. But I've already pushed this week's update
-to upstream, so you won't see it until next week :)
+--iHdpEDzGqjOg
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. Again, this is a small update that contains only one
+new btrfs test and a bug fix to aiocp alignment issue.
+
+The new btrfs test btrfs/171 should fail with v4.18 kernel, btrfs check
+complains about qgroup inconsistency.
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+84fdfc5d8a1c fstests: Fix buffer alignment of aiocp
+
+New commits:
+
+Qu Wenruo (1):
+      [55566e7f7cdd] btrfs: Add test for corrupted childless qgroup numbers
+
+Xiao Yang (1):
+      [84fdfc5d8a1c] fstests: Fix buffer alignment of aiocp
+
+
+Code Diffstat:
+
+ common/filter.btrfs |  9 ++++++
+ tests/btrfs/171     | 85 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/171.out |  2 ++
+ tests/btrfs/group   |  1 +
+ tests/generic/252   |  3 +-
+ tests/generic/329   |  3 +-
+ tests/generic/330   |  3 +-
+ tests/xfs/237       |  3 +-
+ tests/xfs/239       |  3 +-
+ 9 files changed, 107 insertions(+), 5 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--iHdpEDzGqjOg
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJbeYgKAAoJECZSqilcj+djWaYP/imAfKszulWFV1kW9TMPSnF9
+dmQ2hhc6Lku4j87liLetb/eJGlwcYa5pEYf4OVGnCKuHfMeQf///ZTvjPpD3fEVG
+5RkngQ8ZTYzBiuwupN11D67XbuE1BvOmAhRCIO7GHoGPvFv5jk/yd28X0rfbtmZM
+5Ef7H395s6UmmkXDBy4v1+Jhj8FW/ek0NhCpPH46Tt1Wwoz0ZJGWNXWpUqnb5kRe
+ytSEgFiuqsi1EWyHEIW3rbfejHlO/cTcIBJV1ZWMVXxHGm7sA/orn+3Hz50VSMEx
+RF3EMuiISh7sBnwFrUJSW30pe6gtNhOsrMD9R7LGEMNLyro7v/s4oxZ86Qt9U6GU
+u4e/ChrBJ5xOE69hB5qtB0cuZGWpkkB8fva3K1cUz906vRWOpL07cgwYaMGkCHP9
+8Hmu1XJevEJy8GrppQR8DFSETsue2m9Q6Ci7cy3WOuMztRWGih7lLS6fAeoOpDeQ
+ULw9hz2HYuPx9oV2bvhOiQ87SPPqYGeP+qOs/Vedg6mkI3avcJx4KPvz37oFT+gj
+R/+qG0VCFJWMpXmqRW5DIpIaiKpwN3VuEIWqX0LuiMHSNbOF5IwEGyu7YXIVRuUV
+cEbc+e2c1IzjjsiUtSlDQZTphAjCfyENqGl/Hvxyx0E3WC0ZOlpAq+TUSEfG4DFQ
+bgIn6okqUOFVYLiJmAPp
+=iydW
+-----END PGP SIGNATURE-----
+
+--iHdpEDzGqjOg--
