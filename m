@@ -1,57 +1,65 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:35173 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725956AbeHSQTU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 Aug 2018 12:19:20 -0400
-Date: Sun, 19 Aug 2018 21:07:46 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:44909 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725957AbeHSRTm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 19 Aug 2018 13:19:42 -0400
+Date: Sun, 19 Aug 2018 22:07:59 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic: add FIBMAP basic testing
-Message-ID: <20180819130746.GF2791@desktop>
-References: <20180813121439.19667-1-zlang@redhat.com>
+Subject: Re: [PATCH] generic: test for deduplication between different files
+Message-ID: <20180819140759.GG2791@desktop>
+References: <20180817083924.16916-1-fdmanana@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180813121439.19667-1-zlang@redhat.com>
+In-Reply-To: <20180817083924.16916-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Aug 13, 2018 at 08:14:39PM +0800, Zorro Lang wrote:
-> xfstests doesn't cover FIBMAP test, it cause we brought in a
-> regression bug fixed by "79b3dbe4adb3 fs: fix iomap_bmap position
-> calculation".
+On Fri, Aug 17, 2018 at 09:39:24AM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> Although FIBMAP is old, there're still some programs use it, likes
-> LILO. So test FIBMAP basic function in this case.
+> Test that deduplication of an entire file that has a size that is not
+> aligned to the filesystem's block size into a different file does not
+> corrupt the destination's file data.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> This test is motivated by a bug found in Btrfs which is fixed by the
+> following patch for the linux kernel:
+> 
+>   "Btrfs: fix data corruption when deduplicating between different files"
+> 
+> XFS also fails this test, at least as of linux kernel 4.18-rc7, exactly
+> with the same corruption as in Btrfs - some bytes of a block get replaced
+> with zeroes after the deduplication.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
 >  tests/generic/505     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/505.out | 21 +++++++++++++
+>  tests/generic/505.out | 33 ++++++++++++++++++++
 >  tests/generic/group   |  1 +
->  3 files changed, 106 insertions(+)
+>  3 files changed, 118 insertions(+)
 >  create mode 100755 tests/generic/505
 >  create mode 100644 tests/generic/505.out
 > 
 > diff --git a/tests/generic/505 b/tests/generic/505
 > new file mode 100755
-> index 00000000..9a4fd0c8
+> index 00000000..5ee232a2
 > --- /dev/null
 > +++ b/tests/generic/505
 > @@ -0,0 +1,84 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
 > +#
-> +# FS QA Test 505
+> +# FS QA Test No. 505
 > +#
-> +# FIBMAP basic test, cover 79b3dbe4adb3 fs: fix iomap_bmap position calculation
+> +# Test that deduplication of an entire file that has a size that is not aligned
+> +# to the filesystem's block size into a different file does not corrupt the
+> +# destination's file data.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
-> +
-> +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -65,120 +73,119 @@ On Mon, Aug 13, 2018 at 08:14:39PM +0800, Zorro Lang wrote:
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
+> +. ./common/reflink
 > +
 > +# real QA test starts here
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch
-> +_require_command "$FILEFRAG_PROG" filefrag
-
-You need to check if the filesystem being tested supports FIBMAP or not,
-e.g. btrfs doesn't support FIBMAP.
-
+> +_require_scratch_dedupe
 > +
-> +TESTFILE="$SCRATCH_MNT/$seq-testfile"
+> +rm -f $seqres.full
 > +
-> +# Use filefrag -B option to force the use of the older FIBMAP ioctl instead of
-> +# the FIEMAP ioctl.
-> +verify_filefrag()
-> +{
-> +	local frag_info
-> +	local paddr
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
 > +
-> +	# record details in .full file
-> +	${FILEFRAG_PROG} -Bes -v $TESTFILE >> $seqres.full
+> +# The first byte with a value of 0xae starts at an offset (2518890) which is not
+> +# a multiple of the block size.
+> +$XFS_IO_PROG -f \
+> +	-c "pwrite -S 0x6b 0 2518890" \
+> +	-c "pwrite -S 0xae 2518890 102398" \
+> +	$SCRATCH_MNT/foo | _filter_xfs_io
 > +
-> +	# Due to physical things can't be golden image, so only output logical
-> +	# information at here
-> +	frag_info=`${FILEFRAG_PROG} -Be $TESTFILE | _filter_filefrag`
-> +	echo "$frag_info" | cut -d# -f3-
+> +# Create a second file with a length not aligned to the block size, whose bytes
+> +# all have the value 0x6b, so that its extent(s) can be deduplicated with the
+> +# first file.
+> +$XFS_IO_PROG -f -c "pwrite -S 0x6b 0 557771" $SCRATCH_MNT/bar | _filter_xfs_io
+> +
+> +# The file is filled with bytes having the value 0x6b from offset 0 to offset
+> +# 2518889 and with the value 0xae from offset 2518890 to offset 2621287.
+> +echo "File content before deduplication:"
+> +od -t x1 $SCRATCH_MNT/foo
+> +
+> +# Now deduplicate the entire second file into a range of the first file that
+> +# also has all bytes with the value 0x6b. The destination range's end offset
+> +# must not be aligned to the block size and must be less then the offset of
+> +# the first byte with the value 0xae (byte at offset 2518890).
+> +$XFS_IO_PROG -c "dedupe $SCRATCH_MNT/bar 0 1957888 557771" $SCRATCH_MNT/foo \
+> +	| _filter_xfs_io
+> +
+> +# The bytes in the range starting at offset 2515659 (end of the deduplication
+> +# range) and ending at offset 2519040 (start offset rounded up to the block
+> +# size) must all have the value 0xae (and not replaced with 0x00 values).
 
-So you're assuming the filesystem will create as many extents as you
-expected, e.g. you're expecting the fs create three extents for the "5M
-sparse file", but the file layout is controlled by the fs not the user,
-it may create many more extents than expected.
-
-For a basic function test, I'm afraid you need to create your own map
-and check if what FIBMAP returns matches your map, like what
-src/fiemap-tester.c does.
-
-But for a targeted regression test, I think you could simply check if
-the physical addresses returned by FIBMAP are resonable.
+This doesn't seem right to me, range [2515659, 2518890) should be 0x6b
+not 0xae, while range [2518890, 2519040) indeed should contain 0xae.
 
 Thanks,
 Eryu
 
+> +# In other words, we should have exactly the same data we had before we asked
+> +# for deduplication.
+> +echo "File content after deduplication and before unmounting:"
+> +od -t x1 $SCRATCH_MNT/foo
 > +
-> +	# Then verify physical data by physical address
-> +	_scratch_unmount
-> +	for i in $frag_info; do
-> +		paddr=`echo $i | cut -d# -f 1`
-> +		od -j $paddr -N 1048576 -t x1 $SCRATCH_DEV | \
-> +			sed -e 's/^[0-9a-f]\+/XXXX /'
-> +	done
-> +	_scratch_mount
-> +}
+> +# Unmount the filesystem and mount it again. This guarantees any file data in
+> +# the page cache is dropped.
+> +_scratch_cycle_mount
 > +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_scratch_mount
+> +# The bytes in the range starting at offset 2515659 (end of the deduplication
+> +# range) and ending at offset 2519040 (start offset rounded up to the block
+> +# size) must all have the value 0xae (and not replaced with 0x00 values).
+> +# In other words, we should have exactly the same data we had before we asked
+> +# for deduplication.
+> +echo "File content after unmounting:"
+> +od -t x1 $SCRATCH_MNT/foo
 > +
-> +echo "== FIBMAP on an empty file =="
-> +$XFS_IO_PROG -f -c "truncate 0" $TESTFILE > /dev/null
-> +verify_filefrag
-> +
-> +echo "== FIBMAP on 1M general file =="
-> +$XFS_IO_PROG -f -t -c "pwrite -S 0xaa 0 1m" $TESTFILE > /dev/null
-> +verify_filefrag
-> +
-> +echo "== FIBMAP on 5M sparse file =="
-> +$XFS_IO_PROG -f -t -c "pwrite -S 0xaa 0 1m" \
-> +	     -c "pwrite -S 0xaa 2m 1m" \
-> +	     -c "pwrite -S 0xaa 4m 1m" \
-> +	     $TESTFILE > /dev/null
-> +verify_filefrag
-> +
-> +# success, all done
 > +status=0
 > +exit
 > diff --git a/tests/generic/505.out b/tests/generic/505.out
 > new file mode 100644
-> index 00000000..2a310ee8
+> index 00000000..7556b9fb
 > --- /dev/null
 > +++ b/tests/generic/505.out
-> @@ -0,0 +1,21 @@
+> @@ -0,0 +1,33 @@
 > +QA output created by 505
-> +== FIBMAP on an empty file ==
-> +
-> +== FIBMAP on 1M general file ==
-> +0#merged,eof
-> +XXXX  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +wrote 2518890/2518890 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 102398/102398 bytes at offset 2518890
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +wrote 557771/557771 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File content before deduplication:
+> +0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
 > +*
-> +XXXX 
-> +== FIBMAP on 5M sparse file ==
-> +0#merged
-> +2097152#merged
-> +4194304#merged,eof
-> +XXXX  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
+> +11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
 > +*
-> +XXXX 
-> +XXXX  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +11777540 ae ae ae ae ae ae ae ae
+> +11777550
+> +deduped 557771/557771 bytes at offset 1957888
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +File content after deduplication and before unmounting:
+> +0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
 > +*
-> +XXXX 
-> +XXXX  aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
+> +11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
+> +11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
 > +*
-> +XXXX 
+> +11777540 ae ae ae ae ae ae ae ae
+> +11777550
+> +File content after unmounting:
+> +0000000 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b
+> +*
+> +11467540 6b 6b 6b 6b 6b 6b 6b 6b 6b 6b ae ae ae ae ae ae
+> +11467560 ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae ae
+> +*
+> +11777540 ae ae ae ae ae ae ae ae
+> +11777550
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 55155de8..018c5d2d 100644
+> index 55155de8..2ff1bd7e 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
 > @@ -507,3 +507,4 @@
 >  502 auto quick log
 >  503 auto quick dax punch collapse zero
 >  504 auto quick locks
-> +505 auto quick
+> +505 auto quick clone dedupe
 > -- 
-> 2.14.4
+> 2.11.0
 > 
