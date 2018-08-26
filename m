@@ -1,67 +1,78 @@
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:34861 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726589AbeHZQVs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Aug 2018 12:21:48 -0400
-Date: Sun, 26 Aug 2018 20:39:13 +0800
+Received: from mail-pl1-f195.google.com ([209.85.214.195]:37904 "EHLO
+        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726724AbeHZQlA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Aug 2018 12:41:00 -0400
+Received: by mail-pl1-f195.google.com with SMTP id u11-v6so2955322plq.5
+        for <fstests@vger.kernel.org>; Sun, 26 Aug 2018 05:58:30 -0700 (PDT)
+Date: Sun, 26 Aug 2018 20:58:11 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] overlay/016: split into two tests
-Message-ID: <20180826123913.GA3651@desktop>
-References: <1535085644-23131-1-git-send-email-amir73il@gmail.com>
- <CAOQ4uxjaUUMZyfsYs2A=O661XoEq68rktSjFTqLPVZ4V91CCNA@mail.gmail.com>
+Subject: Re: [PATCH v2] xfstests: filter redundant output by getfattr
+Message-ID: <20180826125811.GB3651@desktop>
+References: <20180823024124.5341-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjaUUMZyfsYs2A=O661XoEq68rktSjFTqLPVZ4V91CCNA@mail.gmail.com>
+In-Reply-To: <20180823024124.5341-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 24, 2018 at 01:51:04PM +0300, Amir Goldstein wrote:
-> On Fri, Aug 24, 2018 at 7:38 AM Amir Goldstein <amir73il@gmail.com> wrote:
-> >
-> > overlay/016 tests two cases of ro/rw fd data inconsistecies -
-> > one using pread and one using mmap read (i.e. mread).
-> >
-> > The first case now passes with stacked overlay file operations
-> > patch set merged. The second case will still fail.
-> >
-> > By splitting the two test cases we get one regression test for
-> > the common case of ro/rw fd data inconsistecy with pread and
-> > one test to track the remaining non-standard behavior of
-> > overlayfs w.r.t mmap.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >
-> > Eryu,
-> >
-> > The overlayfs ro/rw fd data inconsistecies patches were
-> > finally merged, so we can now merge this test change to
-> > reflect new behavior.
-> >
-> > After this change on current master:
-> > - overlay/16 is expected to pass
-> > - overlay/61 is expected to fail
-> >
-> > FYI, overlay/60 (new metacopy feature test) is also expected to
-> > run and pass on master.
-> >
+On Thu, Aug 23, 2018 at 10:41:24AM +0800, Zorro Lang wrote:
+> When getfattr dumps values of all extended attributes (-d option),
+> it doesn't print empty extended attributes. e.g: user.name. But
+> from attr-2.4.48 this behavior is changed,  new getfattr prints
+> user.name="".
 > 
-> Eryu,
+> The {=""} will break the golden image, so filter the redundant =""
+> at the end if it has.
 > 
-> More FYI from testing overlayfs over ext4/xfs on master:
-> - With base fs xfs, swap group tests crash the kernel - sent out a fix
-> - With base fs xfs, overlay/019 stress test hits lockdep "circular dependency"
->   and "downgrading a read lock" warnings - it seems like a 4.18-rc1 regression
->   I will need more time to investigate
-> - With base fs ext4, the 6 tests that do "_test_generic_punch -d" fail -
->   all expect for generic/009 are regressions from this cycle
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
 > 
-> The above generic tests failures are the only failures I observed with
-> "check -overlay -g quick" apart from test that also fail on base fs
-> (e.g. generic/484).
+> Hi,
+> 
+> Sorry I took long time to write this V2, due to it changed many
+> cases, I have to test them one by one. V1 patch refer to:
+> https://patchwork.kernel.org/patch/10521875/
+> 
+> V2 did below changes:
+> 1) Bring in a common function named _getfattr()
+> 2) Replace all $GETFATTR_PROG with _getfattr
 
-Thanks a lot for the detailed information!
+Thanks a lot for the work!
 
+> 
+> Thanks,
+> Zorro
+> 
+>  common/attr       | 11 +++++++++++
+>  tests/ext4/022    |  2 +-
+>  tests/ext4/026    |  4 ++--
+>  tests/generic/020 |  8 ++++----
+>  tests/generic/037 |  2 +-
+>  tests/generic/062 |  4 ++--
+>  tests/generic/066 |  4 ++--
+>  tests/generic/093 |  2 +-
+>  tests/generic/097 |  2 +-
+>  tests/generic/337 |  2 +-
+>  tests/generic/364 |  4 ++--
+
+This test and ..
+
+>  tests/generic/403 |  2 +-
+>  tests/generic/454 |  6 +++---
+>  tests/generic/489 |  2 +-
+>  tests/overlay/011 |  2 +-
+>  tests/overlay/026 |  4 ++--
+>  tests/overlay/038 |  4 ++--
+>  tests/overlay/041 |  4 ++--
+>  tests/overlay/046 |  6 +++---
+>  tests/overlay/056 |  2 +-
+>  tests/overlay/060 |  4 ++--
+
+this one requires sourcing common/attr before using _getfattr. I've
+fixed them on commit.
+
+Thanks,
 Eryu
