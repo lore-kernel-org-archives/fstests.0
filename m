@@ -1,113 +1,88 @@
-Received: from mail-pl1-f173.google.com ([209.85.214.173]:33870 "EHLO
-        mail-pl1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726733AbeHZQzY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Aug 2018 12:55:24 -0400
-Received: by mail-pl1-f173.google.com with SMTP id f6-v6so2962525plo.1
-        for <fstests@vger.kernel.org>; Sun, 26 Aug 2018 06:12:52 -0700 (PDT)
-Message-ID: <5b82a753.1c69fb81.ccc82.56ad@mx.google.com>
-Date: Sun, 26 Aug 2018 21:12:45 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to aefa91183494
+Received: from mail-yw1-f65.google.com ([209.85.161.65]:37450 "EHLO
+        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726500AbeHZSPu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 26 Aug 2018 14:15:50 -0400
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="kqKQOb4uyxT5"
-Content-Disposition: inline
+References: <1535085644-23131-1-git-send-email-amir73il@gmail.com>
+ <CAOQ4uxjaUUMZyfsYs2A=O661XoEq68rktSjFTqLPVZ4V91CCNA@mail.gmail.com> <20180826123913.GA3651@desktop>
+In-Reply-To: <20180826123913.GA3651@desktop>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 26 Aug 2018 17:34:49 +0300
+Message-ID: <CAOQ4uxjz4GfiJ241tBp9QAwM7hV9BK-==GocX2_xU2mBO6QPog@mail.gmail.com>
+Subject: Re: [PATCH v3] overlay/016: split into two tests
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
+On Sun, Aug 26, 2018 at 3:39 PM Eryu Guan <guaneryu@gmail.com> wrote:
+>
+> On Fri, Aug 24, 2018 at 01:51:04PM +0300, Amir Goldstein wrote:
+> > On Fri, Aug 24, 2018 at 7:38 AM Amir Goldstein <amir73il@gmail.com> wrote:
+> > >
+> > > overlay/016 tests two cases of ro/rw fd data inconsistecies -
+> > > one using pread and one using mmap read (i.e. mread).
+> > >
+> > > The first case now passes with stacked overlay file operations
+> > > patch set merged. The second case will still fail.
+> > >
+> > > By splitting the two test cases we get one regression test for
+> > > the common case of ro/rw fd data inconsistecy with pread and
+> > > one test to track the remaining non-standard behavior of
+> > > overlayfs w.r.t mmap.
+> > >
+> > > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > > ---
+> > >
+> > > Eryu,
+> > >
+> > > The overlayfs ro/rw fd data inconsistecies patches were
+> > > finally merged, so we can now merge this test change to
+> > > reflect new behavior.
+> > >
+> > > After this change on current master:
+> > > - overlay/16 is expected to pass
+> > > - overlay/61 is expected to fail
+> > >
+> > > FYI, overlay/60 (new metacopy feature test) is also expected to
+> > > run and pass on master.
+> > >
+> >
+> > Eryu,
+> >
+> > More FYI from testing overlayfs over ext4/xfs on master:
 
---kqKQOb4uyxT5
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Some updates:
 
-Hi all,
+> > - With base fs xfs, swap group tests crash the kernel - sent out a fix
 
-The master branch of the xfstests repository at:
+v2 of ovl fixes will be posted shortly.
+v2 doesn't fix overlayfs swap file support - it disables it - so the swap
+group is due to not run if the fix is merged.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> > - With base fs xfs, overlay/019 stress test hits lockdep "circular dependency"
+> >   and "downgrading a read lock" warnings - it seems like a 4.18-rc1 regression
+> >   I will need more time to investigate
+> > - With base fs ext4, the 6 tests that do "_test_generic_punch -d" fail -
+> >   all expect for generic/009 are regressions from this cycle
 
-have just been updated. Again, this is a small update that fixes the output
-mismatch caused by new getfattr and splits overlay/016 into two tests. And the
-new overlay/061 is expected to fail with latest Linus tree.
+Will post an ovl fix shortly.
+generic/009 was failing on overlay over ext4 because the test is
+not "overlay friendly" (it has "$FSTYP" = "ext4") - will send a fix.
 
-Recently the review process is a bit slow on my part, hopefully I'll get to the
-following patchset next week.
+> >
+> > The above generic tests failures are the only failures I observed with
+> > "check -overlay -g quick" apart from test that also fail on base fs
+> > (e.g. generic/484).
+>
 
-[PATCH 00/16] Fix tests to work on non-4k block sized fs instances
+FYI2, there are ~150 generic tests that are notrun when running
+overlay over xfs-reflink compared to xfs-reflink for various reasons
+(mostly _require_block_device), but found one test generic/474
+that is notrun on overlay over ext4 that is not expected and that
+test was written specifically to cover an overlayfs bug fix.
+Will follow up on that.
 
 Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-aefa91183494 overlay/016: split into two tests
-
-New commits:
-
-Amir Goldstein (2):
-      [2028376ff928] open_by_handle: fix name of directory in error messages
-      [aefa91183494] overlay/016: split into two tests
-
-Zorro Lang (1):
-      [794f4594fbf4] fstests: filter redundant output by getfattr
-
-
-Code Diffstat:
-
- common/attr           | 12 ++++++++++
- src/open_by_handle.c  |  6 +++--
- tests/ext4/022        |  2 +-
- tests/ext4/026        |  4 ++--
- tests/generic/020     |  8 +++----
- tests/generic/037     |  2 +-
- tests/generic/062     |  4 ++--
- tests/generic/066     |  4 ++--
- tests/generic/093     |  2 +-
- tests/generic/097     |  2 +-
- tests/generic/337     |  2 +-
- tests/generic/364     |  5 ++--
- tests/generic/403     |  2 +-
- tests/generic/454     |  6 ++---
- tests/generic/489     |  2 +-
- tests/overlay/011     |  2 +-
- tests/overlay/016     | 15 ------------
- tests/overlay/016.out |  3 ---
- tests/overlay/026     |  4 ++--
- tests/overlay/038     |  4 ++--
- tests/overlay/041     |  4 ++--
- tests/overlay/046     |  6 ++---
- tests/overlay/056     |  2 +-
- tests/overlay/060     |  5 ++--
- tests/overlay/061     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/061.out |  4 ++++
- tests/overlay/group   |  1 +
- tests/shared/002      |  2 +-
- tests/xfs/021         |  8 +++----
- tests/xfs/187         |  2 +-
- 30 files changed, 129 insertions(+), 61 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---kqKQOb4uyxT5
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbgqbrAAoJECZSqilcj+djucQQAM2N46RBum/mjGQPM7Jp3U4V
-rWXx8hRmQ0awIYoNRzmi72QIQ9ktUslst2CW/mpK+sb70LriURFrF1qzHnYE3spY
-43n5JOUUIZtdyneepXhoJ1S1w3Km4zVUst1ONt57UYoG83zCgpAlyoa/e7kEqfHA
-7J7zRhZ63zjGgtMeiZg2YKpgTB7KGmdpnbKq9k9+Ua7Hfhs2MmWyVqGhdnno/Xj/
-ok6DFL8goeny9WWIkjQ5aFnZ5zq/rdXeRxL+BzJDObhnFBbObcZrRgBxmrVHsTIe
-x3ql8DMe3p5WL375unRNvvSfdjbEYvD72z+8KYN4JIpFuNLoBOPaq/vrFf7KVCCj
-L5nDubN/MGRMO7Q/MVDVqsQ65YCQV9FB5CcYELBdP2ntpd76/kUIbXv1jEJog/ge
-MwQzTdgqeB2GokqqFyJ/5MM4hRiEb7VgOh6b3GRkEaA2eD9RScAUCbdqVtBq77Ci
-ftq8hqvM0efzk18G4oXYVecu/0LMdx6BMROULYxpGqtrkbQDcx9S2A1Fgb6TIkoj
-WbVG/SDX67uTkr1p0X9YQob5euGpiaeS195W/CYujMjxhEJ+6AMi8pt/naKa2eE+
-ID2b+WpgDujBMbYwZM7NCtYUiSGUuQWzjgDpG6ZxPbgonA7I5DBIZfqdQpEWbZZT
-UTqTQ5/nAEKqsABYiQdR
-=vsSm
------END PGP SIGNATURE-----
-
---kqKQOb4uyxT5--
+Amir.
