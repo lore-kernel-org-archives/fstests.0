@@ -1,48 +1,51 @@
-Received: from mx2.suse.de ([195.135.220.15]:36802 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726851AbeH0Q5x (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 27 Aug 2018 12:57:53 -0400
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id BDD55AFC7
-        for <fstests@vger.kernel.org>; Mon, 27 Aug 2018 13:11:16 +0000 (UTC)
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH] src/seek_sanity_test: skip test20 if file's too big
-Date: Mon, 27 Aug 2018 14:12:11 +0100
-Message-Id: <20180827131211.5887-1-lhenriques@suse.com>
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:44165 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726895AbeH0WPT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Aug 2018 18:15:19 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH 0/2] fstests: fix overlay test failure over ext4
+Date: Mon, 27 Aug 2018 21:29:24 +0300
+Message-Id: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Jan Kara <jack@suse.cz>, Luis Henriques <lhenriques@suse.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Since the allocation size can be quite big for some filesystems (4194304
-for cephfs), the pwrite operation in test20 may fail with EFBIG.  Skip
-this test if that's the case.
+Eryu,
 
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- src/seek_sanity_test.c | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+As I reported earlier, test generic/009 was failing ./check -overlay
+run due to a test bug. The test belongs to a class of tests that have
+explicit check for a certain $FSTYP, which does not apply when FSTYP is
+overlay.
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index e5aab239771d..e9938d1b1a23 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -280,8 +280,17 @@ static int test20(int fd, int testnum)
- 	/* Magic size in the middle of ext[23] triple indirect tree */
- 	filsz = (12 + bufsz / 4 + 8 * bufsz / 4 * bufsz / 4 + 2 * bufsz / 4 + 5) * bufsz;
- 	ret = do_pwrite(fd, buf, bufsz, filsz - bufsz);
--	if (ret)
-+	if (ret) {
-+		/*
-+		 * Report success. Filesystem just cannot handle so large
-+		 * offsets and correctly reports it.
-+		 */
-+		if (errno == EFBIG) {
-+			fprintf(stdout, "Test skipped as fs doesn't support so large files.\n");
-+			ret = 0;
-+		}
- 		goto out;
-+	}
- 
- 	/* Offset inside ext[23] indirect block */
- 	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 14 * bufsz, filsz - bufsz);
+I ran all the tests that check for FSTYP = ext4 with overlay over ext4
+and all the tests that check for FSTYP = xfs with overlay over xfs.
+generic/009 was the only test that failed because of the exlicit check.
+The rest of the tests either passes or did not run for a good reason.
+
+Strangely, tests which _require_seek_data_hole(), that has the exact same
+check as generic/009 didn't fail with overlay over ext4. In fact, those
+tests also did not with with bare ext4 even when I removed the call
+to _ext4_disable_extent_zeroout() from _require_seek_data_hole()???
+
+I tried to come up with a more generic solution, but didn't like any
+ideas I had, so I ended up fixing generic/009 in place in the hope that
+you either accept it as is or propose a better solution.
+
+The fix depends on the user either setting FSTYP=ext4 in a config file
+or setting the variable OVL_BASE_FSTYP before running the test.
+I will soon send a patch for kvm-xfstests to Ted that does the latter.
+
+Thanks,
+Amir.
+
+Amir Goldstein (2):
+  overlay: do not set OVL_BASE_FSTYP value to "overlay"
+  generic/009: fix test failure with overlay over ext4
+
+ common/config     | 2 +-
+ tests/generic/009 | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+-- 
+2.7.4
