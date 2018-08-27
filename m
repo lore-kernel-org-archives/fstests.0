@@ -1,40 +1,48 @@
-Received: from mail-yb0-f193.google.com ([209.85.213.193]:42213 "EHLO
-        mail-yb0-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726526AbeHZSee (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 26 Aug 2018 14:34:34 -0400
-MIME-Version: 1.0
-References: <1513324055-77618-1-git-send-email-cgxu519@icloud.com> <1513324055-77618-3-git-send-email-cgxu519@icloud.com>
-In-Reply-To: <1513324055-77618-3-git-send-email-cgxu519@icloud.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 26 Aug 2018 17:53:33 +0300
-Message-ID: <CAOQ4uxgf=btK-MKed7-8_nmpfO-UnPyVJ4RyTtK1hMQuU8Y=-g@mail.gmail.com>
-Subject: Re: [PATCH v5 3/3] generic/471: add syncfs test
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx2.suse.de ([195.135.220.15]:36802 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726851AbeH0Q5x (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 27 Aug 2018 12:57:53 -0400
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id BDD55AFC7
+        for <fstests@vger.kernel.org>; Mon, 27 Aug 2018 13:11:16 +0000 (UTC)
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] src/seek_sanity_test: skip test20 if file's too big
+Date: Mon, 27 Aug 2018 14:12:11 +0100
+Message-Id: <20180827131211.5887-1-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chengguang Xu <cgxu519@icloud.com>
-Cc: Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Jan Kara <jack@suse.cz>, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Dec 15, 2017 at 9:48 AM Chengguang Xu <cgxu519@icloud.com> wrote:
->
-> Inspired by syncfs bug of overlayfs which does not sync dirtyinodes in
-> underlying filesystem.
-> Run syncfs and shutdown filesystem(or underlying filesystem of overlayfs)
-> to check syncfs result.
->
-> Signed-off-by: Chengguang Xu <cgxu519@icloud.com>
-> ---
+Since the allocation size can be quite big for some filesystems (4194304
+for cephfs), the pwrite operation in test20 may fail with EFBIG.  Skip
+this test if that's the case.
 
-Hi Chengguang,
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ src/seek_sanity_test.c | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
 
-I just noticed that this test (now generic/474) is skipped for overlay over ext4
-for a strange looking reason - it seems that in the overlay_mount() call from
-_scratch_cycle_mount() the function hits
-_notrun "upper fs needs to support d_type".
-
-This doesn't happen on my test system with overlay over xfs.
-Did you happen to test this with overlay over ext4 at the time?
-Will you have time to look into this?
-
-Thanks,
-Amir.
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index e5aab239771d..e9938d1b1a23 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -280,8 +280,17 @@ static int test20(int fd, int testnum)
+ 	/* Magic size in the middle of ext[23] triple indirect tree */
+ 	filsz = (12 + bufsz / 4 + 8 * bufsz / 4 * bufsz / 4 + 2 * bufsz / 4 + 5) * bufsz;
+ 	ret = do_pwrite(fd, buf, bufsz, filsz - bufsz);
+-	if (ret)
++	if (ret) {
++		/*
++		 * Report success. Filesystem just cannot handle so large
++		 * offsets and correctly reports it.
++		 */
++		if (errno == EFBIG) {
++			fprintf(stdout, "Test skipped as fs doesn't support so large files.\n");
++			ret = 0;
++		}
+ 		goto out;
++	}
+ 
+ 	/* Offset inside ext[23] indirect block */
+ 	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 14 * bufsz, filsz - bufsz);
