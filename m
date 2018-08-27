@@ -1,47 +1,48 @@
-Received: from mail-wm0-f67.google.com ([74.125.82.67]:33218 "EHLO
-        mail-wm0-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727410AbeH0WPW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Aug 2018 18:15:22 -0400
+Received: from mail-wm0-f65.google.com ([74.125.82.65]:34676 "EHLO
+        mail-wm0-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726826AbeH0WZA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Aug 2018 18:25:00 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] generic/009: fix test failure with overlay over ext4
-Date: Mon, 27 Aug 2018 21:29:26 +0300
-Message-Id: <1535394566-18837-3-git-send-email-amir73il@gmail.com>
-In-Reply-To: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
-References: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH] test-appliance: store the base fs type for overlay test run
+Date: Mon, 27 Aug 2018 21:39:05 +0300
+Message-Id: <1535395145-19166-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <eguan@redhat.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When running test with overlayfs and ext4 as base fs, we need to
-disable extent zeroout on the underlying base fs.
+The base fs is used by xfstests in several places, for example, to
+check if need to disable extent zeroing for underlying ext4 base fs.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
 
-Eryu,
+Ted,
 
-Suggestions for a cleaner approach are welcome.
+This patch is complimentary to this change in fstests:
+https://marc.info/?l=fstests&m=153539445716875&w=2
 
 Thanks,
 Amir.
 
- tests/generic/009 | 3 +++
- 1 file changed, 3 insertions(+)
+ kvm-xfstests/test-appliance/files/root/runtests.sh | 5 +++++
+ 1 file changed, 5 insertions(+)
 
-diff --git a/tests/generic/009 b/tests/generic/009
-index fa6ef46..a4f56d0 100755
---- a/tests/generic/009
-+++ b/tests/generic/009
-@@ -39,6 +39,9 @@ testfile=$TEST_DIR/009.$$
- if [ "$FSTYP" = "ext4" ]; then
- 	_ext4_disable_extent_zeroout
- fi
-+if [ "$FSTYP" = "overlay" -a "$OVL_BASE_FSTYP" = "ext4" ]; then
-+	_ext4_disable_extent_zeroout "$OVL_BASE_TEST_DEV"
-+fi
- 
- # When PAGE_SIZE > 4096 some filesystems extent layout is different so
- # it would not match the output.
+diff --git a/kvm-xfstests/test-appliance/files/root/runtests.sh b/kvm-xfstests/test-appliance/files/root/runtests.sh
+index 1905493..5430dd7 100755
+--- a/kvm-xfstests/test-appliance/files/root/runtests.sh
++++ b/kvm-xfstests/test-appliance/files/root/runtests.sh
+@@ -379,6 +379,11 @@ do
+ 	    echo TEST_SET_EXCLUDE: $TEST_SET_EXCLUDE
+ 	    echo TEST_SET_EXCLUDE: $XFS_IO_AVOID >> "$RESULT_BASE/config"
+ 	fi
++	if [ "$FS" = overlay ]; then
++		# with an overlay configuration preserve base FSTYP
++		# in OVL_BASE_FSTYP
++		export OVL_BASE_FSTYP="$FSTESTTYP"
++	fi
+ 	export FSTYP=$FS
+ 	AEX=""
+ 	if test -n "$DO_AEX" ; then
 -- 
 2.7.4
