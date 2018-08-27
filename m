@@ -1,51 +1,46 @@
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:44165 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726895AbeH0WPT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 27 Aug 2018 18:15:19 -0400
+Received: from mail-wm0-f66.google.com ([74.125.82.66]:40320 "EHLO
+        mail-wm0-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726895AbeH0WPV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 27 Aug 2018 18:15:21 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 0/2] fstests: fix overlay test failure over ext4
-Date: Mon, 27 Aug 2018 21:29:24 +0300
-Message-Id: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
+Subject: [PATCH 1/2] overlay: do not set OVL_BASE_FSTYP value to "overlay"
+Date: Mon, 27 Aug 2018 21:29:25 +0300
+Message-Id: <1535394566-18837-2-git-send-email-amir73il@gmail.com>
+In-Reply-To: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
+References: <1535394566-18837-1-git-send-email-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+The purpose of OVL_BASE_FSTYP is to store the value of FSTYP that is
+found in a host config file section.
 
-As I reported earlier, test generic/009 was failing ./check -overlay
-run due to a test bug. The test belongs to a class of tests that have
-explicit check for a certain $FSTYP, which does not apply when FSTYP is
-overlay.
+When there is no host config file or if user sets FSTYP=overlay in config
+file, it makes no sense to store the value "overlay" in OVL_BASE_FSTYP
+and it is better to leave it empty or leave its current value in tact.
 
-I ran all the tests that check for FSTYP = ext4 with overlay over ext4
-and all the tests that check for FSTYP = xfs with overlay over xfs.
-generic/009 was the only test that failed because of the exlicit check.
-The rest of the tests either passes or did not run for a good reason.
+This allows user to set OVL_BASE_FSTYP in config file or before running
+the test to support queries about base fs, such as
+_require_metadata_journaling, even when running an overlay test.
 
-Strangely, tests which _require_seek_data_hole(), that has the exact same
-check as generic/009 didn't fail with overlay over ext4. In fact, those
-tests also did not with with bare ext4 even when I removed the call
-to _ext4_disable_extent_zeroout() from _require_seek_data_hole()???
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-I tried to come up with a more generic solution, but didn't like any
-ideas I had, so I ended up fixing generic/009 in place in the hope that
-you either accept it as is or propose a better solution.
-
-The fix depends on the user either setting FSTYP=ext4 in a config file
-or setting the variable OVL_BASE_FSTYP before running the test.
-I will soon send a patch for kvm-xfstests to Ted that does the latter.
-
-Thanks,
-Amir.
-
-Amir Goldstein (2):
-  overlay: do not set OVL_BASE_FSTYP value to "overlay"
-  generic/009: fix test failure with overlay over ext4
-
- common/config     | 2 +-
- tests/generic/009 | 3 +++
- 2 files changed, 4 insertions(+), 1 deletion(-)
-
+diff --git a/common/config b/common/config
+index 2f1f272..d85519a 100644
+--- a/common/config
++++ b/common/config
+@@ -530,7 +530,7 @@ _overlay_config_override()
+ 	[ -b "$TEST_DEV" ] || return 0
+ 
+ 	# Config file may specify base fs type, but we obay -overlay flag
+-	export OVL_BASE_FSTYP="$FSTYP"
++	[ "$FSTYP" == overlay ] || export OVL_BASE_FSTYP="$FSTYP"
+ 	export FSTYP=overlay
+ 
+ 	# Store original base fs vars
 -- 
 2.7.4
