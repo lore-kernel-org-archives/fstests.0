@@ -1,13 +1,11 @@
-Received: from mail-pl1-f196.google.com ([209.85.214.196]:37906 "EHLO
-        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725904AbeH3I3l (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Aug 2018 04:29:41 -0400
-Received: by mail-pl1-f196.google.com with SMTP id u11-v6so3280374plq.5
-        for <fstests@vger.kernel.org>; Wed, 29 Aug 2018 21:29:27 -0700 (PDT)
-Date: Thu, 30 Aug 2018 12:29:21 +0800
-From: Eryu Guan <guaneryu@gmail.com>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:55101 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726457AbeH3Ifr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 Aug 2018 04:35:47 -0400
+Date: Thu, 30 Aug 2018 14:34:46 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH] misc large filesystem fixes
-Message-ID: <20180830042921.GD3651@desktop>
+Message-ID: <20180830043446.GE5631@dastard>
 References: <b647246c-c206-229a-f801-60f20dfa9f28@redhat.com>
  <20180830031902.GC3651@desktop>
  <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
@@ -17,7 +15,7 @@ Content-Disposition: inline
 In-Reply-To: <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
 On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
@@ -29,43 +27,8 @@ On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
 > >> xfs/010 and xfs/013 hardcode 2 AGs, but if the device is larger
 > >> than 2T this will fail.  Check the device size and restrict it
 > >> to just under 2T so that a 2-AG mkfs is possible.
-> >>
-> >> xfs/178 tries to decrease the agcount and re-mkfs, but if the
-> >> default AG size was chosen to be 1T, decreasing the AG count
-> >> results in too-large AGs and mkfs fails.  The intention here
-> >> AFAICT is to simply re-mkfs with non-overlapping AG headers,
-> >> so increasing the AG count should achieve the same purpose,
-> >> and cause mkfs to choose a smaller-than-default AG size which
-> >> should pass.
-> >>
-> >> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> >> ---
-> >>
-> >> diff --git a/tests/xfs/010 b/tests/xfs/010
-> >> index ee1595c8..2b30c867 100755
-> >> --- a/tests/xfs/010
-> >> +++ b/tests/xfs/010
-> >> @@ -96,7 +96,14 @@ _require_xfs_finobt
-> >>  
-> >>  rm -f $seqres.full
-> >>  
-> >> -_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2" | _filter_mkfs 2>$seqres.full
-> >> +# If 2 AGs would result in too-large AG size, restrict the size
-> >> +DSIZEOPT=""
-> >> +DEV_SZ=$(blockdev --getsize64 $SCRATCH_DEV)
-> >> +if [ "$DEV_SZ" -ge "$((2*(2**40)))" ]; then
-> >> +  DSIZEOPT="-d size=2047g"
-> >> +fi
-> >> +
-> >> +_scratch_mkfs_xfs "-m crc=1,finobt=1 -d agcount=2 $DSIZEOPT" | _filter_mkfs 2>$seqres.full
-> > 
-> > I think this kind of problem will happen to all tests that specify a
-> > custom "agcount" in mkfs but without an "agsize" nor "size". For
-> > example, xfs/062 would fail if $SCRATCH_DEV is larger than 8T. I guess
-> > we need a more general way to fix the problem.
-> 
-> Whoops, yes, I missed xfs/062
->  
+
+....
 > > I'm thinking to introduce a new helper to require a given agcount will
 > > fit the device size, and if the device is bigger than ($agcount * 1T)
 > > then _notrun the test, something like (may need a better helper name):
@@ -107,20 +70,11 @@ On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
 > 
 > Rather than a _require and a _notrun, what about a mkfs_scratch_agcount()
 > that does something like
-
-Yeah, I know there're better ways :)
-
 > 
 > mkfs_scratch_agcount()
-
-Or _scratch_mkfs_agcount()? Following the naming as in _scratch_mkfs_sized().
-
 > {
 >  agcount=$1
 >  opts=$2
-
-And make sure local variables are declared as "local".
-
 > 
 >  # If $agcount AGs would result in too-large AG size, restrict the size
 >  # to create $agcount roughly 1T AGs.
@@ -134,6 +88,29 @@ And make sure local variables are declared as "local".
 > 
 > or something like that?
 
-Thanks!
+Or, simpler options:
 
-Eryu
+	- scratch_mkfs_sized with a size appropriate for the test
+	  (works for every configuration)
+	- _require_no_large_scratch_device (or whatever it's name
+	  is) to skip the test on large devices
+	- SCRATCH_MKFS_OPTIONS="-d agcount=500" on a 10GB scratch
+	  device (i.e. 500x20MB AGs) will exercise most of the dusty
+	  code corners cases that a 500TB filesystem with 1TB AGs
+	  and 49.95TB preallocated by --largefs.
+
+Remember, we don't have to test /everything/ with large filesystems
+- most of the filesystem functionality behaves exactly the same on
+small and large filesytsems. i.e. the largefs option is to be able
+run smoke, stress and ENOSPC tests on unreasonably large
+filesystems with a very small sparse backing store space
+requirements, not run our entire suite of pin-point correctness and
+regression tests that mostly only require a few megabytes of space
+to run.... 
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
