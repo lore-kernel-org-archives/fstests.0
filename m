@@ -1,112 +1,171 @@
-Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:55101 "EHLO
-        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726457AbeH3Ifr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 Aug 2018 04:35:47 -0400
-Date: Thu, 30 Aug 2018 14:34:46 +1000
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:60996 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726169AbeH3K2V (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 Aug 2018 06:28:21 -0400
+Date: Thu, 30 Aug 2018 16:27:43 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] misc large filesystem fixes
-Message-ID: <20180830043446.GE5631@dastard>
-References: <b647246c-c206-229a-f801-60f20dfa9f28@redhat.com>
- <20180830031902.GC3651@desktop>
- <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
+Subject: Re: [patch] file dedupe (and maybe clone) data corruption (was Re:
+ [PATCH] generic: test for deduplication between different files)
+Message-ID: <20180830062743.GF5631@dastard>
+References: <20180817083924.16916-1-fdmanana@kernel.org>
+ <20180819231126.GU2234@dastard>
+ <20180820010932.GV2234@dastard>
+ <20180820153349.GA4334@magnolia>
+ <20180823125849.GF13528@hungrycats.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
+In-Reply-To: <20180823125849.GF13528@hungrycats.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+To: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fdmanana@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
-> On 8/29/18 10:19 PM, Eryu Guan wrote:
-> > On Wed, Aug 29, 2018 at 04:43:38PM -0500, Eric Sandeen wrote:
-> >> There are a few tests which fail on large filesytems because
-> >> we run into mkfs limits.
-> >>
-> >> xfs/010 and xfs/013 hardcode 2 AGs, but if the device is larger
-> >> than 2T this will fail.  Check the device size and restrict it
-> >> to just under 2T so that a 2-AG mkfs is possible.
+On Thu, Aug 23, 2018 at 08:58:49AM -0400, Zygo Blaxell wrote:
+> On Mon, Aug 20, 2018 at 08:33:49AM -0700, Darrick J. Wong wrote:
+> > On Mon, Aug 20, 2018 at 11:09:32AM +1000, Dave Chinner wrote:
+> > > 	- is documenting rejection on request alignment grounds
+> > > 	  (i.e. EINVAL) in the man page sufficient for app
+> > > 	  developers to understand what is going on here?
+> > 
+> > I think so.  The manpage says: "The filesystem does not support
+> > reflinking the ranges of the given files", which (to my mind) covers
+> > this case of not supporting dedupe of EOF blocks.
+> 
+> Older versions of btrfs dedupe (before v4.2 or so) used to do exactly
+> this; however, on btrfs, not supporting dedupe of EOF blocks means small
+> files (one extent) cannot be deduped at all, because the EOF block holds
+> a reference to the entire dst extent.  If a dedupe app doesn't go all the
+> way to EOF on btrfs, then it should not attempt to dedupe any part of the
+> last extent of the file as the benefit would be zero or slightly negative.
 
-....
-> > I'm thinking to introduce a new helper to require a given agcount will
-> > fit the device size, and if the device is bigger than ($agcount * 1T)
-> > then _notrun the test, something like (may need a better helper name):
-> > 
-> > _require_xfs_support_agcount()
-> > {
-> > 	local dev=$1
-> > 	local agcount=$2
-> > 	local max_sz=$((agcount*(2**40)))
-> > 	local dev_sz=$(blockdev --getsize64 $dev)
-> > 
-> > 	if [ $dev_sz -gt $max_sz ]; then
-> > 		_notrun "agcount $agcount is too small to hold $dev_sz device"
-> > 	fi
-> > }
-> 
-> I'm not sure we should _notrun, though - if what we really want to check
-> is a 2-AG filesystem on the scratch dev, there are times when we may simply
-> want to make a smaller filesystem and proceed.  For the cases I sent
-> in my patch this should be perfectly fine...
-> 
-> > Then add this _require rule to all tests that only specify a custom
-> > agsize, e.g. for xfs/010 we could do
-> > 
-> > _require_xfs_support_agcount $SCRATCH_DEV 2
-> > 
-> > I roughly went through all xfs tests and found that the following ones
-> > may need this new _require rule
-> > 
-> > xfs/010
-> > xfs/013
-> > xfs/062
-> > xfs/178
-> > xfs/179
-> > xfs/310
-> > 
-> > Perhaps there're better ways to solve the problem, any suggestions are
-> > welcomed! 
-> 
-> Rather than a _require and a _notrun, what about a mkfs_scratch_agcount()
-> that does something like
-> 
-> mkfs_scratch_agcount()
-> {
->  agcount=$1
->  opts=$2
-> 
->  # If $agcount AGs would result in too-large AG size, restrict the size
->  # to create $agcount roughly 1T AGs.
->  dsizeopt=""
->  dev_sz=$(blockdev --getsize64 $SCRATCH_DEV)
->  if [ "$dev_sz" -ge "$(($agcount*(2**40)))" ]; then
->    dsizeopt="-d size=$(($agcount*((2**40)-1)))"
->  fi
->  _scratch_mkfs_xfs "$opts -d agcount=$agcount $dsizeopt" | _filter_mkfs 2>$seqres.full
-> }
-> 
-> or something like that?
+That's a filesystem implementation issue, not an API or application
+issue.
 
-Or, simpler options:
+> The app developer would need to be aware that such a restriction could
+> exist on some filesystems, and be able to distinguish this from other
+> cases that could lead to EINVAL.  Portable code would have to try a dedupe
+> up to EOF, then if that failed, round down and retry, and if that failed
+> too, the app would have to figure out which filesystem it's running on
+> to know what to do next.  Performance demands the app know what the FS
+> will do in advance, and avoid a whole class of behavior.
 
-	- scratch_mkfs_sized with a size appropriate for the test
-	  (works for every configuration)
-	- _require_no_large_scratch_device (or whatever it's name
-	  is) to skip the test on large devices
-	- SCRATCH_MKFS_OPTIONS="-d agcount=500" on a 10GB scratch
-	  device (i.e. 500x20MB AGs) will exercise most of the dusty
-	  code corners cases that a 500TB filesystem with 1TB AGs
-	  and 49.95TB preallocated by --largefs.
+Nobody writes "portable" applications like that. They read the man
+page first, and work out what the common subset of functionality is
+and then code from that. Man page says:
 
-Remember, we don't have to test /everything/ with large filesystems
-- most of the filesystem functionality behaves exactly the same on
-small and large filesytsems. i.e. the largefs option is to be able
-run smoke, stress and ENOSPC tests on unreasonably large
-filesystems with a very small sparse backing store space
-requirements, not run our entire suite of pin-point correctness and
-regression tests that mostly only require a few megabytes of space
-to run.... 
+"Disk filesystems generally require the offset and length arguments
+to be aligned to the fundamental block size."
+
+IOWs, code compatible with starts with supporting the general case.
+i.e. a range rounded to filesystem block boundaries (it's already
+run fstat() on the files it wants to dedupe to find their size,
+yes?), hence ignoring the partial EOF block. Will just work on
+everything.
+
+Code that then wants to optimise for btrfs/xfs/ocfs quirks runs
+fstatvfs to determine what fs it's operating on and applies the
+necessary quirks. For btrfs it can extend the range to include the
+partial EOF block, and hence will handle the implementation quirks
+btrfs has with single extent dedupe.
+
+Simple, reliable, and doesn't require any sort of flailing
+about with offsets and lengths to avoid unexpected EINVAL errors.
+
+> btrfs dedupe reports success if the src extent is inline and the same
+> size as the dst extent (i.e. file is smaller than one page).  No dedupe
+> can occur in such cases--a clone results in a simple copy, so the best
+> a dedupe could do would be a no-op.  Returning EINVAL there would break
+> a few popular tools like "cp --reflink".  Returning OK but doing nothing
+> seems to be the best option in that case.
+
+Again, those are a filesystem implementation issues, not problems
+with the API itself.
+
+> > > 	- should we just round down the EOF dedupe request to the
+> > > 	  block before EOF so dedupe still succeeds?
+> > 
+> > I've often wondered if the interface should (have) be(en) that we start
+> > at src_off/dst_off and share as many common blocks as possible until we
+> > find a mismatch, then tell userspace where we stopped... instead of like
+> > now where we compare the entire extent and fail if any part of it
+> > doesn't match.
+> 
+> The usefulness or harmfulness of that approach depends a lot on what
+> the application expects the filesystem to do.
+> 
+> In btrfs, the dedupe operation acts on references to data, not the
+> underlying data blocks.  If there are 1000 slightly overlapping references
+> to a single contiguous range of data blocks in dst on disk, each dedupe
+> operation acts on only one of those, leaving the other 999 untouched.
+> If the app then submits 999 other dedupe requests, no references to the
+> dst blocks remain and the underlying data blocks can be deleted.
+
+Assuming your strawman is valid, if you have a thousand separate
+references across the same set of data blocks on disk, then that data is
+already heavily deduplicated.  Trying to optimise that further
+seems.... misguided, way down the curve of diminishing returns.
+
+> In a parallel universe (or a better filesystem, or a userspace emulation
+  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> built out of dedupe and other ioctls), dedupe could work at the extent
+> data (physical) level.  The app points at src and dst extent references
+> (inode/offset/length tuples), and the filesystem figures out which
+> physical blocks these point to, then adjusts all the references to the
+> dst blocks at once,
+
+That's XFS dedupe in a nutshell. And we aren't in a parallel
+universe here. :P
+
+> dealing with partial overlaps and snapshots and nodatacow
+> and whatever other exotic features might be lurking in the
+> filesystem, ending with every reference to every part of dst replaced
+> by the longest possible contiguous reference(s) to src.
+
+XFS doesn't have partial overlaps, we don't have nodatacow hacks,
+and the subvol snapshot stuff I'm working on just uses shared data
+extents so it's 100% compatible with dedupe.
+
+[snip btrfs dedupe issues]
+
+Again, it just seems to me like the problems you are describing are
+complexity problems that arise from the filesystem implementation
+and all the hoops you have to jump through to work around them. It
+doesn't seem to have anything to do with problems in the dedupe
+API...
+
+> If we want to design a new interface, it should allow the app to specify
+> maximum and minimum length, so that the kernel knows how much flexibility
+> it is allowed by the application.  Maximum length lets one app say
+> "dedupe as much as you can find, up to EOF", while minimum length lets
+> another app say "don't bother if the match is less than 12K, the space
+> saving is not worth the write iops", and setting them equal lets the
+> third app say "I have a plan that requires you to do precisely what I
+> tell you or do nothing at all."
+
+OK, we didn't need a "btrfs is insane" story to justify this
+proposal - it's an entirely reasonable set of control requests.
+IOWs, you want the current API (do exactly what I say),
+Darricks proposed API (do as much as you can) and a new behaviour
+(do at least this much) all rolled into one interface.
+
+So, cribbing from copy_file_range(), a syscall like:
+
+ssize_t dedupe_file_range(int fd_src, loff_t *off_src,
+			 int fd_dst, loff_t *off_dst,
+			 size_t len, unsigned int flags, u64 optval);
+
+With the control flags:
+
+#define DDFR_F_TRY		(0)	/* default: as much as possible */
+#define DDFR_F_EXACT		(1<<0)	/* exactly what is asked or fail */
+#define DDFR_F_MINLEN		(1<<1)	/* at least as much as optval says or fail */
+
+And all return the number of bytes deduped in the range that was
+specified.
+
+Perhaps you'd like to write a man page describing how it should all
+work?
 
 Cheers,
 
