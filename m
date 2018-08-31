@@ -1,79 +1,137 @@
-Received: from mout.gmx.net ([212.227.15.15]:43877 "EHLO mout.gmx.net"
+Received: from sandeen.net ([63.231.237.45]:37458 "EHLO sandeen.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727661AbeHaTCE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 31 Aug 2018 15:02:04 -0400
-Subject: Re: problem with tune2fs after ext4 godown
-References: <1513324055-77618-1-git-send-email-cgxu519@icloud.com>
- <1513324055-77618-3-git-send-email-cgxu519@icloud.com>
- <CAOQ4uxgf=btK-MKed7-8_nmpfO-UnPyVJ4RyTtK1hMQuU8Y=-g@mail.gmail.com>
- <63598ea1-8fd3-1003-a5b1-cb177a9380d8@gmx.com>
- <6c2125c0-5a89-4a67-7a2c-2bebe8dd5b7e@gmx.com>
- <CAOQ4uxhu9rNBByXwZifcf=mmDekGwu8H4s8GsMrFMcanp-7A5Q@mail.gmail.com>
-From: cgxu519 <cgxu519@gmx.com>
-Message-ID: <92bd7ae7-3601-9682-d131-258500393e9b@gmx.com>
-Date: Fri, 31 Aug 2018 22:53:54 +0800
+        id S1727248AbeHaVxA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 31 Aug 2018 17:53:00 -0400
+Subject: Re: [PATCH] misc large filesystem fixes
+References: <b647246c-c206-229a-f801-60f20dfa9f28@redhat.com>
+ <20180830031902.GC3651@desktop>
+ <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
+ <20180830043446.GE5631@dastard>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <271ddefb-6fac-68fe-aa37-9fb2e5e36c95@sandeen.net>
+Date: Fri, 31 Aug 2018 12:44:26 -0500
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxhu9rNBByXwZifcf=mmDekGwu8H4s8GsMrFMcanp-7A5Q@mail.gmail.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20180830043446.GE5631@dastard>
+Content-Type: text/plain; charset=utf-8
 Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Chengguang Xu <cgxu519@icloud.com>, Eryu Guan <eguan@redhat.com>, fstests <fstests@vger.kernel.org>, Ext4 <linux-ext4@vger.kernel.org>, Theodore Tso <tytso@mit.edu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 08/31/2018 10:28 PM, Amir Goldstein wrote:
-> [switching over to ext4 list]
->
-> On Fri, Aug 31, 2018 at 5:19 PM cgxu519 <cgxu519@gmx.com> wrote:
+
+
+On 8/29/18 11:34 PM, Dave Chinner wrote:
+> On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
+>> On 8/29/18 10:19 PM, Eryu Guan wrote:
+>>> On Wed, Aug 29, 2018 at 04:43:38PM -0500, Eric Sandeen wrote:
+>>>> There are a few tests which fail on large filesytems because
+>>>> we run into mkfs limits.
+>>>>
+>>>> xfs/010 and xfs/013 hardcode 2 AGs, but if the device is larger
+>>>> than 2T this will fail.  Check the device size and restrict it
+>>>> to just under 2T so that a 2-AG mkfs is possible.
+> 
+> ....
+>>> I'm thinking to introduce a new helper to require a given agcount will
+>>> fit the device size, and if the device is bigger than ($agcount * 1T)
+>>> then _notrun the test, something like (may need a better helper name):
+>>>
+>>> _require_xfs_support_agcount()
+>>> {
+>>> 	local dev=$1
+>>> 	local agcount=$2
+>>> 	local max_sz=$((agcount*(2**40)))
+>>> 	local dev_sz=$(blockdev --getsize64 $dev)
+>>>
+>>> 	if [ $dev_sz -gt $max_sz ]; then
+>>> 		_notrun "agcount $agcount is too small to hold $dev_sz device"
+>>> 	fi
+>>> }
 >>
->> Hi Amir,
+>> I'm not sure we should _notrun, though - if what we really want to check
+>> is a 2-AG filesystem on the scratch dev, there are times when we may simply
+>> want to make a smaller filesystem and proceed.  For the cases I sent
+>> in my patch this should be perfectly fine...
 >>
->> It seems godown will cause side effect on ext4/tune2fs, mount an ext4
->> filesystem after running godown,
->> then tune2fs -l <dev> complains like below. so definitely it will not
->> pass d_type check.
+>>> Then add this _require rule to all tests that only specify a custom
+>>> agsize, e.g. for xfs/010 we could do
+>>>
+>>> _require_xfs_support_agcount $SCRATCH_DEV 2
+>>>
+>>> I roughly went through all xfs tests and found that the following ones
+>>> may need this new _require rule
+>>>
+>>> xfs/010
+>>> xfs/013
+>>> xfs/062
+>>> xfs/178
+>>> xfs/179
+>>> xfs/310
+>>>
+>>> Perhaps there're better ways to solve the problem, any suggestions are
+>>> welcomed! 
 >>
+>> Rather than a _require and a _notrun, what about a mkfs_scratch_agcount()
+>> that does something like
 >>
->> [root@x201 xfstests-dev]# tune2fs -l /dev/mapper/test-test1
->> tune2fs 1.44.2 (14-May-2018)
->> tune2fs: Superblock checksum does not match superblock while trying to
->> open /dev/mapper/test-test1
->> Couldn't find valid filesystem superblock.
+>> mkfs_scratch_agcount()
+>> {
+>>  agcount=$1
+>>  opts=$2
 >>
+>>  # If $agcount AGs would result in too-large AG size, restrict the size
+>>  # to create $agcount roughly 1T AGs.
+>>  dsizeopt=""
+>>  dev_sz=$(blockdev --getsize64 $SCRATCH_DEV)
+>>  if [ "$dev_sz" -ge "$(($agcount*(2**40)))" ]; then
+>>    dsizeopt="-d size=$(($agcount*((2**40)-1)))"
+>>  fi
+>>  _scratch_mkfs_xfs "$opts -d agcount=$agcount $dsizeopt" | _filter_mkfs 2>$seqres.full
+>> }
 >>
-> Chengguang,
->
-> Bringing this to the attention of ext4 developers,
-> can you please re-iterate the reproducer (without the mention of
-> overlayfs and genereic/474) to demonstrate the problem.
+>> or something like that?
+> 
+> Or, simpler options:
+> 
+> 	- scratch_mkfs_sized with a size appropriate for the test
+> 	  (works for every configuration)
 
-steps to reproduce:
+AFAIK no way to specify agcount there at this time, is there?
+Could teach it to accept more options I suppose.
 
-1) mount an ext4 fs
-2) write a file in the fs
-3) sync / or do nothing
-4) running godown tool in xfstest to the fs
-5) umount the fs
-6) mount the fs
-7) tune2fs -l <dev>
+> 	- _require_no_large_scratch_device (or whatever it's name
+> 	  is) to skip the test on large devices
 
-tune2fs -l will fail with below error.
+Works if people always specify --large-fs for >= 4T, but not if they
+don't.
 
-[root@x201 xfstests-dev]# tune2fs -l /dev/mapper/test-test1
-tune2fs 1.44.2 (14-May-2018)
-tune2fs: Superblock checksum does not match superblock while trying to
-open /dev/mapper/test-test1
-Couldn't find valid filesystem superblock.
+> 	- SCRATCH_MKFS_OPTIONS="-d agcount=500" on a 10GB scratch
+> 	  device (i.e. 500x20MB AGs) will exercise most of the dusty
+> 	  code corners cases that a 500TB filesystem with 1TB AGs
+> 	  and 49.95TB preallocated by --largefs.
 
+Sure, we could run different tests on smaller devices instead.
 
-If I do not write any file in (2), then tune2fs -l in (7) will finish 
-successfully.
-If I run tune2fs -l during (4) and (5) or during (5) and (6) also finish 
-successfully.
+But that doesn't solve the problem of spurious errors on actual large
+devices, which is what I was trying to solve here.
 
-NOTE, I don't know this is a real issue or just by design.
+> Remember, we don't have to test /everything/ with large filesystems
+> - most of the filesystem functionality behaves exactly the same on
+> small and large filesytsems. i.e. the largefs option is to be able
+> run smoke, stress and ENOSPC tests on unreasonably large
+> filesystems with a very small sparse backing store space
+> requirements, not run our entire suite of pin-point correctness and
+> regression tests that mostly only require a few megabytes of space
+> to run.... 
 
+If we'd rather _notrun than fix, it might take a new _require* to exclude
+sufficiently large devices even in cases where --large-fs was not specified.
 
-Thanks,
-Chengguang
+Really not sure what's wrong with a function which can reliably create X AGs
+on the scratch dev, though.  Multiple tests want to do that, and the request
+can fail today if the device is either too large or too small, and it's not
+gracefully handled.
+
+-Eric
