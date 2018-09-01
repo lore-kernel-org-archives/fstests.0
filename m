@@ -1,137 +1,144 @@
-Received: from sandeen.net ([63.231.237.45]:37458 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727248AbeHaVxA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 31 Aug 2018 17:53:00 -0400
-Subject: Re: [PATCH] misc large filesystem fixes
-References: <b647246c-c206-229a-f801-60f20dfa9f28@redhat.com>
- <20180830031902.GC3651@desktop>
- <7869cd0a-ddb6-4972-1a36-446549d59a62@sandeen.net>
- <20180830043446.GE5631@dastard>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <271ddefb-6fac-68fe-aa37-9fb2e5e36c95@sandeen.net>
-Date: Fri, 31 Aug 2018 12:44:26 -0500
+Received: from mail-qt0-f194.google.com ([209.85.216.194]:33425 "EHLO
+        mail-qt0-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727328AbeIAGPV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 1 Sep 2018 02:15:21 -0400
+Received: by mail-qt0-f194.google.com with SMTP id r37-v6so16648569qtc.0
+        for <fstests@vger.kernel.org>; Fri, 31 Aug 2018 19:05:08 -0700 (PDT)
+Date: Fri, 31 Aug 2018 23:05:03 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: [RFC PATCH] fstests: add support for hfsplus
+Message-ID: <20180901020503.5i4hz4inqtfd3frg@eaf>
 MIME-Version: 1.0
-In-Reply-To: <20180830043446.GE5631@dastard>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@redhat.com>, fstests <fstests@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org
+Cc: Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
+It is not possible to set file system size when running mkfs.hfsplus,
+so use the device mapper as a workaround.
 
+Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
+>
+---
+I've been using this to test hfsplus patches. If there's a better way
+please let me know.
 
-On 8/29/18 11:34 PM, Dave Chinner wrote:
-> On Wed, Aug 29, 2018 at 10:30:29PM -0500, Eric Sandeen wrote:
->> On 8/29/18 10:19 PM, Eryu Guan wrote:
->>> On Wed, Aug 29, 2018 at 04:43:38PM -0500, Eric Sandeen wrote:
->>>> There are a few tests which fail on large filesytems because
->>>> we run into mkfs limits.
->>>>
->>>> xfs/010 and xfs/013 hardcode 2 AGs, but if the device is larger
->>>> than 2T this will fail.  Check the device size and restrict it
->>>> to just under 2T so that a 2-AG mkfs is possible.
-> 
-> ....
->>> I'm thinking to introduce a new helper to require a given agcount will
->>> fit the device size, and if the device is bigger than ($agcount * 1T)
->>> then _notrun the test, something like (may need a better helper name):
->>>
->>> _require_xfs_support_agcount()
->>> {
->>> 	local dev=$1
->>> 	local agcount=$2
->>> 	local max_sz=$((agcount*(2**40)))
->>> 	local dev_sz=$(blockdev --getsize64 $dev)
->>>
->>> 	if [ $dev_sz -gt $max_sz ]; then
->>> 		_notrun "agcount $agcount is too small to hold $dev_sz device"
->>> 	fi
->>> }
->>
->> I'm not sure we should _notrun, though - if what we really want to check
->> is a 2-AG filesystem on the scratch dev, there are times when we may simply
->> want to make a smaller filesystem and proceed.  For the cases I sent
->> in my patch this should be perfectly fine...
->>
->>> Then add this _require rule to all tests that only specify a custom
->>> agsize, e.g. for xfs/010 we could do
->>>
->>> _require_xfs_support_agcount $SCRATCH_DEV 2
->>>
->>> I roughly went through all xfs tests and found that the following ones
->>> may need this new _require rule
->>>
->>> xfs/010
->>> xfs/013
->>> xfs/062
->>> xfs/178
->>> xfs/179
->>> xfs/310
->>>
->>> Perhaps there're better ways to solve the problem, any suggestions are
->>> welcomed! 
->>
->> Rather than a _require and a _notrun, what about a mkfs_scratch_agcount()
->> that does something like
->>
->> mkfs_scratch_agcount()
->> {
->>  agcount=$1
->>  opts=$2
->>
->>  # If $agcount AGs would result in too-large AG size, restrict the size
->>  # to create $agcount roughly 1T AGs.
->>  dsizeopt=""
->>  dev_sz=$(blockdev --getsize64 $SCRATCH_DEV)
->>  if [ "$dev_sz" -ge "$(($agcount*(2**40)))" ]; then
->>    dsizeopt="-d size=$(($agcount*((2**40)-1)))"
->>  fi
->>  _scratch_mkfs_xfs "$opts -d agcount=$agcount $dsizeopt" | _filter_mkfs 2>$seqres.full
->> }
->>
->> or something like that?
-> 
-> Or, simpler options:
-> 
-> 	- scratch_mkfs_sized with a size appropriate for the test
-> 	  (works for every configuration)
+ common/config |  7 +++++++
+ common/rc     | 38 +++++++++++++++++++++++++++++++++++++-
+ 2 files changed, 44 insertions(+), 1 deletion(-)
 
-AFAIK no way to specify agcount there at this time, is there?
-Could teach it to accept more options I suppose.
-
-> 	- _require_no_large_scratch_device (or whatever it's name
-> 	  is) to skip the test on large devices
-
-Works if people always specify --large-fs for >= 4T, but not if they
-don't.
-
-> 	- SCRATCH_MKFS_OPTIONS="-d agcount=500" on a 10GB scratch
-> 	  device (i.e. 500x20MB AGs) will exercise most of the dusty
-> 	  code corners cases that a 500TB filesystem with 1TB AGs
-> 	  and 49.95TB preallocated by --largefs.
-
-Sure, we could run different tests on smaller devices instead.
-
-But that doesn't solve the problem of spurious errors on actual large
-devices, which is what I was trying to solve here.
-
-> Remember, we don't have to test /everything/ with large filesystems
-> - most of the filesystem functionality behaves exactly the same on
-> small and large filesytsems. i.e. the largefs option is to be able
-> run smoke, stress and ENOSPC tests on unreasonably large
-> filesystems with a very small sparse backing store space
-> requirements, not run our entire suite of pin-point correctness and
-> regression tests that mostly only require a few megabytes of space
-> to run.... 
-
-If we'd rather _notrun than fix, it might take a new _require* to exclude
-sufficiently large devices even in cases where --large-fs was not specified.
-
-Really not sure what's wrong with a function which can reliably create X AGs
-on the scratch dev, though.  Multiple tests want to do that, and the request
-can fail today if the device is either too large or too small, and it's not
-gracefully handled.
-
--Eric
+diff --git a/common/config b/common/config
+index 2f1f2720..32a1ccb8 100644
+--- a/common/config
++++ b/common/config
+@@ -229,6 +229,7 @@ case "$HOSTOS" in
+ 	export MKFS_CIFS_PROG=3D"false"
+ 	export MKFS_OVERLAY_PROG=3D"false"
+ 	export MKFS_REISER4_PROG=3D$(type -P mkfs.reiser4)
++	export MKFS_HFSPLUS_PROG=3D$(type -P mkfs.hfsplus)
+ 	export E2FSCK_PROG=3D$(type -P e2fsck)
+ 	export TUNE2FS_PROG=3D$(type -P tune2fs)
+ 	export FSCK_OVERLAY_PROG=3D$(type -P fsck.overlay)
+@@ -313,6 +314,9 @@ _mount_opts()
+ 	ubifs)
+ 		export MOUNT_OPTIONS=3D$UBIFS_MOUNT_OPTIONS
+ 		;;
++	hfsplus)
++		export MOUNT_OPTIONS=3D$HFSPLUS_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -380,6 +384,9 @@ _mkfs_opts()
+ 	f2fs)
+ 		export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
+ 		;;
++	hfsplus)
++		export MKFS_OPTIONS=3D$HFSPLUS_MKFS_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+diff --git a/common/rc b/common/rc
+index ec631ad9..38f61944 100644
+--- a/common/rc
++++ b/common/rc
+@@ -158,6 +158,9 @@ case "$FSTYP" in
+     ubifs)
+ 	[ "$UBIUPDATEVOL_PROG" =3D "" ] && _fatal "ubiupdatevol not found"
+ 	;;
++    hfsplus)
++	 [ "$MKFS_HFSPLUS_PROG" =3D "" ] && _fatal "mkfs.hfsplus not found"
++	 ;;
+ esac
+=20
+ if [ ! -z "$REPORT_LIST" ]; then
+@@ -746,6 +749,12 @@ _scratch_mkfs()
+ 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter=3D"grep -v -e ^mkfs\.ocfs2"
+ 		;;
++	hfsplus)
++		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
++		mkfs_filter=3D"cat"
++		# a test may have been interrupted after _scratch_mkfs_sized()
++		rm -f ${RESULT_DIR}/hfsplus_sectors
++		;;
+ 	*)
+ 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter=3D"cat"
+@@ -995,6 +1004,17 @@ _scratch_mkfs_sized()
+ 	fi
+ 	export MOUNT_OPTIONS=3D"-o size=3D$fssize $TMPFS_MOUNT_OPTIONS"
+ 	;;
++    hfsplus)
++	# mkfs.hfsplus does not allow setting the size of the filesystem
++	_require_dm_target linear
++	local sectors=3D`expr $fssize / 512`
++	local table=3D"0 $sectors linear $SCRATCH_DEV 0"
++	_dmsetup_create hfsplus-tmp --table "$table" || _fatal "dmsetup failed"
++	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize /dev/mapper/hfsplus-tmp
++	_dmsetup_remove hfsplus-tmp
++	# remember the true size of the filesystem for fsck.hfsplus
++	echo -n $sectors > ${RESULT_DIR}/hfsplus_sectors
++	;;
+     *)
+ 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+ 	;;
+@@ -2661,6 +2681,22 @@ _check_scratch_fs()
+     ubifs)
+ 	# there is no fsck program for ubifs yet
+ 	;;
++    hfsplus)
++	# fsck.hfsplus will always assume the filesystem fills the device
++	if [ -f ${RESULT_DIR}/hfsplus_sectors ]; then
++	    local sectors=3D`cat ${RESULT_DIR}/hfsplus_sectors`
++	    rm -f ${RESULT_DIR}/hfsplus_sectors
++	    local table=3D"0 $sectors linear $SCRATCH_DEV 0"
++	    _dmsetup_create hfsplus-tmp --table "$table" || \
++						_fatal "dmsetup failed"
++	    _check_generic_filesystem /dev/mapper/hfsplus-tmp
++	    local fsck_status=3D$?
++	    _dmsetup_remove hfsplus-tmp
++	    return $fsck_status
++	else
++	    _check_generic_filesystem $device
++	fi
++	;;
+     *)
+ 	_check_generic_filesystem $device
+ 	;;
+@@ -3055,7 +3091,7 @@ _require_metadata_journaling()
+ 	fi
+=20
+ 	case "$FSTYP" in
+-	ext2|vfat|msdos|udf)
++	ext2|vfat|msdos|udf|hfsplus)
+ 		_notrun "$FSTYP does not support metadata journaling"
+ 		;;
+ 	ext4)
+--=20
+2.11.0
