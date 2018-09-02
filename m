@@ -1,179 +1,74 @@
-Received: from mail-qk1-f194.google.com ([209.85.222.194]:43463 "EHLO
-        mail-qk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725946AbeIBISA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Sep 2018 04:18:00 -0400
-Received: by mail-qk1-f194.google.com with SMTP id 130-v6so3837580qkd.10
-        for <fstests@vger.kernel.org>; Sat, 01 Sep 2018 21:03:43 -0700 (PDT)
-Date: Sun, 2 Sep 2018 01:03:37 -0300
-From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
-        <ernesto.mnd.fernandez@gmail.com>
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:42936 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726020AbeIBSVf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Sep 2018 14:21:35 -0400
+Received: by mail-pf1-f195.google.com with SMTP id l9-v6so7526082pff.9
+        for <fstests@vger.kernel.org>; Sun, 02 Sep 2018 07:05:37 -0700 (PDT)
+Date: Sun, 2 Sep 2018 22:05:29 +0800
+From: Eryu Guan <guaneryu@gmail.com>
 Subject: Re: [RFC PATCH] fstests: add support for hfsplus
-Message-ID: <20180902040337.3bdp224btok5y5xh@eaf>
+Message-ID: <20180902140529.GI3651@desktop>
 References: <20180901020503.5i4hz4inqtfd3frg@eaf>
  <20180901170957.GF3651@desktop>
+ <20180902040337.3bdp224btok5y5xh@eaf>
+ <4445a65e-42b7-5e2e-36fa-45f116f99f33@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20180901170957.GF3651@desktop>
+In-Reply-To: <4445a65e-42b7-5e2e-36fa-45f116f99f33@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Eryu Guan <guaneryu@gmail.com>
+To: Eric Sandeen <sandeen@sandeen.net>, Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?= <ernesto.mnd.fernandez@gmail.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 02, 2018 at 01:09:57AM +0800, Eryu Guan wrote:
-> On Fri, Aug 31, 2018 at 11:05:03PM -0300, Ernesto A. Fern=C3=A1ndez wro=
-te:
-> > It is not possible to set file system size when running mkfs.hfsplus,
-> > so use the device mapper as a workaround.
+On Sun, Sep 02, 2018 at 12:13:26AM -0500, Eric Sandeen wrote:
 >=20
-> I'd prefer _notrun the test in _scratch_mkfs_sized() instead of this
-> workaround, as the harness is expecting to operate $SCRATCH_DEV but thi=
-s
-> workaround may break this assumption in subtle ways, e.g. now
-> _check_scratch_fs fails to create hfsplus-tmp device because
-> $SCRATCH_DEV may still be mounted.
+>=20
+> On 9/1/18 11:03 PM, Ernesto A. Fern=C3=A1ndez wrote:
+> > On Sun, Sep 02, 2018 at 01:09:57AM +0800, Eryu Guan wrote:
+> >> On Fri, Aug 31, 2018 at 11:05:03PM -0300, Ernesto A. Fern=C3=A1ndez =
+wrote:
+> >>> It is not possible to set file system size when running mkfs.hfsplu=
+s,
+> >>> so use the device mapper as a workaround.
+> >>
+> >> I'd prefer _notrun the test in _scratch_mkfs_sized() instead of this
+> >> workaround, as the harness is expecting to operate $SCRATCH_DEV but =
+this
+> >> workaround may break this assumption in subtle ways, e.g. now
+> >> _check_scratch_fs fails to create hfsplus-tmp device because
+> >> $SCRATCH_DEV may still be mounted.
+> >=20
+> > I didn't realize $SCRATCH_DEV could still be mounted, sorry. Maybe I =
+can
+> > unmount it before _dmsetup_create(), and remount after _dmsetup_remov=
+e()?
+> > Like _check_generic_filesystem() does. Or would that bring other prob=
+lems?
 
-I didn't realize $SCRATCH_DEV could still be mounted, sorry. Maybe I can
-unmount it before _dmsetup_create(), and remount after _dmsetup_remove()?
-Like _check_generic_filesystem() does. Or would that bring other problems=
+I haven't seen other problems yet (after just a few simple test runs),
+but I suspect it may break tests in more subtle ways, the
+_check_scratch_fs failure is just an example. And even it works for now,
+and we have to worry about making it continue to work when adding new
+features in the future and that's a maintaining burden we'd better to
+avoid.
+
+> >=20
+> > I know it's ugly, but one test that uses _scratch_mkfs_sized() has he=
+lped
+> > me find a number of bugs already. It would be really useful to get it=
+ to
+> > work.
+>=20
+> Has anyone proposed a patch to mkfs.hfsplus to accept a filesystem size=
 ?
+> I'd expect that might be less complicated than this sort of devicemappe=
+r
+> setup ;)
 
-I know it's ugly, but one test that uses _scratch_mkfs_sized() has helped
-me find a number of bugs already. It would be really useful to get it to
-work.
+Yeah, this would be the best way to let _scratch_mkfs_sized() support
+hfsplus :)
 
 Thanks,
-Ernest
-
->=20
-> Otherwise this patch looks fine to me.
->=20
-> Thanks,
-> Eryu
->=20
-> >=20
-> > Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail=
-.com>
-> > ---
-> > I've been using this to test hfsplus patches. If there's a better way
-> > please let me know.
-> >=20
-> >  common/config |  7 +++++++
-> >  common/rc     | 38 +++++++++++++++++++++++++++++++++++++-
-> >  2 files changed, 44 insertions(+), 1 deletion(-)
-> >=20
-> > diff --git a/common/config b/common/config
-> > index 2f1f2720..32a1ccb8 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -229,6 +229,7 @@ case "$HOSTOS" in
-> >  	export MKFS_CIFS_PROG=3D"false"
-> >  	export MKFS_OVERLAY_PROG=3D"false"
-> >  	export MKFS_REISER4_PROG=3D$(type -P mkfs.reiser4)
-> > +	export MKFS_HFSPLUS_PROG=3D$(type -P mkfs.hfsplus)
-> >  	export E2FSCK_PROG=3D$(type -P e2fsck)
-> >  	export TUNE2FS_PROG=3D$(type -P tune2fs)
-> >  	export FSCK_OVERLAY_PROG=3D$(type -P fsck.overlay)
-> > @@ -313,6 +314,9 @@ _mount_opts()
-> >  	ubifs)
-> >  		export MOUNT_OPTIONS=3D$UBIFS_MOUNT_OPTIONS
-> >  		;;
-> > +	hfsplus)
-> > +		export MOUNT_OPTIONS=3D$HFSPLUS_MOUNT_OPTIONS
-> > +		;;
-> >  	*)
-> >  		;;
-> >  	esac
-> > @@ -380,6 +384,9 @@ _mkfs_opts()
-> >  	f2fs)
-> >  		export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
-> >  		;;
-> > +	hfsplus)
-> > +		export MKFS_OPTIONS=3D$HFSPLUS_MKFS_OPTIONS
-> > +		;;
-> >  	*)
-> >  		;;
-> >  	esac
-> > diff --git a/common/rc b/common/rc
-> > index ec631ad9..38f61944 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -158,6 +158,9 @@ case "$FSTYP" in
-> >      ubifs)
-> >  	[ "$UBIUPDATEVOL_PROG" =3D "" ] && _fatal "ubiupdatevol not found"
-> >  	;;
-> > +    hfsplus)
-> > +	 [ "$MKFS_HFSPLUS_PROG" =3D "" ] && _fatal "mkfs.hfsplus not found"
-> > +	 ;;
-> >  esac
-> > =20
-> >  if [ ! -z "$REPORT_LIST" ]; then
-> > @@ -746,6 +749,12 @@ _scratch_mkfs()
-> >  		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
-> >  		mkfs_filter=3D"grep -v -e ^mkfs\.ocfs2"
-> >  		;;
-> > +	hfsplus)
-> > +		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
-> > +		mkfs_filter=3D"cat"
-> > +		# a test may have been interrupted after _scratch_mkfs_sized()
-> > +		rm -f ${RESULT_DIR}/hfsplus_sectors
-> > +		;;
-> >  	*)
-> >  		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
-> >  		mkfs_filter=3D"cat"
-> > @@ -995,6 +1004,17 @@ _scratch_mkfs_sized()
-> >  	fi
-> >  	export MOUNT_OPTIONS=3D"-o size=3D$fssize $TMPFS_MOUNT_OPTIONS"
-> >  	;;
-> > +    hfsplus)
-> > +	# mkfs.hfsplus does not allow setting the size of the filesystem
-> > +	_require_dm_target linear
-> > +	local sectors=3D`expr $fssize / 512`
-> > +	local table=3D"0 $sectors linear $SCRATCH_DEV 0"
-> > +	_dmsetup_create hfsplus-tmp --table "$table" || _fatal "dmsetup fai=
-led"
-> > +	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -b $blocksize /dev/mapper/hfsplus=
--tmp
-> > +	_dmsetup_remove hfsplus-tmp
-> > +	# remember the true size of the filesystem for fsck.hfsplus
-> > +	echo -n $sectors > ${RESULT_DIR}/hfsplus_sectors
-> > +	;;
-> >      *)
-> >  	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
-> >  	;;
-> > @@ -2661,6 +2681,22 @@ _check_scratch_fs()
-> >      ubifs)
-> >  	# there is no fsck program for ubifs yet
-> >  	;;
-> > +    hfsplus)
-> > +	# fsck.hfsplus will always assume the filesystem fills the device
-> > +	if [ -f ${RESULT_DIR}/hfsplus_sectors ]; then
-> > +	    local sectors=3D`cat ${RESULT_DIR}/hfsplus_sectors`
-> > +	    rm -f ${RESULT_DIR}/hfsplus_sectors
-> > +	    local table=3D"0 $sectors linear $SCRATCH_DEV 0"
-> > +	    _dmsetup_create hfsplus-tmp --table "$table" || \
-> > +						_fatal "dmsetup failed"
-> > +	    _check_generic_filesystem /dev/mapper/hfsplus-tmp
-> > +	    local fsck_status=3D$?
-> > +	    _dmsetup_remove hfsplus-tmp
-> > +	    return $fsck_status
-> > +	else
-> > +	    _check_generic_filesystem $device
-> > +	fi
-> > +	;;
-> >      *)
-> >  	_check_generic_filesystem $device
-> >  	;;
-> > @@ -3055,7 +3091,7 @@ _require_metadata_journaling()
-> >  	fi
-> > =20
-> >  	case "$FSTYP" in
-> > -	ext2|vfat|msdos|udf)
-> > +	ext2|vfat|msdos|udf|hfsplus)
-> >  		_notrun "$FSTYP does not support metadata journaling"
-> >  		;;
-> >  	ext4)
-> > --=20
-> > 2.11.0
-> >=20
+Eryu
