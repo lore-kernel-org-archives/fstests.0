@@ -1,37 +1,34 @@
-Received: from mail-qk1-f195.google.com ([209.85.222.195]:44717 "EHLO
-        mail-qk1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725759AbeICECk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Sep 2018 00:02:40 -0400
-Received: by mail-qk1-f195.google.com with SMTP id d131-v6so4673167qke.11
-        for <fstests@vger.kernel.org>; Sun, 02 Sep 2018 16:45:10 -0700 (PDT)
-Date: Sun, 2 Sep 2018 20:45:05 -0300
-From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
-        <ernesto.mnd.fernandez@gmail.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:45840 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725759AbeICEGk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Sep 2018 00:06:40 -0400
+Date: Mon, 3 Sep 2018 09:49:06 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [RFC PATCH] fstests: add support for hfsplus
-Message-ID: <20180902234505.2ih75jk2ggbpj727@eaf>
+Message-ID: <20180902234906.GC27618@dastard>
 References: <20180901020503.5i4hz4inqtfd3frg@eaf>
  <20180901170957.GF3651@desktop>
  <20180902040337.3bdp224btok5y5xh@eaf>
  <4445a65e-42b7-5e2e-36fa-45f116f99f33@sandeen.net>
  <20180902140529.GI3651@desktop>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
 In-Reply-To: <20180902140529.GI3651@desktop>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: Eric Sandeen <sandeen@sandeen.net>, fstests@vger.kernel.org
+Cc: Eric Sandeen <sandeen@sandeen.net>, Ernesto =?iso-8859-1?Q?A=2E_Fern=E1ndez?= <ernesto.mnd.fernandez@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On Sun, Sep 02, 2018 at 10:05:29PM +0800, Eryu Guan wrote:
 > On Sun, Sep 02, 2018 at 12:13:26AM -0500, Eric Sandeen wrote:
 > >=20
 > >=20
-> > On 9/1/18 11:03 PM, Ernesto A. Fern=C3=A1ndez wrote:
+> > On 9/1/18 11:03 PM, Ernesto A. Fern=E1ndez wrote:
 > > > On Sun, Sep 02, 2018 at 01:09:57AM +0800, Eryu Guan wrote:
-> > >> On Fri, Aug 31, 2018 at 11:05:03PM -0300, Ernesto A. Fern=C3=A1nde=
-z wrote:
+> > >> On Fri, Aug 31, 2018 at 11:05:03PM -0300, Ernesto A. Fern=E1ndez w=
+rote:
 > > >>> It is not possible to set file system size when running mkfs.hfsp=
 lus,
 > > >>> so use the device mapper as a workaround.
@@ -58,8 +55,9 @@ oblems?
 > and we have to worry about making it continue to work when adding new
 > features in the future and that's a maintaining burden we'd better to
 > avoid.
->=20
-> > >=20
+
+Ah, I just replied on the -fsdevel thread saying exactly this....
+
 > > > I know it's ugly, but one test that uses _scratch_mkfs_sized() has =
 helped
 > > > me find a number of bugs already. It would be really useful to get =
@@ -71,17 +69,19 @@ ze?
 > > I'd expect that might be less complicated than this sort of devicemap=
 per
 > > setup ;)
->=20
+>
 > Yeah, this would be the best way to let _scratch_mkfs_sized() support
 > hfsplus :)
 
-mkfs.hfsplus and fsck.hfsplus both come from Apple. Do you think they
-would pick up a patch? I'm not sure how to reach them.
+.... and this, too. :)
 
-I could also just patch these tools for myself. When somebody calls
-_scratch_mkfs_sized() on hfsplus with an unpatched version, the test
-could _notrun and tell them where to get mine. Is that acceptable?
+It'll be easy to add a mkfs option check in _scratch_mkfs_sized()
+for hfsplus. That should make it work (or not run, as the case
+may be) reliably into the future, too.
 
->=20
-> Thanks,
-> Eryu
+Cheers,
+
+Dave.
+--=20
+Dave Chinner
+david@fromorbit.com
