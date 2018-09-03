@@ -1,46 +1,51 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:47287 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725866AbeICNfI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Sep 2018 09:35:08 -0400
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] generic/504: Check inode number accurately
-Date: Mon, 3 Sep 2018 17:36:20 +0800
-Message-ID: <1535967380-22601-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-wr1-f65.google.com ([209.85.221.65]:38061 "EHLO
+        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727186AbeICQr3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Sep 2018 12:47:29 -0400
+Received: by mail-wr1-f65.google.com with SMTP id w11-v6so487194wrc.5
+        for <fstests@vger.kernel.org>; Mon, 03 Sep 2018 05:27:34 -0700 (PDT)
+From: Miklos Szeredi <mszeredi@redhat.com>
+Subject: [PATCH] tmpfs: don't require TEST_DEV
+Date: Mon,  3 Sep 2018 14:27:28 +0200
+Message-Id: <20180903122728.22882-1-mszeredi@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: xzhou@redhat.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If inode number is equal to the line number of locks which is
-first column in /proc/locks, generic/504 will match wrong number
-and get PASS. For example:
------------------------------------------------------------
-inode 12
-...
-12: FLOCK  ADVISORY  WRITE 1615 00:2e:37889 0 EOF
------------------------------------------------------------
+tmpfs doesn't require a device and the source argument of the mount is ignored.
+If TEST_DEV is not given then set it to "none".
 
-We should match correct inode number by six column in /proc/locks.
-
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 ---
- tests/generic/504 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ common/config | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/504 b/tests/generic/504
-index c7d015d..21d8605 100755
---- a/tests/generic/504
-+++ b/tests/generic/504
-@@ -51,7 +51,7 @@ flock -x 9
- cat /proc/locks >> $seqres.full
+diff --git a/common/config b/common/config
+index 2f1f27206776..40c2b399a3c7 100644
+--- a/common/config
++++ b/common/config
+@@ -456,8 +456,9 @@ _check_device()
+ 	fi
  
- # Checking
--grep -qw $tf_inode /proc/locks || echo "lock info not found"
-+grep -q ":$tf_inode " /proc/locks || echo "lock info not found"
+ 	case "$FSTYP" in
+-	9p)
++	9p|tmpfs)
+ 		# 9p mount tags are just plain strings, so anything is allowed
++		# tmpfs doesn't use mount source, ignore
+ 		;;
+ 	overlay)
+ 		if [ ! -d "$dev" ]; then
+@@ -657,6 +658,10 @@ get_next_config() {
+ 		export RESULT_BASE="$here/results/"
+ 	fi
  
- # success, all done
- status=0
++	if [ "$FSTYP" == tmpfs -a -z "$TEST_DEV" ]; then
++		export TEST_DEV=none
++	fi
++
+ 	#  Mandatory Config values.
+ 	MC=""
+ 	[ -z "$EMAIL" ]          && MC="$MC EMAIL"
 -- 
-1.8.3.1
+2.14.3
