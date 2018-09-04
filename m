@@ -1,51 +1,39 @@
-Received: from mail-wr1-f65.google.com ([209.85.221.65]:38061 "EHLO
-        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727186AbeICQr3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Sep 2018 12:47:29 -0400
-Received: by mail-wr1-f65.google.com with SMTP id w11-v6so487194wrc.5
-        for <fstests@vger.kernel.org>; Mon, 03 Sep 2018 05:27:34 -0700 (PDT)
-From: Miklos Szeredi <mszeredi@redhat.com>
-Subject: [PATCH] tmpfs: don't require TEST_DEV
-Date: Mon,  3 Sep 2018 14:27:28 +0200
-Message-Id: <20180903122728.22882-1-mszeredi@redhat.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:19451 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726011AbeIDKun (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 4 Sep 2018 06:50:43 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 97BE84B6AE18
+        for <fstests@vger.kernel.org>; Tue,  4 Sep 2018 14:26:56 +0800 (CST)
+From: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/498: don't call _cleanup_flakey repeatedly
+Date: Tue, 4 Sep 2018 14:26:50 +0800
+Message-ID: <20180904062650.26695-1-lufq.fnst@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-tmpfs doesn't require a device and the source argument of the mount is ignored.
-If TEST_DEV is not given then set it to "none".
+Since exit always traps into _cleanup function which contains
+_cleanup_flakey, don't need _cleanup_flakey twice.
 
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+Signed-off-by: Lu Fengqi <lufq.fnst@cn.fujitsu.com>
 ---
- common/config | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+ tests/generic/498 | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/common/config b/common/config
-index 2f1f27206776..40c2b399a3c7 100644
---- a/common/config
-+++ b/common/config
-@@ -456,8 +456,9 @@ _check_device()
- 	fi
+diff --git a/tests/generic/498 b/tests/generic/498
+index 1cf73bda3b60..71f5091c30af 100755
+--- a/tests/generic/498
++++ b/tests/generic/498
+@@ -58,7 +58,6 @@ _flakey_drop_and_remount
+ [ -f $SCRATCH_MNT/B/foo ] || echo "file B/foo is missing"
  
- 	case "$FSTYP" in
--	9p)
-+	9p|tmpfs)
- 		# 9p mount tags are just plain strings, so anything is allowed
-+		# tmpfs doesn't use mount source, ignore
- 		;;
- 	overlay)
- 		if [ ! -d "$dev" ]; then
-@@ -657,6 +658,10 @@ get_next_config() {
- 		export RESULT_BASE="$here/results/"
- 	fi
+ _unmount_flakey
+-_cleanup_flakey
  
-+	if [ "$FSTYP" == tmpfs -a -z "$TEST_DEV" ]; then
-+		export TEST_DEV=none
-+	fi
-+
- 	#  Mandatory Config values.
- 	MC=""
- 	[ -z "$EMAIL" ]          && MC="$MC EMAIL"
+ echo "Silence is golden"
+ status=0
 -- 
-2.14.3
+2.18.0
