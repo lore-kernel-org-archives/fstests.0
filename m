@@ -1,130 +1,184 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:38988 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728223AbeIFNNU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:20 -0400
-Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868YCQV081530
-        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:38:58 -0400
-Received: from e32.co.us.ibm.com (e32.co.us.ibm.com [32.97.110.150])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2may61n1xw-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:38:58 -0400
-Received: from localhost
-        by e32.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Thu, 6 Sep 2018 02:38:57 -0600
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V2 15/16] Fix generic/230 to work with 64k block size
-Date: Thu,  6 Sep 2018 14:10:12 +0530
-In-Reply-To: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-References: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180906084013.2687-16-chandan@linux.vnet.ibm.com>
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:64751 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728127AbeIFNMg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:12:36 -0400
+Date: Thu, 6 Sep 2018 18:38:09 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [patch] file dedupe (and maybe clone) data corruption (was Re:
+ [PATCH] generic: test for deduplication between different files)
+Message-ID: <20180906083809.GF27618@dastard>
+References: <20180817083924.16916-1-fdmanana@kernel.org>
+ <20180819231126.GU2234@dastard>
+ <20180820010932.GV2234@dastard>
+ <20180820153349.GA4334@magnolia>
+ <20180823125849.GF13528@hungrycats.org>
+ <20180830062743.GF5631@dastard>
+ <20180831051045.GI26989@hungrycats.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180831051045.GI26989@hungrycats.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
+To: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fdmanana@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit changes the test to work on file offsets that are aligned
-with the block size of the underlying filesystem.
+On Fri, Aug 31, 2018 at 01:10:45AM -0400, Zygo Blaxell wrote:
+> On Thu, Aug 30, 2018 at 04:27:43PM +1000, Dave Chinner wrote:
+> > On Thu, Aug 23, 2018 at 08:58:49AM -0400, Zygo Blaxell wrote:
+> > > On Mon, Aug 20, 2018 at 08:33:49AM -0700, Darrick J. Wong wrote:
+> > > > On Mon, Aug 20, 2018 at 11:09:32AM +1000, Dave Chinner wrote:
+> > > > > 	- is documenting rejection on request alignment grounds
+> > > > > 	  (i.e. EINVAL) in the man page sufficient for app
+> > > > > 	  developers to understand what is going on here?
+> > > > 
+> > > > I think so.  The manpage says: "The filesystem does not support
+> > > > reflinking the ranges of the given files", which (to my mind) covers
+> > > > this case of not supporting dedupe of EOF blocks.
+> > > 
+> > > Older versions of btrfs dedupe (before v4.2 or so) used to do exactly
+> > > this; however, on btrfs, not supporting dedupe of EOF blocks means small
+> > > files (one extent) cannot be deduped at all, because the EOF block holds
+> > > a reference to the entire dst extent.  If a dedupe app doesn't go all the
+> > > way to EOF on btrfs, then it should not attempt to dedupe any part of the
+> > > last extent of the file as the benefit would be zero or slightly negative.
+> > 
+> > That's a filesystem implementation issue, not an API or application
+> > issue.
+> 
+> The API and application issue remains even if btrfs is not considered.
+> btrfs is just the worst case outcome.  Other filesystems still have
+> fragmentation issues, and applications have efficiency-vs-capability
+> tradeoffs to make if they can't rely on dedupe-to-EOF being available.
+> 
+> Tools like 'cp --reflink=auto' work by trying the best case, then falling
+> back to a second choice if the first choice returns an error.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
- tests/generic/230     | 23 +++++++++++++----------
- tests/generic/230.out | 16 ++++++++--------
- 2 files changed, 21 insertions(+), 18 deletions(-)
+Well, yes. That's necessary for the "cp" tool to behave according to
+user expectations.  That's not a kernel API issue - that's just an
+implementation of an *application requirement*.  Indeed, this is
+identical to the behaviour of rename() in "mv" - if rename fails
+with -EXDEV, mv needs to fall back to a manual copy because the user
+expects the file to be moved.
 
-diff --git a/tests/generic/230 b/tests/generic/230
-index bc8c1ad..fc09391 100755
---- a/tests/generic/230
-+++ b/tests/generic/230
-@@ -42,27 +42,27 @@ test_enforcement()
- 	echo "### some buffered IO (type=$type)"
- 	echo "--- initiating IO..." >>$seqres.full
- 	# Firstly fit below block soft limit
--	echo "Write 900k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 900k' -c fsync \
-+	echo "Write 225 blocks..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' -c fsync \
- 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Secondly overcome block soft limit
--	echo "Rewrite 1001k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1001k' -c fsync \
-+	echo "Rewrite 250 blocks plus 1 byte..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' -c fsync \
- 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Now try to overcome block hardlimit
--	echo "Write 1000k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1000k' -c fsync \
-+	echo "Write 250 blocks..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE))' -c fsync \
- 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Now sleep for grace time and check that softlimit got enforced
- 	sleep $((grace+1))
--	echo "Write 4096..."
--	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 4096' \
-+	echo "Write 1 block..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
- 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
-@@ -101,11 +101,14 @@ grace=2
- 
- _scratch_mkfs >> $seqres.full 2>&1
- _scratch_mount "-o usrquota,grpquota"
-+BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
- quotacheck -u -g $SCRATCH_MNT 2>/dev/null
- quotaon $SCRATCH_MNT 2>/dev/null
--setquota -u $qa_user 1000 2000 3 5 $SCRATCH_MNT
-+setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
-+	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
- setquota -u -t $grace $grace $SCRATCH_MNT
--setquota -g $qa_user 1000 2000 3 5 $SCRATCH_MNT
-+setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
-+	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
- setquota -g -t $grace $grace $SCRATCH_MNT
- _scratch_unmount
- 
-diff --git a/tests/generic/230.out b/tests/generic/230.out
-index fcbacf2..9e89a47 100644
---- a/tests/generic/230.out
-+++ b/tests/generic/230.out
-@@ -4,11 +4,11 @@ QA output created by 230
- 
- ### create files, setting up ownership (type=u)
- ### some buffered IO (type=u)
--Write 900k...
--Rewrite 1001k...
--Write 1000k...
-+Write 225 blocks...
-+Rewrite 250 blocks plus 1 byte...
-+Write 250 blocks...
- pwrite: Disk quota exceeded
--Write 4096...
-+Write 1 block...
- pwrite: Disk quota exceeded
- Touch 3+4
- Touch 5+6
-@@ -20,11 +20,11 @@ touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
- 
- ### create files, setting up ownership (type=g)
- ### some buffered IO (type=g)
--Write 900k...
--Rewrite 1001k...
--Write 1000k...
-+Write 225 blocks...
-+Rewrite 250 blocks plus 1 byte...
-+Write 250 blocks...
- pwrite: Disk quota exceeded
--Write 4096...
-+Write 1 block...
- pwrite: Disk quota exceeded
- Touch 3+4
- Touch 5+6
+IOWS, these application level requirements you talk about are just
+not relevant to the kernel API for dedupe/clone operations.
+
+[snip]
+
+> It is something that naive dedupe apps will do.  "naive" here meaning
+> "does not dive deeply into the filesystem's physical structure (or survey
+> the entire filesystem with FIEMAP) to determine that the thousand-refs
+> situation does not exist at dst prior to invoking the dedupe() call."
+
+/me sighs and points at FS_IOC_GETFSMAP
+
+$ man ioctl_getfsmap
+....
+DESCRIPTION
+       This ioctl(2) operation retrieves physical extent mappings
+       for a filesystem.  This information can be used to discover
+       which files are mapped to a physical block, examine free
+       space, or find known bad blocks, among other things.
+.....
+
+I don't really care about "enabling" naive, inefficient
+applications. I care about applications that scale to huge
+filesystems and can get the job done quickly and efficiently.
+
+> > XFS doesn't have partial overlaps, we don't have nodatacow hacks,
+> > and the subvol snapshot stuff I'm working on just uses shared data
+> > extents so it's 100% compatible with dedupe.
+> 
+> If you allow this sequence of operations, you get partial overlaps:
+> 
+> 	dedupe(fd1, 0, fd2, 0, 1048576);
+> 
+> 	dedupe(fd2, 16384, fd3, 0, 65536);
+
+Oh, I misunderstood - I thought you were refering to sharing partial
+filesystem blocks (like at EOF) because that's what this discussion
+was originally about. XFS supports the above just fine.
+
+[snip]
+
+tl;dr we don't need a new clone or dedupe API
+
+> For future development I've abandoned the entire dedupe_file_range
+> approach.  I need to be able to read and dedupe the data blocks of
+> the filesystem directly without having to deal with details like which
+> files those blocks belong to, especially on filesystems with lots of
+> existing deduped blocks and snapshots. 
+
+IOWs, your desired OOB dedupe algorithm is:
+
+	a) ask the filesystem where all it's file data is
+	b) read that used space to build a data hash index
+	c) on all the data hash collisions find the owners of the
+	   colliding blocks
+	d) if the block data is the same dedupe it
+
+I agree - that's a simple and effective algorithm. It's also the
+obvious solution to an expert in the field.
+
+> The file structure is frankly
+> just noise for dedupe on large filesystems.
+
+We learnt that lesson back in the late 1990s. xfsdump, xfs_fsr, all
+the SGI^WHPE HSM scanning tools, etc all avoid the directory
+structure because it's so slow. XFS's bulkstat interface, OTOH, can
+scan for target inodes at a over a million inodes/sec if you've got
+the IO and CPU to throw at it....
+
+> I'm building a translation
+> layer for bees that does this--i.e. the main dedupe loop works only with
+> raw data blocks, and the translation layer maps read(blocknr, length)
+> and dedupe(block1, block2, length) requests onto the existing kernel
+> read(fd, offset, length) and dedupe(fd1, off1, fd2, off2, length)i
+
+That's FS_IOC_GETFSMAP. :P
+
+FYI, in 2012 I came up with a plan for dedupe in XFS:
+
+	a) GETFSMAP to query reverse map tree to find file
+	   data blocks (don't try to dedupe unused space)
+	b) read the underlying block device in ascending block
+	   order and hash each block to build a collision tree.
+	   Trivially parallelised.
+	c) GETFSMAP to query rmap for the owners of colliding
+	   blocks
+	d) For all file data owner maps of a colliding block
+		- bulkstat the inode numbers returned by GETFSMAP
+		  and open_by_handle to get fd's
+		- run dedupe syscall
+
+We've finally got all the infrastructure we need to write this app
+for XFS - we just need to write it and integrate it into xfs_fsr....
+
+> calls.
+> If the end result of that development work meets my performance
+> targets--I've built over a dozen dedupe apps, and only two were good
+> enough to release so far--then I'd propose moving those primitives into
+> the kernel.
+
+dedupe has been around for a long time and there hasn't been any
+breakthroughs in IO efficient OOB dedupe scanning algorithms for
+years.  OOB dedupe is not actually that difficult to do efficiently,
+it's just that most people trying to do it lack the knowledge and/or
+insight to make the jump that it requires reverse block mapping, not
+directory traversal.
+
+You've taken a dozen or so failures to realise what was obvious to
+me at the outset - your translation layer will essentially hold the
+same information that XFS already maintains on disk in it's rmap
+btrees. IIRC btrfs has semi-equivalent reverse mapping functionality
+on disk (back pointers?), so maybe your best bet would be to
+implement FSMAP for btrfs and then you have a dedupe app that works
+efficiently on both XFS and btrfs...
+
+Cheers,
+
+Dave.
 -- 
-2.9.5
+Dave Chinner
+david@fromorbit.com
