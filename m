@@ -1,101 +1,68 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:43074 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728104AbeIFNNH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:07 -0400
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868XxuG088834
-        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:38:46 -0400
-Received: from e32.co.us.ibm.com (e32.co.us.ibm.com [32.97.110.150])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2maxm76f3w-1
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38954 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728221AbeIFNNX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:23 -0400
+Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868Xx6P123547
+        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:39:02 -0400
+Received: from e34.co.us.ibm.com (e34.co.us.ibm.com [32.97.110.152])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2maye2v5ew-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:38:45 -0400
+        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:39:02 -0400
 Received: from localhost
-        by e32.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Thu, 6 Sep 2018 02:38:45 -0600
+        Thu, 6 Sep 2018 02:39:01 -0600
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V2 11/16] Fix generic/102 to work with 64k block size
-Date: Thu,  6 Sep 2018 14:10:08 +0530
+Subject: [PATCH V2 16/16] Fix generic/235 to work with 64k block size
+Date: Thu,  6 Sep 2018 14:10:13 +0530
 In-Reply-To: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
 References: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180906084013.2687-12-chandan@linux.vnet.ibm.com>
+Message-Id: <20180906084013.2687-17-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With 64k block size, mkfs.xfs fails with the following message when the
-filesystem size is 512MiB in size,
-
-"log size 2037 blocks too small, minimum size is 2473 blocks"
-
-Hence this commit increases the test filesystem size to 1GiB. Also, the
-size of the test file is increased to 800MiB which is ~80% of the test
-filesystem size. This is in proportion to the 400MiB test file used with
-the original 512MiB test filesystem.
+With 64k blocksized filesystem, this test fails since a single 8k write
+will actually end up consuming 64k. Hence this commit writes 64k data
+into the test file.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/102     |  4 ++--
- tests/generic/102.out | 20 ++++++++++----------
- 2 files changed, 12 insertions(+), 12 deletions(-)
+ tests/generic/235     | 2 +-
+ tests/generic/235.out | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index faf940a..29abd89 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -31,14 +31,14 @@ _require_scratch
+diff --git a/tests/generic/235 b/tests/generic/235
+index 902e9ad..6adc803 100755
+--- a/tests/generic/235
++++ b/tests/generic/235
+@@ -55,7 +55,7 @@ _try_scratch_mount "-o remount,ro" 2>&1 | tee -a $seqres.full | _filter_scratch
+ touch $SCRATCH_MNT/failed 2>&1 | tee -a $seqres.full | _filter_scratch
+ _try_scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
  
- rm -f $seqres.full
+-$XFS_IO_PROG -c 'pwrite 0 8k' -c 'fsync' \
++$XFS_IO_PROG -c 'pwrite 0 64k' -c 'fsync' \
+ 			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
+ do_repquota
  
--dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
-+dev_size=$((1024 * 1024 * 1024))     # 1GB filesystem
- _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
- _scratch_mount
- 
- for ((i = 0; i < 10; i++)); do
- 	echo "loop $i" >>$seqres.full
- 
--	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
-+	$XFS_IO_PROG -f -c "pwrite -b 1m 0 800m" "$SCRATCH_MNT"/file | \
- _filter_xfs_io | _filter_scratch
- 
- 	rm -f "$SCRATCH_MNT"/file
-diff --git a/tests/generic/102.out b/tests/generic/102.out
-index fc9275d..b58aa5c 100644
---- a/tests/generic/102.out
-+++ b/tests/generic/102.out
-@@ -1,21 +1,21 @@
- QA output created by 102
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/235.out b/tests/generic/235.out
+index 601fa2f..abcb47a 100644
+--- a/tests/generic/235.out
++++ b/tests/generic/235.out
+@@ -17,10 +17,10 @@ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+-fsgqa     --       8       0       0              1     0     0       
++fsgqa     --      64       0       0              1     0     0       
+ *** Report for group quotas on device SCRATCH_DEV
+ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+-fsgqa     --       8       0       0              1     0     0       
++fsgqa     --      64       0       0              1     0     0       
 -- 
 2.9.5
