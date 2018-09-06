@@ -1,90 +1,57 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:47758 "EHLO
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:48794 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728104AbeIFNNF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:05 -0400
-Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868Xu6P025985
-        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:38:43 -0400
-Received: from e33.co.us.ibm.com (e33.co.us.ibm.com [32.97.110.151])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2maymd3c2k-1
+        by vger.kernel.org with ESMTP id S1728255AbeIFNNK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:10 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868Xxmx126999
+        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:38:49 -0400
+Received: from e34.co.us.ibm.com (e34.co.us.ibm.com [32.97.110.152])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2maypek5nc-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:38:43 -0400
+        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:38:49 -0400
 Received: from localhost
-        by e33.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Thu, 6 Sep 2018 02:38:42 -0600
+        Thu, 6 Sep 2018 02:38:48 -0600
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V2 10/16] xfs/325: Inject free_extent error after CoW operation
-Date: Thu,  6 Sep 2018 14:10:07 +0530
+Subject: [PATCH V2 12/16] Fix generic/172 to work with 64k block size
+Date: Thu,  6 Sep 2018 14:10:09 +0530
 In-Reply-To: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
 References: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180906084013.2687-11-chandan@linux.vnet.ibm.com>
+Message-Id: <20180906084013.2687-13-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On a 64k blocksized filesystem, when the test CoWs the file2's offset
-range [10 * 64k, 19 * 64k], the call to xfs_bmapi_reserve_delalloc()
-allocates 32 64k blocks. This is because XFS_DEFAULT_COWEXTSZ_HINT has
-the value of 32 and xfs_get_cowextsz_hint() uses this to compute the
-extent alignment. This leads to xfs_bmapi_reserve_delalloc() to reserve
-space corresponding to the file range [0, 32 * 64k] in the inode's
-cow fork area. On completion of write I/O corresponding to file2's range
-[10 * 64k, 19 * 64k], xfs_end_io() moves 10 out of the originally
-allocated 32 64k blocks to the data fork area. The remaining 22 64k
-blocks linger on in cow fork area of the inode.
+For 64k block size, With 256MiB as the XFS filesystem size and 168 MiB
+as the size of the clone source file, we end up hitting ENOSPC when
+cloning the source file. This happens due to lack of space for housing
+the corresponding metadata. This scenario also occurs when using a
+512MiB XFS filesystem and 300MiB clone source file.
 
-Later, when servicing the exit() syscall for the xfs_io process,
-xfs_free_eofblocks() ends up invoking xfs_reflink_cancel_cow_blocks()
-since i_delayed_blks has the value 22. xfs_reflink_cancel_cow_blocks()
-indirectly invokes __xfs_free_extent() which returns EIO since
-XFS_ERRTAG_FREE_EXTENT has been set. This leads to the filesystem to be
-shutdown. The "rm" command invoked later ends up returning an
-error and hence the test fails. The test actually requires that the
-filesystem gets shutdown when executing the "rm" command.
-
-To fix the problem, this commit injects the free_extent error after we
-CoW file2's [10 * 64k, 19 * 64k] range.
+Hence this commit increases the size of the test filesystem to 1 GiB and
+the size of the clone source file to 768MiB.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/325     | 5 +++--
- tests/xfs/325.out | 2 +-
- 2 files changed, 4 insertions(+), 3 deletions(-)
+ tests/generic/172 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/xfs/325 b/tests/xfs/325
-index b156de9..6795901 100755
---- a/tests/xfs/325
-+++ b/tests/xfs/325
-@@ -54,11 +54,12 @@ echo "Check files"
- md5sum $SCRATCH_MNT/file1 | _filter_scratch
- md5sum $SCRATCH_MNT/file2 | _filter_scratch
+diff --git a/tests/generic/172 b/tests/generic/172
+index 5d6f295..08d2789 100755
+--- a/tests/generic/172
++++ b/tests/generic/172
+@@ -47,8 +47,8 @@ echo "Reformat with appropriate size"
+ blksz="$(_get_block_size $testdir)"
+ umount $SCRATCH_MNT
  
-+echo "CoW a few blocks"
-+$XFS_IO_PROG -c "pwrite -W -S 0x67 $((10 * blksz)) $((10 * blksz))" $SCRATCH_MNT/file2 >> $seqres.full
-+
- echo "Inject error"
- _scratch_inject_error "free_extent"
- 
--echo "CoW a few blocks"
--$XFS_IO_PROG -c "pwrite -W -S 0x67 $((10 * blksz)) $((10 * blksz))" $SCRATCH_MNT/file2 >> $seqres.full
- rm $SCRATCH_MNT/file1
- sync
- 
-diff --git a/tests/xfs/325.out b/tests/xfs/325.out
-index 4e25d2b..92027cd 100644
---- a/tests/xfs/325.out
-+++ b/tests/xfs/325.out
-@@ -4,8 +4,8 @@ Create files
- Check files
- d5a0ed0305c8df4180cb2bf975ecffe8  SCRATCH_MNT/file1
- d5a0ed0305c8df4180cb2bf975ecffe8  SCRATCH_MNT/file2
--Inject error
- CoW a few blocks
-+Inject error
- FS should be shut down, touch will fail
- touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
- Remount to replay log
+-file_size=$((168 * 1024 * 1024))
+-fs_size=$((256 * 1024 * 1024))
++file_size=$((768 * 1024 * 1024))
++fs_size=$((1024 * 1024 * 1024))
+ _scratch_mkfs_sized $fs_size >> $seqres.full 2>&1
+ _scratch_mount >> $seqres.full 2>&1
+ rm -rf $testdir
 -- 
 2.9.5
