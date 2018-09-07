@@ -1,68 +1,184 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38954 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728221AbeIFNNX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Sep 2018 09:13:23 -0400
-Received: from pps.filterd (m0098394.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w868Xx6P123547
-        for <fstests@vger.kernel.org>; Thu, 6 Sep 2018 04:39:02 -0400
-Received: from e34.co.us.ibm.com (e34.co.us.ibm.com [32.97.110.152])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2maye2v5ew-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Thu, 06 Sep 2018 04:39:02 -0400
-Received: from localhost
-        by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Thu, 6 Sep 2018 02:39:01 -0600
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V2 16/16] Fix generic/235 to work with 64k block size
-Date: Thu,  6 Sep 2018 14:10:13 +0530
-In-Reply-To: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-References: <20180906084013.2687-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180906084013.2687-17-chandan@linux.vnet.ibm.com>
+Received: from mail.kernel.org ([198.145.29.99]:57302 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726922AbeIGFkw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 7 Sep 2018 01:40:52 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [xfstests-bld PATCH] kernel-configs: fix i386 configs
+Date: Thu,  6 Sep 2018 18:01:18 -0700
+Message-Id: <20180907010118.234124-1-ebiggers@kernel.org>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, eguan@redhat.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With 64k blocksized filesystem, this test fails since a single 8k write
-will actually end up consuming 64k. Hence this commit writes 64k data
-into the test file.
+From: Eric Biggers <ebiggers@google.com>
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Commit 452331adc6c0 ("kernel-configs: enable virtio_9P and 9P_FS")
+removed the explicit unsetting of CONFIG_64BIT from some of the i386
+kconfigs.  So, they actually became x86_64.  Fix it by syncing them back
+up with the x86_64 configs.  I also added the script I used to do this.
+
+Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/235     | 2 +-
- tests/generic/235.out | 4 ++--
- 2 files changed, 3 insertions(+), 3 deletions(-)
+ kernel-configs/i386-config-3.18     |  1 +
+ kernel-configs/i386-config-4.1      |  5 +---
+ kernel-configs/i386-config-4.14     |  3 +--
+ kernel-configs/i386-config-4.4      |  4 +--
+ kernel-configs/i386-config-4.9      |  3 +--
+ kernel-configs/sync_i386_configs.sh | 38 +++++++++++++++++++++++++++++
+ 6 files changed, 43 insertions(+), 11 deletions(-)
+ create mode 100755 kernel-configs/sync_i386_configs.sh
 
-diff --git a/tests/generic/235 b/tests/generic/235
-index 902e9ad..6adc803 100755
---- a/tests/generic/235
-+++ b/tests/generic/235
-@@ -55,7 +55,7 @@ _try_scratch_mount "-o remount,ro" 2>&1 | tee -a $seqres.full | _filter_scratch
- touch $SCRATCH_MNT/failed 2>&1 | tee -a $seqres.full | _filter_scratch
- _try_scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
- 
--$XFS_IO_PROG -c 'pwrite 0 8k' -c 'fsync' \
-+$XFS_IO_PROG -c 'pwrite 0 64k' -c 'fsync' \
- 			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
- do_repquota
- 
-diff --git a/tests/generic/235.out b/tests/generic/235.out
-index 601fa2f..abcb47a 100644
---- a/tests/generic/235.out
-+++ b/tests/generic/235.out
-@@ -17,10 +17,10 @@ Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- User            used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
--fsgqa     --       8       0       0              1     0     0       
-+fsgqa     --      64       0       0              1     0     0       
- *** Report for group quotas on device SCRATCH_DEV
- Block grace time: 7days; Inode grace time: 7days
-                         Block limits                File limits
- Group           used    soft    hard  grace    used  soft  hard  grace
- ----------------------------------------------------------------------
--fsgqa     --       8       0       0              1     0     0       
-+fsgqa     --      64       0       0              1     0     0       
+diff --git a/kernel-configs/i386-config-3.18 b/kernel-configs/i386-config-3.18
+index 19eeff1..2dba879 100644
+--- a/kernel-configs/i386-config-3.18
++++ b/kernel-configs/i386-config-3.18
+@@ -1,3 +1,4 @@
++# CONFIG_64BIT is not set
+ CONFIG_LOCALVERSION="-xfstests"
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+diff --git a/kernel-configs/i386-config-4.1 b/kernel-configs/i386-config-4.1
+index 2f3c689..0cad730 100644
+--- a/kernel-configs/i386-config-4.1
++++ b/kernel-configs/i386-config-4.1
+@@ -1,3 +1,4 @@
++# CONFIG_64BIT is not set
+ CONFIG_LOCALVERSION="-xfstests"
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+@@ -10,7 +11,6 @@ CONFIG_CGROUPS=y
+ CONFIG_USER_NS=y
+ CONFIG_BLK_DEV_INITRD=y
+ # CONFIG_COMPAT_BRK is not set
+-CONFIG_SLAB=y
+ CONFIG_JUMP_LABEL=y
+ CONFIG_SMP=y
+ # CONFIG_X86_EXTENDED_PLATFORM is not set
+@@ -43,7 +43,6 @@ CONFIG_INET_UDP_DIAG=y
+ CONFIG_NETLINK_DIAG=y
+ # CONFIG_WIRELESS is not set
+ CONFIG_NET_9P=y
+-CONFIG_NET_9P_VIRTIO=y
+ CONFIG_DEVTMPFS=y
+ CONFIG_MTD=y
+ CONFIG_MTD_BLOCK2MTD=y
+@@ -133,8 +132,6 @@ CONFIG_MAGIC_SYSRQ=y
+ CONFIG_DEBUG_KERNEL=y
+ CONFIG_DEBUG_PAGEALLOC=y
+ CONFIG_DEBUG_OBJECTS=y
+-CONFIG_DEBUG_SLAB=y
+-CONFIG_DEBUG_SLAB_LEAK=y
+ CONFIG_DEBUG_KMEMLEAK=y
+ CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
+ CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
+diff --git a/kernel-configs/i386-config-4.14 b/kernel-configs/i386-config-4.14
+index 2deade0..ecb9cf6 100644
+--- a/kernel-configs/i386-config-4.14
++++ b/kernel-configs/i386-config-4.14
+@@ -1,3 +1,4 @@
++# CONFIG_64BIT is not set
+ CONFIG_LOCALVERSION="-xfstests"
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+@@ -138,8 +139,6 @@ CONFIG_MAGIC_SYSRQ=y
+ CONFIG_DEBUG_KERNEL=y
+ CONFIG_DEBUG_PAGEALLOC=y
+ CONFIG_DEBUG_OBJECTS=y
+-CONFIG_DEBUG_SLAB=y
+-CONFIG_DEBUG_SLAB_LEAK=y
+ CONFIG_DEBUG_KMEMLEAK=y
+ CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
+ CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
+diff --git a/kernel-configs/i386-config-4.4 b/kernel-configs/i386-config-4.4
+index b21615a..38ede35 100644
+--- a/kernel-configs/i386-config-4.4
++++ b/kernel-configs/i386-config-4.4
+@@ -1,3 +1,4 @@
++# CONFIG_64BIT is not set
+ CONFIG_LOCALVERSION="-xfstests"
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+@@ -10,7 +11,6 @@ CONFIG_CGROUPS=y
+ CONFIG_USER_NS=y
+ CONFIG_BLK_DEV_INITRD=y
+ # CONFIG_COMPAT_BRK is not set
+-CONFIG_SLAB=y
+ CONFIG_JUMP_LABEL=y
+ CONFIG_SMP=y
+ # CONFIG_X86_EXTENDED_PLATFORM is not set
+@@ -138,8 +138,6 @@ CONFIG_MAGIC_SYSRQ=y
+ CONFIG_DEBUG_KERNEL=y
+ CONFIG_DEBUG_PAGEALLOC=y
+ CONFIG_DEBUG_OBJECTS=y
+-CONFIG_DEBUG_SLAB=y
+-CONFIG_DEBUG_SLAB_LEAK=y
+ CONFIG_DEBUG_KMEMLEAK=y
+ CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
+ CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
+diff --git a/kernel-configs/i386-config-4.9 b/kernel-configs/i386-config-4.9
+index 324b6e6..f235cea 100644
+--- a/kernel-configs/i386-config-4.9
++++ b/kernel-configs/i386-config-4.9
+@@ -1,3 +1,4 @@
++# CONFIG_64BIT is not set
+ CONFIG_LOCALVERSION="-xfstests"
+ CONFIG_SYSVIPC=y
+ CONFIG_POSIX_MQUEUE=y
+@@ -138,8 +139,6 @@ CONFIG_MAGIC_SYSRQ=y
+ CONFIG_DEBUG_KERNEL=y
+ CONFIG_DEBUG_PAGEALLOC=y
+ CONFIG_DEBUG_OBJECTS=y
+-CONFIG_DEBUG_SLAB=y
+-CONFIG_DEBUG_SLAB_LEAK=y
+ CONFIG_DEBUG_KMEMLEAK=y
+ CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=3000
+ CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF=y
+diff --git a/kernel-configs/sync_i386_configs.sh b/kernel-configs/sync_i386_configs.sh
+new file mode 100755
+index 0000000..2d75d64
+--- /dev/null
++++ b/kernel-configs/sync_i386_configs.sh
+@@ -0,0 +1,38 @@
++#!/bin/bash
++
++# Generate the i386 configs from the x86_64 ones.
++
++set -e -u
++
++KCONFIGS_DIR=$(realpath "$(dirname "$0")")
++: "${LINUX_DIR:=$HOME/linux}"
++
++version_at_least()
++{
++    local cur_ver=$1
++    local want_ver=$2
++    [ "$(echo -e "$cur_ver\n$want_ver" | sort -V | head -n1)" = "$want_ver" ]
++}
++
++cd "$KCONFIGS_DIR"
++versions=$(echo x86_64-config-* | sed 's/x86_64-config-//g')
++
++cd "$LINUX_DIR"
++for vers in $versions; do
++    git checkout "stable/linux-$vers.y"
++    if version_at_least "$vers" 3.9; then
++	unset ARCH
++	echo '# CONFIG_64BIT is not set' > .config
++    else
++	export ARCH=i386
++	echo > .config
++    fi
++    cat "$KCONFIGS_DIR/x86_64-config-$vers" >> .config
++    if version_at_least "$vers" 3.7; then
++	make olddefconfig
++    else
++	make oldnoconfig
++    fi
++    make savedefconfig
++    cp -v defconfig "$KCONFIGS_DIR/i386-config-$vers"
++done
 -- 
-2.9.5
+2.19.0.rc2.392.g5ba43deb5a-goog
