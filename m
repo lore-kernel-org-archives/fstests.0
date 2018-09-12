@@ -1,130 +1,67 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:38512 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726642AbeILL17 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:59 -0400
-Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6Owv6011803
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:59 -0400
-Received: from e14.ny.us.ibm.com (e14.ny.us.ibm.com [129.33.205.204])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2meqxvbafn-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:59 -0400
-Received: from localhost
-        by e14.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:45 -0400
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 14/19] Fix generic/177 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:21 +0530
-In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-15-chandan@linux.vnet.ibm.com>
+Received: from mx3-rdu2.redhat.com ([66.187.233.73]:34052 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726552AbeILPTq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Sep 2018 11:19:46 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.rdu2.redhat.com [10.11.54.3])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id C5A3E804BCF4
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 10:15:54 +0000 (UTC)
+Received: from dhcp-12-136.nay.redhat.com (unknown [10.66.12.136])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id CC10010EE6D7
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 10:15:53 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] shared/010: avoid dedupe testing blocked on large fs
+Date: Wed, 12 Sep 2018 18:15:47 +0800
+Message-Id: <20180912101547.28835-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit changes the test to work on file offsets that are aligned
-with the block size of the underlying filesystem.
+When test on large fs (--large-fs), xfstests preallocates a large
+file in SCRATCH_MNT/ at first. Duperemove will take too long time
+to deal with that large file (many days on 500T XFS). So move
+working directory to a sub-dir underlying $SCRATCH_MNT/.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/generic/177     | 20 +++++++++++---------
- tests/generic/177.out | 23 +++++++++++++++--------
- 2 files changed, 26 insertions(+), 17 deletions(-)
 
-diff --git a/tests/generic/177 b/tests/generic/177
-index 36577b1..069bb81 100755
---- a/tests/generic/177
-+++ b/tests/generic/177
-@@ -45,44 +45,46 @@ _require_metadata_journaling $SCRATCH_DEV
- _init_flakey
- _mount_flakey
+Hi,
+
+Besides fix this issue, this patch fix another issue passingly. I left
+a bad variable named "testdir" in this case. This patch can fix it.
+
+If maintainer feels I should fix it in another patch, please tell me:-P
+
+Thanks,
+Zorro
+
+ tests/shared/010 | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tests/shared/010 b/tests/shared/010
+index 1817081b..04f55890 100755
+--- a/tests/shared/010
++++ b/tests/shared/010
+@@ -65,15 +65,17 @@ function end_test()
+ sleep_time=$((50 * TIME_FACTOR))
  
-+BLOCK_SIZE=$(_get_block_size $SCRATCH_MNT)
-+
- # Create out test file with some data and then fsync it.
- # We do the fsync only to make sure the last fsync we do in this test triggers
- # the fast code path of btrfs' fsync implementation, a condition necessary to
- # trigger the bug btrfs had.
--$XFS_IO_PROG -f -c "pwrite -S 0xaa 0K 128K" \
-+$XFS_IO_PROG -f -c "pwrite -S 0xaa 0K $(($BLOCK_SIZE * 32))" \
- 		-c "fsync"                  \
--		$SCRATCH_MNT/foobar | _filter_xfs_io
-+		$SCRATCH_MNT/foobar | _filter_xfs_io_blocks_modified
- 
- # Now punch a hole against the range [96K, 128K[.
--$XFS_IO_PROG -c "fpunch 96K 32K" $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fpunch $(($BLOCK_SIZE * 24)) $(($BLOCK_SIZE * 8))" $SCRATCH_MNT/foobar
- 
- # Punch another hole against a range that overlaps the previous range and ends
- # beyond eof.
--$XFS_IO_PROG -c "fpunch 64K 128K" $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fpunch $(($BLOCK_SIZE * 16)) $(($BLOCK_SIZE * 32))" $SCRATCH_MNT/foobar
- 
- # Punch another hole against a range that overlaps the first range ([96K, 128K[)
- # and ends at eof.
--$XFS_IO_PROG -c "fpunch 32K 96K" $SCRATCH_MNT/foobar
-+$XFS_IO_PROG -c "fpunch $(($BLOCK_SIZE * 8)) $(($BLOCK_SIZE * 24))" $SCRATCH_MNT/foobar
- 
- # Fsync our file. We want to verify that, after a power failure and mounting the
- # filesystem again, the file content reflects all the hole punch operations.
- $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foobar
- 
- echo "File digest before power failure:"
--md5sum $SCRATCH_MNT/foobar | _filter_scratch
-+od -t x1 $SCRATCH_MNT/foobar | _filter_od
- 
- echo "Fiemap before power failure:"
--$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap $BLOCK_SIZE
- 
- _flakey_drop_and_remount
- 
- echo "File digest after log replay:"
- # Must match the same digest we got before the power failure.
--md5sum $SCRATCH_MNT/foobar | _filter_scratch
-+od -t x1 $SCRATCH_MNT/foobar | _filter_od
- 
- echo "Fiemap after log replay:"
- # Must match the same extent listing we got before the power failure.
--$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar | _filter_fiemap $BLOCK_SIZE
- 
- _unmount_flakey
- 
-diff --git a/tests/generic/177.out b/tests/generic/177.out
-index cc10768..b47e136 100644
---- a/tests/generic/177.out
-+++ b/tests/generic/177.out
-@@ -1,13 +1,20 @@
- QA output created by 177
--wrote 131072/131072 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Blocks modified: [0 - 31]
- File digest before power failure:
--d26bbb9a8396a9c0dd76423471b72b15  SCRATCH_MNT/foobar
-+0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+40
- Fiemap before power failure:
--0: [0..63]: data
--1: [64..255]: hole
-+0: [0..7]: data
-+1: [8..31]: hole
- File digest after log replay:
--d26bbb9a8396a9c0dd76423471b72b15  SCRATCH_MNT/foobar
-+0 aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa aa
-+*
-+10 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-+*
-+40
- Fiemap after log replay:
--0: [0..63]: data
--1: [64..255]: hole
-+0: [0..7]: data
-+1: [8..31]: hole
+ # Start fsstress
++testdir="$SCRATCH_MNT/dir"
++mkdir $testdir
+ fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
+-$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
++$FSSTRESS_PROG $fsstress_opts -d $testdir -l 0 >> $seqres.full 2>&1 &
+ dedup_pids=""
+ dupe_run=$TEST_DIR/${seq}-running
+ # Start several dedupe processes on same directory
+ touch $dupe_run
+ for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
+ 	while [ -e $dupe_run ]; do
+-		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/ \
++		$DUPEREMOVE_PROG -dr --dedupe-options=same $testdir \
+ 			>>$seqres.full 2>&1
+ 	done &
+ 	dedup_pids="$! $dedup_pids"
 -- 
-2.9.5
+2.14.4
