@@ -1,310 +1,286 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:37644 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1725910AbeILL1T (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:19 -0400
-Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JgQJ093078
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:18 -0400
-Received: from e13.ny.us.ibm.com (e13.ny.us.ibm.com [129.33.205.203])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2meusq3keg-1
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:48730 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726555AbeILL1W (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:22 -0400
+Received: from pps.filterd (m0098404.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JcDC017351
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:22 -0400
+Received: from e11.ny.us.ibm.com (e11.ny.us.ibm.com [129.33.205.201])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2metq5wf2w-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:18 -0400
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:22 -0400
 Received: from localhost
-        by e13.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e11.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:17 -0400
+        Wed, 12 Sep 2018 02:24:21 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 01/19] Fix xfs/009 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:08 +0530
+Subject: [PATCH V3 03/19] Fix xfs/050 to work with 64k block size
+Date: Wed, 12 Sep 2018 11:56:10 +0530
 In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-2-chandan@linux.vnet.ibm.com>
+Message-Id: <20180912062626.14349-4-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_alloc_file_space() rounds up allocation requests by the filesystem
-block size. Hence this commit changes the test to work with block size
-units rather than with a multiple of 4096 bytes.
+This commit changes the test to calculate quota limits based on the
+block size of the underlying filesystem. Also, the sizes of the test
+files are now made to be a multiple of the filesystem block size.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/009     | 92 ++++++++++++++++++++++++++++++++++++++++++++++---------
- tests/xfs/009.out | 66 +++++++++++++++++++--------------------
- 2 files changed, 110 insertions(+), 48 deletions(-)
+ tests/xfs/050     | 24 ++++++++++++++--------
+ tests/xfs/050.out | 60 +++++++++++++++++++++++++++----------------------------
+ 2 files changed, 46 insertions(+), 38 deletions(-)
 
-diff --git a/tests/xfs/009 b/tests/xfs/009
-index 68f6379..70717eb 100755
---- a/tests/xfs/009
-+++ b/tests/xfs/009
-@@ -14,9 +14,6 @@ here=`pwd`
- tmp=/tmp/$$
- status=1	# failure is the default!
- trap "_cleanup; exit \$status" 0 1 2 3 15
--# This isn't really related to fs block size, it's just what
--# alloc uses for the "block" unit in it's input parameters...
--bsize=4096
- 
- _cleanup()
- {
-@@ -24,13 +21,6 @@ _cleanup()
-     _scratch_unmount
- }
- 
--_block_filter()
--{
--   sed \
--	-e 's/[0-9][0-9]*\.\.[0-9][0-9]*/BLOCKRANGE/g' \
--	-e "s/blocksize $bsize/blocksize BSIZE/g"
--}
--
- _init()
- {
-     echo "*** mkfs"
-@@ -49,11 +39,6 @@ _init()
-     fi
- }
- 
--_filesize()
--{
--    ls -l $1 | $AWK_PROG '{print "filesize = " $5}'
--}
--
- # get standard environment, filters and checks
- . ./common/rc
- . ./common/filter
-@@ -64,9 +49,86 @@ _supported_os Linux
- 
+diff --git a/tests/xfs/050 b/tests/xfs/050
+index 8569c2c..01d82cc 100755
+--- a/tests/xfs/050
++++ b/tests/xfs/050
+@@ -38,8 +38,13 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
  _require_scratch
+ _require_xfs_quota
  
-+_filesize()
-+{
-+    ls -l $1 | $AWK_PROG -v bsize="$bsize" '{print "filesize = " $5 / bsize}'
-+}
-+
-+_block_filter()
-+{
-+	$AWK_PROG -v bsize="$bsize" '
-+	/blocksize/ {
-+		printf("    blocksize BSIZE\n")
-+
-+		next
-+	}
-+
-+	/CMD/ {
-+		split($3, off, "=")
-+		offset = strtonum(off[2])
-+		if (offset != -1)
-+			offset = offset / bsize
-+
-+		split($4, len, "=")
-+		nr_blocks = strtonum(len[2])
-+		if (nr_blocks != -1)
-+			nr_blocks = nr_blocks / bsize
-+
-+		printf("    %s %s off=%s, len=%d\n", $1, $2, offset, nr_blocks)
-+
-+		next
-+	}
-+
-+	/MAP/ {
-+		split($2, off, "=")
-+		offset = strtonum(off[2])
-+		if (offset != -1)
-+			offset = offset / bsize
-+
-+		split($3, len, "=")
-+
-+		nr_blocks = strtonum(len[2])
-+
-+		if (nr_blocks != -1)
-+			nr_blocks = nr_blocks / bsize
-+
-+		printf("    %s off=%s, len=%d %s\n", $1, offset, nr_blocks, $4)
-+
-+		next
-+	}
-+
-+	/TRUNCATE/ {
-+		split($2, off, "=")
-+		offset = strtonum(off[2]) / bsize
-+
-+		printf("    %s off=%s\n", $1, offset)
-+
-+		next
-+	}
-+
-+	/\[[0-9]+,[0-9]+\]:/ {
-+		printf("        %s BLOCKRANGE\n", $1)
-+
-+		next
-+	}
-+
-+	{
-+		print
-+
-+		next
-+	}
-+	'
-+}
-+
- _init
- out=$SCRATCH_MNT/$$.tmp
- 
-+# This isn't really related to fs block size, it's just what
-+# alloc uses for the "block" unit in it's input parameters...
-+# However, xfs_alloc_file_space() rounds up allocation
-+# request by the filesystem's block size.
+-bsoft=100
+-bhard=500
++_scratch_mkfs >/dev/null 2>&1
++_scratch_mount
 +bsize=$(_get_block_size $SCRATCH_MNT)
++_scratch_unmount
 +
- # since we're using a clean FS here, we make some assumptions
- # about availability of contiguous blocks
++bsoft=$(( 25 * $bsize ))
++bhard=$(( 125 * $bsize ))
+ isoft=4
+ ihard=10
  
-diff --git a/tests/xfs/009.out b/tests/xfs/009.out
-index 7132aca..02b5d82 100644
---- a/tests/xfs/009.out
-+++ b/tests/xfs/009.out
-@@ -3,8 +3,8 @@ QA output created by 009
- *** mount
- *** test 1 - reservations cleared on O_TRUNC
-     blocksize BSIZE
--    CMD resvsp, off=0, len=4096000
--    MAP off=0, len=4096000 [0,1000]
-+    CMD resvsp, off=0, len=1000
-+    MAP off=0, len=1000 [0,1000]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
-     MAP off=0, len=-1 [0-]
-@@ -17,53 +17,53 @@ filesize = 0
- filesize = 0
- *** test 2 - reserve & filesize
-     blocksize BSIZE
--    CMD resvsp, off=0, len=4096000
--    MAP off=0, len=4096000 [0,1000]
-+    CMD resvsp, off=0, len=1000
-+    MAP off=0, len=1000 [0,1000]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
- filesize = 0
- *** test 3 - alloc & filesize
-     blocksize BSIZE
--    CMD allocsp, off=4096000, len=-1
--    MAP off=4096000, len=-1 [1000-]
-+    CMD allocsp, off=1000, len=-1
-+    MAP off=1000, len=-1 [1000-]
-         [ofs,count]: start..end
--filesize = 4096000
-+filesize = 1000
- *** test 4 - allocations cleared on O_TRUNC
-     blocksize BSIZE
--    CMD allocsp, off=4096000, len=-1
--    MAP off=4096000, len=-1 [1000-]
-+    CMD allocsp, off=1000, len=-1
-+    MAP off=1000, len=-1 [1000-]
-         [ofs,count]: start..end
--filesize = 4096000
-+filesize = 1000
-     blocksize BSIZE
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
- filesize = 0
- *** test 5 - reserve / unreserve
-     blocksize BSIZE
--    CMD resvsp, off=0, len=409600
--    MAP off=0, len=409600 [0,100]
-+    CMD resvsp, off=0, len=100
-+    MAP off=0, len=100 [0,100]
-         [ofs,count]: start..end
-         [0,100]: BLOCKRANGE
--    CMD unresvsp, off=409600, len=2048000
--    MAP off=409600, len=2048000 [100,500]
-+    CMD unresvsp, off=100, len=500
-+    MAP off=100, len=500 [100,500]
-         [ofs,count]: start..end
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,100]: BLOCKRANGE
--    CMD unresvsp, off=3686400, len=819200
--    MAP off=3686400, len=819200 [900,200]
-+    CMD unresvsp, off=900, len=200
-+    MAP off=900, len=200 [900,200]
-         [ofs,count]: start..end
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,100]: BLOCKRANGE
- *** test 6 - reserve adjacent
-     blocksize BSIZE
--    CMD resvsp, off=0, len=409600
--    MAP off=0, len=409600 [0,100]
-+    CMD resvsp, off=0, len=100
-+    MAP off=0, len=100 [0,100]
-         [ofs,count]: start..end
-         [0,100]: BLOCKRANGE
--    CMD resvsp, off=409600, len=409600
--    MAP off=409600, len=409600 [100,100]
-+    CMD resvsp, off=100, len=100
-+    MAP off=100, len=100 [100,100]
-         [ofs,count]: start..end
-         [100,100]: BLOCKRANGE
-     MAP off=0, len=-1 [0-]
-@@ -71,44 +71,44 @@ filesize = 0
-         [0,200]: BLOCKRANGE
- *** test 7 - alloc
-     blocksize BSIZE
--    CMD allocsp, off=4096000, len=-1
--    MAP off=4096000, len=-1 [1000-]
-+    CMD allocsp, off=1000, len=-1
-+    MAP off=1000, len=-1 [1000-]
-         [ofs,count]: start..end
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
--    CMD allocsp, off=8192000, len=-1
--    MAP off=8192000, len=-1 [2000-]
-+    CMD allocsp, off=2000, len=-1
-+    MAP off=2000, len=-1 [2000-]
-         [ofs,count]: start..end
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,2000]: BLOCKRANGE
--filesize = 8192000
-+filesize = 2000
- *** test 8 - alloc & truncate
-     blocksize BSIZE
--    CMD allocsp, off=4096000, len=-1
--    MAP off=4096000, len=-1 [1000-]
-+    CMD allocsp, off=1000, len=-1
-+    MAP off=1000, len=-1 [1000-]
-         [ofs,count]: start..end
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
--    TRUNCATE off=2048000
-+    TRUNCATE off=500
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,500]: BLOCKRANGE
--filesize = 2048000
-+filesize = 500
- *** test 9 - reserve & truncate
-     blocksize BSIZE
--    CMD resvsp, off=0, len=4096000
--    MAP off=0, len=4096000 [0,1000]
-+    CMD resvsp, off=0, len=1000
-+    MAP off=0, len=1000 [0,1000]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
--    TRUNCATE off=2048000
-+    TRUNCATE off=500
-     MAP off=0, len=-1 [0-]
-         [ofs,count]: start..end
-         [0,1000]: BLOCKRANGE
--filesize = 2048000
-+filesize = 500
+@@ -55,7 +60,9 @@ _filter_report()
+ 		if ($ENV{'LARGE_SCRATCH_DEV'}) {
+ 			$val = $ENV{'NUM_SPACE_FILES'};
+ 		}
+-		s/(^\[ROOT\] \S+ \S+ \S+ \S+ \[--------\] )(\S+)/$1@{[$2 - $val]}/g'
++		s/(^\[ROOT\] \S+ \S+ \S+ \S+ \[--------\] )(\S+)/$1@{[$2 - $val]}/g' |
++	perl -npe '
++		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
+ }
+ 
+ # The actual point at which limit enforcement takes place for the
+@@ -70,9 +77,10 @@ _filter_and_check_blks()
+ 		if (/^\#'$id'\s+(\d+)/ && '$enforce') {
+ 			$maximum = '$bhard';
+ 			$minimum = '$bhard' * 85/100;
+-			if (($1 < $minimum || $1 > $maximum) && '$noextsz') {
++			$used = $1 * 1024;
++			if (($used < $minimum || $used > $maximum) && '$noextsz') {
+ 				printf(" URK %d: %d is out of range! [%d,%d]\n",
+-					'$id', $1, $minimum, $maximum);
++					'$id', $used, $minimum, $maximum);
+ 			}
+ 			s/^(\#'$id'\s+)(\d+)/\1 =OK=/g;
+ 		}
+@@ -132,7 +140,7 @@ _exercise()
+ 	echo "ls -l $SCRATCH_MNT" >>$seqres.full
+ 	ls -l $SCRATCH_MNT >>$seqres.full
+ 	xfs_quota -D $tmp.projects -P $temp.projid -x \
+-		-c "limit -$type bsoft=${bsoft}k bhard=${bhard}k $id" \
++		-c "limit -$type bsoft=${bsoft} bhard=${bhard} $id" \
+ 		-c "limit -$type isoft=$isoft ihard=$ihard $id" \
+ 		$SCRATCH_DEV
+ 	xfs_quota -D $tmp.projects -P $tmp.projid -x \
+@@ -152,7 +160,7 @@ _exercise()
+ 
+ 	echo
+ 	echo "*** push past the soft block limit" | tee -a $seqres.full
+-	_file_as_id $SCRATCH_MNT/softie $id $type 1024 140
++	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 35
+ 	_qmount
+ 	xfs_quota -D $tmp.projects -P $tmp.projid -x \
+ 		-c "repquota -birnN -$type" $SCRATCH_DEV |
+@@ -173,7 +181,7 @@ _exercise()
+ 	echo
+ 	# Note: for quota accounting (not enforcement), EDQUOT is not expected
+ 	echo "*** push past the hard block limit (expect EDQUOT)" | tee -a $seqres.full
+-	_file_as_id $SCRATCH_MNT/softie $id $type 1024 540
++	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 135
+ 	echo "ls -l $SCRATCH_MNT" >>$seqres.full
+ 	ls -l $SCRATCH_MNT >>$seqres.full
+ 	_qmount
+diff --git a/tests/xfs/050.out b/tests/xfs/050.out
+index ff9eb1c..53907a2 100644
+--- a/tests/xfs/050.out
++++ b/tests/xfs/050.out
+@@ -12,23 +12,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 25 125 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** group
+@@ -44,23 +44,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 25 125 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** uqnoenforce
+@@ -76,23 +76,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 135 25 125 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** gqnoenforce
+@@ -108,23 +108,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 135 25 125 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** pquota
+@@ -140,23 +140,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 25 125 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** pqnoenforce
+@@ -172,22 +172,22 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** report initial settings
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 25 125 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 135 25 125 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
  *** unmount
 -- 
 2.9.5
