@@ -1,49 +1,81 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:52374 "EHLO
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:34796 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726502AbeILL1x (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:53 -0400
-Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6Ooq6044261
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:53 -0400
-Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mes578r06-1
+        by vger.kernel.org with ESMTP id S1726502AbeILL1z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:55 -0400
+Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6Os1H005000
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:55 -0400
+Received: from e15.ny.us.ibm.com (e15.ny.us.ibm.com [129.33.205.205])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2mesagg90q-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:53 -0400
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:54 -0400
 Received: from localhost
-        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e15.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:48 -0400
+        Wed, 12 Sep 2018 02:24:46 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 18/19] Fix generic/018 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:25 +0530
+Subject: [PATCH V3 17/19] Fix generic/459 to work with 64k block size
+Date: Wed, 12 Sep 2018 11:56:24 +0530
 In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-19-chandan@linux.vnet.ibm.com>
+Message-Id: <20180912062626.14349-18-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit replaces the hard coded bsize variable with the block size
-obtained from the underlying filesystem.
+With 64k block size, 200MiB disk space is not sufficient to create an
+XFS filesystem. Hence this commit increases the size of the
+overprovisioned dm-thin device to 300MiB. The commit also increases the
+other associated disk sizes (original physical size and new physical
+size) appropriately.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/018 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/generic/459 | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
 
-diff --git a/tests/generic/018 b/tests/generic/018
-index 43610ef..2a56c38 100755
---- a/tests/generic/018
-+++ b/tests/generic/018
-@@ -42,7 +42,7 @@ fragfile=$SCRATCH_MNT/fragfile.$$
- rm -f $fragfile
+diff --git a/tests/generic/459 b/tests/generic/459
+index aee71a0..c430952 100755
+--- a/tests/generic/459
++++ b/tests/generic/459
+@@ -59,14 +59,14 @@ vgname=vg_$seq
+ lvname=lv_$seq
+ poolname=pool_$seq
+ snapname=snap_$seq
+-origpsize=100
+-virtsize=200
+-newpsize=200
++origpsize=200
++virtsize=300
++newpsize=300
  
- # Craft some fragmented files, defrag them, check the result.
--bsize=4096
-+bsize=$(_get_block_size $SCRATCH_MNT)
+ # Ensure we have enough disk space
+-_scratch_mkfs_sized $((250 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mkfs_sized $((350 * 1024 * 1024)) >>$seqres.full 2>&1
  
- echo "zero-length file:" | tee -a $seqres.full
- touch $fragfile
+-# Create a 100MB dm-thin POOL
++# Create a 200MB dm-thin POOL
+ $LVM_PROG pvcreate -f $SCRATCH_DEV >>$seqres.full 2>&1
+ $LVM_PROG vgcreate -f $vgname $SCRATCH_DEV >>$seqres.full 2>&1
+ 
+@@ -74,7 +74,7 @@ $LVM_PROG lvcreate  --thinpool $poolname  --errorwhenfull y \
+ 		    --zero n -L $origpsize \
+ 		    --poolmetadatasize 4M $vgname >>$seqres.full 2>&1
+ 
+-# Create a overprovisioned 200MB dm-thin virt. device
++# Create a overprovisioned 300MB dm-thin virt. device
+ $LVM_PROG lvcreate  --virtualsize $virtsize \
+ 		    -T $vgname/$poolname \
+ 		    -n $lvname >>$seqres.full 2>&1
+@@ -92,7 +92,7 @@ _mount /dev/mapper/$vgname-$snapname $SCRATCH_MNT
+ 
+ # Consume all space available in the volume and freeze to ensure everything
+ # required to make the fs consistent is flushed to disk.
+-$XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 120m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
++$XFS_IO_PROG -f -d -c 'pwrite -b 1m 0 220m' $SCRATCH_MNT/f1 >>$seqres.full 2>&1
+ 
+ # In XFS, this freeze will never complete until the dm-thin POOL device is
+ # extended. It is expected, and is only used so xfsaild is triggered to
 -- 
 2.9.5
