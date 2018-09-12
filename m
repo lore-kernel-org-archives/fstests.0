@@ -1,67 +1,98 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:42308 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726770AbeIKMAh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Sep 2018 08:00:37 -0400
-Date: Tue, 11 Sep 2018 00:02:44 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] cloner: add support for clone_file_range for cifs
-Message-ID: <20180911070244.GA13711@infradead.org>
-References: <20180911052806.1302-1-lsahlber@redhat.com>
- <20180911052806.1302-2-lsahlber@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180911052806.1302-2-lsahlber@redhat.com>
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:34770 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726418AbeILL1S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:18 -0400
+Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6Jdfp143323
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:18 -0400
+Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2meqxvb9xt-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:17 -0400
+Received: from localhost
+        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Wed, 12 Sep 2018 02:24:16 -0400
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH V3 00/19] Fix tests to work on non-4k block sized fs instances
+Date: Wed, 12 Sep 2018 11:56:07 +0530
+Message-Id: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 11, 2018 at 03:28:06PM +1000, Ronnie Sahlberg wrote:
-> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
-> ---
->  src/cloner.c | 16 +++++++++++++++-
->  1 file changed, 15 insertions(+), 1 deletion(-)
-> 
-> diff --git a/src/cloner.c b/src/cloner.c
-> index ffad82f0..9f9156e5 100644
-> --- a/src/cloner.c
-> +++ b/src/cloner.c
-> @@ -120,6 +120,18 @@ clone_file_range_btrfs(int src_fd, int dst_fd, uint64_t src_off,
->  }
->  
->  static int
-> +clone_file_range_cifs(int fd_in, int fd_out, loff_t off_in,
-> +		      loff_t off_out, size_t len)
-> +{
-> +	int ret;
-> +
-> +	ret = copy_file_range(fd_in, &off_in, fd_out, &off_out, len, 0);
-> +	if (ret < 0)
-> +		ret = errno;
-> +	return 0;
-> +}
+This patchset fixes tests (mostly XFS specific ones) to work on
+variable block size. These patches now use the output of "od" utility
+to verify the contents of the test files instead of the md5sum
+utility.
 
-This is weird.  cloner seems to test clone, in which case it should
-test FICLONE (BTRFS_IOC_CLONE) / FICLONERANGE(BTRFS_IOC_CLONE_RANGE).
+Also, The patchset modifies _filter_fiemap() filter function to
+optionally print the file offset range in block size units.
 
-But it seems to check file system magic numbers which is rather bogus
-to start with.  I think the right fix here is to remove all the magic
-number checks, always try FICLONE, and also remove support for the
-odd legacy cifs ioctl.
+Changelog:
+V2->V3:
+Added fixes for getting generic/018, generic/108 and generic/459 tests
+to work in 64k block size scenario.
 
->  {
-> @@ -128,7 +140,9 @@ clone_file_range(unsigned int fs_type, int src_fd, int dst_fd, uint64_t src_off,
->  		return clone_file_range_btrfs(src_fd, dst_fd, src_off, dst_off,
->  					      len);
->  		break;
-> -	case CIFS_MAGIC_NUMBER:	/* only supports full file server-side copies */
-> +	case CIFS_MAGIC_NUMBER:
-> +		return clone_file_range_cifs(src_fd, dst_fd, src_off, dst_off,
-> +					     len);
->  	default:
->  		return ENOTSUP;
->  		break;
+V1->V2:
+Eryu Guan pointed out that some of the tests were obtaining the
+filesystem's block size value from $TEST_DIR even though the test was
+executed on the $SCRATCH_DEV's filesystem. This version of the
+patchset fixes the following tests to obtain the block size from
+$SCRATCH_MNT. The relevant changes was made to the following tests:
+xfs/009, xfs/050, xfs/074, xfs/139, xfs/140, xfs/190, xfs/299,
+generic/177 and generic/230.
 
-And independent break after a return is just insane.  Someone needs
-to fix this program to stop the eye bleeding..
+Chandan Rajendra (19):
+  Fix xfs/009 to work with 64k block size
+  xfs/050: Fix "Push past soft inode limit" case
+  Fix xfs/050 to work with 64k block size
+  Fix xfs/074 to work with 64k block size
+  Fix xfs/127 to work with 64k block size
+  Fix xfs/139 to work with 64k block size
+  Fix xfs/140 to work with 64k block size
+  Fix xfs/190 to work with 64k block size
+  Fix xfs/299 to work with 64k block size
+  xfs/325: Inject free_extent error after CoW operation
+  Fix generic/102 to work with 64k block size
+  Fix generic/172 to work with 64k block size
+  Filter fiemap output by FS block size
+  Fix generic/177 to work with 64k block size
+  Fix generic/230 to work with 64k block size
+  Fix generic/235 to work with 64k block size
+  Fix generic/459 to work with 64k block size
+  Fix generic/018 to work with 64k block size
+  Fix generic/108 to work with 64k block size
+
+ common/punch          | 19 ++++++++---
+ tests/generic/018     |  2 +-
+ tests/generic/102     |  4 +--
+ tests/generic/102.out | 20 +++++------
+ tests/generic/108     |  4 +--
+ tests/generic/172     |  4 +--
+ tests/generic/177     | 20 ++++++-----
+ tests/generic/177.out | 23 ++++++++-----
+ tests/generic/230     | 23 +++++++------
+ tests/generic/230.out | 16 ++++-----
+ tests/generic/235     |  2 +-
+ tests/generic/235.out |  4 +--
+ tests/generic/459     | 14 ++++----
+ tests/xfs/009         | 92 ++++++++++++++++++++++++++++++++++++++++++---------
+ tests/xfs/009.out     | 66 ++++++++++++++++++------------------
+ tests/xfs/050         | 26 ++++++++++-----
+ tests/xfs/050.out     | 60 ++++++++++++++++-----------------
+ tests/xfs/074         | 23 ++++++++++---
+ tests/xfs/127         |  2 +-
+ tests/xfs/139         | 15 +++++----
+ tests/xfs/139.out     |  8 +++--
+ tests/xfs/140         | 12 ++++---
+ tests/xfs/190         | 26 ++++++++++-----
+ tests/xfs/299         | 29 ++++++++++------
+ tests/xfs/299.out     | 60 ++++++++++++++++-----------------
+ tests/xfs/325         |  5 +--
+ tests/xfs/325.out     |  2 +-
+ 27 files changed, 358 insertions(+), 223 deletions(-)
+
+-- 
+2.9.5
