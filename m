@@ -1,81 +1,90 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:34372 "EHLO
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:39260 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726442AbeILL1b (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:31 -0400
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JdKX071046
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:31 -0400
-Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2meuqfkmkh-1
+        by vger.kernel.org with ESMTP id S1725910AbeILL1e (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:34 -0400
+Received: from pps.filterd (m0098413.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JdGa092870
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:33 -0400
+Received: from e14.ny.us.ibm.com (e14.ny.us.ibm.com [129.33.205.204])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2meusq3ktx-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:30 -0400
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:33 -0400
 Received: from localhost
-        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e14.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:30 -0400
+        Wed, 12 Sep 2018 02:24:32 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 08/19] Fix xfs/190 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:15 +0530
+Subject: [PATCH V3 10/19] xfs/325: Inject free_extent error after CoW operation
+Date: Wed, 12 Sep 2018 11:56:17 +0530
 In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-9-chandan@linux.vnet.ibm.com>
+Message-Id: <20180912062626.14349-11-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit describes "file hole" ranges in multiples of block sizes
-rather than using constants.
+On a 64k blocksized filesystem, when the test CoWs the file2's offset
+range [10 * 64k, 19 * 64k], the call to xfs_bmapi_reserve_delalloc()
+allocates 32 64k blocks. This is because XFS_DEFAULT_COWEXTSZ_HINT has
+the value of 32 and xfs_get_cowextsz_hint() uses this to compute the
+extent alignment. This leads to xfs_bmapi_reserve_delalloc() to reserve
+space corresponding to the file range [0, 32 * 64k] in the inode's
+cow fork area. On completion of write I/O corresponding to file2's range
+[10 * 64k, 19 * 64k], xfs_end_io() moves 10 out of the originally
+allocated 32 64k blocks to the data fork area. The remaining 22 64k
+blocks linger on in cow fork area of the inode.
+
+Later, when servicing the exit() syscall for the xfs_io process,
+xfs_free_eofblocks() ends up invoking xfs_reflink_cancel_cow_blocks()
+since i_delayed_blks has the value 22. xfs_reflink_cancel_cow_blocks()
+indirectly invokes __xfs_free_extent() which returns EIO since
+XFS_ERRTAG_FREE_EXTENT has been set. This leads to the filesystem to be
+shutdown. The "rm" command invoked later ends up returning an
+error and hence the test fails. The test actually requires that the
+filesystem gets shutdown when executing the "rm" command.
+
+To fix the problem, this commit injects the free_extent error after we
+CoW file2's [10 * 64k, 19 * 64k] range.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/190 | 26 +++++++++++++++++---------
- 1 file changed, 17 insertions(+), 9 deletions(-)
+ tests/xfs/325     | 5 +++--
+ tests/xfs/325.out | 2 +-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
 
-diff --git a/tests/xfs/190 b/tests/xfs/190
-index 3275e29..53dad06 100755
---- a/tests/xfs/190
-+++ b/tests/xfs/190
-@@ -10,13 +10,6 @@
- #
- # PV 985792
- #
--#This is the list of holes to punch in the file limited to $filesize
--#NOTE holes cannot overlap or this script will fail.
--holes="4096:4096 303104:4096 1048576:512 1051648:8192 1065984:8192 1085440:7168"
--#filesize in MB
--filesize=10
--#Name of file to perform the test on
--filename=test-190
+diff --git a/tests/xfs/325 b/tests/xfs/325
+index b156de9..6795901 100755
+--- a/tests/xfs/325
++++ b/tests/xfs/325
+@@ -54,11 +54,12 @@ echo "Check files"
+ md5sum $SCRATCH_MNT/file1 | _filter_scratch
+ md5sum $SCRATCH_MNT/file2 | _filter_scratch
  
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -38,9 +31,24 @@ _supported_os Linux
- _require_scratch
- _scratch_mkfs_xfs >/dev/null 2>&1
- _scratch_mount
--fsblocksize=`$XFS_INFO_PROG $SCRATCH_MNT|sed 's/=/ /g'|awk '/^data / { print $3 }'`
++echo "CoW a few blocks"
++$XFS_IO_PROG -c "pwrite -W -S 0x67 $((10 * blksz)) $((10 * blksz))" $SCRATCH_MNT/file2 >> $seqres.full
++
+ echo "Inject error"
+ _scratch_inject_error "free_extent"
  
--dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
-+fsblocksize=$(_get_block_size $SCRATCH_MNT)
-+
-+#This is the list of holes to punch in the file limited to $filesize
-+#NOTE holes cannot overlap or this script will fail.
-+holes="$fsblocksize:$fsblocksize \
-+$(($fsblocksize * 74)):$fsblocksize \
-+$(($fsblocksize * 256)):$(($fsblocksize / 8)) \
-+$(echo scale=0\;$fsblocksize \* 256 \+ $fsblocksize \* 3 \/ 4 | bc):$(($fsblocksize * 2)) \
-+$(echo scale=0\;$fsblocksize \* 260 \+ $fsblocksize \* 1 \/ 4 | bc):$(($fsblocksize * 2)) \
-+$(($fsblocksize * 265)):$(echo scale=0\;$fsblocksize \+ $fsblocksize \* 3 \/ 4 | bc)"
-+
-+#filesize
-+filesize=$(($fsblocksize * 2560))
-+#Name of file to perform the test on
-+filename=test-190
-+
-+$XFS_IO_PROG -f -c "pwrite 0 $(($fsblocksize * 2560))" $SCRATCH_MNT/$filename >> $seqres.full 2>&1
+-echo "CoW a few blocks"
+-$XFS_IO_PROG -c "pwrite -W -S 0x67 $((10 * blksz)) $((10 * blksz))" $SCRATCH_MNT/file2 >> $seqres.full
+ rm $SCRATCH_MNT/file1
+ sync
  
- # run DMAPI test using verbose output
- echo Punching holes in file
+diff --git a/tests/xfs/325.out b/tests/xfs/325.out
+index 4e25d2b..92027cd 100644
+--- a/tests/xfs/325.out
++++ b/tests/xfs/325.out
+@@ -4,8 +4,8 @@ Create files
+ Check files
+ d5a0ed0305c8df4180cb2bf975ecffe8  SCRATCH_MNT/file1
+ d5a0ed0305c8df4180cb2bf975ecffe8  SCRATCH_MNT/file2
+-Inject error
+ CoW a few blocks
++Inject error
+ FS should be shut down, touch will fail
+ touch: cannot touch 'SCRATCH_MNT/badfs': Input/output error
+ Remount to replay log
 -- 
 2.9.5
