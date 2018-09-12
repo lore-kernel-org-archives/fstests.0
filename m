@@ -1,101 +1,92 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:57814 "EHLO
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:42706 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726502AbeILL1i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:38 -0400
-Received: from pps.filterd (m0098399.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JeUv121928
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:38 -0400
-Received: from e13.ny.us.ibm.com (e13.ny.us.ibm.com [129.33.205.203])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mescu87cj-1
+        by vger.kernel.org with ESMTP id S1726502AbeILL1j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:39 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JeTE022164
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:39 -0400
+Received: from e15.ny.us.ibm.com (e15.ny.us.ibm.com [129.33.205.205])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2met8xeb5f-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:37 -0400
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:39 -0400
 Received: from localhost
-        by e13.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e15.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:36 -0400
+        Wed, 12 Sep 2018 02:24:38 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 11/19] Fix generic/102 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:18 +0530
+Subject: [PATCH V3 13/19] Filter fiemap output by FS block size
+Date: Wed, 12 Sep 2018 11:56:20 +0530
 In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-12-chandan@linux.vnet.ibm.com>
+Message-Id: <20180912062626.14349-14-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With 64k block size, mkfs.xfs fails with the following message when the
-filesystem size is 512MiB in size,
-
-"log size 2037 blocks too small, minimum size is 2473 blocks"
-
-Hence this commit increases the test filesystem size to 1GiB. Also, the
-size of the test file is increased to 800MiB which is ~80% of the test
-filesystem size. This is in proportion to the 400MiB test file used with
-the original 512MiB test filesystem.
+When testing FS instances of block size other than 4k, the output of
+fiemap command will not match those in *.out files. This commit adds
+an optional "block size" argument to _filter_fiemap() which prints
+fiemap output in units of block size.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/102     |  4 ++--
- tests/generic/102.out | 20 ++++++++++----------
- 2 files changed, 12 insertions(+), 12 deletions(-)
+ common/punch | 19 ++++++++++++++-----
+ 1 file changed, 14 insertions(+), 5 deletions(-)
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index faf940a..29abd89 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -31,14 +31,14 @@ _require_scratch
+diff --git a/common/punch b/common/punch
+index 8088b01..0fc7729 100644
+--- a/common/punch
++++ b/common/punch
+@@ -165,7 +165,11 @@ _test_punch() {
  
- rm -f $seqres.full
+ _coalesce_extents()
+ {
+-	awk -F: '
++	block_size=$1
++
++	[[ -z $block_size ]] && block_size=512
++
++	awk -v block_size="$block_size" -F: '
+ 	{
+ 		range = $2;
+ 		type = $3;
+@@ -176,19 +180,24 @@ _coalesce_extents()
  
--dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
-+dev_size=$((1024 * 1024 * 1024))     # 1GB filesystem
- _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
- _scratch_mount
+ 		if (type != prev_type) {
+ 			if (prev_type != "")
+-				printf("%u]:%s\n", low - 1, prev_type);
+-			printf("%u: [%u..", out_count++, low);
++				printf("%u]:%s\n", (low * 512 / block_size) - 1,
++					prev_type);
++			printf("%u: [%u..", out_count++,
++				(low * 512) / block_size);
+ 			prev_type = type;
+ 		}
+ 	}
+ 	END {
+ 		if (prev_type != "")
+-			printf("%u]:%s\n", high, prev_type);
++			printf("%u]:%s\n", ((high + 1) * 512 / block_size) - 1,
++				prev_type);
+ 	}'
+ }
  
- for ((i = 0; i < 10; i++)); do
- 	echo "loop $i" >>$seqres.full
+ _filter_fiemap()
+ {
++	block_size=$1
++
+ 	$AWK_PROG '
+ 		$3 ~ /hole/ {
+ 			print $1, $2, $3;
+@@ -201,7 +210,7 @@ _filter_fiemap()
+ 		$5 ~ /0x[[:xdigit:]]+/ {
+ 			print $1, $2, "data";
+ 		}' |
+-	_coalesce_extents
++	_coalesce_extents $block_size
+ }
  
--	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
-+	$XFS_IO_PROG -f -c "pwrite -b 1m 0 800m" "$SCRATCH_MNT"/file | \
- _filter_xfs_io | _filter_scratch
- 
- 	rm -f "$SCRATCH_MNT"/file
-diff --git a/tests/generic/102.out b/tests/generic/102.out
-index fc9275d..b58aa5c 100644
---- a/tests/generic/102.out
-+++ b/tests/generic/102.out
-@@ -1,21 +1,21 @@
- QA output created by 102
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ _filter_fiemap_flags()
 -- 
 2.9.5
