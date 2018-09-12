@@ -1,87 +1,81 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:35664 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726642AbeILL1Z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:25 -0400
-Received: from pps.filterd (m0098396.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6Jg5b143587
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:25 -0400
-Received: from e13.ny.us.ibm.com (e13.ny.us.ibm.com [129.33.205.203])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2meqxvba2h-1
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:34372 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726442AbeILL1b (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Sep 2018 07:27:31 -0400
+Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8C6JdKX071046
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:31 -0400
+Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2meuqfkmkh-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:25 -0400
+        for <fstests@vger.kernel.org>; Wed, 12 Sep 2018 02:24:30 -0400
 Received: from localhost
-        by e13.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 12 Sep 2018 02:24:22 -0400
+        Wed, 12 Sep 2018 02:24:30 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V3 04/19] Fix xfs/074 to work with 64k block size
-Date: Wed, 12 Sep 2018 11:56:11 +0530
+Subject: [PATCH V3 08/19] Fix xfs/190 to work with 64k block size
+Date: Wed, 12 Sep 2018 11:56:15 +0530
 In-Reply-To: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
 References: <20180912062626.14349-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180912062626.14349-5-chandan@linux.vnet.ibm.com>
+Message-Id: <20180912062626.14349-9-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit makes file and extent size calculations to be a function of
-the filesystem's block size. It also adds a brief description of the
-bug that is being tested.
+This commit describes "file hole" ranges in multiples of block sizes
+rather than using constants.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/074 | 23 +++++++++++++++++++----
- 1 file changed, 19 insertions(+), 4 deletions(-)
+ tests/xfs/190 | 26 +++++++++++++++++---------
+ 1 file changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/tests/xfs/074 b/tests/xfs/074
-index e5888d5..1e1e16e 100755
---- a/tests/xfs/074
-+++ b/tests/xfs/074
-@@ -7,6 +7,18 @@
- # Check some extent size hint boundary conditions that can result in
- # MAXEXTLEN overflows.
+diff --git a/tests/xfs/190 b/tests/xfs/190
+index 3275e29..53dad06 100755
+--- a/tests/xfs/190
++++ b/tests/xfs/190
+@@ -10,13 +10,6 @@
  #
-+# In xfs_bmap_extsize_align(), we had,
-+# 	if ((temp = (align_alen % extsz))) {
-+# 		align_alen += extsz - temp;
-+# 	}
-+# align_alen had the value of 2097151 (i.e. MAXEXTLEN) blocks. extsz had
-+# the value of 4096 blocks.
-+#
-+# align_alen % extsz will be 4095. so align_alen will end up having
-+# 2097151 + (4096 - 4095) = 2097152 i.e. (MAXEXTLEN + 1). Thus the length
-+# of the new extent will be larger than MAXEXTLEN. This will later cause
-+# the bmbt leaf to have an entry whose length is set to zero block count.
-+#
+ # PV 985792
+ #
+-#This is the list of holes to punch in the file limited to $filesize
+-#NOTE holes cannot overlap or this script will fail.
+-holes="4096:4096 303104:4096 1048576:512 1051648:8192 1065984:8192 1085440:7168"
+-#filesize in MB
+-filesize=10
+-#Name of file to perform the test on
+-filename=test-190
+ 
  seq=`basename $0`
  seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
-@@ -46,19 +58,22 @@ mkdir -p $LOOP_MNT
- $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
- LOOP_DEV=`_create_loop_device $LOOP_FILE`
+@@ -38,9 +31,24 @@ _supported_os Linux
+ _require_scratch
+ _scratch_mkfs_xfs >/dev/null 2>&1
+ _scratch_mount
+-fsblocksize=`$XFS_INFO_PROG $SCRATCH_MNT|sed 's/=/ /g'|awk '/^data / { print $3 }'`
  
--_mkfs_dev -d size=156452m,agcount=4 -l size=32m $LOOP_DEV
-+_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
- _mount $LOOP_DEV $LOOP_MNT
- 
-+BLOCK_SIZE=$(_get_block_size $LOOP_MNT)
+-dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
++fsblocksize=$(_get_block_size $SCRATCH_MNT)
 +
- # Corrupt the BMBT by creating extents larger than MAXEXTLEN
-+# For 4k blocksize, MAXEXTLEN * 4k = 2097151 * 4k = 8589930496 = ~8GiB
- $XFS_IO_PROG -ft \
--	-c "extsize 16m" \
--	-c "falloc 0 30g" \
-+	-c "extsize $(($BLOCK_SIZE * 4096))" \
-+	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
- 	$LOOP_MNT/foo >> $seqres.full
++#This is the list of holes to punch in the file limited to $filesize
++#NOTE holes cannot overlap or this script will fail.
++holes="$fsblocksize:$fsblocksize \
++$(($fsblocksize * 74)):$fsblocksize \
++$(($fsblocksize * 256)):$(($fsblocksize / 8)) \
++$(echo scale=0\;$fsblocksize \* 256 \+ $fsblocksize \* 3 \/ 4 | bc):$(($fsblocksize * 2)) \
++$(echo scale=0\;$fsblocksize \* 260 \+ $fsblocksize \* 1 \/ 4 | bc):$(($fsblocksize * 2)) \
++$(($fsblocksize * 265)):$(echo scale=0\;$fsblocksize \+ $fsblocksize \* 3 \/ 4 | bc)"
++
++#filesize
++filesize=$(($fsblocksize * 2560))
++#Name of file to perform the test on
++filename=test-190
++
++$XFS_IO_PROG -f -c "pwrite 0 $(($fsblocksize * 2560))" $SCRATCH_MNT/$filename >> $seqres.full 2>&1
  
- umount $LOOP_MNT
- _check_xfs_filesystem $LOOP_DEV none none
- 
--_mkfs_dev -f -l size=32m $LOOP_DEV
-+_mkfs_dev -f $LOOP_DEV
- _mount $LOOP_DEV $LOOP_MNT
- 
- # check we trim both ends of the extent approproiately; this will fail
+ # run DMAPI test using verbose output
+ echo Punching holes in file
 -- 
 2.9.5
