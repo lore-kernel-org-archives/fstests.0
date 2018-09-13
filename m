@@ -1,35 +1,28 @@
-Received: from sandeen.net ([63.231.237.45]:60756 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727358AbeIMVil (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 13 Sep 2018 17:38:41 -0400
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:26642 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726558AbeINENl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 14 Sep 2018 00:13:41 -0400
+Date: Fri, 14 Sep 2018 09:01:21 +1000
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH] shared/010: avoid dedupe testing blocked on large fs
+Message-ID: <20180913230121.GB16550@dastard>
 References: <20180912101547.28835-1-zlang@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <2fc0ab97-1fb1-7502-6eff-fbfbbade05d5@sandeen.net>
-Date: Thu, 13 Sep 2018 11:28:26 -0500
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 In-Reply-To: <20180912101547.28835-1-zlang@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 9/12/18 5:15 AM, Zorro Lang wrote:
+On Wed, Sep 12, 2018 at 06:15:47PM +0800, Zorro Lang wrote:
 > When test on large fs (--large-fs), xfstests preallocates a large
 > file in SCRATCH_MNT/ at first. Duperemove will take too long time
 > to deal with that large file (many days on 500T XFS). So move
 > working directory to a sub-dir underlying $SCRATCH_MNT/.
 > 
 > Signed-off-by: Zorro Lang <zlang@redhat.com>
-
-Looks fine to me - 
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-But - I'm not sure what you mean about "testdir?"
-
 > ---
 > 
 > Hi,
@@ -54,19 +47,19 @@ But - I'm not sure what you mean about "testdir?"
 >  
 >  # Start fsstress
 > +testdir="$SCRATCH_MNT/dir"
-> +mkdir $testdir
->  fsstress_opts="-r -n 1000 -p $((5 * LOAD_FACTOR))"
-> -$FSSTRESS_PROG $fsstress_opts -d $SCRATCH_MNT -l 0 >> $seqres.full 2>&1 &
-> +$FSSTRESS_PROG $fsstress_opts -d $testdir -l 0 >> $seqres.full 2>&1 &
->  dedup_pids=""
->  dupe_run=$TEST_DIR/${seq}-running
->  # Start several dedupe processes on same directory
->  touch $dupe_run
->  for ((i = 0; i < $((2 * LOAD_FACTOR)); i++)); do
->  	while [ -e $dupe_run ]; do
-> -		$DUPEREMOVE_PROG -dr --dedupe-options=same $SCRATCH_MNT/ \
-> +		$DUPEREMOVE_PROG -dr --dedupe-options=same $testdir \
->  			>>$seqres.full 2>&1
->  	done &
->  	dedup_pids="$! $dedup_pids"
-> 
+
+Can we not call a temporary on the scratch device "testdir"?
+
+Because the "test dir" name specifically refers to the test device
+mount point, and using it for anything else (even though it's a
+different variable) is just confusing.
+
+Call it something like "local_dir" or "work_dir" or "stress_dir".
+But not "testdir".
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
