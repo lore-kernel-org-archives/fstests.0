@@ -1,78 +1,33 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:44694 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1728082AbeIODSd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 14 Sep 2018 23:18:33 -0400
-Date: Sat, 15 Sep 2018 08:01:52 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] shared/010: avoid dedupe testing blocked on large fs
-Message-ID: <20180914220152.GC16550@dastard>
-References: <20180912101547.28835-1-zlang@redhat.com>
- <20180913230121.GB16550@dastard>
- <20180914011345.GJ8382@dhcp-12-152.nay.redhat.com>
+Received: from imap.thunk.org ([74.207.234.97]:36670 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727278AbeIPA5E (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 15 Sep 2018 20:57:04 -0400
+Date: Sat, 15 Sep 2018 15:36:57 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH resend] android-xfstests: fix finding FS_TYPE when
+ userdata is on dm device
+Message-ID: <20180915193657.GC9979@thunk.org>
+References: <20180905190700.66123-1-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180914011345.GJ8382@dhcp-12-152.nay.redhat.com>
+In-Reply-To: <20180905190700.66123-1-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
+To: Eric Biggers <ebiggers@kernel.org>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 14, 2018 at 09:13:45AM +0800, Zorro Lang wrote:
-> On Fri, Sep 14, 2018 at 09:01:21AM +1000, Dave Chinner wrote:
-> > On Wed, Sep 12, 2018 at 06:15:47PM +0800, Zorro Lang wrote:
-> > > When test on large fs (--large-fs), xfstests preallocates a large
-> > > file in SCRATCH_MNT/ at first. Duperemove will take too long time
-> > > to deal with that large file (many days on 500T XFS). So move
-> > > working directory to a sub-dir underlying $SCRATCH_MNT/.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > Besides fix this issue, this patch fix another issue passingly. I left
-> > > a bad variable named "testdir" in this case. This patch can fix it.
-> > > 
-> > > If maintainer feels I should fix it in another patch, please tell me:-P
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > >  tests/shared/010 | 6 ++++--
-> > >  1 file changed, 4 insertions(+), 2 deletions(-)
-> > > 
-> > > diff --git a/tests/shared/010 b/tests/shared/010
-> > > index 1817081b..04f55890 100755
-> > > --- a/tests/shared/010
-> > > +++ b/tests/shared/010
-> > > @@ -65,15 +65,17 @@ function end_test()
-> > >  sleep_time=$((50 * TIME_FACTOR))
-> > >  
-> > >  # Start fsstress
-> > > +testdir="$SCRATCH_MNT/dir"
-> > 
-> > Can we not call a temporary on the scratch device "testdir"?
-> > 
-> > Because the "test dir" name specifically refers to the test device
-> > mount point, and using it for anything else (even though it's a
-> > different variable) is just confusing.
-> > 
-> > Call it something like "local_dir" or "work_dir" or "stress_dir".
-> > But not "testdir".
+On Wed, Sep 05, 2018 at 12:07:00PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Hmm... by running:
-> # grep -rsn testdir xfstests/tests
+> If the userdata filesystem is on a device-mapper device, then shrinking
+> the partition underneath it breaks 'blkid' probing, which
+> android-setup-partitions now uses find the filesystem type.  Use blkid's
+> '-p' and '-S' options to do a low-level probe with explicitly specified
+> size, which still works in this case.
 > 
-> I found there're lots of "testdir"... do you need I change them all, or
-> just begin to notice this issue from this patch?
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
 
-Just this test for now, but it would be good to clean up all the
-other tests at some point.
+Thanks, applied.
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+					- Ted
