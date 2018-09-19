@@ -1,101 +1,130 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:57330 "EHLO
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:33374 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1731515AbeISRhR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:37:17 -0400
-Received: from pps.filterd (m0098416.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBxdE2171286
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:41 -0400
-Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2mknuy0g9p-1
+        by vger.kernel.org with ESMTP id S1731515AbeISRhT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:37:19 -0400
+Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBx4k6043604
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:43 -0400
+Received: from e17.ny.us.ibm.com (e17.ny.us.ibm.com [129.33.205.207])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2mkm6fvyn9-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:39 -0400
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:43 -0400
 Received: from localhost
-        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e17.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 19 Sep 2018 07:59:27 -0400
+        Wed, 19 Sep 2018 07:59:42 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V4 12/20] Fix generic/102 to work with 64k block size
-Date: Wed, 19 Sep 2018 17:30:45 +0530
+Subject: [PATCH V4 16/20] Fix generic/230 to work with 64k block size
+Date: Wed, 19 Sep 2018 17:30:49 +0530
 In-Reply-To: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
 References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180919120053.7339-13-chandan@linux.vnet.ibm.com>
+Message-Id: <20180919120053.7339-17-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With 64k block size, mkfs.xfs fails with the following message when the
-filesystem size is 512MiB in size,
-
-"log size 2037 blocks too small, minimum size is 2473 blocks"
-
-Hence this commit increases the test filesystem size to 1GiB. Also, the
-size of the test file is increased to 800MiB which is ~80% of the test
-filesystem size. This is in proportion to the 400MiB test file used with
-the original 512MiB test filesystem.
+This commit changes the test to work on file offsets that are aligned
+with the block size of the underlying filesystem.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/102     |  4 ++--
- tests/generic/102.out | 20 ++++++++++----------
- 2 files changed, 12 insertions(+), 12 deletions(-)
+ tests/generic/230     | 23 +++++++++++++----------
+ tests/generic/230.out | 16 ++++++++--------
+ 2 files changed, 21 insertions(+), 18 deletions(-)
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index faf940a..29abd89 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -31,14 +31,14 @@ _require_scratch
+diff --git a/tests/generic/230 b/tests/generic/230
+index bc8c1ad..66b12d2 100755
+--- a/tests/generic/230
++++ b/tests/generic/230
+@@ -42,27 +42,27 @@ test_enforcement()
+ 	echo "### some buffered IO (type=$type)"
+ 	echo "--- initiating IO..." >>$seqres.full
+ 	# Firstly fit below block soft limit
+-	echo "Write 900k..."
+-	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 900k' -c fsync \
++	echo "Write 225 blocks..."
++	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' -c fsync \
+ 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
+ 		_filter_xfs_io_error | tee -a $seqres.full
+ 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+ 	# Secondly overcome block soft limit
+-	echo "Rewrite 1001k..."
+-	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1001k' -c fsync \
++	echo "Rewrite 250 blocks plus 1 byte..."
++	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' -c fsync \
+ 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
+ 		_filter_xfs_io_error | tee -a $seqres.full
+ 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+ 	# Now try to overcome block hardlimit
+-	echo "Write 1000k..."
+-	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1000k' -c fsync \
++	echo "Write 250 blocks..."
++	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE))' -c fsync \
+ 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
+ 		_filter_xfs_io_error | tee -a $seqres.full
+ 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+ 	# Now sleep for grace time and check that softlimit got enforced
+ 	sleep $((grace+1))
+-	echo "Write 4096..."
+-	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 4096' \
++	echo "Write 1 block..."
++	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
+ 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
+ 		_filter_xfs_io_error | tee -a $seqres.full
+ 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
+@@ -101,11 +101,14 @@ grace=2
  
- rm -f $seqres.full
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount "-o usrquota,grpquota"
++BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
+ quotacheck -u -g $SCRATCH_MNT 2>/dev/null
+ quotaon $SCRATCH_MNT 2>/dev/null
+-setquota -u $qa_user 1000 2000 3 5 $SCRATCH_MNT
++setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
++	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
+ setquota -u -t $grace $grace $SCRATCH_MNT
+-setquota -g $qa_user 1000 2000 3 5 $SCRATCH_MNT
++setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
++	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
+ setquota -g -t $grace $grace $SCRATCH_MNT
+ _scratch_unmount
  
--dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
-+dev_size=$((1024 * 1024 * 1024))     # 1GB filesystem
- _scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
- _scratch_mount
+diff --git a/tests/generic/230.out b/tests/generic/230.out
+index fcbacf2..9e89a47 100644
+--- a/tests/generic/230.out
++++ b/tests/generic/230.out
+@@ -4,11 +4,11 @@ QA output created by 230
  
- for ((i = 0; i < 10; i++)); do
- 	echo "loop $i" >>$seqres.full
+ ### create files, setting up ownership (type=u)
+ ### some buffered IO (type=u)
+-Write 900k...
+-Rewrite 1001k...
+-Write 1000k...
++Write 225 blocks...
++Rewrite 250 blocks plus 1 byte...
++Write 250 blocks...
+ pwrite: Disk quota exceeded
+-Write 4096...
++Write 1 block...
+ pwrite: Disk quota exceeded
+ Touch 3+4
+ Touch 5+6
+@@ -20,11 +20,11 @@ touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
  
--	$XFS_IO_PROG -f -c "pwrite -b 1m 0 400m" "$SCRATCH_MNT"/file | \
-+	$XFS_IO_PROG -f -c "pwrite -b 1m 0 800m" "$SCRATCH_MNT"/file | \
- _filter_xfs_io | _filter_scratch
- 
- 	rm -f "$SCRATCH_MNT"/file
-diff --git a/tests/generic/102.out b/tests/generic/102.out
-index fc9275d..b58aa5c 100644
---- a/tests/generic/102.out
-+++ b/tests/generic/102.out
-@@ -1,21 +1,21 @@
- QA output created by 102
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
--wrote 419430400/419430400 bytes at offset 0
-+wrote 838860800/838860800 bytes at offset 0
- XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+ ### create files, setting up ownership (type=g)
+ ### some buffered IO (type=g)
+-Write 900k...
+-Rewrite 1001k...
+-Write 1000k...
++Write 225 blocks...
++Rewrite 250 blocks plus 1 byte...
++Write 250 blocks...
+ pwrite: Disk quota exceeded
+-Write 4096...
++Write 1 block...
+ pwrite: Disk quota exceeded
+ Touch 3+4
+ Touch 5+6
 -- 
 2.9.5
