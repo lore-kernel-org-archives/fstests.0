@@ -1,57 +1,168 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:58164 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1731448AbeISRhI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:37:08 -0400
-Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBx1En007900
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:32 -0400
-Received: from e14.ny.us.ibm.com (e14.ny.us.ibm.com [129.33.205.204])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mkkc9xwjc-1
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:41974 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1731466AbeISRgx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:36:53 -0400
+Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBwxNF051584
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:16 -0400
+Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2mkkxjdbvv-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:31 -0400
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:15 -0400
 Received: from localhost
-        by e14.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 19 Sep 2018 07:59:30 -0400
+        Wed, 19 Sep 2018 07:58:51 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V4 13/20] Fix generic/172 to work with 64k block size
-Date: Wed, 19 Sep 2018 17:30:46 +0530
+Subject: [PATCH V4 02/20] xfs/050: Fix "Push past soft inode limit" case
+Date: Wed, 19 Sep 2018 17:30:35 +0530
 In-Reply-To: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
 References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180919120053.7339-14-chandan@linux.vnet.ibm.com>
+Message-Id: <20180919120053.7339-3-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-For 64k block size, With 256MiB as the XFS filesystem size and 168 MiB
-as the size of the clone source file, we end up hitting ENOSPC when
-cloning the source file. This happens due to lack of space for housing
-the corresponding metadata. This scenario also occurs when using a
-512MiB XFS filesystem and 300MiB clone source file.
-
-Hence this commit increases the size of the test filesystem to 1 GiB and
-the size of the clone source file to 768MiB.
+The test sets an inode soft limit of four but only three files are
+created. This commit creates two more files in order to really push past
+the soft inode limit.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/172 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ tests/xfs/050     |  2 ++
+ tests/xfs/050.out | 36 ++++++++++++++++++------------------
+ 2 files changed, 20 insertions(+), 18 deletions(-)
 
-diff --git a/tests/generic/172 b/tests/generic/172
-index 5d6f295..08d2789 100755
---- a/tests/generic/172
-+++ b/tests/generic/172
-@@ -47,8 +47,8 @@ echo "Reformat with appropriate size"
- blksz="$(_get_block_size $testdir)"
- umount $SCRATCH_MNT
+diff --git a/tests/xfs/050 b/tests/xfs/050
+index dd77971..8569c2c 100755
+--- a/tests/xfs/050
++++ b/tests/xfs/050
+@@ -143,6 +143,8 @@ _exercise()
+ 	echo "*** push past the soft inode limit" | tee -a $seqres.full
+ 	_file_as_id $SCRATCH_MNT/softie1 $id $type 1024 0
+ 	_file_as_id $SCRATCH_MNT/softie2 $id $type 1024 0
++	_file_as_id $SCRATCH_MNT/softie3 $id $type 1024 0
++	_file_as_id $SCRATCH_MNT/softie4 $id $type 1024 0
+ 	_qmount
+ 	xfs_quota -D $tmp.projects -P $tmp.projid -x \
+ 		-c "repquota -birnN -$type" $SCRATCH_DEV |
+diff --git a/tests/xfs/050.out b/tests/xfs/050.out
+index 5cb4a10..ff9eb1c 100644
+--- a/tests/xfs/050.out
++++ b/tests/xfs/050.out
+@@ -16,11 +16,11 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
  
--file_size=$((168 * 1024 * 1024))
--fs_size=$((256 * 1024 * 1024))
-+file_size=$((768 * 1024 * 1024))
-+fs_size=$((1024 * 1024 * 1024))
- _scratch_mkfs_sized $fs_size >> $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
- rm -rf $testdir
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+@@ -48,11 +48,11 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+@@ -80,19 +80,19 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** gqnoenforce
+@@ -112,19 +112,19 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** unmount
+ *** pquota
+@@ -144,11 +144,11 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [7 days] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+@@ -176,18 +176,18 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+ 
+ *** push past the soft inode limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 0 100 500 00 [--------] 3 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the soft block limit
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 4 4 10 00 [--------] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+ 
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 140 100 500 00 [--------] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 540 100 500 00 [--none--] 16 4 10 00 [--none--] 0 0 0 00 [--------]
++[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+ 
+ *** unmount
 -- 
 2.9.5
