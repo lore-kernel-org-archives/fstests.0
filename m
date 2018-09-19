@@ -1,130 +1,68 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:33374 "EHLO
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:33808 "EHLO
         mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1731515AbeISRhT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:37:19 -0400
+        by vger.kernel.org with ESMTP id S1731520AbeISRhZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 19 Sep 2018 13:37:25 -0400
 Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBx4k6043604
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:43 -0400
-Received: from e17.ny.us.ibm.com (e17.ny.us.ibm.com [129.33.205.207])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2mkm6fvyn9-1
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8JBx1AG043250
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:47 -0400
+Received: from e15.ny.us.ibm.com (e15.ny.us.ibm.com [129.33.205.205])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2mkm6fvyr6-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:43 -0400
+        for <fstests@vger.kernel.org>; Wed, 19 Sep 2018 07:59:47 -0400
 Received: from localhost
-        by e17.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e15.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 19 Sep 2018 07:59:42 -0400
+        Wed, 19 Sep 2018 07:59:47 -0400
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V4 16/20] Fix generic/230 to work with 64k block size
-Date: Wed, 19 Sep 2018 17:30:49 +0530
+Subject: [PATCH V4 17/20] Fix generic/235 to work with 64k block size
+Date: Wed, 19 Sep 2018 17:30:50 +0530
 In-Reply-To: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
 References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180919120053.7339-17-chandan@linux.vnet.ibm.com>
+Message-Id: <20180919120053.7339-18-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit changes the test to work on file offsets that are aligned
-with the block size of the underlying filesystem.
+With 64k blocksized filesystem, this test fails since a single 8k write
+will actually end up consuming 64k. Hence this commit writes 64k data
+into the test file.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/generic/230     | 23 +++++++++++++----------
- tests/generic/230.out | 16 ++++++++--------
- 2 files changed, 21 insertions(+), 18 deletions(-)
+ tests/generic/235     | 2 +-
+ tests/generic/235.out | 4 ++--
+ 2 files changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/230 b/tests/generic/230
-index bc8c1ad..66b12d2 100755
---- a/tests/generic/230
-+++ b/tests/generic/230
-@@ -42,27 +42,27 @@ test_enforcement()
- 	echo "### some buffered IO (type=$type)"
- 	echo "--- initiating IO..." >>$seqres.full
- 	# Firstly fit below block soft limit
--	echo "Write 900k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 900k' -c fsync \
-+	echo "Write 225 blocks..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((225 * $BLOCK_SIZE))' -c fsync \
- 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Secondly overcome block soft limit
--	echo "Rewrite 1001k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1001k' -c fsync \
-+	echo "Rewrite 250 blocks plus 1 byte..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE + 1))' -c fsync \
- 		$SCRATCH_MNT/file1" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Now try to overcome block hardlimit
--	echo "Write 1000k..."
--	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 1000k' -c fsync \
-+	echo "Write 250 blocks..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE))' -c fsync \
- 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
- 	# Now sleep for grace time and check that softlimit got enforced
- 	sleep $((grace+1))
--	echo "Write 4096..."
--	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 4096' \
-+	echo "Write 1 block..."
-+	su $qa_user -c "$XFS_IO_PROG -c 'truncate 0' -c 'pwrite 0 $BLOCK_SIZE' \
- 		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
- 		_filter_xfs_io_error | tee -a $seqres.full
- 	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
-@@ -101,11 +101,14 @@ grace=2
+diff --git a/tests/generic/235 b/tests/generic/235
+index 902e9ad..6adc803 100755
+--- a/tests/generic/235
++++ b/tests/generic/235
+@@ -55,7 +55,7 @@ _try_scratch_mount "-o remount,ro" 2>&1 | tee -a $seqres.full | _filter_scratch
+ touch $SCRATCH_MNT/failed 2>&1 | tee -a $seqres.full | _filter_scratch
+ _try_scratch_mount "-o remount,rw" 2>&1 | tee -a $seqres.full | _filter_scratch
  
- _scratch_mkfs >> $seqres.full 2>&1
- _scratch_mount "-o usrquota,grpquota"
-+BLOCK_SIZE=$(_get_file_block_size $SCRATCH_MNT)
- quotacheck -u -g $SCRATCH_MNT 2>/dev/null
- quotaon $SCRATCH_MNT 2>/dev/null
--setquota -u $qa_user 1000 2000 3 5 $SCRATCH_MNT
-+setquota -u $qa_user $((250 * $BLOCK_SIZE / 1024)) \
-+	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
- setquota -u -t $grace $grace $SCRATCH_MNT
--setquota -g $qa_user 1000 2000 3 5 $SCRATCH_MNT
-+setquota -g $qa_user $((250 * $BLOCK_SIZE / 1024)) \
-+	 $((500 * $BLOCK_SIZE / 1024)) 3 5 $SCRATCH_MNT
- setquota -g -t $grace $grace $SCRATCH_MNT
- _scratch_unmount
+-$XFS_IO_PROG -c 'pwrite 0 8k' -c 'fsync' \
++$XFS_IO_PROG -c 'pwrite 0 64k' -c 'fsync' \
+ 			$SCRATCH_MNT/testfile >>$seqres.full 2>&1
+ do_repquota
  
-diff --git a/tests/generic/230.out b/tests/generic/230.out
-index fcbacf2..9e89a47 100644
---- a/tests/generic/230.out
-+++ b/tests/generic/230.out
-@@ -4,11 +4,11 @@ QA output created by 230
- 
- ### create files, setting up ownership (type=u)
- ### some buffered IO (type=u)
--Write 900k...
--Rewrite 1001k...
--Write 1000k...
-+Write 225 blocks...
-+Rewrite 250 blocks plus 1 byte...
-+Write 250 blocks...
- pwrite: Disk quota exceeded
--Write 4096...
-+Write 1 block...
- pwrite: Disk quota exceeded
- Touch 3+4
- Touch 5+6
-@@ -20,11 +20,11 @@ touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
- 
- ### create files, setting up ownership (type=g)
- ### some buffered IO (type=g)
--Write 900k...
--Rewrite 1001k...
--Write 1000k...
-+Write 225 blocks...
-+Rewrite 250 blocks plus 1 byte...
-+Write 250 blocks...
- pwrite: Disk quota exceeded
--Write 4096...
-+Write 1 block...
- pwrite: Disk quota exceeded
- Touch 3+4
- Touch 5+6
+diff --git a/tests/generic/235.out b/tests/generic/235.out
+index 601fa2f..abcb47a 100644
+--- a/tests/generic/235.out
++++ b/tests/generic/235.out
+@@ -17,10 +17,10 @@ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ User            used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+-fsgqa     --       8       0       0              1     0     0       
++fsgqa     --      64       0       0              1     0     0       
+ *** Report for group quotas on device SCRATCH_DEV
+ Block grace time: 7days; Inode grace time: 7days
+                         Block limits                File limits
+ Group           used    soft    hard  grace    used  soft  hard  grace
+ ----------------------------------------------------------------------
+-fsgqa     --       8       0       0              1     0     0       
++fsgqa     --      64       0       0              1     0     0       
 -- 
 2.9.5
