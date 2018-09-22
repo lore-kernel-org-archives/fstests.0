@@ -1,162 +1,98 @@
-Received: from james.kirk.hungrycats.org ([174.142.39.145]:36418 "EHLO
-        james.kirk.hungrycats.org" rhost-flags-OK-FAIL-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726160AbeIUK1U (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Sep 2018 06:27:20 -0400
-Date: Fri, 21 Sep 2018 00:40:13 -0400
-From: Zygo Blaxell <ce3g8jdj@umail.furryterror.org>
-Subject: Re: [patch] file dedupe (and maybe clone) data corruption (was Re:
- [PATCH] generic: test for deduplication between different files)
-Message-ID: <20180921044013.GD11392@hungrycats.org>
-References: <20180820010932.GV2234@dastard>
- <20180820153349.GA4334@magnolia>
- <20180823125849.GF13528@hungrycats.org>
- <20180830062743.GF5631@dastard>
- <20180831051045.GI26989@hungrycats.org>
- <20180906083809.GF27618@dastard>
- <20180907035305.GJ26989@hungrycats.org>
- <20180910090646.GB5631@dastard>
- <20180919041203.GA11397@hungrycats.org>
- <20180921025931.GI16550@dastard>
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:35301 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727013AbeIVUNs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 16:13:48 -0400
+Received: by mail-pg1-f194.google.com with SMTP id 205-v6so6352534pgd.2
+        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 07:20:03 -0700 (PDT)
+Date: Sat, 22 Sep 2018 22:19:49 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH][BROKEN] common/rc: fix check for disabled kmemleak
+Message-ID: <20180922141949.GC17817@desktop>
+References: <20180918104456.12778-1-amir73il@gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="iVCmgExH7+hIHJ1A"
-Content-Disposition: inline
-In-Reply-To: <20180921025931.GI16550@dastard>
-Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fdmanana@kernel.org, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>, linux-xfs@vger.kernel.org, linux-fsdevel@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---iVCmgExH7+hIHJ1A
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-Content-Transfer-Encoding: quoted-printable
+In-Reply-To: <20180918104456.12778-1-amir73il@gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-On Fri, Sep 21, 2018 at 12:59:31PM +1000, Dave Chinner wrote:
-> On Wed, Sep 19, 2018 at 12:12:03AM -0400, Zygo Blaxell wrote:
-[...]
-> With no DMAPI in the future, people with custom HSM-like interfaces
-> based on dmapi are starting to turn to fanotify and friends to
-> provide them with the change notifications they require....
+On Tue, Sep 18, 2018 at 01:44:56PM +0300, Amir Goldstein wrote:
+> With kernel commit b353756b2b71 ("kmemleak: always register debugfs file")
+> that was merged to v4.19-rc3, the kmemleak debugfs knob exists even if
+> kmemleak is disabled, but returns EBUSY on write.
+> 
+> Suppress EBUSY errors from _check_kmemleak() by removing write permission
+> from knob on failure to initialize kmemleak.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+> 
+> Guys,
+> 
+> With kernel v4.19-rc3, tests started printing noisy messages about failure
+> to write to kmemleak knob.
+> 
+> Problem is that kmemleak was disabled on my system but the test for
+> kmemleak enabled we have in place was broken by the kernel change.
+> 
+> I tried this patch to hack around the new kernel behavior, but something
+> is broken in this patch as it doesn't suppress all errors.
 
-I had a fanotify-based scanner once, before I noticed btrfs effectively
-had timestamps all over its metadata.
+I guess that's because root has writable permission even if the file has
+no 'w' permission bit set, i.e the "if [ ! -w $kern_knob ]" check never
+triggers even if we "chmod a-w $kern_knob".
 
-fanotify won't tell me which parts of a file were modified (unless it
-got that feature in the last few years?).  fanotify was pretty useless
-when the only file on the system that was being modified was a 13TB
-VM image.  Or even a little 16GB one.  Has to scan the whole file to
-find the one new byte.  Even on desktops the poor thing spends most of
-its time looping over /var/log/messages.  It was sad.
+But, on the other hand, I prefer not changing a system file's permission
+in test (even if it could hack around the issue). Checking if a special
+file exists would be better, like what we do in _check_dmesg and
+_check_filesystems.
 
-If fanotify gave me (inode, offset, length) tuples of dirty pages in
-cache, I could look them up and use a dedupe_file_range call to replace
-the dirty pages with a reference to an existing disk block.  If my
-listener can do that fast enough, it's in-band dedupe; if it doesn't,
-the data gets flushed to disk as normal, and I fall back to a scan of
-the filesystem to clean it up later.
+For example, touch $RESULT_BASE/check_kmemleak in _init_kmemleak if
+kmemleak is available, remove the file otherwise. Note that we cannot
+create this file in $RESULT_DIR like other similar checks because it's
+not initialized at _init_kmemleak time.
 
-> > > e.g. a soft requirement is that we need to scan the entire fs at
-> > > least once a month.=20
-> >=20
-> > I have to scan and dedupe multiple times per hour.  OK, the first-ever
-> > scan of a non-empty filesystem is allowed to take much longer, but after
-> > that, if you have enough spare iops for continuous autodefrag you should
-> > also have spare iops for continuous dedupe.
->=20
-> Yup, but using notifications avoids the for even these scans - you'd
-> know exactly what data has changed, when it changed, and know
-> exactly that you needed to read to calculate the new hashes.
+Thanks,
+Eryu
 
-=2E..if the scanner can keep up with the notifications; otherwise, the
-notification receiver has to log them somewhere for the scanner to
-catch up.  If there are missed or dropped notifications--or 23 hours a
-day we're not listening for notifications because we only have an hour
-a day maintenance window--some kind of filesystem scan has to be done
-after the fact anyway.
-
-> > > A simple piece-wise per-AG scanning algorithm (like we use in
-> > > xfs_repair) could easily work within a 3GB RAM per AG constraint and
-> > > would scale very well. We'd only need to scan 30-40 AGs in the hour,
-> > > and a single AG at 1GB/s will only take 2 minutes to scan. We can
-> > > then do the processing while the next AG gets scanned. If we've got
-> > > 10-20GB RAM to use (and who doesn't when they have 1PB of storage?)
-> > > then we can scan 5-10AGs at once to keep the IO rate up, and process
-> > > them in bulk as we scan more.
-> >=20
-> > How do you match dupe blocks from different AGs if you only keep RAM for
-> > the duration of one AG scan?  Do you not dedupe across AG boundaries?
->=20
-> We could, but do we need too? There's a heap of runtime considerations
-> at the filesystem level we need to take into consideration here, and
-> there's every chance that too much consolidation creates
-> unpredictable bottlenecks in overwrite workloads that need to break
-> the sharing (i.e. COW operations).
-
-I'm well aware of that.  I have a bunch of hacks in bees to not be too
-efficient lest it push the btrfs reflink bottlenecks too far.
-
-> e.g. An AG contains up to 1TB of data which is more than enough to
-> get decent AG-internal dedupe rates. If we've got 1PB of data spread
-> across 1000AGs, deduping a million copies of a common data pattern
-> spread across the entire filesystem down to one per AG (i.e. 10^6
-> copies down to 10^3) still gives a massive space saving.
-
-That's true for 1000+ AG filesystems, but it's a bigger problem for
-filesystems of 2-5 AGs, where each AG holds one copy of 20-50% of the
-duplicates on the filesystem.
-
-OTOH, a filesystem that small could just be done in one pass with a
-larger but still reasonable amount of RAM.
-
-> > What you've described so far means the scope isn't limited anyway.  If =
-the
-> > call is used to dedupe two heavily-reflinked extents together (e.g.
-> > both duplicate copies are each shared by thousands of snapshots that
-> > have been created during the month-long period between dedupe runs),
-> > it could always be stuck doing a lot of work updating dst owners.
-> > Was there an omitted detail there?
->=20
-> As I said early in the discussion - if both copies of identical data
-> are already shared hundreds or thousands of times each, then it
-> makes no sense to dedupe them again. All that does is create huge
-> amounts of work updating metadata for very little additional gain.
-
-I've had a user complain about the existing 2560-reflink limit in bees,
-because they were starting with 3000 snapshots of their data before they
-ran dedupe for the first time, so almost all their data started above
-the reflink limit before dedupe, and no dedupes occurred because of that.
-
-Build servers end up with a 3-4 digit number of reflinks to every file
-after dedupe, then they make snapshots of a subvol of a million such files
-to back it up--instantly but temporarily doubling every reflink count.
-Billions of reflink updates in only 10 TB of space.
-
-Updating a thousand reflinks to an extent sounds like a stupid amount of
-work, but in configurations like these it is just the price of deduping
-anything.
-
-Still, there has to be a limit somewhere--millions of refs to a block
-might be a reasonable absurdity cutoff.
-
-
-> Cheers,
->=20
-> Dave.
-> --=20
-> Dave Chinner
-> david@fromorbit.com
->=20
-
---iVCmgExH7+hIHJ1A
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iF0EABECAB0WIQSnOVjcfGcC/+em7H2B+YsaVrMbnAUCW6R2JQAKCRCB+YsaVrMb
-nFGdAKDCrCigLAUE/1ow/rDRWMdu6i/qwgCeLYmdgGfc8AQQCj62JvFQo09cqLc=
-=GPz1
------END PGP SIGNATURE-----
-
---iVCmgExH7+hIHJ1A--
+> For me, I prefer to have kmemleak enabled anyway, so I gave up on this
+> hack and enabled kmemleak.
+> 
+> If someone is interested in taking over, be my guest.
+> 
+> FYI, to enable kmemleak on kvm-xfstests I needed to configure
+> CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=5000
+> # CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF is not set
+> 
+> Thanks,
+> Amir.
+> 
+>  common/rc | 10 ++++++++--
+>  1 file changed, 8 insertions(+), 2 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index ec631ad9..cafc83b4 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3514,8 +3514,14 @@ _init_kmemleak()
+>  
+>  	# Disable the automatic scan so that we can control it completely,
+>  	# then dump all the leaks recorded so far.
+> -	echo "scan=off" > "$kern_knob"
+> -	_capture_kmemleak /dev/null
+> +	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
+> +		_capture_kmemleak /dev/null
+> +	else
+> +		# Since kernel v4.19-rc3, the knob exists even if kmemleak is
+> +		# disabled, but returns EBUSY on write. Suppress EBUSY errors
+> +		# from _check_kmemleak() by removing write permission from knob
+> +		chmod a-w "$kern_knob"
+> +	fi
+>  }
+>  
+>  # check kmemleak log
+> -- 
+> 2.17.1
+> 
