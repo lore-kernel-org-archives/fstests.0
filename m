@@ -1,98 +1,79 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:35301 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727013AbeIVUNs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 16:13:48 -0400
-Received: by mail-pg1-f194.google.com with SMTP id 205-v6so6352534pgd.2
-        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 07:20:03 -0700 (PDT)
-Date: Sat, 22 Sep 2018 22:19:49 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH][BROKEN] common/rc: fix check for disabled kmemleak
-Message-ID: <20180922141949.GC17817@desktop>
-References: <20180918104456.12778-1-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20180918104456.12778-1-amir73il@gmail.com>
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:39523 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728764AbeIVVRp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 17:17:45 -0400
+Received: by mail-wr1-f67.google.com with SMTP id s14-v6so15544737wrw.6
+        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 08:23:48 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2] common/rc: fix check for disabled kmemleak
+Date: Sat, 22 Sep 2018 18:23:39 +0300
+Message-Id: <20180922152339.32023-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
+To: Eryu Guan <guaneryu@gmail.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 18, 2018 at 01:44:56PM +0300, Amir Goldstein wrote:
-> With kernel commit b353756b2b71 ("kmemleak: always register debugfs file")
-> that was merged to v4.19-rc3, the kmemleak debugfs knob exists even if
-> kmemleak is disabled, but returns EBUSY on write.
-> 
-> Suppress EBUSY errors from _check_kmemleak() by removing write permission
-> from knob on failure to initialize kmemleak.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> ---
-> 
-> Guys,
-> 
-> With kernel v4.19-rc3, tests started printing noisy messages about failure
-> to write to kmemleak knob.
-> 
-> Problem is that kmemleak was disabled on my system but the test for
-> kmemleak enabled we have in place was broken by the kernel change.
-> 
-> I tried this patch to hack around the new kernel behavior, but something
-> is broken in this patch as it doesn't suppress all errors.
+With kernel commit b353756b2b71 ("kmemleak: always register debugfs file")
+that was merged to v4.19-rc3, the kmemleak debugfs knob exists even if
+kmemleak is disabled, but returns EBUSY on write.
 
-I guess that's because root has writable permission even if the file has
-no 'w' permission bit set, i.e the "if [ ! -w $kern_knob ]" check never
-triggers even if we "chmod a-w $kern_knob".
+Suppress EBUSY errors in tests by disabling _check_kmemleak() calls if the
+write to kmemleak knob failed on _init_kmemleak().
 
-But, on the other hand, I prefer not changing a system file's permission
-in test (even if it could hack around the issue). Checking if a special
-file exists would be better, like what we do in _check_dmesg and
-_check_filesystems.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-For example, touch $RESULT_BASE/check_kmemleak in _init_kmemleak if
-kmemleak is available, remove the file otherwise. Note that we cannot
-create this file in $RESULT_DIR like other similar checks because it's
-not initialized at _init_kmemleak time.
+Eryu,
+
+Good suggestion. This approach is much better and also works.
 
 Thanks,
-Eryu
+Amir.
 
-> For me, I prefer to have kmemleak enabled anyway, so I gave up on this
-> hack and enabled kmemleak.
-> 
-> If someone is interested in taking over, be my guest.
-> 
-> FYI, to enable kmemleak on kvm-xfstests I needed to configure
-> CONFIG_DEBUG_KMEMLEAK_EARLY_LOG_SIZE=5000
-> # CONFIG_DEBUG_KMEMLEAK_DEFAULT_OFF is not set
-> 
-> Thanks,
-> Amir.
-> 
->  common/rc | 10 ++++++++--
->  1 file changed, 8 insertions(+), 2 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index ec631ad9..cafc83b4 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -3514,8 +3514,14 @@ _init_kmemleak()
->  
->  	# Disable the automatic scan so that we can control it completely,
->  	# then dump all the leaks recorded so far.
-> -	echo "scan=off" > "$kern_knob"
-> -	_capture_kmemleak /dev/null
-> +	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
-> +		_capture_kmemleak /dev/null
-> +	else
-> +		# Since kernel v4.19-rc3, the knob exists even if kmemleak is
-> +		# disabled, but returns EBUSY on write. Suppress EBUSY errors
-> +		# from _check_kmemleak() by removing write permission from knob
-> +		chmod a-w "$kern_knob"
-> +	fi
->  }
->  
->  # check kmemleak log
-> -- 
-> 2.17.1
-> 
+Changes from v1:
+- Use a file to disable checks instead of hacky chmod a-w
+
+ common/rc | 15 ++++++++++++---
+ 1 file changed, 12 insertions(+), 3 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index ec631ad9..d5bb1fee 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3508,14 +3508,23 @@ _init_kmemleak()
+ {
+ 	local kern_knob="${DEBUGFS_MNT}/kmemleak"
+ 
++	# Since kernel v4.19-rc3, the kmemleak knob exists even if kmemleak is
++	# disabled, but returns EBUSY on write. So instead of relying on
++	# existance of writable knob file, we use a test file to indicate that
++	# _check_kmemleak() is enabled only if we actually managed to write to
++	# the knob file.
++	rm -f ${RESULT_BASE}/check_kmemleak
++
+ 	if [ ! -w "$kern_knob" ]; then
+ 		return 0
+ 	fi
+ 
+ 	# Disable the automatic scan so that we can control it completely,
+ 	# then dump all the leaks recorded so far.
+-	echo "scan=off" > "$kern_knob"
+-	_capture_kmemleak /dev/null
++	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
++		_capture_kmemleak /dev/null
++		touch ${RESULT_BASE}/check_kmemleak
++	fi
+ }
+ 
+ # check kmemleak log
+@@ -3524,7 +3533,7 @@ _check_kmemleak()
+ 	local kern_knob="${DEBUGFS_MNT}/kmemleak"
+ 	local leak_file="${seqres}.kmemleak"
+ 
+-	if [ ! -w "$kern_knob" ]; then
++	if [ ! -f ${RESULT_BASE}/check_kmemleak ]; then
+ 		return 0
+ 	fi
+ 
+-- 
+2.17.1
