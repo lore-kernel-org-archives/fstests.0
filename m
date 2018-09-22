@@ -1,79 +1,94 @@
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:39523 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728764AbeIVVRp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 17:17:45 -0400
-Received: by mail-wr1-f67.google.com with SMTP id s14-v6so15544737wrw.6
-        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 08:23:48 -0700 (PDT)
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2] common/rc: fix check for disabled kmemleak
-Date: Sat, 22 Sep 2018 18:23:39 +0300
-Message-Id: <20180922152339.32023-1-amir73il@gmail.com>
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:46076 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728390AbeIVWSQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 18:18:16 -0400
+Received: by mail-pl1-f194.google.com with SMTP id j8-v6so7275825pll.12
+        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 09:24:09 -0700 (PDT)
+Date: Sun, 23 Sep 2018 00:24:02 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH V4 00/20] Fix tests to work on non-4k block sized fs
+ instances
+Message-ID: <20180922162402.GD17817@desktop>
+References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
+ <20180920093358.GO8382@dhcp-12-152.nay.redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180920093358.GO8382@dhcp-12-152.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>, Zorro Lang <zlang@redhat.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-With kernel commit b353756b2b71 ("kmemleak: always register debugfs file")
-that was merged to v4.19-rc3, the kmemleak debugfs knob exists even if
-kmemleak is disabled, but returns EBUSY on write.
+On Thu, Sep 20, 2018 at 05:33:58PM +0800, Zorro Lang wrote:
+> On Wed, Sep 19, 2018 at 05:30:33PM +0530, Chandan Rajendra wrote:
+> > This patchset fixes tests (mostly XFS specific ones) to work on
+> > variable block size. These patches now use the output of "od" utility
+> > to verify the contents of the test files instead of the md5sum
+> > utility.
+> > 
+> > Also, The patchset modifies _filter_fiemap() filter function to
+> > optionally print the file offset range in block size units.
+> > 
+> > Changelog:
+> > V3->V4:
+> > 1. The following tests now use _get_file_block_size() function to obtain the
+> >    underlying filesystem's block size.
+> >    xfs/009
+> >    xfs/074
+> >    xfs/139
+> >    xfs/140
+> >    xfs/299
+> >    generic/018
+> >    generic/177
+> >    generic/130
+> > 2. xfs/139 now creates a scratch filesystem with AG size of 8192 filesystem
+> >    blocks instead of the previously used 4400 filesystem blocks.
+> > 3. xfs/050 has now been fixed to work with 512 byte sized filesystem blocks.
+> >    The "block soft" limit and "block hard" limit values have been increased to
+> >    enable the user to have enough blocks in quota to be able to create the
+> >    required test files when using 512 byte filesystem blocks.
+> 
+> Hi,
+> 
+> Test passed on 512b XFS this time [1]. BTW:
+>  - xfs 64k blocksize test PASS
+>  - xfs default blocksize test PASS
+>  - ext4 64k blocksize test PASS
+>  - ext4 default blocksize test PASS
 
-Suppress EBUSY errors in tests by disabling _check_kmemleak() calls if the
-write to kmemleak knob failed on _init_kmemleak().
+Thanks a lot for testing, Zorro!!
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+As I don't have access to hardware that supports 64k page, so I only
+tested them on x86_64 hardware. I tested all explicitly modified cases
+and all cases use _filter_fiemap helper, with test matrix 4k/2k/1k/512 x
+v4/v5/reflink/rmapbt on xfs, 4k/2k/1k on ext4 and btrfs. I also hit some
+other failures that we need to look into.
 
-Eryu,
+xfs/299 fails (and only fails) on 1k block size xfs with reflink or
+rmapbt feature enabled. e.g.
 
-Good suggestion. This approach is much better and also works.
+ *** push past the hard inode limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] 35 25 125 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+ 
+ *** push past the hard block limit (expect EDQUOT)
+ [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+-[NAME] =OK= 25 125 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
++[NAME] =OK= 25 125 0 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+...
+
+And generic/473 fails on xfs with all test combinations. e.g. the diff on 4k
+block size v4 xfs
+
+     1: [256..287]: hole
+     Hole + Data
+     0: [0..127]: hole
+    -1: [128..255]: data
+    +1: [128..135]: data
+     Hole + Data + Hole
+     0: [0..127]: hole
 
 Thanks,
-Amir.
-
-Changes from v1:
-- Use a file to disable checks instead of hacky chmod a-w
-
- common/rc | 15 ++++++++++++---
- 1 file changed, 12 insertions(+), 3 deletions(-)
-
-diff --git a/common/rc b/common/rc
-index ec631ad9..d5bb1fee 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3508,14 +3508,23 @@ _init_kmemleak()
- {
- 	local kern_knob="${DEBUGFS_MNT}/kmemleak"
- 
-+	# Since kernel v4.19-rc3, the kmemleak knob exists even if kmemleak is
-+	# disabled, but returns EBUSY on write. So instead of relying on
-+	# existance of writable knob file, we use a test file to indicate that
-+	# _check_kmemleak() is enabled only if we actually managed to write to
-+	# the knob file.
-+	rm -f ${RESULT_BASE}/check_kmemleak
-+
- 	if [ ! -w "$kern_knob" ]; then
- 		return 0
- 	fi
- 
- 	# Disable the automatic scan so that we can control it completely,
- 	# then dump all the leaks recorded so far.
--	echo "scan=off" > "$kern_knob"
--	_capture_kmemleak /dev/null
-+	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
-+		_capture_kmemleak /dev/null
-+		touch ${RESULT_BASE}/check_kmemleak
-+	fi
- }
- 
- # check kmemleak log
-@@ -3524,7 +3533,7 @@ _check_kmemleak()
- 	local kern_knob="${DEBUGFS_MNT}/kmemleak"
- 	local leak_file="${seqres}.kmemleak"
- 
--	if [ ! -w "$kern_knob" ]; then
-+	if [ ! -f ${RESULT_BASE}/check_kmemleak ]; then
- 		return 0
- 	fi
- 
--- 
-2.17.1
+Eryu
