@@ -1,94 +1,101 @@
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:46076 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728390AbeIVWSQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 22 Sep 2018 18:18:16 -0400
-Received: by mail-pl1-f194.google.com with SMTP id j8-v6so7275825pll.12
-        for <fstests@vger.kernel.org>; Sat, 22 Sep 2018 09:24:09 -0700 (PDT)
-Date: Sun, 23 Sep 2018 00:24:02 +0800
+Received: from mail-pg1-f172.google.com ([209.85.215.172]:34235 "EHLO
+        mail-pg1-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726342AbeIWUzm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Sep 2018 16:55:42 -0400
+Received: by mail-pg1-f172.google.com with SMTP id d19-v6so8084089pgv.1
+        for <fstests@vger.kernel.org>; Sun, 23 Sep 2018 07:57:57 -0700 (PDT)
+Message-ID: <5ba7a9f4.1c69fb81.f7dc3.af33@mx.google.com>
+Date: Sun, 23 Sep 2018 22:57:48 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH V4 00/20] Fix tests to work on non-4k block sized fs
- instances
-Message-ID: <20180922162402.GD17817@desktop>
-References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
- <20180920093358.GO8382@dhcp-12-152.nay.redhat.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 3c48a2ca2078
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Hw53HtBde3Ck"
 Content-Disposition: inline
-In-Reply-To: <20180920093358.GO8382@dhcp-12-152.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>, Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 20, 2018 at 05:33:58PM +0800, Zorro Lang wrote:
-> On Wed, Sep 19, 2018 at 05:30:33PM +0530, Chandan Rajendra wrote:
-> > This patchset fixes tests (mostly XFS specific ones) to work on
-> > variable block size. These patches now use the output of "od" utility
-> > to verify the contents of the test files instead of the md5sum
-> > utility.
-> > 
-> > Also, The patchset modifies _filter_fiemap() filter function to
-> > optionally print the file offset range in block size units.
-> > 
-> > Changelog:
-> > V3->V4:
-> > 1. The following tests now use _get_file_block_size() function to obtain the
-> >    underlying filesystem's block size.
-> >    xfs/009
-> >    xfs/074
-> >    xfs/139
-> >    xfs/140
-> >    xfs/299
-> >    generic/018
-> >    generic/177
-> >    generic/130
-> > 2. xfs/139 now creates a scratch filesystem with AG size of 8192 filesystem
-> >    blocks instead of the previously used 4400 filesystem blocks.
-> > 3. xfs/050 has now been fixed to work with 512 byte sized filesystem blocks.
-> >    The "block soft" limit and "block hard" limit values have been increased to
-> >    enable the user to have enough blocks in quota to be able to create the
-> >    required test files when using 512 byte filesystem blocks.
-> 
-> Hi,
-> 
-> Test passed on 512b XFS this time [1]. BTW:
->  - xfs 64k blocksize test PASS
->  - xfs default blocksize test PASS
->  - ext4 64k blocksize test PASS
->  - ext4 default blocksize test PASS
 
-Thanks a lot for testing, Zorro!!
+--Hw53HtBde3Ck
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-As I don't have access to hardware that supports 64k page, so I only
-tested them on x86_64 hardware. I tested all explicitly modified cases
-and all cases use _filter_fiemap helper, with test matrix 4k/2k/1k/512 x
-v4/v5/reflink/rmapbt on xfs, 4k/2k/1k on ext4 and btrfs. I also hit some
-other failures that we need to look into.
+Hi all,
 
-xfs/299 fails (and only fails) on 1k block size xfs with reflink or
-rmapbt feature enabled. e.g.
+The master branch of the xfstests repository at:
 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 35 25 125 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] =OK= 25 125 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] =OK= 25 125 0 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-...
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-And generic/473 fails on xfs with all test combinations. e.g. the diff on 4k
-block size v4 xfs
+have just been updated. The punch hole tests are updated to work with 64k
+extent, many thanks to Anand Jain's contribution and Chandan Rajendra's
+testing! Also Amir fixed the kmemleak dection to suppress the EBUSY error on
+v4.19-rc3 kernel.
 
-     1: [256..287]: hole
-     Hole + Data
-     0: [0..127]: hole
-    -1: [128..255]: data
-    +1: [128..135]: data
-     Hole + Data + Hole
-     0: [0..127]: hole
+The _test_generic_punch() rework is tested with all possible block sizes on
+ppc64le and x86_64 hardwares, so it should not introduce any new failure, but
+if you find bugs, please report bug and/or contribute fixes.
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+3c48a2ca2078 fstests: fix _test_generic_punch() to fit 64k extent
+
+New commits:
+
+Amir Goldstein (1):
+      [b55879ea9dbd] common/rc: fix check for disabled kmemleak
+
+Anand Jain (1):
+      [3c48a2ca2078] fstests: fix _test_generic_punch() to fit 64k extent
+
+
+Code Diffstat:
+
+ common/punch                  |  13 +-
+ common/rc                     |  15 +-
+ tests/ext4/001.out.default    | 472 ++++++++++++++++++++---------------------
+ tests/ext4/001.out.nodelalloc | 476 +++++++++++++++++++++---------------------
+ tests/ext4/001.out.nozero     | 472 ++++++++++++++++++++---------------------
+ tests/generic/009             |   9 -
+ tests/generic/009.out         | 472 ++++++++++++++++++++---------------------
+ tests/generic/012.out         |  68 +++---
+ tests/generic/016.out         |  68 +++---
+ tests/generic/021.out         |  68 +++---
+ tests/generic/022.out         |  68 +++---
+ tests/generic/058.out         | 124 +++++------
+ tests/generic/060.out         | 124 +++++------
+ tests/generic/061.out         | 128 ++++++------
+ tests/generic/063.out         | 128 ++++++------
+ tests/generic/255.out         | 452 +++++++++++++++++++--------------------
+ tests/generic/316.out         | 224 ++++++++++----------
+ tests/xfs/242.out             | 114 +++++-----
+ tests/xfs/252.out             | 452 +++++++++++++++++++--------------------
+ 19 files changed, 1968 insertions(+), 1979 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--Hw53HtBde3Ck
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJbp6TgAAoJECZSqilcj+djxnIP/itA+TK3g1TwdhHzVd5G4C4v
+8vuq7r8fVeTaa28MMQvw7YpowZ37w5vpWFZhcgsMgA9nYqezGvso4hpEZal2KYNV
+sRI3ZRONv3M2TuxHtn7zl1SBq6z6njCgHJDf/dSW2AlWCgh8zEb8Iw+hClisMNYR
+bSNwYdMIh1fzIMvM9o/pTAXngzH2pJZbu5h4elQTXTHtFKKt4BI1MuhZuhBEiRHz
+m7MnhEZfxeLyMDT3FNSgSuKmVK8MjQxNJxbf2PatdUBSC3Kkrk1UqWK4RFDmwvER
+DwUwfTBK/ac6Yc7cp3NKXwz4SaQdHfONasHTAHOteO1bUYsy8gKAi+eaaDvEpN7J
+1wmrXbXnL54L5jpPcoJ8R5P1svvVh/9vDPip1qy7NXIKnH0Df3zsebAcqtJ4ixhS
+v5tyluYPcNFQEnLw7e2tMI7YXI3tnIsqB1c4IJ9F+5dXlRCNi8EAZ8TyyGFYfogX
+66qkpykNDSKSbJSyJFJhrF5PHAd1X6n0fWBT+hkgkICOAFD7pPlkimH1CPPQ4MlV
+CNEhoN0scM6nxG/NXGjmv2vpCSY4WDornB9f+G46vda4JDmew3XHuUKk9puWL/q3
+7FjpOzgJXzBQeghP9vTQCd5CecmW75Q1OKSwEpf1qSvOdyyQbvUHDr7g0wJQYmUV
+Smay51dG/dbtcmO1ilXr
+=yFzi
+-----END PGP SIGNATURE-----
+
+--Hw53HtBde3Ck--
