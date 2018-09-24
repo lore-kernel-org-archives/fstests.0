@@ -1,24 +1,24 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:57598 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730619AbeIXVUr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:47 -0400
-Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEgS0090709
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:06 -0400
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:27913 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1730546AbeIXVUv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:51 -0400
+Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEY7S108067
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:11 -0400
 Received: from e36.co.us.ibm.com (e36.co.us.ibm.com [32.97.110.154])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2mq1bskenj-1
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2mq20j1fh2-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:06 -0400
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:10 -0400
 Received: from localhost
         by e36.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 24 Sep 2018 09:18:05 -0600
+        Mon, 24 Sep 2018 09:18:09 -0600
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V5 06/20] Fix xfs/139 to work with 64k block size
-Date: Mon, 24 Sep 2018 20:49:28 +0530
+Subject: [PATCH V5 07/20] Fix xfs/140 to work with 64k block size
+Date: Mon, 24 Sep 2018 20:49:29 +0530
 In-Reply-To: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
 References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180924151942.8220-7-chandan@linux.vnet.ibm.com>
+Message-Id: <20180924151942.8220-8-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
@@ -30,15 +30,14 @@ based on block size of the filesystem.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/139     | 15 +++++++++------
- tests/xfs/139.out |  8 ++++++--
- 2 files changed, 15 insertions(+), 8 deletions(-)
+ tests/xfs/140 | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
 
-diff --git a/tests/xfs/139 b/tests/xfs/139
-index 2a26635..c074273 100755
---- a/tests/xfs/139
-+++ b/tests/xfs/139
-@@ -34,17 +34,20 @@ _require_cp_reflink
+diff --git a/tests/xfs/140 b/tests/xfs/140
+index 6e89fe3..c06a722 100755
+--- a/tests/xfs/140
++++ b/tests/xfs/140
+@@ -34,17 +34,21 @@ _require_cp_reflink
  
  rm -f $seqres.full
  
@@ -54,41 +53,15 @@ index 2a26635..c074273 100755
  
  testdir=$SCRATCH_MNT/test-$seq
  mkdir $testdir
--blksz="$(_get_block_size $testdir)"
+-blksz=$(_get_block_size $testdir)
  
  echo "Create the original files"
 -sz=$((48 * 1048576))
 -nr=$((sz / blksz))
-+sz=$((12288 * $blksz))
++nr=12288
++sz=$(($nr * $blksz))
  _pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
  _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
- _scratch_cycle_mount
-@@ -54,8 +57,8 @@ _pwrite_byte 0x62 0 $sz $testdir/file1 >> $seqres.full
- _scratch_cycle_mount
- 
- echo "Compare files"
--md5sum $testdir/file1 | _filter_scratch
--md5sum $testdir/file2 | _filter_scratch
-+od -t x1 $testdir/file1 | _filter_od
-+od -t x1 $testdir/file2 | _filter_od
- #filefrag -v $testdir/file1 $testdir/file2
- 
- # success, all done
-diff --git a/tests/xfs/139.out b/tests/xfs/139.out
-index dc6a31e..72909bc 100644
---- a/tests/xfs/139.out
-+++ b/tests/xfs/139.out
-@@ -3,5 +3,9 @@ Format and mount
- Create the original files
- CoW every other block
- Compare files
--673c759fb131ccf3336c4f8c549a497e  SCRATCH_MNT/test-139/file1
--dc802351f6717547cbf4c951b294f952  SCRATCH_MNT/test-139/file2
-+0 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62
-+*
-+30000
-+0 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61
-+*
-+30000
+ _pwrite_byte 0x61 0 $sz $testdir/file2.chk >> $seqres.full
 -- 
 2.9.5
