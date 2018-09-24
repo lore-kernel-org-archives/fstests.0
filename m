@@ -1,60 +1,123 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:58156 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1730487AbeIXVVo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:21:44 -0400
-Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEaAL129377
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:19:03 -0400
-Received: from e31.co.us.ibm.com (e31.co.us.ibm.com [32.97.110.149])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2mq05hq7eq-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:19:02 -0400
-Received: from localhost
-        by e31.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 24 Sep 2018 09:19:02 -0600
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V5 20/20] Fix generic/108 to work with 64k block size
-Date: Mon, 24 Sep 2018 20:49:42 +0530
-In-Reply-To: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
-References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180924151942.8220-21-chandan@linux.vnet.ibm.com>
+Received: from mail-qt1-f194.google.com ([209.85.160.194]:35550 "EHLO
+        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728290AbeIYDsN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 23:48:13 -0400
+Received: by mail-qt1-f194.google.com with SMTP id z14-v6so6216111qtn.2
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 14:43:57 -0700 (PDT)
+Date: Mon, 24 Sep 2018 18:43:52 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: [PATCH v2] fstests: add support for hfsplus
+Message-ID: <20180924214352.7fjpxbcnxpugnoms@eaf>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
+Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit increases the size of the scsi debug device to 300MiB to
-accommodate a 275MiB sized XFS filesystem with 64k block size. mkfs.xfs
-fails to create a 64k block sized filesystem on devices with capacity
-less than 275MiB.
+Running tests on hfsplus requires patched versions of the mkfs and fsck
+tools [1] that support filesystems smaller than the device.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+[1] https://github.com/eafer/hfsprogs-linux.git
+
+Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
+>
 ---
- tests/generic/108 | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ common/config | 10 ++++++++++
+ common/rc     | 15 ++++++++++++++-
+ 2 files changed, 24 insertions(+), 1 deletion(-)
 
-diff --git a/tests/generic/108 b/tests/generic/108
-index e464335..9b4fe60 100755
---- a/tests/generic/108
-+++ b/tests/generic/108
-@@ -48,7 +48,7 @@ vgname=vg_$seq
- rm -f $seqres.full
- 
- # _get_scsi_debug_dev returns a scsi debug device with 128M in size by default
--SCSI_DEBUG_DEV=`_get_scsi_debug_dev`
-+SCSI_DEBUG_DEV=`_get_scsi_debug_dev 512 512 0 300`
- if [ "$SCSI_DEBUG_DEV" == "/dev/" ]; then
- 	_fail "Failed to initialize scsi debug device"
- fi
-@@ -59,7 +59,7 @@ $LVM_PROG pvcreate -f $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
- $LVM_PROG vgcreate -f $vgname $SCSI_DEBUG_DEV $SCRATCH_DEV >>$seqres.full 2>&1
- # We use yes pipe instead of 'lvcreate --yes' because old version of lvm
- # (like 2.02.95 in RHEL6) don't support --yes option
--yes | $LVM_PROG lvcreate -i 2 -I 4m -L 100m -n $lvname $vgname \
-+yes | $LVM_PROG lvcreate -i 2 -I 4m -L 275m -n $lvname $vgname \
- 	>>$seqres.full 2>&1
- # wait for lv creation to fully complete
- $UDEV_SETTLE_PROG >>$seqres.full 2>&1
--- 
-2.9.5
+diff --git a/common/config b/common/config
+index 1ba8d96c..315f8b1e 100644
+--- a/common/config
++++ b/common/config
+@@ -229,6 +229,7 @@ case "$HOSTOS" in
+ 	export MKFS_CIFS_PROG=3D"false"
+ 	export MKFS_OVERLAY_PROG=3D"false"
+ 	export MKFS_REISER4_PROG=3D$(type -P mkfs.reiser4)
++	export MKFS_HFSPLUS_PROG=3D$(type -P mkfs.hfsplus)
+ 	export E2FSCK_PROG=3D$(type -P e2fsck)
+ 	export TUNE2FS_PROG=3D$(type -P tune2fs)
+ 	export FSCK_OVERLAY_PROG=3D$(type -P fsck.overlay)
+@@ -313,6 +314,9 @@ _mount_opts()
+ 	ubifs)
+ 		export MOUNT_OPTIONS=3D$UBIFS_MOUNT_OPTIONS
+ 		;;
++	hfsplus)
++		export MOUNT_OPTIONS=3D$HFSPLUS_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -380,6 +384,9 @@ _mkfs_opts()
+ 	f2fs)
+ 		export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
+ 		;;
++	hfsplus)
++		export MKFS_OPTIONS=3D$HFSPLUS_MKFS_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -397,6 +404,9 @@ _fsck_opts()
+ 	f2fs)
+ 		export FSCK_OPTIONS=3D""
+ 		;;
++	hfsplus)
++		export FSCK_OPTIONS=3D"-nX"
++		;;
+ 	*)
+ 		export FSCK_OPTIONS=3D"-n"
+ 		;;
+diff --git a/common/rc b/common/rc
+index d5bb1fee..a843e9f6 100644
+--- a/common/rc
++++ b/common/rc
+@@ -158,6 +158,12 @@ case "$FSTYP" in
+     ubifs)
+ 	[ "$UBIUPDATEVOL_PROG" =3D "" ] && _fatal "ubiupdatevol not found"
+ 	;;
++    hfsplus)
++	[ "$MKFS_HFSPLUS_PROG" =3D "" ] && _fatal "mkfs.hfsplus not found"
++	mkfs.hfsplus -X |& grep "invalid" &&
++		_fatal "A patched version of mkfs.hfsplus is required:" \
++		       "https://github.com/eafer/hfsprogs-linux.git"
++	;;
+ esac
+=20
+ if [ ! -z "$REPORT_LIST" ]; then
+@@ -746,6 +752,10 @@ _scratch_mkfs()
+ 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter=3D"grep -v -e ^mkfs\.ocfs2"
+ 		;;
++	hfsplus)
++		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP -- -X"
++		mkfs_filter=3D"cat"
++		;;
+ 	*)
+ 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
+ 		mkfs_filter=3D"cat"
+@@ -995,6 +1005,9 @@ _scratch_mkfs_sized()
+ 	fi
+ 	export MOUNT_OPTIONS=3D"-o size=3D$fssize $TMPFS_MOUNT_OPTIONS"
+ 	;;
++    hfsplus)
++	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -X $fssize -b $blocksize $SCRATCH_DEV
++	;;
+     *)
+ 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
+ 	;;
+@@ -3055,7 +3068,7 @@ _require_metadata_journaling()
+ 	fi
+=20
+ 	case "$FSTYP" in
+-	ext2|vfat|msdos|udf)
++	ext2|vfat|msdos|udf|hfsplus)
+ 		_notrun "$FSTYP does not support metadata journaling"
+ 		;;
+ 	ext4)
+--=20
+2.11.0
