@@ -1,113 +1,117 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:57320 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727816AbeIXTmf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 15:42:35 -0400
-Subject: Re: [PATCH 1/9] fstests: btrfs: _scratch_mkfs_sized fix min size
- without mixed option
-References: <1537784193-24431-1-git-send-email-anand.jain@oracle.com>
- <1537784193-24431-2-git-send-email-anand.jain@oracle.com>
- <c770f3ed-a813-74c9-0b9d-04a3ce740185@gmx.com>
- <bdd780f8-8c50-c859-30ba-53c68d81bb72@oracle.com>
- <80c6fc3d-4c30-34b7-ecc1-31eddb12fe59@gmx.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <5d791c2f-35ee-8e37-056c-d9089483d5af@oracle.com>
-Date: Mon, 24 Sep 2018 21:40:00 +0800
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:44065 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727494AbeIXUVn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 16:21:43 -0400
+Received: by mail-pf1-f194.google.com with SMTP id k21-v6so9068809pff.11
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 07:19:21 -0700 (PDT)
+Date: Mon, 24 Sep 2018 22:19:11 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH V4 00/20] Fix tests to work on non-4k block sized fs
+ instances
+Message-ID: <20180924141911.GE17817@desktop>
+References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com>
+ <20180920093358.GO8382@dhcp-12-152.nay.redhat.com>
+ <20180922162402.GD17817@desktop>
+ <2488111.16P7BqhtSf@localhost.localdomain>
 MIME-Version: 1.0
-In-Reply-To: <80c6fc3d-4c30-34b7-ecc1-31eddb12fe59@gmx.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <2488111.16P7BqhtSf@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+On Mon, Sep 24, 2018 at 03:34:27PM +0530, Chandan Rajendra wrote:
+> On Saturday, September 22, 2018 9:54:02 PM IST Eryu Guan wrote:
+> > On Thu, Sep 20, 2018 at 05:33:58PM +0800, Zorro Lang wrote:
+> > > On Wed, Sep 19, 2018 at 05:30:33PM +0530, Chandan Rajendra wrote:
+> > > > This patchset fixes tests (mostly XFS specific ones) to work on
+> > > > variable block size. These patches now use the output of "od" utility
+> > > > to verify the contents of the test files instead of the md5sum
+> > > > utility.
+> > > > 
+> > > > Also, The patchset modifies _filter_fiemap() filter function to
+> > > > optionally print the file offset range in block size units.
+> > > > 
+> > > > Changelog:
+> > > > V3->V4:
+> > > > 1. The following tests now use _get_file_block_size() function to obtain the
+> > > >    underlying filesystem's block size.
+> > > >    xfs/009
+> > > >    xfs/074
+> > > >    xfs/139
+> > > >    xfs/140
+> > > >    xfs/299
+> > > >    generic/018
+> > > >    generic/177
+> > > >    generic/130
+> > > > 2. xfs/139 now creates a scratch filesystem with AG size of 8192 filesystem
+> > > >    blocks instead of the previously used 4400 filesystem blocks.
+> > > > 3. xfs/050 has now been fixed to work with 512 byte sized filesystem blocks.
+> > > >    The "block soft" limit and "block hard" limit values have been increased to
+> > > >    enable the user to have enough blocks in quota to be able to create the
+> > > >    required test files when using 512 byte filesystem blocks.
+> > > 
+> > > Hi,
+> > > 
+> > > Test passed on 512b XFS this time [1]. BTW:
+> > >  - xfs 64k blocksize test PASS
+> > >  - xfs default blocksize test PASS
+> > >  - ext4 64k blocksize test PASS
+> > >  - ext4 default blocksize test PASS
+> > 
+> > Thanks a lot for testing, Zorro!!
+> > 
+> > As I don't have access to hardware that supports 64k page, so I only
+> > tested them on x86_64 hardware. I tested all explicitly modified cases
+> > and all cases use _filter_fiemap helper, with test matrix 4k/2k/1k/512 x
+> > v4/v5/reflink/rmapbt on xfs, 4k/2k/1k on ext4 and btrfs. I also hit some
+> > other failures that we need to look into.
+> 
+> Eryu, Thanks for testing the patchset.
+> 
+> > 
+> > xfs/299 fails (and only fails) on 1k block size xfs with reflink or
+> > rmapbt feature enabled. e.g.
+> > 
+> >  *** push past the hard inode limit (expect EDQUOT)
+> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > -[NAME] 35 25 125 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > +[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > 
+> >  *** push past the hard block limit (expect EDQUOT)
+> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > -[NAME] =OK= 25 125 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > +[NAME] =OK= 25 125 0 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > ...
+> > 
+> 
+> I will check this and get back soon.
+> 
+> > And generic/473 fails on xfs with all test combinations. e.g. the diff on 4k
+> > block size v4 xfs
+> > 
+> >      1: [256..287]: hole
+> >      Hole + Data
+> >      0: [0..127]: hole
+> >     -1: [128..255]: data
+> >     +1: [128..135]: data
+> >      Hole + Data + Hole
+> >      0: [0..127]: hole
+> 
+> The above test fails even without my patches applied. This is because 
+> xfs_bmapi_read() invoked by xfs_file_iomap_begin() returns a trimmed
+> extent.
 
+Ah, I missed that, just recalled that generic/473 is a broken test.
 
-On 09/24/2018 08:02 PM, Qu Wenruo wrote:
->=20
->=20
-> On 2018/9/24 =E4=B8=8B=E5=8D=887:53, Anand Jain wrote:
->>
->>
->> On 09/24/2018 06:58 PM, Qu Wenruo wrote:
->>>
->>>
->>> On 2018/9/24 =E4=B8=8B=E5=8D=886:16, Anand Jain wrote:
->>>> As of now _scratch_mkfs_sized check if the requested size is below 1=
-G
->>>> and forces the --mixed option for the mkfs.btrfs. Well the correct s=
-ize
->>>> at which we need to force the mixed option is 114294784bytes. Fix th=
-at.
->>>
->>> How this size is get from?
->>> If it's from btrfs_min_dev_size(), I strongly recommend to add refere=
-nce
->>> here, and don't use the ugly intermediate number.
->>>
->>>
->>> BTW, this number is related to mkfs profile.
->>> If you really want to use some maximum number, please follow the max
->>> possible value in btrfs_min_dev_size(), which should be 229M other th=
-an
->>> 106M.
->>
->>  =C2=A0Thanks for the comments. I completely missed out the point of o=
-ther
->>  =C2=A0group profile requiring more than ~115 bytes. Will fix.
->=20
-> I'd go a rounded number, like 256M.
->=20
-> Non of the number from btrfs_min_dev_size() is really easy to remember
-> nor makes sense out of btrfs realm.
->=20
-> And this also leaves a little more headroom for later modification
-> (although I hope such modification never happen)
+Thanks,
+Eryu
 
-  I agree. Actually I was thinking it should be like that when I was=20
-writing this patch, then my logical mind didn't provide any strong=20
-reason to back that up. As ideas match, Will fix it at 256M.
-
-Thanks, Anand
-
-
-> Thanks,
-> Qu
->=20
->>  =C2=A0Yep the ref for the size is btrfs_min_dev_size().
->>
->> -Anand
->>
->>
->>> Thanks,
->>> Qu
->>>
->>>>
->>>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->>>> ---
->>>>  =C2=A0 common/rc | 4 +++-
->>>>  =C2=A0 1 file changed, 3 insertions(+), 1 deletion(-)
->>>>
->>>> diff --git a/common/rc b/common/rc
->>>> index d5bb1feee2c3..bcdbf03e1bf0 100644
->>>> --- a/common/rc
->>>> +++ b/common/rc
->>>> @@ -969,7 +969,9 @@ _scratch_mkfs_sized()
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ;;
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 btrfs)
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 local mixed_opt=3D
->>>> -=C2=A0=C2=A0=C2=A0 (( fssize <=3D 1024 * 1024 * 1024 )) && mixed_op=
-t=3D'--mixed'
->>>> +=C2=A0=C2=A0=C2=A0 # minimum size that's needed without the mixed o=
-ption.
->>>> +=C2=A0=C2=A0=C2=A0 # Non mixed mode is also the default option.
->>>> +=C2=A0=C2=A0=C2=A0 (( fssize < 114294784 )) && mixed_opt=3D'--mixed=
-'
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 $MKFS_BTRFS_PROG $MKFS_OPTIONS $mixe=
-d_opt -b $fssize $SCRATCH_DEV
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 ;;
->>>>  =C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 jfs)
->>>>
->>>
->=20
+> 
+> However, generic/473 passes on Ext4 with 4k blocksize.
+> 
+> -- 
+> chandan
+> 
