@@ -1,11 +1,11 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:36328 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728229AbeIXQSF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 12:18:05 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:36912 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728482AbeIXQSG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 12:18:06 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH 1/9] fstests: btrfs: _scratch_mkfs_sized fix min size without mixed option
-Date: Mon, 24 Sep 2018 18:16:25 +0800
-Message-Id: <1537784193-24431-2-git-send-email-anand.jain@oracle.com>
+Subject: [PATCH 3/9] geneirc/077 fix min size for btrfs
+Date: Mon, 24 Sep 2018 18:16:27 +0800
+Message-Id: <1537784193-24431-4-git-send-email-anand.jain@oracle.com>
 In-Reply-To: <1537784193-24431-1-git-send-email-anand.jain@oracle.com>
 References: <1537784193-24431-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,29 +13,28 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-As of now _scratch_mkfs_sized check if the requested size is below 1G
-and forces the --mixed option for the mkfs.btrfs. Well the correct size
-at which we need to force the mixed option is 114294784bytes. Fix that.
+If btrfs need to be tested at its default blockgroup which is non-mixed,
+then it needs at least ~200mb (upward round off to nearest 100'),
+instead of 50mb use 200mb to test this test case.
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- common/rc | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ tests/generic/077 | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index d5bb1feee2c3..bcdbf03e1bf0 100644
---- a/common/rc
-+++ b/common/rc
-@@ -969,7 +969,9 @@ _scratch_mkfs_sized()
- 	;;
-     btrfs)
- 	local mixed_opt=
--	(( fssize <= 1024 * 1024 * 1024 )) && mixed_opt='--mixed'
-+	# minimum size that's needed without the mixed option.
-+	# Non mixed mode is also the default option.
-+	(( fssize < 114294784 )) && mixed_opt='--mixed'
- 	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
- 	;;
-     jfs)
+diff --git a/tests/generic/077 b/tests/generic/077
+index ef6af18c83e3..60c3493451c7 100755
+--- a/tests/generic/077
++++ b/tests/generic/077
+@@ -49,8 +49,7 @@ rm -f $seqres.full
+ _scratch_unmount >/dev/null 2>&1
+ echo "*** MKFS ***"                         >>$seqres.full
+ echo ""                                     >>$seqres.full
+-SIZE=`expr 50 \* 1024 \* 1024`
+-_scratch_mkfs_sized $SIZE                   >>$seqres.full 2>&1 \
++_scratch_mkfs_sized $((200 * 1024 *1024))   >>$seqres.full 2>&1 \
+ 	|| _fail "mkfs failed"
+ _scratch_mount
+ mkdir $SCRATCH_MNT/subdir
 -- 
 1.8.3.1
