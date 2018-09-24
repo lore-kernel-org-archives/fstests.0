@@ -1,114 +1,70 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:49454 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1728349AbeIXQD1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 12:03:27 -0400
-Received: from pps.filterd (m0098421.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8O9xBsO122956
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 06:02:11 -0400
-Received: from e06smtp03.uk.ibm.com (e06smtp03.uk.ibm.com [195.75.94.99])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mpumg5c5t-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 06:02:11 -0400
-Received: from localhost
-        by e06smtp03.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 24 Sep 2018 11:02:08 +0100
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: Re: [PATCH V4 00/20] Fix tests to work on non-4k block sized fs instances
-Date: Mon, 24 Sep 2018 15:34:27 +0530
-In-Reply-To: <20180922162402.GD17817@desktop>
-References: <20180919120053.7339-1-chandan@linux.vnet.ibm.com> <20180920093358.GO8382@dhcp-12-152.nay.redhat.com> <20180922162402.GD17817@desktop>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
-Message-Id: <2488111.16P7BqhtSf@localhost.localdomain>
+Received: from userp2120.oracle.com ([156.151.31.85]:36862 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727524AbeIXQSD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 12:18:03 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH 0/9] Fix _scratch_mkfs_sized() for btrfs
+Date: Mon, 24 Sep 2018 18:16:24 +0800
+Message-Id: <1537784193-24431-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Zorro Lang <zlang@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Saturday, September 22, 2018 9:54:02 PM IST Eryu Guan wrote:
-> On Thu, Sep 20, 2018 at 05:33:58PM +0800, Zorro Lang wrote:
-> > On Wed, Sep 19, 2018 at 05:30:33PM +0530, Chandan Rajendra wrote:
-> > > This patchset fixes tests (mostly XFS specific ones) to work on
-> > > variable block size. These patches now use the output of "od" utility
-> > > to verify the contents of the test files instead of the md5sum
-> > > utility.
-> > > 
-> > > Also, The patchset modifies _filter_fiemap() filter function to
-> > > optionally print the file offset range in block size units.
-> > > 
-> > > Changelog:
-> > > V3->V4:
-> > > 1. The following tests now use _get_file_block_size() function to obtain the
-> > >    underlying filesystem's block size.
-> > >    xfs/009
-> > >    xfs/074
-> > >    xfs/139
-> > >    xfs/140
-> > >    xfs/299
-> > >    generic/018
-> > >    generic/177
-> > >    generic/130
-> > > 2. xfs/139 now creates a scratch filesystem with AG size of 8192 filesystem
-> > >    blocks instead of the previously used 4400 filesystem blocks.
-> > > 3. xfs/050 has now been fixed to work with 512 byte sized filesystem blocks.
-> > >    The "block soft" limit and "block hard" limit values have been increased to
-> > >    enable the user to have enough blocks in quota to be able to create the
-> > >    required test files when using 512 byte filesystem blocks.
-> > 
-> > Hi,
-> > 
-> > Test passed on 512b XFS this time [1]. BTW:
-> >  - xfs 64k blocksize test PASS
-> >  - xfs default blocksize test PASS
-> >  - ext4 64k blocksize test PASS
-> >  - ext4 default blocksize test PASS
-> 
-> Thanks a lot for testing, Zorro!!
-> 
-> As I don't have access to hardware that supports 64k page, so I only
-> tested them on x86_64 hardware. I tested all explicitly modified cases
-> and all cases use _filter_fiemap helper, with test matrix 4k/2k/1k/512 x
-> v4/v5/reflink/rmapbt on xfs, 4k/2k/1k on ext4 and btrfs. I also hit some
-> other failures that we need to look into.
+Currently _scratch_mkfs_sized() checks if requested size for the fs
+is below 1G for btrfs and forces the --mixed mkfs option. The 1G size
+cut off is too larger where the actual size is 114294784 bytes. The
+patch 1/9 fixes the _scratch_mkfs_sized() to check for 114294784
+bytes instead. By this now we test the default config (non mixed).
+And the mixed option may still be tested using the MKFS_OPTIONS.
+This change only affect btrfs FS and test cases using the
+_scratch_mkfs_sized() in generic and btrfs.
 
-Eryu, Thanks for testing the patchset.
 
-> 
-> xfs/299 fails (and only fails) on 1k block size xfs with reflink or
-> rmapbt feature enabled. e.g.
-> 
->  *** push past the hard inode limit (expect EDQUOT)
->  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> -[NAME] 35 25 125 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> +[NAME] 35 25 125 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> 
->  *** push past the hard block limit (expect EDQUOT)
->  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> -[NAME] =OK= 25 125 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> +[NAME] =OK= 25 125 0 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> ...
-> 
+Also, to make sure btrfs is created in non-mixed mode, so in each individual test cases we need to make sure that _scratch_mkfs_sized()
+been requested to create a FS of at least 200mb in size (114294784
+bytes rounded off to the nearest 100). And there are few test
+cases which does not do that, Patches [2,3,4,8,9]/9 fixes them.
+These changes affects all FS as such.
 
-I will check this and get back soon.
+And there are some test cases where we use local
+variable as an option for the _scratch_mkfs_sized() is being used
+and this local variable is not used anywhere else with in the test
+case. So patches [5,6,7]/9 drops the local variable and open codes
+it. This is a straight forward change as the fs size is kept same
+as in the original.
 
-> And generic/473 fails on xfs with all test combinations. e.g. the diff on 4k
-> block size v4 xfs
-> 
->      1: [256..287]: hole
->      Hole + Data
->      0: [0..127]: hole
->     -1: [128..255]: data
->     +1: [128..135]: data
->      Hole + Data + Hole
->      0: [0..127]: hole
+Further, there are test cases generic/250,252,256 which uses
+_scratch_mkfs_sized with < 200mb but its fix isn't straight forward
+and they are not yet ready for the review.
 
-The above test fails even without my patches applied. This is because 
-xfs_bmapi_read() invoked by xfs_file_iomap_begin() returns a trimmed
-extent.
+The affected testcases (which calls _scratch_mkfs_sized) [1] have
+been tested with xfs/ext4 and btrfs. And there are no regressions.
 
-However, generic/473 passes on Ext4 with 4k blocksize.
+[1]
+generic/015 generic/027 generic/077 generic/081 generic/083 generic/085 generic/096 generic/102 generic/171 generic/172 generic/173 generic/174 generic/204 generic/224 generic/226 generic/250 generic/252 generic/256 generic/269 generic/270 generic/273 generic/274 generic/275 generic/300 generic/312 generic/320 generic/333 generic/334 generic/361 generic/371 generic/387 generic/399 generic/416 generic/427 generic/449 generic/459 generic/466 generic/488 generic/505 btrfs/004 btrfs/007 btrfs/132 btrfs/170
+
+Anand Jain (9):
+  fstests: btrfs: _scratch_mkfs_sized fix min size without mixed option
+  generic/015 fix to test the default non-mixed mode
+  geneirc/077 fix min size for btrfs
+  generic/083 create at least 200mb fs
+  generic/102 open code dev_size _scratch_mkfs_sized()
+  generic/204 open code SIZE for _scratch_mkfs_sized()
+  generic/312 open code fs_size _scratch_mkfs_sized()
+  generic/449 fix fs size for _scratch_mkfs_sized for btrfs
+  generic/387 fix _scratch_mkfs_sized option for btrfs
+
+ common/rc         | 4 +++-
+ tests/generic/015 | 9 ++++-----
+ tests/generic/077 | 3 +--
+ tests/generic/083 | 2 +-
+ tests/generic/102 | 3 +--
+ tests/generic/204 | 3 +--
+ tests/generic/312 | 7 +++----
+ tests/generic/387 | 3 ++-
+ tests/generic/449 | 4 ++--
+ 9 files changed, 18 insertions(+), 20 deletions(-)
 
 -- 
-chandan
+1.8.3.1
