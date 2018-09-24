@@ -1,286 +1,87 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:42212 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730566AbeIXVUh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:37 -0400
-Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEkr9108232
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:17:55 -0400
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:55604 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1730566AbeIXVUj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:39 -0400
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEfmP027885
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:17:59 -0400
 Received: from e35.co.us.ibm.com (e35.co.us.ibm.com [32.97.110.153])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mq1ckk27h-1
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2mq167c42w-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:17:55 -0400
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:17:58 -0400
 Received: from localhost
         by e35.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 24 Sep 2018 09:17:54 -0600
+        Mon, 24 Sep 2018 09:17:57 -0600
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V5 03/20] Fix xfs/050 to work with 64k block size
-Date: Mon, 24 Sep 2018 20:49:25 +0530
+Subject: [PATCH V5 04/20] Fix xfs/074 to work with 64k block size
+Date: Mon, 24 Sep 2018 20:49:26 +0530
 In-Reply-To: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
 References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180924151942.8220-4-chandan@linux.vnet.ibm.com>
+Message-Id: <20180924151942.8220-5-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This commit changes the test to calculate quota limits based on the
-block size of the underlying filesystem. Also, the sizes of the test
-files are now made to be a multiple of the filesystem block size.
+This commit makes file and extent size calculations to be a function of
+the filesystem's block size. It also adds a brief description of the
+bug that is being tested.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/050     | 24 ++++++++++++++--------
- tests/xfs/050.out | 60 +++++++++++++++++++++++++++----------------------------
- 2 files changed, 46 insertions(+), 38 deletions(-)
+ tests/xfs/074 | 23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
-diff --git a/tests/xfs/050 b/tests/xfs/050
-index 8569c2c..788ed7f 100755
---- a/tests/xfs/050
-+++ b/tests/xfs/050
-@@ -38,8 +38,13 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
- _require_scratch
- _require_xfs_quota
+diff --git a/tests/xfs/074 b/tests/xfs/074
+index e5888d5..c10a7d0 100755
+--- a/tests/xfs/074
++++ b/tests/xfs/074
+@@ -7,6 +7,18 @@
+ # Check some extent size hint boundary conditions that can result in
+ # MAXEXTLEN overflows.
+ #
++# In xfs_bmap_extsize_align(), we had,
++# 	if ((temp = (align_alen % extsz))) {
++# 		align_alen += extsz - temp;
++# 	}
++# align_alen had the value of 2097151 (i.e. MAXEXTLEN) blocks. extsz had
++# the value of 4096 blocks.
++#
++# align_alen % extsz will be 4095. so align_alen will end up having
++# 2097151 + (4096 - 4095) = 2097152 i.e. (MAXEXTLEN + 1). Thus the length
++# of the new extent will be larger than MAXEXTLEN. This will later cause
++# the bmbt leaf to have an entry whose length is set to zero block count.
++#
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+ echo "QA output created by $seq"
+@@ -46,19 +58,22 @@ mkdir -p $LOOP_MNT
+ $XFS_IO_PROG -ft -c "truncate 1t" $LOOP_FILE >> $seqres.full
+ LOOP_DEV=`_create_loop_device $LOOP_FILE`
  
--bsoft=100
--bhard=500
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+bsize=$(_get_file_block_size $SCRATCH_MNT)
-+_scratch_unmount
+-_mkfs_dev -d size=156452m,agcount=4 -l size=32m $LOOP_DEV
++_mkfs_dev -d size=260g,agcount=2 $LOOP_DEV
+ _mount $LOOP_DEV $LOOP_MNT
+ 
++BLOCK_SIZE=$(_get_file_block_size $LOOP_MNT)
 +
-+bsoft=$(( 200 * $bsize ))
-+bhard=$(( 1000 * $bsize ))
- isoft=4
- ihard=10
+ # Corrupt the BMBT by creating extents larger than MAXEXTLEN
++# For 4k blocksize, MAXEXTLEN * 4k = 2097151 * 4k = 8589930496 = ~8GiB
+ $XFS_IO_PROG -ft \
+-	-c "extsize 16m" \
+-	-c "falloc 0 30g" \
++	-c "extsize $(($BLOCK_SIZE * 4096))" \
++	-c "falloc 0 $(($BLOCK_SIZE * 2097152))" \
+ 	$LOOP_MNT/foo >> $seqres.full
  
-@@ -55,7 +60,9 @@ _filter_report()
- 		if ($ENV{'LARGE_SCRATCH_DEV'}) {
- 			$val = $ENV{'NUM_SPACE_FILES'};
- 		}
--		s/(^\[ROOT\] \S+ \S+ \S+ \S+ \[--------\] )(\S+)/$1@{[$2 - $val]}/g'
-+		s/(^\[ROOT\] \S+ \S+ \S+ \S+ \[--------\] )(\S+)/$1@{[$2 - $val]}/g' |
-+	perl -npe '
-+		s|^(.*?) (\d+) (\d+) (\d+)|$1 @{[$2 * 1024 /'$bsize']} @{[$3 * 1024 /'$bsize']} @{[$4 * 1024 /'$bsize']}|'
- }
+ umount $LOOP_MNT
+ _check_xfs_filesystem $LOOP_DEV none none
  
- # The actual point at which limit enforcement takes place for the
-@@ -70,9 +77,10 @@ _filter_and_check_blks()
- 		if (/^\#'$id'\s+(\d+)/ && '$enforce') {
- 			$maximum = '$bhard';
- 			$minimum = '$bhard' * 85/100;
--			if (($1 < $minimum || $1 > $maximum) && '$noextsz') {
-+			$used = $1 * 1024;
-+			if (($used < $minimum || $used > $maximum) && '$noextsz') {
- 				printf(" URK %d: %d is out of range! [%d,%d]\n",
--					'$id', $1, $minimum, $maximum);
-+					'$id', $used, $minimum, $maximum);
- 			}
- 			s/^(\#'$id'\s+)(\d+)/\1 =OK=/g;
- 		}
-@@ -132,7 +140,7 @@ _exercise()
- 	echo "ls -l $SCRATCH_MNT" >>$seqres.full
- 	ls -l $SCRATCH_MNT >>$seqres.full
- 	xfs_quota -D $tmp.projects -P $temp.projid -x \
--		-c "limit -$type bsoft=${bsoft}k bhard=${bhard}k $id" \
-+		-c "limit -$type bsoft=${bsoft} bhard=${bhard} $id" \
- 		-c "limit -$type isoft=$isoft ihard=$ihard $id" \
- 		$SCRATCH_DEV
- 	xfs_quota -D $tmp.projects -P $tmp.projid -x \
-@@ -152,7 +160,7 @@ _exercise()
+-_mkfs_dev -f -l size=32m $LOOP_DEV
++_mkfs_dev -f $LOOP_DEV
+ _mount $LOOP_DEV $LOOP_MNT
  
- 	echo
- 	echo "*** push past the soft block limit" | tee -a $seqres.full
--	_file_as_id $SCRATCH_MNT/softie $id $type 1024 140
-+	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 300
- 	_qmount
- 	xfs_quota -D $tmp.projects -P $tmp.projid -x \
- 		-c "repquota -birnN -$type" $SCRATCH_DEV |
-@@ -173,7 +181,7 @@ _exercise()
- 	echo
- 	# Note: for quota accounting (not enforcement), EDQUOT is not expected
- 	echo "*** push past the hard block limit (expect EDQUOT)" | tee -a $seqres.full
--	_file_as_id $SCRATCH_MNT/softie $id $type 1024 540
-+	_file_as_id $SCRATCH_MNT/softie $id $type $bsize 1200
- 	echo "ls -l $SCRATCH_MNT" >>$seqres.full
- 	ls -l $SCRATCH_MNT >>$seqres.full
- 	_qmount
-diff --git a/tests/xfs/050.out b/tests/xfs/050.out
-index ff9eb1c..725cd79 100644
---- a/tests/xfs/050.out
-+++ b/tests/xfs/050.out
-@@ -12,23 +12,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] =OK= 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** unmount
- *** group
-@@ -44,23 +44,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] =OK= 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** unmount
- *** uqnoenforce
-@@ -76,23 +76,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** unmount
- *** gqnoenforce
-@@ -108,23 +108,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** unmount
- *** pquota
-@@ -140,23 +140,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] =OK= 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-+[NAME] =OK= 200 1000 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
- 
- *** unmount
- *** pqnoenforce
-@@ -172,22 +172,22 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
- 
- *** report initial settings
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft inode limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the soft block limit
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
- 
- *** push past the hard inode limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 140 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** push past the hard block limit (expect EDQUOT)
- [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
--[NAME] 540 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-+[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00 [--------]
- 
- *** unmount
+ # check we trim both ends of the extent approproiately; this will fail
 -- 
 2.9.5
