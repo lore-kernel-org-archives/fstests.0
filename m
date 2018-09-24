@@ -1,67 +1,81 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:27913 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1730546AbeIXVUv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:51 -0400
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEY7S108067
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:11 -0400
-Received: from e36.co.us.ibm.com (e36.co.us.ibm.com [32.97.110.154])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mq20j1fh2-1
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:10125 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729413AbeIXVU4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 17:20:56 -0400
+Received: from pps.filterd (m0098419.ppops.net [127.0.0.1])
+        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w8OFEawc129354
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:15 -0400
+Received: from e34.co.us.ibm.com (e34.co.us.ibm.com [32.97.110.152])
+        by mx0b-001b2d01.pphosted.com with ESMTP id 2mq05hq6dr-1
         (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:10 -0400
+        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 11:18:14 -0400
 Received: from localhost
-        by e36.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        by e34.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
         for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 24 Sep 2018 09:18:09 -0600
+        Mon, 24 Sep 2018 09:18:13 -0600
 From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH V5 07/20] Fix xfs/140 to work with 64k block size
-Date: Mon, 24 Sep 2018 20:49:29 +0530
+Subject: [PATCH V5 08/20] Fix xfs/190 to work with 64k block size
+Date: Mon, 24 Sep 2018 20:49:30 +0530
 In-Reply-To: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
 References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20180924151942.8220-8-chandan@linux.vnet.ibm.com>
+Message-Id: <20180924151942.8220-9-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-For 64k block size, the agsize provided in the test causes mkfs.xfs to
-fail due to insufficient log space. Hence this commit computes agsize
-based on block size of the filesystem.
+This commit describes "file hole" ranges in multiples of block sizes
+rather than using constants.
 
 Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- tests/xfs/140 | 12 ++++++++----
- 1 file changed, 8 insertions(+), 4 deletions(-)
+ tests/xfs/190 | 26 +++++++++++++++++---------
+ 1 file changed, 17 insertions(+), 9 deletions(-)
 
-diff --git a/tests/xfs/140 b/tests/xfs/140
-index 6e89fe3..c06a722 100755
---- a/tests/xfs/140
-+++ b/tests/xfs/140
-@@ -34,17 +34,21 @@ _require_cp_reflink
+diff --git a/tests/xfs/190 b/tests/xfs/190
+index 3275e29..13300ac 100755
+--- a/tests/xfs/190
++++ b/tests/xfs/190
+@@ -10,13 +10,6 @@
+ #
+ # PV 985792
+ #
+-#This is the list of holes to punch in the file limited to $filesize
+-#NOTE holes cannot overlap or this script will fail.
+-holes="4096:4096 303104:4096 1048576:512 1051648:8192 1065984:8192 1085440:7168"
+-#filesize in MB
+-filesize=10
+-#Name of file to perform the test on
+-filename=test-190
  
- rm -f $seqres.full
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -38,9 +31,24 @@ _supported_os Linux
+ _require_scratch
+ _scratch_mkfs_xfs >/dev/null 2>&1
+ _scratch_mount
+-fsblocksize=`$XFS_INFO_PROG $SCRATCH_MNT|sed 's/=/ /g'|awk '/^data / { print $3 }'`
  
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_mount
-+blksz=$(_get_file_block_size $SCRATCH_MNT)
-+_scratch_unmount
+-dd if=/dev/zero of=$SCRATCH_MNT/$filename bs=1024k count=10 >> $seqres.full 2>&1
++fsblocksize=$(_get_file_block_size $SCRATCH_MNT)
 +
- echo "Format and mount"
--_scratch_mkfs -d agsize=$((32 * 1048576)) > $seqres.full 2>&1
-+_scratch_mkfs -d agsize=$((8192 * $blksz)) > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
++#This is the list of holes to punch in the file limited to $filesize
++#NOTE holes cannot overlap or this script will fail.
++holes="$fsblocksize:$fsblocksize \
++$(($fsblocksize * 74)):$fsblocksize \
++$(($fsblocksize * 256)):$(($fsblocksize / 8)) \
++$(echo scale=0\;$fsblocksize \* 256 \+ $fsblocksize \* 3 \/ 4 | bc):$(($fsblocksize * 2)) \
++$(echo scale=0\;$fsblocksize \* 260 \+ $fsblocksize \* 1 \/ 4 | bc):$(($fsblocksize * 2)) \
++$(($fsblocksize * 265)):$(echo scale=0\;$fsblocksize \+ $fsblocksize \* 3 \/ 4 | bc)"
++
++#filesize
++filesize=$(($fsblocksize * 2560))
++#Name of file to perform the test on
++filename=test-190
++
++$XFS_IO_PROG -f -c "pwrite 0 $(($fsblocksize * 2560))" $SCRATCH_MNT/$filename >> $seqres.full 2>&1
  
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
--blksz=$(_get_block_size $testdir)
- 
- echo "Create the original files"
--sz=$((48 * 1048576))
--nr=$((sz / blksz))
-+nr=12288
-+sz=$(($nr * $blksz))
- _pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
- _pwrite_byte 0x61 0 $sz $testdir/file2.chk >> $seqres.full
+ # run DMAPI test using verbose output
+ echo Punching holes in file
 -- 
 2.9.5
