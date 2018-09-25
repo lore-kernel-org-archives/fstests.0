@@ -1,69 +1,157 @@
-Received: from mx2.suse.de ([195.135.220.15]:48074 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726435AbeIYRCL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 25 Sep 2018 13:02:11 -0400
-Subject: Re: [PATCH v2 2/9] generic/015 fix to test the default non-mixed mode
-References: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
- <1537849462-619-3-git-send-email-anand.jain@oracle.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <a84533e1-2f93-4b2f-4d20-6a9c6e27aca2@suse.com>
-Date: Tue, 25 Sep 2018 13:55:08 +0300
+Received: from mail-qt1-f193.google.com ([209.85.160.193]:46502 "EHLO
+        mail-qt1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726163AbeIZAGu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 20:06:50 -0400
+Received: by mail-qt1-f193.google.com with SMTP id h22-v6so6386155qtr.13
+        for <fstests@vger.kernel.org>; Tue, 25 Sep 2018 10:58:10 -0700 (PDT)
+Date: Tue, 25 Sep 2018 14:58:05 -0300
+From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
+        <ernesto.mnd.fernandez@gmail.com>
+Subject: Re: [PATCH v2] fstests: add support for hfsplus
+Message-ID: <20180925175805.2sjvygawho4d75ft@eaf>
+References: <20180924214352.7fjpxbcnxpugnoms@eaf>
+ <CAOQ4uxibAJiKrBHV3diRoAqrqTbkNmknzbWv8VnOdGMwEogcWA@mail.gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1537849462-619-3-git-send-email-anand.jain@oracle.com>
 Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxibAJiKrBHV3diRoAqrqTbkNmknzbWv8VnOdGMwEogcWA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Sep 25, 2018 at 08:57:58AM +0300, Amir Goldstein wrote:
+> On Tue, Sep 25, 2018 at 12:44 AM Ernesto A. Fern=C3=A1ndez
+> <ernesto.mnd.fernandez@gmail.com> wrote:
+> >
+> > Running tests on hfsplus requires patched versions of the mkfs and fs=
+ck
+> > tools [1] that support filesystems smaller than the device.
+>=20
+> That's not accurate, is it? Wouldn't it be more accurate to say that th=
+e patched
+> tools are required to run the _scratch_mkfs_sized tests?
 
+I set this up to call _fatal early if the tools are not the patched
+versions.
 
-On 25.09.2018 07:24, Anand Jain wrote:
-> commit 97575acd7495 (generic/015: Change the test filesystem size to
-> 101mb), created 101mb FS instead of 100mb FS to make sure we create
-> a FS which is non mixed mode.
-> 
-> btrfs-progs commit 18e2663db3e1 (btrfs-progs: Add minimum device size
-> check) added a more accurate minimum required space to create the btrfs
-> FS in non mixed mode depending on the group profile, and considering
-> any group profiles we would need at least 256MB (with upward round off).
-> 
-> So this patch changes the FS size to be created by _scratch_sized_mkfs()
-> to 256MB so that we create the FS in non mixed mode for any group
-> profile.
-> 
-> Mixed blockgroup can be tested using the MKFS_OPTIONS explicitly.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
->  tests/generic/015 | 8 +++-----
->  1 file changed, 3 insertions(+), 5 deletions(-)
-> 
-> diff --git a/tests/generic/015 b/tests/generic/015
-> index 0f4d29800f4f..e6c8d7c37c07 100755
-> --- a/tests/generic/015
-> +++ b/tests/generic/015
-> @@ -37,11 +37,9 @@ _supported_os Linux
->  _require_scratch
->  _require_no_large_scratch_dev
->  
-> -# With filesystems less than 100mb btrfs is created in mixed mode
-> -# which can lead to slight accounting errors of 1mb. Having the
-> -# fs be at least 101 mb ensures those errors are within the error
-> -# tolerance of 1%
-> -_scratch_mkfs_sized `expr 101 \* 1024 \* 1024` >/dev/null 2>&1 \
-> +# btrfs needs at least 256MB (with upward round off) to create a non-mixed mode
-> +# fs. Ref: btrfs-progs: btrfs_min_dev_size()
-> +_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1 \
+Using -X on mkfs.hfsplus forces the size to be a whole number of blocks,
+and using -X on fsck makes it work under that assumption.  This is briefl=
+y
+explained in the patched man page for the tools.
 
-Yeah, this test seems rather flaky with mixed block groups I had fixed
-it and then Omar changed the mixed bg threshold to 1g and it started
-failing again internally. I'm happy with this change provided the first
-patch lands as well.
+It's a workaround needed because hfsplus only stores the number of
+allocation blocks in the volume header.  If the device size is not a
+multiple of the block size, the backup header will be past the end, and
+fsck will take that as corruption.
 
->      || _fail "mkfs failed"
->  _scratch_mount
->  out=$SCRATCH_MNT/fillup.$$
-> 
+Of course I could let the patched fsck use the -X flag by default.  But
+that could be dangerous if somebody accidentally uses it to check an
+important filesystem.
+
+>=20
+> >
+> > [1] https://github.com/eafer/hfsprogs-linux.git
+> >
+> > Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail=
+.com>
+> > ---
+> >  common/config | 10 ++++++++++
+> >  common/rc     | 15 ++++++++++++++-
+> >  2 files changed, 24 insertions(+), 1 deletion(-)
+> >
+> > diff --git a/common/config b/common/config
+> > index 1ba8d96c..315f8b1e 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -229,6 +229,7 @@ case "$HOSTOS" in
+> >         export MKFS_CIFS_PROG=3D"false"
+> >         export MKFS_OVERLAY_PROG=3D"false"
+> >         export MKFS_REISER4_PROG=3D$(type -P mkfs.reiser4)
+> > +       export MKFS_HFSPLUS_PROG=3D$(type -P mkfs.hfsplus)
+> >         export E2FSCK_PROG=3D$(type -P e2fsck)
+> >         export TUNE2FS_PROG=3D$(type -P tune2fs)
+> >         export FSCK_OVERLAY_PROG=3D$(type -P fsck.overlay)
+> > @@ -313,6 +314,9 @@ _mount_opts()
+> >         ubifs)
+> >                 export MOUNT_OPTIONS=3D$UBIFS_MOUNT_OPTIONS
+> >                 ;;
+> > +       hfsplus)
+> > +               export MOUNT_OPTIONS=3D$HFSPLUS_MOUNT_OPTIONS
+> > +               ;;
+> >         *)
+> >                 ;;
+> >         esac
+> > @@ -380,6 +384,9 @@ _mkfs_opts()
+> >         f2fs)
+> >                 export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
+> >                 ;;
+> > +       hfsplus)
+> > +               export MKFS_OPTIONS=3D$HFSPLUS_MKFS_OPTIONS
+> > +               ;;
+> >         *)
+> >                 ;;
+> >         esac
+> > @@ -397,6 +404,9 @@ _fsck_opts()
+> >         f2fs)
+> >                 export FSCK_OPTIONS=3D""
+> >                 ;;
+> > +       hfsplus)
+> > +               export FSCK_OPTIONS=3D"-nX"
+> > +               ;;
+> >         *)
+> >                 export FSCK_OPTIONS=3D"-n"
+> >                 ;;
+> > diff --git a/common/rc b/common/rc
+> > index d5bb1fee..a843e9f6 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -158,6 +158,12 @@ case "$FSTYP" in
+> >      ubifs)
+> >         [ "$UBIUPDATEVOL_PROG" =3D "" ] && _fatal "ubiupdatevol not f=
+ound"
+> >         ;;
+> > +    hfsplus)
+> > +       [ "$MKFS_HFSPLUS_PROG" =3D "" ] && _fatal "mkfs.hfsplus not f=
+ound"
+> > +       mkfs.hfsplus -X |& grep "invalid" &&
+> > +               _fatal "A patched version of mkfs.hfsplus is required=
+:" \
+> > +                      "https://github.com/eafer/hfsprogs-linux.git"
+>=20
+> Why fatal and not just notrun the _scratch_mkfs_sized tests if no -X su=
+pport?
+> Must all tests run with mkfs -X and fsck -X??
+
+I always use -X on mkfs so the tests will complain if the size of the
+device is not a whole number of blocks.  Otherwise the tests would later
+fail on fsck.
+
+Maybe I should check for -X support when setting the FSCK_OPTIONS, and in
+_scratch_mkfs()?  Then _fatal would not be necessary.
+
+>=20
+> > +       ;;
+> >  esac
+> >
+> >  if [ ! -z "$REPORT_LIST" ]; then
+> > @@ -746,6 +752,10 @@ _scratch_mkfs()
+> >                 mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
+> >                 mkfs_filter=3D"grep -v -e ^mkfs\.ocfs2"
+> >                 ;;
+> > +       hfsplus)
+> > +               mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP -- -X"
+>=20
+> -X here seems like a typo?
+
+This is so the tests will complain if the device size is not a multiple
+of the block size.  I think I explained it in the patched man page for
+mkfs.hfsplus, but it may be better to put a comment here.
+
+Thanks,
+Ernest
+
+>=20
+> Thanks,
+> Amir.
