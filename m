@@ -1,123 +1,66 @@
-Received: from mail-qt1-f194.google.com ([209.85.160.194]:35550 "EHLO
-        mail-qt1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728290AbeIYDsN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Sep 2018 23:48:13 -0400
-Received: by mail-qt1-f194.google.com with SMTP id z14-v6so6216111qtn.2
-        for <fstests@vger.kernel.org>; Mon, 24 Sep 2018 14:43:57 -0700 (PDT)
-Date: Mon, 24 Sep 2018 18:43:52 -0300
-From: Ernesto =?utf-8?Q?A=2E_Fern=C3=A1ndez?=
-        <ernesto.mnd.fernandez@gmail.com>
-Subject: [PATCH v2] fstests: add support for hfsplus
-Message-ID: <20180924214352.7fjpxbcnxpugnoms@eaf>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
+Received: from userp2120.oracle.com ([156.151.31.85]:49712 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727075AbeIYKaH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 06:30:07 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH v2 0/9] Fix _scratch_mkfs_sized() for btrfs
+Date: Tue, 25 Sep 2018 12:24:13 +0800
+Message-Id: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <guaneryu@gmail.com>, Eric Sandeen <sandeen@sandeen.net>, Dave Chinner <david@fromorbit.com>
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Running tests on hfsplus requires patched versions of the mkfs and fsck
-tools [1] that support filesystems smaller than the device.
+v1->v2: Fix the min size for _scratch_mkfs_sized() to 256MB for btrfs and
+         add comment about its ref.
+	Fix _scratch_mkfs_sized() options to use at least 256MB in each
+	 test case.
+        Update change long.
 
-[1] https://github.com/eafer/hfsprogs-linux.git
+Currently _scratch_mkfs_sized() checks if the requested size is below 1G
+for btrfs and forces the --mixed mkfs option. The 1G size cut off is too
+larger where the actual size is ~256mb. The patch 1/9 fixes the
+_scratch_mkfs_sized() to check for 256mb instead.
 
-Signed-off-by: Ernesto A. Fern=C3=A1ndez <ernesto.mnd.fernandez@gmail.com=
->
----
- common/config | 10 ++++++++++
- common/rc     | 15 ++++++++++++++-
- 2 files changed, 24 insertions(+), 1 deletion(-)
+Also fix the test cases requesting to create FS below 256mb. And open
+code the fssize computation where possible (that is the variable used
+is only used once).
 
-diff --git a/common/config b/common/config
-index 1ba8d96c..315f8b1e 100644
---- a/common/config
-+++ b/common/config
-@@ -229,6 +229,7 @@ case "$HOSTOS" in
- 	export MKFS_CIFS_PROG=3D"false"
- 	export MKFS_OVERLAY_PROG=3D"false"
- 	export MKFS_REISER4_PROG=3D$(type -P mkfs.reiser4)
-+	export MKFS_HFSPLUS_PROG=3D$(type -P mkfs.hfsplus)
- 	export E2FSCK_PROG=3D$(type -P e2fsck)
- 	export TUNE2FS_PROG=3D$(type -P tune2fs)
- 	export FSCK_OVERLAY_PROG=3D$(type -P fsck.overlay)
-@@ -313,6 +314,9 @@ _mount_opts()
- 	ubifs)
- 		export MOUNT_OPTIONS=3D$UBIFS_MOUNT_OPTIONS
- 		;;
-+	hfsplus)
-+		export MOUNT_OPTIONS=3D$HFSPLUS_MOUNT_OPTIONS
-+		;;
- 	*)
- 		;;
- 	esac
-@@ -380,6 +384,9 @@ _mkfs_opts()
- 	f2fs)
- 		export MKFS_OPTIONS=3D"$F2FS_MKFS_OPTIONS"
- 		;;
-+	hfsplus)
-+		export MKFS_OPTIONS=3D$HFSPLUS_MKFS_OPTIONS
-+		;;
- 	*)
- 		;;
- 	esac
-@@ -397,6 +404,9 @@ _fsck_opts()
- 	f2fs)
- 		export FSCK_OPTIONS=3D""
- 		;;
-+	hfsplus)
-+		export FSCK_OPTIONS=3D"-nX"
-+		;;
- 	*)
- 		export FSCK_OPTIONS=3D"-n"
- 		;;
-diff --git a/common/rc b/common/rc
-index d5bb1fee..a843e9f6 100644
---- a/common/rc
-+++ b/common/rc
-@@ -158,6 +158,12 @@ case "$FSTYP" in
-     ubifs)
- 	[ "$UBIUPDATEVOL_PROG" =3D "" ] && _fatal "ubiupdatevol not found"
- 	;;
-+    hfsplus)
-+	[ "$MKFS_HFSPLUS_PROG" =3D "" ] && _fatal "mkfs.hfsplus not found"
-+	mkfs.hfsplus -X |& grep "invalid" &&
-+		_fatal "A patched version of mkfs.hfsplus is required:" \
-+		       "https://github.com/eafer/hfsprogs-linux.git"
-+	;;
- esac
-=20
- if [ ! -z "$REPORT_LIST" ]; then
-@@ -746,6 +752,10 @@ _scratch_mkfs()
- 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter=3D"grep -v -e ^mkfs\.ocfs2"
- 		;;
-+	hfsplus)
-+		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP -- -X"
-+		mkfs_filter=3D"cat"
-+		;;
- 	*)
- 		mkfs_cmd=3D"yes | $MKFS_PROG -t $FSTYP --"
- 		mkfs_filter=3D"cat"
-@@ -995,6 +1005,9 @@ _scratch_mkfs_sized()
- 	fi
- 	export MOUNT_OPTIONS=3D"-o size=3D$fssize $TMPFS_MOUNT_OPTIONS"
- 	;;
-+    hfsplus)
-+	${MKFS_PROG}.$FSTYP $MKFS_OPTIONS -X $fssize -b $blocksize $SCRATCH_DEV
-+	;;
-     *)
- 	_notrun "Filesystem $FSTYP not supported in _scratch_mkfs_sized"
- 	;;
-@@ -3055,7 +3068,7 @@ _require_metadata_journaling()
- 	fi
-=20
- 	case "$FSTYP" in
--	ext2|vfat|msdos|udf)
-+	ext2|vfat|msdos|udf|hfsplus)
- 		_notrun "$FSTYP does not support metadata journaling"
- 		;;
- 	ext4)
---=20
-2.11.0
+Further, there are test cases generic/250,252,256,416 which uses
+_scratch_mkfs_sized with < 200mb but its fix isn't straight forward
+and they are not yet ready for the review.
+
+The affected testcases (which calls _scratch_mkfs_sized) [1] have
+been tested on btrfs. And the test cases [2] which are being patches
+here are tested on xfs ext4 and btrfs for no regression.
+
+[1]
+generic/015 generic/027 generic/077 generic/081 generic/083 generic/085 generic/096 generic/102 generic/171 generic/172 generic/173 generic/174 generic/204 generic/224 generic/226 generic/250 generic/252 generic/256 generic/269 generic/270 generic/273 generic/274 generic/275 generic/300 generic/312 generic/320 generic/333 generic/334 generic/361 generic/371 generic/387 generic/399 generic/416 generic/427 generic/449 generic/459 generic/466 generic/488 generic/505 btrfs/004 btrfs/007 btrfs/132 btrfs/170
+
+[2]
+generic/015 generic/077 generic/083 generic/387 generic/449
+
+Anand Jain (9):
+  fstests: btrfs: _scratch_mkfs_sized fix min size without mixed option
+  generic/015 fix to test the default non-mixed mode
+  geneirc/077 fix min size for btrfs
+  generic/083 fix btrfs fs size for default mode
+  generic/102 open code dev_size _scratch_mkfs_sized()
+  generic/204 open code SIZE for _scratch_mkfs_sized()
+  generic/312 open code fs_size _scratch_mkfs_sized()
+  generic/449 fix fs size for _scratch_mkfs_sized for btrfs
+  generic/387 fix _scratch_mkfs_sized option for btrfs
+
+ common/rc         | 4 +++-
+ tests/generic/015 | 8 +++-----
+ tests/generic/077 | 3 +--
+ tests/generic/083 | 2 +-
+ tests/generic/102 | 3 +--
+ tests/generic/204 | 3 +--
+ tests/generic/312 | 7 +++----
+ tests/generic/387 | 3 ++-
+ tests/generic/449 | 4 ++--
+ 9 files changed, 17 insertions(+), 20 deletions(-)
+
+-- 
+1.8.3.1
