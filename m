@@ -1,11 +1,11 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:51046 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727504AbeIYKaK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 06:30:10 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:49800 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727823AbeIYKaM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 06:30:12 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2 2/9] generic/015 fix to test the default non-mixed mode
-Date: Tue, 25 Sep 2018 12:24:15 +0800
-Message-Id: <1537849462-619-3-git-send-email-anand.jain@oracle.com>
+Subject: [PATCH v2 4/9] generic/083 fix btrfs fs size for default mode
+Date: Tue, 25 Sep 2018 12:24:17 +0800
+Message-Id: <1537849462-619-5-git-send-email-anand.jain@oracle.com>
 In-Reply-To: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
 References: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,44 +13,25 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-commit 97575acd7495 (generic/015: Change the test filesystem size to
-101mb), created 101mb FS instead of 100mb FS to make sure we create
-a FS which is non mixed mode.
-
-btrfs-progs commit 18e2663db3e1 (btrfs-progs: Add minimum device size
-check) added a more accurate minimum required space to create the btrfs
-FS in non mixed mode depending on the group profile, and considering
-any group profiles we would need at least 256MB (with upward round off).
-
-So this patch changes the FS size to be created by _scratch_sized_mkfs()
-to 256MB so that we create the FS in non mixed mode for any group
-profile.
-
-Mixed blockgroup can be tested using the MKFS_OPTIONS explicitly.
+btrfs needs at least 256mb to create a FS with the defaults options.
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/generic/015 | 8 +++-----
- 1 file changed, 3 insertions(+), 5 deletions(-)
+ tests/generic/083 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/generic/015 b/tests/generic/015
-index 0f4d29800f4f..e6c8d7c37c07 100755
---- a/tests/generic/015
-+++ b/tests/generic/015
-@@ -37,11 +37,9 @@ _supported_os Linux
- _require_scratch
- _require_no_large_scratch_dev
+diff --git a/tests/generic/083 b/tests/generic/083
+index 63d96ba2ab88..eabff02a36eb 100755
+--- a/tests/generic/083
++++ b/tests/generic/083
+@@ -71,7 +71,7 @@ workout()
  
--# With filesystems less than 100mb btrfs is created in mixed mode
--# which can lead to slight accounting errors of 1mb. Having the
--# fs be at least 101 mb ensures those errors are within the error
--# tolerance of 1%
--_scratch_mkfs_sized `expr 101 \* 1024 \* 1024` >/dev/null 2>&1 \
-+# btrfs needs at least 256MB (with upward round off) to create a non-mixed mode
-+# fs. Ref: btrfs-progs: btrfs_min_dev_size()
-+_scratch_mkfs_sized $((256 * 1024 * 1024)) >> $seqres.full 2>&1 \
-     || _fail "mkfs failed"
- _scratch_mount
- out=$SCRATCH_MNT/fillup.$$
+ echo "*** test out-of-space handling for random write operations"
+ 
+-filesize=`expr 100 \* 1024 \* 1024`
++filesize=`expr 256 \* 1024 \* 1024`
+ agcount=6
+ numprocs=15
+ numops=1500
 -- 
 1.8.3.1
