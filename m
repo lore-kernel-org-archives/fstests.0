@@ -1,11 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49816 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:49764 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727823AbeIYKaO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 06:30:14 -0400
+        with ESMTP id S1727823AbeIYKaK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Sep 2018 06:30:10 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2 5/9] generic/102 open code dev_size _scratch_mkfs_sized()
-Date: Tue, 25 Sep 2018 12:24:18 +0800
-Message-Id: <1537849462-619-6-git-send-email-anand.jain@oracle.com>
+Subject: [PATCH v2 3/9] geneirc/077 fix min size for btrfs
+Date: Tue, 25 Sep 2018 12:24:16 +0800
+Message-Id: <1537849462-619-4-git-send-email-anand.jain@oracle.com>
 In-Reply-To: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
 References: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,27 +13,27 @@ To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Open code helps to grep and find out parameter sent to the
-_scratch_mkfs_sized here.
+If btrfs need to be tested at its default blockgroup which is non-mixed,
+then it needs at least 256mb.
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/generic/102 | 3 +--
+ tests/generic/077 | 3 +--
  1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/tests/generic/102 b/tests/generic/102
-index faf940ac5070..aad496a5bc69 100755
---- a/tests/generic/102
-+++ b/tests/generic/102
-@@ -31,8 +31,7 @@ _require_scratch
- 
- rm -f $seqres.full
- 
--dev_size=$((512 * 1024 * 1024))     # 512MB filesystem
--_scratch_mkfs_sized $dev_size >>$seqres.full 2>&1
-+_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
+diff --git a/tests/generic/077 b/tests/generic/077
+index ef6af18c83e3..ec236992513f 100755
+--- a/tests/generic/077
++++ b/tests/generic/077
+@@ -49,8 +49,7 @@ rm -f $seqres.full
+ _scratch_unmount >/dev/null 2>&1
+ echo "*** MKFS ***"                         >>$seqres.full
+ echo ""                                     >>$seqres.full
+-SIZE=`expr 50 \* 1024 \* 1024`
+-_scratch_mkfs_sized $SIZE                   >>$seqres.full 2>&1 \
++_scratch_mkfs_sized $((256 * 1024 *1024))   >>$seqres.full 2>&1 \
+ 	|| _fail "mkfs failed"
  _scratch_mount
- 
- for ((i = 0; i < 10; i++)); do
+ mkdir $SCRATCH_MNT/subdir
 -- 
 1.8.3.1
