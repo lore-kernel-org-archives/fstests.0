@@ -1,47 +1,72 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:59064 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726355AbeIZGX1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Sep 2018 02:23:27 -0400
-Date: Tue, 25 Sep 2018 17:13:19 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/270: allow corrupted xfs_db write
-Message-ID: <20180926001319.GB4594@magnolia>
-References: <a2a62573-efd2-f3f6-b986-029bb691372d@redhat.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:59670 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726062AbeIZKSt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 26 Sep 2018 06:18:49 -0400
+Subject: Re: [PATCH v2 1/9] fstests: btrfs: _scratch_mkfs_sized fix min size
+ without mixed option
+References: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
+ <1537849462-619-2-git-send-email-anand.jain@oracle.com>
+ <b054a402-0507-4990-6752-8d75b02a97ed@suse.com>
+From: Anand Jain <anand.jain@oracle.com>
+Message-ID: <68c6443f-6d2b-ba3a-40e1-994fa5ee32e3@oracle.com>
+Date: Wed, 26 Sep 2018 12:07:43 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <a2a62573-efd2-f3f6-b986-029bb691372d@redhat.com>
+In-Reply-To: <b054a402-0507-4990-6752-8d75b02a97ed@suse.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Omar Sandoval <osandov@osandov.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 25, 2018 at 01:16:16PM -0500, Eric Sandeen wrote:
-> Upcoming verifiers treat the unknown ro_compat flag written via xfs_db
-> as corruption, so use the -d flag to allow it, and filter our the
-> resulting informational message.
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 
-Looks ok,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
---D
+On 09/25/2018 06:51 PM, Nikolay Borisov wrote:
+> 
+> 
+> On 25.09.2018 07:24, Anand Jain wrote:
+>> As of now _scratch_mkfs_sized() checks if the requested size is below 1G
+>> and forces the --mixed option for the mkfs.btrfs. Well the correct size
+>> considering all possible group profiles at which we need to force the
+>> mixed option is roughly 256Mbytes. So fix that.
+>>
+>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> 
+> Have you considered the implications of this w.r.t commit
+> d4da414a9a9d ("common/rc: raise btrfs mixed mode threshold to 1GB")
+ >
+> Initially this threshold was 100mb then Omar changed it to 1g. Does this
+> change affect generic/427?
 
-> ---
+d4da414a9a9d does not explain what was the problem that Omar wanted to 
+address, mainly what was the failure about.
+
+And no it does not affect. I have verified generic/427 with kernel 4.1 
+and 4.19-rc5 with  btrfs-progs 4.1, 4.9 and latest from kdave they all 
+run fine. Good to integrate.
+
+Thanks, Anand
+
 > 
-> diff --git a/tests/xfs/270 b/tests/xfs/270
-> index d5c8df19..da66bc33 100755
-> --- a/tests/xfs/270
-> +++ b/tests/xfs/270
-> @@ -44,7 +44,8 @@ _scratch_mkfs_xfs >>$seqres.full 2>&1
->  # set the highest bit of features_ro_compat, use it as an unknown
->  # feature bit. If one day this bit become known feature, please
->  # change this case.
-> -$XFS_DB_PROG -x -c "sb 0" -c "write features_ro_compat $((2**31))" $SCRATCH_DEV
-> +$XFS_DB_PROG -x -c "sb 0" -c "write -d features_ro_compat $((2**31))" \
-> +	$SCRATCH_DEV | grep -v "Allowing write of corrupted data"
->  
->  # rw mount with unknown ro-compat feature should fail
->  echo "rw mount test"
-> 
+>> ---
+>>   common/rc | 5 ++++-
+>>   1 file changed, 4 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index d5bb1feee2c3..90dc3002bc3d 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -969,7 +969,10 @@ _scratch_mkfs_sized()
+>>   	;;
+>>       btrfs)
+>>   	local mixed_opt=
+>> -	(( fssize <= 1024 * 1024 * 1024 )) && mixed_opt='--mixed'
+>> +	# minimum size that's needed without the mixed option.
+>> +	# Ref: btrfs-prog: btrfs_min_dev_size()
+>> +	# Non mixed mode is also the default option.
+>> +	(( fssize < $((256 * 1024 *1024)) )) && mixed_opt='--mixed'
+>>   	$MKFS_BTRFS_PROG $MKFS_OPTIONS $mixed_opt -b $fssize $SCRATCH_DEV
+>>   	;;
+>>       jfs)
+>>
