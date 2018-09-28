@@ -1,162 +1,137 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:47840 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727349AbeI1VUG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Sep 2018 17:20:06 -0400
-Subject: Re: [PATCH] test unaligned punch hole at ENOSPC
-References: <1537789659-29460-1-git-send-email-anand.jain@oracle.com>
- <20180928124249.GH17817@desktop>
+Received: from userp2120.oracle.com ([156.151.31.85]:58700 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726345AbeI1VYn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Sep 2018 17:24:43 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <1296c326-9451-6c73-2c18-ffcc6db8599b@oracle.com>
-Date: Fri, 28 Sep 2018 22:55:30 +0800
-MIME-Version: 1.0
-In-Reply-To: <20180928124249.GH17817@desktop>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Subject: [PATCH v4] test unaligned punch hole at ENOSPC
+Date: Fri, 28 Sep 2018 22:59:59 +0800
+Message-Id: <1538146799-2085-1-git-send-email-anand.jain@oracle.com>
+In-Reply-To: <1538146248-1759-1-git-send-email-anand.jain@oracle.com>
+References: <1538146248-1759-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Try to punch hole with unaligned size and offset when the FS
+returns ENOSPC
 
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v3->v4:
+ add to the group punch
+v2->v3:
+ add _require_xfs_io_command "fpunch"
+ add more logs to $seqfull.full
+   mount options and
+   group profile info
+ add sync after dd upto ENOSPC
+ drop fallocate -p and use xfs_io punch to create holes
+v1->v2: Use at least 256MB to test.
+This test case fails on btrfs as of now.
+ tests/btrfs/172     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/172.out |  2 ++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/btrfs/172
+ create mode 100644 tests/btrfs/172.out
 
-Oops I just realized I sent v2 only to linux-btrfs@vger.kernel.org.
-more below..
-
-On 09/28/2018 08:42 PM, Eryu Guan wrote:
-> On Mon, Sep 24, 2018 at 07:47:39PM +0800, Anand Jain wrote:
->> Try to punch hole with unaligned size and offset when the FS
->> returns ENOSPC
->>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->> This test case fails on btrfs as of now.
->>
->>   tests/btrfs/172     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->>   tests/btrfs/172.out |  2 ++
->>   tests/btrfs/group   |  1 +
->>   3 files changed, 69 insertions(+)
->>   create mode 100755 tests/btrfs/172
->>   create mode 100644 tests/btrfs/172.out
->>
->> diff --git a/tests/btrfs/172 b/tests/btrfs/172
->> new file mode 100755
->> index 000000000000..9c32a173f912
->> --- /dev/null
->> +++ b/tests/btrfs/172
->> @@ -0,0 +1,66 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2018 Oracle. All Rights Reserved.
->> +#
->> +# FS QA Test 172
->> +#
->> +# Test if the unaligned (by size and offset) punch hole is successful when FS
->> +# is at ENOSPC.
->> +#
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=`pwd`
->> +tmp=/tmp/$$
->> +status=1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs generic
->> +_supported_os Linux
->> +_require_scratch
->> +
->> +_scratch_mkfs_sized $((200 * 1024 *1024)) >> $seqres.full
->> +
->> +# max_inline helps to create regular extent
->> +_scratch_mount "-o max_inline=0,nodatacow"
->> +
->> +echo "Fill fs upto ENOSPC" >> $seqres.full
->> +dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
->> +
->> +extent_size=$(_scratch_btrfs_sectorsize)
->> +unalign_by=512
->> +echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
->> +
->> +hole_offset=0
->> +hole_len=$unalign_by
->> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
-> 
-> Please don't introduce new run_check/_run_btrfs_util_prog users, just
-> redirect output to /dev/null if the outputs don't matter. Please refer
-> to this thread
-
-Fixed in v3.
-
-> https://www.spinics.net/lists/linux-btrfs/msg80996.html
-
-
-> And use xfs_io fpunch command instead of bare 'fallocate -p', and check
-> xfs_io and kernel support on fpunch by calling
-
-> _require_xfs_io_comand "fpunch"
-
-Fixed in v3.
-
->> +
->> +hole_offset=$(($extent_size + $unalign_by))
->> +hole_len=$(($extent_size - $unalign_by))
->> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
->> +
->> +hole_offset=$(($extent_size * 2 + $unalign_by))
->> +hole_len=$(($extent_size * 5))
->> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
->> +
->> +# success, all done
->> +echo "Silence is golden"
->> +status=0
->> +exit
->> diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
->> new file mode 100644
->> index 000000000000..ce2de3f0d107
->> --- /dev/null
->> +++ b/tests/btrfs/172.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 172
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index feffc45b6564..7e1a638ab7e1 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -174,3 +174,4 @@
->>   169 auto quick send
->>   170 auto quick snapshot
->>   171 auto quick qgroup
->> +172 auto quick
-> 
-> Add 'punch' group too.
-
-Ah there is punch group..  I was searching with the key word 'hole'.
-Will fix in v4.
-
-Thanks, Anand
-
-
-> Thanks,
-> Eryu
-> 
->> -- 
->> 1.8.3.1
->>
+diff --git a/tests/btrfs/172 b/tests/btrfs/172
+new file mode 100755
+index 000000000000..59413a5de12f
+--- /dev/null
++++ b/tests/btrfs/172
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Oracle. All Rights Reserved.
++#
++# FS QA Test 172
++#
++# Test if the unaligned (by size and offset) punch hole is successful when FS
++# is at ENOSPC.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "fpunch"
++
++_scratch_mkfs_sized $((256 * 1024 *1024)) >> $seqres.full
++
++# max_inline helps to create regular extent
++_scratch_mount "-o max_inline=0,nodatacow"
++
++cat /proc/self/mounts | grep $SCRATCH_DEV >> $seqres.full
++$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
++
++extent_size=$(_scratch_btrfs_sectorsize)
++unalign_by=512
++echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
++
++$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 $((extent_size * 10))" \
++					$SCRATCH_MNT/testfile >> $seqres.full
++
++echo "Fill fs upto ENOSPC" >> $seqres.full
++dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
++sync
++
++hole_offset=0
++hole_len=$unalign_by
++$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
++
++hole_offset=$(($extent_size + $unalign_by))
++hole_len=$(($extent_size - $unalign_by))
++$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
++
++hole_offset=$(($extent_size * 2 + $unalign_by))
++hole_len=$(($extent_size * 5))
++$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
++
++# success, all done
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
+new file mode 100644
+index 000000000000..ce2de3f0d107
+--- /dev/null
++++ b/tests/btrfs/172.out
+@@ -0,0 +1,2 @@
++QA output created by 172
++Silence is golden
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index feffc45b6564..45782565c3b7 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -174,3 +174,4 @@
+ 169 auto quick send
+ 170 auto quick snapshot
+ 171 auto quick qgroup
++172 auto quick punch
+-- 
+1.8.3.1
