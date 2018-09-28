@@ -1,34 +1,143 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:45581 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726971AbeI1SwF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Sep 2018 14:52:05 -0400
-Received: by mail-pg1-f194.google.com with SMTP id t70-v6so4353998pgd.12
-        for <fstests@vger.kernel.org>; Fri, 28 Sep 2018 05:28:32 -0700 (PDT)
-Date: Fri, 28 Sep 2018 20:28:23 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:35393 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726068AbeI1TGd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Sep 2018 15:06:33 -0400
+Date: Fri, 28 Sep 2018 20:42:49 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic: add a testcase to test uid/gid recovery
-Message-ID: <20180928122823.GG17817@desktop>
-References: <20180925084558.77190-1-yuchao0@huawei.com>
- <ab6235fd-ea62-59d4-246c-9b73bc3983f3@huawei.com>
+Subject: Re: [PATCH] test unaligned punch hole at ENOSPC
+Message-ID: <20180928124249.GH17817@desktop>
+References: <1537789659-29460-1-git-send-email-anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <ab6235fd-ea62-59d4-246c-9b73bc3983f3@huawei.com>
+In-Reply-To: <1537789659-29460-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chao Yu <yuchao0@huawei.com>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 25, 2018 at 05:16:31PM +0800, Chao Yu wrote:
-> Hi Eryu,
+On Mon, Sep 24, 2018 at 07:47:39PM +0800, Anand Jain wrote:
+> Try to punch hole with unaligned size and offset when the FS
+> returns ENOSPC
 > 
-> There are several fields in inode rather than uid/gid didn't recover in
-> f2fs, I'm not sure we need to cover all of them with one generic testcase,
-> or with several testcases. Any suggestion?
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+> This test case fails on btrfs as of now.
+> 
+>  tests/btrfs/172     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/172.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 69 insertions(+)
+>  create mode 100755 tests/btrfs/172
+>  create mode 100644 tests/btrfs/172.out
+> 
+> diff --git a/tests/btrfs/172 b/tests/btrfs/172
+> new file mode 100755
+> index 000000000000..9c32a173f912
+> --- /dev/null
+> +++ b/tests/btrfs/172
+> @@ -0,0 +1,66 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 172
+> +#
+> +# Test if the unaligned (by size and offset) punch hole is successful when FS
+> +# is at ENOSPC.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +_scratch_mkfs_sized $((200 * 1024 *1024)) >> $seqres.full
+> +
+> +# max_inline helps to create regular extent
+> +_scratch_mount "-o max_inline=0,nodatacow"
+> +
+> +echo "Fill fs upto ENOSPC" >> $seqres.full
+> +dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
+> +
+> +extent_size=$(_scratch_btrfs_sectorsize)
+> +unalign_by=512
+> +echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
+> +
+> +hole_offset=0
+> +hole_len=$unalign_by
+> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
 
-Sorry for the late response!
+Please don't introduce new run_check/_run_btrfs_util_prog users, just
+redirect output to /dev/null if the outputs don't matter. Please refer
+to this thread
 
-Several targeted test cases would be fine.
+https://www.spinics.net/lists/linux-btrfs/msg80996.html
+
+And use xfs_io fpunch command instead of bare 'fallocate -p', and check
+xfs_io and kernel support on fpunch by calling
+
+_require_xfs_io_comand "fpunch"
+
+> +
+> +hole_offset=$(($extent_size + $unalign_by))
+> +hole_len=$(($extent_size - $unalign_by))
+> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
+> +
+> +hole_offset=$(($extent_size * 2 + $unalign_by))
+> +hole_len=$(($extent_size * 5))
+> +run_check fallocate -p -o $hole_offset -l $hole_len $SCRATCH_MNT/filler
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
+> new file mode 100644
+> index 000000000000..ce2de3f0d107
+> --- /dev/null
+> +++ b/tests/btrfs/172.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 172
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index feffc45b6564..7e1a638ab7e1 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -174,3 +174,4 @@
+>  169 auto quick send
+>  170 auto quick snapshot
+>  171 auto quick qgroup
+> +172 auto quick
+
+Add 'punch' group too.
 
 Thanks,
 Eryu
+
+> -- 
+> 1.8.3.1
+> 
