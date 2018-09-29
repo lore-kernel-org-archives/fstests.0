@@ -1,154 +1,185 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:60520 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727319AbeI2HRz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 29 Sep 2018 03:17:55 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v5] test unaligned punch hole at ENOSPC
-Date: Sat, 29 Sep 2018 08:51:27 +0800
-Message-Id: <1538182287-9297-1-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1538146248-1759-1-git-send-email-anand.jain@oracle.com>
-References: <1538146248-1759-1-git-send-email-anand.jain@oracle.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:59022 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727393AbeI2MYI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 29 Sep 2018 08:24:08 -0400
+Subject: Re: [PATCH] generic: add a testcase to test uid/gid recovery
+References: <20180925084558.77190-1-yuchao0@huawei.com>
+ <20180928122622.GF17817@desktop>
+From: Chao Yu <yuchao0@huawei.com>
+Message-ID: <01a8d829-4dda-962a-9d9b-b7056f6b2166@huawei.com>
+Date: Sat, 29 Sep 2018 13:56:56 +0800
+MIME-Version: 1.0
+In-Reply-To: <20180928122622.GF17817@desktop>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-Try to punch hole with unaligned size and offset when the FS is
-full. Mainly holes are punched at locations which are unaligned
-with the file extent boundaries when the FS is full by data.
-As the punching holes at unaligned location will involve
-truncating blocks instead of just dropping the extents, it shall
-involve reserving data and metadata space for delalloc and data
-alloc fails as the FS is full.
+On 2018/9/28 20:26, Eryu Guan wrote:
+> On Tue, Sep 25, 2018 at 04:45:58PM +0800, Chao Yu wrote:
+>> After fsync, filesystem should guarantee inode metadata including
+>> uid/gid being persisted, so even after sudden power-cut, durign
+>> mount, we should recover uid/gid fields correctly, in order to not
+>> loss those meta info.
+>>
+>> So adding this testcase to check whether generic filesystem can
+>> guarantee that.
+>>
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+> 
+> Looks good to me. Just two minor issues inline, and I'll just fix them
+> on commit.
+> 
+>> ---
+>>  tests/generic/505     | 95 +++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/505.out |  2 +
+>>  tests/generic/group   |  1 +
+>>  3 files changed, 98 insertions(+)
+>>  create mode 100755 tests/generic/505
+>>  create mode 100644 tests/generic/505.out
+>>
+>> diff --git a/tests/generic/505 b/tests/generic/505
+>> new file mode 100755
+>> index 000000000000..103a1e9bbe47
+>> --- /dev/null
+>> +++ b/tests/generic/505
+>> @@ -0,0 +1,95 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2018 Huawei.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 505
+>> +#
+>> +# This testcase is trying to test recovery flow of generic filesystem, w/ below
+>> +# steps, once uid or gid changes, after we fsync that file, we can expect that
+>> +# uid/gid can be recovered after sudden power-cuts.
+>> +# 1. touch testfile;
+>> +# 1.1 sync (optional)
+>> +# 2. chown 100 testfile;
+>> +# 3. chgrp 100 testfile;
+>> +# 4. xfs_io -f testfile -c "fsync";
+>> +# 5. godown;
+>> +# 6. umount;
+>> +# 7. mount;
+>> +# 8. check uid/gid
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +
+>> +_require_scratch
+>> +_require_scratch_shutdown
+>> +
+>> +_scratch_mkfs >/dev/null 2>&1
+>> +_require_metadata_journaling $SCRATCH_DEV
+>> +
+>> +testfile=$SCRATCH_MNT/testfile
+>> +stat_opt='-c "uid: %u, gid: %g"'
+>> +
+>> +_do_check()
+> 
+> Name local functions without the leading underscore, which usually
+> indicates it's a global helper function.
 
-btrfs_punch_hole()
- btrfs_truncate_block()
-   btrfs_check_data_free_space() <-- ENOSPC
+Okay.
 
-We don't fail punch hole if the holes are aligned with the file
-extent boundaries as it shall involve just dropping the related
-extents.
+> 
+>> +{
+>> +	_scratch_mount
+>> +
+>> +	touch $testfile
+>> +
+>> +	if [ "$1" == "sync" ]; then
+>> +		sync
+>> +	fi
+>> +
+>> +	chown 100 $testfile
+>> +	chgrp 100 $testfile
+>> +
+>> +	before=`stat "$stat_opt" $testfile`
+>> +
+>> +	$XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+>> +
+>> +	_scratch_shutdown | tee -a $seqres.full
+>> +	_scratch_unmount
+>> +	_scratch_mount
+> 
+> _scratch_cycle_mount
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-v4->v5:
- Update the change log
- Drop the directio option for xfs_io
-v3->v4:
- Add to the group punch
-v2->v3:
- Add _require_xfs_io_command "fpunch"
- Add more logs to $seqfull.full
-   mount options and
-   group profile info
- Add sync after dd upto ENOSPC
- Drop fallocate -p and use xfs_io punch to create holes
- Use a testfile instead of filler file so that easy to trace
-v1->v2: Use at least 256MB to test.
-This test case fails on btrfs as of now.
- tests/btrfs/172     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/172.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 77 insertions(+)
- create mode 100755 tests/btrfs/172
- create mode 100644 tests/btrfs/172.out
+Yes, that's more clean, thanks. :)
 
-diff --git a/tests/btrfs/172 b/tests/btrfs/172
-new file mode 100755
-index 000000000000..1ecf01d862a2
---- /dev/null
-+++ b/tests/btrfs/172
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle. All Rights Reserved.
-+#
-+# FS QA Test 172
-+#
-+# Test if the unaligned (by size and offset) punch hole is successful when FS
-+# is at ENOSPC.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fpunch"
-+
-+_scratch_mkfs_sized $((256 * 1024 *1024)) >> $seqres.full
-+
-+# max_inline helps to create regular extent
-+_scratch_mount "-o max_inline=0,nodatacow"
-+
-+cat /proc/self/mounts | grep $SCRATCH_DEV >> $seqres.full
-+$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
-+
-+extent_size=$(_scratch_btrfs_sectorsize)
-+unalign_by=512
-+echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
-+
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 0 $((extent_size * 10))" \
-+					$SCRATCH_MNT/testfile >> $seqres.full
-+
-+echo "Fill fs upto ENOSPC" >> $seqres.full
-+dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
-+sync
-+
-+hole_offset=0
-+hole_len=$unalign_by
-+$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-+
-+hole_offset=$(($extent_size + $unalign_by))
-+hole_len=$(($extent_size - $unalign_by))
-+$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-+
-+hole_offset=$(($extent_size * 2 + $unalign_by))
-+hole_len=$(($extent_size * 5))
-+$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-+
-+# success, all done
-+echo "Silence is golden"
-+status=0
-+exit
-diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
-new file mode 100644
-index 000000000000..ce2de3f0d107
---- /dev/null
-+++ b/tests/btrfs/172.out
-@@ -0,0 +1,2 @@
-+QA output created by 172
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index feffc45b6564..45782565c3b7 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -174,3 +174,4 @@
- 169 auto quick send
- 170 auto quick snapshot
- 171 auto quick qgroup
-+172 auto quick punch
--- 
-1.8.3.1
+Thanks,
+
+> 
+> Thanks,
+> Eryu
+> 
+>> +
+>> +	after=`stat "$stat_opt" $testfile`
+>> +
+>> +	# check inode's uid/gid
+>> +	if [ "$before" != "$after" ]; then
+>> +		echo "Before: $before"
+>> +		echo "After : $after"
+>> +	fi
+>> +	echo "Before: $before" >> $seqres.full
+>> +	echo "After : $after" >> $seqres.full
+>> +
+>> +	rm $testfile
+>> +	_scratch_unmount
+>> +}
+>> +
+>> +_do_check
+>> +_do_check sync
+>> +
+>> +status=0
+>> +echo "Silence is golden"
+>> +exit
+>> diff --git a/tests/generic/505.out b/tests/generic/505.out
+>> new file mode 100644
+>> index 000000000000..80e3bd1d9abb
+>> --- /dev/null
+>> +++ b/tests/generic/505.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 505
+>> +Silence is golden
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index 55155de8bc29..4da0e1888f57 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -507,3 +507,4 @@
+>>  502 auto quick log
+>>  503 auto quick dax punch collapse zero
+>>  504 auto quick locks
+>> +505 shutdown auto quick metadata
+>> -- 
+>> 2.18.0.rc1
+>>
+> 
+> .
+> 
