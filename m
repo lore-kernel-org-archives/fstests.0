@@ -1,16 +1,15 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:39402 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726149AbeI3HRw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 Sep 2018 03:17:52 -0400
-Subject: Re: [PATCH v5] test unaligned punch hole at ENOSPC
+Received: from aserp2120.oracle.com ([141.146.126.78]:48440 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725798AbeI3H23 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 Sep 2018 03:28:29 -0400
+Subject: Re: [PATCH v3] test unaligned punch hole at ENOSPC
 References: <1538146248-1759-1-git-send-email-anand.jain@oracle.com>
- <1538182287-9297-1-git-send-email-anand.jain@oracle.com>
- <CAL3q7H5psaV-gXWRykvhvTdV8m7EtZi=O-x4-fepcpS1p7HNpQ@mail.gmail.com>
+ <CAL3q7H4XNMMHwQLdQbvGvxcj=ALqjFJzJi00UFiyA9VV4dKhiw@mail.gmail.com>
 From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <0f198429-f9ab-13d3-2d30-c0a65ee6c8b9@oracle.com>
-Date: Sun, 30 Sep 2018 08:46:31 +0800
+Message-ID: <ab507ac7-6d85-5e93-13da-1522be4fd388@oracle.com>
+Date: Sun, 30 Sep 2018 08:57:16 +0800
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H5psaV-gXWRykvhvTdV8m7EtZi=O-x4-fepcpS1p7HNpQ@mail.gmail.com>
+In-Reply-To: <CAL3q7H4XNMMHwQLdQbvGvxcj=ALqjFJzJi00UFiyA9VV4dKhiw@mail.gmail.com>
 Content-Type: text/plain; charset=utf-8; format=flowed
 Content-Language: en-US
 Content-Transfer-Encoding: 7bit
@@ -21,53 +20,27 @@ List-ID: <fstests@vger.kernel.org>
 
 
 
-On 09/30/2018 12:40 AM, Filipe Manana wrote:
-> On Sat, Sep 29, 2018 at 1:52 AM Anand Jain <anand.jain@oracle.com> wrote:
+On 09/29/2018 01:08 AM, Filipe Manana wrote:
+> On Fri, Sep 28, 2018 at 3:51 PM Anand Jain <anand.jain@oracle.com> wrote:
 >>
->> Try to punch hole with unaligned size and offset when the FS is
->> full. Mainly holes are punched at locations which are unaligned
->> with the file extent boundaries when the FS is full by data.
->> As the punching holes at unaligned location will involve
->> truncating blocks instead of just dropping the extents, it shall
->> involve reserving data and metadata space for delalloc and data
->> alloc fails as the FS is full.
->>
->> btrfs_punch_hole()
->>   btrfs_truncate_block()
->>     btrfs_check_data_free_space() <-- ENOSPC
->>
->> We don't fail punch hole if the holes are aligned with the file
->> extent boundaries as it shall involve just dropping the related
->> extents.
+>> Try to punch hole with unaligned size and offset when the FS
+>> returns ENOSPC
+> 
+> The FS returns ENOSPC is confusing. It's more clear to say when the
+> filesystem doesn't have more space available for data allocation.
 >>
 >> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 >> ---
->> v4->v5:
->>   Update the change log
->>   Drop the directio option for xfs_io
-> 
-> Except for the direct IO and change log, all my previous comments and
-> questions weren't addressed/ answered.
-> Thanks.
-
-Ah. Now I notice there were two emails, I completely missed the other 
-email. Will review. Thanks for pointing out.
-
-Thanks, Anand
-
-
->> v3->v4:
->>   Add to the group punch
 >> v2->v3:
->>   Add _require_xfs_io_command "fpunch"
->>   Add more logs to $seqfull.full
+>>   add _require_xfs_io_command "fpunch"
+>>   add more logs to $seqfull.full
 >>     mount options and
 >>     group profile info
->>   Add sync after dd upto ENOSPC
->>   Drop fallocate -p and use xfs_io punch to create holes
->>   Use a testfile instead of filler file so that easy to trace
+>>   add sync after dd upto ENOSPC
+>>   drop fallocate -p and use xfs_io punch to create holes
 >> v1->v2: Use at least 256MB to test.
 >> This test case fails on btrfs as of now.
+>>
 >>   tests/btrfs/172     | 74 +++++++++++++++++++++++++++++++++++++++++++++++++++++
 >>   tests/btrfs/172.out |  2 ++
 >>   tests/btrfs/group   |  1 +
@@ -77,7 +50,7 @@ Thanks, Anand
 >>
 >> diff --git a/tests/btrfs/172 b/tests/btrfs/172
 >> new file mode 100755
->> index 000000000000..1ecf01d862a2
+>> index 000000000000..59413a5de12f
 >> --- /dev/null
 >> +++ b/tests/btrfs/172
 >> @@ -0,0 +1,74 @@
@@ -123,6 +96,11 @@ Thanks, Anand
 >> +_scratch_mkfs_sized $((256 * 1024 *1024)) >> $seqres.full
 >> +
 >> +# max_inline helps to create regular extent
+> max_inline ensures data is not inlined within metadata extents
+
+  Right. Hmm I saw the term regular extent used some where,
+  so used it here. Looks that wasn't better?
+
 >> +_scratch_mount "-o max_inline=0,nodatacow"
 >> +
 >> +cat /proc/self/mounts | grep $SCRATCH_DEV >> $seqres.full
@@ -132,24 +110,56 @@ Thanks, Anand
 >> +unalign_by=512
 >> +echo extent_size=$extent_size unalign_by=$unalign_by >> $seqres.full
 >> +
->> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 $((extent_size * 10))" \
+>> +$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 $((extent_size * 10))" \
 >> +                                       $SCRATCH_MNT/testfile >> $seqres.full
 >> +
 >> +echo "Fill fs upto ENOSPC" >> $seqres.full
+> Fill all space available for data and all unallocated space.
+
+  Will update comment. (I hope that's what you mean?)
+
 >> +dd status=none if=/dev/zero of=$SCRATCH_MNT/filler bs=512 >> $seqres.full 2>&1
+> Why do you use dd here and not xfs_io?
+
+  What I figured out xfs_io can't write until FS is full, as you need to
+  specify the size for pwrite. OR did I miss something? I see some test
+  cases just specify some arbitrary large number big enough than the FS.
+  I didn't like that approach.
+
 >> +sync
+> Why is the sync needed?
+
+  Yep not needed. Will remove in v6.
+
 >> +
 >> +hole_offset=0
 >> +hole_len=$unalign_by
->> +$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+>> +$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+> 
+> No need to pass -f anymore. No need for -d either.
+
+  Ah. Thanks will fix in v6.
+
 >> +
 >> +hole_offset=$(($extent_size + $unalign_by))
 >> +hole_len=$(($extent_size - $unalign_by))
->> +$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+>> +$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+> 
+> No need to pass -f anymore. No need for -d either.
+
+  Will fix in v6.
+
 >> +
 >> +hole_offset=$(($extent_size * 2 + $unalign_by))
 >> +hole_len=$(($extent_size * 5))
->> +$XFS_IO_PROG -f -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+>> +$XFS_IO_PROG -f -d -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
+> 
+> No need to pass -f anymore. No need for -d either.
+
+  Got it.
+
+Thanks, Anand
+
 >> +
 >> +# success, all done
 >> +echo "Silence is golden"
@@ -164,14 +174,14 @@ Thanks, Anand
 >> +QA output created by 172
 >> +Silence is golden
 >> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index feffc45b6564..45782565c3b7 100644
+>> index feffc45b6564..7e1a638ab7e1 100644
 >> --- a/tests/btrfs/group
 >> +++ b/tests/btrfs/group
 >> @@ -174,3 +174,4 @@
 >>   169 auto quick send
 >>   170 auto quick snapshot
 >>   171 auto quick qgroup
->> +172 auto quick punch
+>> +172 auto quick
 >> --
 >> 1.8.3.1
 >>
