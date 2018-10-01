@@ -1,132 +1,177 @@
-Received: from mail-pg1-f182.google.com ([209.85.215.182]:44202 "EHLO
-        mail-pg1-f182.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728341AbeI3UIA (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 Sep 2018 16:08:00 -0400
-Received: by mail-pg1-f182.google.com with SMTP id g2-v6so7585574pgu.11
-        for <fstests@vger.kernel.org>; Sun, 30 Sep 2018 06:34:56 -0700 (PDT)
-Message-ID: <5bb0d0ff.1c69fb81.f2e79.edf7@mx.google.com>
-Date: Sun, 30 Sep 2018 21:34:45 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 84cbe4d0dddb
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="G2STNHQZSE9B"
-Content-Disposition: inline
+Received: from aserp2120.oracle.com ([141.146.126.78]:39126 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728803AbeJAPG4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 1 Oct 2018 11:06:56 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] verify hardening agaist duplicate fsid
+Date: Mon,  1 Oct 2018 16:29:52 +0800
+Message-Id: <1538382592-1632-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Its not that impossible to imagine that a device OR a btrfs image is
+been copied just by using the dd or the cp command. Which in case both
+the copies of the btrfs will have the same fsid. If on the system with
+automount enabled, the copied FS gets scanned.
 
---G2STNHQZSE9B
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+We have a known bug in btrfs, that we let the device path be changed
+after the device has been mounted. So using this loop hole the new
+copied device would appears as if its mounted immediately after its
+been copied.
 
-Hi all,
+For example:
 
-The master branch of the xfstests repository at:
+Initially.. /dev/mmcblk0p4 is mounted as /
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+mmcblk0     179:0    0 29.2G  0 disk
+|-mmcblk0p4 179:4    0    4G  0 part /
+|-mmcblk0p2 179:2    0  500M  0 part /boot
+|-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+`-mmcblk0p1 179:1    0  256M  0 part /boot/efi
 
-have just been updated. This update mainly pulls in Chandan Rajendra's patches
-to make tests work with 64k block size. These patches has been tested with
-various block size configurations on x86_64 and ppc64 hosts by Chandan, Zorro
-and me, so they should work just fine. Many thanks to Zorro for helping test
-the changes!
+btrfs fi show
+Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+    Total devices 1 FS bytes used 1.40GiB
+    devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
 
-Thanks,
-Eryu
+Copy mmcblk0 to sda
+dd if=/dev/mmcblk0 of=/dev/sda
 
-The new head of the master branch is commit:
+And immediately after the copy completes the change in the device
+superblock is notified which the automount scans using
+btrfs device scan and the new device sda becomes the mounted root
+device.
 
-84cbe4d0dddb generic/108: work with 64k block size
+lsblk
+NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda           8:0    1 14.9G  0 disk
+|-sda4        8:4    1    4G  0 part /
+|-sda2        8:2    1  500M  0 part
+|-sda3        8:3    1  256M  0 part
+`-sda1        8:1    1  256M  0 part
+mmcblk0     179:0    0 29.2G  0 disk
+|-mmcblk0p4 179:4    0    4G  0 part
+|-mmcblk0p2 179:2    0  500M  0 part /boot
+|-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+`-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+btrfs fi show /
+Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+    Total devices 1 FS bytes used 1.40GiB
+    devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
 
-New commits:
+The bug is quite nasty that you can't either unmount /dev/sda4 or
+/dev/mmcblk0p4. And the problem does not get solved until you take
+the sda out of the system on to another system to change its fsid using
+the 'btrfstune -u' command.
 
-Chandan Rajendra (20):
-      [a97909b3f95e] xfs/009: work with 64k block size
-      [05802a3a8a86] xfs/050: Fix "Push past soft inode limit" case
-      [371cf4cf16d1] xfs/050: work with 64k block size
-      [204974ec0733] xfs/074: work with 64k block size
-      [d06c2700b261] xfs/127: work with 64k block size
-      [0e2b99951fa1] xfs/139: work with 64k block size
-      [7a7641063ac3] xfs/140: work with 64k block size
-      [42389505f9ff] xfs/190: work with 64k block size
-      [8758c0065fc4] xfs/299: Fix "Push past soft inode limit" case
-      [dac07d081642] xfs/299: work with 64k block size
-      [8039c7cd3c49] xfs/325: Inject free_extent error after CoW operation
-      [ec6c4e7f857e] generic/102: work with 64k block size
-      [b1180a9f7510] generic/172: work with 64k block size
-      [4ba5b5073556] common/punch: Filter fiemap output by FS block size
-      [b206b62abc1d] generic/177: work with 64k block size
-      [5eb645e8b633] generic/230: work with 64k block size
-      [4f4b89cdf353] generic/235: work with 64k block size
-      [d3a02a6e8a51] generic/459: work with 64k block size
-      [743bd85bfe76] generic/018: to work with 64k block size
-      [84cbe4d0dddb] generic/108: work with 64k block size
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/btrfs/173     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/173.out |  5 ++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 76 insertions(+)
+ create mode 100755 tests/btrfs/173
+ create mode 100644 tests/btrfs/173.out
 
-Chao Yu (1):
-      [c01e04888139] generic: test uid/gid recovery after power failure
-
-Eric Sandeen (1):
-      [9437a0343211] xfs/270: allow corrupted xfs_db write
-
-
-Code Diffstat:
-
- common/punch          | 19 ++++++++---
- tests/generic/018     |  2 +-
- tests/generic/102     |  4 +--
- tests/generic/102.out | 20 +++++------
- tests/generic/108     |  4 +--
- tests/generic/172     |  4 +--
- tests/generic/177     | 20 ++++++-----
- tests/generic/177.out | 23 ++++++++-----
- tests/generic/230     | 23 +++++++------
- tests/generic/230.out | 16 ++++-----
- tests/generic/235     |  2 +-
- tests/generic/235.out |  4 +--
- tests/generic/459     | 14 ++++----
- tests/generic/505     | 94 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/505.out |  2 ++
- tests/generic/group   |  1 +
- tests/xfs/009         | 92 +++++++++++++++++++++++++++++++++++++++++--------
- tests/xfs/009.out     | 66 ++++++++++++++++++------------------
- tests/xfs/050         | 26 +++++++++-----
- tests/xfs/050.out     | 60 ++++++++++++++++----------------
- tests/xfs/074         | 23 ++++++++++---
- tests/xfs/127         |  2 +-
- tests/xfs/139         | 15 ++++----
- tests/xfs/139.out     |  8 +++--
- tests/xfs/140         | 12 ++++---
- tests/xfs/190         | 26 +++++++++-----
- tests/xfs/270         |  3 +-
- tests/xfs/299         | 29 ++++++++++------
- tests/xfs/299.out     | 48 +++++++++++++-------------
- tests/xfs/325         |  5 +--
- tests/xfs/325.out     |  2 +-
- 31 files changed, 451 insertions(+), 218 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---G2STNHQZSE9B
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbsNCGAAoJECZSqilcj+djX0YQAKSmEmCyjfOts6Rstm+WxaSZ
-IKUGtddWH5Q80aEvLDajWCMJkh644RtaUhUJnDzqYchR2BpX9IZnqFbxoWl/byN7
-+GH26PaRvzTkms/8U3tRGa93w7+X3jU/CNt/NhPiAfSKahH2v2Ne67jkTTL0G2WS
-ruQ0Uwv9M3Z/GgGHOc6YGHkXyTocmEnReLCzs+Z6NOlwtGHRzGv+XF3HeiE5X8HS
-4JWcfhS6PPO5VV0NriIn0lDq4BxfX9idc5AUQmtuqNfbEuabTziCno88F4g+JvCl
-Krx5PsBB9flOcEvSOTGc9JbapRNfKCmscBS8loTUm81D4/9wtAQqaiDOAaIsu6n+
-cn0XByeuyGtGzEyJ9zcnIdd4ux0at3OZGb71KuR5TyHLg51g+RUb8xFsGuMmTEav
-e4ou/5E9Y8SvzvYlFfOvmB8X5BeV+sEi72E1eYzsyT4IBvWZZ9zfHonRthhC0+1i
-spsUNfIFhUJaactu1F0kHuBhNtwP5Yn0adpsoeD4WCpHuMAi56j1FXBCx393dazg
-XtFlw4GaaZ3Z0rQVGkewy3846DR8AI3+TP9unu8IYlzNjqTb35xytwRcWpZeC4jF
-QPk39GzrwjCZLTdXf80EFrsmY2jAq0qZiJe6fg6FNoDXv9pdV6kqooRqOHTmG+Hj
-dMMyxeGRIRWZAsT67Q3P
-=jDlT
------END PGP SIGNATURE-----
-
---G2STNHQZSE9B--
+diff --git a/tests/btrfs/173 b/tests/btrfs/173
+new file mode 100755
+index 000000000000..c644b07d6f5b
+--- /dev/null
++++ b/tests/btrfs/173
+@@ -0,0 +1,70 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Oracle. All Rights Reserved.
++#
++# FS QA Test 173
++#
++# Fuzzy test for FS image duplication.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dev_pool 2
++_scratch_dev_pool_get 2
++
++dev_foo=$(echo $SCRATCH_DEV_POOL | awk '{print $1}' | rev | cut -d"/" -f1 | rev)
++dev_bar=$(echo $SCRATCH_DEV_POOL | awk '{print $2}' | rev | cut -d"/" -f1 | rev)
++
++_mkfs_dev /dev/$dev_foo
++_mount /dev/$dev_foo $SCRATCH_MNT
++
++echo mount before btrfs image clone | tee -a $seqres.full
++findmnt /dev/$dev_foo | grep -v TARGET | awk '{print $1" "$2}' | \
++	sed -e "s/$dev_foo/dev_foo/g" | _filter_scratch | tee -a $seqres.full
++findmnt /dev/$dev_bar | grep -v TARGET | awk '{print $1" "$2}' | \
++	sed -e "s/$dev_bar/dev_bar/g" | _filter_scratch | tee -a $seqres.full
++
++for sb_bytenr in 65536 67108864
++do
++	echo -n "dd status=none if=/dev/$dev_foo of=/dev/$dev_bar bs=1 "\
++		"seek=$sb_bytenr skip=$sb_bytenr count=4096" >> $seqres.full
++	dd status=none if=/dev/$dev_foo of=/dev/$dev_bar bs=1 seek=$sb_bytenr \
++				skip=$sb_bytenr count=4096 >> $seqres.full 2>&1
++	echo ..:$? >> $seqres.full
++done
++
++echo mount after btrfs image clone | tee -a $seqres.full
++findmnt /dev/$dev_foo | grep -v TARGET | awk '{print $1" "$2}' | \
++	sed -e "s/$dev_foo/dev_foo/g" | _filter_scratch | tee -a $seqres.full
++findmnt /dev/$dev_bar | grep -v TARGET | awk '{print $1" "$2}' | \
++	sed -e "s/$dev_bar/dev_bar/g" | _filter_scratch | tee -a $seqres.full
++
++_scratch_dev_pool_put
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
+new file mode 100644
+index 000000000000..a2ef7a26f4b9
+--- /dev/null
++++ b/tests/btrfs/173.out
+@@ -0,0 +1,5 @@
++QA output created by 173
++mount before btrfs image clone
++SCRATCH_MNT /dev/dev_foo
++mount after btrfs image clone
++SCRATCH_MNT /dev/dev_foo
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 45782565c3b7..b2f1393f3e97 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -175,3 +175,4 @@
+ 170 auto quick snapshot
+ 171 auto quick qgroup
+ 172 auto quick punch
++173 volume
+-- 
+1.8.3.1
