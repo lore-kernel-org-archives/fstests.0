@@ -1,25 +1,20 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:39126 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728803AbeJAPG4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Oct 2018 11:06:56 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:38874 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728749AbeJAPVn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 1 Oct 2018 11:21:43 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] verify hardening agaist duplicate fsid
-Date: Mon,  1 Oct 2018 16:29:52 +0800
-Message-Id: <1538382592-1632-1-git-send-email-anand.jain@oracle.com>
+Subject: [PATCH] fstests: btrfs verify hardening agaist duplicate fsid
+Date: Mon,  1 Oct 2018 16:44:35 +0800
+Message-Id: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Its not that impossible to imagine that a device OR a btrfs image is
-been copied just by using the dd or the cp command. Which in case both
-the copies of the btrfs will have the same fsid. If on the system with
-automount enabled, the copied FS gets scanned.
-
 We have a known bug in btrfs, that we let the device path be changed
 after the device has been mounted. So using this loop hole the new
 copied device would appears as if its mounted immediately after its
-been copied.
+been copied. So this test case reproduces this issue.
 
 For example:
 
@@ -70,19 +65,19 @@ the 'btrfstune -u' command.
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/btrfs/173     | 70 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/173     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++++
  tests/btrfs/173.out |  5 ++++
  tests/btrfs/group   |  1 +
- 3 files changed, 76 insertions(+)
+ 3 files changed, 78 insertions(+)
  create mode 100755 tests/btrfs/173
  create mode 100644 tests/btrfs/173.out
 
 diff --git a/tests/btrfs/173 b/tests/btrfs/173
 new file mode 100755
-index 000000000000..c644b07d6f5b
+index 000000000000..f59a62e206c3
 --- /dev/null
 +++ b/tests/btrfs/173
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,72 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2018 Oracle. All Rights Reserved.
@@ -90,6 +85,8 @@ index 000000000000..c644b07d6f5b
 +# FS QA Test 173
 +#
 +# Fuzzy test for FS image duplication.
++#  Could be fixed by
++#    [patch] btrfs: harden agaist duplicate fsid
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
