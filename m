@@ -1,172 +1,154 @@
-Received: from imap.thunk.org ([74.207.234.97]:45566 "EHLO imap.thunk.org"
+Received: from mail.kernel.org ([198.145.29.99]:50502 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726852AbeJDKJe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 Oct 2018 06:09:34 -0400
-Date: Wed, 3 Oct 2018 23:18:23 -0400
-From: "Theodore Y. Ts'o" <tytso@mit.edu>
-Subject: Re: [xfstests-bld PATCH] kernel-configs: fix i386 configs
-Message-ID: <20181004031823.GB646@thunk.org>
-References: <20180907010118.234124-1-ebiggers@kernel.org>
-MIME-Version: 1.0
-Content-Type: multipart/mixed; boundary="G4iJoqBmSsgzjUCe"
-Content-Disposition: inline
-In-Reply-To: <20180907010118.234124-1-ebiggers@kernel.org>
+        id S1726735AbeJDL0k (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 4 Oct 2018 07:26:40 -0400
+From: Chao Yu <chao@kernel.org>
+Subject: [PATCH 1/3] generic: test project id recovery after power failure
+Date: Thu,  4 Oct 2018 12:35:00 +0800
+Message-Id: <20181004043502.15005-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: guaneryu@gmail.com, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Chao Yu <yuchao0@huawei.com>
 
---G4iJoqBmSsgzjUCe
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+After fsync, filesystem should guarantee inode metadata including
+project id being persisted, so even after sudden power-cut, during
+mount, we should recover project_id fields correctly, in order to
+not loss those meta info.
 
-On Thu, Sep 06, 2018 at 06:01:18PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> Commit 452331adc6c0 ("kernel-configs: enable virtio_9P and 9P_FS")
-> removed the explicit unsetting of CONFIG_64BIT from some of the i386
-> kconfigs.  So, they actually became x86_64.  Fix it by syncing them back
-> up with the x86_64 configs.  I also added the script I used to do this.
+So adding this testcase to check whether generic filesystem can
+guarantee that.
 
-The explicit "CONFIG_64BIT is not set" is actually not necessary if
-you specify ARCH=i386 in the make command --- and in the latest
-kernel, using ARCH=i386 in the command line is actually required.
-There was a discussion about this on LKML a few months.  I use an
-explicit ARCH=i386 to build 32-bit kernels in my build scripts, since
-it's needed for the latest kernels, and if you use ARCH=i386 in the
-command line, "make savedefconfig" doesn't include the CONFIG_64BIT:
+Signed-off-by: Chao Yu <yuchao0@huawei.com>
+---
+ tests/generic/506     | 97 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/506.out |  2 +
+ tests/generic/group   |  1 +
+ 3 files changed, 100 insertions(+)
+ create mode 100644 tests/generic/506
+ create mode 100644 tests/generic/506.out
 
-% kbuild32 savedefconfig
-make[1]: Entering directory '/build/ext4-3.18'
-  GEN     ./Makefile
-scripts/kconfig/conf --savedefconfig=defconfig Kconfig
-make[1]: Leaving directory '/build/ext4-3.18'
-
-real    0m0.715s
-user    0m0.492s
-sys     0m0.251s
-% grep CONFIG_64BIT /build/ext4-3.18/.config
-# CONFIG_64BIT is not set
-% grep -c CONFIG_64BIT /build/ext4-3.18/defconfig 
-0
-
-... where kbuild32 does:
-
-time nice make O="$BLD_DIR_32" ARCH=i386 -j$N $*
-
-As a result, your script isn't going to actually guarantee the
-CONFIG_64BIT is explicitly unset in the defconfig.  (In fact, I have a
-similar script, called "update-kernel-config" which is in the META
-branch, and I used it to automate the generation of the defconfigs in
-commit 452331adc6c0.  Check out the META branch if you're curious how
-I do my automated build and release.)
-
-Bottom line: depending on the explicit unset of CONFIG_64BIT won't
-work on more modern kernels, so future build scripts will need to
-explicitly use ARCH=i386 in the make command.  (I'll attach my kbuild
-and kbuild32 scripts in case you are interested.)  Still, I don't mind
-adding the explicit unsetting of CONFIG_64BIT to the kernel configs,
-since they are harmless and they will work for the more modern
-kernels.  But the kernel sync scripts will to explicitly add the
-CONFIG_64BIT unset line if it's not there.
-
-Cheers,
-
-					- Ted
-
---G4iJoqBmSsgzjUCe
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: attachment; filename=kbuild32
-
-#!/bin/bash
-
-# N=$(($(getconf _NPROCESSORS_ONLN) / 2))
-N=$(($(getconf _NPROCESSORS_ONLN) * 1))
-
-mkdir -p .git/kbuild
-if test -f .git/kbuild/config ; then
-    . .git/kbuild/config
-elif test -f .git/kbuild.conf ; then
-    . .git/kbuild.conf
-    mv .git/kbuild.conf .git/kbuild/config
-else
-    echo "Missing kbuild configuration file!"
-    exit 1
-fi
-
-if test -z "$BLD_DIR_32" ; then
-   echo "No BLD_DIR_32 directory"
-   exit 1
-fi
-
-if test ! -d "$BLD_DIR_32" ; then
-    mkdir -p "$BLD_DIR_32"
-    if test -f .git/kbuild/kernel-config ; then
-	cp .git/kbuild/kernel-config-32 "$BLD_DIR_32/.config"
-    fi
-    for i in x509.genkey signing_key.pem signing_key.x509
-    do
-	if test -f ".git/kbuild/$i" ; then
-	    mkdir -p "$BLD_DIR_32/certs"
-	    cp ".git/kbuild/$i" "$BLD_DIR_32/certs"
-	fi
-    done
-fi
-
-time nice make O="$BLD_DIR_32" ARCH=i386 -j$N $*
-
-cp "$BLD_DIR_32/.config" .git/kbuild/kernel-config-32
-for i in x509.genkey signing_key.pem signing_key.x509
-do
-    if test -f "$BLD_DIR_32/certs/$i" ; then
-	    cp "$BLD_DIR_32/certs/$i" .git/kbuild
-    fi
-done
-
---G4iJoqBmSsgzjUCe
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: attachment; filename=kbuild
-
-#!/bin/bash
-
-# N=$(($(getconf _NPROCESSORS_ONLN) / 2))
-N=$(($(getconf _NPROCESSORS_ONLN) * 1))
-
-mkdir -p .git/kbuild
-if test -f .git/kbuild/config ; then
-    . .git/kbuild/config
-elif test -f .git/kbuild.conf ; then
-    . .git/kbuild.conf
-    mv .git/kbuild.conf .git/kbuild/config
-else
-    echo "Missing kbuild configuration file!"
-    exit 1
-fi
-
-if test ! -d "$BLD_DIR" ; then
-    mkdir -p "$BLD_DIR"
-    if test -f .git/kbuild/kernel-config ; then
-	cp .git/kbuild/kernel-config "$BLD_DIR/.config"
-    fi
-    for i in x509.genkey signing_key.pem signing_key.x509
-    do
-	if test -f ".git/kbuild/$i" ; then
-	    mkdir -p "$BLD_DIR/certs"
-	    cp ".git/kbuild/$i" "$BLD_DIR/certs"
-	fi
-    done
-fi
-
-time nice make O="$BLD_DIR" ARCH=${KERN_ARCH:-x86_64} -j$N $*
-
-cp "$BLD_DIR/.config" .git/kbuild/kernel-config
-for i in x509.genkey signing_key.pem signing_key.x509
-do
-    if test -f "$BLD_DIR/certs/$i" ; then
-	    cp "$BLD_DIR/certs/$i" .git/kbuild
-    fi
-done
-
-
---G4iJoqBmSsgzjUCe--
+diff --git a/tests/generic/506 b/tests/generic/506
+new file mode 100644
+index 00000000..ca035a91
+--- /dev/null
++++ b/tests/generic/506
+@@ -0,0 +1,97 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Huawei.  All Rights Reserved.
++#
++# FS QA Test 506
++#
++# This testcase is trying to test recovery flow of generic filesystem, w/ below
++# steps, once project id changes, after we fsync that file, we can expect that
++# project id can be recovered after sudden power-cuts.
++# 1. touch testfile;
++# 1.1 sync (optional)
++# 2. chattr -p 100 testfile;
++# 3. xfs_io -f testfile -c "fsync";
++# 4. godown;
++# 5. umount;
++# 6. mount;
++# 7. check project id
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++
++_require_test_lsattr
++_require_command "$CHATTR_PROG" chattr
++
++_require_prjquota $SCRATCH_DEV
++_require_scratch
++_require_scratch_shutdown
++
++_scratch_mkfs >/dev/null 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++
++testfile=$SCRATCH_MNT/testfile
++
++do_check()
++{
++	_scratch_mount
++
++	touch $testfile
++
++	if [ "$1" == "sync" ]; then
++		sync
++	fi
++
++	chattr -p 100 $testfile
++
++	before=`lsattr -p $testfile`
++
++	$XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
++
++	_scratch_shutdown | tee -a $seqres.full
++	_scratch_cycle_mount
++
++	after=`lsattr -p $testfile`
++
++	# check inode's uid/gid
++	if [ "$before" != "$after" ]; then
++		echo "Before: $before"
++		echo "After : $after"
++	fi
++	echo "Before: $before" >> $seqres.full
++	echo "After : $after" >> $seqres.full
++
++	rm $testfile
++	_scratch_unmount
++}
++
++echo "Silence is golden"
++
++do_check
++do_check sync
++
++status=0
++exit
+diff --git a/tests/generic/506.out b/tests/generic/506.out
+new file mode 100644
+index 00000000..cb46b201
+--- /dev/null
++++ b/tests/generic/506.out
+@@ -0,0 +1,2 @@
++QA output created by 506
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 4da0e188..c7d42ff9 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -508,3 +508,4 @@
+ 503 auto quick dax punch collapse zero
+ 504 auto quick locks
+ 505 shutdown auto quick metadata
++506 shutdown auto quick metadata quota
+-- 
+2.18.0
