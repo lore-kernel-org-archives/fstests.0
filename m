@@ -1,12 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:56414 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726038AbeJEHPn (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 Oct 2018 03:15:43 -0400
-Subject: [PATCH 4/6] xfs/270: use _scratch_xfs_set_metadata_field to fuzz
- rocompat bits
+Received: from userp2130.oracle.com ([156.151.31.86]:53414 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726038AbeJEHPo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Oct 2018 03:15:44 -0400
+Subject: [PATCH 5/6] xfs/288: shut up verifier error
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 04 Oct 2018 17:19:33 -0700
-Message-ID: <153869877319.26648.6762297729048228417.stgit@magnolia>
+Date: Thu, 04 Oct 2018 17:19:39 -0700
+Message-ID: <153869877948.26648.4238107405182797711.stgit@magnolia>
 In-Reply-To: <153869874763.26648.516233620615833277.stgit@magnolia>
 References: <153869874763.26648.516233620615833277.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,27 +18,24 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Use the helper to set the metadata field so that we can bypass write
-verifier checks.
+Ignore the verifier errors when we fuzz hdr.count to zero.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/270 |    4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ tests/xfs/288 |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 
-diff --git a/tests/xfs/270 b/tests/xfs/270
-index da66bc33..fb72ba7c 100755
---- a/tests/xfs/270
-+++ b/tests/xfs/270
-@@ -44,8 +44,8 @@ _scratch_mkfs_xfs >>$seqres.full 2>&1
- # set the highest bit of features_ro_compat, use it as an unknown
- # feature bit. If one day this bit become known feature, please
- # change this case.
--$XFS_DB_PROG -x -c "sb 0" -c "write -d features_ro_compat $((2**31))" \
--	$SCRATCH_DEV | grep -v "Allowing write of corrupted data"
-+_scratch_xfs_set_metadata_field "features_ro_compat" "$((2**31))" "sb 0" | \
-+	grep 'features_ro_compat'
- 
- # rw mount with unknown ro-compat feature should fail
- echo "rw mount test"
+diff --git a/tests/xfs/288 b/tests/xfs/288
+index c6821909..13ba3057 100755
+--- a/tests/xfs/288
++++ b/tests/xfs/288
+@@ -62,7 +62,7 @@ _scratch_xfs_set_metadata_field "hdr.count" "0" \
+ # verify current xfs_db write command can set hdr.count to 0. Old xfsprogs
+ # can't do that on v5 filesystems.
+ count=$(_scratch_xfs_get_metadata_field "hdr.count" \
+-					"inode $inum" "ablock 0")
++					"inode $inum" "ablock 0" 2> /dev/null)
+ if [ "$count" != "0" ]; then
+ 	_notrun "xfs_db can't set attr hdr.count to 0"
+ fi
