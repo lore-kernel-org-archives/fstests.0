@@ -1,11 +1,11 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:53020 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726038AbeJEHPT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 Oct 2018 03:15:19 -0400
-Subject: [PATCH 1/6] generic: add bfoster's alternate reproducer
+Received: from userp2120.oracle.com ([156.151.31.85]:56252 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726038AbeJEHPb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Oct 2018 03:15:31 -0400
+Subject: [PATCH 2/6] xfs: test mount time summary counter check and fix
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 04 Oct 2018 17:19:14 -0700
-Message-ID: <153869875404.26648.4736407885559502992.stgit@magnolia>
+Date: Thu, 04 Oct 2018 17:19:20 -0700
+Message-ID: <153869876040.26648.11302951509500617148.stgit@magnolia>
 In-Reply-To: <153869874763.26648.516233620615833277.stgit@magnolia>
 References: <153869874763.26648.516233620615833277.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,41 +18,49 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Add Brian Foster's alternate reproducer code for the mread-after-eof
-problem so that we increase the chances that either this or generic/499
-will catch the problem.
+Tests to ensure that the xfs mount code can detect obviously bad fs
+summary counters at mount time and fix them.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/707     |   55 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/707.out |    2 ++
- tests/generic/group   |    1 +
- 3 files changed, 58 insertions(+)
- create mode 100755 tests/generic/707
- create mode 100644 tests/generic/707.out
+ tests/xfs/722     |   58 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/722.out |    4 +++
+ tests/xfs/723     |   58 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/723.out |    4 +++
+ tests/xfs/724     |   66 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/724.out |    4 +++
+ tests/xfs/group   |    3 ++
+ 7 files changed, 197 insertions(+)
+ create mode 100755 tests/xfs/722
+ create mode 100644 tests/xfs/722.out
+ create mode 100755 tests/xfs/723
+ create mode 100644 tests/xfs/723.out
+ create mode 100755 tests/xfs/724
+ create mode 100644 tests/xfs/724.out
 
 
-diff --git a/tests/generic/707 b/tests/generic/707
+diff --git a/tests/xfs/722 b/tests/xfs/722
 new file mode 100755
-index 00000000..74193c55
+index 00000000..1012bd58
 --- /dev/null
-+++ b/tests/generic/707
-@@ -0,0 +1,55 @@
++++ b/tests/xfs/722
+@@ -0,0 +1,58 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
++# Copyright (c) 2018 Oracle.  All Rights Reserved.
 +#
-+# FS QA Test No. 707
++# FS QA Test 722
 +#
-+# Test a specific sequence of fsx operations that causes an mmap read past
-+# eof to return nonzero contents.
++# Test detection & fixing of bad summary block counts at mount time.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++trap '_cleanup; exit $status' 0 1 2 3 15
 +
 +_cleanup()
 +{
@@ -62,51 +70,213 @@ index 00000000..74193c55
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/punch
++. ./common/filter
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command "fcollapse"
-+_require_xfs_io_command "fzero"
-+
++# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
-+_scratch_mkfs_sized $((1024 * 1024 * 100)) >>$seqres.full 2>&1
-+_scratch_mount
++# real QA test starts here
 +
-+$XFS_IO_PROG -fc "pwrite 0 100m" -c fsync $SCRATCH_MNT/file >>$seqres.full 2>&1
-+rm -f $SCRATCH_MNT/file
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
 +
-+cat >> $tmp.fsxops << ENDL
-+truncate 0x0 0x1f0d6 0x380e1
-+write 0x1ad87 0x6c99 0x180d6
-+zero_range 0x14426 0xd3aa 0x21a20 keep_size
-+mapread 0x1f69a 0x2386 0x21a20
-+ENDL
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++echo "test file" > $SCRATCH_MNT/testfile
 +
-+victim=$SCRATCH_MNT/a
-+touch $victim
-+$here/ltp/fsx --replay-ops $tmp.fsxops $victim > $tmp.output 2>&1 || cat $tmp.output
++echo "Fuzz fdblocks"
++_scratch_unmount
++dblocks=$(_scratch_xfs_get_metadata_field dblocks 'sb 0')
++_scratch_xfs_set_metadata_field fdblocks $((dblocks * 2)) 'sb 0' > $seqres.full 2>&1
 +
-+echo "Silence is golden"
++echo "Detection and Correction"
++_scratch_mount >> $seqres.full 2>&1
++avail=$(stat -c '%a' -f $SCRATCH_MNT)
++total=$(stat -c '%b' -f $SCRATCH_MNT)
++echo "avail: $avail" >> $seqres.full
++echo "total: $total" >> $seqres.full
++test "$avail" -gt "$total" && echo "free space bad: $avail > $total"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/707.out b/tests/generic/707.out
+diff --git a/tests/xfs/722.out b/tests/xfs/722.out
 new file mode 100644
-index 00000000..8e57a1d8
+index 00000000..8d1327b7
 --- /dev/null
-+++ b/tests/generic/707.out
-@@ -0,0 +1,2 @@
-+QA output created by 707
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 4da0e188..06b062e1 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -508,3 +508,4 @@
- 503 auto quick dax punch collapse zero
- 504 auto quick locks
- 505 shutdown auto quick metadata
-+707 auto quick rw collapse zero
++++ b/tests/xfs/722.out
+@@ -0,0 +1,4 @@
++QA output created by 722
++Format and mount
++Fuzz fdblocks
++Detection and Correction
+diff --git a/tests/xfs/723 b/tests/xfs/723
+new file mode 100755
+index 00000000..c068e496
+--- /dev/null
++++ b/tests/xfs/723
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Oracle.  All Rights Reserved.
++#
++# FS QA Test 723
++#
++# Test detection & fixing of bad summary inode counts at mount time.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++echo "test file" > $SCRATCH_MNT/testfile
++
++echo "Fuzz ifree"
++_scratch_unmount
++icount=$(_scratch_xfs_get_metadata_field icount 'sb 0')
++_scratch_xfs_set_metadata_field ifree $((icount * 2)) 'sb 0' > $seqres.full 2>&1
++
++echo "Detection and Correction"
++_scratch_mount >> $seqres.full 2>&1
++avail=$(stat -c '%d' -f $SCRATCH_MNT)
++total=$(stat -c '%c' -f $SCRATCH_MNT)
++echo "avail: $avail" >> $seqres.full
++echo "total: $total" >> $seqres.full
++test "$avail" -gt "$total" && echo "free inodes bad: $avail > $total"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/723.out b/tests/xfs/723.out
+new file mode 100644
+index 00000000..e825855a
+--- /dev/null
++++ b/tests/xfs/723.out
+@@ -0,0 +1,4 @@
++QA output created by 723
++Format and mount
++Fuzz ifree
++Detection and Correction
+diff --git a/tests/xfs/724 b/tests/xfs/724
+new file mode 100755
+index 00000000..f5e44fb6
+--- /dev/null
++++ b/tests/xfs/724
+@@ -0,0 +1,66 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Oracle.  All Rights Reserved.
++#
++# FS QA Test 724
++#
++# Test detection & fixing of bad summary block counts at mount time.
++# Corrupt the AGFs to test mount failure when mount-fixing fails.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap '_cleanup; exit $status' 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++echo "test file" > $SCRATCH_MNT/testfile
++
++echo "Fuzz fdblocks and btreeblks"
++_scratch_unmount
++dblocks=$(_scratch_xfs_get_metadata_field dblocks 'sb 0')
++_scratch_xfs_set_metadata_field fdblocks $((dblocks * 2)) 'sb 0' > $seqres.full 2>&1
++
++aglen=$(_scratch_xfs_get_metadata_field length 'agf 0')
++_scratch_xfs_set_metadata_field btreeblks $aglen 'agf 0' > $seqres.full 2>&1
++
++echo "Detection and Correction"
++if _try_scratch_mount >> $seqres.full 2>&1; then
++	echo "mount should have failed"
++	avail=$(stat -c '%a' -f $SCRATCH_MNT)
++	total=$(stat -c '%b' -f $SCRATCH_MNT)
++	echo "avail: $avail" >> $seqres.full
++	echo "total: $total" >> $seqres.full
++	test "$avail" -gt "$total" && echo "free space bad: $avail > $total"
++	_scratch_unmount
++fi
++_scratch_xfs_repair -n >> $seqres.full 2>&1 && echo "repair didn't find fuzz?"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/724.out b/tests/xfs/724.out
+new file mode 100644
+index 00000000..6571f9ed
+--- /dev/null
++++ b/tests/xfs/724.out
+@@ -0,0 +1,4 @@
++QA output created by 724
++Format and mount
++Fuzz fdblocks and btreeblks
++Detection and Correction
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 821bf2ac..28074f07 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -488,3 +488,6 @@
+ 488 dangerous_fuzzers dangerous_norepair
+ 489 dangerous_fuzzers dangerous_norepair
+ 490 auto quick
++722 auto quick fuzz
++723 auto quick fuzz
++724 auto quick fuzz
