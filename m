@@ -1,181 +1,64 @@
-Received: from mail-vk1-f194.google.com ([209.85.221.194]:39995 "EHLO
-        mail-vk1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727236AbeJEOsf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 5 Oct 2018 10:48:35 -0400
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:37691 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726399AbeJFHhr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 03:37:47 -0400
+Date: Sat, 6 Oct 2018 10:33:38 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH V5 06/20] Fix xfs/139 to work with 64k block size
+Message-ID: <20181006003338.GC6311@dastard>
+References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com>
+ <20180924151942.8220-7-chandan@linux.vnet.ibm.com>
 MIME-Version: 1.0
-References: <1538146248-1759-1-git-send-email-anand.jain@oracle.com> <1538271592-4086-1-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1538271592-4086-1-git-send-email-anand.jain@oracle.com>
-Reply-To: fdmanana@gmail.com
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Fri, 5 Oct 2018 08:50:51 +0100
-Message-ID: <CAL3q7H5P7cOWGOj+MwSookeRDm=ZGSR+pLBbX-nC32x632xr7w@mail.gmail.com>
-Subject: Re: [PATCH v6] test unaligned punch hole at ENOSPC
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180924151942.8220-7-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>
+To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 30, 2018 at 2:40 AM Anand Jain <anand.jain@oracle.com> wrote:
->
-> Try to punch hole with unaligned size and offset when the FS is
-> full. Mainly holes are punched at locations which are unaligned
-> with the file extent boundaries when the FS is full by data.
-> As the punching holes at unaligned location will involve
-> truncating blocks instead of just dropping the extents, it shall
-> involve reserving data and metadata space for delalloc and so data
-> alloc fails as the FS is full.
->
-> btrfs_punch_hole()
->  btrfs_truncate_block()
->    btrfs_check_data_free_space() <-- ENOSPC
->
-> We don't fail punch hole if the holes are aligned with the file
-> extent boundaries as it shall involve just dropping the related
-> extents, without truncating data extent blocks.
->
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-Looks good, thanks!
-
+On Mon, Sep 24, 2018 at 08:49:28PM +0530, Chandan Rajendra wrote:
+> For 64k block size, the agsize provided in the test causes mkfs.xfs to
+> fail due to insufficient log space. Hence this commit computes agsize
+> based on block size of the filesystem.
+> 
+> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 > ---
-> v5->v6:
->  fix comments at two places in the test case
->  drop -f when using xfs_io to punch hole
->  sync after dd is dropped
->  change log is slightly updated
-> v4->v5:
->  Update the change log
->  Drop the directio option for xfs_io
-> v3->v4:
->  Add to the group punch
-> v2->v3:
->  Add _require_xfs_io_command "fpunch"
->  Add more logs to $seqfull.full
->    mount options and
->    group profile info
->  Add sync after dd upto ENOSPC
->  Drop fallocate -p and use xfs_io punch to create holes
->  Use a testfile instead of filler file so that easy to trace
-> v1->v2: Use at least 256MB to test.
-> This test case fails on btrfs as of now.
->  tests/btrfs/172     | 73 +++++++++++++++++++++++++++++++++++++++++++++++=
-++++++
->  tests/btrfs/172.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 76 insertions(+)
->  create mode 100755 tests/btrfs/172
->  create mode 100644 tests/btrfs/172.out
->
-> diff --git a/tests/btrfs/172 b/tests/btrfs/172
-> new file mode 100755
-> index 000000000000..0dffb2dff40b
-> --- /dev/null
-> +++ b/tests/btrfs/172
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 172
-> +#
-> +# Test if the unaligned (by size and offset) punch hole is successful wh=
-en FS
-> +# is at ENOSPC.
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
+>  tests/xfs/139     | 15 +++++++++------
+>  tests/xfs/139.out |  8 ++++++--
+>  2 files changed, 15 insertions(+), 8 deletions(-)
+> 
+> diff --git a/tests/xfs/139 b/tests/xfs/139
+> index 2a26635..c074273 100755
+> --- a/tests/xfs/139
+> +++ b/tests/xfs/139
+> @@ -34,17 +34,20 @@ _require_cp_reflink
+>  
+>  rm -f $seqres.full
+>  
+> +_scratch_mkfs >/dev/null 2>&1
+> +_scratch_mount
+> +blksz=$(_get_file_block_size $SCRATCH_MNT)
+> +_scratch_unmount
 > +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_io_command "fpunch"
-> +
-> +_scratch_mkfs_sized $((256 * 1024 *1024)) >> $seqres.full
-> +
-> +# max_inline ensures data is not inlined within metadata extents
-> +_scratch_mount "-o max_inline=3D0,nodatacow"
-> +
-> +cat /proc/self/mounts | grep $SCRATCH_DEV >> $seqres.full
-> +$BTRFS_UTIL_PROG filesystem df $SCRATCH_MNT >> $seqres.full
-> +
-> +extent_size=3D$(_scratch_btrfs_sectorsize)
-> +unalign_by=3D512
-> +echo extent_size=3D$extent_size unalign_by=3D$unalign_by >> $seqres.full
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 $((extent_size * 10))" \
-> +                                       $SCRATCH_MNT/testfile >> $seqres.=
-full
-> +
-> +echo "Fill all space available for data and all unallocated space." >> $=
-seqres.full
-> +dd status=3Dnone if=3D/dev/zero of=3D$SCRATCH_MNT/filler bs=3D512 >> $se=
-qres.full 2>&1
-> +
-> +hole_offset=3D0
-> +hole_len=3D$unalign_by
-> +$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-> +
-> +hole_offset=3D$(($extent_size + $unalign_by))
-> +hole_len=3D$(($extent_size - $unalign_by))
-> +$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-> +
-> +hole_offset=3D$(($extent_size * 2 + $unalign_by))
-> +hole_len=3D$(($extent_size * 5))
-> +$XFS_IO_PROG -c "fpunch $hole_offset $hole_len" $SCRATCH_MNT/testfile
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/172.out b/tests/btrfs/172.out
-> new file mode 100644
-> index 000000000000..ce2de3f0d107
-> --- /dev/null
-> +++ b/tests/btrfs/172.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 172
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index feffc45b6564..45782565c3b7 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -174,3 +174,4 @@
->  169 auto quick send
->  170 auto quick snapshot
->  171 auto quick qgroup
-> +172 auto quick punch
-> --
-> 1.8.3.1
->
+>  echo "Format and mount"
+> -_scratch_mkfs -d agsize=$((32 * 1048576)) > $seqres.full 2>&1
+> +_scratch_mkfs -d agsize=$((8192 * $blksz)) > $seqres.full 2>&1
 
+This breaks 512 byte and 1k block size filesystems.
 
---=20
-Filipe David Manana,
+$ head -3 139.full
+Invalid value 8388608 for -d agsize option. Value is too small.
+Usage: mkfs.xfs
+/* blocksize */         [-b size=num]
+$
 
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+Minimum AG size is 16MB. There are more changes to other tests in
+this series that also demonstrate this regression.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
