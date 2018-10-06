@@ -1,78 +1,59 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:57136 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727161AbeJFNvN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 09:51:13 -0400
-Received: from pps.filterd (m0098393.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w966dNhk062304
-        for <fstests@vger.kernel.org>; Sat, 6 Oct 2018 02:49:04 -0400
-Received: from e06smtp04.uk.ibm.com (e06smtp04.uk.ibm.com [195.75.94.100])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2mxnxt4u8v-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Sat, 06 Oct 2018 02:49:04 -0400
-Received: from localhost
-        by e06smtp04.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Sat, 6 Oct 2018 07:49:02 +0100
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: Re: [PATCH V5 06/20] Fix xfs/139 to work with 64k block size
-Date: Sat, 06 Oct 2018 12:21:22 +0530
-In-Reply-To: <20181006003338.GC6311@dastard>
-References: <20180924151942.8220-1-chandan@linux.vnet.ibm.com> <20180924151942.8220-7-chandan@linux.vnet.ibm.com> <20181006003338.GC6311@dastard>
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:39261 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726409AbeJFQet (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 12:34:49 -0400
+Received: by mail-pf1-f194.google.com with SMTP id c25-v6so5865625pfe.6
+        for <fstests@vger.kernel.org>; Sat, 06 Oct 2018 02:32:15 -0700 (PDT)
+Date: Sat, 6 Oct 2018 17:32:07 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 1/2] check: recognize f2fs through parameter
+Message-ID: <20181006093207.GI17817@desktop>
+References: <20180930092653.122684-1-yuchao0@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7Bit
-Content-Type: text/plain; charset="us-ascii"
-Message-Id: <3892653.Ddf5GiE5O6@localhost.localdomain>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20180930092653.122684-1-yuchao0@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, linux-xfs@vger.kernel.org
+To: Chao Yu <yuchao0@huawei.com>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, chao@kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Saturday, October 6, 2018 6:03:38 AM IST Dave Chinner wrote:
-> On Mon, Sep 24, 2018 at 08:49:28PM +0530, Chandan Rajendra wrote:
-> > For 64k block size, the agsize provided in the test causes mkfs.xfs to
-> > fail due to insufficient log space. Hence this commit computes agsize
-> > based on block size of the filesystem.
-> > 
-> > Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-> > ---
-> >  tests/xfs/139     | 15 +++++++++------
-> >  tests/xfs/139.out |  8 ++++++--
-> >  2 files changed, 15 insertions(+), 8 deletions(-)
-> > 
-> > diff --git a/tests/xfs/139 b/tests/xfs/139
-> > index 2a26635..c074273 100755
-> > --- a/tests/xfs/139
-> > +++ b/tests/xfs/139
-> > @@ -34,17 +34,20 @@ _require_cp_reflink
-> >  
-> >  rm -f $seqres.full
-> >  
-> > +_scratch_mkfs >/dev/null 2>&1
-> > +_scratch_mount
-> > +blksz=$(_get_file_block_size $SCRATCH_MNT)
-> > +_scratch_unmount
-> > +
-> >  echo "Format and mount"
-> > -_scratch_mkfs -d agsize=$((32 * 1048576)) > $seqres.full 2>&1
-> > +_scratch_mkfs -d agsize=$((8192 * $blksz)) > $seqres.full 2>&1
+On Sun, Sep 30, 2018 at 05:26:52PM +0800, Chao Yu wrote:
+> Add a paramenter in check to configure $FSTYP for f2fs.
 > 
-> This breaks 512 byte and 1k block size filesystems.
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+> ---
+>  check | 2 ++
+>  1 file changed, 2 insertions(+)
 > 
-> $ head -3 139.full
-> Invalid value 8388608 for -d agsize option. Value is too small.
-> Usage: mkfs.xfs
-> /* blocksize */         [-b size=num]
-> $
+> diff --git a/check b/check
+> index f3c8021d94b9..a9024094721a 100755
+> --- a/check
+> +++ b/check
+> @@ -59,6 +59,7 @@ check options
+>      -pvfs2          test PVFS2
+>      -tmpfs              test TMPFS
+>      -ubifs              test ubifs
+> +    -f2fs		test f2fs
+>      -l			line mode diff
+>      -udiff		show unified diff (default)
+>      -n			show me, do not run tests
+> @@ -263,6 +264,7 @@ while [ $# -gt 0 ]; do
+>  	-pvfs2)		FSTYP=pvfs2 ;;
+>  	-tmpfs)		FSTYP=tmpfs ;;
+>  	-ubifs)		FSTYP=ubifs ;;
+> +	-f2fs)		FSTYP=f2fs ;;
+
+The test harness should be able to detect the f2fs type from $TEST_DEV.
+We add param to set FSTYP only when there's no way to tell the
+filesystem type from the device.
+
+Thanks,
+Eryu
+
+>  
+>  	-g)	group=$2 ; shift ;
+>  		GROUP_LIST="$GROUP_LIST ${group//,/ }"
+> -- 
+> 2.18.0.rc1
 > 
-> Minimum AG size is 16MB. There are more changes to other tests in
-> this series that also demonstrate this regression.
-
-Thanks for mentioning this fact about the minimum AG size. I will verify
-all the tests once again. 
-
-Also, for xfs/139, 512 byte block size does not apply since reflink feature
-requires CRC to be enabled. Nevertheless, I will make sure that mkfs.xfs
-actually does succeed for other tests where 512 bytes block size is applicable.
-
--- 
-chandan
