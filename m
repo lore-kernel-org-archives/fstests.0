@@ -1,59 +1,212 @@
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:39261 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726409AbeJFQet (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 12:34:49 -0400
-Received: by mail-pf1-f194.google.com with SMTP id c25-v6so5865625pfe.6
-        for <fstests@vger.kernel.org>; Sat, 06 Oct 2018 02:32:15 -0700 (PDT)
-Date: Sat, 6 Oct 2018 17:32:07 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:41892 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726919AbeJFRRi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 13:17:38 -0400
+Date: Sat, 6 Oct 2018 18:14:49 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 1/2] check: recognize f2fs through parameter
-Message-ID: <20181006093207.GI17817@desktop>
-References: <20180930092653.122684-1-yuchao0@huawei.com>
+Subject: Re: [PATCH] fstests: btrfs verify hardening agaist duplicate fsid
+Message-ID: <20181006101449.GJ17817@desktop>
+References: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20180930092653.122684-1-yuchao0@huawei.com>
+In-Reply-To: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Chao Yu <yuchao0@huawei.com>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, chao@kernel.org
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 30, 2018 at 05:26:52PM +0800, Chao Yu wrote:
-> Add a paramenter in check to configure $FSTYP for f2fs.
+On Mon, Oct 01, 2018 at 04:44:35PM +0800, Anand Jain wrote:
+> We have a known bug in btrfs, that we let the device path be changed
+> after the device has been mounted. So using this loop hole the new
+> copied device would appears as if its mounted immediately after its
+> been copied. So this test case reproduces this issue.
 > 
-> Signed-off-by: Chao Yu <yuchao0@huawei.com>
-> ---
->  check | 2 ++
->  1 file changed, 2 insertions(+)
+> For example:
 > 
-> diff --git a/check b/check
-> index f3c8021d94b9..a9024094721a 100755
-> --- a/check
-> +++ b/check
-> @@ -59,6 +59,7 @@ check options
->      -pvfs2          test PVFS2
->      -tmpfs              test TMPFS
->      -ubifs              test ubifs
-> +    -f2fs		test f2fs
->      -l			line mode diff
->      -udiff		show unified diff (default)
->      -n			show me, do not run tests
-> @@ -263,6 +264,7 @@ while [ $# -gt 0 ]; do
->  	-pvfs2)		FSTYP=pvfs2 ;;
->  	-tmpfs)		FSTYP=tmpfs ;;
->  	-ubifs)		FSTYP=ubifs ;;
-> +	-f2fs)		FSTYP=f2fs ;;
+> Initially.. /dev/mmcblk0p4 is mounted as /
+> 
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part /
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+> 
+> btrfs fi show
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>     Total devices 1 FS bytes used 1.40GiB
+>     devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
+> 
+> Copy mmcblk0 to sda
+> dd if=/dev/mmcblk0 of=/dev/sda
+> 
+> And immediately after the copy completes the change in the device
+> superblock is notified which the automount scans using
+> btrfs device scan and the new device sda becomes the mounted root
+> device.
+> 
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> sda           8:0    1 14.9G  0 disk
+> |-sda4        8:4    1    4G  0 part /
+> |-sda2        8:2    1  500M  0 part
+> |-sda3        8:3    1  256M  0 part
+> `-sda1        8:1    1  256M  0 part
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+> btrfs fi show /
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>     Total devices 1 FS bytes used 1.40GiB
+>     devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
+> 
+> The bug is quite nasty that you can't either unmount /dev/sda4 or
+> /dev/mmcblk0p4. And the problem does not get solved until you take
+> the sda out of the system on to another system to change its fsid using
+> the 'btrfstune -u' command.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 
-The test harness should be able to detect the f2fs type from $TEST_DEV.
-We add param to set FSTYP only when there's no way to tell the
-filesystem type from the device.
+Looks like that the test will break the whole test env as it leaves an
+unmountable $SCRATCH_MNT. I'd wait for the fix to get in first before
+merging the test, in case it breaks normal regression tests. (I noticed
+that the test is not in 'auto' group, so it's not that dangerous.)
+
+Also, it'd be great if test can be reviewed by btrfs folks too!
+
+> ---
+>  tests/btrfs/173     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/173.out |  5 ++++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 78 insertions(+)
+>  create mode 100755 tests/btrfs/173
+>  create mode 100644 tests/btrfs/173.out
+> 
+> diff --git a/tests/btrfs/173 b/tests/btrfs/173
+> new file mode 100755
+> index 000000000000..f59a62e206c3
+> --- /dev/null
+> +++ b/tests/btrfs/173
+> @@ -0,0 +1,72 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 173
+> +#
+> +# Fuzzy test for FS image duplication.
+> +#  Could be fixed by
+> +#    [patch] btrfs: harden agaist duplicate fsid
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +
+> +dev_foo=$(echo $SCRATCH_DEV_POOL | awk '{print $1}' | rev | cut -d"/" -f1 | rev)
+> +dev_bar=$(echo $SCRATCH_DEV_POOL | awk '{print $2}' | rev | cut -d"/" -f1 | rev)
+
+This doesn't work if the devices in SCRATCH_DEV_POOL are symlinks, e.g.
+lvm devices: /dev/mapper/testvg-testlv1, dev_foo is "testvg-testlv1" in
+this case.
+
+> +
+> +_mkfs_dev /dev/$dev_foo
+
+But /dev/testvg-testlv1 isn't existed.
+
+_short_dev and/or _real_dev is useful in this case. e.g.
+
+dev_foo=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
+# dev_foo is like "dm-1"
+dev_foo=$(_short_dev $dev_foo)
+# dev_foo is like "/dev/dm-1"
+dev_foo=$(_real_dev $dev_foo)
+
+> +_mount /dev/$dev_foo $SCRATCH_MNT
+
+It'd better to mount non-SCRATCH_DEV to other mount point, e.g.
+$TEST_DIR/$seq.mnt
 
 Thanks,
 Eryu
 
->  
->  	-g)	group=$2 ; shift ;
->  		GROUP_LIST="$GROUP_LIST ${group//,/ }"
+> +
+> +echo mount before btrfs image clone | tee -a $seqres.full
+> +findmnt /dev/$dev_foo | grep -v TARGET | awk '{print $1" "$2}' | \
+> +	sed -e "s/$dev_foo/dev_foo/g" | _filter_scratch | tee -a $seqres.full
+> +findmnt /dev/$dev_bar | grep -v TARGET | awk '{print $1" "$2}' | \
+> +	sed -e "s/$dev_bar/dev_bar/g" | _filter_scratch | tee -a $seqres.full
+> +
+> +for sb_bytenr in 65536 67108864
+> +do
+> +	echo -n "dd status=none if=/dev/$dev_foo of=/dev/$dev_bar bs=1 "\
+> +		"seek=$sb_bytenr skip=$sb_bytenr count=4096" >> $seqres.full
+> +	dd status=none if=/dev/$dev_foo of=/dev/$dev_bar bs=1 seek=$sb_bytenr \
+> +				skip=$sb_bytenr count=4096 >> $seqres.full 2>&1
+> +	echo ..:$? >> $seqres.full
+> +done
+> +
+> +echo mount after btrfs image clone | tee -a $seqres.full
+> +findmnt /dev/$dev_foo | grep -v TARGET | awk '{print $1" "$2}' | \
+> +	sed -e "s/$dev_foo/dev_foo/g" | _filter_scratch | tee -a $seqres.full
+> +findmnt /dev/$dev_bar | grep -v TARGET | awk '{print $1" "$2}' | \
+> +	sed -e "s/$dev_bar/dev_bar/g" | _filter_scratch | tee -a $seqres.full
+> +
+> +_scratch_dev_pool_put
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
+> new file mode 100644
+> index 000000000000..a2ef7a26f4b9
+> --- /dev/null
+> +++ b/tests/btrfs/173.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 173
+> +mount before btrfs image clone
+> +SCRATCH_MNT /dev/dev_foo
+> +mount after btrfs image clone
+> +SCRATCH_MNT /dev/dev_foo
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 45782565c3b7..b2f1393f3e97 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -175,3 +175,4 @@
+>  170 auto quick snapshot
+>  171 auto quick qgroup
+>  172 auto quick punch
+> +173 volume
 > -- 
-> 2.18.0.rc1
+> 1.8.3.1
 > 
