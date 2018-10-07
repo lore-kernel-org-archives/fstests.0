@@ -1,11 +1,13 @@
-Received: from mail.kernel.org ([198.145.29.99]:52484 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:52506 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727834AbeJGWEI (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Oct 2018 18:04:08 -0400
+        id S1727834AbeJGWEL (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Oct 2018 18:04:11 -0400
 From: Chao Yu <chao@kernel.org>
-Subject: [PATCH v2 1/3] generic: test project id recovery after power failure
-Date: Sun,  7 Oct 2018 20:25:46 +0800
-Message-Id: <20181007122548.21876-1-chao@kernel.org>
+Subject: [PATCH v2 2/3] generic: test i_flags recovery after power failure
+Date: Sun,  7 Oct 2018 20:25:47 +0800
+Message-Id: <20181007122548.21876-2-chao@kernel.org>
+In-Reply-To: <20181007122548.21876-1-chao@kernel.org>
+References: <20181007122548.21876-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: guaneryu@gmail.com, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
@@ -14,63 +16,63 @@ List-ID: <fstests@vger.kernel.org>
 From: Chao Yu <yuchao0@huawei.com>
 
 After fsync, filesystem should guarantee inode metadata including
-project id being persisted, so even after sudden power-cut, during
-mount, we should recover project_id fields correctly, in order to
-not loss those meta info.
+i_flags being persisted, so even after sudden power-cut, during
+mount, we should recover i_flags fields correctly, in order to not
+loss those meta info.
 
 So adding this testcase to check whether generic filesystem can
 guarantee that.
 
+We only check below attribute modification which most filesystem
+supports:
+- no atime updates (A)
+- secure deletion (s)
+- synchronous updates (S)
+- undeletable (u)
+
 Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
 v2:
-- export and use $LSATTR_PROG in common/rc
-- use $CHATTR_PROG instead of chattr
-- fix wrong comments
+- add missing _require_chattr
+- use $CHATTR_PROG/$LSATTR_PROG
 - add -f parameter for rm
- common/config         |  1 +
- tests/generic/506     | 97 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/506.out |  2 +
- tests/generic/group   |  1 +
- 4 files changed, 101 insertions(+)
- create mode 100755 tests/generic/506
- create mode 100644 tests/generic/506.out
+- cleanup codes of traversing each parameter for chattr
+ tests/generic/507     | 134 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/507.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 137 insertions(+)
+ create mode 100755 tests/generic/507
+ create mode 100644 tests/generic/507.out
 
-diff --git a/common/config b/common/config
-index 1ba8d96c..a87cb4a2 100644
---- a/common/config
-+++ b/common/config
-@@ -170,6 +170,7 @@ export WIPEFS_PROG="$(type -P wipefs)"
- export DUMP_PROG="$(type -P dump)"
- export RESTORE_PROG="$(type -P restore)"
- export LVM_PROG="$(type -P lvm)"
-+export LSATTR_PROG="$(type -P lsattr)"
- export CHATTR_PROG="$(type -P chattr)"
- export DEBUGFS_PROG="$(type -P debugfs)"
- export UUIDGEN_PROG="$(type -P uuidgen)"
-diff --git a/tests/generic/506 b/tests/generic/506
+diff --git a/tests/generic/507 b/tests/generic/507
 new file mode 100755
-index 00000000..5d419cad
+index 00000000..7af8c5ef
 --- /dev/null
-+++ b/tests/generic/506
-@@ -0,0 +1,97 @@
++++ b/tests/generic/507
+@@ -0,0 +1,134 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2018 Huawei.  All Rights Reserved.
 +#
-+# FS QA Test 506
++# FS QA Test 507
 +#
 +# This testcase is trying to test recovery flow of generic filesystem, w/ below
-+# steps, once project id changes, after we fsync that file, we can expect that
-+# project id can be recovered after sudden power-cuts.
++# steps, once i_flags changes, after we fsync that file, we can expect that
++# i_flags can be recovered after sudden power-cuts.
 +# 1. touch testfile;
 +# 1.1 sync (optional)
-+# 2. chattr -p 100 testfile;
++# 2. chattr +[AsSu] testfile
 +# 3. xfs_io -f testfile -c "fsync";
 +# 4. godown;
 +# 5. umount;
 +# 6. mount;
-+# 7. check project id
++# 7. check i_flags
++# 8. chattr -[AsSu] testfile
++# 9. xfs_io -f testfile -c "fsync";
++# 10. godown;
++# 11. umount;
++# 12. mount;
++# 13. check i_flags
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -90,7 +92,6 @@ index 00000000..5d419cad
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/quota
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -99,10 +100,10 @@ index 00000000..5d419cad
 +_supported_fs generic
 +_supported_os Linux
 +
-+_require_command "$LSATTR_PROG" lsattr
++_require_command "$LSATTR_PROG" lasttr
 +_require_command "$CHATTR_PROG" chattr
++_require_chattr AsSu
 +
-+_require_prjquota $SCRATCH_DEV
 +_require_scratch
 +_require_scratch_shutdown
 +
@@ -110,29 +111,58 @@ index 00000000..5d419cad
 +_require_metadata_journaling $SCRATCH_DEV
 +
 +testfile=$SCRATCH_MNT/testfile
++opt="AsSu"
 +
 +do_check()
 +{
++	attr=$1
++
 +	_scratch_mount
 +
 +	touch $testfile
 +
-+	if [ "$1" == "sync" ]; then
++	if [ "$2" == "sync" ]; then
++		echo "sync" >> $seqres.full
 +		sync
 +	fi
 +
-+	$CHATTR_PROG -p 100 $testfile
++	echo "Test chattr +$1" >> $seqres.full
 +
-+	before=`$LSATTR_PROG -p $testfile`
++	# add attribute
++	$CHATTR_PROG +$attr $testfile
++
++	before=`$LSATTR_PROG $testfile`
 +
 +	$XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
 +
 +	_scratch_shutdown | tee -a $seqres.full
 +	_scratch_cycle_mount
 +
-+	after=`$LSATTR_PROG -p $testfile`
++	after=`$LSATTR_PROG $testfile`
 +
-+	# check inode's project quota id
++	# check inode's i_flags
++	if [ "$before" != "$after" ]; then
++		echo "Before: $before"
++		echo "After : $after"
++	fi
++	echo "Before: $before" >> $seqres.full
++	echo "After : $after" >> $seqres.full
++
++	echo "Test chattr -$1" >> $seqres.full
++
++	# delete attribute
++	$CHATTR_PROG -$attr $testfile
++
++	before=`$LSATTR_PROG $testfile`
++
++	$XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
++
++	_scratch_shutdown | tee -a $seqres.full
++	_scratch_cycle_mount
++
++	after=`$LSATTR_PROG $testfile`
++
++	# check inode's i_flags
 +	if [ "$before" != "$after" ]; then
 +		echo "Before: $before"
 +		echo "After : $after"
@@ -146,27 +176,30 @@ index 00000000..5d419cad
 +
 +echo "Silence is golden"
 +
-+do_check
-+do_check sync
++opts="A s S u"
++for i in $opts; do
++	do_check $i
++	do_check $i sync
++done
 +
 +status=0
 +exit
-diff --git a/tests/generic/506.out b/tests/generic/506.out
+diff --git a/tests/generic/507.out b/tests/generic/507.out
 new file mode 100644
-index 00000000..cb46b201
+index 00000000..3d8672f8
 --- /dev/null
-+++ b/tests/generic/506.out
++++ b/tests/generic/507.out
 @@ -0,0 +1,2 @@
-+QA output created by 506
++QA output created by 507
 +Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 4da0e188..c7d42ff9 100644
+index c7d42ff9..e94253dc 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -508,3 +508,4 @@
- 503 auto quick dax punch collapse zero
+@@ -509,3 +509,4 @@
  504 auto quick locks
  505 shutdown auto quick metadata
-+506 shutdown auto quick metadata quota
+ 506 shutdown auto quick metadata quota
++507 shutdown auto quick metadata
 -- 
 2.18.0
