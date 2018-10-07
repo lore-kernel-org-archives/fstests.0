@@ -1,69 +1,182 @@
-Received: from mail-pl1-f196.google.com ([209.85.214.196]:41150 "EHLO
-        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727161AbeJFS2G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Oct 2018 14:28:06 -0400
-Date: Sat, 6 Oct 2018 19:25:07 +0800
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:46349 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726785AbeJGUqB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 7 Oct 2018 16:46:01 -0400
+Received: by mail-pg1-f194.google.com with SMTP id a5-v6so6644474pgv.13
+        for <fstests@vger.kernel.org>; Sun, 07 Oct 2018 06:38:47 -0700 (PDT)
+Date: Sun, 7 Oct 2018 21:38:38 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 3/9] geneirc/077 fix min size for btrfs
-Message-ID: <20181006112507.GL17817@desktop>
-References: <1537849462-619-1-git-send-email-anand.jain@oracle.com>
- <1537849462-619-4-git-send-email-anand.jain@oracle.com>
+Subject: Re: [PATCH 1/3] generic: test project id recovery after power failure
+Message-ID: <20181007133838.GM17817@desktop>
+References: <20181004043502.15005-1-chao@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1537849462-619-4-git-send-email-anand.jain@oracle.com>
+In-Reply-To: <20181004043502.15005-1-chao@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <anand.jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Chao Yu <chao@kernel.org>
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Sep 25, 2018 at 12:24:16PM +0800, Anand Jain wrote:
-> If btrfs need to be tested at its default blockgroup which is non-mixed,
-> then it needs at least 256mb.
+On Thu, Oct 04, 2018 at 12:35:00PM +0800, Chao Yu wrote:
+> From: Chao Yu <yuchao0@huawei.com>
 > 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-
-(Sorry for the late review..)
-
+> After fsync, filesystem should guarantee inode metadata including
+> project id being persisted, so even after sudden power-cut, during
+> mount, we should recover project_id fields correctly, in order to
+> not loss those meta info.
+> 
+> So adding this testcase to check whether generic filesystem can
+> guarantee that.
+> 
+> Signed-off-by: Chao Yu <yuchao0@huawei.com>
 > ---
->  tests/generic/077 | 3 +--
->  1 file changed, 1 insertion(+), 2 deletions(-)
+>  tests/generic/506     | 97 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/506.out |  2 +
+>  tests/generic/group   |  1 +
+>  3 files changed, 100 insertions(+)
+>  create mode 100644 tests/generic/506
+>  create mode 100644 tests/generic/506.out
 > 
-> diff --git a/tests/generic/077 b/tests/generic/077
-> index ef6af18c83e3..ec236992513f 100755
-> --- a/tests/generic/077
-> +++ b/tests/generic/077
-> @@ -49,8 +49,7 @@ rm -f $seqres.full
->  _scratch_unmount >/dev/null 2>&1
->  echo "*** MKFS ***"                         >>$seqres.full
->  echo ""                                     >>$seqres.full
-> -SIZE=`expr 50 \* 1024 \* 1024`
-> -_scratch_mkfs_sized $SIZE                   >>$seqres.full 2>&1 \
-> +_scratch_mkfs_sized $((256 * 1024 *1024))   >>$seqres.full 2>&1 \
->  	|| _fail "mkfs failed"
+> diff --git a/tests/generic/506 b/tests/generic/506
+> new file mode 100644
+> index 00000000..ca035a91
+> --- /dev/null
+> +++ b/tests/generic/506
+> @@ -0,0 +1,97 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Huawei.  All Rights Reserved.
+> +#
+> +# FS QA Test 506
+> +#
+> +# This testcase is trying to test recovery flow of generic filesystem, w/ below
+> +# steps, once project id changes, after we fsync that file, we can expect that
+> +# project id can be recovered after sudden power-cuts.
+> +# 1. touch testfile;
+> +# 1.1 sync (optional)
+> +# 2. chattr -p 100 testfile;
+> +# 3. xfs_io -f testfile -c "fsync";
+> +# 4. godown;
+> +# 5. umount;
+> +# 6. mount;
+> +# 7. check project id
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +
+> +_require_test_lsattr
+> +_require_command "$CHATTR_PROG" chattr
 
-Hmm, this test copies "/lib/modules/" to fill the original 50M
-filesystem (which seems a bad way to me)
+Better to add a new "LSATTR_PROG" entry as well in common/config and
+_require_command "$LSATTR_PROG" lsattr
 
-"
-# Something w/ enough data to fill 50M of fs...
-filler=/lib/modules/
-...
-echo "*** populate filesystem, pass #1" | tee -a $seqres.full
-cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
-...
-"
+> +
+> +_require_prjquota $SCRATCH_DEV
+> +_require_scratch
+> +_require_scratch_shutdown
+> +
+> +_scratch_mkfs >/dev/null 2>&1
+> +_require_metadata_journaling $SCRATCH_DEV
+> +
+> +testfile=$SCRATCH_MNT/testfile
+> +
+> +do_check()
+> +{
+> +	_scratch_mount
+> +
+> +	touch $testfile
+> +
+> +	if [ "$1" == "sync" ]; then
+> +		sync
+> +	fi
+> +
+> +	chattr -p 100 $testfile
 
-It works most of the time as "/lib/modules" is usually larger than 50M,
-but it may not fullfil the fs with 256M size.
+And use $CHATTR_PROG
 
-I think we should fix the way to fill the fs too.
+> +
+> +	before=`lsattr -p $testfile`
+
+and $LSATTR_PROG in the test.
+
+> +
+> +	$XFS_IO_PROG -f $testfile -c "fsync" | _filter_xfs_io
+> +
+> +	_scratch_shutdown | tee -a $seqres.full
+> +	_scratch_cycle_mount
+> +
+> +	after=`lsattr -p $testfile`
+> +
+> +	# check inode's uid/gid
+
+Should be "project quota id"?
+
+> +	if [ "$before" != "$after" ]; then
+> +		echo "Before: $before"
+> +		echo "After : $after"
+> +	fi
+> +	echo "Before: $before" >> $seqres.full
+> +	echo "After : $after" >> $seqres.full
+> +
+> +	rm $testfile
+
+rm -f $testfile
 
 Thanks,
 Eryu
 
->  _scratch_mount
->  mkdir $SCRATCH_MNT/subdir
+> +	_scratch_unmount
+> +}
+> +
+> +echo "Silence is golden"
+> +
+> +do_check
+> +do_check sync
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/506.out b/tests/generic/506.out
+> new file mode 100644
+> index 00000000..cb46b201
+> --- /dev/null
+> +++ b/tests/generic/506.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 506
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 4da0e188..c7d42ff9 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -508,3 +508,4 @@
+>  503 auto quick dax punch collapse zero
+>  504 auto quick locks
+>  505 shutdown auto quick metadata
+> +506 shutdown auto quick metadata quota
 > -- 
-> 1.8.3.1
+> 2.18.0
 > 
