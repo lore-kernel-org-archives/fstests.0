@@ -1,73 +1,118 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:38828 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1726113AbeJHNbK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 8 Oct 2018 09:31:10 -0400
-Received: from pps.filterd (m0098414.ppops.net [127.0.0.1])
-        by mx0b-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w986JqP4098655
-        for <fstests@vger.kernel.org>; Mon, 8 Oct 2018 02:21:04 -0400
-Received: from e31.co.us.ibm.com (e31.co.us.ibm.com [32.97.110.149])
-        by mx0b-001b2d01.pphosted.com with ESMTP id 2myxynxayw-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Mon, 08 Oct 2018 02:21:03 -0400
-Received: from localhost
-        by e31.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Mon, 8 Oct 2018 00:21:02 -0600
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH 2/2] xfs/140: work with 1k block size
-Date: Mon,  8 Oct 2018 11:53:03 +0530
-In-Reply-To: <20181008062303.32286-1-chandan@linux.vnet.ibm.com>
-References: <20181008062303.32286-1-chandan@linux.vnet.ibm.com>
-Message-Id: <20181008062303.32286-2-chandan@linux.vnet.ibm.com>
+Received: from mail.kernel.org ([198.145.29.99]:50274 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726193AbeJHRYP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Oct 2018 13:24:15 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] generic: test mounting filesystem after fsync of a tmpfile
+Date: Mon,  8 Oct 2018 11:13:13 +0100
+Message-Id: <20181008101313.17156-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, david@fromorbit.com, linux-xfs@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Commit 7a7641063ac3a7ae051c9e1959f4d7b1a25bb91c (xfs/140: work with 64k
-block size) created a test filesystem with AG size set to (8192 * block
-size). When working with a 1k block sized XFS filesystem, this tries to
-set the AG size to 8MiB which is less than the minimum AG size of
-16MiB. Hence creation of the filesystem had actually failed.
+From: Filipe Manana <fdmanana@suse.com>
 
-This commit fixes the issue by resetting AG size to 16MiB if (8192 *
-block size) results in a value less than 16MiB. Later the test file size
-and the test file block count are then appropriately calculated.
+Test that if we fsync a tmpfile, without adding a hard link to it, and
+then power fail, we will be able to mount the filesystem without
+triggering any crashes, warnings or corruptions.
 
-Reported-by: Dave Chinner <david@fromorbit.com>
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+This test is motivated by an issue in btrfs where this scenario triggered
+a warning (without any side effects). The following linux kernel patch
+fixes the issue in btrfs:
+
+  "Btrfs: fix warning when replaying log after fsync of a tmpfile"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/xfs/140 | 11 ++++++++---
- 1 file changed, 8 insertions(+), 3 deletions(-)
+ tests/generic/506     | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/506.out |  3 +++
+ tests/generic/group   |  1 +
+ 3 files changed, 62 insertions(+)
+ create mode 100755 tests/generic/506
+ create mode 100644 tests/generic/506.out
 
-diff --git a/tests/xfs/140 b/tests/xfs/140
-index c06a722..7385dc4 100755
---- a/tests/xfs/140
-+++ b/tests/xfs/140
-@@ -39,16 +39,21 @@ _scratch_mount
- blksz=$(_get_file_block_size $SCRATCH_MNT)
- _scratch_unmount
- 
-+agsize=$((8192 * $blksz))
-+if [[ $agsize -lt $((16 * 1024 * 1024)) ]]; then
-+	agsize=$((16 * 1024 * 1024))
-+fi
-+sz=$((4096 * $blksz + $agsize))
-+nr=$(($sz / $blksz))
+diff --git a/tests/generic/506 b/tests/generic/506
+new file mode 100755
+index 00000000..7d28d3b0
+--- /dev/null
++++ b/tests/generic/506
+@@ -0,0 +1,58 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 506
++#
++# Test that if we fsync a tmpfile, without adding a hard link to it, and then
++# power fail, we will be able to mount the filesystem without triggering any
++# crashes, warnings or corruptions.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
- echo "Format and mount"
--_scratch_mkfs -d agsize=$((8192 * $blksz)) > $seqres.full 2>&1
-+_scratch_mkfs -d agsize=$agsize > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
- 
- testdir=$SCRATCH_MNT/test-$seq
- mkdir $testdir
- 
- echo "Create the original files"
--nr=12288
--sz=$(($nr * $blksz))
- _pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
- _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
- _pwrite_byte 0x61 0 $sz $testdir/file2.chk >> $seqres.full
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "-T"
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our tmpfile, write some data to it and fsync it. We want a power
++# failure to happen after the fsync, so that we have an inode with a link
++# count of 0 in our log/journal.
++$XFS_IO_PROG -T \
++	-c "pwrite -S 0xab 0 64K" \
++	-c "fsync" \
++	$SCRATCH_MNT | _filter_xfs_io
++
++# Simulate a power failure and mount the filesystem to check that it succeeds.
++_flakey_drop_and_remount
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/generic/506.out b/tests/generic/506.out
+new file mode 100644
+index 00000000..f522e663
+--- /dev/null
++++ b/tests/generic/506.out
+@@ -0,0 +1,3 @@
++QA output created by 506
++wrote 65536/65536 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/generic/group b/tests/generic/group
+index 4da0e188..2e2a6247 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -508,3 +508,4 @@
+ 503 auto quick dax punch collapse zero
+ 504 auto quick locks
+ 505 shutdown auto quick metadata
++506 auto quick log
 -- 
-2.9.5
+2.11.0
