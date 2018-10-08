@@ -1,99 +1,77 @@
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:45529 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726448AbeJGWj3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 7 Oct 2018 18:39:29 -0400
-Received: by mail-pl1-f195.google.com with SMTP id y15-v6so8925464plr.12
-        for <fstests@vger.kernel.org>; Sun, 07 Oct 2018 08:31:51 -0700 (PDT)
-Message-ID: <5bba26e5.1c69fb81.86b01.9020@mx.google.com>
-Date: Sun, 07 Oct 2018 23:31:42 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to c85c46531b4f
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="8KmEtuT3Cb5O"
-Content-Disposition: inline
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:50430 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1726020AbeJHNbG (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Oct 2018 09:31:06 -0400
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id w986Jps3027732
+        for <fstests@vger.kernel.org>; Mon, 8 Oct 2018 02:21:00 -0400
+Received: from e32.co.us.ibm.com (e32.co.us.ibm.com [32.97.110.150])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2n008hktc5-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 08 Oct 2018 02:21:00 -0400
+Received: from localhost
+        by e32.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Mon, 8 Oct 2018 00:20:59 -0600
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH 1/2] xfs/139: work with 1k block size
+Date: Mon,  8 Oct 2018 11:53:02 +0530
+Message-Id: <20181008062303.32286-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com, darrick.wong@oracle.com, zlang@redhat.com, david@fromorbit.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Commit 0e2b99951fa11ea8a8adf4676aef130cfeeb5250 (xfs/139: work with 64k
+block size) created a test filesystem with AG size set to (8192 * block
+size). When working with a 1k block sized XFS filesystem, this tries to
+set the AG size to 8MiB which is less than the minimum AG size of
+16MiB. Hence creation of the filesystem had actually failed.
 
---8KmEtuT3Cb5O
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This commit fixes the issue by setting AG size to be (16384 * block
+size).
 
-Hi all,
+Reported-by: Dave Chinner <david@fromorbit.com>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+---
+ tests/xfs/139     | 4 ++--
+ tests/xfs/139.out | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. I'm mainly pulling in the _scratch_mkfs_sized fixes for
-btrfs from Anand Jain in this update, which increase the filesystem size
-created to 256M so that btrfs is not in mixed mode.
-
-Note that the new btrfs/172 test would fail with current Linus tree.
-
-Many thanks to those who helped review and test patches!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-c85c46531b4f generic/387: fix _scratch_mkfs_sized option for btrfs
-
-New commits:
-
-Anand Jain (6):
-      [4c2c678cd56a] btrfs: test unaligned punch hole at ENOSPC
-      [50c1905c2795] btrfs: _scratch_mkfs_sized fix min size without mixed option
-      [36a371bdf8bc] generic/015: fix to test the default non-mixed mode
-      [626231c289b8] generic/083: fix btrfs fs size for default mode
-      [96621a053236] generic/449: fix fs size for _scratch_mkfs_sized for btrfs
-      [c85c46531b4f] generic/387: fix _scratch_mkfs_sized option for btrfs
-
-Chao Yu (1):
-      [f6abb65ebcee] common/quota: adapt _require_prjquota() for f2fs
-
-Eric Sandeen (1):
-      [1895cf6b659e] xfs/122: add struct xfs_unmount_log_format
-
-
-Code Diffstat:
-
- common/quota        |  7 +++++
- common/rc           |  5 +++-
- tests/btrfs/172     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/172.out |  2 ++
- tests/btrfs/group   |  1 +
- tests/generic/015   |  8 +++---
- tests/generic/083   |  2 +-
- tests/generic/387   |  3 ++-
- tests/generic/449   |  4 +--
- tests/xfs/122.out   |  1 +
- 10 files changed, 96 insertions(+), 10 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---8KmEtuT3Cb5O
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbuiZiAAoJECZSqilcj+djZGYQAMf+wwRorUlIC01SP6KdnAPa
-Rtm29DgsV7OpzAkeF+4P8rPoxPkWRRSFJOK4Cpo+v9tg60/6xirJFsrWwCttnJst
-hajSrZMFT0yo1qGtuArVpcaw+G6tTLXazZVNDMfWmRyk6owuv08/57CpVyz1BSSI
-4jcch4vjDgwIsPk43p1Be0LMmfy0x7TocEdwhILsr95FyJoJ7OJQ3hF/L3U8nGY5
-oW9W4+zAshtka7MFdaPrpxG01sVpu1XgkLLuY5l3RRJJZHmZ5NbgGnmsmISSxhnD
-hT/zOAlnl9TreHzXEYYupnaUald8xQ/1LqwxXREzqcSnOkpEs/2DqAcc5k5wAtPm
-BrmOdaG5NRFQidFI7FrXcUXhPGgWybjPtMXFyl6Xt0N/DrzhNyZnrHfyIlaSkpXd
-ChPoI4+GVaj56EzDFT+PMm6jGMKwPqHXEjUnx4ZLQ48DLIqNkV66UOHtQU5ugQYm
-/tGnbia3s917m7p9eZESOJ9ShVYMzpaBHemJ5eYBQWo55mMbHxmTWKecV0nbDQ9M
-fW5Tik2QFZkIH2+QblXA7atLdDI2rc8s2AVw9Mx3i+UPCbVhWsoYuIeGRlR8iLY3
-6ABJg2SO5OwwJMA2l1HI+RMsEFZR6bPY+Z3DTykYVw8pXIcQE0GW4NJPgSoFBogq
-b+t/3XPnmrgeHz2bToR+
-=rmMc
------END PGP SIGNATURE-----
-
---8KmEtuT3Cb5O--
+diff --git a/tests/xfs/139 b/tests/xfs/139
+index c074273..3a20ce5 100755
+--- a/tests/xfs/139
++++ b/tests/xfs/139
+@@ -40,14 +40,14 @@ blksz=$(_get_file_block_size $SCRATCH_MNT)
+ _scratch_unmount
+ 
+ echo "Format and mount"
+-_scratch_mkfs -d agsize=$((8192 * $blksz)) > $seqres.full 2>&1
++_scratch_mkfs -d agsize=$((16384 * $blksz)) > $seqres.full 2>&1
+ _scratch_mount >> $seqres.full 2>&1
+ 
+ testdir=$SCRATCH_MNT/test-$seq
+ mkdir $testdir
+ 
+ echo "Create the original files"
+-sz=$((12288 * $blksz))
++sz=$((20480 * $blksz))
+ _pwrite_byte 0x61 0 $sz $testdir/file1 >> $seqres.full
+ _cp_reflink $testdir/file1 $testdir/file2 >> $seqres.full
+ _scratch_cycle_mount
+diff --git a/tests/xfs/139.out b/tests/xfs/139.out
+index 72909bc..1005d5c 100644
+--- a/tests/xfs/139.out
++++ b/tests/xfs/139.out
+@@ -5,7 +5,7 @@ CoW every other block
+ Compare files
+ 0 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62 62
+ *
+-30000
++50000
+ 0 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61
+ *
+-30000
++50000
+-- 
+2.9.5
