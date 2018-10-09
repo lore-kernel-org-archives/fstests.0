@@ -1,108 +1,68 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:42652 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725759AbeJIGPC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 9 Oct 2018 02:15:02 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2] fstests: btrfs verify hardening agaist duplicate fsid
-Date: Tue,  9 Oct 2018 02:14:52 +0800
-Message-Id: <1539022492-3449-1-git-send-email-anand.jain@oracle.com>
-In-Reply-To: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
-References: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
+Received: from mail.kernel.org ([198.145.29.99]:49008 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726468AbeJIVWt (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 9 Oct 2018 17:22:49 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] generic: test for file fsync after moving it to a new parent directory
+Date: Tue,  9 Oct 2018 15:05:35 +0100
+Message-Id: <20181009140535.31264-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-We have a known bug in btrfs, that we let the device path be changed
-after the device has been mounted. So using this loop hole the new
-copied device would appears as if its mounted immediately after its
-been copied. So this test case reproduces this issue.
+From: Filipe Manana <fdmanana@suse.com>
 
-For example:
+Test that if we move a file from a directory B to a directory A, replace
+directory B with directory A, fsync the file and then power fail, after
+mounting the filesystem the file has a single parent, named B and there
+is no longer any directory with the name A.
 
-Initially.. /dev/mmcblk0p4 is mounted as /
+This test is motivated by a bug found in btrfs which is fixed by a patch
+for the linux kernel titled:
 
-lsblk
-NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-mmcblk0     179:0    0 29.2G  0 disk
-|-mmcblk0p4 179:4    0    4G  0 part /
-|-mmcblk0p2 179:2    0  500M  0 part /boot
-|-mmcblk0p3 179:3    0  256M  0 part [SWAP]
-`-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+  "Btrfs: fix wrong dentries after fsync of file that got its parent
+   replaced"
 
-btrfs fi show
-Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
-    Total devices 1 FS bytes used 1.40GiB
-    devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
+This test passes on ext4, xfs and patched btrfs but it hangs on f2fs (the
+fsck.f2fs process seems stuck).
 
-Copy mmcblk0 to sda
-dd if=/dev/mmcblk0 of=/dev/sda
-
-And immediately after the copy completes the change in the device
-superblock is notified which the automount scans using
-btrfs device scan and the new device sda becomes the mounted root
-device.
-
-lsblk
-NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-sda           8:0    1 14.9G  0 disk
-|-sda4        8:4    1    4G  0 part /
-|-sda2        8:2    1  500M  0 part
-|-sda3        8:3    1  256M  0 part
-`-sda1        8:1    1  256M  0 part
-mmcblk0     179:0    0 29.2G  0 disk
-|-mmcblk0p4 179:4    0    4G  0 part
-|-mmcblk0p2 179:2    0  500M  0 part /boot
-|-mmcblk0p3 179:3    0  256M  0 part [SWAP]
-`-mmcblk0p1 179:1    0  256M  0 part /boot/efi
-btrfs fi show /
-Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
-    Total devices 1 FS bytes used 1.40GiB
-    devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
-
-The bug is quite nasty that you can't either unmount /dev/sda4 or
-/dev/mmcblk0p4. And the problem does not get solved until you take
-the sda out of the system on to another system to change its fsid using
-the 'btrfstune -u' command.
-
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/173     | 88 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/173.out |  6 ++++
- tests/btrfs/group   |  1 +
- 3 files changed, 95 insertions(+)
- create mode 100755 tests/btrfs/173
- create mode 100644 tests/btrfs/173.out
+ tests/generic/507     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/507.out |  7 +++++
+ tests/generic/group   |  1 +
+ 3 files changed, 79 insertions(+)
+ create mode 100755 tests/generic/507
+ create mode 100644 tests/generic/507.out
 
-diff --git a/tests/btrfs/173 b/tests/btrfs/173
+diff --git a/tests/generic/507 b/tests/generic/507
 new file mode 100755
-index 000000000000..b466ae921e19
+index 00000000..f23db677
 --- /dev/null
-+++ b/tests/btrfs/173
-@@ -0,0 +1,88 @@
++++ b/tests/generic/507
+@@ -0,0 +1,71 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle. All Rights Reserved.
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test 173
++# FS QA Test No. 507
 +#
-+# Fuzzy test for FS image duplication.
-+#  Could be fixed by
-+#    [patch] btrfs: harden agaist duplicate fsid
++# Test that if we move a file from a directory B to a directory A, replace
++# directory B with directory A, fsync the file and then power fail, after
++# mounting the filesystem the file has a single parent, named B and there
++# is no longer any directory with the name A.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
-+
-+here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+mnt=$TEST_DIR/$seq.mnt
 +_cleanup()
 +{
-+	rm -rf $mnt > /dev/null 2>&1
++	_cleanup_flakey
 +	cd /
 +	rm -f $tmp.*
 +}
@@ -110,84 +70,70 @@ index 000000000000..b466ae921e19
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
++. ./common/dmflakey
 +
 +# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch_dev_pool 2
-+_scratch_dev_pool_get 2
++_require_scratch
++_require_dm_target flakey
 +
-+dev_foo=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-+dev_bar=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
++rm -f $seqres.full
 +
-+echo dev_foo=$dev_foo >> $seqres.full
-+echo dev_bar=$dev_bar >> $seqres.full
-+echo | tee -a $seqres.full
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
 +
-+rm -rf $mnt > /dev/null 2>&1
-+mkdir $mnt
-+_mkfs_dev $dev_foo
-+_mount $dev_foo $mnt
++# Create our test directories and file.
++mkdir $SCRATCH_MNT/testdir
++mkdir $SCRATCH_MNT/testdir/A
++mkdir $SCRATCH_MNT/testdir/B
++touch $SCRATCH_MNT/testdir/B/bar
 +
-+check_btrfs_mount()
-+{
-+	local x=$(findmnt $mnt | grep -v TARGET | awk '{print $2}')
-+	[[ $x == $dev_foo ]] && echo DEV_FOO
-+	[[ $x == $dev_bar ]] && echo DEV_BAR
-+}
++# Make sure everything done so far is durably persisted.
++sync
 +
-+echo MNT $(check_btrfs_mount)
++# Now move our file bar from directory B to directory A and then replace
++# directory B with directory A, also renaming directory A to B. Finally
++# fsync file bar.
++mv $SCRATCH_MNT/testdir/B/bar $SCRATCH_MNT/testdir/A/bar
++mv -T $SCRATCH_MNT/testdir/A $SCRATCH_MNT/testdir/B
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/B/bar
 +
-+for sb_bytenr in 65536 67108864
-+do
-+	echo -n "dd status=none if=$dev_foo of=$dev_bar bs=1 "\
-+		"seek=$sb_bytenr skip=$sb_bytenr count=4096" >> $seqres.full
-+	dd status=none if=$dev_foo of=$dev_bar bs=1 seek=$sb_bytenr \
-+				skip=$sb_bytenr count=4096 >> $seqres.full 2>&1
-+	echo ..:$? >> $seqres.full
-+done
++# Simulate a power failure and mount the filesystem. We expect file bar
++# to exist and have a single parent directory, named B, and that no
++# directory named A exists.
++_flakey_drop_and_remount
 +
-+#Original device is mounted, scan of its clone should fail
-+$BTRFS_UTIL_PROG device scan $dev_bar >> $seqres.full 2>&1
-+echo btrfs device scan dev_bar ...:$?| tee -a $seqres.full
++echo "Filesystem content after power failure:"
++ls -R $SCRATCH_MNT/testdir | _filter_scratch
 +
-+echo MNT $(check_btrfs_mount)
++_unmount_flakey
 +
-+#Original device scan should be successful
-+$BTRFS_UTIL_PROG device scan $dev_foo >> $seqres.full 2>&1
-+echo btrfs device scan dev_foo ...:$?| tee -a $seqres.full
-+
-+umount $mnt > /dev/null 2>&1
-+_scratch_dev_pool_put
-+
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
+diff --git a/tests/generic/507.out b/tests/generic/507.out
 new file mode 100644
-index 000000000000..3c7e3fb4e3f7
+index 00000000..49877654
 --- /dev/null
-+++ b/tests/btrfs/173.out
-@@ -0,0 +1,6 @@
-+QA output created by 173
++++ b/tests/generic/507.out
+@@ -0,0 +1,7 @@
++QA output created by 507
++Filesystem content after power failure:
++SCRATCH_MNT/testdir:
++B
 +
-+MNT DEV_FOO
-+btrfs device scan dev_bar ...:1
-+MNT DEV_FOO
-+btrfs device scan dev_foo ...:0
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 45782565c3b7..b2f1393f3e97 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -175,3 +175,4 @@
- 170 auto quick snapshot
- 171 auto quick qgroup
- 172 auto quick punch
-+173 volume
++SCRATCH_MNT/testdir/B:
++bar
+diff --git a/tests/generic/group b/tests/generic/group
+index 2e2a6247..f4d1524b 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -509,3 +509,4 @@
+ 504 auto quick locks
+ 505 shutdown auto quick metadata
+ 506 auto quick log
++507 auto quick log
 -- 
-1.8.3.1
+2.11.0
