@@ -1,139 +1,46 @@
-Received: from mail.kernel.org ([198.145.29.99]:49008 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726468AbeJIVWt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Oct 2018 17:22:49 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] generic: test for file fsync after moving it to a new parent directory
-Date: Tue,  9 Oct 2018 15:05:35 +0100
-Message-Id: <20181009140535.31264-1-fdmanana@kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:33006 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726047AbeJKHUb (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Oct 2018 03:20:31 -0400
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 3858FB0B2
+        for <fstests@vger.kernel.org>; Wed, 10 Oct 2018 23:56:00 +0000 (UTC)
+From: Anthony Iliopoulos <ailiopoulos@suse.com>
+Subject: [PATCH] common/reflink: fix error messages in _require_scratch_dedupe()
+Date: Thu, 11 Oct 2018 01:55:50 +0200
+Message-Id: <20181010235550.18742-1-ailiopoulos@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: Anthony Iliopoulos <ailiopoulos@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+In case dedupe returns an error in _require_scratch_dedupe(),
+report the error for the scratch rather than for the test
+filesystem.
 
-Test that if we move a file from a directory B to a directory A, replace
-directory B with directory A, fsync the file and then power fail, after
-mounting the filesystem the file has a single parent, named B and there
-is no longer any directory with the name A.
-
-This test is motivated by a bug found in btrfs which is fixed by a patch
-for the linux kernel titled:
-
-  "Btrfs: fix wrong dentries after fsync of file that got its parent
-   replaced"
-
-This test passes on ext4, xfs and patched btrfs but it hangs on f2fs (the
-fsck.f2fs process seems stuck).
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Anthony Iliopoulos <ailiopoulos@suse.com>
 ---
- tests/generic/507     | 71 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/507.out |  7 +++++
- tests/generic/group   |  1 +
- 3 files changed, 79 insertions(+)
- create mode 100755 tests/generic/507
- create mode 100644 tests/generic/507.out
+ common/reflink | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-diff --git a/tests/generic/507 b/tests/generic/507
-new file mode 100755
-index 00000000..f23db677
---- /dev/null
-+++ b/tests/generic/507
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 507
-+#
-+# Test that if we move a file from a directory B to a directory A, replace
-+# directory B with directory A, fsync the file and then power fail, after
-+# mounting the filesystem the file has a single parent, named B and there
-+# is no longer any directory with the name A.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	_cleanup_flakey
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/dmflakey
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_dm_target flakey
-+
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_require_metadata_journaling $SCRATCH_DEV
-+_init_flakey
-+_mount_flakey
-+
-+# Create our test directories and file.
-+mkdir $SCRATCH_MNT/testdir
-+mkdir $SCRATCH_MNT/testdir/A
-+mkdir $SCRATCH_MNT/testdir/B
-+touch $SCRATCH_MNT/testdir/B/bar
-+
-+# Make sure everything done so far is durably persisted.
-+sync
-+
-+# Now move our file bar from directory B to directory A and then replace
-+# directory B with directory A, also renaming directory A to B. Finally
-+# fsync file bar.
-+mv $SCRATCH_MNT/testdir/B/bar $SCRATCH_MNT/testdir/A/bar
-+mv -T $SCRATCH_MNT/testdir/A $SCRATCH_MNT/testdir/B
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/B/bar
-+
-+# Simulate a power failure and mount the filesystem. We expect file bar
-+# to exist and have a single parent directory, named B, and that no
-+# directory named A exists.
-+_flakey_drop_and_remount
-+
-+echo "Filesystem content after power failure:"
-+ls -R $SCRATCH_MNT/testdir | _filter_scratch
-+
-+_unmount_flakey
-+
-+status=0
-+exit
-diff --git a/tests/generic/507.out b/tests/generic/507.out
-new file mode 100644
-index 00000000..49877654
---- /dev/null
-+++ b/tests/generic/507.out
-@@ -0,0 +1,7 @@
-+QA output created by 507
-+Filesystem content after power failure:
-+SCRATCH_MNT/testdir:
-+B
-+
-+SCRATCH_MNT/testdir/B:
-+bar
-diff --git a/tests/generic/group b/tests/generic/group
-index 2e2a6247..f4d1524b 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -509,3 +509,4 @@
- 504 auto quick locks
- 505 shutdown auto quick metadata
- 506 auto quick log
-+507 auto quick log
+diff --git a/common/reflink b/common/reflink
+index e2663277..11561a76 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -145,11 +145,11 @@ _require_scratch_dedupe()
+ 	$XFS_IO_PROG -f -c "pwrite -S 0x61 0 65536" "$SCRATCH_MNT/file2" > /dev/null
+ 	testio="$($XFS_IO_PROG -f -c "dedupe $SCRATCH_MNT/file1 0 0 65536" "$SCRATCH_MNT/file2" 2>&1)"
+ 	echo $testio | grep -q "Operation not supported" && \
+-		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
++		_notrun "Dedupe not supported by scratch filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Inappropriate ioctl for device" && \
+-		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
++		_notrun "Dedupe not supported by scratch filesystem type: $FSTYP"
+ 	echo $testio | grep -q "Invalid argument" && \
+-		_notrun "Dedupe not supported by test filesystem type: $FSTYP"
++		_notrun "Dedupe not supported by scratch filesystem type: $FSTYP"
+ 	_scratch_unmount
+ }
+ 
 -- 
-2.11.0
+2.16.3
