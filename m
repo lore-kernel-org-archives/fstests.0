@@ -1,53 +1,43 @@
-Received: from mail-yb1-f196.google.com ([209.85.219.196]:37973 "EHLO
-        mail-yb1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727790AbeJKT2n (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Oct 2018 15:28:43 -0400
-Received: by mail-yb1-f196.google.com with SMTP id e190-v6so3489814ybb.5
-        for <fstests@vger.kernel.org>; Thu, 11 Oct 2018 05:01:48 -0700 (PDT)
+Received: from szxga04-in.huawei.com ([45.249.212.190]:13620 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726126AbeJKU1p (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Oct 2018 16:27:45 -0400
+Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.60])
+        by Forcepoint Email with ESMTP id 4B1F56060A308
+        for <fstests@vger.kernel.org>; Thu, 11 Oct 2018 21:00:35 +0800 (CST)
+From: Yufen Yu <yuyufen@huawei.com>
+Subject: [PATCH] ext4/018: fix mismatch wildcard with debugfs
+Date: Thu, 11 Oct 2018 21:14:10 +0800
+Message-ID: <20181011131410.3587-1-yuyufen@huawei.com>
 MIME-Version: 1.0
-References: <20180905190700.66123-1-ebiggers@kernel.org> <20180915193657.GC9979@thunk.org>
- <20181003233717.GA58226@gmail.com> <20181004023502.GA646@thunk.org>
-In-Reply-To: <20181004023502.GA646@thunk.org>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 11 Oct 2018 15:01:36 +0300
-Message-ID: <CAOQ4uxibDWQPh_Vno9s2RUXkrkSR0kStd2r3UXpaK_XV681oVg@mail.gmail.com>
-Subject: Re: [PATCH resend] android-xfstests: fix finding FS_TYPE when
- userdata is on dm device
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Tso <tytso@mit.edu>
-Cc: ebiggers@kernel.org, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: Yufen Yu <yuyufen@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 4, 2018 at 5:35 AM Theodore Y. Ts'o <tytso@mit.edu> wrote:
->
-> On Wed, Oct 03, 2018 at 04:37:18PM -0700, Eric Biggers wrote:
-> >
-> > Hi Ted, are you planning to push this out?
-> >
->
-> Oops, sorry.   Pushed out now.
->
+For the new version of debugfs(v1.44.0+), it changes "File ACL:" format
+from "%sFile ACL: %llu    Directory ACL: %d\n" to "%sFile ACL: %llu\n".
 
-Ted,
+Thus, update this case accordingly.
 
-FYI, this is pushed to github, but not kernel.org tree.
-Intentional?
+Signed-off-by: Yufen Yu <yuyufen@huawei.com>
+---
+ tests/ext4/018 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-FYI2, I started trying to build a kvm-xfstests image with Debian buster.
-First thing I ran into with setup-buildchroot is that golang-1.8-go
-package is not available.
-I suppose golang is for syzbot? Their wiki recommends to use
-golang-go for debian based releases, which does work for buster.
-
-Now I hit an error in ./gen-image:
-W: Couldn't download package openssl (ver 1.1.0f-3+deb9u1 arch amd64) at
-http://mirrors.kernel.org/debian/pool/main/o/openssl/openssl_1.1.0f-3+deb9u1_amd64.deb
-I see that this pkg doesn't exist in the mirror, but this pkg does
-exists (deb9u2):
-http://mirrors.edge.kernel.org/debian/pool/main/o/openssl/openssl_1.1.0f-3+deb9u2_amd64.deb
-
-Do you know what that is about?
-
-Thanks,
-Amir.
+diff --git a/tests/ext4/018 b/tests/ext4/018
+index 0116c5f7..eb6d827b 100755
+--- a/tests/ext4/018
++++ b/tests/ext4/018
+@@ -55,7 +55,7 @@ echo "+ check fs"
+ e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
+ 
+ echo "+ corrupt image"
+-blk="$(debugfs -R 'stat /attrfile' "${SCRATCH_DEV}" 2> /dev/null | grep 'File ACL:' | sed -e 's/^.*File ACL: \([0-9]*\).*Directory.*$/\1/g')"
++blk="$(debugfs -R 'stat /attrfile' "${SCRATCH_DEV}" 2> /dev/null | grep 'File ACL:' | sed -e 's/^.*File ACL: \([0-9]*\)/\1/g')"
+ $XFS_IO_PROG -f -c "pwrite -S 0x62 $((blk * blksz + 20)) 8" "${SCRATCH_DEV}" >> $seqres.full
+ 
+ echo "+ mount image"
+-- 
+2.13.6
