@@ -1,304 +1,40 @@
-Received: from mail-wm1-f68.google.com ([209.85.128.68]:37384 "EHLO
-        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725917AbeJPEQU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Oct 2018 00:16:20 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay: check expected fsck.overlay exit codes
-Date: Mon, 15 Oct 2018 23:29:19 +0300
-Message-Id: <20181015202919.23679-1-amir73il@gmail.com>
+Received: from mail-wr1-f47.google.com ([209.85.221.47]:46710 "EHLO
+        mail-wr1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726112AbeJPEpR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Oct 2018 00:45:17 -0400
+Received: by mail-wr1-f47.google.com with SMTP id n11-v6so22841057wru.13
+        for <fstests@vger.kernel.org>; Mon, 15 Oct 2018 13:58:20 -0700 (PDT)
+MIME-Version: 1.0
+From: Jayashree Mohan <jayashree2912@gmail.com>
+Date: Mon, 15 Oct 2018 15:58:06 -0500
+Message-ID: <CA+EzBbDZ5QZPqbgicY6Ar=uroM9a0-7b8PyUBdwYGMwXgBEanw@mail.gmail.com>
+Subject: Submitting patches to xfstests based on OSDI '18 paper (CrashMonkey)
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: zhangyi <yi.zhang@huawei.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>
+Cc: Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-The latest version of fsck.overlay now conforms to e2fsck exit codes.
-Adjust the tests to correctly check the expected exit codes.
+Hi Ted,
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+Thanks for encouraging and helping us in the course of building
+CrashMonkey for file-system crash consistency testing. Our work is
+published in OSDI '18
+(https://www.usenix.org/conference/osdi18/presentation/mohan). While
+our goal is to enable the integration of a tool like CrashMonkey in
+the file-system development cycle, we think it would be beneficial to
+add the test suite of about 300 workloads (consisting of 1 core
+file-system operation) that we systematically generated, to xfstest.
+The complete list of these workloads is in the CrashMonkey repository
+(https://github.com/utsaslab/crashmonkey/tree/master/code/tests/seq1).
+Given that developers currently use the xfstest, this addition would
+ensure that simple crash-consistency bugs are eliminated from any
+future kernel versions.
 
-Zhangyi,
-
-With fsck.overlay from your master branch all the -g overlay/fsck
-test fail.
-
-Please confirm that this patch correctly describes expected behavior.
-
-The test overlay/045 still fails on "fsck should be happy" assertions.
-Does fsck.overlay actually fixes anything in those cases? or is not
-returning FSCK_OK an oversight?
+If this idea sounds good to you, we can write a patch for including
+our workloads into xfstest, using dm_flakey. If there's some specific
+format you want us to follow while writing patches for these
+crash-consistency tests, we are happy to adopt it.
 
 Thanks,
-Amir.
-
- tests/overlay/045 | 35 +++++++++++++++++++----------------
- tests/overlay/046 | 46 ++++++++++++++++++++++++----------------------
- tests/overlay/056 | 12 ++++++------
- 3 files changed, 49 insertions(+), 44 deletions(-)
-
-diff --git a/tests/overlay/045 b/tests/overlay/045
-index acc70871..4d06f7a1 100755
---- a/tests/overlay/045
-+++ b/tests/overlay/045
-@@ -96,8 +96,8 @@ echo "+ Orphan whiteout"
- make_test_dirs
- make_whiteout $lowerdir/foo $upperdir/{foo,bar}
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- ls $lowerdir
- ls $upperdir
- 
-@@ -108,7 +108,8 @@ touch $lowerdir2/{foo,bar}
- make_whiteout $upperdir/foo $lowerdir/bar
- 
- _overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
--	 $seqres.full 2>&1 || echo "fsck should not fail"
-+	$seqres.full 2>&1
-+[ $? = 0 ] || echo "fsck should be happy"
- check_whiteout $upperdir/foo $lowerdir/bar
- 
- # Test orphan whiteout in opaque directory, should remove
-@@ -119,8 +120,8 @@ touch $lowerdir/testdir/foo
- make_opaque_dir $upperdir/testdir
- make_whiteout $upperdir/testdir/foo
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- ls $upperdir/testdir
- 
- # Test orphan whiteout whose parent path is not an merged directory,
-@@ -136,7 +137,8 @@ make_opaque_dir $lowerdir/testdir3
- make_whiteout $upperdir/{testdir1/foo,/testdir2/foo,testdir3/foo,testdir4/foo}
- 
- _overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
--	$seqres.full 2>&1 || echo "fsck should not fail"
-+	$seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- ls $upperdir/testdir1
- ls $upperdir/testdir2
- ls $upperdir/testdir3
-@@ -150,8 +152,8 @@ touch $lowerdir/testdir/foo
- make_redirect_dir $upperdir/testdir "origin"
- make_whiteout $upperdir/testdir/foo
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- ls $upperdir/testdir
- 
- # Test valid whiteout in redirect directory cover file in lower
-@@ -163,8 +165,8 @@ touch $lowerdir/origin/foo
- make_redirect_dir $upperdir/testdir "origin"
- make_whiteout $upperdir/testdir/foo
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 0 ] || echo "fsck should be happy"
- check_whiteout $upperdir/testdir/foo
- 
- # Test valid whiteout covering lower target whose parent directory
-@@ -177,8 +179,9 @@ make_redirect_dir $lowerdir/testdir "origin"
- mkdir -p $upperdir/testdir/subdir
- make_whiteout $upperdir/testdir/subdir/foo
- 
--_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p \
--	>> $seqres.full 2>&1 || echo "fsck should not fail"
-+_overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
-+	$seqres.full 2>&1
-+[ $? = 0 ] || echo "fsck should be happy"
- check_whiteout $upperdir/testdir/subdir/foo
- 
- # Test invalid whiteout in opaque subdirectory in a redirect directory,
-@@ -191,8 +194,8 @@ make_redirect_dir $upperdir/testdir "origin"
- make_opaque_dir $upperdir/testdir/subdir
- make_whiteout $upperdir/testdir/subdir/foo
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- ls $upperdir/testdir/subdir
- 
- # Test valid whiteout in reidrect subdirectory in a opaque directory
-@@ -205,8 +208,8 @@ make_opaque_dir $upperdir/testdir
- make_redirect_dir $upperdir/testdir/subdir "/origin"
- make_whiteout $upperdir/testdir/subdir/foo
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--        echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 0 ] || echo "fsck should be happy"
- check_whiteout $upperdir/testdir/subdir/foo
- 
- # success, all done
-diff --git a/tests/overlay/046 b/tests/overlay/046
-index 6338a383..d4dc0977 100755
---- a/tests/overlay/046
-+++ b/tests/overlay/046
-@@ -121,8 +121,8 @@ echo "+ Invalid redirect"
- make_test_dirs
- make_redirect_dir $upperdir/testdir "invalid"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_no_redirect $upperdir/testdir
- 
- # Test invalid redirect xattr point to a file origin, should remove
-@@ -131,8 +131,8 @@ make_test_dirs
- touch $lowerdir/origin
- make_redirect_dir $upperdir/testdir "origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_no_redirect $upperdir/testdir
- 
- # Test valid redirect xattr point to a directory origin in the same directory,
-@@ -143,8 +143,8 @@ mkdir $lowerdir/origin
- make_whiteout $upperdir/origin
- make_redirect_dir $upperdir/testdir "origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_redirect $upperdir/testdir "origin"
- 
- # Test valid redirect xattr point to a directory origin in different directories
-@@ -155,8 +155,8 @@ mkdir $lowerdir/origin
- make_whiteout $upperdir/origin
- make_redirect_dir $upperdir/testdir1/testdir2 "/origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_redirect $upperdir/testdir1/testdir2 "/origin"
- 
- # Test valid redirect xattr but missing whiteout to cover lower target,
-@@ -166,8 +166,8 @@ make_test_dirs
- mkdir $lowerdir/origin
- make_redirect_dir $upperdir/testdir "origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_redirect $upperdir/testdir "origin"
- check_whiteout $upperdir/origin
- 
-@@ -178,8 +178,8 @@ mkdir $lowerdir/{testdir1,testdir2}
- make_redirect_dir $upperdir/testdir1 "testdir2"
- make_redirect_dir $upperdir/testdir2 "testdir1"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_redirect $upperdir/testdir1 "testdir2"
- check_redirect $upperdir/testdir2 "testdir1"
- 
-@@ -191,8 +191,8 @@ mkdir $lowerdir/testdir
- make_redirect_dir $upperdir/testdir "invalid"
- 
- # Question get yes answer: Should set opaque dir ?
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_no_redirect $upperdir/testdir
- check_opaque $upperdir/testdir
- 
-@@ -206,11 +206,13 @@ make_redirect_dir $lowerdir/testdir2 "origin"
- make_redirect_dir $upperdir/testdir3 "origin"
- 
- _overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -p >> \
--	$seqres.full 2>&1 && echo "fsck should fail"
-+	$seqres.full 2>&1
-+[ $? = 4 ] || echo "fsck should fail to correct errors"
- 
- # Question get yes answer: Duplicate redirect directory, remove xattr ?
- _overlay_fsck_dirs "$lowerdir:$lowerdir2" $upperdir $workdir -y >> \
--	$seqres.full 2>&1 || echo "fsck should not fail"
-+	$seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- redirect_1=`check_redirect $lowerdir/testdir1 "origin" 2>/dev/null`
- redirect_2=`check_redirect $lowerdir/testdir2 "origin" 2>/dev/null`
- [[ $redirect_1 == $redirect_2 ]] && echo "Redirect xattr incorrect"
-@@ -223,12 +225,12 @@ make_test_dirs
- mkdir $lowerdir/origin $upperdir/origin
- make_redirect_dir $upperdir/testdir "origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 && \
--	echo "fsck should fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 4 ] || echo "fsck should fail to correct errors"
- 
- # Question get yes answer: Duplicate redirect directory, remove xattr ?
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_no_redirect $upperdir/testdir
- 
- # Test duplicate redirect xattr with lower same name directory exists,
-@@ -240,8 +242,8 @@ make_redirect_dir $upperdir/testdir "invalid"
- 
- # Question one get yes answer: Duplicate redirect directory, remove xattr?
- # Question two get yes answer: Should set opaque dir ?
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -y >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_no_redirect $upperdir/testdir
- check_opaque $upperdir/testdir
- 
-diff --git a/tests/overlay/056 b/tests/overlay/056
-index 44ffb54a..9fccaaea 100755
---- a/tests/overlay/056
-+++ b/tests/overlay/056
-@@ -96,8 +96,8 @@ $UMOUNT_PROG $SCRATCH_MNT
- remove_impure $upperdir/testdir1
- remove_impure $upperdir/testdir2
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_impure $upperdir/testdir1
- check_impure $upperdir/testdir2
- 
-@@ -108,8 +108,8 @@ make_test_dirs
- mkdir $lowerdir/origin
- make_redirect_dir $upperdir/testdir/subdir "/origin"
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_impure $upperdir/testdir
- 
- # Test missing impure xattr in directory which has merge directories,
-@@ -118,8 +118,8 @@ echo "+ Missing impure(3)"
- make_test_dirs
- mkdir $lowerdir/testdir $upperdir/testdir
- 
--_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1 || \
--	echo "fsck should not fail"
-+_overlay_fsck_dirs $lowerdir $upperdir $workdir -p >> $seqres.full 2>&1
-+[ $? = 1 ] || echo "fsck should correct errors"
- check_impure $upperdir
- 
- # success, all done
--- 
-2.17.1
+Jayashree Mohan
