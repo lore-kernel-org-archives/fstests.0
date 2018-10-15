@@ -1,139 +1,131 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:34054 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726339AbeJNXz3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 14 Oct 2018 19:55:29 -0400
-Received: by mail-pf1-f193.google.com with SMTP id f78-v6so2691789pfe.1
-        for <fstests@vger.kernel.org>; Sun, 14 Oct 2018 09:13:57 -0700 (PDT)
-Message-ID: <5bc36b43.1c69fb81.5b833.048f@mx.google.com>
-Date: Mon, 15 Oct 2018 00:13:50 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 6fe6c772f66a
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="UhUpTQrp4CGd"
-Content-Disposition: inline
+Received: from mail.kernel.org ([198.145.29.99]:42456 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726273AbeJOQfj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Oct 2018 12:35:39 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] generic: test fsync after fallocate on a very small file
+Date: Mon, 15 Oct 2018 09:51:17 +0100
+Message-Id: <20181015085117.5767-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Filipe Manana <fdmanana@suse.com>
 
---UhUpTQrp4CGd
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Test that if we have a very small file, with a size smaller than the
+block size, then fallocate a very small range within the block size but
+past the file's current size, fsync the file and then power fail, after
+mounting the filesystem all the file data is there and the file size is
+correct.
 
-Hi all,
+This test is motivated by a failure in btrfs where it triggered an
+assertion when using the no-holes feature, that is, when running with
+MKFS_OPTIONS="-O no-holes". The btrfs issue is fixed by a patch for the
+linux kernel titled:
 
-The master branch of the xfstests repository at:
+ "Btrfs: fix assertion on fsync of regular file when using no-holes
+  feature"
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/generic/512     | 61 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/512.out |  9 ++++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 71 insertions(+)
+ create mode 100755 tests/generic/512
+ create mode 100644 tests/generic/512.out
 
-have just been updated. This is a relatively big update that contains 9 new
-tests and various bug fixes & improvements. Many thanks to all the
-contributors!
-
-There're also some patches not reviewed yet. Specifically, Chandan Rajendra's
-patches for xfs/{139,140} may need some reviews from XFS folks and it'd be good
-to get an ACK from btrfs folks on Anand Jain's btrfs test agains duplicate
-fsid.
-
-generic/{509,510} currently fail on btrfs, other than that I didn't notice any
-new failures.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-6fe6c772f66a src/fiemap-tester: fix getting blocksize on overlayfs
-
-New commits:
-
-Amir Goldstein (1):
-      [6fe6c772f66a] src/fiemap-tester: fix getting blocksize on overlayfs
-
-Anand Jain (1):
-      [32cb15945075] geneirc/077: fix min size for btrfs
-
-Anthony Iliopoulos (1):
-      [60d700e885ff] common/reflink: fix error messages in _require_scratch_dedupe()
-
-Chao Yu (3):
-      [9ca1f65a7bf9] generic: test project id recovery after power failure
-      [1c29d399b6eb] generic: test i_flags recovery after power failure
-      [28c8fb706fee] generic: test creation time recovery after power failure
-
-Darrick J. Wong (5):
-      [d98d483b74a6] generic: another mread-after-eof test
-      [a62490a11844] xfs: test mount time summary counter check and fix
-      [ed9251da1e26] xfs/189: skip 'barrier' mount option test on newer kernels
-      [8cd8fa12e1e4] xfs/270: use _scratch_xfs_set_metadata_field to fuzz rocompat bits
-      [9200725300a1] xfs/288: shut up verifier error
-
-Filipe Manana (2):
-      [2fdaeccead93] generic: test mounting filesystem after fsync of a tmpfile
-      [1b61fc81a568] generic: test for file fsync after moving it to a new parent directory
-
-Johannes Thumshirn (1):
-      [45d1dd73754b] common/rc: fix check for yp
-
-Yufen Yu (1):
-      [1fe8a4d08f86] ext4/018: fix mismatch wildcard with debugfs
-
-
-Code Diffstat:
-
- common/config         |   1 +
- common/rc             |  12 ++++-
- common/reflink        |   6 +--
- src/fiemap-tester.c   |  15 +++++-
- tests/ext4/018        |   2 +-
- tests/generic/077     |  22 ++++++---
- tests/generic/506     |  97 ++++++++++++++++++++++++++++++++++++
- tests/generic/506.out |   2 +
- tests/generic/507     | 133 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/507.out |   2 +
- tests/generic/508     |  96 ++++++++++++++++++++++++++++++++++++
- tests/generic/508.out |   2 +
- tests/generic/509     |  58 ++++++++++++++++++++++
- tests/generic/509.out |   3 ++
- tests/generic/510     |  71 +++++++++++++++++++++++++++
- tests/generic/510.out |   7 +++
- tests/generic/511     |  54 ++++++++++++++++++++
- tests/generic/511.out |   2 +
- tests/generic/group   |   6 +++
- tests/xfs/189         |  14 +++++-
- tests/xfs/270         |   4 +-
- tests/xfs/288         |   2 +-
- tests/xfs/491         |  58 ++++++++++++++++++++++
- tests/xfs/491.out     |   4 ++
- tests/xfs/492         |  58 ++++++++++++++++++++++
- tests/xfs/492.out     |   4 ++
- tests/xfs/493         |  66 +++++++++++++++++++++++++
- tests/xfs/493.out     |   4 ++
- tests/xfs/group       |   3 ++
- 29 files changed, 790 insertions(+), 18 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---UhUpTQrp4CGd
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJbw2rAAAoJECZSqilcj+djufAP/3eHKJpKiSG1CMN+NF0gCWJy
-7BFp+UjTjKusbfYjmorFQv7bMlaTxt1tLrsG73sgJhP/tWog02pQ8CQs0osySO66
-oLUHWQ4qjq//fLRTgwZaV55dnZKd6iGbpk+rrsPCrRJIO1LLua+zwWHgws/fV3FU
-xK8f95rdt6CTKjCy4hKM2n8nDweWEekFtTfRclk4sxboTZxXhR9+t57m+HemvnT5
-ZZcZg+h1Ux1e13AqdI8cePgXbXKQ9XAhl9ecJzoW6x+eCM2YrNAFTpl/jzMSsQfP
-y+U9hwRm+fcNWGmXVIU2OBi99XLb4S9VXU8s91IvqYXhmOqw2/yjjSFhmV5PabKK
-dnL1xNCBY3iDIYiQ0qwE6vLH7OGv+urAlFt2a7s70pPeDYtSkJ1G3bk7UQBNb3Ro
-timCEkw6AXs5mc+AoWGomGwyOkGziTP7luBRDnXVo7QFAap7dBfrHd0cWHsyLpjM
-4ZG+CjR+32s6rX7gxDule4FiUTslPufcXckBZW0EuwuB19MLymLI/7sj3MbAPcdQ
-YyXdQM4ezMg0OGYaw0aqgSFD86mSDrzme6/afbel1DallWfw9ZbVGKK+g0N9/xSM
-Bv4eF1vz26BSOuu2//ojQnTCJY1uy2aAEh2a5B1mQEFNVTZRGIHZQAIzYCDfBXew
-kOK3DKKZJ5YoGGDYpHGf
-=Cw33
------END PGP SIGNATURE-----
-
---UhUpTQrp4CGd--
+diff --git a/tests/generic/512 b/tests/generic/512
+new file mode 100755
+index 00000000..f4e13c68
+--- /dev/null
++++ b/tests/generic/512
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 512
++#
++# Test that if we have a very small file, with a size smaller than the block
++# size, then fallocate a very small range within the block size but past the
++# file's current size, fsync the file and then power fail, after mounting the
++# filesystem all the file data is there and the file size is correct.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command "falloc"
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++$XFS_IO_PROG -f \
++	     -c "pwrite -S 0xb6 0 21" \
++	     -c "falloc 40 40" \
++	     -c "fsync" \
++	     $SCRATCH_MNT/foobar | _filter_xfs_io
++
++# Simulate a power failure and mount the filesystem. We expect no data loss
++# and a correct file size.
++_flakey_drop_and_remount
++
++echo "File content after power failure:"
++od -t x1 -A d $SCRATCH_MNT/foobar
++
++_unmount_flakey
++
++status=0
++exit
+diff --git a/tests/generic/512.out b/tests/generic/512.out
+new file mode 100644
+index 00000000..19a0a1b1
+--- /dev/null
++++ b/tests/generic/512.out
+@@ -0,0 +1,9 @@
++QA output created by 512
++wrote 21/21 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File content after power failure:
++0000000 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6 b6
++0000016 b6 b6 b6 b6 b6 00 00 00 00 00 00 00 00 00 00 00
++0000032 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
++*
++0000080
+diff --git a/tests/generic/group b/tests/generic/group
+index 348214ac..d17a0248 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -514,3 +514,4 @@
+ 509 auto quick log
+ 510 auto quick log
+ 511 auto quick rw zero
++512 auto quick log prealloc
+-- 
+2.11.0
