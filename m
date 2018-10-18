@@ -1,40 +1,47 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:39816 "EHLO huawei.com"
+Received: from szxga05-in.huawei.com ([45.249.212.191]:13671 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727297AbeJRLrz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 18 Oct 2018 07:47:55 -0400
-Received: from DGGEMS414-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id 332014A1D8BA9
-        for <fstests@vger.kernel.org>; Thu, 18 Oct 2018 11:49:00 +0800 (CST)
-Subject: Re: [PATCH v2 3/4] overlay: add fsck.overlay stress test
+        id S1727297AbeJRLt4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 18 Oct 2018 07:49:56 -0400
+Subject: Re: [PATCH v2 0/4] overlay: enhance fsck.overlay test cases
 References: <20181016074559.24728-1-yi.zhang@huawei.com>
- <20181016074559.24728-4-yi.zhang@huawei.com>
- <CAOQ4uxj_6CA1thOwwXOCtgZ3+oBW9g_sH=RY-Np5CmJkdH_+vA@mail.gmail.com>
+ <CAOQ4uxhqJ1XtaDaDbehj6NbLwd1up_00dS7cu5v5QieHre04oA@mail.gmail.com>
+ <CAOQ4uxioM4b0RGddV6arN3AbSr263UzH-Ta4TVbTmWjW6kzRmA@mail.gmail.com>
 From: "zhangyi (F)" <yi.zhang@huawei.com>
-Message-ID: <1d2c7919-64d6-5e2e-9908-5729d4e561df@huawei.com>
-Date: Thu, 18 Oct 2018 11:48:52 +0800
+Message-ID: <eeddc565-bc98-a286-fa1b-d47aa9bbe53d@huawei.com>
+Date: Thu, 18 Oct 2018 11:50:51 +0800
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxj_6CA1thOwwXOCtgZ3+oBW9g_sH=RY-Np5CmJkdH_+vA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxioM4b0RGddV6arN3AbSr263UzH-Ta4TVbTmWjW6kzRmA@mail.gmail.com>
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>
+Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, overlayfs <linux-unionfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/10/16 18:07, Amir Goldstein Wrote:
-> On Tue, Oct 16, 2018 at 10:32 AM zhangyi (F) <yi.zhang@huawei.com> wrote:
+On 2018/10/16 20:39, Amir Goldstein Wrote:
+> On Tue, Oct 16, 2018 at 12:27 PM Amir Goldstein <amir73il@gmail.com> wrote:
 >>
->> Introduce a test case for fsck.overlay which runs on the underlying
->> directories created by fsstress (contain a lot of fs objects) to
->> find potential stability issue.
+>> On Tue, Oct 16, 2018 at 10:32 AM zhangyi (F) <yi.zhang@huawei.com> wrote:
+>>>
+>>> Hi all,
+>>>
+>>> These are the second version of fsck.overlay[1] program related patch set
+>>> (the first one was posted about two mounths ago[2], sorry for the late).
+>>
+>> Oh right. I managed to forget about that...
+>> Thanks for following up.
 >>
 > 
-> Looks good.
-> Did it help you find any stability issues?
+> Zhangyi,
 > 
+> For the next submission, please CC  linux-unionfs.
+> I bet folks are interested to know about progress with fsck.overlay.
+> 
+> And if you can provide a public branch with the tests, that would be nice.
+> 
+Hi, Amir
 
-Not yet, it looks fine everytime I run this test, maybe could help to
-find in the future. :)
+Thanks for your comments, will do.
 
 Thanks,
 Yi.
