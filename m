@@ -1,87 +1,96 @@
-Received: from mail-yb1-f193.google.com ([209.85.219.193]:37494 "EHLO
+Received: from mail-yb1-f193.google.com ([209.85.219.193]:39077 "EHLO
         mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727349AbeJRMnW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 18 Oct 2018 08:43:22 -0400
-Received: by mail-yb1-f193.google.com with SMTP id h1-v6so11336931ybm.4
-        for <fstests@vger.kernel.org>; Wed, 17 Oct 2018 21:44:19 -0700 (PDT)
+        with ESMTP id S1727363AbeJRMyM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 18 Oct 2018 08:54:12 -0400
+Received: by mail-yb1-f193.google.com with SMTP id j193-v6so76730ybj.6
+        for <fstests@vger.kernel.org>; Wed, 17 Oct 2018 21:55:06 -0700 (PDT)
 MIME-Version: 1.0
-References: <20181016074559.24728-1-yi.zhang@huawei.com> <20181016074559.24728-3-yi.zhang@huawei.com>
- <CAOQ4uxhJRxMqMzMn_zm+1LyaAUuRmMmr=YNPshX7U2MAUTtmYw@mail.gmail.com> <c3b4ba3b-001d-ad70-445f-f0c1ce5d17f0@huawei.com>
-In-Reply-To: <c3b4ba3b-001d-ad70-445f-f0c1ce5d17f0@huawei.com>
+References: <20181016074559.24728-1-yi.zhang@huawei.com> <20181016074559.24728-2-yi.zhang@huawei.com>
+In-Reply-To: <20181016074559.24728-2-yi.zhang@huawei.com>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 18 Oct 2018 07:44:07 +0300
-Message-ID: <CAOQ4uxgZCWFR5qr-6z4DH=UrtqX+Q2aY=XiX2bEpFNpeDvN2OA@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] overlay: fix exit code for some fsck.overlay valid cases
+Date: Thu, 18 Oct 2018 07:54:54 +0300
+Message-ID: <CAOQ4uxh+4QaFuv+hrbM+9W0pSUk=UQhULcSmZL0R7wC6u5Ophg@mail.gmail.com>
+Subject: Re: [PATCH v2 1/4] overlay: correct fsck.overlay exit code
 Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
 To: "zhangyi (F)" <yi.zhang@huawei.com>
 Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Oct 18, 2018 at 6:43 AM zhangyi (F) <yi.zhang@huawei.com> wrote:
+On Tue, Oct 16, 2018 at 10:32 AM zhangyi (F) <yi.zhang@huawei.com> wrote:
 >
-> On 2018/10/16 17:26, Amir Goldstein Wrote:
-> > On Tue, Oct 16, 2018 at 10:32 AM zhangyi (F) <yi.zhang@huawei.com> wrot=
-e:
-> >>
-> >> Some valid test cases about fsck.overlay may be not valid enough now,
-> >> they lose the impure xattr on the parent directory of the simluated
-> >> redirect directory, and lose the whiteout which use to cover the origi=
-n
-> >> lower object. Then fsck.overlay will fix these two inconsistency which
-> >> are not those test cases want to cover, thus it will lead to
-> >> fsck.overlay return FSCK_NONDESTRUCT instead of FSCK_OK. Fix these by
-> >> complement the missing overlay related features.
-> >>
-> >> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> >> ---
-> >
-> > Ok. I think it's fine if we merge this fix now, but this way it is goin=
-g
-> > to be quite hard to maintain this test.
-> >
-> > Imagine every time that you add another feature to fsck.overlay,
-> > say "add overlay features xattr", fsck will start returning FSCK_NONDES=
-TRUCT
-> > and break this test.
-> >
-> > Perhaps it would have been better to construct the test cases by:
-> > - mount overlay
-> > - create some copied up/ redirected  dirs and whiteouts
-> > - umount overlay
-> > - make minor modifications to upper/lower layer
-> > - run fsck
-> >
-> > Then you wouldn't need to worry about things like impure parent dir
-> > and future overlay features.
-> >
-> > I will leave it to you to decide if you want to fix this now or the
-> > next time around...
-> >
+> fsck.overlay should return correct exit code to show the file system
+> status after fsck, instead of return 0 means consistency and !0 means
+> inconsistency or something bad happened.
 >
-> Indeed, I thought about this choice. If we create overlay on-disk feature=
-s
-> (xattrs=EF=BC=8Cwhiteouts...) through overlayfs, the fsck tests results b=
-ecomes
-> non-independent. It will depends on the kernel (overlayfs module) user ar=
-e
-> running the test. Imaging if user want to test the latest fsck.overlay
-> on the old kernel which contains a compatible feature xattr fsck.overlay
-> know but the kernel don't, we will get the unexpected result. Or maybe
-> we can add some _require_xxx_feature() helper to enforce user doing test
-> on the kernel which supports the specified feature?
+> Fix the following three exit code after running fsck.overlay:
 >
+> - Return FSCK_OK if the input file system is consistent,
+> - Return FSCK_NONDESTRUCT if the file system inconsistent errors
+>   corrected,
+> - Return FSCK_UNCORRECTED if the file system still have inconsistent
+>   errors.
+>
+> This patch also add a helper function to run fsck.overlay and check
+> the return value is expected or not.
+>
+> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+> ---
+>  common/overlay    | 29 +++++++++++++++++++++++++++++
+>  tests/overlay/045 | 27 +++++++++------------------
+>  tests/overlay/046 | 36 ++++++++++++------------------------
+>  tests/overlay/056 |  9 +++------
+>  4 files changed, 53 insertions(+), 48 deletions(-)
+>
+> diff --git a/common/overlay b/common/overlay
+> index b526f24..4cc2829 100644
+> --- a/common/overlay
+> +++ b/common/overlay
+> @@ -12,6 +12,16 @@ export OVL_XATTR_NLINK="trusted.overlay.nlink"
+>  export OVL_XATTR_UPPER="trusted.overlay.upper"
+>  export OVL_XATTR_METACOPY="trusted.overlay.metacopy"
+>
+> +# Export exit code used by fsck.overlay program
+> +export FSCK_OK=0
+> +export FSCK_NONDESTRUCT=1
+> +export FSCK_REBOOT=2
+> +export FSCK_UNCORRECTED=4
+> +export FSCK_ERROR=8
+> +export FSCK_USAGE=16
+> +export FSCK_CANCELED=32
+> +export FSCK_LIBRARY=128
+> +
+>  # helper function to do the actual overlayfs mount operation
+>  _overlay_mount_dirs()
+>  {
+> @@ -193,6 +203,25 @@ _overlay_fsck_dirs()
+>                            -o workdir=$workdir $*
+>  }
+>
+> +# Run fsck and check the return value
+> +_run_check_fsck()
+> +{
+> +       # The first arguments is the expected fsck program exit code, the
+> +       # remaining arguments are the input parameters of the fsck program.
+> +       local expect_ret=$1
+> +       local lowerdir=$2
+> +       local upperdir=$3
+> +       local workdir=$4
+> +       shift 4
+> +
+> +       _overlay_fsck_dirs $lowerdir $upperdir $workdir $* >> \
+> +                       $seqres.full 2>&1
+> +       fsck_ret=$?
+> +
+> +       [[ "$fsck_ret" == "$expect_ret" ]] || \
+> +               echo "fsck return unexpected value:$expect_ret,$fsck_ret"
+> +}
 
-I think the only sane choice is for this test to relax the expectation of 0
-exit code to "correct" exit code (i.e. _overlay_repair_dirs()) for the "Val=
-id"
-test cases.
-
-Maybe the only fsck run that we are fine with expecting 0 exit code is
--n run. As you can see this is common practice for e2fsck:
-e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not =
-fail"
+Let's put some naming rules into effect here.
+Helper should be prefixed _overlay.
+_run_* to me implies run_check() wrapper.
+So what's a better descriptive name for this helper? I donno, maybe
+_overlay_fsck_expect() ?
 
 Thanks,
 Amir.
