@@ -1,120 +1,281 @@
-Received: from mail-yb1-f196.google.com ([209.85.219.196]:38589 "EHLO
-        mail-yb1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727378AbeJSWG6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 19 Oct 2018 18:06:58 -0400
+Received: from mail-ua1-f67.google.com ([209.85.222.67]:40427 "EHLO
+        mail-ua1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726980AbeJURaK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 21 Oct 2018 13:30:10 -0400
 MIME-Version: 1.0
-References: <20181016074559.24728-1-yi.zhang@huawei.com> <20181016074559.24728-3-yi.zhang@huawei.com>
- <CAOQ4uxhJRxMqMzMn_zm+1LyaAUuRmMmr=YNPshX7U2MAUTtmYw@mail.gmail.com>
- <c3b4ba3b-001d-ad70-445f-f0c1ce5d17f0@huawei.com> <CAOQ4uxgZCWFR5qr-6z4DH=UrtqX+Q2aY=XiX2bEpFNpeDvN2OA@mail.gmail.com>
- <dfe2286a-e0f1-29f7-6ae2-aaf32ad203db@huawei.com>
-In-Reply-To: <dfe2286a-e0f1-29f7-6ae2-aaf32ad203db@huawei.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Fri, 19 Oct 2018 17:00:30 +0300
-Message-ID: <CAOQ4uxjAJ_X0=jCaGqxycOjJYH2XfyNXEH2LS=gDkuHZjaaSnQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/4] overlay: fix exit code for some fsck.overlay valid cases
+References: <20171113022541.7413-1-anand.jain@oracle.com>
+In-Reply-To: <20171113022541.7413-1-anand.jain@oracle.com>
+Reply-To: fdmanana@gmail.com
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Sun, 21 Oct 2018 10:16:19 +0100
+Message-ID: <CAL3q7H41dQpiVaCyre3sCgAaVXd19-cWbLO68z4ovJz2F1E2-g@mail.gmail.com>
+Subject: Re: [PATCH] btrfs/154: test for device dynamic rescan
 Content-Type: text/plain; charset="UTF-8"
 Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, Miao Xie <miaoxie@huawei.com>, overlayfs <linux-unionfs@vger.kernel.org>
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 19, 2018 at 3:36 PM zhangyi (F) <yi.zhang@huawei.com> wrote:
+On Mon, Nov 13, 2017 at 2:26 AM Anand Jain <anand.jain@oracle.com> wrote:
 >
-> On 2018/10/18 12:44, Amir Goldstein Wrote:
-> > On Thu, Oct 18, 2018 at 6:43 AM zhangyi (F) <yi.zhang@huawei.com> wrote=
-:
-> >>
-> >> On 2018/10/16 17:26, Amir Goldstein Wrote:
-> >>> On Tue, Oct 16, 2018 at 10:32 AM zhangyi (F) <yi.zhang@huawei.com> wr=
-ote:
-> >>>>
-> >>>> Some valid test cases about fsck.overlay may be not valid enough now=
-,
-> >>>> they lose the impure xattr on the parent directory of the simluated
-> >>>> redirect directory, and lose the whiteout which use to cover the ori=
-gin
-> >>>> lower object. Then fsck.overlay will fix these two inconsistency whi=
-ch
-> >>>> are not those test cases want to cover, thus it will lead to
-> >>>> fsck.overlay return FSCK_NONDESTRUCT instead of FSCK_OK. Fix these b=
-y
-> >>>> complement the missing overlay related features.
-> >>>>
-> >>>> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> >>>> ---
-> >>>
-> >>> Ok. I think it's fine if we merge this fix now, but this way it is go=
-ing
-> >>> to be quite hard to maintain this test.
-> >>>
-> >>> Imagine every time that you add another feature to fsck.overlay,
-> >>> say "add overlay features xattr", fsck will start returning FSCK_NOND=
-ESTRUCT
-> >>> and break this test.
-> >>>
-> >>> Perhaps it would have been better to construct the test cases by:
-> >>> - mount overlay
-> >>> - create some copied up/ redirected  dirs and whiteouts
-> >>> - umount overlay
-> >>> - make minor modifications to upper/lower layer
-> >>> - run fsck
-> >>>
-> >>> Then you wouldn't need to worry about things like impure parent dir
-> >>> and future overlay features.
-> >>>
-> >>> I will leave it to you to decide if you want to fix this now or the
-> >>> next time around...
-> >>>
-> >>
-> >> Indeed, I thought about this choice. If we create overlay on-disk feat=
-ures
-> >> (xattrs=EF=BC=8Cwhiteouts...) through overlayfs, the fsck tests result=
-s becomes
-> >> non-independent. It will depends on the kernel (overlayfs module) user=
- are
-> >> running the test. Imaging if user want to test the latest fsck.overlay
-> >> on the old kernel which contains a compatible feature xattr fsck.overl=
-ay
-> >> know but the kernel don't, we will get the unexpected result. Or maybe
-> >> we can add some _require_xxx_feature() helper to enforce user doing te=
-st
-> >> on the kernel which supports the specified feature?
-> >>
-> >
-> > I think the only sane choice is for this test to relax the expectation =
-of 0
-> > exit code to "correct" exit code (i.e. _overlay_repair_dirs()) for the =
-"Valid"
-> > test cases.
-> >
-> The meaning of the "valid" test cases is to make sure fsck.overlay will n=
-ever
-> change the on-disk filesystem if the feature(xattr) we want to test is va=
-lid,
-> so the FSCK_OK and FSCK_NONDESTRUCT is totally different.
+> Make sure missing device is included in the alloc list when it is
+> scanned on a mounted FS.
 >
-> If we relax the expectation of 0(FSCK_OK) exit code, we couldn't distingu=
-ish
-> the fsck was changed the file system or not, if so, we also couldn't dist=
-inguish
-> it's caused by some bugs of fsck or the base dirs were not valid enough. =
-Then
-> the "valid" test cases cannot catch fsck's fault accurately. So I think m=
-ake
-> a valid enough overlay image manually now is still the best way.
->
-> I think maybe after we introduce "feature set" xattr, it will becomes muc=
-h easier,
-> fsck.overlay will fix things according to feature set, and we create over=
-lay image
-> through mkfs.overlay. So we could disable some irrelevant features to avo=
-id
-> disturbing our tests. Is it fine?
->
+> This test case needs btrfs kernel patch which is in the ML
+>   [PATCH] btrfs: handle dynamically reappearing missing device
+> Without the kernel patch, the test will run, but reports as
+> failed, as the device scanned won't appear in the alloc_list.
 
-Its fine by me to re-open this for discussion that next time fsck.overlay
-changes and breaks the test.
+So that patch was never merged, at least not with that subject.
+What happened?
 
-Thanks,
-Amir.
+>
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> ---
+>  tests/btrfs/154     | 188 ++++++++++++++++++++++++++++++++++++++++++++++=
+++++++
+>  tests/btrfs/154.out |  10 +++
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 199 insertions(+)
+>  create mode 100755 tests/btrfs/154
+>  create mode 100644 tests/btrfs/154.out
+>
+> diff --git a/tests/btrfs/154 b/tests/btrfs/154
+> new file mode 100755
+> index 000000000000..8b06fc4d9347
+> --- /dev/null
+> +++ b/tests/btrfs/154
+> @@ -0,0 +1,188 @@
+> +#! /bin/bash
+> +# FS QA Test 154
+> +#
+> +# Test for reappearing missing device functionality.
+> +#   This test will fail without the btrfs kernel patch
+> +#   [PATCH] btrfs: handle dynamically reappearing missing device
+> +#
+> +#---------------------------------------------------------------------
+> +# Copyright (c) 2017 Oracle.  All Rights Reserved.
+> +# Author: Anand Jain <anand.jain@oracle.com>
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#---------------------------------------------------------------------
+> +#
+> +
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/module
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +_test_unmount
+> +_require_loadable_fs_module "btrfs"
+> +
+> +_scratch_dev_pool_get 2
+> +
+> +DEV1=3D`echo $SCRATCH_DEV_POOL | awk '{print $1}'`
+> +DEV2=3D`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
+> +
+> +echo DEV1=3D$DEV1 >> $seqres.full
+> +echo DEV2=3D$DEV2 >> $seqres.full
+> +
+> +# Balance won't be successful if filled too much
+> +DEV1_SZ=3D`blockdev --getsize64 $DEV1`
+> +DEV2_SZ=3D`blockdev --getsize64 $DEV2`
+> +
+> +# get min
+> +MAX_FS_SZ=3D`echo -e "$DEV1_SZ\n$DEV2_SZ" | sort | head -1`
+> +# Need disks with more than 2G
+> +if [ $MAX_FS_SZ -lt 2000000000 ]; then
+> +       _scratch_dev_pool_put
+> +       _test_mount
+> +       _notrun "Smallest dev size $MAX_FS_SZ, Need at least 2G"
+> +fi
+> +
+> +MAX_FS_SZ=3D100000000
+> +bs=3D"1M"
+> +COUNT=3D$(($MAX_FS_SZ / 1000000))
+> +CHECKPOINT1=3D0
+> +CHECKPOINT2=3D0
+> +
+> +setup()
+> +{
+> +       echo >> $seqres.full
+> +       echo "MAX_FS_SZ=3D$MAX_FS_SZ COUNT=3D$COUNT" >> $seqres.full
+> +       echo "setup"
+> +       echo "-----setup-----" >> $seqres.full
+> +       _scratch_pool_mkfs "-mraid1 -draid1" >> $seqres.full 2>&1
+> +       _scratch_mount >> $seqres.full 2>&1
+> +       dd if=3D/dev/urandom of=3D"$SCRATCH_MNT"/tf bs=3D$bs count=3D1 \
+> +                                       >>$seqres.full 2>&1
+> +       _run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
+> +       _run_btrfs_util_prog filesystem df $SCRATCH_MNT
+> +       COUNT=3D$(( $COUNT - 1 ))
+> +       echo "unmount" >> $seqres.full
+> +       _scratch_unmount
+> +}
+> +
+> +degrade_mount_write()
+> +{
+> +       echo >> $seqres.full
+> +       echo "--degraded mount: max_fs_sz $max_fs_sz bytes--" >> $seqres.=
+full
+> +       echo
+> +       echo "degraded mount"
+> +
+> +       echo "clean btrfs ko" >> $seqres.full
+> +       # un-scan the btrfs devices
+> +       _reload_fs_module "btrfs"
+> +       _mount -o degraded $DEV1 $SCRATCH_MNT >>$seqres.full 2>&1
+> +       cnt=3D$(( $COUNT/10 ))
+> +       dd if=3D/dev/urandom of=3D"$SCRATCH_MNT"/tf1 bs=3D$bs count=3D$cn=
+t \
+> +                                       >>$seqres.full 2>&1
+> +       COUNT=3D$(( $COUNT - $cnt ))
+> +       _run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
+> +       _run_btrfs_util_prog filesystem df $SCRATCH_MNT
+> +       CHECKPOINT1=3D`md5sum $SCRATCH_MNT/tf1`
+> +       echo $SCRATCH_MNT/tf1:$CHECKPOINT1 >> $seqres.full 2>&1
+> +}
+> +
+> +scan_missing_dev_and_write()
+> +{
+> +       echo >> $seqres.full
+> +       echo "--scan missing $DEV2--" >> $seqres.full
+> +       echo
+> +       echo "scan missing dev and write"
+> +
+> +       _run_btrfs_util_prog device scan $DEV2
+> +
+> +       echo >> $seqres.full
+> +
+> +       _run_btrfs_util_prog filesystem show -m ${SCRATCH_MNT}
+> +       _run_btrfs_util_prog filesystem df ${SCRATCH_MNT}
+> +
+> +       dd if=3D/dev/urandom of=3D"$SCRATCH_MNT"/tf2 bs=3D$bs count=3D$CO=
+UNT \
+> +                                               >>$seqres.full 2>&1
+> +       CHECKPOINT2=3D`md5sum $SCRATCH_MNT/tf2`
+> +       echo $SCRATCH_MNT/tf2:$CHECKPOINT2 >> $seqres.full 2>&1
+> +}
+> +
+> +balance_convert()
+> +{
+> +       echo >> $seqres.full
+> +       echo "----- run balance -----" >> $seqres.full
+> +       echo
+> +       echo "run balance"
+> +
+> +       _run_btrfs_util_prog bal start --full-balance -dconvert=3Draid1 \
+> +                               -mconvert=3Draid1 ${SCRATCH_MNT}
+> +}
+> +
+> +verify()
+> +{
+> +       echo >> $seqres.full
+> +       echo "--mount reconstructed dev only and check md5sum--" >> $seqr=
+es.full
+> +       echo
+> +       echo "mount reconstructed dev only and check md5sum"
+> +       echo "unmount" >> $seqres.full
+> +
+> +       _scratch_unmount
+> +       _reload_fs_module "btrfs"
+> +       _mount -o degraded $DEV2 $SCRATCH_MNT >>$seqres.full 2>&1
+> +       verify_checkpoint1=3D`md5sum $SCRATCH_MNT/tf1`
+> +       verify_checkpoint2=3D`md5sum $SCRATCH_MNT/tf2`
+> +
+> +       if [ "$verify_checkpoint1" !=3D "$CHECKPOINT1" ]; then
+> +               echo "checkpoint1 does not match with after scrub"
+> +       fi
+> +
+> +       if [ "$verify_checkpoint2" !=3D "$CHECKPOINT2" ]; then
+> +               echo "checkpoint2 does not match with after scrub"
+> +       fi
+> +}
+> +
+> +setup
+> +degrade_mount_write
+> +scan_missing_dev_and_write
+> +balance_convert
+> +verify
+> +
+> +$UMOUNT_PROG $DEV2
+> +_scratch_dev_pool_put
+> +_test_mount
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/154.out b/tests/btrfs/154.out
+> new file mode 100644
+> index 000000000000..4a4939d448aa
+> --- /dev/null
+> +++ b/tests/btrfs/154.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 154
+> +setup
+> +
+> +degraded mount
+> +
+> +scan missing dev and write
+> +
+> +run balance
+> +
+> +mount reconstructed dev only and check md5sum
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 15c2ecbf553c..c98cf823224e 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -156,3 +156,4 @@
+>  151 auto quick
+>  152 auto quick metadata qgroup send
+>  153 auto quick qgroup
+> +154 auto quick
+> --
+> 2.13.1
+>
+> --
+> To unsubscribe from this list: send the line "unsubscribe linux-btrfs" in
+> the body of a message to majordomo@vger.kernel.org
+> More majordomo info at  http://vger.kernel.org/majordomo-info.html
+
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
