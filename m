@@ -1,67 +1,65 @@
-Received: from mail-yw1-f68.google.com ([209.85.161.68]:35736 "EHLO
-        mail-yw1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726784AbeJVMk1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Oct 2018 08:40:27 -0400
-Received: by mail-yw1-f68.google.com with SMTP id y76-v6so15490486ywd.2
-        for <fstests@vger.kernel.org>; Sun, 21 Oct 2018 21:23:38 -0700 (PDT)
-MIME-Version: 1.0
+Received: from imap.thunk.org ([74.207.234.97]:43582 "EHLO imap.thunk.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727546AbeJVPbz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 22 Oct 2018 11:31:55 -0400
+Date: Mon, 22 Oct 2018 03:14:31 -0400
+From: "Theodore Y. Ts'o" <tytso@mit.edu>
+Subject: Re: Submitting patches to xfstests based on OSDI '18 paper
+ (CrashMonkey)
+Message-ID: <20181022071431.GL1617@thunk.org>
 References: <CA+EzBbDZ5QZPqbgicY6Ar=uroM9a0-7b8PyUBdwYGMwXgBEanw@mail.gmail.com>
- <20181021104525.GS17817@desktop> <CA+EzBbCd2zZ9sNW-dgyPyR5FH-HK5LArG6y+bPOCJ3Wqyp5=Ug@mail.gmail.com>
- <20181021222111.GH1617@thunk.org> <CA+EzBbB7GA8PZ1xHag0fTWst5cYMUngTmsjUeWemvKOvJ5B8yQ@mail.gmail.com>
- <20181022020539.GR6311@dastard> <CA+EzBbBBicj8qDAtEsjo-8Vys_K_JAF5HP75D5dOvgSMb-CZDQ@mail.gmail.com>
- <CAOQ4uxj6rZ_efkYXoj4T0E0DDomaEZ-OPTcC0zju4U_QyG-a6Q@mail.gmail.com> <CA+EzBbDdcJpupjPXnQZxcfQxqamwpc9TD0QJrvMOh6SSpy1Fyw@mail.gmail.com>
-In-Reply-To: <CA+EzBbDdcJpupjPXnQZxcfQxqamwpc9TD0QJrvMOh6SSpy1Fyw@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 22 Oct 2018 07:23:26 +0300
-Message-ID: <CAOQ4uxjuMCjPDwuDmQaL6XGF2xwJ+Vt0_kY4G0hksFG5G970OA@mail.gmail.com>
-Subject: Re: Submitting patches to xfstests based on OSDI '18 paper (CrashMonkey)
-Content-Type: text/plain; charset="UTF-8"
+ <20181021104525.GS17817@desktop>
+ <CA+EzBbCd2zZ9sNW-dgyPyR5FH-HK5LArG6y+bPOCJ3Wqyp5=Ug@mail.gmail.com>
+ <20181021222111.GH1617@thunk.org>
+ <CA+EzBbB7GA8PZ1xHag0fTWst5cYMUngTmsjUeWemvKOvJ5B8yQ@mail.gmail.com>
+ <20181022020539.GR6311@dastard>
+ <CA+EzBbBBicj8qDAtEsjo-8Vys_K_JAF5HP75D5dOvgSMb-CZDQ@mail.gmail.com>
+ <CAOQ4uxj6rZ_efkYXoj4T0E0DDomaEZ-OPTcC0zju4U_QyG-a6Q@mail.gmail.com>
+ <CA+EzBbDdcJpupjPXnQZxcfQxqamwpc9TD0QJrvMOh6SSpy1Fyw@mail.gmail.com>
+ <20181022040231.GN18822@dastard>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181022040231.GN18822@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Jayashree Mohan <jayashree2912@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Theodore Tso <tytso@mit.edu>, Eryu Guan <guaneryu@gmail.com>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, Josef Bacik <jbacik@fb.com>, Chengguang Xu <cgxu519@icloud.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Jayashree Mohan <jayashree2912@gmail.com>, Amir Goldstein <amir73il@gmail.com>, Eryu Guan <guaneryu@gmail.com>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 22, 2018 at 6:23 AM Jayashree Mohan <jayashree2912@gmail.com> wrote:
->
-> On Sun, Oct 21, 2018 at 9:49 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> > Wait, why _scratch_shutdown and not using dm_flakey?
-> > Fewer filesystems support _scratch_shutdown and _scratch_shutdown
-> > could be buggy and not simulate crash accurately.
->
-> Thanks for this note. I was looking at previous xfstest tests
-> (something not very old - generic/468 for eg), and it was using
-> scratch_shutdown. Hence I used that as an example. I'll use
-> flakey_drop_and_remount while writing up future patches.
->
-> Doesn't this mean the current tests in xfstest suite might miss bugs
-> in current/future kernel versions, because some file systems don't
-> support it? There are many crash-consistency tests in xfstest suite
-> that still use _scratch_shutdown. In fact generic/468 is one of the
-> test cases that could not run on btrfs because it does not support
-> _shutdown. But then this is the exact test case required to reveal a
-> bug in btrfs - where you lose allocated blocks beyond the eof on
-> fallocate. Just wanted to bring this up, in case you did not notice it
-> :)
->
+On Mon, Oct 22, 2018 at 03:02:31PM +1100, Dave Chinner wrote:
+> scratch_shutdown is testing shutdown behaviour, whatever the cause.
+> Not all filesystems have a shutdown mechanism - it's a specific set
+> of operations that the filesystem performs in response to failure
+> triggers. Some filesystems just go read-only or have other response
+> mechanisms, which aren't compatible with expectetd shutdown
+> behaviour.
 
-xfstests grew up with xfs having shutdown ability, so I suppose some
-shutdown tests test this functionality and some shutdown tests are pure
-crash consistency tests.
-Later, ext4 got shutdown support so it enjoys all this test coverage.
-Quite recently, Chengguang Xu added shutdown support for testing
-overlayfs over xfs/ext4. Note that this was done without changing kernel
-code.
+What Dave said.
 
-Josef Bacik added the dmflakey infrastructure to xfstests for btrfs crash tests
-generic/311,321. Later, I also added Josef's dmlogwrites infrastructure for
-crash stress tests. dmflakey and dmlogwrites _require_block_device,
-so they don't run on overlayfs.
+I'll note that at the moment ext4 passes dm_flakey power cut tests
+reliably, which is *different* from the tests which use the
+FS_IOC_SHUTDOWN ioctl.  At the moment ext4, fails FS_IOC_SHUTDOWN
+tests around 3% -- 5% of the time --- which is why generic/388, which
+repeatedly mounts and call FS_IOC_SHUTDOWN 30 times, is a flaky
+(sorry) test for ext4.
 
-Now, if you write your tests with dmflakey, overlayfs will not run them
-and if you write your tests with shutdown, btrfs won't run them.
-Obviously, btrfs is more important in the context of your tests and adding
-dmflakey support for overlayfs is something we can do in the future.
+So for the crashmonkey tests, if you are specifically trying to test
+what happens on a power cut, you need to be using dm_flakey, and not
+FS_IOC_SHUTDOWN.  Testing what happens on FS_IOC_SHUTDOWN would also
+be useful, but it's a different thing.  (And at least for ext4, I know
+what the problems are with ext4's FS_IOC_SHUTDOWN support; the
+challenge is how to fix it without imposing a performance regression,
+and since FS_IOC_SHUTDOWN is rarely used in production[1], it's been
+low priority for me to fix.)
 
-Thanks,
-Amir.
+						- Ted
+
+[1] Actually, Google does use FS_IOC_SHUTDOWN in production, but only
+for scratch iSCSI volumes which have already disappeared and so we
+don't care if the underlying file system might get corrupted, since
+the whole point is to forcibly detach the failed iSCSI device while
+keeping the iSCSI client system running.  (And since it's a scratch
+volume, it's mounted with the journal disabled, which means on
+shutdown, even we cared about the state of the scratch volume after
+shutdown, by in no journal mode there are no guarantees about file
+system consistency after a shutdown or power cut anyway.)
