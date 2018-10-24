@@ -1,180 +1,306 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37954 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:48482 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726256AbeJXRvW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Oct 2018 13:51:22 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 5ACBA81256
-        for <fstests@vger.kernel.org>; Wed, 24 Oct 2018 09:24:03 +0000 (UTC)
-Received: from dhcp-12-153.nay.redhat.com (dhcp-12-153.nay.redhat.com [10.66.12.153])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 7C055608F3
-        for <fstests@vger.kernel.org>; Wed, 24 Oct 2018 09:24:02 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] generic: verify FIBMAP address overlap
-Date: Wed, 24 Oct 2018 17:23:56 +0800
-Message-Id: <20181024092356.25406-1-zlang@redhat.com>
+        id S1726426AbeJXTkc (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Oct 2018 15:40:32 -0400
+Date: Wed, 24 Oct 2018 13:12:47 +0200
+From: Lukas Czerner <lczerner@redhat.com>
+Subject: Re: [PATCH] fstests: add support for fuse.ext4
+Message-ID: <20181024111247.m65wcgpka5g4yupp@localhost.localdomain>
+References: <20181011134153.722-1-lczerner@redhat.com>
+ <20181021164047.GA3876@desktop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181021164047.GA3876@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfstests doesn't cover FIBMAP test, it cause we brought in a
-regression bug fixed by "79b3dbe4adb3 fs: fix iomap_bmap position
-calculation".
+Hi Eryu,
 
-Although FIBMAP is old, there're still some programs use it, likes
-LILO. This case tests if there's physical address overlap returned
-by FIBMAP.
+thanks for the review.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/generic/999     | 117 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/999.out |   3 ++
- tests/generic/group   |   1 +
- 3 files changed, 121 insertions(+)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
+On Mon, Oct 22, 2018 at 12:40:47AM +0800, Eryu Guan wrote:
+> On Thu, Oct 11, 2018 at 03:41:53PM +0200, Lukas Czerner wrote:
+> > Add support for ext4 file system in userspace. The new file system type
+> > (FSTYP) is fuse.ext4 and it allows the device to be either a regular
+> > block device, or a regular file.
+> > 
+> > Signed-off-by: Lukas Czerner <lczerner@redhat.com>
+> > ---
+> >  common/config |  6 +++++
+> >  common/rc     | 65 ++++++++++++++++++++++++++++++++++++++++++++-------
+> >  2 files changed, 62 insertions(+), 9 deletions(-)
+> > 
+> > diff --git a/common/config b/common/config
+> > index 1ba8d96c..37b66d31 100644
+> > --- a/common/config
+> > +++ b/common/config
+> > @@ -232,6 +232,7 @@ case "$HOSTOS" in
+> >  	export E2FSCK_PROG=$(type -P e2fsck)
+> >  	export TUNE2FS_PROG=$(type -P tune2fs)
+> >  	export FSCK_OVERLAY_PROG=$(type -P fsck.overlay)
+> > +	export FUSE2FS=$(type -P fuse2fs)
+> >          ;;
+> >  esac
+> >  
+> > @@ -470,6 +471,11 @@ _check_device()
+> >  			_fatal "common/config: $name ($dev) is not a character device"
+> >  		fi
+> >  		;;
+> > +	fuse.ext4)
+> > +		if [ ! -b "$dev" ] && [ ! -f "$dev" ]; then
+> > +			__fatal "common/config: $name ($dev) is not a block device nor a regular file"
+> 
+> Typo here, should be "_fatal".
 
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 00000000..3f70452d
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,117 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 999
-+#
-+# Verify if there's physical address overlap returned by FIBMAP, cover:
-+# 79b3dbe4adb3 fs: fix iomap_bmap position calculation
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_command "$FILEFRAG_PROG" filefrag
-+
-+TESTFILE="$SCRATCH_MNT/$seq-testfile"
-+
-+# Use filefrag -B option to force the use of the older FIBMAP ioctl instead of
-+# the FIEMAP ioctl. Then verify if there's map overlap.
-+verify_filefrag()
-+{
-+	local n=1
-+
-+	# record details in .full file
-+	${FILEFRAG_PROG} -Bes -v $TESTFILE >> $seqres.full
-+
-+	# Due to physical things can't be golden image, so only output logical
-+	# information at here
-+	${FILEFRAG_PROG} -Be $TESTFILE | _filter_filefrag | \
-+		cut -d# -f1-2 > $tmp.filefrag
-+
-+	# Verify there's not physical address overlay
-+	for i in `cat $tmp.filefrag`; do
-+		# Get the start(v1) and end(v2) addresses will be verified
-+		v1=`sed -n "${n}p" $tmp.filefrag | cut -d# -f1`
-+		v2=`sed -n "${n}p" $tmp.filefrag | cut -d# -f2`
-+		# The 2nd value is length, so the real end addr is:
-+		v2=$((v1 + v2))
-+		# The end address maybe same with the next start address, so
-+		# reduce 1 at here
-+		((v2--))
-+
-+		# Remove the line need to be verified ($i), compare with other
-+		# lines one by one
-+		sed -e "${n}d" $tmp.filefrag > $tmp.filefrag.tmp
-+		for j in `cat $tmp.filefrag.tmp`; do
-+			# Get 'next' line start(e1) and end(e2) addresses
-+			e1=`echo $j | cut -d# -f1`
-+			e2=`echo $j | cut -d# -f2`
-+			# The 2nd value is length, so the real end addr is:
-+			e2=$((e1 + e2))
-+			# Verify there's not:
-+			# [ e1 ... e2 ]
-+			#       [ v1 ... v2 ]
-+			if [ ${v1} -ge ${e1} -a ${v1} -le ${e2} ]; then
-+				echo "find physical addr overlap [$i] vs [$j]"
-+			fi
-+			# Verify there's not:
-+			#       [ e1 ... e2 ]
-+			# [ v1 ... v2 ]
-+			if [ ${v2} -ge ${e1} -a ${v2} -le ${e2} ]; then
-+				echo "find physical addr overlap [$i] vs [$j]"
-+			fi
-+		done
-+		((n++))
-+	done
-+}
-+
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
-+
-+# Check if FIBMAP is supported
-+echo "XX" > $TESTFILE
-+${FILEFRAG_PROG} -B $TESTFILE 2>&1 | \
-+	grep -q "FIBMAP[[:space:]]*unsupported"
-+if [ $? -eq 0 ]; then
-+	_notrun "FIBMAP isn't supported on current fs"
-+fi
-+rm -f $TESTFILE
-+
-+# Test
-+echo "== FIBMAP on empty file =="
-+$XFS_IO_PROG -f -c "truncate 0" $TESTFILE > /dev/null
-+verify_filefrag
-+
-+echo "== FIBMAP on sparse file =="
-+$XFS_IO_PROG -f -t -c "pwrite -S 0xaa 0 1m" \
-+	     -c "pwrite -S 0xaa 2m 1m" \
-+	     -c "pwrite -S 0xaa 4m 1m" \
-+	     $TESTFILE > /dev/null
-+verify_filefrag
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 00000000..d3edbccf
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1,3 @@
-+QA output created by 999
-+== FIBMAP on empty file ==
-+== FIBMAP on sparse file ==
-diff --git a/tests/generic/group b/tests/generic/group
-index 47de9782..45f1d534 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -519,3 +519,4 @@
- 514 auto quick clone
- 515 auto quick clone
- 516 auto quick dedupe clone
-+999 auto quick
--- 
-2.14.5
+yep, will fix that.
+
+> 
+> > +		fi
+> > +		;;
+> >  	*)
+> >  		_fatal "common/config: $name ($dev) is not a block device or a network filesystem"
+> >  	esac
+> > diff --git a/common/rc b/common/rc
+> > index 90dc3002..2f5a3463 100644
+> > --- a/common/rc
+> > +++ b/common/rc
+> > @@ -130,6 +130,10 @@ case "$FSTYP" in
+> >  
+> >  	 . ./common/btrfs
+> >  	 ;;
+> > +    fuse.ext4)
+> > +	 [ "$FUSE2FS" = "" ] && _fatal "fuse2fs not found"
+> > +	 [ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
+> > +	 ;;
+> >      ext4)
+> >  	 [ "$MKFS_EXT4_PROG" = "" ] && _fatal "mkfs.ext4 not found"
+> >  	 ;;
+> > @@ -170,6 +174,22 @@ _mount()
+> >      $MOUNT_PROG `_mount_ops_filter $*`
+> >  }
+> >  
+> > +_mount_fstyp()
+> > +{
+> > +	ret=0
+> > +	case "$FSTYP" in
+> > +		fuse.ext4)
+> > +			$FUSE2FS `_mount_ops_filter $*` 2>&1> /dev/null
+> 
+> Hmm, fuse2fs expects the first argument to be the device/image file, if
+> we pass mount options first, /proc/mounts shows weird "device", e.g.
+> 
+> mount -o ro /dev/sda5 /mnt/test, then /proc/mounts shows
+> 
+> -o on /mnt/test type fuse.ext4 (rw,nosuid,nodev,relatime,user_id=0,group_id=0)
+
+That's becuase there is a bug in fuse2fs. Fix for it is already on the
+list.
+
+> 
+> I think it might be better to update _mount() instead of introducing a
+> new _mount_fstyp() function, so that we keep the _mount() interface
+> unchanged and don't need to update all callers of _mount() (either in
+> common/rc or in tests).
+
+The problem is that _mount is used for more than just to mount the file
+system. This scheme might be useful in the future, for example for a
+different fuse file system. Now we can just change _mount_fstyp and not
+every _mount caller.
+
+> 
+> > +			ret=$?
+> > +			;;
+> > +		*)
+> > +			_mount -t $FSTYP $*
+> > +			ret=$?
+> > +			;;
+> > +	esac
+> > +	return $ret
+> > +}
+> > +
+> >  # Call _mount to do mount operation but also save mountpoint to
+> >  # MOUNTED_POINT_STACK. Note that the mount point must be the last parameter
+> >  _get_mount()
+> > @@ -305,7 +325,7 @@ _supports_filetype()
+> >  	xfs)
+> >  		$XFS_INFO_PROG $dir | grep -q "ftype=1"
+> >  		;;
+> > -	ext2|ext3|ext4)
+> > +	ext2|ext3|ext4|fuse.ext4)
+> >  		local dev=`$DF_PROG $dir | tail -1 | $AWK_PROG '{print $1}'`
+> >  		tune2fs -l $dev | grep -q filetype
+> >  		;;
+> > @@ -328,7 +348,7 @@ _try_scratch_mount()
+> >  		_overlay_scratch_mount $*
+> >  		return $?
+> >  	fi
+> > -	_mount -t $FSTYP `_scratch_mount_options $*`
+> > +	_mount_fstyp `_scratch_mount_options $*`
+> >  }
+> >  
+> >  # mount scratch device with given options and _fail if mount fails
+> > @@ -400,7 +420,7 @@ _test_mount()
+> >          return $?
+> >      fi
+> >      _test_options mount
+> > -    _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> > +    _mount_fstyp $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+> >  }
+> >  
+> >  _test_unmount()
+> > @@ -610,6 +630,9 @@ _test_mkfs()
+> >      btrfs)
+> >          $MKFS_BTRFS_PROG $MKFS_OPTIONS $* $TEST_DEV > /dev/null
+> >  	;;
+> > +    fuse.ext4)
+> > +	$MKFS_PROG -t ext4 -- -F $MKFS_OPTIONS $* $TEST_DEV
+> > +	;;
+> >      ext2|ext3|ext4)
+> >  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* $TEST_DEV
+> >  	;;
+> > @@ -641,7 +664,7 @@ _mkfs_dev()
+> >      btrfs)
+> >          $MKFS_BTRFS_PROG $MKFS_OPTIONS $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
+> >  	;;
+> > -    ext2|ext3|ext4)
+> > +    ext2|ext3|ext4|fuse.ext4)
+> >  	$MKFS_PROG -t $FSTYP -- -F $MKFS_OPTIONS $* \
+> 
+> Introduce a new "fuse.ext4" case as in _test_mkfs(), otherwise we'll do
+> "mkfs -t fuse.ext4 ..." here.
+
+Right, I've missed this one.
+
+> 
+> >  		2>$tmp.mkfserr 1>$tmp.mkfsstd
+> >  	;;
+> > @@ -709,7 +732,7 @@ _scratch_mkfs()
+> >  		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
+> >  		return 0
+> >  		;;
+> > -	ext4)
+> > +	ext4|fuse.ext4)
+> >  		_scratch_mkfs_ext4 $*
+> >  		return $?
+> >  		;;
+> > @@ -906,7 +929,7 @@ _scratch_mkfs_sized()
+> >      xfs)
+> >  	def_blksz=`echo $MKFS_OPTIONS|sed -rn 's/.*-b ?size= ?+([0-9]+).*/\1/p'`
+> >  	;;
+> > -    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2|reiserfs)
+> > +    ext2|ext3|ext4|ext4dev|udf|btrfs|reiser4|ocfs2|reiserfs|fuse.ext4)
+> >  	def_blksz=`echo $MKFS_OPTIONS| sed -rn 's/.*-b ?+([0-9]+).*/\1/p'`
+> >  	;;
+> >      jfs)
+> > @@ -943,6 +966,9 @@ _scratch_mkfs_sized()
+> >  		_scratch_mkfs_xfs -d size=$fssize -b size=$blocksize
+> >  	fi
+> >  	;;
+> > +    fuse.ext4)
+> > +	${MKFS_PROG}.ext4 -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> > +	;;
+> >      ext2|ext3|ext4|ext4dev)
+> >  	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV $blocks
+> >  	;;
+> > @@ -1020,7 +1046,7 @@ _scratch_mkfs_geom()
+> >      xfs)
+> >  	MKFS_OPTIONS+=" -b size=$blocksize, -d su=$sunit_bytes,sw=$swidth_mult"
+> >  	;;
+> > -    ext4|ext4dev)
+> > +    ext4|ext4dev|fuse.ext4)
+> >  	MKFS_OPTIONS+=" -b $blocksize -E stride=$sunit_blocks,stripe_width=$swidth_blocks"
+> >  	;;
+> >      *)
+> > @@ -1045,6 +1071,9 @@ _scratch_mkfs_blocksized()
+> >      xfs)
+> >  	_scratch_mkfs_xfs $MKFS_OPTIONS -b size=$blocksize
+> >  	;;
+> > +    fuse.ext4)
+> > +	${MKFS_PROG}.ext4 -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
+> > +	;;
+> >      ext2|ext3|ext4)
+> >  	${MKFS_PROG}.$FSTYP -F $MKFS_OPTIONS -b $blocksize $SCRATCH_DEV
+> >  	;;
+> > @@ -1514,6 +1543,15 @@ _require_scratch_nocheck()
+> >  			_notrun "this test requires a valid \$SCRATCH_MNT"
+> >  		fi
+> >  		;;
+> > +	fuse.ext4)
+> > +		if [ ! -b "$SCRATCH_DEV" ] && [ ! -f "$SCRATCH_DEV" ]; then
+> > +		     _notrun "this test requires a valid \$SCRATCH_DEV"
+> > +		fi
+> > +		if [ ! -d "$SCRATCH_MNT" ]
+> > +		then
+> 
+> Make "if" and "then" in the same line as in above if check.
+> 
+> > +		     _notrun "this test requires a valid \$SCRATCH_MNT"
+> > +		fi
+> > +		 ;;
+> >  	*)
+> >  		 if [ -z "$SCRATCH_DEV" -o "`_is_block_dev "$SCRATCH_DEV"`" = "" ]
+> >  		 then
+> > @@ -1635,6 +1673,15 @@ _require_test()
+> >  			_notrun "this test requires a valid \$TEST_DIR"
+> >  		fi
+> >  		;;
+> > +	fuse.ext4)
+> > +		if [ ! -b "$TEST_DEV" ] && [ ! -f "$TEST_DEV" ]; then
+> > +		     _notrun "this test requires a valid \$TEST_DEV"
+> > +		fi
+> > +		if [ ! -d "$TEST_DIR" ]
+> > +		then
+> 
+> Same here.
+
+will do
+
+> 
+> > +		     _notrun "this test requires a valid \$TEST_DIR"
+> > +		fi
+> > +		 ;;
+> >  	*)
+> >  		 if [ -z "$TEST_DEV" ] || [ "`_is_block_dev "$TEST_DEV"`" = "" ]
+> >  		 then
+> > @@ -1961,7 +2008,7 @@ _filesystem_timestamp_range()
+> >  {
+> >  	local device=${1:-$TEST_DEV}
+> >  	case $FSTYP in
+> > -	ext4)
+> > +	ext4|fuse.ext4)
+> >  		if [ $(dumpe2fs -h $device 2>/dev/null | grep "Inode size:" | cut -d: -f2) -gt 128 ]; then
+> >  			echo "-2147483648 15032385535"
+> >  		else
+> > @@ -2458,7 +2505,7 @@ _mount_or_remount_rw()
+> >  
+> >  	if [ $USE_REMOUNT -eq 0 ]; then
+> >  		if [ "$FSTYP" != "overlay" ]; then
+> > -			_mount -t $FSTYP $mount_opts $device $mountpoint
+> > +			_mount_fstyp $mount_opts $device $mountpoint
+> 
+> This (fuse2fs) won't remount the filesystem, mount command is still
+> needed here.
+
+It is not needed. This is supposed to mount the file system not remount, for
+that we have _remount.
+
+By default we do unmount/mount not remount ro/rw and besides fuse does
+not support remount.
+
+Thanks!
+-Lukas
+
+
+> 
+> Thanks,
+> Eryu
+> 
+> >  		else
+> >  			_overlay_mount $device $mountpoint
+> >  		fi
+> > -- 
+> > 2.17.1
+> > 
