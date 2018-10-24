@@ -1,72 +1,63 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:36958 "EHLO huawei.com"
+Received: from szxga07-in.huawei.com ([45.249.212.35]:37687 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726449AbeJXPvf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Oct 2018 11:51:35 -0400
+        id S1726279AbeJXPww (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Oct 2018 11:52:52 -0400
+Subject: Re: [PATCH] common/rc: fix to check inode creation on scratch_mnt in
+ _require_btime()
+References: <20181024022645.74084-1-yuchao0@huawei.com>
+ <20181024044541.GD6311@dastard>
 From: Chao Yu <yuchao0@huawei.com>
-Subject: [PATCH v2] generic/508: fix to check inode creation time feature on scratch mountpoint
-Date: Wed, 24 Oct 2018 15:24:33 +0800
-Message-ID: <20181024072433.109167-1-yuchao0@huawei.com>
+Message-ID: <913e0917-11c0-c954-15f8-d814d1219407@huawei.com>
+Date: Wed, 24 Oct 2018 15:25:55 +0800
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <20181024044541.GD6311@dastard>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, david@fromorbit.com
-Cc: fstests@vger.kernel.org, chao@kernel.org, Chao Yu <yuchao0@huawei.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: guaneryu@gmail.com, fstests@vger.kernel.org, chao@kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-_require_btime() just check inode creation time feature on TEST_DIR
-mountpoint, but generic/508 needs to do that check on SCRATCH_MNT
-mountpoint. Let's add _require_scratch_btime() for that, meanwhile
-moving the check behind scratch_mkfs/scratch_moun.
+On 2018/10/24 12:45, Dave Chinner wrote:
+> On Wed, Oct 24, 2018 at 10:26:45AM +0800, Chao Yu wrote:
+>> _require_btime() should check inode creation feature on SCRATCH_MNT
+>> mountpoint intead of TEST_DIR mountpoint, otherwise generic/508 will
+>> fail due to incorrect check of this function.
+>>
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+>> ---
+>>  common/rc | 4 ++--
+>>  1 file changed, 2 insertions(+), 2 deletions(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index b4987a9cd7f7..5154241a5cee 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -3845,10 +3845,10 @@ _dmsetup_create()
+>>  
+>>  _require_btime()
+>>  {
+>> -	$XFS_IO_PROG -f $TEST_DIR/test_creation_time -c "statx -v" \
+>> +	$XFS_IO_PROG -f $SCRATCH_MNT/test_creation_time -c "statx -v" \
+>>  		| grep btime >>$seqres.full 2>&1 || \
+>>  		_notrun "inode creation time not supported by this filesystem"
+>> -	rm -f $TEST_DIR/test_creation_time
+>> +	rm -f $SCRATCH_MNT/test_creation_time
+>>  }
+> 
+> This doesn't work. the scratch device is not mounted at the time
+> generic/508 calls it.
+> 
+> If you are going to check the scratch device, the function needs to
+> be called _require_scratch_btime and be called after
+> scratch_mkfs/scratch_mount has been run by the test.
+That's correct, I've fixed in v2, could you please help to check that?
 
-Signed-off-by: Chao Yu <yuchao0@huawei.com>
----
-v2:
-As Dave Chinner suggested:
-- introduce _require_scratch_btime() to check inode creation time
-feature in scratch mountpoint, adjust generic/508 to use it.
-- relocate the check behind scratch_mkfs/scratch_mount.
- common/rc         | 8 ++++++++
- tests/generic/508 | 2 +-
- 2 files changed, 9 insertions(+), 1 deletion(-)
+Thanks,
 
-diff --git a/common/rc b/common/rc
-index b4987a9cd7f7..111ba5410506 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3851,6 +3851,14 @@ _require_btime()
- 	rm -f $TEST_DIR/test_creation_time
- }
- 
-+_require_scratch_btime()
-+{
-+	$XFS_IO_PROG -f $SCRATCH_MNT/test_creation_time -c "statx -v" \
-+		| grep btime >>$seqres.full 2>&1 || \
-+		_notrun "inode creation time not supported by this filesystem"
-+	rm -f $SCRATCH_MNT/test_creation_time
-+}
-+
- init_rc
- 
- ################################################################################
-diff --git a/tests/generic/508 b/tests/generic/508
-index b869b3a9c260..f1cda52fa44c 100755
---- a/tests/generic/508
-+++ b/tests/generic/508
-@@ -46,7 +46,6 @@ _supported_os Linux
- _require_test_lsattr
- _require_statx
- _require_xfs_io_command "statx" "-v"
--_require_btime
- 
- _require_scratch
- _require_scratch_shutdown
-@@ -59,6 +58,7 @@ testfile=$SCRATCH_MNT/testfile
- do_check()
- {
- 	_scratch_mount
-+	_require_scratch_btime
- 
- 	touch $testfile
- 
--- 
-2.18.0.rc1
+> 
+> Cheers,
+> 
+> Dave.
+> 
