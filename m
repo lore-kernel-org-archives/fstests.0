@@ -1,44 +1,241 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43578 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726113AbeJZXSM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 26 Oct 2018 19:18:12 -0400
-Date: Fri, 26 Oct 2018 09:40:51 -0500
-From: "Bill O'Donnell" <billodo@redhat.com>
-Subject: Re: [PATCH] generic: update group file to indicate generic/456 uses
- {collapse,zero}_range
-Message-ID: <20181026144051.GA31432@redhat.com>
-References: <20181026115349.4241-1-tytso@mit.edu>
+Received: from mx2.suse.de ([195.135.220.15]:44226 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726195AbeJZXj7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 26 Oct 2018 19:39:59 -0400
+Subject: Re: [PATCH v2 rev log added] fstests: btrfs verify hardening agaist
+ duplicate fsid
+References: <1538383475-2532-1-git-send-email-anand.jain@oracle.com>
+ <1539023301-4583-1-git-send-email-anand.jain@oracle.com>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <c2e09b66-6c15-9bbe-c340-0a6015ea4a0e@suse.com>
+Date: Fri, 26 Oct 2018 18:02:32 +0300
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181026115349.4241-1-tytso@mit.edu>
+In-Reply-To: <1539023301-4583-1-git-send-email-anand.jain@oracle.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Oct 26, 2018 at 07:53:49AM -0400, Theodore Ts'o wrote:
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+
+
+On 8.10.18 =D0=B3. 21:28 =D1=87., Anand Jain wrote:
+> We have a known bug in btrfs, that we let the device path be changed
+> after the device has been mounted. So using this loop hole the new
+> copied device would appears as if its mounted immediately after its
+> been copied. So this test case reproduces this issue.
+>=20
+> For example:
+>=20
+> Initially.. /dev/mmcblk0p4 is mounted as /
+>=20
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part /
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+>=20
+> btrfs fi show
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>     Total devices 1 FS bytes used 1.40GiB
+>     devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
+>=20
+> Copy mmcblk0 to sda
+> dd if=3D/dev/mmcblk0 of=3D/dev/sda
+>=20
+> And immediately after the copy completes the change in the device
+> superblock is notified which the automount scans using
+> btrfs device scan and the new device sda becomes the mounted root
+> device.
+>=20
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> sda           8:0    1 14.9G  0 disk
+> |-sda4        8:4    1    4G  0 part /
+> |-sda2        8:2    1  500M  0 part
+> |-sda3        8:3    1  256M  0 part
+> `-sda1        8:1    1  256M  0 part
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+> btrfs fi show /
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>     Total devices 1 FS bytes used 1.40GiB
+>     devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
+>=20
+> The bug is quite nasty that you can't either unmount /dev/sda4 or
+> /dev/mmcblk0p4. And the problem does not get solved until you take
+> the sda out of the system on to another system to change its fsid using
+> the 'btrfstune -u' command.
+
+Is there a pending fix for this?
+
+>=20
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
+> v1->v2:=20
+>   dont play around with dev patch use it as it is.
+>   do not use SCRATCH_MNT instead create it at the TEST_DIR and its rela=
+ted
+>    changes.
+>   golden out changes
+>   =20
+>  tests/btrfs/173     | 88 +++++++++++++++++++++++++++++++++++++++++++++=
+++++++++
+>  tests/btrfs/173.out |  6 ++++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 95 insertions(+)
+>  create mode 100755 tests/btrfs/173
+>  create mode 100644 tests/btrfs/173.out
+>=20
+> diff --git a/tests/btrfs/173 b/tests/btrfs/173
+> new file mode 100755
+> index 000000000000..b466ae921e19
+> --- /dev/null
+> +++ b/tests/btrfs/173
+> @@ -0,0 +1,88 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 173
+> +#
+> +# Fuzzy test for FS image duplication.
+> +#  Could be fixed by
+> +#    [patch] btrfs: harden agaist duplicate fsid
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +mnt=3D$TEST_DIR/$seq.mnt
+> +_cleanup()
+> +{
+> +	rm -rf $mnt > /dev/null 2>&1
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +
+> +dev_foo=3D$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
+> +dev_bar=3D$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
 
-Reviewed-by: Bill O'Donnell <billodo@redhat.com>
+Naming devices _foo and _bar just shows you could not care less about
+the test. Either use sane names - primary_dev/secondary dev or device_1
+and device_2.
 
->  tests/generic/group | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 28452732..8a21970e 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -458,7 +458,7 @@
->  453 auto quick dir
->  454 auto quick attr
->  455 auto log replay
-> -456 auto quick metadata
-> +456 auto quick metadata collapse zero
->  457 auto log replay clone
->  458 auto quick clone collapse zero
->  459 auto thin
-> -- 
-> 2.18.0.rc0
-> 
+> +
+> +echo dev_foo=3D$dev_foo >> $seqres.full
+> +echo dev_bar=3D$dev_bar >> $seqres.full
+> +echo | tee -a $seqres.full
+> +
+> +rm -rf $mnt > /dev/null 2>&1
+
+So what is $mnt? I can see it's used by very few tests and it's not
+obvious? Generally you should either define it as a local variable or
+use one of the SCRATCH_MNT/TEST_MNT global variables. Also I checked
+with Eric re. the use of $mnt in tests and his conclusion is :
+
+"<sandeen> looks like a bug"
+
+> +mkdir $mnt
+> +_mkfs_dev $dev_foo
+> +_mount $dev_foo $mnt
+> +
+> +check_btrfs_mount()
+> +{
+> +	local x=3D$(findmnt $mnt | grep -v TARGET | awk '{print $2}')
+> +	[[ $x =3D=3D $dev_foo ]] && echo DEV_FOO
+> +	[[ $x =3D=3D $dev_bar ]] && echo DEV_BAR
+> +}
+
+Same thing here re. DEV_(FOO|BAR).
+
+> +
+> +echo MNT $(check_btrfs_mount)
+> +
+> +for sb_bytenr in 65536 67108864
+> +do
+> +	echo -n "dd status=3Dnone if=3D$dev_foo of=3D$dev_bar bs=3D1 "\
+> +		"seek=3D$sb_bytenr skip=3D$sb_bytenr count=3D4096" >> $seqres.full
+> +	dd status=3Dnone if=3D$dev_foo of=3D$dev_bar bs=3D1 seek=3D$sb_bytenr=
+ \
+> +				skip=3D$sb_bytenr count=3D4096 >> $seqres.full 2>&1
+> +	echo ..:$? >> $seqres.full
+
+This is an overkill, just use dd ... >/dev/null 2>&1, no one cares about
+the output of that. Also use DIO so that sb's are directly written to
+the devices.
+
+> +done
+> +
+> +#Original device is mounted, scan of its clone should fail
+> +$BTRFS_UTIL_PROG device scan $dev_bar >> $seqres.full 2>&1
+> +echo btrfs device scan dev_bar ...:$?| tee -a $seqres.full
+> +
+> +echo MNT $(check_btrfs_mount)
+> +
+> +#Original device scan should be successful
+> +$BTRFS_UTIL_PROG device scan $dev_foo >> $seqres.full 2>&1
+> +echo btrfs device scan dev_foo ...:$?| tee -a $seqres.full
+> +
+> +umount $mnt > /dev/null 2>&1
+> +_scratch_dev_pool_put
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
+> new file mode 100644
+> index 000000000000..3c7e3fb4e3f7
+> --- /dev/null
+> +++ b/tests/btrfs/173.out
+> @@ -0,0 +1,6 @@
+> +QA output created by 173
+> +
+> +MNT DEV_FOO
+> +btrfs device scan dev_bar ...:1
+> +MNT DEV_FOO
+> +btrfs device scan dev_foo ...:0
+
+It seems the output is really pointless it should just be "Silence is
+golden". Then in the test you would do all your run-time checks of
+what's the source of the mount etc etc and if your expectations don't
+match you fail the test and don't output "Silence is golden" which would
+signal success. Check for example
+
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 45782565c3b7..b2f1393f3e97 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -175,3 +175,4 @@
+>  170 auto quick snapshot
+>  171 auto quick qgroup
+>  172 auto quick punch
+> +173 volume
+>=20
