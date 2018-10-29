@@ -1,151 +1,132 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37276 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:50202 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729528AbeJ2SP6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 29 Oct 2018 14:15:58 -0400
-Date: Mon, 29 Oct 2018 05:28:06 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] tests/xfs: writepage map error unmount test
-Message-ID: <20181029092805.GA5631@bfoster>
-References: <20181023181543.43315-1-bfoster@redhat.com>
- <20181023181638.43407-1-bfoster@redhat.com>
- <20181028135633.GF3876@desktop>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181028135633.GF3876@desktop>
+        id S1729588AbeJ2Sbi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 29 Oct 2018 14:31:38 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: fix fssum to actually ignore file holes when supposed to
+Date: Mon, 29 Oct 2018 09:43:40 +0000
+Message-Id: <20181029094340.18154-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Oct 28, 2018 at 09:56:33PM +0800, Eryu Guan wrote:
-> On Tue, Oct 23, 2018 at 02:16:38PM -0400, Brian Foster wrote:
-> > Certain failures in the page writeback codepath can cause a broader
-> > writeback (i.e., a sync) sequence to exit prematurely. If this
-> > occurs during an unmount, it's likely the filesystem will reclaim
-> > inodes without having cleared all delayed allocation blocks. This
-> > produces a warning and leaves the filesystem inconsistent.
-> > 
-> > This test reproduces this scenario using the 'writepage_map'
-> > errortag. It performs delayed allocation, injects writeback errors
-> > and immediately unmounts the filesystem.
-> > 
-> > Signed-off-by: Brian Foster <bfoster@redhat.com>
-> > ---
-> > 
-> > Note that this depends on a not yet available error tag.
-> 
-> I'll wait for the "error tag" patch goes in first, or gets some ACKs
-> first. One really minor issue below.
-> 
+From: Filipe Manana <fdmanana@suse.com>
 
-Yep. I probably should have been more clear and/or set this RFC. This
-test is wholly dependent on if/whether/how to deal with the associated
-error handling issue, which atm is still up in the air. The tag/test is
-primarily to demonstrate the problem and may not be independently useful
-until there's a supporting fix. I may float a patch for that soon..
+Unless the '-s' option is passed to fssum, it should not detect file holes
+and have their existence influence the computed checksum for a file. This
+tool was added to test btrfs' send/receive feature, so that it checks for
+any metadata and data differences between the original filesystem and the
+filesystem that receives send streams.
 
-> > 
-> > Brian
-> > 
-> >  tests/xfs/494     | 57 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/494.out |  2 ++
-> >  tests/xfs/group   |  1 +
-> >  3 files changed, 60 insertions(+)
-> >  create mode 100755 tests/xfs/494
-> >  create mode 100644 tests/xfs/494.out
-> > 
-> > diff --git a/tests/xfs/494 b/tests/xfs/494
-> > new file mode 100755
-> > index 00000000..30877d38
-> > --- /dev/null
-> > +++ b/tests/xfs/494
-> > @@ -0,0 +1,57 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test 494
-> > +#
-> > +# Simulate a serialization problem between page writeback error handling and
-> > +# unmount. If ->writepages() fails and returns an error back to the mm
-> > +# subsystem, writeback of subsequent pages is interrupted and the filesystem
-> > +# unmounts before processing all dirty pages. This results in unmounting a
-> > +# filesystem with dirty+delalloc pages, which in turn causes unmount time
-> > +# warnings and filesystem inconsistency.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/inject
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> 
-> Supported fs should be 'xfs' here.
-> 
+For a long time the test btrfs/007, which tests btrfs' send/receive with
+fsstress, fails sporadically reporting data differences between files.
+However the md5sum/sha1sum from the reported files in the original and
+new filesystems are the same. The reason why fssum fails is because even
+in normal mode it still accounts for number of holes that exist in the
+file and their respective lengths. This is done using the SEEK_DATA mode
+of lseek. The btrfs send feature does not preserve holes nor prealloc
+extents (not supported by the current protocol), so whenever a hole or
+prealloc (unwritten) extent is detected in the source filesystem, it
+issues a write command full of zeroes, which will translate to a regular
+(written) extent in the destination filesystem. This is why fssum reports
+a different checksum. A prealloc extent also counts as hole when using
+lseek.
 
-Will fix, thanks.
+For example when passing a seed of 1540592967 to fsstress in btrfs/007,
+the test fails, as file p0/d0/f7 has a prealloc extent in the original
+filesystem (in the incr snapshot).
 
-Brian
+Fix this by making fssum just read the hole file and feed its data to the
+digest calculation function when option '-s' is not given. If we ever get
+btrfs' send/receive to support holes and fallocate, we can just change
+the test and pass the '-s' option to all fssum calls.
 
-> Thanks,
-> Eryu
-> 
-> > +_supported_os Linux
-> > +_require_error_injection
-> > +_require_xfs_io_error_injection "writepage_map"
-> > +_require_scratch
-> > +
-> > +_scratch_mkfs >> $seqres.full 2>&1
-> > +
-> > +_scratch_mount
-> > +_scratch_inject_error "writepage_map" 1
-> > +# use 512k to dirty multiple pages on large page size systems
-> > +$XFS_IO_PROG -fc "pwrite 0 512k" $SCRATCH_MNT/file >> $seqres.full 2>&1
-> > +_scratch_unmount
-> > +
-> > +echo Silence is golden
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/494.out b/tests/xfs/494.out
-> > new file mode 100644
-> > index 00000000..827c239a
-> > --- /dev/null
-> > +++ b/tests/xfs/494.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 494
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 2cec0585..136d3707 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -491,3 +491,4 @@
-> >  491 auto quick fuzz
-> >  492 auto quick fuzz
-> >  493 auto quick fuzz
-> > +494 auto quick
-> > -- 
-> > 2.17.2
-> > 
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ src/fssum.c | 65 +++++--------------------------------------------------------
+ 1 file changed, 5 insertions(+), 60 deletions(-)
+
+diff --git a/src/fssum.c b/src/fssum.c
+index 5da39abf..f1da72fb 100644
+--- a/src/fssum.c
++++ b/src/fssum.c
+@@ -224,71 +224,16 @@ int
+ sum_file_data_permissive(int fd, sum_t *dst)
+ {
+ 	int ret;
+-	off_t pos;
+-	off_t old;
+-	int i;
+-	uint64_t zeros = 0;
+-
+-	pos = lseek(fd, 0, SEEK_CUR);
+-	if (pos == (off_t)-1)
+-		return errno == ENXIO ? 0 : -2;
+ 
+ 	while (1) {
+-		old = pos;
+-		pos = lseek(fd, pos, SEEK_DATA);
+-		if (pos == (off_t)-1) {
+-			if (errno == ENXIO) {
+-				ret = 0;
+-				pos = lseek(fd, 0, SEEK_END);
+-				if (pos != (off_t)-1)
+-					zeros += pos - old;
+-			} else {
+-				ret = -2;
+-			}
+-			break;
+-		}
+ 		ret = read(fd, buf, sizeof(buf));
+-		assert(ret); /* eof found by lseek */
+-		if (ret <= 0)
++		if (ret < 0)
++			return -errno;
++		sum_add(dst, buf, ret);
++		if (ret < sizeof(buf))
+ 			break;
+-		if (old < pos) /* hole */
+-			zeros += pos - old;
+-		for (i = 0; i < ret; ++i) {
+-			for (old = i; buf[i] == 0 && i < ret; ++i)
+-				;
+-			if (old < i) /* code like a hole */
+-				zeros += i - old;
+-			if (i == ret)
+-				break;
+-			if (zeros) {
+-				if (verbose >= 2)
+-					fprintf(stderr,
+-						"adding %llu zeros to sum\n",
+-						(unsigned long long)zeros);
+-				sum_add_u64(dst, 0);
+-				sum_add_u64(dst, zeros);
+-				zeros = 0;
+-			}
+-			for (old = i; buf[i] != 0 && i < ret; ++i)
+-				;
+-			if (verbose >= 2)
+-				fprintf(stderr, "adding %u non-zeros to sum\n",
+-					i - (int)old);
+-			sum_add(dst, buf + old, i - old);
+-		}
+-		pos += ret;
+ 	}
+-
+-	if (zeros) {
+-		if (verbose >= 2)
+-			fprintf(stderr,
+-				"adding %llu zeros to sum (finishing)\n",
+-				(unsigned long long)zeros);
+-		sum_add_u64(dst, 0);
+-		sum_add_u64(dst, zeros);
+-	}
+-
+-	return ret;
++	return 0;
+ }
+ 
+ int
+-- 
+2.11.0
