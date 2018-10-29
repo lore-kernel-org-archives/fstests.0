@@ -1,132 +1,74 @@
-Received: from mail.kernel.org ([198.145.29.99]:50202 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729588AbeJ2Sbi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 29 Oct 2018 14:31:38 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: fix fssum to actually ignore file holes when supposed to
-Date: Mon, 29 Oct 2018 09:43:40 +0000
-Message-Id: <20181029094340.18154-1-fdmanana@kernel.org>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:34268 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1729146AbeJ2TWp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 29 Oct 2018 15:22:45 -0400
+Subject: Re: [PATCH v3] generic/508: fix to check inode creation time feature
+ on scratch mountpoint
+References: <20181027015520.7355-1-yuchao0@huawei.com>
+ <20181027032801.GH6311@dastard>
+From: Chao Yu <yuchao0@huawei.com>
+Message-ID: <a519cbed-3f03-8023-01ad-0b7416638e69@huawei.com>
+Date: Mon, 29 Oct 2018 18:34:34 +0800
+MIME-Version: 1.0
+In-Reply-To: <20181027032801.GH6311@dastard>
+Content-Type: text/plain; charset="windows-1252"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: guaneryu@gmail.com, fstests@vger.kernel.org, chao@kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On 2018/10/27 11:28, Dave Chinner wrote:
+> On Sat, Oct 27, 2018 at 09:55:20AM +0800, Chao Yu wrote:
+>> _require_btime() just check inode creation time feature on TEST_DIR
+>> mountpoint, but generic/508 needs to do that check on SCRATCH_MNT
+>> mountpoint. Let's add _require_scratch_btime() for that, meanwhile
+>> handling scratch_{mkfs,mount,umount} inside the function to decouple
+>> with caller.
+>>
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+>> ---
+>> v3:
+>> - hanlde scratch mkfs/mount/umount inside _require_scratch_btime
+>> - relocate _require_scratch_btime
+>>  common/rc         | 14 ++++++++++++++
+>>  tests/generic/508 |  2 +-
+>>  2 files changed, 15 insertions(+), 1 deletion(-)
+>>
+>> diff --git a/common/rc b/common/rc
+>> index b4987a9cd7f7..a882fada7d02 100644
+>> --- a/common/rc
+>> +++ b/common/rc
+>> @@ -3851,6 +3851,20 @@ _require_btime()
+>>  	rm -f $TEST_DIR/test_creation_time
+>>  }
+>>  
+>> +_require_scratch_btime()
+>> +{
+>> +	_require_scratch
+>> +	_scratch_mkfs > /dev/null 2>&1
+>> +	_scratch_mount
+>> +
+>> +	$XFS_IO_PROG -f $SCRATCH_MNT/test_creation_time -c "statx -v" \
+>> +		| grep btime >>$seqres.full 2>&1 || \
+>> +		_notrun "inode creation time not supported by this filesystem"
+>> +	rm -f $SCRATCH_MNT/test_creation_time
+> 
+> No need to remove that file - it's going to get mkfs'd again,
+> anyway.
 
-Unless the '-s' option is passed to fssum, it should not detect file holes
-and have their existence influence the computed checksum for a file. This
-tool was added to test btrfs' send/receive feature, so that it checks for
-any metadata and data differences between the original filesystem and the
-filesystem that receives send streams.
+That's correct, I just saw Eryu has fixed this in upstream, so I think I
+don't need to send v4...
 
-For a long time the test btrfs/007, which tests btrfs' send/receive with
-fsstress, fails sporadically reporting data differences between files.
-However the md5sum/sha1sum from the reported files in the original and
-new filesystems are the same. The reason why fssum fails is because even
-in normal mode it still accounts for number of holes that exist in the
-file and their respective lengths. This is done using the SEEK_DATA mode
-of lseek. The btrfs send feature does not preserve holes nor prealloc
-extents (not supported by the current protocol), so whenever a hole or
-prealloc (unwritten) extent is detected in the source filesystem, it
-issues a write command full of zeroes, which will translate to a regular
-(written) extent in the destination filesystem. This is why fssum reports
-a different checksum. A prealloc extent also counts as hole when using
-lseek.
+> 
+> Otherwise looks fine. I'm not a fan of all these require_scratch
+> rules having to run mkfs, but I can live with it.
+> 
+> Reviewed-by: Dave Chinner <dchinner@redhat.com>
 
-For example when passing a seed of 1540592967 to fsstress in btrfs/007,
-the test fails, as file p0/d0/f7 has a prealloc extent in the original
-filesystem (in the incr snapshot).
+Thanks for the review. :)
 
-Fix this by making fssum just read the hole file and feed its data to the
-digest calculation function when option '-s' is not given. If we ever get
-btrfs' send/receive to support holes and fallocate, we can just change
-the test and pass the '-s' option to all fssum calls.
+Thanks,
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- src/fssum.c | 65 +++++--------------------------------------------------------
- 1 file changed, 5 insertions(+), 60 deletions(-)
-
-diff --git a/src/fssum.c b/src/fssum.c
-index 5da39abf..f1da72fb 100644
---- a/src/fssum.c
-+++ b/src/fssum.c
-@@ -224,71 +224,16 @@ int
- sum_file_data_permissive(int fd, sum_t *dst)
- {
- 	int ret;
--	off_t pos;
--	off_t old;
--	int i;
--	uint64_t zeros = 0;
--
--	pos = lseek(fd, 0, SEEK_CUR);
--	if (pos == (off_t)-1)
--		return errno == ENXIO ? 0 : -2;
- 
- 	while (1) {
--		old = pos;
--		pos = lseek(fd, pos, SEEK_DATA);
--		if (pos == (off_t)-1) {
--			if (errno == ENXIO) {
--				ret = 0;
--				pos = lseek(fd, 0, SEEK_END);
--				if (pos != (off_t)-1)
--					zeros += pos - old;
--			} else {
--				ret = -2;
--			}
--			break;
--		}
- 		ret = read(fd, buf, sizeof(buf));
--		assert(ret); /* eof found by lseek */
--		if (ret <= 0)
-+		if (ret < 0)
-+			return -errno;
-+		sum_add(dst, buf, ret);
-+		if (ret < sizeof(buf))
- 			break;
--		if (old < pos) /* hole */
--			zeros += pos - old;
--		for (i = 0; i < ret; ++i) {
--			for (old = i; buf[i] == 0 && i < ret; ++i)
--				;
--			if (old < i) /* code like a hole */
--				zeros += i - old;
--			if (i == ret)
--				break;
--			if (zeros) {
--				if (verbose >= 2)
--					fprintf(stderr,
--						"adding %llu zeros to sum\n",
--						(unsigned long long)zeros);
--				sum_add_u64(dst, 0);
--				sum_add_u64(dst, zeros);
--				zeros = 0;
--			}
--			for (old = i; buf[i] != 0 && i < ret; ++i)
--				;
--			if (verbose >= 2)
--				fprintf(stderr, "adding %u non-zeros to sum\n",
--					i - (int)old);
--			sum_add(dst, buf + old, i - old);
--		}
--		pos += ret;
- 	}
--
--	if (zeros) {
--		if (verbose >= 2)
--			fprintf(stderr,
--				"adding %llu zeros to sum (finishing)\n",
--				(unsigned long long)zeros);
--		sum_add_u64(dst, 0);
--		sum_add_u64(dst, zeros);
--	}
--
--	return ret;
-+	return 0;
- }
- 
- int
--- 
-2.11.0
+> 
