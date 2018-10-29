@@ -1,119 +1,55 @@
-Received: from mail-vs1-f66.google.com ([209.85.217.66]:35829 "EHLO
-        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727734AbeJ2Udl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Oct 2018 16:33:41 -0400
+Received: from mail-qk1-f193.google.com ([209.85.222.193]:41191 "EHLO
+        mail-qk1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725920AbeJ2Wd0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 29 Oct 2018 18:33:26 -0400
+Received: by mail-qk1-f193.google.com with SMTP id 189so3490827qkj.8
+        for <fstests@vger.kernel.org>; Mon, 29 Oct 2018 06:44:42 -0700 (PDT)
+Date: Mon, 29 Oct 2018 09:44:36 -0400
+From: Masayoshi Mizuma <msys.mizuma@gmail.com>
+Subject: Re: [PATCH] check: skip parsing if the file is not shell script.
+Message-ID: <20181029134435.lx5otokns2pwfvyq@gabell>
+References: <20181024143307.25372-1-msys.mizuma@gmail.com>
+ <20181028134452.GE3876@desktop>
 MIME-Version: 1.0
-References: <20181029063501.21604-1-wqu@suse.com>
-In-Reply-To: <20181029063501.21604-1-wqu@suse.com>
-Reply-To: fdmanana@gmail.com
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Mon, 29 Oct 2018 11:45:10 +0000
-Message-ID: <CAL3q7H7whUCd-a97ZvqkLUFO1oe1L2aYhmiECxH1n5Bx6Wf-tg@mail.gmail.com>
-Subject: Re: [PATCH] fstests: btrfs/057: Fix false alerts due to orphan files
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181028134452.GE3876@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 29, 2018 at 6:35 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> For latest kernel, there is a chance that btrfs/057 reports false
-> errors.
->
-> The false error would look like:
->   btrfs/057 4s ... - output mismatch (see /home/adam/xfstests-dev/results=
-//btrfs/057.out.bad)
->       --- tests/btrfs/057.out   2017-08-21 09:25:33.166666666 +0800
->       +++ /home/adam/xfstests-dev/results//btrfs/057.out.bad    2018-10-2=
-9 14:07:28.443651293 +0800
->       @@ -1,3 +1,3 @@
->        QA output created by 057
->        4096 4096
->       -4096 4096
->       +28672 28672
->
-> This is related to the fact that "btrfs subvolume sync" (or
-> vanilla sync) will not ensure orphan (unlinked but still exist) files to
-> be removed.
->
-> In fact, for that false error case, if inspecting the fs after umount,
-> its qgroup number is correct and btrfs check won't report qgroup error.
->
-> To fix the false alerts, just skip any manual qgroup number comparison,
-> and let fsck done after the test case to detect problem.
->
-> This also elimiate the necessary of using specified mount and mkfs
-> option, allowing us to improve coverage.
->
-> Reported-by: Nikolay Borisov <nborisov@suse.com>
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
+On Sun, Oct 28, 2018 at 09:44:52PM +0800, Eryu Guan wrote:
+> On Wed, Oct 24, 2018 at 10:33:07AM -0400, Masayoshi Mizuma wrote:
+> > From: Masayoshi Mizuma <m.mizuma@jp.fujitsu.com>
+> > 
+> > If we run tests using '*', for example './check xfs/*', we will
+> > get following error messages. This patch introduces to avoid
+> > the messages.
+> > 
+> > ./check xfs/*
+> > xfs/001.out - unknown test, ignored
+> > xfs/002.out - unknown test, ignored
+> > xfs/003.out - unknown test, ignored
+> > xfs/004.out - unknown test, ignored
+> > ...
+> 
+> Hmm, that's just not the recommended way to run tests. Not all tests are
+> valid (yes, there're broken tests) and sometimes we may forget to add x
+> permission on a test (though I have a local script to catch that, but it
+> did happen before).
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Got it, thanks!
 
-> ---
->  tests/btrfs/057     | 17 ++++-------------
->  tests/btrfs/057.out |  3 +--
->  2 files changed, 5 insertions(+), 15 deletions(-)
->
-> diff --git a/tests/btrfs/057 b/tests/btrfs/057
-> index b019f4e1..0b5a36d3 100755
-> --- a/tests/btrfs/057
-> +++ b/tests/btrfs/057
-> @@ -33,12 +33,9 @@ _require_scratch
->  rm -f $seqres.full
->
->  # use small leaf size to get higher btree height.
-> -run_check _scratch_mkfs "-b 1g --nodesize 4096"
-> +run_check _scratch_mkfs "-b 1g"
+> Please either use a more precise pattern to match the tests you want to
+> run, or even better, run tests by specifying the groups, e.g.
+> 
+> ./check -g xfs/log
+> 
+> to run all tests in 'log' group in 'xfs' directory.
 
-The comment above should go away too.
+What is the better way to run all the tests?
+Should I set the all groups? look like check -g xfs/auto,xfs/ioctl,...?
 
->
-> -# inode cache is saved in the FS tree itself for every
-> -# individual FS tree,that affects the sizes reported by qgroup show
-> -# so we need to explicitly turn it off to get consistent values.
-> -_scratch_mount "-o noinode_cache"
-> +_scratch_mount
->
->  # -w ensures that the only ops are ones which cause write I/O
->  run_check $FSSTRESS_PROG -d $SCRATCH_MNT -w -p 5 -n 1000 \
-> @@ -53,14 +50,8 @@ run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w -p 5=
- -n 1000 \
->  _run_btrfs_util_prog quota enable $SCRATCH_MNT
->  _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
->
-> -# remove all file/dir other than subvolume
-> -rm -rf $SCRATCH_MNT/snap1/* >& /dev/null
-> -rm -rf $SCRATCH_MNT/p* >& /dev/null
-> -
-> -_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
-> -units=3D`_btrfs_qgroup_units`
-> -$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9]/=
-p' \
-> -       | $AWK_PROG '{print $2" "$3}'
-> +echo "Silence is golden"
-> +# btrfs check will detect any qgroup number mismatch.
->
->  status=3D0
->  exit
-> diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
-> index 60cb92d0..185023c7 100644
-> --- a/tests/btrfs/057.out
-> +++ b/tests/btrfs/057.out
-> @@ -1,3 +1,2 @@
->  QA output created by 057
-> -4096 4096
-> -4096 4096
-> +Silence is golden
-> --
-> 2.18.0
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+Thanks,
+Masa
