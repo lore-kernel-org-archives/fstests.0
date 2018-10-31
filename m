@@ -1,179 +1,115 @@
-Received: from mx2.suse.de ([195.135.220.15]:44294 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727527AbeJaStH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 31 Oct 2018 14:49:07 -0400
-Subject: Re: [PATCH v3] fstests: btrfs/057: Fix false alerts due to orphan
- files
-References: <20181030101819.19510-1-wqu@suse.com>
- <96e63270-1697-479a-b2b0-f6b2e78ede90@suse.com>
- <c3617dc2-cbb0-492e-5161-bcc264cbf673@gmx.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <add06369-26b8-c895-93c8-354ac80e4428@suse.com>
-Date: Wed, 31 Oct 2018 11:51:38 +0200
-MIME-Version: 1.0
-In-Reply-To: <c3617dc2-cbb0-492e-5161-bcc264cbf673@gmx.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:53123 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727823AbeJaSwe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Oct 2018 14:52:34 -0400
+Received: by mail-wm1-f68.google.com with SMTP id 189-v6so14465263wmw.2
+        for <fstests@vger.kernel.org>; Wed, 31 Oct 2018 02:55:08 -0700 (PDT)
+From: Miklos Szeredi <mszeredi@redhat.com>
+Subject: [PATCH] overlay: create directory over deleted whiteout
+Date: Wed, 31 Oct 2018 10:55:02 +0100
+Message-Id: <20181031095502.12504-1-mszeredi@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>, Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+There's a bug in the overlayfs implementation starting from the very first
+merged version that may cause an Oops of various forms if a directory is created
+over a whiteout dentry, but the actual whiteout on the upper layer was removed
+to the directory creation.
 
+Reported by: kaixuxia <xiakaixu1987@gmail.com>
+Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+---
+ tests/overlay/062     | 60 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/062.out |  2 ++
+ tests/overlay/group   |  1 +
+ 3 files changed, 63 insertions(+)
+ create mode 100644 tests/overlay/062
+ create mode 100644 tests/overlay/062.out
 
-On 31.10.18 =D0=B3. 11:22 =D1=87., Qu Wenruo wrote:
->=20
->=20
-> On 2018/10/31 =E4=B8=8B=E5=8D=884:55, Nikolay Borisov wrote:
->>
->>
->> On 30.10.18 =D0=B3. 12:18 =D1=87., Qu Wenruo wrote:
->>> For any recent kernel, there is a chance that btrfs/057 reports false
->>> errors.
->>>
->>> The false error would look like:
->>>   btrfs/057 4s ... - output mismatch (see /home/adam/xfstests-dev/res=
-ults//btrfs/057.out.bad)
->>>       --- tests/btrfs/057.out	2017-08-21 09:25:33.166666666 +0800
->>>       +++ /home/adam/xfstests-dev/results//btrfs/057.out.bad	2018-10-=
-29 14:07:28.443651293 +0800
->>>       @@ -1,3 +1,3 @@
->>>        QA output created by 057
->>>        4096 4096
->>>       -4096 4096
->>>       +28672 28672
->>>
->>> This is related to the fact that "btrfs subvolume sync" (or
->>> vanilla sync) will not ensure orphan (unlinked but still exist) files=
- to
->>> be removed.
->>>
->>> In fact, for that false error case, if inspecting the fs after umount=
-,
->>> its qgroup number is correct and btrfs check won't report qgroup erro=
-r.
->>>
->>> To fix the false alerts, just skip any manual qgroup number compariso=
-n,
->>> and let fsck done after the test case to detect problem.
->>>
->>> This also elimiate the necessary of using specified mount and mkfs
->>> option, allowing us to improve coverage.
->>
->> Something's fishy about this test! THe description states that "
->>  Quota rescan stress test, we run fsstress and quota rescan
->> concurrently" yet fsstress is not run concurrently to quota. We first
->> run fsstress, then trigger rescan with -w. How exactly are rescan and
->> fsstress run concurrently ?
->=20
-> Indeed that description is just garbage.
->=20
-> The real objective looks like just fsstress + rescan test.
-> No concurrency at all from the very beginning.
->=20
-> Not sure what to do with it.
-
-I guess the real question here is whether the test as-is tests for
-anything useful - if not, we have to either:
-
-a) Rewrite it so that it is useful. From the original commit log:
-
- Test flow is to run fsstress after triggering quota rescan.
- the ruler is simple, we just remove all files and directories,
- sync filesystem and see if qgroup's ref and excl are nodesize.
-
-b) Delete it
-
-
-I can see how a concurrent write to the fs and a pending rescan could be
-a useful thing to exercise. Perhaps it's just a question of making
-fsstress run in the background with slightly bigger workload (and do
-away with the awful (and deprecated) style of stream redirection
-'>&/dev/null').
-
->From bash's man page:
-
-There are two formats for redirecting standard output and standard error:
-
-    &>word
-       and
-    >&word
-
-Of the two forms, the first is preferred.
-
-
-
-
-
->=20
-> Thanks,
-> Qu
->=20
->>
->>>
->>> Reported-by: Nikolay Borisov <nborisov@suse.com>
->>> Signed-off-by: Qu Wenruo <wqu@suse.com>
->>> Reviewed-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>> Changelog:
->>> v2:
->>>   Update commit message to show this is a long existing bug.
->>> v3:
->>>   Remove an old comment since now we don't need to specify the leaf
->>>   size.
->>>   Added Reviewed-by tags.
->>> ---
->>>  tests/btrfs/057     | 18 ++++--------------
->>>  tests/btrfs/057.out |  3 +--
->>>  2 files changed, 5 insertions(+), 16 deletions(-)
->>>
->>> diff --git a/tests/btrfs/057 b/tests/btrfs/057
->>> index b019f4e1e054..82e3162ebfeb 100755
->>> --- a/tests/btrfs/057
->>> +++ b/tests/btrfs/057
->>> @@ -32,13 +32,9 @@ _require_scratch
->>> =20
->>>  rm -f $seqres.full
->>> =20
->>> -# use small leaf size to get higher btree height.
->>> -run_check _scratch_mkfs "-b 1g --nodesize 4096"
->>> +run_check _scratch_mkfs "-b 1g"
->>> =20
->>> -# inode cache is saved in the FS tree itself for every
->>> -# individual FS tree,that affects the sizes reported by qgroup show
->>> -# so we need to explicitly turn it off to get consistent values.
->>> -_scratch_mount "-o noinode_cache"
->>> +_scratch_mount
->>> =20
->>>  # -w ensures that the only ops are ones which cause write I/O
->>>  run_check $FSSTRESS_PROG -d $SCRATCH_MNT -w -p 5 -n 1000 \
->>> @@ -53,14 +49,8 @@ run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w =
--p 5 -n 1000 \
->>>  _run_btrfs_util_prog quota enable $SCRATCH_MNT
->>>  _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
->>> =20
->>> -# remove all file/dir other than subvolume
->>> -rm -rf $SCRATCH_MNT/snap1/* >& /dev/null
->>> -rm -rf $SCRATCH_MNT/p* >& /dev/null
->>> -
->>> -_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
->>> -units=3D`_btrfs_qgroup_units`
->>> -$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0=
--9]/p' \
->>> -	| $AWK_PROG '{print $2" "$3}'
->>> +echo "Silence is golden"
->>> +# btrfs check will detect any qgroup number mismatch.
->>> =20
->>>  status=3D0
->>>  exit
->>> diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
->>> index 60cb92d0926c..185023c79961 100644
->>> --- a/tests/btrfs/057.out
->>> +++ b/tests/btrfs/057.out
->>> @@ -1,3 +1,2 @@
->>>  QA output created by 057
->>> -4096 4096
->>> -4096 4096
->>> +Silence is golden
->>>
->=20
+diff --git a/tests/overlay/062 b/tests/overlay/062
+new file mode 100644
+index 000000000000..b2cc350afefb
+--- /dev/null
++++ b/tests/overlay/062
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 062
++#
++# Create dir over cached negative dentry, but whiteout removed from upper
++#
++# The following kernel commit fixed the kernel crash: ???
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create test file
++lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
++upperdir=${OVL_BASE_SCRATCH_MNT}/${OVL_UPPER}
++mkdir -p $lowerdir
++touch ${lowerdir}/file
++
++_scratch_mount
++
++rm ${SCRATCH_MNT}/file
++ls -l ${SCRATCH_MNT}/file > /dev/null 2>&1
++rm ${upperdir}/file
++mkdir ${SCRATCH_MNT}/file > /dev/null 2>&1
++
++# unmount overlayfs
++$UMOUNT_PROG $SCRATCH_MNT
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/overlay/062.out b/tests/overlay/062.out
+new file mode 100644
+index 000000000000..a1578f4842ef
+--- /dev/null
++++ b/tests/overlay/062.out
+@@ -0,0 +1,2 @@
++QA output created by 062
++Silence is golden
+diff --git a/tests/overlay/group b/tests/overlay/group
+index ccc71f3bf846..0d3ceed3602d 100644
+--- a/tests/overlay/group
++++ b/tests/overlay/group
+@@ -64,3 +64,4 @@
+ 059 auto quick copyup
+ 060 auto quick metacopy
+ 061 auto quick copyup
++062 auto quick whiteout
+-- 
+2.14.3
