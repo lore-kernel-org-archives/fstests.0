@@ -1,60 +1,60 @@
-Received: from mail-it1-f195.google.com ([209.85.166.195]:56296 "EHLO
-        mail-it1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726646AbeJaULH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 Oct 2018 16:11:07 -0400
-Received: by mail-it1-f195.google.com with SMTP id e17so16040915itk.5
-        for <fstests@vger.kernel.org>; Wed, 31 Oct 2018 04:13:29 -0700 (PDT)
+Received: from mail-yb1-f194.google.com ([209.85.219.194]:36839 "EHLO
+        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729782AbeKABDr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Oct 2018 21:03:47 -0400
+Received: by mail-yb1-f194.google.com with SMTP id w16-v6so6844164ybp.3
+        for <fstests@vger.kernel.org>; Wed, 31 Oct 2018 09:05:09 -0700 (PDT)
+Date: Wed, 31 Oct 2018 12:05:05 -0400
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: Re: [PATCH] fstests: fix fssum to actually ignore file holes when
+ supposed to
+Message-ID: <20181031160504.hldii2zywr2n7sp6@macbook-pro-91.dhcp.thefacebook.com>
+References: <20181029094340.18154-1-fdmanana@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <CAOQ4uxjeF=+GWzO2WgEaWds4Riory+QgxSPywLHT2_Bxqz=q4w@mail.gmail.com>
-References: <20181031095502.12504-1-mszeredi@redhat.com> <CAOQ4uxi9YX23C7NLQ2yqsz1Ur4nwMZFbQta=nBU=6bvYPU2YGg@mail.gmail.com>
- <CAJfpegtOzh9Z3xPJi6aFgzGazCVr5WHXaHw1s6mXMhpav0xT7A@mail.gmail.com> <CAOQ4uxjeF=+GWzO2WgEaWds4Riory+QgxSPywLHT2_Bxqz=q4w@mail.gmail.com>
-From: Miklos Szeredi <miklos@szeredi.hu>
-Date: Wed, 31 Oct 2018 12:13:27 +0100
-Message-ID: <CAJfpegvd67cFoBUbOdqtZknB-Db5GFRR6a=gGtKpatFZ5vUKbQ@mail.gmail.com>
-Subject: Re: [PATCH] overlay: create directory over deleted whiteout
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181029094340.18154-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Miklos Szeredi <mszeredi@redhat.com>, Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Oct 31, 2018 at 11:33 AM, Amir Goldstein <amir73il@gmail.com> wrote:
-> On Wed, Oct 31, 2018 at 12:26 PM Miklos Szeredi <miklos@szeredi.hu> wrote:
->>
->> On Wed, Oct 31, 2018 at 11:17 AM, Amir Goldstein <amir73il@gmail.com> wrote:
->> > On Wed, Oct 31, 2018 at 11:55 AM Miklos Szeredi <mszeredi@redhat.com> wrote:
->> >>
->> >> There's a bug in the overlayfs implementation starting from the very first
->> >> merged version that may cause an Oops of various forms if a directory is created
->> >> over a whiteout dentry, but the actual whiteout on the upper layer was removed
->> >> to the directory creation.
->> >>
->> >> Reported by: kaixuxia <xiakaixu1987@gmail.com>
->> >> Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
->> >> ---
->> >
->> > Looks good. A bit of commentary could be useful...
->>
->> Okay.
->>
->> >> +
->> >> +# unmount overlayfs
->> >> +$UMOUNT_PROG $SCRATCH_MNT
->> >
->> > Umount of scratch is not needed at the end of the test.
->>
->> It's not strictly needed, but gives additional assurance that things
->> hadn't gone bad (after the oops umount returns with EBUSY).
->>
->
-> But the test harness unmount the scratch mount anyway
-> and if you have fsck.overlay installed it also runs fsck.overay on the layers
-> after each test.
->
-> The question is why do you need the umount command in the test itself?
-> Is the output/result different without the explicit umount command in the test?
+On Mon, Oct 29, 2018 at 09:43:40AM +0000, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
+> 
+> Unless the '-s' option is passed to fssum, it should not detect file holes
+> and have their existence influence the computed checksum for a file. This
+> tool was added to test btrfs' send/receive feature, so that it checks for
+> any metadata and data differences between the original filesystem and the
+> filesystem that receives send streams.
+> 
+> For a long time the test btrfs/007, which tests btrfs' send/receive with
+> fsstress, fails sporadically reporting data differences between files.
+> However the md5sum/sha1sum from the reported files in the original and
+> new filesystems are the same. The reason why fssum fails is because even
+> in normal mode it still accounts for number of holes that exist in the
+> file and their respective lengths. This is done using the SEEK_DATA mode
+> of lseek. The btrfs send feature does not preserve holes nor prealloc
+> extents (not supported by the current protocol), so whenever a hole or
+> prealloc (unwritten) extent is detected in the source filesystem, it
+> issues a write command full of zeroes, which will translate to a regular
+> (written) extent in the destination filesystem. This is why fssum reports
+> a different checksum. A prealloc extent also counts as hole when using
+> lseek.
+> 
+> For example when passing a seed of 1540592967 to fsstress in btrfs/007,
+> the test fails, as file p0/d0/f7 has a prealloc extent in the original
+> filesystem (in the incr snapshot).
+> 
+> Fix this by making fssum just read the hole file and feed its data to the
+> digest calculation function when option '-s' is not given. If we ever get
+> btrfs' send/receive to support holes and fallocate, we can just change
+> the test and pass the '-s' option to all fssum calls.
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-The output is different, because the umount command fails if the mkdir crashed.
+Reviewed-by: Josef Bacik <josef@toxicpanda.com>
 
 Thanks,
-Miklos
+
+Josef
