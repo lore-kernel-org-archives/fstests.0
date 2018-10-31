@@ -1,259 +1,123 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:36084 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726549AbeJaC6P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Oct 2018 22:58:15 -0400
-Subject: [PATCH 3/3] xfs: fuzz directories containing single leafn blocks
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 30 Oct 2018 11:03:41 -0700
-Message-ID: <154092262132.14882.9439371379100909096.stgit@magnolia>
-In-Reply-To: <154092260885.14882.10714249211090490549.stgit@magnolia>
-References: <154092260885.14882.10714249211090490549.stgit@magnolia>
+Received: from mx2.suse.de ([195.135.220.15]:52740 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727764AbeJaR6R (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Oct 2018 13:58:17 -0400
+Subject: Re: [PATCH v3] fstests: btrfs/057: Fix false alerts due to orphan
+ files
+References: <20181030101819.19510-1-wqu@suse.com>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <96e63270-1697-479a-b2b0-f6b2e78ede90@suse.com>
+Date: Wed, 31 Oct 2018 10:55:23 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <20181030101819.19510-1-wqu@suse.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Qu Wenruo <wqu@suse.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
-
-Test scrub, repair, and metadata verifiers on directories containing
-fuzzed single-leafn blocks.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/1422     |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1422.out |    5 +++++
- tests/xfs/1423     |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1423.out |    5 +++++
- tests/xfs/1424     |   52 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/1424.out |    5 +++++
- tests/xfs/group    |    3 +++
- 7 files changed, 174 insertions(+)
- create mode 100755 tests/xfs/1422
- create mode 100644 tests/xfs/1422.out
- create mode 100755 tests/xfs/1423
- create mode 100644 tests/xfs/1423.out
- create mode 100755 tests/xfs/1424
- create mode 100644 tests/xfs/1424.out
 
 
-diff --git a/tests/xfs/1422 b/tests/xfs/1422
-new file mode 100755
-index 00000000..cd2cbc2a
---- /dev/null
-+++ b/tests/xfs/1422
-@@ -0,0 +1,52 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 1422
-+#
-+# Populate a XFS filesystem and fuzz every single-leafn-format dir block field.
-+# Use xfs_repair to fix the corruption.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+. ./common/fuzzy
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_xfs_fuzz_fields
-+
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+echo "Find single-leafn-format dir block"
-+_scratch_mount
-+inum=$(stat -c '%i' $SCRATCH_MNT/S_IFDIR.FMT_LEAFN)
-+blk_sz=$(_get_block_size $SCRATCH_MNT)
-+_scratch_unmount
-+
-+leaf_offset=$(( (2 ** 35) / blk_sz ))
-+echo "Fuzz single-leafn-format dir block"
-+_scratch_xfs_fuzz_metadata '' 'offline'  "inode ${inum}" "dblock ${leaf_offset}" >> $seqres.full
-+echo "Done fuzzing single-leafn-format dir block"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1422.out b/tests/xfs/1422.out
-new file mode 100644
-index 00000000..76cb50a5
---- /dev/null
-+++ b/tests/xfs/1422.out
-@@ -0,0 +1,5 @@
-+QA output created by 1422
-+Format and populate
-+Find single-leafn-format dir block
-+Fuzz single-leafn-format dir block
-+Done fuzzing single-leafn-format dir block
-diff --git a/tests/xfs/1423 b/tests/xfs/1423
-new file mode 100755
-index 00000000..3220264f
---- /dev/null
-+++ b/tests/xfs/1423
-@@ -0,0 +1,52 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 1423
-+#
-+# Populate a XFS filesystem and fuzz every single-leafn-format dir block field.
-+# Use xfs_scrub to fix the corruption.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+. ./common/fuzzy
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_xfs_fuzz_fields
-+
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+echo "Find single-leafn-format dir block"
-+_scratch_mount
-+inum=$(stat -c '%i' $SCRATCH_MNT/S_IFDIR.FMT_LEAFN)
-+blk_sz=$(_get_block_size $SCRATCH_MNT)
-+_scratch_unmount
-+
-+leaf_offset=$(( (2 ** 35) / blk_sz ))
-+echo "Fuzz single-leafn-format dir block"
-+_scratch_xfs_fuzz_metadata '' 'online'  "inode ${inum}" "dblock ${leaf_offset}" >> $seqres.full
-+echo "Done fuzzing single-leafn-format dir block"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1423.out b/tests/xfs/1423.out
-new file mode 100644
-index 00000000..bca6d99d
---- /dev/null
-+++ b/tests/xfs/1423.out
-@@ -0,0 +1,5 @@
-+QA output created by 1423
-+Format and populate
-+Find single-leafn-format dir block
-+Fuzz single-leafn-format dir block
-+Done fuzzing single-leafn-format dir block
-diff --git a/tests/xfs/1424 b/tests/xfs/1424
-new file mode 100755
-index 00000000..c8666f5d
---- /dev/null
-+++ b/tests/xfs/1424
-@@ -0,0 +1,52 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 1424
-+#
-+# Populate a XFS filesystem and fuzz every single-leafn-format dir block field.
-+# Do not fix the filesystem, to test metadata verifiers.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+. ./common/fuzzy
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_xfs_fuzz_fields
-+
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+echo "Find single-leafn-format dir block"
-+_scratch_mount
-+inum=$(stat -c '%i' $SCRATCH_MNT/S_IFDIR.FMT_LEAFN)
-+blk_sz=$(_get_block_size $SCRATCH_MNT)
-+_scratch_unmount
-+
-+leaf_offset=$(( (2 ** 35) / blk_sz ))
-+echo "Fuzz single-leafn-format dir block"
-+_scratch_xfs_fuzz_metadata '' 'none'  "inode ${inum}" "dblock ${leaf_offset}" >> $seqres.full
-+echo "Done fuzzing single-leafn-format dir block"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/1424.out b/tests/xfs/1424.out
-new file mode 100644
-index 00000000..50d09f48
---- /dev/null
-+++ b/tests/xfs/1424.out
-@@ -0,0 +1,5 @@
-+QA output created by 1424
-+Format and populate
-+Find single-leafn-format dir block
-+Fuzz single-leafn-format dir block
-+Done fuzzing single-leafn-format dir block
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 4b0552b9..b3afe31a 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -493,3 +493,6 @@
- 493 auto quick fuzz
- 734 auto quick
- 1421 auto quick repair
-+1422 dangerous_fuzzers dangerous_scrub dangerous_repair
-+1423 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-+1424 dangerous_fuzzers dangerous_norepair
+On 30.10.18 =D0=B3. 12:18 =D1=87., Qu Wenruo wrote:
+> For any recent kernel, there is a chance that btrfs/057 reports false
+> errors.
+>=20
+> The false error would look like:
+>   btrfs/057 4s ... - output mismatch (see /home/adam/xfstests-dev/resul=
+ts//btrfs/057.out.bad)
+>       --- tests/btrfs/057.out	2017-08-21 09:25:33.166666666 +0800
+>       +++ /home/adam/xfstests-dev/results//btrfs/057.out.bad	2018-10-29=
+ 14:07:28.443651293 +0800
+>       @@ -1,3 +1,3 @@
+>        QA output created by 057
+>        4096 4096
+>       -4096 4096
+>       +28672 28672
+>=20
+> This is related to the fact that "btrfs subvolume sync" (or
+> vanilla sync) will not ensure orphan (unlinked but still exist) files t=
+o
+> be removed.
+>=20
+> In fact, for that false error case, if inspecting the fs after umount,
+> its qgroup number is correct and btrfs check won't report qgroup error.
+>=20
+> To fix the false alerts, just skip any manual qgroup number comparison,
+> and let fsck done after the test case to detect problem.
+>=20
+> This also elimiate the necessary of using specified mount and mkfs
+> option, allowing us to improve coverage.
+
+Something's fishy about this test! THe description states that "
+ Quota rescan stress test, we run fsstress and quota rescan
+concurrently" yet fsstress is not run concurrently to quota. We first
+run fsstress, then trigger rescan with -w. How exactly are rescan and
+fsstress run concurrently ?
+
+>=20
+> Reported-by: Nikolay Borisov <nborisov@suse.com>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> ---
+> Changelog:
+> v2:
+>   Update commit message to show this is a long existing bug.
+> v3:
+>   Remove an old comment since now we don't need to specify the leaf
+>   size.
+>   Added Reviewed-by tags.
+> ---
+>  tests/btrfs/057     | 18 ++++--------------
+>  tests/btrfs/057.out |  3 +--
+>  2 files changed, 5 insertions(+), 16 deletions(-)
+>=20
+> diff --git a/tests/btrfs/057 b/tests/btrfs/057
+> index b019f4e1e054..82e3162ebfeb 100755
+> --- a/tests/btrfs/057
+> +++ b/tests/btrfs/057
+> @@ -32,13 +32,9 @@ _require_scratch
+> =20
+>  rm -f $seqres.full
+> =20
+> -# use small leaf size to get higher btree height.
+> -run_check _scratch_mkfs "-b 1g --nodesize 4096"
+> +run_check _scratch_mkfs "-b 1g"
+> =20
+> -# inode cache is saved in the FS tree itself for every
+> -# individual FS tree,that affects the sizes reported by qgroup show
+> -# so we need to explicitly turn it off to get consistent values.
+> -_scratch_mount "-o noinode_cache"
+> +_scratch_mount
+> =20
+>  # -w ensures that the only ops are ones which cause write I/O
+>  run_check $FSSTRESS_PROG -d $SCRATCH_MNT -w -p 5 -n 1000 \
+> @@ -53,14 +49,8 @@ run_check $FSSTRESS_PROG -d $SCRATCH_MNT/snap1 -w -p=
+ 5 -n 1000 \
+>  _run_btrfs_util_prog quota enable $SCRATCH_MNT
+>  _run_btrfs_util_prog quota rescan -w $SCRATCH_MNT
+> =20
+> -# remove all file/dir other than subvolume
+> -rm -rf $SCRATCH_MNT/snap1/* >& /dev/null
+> -rm -rf $SCRATCH_MNT/p* >& /dev/null
+> -
+> -_run_btrfs_util_prog filesystem sync $SCRATCH_MNT
+> -units=3D`_btrfs_qgroup_units`
+> -$BTRFS_UTIL_PROG qgroup show $units $SCRATCH_MNT | $SED_PROG -n '/[0-9=
+]/p' \
+> -	| $AWK_PROG '{print $2" "$3}'
+> +echo "Silence is golden"
+> +# btrfs check will detect any qgroup number mismatch.
+> =20
+>  status=3D0
+>  exit
+> diff --git a/tests/btrfs/057.out b/tests/btrfs/057.out
+> index 60cb92d0926c..185023c79961 100644
+> --- a/tests/btrfs/057.out
+> +++ b/tests/btrfs/057.out
+> @@ -1,3 +1,2 @@
+>  QA output created by 057
+> -4096 4096
+> -4096 4096
+> +Silence is golden
+>=20
