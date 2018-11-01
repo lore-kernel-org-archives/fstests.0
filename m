@@ -1,11 +1,13 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:52532 "EHLO
+Received: from aserp2120.oracle.com ([141.146.126.78]:52744 "EHLO
         aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727749AbeKBIYJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 04:24:09 -0400
-Subject: [PATCH 0/8] fstests: fix quota failures on xfs
+        with ESMTP id S1727749AbeKBIYV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 04:24:21 -0400
+Subject: [PATCH 2/8] xfs: force unlink metadata updates to disk
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 01 Nov 2018 16:19:02 -0700
-Message-ID: <154111434286.6577.15010861884505931015.stgit@magnolia>
+Date: Thu, 01 Nov 2018 16:19:15 -0700
+Message-ID: <154111435522.6577.18438780918971479613.stgit@magnolia>
+In-Reply-To: <154111434286.6577.15010861884505931015.stgit@magnolia>
+References: <154111434286.6577.15010861884505931015.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,42 +16,44 @@ To: guaneryu@gmail.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Several months ago I tried testing xfs with quotas enabled and was
-surprised at the number of failures.  Since then I've been on a bug hunt
-to triage the mess, and the following series fixes some of the low
-hanging fruit.  Some of these are minor behavioral variations when quota
-are enabled, and other fixes upgrade old v4 tests to work on v5
-filesystems.
+In xfs/318 and xfs/325 we inject errors on extent freeing then delete
+some files to see if we can make the filesystem go offline.  However,
+with the advent of deferred inode inactivation, sync won't guarantee
+that unlinked inodes removal is actually pushed to disk since the "inode
+needs to be deallocated" state is persisted to disk.  Freeze achieves
+this, however, so inject a freeze/thaw cycle to make sure we hit the
+injected error.
 
-To reproduce the results, run xfstests with
-'MOUNT_OPTIONS="-o usrquota,grpquota,prjquota"' on a v5 filesystem.
-Strike the ',grpquota' on a v4 filesystem.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/xfs/318 |    1 +
+ tests/xfs/325 |    1 +
+ 2 files changed, 2 insertions(+)
 
-The first patch fixes the sporadic quota count failures when testing XFS
-with quotas by replacing the xfs_spaceman call that cleans out (only)
-speculative preallocations with a umount/mount pair that forcibly cleans
-out /all/ preallocations and delayed allocations.
 
-The second patch fixes bugs in a couple of tests that use error
-injection to test log recovery paths but don't succeed in directly
-causing the error to trip.
-
-The third patch works around the fact that mounting xfs with quotas
-requires a writable block device even for a ro mount, which leads to
-a slightly different error message from the mount call.
-
-Patch 4 and 5 fix the dump and restore tests to handle the case that
-quota inodes get sent along with dumps when quotas are enabled.
-
-Patch 6 updates xfs/205 to work with v5 filesystems.
-
-Patch 7 changes tests that require specific quota mount options to clear
-out the background quota mount options so that we test with /exactly/
-the set of mount options.
-
-Patch 8 filters v5 mount options out of tests that format v4
-filesystems on the scratch device.
-
---D
+diff --git a/tests/xfs/318 b/tests/xfs/318
+index 2f2a34b0..83b858ea 100755
+--- a/tests/xfs/318
++++ b/tests/xfs/318
+@@ -59,6 +59,7 @@ _scratch_inject_error "free_extent"
+ echo "Remove files"
+ rm -rf $SCRATCH_MNT/file1
+ sync
++$XFS_IO_PROG -x -c 'freeze' -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
+ 
+ echo "FS should be shut down, touch will fail"
+ touch $SCRATCH_MNT/badfs 2>&1 | _filter_scratch
+diff --git a/tests/xfs/325 b/tests/xfs/325
+index 67959015..eafb4ae0 100755
+--- a/tests/xfs/325
++++ b/tests/xfs/325
+@@ -62,6 +62,7 @@ _scratch_inject_error "free_extent"
+ 
+ rm $SCRATCH_MNT/file1
+ sync
++$XFS_IO_PROG -x -c 'freeze' -c 'thaw' $SCRATCH_MNT >> $seqres.full 2>&1
+ 
+ echo "FS should be shut down, touch will fail"
+ touch $SCRATCH_MNT/badfs 2>&1 | _filter_scratch
