@@ -1,12 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:53878 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:54134 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727749AbeKBIYP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 04:24:15 -0400
-Subject: [PATCH 1/8] quota: clean out speculative preallocations when
- checking quota usage
+        with ESMTP id S1727749AbeKBIYc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 04:24:32 -0400
+Subject: [PATCH 3/8] generic/050: fix ro blockdev mount of xfs with quota
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 01 Nov 2018 16:19:09 -0700
-Message-ID: <154111434915.6577.14047300095921080052.stgit@magnolia>
+Date: Thu, 01 Nov 2018 16:19:21 -0700
+Message-ID: <154111436126.6577.15057711037961689350.stgit@magnolia>
 In-Reply-To: <154111434286.6577.15010861884505931015.stgit@magnolia>
 References: <154111434286.6577.15010861884505931015.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,35 +18,70 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-On XFS, the only reliable way to clean out speculative post-eof
-preallocations, delayed allocations, and speculative cow preallocations
-is to cycle the filesystem mount.  Since we're comparing the post-test
-quota counts against a freshly quotacheck to look for leaks, it's fine
-to cycle the mount.  This eliminates sporadic quota count failures when
-running xfstests with quotas enabled.
+In XFS, mounting with quota always require a writable device.  If the
+block device is read only, the mount fails, which fails this test.
+Since this is expected, work around this.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/quota |    8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ tests/generic/050 |   23 +++++++++++++++++++----
+ 1 file changed, 19 insertions(+), 4 deletions(-)
 
 
-diff --git a/common/quota b/common/quota
-index 993ff5de..9309e786 100644
---- a/common/quota
-+++ b/common/quota
-@@ -260,10 +260,10 @@ _check_quota_usage()
- 		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
- 		;;
- 	xfs)
--		# Clear out speculative preallocations to eliminate them
--		# as a source of intermittent orig/checked differences.
--		test -x "$XFS_SPACEMAN_PROG" && \
--			"$XFS_SPACEMAN_PROG" -c 'prealloc -s' $SCRATCH_MNT
-+		# Only way to make this reliable with cow/delalloc/speculative
-+		# preallocations is to unmount and remount the whole mess...
-+		_scratch_unmount
-+		_scratch_mount "-o usrquota,grpquota"
- 		;;
- 	*)
- 		;;
+diff --git a/tests/generic/050 b/tests/generic/050
+index 90e924db..33da228d 100755
+--- a/tests/generic/050
++++ b/tests/generic/050
+@@ -36,6 +36,21 @@ _require_norecovery
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ 
++filter_ro_mount() {
++	local arg=""
++
++	# Mounting with quota on XFS requires a writable fs, which means
++	# we fail the ro blockdev test with with EPERM.
++	if [ "$FSTYP" = "xfs" ] && echo "$MOUNT_OPTIONS" | grep -q quota ; then
++		arg="s|mount: $SCRATCH_MNT: permission denied|mount: device write-protected, mounting read-only|g"
++	fi
++	sed -e "$arg" | _filter_ro_mount
++}
++
++filter_umount() {
++	sed -e "\|umount: $SCRATCH_DEV: not mounted.|d" | _filter_scratch
++}
++
+ #
+ # Mark the device read-only
+ #
+@@ -46,7 +61,7 @@ blockdev --setro $SCRATCH_DEV
+ # Mount it, and make sure we can't write to it, and we can unmount it again
+ #
+ echo "mounting read-only block device:"
+-_try_scratch_mount 2>&1 | _filter_ro_mount
++_try_scratch_mount 2>&1 | filter_ro_mount
+ 
+ echo "touching file on read-only filesystem (should fail)"
+ touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+@@ -56,7 +71,7 @@ touch $SCRATCH_MNT/foo 2>&1 | _filter_scratch
+ #	http://oss.sgi.com/bugzilla/show_bug.cgi?id=807
+ #
+ echo "unmounting read-only filesystem"
+-_scratch_unmount 2>&1 | _filter_scratch
++_scratch_unmount 2>&1 | filter_umount
+ 
+ echo "setting device read-write"
+ blockdev --setrw $SCRATCH_DEV
+@@ -92,10 +107,10 @@ _scratch_unmount 2>&1 | _filter_scratch | _filter_ending_dot
+ # data recovery hack.
+ #
+ echo "mounting filesystem with -o norecovery on a read-only device:"
+-_try_scratch_mount -o norecovery 2>&1 | _filter_ro_mount
++_try_scratch_mount -o norecovery 2>&1 | filter_ro_mount
+ 
+ echo "unmounting read-only filesystem"
+-_scratch_unmount 2>&1 | _filter_scratch
++_scratch_unmount 2>&1 | filter_umount
+ 
+ echo "setting device read-write"
+ blockdev --setrw $SCRATCH_DEV
