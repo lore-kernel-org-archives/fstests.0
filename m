@@ -1,13 +1,13 @@
-Received: from mail-it1-f195.google.com ([209.85.166.195]:37622 "EHLO
-        mail-it1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728265AbeKCGi7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 02:38:59 -0400
-Received: by mail-it1-f195.google.com with SMTP id e74-v6so5076067ita.2
-        for <fstests@vger.kernel.org>; Fri, 02 Nov 2018 14:30:12 -0700 (PDT)
+Received: from mail-it1-f196.google.com ([209.85.166.196]:36144 "EHLO
+        mail-it1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728285AbeKCGjC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 02:39:02 -0400
+Received: by mail-it1-f196.google.com with SMTP id w7-v6so5099024itd.1
+        for <fstests@vger.kernel.org>; Fri, 02 Nov 2018 14:30:15 -0700 (PDT)
 From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 2/7] generic/{472,496}: fix swap file creation on Btrfs
-Date: Fri,  2 Nov 2018 14:29:37 -0700
-Message-Id: <6da5f398715af4f7478554920470a85e8a186b50.1541193856.git.osandov@fb.com>
+Subject: [PATCH 4/7] btrfs: test invalid operations on a swap file
+Date: Fri,  2 Nov 2018 14:29:39 -0700
+Message-Id: <ef3cf56dce9333158dc8e60d914dbbfad8a4dbe8.1541193856.git.osandov@fb.com>
 In-Reply-To: <cover.1541193856.git.osandov@fb.com>
 References: <cover.1541193856.git.osandov@fb.com>
 MIME-Version: 1.0
@@ -19,85 +19,113 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Omar Sandoval <osandov@fb.com>
 
-The swap file must be set nocow before it is written to, otherwise it is
-ignored and Btrfs refuses to activate it as swap.
+Btrfs forbids some operations which should not be done on a swap file.
 
-Fixes: 25ce9740065e ("generic: test swapfile creation, activation, and deactivation")
 Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
- tests/generic/472 | 14 ++++++--------
- tests/generic/496 |  6 +++---
- 2 files changed, 9 insertions(+), 11 deletions(-)
+ tests/btrfs/174     | 66 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/174.out | 10 +++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 77 insertions(+)
+ create mode 100755 tests/btrfs/174
+ create mode 100644 tests/btrfs/174.out
 
-diff --git a/tests/generic/472 b/tests/generic/472
-index 04ed3e73..aba4a007 100755
---- a/tests/generic/472
-+++ b/tests/generic/472
-@@ -42,13 +42,15 @@ _scratch_mount >>$seqres.full 2>&1
- 
- swapfile=$SCRATCH_MNT/swap
- len=$((2 * 1048576))
--page_size=$(get_page_size)
- 
- swapfile_cycle() {
- 	local swapfile="$1"
-+	local len="$2"
- 
-+	touch $swapfile
- 	# Swap files must be nocow on Btrfs.
- 	$CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
-+	_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
- 	"$here/src/mkswap" $swapfile >> $seqres.full
- 	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
- 	swapoff $swapfile 2>> $seqres.full
-@@ -57,20 +59,16 @@ swapfile_cycle() {
- 
- # Create a regular swap file
- echo "regular swap" | tee -a $seqres.full
--_pwrite_byte 0x58 0 $len $swapfile >> $seqres.full
--swapfile_cycle $swapfile
-+swapfile_cycle $swapfile $len
- 
- # Create a swap file with a little too much junk on the end
- echo "too long swap" | tee -a $seqres.full
--_pwrite_byte 0x58 0 $((len + 3)) $swapfile >> $seqres.full
--swapfile_cycle $swapfile
-+swapfile_cycle $swapfile $((len + 3))
- 
- # Create a ridiculously small swap file.  Each swap file must have at least
- # two pages after the header page.
- echo "tiny swap" | tee -a $seqres.full
--tiny_len=$((page_size * 3))
--_pwrite_byte 0x58 0 $tiny_len $swapfile >> $seqres.full
--swapfile_cycle $swapfile
-+swapfile_cycle $swapfile $(($(get_page_size) * 3))
- 
- status=0
- exit
-diff --git a/tests/generic/496 b/tests/generic/496
-index 968b8012..3083eef0 100755
---- a/tests/generic/496
-+++ b/tests/generic/496
-@@ -49,8 +49,6 @@ page_size=$(get_page_size)
- swapfile_cycle() {
- 	local swapfile="$1"
- 
--	# Swap files must be nocow on Btrfs.
--	$CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
- 	"$here/src/mkswap" $swapfile >> $seqres.full
- 	"$here/src/swapon" $swapfile 2>&1 | _filter_scratch
- 	swapoff $swapfile 2>> $seqres.full
-@@ -59,8 +57,10 @@ swapfile_cycle() {
- 
- # Create a fallocated swap file
- echo "fallocate swap" | tee -a $seqres.full
--$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
-+touch $swapfile
-+# Swap files must be nocow on Btrfs.
- $CHATTR_PROG +C $swapfile >> $seqres.full 2>&1
-+$XFS_IO_PROG -f -c "falloc 0 $len" $swapfile >> $seqres.full
- "$here/src/mkswap" $swapfile
- "$here/src/swapon" $swapfile >> $seqres.full 2>&1 || \
- 	_notrun "fallocated swap not supported here"
+diff --git a/tests/btrfs/174 b/tests/btrfs/174
+new file mode 100755
+index 00000000..a26e6669
+--- /dev/null
++++ b/tests/btrfs/174
+@@ -0,0 +1,66 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Facebook.  All Rights Reserved.
++#
++# FS QA Test 174
++#
++# Test restrictions on operations that can be done on an active swap file
++# specific to Btrfs.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++_supported_fs generic
++_supported_os Linux
++_require_scratch_swapfile
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG subvol create "$SCRATCH_MNT/swapvol" >> $seqres.full
++swapfile="$SCRATCH_MNT/swapvol/swap"
++_format_swapfile "$swapfile" $(($(get_page_size) * 10))
++swapon "$swapfile"
++
++# Turning off nowcow doesn't do anything because the file is not empty, not
++# because the file is a swap file, but make sure this works anyways.
++echo "Disable nocow"
++$CHATTR_PROG -C "$swapfile"
++lsattr -l "$swapfile" | _filter_scratch | _filter_spaces
++
++# Compression we reject outright.
++echo "Enable compression"
++$CHATTR_PROG +c "$swapfile" 2>&1 | grep -o "Text file busy"
++lsattr -l "$swapfile" | _filter_scratch | _filter_spaces
++
++echo "Snapshot"
++$BTRFS_UTIL_PROG subvol snap "$SCRATCH_MNT/swapvol" \
++	"$SCRATCH_MNT/swapsnap" 2>&1 | grep -o "Text file busy"
++
++echo "Defrag"
++# We pass the -c (compress) flag to force defrag even if the file isn't
++# fragmented.
++$BTRFS_UTIL_PROG filesystem defrag -c "$swapfile" 2>&1 | grep -o "Text file busy"
++
++swapoff "$swapfile"
++_scratch_unmount
++
++status=0
++exit
+diff --git a/tests/btrfs/174.out b/tests/btrfs/174.out
+new file mode 100644
+index 00000000..bc24f1fb
+--- /dev/null
++++ b/tests/btrfs/174.out
+@@ -0,0 +1,10 @@
++QA output created by 174
++Disable nocow
++SCRATCH_MNT/swapvol/swap No_COW
++Enable compression
++Text file busy
++SCRATCH_MNT/swapvol/swap No_COW
++Snapshot
++Text file busy
++Defrag
++Text file busy
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 3525014f..2e10f7df 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -176,3 +176,4 @@
+ 171 auto quick qgroup
+ 172 auto quick punch
+ 173 auto quick swap
++174 auto quick swap
 -- 
 2.19.1
