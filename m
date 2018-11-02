@@ -1,13 +1,13 @@
-Received: from mail-it1-f195.google.com ([209.85.166.195]:40617 "EHLO
-        mail-it1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728294AbeKCGjF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 02:39:05 -0400
-Received: by mail-it1-f195.google.com with SMTP id e11so1798597itl.5
-        for <fstests@vger.kernel.org>; Fri, 02 Nov 2018 14:30:18 -0700 (PDT)
+Received: from mail-it1-f193.google.com ([209.85.166.193]:51327 "EHLO
+        mail-it1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728297AbeKCGjE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 02:39:04 -0400
+Received: by mail-it1-f193.google.com with SMTP id h13so5119610itl.1
+        for <fstests@vger.kernel.org>; Fri, 02 Nov 2018 14:30:17 -0700 (PDT)
 From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 7/7] btrfs: test balance and resize with an active swap file
-Date: Fri,  2 Nov 2018 14:29:42 -0700
-Message-Id: <e6656ec218c973d548803ed50a45c8d3f81fe388.1541193856.git.osandov@fb.com>
+Subject: [PATCH 6/7] btrfs: test device add/remove/replace with an active swap file
+Date: Fri,  2 Nov 2018 14:29:41 -0700
+Message-Id: <e25fbb2fa868368febd346598a395fbe1f56f8e7.1541193856.git.osandov@fb.com>
 In-Reply-To: <cover.1541193856.git.osandov@fb.com>
 References: <cover.1541193856.git.osandov@fb.com>
 MIME-Version: 1.0
@@ -19,31 +19,31 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Omar Sandoval <osandov@fb.com>
 
-Make sure we don't shrink the device past an active swap file, but allow
-shrinking otherwise, as well as growing and balance.
+Make sure that we don't remove or replace a device with an active swap
+file but can add, remove, and replace other devices.
 
 Signed-off-by: Omar Sandoval <osandov@fb.com>
 ---
- tests/btrfs/177     | 64 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/177.out |  6 +++++
+ tests/btrfs/176     | 82 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/176.out |  5 +++
  tests/btrfs/group   |  1 +
- 3 files changed, 71 insertions(+)
- create mode 100755 tests/btrfs/177
- create mode 100644 tests/btrfs/177.out
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/btrfs/176
+ create mode 100644 tests/btrfs/176.out
 
-diff --git a/tests/btrfs/177 b/tests/btrfs/177
+diff --git a/tests/btrfs/176 b/tests/btrfs/176
 new file mode 100755
-index 00000000..12dad8fc
+index 00000000..1e576149
 --- /dev/null
-+++ b/tests/btrfs/177
-@@ -0,0 +1,64 @@
++++ b/tests/btrfs/176
+@@ -0,0 +1,82 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2018 Facebook.  All Rights Reserved.
 +#
-+# FS QA Test 177
++# FS QA Test 176
 +#
-+# Test relocation (balance and resize) with an active swap file.
++# Test device remove/replace with an active swap file.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -60,67 +60,84 @@ index 00000000..12dad8fc
 +	rm -f $tmp.*
 +}
 +
++# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/btrfs
 +
++# remove previous $seqres.full before test
 +rm -f $seqres.full
++
++# real QA test starts here
 +
 +# Modify as appropriate.
 +_supported_fs generic
 +_supported_os Linux
++_require_scratch_dev_pool 3
 +_require_scratch_swapfile
 +
-+swapfile="$SCRATCH_MNT/swap"
++# We check the filesystem manually because we move devices around.
++rm -f "${RESULT_DIR}/require_scratch"
 +
-+# First, create a 1GB filesystem and fill it up.
-+_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
++scratch_dev1="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $1 }')"
++scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
++scratch_dev3="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $3 }')"
++
++echo "Remove device"
++_scratch_mkfs >> $seqres.full 2>&1
 +_scratch_mount
-+dd if=/dev/zero of="$SCRATCH_MNT/fill" bs=1024k >> $seqres.full 2>&1
-+# Now add more space and create a swap file. We know that the first 1GB of the
-+# filesystem was used, so the swap file must be in the new part of the
-+# filesystem.
-+$BTRFS_UTIL_PROG filesystem resize 2G "$SCRATCH_MNT" | _filter_scratch
-+_format_swapfile "$swapfile" $((32 * 1024 * 1024))
-+swapon "$swapfile"
-+# Add even more space which we know is unused.
-+$BTRFS_UTIL_PROG filesystem resize 3G "$SCRATCH_MNT" | _filter_scratch
-+# Free up the first 1GB of the filesystem.
-+rm -f "$SCRATCH_MNT/fill"
-+# Get rid of empty block groups and also make sure that balance skips block
-+# groups containing active swap files.
-+_run_btrfs_balance_start "$SCRATCH_MNT"
-+# Shrink away the unused space.
-+$BTRFS_UTIL_PROG filesystem resize 2G "$SCRATCH_MNT" | _filter_scratch
-+# Try to shrink away the area occupied by the swap file, which should fail.
-+$BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
-+swapoff "$swapfile"
-+# It should work again after swapoff.
-+$BTRFS_UTIL_PROG filesystem resize 1G "$SCRATCH_MNT" | _filter_scratch
++_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
++# We know the swap file is on device 1 because we added device 2 after it was
++# already created.
++$BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
++# Deleting/readding device 2 should still work.
++$BTRFS_UTIL_PROG device delete "$scratch_dev2" "$SCRATCH_MNT"
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
++# Deleting device 1 should work again after swapoff.
++$BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT"
 +_scratch_unmount
++_check_scratch_fs "$scratch_dev2"
 +
++echo "Replace device"
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
++$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
++swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
++# Again, we know the swap file is on device 1.
++$BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev3" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
++# Replacing device 2 should still work.
++$BTRFS_UTIL_PROG replace start -fB "$scratch_dev2" "$scratch_dev3" "$SCRATCH_MNT"
++swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
++# Replacing device 1 should work again after swapoff.
++$BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev2" "$SCRATCH_MNT"
++_scratch_unmount
++_check_scratch_fs "$scratch_dev2"
++
++# success, all done
 +status=0
 +exit
-diff --git a/tests/btrfs/177.out b/tests/btrfs/177.out
+diff --git a/tests/btrfs/176.out b/tests/btrfs/176.out
 new file mode 100644
-index 00000000..6ced01da
+index 00000000..5c99e0fd
 --- /dev/null
-+++ b/tests/btrfs/177.out
-@@ -0,0 +1,6 @@
-+QA output created by 177
-+Resize 'SCRATCH_MNT' of '2G'
-+Resize 'SCRATCH_MNT' of '3G'
-+Resize 'SCRATCH_MNT' of '2G'
++++ b/tests/btrfs/176.out
+@@ -0,0 +1,5 @@
++QA output created by 176
++Remove device
 +Text file busy
-+Resize 'SCRATCH_MNT' of '1G'
++Replace device
++Text file busy
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 3562420b..0b62e58a 100644
+index b6160b72..3562420b 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -179,3 +179,4 @@
+@@ -178,3 +178,4 @@
+ 173 auto quick swap
  174 auto quick swap
  175 auto quick swap
- 176 auto quick swap
-+177 auto quick swap
++176 auto quick swap
 -- 
 2.19.1
