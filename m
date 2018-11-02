@@ -1,72 +1,56 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:54642 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727749AbeKBIZE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 04:25:04 -0400
-Subject: [PATCH 8/8] xfs: filter out mount options that don't work on v4
- filesystems
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 01 Nov 2018 16:19:52 -0700
-Message-ID: <154111439271.6577.9895278106106014415.stgit@magnolia>
-In-Reply-To: <154111434286.6577.15010861884505931015.stgit@magnolia>
-References: <154111434286.6577.15010861884505931015.stgit@magnolia>
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:40145 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726008AbeKBKPI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 06:15:08 -0400
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1gINy9-0000yL-3H
+        for fstests@vger.kernel.org; Fri, 02 Nov 2018 12:09:49 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.91)
+        (envelope-from <david@fromorbit.com>)
+        id 1gINy8-0002FI-W4
+        for fstests@vger.kernel.org; Fri, 02 Nov 2018 12:09:49 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH] check: use full paths for diff on error
+Date: Fri,  2 Nov 2018 12:09:48 +1100
+Message-Id: <20181102010948.8594-1-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+From: Dave Chinner <dchinner@redhat.com>
 
-A few tests require v4 filesystems and enforce this by disabling crc's
-in the _scratch_mkfs call.  However, if the user specified MOUNT_OPTIONS
-that only work with v5 filesystems, these tests fail.  If we detect a
-test creating a v4 scratch filesystem, filter out incompatible mount
-options that don't work on v4, such as simultaneous group/project quota.
+i don't run fstests from the source directory, so when I get a
+golden image mismatch the relative path to the golden output is
+not useful:
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+(Run 'diff -u tests/generic/013.out /home/dave/src/xfstests-dev/results//xfs_64k/generic/013.out.bad'  to see the entire diff)
+
+Change the output to emit the real path for the golden out so this
+can be cut and pasted and run from anywhere.
+
+(Run 'diff -u /home/dave/src/xfstests-dev/tests/generic/013.out /home/dave/src/xfstests-dev/results//xfs_64k/generic/013.out.bad'  to see the entire diff)
+
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
- common/xfs |   24 ++++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ check | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-diff --git a/common/xfs b/common/xfs
-index 80340b0d..484e6ab6 100644
---- a/common/xfs
-+++ b/common/xfs
-@@ -89,6 +89,7 @@ _scratch_mkfs_xfs()
- 	_scratch_do_mkfs "$mkfs_cmd" "$mkfs_filter" $* 2>$tmp.mkfserr 1>$tmp.mkfsstd
- 	mkfs_status=$?
- 
-+	grep -q crc=0 $tmp.mkfsstd && _force_xfsv4_mount_options
- 
- 	if [ $mkfs_status -eq 0 -a "$LARGE_SCRATCH_DEV" = yes ]; then
- 		# manually parse the mkfs output to get the fs size in bytes
-@@ -779,3 +780,26 @@ _scratch_get_bmx_prefix() {
- 	_scratch_xfs_db -c "inode ${ino}" -c 'p' >> $seqres.full
- 	return 1
- }
-+
-+#
-+# Ensures that we don't pass any mount options incompatible with XFS v4
-+#
-+_force_xfsv4_mount_options()
-+{
-+	local gquota=0
-+	local pquota=0
-+
-+	# Can't have group and project quotas in XFS v4
-+	echo "$MOUNT_OPTIONS" | egrep -q "(gquota|grpquota|grpjquota=|gqnoenforce)" && gquota=1
-+	echo "$MOUNT_OPTIONS" | egrep -q "(\bpquota|prjquota|pqnoenforce)" && pquota=1
-+
-+	if [ $gquota -gt 0 ] && [ $pquota -gt 0 ]; then
-+		export MOUNT_OPTIONS=$(echo $MOUNT_OPTIONS \
-+			| sed   -e 's/gquota/QUOTA/g'      \
-+				-e 's/grpquota/QUOTA/g'    \
-+				-e 's/grpjquota=[^, ]/QUOTA/g' \
-+				-e 's/gqnoenforce/QUOTA/g' \
-+				-e "s/QUOTA/defaults/g")
-+	fi
-+	echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
-+}
+diff --git a/check b/check
+index f3c8021d94b9..59f94c1c33f9 100755
+--- a/check
++++ b/check
+@@ -799,7 +799,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			else
+ 				head -n "$DIFF_LENGTH"
+ 				echo "..."
+-				echo "(Run '$diff $seq.out $seqres.out.bad'" \
++				echo "(Run '$diff $here/$seq.out $seqres.out.bad'" \
+ 					" to see the entire diff)"
+ 			fi; } | sed -e 's/^\(.\)/    \1/'
+ 			err=true
+-- 
+2.19.1
