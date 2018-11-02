@@ -1,56 +1,146 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:40145 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726008AbeKBKPI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 06:15:08 -0400
-Received: from discord.disaster.area ([192.168.1.111])
-        by dastard with esmtp (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1gINy9-0000yL-3H
-        for fstests@vger.kernel.org; Fri, 02 Nov 2018 12:09:49 +1100
-Received: from dave by discord.disaster.area with local (Exim 4.91)
-        (envelope-from <david@fromorbit.com>)
-        id 1gINy8-0002FI-W4
-        for fstests@vger.kernel.org; Fri, 02 Nov 2018 12:09:49 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] check: use full paths for diff on error
-Date: Fri,  2 Nov 2018 12:09:48 +1100
-Message-Id: <20181102010948.8594-1-david@fromorbit.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Received: from out30-133.freemail.mail.aliyun.com ([115.124.30.133]:42289 "EHLO
+        out30-133.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726119AbeKBLZT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 2 Nov 2018 07:25:19 -0400
+From: Liu Bo <bo.liu@linux.alibaba.com>
+Subject: [PATCH] Fstest: ext4: regression test for a ENOSPC warning
+Date: Fri,  2 Nov 2018 10:19:25 +0800
+Message-Id: <1541125165-122108-1-git-send-email-bo.liu@linux.alibaba.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+This adds a regression test for a ENOSPC warning which can be triggered if
+'-odioread_nolock,nodelalloc' and quota are used.
 
-i don't run fstests from the source directory, so when I get a
-golden image mismatch the relative path to the golden output is
-not useful:
+The bug was fixed by patch
+"Ext4: fix ENOSPC when both quota and dioread_nolock are enabled".
 
-(Run 'diff -u tests/generic/013.out /home/dave/src/xfstests-dev/results//xfs_64k/generic/013.out.bad'  to see the entire diff)
-
-Change the output to emit the real path for the golden out so this
-can be cut and pasted and run from anywhere.
-
-(Run 'diff -u /home/dave/src/xfstests-dev/tests/generic/013.out /home/dave/src/xfstests-dev/results//xfs_64k/generic/013.out.bad'  to see the entire diff)
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Signed-off-by: Liu Bo <bo.liu@linux.alibaba.com>
 ---
- check | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ tests/ext4/034     | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/034.out | 17 +++++++++++++
+ tests/ext4/group   |  1 +
+ 3 files changed, 93 insertions(+)
+ create mode 100755 tests/ext4/034
+ create mode 100644 tests/ext4/034.out
 
-diff --git a/check b/check
-index f3c8021d94b9..59f94c1c33f9 100755
---- a/check
-+++ b/check
-@@ -799,7 +799,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			else
- 				head -n "$DIFF_LENGTH"
- 				echo "..."
--				echo "(Run '$diff $seq.out $seqres.out.bad'" \
-+				echo "(Run '$diff $here/$seq.out $seqres.out.bad'" \
- 					" to see the entire diff)"
- 			fi; } | sed -e 's/^\(.\)/    \1/'
- 			err=true
+diff --git a/tests/ext4/034 b/tests/ext4/034
+new file mode 100755
+index 00000000..2449c3b7
+--- /dev/null
++++ b/tests/ext4/034
+@@ -0,0 +1,75 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Liu Bo, Alibaba.  All Rights Reserved.
++#
++# FS QA Test 034
++#
++# Regression test for a ENOSPC warning when both quota and
++# "-o dioread_nolock,nodelalloc" is used.
++#
++# The bug was fixed by commit
++# "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_quota
++_require_nobody
++
++echo "Format and mount"
++_scratch_mkfs "-O quota" > $seqres.full 2>&1
++_scratch_mount "-o dioread_nolock,nodelalloc" > $seqres.full 2>&1
++quotaon $SCRATCH_MNT 2>/dev/null
++
++echo "Create the original file"
++touch $SCRATCH_MNT/foobar >> $seqres.full
++chown nobody $SCRATCH_MNT/foobar >> $seqres.full
++
++quotaon $SCRATCH_MNT 2>/dev/null
++echo "Set hard quota"
++setquota -u nobody 0 10M 0 0 $SCRATCH_MNT
++_report_quota_blocks $SCRATCH_MNT
++
++echo "Create 2 level extent tree (btree) for foobar with a unwritten extent"
++$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k"  -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
++
++xfs_io -c "fiemap -v" $SCRATCH_MNT/foobar >> $seqres.full
++
++echo "Convert unwritten extent to written and collapse extent tree to inode"
++$XFS_IO_PROG -c "pwrite 4k 4k" $SCRATCH_MNT/foobar >> $seqres.full
++
++echo "Create a new file and do fsync to force a jbd2 commit"
++$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy >> $seqres.full
++
++echo "sync $SCRATCH_MNT to writeback"
++$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/034.out b/tests/ext4/034.out
+new file mode 100644
+index 00000000..dd0c8a7c
+--- /dev/null
++++ b/tests/ext4/034.out
+@@ -0,0 +1,17 @@
++QA output created by 034
++Format and mount
++Create the original file
++Set hard quota
++root 20 0 0
++nobody 0 0 10240
++User soft hard grace
++Block time: 7days; Inode
++Block File limits 
++----------------------------------------------------------------------   
++*** for user quotas
++   
++   
++Create 2 level extent tree (btree) for foobar with a unwritten extent
++Convert unwritten extent to written and collapse extent tree to inode
++Create a new file and do fsync to force a jbd2 commit
++sync /mnt/scratch to writeback
+diff --git a/tests/ext4/group b/tests/ext4/group
+index b850f568..eb744a12 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -36,6 +36,7 @@
+ 031 auto quick dax
+ 032 auto quick ioctl resize
+ 033 auto ioctl resize
++034 auto quick quota
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
 -- 
-2.19.1
+2.14.2
