@@ -1,143 +1,188 @@
-Received: from mail-it1-f193.google.com ([209.85.166.193]:51327 "EHLO
-        mail-it1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728297AbeKCGjE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 02:39:04 -0400
-Received: by mail-it1-f193.google.com with SMTP id h13so5119610itl.1
-        for <fstests@vger.kernel.org>; Fri, 02 Nov 2018 14:30:17 -0700 (PDT)
-From: Omar Sandoval <osandov@osandov.com>
-Subject: [PATCH 6/7] btrfs: test device add/remove/replace with an active swap file
-Date: Fri,  2 Nov 2018 14:29:41 -0700
-Message-Id: <e25fbb2fa868368febd346598a395fbe1f56f8e7.1541193856.git.osandov@fb.com>
-In-Reply-To: <cover.1541193856.git.osandov@fb.com>
-References: <cover.1541193856.git.osandov@fb.com>
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:32917 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726683AbeKCSwx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 14:52:53 -0400
+Date: Sat, 3 Nov 2018 17:42:01 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] Fstest: ext4: regression test for a ENOSPC warning
+Message-ID: <20181103094201.GA12788@desktop>
+References: <1541125165-122108-1-git-send-email-bo.liu@linux.alibaba.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1541125165-122108-1-git-send-email-bo.liu@linux.alibaba.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: kernel-team@fb.com, linux-btrfs@vger.kernel.org
+To: Liu Bo <bo.liu@linux.alibaba.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Omar Sandoval <osandov@fb.com>
+On Fri, Nov 02, 2018 at 10:19:25AM +0800, Liu Bo wrote:
+> This adds a regression test for a ENOSPC warning which can be triggered if
+> '-odioread_nolock,nodelalloc' and quota are used.
+> 
+> The bug was fixed by patch
+> "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled".
+> 
+> Signed-off-by: Liu Bo <bo.liu@linux.alibaba.com>
+> ---
+>  tests/ext4/034     | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/034.out | 17 +++++++++++++
+>  tests/ext4/group   |  1 +
+>  3 files changed, 93 insertions(+)
+>  create mode 100755 tests/ext4/034
+>  create mode 100644 tests/ext4/034.out
+> 
+> diff --git a/tests/ext4/034 b/tests/ext4/034
+> new file mode 100755
+> index 00000000..2449c3b7
+> --- /dev/null
+> +++ b/tests/ext4/034
+> @@ -0,0 +1,75 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Liu Bo, Alibaba.  All Rights Reserved.
+> +#
+> +# FS QA Test 034
+> +#
+> +# Regression test for a ENOSPC warning when both quota and
+> +# "-o dioread_nolock,nodelalloc" is used.
+> +#
+> +# The bug was fixed by commit
+> +# "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled"
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/quota
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
 
-Make sure that we don't remove or replace a device with an active swap
-file but can add, remove, and replace other devices.
+_supported_fs ext4
 
-Signed-off-by: Omar Sandoval <osandov@fb.com>
----
- tests/btrfs/176     | 82 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/176.out |  5 +++
- tests/btrfs/group   |  1 +
- 3 files changed, 88 insertions(+)
- create mode 100755 tests/btrfs/176
- create mode 100644 tests/btrfs/176.out
+> +_supported_os Linux
+> +_require_scratch
+> +_require_quota
+> +_require_nobody
+> +
+> +echo "Format and mount"
+> +_scratch_mkfs "-O quota" > $seqres.full 2>&1
 
-diff --git a/tests/btrfs/176 b/tests/btrfs/176
-new file mode 100755
-index 00000000..1e576149
---- /dev/null
-+++ b/tests/btrfs/176
-@@ -0,0 +1,82 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Facebook.  All Rights Reserved.
-+#
-+# FS QA Test 176
-+#
-+# Test device remove/replace with an active swap file.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_dev_pool 3
-+_require_scratch_swapfile
-+
-+# We check the filesystem manually because we move devices around.
-+rm -f "${RESULT_DIR}/require_scratch"
-+
-+scratch_dev1="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $1 }')"
-+scratch_dev2="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $2 }')"
-+scratch_dev3="$(echo "${SCRATCH_DEV_POOL}" | awk '{ print $3 }')"
-+
-+echo "Remove device"
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-+$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-+swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
-+# We know the swap file is on device 1 because we added device 2 after it was
-+# already created.
-+$BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
-+# Deleting/readding device 2 should still work.
-+$BTRFS_UTIL_PROG device delete "$scratch_dev2" "$SCRATCH_MNT"
-+$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-+swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
-+# Deleting device 1 should work again after swapoff.
-+$BTRFS_UTIL_PROG device delete "$scratch_dev1" "$SCRATCH_MNT"
-+_scratch_unmount
-+_check_scratch_fs "$scratch_dev2"
-+
-+echo "Replace device"
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
-+$BTRFS_UTIL_PROG device add -f "$scratch_dev2" "$SCRATCH_MNT"
-+swapon "$SCRATCH_MNT/swap" 2>&1 | _filter_scratch
-+# Again, we know the swap file is on device 1.
-+$BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev3" "$SCRATCH_MNT" 2>&1 | grep -o "Text file busy"
-+# Replacing device 2 should still work.
-+$BTRFS_UTIL_PROG replace start -fB "$scratch_dev2" "$scratch_dev3" "$SCRATCH_MNT"
-+swapoff "$SCRATCH_MNT/swap" > /dev/null 2>&1
-+# Replacing device 1 should work again after swapoff.
-+$BTRFS_UTIL_PROG replace start -fB "$scratch_dev1" "$scratch_dev2" "$SCRATCH_MNT"
-+_scratch_unmount
-+_check_scratch_fs "$scratch_dev2"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/176.out b/tests/btrfs/176.out
-new file mode 100644
-index 00000000..5c99e0fd
---- /dev/null
-+++ b/tests/btrfs/176.out
-@@ -0,0 +1,5 @@
-+QA output created by 176
-+Remove device
-+Text file busy
-+Replace device
-+Text file busy
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index b6160b72..3562420b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -178,3 +178,4 @@
- 173 auto quick swap
- 174 auto quick swap
- 175 auto quick swap
-+176 auto quick swap
--- 
-2.19.1
+This needs a require rule to check quota feature support status, i.e.
+
+_require_scratch_ext4_feature "quota"
+
+> +_scratch_mount "-o dioread_nolock,nodelalloc" > $seqres.full 2>&1
+> +quotaon $SCRATCH_MNT 2>/dev/null
+
+And given that "quota" feature is enabled, quota is turned on
+automatically on mount, seems there's no need to do quotaon.
+
+> +
+> +echo "Create the original file"
+> +touch $SCRATCH_MNT/foobar >> $seqres.full
+> +chown nobody $SCRATCH_MNT/foobar >> $seqres.full
+> +
+> +quotaon $SCRATCH_MNT 2>/dev/null
+
+Duplicated quotaon?
+
+> +echo "Set hard quota"
+> +setquota -u nobody 0 10M 0 0 $SCRATCH_MNT
+> +_report_quota_blocks $SCRATCH_MNT
+
+Looks like this is not needed either, if it's only for debug purpose
+just dump the output to $seqres.full
+
+> +
+> +echo "Create 2 level extent tree (btree) for foobar with a unwritten extent"
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k"  -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
+
+Too long line, wrap it :)
+
+> +
+> +xfs_io -c "fiemap -v" $SCRATCH_MNT/foobar >> $seqres.full
+
+$XFS_IO_PROG
+
+> +
+> +echo "Convert unwritten extent to written and collapse extent tree to inode"
+> +$XFS_IO_PROG -c "pwrite 4k 4k" $SCRATCH_MNT/foobar >> $seqres.full
+> +
+> +echo "Create a new file and do fsync to force a jbd2 commit"
+> +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy >> $seqres.full
+> +
+> +echo "sync $SCRATCH_MNT to writeback"
+> +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
+
+syncfs needs
+
+_require_xfs_io_command "syncfs"
+
+Perhaps _scratch_unmount or just sync to trigger the writeback?
+
+Thanks,
+Eryu
+
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/ext4/034.out b/tests/ext4/034.out
+> new file mode 100644
+> index 00000000..dd0c8a7c
+> --- /dev/null
+> +++ b/tests/ext4/034.out
+> @@ -0,0 +1,17 @@
+> +QA output created by 034
+> +Format and mount
+> +Create the original file
+> +Set hard quota
+> +root 20 0 0
+> +nobody 0 0 10240
+> +User soft hard grace
+> +Block time: 7days; Inode
+> +Block File limits 
+> +----------------------------------------------------------------------   
+> +*** for user quotas
+> +   
+> +   
+> +Create 2 level extent tree (btree) for foobar with a unwritten extent
+> +Convert unwritten extent to written and collapse extent tree to inode
+> +Create a new file and do fsync to force a jbd2 commit
+> +sync /mnt/scratch to writeback
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index b850f568..eb744a12 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -36,6 +36,7 @@
+>  031 auto quick dax
+>  032 auto quick ioctl resize
+>  033 auto ioctl resize
+> +034 auto quick quota
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress defrag
+>  302 aio auto ioctl rw stress defrag
+> -- 
+> 2.14.2
+> 
