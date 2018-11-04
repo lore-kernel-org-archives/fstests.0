@@ -1,67 +1,83 @@
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:46819 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730522AbeKEBRX (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Nov 2018 20:17:23 -0500
-Date: Mon, 5 Nov 2018 00:01:49 +0800
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:43668 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730078AbeKEBZH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Nov 2018 20:25:07 -0500
+Date: Mon, 5 Nov 2018 00:09:31 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 0/8] fstests: fix quota failures on xfs
-Message-ID: <20181104160149.GD12788@desktop>
-References: <154111434286.6577.15010861884505931015.stgit@magnolia>
+Subject: Re: [PATCH 0/7] fstests: test Btrfs swapfile support
+Message-ID: <20181104160931.GE12788@desktop>
+References: <cover.1541193856.git.osandov@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <154111434286.6577.15010861884505931015.stgit@magnolia>
+In-Reply-To: <cover.1541193856.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, kernel-team@fb.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 01, 2018 at 04:19:02PM -0700, Darrick J. Wong wrote:
-> Hi all,
+On Fri, Nov 02, 2018 at 02:29:35PM -0700, Omar Sandoval wrote:
+> From: Omar Sandoval <osandov@fb.com>
 > 
-> Several months ago I tried testing xfs with quotas enabled and was
-> surprised at the number of failures.  Since then I've been on a bug hunt
-> to triage the mess, and the following series fixes some of the low
-> hanging fruit.  Some of these are minor behavioral variations when quota
-> are enabled, and other fixes upgrade old v4 tests to work on v5
-> filesystems.
+> This series fixes a couple of generic swapfile tests and adds some
+> Btrfs-specific swapfile tests. Btrfs swapfile support is scheduled for
+> 4.21 [1].
 > 
-> To reproduce the results, run xfstests with
-> 'MOUNT_OPTIONS="-o usrquota,grpquota,prjquota"' on a v5 filesystem.
-> Strike the ',grpquota' on a v4 filesystem.
+> 1: https://www.spinics.net/lists/linux-btrfs/msg83454.html
+> 
+> Thanks!
 
-I merged all patches but patch 3 and 8, because ..
+Thanks for the fixes and new tests!
 
 > 
-> The first patch fixes the sporadic quota count failures when testing XFS
-> with quotas by replacing the xfs_spaceman call that cleans out (only)
-> speculative preallocations with a umount/mount pair that forcibly cleans
-> out /all/ preallocations and delayed allocations.
-> 
-> The second patch fixes bugs in a couple of tests that use error
-> injection to test log recovery paths but don't succeed in directly
-> causing the error to trip.
-> 
-> The third patch works around the fact that mounting xfs with quotas
-> requires a writable block device even for a ro mount, which leads to
-> a slightly different error message from the mount call.
+> Omar Sandoval (7):
+>   generic/{472,496,497}: fix $seeqres typo
+>   generic/{472,496}: fix swap file creation on Btrfs
 
-The test still fails and patch needs further tweaks.
+I've merged above two patches, they're two obvious bug fixes.
 
-> 
-> Patch 4 and 5 fix the dump and restore tests to handle the case that
-> quota inodes get sent along with dumps when quotas are enabled.
-> 
-> Patch 6 updates xfs/205 to work with v5 filesystems.
-> 
-> Patch 7 changes tests that require specific quota mount options to clear
-> out the background quota mount options so that we test with /exactly/
-> the set of mount options.
-> 
-> Patch 8 filters v5 mount options out of tests that format v4
-> filesystems on the scratch device.
+>   btrfs: test swap file activation restrictions
+>   btrfs: test invalid operations on a swap file
+>   btrfs: test swap files on multiple devices
+>   btrfs: test device add/remove/replace with an active swap file
+>   btrfs: test balance and resize with an active swap file
 
-This patch touches _scratch_mkfs_xfs() and needs more careful testing.
+These tests look fine to me, but it'd be really great if btrfs folks
+could help review above tests and provide Reviewed-by tags.
+
+And perhaps we could add test 17[56] to 'volume' group, as they do
+device operations. And similarly, add the last test to 'balance' group.
 
 Thanks,
 Eryu
+
+> 
+>  tests/btrfs/173     | 55 ++++++++++++++++++++++++++++++
+>  tests/btrfs/173.out |  5 +++
+>  tests/btrfs/174     | 66 ++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/174.out | 10 ++++++
+>  tests/btrfs/175     | 73 ++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/175.out |  8 +++++
+>  tests/btrfs/176     | 82 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/176.out |  5 +++
+>  tests/btrfs/177     | 64 +++++++++++++++++++++++++++++++++++
+>  tests/btrfs/177.out |  6 ++++
+>  tests/btrfs/group   |  5 +++
+>  tests/generic/472   | 16 ++++-----
+>  tests/generic/496   |  8 ++---
+>  tests/generic/497   |  2 +-
+>  14 files changed, 391 insertions(+), 14 deletions(-)
+>  create mode 100755 tests/btrfs/173
+>  create mode 100644 tests/btrfs/173.out
+>  create mode 100755 tests/btrfs/174
+>  create mode 100644 tests/btrfs/174.out
+>  create mode 100755 tests/btrfs/175
+>  create mode 100644 tests/btrfs/175.out
+>  create mode 100755 tests/btrfs/176
+>  create mode 100644 tests/btrfs/176.out
+>  create mode 100755 tests/btrfs/177
+>  create mode 100644 tests/btrfs/177.out
+> 
+> -- 
+> 2.19.1
+> 
