@@ -1,85 +1,79 @@
-Received: from mx2.suse.de ([195.135.220.15]:33030 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2388029AbeKFXJp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 6 Nov 2018 18:09:45 -0500
-Date: Tue, 6 Nov 2018 14:44:11 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH 7/7] btrfs: test balance and resize with an active swap
- file
-Message-ID: <20181106134411.GB24115@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <cover.1541193856.git.osandov@fb.com>
- <e6656ec218c973d548803ed50a45c8d3f81fe388.1541193856.git.osandov@fb.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <e6656ec218c973d548803ed50a45c8d3f81fe388.1541193856.git.osandov@fb.com>
+Received: from mail.kernel.org ([198.145.29.99]:57286 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2387480AbeKGBAa (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Nov 2018 20:00:30 -0500
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs: fix computation of max fs size for multiple device fs tests
+Date: Tue,  6 Nov 2018 15:34:37 +0000
+Message-Id: <20181106153437.26870-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Omar Sandoval <osandov@osandov.com>
-Cc: fstests@vger.kernel.org, kernel-team@fb.com, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Nov 02, 2018 at 02:29:42PM -0700, Omar Sandoval wrote:
-> From: Omar Sandoval <osandov@fb.com>
-> 
-> Make sure we don't shrink the device past an active swap file, but allow
-> shrinking otherwise, as well as growing and balance.
-> 
-> Signed-off-by: Omar Sandoval <osandov@fb.com>
-> ---
->  tests/btrfs/177     | 64 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/177.out |  6 +++++
->  tests/btrfs/group   |  1 +
->  3 files changed, 71 insertions(+)
->  create mode 100755 tests/btrfs/177
->  create mode 100644 tests/btrfs/177.out
-> 
-> diff --git a/tests/btrfs/177 b/tests/btrfs/177
-> new file mode 100755
-> index 00000000..12dad8fc
-> --- /dev/null
-> +++ b/tests/btrfs/177
-> @@ -0,0 +1,64 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Facebook.  All Rights Reserved.
-> +#
-> +# FS QA Test 177
-> +#
-> +# Test relocation (balance and resize) with an active swap file.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/btrfs
-> +
-> +rm -f $seqres.full
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch_swapfile
-> +
-> +swapfile="$SCRATCH_MNT/swap"
-> +
-> +# First, create a 1GB filesystem and fill it up.
-> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
-> +_scratch_mount
-> +dd if=/dev/zero of="$SCRATCH_MNT/fill" bs=1024k >> $seqres.full 2>&1
+From: Filipe Manana <fdmanana@suse.com>
 
-Can this be replaced by fallocate? Though it's just a 1GiB of data, it
-still takes some seconds on rotational storage.
+We were sorting numerical values with the 'sort' tool without telling it
+that we are sorting numbers, giving us unexpected ordering. So just pass
+the '-n' option to the 'sort' tool.
+
+Example:
+
+$ echo -e "11\n9\n20" | sort
+11
+20
+9
+
+$ echo -e "11\n9\n20" | sort -n
+9
+11
+20
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/124 | 2 +-
+ tests/btrfs/125 | 2 +-
+ tests/btrfs/154 | 2 +-
+ 3 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/tests/btrfs/124 b/tests/btrfs/124
+index ce3ad6aa..a52c65f6 100755
+--- a/tests/btrfs/124
++++ b/tests/btrfs/124
+@@ -61,7 +61,7 @@ dev2=`echo $SCRATCH_DEV_POOL | awk '{print $2}'`
+ dev1_sz=`blockdev --getsize64 $dev1`
+ dev2_sz=`blockdev --getsize64 $dev2`
+ # get min of both
+-max_fs_sz=`echo -e "$dev1_sz\n$dev2_sz" | sort | head -1`
++max_fs_sz=`echo -e "$dev1_sz\n$dev2_sz" | sort -n | head -1`
+ # Need disks with more than 2G.
+ if [ $max_fs_sz -lt 2000000000 ]; then
+ 	_scratch_dev_pool_put
+diff --git a/tests/btrfs/125 b/tests/btrfs/125
+index e38de264..5ac68b67 100755
+--- a/tests/btrfs/125
++++ b/tests/btrfs/125
+@@ -68,7 +68,7 @@ dev2_sz=`blockdev --getsize64 $dev2`
+ dev3_sz=`blockdev --getsize64 $dev3`
+ 
+ # get min of both.
+-max_fs_sz=`echo -e "$dev1_sz\n$dev2_sz\n$dev3_sz" | sort | head -1`
++max_fs_sz=`echo -e "$dev1_sz\n$dev2_sz\n$dev3_sz" | sort -n | head -1`
+ # Need disks with more than 2G
+ if [ $max_fs_sz -lt 2000000000 ]; then
+ 	_scratch_dev_pool_put
+diff --git a/tests/btrfs/154 b/tests/btrfs/154
+index 99ea232a..cd6c688f 100755
+--- a/tests/btrfs/154
++++ b/tests/btrfs/154
+@@ -51,7 +51,7 @@ DEV1_SZ=`blockdev --getsize64 $DEV1`
+ DEV2_SZ=`blockdev --getsize64 $DEV2`
+ 
+ # get min
+-MAX_FS_SZ=`echo -e "$DEV1_SZ\n$DEV2_SZ" | sort | head -1`
++MAX_FS_SZ=`echo -e "$DEV1_SZ\n$DEV2_SZ" | sort -n | head -1`
+ # Need disks with more than 2G
+ if [ $MAX_FS_SZ -lt 2000000000 ]; then
+ 	_scratch_dev_pool_put
+-- 
+2.11.0
