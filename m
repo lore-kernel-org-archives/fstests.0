@@ -1,61 +1,85 @@
-Received: from mx2.suse.de ([195.135.220.15]:52544 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:33030 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1729272AbeKFWby (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 6 Nov 2018 17:31:54 -0500
-Date: Tue, 6 Nov 2018 14:06:30 +0100
+        id S2388029AbeKFXJp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 6 Nov 2018 18:09:45 -0500
+Date: Tue, 6 Nov 2018 14:44:11 +0100
 From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH 0/7] fstests: test Btrfs swapfile support
-Message-ID: <20181106130630.GA24115@twin.jikos.cz>
+Subject: Re: [PATCH 7/7] btrfs: test balance and resize with an active swap
+ file
+Message-ID: <20181106134411.GB24115@twin.jikos.cz>
 Reply-To: dsterba@suse.cz
 References: <cover.1541193856.git.osandov@fb.com>
- <20181104160931.GE12788@desktop>
+ <e6656ec218c973d548803ed50a45c8d3f81fe388.1541193856.git.osandov@fb.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181104160931.GE12788@desktop>
+In-Reply-To: <e6656ec218c973d548803ed50a45c8d3f81fe388.1541193856.git.osandov@fb.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, kernel-team@fb.com, linux-btrfs@vger.kernel.org
+To: Omar Sandoval <osandov@osandov.com>
+Cc: fstests@vger.kernel.org, kernel-team@fb.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 05, 2018 at 12:09:31AM +0800, Eryu Guan wrote:
-> On Fri, Nov 02, 2018 at 02:29:35PM -0700, Omar Sandoval wrote:
-> > From: Omar Sandoval <osandov@fb.com>
-> > 
-> > This series fixes a couple of generic swapfile tests and adds some
-> > Btrfs-specific swapfile tests. Btrfs swapfile support is scheduled for
-> > 4.21 [1].
-> > 
-> > 1: https://www.spinics.net/lists/linux-btrfs/msg83454.html
-> > 
-> > Thanks!
+On Fri, Nov 02, 2018 at 02:29:42PM -0700, Omar Sandoval wrote:
+> From: Omar Sandoval <osandov@fb.com>
 > 
-> Thanks for the fixes and new tests!
+> Make sure we don't shrink the device past an active swap file, but allow
+> shrinking otherwise, as well as growing and balance.
 > 
-> > 
-> > Omar Sandoval (7):
-> >   generic/{472,496,497}: fix $seeqres typo
-> >   generic/{472,496}: fix swap file creation on Btrfs
+> Signed-off-by: Omar Sandoval <osandov@fb.com>
+> ---
+>  tests/btrfs/177     | 64 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/177.out |  6 +++++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 71 insertions(+)
+>  create mode 100755 tests/btrfs/177
+>  create mode 100644 tests/btrfs/177.out
 > 
-> I've merged above two patches, they're two obvious bug fixes.
-> 
-> >   btrfs: test swap file activation restrictions
-> >   btrfs: test invalid operations on a swap file
-> >   btrfs: test swap files on multiple devices
-> >   btrfs: test device add/remove/replace with an active swap file
-> >   btrfs: test balance and resize with an active swap file
-> 
-> These tests look fine to me, but it'd be really great if btrfs folks
-> could help review above tests and provide Reviewed-by tags.
+> diff --git a/tests/btrfs/177 b/tests/btrfs/177
+> new file mode 100755
+> index 00000000..12dad8fc
+> --- /dev/null
+> +++ b/tests/btrfs/177
+> @@ -0,0 +1,64 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Facebook.  All Rights Reserved.
+> +#
+> +# FS QA Test 177
+> +#
+> +# Test relocation (balance and resize) with an active swap file.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/btrfs
+> +
+> +rm -f $seqres.full
+> +
+> +# Modify as appropriate.
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch_swapfile
+> +
+> +swapfile="$SCRATCH_MNT/swap"
+> +
+> +# First, create a 1GB filesystem and fill it up.
+> +_scratch_mkfs_sized $((1024 * 1024 * 1024)) >> $seqres.full 2>&1
+> +_scratch_mount
+> +dd if=/dev/zero of="$SCRATCH_MNT/fill" bs=1024k >> $seqres.full 2>&1
 
-All look good to me,
-
-Reviewed-by: David Sterba <dsterba@suse.com>
-
-A few nits I saw:
-
-- the command names should not be shortened, ie. 'btrfs subvolume
-  snapshot' instead of 'btrfs subvol snap'
-- the test description (eg. 3/7 and 4/7) could mention which case is
-  tested, eg. swapfile with compression or COW or snapshot
-- 4/7 has typo 'nowcow' in a comment
+Can this be replaced by fallocate? Though it's just a 1GiB of data, it
+still takes some seconds on rotational storage.
