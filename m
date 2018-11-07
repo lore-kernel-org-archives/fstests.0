@@ -1,173 +1,221 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:34077 "EHLO
- ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
- with ESMTP id S2388677AbeKGLho (ORCPT <rfc822;fstests@vger.kernel.org>); Wed,
- 7 Nov 2018 06:37:44 -0500
+Received: from out30-130.freemail.mail.aliyun.com ([115.124.30.130]:41944 "EHLO
+        out30-130.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388451AbeKGMZW (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 7 Nov 2018 07:25:22 -0500
+Date: Tue, 6 Nov 2018 18:56:32 -0800
+From: Liu Bo <bo.liu@linux.alibaba.com>
+Subject: Re: [PATCH] Fstest: ext4: regression test for a ENOSPC warning
+Message-ID: <20181107025631.dyudsnkfk3m7ldme@US-160370MP2.local>
+Reply-To: bo.liu@linux.alibaba.com
+References: <1541125165-122108-1-git-send-email-bo.liu@linux.alibaba.com>
+ <20181103094201.GA12788@desktop>
 MIME-Version: 1.0
-Message-ID: <20181107020922.GY6311@dastard>
-Date: Tue, 6 Nov 2018 18:09:22 -0800 (PST)
-From: Dave Chinner <david@fromorbit.com>
-Sender: fstests-owner@vger.kernel.org
-Subject: Re: [PATCH] fstest: CrashMonkey tests ported to xfstest
-References: <CA+EzBbB5t5bSZ0hB6Y1jkxTgOLOv809Jbbcx7w5eK_XS_FPG7w@mail.gmail.com>
- <20181104163826.GH12788@desktop>
- <1B22AFA2-FAF3-45AA-9910-CDBE4AEBFB09@gmail.com>
- <20181105052217.GT6311@dastard>
- <46630C6B-77FA-4D15-92E7-43B89AD889A0@gmail.com>
- <20181106231536.GB8691@thunk.org> <20181106233956.GX6311@dastard>
- <CA+EzBbDwdi26MCswz0iQ8hUTcGixATUXayxMOmEw5gekYvmMuw@mail.gmail.com>
-In-Reply-To: <CA+EzBbDwdi26MCswz0iQ8hUTcGixATUXayxMOmEw5gekYvmMuw@mail.gmail.com>
 Content-Type: text/plain; charset=us-ascii
-Content-Transfer-Encoding: 7bit
-To: Jayashree Mohan <jayashree2912@gmail.com>
-Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>
+Content-Disposition: inline
+In-Reply-To: <20181103094201.GA12788@desktop>
+Sender: fstests-owner@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Nov 06, 2018 at 05:50:28PM -0600, Jayashree Mohan wrote:
-> On Tue, Nov 6, 2018 at 5:40 PM Dave Chinner <david@fromorbit.com> wrote:
+Hi,
+On Sat, Nov 03, 2018 at 05:42:01PM +0800, Eryu Guan wrote:
+> On Fri, Nov 02, 2018 at 10:19:25AM +0800, Liu Bo wrote:
+> > This adds a regression test for a ENOSPC warning which can be triggered if
+> > '-odioread_nolock,nodelalloc' and quota are used.
+> > 
+> > The bug was fixed by patch
+> > "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled".
+> > 
+> > Signed-off-by: Liu Bo <bo.liu@linux.alibaba.com>
+> > ---
+> >  tests/ext4/034     | 75 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/ext4/034.out | 17 +++++++++++++
+> >  tests/ext4/group   |  1 +
+> >  3 files changed, 93 insertions(+)
+> >  create mode 100755 tests/ext4/034
+> >  create mode 100644 tests/ext4/034.out
+> > 
+> > diff --git a/tests/ext4/034 b/tests/ext4/034
+> > new file mode 100755
+> > index 00000000..2449c3b7
+> > --- /dev/null
+> > +++ b/tests/ext4/034
+> > @@ -0,0 +1,75 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2018 Liu Bo, Alibaba.  All Rights Reserved.
+> > +#
+> > +# FS QA Test 034
+> > +#
+> > +# Regression test for a ENOSPC warning when both quota and
+> > +# "-o dioread_nolock,nodelalloc" is used.
+> > +#
+> > +# The bug was fixed by commit
+> > +# "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled"
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/quota
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
 > 
-> > On Tue, Nov 06, 2018 at 06:15:36PM -0500, Theodore Y. Ts'o wrote:
-> > > On Mon, Nov 05, 2018 at 02:16:57PM -0600, Jayashree Mohan wrote:
-> > > >
-> > > > I believe that to _scratch_mkfs, I must first _cleanup dm_flakey. If I
-> > replace the above snippet by
-> > > > _cleanup
-> > > > _scratch_mkfs
-> > > > _init_flakey
-> > > >
-> > > > The time taken for the test goes up by around 10 seconds (due to mkfs
-> > maybe). So I thought it was sufficient to remove the working directory.
-> > >
-> > > Can you try adding _check_scratch_fs after each test case?  Yes, it
-> >
-> > _check_scratch_fs now runs xfs_scrub on XFS as well as xfs_repair,
-> > so it's actually quite expensive.
-> >
-> > The whole point of aggregating all these tests into one fstest is to
-> > avoid the overhead of running _check_scratch_fs after every single
-> > test that are /extremely unlikely/ to fail on existing filesystems.
-> >
+> _supported_fs ext4
+>
+
+OK.
+
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_quota
+> > +_require_nobody
+> > +
+> > +echo "Format and mount"
+> > +_scratch_mkfs "-O quota" > $seqres.full 2>&1
 > 
-> Filipe and Eryu suggest that we run _check_scratch_fs after each subtest.
-> Quoting Filipe,
-
-These tests are highly unlikely to fail on existing filesystems.
-If they do fail, then the developer can narrow it down by modifying
-the test to the single test that fails and add _check_scratch_fs
-where necessary.
-
-Run time matters. Expensive, finegrained testing is only
-useful if there's a high probability of the test finding ongoing
-bugs. These tests have found bugs when they were first written, but
-the ongoing probability of finding more bugs is extremely low.
-Adding a huge amount of testing overhead for what appear to be very
-marginal returns is not a good tradeoff.
-
-> > Plus this test creates a very small fs, it's not like fsck will take a
-> > significant time to run.
-> > So for all these reasons I would unmount and fsck after each test.
+> This needs a require rule to check quota feature support status, i.e.
 > 
-> For this reason, we currently _check_scratch_fs after each subtest in the
-> _check_consistency method in my patch.
-> +       _unmount_flakey
-> +       _check_scratch_fs $FLAKEY_DEV
-> +       [ $? -ne 0 ] && _fatal "fsck failed"
+> _require_scratch_ext4_feature "quota"
+>
+
+OK.
+
+> > +_scratch_mount "-o dioread_nolock,nodelalloc" > $seqres.full 2>&1
+> > +quotaon $SCRATCH_MNT 2>/dev/null
 > 
-> Running on a 200MB partition, addition of this check added only around 3-4
-> seconds of delay in total for this patch consisting of 37 tests. Currently
-> this patch takes about 12-15 seconds to run to completion on my 200MB
-> partition.
+> And given that "quota" feature is enabled, quota is turned on
+> automatically on mount, seems there's no need to do quotaon.
+>
 
-What filesystem, and what about 20GB scratch partitions (which are
-common)?  i.e. Checking cost is different on different filesystems,
-different capacity devices and even different userspace versions of
-the same filesystem utilities. It is most definitely not free, and
-in some cases can be prohibitively expensive.
+I see, will confirm it.
 
-----
+> > +
+> > +echo "Create the original file"
+> > +touch $SCRATCH_MNT/foobar >> $seqres.full
+> > +chown nobody $SCRATCH_MNT/foobar >> $seqres.full
+> > +
+> > +quotaon $SCRATCH_MNT 2>/dev/null
+> 
+> Duplicated quotaon?
+>
 
-I suspect we've lost sight of the fact that fstests was /primarily/
-a filesystem developer test suite, not a distro regression test
-suite. If the test suite becomes too cumbersome and slow for
-developers to use effectively, then it will get used less during
-development and that's a *really, really bad outcome*.
+OK.
 
-e.g. I don't use the auto group in my development workflow any more
-- it's too slow to get decent coverage of changes these days. I only
-use the auto group for integration testing now. A few years ago it
-would take about an hour to run the auto group on a couple of
-spindles. These days it takes closer to 5 hours on the same setup.
-Even on my really fast pmem setup it take a couple of hours to run
-the entire auto group. As I have 15 different configurations I
-need to run through integration testing and limited resources,
-runtime certainly matters.
+> > +echo "Set hard quota"
+> > +setquota -u nobody 0 10M 0 0 $SCRATCH_MNT
+> > +_report_quota_blocks $SCRATCH_MNT
+> 
+> Looks like this is not needed either, if it's only for debug purpose
+> just dump the output to $seqres.full
+>
 
-It even takes half an hour to run the quick group on my fast
-machine, which really isn't very quick anymore because of the sheer
-number of tests in the quick group.  Half an hour is too slow for
-effective change feed back - feedback within 5 minutes is
-necessary, otherwise the developer will context switch to something
-else while waiting and lose all focus on what they were doing. This
-leads to highly inefficient developers.
+Make sense.
 
-The quick group is now full of short, fine grained, targetted
-regression tests. These are useful for distro release-to-release
-testing, but the chances that they find new bugs are extremely low.
-They really aren't that useful for developers who "fix the bug and
-move on" and will never see that test fail ever again. If one of
-these tests has a huge overhead or the sheer number of those tests
-creates substantial overhead, then that is not a particularly good
-use of the developer's time and resources.
+> > +
+> > +echo "Create 2 level extent tree (btree) for foobar with a unwritten extent"
+> > +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k"  -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
+> 
+> Too long line, wrap it :)
+>
 
-IOWs, there's a cost to run each test that the really important use
-case for fstests (i.e. the developers' test/dev cycle) cannot really
-afford to pay that cost. i.e. developers need wide test coverage /at
-speed/, not need deep, fine-grained, time consuming test coverage.
+OK.
 
-To put it in other words, developers need tests focussed on finding
-bugs quickly, not regression tests that provide the core
-requirements of integration and release testing. The development
-testing phase is all about finding fast and effciently.
+> > +
+> > +xfs_io -c "fiemap -v" $SCRATCH_MNT/foobar >> $seqres.full
+> 
+> $XFS_IO_PROG
+>
 
-There's been little done in recent times to make fstests faster and
-more efficient at finding new bugs for developers - the vast
-majority of new tests has been for specific bugs that have already
-been fixed.  Even these crashmonkey tests are not "find new bugs"
-tests. The bugs they uncovered have been found and fixed, and so
-they fall into this same finegrained integration regression test
-category.
+OK.
 
-The only tests that I've seen discover new bugs recently are those
-that run fsx, fstress or some other semi-randomised workloads that
-are combined with some other operation. These tests find the bugs
-that fine-grained, targetted regression tests will never uncover,
-and so in many cases running most of these integration/regression
-tests doesn't provide any value to the developer.
+> > +
+> > +echo "Convert unwritten extent to written and collapse extent tree to inode"
+> > +$XFS_IO_PROG -c "pwrite 4k 4k" $SCRATCH_MNT/foobar >> $seqres.full
+> > +
+> > +echo "Create a new file and do fsync to force a jbd2 commit"
+> > +$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy >> $seqres.full
+> > +
+> > +echo "sync $SCRATCH_MNT to writeback"
+> > +$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
+> 
+> syncfs needs
+> 
+> _require_xfs_io_command "syncfs"
+> 
+> Perhaps _scratch_unmount or just sync to trigger the writeback?
+>
 
-The faster the tests find the bugs, the faster the developer fixes
-them. Then more dev/test cycles a developer can do in a day, the
-more bugs they find and fix. So we want fstests to remain useful to
-developers, then we have to pay more attention to runtime and how
-efficient the tests are at fiding new bugs. More is not better.
+'sync' should be fine.
 
-Perhaps we need to recategorise the tests into new groups.
+Thank you so much for the comments, I'll update the patch.
 
-Perhaps we need to start working on reducing the huge amount
-of technical debt we now have in fstests.
+thanks,
+-liubo
 
-Perhaps we need to scale the fstests infrastructure to support
-thousands of tests efficiently.
-
-Perhaps we need to focus on tests that uncover new bugs (looking
-forwards) rather than regression tests (looking backwards)
-
-But, really, if we don't stop and think about what we are doing here
-fstests will slowly drop out of the day-to-day developer workflow
-because it is becoming less useful for finding new filesystem bugs
-quickly...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> Thanks,
+> Eryu
+> 
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/ext4/034.out b/tests/ext4/034.out
+> > new file mode 100644
+> > index 00000000..dd0c8a7c
+> > --- /dev/null
+> > +++ b/tests/ext4/034.out
+> > @@ -0,0 +1,17 @@
+> > +QA output created by 034
+> > +Format and mount
+> > +Create the original file
+> > +Set hard quota
+> > +root 20 0 0
+> > +nobody 0 0 10240
+> > +User soft hard grace
+> > +Block time: 7days; Inode
+> > +Block File limits 
+> > +----------------------------------------------------------------------   
+> > +*** for user quotas
+> > +   
+> > +   
+> > +Create 2 level extent tree (btree) for foobar with a unwritten extent
+> > +Convert unwritten extent to written and collapse extent tree to inode
+> > +Create a new file and do fsync to force a jbd2 commit
+> > +sync /mnt/scratch to writeback
+> > diff --git a/tests/ext4/group b/tests/ext4/group
+> > index b850f568..eb744a12 100644
+> > --- a/tests/ext4/group
+> > +++ b/tests/ext4/group
+> > @@ -36,6 +36,7 @@
+> >  031 auto quick dax
+> >  032 auto quick ioctl resize
+> >  033 auto ioctl resize
+> > +034 auto quick quota
+> >  271 auto rw quick
+> >  301 aio auto ioctl rw stress defrag
+> >  302 aio auto ioctl rw stress defrag
+> > -- 
+> > 2.14.2
+> > 
