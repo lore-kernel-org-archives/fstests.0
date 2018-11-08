@@ -1,124 +1,50 @@
-Received: from mail-vs1-f68.google.com ([209.85.217.68]:33696 "EHLO
-        mail-vs1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728328AbeKHLPH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 8 Nov 2018 06:15:07 -0500
-Received: by mail-vs1-f68.google.com with SMTP id p74so10681194vsc.0
-        for <fstests@vger.kernel.org>; Wed, 07 Nov 2018 17:42:03 -0800 (PST)
-MIME-Version: 1.0
-References: <CA+EzBbB5t5bSZ0hB6Y1jkxTgOLOv809Jbbcx7w5eK_XS_FPG7w@mail.gmail.com>
- <20181104163826.GH12788@desktop> <1B22AFA2-FAF3-45AA-9910-CDBE4AEBFB09@gmail.com>
- <20181105052217.GT6311@dastard> <46630C6B-77FA-4D15-92E7-43B89AD889A0@gmail.com>
- <20181106231536.GB8691@thunk.org> <20181106233956.GX6311@dastard>
- <CA+EzBbDwdi26MCswz0iQ8hUTcGixATUXayxMOmEw5gekYvmMuw@mail.gmail.com>
- <20181107020922.GY6311@dastard> <20181107040429.GA13539@thunk.org>
-In-Reply-To: <20181107040429.GA13539@thunk.org>
-From: Jayashree Mohan <jayashree2912@gmail.com>
-Date: Wed, 7 Nov 2018 19:41:50 -0600
-Message-ID: <CA+EzBbDp4UrcYLgDpHjtSuQb0a-Ny_94vJzXaMu0sskD1K3skg@mail.gmail.com>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:55915 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726145AbeKHSpA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 8 Nov 2018 13:45:00 -0500
+Date: Thu, 8 Nov 2018 20:10:25 +1100
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH] fstest: CrashMonkey tests ported to xfstest
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20181108091025.GA6311@dastard>
+References: <20181104163826.GH12788@desktop>
+ <1B22AFA2-FAF3-45AA-9910-CDBE4AEBFB09@gmail.com>
+ <20181105052217.GT6311@dastard>
+ <46630C6B-77FA-4D15-92E7-43B89AD889A0@gmail.com>
+ <20181106231536.GB8691@thunk.org>
+ <20181106233956.GX6311@dastard>
+ <CA+EzBbDwdi26MCswz0iQ8hUTcGixATUXayxMOmEw5gekYvmMuw@mail.gmail.com>
+ <20181107020922.GY6311@dastard>
+ <20181107040429.GA13539@thunk.org>
+ <CA+EzBbDp4UrcYLgDpHjtSuQb0a-Ny_94vJzXaMu0sskD1K3skg@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CA+EzBbDp4UrcYLgDpHjtSuQb0a-Ny_94vJzXaMu0sskD1K3skg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>
+To: Jayashree Mohan <jayashree2912@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Wed, Nov 07, 2018 at 07:41:50PM -0600, Jayashree Mohan wrote:
+> Hi all,
+> 
+> We understand the concern about testing times. To choose a middle
+> ground, Ted's suggestion of using _scratch_mkfs_sized works best for
+> CrashMonkey specific tests. These tests involve very few files and it
+> suffices to have a 100MB file system. I tested the patch on ext4, xfs,
+> btrfs and f2fs on a partition of this size. The overhead due to
+> _check_scratch_fs  after each sub test is in the range of 3-5 seconds
 
-We understand the concern about testing times. To choose a middle
-ground, Ted's suggestion of using _scratch_mkfs_sized works best for
-CrashMonkey specific tests. These tests involve very few files and it
-suffices to have a 100MB file system. I tested the patch on ext4, xfs,
-btrfs and f2fs on a partition of this size. The overhead due to
-_check_scratch_fs  after each sub test is in the range of 3-5 seconds
-for all  these file systems. If this is tolerable, we can force a
-smaller file system size for all CrashMonkey tests. Does this sound
-reasonable to you?
+3-5 second per invocation of _check_scratch_fs?
 
-Thanks,
-Jayashree Mohan
-On Tue, Nov 6, 2018 at 10:04 PM Theodore Y. Ts'o <tytso@mit.edu> wrote:
->
-> On Wed, Nov 07, 2018 at 01:09:22PM +1100, Dave Chinner wrote:
-> > > Running on a 200MB partition, addition of this check added only around 3-4
-> > > seconds of delay in total for this patch consisting of 37 tests. Currently
-> > > this patch takes about 12-15 seconds to run to completion on my 200MB
-> > > partition.
-> >
-> > What filesystem, and what about 20GB scratch partitions (which are
-> > common)?  i.e. Checking cost is different on different filesystems,
-> > different capacity devices and even different userspace versions of
-> > the same filesystem utilities. It is most definitely not free, and
-> > in some cases can be prohibitively expensive.
->
-> For the CrashMonkey tests, one solution might be to force the use of a
-> small file system on the scratch disk.  (e.g., using _scratch_mkfs_sized).
->
-> > I suspect we've lost sight of the fact that fstests was /primarily/h
-> > a filesystem developer test suite, not a distro regression test
-> > suite. If the test suite becomes too cumbersome and slow for
-> > developers to use effectively, then it will get used less during
-> > development and that's a *really, really bad outcome*.
->
-> I agree with your concern.
->
-> > It even takes half an hour to run the quick group on my fast
-> > machine, which really isn't very quick anymore because of the sheer
-> > number of tests in the quick group.  Half an hour is too slow for
-> > effective change feed back - feedback within 5 minutes is
-> > necessary, otherwise the developer will context switch to somethingt
-> > else while waiting and lose all focus on what they were doing. This
-> > leads to highly inefficient developers.
->
-> At Google we were willing to live with a 10 minute "fssmoke" subset,
-> but admittedly, that's grown to 15-20 minutes in recent years.  So
-> trying to create a "smoke" group that is only 5 minutes SGTM.
->
-> > The only tests that I've seen discover new bugs recently are those
-> > that run fsx, fstress or some other semi-randomised workloads that
-> > are combined with some other operation. These tests find the bugs
-> > that fine-grained, targetted regression tests will never uncover,
-> > and so in many cases running most of these integration/regression
-> > tests doesn't provide any value to the developer.
->
-> Yeah, what I used to do is assume that if the test run survives past
-> generic/013 (which uses fsstress), I'd assume that it would pass the
-> rest of the tests, and I would move on to reviewing the next commit.
-> Unfortuantely we've added so many ext4 specific tests (which run in
-> front of generic) that this trick no longer works.  I haven't gotten
-> annoyed enough to hack in some way to reorder the tests that get run
-> so the highest value tests run first, and then sending a "90+% chance
-> the commit is good, running the rest of the tests" message, but it has
-> occurred to me....
->
-> > Perhaps we need to recategorise the tests into new groups.
->
-> Agreed.  Either we need to change what tests we leave in "quick", or
-> we need to create a new group "smoke" where quick is an attribute of
-> the group as a whole, not an attribute of each test in the "quick"
-> group.
->
-> > Perhaps we need to scale the fstests infrastructure to support
-> > thousands of tests efficiently.
->
-> On my "when I find the round tuit, or when I can get a GSOC or intern
-> to work on it, whichever comes first" list is to enhance gce-xfstests
-> so it can shard the tests for a particular fs configuration so they
-> use a group of a VMs, instead of just using a separate VM for each
-> config scenario (e.g., dax, blocksize < page size, bigalloc, ext3
-> compat, etc.)
->
-> It might mean using ~100 VM's instead of the current 10 that I use,
-> but if it means the tests complete in a tenth of the time, the total
-> cost for doing a full integration test won't change by that much.  The
-> bigger problem is that people might have to ask permission to increase
-> the GCE quotas from the defaults used on new accounts.
->
-> For those people who are trying to run xfstests on bare metal, I'm not
-> sure there's that much that can be done to improve things; did you
-> have some ideas?  Or were you assuming that step one would require
-> buying many more physical test machines in your test cluster?
->
-> (Maybe IBM will be willing to give you a much bigger test machine
-> budget?  :-)
->
->                                                         - Ted
+> for all  these file systems. If this is tolerable, we can force a
+
+Not if your numbers that means 300 x 3-5 seconds. That's 15-25
+minutes of extra runtime.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
