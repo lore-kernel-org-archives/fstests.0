@@ -1,11 +1,11 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:35928 "EHLO
+Received: from bombadil.infradead.org ([198.137.202.133]:35942 "EHLO
         bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728910AbeKJVgr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 10 Nov 2018 16:36:47 -0500
+        with ESMTP id S1729060AbeKJVgt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 10 Nov 2018 16:36:49 -0500
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 4/5] xfs: xfs_fsr requires working preallocation support
-Date: Sat, 10 Nov 2018 12:51:44 +0100
-Message-Id: <20181110115145.30356-5-hch@lst.de>
+Subject: [PATCH 5/5] xfs/420: only check the extent layout after syncing
+Date: Sat, 10 Nov 2018 12:51:45 +0100
+Message-Id: <20181110115145.30356-6-hch@lst.de>
 In-Reply-To: <20181110115145.30356-1-hch@lst.de>
 References: <20181110115145.30356-1-hch@lst.de>
 MIME-Version: 1.0
@@ -15,26 +15,32 @@ To: guaneryu@gmail.com
 Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Check that the file system actually supports preallocation for defrag
-tests that end up calling xfs_fsr, as they can't be supported in
-always_cow mode.
+This tests validates the correct extent layout for some hairy reflink
+related issues.  But until we called sync or fsync we have no gurantee
+of any data fork layout, as only writeback moves the extents from the
+COW for to the data fork.
+
+Without this we'll see an error if we use COW fork speculative
+preallocations for non-overwrites, which is useful to reduce
+fragmentation.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- common/defrag | 1 +
- 1 file changed, 1 insertion(+)
+ tests/xfs/420 | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/common/defrag b/common/defrag
-index df249dfd..79485f0d 100644
---- a/common/defrag
-+++ b/common/defrag
-@@ -8,6 +8,7 @@ _require_defrag()
- {
-     case "$FSTYP" in
-     xfs)
-+        _require_xfs_io_command "falloc"
-         DEFRAG_PROG="$XFS_FSR_PROG"
- 	;;
-     ext4|ext4dev)
+diff --git a/tests/xfs/420 b/tests/xfs/420
+index a083a12b..aea95c7b 100755
+--- a/tests/xfs/420
++++ b/tests/xfs/420
+@@ -93,6 +93,8 @@ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres
+ $XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
+ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
+ 
++sync
++
+ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+ $XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
 -- 
 2.19.1
