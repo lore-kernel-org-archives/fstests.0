@@ -1,144 +1,70 @@
-Received: from out30-132.freemail.mail.aliyun.com ([115.124.30.132]:38595 "EHLO
-        out30-132.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726086AbeKKBAo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 10 Nov 2018 20:00:44 -0500
-From: Liu Bo <bo.liu@linux.alibaba.com>
-Subject: [PATCH v2] Fstest: ext4: regression test for a ENOSPC warning
-Date: Sat, 10 Nov 2018 23:14:49 +0800
-Message-Id: <1541862889-34010-1-git-send-email-bo.liu@linux.alibaba.com>
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:33608 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727805AbeKLA0v (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Nov 2018 19:26:51 -0500
+Date: Sun, 11 Nov 2018 22:37:59 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 0/7] fstests: test Btrfs swapfile support
+Message-ID: <20181111143759.GA3889@desktop>
+References: <cover.1541193856.git.osandov@fb.com>
+ <20181104160931.GE12788@desktop>
+ <20181106130630.GA24115@twin.jikos.cz>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181106130630.GA24115@twin.jikos.cz>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-ext4@vger.kernel.org
+To: dsterba@suse.cz
+Cc: Omar Sandoval <osandov@osandov.com>, fstests@vger.kernel.org, kernel-team@fb.com, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This adds a regression test for a ENOSPC warning which can be triggered if
-'-odioread_nolock,nodelalloc' and quota are used.
+On Tue, Nov 06, 2018 at 02:06:30PM +0100, David Sterba wrote:
+> On Mon, Nov 05, 2018 at 12:09:31AM +0800, Eryu Guan wrote:
+> > On Fri, Nov 02, 2018 at 02:29:35PM -0700, Omar Sandoval wrote:
+> > > From: Omar Sandoval <osandov@fb.com>
+> > > 
+> > > This series fixes a couple of generic swapfile tests and adds some
+> > > Btrfs-specific swapfile tests. Btrfs swapfile support is scheduled for
+> > > 4.21 [1].
+> > > 
+> > > 1: https://www.spinics.net/lists/linux-btrfs/msg83454.html
+> > > 
+> > > Thanks!
+> > 
+> > Thanks for the fixes and new tests!
+> > 
+> > > 
+> > > Omar Sandoval (7):
+> > >   generic/{472,496,497}: fix $seeqres typo
+> > >   generic/{472,496}: fix swap file creation on Btrfs
+> > 
+> > I've merged above two patches, they're two obvious bug fixes.
+> > 
+> > >   btrfs: test swap file activation restrictions
+> > >   btrfs: test invalid operations on a swap file
+> > >   btrfs: test swap files on multiple devices
+> > >   btrfs: test device add/remove/replace with an active swap file
+> > >   btrfs: test balance and resize with an active swap file
+> > 
+> > These tests look fine to me, but it'd be really great if btrfs folks
+> > could help review above tests and provide Reviewed-by tags.
+> 
+> All look good to me,
+> 
+> Reviewed-by: David Sterba <dsterba@suse.com>
 
-The bug was fixed by patch
-"Ext4: fix ENOSPC when both quota and dioread_nolock are enabled".
+Thanks a lot for the review!
 
-Signed-off-by: Liu Bo <bo.liu@linux.alibaba.com>
----
-v2:
-    - Add several _require and fix style and typos.
-    - So with 'sync' instead of 'syncfs' the regression couldn't be
-      reproduced due to 'sync' could have dirtied quota files ahead of
-      writeback.
+> 
+> A few nits I saw:
+> 
+> - the command names should not be shortened, ie. 'btrfs subvolume
+>   snapshot' instead of 'btrfs subvol snap'
+> - the test description (eg. 3/7 and 4/7) could mention which case is
+>   tested, eg. swapfile with compression or COW or snapshot
+> - 4/7 has typo 'nowcow' in a comment
 
- tests/ext4/034     | 76 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/ext4/034.out |  8 ++++++
- tests/ext4/group   |  1 +
- 3 files changed, 85 insertions(+)
- create mode 100755 tests/ext4/034
- create mode 100644 tests/ext4/034.out
+I've addressed these nits on commit.
 
-diff --git a/tests/ext4/034 b/tests/ext4/034
-new file mode 100755
-index 00000000..892d7687
---- /dev/null
-+++ b/tests/ext4/034
-@@ -0,0 +1,76 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Liu Bo, Alibaba.  All Rights Reserved.
-+#
-+# FS QA Test 034
-+#
-+# Regression test for a ENOSPC warning when both quota and
-+# "-o dioread_nolock,nodelalloc" is used.
-+#
-+# The bug was fixed by commit
-+# "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled"
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs ext4
-+_supported_os Linux
-+_require_scratch
-+_require_quota
-+_require_nobody
-+_require_xfs_io_command "syncfs"
-+
-+echo "Format and mount"
-+_scratch_mkfs "-O quota" > $seqres.full 2>&1
-+_scratch_mount "-o dioread_nolock,nodelalloc" > $seqres.full 2>&1
-+
-+echo "Create the original file"
-+touch $SCRATCH_MNT/foobar >> $seqres.full
-+chown nobody $SCRATCH_MNT/foobar >> $seqres.full
-+
-+echo "Set hard quota"
-+setquota -u nobody 0 10M 0 0 $SCRATCH_MNT
-+_report_quota_blocks $SCRATCH_MNT >> $seqres.full
-+
-+echo "Create 2 level extent tree (btree) for foobar with a unwritten extent"
-+$XFS_IO_PROG -f -c "pwrite 0 4k" -c "falloc 4k 4k" -c "pwrite 8k 4k" \
-+	     -c "pwrite 20k 4k"  -c "pwrite 28k 4k" -c "pwrite 36k 4k" \
-+	     -c "fsync" $SCRATCH_MNT/foobar >> $seqres.full
-+
-+$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/foobar >> $seqres.full
-+
-+echo "Convert unwritten extent to written and collapse extent tree to inode"
-+$XFS_IO_PROG -c "pwrite 4k 4k" $SCRATCH_MNT/foobar >> $seqres.full
-+
-+echo "Create a new file and do fsync to force a jbd2 commit"
-+$XFS_IO_PROG -f -c "pwrite 0 4k" -c "fsync" $SCRATCH_MNT/dummy >> $seqres.full
-+
-+echo "sync $SCRATCH_MNT to writeback"
-+$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT >> $seqres.full
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/ext4/034.out b/tests/ext4/034.out
-new file mode 100644
-index 00000000..0791ef76
---- /dev/null
-+++ b/tests/ext4/034.out
-@@ -0,0 +1,8 @@
-+QA output created by 034
-+Format and mount
-+Create the original file
-+Set hard quota
-+Create 2 level extent tree (btree) for foobar with a unwritten extent
-+Convert unwritten extent to written and collapse extent tree to inode
-+Create a new file and do fsync to force a jbd2 commit
-+sync /mnt/scratch to writeback
-diff --git a/tests/ext4/group b/tests/ext4/group
-index b850f568..eb744a12 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -36,6 +36,7 @@
- 031 auto quick dax
- 032 auto quick ioctl resize
- 033 auto ioctl resize
-+034 auto quick quota
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
--- 
-2.14.2
+Thanks,
+Eryu
