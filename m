@@ -1,49 +1,50 @@
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:47060 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727156AbeKLTku (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 12 Nov 2018 14:40:50 -0500
-Received: by mail-wr1-f67.google.com with SMTP id 74-v6so8520595wrb.13
-        for <fstests@vger.kernel.org>; Mon, 12 Nov 2018 01:48:23 -0800 (PST)
-From: Miklos Szeredi <mszeredi@redhat.com>
-Subject: [PATCH v2] overlay: create directory over deleted whiteout
-Date: Mon, 12 Nov 2018 10:48:18 +0100
-Message-Id: <20181112094818.3742-1-mszeredi@redhat.com>
+Received: from mail-vs1-f66.google.com ([209.85.217.66]:40987 "EHLO
+        mail-vs1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726111AbeKMO5f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 13 Nov 2018 09:57:35 -0500
+Received: by mail-vs1-f66.google.com with SMTP id t17so6511132vsc.8
+        for <fstests@vger.kernel.org>; Mon, 12 Nov 2018 21:01:14 -0800 (PST)
+MIME-Version: 1.0
+From: Jayashree Mohan <jayashree2912@gmail.com>
+Date: Mon, 12 Nov 2018 23:00:57 -0600
+Message-ID: <CA+EzBbDr7rxN1ptJKd5FOLQFxLQSRnvEod6+xvR4A6pFuG07fQ@mail.gmail.com>
+Subject: [PATCH v2] fstest: CrashMonkey tests ported to xfstest Inbox x
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <guaneryu@gmail.com>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-There's a bug in the overlayfs implementation starting from the very first
-merged version that may cause an Oops of various forms if a directory is
-created over a whiteout dentry, but the actual whiteout on the upper layer
-was removed to the directory creation.
+Hi all,
 
-Reported by: kaixuxia <xiakaixu1987@gmail.com>
-Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
+Here is the new patch porting the first set of CrashMonkey tests to
+xfstests. This patch batches 37 CrashMonkey tests, and tests them on a
+file system of size 200MB. Each sub test is also followed by fsck to
+check for metadata inconsistencies. This test is added to a new group
+- regress.
+Let me know if this looks good to you.
+
+Thanks,
+Jayashree
+
 ---
- tests/overlay/063     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/063.out |  2 ++
- tests/overlay/group   |  1 +
- 3 files changed, 69 insertions(+)
- create mode 100644 tests/overlay/063
- create mode 100644 tests/overlay/063.out
 
-diff --git a/tests/overlay/063 b/tests/overlay/063
-new file mode 100644
-index 000000000000..0b62c2ca9a9d
+diff --git a/tests/generic/517 b/tests/generic/517
+new file mode 100755
+index 0000000..3e92fbb
 --- /dev/null
-+++ b/tests/overlay/063
-@@ -0,0 +1,66 @@
++++ b/tests/generic/517
+@@ -0,0 +1,183 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
++# Copyright (c) 2018 The University of Texas at Austin.  All Rights Reserved.
 +#
-+# FS QA Test 063
++# FS QA Test 517-link
 +#
-+# Create dir over cached negative dentry, but whiteout removed from upper
++# Test case created by CrashMonkey
 +#
-+# The following kernel commit fixed the kernel crash: 5e1275808630 ("ovl: check
-+# whiteout in ovl_create_over_whiteout()")
++# Test if we create a hard link to a file and persist either of the
+files, all the names persist.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -51,71 +52,260 @@ index 000000000000..0b62c2ca9a9d
 +
 +here=`pwd`
 +tmp=/tmp/$$
-+status=1	# failure is the default!
++status=1    # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
-+	cd /
-+	rm -f $tmp.*
++    _cleanup_flakey
++    cd /
++    rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/dmflakey
++
++# 200MB in byte
++fssize=$((2**20 * 200))
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
 +
 +# real QA test starts here
-+_supported_fs overlay
++_supported_fs generic
 +_supported_os Linux
-+_require_scratch
++_require_scratch_nocheck
++_require_dm_target flakey
 +
-+# Remove all files from previous tests
-+_scratch_mkfs
++# initialize scratch device
++_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
 +
-+# Create test file
-+lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
-+upperdir=${OVL_BASE_SCRATCH_MNT}/${OVL_UPPER}
-+mkdir -p $lowerdir
-+touch ${lowerdir}/file
++stat_opt='-c "blocks: %b size: %s inode: %i links: %h"'
++before=""
++after=""
 +
-+_scratch_mount
 +
-+# Create whiteout and populate dcache with negative dentry
++# Using _scratch_mkfs instead of cleaning up the  working directory,
++# adds about 10 seconds of delay in total for the 37 tests.
++_clean_dir()
++{
++    _mount_flakey
++    rm -rf $SCRATCH_MNT/*
++    sync
++    _unmount_flakey
++}
 +
-+rm ${SCRATCH_MNT}/file
-+ls -l ${SCRATCH_MNT}/file > /dev/null 2>&1
++_check_consistency()
++{
++    _flakey_drop_and_remount | tee -a $seqres.full
 +
-+# Remove whiteout and try to create dir over negative dentry
++    if [ -f $1 ]; then
++        after=`stat "$stat_opt" $1`
++    fi
 +
-+rm ${upperdir}/file
-+mkdir ${SCRATCH_MNT}/file > /dev/null 2>&1
++    if [ "$before" != "$after" ] && [ $2 -ne 1 ]; then
++        echo "Before: $before"
++        echo "After: $after"
++    fi
 +
-+# unmount overlayfs
-+$UMOUNT_PROG $SCRATCH_MNT
++    _unmount_flakey
++    _check_scratch_fs $FLAKEY_DEV
++    [ $? -ne 0 ] && _fatal "fsck failed"
++}
 +
-+echo "Silence is golden"
++# create a hard link $2 to file $1, and fsync $3, followed by power-cut
++test_link_fsync()
++{
++    local sibling=0
++    before=""
++    after=""
++    src=$SCRATCH_MNT/$1
++    dest=$SCRATCH_MNT/$2
++
++    if [ "$3" == "./" ]; then
++        fsync=$SCRATCH_MNT
++    else
++        fsync=$SCRATCH_MNT/$3
++    fi
++
++    echo -ne "\n=== link $src $dest  with fsync $fsync ===\n" | _filter_scratch
++    _mount_flakey
++
++    # Now execute the workload
++    # Create the directory in which the source and destination files
++    # will be created
++    mkdir -p "${src%/*}"
++    mkdir -p "${dest%/*}"
++    touch $src
++    ln $src $dest
++
++    # If the file being persisted is a sibling, create it first
++    if [ ! -f $fsync ]; then
++        sibling=1
++        touch $fsync
++    fi
++
++    $XFS_IO_PROG -c "fsync" $fsync
++
++    if [ $sibling -ne 1 ]; then
++        before=`stat "$stat_opt" $src`
++    fi
++
++    _check_consistency $src $sibling
++    _clean_dir
++}
++
++# create a hard link $2 to file $1, and sync, followed by power-cut
++test_link_sync()
++{
++    src=$SCRATCH_MNT/$1
++    dest=$SCRATCH_MNT/$2
++    before=""
++    after=""
++    echo -ne "\n=== link $src $dest  with sync ===\n" | _filter_scratch
++    _mount_flakey
++
++    # now execute the workload
++    # Create the directory in which the source and destination files
++    # will be created
++    mkdir -p "${src%/*}"
++    mkdir -p "${dest%/*}"
++    touch $src
++    ln $src $dest
++    sync
++    before=`stat "$stat_opt" $src`
++
++    _check_consistency $src 0
++    _clean_dir
++}
++
++
++# Create different combinations to run the link test
++# Group 0: Both files within root directory
++file_names[0]="foo bar"
++fsync_names[0]="./ foo bar"
++
++# Group 1: Create hard link in a sub directory
++file_names[1]="foo A/bar"
++fsync_names[1]="./ foo bar A A/bar A/foo"
++
++# Group 2: Create hard link in parent directory
++file_names[2]="A/foo bar"
++fsync_names[2]="./ foo bar A A/bar A/foo"
++
++# Group 3: Both files within a directory other than root
++file_names[3]="A/foo A/bar"
++fsync_names[3]="./ A A/bar A/foo"
++
++#Group 4: Exercise name reuse : Link file in sub-directory
++file_names[4]="bar A/bar"
++fsync_names[4]="./ foo bar A A/bar A/foo"
++
++#Group 5: Exercise name reuse : Link file in parent directory
++file_names[5]="A/bar bar"
++fsync_names[5]="./ foo bar A A/bar A/foo"
++
++for ((test_group=0; test_group<6; test_group++)); do
++    for file in ${fsync_names[$test_group]}; do
++        test_link_fsync ${file_names[$test_group]} $file
++    done
++    test_link_sync ${file_names[$test_group]}
++done
++
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/overlay/063.out b/tests/overlay/063.out
+diff --git a/tests/generic/517.out b/tests/generic/517.out
 new file mode 100644
-index 000000000000..de35fc52cfc4
+index 0000000..b0d75a1
 --- /dev/null
-+++ b/tests/overlay/063.out
-@@ -0,0 +1,2 @@
-+QA output created by 063
-+Silence is golden
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 165f002d96ae..1c4acd640a30 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -65,3 +65,4 @@
- 060 auto quick metacopy
- 061 auto quick copyup
- 062 auto quick exportfs
-+063 auto quick whiteout
--- 
-2.14.3
++++ b/tests/generic/517.out
+@@ -0,0 +1,75 @@
++QA output created by 517
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with sync ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/foo ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/bar ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
++
++=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with sync ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/bar ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/foo ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with sync ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
++
++=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with sync ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/foo ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/bar ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
++
++=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with sync ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/bar ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/foo ===
++
++=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with sync ===
+diff --git a/tests/generic/group b/tests/generic/group
+index 47de978..3e81ae8 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -519,3 +519,4 @@
+ 514 auto quick clone
+ 515 auto quick clone
+ 516 auto quick dedupe clone
++517 regress
