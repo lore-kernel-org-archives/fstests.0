@@ -1,257 +1,351 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43572 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726574AbeKORZt (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 15 Nov 2018 12:25:49 -0500
-Date: Thu, 15 Nov 2018 02:19:10 -0500 (EST)
-From: Xiaoli Feng <xifeng@redhat.com>
-Message-ID: <1047154516.51611825.1542266350177.JavaMail.zimbra@redhat.com>
-In-Reply-To: <20181104161554.GF12788@desktop>
-References: <1540522074-20036-1-git-send-email-xifeng@redhat.com> <20181104161554.GF12788@desktop>
-Subject: Re: [PATCH v1] xfs/050: make it passed for dax 2 MiB alignment test
+Received: from aserp2120.oracle.com ([141.146.126.78]:35452 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725854AbeKQFkL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 17 Nov 2018 00:40:11 -0500
+Date: Fri, 16 Nov 2018 11:26:26 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 1/6] fsx: add clone range
+Message-ID: <20181116192626.GA9387@magnolia>
+References: <154215237717.21151.11976488103599724788.stgit@magnolia>
+ <154215238338.21151.852724936803809717.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <154215238338.21151.852724936803809717.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: esandeen@redhat.com, jmoyer@redhat.com, fstests@vger.kernel.org, xzhou@redhat.com, linux-xfs@vger.kernel.org, chandan@linux.vnet.ibm.com
+To: guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hello all,
-  Any thoughts for this patch? Adding chandan@linux.vnet.ibm.com to cc list for review. 
-Because his patch "xfs/050: work with 64k block size" change the bsoft and bhard size.
+On Tue, Nov 13, 2018 at 03:39:43PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Add support for FICLONERANGE to fsx.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  ltp/fsx.c |  182 +++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+>  1 file changed, 158 insertions(+), 24 deletions(-)
+> 
+> 
+> diff --git a/ltp/fsx.c b/ltp/fsx.c
+> index b0157ba3..2b0a2b28 100644
+> --- a/ltp/fsx.c
+> +++ b/ltp/fsx.c
+> @@ -88,25 +88,28 @@ int			logcount = 0;	/* total ops */
+>   * mode being run.
+>   */
+>  
+> -/* common operations */
+> -#define	OP_READ		0
+> -#define OP_WRITE	1
+> -#define OP_MAPREAD	2
+> -#define OP_MAPWRITE	3
+> -#define OP_MAX_LITE	4
+> -
+> -/* !lite operations */
+> -#define OP_TRUNCATE		4
+> -#define OP_FALLOCATE		5
+> -#define OP_PUNCH_HOLE		6
+> -#define OP_ZERO_RANGE		7
+> -#define OP_COLLAPSE_RANGE	8
+> -#define OP_INSERT_RANGE	9
+> -#define OP_MAX_FULL		10
+> -
+> -/* integrity operations */
+> -#define OP_FSYNC		10
+> -#define OP_MAX_INTEGRITY	11
+> +enum {
+> +	/* common operations */
+> +	OP_READ = 0,
+> +	OP_WRITE,
+> +	OP_MAPREAD,
+> +	OP_MAPWRITE,
+> +	OP_MAX_LITE,
+> +
+> +	/* !lite operations */
+> +	OP_TRUNCATE = OP_MAX_LITE,
+> +	OP_FALLOCATE,
+> +	OP_PUNCH_HOLE,
+> +	OP_ZERO_RANGE,
+> +	OP_COLLAPSE_RANGE,
+> +	OP_INSERT_RANGE,
+> +	OP_CLONE_RANGE,
+> +	OP_MAX_FULL,
+> +
+> +	/* integrity operations */
+> +	OP_FSYNC = OP_MAX_FULL,
+> +	OP_MAX_INTEGRITY,
+> +};
+>  
+>  #undef PAGE_SIZE
+>  #define PAGE_SIZE       getpagesize()
+> @@ -160,6 +163,7 @@ int     punch_hole_calls = 1;           /* -H flag disables */
+>  int     zero_range_calls = 1;           /* -z flag disables */
+>  int	collapse_range_calls = 1;	/* -C flag disables */
+>  int	insert_range_calls = 1;		/* -I flag disables */
+> +int	remap_calls = 1;		/* -J flag disables */
+>  int 	mapped_reads = 1;		/* -R flag disables it */
+>  int	integrity = 0;			/* -i flag */
+>  int	fsxgoodfd = 0;
+> @@ -254,6 +258,7 @@ static const char *op_names[] = {
+>  	[OP_ZERO_RANGE] = "zero_range",
+>  	[OP_COLLAPSE_RANGE] = "collapse_range",
+>  	[OP_INSERT_RANGE] = "insert_range",
+> +	[OP_CLONE_RANGE] = "clone_range",
+>  	[OP_FSYNC] = "fsync",
+>  };
+>  
+> @@ -275,6 +280,25 @@ static int op_code(const char *name)
+>  	return -1;
+>  }
+>  
+> +void
+> +log5(int operation, int arg0, int arg1, int arg2, enum opflags flags)
+> +{
+> +	struct log_entry *le;
+> +
+> +	le = &oplog[logptr];
+> +	le->operation = operation;
+> +	if (closeopen)
+> +		flags |= FL_CLOSE_OPEN;
+> +	le->args[0] = arg0;
+> +	le->args[1] = arg1;
+> +	le->args[2] = arg2;
 
-Thanks.
+I would like to withdraw this patch so that I can add a fourth args[]
+slot so that we can maintain the convention of printing the
+pre-operation file size after the other operation arguments.  This will
+make tracking the location of EOF through an fsxops file easier.
 
------ Original Message -----
-> From: "Eryu Guan" <guaneryu@gmail.com>
-> To: "XiaoLi Feng" <xifeng@redhat.com>
-> Cc: esandeen@redhat.com, jmoyer@redhat.com, fstests@vger.kernel.org, xzhou@redhat.com, linux-xfs@vger.kernel.org
-> Sent: Monday, November 5, 2018 12:15:54 AM
-> Subject: Re: [PATCH v1] xfs/050: make it passed for dax 2 MiB alignment test
-> 
-> On Fri, Oct 26, 2018 at 10:47:54AM +0800, Xiaoli Feng wrote:
-> > From: xiaoli feng <xifeng@redhat.com>
-> > 
-> > This case is failed for dax 2MiB alignment test. When test "push past
-> > the hard block limit" in this case, the quota bhard is 4000kb, and
-> > try to create 4096kb in dax fs. dax only create 2048kb because of 2MiB
-> > alignment. But there is a check that the file size must > 3400kb(bhard
-> > * 85%). So there are two method to fix it. One is to decrease bhard
-> > size. Second is to descreate minimum size. The minimum is hard to define.
-> > So I choose first method.
-> 
-> Adding linux-xfs to cc list for review from xfs folks. Thanks a lot!
-> 
-> Eryu
-> 
-> > ---
-> >  tests/xfs/050     |  4 ++--
-> >  tests/xfs/050.out | 60
-> >  +++++++++++++++++++++++++++----------------------------
-> >  2 files changed, 32 insertions(+), 32 deletions(-)
-> > 
-> > diff --git a/tests/xfs/050 b/tests/xfs/050
-> > index 788ed7f..d2ca477 100755
-> > --- a/tests/xfs/050
-> > +++ b/tests/xfs/050
-> > @@ -43,8 +43,8 @@ _scratch_mount
-> >  bsize=$(_get_file_block_size $SCRATCH_MNT)
-> >  _scratch_unmount
-> >  
-> > -bsoft=$(( 200 * $bsize ))
-> > -bhard=$(( 1000 * $bsize ))
-> > +bsoft=$(( 100 * $bsize ))
-> > +bhard=$(( 500 * $bsize ))
-> >  isoft=4
-> >  ihard=10
-> >  
-> > diff --git a/tests/xfs/050.out b/tests/xfs/050.out
-> > index 725cd79..6a7af1a 100644
-> > --- a/tests/xfs/050.out
-> > +++ b/tests/xfs/050.out
-> > @@ -12,23 +12,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] =OK= 100 500 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** unmount
-> >  *** group
-> > @@ -44,23 +44,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] =OK= 100 500 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** unmount
-> >  *** uqnoenforce
-> > @@ -76,23 +76,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> >  
-> >  *** unmount
-> >  *** gqnoenforce
-> > @@ -108,23 +108,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> >  
-> >  *** unmount
-> >  *** pquota
-> > @@ -140,23 +140,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] =OK= 200 1000 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> > +[NAME] =OK= 100 500 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
-> >  
-> >  *** unmount
-> >  *** pqnoenforce
-> > @@ -172,22 +172,22 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
-> >  
-> >  *** report initial settings
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft inode limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the soft block limit
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard inode limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
-> >  
-> >  *** push past the hard block limit (expect EDQUOT)
-> >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
-> > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
-> > [--------]
-> >  
-> >  *** unmount
-> > --
-> > 1.8.3.1
-> > 
+--D
+
+> +	le->flags = flags;
+> +	logptr++;
+> +	logcount++;
+> +	if (logptr >= LOGSIZE)
+> +		logptr = 0;
+> +}
+> +
+>  void
+>  log4(int operation, int arg0, int arg1, enum opflags flags)
+>  {
+> @@ -294,7 +318,6 @@ log4(int operation, int arg0, int arg1, enum opflags flags)
+>  		logptr = 0;
+>  }
+>  
+> -
+>  void
+>  logdump(void)
+>  {
+> @@ -418,6 +441,13 @@ logdump(void)
+>  			if (overlap)
+>  				prt("\t******IIII");
+>  			break;
+> +		case OP_CLONE_RANGE:
+> +			prt("CLONE 0x%x thru 0x%x\t(0x%x bytes) to 0x%x",
+> +			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+> +			    lp->args[1], lp->args[2]);
+> +			if (overlap)
+> +				prt("\t******IIII");
+> +			break;
+>  		case OP_FSYNC:
+>  			prt("FSYNC");
+>  			break;
+> @@ -1218,6 +1248,73 @@ do_insert_range(unsigned offset, unsigned length)
+>  }
+>  #endif
+>  
+> +#ifdef FICLONERANGE
+> +void
+> +do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> +{
+> +	struct file_clone_range	fcr;
+> +
+> +	if (length == 0) {
+> +		if (!quiet && testcalls > simulatedopcount)
+> +			prt("skipping zero length clone range\n");
+> +		log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> +		return;
+> +	}
+> +
+> +	if ((loff_t)offset >= file_size) {
+> +		if (!quiet && testcalls > simulatedopcount)
+> +			prt("skipping clone range behind EOF\n");
+> +		log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> +		return;
+> +	}
+> +
+> +	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
+> +
+> +	if (testcalls <= simulatedopcount)
+> +		return;
+> +
+> +	if ((progressinterval && testcalls % progressinterval == 0) ||
+> +	    (debug && (monitorstart == -1 || monitorend == -1 ||
+> +		       dest <= monitorstart || dest + length <= monitorend))) {
+> +		prt("%lu clone\tfrom 0x%x to 0x%x, (0x%x bytes) at 0x%x\n",
+> +			testcalls, offset, offset+length, length, dest);
+> +	}
+> +
+> +	fcr.src_fd = fd;
+> +	fcr.src_offset = offset;
+> +	fcr.src_length = length;
+> +	fcr.dest_offset = dest;
+> +
+> +	if (ioctl(fd, FICLONERANGE, &fcr) == -1) {
+> +		if (errno == EOPNOTSUPP || errno == ENOTTY) {
+> +			if (!quiet && testcalls > simulatedopcount)
+> +				prt("skipping unsupported clone range\n");
+> +			logptr--;
+> +			log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> +			return;
+> +		}
+> +
+> +		prt("clone range: 0x%x to 0x%x at 0x%x\n", offset,
+> +				offset + length, dest);
+> +		prterr("do_clone_range: FICLONERANGE");
+> +		report_failure(161);
+> +	}
+> +
+> +	memcpy(good_buf + dest, good_buf + offset, length);
+> +	if (dest > file_size)
+> +		memset(good_buf + file_size, '\0', dest - file_size);
+> +	if (dest + length > file_size)
+> +		file_size = dest + length;
+> +}
+> +
+> +#else
+> +void
+> +do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> +{
+> +	return;
+> +}
+> +#endif
+> +
+>  #ifdef HAVE_LINUX_FALLOC_H
+>  /* fallocate is basically a no-op unless extending, then a lot like a truncate */
+>  void
+> @@ -1374,6 +1471,7 @@ cleanup(int sig)
+>  static int
+>  read_op(struct log_entry *log_entry)
+>  {
+> +	char *end;
+>  	char line[256];
+>  
+>  	memset(log_entry, 0, sizeof(*log_entry));
+> @@ -1404,8 +1502,6 @@ read_op(struct log_entry *log_entry)
+>  		if (log_entry->operation == -1)
+>  			goto fail;
+>  		for (i = 0; i < 3; i++) {
+> -			char *end;
+> -
+>  			str = strtok(NULL, " \t\n");
+>  			if (!str)
+>  				goto fail;
+> @@ -1438,7 +1534,7 @@ read_op(struct log_entry *log_entry)
+>  int
+>  test(void)
+>  {
+> -	unsigned long	offset;
+> +	unsigned long	offset, offset2;
+>  	unsigned long	size;
+>  	unsigned long	rv;
+>  	unsigned long	op;
+> @@ -1469,6 +1565,7 @@ test(void)
+>  			op = log_entry.operation;
+>  			offset = log_entry.args[0];
+>  			size = log_entry.args[1];
+> +			offset2 = log_entry.args[2];
+>  			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
+>  			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
+>  			goto have_op;
+> @@ -1481,6 +1578,7 @@ test(void)
+>  		closeopen = (rv >> 3) < (1 << 28) / closeprob;
+>  
+>  	offset = random();
+> +	offset2 = 0;
+>  	size = maxoplen;
+>  	if (randomoplen)
+>  		size = random() % (maxoplen + 1);
+> @@ -1506,6 +1604,17 @@ test(void)
+>  		if (zero_range_calls && size && keep_size_calls)
+>  			keep_size = random() % 2;
+>  		break;
+> +	case OP_CLONE_RANGE:
+> +		TRIM_OFF_LEN(offset, size, file_size);
+> +		offset = offset & ~(block_size - 1);
+> +		size = size & ~(block_size - 1);
+> +		do {
+> +			offset2 = random();
+> +			TRIM_OFF(offset2, maxfilelen);
+> +			offset2 = offset2 & ~(block_size - 1);
+> +		} while (llabs(offset2 - offset) < size ||
+> +			 offset2 + size > maxfilelen);
+> +		break;
+>  	}
+>  
+>  have_op:
+> @@ -1549,6 +1658,12 @@ test(void)
+>  			goto out;
+>  		}
+>  		break;
+> +	case OP_CLONE_RANGE:
+> +		if (!remap_calls) {
+> +			log5(op, offset, size, offset2, FL_SKIPPED);
+> +			goto out;
+> +		}
+> +		break;
+>  	}
+>  
+>  	switch (op) {
+> @@ -1615,6 +1730,18 @@ test(void)
+>  
+>  		do_insert_range(offset, size);
+>  		break;
+> +	case OP_CLONE_RANGE:
+> +		if (size == 0) {
+> +			log5(OP_CLONE_RANGE, offset, size, offset2, FL_SKIPPED);
+> +			goto out;
+> +		}
+> +		if (offset2 + size > maxfilelen) {
+> +			log5(OP_CLONE_RANGE, offset, size, offset2, FL_SKIPPED);
+> +			goto out;
+> +		}
+> +
+> +		do_clone_range(offset, size, offset2);
+> +		break;
+>  	case OP_FSYNC:
+>  		dofsync();
+>  		break;
+> @@ -1637,7 +1764,7 @@ void
+>  usage(void)
+>  {
+>  	fprintf(stdout, "usage: %s",
+> -		"fsx [-dknqxAFLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
+> +		"fsx [-dknqxAFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
+>  	-b opnum: beginning operation number (default 1)\n\
+>  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+>  	-d: debug output for all operations\n\
+> @@ -1678,6 +1805,10 @@ usage(void)
+>  #ifdef FALLOC_FL_INSERT_RANGE
+>  "	-I: Do not use insert range calls\n"
+>  #endif
+> +#if defined(FICLONERANGE) || defined(FIDEDUPERANGE) || \
+> +    defined(HAVE_COPY_FILE_RANGE)
+> +"	-J: Do not use clone/dedupe/copy range calls\n"
+> +#endif
+>  "	-L: fsxLite - no file creations & no file size changes\n\
+>  	-N numops: total # operations to do (default infinity)\n\
+>  	-O: use oplen (see -o flag) for every op (default random)\n\
+> @@ -2010,6 +2141,9 @@ main(int argc, char **argv)
+>  		case 'I':
+>  			insert_range_calls = 0;
+>  			break;
+> +		case 'J':
+> +			remap_calls = 0;
+> +			break;
+>  		case 'L':
+>  		        lite = 1;
+>  			o_flags &= ~(O_CREAT|O_TRUNC);
 > 
