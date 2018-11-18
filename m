@@ -1,50 +1,31 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:48396 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725851AbeKUI2G (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 03:28:06 -0500
-Subject: [PATCH v2 00/10] xfstests: add copy/dedupe/clone to fsx/fsstress
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 20 Nov 2018 13:56:41 -0800
-Message-ID: <154275100143.8611.10235098565750994724.stgit@magnolia>
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:44650 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726269AbeKSAN3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Nov 2018 19:13:29 -0500
+Date: Sun, 18 Nov 2018 21:53:00 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] overlay: create directory over deleted whiteout
+Message-ID: <20181118135300.GF3889@desktop>
+References: <20181112094818.3742-1-mszeredi@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181112094818.3742-1-mszeredi@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Miklos Szeredi <mszeredi@redhat.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Mon, Nov 12, 2018 at 10:48:18AM +0100, Miklos Szeredi wrote:
+> There's a bug in the overlayfs implementation starting from the very first
+> merged version that may cause an Oops of various forms if a directory is
+> created over a whiteout dentry, but the actual whiteout on the upper layer
+> was removed to the directory creation.
+> 
+> Reported by: kaixuxia <xiakaixu1987@gmail.com>
+> Signed-off-by: Miklos Szeredi <mszeredi@redhat.com>
 
-This series adds to fsx and fsstress support for FICLONERANGE,
-FIDEDUPERANGE, and copy_file_range.
+Thanks for the resending and fix-up! Thanks to Amir for reviewing as
+well :)
 
-First, I fix some gcc warnings in fsx.
-
-Then, I teach fsx to read the fsx file after every operation to compare
-it to the good buffer.  This made it easier for me to find corruption
-problem as soon as they happen, though I'm not sure it really makes
-sense to have this enabled by default because of the behavior change
-that it makes.
-
-Next come a couple of generic reworks to fsx that we need to support the
-new clone/dedupe/copy commands.
-
-Patches 5-6 add clone and dedupe to fsx.
-
-Patches 7-8 add copy_file_range support to fsstress and fsx.
-
-Dave Chinner contributed some cleanups to the fsx patches as the 9th
-patch.
-
-The last patch fixes the common/dump tests to disable the new commands
-so that the dump/restore tests continue to function exactly as they have
-for years.
-
-There are known failures in 4.20-rc3, particularly with copy_file_range,
-which hopefully have been fixed by the patch series that Dave Chinner
-posted to the xfs list yesterday.  Branch can be downloaded here[1].
-
---D
-
-[1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsstress-clone
+Eryu
