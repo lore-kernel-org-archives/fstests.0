@@ -1,55 +1,170 @@
-Received: from mail-ua1-f65.google.com ([209.85.222.65]:40664 "EHLO
-        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725763AbeKQFq6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 17 Nov 2018 00:46:58 -0500
-Received: by mail-ua1-f65.google.com with SMTP id n7so8677686uao.7
-        for <fstests@vger.kernel.org>; Fri, 16 Nov 2018 11:33:16 -0800 (PST)
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:39859 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726935AbeKSAF0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Nov 2018 19:05:26 -0500
+Date: Sun, 18 Nov 2018 21:44:56 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 1/5] generic: move prealloc-enabled fsx to separate tests
+Message-ID: <20181118134456.GC3889@desktop>
+References: <20181110115145.30356-1-hch@lst.de>
+ <20181110115145.30356-2-hch@lst.de>
 MIME-Version: 1.0
-References: <CA+EzBbDr7rxN1ptJKd5FOLQFxLQSRnvEod6+xvR4A6pFuG07fQ@mail.gmail.com>
-In-Reply-To: <CA+EzBbDr7rxN1ptJKd5FOLQFxLQSRnvEod6+xvR4A6pFuG07fQ@mail.gmail.com>
-From: Jayashree Mohan <jayashree2912@gmail.com>
-Date: Fri, 16 Nov 2018 13:33:02 -0600
-Message-ID: <CA+EzBbDKZzW++xuzL3oefmbEAY=_65L_ux_V7a_6tYoXuMZpsQ@mail.gmail.com>
-Subject: Re: [PATCH v2] fstest: CrashMonkey tests ported to xfstest Inbox x
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20181110115145.30356-2-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: Dave Chinner <david@fromorbit.com>, Eryu Guan <guaneryu@gmail.com>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
-
-This is a gentle reminder to review the patch porting the first set of
-CrashMonkey tests to xfstest. Do let me know if this patch requires
-any correction, so that I can incorporate them and send out all
-patches as soon as possible.
-
-
-> Here is the new patch porting the first set of CrashMonkey tests to
-> xfstests. This patch batches 37 CrashMonkey tests, and tests them on a
-> file system of size 200MB. Each sub test is also followed by fsck to
-> check for metadata inconsistencies. This test is added to a new group
-> - regress.
-> Let me know if this looks good to you.
->
+On Sat, Nov 10, 2018 at 12:51:41PM +0100, Christoph Hellwig wrote:
+> Currently generic/075 and generic/112 have two extra fsx passes each that
+> exercise fsx with preallocation, which are only enabled for XFS.
+> 
+> These tests can also be run with other file systems, given that the XFS
+> prealloc ioctls are implemented in generic code since the addition of
+> the fallocate system call.  This also means a version of XFS that does
+> not support preallocation (e.g. because it always writes out of place)
+> can skip the prealloc tests while still completing the normal fsx tests
+> just fine.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 > ---
->
-> diff --git a/tests/generic/517 b/tests/generic/517
+>  tests/generic/075     |   7 +--
+>  tests/generic/075.out |  10 +--
+>  tests/generic/112     |  13 +---
+>  tests/generic/112.out |  10 +--
+>  tests/generic/601     | 136 +++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/601.out |  10 +++
+>  tests/generic/602     | 137 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/602.out |  10 +++
+>  tests/generic/group   |   2 +
+>  9 files changed, 299 insertions(+), 36 deletions(-)
+>  create mode 100755 tests/generic/601
+>  create mode 100644 tests/generic/601.out
+>  create mode 100755 tests/generic/602
+>  create mode 100644 tests/generic/602.out
+> 
+> diff --git a/tests/generic/075 b/tests/generic/075
+> index 2b957891..424ec485 100755
+> --- a/tests/generic/075
+> +++ b/tests/generic/075
+> @@ -48,14 +48,11 @@ _do_test()
+>      echo "fsx.$_n : $_filter_param"
+>      echo "-----------------------------------------------"
+>  
+> -    if [ "$FSTYP" != "xfs" ]
+> -    then
+>  	if [ "$_n" = "1" -o "$_n" = "3" ]
+>  	then
+>  	    # HACK: only xfs handles preallocation (-x) so just skip this test
+>  	    return
+>  	fi
+> -    fi
+
+Looks like the whole hunk should be removed here.
+
+>  
+>      # This cd and use of -P gets full debug on $here (not TEST_DEV)
+>      cd $out
+> @@ -138,9 +135,7 @@ _check_test_fs
+>  # -x: pre-allocate file space, exercising unwritten extents
+>  
+>  _do_test 0 "-d -N $numops1 -S 0"
+> -_do_test 1 "-d -N $numops1 -S 0 -x"
+> -_do_test 2 "-d -N $numops2 -l $filelen -S 0"
+> -_do_test 3 "-d -N $numops2 -l $filelen -S 0 -x"
+> +_do_test 1 "-d -N $numops2 -l $filelen -S 0"
+>  
+>  rm -f $seq.*.fsx{good,log}
+>  exit 0
+> diff --git a/tests/generic/075.out b/tests/generic/075.out
+> index 1f81cdf0..3ad4ae95 100644
+> --- a/tests/generic/075.out
+> +++ b/tests/generic/075.out
+> @@ -6,13 +6,5 @@ fsx.0 : -d -N numops -S 0
+>  -----------------------------------------------
+>  
+>  -----------------------------------------------
+> -fsx.1 : -d -N numops -S 0 -x
+> ------------------------------------------------
+> -
+> ------------------------------------------------
+> -fsx.2 : -d -N numops -l filelen -S 0
+> ------------------------------------------------
+> -
+> ------------------------------------------------
+> -fsx.3 : -d -N numops -l filelen -S 0 -x
+> +fsx.1 : -d -N numops -l filelen -S 0
+>  -----------------------------------------------
+> diff --git a/tests/generic/112 b/tests/generic/112
+> index 1879e7b5..c9c5e194 100755
+> --- a/tests/generic/112
+> +++ b/tests/generic/112
+> @@ -48,15 +48,6 @@ _do_test()
+>      echo "fsx.$_n : $_filter_param"
+>      echo "-----------------------------------------------"
+>  
+> -    if [ "$FSTYP" != "xfs" ]
+> -    then
+> -        if [ "$_n" = "1" -o "$_n" = "3" ]
+> -        then
+> -            # HACK: only xfs handles preallocation (-x) so just skip this test
+> -            return
+> -        fi
+> -    fi
+> -
+>      # This cd and use of -P gets full debug on $here (not TEST_DEV)
+>      cd $out
+>      if ! $here/ltp/fsx $_param -P $here $FSX_AVOID $seq.$_n &>/dev/null
+> @@ -139,9 +130,7 @@ _check_test_fs
+>  # -A: use the AIO system calls
+>  
+>  _do_test 0 "-A -d -N $numops1 -S 0"
+> -_do_test 1 "-A -d -N $numops1 -S 0 -x"
+> -_do_test 2 "-A -d -N $numops2 -l $filelen -S 0"
+> -_do_test 3 "-A -d -N $numops2 -l $filelen -S 0 -x"
+> +_do_test 1 "-A -d -N $numops2 -l $filelen -S 0"
+>  
+>  rm -f $seq.*.fsx{good,log}
+>  exit 0
+> diff --git a/tests/generic/112.out b/tests/generic/112.out
+> index 7d1709cf..488ec682 100644
+> --- a/tests/generic/112.out
+> +++ b/tests/generic/112.out
+> @@ -6,13 +6,5 @@ fsx.0 : -A -d -N numops -S 0
+>  -----------------------------------------------
+>  
+>  -----------------------------------------------
+> -fsx.1 : -A -d -N numops -S 0 -x
+> ------------------------------------------------
+> -
+> ------------------------------------------------
+> -fsx.2 : -A -d -N numops -l filelen -S 0
+> ------------------------------------------------
+> -
+> ------------------------------------------------
+> -fsx.3 : -A -d -N numops -l filelen -S 0 -x
+> +fsx.1 : -A -d -N numops -l filelen -S 0
+>  -----------------------------------------------
+> diff --git a/tests/generic/601 b/tests/generic/601
 > new file mode 100755
-> index 0000000..3e92fbb
+> index 00000000..3fb785a1
 > --- /dev/null
-> +++ b/tests/generic/517
-> @@ -0,0 +1,183 @@
+> +++ b/tests/generic/601
+> @@ -0,0 +1,136 @@
 > +#! /bin/bash
 > +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 The University of Texas at Austin.  All Rights Reserved.
+> +# Copyright (c) 2000-2003 Silicon Graphics, Inc.  All Rights Reserved.
+
+Hmm, I think it's better to write proper Copyright information for new
+tests, also it's better to follow new code style instead of copying the
+old test. Some examples inline..
+
 > +#
-> +# FS QA Test 517-link
+> +# FS QA Test No. 601
 > +#
-> +# Test case created by CrashMonkey
-> +#
-> +# Test if we create a hard link to a file and persist either of the
-> files, all the names persist.
+> +# fsx (non-AIO variant, with preallocation)
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
@@ -57,260 +172,340 @@ patches as soon as possible.
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1    # failure is the default!
+> +status=0	# success is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
 > +_cleanup()
 > +{
-> +    _cleanup_flakey
 > +    cd /
-> +    rm -f $tmp.*
+> +    rm -rf $TEST_DIR/fsx.* $tmp.*
+> +}
+
+Use tab as indention. Please ./new to generate new test template, so all
+has been taken care of.
+
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +_do_test()
+
+No leading underscore for local functions. But I'm wondering if we could
+just use "run_fsx" from common/rc
+
+> +{
+> +    _n="$1"
+> +    _param="$2"
+
+Similarly, local variables without "_". And declare local variables as
+"local".
+
+> +
+> +    out=$TEST_DIR/fsx
+> +    rm -rf $out
+> +    if ! mkdir $out
+> +    then
+> +	echo "    failed to mkdir $out"
+> +	status=1
+> +	exit
+> +    fi
+> +
+> +    _filter_param=`echo "$_param" | sed\
+> +	-e 's/-N [0-9][0-9]*/-N numops/' \
+> +	-e 's/-l [0-9][0-9]*/-l filelen/'`
+> +
+> +    echo ""
+> +    echo "-----------------------------------------------"
+> +    echo "fsx.$_n : $_filter_param"
+> +    echo "-----------------------------------------------"
+> +
+> +    # This cd and use of -P gets full debug on $here (not TEST_DEV)
+> +    cd $out
+> +    if ! $here/ltp/fsx $_param -P $here $seq.$_n $FSX_AVOID &>/dev/null
+> +    then
+> +	echo "    fsx ($_param) failed, $? - compare $seqres.$_n.{good,bad,fsxlog}"
+> +	mv $out/$seq.$_n $seqres.$_n.full
+> +	mv $here/$seq.$_n.fsxlog $seqres.$_n.fsxlog
+> +	od -xAx $seqres.$_n.full > $seqres.$_n.bad
+> +	od -xAx $here/$seq.$_n.fsxgood > $seqres.$_n.good
+> +	rm -f $here/$seq.$_n.fsxgood
+> +	status=1
+> +	exit
+> +    fi
+> +
+> +    cd $here
+> +    _check_test_fs
+> +}
+> +
+> +_usage()
+> +{
+> +    echo "$0: [-l filelen] [-n numops1] [-N numops2]"
+> +}
+> +
+> +_process_args()
+> +{
+> +    OPTIND=1
+> +    while getopts "l:n:N:?" c $@
+> +    do
+> +        case $c
+> +        in
+> +            l)
+> +                filelen=$OPTARG
+> +		param_type="$param_type, overidde -l"
+> +                ;;
+> +            N)
+> +                numops2=$OPTARG
+> +		param_type="$param_type, overidde -N"
+> +                ;;
+> +            n)
+> +                numops1=$OPTARG
+> +		param_type="$param_type, overidde -n"
+> +                ;;
+> +	    ?)
+> +		_usage
+> +		exit	
+> +		;;
+> +	esac
+> +    done
+> +}
+
+Above two functions doesn't seem that useful in new tests, I think we
+can just remove them.
+
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +_require_xfs_io_command "falloc"
+> +
+> +size10=`expr 10 \* 1024 \* 1024`	# 10 megabytes
+> +filelen=$size10
+> +numops1=1000
+> +numops2=10000
+> +
+> +# can override the params here
+> +_process_args "$@"
+> +
+> +echo "Params are for $param_type" >>$seqres.full
+> +echo "Params: n = $numops1 N = $numops2 l = $filelen" >>$seqres.full
+> +
+> +rm -f $seqres.full
+> +echo "brevity is wit..."
+
+"Silence is golden"
+
+> +
+> +_check_test_fs
+
+We do fsck after each test, no need to check fs before test.
+
+And generic/602 has similar problems as well.
+
+Thanks,
+Eryu
+
+> +
+> +# Options:
+> +# -d: debug output for all operations
+> +# -l flen: the upper bound on file size (default 262144)
+> +# -o oplen: the upper bound on operation size
+> +# -N numops: total # operations to do (default infinity)
+> +# -P: save .fsxlog and .fsxgood files in dirpath (default ./)
+> +# -S seed: for random # generator (default 1) 0 gets timestamp
+> +# -x: pre-allocate file space, exercising unwritten extents
+> +
+> +_do_test 0 "-d -N $numops1 -S 0 -x"
+> +_do_test 1 "-d -N $numops2 -l $filelen -S 0 -x"
+> +
+> +rm -f $seq.*.fsx{good,log}
+> +exit 0
+> diff --git a/tests/generic/601.out b/tests/generic/601.out
+> new file mode 100644
+> index 00000000..d1346da2
+> --- /dev/null
+> +++ b/tests/generic/601.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 601
+> +brevity is wit...
+> +
+> +-----------------------------------------------
+> +fsx.0 : -d -N numops -S 0 -x
+> +-----------------------------------------------
+> +
+> +-----------------------------------------------
+> +fsx.1 : -d -N numops -l filelen -S 0 -x
+> +-----------------------------------------------
+> diff --git a/tests/generic/602 b/tests/generic/602
+> new file mode 100755
+> index 00000000..ec853eb1
+> --- /dev/null
+> +++ b/tests/generic/602
+> @@ -0,0 +1,137 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2005 Silicon Graphics, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 602
+> +#
+> +# fsx (AIO variant, with preallocation, based on 601)
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=0	# success is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +    cd /
+> +    rm -rf $TEST_DIR/fsx.* $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
 > +. ./common/rc
 > +. ./common/filter
-> +. ./common/dmflakey
 > +
-> +# 200MB in byte
-> +fssize=$((2**20 * 200))
+> +_do_test()
+> +{
+> +    _n="$1"
+> +    _param="$2"
 > +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
+> +    out=$TEST_DIR/fsx
+> +    rm -rf $out
+> +    if ! mkdir $out
+> +    then
+> +	echo "    failed to mkdir $out"
+> +	status=1
+> +	exit
+> +    fi
+> +
+> +    _filter_param=`echo "$_param" | sed\
+> +	-e 's/-N [0-9][0-9]*/-N numops/' \
+> +	-e 's/-l [0-9][0-9]*/-l filelen/'`
+> +
+> +    echo ""
+> +    echo "-----------------------------------------------"
+> +    echo "fsx.$_n : $_filter_param"
+> +    echo "-----------------------------------------------"
+> +
+> +    # This cd and use of -P gets full debug on $here (not TEST_DEV)
+> +    cd $out
+> +    if ! $here/ltp/fsx $_param -P $here $FSX_AVOID $seq.$_n &>/dev/null
+> +    then
+> +	echo "    fsx ($_param) returned $? - see $seq.$_n.full"
+> +	mv $here/$seq.$_n.fsxlog $seqres.$_n.full
+> +	status=1
+> +	exit
+> +    fi
+> +
+> +    cd $here
+> +    _check_test_fs
+> +}
+> +
+> +_usage()
+> +{
+> +    echo "$0: [-l filelen] [-n numops1] [-N numops2]"
+> +}
+> +
+> +_process_args()
+> +{
+> +    OPTIND=1
+> +    while getopts "l:n:N:?" c $@
+> +    do
+> +        case $c
+> +        in
+> +            l)
+> +                filelen=$OPTARG
+> +		param_type="$param_type, overidde -l"
+> +                ;;
+> +            N)
+> +                numops2=$OPTARG
+> +		param_type="$param_type, overidde -N"
+> +                ;;
+> +            n)
+> +                numops1=$OPTARG
+> +		param_type="$param_type, overidde -n"
+> +                ;;
+> +	    ?)
+> +		_usage
+> +		exit	
+> +		;;
+> +	esac
+> +    done
+> +}
 > +
 > +# real QA test starts here
 > +_supported_fs generic
 > +_supported_os Linux
-> +_require_scratch_nocheck
-> +_require_dm_target flakey
+> +_require_test
+> +_require_aio
+> +_require_xfs_io_command "falloc"
 > +
-> +# initialize scratch device
-> +_scratch_mkfs_sized $fssize >> $seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
+> +[ -x $here/ltp/aio-stress ] || \
+> +	_notrun "fsx not built with AIO for this platform"
 > +
-> +stat_opt='-c "blocks: %b size: %s inode: %i links: %h"'
-> +before=""
-> +after=""
+> +size10=`expr 10 \* 1024 \* 1024`	# 10 megabytes
+> +filelen=$size10
+> +numops1=1000
+> +numops2=10000
 > +
+> +# can override the params here
+> +_process_args "$@"
 > +
-> +# Using _scratch_mkfs instead of cleaning up the  working directory,
-> +# adds about 10 seconds of delay in total for the 37 tests.
-> +_clean_dir()
-> +{
-> +    _mount_flakey
-> +    rm -rf $SCRATCH_MNT/*
-> +    sync
-> +    _unmount_flakey
-> +}
+> +echo "Params are for $param_type" >>$seqres.full
+> +echo "Params: n = $numops1 N = $numops2 l = $filelen" >>$seqres.full
 > +
-> +_check_consistency()
-> +{
-> +    _flakey_drop_and_remount | tee -a $seqres.full
+> +rm -f $seqres.full
+> +echo "brevity is wit..."
 > +
-> +    if [ -f $1 ]; then
-> +        after=`stat "$stat_opt" $1`
-> +    fi
+> +_check_test_fs
 > +
-> +    if [ "$before" != "$after" ] && [ $2 -ne 1 ]; then
-> +        echo "Before: $before"
-> +        echo "After: $after"
-> +    fi
+> +# Options:
+> +# -d: debug output for all operations
+> +# -l flen: the upper bound on file size (default 262144)
+> +# -o oplen: the upper bound on operation size
+> +# -N numops: total # operations to do (default infinity)
+> +# -P: save .fsxlog and .fsxgood files in dirpath (default ./)
+> +# -S seed: for random # generator (default 1) 0 gets timestamp
+> +# -x: pre-allocate file space, exercising unwritten extents
+> +# -A: use the AIO system calls
 > +
-> +    _unmount_flakey
-> +    _check_scratch_fs $FLAKEY_DEV
-> +    [ $? -ne 0 ] && _fatal "fsck failed"
-> +}
+> +_do_test 0 "-A -d -N $numops1 -S 0 -x"
+> +_do_test 1 "-A -d -N $numops2 -l $filelen -S 0 -x"
 > +
-> +# create a hard link $2 to file $1, and fsync $3, followed by power-cut
-> +test_link_fsync()
-> +{
-> +    local sibling=0
-> +    before=""
-> +    after=""
-> +    src=$SCRATCH_MNT/$1
-> +    dest=$SCRATCH_MNT/$2
-> +
-> +    if [ "$3" == "./" ]; then
-> +        fsync=$SCRATCH_MNT
-> +    else
-> +        fsync=$SCRATCH_MNT/$3
-> +    fi
-> +
-> +    echo -ne "\n=== link $src $dest  with fsync $fsync ===\n" | _filter_scratch
-> +    _mount_flakey
-> +
-> +    # Now execute the workload
-> +    # Create the directory in which the source and destination files
-> +    # will be created
-> +    mkdir -p "${src%/*}"
-> +    mkdir -p "${dest%/*}"
-> +    touch $src
-> +    ln $src $dest
-> +
-> +    # If the file being persisted is a sibling, create it first
-> +    if [ ! -f $fsync ]; then
-> +        sibling=1
-> +        touch $fsync
-> +    fi
-> +
-> +    $XFS_IO_PROG -c "fsync" $fsync
-> +
-> +    if [ $sibling -ne 1 ]; then
-> +        before=`stat "$stat_opt" $src`
-> +    fi
-> +
-> +    _check_consistency $src $sibling
-> +    _clean_dir
-> +}
-> +
-> +# create a hard link $2 to file $1, and sync, followed by power-cut
-> +test_link_sync()
-> +{
-> +    src=$SCRATCH_MNT/$1
-> +    dest=$SCRATCH_MNT/$2
-> +    before=""
-> +    after=""
-> +    echo -ne "\n=== link $src $dest  with sync ===\n" | _filter_scratch
-> +    _mount_flakey
-> +
-> +    # now execute the workload
-> +    # Create the directory in which the source and destination files
-> +    # will be created
-> +    mkdir -p "${src%/*}"
-> +    mkdir -p "${dest%/*}"
-> +    touch $src
-> +    ln $src $dest
-> +    sync
-> +    before=`stat "$stat_opt" $src`
-> +
-> +    _check_consistency $src 0
-> +    _clean_dir
-> +}
-> +
-> +
-> +# Create different combinations to run the link test
-> +# Group 0: Both files within root directory
-> +file_names[0]="foo bar"
-> +fsync_names[0]="./ foo bar"
-> +
-> +# Group 1: Create hard link in a sub directory
-> +file_names[1]="foo A/bar"
-> +fsync_names[1]="./ foo bar A A/bar A/foo"
-> +
-> +# Group 2: Create hard link in parent directory
-> +file_names[2]="A/foo bar"
-> +fsync_names[2]="./ foo bar A A/bar A/foo"
-> +
-> +# Group 3: Both files within a directory other than root
-> +file_names[3]="A/foo A/bar"
-> +fsync_names[3]="./ A A/bar A/foo"
-> +
-> +#Group 4: Exercise name reuse : Link file in sub-directory
-> +file_names[4]="bar A/bar"
-> +fsync_names[4]="./ foo bar A A/bar A/foo"
-> +
-> +#Group 5: Exercise name reuse : Link file in parent directory
-> +file_names[5]="A/bar bar"
-> +fsync_names[5]="./ foo bar A A/bar A/foo"
-> +
-> +for ((test_group=0; test_group<6; test_group++)); do
-> +    for file in ${fsync_names[$test_group]}; do
-> +        test_link_fsync ${file_names[$test_group]} $file
-> +    done
-> +    test_link_sync ${file_names[$test_group]}
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/517.out b/tests/generic/517.out
+> +rm -f $seq.*.fsx{good,log}
+> +exit 0
+> diff --git a/tests/generic/602.out b/tests/generic/602.out
 > new file mode 100644
-> index 0000000..b0d75a1
+> index 00000000..bf771f04
 > --- /dev/null
-> +++ b/tests/generic/517.out
-> @@ -0,0 +1,75 @@
-> +QA output created by 517
+> +++ b/tests/generic/602.out
+> @@ -0,0 +1,10 @@
+> +QA output created by 602
+> +brevity is wit...
 > +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
+> +-----------------------------------------------
+> +fsx.0 : -A -d -N numops -S 0 -x
+> +-----------------------------------------------
 > +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/bar  with sync ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/foo ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/bar ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
-> +
-> +=== link SCRATCH_MNT/foo SCRATCH_MNT/A/bar  with sync ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/bar ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/foo ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/bar  with sync ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
-> +
-> +=== link SCRATCH_MNT/A/foo SCRATCH_MNT/A/bar  with sync ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/foo ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/bar ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/bar ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with fsync SCRATCH_MNT/A/foo ===
-> +
-> +=== link SCRATCH_MNT/bar SCRATCH_MNT/A/bar  with sync ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/foo ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/bar ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/bar ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with fsync SCRATCH_MNT/A/foo ===
-> +
-> +=== link SCRATCH_MNT/A/bar SCRATCH_MNT/bar  with sync ===
+> +-----------------------------------------------
+> +fsx.1 : -A -d -N numops -l filelen -S 0 -x
+> +-----------------------------------------------
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 47de978..3e81ae8 100644
+> index 54d71d55..b01e1cb0 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -519,3 +519,4 @@
+> @@ -519,3 +519,5 @@
 >  514 auto quick clone
 >  515 auto quick clone
 >  516 auto quick dedupe clone
-> +517 regress
+> +601 auto rw
+> +602 auto aio rw
+> -- 
+> 2.19.1
+> 
