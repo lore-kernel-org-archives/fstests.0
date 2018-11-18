@@ -1,58 +1,360 @@
-Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:50307 "EHLO
-        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725898AbeKTHzH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Nov 2018 02:55:07 -0500
-Date: Tue, 20 Nov 2018 08:29:31 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 0/6] xfstests: add copy/dedupe/clone to fsx/fsstress
-Message-ID: <20181119212931.GJ19305@dastard>
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:39713 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726596AbeKSALk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Nov 2018 19:11:40 -0500
+Date: Sun, 18 Nov 2018 21:51:08 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 1/6] fsx: add clone range
+Message-ID: <20181118135108.GE3889@desktop>
 References: <154215237717.21151.11976488103599724788.stgit@magnolia>
- <20181119052251.GQ2279@dhcp-12-117.nay.redhat.com>
- <20181119104547.GR2279@dhcp-12-117.nay.redhat.com>
- <20181119163809.GX4235@magnolia>
+ <154215238338.21151.852724936803809717.stgit@magnolia>
+ <20181116192626.GA9387@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181119163809.GX4235@magnolia>
+In-Reply-To: <20181116192626.GA9387@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Zorro Lang <zlang@redhat.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 19, 2018 at 08:38:09AM -0800, Darrick J. Wong wrote:
-> On Mon, Nov 19, 2018 at 06:45:47PM +0800, Zorro Lang wrote:
-> > On Mon, Nov 19, 2018 at 01:22:52PM +0800, Zorro Lang wrote:
-> > > On Tue, Nov 13, 2018 at 03:39:37PM -0800, Darrick J. Wong wrote:
-> > > > Hi all,
-> > > > 
-> > > > This series adds to fsx support for FICLONERANGE, FIDEDUPERANGE, and
-> > > > copy_file_range.  It adds to fsstress support for copy_file_range.
-> > > > There are known failures in 4.20-rc2, particularly with copy_file_range,
-> > > > so these patches provide a fstests base for everyone to start/continue
-> > > > looking for bugs.
-> > > 
-> > > Hi Darrick,
-> > > 
-> > > Your patches triggered 2 new failures on g/091 and g/263, refer to [1]. I can't
-> > > reproduce these failures on original xfstests [2]. I saw you were talking about g/091
-> > > in #xfs. Are these two failures same issue?
+On Fri, Nov 16, 2018 at 11:26:26AM -0800, Darrick J. Wong wrote:
+> On Tue, Nov 13, 2018 at 03:39:43PM -0800, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Add support for FICLONERANGE to fsx.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  ltp/fsx.c |  182 +++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+> >  1 file changed, 158 insertions(+), 24 deletions(-)
+> > 
+> > 
+> > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > index b0157ba3..2b0a2b28 100644
+> > --- a/ltp/fsx.c
+> > +++ b/ltp/fsx.c
+> > @@ -88,25 +88,28 @@ int			logcount = 0;	/* total ops */
+> >   * mode being run.
+> >   */
+> >  
+> > -/* common operations */
+> > -#define	OP_READ		0
+> > -#define OP_WRITE	1
+> > -#define OP_MAPREAD	2
+> > -#define OP_MAPWRITE	3
+> > -#define OP_MAX_LITE	4
+> > -
+> > -/* !lite operations */
+> > -#define OP_TRUNCATE		4
+> > -#define OP_FALLOCATE		5
+> > -#define OP_PUNCH_HOLE		6
+> > -#define OP_ZERO_RANGE		7
+> > -#define OP_COLLAPSE_RANGE	8
+> > -#define OP_INSERT_RANGE	9
+> > -#define OP_MAX_FULL		10
+> > -
+> > -/* integrity operations */
+> > -#define OP_FSYNC		10
+> > -#define OP_MAX_INTEGRITY	11
+> > +enum {
+> > +	/* common operations */
+> > +	OP_READ = 0,
+> > +	OP_WRITE,
+> > +	OP_MAPREAD,
+> > +	OP_MAPWRITE,
+> > +	OP_MAX_LITE,
+> > +
+> > +	/* !lite operations */
+> > +	OP_TRUNCATE = OP_MAX_LITE,
+> > +	OP_FALLOCATE,
+> > +	OP_PUNCH_HOLE,
+> > +	OP_ZERO_RANGE,
+> > +	OP_COLLAPSE_RANGE,
+> > +	OP_INSERT_RANGE,
+> > +	OP_CLONE_RANGE,
+> > +	OP_MAX_FULL,
+> > +
+> > +	/* integrity operations */
+> > +	OP_FSYNC = OP_MAX_FULL,
+> > +	OP_MAX_INTEGRITY,
+> > +};
+> >  
+> >  #undef PAGE_SIZE
+> >  #define PAGE_SIZE       getpagesize()
+> > @@ -160,6 +163,7 @@ int     punch_hole_calls = 1;           /* -H flag disables */
+> >  int     zero_range_calls = 1;           /* -z flag disables */
+> >  int	collapse_range_calls = 1;	/* -C flag disables */
+> >  int	insert_range_calls = 1;		/* -I flag disables */
+> > +int	remap_calls = 1;		/* -J flag disables */
+> >  int 	mapped_reads = 1;		/* -R flag disables it */
+> >  int	integrity = 0;			/* -i flag */
+> >  int	fsxgoodfd = 0;
+> > @@ -254,6 +258,7 @@ static const char *op_names[] = {
+> >  	[OP_ZERO_RANGE] = "zero_range",
+> >  	[OP_COLLAPSE_RANGE] = "collapse_range",
+> >  	[OP_INSERT_RANGE] = "insert_range",
+> > +	[OP_CLONE_RANGE] = "clone_range",
+> >  	[OP_FSYNC] = "fsync",
+> >  };
+> >  
+> > @@ -275,6 +280,25 @@ static int op_code(const char *name)
+> >  	return -1;
+> >  }
+> >  
+> > +void
+> > +log5(int operation, int arg0, int arg1, int arg2, enum opflags flags)
+> > +{
+> > +	struct log_entry *le;
+> > +
+> > +	le = &oplog[logptr];
+> > +	le->operation = operation;
+> > +	if (closeopen)
+> > +		flags |= FL_CLOSE_OPEN;
+> > +	le->args[0] = arg0;
+> > +	le->args[1] = arg1;
+> > +	le->args[2] = arg2;
 > 
-> Most probably.  Dave and I are still digging through all the new
-> failures that show up in g/091, g/263, and g/127 once clonerange starts
-> happening.
+> I would like to withdraw this patch so that I can add a fourth args[]
+> slot so that we can maintain the convention of printing the
+> pre-operation file size after the other operation arguments.  This will
+> make tracking the location of EOF through an fsxops file easier.
 
-Yup, there's lots of bugs in the code that fsx now exercises. These
-tests will now fail until we get the fixes into the upstream kernel.
+I'll wait for the new version of the whole patchset then, that gives me
+extra time to look at & test them :)
 
-And, really, even when these tests pass (as they do on my machines
-now) fsx still fails. I have at least 4 different failures which
-occur at between 350k and 5m ops that I can reproduce. These tests
-only run about 10-100k ops, so they don't trip over the bugs I
-haven't found and fixed yet.
+Thanks,
+Eryu
 
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+> --D
+> 
+> > +	le->flags = flags;
+> > +	logptr++;
+> > +	logcount++;
+> > +	if (logptr >= LOGSIZE)
+> > +		logptr = 0;
+> > +}
+> > +
+> >  void
+> >  log4(int operation, int arg0, int arg1, enum opflags flags)
+> >  {
+> > @@ -294,7 +318,6 @@ log4(int operation, int arg0, int arg1, enum opflags flags)
+> >  		logptr = 0;
+> >  }
+> >  
+> > -
+> >  void
+> >  logdump(void)
+> >  {
+> > @@ -418,6 +441,13 @@ logdump(void)
+> >  			if (overlap)
+> >  				prt("\t******IIII");
+> >  			break;
+> > +		case OP_CLONE_RANGE:
+> > +			prt("CLONE 0x%x thru 0x%x\t(0x%x bytes) to 0x%x",
+> > +			    lp->args[0], lp->args[0] + lp->args[1] - 1,
+> > +			    lp->args[1], lp->args[2]);
+> > +			if (overlap)
+> > +				prt("\t******IIII");
+> > +			break;
+> >  		case OP_FSYNC:
+> >  			prt("FSYNC");
+> >  			break;
+> > @@ -1218,6 +1248,73 @@ do_insert_range(unsigned offset, unsigned length)
+> >  }
+> >  #endif
+> >  
+> > +#ifdef FICLONERANGE
+> > +void
+> > +do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> > +{
+> > +	struct file_clone_range	fcr;
+> > +
+> > +	if (length == 0) {
+> > +		if (!quiet && testcalls > simulatedopcount)
+> > +			prt("skipping zero length clone range\n");
+> > +		log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> > +		return;
+> > +	}
+> > +
+> > +	if ((loff_t)offset >= file_size) {
+> > +		if (!quiet && testcalls > simulatedopcount)
+> > +			prt("skipping clone range behind EOF\n");
+> > +		log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> > +		return;
+> > +	}
+> > +
+> > +	log5(OP_CLONE_RANGE, offset, length, dest, FL_NONE);
+> > +
+> > +	if (testcalls <= simulatedopcount)
+> > +		return;
+> > +
+> > +	if ((progressinterval && testcalls % progressinterval == 0) ||
+> > +	    (debug && (monitorstart == -1 || monitorend == -1 ||
+> > +		       dest <= monitorstart || dest + length <= monitorend))) {
+> > +		prt("%lu clone\tfrom 0x%x to 0x%x, (0x%x bytes) at 0x%x\n",
+> > +			testcalls, offset, offset+length, length, dest);
+> > +	}
+> > +
+> > +	fcr.src_fd = fd;
+> > +	fcr.src_offset = offset;
+> > +	fcr.src_length = length;
+> > +	fcr.dest_offset = dest;
+> > +
+> > +	if (ioctl(fd, FICLONERANGE, &fcr) == -1) {
+> > +		if (errno == EOPNOTSUPP || errno == ENOTTY) {
+> > +			if (!quiet && testcalls > simulatedopcount)
+> > +				prt("skipping unsupported clone range\n");
+> > +			logptr--;
+> > +			log5(OP_CLONE_RANGE, offset, length, dest, FL_SKIPPED);
+> > +			return;
+> > +		}
+> > +
+> > +		prt("clone range: 0x%x to 0x%x at 0x%x\n", offset,
+> > +				offset + length, dest);
+> > +		prterr("do_clone_range: FICLONERANGE");
+> > +		report_failure(161);
+> > +	}
+> > +
+> > +	memcpy(good_buf + dest, good_buf + offset, length);
+> > +	if (dest > file_size)
+> > +		memset(good_buf + file_size, '\0', dest - file_size);
+> > +	if (dest + length > file_size)
+> > +		file_size = dest + length;
+> > +}
+> > +
+> > +#else
+> > +void
+> > +do_clone_range(unsigned offset, unsigned length, unsigned dest)
+> > +{
+> > +	return;
+> > +}
+> > +#endif
+> > +
+> >  #ifdef HAVE_LINUX_FALLOC_H
+> >  /* fallocate is basically a no-op unless extending, then a lot like a truncate */
+> >  void
+> > @@ -1374,6 +1471,7 @@ cleanup(int sig)
+> >  static int
+> >  read_op(struct log_entry *log_entry)
+> >  {
+> > +	char *end;
+> >  	char line[256];
+> >  
+> >  	memset(log_entry, 0, sizeof(*log_entry));
+> > @@ -1404,8 +1502,6 @@ read_op(struct log_entry *log_entry)
+> >  		if (log_entry->operation == -1)
+> >  			goto fail;
+> >  		for (i = 0; i < 3; i++) {
+> > -			char *end;
+> > -
+> >  			str = strtok(NULL, " \t\n");
+> >  			if (!str)
+> >  				goto fail;
+> > @@ -1438,7 +1534,7 @@ read_op(struct log_entry *log_entry)
+> >  int
+> >  test(void)
+> >  {
+> > -	unsigned long	offset;
+> > +	unsigned long	offset, offset2;
+> >  	unsigned long	size;
+> >  	unsigned long	rv;
+> >  	unsigned long	op;
+> > @@ -1469,6 +1565,7 @@ test(void)
+> >  			op = log_entry.operation;
+> >  			offset = log_entry.args[0];
+> >  			size = log_entry.args[1];
+> > +			offset2 = log_entry.args[2];
+> >  			closeopen = !!(log_entry.flags & FL_CLOSE_OPEN);
+> >  			keep_size = !!(log_entry.flags & FL_KEEP_SIZE);
+> >  			goto have_op;
+> > @@ -1481,6 +1578,7 @@ test(void)
+> >  		closeopen = (rv >> 3) < (1 << 28) / closeprob;
+> >  
+> >  	offset = random();
+> > +	offset2 = 0;
+> >  	size = maxoplen;
+> >  	if (randomoplen)
+> >  		size = random() % (maxoplen + 1);
+> > @@ -1506,6 +1604,17 @@ test(void)
+> >  		if (zero_range_calls && size && keep_size_calls)
+> >  			keep_size = random() % 2;
+> >  		break;
+> > +	case OP_CLONE_RANGE:
+> > +		TRIM_OFF_LEN(offset, size, file_size);
+> > +		offset = offset & ~(block_size - 1);
+> > +		size = size & ~(block_size - 1);
+> > +		do {
+> > +			offset2 = random();
+> > +			TRIM_OFF(offset2, maxfilelen);
+> > +			offset2 = offset2 & ~(block_size - 1);
+> > +		} while (llabs(offset2 - offset) < size ||
+> > +			 offset2 + size > maxfilelen);
+> > +		break;
+> >  	}
+> >  
+> >  have_op:
+> > @@ -1549,6 +1658,12 @@ test(void)
+> >  			goto out;
+> >  		}
+> >  		break;
+> > +	case OP_CLONE_RANGE:
+> > +		if (!remap_calls) {
+> > +			log5(op, offset, size, offset2, FL_SKIPPED);
+> > +			goto out;
+> > +		}
+> > +		break;
+> >  	}
+> >  
+> >  	switch (op) {
+> > @@ -1615,6 +1730,18 @@ test(void)
+> >  
+> >  		do_insert_range(offset, size);
+> >  		break;
+> > +	case OP_CLONE_RANGE:
+> > +		if (size == 0) {
+> > +			log5(OP_CLONE_RANGE, offset, size, offset2, FL_SKIPPED);
+> > +			goto out;
+> > +		}
+> > +		if (offset2 + size > maxfilelen) {
+> > +			log5(OP_CLONE_RANGE, offset, size, offset2, FL_SKIPPED);
+> > +			goto out;
+> > +		}
+> > +
+> > +		do_clone_range(offset, size, offset2);
+> > +		break;
+> >  	case OP_FSYNC:
+> >  		dofsync();
+> >  		break;
+> > @@ -1637,7 +1764,7 @@ void
+> >  usage(void)
+> >  {
+> >  	fprintf(stdout, "usage: %s",
+> > -		"fsx [-dknqxAFLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
+> > +		"fsx [-dknqxAFJLOWZ] [-b opnum] [-c Prob] [-g filldata] [-i logdev] [-j logid] [-l flen] [-m start:end] [-o oplen] [-p progressinterval] [-r readbdy] [-s style] [-t truncbdy] [-w writebdy] [-D startingop] [-N numops] [-P dirpath] [-S seed] fname\n\
+> >  	-b opnum: beginning operation number (default 1)\n\
+> >  	-c P: 1 in P chance of file close+open at each op (default infinity)\n\
+> >  	-d: debug output for all operations\n\
+> > @@ -1678,6 +1805,10 @@ usage(void)
+> >  #ifdef FALLOC_FL_INSERT_RANGE
+> >  "	-I: Do not use insert range calls\n"
+> >  #endif
+> > +#if defined(FICLONERANGE) || defined(FIDEDUPERANGE) || \
+> > +    defined(HAVE_COPY_FILE_RANGE)
+> > +"	-J: Do not use clone/dedupe/copy range calls\n"
+> > +#endif
+> >  "	-L: fsxLite - no file creations & no file size changes\n\
+> >  	-N numops: total # operations to do (default infinity)\n\
+> >  	-O: use oplen (see -o flag) for every op (default random)\n\
+> > @@ -2010,6 +2141,9 @@ main(int argc, char **argv)
+> >  		case 'I':
+> >  			insert_range_calls = 0;
+> >  			break;
+> > +		case 'J':
+> > +			remap_calls = 0;
+> > +			break;
+> >  		case 'L':
+> >  		        lite = 1;
+> >  			o_flags &= ~(O_CREAT|O_TRUNC);
+> > 
