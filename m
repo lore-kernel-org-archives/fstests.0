@@ -1,41 +1,38 @@
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs/205: Fix that b2 variable is treated as octal vaule
-Date: Mon, 12 Nov 2018 16:01:03 +0800
-Message-ID: <1542009663-26173-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:52965 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1731046AbeKTIBw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Nov 2018 03:01:52 -0500
+Date: Tue, 20 Nov 2018 08:36:14 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] fstest: CrashMonkey tests ported to xfstest Inbox x
+Message-ID: <20181119213614.GK19305@dastard>
+References: <CA+EzBbDr7rxN1ptJKd5FOLQFxLQSRnvEod6+xvR4A6pFuG07fQ@mail.gmail.com>
+ <CA+EzBbDKZzW++xuzL3oefmbEAY=_65L_ux_V7a_6tYoXuMZpsQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CA+EzBbDKZzW++xuzL3oefmbEAY=_65L_ux_V7a_6tYoXuMZpsQ@mail.gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Jayashree Mohan <jayashree2912@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Running xfs/205 triggers the following error:
-----------------------------------------------
-QA output created by 205
-+./tests/xfs/205: line 61: 098: value too great for base (error token is "098")
-...
-----------------------------------------------
+On Fri, Nov 16, 2018 at 01:33:02PM -0600, Jayashree Mohan wrote:
+> Hi all,
+> 
+> This is a gentle reminder to review the patch porting the first set of
+> CrashMonkey tests to xfstest. Do let me know if this patch requires
+> any correction, so that I can incorporate them and send out all
+> patches as soon as possible.
 
-If b2 variable is a 2-digit number beginning with 0(e.g. 098),
-it will be treated as octal vaule instaed of decimal value.  We
-try to declare it as decimal value forcely.
+Sorry, I've been busy trying to get to the bottom of the data
+corruption problems exposed by new fsx functionality. I've still a
+fair way from the bottom, so it might be a while before I get back
+to this.
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/205 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Cheers,
 
-diff --git a/tests/xfs/205 b/tests/xfs/205
-index 9cc9b59..9035870 100755
---- a/tests/xfs/205
-+++ b/tests/xfs/205
-@@ -54,7 +54,7 @@ _scratch_resvblks 1024 >> $seqres.full 2>&1
- blks=$(( ($(_get_available_space $SCRATCH_MNT) / $fsblksz) - 15 ))
- test $blks -gt 1100 || _notrun "not enough space"
- b1=$(echo $blks | sed -e 's/[0-9][0-9][0-9]$/000/g')
--b2=$(echo $blks | sed -e 's/^[0-9][0-9]//g')
-+b2=$((10#$(echo $blks | sed -e 's/^[0-9][0-9]//g')))
- echo "blks: $blks b1: $b1 b2: $b2" >> $seqres.full
- dd if=/dev/zero of=$SCRATCH_MNT/fred bs=$fsblksz count=$((b1 - 1000)) 2>&1 | _filter_dd
- dd if=/dev/zero of=$SCRATCH_MNT/fred2 bs=$fsblksz count=$b2 2>&1 | _filter_dd
+Dave.
 -- 
-1.8.3.1
+Dave Chinner
+david@fromorbit.com
