@@ -1,131 +1,112 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:46216 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726643AbeKSApV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 18 Nov 2018 19:45:21 -0500
-Received: by mail-pg1-f194.google.com with SMTP id w7so12630373pgp.13
-        for <fstests@vger.kernel.org>; Sun, 18 Nov 2018 06:24:54 -0800 (PST)
-Message-ID: <5bf17635.1c69fb81.9b4aa.85c9@mx.google.com>
-Date: Sun, 18 Nov 2018 22:24:46 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 7022f85ca72f
+Received: from mx1.redhat.com ([209.132.183.28]:52422 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725828AbeKSPnJ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 19 Nov 2018 10:43:09 -0500
+Date: Mon, 19 Nov 2018 13:22:52 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH 0/6] xfstests: add copy/dedupe/clone to fsx/fsstress
+Message-ID: <20181119052251.GQ2279@dhcp-12-117.nay.redhat.com>
+References: <154215237717.21151.11976488103599724788.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="2L7AGc3rH9R3"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---2L7AGc3rH9R3
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <154215237717.21151.11976488103599724788.stgit@magnolia>
+Sender: fstests-owner@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Tue, Nov 13, 2018 at 03:39:37PM -0800, Darrick J. Wong wrote:
+> Hi all,
+> 
+> This series adds to fsx support for FICLONERANGE, FIDEDUPERANGE, and
+> copy_file_range.  It adds to fsstress support for copy_file_range.
+> There are known failures in 4.20-rc2, particularly with copy_file_range,
+> so these patches provide a fstests base for everyone to start/continue
+> looking for bugs.
 
-The master branch of the xfstests repository at:
+Hi Darrick,
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update touches many files, which is due to
-Christoph Hellwig's "require falloc" patches, but the actual changes are simple
-and straightforward. There're also two new tests (for btrfs and overlayfs,
-respectively) and some minor bug fixes.
-
-New test btrfs/178 currently fails with v4.20-rc2 kernel.
+Your patches triggered 2 new failures on g/091 and g/263, refer to [1]. I can't
+reproduce these failures on original xfstests [2]. I saw you were talking about g/091
+in #xfs. Are these two failures same issue?
 
 Thanks,
-Eryu
+Zorro
 
-The new head of the master branch is commit:
+[1]
+# ./check --large-fs generic/075 generic/127 generic/112 generic/263 generic/091 generic/231 generic/499 generic/511 generic/469 generic/455 generic/456 generic/4
+57 xfs/207
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 hp-dl580g7-04 4.18.0-39.el8.x86_64
+MKFS_OPTIONS  -- -f -b size=2048 /dev/mapper/VG500T-LV500T
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/VG500T-LV500T /mnt/scratch
 
-7022f85ca72f xfs: xfs_fsr requires working preallocation support
+generic/075      15s
+generic/091     [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/091.out.bad)                                                                                
+    --- tests/generic/091.out   2018-11-16 22:51:29.117927437 +0800
+    +++ /root/git/xfstests/results//generic/091.out.bad 2018-11-19 11:18:21.618028378 +0800
+    @@ -5,3 +5,31 @@
+     fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W
+     fsx -N 10000 -o 32768 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -R -W
+     fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z -W
+    +mapped writes DISABLED
+    +Seed set to 1
+    +skipping zero size read
+    +truncating to largest ever: 0xe400
+    ...
+    (Run 'diff -u tests/generic/091.out /root/git/xfstests/results//generic/091.out.bad'  to see the entire diff)                                                                             
+generic/112      16s
+generic/127      225s
+generic/231      179s
+generic/263     [failed, exit status 1]- output mismatch (see /root/git/xfstests/results//generic/263.out.bad)                                                                                
+    --- tests/generic/263.out   2018-11-16 22:51:29.172929902 +0800
+    +++ /root/git/xfstests/results//generic/263.out.bad 2018-11-19 11:25:24.841385577 +0800
+    @@ -1,3 +1,52 @@
+     QA output created by 263
+     fsx -N 10000 -o 8192 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z
+     fsx -N 10000 -o 128000 -l 500000 -r PSIZE -t BSIZE -w BSIZE -Z
+    +Seed set to 1
+    +skipping zero size read
+    +truncating to largest ever: 0xe400
+    +fallocating to largest ever: 0x49915
+    ...
+    (Run 'diff -u tests/generic/263.out /root/git/xfstests/results//generic/263.out.bad'  to see the entire diff)                                                                             
+generic/455      2024s
+generic/456      27s
+generic/457      350s
+generic/469      1s
+generic/499      26s
+generic/511      2s
+xfs/207  47s
+Ran: generic/075 generic/091 generic/112 generic/127 generic/231 generic/263 generic/455 generic/456 generic/457 generic/469 generic/499 generic/511 xfs/207
+Failures: generic/091 generic/263
+Failed 2 of 13 tests
 
-New commits:
+[2]
+# ./check --large-fs generic/075 generic/127 generic/112 generic/263 generic/091 generic/231 generic/499 generic/511 generic/469 generic/455 generic/456 generic/457 xfs/207
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- Linux/x86_64 hp-dl580g7-04 4.18.0-39.el8.x86_64
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/VG500T-LV500T
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/VG500T-LV500T /mnt/scratch
 
-Christoph Hellwig (3):
-      [31735e301efc] generic: don't assume preallocation is supported when reflinks are supported
-      [09e94f84d929] xfs: don't assume preallocation is always supported on XFS
-      [7022f85ca72f] xfs: xfs_fsr requires working preallocation support
+generic/075 18s ...  17s
+generic/091 24s ...  16s
+generic/112 18s ...  18s
+generic/127 267s ...  214s
+generic/231 199s ...  198s
+generic/263 10s ...  9s
+generic/455      2728s
+generic/456 27s ...  26s
+generic/457      367s
+generic/469 1s ...  2s
+generic/499 27s ...  24s
+generic/511      3s
+xfs/207  47s
+Ran: generic/075 generic/091 generic/112 generic/127 generic/231 generic/263 generic/455 generic/456 generic/457 generic/469 generic/499 generic/511 xfs/207
+Passed all 13 tests
 
-Filipe Manana (1):
-      [ad91ed8a66cf] btrfs: test send after radical changes in a complex directory hierarchy
-
-Miklos Szeredi (1):
-      [98a4eb33deb5] overlay: create directory over deleted whiteout
-
-Xiao Yang (1):
-      [4096b78d665e] xfs/205: Fix that b2 variable is treated as octal vaule
-
-xiaoli feng (1):
-      [86aad197875e] ext4/034: filter out the specified vaule of $SCRATCH_MNT
 
 
-Code Diffstat:
-
- common/defrag         |   2 +
- tests/btrfs/178       | 190 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/178.out   |   6 ++
- tests/btrfs/group     |   1 +
- tests/ext4/034        |   2 +-
- tests/ext4/034.out    |   2 +-
- tests/generic/176     |   1 +
- tests/generic/372     |   1 +
- tests/generic/414     |   1 +
- tests/generic/415     |   1 +
- tests/generic/447     |   1 +
- tests/generic/515     |   1 +
- tests/overlay/063     |  64 +++++++++++++++++
- tests/overlay/063.out |   2 +
- tests/overlay/group   |   1 +
- tests/xfs/009         |   1 +
- tests/xfs/072         |   3 +-
- tests/xfs/084         |   1 +
- tests/xfs/104         |   1 +
- tests/xfs/128         |   1 +
- tests/xfs/164         |   1 +
- tests/xfs/165         |   1 +
- tests/xfs/166         |   2 +
- tests/xfs/167         |   1 +
- tests/xfs/205         |   4 +-
- tests/xfs/231         |   1 +
- tests/xfs/232         |   1 +
- tests/xfs/242         |   1 +
- tests/xfs/250         |   1 +
- tests/xfs/280         |   1 +
- tests/xfs/294         |   2 +
- tests/xfs/312         |   1 +
- tests/xfs/313         |   1 +
- tests/xfs/316         |   1 +
- tests/xfs/324         |   1 +
- tests/xfs/326         |   1 +
- tests/xfs/328         |   1 +
- tests/xfs/330         |   1 +
- tests/xfs/444         |   1 +
- tests/xfs/445         |   1 +
- 40 files changed, 303 insertions(+), 5 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---2L7AGc3rH9R3
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJb8XXHAAoJECZSqilcj+djewIQAIT2HpOvOlBw+JkCwR/s4F+a
-d79ZJ9cMYQdOZ5wl/2Gl0L/OIhLxVEmZu0GY7Nod7WyO27ovvO1Ht0rwLc9OrBld
-EMNYJanZ60ZMYfzei//BwsQPt3HQo/Uzy90NxLR55wfJpqYcQ5aJVxuwY4gzpBwI
-EIyPg7PSpDujR5HCKq3ze+9HI2jkOZHDROif4qp1rTyIoxEv9sqBS/aII2AEKyeb
-wPZ6N1TQg/uguZx6LGRvGPFmWGcfrVnqCJB7gxutH3O1yiow/spjoCyaX8Nq6cIB
-HmOfZURlLtNZuXcbooqZ4kEddpyGiBwx7ZvbGLVtDUuh2bE06pNhDonBD9ktxlfH
-4/OHTgqBjNFo+yeVY4rVYHAnpJCrj7qMxTxNPN8XI/AQE2qQi2JmS5vvh0uEmevH
-qz5efunVfx7sO1DxN9do1lsiJ7ZMaL+q+42GGo/uU7jxwD7x/wzUp+gTCtonuaK/
-cFH2ckUpb65VhTvhI4UlA1u+VRw921kSsSvuzLkTi98uvHbcEQ8YaS9L4mqRfPhf
-IpfHYTfeevp1vYUEPVy7AfgBMZ4zE7jH3UqIhreaX/narbtp1fsgDi8u1K9QG8MC
-f2GDCmIMygzyYXxLOHneYB18U3kP0jvZXpdGx7oRp3htLkGXbs22G0RXZNwTpJMi
-6mXuQhCITgtirMdNdCR/
-=/mNG
------END PGP SIGNATURE-----
-
---2L7AGc3rH9R3--
+> 
+> --D
