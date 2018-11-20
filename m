@@ -1,78 +1,75 @@
-Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:51222 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
-        by vger.kernel.org with ESMTP id S1729727AbeKVDCB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 22:02:01 -0500
-Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id wALGONaL109659
-        for <fstests@vger.kernel.org>; Wed, 21 Nov 2018 11:26:53 -0500
-Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2nwae29ch5-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 21 Nov 2018 11:26:53 -0500
-Received: from localhost
-        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Wed, 21 Nov 2018 16:26:52 -0000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH] src/t_stripealign.c: Use block size reported by fstatfs()
-Date: Wed, 21 Nov 2018 21:56:46 +0530
+Received: from userp2130.oracle.com ([156.151.31.86]:48336 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725851AbeKUI2I (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 03:28:08 -0500
+Subject: [PATCH 01/10] fsx: shut up compiler warnings
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Tue, 20 Nov 2018 13:56:47 -0800
+Message-ID: <154275100761.8611.14831629844790867009.stgit@magnolia>
+In-Reply-To: <154275100143.8611.10235098565750994724.stgit@magnolia>
+References: <154275100143.8611.10235098565750994724.stgit@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Message-Id: <20181121162646.18117-1-chandan@linux.vnet.ibm.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On ppc64le, block size reported by fstat(2) is 64k (the page size)
-i.e. the "preferred I/O size". However src/t_stripealign.c requires the
-actual block size of the filesystem. Hence this commit now makes use of
-the block size reported by fstatfs(2) syscall.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Fix unused variables and potential filename overflows in fsx.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- src/t_stripealign.c | 8 ++++----
- 1 file changed, 4 insertions(+), 4 deletions(-)
+ ltp/fsx.c |   10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/src/t_stripealign.c b/src/t_stripealign.c
-index c61e7632..5cdadaae 100644
---- a/src/t_stripealign.c
-+++ b/src/t_stripealign.c
-@@ -7,7 +7,7 @@
- #include <unistd.h>
- #include <stdlib.h>
- #include <sys/types.h>
--#include <sys/stat.h>
-+#include <sys/vfs.h>
- #include <fcntl.h>
- #include <stdio.h>
- #include <sys/ioctl.h>
-@@ -31,7 +31,7 @@
+
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index b0157ba3..5601c70c 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -121,7 +121,7 @@ char	*bname;				/* basename of our test file */
+ char	*logdev;			/* -i flag */
+ char	*logid;				/* -j flag */
+ char	dname[1024];			/* -P flag */
+-char	goodfile[1024];
++char	goodfile[PATH_MAX];
+ int	dirpath = 0;			/* -P flag */
+ int	fd;				/* fd for our test file */
  
- int main(int argc, char ** argv)
+@@ -185,7 +185,7 @@ const char *replayops = NULL;
+ const char *recordops = NULL;
+ FILE *	fsxlogf = NULL;
+ FILE *	replayopsf = NULL;
+-char opsfile[1024];
++char opsfile[PATH_MAX];
+ int badoff = -1;
+ int closeopen = 0;
+ 
+@@ -541,13 +541,13 @@ mark_log(void)
+ void
+ dump_fsync_buffer(void)
  {
--	struct stat		sb;
-+	struct statfs		sb;
- 	struct fiemap		*fie;
- 	struct fiemap_extent	*fe;
- 	int			fd;
-@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
-                 return 1;
-         }
+-	char fname_buffer[1024];
++	char fname_buffer[PATH_MAX];
+ 	int good_fd;
  
--	ret = fstat(fd, &sb);
-+	ret = fstatfs(fd, &sb);
- 	if (ret) {
- 		perror(filename);
- 		close(fd);
-@@ -101,7 +101,7 @@ int main(int argc, char ** argv)
- 		return 1;
- 	}
+ 	if (!good_buf)
+ 		return;
  
--	block = fie->fm_extents[0].fe_physical / sb.st_blksize;
-+	block = fie->fm_extents[0].fe_physical / sb.f_bsize;
- check:
- 	if (block % sunit) {
- 		printf("%s: Start block %llu not multiple of sunit %u\n",
--- 
-2.19.1
+-	snprintf(fname_buffer, 1024, "%s%s.mark%d", dname,
++	snprintf(fname_buffer, sizeof(fname_buffer), "%s%s.mark%d", dname,
+ 		 bname, mark_nr);
+ 	good_fd = open(fname_buffer, O_WRONLY|O_CREAT|O_TRUNC, 0666);
+ 	if (good_fd < 0) {
+@@ -1865,7 +1865,7 @@ main(int argc, char **argv)
+ {
+ 	int	i, style, ch;
+ 	char	*endp, *tmp;
+-	char logfile[1024];
++	char logfile[PATH_MAX];
+ 	struct stat statbuf;
+ 	int o_flags = O_RDWR|O_CREAT|O_TRUNC;
+ 
