@@ -1,44 +1,27 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:33806 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725889AbeKUI3M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 03:29:12 -0500
-Subject: [PATCH 10/10] common/dump: disable copyrange
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 20 Nov 2018 13:57:51 -0800
-Message-ID: <154275107150.8611.15972158351495348017.stgit@magnolia>
-In-Reply-To: <154275100143.8611.10235098565750994724.stgit@magnolia>
-References: <154275100143.8611.10235098565750994724.stgit@magnolia>
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:37050 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726393AbeKUK2q (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 05:28:46 -0500
+Received: by mail-vs1-f67.google.com with SMTP id h18so2209387vsj.4
+        for <fstests@vger.kernel.org>; Tue, 20 Nov 2018 15:56:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <CA+EzBbDr7rxN1ptJKd5FOLQFxLQSRnvEod6+xvR4A6pFuG07fQ@mail.gmail.com>
+ <CA+EzBbDKZzW++xuzL3oefmbEAY=_65L_ux_V7a_6tYoXuMZpsQ@mail.gmail.com> <20181120030908.GI3889@desktop>
+In-Reply-To: <20181120030908.GI3889@desktop>
+From: Jayashree Mohan <jayashree2912@gmail.com>
+Date: Tue, 20 Nov 2018 17:56:42 -0600
+Message-ID: <CA+EzBbC1uwYDJMfns+BLK3Ct1q5tvXnun2C-1nf5eWfSkw9Hjw@mail.gmail.com>
+Subject: Re: [PATCH v2] fstest: CrashMonkey tests ported to xfstest Inbox x
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, Dave Chinner <david@fromorbit.com>, Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@gmail.com>, Theodore Ts'o <tytso@mit.edu>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Hi all,
+I've resent the patch with a detailed commit log, using git
+send-email, which should solve the line wrap issue. I've also
+addressed minor nits as pointed out by Eryu.
 
-In _create_dumpdir_stress_num, disable copyrange in fsstress so that we
-dump exactly the same set of files and directories no matter how the xfs
-is configured.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/dump |    3 +++
- 1 file changed, 3 insertions(+)
-
-
-diff --git a/common/dump b/common/dump
-index c45b8a5a..4d1a1607 100644
---- a/common/dump
-+++ b/common/dump
-@@ -307,6 +307,9 @@ _create_dumpdir_stress_num()
-     if $FSSTRESS_PROG | grep -q deduperange; then
-         FSSTRESS_AVOID="-f deduperange=0 $FSSTRESS_AVOID"
-     fi
-+    if $FSSTRESS_PROG | grep -q copyrange; then
-+        FSSTRESS_AVOID="-f copyrange=0 $FSSTRESS_AVOID"
-+    fi
- 
-     echo ""
-     echo "-----------------------------------------------"
+Thanks,
+Jayashree Mohan
