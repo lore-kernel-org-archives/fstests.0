@@ -1,198 +1,171 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:51448 "EHLO
+Received: from userp2130.oracle.com ([156.151.31.86]:48434 "EHLO
         userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726172AbeKVFOZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 22 Nov 2018 00:14:25 -0500
-Date: Wed, 21 Nov 2018 10:38:50 -0800
+        with ESMTP id S1725851AbeKUI2O (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 03:28:14 -0500
+Subject: [PATCH 02/10] fsx: always check buffer after each operation
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH 11/10] generic: long fsx soak tests
-Message-ID: <20181121183850.GB6783@magnolia>
+Date: Tue, 20 Nov 2018 13:56:53 -0800
+Message-ID: <154275101368.8611.120389888153356093.stgit@magnolia>
+In-Reply-To: <154275100143.8611.10235098565750994724.stgit@magnolia>
 References: <154275100143.8611.10235098565750994724.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <154275100143.8611.10235098565750994724.stgit@magnolia>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
+To: guaneryu@gmail.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Add a few tests to implement long soak tests of fsx.
+Add a new option to make fsx read the file after each operation and
+compare it with the good buffer to try to catch corruptions as soon as
+they occur.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/938     |   65 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/938.out |    2 ++
- tests/generic/939     |   60 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/939.out |    2 ++
- tests/generic/group   |    2 ++
- 5 files changed, 131 insertions(+)
- create mode 100644 tests/generic/938
- create mode 100644 tests/generic/938.out
- create mode 100644 tests/generic/939
- create mode 100644 tests/generic/939.out
+ ltp/fsx.c |   65 +++++++++++++++++++++++++++++++++++++++++++++++++++++--------
+ 1 file changed, 56 insertions(+), 9 deletions(-)
 
-diff --git a/tests/generic/938 b/tests/generic/938
-new file mode 100644
-index 00000000..a85a6472
---- /dev/null
-+++ b/tests/generic/938
-@@ -0,0 +1,65 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 938
-+#
-+# Long-soak directio fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+        cd /
-+        rm -f $tmp.*
+
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 5601c70c..4b3a5d5a 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -160,7 +160,8 @@ int     punch_hole_calls = 1;           /* -H flag disables */
+ int     zero_range_calls = 1;           /* -z flag disables */
+ int	collapse_range_calls = 1;	/* -C flag disables */
+ int	insert_range_calls = 1;		/* -I flag disables */
+-int 	mapped_reads = 1;		/* -R flag disables it */
++int	mapped_reads = 1;		/* -R flag disables it */
++int	check_file = 1;			/* -X flag disables */
+ int	integrity = 0;			/* -i flag */
+ int	fsxgoodfd = 0;
+ int	o_direct;			/* -Z */
+@@ -561,7 +562,7 @@ dump_fsync_buffer(void)
+ }
+ 
+ void
+-check_buffers(unsigned offset, unsigned size)
++check_buffers(char *buf, unsigned offset, unsigned size)
+ {
+ 	unsigned char c, t;
+ 	unsigned i = 0;
+@@ -569,19 +570,19 @@ check_buffers(unsigned offset, unsigned size)
+ 	unsigned op = 0;
+ 	unsigned bad = 0;
+ 
+-	if (memcmp(good_buf + offset, temp_buf, size) != 0) {
++	if (memcmp(good_buf + offset, buf, size) != 0) {
+ 		prt("READ BAD DATA: offset = 0x%x, size = 0x%x, fname = %s\n",
+ 		    offset, size, fname);
+ 		prt("OFFSET\tGOOD\tBAD\tRANGE\n");
+ 		while (size > 0) {
+ 			c = good_buf[offset];
+-			t = temp_buf[i];
++			t = buf[i];
+ 			if (c != t) {
+ 			        if (n < 16) {
+-					bad = short_at(&temp_buf[i]);
++					bad = short_at(&buf[i]);
+ 				        prt("0x%05x\t0x%04x\t0x%04x", offset,
+ 				            short_at(&good_buf[offset]), bad);
+-					op = temp_buf[offset & 1 ? i+1 : i];
++					op = buf[offset & 1 ? i+1 : i];
+ 				        prt("\t0x%05x\n", n);
+ 					if (op)
+ 						prt("operation# (mod 256) for "
+@@ -725,7 +726,46 @@ doread(unsigned offset, unsigned size)
+ 			    iret, size);
+ 		report_failure(141);
+ 	}
+-	check_buffers(offset, size);
++	check_buffers(temp_buf, offset, size);
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+
-+# Run fsx for a million ops or more
-+nr_ops=$((1000000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+min_dio_sz=$(_min_dio_alignment)
-+
-+fsx_args=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+fsx_args+=(-r $min_dio_sz)
-+fsx_args+=(-t $min_dio_sz)
-+fsx_args+=(-w $min_dio_sz)
-+fsx_args+=(-Z)
-+fsx_args+=($fsx_file)
-+
-+echo "ltp ${fsx_args[@]} $FSX_ARGS" >> $seqres.full
-+
-+if ! ltp/fsx "${fsx_args[@]}" $FSX_ARGS > $tmp.fsx 2>&1; then
-+	cat $tmp.fsx | tee -a $seqres.full
-+fi
-+
-+# success, all done
-+echo Silence is golden
-+status=0
-+exit
-diff --git a/tests/generic/938.out b/tests/generic/938.out
-new file mode 100644
-index 00000000..11b565ee
---- /dev/null
-+++ b/tests/generic/938.out
-@@ -0,0 +1,2 @@
-+QA output created by 938
-+Silence is golden
-diff --git a/tests/generic/939 b/tests/generic/939
-new file mode 100644
-index 00000000..5e341e30
---- /dev/null
-+++ b/tests/generic/939
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 938
-+#
-+# Long-soak buffered fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
++void
++check_contents(void)
 +{
-+        cd /
-+        rm -f $tmp.*
-+}
++	static char *check_buf;
++	unsigned offset = 0;
++	unsigned size = file_size;
++	off_t ret;
++	unsigned iret;
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
++	if (!check_buf) {
++		check_buf = (char *) malloc(maxfilelen + writebdy);
++		assert(check_buf != NULL);
++		check_buf = round_ptr_up(check_buf, writebdy, 0);
++		memset(check_buf, '\0', maxfilelen);
++	}
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
++	if (o_direct)
++		size -= size % readbdy;
++	if (size == 0)
++		return;
 +
-+# real QA test starts here
++	ret = lseek(fd, (off_t)offset, SEEK_SET);
++	if (ret == (off_t)-1) {
++		prterr("doread: lseek");
++		report_failure(140);
++	}
 +
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
++	iret = fsxread(fd, check_buf, size, offset);
++	if (iret != size) {
++		if (iret == -1)
++			prterr("check_contents: read");
++		else
++			prt("short check read: 0x%x bytes instead of 0x%x\n",
++			    iret, size);
++		report_failure(141);
++	}
++	check_buffers(check_buf, offset, size);
+ }
+ 
+ 
+@@ -808,7 +848,7 @@ domapread(unsigned offset, unsigned size)
+ 		report_failure(191);
+ 	}
+ 
+-	check_buffers(offset, size);
++	check_buffers(temp_buf, offset, size);
+ }
+ 
+ 
+@@ -1624,6 +1664,9 @@ test(void)
+ 		break;
+ 	}
+ 
++	if (check_file)
++		check_contents();
 +
-+# Run fsx for a million ops or more
-+nr_ops=$((1000000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+
-+fsx_args=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+fsx_args+=($fsx_file)
-+
-+echo "ltp ${fsx_args[@]} $FSX_ARGS" >> $seqres.full
-+
-+if ! ltp/fsx "${fsx_args[@]}" $FSX_ARGS > $tmp.fsx 2>&1; then
-+	cat $tmp.fsx | tee -a $seqres.full
-+fi
-+
-+# success, all done
-+echo Silence is golden
-+status=0
-+exit
-diff --git a/tests/generic/939.out b/tests/generic/939.out
-new file mode 100644
-index 00000000..a86e90c5
---- /dev/null
-+++ b/tests/generic/939.out
-@@ -0,0 +1,2 @@
-+QA output created by 939
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 92330b52..16e5cc17 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -522,3 +522,5 @@
- 517 auto quick dedupe clone
- 518 auto quick clone
- 519 auto quick
-+938 soak long_rw
-+939 soak long_rw
+ out:
+ 	if (sizechecks && testcalls > simulatedopcount)
+ 		check_size();
+@@ -1684,6 +1727,7 @@ usage(void)
+ 	-P: save .fsxlog .fsxops and .fsxgood files in dirpath (default ./)\n\
+ 	-S seed: for random # generator (default 1) 0 gets timestamp\n\
+ 	-W: mapped write operations DISabled\n\
++	-X: Do not read file and compare to good buffer after every operation.\n\
+         -R: read() system calls only (mapped reads disabled)\n\
+         -Z: O_DIRECT (use -R, -W, -r and -w too)\n\
+ 	--replay-ops opsfile: replay ops from recorded .fsxops file\n\
+@@ -1880,7 +1924,7 @@ main(int argc, char **argv)
+ 	setvbuf(stdout, (char *)0, _IOLBF, 0); /* line buffered stdout */
+ 
+ 	while ((ch = getopt_long(argc, argv,
+-				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WZ",
++				 "b:c:dfg:i:j:kl:m:no:p:qr:s:t:w:xyAD:FKHzCILN:OP:RS:WXZ",
+ 				 longopts, NULL)) != EOF)
+ 		switch (ch) {
+ 		case 'b':
+@@ -2044,6 +2088,9 @@ main(int argc, char **argv)
+ 			if (!quiet)
+ 				prt("mapped writes DISABLED\n");
+ 			break;
++		case 'X':
++			check_file = 0;
++			break;
+ 		case 'Z':
+ 			o_direct = O_DIRECT;
+ 			o_flags |= O_DIRECT;
