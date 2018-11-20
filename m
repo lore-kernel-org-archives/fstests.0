@@ -1,141 +1,284 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:36147 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726576AbeKTNYs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Nov 2018 08:24:48 -0500
-Date: Tue, 20 Nov 2018 10:57:50 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 1/6] fsx: add clone range
-Message-ID: <20181120025750.GH3889@desktop>
-References: <154215237717.21151.11976488103599724788.stgit@magnolia>
- <154215238338.21151.852724936803809717.stgit@magnolia>
- <20181116192626.GA9387@magnolia>
- <20181118135108.GE3889@desktop>
- <20181120022755.GA6783@magnolia>
+Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:44728 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725925AbeKTTYc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 20 Nov 2018 14:24:32 -0500
+Received: from pps.filterd (m0098409.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id wAK8s9CR108963
+        for <fstests@vger.kernel.org>; Tue, 20 Nov 2018 03:56:30 -0500
+Received: from e06smtp02.uk.ibm.com (e06smtp02.uk.ibm.com [195.75.94.98])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2nvc10083f-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Tue, 20 Nov 2018 03:56:30 -0500
+Received: from localhost
+        by e06smtp02.uk.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Tue, 20 Nov 2018 08:56:27 -0000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: Re: [PATCH v1] xfs/050: make it passed for dax 2 MiB alignment test
+Date: Tue, 20 Nov 2018 14:26:23 +0530
+In-Reply-To: <1047154516.51611825.1542266350177.JavaMail.zimbra@redhat.com>
+References: <1540522074-20036-1-git-send-email-xifeng@redhat.com> <20181104161554.GF12788@desktop> <1047154516.51611825.1542266350177.JavaMail.zimbra@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181120022755.GA6783@magnolia>
+Content-Transfer-Encoding: 7Bit
+Content-Type: text/plain; charset="us-ascii"
+Message-Id: <2636273.fJmzGCklQ6@localhost.localdomain>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Xiaoli Feng <xifeng@redhat.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, esandeen@redhat.com, jmoyer@redhat.com, fstests@vger.kernel.org, xzhou@redhat.com, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Nov 19, 2018 at 06:27:55PM -0800, Darrick J. Wong wrote:
-> On Sun, Nov 18, 2018 at 09:51:08PM +0800, Eryu Guan wrote:
-> > On Fri, Nov 16, 2018 at 11:26:26AM -0800, Darrick J. Wong wrote:
-> > > On Tue, Nov 13, 2018 at 03:39:43PM -0800, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > Add support for FICLONERANGE to fsx.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > ---
-> > > >  ltp/fsx.c |  182 +++++++++++++++++++++++++++++++++++++++++++++++++++++--------
-> > > >  1 file changed, 158 insertions(+), 24 deletions(-)
-> > > > 
-> > > > 
-> > > > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > > > index b0157ba3..2b0a2b28 100644
-> > > > --- a/ltp/fsx.c
-> > > > +++ b/ltp/fsx.c
-> > > > @@ -88,25 +88,28 @@ int			logcount = 0;	/* total ops */
-> > > >   * mode being run.
-> > > >   */
-> > > >  
-> > > > -/* common operations */
-> > > > -#define	OP_READ		0
-> > > > -#define OP_WRITE	1
-> > > > -#define OP_MAPREAD	2
-> > > > -#define OP_MAPWRITE	3
-> > > > -#define OP_MAX_LITE	4
-> > > > -
-> > > > -/* !lite operations */
-> > > > -#define OP_TRUNCATE		4
-> > > > -#define OP_FALLOCATE		5
-> > > > -#define OP_PUNCH_HOLE		6
-> > > > -#define OP_ZERO_RANGE		7
-> > > > -#define OP_COLLAPSE_RANGE	8
-> > > > -#define OP_INSERT_RANGE	9
-> > > > -#define OP_MAX_FULL		10
-> > > > -
-> > > > -/* integrity operations */
-> > > > -#define OP_FSYNC		10
-> > > > -#define OP_MAX_INTEGRITY	11
-> > > > +enum {
-> > > > +	/* common operations */
-> > > > +	OP_READ = 0,
-> > > > +	OP_WRITE,
-> > > > +	OP_MAPREAD,
-> > > > +	OP_MAPWRITE,
-> > > > +	OP_MAX_LITE,
-> > > > +
-> > > > +	/* !lite operations */
-> > > > +	OP_TRUNCATE = OP_MAX_LITE,
-> > > > +	OP_FALLOCATE,
-> > > > +	OP_PUNCH_HOLE,
-> > > > +	OP_ZERO_RANGE,
-> > > > +	OP_COLLAPSE_RANGE,
-> > > > +	OP_INSERT_RANGE,
-> > > > +	OP_CLONE_RANGE,
-> > > > +	OP_MAX_FULL,
-> > > > +
-> > > > +	/* integrity operations */
-> > > > +	OP_FSYNC = OP_MAX_FULL,
-> > > > +	OP_MAX_INTEGRITY,
-> > > > +};
-> > > >  
-> > > >  #undef PAGE_SIZE
-> > > >  #define PAGE_SIZE       getpagesize()
-> > > > @@ -160,6 +163,7 @@ int     punch_hole_calls = 1;           /* -H flag disables */
-> > > >  int     zero_range_calls = 1;           /* -z flag disables */
-> > > >  int	collapse_range_calls = 1;	/* -C flag disables */
-> > > >  int	insert_range_calls = 1;		/* -I flag disables */
-> > > > +int	remap_calls = 1;		/* -J flag disables */
-> > > >  int 	mapped_reads = 1;		/* -R flag disables it */
-> > > >  int	integrity = 0;			/* -i flag */
-> > > >  int	fsxgoodfd = 0;
-> > > > @@ -254,6 +258,7 @@ static const char *op_names[] = {
-> > > >  	[OP_ZERO_RANGE] = "zero_range",
-> > > >  	[OP_COLLAPSE_RANGE] = "collapse_range",
-> > > >  	[OP_INSERT_RANGE] = "insert_range",
-> > > > +	[OP_CLONE_RANGE] = "clone_range",
-> > > >  	[OP_FSYNC] = "fsync",
-> > > >  };
-> > > >  
-> > > > @@ -275,6 +280,25 @@ static int op_code(const char *name)
-> > > >  	return -1;
-> > > >  }
-> > > >  
-> > > > +void
-> > > > +log5(int operation, int arg0, int arg1, int arg2, enum opflags flags)
-> > > > +{
-> > > > +	struct log_entry *le;
-> > > > +
-> > > > +	le = &oplog[logptr];
-> > > > +	le->operation = operation;
-> > > > +	if (closeopen)
-> > > > +		flags |= FL_CLOSE_OPEN;
-> > > > +	le->args[0] = arg0;
-> > > > +	le->args[1] = arg1;
-> > > > +	le->args[2] = arg2;
-> > > 
-> > > I would like to withdraw this patch so that I can add a fourth args[]
-> > > slot so that we can maintain the convention of printing the
-> > > pre-operation file size after the other operation arguments.  This will
-> > > make tracking the location of EOF through an fsxops file easier.
-> > 
-> > I'll wait for the new version of the whole patchset then, that gives me
-> > extra time to look at & test them :)
+On Thursday, November 15, 2018 12:49:10 PM IST Xiaoli Feng wrote:
+> Hello all,
+>   Any thoughts for this patch? Adding chandan@linux.vnet.ibm.com to cc list for review. 
+> Because his patch "xfs/050: work with 64k block size" change the bsoft and bhard size.
 > 
-> I also added separate command line arguments to disable each of {clone,
-> dedupe, copy} range, and fixed the "does this overlap with the bad
-> range" reporting.  I also added a new mode where you can ask fsx to
-> reread the entire file after every operation to look for corruption
-> problems.  Will send patches shortly.
+> Thanks.
+> 
+> ----- Original Message -----
+> > From: "Eryu Guan" <guaneryu@gmail.com>
+> > To: "XiaoLi Feng" <xifeng@redhat.com>
+> > Cc: esandeen@redhat.com, jmoyer@redhat.com, fstests@vger.kernel.org, xzhou@redhat.com, linux-xfs@vger.kernel.org
+> > Sent: Monday, November 5, 2018 12:15:54 AM
+> > Subject: Re: [PATCH v1] xfs/050: make it passed for dax 2 MiB alignment test
+> > 
+> > On Fri, Oct 26, 2018 at 10:47:54AM +0800, Xiaoli Feng wrote:
+> > > From: xiaoli feng <xifeng@redhat.com>
+> > > 
+> > > This case is failed for dax 2MiB alignment test. When test "push past
+> > > the hard block limit" in this case, the quota bhard is 4000kb, and
+> > > try to create 4096kb in dax fs.
 
-As we're seeing many new failures (even crashes and hangs) when
-clone/dedupe/copy range are enabled, is it better to mark them as
-disabled by default?
+It actually tries to create "1200 * 4096 = 4800kb" right?
 
-Thanks,
-Eryu
+> > > dax only create 2048kb because of 2MiB
+> > > alignment.
+
+Can you please explain how this could happen?
+
+> > > But there is a check that the file size must > 3400kb(bhard
+> > > * 85%). So there are two method to fix it. One is to decrease bhard
+> > > size. Second is to descreate minimum size. The minimum is hard to define.
+> > > So I choose first method.
+
+> > 
+> > Adding linux-xfs to cc list for review from xfs folks. Thanks a lot!
+> > 
+> > Eryu
+> > 
+> > > ---
+> > >  tests/xfs/050     |  4 ++--
+> > >  tests/xfs/050.out | 60
+> > >  +++++++++++++++++++++++++++----------------------------
+> > >  2 files changed, 32 insertions(+), 32 deletions(-)
+> > > 
+> > > diff --git a/tests/xfs/050 b/tests/xfs/050
+> > > index 788ed7f..d2ca477 100755
+> > > --- a/tests/xfs/050
+> > > +++ b/tests/xfs/050
+> > > @@ -43,8 +43,8 @@ _scratch_mount
+> > >  bsize=$(_get_file_block_size $SCRATCH_MNT)
+> > >  _scratch_unmount
+> > >  
+> > > -bsoft=$(( 200 * $bsize ))
+> > > -bhard=$(( 1000 * $bsize ))
+> > > +bsoft=$(( 100 * $bsize ))
+> > > +bhard=$(( 500 * $bsize ))
+> > >  isoft=4
+> > >  ihard=10
+> > >  
+> > > diff --git a/tests/xfs/050.out b/tests/xfs/050.out
+> > > index 725cd79..6a7af1a 100644
+> > > --- a/tests/xfs/050.out
+> > > +++ b/tests/xfs/050.out
+> > > @@ -12,23 +12,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] =OK= 100 500 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** unmount
+> > >  *** group
+> > > @@ -44,23 +44,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] =OK= 200 1000 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] =OK= 100 500 0 [7 days] 10 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** unmount
+> > >  *** uqnoenforce
+> > > @@ -76,23 +76,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > >  
+> > >  *** unmount
+> > >  *** gqnoenforce
+> > > @@ -108,23 +108,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > >  
+> > >  *** unmount
+> > >  *** pquota
+> > > @@ -140,23 +140,23 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 6 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] =OK= 200 1000 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > > +[NAME] =OK= 100 500 0 [7 days] 9 4 10 00 [7 days] 0 0 0 00 [--------]
+> > >  
+> > >  *** unmount
+> > >  *** pqnoenforce
+> > > @@ -172,22 +172,22 @@ realtime =RDEV extsz=XXX blocks=XXX, rtextents=XXX
+> > >  
+> > >  *** report initial settings
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 1 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft inode limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 0 200 1000 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 0 100 500 00 [--------] 5 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the soft block limit
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > > +[NAME] 300 100 500 00 [--------] 6 4 10 00 [--------] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard inode limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 300 200 1000 00 [--------] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 300 100 500 00 [--------] 18 4 10 00 [--none--] 0 0 0 00 [--------]
+> > >  
+> > >  *** push past the hard block limit (expect EDQUOT)
+> > >  [ROOT] 0 0 0 00 [--------] 3 0 0 00 [--------] 0 0 0 00 [--------]
+> > > -[NAME] 1200 200 1000 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > > +[NAME] 1200 100 500 00 [--none--] 18 4 10 00 [--none--] 0 0 0 00
+> > > [--------]
+> > >  
+> > >  *** unmount
+> > > --
+> > > 1.8.3.1
+> > > 
+> > 
+> 
+> 
+
+
+-- 
+chandan
