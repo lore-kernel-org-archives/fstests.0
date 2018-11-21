@@ -1,81 +1,78 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:5837 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726477AbeKTTsh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 20 Nov 2018 14:48:37 -0500
-Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
-        by cn.fujitsu.com (Postfix) with ESMTP id F1DC34B7349F
-        for <fstests@vger.kernel.org>; Tue, 20 Nov 2018 17:20:26 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] common/rc: Check more options for filefrag command
-Date: Tue, 20 Nov 2018 16:41:08 +0800
-Message-ID: <1542703268-30302-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mx0b-001b2d01.pphosted.com ([148.163.158.5]:51222 "EHLO
+        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-FAIL)
+        by vger.kernel.org with ESMTP id S1729727AbeKVDCB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 21 Nov 2018 22:02:01 -0500
+Received: from pps.filterd (m0098417.ppops.net [127.0.0.1])
+        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id wALGONaL109659
+        for <fstests@vger.kernel.org>; Wed, 21 Nov 2018 11:26:53 -0500
+Received: from e16.ny.us.ibm.com (e16.ny.us.ibm.com [129.33.205.206])
+        by mx0a-001b2d01.pphosted.com with ESMTP id 2nwae29ch5-1
+        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Wed, 21 Nov 2018 11:26:53 -0500
+Received: from localhost
+        by e16.ny.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
+        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
+        Wed, 21 Nov 2018 16:26:52 -0000
+From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+Subject: [PATCH] src/t_stripealign.c: Use block size reported by fstatfs()
+Date: Wed, 21 Nov 2018 21:56:46 +0530
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
+Message-Id: <20181121162646.18117-1-chandan@linux.vnet.ibm.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-In generic/519, filefrag command use FIBMAP ioctl(-B option) to print
-output in extent format(-e option) on purpose and sync file(-s option),
-so check if the command supports all of these options by _require_filefrag_options().
+On ppc64le, block size reported by fstat(2) is 64k (the page size)
+i.e. the "preferred I/O size". However src/t_stripealign.c requires the
+actual block size of the filesystem. Hence this commit now makes use of
+the block size reported by fstatfs(2) syscall.
 
-Rename _require_fibmap() to _require_filefrag_options()
-Also remove duplicate _require_command "$FILEFRAG_PROG" filefrag
-
-References:
-1) filefrag supports -e option by commit 2508eaa since v1.42.7.
-2) filefrag supports -B option by commit 5d5e01d since v1.41.9.
-3) filefrag supports -s option by commit e62847c since v1.41.6.
-
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
 ---
- common/rc         | 12 +++++++-----
- tests/generic/519 |  3 +--
- 2 files changed, 8 insertions(+), 7 deletions(-)
+ src/t_stripealign.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index ecb1738..5a11359 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3843,17 +3843,19 @@ _require_scratch_btime()
- 	_scratch_unmount
- }
+diff --git a/src/t_stripealign.c b/src/t_stripealign.c
+index c61e7632..5cdadaae 100644
+--- a/src/t_stripealign.c
++++ b/src/t_stripealign.c
+@@ -7,7 +7,7 @@
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <sys/types.h>
+-#include <sys/stat.h>
++#include <sys/vfs.h>
+ #include <fcntl.h>
+ #include <stdio.h>
+ #include <sys/ioctl.h>
+@@ -31,7 +31,7 @@
  
--_require_fibmap()
-+_require_filefrag_options()
+ int main(int argc, char ** argv)
  {
- 	_require_command "$FILEFRAG_PROG" filefrag
+-	struct stat		sb;
++	struct statfs		sb;
+ 	struct fiemap		*fie;
+ 	struct fiemap_extent	*fe;
+ 	int			fd;
+@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
+                 return 1;
+         }
  
--	local file="$TEST_DIR/fibmap_testfile"
-+	local options=$1
-+	local file="$TEST_DIR/testfile"
+-	ret = fstat(fd, &sb);
++	ret = fstatfs(fd, &sb);
+ 	if (ret) {
+ 		perror(filename);
+ 		close(fd);
+@@ -101,7 +101,7 @@ int main(int argc, char ** argv)
+ 		return 1;
+ 	}
  
- 	echo "XX" > $file
--	${FILEFRAG_PROG} -B $file 2>&1 | grep -q "FIBMAP[[:space:]]*unsupported"
--	if [ $? -eq 0 ]; then
-+	local output=`${FILEFRAG_PROG} $options $file 2>&1`
-+	echo $output | grep -q "FIBMAP[[:space:]]*unsupported" && \
- 		_notrun "FIBMAP not supported by this filesystem"
--	fi
-+	echo $output | grep -q "invalid option" && \
-+		_notrun "filefrag doesn't support $options option"
- 	rm -f $file
- }
- 
-diff --git a/tests/generic/519 b/tests/generic/519
-index 229c5b4..ccc15d4 100755
---- a/tests/generic/519
-+++ b/tests/generic/519
-@@ -33,8 +33,7 @@ rm -f $seqres.full
- _supported_fs generic
- _supported_os Linux
- _require_scratch
--_require_command "$FILEFRAG_PROG" filefrag
--_require_fibmap
-+_require_filefrag_options "-Bes"
- 
- testfile="$SCRATCH_MNT/$seq-testfile"
- 
+-	block = fie->fm_extents[0].fe_physical / sb.st_blksize;
++	block = fie->fm_extents[0].fe_physical / sb.f_bsize;
+ check:
+ 	if (block % sunit) {
+ 		printf("%s: Start block %llu not multiple of sunit %u\n",
 -- 
-1.8.3.1
+2.19.1
