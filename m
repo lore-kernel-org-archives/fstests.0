@@ -1,37 +1,64 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:42437 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729253AbeKWRC5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Nov 2018 12:02:57 -0500
-Received: by mail-pf1-f196.google.com with SMTP id 64so2879218pfr.9
-        for <fstests@vger.kernel.org>; Thu, 22 Nov 2018 22:20:09 -0800 (PST)
-Date: Fri, 23 Nov 2018 14:20:03 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] src/t_stripealign.c: Use block size reported by fstatfs()
-Message-ID: <20181123062003.GK3889@desktop>
-References: <20181121162646.18117-1-chandan@linux.vnet.ibm.com>
+Received: from aserp2120.oracle.com ([141.146.126.78]:60408 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725744AbeKYFLe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Nov 2018 00:11:34 -0500
+From: Allison Henderson <allison.henderson@oracle.com>
+Subject: Re: [PATCH 01/12] fsstress: fix compiler warnings
+References: <154290950237.1218.9937108728673485814.stgit@magnolia>
+ <154290950874.1218.16162093723366805081.stgit@magnolia>
+Message-ID: <d60f04c8-9e77-dc93-1cc6-082118f66ba7@oracle.com>
+Date: Sat, 24 Nov 2018 11:22:31 -0700
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181121162646.18117-1-chandan@linux.vnet.ibm.com>
+In-Reply-To: <154290950874.1218.16162093723366805081.stgit@magnolia>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Nov 21, 2018 at 09:56:46PM +0530, Chandan Rajendra wrote:
-> On ppc64le, block size reported by fstat(2) is 64k (the page size)
-> i.e. the "preferred I/O size". However src/t_stripealign.c requires the
-> actual block size of the filesystem. Hence this commit now makes use of
-> the block size reported by fstatfs(2) syscall.
+
+
+On 11/22/18 10:58 AM, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
+> Fix all the gcc warnings in fsstress.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>   ltp/fsstress.c |    4 ++--
+>   1 file changed, 2 insertions(+), 2 deletions(-)
+> 
+> 
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index edbb3f2f..8d0734fc 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -499,7 +499,7 @@ int main(int argc, char **argv)
+>   		exit(1);
+>   	}
+>   	if (logname) {
+> -		char path[PATH_MAX];
+> +		char path[PATH_MAX + NAME_MAX + 1];
+>   		snprintf(path, sizeof(path), "%s/%s", rpath, logname);
+>   		if (freopen(path, "a", stdout) == NULL) {
+>   			perror("freopen logfile failed");
+> @@ -583,7 +583,7 @@ int main(int argc, char **argv)
+>   				return 0;
+>   #endif
+>   			if (logname) {
+> -				char path[PATH_MAX];
+> +				char path[PATH_MAX + NAME_MAX + 2 + 11];
+>   				snprintf(path, sizeof(path), "%s/%s.%d",
+>   					 rpath, logname, i);
+>   				if (freopen(path, "a", stdout) == NULL) {
+> 
 
-Looks like that only XFS returns the preferred iosize
-(xfs_preferred_iosize()) on stat(2), other filesystems will return block
-size (I checked the code of ext4, f2fs, ocfs2).
+Looks ok.  I'm assuming the 2 and the 11 are for the slash, dot and 
+logname?  Maybe just a comment or two in the commit.  Otherwise looks 
+good to me, you can add my review.  Thx!  :-)
 
-On the other hand, statfs(2) returns the actual block size on all
-filesystems I've checked, including XFS. So this patch looks fine to me.
+Reviewed-By: Allison Henderson <allison.henderson@oracle.com>
 
-Thanks,
-Eryu
+Allison
