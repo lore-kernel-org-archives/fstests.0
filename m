@@ -1,64 +1,129 @@
-Received: from mx0a-001b2d01.pphosted.com ([148.163.156.1]:50372 "EHLO
-        mx0a-001b2d01.pphosted.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1729305AbeKWQmd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Nov 2018 11:42:33 -0500
-Received: from pps.filterd (m0098410.ppops.net [127.0.0.1])
-        by mx0a-001b2d01.pphosted.com (8.16.0.22/8.16.0.22) with SMTP id wAN5sSpE101970
-        for <fstests@vger.kernel.org>; Fri, 23 Nov 2018 00:59:49 -0500
-Received: from e36.co.us.ibm.com (e36.co.us.ibm.com [32.97.110.154])
-        by mx0a-001b2d01.pphosted.com with ESMTP id 2nx24t9x31-1
-        (version=TLSv1.2 cipher=AES256-GCM-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Fri, 23 Nov 2018 00:59:48 -0500
-Received: from localhost
-        by e36.co.us.ibm.com with IBM ESMTP SMTP Gateway: Authorized Use Only! Violators will be prosecuted
-        for <fstests@vger.kernel.org> from <chandan@linux.vnet.ibm.com>;
-        Fri, 23 Nov 2018 05:59:40 -0000
-From: Chandan Rajendra <chandan@linux.vnet.ibm.com>
-Subject: [PATCH 2/2] ext4/021: Work with 64k block size
-Date: Fri, 23 Nov 2018 11:29:30 +0530
-In-Reply-To: <20181123055930.21423-1-chandan@linux.vnet.ibm.com>
-References: <20181123055930.21423-1-chandan@linux.vnet.ibm.com>
+Received: from mail-pl1-f179.google.com ([209.85.214.179]:37944 "EHLO
+        mail-pl1-f179.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726447AbeKZD1N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Nov 2018 22:27:13 -0500
+Received: by mail-pl1-f179.google.com with SMTP id e5so12682938plb.5
+        for <fstests@vger.kernel.org>; Sun, 25 Nov 2018 08:35:47 -0800 (PST)
+Message-ID: <5bfacf61.1c69fb81.7731a.4a9b@mx.google.com>
+Date: Mon, 26 Nov 2018 00:35:27 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 15b13f7fcb85
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Message-Id: <20181123055930.21423-2-chandan@linux.vnet.ibm.com>
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="wkV2jt4OevCi"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Chandan Rajendra <chandan@linux.vnet.ibm.com>, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-For 64k blocksize, 10MiB as the filesystem size isn't sufficient to have
-a journal included. Hence this commit computes the test FS size based on
-the block size of the underlying filesystem.
 
-Signed-off-by: Chandan Rajendra <chandan@linux.vnet.ibm.com>
----
- tests/ext4/021 | 11 +++++++----
- 1 file changed, 7 insertions(+), 4 deletions(-)
+--wkV2jt4OevCi
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-diff --git a/tests/ext4/021 b/tests/ext4/021
-index 3d36efd0..519737e1 100755
---- a/tests/ext4/021
-+++ b/tests/ext4/021
-@@ -34,13 +34,16 @@ _supported_os Linux
- _require_scratch
- _require_dumpe2fs
- 
--# 10M in bytes
--fssize=$((10 * 1024 * 1024))
-+_scratch_mkfs >> $seqres.full 2>&1
-+_scratch_mount
-+blocksize=$(_get_block_size $SCRATCH_MNT)
-+_scratch_unmount
-+
-+# With 4k block size, this amounts to 10M FS instance.
-+fssize=$((2560 * $blocksize))
- _scratch_mkfs_sized $fssize >> $seqres.full 2>&1
- _require_metadata_journaling $SCRATCH_DEV
- 
--blocksize=`$DUMPE2FS_PROG -h $SCRATCH_DEV 2>/dev/null | grep "Block size" | \
--	awk '{print $3}'`
- offset=0
- found=0
- # this is the jbd2 journal superblock magic number on disk, in big endian
--- 
-2.19.1
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update contains fixes for 64k blocksize fs testing
+from Chandan Rajendra and two bug fixes from Xiao Yang. The CrashMonkey test
+and clone/dedupe/copy range support to fsx/fsstress patches are still in
+review, hopefully they'll get merged in next update.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+15b13f7fcb85 ext4/021: Work with 64k block size
+
+New commits:
+
+Chandan Rajendra (3):
+      [89e42dcda50f] src/t_stripealign.c: Use block size reported by fstatfs()
+      [6b06a9bb6fb0] ext4/002: Work with 64k block size
+      [15b13f7fcb85] ext4/021: Work with 64k block size
+
+Xiao Yang (2):
+      [ded188b86096] xfs: Fix the situation that mount operation rejects corrupted XFS
+      [c1cef1bd82a9] common/rc: Add _require_filefrag_options() to check options for filefrag
+
+
+Code Diffstat:
+
+ common/rc           | 15 +++++++++++-
+ src/t_stripealign.c |  8 +++----
+ tests/ext4/002      | 68 +++++++++++++++++++++++++++--------------------------
+ tests/ext4/002.out  | 18 +++++---------
+ tests/ext4/021      | 11 +++++----
+ tests/generic/519   |  2 +-
+ tests/xfs/086       |  3 +--
+ tests/xfs/086.out   |  3 +--
+ tests/xfs/087       |  9 ++++---
+ tests/xfs/087.out   |  3 +--
+ tests/xfs/088       |  3 +--
+ tests/xfs/088.out   |  3 +--
+ tests/xfs/089       |  3 +--
+ tests/xfs/089.out   |  3 +--
+ tests/xfs/091       |  3 +--
+ tests/xfs/091.out   |  3 +--
+ tests/xfs/093       |  9 ++++---
+ tests/xfs/093.out   |  3 +--
+ tests/xfs/097       |  8 +++----
+ tests/xfs/097.out   |  3 +--
+ tests/xfs/099       |  3 +--
+ tests/xfs/099.out   |  3 +--
+ tests/xfs/100       |  3 +--
+ tests/xfs/100.out   |  3 +--
+ tests/xfs/101       |  3 +--
+ tests/xfs/101.out   |  3 +--
+ tests/xfs/102       |  3 +--
+ tests/xfs/102.out   |  3 +--
+ tests/xfs/105       |  3 +--
+ tests/xfs/105.out   |  3 +--
+ tests/xfs/112       |  3 +--
+ tests/xfs/112.out   |  3 +--
+ tests/xfs/113       |  3 +--
+ tests/xfs/113.out   |  3 +--
+ tests/xfs/117       | 11 ++++-----
+ tests/xfs/117.out   |  3 +--
+ tests/xfs/120       |  3 +--
+ tests/xfs/120.out   |  3 +--
+ tests/xfs/124       |  3 +--
+ tests/xfs/124.out   |  3 +--
+ tests/xfs/125       |  3 +--
+ tests/xfs/125.out   |  3 +--
+ tests/xfs/126       |  3 +--
+ tests/xfs/126.out   |  3 +--
+ tests/xfs/235       |  3 +--
+ tests/xfs/235.out   |  3 +--
+ tests/xfs/337       |  3 +--
+ tests/xfs/337.out   |  3 +--
+ 48 files changed, 122 insertions(+), 151 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--wkV2jt4OevCi
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJb+s8IAAoJECZSqilcj+djeZgP/3uSCzH7qcYdqC2vpJvTvMtB
+cwUl9DN72Cxf7+FDN8izoUT/oHU+usZpTHXmq6nJx3drE3VceV2060YbIDFsyR21
+aeW0XZiL+Kyda7wTNXamXLN02rxRBLf9b1rFc8y6FvVIsLoUwCiqqQUpJlYKF1ka
+Avav/g5kmgYcQvkLX0l7pkMewt22roAhS/msXl6fvXhabx7ug3CcaILwZCAVonmO
+Ue1HY/xBD/4q4UkS7aOKSqa5rsMH7RfYcuSJkw17IOI3tZDQ9d09UaG5GC0SPVp4
+YyLafbFT5E5OziyxUK3kMVXzc73nLnFadhr++s20jWkpX49yOrV1r/n2XZA47bf+
+1sMb6d74gThdFXg7uyb00SeSdiybbxc1waT9x2++dGcc4iO2pTGZbDso2fChEwbv
+dsaovREGEo77WyIykoxgKuxQ8lQGnyQsehh1q+e6JMKYacrc/Jz/e0WDYUWGqV09
+YbycwNpOi3VOthFIe9hHV6pj7OQKkReO2pBJP3+JTKffXL8aMTd4U8ztU4lbArJH
+m5opich5k0UbbLAMceNuNLb6RNafvYN1mM+tRFVi9wfwKZ7eA1LiUpjj+f+H+9yq
+xetRtxkOMnvblwPxJPYeCTEOrAkdRZVoD2H5GRWj99K18YTMHKwv52wsVIOCoXnC
+WbuwnJJYxu+LV+lPx85r
+=dLFD
+-----END PGP SIGNATURE-----
+
+--wkV2jt4OevCi--
