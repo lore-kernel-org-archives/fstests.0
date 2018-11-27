@@ -1,47 +1,51 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:59531 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727684AbeK0RcC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Nov 2018 12:32:02 -0500
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] xfs/111: Filter a "Structure needs cleaning" error from xfs_fsr
-Date: Tue, 27 Nov 2018 13:56:15 +0800
-Message-ID: <1543298175-5405-1-git-send-email-yangx.jy@cn.fujitsu.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:33103 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726286AbeK1Iml (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Nov 2018 03:42:41 -0500
+Received: by mail-pf1-f194.google.com with SMTP id c123so8347525pfb.0
+        for <fstests@vger.kernel.org>; Tue, 27 Nov 2018 13:43:25 -0800 (PST)
+From: Gwendal Grignou <gwendal@chromium.org>
+Subject: [PATCH 0/3] Adapt some tests to ChromeOS
+Date: Tue, 27 Nov 2018 13:43:05 -0800
+Message-Id: <20181127214308.137410-1-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: david@fromorbit.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: guaneryu@gmail.com
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-on upstream kernel, running xfs/111 got the following error:
--------------------------------------------------
-+xfs_fsr: xfs_bulkstat: Structure needs cleaning
--------------------------------------------------
+When running xfstests on ChromeOS, some were failing for spurious
+reasons:
+- getconf not present on the test system because glibc is not installed.
+- ftruncate want to allocate a file bigger than the partition.
+- Attribute selinux.security in the way of testing xattr.
 
-Since kernel commit 29cad0b, we don't convert a -EFSCORRUPTED error
-to -EINVAL in xfs_imap_to_bp() if we are doing an untrusted lookup.
-So xfs_bulkstat() called by xfs_fsr command fails and returns
-EFSCORRUPTED.  We think it is reasonable for xfs_fsr to report
-EFSCORRUPTED because some inodes are actually corrupted.
+Gwendal Grignou (3):
+  generic: workaround device where glibc is not installed
+  ext4: 032: fail nicely if the test partition is not big enough for the
+    test
+  generic: exclude selinux xattr form being considered
 
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/xfs/111 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ common/config     | 18 ++++++++++++++++++
+ common/filter     |  1 +
+ common/rc         |  6 ------
+ tests/btrfs/053   |  2 +-
+ tests/ext4/032    | 11 ++++++++++-
+ tests/generic/062 |  2 +-
+ tests/generic/205 |  2 +-
+ tests/generic/206 |  2 +-
+ tests/generic/216 |  2 +-
+ tests/generic/217 |  2 +-
+ tests/generic/218 |  2 +-
+ tests/generic/220 |  2 +-
+ tests/generic/222 |  2 +-
+ tests/generic/227 |  2 +-
+ tests/generic/229 |  2 +-
+ tests/generic/238 |  2 +-
+ tests/generic/349 |  6 +++---
+ tests/generic/350 |  6 +++---
+ tests/generic/351 |  6 +++---
+ tests/generic/377 |  2 +-
+ 20 files changed, 51 insertions(+), 29 deletions(-)
 
-diff --git a/tests/xfs/111 b/tests/xfs/111
-index 2ef69f0..2bcf002 100755
---- a/tests/xfs/111
-+++ b/tests/xfs/111
-@@ -58,7 +58,8 @@ _try_scratch_mount || _fail "Couldn't mount after itrash"
- 
- echo Attempting bulkstat
- #src/bstat -q $SCRATCH_MNT
--$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch
-+#Since kernel commit 29cad0b, xfs_fsr reports a "Structure needs cleaning" error
-+$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch | grep -v "Structure needs cleaning"
- 
- # Fix up intentional corruption so test can pass
- _scratch_unmount
 -- 
-1.8.3.1
+2.18.1
