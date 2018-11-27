@@ -1,73 +1,47 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:48404 "EHLO
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:59531 "EHLO
         heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728097AbeK0Noh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Nov 2018 08:44:37 -0500
-Message-ID: <5BFCB05E.9050803@cn.fujitsu.com>
-Date: Tue, 27 Nov 2018 10:47:58 +0800
+        with ESMTP id S1727684AbeK0RcC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 27 Nov 2018 12:32:02 -0500
 From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] xfs/111: Filter a "Structure needs cleaning" error from xfs_fsr
+Date: Tue, 27 Nov 2018 13:56:15 +0800
+Message-ID: <1543298175-5405-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Subject: Re: [PATCH v2] common/rc: Add _require_filefrag_options() to check
- options for filefrag
-References: <20181123051251.GJ3889@desktop> <1542950663-7784-1-git-send-email-yangx.jy@cn.fujitsu.com> <20181126215007.GA19305@dastard>
-In-Reply-To: <20181126215007.GA19305@dastard>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: guaneryu@gmail.com, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: david@fromorbit.com, Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2018/11/27 5:50, Dave Chinner wrote:
-> On Fri, Nov 23, 2018 at 01:24:23PM +0800, Xiao Yang wrote:
->> In generic/519, filefrag command use FIBMAP ioctl(-B option) to print
->> output in extent format(-e option) on purpose and sync file(-s option),
->> so add _require_filefrag_options() to check if the command supports
->> all of these options.
->>
->> References:
->> 1) filefrag supports -e option by commit 2508eaa since e2fsprogs v1.42.7.
->> 2) filefrag supports -B option by commit 5d5e01d since e2fsprogs v1.41.9.
->> 3) filefrag supports -s option by commit e62847c since e2fsprogs v1.41.6.
->>
->> Signed-off-by: Xiao Yang<yangx.jy@cn.fujitsu.com>
->> ---
->>   common/rc         | 15 ++++++++++++++-
->>   tests/generic/519 |  2 +-
->>   2 files changed, 15 insertions(+), 2 deletions(-)
->>
->> diff --git a/common/rc b/common/rc
->> index ecb1738..e5da648 100644
->> --- a/common/rc
->> +++ b/common/rc
->> @@ -3843,10 +3843,23 @@ _require_scratch_btime()
->>   	_scratch_unmount
->>   }
->>
->> -_require_fibmap()
->> +_require_filefrag_options()
->>   {
->>   	_require_command "$FILEFRAG_PROG" filefrag
->>
->> +	local options=$1
->> +	local file="$TEST_DIR/options_testfile"
->> +
->> +	echo "XX">  $file
->> +	${FILEFRAG_PROG} -$options $file 2>&1 | grep -q "invalid option"&&  \
->> +		_notrun "filefrag doesn't support $options option"
->> +	rm -f $file
->> +}
-> Can we just get rid of filefrag and use xfs_io's fiemap commands
-> instead?
-Hi Dave,
+on upstream kernel, running xfs/111 got the following error:
+-------------------------------------------------
++xfs_fsr: xfs_bulkstat: Structure needs cleaning
+-------------------------------------------------
 
-According to the comment in test,  we have to reproduce the bug by 
-specifying FIBMAP ioctl instead of FIEMAP ioctl.
-It seems that we can just use FIEMAP ioctl by xfs_io's fiemap command, 
-so we use FIBMAP ioctl  forcely by filefrag
-with -B option.
+Since kernel commit 29cad0b, we don't convert a -EFSCORRUPTED error
+to -EINVAL in xfs_imap_to_bp() if we are doing an untrusted lookup.
+So xfs_bulkstat() called by xfs_fsr command fails and returns
+EFSCORRUPTED.  We think it is reasonable for xfs_fsr to report
+EFSCORRUPTED because some inodes are actually corrupted.
 
-Best Regards,
-Xiao Yang
-> Cheers,
->
-> Dave.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/xfs/111 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/tests/xfs/111 b/tests/xfs/111
+index 2ef69f0..2bcf002 100755
+--- a/tests/xfs/111
++++ b/tests/xfs/111
+@@ -58,7 +58,8 @@ _try_scratch_mount || _fail "Couldn't mount after itrash"
+ 
+ echo Attempting bulkstat
+ #src/bstat -q $SCRATCH_MNT
+-$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch
++#Since kernel commit 29cad0b, xfs_fsr reports a "Structure needs cleaning" error
++$XFS_FSR_PROG $SCRATCH_MNT | _filter_scratch | grep -v "Structure needs cleaning"
+ 
+ # Fix up intentional corruption so test can pass
+ _scratch_unmount
+-- 
+1.8.3.1
