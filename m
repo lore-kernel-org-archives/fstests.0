@@ -1,13 +1,13 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:40113 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726286AbeK1Imu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Nov 2018 03:42:50 -0500
-Received: by mail-pg1-f194.google.com with SMTP id z10so8459468pgp.7
-        for <fstests@vger.kernel.org>; Tue, 27 Nov 2018 13:43:34 -0800 (PST)
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:44011 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726286AbeK1Imw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Nov 2018 03:42:52 -0500
+Received: by mail-pl1-f196.google.com with SMTP id gn14so16266103plb.10
+        for <fstests@vger.kernel.org>; Tue, 27 Nov 2018 13:43:36 -0800 (PST)
 From: Gwendal Grignou <gwendal@chromium.org>
-Subject: [PATCH 2/3] ext4: 032: fail nicely if the test partition is not big enough for the test
-Date: Tue, 27 Nov 2018 13:43:07 -0800
-Message-Id: <20181127214308.137410-3-gwendal@chromium.org>
+Subject: [PATCH 3/3] generic: exclude selinux xattr form being considered
+Date: Tue, 27 Nov 2018 13:43:08 -0800
+Message-Id: <20181127214308.137410-4-gwendal@chromium.org>
 In-Reply-To: <20181127214308.137410-1-gwendal@chromium.org>
 References: <20181127214308.137410-1-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
@@ -17,35 +17,48 @@ List-ID: <fstests@vger.kernel.org>
 
 Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 ---
- tests/ext4/032 | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ common/filter     | 1 +
+ tests/generic/062 | 2 +-
+ tests/generic/377 | 2 +-
+ 3 files changed, 3 insertions(+), 2 deletions(-)
 
-diff --git a/tests/ext4/032 b/tests/ext4/032
-index 8534ddd6..7d8c6da7 100755
---- a/tests/ext4/032
-+++ b/tests/ext4/032
-@@ -35,12 +35,21 @@ ext4_online_resize()
- 	local original_size=$1
- 	local final_size=$2
- 	local check_if_supported=${3:-0}
-+	local avail=`df -P $SCRATCH_DIR | awk 'END {print $4}'`
-+	local requested=$(($final_size * $BLK_SIZ))
-+
-+	if [ $avail -lt $requested ]; then
-+		echo "+++ not enough space on $SCRATCH_DIR: " \
-+		     "requested $requested only $avail left" | \
-+			tee -a $seqres.full
-+		_notrun "incomplete test due to storage space constraint"
-+	fi
+diff --git a/common/filter b/common/filter
+index ed082d24..3ca40431 100644
+--- a/common/filter
++++ b/common/filter
+@@ -290,6 +290,7 @@ _filter_scratch()
+ 	# so substitute SCRATCH_MNT first
+ 	sed -e "s,\B$SCRATCH_MNT,SCRATCH_MNT,g" \
+ 	    -e "s,\B$SCRATCH_DEV,SCRATCH_DEV,g" \
++	    -e "/security\.selinux/d" \
+ 	    -e "/.use_space/d"
+ }
  
- 	## Start with a clean image file.
- 	echo "" > ${IMG_FILE}
- 	echo "+++ truncate image file to $final_size" | \
- 		tee -a $seqres.full
--	$XFS_IO_PROG -f -c "truncate $(($final_size * $BLK_SIZ))" ${IMG_FILE}
-+	$XFS_IO_PROG -f -c "truncate $requested" ${IMG_FILE}
- 	LOOP_DEVICE=`_create_loop_device $IMG_FILE`
+diff --git a/tests/generic/062 b/tests/generic/062
+index 9024af2e..7e79a2dd 100755
+--- a/tests/generic/062
++++ b/tests/generic/062
+@@ -120,7 +120,7 @@ for nsp in $ATTR_MODES; do
+ 		getfattr -m $nsp -e hex -n $nsp.name2 $SCRATCH_MNT/$inode 2>&1 | invalid_attribute_filter
  
- 	echo "+++ create fs on image file $original_size" | \
+ 		echo "*** final list (strings, type=$inode, nsp=$nsp)"
+-		getfattr -m '.' -e hex $SCRATCH_MNT/$inode
++		getfattr -m '.' -e hex $SCRATCH_MNT/$inode | grep -ve "security\.selinux"
+ 	
+ 	done
+ done
+diff --git a/tests/generic/377 b/tests/generic/377
+index f7835ee8..0ce2cb4b 100755
+--- a/tests/generic/377
++++ b/tests/generic/377
+@@ -66,7 +66,7 @@ $listxattr $testfile 9
+ $listxattr $testfile 11
+ 
+ # 6. Calling listxattr with buffersize bigger than needed should succeed.
+-$listxattr $testfile 500 | sort
++$listxattr $testfile 500 | grep -ve "security\.selinux" | sort
+ 
+ status=0
+ exit
 -- 
 2.18.1
