@@ -1,113 +1,330 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:42315 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726387AbeKDAtv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 3 Nov 2018 20:49:51 -0400
-Date: Sat, 3 Nov 2018 23:38:03 +0800
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:42034 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726989AbeK1Oau (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Nov 2018 09:30:50 -0500
+Received: by mail-pl1-f196.google.com with SMTP id x21-v6so16650015pln.9
+        for <fstests@vger.kernel.org>; Tue, 27 Nov 2018 19:30:46 -0800 (PST)
+Date: Wed, 28 Nov 2018 11:30:39 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs: test packaged crc32c code
-Message-ID: <20181103153803.GB12788@desktop>
-References: <20181029181242.GA4131@magnolia>
+Subject: Re: [PATCH 1/3] generic: workaround device where glibc is not
+ installed
+Message-ID: <20181128033039.GQ3889@desktop>
+References: <20181127214308.137410-1-gwendal@chromium.org>
+ <20181127214308.137410-2-gwendal@chromium.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181029181242.GA4131@magnolia>
+In-Reply-To: <20181127214308.137410-2-gwendal@chromium.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>
+To: Gwendal Grignou <gwendal@chromium.org>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Oct 29, 2018 at 11:12:42AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Tue, Nov 27, 2018 at 01:43:06PM -0800, Gwendal Grignou wrote:
+> Some tests needs page size and long size, provided by getconf.
+> On systems where getconf is not installed, guess with default values.
 > 
-> Use the new crc32selftest command in xfs_io to check the correct
-> operation of the packaged xfsprogs, on the off chance that the packages
-> were cross compiled on a different machine type (which means the build
-> time test doesn't hold much water).
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Signed-off-by: Gwendal Grignou <gwendal@chromium.org>
 > ---
->  tests/xfs/734     |   44 ++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/734.out |    3 +++
->  tests/xfs/group   |    1 +
->  3 files changed, 48 insertions(+)
->  create mode 100755 tests/xfs/734
->  create mode 100644 tests/xfs/734.out
+>  common/config     | 18 ++++++++++++++++++
+>  common/rc         |  6 ------
+>  tests/btrfs/053   |  2 +-
+>  tests/generic/205 |  2 +-
+>  tests/generic/206 |  2 +-
+>  tests/generic/216 |  2 +-
+>  tests/generic/217 |  2 +-
+>  tests/generic/218 |  2 +-
+>  tests/generic/220 |  2 +-
+>  tests/generic/222 |  2 +-
+>  tests/generic/227 |  2 +-
+>  tests/generic/229 |  2 +-
+>  tests/generic/238 |  2 +-
+>  tests/generic/349 |  6 +++---
+>  tests/generic/350 |  6 +++---
+>  tests/generic/351 |  6 +++---
+>  16 files changed, 38 insertions(+), 26 deletions(-)
 > 
-> diff --git a/tests/xfs/734 b/tests/xfs/734
-> new file mode 100755
-> index 00000000..847c5bfd
-> --- /dev/null
-> +++ b/tests/xfs/734
-> @@ -0,0 +1,44 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 734
-> +#
-> +# Ensure that xfsprogs crc32 works correctly via xfs_io crc32selftest command.
-> +#
-> +seq=`basename "$0"`
-> +seqres="$RESULT_DIR/$seq"
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -rf "$tmp".*
+> diff --git a/common/config b/common/config
+> index 8a5a6e08..e7a83c3c 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -718,6 +718,24 @@ get_next_config() {
+>  	fi
+>  }
+>  
+> +# Workaround systems where glibc is not installed.
+> +GETCONF=$(which getconf 2> /dev/null) || GETCONF=
+
+The GETCONF (or GETCONF_PROG is prefered) definition belongs to
+common/config along with other FOO_PROG definitions.
+
+> +get_page_size() {
+> +	if [ -z "$GETCONF" ]; then
+> +		echo "4096"
+> +	else
+> +		"$GETCONF" PAGE_SIZE
+> +	fi
 > +}
 > +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs xfs
-> +_require_xfs_io_command "crc32selftest"
-
-Looks like the new command was renamed to "crc32cselftest", I did the
-same rename on commit then.
-
-> +
-> +rm -f "$seqres.full"
-> +
-> +filter_selftest() {
-> +	sed -e 's/bytes in [0-9]* usec/bytes in XXX usec/g'
+> +get_long_bit() {
+> +	if [ -z "$GETCONF" ]; then
+> +		echo "64"
+> +	else
+> +		"$GETCONF" LONG_BIT
+> +	fi
 > +}
 > +
-> +$XFS_IO_PROG -c 'crc32selftest' | filter_selftest
 
-Same here.
+The functions should go to common/rc file.
+
+>  if [ -z "$CONFIG_INCLUDED" ]; then
+>  	get_next_config `echo $HOST_OPTIONS_SECTIONS | cut -f1 -d" "`
+>  	export CONFIG_INCLUDED=true
+> diff --git a/common/rc b/common/rc
+> index be1ed68c..992cb3cc 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3686,12 +3686,6 @@ _get_block_size()
+>  	stat -f -c %S $1
+>  }
+>  
+> -get_page_size()
+> -{
+> -	echo $(getconf PAGE_SIZE)
+> -}
+> -
+> -
+
+But I think we could just use "$here/src/feature -s" to get page size in
+get_page_size() and "$here/src/feature -w" to get bits per long. But we
+need to add
+
+_require_test_program "feature"
+
+to all tests that call get_page_size()/get_long_bit().
+
+And maybe we could rename get_page_size to _get_page_size while we're at
+it (perhaps in a separate patch), as it's a global helper function not a
+local one.
 
 Thanks,
 Eryu
 
-> +
-> +echo "Silence is golden."
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/734.out b/tests/xfs/734.out
-> new file mode 100644
-> index 00000000..f2a3fdc1
-> --- /dev/null
-> +++ b/tests/xfs/734.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 734
-> +crc32c: tests passed, 225944 bytes in XXX usec
-> +Silence is golden.
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 2cec0585..de66378f 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -491,3 +491,4 @@
->  491 auto quick fuzz
->  492 auto quick fuzz
->  493 auto quick fuzz
-> +734 auto quick
+>  run_fsx()
+>  {
+>  	echo fsx $@
+> diff --git a/tests/btrfs/053 b/tests/btrfs/053
+> index 16656fa8..2c206e2a 100755
+> --- a/tests/btrfs/053
+> +++ b/tests/btrfs/053
+> @@ -43,7 +43,7 @@ _require_attrs
+>  # max(16384, PAGE_SIZE) is the default leaf/node size on btrfs-progs v3.12+.
+>  # Older versions just use max(4096, PAGE_SIZE).
+>  # mkfs.btrfs can't create an fs with a leaf/node size smaller than PAGE_SIZE.
+> -leaf_size=$(echo -e "16384\n`getconf PAGE_SIZE`" | sort -nr | head -1)
+> +leaf_size=$(echo -e "16384\n`get_page_size`" | sort -nr | head -1)
+>  
+>  send_files_dir=$TEST_DIR/btrfs-test-$seq
+>  
+> diff --git a/tests/generic/205 b/tests/generic/205
+> index 53aa1abb..3acd3a28 100755
+> --- a/tests/generic/205
+> +++ b/tests/generic/205
+> @@ -36,7 +36,7 @@ _require_scratch_reflink
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/206 b/tests/generic/206
+> index 9c933657..431e3320 100755
+> --- a/tests/generic/206
+> +++ b/tests/generic/206
+> @@ -37,7 +37,7 @@ _require_odirect
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/216 b/tests/generic/216
+> index abf664d6..16a48aa3 100755
+> --- a/tests/generic/216
+> +++ b/tests/generic/216
+> @@ -37,7 +37,7 @@ _require_xfs_io_command "falloc"
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/217 b/tests/generic/217
+> index dda6ec7a..fc07c8ea 100755
+> --- a/tests/generic/217
+> +++ b/tests/generic/217
+> @@ -38,7 +38,7 @@ _require_odirect
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/218 b/tests/generic/218
+> index 7ed74724..fbba706b 100755
+> --- a/tests/generic/218
+> +++ b/tests/generic/218
+> @@ -37,7 +37,7 @@ _require_xfs_io_command "falloc"
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/220 b/tests/generic/220
+> index fdee86d8..f6a35290 100755
+> --- a/tests/generic/220
+> +++ b/tests/generic/220
+> @@ -38,7 +38,7 @@ _require_odirect
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/222 b/tests/generic/222
+> index 06d88ff5..357f453a 100755
+> --- a/tests/generic/222
+> +++ b/tests/generic/222
+> @@ -37,7 +37,7 @@ _require_xfs_io_command "falloc"
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/227 b/tests/generic/227
+> index 457b5a48..52b41ba2 100755
+> --- a/tests/generic/227
+> +++ b/tests/generic/227
+> @@ -38,7 +38,7 @@ _require_odirect
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/229 b/tests/generic/229
+> index 9872b295..2b099bdf 100755
+> --- a/tests/generic/229
+> +++ b/tests/generic/229
+> @@ -37,7 +37,7 @@ _require_xfs_io_command "falloc"
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/238 b/tests/generic/238
+> index e8276cc5..fc5d3f49 100755
+> --- a/tests/generic/238
+> +++ b/tests/generic/238
+> @@ -38,7 +38,7 @@ _require_odirect
+>  
+>  rm -f $seqres.full
+>  
+> -pagesz=$(getconf PAGE_SIZE)
+> +pagesz=$(get_page_size)
+>  blksz=$((pagesz / 4))
+>  
+>  echo "Format and mount"
+> diff --git a/tests/generic/349 b/tests/generic/349
+> index f01f817d..9084bf56 100755
+> --- a/tests/generic/349
+> +++ b/tests/generic/349
+> @@ -50,15 +50,15 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+>  
+>  echo "Zero range to MAX_LFS_FILESIZE"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> +case "$(get_long_bit)" in
+>  "32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> +	zod=$(( ($(get_page_size) << ($(get_long_bit) - 1) ) - 1))
+>  	;;
+>  "64")
+>  	zod=9223372036854775807
+>  	;;
+>  *)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> +	_fail "sizeof(long) == $(get_long_bit)?"
+>  	;;
+>  esac
+>  $XFS_IO_PROG -c "fzero -k 0 $zod" $dev
+> diff --git a/tests/generic/350 b/tests/generic/350
+> index 0aea4c09..b4d30a57 100755
+> --- a/tests/generic/350
+> +++ b/tests/generic/350
+> @@ -47,15 +47,15 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+>  
+>  echo "Punch to MAX_LFS_FILESIZE"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> +case "$(get_long_bit)" in
+>  "32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> +	zod=$(( ($(get_page_size) << ($(get_long_bit) - 1) ) - 1))
+>  	;;
+>  "64")
+>  	zod=9223372036854775807
+>  	;;
+>  *)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> +	_fail "sizeof(long) == $(get_long_bit)?"
+>  	;;
+>  esac
+>  $XFS_IO_PROG -c "fpunch 0 $zod" $dev
+> diff --git a/tests/generic/351 b/tests/generic/351
+> index e326dca1..b86b4d58 100755
+> --- a/tests/generic/351
+> +++ b/tests/generic/351
+> @@ -62,15 +62,15 @@ $XFS_IO_PROG -c "fpunch 512 512" $dev
+>  
+>  echo "Zero range past MAX_LFS_FILESIZE keep size"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> +case "$(get_long_bit)" in
+>  "32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> +	zod=$(( ($(get_page_size) << ($(get_long_bit) - 1) ) - 1))
+>  	;;
+>  "64")
+>  	zod=9223372036854775807
+>  	;;
+>  *)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> +	_fail "sizeof(long) == $(get_long_bit)?"
+>  	;;
+>  esac
+>  $XFS_IO_PROG -c "fzero -k 512k $zod" $dev
+> -- 
+> 2.18.1
+> 
