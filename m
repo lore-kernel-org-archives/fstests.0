@@ -1,60 +1,60 @@
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:34140 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726456AbeK3RqV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 30 Nov 2018 12:46:21 -0500
-Received: by mail-pl1-f195.google.com with SMTP id w4so2318040plz.1
-        for <fstests@vger.kernel.org>; Thu, 29 Nov 2018 22:38:06 -0800 (PST)
-Date: Fri, 30 Nov 2018 14:37:59 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 1/3] generic: workaround device where glibc is not
- installed
-Message-ID: <20181130063759.GT3889@desktop>
-References: <20181127214308.137410-1-gwendal@chromium.org>
- <20181127214308.137410-2-gwendal@chromium.org>
- <20181128033039.GQ3889@desktop>
- <20181129021003.GJ19305@dastard>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:53914 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726766AbeK2S7E (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Nov 2018 13:59:04 -0500
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
+        by cn.fujitsu.com (Postfix) with ESMTP id 405864B7349C
+        for <fstests@vger.kernel.org>; Thu, 29 Nov 2018 15:54:32 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] ext4/002: Fix obsolete TEST_DEV/TEST_DIR in _check_ext4_eof_flag()
+Date: Thu, 29 Nov 2018 15:15:32 +0800
+Message-ID: <1543475732-10002-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181129021003.GJ19305@dastard>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Gwendal Grignou <gwendal@chromium.org>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Nov 29, 2018 at 01:10:03PM +1100, Dave Chinner wrote:
-> On Wed, Nov 28, 2018 at 11:30:39AM +0800, Eryu Guan wrote:
-> > >  	export CONFIG_INCLUDED=true
-> > > diff --git a/common/rc b/common/rc
-> > > index be1ed68c..992cb3cc 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -3686,12 +3686,6 @@ _get_block_size()
-> > >  	stat -f -c %S $1
-> > >  }
-> > >  
-> > > -get_page_size()
-> > > -{
-> > > -	echo $(getconf PAGE_SIZE)
-> > > -}
-> > > -
-> > > -
-> > 
-> > But I think we could just use "$here/src/feature -s" to get page size in
-> > get_page_size() and "$here/src/feature -w" to get bits per long. But we
-> > need to add
-> > 
-> > _require_test_program "feature"
-> 
-> IMO, that is unnecessary. `feature` is test harness infrastructure,
-> like common/rc and check.  If the feature binary does not build then
-> the test harness is running on a broken platform. IOWs, we shouldn't
-> be requiring functionality tests for core infrastructure - if the
-> core infrastructure didn't build, then there's bigger problems that
-> need to be fixed...
+Commit 6b06a9bb6fb0 has used SCRATCH_DEV/SCRATCH_MNT rather than
+TEST_DEV/TEST_DIR for holding the test files, so we need to use
+SCRATCH_DEV/SCRATCH_MNT in _check_ext4_eof_flag() as well.
 
-Makes sense. Then it'd be better to require it explicitly in
-common/config as what we did to fsstress and xfs_io etc.
+Fixes: 6b06a9bb6fb0 ("ext4/002: Work with 64k block size")
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/ext4/002 | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
 
-Thanks,
-Eryu
+diff --git a/tests/ext4/002 b/tests/ext4/002
+index b911b1a..986834b 100755
+--- a/tests/ext4/002
++++ b/tests/ext4/002
+@@ -62,11 +62,11 @@ _check_ext4_eof_flag()
+   if [ "${FSTYP}" == "ext4" ]; then
+     bit_set=1
+ 
+-    # Unmount the ${TEST_DEV}
+-    _test_unmount
++    # Unmount the ${SCRATCH_DEV}
++    _scratch_unmount
+ 
+     # Run debugfs to gather file_parameters - specifically iflags.
+-    file_params=`debugfs ${TEST_DEV} -R "stat ${1}" 2>&1 | grep -e Flags:`
++    file_params=`debugfs ${SCRATCH_DEV} -R "stat ${1}" 2>&1 | grep -e Flags:`
+     iflags=${file_params#*Flags: }
+ 
+     # Ensure that the iflags value was parsed correctly.
+@@ -92,8 +92,8 @@ _check_ext4_eof_flag()
+       exit ${status}
+     fi
+ 
+-    # Mount the ${TEST_DEV}
+-    mount ${TEST_DEV} -t ${FSTYP} ${TEST_DIR}
++    # Mount the ${SCRATCH_DEV}
++    _scratch_mount
+   fi
+ }
+ 
+-- 
+1.8.3.1
