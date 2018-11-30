@@ -1,60 +1,91 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:53914 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726766AbeK2S7E (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Nov 2018 13:59:04 -0500
-Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
-        by cn.fujitsu.com (Postfix) with ESMTP id 405864B7349C
-        for <fstests@vger.kernel.org>; Thu, 29 Nov 2018 15:54:32 +0800 (CST)
-From: Xiao Yang <yangx.jy@cn.fujitsu.com>
-Subject: [PATCH] ext4/002: Fix obsolete TEST_DEV/TEST_DIR in _check_ext4_eof_flag()
-Date: Thu, 29 Nov 2018 15:15:32 +0800
-Message-ID: <1543475732-10002-1-git-send-email-yangx.jy@cn.fujitsu.com>
+Received: from mail-yb1-f194.google.com ([209.85.219.194]:45571 "EHLO
+        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726084AbeLAAkY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 30 Nov 2018 19:40:24 -0500
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20181130051253.GB7100@sh-el5.eng.rdu2.redhat.com> <20181130121506.GI2299@dhcp-12-149.nay.redhat.com>
+In-Reply-To: <20181130121506.GI2299@dhcp-12-149.nay.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 30 Nov 2018 15:30:54 +0200
+Message-ID: <CAOQ4uxg9MdMbkM5+CuXK-VmmqxF8UmNkNqeKTHoxOtTnQ2=LnQ@mail.gmail.com>
+Subject: Re: [4.20-rc4 regression] generic/095 Concurrent mixed I/O hang on
+ xfs based overlayfs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Commit 6b06a9bb6fb0 has used SCRATCH_DEV/SCRATCH_MNT rather than
-TEST_DEV/TEST_DIR for holding the test files, so we need to use
-SCRATCH_DEV/SCRATCH_MNT in _check_ext4_eof_flag() as well.
+On Fri, Nov 30, 2018 at 2:13 PM Zorro Lang <zlang@redhat.com> wrote:
+>
+> On Fri, Nov 30, 2018 at 12:12:53AM -0500, Murphy Zhou wrote:
+> > Hi,
+> >
+> > Hit a xfs regression issue by generic/095 on overlayfs.
+> >
+> > It's easy to reproduce. Tests processes hang there and never return.
+> > There are some warning in the dmesg.
+> >
+> > SIGINT (Ctrl+C) can't kill the tests, neither does SIGTERM (kill).
+> > However, SIGKILL (kill -9) can clean them up.
+> >
+> > This happens when testing on v4 or v5 or reflink, with the same behaviour.
+> > -m crc=0
+> > -m crc=1,finobt=1,rmapbt=0,reflink=0 -i sparse=1
+> > -m crc=1,finobt=1,rmapbt=1,reflink=1 -i sparse=1
+> >
+> > This does not happen if ext4 as base fs for overlayfs.
+> >
+> > Bisecting points to this commit:
+> >       4721a601 iomap: dio data corruption and spurious errors when pipes fill
+> >
+> > Test pass soon after this commit reverted.
+> >
+> > # ps axjf
+> >  1839  1862   S+    0:00  |  \_ /bin/bash ./bin/single -o -t generic/095
+> >  1862  2005   S+    0:00  |      \_ /bin/bash ./check -T -overlay generic/095
+> >  2005  2292   S+    0:00  |          \_ /bin/bash ./tests/generic/095
+> >  2292  2516   Sl+   0:01  |              \_ /usr/bin/fio /tmp/2292.fio
+> >  2516  2565   Rs    6:02  |                  \_ /usr/bin/fio /tmp/2292.fio
+> >  2516  2566   Rs    6:02  |                  \_ /usr/bin/fio /tmp/2292.fio
+> >  2516  2567   Rs    6:02  |                  \_ /usr/bin/fio /tmp/2292.fio
+> >  2516  2568   Rs    6:02  |                  \_ /usr/bin/fio /tmp/2292.fio
+> >  2516  2569   Rs    6:02  |                  \_ /usr/bin/fio /tmp/2292.fio
+>
+> Nice catch! I didn't tried overlayfs on XFS regression test this time. I never hit
+> issue on XFS singly, even on glusterfs(XFS underlying).
+>
+> I just gave it a try. This bug is reproducible on xfs-linux git tree
+> xfs-4.20-fixes-2 HEAD. And by strace all fio processes, they all
+> keep outputing [1]. More details as [2]. Only overlayfs on XFS can
+> reproduce this bug, overlayfs on Ext4 can't.
+>
 
-Fixes: 6b06a9bb6fb0 ("ext4/002: Work with 64k block size")
-Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
----
- tests/ext4/002 | 10 +++++-----
- 1 file changed, 5 insertions(+), 5 deletions(-)
+Darrick,
 
-diff --git a/tests/ext4/002 b/tests/ext4/002
-index b911b1a..986834b 100755
---- a/tests/ext4/002
-+++ b/tests/ext4/002
-@@ -62,11 +62,11 @@ _check_ext4_eof_flag()
-   if [ "${FSTYP}" == "ext4" ]; then
-     bit_set=1
- 
--    # Unmount the ${TEST_DEV}
--    _test_unmount
-+    # Unmount the ${SCRATCH_DEV}
-+    _scratch_unmount
- 
-     # Run debugfs to gather file_parameters - specifically iflags.
--    file_params=`debugfs ${TEST_DEV} -R "stat ${1}" 2>&1 | grep -e Flags:`
-+    file_params=`debugfs ${SCRATCH_DEV} -R "stat ${1}" 2>&1 | grep -e Flags:`
-     iflags=${file_params#*Flags: }
- 
-     # Ensure that the iflags value was parsed correctly.
-@@ -92,8 +92,8 @@ _check_ext4_eof_flag()
-       exit ${status}
-     fi
- 
--    # Mount the ${TEST_DEV}
--    mount ${TEST_DEV} -t ${FSTYP} ${TEST_DIR}
-+    # Mount the ${SCRATCH_DEV}
-+    _scratch_mount
-   fi
- }
- 
--- 
-1.8.3.1
+This is my cue to insert a rant. You already know what I am going to rant about.
+
+I cannot force you to add a check -overlay xfstests run to your pull
+request validation
+routine. I can offer assistance in any questions you may have and I can offer
+support for check -overlay infrastructure if it breaks or if it needs
+improvements.
+
+I have checked on several recent point releases that check -overlay does not
+regress any tests compared to xfs reflink configuration, and when I
+found a regression
+(mostly in overlayfs code, but also in xfs code sometimes) I reported
+and/or fixed it.
+But I do not have the resources to validate every xfs merge and
+certainly not xfs-next.
+
+There is a large group of tests that is expected to notrun, which
+makes running the
+-overlay test a lot faster than any given xfs configuration and IMO
+running just a single
+xfs reflink config with -overlay would give a pretty good test coverage.
+
+So what do you say?...
+
+Thanks,
+Amir.
