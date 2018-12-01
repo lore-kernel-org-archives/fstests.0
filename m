@@ -1,85 +1,79 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:45476 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726650AbeLCQls (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 11:41:48 -0500
-Date: Mon, 3 Dec 2018 08:41:36 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 0/3] fstests: copy_file_range() bounds testing
-Message-ID: <20181203164136.GB8115@magnolia>
-References: <20181203064256.26768-1-david@fromorbit.com>
+Received: from mail-yb1-f193.google.com ([209.85.219.193]:43707 "EHLO
+        mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726209AbeLAUg6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 1 Dec 2018 15:36:58 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181203064256.26768-1-david@fromorbit.com>
+References: <20181130051253.GB7100@sh-el5.eng.rdu2.redhat.com>
+ <20181130121506.GI2299@dhcp-12-149.nay.redhat.com> <CAOQ4uxg9MdMbkM5+CuXK-VmmqxF8UmNkNqeKTHoxOtTnQ2=LnQ@mail.gmail.com>
+ <20181130182322.GM8125@magnolia>
+In-Reply-To: <20181130182322.GM8125@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sat, 1 Dec 2018 11:24:41 +0200
+Message-ID: <CAOQ4uxjxTXZ14pcvy5wkJrwP012BdStx8gSNL=dkkOW1BXKT-g@mail.gmail.com>
+Subject: Re: [4.20-rc4 regression] generic/095 Concurrent mixed I/O hang on
+ xfs based overlayfs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 03, 2018 at 05:42:53PM +1100, Dave Chinner wrote:
-> Hi folks,
-> 
-> We suck at bounds testing new system calls. This is a test that
-> exercises the expected failure cases for copy_file_range(). It's
-> going to fail miserably on existing kernels - I'm about to post a
-> series of fixes to linux-fsdevel that make this test pass.
+> > Darrick,
+> >
+> > This is my cue to insert a rant. You already know what I am going to rant about.
+> >
+> > I cannot force you to add a check -overlay xfstests run to your pull
+> > request validation
+> > routine. I can offer assistance in any questions you may have and I can offer
+> > support for check -overlay infrastructure if it breaks or if it needs
+> > improvements.
+> >
+> > I have checked on several recent point releases that check -overlay does not
+> > regress any tests compared to xfs reflink configuration, and when I
+> > found a regression
+> > (mostly in overlayfs code, but also in xfs code sometimes) I reported
+> > and/or fixed it.
+> > But I do not have the resources to validate every xfs merge and
+> > certainly not xfs-next.
+> >
+> > There is a large group of tests that is expected to notrun, which
+> > makes running the
+> > -overlay test a lot faster than any given xfs configuration and IMO
+> > running just a single
+> > xfs reflink config with -overlay would give a pretty good test coverage.
+> >
+> > So what do you say?...
+>
+> Frankly I'd rather push the kernelci/0day/lf/whoever folks to kick off
+> fstests across all the major filesystems after the daily for-next merge
+> so that we can all see if there are regressions over the previous day's
+> test.  IOWs, rather than loading ourselves down with more testing
+> burden, let's make it more public.
+>
+> I've received occasional reports from the 0day robot, but I'm not sure
+> if it's testing consistently because it only ever seems to emit
+> complaints, not "I love your branch and even better nothing regressed!".
+>
 
-Can you please cc the xfs list on fstests changes that affect xfs? :)
+That would indeed be great if we had some more knowledge about
+what is being tested by 0day and friends.
 
-(says a prolific patchbomber :P)
+Regardless, check -overlay had already found several bugs in XFS code
+(I can look it up, but you know what I mean), so I argue that it would be
+beneficial to you as XFS maintainer and not only to overlayfs users if
+you run check -overlay on pull request branches.
+Consider overlayfs as a unit test for some of the XFS VFS interfaces
+that are harder (or impossible) to hit from userspace.
+Besides, as I said, the cost of running check -overlay on a single reflink
+config is relatively cheap, so please consider running it occasionally to be
+a head of those type of bugs.
 
-> The test is also dependent on xfs_io changes that I posted a few
-> hours ago. The three (not 2!) patches can be found here:
-> 
-> https://marc.info/?l=linux-xfs&m=154378403323889&w=2
-> https://marc.info/?l=linux-xfs&m=154378403523890&w=2
-> https://marc.info/?l=linux-xfs&m=154378403323888&w=2
-> https://marc.info/?l=linux-xfs&m=154379644526132&w=2
-> 
-> Comments welcome.
-> 
-> -Dave
-> 
-> ---
-> 
-> As an aside, one thing that I've discovered in writing this test is
-> that certain things we do to test certain file conditions are not
-> being tested corectly. e.g. immutable files.
-> 
-> When we set a file as immutable and then go to modify it with xfs_io
-> like this:
-> 
-> # xfs_io -c "chattr +i" test_file
-> # xfs_io -c "pwrite 0 4k" test_file
-> 
-> We are not actually testing whether the pwrite() syscall detected
-> that it can't write to an immutable file. xfs_io actually fails when
-> the open(O_RDWR) syscall fails because we can't open an immutable
-> file for writing. IOWs, it's not testing pwrite() at all.
-> 
-> Hence tests like generic/159 and generic/160 are not actually
-> testing whether cloning/deduping files fails on immutable files.
-> 
-> Instead, what we need to do is open the file O_RDWR, then set the
-> file immutable, then perform the modification operation. i.e. this:
-> 
-> # xfs_io -c "chattr +i" -c "pwrite 0 4k" test_file
+> That said, this *does* confirm Zorro's earlier point that I should give
+> him a week to test xfs for-next before pushing to Linus.
+>
 
-Ok, I'll post a change to 159/160 to fix that.  I don't think btrfs got
-this right (inode_permission vs. security_file_permission) either, which
-is why the hoisted code and tests (mis)behave the way they do.
+It looks like between Zorro and yourself, overlayfs+xfs bugs should not
+be slipping in to master anymore, so I'm happy with the way things are :-)
 
-> Will exercise the pwrite() syscall hitting an immutable file. A
-> similar thing happens with trying to write/modify to read only files
-> - the open() call fails, not the call that we want to test. That's
-> why I added the "chmod" operation to xfs_io, to allow us to open a
-> file for write, then turn it read only while we still have a
-> writeable fd open. This then exercises trying to write/modify a
-> read-only file.
-> 
-> I'm sure there's lots of tests that have these problems. I don't
-> have time to audit them right now, but I'm bringing it up so that
-> people are aware of the issue and at least catch problems like this
-> in new tests....
-
---D
+Thanks,
+Amir.
