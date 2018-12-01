@@ -1,79 +1,66 @@
-Received: from mail-yb1-f193.google.com ([209.85.219.193]:43707 "EHLO
-        mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726209AbeLAUg6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 1 Dec 2018 15:36:58 -0500
+Received: from mail-yb1-f196.google.com ([209.85.219.196]:39304 "EHLO
+        mail-yb1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726299AbeLAVAK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 1 Dec 2018 16:00:10 -0500
 MIME-Version: 1.0
-References: <20181130051253.GB7100@sh-el5.eng.rdu2.redhat.com>
- <20181130121506.GI2299@dhcp-12-149.nay.redhat.com> <CAOQ4uxg9MdMbkM5+CuXK-VmmqxF8UmNkNqeKTHoxOtTnQ2=LnQ@mail.gmail.com>
- <20181130182322.GM8125@magnolia>
-In-Reply-To: <20181130182322.GM8125@magnolia>
+References: <20181130192047.GO8125@magnolia>
+In-Reply-To: <20181130192047.GO8125@magnolia>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Sat, 1 Dec 2018 11:24:41 +0200
-Message-ID: <CAOQ4uxjxTXZ14pcvy5wkJrwP012BdStx8gSNL=dkkOW1BXKT-g@mail.gmail.com>
-Subject: Re: [4.20-rc4 regression] generic/095 Concurrent mixed I/O hang on
- xfs based overlayfs
+Date: Sat, 1 Dec 2018 11:47:50 +0200
+Message-ID: <CAOQ4uxhv7vOaCRK9FojG5zm=cKtobBvPmVOdWS+3GE53OoX+9A@mail.gmail.com>
+Subject: Re: [RFC PATCH] splice: don't read more than available pipe space
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>
 List-ID: <fstests@vger.kernel.org>
 
-> > Darrick,
-> >
-> > This is my cue to insert a rant. You already know what I am going to rant about.
-> >
-> > I cannot force you to add a check -overlay xfstests run to your pull
-> > request validation
-> > routine. I can offer assistance in any questions you may have and I can offer
-> > support for check -overlay infrastructure if it breaks or if it needs
-> > improvements.
-> >
-> > I have checked on several recent point releases that check -overlay does not
-> > regress any tests compared to xfs reflink configuration, and when I
-> > found a regression
-> > (mostly in overlayfs code, but also in xfs code sometimes) I reported
-> > and/or fixed it.
-> > But I do not have the resources to validate every xfs merge and
-> > certainly not xfs-next.
-> >
-> > There is a large group of tests that is expected to notrun, which
-> > makes running the
-> > -overlay test a lot faster than any given xfs configuration and IMO
-> > running just a single
-> > xfs reflink config with -overlay would give a pretty good test coverage.
-> >
-> > So what do you say?...
+On Fri, Nov 30, 2018 at 9:20 PM Darrick J. Wong <darrick.wong@oracle.com> wrote:
 >
-> Frankly I'd rather push the kernelci/0day/lf/whoever folks to kick off
-> fstests across all the major filesystems after the daily for-next merge
-> so that we can all see if there are regressions over the previous day's
-> test.  IOWs, rather than loading ourselves down with more testing
-> burden, let's make it more public.
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 >
-> I've received occasional reports from the 0day robot, but I'm not sure
-> if it's testing consistently because it only ever seems to emit
-> complaints, not "I love your branch and even better nothing regressed!".
+> In commit 4721a601099, we tried to fix a problem wherein directio reads
+> into a splice pipe will bounce EFAULT/EAGAIN all the way out to
+> userspace by simulating a zero-byte short read.  This happens because
+> some directio read implementations (xfs) will call
+> bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchronous
+> reads, but as soon as we run out of pipe buffers that _get_pages call
+> returns EFAULT, which the splice code translates to EAGAIN and bounces
+> out to userspace.
 >
-
-That would indeed be great if we had some more knowledge about
-what is being tested by 0day and friends.
-
-Regardless, check -overlay had already found several bugs in XFS code
-(I can look it up, but you know what I mean), so I argue that it would be
-beneficial to you as XFS maintainer and not only to overlayfs users if
-you run check -overlay on pull request branches.
-Consider overlayfs as a unit test for some of the XFS VFS interfaces
-that are harder (or impossible) to hit from userspace.
-Besides, as I said, the cost of running check -overlay on a single reflink
-config is relatively cheap, so please consider running it occasionally to be
-a head of those type of bugs.
-
-> That said, this *does* confirm Zorro's earlier point that I should give
-> him a week to test xfs for-next before pushing to Linus.
+> In that commit, the iomap code catches the EFAULT and simulates a
+> zero-byte read, but that causes assertion errors on regular splice reads
+> because xfs doesn't allow short directio reads.
 >
+> The brokenness is compounded by splice_direct_to_actor immediately
+> bailing on do_splice_to returning <= 0 without ever calling ->actor
+> (which empties out the pipe), so if userspace calls back we'll EFAULT
+> again on the full pipe, and nothing ever gets copied.
+>
+> Therefore, teach splice_direct_to_actor to clamp its requests to the
+> amount of free space in the pipe and remove the simulated short read
+> from the iomap directio code.
+>
+> Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
 
-It looks like between Zorro and yourself, overlayfs+xfs bugs should not
-be slipping in to master anymore, so I'm happy with the way things are :-)
+Problem is the regressing commit does two things and you here revert one
+of them and re-fix the bug.
+
+IMO, it would be nicer to:
+- Revert the regression commit
+- Attribute Reported-by and specify regression details in revert commit
+- Re-apply Dave's zero_tail fix with its own commit instead of a
+  "To make matters worse..." clause.
+- Apply your re-fix with description of original problem and without the
+  story about the regression
+
+Your call.
+
+Miklos,
+
+Can you please review the suggested re-fix?
 
 Thanks,
 Amir.
