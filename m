@@ -1,14 +1,17 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:38876 "EHLO
+Received: from aserp2120.oracle.com ([141.146.126.78]:40300 "EHLO
         aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725554AbeLBSJI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Dec 2018 13:09:08 -0500
-Date: Sun, 2 Dec 2018 10:08:32 -0800
+        with ESMTP id S1725535AbeLBSLJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Dec 2018 13:11:09 -0500
+Date: Sun, 2 Dec 2018 10:10:45 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 1/2] splice: don't read more than available pipe space
-Message-ID: <20181202180832.GR8125@magnolia>
+Subject: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
+ directio short read on EFAULT)
+Message-ID: <20181202181045.GS8125@magnolia>
+References: <20181202180832.GR8125@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20181202180832.GR8125@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>
 Cc: jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
@@ -27,40 +30,43 @@ out to userspace.
 
 In that commit, the iomap code catches the EFAULT and simulates a
 zero-byte read, but that causes assertion errors on regular splice reads
-because xfs doesn't allow short directio reads.
+because xfs doesn't allow short directio reads.  This causes infinite
+splice() loops and assertion failures on generic/095 on overlayfs
+because xfs only permit total success or total failure of a directio
+operation.  The underlying issue in the pipe splice code has now been
+fixed by changing the pipe splice loop to avoid avoid reading more data
+than there is space in the pipe.
 
-The brokenness is compounded by splice_direct_to_actor immediately
-bailing on do_splice_to returning <= 0 without ever calling ->actor
-(which empties out the pipe), so if userspace calls back we'll EFAULT
-again on the full pipe, and nothing ever gets copied.
-
-Therefore, teach splice_direct_to_actor to clamp its requests to the
-amount of free space in the pipe and remove the simulated short read
-from the iomap directio code.
+Therefore, it's no longer necessary to simulate the short directio, so
+remove the hack from iomap.
 
 Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
 Reported-by: Amir Goldstein <amir73il@gmail.com>
 Reviewed-by: Christoph Hellwig <hch@lst.de>
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
-v2: split into two parts per hch request
+v2: split into two patches per hch request
 ---
- fs/splice.c |    5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ fs/iomap.c |    9 ---------
+ 1 file changed, 9 deletions(-)
 
-diff --git a/fs/splice.c b/fs/splice.c
-index 3553f1956508..4bd9d9590199 100644
---- a/fs/splice.c
-+++ b/fs/splice.c
-@@ -949,7 +949,10 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
- 		size_t read_len;
- 		loff_t pos = sd->pos, prev_pos = pos;
- 
--		ret = do_splice_to(in, &pos, pipe, len, flags);
-+		/* Don't try to read more the pipe has space for. */
-+		read_len = min_t(size_t, len,
-+				 (pipe->buffers - pipe->nrbufs) << PAGE_SHIFT);
-+		ret = do_splice_to(in, &pos, pipe, read_len, flags);
- 		if (unlikely(ret <= 0))
- 			goto out_release;
- 
+diff --git a/fs/iomap.c b/fs/iomap.c
+index 3ffb776fbebe..d6bc98ae8d35 100644
+--- a/fs/iomap.c
++++ b/fs/iomap.c
+@@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_iter *iter,
+ 				dio->wait_for_completion = true;
+ 				ret = 0;
+ 			}
+-
+-			/*
+-			 * Splicing to pipes can fail on a full pipe. We have to
+-			 * swallow this to make it look like a short IO
+-			 * otherwise the higher splice layers will completely
+-			 * mishandle the error and stop moving data.
+-			 */
+-			if (ret == -EFAULT)
+-				ret = 0;
+ 			break;
+ 		}
+ 		pos += ret;
