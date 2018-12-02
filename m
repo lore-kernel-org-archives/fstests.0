@@ -1,87 +1,66 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:36653 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725379AbeLBRKc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Dec 2018 12:10:32 -0500
-Received: by mail-pf1-f193.google.com with SMTP id b85so5168138pfc.3
-        for <fstests@vger.kernel.org>; Sun, 02 Dec 2018 09:10:28 -0800 (PST)
-Message-ID: <5c041202.1c69fb81.ce73c.02e7@mx.google.com>
-Date: Mon, 03 Dec 2018 01:10:21 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to fd532405deaf
+Received: from aserp2120.oracle.com ([141.146.126.78]:38876 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725554AbeLBSJI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Dec 2018 13:09:08 -0500
+Date: Sun, 2 Dec 2018 10:08:32 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH v2 1/2] splice: don't read more than available pipe space
+Message-ID: <20181202180832.GR8125@magnolia>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="6QU4zmhAizy8"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---6QU4zmhAizy8
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>
+Cc: jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-The master branch of the xfstests repository at:
+In commit 4721a601099, we tried to fix a problem wherein directio reads
+into a splice pipe will bounce EFAULT/EAGAIN all the way out to
+userspace by simulating a zero-byte short read.  This happens because
+some directio read implementations (xfs) will call
+bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchronous
+reads, but as soon as we run out of pipe buffers that _get_pages call
+returns EFAULT, which the splice code translates to EAGAIN and bounces
+out to userspace.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+In that commit, the iomap code catches the EFAULT and simulates a
+zero-byte read, but that causes assertion errors on regular splice reads
+because xfs doesn't allow short directio reads.
 
-have just been updated. This update mainly pulls in the first piece of the
-CrashMonkey tests from Jayashree Mohan, many thanks to Jayashree for the test
-and to Filipe Manana and others for reviewing and providing review comments!
-The new test currently fails on btrfs, but the fix is pending on btrfs list.
+The brokenness is compounded by splice_direct_to_actor immediately
+bailing on do_splice_to returning <= 0 without ever calling ->actor
+(which empties out the pipe), so if userspace calls back we'll EFAULT
+again on the full pipe, and nothing ever gets copied.
 
-I didn't pick up the {clone, copy, dedupe}_range addition to fsx/fsstress
-patchset, but I think they're ready to go (except the fsx long soak tests).
-Darrick, please feel free to just resend the long soak tests if there're no
-further updates to the series.
+Therefore, teach splice_direct_to_actor to clamp its requests to the
+amount of free space in the pipe and remove the simulated short read
+from the iomap directio code.
 
-Thanks,
-Eryu
+Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
+Reported-by: Amir Goldstein <amir73il@gmail.com>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+v2: split into two parts per hch request
+---
+ fs/splice.c |    5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
 
-The new head of the master branch is commit:
-
-fd532405deaf fstest: CrashMonkey 'hard link' tests ported to xfstest
-
-New commits:
-
-Jayashree (1):
-      [fd532405deaf] fstest: CrashMonkey 'hard link' tests ported to xfstest
-
-Xiao Yang (1):
-      [8f399f01d1e4] ext4/002: Fix obsolete TEST_DEV/TEST_DIR in _check_ext4_eof_flag()
-
-
-Code Diffstat:
-
- tests/ext4/002        |  10 +--
- tests/generic/520     | 184 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/520.out |  75 ++++++++++++++++++++
- tests/generic/group   |   1 +
- 4 files changed, 265 insertions(+), 5 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---6QU4zmhAizy8
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJcBBHGAAoJECZSqilcj+djadoP+wacsQ9TySs3iWCkjHm/OX63
-mxGB75zJctqpGR9s+bLoCqH1GI41d0WA/0gjHqT6cKJyo9n0XfxCMsoL7Y/MOcbY
-Np4o3jO6/0p4Z4juTVj5JUT7kfdZhx71sj04hGjuV3a+bo5u22ZVyi3xkbGK6NrN
-Zfn8RttCGqlGTdYQW047Jrk5yCBMlAJpMVocHvBsoNJt00deXSXJE5bKSzEKgun1
-bno9LV6T9rDSIyCcRW+VlBs5Ks+UhYXgsmzxj1Q6JpDXOul0QCuKQn4c8vFq3s/6
-plIqK93nV9bjuETetdsUum5yCA8JeL1GyQpp2jjfLUWdiRCNNyT/A+dhY+Wb8Io2
-nIGlmZuOTlOXU7/J3kQlnZcSpa0AXKBFQDoXm5TbeHeJjEs3kFafFmoMaVQvQtf3
-ed1RNN1JOi29b5TOfo8fukNrvsZz26bXUJP66CdAk00I2EuNcZ3eYTX2J86CnMw4
-kDTHdQEa8WQuhxbYJcRP1qoj+rsfmxMu5ofelXBJYkg7G5juRxAEnw6ZiOKUcjbn
-10OezWt2VBirSvodVPL/XaO1bSPfZ8hNfvsZVK/IbThrmOzmgMEPjUWSN9TiUU/q
-+eE3G8uf4ai9b/HAHP4iD1iuJH4UtO/ho1zr8Y08VhMc9WucOxKd2mA0G39YShmC
-5QtCfSqqlrCVOhmyOk0z
-=bdnv
------END PGP SIGNATURE-----
-
---6QU4zmhAizy8--
+diff --git a/fs/splice.c b/fs/splice.c
+index 3553f1956508..4bd9d9590199 100644
+--- a/fs/splice.c
++++ b/fs/splice.c
+@@ -949,7 +949,10 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
+ 		size_t read_len;
+ 		loff_t pos = sd->pos, prev_pos = pos;
+ 
+-		ret = do_splice_to(in, &pos, pipe, len, flags);
++		/* Don't try to read more the pipe has space for. */
++		read_len = min_t(size_t, len,
++				 (pipe->buffers - pipe->nrbufs) << PAGE_SHIFT);
++		ret = do_splice_to(in, &pos, pipe, read_len, flags);
+ 		if (unlikely(ret <= 0))
+ 			goto out_release;
+ 
