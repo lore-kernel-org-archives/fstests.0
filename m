@@ -1,28 +1,29 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:46648 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726637AbeLCQ6K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 11:58:10 -0500
-Date: Mon, 3 Dec 2018 08:58:03 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
-Message-ID: <20181203165803.GE8115@magnolia>
-References: <20181203064256.26768-1-david@fromorbit.com>
- <20181203064256.26768-4-david@fromorbit.com>
+Received: from mail-yw1-f65.google.com ([209.85.161.65]:36646 "EHLO
+        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725829AbeLCHZf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 02:25:35 -0500
+Received: by mail-yw1-f65.google.com with SMTP id y194so4995903ywg.3
+        for <fstests@vger.kernel.org>; Sun, 02 Dec 2018 23:25:31 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20181203064256.26768-1-david@fromorbit.com> <20181203064256.26768-4-david@fromorbit.com>
 In-Reply-To: <20181203064256.26768-4-david@fromorbit.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 3 Dec 2018 09:25:19 +0200
+Message-ID: <CAOQ4uxgddSnVGC6+JmpiseAGKcKVjSq6nYOD4tAMUx5y8Yx3XA@mail.gmail.com>
+Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+Cc: fstests <fstests@vger.kernel.org>, Olga Kornievskaia <kolga@netapp.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
+On Mon, Dec 3, 2018 at 8:43 AM Dave Chinner <david@fromorbit.com> wrote:
+>
 > From: Dave Chinner <dchinner@redhat.com>
-> 
+>
 > Test that copy_file_range will return the correct errors for various
 > error conditions and boundary constraints.
-> 
+>
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
 > ---
 >  tests/generic/530     | 165 ++++++++++++++++++++++++++++++++++++++++++
@@ -31,7 +32,7 @@ On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
 >  3 files changed, 228 insertions(+)
 >  create mode 100755 tests/generic/530
 >  create mode 100644 tests/generic/530.out
-> 
+>
 > diff --git a/tests/generic/530 b/tests/generic/530
 > new file mode 100755
 > index 000000000000..42243cc70914
@@ -52,13 +53,13 @@ On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
 > +
 > +here=`pwd`
 > +tmp=/tmp/$$
-> +status=1	# failure is the default!
+> +status=1       # failure is the default!
 > +trap "_cleanup; exit \$status" 0 1 2 3 7 15
 > +
 > +_cleanup()
 > +{
-> +	cd /
-> +	rm -rf $tmp.*
+> +       cd /
+> +       rm -rf $tmp.*
 > +}
 > +
 > +# get standard environment, filters and checks
@@ -185,7 +186,7 @@ On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
 > +# need a wrapper so the "File size limit exceeded" error can be filtered
 > +do_rlimit_copy()
 > +{
-> +	$XFS_IO_PROG -f -c "copy_range -l 32k -s 0 -d 16m $testdir/file" $testdir/copy
+> +       $XFS_IO_PROG -f -c "copy_range -l 32k -s 0 -d 16m $testdir/file" $testdir/copy
 > +}
 > +
 > +ulimit -f $((8 * 1024))
@@ -199,95 +200,21 @@ On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
 > +cmp $testdir/file $SCRATCH_MNT/copy
 > +echo "md5sums after xdev copy:"
 > +md5sum $testdir/file $SCRATCH_MNT/copy | _filter_test_dir | _filter_scratch
+> +
 
-Echoing Amir, this should be a separate test because it tests new
-functionality.
 
-Really wishing we'd put a WARN_ONCE(1, "Using EXPERIMENTAL
-copy_file_range syscall"); in when this got merged. :( :(
+All the test cases above check for bugs, which I presume your kernel patch
+series is aimed at fixing(?)
 
---D
+This one last test case tests for new functionality that is not
+currently available
+for any filesystem in upstream kernel.
 
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/530.out b/tests/generic/530.out
-> new file mode 100644
-> index 000000000000..c433fb989637
-> --- /dev/null
-> +++ b/tests/generic/530.out
-> @@ -0,0 +1,62 @@
-> +QA output created by 530
-> +swap files return ETXTBUSY
-> +copy_range: Text file busy
-> +copy_range: Text file busy
-> +
-> +immutable file returns EPERM
-> +wrote 65536/65536 bytes at offset 0
-> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> +copy_range: Operation not permitted
-> +
-> +no write perms on destination returns EACCES
-> +copy_range: Permission denied
-> +
-> +source range overlaps EOF returns EINVAL
-> +copy_range: Invalid argument
-> +
-> +source range beyond EOF returns EINVAL
-> +copy_range: Invalid argument
-> +
-> +source range overlaps destination range in same file returns EINVAL
-> +copy_range: Invalid argument
-> +
-> +destination file O_RDONLY returns EBADF
-> +copy_range: Bad file descriptor
-> +
-> +destination file O_APPEND returns EBADF
-> +copy_range: Bad file descriptor
-> +
-> +source/destination as directory returns EISDIR
-> +copy_range: Is a directory
-> +copy_range: Is a directory
-> +
-> +source/destination as blkdev returns EINVAL
-> +copy_range: Invalid argument
-> +copy_range: Invalid argument
-> +
-> +source/destination as chardev returns EINVAL
-> +copy_range: Invalid argument
-> +copy_range: Invalid argument
-> +
-> +source/destination as FIFO returns EINVAL
-> +copy_range: Invalid argument
-> +copy_range: Invalid argument
-> +
-> +length beyond 8EiB wraps around 0 returns EOVERFLOW
-> +copy_range: Value too large for defined data type
-> +copy_range: Value too large for defined data type
-> +
-> +source range beyond 8EiB returns EINVAL
-> +copy_range: Invalid argument
-> +copy_range: Invalid argument
-> +
-> +destination range beyond 8TiB returns EFBIG
-> +copy_range: File too large
-> +
-> +destination larger than rlimit returns EFBIG
-> +File size limit exceeded
-> +
-> +copy across devices
-> +md5sums after xdev copy:
-> +81615449a98aaaad8dc179b3bec87f38  TEST_DIR/test-530/file
-> +81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/copy
-> diff --git a/tests/generic/group b/tests/generic/group
-> index cc05792ba3b6..5ba1280aa3e6 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -523,3 +523,4 @@
->  517 auto quick dedupe clone
->  518 auto quick clone
->  519 auto quick
-> +530 auto quick copy_range
-> -- 
-> 2.19.1
-> 
+Does your kernel patch set also add this functionality to xfs? to generic?
+IMO, it would be better to split this test case for new functionality to a new
+test, so that this one can pass on stable kernels once all the bug
+fixes have been
+applied.
+
+Thanks,
+Amir.
