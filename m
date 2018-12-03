@@ -1,83 +1,85 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:58502 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725867AbeLAGbM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 1 Dec 2018 01:31:12 -0500
-Date: Fri, 30 Nov 2018 11:20:47 -0800
+Received: from aserp2120.oracle.com ([141.146.126.78]:45476 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726650AbeLCQls (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 11:41:48 -0500
+Date: Mon, 3 Dec 2018 08:41:36 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [RFC PATCH] splice: don't read more than available pipe space
-Message-ID: <20181130192047.GO8125@magnolia>
+Subject: Re: [PATCH 0/3] fstests: copy_file_range() bounds testing
+Message-ID: <20181203164136.GB8115@magnolia>
+References: <20181203064256.26768-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20181203064256.26768-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>
-Cc: jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Dec 03, 2018 at 05:42:53PM +1100, Dave Chinner wrote:
+> Hi folks,
+> 
+> We suck at bounds testing new system calls. This is a test that
+> exercises the expected failure cases for copy_file_range(). It's
+> going to fail miserably on existing kernels - I'm about to post a
+> series of fixes to linux-fsdevel that make this test pass.
 
-In commit 4721a601099, we tried to fix a problem wherein directio reads
-into a splice pipe will bounce EFAULT/EAGAIN all the way out to
-userspace by simulating a zero-byte short read.  This happens because
-some directio read implementations (xfs) will call
-bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchronous
-reads, but as soon as we run out of pipe buffers that _get_pages call
-returns EFAULT, which the splice code translates to EAGAIN and bounces
-out to userspace.
+Can you please cc the xfs list on fstests changes that affect xfs? :)
 
-In that commit, the iomap code catches the EFAULT and simulates a
-zero-byte read, but that causes assertion errors on regular splice reads
-because xfs doesn't allow short directio reads.
+(says a prolific patchbomber :P)
 
-The brokenness is compounded by splice_direct_to_actor immediately
-bailing on do_splice_to returning <= 0 without ever calling ->actor
-(which empties out the pipe), so if userspace calls back we'll EFAULT
-again on the full pipe, and nothing ever gets copied.
+> The test is also dependent on xfs_io changes that I posted a few
+> hours ago. The three (not 2!) patches can be found here:
+> 
+> https://marc.info/?l=linux-xfs&m=154378403323889&w=2
+> https://marc.info/?l=linux-xfs&m=154378403523890&w=2
+> https://marc.info/?l=linux-xfs&m=154378403323888&w=2
+> https://marc.info/?l=linux-xfs&m=154379644526132&w=2
+> 
+> Comments welcome.
+> 
+> -Dave
+> 
+> ---
+> 
+> As an aside, one thing that I've discovered in writing this test is
+> that certain things we do to test certain file conditions are not
+> being tested corectly. e.g. immutable files.
+> 
+> When we set a file as immutable and then go to modify it with xfs_io
+> like this:
+> 
+> # xfs_io -c "chattr +i" test_file
+> # xfs_io -c "pwrite 0 4k" test_file
+> 
+> We are not actually testing whether the pwrite() syscall detected
+> that it can't write to an immutable file. xfs_io actually fails when
+> the open(O_RDWR) syscall fails because we can't open an immutable
+> file for writing. IOWs, it's not testing pwrite() at all.
+> 
+> Hence tests like generic/159 and generic/160 are not actually
+> testing whether cloning/deduping files fails on immutable files.
+> 
+> Instead, what we need to do is open the file O_RDWR, then set the
+> file immutable, then perform the modification operation. i.e. this:
+> 
+> # xfs_io -c "chattr +i" -c "pwrite 0 4k" test_file
 
-Therefore, teach splice_direct_to_actor to clamp its requests to the
-amount of free space in the pipe and remove the simulated short read
-from the iomap directio code.
+Ok, I'll post a change to 159/160 to fix that.  I don't think btrfs got
+this right (inode_permission vs. security_file_permission) either, which
+is why the hoisted code and tests (mis)behave the way they do.
 
-Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- fs/iomap.c  |    9 ---------
- fs/splice.c |    5 ++++-
- 2 files changed, 4 insertions(+), 10 deletions(-)
+> Will exercise the pwrite() syscall hitting an immutable file. A
+> similar thing happens with trying to write/modify to read only files
+> - the open() call fails, not the call that we want to test. That's
+> why I added the "chmod" operation to xfs_io, to allow us to open a
+> file for write, then turn it read only while we still have a
+> writeable fd open. This then exercises trying to write/modify a
+> read-only file.
+> 
+> I'm sure there's lots of tests that have these problems. I don't
+> have time to audit them right now, but I'm bringing it up so that
+> people are aware of the issue and at least catch problems like this
+> in new tests....
 
-diff --git a/fs/iomap.c b/fs/iomap.c
-index 3ffb776fbebe..d6bc98ae8d35 100644
---- a/fs/iomap.c
-+++ b/fs/iomap.c
-@@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_iter *iter,
- 				dio->wait_for_completion = true;
- 				ret = 0;
- 			}
--
--			/*
--			 * Splicing to pipes can fail on a full pipe. We have to
--			 * swallow this to make it look like a short IO
--			 * otherwise the higher splice layers will completely
--			 * mishandle the error and stop moving data.
--			 */
--			if (ret == -EFAULT)
--				ret = 0;
- 			break;
- 		}
- 		pos += ret;
-diff --git a/fs/splice.c b/fs/splice.c
-index 3553f1956508..4bd9d9590199 100644
---- a/fs/splice.c
-+++ b/fs/splice.c
-@@ -949,7 +949,10 @@ ssize_t splice_direct_to_actor(struct file *in, struct splice_desc *sd,
- 		size_t read_len;
- 		loff_t pos = sd->pos, prev_pos = pos;
- 
--		ret = do_splice_to(in, &pos, pipe, len, flags);
-+		/* Don't try to read more the pipe has space for. */
-+		read_len = min_t(size_t, len,
-+				 (pipe->buffers - pipe->nrbufs) << PAGE_SHIFT);
-+		ret = do_splice_to(in, &pos, pipe, read_len, flags);
- 		if (unlikely(ret <= 0))
- 			goto out_release;
- 
+--D
