@@ -1,173 +1,293 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:52546 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726649AbeLCQrQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 11:47:16 -0500
-Date: Mon, 3 Dec 2018 08:47:05 -0800
+Received: from userp2130.oracle.com ([156.151.31.86]:46648 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726637AbeLCQ6K (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 11:58:10 -0500
+Date: Mon, 3 Dec 2018 08:58:03 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 2/3] generic/43[014]: copy_range beyond source EOF should
- fail
-Message-ID: <20181203164705.GD8115@magnolia>
+Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
+Message-ID: <20181203165803.GE8115@magnolia>
 References: <20181203064256.26768-1-david@fromorbit.com>
- <20181203064256.26768-3-david@fromorbit.com>
+ <20181203064256.26768-4-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181203064256.26768-3-david@fromorbit.com>
+In-Reply-To: <20181203064256.26768-4-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
 To: Dave Chinner <david@fromorbit.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 03, 2018 at 05:42:55PM +1100, Dave Chinner wrote:
+On Mon, Dec 03, 2018 at 05:42:56PM +1100, Dave Chinner wrote:
 > From: Dave Chinner <dchinner@redhat.com>
 > 
-> As per the copy_file_range() man page:
-> 
-> EINVAL
-> 	Requested range extends beyond the end of the source file;
-> .....
-> 
-> These tests actually attempt to copy beyond the end of the source
-> file and so should fail with EINVAL. The kernel does not check this
-> and so needs fixing. These operations should fail, so fix the tests.
-> 
-> Also move the tests to the copy_range group so they are distinct
-> from the copy group which refers to xfs_copy tests.
+> Test that copy_file_range will return the correct errors for various
+> error conditions and boundary constraints.
 > 
 > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tests/generic/530     | 165 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/530.out |  62 ++++++++++++++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 228 insertions(+)
+>  create mode 100755 tests/generic/530
+>  create mode 100644 tests/generic/530.out
+> 
+> diff --git a/tests/generic/530 b/tests/generic/530
+> new file mode 100755
+> index 000000000000..42243cc70914
+> --- /dev/null
+> +++ b/tests/generic/530
+> @@ -0,0 +1,165 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 530
+> +#
+> +# Exercise copy_file_range() syscall error conditions.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs generic
+> +
+> +rm -f $seqres.full
+> +
+> +_require_test
+> +_require_scratch
+> +_require_xfs_io_command "copy_range"
+> +_require_user
+> +_require_test_swapfile
+> +
+> +_scratch_mkfs 2>&1 >> $seqres.full
+> +_scratch_mount
+> +
+> +
+> +testdir=$TEST_DIR/test-$seq
+> +rm -rf $testdir
+> +mkdir $testdir
+> +rm -f $seqres.full
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
+> +chmod 777 $testdir/file
+> +
+> +echo swap files return ETXTBUSY
+> +_format_swapfile $testdir/swapfile 16m
+> +swapon $testdir/swapfile
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
+> +swapoff $testdir/swapfile
+> +
+> +# we have to open the file to be immutable rw and hold it open over the
+> +# chattr command to set it immutable, otherwise we won't be able to open it for
+> +# writing after it's been made immutable. (i.e. would exercise file mode checks,
+> +# not immutable inode flag checks).
+> +echo
+> +echo immutable file returns EPERM
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 64k" -c fsync $testdir/immutable | _filter_xfs_io
+> +$XFS_IO_PROG -f -c "chattr +i" -c "copy_range -l 32k $testdir/file" $testdir/immutable
+> +$XFS_IO_PROG -f -r -c "chattr -i" $testdir/immutable
+> +rm -f $testdir/immutable
+> +
+> +# can't test this as root, because root is allowed to write to files do not
+> +# have write permission bits set.
+> +echo
+> +echo no write perms on destination returns EACCES
+> +chown $qa_user:12345 $testdir/copy
+> +su $qa_user -c "$XFS_IO_PROG -f -c 'chmod -r' -c 'copy_range -l 32k $testdir/file' $testdir/copy"
+> +rm -f $testdir/copy
+> +
+> +echo
+> +echo source range overlaps EOF returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 112k -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range beyond EOF returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 128k -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range overlaps destination range in same file returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 32k -d 48k -l 32k $testdir/file" $testdir/file
+> +
+> +echo
+> +echo destination file O_RDONLY returns EBADF
+> +$XFS_IO_PROG -f -r -c "copy_range -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo destination file O_APPEND returns EBADF
+> +$XFS_IO_PROG -f -a -c "copy_range -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source/destination as directory returns EISDIR
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
+> +
+> +echo
+> +echo source/destination as blkdev returns EINVAL
+> +mknod $testdir/dev1 b 1 3
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev1
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev1" $testdir/copy
+> +
+> +echo
+> +echo source/destination as chardev returns EINVAL
+> +mknod $testdir/dev2 c 1 3
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev2
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev2" $testdir/copy
+> +
+> +echo
+> +echo source/destination as FIFO returns EINVAL
+> +mkfifo $testdir/fifo
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/fifo
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/fifo" $testdir/copy
+> +
+> +max_off=$((8 * 2**60 - 65536 - 1))
+> +min_off=65537
+> +
+> +echo
+> +echo length beyond 8EiB wraps around 0 returns EOVERFLOW
+> +$XFS_IO_PROG -f -c "copy_range -l 10e -s $max_off $testdir/file" $testdir/copy
+> +$XFS_IO_PROG -f -c "copy_range -l 10e -d $max_off $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range beyond 8EiB returns EINVAL
+> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/file
+> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/copy
+> +$XFS_IO_PROG -c "copy_range -s $max_off -l $min_off -d 0 $testdir/file" $testdir/copy
+> +$XFS_IO_PROG -c "copy_range -s $min_off -l $max_off -d 0 $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo destination range beyond 8TiB returns EFBIG
+> +$XFS_IO_PROG -c "copy_range -l $min_off -s 0 -d $max_off $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo destination larger than rlimit returns EFBIG
+> +rm -f $testdir/copy
+> +$XFS_IO_PROG -c "truncate 128k" $testdir/file
+> +
+> +# need a wrapper so the "File size limit exceeded" error can be filtered
+> +do_rlimit_copy()
+> +{
+> +	$XFS_IO_PROG -f -c "copy_range -l 32k -s 0 -d 16m $testdir/file" $testdir/copy
+> +}
+> +
+> +ulimit -f $((8 * 1024))
+> +ulimit -c 0
+> +do_rlimit_copy 2>&1 | grep -o "File size limit exceeded"
+> +ulimit -f unlimited
+> +
+> +echo
+> +echo copy across devices
+> +$XFS_IO_PROG -f -c "copy_range -l 128k $testdir/file" $SCRATCH_MNT/copy
+> +cmp $testdir/file $SCRATCH_MNT/copy
+> +echo "md5sums after xdev copy:"
+> +md5sum $testdir/file $SCRATCH_MNT/copy | _filter_test_dir | _filter_scratch
 
-Looks ok; sorry I didn't notice this on the original patch.
+Echoing Amir, this should be a separate test because it tests new
+functionality.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Really wishing we'd put a WARN_ONCE(1, "Using EXPERIMENTAL
+copy_file_range syscall"); in when this got merged. :( :(
 
 --D
 
-> ---
->  tests/generic/430     |  5 +----
->  tests/generic/430.out |  6 ++----
->  tests/generic/431     |  1 +
->  tests/generic/431.out |  1 +
->  tests/generic/434     |  5 +++--
->  tests/generic/434.out |  4 ++--
->  tests/generic/group   | 10 +++++-----
->  7 files changed, 15 insertions(+), 17 deletions(-)
-> 
-> diff --git a/tests/generic/430 b/tests/generic/430
-> index 1b11f60df059..ab15ce0e37d4 100755
-> --- a/tests/generic/430
-> +++ b/tests/generic/430
-> @@ -70,11 +70,8 @@ cmp -n 1000 $testdir/file $testdir/end 4000
->  echo "md5sums after copying end:"
->  md5sum $testdir/{file,end} | _filter_test_dir
->  
-> -echo "Copy beyond end of original file"
-> +echo "Copy beyond end of original file - should fail"
->  $XFS_IO_PROG -f -c "copy_range -s 4000 -l 2000 $testdir/file" "$testdir/beyond"
-> -cmp -n 1000 $testdir/file $testdir/beyond 4000
-> -echo "md5sums after copying beyond:"
-> -md5sum $testdir/{file,beyond} | _filter_test_dir
->  
->  echo "Copy creates hole in target file"
->  $XFS_IO_PROG -f -c "copy_range -s 1000 -l 3000 -d 1000 $testdir/file" "$testdir/hole"
-> diff --git a/tests/generic/430.out b/tests/generic/430.out
-> index 4b4ca75d5980..8dd7870658cb 100644
-> --- a/tests/generic/430.out
-> +++ b/tests/generic/430.out
-> @@ -15,10 +15,8 @@ Copy end of original file
->  md5sums after copying end:
->  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
->  e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-430/end
-> -Copy beyond end of original file
-> -md5sums after copying beyond:
-> -e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
-> -e68d4a150c4e42f4f9ea3ffe4c9cf4ed  TEST_DIR/test-430/beyond
-> +Copy beyond end of original file - should fail
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/530.out b/tests/generic/530.out
+> new file mode 100644
+> index 000000000000..c433fb989637
+> --- /dev/null
+> +++ b/tests/generic/530.out
+> @@ -0,0 +1,62 @@
+> +QA output created by 530
+> +swap files return ETXTBUSY
+> +copy_range: Text file busy
+> +copy_range: Text file busy
+> +
+> +immutable file returns EPERM
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +copy_range: Operation not permitted
+> +
+> +no write perms on destination returns EACCES
+> +copy_range: Permission denied
+> +
+> +source range overlaps EOF returns EINVAL
 > +copy_range: Invalid argument
->  Copy creates hole in target file
->  md5sums after creating hole:
->  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
-> diff --git a/tests/generic/431 b/tests/generic/431
-> index f04ae2152bae..273068c78d40 100755
-> --- a/tests/generic/431
-> +++ b/tests/generic/431
-> @@ -52,6 +52,7 @@ $XFS_IO_PROG -f -c "copy_range -s 2 -l 1      $testdir/file" "$testdir/c"
->  $XFS_IO_PROG -f -c "copy_range -s 3 -l 1      $testdir/file" "$testdir/d"
->  $XFS_IO_PROG -f -c "copy_range -s 4 -l 1      $testdir/file" "$testdir/e"
->  $XFS_IO_PROG -f -c "copy_range -s 4 -l 1 -d 1 $testdir/file" "$testdir/f"
-> +# this should fail with EINVAL and leave an empty file behind.
->  $XFS_IO_PROG -f -c "copy_range -s 5 -l 1      $testdir/file" "$testdir/g"
->  echo -n "a"    | cmp $testdir/a
->  echo -n "b"    | cmp $testdir/b
-> diff --git a/tests/generic/431.out b/tests/generic/431.out
-> index 978c4a1b56fc..834a5db6f56f 100644
-> --- a/tests/generic/431.out
-> +++ b/tests/generic/431.out
-> @@ -4,6 +4,7 @@ Original md5sums:
->  ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-431/file
->  ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-431/copy
->  Small copies from various points in the original file
+> +
+> +source range beyond EOF returns EINVAL
 > +copy_range: Invalid argument
->  md5sums after small copies
->  ab56b4d92b40713acc5af89985d4b786  TEST_DIR/test-431/file
->  0cc175b9c0f1b6a831c399e269772661  TEST_DIR/test-431/a
-> diff --git a/tests/generic/434 b/tests/generic/434
-> index 032f933dff76..4bcaf9bac04b 100755
-> --- a/tests/generic/434
-> +++ b/tests/generic/434
-> @@ -41,15 +41,16 @@ $XFS_IO_PROG -f -c 'pwrite -S 0x61 0 1000' $testdir/file >> $seqres.full 2>&1
->  mknod $testdir/dev1 c 1 3
->  mkfifo $testdir/fifo
->  
-> -echo "Try to copy when source pos > source size"
-> +echo "Try to copy when source pos > source size - should fail"
->  $XFS_IO_PROG -f -c "copy_range -s 1000 -l 100 $testdir/file" "$testdir/copy"
-> -md5sum $testdir/copy | _filter_test_dir
->  
->  echo "Try to copy to a read-only file"
-> +rm -f $testdir/copy
->  $XFS_IO_PROG -r -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
->  md5sum $testdir/copy | _filter_test_dir
->  
->  echo "Try to copy to an append-only file"
-> +rm -f $testdir/copy
->  $XFS_IO_PROG -a -f -c "copy_range -s 0 -l 100 $testdir/file" "$testdir/copy"
->  md5sum $testdir/copy | _filter_test_dir
->  
-> diff --git a/tests/generic/434.out b/tests/generic/434.out
-> index 4532ebbaf864..3659592b949b 100644
-> --- a/tests/generic/434.out
-> +++ b/tests/generic/434.out
-> @@ -1,7 +1,7 @@
->  QA output created by 434
->  Create the original files
-> -Try to copy when source pos > source size
-> -d41d8cd98f00b204e9800998ecf8427e  TEST_DIR/test-434/copy
-> +Try to copy when source pos > source size - should fail
+> +
+> +source range overlaps destination range in same file returns EINVAL
 > +copy_range: Invalid argument
->  Try to copy to a read-only file
->  copy_range: Bad file descriptor
->  d41d8cd98f00b204e9800998ecf8427e  TEST_DIR/test-434/copy
+> +
+> +destination file O_RDONLY returns EBADF
+> +copy_range: Bad file descriptor
+> +
+> +destination file O_APPEND returns EBADF
+> +copy_range: Bad file descriptor
+> +
+> +source/destination as directory returns EISDIR
+> +copy_range: Is a directory
+> +copy_range: Is a directory
+> +
+> +source/destination as blkdev returns EINVAL
+> +copy_range: Invalid argument
+> +copy_range: Invalid argument
+> +
+> +source/destination as chardev returns EINVAL
+> +copy_range: Invalid argument
+> +copy_range: Invalid argument
+> +
+> +source/destination as FIFO returns EINVAL
+> +copy_range: Invalid argument
+> +copy_range: Invalid argument
+> +
+> +length beyond 8EiB wraps around 0 returns EOVERFLOW
+> +copy_range: Value too large for defined data type
+> +copy_range: Value too large for defined data type
+> +
+> +source range beyond 8EiB returns EINVAL
+> +copy_range: Invalid argument
+> +copy_range: Invalid argument
+> +
+> +destination range beyond 8TiB returns EFBIG
+> +copy_range: File too large
+> +
+> +destination larger than rlimit returns EFBIG
+> +File size limit exceeded
+> +
+> +copy across devices
+> +md5sums after xdev copy:
+> +81615449a98aaaad8dc179b3bec87f38  TEST_DIR/test-530/file
+> +81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/copy
 > diff --git a/tests/generic/group b/tests/generic/group
-> index 58318608e7a9..cc05792ba3b6 100644
+> index cc05792ba3b6..5ba1280aa3e6 100644
 > --- a/tests/generic/group
 > +++ b/tests/generic/group
-> @@ -432,11 +432,11 @@
->  427 auto quick aio rw
->  428 auto quick dax
->  429 auto encrypt
-> -430 auto quick copy
-> -431 auto quick copy
-> -432 auto quick copy
-> -433 auto quick copy
-> -434 auto quick copy
-> +430 auto quick copy_range
-> +431 auto quick copy_range
-> +432 auto quick copy_range
-> +433 auto quick copy_range
-> +434 auto quick copy_range
->  435 auto encrypt
->  436 auto quick rw
->  437 auto quick dax
+> @@ -523,3 +523,4 @@
+>  517 auto quick dedupe clone
+>  518 auto quick clone
+>  519 auto quick
+> +530 auto quick copy_range
 > -- 
 > 2.19.1
 > 
