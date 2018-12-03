@@ -1,79 +1,147 @@
 Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5095 "EHLO
         ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725829AbeLCGnI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 01:43:08 -0500
+        by vger.kernel.org with ESMTP id S1725829AbeLCGnK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 01:43:10 -0500
 Received: from discord.disaster.area ([192.168.1.111])
         by dastard with esmtp (Exim 4.80)
         (envelope-from <david@fromorbit.com>)
-        id 1gThwZ-0003G3-1w
+        id 1gThwZ-0003G4-2z
         for fstests@vger.kernel.org; Mon, 03 Dec 2018 17:42:59 +1100
 Received: from dave by discord.disaster.area with local (Exim 4.91)
         (envelope-from <david@fromorbit.com>)
-        id 1gThwY-00075F-WE
+        id 1gThwZ-00075H-1x
         for fstests@vger.kernel.org; Mon, 03 Dec 2018 17:42:59 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH 0/3] fstests: copy_file_range() bounds testing
-Date: Mon,  3 Dec 2018 17:42:53 +1100
-Message-Id: <20181203064256.26768-1-david@fromorbit.com>
+Subject: [PATCH 1/3] common: add _require_test_swapfile
+Date: Mon,  3 Dec 2018 17:42:54 +1100
+Message-Id: <20181203064256.26768-2-david@fromorbit.com>
+In-Reply-To: <20181203064256.26768-1-david@fromorbit.com>
+References: <20181203064256.26768-1-david@fromorbit.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi folks,
+From: Dave Chinner <dchinner@redhat.com>
 
-We suck at bounds testing new system calls. This is a test that
-exercises the expected failure cases for copy_file_range(). It's
-going to fail miserably on existing kernels - I'm about to post a
-series of fixes to linux-fsdevel that make this test pass.
+Because we can host swap files on the test device, not just the
+scratch device.
 
-The test is also dependent on xfs_io changes that I posted a few
-hours ago. The three (not 2!) patches can be found here:
+Also, move the tests for the utilities needed to manipulate swap
+files into the functions that test whether swap files are supported
+so they are checked for existence /before/ we try to us them. This
+fixes all the tests that currently check for these utilities
+manually /after/ checking if swapfiles are supported.
 
-https://marc.info/?l=linux-xfs&m=154378403323889&w=2
-https://marc.info/?l=linux-xfs&m=154378403523890&w=2
-https://marc.info/?l=linux-xfs&m=154378403323888&w=2
-https://marc.info/?l=linux-xfs&m=154379644526132&w=2
-
-Comments welcome.
-
--Dave
-
+Signed-off-by: Dave Chinner <dchinner@redhat.com>
 ---
+ common/rc         | 29 +++++++++++++++++++++--------
+ tests/generic/472 |  2 --
+ tests/generic/495 |  2 --
+ tests/generic/496 |  2 --
+ tests/generic/497 |  2 --
+ 5 files changed, 21 insertions(+), 16 deletions(-)
 
-As an aside, one thing that I've discovered in writing this test is
-that certain things we do to test certain file conditions are not
-being tested corectly. e.g. immutable files.
-
-When we set a file as immutable and then go to modify it with xfs_io
-like this:
-
-# xfs_io -c "chattr +i" test_file
-# xfs_io -c "pwrite 0 4k" test_file
-
-We are not actually testing whether the pwrite() syscall detected
-that it can't write to an immutable file. xfs_io actually fails when
-the open(O_RDWR) syscall fails because we can't open an immutable
-file for writing. IOWs, it's not testing pwrite() at all.
-
-Hence tests like generic/159 and generic/160 are not actually
-testing whether cloning/deduping files fails on immutable files.
-
-Instead, what we need to do is open the file O_RDWR, then set the
-file immutable, then perform the modification operation. i.e. this:
-
-# xfs_io -c "chattr +i" -c "pwrite 0 4k" test_file
-
-Will exercise the pwrite() syscall hitting an immutable file. A
-similar thing happens with trying to write/modify to read only files
-- the open() call fails, not the call that we want to test. That's
-why I added the "chmod" operation to xfs_io, to allow us to open a
-file for write, then turn it read only while we still have a
-writeable fd open. This then exercises trying to write/modify a
-read-only file.
-
-I'm sure there's lots of tests that have these problems. I don't
-have time to audit them right now, but I'm bringing it up so that
-people are aware of the issue and at least catch problems like this
-in new tests....
+diff --git a/common/rc b/common/rc
+index ecb17380bad8..5b344b25012b 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2214,22 +2214,35 @@ _format_swapfile() {
+ }
+ 
+ # Check that the filesystem supports swapfiles
+-_require_scratch_swapfile()
++_require_swapfile()
+ {
+-	_require_scratch
++	dir=$1
+ 
+-	_scratch_mkfs >/dev/null
+-	_scratch_mount
++	# fstests also has custom binaries for mkswap/swapon
++	_require_test_program mkswap
++	_require_test_program swapon
+ 
+ 	# Minimum size for mkswap is 10 pages
+-	_format_swapfile "$SCRATCH_MNT/swap" $(($(get_page_size) * 10))
++	_format_swapfile "$dir/swap" $(($(get_page_size) * 10))
+ 
+-	if ! swapon "$SCRATCH_MNT/swap" >/dev/null 2>&1; then
+-		_scratch_unmount
++	if ! swapon "$dir/swap" >/dev/null 2>&1; then
+ 		_notrun "swapfiles are not supported"
+ 	fi
+ 
+-	swapoff "$SCRATCH_MNT/swap" >/dev/null 2>&1
++	swapoff "$dir/swap" >/dev/null 2>&1
++}
++
++_require_test_swapfile()
++{
++	_require_swapfile $TEST_DIR
++}
++
++_require_scratch_swapfile()
++{
++	_require_scratch
++	_scratch_mkfs >/dev/null
++	_scratch_mount
++	_require_swapfile $SCRATCH_MNT
+ 	_scratch_unmount
+ }
+ 
+diff --git a/tests/generic/472 b/tests/generic/472
+index aba4a00719bc..d598eef37997 100755
+--- a/tests/generic/472
++++ b/tests/generic/472
+@@ -33,8 +33,6 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch_swapfile
+-_require_test_program mkswap
+-_require_test_program swapon
+ 
+ rm -f $seqres.full
+ _scratch_mkfs >>$seqres.full 2>&1
+diff --git a/tests/generic/495 b/tests/generic/495
+index 88df26c78ec2..63f45cf4b336 100755
+--- a/tests/generic/495
++++ b/tests/generic/495
+@@ -31,8 +31,6 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch_swapfile
+-_require_test_program mkswap
+-_require_test_program swapon
+ 
+ _scratch_mkfs >> $seqres.full 2>&1
+ _scratch_mount
+diff --git a/tests/generic/496 b/tests/generic/496
+index 3083eef0bebc..0e214909f596 100755
+--- a/tests/generic/496
++++ b/tests/generic/496
+@@ -34,8 +34,6 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch_swapfile
+-_require_test_program mkswap
+-_require_test_program swapon
+ _require_xfs_io_command "falloc"
+ 
+ rm -f $seqres.full
+diff --git a/tests/generic/497 b/tests/generic/497
+index 3d5502ef7c08..d9f9b7521eff 100755
+--- a/tests/generic/497
++++ b/tests/generic/497
+@@ -34,8 +34,6 @@ rm -f $seqres.full
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch_swapfile
+-_require_test_program mkswap
+-_require_test_program swapon
+ _require_xfs_io_command "fcollapse"
+ 
+ rm -f $seqres.full
+-- 
+2.19.1
