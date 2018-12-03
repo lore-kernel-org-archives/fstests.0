@@ -1,79 +1,79 @@
-Received: from mail-yb1-f194.google.com ([209.85.219.194]:35037 "EHLO
-        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725616AbeLBTiM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Dec 2018 14:38:12 -0500
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:5095 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725829AbeLCGnI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 3 Dec 2018 01:43:08 -0500
+Received: from discord.disaster.area ([192.168.1.111])
+        by dastard with esmtp (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1gThwZ-0003G3-1w
+        for fstests@vger.kernel.org; Mon, 03 Dec 2018 17:42:59 +1100
+Received: from dave by discord.disaster.area with local (Exim 4.91)
+        (envelope-from <david@fromorbit.com>)
+        id 1gThwY-00075F-WE
+        for fstests@vger.kernel.org; Mon, 03 Dec 2018 17:42:59 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: [PATCH 0/3] fstests: copy_file_range() bounds testing
+Date: Mon,  3 Dec 2018 17:42:53 +1100
+Message-Id: <20181203064256.26768-1-david@fromorbit.com>
 MIME-Version: 1.0
-References: <20181202180832.GR8125@magnolia> <20181202181045.GS8125@magnolia>
-In-Reply-To: <20181202181045.GS8125@magnolia>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 2 Dec 2018 21:37:55 +0200
-Message-ID: <CAOQ4uxieA_e1_Fvbw8Svr8PA+DBim4W_FpYm8VOYRM4AsZ9S8Q@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
- directio short read on EFAULT)
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Dec 2, 2018 at 8:10 PM Darrick J. Wong <darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> In commit 4721a601099, we tried to fix a problem wherein directio reads
-> into a splice pipe will bounce EFAULT/EAGAIN all the way out to
-> userspace by simulating a zero-byte short read.  This happens because
-> some directio read implementations (xfs) will call
-> bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchronous
-> reads, but as soon as we run out of pipe buffers that _get_pages call
-> returns EFAULT, which the splice code translates to EAGAIN and bounces
-> out to userspace.
->
-> In that commit, the iomap code catches the EFAULT and simulates a
-> zero-byte read, but that causes assertion errors on regular splice reads
-> because xfs doesn't allow short directio reads.  This causes infinite
-> splice() loops and assertion failures on generic/095 on overlayfs
-> because xfs only permit total success or total failure of a directio
-> operation.  The underlying issue in the pipe splice code has now been
-> fixed by changing the pipe splice loop to avoid avoid reading more data
-> than there is space in the pipe.
->
-> Therefore, it's no longer necessary to simulate the short directio, so
-> remove the hack from iomap.
->
-> Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
-> Reported-by: Amir Goldstein <amir73il@gmail.com>
+Hi folks,
 
-Wasn't me. I believe it was Murphy Zhou <jencce.kernel@gmail.com>.
-If you want you can add Ranted-by Amir ;-)
+We suck at bounds testing new system calls. This is a test that
+exercises the expected failure cases for copy_file_range(). It's
+going to fail miserably on existing kernels - I'm about to post a
+series of fixes to linux-fsdevel that make this test pass.
 
-Anyway, looks fine.
+The test is also dependent on xfs_io changes that I posted a few
+hours ago. The three (not 2!) patches can be found here:
 
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
-> v2: split into two patches per hch request
-> ---
->  fs/iomap.c |    9 ---------
->  1 file changed, 9 deletions(-)
->
-> diff --git a/fs/iomap.c b/fs/iomap.c
-> index 3ffb776fbebe..d6bc98ae8d35 100644
-> --- a/fs/iomap.c
-> +++ b/fs/iomap.c
-> @@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_iter *iter,
->                                 dio->wait_for_completion = true;
->                                 ret = 0;
->                         }
-> -
-> -                       /*
-> -                        * Splicing to pipes can fail on a full pipe. We have to
-> -                        * swallow this to make it look like a short IO
-> -                        * otherwise the higher splice layers will completely
-> -                        * mishandle the error and stop moving data.
-> -                        */
-> -                       if (ret == -EFAULT)
-> -                               ret = 0;
->                         break;
->                 }
->                 pos += ret;
+https://marc.info/?l=linux-xfs&m=154378403323889&w=2
+https://marc.info/?l=linux-xfs&m=154378403523890&w=2
+https://marc.info/?l=linux-xfs&m=154378403323888&w=2
+https://marc.info/?l=linux-xfs&m=154379644526132&w=2
+
+Comments welcome.
+
+-Dave
+
+---
+
+As an aside, one thing that I've discovered in writing this test is
+that certain things we do to test certain file conditions are not
+being tested corectly. e.g. immutable files.
+
+When we set a file as immutable and then go to modify it with xfs_io
+like this:
+
+# xfs_io -c "chattr +i" test_file
+# xfs_io -c "pwrite 0 4k" test_file
+
+We are not actually testing whether the pwrite() syscall detected
+that it can't write to an immutable file. xfs_io actually fails when
+the open(O_RDWR) syscall fails because we can't open an immutable
+file for writing. IOWs, it's not testing pwrite() at all.
+
+Hence tests like generic/159 and generic/160 are not actually
+testing whether cloning/deduping files fails on immutable files.
+
+Instead, what we need to do is open the file O_RDWR, then set the
+file immutable, then perform the modification operation. i.e. this:
+
+# xfs_io -c "chattr +i" -c "pwrite 0 4k" test_file
+
+Will exercise the pwrite() syscall hitting an immutable file. A
+similar thing happens with trying to write/modify to read only files
+- the open() call fails, not the call that we want to test. That's
+why I added the "chmod" operation to xfs_io, to allow us to open a
+file for write, then turn it read only while we still have a
+writeable fd open. This then exercises trying to write/modify a
+read-only file.
+
+I'm sure there's lots of tests that have these problems. I don't
+have time to audit them right now, but I'm bringing it up so that
+people are aware of the issue and at least catch problems like this
+in new tests....
