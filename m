@@ -1,51 +1,51 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:21027 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727592AbeLEWXh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 5 Dec 2018 17:23:37 -0500
-Received: from dave by dastard with local (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1gUfZu-0007Vo-Db
-        for fstests@vger.kernel.org; Thu, 06 Dec 2018 09:23:34 +1100
-Date: Thu, 6 Dec 2018 09:23:34 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 2/3] generic/43[014]: copy_range beyond source EOF should
- fail
-Message-ID: <20181205222334.GY19305@dastard>
-References: <20181203064256.26768-1-david@fromorbit.com>
- <20181203064256.26768-3-david@fromorbit.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:33638 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725952AbeLGGXR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Dec 2018 01:23:17 -0500
+Subject: [PATCH v4 00/12] xfstests: add copy/dedupe/clone to fsx/fsstress
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Thu, 06 Dec 2018 22:23:12 -0800
+Message-ID: <154416379233.15344.4377231692638417530.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20181203064256.26768-3-david@fromorbit.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 03, 2018 at 05:42:55PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
-> 
-> As per the copy_file_range() man page:
-> 
-> EINVAL
-> 	Requested range extends beyond the end of the source file;
-> .....
-> 
-> These tests actually attempt to copy beyond the end of the source
-> file and so should fail with EINVAL. The kernel does not check this
-> and so needs fixing. These operations should fail, so fix the tests.
-> 
-> Also move the tests to the copy_range group so they are distinct
-> from the copy group which refers to xfs_copy tests.
-> 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+Hi all,
 
-Self NACK on this - the behaviour for this corner case we've decided
-on is going to be different to what the man page says, so this patch
-is going to have to be reworked.
+This series adds to fsx and fsstress support for FICLONERANGE,
+FIDEDUPERANGE, and copy_file_range.  The only differences since v3 have
+been to deal with copy_file_range's short copies correctly...ish.
 
-Cheers,
+The first three patches fix gcc warnings in fsx and fsstress.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Patch 4 adds an -X option to fsx that causes it to re-read the fsx file
+after every operation to compare it to the good buffer.  This made it
+easier for me to find corruption problem as soon as they happen, though
+it slows down fsx and perturbs in-core state considerably.
+
+Patche 5-6 are a couple of generic reworks to fsx that we need to
+support the new clone/dedupe/copy commands.
+
+Patches 7-8 add clone and dedupe to fsx.
+
+Patches 9-10 add copy_file_range support to fsstress and fsx.
+
+Patch 11 fixes the common/dump tests to disable the new commands so that
+the dump/restore tests continue to function exactly as they have for
+years.
+
+Patch 12 contains long-soak fsx tests designed to draw out corruption
+problems by running (1 million * TIME_FACTOR) operations.  These will be
+running all weekend during the US Thanksgiving holiday, though I hope
+we've sorted out all the problems.
+
+There are known failures in XFS on 4.20-rc5, particularly with
+copy_file_range and reflink, all of which hopefully will have been fixed
+by the time 4.21 comes out.  Dave Chinner has more fixes in progress to
+correct various flaws of copy_file_range.
+
+--D
