@@ -1,190 +1,99 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:34586 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725952AbeLGGYu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Dec 2018 01:24:50 -0500
-Subject: [PATCH 12/12] generic: long fsx soak tests
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 06 Dec 2018 22:24:45 -0800
-Message-ID: <154416388577.15344.12576557765635823075.stgit@magnolia>
-In-Reply-To: <154416379233.15344.4377231692638417530.stgit@magnolia>
-References: <154416379233.15344.4377231692638417530.stgit@magnolia>
+Received: from mail-pl1-f180.google.com ([209.85.214.180]:36762 "EHLO
+        mail-pl1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726089AbeLIPrE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Dec 2018 10:47:04 -0500
+Received: by mail-pl1-f180.google.com with SMTP id g9so4036619plo.3
+        for <fstests@vger.kernel.org>; Sun, 09 Dec 2018 07:47:04 -0800 (PST)
+Message-ID: <5c0d38f6.1c69fb81.87b14.4167@mx.google.com>
+Date: Sun, 09 Dec 2018 23:46:56 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to b155c8b87c42
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="1g4j3RsQu0Um"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Add a few tests to implement long soak tests of fsx.
+--1g4j3RsQu0Um
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/generic/938     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/938.out |    2 ++
- tests/generic/939     |   55 ++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/939.out |    2 ++
- tests/generic/group   |    2 ++
- 5 files changed, 122 insertions(+)
- create mode 100755 tests/generic/938
- create mode 100644 tests/generic/938.out
- create mode 100755 tests/generic/939
- create mode 100644 tests/generic/939.out
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update pulls in the {copy,dedupe,clone}_file_range
+additions to fsx/fsstress from Darrick. This may bring in new failures in
+tests, but that means we enlarge the test coverage and find new issues in the
+areas that we've never covered before. But if you find bugs in tests please
+help report bugs and/or contribute fixes.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+b155c8b87c42 generic: long fsx soak tests
+
+New commits:
+
+Darrick J. Wong (12):
+      [b7b480a0ab37] fsstress: fix compiler warnings
+      [39faacd27425] fsstress: check system call return values
+      [1579ad7da484] fsx: shut up compiler warnings
+      [155cd617f34b] fsx: always check buffer after each operation
+      [7a9db35d5635] fsx: use an enum to define the operation commands
+      [e05b9c781a71] fsx: add five-argument logging function
+      [cff5b96016e8] fsx: add FICLONERANGE support
+      [e7b6734822aa] fsx: add FIDEDUPERANGE support
+      [50fa944e89be] fsstress: add copy_file_range support
+      [f2c8acbf97a1] fsx: add copy_file_range support
+      [722a0cf3d620] common/dump: disable copyrange
+      [b155c8b87c42] generic: long fsx soak tests
 
 
-diff --git a/tests/generic/938 b/tests/generic/938
-new file mode 100755
-index 00000000..9a860579
---- /dev/null
-+++ b/tests/generic/938
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 938
-+#
-+# Long-soak directio fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+        cd /
-+        rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_odirect
-+
-+# Run fsx for a million ops or more
-+nr_ops=$((1000000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+min_dio_sz=$(_min_dio_alignment)
-+
-+fsx_args=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+fsx_args+=(-r $min_dio_sz)
-+fsx_args+=(-t $min_dio_sz)
-+fsx_args+=(-w $min_dio_sz)
-+fsx_args+=(-Z)
-+
-+run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-+
-+# success, all done
-+echo Silence is golden
-+status=0
-+exit
-diff --git a/tests/generic/938.out b/tests/generic/938.out
-new file mode 100644
-index 00000000..11b565ee
---- /dev/null
-+++ b/tests/generic/938.out
-@@ -0,0 +1,2 @@
-+QA output created by 938
-+Silence is golden
-diff --git a/tests/generic/939 b/tests/generic/939
-new file mode 100755
-index 00000000..6a251fdd
---- /dev/null
-+++ b/tests/generic/939
-@@ -0,0 +1,55 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Oracle.  All Rights Reserved.
-+#
-+# FS QA Test 938
-+#
-+# Long-soak buffered fsx test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+        cd /
-+        rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+
-+# Run fsx for a million ops or more
-+nr_ops=$((1000000 * TIME_FACTOR))
-+op_sz=$((128000 * LOAD_FACTOR))
-+file_sz=$((600000 * LOAD_FACTOR))
-+fsx_file=$TEST_DIR/fsx.$seq
-+
-+fsx_args=(-q)
-+fsx_args+=(-N $nr_ops)
-+fsx_args+=(-p $((nr_ops / 100)))
-+fsx_args+=(-o $op_sz)
-+fsx_args+=(-l $file_sz)
-+
-+run_fsx "${fsx_args[@]}" | sed -e '/^fsx.*/d'
-+
-+# success, all done
-+echo Silence is golden
-+status=0
-+exit
-diff --git a/tests/generic/939.out b/tests/generic/939.out
-new file mode 100644
-index 00000000..a86e90c5
---- /dev/null
-+++ b/tests/generic/939.out
-@@ -0,0 +1,2 @@
-+QA output created by 939
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index eb5e4ce9..9025d24e 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -523,3 +523,5 @@
- 518 auto quick clone
- 519 auto quick
- 520 auto quick log
-+938 soak long_rw
-+939 soak long_rw
+Code Diffstat:
+
+ common/dump           |   3 +
+ configure.ac          |   2 +
+ include/builddefs.in  |   1 +
+ ltp/Makefile          |   4 +
+ ltp/fsstress.c        | 207 +++++++++++++--
+ ltp/fsx.c             | 691 ++++++++++++++++++++++++++++++++++++++++++++++----
+ m4/package_libcdev.m4 |  19 ++
+ tests/generic/521     |  61 +++++
+ tests/generic/521.out |   2 +
+ tests/generic/522     |  55 ++++
+ tests/generic/522.out |   2 +
+ tests/generic/group   |   2 +
+ 12 files changed, 978 insertions(+), 71 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--1g4j3RsQu0Um
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJcDTL6AAoJECZSqilcj+djQiwP/R5u5unWaX/EEkhKBzi9eiej
+Xhq3kh7+UrVdh1UTvQvGp8O4023Iro9k7+ZElcafoLaJT4Uvaet7ebWJ4hyMS+kE
+eaUwdDRUcLt54d3nL72TmA/sRUmrhT0rCcgCPWGA0zkI2GiJOXxus/XhyyiyiP2+
+uw8Bzjt3+tRm/gxVZ142XsJdnfLhm+m5ACZNuqcbhqxZlDmaXBpPqXtt674VZgIw
+hjP/6C6+1UnI584L+eMfK5tCxPFUTiEUJzc104veAa5ArGRAKzVUqIcQcRcYACm0
+ofHjqyz309p4buE5ff0m6jY3aPTfnMu9mWtGj5tGMUjZUZ+ZvDwYkKtI2dU6JJjk
+yOQhhoK4xLMTTFRZ1r1e8dj5hBW4mtDRLHqyNQ7PNWCulq1rM781Qc5LlysTtssF
+A7mC5C272wkO3I8AcUH69c0I2stSXyDoLDSwME8mrhDKK5jSK8ZKgIYGpga7VQK5
+jIGDYOLRDcjoKXnk2fPVlS5AEY3QF6S+p6GSdBvWbfEnhwShGXLk7lgy5zPsXYLw
+1m2vpeoN7QdG0bmstmIBrwnGYGpT8XuuzRDc9qAXvYM3J6Kbz03CeQDH+t3x72jL
+qXlyYePtfufK7gr1by6a5Gx5Ruc7WDkwvvBSUdyzIgpVv8TuAWUZ1iUj+rhrkOPs
+Qxr//ZpGSeId/qxR4QLx
+=9O3k
+-----END PGP SIGNATURE-----
+
+--1g4j3RsQu0Um--
