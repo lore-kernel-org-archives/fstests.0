@@ -1,71 +1,75 @@
-Received: from mx2.suse.de ([195.135.220.15]:56384 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726687AbeLJRam (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 10 Dec 2018 12:30:42 -0500
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH v2 00/10] xfstests: add copy/dedupe/clone to fsx/fsstress
-References: <154275100143.8611.10235098565750994724.stgit@magnolia>
-Date: Mon, 10 Dec 2018 17:30:54 +0000
-In-Reply-To: <154275100143.8611.10235098565750994724.stgit@magnolia> (Darrick
-        J. Wong's message of "Tue, 20 Nov 2018 13:56:41 -0800")
-Message-ID: <874lblthkh.fsf@suse.com>
+Received: from mail.kernel.org ([198.145.29.99]:53488 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726024AbeLJWZs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 10 Dec 2018 17:25:48 -0500
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH 0/7] xfstests: add fs-verity tests
+Date: Mon, 10 Dec 2018 14:21:35 -0800
+Message-Id: <20181210222142.222342-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-fscrypt@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Victor Hsieh <victorhsieh@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-"Darrick J. Wong" <darrick.wong@oracle.com> writes:
+Add tests for fs-verity, a new feature for read-only file-based
+authenticity protection.  fs-verity will be supported by ext4 and f2fs,
+and perhaps other filesystems later.  Running these tests requires:
 
-> Hi all,
->
-> This series adds to fsx and fsstress support for FICLONERANGE,
-> FIDEDUPERANGE, and copy_file_range.
->
-> First, I fix some gcc warnings in fsx.
->
-> Then, I teach fsx to read the fsx file after every operation to compare
-> it to the good buffer.  This made it easier for me to find corruption
-> problem as soon as they happen, though I'm not sure it really makes
-> sense to have this enabled by default because of the behavior change
-> that it makes.
->
-> Next come a couple of generic reworks to fsx that we need to support the
-> new clone/dedupe/copy commands.
->
-> Patches 5-6 add clone and dedupe to fsx.
->
-> Patches 7-8 add copy_file_range support to fsstress and fsx.
+- A kernel with the fs-verity patches from
+  https://git.kernel.org/pub/scm/linux/kernel/git/tytso/fscrypt.git/log/
+  (should be merged in 4.21) and configured with CONFIG_FS_VERITY.
+- The fsverity utility program, which can be installed from
+  https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/fsverity-utils.git/
+- e2fsprogs v1.44.4-2 or later for ext4 tests, or f2fs-tools v1.11.0 or
+  later for f2fs tests.
 
-An annoying side-effect of these changes is that I now see a couple of
-new generic tests failing on cephfs (for example, generic/075).  That's
-because fsx does use copy_file_range with the same fd both as source and
-destination.  We currently return -EINVAL in that case (as nfs and cifs
-seem to be doing as well btw).
+Example with kvm-xfstests:
 
-At least for the cephfs, this check could eventually be changed but I
-would need to spend some time trying and testing the effects of
-offloading object copies on the same file.  Of course that another
-(easy!) option would be to simply return -EOPNOTSUPP instead and
-fallback to the VFS implementation.
+	$ kvm-xfstests -c ext4,f2fs -g verity
 
-Cheers,
+See the file Documentation/filesystem/fsverity.rst in the kernel tree
+for more information about fs-verity.
+
+Eric Biggers (7):
+  common/verity: add common functions for testing fs-verity
+  generic: test general behavior of verity files
+  generic: test access controls on the fs-verity ioctls
+  generic: test fs-verity descriptor validation
+  generic: test corrupting verity files
+  generic: test that fs-verity is using the correct measurement values
+  generic: test using fs-verity and fscrypt simultaneously
+
+ common/config         |   1 +
+ common/verity         | 198 ++++++++++++++++++++++++++
+ tests/generic/900     | 165 +++++++++++++++++++++
+ tests/generic/900.out |  54 +++++++
+ tests/generic/901     |  71 ++++++++++
+ tests/generic/901.out |  14 ++
+ tests/generic/902     | 323 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/902.out | 125 ++++++++++++++++
+ tests/generic/903     | 126 ++++++++++++++++
+ tests/generic/903.out |  91 ++++++++++++
+ tests/generic/904     | 124 ++++++++++++++++
+ tests/generic/904.out |   7 +
+ tests/generic/905     |  81 +++++++++++
+ tests/generic/905.out |  12 ++
+ tests/generic/group   |   6 +
+ 15 files changed, 1398 insertions(+)
+ create mode 100644 common/verity
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100755 tests/generic/902
+ create mode 100644 tests/generic/902.out
+ create mode 100755 tests/generic/903
+ create mode 100644 tests/generic/903.out
+ create mode 100755 tests/generic/904
+ create mode 100644 tests/generic/904.out
+ create mode 100755 tests/generic/905
+ create mode 100644 tests/generic/905.out
+
 -- 
-Luis
-
->
-> Dave Chinner contributed some cleanups to the fsx patches as the 9th
-> patch.
->
-> The last patch fixes the common/dump tests to disable the new commands
-> so that the dump/restore tests continue to function exactly as they have
-> for years.
->
-> There are known failures in 4.20-rc3, particularly with copy_file_range,
-> which hopefully have been fixed by the patch series that Dave Chinner
-> posted to the xfs list yesterday.  Branch can be downloaded here[1].
->
-> --D
->
-> [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsstress-clone
+2.20.0.rc2.403.gdbc3b29805-goog
