@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.99]:53514 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:53542 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729482AbeLJWZu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1729671AbeLJWZu (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 10 Dec 2018 17:25:50 -0500
 From: Eric Biggers <ebiggers@kernel.org>
-Subject: [PATCH 6/7] generic: test that fs-verity is using the correct measurement values
-Date: Mon, 10 Dec 2018 14:21:41 -0800
-Message-Id: <20181210222142.222342-7-ebiggers@kernel.org>
+Subject: [PATCH 7/7] generic: test using fs-verity and fscrypt simultaneously
+Date: Mon, 10 Dec 2018 14:21:42 -0800
+Message-Id: <20181210222142.222342-8-ebiggers@kernel.org>
 In-Reply-To: <20181210222142.222342-1-ebiggers@kernel.org>
 References: <20181210222142.222342-1-ebiggers@kernel.org>
 MIME-Version: 1.0
@@ -17,33 +17,32 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-This test verifies that fs-verity is doing its Merkle tree-based hashing
-correctly, i.e. that it hasn't been broken by a change.
+This primarily verifies correct ordering of the hooks for each feature:
+fscrypt needs to be first.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/904     | 124 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/904.out |   7 +++
- tests/generic/group   |   1 +
- 3 files changed, 132 insertions(+)
- create mode 100755 tests/generic/904
- create mode 100644 tests/generic/904.out
+ tests/generic/905     | 81 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/905.out | 12 +++++++
+ tests/generic/group   |  1 +
+ 3 files changed, 94 insertions(+)
+ create mode 100755 tests/generic/905
+ create mode 100644 tests/generic/905.out
 
-diff --git a/tests/generic/904 b/tests/generic/904
+diff --git a/tests/generic/905 b/tests/generic/905
 new file mode 100755
-index 00000000..57e0683e
+index 00000000..18d10d50
 --- /dev/null
-+++ b/tests/generic/904
-@@ -0,0 +1,124 @@
++++ b/tests/generic/905
+@@ -0,0 +1,81 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright 2018 Google LLC
 +#
-+# FS QA Test generic/904
++# FS QA Test generic/905
 +#
-+# Test that fs-verity is using the correct measurement values.  This test
-+# verifies that fs-verity is doing its Merkle tree-based hashing correctly,
-+# i.e. that it hasn't been broken by a change.
++# Test using fs-verity and fscrypt simultaneously.  This primarily verifies
++# correct ordering of the hooks for each feature: fscrypt needs to be first.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -64,6 +63,7 @@ index 00000000..57e0683e
 +. ./common/rc
 +. ./common/filter
 +. ./common/verity
++. ./common/encrypt
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -72,114 +72,76 @@ index 00000000..57e0683e
 +_supported_fs generic
 +_supported_os Linux
 +_require_scratch_verity
++_require_scratch_encryption
++_require_xfs_io_command "set_encpolicy"
++_require_command "$KEYCTL_PROG" keyctl
 +
-+_scratch_mkfs_verity &>> $seqres.full
++_scratch_mkfs_encrypted_verity &>> $seqres.full
 +_scratch_mount
-+fsv_orig_file=$SCRATCH_MNT/file
-+fsv_file=$SCRATCH_MNT/file.fsv
 +
-+have_hash_algorithm()
-+{
-+	local alg=$1
++fsv_orig_file=$tmp.file
++edir=$SCRATCH_MNT/edir
++fsv_file=$edir/file.fsv
 +
-+	head -c 4096 /dev/zero > $fsv_file
-+	if ! _fsv_setup --hash=$alg $fsv_file &>> $seqres.full; then
-+		# no userspace tool support
-+		return 1
-+	fi
-+	if ! _fsv_enable $fsv_file &>> $seqres.full; then
-+		# no kernel support
-+		return 1
-+	fi
-+	rm -f $fsv_file
-+	return 0
-+}
++# Set up an encrypted directory.
++_new_session_keyring
++keydesc=$(_generate_encryption_key)
++mkdir $edir
++$XFS_IO_PROG -c "set_encpolicy $keydesc" $edir
 +
-+algs=(sha256 sha512 crc32c)
-+file_sizes=(4096 65536 100000000)
++# Set up an fs-verity file within the encrypted directory.
++# Verity that it actually has an encryption policy.
++head -c 100000 /dev/zero > $fsv_orig_file
++_fsv_setup $fsv_orig_file $fsv_file >> $seqres.full
++_fsv_enable $fsv_file
++echo
++$XFS_IO_PROG -r -c "get_encpolicy" $fsv_file |& _filter_scratch \
++	| sed 's/Master key descriptor:.*/Master key descriptor: 0000000000000000/'
++echo
 +
-+# The expected values are here rather than in the expected output file because
-+# not all hash algorithms may be available.
-+sha256_vals=(
-+sha256:47b92f80eedc47a224cc4f922de978c8933bc205844a7fd06da848d2c37471ab
-+sha256:8f6f7df7c0babebacc1b4a158ba9d40ecfe3ad5e66647d1aaf715244ae882a80
-+sha256:66fcfdf105061a621b13da383ff57d0ac63c61311215b46c1f4fc4959db69ef6
-+)
-+sha512_vals=(
-+sha512:2709f8fc180abb2444b6a57143442737ab3ece8d6e463e1bf328a78e5b0a902f0031cc7ac58797e40c6cfbb29e3005c4730800932308bc549df5375fb1859d37
-+sha512:bfdcd4c1a9493c830e2e175da7fda02e60e2deeb21f2787cea3a70e545fd34b9d0266738cbe2435f81bc5a44f58d8ae404f9e5f835c8b989a7a0b234e4cadffa
-+sha512:f08e75b685b65f43d9ffa71b85e400cbdc67215cfa755c126237d8dc96ba9570225387586ee47f97d552aeba9e73a318fcb65c6b27ffc58106d803f0acea29e3
-+)
-+crc32c_vals=(
-+crc32c:91806377
-+crc32c:cf55a43e
-+crc32c:d672241e
-+)
++# Verify that the file contents are as expected.  This should be going through
++# both the decryption and verity I/O paths.
++cmp $fsv_orig_file $fsv_file && echo "Files matched"
 +
-+test_alg()
-+{
-+	local alg=$1
-+	local -n vals=${alg}_vals
-+	local i
-+	local file_size
-+	local expected actual
++# Just in case, try again after a mount cycle to empty the page cache.
++_scratch_cycle_mount
++cmp $fsv_orig_file $fsv_file && echo "Files matched"
 +
-+	_fsv_begin_subtest "Check for expected measurement values ($alg)"
-+
-+	if ! have_hash_algorithm $alg; then
-+		if [ "$alg" = sha256 ]; then
-+			_fail "Something is wrong - sha256 hash should always be available"
-+		fi
-+		return 0
-+	fi
-+
-+	for i in ${!file_sizes[@]}; do
-+		file_size=${file_sizes[$i]}
-+		expected=${vals[$i]}
-+
-+		head -c $file_size /dev/zero > $fsv_orig_file
-+		actual=$(_fsv_setup --hash=$alg $fsv_orig_file $fsv_file)
-+		if [ "$actual" != "$expected" ]; then
-+			echo "Mismatch: expected $expected, 'fsverity setup' calculated $actual (file_size=$file_size)"
-+		fi
-+		_fsv_enable $fsv_file
-+		actual=$(_fsv_measure $fsv_file)
-+		if [ "$actual" != "$expected" ]; then
-+			echo "Mismatch: expected $expected, kernel calculated $actual (file_size=$file_size)"
-+		fi
-+		cmp $fsv_orig_file $fsv_file
-+		rm -f $fsv_file
-+	done
-+}
-+
-+for alg in ${algs[@]}; do
-+	test_alg $alg
-+done
++# Corrupt some bytes as a sanity check that fs-verity is really working.
++# This also verifies that the data on-disk is really encrypted, since otherwise
++# the data being written here would be identical to the old data.
++head -c 1000 /dev/zero | _fsv_corrupt_bytes $fsv_file 50000
++md5sum $fsv_file |& _filter_scratch
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/904.out b/tests/generic/904.out
+diff --git a/tests/generic/905.out b/tests/generic/905.out
 new file mode 100644
-index 00000000..fc1c7015
+index 00000000..62418f7e
 --- /dev/null
-+++ b/tests/generic/904.out
-@@ -0,0 +1,7 @@
-+QA output created by 904
++++ b/tests/generic/905.out
+@@ -0,0 +1,12 @@
++QA output created by 905
 +
-+# Check for expected measurement values (sha256)
++Encryption policy for SCRATCH_MNT/edir/file.fsv:
++	Policy version: 0
++	Master key descriptor: 0000000000000000
++	Contents encryption mode: 1 (AES-256-XTS)
++	Filenames encryption mode: 4 (AES-256-CTS)
++	Flags: 0x02
 +
-+# Check for expected measurement values (sha512)
-+
-+# Check for expected measurement values (crc32c)
++Files matched
++Files matched
++md5sum: SCRATCH_MNT/edir/file.fsv: Input/output error
 diff --git a/tests/generic/group b/tests/generic/group
-index 0d7e0177..c7e5098f 100644
+index c7e5098f..5668c046 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -529,3 +529,4 @@
- 901 auto quick verity
+@@ -530,3 +530,4 @@
  902 auto quick verity
  903 auto quick verity
-+904 auto quick verity
+ 904 auto quick verity
++905 auto quick verity encrypt
 -- 
 2.20.0.rc2.403.gdbc3b29805-goog
