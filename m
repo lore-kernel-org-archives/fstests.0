@@ -1,124 +1,78 @@
-Received: from sandeen.net ([63.231.237.45]:48652 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726211AbeLLC6P (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 11 Dec 2018 21:58:15 -0500
-Subject: Re: xfstests generic/347 was never correct [was: Re: dm: fix inflight
- IO check]
-References: <4fec4b01-35f9-8008-22ec-2ac8af58b854@kernel.dk>
- <20181211003204.GA14673@redhat.com> <20181212023424.GA21119@redhat.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <c4d94e2b-883b-7b6c-ec08-54b10ba4c9ca@sandeen.net>
-Date: Tue, 11 Dec 2018 20:58:13 -0600
+Received: from aserp2130.oracle.com ([141.146.126.79]:60408 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726218AbeLLE6N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Dec 2018 23:58:13 -0500
+Date: Tue, 11 Dec 2018 20:58:06 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v2 00/10] xfstests: add copy/dedupe/clone to fsx/fsstress
+Message-ID: <20181212045806.GD3306@magnolia>
+References: <154275100143.8611.10235098565750994724.stgit@magnolia>
+ <874lblthkh.fsf@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <20181212023424.GA21119@redhat.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <874lblthkh.fsf@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Mike Snitzer <snitzer@redhat.com>, Jens Axboe <axboe@kernel.dk>, sandeen@redhat.com, fstests@vger.kernel.org
-Cc: "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, device-mapper development <dm-devel@redhat.com>, Christoph Hellwig <hch@lst.de>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 12/11/18 8:34 PM, Mike Snitzer wrote:
-> On Mon, Dec 10 2018 at  7:32pm -0500,
-> Mike Snitzer <snitzer@redhat.com> wrote:
+On Mon, Dec 10, 2018 at 05:30:54PM +0000, Luis Henriques wrote:
+> "Darrick J. Wong" <darrick.wong@oracle.com> writes:
 > 
->> On Mon, Dec 10 2018 at  5:45pm -0500,
->> Jens Axboe <axboe@kernel.dk> wrote:
->>
->>> After switching to percpu inflight counters, the inflight check
->>> is totally buggy. It's perfectly valid for some counters to be
->>> non-zero while having a total inflight IO count of 0, that's how
->>> these kinds of counters work (inc on one CPU, dec on another).
->>> Fix the md_in_flight() check to sum all counters before returning
->>> a false positive, potentially.
->>>
->>> While at it, remove the inflight read for IO completion. We don't
->>> need it, just wake anyone that's waiting for the IO count to drop
->>> to zero. The caller needs to re-check that value anyway when woken,
->>> which it does.
->>>
->>> Fixes: 6f75723190d8 ("dm: remove the pending IO accounting")
->>> Reported-by: Christoph Hellwig <hch@lst.de>
->>> Signed-off-by: Jens Axboe <axboe@kernel.dk>
->>
->> I'm seeing that device-mapper-test-suite's "resize_io" test doesn't
->> pass.  Glad this resolves the xfstest issue but I think more work is
->> needed, so I'll build any additional changes on this fix.
+> > Hi all,
+> >
+> > This series adds to fsx and fsstress support for FICLONERANGE,
+> > FIDEDUPERANGE, and copy_file_range.
+> >
+> > First, I fix some gcc warnings in fsx.
+> >
+> > Then, I teach fsx to read the fsx file after every operation to compare
+> > it to the good buffer.  This made it easier for me to find corruption
+> > problem as soon as they happen, though I'm not sure it really makes
+> > sense to have this enabled by default because of the behavior change
+> > that it makes.
+> >
+> > Next come a couple of generic reworks to fsx that we need to support the
+> > new clone/dedupe/copy commands.
+> >
+> > Patches 5-6 add clone and dedupe to fsx.
+> >
+> > Patches 7-8 add copy_file_range support to fsstress and fsx.
 > 
-> Turns out the device-mapper-test-suite 'resize_io' issue I was seeing is
-> just a long lingering race that just got much more likely on my newer
-> testbed.  This fixes what I was seeing:
-> https://git.kernel.org/pub/scm/linux/kernel/git/device-mapper/linux-dm.git/commit/?h=dm-4.20&id=f6c367585d0d851349d3a9e607c43e5bea993fa1
+> An annoying side-effect of these changes is that I now see a couple of
+> new generic tests failing on cephfs (for example, generic/075).  That's
+> because fsx does use copy_file_range with the same fd both as source and
+> destination.  We currently return -EINVAL in that case (as nfs and cifs
+> seem to be doing as well btw).
 > 
-> But pivoting back to xfstests generic/347: that test was broken from the
-> start, if it ever _really_ worked it would've been a bug in dm-thinp.
-> And even after Jens' fix (above) the test still just times out after 60
-> secs while in out-of-data-space (OODS) mode and gives a false "Passed
-> all 1 tests".
-> 
-> generic/347 exhausting the thin-pool's data space and then issuing
-> "sync" will cause IO to hang for 60 secs unless, in parallel, another
-> process comes along and grows the thin-pool to have more data space.
-> But even if xfstests' _dmthin_grow function were to be issued in 
-> parallel with another process it'll fail because it uses
-> _dmthin_reload_table which "dmsetup suspend"s the thin device (that was
-> just used by XFS to fill the thin-pool) _without_ using the --noflush
-> flag for "dmsetup suspend".  So the thin device will wait forever for
-> its  outstanding IO to finish before generic/347's _dmthin_grow will be
-> able to resize the thin-pool.  Leading to deadlock.  Or until the 60
-> secs (dm_thin_pool.ko "no_space_timeout" modparam default) causes the
-> thin-pool to switch from OODS "queue IO" to OODS "error IO" mode:
-> 
-> # tail -f /var/log/messages &
-> # ./check generic/347
-> Dec 11 21:12:57 thegoat kernel: XFS (dm-1): Mounting V5 Filesystem
-> Dec 11 21:12:57 thegoat kernel: XFS (dm-1): Ending clean mount
-> FSTYP         -- xfs (non-debug)
-> PLATFORM      -- Linux/x86_64 thegoat 4.20.0-rc6.snitm+
-> MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/test-metadata
-> MOUNT_OPTIONS -- /dev/mapper/test-metadata /scratch
-> 
-> Dec 11 21:12:58 thegoat kernel: device-mapper: thin: 253:4: reached low water mark for data device: sending event.
-> Dec 11 21:12:58 thegoat kernel: device-mapper: thin: 253:4: switching pool to out-of-data-space (queue IO) mode
-> Dec 11 21:14:01 thegoat kernel: device-mapper: thin: 253:4: switching pool to out-of-data-space (error IO) mode
-> Dec 11 21:14:01 thegoat kernel: xfs_destroy_ioend: 136 callbacks suppressed
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1354752
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1358592
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1362432
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1366272
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1370112
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1373952
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1377792
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1381632
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1385472
-> Dec 11 21:14:01 thegoat kernel: XFS (dm-5): writeback error on sector 1389312
-> Dec 11 21:14:02 thegoat kernel: device-mapper: thin: 253:4: switching pool to write mode
-> Dec 11 21:14:02 thegoat kernel: device-mapper: thin: 253:4: growing the data device from 1000 to 1200 blocks
-> Dec 11 21:14:02 thegoat kernel: device-mapper: thin: 253:4: reached low water mark for data device: sending event.
-> Dec 11 21:14:02 thegoat kernel: XFS (dm-5): Unmounting Filesystem
->  65s
-> Ran: generic/347
-> Passed all 1 tests
-> 
-> Dec 11 21:14:02 thegoat kernel: XFS (dm-1): Unmounting Filesystem
-> 
-> SO generic/347 needs to account for 2 things:
-> 1) issue $XFS_IO_PROG IO in the background with other process(es)
-> 2) in parallel, in main generic/347 shell, run _dmthin_grow but the
-> "thin" device must be suspended with dmsetup suspend --noflush
-> 
-> Eric Sandeen: can you or someone else xfstests inclined use this info to
-> fix generic/347 please?
+> At least for the cephfs, this check could eventually be changed but I
+> would need to spend some time trying and testing the effects of
+> offloading object copies on the same file.  Of course that another
+> (easy!) option would be to simply return -EOPNOTSUPP instead and
+> fallback to the VFS implementation.
 
-It's not at all clear to me what is wrong with the test.  "Do a bunch of IO
-including a sync, completely filling the backing store, then grow the backing store"
-is surely a real-world scenario that dm-thinp might encounter, no?  Things
-do recover, subsequent writes succeed, and when all is said and done the filesystem
-is checked and it's still consistent.  That sounds like some version of success to me.
+I think Dave Chinner's copy_file_range cleanup series fixes that, among
+other problems.
 
-Even if it's emulating a dumb user/administrator, that doesn't seem invalid.
+--D
 
-What is wrong here?
-
--Eric
+> Cheers,
+> -- 
+> Luis
+> 
+> >
+> > Dave Chinner contributed some cleanups to the fsx patches as the 9th
+> > patch.
+> >
+> > The last patch fixes the common/dump tests to disable the new commands
+> > so that the dump/restore tests continue to function exactly as they have
+> > for years.
+> >
+> > There are known failures in 4.20-rc3, particularly with copy_file_range,
+> > which hopefully have been fixed by the patch series that Dave Chinner
+> > posted to the xfs list yesterday.  Branch can be downloaded here[1].
+> >
+> > --D
+> >
+> > [1] https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fsstress-clone
