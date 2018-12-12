@@ -1,47 +1,51 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:35820 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726242AbeLLJPz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Dec 2018 04:15:55 -0500
-Date: Wed, 12 Dec 2018 01:15:54 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH 0/7] xfstests: add fs-verity tests
-Message-ID: <20181212091554.GB7855@infradead.org>
-References: <20181210222142.222342-1-ebiggers@kernel.org>
- <20181211135231.GA14965@infradead.org>
- <20181211172931.GA221175@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53942 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726440AbeLLPSw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Dec 2018 10:18:52 -0500
+Date: Wed, 12 Dec 2018 10:18:44 -0500
+From: Mike Snitzer <snitzer@redhat.com>
+Subject: Re: xfstests generic/347 was never correct [was: Re: dm: fix
+ inflight IO check]
+Message-ID: <20181212151844.GA24433@redhat.com>
+References: <4fec4b01-35f9-8008-22ec-2ac8af58b854@kernel.dk>
+ <20181211003204.GA14673@redhat.com>
+ <20181212023424.GA21119@redhat.com>
+ <c4d94e2b-883b-7b6c-ec08-54b10ba4c9ca@sandeen.net>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181211172931.GA221175@gmail.com>
+In-Reply-To: <c4d94e2b-883b-7b6c-ec08-54b10ba4c9ca@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Victor Hsieh <victorhsieh@google.com>
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: Jens Axboe <axboe@kernel.dk>, sandeen@redhat.com, fstests@vger.kernel.org, "linux-block@vger.kernel.org" <linux-block@vger.kernel.org>, device-mapper development <dm-devel@redhat.com>, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Dec 11, 2018 at 09:29:32AM -0800, Eric Biggers wrote:
-> Hi Christoph,
-> 
-> On Tue, Dec 11, 2018 at 05:52:31AM -0800, Christoph Hellwig wrote:
-> > On Mon, Dec 10, 2018 at 02:21:35PM -0800, Eric Biggers wrote:
-> > > Add tests for fs-verity, a new feature for read-only file-based
-> > > authenticity protection.  fs-verity will be supported by ext4 and f2fs,
-> > > and perhaps other filesystems later.  Running these tests requires:
+On Tue, Dec 11 2018 at  9:58pm -0500,
+Eric Sandeen <sandeen@sandeen.net> wrote:
+
+> On 12/11/18 8:34 PM, Mike Snitzer wrote:
+> > On Mon, Dec 10 2018 at  7:32pm -0500,
+> > Mike Snitzer <snitzer@redhat.com> wrote:
 > > 
-> > Seriously, given how broken the current fs-verify support is we should
-> > neither merge it into the kernel nor fstests.
+> > SO generic/347 needs to account for 2 things:
+> > 1) issue $XFS_IO_PROG IO in the background with other process(es)
+> > 2) in parallel, in main generic/347 shell, run _dmthin_grow but the
+> > "thin" device must be suspended with dmsetup suspend --noflush
 > > 
-> > Nothing against the highlevel feature per-se, but the implementation
-> > posted to linux-fsdevel a while ago is simply too broken.
+> > Eric Sandeen: can you or someone else xfstests inclined use this info to
+> > fix generic/347 please?
 > 
-> Please explain.  Broken, how so?  What changes do you suggest, specifically?
+> It's not at all clear to me what is wrong with the test.  "Do a bunch of IO
+> including a sync, completely filling the backing store, then grow the backing store"
+> is surely a real-world scenario that dm-thinp might encounter, no?  Things
+> do recover, subsequent writes succeed, and when all is said and done the filesystem
+> is checked and it's still consistent.  That sounds like some version of success to me.
+> 
+> Even if it's emulating a dumb user/administrator, that doesn't seem invalid.
+> 
+> What is wrong here?
 
-Don't magically pass the hash in the file data, that is just broken
-beyond repairable.
+I told you in elaborate detail.
 
-> Also, if you have feedback it would be helpful if you posted it in response to
-> the actual kernel patchset, not just the tests.  AFAICS, this is your first time
-> responding to any fs-verity related thread, despite it being out for review for
-> months; is that correct or did I miss something you previously posted?
-
-No.  But given how broken it I'd rather ignore it rather than wasting
-my time.  It isn't like it did get any other serious review either.
+Your willingness to leave generic/347 as is makes little sense; but that
+is your call.  I'll just move on...
