@@ -1,284 +1,57 @@
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:35619 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730037AbeLOOmz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 15 Dec 2018 09:42:55 -0500
-Date: Sat, 15 Dec 2018 22:42:47 +0800
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:37849 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729687AbeLOO3A (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 15 Dec 2018 09:29:00 -0500
+Date: Sat, 15 Dec 2018 22:28:52 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 5/7] generic: test corrupting verity files
-Message-ID: <20181215144247.GY3889@desktop>
+Subject: Re: [PATCH 0/7] xfstests: add fs-verity tests
+Message-ID: <20181215142852.GV3889@desktop>
 References: <20181210222142.222342-1-ebiggers@kernel.org>
- <20181210222142.222342-6-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181210222142.222342-6-ebiggers@kernel.org>
+In-Reply-To: <20181210222142.222342-1-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers@kernel.org>
 Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Victor Hsieh <victorhsieh@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 10, 2018 at 02:21:40PM -0800, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On Mon, Dec 10, 2018 at 02:21:35PM -0800, Eric Biggers wrote:
+> Add tests for fs-verity, a new feature for read-only file-based
+> authenticity protection.  fs-verity will be supported by ext4 and f2fs,
+> and perhaps other filesystems later.  Running these tests requires:
 > 
-> This test zaps various parts of the contents of a verity file, or parts
-> of its Merkle tree, by writing directly to the block device.  It
-> verifies that this causes I/O errors when the relevant part of the
-> contents is later read by any means.
+> - A kernel with the fs-verity patches from
+>   https://git.kernel.org/pub/scm/linux/kernel/git/tytso/fscrypt.git/log/
+>   (should be merged in 4.21) and configured with CONFIG_FS_VERITY.
+> - The fsverity utility program, which can be installed from
+>   https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/fsverity-utils.git/
+> - e2fsprogs v1.44.4-2 or later for ext4 tests, or f2fs-tools v1.11.0 or
+>   later for f2fs tests.
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  tests/generic/903     | 126 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/903.out |  91 ++++++++++++++++++++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 218 insertions(+)
->  create mode 100755 tests/generic/903
->  create mode 100644 tests/generic/903.out
+> Example with kvm-xfstests:
 > 
-> diff --git a/tests/generic/903 b/tests/generic/903
-> new file mode 100755
-> index 00000000..8176d6e0
-> --- /dev/null
-> +++ b/tests/generic/903
-> @@ -0,0 +1,126 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright 2018 Google LLC
-> +#
-> +# FS QA Test generic/903
-> +#
-> +# Test corrupting verity files.  This test zaps various parts of the contents of
-> +# a verity file, or parts of its Merkle tree, by writing directly to the block
-> +# device.  It verifies that this causes I/O errors when the relevant part of the
-> +# contents is later read by any means.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/verity
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch_verity
-> +
-> +_scratch_mkfs_verity &>> $seqres.full
-> +_scratch_mount
-> +fsv_orig_file=$SCRATCH_MNT/file
-> +fsv_file=$SCRATCH_MNT/file.fsv
-> +
-> +setup_zeroed_file()
-> +{
-> +	local len=$1
-> +
-> +	head -c $len /dev/zero > $fsv_orig_file
-> +	_fsv_setup $fsv_orig_file $fsv_file >> $seqres.full
-> +	_fsv_enable $fsv_file
-> +	md5sum $fsv_file |& _filter_scratch 1>&2
-> +}
-> +
-> +filter_sigbus()
-> +{
-> +	sed -e 's/.*Bus error.*/Bus error/'
-> +}
-> +
-> +page_boundary()
-> +{
-> +	local n=$1
-> +	local page_size=$(getconf PAGE_SIZE)
+> 	$ kvm-xfstests -c ext4,f2fs -g verity
+> 
+> See the file Documentation/filesystem/fsverity.rst in the kernel tree
+> for more information about fs-verity.
+> 
+> Eric Biggers (7):
+>   common/verity: add common functions for testing fs-verity
+>   generic: test general behavior of verity files
+>   generic: test access controls on the fs-verity ioctls
+>   generic: test fs-verity descriptor validation
+>   generic: test corrupting verity files
+>   generic: test that fs-verity is using the correct measurement values
+>   generic: test using fs-verity and fscrypt simultaneously
 
-get_page_size. (I think we really should rename it to _get_page_size and
-fix all the callers..)
+The tests look good to me overall, and tests ran fine on my test vm (I
+only tested with ext4 though), thanks a lot! There're just a few minor
+issues, the comments go to individual patch.
+
+But it seems that there're still disagreements on the implemention of
+fsverity, I'd like to wait and see what's the final decision before
+taking the tests.
 
 Thanks,
 Eryu
-
-> +
-> +	echo $(( (n + page_size - 1) & ~(page_size - 1) ))
-> +}
-> +
-> +corruption_test()
-> +{
-> +	local file_len=$1
-> +	local zap_offset=$2
-> +	local zap_len=$3
-> +	local metadata_offset=$(page_boundary $file_len)
-> +	local measurement
-> +
-> +	_fsv_begin_subtest "Corruption test: file_len=$file_len zap_offset=$zap_offset zap_len=$zap_len"
-> +	setup_zeroed_file $file_len
-> +	cmp $fsv_file $fsv_orig_file
-> +	echo "Corrupting bytes..."
-> +	head -c $zap_len /dev/zero | tr '\0' X \
-> +		| _fsv_corrupt_bytes $fsv_file $zap_offset
-> +
-> +	echo "Validating corruption (reading full file)..."
-> +	_scratch_cycle_mount
-> +	md5sum $fsv_file |& _filter_scratch
-> +
-> +	echo "Validating corruption (direct I/O)..."
-> +	_scratch_cycle_mount
-> +	dd if=$fsv_file bs=$FSV_BLOCK_SIZE iflag=direct status=none \
-> +		of=/dev/null |& _filter_scratch
-> +
-> +	if (( zap_offset < metadata_offset )); then
-> +		echo "Validating corruption (reading just corrupted part)..."
-> +		dd if=$fsv_file bs=1 skip=$zap_offset count=$zap_len \
-> +			of=/dev/null status=none |& _filter_scratch
-> +	fi
-> +
-> +	echo "Validating corruption (reading full file via mmap)..."
-> +	bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $fsv_file \
-> +		-c 'mmap -r 0 $metadata_offset' \
-> +		-c 'mread 0 $file_len'" |& filter_sigbus
-> +
-> +	if (( zap_offset < metadata_offset )); then
-> +		echo "Validating corruption (reading just corrupted part via mmap)..."
-> +		bash -c "trap '' SIGBUS; $XFS_IO_PROG -r $fsv_file \
-> +			-c 'mmap -r 0 $metadata_offset' \
-> +			-c 'mread $zap_offset $zap_len'" |& filter_sigbus
-> +	fi
-> +}
-> +
-> +corruption_test 131072 0 1
-> +corruption_test 131072 4095 1
-> +corruption_test 131072 65536 65536
-> +corruption_test 131072 131071 1
-> +
-> +# Non-zeroed bytes in the final partial block beyond EOF should cause reads to
-> +# fail too.  Such bytes would be visible via mmap().
-> +corruption_test 129999 131000 72
-> +
-> +# Hash tree corruption
-> +corruption_test 1048576 1052672 4096
-> +corruption_test 1048576 1056767 1
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/903.out b/tests/generic/903.out
-> new file mode 100644
-> index 00000000..2006cf67
-> --- /dev/null
-> +++ b/tests/generic/903.out
-> @@ -0,0 +1,91 @@
-> +QA output created by 903
-> +
-> +# Corruption test: file_len=131072 zap_offset=0 zap_len=1
-> +0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading just corrupted part)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +Validating corruption (reading just corrupted part via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=131072 zap_offset=4095 zap_len=1
-> +0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading just corrupted part)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +Validating corruption (reading just corrupted part via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=131072 zap_offset=65536 zap_len=65536
-> +0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading just corrupted part)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +Validating corruption (reading just corrupted part via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=131072 zap_offset=131071 zap_len=1
-> +0dfbe8aa4c20b52e1b8bf3cb6cbdf193  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading just corrupted part)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +Validating corruption (reading just corrupted part via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=129999 zap_offset=131000 zap_len=72
-> +0ed66e88b29ce0c585cedf35ee127213  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading just corrupted part)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +Validating corruption (reading just corrupted part via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=1048576 zap_offset=1052672 zap_len=4096
-> +b6d81b360a5672d80c27430f39153e2c  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> +
-> +# Corruption test: file_len=1048576 zap_offset=1056767 zap_len=1
-> +b6d81b360a5672d80c27430f39153e2c  SCRATCH_MNT/file.fsv
-> +Corrupting bytes...
-> +Validating corruption (reading full file)...
-> +md5sum: SCRATCH_MNT/file.fsv: Input/output error
-> +Validating corruption (direct I/O)...
-> +dd: error reading 'SCRATCH_MNT/file.fsv': Input/output error
-> +Validating corruption (reading full file via mmap)...
-> +Bus error
-> diff --git a/tests/generic/group b/tests/generic/group
-> index f8f67918..0d7e0177 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -528,3 +528,4 @@
->  900 auto quick verity
->  901 auto quick verity
->  902 auto quick verity
-> +903 auto quick verity
-> -- 
-> 2.20.0.rc2.403.gdbc3b29805-goog
-> 
