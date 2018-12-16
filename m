@@ -1,57 +1,75 @@
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:37849 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729687AbeLOO3A (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 15 Dec 2018 09:29:00 -0500
-Date: Sat, 15 Dec 2018 22:28:52 +0800
+Received: from mail-pl1-f176.google.com ([209.85.214.176]:39564 "EHLO
+        mail-pl1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729822AbeLPOgq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Dec 2018 09:36:46 -0500
+Received: by mail-pl1-f176.google.com with SMTP id 101so4902061pld.6
+        for <fstests@vger.kernel.org>; Sun, 16 Dec 2018 06:36:46 -0800 (PST)
+Message-ID: <5c1662fc.1c69fb81.b6c1e.cb65@mx.google.com>
+Date: Sun, 16 Dec 2018 22:36:39 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 0/7] xfstests: add fs-verity tests
-Message-ID: <20181215142852.GV3889@desktop>
-References: <20181210222142.222342-1-ebiggers@kernel.org>
+Subject: [ANNOUNCE] fstests: master branch updated to 2c97b8691d05
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="6WPgxdNYvisL"
 Content-Disposition: inline
-In-Reply-To: <20181210222142.222342-1-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, "Theodore Y . Ts'o" <tytso@mit.edu>, Jaegeuk Kim <jaegeuk@kernel.org>, Victor Hsieh <victorhsieh@google.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 10, 2018 at 02:21:35PM -0800, Eric Biggers wrote:
-> Add tests for fs-verity, a new feature for read-only file-based
-> authenticity protection.  fs-verity will be supported by ext4 and f2fs,
-> and perhaps other filesystems later.  Running these tests requires:
-> 
-> - A kernel with the fs-verity patches from
->   https://git.kernel.org/pub/scm/linux/kernel/git/tytso/fscrypt.git/log/
->   (should be merged in 4.21) and configured with CONFIG_FS_VERITY.
-> - The fsverity utility program, which can be installed from
->   https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/fsverity-utils.git/
-> - e2fsprogs v1.44.4-2 or later for ext4 tests, or f2fs-tools v1.11.0 or
->   later for f2fs tests.
-> 
-> Example with kvm-xfstests:
-> 
-> 	$ kvm-xfstests -c ext4,f2fs -g verity
-> 
-> See the file Documentation/filesystem/fsverity.rst in the kernel tree
-> for more information about fs-verity.
-> 
-> Eric Biggers (7):
->   common/verity: add common functions for testing fs-verity
->   generic: test general behavior of verity files
->   generic: test access controls on the fs-verity ioctls
->   generic: test fs-verity descriptor validation
->   generic: test corrupting verity files
->   generic: test that fs-verity is using the correct measurement values
->   generic: test using fs-verity and fscrypt simultaneously
 
-The tests look good to me overall, and tests ran fine on my test vm (I
-only tested with ext4 though), thanks a lot! There're just a few minor
-issues, the comments go to individual patch.
+--6WPgxdNYvisL
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-But it seems that there're still disagreements on the implemention of
-fsverity, I'd like to wait and see what's the final decision before
-taking the tests.
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is one really minor update that contains only one
+improvement.
 
 Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+2c97b8691d05 generic/062, 520: Don't remove lost+found during cleanup
+
+New commits:
+
+Xiao Yang (1):
+      [2c97b8691d05] generic/062, 520: Don't remove lost+found during cleanup
+
+
+Code Diffstat:
+
+ tests/generic/062 | 2 +-
+ tests/generic/520 | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--6WPgxdNYvisL
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJcFmKOAAoJECZSqilcj+djP+UP/iA/sKcPk8Nz8qXl3DtWOUPW
+kwkl0VKCJ80c1ZhfwW9jTw1hAhvGa1xq66XAlD8EJ21ScTi+Nh+ANMvEuVNEiGRA
+LNn3Sa5NTsfTf3NgwByIckccdxCalNHhq07ViKVH04DIq+14JJG5Xg6CqfdH8zO0
+9L4ohD3moMWuSCPPaNI23wZapZECm5V5YAzlV5DpUUT/zBVxTm5tuDG7iuSY9hPj
+AmAmH/Fq0A6p09Z2Qy9hh/Z3/ARUNP/Vn2ivJffHjvz17xvgUUe4PTtU2fbXUnGC
+RFw5eORTu48t8S5zla/MAAvX/Vxas9Ht6SGmF6lTEIoYYAoc45wgQuH8eop1gYaW
+0FTBXOY2LbL/O4+Ra4MuzANzms44GzI3RKsPS7kTh0E4S+CrMpryyiyzaIB8KOrA
+B8DJzIRTx9L44j6nrERX4LMZKb1kdeWAiqjy1z8zu/P9qwPPxAdTpGbyXsDyTC45
+GXgNVIj7wkHmAe2hSdD2BhRChYx0Lc8T/0kUZh7nf4fgYfHljqkehJgzHHjMRCrt
+PCTjaZXcbEpVhQnf30sVXCq/RB9jd+7xY5IrRNXxT8qMVh+wsMXWcX3+h9H7CWyp
+d8SJibpIG2HcYS5J2IgjaNkszSnVejVdk4kUpmiJ7OFh8UKlQizIDb2uzky7k3+d
+FWpYNCciXdrBG/LW9msf
+=YdNn
+-----END PGP SIGNATURE-----
+
+--6WPgxdNYvisL--
