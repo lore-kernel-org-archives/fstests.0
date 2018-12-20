@@ -1,70 +1,49 @@
-Received: from mx2.suse.de ([195.135.220.15]:39262 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728844AbeLSPmA (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 19 Dec 2018 10:42:00 -0500
-Received: from relay1.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id F20B1ADD4
-        for <fstests@vger.kernel.org>; Wed, 19 Dec 2018 15:41:58 +0000 (UTC)
-From: David Disseldorp <ddiss@suse.de>
-Subject: [PATCH] check: fix -X exclude_file behaviour
-Date: Wed, 19 Dec 2018 16:41:55 +0100
-Message-Id: <20181219154155.10140-1-ddiss@suse.de>
+Received: from mx1.redhat.com ([209.132.183.28]:54212 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726604AbeLTCRD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Dec 2018 21:17:03 -0500
+Date: Wed, 19 Dec 2018 21:17:02 -0500 (EST)
+From: Xiaoli Feng <xifeng@redhat.com>
+Message-ID: <966737066.61401666.1545272222334.JavaMail.zimbra@redhat.com>
+In-Reply-To: <20181219071834.GA14993@infradead.org>
+References: <1545191068-6719-1-git-send-email-xifeng@redhat.com> <20181219071834.GA14993@infradead.org>
+Subject: Re: [PATCH v1] xfstests: filter the default EA
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: David Disseldorp <ddiss@suse.de>
+To: Christoph Hellwig <hch@infradead.org>
+Cc: fstests@vger.kernel.org, smfrench@gmail.com, Ronnie Sahlberg <lsahlber@redhat.com>, sprabhu <sprabhu@redhat.co>, linux-cifs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-It is currently processed before FSTYP has been properly set, leading to
-xfs, btrfs, etc. specific exclude_files being ignored.
+Hi Christoph,
 
-Signed-off-by: David Disseldorp <ddiss@suse.de>
-Reviewed-by: Johannes Thumshirn <jthumshirn@suse.de>
----
- check | 18 +++++++++++-------
- 1 file changed, 11 insertions(+), 7 deletions(-)
+----- Original Message -----
+> From: "Christoph Hellwig" <hch@infradead.org>
+> To: "XiaoLi Feng" <xifeng@redhat.com>
+> Cc: fstests@vger.kernel.org
+> Sent: Wednesday, December 19, 2018 3:18:34 PM
+> Subject: Re: [PATCH v1] xfstests: filter the default EA
+> 
+> On Wed, Dec 19, 2018 at 11:44:28AM +0800, XiaoLi Feng wrote:
+> > From: xiaoli feng <xifeng@redhat.com>
+> > 
+> > For some filesystems, such as CIFS, the file or directory has the
+> > default extend attribute. It makes these tests generic/020
+> > generic/337 generic/377 failed. Now add this patch to filter the
+> > default EA.
+> 
+> What is "the default EA"?  This sounds like a CIFS bug to me.
 
-diff --git a/check b/check
-index 59f94c1c..5f8210d7 100755
---- a/check
-+++ b/check
-@@ -22,6 +22,7 @@ have_test_arg=false
- randomize=false
- export here=`pwd`
- xfile=""
-+subdir_xfile=""
- brief_test_summary=false
- do_report=false
- DUMP_OUTPUT=false
-@@ -272,13 +273,7 @@ while [ $# -gt 0 ]; do
- 		XGROUP_LIST="$XGROUP_LIST ${xgroup//,/ }"
- 		;;
- 
--	-X)	xfile=$2; shift ;
--		for d in $SRC_GROUPS $FSTYP; do
--			[ -f $SRC_DIR/$d/$xfile ] || continue
--			for f in `sed "s/#.*$//" $SRC_DIR/$d/$xfile`; do
--				echo $d/$f >> $tmp.xlist
--			done
--		done
-+	-X)	subdir_xfile=$2; shift ;
- 		;;
- 	-E)	xfile=$2; shift ;
- 		if [ -f $xfile ]; then
-@@ -325,6 +320,15 @@ if ! . ./common/rc; then
- 	exit 1
- fi
- 
-+if [ -n "$subdir_xfile" ]; then
-+	for d in $SRC_GROUPS $FSTYP; do
-+		[ -f $SRC_DIR/$d/$subdir_xfile ] || continue
-+		for f in `sed "s/#.*$//" $SRC_DIR/$d/$subdir_xfile`; do
-+			echo $d/$f >> $tmp.xlist
-+		done
-+	done
-+fi
-+
- # Process tests from command line now.
- if $have_test_arg; then
- 	while [ $# -gt 0 ]; do
--- 
-2.13.7
+the default EA means the new file or directory has extended attributes.
+
+# touch cifs/file
+# getfattr cifs/file
+# file: cifs/file
+user.security.selinux
+
+I don't think it's a CIFS bug to me. But we need the CIFS developers's
+analysis. cc the cifs developer mail.
+
+Thanks.
+> 
