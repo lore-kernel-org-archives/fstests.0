@@ -1,32 +1,43 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:55664 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728966AbeLTHl1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Dec 2018 02:41:27 -0500
-Date: Wed, 19 Dec 2018 23:41:25 -0800
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH v1] xfstests: filter the default EA
-Message-ID: <20181220074125.GA24403@infradead.org>
-References: <1545191068-6719-1-git-send-email-xifeng@redhat.com>
- <20181219071834.GA14993@infradead.org>
- <966737066.61401666.1545272222334.JavaMail.zimbra@redhat.com>
- <CAH2r5mueD3quzrQ=pnY+w1H9T7FDK5tfmif-AoBJ66a-LVhK=A@mail.gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAH2r5mueD3quzrQ=pnY+w1H9T7FDK5tfmif-AoBJ66a-LVhK=A@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:60586 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1728966AbeLTMw1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 20 Dec 2018 07:52:27 -0500
+From: Johannes Thumshirn <jthumshirn@suse.de>
+Subject: [PATCH] common/rc: create $RESULT_BASE before dumping kmemleak leaks
+Date: Thu, 20 Dec 2018 13:52:22 +0100
+Message-Id: <20181220125222.12041-1-jthumshirn@suse.de>
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: Xiaoli Feng <xifeng@redhat.com>, Christoph Hellwig <hch@infradead.org>, fstests@vger.kernel.org, Ronnie Sahlberg <lsahlber@redhat.com>, sprabhu <sprabhu@redhat.co>, CIFS <linux-cifs@vger.kernel.org>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org, Johannes Thumshirn <jthumshirn@suse.de>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Dec 19, 2018 at 08:24:26PM -0600, Steve French wrote:
-> > # touch cifs/file
-> > # getfattr cifs/file
-> > # file: cifs/file
-> > user.security.selinux
-> 
-> user.security.selinux is not a cifs EA.  This "default EA" is not
-> handled/returned by CIFS.
+In _init_kmemleak() we're touching a check_kmemleak file in ${RESULT_BASE}
+if ${DEBUGFS_MNT/kmemleak} exists as a marker that we have to check for
+kmemleak output after running a test.
 
-The user. prefix for security.selinux is bogus.  Someone on either
-the server or client side has a bad bug here.
+In 'check' we're calling _init_kmemleak() at around 60% of the file, but
+${RESULT_BASE} is created later at around 62% of the file, causing the
+'touch' in _init_kmemleak() to fail.
+
+The workaround to this is creating ${RESULT_BASE} before touching
+${RESULT_BASE}/check_kmemleak to always have the marker.
+
+Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
+---
+ common/rc | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/common/rc b/common/rc
+index e5da648466eb..5565b63e07ed 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3528,6 +3528,7 @@ _init_kmemleak()
+ 	# then dump all the leaks recorded so far.
+ 	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
+ 		_capture_kmemleak /dev/null
++		mkdir -p ${RESULT_BASE}
+ 		touch ${RESULT_BASE}/check_kmemleak
+ 	fi
+ }
+-- 
+2.16.4
