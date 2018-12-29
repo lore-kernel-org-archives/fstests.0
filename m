@@ -1,53 +1,61 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:41890 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727754AbeL2Sxg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 29 Dec 2018 13:53:36 -0500
-Date: Sat, 29 Dec 2018 10:53:26 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 5/5] fsx: check ENOSYS in test_copy_range()
-Message-ID: <20181229185326.GA20474@magnolia>
-References: <20181229023452.28074-1-houtao1@huawei.com>
- <20181229023452.28074-6-houtao1@huawei.com>
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:44932 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725923AbeL2FIz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 29 Dec 2018 00:08:55 -0500
+Date: Sat, 29 Dec 2018 13:08:46 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] ext4/034: adjust commit which fixes the problem tested
+ by ext4/034
+Message-ID: <20181229050846.GC21777@desktop>
+References: <20181226160805.8987-1-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20181229023452.28074-6-houtao1@huawei.com>
+In-Reply-To: <20181226160805.8987-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Hou Tao <houtao1@huawei.com>
-Cc: fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Ext4 Developers List <linux-ext4@vger.kernel.org>, Liu Bo <obuil.liubo@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Dec 29, 2018 at 10:34:52AM +0800, Hou Tao wrote:
-> In configure script, we only check whether or not the build
-> of copy-range test program is successful, but that doesn't
-> mean the kernel has implemented the syscall, so checking
-> for this case.
+On Wed, Dec 26, 2018 at 11:08:05AM -0500, Theodore Ts'o wrote:
+> Also add a requirment that fallocate and fiemap is supported.
+> (Fallocate isn't the case when we are emulating ext3, for example.)
 > 
-> Signed-off-by: Hou Tao <houtao1@huawei.com>
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> Cc: Liu Bo <obuil.liubo@gmail.com>
 
-Err, oops.  Thanks for catching that!
+Patch looks good, but I assume you meant to send it to
+fstests@vger.kernel.org not linux-fstests@mit.edu :)
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
+Thanks,
+Eryu
 
 > ---
->  ltp/fsx.c | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+>  tests/ext4/034 | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index 316f08eb..b84180f7 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -1583,7 +1583,7 @@ test_copy_range(void)
->  	loff_t o1 = 0, o2 = 0;
+> diff --git a/tests/ext4/034 b/tests/ext4/034
+> index 5c34d0d9..f9e4bfaf 100755
+> --- a/tests/ext4/034
+> +++ b/tests/ext4/034
+> @@ -8,7 +8,7 @@
+>  # "-o dioread_nolock,nodelalloc" is used.
+>  #
+>  # The bug was fixed by commit
+> -# "Ext4: fix ENOSPC when both quota and dioread_nolock are enabled"
+> +# "ext4: make sure enough credits are reserved for dioread_nolock writes"
+>  #
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -41,6 +41,8 @@ _supported_os Linux
+>  _require_scratch
+>  _require_quota
+>  _require_nobody
+> +_require_xfs_io_command "falloc"
+> +_require_xfs_io_command "fiemap"
+>  _require_xfs_io_command "syncfs"
 >  
->  	if (syscall(__NR_copy_file_range, fd, &o1, fd, &o2, 0, 0) == -1 &&
-> -	    (errno == EOPNOTSUPP || errno == ENOTTY)) {
-> +	    (errno == ENOSYS || errno == EOPNOTSUPP || errno == ENOTTY)) {
->  		if (!quiet)
->  			fprintf(stderr,
->  				"main: filesystem does not support "
+>  echo "Format and mount"
 > -- 
-> 2.16.2.dirty
+> 2.19.1
 > 
