@@ -1,84 +1,54 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:45579 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725992AbeL3PPS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 Dec 2018 10:15:18 -0500
-Received: by mail-pg1-f194.google.com with SMTP id y4so11881291pgc.12
-        for <fstests@vger.kernel.org>; Sun, 30 Dec 2018 07:15:18 -0800 (PST)
-Message-ID: <5c28e104.1c69fb81.77776.e57f@mx.google.com>
-Date: Sun, 30 Dec 2018 23:15:08 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to ff67bfc354fc
+Received: from mail-eopbgr740121.outbound.protection.outlook.com ([40.107.74.121]:6077
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725935AbeLaDzR (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 30 Dec 2018 22:55:17 -0500
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: [PATCH] report: gracefully handle XML report creation when no tests are run
+Date: Sun, 30 Dec 2018 22:55:07 -0500
+Message-ID: <20181231035507.10530-1-tytso@mit.edu>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="ThX9k5wSLRvc"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
+If no tests are run (because they have all been excluded) then make
+sure we insert a valid timestamp into the XML file, and avoid printing
+an error message when reading a non-existent test summary scratch
+file.
 
---ThX9k5wSLRvc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+---
+ common/report | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This is the last update in 2018 that contains only
-minor bug fixes.
-
-Happy New Year!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-ff67bfc354fc generic/466: explicitly request $SCRATCH_DEV to be a block device
-
-New commits:
-
-Hou Tao (3):
-      [3f95ea9fb3fd] check: use _try_scratch_mount instead of _scratch_mount to mount SCRATCH_DEV
-      [a6c53104a41e] generic/019: require scratch device to be a block device
-      [ff67bfc354fc] generic/466: explicitly request $SCRATCH_DEV to be a block device
-
-Theodore Ts'o (1):
-      [deab8ca02e36] ext4/034: adjust commit which fixes the problem tested by ext4/034
-
-
-Code Diffstat:
-
- check             | 2 +-
- tests/ext4/034    | 4 +++-
- tests/generic/019 | 1 +
- tests/generic/466 | 1 +
- 4 files changed, 6 insertions(+), 2 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---ThX9k5wSLRvc
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJcKOCcAAoJECZSqilcj+djGd0P/jGBKVPQ38bNfrNg6e32WbWO
-vMZQjm9aPuhsG98EMB3cYFdQgT07USpXnL6bluRUr4m1e0Xp3B72Z5iNm0UYKJEV
-iXnpEidg7qeIDc+dBCBogX6tELnZAU2N07qXiIvoY/zS4BfsDp0HEQmvrP5GmDux
-+XjTGpLbINoK+lpa5ve2damxTk+s56ckx5j8P33yN47IEERZkd6yIrXSsSybcDzc
-VT20dR2smhZ8X6jDv0y81QL8TLHdiMXT7rGPOLVvVrJIYnIVB0M5fdJA9tKGLK+V
-KjnsgluI77eK+sXBFSK0Ln0tvHMVgffSnc7PdHOi0io98dfVY02ZBpzuQ2WGjrcO
-EriRfFBI/rbkSSnxvQwxfsUXLqg0dqhGvGHfOybwlKVqSgzg7p8sP8jIqo7myTEu
-aJmvKj0kmVYxuL8HV46wW0NKqNt5rnWb8aRhx85NtVSXqhbEFgjgeWU5UpEqY0it
-+Q8xHErIdHXp9VqddPbPwZq1lmpTCUy3PGDtXUY+GXfdpKkDYviKC1PJOIaKIns3
-Jq/k+f82u2NK7pZ1U51PJtyKc2gJ/yE6s9f8kCsHx3K1NvnWdzNxzKzXFT145PpT
-n+/7LsAivBe/ae31qsU84qOq7FI4E4VFJlxkztIulQefUI9T555qkPqIJBNvEJKC
-HBGpxTwxbpA6GqYJ5BcJ
-=zqfp
------END PGP SIGNATURE-----
-
---ThX9k5wSLRvc--
+diff --git a/common/report b/common/report
+index fb00b402..6cac71fc 100644
+--- a/common/report
++++ b/common/report
+@@ -59,6 +59,9 @@ _xunit_make_section_report()
+ 	local report=$tmp.report.xunit.$sect_name.xml
+ 	# Header
+ 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
++	if [ -z "$date_time" ]; then
++		date_time=$(date +"%F %T")
++	fi
+ 	local dtime=`echo $date_time| tr  " " 'T'`
+ 	local stats="failures=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
+ 	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
+@@ -70,7 +73,9 @@ _xunit_make_section_report()
+ 		_xunit_add_property "$p"
+ 	done
+ 	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
+-	cat $tmp.report.xunit.$sect_name.xml >> $REPORT_DIR/result.xml
++	if [ -f $report ]; then
++		cat $report >> $REPORT_DIR/result.xml
++	fi
+ 	echo "</testsuite>" >> $REPORT_DIR/result.xml
+ 	echo "Xunit report: $REPORT_DIR/result.xml"
+ }
+-- 
+2.19.1
