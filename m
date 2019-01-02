@@ -1,37 +1,68 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:60726 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1727753AbfAIVDb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 9 Jan 2019 16:03:31 -0500
-Date: Thu, 10 Jan 2019 08:02:43 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] common/scsi_debug: make sure scsi_debug been removed
- correctly
-Message-ID: <20190109210243.GG27534@dastard>
-References: <20190109054845.93810-1-yangerkun@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190109054845.93810-1-yangerkun@huawei.com>
+Received: from mx1.redhat.com ([209.132.183.28]:37364 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726250AbfABED1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 1 Jan 2019 23:03:27 -0500
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 87B38461F8
+        for <fstests@vger.kernel.org>; Wed,  2 Jan 2019 04:03:27 +0000 (UTC)
+Received: from localhost.localdomain.com (unknown [10.66.13.9])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id B19CD60123
+        for <fstests@vger.kernel.org>; Wed,  2 Jan 2019 04:03:26 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH 1/2] generic/474: shift target directory to a sub-dir of SCRATCH_MNT
+Date: Wed,  2 Jan 2019 12:03:18 +0800
+Message-Id: <20190102040319.7668-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: yangerkun <yangerkun@huawei.com>
-Cc: guaneryu@gmail.com, houtao1@huawei.com, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 09, 2019 at 01:48:45PM +0800, yangerkun wrote:
-> Case generic/108 sometimes will fail while testing ext2, and the reson
-> is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
-> add the loop to do rmmod to make sure scsi_debug can be removed
-> correctly.
+If testing on large fs, there's a huge size .use_space file in
+$SCRATCH_MNT, then `fssum $SCRATCH_MNT` trys to read whole huge
+file. That's wasting time, so change the target path to a sub-dir
+of $SCRATCH_MNT.
 
-Why does 'rmmod scsi_debug' randomly fail?
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-What bug does ext2 have that prevents the scsi debug module from
-being released and hence removed?
+Hi,
 
-Cheers,
+These 2 patches try to fix case issues which cause testing hang on(not real hang)
+large-fs.
 
-Dave.
+Thanks,
+Zorro
 
+ tests/generic/474 | 12 ++++++++----
+ 1 file changed, 8 insertions(+), 4 deletions(-)
+
+diff --git a/tests/generic/474 b/tests/generic/474
+index 12157a39..5ce72d75 100755
+--- a/tests/generic/474
++++ b/tests/generic/474
+@@ -55,14 +55,18 @@ _scratch_mount
+ 
+ sync
+ 
+-$XFS_IO_PROG -f -c "pwrite 0 4K" $SCRATCH_MNT/testfile >/dev/null 2>&1
++# Large fs has a huge size .use_space file, will take long time on running
++# fssum $SCRATCH_MNT. So change the target path to a sub-dir of $SCRATCH_MNT.
++localdir=$SCRATCH_MNT/dir
++mkdir $localdir
++$XFS_IO_PROG -f -c "pwrite 0 4K" $localdir/testfile >/dev/null 2>&1
+ 
+ # fssum used for comparing checksum of test file(data & metedata),
+ # exclude checking about atime, block structure, open error.
+-$FSSUM_PROG -ugomAcdES -f -w $tmp.fssum $SCRATCH_MNT
+-$XFS_IO_PROG -c "syncfs" $SCRATCH_MNT/testfile >/dev/null 2>&1
++$FSSUM_PROG -ugomAcdES -f -w $tmp.fssum $localdir
++$XFS_IO_PROG -c "syncfs" $localdir/testfile >/dev/null 2>&1
+ _scratch_shutdown
+ _scratch_cycle_mount
+-$FSSUM_PROG -r $tmp.fssum $SCRATCH_MNT
++$FSSUM_PROG -r $tmp.fssum $localdir
+ 
+ exit
 -- 
-Dave Chinner
-david@fromorbit.com
+2.17.2
