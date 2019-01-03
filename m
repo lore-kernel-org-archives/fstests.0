@@ -1,62 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:37396 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726250AbfABEDe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 1 Jan 2019 23:03:34 -0500
-Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 0C01F5275A
-        for <fstests@vger.kernel.org>; Wed,  2 Jan 2019 04:03:34 +0000 (UTC)
-Received: from localhost.localdomain.com (unknown [10.66.13.9])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3430C60123
-        for <fstests@vger.kernel.org>; Wed,  2 Jan 2019 04:03:32 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH 2/2] xfs/139-140: skip testing on large scratch dev
-Date: Wed,  2 Jan 2019 12:03:19 +0800
-Message-Id: <20190102040319.7668-2-zlang@redhat.com>
-In-Reply-To: <20190102040319.7668-1-zlang@redhat.com>
-References: <20190102040319.7668-1-zlang@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:47570 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1730285AbfACKBj (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 3 Jan 2019 05:01:39 -0500
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] common/config: Always create RESULT_BASE
+Date: Thu,  3 Jan 2019 12:01:35 +0200
+Message-Id: <20190103100135.24748-1-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: guaneryu@gmail.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-x/139 and x/140 makes XFS with very small agsize. That agsize is too
-small for a large fs. And it's not necessary to test on large fs, so
-skip it directly if scratch dev is large dev.
+Commit 7fc034868d5d ("common/config: create $RESULT_BASE before dumping kmemleak leaks")
+inadvertently broke $RESULT_BASE dir creation since it changed the logic
+to only create the directory only if this variable is not explicitly set
+by the user. Fix this by ensuring RESULT_BASE is always created.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- tests/xfs/139 | 3 +++
- tests/xfs/140 | 3 +++
- 2 files changed, 6 insertions(+)
+ common/config | 11 ++++++-----
+ 1 file changed, 6 insertions(+), 5 deletions(-)
 
-diff --git a/tests/xfs/139 b/tests/xfs/139
-index 3a20ce50..4c498ff2 100755
---- a/tests/xfs/139
-+++ b/tests/xfs/139
-@@ -29,6 +29,9 @@ _cleanup()
+diff --git a/common/config b/common/config
+index fb664cf0a967..e2da9cfacbb5 100644
+--- a/common/config
++++ b/common/config
+@@ -663,11 +663,12 @@ get_next_config() {
+ 	# set default RESULT_BASE
+ 	if [ -z "$RESULT_BASE" ]; then
+ 		export RESULT_BASE="$here/results/"
+-		mkdir -p ${RESULT_BASE}
+-		if [ ! -d ${RESULT_BASE} ]; then
+-			echo "failed to create results directory $RESULT_BASE"
+-			exit 1
+-		fi
++	fi
++
++	mkdir -p ${RESULT_BASE}
++	if [ ! -d ${RESULT_BASE} ]; then
++		echo "failed to create results directory $RESULT_BASE"
++		exit 1
+ 	fi
  
- # real QA test starts here
- _supported_os Linux
-+# Below agsize (16384 * $blksz) is too small for a large fs, and it's not
-+# necessary to test on large fs
-+_require_no_large_scratch_dev
- _require_scratch_reflink
- _require_cp_reflink
- 
-diff --git a/tests/xfs/140 b/tests/xfs/140
-index 7385dc42..863b1e6f 100755
---- a/tests/xfs/140
-+++ b/tests/xfs/140
-@@ -29,6 +29,9 @@ _cleanup()
- 
- # real QA test starts here
- _supported_os Linux
-+# Below agsize is too small for a large fs, and it's not necessary to test on
-+# large fs
-+_require_no_large_scratch_dev
- _require_scratch_reflink
- _require_cp_reflink
- 
+ 	if [ "$FSTYP" == "tmpfs" ]; then
 -- 
-2.17.2
+2.7.4
