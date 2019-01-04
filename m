@@ -1,64 +1,108 @@
-Received: from mx2.suse.de ([195.135.220.15]:47254 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726488AbfADObT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 4 Jan 2019 09:31:19 -0500
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH] Revert "common/config: create $RESULT_BASE before dumping kmemleak leaks"
-Date: Fri,  4 Jan 2019 16:31:16 +0200
-Message-Id: <20190104143116.5698-1-nborisov@suse.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:38812 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726015AbfADVXo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 4 Jan 2019 16:23:44 -0500
+Date: Fri, 4 Jan 2019 13:23:36 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] generic: test that xattrs can have slashes in their names
+Message-ID: <20190104212336.GC12689@magnolia>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, Nikolay Borisov <nborisov@suse.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-This commit tried to fix the brokennes of the kmemleak support but it 
-inadvertently broke the creation of the RESULT_BASE directory which lead to 
-problems creating check.time file. Turns out kmemleak support in xfstests has 
-more problems and it needs to be majorly refactor and this commit doesn't 
-really solve the problem. For the time being just revert to at least allow 
-older configuration files, which have explicitly set RESULT_BASE to work. 
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-This reverts commit 7fc034868d5dce9aaf3517c9c2197221b9a772e4.
+Eric Sandeen recently found a bug in xfs_repair that flagged extended
+attribute names containing "/" as corrupt and purged them.  There's
+nothing in the IRIX or Linux manuals that say anything about slashes not
+being allowed (and Linux certainly allows this) so let's make sure this
+continues to work.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- check         | 7 +++++++
- common/config | 5 -----
- 2 files changed, 7 insertions(+), 5 deletions(-)
+ tests/generic/708     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/708.out |    6 ++++++
+ tests/generic/group   |    1 +
+ 3 files changed, 55 insertions(+)
+ create mode 100755 tests/generic/708
+ create mode 100644 tests/generic/708.out
 
-diff --git a/check b/check
-index e4d767375b57..77a06b00dbba 100755
---- a/check
-+++ b/check
-@@ -538,6 +538,13 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 		fi
- 	fi
- 
-+	mkdir -p $RESULT_BASE
-+	if [ ! -d $RESULT_BASE ]; then
-+		echo "failed to create results directory $RESULT_BASE"
-+		status=1
-+		exit
-+	fi
+diff --git a/tests/generic/708 b/tests/generic/708
+new file mode 100755
+index 00000000..ee63ba79
+--- /dev/null
++++ b/tests/generic/708
+@@ -0,0 +1,48 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 708
++#
++# Check that xattrs can have slashes in their name.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
- 	if $OPTIONS_HAVE_SECTIONS; then
- 		echo "SECTION       -- $section"
- 	fi
-diff --git a/common/config b/common/config
-index fb664cf0a967..5b48e1e7323b 100644
---- a/common/config
-+++ b/common/config
-@@ -663,11 +663,6 @@ get_next_config() {
- 	# set default RESULT_BASE
- 	if [ -z "$RESULT_BASE" ]; then
- 		export RESULT_BASE="$here/results/"
--		mkdir -p ${RESULT_BASE}
--		if [ ! -d ${RESULT_BASE} ]; then
--			echo "failed to create results directory $RESULT_BASE"
--			exit 1
--		fi
- 	fi
- 
- 	if [ "$FSTYP" == "tmpfs" ]; then
--- 
-2.12.3
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_attrs
++
++rm -f $seqres.full
++
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++echo "set attr"
++file=$SCRATCH_MNT/moofile
++touch $file
++setfattr -n "user.boo/hoo" -v "woof" $file
++
++echo "check attr"
++getfattr -d --absolute-names $file | _filter_scratch
++
++# success, all done(?)
++status=0
++exit
+diff --git a/tests/generic/708.out b/tests/generic/708.out
+new file mode 100644
+index 00000000..6978532e
+--- /dev/null
++++ b/tests/generic/708.out
+@@ -0,0 +1,6 @@
++QA output created by 708
++set attr
++check attr
++# file: SCRATCH_MNT/moofile
++user.boo/hoo="woof"
++
+diff --git a/tests/generic/group b/tests/generic/group
+index ea5aa7aa..f88125b4 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -525,3 +525,4 @@
+ 520 auto quick log
+ 521 soak long_rw
+ 522 soak long_rw
++708 auto quick attr
