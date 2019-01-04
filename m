@@ -1,16 +1,14 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:44279 "EHLO huawei.com"
+Received: from szxga05-in.huawei.com ([45.249.212.191]:16678 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726786AbfADIQC (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 4 Jan 2019 03:16:02 -0500
-Received: from DGGEMS405-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id 390E7584DC47F
-        for <fstests@vger.kernel.org>; Fri,  4 Jan 2019 16:15:59 +0800 (CST)
+        id S1725984AbfADItp (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 4 Jan 2019 03:49:45 -0500
+Received: from DGGEMS406-HUB.china.huawei.com (unknown [172.30.72.58])
+        by Forcepoint Email with ESMTP id CED001A2AE2C2
+        for <fstests@vger.kernel.org>; Fri,  4 Jan 2019 16:49:38 +0800 (CST)
 From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH v2 2/2] fsx: check ENOSYS in test_copy_range() & test_fallocate()
-Date: Fri, 4 Jan 2019 16:19:27 +0800
-Message-ID: <20190104081927.112622-3-houtao1@huawei.com>
-In-Reply-To: <20190104081927.112622-1-houtao1@huawei.com>
-References: <20190104081927.112622-1-houtao1@huawei.com>
+Subject: [PATCH] fstests: add support for JFFS2
+Date: Fri, 4 Jan 2019 16:53:09 +0800
+Message-ID: <20190104085309.89520-1-houtao1@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -18,41 +16,243 @@ To: fstests@vger.kernel.org
 Cc: houtao1@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-In configure script, we only check whether or not the build
-of test program succeeds, but that doesn't mean the kernel
-has implemented the syscall, so checking for this case.
+Mainly based on support for UBIFS, and there are two differences
+between them.
+
+The major difference is the definitions of TEST_DEV and SCRATCH_DEV
+in local.config.
+
+For UBIFS, TEST_DEV is something like /dev/ubi0_0. It's an UBI volume
+and mount program will handle it correctly. For JFFS2, we can use
+/dev/mtdblockX or mtdX, but can not use /dev/mtdX because mount program
+will complain it is a character device and refuse to mount it.
+
+If /dev/mtdblockX is used, test cases for blkdev will be runnable for
+jffs2, but that will go against our intention because JFFS2 is a filesystem
+used for MTD character device and is not a block filesystem. So we choose
+to use mtdX as TEST_DEV & SCRATCH_DEV and take care of that during fs
+check/mount/umount.
+
+The minor difference is the procedures of making file-system: JFFS2 is
+formatted by flash_erase instead of ubiupdatevol which is usedfor UBIFS.
+
+Serveral bugs have already been spotted by it, especially the one found
+by generic/097.
 
 Signed-off-by: Hou Tao <houtao1@huawei.com>
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
-v2:
-	* also check ENOSYS for fallocate syscall
----
- ltp/fsx.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ check         |  2 ++
+ common/config | 13 +++++++++++++
+ common/jffs2  | 23 +++++++++++++++++++++++
+ common/rc     | 45 +++++++++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 83 insertions(+)
+ create mode 100644 common/jffs2
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 316f08eb..f4a1c7cf 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1583,7 +1583,7 @@ test_copy_range(void)
- 	loff_t o1 = 0, o2 = 0;
+diff --git a/check b/check
+index e4d76737..6beef483 100755
+--- a/check
++++ b/check
+@@ -60,6 +60,7 @@ check options
+     -pvfs2          test PVFS2
+     -tmpfs              test TMPFS
+     -ubifs              test ubifs
++    -jffs2              test jffs2
+     -l			line mode diff
+     -udiff		show unified diff (default)
+     -n			show me, do not run tests
+@@ -264,6 +265,7 @@ while [ $# -gt 0 ]; do
+ 	-pvfs2)		FSTYP=pvfs2 ;;
+ 	-tmpfs)		FSTYP=tmpfs ;;
+ 	-ubifs)		FSTYP=ubifs ;;
++	-jffs2)		FSTYP=jffs2 ;;
  
- 	if (syscall(__NR_copy_file_range, fd, &o1, fd, &o2, 0, 0) == -1 &&
--	    (errno == EOPNOTSUPP || errno == ENOTTY)) {
-+	    (errno == ENOSYS || errno == EOPNOTSUPP || errno == ENOTTY)) {
- 		if (!quiet)
- 			fprintf(stderr,
- 				"main: filesystem does not support "
-@@ -2423,7 +2423,8 @@ __test_fallocate(int mode, const char *mode_str)
- #ifdef HAVE_LINUX_FALLOC_H
- 	int ret = 0;
- 	if (!lite) {
--		if (fallocate(fd, mode, file_size, 1) && errno == EOPNOTSUPP) {
-+		if (fallocate(fd, mode, file_size, 1) &&
-+		    (errno == ENOSYS || errno == EOPNOTSUPP)) {
- 			if(!quiet)
- 				fprintf(stderr,
- 					"main: filesystem does not support "
+ 	-g)	group=$2 ; shift ;
+ 		GROUP_LIST="$GROUP_LIST ${group//,/ }"
+diff --git a/common/config b/common/config
+index fb664cf0..f9e932f1 100644
+--- a/common/config
++++ b/common/config
+@@ -190,6 +190,7 @@ export MAN_PROG="$(type -P man)"
+ export NFS4_SETFACL_PROG="$(type -P nfs4_setfacl)"
+ export NFS4_GETFACL_PROG="$(type -P nfs4_getfacl)"
+ export UBIUPDATEVOL_PROG="$(type -P ubiupdatevol)"
++export FLASH_ERASE_PROG="$(type -P flash_erase)"
+ export THIN_CHECK_PROG="$(type -P thin_check)"
+ export PYTHON2_PROG="$(type -P python2)"
+ export SQLITE3_PROG="$(type -P sqlite3)"
+@@ -320,6 +321,9 @@ _mount_opts()
+ 	ubifs)
+ 		export MOUNT_OPTIONS=$UBIFS_MOUNT_OPTIONS
+ 		;;
++	jffs2)
++		export MOUNT_OPTIONS=$JFFS2_MOUNT_OPTIONS
++		;;
+ 	*)
+ 		;;
+ 	esac
+@@ -472,6 +476,15 @@ _check_device()
+ 			_fatal "common/config: $name ($dev) is not a directory for overlay"
+ 		fi
+ 		;;
++	jffs2)
++		if ! grep -q "${dev}:" /proc/mtd &>/dev/null ; then
++			_fatal "common/config: $name ($dev) is not a MTD device"
++		fi
++		dev=/dev/$dev
++		if [ ! -c $dev ]; then
++			_fatal "common/config: $name ($dev) is not a character device"
++		fi
++		;;
+ 	ubifs)
+ 		if [ ! -c "$dev" ]; then
+ 			_fatal "common/config: $name ($dev) is not a character device"
+diff --git a/common/jffs2 b/common/jffs2
+new file mode 100644
+index 00000000..20611195
+--- /dev/null
++++ b/common/jffs2
+@@ -0,0 +1,23 @@
++_jffs2_scratch_mount()
++{
++	_scratch_options mount
++	_mount -t $FSTYP `_common_dev_mount_options $*` $SCRATCH_OPTIONS \
++		$SCRATCH_DEV $SCRATCH_MNT
++}
++
++_jffs2_test_mount()
++{
++	_test_options mount
++	_mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS \
++		$SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
++}
++
++_jffs2_scratch_unmount()
++{
++	$UMOUNT_PROG $SCRATCH_MNT
++}
++
++_jffs2_test_unmount()
++{
++	$UMOUNT_PROG $TEST_DIR
++}
+diff --git a/common/rc b/common/rc
+index b8ed1776..887f35ea 100644
+--- a/common/rc
++++ b/common/rc
+@@ -158,6 +158,10 @@ case "$FSTYP" in
+     ubifs)
+ 	[ "$UBIUPDATEVOL_PROG" = "" ] && _fatal "ubiupdatevol not found"
+ 	;;
++	jffs2)
++	[ "$FLASH_ERASE_PROG" = "" ] && _fatal "flash_erase not found"
++	. ./common/jffs2
++	;;
+ esac
+ 
+ if [ ! -z "$REPORT_LIST" ]; then
+@@ -327,6 +331,9 @@ _try_scratch_mount()
+ 	if [ "$FSTYP" == "overlay" ]; then
+ 		_overlay_scratch_mount $*
+ 		return $?
++	elif [ "$FSTYP" == "jffs2" ]; then
++		_jffs2_scratch_mount $*
++		return $?
+ 	fi
+ 	_mount -t $FSTYP `_scratch_mount_options $*`
+ }
+@@ -346,6 +353,9 @@ _scratch_unmount()
+ 	btrfs)
+ 		$UMOUNT_PROG $SCRATCH_MNT
+ 		;;
++	jffs2)
++		_jffs2_scratch_unmount
++		;;
+ 	*)
+ 		$UMOUNT_PROG $SCRATCH_DEV
+ 		;;
+@@ -398,6 +408,9 @@ _test_mount()
+     if [ "$FSTYP" == "overlay" ]; then
+         _overlay_test_mount $*
+         return $?
++    elif [ "$FSTYP" == "jffs2" ]; then
++        _jffs2_test_mount $*
++        return $?
+     fi
+     _test_options mount
+     _mount -t $FSTYP $TEST_OPTIONS $TEST_FS_MOUNT_OPTS $SELINUX_MOUNT_OPTIONS $* $TEST_DEV $TEST_DIR
+@@ -407,6 +420,8 @@ _test_unmount()
+ {
+ 	if [ "$FSTYP" == "overlay" ]; then
+ 		_overlay_test_unmount
++	elif [ "$FSTYP" == "jffs2" ]; then
++		_jffs2_test_unmount
+ 	else
+ 		$UMOUNT_PROG $TEST_DEV
+ 	fi
+@@ -709,6 +724,12 @@ _scratch_mkfs()
+ 		$UBIUPDATEVOL_PROG ${SCRATCH_DEV} -t
+ 		return 0
+ 		;;
++	jffs2)
++		# erase the whole MTD device for jffs2
++		# it will be reformatted automatically on next mount
++		$FLASH_ERASE_PROG -j -q /dev/${SCRATCH_DEV} 0 0
++		return $?
++		;;
+ 	ext4)
+ 		_scratch_mkfs_ext4 $*
+ 		return $?
+@@ -1505,6 +1526,15 @@ _require_scratch_nocheck()
+ 		    _notrun "this test requires a valid \$SCRATCH_MNT and unique $SCRATCH_DEV"
+ 		fi
+ 		;;
++	jffs2)
++		# jffs2 needs a MTD device
++		if [ ! -c "/dev/$SCRATCH_DEV" ]; then
++			_notrun "this test requires a valid MTD device for \$SCRATCH_DEV"
++		fi
++		if [ ! -d "$SCRATCH_MNT" ]; then
++			_notrun "this test requires a valid \$SCRATCH_MNT"
++		fi
++		;;
+ 	ubifs)
+ 		# ubifs needs an UBI volume. This will be a char device, not a block device.
+ 		if [ ! -c "$SCRATCH_DEV" ]; then
+@@ -1626,6 +1656,15 @@ _require_test()
+ 		    _notrun "this test requires a valid \$TEST_DIR and unique $TEST_DEV"
+ 		fi
+ 		;;
++	jffs2)
++		# jffs2 needs a MTD device
++		if [ ! -c /dev/"$TEST_DEV" ]; then
++			_notrun "this test requires a valid MTD device for \$TEST_DEV"
++		fi
++		if [ ! -d "$TEST_DIR" ]; then
++			_notrun "this test requires a valid \$TEST_DIR"
++		fi
++		;;
+ 	ubifs)
+ 		# ubifs needs an UBI volume. This will be a char device, not a block device.
+ 		if [ ! -c "$TEST_DEV" ]; then
+@@ -2624,6 +2663,9 @@ _check_test_fs()
+     ubifs)
+ 	# there is no fsck program for ubifs yet
+ 	;;
++	jffs2)
++	# there is no fsck program for jffs2
++	;;
+     *)
+ 	_check_generic_filesystem $TEST_DEV
+ 	;;
+@@ -2679,6 +2721,9 @@ _check_scratch_fs()
+     ubifs)
+ 	# there is no fsck program for ubifs yet
+ 	;;
++    jffs2)
++	# there is no fsck program for jffs2
++	;;
+     *)
+ 	_check_generic_filesystem $device
+ 	;;
 -- 
 2.16.2.dirty
