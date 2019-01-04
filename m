@@ -1,58 +1,64 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:17081 "EHLO huawei.com"
+Received: from mx2.suse.de ([195.135.220.15]:47254 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725913AbfADIwo (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 4 Jan 2019 03:52:44 -0500
-Received: from DGGEMS403-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id AF82EF5BCECAB
-        for <fstests@vger.kernel.org>; Fri,  4 Jan 2019 16:52:41 +0800 (CST)
-From: Hou Tao <houtao1@huawei.com>
-Subject: [PATCH] xfs: only set XFS_MKFS_HAS_NO_META_SUPPORT for XFS
-Date: Fri, 4 Jan 2019 16:56:10 +0800
-Message-ID: <20190104085610.93116-1-houtao1@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+        id S1726488AbfADObT (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 4 Jan 2019 09:31:19 -0500
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH] Revert "common/config: create $RESULT_BASE before dumping kmemleak leaks"
+Date: Fri,  4 Jan 2019 16:31:16 +0200
+Message-Id: <20190104143116.5698-1-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: houtao1@huawei.com
+Cc: guaneryu@gmail.com, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-No need to set XFS_MKFS_HAS_NO_META_SUPPORT for all filesystems.
+This commit tried to fix the brokennes of the kmemleak support but it 
+inadvertently broke the creation of the RESULT_BASE directory which lead to 
+problems creating check.time file. Turns out kmemleak support in xfstests has 
+more problems and it needs to be majorly refactor and this commit doesn't 
+really solve the problem. For the time being just revert to at least allow 
+older configuration files, which have explicitly set RESULT_BASE to work. 
 
-Cc: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Hou Tao <houtao1@huawei.com>
+This reverts commit 7fc034868d5dce9aaf3517c9c2197221b9a772e4.
+
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
 ---
- common/config | 18 ++++++++++--------
- 1 file changed, 10 insertions(+), 8 deletions(-)
+ check         | 7 +++++++
+ common/config | 5 -----
+ 2 files changed, 7 insertions(+), 5 deletions(-)
 
+diff --git a/check b/check
+index e4d767375b57..77a06b00dbba 100755
+--- a/check
++++ b/check
+@@ -538,6 +538,13 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 		fi
+ 	fi
+ 
++	mkdir -p $RESULT_BASE
++	if [ ! -d $RESULT_BASE ]; then
++		echo "failed to create results directory $RESULT_BASE"
++		status=1
++		exit
++	fi
++
+ 	if $OPTIONS_HAVE_SECTIONS; then
+ 		echo "SECTION       -- $section"
+ 	fi
 diff --git a/common/config b/common/config
-index f9e932f1..f7b5b7ae 100644
+index fb664cf0a967..5b48e1e7323b 100644
 --- a/common/config
 +++ b/common/config
-@@ -258,15 +258,17 @@ if [ -x /usr/sbin/selinuxenabled ] && /usr/sbin/selinuxenabled; then
- fi
+@@ -663,11 +663,6 @@ get_next_config() {
+ 	# set default RESULT_BASE
+ 	if [ -z "$RESULT_BASE" ]; then
+ 		export RESULT_BASE="$here/results/"
+-		mkdir -p ${RESULT_BASE}
+-		if [ ! -d ${RESULT_BASE} ]; then
+-			echo "failed to create results directory $RESULT_BASE"
+-			exit 1
+-		fi
+ 	fi
  
- # check if mkfs.xfs supports v5 xfs
--XFS_MKFS_HAS_NO_META_SUPPORT=""
--touch /tmp/crc_check.img
--$MKFS_XFS_PROG -N -d file,name=/tmp/crc_check.img,size=32m -m crc=0 \
--	>/dev/null 2>&1;
--if [ $? -ne 0 ]; then
--	XFS_MKFS_HAS_NO_META_SUPPORT=true
-+if [ "$FSTYP" == "xfs" ]; then
-+	XFS_MKFS_HAS_NO_META_SUPPORT=""
-+	touch /tmp/crc_check.img
-+	$MKFS_XFS_PROG -N -d file,name=/tmp/crc_check.img,size=32m -m crc=0 \
-+		>/dev/null 2>&1;
-+	if [ $? -ne 0 ]; then
-+		XFS_MKFS_HAS_NO_META_SUPPORT=true
-+	fi
-+	rm -f /tmp/crc_check.img
-+	export XFS_MKFS_HAS_NO_META_SUPPORT
- fi
--rm -f /tmp/crc_check.img
--export XFS_MKFS_HAS_NO_META_SUPPORT
- 
- _mount_opts()
- {
+ 	if [ "$FSTYP" == "tmpfs" ]; then
 -- 
-2.16.2.dirty
+2.12.3
