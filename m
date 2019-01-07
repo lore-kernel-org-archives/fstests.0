@@ -1,114 +1,39 @@
-Received: from mail-wm1-f68.google.com ([209.85.128.68]:37709 "EHLO
-        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726485AbfAGJ7c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jan 2019 04:59:32 -0500
-Received: by mail-wm1-f68.google.com with SMTP id g67so269064wmd.2
-        for <fstests@vger.kernel.org>; Mon, 07 Jan 2019 01:59:31 -0800 (PST)
-Date: Mon, 7 Jan 2019 10:59:27 +0100
-From: Carlos Maiolino <cmaiolino@redhat.com>
-Subject: Re: [PATCH v2] generic: test that xattrs can have slashes in their
- names
-Message-ID: <20190107095927.yprhqj7h474bj4we@hades.usersys.redhat.com>
-References: <20190104212336.GC12689@magnolia>
- <20190104231448.GF12689@magnolia>
+Received: from mail-pg1-f177.google.com ([209.85.215.177]:43498 "EHLO
+        mail-pg1-f177.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726404AbfAGIrc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jan 2019 03:47:32 -0500
+Received: by mail-pg1-f177.google.com with SMTP id v28so20441158pgk.10
+        for <fstests@vger.kernel.org>; Mon, 07 Jan 2019 00:47:32 -0800 (PST)
+Date: Mon, 7 Jan 2019 16:47:23 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [ANNOUNCE] fstests: master branch updated to f3a1213c2494
+Message-ID: <20190107084723.GE2803@desktop>
+References: <5c321737.1c69fb81.b9424.ce58@mx.google.com>
+ <20190106181054.GF20474@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190104231448.GF12689@magnolia>
+In-Reply-To: <20190106181054.GF20474@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eric Sandeen <sandeen@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 04, 2019 at 03:14:48PM -0800, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Sun, Jan 06, 2019 at 10:10:54AM -0800, Darrick J. Wong wrote:
+> On Sun, Jan 06, 2019 at 10:56:48PM +0800, Eryu Guan wrote:
+> > Hi all,
+> > 
+> > The master branch of the xfstests repository at:
+> > 
+> > 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> > 
+> > have just been updated. This is a bugfix-only update, and notably we reverted
+> > the RESULT_BASE fix in kmemleak support (sorry for suggesting a wrong fix), it
+> > turns that it's the kmemleak infrastracture that needs to be fixed (I'll look
+> > into it next week).
 > 
-> Eric Sandeen recently found a bug in xfs_repair that flagged extended
-> attribute names containing "/" as corrupt and purged them.  There's
-> nothing in the IRIX or Linux manuals that say anything about slashes not
-> being allowed (and Linux certainly allows this) so let's make sure this
-> continues to work.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-> ---
->  tests/generic/708     |   50 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/708.out |    6 ++++++
->  tests/generic/group   |    1 +
->  3 files changed, 57 insertions(+)
->  create mode 100755 tests/generic/708
->  create mode 100644 tests/generic/708.out
-> 
-> diff --git a/tests/generic/708 b/tests/generic/708
-> new file mode 100755
-> index 00000000..c32f966c
-> --- /dev/null
-> +++ b/tests/generic/708
-> @@ -0,0 +1,50 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0+
-> +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 708
-> +#
-> +# Check that xattrs can have slashes in their name.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/attr
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_attrs
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >> $seqres.full 2>&1
-> +_scratch_mount
-> +
-> +echo "set attr"
-> +file=$SCRATCH_MNT/moofile
-> +touch $file
-> +setfattr -n "user.boo/hoo" -v "woof" $file
+> The kmemleak thing is a mess I created, I'll clean it up.
 
-[off-topic] I love your creativity for naming :D
+Thanks a lot! :)
 
-> +
-> +echo "check attr"
-> +getfattr -d --absolute-names $file | _filter_scratch
-> +
-> +# Now we let the fsck tool check the filesystem, because xfs_repair had a
-> +# regression where it would flag and erase any xattr with a '/' in it.
-> +
-
-I'd prefer this to be in the beginning of the test description instead of
-'hidden' in the middle of the code, so, it's easily accessible via 'grep'.
-
-But the test itself looks good, and I don't think this change is worth a V3, so
-if you want, you could move it to the test description before merging, or ignore
-my suggestion completely :P
-But anyway, you can add:
-
-Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
-
-
-Cheers
-
--- 
-Carlos
+Eryu
