@@ -1,115 +1,114 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:34824 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726014AbfAFSJM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 6 Jan 2019 13:09:12 -0500
-Date: Sun, 6 Jan 2019 10:08:38 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] common/config: Always create RESULT_BASE
-Message-ID: <20190106180838.GE20474@magnolia>
-References: <20190103100135.24748-1-nborisov@suse.com>
- <d8faa1f5-87db-b029-4e68-68d76f7c410a@suse.com>
- <20190103215609.GU6311@dastard>
- <20190106174734.GD20474@magnolia>
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:37709 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726485AbfAGJ7c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 7 Jan 2019 04:59:32 -0500
+Received: by mail-wm1-f68.google.com with SMTP id g67so269064wmd.2
+        for <fstests@vger.kernel.org>; Mon, 07 Jan 2019 01:59:31 -0800 (PST)
+Date: Mon, 7 Jan 2019 10:59:27 +0100
+From: Carlos Maiolino <cmaiolino@redhat.com>
+Subject: Re: [PATCH v2] generic: test that xattrs can have slashes in their
+ names
+Message-ID: <20190107095927.yprhqj7h474bj4we@hades.usersys.redhat.com>
+References: <20190104212336.GC12689@magnolia>
+ <20190104231448.GF12689@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190106174734.GD20474@magnolia>
+In-Reply-To: <20190104231448.GF12689@magnolia>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Dave Chinner <david@fromorbit.com>
-Cc: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, guaneryu@gmail.com, Dave Chinner <dchinner@redhat.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jan 06, 2019 at 09:47:34AM -0800, Darrick J. Wong wrote:
-> On Fri, Jan 04, 2019 at 08:56:09AM +1100, Dave Chinner wrote:
-> > On Thu, Jan 03, 2019 at 02:29:08PM +0200, Nikolay Borisov wrote:
-> > >=20
-> > >=20
-> > > On 3.01.19 =D0=B3. 12:01 =D1=87., Nikolay Borisov wrote:
-> > > > Commit 7fc034868d5d ("common/config: create $RESULT_BASE before d=
-umping kmemleak leaks")
-> > > > inadvertently broke $RESULT_BASE dir creation since it changed th=
-e logic
-> > > > to only create the directory only if this variable is not explici=
-tly set
-> > > > by the user. Fix this by ensuring RESULT_BASE is always created.
-> > > >=20
-> > > > Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> > >=20
-> > > Eryu,
-> > >=20
-> > > I think Johannes' commit should actually be reverted. Currently
-> > > get_next_config is called at the beginning of the section code _AFT=
-ER_
-> > > _init_kmemleak so it's not really fixing the problem that Johannes
-> > > described. So care to revert his commit ?
-> >=20
-> > Yes, the original commit should be reverted. Using RESULT_BASE in
-> > the way that init_kmemleak is using it is fundamentally broken.
-> > Using RESULTS_BASE is incorrect - harness run state is supposed to
-> > be stored in the section-aware RESULTS_DIR (e.g. see
-> > _require_scratch()) which is constant and always exists for each
-> > section that is run.
-> >=20
-> > The code was architectected this way because section definitions can
-> > change RESULT_BASE, and that means the RESULT_BASE defined when
-> > init_kmemleak() is called may not point to the same location as when
-> > check_memleak() is called. Hence check_memleak will never run if a
-> > section definition changes RESULT_BASE.
-> >=20
-> > IOWs, the init_kmemleak() call needs to be done inside the
-> > section iteration loop, after the section config has been parsed and
-> > we've determined if the the section will be run. This is where the
-> > original code created RESULT_BASE if it didn't exist. Further, all
-> > the section run state is then stored in RESULTS_DIR, which is
-> > created from the current RESULT_BASE (e.g. see _require_scratch,
-> > check_dmesg, etc).
-> >=20
-> > Hence init_kmemleak() and check_kmemleak() should have a scope
-> > inside a valid RESULT_DIR path. And once this is done, you can then
->=20
-> However, the scope of RESULT_DIR is per-test, not per-section.  Either
-> we'd have to hoist the creation of RESULT_DIR above the "for seq in
-> $list..." or engage in some egregious hacks to get this set up before
-> we loop through the tests.
->=20
-> The other problem with kmemleak is that it takes a while for the scanne=
-r
-> to notice leaks (hence all the "read report twice" crap code) which
-> means we'd really don't want to be cycling it on and off repeatedly,
-> because that causes it to lose leaks periodically.  It works best when
-> you turn it on once and sample every now and then.
+On Fri, Jan 04, 2019 at 03:14:48PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Eric Sandeen recently found a bug in xfs_repair that flagged extended
+> attribute names containing "/" as corrupt and purged them.  There's
+> nothing in the IRIX or Linux manuals that say anything about slashes not
+> being allowed (and Linux certainly allows this) so let's make sure this
+> continues to work.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> Reviewed-by: Eric Sandeen <sandeen@redhat.com>
+> ---
+>  tests/generic/708     |   50 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/708.out |    6 ++++++
+>  tests/generic/group   |    1 +
+>  3 files changed, 57 insertions(+)
+>  create mode 100755 tests/generic/708
+>  create mode 100644 tests/generic/708.out
+> 
+> diff --git a/tests/generic/708 b/tests/generic/708
+> new file mode 100755
+> index 00000000..c32f966c
+> --- /dev/null
+> +++ b/tests/generic/708
+> @@ -0,0 +1,50 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0+
+> +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 708
+> +#
+> +# Check that xattrs can have slashes in their name.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/attr
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_scratch
+> +_require_attrs
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo "set attr"
+> +file=$SCRATCH_MNT/moofile
+> +touch $file
+> +setfattr -n "user.boo/hoo" -v "woof" $file
 
-Ahh, we don't cycle the background scanner anymore, we use the
-_init_kmemleak method to disable background scanning and discard all the
-leaks that happened before the user even ran ./check.  So that only
-needs to run once at the very beginning, which is how it behaves now.
+[off-topic] I love your creativity for naming :D
 
-As for _check_kmemleak, we actually need it to run after ever test, if
-nothing else to clean out corruption reports.  I can make it discard the
-results if USE_KMEMLEAK=3Dno or CONFIG_DEBUG_KMEMLEAK=3Dn.  I will also
-change it to drop the report in the $RESULT_DIR instead of $RESULT_BASE,
-as discussed.
+> +
+> +echo "check attr"
+> +getfattr -d --absolute-names $file | _filter_scratch
+> +
+> +# Now we let the fsck tool check the filesystem, because xfs_repair had a
+> +# regression where it would flag and erase any xattr with a '/' in it.
+> +
 
---D
+I'd prefer this to be in the beginning of the test description instead of
+'hidden' in the middle of the code, so, it's easily accessible via 'grep'.
 
-> Frankly, the kmemleak mechanism is just grody and unreliable enough tha=
-t
-> I'm tempted to ask Eryu to rip it out entirely.  But, I'll give one go
-> at fixing it, since I wrote it...
->=20
-> --D
->=20
-> > add a USE_KMEMLEAK section variable to turn kmemleak detection on
-> > and off via the config file on a per-section basis.....
-> >=20
-> > So, IMO, the correct thing to do here is revert the original broken
-> > change and fix the kmemleak infrastructure to be properly aware of
-> > config sections.
-> >=20
-> > Cheers,
-> >=20
-> > Dave.
-> > --=20
-> > Dave Chinner
-> > david@fromorbit.com
+But the test itself looks good, and I don't think this change is worth a V3, so
+if you want, you could move it to the test description before merging, or ignore
+my suggestion completely :P
+But anyway, you can add:
+
+Reviewed-by: Carlos Maiolino <cmaiolino@redhat.com>
+
+
+Cheers
+
+-- 
+Carlos
