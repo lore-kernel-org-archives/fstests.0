@@ -1,54 +1,37 @@
-Received: from mail-eopbgr740121.outbound.protection.outlook.com ([40.107.74.121]:6077
-        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725935AbeLaDzR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 30 Dec 2018 22:55:17 -0500
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH] report: gracefully handle XML report creation when no tests are run
-Date: Sun, 30 Dec 2018 22:55:07 -0500
-Message-ID: <20181231035507.10530-1-tytso@mit.edu>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:60726 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727753AbfAIVDb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Jan 2019 16:03:31 -0500
+Date: Thu, 10 Jan 2019 08:02:43 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common/scsi_debug: make sure scsi_debug been removed
+ correctly
+Message-ID: <20190109210243.GG27534@dastard>
+References: <20190109054845.93810-1-yangerkun@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190109054845.93810-1-yangerkun@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
+To: yangerkun <yangerkun@huawei.com>
+Cc: guaneryu@gmail.com, houtao1@huawei.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If no tests are run (because they have all been excluded) then make
-sure we insert a valid timestamp into the XML file, and avoid printing
-an error message when reading a non-existent test summary scratch
-file.
+On Wed, Jan 09, 2019 at 01:48:45PM +0800, yangerkun wrote:
+> Case generic/108 sometimes will fail while testing ext2, and the reson
+> is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
+> add the loop to do rmmod to make sure scsi_debug can be removed
+> correctly.
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
- common/report | 7 ++++++-
- 1 file changed, 6 insertions(+), 1 deletion(-)
+Why does 'rmmod scsi_debug' randomly fail?
 
-diff --git a/common/report b/common/report
-index fb00b402..6cac71fc 100644
---- a/common/report
-+++ b/common/report
-@@ -59,6 +59,9 @@ _xunit_make_section_report()
- 	local report=$tmp.report.xunit.$sect_name.xml
- 	# Header
- 	echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $REPORT_DIR/result.xml
-+	if [ -z "$date_time" ]; then
-+		date_time=$(date +"%F %T")
-+	fi
- 	local dtime=`echo $date_time| tr  " " 'T'`
- 	local stats="failures=\"$n_bad\" skipped=\"$n_notrun\" tests=\"$n_total\" time=\"$sect_time\""
- 	local hw_info="hostname=\"$HOST\" timestamp=\"$dtime\" "
-@@ -70,7 +73,9 @@ _xunit_make_section_report()
- 		_xunit_add_property "$p"
- 	done
- 	echo -e "\t</properties>" >> $REPORT_DIR/result.xml
--	cat $tmp.report.xunit.$sect_name.xml >> $REPORT_DIR/result.xml
-+	if [ -f $report ]; then
-+		cat $report >> $REPORT_DIR/result.xml
-+	fi
- 	echo "</testsuite>" >> $REPORT_DIR/result.xml
- 	echo "Xunit report: $REPORT_DIR/result.xml"
- }
+What bug does ext2 have that prevents the scsi debug module from
+being released and hence removed?
+
+Cheers,
+
+Dave.
+
 -- 
-2.19.1
+Dave Chinner
+david@fromorbit.com
