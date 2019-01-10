@@ -1,50 +1,40 @@
-Received: from szxga05-in.huawei.com ([45.249.212.191]:17125 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725440AbfAIFpT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 9 Jan 2019 00:45:19 -0500
-Received: from DGGEMS403-HUB.china.huawei.com (unknown [172.30.72.58])
-        by Forcepoint Email with ESMTP id 772373BD6176EF914F30
-        for <fstests@vger.kernel.org>; Wed,  9 Jan 2019 13:45:17 +0800 (CST)
-From: yangerkun <yangerkun@huawei.com>
-Subject: [PATCH] common/scsi_debug: make sure scsi_debug been removed correctly
-Date: Wed, 9 Jan 2019 13:48:45 +0800
-Message-ID: <20190109054845.93810-1-yangerkun@huawei.com>
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:44988 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726605AbfAJIf6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Jan 2019 03:35:58 -0500
+Received: by mail-pl1-f196.google.com with SMTP id e11so4882175plt.11
+        for <fstests@vger.kernel.org>; Thu, 10 Jan 2019 00:35:56 -0800 (PST)
+Date: Thu, 10 Jan 2019 16:35:49 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/423: statx mask of the reference file is
+ different from the original file
+Message-ID: <20190110083549.GF2803@desktop>
+References: <1547090099-8394-1-git-send-email-cuiyue-fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1547090099-8394-1-git-send-email-cuiyue-fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: houtao1@huawei.com, yangerkun@huawei.com, fstests@vger.kernel.org
+To: Cui Yue <cuiyue-fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Case generic/108 sometimes will fail while testing ext2, and the reson
-is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
-add the loop to do rmmod to make sure scsi_debug can be removed
-correctly.
+On Wed, Jan 09, 2019 at 10:14:59PM -0500, Cui Yue wrote:
+> When running xfstests generic/423 to test system call statx() on hard link files of NFS, it fails.
+> error message:
+> [!] attr 'stx_mask' differs from ref file, 7ff != e0
+> 
+> The values of parameter "mask" between the original file and the reference file are different.
+> One is STATX_ALL;
+> The other is STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME.
+> 
+> Modify the function get_reference() to pass the "mask" in,
+> and change STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME to "mask".
 
-Signed-off-by: yangerkun <yangerkun@huawei.com>
----
- common/scsi_debug | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+Thanks for the fix! Patch looks fine to me, but please follow the kernel
+rules for submitting patches in the future. The commit log has too long
+lines and you're missing Signed-off-by tag. I'll do the update at commit
+time, no need to resend.
 
-diff --git a/common/scsi_debug b/common/scsi_debug
-index d9aa0bd..890ec68 100644
---- a/common/scsi_debug
-+++ b/common/scsi_debug
-@@ -45,11 +45,13 @@ _put_scsi_debug_dev()
- {
- 	lsmod | grep -wq scsi_debug || return
- 
--	n=2
-+	n=15
- 	# use redirection not -q option of modprobe here, because -q of old
- 	# modprobe is only quiet when the module is not found, not when the
- 	# module is in use.
--	while [ $n -ge 0 ] && ! modprobe -nr scsi_debug >/dev/null 2>&1; do
-+	while [ $n -ge 0 ]; do
-+		modprobe -r scsi_debug >/dev/null 2>&1
-+		[ $? -eq 0 ] && return 0
- 		sleep 1
- 		n=$((n-1))
- 	done
--- 
-2.9.5
+Thanks,
+Eryu
