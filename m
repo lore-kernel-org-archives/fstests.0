@@ -1,78 +1,67 @@
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:44237 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728208AbfACPW3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 3 Jan 2019 10:22:29 -0500
-Received: by mail-pl1-f194.google.com with SMTP id e11so16036448plt.11
-        for <fstests@vger.kernel.org>; Thu, 03 Jan 2019 07:22:28 -0800 (PST)
-Date: Thu, 3 Jan 2019 23:22:17 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common/config: Always create RESULT_BASE
-Message-ID: <20190103152217.GA2803@desktop>
-References: <20190103100135.24748-1-nborisov@suse.com>
- <d8faa1f5-87db-b029-4e68-68d76f7c410a@suse.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:20251 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726637AbfAJDPK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 9 Jan 2019 22:15:10 -0500
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id 280EB4BAC833
+        for <fstests@vger.kernel.org>; Thu, 10 Jan 2019 11:15:04 +0800 (CST)
+From: Cui Yue <cuiyue-fnst@cn.fujitsu.com>
+Subject: [PATCH] generic/423: statx mask of the reference file is different from the original file
+Date: Wed, 9 Jan 2019 22:14:59 -0500
+Message-ID: <1547090099-8394-1-git-send-email-cuiyue-fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <d8faa1f5-87db-b029-4e68-68d76f7c410a@suse.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Nikolay Borisov <nborisov@suse.com>
-Cc: fstests@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
+Cc: Cui Yue <cuiyue-fnst@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 03, 2019 at 02:29:08PM +0200, Nikolay Borisov wrote:
->=20
->=20
-> On 3.01.19 =D0=B3. 12:01 =D1=87., Nikolay Borisov wrote:
-> > Commit 7fc034868d5d ("common/config: create $RESULT_BASE before dumpi=
-ng kmemleak leaks")
-> > inadvertently broke $RESULT_BASE dir creation since it changed the lo=
-gic
-> > to only create the directory only if this variable is not explicitly =
-set
-> > by the user. Fix this by ensuring RESULT_BASE is always created.
-> >=20
-> > Signed-off-by: Nikolay Borisov <nborisov@suse.com>
->=20
-> Eryu,
->=20
-> I think Johannes' commit should actually be reverted. Currently
-> get_next_config is called at the beginning of the section code _AFTER_
-> _init_kmemleak so it's not really fixing the problem that Johannes
-> described. So care to revert his commit ?
+When running xfstests generic/423 to test system call statx() on hard link files of NFS, it fails.
+error message:
+[!] attr 'stx_mask' differs from ref file, 7ff != e0
 
-get_next_config is always called at the end of common/config as well,
-which is sourced before _init_kmemleak, so $RESULT_BASE is created. But
-I missed the user-specified RESULT_BASE case, so I think everything is
-fine after applying your patch. Thanks for the fix!
+The values of parameter "mask" between the original file and the reference file are different.
+One is STATX_ALL;
+The other is STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME.
 
-Eryu
+Modify the function get_reference() to pass the "mask" in,
+and change STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME to "mask".
+---
+ src/stat_test.c | 8 +++-----
+ 1 file changed, 3 insertions(+), 5 deletions(-)
 
->=20
-> > ---
-> >  common/config | 11 ++++++-----
-> >  1 file changed, 6 insertions(+), 5 deletions(-)
-> >=20
-> > diff --git a/common/config b/common/config
-> > index fb664cf0a967..e2da9cfacbb5 100644
-> > --- a/common/config
-> > +++ b/common/config
-> > @@ -663,11 +663,12 @@ get_next_config() {
-> >  	# set default RESULT_BASE
-> >  	if [ -z "$RESULT_BASE" ]; then
-> >  		export RESULT_BASE=3D"$here/results/"
-> > -		mkdir -p ${RESULT_BASE}
-> > -		if [ ! -d ${RESULT_BASE} ]; then
-> > -			echo "failed to create results directory $RESULT_BASE"
-> > -			exit 1
-> > -		fi
-> > +	fi
-> > +
-> > +	mkdir -p ${RESULT_BASE}
-> > +	if [ ! -d ${RESULT_BASE} ]; then
-> > +		echo "failed to create results directory $RESULT_BASE"
-> > +		exit 1
-> >  	fi
-> > =20
-> >  	if [ "$FSTYP" =3D=3D "tmpfs" ]; then
-> >=20
+diff --git a/src/stat_test.c b/src/stat_test.c
+index 94c20d6..95cfdc4 100644
+--- a/src/stat_test.c
++++ b/src/stat_test.c
+@@ -290,7 +290,7 @@ static void set_origin_timestamp(const char *arg)
+ /*
+  * Get reference stats from a file.
+  */
+-static void get_reference(const char *file)
++static void get_reference(const char *file, unsigned int mask)
+ {
+ 	int ret;
+ 
+@@ -298,9 +298,7 @@ static void get_reference(const char *file)
+ 		bad_arg("ref= requires a filename\n");
+ 
+ 	memset(&ref, 0xfb, sizeof(ref));
+-	ret = xfstests_statx(AT_FDCWD, file, AT_SYMLINK_NOFOLLOW,
+-			     STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME,
+-			     &ref);
++	ret = xfstests_statx(AT_FDCWD, file, AT_SYMLINK_NOFOLLOW, mask, &ref);
+ 	switch (ret) {
+ 	case 0:
+ 		ref_set = true;
+@@ -751,7 +749,7 @@ int main(int argc, char **argv)
+ 
+ 		if (strncmp("ref=", arg, 4) == 0) {
+ 			/* ref=<file> - set reference stats from file */
+-			get_reference(arg + 4);
++			get_reference(arg + 4, mask);
+ 			continue;
+ 		}
+ 
+-- 
+1.8.3.1
