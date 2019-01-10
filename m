@@ -1,263 +1,121 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:43470 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728181AbfAJOBW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 10 Jan 2019 09:01:22 -0500
-Received: by mail-pf1-f193.google.com with SMTP id w73so5339080pfk.10
-        for <fstests@vger.kernel.org>; Thu, 10 Jan 2019 06:01:21 -0800 (PST)
-Date: Thu, 10 Jan 2019 22:01:13 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 1/2] fsstress: add splice support
-Message-ID: <20190110140113.GA2713@desktop>
-References: <20190110082516.22526-1-zlang@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:53980 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727938AbfAJWcw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 10 Jan 2019 17:32:52 -0500
+Date: Thu, 10 Jan 2019 17:32:51 -0500
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH] xfstest: overlay: File capabilities should not be lost over
+ copy-up
+Message-ID: <20190110223251.GA15463@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190110082516.22526-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
+Cc: guaneryu@gmail.com, Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 10, 2019 at 04:25:15PM +0800, Zorro Lang wrote:
-> Support the splice syscall in fsstress.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> Thanks Eryu reviewed my v1 patch, this patch has below changes:
-> 1) Set random off2 properly.
-> 2) Improve splice read and write logic (in while loop).
-> 3) Bring in length, offset1 and offset2 for proper output at the end.
-> 4) Judge the return value (ret1 and ret2) properly.
-> 
-> Thanks,
-> Zorro
-> 
->  ltp/fsstress.c | 171 +++++++++++++++++++++++++++++++++++++++++++++++++
->  1 file changed, 171 insertions(+)
-> 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index 99a1d733..e477d0ef 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -85,6 +85,7 @@ typedef enum {
->  	OP_RMDIR,
->  	OP_SETATTR,
->  	OP_SETXATTR,
-> +	OP_SPLICE,
->  	OP_STAT,
->  	OP_SYMLINK,
->  	OP_SYNC,
-> @@ -194,6 +195,7 @@ void	resvsp_f(int, long);
->  void	rmdir_f(int, long);
->  void	setattr_f(int, long);
->  void	setxattr_f(int, long);
-> +void	splice_f(int, long);
->  void	stat_f(int, long);
->  void	symlink_f(int, long);
->  void	sync_f(int, long);
-> @@ -244,6 +246,7 @@ opdesc_t	ops[] = {
->  	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
->  	{ OP_SETATTR, "setattr", setattr_f, 0, 1 },
->  	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
-> +	{ OP_SPLICE, "splice", splice_f, 1, 1 },
->  	{ OP_STAT, "stat", stat_f, 1, 0 },
->  	{ OP_SYMLINK, "symlink", symlink_f, 2, 1 },
->  	{ OP_SYNC, "sync", sync_f, 1, 1 },
-> @@ -2764,6 +2767,174 @@ setxattr_f(int opno, long r)
->  #endif
->  }
->  
-> +void
-> +splice_f(int opno, long r)
-> +{
-> +	struct pathname		fpath1;
-> +	struct pathname		fpath2;
-> +	struct stat64		stat1;
-> +	struct stat64		stat2;
-> +	char			inoinfo1[1024];
-> +	char			inoinfo2[1024];
-> +	loff_t			lr;
-> +	loff_t			off1, off2;
-> +	size_t			len;
-> +	loff_t			offset1, offset2;
-> +	size_t			length;
-> +	size_t			total;
-> +	int			v1;
-> +	int			v2;
-> +	int			fd1;
-> +	int			fd2;
-> +	ssize_t			ret1 = 0, ret2 = 0;
-> +	size_t			bytes;
-> +	int			e;
-> +	int			filedes[2];
-> +
-> +	/* Load paths */
-> +	init_pathname(&fpath1);
-> +	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
-> +		if (v1)
-> +			printf("%d/%d: splice read - no filename\n",
-> +				procid, opno);
-> +		goto out_fpath1;
-> +	}
-> +
-> +	init_pathname(&fpath2);
-> +	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
-> +		if (v2)
-> +			printf("%d/%d: splice write - no filename\n",
-> +				procid, opno);
-> +		goto out_fpath2;
-> +	}
-> +
-> +	/* Open files */
-> +	fd1 = open_path(&fpath1, O_RDONLY);
-> +	e = fd1 < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd1 < 0) {
-> +		if (v1)
-> +			printf("%d/%d: splice read - open %s failed %d\n",
-> +				procid, opno, fpath1.path, e);
-> +		goto out_fpath2;
-> +	}
-> +
-> +	fd2 = open_path(&fpath2, O_WRONLY);
-> +	e = fd2 < 0 ? errno : 0;
-> +	check_cwd();
-> +	if (fd2 < 0) {
-> +		if (v2)
-> +			printf("%d/%d: splice write - open %s failed %d\n",
-> +				procid, opno, fpath2.path, e);
-> +		goto out_fd1;
-> +	}
-> +
-> +	/* Get file stats */
-> +	if (fstat64(fd1, &stat1) < 0) {
-> +		if (v1)
-> +			printf("%d/%d: splice read - fstat64 %s failed %d\n",
-> +				procid, opno, fpath1.path, errno);
-> +		goto out_fd2;
-> +	}
-> +	inode_info(inoinfo1, sizeof(inoinfo1), &stat1, v1);
-> +
-> +	if (fstat64(fd2, &stat2) < 0) {
-> +		if (v2)
-> +			printf("%d/%d: splice write - fstat64 %s failed %d\n",
-> +				procid, opno, fpath2.path, errno);
-> +		goto out_fd2;
-> +	}
-> +	inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
-> +
-> +	/* Calculate offsets */
-> +	len = (random() % FILELEN_MAX) + 1;
-> +	if (len == 0)
-> +		len = MIN(stat1.st_blksize, stat2.st_blksize);
+Make sure file capabilities are not lost over copy-up when file is
+opened for WRITE but nothing is actually written to it.
 
-I don't think it's necessary to take MIN here, the two st_blksize should
-be the same.
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+---
+ tests/overlay/064     |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/064.out |    3 ++
+ tests/overlay/group   |    1 
+ 3 files changed, 76 insertions(+)
 
-> +	if (len > MIN(stat1.st_size, stat2.st_size))
-> +		len = MIN(stat1.st_size, stat2.st_size);
-
-Seems not necessary to take MIN either, just let len = stat1.st_size?
-
-> +
-> +	lr = ((int64_t)random() << 32) + random();
-> +	if (stat1.st_size == len)
-> +		off1 = 0;
-> +	else
-> +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
-> +	off1 %= maxfsize;
-> +
-> +	if (stat2.st_size == len)
-> +		off2 = 0;
-> +	else
-> +		off2 = (off64_t)(lr % MIN(stat2.st_size - len, MAXFSIZE));
-> +	off2 %= maxfsize;
-> +
-> +	/*
-> +	 * Due to len, off1 and off2 will be changed later, so record the
-> +	 * original number at here
-> +	 */
-> +	length = len;
-> +	offset1 = off1;
-> +	offset2 = off2;
-> +
-> +	/* Pipe initialize */
-> +	if (pipe(filedes) < 0) {
-> +		if (v1 || v2) {
-> +			printf("%d/%d: splice - pipe failed %d\n",
-> +				procid, opno, errno);
-> +			goto out_fd2;
-> +		}
-> +	}
-> +
-> +	bytes = 0;
-> +	total = 0;
-> +	while (len > 0) {
-> +		/* move to pipe buffer */
-> +		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
-> +		if (ret1 < 0) {
-> +			break;
-> +		}
-> +		bytes = ret1;
-> +
-> +		/* move from pipe buffer to dst file */
-> +		while (bytes > 0) {
-> +			ret2 = splice(filedes[0], NULL, fd2, &off2, bytes, 0);
-> +			if (ret2 < 0) {
-> +				break;
-
-Should break the outer while loop too.
-
-> +			}
-> +			bytes -= ret2;
-> +		}
-> +		len -= ret1;
-> +		total += ret1;
-> +	}
-> +
-> +	if (ret1 < 0 || ret2 < 0)
-> +		e = errno;
-> +	else
-> +		e = 0;
-> +	if (v1 || v2) {
-> +		printf("%d/%d: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
-
-Better to print out error number on success (0) too, to be consistent
-with other operations.
-
-Thanks,
-Eryu
-
-> +			procid, opno,
-> +			fpath1.path, inoinfo1, (long long)offset1, (long long)length,
-> +			fpath2.path, inoinfo2, (long long)offset2, (long long)length);
-> +
-> +		if (ret1 < 0 || ret2 < 0)
-> +			printf(" error %d", e);
-> +		else if (length && length > total)
-> +			printf(" asked for %lld, spliced %lld??\n",
-> +				(long long)length, (long long)total);
-> +		printf("\n");
-> +	}
-> +
-> +	close(filedes[0]);
-> +	close(filedes[1]);
-> +out_fd2:
-> +	close(fd2);
-> +out_fd1:
-> +	close(fd1);
-> +out_fpath2:
-> +	free_pathname(&fpath2);
-> +out_fpath1:
-> +	free_pathname(&fpath1);
-> +}
-> +
->  void
->  creat_f(int opno, long r)
->  {
-> -- 
-> 2.17.2
-> 
+Index: xfstests-dev/tests/overlay/064
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/064	2019-01-10 17:06:28.806079686 -0500
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 064
++#
++# Make sure CAP_SETUID is not cleared over file copy up.
++#
++# Following commit introduced regression where if a lower file with
++# CAP_SETUID is opened for writing, and capability is cleared over copy up.
++#
++# bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
++#
++# A later kernel patch will fix it. This test will help avoid introducing
++# such regressions again.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_command "$SETCAP_PROG" setcap
++_require_command "$GETCAP_PROG" getcap
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create test file
++lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
++upperdir=${OVL_BASE_SCRATCH_MNT}/${OVL_UPPER}
++mkdir -p $lowerdir
++touch ${lowerdir}/file
++echo "This is lower" >> ${lowerdir}/file
++# set setuid bit
++$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
++
++_scratch_mount
++
++# Trigger file copy up without actually writing anything to file.
++$XFS_IO_PROG -c "open -a" ${SCRATCH_MNT}/file >>$seqres.full
++
++# Make sure cap_setuid is still there
++$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
++
++# unmount overlayfs
++$UMOUNT_PROG $SCRATCH_MNT
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+Index: xfstests-dev/tests/overlay/064.out
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/064.out	2019-01-10 17:18:14.731461223 -0500
+@@ -0,0 +1,3 @@
++QA output created by 064
++SCRATCH_MNT/file = cap_setuid+ep
++Silence is golden
+Index: xfstests-dev/tests/overlay/group
+===================================================================
+--- xfstests-dev.orig/tests/overlay/group	2018-12-19 11:47:04.443031019 -0500
++++ xfstests-dev/tests/overlay/group	2019-01-10 15:43:28.053079686 -0500
+@@ -66,3 +66,4 @@
+ 061 auto quick copyup
+ 062 auto quick exportfs
+ 063 auto quick whiteout
++064 auto quick copyup
