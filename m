@@ -1,53 +1,127 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:45190 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725793AbfAKFka (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 11 Jan 2019 00:40:30 -0500
-Received: by mail-pg1-f196.google.com with SMTP id y4so5830901pgc.12
-        for <fstests@vger.kernel.org>; Thu, 10 Jan 2019 21:40:30 -0800 (PST)
-Date: Fri, 11 Jan 2019 13:40:23 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 1/2] fsstress: add splice support
-Message-ID: <20190111054023.GD2713@desktop>
-References: <20190110082516.22526-1-zlang@redhat.com>
- <20190110140113.GA2713@desktop>
- <20190111033117.GV30999@dhcp-12-149.nay.redhat.com>
+Received: from mail-yw1-f65.google.com ([209.85.161.65]:47093 "EHLO
+        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725793AbfAKFvl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 11 Jan 2019 00:51:41 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190111033117.GV30999@dhcp-12-149.nay.redhat.com>
+References: <20190110223251.GA15463@redhat.com>
+In-Reply-To: <20190110223251.GA15463@redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Fri, 11 Jan 2019 07:51:28 +0200
+Message-ID: <CAOQ4uxi8Cv68kwEVjT1qhURbhObq1aFbJ1WMdTgiJ+Dig0t5NQ@mail.gmail.com>
+Subject: Re: [PATCH] xfstest: overlay: File capabilities should not be lost
+ over copy-up
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Vivek Goyal <vgoyal@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jan 11, 2019 at 11:31:17AM +0800, Zorro Lang wrote:
-> On Thu, Jan 10, 2019 at 10:01:13PM +0800, Eryu Guan wrote:
-> > On Thu, Jan 10, 2019 at 04:25:15PM +0800, Zorro Lang wrote:
-> > > Support the splice syscall in fsstress.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
+On Fri, Jan 11, 2019 at 12:32 AM Vivek Goyal <vgoyal@redhat.com> wrote:
+>
+> Make sure file capabilities are not lost over copy-up when file is
+> opened for WRITE but nothing is actually written to it.
+>
+> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
 
-<snap>
+Just some nits...
 
-> > > +	if (ret1 < 0 || ret2 < 0)
-> > > +		e = errno;
-> > > +	else
-> > > +		e = 0;
-> > > +	if (v1 || v2) {
-> > > +		printf("%d/%d: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
-> > 
-> > Better to print out error number on success (0) too, to be consistent
-> > with other operations.
-> 
-> Hmm... it's not consistent for all, likes clonerange_f, copyrange_f and
-> deduperange_f don't print out error number on success (0), do you need I change
-> them to keep consistent too, as you're asking for that now?
+> ---
+>  tests/overlay/064     |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/overlay/064.out |    3 ++
+>  tests/overlay/group   |    1
+>  3 files changed, 76 insertions(+)
+>
+> Index: xfstests-dev/tests/overlay/064
+> ===================================================================
+> --- /dev/null   1970-01-01 00:00:00.000000000 +0000
+> +++ xfstests-dev/tests/overlay/064      2019-01-10 17:06:28.806079686 -0500
+> @@ -0,0 +1,72 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 064
+> +#
+> +# Make sure CAP_SETUID is not cleared over file copy up.
+> +#
+> +# Following commit introduced regression where if a lower file with
+> +# CAP_SETUID is opened for writing, and capability is cleared over copy up.
+> +#
+> +# bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
+> +#
+> +# A later kernel patch will fix it. This test will help avoid introducing
+> +# such regressions again.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs overlay
+> +_supported_os Linux
+> +_require_scratch
+> +_require_command "$SETCAP_PROG" setcap
+> +_require_command "$GETCAP_PROG" getcap
+> +
+> +# Remove all files from previous tests
+> +_scratch_mkfs
+> +
+> +# Create test file
+> +lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
+> +upperdir=${OVL_BASE_SCRATCH_MNT}/${OVL_UPPER}
+> +mkdir -p $lowerdir
 
-That'd be great (but we can do that in a separate patch)! I think it's
-easier to parse fsstress log when tracing down bugs if the log follows
-similar formats.
+Already done by _scratch_mkfs
+
+> +touch ${lowerdir}/file
+
+Not needed.
+
+> +echo "This is lower" >> ${lowerdir}/file
+> +# set setuid bit
+> +$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
+> +
+> +_scratch_mount
+> +
+> +# Trigger file copy up without actually writing anything to file.
+> +$XFS_IO_PROG -c "open -a" ${SCRATCH_MNT}/file >>$seqres.full
+> +
+
+That's wrong syntax and it fails (after opening the file O_RDWR)
+
+The correct syntax is:
+$XFS_IO_PROG [-a] -c "quit" ${SCRATCH_MNT}/file >>$seqres.full
+
+Is it important to open O_APPEND? if yes please explain in comment why
+If not drop -a.
+
+> +# Make sure cap_setuid is still there
+> +$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
+> +
+> +# unmount overlayfs
+> +$UMOUNT_PROG $SCRATCH_MNT
+> +
+> +echo "Silence is golden"
+
+You already broke the silence...
 
 Thanks,
-Eryu
+Amir.
