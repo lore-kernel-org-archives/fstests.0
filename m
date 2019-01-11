@@ -1,121 +1,45 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53980 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727938AbfAJWcw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 10 Jan 2019 17:32:52 -0500
-Date: Thu, 10 Jan 2019 17:32:51 -0500
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: [PATCH] xfstest: overlay: File capabilities should not be lost over
- copy-up
-Message-ID: <20190110223251.GA15463@redhat.com>
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:40382 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727780AbfAKC6N (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 10 Jan 2019 21:58:13 -0500
+Received: by mail-pl1-f193.google.com with SMTP id u18so6089446plq.7
+        for <fstests@vger.kernel.org>; Thu, 10 Jan 2019 18:58:12 -0800 (PST)
+Date: Fri, 11 Jan 2019 10:58:06 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] generic/423: statx mask of the reference file is
+ different from the original file
+Message-ID: <20190111025806.GC2713@desktop>
+References: <1547090099-8394-1-git-send-email-cuiyue-fnst@cn.fujitsu.com>
+ <20190110083549.GF2803@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20190110083549.GF2803@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
-Cc: guaneryu@gmail.com, Miklos Szeredi <miklos@szeredi.hu>, Amir Goldstein <amir73il@gmail.com>
+To: Cui Yue <cuiyue-fnst@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Make sure file capabilities are not lost over copy-up when file is
-opened for WRITE but nothing is actually written to it.
+On Thu, Jan 10, 2019 at 04:35:49PM +0800, Eryu Guan wrote:
+> On Wed, Jan 09, 2019 at 10:14:59PM -0500, Cui Yue wrote:
+> > When running xfstests generic/423 to test system call statx() on hard link files of NFS, it fails.
+> > error message:
+> > [!] attr 'stx_mask' differs from ref file, 7ff != e0
+> > 
+> > The values of parameter "mask" between the original file and the reference file are different.
+> > One is STATX_ALL;
+> > The other is STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME.
+> > 
+> > Modify the function get_reference() to pass the "mask" in,
+> > and change STATX_ATIME | STATX_BTIME | STATX_CTIME | STATX_MTIME to "mask".
+> 
+> Thanks for the fix! Patch looks fine to me, but please follow the kernel
+> rules for submitting patches in the future. The commit log has too long
+> lines and you're missing Signed-off-by tag. I'll do the update at commit
 
-Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
----
- tests/overlay/064     |   72 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/064.out |    3 ++
- tests/overlay/group   |    1 
- 3 files changed, 76 insertions(+)
+As remindered by Darrick (thanks Darrick!), I need an explicit SOB tag
+from you. Could You please either resend the patch with proper SOB tag
+or provide the SOB tag by replying this thread?
 
-Index: xfstests-dev/tests/overlay/064
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064	2019-01-10 17:06:28.806079686 -0500
-@@ -0,0 +1,72 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 064
-+#
-+# Make sure CAP_SETUID is not cleared over file copy up.
-+#
-+# Following commit introduced regression where if a lower file with
-+# CAP_SETUID is opened for writing, and capability is cleared over copy up.
-+#
-+# bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
-+#
-+# A later kernel patch will fix it. This test will help avoid introducing
-+# such regressions again.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_command "$SETCAP_PROG" setcap
-+_require_command "$GETCAP_PROG" getcap
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create test file
-+lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
-+upperdir=${OVL_BASE_SCRATCH_MNT}/${OVL_UPPER}
-+mkdir -p $lowerdir
-+touch ${lowerdir}/file
-+echo "This is lower" >> ${lowerdir}/file
-+# set setuid bit
-+$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
-+
-+_scratch_mount
-+
-+# Trigger file copy up without actually writing anything to file.
-+$XFS_IO_PROG -c "open -a" ${SCRATCH_MNT}/file >>$seqres.full
-+
-+# Make sure cap_setuid is still there
-+$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
-+
-+# unmount overlayfs
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-Index: xfstests-dev/tests/overlay/064.out
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064.out	2019-01-10 17:18:14.731461223 -0500
-@@ -0,0 +1,3 @@
-+QA output created by 064
-+SCRATCH_MNT/file = cap_setuid+ep
-+Silence is golden
-Index: xfstests-dev/tests/overlay/group
-===================================================================
---- xfstests-dev.orig/tests/overlay/group	2018-12-19 11:47:04.443031019 -0500
-+++ xfstests-dev/tests/overlay/group	2019-01-10 15:43:28.053079686 -0500
-@@ -66,3 +66,4 @@
- 061 auto quick copyup
- 062 auto quick exportfs
- 063 auto quick whiteout
-+064 auto quick copyup
+Thanks,
+Eryu
