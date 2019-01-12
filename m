@@ -1,119 +1,49 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36850 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727570AbfAKSj0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 11 Jan 2019 13:39:26 -0500
-Date: Fri, 11 Jan 2019 13:39:25 -0500
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: [PATCH][V2] xfstest: overlay: File capabilities should not be lost
- over copy-up
-Message-ID: <20190111183925.GD16012@redhat.com>
+Received: from szxga05-in.huawei.com ([45.249.212.191]:17133 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726276AbfALCUi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 11 Jan 2019 21:20:38 -0500
+Subject: Re: [PATCH] common/scsi_debug: make sure scsi_debug been removed
+ correctly
+References: <20190109054845.93810-1-yangerkun@huawei.com>
+ <20190109210243.GG27534@dastard>
+From: yangerkun <yangerkun@huawei.com>
+Message-ID: <a91e3234-9a4a-27b4-2382-683f773e892c@huawei.com>
+Date: Sat, 12 Jan 2019 10:20:26 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+In-Reply-To: <20190109210243.GG27534@dastard>
+Content-Type: text/plain; charset="utf-8"; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-unionfs@vger.kernel.org
-Cc: guaneryu@gmail.com, Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>
+To: Dave Chinner <david@fromorbit.com>
+Cc: guaneryu@gmail.com, houtao1@huawei.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Make sure file capabilities are not lost over copy-up when file is
-opened for WRITE but nothing is actually written to it.
 
-Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
----
- tests/overlay/064     |   71 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/064.out |    2 +
- tests/overlay/group   |    1 
- 3 files changed, 74 insertions(+)
 
-Index: xfstests-dev/tests/overlay/064
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064	2019-01-11 13:18:16.900461223 -0500
-@@ -0,0 +1,71 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 064
-+#
-+# Make sure CAP_SETUID is not cleared over file copy up.
-+#
-+# Following commit introduced regression where if a lower file with
-+# CAP_SETUID is opened for writing, and capability is cleared over copy up.
-+#
-+# bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
-+#
-+# A later kernel patch will fix it. This test will help avoid introducing
-+# such regressions again.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_command "$SETCAP_PROG" setcap
-+_require_command "$GETCAP_PROG" getcap
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create test file
-+lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
-+echo "This is lower" >> ${lowerdir}/file
-+
-+# set setuid bit
-+$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
-+
-+_scratch_mount
-+
-+# Trigger file copy up without actually writing anything to file. This
-+# requires opening file with WRITE and xfs_io seems to open it with
-+# O_RDWR by default.
-+$XFS_IO_PROG -c "quit" ${SCRATCH_MNT}/file >>$seqres.full
-+
-+# Make sure cap_setuid is still there
-+$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
-+
-+# unmount overlayfs
-+$UMOUNT_PROG $SCRATCH_MNT
-+
-+# success, all done
-+status=0
-+exit
-Index: xfstests-dev/tests/overlay/064.out
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064.out	2019-01-11 13:18:22.652461223 -0500
-@@ -0,0 +1,2 @@
-+QA output created by 064
-+SCRATCH_MNT/file = cap_setuid+ep
-Index: xfstests-dev/tests/overlay/group
-===================================================================
---- xfstests-dev.orig/tests/overlay/group	2018-12-19 11:47:04.443031019 -0500
-+++ xfstests-dev/tests/overlay/group	2019-01-10 15:43:28.053079686 -0500
-@@ -66,3 +66,4 @@
- 061 auto quick copyup
- 062 auto quick exportfs
- 063 auto quick whiteout
-+064 auto quick copyup
+Dave Chinner wrote on 2019/1/10 5:02:
+> On Wed, Jan 09, 2019 at 01:48:45PM +0800, yangerkun wrote:
+>> Case generic/108 sometimes will fail while testing ext2, and the reson
+>> is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
+>> add the loop to do rmmod to make sure scsi_debug can be removed
+>> correctly.
+> 
+> Why does 'rmmod scsi_debug' randomly fail?
+> 
+> What bug does ext2 have that prevents the scsi debug module from
+> being released and hence removed?
+
+It's not a bug with ext2, ever been existing in ext4 too. This patch is 
+a reference to 'https://gitlab.com/cryptsetup/cryptsetup.git' commit 
+d7b9ed05f0931b416c33c8eb2ff1e6efa39270ff, and the reason why need this 
+is that the behavior of udev cannot be speculated, so scsi_debug may 
+rmmod failed since udev scan open the device and take the reference of 
+module scsi_debug.
+
+Thanks,
+Kun.
+> 
+> Cheers,
+> 
+> Dave.
+> 
