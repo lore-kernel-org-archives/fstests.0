@@ -1,105 +1,50 @@
-Received: from mail.kernel.org ([198.145.29.99]:51452 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725536AbfAKVyY (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 11 Jan 2019 16:54:24 -0500
-From: Luis Chamberlain <mcgrof@kernel.org>
-Subject: [PATCH] check: force hostname to be unique
-Date: Fri, 11 Jan 2019 13:54:20 -0800
-Message-Id: <20190111215420.9676-1-mcgrof@kernel.org>
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:37342 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726497AbfAMPVb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 13 Jan 2019 10:21:31 -0500
+Received: by mail-pl1-f194.google.com with SMTP id b5so8981757plr.4
+        for <fstests@vger.kernel.org>; Sun, 13 Jan 2019 07:21:30 -0800 (PST)
+Date: Sun, 13 Jan 2019 23:21:19 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] common/scsi_debug: make sure scsi_debug been removed
+ correctly
+Message-ID: <20190113152119.GG2713@desktop>
+References: <20190109054845.93810-1-yangerkun@huawei.com>
+ <20190109210243.GG27534@dastard>
+ <a91e3234-9a4a-27b4-2382-683f773e892c@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <a91e3234-9a4a-27b4-2382-683f773e892c@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Luis Chamberlain <mcgrof@kernel.org>
+To: yangerkun <yangerkun@huawei.com>
+Cc: Dave Chinner <david@fromorbit.com>, houtao1@huawei.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-If you use a hostname which is part of the output of
-standard tools you end up with failures with fstests
-due to differences in output against the golden output.
+On Sat, Jan 12, 2019 at 10:20:26AM +0800, yangerkun wrote:
+> 
+> 
+> Dave Chinner wrote on 2019/1/10 5:02:
+> > On Wed, Jan 09, 2019 at 01:48:45PM +0800, yangerkun wrote:
+> > > Case generic/108 sometimes will fail while testing ext2, and the reson
+> > > is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
+> > > add the loop to do rmmod to make sure scsi_debug can be removed
+> > > correctly.
+> > 
+> > Why does 'rmmod scsi_debug' randomly fail?
+> > 
+> > What bug does ext2 have that prevents the scsi debug module from
+> > being released and hence removed?
+> 
+> It's not a bug with ext2, ever been existing in ext4 too. This patch is a
+> reference to 'https://gitlab.com/cryptsetup/cryptsetup.git' commit
+> d7b9ed05f0931b416c33c8eb2ff1e6efa39270ff, and the reason why need this is
+> that the behavior of udev cannot be speculated, so scsi_debug may rmmod
+> failed since udev scan open the device and take the reference of module
+> scsi_debug.
 
-The failures are false positives due to the hostname.
-For instance if you hostname is 'xfs' _dump_filter_main()
-will substitute the initiial 'xfs' with HOSTNAME as part
-of your logs, and will fail the output will fail against
-the golden output on say all xfsdump / xfsrestores tests.
+It's probably a good thing to have the specific reason in commit log
+too.
 
-The hostname must be a unique string, not used as part
-of the output from any tool used when capturing output.
-
-Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
----
-
-We could be more pedantic about uniqueness, but this should suffice at
-last of most issues.
-
- README |  2 ++
- check  | 36 ++++++++++++++++++++++++++++++++++++
- 2 files changed, 38 insertions(+)
-
-diff --git a/README b/README
-index 73f057f3..7128da67 100644
---- a/README
-+++ b/README
-@@ -22,6 +22,8 @@ _______________________
- - create fsgqa test user ("sudo useradd fsgqa")
- - create fsgqa group ("sudo groupadd fsgqa")
- - create 123456-fsgqa test user ("sudo useradd 123456-fsgqa")
-+- assign a unique hostname to the test system. It must not clash with
-+  any word used on output by standard tools or tools for your filesystem.
- 
- ______________________
- USING THE FSQA SUITE
-diff --git a/check b/check
-index 77a06b00..3a0bb026 100755
---- a/check
-+++ b/check
-@@ -251,6 +251,40 @@ _prepare_test_list()
- 	fi
- }
- 
-+_invalid_hostname()
-+{
-+	host_check=`hostname`
-+
-+	case $host_check in
-+	xfs)
-+		return 1;
-+	;;
-+	btrfs)
-+		return 1;
-+	;;
-+	ext4)
-+		return 1;
-+	;;
-+	ext3)
-+		return 1;
-+	;;
-+	ext2)
-+		return 1;
-+	;;
-+	esac
-+
-+	return 0
-+}
-+
-+_check_unique_hostname()
-+{
-+	_invalid_hostname
-+	if [ $? -ne -0 ]; then
-+		echo "Hostname `hostname` is not unique, make a unique hostname to avoid output log clashes with tools"
-+		exit 1
-+	fi
-+}
-+
- # Process command arguments first.
- while [ $# -gt 0 ]; do
- 	case "$1" in
-@@ -371,6 +405,8 @@ then
-     exit 1
- fi
- 
-+_check_unique_hostname
-+
- _wipe_counters()
- {
- 	n_try="0"
--- 
-2.20.1
+Thanks,
+Eryu
