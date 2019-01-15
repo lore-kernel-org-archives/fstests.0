@@ -1,145 +1,53 @@
-Received: from mx2.suse.de ([195.135.220.15]:44936 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726092AbfANIUu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 14 Jan 2019 03:20:50 -0500
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH RFC] fstests: btrfs: Test if balance takes too long time or return -ENOSPC unexpected
-Date: Mon, 14 Jan 2019 16:20:43 +0800
-Message-Id: <20190114082043.31220-1-wqu@suse.com>
+Received: from ipmail01.adl6.internode.on.net ([150.101.137.136]:65443 "EHLO
+        ipmail01.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726769AbfAODrr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 14 Jan 2019 22:47:47 -0500
+Date: Tue, 15 Jan 2019 14:47:43 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] common/scsi_debug: make sure scsi_debug been removed
+ correctly
+Message-ID: <20190115034743.GS27534@dastard>
+References: <20190109054845.93810-1-yangerkun@huawei.com>
+ <20190109210243.GG27534@dastard>
+ <a91e3234-9a4a-27b4-2382-683f773e892c@huawei.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <a91e3234-9a4a-27b4-2382-683f773e892c@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
-Cc: josef@toxicpanda.com
+To: yangerkun <yangerkun@huawei.com>
+Cc: guaneryu@gmail.com, houtao1@huawei.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Kernel commit 64403612b73a ("btrfs: rework
-btrfs_check_space_for_delayed_refs") is introducing a regression for
-btrfs balance performance.
+On Sat, Jan 12, 2019 at 10:20:26AM +0800, yangerkun wrote:
+> 
+> 
+> Dave Chinner wrote on 2019/1/10 5:02:
+> >On Wed, Jan 09, 2019 at 01:48:45PM +0800, yangerkun wrote:
+> >>Case generic/108 sometimes will fail while testing ext2, and the reson
+> >>is that rmmod scsi_debug in _put_scsi_debug_dev may randomly fail. Now
+> >>add the loop to do rmmod to make sure scsi_debug can be removed
+> >>correctly.
+> >
+> >Why does 'rmmod scsi_debug' randomly fail?
+> >
+> >What bug does ext2 have that prevents the scsi debug module from
+> >being released and hence removed?
+> 
+> It's not a bug with ext2, ever been existing in ext4 too. This patch
+> is a reference to 'https://gitlab.com/cryptsetup/cryptsetup.git'
+> commit d7b9ed05f0931b416c33c8eb2ff1e6efa39270ff, and the reason why
+> need this is that the behavior of udev cannot be speculated, so
+> scsi_debug may rmmod failed since udev scan open the device and take
+> the reference of module scsi_debug.
 
-Originally, the workload used in the test case only takes seconds for
-balance on v4.20 while now it takes over 400 seconds for balance.
+IOWs, you copied a hack from cryptsetup tests because you didn't
+know about $UDEV_SETTLE_PROG and didn't think to ask if anyone knew
+a solution to this problem?
 
-During that 400 seconds balance, it commits over 2000 transactions just
-for nothing, compare to original several transactions.
+Cheers,
 
-Add test cases to detect such regression.
-
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
-Extra note:
-In fact, without the snapshots created in the test case, it would return
--ENOSPC even we have enough unallocated space.
----
- tests/btrfs/180     | 80 +++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/180.out |  2 ++
- tests/btrfs/group   |  1 +
- 3 files changed, 83 insertions(+)
- create mode 100755 tests/btrfs/180
- create mode 100644 tests/btrfs/180.out
-
-diff --git a/tests/btrfs/180 b/tests/btrfs/180
-new file mode 100755
-index 00000000..534fea01
---- /dev/null
-+++ b/tests/btrfs/180
-@@ -0,0 +1,80 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test 180
-+#
-+# Test if metadata balance would take forever to finish or return ENOSPC even
-+# there there are tons of space.
-+#
-+# This is regression caused by upstream commit 64403612b73a
-+# ("btrfs: rework btrfs_check_space_for_delayed_refs")
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_io_command falloc
-+
-+i=0
-+loop=16384
-+
-+_scratch_mkfs > /dev/null 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
-+
-+while [ $i -le $loop ]; do
-+	# Use small file to create inline extent
-+	_pwrite_byte 0x00 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
-+	#$XFS_IO_PROG -f -c "falloc 0 4K" "$SCRATCH_MNT/src/regular_$i" > /dev/null
-+	i=$((i + 1))
-+done
-+
-+# Create enough snapshots so at space reservation part of relocation, we could
-+# generate enough space pressure
-+for i in $(seq -w 0 16); do
-+	$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
-+		"$SCRATCH_MNT/snapshot_$i" > /dev/null
-+	# touch random files to create some new tree blocks
-+	for j in $(seq -w 0 16); do
-+		victim="$(ls $SCRATCH_MNT/snapshot_$i | sort -R | head -n1)"
-+		touch "$SCRATCH_MNT/snapshot_$i/$victim"
-+	done
-+done
-+
-+# Balancing metadata shouldn't be too time consuming, as the amount of metadata
-+# is less than 8M, thus normally it should finish very quick.
-+#
-+# However with that offending commit, it will take forever to finish or return
-+# ENOSPC after a long wait.
-+$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
-+
-+echo "Silence is golden"
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
-new file mode 100644
-index 00000000..50aba766
---- /dev/null
-+++ b/tests/btrfs/180.out
-@@ -0,0 +1,2 @@
-+QA output created by 180
-+Silence is golden
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 46dd3c95..e724968b 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -182,3 +182,4 @@
- 177 auto quick swap balance
- 178 auto quick send
- 179 auto qgroup dangerous
-+180 auto balance dangerous
+Dave.
 -- 
-2.18.0
+Dave Chinner
+david@fromorbit.com
