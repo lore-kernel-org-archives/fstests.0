@@ -1,43 +1,116 @@
-Received: from newman.cs.utexas.edu ([128.83.139.110]:40197 "EHLO
-        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726928AbfAPRra (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 16 Jan 2019 12:47:30 -0500
-Received: from mail-ot1-f50.google.com (mail-ot1-f50.google.com [209.85.210.50])
-        (authenticated bits=0)
-        by newman.cs.utexas.edu (8.14.4/8.14.4/Debian-4.1ubuntu1) with ESMTP id x0GHXmTY038227
-        (version=TLSv1/SSLv3 cipher=AES128-GCM-SHA256 bits=128 verify=NOT)
-        for <fstests@vger.kernel.org>; Wed, 16 Jan 2019 11:33:48 -0600
-Received: by mail-ot1-f50.google.com with SMTP id f18so8428525otl.11
-        for <fstests@vger.kernel.org>; Wed, 16 Jan 2019 09:33:48 -0800 (PST)
+Received: from mx1.redhat.com ([209.132.183.28]:36706 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726803AbfAPVER (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 16 Jan 2019 16:04:17 -0500
+Date: Wed, 16 Jan 2019 16:04:15 -0500
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH][V3] xfstest: overlay: File capabilities should not be lost
+ over copy-up
+Message-ID: <20190116210415.GB4945@redhat.com>
 MIME-Version: 1.0
-References: <f5404232-3b9a-6bb6-9841-a2a56f314e51@gmx.com> <20190116035745.GO4205@dastard>
- <643f7899-e010-2694-4af6-960f0fc6e5cc@gmx.com>
-In-Reply-To: <643f7899-e010-2694-4af6-960f0fc6e5cc@gmx.com>
-From: Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
-Date: Wed, 16 Jan 2019 11:33:37 -0600
-Message-ID: <CAHWVdUV-oy9s=LteB_DfbZjAMenjDeaBqJqWf0v2cyNfP2G2rg@mail.gmail.com>
-Subject: Re: Any way to detect performance in a test case?
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>
+To: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+Cc: Dave Chinner <dchinner@redhat.com>, Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-> I mean if it's possible for a test case to just fail when hitting some
-> big performance regression.
->
-> E.g. one operation should finish in 30s, but when it takes over 300s,
-> it's definitely a big regression.
->
-> But considering how many different hardware/VM the test may be run on,
-> I'm not really confident if this is possible.
+Make sure file capabilities are not lost over copy-up when file is
+opened for WRITE but nothing is actually written to it.
 
-It is a lot of work, but one-setup-agnostic way of doing this is the following:
-- Run test with some older version that is known to be correct/stable,
-measure time
-- Run test with latest version, measure time
-- If newer version is 2x (or some configurable threshold) slower than
-old version, warn developer
+Following commit introduced regression where if a lower file with
+CAP_SETUID is opened for writing, and capability is cleared over copy up.
 
-Since both old and new versions are being run on the same setup, we
-don't have to worry about hardware or setup differences.
+bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
+
+A later kernel patch will fix it. This test will help avoid introducing
+such regressions again.
+
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
+---
+ tests/overlay/064     |   60 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/overlay/064.out |    2 +
+ tests/overlay/group   |    1 
+ 3 files changed, 63 insertions(+)
+
+Index: xfstests-dev/tests/overlay/064
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/064	2019-01-16 15:31:58.268178038 -0500
+@@ -0,0 +1,60 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat Inc.  All Rights Reserved.
++#
++# FS QA Test 064
++#
++# Make sure CAP_SETUID is not cleared over file copy up.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs overlay
++_supported_os Linux
++_require_scratch
++_require_command "$SETCAP_PROG" setcap
++_require_command "$GETCAP_PROG" getcap
++
++# Remove all files from previous tests
++_scratch_mkfs
++
++# Create test file
++lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
++echo "This is lower" >> ${lowerdir}/file
++
++# set setuid bit
++$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
++
++_scratch_mount
++
++# Trigger file copy up without actually writing anything to file. This
++# requires opening file with WRITE and xfs_io opens file with
++# O_RDWR by default.
++$XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file >>$seqres.full
++
++# Make sure cap_setuid is still there
++$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
++
++# success, all done
++status=0
++exit
+Index: xfstests-dev/tests/overlay/064.out
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ xfstests-dev/tests/overlay/064.out	2019-01-11 13:18:22.652461223 -0500
+@@ -0,0 +1,2 @@
++QA output created by 064
++SCRATCH_MNT/file = cap_setuid+ep
+Index: xfstests-dev/tests/overlay/group
+===================================================================
+--- xfstests-dev.orig/tests/overlay/group	2018-12-19 11:47:04.443031019 -0500
++++ xfstests-dev/tests/overlay/group	2019-01-10 15:43:28.053079686 -0500
+@@ -66,3 +66,4 @@
+ 061 auto quick copyup
+ 062 auto quick exportfs
+ 063 auto quick whiteout
++064 auto quick copyup
