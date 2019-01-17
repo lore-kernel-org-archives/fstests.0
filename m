@@ -1,116 +1,97 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36706 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726803AbfAPVER (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 16 Jan 2019 16:04:17 -0500
-Date: Wed, 16 Jan 2019 16:04:15 -0500
-From: Vivek Goyal <vgoyal@redhat.com>
-Subject: [PATCH][V3] xfstest: overlay: File capabilities should not be lost
- over copy-up
-Message-ID: <20190116210415.GB4945@redhat.com>
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:15852 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1728450AbfAQAQT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 16 Jan 2019 19:16:19 -0500
+Date: Thu, 17 Jan 2019 11:16:15 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: Any way to detect performance in a test case?
+Message-ID: <20190117001615.GB6173@dastard>
+References: <f5404232-3b9a-6bb6-9841-a2a56f314e51@gmx.com>
+ <20190116035745.GO4205@dastard>
+ <643f7899-e010-2694-4af6-960f0fc6e5cc@gmx.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
+In-Reply-To: <643f7899-e010-2694-4af6-960f0fc6e5cc@gmx.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
-Cc: Dave Chinner <dchinner@redhat.com>, Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, guaneryu@gmail.com
+Content-Transfer-Encoding: quoted-printable
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Make sure file capabilities are not lost over copy-up when file is
-opened for WRITE but nothing is actually written to it.
+On Wed, Jan 16, 2019 at 12:47:21PM +0800, Qu Wenruo wrote:
+>=20
+>=20
+> On 2019/1/16 =E4=B8=8A=E5=8D=8811:57, Dave Chinner wrote:
+> > On Wed, Jan 16, 2019 at 09:59:40AM +0800, Qu Wenruo wrote:
+> >> Hi,
+> >>
+> >> Is there any way to detect (huge) performance regression in a test c=
+ase?
+> >>
+> >> By huge performance regression, I mean some operation takes from les=
+s
+> >> than 10s to around 400s.
+> >>
+> >> There is existing runtime accounting, but we can't do it inside a te=
+st
+> >> case (or can we?)
+> >>
+> >> So is there any way to detect huge performance regression in a test =
+case?
+> >=20
+> > Just run your normal performance monitoring tools while the test is
+> > running to see what has changed. Is it IO, memory, CPU, lock
+> > contention or somethign else that is the problem?  pcp, strace, top,
+> > iostat, perf, etc all work just fine for finding perf regressions
+> > reported by test cases...
+>=20
+> Sorry for the misunderstanding.
+>=20
+> I mean if it's possible for a test case to just fail when hitting some
+> big performance regression.
 
-Following commit introduced regression where if a lower file with
-CAP_SETUID is opened for writing, and capability is cleared over copy up.
+This is part of the reported information in $RESULT_BASE/check.time.
 
-bd64e57586d3 ("ovl: During copy up, first copy up metadata and then data")
+If you want to keep a history of runtimes for later comparison, then
+you just need to archive contents of that file with the test
+results.
 
-A later kernel patch will fix it. This test will help avoid introducing
-such regressions again.
+OR, alternatively, generate an XML test report which reports the
+individual test runtime in each report:
 
-Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
----
- tests/overlay/064     |   60 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/overlay/064.out |    2 +
- tests/overlay/group   |    1 
- 3 files changed, 63 insertions(+)
+.....
+        <testcase classname=3D"xfstests.xfs" name=3D"generic/036" time=3D=
+"12">
+        </testcase>
+        <testcase classname=3D"xfstests.xfs" name=3D"generic/112" time=3D=
+"5">
+        </testcase>
+        <testcase classname=3D"xfstests.xfs" name=3D"generic/113" time=3D=
+"4">
+        </testcase>
+        <testcase classname=3D"xfstests.xfs" name=3D"generic/114" time=3D=
+"1">
+.....
 
-Index: xfstests-dev/tests/overlay/064
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064	2019-01-16 15:31:58.268178038 -0500
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test 064
-+#
-+# Make sure CAP_SETUID is not cleared over file copy up.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs overlay
-+_supported_os Linux
-+_require_scratch
-+_require_command "$SETCAP_PROG" setcap
-+_require_command "$GETCAP_PROG" getcap
-+
-+# Remove all files from previous tests
-+_scratch_mkfs
-+
-+# Create test file
-+lowerdir=${OVL_BASE_SCRATCH_MNT}/${OVL_LOWER}
-+echo "This is lower" >> ${lowerdir}/file
-+
-+# set setuid bit
-+$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
-+
-+_scratch_mount
-+
-+# Trigger file copy up without actually writing anything to file. This
-+# requires opening file with WRITE and xfs_io opens file with
-+# O_RDWR by default.
-+$XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file >>$seqres.full
-+
-+# Make sure cap_setuid is still there
-+$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-Index: xfstests-dev/tests/overlay/064.out
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ xfstests-dev/tests/overlay/064.out	2019-01-11 13:18:22.652461223 -0500
-@@ -0,0 +1,2 @@
-+QA output created by 064
-+SCRATCH_MNT/file = cap_setuid+ep
-Index: xfstests-dev/tests/overlay/group
-===================================================================
---- xfstests-dev.orig/tests/overlay/group	2018-12-19 11:47:04.443031019 -0500
-+++ xfstests-dev/tests/overlay/group	2019-01-10 15:43:28.053079686 -0500
-@@ -66,3 +66,4 @@
- 061 auto quick copyup
- 062 auto quick exportfs
- 063 auto quick whiteout
-+064 auto quick copyup
+And then post-process these reports to determine runtime
+differences.
+
+> E.g. one operation should finish in 30s, but when it takes over 300s,
+> it's definitely a big regression.
+>=20
+> But considering how many different hardware/VM the test may be run on,
+> I'm not really confident if this is possible.
+
+You can really only determine performance regressions by comparing
+test runtime on kernels with the same features set run on the same
+hardware. Hence you'll need to keep archives from all your test
+machiens and configs and only compare between matching
+configurations.
+
+Cheers,
+
+Dave.
+--=20
+Dave Chinner
+david@fromorbit.com
