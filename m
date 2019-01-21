@@ -1,82 +1,62 @@
-Received: from mail-pl1-f180.google.com ([209.85.214.180]:36461 "EHLO
-        mail-pl1-f180.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728378AbfAUHS5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 21 Jan 2019 02:18:57 -0500
-Received: by mail-pl1-f180.google.com with SMTP id g9so9380904plo.3
-        for <fstests@vger.kernel.org>; Sun, 20 Jan 2019 23:18:57 -0800 (PST)
-Message-ID: <5c452847.1c69fb81.a0ae1.e808@mx.google.com>
-Date: Mon, 21 Jan 2019 10:02:42 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 23703a8d22db
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="d00Yqa4GY6eh"
-Content-Disposition: inline
+Received: from mx2.suse.de ([195.135.220.15]:46338 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1730116AbfAUQdo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 21 Jan 2019 11:33:44 -0500
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 8266AAFB2
+        for <fstests@vger.kernel.org>; Mon, 21 Jan 2019 16:33:43 +0000 (UTC)
+From: jeffm@suse.com
+Subject: [PATCH 1/7] btrfs/010: don't run without /sys/fs/btrfs
+Date: Mon, 21 Jan 2019 11:33:10 -0500
+Message-Id: <20190121163316.20616-1-jeffm@suse.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: Jeff Mahoney <jeffm@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Jeff Mahoney <jeffm@suse.com>
 
---d00Yqa4GY6eh
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Older kernels don't have /sys/fs/btrfs.  btrfs/010 will happily run
+until it goes to check its work against sysfs and finds those
+files don't exist.  This patch introduces a require check to
+ensure that the sysfs files are present before running.
 
-Hi all,
+Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+---
+ common/btrfs    | 8 ++++++++
+ tests/btrfs/010 | 1 +
+ 2 files changed, 9 insertions(+)
 
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update only contains two new tests, and currently
-the new overlay test fails with latest kernel, the generic one fails on XFS.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-23703a8d22db overlay: File capabilities should not be lost over copy-up
-
-New commits:
-
-Brian Foster (1):
-      [be5dedec18d2] generic: test writepage cached mapping validity
-
-Vivek Goyal (1):
-      [23703a8d22db] overlay: File capabilities should not be lost over copy-up
-
-
-Code Diffstat:
-
- tests/generic/524     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/524.out |  2 ++
- tests/generic/group   |  1 +
- tests/overlay/064     | 60 ++++++++++++++++++++++++++++++++++++++
- tests/overlay/064.out |  2 ++
- tests/overlay/group   |  1 +
- 6 files changed, 146 insertions(+)
---
-Eryu Guan
-guaneryu@gmail.com
-
---d00Yqa4GY6eh
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJcRH+KAAoJECZSqilcj+dj8+UQAJ33+BGEGaP8b5ETWXflHTs7
-UyGWYZlU59QHYW57iD35mRVU8LoGt2f9nc4N8my+EIISlw+6vHmEg/JPc7ZjOudV
-xA5e7KfuqN0HuZSM8zdDBwddjD0hO25bcsAUH0ORaEamiXp2LNm0/XPG1lmK5sIL
-jwUb1IElZ/W7nANCcBLKZif/rMUJc7zwsUPY7vDAkrPTPdCWrswT49fIv1sha7jR
-mQb10GQ1dmUR9MYHvNroxZpNeecXrSUSbmTrDWu74JnjheO1ar0ARWekQaxJzYDe
-ir+ivVRTqEANZdgVeSX+cqsUS3/tI3JkYM8nGblN8egOD8E8T9dtIo1wr9FMu1Q5
-K2VjKm0m6E8JfBQfVwaVayfiNQ0sQdY3DV/sdRn8W5Pc+LGV3tf0X9AKIRSEXmmL
-yrfHfRXKwLWd2l4eSScBbJw2qdJqAKODiN6gQ5yG+m3jG5x6ciI4oqhPL9GGYuJv
-6Q84cADxm9eVPlf9EsDVIn51+VJFRM6uVFtDD86ZY/wxWWn4wwAeJn9StUou59ES
-HvxDkedG/4b2jqdQkg1CNJgdVVp4x9L/MIlTKXwH/kj+kNkpnVsBSWzq40SHF1Dh
-gylh4EaOX7AD5nBaZyaxCeGIaJJl3+LzP8ZSgeskiDRVTZ3C/dHhdJKF/h9DDRdM
-2L9+vWuz40sMvCDNFvcY
-=WJSq
------END PGP SIGNATURE-----
-
---d00Yqa4GY6eh--
+diff --git a/common/btrfs b/common/btrfs
+index 26dc0bb9..f6513c06 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -89,6 +89,14 @@ _require_btrfs_fs_feature()
+ 		_notrun "Feature $feat not supported by the available btrfs version"
+ }
+ 
++_require_btrfs_fs_sysfs()
++{
++	modprobe btrfs > /dev/null 2>&1
++	[ -e /sys/fs/btrfs/features ] || \
++		_notrun "Sysfs not supported by the available btrfs version"
++
++}
++
+ _check_btrfs_filesystem()
+ {
+ 	device=$1
+diff --git a/tests/btrfs/010 b/tests/btrfs/010
+index 1a5f0146..72b2c727 100755
+--- a/tests/btrfs/010
++++ b/tests/btrfs/010
+@@ -33,6 +33,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_test
++_require_btrfs_fs_sysfs
+ 
+ # Create 32k extents. All of these extents will be accounted as outstanding and
+ # reserved.
+-- 
+2.16.4
