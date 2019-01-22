@@ -1,100 +1,86 @@
-Received: from mx2.suse.de ([195.135.220.15]:42536 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726930AbfAWB7j (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 22 Jan 2019 20:59:39 -0500
-Subject: Re: [PATCH 7/7] check: move test exclusion handling to
- _prepare_test_list
-References: <20190121163316.20616-1-jeffm@suse.com>
- <20190121163316.20616-7-jeffm@suse.com> <20190121230919.GI4205@dastard>
-From: Jeff Mahoney <jeffm@suse.com>
-Message-ID: <a9bbc4d3-aa35-7396-1c7d-77b943bc1638@suse.com>
-Date: Tue, 22 Jan 2019 20:59:36 -0500
+Received: from mail-ua1-f68.google.com ([209.85.222.68]:39644 "EHLO
+        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726218AbfAVWiz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 22 Jan 2019 17:38:55 -0500
+Received: by mail-ua1-f68.google.com with SMTP id c12so68907uas.6
+        for <fstests@vger.kernel.org>; Tue, 22 Jan 2019 14:38:54 -0800 (PST)
 MIME-Version: 1.0
-In-Reply-To: <20190121230919.GI4205@dastard>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20190121163316.20616-1-jeffm@suse.com>
+In-Reply-To: <20190121163316.20616-1-jeffm@suse.com>
+Reply-To: fdmanana@gmail.com
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Tue, 22 Jan 2019 22:38:43 +0000
+Message-ID: <CAL3q7H4mXQK-NPNtBbA5BGWfYk-8R567cNBVDZnHTAx4=-kyqg@mail.gmail.com>
+Subject: Re: [PATCH 1/7] btrfs/010: don't run without /sys/fs/btrfs
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: Jeff Mahoney <jeffm@suse.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 1/21/19 6:09 PM, Dave Chinner wrote:
-> On Mon, Jan 21, 2019 at 11:33:16AM -0500, jeffm@suse.com wrote:
->> From: Jeff Mahoney <jeffm@suse.com>
->>
->> In order to simplify combining excluded tests specified on the command
->> line vs specified via config files,
-> 
-> You mean defining excludes in configs/<hostname>.config files,
-> right? i.e. in config sections?
+On Mon, Jan 21, 2019 at 4:33 PM <jeffm@suse.com> wrote:
+>
+> From: Jeff Mahoney <jeffm@suse.com>
 
-Yes.
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 
-> But the section code only calls _prepare_test_list if the test dev
-> is recreated by each section, right? So you can't really change the
-> expunge list from the config files without forcing a test dev
-> reformat, right?
+Looks good. Since it's a btrfs specific change/fix, it would have been
+a good idea to cc linux-btrfs.
 
-Right.  In my testing I didn't hit this situation, but it's there.  I
-can fix that.
+>
+> Older kernels don't have /sys/fs/btrfs.  btrfs/010 will happily run
+> until it goes to check its work against sysfs and finds those
+> files don't exist.  This patch introduces a require check to
+> ensure that the sysfs files are present before running.
+>
+> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
+> ---
+>  common/btrfs    | 8 ++++++++
+>  tests/btrfs/010 | 1 +
+>  2 files changed, 9 insertions(+)
+>
+> diff --git a/common/btrfs b/common/btrfs
+> index 26dc0bb9..f6513c06 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -89,6 +89,14 @@ _require_btrfs_fs_feature()
+>                 _notrun "Feature $feat not supported by the available btr=
+fs version"
+>  }
+>
+> +_require_btrfs_fs_sysfs()
+> +{
+> +       modprobe btrfs > /dev/null 2>&1
+> +       [ -e /sys/fs/btrfs/features ] || \
+> +               _notrun "Sysfs not supported by the available btrfs versi=
+on"
+> +
+> +}
+> +
+>  _check_btrfs_filesystem()
+>  {
+>         device=3D$1
+> diff --git a/tests/btrfs/010 b/tests/btrfs/010
+> index 1a5f0146..72b2c727 100755
+> --- a/tests/btrfs/010
+> +++ b/tests/btrfs/010
+> @@ -33,6 +33,7 @@ rm -f $seqres.full
+>  _supported_fs btrfs
+>  _supported_os Linux
+>  _require_test
+> +_require_btrfs_fs_sysfs
+>
+>  # Create 32k extents. All of these extents will be accounted as outstand=
+ing and
+>  # reserved.
+> --
+> 2.16.4
+>
 
->> it makes sense to push the handling
->> into _prepare_test_list.  This means we start with a fresh $tmp.xlist
->> and rebuild it each time _prepare_test_list is called.
-> 
-> The patch does more than that, right?
-> 
->> Signed-off-by: Jeff Mahoney <jeffm@suse.com>
->> ---
->>  check | 41 ++++++++++++++++++++++++-----------------
->>  1 file changed, 24 insertions(+), 17 deletions(-)
->>
->> diff --git a/check b/check
->> index 77a06b00..17073c4e 100755
->> --- a/check
->> +++ b/check
->> @@ -230,7 +230,28 @@ _prepare_test_list()
->>  		done
->>  	fi
->>  
->> -	# Specified groups to exclude
->> +	:> $tmp.xlist
->> +
->> +	# Per-fstype/generic/shared file of tests to exclude (-X)
->> +	for xfile in $XGROUP_FILES; do
-> 
-> That adds support for multiple group exclude files (i.e. multiple -X
-> options), right?
 
-Yes.  I'll document that in the commit message.
+--=20
+Filipe David Manana,
 
->> +		for d in $SRC_GROUPS $FSTYP; do
->> +			[ -f $SRC_DIR/$d/$xfile ] || continue
->> +			for f in `sed "s/#.*$//" $SRC_DIR/$d/$xfile`; do
->> +				echo "$d/$f command line" >> $tmp.xlist
->> +			done
->> +		done
->> +	done
->> +
->> +	# External file of tests to exclude (-E)
->> +	for xfile in $EXCLUDE_FILES; do
->> +		if [ -f $xfile ]; then
->> +			sed -e "s/#.*$//" \
->> +			    -e "s;$; file $xfile;" "$xfile" \
-> 
-> And I have no idea what problem this second expression is solving -
-> it wasn't in the original code that got copied here.
-
-This series is part of a larger set I've been using for a while.  I
-reordered them and pulled out the least controversial.  This was
-originally after a patch that adds reporting for why a test was expunged
-to the check output.  We can ignore this part for now.
-
-Thanks for the review,
-
--Jeff
-
--- 
-Jeff Mahoney
-SUSE Labs
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
