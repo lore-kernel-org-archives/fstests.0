@@ -1,11 +1,11 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58354 "EHLO huawei.com"
+Received: from szxga07-in.huawei.com ([45.249.212.35]:58348 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726869AbfAVDUf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1726839AbfAVDUf (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 21 Jan 2019 22:20:35 -0500
 From: zhengbin <zhengbin13@huawei.com>
-Subject: [PATCH 5/6] squashfs: add xattr test
-Date: Tue, 22 Jan 2019 11:24:07 +0800
-Message-ID: <20190122032408.91336-6-zhengbin13@huawei.com>
+Subject: [PATCH 6/6] squashfs: add mksquashfs options test
+Date: Tue, 22 Jan 2019 11:24:08 +0800
+Message-ID: <20190122032408.91336-7-zhengbin13@huawei.com>
 In-Reply-To: <20190122032408.91336-1-zhengbin13@huawei.com>
 References: <20190122032408.91336-1-zhengbin13@huawei.com>
 MIME-Version: 1.0
@@ -15,223 +15,186 @@ To: david@fromorbit.com, guaneryu@gmail.com, fstests@vger.kernel.org
 Cc: houtao1@huawei.com, zhaohongjiang@huawei.com, zhengbin13@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-This patch add xattr test(set, get, list).
+This patch add mksquashfs options test(compressors, sparse file,
+xattr, block size, fragment, compress inode,data,fragment,xattr,
+file owner).
 
 Signed-off-by: zhengbin <zhengbin13@huawei.com>
 ---
- common/attr            |   5 +++
- tests/readonly/019     | 109 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/readonly/019.out |  45 ++++++++++++++++++++
- tests/readonly/020     |  56 +++++++++++++++++++++++++
- tests/readonly/020.out |   9 ++++
- tests/readonly/021     |  74 +++++++++++++++++++++++++++++++++
- tests/readonly/021.out |  11 +++++
- tests/readonly/group   |   3 ++
- 8 files changed, 312 insertions(+)
- create mode 100755 tests/readonly/019
- create mode 100644 tests/readonly/019.out
- create mode 100755 tests/readonly/020
- create mode 100644 tests/readonly/020.out
- create mode 100755 tests/readonly/021
- create mode 100644 tests/readonly/021.out
+ tests/squashfs/001      | 60 ++++++++++++++++++++++++++++++++++++++++
+ tests/squashfs/001.out  |  9 ++++++
+ tests/squashfs/002      | 40 +++++++++++++++++++++++++++
+ tests/squashfs/002.out  |  2 ++
+ tests/squashfs/003      | 55 +++++++++++++++++++++++++++++++++++++
+ tests/squashfs/003.out  | 12 ++++++++
+ tests/squashfs/004      | 73 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/squashfs/004.out  | 23 ++++++++++++++++
+ tests/squashfs/005      | 54 ++++++++++++++++++++++++++++++++++++
+ tests/squashfs/005.out  | 13 +++++++++
+ tests/squashfs/Makefile | 20 ++++++++++++++
+ tests/squashfs/group    | 10 +++++++
+ 12 files changed, 371 insertions(+)
+ create mode 100755 tests/squashfs/001
+ create mode 100644 tests/squashfs/001.out
+ create mode 100755 tests/squashfs/002
+ create mode 100644 tests/squashfs/002.out
+ create mode 100755 tests/squashfs/003
+ create mode 100644 tests/squashfs/003.out
+ create mode 100755 tests/squashfs/004
+ create mode 100644 tests/squashfs/004.out
+ create mode 100755 tests/squashfs/005
+ create mode 100644 tests/squashfs/005.out
+ create mode 100644 tests/squashfs/Makefile
+ create mode 100644 tests/squashfs/group
 
-diff --git a/common/attr b/common/attr
-index 20049de0..845ed88e 100644
---- a/common/attr
-+++ b/common/attr
-@@ -179,6 +179,11 @@ _require_attrs()
-     [ -n "$GETFATTR_PROG" ] || _notrun "getfattr command not found"
-     [ -n "$SETFATTR_PROG" ] || _notrun "setfattr command not found"
-
-+    if [ "$FSTYP" == "squashfs" ]; then
-+	# squashfs is a readonly filesystem, can not touch file
-+	return
-+    fi
-+
-     #
-     # Test if chacl is able to write an attribute on the target filesystems.
-     # On really old kernels the system calls might not be implemented at all,
-diff --git a/tests/readonly/019 b/tests/readonly/019
+diff --git a/tests/squashfs/001 b/tests/squashfs/001
 new file mode 100755
-index 00000000..69c6c7fd
+index 00000000..3f71f122
 --- /dev/null
-+++ b/tests/readonly/019
-@@ -0,0 +1,109 @@
++++ b/tests/squashfs/001
+@@ -0,0 +1,60 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
 +# Copyright (c) 2019 Huawei. All Rights Reserved.
 +#
-+# FS QA Test No. 019. Modifed from generic/097.
++# FS QA Test No. 001
 +#
-+# simple attr tests for EAs:
-+#  - set should return error
-+#  - get
-+#  - list
-+# Basic testing.
++# Compression test
 +#
++
 +seq=`basename $0`
 +echo "QA output created by $seq"
 +
-+status=1	# failure is the default!
++status=1    # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -f $SCRATCH_DEV/fooA
-+	rm -f $SCRATCH_DEV/fooB
-+	rm -f $SCRATCH_DEV/fooC
-+}
-+
-+getfattr()
-+{
-+	_getfattr --absolute-names "$@" |& _filter_scratch
-+}
-+
-+setfattr()
-+{
-+	$SETFATTR_PROG "$@" |& _filter_scratch
++	rm -rf $THIS_TEST_DIR
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
-+. ./common/attr
 +. ./common/filter
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
-+
 +_require_scratch
-+_require_attrs
 +
-+file0=$SCRATCH_DEV/foo0
-+fileA=$SCRATCH_DEV/fooA
-+fileB=$SCRATCH_DEV/fooB
-+fileC=$SCRATCH_DEV/fooC
++# rarely use lzma, do not test it
++mcomp=(gzip lz4 lzo xz)
++iter=5
++THIS_TEST_DIR=$SCRATCH_DEV/testdir
 +
-+rm -f $file0
-+rm -f $fileA
-+rm -f $fileB
-+rm -f $fileC
-+echo -e "\ncreate file fooA"
-+touch $fileA
++rm -rf $THIS_TEST_DIR
++mkdir -p $THIS_TEST_DIR
 +
-+echo -e "\ncreate file fooB"
-+touch $fileB
-+echo -e "\nset fooB EA <user.noise,woof>:"
-+setfattr -n user.noise -v woof $fileB
++for ((count=1;${count}<=${iter};count++)); do
++	dd if=/dev/urandom of=$THIS_TEST_DIR/file-$count bs=1K count=1024 > /dev/null 2>&1
++	mkdir -p $THIS_TEST_DIR/dir-$count
++	dd if=/dev/urandom of=$THIS_TEST_DIR/dir-$count/file-$count bs=1K count=1024 > /dev/null 2>&1
++done
 +
-+echo -e "\ncreate file fooC"
-+touch $fileC
-+echo -e "\nset fooC EA <user.size,small>:"
-+setfattr -n user.size -v small $fileC
-+echo -e "\nset fooC EA <user.noise,low>:"
-+setfattr -n user.noise -v low $fileC
-+echo -e "\nset fooC EA <trusted.colour,blue>:"
-+setfattr -n trusted.colour -v blue $fileC
++# Run tests
++for comp in ${mcomp[*]}; do
++	echo "making squashfs image using $comp compression."
++	_scratch_mkfs "-comp $comp" >/dev/null 2>&1
++	if [ $?  != 0 ]; then
++		echo "mksquashfs failed for $comp compression."
++		continue
++	fi
++	echo "Testing mount and diff data."
++	_scratch_mount
++	diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
++	_scratch_unmount
++done
 +
-+_scratch_mkfs >/dev/null 2>&1 || _fail "Could not mkfs scratch device"
-+_scratch_mount
-+
-+file0=$SCRATCH_MNT/foo0
-+fileA=$SCRATCH_MNT/fooA
-+fileB=$SCRATCH_MNT/fooB
-+fileC=$SCRATCH_MNT/fooC
-+
-+echo -e "\nset SCRATCH_MNT fooA EA"
-+setfattr -n user.noise -v woof $fileA
-+
-+echo -e "\nlist non-existent file0 EA"
-+getfattr -d $file0
-+
-+echo -e "\nshould be no EAs for fooA:"
-+getfattr -d $fileA
-+
-+echo -e "\nlist the EAs for fooB: user.noise"
-+getfattr -d $fileB
-+
-+echo -e "\nlist the EAs for fooC: user.size, user.noise"
-+getfattr -d $fileC
-+
-+echo -e "\nget the value of the fooC user.size EA"
-+getfattr -n user.size $fileC
-+
-+echo -e "\nlist fooC trusted EAs"
-+getfattr -d -m '^trusted\.' $fileC
-+
-+echo -e "success"
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/readonly/019.out b/tests/readonly/019.out
+diff --git a/tests/squashfs/001.out b/tests/squashfs/001.out
 new file mode 100644
-index 00000000..48593890
+index 00000000..93cafe6a
 --- /dev/null
-+++ b/tests/readonly/019.out
-@@ -0,0 +1,45 @@
-+QA output created by 019
-+
-+create file fooA
-+
-+create file fooB
-+
-+set fooB EA <user.noise,woof>:
-+
-+create file fooC
-+
-+set fooC EA <user.size,small>:
-+
-+set fooC EA <user.noise,low>:
-+
-+set fooC EA <trusted.colour,blue>:
-+
-+set SCRATCH_MNT fooA EA
-+setfattr: SCRATCH_MNT/fooA: Read-only file system
-+
-+list non-existent file0 EA
-+getfattr: SCRATCH_MNT/foo0: No such file or directory
-+
-+should be no EAs for fooA:
-+
-+list the EAs for fooB: user.noise
-+# file: SCRATCH_MNT/fooB
-+user.noise="woof"
-+
-+
-+list the EAs for fooC: user.size, user.noise
-+# file: SCRATCH_MNT/fooC
-+user.noise="low"
-+user.size="small"
-+
-+
-+get the value of the fooC user.size EA
-+# file: SCRATCH_MNT/fooC
-+user.size="small"
-+
-+
-+list fooC trusted EAs
-+# file: SCRATCH_MNT/fooC
-+trusted.colour="blue"
-+
-+success
-diff --git a/tests/readonly/020 b/tests/readonly/020
++++ b/tests/squashfs/001.out
+@@ -0,0 +1,9 @@
++QA output created by 001
++making squashfs image using gzip compression.
++Testing mount and diff data.
++making squashfs image using lz4 compression.
++Testing mount and diff data.
++making squashfs image using lzo compression.
++Testing mount and diff data.
++making squashfs image using xz compression.
++Testing mount and diff data.
+diff --git a/tests/squashfs/002 b/tests/squashfs/002
 new file mode 100755
-index 00000000..c56c4d3f
+index 00000000..ae999a38
 --- /dev/null
-+++ b/tests/readonly/020
-@@ -0,0 +1,56 @@
++++ b/tests/squashfs/002
+@@ -0,0 +1,40 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2016 SUSE Linux Products GmbH. All Rights Reserved.
 +# Copyright (c) 2019 Huawei. All Rights Reserved.
 +#
-+# FS QA Test No. 020. Modifed from generic/337.
++# FS QA Test No. 002
 +#
-+# Test that the filesystem's implementation of the listxattrs system call lists
-+# all the xattrs an inode has.
++# mksquashfs -no-sparse test, -no-sparse: read all data of sparse files
++#
++seq=`basename $0`
++echo "QA output created by $seq"
++
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $SCRATCH_DEV/testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++rm -f $SCRATCH_DEV/testfile
++truncate -s 100M $SCRATCH_DEV/testfile
++
++_scratch_mkfs "-no-sparse" >/dev/null 2>&1 || _fail "Could not mkfs scratch device"
++_scratch_mount
++# If use -no-sparse, du -h will be 100M
++du -h $SCRATCH_MNT/testfile | awk '{print $1}'
++diff -r $SCRATCH_DEV/testfile $SCRATCH_MNT/testfile
++
++status=0
++exit
+diff --git a/tests/squashfs/002.out b/tests/squashfs/002.out
+new file mode 100644
+index 00000000..7ca3f044
+--- /dev/null
++++ b/tests/squashfs/002.out
+@@ -0,0 +1,2 @@
++QA output created by 002
++100M
+diff --git a/tests/squashfs/003 b/tests/squashfs/003
+new file mode 100755
+index 00000000..4c2ea806
+--- /dev/null
++++ b/tests/squashfs/003
+@@ -0,0 +1,55 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Huawei. All Rights Reserved.
++#
++# FS QA Test No. 003
++#
++# mksquashfs -xattrs, -no-xattrs test
 +#
 +seq=`basename $0`
 +echo "QA output created by $seq"
@@ -256,36 +219,39 @@ index 00000000..c56c4d3f
 +_require_scratch
 +_require_attrs
 +
++opts=(-xattrs -no-xattrs)
++
 +rm -f $SCRATCH_DEV/testfile
++
 +touch $SCRATCH_DEV/testfile
-+# Create our test file with a few xattrs. The first 3 xattrs have a name that
-+# when given as input to a crc32c function result in the same checksum. This
-+# made btrfs list only one of the xattrs through listxattrs system call (because
-+# it packs xattrs with the same name checksum into the same btree item).
 +$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_DEV/testfile
 +$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_DEV/testfile
 +$SETFATTR_PROG -n user.J3__T_Km3dVsW_ -v hello $SCRATCH_DEV/testfile
 +$SETFATTR_PROG -n user.something -v pizza $SCRATCH_DEV/testfile
 +$SETFATTR_PROG -n user.ping -v pong $SCRATCH_DEV/testfile
 +
-+_scratch_mkfs >/dev/null 2>&1 || _fail "Could not mkfs scratch device"
-+_scratch_mount
++# Run tests
++for opt in ${opts[*]}; do
++	echo "making squashfs image using $opt"
++	_scratch_mkfs "$opt" >/dev/null 2>&1 || _fail "Could not mkfs scratch device use $opt"
++	_scratch_mount
++	# list all the xattrs we have set before.
++	echo "list all testfile xattr"
++	_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
++	_scratch_unmount
++done
 +
-+# Now call getfattr with --dump, which calls the listxattrs system call.
-+# It should list all the xattrs we have set before.
-+_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
-+
-+echo -e "success"
-+# success, all done
 +status=0
 +exit
-diff --git a/tests/readonly/020.out b/tests/readonly/020.out
+diff --git a/tests/squashfs/003.out b/tests/squashfs/003.out
 new file mode 100644
-index 00000000..27ca52a9
+index 00000000..c55184f8
 --- /dev/null
-+++ b/tests/readonly/020.out
-@@ -0,0 +1,9 @@
-+QA output created by 020
++++ b/tests/squashfs/003.out
+@@ -0,0 +1,12 @@
++QA output created by 003
++making squashfs image using -xattrs
++list all testfile xattr
 +# file: SCRATCH_MNT/testfile
 +user.J3__T_Km3dVsW_="hello"
 +user.WvG1c1Td="qwerty"
@@ -293,114 +259,236 @@ index 00000000..27ca52a9
 +user.ping="pong"
 +user.something="pizza"
 +
-+success
-diff --git a/tests/readonly/021 b/tests/readonly/021
++making squashfs image using -no-xattrs
++list all testfile xattr
+diff --git a/tests/squashfs/004 b/tests/squashfs/004
 new file mode 100755
-index 00000000..9d46c8e5
+index 00000000..bd34b661
 --- /dev/null
-+++ b/tests/readonly/021
-@@ -0,0 +1,74 @@
++++ b/tests/squashfs/004
+@@ -0,0 +1,73 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2016 Red Hat, Inc.  All Rights Reserved.
 +# Copyright (c) 2019 Huawei. All Rights Reserved.
 +#
-+# FS QA Test No. 021. Modifed from generic/377.
++# FS QA Test No. 004
 +#
-+# Test listxattr syscall behaviour with different buffer sizes.
++# mksquashfs -no-fragments -always-use-fragments, -noI -noD -noF -noX, -b test
 +#
 +seq=`basename $0`
 +echo "QA output created by $seq"
 +
-+here=`pwd`
-+status=1	# failure is the default!
++status=1    # failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -f $SCRATCH_DEV/testfile
++	rm -rf $THIS_TEST_DIR
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
-+. ./common/attr
 +
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
 +_require_scratch
-+_require_attrs
-+_require_test_program "listxattr"
 +
-+listxattr="$here/src/listxattr"
++mfrag=(-no-fragments -always-use-fragments)
++mcomp=(-noI -noD -noF -noX)
++iter=6
++THIS_TEST_DIR=$SCRATCH_DEV/testdir
 +
-+# Create a testfile with three xattrs such that the sum of namelengths of the
-+# first two is bigger than the namelength of the third. This is needed for
-+# the 5th testcase that tests one of the cornercases.
-+testfile=$SCRATCH_DEV/testfile
-+rm -f $testfile
-+touch $testfile
-+$SETFATTR_PROG -n user.foo -v bar $testfile
-+$SETFATTR_PROG -n user.ping -v pong $testfile
-+$SETFATTR_PROG -n user.hello -v there $testfile
++rm -rf $THIS_TEST_DIR
++mkdir -p $THIS_TEST_DIR
 +
-+_scratch_mkfs >/dev/null 2>&1 || _fail "Could not mkfs scratch device"
-+_scratch_mount
++for ((count=1;${count}<=${iter};count++)); do
++	dd if=/dev/urandom of=$THIS_TEST_DIR/file-$count bs=1M count=1 >/dev/null 2>&1
++	mkdir -p $THIS_TEST_DIR/dir-$count
++	dd if=/dev/urandom of=$THIS_TEST_DIR/dir-$count/file-$count bs=1K count=1 >/dev/null 2>&1
++done
 +
-+testfile=$SCRATCH_MNT/testfile
++for frag in ${mfrag[*]}; do
++	for comp in ${mcomp[*]}; do
++		echo "making squashfs image using 16384 blocksize, $frag, $comp"
++		_scratch_mkfs "-b 16384 $frag $comp" >/dev/null 2>&1
++		if [ $?  != 0 ]; then
++			echo "mksquashfs failed."
++			continue
++		fi
++		echo "Testing mount and diff data."
++		_scratch_mount
++		diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
++		_scratch_unmount
++	done
++done
 +
-+# 1. Call listxattr without buffer length argument. This should succeed.
-+$listxattr $testfile | sort
-+
-+# 2. Calling listxattr on nonexistant file should fail with -ENOENT.
-+$listxattr ""
-+
-+# 3. Calling listxattr with buffersize not suffecient for even one xattr
-+# should fail with -ERANGE.
-+$listxattr $testfile 1
-+
-+# 4. Calling listxattr with buffersize suffecient for one xattr, but not
-+# sufficient for the whole list should still fail with -ERANGE.
-+$listxattr $testfile 9
-+
-+# 5. Calling listxattr with buffersize suffecient for the last xattr, but not
-+# sufficient for the sum of first two. Should fail with -ERANGE.
-+$listxattr $testfile 11
-+
-+# 6. Calling listxattr with buffersize bigger than needed should succeed.
-+$listxattr $testfile 500 | sort
++for blocksize in 4096 8192 32768; do
++	echo "making squashfs image using $blocksize blocksize"
++	_scratch_mkfs "-b $blocksize" >/dev/null 2>&1
++	if [ $?  != 0 ]; then
++		echo "mksquashfs failed."
++		continue
++	fi
++	echo "Testing mount and diff data."
++	_scratch_mount
++	diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
++	_scratch_unmount
++done
 +
 +status=0
 +exit
-diff --git a/tests/readonly/021.out b/tests/readonly/021.out
+diff --git a/tests/squashfs/004.out b/tests/squashfs/004.out
 new file mode 100644
-index 00000000..09b2c5ea
+index 00000000..e6b65559
 --- /dev/null
-+++ b/tests/readonly/021.out
-@@ -0,0 +1,11 @@
-+QA output created by 021
-+xattr: user.foo
-+xattr: user.hello
-+xattr: user.ping
-+listxattr: No such file or directory
-+listxattr: Numerical result out of range
-+listxattr: Numerical result out of range
-+listxattr: Numerical result out of range
-+xattr: user.foo
-+xattr: user.hello
-+xattr: user.ping
-diff --git a/tests/readonly/group b/tests/readonly/group
-index c5bca62c..3953328d 100644
---- a/tests/readonly/group
-+++ b/tests/readonly/group
-@@ -21,3 +21,6 @@
- 016 auto
- 017 auto
- 018 auto
-+019 auto
-+020 auto
-+021 auto
++++ b/tests/squashfs/004.out
+@@ -0,0 +1,23 @@
++QA output created by 004
++making squashfs image using 16384 blocksize, -no-fragments, -noI
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -no-fragments, -noD
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -no-fragments, -noF
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -no-fragments, -noX
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -always-use-fragments, -noI
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -always-use-fragments, -noD
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -always-use-fragments, -noF
++Testing mount and diff data.
++making squashfs image using 16384 blocksize, -always-use-fragments, -noX
++Testing mount and diff data.
++making squashfs image using 4096 blocksize
++Testing mount and diff data.
++making squashfs image using 8192 blocksize
++Testing mount and diff data.
++making squashfs image using 32768 blocksize
++Testing mount and diff data.
+diff --git a/tests/squashfs/005 b/tests/squashfs/005
+new file mode 100755
+index 00000000..2935123d
+--- /dev/null
++++ b/tests/squashfs/005
+@@ -0,0 +1,54 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Huawei. All Rights Reserved.
++#
++# FS QA Test No. 005
++#
++# mksquashfs -all-root, -force-uid uid, -force-gid gid test
++#
++seq=`basename $0`
++echo "QA output created by $seq"
++
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++
++testfile=$SCRATCH_DEV/testfile
++rm -f $testfile
++
++echo test >$testfile
++chown 1 $testfile
++chgrp 2 $testfile
++chmod 421 $testfile
++
++for ids in "-all-root" "-force-uid 2" "-force-gid 1"; do
++	echo "making squashfs image using $ids"
++	_scratch_mkfs "$ids" >/dev/null 2>&1
++	if [ $?  != 0 ]; then
++		echo "mksquashfs failed."
++		continue
++	fi
++	echo "getting uid, gid"
++	_scratch_mount
++	stat -c %u $SCRATCH_MNT/testfile
++	stat -c %g $SCRATCH_MNT/testfile
++	_scratch_unmount
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/squashfs/005.out b/tests/squashfs/005.out
+new file mode 100644
+index 00000000..1ee4f9c3
+--- /dev/null
++++ b/tests/squashfs/005.out
+@@ -0,0 +1,13 @@
++QA output created by 005
++making squashfs image using -all-root
++getting uid, gid
++0
++0
++making squashfs image using -force-uid 2
++getting uid, gid
++2
++2
++making squashfs image using -force-gid 1
++getting uid, gid
++1
++1
+diff --git a/tests/squashfs/Makefile b/tests/squashfs/Makefile
+new file mode 100644
+index 00000000..bbdc91ea
+--- /dev/null
++++ b/tests/squashfs/Makefile
+@@ -0,0 +1,20 @@
++#
++# Copyright (c) 2019 Huawei.  All Rights Reserved.
++#
++
++TOPDIR = ../..
++include $(TOPDIR)/include/builddefs
++
++SQUASHFS_DIR = squashfs
++TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(SQUASHFS_DIR)
++
++include $(BUILDRULES)
++
++install:
++	$(INSTALL) -m 755 -d $(TARGET_DIR)
++	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
++	$(INSTALL) -m 644 group $(TARGET_DIR)
++	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
++
++# Nothing.
++install-dev install-lib:
+diff --git a/tests/squashfs/group b/tests/squashfs/group
+new file mode 100644
+index 00000000..a3544bc1
+--- /dev/null
++++ b/tests/squashfs/group
+@@ -0,0 +1,10 @@
++# QA groups control file
++# Defines test groups and nominal group owners
++# - do not start group names with a digit
++# - comment line before each group is "new" description
++#
++001 auto squashfs
++002 auto squashfs
++003 auto squashfs
++004 auto squashfs
++005 auto squashfs
 --
 2.16.2.dirty
