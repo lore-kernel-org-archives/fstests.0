@@ -1,88 +1,86 @@
-Received: from ipmail02.adl2.internode.on.net ([150.101.137.139]:18426 "EHLO
-        ipmail02.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726968AbfAWEMu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 22 Jan 2019 23:12:50 -0500
-Date: Wed, 23 Jan 2019 15:12:46 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v3 2/2] xfs/068: new fsstress operation breaks xfsrestore
- output
-Message-ID: <20190123041246.GO6173@dastard>
-References: <20190119024258.6864-1-zlang@redhat.com>
- <20190119024258.6864-2-zlang@redhat.com>
- <20190121224412.GE4205@dastard>
- <CAOQ4uxjjGuNKWXmNKGq_7+ckkYm9ERF+Mne-jdvJY8r-4YzkZQ@mail.gmail.com>
- <20190122045854.GE2255@dhcp-12-149.nay.redhat.com>
- <20190122222216.GN6173@dastard>
- <20190123034406.GF2255@dhcp-12-149.nay.redhat.com>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:38466 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726108AbfAWHf7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 23 Jan 2019 02:35:59 -0500
+Received: by mail-yw1-f67.google.com with SMTP id d190so513194ywb.5
+        for <fstests@vger.kernel.org>; Tue, 22 Jan 2019 23:35:58 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20190119024258.6864-1-zlang@redhat.com> <20190119024258.6864-2-zlang@redhat.com>
+ <20190121224412.GE4205@dastard> <CAOQ4uxjjGuNKWXmNKGq_7+ckkYm9ERF+Mne-jdvJY8r-4YzkZQ@mail.gmail.com>
+ <20190122045854.GE2255@dhcp-12-149.nay.redhat.com> <20190122222216.GN6173@dastard>
+ <20190123034406.GF2255@dhcp-12-149.nay.redhat.com>
 In-Reply-To: <20190123034406.GF2255@dhcp-12-149.nay.redhat.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 23 Jan 2019 09:35:47 +0200
+Message-ID: <CAOQ4uxiPvUnHTYVsq6Tk1ywzR0dc8ySi0WYKKXiD5RDCjoNkAg@mail.gmail.com>
+Subject: Re: [PATCH v3 2/2] xfs/068: new fsstress operation breaks xfsrestore output
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: Zorro Lang <zlang@redhat.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, fstests <fstests@vger.kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, Eric Sandeen <sandeen@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jan 23, 2019 at 11:44:06AM +0800, Zorro Lang wrote:
-> On Wed, Jan 23, 2019 at 09:22:16AM +1100, Dave Chinner wrote:
-> > On Tue, Jan 22, 2019 at 12:58:54PM +0800, Zorro Lang wrote:
-> > > > This is not the case with the newly added SPLICE operation and
-> > > > updating the golden output rather than blacklisting the new operation
-> > > > is what was decided and done two times in recent history (also patches
-> > > > by Zorro).
-> > > 
-> > > Yes, I saw that FSSTRESS_AVOID in common/dump. But I thought (if I'm wrong
-> > > please feel free to correct me):
-> > > 1) dedupe/clone/copyrange might not be compiled in fsstress, they depend
-> > >    on "#ifndef ... #endif". That will make different xfsdump/restore output
-> > >    when a fs with or without these operations. Then there's not a fixed 068.out.
-> > >    So they must be avoided.
-> > 
-> > > 2) splice syscall is an old common function, which is first appeared in Linux
-> > >    2.6.17. So I think it's safe to be added.
-> > 
-> > What makes you think it worked in 2.6.17? I mean:
-> > 
-> > commit 0ff28d9f4674d781e492bcff6f32f0fe48cf0fed
-> > Author: Christophe Leroy <christophe.leroy@c-s.fr>
-> > Date:   Wed May 6 17:26:47 2015 +0200
-> > 
-> >     splice: sendfile() at once fails for big files
-> >     
-> >     Using sendfile with below small program to get MD5 sums of some files,
-> >     it appear that big files (over 64kbytes with 4k pages system) get a
-> >     wrong MD5 sum while small files get the correct sum.
-> >     This program uses sendfile() to send a file to an AF_ALG socket
-> >     for hashing.
-> > .....
-> > 
-> > i.e. using sendfile to copy large files resulted in corrupt copies
-> > up until 2015.
-> > 
-> > Basically, sendfile is a legacy interface that has spend a very
-> > large amount of it's time broken, full of deadlocks (i.e. unusable)
-> > and not used by anyone. It's not something we really want to enable
-> > in xfstests because it will cause all sorts of failures on older
-> > distros...
-> 
-> Sorry I didn't learn about that. I just checked "man 2 splice", it said:
-> "The splice() system call first appeared in Linux 2.6.17; library support was
-> added to glibc in version 2.5."
+> > > 3) Either change common/dump or xfs/068.out doesn't take much time/code, so I
+> > >    decided to change 068.out to make x/068 to do operations.
+> >
+> > Did you validate that the file count is actually correct?
+> >
+> > The file count in these dump/restore tests is how we tell we've
+> > broken bulkstat iteration - any mismatch on the file count indicates
+> > bulkstat didn't find something it should have or it counted things
+> > twice. Hence I'm wary making changes to the file set size the
+> > dump/restore tests use.
+> >
+> > And, really, changing the file set size somewhat invalidates the
+> > long regression history we have with these existing tests. i.e.
+> > don't change tests that work correctly unless it's absolutely
+> > necessary. It only adds to the risk of introducing new bugs.
+>
+> Thanks so much for your detailed description :) I'll turn to change
+> FSSTRESS_AVOID in next V4 patch.
+>
 
-splice() != sendfile().
+On the same discussion when Zorro added "insert" op, I asked
+why not convert test to whitelist of ops instead of having to update
+the blacklist every time fsstress is extended (which happened 3 times
+since we had this discussion).
 
-sendfile has been around since the 2.2 days, originally implemented
-to allow web servers to do zero-copy of file data to the network.
-The ability to do file-to-file copies was in the original 2.2/2.4
-implementation, but it was removed in the 2.5 series.  Back around
-2.6.32 it got converted to use the splice(2) kernel infrastructure
-and started supporting files as the destination again, and that's
-where it all went off the rails....
+To my question, Dave answered:
+(https://marc.info/?l=fstests&m=149013211607727&w=2)
 
-Cheers,
+> That means dump tests will /never/ exercise new fsstress operations
+> which, IMO, is much worse than having to keep a test up to date with
+> new operations.
+>
+> i.e. The whole point of adding new operations to fsstress and have
+> tests run them is that we automatically get coverage of new
+> functionality. Neutering this for all xfsdump tests by using "-z" is
+> - philosophically speaking - the wrong thing to do.
 
-Dave.
+For the life of me, I cannot follow the logic of how this argument ends
+up with a decision to update the blacklist. It is just me?
 
--- 
-Dave Chinner
-david@fromorbit.com
+Yes, if we use a whitelist we will /never/ exercise new fsstress operations for
+xfs/068. It may be the wrong thing to do "philosophically speaking" but in
+practice, we are doing this anyway, just manually every time an op is added.
+
+This is just madness.
+
+Eryu, can you please step in and end this ordeal once and for all.
+
+If we still want to exercise new fsstress ops for xfs/022 and future xfsdump
+tests (do we?) the solution is quite simple:
+factor out _create_dumpdir_stress_num_param and pass in whitelist
+of ops only from xfs/068 and be done with that.
+
+Zorro, be the final decision as it may, blacklist or whitelist, the test 068 is
+currently verifying that the file count is what happened to be the file count
+after addition of "insert" and "mread/mwrite" ops, which to the best of my
+knowledge, no one verified is the correct file count.
+
+So if we want to leave this test "unchanged", we'd better revert your last two
+changes to 068.out and resort to Eric's original test output and also
+exclude (or not include in whitelist) insert/mread/mwrite ops.
+
+Thanks,
+Amir.
