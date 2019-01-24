@@ -1,59 +1,71 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55728 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726228AbfAWHfH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 23 Jan 2019 02:35:07 -0500
-Received: from smtp.corp.redhat.com (int-mx02.intmail.prod.int.phx2.redhat.com [10.5.11.12])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id D1DB983F3D
-        for <fstests@vger.kernel.org>; Wed, 23 Jan 2019 07:35:07 +0000 (UTC)
-Received: from localhost.localdomain.com (unknown [10.66.13.9])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0767B662EC
-        for <fstests@vger.kernel.org>; Wed, 23 Jan 2019 07:35:06 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v4 2/2] common/dump: disable splice from FSSTRESS_AVOID
-Date: Wed, 23 Jan 2019 15:34:55 +0800
-Message-Id: <20190123073455.24539-2-zlang@redhat.com>
-In-Reply-To: <20190123073455.24539-1-zlang@redhat.com>
-References: <20190123073455.24539-1-zlang@redhat.com>
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:41344 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726252AbfAXQps (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 24 Jan 2019 11:45:48 -0500
+Received: by mail-pl1-f194.google.com with SMTP id u6so3139027plm.8
+        for <fstests@vger.kernel.org>; Thu, 24 Jan 2019 08:45:48 -0800 (PST)
+Date: Thu, 24 Jan 2019 08:45:43 -0800
+From: Luis Chamberlain <mcgrof@kernel.org>
+Subject: Re: [PATCH] check: force hostname to be unique
+Message-ID: <20190124164543.GI11489@garbanzo.do-not-panic.com>
+References: <20190111215420.9676-1-mcgrof@kernel.org>
+ <20190116081212.GI2713@desktop>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190116081212.GI2713@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-New fsstress operation breaks fs dump/restore testing which use
-fsstress, e.g xfs/068.
+On Wed, Jan 16, 2019 at 04:12:12PM +0800, Eryu Guan wrote:
+> On Fri, Jan 11, 2019 at 01:54:20PM -0800, Luis Chamberlain wrote:
+> > If you use a hostname which is part of the output of
+> > standard tools you end up with failures with fstests
+> > due to differences in output against the golden output.
+> > 
+> > The failures are false positives due to the hostname.
+> > For instance if you hostname is 'xfs' _dump_filter_main()
+> > will substitute the initiial 'xfs' with HOSTNAME as part
+> > of your logs, and will fail the output will fail against
+> > the golden output on say all xfsdump / xfsrestores tests.
+> > 
+> > The hostname must be a unique string, not used as part
+> > of the output from any tool used when capturing output.
+> > 
+> > Signed-off-by: Luis Chamberlain <mcgrof@kernel.org>
+> 
+> IMHO, a better fix would be improving the regexp in _dump_filter_main to
+> match hostname more precisely. I did the following update and it seemed
+> to work fine, I tested with '-g dump' and all tests passed (some tests
+> _notrun due to missing tape device).
+> 
+> --- a/common/dump
+> +++ b/common/dump
+> @@ -826,7 +826,8 @@ _dump_filter_main()
+>        -e "s#$__XFSDUMP_PROG#xfsdump#"                  \
+>        -e "s#$XFSRESTORE_PROG#xfsrestore#"              \
+>        -e "s#$XFSINVUTIL_PROG#xfsinvutil#"              \
+> -      -e "s/`hostname`/HOSTNAME/"                      \
+> +      -e "s/`hostname`:/HOSTNAME:/"                    \
+> +      -e "s/: `hostname`/: HOSTNAME/"                  \
+>        -e "s#$SCRATCH_DEV#SCRATCH_DEV#"                 \
+>        -e "s#$SCRATCH_RAWDEV#SCRATCH_DEV#"              \
+>        -e "s#$dumptape#TAPE_DEV#"                       \
+> 
+> It's based on the fact that there're basically two patterns that contain
+> 'HOSTNAME':
+> 
+> xfsrestore: hostname: HOSTNAME
+> xfsdump: level 0 dump of HOSTNAME:SCRATCH_MNT
 
-In _create_dumpdir_stress_num, disable splice in fsstress so that we
-dump exactly the same set of files and directories no matter how the
-xfs is configured.
+Works for me but this is still pretty fragile, and it does not cover
+the what other filesystems use as best-practices for issuign a hostname
+either. Even if we consider xfs: are we *certain* that the above regexp
+covers all output issued by xfs utils when hostname is used? We're
+talking about a generic rule of thumb here.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
+So I'd say we do both for now. Just my 0.01 CRC.
 
-Hi,
-
-V4 only changed this patch. Ealier patch tried to change xfs/086.out,
-this patche add splice into FSSTRESS_AVOID for dump/restore testing.
-
-Thanks,
-Zorro
-
- common/dump | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/common/dump b/common/dump
-index 4d1a1607..b17771b9 100644
---- a/common/dump
-+++ b/common/dump
-@@ -310,6 +310,9 @@ _create_dumpdir_stress_num()
-     if $FSSTRESS_PROG | grep -q copyrange; then
-         FSSTRESS_AVOID="-f copyrange=0 $FSSTRESS_AVOID"
-     fi
-+    if $FSSTRESS_PROG | grep -q splice; then
-+        FSSTRESS_AVOID="-f splice=0 $FSSTRESS_AVOID"
-+    fi
- 
-     echo ""
-     echo "-----------------------------------------------"
--- 
-2.17.2
+  Luis
