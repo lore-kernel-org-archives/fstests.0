@@ -1,64 +1,238 @@
-Received: from mail.kernel.org ([198.145.29.99]:53934 "EHLO mail.kernel.org"
+Received: from mout.gmx.net ([212.227.15.18]:57797 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726026AbfAYLqa (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 25 Jan 2019 06:46:30 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH 2/2] fstests: btrfs/081, fix killing of reader loop subshell
-Date: Fri, 25 Jan 2019 11:46:24 +0000
-Message-Id: <20190125114624.4004-1-fdmanana@kernel.org>
+        id S1726218AbfAYXiV (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 25 Jan 2019 18:38:21 -0500
+Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
+ or return -ENOSPC unexpected
+References: <20190114082043.31220-1-wqu@suse.com>
+ <20190125185738.GD2900@twin.jikos.cz>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <b8181a19-46ce-126f-b61d-9fea22aa0bc4@gmx.com>
+Date: Sat, 26 Jan 2019 07:38:03 +0800
+MIME-Version: 1.0
+In-Reply-To: <20190125185738.GD2900@twin.jikos.cz>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: dsterba@suse.cz, Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, josef@toxicpanda.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf
+Content-Type: multipart/mixed; boundary="ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: dsterba@suse.cz, Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+ fstests@vger.kernel.org, josef@toxicpanda.com
+Message-ID: <b8181a19-46ce-126f-b61d-9fea22aa0bc4@gmx.com>
+Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
+ or return -ENOSPC unexpected
+References: <20190114082043.31220-1-wqu@suse.com>
+ <20190125185738.GD2900@twin.jikos.cz>
+In-Reply-To: <20190125185738.GD2900@twin.jikos.cz>
 
-The test creates a subshell that keeps running the 'cat' command against a
-test file in an infinite loop, and after it kills the subshell it unmounts
-the filesystem, after which point any 'cat' subcommand that runs after or
-at that time will fail resulting in an unexpected golden output:
+--ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-  $ ./check btrfs/081
-  btrfs/081 3s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/081.out.bad)
-      --- tests/btrfs/081.out	2018-09-16 21:30:48.501104179 +0100
-      +++ /home/fdmanana/git/hub/xfstests/results//btrfs/081.out.bad	2019-01-24 20:36:18.989746185 +0000
-      @@ -206,5 +206,6 @@
-       Verifying file digests after cloning
-       14968c092c68e32fa35e776392d14523  SCRATCH_MNT/foo
-       14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
-      +cat: /mnt/scratch/bar: No such file or directory
-       Verifying target file digest after umount + mount
-       14968c092c68e32fa35e776392d14523  SCRATCH_MNT/bar
-      ...
-      (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/081.out /home/fdmanana/git/hub/xfstests/results//btrfs/081.out.bad'  to see the entire diff)
-  Ran: btrfs/081
-  Failures: btrfs/081
-  Failed 1 of 1 tests
 
-Fix that by adding a proper trap to the reader loop function so that the
-subshell waits for executed 'cat' commands when it receives SIGTERM.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/081 | 6 ++++++
- 1 file changed, 6 insertions(+)
+On 2019/1/26 =E4=B8=8A=E5=8D=882:57, David Sterba wrote:
+> On Mon, Jan 14, 2019 at 04:20:43PM +0800, Qu Wenruo wrote:
+>> Kernel commit 64403612b73a ("btrfs: rework
+>> btrfs_check_space_for_delayed_refs") is introducing a regression for
+>> btrfs balance performance.
+>>
+>> Originally, the workload used in the test case only takes seconds for
+>> balance on v4.20 while now it takes over 400 seconds for balance.
+>>
+>> During that 400 seconds balance, it commits over 2000 transactions jus=
+t
+>> for nothing, compare to original several transactions.
+>>
+>> Add test cases to detect such regression.
+>=20
+> How do you detect that the test regressed, other than comparing the
+> runtime recorded between runs of the testsuite? I don't actually know
+> how this could be done inside the script, as there can't be a fixed
+> number of seconds to compare with. The run time depends on the
+> underlying storage.
 
-diff --git a/tests/btrfs/081 b/tests/btrfs/081
-index 7e83525f..726a370f 100755
---- a/tests/btrfs/081
-+++ b/tests/btrfs/081
-@@ -69,6 +69,12 @@ create_target_file()
- 
- reader_loop()
- {
-+	# Wait for any running 'cat' subcommand before exitting so that after
-+	# the test kills the reader loop subshell it does not fail with an
-+	# error message from a 'cat' subcommand due to the test file being
-+	# temporarily unavailable due to the scratch fs unmount operation.
-+	trap "wait; exit" SIGTERM
+I have a better idea for detecting this, by using super generation as
+failure criteria.
+
+So then we could have a simple FAIL/PASS check.
+Although, we still need to take a long time to run if we hit that
+regression.
+
+Thanks,
+Qu
+
+>=20
+> I takes 14 seconds on a physical machine on a rotational disk and 9
+> seconds on a SSD.
+>=20
+> Other than the, I've used this test to validate the fix, for that
+>=20
+> Tested-by: David Sterba <dsterba@suse.com>
+>=20
+> It would be good to have the test in the testsuite so possibly some
+> large timeout can be set and the test will print a message, this should=
+
+> catch attention at least and let us decide.
+>=20
+>> Signed-off-by: Qu Wenruo <wqu@suse.com>
+>> ---
+>> Extra note:
+>> In fact, without the snapshots created in the test case, it would retu=
+rn
+>> -ENOSPC even we have enough unallocated space.
+>> ---
+>>  tests/btrfs/180     | 80 ++++++++++++++++++++++++++++++++++++++++++++=
 +
- 	local name=$1
- 
- 	while true; do
--- 
-2.11.0
+>>  tests/btrfs/180.out |  2 ++
+>>  tests/btrfs/group   |  1 +
+>>  3 files changed, 83 insertions(+)
+>>  create mode 100755 tests/btrfs/180
+>>  create mode 100644 tests/btrfs/180.out
+>>
+>> diff --git a/tests/btrfs/180 b/tests/btrfs/180
+>> new file mode 100755
+>> index 00000000..534fea01
+>> --- /dev/null
+>> +++ b/tests/btrfs/180
+>> @@ -0,0 +1,80 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+>> +#
+>> +# FS QA Test 180
+>> +#
+>> +# Test if metadata balance would take forever to finish or return ENO=
+SPC even
+>> +# there there are tons of space.
+>> +#
+>> +# This is regression caused by upstream commit 64403612b73a
+>> +# ("btrfs: rework btrfs_check_space_for_delayed_refs")
+>> +#
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=3D`pwd`
+>> +tmp=3D/tmp/$$
+>> +status=3D1	# failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +	cd /
+>> +	rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +
+>> +# Modify as appropriate.
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_xfs_io_command falloc
+>> +
+>> +i=3D0
+>> +loop=3D16384
+>> +
+>> +_scratch_mkfs > /dev/null 2>&1
+>> +_scratch_mount
+>> +
+>> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
+>> +
+>> +while [ $i -le $loop ]; do
+>> +	# Use small file to create inline extent
+>> +	_pwrite_byte 0x00 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
+>> +	#$XFS_IO_PROG -f -c "falloc 0 4K" "$SCRATCH_MNT/src/regular_$i" > /d=
+ev/null
+>=20
+> You can delete the commented command
+>=20
+>> +	i=3D$((i + 1))
+>> +done
+>> +
+>> +# Create enough snapshots so at space reservation part of relocation,=
+ we could
+>> +# generate enough space pressure
+>> +for i in $(seq -w 0 16); do
+>> +	$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
+>> +		"$SCRATCH_MNT/snapshot_$i" > /dev/null
+>> +	# touch random files to create some new tree blocks
+>> +	for j in $(seq -w 0 16); do
+>> +		victim=3D"$(ls $SCRATCH_MNT/snapshot_$i | sort -R | head -n1)"
+>> +		touch "$SCRATCH_MNT/snapshot_$i/$victim"
+>> +	done
+>> +done
+>> +
+>> +# Balancing metadata shouldn't be too time consuming, as the amount o=
+f metadata
+>> +# is less than 8M, thus normally it should finish very quick.
+>> +#
+>> +# However with that offending commit, it will take forever to finish =
+or return
+>> +# ENOSPC after a long wait.
+>> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
+>> +
+>> +echo "Silence is golden"
+>> +# success, all done
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
+>> new file mode 100644
+>> index 00000000..50aba766
+>> --- /dev/null
+>> +++ b/tests/btrfs/180.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 180
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index 46dd3c95..e724968b 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -182,3 +182,4 @@
+>>  177 auto quick swap balance
+>>  178 auto quick send
+>>  179 auto qgroup dangerous
+>> +180 auto balance dangerous
+>=20
+> I don't think it falls to the dangerous category, it does not crash the=
+
+> machine, only that the test could take long.
+>=20
+
+
+--ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1--
+
+--bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlxLndsACgkQwj2R86El
+/qgFHQgAlSm3pfJBwNBMkEllLEXYromKInKyTDaXRp36B68lfZufTfr2NutPeZmi
+jJkAdMoxrTS379yEvSfU0V0jyVSx6rsOGbiUs8W43sJ4NYjMO9PW4l2nRhbbR917
+nvIdRfuq2TzAuxChVTdB91C3M5o+z11sWfAMKTk8zeL8PvI1vBJEnAMs7Jpmm5ba
+eTKyJUH7qTJ0ki9jWIkeC7soGQG9FL3OmHoSWxvYwQTMElJFS5bBkwnrGeUTExCh
+/dC2mhs3uPR6XK8OwGo396bxI2CXmyeaHr13SAfg0cnrJB/zG1haWbW/0yHU6BQH
+3hX8bKPIwG6yNeIx4+5UwysdMSZUaA==
+=GFyo
+-----END PGP SIGNATURE-----
+
+--bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf--
