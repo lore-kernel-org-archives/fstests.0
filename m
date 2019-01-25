@@ -1,87 +1,172 @@
-Received: from mail-wr1-f54.google.com ([209.85.221.54]:35728 "EHLO
-        mail-wr1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726347AbfAXIdV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 24 Jan 2019 03:33:21 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 2/2] xfs/068: Add fsstress generated file count to golden output
-Date: Thu, 24 Jan 2019 10:33:10 +0200
-Message-Id: <20190124083310.25928-2-amir73il@gmail.com>
-In-Reply-To: <20190124083310.25928-1-amir73il@gmail.com>
-References: <20190124083310.25928-1-amir73il@gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:35476 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726024AbfAYS6O (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 25 Jan 2019 13:58:14 -0500
+Date: Fri, 25 Jan 2019 19:57:38 +0100
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
+ or return -ENOSPC unexpected
+Message-ID: <20190125185738.GD2900@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <20190114082043.31220-1-wqu@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190114082043.31220-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, josef@toxicpanda.com
 List-ID: <fstests@vger.kernel.org>
 
-This test has the number of files/dirs created by fsstress hardcoded
-in golden output.
+On Mon, Jan 14, 2019 at 04:20:43PM +0800, Qu Wenruo wrote:
+> Kernel commit 64403612b73a ("btrfs: rework
+> btrfs_check_space_for_delayed_refs") is introducing a regression for
+> btrfs balance performance.
+> 
+> Originally, the workload used in the test case only takes seconds for
+> balance on v4.20 while now it takes over 400 seconds for balance.
+> 
+> During that 400 seconds balance, it commits over 2000 transactions just
+> for nothing, compare to original several transactions.
+> 
+> Add test cases to detect such regression.
 
-When fsstress is added new ops, the number of files/dirs created with
-the same random seed changes and this regularly breaks this test.
+How do you detect that the test regressed, other than comparing the
+runtime recorded between runs of the testsuite? I don't actually know
+how this could be done inside the script, as there can't be a fixed
+number of seconds to compare with. The run time depends on the
+underlying storage.
 
-So when new fsstress ops are added they should be either added to the
-dump test blacklist or golden output of this test needs to be ammended
-to reflect the change.
+I takes 14 seconds on a physical machine on a rotational disk and 9
+seconds on a SSD.
 
-Since the golden output includes only the file count after dump/restore,
-add also the file count before dump/restore so developers are less
-likely to forget to check the validity of golden output before commiting
-the change.
+Other than the, I've used this test to validate the fix, for that
 
-For some reason the file count reported by xfsrestore has one directory
-more than the file count reported by 'find'. I did not investigate why
-that is, but did verify that this was the same with the original test
-fsstress ops (i.e. without the added ops
-insert/mread/mwrite/aread/awrite/readv/writev).
+Tested-by: David Sterba <dsterba@suse.com>
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- common/dump       | 7 +++++++
- tests/xfs/068     | 1 +
- tests/xfs/068.out | 1 +
- 3 files changed, 9 insertions(+)
+It would be good to have the test in the testsuite so possibly some
+large timeout can be set and the test will print a message, this should
+catch attention at least and let us decide.
 
-diff --git a/common/dump b/common/dump
-index 47d14601..23f42216 100644
---- a/common/dump
-+++ b/common/dump
-@@ -1515,6 +1515,13 @@ _check_quota_file()
-    _check_quota 'xfsdump_quotas' 'xfsdump_quotas_group' 'xfsdump_quotas_proj'
- }
- 
-+_count_dumpdir_files()
-+{
-+	local ndirs=$(find $dump_dir -type d | wc -l)
-+	local nents=$(find $dump_dir | wc -l)
-+
-+	echo "Created $ndirs directories and $nents entries"
-+}
- 
- # make sure this script returns success
- /bin/true
-diff --git a/tests/xfs/068 b/tests/xfs/068
-index 95a8cd12..ffc293bd 100755
---- a/tests/xfs/068
-+++ b/tests/xfs/068
-@@ -28,6 +28,7 @@ _supported_fs xfs
- _supported_os Linux
- 
- _create_dumpdir_stress_num 4096
-+_count_dumpdir_files
- _do_dump_restore
- 
- # success, all done
-diff --git a/tests/xfs/068.out b/tests/xfs/068.out
-index fa3a5523..61cbbfa4 100644
---- a/tests/xfs/068.out
-+++ b/tests/xfs/068.out
-@@ -4,6 +4,7 @@ Creating directory system to dump using fsstress.
- -----------------------------------------------
- fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
- -----------------------------------------------
-+Created 382 directories and 1334 entries
- xfsdump|xfsrestore ...
- xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
- xfsrestore: using file dump (drive_simple) strategy
--- 
-2.17.1
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> Extra note:
+> In fact, without the snapshots created in the test case, it would return
+> -ENOSPC even we have enough unallocated space.
+> ---
+>  tests/btrfs/180     | 80 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/180.out |  2 ++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 83 insertions(+)
+>  create mode 100755 tests/btrfs/180
+>  create mode 100644 tests/btrfs/180.out
+> 
+> diff --git a/tests/btrfs/180 b/tests/btrfs/180
+> new file mode 100755
+> index 00000000..534fea01
+> --- /dev/null
+> +++ b/tests/btrfs/180
+> @@ -0,0 +1,80 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 180
+> +#
+> +# Test if metadata balance would take forever to finish or return ENOSPC even
+> +# there there are tons of space.
+> +#
+> +# This is regression caused by upstream commit 64403612b73a
+> +# ("btrfs: rework btrfs_check_space_for_delayed_refs")
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_io_command falloc
+> +
+> +i=0
+> +loop=16384
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +
+> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
+> +
+> +while [ $i -le $loop ]; do
+> +	# Use small file to create inline extent
+> +	_pwrite_byte 0x00 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
+> +	#$XFS_IO_PROG -f -c "falloc 0 4K" "$SCRATCH_MNT/src/regular_$i" > /dev/null
+
+You can delete the commented command
+
+> +	i=$((i + 1))
+> +done
+> +
+> +# Create enough snapshots so at space reservation part of relocation, we could
+> +# generate enough space pressure
+> +for i in $(seq -w 0 16); do
+> +	$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
+> +		"$SCRATCH_MNT/snapshot_$i" > /dev/null
+> +	# touch random files to create some new tree blocks
+> +	for j in $(seq -w 0 16); do
+> +		victim="$(ls $SCRATCH_MNT/snapshot_$i | sort -R | head -n1)"
+> +		touch "$SCRATCH_MNT/snapshot_$i/$victim"
+> +	done
+> +done
+> +
+> +# Balancing metadata shouldn't be too time consuming, as the amount of metadata
+> +# is less than 8M, thus normally it should finish very quick.
+> +#
+> +# However with that offending commit, it will take forever to finish or return
+> +# ENOSPC after a long wait.
+> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
+> +
+> +echo "Silence is golden"
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
+> new file mode 100644
+> index 00000000..50aba766
+> --- /dev/null
+> +++ b/tests/btrfs/180.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 180
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 46dd3c95..e724968b 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -182,3 +182,4 @@
+>  177 auto quick swap balance
+>  178 auto quick send
+>  179 auto qgroup dangerous
+> +180 auto balance dangerous
+
+I don't think it falls to the dangerous category, it does not crash the
+machine, only that the test could take long.
