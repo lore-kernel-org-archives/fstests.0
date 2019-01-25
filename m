@@ -1,172 +1,188 @@
-Received: from mx2.suse.de ([195.135.220.15]:35476 "EHLO mx1.suse.de"
+Received: from szxga04-in.huawei.com ([45.249.212.190]:2672 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726024AbfAYS6O (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 25 Jan 2019 13:58:14 -0500
-Date: Fri, 25 Jan 2019 19:57:38 +0100
-From: David Sterba <dsterba@suse.cz>
-Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
- or return -ENOSPC unexpected
-Message-ID: <20190125185738.GD2900@twin.jikos.cz>
-Reply-To: dsterba@suse.cz
-References: <20190114082043.31220-1-wqu@suse.com>
+        id S1725909AbfAYKts (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 25 Jan 2019 05:49:48 -0500
+Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
+References: <20190122032408.91336-1-zhengbin13@huawei.com>
+From: "zhengbin (A)" <zhengbin13@huawei.com>
+Message-ID: <d498dc46-edf1-7aed-4e67-8b1606c3bba5@huawei.com>
+Date: Fri, 25 Jan 2019 18:49:37 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190114082043.31220-1-wqu@suse.com>
+In-Reply-To: <20190122032408.91336-1-zhengbin13@huawei.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, josef@toxicpanda.com
+To: david@fromorbit.com, guaneryu@gmail.com, fstests@vger.kernel.org
+Cc: houtao1@huawei.com, zhaohongjiang@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jan 14, 2019 at 04:20:43PM +0800, Qu Wenruo wrote:
-> Kernel commit 64403612b73a ("btrfs: rework
-> btrfs_check_space_for_delayed_refs") is introducing a regression for
-> btrfs balance performance.
+Ping?
+
+On 2019/1/22 11:24, zhengbin wrote:
+> This patch add squashfs support in xfstests-dev. Add two directories
+> in tests directory, readonly can also be used for other readonly
+> filesystem, squashfs is just used for squashfs filesystem.
+> tests/readonly/001        mount test
+> tests/readonly/002--010   metadata test
+> tests/readonly/011--018   data test
+> tests/readonly/019--021   xattr test
+> tests/squashfs/001--005   mksquashfs options test
 > 
-> Originally, the workload used in the test case only takes seconds for
-> balance on v4.20 while now it takes over 400 seconds for balance.
+> The reason of use 'readonly' directory instead of generic/shard is:
+> The step of tests in readonly filesystem(such as squashfs) are
+> as follows:
+> 1. write data in $SCRATCH_DEV
+> 2. mkfs $SCRATCH_DEV file
+> 3. mount file $SCRATCH_MNT
+> 4. test in $SCRATCH_MNT
 > 
-> During that 400 seconds balance, it commits over 2000 transactions just
-> for nothing, compare to original several transactions.
+> While the rw filesystems are as follows:
+> 1. mkfs $SCRATCH_DEV
+> 2. mount $SCRATCH_DEV $SCRATCH_MNT
+> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
 > 
-> Add test cases to detect such regression.
-
-How do you detect that the test regressed, other than comparing the
-runtime recorded between runs of the testsuite? I don't actually know
-how this could be done inside the script, as there can't be a fixed
-number of seconds to compare with. The run time depends on the
-underlying storage.
-
-I takes 14 seconds on a physical machine on a rotational disk and 9
-seconds on a SSD.
-
-Other than the, I've used this test to validate the fix, for that
-
-Tested-by: David Sterba <dsterba@suse.com>
-
-It would be good to have the test in the testsuite so possibly some
-large timeout can be set and the test will print a message, this should
-catch attention at least and let us decide.
-
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
-> Extra note:
-> In fact, without the snapshots created in the test case, it would return
-> -ENOSPC even we have enough unallocated space.
-> ---
->  tests/btrfs/180     | 80 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/180.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 83 insertions(+)
->  create mode 100755 tests/btrfs/180
->  create mode 100644 tests/btrfs/180.out
+> The tests in generic/shared are set as rw filesystem, it is hard
+> to use this in readonly filesystem, use 'readonly' dir which can
+> be easier to read.
 > 
-> diff --git a/tests/btrfs/180 b/tests/btrfs/180
-> new file mode 100755
-> index 00000000..534fea01
-> --- /dev/null
-> +++ b/tests/btrfs/180
-> @@ -0,0 +1,80 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 180
-> +#
-> +# Test if metadata balance would take forever to finish or return ENOSPC even
-> +# there there are tons of space.
-> +#
-> +# This is regression caused by upstream commit 64403612b73a
-> +# ("btrfs: rework btrfs_check_space_for_delayed_refs")
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_io_command falloc
-> +
-> +i=0
-> +loop=16384
-> +
-> +_scratch_mkfs > /dev/null 2>&1
-> +_scratch_mount
-> +
-> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
-> +
-> +while [ $i -le $loop ]; do
-> +	# Use small file to create inline extent
-> +	_pwrite_byte 0x00 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
-> +	#$XFS_IO_PROG -f -c "falloc 0 4K" "$SCRATCH_MNT/src/regular_$i" > /dev/null
-
-You can delete the commented command
-
-> +	i=$((i + 1))
-> +done
-> +
-> +# Create enough snapshots so at space reservation part of relocation, we could
-> +# generate enough space pressure
-> +for i in $(seq -w 0 16); do
-> +	$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
-> +		"$SCRATCH_MNT/snapshot_$i" > /dev/null
-> +	# touch random files to create some new tree blocks
-> +	for j in $(seq -w 0 16); do
-> +		victim="$(ls $SCRATCH_MNT/snapshot_$i | sort -R | head -n1)"
-> +		touch "$SCRATCH_MNT/snapshot_$i/$victim"
-> +	done
-> +done
-> +
-> +# Balancing metadata shouldn't be too time consuming, as the amount of metadata
-> +# is less than 8M, thus normally it should finish very quick.
-> +#
-> +# However with that offending commit, it will take forever to finish or return
-> +# ENOSPC after a long wait.
-> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
-> +
-> +echo "Silence is golden"
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
-> new file mode 100644
-> index 00000000..50aba766
-> --- /dev/null
-> +++ b/tests/btrfs/180.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 180
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 46dd3c95..e724968b 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -182,3 +182,4 @@
->  177 auto quick swap balance
->  178 auto quick send
->  179 auto qgroup dangerous
-> +180 auto balance dangerous
-
-I don't think it falls to the dangerous category, it does not crash the
-machine, only that the test could take long.
+> PS: As readonly filesystems need to mkfs in every test, do not
+> use TEST_DEV&TEST_DIR.
+> 
+> zhengbin (6):
+>   squashfs: add squashfs support
+>   squashfs: add mount test
+>   squashfs: add metadata test
+>   squashfs: add data test
+>   squashfs: add xattr test
+>   squashfs: add mksquashfs options test
+> 
+>  .gitignore                                  |   1 +
+>  README.squashfs                             |  12 ++
+>  check                                       |  19 ++-
+>  common/attr                                 |   5 +
+>  common/config                               |   6 +
+>  common/rc                                   |  63 ++++++++-
+>  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
+>  tests/readonly/001                          |  97 ++++++++++++++
+>  tests/readonly/001.out                      |   2 +
+>  tests/readonly/002                          |  48 +++++++
+>  tests/readonly/002.out                      |   6 +
+>  tests/readonly/003                          |  72 +++++++++++
+>  tests/readonly/003.out                      |   5 +
+>  tests/readonly/004                          |  50 +++++++
+>  tests/readonly/004.out                      |   3 +
+>  tests/readonly/005                          |  77 +++++++++++
+>  tests/readonly/005.out                      |   2 +
+>  tests/readonly/006                          |  48 +++++++
+>  tests/readonly/006.out                      |   4 +
+>  tests/readonly/007                          |  74 +++++++++++
+>  tests/readonly/007.out                      |   9 ++
+>  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
+>  tests/readonly/008.out                      |  34 +++++
+>  tests/readonly/009                          |  50 +++++++
+>  tests/readonly/009.out                      |   2 +
+>  tests/readonly/010                          |  49 +++++++
+>  tests/readonly/010.out                      |   4 +
+>  tests/readonly/011                          |  92 +++++++++++++
+>  tests/readonly/011.out                      |  30 +++++
+>  tests/readonly/012                          |  56 ++++++++
+>  tests/readonly/012.out                      |   5 +
+>  tests/readonly/013                          |  47 +++++++
+>  tests/readonly/013.out                      |   2 +
+>  tests/readonly/014                          |  46 +++++++
+>  tests/readonly/014.out                      |   2 +
+>  tests/readonly/015                          |  42 ++++++
+>  tests/readonly/015.out                      |   2 +
+>  tests/readonly/016                          | 145 +++++++++++++++++++++
+>  tests/readonly/016.out                      |   8 ++
+>  tests/readonly/017                          | 107 +++++++++++++++
+>  tests/readonly/017.out                      |   2 +
+>  tests/readonly/018                          |  49 +++++++
+>  tests/readonly/018.out                      |   2 +
+>  tests/readonly/019                          | 109 ++++++++++++++++
+>  tests/readonly/019.out                      |  45 +++++++
+>  tests/readonly/020                          |  56 ++++++++
+>  tests/readonly/020.out                      |   9 ++
+>  tests/readonly/021                          |  74 +++++++++++
+>  tests/readonly/021.out                      |  11 ++
+>  tests/readonly/Makefile                     |  20 +++
+>  tests/readonly/group                        |  26 ++++
+>  tests/squashfs/001                          |  60 +++++++++
+>  tests/squashfs/001.out                      |   9 ++
+>  tests/squashfs/002                          |  40 ++++++
+>  tests/squashfs/002.out                      |   2 +
+>  tests/squashfs/003                          |  55 ++++++++
+>  tests/squashfs/003.out                      |  12 ++
+>  tests/squashfs/004                          |  73 +++++++++++
+>  tests/squashfs/004.out                      |  23 ++++
+>  tests/squashfs/005                          |  54 ++++++++
+>  tests/squashfs/005.out                      |  13 ++
+>  tests/squashfs/Makefile                     |  20 +++
+>  tests/squashfs/group                        |  10 ++
+>  63 files changed, 2372 insertions(+), 5 deletions(-)
+>  create mode 100644 README.squashfs
+>  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
+>  create mode 100755 tests/readonly/001
+>  create mode 100644 tests/readonly/001.out
+>  create mode 100755 tests/readonly/002
+>  create mode 100644 tests/readonly/002.out
+>  create mode 100755 tests/readonly/003
+>  create mode 100644 tests/readonly/003.out
+>  create mode 100755 tests/readonly/004
+>  create mode 100644 tests/readonly/004.out
+>  create mode 100755 tests/readonly/005
+>  create mode 100644 tests/readonly/005.out
+>  create mode 100755 tests/readonly/006
+>  create mode 100644 tests/readonly/006.out
+>  create mode 100755 tests/readonly/007
+>  create mode 100644 tests/readonly/007.out
+>  create mode 100755 tests/readonly/008
+>  create mode 100644 tests/readonly/008.out
+>  create mode 100755 tests/readonly/009
+>  create mode 100644 tests/readonly/009.out
+>  create mode 100755 tests/readonly/010
+>  create mode 100644 tests/readonly/010.out
+>  create mode 100755 tests/readonly/011
+>  create mode 100644 tests/readonly/011.out
+>  create mode 100755 tests/readonly/012
+>  create mode 100644 tests/readonly/012.out
+>  create mode 100755 tests/readonly/013
+>  create mode 100644 tests/readonly/013.out
+>  create mode 100755 tests/readonly/014
+>  create mode 100644 tests/readonly/014.out
+>  create mode 100755 tests/readonly/015
+>  create mode 100644 tests/readonly/015.out
+>  create mode 100755 tests/readonly/016
+>  create mode 100644 tests/readonly/016.out
+>  create mode 100755 tests/readonly/017
+>  create mode 100644 tests/readonly/017.out
+>  create mode 100755 tests/readonly/018
+>  create mode 100644 tests/readonly/018.out
+>  create mode 100755 tests/readonly/019
+>  create mode 100644 tests/readonly/019.out
+>  create mode 100755 tests/readonly/020
+>  create mode 100644 tests/readonly/020.out
+>  create mode 100755 tests/readonly/021
+>  create mode 100644 tests/readonly/021.out
+>  create mode 100644 tests/readonly/Makefile
+>  create mode 100644 tests/readonly/group
+>  create mode 100755 tests/squashfs/001
+>  create mode 100644 tests/squashfs/001.out
+>  create mode 100755 tests/squashfs/002
+>  create mode 100644 tests/squashfs/002.out
+>  create mode 100755 tests/squashfs/003
+>  create mode 100644 tests/squashfs/003.out
+>  create mode 100755 tests/squashfs/004
+>  create mode 100644 tests/squashfs/004.out
+>  create mode 100755 tests/squashfs/005
+>  create mode 100644 tests/squashfs/005.out
+>  create mode 100644 tests/squashfs/Makefile
+>  create mode 100644 tests/squashfs/group
+> 
+> --
+> 2.16.2.dirty
+> 
+> 
+> .
+> 
