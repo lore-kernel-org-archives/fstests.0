@@ -1,238 +1,117 @@
-Received: from mout.gmx.net ([212.227.15.18]:57797 "EHLO mout.gmx.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726218AbfAYXiV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 25 Jan 2019 18:38:21 -0500
-Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
- or return -ENOSPC unexpected
-References: <20190114082043.31220-1-wqu@suse.com>
- <20190125185738.GD2900@twin.jikos.cz>
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-Message-ID: <b8181a19-46ce-126f-b61d-9fea22aa0bc4@gmx.com>
-Date: Sat, 26 Jan 2019 07:38:03 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:34349 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725781AbfA0FCZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 00:02:25 -0500
+Date: Sun, 27 Jan 2019 13:02:17 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 2/2] xfs/068: Add fsstress generated file count to golden
+ output
+Message-ID: <20190127050217.GL2713@desktop>
+References: <20190124083310.25928-1-amir73il@gmail.com>
+ <20190124083310.25928-2-amir73il@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <20190125185738.GD2900@twin.jikos.cz>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190124083310.25928-2-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz, Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org, josef@toxicpanda.com
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf
-Content-Type: multipart/mixed; boundary="ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1";
- protected-headers="v1"
-From: Qu Wenruo <quwenruo.btrfs@gmx.com>
-To: dsterba@suse.cz, Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
- fstests@vger.kernel.org, josef@toxicpanda.com
-Message-ID: <b8181a19-46ce-126f-b61d-9fea22aa0bc4@gmx.com>
-Subject: Re: [PATCH RFC] fstests: btrfs: Test if balance takes too long time
- or return -ENOSPC unexpected
-References: <20190114082043.31220-1-wqu@suse.com>
- <20190125185738.GD2900@twin.jikos.cz>
-In-Reply-To: <20190125185738.GD2900@twin.jikos.cz>
+[I'm sorry that I've been absent from the discussion entirely.. I was
+busy with other tasks recently.]
 
---ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+On Thu, Jan 24, 2019 at 10:33:10AM +0200, Amir Goldstein wrote:
+> This test has the number of files/dirs created by fsstress hardcoded
+> in golden output.
 
+This leads me to wonder if we could remove the hardcoded dir/entries
+number from the golden output and verify the counts on the fly? i.e. we
+count the dir/entries numbers that fsstress created and compare them
+with the numbers xfsrestore reports. So we don't have to worry about new
+ops in fsstress and xfs configurations.
 
+But for now, I'd like to take Zorro's v3 patch, which follows Dave's
+suggestion. And I've verified that the restored dir/entires counts
+matched what fsstress created (so previously added
+insert/mread/mwrite etc. ops didn't break xfs/068 either).
 
-On 2019/1/26 =E4=B8=8A=E5=8D=882:57, David Sterba wrote:
-> On Mon, Jan 14, 2019 at 04:20:43PM +0800, Qu Wenruo wrote:
->> Kernel commit 64403612b73a ("btrfs: rework
->> btrfs_check_space_for_delayed_refs") is introducing a regression for
->> btrfs balance performance.
->>
->> Originally, the workload used in the test case only takes seconds for
->> balance on v4.20 while now it takes over 400 seconds for balance.
->>
->> During that 400 seconds balance, it commits over 2000 transactions jus=
-t
->> for nothing, compare to original several transactions.
->>
->> Add test cases to detect such regression.
->=20
-> How do you detect that the test regressed, other than comparing the
-> runtime recorded between runs of the testsuite? I don't actually know
-> how this could be done inside the script, as there can't be a fixed
-> number of seconds to compare with. The run time depends on the
-> underlying storage.
+> 
+> When fsstress is added new ops, the number of files/dirs created with
+> the same random seed changes and this regularly breaks this test.
+> 
+> So when new fsstress ops are added they should be either added to the
+> dump test blacklist or golden output of this test needs to be ammended
+> to reflect the change.
+> 
+> Since the golden output includes only the file count after dump/restore,
+> add also the file count before dump/restore so developers are less
+> likely to forget to check the validity of golden output before commiting
+> the change.
+> 
+> For some reason the file count reported by xfsrestore has one directory
+> more than the file count reported by 'find'. I did not investigate why
 
-I have a better idea for detecting this, by using super generation as
-failure criteria.
-
-So then we could have a simple FAIL/PASS check.
-Although, we still need to take a long time to run if we hit that
-regression.
+I haven't looked at the xfsrestore code yet, but I guess it's because
+xfsrestore counts the '$SCRATCH_MNT/restoredir' as one entry processed
+as well.
 
 Thanks,
-Qu
+Eryu
 
->=20
-> I takes 14 seconds on a physical machine on a rotational disk and 9
-> seconds on a SSD.
->=20
-> Other than the, I've used this test to validate the fix, for that
->=20
-> Tested-by: David Sterba <dsterba@suse.com>
->=20
-> It would be good to have the test in the testsuite so possibly some
-> large timeout can be set and the test will print a message, this should=
-
-> catch attention at least and let us decide.
->=20
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->> ---
->> Extra note:
->> In fact, without the snapshots created in the test case, it would retu=
-rn
->> -ENOSPC even we have enough unallocated space.
->> ---
->>  tests/btrfs/180     | 80 ++++++++++++++++++++++++++++++++++++++++++++=
-+
->>  tests/btrfs/180.out |  2 ++
->>  tests/btrfs/group   |  1 +
->>  3 files changed, 83 insertions(+)
->>  create mode 100755 tests/btrfs/180
->>  create mode 100644 tests/btrfs/180.out
->>
->> diff --git a/tests/btrfs/180 b/tests/btrfs/180
->> new file mode 100755
->> index 00000000..534fea01
->> --- /dev/null
->> +++ b/tests/btrfs/180
->> @@ -0,0 +1,80 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
->> +#
->> +# FS QA Test 180
->> +#
->> +# Test if metadata balance would take forever to finish or return ENO=
-SPC even
->> +# there there are tons of space.
->> +#
->> +# This is regression caused by upstream commit 64403612b73a
->> +# ("btrfs: rework btrfs_check_space_for_delayed_refs")
->> +#
->> +seq=3D`basename $0`
->> +seqres=3D$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +here=3D`pwd`
->> +tmp=3D/tmp/$$
->> +status=3D1	# failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -f $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +
->> +# remove previous $seqres.full before test
->> +rm -f $seqres.full
->> +
->> +# real QA test starts here
->> +
->> +# Modify as appropriate.
->> +_supported_fs btrfs
->> +_supported_os Linux
->> +_require_scratch
->> +_require_xfs_io_command falloc
->> +
->> +i=3D0
->> +loop=3D16384
->> +
->> +_scratch_mkfs > /dev/null 2>&1
->> +_scratch_mount
->> +
->> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
->> +
->> +while [ $i -le $loop ]; do
->> +	# Use small file to create inline extent
->> +	_pwrite_byte 0x00 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
->> +	#$XFS_IO_PROG -f -c "falloc 0 4K" "$SCRATCH_MNT/src/regular_$i" > /d=
-ev/null
->=20
-> You can delete the commented command
->=20
->> +	i=3D$((i + 1))
->> +done
->> +
->> +# Create enough snapshots so at space reservation part of relocation,=
- we could
->> +# generate enough space pressure
->> +for i in $(seq -w 0 16); do
->> +	$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
->> +		"$SCRATCH_MNT/snapshot_$i" > /dev/null
->> +	# touch random files to create some new tree blocks
->> +	for j in $(seq -w 0 16); do
->> +		victim=3D"$(ls $SCRATCH_MNT/snapshot_$i | sort -R | head -n1)"
->> +		touch "$SCRATCH_MNT/snapshot_$i/$victim"
->> +	done
->> +done
->> +
->> +# Balancing metadata shouldn't be too time consuming, as the amount o=
-f metadata
->> +# is less than 8M, thus normally it should finish very quick.
->> +#
->> +# However with that offending commit, it will take forever to finish =
-or return
->> +# ENOSPC after a long wait.
->> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
->> +
->> +echo "Silence is golden"
->> +# success, all done
->> +status=3D0
->> +exit
->> diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
->> new file mode 100644
->> index 00000000..50aba766
->> --- /dev/null
->> +++ b/tests/btrfs/180.out
->> @@ -0,0 +1,2 @@
->> +QA output created by 180
->> +Silence is golden
->> diff --git a/tests/btrfs/group b/tests/btrfs/group
->> index 46dd3c95..e724968b 100644
->> --- a/tests/btrfs/group
->> +++ b/tests/btrfs/group
->> @@ -182,3 +182,4 @@
->>  177 auto quick swap balance
->>  178 auto quick send
->>  179 auto qgroup dangerous
->> +180 auto balance dangerous
->=20
-> I don't think it falls to the dangerous category, it does not crash the=
-
-> machine, only that the test could take long.
->=20
-
-
---ODNEYOP3zJYaCjKG8vsChlXLWNBjLUkh1--
-
---bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlxLndsACgkQwj2R86El
-/qgFHQgAlSm3pfJBwNBMkEllLEXYromKInKyTDaXRp36B68lfZufTfr2NutPeZmi
-jJkAdMoxrTS379yEvSfU0V0jyVSx6rsOGbiUs8W43sJ4NYjMO9PW4l2nRhbbR917
-nvIdRfuq2TzAuxChVTdB91C3M5o+z11sWfAMKTk8zeL8PvI1vBJEnAMs7Jpmm5ba
-eTKyJUH7qTJ0ki9jWIkeC7soGQG9FL3OmHoSWxvYwQTMElJFS5bBkwnrGeUTExCh
-/dC2mhs3uPR6XK8OwGo396bxI2CXmyeaHr13SAfg0cnrJB/zG1haWbW/0yHU6BQH
-3hX8bKPIwG6yNeIx4+5UwysdMSZUaA==
-=GFyo
------END PGP SIGNATURE-----
-
---bwofuVIKbKM5dAHdnsq7O7ZMQN5jjFVPf--
+> that is, but did verify that this was the same with the original test
+> fsstress ops (i.e. without the added ops
+> insert/mread/mwrite/aread/awrite/readv/writev).
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  common/dump       | 7 +++++++
+>  tests/xfs/068     | 1 +
+>  tests/xfs/068.out | 1 +
+>  3 files changed, 9 insertions(+)
+> 
+> diff --git a/common/dump b/common/dump
+> index 47d14601..23f42216 100644
+> --- a/common/dump
+> +++ b/common/dump
+> @@ -1515,6 +1515,13 @@ _check_quota_file()
+>     _check_quota 'xfsdump_quotas' 'xfsdump_quotas_group' 'xfsdump_quotas_proj'
+>  }
+>  
+> +_count_dumpdir_files()
+> +{
+> +	local ndirs=$(find $dump_dir -type d | wc -l)
+> +	local nents=$(find $dump_dir | wc -l)
+> +
+> +	echo "Created $ndirs directories and $nents entries"
+> +}
+>  
+>  # make sure this script returns success
+>  /bin/true
+> diff --git a/tests/xfs/068 b/tests/xfs/068
+> index 95a8cd12..ffc293bd 100755
+> --- a/tests/xfs/068
+> +++ b/tests/xfs/068
+> @@ -28,6 +28,7 @@ _supported_fs xfs
+>  _supported_os Linux
+>  
+>  _create_dumpdir_stress_num 4096
+> +_count_dumpdir_files
+>  _do_dump_restore
+>  
+>  # success, all done
+> diff --git a/tests/xfs/068.out b/tests/xfs/068.out
+> index fa3a5523..61cbbfa4 100644
+> --- a/tests/xfs/068.out
+> +++ b/tests/xfs/068.out
+> @@ -4,6 +4,7 @@ Creating directory system to dump using fsstress.
+>  -----------------------------------------------
+>  fsstress : -f link=10 -f creat=10 -f mkdir=10 -f truncate=5 -f symlink=10
+>  -----------------------------------------------
+> +Created 382 directories and 1334 entries
+>  xfsdump|xfsrestore ...
+>  xfsdump  -s DUMP_SUBDIR - SCRATCH_MNT | xfsrestore  - RESTORE_DIR
+>  xfsrestore: using file dump (drive_simple) strategy
+> -- 
+> 2.17.1
+> 
