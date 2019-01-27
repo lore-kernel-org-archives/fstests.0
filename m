@@ -1,102 +1,115 @@
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:37086 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726280AbfA0HvJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 02:51:09 -0500
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:39774 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726327AbfA0Ii7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 03:38:59 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/2] xfs/068: Verify actual file count instead of reported file count
-Date: Sun, 27 Jan 2019 09:50:57 +0200
-Message-Id: <20190127075057.25254-2-amir73il@gmail.com>
-In-Reply-To: <20190127075057.25254-1-amir73il@gmail.com>
-References: <20190127075057.25254-1-amir73il@gmail.com>
+Subject: [PATCH] overlay/061: enhance mmap ro/rw inconsistencies test
+Date: Sun, 27 Jan 2019 10:38:50 +0200
+Message-Id: <20190127083850.28834-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This test has the number of files/dirs created by xfsrestore hardcoded
-in golden output.
+overlay/061 is currently the only overlay test that is expected to fail
+on upstream kernel.
 
-When fsstress is added new ops, the number of files/dirs created with
-the same random seed changes and this regularly breaks this test,
-so when new fsstress ops are added they should be either added to the
-dump test blacklist or golden output of this test needs to be ammended
-to reflect the change.
+It is a flavor of test overlay/016 with mread in stead of pread.
+The ro/rw inconsistencies related to file read()/write() API were fixed
+with stacked file operations in v4.19, but the ro/rw inconsistencies
+related to shared mmap read/write remain to be fixed.
 
-The golden output includes only the file count reported by xfsrestore
-and test does not even verify that this is the correct file count.
-Instead, leave the golden output nuetral and explicitly verify that
-file count before and after the test are the same.
+The test currently checks cache coherency between mmap read and file
+write(), but this sort of cache coherency is a Linux implementation
+detail not a requirement of the API.
+Instead of mread vs. pwrite, check consistency of mread vs. mwrite
+to shared mmap, which is required by the MMAP_SHARED API.
 
-With this change, the test becomes agnostic to fsstress ops and we
-could also stop blacklisting clone/dedup/copy ops if we want.
+Because we can, perform the test on shared memory that maps files
+that are already close and check also that mwrite after file is closed
+is persistent.
+This adds test coverage for future overlayfs writeback code.
 
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/dump       |  7 +++++++
- tests/xfs/068     | 14 +++++++++++++-
- tests/xfs/068.out |  2 +-
- 3 files changed, 21 insertions(+), 2 deletions(-)
+ tests/overlay/061     | 36 +++++++++++++++++++++++++++++-------
+ tests/overlay/061.out |  4 ++--
+ 2 files changed, 31 insertions(+), 9 deletions(-)
 
-diff --git a/common/dump b/common/dump
-index 89fa0391..f112fc37 100644
---- a/common/dump
-+++ b/common/dump
-@@ -1514,6 +1514,13 @@ _check_quota_file()
-    _check_quota 'xfsdump_quotas' 'xfsdump_quotas_group' 'xfsdump_quotas_proj'
- }
+diff --git a/tests/overlay/061 b/tests/overlay/061
+index aea72eb9..47be2cc3 100755
+--- a/tests/overlay/061
++++ b/tests/overlay/061
+@@ -4,14 +4,15 @@
+ #
+ # FSQA Test No. 061
+ #
+-# Test ro/rw fd data inconsistecies
++# Test memory mapped data inconsistencies
+ #
+ # This is a variant of test overlay/016 with mread instead of pread.
+ #
+ # This simple test demonstrates a known issue with overlayfs:
+-# - process A opens file F for read + mmap
+-# - process B writes new data to file F
+-# - process A reads old data from mapped memory
++# - process A created shared ro mmap on file F
++# - process B created shared rw mmap on file F
++# - process B writes new data to shared mmap
++# - process A reads old data from shared mmap
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -49,15 +50,36 @@ echo "This is old news" > $lowerdir/foo
+ _scratch_mount
  
-+_count_dumpdir_files()
+ 
++filter_xfs_io_mmap()
 +{
-+	local ndirs=$(find $dump_dir -type d | wc -l)
-+	local nents=$(find $dump_dir | wc -l)
-+
-+	echo "$ndirs directories and $nents entries"
++	# filter out these lines:
++	# [000] 0x7f3d9aece000 - 0x7f3d9aece010 r--  SCRATCH_MNT/foo (0 : 16)
++	grep -Fv '[00'
 +}
- 
- # make sure this script returns success
- /bin/true
-diff --git a/tests/xfs/068 b/tests/xfs/068
-index 7f5900fc..264a9e96 100755
---- a/tests/xfs/068
-+++ b/tests/xfs/068
-@@ -30,12 +30,24 @@ _cleanup()
- . ./common/rc
- . ./common/dump
- 
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
 +
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
+ #
+ # mmap MAP_SHARED|PROT_READ of rofd
+-# write to rwfd
+-# read from mapped memory
++# mmap MAP_SHARED|PROT_WRITE of rwfd
++# write to rw mmap
++# read from ro mmap
+ #
+ $XFS_IO_PROG -r $SCRATCH_MNT/foo \
+ 	-C "mmap -r 0 16" \
++	-C "close" \
+ 	-C "open $SCRATCH_MNT/foo" \
+-	-C "pwrite -S 0x61 0 16" \
++	-C "mmap -w 0 16" \
++	-C "close" \
++	-C "mwrite -S 0x61 0 16" \
++	-C "munmap" \
++	-C "mread -v 0 16" \
++| _filter_xfs_io | _filter_scratch | filter_xfs_io_mmap
++
++_scratch_cycle_mount
++
++# Verify mmap write after close has persisted through mount cycle
++echo "After mount cycle:"
++$XFS_IO_PROG -r $SCRATCH_MNT/foo \
++	-C "mmap -r 0 16" \
+ 	-C "mread -v 0 16" \
+ | _filter_xfs_io | _filter_scratch
  
- _create_dumpdir_stress_num 4096
--_do_dump_restore
-+
-+echo -n "Before: " >> $seqres.full
-+_count_dumpdir_files | tee $tmp.before >> $seqres.full
-+
-+# filter out the file count, it changes as fsstress adds new operations
-+_do_dump_restore | sed -e "/entries processed$/s/[0-9][0-9]*/NUM/g"
-+
-+echo -n "After: " >> $seqres.full
-+_count_dumpdir_files | tee $tmp.after >> $seqres.full
-+diff -u $tmp.before $tmp.after
- 
- # success, all done
- exit
-diff --git a/tests/xfs/068.out b/tests/xfs/068.out
-index fa3a5523..2b276b77 100644
---- a/tests/xfs/068.out
-+++ b/tests/xfs/068.out
-@@ -22,7 +22,7 @@ xfsrestore: session id: ID
- xfsrestore: media ID: ID
- xfsrestore: searching media for directory dump
- xfsrestore: reading directories
--xfsrestore: 383 directories and 1335 entries processed
-+xfsrestore: NUM directories and NUM entries processed
- xfsrestore: directory post-processing
- xfsrestore: restoring non-directory files
- xfsrestore: restore complete: SECS seconds elapsed
+diff --git a/tests/overlay/061.out b/tests/overlay/061.out
+index 0662721c..d0e8b86e 100644
+--- a/tests/overlay/061.out
++++ b/tests/overlay/061.out
+@@ -1,4 +1,4 @@
+ QA output created by 061
+-wrote 16/16 bytes at offset 0
+-XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
++After mount cycle:
+ 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
 -- 
 2.17.1
