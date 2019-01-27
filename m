@@ -1,115 +1,101 @@
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:39774 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726327AbfA0Ii7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 03:38:59 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay/061: enhance mmap ro/rw inconsistencies test
-Date: Sun, 27 Jan 2019 10:38:50 +0200
-Message-Id: <20190127083850.28834-1-amir73il@gmail.com>
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:35530 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726403AbfA0PIB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 10:08:01 -0500
+Received: by mail-pf1-f195.google.com with SMTP id z9so6860936pfi.2
+        for <fstests@vger.kernel.org>; Sun, 27 Jan 2019 07:08:01 -0800 (PST)
+Message-ID: <5c4dc94f.1c69fb81.935c2.306e@mx.google.com>
+Date: Sun, 27 Jan 2019 23:07:53 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 2065ab00791f
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="FuA9lEB3MtNx"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-overlay/061 is currently the only overlay test that is expected to fail
-on upstream kernel.
 
-It is a flavor of test overlay/016 with mread in stead of pread.
-The ro/rw inconsistencies related to file read()/write() API were fixed
-with stacked file operations in v4.19, but the ro/rw inconsistencies
-related to shared mmap read/write remain to be fixed.
+--FuA9lEB3MtNx
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-The test currently checks cache coherency between mmap read and file
-write(), but this sort of cache coherency is a Linux implementation
-detail not a requirement of the API.
-Instead of mread vs. pwrite, check consistency of mread vs. mwrite
-to shared mmap, which is required by the MMAP_SHARED API.
+Hi all,
 
-Because we can, perform the test on shared memory that maps files
-that are already close and check also that mwrite after file is closed
-is persistent.
-This adds test coverage for future overlayfs writeback code.
+The master branch of the xfstests repository at:
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/overlay/061     | 36 +++++++++++++++++++++++++++++-------
- tests/overlay/061.out |  4 ++--
- 2 files changed, 31 insertions(+), 9 deletions(-)
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-diff --git a/tests/overlay/061 b/tests/overlay/061
-index aea72eb9..47be2cc3 100755
---- a/tests/overlay/061
-+++ b/tests/overlay/061
-@@ -4,14 +4,15 @@
- #
- # FSQA Test No. 061
- #
--# Test ro/rw fd data inconsistecies
-+# Test memory mapped data inconsistencies
- #
- # This is a variant of test overlay/016 with mread instead of pread.
- #
- # This simple test demonstrates a known issue with overlayfs:
--# - process A opens file F for read + mmap
--# - process B writes new data to file F
--# - process A reads old data from mapped memory
-+# - process A created shared ro mmap on file F
-+# - process B created shared rw mmap on file F
-+# - process B writes new data to shared mmap
-+# - process A reads old data from shared mmap
- #
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -49,15 +50,36 @@ echo "This is old news" > $lowerdir/foo
- _scratch_mount
- 
- 
-+filter_xfs_io_mmap()
-+{
-+	# filter out these lines:
-+	# [000] 0x7f3d9aece000 - 0x7f3d9aece010 r--  SCRATCH_MNT/foo (0 : 16)
-+	grep -Fv '[00'
-+}
-+
- #
- # mmap MAP_SHARED|PROT_READ of rofd
--# write to rwfd
--# read from mapped memory
-+# mmap MAP_SHARED|PROT_WRITE of rwfd
-+# write to rw mmap
-+# read from ro mmap
- #
- $XFS_IO_PROG -r $SCRATCH_MNT/foo \
- 	-C "mmap -r 0 16" \
-+	-C "close" \
- 	-C "open $SCRATCH_MNT/foo" \
--	-C "pwrite -S 0x61 0 16" \
-+	-C "mmap -w 0 16" \
-+	-C "close" \
-+	-C "mwrite -S 0x61 0 16" \
-+	-C "munmap" \
-+	-C "mread -v 0 16" \
-+| _filter_xfs_io | _filter_scratch | filter_xfs_io_mmap
-+
-+_scratch_cycle_mount
-+
-+# Verify mmap write after close has persisted through mount cycle
-+echo "After mount cycle:"
-+$XFS_IO_PROG -r $SCRATCH_MNT/foo \
-+	-C "mmap -r 0 16" \
- 	-C "mread -v 0 16" \
- | _filter_xfs_io | _filter_scratch
- 
-diff --git a/tests/overlay/061.out b/tests/overlay/061.out
-index 0662721c..d0e8b86e 100644
---- a/tests/overlay/061.out
-+++ b/tests/overlay/061.out
-@@ -1,4 +1,4 @@
- QA output created by 061
--wrote 16/16 bytes at offset 0
--XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
-+After mount cycle:
- 00000000:  61 61 61 61 61 61 61 61 61 61 61 61 61 61 61 61  aaaaaaaaaaaaaaaa
--- 
-2.17.1
+have just been updated. The update adds splice(2) support to fsstress and
+contains various bug fixes for btrfs tests. There should be no new failures
+after this update.
+
+My apology for being absent from some of the discussions and the late review,
+I've been busy with other tasks, and probably the review process will be slow
+in next two weeks due to the public holiday. So many thanks to Filipe, Dave and
+Amir for reviewing patches.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+2065ab00791f btrfs/131: require support for free-space-tree
+
+New commits:
+
+Filipe Manana (2):
+      [2223d8fe1822] btrfs/081: declare local variables as local
+      [a1c91630a374] btrfs/081: fix killing of reader loop subshell
+
+Jeff Mahoney (4):
+      [5b1a503aba5f] btrfs/010: don't run without /sys/fs/btrfs
+      [c38ce3551695] btrfs: require feature raid56 for raid56 tests
+      [33cd745db03e] btrfs/023: skip trying to test raid56 without kernel support
+      [2065ab00791f] btrfs/131: require support for free-space-tree
+
+Zorro Lang (2):
+      [544624ac14de] fsstress: add splice support
+      [04b405fa1f8d] common/dump: disable splice from FSSTRESS_AVOID
+
+
+Code Diffstat:
+
+ common/btrfs    |   8 +++
+ common/dump     |   3 +
+ ltp/fsstress.c  | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/010 |   1 +
+ tests/btrfs/023 |  10 ++--
+ tests/btrfs/081 |  14 +++--
+ tests/btrfs/125 |   1 +
+ tests/btrfs/131 |   1 +
+ tests/btrfs/148 |   1 +
+ tests/btrfs/157 |   1 +
+ tests/btrfs/158 |   1 +
+ 11 files changed, 206 insertions(+), 8 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--FuA9lEB3MtNx
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJcTcjsAAoJECZSqilcj+dj/vkP/RtiuiL9+29BdLV4l2RDJWEc
+UrLdTcE2G6tgMn+hDVyKvAq9PAhaYzeCtB0P6DTrDlOxJtYW6QANRDRGuiZ9JBEl
+LFjBELLfrw/JLmw+C8I4gmRGjDqN9bxh4zK6S+dsk5iHEDJ7xlQjnPFovacK5vaI
+Rs+T5OPAuo4V0HrThS1RG2mE8gCFOsOOhMeRhbxdPVt2NZmz06VVVtCm7LtbzFet
+IUw27WGEYH/iT9FaAk6dX/MP+JmJahg6vYF80AS+gUC7/07DV669enblIU6sMT7v
+3OKMqTGbHx5+f+XLI2E4HF27QkX3KMt0Vv55FHIHlgOy8JyISK2OJA6/xalFC/E6
+JhXD4ruL8bGixOAUsTPrDjci/wwXoPwVuk6lA+5Q4ig11O1/k5rwGB3hPCTWU90h
+XifjOnm04CVuMBeU9qYvfZW1naePwoVB1YwDasfN/EAM18p/DssQnMaNStN9VTFu
+ntcx8P2/X6NNEVID6RuFKGEvnlwCDwDv+oZ3qPJZIuxXpAuh6RsEd1NLpcfVg9wd
+PQdzUiNIo/KqO5iP8OlzYKX6SdtmwigprHv7KqzdcQ+sUOvOtvdeYuIVVNCQEjGr
+7YYxpgZlBuxEGEsyAsdy1rsHR3BRfpaumrUrLKNkTWuL69NnuID1ImQYzvyOfhmh
+jmuIgxT7niz2ZKFMPZ9q
+=Rrrv
+-----END PGP SIGNATURE-----
+
+--FuA9lEB3MtNx--
