@@ -1,101 +1,136 @@
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:35530 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726403AbfA0PIB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 27 Jan 2019 10:08:01 -0500
-Received: by mail-pf1-f195.google.com with SMTP id z9so6860936pfi.2
-        for <fstests@vger.kernel.org>; Sun, 27 Jan 2019 07:08:01 -0800 (PST)
-Message-ID: <5c4dc94f.1c69fb81.935c2.306e@mx.google.com>
-Date: Sun, 27 Jan 2019 23:07:53 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 2065ab00791f
+Received: from mx2.suse.de ([195.135.220.15]:48794 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726517AbfA1CET (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 27 Jan 2019 21:04:19 -0500
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] btrfs: Test if btrfs hits EDQUOT without trying to reclaim some space
+Date: Mon, 28 Jan 2019 10:04:13 +0800
+Message-Id: <20190128020413.16243-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="FuA9lEB3MtNx"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Commit a514d63882c3 ("btrfs: qgroup: Commit transaction in advance to reduce
+early EDQUOT") is no longer forcing transaction commit to reclaim space,
+and only commits transaction asynchronously in advance to address it.
 
---FuA9lEB3MtNx
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+However the criteria used in async transaction commit is not
+comprehensive, thus it doesn't reclaim space automatically.
 
-Hi all,
+This test case will check the behavior by:
+1) Falloc a large padding file
+   This file will take 90% of the qgroup limit
 
-The master branch of the xfstests repository at:
+2) Sync the fs
+   To reflect the qgroup changes
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+3) Delete the file
+   Qgroup won't reclaim the space until transaction committed.
 
-have just been updated. The update adds splice(2) support to fsstress and
-contains various bug fixes for btrfs tests. There should be no new failures
-after this update.
+4) Try to write a file
+   If kernel not fixed, qgroup will not automatically commit transaction
+   to reclaim the freed space and hit EDQUOT.
 
-My apology for being absent from some of the discussions and the late review,
-I've been busy with other tasks, and probably the review process will be slow
-in next two weeks due to the public holiday. So many thanks to Filipe, Dave and
-Amir for reviewing patches.
+This bug is going to be fxied by a patch for kernel titled
+"btrfs: qgroup: Make qgroup async transaction commit more aggressive".
 
-Thanks,
-Eryu
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/180     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/180.out |  3 +++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 66 insertions(+)
+ create mode 100755 tests/btrfs/180
+ create mode 100644 tests/btrfs/180.out
 
-The new head of the master branch is commit:
-
-2065ab00791f btrfs/131: require support for free-space-tree
-
-New commits:
-
-Filipe Manana (2):
-      [2223d8fe1822] btrfs/081: declare local variables as local
-      [a1c91630a374] btrfs/081: fix killing of reader loop subshell
-
-Jeff Mahoney (4):
-      [5b1a503aba5f] btrfs/010: don't run without /sys/fs/btrfs
-      [c38ce3551695] btrfs: require feature raid56 for raid56 tests
-      [33cd745db03e] btrfs/023: skip trying to test raid56 without kernel support
-      [2065ab00791f] btrfs/131: require support for free-space-tree
-
-Zorro Lang (2):
-      [544624ac14de] fsstress: add splice support
-      [04b405fa1f8d] common/dump: disable splice from FSSTRESS_AVOID
-
-
-Code Diffstat:
-
- common/btrfs    |   8 +++
- common/dump     |   3 +
- ltp/fsstress.c  | 173 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/010 |   1 +
- tests/btrfs/023 |  10 ++--
- tests/btrfs/081 |  14 +++--
- tests/btrfs/125 |   1 +
- tests/btrfs/131 |   1 +
- tests/btrfs/148 |   1 +
- tests/btrfs/157 |   1 +
- tests/btrfs/158 |   1 +
- 11 files changed, 206 insertions(+), 8 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---FuA9lEB3MtNx
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJcTcjsAAoJECZSqilcj+dj/vkP/RtiuiL9+29BdLV4l2RDJWEc
-UrLdTcE2G6tgMn+hDVyKvAq9PAhaYzeCtB0P6DTrDlOxJtYW6QANRDRGuiZ9JBEl
-LFjBELLfrw/JLmw+C8I4gmRGjDqN9bxh4zK6S+dsk5iHEDJ7xlQjnPFovacK5vaI
-Rs+T5OPAuo4V0HrThS1RG2mE8gCFOsOOhMeRhbxdPVt2NZmz06VVVtCm7LtbzFet
-IUw27WGEYH/iT9FaAk6dX/MP+JmJahg6vYF80AS+gUC7/07DV669enblIU6sMT7v
-3OKMqTGbHx5+f+XLI2E4HF27QkX3KMt0Vv55FHIHlgOy8JyISK2OJA6/xalFC/E6
-JhXD4ruL8bGixOAUsTPrDjci/wwXoPwVuk6lA+5Q4ig11O1/k5rwGB3hPCTWU90h
-XifjOnm04CVuMBeU9qYvfZW1naePwoVB1YwDasfN/EAM18p/DssQnMaNStN9VTFu
-ntcx8P2/X6NNEVID6RuFKGEvnlwCDwDv+oZ3qPJZIuxXpAuh6RsEd1NLpcfVg9wd
-PQdzUiNIo/KqO5iP8OlzYKX6SdtmwigprHv7KqzdcQ+sUOvOtvdeYuIVVNCQEjGr
-7YYxpgZlBuxEGEsyAsdy1rsHR3BRfpaumrUrLKNkTWuL69NnuID1ImQYzvyOfhmh
-jmuIgxT7niz2ZKFMPZ9q
-=Rrrv
------END PGP SIGNATURE-----
-
---FuA9lEB3MtNx--
+diff --git a/tests/btrfs/180 b/tests/btrfs/180
+new file mode 100755
+index 00000000..df876310
+--- /dev/null
++++ b/tests/btrfs/180
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 180
++#
++# Test if btrfs hits EDQUOT without reclaim already freed extents when quota
++# is enabled.
++#
++# This bug is going to be fxied by a patch for kernel titled
++# "btrfs: qgroup: Make qgroup async transaction commit more aggressive"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command falloc
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG qgroup limit -e 1G "$SCRATCH_MNT"
++
++$XFS_IO_PROG -f -c "falloc 0 900M" "$SCRATCH_MNT/padding" | _filter_xfs_io
++
++# Commit transaction to reflect the quota usage
++sync
++
++rm "$SCRATCH_MNT/padding"
++
++# Without the kernel fix, this will trigger EDQUOT.
++_pwrite_byte 0xcd 0 512M "$SCRATCH_MNT/real_file" | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
+new file mode 100644
+index 00000000..17187477
+--- /dev/null
++++ b/tests/btrfs/180.out
+@@ -0,0 +1,3 @@
++QA output created by 180
++wrote 536870912/536870912 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 46dd3c95..03eb62f9 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -182,3 +182,4 @@
+ 177 auto quick swap balance
+ 178 auto quick send
+ 179 auto qgroup dangerous
++180 auto quick qgroup limit
+-- 
+2.18.0
