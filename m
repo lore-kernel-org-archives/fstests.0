@@ -1,196 +1,176 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:59890 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725730AbfA2Oo0 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Jan 2019 09:44:26 -0500
-Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
-From: "zhengbin (A)" <zhengbin13@huawei.com>
-References: <20190122032408.91336-1-zhengbin13@huawei.com>
- <d498dc46-edf1-7aed-4e67-8b1606c3bba5@huawei.com>
-Message-ID: <76cacb22-fe14-199f-e113-236d9b5eb083@huawei.com>
-Date: Tue, 29 Jan 2019 22:44:13 +0800
+Received: from mail-vs1-f67.google.com ([209.85.217.67]:38531 "EHLO
+        mail-vs1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728726AbfA2LhI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 06:37:08 -0500
 MIME-Version: 1.0
-In-Reply-To: <d498dc46-edf1-7aed-4e67-8b1606c3bba5@huawei.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <20190128020413.16243-1-wqu@suse.com>
+In-Reply-To: <20190128020413.16243-1-wqu@suse.com>
+Reply-To: fdmanana@gmail.com
+From: Filipe Manana <fdmanana@gmail.com>
+Date: Tue, 29 Jan 2019 11:36:56 +0000
+Message-ID: <CAL3q7H7wN_VbdHhFcN5vsFPEyG1ran96P=PGsavd_onJ+TcEew@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: Test if btrfs hits EDQUOT without trying to
+ reclaim some space
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, guaneryu@gmail.com, fstests@vger.kernel.org
-Cc: houtao1@huawei.com, zhaohongjiang@huawei.com
+To: Qu Wenruo <wqu@suse.com>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-ping
+On Mon, Jan 28, 2019 at 2:05 AM Qu Wenruo <wqu@suse.com> wrote:
+>
+> Commit a514d63882c3 ("btrfs: qgroup: Commit transaction in advance to red=
+uce
+> early EDQUOT") is no longer forcing transaction commit to reclaim space,
+> and only commits transaction asynchronously in advance to address it.
+>
+> However the criteria used in async transaction commit is not
+> comprehensive, thus it doesn't reclaim space automatically.
+>
+> This test case will check the behavior by:
+> 1) Falloc a large padding file
+>    This file will take 90% of the qgroup limit
+>
+> 2) Sync the fs
+>    To reflect the qgroup changes
+>
+> 3) Delete the file
+>    Qgroup won't reclaim the space until transaction committed.
+>
+> 4) Try to write a file
+>    If kernel not fixed, qgroup will not automatically commit transaction
+>    to reclaim the freed space and hit EDQUOT.
+>
+> This bug is going to be fxied by a patch for kernel titled
 
-On 2019/1/25 18:49, zhengbin (A) wrote:
-> Ping?
-> 
-> On 2019/1/22 11:24, zhengbin wrote:
->> This patch add squashfs support in xfstests-dev. Add two directories
->> in tests directory, readonly can also be used for other readonly
->> filesystem, squashfs is just used for squashfs filesystem.
->> tests/readonly/001        mount test
->> tests/readonly/002--010   metadata test
->> tests/readonly/011--018   data test
->> tests/readonly/019--021   xattr test
->> tests/squashfs/001--005   mksquashfs options test
->>
->> The reason of use 'readonly' directory instead of generic/shard is:
->> The step of tests in readonly filesystem(such as squashfs) are
->> as follows:
->> 1. write data in $SCRATCH_DEV
->> 2. mkfs $SCRATCH_DEV file
->> 3. mount file $SCRATCH_MNT
->> 4. test in $SCRATCH_MNT
->>
->> While the rw filesystems are as follows:
->> 1. mkfs $SCRATCH_DEV
->> 2. mount $SCRATCH_DEV $SCRATCH_MNT
->> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
->>
->> The tests in generic/shared are set as rw filesystem, it is hard
->> to use this in readonly filesystem, use 'readonly' dir which can
->> be easier to read.
->>
->> PS: As readonly filesystems need to mkfs in every test, do not
->> use TEST_DEV&TEST_DIR.
->>
->> zhengbin (6):
->>   squashfs: add squashfs support
->>   squashfs: add mount test
->>   squashfs: add metadata test
->>   squashfs: add data test
->>   squashfs: add xattr test
->>   squashfs: add mksquashfs options test
->>
->>  .gitignore                                  |   1 +
->>  README.squashfs                             |  12 ++
->>  check                                       |  19 ++-
->>  common/attr                                 |   5 +
->>  common/config                               |   6 +
->>  common/rc                                   |  63 ++++++++-
->>  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
->>  tests/readonly/001                          |  97 ++++++++++++++
->>  tests/readonly/001.out                      |   2 +
->>  tests/readonly/002                          |  48 +++++++
->>  tests/readonly/002.out                      |   6 +
->>  tests/readonly/003                          |  72 +++++++++++
->>  tests/readonly/003.out                      |   5 +
->>  tests/readonly/004                          |  50 +++++++
->>  tests/readonly/004.out                      |   3 +
->>  tests/readonly/005                          |  77 +++++++++++
->>  tests/readonly/005.out                      |   2 +
->>  tests/readonly/006                          |  48 +++++++
->>  tests/readonly/006.out                      |   4 +
->>  tests/readonly/007                          |  74 +++++++++++
->>  tests/readonly/007.out                      |   9 ++
->>  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
->>  tests/readonly/008.out                      |  34 +++++
->>  tests/readonly/009                          |  50 +++++++
->>  tests/readonly/009.out                      |   2 +
->>  tests/readonly/010                          |  49 +++++++
->>  tests/readonly/010.out                      |   4 +
->>  tests/readonly/011                          |  92 +++++++++++++
->>  tests/readonly/011.out                      |  30 +++++
->>  tests/readonly/012                          |  56 ++++++++
->>  tests/readonly/012.out                      |   5 +
->>  tests/readonly/013                          |  47 +++++++
->>  tests/readonly/013.out                      |   2 +
->>  tests/readonly/014                          |  46 +++++++
->>  tests/readonly/014.out                      |   2 +
->>  tests/readonly/015                          |  42 ++++++
->>  tests/readonly/015.out                      |   2 +
->>  tests/readonly/016                          | 145 +++++++++++++++++++++
->>  tests/readonly/016.out                      |   8 ++
->>  tests/readonly/017                          | 107 +++++++++++++++
->>  tests/readonly/017.out                      |   2 +
->>  tests/readonly/018                          |  49 +++++++
->>  tests/readonly/018.out                      |   2 +
->>  tests/readonly/019                          | 109 ++++++++++++++++
->>  tests/readonly/019.out                      |  45 +++++++
->>  tests/readonly/020                          |  56 ++++++++
->>  tests/readonly/020.out                      |   9 ++
->>  tests/readonly/021                          |  74 +++++++++++
->>  tests/readonly/021.out                      |  11 ++
->>  tests/readonly/Makefile                     |  20 +++
->>  tests/readonly/group                        |  26 ++++
->>  tests/squashfs/001                          |  60 +++++++++
->>  tests/squashfs/001.out                      |   9 ++
->>  tests/squashfs/002                          |  40 ++++++
->>  tests/squashfs/002.out                      |   2 +
->>  tests/squashfs/003                          |  55 ++++++++
->>  tests/squashfs/003.out                      |  12 ++
->>  tests/squashfs/004                          |  73 +++++++++++
->>  tests/squashfs/004.out                      |  23 ++++
->>  tests/squashfs/005                          |  54 ++++++++
->>  tests/squashfs/005.out                      |  13 ++
->>  tests/squashfs/Makefile                     |  20 +++
->>  tests/squashfs/group                        |  10 ++
->>  63 files changed, 2372 insertions(+), 5 deletions(-)
->>  create mode 100644 README.squashfs
->>  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
->>  create mode 100755 tests/readonly/001
->>  create mode 100644 tests/readonly/001.out
->>  create mode 100755 tests/readonly/002
->>  create mode 100644 tests/readonly/002.out
->>  create mode 100755 tests/readonly/003
->>  create mode 100644 tests/readonly/003.out
->>  create mode 100755 tests/readonly/004
->>  create mode 100644 tests/readonly/004.out
->>  create mode 100755 tests/readonly/005
->>  create mode 100644 tests/readonly/005.out
->>  create mode 100755 tests/readonly/006
->>  create mode 100644 tests/readonly/006.out
->>  create mode 100755 tests/readonly/007
->>  create mode 100644 tests/readonly/007.out
->>  create mode 100755 tests/readonly/008
->>  create mode 100644 tests/readonly/008.out
->>  create mode 100755 tests/readonly/009
->>  create mode 100644 tests/readonly/009.out
->>  create mode 100755 tests/readonly/010
->>  create mode 100644 tests/readonly/010.out
->>  create mode 100755 tests/readonly/011
->>  create mode 100644 tests/readonly/011.out
->>  create mode 100755 tests/readonly/012
->>  create mode 100644 tests/readonly/012.out
->>  create mode 100755 tests/readonly/013
->>  create mode 100644 tests/readonly/013.out
->>  create mode 100755 tests/readonly/014
->>  create mode 100644 tests/readonly/014.out
->>  create mode 100755 tests/readonly/015
->>  create mode 100644 tests/readonly/015.out
->>  create mode 100755 tests/readonly/016
->>  create mode 100644 tests/readonly/016.out
->>  create mode 100755 tests/readonly/017
->>  create mode 100644 tests/readonly/017.out
->>  create mode 100755 tests/readonly/018
->>  create mode 100644 tests/readonly/018.out
->>  create mode 100755 tests/readonly/019
->>  create mode 100644 tests/readonly/019.out
->>  create mode 100755 tests/readonly/020
->>  create mode 100644 tests/readonly/020.out
->>  create mode 100755 tests/readonly/021
->>  create mode 100644 tests/readonly/021.out
->>  create mode 100644 tests/readonly/Makefile
->>  create mode 100644 tests/readonly/group
->>  create mode 100755 tests/squashfs/001
->>  create mode 100644 tests/squashfs/001.out
->>  create mode 100755 tests/squashfs/002
->>  create mode 100644 tests/squashfs/002.out
->>  create mode 100755 tests/squashfs/003
->>  create mode 100644 tests/squashfs/003.out
->>  create mode 100755 tests/squashfs/004
->>  create mode 100644 tests/squashfs/004.out
->>  create mode 100755 tests/squashfs/005
->>  create mode 100644 tests/squashfs/005.out
->>  create mode 100644 tests/squashfs/Makefile
->>  create mode 100644 tests/squashfs/group
->>
->> --
->> 2.16.2.dirty
->>
->>
->> .
->>
-> 
-> 
-> .
-> 
+fxied -> fixed
+
+titled -> titled:
+
+> "btrfs: qgroup: Make qgroup async transaction commit more aggressive".
+>
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+>  tests/btrfs/180     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/180.out |  3 +++
+>  tests/btrfs/group   |  1 +
+>  3 files changed, 66 insertions(+)
+>  create mode 100755 tests/btrfs/180
+>  create mode 100644 tests/btrfs/180.out
+>
+> diff --git a/tests/btrfs/180 b/tests/btrfs/180
+> new file mode 100755
+> index 00000000..df876310
+> --- /dev/null
+> +++ b/tests/btrfs/180
+> @@ -0,0 +1,62 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 180
+> +#
+> +# Test if btrfs hits EDQUOT without reclaim already freed extents when q=
+uota
+
+reclaim -> reclaiming
+
+> +# is enabled.
+> +#
+> +# This bug is going to be fxied by a patch for kernel titled
+> +# "btrfs: qgroup: Make qgroup async transaction commit more aggressive"
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +_require_xfs_io_command falloc
+> +
+> +_scratch_mkfs > /dev/null
+> +_scratch_mount
+> +
+> +$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
+> +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
+> +$BTRFS_UTIL_PROG qgroup limit -e 1G "$SCRATCH_MNT"
+> +
+> +$XFS_IO_PROG -f -c "falloc 0 900M" "$SCRATCH_MNT/padding" | _filter_xfs_=
+io
+
+No need to use the _filter_xfs_io for falloc (it doesn't output
+throughput values such as the write, reflink and dedupe commands).
+
+> +
+> +# Commit transaction to reflect the quota usage
+> +sync
+> +
+> +rm "$SCRATCH_MNT/padding"
+
+I would pass -f to rm. It's not uncommon to have setups with "alias rm=3D'r=
+m -i'".
+
+Other than that, it looks good.
+
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
+
+Thanks.
+
+> +
+> +# Without the kernel fix, this will trigger EDQUOT.
+> +_pwrite_byte 0xcd 0 512M "$SCRATCH_MNT/real_file" | _filter_xfs_io
+> +
+> +# success, all done
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
+> new file mode 100644
+> index 00000000..17187477
+> --- /dev/null
+> +++ b/tests/btrfs/180.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 180
+> +wrote 536870912/536870912 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 46dd3c95..03eb62f9 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -182,3 +182,4 @@
+>  177 auto quick swap balance
+>  178 auto quick send
+>  179 auto qgroup dangerous
+> +180 auto quick qgroup limit
+> --
+> 2.18.0
+>
+
+
+--=20
+Filipe David Manana,
+
+=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
+ right.=E2=80=9D
