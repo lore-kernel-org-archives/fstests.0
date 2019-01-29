@@ -1,12 +1,13 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:46306 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725804AbfA2QRR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 11:17:17 -0500
-Subject: [PATCH 1/4] xfs/093: make sure the scratch directory still exists
- after repair
+Received: from userp2130.oracle.com ([156.151.31.86]:52612 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726060AbfA2QR2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 11:17:28 -0500
+Subject: [PATCH 2/4] xfs/138: format the scratch device before using it
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 29 Jan 2019 08:17:12 -0800
-Message-ID: <154877863279.9277.4463697450629081138.stgit@magnolia>
+Date: Tue, 29 Jan 2019 08:17:19 -0800
+Message-ID: <154877863906.9277.11927709578869134810.stgit@magnolia>
+In-Reply-To: <154877863279.9277.4463697450629081138.stgit@magnolia>
+References: <154877863279.9277.4463697450629081138.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -17,24 +18,24 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Make sure that we still have the scratch directory after repairing our
-corrupted filesystem, because repair could have nuked it.
+Format the scratch device before using it, or else xfs_db will fail,
+particularly if the previous test left a corrupt fs behind.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/093 |    1 +
+ tests/xfs/138 |    1 +
  1 file changed, 1 insertion(+)
 
 
-diff --git a/tests/xfs/093 b/tests/xfs/093
-index 2b16020c..2dfad39d 100755
---- a/tests/xfs/093
-+++ b/tests/xfs/093
-@@ -97,6 +97,7 @@ $CHATTR_PROG -R -f -i "${SCRATCH_MNT}/"
+diff --git a/tests/xfs/138 b/tests/xfs/138
+index 36490e6a..41988530 100755
+--- a/tests/xfs/138
++++ b/tests/xfs/138
+@@ -38,6 +38,7 @@ echo This is file B
+ ENDL
  
- echo "+ modify files (2)"
- broken=0
-+mkdir -p "${TESTDIR}"
- for x in `seq 65 70`; do
- 	touch "${TESTFILE}.${x}" || broken=1
- done
+ echo "Test with -c"
++_scratch_mkfs > $seqres.full 2>&1
+ _scratch_xfs_db -c "sb 0" -c "p magicnum" -c "source $tmp.a" -c "p magicnum" | sed -e 's/0x58465342/XFS_MAGIC/g'
+ 
+ echo "Test with interactive"
