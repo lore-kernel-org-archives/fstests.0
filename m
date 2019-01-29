@@ -1,161 +1,114 @@
-Received: from mail-vs1-f65.google.com ([209.85.217.65]:46139 "EHLO
-        mail-vs1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725772AbfA2L0P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 06:26:15 -0500
-MIME-Version: 1.0
-References: <20190129072749.494-1-wqu@suse.com>
-In-Reply-To: <20190129072749.494-1-wqu@suse.com>
-Reply-To: fdmanana@gmail.com
-From: Filipe Manana <fdmanana@gmail.com>
-Date: Tue, 29 Jan 2019 11:26:03 +0000
-Message-ID: <CAL3q7H7OvdJ0jub_nnUc_VYzDGc+mLfs5Q6-bLn4MdSFaOBGOw@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: Test if btrfs will report false ENOSPC error
- balnacing small metadata chunk
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Received: from mx1.redhat.com ([209.132.183.28]:52190 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727762AbfA2IJZ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Jan 2019 03:09:25 -0500
+Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A1E31C7A07
+        for <fstests@vger.kernel.org>; Tue, 29 Jan 2019 08:09:25 +0000 (UTC)
+Received: from localhost.localdomain.com (unknown [10.66.13.9])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C196F5C893
+        for <fstests@vger.kernel.org>; Tue, 29 Jan 2019 08:09:24 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] fsstress: avoid infinite zero byte reading
+Date: Tue, 29 Jan 2019 16:09:16 +0800
+Message-Id: <20190129080916.11529-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.com>
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 29, 2019 at 7:28 AM Qu Wenruo <wqu@suse.com> wrote:
->
-> This is a long existing bug, caused by over-estimated metadata
-> space_info::bytes_may_use.
+copyrange_f and splice_f functions use a while loop to read a file,
+it's fine if there's only one fsstress process(and its children),
+but if some third part testing processes remove the file in the
+middle phase of copyrange_f running, copyrange_f maybe always return
+0, and the while loop can't be end. As below:
 
-Nop, this is a test case :)
-The sentence should be more like "This is a test case for a long
-existing bug, ...".
+root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
+root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+root     47314  xxxxxx S+ grep --color=auto fsstress
+...
+...
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+...
+...
+lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
 
->
-> There is one purposed patch for btrfs-progs to fix it, titled:
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ ltp/fsstress.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
 
-purposed -> proposed
-
-> "btrfs-progs: balance: Sync the fs before balancing metadata chunks"
->
-> The test case itself is almost the same as btrfs/181, which use small
-
-use -> uses
-
-> files to bump a reserved space to trigger the false alert.
-
-a -> the
-
-Also, for the subject, there's the typo "balnacing".
-
->
-> Signed-off-by: Qu Wenruo <wqu@suse.com>
-> ---
->  tests/btrfs/182     | 60 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/182.out |  2 ++
->  tests/btrfs/group   |  1 +
->  3 files changed, 63 insertions(+)
->  create mode 100755 tests/btrfs/182
->  create mode 100644 tests/btrfs/182.out
->
-> diff --git a/tests/btrfs/182 b/tests/btrfs/182
-> new file mode 100755
-> index 00000000..61efcb9e
-> --- /dev/null
-> +++ b/tests/btrfs/182
-> @@ -0,0 +1,60 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test 182
-> +#
-> +# Test if balance will report false ENOSPC error
-> +#
-> +# This is a long existing bug, caused by over-estimated metadata
-> +# space_info::bytes_may_use.
-> +# There is one purposed patch for btrfs-progs to fix it, titled:
-
-purposed -> proposed
-
-> +# "btrfs-progs: balance: Sync the fs before balancing metadata chunks"
-> +#
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=3D`pwd`
-> +tmp=3D/tmp/$$
-> +status=3D1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +nr_files=3D1024
-> +
-> +_scratch_mkfs > /dev/null
-> +_scratch_mount
-> +
-> +$BTRFS_UTIL_PROG subv create "$SCRATCH_MNT/subvol" > /dev/null
-
-subv -> subvolume
-
-We always prefer full command names.
-
-Other than that, it looks good.
-
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
-> +
-> +# Create some small files to take up enough metadata reserved space
-> +for ((i =3D 0; i < $nr_files; i++)) do
-> +       _pwrite_byte 0xcd 0 1K "$SCRATCH_MNT/subvol/file_$i" > /dev/null
-> +done
-> +
-> +$BTRFS_UTIL_PROG balance start -m "$SCRATCH_MNT" > /dev/null
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/btrfs/182.out b/tests/btrfs/182.out
-> new file mode 100644
-> index 00000000..53d28e50
-> --- /dev/null
-> +++ b/tests/btrfs/182.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 182
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 0db485cb..e32c84e4 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -184,3 +184,4 @@
->  179 auto qgroup dangerous
->  180 auto quick qgroup limit
->  181 auto quick balance
-> +182 auto quick balance
-> --
-> 2.18.0
->
-
-
---=20
-Filipe David Manana,
-
-=E2=80=9CWhether you think you can, or you think you can't =E2=80=94 you're=
- right.=E2=80=9D
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index c04feb78..68e40ee6 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -2363,8 +2363,9 @@ copyrange_f(
+ 	int			v2;
+ 	int			fd1;
+ 	int			fd2;
+-	size_t			ret;
++	size_t			ret = 0;
+ 	int			e;
++	int			limit;
+ 
+ 	/* Load paths */
+ 	init_pathname(&fpath1);
+@@ -2446,6 +2447,7 @@ copyrange_f(
+ 		off2 %= maxfsize;
+ 	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
+ 
++	limit = 300;
+ 	while (len > 0) {
+ 		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
+ 			      len, 0);
+@@ -2456,6 +2458,15 @@ copyrange_f(
+ 			break;
+ 		else if (ret > 0)
+ 			len -= ret;
++		else {
++			/*
++			 * if copy_file_range always get 0 byte, break from the
++			 * infinite loop running
++			 */
++			limit--;
++			if (limit <= 0)
++				break;
++		}
+ 	}
+ 	e = ret < 0 ? errno : 0;
+ 	if (v1 || v2) {
+@@ -2790,6 +2801,7 @@ splice_f(int opno, long r)
+ 	size_t			bytes;
+ 	int			e;
+ 	int			filedes[2];
++	int			limit;
+ 
+ 	/* Load paths */
+ 	init_pathname(&fpath1);
+@@ -2886,6 +2898,7 @@ splice_f(int opno, long r)
+ 
+ 	bytes = 0;
+ 	total = 0;
++	limit = 300;
+ 	while (len > 0) {
+ 		/* move to pipe buffer */
+ 		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
+@@ -2907,6 +2920,11 @@ splice_f(int opno, long r)
+ 
+ 		len -= ret1;
+ 		total += ret1;
++		if (ret1 == 0) {
++			limit--;
++			if (limit <= 0)
++				break;
++		}
+ 	}
+ 
+ 	if (ret1 < 0 || ret2 < 0)
+-- 
+2.17.2
