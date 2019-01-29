@@ -1,11 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:43620 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727032AbfA2QRa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 11:17:30 -0500
-Subject: [PATCH 3/4] common: fix kmemleak to work with sections
+Received: from aserp2130.oracle.com ([141.146.126.79]:46778 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725846AbfA2QRh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 11:17:37 -0500
+Subject: [PATCH 4/4] generic: check for reasonable inode creation time
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 29 Jan 2019 08:17:25 -0800
-Message-ID: <154877864538.9277.6249607598508212314.stgit@magnolia>
+Date: Tue, 29 Jan 2019 08:17:31 -0800
+Message-ID: <154877865178.9277.5385935769005684086.stgit@magnolia>
 In-Reply-To: <154877863279.9277.4463697450629081138.stgit@magnolia>
 References: <154877863279.9277.4463697450629081138.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,107 +18,101 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Refactor the kmemleak code to work correctly with sections.  This
-requires changing the report location to use RESULT_DIR instead of
-RESULT_BASE, and clarifying which functions get used when.
+If statx returns inode creation time (aka btime), check it to make sure
+that the filesystem is setting a creation time that's reasonably close
+to when it creates a file.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- check     |    4 ++--
- common/rc |   32 ++++++++++++++++++++++----------
- 2 files changed, 24 insertions(+), 12 deletions(-)
+ tests/generic/709     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/709.out |    2 ++
+ tests/generic/group   |    1 +
+ 3 files changed, 64 insertions(+)
+ create mode 100755 tests/generic/709
+ create mode 100644 tests/generic/709.out
 
 
-diff --git a/check b/check
-index c0eee0aa..b9eb86cb 100755
---- a/check
-+++ b/check
-@@ -509,7 +509,7 @@ _expunge_test()
- 	return 0
- }
- 
--_init_kmemleak
-+_detect_kmemleak
- _prepare_test_list
- 
- if $OPTIONS_HAVE_SECTIONS; then
-@@ -793,8 +793,8 @@ for section in $HOST_OPTIONS_SECTIONS; do
- 			# and log messages that shouldn't be there.
- 			_check_filesystems
- 			_check_dmesg || err=true
--			_check_kmemleak || err=true
- 		fi
-+		_check_kmemleak || err=true
- 
- 		# test ends after all checks are done.
- 		$timestamp && _timestamp
-diff --git a/common/rc b/common/rc
-index 19e947df..75771f31 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3514,7 +3514,7 @@ _check_dmesg()
- # capture the kmemleak report
- _capture_kmemleak()
- {
--	local kern_knob="${DEBUGFS_MNT}/kmemleak"
-+	local kern_knob="$DEBUGFS_MNT/kmemleak"
- 	local leak_file="$1"
- 
- 	# Tell the kernel to scan for memory leaks.  Apparently the write
-@@ -3535,17 +3535,20 @@ ENDL
- 	echo "clear" > "$kern_knob"
- }
- 
--# set up kmemleak
--_init_kmemleak()
-+# Figure out if the running kernel supports kmemleak; if it does, clear out
-+# anything that leaked before we even started testing.  The leak checker only
-+# needs to be primed like this once per ./check invocation.
-+_detect_kmemleak()
- {
--	local kern_knob="${DEBUGFS_MNT}/kmemleak"
-+	local kern_knob="$DEBUGFS_MNT/kmemleak"
-+	KMEMLEAK_CHECK_FILE="/tmp/check_kmemleak"
- 
- 	# Since kernel v4.19-rc3, the kmemleak knob exists even if kmemleak is
- 	# disabled, but returns EBUSY on write. So instead of relying on
- 	# existance of writable knob file, we use a test file to indicate that
- 	# _check_kmemleak() is enabled only if we actually managed to write to
- 	# the knob file.
--	rm -f ${RESULT_BASE}/check_kmemleak
-+	rm -f "$KMEMLEAK_CHECK_FILE"
- 
- 	if [ ! -w "$kern_knob" ]; then
- 		return 0
-@@ -3555,17 +3558,26 @@ _init_kmemleak()
- 	# then dump all the leaks recorded so far.
- 	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
- 		_capture_kmemleak /dev/null
--		touch ${RESULT_BASE}/check_kmemleak
-+		touch "$KMEMLEAK_CHECK_FILE"
- 	fi
- }
- 
--# check kmemleak log
-+# Kick the kmemleak checker to scan for leaks.  Background leak scan mode is
-+# not enabled, so we must call the kernel to ask for a scan and deal with the
-+# results appropriately.  This we do after every test completes, whether or not
-+# it was successful.
- _check_kmemleak()
- {
--	local kern_knob="${DEBUGFS_MNT}/kmemleak"
--	local leak_file="${seqres}.kmemleak"
-+	local kern_knob="$DEBUGFS_MNT/kmemleak"
-+	local leak_file="$seqres.kmemleak"
- 
--	if [ ! -f ${RESULT_BASE}/check_kmemleak ]; then
-+	if [ ! -f "$KMEMLEAK_CHECK_FILE" ]; then
-+		return 0
-+	fi
+diff --git a/tests/generic/709 b/tests/generic/709
+new file mode 100755
+index 00000000..724a16a8
+--- /dev/null
++++ b/tests/generic/709
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 709
++#
++# Check that statx btime (aka creation time) is plausibly close to when
++# we created a file.  A bug caught during code review of xfs patches revealed
++# that there weren't any sanity checks of the btime values.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++testfile=$TEST_DIR/$seq.txt
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+	# Not enabled, so discard any report of leaks found.
-+	if [ "$USE_KMEMLEAK" != "yes" ]; then
-+		_capture_kmemleak /dev/null
- 		return 0
- 	fi
- 
++_cleanup()
++{
++	cd /
++	rm -f $tmp.* $testfile
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++. ./common/filter
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_xfs_io_command "statx" "-r"
++
++rm -f $seqres.full
++rm -f $testfile
++
++# Create a file and the time we created it
++now=$(date +%s)
++touch $testfile
++
++# Does statx return results with the BTIME flag set in the result mask?
++STATX_BTIME=0x800
++$XFS_IO_PROG -c "statx -F -r -m $STATX_BTIME" $testfile > $tmp.statx
++cat $tmp.statx >> $seqres.full
++
++result_mask=$(grep 'stat.mask =' $tmp.statx | cut -d ' ' -f 3)
++test -n "$result_mask" || _notrun "did not see stat.mask in output"
++
++test "$(( result_mask & STATX_BTIME ))" -ne 0 || \
++	_notrun "statx did not return btime"
++
++# Make sure the reported btime is within 5 seconds of the time we recorded
++# just prior to creating the file.
++btime=$(grep 'stat.btime.tv_sec =' $tmp.statx | cut -d ' ' -f 3)
++test -n "$btime" || echo "error: did not see btime in output??"
++
++_within_tolerance "btime" "$btime" "$now" 0 5 -v
++
++status=0
++exit
+diff --git a/tests/generic/709.out b/tests/generic/709.out
+new file mode 100644
+index 00000000..d8495ace
+--- /dev/null
++++ b/tests/generic/709.out
+@@ -0,0 +1,2 @@
++QA output created by 709
++btime is in range
+diff --git a/tests/generic/group b/tests/generic/group
+index 6f5f28d8..9ce608c0 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -527,3 +527,4 @@
+ 522 soak long_rw
+ 523 auto quick attr
+ 524 auto quick
++709 auto quick
