@@ -1,114 +1,143 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52190 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727762AbfA2IJZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 29 Jan 2019 03:09:25 -0500
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A1E31C7A07
-        for <fstests@vger.kernel.org>; Tue, 29 Jan 2019 08:09:25 +0000 (UTC)
-Received: from localhost.localdomain.com (unknown [10.66.13.9])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id C196F5C893
-        for <fstests@vger.kernel.org>; Tue, 29 Jan 2019 08:09:24 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] fsstress: avoid infinite zero byte reading
-Date: Tue, 29 Jan 2019 16:09:16 +0800
-Message-Id: <20190129080916.11529-1-zlang@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:45496 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727215AbfA2Mc3 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 29 Jan 2019 07:32:29 -0500
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2 1/3] btrfs: Test if btrfs hits EDQUOT without trying to reclaim some space
+Date: Tue, 29 Jan 2019 20:32:20 +0800
+Message-Id: <20190129123222.8698-1-wqu@suse.com>
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-copyrange_f and splice_f functions use a while loop to read a file,
-it's fine if there's only one fsstress process(and its children),
-but if some third part testing processes remove the file in the
-middle phase of copyrange_f running, copyrange_f maybe always return
-0, and the while loop can't be end. As below:
+Commit a514d63882c3 ("btrfs: qgroup: Commit transaction in advance to reduce
+early EDQUOT") is no longer forcing transaction commit to reclaim space,
+and only commits transaction asynchronously in advance to address it.
 
-root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
-root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
-root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
-root     47314  xxxxxx S+ grep --color=auto fsstress
-...
-...
-copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-...
-...
-lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
+However the criteria used in async transaction commit is not
+comprehensive, thus it doesn't reclaim space automatically.
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+This test case will check the behavior by:
+1) Falloc a large padding file
+   This file will take 90% of the qgroup limit
+
+2) Sync the fs
+   To reflect the qgroup changes
+
+3) Delete the file
+   Qgroup won't reclaim the space until transaction committed.
+
+4) Try to write a file
+   If kernel not fixed, qgroup will not automatically commit transaction
+   to reclaim the freed space and hit EDQUOT.
+
+This bug is going to be fixed by a patch for kernel titled:
+"btrfs: qgroup: Make qgroup async transaction commit more aggressive".
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+Reviewed-by: Filipe Manana <fdmanana@suse.com>
 ---
- ltp/fsstress.c | 20 +++++++++++++++++++-
- 1 file changed, 19 insertions(+), 1 deletion(-)
+changelog:
+v2:
+- Grammar and typo fixes.
+- Remove unnecessary filter for falloc.
+- Append '-f' option for rm.
+---
+ tests/btrfs/180     | 62 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/180.out |  3 +++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 66 insertions(+)
+ create mode 100755 tests/btrfs/180
+ create mode 100644 tests/btrfs/180.out
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index c04feb78..68e40ee6 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -2363,8 +2363,9 @@ copyrange_f(
- 	int			v2;
- 	int			fd1;
- 	int			fd2;
--	size_t			ret;
-+	size_t			ret = 0;
- 	int			e;
-+	int			limit;
- 
- 	/* Load paths */
- 	init_pathname(&fpath1);
-@@ -2446,6 +2447,7 @@ copyrange_f(
- 		off2 %= maxfsize;
- 	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
- 
-+	limit = 300;
- 	while (len > 0) {
- 		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
- 			      len, 0);
-@@ -2456,6 +2458,15 @@ copyrange_f(
- 			break;
- 		else if (ret > 0)
- 			len -= ret;
-+		else {
-+			/*
-+			 * if copy_file_range always get 0 byte, break from the
-+			 * infinite loop running
-+			 */
-+			limit--;
-+			if (limit <= 0)
-+				break;
-+		}
- 	}
- 	e = ret < 0 ? errno : 0;
- 	if (v1 || v2) {
-@@ -2790,6 +2801,7 @@ splice_f(int opno, long r)
- 	size_t			bytes;
- 	int			e;
- 	int			filedes[2];
-+	int			limit;
- 
- 	/* Load paths */
- 	init_pathname(&fpath1);
-@@ -2886,6 +2898,7 @@ splice_f(int opno, long r)
- 
- 	bytes = 0;
- 	total = 0;
-+	limit = 300;
- 	while (len > 0) {
- 		/* move to pipe buffer */
- 		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
-@@ -2907,6 +2920,11 @@ splice_f(int opno, long r)
- 
- 		len -= ret1;
- 		total += ret1;
-+		if (ret1 == 0) {
-+			limit--;
-+			if (limit <= 0)
-+				break;
-+		}
- 	}
- 
- 	if (ret1 < 0 || ret2 < 0)
+diff --git a/tests/btrfs/180 b/tests/btrfs/180
+new file mode 100755
+index 000000000000..2b4cfcc92e25
+--- /dev/null
++++ b/tests/btrfs/180
+@@ -0,0 +1,62 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 180
++#
++# Test if btrfs hits EDQUOT without reclaiming already freed extents when quota
++# is enabled.
++#
++# This bug is going to be fxied by a patch for kernel titled
++# "btrfs: qgroup: Make qgroup async transaction commit more aggressive"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command falloc
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG qgroup limit -e 1G "$SCRATCH_MNT"
++
++$XFS_IO_PROG -f -c "falloc 0 900M" "$SCRATCH_MNT/padding"
++
++# Commit transaction to reflect the quota usage
++sync
++
++rm -f "$SCRATCH_MNT/padding"
++
++# Without the kernel fix, this will trigger EDQUOT.
++_pwrite_byte 0xcd 0 512M "$SCRATCH_MNT/real_file" | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/180.out b/tests/btrfs/180.out
+new file mode 100644
+index 000000000000..17187477fc12
+--- /dev/null
++++ b/tests/btrfs/180.out
+@@ -0,0 +1,3 @@
++QA output created by 180
++wrote 536870912/536870912 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 46dd3c9523c2..03eb62f98332 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -182,3 +182,4 @@
+ 177 auto quick swap balance
+ 178 auto quick send
+ 179 auto qgroup dangerous
++180 auto quick qgroup limit
 -- 
-2.17.2
+2.20.1
