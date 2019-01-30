@@ -1,118 +1,65 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:46778 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725846AbfA2QRh (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 29 Jan 2019 11:17:37 -0500
-Subject: [PATCH 4/4] generic: check for reasonable inode creation time
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 29 Jan 2019 08:17:31 -0800
-Message-ID: <154877865178.9277.5385935769005684086.stgit@magnolia>
-In-Reply-To: <154877863279.9277.4463697450629081138.stgit@magnolia>
-References: <154877863279.9277.4463697450629081138.stgit@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:41466 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731623AbfA3Qcs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 30 Jan 2019 11:32:48 -0500
+Date: Wed, 30 Jan 2019 11:32:47 -0500
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH] xfstests: overlay: Do not lose security.capability xattr
+ over metadata only file copy-up
+Message-ID: <20190130163247.GB2757@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+Cc: Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Extend test 064 to check security.capability xattr is not lost over copy-up
+of a metadata only file. This requires mounting overlay with option
+metacopy=on and first trigger metadata only copy-up and then trigger
+data copy-up.
 
-If statx returns inode creation time (aka btime), check it to make sure
-that the filesystem is setting a creation time that's reasonably close
-to when it creates a file.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
 ---
- tests/generic/709     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/709.out |    2 ++
- tests/generic/group   |    1 +
- 3 files changed, 64 insertions(+)
- create mode 100755 tests/generic/709
- create mode 100644 tests/generic/709.out
+ tests/overlay/064     |   18 ++++++++++++++++++
+ tests/overlay/064.out |    1 +
+ 2 files changed, 19 insertions(+)
 
-
-diff --git a/tests/generic/709 b/tests/generic/709
-new file mode 100755
-index 00000000..724a16a8
---- /dev/null
-+++ b/tests/generic/709
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 709
-+#
-+# Check that statx btime (aka creation time) is plausibly close to when
-+# we created a file.  A bug caught during code review of xfs patches revealed
-+# that there weren't any sanity checks of the btime values.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+testfile=$TEST_DIR/$seq.txt
-+trap "_cleanup; exit \$status" 0 1 2 3 15
+Index: xfstests-dev/tests/overlay/064
+===================================================================
+--- xfstests-dev.orig/tests/overlay/064	2019-01-28 15:03:12.590434802 -0500
++++ xfstests-dev/tests/overlay/064	2019-01-30 11:18:29.595591985 -0500
+@@ -55,6 +55,24 @@ $XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/fi
+ # Make sure cap_setuid is still there
+ $GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
+ 
++# Test copy-up with metacopy on.
++$UMOUNT_PROG $SCRATCH_MNT
++_scratch_mkfs
++echo "This is lower" >> ${lowerdir}/file
 +
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.* $testfile
-+}
++# Set CAP_SETUID
++$SETCAP_PROG cap_setuid+ep ${lowerdir}/file
++_scratch_mount "-o metacopy=on"
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/attr
-+. ./common/filter
++# Trigger metadata only copy-up
++chmod 000 ${SCRATCH_MNT}/file
 +
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_xfs_io_command "statx" "-r"
++# Trigger data copy-up
++$XFS_IO_PROG -c "stat" ${SCRATCH_MNT}/file >>$seqres.full
 +
-+rm -f $seqres.full
-+rm -f $testfile
++# Make sure cap_setuid is still there
++$GETCAP_PROG ${SCRATCH_MNT}/file | _filter_scratch
 +
-+# Create a file and the time we created it
-+now=$(date +%s)
-+touch $testfile
-+
-+# Does statx return results with the BTIME flag set in the result mask?
-+STATX_BTIME=0x800
-+$XFS_IO_PROG -c "statx -F -r -m $STATX_BTIME" $testfile > $tmp.statx
-+cat $tmp.statx >> $seqres.full
-+
-+result_mask=$(grep 'stat.mask =' $tmp.statx | cut -d ' ' -f 3)
-+test -n "$result_mask" || _notrun "did not see stat.mask in output"
-+
-+test "$(( result_mask & STATX_BTIME ))" -ne 0 || \
-+	_notrun "statx did not return btime"
-+
-+# Make sure the reported btime is within 5 seconds of the time we recorded
-+# just prior to creating the file.
-+btime=$(grep 'stat.btime.tv_sec =' $tmp.statx | cut -d ' ' -f 3)
-+test -n "$btime" || echo "error: did not see btime in output??"
-+
-+_within_tolerance "btime" "$btime" "$now" 0 5 -v
-+
-+status=0
-+exit
-diff --git a/tests/generic/709.out b/tests/generic/709.out
-new file mode 100644
-index 00000000..d8495ace
---- /dev/null
-+++ b/tests/generic/709.out
-@@ -0,0 +1,2 @@
-+QA output created by 709
-+btime is in range
-diff --git a/tests/generic/group b/tests/generic/group
-index 6f5f28d8..9ce608c0 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -527,3 +527,4 @@
- 522 soak long_rw
- 523 auto quick attr
- 524 auto quick
-+709 auto quick
+ # success, all done
+ status=0
+ exit
+Index: xfstests-dev/tests/overlay/064.out
+===================================================================
+--- xfstests-dev.orig/tests/overlay/064.out	2019-01-28 15:03:12.590434802 -0500
++++ xfstests-dev/tests/overlay/064.out	2019-01-30 11:21:11.745591985 -0500
+@@ -1,2 +1,3 @@
+ QA output created by 064
+ SCRATCH_MNT/file = cap_setuid+ep
++SCRATCH_MNT/file = cap_setuid+ep
