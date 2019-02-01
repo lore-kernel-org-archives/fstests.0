@@ -1,494 +1,280 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58348 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726839AbfAVDUf (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 21 Jan 2019 22:20:35 -0500
-From: zhengbin <zhengbin13@huawei.com>
-Subject: [PATCH 6/6] squashfs: add mksquashfs options test
-Date: Tue, 22 Jan 2019 11:24:08 +0800
-Message-ID: <20190122032408.91336-7-zhengbin13@huawei.com>
-In-Reply-To: <20190122032408.91336-1-zhengbin13@huawei.com>
-References: <20190122032408.91336-1-zhengbin13@huawei.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:55224 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727617AbfBACLi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 31 Jan 2019 21:11:38 -0500
+Date: Thu, 31 Jan 2019 18:11:30 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH v4 1/2] fsstress: add splice support
+Message-ID: <20190201021130.GA29630@magnolia>
+References: <20190123073455.24539-1-zlang@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190123073455.24539-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: david@fromorbit.com, guaneryu@gmail.com, fstests@vger.kernel.org
-Cc: houtao1@huawei.com, zhaohongjiang@huawei.com, zhengbin13@huawei.com
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This patch add mksquashfs options test(compressors, sparse file,
-xattr, block size, fragment, compress inode,data,fragment,xattr,
-file owner).
+On Wed, Jan 23, 2019 at 03:34:54PM +0800, Zorro Lang wrote:
+> Support the splice syscall in fsstress.
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  ltp/fsstress.c | 173 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 173 insertions(+)
+> 
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 99a1d733..c04feb78 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -85,6 +85,7 @@ typedef enum {
+>  	OP_RMDIR,
+>  	OP_SETATTR,
+>  	OP_SETXATTR,
+> +	OP_SPLICE,
+>  	OP_STAT,
+>  	OP_SYMLINK,
+>  	OP_SYNC,
+> @@ -194,6 +195,7 @@ void	resvsp_f(int, long);
+>  void	rmdir_f(int, long);
+>  void	setattr_f(int, long);
+>  void	setxattr_f(int, long);
+> +void	splice_f(int, long);
+>  void	stat_f(int, long);
+>  void	symlink_f(int, long);
+>  void	sync_f(int, long);
+> @@ -244,6 +246,7 @@ opdesc_t	ops[] = {
+>  	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+>  	{ OP_SETATTR, "setattr", setattr_f, 0, 1 },
+>  	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
+> +	{ OP_SPLICE, "splice", splice_f, 1, 1 },
+>  	{ OP_STAT, "stat", stat_f, 1, 0 },
+>  	{ OP_SYMLINK, "symlink", symlink_f, 2, 1 },
+>  	{ OP_SYNC, "sync", sync_f, 1, 1 },
+> @@ -2764,6 +2767,176 @@ setxattr_f(int opno, long r)
+>  #endif
+>  }
+>  
+> +void
+> +splice_f(int opno, long r)
+> +{
+> +	struct pathname		fpath1;
+> +	struct pathname		fpath2;
+> +	struct stat64		stat1;
+> +	struct stat64		stat2;
+> +	char			inoinfo1[1024];
+> +	char			inoinfo2[1024];
+> +	loff_t			lr;
+> +	loff_t			off1, off2;
+> +	size_t			len;
+> +	loff_t			offset1, offset2;
+> +	size_t			length;
+> +	size_t			total;
+> +	int			v1;
+> +	int			v2;
+> +	int			fd1;
+> +	int			fd2;
+> +	ssize_t			ret1 = 0, ret2 = 0;
+> +	size_t			bytes;
+> +	int			e;
+> +	int			filedes[2];
+> +
+> +	/* Load paths */
+> +	init_pathname(&fpath1);
+> +	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
+> +		if (v1)
+> +			printf("%d/%d: splice read - no filename\n",
+> +				procid, opno);
+> +		goto out_fpath1;
+> +	}
+> +
+> +	init_pathname(&fpath2);
+> +	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
+> +		if (v2)
+> +			printf("%d/%d: splice write - no filename\n",
+> +				procid, opno);
+> +		goto out_fpath2;
+> +	}
+> +
+> +	/* Open files */
+> +	fd1 = open_path(&fpath1, O_RDONLY);
+> +	e = fd1 < 0 ? errno : 0;
+> +	check_cwd();
+> +	if (fd1 < 0) {
+> +		if (v1)
+> +			printf("%d/%d: splice read - open %s failed %d\n",
+> +				procid, opno, fpath1.path, e);
+> +		goto out_fpath2;
+> +	}
+> +
+> +	fd2 = open_path(&fpath2, O_WRONLY);
+> +	e = fd2 < 0 ? errno : 0;
+> +	check_cwd();
+> +	if (fd2 < 0) {
+> +		if (v2)
+> +			printf("%d/%d: splice write - open %s failed %d\n",
+> +				procid, opno, fpath2.path, e);
+> +		goto out_fd1;
+> +	}
+> +
+> +	/* Get file stats */
+> +	if (fstat64(fd1, &stat1) < 0) {
+> +		if (v1)
+> +			printf("%d/%d: splice read - fstat64 %s failed %d\n",
+> +				procid, opno, fpath1.path, errno);
+> +		goto out_fd2;
+> +	}
+> +	inode_info(inoinfo1, sizeof(inoinfo1), &stat1, v1);
+> +
+> +	if (fstat64(fd2, &stat2) < 0) {
+> +		if (v2)
+> +			printf("%d/%d: splice write - fstat64 %s failed %d\n",
+> +				procid, opno, fpath2.path, errno);
+> +		goto out_fd2;
+> +	}
+> +	inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
+> +
+> +	/* Calculate offsets */
+> +	len = (random() % FILELEN_MAX) + 1;
+> +	if (len == 0)
+> +		len = stat1.st_blksize;
+> +	if (len > stat1.st_size)
+> +		len = stat1.st_size;
+> +
+> +	lr = ((int64_t)random() << 32) + random();
+> +	if (stat1.st_size == len)
+> +		off1 = 0;
+> +	else
+> +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
+> +	off1 %= maxfsize;
+> +
+> +	/*
+> +	 * splice can overlap write, so the offset of the target file can be
+> +	 * any number (< maxfsize)
+> +	 */
 
-Signed-off-by: zhengbin <zhengbin13@huawei.com>
----
- tests/squashfs/001      | 60 ++++++++++++++++++++++++++++++++++++++++
- tests/squashfs/001.out  |  9 ++++++
- tests/squashfs/002      | 40 +++++++++++++++++++++++++++
- tests/squashfs/002.out  |  2 ++
- tests/squashfs/003      | 55 +++++++++++++++++++++++++++++++++++++
- tests/squashfs/003.out  | 12 ++++++++
- tests/squashfs/004      | 73 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/squashfs/004.out  | 23 ++++++++++++++++
- tests/squashfs/005      | 54 ++++++++++++++++++++++++++++++++++++
- tests/squashfs/005.out  | 13 +++++++++
- tests/squashfs/Makefile | 20 ++++++++++++++
- tests/squashfs/group    | 10 +++++++
- 12 files changed, 371 insertions(+)
- create mode 100755 tests/squashfs/001
- create mode 100644 tests/squashfs/001.out
- create mode 100755 tests/squashfs/002
- create mode 100644 tests/squashfs/002.out
- create mode 100755 tests/squashfs/003
- create mode 100644 tests/squashfs/003.out
- create mode 100755 tests/squashfs/004
- create mode 100644 tests/squashfs/004.out
- create mode 100755 tests/squashfs/005
- create mode 100644 tests/squashfs/005.out
- create mode 100644 tests/squashfs/Makefile
- create mode 100644 tests/squashfs/group
+Er... sorry I've been offline for a couple of weeks due to illness and
+so was not able to comment on this patch until now, but I've had a
+problem with my overnight fstests runs:
 
-diff --git a/tests/squashfs/001 b/tests/squashfs/001
-new file mode 100755
-index 00000000..3f71f122
---- /dev/null
-+++ b/tests/squashfs/001
-@@ -0,0 +1,60 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Huawei. All Rights Reserved.
-+#
-+# FS QA Test No. 001
-+#
-+# Compression test
-+#
-+
-+seq=`basename $0`
-+echo "QA output created by $seq"
-+
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $THIS_TEST_DIR
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+# rarely use lzma, do not test it
-+mcomp=(gzip lz4 lzo xz)
-+iter=5
-+THIS_TEST_DIR=$SCRATCH_DEV/testdir
-+
-+rm -rf $THIS_TEST_DIR
-+mkdir -p $THIS_TEST_DIR
-+
-+for ((count=1;${count}<=${iter};count++)); do
-+	dd if=/dev/urandom of=$THIS_TEST_DIR/file-$count bs=1K count=1024 > /dev/null 2>&1
-+	mkdir -p $THIS_TEST_DIR/dir-$count
-+	dd if=/dev/urandom of=$THIS_TEST_DIR/dir-$count/file-$count bs=1K count=1024 > /dev/null 2>&1
-+done
-+
-+# Run tests
-+for comp in ${mcomp[*]}; do
-+	echo "making squashfs image using $comp compression."
-+	_scratch_mkfs "-comp $comp" >/dev/null 2>&1
-+	if [ $?  != 0 ]; then
-+		echo "mksquashfs failed for $comp compression."
-+		continue
-+	fi
-+	echo "Testing mount and diff data."
-+	_scratch_mount
-+	diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
-+	_scratch_unmount
-+done
-+
-+status=0
-+exit
-diff --git a/tests/squashfs/001.out b/tests/squashfs/001.out
-new file mode 100644
-index 00000000..93cafe6a
---- /dev/null
-+++ b/tests/squashfs/001.out
-@@ -0,0 +1,9 @@
-+QA output created by 001
-+making squashfs image using gzip compression.
-+Testing mount and diff data.
-+making squashfs image using lz4 compression.
-+Testing mount and diff data.
-+making squashfs image using lzo compression.
-+Testing mount and diff data.
-+making squashfs image using xz compression.
-+Testing mount and diff data.
-diff --git a/tests/squashfs/002 b/tests/squashfs/002
-new file mode 100755
-index 00000000..ae999a38
---- /dev/null
-+++ b/tests/squashfs/002
-@@ -0,0 +1,40 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Huawei. All Rights Reserved.
-+#
-+# FS QA Test No. 002
-+#
-+# mksquashfs -no-sparse test, -no-sparse: read all data of sparse files
-+#
-+seq=`basename $0`
-+echo "QA output created by $seq"
-+
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $SCRATCH_DEV/testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+rm -f $SCRATCH_DEV/testfile
-+truncate -s 100M $SCRATCH_DEV/testfile
-+
-+_scratch_mkfs "-no-sparse" >/dev/null 2>&1 || _fail "Could not mkfs scratch device"
-+_scratch_mount
-+# If use -no-sparse, du -h will be 100M
-+du -h $SCRATCH_MNT/testfile | awk '{print $1}'
-+diff -r $SCRATCH_DEV/testfile $SCRATCH_MNT/testfile
-+
-+status=0
-+exit
-diff --git a/tests/squashfs/002.out b/tests/squashfs/002.out
-new file mode 100644
-index 00000000..7ca3f044
---- /dev/null
-+++ b/tests/squashfs/002.out
-@@ -0,0 +1,2 @@
-+QA output created by 002
-+100M
-diff --git a/tests/squashfs/003 b/tests/squashfs/003
-new file mode 100755
-index 00000000..4c2ea806
---- /dev/null
-+++ b/tests/squashfs/003
-@@ -0,0 +1,55 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Huawei. All Rights Reserved.
-+#
-+# FS QA Test No. 003
-+#
-+# mksquashfs -xattrs, -no-xattrs test
-+#
-+seq=`basename $0`
-+echo "QA output created by $seq"
-+
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $SCRATCH_DEV/testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+_require_attrs
-+
-+opts=(-xattrs -no-xattrs)
-+
-+rm -f $SCRATCH_DEV/testfile
-+
-+touch $SCRATCH_DEV/testfile
-+$SETFATTR_PROG -n user.foobar -v 123 $SCRATCH_DEV/testfile
-+$SETFATTR_PROG -n user.WvG1c1Td -v qwerty $SCRATCH_DEV/testfile
-+$SETFATTR_PROG -n user.J3__T_Km3dVsW_ -v hello $SCRATCH_DEV/testfile
-+$SETFATTR_PROG -n user.something -v pizza $SCRATCH_DEV/testfile
-+$SETFATTR_PROG -n user.ping -v pong $SCRATCH_DEV/testfile
-+
-+# Run tests
-+for opt in ${opts[*]}; do
-+	echo "making squashfs image using $opt"
-+	_scratch_mkfs "$opt" >/dev/null 2>&1 || _fail "Could not mkfs scratch device use $opt"
-+	_scratch_mount
-+	# list all the xattrs we have set before.
-+	echo "list all testfile xattr"
-+	_getfattr --absolute-names --dump $SCRATCH_MNT/testfile | _filter_scratch
-+	_scratch_unmount
-+done
-+
-+status=0
-+exit
-diff --git a/tests/squashfs/003.out b/tests/squashfs/003.out
-new file mode 100644
-index 00000000..c55184f8
---- /dev/null
-+++ b/tests/squashfs/003.out
-@@ -0,0 +1,12 @@
-+QA output created by 003
-+making squashfs image using -xattrs
-+list all testfile xattr
-+# file: SCRATCH_MNT/testfile
-+user.J3__T_Km3dVsW_="hello"
-+user.WvG1c1Td="qwerty"
-+user.foobar="123"
-+user.ping="pong"
-+user.something="pizza"
-+
-+making squashfs image using -no-xattrs
-+list all testfile xattr
-diff --git a/tests/squashfs/004 b/tests/squashfs/004
-new file mode 100755
-index 00000000..bd34b661
---- /dev/null
-+++ b/tests/squashfs/004
-@@ -0,0 +1,73 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Huawei. All Rights Reserved.
-+#
-+# FS QA Test No. 004
-+#
-+# mksquashfs -no-fragments -always-use-fragments, -noI -noD -noF -noX, -b test
-+#
-+seq=`basename $0`
-+echo "QA output created by $seq"
-+
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $THIS_TEST_DIR
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+mfrag=(-no-fragments -always-use-fragments)
-+mcomp=(-noI -noD -noF -noX)
-+iter=6
-+THIS_TEST_DIR=$SCRATCH_DEV/testdir
-+
-+rm -rf $THIS_TEST_DIR
-+mkdir -p $THIS_TEST_DIR
-+
-+for ((count=1;${count}<=${iter};count++)); do
-+	dd if=/dev/urandom of=$THIS_TEST_DIR/file-$count bs=1M count=1 >/dev/null 2>&1
-+	mkdir -p $THIS_TEST_DIR/dir-$count
-+	dd if=/dev/urandom of=$THIS_TEST_DIR/dir-$count/file-$count bs=1K count=1 >/dev/null 2>&1
-+done
-+
-+for frag in ${mfrag[*]}; do
-+	for comp in ${mcomp[*]}; do
-+		echo "making squashfs image using 16384 blocksize, $frag, $comp"
-+		_scratch_mkfs "-b 16384 $frag $comp" >/dev/null 2>&1
-+		if [ $?  != 0 ]; then
-+			echo "mksquashfs failed."
-+			continue
-+		fi
-+		echo "Testing mount and diff data."
-+		_scratch_mount
-+		diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
-+		_scratch_unmount
-+	done
-+done
-+
-+for blocksize in 4096 8192 32768; do
-+	echo "making squashfs image using $blocksize blocksize"
-+	_scratch_mkfs "-b $blocksize" >/dev/null 2>&1
-+	if [ $?  != 0 ]; then
-+		echo "mksquashfs failed."
-+		continue
-+	fi
-+	echo "Testing mount and diff data."
-+	_scratch_mount
-+	diff -r $THIS_TEST_DIR $SCRATCH_MNT/testdir
-+	_scratch_unmount
-+done
-+
-+status=0
-+exit
-diff --git a/tests/squashfs/004.out b/tests/squashfs/004.out
-new file mode 100644
-index 00000000..e6b65559
---- /dev/null
-+++ b/tests/squashfs/004.out
-@@ -0,0 +1,23 @@
-+QA output created by 004
-+making squashfs image using 16384 blocksize, -no-fragments, -noI
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -no-fragments, -noD
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -no-fragments, -noF
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -no-fragments, -noX
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -always-use-fragments, -noI
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -always-use-fragments, -noD
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -always-use-fragments, -noF
-+Testing mount and diff data.
-+making squashfs image using 16384 blocksize, -always-use-fragments, -noX
-+Testing mount and diff data.
-+making squashfs image using 4096 blocksize
-+Testing mount and diff data.
-+making squashfs image using 8192 blocksize
-+Testing mount and diff data.
-+making squashfs image using 32768 blocksize
-+Testing mount and diff data.
-diff --git a/tests/squashfs/005 b/tests/squashfs/005
-new file mode 100755
-index 00000000..2935123d
---- /dev/null
-+++ b/tests/squashfs/005
-@@ -0,0 +1,54 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Huawei. All Rights Reserved.
-+#
-+# FS QA Test No. 005
-+#
-+# mksquashfs -all-root, -force-uid uid, -force-gid gid test
-+#
-+seq=`basename $0`
-+echo "QA output created by $seq"
-+
-+status=1        # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $testfile
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+testfile=$SCRATCH_DEV/testfile
-+rm -f $testfile
-+
-+echo test >$testfile
-+chown 1 $testfile
-+chgrp 2 $testfile
-+chmod 421 $testfile
-+
-+for ids in "-all-root" "-force-uid 2" "-force-gid 1"; do
-+	echo "making squashfs image using $ids"
-+	_scratch_mkfs "$ids" >/dev/null 2>&1
-+	if [ $?  != 0 ]; then
-+		echo "mksquashfs failed."
-+		continue
-+	fi
-+	echo "getting uid, gid"
-+	_scratch_mount
-+	stat -c %u $SCRATCH_MNT/testfile
-+	stat -c %g $SCRATCH_MNT/testfile
-+	_scratch_unmount
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/squashfs/005.out b/tests/squashfs/005.out
-new file mode 100644
-index 00000000..1ee4f9c3
---- /dev/null
-+++ b/tests/squashfs/005.out
-@@ -0,0 +1,13 @@
-+QA output created by 005
-+making squashfs image using -all-root
-+getting uid, gid
-+0
-+0
-+making squashfs image using -force-uid 2
-+getting uid, gid
-+2
-+2
-+making squashfs image using -force-gid 1
-+getting uid, gid
-+1
-+1
-diff --git a/tests/squashfs/Makefile b/tests/squashfs/Makefile
-new file mode 100644
-index 00000000..bbdc91ea
---- /dev/null
-+++ b/tests/squashfs/Makefile
-@@ -0,0 +1,20 @@
-+#
-+# Copyright (c) 2019 Huawei.  All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+SQUASHFS_DIR = squashfs
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(SQUASHFS_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
-diff --git a/tests/squashfs/group b/tests/squashfs/group
-new file mode 100644
-index 00000000..a3544bc1
---- /dev/null
-+++ b/tests/squashfs/group
-@@ -0,0 +1,10 @@
-+# QA groups control file
-+# Defines test groups and nominal group owners
-+# - do not start group names with a digit
-+# - comment line before each group is "new" description
-+#
-+001 auto squashfs
-+002 auto squashfs
-+003 auto squashfs
-+004 auto squashfs
-+005 auto squashfs
---
-2.16.2.dirty
+> +	lr = ((int64_t)random() << 32) + random();
+
+This generates a pseudorandom 64-bit candidate offset for the
+destination file where we'll land the splice data...
+
+> +	off2 = (off64_t)(lr % maxfsize);
+
+...and this caps the offset at maxfsize (which is 2^63-	1 on x64), which
+effectively means that the data will appear at a very high file offset,
+which creates large (sparse) files very quickly.
+
+Contrast this to other functions like clonerange_f, which add an
+additional clamp of 1024 blocks past the current dest file EOF:
+
+ max_off2 = MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE);
+ do {
+	lr = ((int64_t)random() << 32) + random();
+	off2 = (off64_t)(lr % max_off2);
+	off2 %= maxfsize;
+	...
+ }
+
+or truncate_f, which clamps to both 1MB past EOF and MAXFSIZE:
+
+ lr = ((int64_t)random() << 32) + random();
+ off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
+ off %= maxfsize;
+
+IOWs, I think we try to grow the fsstress file sizes fairly slowly so
+that gigantic files don't suddenly jump out of the bushes:
+
+0/487: splice d3/d9/f2c[6319385 1 0 0 176 1395200] [860317,88612] ->
+d3/d9/dd/d1c/d21/f4b[1111 1 0 0 0 1408811] [8492675175361853476,88612] 0
+
+Yikes, it wrote 88,612 bytes of data at offset 8,492,675,175,361,853,476!
+
+This causes shared/009 to take forever to run, because it runs fsstress
+to generate some files, and then uses md5sum to ensure that duperemove
+doesn't corrupt files.  Unfortunately it takes a very long time to
+read an entire 8500 petabyte file.
+
+--D
+
+> +
+> +	/*
+> +	 * Due to len, off1 and off2 will be changed later, so record the
+> +	 * original number at here
+> +	 */
+> +	length = len;
+> +	offset1 = off1;
+> +	offset2 = off2;
+> +
+> +	/* Pipe initialize */
+> +	if (pipe(filedes) < 0) {
+> +		if (v1 || v2) {
+> +			printf("%d/%d: splice - pipe failed %d\n",
+> +				procid, opno, errno);
+> +			goto out_fd2;
+> +		}
+> +	}
+> +
+> +	bytes = 0;
+> +	total = 0;
+> +	while (len > 0) {
+> +		/* move to pipe buffer */
+> +		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
+> +		if (ret1 < 0) {
+> +			break;
+> +		}
+> +		bytes = ret1;
+> +
+> +		/* move from pipe buffer to dst file */
+> +		while (bytes > 0) {
+> +			ret2 = splice(filedes[0], NULL, fd2, &off2, bytes, 0);
+> +			if (ret2 < 0) {
+> +				break;
+> +			}
+> +			bytes -= ret2;
+> +		}
+> +		if (ret2 < 0)
+> +			break;
+> +
+> +		len -= ret1;
+> +		total += ret1;
+> +	}
+> +
+> +	if (ret1 < 0 || ret2 < 0)
+> +		e = errno;
+> +	else
+> +		e = 0;
+> +	if (v1 || v2) {
+> +		printf("%d/%d: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld] %d",
+> +			procid, opno,
+> +			fpath1.path, inoinfo1, (long long)offset1, (long long)length,
+> +			fpath2.path, inoinfo2, (long long)offset2, (long long)length, e);
+> +
+> +		if (length && length > total)
+> +			printf(" asked for %lld, spliced %lld??\n",
+> +				(long long)length, (long long)total);
+> +		printf("\n");
+> +	}
+> +
+> +	close(filedes[0]);
+> +	close(filedes[1]);
+> +out_fd2:
+> +	close(fd2);
+> +out_fd1:
+> +	close(fd1);
+> +out_fpath2:
+> +	free_pathname(&fpath2);
+> +out_fpath1:
+> +	free_pathname(&fpath1);
+> +}
+> +
+>  void
+>  creat_f(int opno, long r)
+>  {
+> -- 
+> 2.17.2
+> 
