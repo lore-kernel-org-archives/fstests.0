@@ -1,290 +1,208 @@
-Received: from mx1.redhat.com ([209.132.183.28]:45552 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725681AbfBAFDm (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 1 Feb 2019 00:03:42 -0500
-Date: Fri, 1 Feb 2019 13:07:49 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v4 1/2] fsstress: add splice support
-Message-ID: <20190201050748.GH2255@dhcp-12-149.nay.redhat.com>
-References: <20190123073455.24539-1-zlang@redhat.com>
- <20190201021130.GA29630@magnolia>
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:43532 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726812AbfBCJVF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Feb 2019 04:21:05 -0500
+Received: by mail-pl1-f196.google.com with SMTP id gn14so5399919plb.10
+        for <fstests@vger.kernel.org>; Sun, 03 Feb 2019 01:21:04 -0800 (PST)
+Date: Sun, 3 Feb 2019 17:20:58 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
+Message-ID: <20190203092058.GP2713@desktop>
+References: <20190122032408.91336-1-zhengbin13@huawei.com>
+ <d498dc46-edf1-7aed-4e67-8b1606c3bba5@huawei.com>
+ <76cacb22-fe14-199f-e113-236d9b5eb083@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190201021130.GA29630@magnolia>
+In-Reply-To: <76cacb22-fe14-199f-e113-236d9b5eb083@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org
+To: "zhengbin (A)" <zhengbin13@huawei.com>
+Cc: david@fromorbit.com, fstests@vger.kernel.org, houtao1@huawei.com, zhaohongjiang@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jan 31, 2019 at 06:11:30PM -0800, Darrick J. Wong wrote:
-> On Wed, Jan 23, 2019 at 03:34:54PM +0800, Zorro Lang wrote:
-> > Support the splice syscall in fsstress.
+On Tue, Jan 29, 2019 at 10:44:13PM +0800, zhengbin (A) wrote:
+> ping
+
+Sorry for the late response! I'm on holiday now and will only check
+emails from time to time, and I'll be back on Feb. 11. I may need more
+time to check this suqashfs support and new tests.
+
+Thanks,
+Eryu
+
+> 
+> On 2019/1/25 18:49, zhengbin (A) wrote:
+> > Ping?
 > > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> >  ltp/fsstress.c | 173 +++++++++++++++++++++++++++++++++++++++++++++++++
-> >  1 file changed, 173 insertions(+)
+> > On 2019/1/22 11:24, zhengbin wrote:
+> >> This patch add squashfs support in xfstests-dev. Add two directories
+> >> in tests directory, readonly can also be used for other readonly
+> >> filesystem, squashfs is just used for squashfs filesystem.
+> >> tests/readonly/001        mount test
+> >> tests/readonly/002--010   metadata test
+> >> tests/readonly/011--018   data test
+> >> tests/readonly/019--021   xattr test
+> >> tests/squashfs/001--005   mksquashfs options test
+> >>
+> >> The reason of use 'readonly' directory instead of generic/shard is:
+> >> The step of tests in readonly filesystem(such as squashfs) are
+> >> as follows:
+> >> 1. write data in $SCRATCH_DEV
+> >> 2. mkfs $SCRATCH_DEV file
+> >> 3. mount file $SCRATCH_MNT
+> >> 4. test in $SCRATCH_MNT
+> >>
+> >> While the rw filesystems are as follows:
+> >> 1. mkfs $SCRATCH_DEV
+> >> 2. mount $SCRATCH_DEV $SCRATCH_MNT
+> >> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
+> >>
+> >> The tests in generic/shared are set as rw filesystem, it is hard
+> >> to use this in readonly filesystem, use 'readonly' dir which can
+> >> be easier to read.
+> >>
+> >> PS: As readonly filesystems need to mkfs in every test, do not
+> >> use TEST_DEV&TEST_DIR.
+> >>
+> >> zhengbin (6):
+> >>   squashfs: add squashfs support
+> >>   squashfs: add mount test
+> >>   squashfs: add metadata test
+> >>   squashfs: add data test
+> >>   squashfs: add xattr test
+> >>   squashfs: add mksquashfs options test
+> >>
+> >>  .gitignore                                  |   1 +
+> >>  README.squashfs                             |  12 ++
+> >>  check                                       |  19 ++-
+> >>  common/attr                                 |   5 +
+> >>  common/config                               |   6 +
+> >>  common/rc                                   |  63 ++++++++-
+> >>  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
+> >>  tests/readonly/001                          |  97 ++++++++++++++
+> >>  tests/readonly/001.out                      |   2 +
+> >>  tests/readonly/002                          |  48 +++++++
+> >>  tests/readonly/002.out                      |   6 +
+> >>  tests/readonly/003                          |  72 +++++++++++
+> >>  tests/readonly/003.out                      |   5 +
+> >>  tests/readonly/004                          |  50 +++++++
+> >>  tests/readonly/004.out                      |   3 +
+> >>  tests/readonly/005                          |  77 +++++++++++
+> >>  tests/readonly/005.out                      |   2 +
+> >>  tests/readonly/006                          |  48 +++++++
+> >>  tests/readonly/006.out                      |   4 +
+> >>  tests/readonly/007                          |  74 +++++++++++
+> >>  tests/readonly/007.out                      |   9 ++
+> >>  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
+> >>  tests/readonly/008.out                      |  34 +++++
+> >>  tests/readonly/009                          |  50 +++++++
+> >>  tests/readonly/009.out                      |   2 +
+> >>  tests/readonly/010                          |  49 +++++++
+> >>  tests/readonly/010.out                      |   4 +
+> >>  tests/readonly/011                          |  92 +++++++++++++
+> >>  tests/readonly/011.out                      |  30 +++++
+> >>  tests/readonly/012                          |  56 ++++++++
+> >>  tests/readonly/012.out                      |   5 +
+> >>  tests/readonly/013                          |  47 +++++++
+> >>  tests/readonly/013.out                      |   2 +
+> >>  tests/readonly/014                          |  46 +++++++
+> >>  tests/readonly/014.out                      |   2 +
+> >>  tests/readonly/015                          |  42 ++++++
+> >>  tests/readonly/015.out                      |   2 +
+> >>  tests/readonly/016                          | 145 +++++++++++++++++++++
+> >>  tests/readonly/016.out                      |   8 ++
+> >>  tests/readonly/017                          | 107 +++++++++++++++
+> >>  tests/readonly/017.out                      |   2 +
+> >>  tests/readonly/018                          |  49 +++++++
+> >>  tests/readonly/018.out                      |   2 +
+> >>  tests/readonly/019                          | 109 ++++++++++++++++
+> >>  tests/readonly/019.out                      |  45 +++++++
+> >>  tests/readonly/020                          |  56 ++++++++
+> >>  tests/readonly/020.out                      |   9 ++
+> >>  tests/readonly/021                          |  74 +++++++++++
+> >>  tests/readonly/021.out                      |  11 ++
+> >>  tests/readonly/Makefile                     |  20 +++
+> >>  tests/readonly/group                        |  26 ++++
+> >>  tests/squashfs/001                          |  60 +++++++++
+> >>  tests/squashfs/001.out                      |   9 ++
+> >>  tests/squashfs/002                          |  40 ++++++
+> >>  tests/squashfs/002.out                      |   2 +
+> >>  tests/squashfs/003                          |  55 ++++++++
+> >>  tests/squashfs/003.out                      |  12 ++
+> >>  tests/squashfs/004                          |  73 +++++++++++
+> >>  tests/squashfs/004.out                      |  23 ++++
+> >>  tests/squashfs/005                          |  54 ++++++++
+> >>  tests/squashfs/005.out                      |  13 ++
+> >>  tests/squashfs/Makefile                     |  20 +++
+> >>  tests/squashfs/group                        |  10 ++
+> >>  63 files changed, 2372 insertions(+), 5 deletions(-)
+> >>  create mode 100644 README.squashfs
+> >>  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
+> >>  create mode 100755 tests/readonly/001
+> >>  create mode 100644 tests/readonly/001.out
+> >>  create mode 100755 tests/readonly/002
+> >>  create mode 100644 tests/readonly/002.out
+> >>  create mode 100755 tests/readonly/003
+> >>  create mode 100644 tests/readonly/003.out
+> >>  create mode 100755 tests/readonly/004
+> >>  create mode 100644 tests/readonly/004.out
+> >>  create mode 100755 tests/readonly/005
+> >>  create mode 100644 tests/readonly/005.out
+> >>  create mode 100755 tests/readonly/006
+> >>  create mode 100644 tests/readonly/006.out
+> >>  create mode 100755 tests/readonly/007
+> >>  create mode 100644 tests/readonly/007.out
+> >>  create mode 100755 tests/readonly/008
+> >>  create mode 100644 tests/readonly/008.out
+> >>  create mode 100755 tests/readonly/009
+> >>  create mode 100644 tests/readonly/009.out
+> >>  create mode 100755 tests/readonly/010
+> >>  create mode 100644 tests/readonly/010.out
+> >>  create mode 100755 tests/readonly/011
+> >>  create mode 100644 tests/readonly/011.out
+> >>  create mode 100755 tests/readonly/012
+> >>  create mode 100644 tests/readonly/012.out
+> >>  create mode 100755 tests/readonly/013
+> >>  create mode 100644 tests/readonly/013.out
+> >>  create mode 100755 tests/readonly/014
+> >>  create mode 100644 tests/readonly/014.out
+> >>  create mode 100755 tests/readonly/015
+> >>  create mode 100644 tests/readonly/015.out
+> >>  create mode 100755 tests/readonly/016
+> >>  create mode 100644 tests/readonly/016.out
+> >>  create mode 100755 tests/readonly/017
+> >>  create mode 100644 tests/readonly/017.out
+> >>  create mode 100755 tests/readonly/018
+> >>  create mode 100644 tests/readonly/018.out
+> >>  create mode 100755 tests/readonly/019
+> >>  create mode 100644 tests/readonly/019.out
+> >>  create mode 100755 tests/readonly/020
+> >>  create mode 100644 tests/readonly/020.out
+> >>  create mode 100755 tests/readonly/021
+> >>  create mode 100644 tests/readonly/021.out
+> >>  create mode 100644 tests/readonly/Makefile
+> >>  create mode 100644 tests/readonly/group
+> >>  create mode 100755 tests/squashfs/001
+> >>  create mode 100644 tests/squashfs/001.out
+> >>  create mode 100755 tests/squashfs/002
+> >>  create mode 100644 tests/squashfs/002.out
+> >>  create mode 100755 tests/squashfs/003
+> >>  create mode 100644 tests/squashfs/003.out
+> >>  create mode 100755 tests/squashfs/004
+> >>  create mode 100644 tests/squashfs/004.out
+> >>  create mode 100755 tests/squashfs/005
+> >>  create mode 100644 tests/squashfs/005.out
+> >>  create mode 100644 tests/squashfs/Makefile
+> >>  create mode 100644 tests/squashfs/group
+> >>
+> >> --
+> >> 2.16.2.dirty
+> >>
+> >>
+> >> .
+> >>
 > > 
-> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > index 99a1d733..c04feb78 100644
-> > --- a/ltp/fsstress.c
-> > +++ b/ltp/fsstress.c
-> > @@ -85,6 +85,7 @@ typedef enum {
-> >  	OP_RMDIR,
-> >  	OP_SETATTR,
-> >  	OP_SETXATTR,
-> > +	OP_SPLICE,
-> >  	OP_STAT,
-> >  	OP_SYMLINK,
-> >  	OP_SYNC,
-> > @@ -194,6 +195,7 @@ void	resvsp_f(int, long);
-> >  void	rmdir_f(int, long);
-> >  void	setattr_f(int, long);
-> >  void	setxattr_f(int, long);
-> > +void	splice_f(int, long);
-> >  void	stat_f(int, long);
-> >  void	symlink_f(int, long);
-> >  void	sync_f(int, long);
-> > @@ -244,6 +246,7 @@ opdesc_t	ops[] = {
-> >  	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
-> >  	{ OP_SETATTR, "setattr", setattr_f, 0, 1 },
-> >  	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
-> > +	{ OP_SPLICE, "splice", splice_f, 1, 1 },
-> >  	{ OP_STAT, "stat", stat_f, 1, 0 },
-> >  	{ OP_SYMLINK, "symlink", symlink_f, 2, 1 },
-> >  	{ OP_SYNC, "sync", sync_f, 1, 1 },
-> > @@ -2764,6 +2767,176 @@ setxattr_f(int opno, long r)
-> >  #endif
-> >  }
-> >  
-> > +void
-> > +splice_f(int opno, long r)
-> > +{
-> > +	struct pathname		fpath1;
-> > +	struct pathname		fpath2;
-> > +	struct stat64		stat1;
-> > +	struct stat64		stat2;
-> > +	char			inoinfo1[1024];
-> > +	char			inoinfo2[1024];
-> > +	loff_t			lr;
-> > +	loff_t			off1, off2;
-> > +	size_t			len;
-> > +	loff_t			offset1, offset2;
-> > +	size_t			length;
-> > +	size_t			total;
-> > +	int			v1;
-> > +	int			v2;
-> > +	int			fd1;
-> > +	int			fd2;
-> > +	ssize_t			ret1 = 0, ret2 = 0;
-> > +	size_t			bytes;
-> > +	int			e;
-> > +	int			filedes[2];
-> > +
-> > +	/* Load paths */
-> > +	init_pathname(&fpath1);
-> > +	if (!get_fname(FT_REGm, r, &fpath1, NULL, NULL, &v1)) {
-> > +		if (v1)
-> > +			printf("%d/%d: splice read - no filename\n",
-> > +				procid, opno);
-> > +		goto out_fpath1;
-> > +	}
-> > +
-> > +	init_pathname(&fpath2);
-> > +	if (!get_fname(FT_REGm, random(), &fpath2, NULL, NULL, &v2)) {
-> > +		if (v2)
-> > +			printf("%d/%d: splice write - no filename\n",
-> > +				procid, opno);
-> > +		goto out_fpath2;
-> > +	}
-> > +
-> > +	/* Open files */
-> > +	fd1 = open_path(&fpath1, O_RDONLY);
-> > +	e = fd1 < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd1 < 0) {
-> > +		if (v1)
-> > +			printf("%d/%d: splice read - open %s failed %d\n",
-> > +				procid, opno, fpath1.path, e);
-> > +		goto out_fpath2;
-> > +	}
-> > +
-> > +	fd2 = open_path(&fpath2, O_WRONLY);
-> > +	e = fd2 < 0 ? errno : 0;
-> > +	check_cwd();
-> > +	if (fd2 < 0) {
-> > +		if (v2)
-> > +			printf("%d/%d: splice write - open %s failed %d\n",
-> > +				procid, opno, fpath2.path, e);
-> > +		goto out_fd1;
-> > +	}
-> > +
-> > +	/* Get file stats */
-> > +	if (fstat64(fd1, &stat1) < 0) {
-> > +		if (v1)
-> > +			printf("%d/%d: splice read - fstat64 %s failed %d\n",
-> > +				procid, opno, fpath1.path, errno);
-> > +		goto out_fd2;
-> > +	}
-> > +	inode_info(inoinfo1, sizeof(inoinfo1), &stat1, v1);
-> > +
-> > +	if (fstat64(fd2, &stat2) < 0) {
-> > +		if (v2)
-> > +			printf("%d/%d: splice write - fstat64 %s failed %d\n",
-> > +				procid, opno, fpath2.path, errno);
-> > +		goto out_fd2;
-> > +	}
-> > +	inode_info(inoinfo2, sizeof(inoinfo2), &stat2, v2);
-> > +
-> > +	/* Calculate offsets */
-> > +	len = (random() % FILELEN_MAX) + 1;
-> > +	if (len == 0)
-> > +		len = stat1.st_blksize;
-> > +	if (len > stat1.st_size)
-> > +		len = stat1.st_size;
-> > +
-> > +	lr = ((int64_t)random() << 32) + random();
-> > +	if (stat1.st_size == len)
-> > +		off1 = 0;
-> > +	else
-> > +		off1 = (off64_t)(lr % MIN(stat1.st_size - len, MAXFSIZE));
-> > +	off1 %= maxfsize;
-> > +
-> > +	/*
-> > +	 * splice can overlap write, so the offset of the target file can be
-> > +	 * any number (< maxfsize)
-> > +	 */
-> 
-> Er... sorry I've been offline for a couple of weeks due to illness and
-> so was not able to comment on this patch until now, but I've had a
-> problem with my overnight fstests runs:
-> 
-> > +	lr = ((int64_t)random() << 32) + random();
-> 
-> This generates a pseudorandom 64-bit candidate offset for the
-> destination file where we'll land the splice data...
-> 
-> > +	off2 = (off64_t)(lr % maxfsize);
-> 
-> ...and this caps the offset at maxfsize (which is 2^63-	1 on x64), which
-> effectively means that the data will appear at a very high file offset,
-> which creates large (sparse) files very quickly.
-> 
-> Contrast this to other functions like clonerange_f, which add an
-> additional clamp of 1024 blocks past the current dest file EOF:
-> 
->  max_off2 = MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE);
->  do {
-> 	lr = ((int64_t)random() << 32) + random();
-> 	off2 = (off64_t)(lr % max_off2);
-> 	off2 %= maxfsize;
-> 	...
->  }
-> 
-> or truncate_f, which clamps to both 1MB past EOF and MAXFSIZE:
-> 
->  lr = ((int64_t)random() << 32) + random();
->  off = (off64_t)(lr % MIN(stb.st_size + (1024 * 1024), MAXFSIZE));
->  off %= maxfsize;
-> 
-> IOWs, I think we try to grow the fsstress file sizes fairly slowly so
-> that gigantic files don't suddenly jump out of the bushes:
-> 
-> 0/487: splice d3/d9/f2c[6319385 1 0 0 176 1395200] [860317,88612] ->
-> d3/d9/dd/d1c/d21/f4b[1111 1 0 0 0 1408811] [8492675175361853476,88612] 0
-> 
-> Yikes, it wrote 88,612 bytes of data at offset 8,492,675,175,361,853,476!
-> 
-> This causes shared/009 to take forever to run, because it runs fsstress
-> to generate some files, and then uses md5sum to ensure that duperemove
-> doesn't corrupt files.  Unfortunately it takes a very long time to
-> read an entire 8500 petabyte file.
-
-Wow, you're right! I didn't think that large sparse file will cause this
-problem. This patch has been merged, I'll send another patch to fix it.
-
-Thanks very much,
-Zorro
-
-
-> 
-> --D
-> 
-> > +
-> > +	/*
-> > +	 * Due to len, off1 and off2 will be changed later, so record the
-> > +	 * original number at here
-> > +	 */
-> > +	length = len;
-> > +	offset1 = off1;
-> > +	offset2 = off2;
-> > +
-> > +	/* Pipe initialize */
-> > +	if (pipe(filedes) < 0) {
-> > +		if (v1 || v2) {
-> > +			printf("%d/%d: splice - pipe failed %d\n",
-> > +				procid, opno, errno);
-> > +			goto out_fd2;
-> > +		}
-> > +	}
-> > +
-> > +	bytes = 0;
-> > +	total = 0;
-> > +	while (len > 0) {
-> > +		/* move to pipe buffer */
-> > +		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
-> > +		if (ret1 < 0) {
-> > +			break;
-> > +		}
-> > +		bytes = ret1;
-> > +
-> > +		/* move from pipe buffer to dst file */
-> > +		while (bytes > 0) {
-> > +			ret2 = splice(filedes[0], NULL, fd2, &off2, bytes, 0);
-> > +			if (ret2 < 0) {
-> > +				break;
-> > +			}
-> > +			bytes -= ret2;
-> > +		}
-> > +		if (ret2 < 0)
-> > +			break;
-> > +
-> > +		len -= ret1;
-> > +		total += ret1;
-> > +	}
-> > +
-> > +	if (ret1 < 0 || ret2 < 0)
-> > +		e = errno;
-> > +	else
-> > +		e = 0;
-> > +	if (v1 || v2) {
-> > +		printf("%d/%d: splice %s%s [%lld,%lld] -> %s%s [%lld,%lld] %d",
-> > +			procid, opno,
-> > +			fpath1.path, inoinfo1, (long long)offset1, (long long)length,
-> > +			fpath2.path, inoinfo2, (long long)offset2, (long long)length, e);
-> > +
-> > +		if (length && length > total)
-> > +			printf(" asked for %lld, spliced %lld??\n",
-> > +				(long long)length, (long long)total);
-> > +		printf("\n");
-> > +	}
-> > +
-> > +	close(filedes[0]);
-> > +	close(filedes[1]);
-> > +out_fd2:
-> > +	close(fd2);
-> > +out_fd1:
-> > +	close(fd1);
-> > +out_fpath2:
-> > +	free_pathname(&fpath2);
-> > +out_fpath1:
-> > +	free_pathname(&fpath1);
-> > +}
-> > +
-> >  void
-> >  creat_f(int opno, long r)
-> >  {
-> > -- 
-> > 2.17.2
 > > 
+> > .
+> > 
+> 
