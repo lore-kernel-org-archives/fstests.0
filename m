@@ -1,60 +1,39 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43502 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:25948 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728216AbfBDPsR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Feb 2019 10:48:17 -0500
-Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id E62217F416
-        for <fstests@vger.kernel.org>; Mon,  4 Feb 2019 15:48:16 +0000 (UTC)
-Received: from bogon.redhat.com (ovpn-12-28.pek2.redhat.com [10.72.12.28])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id EA2C88A625
-        for <fstests@vger.kernel.org>; Mon,  4 Feb 2019 15:48:15 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] fsstress: avoid splice_f generating too large sparse file
-Date: Mon,  4 Feb 2019 23:48:09 +0800
-Message-Id: <20190204154809.7990-1-zlang@redhat.com>
+        id S1728021AbfBDSez (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 4 Feb 2019 13:34:55 -0500
+Date: Mon, 4 Feb 2019 13:34:54 -0500
+From: Vivek Goyal <vgoyal@redhat.com>
+Subject: [PATCH] xfstest, overlayfs: Use falloc to make sure a meta copy file
+ got copied up
+Message-ID: <20190204183454.GA19549@redhat.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>, linux-unionfs@vger.kernel.org
+Cc: Amir Goldstein <amir73il@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>
 List-ID: <fstests@vger.kernel.org>
 
-Thanks to Darrick J. Wong find this issue! Current splice_f generates
-file offset as below:
+Overlayfs might copy up data of file on first write of file (and
+not necessarily upon open of file). So call falloc file opened
+with O_RDWR and after that data must have been copied up.
 
-  lr = ((int64_t)random() << 32) + random();
-  off2 = (off64_t)(lr % maxfsize);
-
-It generates a pseudorandom 64-bit candidate offset for the
-destination file where we'll land the splice data, and then caps the
-offset at maxfsize (which is 2^63- 1 on x64), which effectively means
-that the data will appear at a very high file offset which creates
-large (sparse) files very quickly.
-
-That's not what we want, and some case likes shared/009 will take
-forever to run md5sum on lots of huge files.
-
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
 ---
- ltp/fsstress.c | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+ tests/overlay/060 |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 68e40ee6..cacaedbc 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -2874,10 +2874,11 @@ splice_f(int opno, long r)
+Index: xfstests-dev/tests/overlay/060
+===================================================================
+--- xfstests-dev.orig/tests/overlay/060	2018-08-27 11:21:51.811847671 -0400
++++ xfstests-dev/tests/overlay/060	2019-02-04 11:28:09.023718690 -0500
+@@ -170,7 +170,7 @@ test_common()
  
- 	/*
- 	 * splice can overlap write, so the offset of the target file can be
--	 * any number (< maxfsize)
-+	 * any number. But to avoid too large offset, add a clamp of 1024 blocks
-+	 * past the current dest file EOF
- 	 */
- 	lr = ((int64_t)random() << 32) + random();
--	off2 = (off64_t)(lr % maxfsize);
-+	off2 = (off64_t)(lr % MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE));
- 
- 	/*
- 	 * Due to len, off1 and off2 will be changed later, so record the
--- 
-2.17.2
+ 	# Trigger data copy up and check absence of metacopy xattr.
+ 	mount_overlay $_lowerdir
+-	$XFS_IO_PROG -c "open -a $SCRATCH_MNT/$_target"
++	$XFS_IO_PROG -c "falloc 0 1" $SCRATCH_MNT/$_target >> $seqres.full
+ 	echo "check properties of data copied up file"
+ 	check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
+ 	umount_overlay
