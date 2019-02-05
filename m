@@ -1,44 +1,108 @@
-Received: from mail-yw1-f43.google.com ([209.85.161.43]:38319 "EHLO
-        mail-yw1-f43.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727245AbfBDUEy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Feb 2019 15:04:54 -0500
+Received: from bombadil.infradead.org ([198.137.202.133]:59478 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727509AbfBESrQ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Feb 2019 13:47:16 -0500
+Received: from 089144212163.atnat0021.highway.a1.net ([89.144.212.163] helo=localhost)
+        by bombadil.infradead.org with esmtpsa (Exim 4.90_1 #2 (Red Hat Linux))
+        id 1gr5kZ-0001j4-Pm
+        for fstests@vger.kernel.org; Tue, 05 Feb 2019 18:47:16 +0000
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH] generic: detect preallocation support for fsx tests 075 and 112
+Date: Tue,  5 Feb 2019 19:47:13 +0100
+Message-Id: <20190205184713.20266-1-hch@lst.de>
 MIME-Version: 1.0
-References: <20190204183454.GA19549@redhat.com>
-In-Reply-To: <20190204183454.GA19549@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 4 Feb 2019 22:04:42 +0200
-Message-ID: <CAOQ4uxjVJHd4iSs12yn8UJrG8rXwF1-By9zauzYQaPSFoTiLZA@mail.gmail.com>
-Subject: Re: [PATCH] xfstest, overlayfs: Use falloc to make sure a meta copy
- file got copied up
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Vivek Goyal <vgoyal@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Miklos Szeredi <miklos@szeredi.hu>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 4, 2019 at 8:34 PM Vivek Goyal <vgoyal@redhat.com> wrote:
->
-> Overlayfs might copy up data of file on first write of file (and
-> not necessarily upon open of file). So call falloc file opened
-> with O_RDWR and after that data must have been copied up.
->
-> Signed-off-by: Vivek Goyal <vgoyal@redhat.com>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Currently generic/075 and generic/112 have two extra fsx passes each that
+exercise fsx with preallocation, which are only enabled for XFS.
 
-> ---
->  tests/overlay/060 |    2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> Index: xfstests-dev/tests/overlay/060
-> ===================================================================
-> --- xfstests-dev.orig/tests/overlay/060 2018-08-27 11:21:51.811847671 -0400
-> +++ xfstests-dev/tests/overlay/060      2019-02-04 11:28:09.023718690 -0500
-> @@ -170,7 +170,7 @@ test_common()
->
->         # Trigger data copy up and check absence of metacopy xattr.
->         mount_overlay $_lowerdir
-> -       $XFS_IO_PROG -c "open -a $SCRATCH_MNT/$_target"
-> +       $XFS_IO_PROG -c "falloc 0 1" $SCRATCH_MNT/$_target >> $seqres.full
->         echo "check properties of data copied up file"
->         check_file_size_contents $SCRATCH_MNT/$_target $_size "$_data"
->         umount_overlay
+These tests can also be run with other file systems, given that the XFS
+prealloc ioctls are implemented in generic code since the addition of
+the fallocate system call.  This also means a version of XFS that does
+not support preallocation (e.g. because it always writes out of place)
+can skip the prealloc tests while still completing the normal fsx tests
+just fine.
+
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/generic/075 | 16 +++++++++++-----
+ tests/generic/112 | 20 +++++++++++++-------
+ 2 files changed, 24 insertions(+), 12 deletions(-)
+
+diff --git a/tests/generic/075 b/tests/generic/075
+index 2b957891..8981c560 100755
+--- a/tests/generic/075
++++ b/tests/generic/075
+@@ -48,11 +48,12 @@ _do_test()
+     echo "fsx.$_n : $_filter_param"
+     echo "-----------------------------------------------"
+ 
+-    if [ "$FSTYP" != "xfs" ]
+-    then
+-	if [ "$_n" = "1" -o "$_n" = "3" ]
+-	then
+-	    # HACK: only xfs handles preallocation (-x) so just skip this test
++    if [ "$_n" = "1" -o "$_n" = "3" ]; then
++        if echo $testio | grep -q "Operation not supported"; then
++	    #
++	    # Skip the prealloc runs if the file system does not support
++	    # preallocation
++	    #
+ 	    return
+ 	fi
+     fi
+@@ -128,6 +129,11 @@ echo "brevity is wit..."
+ 
+ _check_test_fs
+ 
++# check if preallocation is supported
++testfile=$TEST_DIR/$$.xfs_io
++testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
++rm -f $testfile 2>&1 > /dev/null
++
+ # Options:
+ # -d: debug output for all operations
+ # -l flen: the upper bound on file size (default 262144)
+diff --git a/tests/generic/112 b/tests/generic/112
+index 1879e7b5..a6f8fc14 100755
+--- a/tests/generic/112
++++ b/tests/generic/112
+@@ -48,13 +48,14 @@ _do_test()
+     echo "fsx.$_n : $_filter_param"
+     echo "-----------------------------------------------"
+ 
+-    if [ "$FSTYP" != "xfs" ]
+-    then
+-        if [ "$_n" = "1" -o "$_n" = "3" ]
+-        then
+-            # HACK: only xfs handles preallocation (-x) so just skip this test
+-            return
+-        fi
++    if [ "$_n" = "1" -o "$_n" = "3" ]; then
++        if echo $testio | grep -q "Operation not supported"; then
++	    #
++	    # Skip the prealloc runs if the file system does not support
++	    # preallocation
++	    #
++	    return
++	fi
+     fi
+ 
+     # This cd and use of -P gets full debug on $here (not TEST_DEV)
+@@ -128,6 +129,11 @@ echo "brevity is wit..."
+ 
+ _check_test_fs
+ 
++# check if preallocation is supported
++testfile=$TEST_DIR/$$.xfs_io
++testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
++rm -f $testfile 2>&1 > /dev/null
++
+ # Options:
+ # -d: debug output for all operations
+ # -l flen: the upper bound on file size (default 262144)
+-- 
+2.20.1
