@@ -1,98 +1,125 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:38516 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725988AbfBJLOf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 06:14:35 -0500
-Date: Sun, 10 Feb 2019 19:14:28 +0800
+Received: from mail-pl1-f196.google.com ([209.85.214.196]:33847 "EHLO
+        mail-pl1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725999AbfBJLLu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 06:11:50 -0500
+Received: by mail-pl1-f196.google.com with SMTP id w4so3923636plz.1
+        for <fstests@vger.kernel.org>; Sun, 10 Feb 2019 03:11:50 -0800 (PST)
+Date: Sun, 10 Feb 2019 19:11:42 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs/420: only check the extent layout after syncing
-Message-ID: <20190210111428.GV2713@desktop>
-References: <20190204153026.1673-1-hch@lst.de>
+Subject: Re: [PATCH] generic: detect preallocation support for fsx tests 075
+ and 112
+Message-ID: <20190210111142.GU2713@desktop>
+References: <20190205184713.20266-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190204153026.1673-1-hch@lst.de>
+In-Reply-To: <20190205184713.20266-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
 To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 04, 2019 at 04:30:26PM +0100, Christoph Hellwig wrote:
-> This tests validates the correct extent layout for some hairy reflink
-> related issues.  But until we called sync or fsync we have no gurantee
-> of any data fork layout, as only writeback moves the extents from the
-> COW for to the data fork.
+On Tue, Feb 05, 2019 at 07:47:13PM +0100, Christoph Hellwig wrote:
+> Currently generic/075 and generic/112 have two extra fsx passes each that
+> exercise fsx with preallocation, which are only enabled for XFS.
 > 
-> The comparism pass before the sync might see an "error" if we use COW
-> fork speculative preallocations for non-overwrites, which is useful to
-> reduce fragmentation.
-> 
-> Just remove the pass of comparisms before the sync, as the one after
-> the sync will catch all persistent issues.
+> These tests can also be run with other file systems, given that the XFS
+> prealloc ioctls are implemented in generic code since the addition of
+> the fallocate system call.  This also means a version of XFS that does
+> not support preallocation (e.g. because it always writes out of place)
+> can skip the prealloc tests while still completing the normal fsx tests
+> just fine.
 > 
 > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/generic/075 | 16 +++++++++++-----
+>  tests/generic/112 | 20 +++++++++++++-------
+>  2 files changed, 24 insertions(+), 12 deletions(-)
+> 
+> diff --git a/tests/generic/075 b/tests/generic/075
+> index 2b957891..8981c560 100755
+> --- a/tests/generic/075
+> +++ b/tests/generic/075
+> @@ -48,11 +48,12 @@ _do_test()
+>      echo "fsx.$_n : $_filter_param"
+>      echo "-----------------------------------------------"
+>  
+> -    if [ "$FSTYP" != "xfs" ]
+> -    then
+> -	if [ "$_n" = "1" -o "$_n" = "3" ]
+> -	then
+> -	    # HACK: only xfs handles preallocation (-x) so just skip this test
+> +    if [ "$_n" = "1" -o "$_n" = "3" ]; then
+> +        if echo $testio | grep -q "Operation not supported"; then
 
-I think this is fine. But I'd like the test author to take a look too.
+Hmm, I don't think checking ENOSUPP message is sufficient, old distros
+may ship xfs_io without falloc support or there's no generic prealloc
+ioctl support, these cases are rare but possible.
 
-/me looks at Darrick :)
+How about adding a new XFS_IOC_RESVSP ioctl check in src/feature.c and
+skip the fsx's "-x" option if feature reports that the ioctl is not
+supported by the fs?
 
 Thanks,
 Eryu
 
-> ---
->  tests/xfs/420     | 14 --------------
->  tests/xfs/420.out | 14 --------------
->  2 files changed, 28 deletions(-)
-> 
-> diff --git a/tests/xfs/420 b/tests/xfs/420
-> index a083a12b..0d611fd6 100755
-> --- a/tests/xfs/420
-> +++ b/tests/xfs/420
-> @@ -93,20 +93,6 @@ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres
->  $XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
->  $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
+> +	    #
+> +	    # Skip the prealloc runs if the file system does not support
+> +	    # preallocation
+> +	    #
+>  	    return
+>  	fi
+>      fi
+> @@ -128,6 +129,11 @@ echo "brevity is wit..."
 >  
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-> -
-> -echo "Seek holes and data in file1"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> -echo "Seek holes and data in file2"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-> -
-> -echo "Compare files"
-> -md5sum $testdir/file1 | _filter_scratch
-> -md5sum $testdir/file2 | _filter_scratch
-> -md5sum $testdir/file3 | _filter_scratch
-> -
->  echo "sync filesystem" | tee -a $seqres.full
->  sync
+>  _check_test_fs
 >  
-> diff --git a/tests/xfs/420.out b/tests/xfs/420.out
-> index d1b5483a..39360741 100644
-> --- a/tests/xfs/420.out
-> +++ b/tests/xfs/420.out
-> @@ -6,20 +6,6 @@ c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file2
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file3
->  CoW the shared part then write into the empty part
-> -Seek holes and data in file1
-> -Whence	Result
-> -DATA	0
-> -HOLE	131072
-> -Seek holes and data in file2
-> -Whence	Result
-> -DATA	0
-> -HOLE	131072
-> -DATA	196608
-> -HOLE	262144
-> -Compare files
-> -c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
-> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file2
-> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file3
->  sync filesystem
->  Seek holes and data in file1
->  Whence	Result
+> +# check if preallocation is supported
+> +testfile=$TEST_DIR/$$.xfs_io
+> +testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
+> +rm -f $testfile 2>&1 > /dev/null
+> +
+>  # Options:
+>  # -d: debug output for all operations
+>  # -l flen: the upper bound on file size (default 262144)
+> diff --git a/tests/generic/112 b/tests/generic/112
+> index 1879e7b5..a6f8fc14 100755
+> --- a/tests/generic/112
+> +++ b/tests/generic/112
+> @@ -48,13 +48,14 @@ _do_test()
+>      echo "fsx.$_n : $_filter_param"
+>      echo "-----------------------------------------------"
+>  
+> -    if [ "$FSTYP" != "xfs" ]
+> -    then
+> -        if [ "$_n" = "1" -o "$_n" = "3" ]
+> -        then
+> -            # HACK: only xfs handles preallocation (-x) so just skip this test
+> -            return
+> -        fi
+> +    if [ "$_n" = "1" -o "$_n" = "3" ]; then
+> +        if echo $testio | grep -q "Operation not supported"; then
+> +	    #
+> +	    # Skip the prealloc runs if the file system does not support
+> +	    # preallocation
+> +	    #
+> +	    return
+> +	fi
+>      fi
+>  
+>      # This cd and use of -P gets full debug on $here (not TEST_DEV)
+> @@ -128,6 +129,11 @@ echo "brevity is wit..."
+>  
+>  _check_test_fs
+>  
+> +# check if preallocation is supported
+> +testfile=$TEST_DIR/$$.xfs_io
+> +testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
+> +rm -f $testfile 2>&1 > /dev/null
+> +
+>  # Options:
+>  # -d: debug output for all operations
+>  # -l flen: the upper bound on file size (default 262144)
 > -- 
 > 2.20.1
 > 
