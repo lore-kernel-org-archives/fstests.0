@@ -1,127 +1,98 @@
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:40750 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725862AbfBJJZp (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 04:25:45 -0500
-Received: by mail-pf1-f195.google.com with SMTP id h1so993203pfo.7
-        for <fstests@vger.kernel.org>; Sun, 10 Feb 2019 01:25:44 -0800 (PST)
-Date: Sun, 10 Feb 2019 17:25:37 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:38516 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725988AbfBJLOf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 06:14:35 -0500
+Date: Sun, 10 Feb 2019 19:14:28 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] fsstress: avoid infinite zero byte reading
-Message-ID: <20190210092537.GR2713@desktop>
-References: <20190129080916.11529-1-zlang@redhat.com>
+Subject: Re: [PATCH] xfs/420: only check the extent layout after syncing
+Message-ID: <20190210111428.GV2713@desktop>
+References: <20190204153026.1673-1-hch@lst.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190129080916.11529-1-zlang@redhat.com>
+In-Reply-To: <20190204153026.1673-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jan 29, 2019 at 04:09:16PM +0800, Zorro Lang wrote:
-> copyrange_f and splice_f functions use a while loop to read a file,
-> it's fine if there's only one fsstress process(and its children),
-> but if some third part testing processes remove the file in the
-> middle phase of copyrange_f running, copyrange_f maybe always return
-> 0, and the while loop can't be end. As below:
+On Mon, Feb 04, 2019 at 04:30:26PM +0100, Christoph Hellwig wrote:
+> This tests validates the correct extent layout for some hairy reflink
+> related issues.  But until we called sync or fsync we have no gurantee
+> of any data fork layout, as only writeback moves the extents from the
+> COW for to the data fork.
 > 
-> root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
-> root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
-> root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
-> root     47314  xxxxxx S+ grep --color=auto fsstress
-> ...
-> ...
-> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
-> ...
-> ...
-> lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
+> The comparism pass before the sync might see an "error" if we use COW
+> fork speculative preallocations for non-overwrites, which is useful to
+> reduce fragmentation.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
->  ltp/fsstress.c | 20 +++++++++++++++++++-
->  1 file changed, 19 insertions(+), 1 deletion(-)
+> Just remove the pass of comparisms before the sync, as the one after
+> the sync will catch all persistent issues.
 > 
-> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> index c04feb78..68e40ee6 100644
-> --- a/ltp/fsstress.c
-> +++ b/ltp/fsstress.c
-> @@ -2363,8 +2363,9 @@ copyrange_f(
->  	int			v2;
->  	int			fd1;
->  	int			fd2;
-> -	size_t			ret;
-> +	size_t			ret = 0;
->  	int			e;
-> +	int			limit;
->  
->  	/* Load paths */
->  	init_pathname(&fpath1);
-> @@ -2446,6 +2447,7 @@ copyrange_f(
->  		off2 %= maxfsize;
->  	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
->  
-> +	limit = 300;
->  	while (len > 0) {
->  		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
->  			      len, 0);
-> @@ -2456,6 +2458,15 @@ copyrange_f(
->  			break;
->  		else if (ret > 0)
->  			len -= ret;
-> +		else {
-> +			/*
-> +			 * if copy_file_range always get 0 byte, break from the
-> +			 * infinite loop running
-> +			 */
-> +			limit--;
-> +			if (limit <= 0)
-> +				break;
-> +		}
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
 
-I think we could just break the while loop if ret == 0, no need to retry
-300 times.
+I think this is fine. But I'd like the test author to take a look too.
 
->  	}
->  	e = ret < 0 ? errno : 0;
->  	if (v1 || v2) {
-> @@ -2790,6 +2801,7 @@ splice_f(int opno, long r)
->  	size_t			bytes;
->  	int			e;
->  	int			filedes[2];
-> +	int			limit;
->  
->  	/* Load paths */
->  	init_pathname(&fpath1);
-> @@ -2886,6 +2898,7 @@ splice_f(int opno, long r)
->  
->  	bytes = 0;
->  	total = 0;
-> +	limit = 300;
->  	while (len > 0) {
->  		/* move to pipe buffer */
->  		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
-> @@ -2907,6 +2920,11 @@ splice_f(int opno, long r)
->  
->  		len -= ret1;
->  		total += ret1;
-> +		if (ret1 == 0) {
-> +			limit--;
-> +			if (limit <= 0)
-> +				break;
-> +		}
-
-Same here, just check ret1 after the 'read' splice and break the loop if
-ret1 == 0.
+/me looks at Darrick :)
 
 Thanks,
 Eryu
 
->  	}
+> ---
+>  tests/xfs/420     | 14 --------------
+>  tests/xfs/420.out | 14 --------------
+>  2 files changed, 28 deletions(-)
+> 
+> diff --git a/tests/xfs/420 b/tests/xfs/420
+> index a083a12b..0d611fd6 100755
+> --- a/tests/xfs/420
+> +++ b/tests/xfs/420
+> @@ -93,20 +93,6 @@ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres
+>  $XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
+>  $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
 >  
->  	if (ret1 < 0 || ret2 < 0)
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> -
+> -echo "Seek holes and data in file1"
+> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> -echo "Seek holes and data in file2"
+> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+> -
+> -echo "Compare files"
+> -md5sum $testdir/file1 | _filter_scratch
+> -md5sum $testdir/file2 | _filter_scratch
+> -md5sum $testdir/file3 | _filter_scratch
+> -
+>  echo "sync filesystem" | tee -a $seqres.full
+>  sync
+>  
+> diff --git a/tests/xfs/420.out b/tests/xfs/420.out
+> index d1b5483a..39360741 100644
+> --- a/tests/xfs/420.out
+> +++ b/tests/xfs/420.out
+> @@ -6,20 +6,6 @@ c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
+>  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file2
+>  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file3
+>  CoW the shared part then write into the empty part
+> -Seek holes and data in file1
+> -Whence	Result
+> -DATA	0
+> -HOLE	131072
+> -Seek holes and data in file2
+> -Whence	Result
+> -DATA	0
+> -HOLE	131072
+> -DATA	196608
+> -HOLE	262144
+> -Compare files
+> -c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
+> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file2
+> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file3
+>  sync filesystem
+>  Seek holes and data in file1
+>  Whence	Result
 > -- 
-> 2.17.2
+> 2.20.1
 > 
