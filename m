@@ -1,70 +1,127 @@
-Received: from mail-ua1-f65.google.com ([209.85.222.65]:40644 "EHLO
-        mail-ua1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726353AbfBHWrF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 8 Feb 2019 17:47:05 -0500
-Received: by mail-ua1-f65.google.com with SMTP id n32so210598uae.7
-        for <fstests@vger.kernel.org>; Fri, 08 Feb 2019 14:47:04 -0800 (PST)
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:40750 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725862AbfBJJZp (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 04:25:45 -0500
+Received: by mail-pf1-f195.google.com with SMTP id h1so993203pfo.7
+        for <fstests@vger.kernel.org>; Sun, 10 Feb 2019 01:25:44 -0800 (PST)
+Date: Sun, 10 Feb 2019 17:25:37 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] fsstress: avoid infinite zero byte reading
+Message-ID: <20190210092537.GR2713@desktop>
+References: <20190129080916.11529-1-zlang@redhat.com>
 MIME-Version: 1.0
-From: Jayashree Mohan <jayashree2912@gmail.com>
-Date: Fri, 8 Feb 2019 16:46:50 -0600
-Message-ID: <CA+EzBbDyoPF8=mZyG8HQAoHTm4h4MSCe=5WX_SBqRwPej=4uFg@mail.gmail.com>
-Subject: Documenting the crash consistency guarantees of file systems
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190129080916.11529-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: Theodore Ts'o <tytso@mit.edu>, Filipe Manana <fdmanana@gmail.com>, Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, Chris Mason <clm@fb.com>, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Tue, Jan 29, 2019 at 04:09:16PM +0800, Zorro Lang wrote:
+> copyrange_f and splice_f functions use a while loop to read a file,
+> it's fine if there's only one fsstress process(and its children),
+> but if some third part testing processes remove the file in the
+> middle phase of copyrange_f running, copyrange_f maybe always return
+> 0, and the while loop can't be end. As below:
+> 
+> root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
+> root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+> root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+> root     47314  xxxxxx S+ grep --color=auto fsstress
+> ...
+> ...
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> ...
+> ...
+> lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
+> 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
+>  ltp/fsstress.c | 20 +++++++++++++++++++-
+>  1 file changed, 19 insertions(+), 1 deletion(-)
+> 
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index c04feb78..68e40ee6 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -2363,8 +2363,9 @@ copyrange_f(
+>  	int			v2;
+>  	int			fd1;
+>  	int			fd2;
+> -	size_t			ret;
+> +	size_t			ret = 0;
+>  	int			e;
+> +	int			limit;
+>  
+>  	/* Load paths */
+>  	init_pathname(&fpath1);
+> @@ -2446,6 +2447,7 @@ copyrange_f(
+>  		off2 %= maxfsize;
+>  	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
+>  
+> +	limit = 300;
+>  	while (len > 0) {
+>  		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
+>  			      len, 0);
+> @@ -2456,6 +2458,15 @@ copyrange_f(
+>  			break;
+>  		else if (ret > 0)
+>  			len -= ret;
+> +		else {
+> +			/*
+> +			 * if copy_file_range always get 0 byte, break from the
+> +			 * infinite loop running
+> +			 */
+> +			limit--;
+> +			if (limit <= 0)
+> +				break;
+> +		}
 
-We all understand that providing strong crash consistency guarantees
-while not impacting performance, can be tricky. While you strive to
-achieve that, it is worth documenting the expected/current guarantees
-provided by each file system so that users can report buggy behaviors
-and stop pursuing potential dead ends.
+I think we could just break the while loop if ret == 0, no need to retry
+300 times.
 
-In the course of developing our crash-consistency testing tool:
-CrashMonkey, we've had several interesting discussions with
-file-system developers regarding the guarantees provided by
-file-system operations. For example, the crash-consistency guarantees
-of symlink does not ensure that the symlink-ed file survives a crash,
-even if it was persisted explicitly before the crash. This is because,
-unlike hard links, symlinks are not regular files and it is not
-possible to directly open them to fsync() [1].
+>  	}
+>  	e = ret < 0 ? errno : 0;
+>  	if (v1 || v2) {
+> @@ -2790,6 +2801,7 @@ splice_f(int opno, long r)
+>  	size_t			bytes;
+>  	int			e;
+>  	int			filedes[2];
+> +	int			limit;
+>  
+>  	/* Load paths */
+>  	init_pathname(&fpath1);
+> @@ -2886,6 +2898,7 @@ splice_f(int opno, long r)
+>  
+>  	bytes = 0;
+>  	total = 0;
+> +	limit = 300;
+>  	while (len > 0) {
+>  		/* move to pipe buffer */
+>  		ret1 = splice(fd1, &off1, filedes[1], NULL, len, 0);
+> @@ -2907,6 +2920,11 @@ splice_f(int opno, long r)
+>  
+>  		len -= ret1;
+>  		total += ret1;
+> +		if (ret1 == 0) {
+> +			limit--;
+> +			if (limit <= 0)
+> +				break;
+> +		}
 
-Similarly, most file systems today provide guarantees more
-than what the POSIX expects; however, these are not formally
-documented. For example, in btrfs, fsync() of any file should be
-enough to persist that file in its current directory; it does
-not require that its parent directory be explicitly persisted [2].
-f2fs on the other hand, offers multiple fsync() modes like
-FSYNC_MODE_STRICT, FSYNC_MODE_POSIX etc, each with different
-guarantees. As a user, we are unaware of these differences in
-guarantees each file system has to offer.
-
-More recently, there was a bug report which stated that chmod'ed
-permissions on special files were not persisted upon fsync() [3].
-While Ted explained that special files don't have a fsync() function
-defined, thereby making it a no-op, we believe such information is
-crucial and worth documenting.
-
-In this context, how about adding a new file to the Linux kernel
-documentation, for example,
-linux/Documentation/filesystems/crash-consistency-guarantees.txt,
-where developers or users could contribute their knowledge on such
-special cases where persistence guarantees are not applicable, or the
-extent of crash-guarantees each file system provides? If this sounds
-good, we will be happy to send out a patch detailing the information
-we gathered about each file-system's guarantees while testing them
-with CrashMonkey. This would serve as a one-stop destination for all
-information related to crash-consistency guarantees and encourage any
-future conversations pertaining to crash consistency to be documented
-here.
-
-[1] https://www.spinics.net/lists/linux-btrfs/msg76835.html
-[2] https://www.spinics.net/lists/linux-btrfs/msg77340.html
-[3] https://bugzilla.kernel.org/show_bug.cgi?id=202485
-
+Same here, just check ret1 after the 'read' splice and break the loop if
+ret1 == 0.
 
 Thanks,
-Jayashree Mohan
+Eryu
+
+>  	}
+>  
+>  	if (ret1 < 0 || ret2 < 0)
+> -- 
+> 2.17.2
+> 
