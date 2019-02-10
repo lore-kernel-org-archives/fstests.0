@@ -1,51 +1,48 @@
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:45831 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725862AbfBJJa0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 04:30:26 -0500
-Received: by mail-pf1-f194.google.com with SMTP id j3so3786890pfi.12
-        for <fstests@vger.kernel.org>; Sun, 10 Feb 2019 01:30:26 -0800 (PST)
-Date: Sun, 10 Feb 2019 17:30:19 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:37797 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725999AbfBJLFi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 06:05:38 -0500
+Date: Sun, 10 Feb 2019 19:05:31 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs/252: requires fallocate support for preallocation
-Message-ID: <20190210093019.GS2713@desktop>
-References: <20190205184816.20330-1-hch@lst.de>
+Subject: Re: [PATCH v3] xfs/068: Verify actual file count instead of reported
+ file count
+Message-ID: <20190210110531.GT2713@desktop>
+References: <20190205193118.30969-1-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190205184816.20330-1-hch@lst.de>
+In-Reply-To: <20190205193118.30969-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 05, 2019 at 07:48:16PM +0100, Christoph Hellwig wrote:
-> xfs/252 has a few feature tests, but misses checking for preallocation
-> support.  Because of that it will fail instead of not being run for
-> and XFS file system in always COW mode.
+On Tue, Feb 05, 2019 at 09:31:18PM +0200, Amir Goldstein wrote:
+> This test has the number of files/dirs created by xfsrestore hardcoded
+> in golden output.
 > 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/252 | 1 +
->  1 file changed, 1 insertion(+)
+> When fsstress is added new ops, the number of files/dirs created with
+> the same random seed changes and this regularly breaks this test,
+> so when new fsstress ops are added they should be either added to the
+> dump test blacklist or golden output of this test needs to be ammended
+> to reflect the change.
 > 
-> diff --git a/tests/xfs/252 b/tests/xfs/252
-> index df795b81..42650ad1 100755
-> --- a/tests/xfs/252
-> +++ b/tests/xfs/252
-> @@ -31,6 +31,7 @@ _supported_fs xfs
->  _supported_os Linux
->  
->  _require_test
-> +_require_xfs_io_command "fallocate"
+> The golden output includes only the file count reported by xfsrestore
+> and test does not even verify that this is the correct file count.
+> Instead, leave the golden output neutral and explicitly verify that
+> file count before and after the test are the same.
+> 
+> With this change, the test becomes agnostic to fsstress ops and we
+> could also stop blacklisting clone/dedup/copy ops if we want.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
-The xfs_io command should be "falloc", fixed on commit :)
+This looks good to me, thanks a lot!
+
+I added all blacklisted ops manually and tested again with both reflink
+enabled/disabled XFS and tests passed fine, the dumped and restured
+entry numbers did match. Next, I think we're ready to add all the ops in
+the blacklist back.
 
 Thanks,
 Eryu
-
->  _require_xfs_io_command "fpunch"
->  _require_xfs_io_command "fiemap"
->  
-> -- 
-> 2.20.1
-> 
