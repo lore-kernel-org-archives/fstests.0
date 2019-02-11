@@ -1,104 +1,116 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:45426 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726584AbfBCNHw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Feb 2019 08:07:52 -0500
+Received: from userp2130.oracle.com ([156.151.31.86]:40654 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727122AbfBKXvw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 18:51:52 -0500
+Date: Mon, 11 Feb 2019 15:51:44 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/420: only check the extent layout after syncing
+Message-ID: <20190211235144.GA6477@magnolia>
+References: <20190204153026.1673-1-hch@lst.de>
 MIME-Version: 1.0
-References: <20190127075057.25254-1-amir73il@gmail.com> <20190127075057.25254-2-amir73il@gmail.com>
- <20190203124041.GQ2713@desktop>
-In-Reply-To: <20190203124041.GQ2713@desktop>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 3 Feb 2019 15:07:39 +0200
-Message-ID: <CAOQ4uxjR7e9eYUtJ+BY3SfQs2tMXuOkKuFEwv5K1XOPLmqxoEw@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] xfs/068: Verify actual file count instead of
- reported file count
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190204153026.1673-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Dave Chinner <david@fromorbit.com>, Zorro Lang <zlang@redhat.com>, Eric Sandeen <sandeen@redhat.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: Christoph Hellwig <hch@lst.de>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Feb 3, 2019 at 2:40 PM Eryu Guan <guaneryu@gmail.com> wrote:
->
-> On Sun, Jan 27, 2019 at 09:50:57AM +0200, Amir Goldstein wrote:
-> > This test has the number of files/dirs created by xfsrestore hardcoded
-> > in golden output.
-> >
-> > When fsstress is added new ops, the number of files/dirs created with
-> > the same random seed changes and this regularly breaks this test,
-> > so when new fsstress ops are added they should be either added to the
-> > dump test blacklist or golden output of this test needs to be ammended
-> > to reflect the change.
-> >
-> > The golden output includes only the file count reported by xfsrestore
-> > and test does not even verify that this is the correct file count.
-> > Instead, leave the golden output nuetral and explicitly verify that
-> > file count before and after the test are the same.
-> >
-> > With this change, the test becomes agnostic to fsstress ops and we
-> > could also stop blacklisting clone/dedup/copy ops if we want.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
->
-> Looks fine to me overall, thanks a lot for the fix! But I'd like an ACK
-> from XFS folks :)
->
-> > ---
-> >  common/dump       |  7 +++++++
-> >  tests/xfs/068     | 14 +++++++++++++-
-> >  tests/xfs/068.out |  2 +-
-> >  3 files changed, 21 insertions(+), 2 deletions(-)
-> >
-> > diff --git a/common/dump b/common/dump
-> > index 89fa0391..f112fc37 100644
-> > --- a/common/dump
-> > +++ b/common/dump
-> > @@ -1514,6 +1514,13 @@ _check_quota_file()
-> >     _check_quota 'xfsdump_quotas' 'xfsdump_quotas_group' 'xfsdump_quotas_proj'
-> >  }
-> >
-> > +_count_dumpdir_files()
-> > +{
-> > +     local ndirs=$(find $dump_dir -type d | wc -l)
-> > +     local nents=$(find $dump_dir | wc -l)
-> > +
-> > +     echo "$ndirs directories and $nents entries"
-> > +}
-> >
-> >  # make sure this script returns success
-> >  /bin/true
-> > diff --git a/tests/xfs/068 b/tests/xfs/068
-> > index 7f5900fc..264a9e96 100755
-> > --- a/tests/xfs/068
-> > +++ b/tests/xfs/068
-> > @@ -30,12 +30,24 @@ _cleanup()
-> >  . ./common/rc
-> >  . ./common/dump
-> >
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> >  # real QA test starts here
-> >  _supported_fs xfs
-> >  _supported_os Linux
-> >
-> >  _create_dumpdir_stress_num 4096
-> > -_do_dump_restore
-> > +
-> > +echo -n "Before: " >> $seqres.full
-> > +_count_dumpdir_files | tee $tmp.before >> $seqres.full
-> > +
-> > +# filter out the file count, it changes as fsstress adds new operations
-> > +_do_dump_restore | sed -e "/entries processed$/s/[0-9][0-9]*/NUM/g"
-> > +
-> > +echo -n "After: " >> $seqres.full
-> > +_count_dumpdir_files | tee $tmp.after >> $seqres.full
->
-> The "Before" and "After" both count the file entries in $dump_dir, so
-> they should always be the same, we should count $restore_dir at "After"?
->
+On Mon, Feb 04, 2019 at 04:30:26PM +0100, Christoph Hellwig wrote:
+> This tests validates the correct extent layout for some hairy reflink
+> related issues.  But until we called sync or fsync we have no gurantee
+> of any data fork layout, as only writeback moves the extents from the
+> COW for to the data fork.
 
-Certainly. We should count $restore_dir/$dump_sdir.
-I there is an ACK to concept, I will send a fix.
+Hmm.  Looking at my notes for xfs/420, the goal was to make sure that if
+userspace writes to offsets X and Y, an immediately subsequent SEEK_DATA
+returns X and Y as data, both before and after an fsync.
 
-Thanks,
-Amir.
+The twist for this test is that offset Y didn't have any block mapped
+before the COW requirement was added to the file, which means that this
+test is making sure that we can't miss a piece of data that will be COWd
+into place in the future but isn't currently mapped into the data fork.
+
+It also checks that the file contents and SEEK_DATA results remain the
+same after an fsync.
+
+> The comparism pass before the sync might see an "error" if we use COW
+> fork speculative preallocations for non-overwrites, which is useful to
+> reduce fragmentation.
+
+What error do you see?
+
+> Just remove the pass of comparisms before the sync, as the one after
+> the sync will catch all persistent issues.
+> 
+> Signed-off-by: Christoph Hellwig <hch@lst.de>
+> ---
+>  tests/xfs/420     | 14 --------------
+>  tests/xfs/420.out | 14 --------------
+>  2 files changed, 28 deletions(-)
+> 
+> diff --git a/tests/xfs/420 b/tests/xfs/420
+> index a083a12b..0d611fd6 100755
+> --- a/tests/xfs/420
+> +++ b/tests/xfs/420
+> @@ -93,20 +93,6 @@ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres
+>  $XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
+>  $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
+>  
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
+> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
+> -
+> -echo "Seek holes and data in file1"
+> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
+> -echo "Seek holes and data in file2"
+> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
+
+This removed code tests that the earlier write of 64k of data into file2
+between 192k and 256k can be found by SEEK_DATA before file2 gets
+sync'd to disk.
+
+> -echo "Compare files"
+> -md5sum $testdir/file1 | _filter_scratch
+> -md5sum $testdir/file2 | _filter_scratch
+> -md5sum $testdir/file3 | _filter_scratch
+
+And this removed code checks that the page cache contents remain stable
+and correct even for a write that goes through the COW mechanism.
+
+I don't see why it's advantageous to remove this part of the test?
+
+--D
+
+> -
+>  echo "sync filesystem" | tee -a $seqres.full
+>  sync
+>  
+> diff --git a/tests/xfs/420.out b/tests/xfs/420.out
+> index d1b5483a..39360741 100644
+> --- a/tests/xfs/420.out
+> +++ b/tests/xfs/420.out
+> @@ -6,20 +6,6 @@ c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
+>  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file2
+>  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file3
+>  CoW the shared part then write into the empty part
+> -Seek holes and data in file1
+> -Whence	Result
+> -DATA	0
+> -HOLE	131072
+> -Seek holes and data in file2
+> -Whence	Result
+> -DATA	0
+> -HOLE	131072
+> -DATA	196608
+> -HOLE	262144
+> -Compare files
+> -c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
+> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file2
+> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file3
+>  sync filesystem
+>  Seek holes and data in file1
+>  Whence	Result
+> -- 
+> 2.20.1
+> 
