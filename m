@@ -1,508 +1,125 @@
-Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:33747
-        "EHLO ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726032AbfBKBgw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 20:36:52 -0500
-Received: from discord.disaster.area ([192.168.1.111])
-        by dastard with esmtp (Exim 4.80)
-        (envelope-from <david@fromorbit.com>)
-        id 1gt0Wd-0000vY-BD
-        for fstests@vger.kernel.org; Mon, 11 Feb 2019 12:36:47 +1100
-Received: from dave by discord.disaster.area with local (Exim 4.92-RC5)
-        (envelope-from <david@fromorbit.com>)
-        id 1gt0Wd-0005su-9k
-        for fstests@vger.kernel.org; Mon, 11 Feb 2019 12:36:47 +1100
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:6376 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726074AbfBKVvV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 16:51:21 -0500
+Date: Tue, 12 Feb 2019 08:51:17 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: [PATCH] xfs: new EOF fragmentation tests
-Date: Mon, 11 Feb 2019 12:36:47 +1100
-Message-Id: <20190211013647.22580-1-david@fromorbit.com>
+Subject: Re: [PATCH] cifs: add test that setfattr -x fails non-existing EAs
+Message-ID: <20190211215117.GG20493@dastard>
+References: <20190211051932.20542-1-lsahlber@redhat.com>
+ <20190211051932.20542-2-lsahlber@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190211051932.20542-2-lsahlber@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Ronnie Sahlberg <lsahlber@redhat.com>
+Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Dave Chinner <dchinner@redhat.com>
+[cc fstests@vger.kernel.org]
 
-These tests create substantial file fragmentation as a result of
-application actions that defeat post-EOF preallocation
-optimisations. They are intended to replicate known vectors for
-these problems, and provide a check that the fragmentation levels
-have been controlled. The mitigations we make may not completely
-remove fragmentation (e.g. they may demonstrate speculative delalloc
-related extent size growth) so the checks don't assume we'll end up
-with perfect layouts and hence check for an exceptable level of
-fragmentation rather than none.
+Hi Ronnie,
 
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
----
- tests/xfs/500     | 79 +++++++++++++++++++++++++++++++++++++++++
- tests/xfs/500.out |  9 +++++
- tests/xfs/501     | 81 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/501.out |  9 +++++
- tests/xfs/502     | 81 ++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/502.out |  9 +++++
- tests/xfs/503     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/503.out | 33 ++++++++++++++++++
- tests/xfs/group   |  4 +++
- 9 files changed, 394 insertions(+)
- create mode 100755 tests/xfs/500
- create mode 100644 tests/xfs/500.out
- create mode 100755 tests/xfs/501
- create mode 100644 tests/xfs/501.out
- create mode 100755 tests/xfs/502
- create mode 100644 tests/xfs/502.out
- create mode 100755 tests/xfs/503
- create mode 100644 tests/xfs/503.out
+Probably better to send this (and any followups) to the fstests
+list... :)
 
-diff --git a/tests/xfs/500 b/tests/xfs/500
-new file mode 100755
-index 00000000..d0802e86
---- /dev/null
-+++ b/tests/xfs/500
-@@ -0,0 +1,79 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test xfs/500
-+#
-+# Post-EOF preallocation defeat test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs 2>&1 >> $seqres.full
-+_scratch_mount
-+
-+# Write multiple files in parallel using synchronous buffered writes. Aim is to
-+# interleave allocations to fragment the files. Synchronous writes defeat the
-+# open/write/close heuristics in xfs_release() that prevent EOF block removal,
-+# so this should fragment badly. Typical problematic behaviour shows per-file
-+# extent counts of >900 (almost worse case) whilst fixed behaviour typically
-+# shows extent counts in the low 20s.
-+#
-+# Failure is determined by golden output mismatch from _within_tolerance().
-+
-+workfile=$SCRATCH_MNT/file
-+nfiles=8
-+wsize=4096
-+wcnt=1000
-+
-+write_sync_file()
-+{
-+	idx=$1
-+
-+	for ((cnt=0; cnt<$wcnt; cnt++)); do
-+		$XFS_IO_PROG -f -s -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-+	done
-+}
-+
-+rm -f $workfile*
-+for ((n=0; n<$nfiles; n++)); do
-+	write_sync_file $n > /dev/null 2>&1 &
-+done
-+wait
-+sync
-+
-+for ((n=0; n<$nfiles; n++)); do
-+	count=$(_count_extents $workfile.$n)
-+	# Acceptible extent count range is 1-40
-+	_within_tolerance "file.$n extent count" $count 21 19 -v
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/500.out b/tests/xfs/500.out
-new file mode 100644
-index 00000000..1ffc1790
---- /dev/null
-+++ b/tests/xfs/500.out
-@@ -0,0 +1,9 @@
-+QA output created by 500
-+file.0 extent count is in range
-+file.1 extent count is in range
-+file.2 extent count is in range
-+file.3 extent count is in range
-+file.4 extent count is in range
-+file.5 extent count is in range
-+file.6 extent count is in range
-+file.7 extent count is in range
-diff --git a/tests/xfs/501 b/tests/xfs/501
-new file mode 100755
-index 00000000..493e4d77
---- /dev/null
-+++ b/tests/xfs/501
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test xfs/501
-+#
-+# Post-EOF preallocation defeat test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs 2>&1 >> $seqres.full
-+_scratch_mount
-+
-+# Write multiple files in parallel using buffered writes with extent size hints.
-+# Aim is to interleave allocations to fragment the files. Writes w/ extent size
-+# hints set defeat the open/write/close heuristics in xfs_release() that prevent
-+# EOF block removal, so this should fragment badly. Typical problematic
-+# behaviour shows per-file extent counts of 1000 (worst case!) whilst
-+# fixed behaviour should show very few extents (almost best case).
-+#
-+# Failure is determined by golden output mismatch from _within_tolerance().
-+
-+workfile=$SCRATCH_MNT/file
-+nfiles=8
-+wsize=4096
-+wcnt=1000
-+extent_size=16m
-+
-+write_extsz_file()
-+{
-+	idx=$1
-+
-+	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-+	for ((cnt=0; cnt<$wcnt; cnt++)); do
-+		$XFS_IO_PROG -f -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-+	done
-+}
-+
-+rm -f $workfile*
-+for ((n=0; n<$nfiles; n++)); do
-+	write_extsz_file $n > /dev/null 2>&1 &
-+done
-+wait
-+sync
-+
-+for ((n=0; n<$nfiles; n++)); do
-+	count=$(_count_extents $workfile.$n)
-+	# Acceptible extent count range is 1-10
-+	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/501.out b/tests/xfs/501.out
-new file mode 100644
-index 00000000..ead0b496
---- /dev/null
-+++ b/tests/xfs/501.out
-@@ -0,0 +1,9 @@
-+QA output created by 501
-+file.0 extent count is in range
-+file.1 extent count is in range
-+file.2 extent count is in range
-+file.3 extent count is in range
-+file.4 extent count is in range
-+file.5 extent count is in range
-+file.6 extent count is in range
-+file.7 extent count is in range
-diff --git a/tests/xfs/502 b/tests/xfs/502
-new file mode 100755
-index 00000000..9f314a3d
---- /dev/null
-+++ b/tests/xfs/502
-@@ -0,0 +1,81 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test xfs/502
-+#
-+# Post-EOF preallocation defeat test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs 2>&1 >> $seqres.full
-+_scratch_mount
-+
-+# Write multiple files in parallel using O_DIRECT writes w/ extent size hints.
-+# Aim is to interleave allocations to fragment the files. O_DIRECT writes defeat
-+# the open/write/close heuristics in xfs_release() that prevent EOF block
-+# removal, so this should fragment badly. Typical problematic behaviour shows
-+# per-file extent counts of ~1000 (worst case) whilst fixed behaviour typically
-+# shows extent counts in the low single digits (almost best case)
-+#
-+# Failure is determined by golden output mismatch from _within_tolerance().
-+
-+workfile=$SCRATCH_MNT/file
-+nfiles=8
-+wsize=4096
-+wcnt=1000
-+extent_size=16m
-+
-+write_direct_file()
-+{
-+	idx=$1
-+
-+	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-+	for ((cnt=0; cnt<$wcnt; cnt++)); do
-+		$XFS_IO_PROG -f -d -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-+	done
-+}
-+
-+rm -f $workfile*
-+for ((n=0; n<$nfiles; n++)); do
-+	write_direct_file $n > /dev/null 2>&1 &
-+done
-+wait
-+sync
-+
-+for ((n=0; n<$nfiles; n++)); do
-+	count=$(_count_extents $workfile.$n)
-+	# Acceptible extent count range is 1-10
-+	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/502.out b/tests/xfs/502.out
-new file mode 100644
-index 00000000..766a6efe
---- /dev/null
-+++ b/tests/xfs/502.out
-@@ -0,0 +1,9 @@
-+QA output created by 502
-+file.0 extent count is in range
-+file.1 extent count is in range
-+file.2 extent count is in range
-+file.3 extent count is in range
-+file.4 extent count is in range
-+file.5 extent count is in range
-+file.6 extent count is in range
-+file.7 extent count is in range
-diff --git a/tests/xfs/503 b/tests/xfs/503
-new file mode 100755
-index 00000000..ad303551
---- /dev/null
-+++ b/tests/xfs/503
-@@ -0,0 +1,89 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-+#
-+# FS QA Test xfs/503
-+#
-+# Post-EOF preallocation defeat test
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+
-+# Modify as appropriate.
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch
-+
-+_scratch_mkfs 2>&1 >> $seqres.full
-+_scratch_mount
-+
-+# Write multiple files in parallel using synchronous buffered writes. Aim is to
-+# interleave allocations to fragment the files. Assuming we've fixed the
-+# sycnhronous write defeat, we can still trigger the same issue with a
-+# open/read/close on O_RDONLY files. We should not be triggering EOF
-+# preallocation removal on files we don't have permission to write, so until
-+# this is fixed it should fragment badly.  Typical problematic behaviour shows
-+# per-file extent counts of 50-350 whilst fixed behaviour typically demonstrates
-+# post-eof speculative delalloc growth in extent size (~6 extents for 50MB
-+# file).
-+#
-+# Failure is determined by golden output mismatch from _within_tolerance().
-+
-+workfile=$SCRATCH_MNT/file
-+nfiles=32
-+wsize=4096
-+wcnt=1000
-+
-+write_file()
-+{
-+	idx=$1
-+
-+	$XFS_IO_PROG -f -s -c "pwrite -b 64k 0 50m" $workfile.$idx
-+}
-+
-+read_file()
-+{
-+	idx=$1
-+
-+	for ((cnt=0; cnt<$wcnt; cnt++)); do
-+		$XFS_IO_PROG -f -r -c "pread 0 28" $workfile.$idx
-+	done
-+}
-+
-+rm -f $workdir/file*
-+for ((n=0; n<$((nfiles)); n++)); do
-+	write_file $n > /dev/null 2>&1 &
-+	read_file $n > /dev/null 2>&1 &
-+done
-+wait
-+
-+for ((n=0; n<$nfiles; n++)); do
-+	count=$(_count_extents $workfile.$n)
-+	# Acceptible extent count range is 1-40
-+	_within_tolerance "file.$n extent count" $count 6 5 10 -v
-+done
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/503.out b/tests/xfs/503.out
-new file mode 100644
-index 00000000..0089a698
---- /dev/null
-+++ b/tests/xfs/503.out
-@@ -0,0 +1,33 @@
-+QA output created by 503
-+file.0 extent count is in range
-+file.1 extent count is in range
-+file.2 extent count is in range
-+file.3 extent count is in range
-+file.4 extent count is in range
-+file.5 extent count is in range
-+file.6 extent count is in range
-+file.7 extent count is in range
-+file.8 extent count is in range
-+file.9 extent count is in range
-+file.10 extent count is in range
-+file.11 extent count is in range
-+file.12 extent count is in range
-+file.13 extent count is in range
-+file.14 extent count is in range
-+file.15 extent count is in range
-+file.16 extent count is in range
-+file.17 extent count is in range
-+file.18 extent count is in range
-+file.19 extent count is in range
-+file.20 extent count is in range
-+file.21 extent count is in range
-+file.22 extent count is in range
-+file.23 extent count is in range
-+file.24 extent count is in range
-+file.25 extent count is in range
-+file.26 extent count is in range
-+file.27 extent count is in range
-+file.28 extent count is in range
-+file.29 extent count is in range
-+file.30 extent count is in range
-+file.31 extent count is in range
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 7b7d69f1..d0d33d73 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -497,3 +497,7 @@
- 497 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 498 dangerous_fuzzers dangerous_norepair
- 499 auto quick
-+500 auto prealloc rw
-+501 auto prealloc rw
-+502 auto prealloc rw
-+503 auto prealloc rw
+On Mon, Feb 11, 2019 at 03:19:32PM +1000, Ronnie Sahlberg wrote:
+> We just fixed a bug in cifs.ko where it would incorrectly return success
+> for setfattr -x user.does-not-exist.
+> 
+> This patch adds a test case for this.
+> 
+> Xfstests already have tests for setfattr -x in generic/097
+> but we can not yet use that test for cifs since we can only support
+> the user namespace.
+
+'the "user." xattr namespace.'
+
+"user namespace" is an overloaded term.
+
+> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
+> ---
+>  tests/cifs/002     | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/cifs/002.out |  6 ++++++
+>  tests/cifs/group   |  1 +
+>  3 files changed, 60 insertions(+)
+>  create mode 100755 tests/cifs/002
+>  create mode 100644 tests/cifs/002.out
+> 
+> diff --git a/tests/cifs/002 b/tests/cifs/002
+> new file mode 100755
+> index 00000000..80baa66a
+> --- /dev/null
+> +++ b/tests/cifs/002
+> @@ -0,0 +1,53 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
+> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 002. Modified from generic/097
+> +#
+> +# simple attr test for deleting a non-existing EA:
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +file=$TEST_DIR/foo
+> +
+> +_cleanup()
+> +{
+> +	rm -f $tmp.* $file
+> +}
+> +
+> +setfattr()
+> +{
+> +    echo $SETFATTR_PROG "$@" >>/tmp/foo
+
+Why? And it doesn't get cleaned up on test exit, either.
+
+> +	$SETFATTR_PROG "$@" |& _filter_test_dir
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/attr
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +
+> +_require_test
+> +_require_attrs
+> +
+> +echo -e "\ncreate file foo"
+> +rm -f $file
+> +touch $file
+> +
+> +echo -e "\nunset EA <does-not-exist>:"
+> +setfattr -x user.does-not-exist $file
+> +
+> +# success, all done
+> +status=0
+> +exit
+
+I don't see anything cifs specific in this test.
+
+And why just test this one specific thing you found a bug in? Why
+not just copy all of generic/097 and chop out all the non-"user."
+xattr namespace bits so you exercise all the different xattr
+operations?
+
+Cheers,
+
+Dave.
 -- 
-2.20.1
+Dave Chinner
+david@fromorbit.com
