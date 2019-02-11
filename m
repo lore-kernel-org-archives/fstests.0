@@ -1,52 +1,50 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49830 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727265AbfBLCRm (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 21:17:42 -0500
-Subject: [PATCH 2/3] common: fix _require_btime for lazy filesystems
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 11 Feb 2019 18:17:32 -0800
-Message-ID: <154993785290.1948.9192893627999402298.stgit@magnolia>
-In-Reply-To: <154993784038.1948.7502664832930298472.stgit@magnolia>
-References: <154993784038.1948.7502664832930298472.stgit@magnolia>
+Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:3919 "EHLO
+        ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726101AbfBKBzn (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 10 Feb 2019 20:55:43 -0500
+Received: from dave by dastard with local (Exim 4.80)
+        (envelope-from <david@fromorbit.com>)
+        id 1gt0ou-0000wi-Gk
+        for fstests@vger.kernel.org; Mon, 11 Feb 2019 12:55:40 +1100
+Date: Mon, 11 Feb 2019 12:55:40 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs: new EOF fragmentation tests
+Message-ID: <20190211015540.GD20493@dastard>
+References: <20190211013647.22580-1-david@fromorbit.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190211013647.22580-1-david@fromorbit.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Feb 11, 2019 at 12:36:47PM +1100, Dave Chinner wrote:
+> From: Dave Chinner <dchinner@redhat.com>
+> 
+> These tests create substantial file fragmentation as a result of
+> application actions that defeat post-EOF preallocation
+> optimisations. They are intended to replicate known vectors for
+> these problems, and provide a check that the fragmentation levels
+> have been controlled. The mitigations we make may not completely
+> remove fragmentation (e.g. they may demonstrate speculative delalloc
+> related extent size growth) so the checks don't assume we'll end up
+> with perfect layouts and hence check for an exceptable level of
+> fragmentation rather than none.
+> 
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
 
-Filesystems are not required to try to fill the statx btime field unless
-the caller actually sets STATX_BTIME.  They're allowed to volunteer that
-information "if it's cheap", but XFS doesn't volunteer and there may be
-filesystems that support btime but not cheaply.
+Forgot to add that these tests go along with this patch series:
 
-Either way, we want to test btime on any filesystem that supports it,
-cheaply or otherwise, so set STATX_BTIME when we're trying to detect
-support for it.
+https://marc.info/?l=linux-xfs&m=154951612101291&w=2
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/rc |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+And can be used to test whatever way we decide to minimise
+fragmentation through maintianing post-EOF preallocation.
 
+Cheers,
 
-diff --git a/common/rc b/common/rc
-index ab468adf..6fb71e60 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3849,7 +3849,11 @@ _dmsetup_create()
- 
- _require_btime()
- {
--	$XFS_IO_PROG -f $TEST_DIR/test_creation_time -c "statx -v" \
-+	# Note: filesystems are not required to report btime (creation time)
-+	# if the caller doesn't ask for it, so we define STATX_BTIME here and
-+	# pass it in to the statx command.
-+	export STATX_BTIME=0x800
-+	$XFS_IO_PROG -f $TEST_DIR/test_creation_time -c "statx -m $STATX_BTIME -v" \
- 		| grep btime >>$seqres.full 2>&1 || \
- 		_notrun "inode creation time not supported by this filesystem"
- 	rm -f $TEST_DIR/test_creation_time
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
