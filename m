@@ -1,140 +1,143 @@
-Received: from mail-pl1-f175.google.com ([209.85.214.175]:44825 "EHLO
-        mail-pl1-f175.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726584AbfBCMur (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Feb 2019 07:50:47 -0500
-Received: by mail-pl1-f175.google.com with SMTP id p4so2250497plq.11
-        for <fstests@vger.kernel.org>; Sun, 03 Feb 2019 04:50:47 -0800 (PST)
-Message-ID: <5c56e3a5.1c69fb81.40a19.61e3@mx.google.com>
-Date: Sun, 03 Feb 2019 20:50:40 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 6d17c9076fe9
+Received: from userp2130.oracle.com ([156.151.31.86]:36346 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727631AbfBLCRg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 21:17:36 -0500
+Subject: [PATCH 1/3] common: fix kmemleak to work with sections
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Mon, 11 Feb 2019 18:17:26 -0800
+Message-ID: <154993784666.1948.2898373791588046149.stgit@magnolia>
+In-Reply-To: <154993784038.1948.7502664832930298472.stgit@magnolia>
+References: <154993784038.1948.7502664832930298472.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="KOvMagNcLZ8d"
-Content-Disposition: inline
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
---KOvMagNcLZ8d
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Refactor the kmemleak code to work correctly with sections.  This
+requires changing the location of the "is kmemleak enabled?" flag to use
+/tmp instead of RESULT_BASE, scanning for leaks after every test, and
+clarifying which functions get used when.
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. We have new btrfs tests and bug fixes for overlay & xfs
-tests in this update. Note that currently the three new btrfs tests
-(btrfs/18[012]) all fail with latest RC kernel (v5.0-rc4).
-
-I'll be on public holiday next week, so the response and review might be slow,
-but I'll do check emails from time to time, and hopefully I can do another
-update next Sunday as usual :)
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-6d17c9076fe9 common/dump: do not override test cleanup trap
-
-New commits:
-
-Amir Goldstein (2):
-      [43c35280910e] overlay/061: enhance mmap ro/rw inconsistencies test
-      [6d17c9076fe9] common/dump: do not override test cleanup trap
-
-Darrick J. Wong (2):
-      [141c0f5a9a20] xfs/093: make sure the scratch directory still exists after repair
-      [f479ce6186d0] xfs/138: format the scratch device before using it
-
-Qu Wenruo (3):
-      [04e1a5e0678b] btrfs: Test if btrfs hits EDQUOT without trying to reclaim some space
-      [3bea049648f8] btrfs: Test if btrfs will commit too many transactions for balance
-      [7f3a0bf60d6e] btrfs: Test if btrfs will report false ENOSPC error balancing small metadata chunk
-
-Vivek Goyal (1):
-      [ebc6c083d3bc] overlay: Do not lose security.capability xattr over metadata only file copy-up
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ README    |    2 ++
+ check     |    7 +++++--
+ common/rc |   32 ++++++++++++++++++++++----------
+ 3 files changed, 29 insertions(+), 12 deletions(-)
 
 
-Code Diffstat:
-
- common/dump           |   6 +--
- tests/btrfs/180       |  62 +++++++++++++++++++++++++++++++
- tests/btrfs/180.out   |   3 ++
- tests/btrfs/181       | 101 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/181.out   |   2 +
- tests/btrfs/182       |  61 ++++++++++++++++++++++++++++++
- tests/btrfs/182.out   |   2 +
- tests/btrfs/group     |   3 ++
- tests/overlay/061     |  36 ++++++++++++++----
- tests/overlay/061.out |   4 +-
- tests/overlay/064     |  22 ++++++++---
- tests/overlay/064.out |   3 +-
- tests/xfs/022         |   9 ++++-
- tests/xfs/023         |   9 ++++-
- tests/xfs/024         |   9 ++++-
- tests/xfs/025         |   9 ++++-
- tests/xfs/026         |   9 ++++-
- tests/xfs/027         |   9 ++++-
- tests/xfs/028         |   9 ++++-
- tests/xfs/035         |   9 ++++-
- tests/xfs/036         |   9 ++++-
- tests/xfs/037         |   9 ++++-
- tests/xfs/038         |   9 ++++-
- tests/xfs/039         |   9 ++++-
- tests/xfs/043         |   9 ++++-
- tests/xfs/046         |   9 ++++-
- tests/xfs/047         |   9 ++++-
- tests/xfs/055         |   9 ++++-
- tests/xfs/056         |   9 ++++-
- tests/xfs/059         |   9 ++++-
- tests/xfs/060         |   9 ++++-
- tests/xfs/061         |   9 ++++-
- tests/xfs/063         |   9 ++++-
- tests/xfs/064         |   9 ++++-
- tests/xfs/065         |   9 ++++-
- tests/xfs/066         |   1 +
- tests/xfs/068         |   9 ++++-
- tests/xfs/093         |   3 ++
- tests/xfs/138         |   1 +
- tests/xfs/266         |   9 ++++-
- tests/xfs/267         |   9 ++++-
- tests/xfs/268         |   9 ++++-
- tests/xfs/281         |   9 ++++-
- tests/xfs/282         |   9 ++++-
- tests/xfs/283         |   9 ++++-
- tests/xfs/287         |   2 +-
- tests/xfs/296         |   1 +
- tests/xfs/301         |   1 +
- tests/xfs/302         |   1 +
- 49 files changed, 534 insertions(+), 51 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---KOvMagNcLZ8d
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJcVuNVAAoJECZSqilcj+djbzUQAN1bkqVlg51PuxkzTgpmh0Ab
-eo9tTlRDO/7pURA9J6VC8GVo1+yeNJMNLyQssVErvQvc24QyYz8eyYegqkWmlkuH
-EQHdqWLnrCDbrreyMpVPOMFn25NuilmtIxOu8DPyQl1Eg7dema+2/4WsMDwx4RyP
-ZNgk//cxM0D4tDeIx8MIGa9Kk3iusQrH/iKNC8uga2S8CaOqihIehUg2a3zf7Cus
-lJ3gFGJSbcy7dcN3eMZ3jGlANSeKeD5Rkqbm0NXDz9VKNYORgTgYahYm5oYsTQ42
-VxQRJRNdISDpAiQXH7diCagi153HF4siDXVNOtGRlAHso5DGSjvkXyoRbx7A0JlR
-Z87NONNWWdOmOjK4ADB6pGleTub5oXS//4SRbnBIDwPrFqE+XtpSrqTiedcbLxoK
-D0BkZZLytDzyS7Xo5tz2kzvnFt8s89F6MGmz7or+fChiZdEwHlVvImct66rHg9X0
-8RhWBTHiPcTzRJQiUbTZT3wCGPjX5nKNyC34R+KiXKpSKfAsuM/pRO7A7NCOBIRr
-5dDKRztxhamOsx4J8MU76ShUqEjPFSF3AMTeLNLj1p17VLf/ImAurbBLbibl5beh
-uypLctGHX7gWOFjuaEjHEem7/fumPmBIqJr7C61OlqaRrrzhdlhQnNrrG1pwqveO
-SLF1rI5rwvHao9Q5PBSK
-=k0OD
------END PGP SIGNATURE-----
-
---KOvMagNcLZ8d--
+diff --git a/README b/README
+index 73f057f3..6e9aa34d 100644
+--- a/README
++++ b/README
+@@ -99,6 +99,8 @@ Preparing system for tests:
+                that relevant results are compared.  For example 'spinningrust'
+                for configurations that use spinning disks and 'nvme' for tests
+                using nvme drives.
++             - set USE_KMEMLEAK=yes to scan for memory leaks in the kernel
++               after every test, if the kernel supports kmemleak.
+ 
+         - or add a case to the switch in common/config assigning
+           these variables based on the hostname of your test
+diff --git a/check b/check
+index 77a06b00..20e95302 100755
+--- a/check
++++ b/check
+@@ -496,7 +496,7 @@ _expunge_test()
+ 	return 0
+ }
+ 
+-_init_kmemleak
++_detect_kmemleak
+ _prepare_test_list
+ 
+ if $OPTIONS_HAVE_SECTIONS; then
+@@ -771,9 +771,12 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			# and log messages that shouldn't be there.
+ 			_check_filesystems
+ 			_check_dmesg || err=true
+-			_check_kmemleak || err=true
+ 		fi
+ 
++		# Scan for memory leaks after every test so that associating
++		# a leak to a particular test will be as accurate as possible.
++		_check_kmemleak || err=true
++
+ 		# test ends after all checks are done.
+ 		$timestamp && _timestamp
+ 		stop=`_wallclock`
+diff --git a/common/rc b/common/rc
+index b8ed1776..ab468adf 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3500,7 +3500,7 @@ _check_dmesg()
+ # capture the kmemleak report
+ _capture_kmemleak()
+ {
+-	local kern_knob="${DEBUGFS_MNT}/kmemleak"
++	local kern_knob="$DEBUGFS_MNT/kmemleak"
+ 	local leak_file="$1"
+ 
+ 	# Tell the kernel to scan for memory leaks.  Apparently the write
+@@ -3521,17 +3521,20 @@ ENDL
+ 	echo "clear" > "$kern_knob"
+ }
+ 
+-# set up kmemleak
+-_init_kmemleak()
++# Figure out if the running kernel supports kmemleak; if it does, clear out
++# anything that leaked before we even started testing.  The leak checker only
++# needs to be primed like this once per ./check invocation.
++_detect_kmemleak()
+ {
+-	local kern_knob="${DEBUGFS_MNT}/kmemleak"
++	local kern_knob="$DEBUGFS_MNT/kmemleak"
++	KMEMLEAK_CHECK_FILE="/tmp/check_kmemleak"
+ 
+ 	# Since kernel v4.19-rc3, the kmemleak knob exists even if kmemleak is
+ 	# disabled, but returns EBUSY on write. So instead of relying on
+ 	# existance of writable knob file, we use a test file to indicate that
+ 	# _check_kmemleak() is enabled only if we actually managed to write to
+ 	# the knob file.
+-	rm -f ${RESULT_BASE}/check_kmemleak
++	rm -f "$KMEMLEAK_CHECK_FILE"
+ 
+ 	if [ ! -w "$kern_knob" ]; then
+ 		return 0
+@@ -3541,17 +3544,26 @@ _init_kmemleak()
+ 	# then dump all the leaks recorded so far.
+ 	if echo "scan=off" > "$kern_knob" 2>/dev/null; then
+ 		_capture_kmemleak /dev/null
+-		touch ${RESULT_BASE}/check_kmemleak
++		touch "$KMEMLEAK_CHECK_FILE"
+ 	fi
+ }
+ 
+-# check kmemleak log
++# Kick the kmemleak checker to scan for leaks.  Background leak scan mode is
++# not enabled, so we must call the kernel to ask for a scan and deal with the
++# results appropriately.  This we do after every test completes, whether or not
++# it was successful.
+ _check_kmemleak()
+ {
+-	local kern_knob="${DEBUGFS_MNT}/kmemleak"
+-	local leak_file="${seqres}.kmemleak"
++	local kern_knob="$DEBUGFS_MNT/kmemleak"
++	local leak_file="$seqres.kmemleak"
+ 
+-	if [ ! -f ${RESULT_BASE}/check_kmemleak ]; then
++	if [ ! -f "$KMEMLEAK_CHECK_FILE" ]; then
++		return 0
++	fi
++
++	# Not enabled, so discard any report of leaks found.
++	if [ "$USE_KMEMLEAK" != "yes" ]; then
++		_capture_kmemleak /dev/null
+ 		return 0
+ 	fi
+ 
