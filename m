@@ -1,74 +1,205 @@
-Received: from mail.kernel.org ([198.145.29.99]:51278 "EHLO mail.kernel.org"
+Received: from mout.gmx.net ([212.227.15.19]:60775 "EHLO mout.gmx.net"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729700AbfBLRFB (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 12 Feb 2019 12:05:01 -0500
-Received: from mail-ua1-f46.google.com (mail-ua1-f46.google.com [209.85.222.46])
-        (using TLSv1.2 with cipher ECDHE-RSA-AES128-GCM-SHA256 (128/128 bits))
-        (No client certificate requested)
-        by mail.kernel.org (Postfix) with ESMTPSA id 8991020700
-        for <fstests@vger.kernel.org>; Tue, 12 Feb 2019 17:04:59 +0000 (UTC)
-Received: by mail-ua1-f46.google.com with SMTP id p9so1124489uaa.5
-        for <fstests@vger.kernel.org>; Tue, 12 Feb 2019 09:04:59 -0800 (PST)
+        id S1725909AbfBLFOQ (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 Feb 2019 00:14:16 -0500
+Subject: Re: [PATCH v2 2/2] fstests: btrfs: Introduce stress test for deadlock
+ between snapshot delete and other read-write operations
+References: <20190111050151.982-1-wqu@suse.com>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <bd51a34e-0d80-0e89-36cd-6256c77067ab@gmx.com>
+Date: Tue, 12 Feb 2019 13:14:02 +0800
 MIME-Version: 1.0
-References: <20180412213838.28929-1-jeffm@suse.com> <20180424093646.GA11384@desktop>
- <fde6f93d-5c12-dcc8-9194-c91f96773bc6@suse.com> <20180427112356.GP11384@desktop>
- <20180427170009.GT27853@wotan.suse.de> <20180428024545.GR11384@desktop>
- <33a80b8a-fe26-faee-9704-d1bb2c933a3a@suse.com> <21a3f3ab-b439-9851-8258-4e3e7f9ca472@suse.com>
- <d00ccf46-0b58-9f69-51f4-570bc9fce805@suse.com>
-In-Reply-To: <d00ccf46-0b58-9f69-51f4-570bc9fce805@suse.com>
-From: Luis Chamberlain <mcgrof@kernel.org>
-Date: Tue, 12 Feb 2019 11:04:46 -0600
-Message-ID: <CAB=NE6WQwAOcSyKWi_smYVCiLSZoYGMdO4fJwnZ85_0jR7wh+Q@mail.gmail.com>
-Subject: Re: [PATCH] check: annotate good and expunged tests in results
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20190111050151.982-1-wqu@suse.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="LJ9UnL0qn6DAFhjE1rnPeyP9K9As3mS52"
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Mahoney <jeffm@suse.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, Nikolay Borisov <nborisov@suse.com>, Filipe Manana <fdmanana@suse.com>
+To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 1, 2018 at 8:44 AM Jeff Mahoney <jeffm@suse.com> wrote:
->
-> On 5/1/18 9:34 AM, Jeff Mahoney wrote:
-> > On 4/30/18 4:48 PM, Jeff Mahoney wrote:
-> >> On 4/27/18 10:45 PM, Eryu Guan wrote:
-> >>> On Fri, Apr 27, 2018 at 05:00:09PM +0000, Luis R. Rodriguez wrote:
-> >>>> On Fri, Apr 27, 2018 at 07:23:56PM +0800, Eryu Guan wrote:
-> >>>>>
-> >>>>> But the test run & pass info is already available from the check output
-> >>>>> and the test result summary at the end of check. Is that sufficient for
-> >>>>> you? Also, we already have mechanism to generate a test report in xunit
-> >>>>> format, i.e. ./check -R xunit -g auto, which includes results for passed
-> >>>>> & failed & notrun tests.
-> >>>>
-> >>>> Do we have a way to parse the results *after* a run? For instance,
-> >>>> if you forgot -R xunit ?
-> >>>
-> >>> There's a tools/compare-failures script that takes the outputs of check
-> >>> as inputs and compares the results. But, TBH, I never run it after
-> >>> reviewing it.. Perhaps it could be enhanced somehow.
-> >>
-> >> Yeah, that takes check output.  Without capturing it at runtime, it
-> >> can't compare anything.
-> >>
-> >> The XML report may do most of what I want provided we can enable it by
-> >> default and write it someplace safe rather than clean it up
-> >> automatically when the test run is interrupted.
-> >>
-> >> I already have test code that extends it to output expunged tests and to
-> >> add an explicit <pass/> element.  It saves the timestamps already, so
-> >> that's a plus.
-> >
-> > And shortly after writing this, I had a test run hang.  Since it hung,
-> > even writing it on exit wouldn't have worked.  There's not enough
-> > information leftover to generate it.  I think I'd still like the results
-> > directory to contain the information required to generate it as a
-> > post-mortem.
->
-> After thinking on it a bit more, since you object to writing a bunch of
-> files by default, we could accomplish the same goal by adding a "files"
-> report type that does this without dropping files for everyone.  I'm
-> working that up now.
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--LJ9UnL0qn6DAFhjE1rnPeyP9K9As3mS52
+Content-Type: multipart/mixed; boundary="QLIxW8TzNEsBG8VbJJIALFeiDYuDWh1wT";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: Qu Wenruo <wqu@suse.com>, linux-btrfs@vger.kernel.org,
+ fstests@vger.kernel.org
+Message-ID: <bd51a34e-0d80-0e89-36cd-6256c77067ab@gmx.com>
+Subject: Re: [PATCH v2 2/2] fstests: btrfs: Introduce stress test for deadlock
+ between snapshot delete and other read-write operations
+References: <20190111050151.982-1-wqu@suse.com>
+In-Reply-To: <20190111050151.982-1-wqu@suse.com>
 
-How's that going BTW? :)
+--QLIxW8TzNEsBG8VbJJIALFeiDYuDWh1wT
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
- Luis
+
+
+On 2019/1/11 =E4=B8=8B=E5=8D=881:01, Qu Wenruo wrote:
+[snip]
+> +# FS QA Test 179
+> +#
+> +# Test if btrfs will lockup at subvolume deletion when qgroups are ena=
+bled.
+> +#
+> +# This bug is going to be fixed by a patch for the kernel titled
+> +# "btrfs: qgroup: Don't trigger backref walk at delayed ref insert tim=
+e".
+
+Although the test case is already merged, btrfs community is going to
+use a much better fix than this.
+
+Should I update the patch in this test case after the fix get merged
+upstream?
+
+Thanks,
+Qu
+
+> +#
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=3D`pwd`
+> +tmp=3D/tmp/$$
+> +status=3D1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch
+> +
+> +# default sleep interval
+> +sleep_time=3D1
+> +
+> +# stress test runtime
+> +runtime=3D120
+> +
+> +_scratch_mkfs > /dev/null 2>&1
+> +_scratch_mount
+> +
+> +mkdir -p "$SCRATCH_MNT/snapshots"
+> +$BTRFS_UTIL_PROG subvolume create "$SCRATCH_MNT/src" > /dev/null
+> +$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
+> +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
+> +
+> +fill_workload()
+> +{
+> +	trap "wait; exit" SIGTERM
+> +	local i=3D0
+> +	while true; do
+> +		_pwrite_byte 0xcd 0 8K "$SCRATCH_MNT/src/large_$i" > /dev/null
+> +		_pwrite_byte 0xcd 0 2K "$SCRATCH_MNT/src/inline_$i" > /dev/null
+> +
+> +		# Randomly remove some files for every 5 loop
+> +		if [ $(( $i % 5 )) -eq 0 ]; then
+> +			victim=3D$(ls "$SCRATCH_MNT/src" | sort -R | head -n1)
+> +			rm "$SCRATCH_MNT/src/$victim"
+> +		fi
+> +		i=3D$((i + 1))
+> +	done
+> +}
+> +
+> +snapshot_workload()
+> +{
+> +	trap "wait; exit" SIGTERM
+> +	local i=3D0
+> +	while true; do
+> +		sleep $sleep_time
+> +		$BTRFS_UTIL_PROG subvolume snapshot "$SCRATCH_MNT/src" \
+> +			"$SCRATCH_MNT/snapshots/$i" > /dev/null
+> +		i=3D$((i + 1))
+> +	done
+> +}
+> +
+> +delete_workload()
+> +{
+> +	trap "wait; exit" SIGTERM
+> +	while true; do
+> +		sleep $((sleep_time * 2))
+> +		victim=3D$(ls "$SCRATCH_MNT/snapshots" | sort -R | head -n1)
+> +		$BTRFS_UTIL_PROG subvolume delete \
+> +			"$SCRATCH_MNT/snapshots/$victim" > /dev/null
+> +	done
+> +}
+> +
+> +fill_workload &
+> +fill_pid=3D$!
+> +
+> +sleep $((sleep_time * 2))
+> +snapshot_workload &
+> +snapshot_pid=3D$!
+> +delete_workload &
+> +delete_pid=3D$!
+> +
+> +sleep $runtime
+> +kill $fill_pid
+> +wait $fill_pid
+> +kill $snapshot_pid
+> +wait $snapshot_pid
+> +kill $delete_pid
+> +wait $delete_pid
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +
+> +status=3D0
+> +exit
+> diff --git a/tests/btrfs/179.out b/tests/btrfs/179.out
+> new file mode 100644
+> index 000000000000..cb9eba3d34b1
+> --- /dev/null
+> +++ b/tests/btrfs/179.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 179
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 04c0254aa4bf..46dd3c9523c2 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -181,3 +181,4 @@
+>  176 auto quick swap volume
+>  177 auto quick swap balance
+>  178 auto quick send
+> +179 auto qgroup dangerous
+>=20
+
+
+--QLIxW8TzNEsBG8VbJJIALFeiDYuDWh1wT--
+
+--LJ9UnL0qn6DAFhjE1rnPeyP9K9As3mS52
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlxiVhoACgkQwj2R86El
+/qhqHQf9GAet+YICcPUI4omZXsV0eRoEQGwUiku2ds371XcGqP5ckaOkH1bBYyLY
+D65+wrW1a1HSBlI0poZFc2p8wA/BGcDMOAv+j8Dr67Sx2oSw+kJKNFl958vsQUjz
+6TL3tmb461I6U2KEQwbyRBH892f6XXzf/lDa1WEpydKEd5MAygnzwiCH1Q1SQF6L
+/jShdnlFMgxXY/wOtAf0K5p1EFecra4tvhQbcRmToGpscsAGrghyf7DB6fpLppFj
+HwvFS/OW0P/YgkscQXJMTcKubLBg97G/eoyOfrLBeu/bWRaZjx+9BlyjozALdxwJ
+ZGm/YkUuYGj8WK16rclyte5Tbms3Iw==
+=dgxw
+-----END PGP SIGNATURE-----
+
+--LJ9UnL0qn6DAFhjE1rnPeyP9K9As3mS52--
