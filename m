@@ -1,125 +1,52 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:6376 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726074AbfBKVvV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 16:51:21 -0500
-Date: Tue, 12 Feb 2019 08:51:17 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] cifs: add test that setfattr -x fails non-existing EAs
-Message-ID: <20190211215117.GG20493@dastard>
-References: <20190211051932.20542-1-lsahlber@redhat.com>
- <20190211051932.20542-2-lsahlber@redhat.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:49830 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727265AbfBLCRm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 21:17:42 -0500
+Subject: [PATCH 2/3] common: fix _require_btime for lazy filesystems
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Mon, 11 Feb 2019 18:17:32 -0800
+Message-ID: <154993785290.1948.9192893627999402298.stgit@magnolia>
+In-Reply-To: <154993784038.1948.7502664832930298472.stgit@magnolia>
+References: <154993784038.1948.7502664832930298472.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190211051932.20542-2-lsahlber@redhat.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests@vger.kernel.org]
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Hi Ronnie,
+Filesystems are not required to try to fill the statx btime field unless
+the caller actually sets STATX_BTIME.  They're allowed to volunteer that
+information "if it's cheap", but XFS doesn't volunteer and there may be
+filesystems that support btime but not cheaply.
 
-Probably better to send this (and any followups) to the fstests
-list... :)
+Either way, we want to test btime on any filesystem that supports it,
+cheaply or otherwise, so set STATX_BTIME when we're trying to detect
+support for it.
 
-On Mon, Feb 11, 2019 at 03:19:32PM +1000, Ronnie Sahlberg wrote:
-> We just fixed a bug in cifs.ko where it would incorrectly return success
-> for setfattr -x user.does-not-exist.
-> 
-> This patch adds a test case for this.
-> 
-> Xfstests already have tests for setfattr -x in generic/097
-> but we can not yet use that test for cifs since we can only support
-> the user namespace.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/rc |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-'the "user." xattr namespace.'
 
-"user namespace" is an overloaded term.
-
-> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
-> ---
->  tests/cifs/002     | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/cifs/002.out |  6 ++++++
->  tests/cifs/group   |  1 +
->  3 files changed, 60 insertions(+)
->  create mode 100755 tests/cifs/002
->  create mode 100644 tests/cifs/002.out
-> 
-> diff --git a/tests/cifs/002 b/tests/cifs/002
-> new file mode 100755
-> index 00000000..80baa66a
-> --- /dev/null
-> +++ b/tests/cifs/002
-> @@ -0,0 +1,53 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
-> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 002. Modified from generic/097
-> +#
-> +# simple attr test for deleting a non-existing EA:
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +file=$TEST_DIR/foo
-> +
-> +_cleanup()
-> +{
-> +	rm -f $tmp.* $file
-> +}
-> +
-> +setfattr()
-> +{
-> +    echo $SETFATTR_PROG "$@" >>/tmp/foo
-
-Why? And it doesn't get cleaned up on test exit, either.
-
-> +	$SETFATTR_PROG "$@" |& _filter_test_dir
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/attr
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +
-> +_require_test
-> +_require_attrs
-> +
-> +echo -e "\ncreate file foo"
-> +rm -f $file
-> +touch $file
-> +
-> +echo -e "\nunset EA <does-not-exist>:"
-> +setfattr -x user.does-not-exist $file
-> +
-> +# success, all done
-> +status=0
-> +exit
-
-I don't see anything cifs specific in this test.
-
-And why just test this one specific thing you found a bug in? Why
-not just copy all of generic/097 and chop out all the non-"user."
-xattr namespace bits so you exercise all the different xattr
-operations?
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+diff --git a/common/rc b/common/rc
+index ab468adf..6fb71e60 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3849,7 +3849,11 @@ _dmsetup_create()
+ 
+ _require_btime()
+ {
+-	$XFS_IO_PROG -f $TEST_DIR/test_creation_time -c "statx -v" \
++	# Note: filesystems are not required to report btime (creation time)
++	# if the caller doesn't ask for it, so we define STATX_BTIME here and
++	# pass it in to the statx command.
++	export STATX_BTIME=0x800
++	$XFS_IO_PROG -f $TEST_DIR/test_creation_time -c "statx -m $STATX_BTIME -v" \
+ 		| grep btime >>$seqres.full 2>&1 || \
+ 		_notrun "inode creation time not supported by this filesystem"
+ 	rm -f $TEST_DIR/test_creation_time
