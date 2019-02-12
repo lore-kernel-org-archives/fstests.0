@@ -1,61 +1,90 @@
-Received: from sandeen.net ([63.231.237.45]:33516 "EHLO sandeen.net"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728353AbfBLS7H (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 12 Feb 2019 13:59:07 -0500
+Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:50245 "EHLO
+        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1727932AbfBLVQg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Feb 2019 16:16:36 -0500
+Date: Wed, 13 Feb 2019 08:15:26 +1100
+From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH] Fix error message when xfs handle library not found
+Message-ID: <20190212211526.GK20493@dastard>
 References: <20190212181840.7093-1-fdmanana@kernel.org>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <93a04478-db84-95f2-9957-5588dc0a54ed@sandeen.net>
-Date: Tue, 12 Feb 2019 12:59:02 -0600
+ <93a04478-db84-95f2-9957-5588dc0a54ed@sandeen.net>
 MIME-Version: 1.0
-In-Reply-To: <20190212181840.7093-1-fdmanana@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <93a04478-db84-95f2-9957-5588dc0a54ed@sandeen.net>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org, fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@sandeen.net>
+Cc: fdmanana@kernel.org, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2/12/19 12:18 PM, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+[cc linux-xfs@vger.kernel.org]
+
+On Tue, Feb 12, 2019 at 12:59:02PM -0600, Eric Sandeen wrote:
+> On 2/12/19 12:18 PM, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> > 
+> > The error message mentions a "make install-lib" target from xfsprogs,
+> > however that target does not exists in xfsprogs, what exists is a
+> > target named "install-dev". So fix that and replace "install-lib" with
+> > "install-dev".
+> > 
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  m4/package_xfslibs.m4 | 2 +-
+> >  1 file changed, 1 insertion(+), 1 deletion(-)
+> > 
+> > diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
+> > index 9be56e11..ad019518 100644
+> > --- a/m4/package_xfslibs.m4
+> > +++ b/m4/package_xfslibs.m4
+> > @@ -83,7 +83,7 @@ AC_DEFUN([AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE],
+> >          echo
+> >          echo 'FATAL ERROR: could not find a current XFS handle library.'
+> >          echo 'Install or upgrade the XFS library package.'
 > 
-> The error message mentions a "make install-lib" target from xfsprogs,
-> however that target does not exists in xfsprogs, what exists is a
-> target named "install-dev". So fix that and replace "install-lib" with
-> "install-dev".
+> To fix things up a bit more, I'd probably not refer to the "XFS library package"
+> because I'm not sure that exists anywhere either, does it?
 > 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  m4/package_xfslibs.m4 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> In fedora/rhel land, it's in xfsprogs & xfsprogs-devel for development.
 > 
-> diff --git a/m4/package_xfslibs.m4 b/m4/package_xfslibs.m4
-> index 9be56e11..ad019518 100644
-> --- a/m4/package_xfslibs.m4
-> +++ b/m4/package_xfslibs.m4
-> @@ -83,7 +83,7 @@ AC_DEFUN([AC_PACKAGE_NEED_ATTRLIST_LIBHANDLE],
->          echo
->          echo 'FATAL ERROR: could not find a current XFS handle library.'
->          echo 'Install or upgrade the XFS library package.'
+> Not sure about suse or debian or ...?
 
-To fix things up a bit more, I'd probably not refer to the "XFS library package"
-because I'm not sure that exists anywhere either, does it?
+Debian:
 
-In fedora/rhel land, it's in xfsprogs & xfsprogs-devel for development.
+$ apt-file search libhandle
+....
+xfslibs-dev: /lib/libhandle.a
+xfslibs-dev: /lib/libhandle.so
+xfslibs-dev: /usr/lib/libhandle.a
+xfslibs-dev: /usr/lib/libhandle.la
+xfsprogs: /lib/libhandle.so.1
+xfsprogs: /lib/libhandle.so.1.0.3
+$
 
-Not sure about suse or debian or ...?
+So the libhandle library DSO is shipped in xfsprogs. The /static/
+library is shipped in xfslibs-dev.
 
-Not a huge deal but if nobody ships xfsprogs-libs (or similar) then maybe best
-to fix that line as well.
+So what is fstests requiring here - the DSO or the static library?
+If it's the static library, then why does it need that and why can't
+it use the DSO shipped as part of the main xfsprogs package?
 
-> -        echo 'Alternatively, run "make install-lib" from the xfsprogs source.'
-> +        echo 'Alternatively, run "make install-dev" from the xfsprogs source.'
-
-and yeah, this part makes sense.
-
--Eric
-
->          exit 1
->      ])
->      libhdl="-lhandle"
+> Not a huge deal but if nobody ships xfsprogs-libs (or similar) then maybe best
+> to fix that line as well.
 > 
+> > -        echo 'Alternatively, run "make install-lib" from the xfsprogs source.'
+> > +        echo 'Alternatively, run "make install-dev" from the xfsprogs source.'
+> 
+> and yeah, this part makes sense.
+
+Only if it requires the static libhandle.a library.
+
+But that said, we should probably get rid of the static library and
+just ship the DSO - I can't think of a good reason for shipping a
+static version of a DSO in a "dev" package these days.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
