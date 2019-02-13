@@ -1,74 +1,97 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:59122 "EHLO
+Received: from aserp2130.oracle.com ([141.146.126.79]:52356 "EHLO
         aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725562AbfBMFGy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Feb 2019 00:06:54 -0500
-Date: Tue, 12 Feb 2019 21:06:46 -0800
+        with ESMTP id S1726530AbfBMEdr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Feb 2019 23:33:47 -0500
+Date: Tue, 12 Feb 2019 20:33:41 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/420: only check the extent layout after syncing
-Message-ID: <20190213050646.GA6503@magnolia>
-References: <20190204153026.1673-1-hch@lst.de>
- <20190211235144.GA6477@magnolia>
- <20190212190022.GA28460@lst.de>
+Subject: Re: [PATCH 2/2] generic: check the behavior of programs opening a
+ lot of O_TMPFILE files
+Message-ID: <20190213043341.GA32253@magnolia>
+References: <154993786231.2062.8490515215533507881.stgit@magnolia>
+ <154993787478.2062.17047634303195751186.stgit@magnolia>
+ <CAOQ4uxjz=Wp1wg2vmvmTe8g69qzN2FF_+nJ=FJZkTsNPMPLCvA@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190212190022.GA28460@lst.de>
+In-Reply-To: <CAOQ4uxjz=Wp1wg2vmvmTe8g69qzN2FF_+nJ=FJZkTsNPMPLCvA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 12, 2019 at 08:00:22PM +0100, Christoph Hellwig wrote:
-> On Mon, Feb 11, 2019 at 03:51:44PM -0800, Darrick J. Wong wrote:
-> > > The comparism pass before the sync might see an "error" if we use COW
-> > > fork speculative preallocations for non-overwrites, which is useful to
-> > > reduce fragmentation.
-> > 
-> > What error do you see?
+On Tue, Feb 12, 2019 at 04:42:21AM +0200, Amir Goldstein wrote:
+> On Tue, Feb 12, 2019 at 4:18 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> >
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> >
+> > Create a test (+ helper program) that opens as many unlinked files as it
+> > possibly can on the scratch filesystem, then closes all the files at
+> > once to stress-test unlinked file cleanup.  Add an xfs-specific test to
+> > make sure that the fallback code doesn't bitrot.
+> >
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  src/Makefile          |    2 -
+> >  src/tmpfile.c         |  127 +++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/710     |   65 +++++++++++++++++++++++++
+> >  tests/generic/710.out |    2 +
+> >  tests/generic/711     |   73 ++++++++++++++++++++++++++++
+> >  tests/generic/711.out |    2 +
+> >  tests/generic/group   |    2 +
+> >  tests/xfs/736         |   71 +++++++++++++++++++++++++++
+> >  tests/xfs/736.out     |    2 +
+> >  tests/xfs/737         |   79 ++++++++++++++++++++++++++++++
+> >  tests/xfs/737.out     |    2 +
+> >  tests/xfs/group       |    2 +
+> >  12 files changed, 428 insertions(+), 1 deletion(-)
+> >  create mode 100644 src/tmpfile.c
+> >  create mode 100755 tests/generic/710
+> >  create mode 100644 tests/generic/710.out
+> >  create mode 100755 tests/generic/711
+> >  create mode 100644 tests/generic/711.out
+> >  create mode 100755 tests/xfs/736
+> >  create mode 100644 tests/xfs/736.out
+> >  create mode 100755 tests/xfs/737
+> >  create mode 100644 tests/xfs/737.out
+> >
+> >
+> > diff --git a/src/Makefile b/src/Makefile
+> > index 41826585..5fce881d 100644
+> > --- a/src/Makefile
+> > +++ b/src/Makefile
+> > @@ -27,7 +27,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+> >         renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+> >         attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+> >         dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> > -       attr_replace_test swapon mkswap
+> > +       attr_replace_test swapon mkswap tmpfile
+> >
+> >  SUBDIRS = log-writes perf
+> >
+> > diff --git a/src/tmpfile.c b/src/tmpfile.c
 > 
-> -- /root/xfstests/tests/xfs/420.out	2019-02-12 15:41:12.202606228 +0000
-> +++ /root/xfstests/results//xfs/420.out.bad	2019-02-12 18:58:06.158426573
-> +0000
-> @@ -14,8 +14,6 @@
->  Whence	Result
->  DATA	0
->  HOLE	131072
-> -DATA	196608
-> -HOLE	262144
->  Compare files
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
->  017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file2
+> Let's go crazy and call it t_open_tmpfiles ?
+> Missing .gitignore patch.
+
+Will fix.
+
+> ...
+> > +/* Put an opened file on the unlinked list and leak the fd. */
+> > +void leak_tmpfile(void)
+> > +{
+> > +       int fd = -1;
+> > +       int ret;
+> > +
+> > +       /* Try to create an O_TMPFILE and leak the fd. */
+> > +#ifdef O_TMPFILE
+> > +       fd = open(".", O_TMPFILE | O_RDWR, 0644);
 > 
-> 
-> > > -echo "Seek holes and data in file1"
-> > > -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> > > -echo "Seek holes and data in file2"
-> > > -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-> > 
-> > This removed code tests that the earlier write of 64k of data into file2
-> > between 192k and 256k can be found by SEEK_DATA before file2 gets
-> > sync'd to disk.
-> 
-> Well, and it might not be able to be found if it is in the COW fork..
+> Pass in path as argv[1], so you won't need to cd $SCRATCH_MNT
+> all the time. Or does it have a purpose?
 
-But why would data only be able to be found in the COW fork?
-
-Does this test failure happen for you on a regular xfs filesystem, or
-does it only happen with the alwayscow patchset?
-
-If yes, are unfsync'd O_ATOMIC writes to holes invisible to seek_data
-until fsync finishes?
-
-> > And this removed code checks that the page cache contents remain stable
-> > and correct even for a write that goes through the COW mechanism.
-> > 
-> > I don't see why it's advantageous to remove this part of the test?
-> 
-> Last time I send a patch to just add a sync and got the recommendation
-> to just remove the double tests before and after the sync..
-
-Yes, and I think Eryu is wrong.  We wrote data into a hole between 192k
-and 256k, and SEEK_DATA should be able to find that data (it's readable
-from the page cache, after all) even if we haven't yet fsync'd the file.
+Nope, just sillyness on my part.  Thanks for the suggestion.
 
 --D
+
+> Thanks,
+> Amir.
