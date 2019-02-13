@@ -1,114 +1,142 @@
-Received: from mail-yb1-f172.google.com ([209.85.219.172]:35961 "EHLO
-        mail-yb1-f172.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728018AbfBMTem (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Feb 2019 14:34:42 -0500
+Received: from mx1.redhat.com ([209.132.183.28]:52908 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726143AbfBMNjx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 13 Feb 2019 08:39:53 -0500
+Date: Wed, 13 Feb 2019 08:39:50 -0500
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH] xfs: new EOF fragmentation tests
+Message-ID: <20190213133950.GA42812@bfoster>
+References: <20190211013647.22580-1-david@fromorbit.com>
+ <20190212140330.GC35803@bfoster>
+ <20190212210422.GJ20493@dastard>
 MIME-Version: 1.0
-References: <CA+EzBbDyoPF8=mZyG8HQAoHTm4h4MSCe=5WX_SBqRwPej=4uFg@mail.gmail.com>
- <CAOQ4uxh7OayzbGFk0cxoZf_t9jGxesv9k6zPPOA=+5MDsqWOzA@mail.gmail.com>
- <CA+EzBbC5c-O0ZBuC+UaL7Ftp2Vh8K8d46_6HTBWetY2Otd=tiA@mail.gmail.com>
- <CAOQ4uxi=riQHbaaBxK64SdWdQ1bbHPrPTyXaoOrinG1zggK5gQ@mail.gmail.com> <CAHWVdUUQ4=jWJj3eJMyv54n3O3svT8S_BJM9E8gbY4UCc1Rwow@mail.gmail.com>
-In-Reply-To: <CAHWVdUUQ4=jWJj3eJMyv54n3O3svT8S_BJM9E8gbY4UCc1Rwow@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 13 Feb 2019 21:34:29 +0200
-Message-ID: <CAOQ4uxh8n5ieuaeZ4jSUKJmUTf9QZtBVM8kRaBwGDuhtJbf64g@mail.gmail.com>
-Subject: Re: Documenting the crash consistency guarantees of file systems
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190212210422.GJ20493@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Vijay Chidambaram <vijay@cs.utexas.edu>
-Cc: Jayashree Mohan <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, Theodore Ts'o <tytso@mit.edu>, Filipe Manana <fdmanana@gmail.com>, Dave Chinner <david@fromorbit.com>, Chris Mason <clm@fb.com>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Feb 13, 2019 at 8:35 PM Vijay Chidambaram <vijay@cs.utexas.edu> wrote:
->
-> On Wed, Feb 13, 2019 at 12:22 PM Amir Goldstein <amir73il@gmail.com> wrote:
-> >
-> > On Wed, Feb 13, 2019 at 7:06 PM Jayashree Mohan <jaya@cs.utexas.edu> wrote:
-> > >
-> > > Hi Amir!
-> > >
-> > > Thanks for putting across your thoughts on this. Your suggestions
-> > > definitely make sense, and we'll compile these information and submit
-> > > a patch for review.
-> > >
-> > > When it comes to strictly ordered metadata consistency, to the best of
-> > > our knowledge only xfs claims to provide it explicitly. In ext4,
-> > > delayed allocation and fsync of a file not persisting all its hard
-> > > links[1] are examples of violation to the strictly ordered metadata
-> > > consistency right?
-> >
-> > No, I don't think they are.
-> > At least that is not how understand what Ted wrote.
-> >
-> > > And for btrfs, they don't seem to explicit about
-> > > providing such semantics. Look at this thread[2] for example, owing to
-> > > the lack of specification, btrfs does not commit to providing such
-> > > guarantees.
-> >
-> > The discussion is not about ordered metadata, is it about what
-> > fsync(file) should do. They are related if we decide that fsync(file)
-> > should persist nlink, but I think all fs maintainers are in agreement
-> > that it doesn't matter and btrfs choice is as valid as ext4/xfs choice.
-> >
-> > That said, I don't know if btrfs does strictly ordered metadata or not.
-> > Order metadata means if user does op A then op B, you should not be
-> > able to see consequence of op B after crash without seeing the
-> > consequence of op A.
-> >
-> > Can you give a counter example for btrfs? for ext4?
->
-> My understanding of strictly ordered metadata is that if op A precedes
-> op B in program order (in-memory execution), then op A should precede
-> op B in persistence order. As you say, one should not observe op B on
-> storage without op A. Note that we don't say anything about whether
-> fsync was called on op A or op B.
->
-> I remember this old conversation from our ALICE work that btrfs does
-> not persist things in order:
-> https://www.spinics.net/lists/linux-btrfs/msg32215.html
->
+On Wed, Feb 13, 2019 at 08:04:22AM +1100, Dave Chinner wrote:
+> On Tue, Feb 12, 2019 at 09:03:30AM -0500, Brian Foster wrote:
+> > On Mon, Feb 11, 2019 at 12:36:47PM +1100, Dave Chinner wrote:
+> > > From: Dave Chinner <dchinner@redhat.com>
+> > > 
+> > > These tests create substantial file fragmentation as a result of
+> > > application actions that defeat post-EOF preallocation
+> > > optimisations. They are intended to replicate known vectors for
+> > > these problems, and provide a check that the fragmentation levels
+> > > have been controlled. The mitigations we make may not completely
+> > > remove fragmentation (e.g. they may demonstrate speculative delalloc
+> > > related extent size growth) so the checks don't assume we'll end up
+> > > with perfect layouts and hence check for an exceptable level of
+> > > fragmentation rather than none.
+> .....
+> > > +workfile=$SCRATCH_MNT/file
+> > > +nfiles=8
+> > > +wsize=4096
+> > > +wcnt=1000
+> > > +
+> > > +write_sync_file()
+> > > +{
+> > > +	idx=$1
+> > > +
+> > > +	for ((cnt=0; cnt<$wcnt; cnt++)); do
+> > > +		$XFS_IO_PROG -f -s -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
+> > > +	done
+> > > +}
+> > > +
+> > > +rm -f $workfile*
+> > > +for ((n=0; n<$nfiles; n++)); do
+> > > +	write_sync_file $n > /dev/null 2>&1 &
+> > > +done
+> > > +wait
+> > > +sync
+> > 
+> > I'm not a huge fan of seeing these global syncs sprinkled around tests
+> > where they might not be needed. Are these here for a reason? If so, could
+> > they be replaced with an xfs_io -c syncfs or some such?
+> 
+> sync is there to ensure that everything is stable and I don't need
+> to care about using sync flags for counting extents.
+> 
+> I could use syncfs (either binary or xfs_io) but that's not
+> supported on all the OS's that fstests runs on. And I don't think
+> using sync really matters - if "sync" causes problems for fstests
+> that using syncfs fixes, then we've got bigger issues to worry
+> about.
+> 
 
-Yap that seems to break strict ordering.
+It's not a matter of sync causing problems, I just think it's a kludge
+to sync the entire system. syncfs by definition is localized to a target
+fs.
 
-> If you do the following:
->
-> create file foo
-> write to file foo
-> rename bar to baz
-> CRASH
->
-> and then you see baz but not foo on storage, that is a violation of
-> strictly ordered semantics. ext4 violates this due to delayed
-> allocation. So it does not provide strictly ordered metadata?
->
+Having taken a closer look, xfs_io unconditionally uses the fiemap sync
+flag so this is an instance where we don't need either.
 
-You are saying that you do not see foo dir entry on storage
-or that you do not see foo data on storage. Two completely different
-things. metadata ordering is not about data and delayed allocation
-is mostly about data.
+> > > +
+> > > +for ((n=0; n<$nfiles; n++)); do
+> > > +	count=$(_count_extents $workfile.$n)
+> > > +	# Acceptible extent count range is 1-40
+> > > +	_within_tolerance "file.$n extent count" $count 21 19 -v
+> > > +done
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > ...
+> > > diff --git a/tests/xfs/502 b/tests/xfs/502
+> > > new file mode 100755
+> > > index 00000000..9f314a3d
+> > > --- /dev/null
+> > > +++ b/tests/xfs/502
+> > > @@ -0,0 +1,81 @@
+> > ...
+> > > +
+> > > +# Write multiple files in parallel using O_DIRECT writes w/ extent size hints.
+> > > +# Aim is to interleave allocations to fragment the files. O_DIRECT writes defeat
+> > > +# the open/write/close heuristics in xfs_release() that prevent EOF block
+> > > +# removal, so this should fragment badly. Typical problematic behaviour shows
+> > > +# per-file extent counts of ~1000 (worst case) whilst fixed behaviour typically
+> > > +# shows extent counts in the low single digits (almost best case)
+> > > +#
+> > 
+> > This is essentially equivalent to the previous test, right? E.g.,
+> 
+> IMO, no. This is a different IO pattern that demonstrates a
+> fragmentation problem, regardless of the underlying cause. We may
+> fix the buffered write problem (e.g. via enabling delalloc on extent
+> size hints) but that leaves the direct IO variant unchanged. Hence,
+> if we drop this test, we'll never realise we still have a direct IO
+> variant we have to ensure we don't break.
+> 
+> IOWs, I'm attempting to characterise and exercise the userspace IO
+> patterns that cause fragmentation problems rather than exercise a
+> specific bug in the filesystem implementation.
+> 
+> > path as direct I/O with an extent size hint in current XFS. Of course
+> > that may not always be so, but I wonder if these two could be combined.
+> 
+> That's kinda my point - these IO patterns haven't always (and won't
+> always) exercised the same code paths and allocation behaviours.
+> Hence we nee dto exercise them both, even if they currently both
+> expose the same underlying problem.
+> 
 
-There are metadata changes that are implied by data changes
-(mtime,ctime,size), but those are also deferred along with delayed
-allocation.
+Ok, but I wasn't suggesting to not test any of these codepaths. I wanted
+to make sure the duplication of (current) behavior across the separate
+tests was intentional, for one. I'm also noting that the difference
+between this test and the previous is the xfs_io '-d' flag, and thus
+wondering why we wouldn't combine that into a single test (that tests
+extsz hint fragmentation on buffered and direct I/O).
 
-So we need to rephrase/clarify.
-I intentionally use the language "op A" and "op B" and I meant
-that the rule only apply to "metadata ops" - now this is a term that
-may be hard to define. Different filesystems may have different
-views on what qualifies as a "metadata op".
-No one will probably argue that rename() is not a metadata op,
-but truncate/punch/clone, there may be some wiggle room for
-interpretation (and that statement is likely to draw flames).
+Brian
 
-> AFAIK, any file system which persists things out of order to increase
-> performance does not provide strictly ordered metadata semantics.
-> These semantics seem to indicate a total ordering among all
-> operations, and an fsync should persist all previous operations (as
-> ext3 used to do).
->
-
-fsync in xfs does not persist all previous operations.
-It knows which is the last transaction where target inode was changed
-and it only needs to flush transactions up this this one.
-
-Thanks,
-Amir.
+> Cheers,
+> 
+> Dave.
+> 
+> -- 
+> Dave Chinner
+> david@fromorbit.com
