@@ -1,116 +1,262 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:40654 "EHLO
+Received: from userp2130.oracle.com ([156.151.31.86]:59680 "EHLO
         userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727122AbfBKXvw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 11 Feb 2019 18:51:52 -0500
-Date: Mon, 11 Feb 2019 15:51:44 -0800
+        with ESMTP id S1727251AbfBMUsT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Feb 2019 15:48:19 -0500
+Date: Wed, 13 Feb 2019 12:48:14 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/420: only check the extent layout after syncing
-Message-ID: <20190211235144.GA6477@magnolia>
-References: <20190204153026.1673-1-hch@lst.de>
+Subject: [PATCH 4/3] generic: posix acl extended attribute memory corruption
+ test
+Message-ID: <20190213204814.GB6477@magnolia>
+References: <154993784038.1948.7502664832930298472.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190204153026.1673-1-hch@lst.de>
+In-Reply-To: <154993784038.1948.7502664832930298472.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@lst.de>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 04, 2019 at 04:30:26PM +0100, Christoph Hellwig wrote:
-> This tests validates the correct extent layout for some hairy reflink
-> related issues.  But until we called sync or fsync we have no gurantee
-> of any data fork layout, as only writeback moves the extents from the
-> COW for to the data fork.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Hmm.  Looking at my notes for xfs/420, the goal was to make sure that if
-userspace writes to offsets X and Y, an immediately subsequent SEEK_DATA
-returns X and Y as data, both before and after an fsync.
+XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
+listxattr buffer space while trying to store the name
+"system.posix_acl_access" and then corrupts memory by not checking the
+seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into
+the buffer as well.
 
-The twist for this test is that offset Y didn't have any block mapped
-before the COW requirement was added to the file, which means that this
-test is making sure that we can't miss a piece of data that will be COWd
-into place in the future but isn't currently mapped into the data fork.
+In order to tickle the bug in a user visible way we must have already
+put a name in the buffer, so we take advantage of the fact that
+"security.evm" sorts before "system.posix_acl_access" to make sure this
+happens.
 
-It also checks that the file contents and SEEK_DATA results remain the
-same after an fsync.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ .gitignore              |    1 
+ src/Makefile            |    2 -
+ src/t_attr_corruption.c |  122 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/712       |   41 ++++++++++++++++
+ tests/generic/712.out   |    2 +
+ tests/generic/group     |    1 
+ 6 files changed, 168 insertions(+), 1 deletion(-)
+ create mode 100644 src/t_attr_corruption.c
+ create mode 100755 tests/generic/712
+ create mode 100644 tests/generic/712.out
 
-> The comparism pass before the sync might see an "error" if we use COW
-> fork speculative preallocations for non-overwrites, which is useful to
-> reduce fragmentation.
-
-What error do you see?
-
-> Just remove the pass of comparisms before the sync, as the one after
-> the sync will catch all persistent issues.
-> 
-> Signed-off-by: Christoph Hellwig <hch@lst.de>
-> ---
->  tests/xfs/420     | 14 --------------
->  tests/xfs/420.out | 14 --------------
->  2 files changed, 28 deletions(-)
-> 
-> diff --git a/tests/xfs/420 b/tests/xfs/420
-> index a083a12b..0d611fd6 100755
-> --- a/tests/xfs/420
-> +++ b/tests/xfs/420
-> @@ -93,20 +93,6 @@ $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file2 >> $seqres
->  $XFS_IO_PROG -c "pwrite -S 0x63 0 $blksz" $testdir/file3 >> $seqres.full
->  $XFS_IO_PROG -c "pwrite -S 0x63 $((blksz * 3)) $blksz" $testdir/file3 >> $seqres.full
->  
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file1 >> $seqres.full 2>&1
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file2 >> $seqres.full 2>&1
-> -$XFS_IO_PROG -c "bmap -ev" -c "bmap -cv" $testdir/file3 >> $seqres.full 2>&1
-> -
-> -echo "Seek holes and data in file1"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file1
-> -echo "Seek holes and data in file2"
-> -$XFS_IO_PROG -c "seek -a -r 0" $testdir/file2
-
-This removed code tests that the earlier write of 64k of data into file2
-between 192k and 256k can be found by SEEK_DATA before file2 gets
-sync'd to disk.
-
-> -echo "Compare files"
-> -md5sum $testdir/file1 | _filter_scratch
-> -md5sum $testdir/file2 | _filter_scratch
-> -md5sum $testdir/file3 | _filter_scratch
-
-And this removed code checks that the page cache contents remain stable
-and correct even for a write that goes through the COW mechanism.
-
-I don't see why it's advantageous to remove this part of the test?
-
---D
-
-> -
->  echo "sync filesystem" | tee -a $seqres.full
->  sync
->  
-> diff --git a/tests/xfs/420.out b/tests/xfs/420.out
-> index d1b5483a..39360741 100644
-> --- a/tests/xfs/420.out
-> +++ b/tests/xfs/420.out
-> @@ -6,20 +6,6 @@ c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file2
->  c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file3
->  CoW the shared part then write into the empty part
-> -Seek holes and data in file1
-> -Whence	Result
-> -DATA	0
-> -HOLE	131072
-> -Seek holes and data in file2
-> -Whence	Result
-> -DATA	0
-> -HOLE	131072
-> -DATA	196608
-> -HOLE	262144
-> -Compare files
-> -c2803804acc9936eef8aab42c119bfac  SCRATCH_MNT/test-420/file1
-> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file2
-> -017c08a9320aad844ce86aa9631afb98  SCRATCH_MNT/test-420/file3
->  sync filesystem
->  Seek holes and data in file1
->  Whence	Result
-> -- 
-> 2.20.1
-> 
+diff --git a/.gitignore b/.gitignore
+index ea1aac8a..0933dc7d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -114,6 +114,7 @@
+ /src/stat_test
+ /src/swapon
+ /src/t_access_root
++/src/t_attr_corruption
+ /src/t_dir_offset
+ /src/t_dir_offset2
+ /src/t_dir_type
+diff --git a/src/Makefile b/src/Makefile
+index 41826585..ae09eb0a 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -27,7 +27,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+-	attr_replace_test swapon mkswap
++	attr_replace_test swapon mkswap t_attr_corruption
+ 
+ SUBDIRS = log-writes perf
+ 
+diff --git a/src/t_attr_corruption.c b/src/t_attr_corruption.c
+new file mode 100644
+index 00000000..1fa5e41f
+--- /dev/null
++++ b/src/t_attr_corruption.c
+@@ -0,0 +1,122 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 Oracle.  All Rights Reserved.
++ * Author: Darrick J. Wong <darrick.wong@oracle.com>
++ *
++ * Test program to tickle a use-after-free bug in xfs.
++ *
++ * XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
++ * listxattr buffer space while trying to store the name
++ * "system.posix_acl_access" and then corrupts memory by not checking the
++ * seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into the
++ * buffer as well.
++ *
++ * In order to tickle the bug in a user visible way we must have already put a
++ * name in the buffer, so we take advantage of the fact that "security.evm"
++ * sorts before "system.posix_acl_access" to make sure this happens.
++ *
++ * If we trigger the bug, the program will print the garbled string
++ * "rusted.SGI_ACL_FILE".  If the bug is fixed, the flistxattr call returns
++ * ERANGE.
++ */
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <fcntl.h>
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++#include <stdint.h>
++#include <unistd.h>
++#include <attr/xattr.h>
++
++void die(const char *msg)
++{
++	perror(msg);
++	exit(1);
++}
++
++struct entry {
++	uint16_t	a;
++	uint16_t	b;
++	uint32_t	c;
++};
++
++struct myacl {
++	uint32_t	d;
++	struct entry	e[4];
++};
++
++int main(int argc, char *argv[])
++{
++	struct myacl acl = {
++		.d = 2,
++		.e = {
++			{1, 0, 0},
++			{4, 0, 0},
++			{0x10, 0, 0},
++			{0x20, 0, 0},
++		},
++	};
++	char buf[64];
++	ssize_t sz;
++	int fd;
++	int ret;
++
++	if (argc > 1) {
++		ret = chdir(argv[1]);
++		if (ret)
++			die(argv[1]);
++	}
++
++	fd = creat("file0", 0644);
++	if (fd < 0)
++		die("create");
++
++	ret = fsetxattr(fd, "system.posix_acl_access", &acl, sizeof(acl), 0);
++	if (ret)
++		die("set posix acl");
++
++	ret = fsetxattr(fd, "security.evm", buf, 1, 1);
++	if (ret)
++		die("set evm");
++
++	sz = flistxattr(fd, buf, 30);
++	if (sz < 0)
++		die("list attr");
++
++	printf("%s\n", buf);
++
++	return 0;
++
++#if 0
++	/* original syzkaller reproducer */
++
++	syscall(__NR_mmap, 0x20000000, 0x1000000, 3, 0x32, -1, 0);
++
++	memcpy((void*)0x20000180, "./file0", 8);
++	syscall(__NR_creat, 0x20000180, 0);
++	memcpy((void*)0x20000000, "./file0", 8);
++	memcpy((void*)0x20000040, "system.posix_acl_access", 24);
++	*(uint32_t*)0x20000680 = 2;
++	*(uint16_t*)0x20000684 = 1;
++	*(uint16_t*)0x20000686 = 0;
++	*(uint32_t*)0x20000688 = 0;
++	*(uint16_t*)0x2000068c = 4;
++	*(uint16_t*)0x2000068e = 0;
++	*(uint32_t*)0x20000690 = 0;
++	*(uint16_t*)0x20000694 = 0x10;
++	*(uint16_t*)0x20000696 = 0;
++	*(uint32_t*)0x20000698 = 0;
++	*(uint16_t*)0x2000069c = 0x20;
++	*(uint16_t*)0x2000069e = 0;
++	*(uint32_t*)0x200006a0 = 0;
++	syscall(__NR_setxattr, 0x20000000, 0x20000040, 0x20000680, 0x24, 0);
++	memcpy((void*)0x20000080, "./file0", 8);
++	memcpy((void*)0x200000c0, "security.evm", 13);
++	memcpy((void*)0x20000100, "\x03\x00\x00\x00\x57", 5);
++	syscall(__NR_lsetxattr, 0x20000080, 0x200000c0, 0x20000100, 1, 1);
++	memcpy((void*)0x20000300, "./file0", 8);
++	syscall(__NR_listxattr, 0x20000300, 0x200002c0, 0x1e);
++	return 0;
++#endif
++}
+diff --git a/tests/generic/712 b/tests/generic/712
+new file mode 100755
+index 00000000..6348a797
+--- /dev/null
++++ b/tests/generic/712
+@@ -0,0 +1,41 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 712
++#
++# Regression test for a bug where XFS corrupts memory if the listxattr buffer
++# is a particularly well crafted size on a filesystem that supports posix acls.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++testfile=$TEST_DIR/$seq.txt
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_acls
++_require_scratch
++
++rm -f $seqres.full
++_scratch_mkfs >> $seqres.full 2>&1
++_scratch_mount
++
++src/t_attr_corruption $SCRATCH_MNT
++
++status=0
++exit
+diff --git a/tests/generic/712.out b/tests/generic/712.out
+new file mode 100644
+index 00000000..a2ba09f3
+--- /dev/null
++++ b/tests/generic/712.out
+@@ -0,0 +1,2 @@
++QA output created by 712
++list attr: Numerical result out of range
+diff --git a/tests/generic/group b/tests/generic/group
+index f56eb475..b3086154 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -529,3 +529,4 @@
+ 524 auto quick
+ 525 auto quick rw
+ 709 auto quick
++712 auto quick attr
