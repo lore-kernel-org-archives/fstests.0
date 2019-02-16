@@ -1,279 +1,264 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:42082 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726084AbfBPRY4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Feb 2019 12:24:56 -0500
-Date: Sat, 16 Feb 2019 09:24:47 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 4/3] generic: posix acl extended attribute memory
- corruption test
-Message-ID: <20190216172447.GX32253@magnolia>
-References: <154993784038.1948.7502664832930298472.stgit@magnolia>
- <20190213204814.GB6477@magnolia>
- <20190216120530.GZ2713@desktop>
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:44720 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726090AbfBPNzD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 16 Feb 2019 08:55:03 -0500
+Received: by mail-pf1-f196.google.com with SMTP id u6so6215268pfh.11
+        for <fstests@vger.kernel.org>; Sat, 16 Feb 2019 05:55:02 -0800 (PST)
+Date: Sat, 16 Feb 2019 21:54:55 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] fstests/generic: cgroup aware writeback accounting test
+Message-ID: <20190216135455.GA2713@desktop>
+References: <20190212152203.37434-1-bfoster@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190216120530.GZ2713@desktop>
+In-Reply-To: <20190212152203.37434-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Feb 16, 2019 at 08:05:30PM +0800, Eryu Guan wrote:
-> On Wed, Feb 13, 2019 at 12:48:14PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
-> > listxattr buffer space while trying to store the name
-> > "system.posix_acl_access" and then corrupts memory by not checking the
-> > seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into
-> > the buffer as well.
-> > 
-> > In order to tickle the bug in a user visible way we must have already
-> > put a name in the buffer, so we take advantage of the fact that
-> > "security.evm" sorts before "system.posix_acl_access" to make sure this
-> > happens.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  .gitignore              |    1 
-> >  src/Makefile            |    2 -
-> >  src/t_attr_corruption.c |  122 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/712       |   41 ++++++++++++++++
-> >  tests/generic/712.out   |    2 +
-> >  tests/generic/group     |    1 
-> >  6 files changed, 168 insertions(+), 1 deletion(-)
-> >  create mode 100644 src/t_attr_corruption.c
-> >  create mode 100755 tests/generic/712
-> >  create mode 100644 tests/generic/712.out
-> > 
-> > diff --git a/.gitignore b/.gitignore
-> > index ea1aac8a..0933dc7d 100644
-> > --- a/.gitignore
-> > +++ b/.gitignore
-> > @@ -114,6 +114,7 @@
-> >  /src/stat_test
-> >  /src/swapon
-> >  /src/t_access_root
-> > +/src/t_attr_corruption
-> >  /src/t_dir_offset
-> >  /src/t_dir_offset2
-> >  /src/t_dir_type
-> > diff --git a/src/Makefile b/src/Makefile
-> > index 41826585..ae09eb0a 100644
-> > --- a/src/Makefile
-> > +++ b/src/Makefile
-> > @@ -27,7 +27,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
-> >  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
-> >  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
-> >  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
-> > -	attr_replace_test swapon mkswap
-> > +	attr_replace_test swapon mkswap t_attr_corruption
-> >  
-> >  SUBDIRS = log-writes perf
-> >  
-> > diff --git a/src/t_attr_corruption.c b/src/t_attr_corruption.c
-> > new file mode 100644
-> > index 00000000..1fa5e41f
-> > --- /dev/null
-> > +++ b/src/t_attr_corruption.c
-> > @@ -0,0 +1,122 @@
-> > +// SPDX-License-Identifier: GPL-2.0+
-> > +/*
-> > + * Copyright (C) 2019 Oracle.  All Rights Reserved.
-> > + * Author: Darrick J. Wong <darrick.wong@oracle.com>
-> > + *
-> > + * Test program to tickle a use-after-free bug in xfs.
-> > + *
-> > + * XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
-> > + * listxattr buffer space while trying to store the name
-> > + * "system.posix_acl_access" and then corrupts memory by not checking the
-> > + * seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into the
-> > + * buffer as well.
-> > + *
-> > + * In order to tickle the bug in a user visible way we must have already put a
-> > + * name in the buffer, so we take advantage of the fact that "security.evm"
-> > + * sorts before "system.posix_acl_access" to make sure this happens.
-> > + *
-> > + * If we trigger the bug, the program will print the garbled string
-> > + * "rusted.SGI_ACL_FILE".  If the bug is fixed, the flistxattr call returns
-> > + * ERANGE.
-> > + */
-> > +#include <sys/types.h>
-> > +#include <sys/stat.h>
-> > +#include <fcntl.h>
-> > +#include <stdlib.h>
-> > +#include <stdio.h>
-> > +#include <string.h>
-> > +#include <stdint.h>
-> > +#include <unistd.h>
-> > +#include <attr/xattr.h>
-> > +
-> > +void die(const char *msg)
-> > +{
-> > +	perror(msg);
-> > +	exit(1);
-> > +}
-> > +
-> > +struct entry {
-> > +	uint16_t	a;
-> > +	uint16_t	b;
-> > +	uint32_t	c;
-> > +};
-> > +
-> > +struct myacl {
-> > +	uint32_t	d;
-> > +	struct entry	e[4];
-> > +};
-> > +
-> > +int main(int argc, char *argv[])
-> > +{
-> > +	struct myacl acl = {
-> > +		.d = 2,
-> > +		.e = {
-> > +			{1, 0, 0},
-> > +			{4, 0, 0},
-> > +			{0x10, 0, 0},
-> > +			{0x20, 0, 0},
-> > +		},
-> > +	};
-> > +	char buf[64];
-> > +	ssize_t sz;
-> > +	int fd;
-> > +	int ret;
-> > +
-> > +	if (argc > 1) {
-> > +		ret = chdir(argv[1]);
-> > +		if (ret)
-> > +			die(argv[1]);
-> > +	}
-> > +
-> > +	fd = creat("file0", 0644);
-> > +	if (fd < 0)
-> > +		die("create");
-> > +
-> > +	ret = fsetxattr(fd, "system.posix_acl_access", &acl, sizeof(acl), 0);
-> > +	if (ret)
-> > +		die("set posix acl");
-> > +
-> > +	ret = fsetxattr(fd, "security.evm", buf, 1, 1);
-> > +	if (ret)
-> > +		die("set evm");
-> > +
-> > +	sz = flistxattr(fd, buf, 30);
-> > +	if (sz < 0)
-> > +		die("list attr");
-> > +
-> > +	printf("%s\n", buf);
-> > +
-> > +	return 0;
-> > +
-> > +#if 0
-> > +	/* original syzkaller reproducer */
-> > +
-> > +	syscall(__NR_mmap, 0x20000000, 0x1000000, 3, 0x32, -1, 0);
-> > +
-> > +	memcpy((void*)0x20000180, "./file0", 8);
-> > +	syscall(__NR_creat, 0x20000180, 0);
-> > +	memcpy((void*)0x20000000, "./file0", 8);
-> > +	memcpy((void*)0x20000040, "system.posix_acl_access", 24);
-> > +	*(uint32_t*)0x20000680 = 2;
-> > +	*(uint16_t*)0x20000684 = 1;
-> > +	*(uint16_t*)0x20000686 = 0;
-> > +	*(uint32_t*)0x20000688 = 0;
-> > +	*(uint16_t*)0x2000068c = 4;
-> > +	*(uint16_t*)0x2000068e = 0;
-> > +	*(uint32_t*)0x20000690 = 0;
-> > +	*(uint16_t*)0x20000694 = 0x10;
-> > +	*(uint16_t*)0x20000696 = 0;
-> > +	*(uint32_t*)0x20000698 = 0;
-> > +	*(uint16_t*)0x2000069c = 0x20;
-> > +	*(uint16_t*)0x2000069e = 0;
-> > +	*(uint32_t*)0x200006a0 = 0;
-> > +	syscall(__NR_setxattr, 0x20000000, 0x20000040, 0x20000680, 0x24, 0);
-> > +	memcpy((void*)0x20000080, "./file0", 8);
-> > +	memcpy((void*)0x200000c0, "security.evm", 13);
-> > +	memcpy((void*)0x20000100, "\x03\x00\x00\x00\x57", 5);
-> > +	syscall(__NR_lsetxattr, 0x20000080, 0x200000c0, 0x20000100, 1, 1);
-> > +	memcpy((void*)0x20000300, "./file0", 8);
-> > +	syscall(__NR_listxattr, 0x20000300, 0x200002c0, 0x1e);
-> > +	return 0;
-> > +#endif
-> > +}
-> > diff --git a/tests/generic/712 b/tests/generic/712
-> > new file mode 100755
-> > index 00000000..6348a797
-> > --- /dev/null
-> > +++ b/tests/generic/712
-> > @@ -0,0 +1,41 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0+
-> > +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 712
-> > +#
-> > +# Regression test for a bug where XFS corrupts memory if the listxattr buffer
-> > +# is a particularly well crafted size on a filesystem that supports posix acls.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +testfile=$TEST_DIR/$seq.txt
+On Tue, Feb 12, 2019 at 10:22:03AM -0500, Brian Foster wrote:
+> A test to perform reads/writes under various cgroups and verify that
+> I/Os are accounted properly according to cgroup aware writeback.
+> This is a generic test, but not all commonly used local filesystems
+> support cgroup aware writeback at the moment (i.e., XFS). Therefore,
+> this test currently requires ext4 or btrfs for the time being.
 > 
-> I removed this definition, which is not used in the test.
+> The common/cgroup2 file is copied from a separate cgroup related
+> patch from Shaohua Li that never made it upstream.
 > 
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/attr
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_acls
-> > +_require_scratch
+> Signed-off-by: Brian Foster <bfoster@redhat.com>
+> Signed-off-by: Shaohua Li <shli@fb.com>
+> ---
 > 
-> I also added
+> This is a test I had lying around from previous cgawb on XFS discussions
+> that I never got back to finishing off. This currently passes on
+> ext4/btrfs, fails on upstream XFS and survives XFS with the old cgawb
+> enablement patch applied.
 > 
-> _require_test_program "t_attr_corruption"
+> Shaohua's patch referenced in the commit log is available here[1].
+> 
+> Brian
+> 
+> [1] https://marc.info/?l=fstests&m=152175327503759&w=2
+> 
+>  common/cgroup2        |  15 +++++
+>  tests/generic/999     | 141 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/999.out |  14 +++++
+>  tests/generic/group   |   1 +
+>  4 files changed, 171 insertions(+)
+>  create mode 100644 common/cgroup2
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/common/cgroup2 b/common/cgroup2
+> new file mode 100644
+> index 00000000..f89825e2
+> --- /dev/null
+> +++ b/common/cgroup2
+> @@ -0,0 +1,15 @@
+> +# cgroup2 specific common functions
+> +
+> +export CGROUP2_PATH="${CGROUP2_PATH:-/sys/fs/cgroup}"
+> +
+> +_require_cgroup2()
+> +{
+> +	if [ ! -f "${CGROUP2_PATH}/cgroup.subtree_control" ]; then
+> +		_notrun "Test requires cgroup2 enabled"
+> +	fi
+> +	if [[ ! $(cat ${CGROUP2_PATH}/cgroup.controllers) =~ $1 ]]; then
+> +		_notrun "Cgroup2 doesn't support $1 controller $1"
+> +	fi
+> +}
+> +
+> +/bin/true
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..1664da60
+> --- /dev/null
+> +++ b/tests/generic/999
+> @@ -0,0 +1,141 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test 999
+> +#
+> +# This test verifies that cgroup aware writeback properly accounts I/Os in
+> +# various scenarios. We perform reads/writes from different combinations of
+> +# cgroups and verify that pages are accounted against the group that brought
+> +# them into cache.
+> +#
+> +
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +
+> +	echo $$ > $cgdir/cgroup.procs
+> +	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/cgroup2
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs ext4 btrfs
 
-Sounds good, thank you!
+Then this should be a 'shared' test, I renamed it to shared/011.
 
-> Thanks,
-> Eryu
+> +_supported_os Linux
+> +_require_scratch
+> +_require_cgroup2 io
+> +
+> +smajor=$((0x`stat -L -c %t $SCRATCH_DEV`))
+> +sminor=$((0x`stat -L -c %T $SCRATCH_DEV`))
+> +cgdir=$CGROUP2_PATH
+> +
+> +iosize=$((1024 * 1024 * 8))
+> +
+> +# Check cgroup read/write charges against expected values. Allow for some
+> +# tolerance as different filesystems seem to account slightly differently.
+> +check_cg()
+> +{
+> +	cgroot=$1
+> +	cgname=$(basename $cgroot)
+> +	expectedread=$2
+> +	expectedwrite=$3
+> +	rbytes=0
+> +	wbytes=0
+> +
+> +	iobytes=`cat $cgroot/io.stat | grep $smajor:$sminor`
+> +	if [ $? == 0 ]; then
+> +		rbytes=`echo $iobytes | awk '{ print $2 }' | \
+> +			awk -F = '{ print $2 }'`
+> +		wbytes=`echo $iobytes | awk '{ print $3 }' | \
+> +			awk -F = '{ print $2 }'`
+> +	fi
+> +
+> +	_within_tolerance "read" $rbytes $expectedread 5% -v
+> +	_within_tolerance "write" $wbytes $expectedwrite 5% -v
+> +}
+> +
+> +# Move current process to another cgroup.
+> +switch_cg()
+> +{
+> +	mkdir -p $1
+> +	echo $$ > $1/cgroup.procs
+> +}
+> +
+> +# Reset cgroup state for a new test.
+> +reset()
+> +{
+> +	echo $$ > $cgdir/cgroup.procs
+> +	rmdir $cgdir/$seq-cg* > /dev/null 2>&1
+> +	$XFS_IO_PROG -fc "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> +		>> $seqres.full 2>&1
+> +	_scratch_cycle_mount || _fail "mount failed"
+
+_scratch_cycle_mount will call _fail too, no need to _fail explicitly
+here. Otherwise looks good to me.
+
+Thanks,
+Eryu
+
+> +	stat $SCRATCH_MNT/file > /dev/null
+> +}
+> +
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
+> +
+> +echo "+io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+> +
+> +# Read and write from a single group.
+> +echo "read/write"
+> +reset
+> +switch_cg $cgdir/$seq-cg
+> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" -c fsync \
+> +	$SCRATCH_MNT/file >> $seqres.full 2>&1
+> +switch_cg $cgdir
+> +$XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> +check_cg $cgdir/$seq-cg $iosize $iosize
+> +
+> +# Write from one cgroup then read and write from a second. Writes are charged to
+> +# the first group and nothing to the second.
+> +echo "write -> read/write"
+> +reset
+> +switch_cg $cgdir/$seq-cg
+> +$XFS_IO_PROG -c "pwrite 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
+> +switch_cg $cgdir/$seq-cg-2
+> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> +	>> $seqres.full 2>&1
+> +switch_cg $cgdir
+> +$XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> +check_cg $cgdir/$seq-cg 0 $iosize
+> +check_cg $cgdir/$seq-cg-2 0 0
+> +
+> +# Read from one cgroup, read & write from a second. Both reads and writes are
+> +# charged to the first group and nothing to the second.
+> +echo "read -> read/write"
+> +reset
+> +switch_cg $cgdir/$seq-cg
+> +$XFS_IO_PROG -c "pread 0 $iosize" $SCRATCH_MNT/file >> $seqres.full 2>&1
+> +switch_cg $cgdir/$seq-cg-2
+> +$XFS_IO_PROG -c "pread 0 $iosize" -c "pwrite 0 $iosize" $SCRATCH_MNT/file \
+> +	>> $seqres.full 2>&1
+> +switch_cg $cgdir
+> +$XFS_IO_PROG -c fsync $SCRATCH_MNT/file
+> +check_cg $cgdir/$seq-cg $iosize $iosize
+> +check_cg $cgdir/$seq-cg-2 0 0
+> +
+> +echo "-io" > $cgdir/cgroup.subtree_control || _fail "subtree control"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..d93b7089
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1,14 @@
+> +QA output created by 999
+> +read/write
+> +read is in range
+> +write is in range
+> +write -> read/write
+> +read is in range
+> +write is in range
+> +read is in range
+> +write is in range
+> +read -> read/write
+> +read is in range
+> +write is in range
+> +read is in range
+> +write is in range
+> diff --git a/tests/generic/group b/tests/generic/group
+> index cfd003d3..9d7d7613 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -528,3 +528,4 @@
+>  523 auto quick attr
+>  524 auto quick
+>  525 auto quick rw
+> +999 auto quick
+> -- 
+> 2.17.2
 > 
-> > +
-> > +rm -f $seqres.full
-> > +_scratch_mkfs >> $seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +src/t_attr_corruption $SCRATCH_MNT
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/712.out b/tests/generic/712.out
-> > new file mode 100644
-> > index 00000000..a2ba09f3
-> > --- /dev/null
-> > +++ b/tests/generic/712.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 712
-> > +list attr: Numerical result out of range
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index f56eb475..b3086154 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -529,3 +529,4 @@
-> >  524 auto quick
-> >  525 auto quick rw
-> >  709 auto quick
-> > +712 auto quick attr
