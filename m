@@ -1,106 +1,85 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:34510 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726145AbfBPAl0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Feb 2019 19:41:26 -0500
-Date: Fri, 15 Feb 2019 16:41:19 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] xfs: test mkfs extent size hint validation
-Message-ID: <20190216004119.GW32253@magnolia>
-References: <20190216003923.GV32253@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190216003923.GV32253@magnolia>
+Received: from mx1.redhat.com ([209.132.183.28]:52598 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726149AbfBPHZq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 16 Feb 2019 02:25:46 -0500
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 0D3D85944F
+        for <fstests@vger.kernel.org>; Sat, 16 Feb 2019 07:25:46 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-12-20.pek2.redhat.com [10.72.12.20])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 28B105D9C6
+        for <fstests@vger.kernel.org>; Sat, 16 Feb 2019 07:25:44 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] fsstress: avoid infinite zero byte reading
+Date: Sat, 16 Feb 2019 15:25:40 +0800
+Message-Id: <20190216072540.26272-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+copyrange_f and splice_f functions use a while loop to read a file,
+it's fine if there's only one fsstress process(and its children),
+but if some third part testing processes remove the file in the
+middle phase of copyrange_f running, copyrange_f maybe always return
+0, and the while loop can't be end. As below:
 
-Make sure mkfs won't format filesystems that fail extent size hint
-validation.
+root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
+root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+root     47314  xxxxxx S+ grep --color=auto fsstress
+...
+...
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+...
+...
+lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/xfs/738     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/738.out |    2 ++
- tests/xfs/group   |    1 +
- 3 files changed, 51 insertions(+)
- create mode 100755 tests/xfs/738
- create mode 100644 tests/xfs/738.out
 
-diff --git a/tests/xfs/738 b/tests/xfs/738
-new file mode 100755
-index 00000000..ee0ffaae
---- /dev/null
-+++ b/tests/xfs/738
-@@ -0,0 +1,48 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 738
-+#
-+# Make sure we can't format a filesystem with insane extent hints.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+testfile=$TEST_DIR/$seq.txt
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch_nocheck
-+
-+rm -f $seqres.full
-+
-+# Try regular extent size hint
-+echo extszinherit >> $seqres.full
-+_scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
-+test $? -eq 1 || echo "should have failed extszinherit"
-+
-+# Try cow extent size hint if supported
-+$MKFS_XFS_PROG -N -f $SCRATCH_DEV > $tmp.mkfs
-+if grep -q 'reflink=' $tmp.mkfs ; then
-+	echo cowextsize >> $seqres.full
-+	_scratch_mkfs -m reflink=1 -d cowextsize=8388608 >> $seqres.full 2>&1
-+	test $? -eq 1 || echo "should have failed cowextsize"
-+fi
-+
-+echo silence is golden
-+status=0
-+exit
-diff --git a/tests/xfs/738.out b/tests/xfs/738.out
-new file mode 100644
-index 00000000..703fe23b
---- /dev/null
-+++ b/tests/xfs/738.out
-@@ -0,0 +1,2 @@
-+QA output created by 738
-+silence is golden
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 677396fb..b2fea9ef 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -515,6 +515,7 @@
- 731 dangerous_scrub dangerous_online_repair
- 736 auto quick unlink
- 737 auto quick unlink
-+738 auto quick
- 1500 auto prealloc rw
- 1501 auto prealloc rw
- 1502 auto prealloc rw
+V2 remove 300 times loop, just return if get ret == 0
+
+Thanks,
+Zorro
+
+ ltp/fsstress.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 25e0c3e2..138f7ecf 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -2363,7 +2363,7 @@ copyrange_f(
+ 	int			v2;
+ 	int			fd1;
+ 	int			fd2;
+-	size_t			ret;
++	size_t			ret = 0;
+ 	int			e;
+ 
+ 	/* Load paths */
+@@ -2452,7 +2452,7 @@ copyrange_f(
+ 		if (ret < 0) {
+ 			if (errno != EAGAIN || tries++ >= 300)
+ 				break;
+-		} else if (ret > len)
++		} else if (ret > len || ret == 0)
+ 			break;
+ 		else if (ret > 0)
+ 			len -= ret;
+@@ -2908,6 +2908,9 @@ splice_f(int opno, long r)
+ 
+ 		len -= ret1;
+ 		total += ret1;
++		if (ret1 == 0) {
++			break;
++		}
+ 	}
+ 
+ 	if (ret1 < 0 || ret2 < 0)
+-- 
+2.17.2
