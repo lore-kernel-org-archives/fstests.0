@@ -1,107 +1,106 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:45630 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728436AbfBOMlq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Feb 2019 07:41:46 -0500
-Received: from clnet-p01-149.ikbnet.co.at ([83.175.85.149] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.90_1 #2 (Red Hat Linux))
-        id 1gucoK-0002CZ-5H
-        for fstests@vger.kernel.org; Fri, 15 Feb 2019 12:41:45 +0000
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH v2] generic: detect preallocation support for fsx tests 075 and 112
-Date: Fri, 15 Feb 2019 13:41:40 +0100
-Message-Id: <20190215124140.6832-1-hch@lst.de>
+Received: from userp2130.oracle.com ([156.151.31.86]:34510 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726145AbfBPAl0 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 15 Feb 2019 19:41:26 -0500
+Date: Fri, 15 Feb 2019 16:41:19 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] xfs: test mkfs extent size hint validation
+Message-ID: <20190216004119.GW32253@magnolia>
+References: <20190216003923.GV32253@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190216003923.GV32253@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-Currently generic/075 and generic/112 have two extra fsx passes each that
-exercise fsx with preallocation, which are only enabled for XFS.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-These tests can also be run with other file systems, given that the XFS
-prealloc ioctls are implemented in generic code since the addition of
-the fallocate system call.  This also means a version of XFS that does
-not support preallocation (e.g. because it always writes out of place)
-can skip the prealloc tests while still completing the normal fsx tests
-just fine.
+Make sure mkfs won't format filesystems that fail extent size hint
+validation.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
+ tests/xfs/738     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/738.out |    2 ++
+ tests/xfs/group   |    1 +
+ 3 files changed, 51 insertions(+)
+ create mode 100755 tests/xfs/738
+ create mode 100644 tests/xfs/738.out
 
-Changes since v1:
- - use the resvsp command instead of falloc
- - just check for a non-empty output from xfs_io
-
- tests/generic/075 | 13 ++++++++-----
- tests/generic/112 | 17 ++++++++++-------
- 2 files changed, 18 insertions(+), 12 deletions(-)
-
-diff --git a/tests/generic/075 b/tests/generic/075
-index 2b957891..acaa3b4c 100755
---- a/tests/generic/075
-+++ b/tests/generic/075
-@@ -48,11 +48,9 @@ _do_test()
-     echo "fsx.$_n : $_filter_param"
-     echo "-----------------------------------------------"
- 
--    if [ "$FSTYP" != "xfs" ]
--    then
--	if [ "$_n" = "1" -o "$_n" = "3" ]
--	then
--	    # HACK: only xfs handles preallocation (-x) so just skip this test
-+    # Skip the prealloc runs if the file system does not support preallocation
-+    if [ "$_n" = "1" -o "$_n" = "3" ]; then
-+        if [ -n "$testio" ]; then
- 	    return
- 	fi
-     fi
-@@ -128,6 +126,11 @@ echo "brevity is wit..."
- 
- _check_test_fs
- 
-+# check if preallocation is supported
-+testfile=$TEST_DIR/$$.xfs_io
-+testio=`$XFS_IO_PROG -F -f -c "resvsp 0 1" $testfile 2>&1`
-+rm -f $testfile 2>&1 > /dev/null
+diff --git a/tests/xfs/738 b/tests/xfs/738
+new file mode 100755
+index 00000000..ee0ffaae
+--- /dev/null
++++ b/tests/xfs/738
+@@ -0,0 +1,48 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 738
++#
++# Make sure we can't format a filesystem with insane extent hints.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++testfile=$TEST_DIR/$seq.txt
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
- # Options:
- # -d: debug output for all operations
- # -l flen: the upper bound on file size (default 262144)
-diff --git a/tests/generic/112 b/tests/generic/112
-index 1879e7b5..2c0d53e3 100755
---- a/tests/generic/112
-+++ b/tests/generic/112
-@@ -48,13 +48,11 @@ _do_test()
-     echo "fsx.$_n : $_filter_param"
-     echo "-----------------------------------------------"
- 
--    if [ "$FSTYP" != "xfs" ]
--    then
--        if [ "$_n" = "1" -o "$_n" = "3" ]
--        then
--            # HACK: only xfs handles preallocation (-x) so just skip this test
--            return
--        fi
-+    # Skip the prealloc runs if the file system does not support preallocation
-+    if [ "$_n" = "1" -o "$_n" = "3" ]; then
-+        if [ -n "$testio" ]; then
-+	    return
-+	fi
-     fi
- 
-     # This cd and use of -P gets full debug on $here (not TEST_DEV)
-@@ -128,6 +126,11 @@ echo "brevity is wit..."
- 
- _check_test_fs
- 
-+# check if preallocation is supported
-+testfile=$TEST_DIR/$$.xfs_io
-+testio=`$XFS_IO_PROG -F -f -c "falloc 0 1m" $testfile 2>&1`
-+rm -f $testfile 2>&1 > /dev/null
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
 +
- # Options:
- # -d: debug output for all operations
- # -l flen: the upper bound on file size (default 262144)
--- 
-2.20.1
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++
++rm -f $seqres.full
++
++# Try regular extent size hint
++echo extszinherit >> $seqres.full
++_scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
++test $? -eq 1 || echo "should have failed extszinherit"
++
++# Try cow extent size hint if supported
++$MKFS_XFS_PROG -N -f $SCRATCH_DEV > $tmp.mkfs
++if grep -q 'reflink=' $tmp.mkfs ; then
++	echo cowextsize >> $seqres.full
++	_scratch_mkfs -m reflink=1 -d cowextsize=8388608 >> $seqres.full 2>&1
++	test $? -eq 1 || echo "should have failed cowextsize"
++fi
++
++echo silence is golden
++status=0
++exit
+diff --git a/tests/xfs/738.out b/tests/xfs/738.out
+new file mode 100644
+index 00000000..703fe23b
+--- /dev/null
++++ b/tests/xfs/738.out
+@@ -0,0 +1,2 @@
++QA output created by 738
++silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 677396fb..b2fea9ef 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -515,6 +515,7 @@
+ 731 dangerous_scrub dangerous_online_repair
+ 736 auto quick unlink
+ 737 auto quick unlink
++738 auto quick
+ 1500 auto prealloc rw
+ 1501 auto prealloc rw
+ 1502 auto prealloc rw
