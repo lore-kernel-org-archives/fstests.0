@@ -1,524 +1,275 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:42321 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726924AbfBPKFG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 16 Feb 2019 05:05:06 -0500
-Received: by mail-pg1-f196.google.com with SMTP id b2so285407pgl.9
-        for <fstests@vger.kernel.org>; Sat, 16 Feb 2019 02:05:05 -0800 (PST)
-Date: Sat, 16 Feb 2019 18:04:54 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:45364 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726156AbfBPMFi (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 16 Feb 2019 07:05:38 -0500
+Date: Sat, 16 Feb 2019 20:05:30 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs: new EOF fragmentation tests
-Message-ID: <20190216100454.GY2713@desktop>
-References: <20190211013647.22580-1-david@fromorbit.com>
+Subject: Re: [PATCH 4/3] generic: posix acl extended attribute memory
+ corruption test
+Message-ID: <20190216120530.GZ2713@desktop>
+References: <154993784038.1948.7502664832930298472.stgit@magnolia>
+ <20190213204814.GB6477@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190211013647.22580-1-david@fromorbit.com>
+In-Reply-To: <20190213204814.GB6477@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 11, 2019 at 12:36:47PM +1100, Dave Chinner wrote:
-> From: Dave Chinner <dchinner@redhat.com>
+On Wed, Feb 13, 2019 at 12:48:14PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> These tests create substantial file fragmentation as a result of
-> application actions that defeat post-EOF preallocation
-> optimisations. They are intended to replicate known vectors for
-> these problems, and provide a check that the fragmentation levels
-> have been controlled. The mitigations we make may not completely
-> remove fragmentation (e.g. they may demonstrate speculative delalloc
-> related extent size growth) so the checks don't assume we'll end up
-> with perfect layouts and hence check for an exceptable level of
-> fragmentation rather than none.
+> XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
+> listxattr buffer space while trying to store the name
+> "system.posix_acl_access" and then corrupts memory by not checking the
+> seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into
+> the buffer as well.
 > 
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> In order to tickle the bug in a user visible way we must have already
+> put a name in the buffer, so we take advantage of the fact that
+> "security.evm" sorts before "system.posix_acl_access" to make sure this
+> happens.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/xfs/500     | 79 +++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/500.out |  9 +++++
->  tests/xfs/501     | 81 ++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/501.out |  9 +++++
->  tests/xfs/502     | 81 ++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/502.out |  9 +++++
->  tests/xfs/503     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/503.out | 33 ++++++++++++++++++
->  tests/xfs/group   |  4 +++
->  9 files changed, 394 insertions(+)
->  create mode 100755 tests/xfs/500
->  create mode 100644 tests/xfs/500.out
->  create mode 100755 tests/xfs/501
->  create mode 100644 tests/xfs/501.out
->  create mode 100755 tests/xfs/502
->  create mode 100644 tests/xfs/502.out
->  create mode 100755 tests/xfs/503
->  create mode 100644 tests/xfs/503.out
+>  .gitignore              |    1 
+>  src/Makefile            |    2 -
+>  src/t_attr_corruption.c |  122 +++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/712       |   41 ++++++++++++++++
+>  tests/generic/712.out   |    2 +
+>  tests/generic/group     |    1 
+>  6 files changed, 168 insertions(+), 1 deletion(-)
+>  create mode 100644 src/t_attr_corruption.c
+>  create mode 100755 tests/generic/712
+>  create mode 100644 tests/generic/712.out
 > 
-> diff --git a/tests/xfs/500 b/tests/xfs/500
-> new file mode 100755
-> index 00000000..d0802e86
-> --- /dev/null
-> +++ b/tests/xfs/500
-> @@ -0,0 +1,79 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/500
-> +#
-> +# Post-EOF preallocation defeat test
-
-The test description of the four tests are all the same, I know there're
-detailed descriptions later in each test, but it's better to write high
-level descriptions here.
-
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-
-_supported_fs xfs
-
-The four tests all have the same issue.
-
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using synchronous buffered writes. Aim is to
-> +# interleave allocations to fragment the files. Synchronous writes defeat the
-> +# open/write/close heuristics in xfs_release() that prevent EOF block removal,
-> +# so this should fragment badly. Typical problematic behaviour shows per-file
-> +# extent counts of >900 (almost worse case) whilst fixed behaviour typically
-> +# shows extent counts in the low 20s.
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +
-> +write_sync_file()
-> +{
-> +	idx=$1
-> +
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -s -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_sync_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-40
-> +	_within_tolerance "file.$n extent count" $count 21 19 -v
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/500.out b/tests/xfs/500.out
+> diff --git a/.gitignore b/.gitignore
+> index ea1aac8a..0933dc7d 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -114,6 +114,7 @@
+>  /src/stat_test
+>  /src/swapon
+>  /src/t_access_root
+> +/src/t_attr_corruption
+>  /src/t_dir_offset
+>  /src/t_dir_offset2
+>  /src/t_dir_type
+> diff --git a/src/Makefile b/src/Makefile
+> index 41826585..ae09eb0a 100644
+> --- a/src/Makefile
+> +++ b/src/Makefile
+> @@ -27,7 +27,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+>  	renameat2 t_getcwd e4compact test-nextquota punch-alternating \
+>  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+>  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> -	attr_replace_test swapon mkswap
+> +	attr_replace_test swapon mkswap t_attr_corruption
+>  
+>  SUBDIRS = log-writes perf
+>  
+> diff --git a/src/t_attr_corruption.c b/src/t_attr_corruption.c
 > new file mode 100644
-> index 00000000..1ffc1790
+> index 00000000..1fa5e41f
 > --- /dev/null
-> +++ b/tests/xfs/500.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 500
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/501 b/tests/xfs/501
+> +++ b/src/t_attr_corruption.c
+> @@ -0,0 +1,122 @@
+> +// SPDX-License-Identifier: GPL-2.0+
+> +/*
+> + * Copyright (C) 2019 Oracle.  All Rights Reserved.
+> + * Author: Darrick J. Wong <darrick.wong@oracle.com>
+> + *
+> + * Test program to tickle a use-after-free bug in xfs.
+> + *
+> + * XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
+> + * listxattr buffer space while trying to store the name
+> + * "system.posix_acl_access" and then corrupts memory by not checking the
+> + * seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into the
+> + * buffer as well.
+> + *
+> + * In order to tickle the bug in a user visible way we must have already put a
+> + * name in the buffer, so we take advantage of the fact that "security.evm"
+> + * sorts before "system.posix_acl_access" to make sure this happens.
+> + *
+> + * If we trigger the bug, the program will print the garbled string
+> + * "rusted.SGI_ACL_FILE".  If the bug is fixed, the flistxattr call returns
+> + * ERANGE.
+> + */
+> +#include <sys/types.h>
+> +#include <sys/stat.h>
+> +#include <fcntl.h>
+> +#include <stdlib.h>
+> +#include <stdio.h>
+> +#include <string.h>
+> +#include <stdint.h>
+> +#include <unistd.h>
+> +#include <attr/xattr.h>
+> +
+> +void die(const char *msg)
+> +{
+> +	perror(msg);
+> +	exit(1);
+> +}
+> +
+> +struct entry {
+> +	uint16_t	a;
+> +	uint16_t	b;
+> +	uint32_t	c;
+> +};
+> +
+> +struct myacl {
+> +	uint32_t	d;
+> +	struct entry	e[4];
+> +};
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	struct myacl acl = {
+> +		.d = 2,
+> +		.e = {
+> +			{1, 0, 0},
+> +			{4, 0, 0},
+> +			{0x10, 0, 0},
+> +			{0x20, 0, 0},
+> +		},
+> +	};
+> +	char buf[64];
+> +	ssize_t sz;
+> +	int fd;
+> +	int ret;
+> +
+> +	if (argc > 1) {
+> +		ret = chdir(argv[1]);
+> +		if (ret)
+> +			die(argv[1]);
+> +	}
+> +
+> +	fd = creat("file0", 0644);
+> +	if (fd < 0)
+> +		die("create");
+> +
+> +	ret = fsetxattr(fd, "system.posix_acl_access", &acl, sizeof(acl), 0);
+> +	if (ret)
+> +		die("set posix acl");
+> +
+> +	ret = fsetxattr(fd, "security.evm", buf, 1, 1);
+> +	if (ret)
+> +		die("set evm");
+> +
+> +	sz = flistxattr(fd, buf, 30);
+> +	if (sz < 0)
+> +		die("list attr");
+> +
+> +	printf("%s\n", buf);
+> +
+> +	return 0;
+> +
+> +#if 0
+> +	/* original syzkaller reproducer */
+> +
+> +	syscall(__NR_mmap, 0x20000000, 0x1000000, 3, 0x32, -1, 0);
+> +
+> +	memcpy((void*)0x20000180, "./file0", 8);
+> +	syscall(__NR_creat, 0x20000180, 0);
+> +	memcpy((void*)0x20000000, "./file0", 8);
+> +	memcpy((void*)0x20000040, "system.posix_acl_access", 24);
+> +	*(uint32_t*)0x20000680 = 2;
+> +	*(uint16_t*)0x20000684 = 1;
+> +	*(uint16_t*)0x20000686 = 0;
+> +	*(uint32_t*)0x20000688 = 0;
+> +	*(uint16_t*)0x2000068c = 4;
+> +	*(uint16_t*)0x2000068e = 0;
+> +	*(uint32_t*)0x20000690 = 0;
+> +	*(uint16_t*)0x20000694 = 0x10;
+> +	*(uint16_t*)0x20000696 = 0;
+> +	*(uint32_t*)0x20000698 = 0;
+> +	*(uint16_t*)0x2000069c = 0x20;
+> +	*(uint16_t*)0x2000069e = 0;
+> +	*(uint32_t*)0x200006a0 = 0;
+> +	syscall(__NR_setxattr, 0x20000000, 0x20000040, 0x20000680, 0x24, 0);
+> +	memcpy((void*)0x20000080, "./file0", 8);
+> +	memcpy((void*)0x200000c0, "security.evm", 13);
+> +	memcpy((void*)0x20000100, "\x03\x00\x00\x00\x57", 5);
+> +	syscall(__NR_lsetxattr, 0x20000080, 0x200000c0, 0x20000100, 1, 1);
+> +	memcpy((void*)0x20000300, "./file0", 8);
+> +	syscall(__NR_listxattr, 0x20000300, 0x200002c0, 0x1e);
+> +	return 0;
+> +#endif
+> +}
+> diff --git a/tests/generic/712 b/tests/generic/712
 > new file mode 100755
-> index 00000000..493e4d77
+> index 00000000..6348a797
 > --- /dev/null
-> +++ b/tests/xfs/501
-> @@ -0,0 +1,81 @@
+> +++ b/tests/generic/712
+> @@ -0,0 +1,41 @@
 > +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+> +# SPDX-License-Identifier: GPL-2.0+
+> +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
 > +#
-> +# FS QA Test xfs/501
+> +# FS QA Test No. 712
 > +#
-> +# Post-EOF preallocation defeat test
+> +# Regression test for a bug where XFS corrupts memory if the listxattr buffer
+> +# is a particularly well crafted size on a filesystem that supports posix acls.
 > +#
 > +seq=`basename $0`
 > +seqres=$RESULT_DIR/$seq
 > +echo "QA output created by $seq"
-> +
-> +here=`pwd`
 > +tmp=/tmp/$$
 > +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using buffered writes with extent size hints.
-> +# Aim is to interleave allocations to fragment the files. Writes w/ extent size
-> +# hints set defeat the open/write/close heuristics in xfs_release() that prevent
-> +# EOF block removal, so this should fragment badly. Typical problematic
-> +# behaviour shows per-file extent counts of 1000 (worst case!) whilst
-> +# fixed behaviour should show very few extents (almost best case).
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +extent_size=16m
-> +
-> +write_extsz_file()
-> +{
-> +	idx=$1
-> +
-> +	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_extsz_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-10
-> +	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/501.out b/tests/xfs/501.out
-> new file mode 100644
-> index 00000000..ead0b496
-> --- /dev/null
-> +++ b/tests/xfs/501.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 501
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/502 b/tests/xfs/502
-> new file mode 100755
-> index 00000000..9f314a3d
-> --- /dev/null
-> +++ b/tests/xfs/502
-> @@ -0,0 +1,81 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/502
-> +#
-> +# Post-EOF preallocation defeat test
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using O_DIRECT writes w/ extent size hints.
-> +# Aim is to interleave allocations to fragment the files. O_DIRECT writes defeat
-> +# the open/write/close heuristics in xfs_release() that prevent EOF block
-> +# removal, so this should fragment badly. Typical problematic behaviour shows
-> +# per-file extent counts of ~1000 (worst case) whilst fixed behaviour typically
-> +# shows extent counts in the low single digits (almost best case)
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
-> +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=8
-> +wsize=4096
-> +wcnt=1000
-> +extent_size=16m
-> +
-> +write_direct_file()
-> +{
-> +	idx=$1
-> +
-> +	$XFS_IO_PROG -f -c "extsize $extent_size" $workfile.$idx
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -d -c "pwrite $((cnt * wsize)) $wsize" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workfile*
-> +for ((n=0; n<$nfiles; n++)); do
-> +	write_direct_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +sync
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-10
-> +	_within_tolerance "file.$n extent count" $count 2 1 8 -v
-> +done
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/502.out b/tests/xfs/502.out
-> new file mode 100644
-> index 00000000..766a6efe
-> --- /dev/null
-> +++ b/tests/xfs/502.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 502
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> diff --git a/tests/xfs/503 b/tests/xfs/503
-> new file mode 100755
-> index 00000000..ad303551
-> --- /dev/null
-> +++ b/tests/xfs/503
-> @@ -0,0 +1,89 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test xfs/503
-> +#
-> +# Post-EOF preallocation defeat test
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +
-> +# Modify as appropriate.
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +# Write multiple files in parallel using synchronous buffered writes. Aim is to
+> +testfile=$TEST_DIR/$seq.txt
 
-This should be "using open/read/close loops" not "synchronous buffered
-writes"?
+I removed this definition, which is not used in the test.
+
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/attr
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_acls
+> +_require_scratch
+
+I also added
+
+_require_test_program "t_attr_corruption"
 
 Thanks,
 Eryu
 
-> +# interleave allocations to fragment the files. Assuming we've fixed the
-> +# sycnhronous write defeat, we can still trigger the same issue with a
-> +# open/read/close on O_RDONLY files. We should not be triggering EOF
-> +# preallocation removal on files we don't have permission to write, so until
-> +# this is fixed it should fragment badly.  Typical problematic behaviour shows
-> +# per-file extent counts of 50-350 whilst fixed behaviour typically demonstrates
-> +# post-eof speculative delalloc growth in extent size (~6 extents for 50MB
-> +# file).
-> +#
-> +# Failure is determined by golden output mismatch from _within_tolerance().
 > +
-> +workfile=$SCRATCH_MNT/file
-> +nfiles=32
-> +wsize=4096
-> +wcnt=1000
+> +rm -f $seqres.full
+> +_scratch_mkfs >> $seqres.full 2>&1
+> +_scratch_mount
 > +
-> +write_file()
-> +{
-> +	idx=$1
+> +src/t_attr_corruption $SCRATCH_MNT
 > +
-> +	$XFS_IO_PROG -f -s -c "pwrite -b 64k 0 50m" $workfile.$idx
-> +}
-> +
-> +read_file()
-> +{
-> +	idx=$1
-> +
-> +	for ((cnt=0; cnt<$wcnt; cnt++)); do
-> +		$XFS_IO_PROG -f -r -c "pread 0 28" $workfile.$idx
-> +	done
-> +}
-> +
-> +rm -f $workdir/file*
-> +for ((n=0; n<$((nfiles)); n++)); do
-> +	write_file $n > /dev/null 2>&1 &
-> +	read_file $n > /dev/null 2>&1 &
-> +done
-> +wait
-> +
-> +for ((n=0; n<$nfiles; n++)); do
-> +	count=$(_count_extents $workfile.$n)
-> +	# Acceptible extent count range is 1-40
-> +	_within_tolerance "file.$n extent count" $count 6 5 10 -v
-> +done
-> +
-> +# success, all done
 > +status=0
 > +exit
-> diff --git a/tests/xfs/503.out b/tests/xfs/503.out
+> diff --git a/tests/generic/712.out b/tests/generic/712.out
 > new file mode 100644
-> index 00000000..0089a698
+> index 00000000..a2ba09f3
 > --- /dev/null
-> +++ b/tests/xfs/503.out
-> @@ -0,0 +1,33 @@
-> +QA output created by 503
-> +file.0 extent count is in range
-> +file.1 extent count is in range
-> +file.2 extent count is in range
-> +file.3 extent count is in range
-> +file.4 extent count is in range
-> +file.5 extent count is in range
-> +file.6 extent count is in range
-> +file.7 extent count is in range
-> +file.8 extent count is in range
-> +file.9 extent count is in range
-> +file.10 extent count is in range
-> +file.11 extent count is in range
-> +file.12 extent count is in range
-> +file.13 extent count is in range
-> +file.14 extent count is in range
-> +file.15 extent count is in range
-> +file.16 extent count is in range
-> +file.17 extent count is in range
-> +file.18 extent count is in range
-> +file.19 extent count is in range
-> +file.20 extent count is in range
-> +file.21 extent count is in range
-> +file.22 extent count is in range
-> +file.23 extent count is in range
-> +file.24 extent count is in range
-> +file.25 extent count is in range
-> +file.26 extent count is in range
-> +file.27 extent count is in range
-> +file.28 extent count is in range
-> +file.29 extent count is in range
-> +file.30 extent count is in range
-> +file.31 extent count is in range
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index 7b7d69f1..d0d33d73 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -497,3 +497,7 @@
->  497 dangerous_fuzzers dangerous_scrub dangerous_online_repair
->  498 dangerous_fuzzers dangerous_norepair
->  499 auto quick
-> +500 auto prealloc rw
-> +501 auto prealloc rw
-> +502 auto prealloc rw
-> +503 auto prealloc rw
-> -- 
-> 2.20.1
-> 
+> +++ b/tests/generic/712.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 712
+> +list attr: Numerical result out of range
+> diff --git a/tests/generic/group b/tests/generic/group
+> index f56eb475..b3086154 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -529,3 +529,4 @@
+>  524 auto quick
+>  525 auto quick rw
+>  709 auto quick
+> +712 auto quick attr
