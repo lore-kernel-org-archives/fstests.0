@@ -1,180 +1,102 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:58769 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726124AbfBQV4M (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Feb 2019 16:56:12 -0500
-Date: Mon, 18 Feb 2019 08:56:06 +1100
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:43820 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726124AbfBQWHV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Feb 2019 17:07:21 -0500
+Date: Mon, 18 Feb 2019 09:07:16 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] xfs: new EOF fragmentation tests
-Message-ID: <20190217215606.GX20493@dastard>
-References: <20190211013647.22580-1-david@fromorbit.com>
- <20190216100454.GY2713@desktop>
+Subject: Re: [PATCH] xfs: test mkfs extent size hint validation
+Message-ID: <20190217220716.GA9805@dastard>
+References: <20190216003923.GV32253@magnolia>
+ <20190216004119.GW32253@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190216100454.GY2713@desktop>
+In-Reply-To: <20190216004119.GW32253@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Feb 16, 2019 at 06:04:54PM +0800, Eryu Guan wrote:
-> On Mon, Feb 11, 2019 at 12:36:47PM +1100, Dave Chinner wrote:
-> > From: Dave Chinner <dchinner@redhat.com>
-> > 
-> > These tests create substantial file fragmentation as a result of
-> > application actions that defeat post-EOF preallocation
-> > optimisations. They are intended to replicate known vectors for
-> > these problems, and provide a check that the fragmentation levels
-> > have been controlled. The mitigations we make may not completely
-> > remove fragmentation (e.g. they may demonstrate speculative delalloc
-> > related extent size growth) so the checks don't assume we'll end up
-> > with perfect layouts and hence check for an exceptable level of
-> > fragmentation rather than none.
-> > 
-> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> > ---
-> >  tests/xfs/500     | 79 +++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/500.out |  9 +++++
-> >  tests/xfs/501     | 81 ++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/501.out |  9 +++++
-> >  tests/xfs/502     | 81 ++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/502.out |  9 +++++
-> >  tests/xfs/503     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/503.out | 33 ++++++++++++++++++
-> >  tests/xfs/group   |  4 +++
-> >  9 files changed, 394 insertions(+)
-> >  create mode 100755 tests/xfs/500
-> >  create mode 100644 tests/xfs/500.out
-> >  create mode 100755 tests/xfs/501
-> >  create mode 100644 tests/xfs/501.out
-> >  create mode 100755 tests/xfs/502
-> >  create mode 100644 tests/xfs/502.out
-> >  create mode 100755 tests/xfs/503
-> >  create mode 100644 tests/xfs/503.out
-> > 
-> > diff --git a/tests/xfs/500 b/tests/xfs/500
-> > new file mode 100755
-> > index 00000000..d0802e86
-> > --- /dev/null
-> > +++ b/tests/xfs/500
-> > @@ -0,0 +1,79 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test xfs/500
-> > +#
-> > +# Post-EOF preallocation defeat test
+On Fri, Feb 15, 2019 at 04:41:19PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> The test description of the four tests are all the same, I know there're
-> detailed descriptions later in each test, but it's better to write high
-> level descriptions here.
-
-Not really. lsqa.pl gets drowned by detailed test decsriptions in
-the header rather than just the one line description it was
-originally supposed to be. i.e. if I'm looking for preallocation
-defeat tests, then './lsqa.pl |grep -B 2 -i preallocation' should
-get me the description of all the tests that exercise preallocation
-in some way.
-
-e.g.
-
-$ ./lsqa.pl |grep -B 2 -i prealloc |grep "FS QA"
-FS QA Test No. btrfs/013
-FS QA Test 153
-FS QA Test No. 094
-FS QA Test No. 226
-FS QA Test No. 274
-FS QA Test No. 009
-FS QA Test No. xfs/014
-FS QA Test 118
-FS QA Test No. 165
-FS QA Test xfs/500
-FS QA Test xfs/501
-FS QA Test xfs/502
-FS QA Test xfs/503
-
-(you can also see why I put "FS QA Test <testdir>/<number>" in the
-identifier line, too)
-
-IOWs, the rest of the test description is irrelevant to lsqa - like
-git commits, it's mostly the one-line description that matters for
-finding relevant tests....
-
-AFAIC, if you're describing how/why the test code does what it does,
-then it should be with the code that does those operations, not 50
-lines away where it will bitrot as the code gets changed over time.
-That's pretty much the rule we use for writing kernel/application
-code - the test code should be no different...
-
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
+> Make sure mkfs won't format filesystems that fail extent size hint
+> validation.
 > 
-> _supported_fs xfs
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  tests/xfs/738     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/xfs/738.out |    2 ++
+>  tests/xfs/group   |    1 +
+>  3 files changed, 51 insertions(+)
+>  create mode 100755 tests/xfs/738
+>  create mode 100644 tests/xfs/738.out
 > 
-> The four tests all have the same issue.
+> diff --git a/tests/xfs/738 b/tests/xfs/738
+> new file mode 100755
+> index 00000000..ee0ffaae
+> --- /dev/null
+> +++ b/tests/xfs/738
+> @@ -0,0 +1,48 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0+
+> +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 738
+> +#
+> +# Make sure we can't format a filesystem with insane extent hints.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +testfile=$TEST_DIR/$seq.txt
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_fs xfs
+> +_supported_os Linux
+> +_require_scratch_nocheck
+> +
+> +rm -f $seqres.full
+> +
+> +# Try regular extent size hint
+> +echo extszinherit >> $seqres.full
+> +_scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
+> +test $? -eq 1 || echo "should have failed extszinherit"
 
-The contents of the test is generic and has no XFS specific code in
-them. I just placed it in tests/xfs because I don't care about
-what the other filesystems do in these situations.
+That won't fail on 64k block size filesystems....
 
-Whatever, I'll change it.
+> +# Try cow extent size hint if supported
+> +$MKFS_XFS_PROG -N -f $SCRATCH_DEV > $tmp.mkfs
+> +if grep -q 'reflink=' $tmp.mkfs ; then
 
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +
-> > +_scratch_mkfs 2>&1 >> $seqres.full
-> > +_scratch_mount
-> > +
-> > +# Write multiple files in parallel using synchronous buffered writes. Aim is to
-> 
-> This should be "using open/read/close loops" not "synchronous buffered
-> writes"?
+That's testing mkfs for reflink support, yes? i.e.
 
-No. write_file() uses synchronous buffered writes and they are
-written in parallel. And three lines later:
+_scratch_mkfs_xfs_supported -m crc=1,reflink=1 
 
-> > +# interleave allocations to fragment the files. Assuming we've fixed the
-> > +# sycnhronous write defeat, we can still trigger the same issue with a
-> > +# open/read/close on O_RDONLY files.
+[ need to explicitly say -m crc=1 here, because MKFS_OPTIONS might
+have -m crc=0, right? ]
 
-is the description of using open/read/close loops to trigger
-fragmentation.
+> --- a/tests/xfs/group
+> +++ b/tests/xfs/group
+> @@ -515,6 +515,7 @@
+>  731 dangerous_scrub dangerous_online_repair
+>  736 auto quick unlink
+>  737 auto quick unlink
+> +738 auto quick
+
+prealloc, too. And maybe mkfs?
 
 Cheers,
 
