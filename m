@@ -1,123 +1,184 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:55010 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726012AbfBQUEi (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 17 Feb 2019 15:04:38 -0500
-Date: Sun, 17 Feb 2019 12:04:32 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [ANNOUNCE] fstests: master branch updated to 17d70b52f5da
-Message-ID: <20190217200432.GE6477@magnolia>
-References: <5c697a39.1c69fb81.fb482.c48a@mx.google.com>
+Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:58769 "EHLO
+        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726124AbfBQV4M (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Feb 2019 16:56:12 -0500
+Date: Mon, 18 Feb 2019 08:56:06 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs: new EOF fragmentation tests
+Message-ID: <20190217215606.GX20493@dastard>
+References: <20190211013647.22580-1-david@fromorbit.com>
+ <20190216100454.GY2713@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <5c697a39.1c69fb81.fb482.c48a@mx.google.com>
+In-Reply-To: <20190216100454.GY2713@desktop>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Feb 17, 2019 at 11:13:52PM +0800, Eryu Guan wrote:
-> Hi all,
+On Sat, Feb 16, 2019 at 06:04:54PM +0800, Eryu Guan wrote:
+> On Mon, Feb 11, 2019 at 12:36:47PM +1100, Dave Chinner wrote:
+> > From: Dave Chinner <dchinner@redhat.com>
+> > 
+> > These tests create substantial file fragmentation as a result of
+> > application actions that defeat post-EOF preallocation
+> > optimisations. They are intended to replicate known vectors for
+> > these problems, and provide a check that the fragmentation levels
+> > have been controlled. The mitigations we make may not completely
+> > remove fragmentation (e.g. they may demonstrate speculative delalloc
+> > related extent size growth) so the checks don't assume we'll end up
+> > with perfect layouts and hence check for an exceptable level of
+> > fragmentation rather than none.
+> > 
+> > Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> > ---
+> >  tests/xfs/500     | 79 +++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/500.out |  9 +++++
+> >  tests/xfs/501     | 81 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/501.out |  9 +++++
+> >  tests/xfs/502     | 81 ++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/502.out |  9 +++++
+> >  tests/xfs/503     | 89 +++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/503.out | 33 ++++++++++++++++++
+> >  tests/xfs/group   |  4 +++
+> >  9 files changed, 394 insertions(+)
+> >  create mode 100755 tests/xfs/500
+> >  create mode 100644 tests/xfs/500.out
+> >  create mode 100755 tests/xfs/501
+> >  create mode 100644 tests/xfs/501.out
+> >  create mode 100755 tests/xfs/502
+> >  create mode 100644 tests/xfs/502.out
+> >  create mode 100755 tests/xfs/503
+> >  create mode 100644 tests/xfs/503.out
+> > 
+> > diff --git a/tests/xfs/500 b/tests/xfs/500
+> > new file mode 100755
+> > index 00000000..d0802e86
+> > --- /dev/null
+> > +++ b/tests/xfs/500
+> > @@ -0,0 +1,79 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+> > +#
+> > +# FS QA Test xfs/500
+> > +#
+> > +# Post-EOF preallocation defeat test
 > 
-> The master branch of the xfstests repository at:
-> 
-> 	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-> 
-> have just been updated. This is a big update that contains 14 commits and adds
-> 11 new tests along with some random bug fixes.
-> 
-> One notable change is that you need to set 'USE_KMEMLEAK=yes' variable to
-> enable kmemleak check now.
-> 
-> New failures I've noticed (tested with 5.0-rc4 kernel):
-> - generic/52{6,7} and btrfs/183 fail on btrfs
-> - generic/529,530 fail on XFS
+> The test description of the four tests are all the same, I know there're
+> detailed descriptions later in each test, but it's better to write high
+> level descriptions here.
 
-Yes, those are new regression tests for fixes that will be in 5.1. :)
+Not really. lsqa.pl gets drowned by detailed test decsriptions in
+the header rather than just the one line description it was
+originally supposed to be. i.e. if I'm looking for preallocation
+defeat tests, then './lsqa.pl |grep -B 2 -i preallocation' should
+get me the description of all the tests that exercise preallocation
+in some way.
 
---D
+e.g.
 
-> As we have many patches posted for review last week, there're still some
-> pending patches didn't get reviewed yet, please be patient :)
+$ ./lsqa.pl |grep -B 2 -i prealloc |grep "FS QA"
+FS QA Test No. btrfs/013
+FS QA Test 153
+FS QA Test No. 094
+FS QA Test No. 226
+FS QA Test No. 274
+FS QA Test No. 009
+FS QA Test No. xfs/014
+FS QA Test 118
+FS QA Test No. 165
+FS QA Test xfs/500
+FS QA Test xfs/501
+FS QA Test xfs/502
+FS QA Test xfs/503
+
+(you can also see why I put "FS QA Test <testdir>/<number>" in the
+identifier line, too)
+
+IOWs, the rest of the test description is irrelevant to lsqa - like
+git commits, it's mostly the one-line description that matters for
+finding relevant tests....
+
+AFAIC, if you're describing how/why the test code does what it does,
+then it should be with the code that does those operations, not 50
+lines away where it will bitrot as the code gets changed over time.
+That's pretty much the rule we use for writing kernel/application
+code - the test code should be no different...
+
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1	# failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	cd /
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
 > 
-> Thanks,
-> Eryu
+> _supported_fs xfs
 > 
-> The new head of the master branch is commit:
+> The four tests all have the same issue.
+
+The contents of the test is generic and has no XFS specific code in
+them. I just placed it in tests/xfs because I don't care about
+what the other filesystems do in these situations.
+
+Whatever, I'll change it.
+
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +# remove previous $seqres.full before test
+> > +rm -f $seqres.full
+> > +
+> > +# real QA test starts here
+> > +
+> > +# Modify as appropriate.
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +
+> > +_scratch_mkfs 2>&1 >> $seqres.full
+> > +_scratch_mount
+> > +
+> > +# Write multiple files in parallel using synchronous buffered writes. Aim is to
 > 
-> 17d70b52f5da shared: cgroup aware writeback accounting test
-> 
-> New commits:
-> 
-> Brian Foster (1):
->       [17d70b52f5da] shared: cgroup aware writeback accounting test
-> 
-> Christoph Hellwig (1):
->       [ec295d73ac19] generic/075,112: detect preallocation support for fsx tests
-> 
-> Cui Yue (1):
->       [0177f3c45883] src/t_mtab: Add error check for unlock_mtab()
-> 
-> Darrick J. Wong (7):
->       [c869a6712a86] xfs: test mkfs extent size hint validation
->       [0c24aa077f64] common: fix kmemleak to work with sections
->       [08174ee11083] common: fix _require_btime for lazy filesystems
->       [26e4a81c78d7] generic: check for reasonable inode creation time
->       [e6897e32b83e] generic: posix acl extended attribute memory corruption test
->       [f98cc2256bbe] inject: skip tests when knob dir exists but knob doesn't
->       [e6703b903a50] generic: check the behavior of programs opening a lot of O_TMPFILE files
-> 
-> Filipe Manana (3):
->       [31603fea8083] generic: test fsync after succession of file renames
->       [7e764183bbd5] generic: test fsync after succession of renames and unlink
->       [53fc54907b7e] btrfs: test for corruption when reading compressed files
-> 
-> Zorro Lang (1):
->       [1ee89eea1cb9] fsstress: avoid infinite zero byte reading
-> 
-> 
-> Code Diffstat:
-> 
->  .gitignore              |   2 +
->  README                  |   2 +
->  check                   |   7 +-
->  common/cgroup2          |  15 +++++
->  common/inject           |   7 ++
->  common/rc               |  44 +++++++++----
->  ltp/fsstress.c          |   6 +-
->  src/Makefile            |   2 +-
->  src/t_attr_corruption.c | 122 +++++++++++++++++++++++++++++++++++
->  src/t_mtab.c            |  10 ++-
->  src/t_open_tmpfiles.c   | 166 ++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/183         |  76 ++++++++++++++++++++++
->  tests/btrfs/183.out     |  21 ++++++
->  tests/btrfs/group       |   1 +
->  tests/generic/075       |  14 ++--
->  tests/generic/112       |  18 ++++--
->  tests/generic/526       |  72 +++++++++++++++++++++
->  tests/generic/526.out   |   5 ++
->  tests/generic/527       |  71 +++++++++++++++++++++
->  tests/generic/527.out   |   4 ++
->  tests/generic/528       |  53 ++++++++++++++++
->  tests/generic/528.out   |   2 +
->  tests/generic/529       |  41 ++++++++++++
->  tests/generic/529.out   |   2 +
->  tests/generic/530       |  65 +++++++++++++++++++
->  tests/generic/530.out   |   2 +
->  tests/generic/531       |  71 +++++++++++++++++++++
->  tests/generic/531.out   |   2 +
->  tests/generic/group     |   6 ++
->  tests/shared/011        | 141 ++++++++++++++++++++++++++++++++++++++++
->  tests/shared/011.out    |  14 ++++
->  tests/shared/group      |   1 +
->  tests/xfs/500           |  48 ++++++++++++++
->  tests/xfs/500.out       |   2 +
->  tests/xfs/501           |  91 ++++++++++++++++++++++++++
->  tests/xfs/501.out       |   2 +
->  tests/xfs/502           |  76 ++++++++++++++++++++++
->  tests/xfs/502.out       |   2 +
->  tests/xfs/group         |   3 +
->  39 files changed, 1257 insertions(+), 32 deletions(-)
-> --
-> Eryu Guan
-> guaneryu@gmail.com
+> This should be "using open/read/close loops" not "synchronous buffered
+> writes"?
+
+No. write_file() uses synchronous buffered writes and they are
+written in parallel. And three lines later:
+
+> > +# interleave allocations to fragment the files. Assuming we've fixed the
+> > +# sycnhronous write defeat, we can still trigger the same issue with a
+> > +# open/read/close on O_RDONLY files.
+
+is the description of using open/read/close loops to trigger
+fragmentation.
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
