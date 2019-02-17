@@ -1,120 +1,100 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:34370 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389255AbfBRSDt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Feb 2019 13:03:49 -0500
-Date: Mon, 18 Feb 2019 10:03:34 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: test mkfs extent size hint validation
-Message-ID: <20190218180334.GF6477@magnolia>
-References: <20190216003923.GV32253@magnolia>
- <20190216004119.GW32253@magnolia>
- <20190217220716.GA9805@dastard>
+Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:8254 "EHLO
+        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726124AbfBQWOe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Feb 2019 17:14:34 -0500
+Date: Mon, 18 Feb 2019 09:14:30 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] fsstress: avoid infinite zero byte reading
+Message-ID: <20190217221430.GB9805@dastard>
+References: <20190216072540.26272-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190217220716.GA9805@dastard>
+In-Reply-To: <20190216072540.26272-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Feb 18, 2019 at 09:07:16AM +1100, Dave Chinner wrote:
-> On Fri, Feb 15, 2019 at 04:41:19PM -0800, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Make sure mkfs won't format filesystems that fail extent size hint
-> > validation.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/738     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/738.out |    2 ++
-> >  tests/xfs/group   |    1 +
-> >  3 files changed, 51 insertions(+)
-> >  create mode 100755 tests/xfs/738
-> >  create mode 100644 tests/xfs/738.out
-> > 
-> > diff --git a/tests/xfs/738 b/tests/xfs/738
-> > new file mode 100755
-> > index 00000000..ee0ffaae
-> > --- /dev/null
-> > +++ b/tests/xfs/738
-> > @@ -0,0 +1,48 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0+
-> > +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 738
-> > +#
-> > +# Make sure we can't format a filesystem with insane extent hints.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +testfile=$TEST_DIR/$seq.txt
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch_nocheck
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +# Try regular extent size hint
-> > +echo extszinherit >> $seqres.full
-> > +_scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
-> > +test $? -eq 1 || echo "should have failed extszinherit"
+On Sat, Feb 16, 2019 at 03:25:40PM +0800, Zorro Lang wrote:
+> copyrange_f and splice_f functions use a while loop to read a file,
+> it's fine if there's only one fsstress process(and its children),
+> but if some third part testing processes remove the file in the
+> middle phase of copyrange_f running, copyrange_f maybe always return
+> 0, and the while loop can't be end. As below:
 > 
-> That won't fail on 64k block size filesystems....
-
-The extzinherit parameter is copied directly into the root inode without
-any unit conversion (dopts[D_EXTSZINHERIT].convert == false), which
-means that it's specified in units of fs blocks, right?  So then the
-only constraints are that the value < MAXEXTLEN and value < agsize/2,
-which means that block size shouldn't matter.
-
-> > +# Try cow extent size hint if supported
-> > +$MKFS_XFS_PROG -N -f $SCRATCH_DEV > $tmp.mkfs
-> > +if grep -q 'reflink=' $tmp.mkfs ; then
+> root     47184  xxxxxx S+ ./fsstress -R -d /mnt/scratch -n 10000 -p 20 -v
+> root     47187  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+> root     47199  xxxxxx R+ ./fsstress -d /mnt/scratch -n 10000 -p 20 -v
+> root     47314  xxxxxx S+ grep --color=auto fsstress
+> ...
+> ...
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> copy_file_range(3, [372258], 4, [2658770], 71179, 0) = 0
+> ...
+> ...
+> lr-x------. 1 root root 64 Jan 28 11:34 /proc/47187/fd/3 -> '/mnt/scratch/p2/f2 (deleted)'
 > 
-> That's testing mkfs for reflink support, yes? i.e.
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> ---
 > 
-> _scratch_mkfs_xfs_supported -m crc=1,reflink=1 
-
-Ok.
-
-> [ need to explicitly say -m crc=1 here, because MKFS_OPTIONS might
-> have -m crc=0, right? ]
+> V2 remove 300 times loop, just return if get ret == 0
 > 
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -515,6 +515,7 @@
-> >  731 dangerous_scrub dangerous_online_repair
-> >  736 auto quick unlink
-> >  737 auto quick unlink
-> > +738 auto quick
+> Thanks,
+> Zorro
 > 
-> prealloc, too. And maybe mkfs?
-
-Will fix the last two; thanks for the review.
-
---D
-
-> Cheers,
+>  ltp/fsstress.c | 7 +++++--
+>  1 file changed, 5 insertions(+), 2 deletions(-)
 > 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
+> diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> index 25e0c3e2..138f7ecf 100644
+> --- a/ltp/fsstress.c
+> +++ b/ltp/fsstress.c
+> @@ -2363,7 +2363,7 @@ copyrange_f(
+>  	int			v2;
+>  	int			fd1;
+>  	int			fd2;
+> -	size_t			ret;
+> +	size_t			ret = 0;
+>  	int			e;
+
+What's this fix?
+
+>  
+>  	/* Load paths */
+> @@ -2452,7 +2452,7 @@ copyrange_f(
+>  		if (ret < 0) {
+>  			if (errno != EAGAIN || tries++ >= 300)
+>  				break;
+> -		} else if (ret > len)
+> +		} else if (ret > len || ret == 0)
+
+Shoul dbe changing the first line, not this one.
+
+-		if (ret < 0) {
++		if (ret <= 0) {
+
+>  			break;
+>  		else if (ret > 0)
+>  			len -= ret;
+> @@ -2908,6 +2908,9 @@ splice_f(int opno, long r)
+>  
+>  		len -= ret1;
+>  		total += ret1;
+> +		if (ret1 == 0) {
+> +			break;
+> +		}
+
+Same thing as above. The checks after the splice() calls should
+be changed from "if (ret < 0)" to "if (ret <= 0)". And there's two
+splice calls with different error return values that need to be
+checked, not one. And there's two checks for ret2, not one. :P
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
