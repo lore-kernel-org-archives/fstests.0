@@ -1,166 +1,97 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:44178 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726175AbfBSB3a (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 18 Feb 2019 20:29:30 -0500
-Subject: Re: [PATCH 1/2] fstests: generic, test fsync after succession of file
- renames
-References: <20190212180807.26368-1-fdmanana@kernel.org>
-From: Chao Yu <yuchao0@huawei.com>
-Message-ID: <1ef915e7-2c1e-872f-4686-0a636d822ddd@huawei.com>
-Date: Tue, 19 Feb 2019 09:29:24 +0800
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:6856 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729382AbfBRVRt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Feb 2019 16:17:49 -0500
+Date: Tue, 19 Feb 2019 08:17:42 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] xfs: test mkfs extent size hint validation
+Message-ID: <20190218211742.GE9805@dastard>
+References: <20190216003923.GV32253@magnolia>
+ <20190216004119.GW32253@magnolia>
+ <20190217220716.GA9805@dastard>
+ <20190218180334.GF6477@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20190212180807.26368-1-fdmanana@kernel.org>
-Content-Type: text/plain; charset="windows-1252"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190218180334.GF6477@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eric Sandeen <sandeen@redhat.com>, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 2019/2/13 2:08, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
+On Mon, Feb 18, 2019 at 10:03:34AM -0800, Darrick J. Wong wrote:
+> On Mon, Feb 18, 2019 at 09:07:16AM +1100, Dave Chinner wrote:
+> > On Fri, Feb 15, 2019 at 04:41:19PM -0800, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > Make sure mkfs won't format filesystems that fail extent size hint
+> > > validation.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  tests/xfs/738     |   48 ++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/xfs/738.out |    2 ++
+> > >  tests/xfs/group   |    1 +
+> > >  3 files changed, 51 insertions(+)
+> > >  create mode 100755 tests/xfs/738
+> > >  create mode 100644 tests/xfs/738.out
+> > > 
+> > > diff --git a/tests/xfs/738 b/tests/xfs/738
+> > > new file mode 100755
+> > > index 00000000..ee0ffaae
+> > > --- /dev/null
+> > > +++ b/tests/xfs/738
+> > > @@ -0,0 +1,48 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0+
+> > > +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 738
+> > > +#
+> > > +# Make sure we can't format a filesystem with insane extent hints.
+> > > +#
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +tmp=/tmp/$$
+> > > +status=1	# failure is the default!
+> > > +testfile=$TEST_DIR/$seq.txt
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_fs xfs
+> > > +_supported_os Linux
+> > > +_require_scratch_nocheck
+> > > +
+> > > +rm -f $seqres.full
+> > > +
+> > > +# Try regular extent size hint
+> > > +echo extszinherit >> $seqres.full
+> > > +_scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
+> > > +test $? -eq 1 || echo "should have failed extszinherit"
+> > 
+> > That won't fail on 64k block size filesystems....
 > 
-> Test that after a combination of file renames, linking and creating a new
-> file with the old name of a renamed file, if we fsync the new file, after
-> a power failure we are able to mount the filesystem and all file names
-> correspond to the correct inodes.
-> 
-> This test is motivated by a bug found in btrfs which is fixed by a patch
-> for the linux kernel titled:
-> 
->   "Btrfs: fix fsync after succession of renames of different files"
-> 
-> The test passes on ext4, xfs and patched btrfs, however at least in a
-> 5.0-rc5 linux kernel, it fails on f2fs.
+> The extzinherit parameter is copied directly into the root inode without
+> any unit conversion (dopts[D_EXTSZINHERIT].convert == false), which
+> means that it's specified in units of fs blocks, right?  So then the
+> only constraints are that the value < MAXEXTLEN and value < agsize/2,
+> which means that block size shouldn't matter.
 
-We have introduced one additional mount option to handle that case:
+Ah, good point. I read it as 8GB, not 8M blocks.
 
-fsync_mode=%s
+Cheers,
 
-Control the policy of fsync. Currently supports "posix",
-"strict", and "nobarrier". In "posix" mode, which is
-default, fsync will follow POSIX semantics and does a
-light operation to improve the filesystem performance.
-In "strict" mode, fsync will be heavy and behaves in line
-with xfs, ext4 and btrfs, where xfstest generic/342 will
-pass, but the performance will regress. "nobarrier" is
-based on "posix", but doesn't issue flush command for
-non-atomic files likewise "nobarrier" mount option.
-
-I've tested for confirmation, it passed both tests 526/527 on f2fs once I
-changed mount option from default to fsync_mode=strict.
-
-Filipe, could you please check that?
-
-Thanks,
-
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> ---
->  tests/generic/526     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/526.out |  5 ++++
->  tests/generic/group   |  1 +
->  3 files changed, 78 insertions(+)
->  create mode 100755 tests/generic/526
->  create mode 100644 tests/generic/526.out
-> 
-> diff --git a/tests/generic/526 b/tests/generic/526
-> new file mode 100755
-> index 00000000..d0b51f87
-> --- /dev/null
-> +++ b/tests/generic/526
-> @@ -0,0 +1,72 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FS QA Test No. 526
-> +#
-> +# Test that after a combination of file renames, linking and creating a new file
-> +# with the old name of a renamed file, if we fsync the new file, after a power
-> +# failure we are able to mount the filesystem and all file names correspond to
-> +# the correct inodes.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	_cleanup_flakey
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/dmflakey
-> +
-> +# real QA test starts here
-> +_supported_fs generic
-> +_supported_os Linux
-> +_require_scratch
-> +_require_dm_target flakey
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +_init_flakey
-> +_mount_flakey
-> +
-> +mkdir $SCRATCH_MNT/testdir
-> +echo -n "foo" > $SCRATCH_MNT/testdir/fname1
-> +echo -n "hello" > $SCRATCH_MNT/testdir/fname2
-> +
-> +# Make sure everything done so far is durably persisted.
-> +sync
-> +
-> +# Rename and link files such that one new name corresponds to the name of
-> +# another renamed file and one new file has the old name of one of the renamed
-> +# files. Then fsync only the new file.
-> +mv $SCRATCH_MNT/testdir/fname1 $SCRATCH_MNT/testdir/fname3
-> +mv $SCRATCH_MNT/testdir/fname2 $SCRATCH_MNT/testdir/fname4
-> +ln $SCRATCH_MNT/testdir/fname3 $SCRATCH_MNT/testdir/fname2
-> +echo -n "bar" > $SCRATCH_MNT/testdir/fname1
-> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/fname1
-> +
-> +# Simulate a power failure and mount the filesystem to check that all file names
-> +# exist and correspond to the correct inodes.
-> +_flakey_drop_and_remount
-> +
-> +echo "File fname1 data after power failure: $(cat $SCRATCH_MNT/testdir/fname1)"
-> +echo "File fname2 data after power failure: $(cat $SCRATCH_MNT/testdir/fname2)"
-> +echo "File fname3 data after power failure: $(cat $SCRATCH_MNT/testdir/fname3)"
-> +echo "File fname4 data after power failure: $(cat $SCRATCH_MNT/testdir/fname4)"
-> +
-> +_unmount_flakey
-> +
-> +status=0
-> +exit
-> diff --git a/tests/generic/526.out b/tests/generic/526.out
-> new file mode 100644
-> index 00000000..83979d28
-> --- /dev/null
-> +++ b/tests/generic/526.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 526
-> +File fname1 data after power failure: bar
-> +File fname2 data after power failure: foo
-> +File fname3 data after power failure: foo
-> +File fname4 data after power failure: hello
-> diff --git a/tests/generic/group b/tests/generic/group
-> index cfd003d3..492a5875 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -528,3 +528,4 @@
->  523 auto quick attr
->  524 auto quick
->  525 auto quick rw
-> +526 auto quick log
-> 
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
