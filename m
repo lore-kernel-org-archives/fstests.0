@@ -1,104 +1,47 @@
-Received: from verein.lst.de ([213.95.11.211]:43737 "EHLO newverein.lst.de"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729437AbfBRJTw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 18 Feb 2019 04:19:52 -0500
-Date: Mon, 18 Feb 2019 10:19:51 +0100
-From: Christoph Hellwig <hch@lst.de>
-Subject: xfs/420 and xfs/421: don't disturb unwritten status with md5sum
-Message-ID: <20190218091951.GA5171@lst.de>
-References: <20190218091827.12619-1-hch@lst.de>
+Received: from aserp2130.oracle.com ([141.146.126.79]:51038 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1732601AbfBRSOF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 18 Feb 2019 13:14:05 -0500
+Date: Mon, 18 Feb 2019 10:13:59 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] t_open_tmpfiles: flush log when shutting down filesystem
+Message-ID: <20190218181359.GG6477@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190218091827.12619-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-The way we decided if an unwritten extent is considered a hole or data
-is by checking if the page and/or blocks are marked uptodate, that is
-contain valid data in the page cache.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-xfs/420 and xfs/421 try to exercise SEEK_HOLE / SEEK_DATA in the
-presence of cowextsize preallocations over holes in the data fork.  The
-current XFS code never actually uses those for buffer writes, but a
-pending patch changes that.  For SEEK_HOLE / SEEK_DATA to work properly
-in that case we also need to look at the COW fork in their
-implementations and thus have to rely on the unwritten extent page cache
-probing.  But the tests for it ensure we do have valid data in the
-pagecache by calling md5sum on the test files, and thus reading their
-contents (including the zero-filled holes) in, and thus making them
-all valid data.
+If the caller of t_open_tmpfiles wants to shut down the filesystem, be
+sure to flush the log when we shut down so that log recovery will have
+to process all the unlinked temporary files.
 
-Fix that by dropping the page cache content after the md5sum calls.
+This is apparently needed to force ext4 to flush updated inode blocks
+through the journal at all.
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/420 | 6 ++++++
- tests/xfs/421 | 6 ++++++
- 2 files changed, 12 insertions(+)
+ src/t_open_tmpfiles.c |    6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-diff --git a/tests/xfs/420 b/tests/xfs/420
-index a083a12b..34199637 100755
---- a/tests/xfs/420
-+++ b/tests/xfs/420
-@@ -83,6 +83,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
+diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
+index 9e70fbaa..da9390fd 100644
+--- a/src/t_open_tmpfiles.c
++++ b/src/t_open_tmpfiles.c
+@@ -70,7 +70,11 @@ void die(void)
+ 		fflush(stdout);
  
- echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
- $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-@@ -106,6 +108,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
+ 		if (shutdown_fs) {
+-			int flag = XFS_FSOP_GOING_FLAGS_NOLOGFLUSH;
++			/*
++			 * Flush the log so that we have to process the
++			 * unlinked inodes the next time we mount.
++			 */
++			int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
+ 			int ret;
  
- echo "sync filesystem" | tee -a $seqres.full
- sync
-@@ -123,6 +127,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
- 
- echo "Remount" | tee -a $seqres.full
- _scratch_cycle_mount
-diff --git a/tests/xfs/421 b/tests/xfs/421
-index a2734aba..374389bd 100755
---- a/tests/xfs/421
-+++ b/tests/xfs/421
-@@ -83,6 +83,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
- 
- echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
- $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-@@ -106,6 +108,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
- 
- echo "sync filesystem" | tee -a $seqres.full
- sync
-@@ -123,6 +127,8 @@ echo "Compare files"
- md5sum $testdir/file1 | _filter_scratch
- md5sum $testdir/file2 | _filter_scratch
- md5sum $testdir/file3 | _filter_scratch
-+# drop caches to make sure the page cache for the unwritten extents is clean
-+echo 1 > /proc/sys/vm/drop_caches
- 
- echo "Remount" | tee -a $seqres.full
- _scratch_cycle_mount
--- 
-2.20.1
+ 			ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
