@@ -1,105 +1,104 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:42068 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727423AbfBRJFT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Feb 2019 04:05:19 -0500
-Received: from [88.128.83.71] (helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.90_1 #2 (Red Hat Linux))
-        id 1gverV-0007Pw-VC
-        for fstests@vger.kernel.org; Mon, 18 Feb 2019 09:05:18 +0000
+Received: from verein.lst.de ([213.95.11.211]:43737 "EHLO newverein.lst.de"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729437AbfBRJTw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 Feb 2019 04:19:52 -0500
+Date: Mon, 18 Feb 2019 10:19:51 +0100
 From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 2/2] add a seek group
-Date: Mon, 18 Feb 2019 10:05:03 +0100
-Message-Id: <20190218090503.12034-3-hch@lst.de>
-In-Reply-To: <20190218090503.12034-1-hch@lst.de>
-References: <20190218090503.12034-1-hch@lst.de>
+Subject: xfs/420 and xfs/421: don't disturb unwritten status with md5sum
+Message-ID: <20190218091951.GA5171@lst.de>
+References: <20190218091827.12619-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190218091827.12619-1-hch@lst.de>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This groups all tests exercising SEEK_DATA / SEEK_HOLE behavior.
+The way we decided if an unwritten extent is considered a hole or data
+is by checking if the page and/or blocks are marked uptodate, that is
+contain valid data in the page cache.
+
+xfs/420 and xfs/421 try to exercise SEEK_HOLE / SEEK_DATA in the
+presence of cowextsize preallocations over holes in the data fork.  The
+current XFS code never actually uses those for buffer writes, but a
+pending patch changes that.  For SEEK_HOLE / SEEK_DATA to work properly
+in that case we also need to look at the COW fork in their
+implementations and thus have to rely on the unwritten extent page cache
+probing.  But the tests for it ensure we do have valid data in the
+pagecache by calling md5sum on the test files, and thus reading their
+contents (including the zero-filled holes) in, and thus making them
+all valid data.
+
+Fix that by dropping the page cache content after the md5sum calls.
 
 Signed-off-by: Christoph Hellwig <hch@lst.de>
 ---
- tests/btrfs/group   |  2 +-
- tests/generic/group | 12 ++++++------
- tests/xfs/group     |  4 ++--
- 3 files changed, 9 insertions(+), 9 deletions(-)
+ tests/xfs/420 | 6 ++++++
+ tests/xfs/421 | 6 ++++++
+ 2 files changed, 12 insertions(+)
 
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index e32c84e4..8881c29d 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -9,7 +9,7 @@
- 004 auto rw metadata
- 005 auto defrag
- 006 auto quick volume
--007 auto quick rw metadata send
-+007 auto quick rw metadata send seek
- 008 auto quick send
- 009 auto quick subvol
- 010 auto
-diff --git a/tests/generic/group b/tests/generic/group
-index cfd003d3..06e61fa7 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -287,8 +287,8 @@
- 282 auto quick clone
- 283 auto quick clone
- 284 auto quick clone
--285 auto rw
--286 auto quick other
-+285 auto rw seek
-+286 auto quick other seek
- 287 auto quick clone
- 288 auto quick ioctl trim
- 289 auto quick clone
-@@ -438,7 +438,7 @@
- 433 auto quick copy
- 434 auto quick copy
- 435 auto encrypt
--436 auto quick rw
-+436 auto quick rw seek
- 437 auto quick dax
- 438 auto
- 439 auto quick punch
-@@ -447,10 +447,10 @@
- 442 blockdev
- 443 auto quick rw
- 444 auto quick acl
--445 auto quick rw
-+445 auto quick rw seek
- 446 auto quick rw punch
- 447 auto clone
--448 auto quick rw
-+448 auto quick rw seek
- 449 auto quick acl enospc
- 450 auto quick rw
- 451 auto quick rw aio
-@@ -492,7 +492,7 @@
- 487 auto quick
- 488 auto quick
- 489 auto quick attr log
--490 auto quick rw
-+490 auto quick rw seek
- 491 auto quick freeze mount
- 492 auto quick
- 493 auto quick swap
-diff --git a/tests/xfs/group b/tests/xfs/group
-index cd4bb72f..4f00ae10 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -417,8 +417,8 @@
- 417 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 418 dangerous_fuzzers dangerous_scrub dangerous_repair
- 419 auto quick swap
--420 auto quick clone punch
--421 auto quick clone punch
-+420 auto quick clone punch seek
-+421 auto quick clone punch seek
- 422 dangerous_scrub dangerous_online_repair
- 423 dangerous_scrub
- 424 auto quick db
+diff --git a/tests/xfs/420 b/tests/xfs/420
+index a083a12b..34199637 100755
+--- a/tests/xfs/420
++++ b/tests/xfs/420
+@@ -83,6 +83,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
+ $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
+@@ -106,6 +108,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "sync filesystem" | tee -a $seqres.full
+ sync
+@@ -123,6 +127,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "Remount" | tee -a $seqres.full
+ _scratch_cycle_mount
+diff --git a/tests/xfs/421 b/tests/xfs/421
+index a2734aba..374389bd 100755
+--- a/tests/xfs/421
++++ b/tests/xfs/421
+@@ -83,6 +83,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
+ $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
+@@ -106,6 +108,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "sync filesystem" | tee -a $seqres.full
+ sync
+@@ -123,6 +127,8 @@ echo "Compare files"
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
++# drop caches to make sure the page cache for the unwritten extents is clean
++echo 1 > /proc/sys/vm/drop_caches
+ 
+ echo "Remount" | tee -a $seqres.full
+ _scratch_cycle_mount
 -- 
 2.20.1
