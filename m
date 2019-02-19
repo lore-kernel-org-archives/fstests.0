@@ -1,55 +1,176 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:56602 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725730AbfBSF3K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Feb 2019 00:29:10 -0500
-Date: Mon, 18 Feb 2019 21:29:05 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] xfs/500: fix review comments
-Message-ID: <20190219052905.GH6477@magnolia>
+Received: from mail.kernel.org ([198.145.29.99]:35028 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725772AbfBSME2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 19 Feb 2019 07:04:28 -0500
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20190212180807.26368-1-fdmanana@kernel.org> <1ef915e7-2c1e-872f-4686-0a636d822ddd@huawei.com>
+In-Reply-To: <1ef915e7-2c1e-872f-4686-0a636d822ddd@huawei.com>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Tue, 19 Feb 2019 12:04:14 +0000
+Message-ID: <CAL3q7H6ExsyQbyEW1j7Sr=a2k0YibWqQqT+sVOPRainO9pzRBQ@mail.gmail.com>
+Subject: Re: [PATCH 1/2] fstests: generic, test fsync after succession of file renames
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, Dave Chinner <david@fromorbit.com>
+To: Chao Yu <yuchao0@huawei.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Tue, Feb 19, 2019 at 1:29 AM Chao Yu <yuchao0@huawei.com> wrote:
+>
+> On 2019/2/13 2:08, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
+> >
+> > Test that after a combination of file renames, linking and creating a new
+> > file with the old name of a renamed file, if we fsync the new file, after
+> > a power failure we are able to mount the filesystem and all file names
+> > correspond to the correct inodes.
+> >
+> > This test is motivated by a bug found in btrfs which is fixed by a patch
+> > for the linux kernel titled:
+> >
+> >   "Btrfs: fix fsync after succession of renames of different files"
+> >
+> > The test passes on ext4, xfs and patched btrfs, however at least in a
+> > 5.0-rc5 linux kernel, it fails on f2fs.
+>
+> We have introduced one additional mount option to handle that case:
+>
+> fsync_mode=%s
+>
+> Control the policy of fsync. Currently supports "posix",
+> "strict", and "nobarrier". In "posix" mode, which is
+> default, fsync will follow POSIX semantics and does a
+> light operation to improve the filesystem performance.
+> In "strict" mode, fsync will be heavy and behaves in line
+> with xfs, ext4 and btrfs, where xfstest generic/342 will
+> pass, but the performance will regress. "nobarrier" is
+> based on "posix", but doesn't issue flush command for
+> non-atomic files likewise "nobarrier" mount option.
+>
+> I've tested for confirmation, it passed both tests 526/527 on f2fs once I
+> changed mount option from default to fsync_mode=strict.
+>
+> Filipe, could you please check that?
 
-Fix some problems detecting reflink support in the test.
+Thanks. I wasn't aware of that mount option.
+Btw, it seems complicated for a user to know which option to use for
+that mount option,
+even if it's very well documented, as it's unlikely the user is aware
+of what all applications
+in the system do and expect (or make the strict mode the default).
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/500   |    5 ++---
- tests/xfs/group |    2 +-
- 2 files changed, 3 insertions(+), 4 deletions(-)
+Thanks.
 
-diff --git a/tests/xfs/500 b/tests/xfs/500
-index 7a965c69..370c78ec 100755
---- a/tests/xfs/500
-+++ b/tests/xfs/500
-@@ -36,10 +36,9 @@ _scratch_mkfs -d extszinherit=8388608 >> $seqres.full 2>&1
- test $? -eq 1 || echo "should have failed extszinherit"
- 
- # Try cow extent size hint if supported
--$MKFS_XFS_PROG -N -f $SCRATCH_DEV > $tmp.mkfs
--if grep -q 'reflink=' $tmp.mkfs ; then
-+if _scratch_mkfs_xfs_supported -m crc=1,reflink=1 >> $seqres.full 2>&1; then
- 	echo cowextsize >> $seqres.full
--	_scratch_mkfs -m reflink=1 -d cowextsize=8388608 >> $seqres.full 2>&1
-+	_scratch_mkfs -m reflink=1,crc=1 -d cowextsize=8388608 >> $seqres.full 2>&1
- 	test $? -eq 1 || echo "should have failed cowextsize"
- fi
- 
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 76b8a413..0047fb5c 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -497,6 +497,6 @@
- 497 dangerous_fuzzers dangerous_scrub dangerous_online_repair
- 498 dangerous_fuzzers dangerous_norepair
- 499 auto quick
--500 auto quick mkfs
-+500 auto quick mkfs prealloc mkfs
- 501 auto quick unlink
- 502 auto quick unlink
+>
+> Thanks,
+>
+> >
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > ---
+> >  tests/generic/526     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/generic/526.out |  5 ++++
+> >  tests/generic/group   |  1 +
+> >  3 files changed, 78 insertions(+)
+> >  create mode 100755 tests/generic/526
+> >  create mode 100644 tests/generic/526.out
+> >
+> > diff --git a/tests/generic/526 b/tests/generic/526
+> > new file mode 100755
+> > index 00000000..d0b51f87
+> > --- /dev/null
+> > +++ b/tests/generic/526
+> > @@ -0,0 +1,72 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0
+> > +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 526
+> > +#
+> > +# Test that after a combination of file renames, linking and creating a new file
+> > +# with the old name of a renamed file, if we fsync the new file, after a power
+> > +# failure we are able to mount the filesystem and all file names correspond to
+> > +# the correct inodes.
+> > +#
+> > +seq=`basename $0`
+> > +seqres=$RESULT_DIR/$seq
+> > +echo "QA output created by $seq"
+> > +tmp=/tmp/$$
+> > +status=1     # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +     _cleanup_flakey
+> > +     cd /
+> > +     rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +. ./common/dmflakey
+> > +
+> > +# real QA test starts here
+> > +_supported_fs generic
+> > +_supported_os Linux
+> > +_require_scratch
+> > +_require_dm_target flakey
+> > +
+> > +rm -f $seqres.full
+> > +
+> > +_scratch_mkfs >>$seqres.full 2>&1
+> > +_require_metadata_journaling $SCRATCH_DEV
+> > +_init_flakey
+> > +_mount_flakey
+> > +
+> > +mkdir $SCRATCH_MNT/testdir
+> > +echo -n "foo" > $SCRATCH_MNT/testdir/fname1
+> > +echo -n "hello" > $SCRATCH_MNT/testdir/fname2
+> > +
+> > +# Make sure everything done so far is durably persisted.
+> > +sync
+> > +
+> > +# Rename and link files such that one new name corresponds to the name of
+> > +# another renamed file and one new file has the old name of one of the renamed
+> > +# files. Then fsync only the new file.
+> > +mv $SCRATCH_MNT/testdir/fname1 $SCRATCH_MNT/testdir/fname3
+> > +mv $SCRATCH_MNT/testdir/fname2 $SCRATCH_MNT/testdir/fname4
+> > +ln $SCRATCH_MNT/testdir/fname3 $SCRATCH_MNT/testdir/fname2
+> > +echo -n "bar" > $SCRATCH_MNT/testdir/fname1
+> > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/fname1
+> > +
+> > +# Simulate a power failure and mount the filesystem to check that all file names
+> > +# exist and correspond to the correct inodes.
+> > +_flakey_drop_and_remount
+> > +
+> > +echo "File fname1 data after power failure: $(cat $SCRATCH_MNT/testdir/fname1)"
+> > +echo "File fname2 data after power failure: $(cat $SCRATCH_MNT/testdir/fname2)"
+> > +echo "File fname3 data after power failure: $(cat $SCRATCH_MNT/testdir/fname3)"
+> > +echo "File fname4 data after power failure: $(cat $SCRATCH_MNT/testdir/fname4)"
+> > +
+> > +_unmount_flakey
+> > +
+> > +status=0
+> > +exit
+> > diff --git a/tests/generic/526.out b/tests/generic/526.out
+> > new file mode 100644
+> > index 00000000..83979d28
+> > --- /dev/null
+> > +++ b/tests/generic/526.out
+> > @@ -0,0 +1,5 @@
+> > +QA output created by 526
+> > +File fname1 data after power failure: bar
+> > +File fname2 data after power failure: foo
+> > +File fname3 data after power failure: foo
+> > +File fname4 data after power failure: hello
+> > diff --git a/tests/generic/group b/tests/generic/group
+> > index cfd003d3..492a5875 100644
+> > --- a/tests/generic/group
+> > +++ b/tests/generic/group
+> > @@ -528,3 +528,4 @@
+> >  523 auto quick attr
+> >  524 auto quick
+> >  525 auto quick rw
+> > +526 auto quick log
+> >
+>
