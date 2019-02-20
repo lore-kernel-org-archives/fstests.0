@@ -1,14 +1,14 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:35514 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:35508 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726884AbfBTBz7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1726544AbfBTBz7 (ORCPT <rfc822;fstests@vger.kernel.org>);
         Tue, 19 Feb 2019 20:55:59 -0500
 Received: from DGGEMS413-HUB.china.huawei.com (unknown [172.30.72.59])
-        by Forcepoint Email with ESMTP id D09243DB5880CC55131E
+        by Forcepoint Email with ESMTP id D3A39C827738BBB4B3F0
         for <fstests@vger.kernel.org>; Wed, 20 Feb 2019 09:55:57 +0800 (CST)
 From: Yufen Yu <yuyufen@huawei.com>
-Subject: [PATCH 4/5] generic/349: use the common function _get_max_file_size
-Date: Wed, 20 Feb 2019 09:59:54 +0800
-Message-ID: <20190220015955.26342-5-yuyufen@huawei.com>
+Subject: [PATCH 5/5] generic/350: use the common function _get_max_file_size
+Date: Wed, 20 Feb 2019 09:59:55 +0800
+Message-ID: <20190220015955.26342-6-yuyufen@huawei.com>
 In-Reply-To: <20190220015955.26342-1-yuyufen@huawei.com>
 References: <20190220015955.26342-1-yuyufen@huawei.com>
 MIME-Version: 1.0
@@ -23,16 +23,16 @@ be clean.
 
 Signed-off-by: Yufen Yu <yuyufen@huawei.com>
 ---
- tests/generic/349 | 13 ++-----------
+ tests/generic/350 | 13 ++-----------
  1 file changed, 2 insertions(+), 11 deletions(-)
 
-diff --git a/tests/generic/349 b/tests/generic/349
-index f01f817d..1e76b6ef 100755
---- a/tests/generic/349
-+++ b/tests/generic/349
-@@ -50,17 +50,8 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+diff --git a/tests/generic/350 b/tests/generic/350
+index 0aea4c09..f1d9887b 100755
+--- a/tests/generic/350
++++ b/tests/generic/350
+@@ -47,17 +47,8 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
  
- echo "Zero range to MAX_LFS_FILESIZE"
+ echo "Punch to MAX_LFS_FILESIZE"
  # zod = MAX_LFS_FILESIZE
 -case "$(getconf LONG_BIT)" in
 -"32")
@@ -47,7 +47,7 @@ index f01f817d..1e76b6ef 100755
 -esac
 +zod=$(_get_max_file_size)
 +
- $XFS_IO_PROG -c "fzero -k 0 $zod" $dev
+ $XFS_IO_PROG -c "fpunch 0 $zod" $dev
  
  echo "Check contents"
 -- 
