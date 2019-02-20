@@ -1,44 +1,26 @@
-Received: from mail02.iobjects.de ([188.40.134.68]:55362 "EHLO
-        mail02.iobjects.de" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726030AbfBTOQK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 20 Feb 2019 09:16:10 -0500
-Date: Wed, 20 Feb 2019 15:09:32 +0100 (CET)
-From: =?ISO-8859-15?Q?Holger_Hoffst=E4tte?=
-        <holger@applied-asynchrony.com>
-Subject: Re: [PATCH 4/3] generic: posix acl extended attribute memory corruption
- test
-In-Reply-To: <20190220132952.GW9874@twin.jikos.cz>
-Message-ID: <alpine.LNX.2.21.9999.1902201501470.8769@tux.applied-asynchrony.com>
-References: <154993784038.1948.7502664832930298472.stgit@magnolia> <20190213204814.GB6477@magnolia> <20190220132952.GW9874@twin.jikos.cz>
+Received: from bombadil.infradead.org ([198.137.202.133]:33530 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726030AbfBTOO3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 20 Feb 2019 09:14:29 -0500
+Date: Wed, 20 Feb 2019 06:14:27 -0800
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH] xfs/450: require working falloc command
+Message-ID: <20190220141427.GA31714@infradead.org>
+References: <20190219183238.GI6477@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=US-ASCII; format=flowed
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190219183238.GI6477@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: David Sterba <dsterba@suse.cz>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>
 List-ID: <fstests@vger.kernel.org>
 
+On Tue, Feb 19, 2019 at 10:32:38AM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> This test needs to check for working falloc command before using it.
 
-On Wed, 20 Feb 2019, David Sterba wrote:
+Looks good,
 
-> On Wed, Feb 13, 2019 at 12:48:14PM -0800, Darrick J. Wong wrote:
->> +#include <attr/xattr.h>
->
-> This does not compile on some systems, sys/xattr.h works (it's provided
-> by glibc) and is also used by other fstests' sources. I'm not sure where
-> does attr/xattr.h come from, my devel package for libattr provides only
-> attr/libattr.h.
-
-This was removed from attr back in 2015 [1] but apparently caused
-many aplications to no longer compile, so some packagers added 
-attr/xattr.h back, completing the cycle of confusion.
-I just randomly remembered because Gentoo fell into the same sinkhole
-and is still climbing out [2].
-
-AFAIK sys/xattr.h is the preferred thing now unless you are building on 
-an ancient distro.
-
-cheers
-Holger
-
-[1] http://git.savannah.nongnu.org/cgit/attr.git/commit/?id=7921157890d07858d092f4003ca4c6bae9fd2c38
-[2] https://bugs.gentoo.org/648864
+Reviewed-by: Christoph Hellwig <hch@lst.de>
