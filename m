@@ -1,192 +1,36 @@
-Received: from szxga04-in.huawei.com ([45.249.212.190]:3699 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:35510 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1727264AbfBTCnN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 19 Feb 2019 21:43:13 -0500
-Subject: Re: [PATCH 1/2] fstests: generic, test fsync after succession of file
- renames
-References: <20190212180807.26368-1-fdmanana@kernel.org>
- <1ef915e7-2c1e-872f-4686-0a636d822ddd@huawei.com>
- <CAL3q7H6ExsyQbyEW1j7Sr=a2k0YibWqQqT+sVOPRainO9pzRBQ@mail.gmail.com>
-From: Chao Yu <yuchao0@huawei.com>
-Message-ID: <ca9c1958-95c3-1bd9-e544-58f280a3679d@huawei.com>
-Date: Wed, 20 Feb 2019 10:43:14 +0800
+        id S1725616AbfBTBz7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 19 Feb 2019 20:55:59 -0500
+Received: from DGGEMS413-HUB.china.huawei.com (unknown [172.30.72.59])
+        by Forcepoint Email with ESMTP id CDA871FE771470DC44A5
+        for <fstests@vger.kernel.org>; Wed, 20 Feb 2019 09:55:57 +0800 (CST)
+From: Yufen Yu <yuyufen@huawei.com>
+Subject: [PATCH 0/5] define common _get_max_file_size function 
+Date: Wed, 20 Feb 2019 09:59:50 +0800
+Message-ID: <20190220015955.26342-1-yuyufen@huawei.com>
 MIME-Version: 1.0
-In-Reply-To: <CAL3q7H6ExsyQbyEW1j7Sr=a2k0YibWqQqT+sVOPRainO9pzRBQ@mail.gmail.com>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2019/2/19 20:04, Filipe Manana wrote:
-> On Tue, Feb 19, 2019 at 1:29 AM Chao Yu <yuchao0@huawei.com> wrote:
->>
->> On 2019/2/13 2:08, fdmanana@kernel.org wrote:
->>> From: Filipe Manana <fdmanana@suse.com>
->>>
->>> Test that after a combination of file renames, linking and creating a new
->>> file with the old name of a renamed file, if we fsync the new file, after
->>> a power failure we are able to mount the filesystem and all file names
->>> correspond to the correct inodes.
->>>
->>> This test is motivated by a bug found in btrfs which is fixed by a patch
->>> for the linux kernel titled:
->>>
->>>   "Btrfs: fix fsync after succession of renames of different files"
->>>
->>> The test passes on ext4, xfs and patched btrfs, however at least in a
->>> 5.0-rc5 linux kernel, it fails on f2fs.
->>
->> We have introduced one additional mount option to handle that case:
->>
->> fsync_mode=%s
->>
->> Control the policy of fsync. Currently supports "posix",
->> "strict", and "nobarrier". In "posix" mode, which is
->> default, fsync will follow POSIX semantics and does a
->> light operation to improve the filesystem performance.
->> In "strict" mode, fsync will be heavy and behaves in line
->> with xfs, ext4 and btrfs, where xfstest generic/342 will
->> pass, but the performance will regress. "nobarrier" is
->> based on "posix", but doesn't issue flush command for
->> non-atomic files likewise "nobarrier" mount option.
->>
->> I've tested for confirmation, it passed both tests 526/527 on f2fs once I
->> changed mount option from default to fsync_mode=strict.
->>
->> Filipe, could you please check that?
-> 
-> Thanks. I wasn't aware of that mount option.
-> Btw, it seems complicated for a user to know which option to use for
-> that mount option,
-> even if it's very well documented, as it's unlikely the user is aware
-> of what all applications
-> in the system do and expect (or make the strict mode the default).
+We define a new function _get_max_file_size, and let generic/299,
+351, 349 use this.
 
-Yup, I'm not sure this is a real problem... since that as I know, there is
-no related issue reported in f2fs mailing list and products (at least
-Huawei's products).
+Yufen Yu (5):
+  commom/rc: define function _get_max_file_size
+  generic/299: limit max file size
+  generic/351: use the common function _get_max_file_size
+  generic/349: use the common function _get_max_file_size
+  generic/350: use the common function _get_max_file_size
 
-Thanks,
+ common/rc         | 23 +++++++++++++++++++++++
+ tests/generic/299 |  5 +++++
+ tests/generic/349 | 13 ++-----------
+ tests/generic/350 | 13 ++-----------
+ tests/generic/351 | 13 ++-----------
+ 5 files changed, 34 insertions(+), 33 deletions(-)
 
-> 
-> Thanks.
-> 
->>
->> Thanks,
->>
->>>
->>> Signed-off-by: Filipe Manana <fdmanana@suse.com>
->>> ---
->>>  tests/generic/526     | 72 +++++++++++++++++++++++++++++++++++++++++++++++++++
->>>  tests/generic/526.out |  5 ++++
->>>  tests/generic/group   |  1 +
->>>  3 files changed, 78 insertions(+)
->>>  create mode 100755 tests/generic/526
->>>  create mode 100644 tests/generic/526.out
->>>
->>> diff --git a/tests/generic/526 b/tests/generic/526
->>> new file mode 100755
->>> index 00000000..d0b51f87
->>> --- /dev/null
->>> +++ b/tests/generic/526
->>> @@ -0,0 +1,72 @@
->>> +#! /bin/bash
->>> +# SPDX-License-Identifier: GPL-2.0
->>> +# Copyright (C) 2018 SUSE Linux Products GmbH. All Rights Reserved.
->>> +#
->>> +# FS QA Test No. 526
->>> +#
->>> +# Test that after a combination of file renames, linking and creating a new file
->>> +# with the old name of a renamed file, if we fsync the new file, after a power
->>> +# failure we are able to mount the filesystem and all file names correspond to
->>> +# the correct inodes.
->>> +#
->>> +seq=`basename $0`
->>> +seqres=$RESULT_DIR/$seq
->>> +echo "QA output created by $seq"
->>> +tmp=/tmp/$$
->>> +status=1     # failure is the default!
->>> +trap "_cleanup; exit \$status" 0 1 2 3 15
->>> +
->>> +_cleanup()
->>> +{
->>> +     _cleanup_flakey
->>> +     cd /
->>> +     rm -f $tmp.*
->>> +}
->>> +
->>> +# get standard environment, filters and checks
->>> +. ./common/rc
->>> +. ./common/filter
->>> +. ./common/dmflakey
->>> +
->>> +# real QA test starts here
->>> +_supported_fs generic
->>> +_supported_os Linux
->>> +_require_scratch
->>> +_require_dm_target flakey
->>> +
->>> +rm -f $seqres.full
->>> +
->>> +_scratch_mkfs >>$seqres.full 2>&1
->>> +_require_metadata_journaling $SCRATCH_DEV
->>> +_init_flakey
->>> +_mount_flakey
->>> +
->>> +mkdir $SCRATCH_MNT/testdir
->>> +echo -n "foo" > $SCRATCH_MNT/testdir/fname1
->>> +echo -n "hello" > $SCRATCH_MNT/testdir/fname2
->>> +
->>> +# Make sure everything done so far is durably persisted.
->>> +sync
->>> +
->>> +# Rename and link files such that one new name corresponds to the name of
->>> +# another renamed file and one new file has the old name of one of the renamed
->>> +# files. Then fsync only the new file.
->>> +mv $SCRATCH_MNT/testdir/fname1 $SCRATCH_MNT/testdir/fname3
->>> +mv $SCRATCH_MNT/testdir/fname2 $SCRATCH_MNT/testdir/fname4
->>> +ln $SCRATCH_MNT/testdir/fname3 $SCRATCH_MNT/testdir/fname2
->>> +echo -n "bar" > $SCRATCH_MNT/testdir/fname1
->>> +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/testdir/fname1
->>> +
->>> +# Simulate a power failure and mount the filesystem to check that all file names
->>> +# exist and correspond to the correct inodes.
->>> +_flakey_drop_and_remount
->>> +
->>> +echo "File fname1 data after power failure: $(cat $SCRATCH_MNT/testdir/fname1)"
->>> +echo "File fname2 data after power failure: $(cat $SCRATCH_MNT/testdir/fname2)"
->>> +echo "File fname3 data after power failure: $(cat $SCRATCH_MNT/testdir/fname3)"
->>> +echo "File fname4 data after power failure: $(cat $SCRATCH_MNT/testdir/fname4)"
->>> +
->>> +_unmount_flakey
->>> +
->>> +status=0
->>> +exit
->>> diff --git a/tests/generic/526.out b/tests/generic/526.out
->>> new file mode 100644
->>> index 00000000..83979d28
->>> --- /dev/null
->>> +++ b/tests/generic/526.out
->>> @@ -0,0 +1,5 @@
->>> +QA output created by 526
->>> +File fname1 data after power failure: bar
->>> +File fname2 data after power failure: foo
->>> +File fname3 data after power failure: foo
->>> +File fname4 data after power failure: hello
->>> diff --git a/tests/generic/group b/tests/generic/group
->>> index cfd003d3..492a5875 100644
->>> --- a/tests/generic/group
->>> +++ b/tests/generic/group
->>> @@ -528,3 +528,4 @@
->>>  523 auto quick attr
->>>  524 auto quick
->>>  525 auto quick rw
->>> +526 auto quick log
->>>
->>
-> 
-> .
-> 
+-- 
+2.16.2.dirty
