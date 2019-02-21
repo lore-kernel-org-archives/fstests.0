@@ -1,93 +1,47 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:52354 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727704AbfBZUDr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Feb 2019 15:03:47 -0500
-Subject: Re: [PATCH 2/2] t_attr_corruption: fix this yet again
-References: <155114852926.9683.4048206997940455508.stgit@magnolia>
- <155114853550.9683.11298191063436471344.stgit@magnolia>
-From: Allison Henderson <allison.henderson@oracle.com>
-Message-ID: <e2e10092-da81-e883-8745-50be9658b877@oracle.com>
-Date: Tue, 26 Feb 2019 13:03:37 -0700
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:2733 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725648AbfBUHjM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 21 Feb 2019 02:39:12 -0500
+Received: from G08CNEXCHPEKD02.g08.fujitsu.local (unknown [10.167.33.83])
+        by cn.fujitsu.com (Postfix) with ESMTP id 71B8A4BAD9DB
+        for <fstests@vger.kernel.org>; Thu, 21 Feb 2019 15:39:01 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] src/Makefile: Link clock_gettime(2) with -lrt
+Date: Thu, 21 Feb 2019 15:39:01 +0800
+Message-ID: <1550734741-4375-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-In-Reply-To: <155114853550.9683.11298191063436471344.stgit@magnolia>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
+Compiling t_open_tmpfiles.c failed on older glibc(before glibc v2.17)
+because clock_gettime(2) was not linked with -lrt, as below:
+--------------------------------------------------------------------
+/home/yangxiao/xfstests/src/t_open_tmpfiles.c:36: undefined reference to `clock_gettime'
+--------------------------------------------------------------------
 
+According to clock_gettime(2) manpage, we should link clock_gettime(2)
+with -lrt on older glibc.
 
-On 2/25/19 7:35 PM, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Jeff Moyer pointed out that 'security.evm' actually has an expected
-> value format, which breaks the test if EVM is enabled.  It turns out
-> that the 'security.evm' setxattr call in the original syzkaller report
-> was a total red herring, as this bug can be reproduced without it.
-> 
-> Fix the test case to do the minimum amount of work needed to reproduce
-> the corruption.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->   src/t_attr_corruption.c |   28 ++++++++++++++--------------
->   1 file changed, 14 insertions(+), 14 deletions(-)
-> 
-> 
-> diff --git a/src/t_attr_corruption.c b/src/t_attr_corruption.c
-> index f26611f9..9101024e 100644
-> --- a/src/t_attr_corruption.c
-> +++ b/src/t_attr_corruption.c
-> @@ -3,17 +3,21 @@
->    * Copyright (C) 2019 Oracle.  All Rights Reserved.
->    * Author: Darrick J. Wong <darrick.wong@oracle.com>
->    *
-> - * Test program to tickle a use-after-free bug in xfs.
-> + * XFS had a memory corruption bug in its handling of the POSIX ACL attribute
-> + * names during a listxattr call.
->    *
-> - * XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
-> - * listxattr buffer space while trying to store the name
-> - * "system.posix_acl_access" and then corrupts memory by not checking the
-> - * seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into the
-> - * buffer as well.
-> + * On IRIX, file ACLs were stored under the name "trusted.SGI_ACL_FILE",
-> + * whereas on Linux the name is "system.posix_acl_access".  In order to
-> + * maintain compatibility with old filesystems, XFS internally continues to
-> + * use the old SGI_ACL_FILE name on disk and remap the new name whenever it
-> + * sees it.
->    *
-> - * In order to tickle the bug in a user visible way we must have already put a
-> - * name in the buffer, so we take advantage of the fact that "security.evm"
-> - * sorts before "system.posix_acl_access" to make sure this happens.
-> + * In order to make this magic happen, XFS' listxattr implementation will emit
-> + * first the Linux name and then the on-disk name.  Unfortunately, it doesn't
-> + * correctly check the buffer length, so if the buffer is large enough to fit
-> + * the on-disk name but not large enough to fit the Linux name, we screw up
-> + * the buffer position accounting while trying to emit the Linux name and then
-> + * corrupt memory when we try to emit the on-disk name.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ src/Makefile |    2 +-
+ 1 files changed, 1 insertions(+), 1 deletions(-)
 
-Ok, thanks for the explanation!  You can add my review:
-
-Reviewed-by: Allison Henderson <allison.henderson@oracle.com>
-
->    *
->    * If we trigger the bug, the program will print the garbled string
->    * "rusted.SGI_ACL_FILE".  If the bug is fixed, the flistxattr call returns
-> @@ -76,11 +80,7 @@ int main(int argc, char *argv[])
->   	if (ret)
->   		die("set posix acl");
->   
-> -	ret = fsetxattr(fd, "security.evm", buf, 1, 1);
-> -	if (ret)
-> -		die("set evm");
-> -
-> -	sz = flistxattr(fd, buf, 30);
-> +	sz = flistxattr(fd, buf, 20);
->   	if (sz < 0)
->   		die("list attr");
->   
-> 
+diff --git a/src/Makefile b/src/Makefile
+index dbba7c7..4057d7b 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -31,7 +31,7 @@ LINUX_TARGETS = xfsctl bstat t_mtab getdevicesize preallo_rw_pattern_reader \
+ 
+ SUBDIRS = log-writes perf
+ 
+-LLDLIBS = $(LIBATTR) $(LIBHANDLE) $(LIBACL) -lpthread
++LLDLIBS = $(LIBATTR) $(LIBHANDLE) $(LIBACL) -lpthread -lrt
+ 
+ ifeq ($(HAVE_XLOG_ASSIGN_LSN), true)
+ LINUX_TARGETS += loggen
+-- 
+1.7.1
