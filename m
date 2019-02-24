@@ -1,206 +1,98 @@
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:41238 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727752AbfBXPkB (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Feb 2019 10:40:01 -0500
-Received: by mail-pg1-f193.google.com with SMTP id m1so3295896pgq.8
-        for <fstests@vger.kernel.org>; Sun, 24 Feb 2019 07:40:00 -0800 (PST)
-Date: Sun, 24 Feb 2019 23:39:54 +0800
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:46494 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726996AbfBXOv5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Feb 2019 09:51:57 -0500
+Received: by mail-pg1-f194.google.com with SMTP id 196so3251471pgf.13
+        for <fstests@vger.kernel.org>; Sun, 24 Feb 2019 06:51:57 -0800 (PST)
+Message-ID: <5c72af8b.1c69fb81.9f4cf.e64a@mx.google.com>
+Date: Sun, 24 Feb 2019 22:51:50 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
-Message-ID: <20190224153954.GD2713@desktop>
-References: <20190122032408.91336-1-zhengbin13@huawei.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 0680ff2ea531
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="CpVy3bFvEBQk"
 Content-Disposition: inline
-In-Reply-To: <20190122032408.91336-1-zhengbin13@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: zhengbin <zhengbin13@huawei.com>
-Cc: david@fromorbit.com, fstests@vger.kernel.org, houtao1@huawei.com, zhaohongjiang@huawei.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[Sorry for being so long to review this squashfs support.]
 
-On Tue, Jan 22, 2019 at 11:24:02AM +0800, zhengbin wrote:
-> This patch add squashfs support in xfstests-dev. Add two directories
-> in tests directory, readonly can also be used for other readonly
-> filesystem, squashfs is just used for squashfs filesystem.
-> tests/readonly/001        mount test
-> tests/readonly/002--010   metadata test
-> tests/readonly/011--018   data test
-> tests/readonly/019--021   xattr test
-> tests/squashfs/001--005   mksquashfs options test
+--CpVy3bFvEBQk
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-I don't quite like the idea of "forking" random tests from 'generic' to
-'readonly'. The biggest benefit of adding new fs support to fstests is
-that it shares most of the 'generic' tests and gets good test coverage.
-But forking a very small subset of generic tests not only defeats the
-benefit but also adding extra maintain burden.
+Hi all,
 
-But the problem is that squashfs is a readonly filesystem and sharing
-the existing generic tests is not easy. (Actually I've been looking at
-this series several times, but couldn't come out with a good solution.)
-Because fstests harness assumes the filesystem being tested is writable
-by default, various _require rules also write/create files to check if a
-functionality is supported by the underlying filesystem. This leads me
-to wonder if fstests is suitable for such readonly filesystems?
+The master branch of the xfstests repository at:
 
-I'm glad to hear what do others think, any comments are welcomed!
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update mainly fixes some issues introduced by last
+update, there're also some other random fixes and improvements, but no new
+tests. Many thanks to those who contributed and/or reviewed patches!
 
 Thanks,
 Eryu
 
-> 
-> The reason of use 'readonly' directory instead of generic/shard is:
-> The step of tests in readonly filesystem(such as squashfs) are
-> as follows:
-> 1. write data in $SCRATCH_DEV
-> 2. mkfs $SCRATCH_DEV file
-> 3. mount file $SCRATCH_MNT
-> 4. test in $SCRATCH_MNT
-> 
-> While the rw filesystems are as follows:
-> 1. mkfs $SCRATCH_DEV
-> 2. mount $SCRATCH_DEV $SCRATCH_MNT
-> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
-> 
-> The tests in generic/shared are set as rw filesystem, it is hard
-> to use this in readonly filesystem, use 'readonly' dir which can
-> be easier to read.
-> 
-> PS: As readonly filesystems need to mkfs in every test, do not
-> use TEST_DEV&TEST_DIR.
-> 
-> zhengbin (6):
->   squashfs: add squashfs support
->   squashfs: add mount test
->   squashfs: add metadata test
->   squashfs: add data test
->   squashfs: add xattr test
->   squashfs: add mksquashfs options test
-> 
->  .gitignore                                  |   1 +
->  README.squashfs                             |  12 ++
->  check                                       |  19 ++-
->  common/attr                                 |   5 +
->  common/config                               |   6 +
->  common/rc                                   |  63 ++++++++-
->  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
->  tests/readonly/001                          |  97 ++++++++++++++
->  tests/readonly/001.out                      |   2 +
->  tests/readonly/002                          |  48 +++++++
->  tests/readonly/002.out                      |   6 +
->  tests/readonly/003                          |  72 +++++++++++
->  tests/readonly/003.out                      |   5 +
->  tests/readonly/004                          |  50 +++++++
->  tests/readonly/004.out                      |   3 +
->  tests/readonly/005                          |  77 +++++++++++
->  tests/readonly/005.out                      |   2 +
->  tests/readonly/006                          |  48 +++++++
->  tests/readonly/006.out                      |   4 +
->  tests/readonly/007                          |  74 +++++++++++
->  tests/readonly/007.out                      |   9 ++
->  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
->  tests/readonly/008.out                      |  34 +++++
->  tests/readonly/009                          |  50 +++++++
->  tests/readonly/009.out                      |   2 +
->  tests/readonly/010                          |  49 +++++++
->  tests/readonly/010.out                      |   4 +
->  tests/readonly/011                          |  92 +++++++++++++
->  tests/readonly/011.out                      |  30 +++++
->  tests/readonly/012                          |  56 ++++++++
->  tests/readonly/012.out                      |   5 +
->  tests/readonly/013                          |  47 +++++++
->  tests/readonly/013.out                      |   2 +
->  tests/readonly/014                          |  46 +++++++
->  tests/readonly/014.out                      |   2 +
->  tests/readonly/015                          |  42 ++++++
->  tests/readonly/015.out                      |   2 +
->  tests/readonly/016                          | 145 +++++++++++++++++++++
->  tests/readonly/016.out                      |   8 ++
->  tests/readonly/017                          | 107 +++++++++++++++
->  tests/readonly/017.out                      |   2 +
->  tests/readonly/018                          |  49 +++++++
->  tests/readonly/018.out                      |   2 +
->  tests/readonly/019                          | 109 ++++++++++++++++
->  tests/readonly/019.out                      |  45 +++++++
->  tests/readonly/020                          |  56 ++++++++
->  tests/readonly/020.out                      |   9 ++
->  tests/readonly/021                          |  74 +++++++++++
->  tests/readonly/021.out                      |  11 ++
->  tests/readonly/Makefile                     |  20 +++
->  tests/readonly/group                        |  26 ++++
->  tests/squashfs/001                          |  60 +++++++++
->  tests/squashfs/001.out                      |   9 ++
->  tests/squashfs/002                          |  40 ++++++
->  tests/squashfs/002.out                      |   2 +
->  tests/squashfs/003                          |  55 ++++++++
->  tests/squashfs/003.out                      |  12 ++
->  tests/squashfs/004                          |  73 +++++++++++
->  tests/squashfs/004.out                      |  23 ++++
->  tests/squashfs/005                          |  54 ++++++++
->  tests/squashfs/005.out                      |  13 ++
->  tests/squashfs/Makefile                     |  20 +++
->  tests/squashfs/group                        |  10 ++
->  63 files changed, 2372 insertions(+), 5 deletions(-)
->  create mode 100644 README.squashfs
->  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
->  create mode 100755 tests/readonly/001
->  create mode 100644 tests/readonly/001.out
->  create mode 100755 tests/readonly/002
->  create mode 100644 tests/readonly/002.out
->  create mode 100755 tests/readonly/003
->  create mode 100644 tests/readonly/003.out
->  create mode 100755 tests/readonly/004
->  create mode 100644 tests/readonly/004.out
->  create mode 100755 tests/readonly/005
->  create mode 100644 tests/readonly/005.out
->  create mode 100755 tests/readonly/006
->  create mode 100644 tests/readonly/006.out
->  create mode 100755 tests/readonly/007
->  create mode 100644 tests/readonly/007.out
->  create mode 100755 tests/readonly/008
->  create mode 100644 tests/readonly/008.out
->  create mode 100755 tests/readonly/009
->  create mode 100644 tests/readonly/009.out
->  create mode 100755 tests/readonly/010
->  create mode 100644 tests/readonly/010.out
->  create mode 100755 tests/readonly/011
->  create mode 100644 tests/readonly/011.out
->  create mode 100755 tests/readonly/012
->  create mode 100644 tests/readonly/012.out
->  create mode 100755 tests/readonly/013
->  create mode 100644 tests/readonly/013.out
->  create mode 100755 tests/readonly/014
->  create mode 100644 tests/readonly/014.out
->  create mode 100755 tests/readonly/015
->  create mode 100644 tests/readonly/015.out
->  create mode 100755 tests/readonly/016
->  create mode 100644 tests/readonly/016.out
->  create mode 100755 tests/readonly/017
->  create mode 100644 tests/readonly/017.out
->  create mode 100755 tests/readonly/018
->  create mode 100644 tests/readonly/018.out
->  create mode 100755 tests/readonly/019
->  create mode 100644 tests/readonly/019.out
->  create mode 100755 tests/readonly/020
->  create mode 100644 tests/readonly/020.out
->  create mode 100755 tests/readonly/021
->  create mode 100644 tests/readonly/021.out
->  create mode 100644 tests/readonly/Makefile
->  create mode 100644 tests/readonly/group
->  create mode 100755 tests/squashfs/001
->  create mode 100644 tests/squashfs/001.out
->  create mode 100755 tests/squashfs/002
->  create mode 100644 tests/squashfs/002.out
->  create mode 100755 tests/squashfs/003
->  create mode 100644 tests/squashfs/003.out
->  create mode 100755 tests/squashfs/004
->  create mode 100644 tests/squashfs/004.out
->  create mode 100755 tests/squashfs/005
->  create mode 100644 tests/squashfs/005.out
->  create mode 100644 tests/squashfs/Makefile
->  create mode 100644 tests/squashfs/group
-> 
-> --
-> 2.16.2.dirty
-> 
+The new head of the master branch is commit:
+
+0680ff2ea531 shared/298: Wire btrfs support in get_free_sectors
+
+New commits:
+
+Christoph Hellwig (2):
+      [ca513ad171d1] xfs/42[01]: remove from the dedup group
+      [6fd9210bc977] fstests: add a seek group
+
+Darrick J. Wong (4):
+      [1d32301394c4] xfs/450: require working falloc command
+      [e7046479b477] xfs/500: fix reflink support detection and add new groups
+      [5fd70db390dd] src/t_open_tmpfiles: flush log when shutting down filesystem
+      [23b1f2ccba1d] src/t_attr_corruption: fix xattr.h include problems
+
+Nikolay Borisov (1):
+      [0680ff2ea531] shared/298: Wire btrfs support in get_free_sectors
+
+Xiao Yang (1):
+      [202779bc0989] src/Makefile: Link clock_gettime(2) with -lrt
+
+
+Code Diffstat:
+
+ src/Makefile              |   2 +-
+ src/parse-dev-tree.awk    |  64 +++++++++++++++++++++
+ src/parse-extent-tree.awk | 144 ++++++++++++++++++++++++++++++++++++++++++++++
+ src/t_attr_corruption.c   |   2 +-
+ src/t_open_tmpfiles.c     |   6 +-
+ tests/btrfs/group         |   2 +-
+ tests/generic/group       |  12 ++--
+ tests/shared/298          |  33 ++++++++++-
+ tests/xfs/450             |   1 +
+ tests/xfs/500             |   5 +-
+ tests/xfs/group           |   6 +-
+ 11 files changed, 258 insertions(+), 19 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--CpVy3bFvEBQk
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJccqy6AAoJECZSqilcj+djulIP/3yUDrD4GNbz888nifLCyK3H
+6RcAuHJtuQOtaFwmCNJQzK3Ei1RToSR4n199b4j//6XTBiitkFi6lGtBRHeWlguE
+2As+8XmPq9Vgfh9v9gYm8MJqagfoAeEjgtP/X/hv/t8lXxDn75ou+dkB7fEETwA7
+EaMxeB2CDcjd4T+9SrVp9VAWYcAJhjfp9CHugUWDRzDufLUKBDtUwcwCS5ZIGczs
+zhCN1e7bNGOOIP3EDZ4MED5yuukyYIINi1O3MtIYI+ipPzvkd5KOVjjHd/XjWAzu
+zcbQZDrSzMGtcmISRAJIDfYE/M8duGr1EOx4divA5UqUNcpHEZGG22PFcYj9zDAI
+UuYWjQUZMZuxAaHZAVenlfd8sQVhemYj6RI70s2Hc8y1RB444vaqiBzJDSludYPm
+uEutR5PGDRks8kmFQRUtfcteSVJjcYi7tZIzwdet9kaaEe9+uwNgmHS0l3ueVA48
+ohUSPqsTVWAfQD4rr2tVS4dyQViaNDdOn6V5Np1iSezMnE673X1+jml/ucDfwRnS
+p0FgDSMkdB8mEMglIHJz3jcCRPg/RvunmLXGwhRXP4ftFsudxz5xYljtlemKvYh4
+W/1NOrmpeIdZ3/sjJNsggvJpMR+ZDyO1IouKIJ/esLBXHsB882TM4muTiL+cWFrW
+1Ydu5NIsC4kCEpzzWVNH
+=JPRw
+-----END PGP SIGNATURE-----
+
+--CpVy3bFvEBQk--
