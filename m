@@ -1,368 +1,206 @@
-Received: from mx2.suse.de ([195.135.220.15]:42498 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725894AbfBVKEc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 22 Feb 2019 05:04:32 -0500
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v3] shared/298: Wire btrfs support in get_free_sectors
-Date: Fri, 22 Feb 2019 12:04:25 +0200
-Message-Id: <20190222100425.22433-1-nborisov@suse.com>
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:41238 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727752AbfBXPkB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 24 Feb 2019 10:40:01 -0500
+Received: by mail-pg1-f193.google.com with SMTP id m1so3295896pgq.8
+        for <fstests@vger.kernel.org>; Sun, 24 Feb 2019 07:40:00 -0800 (PST)
+Date: Sun, 24 Feb 2019 23:39:54 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
+Message-ID: <20190224153954.GD2713@desktop>
+References: <20190122032408.91336-1-zhengbin13@huawei.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190122032408.91336-1-zhengbin13@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, guaneryu@gmail.com, Nikolay Borisov <nborisov@suse.com>
+To: zhengbin <zhengbin13@huawei.com>
+Cc: david@fromorbit.com, fstests@vger.kernel.org, houtao1@huawei.com, zhaohongjiang@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
-Add support for btrfs in shared/298. Achieve this by introducing 2
-new awk scripts that parse relevant btrfs structures and print holes.
-Additionally modify the test to create larger - 3gb filesystem in the
-case of btrfs. This is needed so that distinct block groups are used
-for data and metadata.
+[Sorry for being so long to review this squashfs support.]
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
----
+On Tue, Jan 22, 2019 at 11:24:02AM +0800, zhengbin wrote:
+> This patch add squashfs support in xfstests-dev. Add two directories
+> in tests directory, readonly can also be used for other readonly
+> filesystem, squashfs is just used for squashfs filesystem.
+> tests/readonly/001        mount test
+> tests/readonly/002--010   metadata test
+> tests/readonly/011--018   data test
+> tests/readonly/019--021   xattr test
+> tests/squashfs/001--005   mksquashfs options test
 
-Changes since v2:=20
+I don't quite like the idea of "forking" random tests from 'generic' to
+'readonly'. The biggest benefit of adding new fs support to fstests is
+that it shares most of the 'generic' tests and gets good test coverage.
+But forking a very small subset of generic tests not only defeats the
+benefit but also adding extra maintain burden.
 
- * Moved files to src/ dir
- * Rename spb parameter in both scripts to sectorsize
- * Added comments for function
- * Added spaces after every # of a comment
- * Removed btrfs_Free variable from shared/298, now the awk scripts direc=
-tly
- print their output
+But the problem is that squashfs is a readonly filesystem and sharing
+the existing generic tests is not easy. (Actually I've been looking at
+this series several times, but couldn't come out with a good solution.)
+Because fstests harness assumes the filesystem being tested is writable
+by default, various _require rules also write/create files to check if a
+functionality is supported by the underlying filesystem. This leads me
+to wonder if fstests is suitable for such readonly filesystems?
 
- src/parse-dev-tree.awk    |  64 +++++++++++++++++++++
- src/parse-extent-tree.awk | 144 ++++++++++++++++++++++++++++++++++++++++=
-++++++
- tests/shared/298          |  33 ++++++++++-
- 3 files changed, 238 insertions(+), 3 deletions(-)
- create mode 100755 src/parse-dev-tree.awk
- create mode 100755 src/parse-extent-tree.awk
+I'm glad to hear what do others think, any comments are welcomed!
 
-diff --git a/src/parse-dev-tree.awk b/src/parse-dev-tree.awk
-new file mode 100755
-index 000000000000..9c98402cf66b
---- /dev/null
-+++ b/src/parse-dev-tree.awk
-@@ -0,0 +1,64 @@
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Nikolay Borisov, SUSE LLC.  All Rights Reserved.
-+#
-+# Parses btrfs' device tree for holes. For example given the followin de=
-vice extents:
-+#	item 3 key (1 DEV_EXTENT 38797312) itemoff 16091 itemsize 48
-+#		dev extent chunk_tree 3
-+#		chunk_objectid 256 chunk_offset 30408704 length 1073741824
-+#		chunk_tree_uuid b8c8f022-452b-4fc1-bf5c-b42d9fba613e
-+#	item 4 key (1 DEV_EXTENT 1112539136) itemoff 16043 itemsize 48
-+#		dev extent chunk_tree 3
-+#		chunk_objectid 256 chunk_offset 30408704 length 1073741824
-+#		chunk_tree_uuid b8c8f022-452b-4fc1-bf5c-b42d9fba613e
-+#
-+# The scripts will find out if there is a hole between 38797312+10737418=
-24 and
-+# the start offset of the next extent, in this case 1112539136 so no hol=
-e. But
-+# if there was it would have printed the size of the hole.
-+#
-+# Following paramters must be set:
-+#    * sectorsize - how many bytes per sector, used to convert script's =
-output
-+#    to sectors.
-+#    * devsize - size of the device in bytes, used to output the final
-+#    hole (if any)
-+
-+# Given a 'chunk_objectid 256 chunk_offset 22020096 length 8388608' line=
- this
-+# function returns 8388608
-+function get_extent_size(line,  tmp) {
-+	split(line, tmp)
-+	return tmp[6]
-+}
-+
-+# Given a '	item 3 key (1 DEV_EXTENT 38797312) itemoff 16091 itemsize 48=
-' line
-+# this function returns 38797312
-+function get_extent_offset(line,  tmp) {
-+	split(line, tmp)
-+	gsub(/\)/,"", tmp[6])
-+	return tmp[6]
-+}
-+
-+BEGIN {
-+	dev_extent_match=3D"^.item [0-9]* key \\([0-9]* DEV_EXTENT [0-9]*\\).*"
-+	dev_extent_len_match=3D"^\\s*chunk_objectid [0-9]* chunk_offset [0-9]* =
-length [0-9]*$"
-+}
-+
-+{
-+	if (match($0,dev_extent_match)) {
-+		extent_offset =3D get_extent_offset($0)
-+		if (prev_extent_end) {
-+			hole_size =3D extent_offset - prev_extent_end
-+			if (hole_size > 0) {
-+				print prev_extent_end / sectorsize, int((extent_offset - 1) / sector=
-size)
-+			}
-+		}
-+	} else if (match($0, dev_extent_len_match)) {
-+		extent_size =3D get_extent_size($0)
-+		prev_extent_end =3D extent_offset + extent_size
-+	}
-+}
-+
-+END {
-+	if (prev_extent_end) {
-+		print prev_extent_end / sectorsize, int((devsize - 1) / sectorsize)
-+	}
-+}
-+
-diff --git a/src/parse-extent-tree.awk b/src/parse-extent-tree.awk
-new file mode 100755
-index 000000000000..09fed61e5b71
---- /dev/null
-+++ b/src/parse-extent-tree.awk
-@@ -0,0 +1,144 @@
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Nikolay Borisov, SUSE LLC.  All Rights Reserved.
-+#
-+# Parses btrfs' extent tree for holes. Holes are the ranges between 2 ad=
-jacent
-+# extent blocks. For example if we have the following 2 metadata items i=
-n the
-+# extent tree:
-+#	item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33
-+#	item 7 key (30490624 METADATA_ITEM 0) itemoff 15986 itemsize 33
-+#
-+# There is a whole of 64k between then - 30490624=E2=88=9230425088 =3D 6=
-5536
-+# Same logic applies for adjacent EXTENT_ITEMS.
-+#
-+# The script requires the following parameters passed on command line:
-+#     * sectorsize - how many bytes per sector, used to convert the outp=
-ut of
-+#     the script to sectors.
-+#     * nodesize - size of metadata extents, used for internal calculati=
-ons
-+
-+# Given an extent line "item 2 key (13672448 EXTENT_ITEM 65536) itemoff =
-16153 itemsize 53"
-+# or "item 6 key (30425088 METADATA_ITEM 0) itemoff 16019 itemsize 33" r=
-eturns
-+# either 65536 (for data extents) or the fixes nodesize value for metada=
-ta
-+# extents.
-+function get_extent_size(line,  tmp) {
-+	if (line ~ data_match || line ~ bg_match) {
-+		split(line, tmp)
-+		gsub(/\)/,"", tmp[6])
-+		return tmp[6]
-+	} else if (line ~ metadata_match) {
-+		return nodesize
-+	}
-+}
-+
-+# given a 'item 2 key (13672448 EXTENT_ITEM 65536) itemoff 16153 itemsiz=
-e 53' or
-+# returns 13672448.
-+function get_extent_offset(line,  tmp) {
-+	split(line, tmp)
-+	gsub(/\(/,"",tmp[4])
-+	return tmp[4]
-+}
-+
-+# This function parse all the extents belonging to a particular block gr=
-oup
-+# which are accumulated in lines[] and calculates the offsets of the hol=
-es
-+# part of this block group.
-+#
-+# base_offset and bg_line are local variables
-+function print_array(         base_offset, bg_line)
-+{
-+	if (match(lines[0], bg_match)) {
-+		# we don't have an extent at the beginning of of blockgroup, so we
-+		# have a hole between blockgroup offset and first extent offset
-+		bg_line =3D lines[0]
-+		prev_size=3D0
-+		prev_offset=3Dget_extent_offset(bg_line)
-+		delete lines[0]
-+	} else {
-+		# we have an extent at the beginning of block group, so initialize
-+		# the prev_* vars correctly
-+		bg_line =3D lines[1]
-+		prev_size =3D get_extent_size(lines[0])
-+		prev_offset =3D get_extent_offset(lines[0])
-+		delete lines[1]
-+		delete lines[0]
-+	}
-+
-+	bg_offset=3Dget_extent_offset(bg_line)
-+	bgend=3Dbg_offset + get_extent_size(bg_line)
-+
-+	for (i in lines) {
-+			cur_size =3D get_extent_size(lines[i])
-+			cur_offset =3D get_extent_offset(lines[i])
-+			if (cur_offset  !=3D prev_offset + prev_size)
-+				print int((prev_size + prev_offset) / sectorsize), int((cur_offset-1=
-) / sectorsize)
-+			prev_size =3D cur_size
-+			prev_offset =3D cur_offset
-+	}
-+
-+	print int((prev_size + prev_offset) / sectorsize), int((bgend-1) / sect=
-orsize)
-+	total_printed++
-+	delete lines
-+}
-+
-+BEGIN {
-+	loi_match=3D"^.item [0-9]* key \\([0-9]* (BLOCK_GROUP_ITEM|METADATA_ITE=
-M|EXTENT_ITEM) [0-9]*\\).*"
-+	metadata_match=3D"^.item [0-9]* key \\([0-9]* METADATA_ITEM [0-9]*\\).*=
-"
-+	data_match=3D"^.item [0-9]* key \\([0-9]* EXTENT_ITEM [0-9]*\\).*"
-+	bg_match=3D"^.item [0-9]* key \\([0-9]* BLOCK_GROUP_ITEM [0-9]*\\).*"
-+	node_match=3D"^node.*$"
-+	leaf_match=3D"^leaf [0-9]* flags"
-+	line_count=3D0
-+	total_printed=3D0
-+	skip_lines=3D0
-+}
-+
-+{
-+	# skip lines not belonging to a leaf
-+	if (match($0,node_match)) {
-+		skip_lines=3D1
-+	} else if (match($0, leaf_match)) {
-+		skip_lines=3D0
-+	}
-+
-+	if (!match($0,loi_match) || skip_lines =3D=3D 1) next;
-+
-+	# we have a line of interest, we need to parse it. First check if there=
- is
-+	# anything in the array
-+	if (line_count=3D=3D0) {
-+		lines[line_count++]=3D$0;
-+	} else {
-+		prev_line=3Dlines[line_count-1]
-+		split(prev_line, prev_line_fields)
-+		prev_objectid=3Dprev_line_fields[4]
-+		objectid=3D$4
-+
-+		if (objectid =3D=3D prev_objectid && match($0, bg_match)) {
-+			if (total_printed>0) {
-+				# We are adding a BG after we have added its first extent
-+				# previously, consider this a record ending event and just print
-+				# the array
-+
-+				delete lines[line_count-1]
-+				print_array()
-+				# we now start a new array with current and previous lines
-+				line_count=3D0
-+				lines[line_count++]=3Dprev_line
-+				lines[line_count++]=3D$0
-+			} else {
-+				# first 2 added lines are EXTENT and BG that match, in this case
-+				# just add them
-+				lines[line_count++]=3D$0
-+
-+			}
-+		} else if (match($0, bg_match)) {
-+			# ordinary end of record
-+			print_array()
-+			line_count=3D0
-+			lines[line_count++]=3D$0
-+		} else {
-+			lines[line_count++]=3D$0
-+		}
-+	}
-+}
-+
-+END {
-+	print_array()
-+}
-diff --git a/tests/shared/298 b/tests/shared/298
-index e7b7b233de45..aafdc25f5575 100755
---- a/tests/shared/298
-+++ b/tests/shared/298
-@@ -15,14 +15,24 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
-=20
- . ./common/rc
-=20
--_supported_fs ext4 xfs
-+_supported_fs ext4 xfs btrfs
- _supported_os Linux
- _require_test
- _require_loop
- _require_fstrim
- _require_xfs_io_command "fiemap"
--_require_fs_space $TEST_DIR 307200
-+if [ "$FSTYP" =3D "btrfs" ]; then
-+	# 3g for btrfs to have distinct bgs
-+	_require_fs_space $TEST_DIR 3145728
-+	fssize=3D3000
-+else
-+	_require_fs_space $TEST_DIR 307200
-+	fssize=3D300
-+fi
-+
- [ "$FSTYP" =3D "ext4" ] && _require_dumpe2fs
-+[ "$FSTYP" =3D "btrfs" ] && _require_btrfs_command inspect-internal dump=
--super
-+[ "$FSTYP" =3D "btrfs" ] && _require_btrfs_command inspect-internal dump=
--tree
-=20
- _cleanup()
- {
-@@ -61,6 +71,22 @@ get_free_sectors()
- 		 $AWK_PROG -v spb=3D$sectors_per_block -v agsize=3D$agsize \
- 		'{ print spb * ($1 * agsize + $2), spb * ($1 * agsize + $2 + $3) - 1 }=
-'
- 	;;
-+	btrfs)
-+		local device_size=3D$($BTRFS_UTIL_PROG filesystem show --raw $loop_mnt=
- 2>&1 \
-+			| sed -n "s/^.*size \([0-9]*\).*$/\1/p")
-+
-+		local nodesize=3D$($BTRFS_UTIL_PROG inspect-internal dump-super $img_f=
-ile  \
-+			| sed -n 's/nodesize\s*\(.*\)/\1/p')
-+
-+		# Get holes within block groups
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree -t extent $img_file \
-+			| $AWK_PROG -v sectorsize=3D512 -v nodesize=3D$nodesize -f $here/src/=
-parse-extent-tree.awk
-+
-+		# Get holes within unallocated space on disk
-+		$BTRFS_UTIL_PROG inspect-internal dump-tree -t dev $img_file \
-+			| $AWK_PROG -v sectorsize=3D512 -v devsize=3D$device_size -f $here/sr=
-c/parse-dev-tree.awk
-+
-+	;;
- 	esac
- }
-=20
-@@ -105,7 +131,7 @@ here=3D`pwd`
- tmp=3D`mktemp -d`
-=20
- img_file=3D$TEST_DIR/$$.fs
--dd if=3D/dev/zero of=3D$img_file bs=3D1M count=3D300 &> /dev/null
-+dd if=3D/dev/zero of=3D$img_file bs=3D1M count=3D$fssize &> /dev/null
-=20
- loop_dev=3D$(_create_loop_device $img_file)
- loop_mnt=3D$tmp/loop_mnt
-@@ -118,6 +144,7 @@ merged_sectors=3D"$tmp/merged_free_sectors"
- mkdir $loop_mnt
-=20
- [ "$FSTYP" =3D "xfs" ] && MKFS_OPTIONS=3D"-f $MKFS_OPTIONS"
-+[ "$FSTYP" =3D "btrfs" ] && MKFS_OPTIONS=3D"$MKFS_OPTIONS -f -dsingle -m=
-single"
-=20
- _mkfs_dev $loop_dev
- _mount $loop_dev $loop_mnt
---=20
-2.7.4
+Thanks,
+Eryu
+
+> 
+> The reason of use 'readonly' directory instead of generic/shard is:
+> The step of tests in readonly filesystem(such as squashfs) are
+> as follows:
+> 1. write data in $SCRATCH_DEV
+> 2. mkfs $SCRATCH_DEV file
+> 3. mount file $SCRATCH_MNT
+> 4. test in $SCRATCH_MNT
+> 
+> While the rw filesystems are as follows:
+> 1. mkfs $SCRATCH_DEV
+> 2. mount $SCRATCH_DEV $SCRATCH_MNT
+> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
+> 
+> The tests in generic/shared are set as rw filesystem, it is hard
+> to use this in readonly filesystem, use 'readonly' dir which can
+> be easier to read.
+> 
+> PS: As readonly filesystems need to mkfs in every test, do not
+> use TEST_DEV&TEST_DIR.
+> 
+> zhengbin (6):
+>   squashfs: add squashfs support
+>   squashfs: add mount test
+>   squashfs: add metadata test
+>   squashfs: add data test
+>   squashfs: add xattr test
+>   squashfs: add mksquashfs options test
+> 
+>  .gitignore                                  |   1 +
+>  README.squashfs                             |  12 ++
+>  check                                       |  19 ++-
+>  common/attr                                 |   5 +
+>  common/config                               |   6 +
+>  common/rc                                   |  63 ++++++++-
+>  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
+>  tests/readonly/001                          |  97 ++++++++++++++
+>  tests/readonly/001.out                      |   2 +
+>  tests/readonly/002                          |  48 +++++++
+>  tests/readonly/002.out                      |   6 +
+>  tests/readonly/003                          |  72 +++++++++++
+>  tests/readonly/003.out                      |   5 +
+>  tests/readonly/004                          |  50 +++++++
+>  tests/readonly/004.out                      |   3 +
+>  tests/readonly/005                          |  77 +++++++++++
+>  tests/readonly/005.out                      |   2 +
+>  tests/readonly/006                          |  48 +++++++
+>  tests/readonly/006.out                      |   4 +
+>  tests/readonly/007                          |  74 +++++++++++
+>  tests/readonly/007.out                      |   9 ++
+>  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
+>  tests/readonly/008.out                      |  34 +++++
+>  tests/readonly/009                          |  50 +++++++
+>  tests/readonly/009.out                      |   2 +
+>  tests/readonly/010                          |  49 +++++++
+>  tests/readonly/010.out                      |   4 +
+>  tests/readonly/011                          |  92 +++++++++++++
+>  tests/readonly/011.out                      |  30 +++++
+>  tests/readonly/012                          |  56 ++++++++
+>  tests/readonly/012.out                      |   5 +
+>  tests/readonly/013                          |  47 +++++++
+>  tests/readonly/013.out                      |   2 +
+>  tests/readonly/014                          |  46 +++++++
+>  tests/readonly/014.out                      |   2 +
+>  tests/readonly/015                          |  42 ++++++
+>  tests/readonly/015.out                      |   2 +
+>  tests/readonly/016                          | 145 +++++++++++++++++++++
+>  tests/readonly/016.out                      |   8 ++
+>  tests/readonly/017                          | 107 +++++++++++++++
+>  tests/readonly/017.out                      |   2 +
+>  tests/readonly/018                          |  49 +++++++
+>  tests/readonly/018.out                      |   2 +
+>  tests/readonly/019                          | 109 ++++++++++++++++
+>  tests/readonly/019.out                      |  45 +++++++
+>  tests/readonly/020                          |  56 ++++++++
+>  tests/readonly/020.out                      |   9 ++
+>  tests/readonly/021                          |  74 +++++++++++
+>  tests/readonly/021.out                      |  11 ++
+>  tests/readonly/Makefile                     |  20 +++
+>  tests/readonly/group                        |  26 ++++
+>  tests/squashfs/001                          |  60 +++++++++
+>  tests/squashfs/001.out                      |   9 ++
+>  tests/squashfs/002                          |  40 ++++++
+>  tests/squashfs/002.out                      |   2 +
+>  tests/squashfs/003                          |  55 ++++++++
+>  tests/squashfs/003.out                      |  12 ++
+>  tests/squashfs/004                          |  73 +++++++++++
+>  tests/squashfs/004.out                      |  23 ++++
+>  tests/squashfs/005                          |  54 ++++++++
+>  tests/squashfs/005.out                      |  13 ++
+>  tests/squashfs/Makefile                     |  20 +++
+>  tests/squashfs/group                        |  10 ++
+>  63 files changed, 2372 insertions(+), 5 deletions(-)
+>  create mode 100644 README.squashfs
+>  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
+>  create mode 100755 tests/readonly/001
+>  create mode 100644 tests/readonly/001.out
+>  create mode 100755 tests/readonly/002
+>  create mode 100644 tests/readonly/002.out
+>  create mode 100755 tests/readonly/003
+>  create mode 100644 tests/readonly/003.out
+>  create mode 100755 tests/readonly/004
+>  create mode 100644 tests/readonly/004.out
+>  create mode 100755 tests/readonly/005
+>  create mode 100644 tests/readonly/005.out
+>  create mode 100755 tests/readonly/006
+>  create mode 100644 tests/readonly/006.out
+>  create mode 100755 tests/readonly/007
+>  create mode 100644 tests/readonly/007.out
+>  create mode 100755 tests/readonly/008
+>  create mode 100644 tests/readonly/008.out
+>  create mode 100755 tests/readonly/009
+>  create mode 100644 tests/readonly/009.out
+>  create mode 100755 tests/readonly/010
+>  create mode 100644 tests/readonly/010.out
+>  create mode 100755 tests/readonly/011
+>  create mode 100644 tests/readonly/011.out
+>  create mode 100755 tests/readonly/012
+>  create mode 100644 tests/readonly/012.out
+>  create mode 100755 tests/readonly/013
+>  create mode 100644 tests/readonly/013.out
+>  create mode 100755 tests/readonly/014
+>  create mode 100644 tests/readonly/014.out
+>  create mode 100755 tests/readonly/015
+>  create mode 100644 tests/readonly/015.out
+>  create mode 100755 tests/readonly/016
+>  create mode 100644 tests/readonly/016.out
+>  create mode 100755 tests/readonly/017
+>  create mode 100644 tests/readonly/017.out
+>  create mode 100755 tests/readonly/018
+>  create mode 100644 tests/readonly/018.out
+>  create mode 100755 tests/readonly/019
+>  create mode 100644 tests/readonly/019.out
+>  create mode 100755 tests/readonly/020
+>  create mode 100644 tests/readonly/020.out
+>  create mode 100755 tests/readonly/021
+>  create mode 100644 tests/readonly/021.out
+>  create mode 100644 tests/readonly/Makefile
+>  create mode 100644 tests/readonly/group
+>  create mode 100755 tests/squashfs/001
+>  create mode 100644 tests/squashfs/001.out
+>  create mode 100755 tests/squashfs/002
+>  create mode 100644 tests/squashfs/002.out
+>  create mode 100755 tests/squashfs/003
+>  create mode 100644 tests/squashfs/003.out
+>  create mode 100755 tests/squashfs/004
+>  create mode 100644 tests/squashfs/004.out
+>  create mode 100755 tests/squashfs/005
+>  create mode 100644 tests/squashfs/005.out
+>  create mode 100644 tests/squashfs/Makefile
+>  create mode 100644 tests/squashfs/group
+> 
+> --
+> 2.16.2.dirty
+> 
