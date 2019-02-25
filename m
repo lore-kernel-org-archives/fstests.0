@@ -1,215 +1,129 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:52420 "EHLO huawei.com"
+Received: from mx2.suse.de ([195.135.220.15]:37190 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725900AbfBYH4O (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 25 Feb 2019 02:56:14 -0500
-From: Gao Xiang <gaoxiang25@huawei.com>
-Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
-References: <20190122032408.91336-1-zhengbin13@huawei.com>
- <20190224153954.GD2713@desktop>
-Message-ID: <d1d7dcf3-c953-9d35-bc12-2e08b16b254e@huawei.com>
-Date: Mon, 25 Feb 2019 15:55:39 +0800
+        id S1725842AbfBYS5z (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 25 Feb 2019 13:57:55 -0500
+Subject: Re: [PATCH 4/3] generic: posix acl extended attribute memory
+ corruption test
+References: <154993784038.1948.7502664832930298472.stgit@magnolia>
+ <20190213204814.GB6477@magnolia>
+From: Jeff Mahoney <jeffm@suse.com>
+Message-ID: <ac4a3f51-150f-e089-52bb-9adea57dc731@suse.com>
+Date: Mon, 25 Feb 2019 13:57:51 -0500
 MIME-Version: 1.0
-In-Reply-To: <20190224153954.GD2713@desktop>
-Content-Type: text/plain; charset="utf-8"
+In-Reply-To: <20190213204814.GB6477@magnolia>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: zhengbin <zhengbin13@huawei.com>, david@fromorbit.com, fstests@vger.kernel.org, houtao1@huawei.com, Zhaohongjiang <zhaohongjiang@huawei.com>, Chao Yu <yuchao0@huawei.com>, "fangwei (I)" <fangwei1@huawei.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eryu,
+On 2/13/19 3:48 PM, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> XFS had a use-after-free bug when xfs_xattr_put_listent runs out of
+> listxattr buffer space while trying to store the name
+> "system.posix_acl_access" and then corrupts memory by not checking the
+> seen_enough state and then trying to shove "trusted.SGI_ACL_FILE" into
+> the buffer as well.
+> 
+> In order to tickle the bug in a user visible way we must have already
+> put a name in the buffer, so we take advantage of the fact that
+> "security.evm" sorts before "system.posix_acl_access" to make sure this
+> happens.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-On 2019/2/24 23:39, Eryu Guan wrote:
-> [Sorry for being so long to review this squashfs support.]
-> 
-> On Tue, Jan 22, 2019 at 11:24:02AM +0800, zhengbin wrote:
->> This patch add squashfs support in xfstests-dev. Add two directories
->> in tests directory, readonly can also be used for other readonly
->> filesystem, squashfs is just used for squashfs filesystem.
->> tests/readonly/001        mount test
->> tests/readonly/002--010   metadata test
->> tests/readonly/011--018   data test
->> tests/readonly/019--021   xattr test
->> tests/squashfs/001--005   mksquashfs options test
-> 
-> I don't quite like the idea of "forking" random tests from 'generic' to
-> 'readonly'. The biggest benefit of adding new fs support to fstests is
-> that it shares most of the 'generic' tests and gets good test coverage.
-> But forking a very small subset of generic tests not only defeats the
-> benefit but also adding extra maintain burden.
-> 
-> But the problem is that squashfs is a readonly filesystem and sharing
-> the existing generic tests is not easy. (Actually I've been looking at
-> this series several times, but couldn't come out with a good solution.)
-> Because fstests harness assumes the filesystem being tested is writable
-> by default, various _require rules also write/create files to check if a
-> functionality is supported by the underlying filesystem. This leads me
-> to wonder if fstests is suitable for such readonly filesystems?
+[...]
 
-I'm also interested in integrating erofs support and adding specific
-testcases to fstests and hoping the conclusion for read-only fses...
+> +
+> +int main(int argc, char *argv[])
+> +{
+> +	struct myacl acl = {
+> +		.d = 2,
+> +		.e = {
+> +			{1, 0, 0},
+> +			{4, 0, 0},
+> +			{0x10, 0, 0},
+> +			{0x20, 0, 0},
+> +		},
+> +	};
+> +	char buf[64];
+> +	ssize_t sz;
+> +	int fd;
+> +	int ret;
+> +
+> +	if (argc > 1) {
+> +		ret = chdir(argv[1]);
+> +		if (ret)
+> +			die(argv[1]);
+> +	}
+> +
+> +	fd = creat("file0", 0644);
+> +	if (fd < 0)
+> +		die("create");
+> +
+> +	ret = fsetxattr(fd, "system.posix_acl_access", &acl, sizeof(acl), 0);
+> +	if (ret)
+> +		die("set posix acl");
+> +
+> +	ret = fsetxattr(fd, "security.evm", buf, 1, 1);
+> +	if (ret)
+> +		die("set evm");
 
-Thanks,
-Gao Xiang
+How is this working on your test system?  The EVM xattr is a formatted
+structure and this is passing it an uninitialized buffer.  It *should*
+return EPERM and on our test systems it is.
 
-> 
-> I'm glad to hear what do others think, any comments are welcomed!
-> 
-> Thanks,
-> Eryu
-> 
->>
->> The reason of use 'readonly' directory instead of generic/shard is:
->> The step of tests in readonly filesystem(such as squashfs) are
->> as follows:
->> 1. write data in $SCRATCH_DEV
->> 2. mkfs $SCRATCH_DEV file
->> 3. mount file $SCRATCH_MNT
->> 4. test in $SCRATCH_MNT
->>
->> While the rw filesystems are as follows:
->> 1. mkfs $SCRATCH_DEV
->> 2. mount $SCRATCH_DEV $SCRATCH_MNT
->> 3. test in $SCRATCH_MNT(just write data in $SCRATCH_MNT)
->>
->> The tests in generic/shared are set as rw filesystem, it is hard
->> to use this in readonly filesystem, use 'readonly' dir which can
->> be easier to read.
->>
->> PS: As readonly filesystems need to mkfs in every test, do not
->> use TEST_DEV&TEST_DIR.
->>
->> zhengbin (6):
->>   squashfs: add squashfs support
->>   squashfs: add mount test
->>   squashfs: add metadata test
->>   squashfs: add data test
->>   squashfs: add xattr test
->>   squashfs: add mksquashfs options test
->>
->>  .gitignore                                  |   1 +
->>  README.squashfs                             |  12 ++
->>  check                                       |  19 ++-
->>  common/attr                                 |   5 +
->>  common/config                               |   6 +
->>  common/rc                                   |  63 ++++++++-
->>  src/aio-dio-regress/aio-subblock-eof-read.c |  84 ++++++++++++
->>  tests/readonly/001                          |  97 ++++++++++++++
->>  tests/readonly/001.out                      |   2 +
->>  tests/readonly/002                          |  48 +++++++
->>  tests/readonly/002.out                      |   6 +
->>  tests/readonly/003                          |  72 +++++++++++
->>  tests/readonly/003.out                      |   5 +
->>  tests/readonly/004                          |  50 +++++++
->>  tests/readonly/004.out                      |   3 +
->>  tests/readonly/005                          |  77 +++++++++++
->>  tests/readonly/005.out                      |   2 +
->>  tests/readonly/006                          |  48 +++++++
->>  tests/readonly/006.out                      |   4 +
->>  tests/readonly/007                          |  74 +++++++++++
->>  tests/readonly/007.out                      |   9 ++
->>  tests/readonly/008                          | 193 ++++++++++++++++++++++++++++
->>  tests/readonly/008.out                      |  34 +++++
->>  tests/readonly/009                          |  50 +++++++
->>  tests/readonly/009.out                      |   2 +
->>  tests/readonly/010                          |  49 +++++++
->>  tests/readonly/010.out                      |   4 +
->>  tests/readonly/011                          |  92 +++++++++++++
->>  tests/readonly/011.out                      |  30 +++++
->>  tests/readonly/012                          |  56 ++++++++
->>  tests/readonly/012.out                      |   5 +
->>  tests/readonly/013                          |  47 +++++++
->>  tests/readonly/013.out                      |   2 +
->>  tests/readonly/014                          |  46 +++++++
->>  tests/readonly/014.out                      |   2 +
->>  tests/readonly/015                          |  42 ++++++
->>  tests/readonly/015.out                      |   2 +
->>  tests/readonly/016                          | 145 +++++++++++++++++++++
->>  tests/readonly/016.out                      |   8 ++
->>  tests/readonly/017                          | 107 +++++++++++++++
->>  tests/readonly/017.out                      |   2 +
->>  tests/readonly/018                          |  49 +++++++
->>  tests/readonly/018.out                      |   2 +
->>  tests/readonly/019                          | 109 ++++++++++++++++
->>  tests/readonly/019.out                      |  45 +++++++
->>  tests/readonly/020                          |  56 ++++++++
->>  tests/readonly/020.out                      |   9 ++
->>  tests/readonly/021                          |  74 +++++++++++
->>  tests/readonly/021.out                      |  11 ++
->>  tests/readonly/Makefile                     |  20 +++
->>  tests/readonly/group                        |  26 ++++
->>  tests/squashfs/001                          |  60 +++++++++
->>  tests/squashfs/001.out                      |   9 ++
->>  tests/squashfs/002                          |  40 ++++++
->>  tests/squashfs/002.out                      |   2 +
->>  tests/squashfs/003                          |  55 ++++++++
->>  tests/squashfs/003.out                      |  12 ++
->>  tests/squashfs/004                          |  73 +++++++++++
->>  tests/squashfs/004.out                      |  23 ++++
->>  tests/squashfs/005                          |  54 ++++++++
->>  tests/squashfs/005.out                      |  13 ++
->>  tests/squashfs/Makefile                     |  20 +++
->>  tests/squashfs/group                        |  10 ++
->>  63 files changed, 2372 insertions(+), 5 deletions(-)
->>  create mode 100644 README.squashfs
->>  create mode 100644 src/aio-dio-regress/aio-subblock-eof-read.c
->>  create mode 100755 tests/readonly/001
->>  create mode 100644 tests/readonly/001.out
->>  create mode 100755 tests/readonly/002
->>  create mode 100644 tests/readonly/002.out
->>  create mode 100755 tests/readonly/003
->>  create mode 100644 tests/readonly/003.out
->>  create mode 100755 tests/readonly/004
->>  create mode 100644 tests/readonly/004.out
->>  create mode 100755 tests/readonly/005
->>  create mode 100644 tests/readonly/005.out
->>  create mode 100755 tests/readonly/006
->>  create mode 100644 tests/readonly/006.out
->>  create mode 100755 tests/readonly/007
->>  create mode 100644 tests/readonly/007.out
->>  create mode 100755 tests/readonly/008
->>  create mode 100644 tests/readonly/008.out
->>  create mode 100755 tests/readonly/009
->>  create mode 100644 tests/readonly/009.out
->>  create mode 100755 tests/readonly/010
->>  create mode 100644 tests/readonly/010.out
->>  create mode 100755 tests/readonly/011
->>  create mode 100644 tests/readonly/011.out
->>  create mode 100755 tests/readonly/012
->>  create mode 100644 tests/readonly/012.out
->>  create mode 100755 tests/readonly/013
->>  create mode 100644 tests/readonly/013.out
->>  create mode 100755 tests/readonly/014
->>  create mode 100644 tests/readonly/014.out
->>  create mode 100755 tests/readonly/015
->>  create mode 100644 tests/readonly/015.out
->>  create mode 100755 tests/readonly/016
->>  create mode 100644 tests/readonly/016.out
->>  create mode 100755 tests/readonly/017
->>  create mode 100644 tests/readonly/017.out
->>  create mode 100755 tests/readonly/018
->>  create mode 100644 tests/readonly/018.out
->>  create mode 100755 tests/readonly/019
->>  create mode 100644 tests/readonly/019.out
->>  create mode 100755 tests/readonly/020
->>  create mode 100644 tests/readonly/020.out
->>  create mode 100755 tests/readonly/021
->>  create mode 100644 tests/readonly/021.out
->>  create mode 100644 tests/readonly/Makefile
->>  create mode 100644 tests/readonly/group
->>  create mode 100755 tests/squashfs/001
->>  create mode 100644 tests/squashfs/001.out
->>  create mode 100755 tests/squashfs/002
->>  create mode 100644 tests/squashfs/002.out
->>  create mode 100755 tests/squashfs/003
->>  create mode 100644 tests/squashfs/003.out
->>  create mode 100755 tests/squashfs/004
->>  create mode 100644 tests/squashfs/004.out
->>  create mode 100755 tests/squashfs/005
->>  create mode 100644 tests/squashfs/005.out
->>  create mode 100644 tests/squashfs/Makefile
->>  create mode 100644 tests/squashfs/group
->>
->> --
->> 2.16.2.dirty
->>
+Using security.capability will sort before system.posix_acl_access and
+accepts unformatted contents.
+
+-Jeff
+
+> +	sz = flistxattr(fd, buf, 30);
+> +	if (sz < 0)
+> +		die("list attr");
+> +
+> +	printf("%s\n", buf);
+> +
+> +	return 0;
+> +
+> +#if 0
+> +	/* original syzkaller reproducer */
+> +
+> +	syscall(__NR_mmap, 0x20000000, 0x1000000, 3, 0x32, -1, 0);
+> +
+> +	memcpy((void*)0x20000180, "./file0", 8);
+> +	syscall(__NR_creat, 0x20000180, 0);
+> +	memcpy((void*)0x20000000, "./file0", 8);
+> +	memcpy((void*)0x20000040, "system.posix_acl_access", 24);
+> +	*(uint32_t*)0x20000680 = 2;
+> +	*(uint16_t*)0x20000684 = 1;
+> +	*(uint16_t*)0x20000686 = 0;
+> +	*(uint32_t*)0x20000688 = 0;
+> +	*(uint16_t*)0x2000068c = 4;
+> +	*(uint16_t*)0x2000068e = 0;
+> +	*(uint32_t*)0x20000690 = 0;
+> +	*(uint16_t*)0x20000694 = 0x10;
+> +	*(uint16_t*)0x20000696 = 0;
+> +	*(uint32_t*)0x20000698 = 0;
+> +	*(uint16_t*)0x2000069c = 0x20;
+> +	*(uint16_t*)0x2000069e = 0;
+> +	*(uint32_t*)0x200006a0 = 0;
+> +	syscall(__NR_setxattr, 0x20000000, 0x20000040, 0x20000680, 0x24, 0);
+> +	memcpy((void*)0x20000080, "./file0", 8);
+> +	memcpy((void*)0x200000c0, "security.evm", 13);
+> +	memcpy((void*)0x20000100, "\x03\x00\x00\x00\x57", 5);
+> +	syscall(__NR_lsetxattr, 0x20000080, 0x200000c0, 0x20000100, 1, 1);
+> +	memcpy((void*)0x20000300, "./file0", 8);
+> +	syscall(__NR_listxattr, 0x20000300, 0x200002c0, 0x1e);
+> +	return 0;
+> +#endif
+> +}
+
+
+
+-- 
+Jeff Mahoney
+SUSE Labs
