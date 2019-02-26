@@ -1,86 +1,98 @@
-Received: from mgw-01.mpynet.fi ([82.197.21.90]:52626 "EHLO mgw-01.mpynet.fi"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726099AbfBZOtM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 26 Feb 2019 09:49:12 -0500
-Received: from pps.filterd (mgw-01.mpynet.fi [127.0.0.1])
-        by mgw-01.mpynet.fi (8.16.0.27/8.16.0.27) with SMTP id x1QEUDfl040728
-        for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 16:31:05 +0200
-Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
-        by mgw-01.mpynet.fi with ESMTP id 2qvkkf9p9q-1
-        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT)
-        for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 16:31:05 +0200
-From: Rostislav Skudnov <rostislav@tuxera.com>
-Subject: [PATCH] fsstress: show correct offsets and length for copy_file_range
-Date: Tue, 26 Feb 2019 14:29:02 +0000
-Message-ID: <1551191342-14428-1-git-send-email-rostislav@tuxera.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:46436 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727416AbfBZTIa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Feb 2019 14:08:30 -0500
+Subject: Re: [PATCH 1/2] misc: don't oom the box opening tmpfiles
+References: <155114852926.9683.4048206997940455508.stgit@magnolia>
+From: Allison Henderson <allison.henderson@oracle.com>
+Message-ID: <ae463130-7e23-9fdc-6a7e-72996492abf8@oracle.com>
+Date: Tue, 26 Feb 2019 12:08:20 -0700
 MIME-Version: 1.0
-Content-Type: text/plain
+In-Reply-To: <155114852926.9683.4048206997940455508.stgit@magnolia>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Copy original offsets and length and use them for logging as in
-splice_f. Fix grammar mistakes in the comment about them.
+On 2/25/19 7:35 PM, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> For the t_open_tmpfiles tests, limit ourselves to half of file-max so
+> that we don't OOM the test machine.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>   tests/generic/530 |    2 +-
+>   tests/generic/531 |    2 +-
+>   tests/xfs/501     |    2 +-
+>   tests/xfs/502     |    2 +-
+>   4 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> 
+> diff --git a/tests/generic/530 b/tests/generic/530
+> index a2968d25..2bc4a992 100755
+> --- a/tests/generic/530
+> +++ b/tests/generic/530
+> @@ -42,7 +42,7 @@ _scratch_mount
+>   # Set ULIMIT_NOFILE to min(file-max, 50000 files per LOAD_FACTOR)
+>   # so that this test doesn't take forever or OOM the box
+>   max_files=$((50000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
+>   test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>   	max_files=$max_allowable_files
+>   ulimit -n $max_files
+> diff --git a/tests/generic/531 b/tests/generic/531
+> index f3eb5cde..5d60e4b6 100755
+> --- a/tests/generic/531
+> +++ b/tests/generic/531
+> @@ -44,7 +44,7 @@ nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+>   # Set ULIMIT_NOFILE to min(file-max, 50000 files per LOAD_FACTOR)
+>   # so that this test doesn't take forever or OOM the box
+>   max_files=$((50000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
 
-Signed-off-by: Rostislav Skudnov <rostislav@tuxera.com>
----
- ltp/fsstress.c | 21 +++++++++++++++++----
- 1 file changed, 17 insertions(+), 4 deletions(-)
+This looks like this would certainly help, but wouldn't we want it to be 
+something more like file-max - file-nr ?  Or something similar?  I'm 
+just thinking the threshold at which we pop the file limit would 
+probably be more dependent on how many files are already allocated about 
+the system.  The 2 probably solves it most of the time, but it's 
+certainly possible that file-max / 2 may still be too much in some 
+cases.  Thoughts?
 
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 2223fd7..41a0155 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -2356,8 +2356,11 @@ copyrange_f(
- 	loff_t			lr;
- 	loff_t			off1;
- 	loff_t			off2;
-+	loff_t			offset1;
-+	loff_t			offset2;
- 	loff_t			max_off2;
- 	size_t			len;
-+	size_t			length;
- 	int			tries = 0;
- 	int			v1;
- 	int			v2;
-@@ -2446,6 +2449,14 @@ copyrange_f(
- 		off2 %= maxfsize;
- 	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
- 
-+	/*
-+	 * Since len, off1 and off2 will be changed later, preserve their
-+	 * original values.
-+	 */
-+	length = len;
-+	offset1 = off1;
-+	offset2 = off2;
-+
- 	while (len > 0) {
- 		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
- 			      len, 0);
-@@ -2461,8 +2472,10 @@ copyrange_f(
- 	if (v1 || v2) {
- 		printf("%d/%d: copyrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
- 			procid, opno,
--			fpath1.path, inoinfo1, (long long)off1, (long long)len,
--			fpath2.path, inoinfo2, (long long)off2, (long long)len);
-+			fpath1.path, inoinfo1,
-+			(long long)offset1, (long long)length,
-+			fpath2.path, inoinfo2,
-+			(long long)offset2, (long long)length);
- 
- 		if (ret < 0)
- 			printf(" error %d", e);
-@@ -2869,8 +2882,8 @@ splice_f(int opno, long r)
- 	off2 = (off64_t)(lr % MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE));
- 
- 	/*
--	 * Due to len, off1 and off2 will be changed later, so record the
--	 * original number at here
-+	 * Since len, off1 and off2 will be changed later, preserve their
-+	 * original values.
- 	 */
- 	length = len;
- 	offset1 = off1;
--- 
-2.1.4
+Allison
+
+>   test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>   	max_files=$max_allowable_files
+>   ulimit -n $max_files
+> diff --git a/tests/xfs/501 b/tests/xfs/501
+> index 51cdb020..d689145f 100755
+> --- a/tests/xfs/501
+> +++ b/tests/xfs/501
+> @@ -47,7 +47,7 @@ _scratch_mount
+>   # Set ULIMIT_NOFILE to min(file-max, 30000 files per LOAD_FACTOR)
+>   # so that this test doesn't take forever or OOM the box
+>   max_files=$((30000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
+>   test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>   	max_files=$max_allowable_files
+>   ulimit -n $max_files
+> diff --git a/tests/xfs/502 b/tests/xfs/502
+> index bfb063f4..5ad10316 100755
+> --- a/tests/xfs/502
+> +++ b/tests/xfs/502
+> @@ -46,7 +46,7 @@ nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+>   # Set ULIMIT_NOFILE to min(file-max, 30000 files per cpu per LOAD_FACTOR)
+>   # so that this test doesn't take forever or OOM the box
+>   max_files=$((30000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
+>   test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>   	max_files=$max_allowable_files
+>   ulimit -n $max_files
+> 
