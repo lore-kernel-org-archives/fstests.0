@@ -1,73 +1,85 @@
-Received: from mail-yb1-f193.google.com ([209.85.219.193]:34825 "EHLO
-        mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727631AbfBZKBV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Feb 2019 05:01:21 -0500
-MIME-Version: 1.0
-References: <CALLuPvpzHUHH3R8DkQS35NSn76fd_An_7EPkY919m3a0oaLTrg@mail.gmail.com>
-In-Reply-To: <CALLuPvpzHUHH3R8DkQS35NSn76fd_An_7EPkY919m3a0oaLTrg@mail.gmail.com>
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:37943 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726020AbfBZOJN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 26 Feb 2019 09:09:13 -0500
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 26 Feb 2019 12:01:08 +0200
-Message-ID: <CAOQ4uxiD4=jn8fUwm1ACdhvM8JjtVCwLhmMQ5deOrACcW4M_KQ@mail.gmail.com>
-Subject: Re: real_inode->i_fop->llseek is not called by ovl_llseek
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH 1/2] generic/{436,445}: check falloc support
+Date: Tue, 26 Feb 2019 16:09:01 +0200
+Message-Id: <20190226140902.32219-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eddie Horng <eddiehorng.tw@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 26, 2019 at 8:31 AM Eddie Horng <eddiehorng.tw@gmail.com> wrote:
->
-> Hello,
-> Seems real_inode->i_fop->llseek is not called by ovl_llseek?
-> It happens the lower fs implements llseek similar with ovl_llseek or lower fs
-> is overlayfs, the "real inode"  s_maxbytes is not passed to
-> generic_file_llseek_size. Generally it is not a problem, but is it
-> better to check if realinode has llseek and invoke it?
+The sanity test case in those tests (i.e. 13..17)
+are all skipped in fs with no falloc support, but the tests
+are reported to pass.
 
-Yes, it is a problem!
+For example, from 445.full:
 
-We have a silent regression in v4.19.
-Overlayfs used to do SEEK_HOLE/SEEK_DATA correctly
-and does not anymore.
+ File system supports the default behavior.
+ File system does not support fallocate.
+ Allocation size: 4096
+ 17. Test file with unwritten extents, data-hole-data inside page
+ Test skipped as fs doesn't support unwritten extents.
 
-Here is head of full output of xfstests seek hole sanity test:
+Explicitly check for falloc support before running those tests
+so they would be properly reported as skipped.
 
-XFS
-===
-root@kvm-xfstests:~# head -3 /results/xfs/results-reflink/generic/285.full
-File system magic#: 0x58465342
-Allocation size: 4096
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ tests/generic/436   | 2 ++
+ tests/generic/445   | 2 ++
+ tests/generic/group | 4 ++--
+ 3 files changed, 6 insertions(+), 2 deletions(-)
 
-Overlayfs (v4.18)
-=============
-root@kvm-xfstests:~# head -3 /results/overlay/results-large/generic/285.full
-File system magic#: 0x794c7630
-Allocation size: 4096
-
-Overlayfs (master)
-==============
-root@kvm-xfstests:~# head -3 /results/overlay/results-large/generic/285.full
-File system supports the default behavior.
-File system does not support unwritten extents.
-File system magic#: 0x794c7630
-
-The reason that regression went unnoticed is that xfstests seek hole
-sanity tests does not require SEEK_HOLE to find a punched hole.
-
-AFAICT, there are 11 filesystems in tree that support PUNCH_HOLE:
-btrfs ceph cifs ext4 f2fs fuse gfs2 hugetlbfs nfs ocfs2 xfs
-
-Out of which only hugetlbfs does not implement SEEK_HOLE,
-and this could probably be considered a bug if anyone cared enough.
-so I propose that src/seek_sanity_test.c:test_basic_support()
-should check for PUNCH_HOLE support and fail if filesystem is
-found to "support the default behavior".
-
-Besides that, there is no actual sanity test in xfstests (or I couldn't
-find one) that verifies PUNCH_HOLE=>SEEK_HOLE.
-There is an LTP test fallocate04 that checks that, but there is
-no coverage to overlayfs with .all_filesystems = 1 test.
-So I will add a test case to xfstest seek_sanity_test to cover this HOLE.
-
-Thanks,
-Amir.
+diff --git a/tests/generic/436 b/tests/generic/436
+index 3ed22c96..a3ef70e5 100755
+--- a/tests/generic/436
++++ b/tests/generic/436
+@@ -24,6 +24,8 @@ _supported_os Linux
+ 
+ _require_test
+ _require_seek_data_hole
++# All the seek sanity test cases here do falloc
++_require_xfs_io_command "falloc"
+ 
+ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
+ 
+diff --git a/tests/generic/445 b/tests/generic/445
+index e697cca0..694913ae 100755
+--- a/tests/generic/445
++++ b/tests/generic/445
+@@ -24,6 +24,8 @@ _supported_os Linux
+ 
+ _require_test
+ _require_seek_data_hole
++# All the seek sanity test cases here do falloc
++_require_xfs_io_command "falloc"
+ 
+ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile
+ 
+diff --git a/tests/generic/group b/tests/generic/group
+index 31011ac8..15227b67 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -438,7 +438,7 @@
+ 433 auto quick copy
+ 434 auto quick copy
+ 435 auto encrypt
+-436 auto quick rw seek
++436 auto quick rw seek prealloc
+ 437 auto quick dax
+ 438 auto
+ 439 auto quick punch
+@@ -447,7 +447,7 @@
+ 442 blockdev
+ 443 auto quick rw
+ 444 auto quick acl
+-445 auto quick rw seek
++445 auto quick rw seek prealloc
+ 446 auto quick rw punch
+ 447 auto clone
+ 448 auto quick rw seek
+-- 
+2.17.1
