@@ -1,14 +1,14 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:41592 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:41596 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726020AbfBZOHp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 26 Feb 2019 09:07:45 -0500
+        id S1726020AbfBZOHs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 26 Feb 2019 09:07:48 -0500
 Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id D516F9F16C94CD03FF20
+        by Forcepoint Email with ESMTP id D8DA7F06F6EEC2AD1BA7
         for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 22:07:42 +0800 (CST)
 From: Yufen Yu <yuyufen@huawei.com>
-Subject: [PATCH v2 1/2] commom/rc: use the common function get_max_file_size
-Date: Tue, 26 Feb 2019 22:11:53 +0800
-Message-ID: <20190226141154.142271-2-yuyufen@huawei.com>
+Subject: [PATCH v2 2/2] common/rc: add get_max_lfs_filesize to return MAX_LFS_FILESIZE
+Date: Tue, 26 Feb 2019 22:11:54 +0800
+Message-ID: <20190226141154.142271-3-yuyufen@huawei.com>
 In-Reply-To: <20190226141154.142271-1-yuyufen@huawei.com>
 References: <20190226141154.142271-1-yuyufen@huawei.com>
 MIME-Version: 1.0
@@ -18,99 +18,112 @@ To: guaneryu@gmail.com
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Move the function get_max_file_size() of generci/485 to common/rc,
-and add the max filesize limit to generic/299.
+Pick up the common function get_max_lfs_filesize() to return
+MAX_LFS_FILESIZE.
 
 Signed-off-by: Yufen Yu <yuyufen@huawei.com>
 ---
- common/rc         | 23 +++++++++++++++++++++++
- tests/generic/299 |  5 +++++
- tests/generic/485 | 23 -----------------------
- 3 files changed, 28 insertions(+), 23 deletions(-)
+ common/rc         | 16 ++++++++++++++++
+ tests/generic/349 | 12 +-----------
+ tests/generic/350 | 12 +-----------
+ tests/generic/351 | 12 +-----------
+ 4 files changed, 19 insertions(+), 33 deletions(-)
 
 diff --git a/common/rc b/common/rc
-index e5da6484..987f3e23 100644
+index 987f3e23..07883540 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -3785,6 +3785,29 @@ _require_scratch_feature()
- 	esac
+@@ -3808,6 +3808,22 @@ get_max_file_size()
+ 	echo $l
  }
  
-+# Get the maximum size of a file in $TEST_DIR (s_maxbytes).  On ext4 this will
-+# be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
-+get_max_file_size()
++# get MAX_LFS_FILESIZE
++get_max_lfs_filesize()
 +{
-+	local testfile=$TEST_DIR/maxfilesize.$seq
-+	local l=0
-+	local r=9223372036854775807 # LLONG_MAX
-+
-+	rm -f $testfile
-+	while (( l < r )); do
-+		# Use _math() to avoid signed integer overflow.
-+		local m=$(_math "($l + $r + 1) / 2")
-+		if $XFS_IO_PROG -f -c "truncate $m" $testfile \
-+			|& grep -q 'File too large'
-+		then
-+			r=$(( m - 1 ))
-+		else
-+			l=$m
-+		fi
-+	done
-+	echo $l
++	case "$(getconf LONG_BIT)" in
++	"32")
++       echo $(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
++	       ;;
++	"64")
++	       echo 9223372036854775807
++	       ;;
++	*)
++	       _fail "sizeof(long) == $(getconf LONG_BIT)?"
++	       ;;
++	esac
 +}
 +
  # The maximum filesystem label length, /not/ including terminating NULL
  _label_get_max()
  {
-diff --git a/tests/generic/299 b/tests/generic/299
-index c4d74fc8..494bf61c 100755
---- a/tests/generic/299
-+++ b/tests/generic/299
-@@ -33,6 +33,11 @@ NUM_JOBS=$((4*LOAD_FACTOR))
- BLK_DEV_SIZE=`blockdev --getsz $SCRATCH_DEV`
- FILE_SIZE=$((BLK_DEV_SIZE * 512))
+diff --git a/tests/generic/349 b/tests/generic/349
+index f01f817d..45d0619b 100755
+--- a/tests/generic/349
++++ b/tests/generic/349
+@@ -50,17 +50,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
  
-+max_file_size=$(get_max_file_size)
-+if [ $max_file_size -lt $FILE_SIZE ]; then
-+	FILE_SIZE=$max_file_size
-+fi
-+
- cat >$fio_config <<EOF
- ###########
- # $seq test fio activity
-diff --git a/tests/generic/485 b/tests/generic/485
-index e88ac2e4..d55535c2 100755
---- a/tests/generic/485
-+++ b/tests/generic/485
-@@ -37,29 +37,6 @@ _require_xfs_io_command "falloc" "-k"
- _require_xfs_io_command "finsert"
- _require_xfs_io_command "truncate"
+ echo "Zero range to MAX_LFS_FILESIZE"
+ # zod = MAX_LFS_FILESIZE
+-case "$(getconf LONG_BIT)" in
+-"32")
+-	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+-	;;
+-"64")
+-	zod=9223372036854775807
+-	;;
+-*)
+-	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+-	;;
+-esac
++zod=$(get_max_lfs_filesize)
+ $XFS_IO_PROG -c "fzero -k 0 $zod" $dev
  
--# Get the maximum size of a file in $TEST_DIR (s_maxbytes).  On ext4 this will
--# be UINT32_MAX * block_size, but other filesystems may allow up to LLONG_MAX.
--get_max_file_size()
--{
--	local testfile=$TEST_DIR/maxfilesize.$seq
--	local l=0
--	local r=9223372036854775807 # LLONG_MAX
--
--	rm -f $testfile
--	while (( l < r )); do
--		# Use _math() to avoid signed integer overflow.
--		local m=$(_math "($l + $r + 1) / 2")
--		if $XFS_IO_PROG -f -c "truncate $m" $testfile \
--			|& grep -q 'File too large'
--		then
--			r=$(( m - 1 ))
--		else
--			l=$m
--		fi
--	done
--	echo $l
--}
--
- block_size=$(_get_file_block_size $TEST_DIR)
- max_file_size=$(get_max_file_size)
- max_blocks=$((max_file_size / block_size))
+ echo "Check contents"
+diff --git a/tests/generic/350 b/tests/generic/350
+index 0aea4c09..a8f2939b 100755
+--- a/tests/generic/350
++++ b/tests/generic/350
+@@ -47,17 +47,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+ 
+ echo "Punch to MAX_LFS_FILESIZE"
+ # zod = MAX_LFS_FILESIZE
+-case "$(getconf LONG_BIT)" in
+-"32")
+-	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+-	;;
+-"64")
+-	zod=9223372036854775807
+-	;;
+-*)
+-	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+-	;;
+-esac
++zod=$(get_max_lfs_filesize)
+ $XFS_IO_PROG -c "fpunch 0 $zod" $dev
+ 
+ echo "Check contents"
+diff --git a/tests/generic/351 b/tests/generic/351
+index e326dca1..c250bac4 100755
+--- a/tests/generic/351
++++ b/tests/generic/351
+@@ -62,17 +62,7 @@ $XFS_IO_PROG -c "fpunch 512 512" $dev
+ 
+ echo "Zero range past MAX_LFS_FILESIZE keep size"
+ # zod = MAX_LFS_FILESIZE
+-case "$(getconf LONG_BIT)" in
+-"32")
+-	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+-	;;
+-"64")
+-	zod=9223372036854775807
+-	;;
+-*)
+-	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+-	;;
+-esac
++zod=$(get_max_lfs_filesize)
+ $XFS_IO_PROG -c "fzero -k 512k $zod" $dev
+ 
+ echo "Zero range past MAX_LFS_FILESIZE"
 -- 
 2.16.2.dirty
