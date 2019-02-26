@@ -1,129 +1,86 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:41596 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726020AbfBZOHs (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 26 Feb 2019 09:07:48 -0500
-Received: from DGGEMS410-HUB.china.huawei.com (unknown [172.30.72.60])
-        by Forcepoint Email with ESMTP id D8DA7F06F6EEC2AD1BA7
-        for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 22:07:42 +0800 (CST)
-From: Yufen Yu <yuyufen@huawei.com>
-Subject: [PATCH v2 2/2] common/rc: add get_max_lfs_filesize to return MAX_LFS_FILESIZE
-Date: Tue, 26 Feb 2019 22:11:54 +0800
-Message-ID: <20190226141154.142271-3-yuyufen@huawei.com>
-In-Reply-To: <20190226141154.142271-1-yuyufen@huawei.com>
-References: <20190226141154.142271-1-yuyufen@huawei.com>
+Received: from mgw-01.mpynet.fi ([82.197.21.90]:52626 "EHLO mgw-01.mpynet.fi"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726099AbfBZOtM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 26 Feb 2019 09:49:12 -0500
+Received: from pps.filterd (mgw-01.mpynet.fi [127.0.0.1])
+        by mgw-01.mpynet.fi (8.16.0.27/8.16.0.27) with SMTP id x1QEUDfl040728
+        for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 16:31:05 +0200
+Received: from ex13.tuxera.com (ex13.tuxera.com [178.16.184.72])
+        by mgw-01.mpynet.fi with ESMTP id 2qvkkf9p9q-1
+        (version=TLSv1.2 cipher=ECDHE-RSA-AES256-SHA384 bits=256 verify=NOT)
+        for <fstests@vger.kernel.org>; Tue, 26 Feb 2019 16:31:05 +0200
+From: Rostislav Skudnov <rostislav@tuxera.com>
+Subject: [PATCH] fsstress: show correct offsets and length for copy_file_range
+Date: Tue, 26 Feb 2019 14:29:02 +0000
+Message-ID: <1551191342-14428-1-git-send-email-rostislav@tuxera.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Pick up the common function get_max_lfs_filesize() to return
-MAX_LFS_FILESIZE.
+Copy original offsets and length and use them for logging as in
+splice_f. Fix grammar mistakes in the comment about them.
 
-Signed-off-by: Yufen Yu <yuyufen@huawei.com>
+Signed-off-by: Rostislav Skudnov <rostislav@tuxera.com>
 ---
- common/rc         | 16 ++++++++++++++++
- tests/generic/349 | 12 +-----------
- tests/generic/350 | 12 +-----------
- tests/generic/351 | 12 +-----------
- 4 files changed, 19 insertions(+), 33 deletions(-)
+ ltp/fsstress.c | 21 +++++++++++++++++----
+ 1 file changed, 17 insertions(+), 4 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 987f3e23..07883540 100644
---- a/common/rc
-+++ b/common/rc
-@@ -3808,6 +3808,22 @@ get_max_file_size()
- 	echo $l
- }
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 2223fd7..41a0155 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -2356,8 +2356,11 @@ copyrange_f(
+ 	loff_t			lr;
+ 	loff_t			off1;
+ 	loff_t			off2;
++	loff_t			offset1;
++	loff_t			offset2;
+ 	loff_t			max_off2;
+ 	size_t			len;
++	size_t			length;
+ 	int			tries = 0;
+ 	int			v1;
+ 	int			v2;
+@@ -2446,6 +2449,14 @@ copyrange_f(
+ 		off2 %= maxfsize;
+ 	} while (stat1.st_ino == stat2.st_ino && llabs(off2 - off1) < len);
  
-+# get MAX_LFS_FILESIZE
-+get_max_lfs_filesize()
-+{
-+	case "$(getconf LONG_BIT)" in
-+	"32")
-+       echo $(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
-+	       ;;
-+	"64")
-+	       echo 9223372036854775807
-+	       ;;
-+	*)
-+	       _fail "sizeof(long) == $(getconf LONG_BIT)?"
-+	       ;;
-+	esac
-+}
++	/*
++	 * Since len, off1 and off2 will be changed later, preserve their
++	 * original values.
++	 */
++	length = len;
++	offset1 = off1;
++	offset2 = off2;
 +
- # The maximum filesystem label length, /not/ including terminating NULL
- _label_get_max()
- {
-diff --git a/tests/generic/349 b/tests/generic/349
-index f01f817d..45d0619b 100755
---- a/tests/generic/349
-+++ b/tests/generic/349
-@@ -50,17 +50,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+ 	while (len > 0) {
+ 		ret = syscall(__NR_copy_file_range, fd1, &off1, fd2, &off2,
+ 			      len, 0);
+@@ -2461,8 +2472,10 @@ copyrange_f(
+ 	if (v1 || v2) {
+ 		printf("%d/%d: copyrange %s%s [%lld,%lld] -> %s%s [%lld,%lld]",
+ 			procid, opno,
+-			fpath1.path, inoinfo1, (long long)off1, (long long)len,
+-			fpath2.path, inoinfo2, (long long)off2, (long long)len);
++			fpath1.path, inoinfo1,
++			(long long)offset1, (long long)length,
++			fpath2.path, inoinfo2,
++			(long long)offset2, (long long)length);
  
- echo "Zero range to MAX_LFS_FILESIZE"
- # zod = MAX_LFS_FILESIZE
--case "$(getconf LONG_BIT)" in
--"32")
--	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
--	;;
--"64")
--	zod=9223372036854775807
--	;;
--*)
--	_fail "sizeof(long) == $(getconf LONG_BIT)?"
--	;;
--esac
-+zod=$(get_max_lfs_filesize)
- $XFS_IO_PROG -c "fzero -k 0 $zod" $dev
+ 		if (ret < 0)
+ 			printf(" error %d", e);
+@@ -2869,8 +2882,8 @@ splice_f(int opno, long r)
+ 	off2 = (off64_t)(lr % MIN(stat2.st_size + (1024ULL * stat2.st_blksize), MAXFSIZE));
  
- echo "Check contents"
-diff --git a/tests/generic/350 b/tests/generic/350
-index 0aea4c09..a8f2939b 100755
---- a/tests/generic/350
-+++ b/tests/generic/350
-@@ -47,17 +47,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
- 
- echo "Punch to MAX_LFS_FILESIZE"
- # zod = MAX_LFS_FILESIZE
--case "$(getconf LONG_BIT)" in
--"32")
--	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
--	;;
--"64")
--	zod=9223372036854775807
--	;;
--*)
--	_fail "sizeof(long) == $(getconf LONG_BIT)?"
--	;;
--esac
-+zod=$(get_max_lfs_filesize)
- $XFS_IO_PROG -c "fpunch 0 $zod" $dev
- 
- echo "Check contents"
-diff --git a/tests/generic/351 b/tests/generic/351
-index e326dca1..c250bac4 100755
---- a/tests/generic/351
-+++ b/tests/generic/351
-@@ -62,17 +62,7 @@ $XFS_IO_PROG -c "fpunch 512 512" $dev
- 
- echo "Zero range past MAX_LFS_FILESIZE keep size"
- # zod = MAX_LFS_FILESIZE
--case "$(getconf LONG_BIT)" in
--"32")
--	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
--	;;
--"64")
--	zod=9223372036854775807
--	;;
--*)
--	_fail "sizeof(long) == $(getconf LONG_BIT)?"
--	;;
--esac
-+zod=$(get_max_lfs_filesize)
- $XFS_IO_PROG -c "fzero -k 512k $zod" $dev
- 
- echo "Zero range past MAX_LFS_FILESIZE"
+ 	/*
+-	 * Due to len, off1 and off2 will be changed later, so record the
+-	 * original number at here
++	 * Since len, off1 and off2 will be changed later, preserve their
++	 * original values.
+ 	 */
+ 	length = len;
+ 	offset1 = off1;
 -- 
-2.16.2.dirty
+2.1.4
