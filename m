@@ -1,85 +1,209 @@
-Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:52773 "EHLO
-        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726353AbfBZXWR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Feb 2019 18:22:17 -0500
-Date: Wed, 27 Feb 2019 10:22:12 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic: skip dm-log-writes tests on XFS v5 superblock
- filesystems
-Message-ID: <20190226232212.GD16436@dastard>
-References: <20190226181407.44612-1-bfoster@redhat.com>
- <CAOQ4uxg12SAKrSpX8_cdx4Cs56FVjdXiH5U1e8Y3yyCegNYDSw@mail.gmail.com>
+Received: from szxga06-in.huawei.com ([45.249.212.32]:33056 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726062AbfB0MqC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 27 Feb 2019 07:46:02 -0500
+Subject: Re: [PATCH] generic: test i_mode recovery after power failure
+References: <20190226070302.17756-1-yuchao0@huawei.com>
+ <CAL3q7H4Xn=ncGQcKKwNBpHBWAUPLt8T8T=RVpmvqA6h83r5tug@mail.gmail.com>
+From: Chao Yu <yuchao0@huawei.com>
+Message-ID: <aa506a05-35ad-c43f-50a0-461f7bc6d7d1@huawei.com>
+Date: Wed, 27 Feb 2019 20:45:56 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxg12SAKrSpX8_cdx4Cs56FVjdXiH5U1e8Y3yyCegNYDSw@mail.gmail.com>
+In-Reply-To: <CAL3q7H4Xn=ncGQcKKwNBpHBWAUPLt8T8T=RVpmvqA6h83r5tug@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Brian Foster <bfoster@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Qu Wenruo <wqu@suse.com>, Josef Bacik <josef@toxicpanda.com>
+To: fdmanana@gmail.com
+Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Feb 26, 2019 at 11:10:02PM +0200, Amir Goldstein wrote:
-> On Tue, Feb 26, 2019 at 8:14 PM Brian Foster <bfoster@redhat.com> wrote:
-> >
-> > The dm-log-writes mechanism runs a workload against a filesystem,
-> > tracks underlying FUAs and restores the filesystem to various points
-> > in time based on FUA marks. This allows fstests to check fs
-> > consistency at various points and verify log recovery works as
-> > expected.
-> >
+On 2019/2/26 19:02, Filipe Manana wrote:
+> On Tue, Feb 26, 2019 at 7:03 AM Chao Yu <yuchao0@huawei.com> wrote:
+>>
+>> After fsync, filesystem should guarantee inode metadata including
+>> permission info being persisted, so even after sudden power-cut,
+>> during mount, we should recover i_mode fields correctly, in order
+>> to not loss those meta info.
+>>
+>> So adding this testcase to check whether generic filesystem can
+>> guarantee that.
+>>
+>> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+>> ---
+>>  tests/generic/532     | 106 ++++++++++++++++++++++++++++++++++++++++++
+>>  tests/generic/532.out |   2 +
+>>  tests/generic/group   |   1 +
+>>  3 files changed, 109 insertions(+)
+>>  create mode 100755 tests/generic/532
+>>  create mode 100644 tests/generic/532.out
+>>
+>> diff --git a/tests/generic/532 b/tests/generic/532
+>> new file mode 100755
+>> index 000000000000..d89f7ab09fcf
+>> --- /dev/null
+>> +++ b/tests/generic/532
+>> @@ -0,0 +1,106 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2019 Huawei.  All Rights Reserved.
+>> +#
+>> +# FS QA Test 532
+>> +#
+>> +# This testcase is trying to test recovery flow of generic filesystem,
+>> +# w/ below steps, once i_mode changes, after we fsync that file, we can
+>> +# expect that i_mode can be recovered after sudden power-cuts.
+>> +# 1. touch testfile or mkdir testdir
+>> +# 2. chmod 777 testfile/testdir
+>> +# 3. sync
+>> +# 4. chmod 755 testfile/testdir
+>> +# 5. fsync testfile/testdir
+>> +# 6. record last i_mode
+>> +# 7. godown
+>> +# 8. umount
+>> +# 9. mount
+>> +# 10. check i_mode
+>> +#
+>> +seq=`basename $0`
+>> +seqres=$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=`pwd`
+>> +tmp=/tmp/$$
+>> +status=1       # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +       cd /
+>> +       rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +# remove previous $seqres.full before test
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +_supported_fs generic
+>> +_supported_os Linux
+>> +
+>> +_require_scratch
+>> +_require_scratch_shutdown
 > 
-> Inaccurate. generic/482 restores to FUA points.
-> generic/45[57] restore to user defined points in time (marks).
-> dm-log-writes mechanism is capable of restoring either.
+> Is the use of the shutdown functionality necessary to trigger the bug on f2fs?
+
+No.
+
+> If not, I'd rather have it use dmflakey so that the test is able to
+> run as well on filesystems that don't support shutdown (btrfs for
+> example).
+> It also feels more natural then relying on a specific feature such as shutdown.
+
+Agreed, let me try to use dmflakey to instead.
+
 > 
-> > This mechanism does not play well with LSN based log recovery
-> > ordering behavior on XFS v5 superblocks, however. For example,
-> > generic/482 can reproduce false positive corruptions based on extent
-> > to btree conversion of an inode if the inode and associated btree
-> > block are written back after different checkpoints. Even though both
-> > items are logged correctly in the extent-to-btree transaction, the
-> > btree block can be relogged (multiple times) and only written back
-> > once when the filesystem unmounts. If the inode was written back
-> > after the initial conversion, recovery points between that mark and
-> > when the btree block is ultimately written back will show corruption
-> > because log recovery sees that the destination buffer is newer than
-> > the recovered buffer and intentionally skips the buffer. This is a
-> > false positive because the destination buffer was resiliently
-> > written back after being physically relogged one or more times.
-> >
+>> +
+>> +_scratch_mkfs >/dev/null 2>&1
+>> +_require_metadata_journaling $SCRATCH_DEV
+>> +
+>> +testfile=$SCRATCH_MNT/testfile
+>> +testdir=$SCRATCH_MNT/testdir
+>> +
+>> +do_check()
+>> +{
+>> +       target=$1
+>> +       is_dir=$2
 > 
-> This story doesn't add up.
-> Either dm-log-writes emulated power failure correctly or it doesn't.
-> My understanding is that the issue you are seeing is a result of
-> XFS seeing "data from the future" after a restore of a power failure
-> snapshot, because the scratch device is not a clean slate.
-> If I am right, then the correct solution is to wipe the journal before
-> starting to replay restore points.
-
-If that is the problem, then I think we should be wiping the entire
-block device before replaying the recorded logwrite.
-
-i.e. this sounds like a "block device we are replaying onto has
-stale data in it" problem because we are replaying the same
-filesystem over the top of itself.  Hence there are no unique
-identifiers in the metadata that can detect stale metadata in
-the block device.
-
-I'm surprised that we haven't tripped over this much earlier that
-this...
-
-> > Update the dm-log-writes require checks to enforce v4 superblocks
-> > when running against XFS and skip the test otherwise.
+> Both should be declared as local.
 > 
-> You might as well disable dm-log-writes test for XFS completely.
-> Who cares about v4 superblocks these days?
+>> +
+>> +       _scratch_mount
+>> +
+>> +       if [ $is_dir = 1 ]; then
+>> +               mkdir $target
+>> +       else
+>> +               touch $target
+>> +       fi
+>> +
+>> +       echo "Test chmod $target" >> $seqres.full
+>> +
+>> +       chmod 777 $target
+>> +       sync
+>> +
+>> +       chmod 755 $target
+>> +       $XFS_IO_PROG $target -c "fsync" | _filter_xfs_io
+> 
+> No need to use the filter here.
+> 
+>> +
+>> +       before=`stat -c %a $target`
+> 
+> Should be local as well.
+> 
+>> +
+>> +       _scratch_shutdown | tee -a $seqres.full
+>> +       _scratch_cycle_mount
+>> +
+>> +       after=`stat -c %a $target`
+> 
+> Local as well.
+> 
+>> +
+>> +       # check inode's i_mode
+>> +       if [ "$before" != "$after" ]; then
+>> +               echo "Before: $before"
+>> +               echo "After : $after"
+>> +       fi
+>> +       echo "Before: $before" >> $seqres.full
+>> +       echo "After : $after" >> $seqres.full
+> 
+> Seems pointless to dump the values to $seqres.full in case of success.
 
-Enough of the inflammatory hyperbole, Amir. Statements like this
-serve no useful purpose.
+Will fix them all.
 
-Cheers,
+Thanks,
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+> 
+> Thanks.
+> 
+>> +
+>> +       if [ $is_dir = 1 ]; then
+>> +               rmdir $target
+>> +       else
+>> +               rm -f $target
+>> +       fi
+>> +       _scratch_unmount
+>> +}
+>> +
+>> +echo "Silence is golden"
+>> +
+>> +do_check $testfile 0
+>> +do_check $testdir 1
+>> +
+>> +status=0
+>> +exit
+>> diff --git a/tests/generic/532.out b/tests/generic/532.out
+>> new file mode 100644
+>> index 000000000000..1f7d4677c3be
+>> --- /dev/null
+>> +++ b/tests/generic/532.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 532
+>> +Silence is golden
+>> diff --git a/tests/generic/group b/tests/generic/group
+>> index 31011ac872c2..2fc50fbbfb5c 100644
+>> --- a/tests/generic/group
+>> +++ b/tests/generic/group
+>> @@ -534,3 +534,4 @@
+>>  529 auto quick attr
+>>  530 auto quick unlink
+>>  531 auto quick unlink
+>> +532 shutdown auto quick metadata
+>> --
+>> 2.18.0.rc1
+>>
+> 
+> 
