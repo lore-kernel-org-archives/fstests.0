@@ -1,80 +1,188 @@
-Received: from mail-yw1-f68.google.com ([209.85.161.68]:43628 "EHLO
-        mail-yw1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727187AbfB0F7B (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Feb 2019 00:59:01 -0500
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:16928 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1729592AbfB0GPh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Feb 2019 01:15:37 -0500
+Date: Wed, 27 Feb 2019 17:15:29 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH] generic: skip dm-log-writes tests on XFS v5 superblock
+ filesystems
+Message-ID: <20190227061529.GF16436@dastard>
+References: <20190226181407.44612-1-bfoster@redhat.com>
+ <CAOQ4uxg12SAKrSpX8_cdx4Cs56FVjdXiH5U1e8Y3yyCegNYDSw@mail.gmail.com>
+ <20190226232212.GD16436@dastard>
+ <CAOQ4uxgueAtF5o+Zjd+N0_h7784veL2FNd7-aB+33HWEN07gHg@mail.gmail.com>
+ <ed870e00-1931-d7b1-a3ed-8a184889f6fc@gmx.com>
+ <CAOQ4uxhNdzbSiPREmMtv5_81=7bxCRbTaa_KUN00g7De_j6a4Q@mail.gmail.com>
 MIME-Version: 1.0
-References: <20190226181407.44612-1-bfoster@redhat.com> <CAOQ4uxg12SAKrSpX8_cdx4Cs56FVjdXiH5U1e8Y3yyCegNYDSw@mail.gmail.com>
- <20190226232212.GD16436@dastard> <CAOQ4uxgueAtF5o+Zjd+N0_h7784veL2FNd7-aB+33HWEN07gHg@mail.gmail.com>
- <ed870e00-1931-d7b1-a3ed-8a184889f6fc@gmx.com> <CAOQ4uxhNdzbSiPREmMtv5_81=7bxCRbTaa_KUN00g7De_j6a4Q@mail.gmail.com>
- <1f5c2280-f4db-2c13-bf2b-f4dc4111613a@suse.de> <CAOQ4uxihcTPhJnNKc3siZs3a9iwRnqG1fiXa64_Rgo5rd-hM=Q@mail.gmail.com>
- <7aa13461-0f5f-af48-b3d1-48d03108da09@suse.de>
-In-Reply-To: <7aa13461-0f5f-af48-b3d1-48d03108da09@suse.de>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 27 Feb 2019 07:58:48 +0200
-Message-ID: <CAOQ4uxjRRtS+sAB8mywdFepWGGZD67JKES3NMoLvbeEQsGJUSg@mail.gmail.com>
-Subject: Re: [PATCH] generic: skip dm-log-writes tests on XFS v5 superblock filesystems
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhNdzbSiPREmMtv5_81=7bxCRbTaa_KUN00g7De_j6a4Q@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.de>
-Cc: Qu Wenruo <quwenruo.btrfs@gmx.com>, Dave Chinner <david@fromorbit.com>, Brian Foster <bfoster@redhat.com>, Josef Bacik <josef@toxicpanda.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Qu Wenruo <quwenruo.btrfs@gmx.com>, Brian Foster <bfoster@redhat.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>, Qu Wenruo <wqu@suse.com>, Josef Bacik <josef@toxicpanda.com>
 List-ID: <fstests@vger.kernel.org>
 
-> >> It seems that metadata CoW makes it impossible to see future data.
-> >>
-> >> All btree trees get updated CoW, so no metadata will be overwritten
-> >> during one transaction.
-> >> Only super block is overwritten and normally superblock is updated
-> >> atomically.
-> >>
-> >> So either old superblock is still here, all we can see is old tree pointers.
-> >> Or new superblock is here, all we can see is new tree pointers.
-> >> And new metadata will never be written into old metadata, there is no
-> >> way to see future metadata.
-> >>
+On Wed, Feb 27, 2019 at 06:49:56AM +0200, Amir Goldstein wrote:
+> On Wed, Feb 27, 2019 at 6:19 AM Qu Wenruo <quwenruo.btrfs@gmx.com> wrot=
+e:
 > >
-> > Those assumptions could fail if you have unreliable hardware that
-> > reorders IO across FUA, just drops IO on the floor or a bug in the filesystem
-> > or block layer.
->
-> Well, if hardware has problem, we can't really do anything to help.
->
-> Maybe that's reason why there are more corruption report for btrfs as
-> there are more problematic hardware than we thought?
->
-
-I think we are not understanding each other.
-
-dm-log-writes and xfstests are not expected to test unreliable hardware.
-filesystems are not expected to work properly on unreliable hardware,
-but they do have sanity checks to try and detect metadata corruptions that
-could be a result of unreliable hardware/storage stack and put up a big
-red sign.
-
-If we don't wipe block device before log-writes replay, filesystem trips
-over those sanity checks, because replay to time N-1 without wipe of
-writes from time N looks awfully similar to flaky hardware/storage stack.
-
 > >
-> > Existence of metadata from the future could look like any of
-> > the above has happened.
->
-> Btrfs has an extra layer to prevent such problem from happening, each
-> metadata pointer has its expected generation.
->
-> If one metadata has a mismatch generation with its parent, then kernel
-> will know something went wrong.
->
-> And in fact, that's the most common failure mode for btrfs (although
-> most of them is seeing too old metadata), and we're looking into the
-> problem (but not much progress yet).
->
+> >
+> > On 2019/2/27 =E4=B8=8B=E5=8D=8812:06, Amir Goldstein wrote:
+> > > On Wed, Feb 27, 2019 at 1:22 AM Dave Chinner <david@fromorbit.com> =
+wrote:
+> > >>
+> > >> On Tue, Feb 26, 2019 at 11:10:02PM +0200, Amir Goldstein wrote:
+> > >>> On Tue, Feb 26, 2019 at 8:14 PM Brian Foster <bfoster@redhat.com>=
+ wrote:
+> > >>>>
+> > >>>> The dm-log-writes mechanism runs a workload against a filesystem=
+,
+> > >>>> tracks underlying FUAs and restores the filesystem to various po=
+ints
+> > >>>> in time based on FUA marks. This allows fstests to check fs
+> > >>>> consistency at various points and verify log recovery works as
+> > >>>> expected.
+> > >>>>
+> > >>>
+> > >>> Inaccurate. generic/482 restores to FUA points.
+> > >>> generic/45[57] restore to user defined points in time (marks).
+> > >>> dm-log-writes mechanism is capable of restoring either.
+> > >>>
+> > >>>> This mechanism does not play well with LSN based log recovery
+> > >>>> ordering behavior on XFS v5 superblocks, however. For example,
+> > >>>> generic/482 can reproduce false positive corruptions based on ex=
+tent
+> > >>>> to btree conversion of an inode if the inode and associated btre=
+e
+> > >>>> block are written back after different checkpoints. Even though =
+both
+> > >>>> items are logged correctly in the extent-to-btree transaction, t=
+he
+> > >>>> btree block can be relogged (multiple times) and only written ba=
+ck
+> > >>>> once when the filesystem unmounts. If the inode was written back
+> > >>>> after the initial conversion, recovery points between that mark =
+and
+> > >>>> when the btree block is ultimately written back will show corrup=
+tion
+> > >>>> because log recovery sees that the destination buffer is newer t=
+han
+> > >>>> the recovered buffer and intentionally skips the buffer. This is=
+ a
+> > >>>> false positive because the destination buffer was resiliently
+> > >>>> written back after being physically relogged one or more times.
+> > >>>>
+> > >>>
+> > >>> This story doesn't add up.
+> > >>> Either dm-log-writes emulated power failure correctly or it doesn=
+'t.
+> > >>> My understanding is that the issue you are seeing is a result of
+> > >>> XFS seeing "data from the future" after a restore of a power fail=
+ure
+> > >>> snapshot, because the scratch device is not a clean slate.
+> > >>> If I am right, then the correct solution is to wipe the journal b=
+efore
+> > >>> starting to replay restore points.
+> > >>
+> > >> If that is the problem, then I think we should be wiping the entir=
+e
+> > >> block device before replaying the recorded logwrite.
+> > >>
+> > >
+> > > Indeed.
+> >
+> > May I ask a stupid question?
+> >
+> > How does it matter whether the device is clean or not?
+> > Shouldn't the journal/metadata or whatever be self-contained?
+> >
+>=20
+> Yes and no.
+>=20
+> The most simple example (not limited to xfs and not sure it is like tha=
+t in xfs)
+> is how you find the last valid journal commit entry. It should have cor=
+rect CRC
+> and the largest LSN. But it you replay IO on top of existing journal wi=
+thout
+> wiping it first, then journal recovery will continue past the point to =
+meant to
+> replay or worse.
 
-Yes, and that is exactly the reason why dm-log-writes has the potential
-to generate false positive sanity check failures. Granted, I do not know
-the inner works of btrfs CoW to point out a specific problematic use case.
+No, that's not the problem we have with XFS. THe problem is that XFS
+will not recover the changes in the log if the object on disk it
+would recover into is more recent than the information found in the
+log. i.e. it's already been written back and so the journal entry
+does not need to be replayed.
 
-Anyway, we do need to wipe block device before log replay regardless
-if btrfs needs it or not.
+IOWs, if the block device is not wiped, the first read of a piece
+of a newly allocated and modified metadata object in the log will
+see the future state of the object, not whatever was there when the
+block was first allocated.
 
-Thanks,
-Amir.
+i.e.
+			in memory	in journal	on disk
+initial contents	0000		n/a		0000
+allocate,		0001		n/a		0000
+modify, checkpoint 1	0002		0002		0000
+modify, checkpoint 2	0003		0003		0000
+modify, checkpoint 3	0004		0004		0000
+write back		0004		0004		0004
+checkpoint 4		0004		n/a		0004
+
+Now when we replay up to checkpoint 1, log recovery will read the
+object from disk. If the disk has been zeroed before we replay, the
+read in log recovery will see 0000 and replay 0002 over the top,
+and all will be good. However, if the device hasn;t been zeroed,
+recovery will read "0004", which is more recent than 0002, and it
+will not replay 0002 because it knows there are future changes to
+that object in the journal that will be replayed.
+
+IOWs, stale metadata (from the future) prevents log recovery from
+replaying the objects it should be replaying.
+
+> The problem that Brian describes is more complicated than that and not
+> limited to the data in the journal IIUC, but I think what I described a=
+bove
+> may plague also ext4 and xfs v4.
+
+It will affect xfs v4, but we can't detect it at all because we
+don't have sequence numbers in the metadata. ext4 is in the same
+boat as xfs v4, while btrfs is like XFS v5 with transaction
+identifiers in the metadata to indicate when it was written...
+
+> > This "discard everything" assumption doesn't look right to me.
+> > Although most mkfs would discard at least part of the device, even
+> > without discarding the newly created fs should be self-contained, no
+> > wild pointer points to some garbage.
+
+If the block device is in an uninitialised state when we start,
+then all bets are off - it is not a "self contained" test because
+the initial state is completely unknown. We need to zero so that the
+initial state for both creation and each replay that occurs start
+from the same initial conditions.
+
+> > Am I missing something? Or do I get too poisoned by btrfs CoW?
+>=20
+> I'd be very surprised if btrfs cannot be flipped by seeing stale data "=
+from
+> the future" in the block device. Seems to me like the entire concept of
+> CoW and metadata checksums is completely subverted by the existence
+> of correct checksums on "stale metadata from the future".
+
+No, this is a journal recovery issue - recovery is a
+read-modify-write operation and so if the contents that are read are
+stale in a specific way we can be exposed to problems like this.
+btrfs is not a journalling filesystem, so it shouldn't be doing RMW
+cycles on metadata to bring it into a consistent state during
+recovery - it should be doing atomic updates of the tree root to
+switch from one consistent state on disk to the next....
+
+Cheers,
+
+Dave.
+--=20
+Dave Chinner
+david@fromorbit.com
