@@ -1,115 +1,98 @@
-Received: from mail-yw1-f54.google.com ([209.85.161.54]:39711 "EHLO
-        mail-yw1-f54.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726717AbfB1QrT (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Feb 2019 11:47:19 -0500
-Received: by mail-yw1-f54.google.com with SMTP id z191so10968319ywa.6
-        for <fstests@vger.kernel.org>; Thu, 28 Feb 2019 08:47:18 -0800 (PST)
+Received: from userp2120.oracle.com ([156.151.31.85]:55772 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727864AbfB1X3K (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 28 Feb 2019 18:29:10 -0500
+Date: Thu, 28 Feb 2019 15:29:01 -0800
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: sporadic shared/298 failures?
+Message-ID: <20190228232901.GC6471@magnolia>
 MIME-Version: 1.0
-References: <20190228144128.55583-1-bfoster@redhat.com> <20190228144128.55583-3-bfoster@redhat.com>
-In-Reply-To: <20190228144128.55583-3-bfoster@redhat.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 28 Feb 2019 18:47:07 +0200
-Message-ID: <CAOQ4uxjz-orP1+aX2R8aKdZfj8xsu+Ad5BWnaVaBCmipR5nhWw@mail.gmail.com>
-Subject: Re: [PATCH 2/2] generic/482: use thin volume as data device
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
+To: Eric Whitney <enwlinux@gmail.com>
+Cc: linux-ext4@vger.kernel.org, tytso@mit.edu, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Feb 28, 2019 at 4:41 PM Brian Foster <bfoster@redhat.com> wrote:
->
-> The dm-log-writes replay mechanism issues discards to provide
-> zeroing functionality to prevent out-of-order replay issues. These
-> discards don't always result in zeroing bevavior, however, depending
-> on the underlying physical device. In turn, this causes test
-> failures on XFS v5 filesystems that enforce metadata log recovery
-> ordering if the filesystem ends up with stale data from the future
-> with respect to the active log at a particular recovery point.
->
-> To ensure reliable discard zeroing behavior, use a thinly
-> provisioned volume as the data device instead of using the scratch
-> device directly. This slows the test down slightly, but provides
-> reliable functional behavior at a reduced cost from active snapshot
-> management or forced zeroing.
->
-> Signed-off-by: Brian Foster <bfoster@redhat.com>
+Hi Eric,
 
-Looks ok. Apart from minor nit below
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+On this morning's ext4 concall you mentioned that you saw sporadic
+failures in shared/298, and I mentioned that I'd seen similar symptoms
+on xfs.  I had a look at 298 and discovered that it probes the file
+image for holes while the filesystem is loop-mounted!  Yikes!  I don't
+remember the exact circumstances of your testing (I think you said it
+was related to bigalloc?) but this reproduces on XFS with blocksize = 1k
+every time.
 
+Does the following patch fix your sporadic failures?
 
-> ---
->  tests/generic/482 | 20 ++++++++++++++------
->  1 file changed, 14 insertions(+), 6 deletions(-)
->
-> diff --git a/tests/generic/482 b/tests/generic/482
-> index 3c2199d7..3b93a7fc 100755
-> --- a/tests/generic/482
-> +++ b/tests/generic/482
-> @@ -22,12 +22,14 @@ _cleanup()
->         cd /
->         $KILLALL_PROG -KILL -q $FSSTRESS_PROG &> /dev/null
->         _log_writes_cleanup &> /dev/null
-> +       _dmthin_cleanup
->         rm -f $tmp.*
->  }
->
->  # get standard environment, filters and checks
->  . ./common/rc
->  . ./common/filter
-> +. ./common/dmthin
->  . ./common/dmlogwrites
->
->  # remove previous $seqres.full before test
-> @@ -44,6 +46,7 @@ _require_command "$KILLALL_PROG" killall
->  _require_scratch
-_require_scratch_nocheck
+(This isn't the last word on this test -- both ext4 and XFS now /do/
+support live queries of the freep space map, so we're probably going
+to want a similar test that doesn't clunkily unmount the fs so much.)
 
->  # and we need extra device as log device
->  _require_log_writes
-> +_require_dm_target thin-pool
->
->
->  nr_cpus=$("$here/src/feature" -o)
-> @@ -53,9 +56,15 @@ if [ $nr_cpus -gt 8 ]; then
->  fi
->  fsstress_args=$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 512 -p $nr_cpus \
->                 $FSSTRESS_AVOID)
-> +devsize=$((1024*1024*200 / 512))       # 200m phys/virt size
-> +csize=$((1024*64 / 512))               # 64k cluster size
-> +lowspace=$((1024*1024 / 512))          # 1m low space threshold
->
-> +# Use a thin device to provide deterministic discard behavior. Discards are used
-> +# by the log replay tool for fast zeroing to prevent out-of-order replay issues.
->  _test_unmount
-> -_log_writes_init $SCRATCH_DEV
-> +_dmthin_init $devsize $devsize $csize $lowspace
-> +_log_writes_init $DMTHIN_VOL_DEV
->  _log_writes_mkfs >> $seqres.full 2>&1
->  _log_writes_mark mkfs
->
-> @@ -70,16 +79,15 @@ cur=$(_log_writes_find_next_fua $prev)
->  [ -z "$cur" ] && _fail "failed to locate next FUA write"
->
->  while [ ! -z "$cur" ]; do
-> -       _log_writes_replay_log_range $cur $SCRATCH_DEV >> $seqres.full
-> +       _log_writes_replay_log_range $cur $DMTHIN_VOL_DEV >> $seqres.full
->
->         # Here we need extra mount to replay the log, mainly for journal based
->         # fs, as their fsck will report dirty log as error.
-> -       # We don't care to preserve any data on $SCRATCH_DEV, as we can replay
-> +       # We don't care to preserve any data on the replay dev, as we can replay
->         # back to the point we need, and in fact sometimes creating/deleting
->         # snapshots repeatedly can be slower than replaying the log.
-> -       _scratch_mount
-> -       _scratch_unmount
-> -       _check_scratch_fs
-> +       _dmthin_mount
-> +       _dmthin_check_fs
->
->         prev=$cur
->         cur=$(_log_writes_find_next_fua $(($cur + 1)))
-> --
-> 2.17.2
->
+I'll send this patch out with proper subject line and whatnot next week
+after I give it more thorough testing on xfs.
+
+--D
+
+This test does some weird things with live filesystems -- it seems to be
+validating the behavior of fstrim by comparing the filesystem's free
+space map to holes in the file image that backs the filesystem.
+However, this doesn't account for the fact that some filesystems
+maintain in-core preallocations and/or can perturb the free space data
+during unmount.  This causes sporadic test failures when the two become
+out of sync.
+
+Therefore, make sure we unmount the filesystem before we start running
+tools against the filesystem image file to eliminate the possibility of
+changes to the free space map.  This was found by running shared/298 on
+xfs with a 1k block size.
+
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/shared/298 |   18 ++++++++++++++++++
+ 1 file changed, 18 insertions(+)
+
+diff --git a/tests/shared/298 b/tests/shared/298
+index aafdc25f..5d6c6ccf 100755
+--- a/tests/shared/298
++++ b/tests/shared/298
+@@ -46,13 +46,21 @@ _cleanup()
+ 
+ get_holes()
+ {
++	# It's not a good idea to be running tools against the image file
++	# backing a live filesystem because the filesystem could be maintaining
++	# in-core state that will perturb the free space map on umount.  Stick
++	# to established convention which requires the filesystem to be
++	# unmounted while we probe the underlying file.
++	$UMOUNT_PROG $loop_mnt
+ 	$XFS_IO_PROG -F -c fiemap $1 | grep hole | $SED_PROG 's/.*\[\(.*\)\.\.\(.*\)\].*/\1 \2/'
++	_mount $loop_dev $loop_mnt
+ }
+ 
+ get_free_sectors()
+ {
+ 	case $FSTYP in
+ 	ext4)
++	$UMOUNT_PROG $loop_mnt
+ 	$DUMPE2FS_PROG $img_file  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
+ 		tr ',' '\n' | $SED_PROG 's/^ //' | \
+ 		$AWK_PROG -v spb=$sectors_per_block 'BEGIN{FS="-"};
+@@ -195,6 +203,16 @@ while read line; do
+ 		END { if(found) exit 0; else exit 1}' $merged_sectors
+ 	then
+ 		echo "Sectors $from-$to are not marked as free!"
++
++		# Dump the state to make it easier to debug this...
++		echo free_sectors >> $seqres.full
++		sort -g < $free_sectors >> $seqres.full
++		echo fiemap_ref >> $seqres.full
++		sort -g < $fiemap_ref >> $seqres.full
++		echo merged_sectors >> $seqres.full
++		sort -g < $merged_sectors >> $seqres.full
++		echo fiemap_after >> $seqres.full
++		sort -g < $fiemap_after >> $seqres.full
+ 		exit
+ 	fi
+ done < $fiemap_after
