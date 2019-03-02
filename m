@@ -1,152 +1,144 @@
-Received: from mail.kernel.org ([198.145.29.99]:43444 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726098AbfCDPXi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Mar 2019 10:23:38 -0500
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:33414 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725902AbfCBJXu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 2 Mar 2019 04:23:50 -0500
+Received: by mail-pg1-f196.google.com with SMTP id h11so186537pgl.0
+        for <fstests@vger.kernel.org>; Sat, 02 Mar 2019 01:23:50 -0800 (PST)
+Date: Sat, 2 Mar 2019 17:23:41 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2 2/2] common/rc: add get_max_lfs_filesize to return
+ MAX_LFS_FILESIZE
+Message-ID: <20190302092341.GB2824@desktop>
+References: <20190226141154.142271-1-yuyufen@huawei.com>
+ <20190226141154.142271-3-yuyufen@huawei.com>
 MIME-Version: 1.0
-References: <20190304140622.23997-1-fdmanana@kernel.org> <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
-In-Reply-To: <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Mon, 4 Mar 2019 15:23:25 +0000
-Message-ID: <CAL3q7H6ceptNOyf65jbzojbZV5Nq3d0iKvYOvvE=pLaVnpgO2w@mail.gmail.com>
-Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and rename
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190226141154.142271-3-yuyufen@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Yufen Yu <yuyufen@huawei.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 4, 2019 at 3:04 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> On Mon, Mar 4, 2019 at 4:44 PM <fdmanana@kernel.org> wrote:
-> >
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that if we truncate a file to reduce its size, rename it and then
-> > fsync it, after a power failure the file has a correct size and name.
-> >
->
-> I am not sure that ext4/xfs semantics guaranty anything about
-> persisting file name after fsync of file?...
->
-> > This test is motivated by a bug found in btrfs, which is fixed by a
-> > patch for the linux kernel titled:
-> >
-> >   "Btrfs: fix incorrect file size after shrinking truncate and fsync"
->
-> At least the title of this patch says nothing about persisting the
-> name.
+On Tue, Feb 26, 2019 at 10:11:54PM +0800, Yufen Yu wrote:
+> Pick up the common function get_max_lfs_filesize() to return
+> MAX_LFS_FILESIZE.
+> 
+> Signed-off-by: Yufen Yu <yuyufen@huawei.com>
+> ---
+>  common/rc         | 16 ++++++++++++++++
+>  tests/generic/349 | 12 +-----------
+>  tests/generic/350 | 12 +-----------
+>  tests/generic/351 | 12 +-----------
+>  4 files changed, 19 insertions(+), 33 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 987f3e23..07883540 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3808,6 +3808,22 @@ get_max_file_size()
+>  	echo $l
+>  }
+>  
+> +# get MAX_LFS_FILESIZE
+> +get_max_lfs_filesize()
+> +{
+> +	case "$(getconf LONG_BIT)" in
+> +	"32")
+> +       echo $(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
 
-Because the bug in btrfs is not about persisting the name, it's about
-persisting the correct inode size.
+Indenion problem here.
 
->
-> >
-> > This test currently passes on ext4, xfs, f2fs and patched btrfs.
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >  tests/generic/532     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/532.out |  8 +++++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 75 insertions(+)
-> >  create mode 100755 tests/generic/532
-> >  create mode 100644 tests/generic/532.out
-> >
-> > diff --git a/tests/generic/532 b/tests/generic/532
-> > new file mode 100755
-> > index 00000000..64992d85
-> > --- /dev/null
-> > +++ b/tests/generic/532
-> > @@ -0,0 +1,66 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 532
-> > +#
-> > +# Test that if we truncate a file to reduce its size, rename it and then fsync
-> > +# it, after a power failure the file has a correct size and name.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       _cleanup_flakey
-> > +       cd /
-> > +       rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/dmflakey
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_dm_target flakey
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs >>$seqres.full 2>&1
-> > +_require_metadata_journaling $SCRATCH_DEV
-> > +_init_flakey
-> > +_mount_flakey
-> > +
-> > +# Create our test file with an initial size of 8000 bytes, then fsync it,
-> > +# followed by a truncate that reduces its size down to 3000 bytes.
-> > +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 8000" \
-> > +            -c "fsync" \
-> > +            -c "truncate 3000" \
-> > +            $SCRATCH_MNT/foo | _filter_xfs_io
-> > +
-> > +# Now rename the file and fsync it again.
-> > +mv $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-> > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
-> > +
-> > +# Simulate a power failure and mount the filesystem to check that the file was
-> > +# persisted with the new name and has a size of 3000 bytes.
-> > +_flakey_drop_and_remount
-> > +
-> > +[ -f $SCRATCH_MNT/bar ] || echo "file name 'bar' is missing"
-> > +[ -f $SCRATCH_MNT/foo ] && echo "file name 'foo' still exists"
-> > +
-> > +echo "File content after power failure:"
-> > +od -A d -t x1 $SCRATCH_MNT/bar
-> > +
-> > +_unmount_flakey
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/532.out b/tests/generic/532.out
-> > new file mode 100644
-> > index 00000000..554fbe2a
-> > --- /dev/null
-> > +++ b/tests/generic/532.out
-> > @@ -0,0 +1,8 @@
-> > +QA output created by 532
-> > +wrote 8000/8000 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +File content after power failure:
-> > +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> > +*
-> > +0002992 ab ab ab ab ab ab ab ab
-> > +0003000
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 31011ac8..7d63f303 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -534,3 +534,4 @@
-> >  529 auto quick attr
-> >  530 auto quick unlink
-> >  531 auto quick unlink
-> > +532 auto quick log
-> > --
-> > 2.11.0
-> >
+> +	       ;;
+> +	"64")
+> +	       echo 9223372036854775807
+
+Mixing space and tab as indentions.
+
+I'll fix them on commit.
+
+Thanks,
+Eryu
+
+> +	       ;;
+> +	*)
+> +	       _fail "sizeof(long) == $(getconf LONG_BIT)?"
+> +	       ;;
+> +	esac
+> +}
+> +
+>  # The maximum filesystem label length, /not/ including terminating NULL
+>  _label_get_max()
+>  {
+> diff --git a/tests/generic/349 b/tests/generic/349
+> index f01f817d..45d0619b 100755
+> --- a/tests/generic/349
+> +++ b/tests/generic/349
+> @@ -50,17 +50,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+>  
+>  echo "Zero range to MAX_LFS_FILESIZE"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> -"32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> -	;;
+> -"64")
+> -	zod=9223372036854775807
+> -	;;
+> -*)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> -	;;
+> -esac
+> +zod=$(get_max_lfs_filesize)
+>  $XFS_IO_PROG -c "fzero -k 0 $zod" $dev
+>  
+>  echo "Check contents"
+> diff --git a/tests/generic/350 b/tests/generic/350
+> index 0aea4c09..a8f2939b 100755
+> --- a/tests/generic/350
+> +++ b/tests/generic/350
+> @@ -47,17 +47,7 @@ md5sum $dev | sed -e "s|$dev|SCSI_DEBUG_DEV|g"
+>  
+>  echo "Punch to MAX_LFS_FILESIZE"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> -"32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> -	;;
+> -"64")
+> -	zod=9223372036854775807
+> -	;;
+> -*)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> -	;;
+> -esac
+> +zod=$(get_max_lfs_filesize)
+>  $XFS_IO_PROG -c "fpunch 0 $zod" $dev
+>  
+>  echo "Check contents"
+> diff --git a/tests/generic/351 b/tests/generic/351
+> index e326dca1..c250bac4 100755
+> --- a/tests/generic/351
+> +++ b/tests/generic/351
+> @@ -62,17 +62,7 @@ $XFS_IO_PROG -c "fpunch 512 512" $dev
+>  
+>  echo "Zero range past MAX_LFS_FILESIZE keep size"
+>  # zod = MAX_LFS_FILESIZE
+> -case "$(getconf LONG_BIT)" in
+> -"32")
+> -	zod=$(( ($(getconf PAGE_SIZE) << ($(getconf LONG_BIT) - 1) ) - 1))
+> -	;;
+> -"64")
+> -	zod=9223372036854775807
+> -	;;
+> -*)
+> -	_fail "sizeof(long) == $(getconf LONG_BIT)?"
+> -	;;
+> -esac
+> +zod=$(get_max_lfs_filesize)
+>  $XFS_IO_PROG -c "fzero -k 512k $zod" $dev
+>  
+>  echo "Zero range past MAX_LFS_FILESIZE"
+> -- 
+> 2.16.2.dirty
+> 
