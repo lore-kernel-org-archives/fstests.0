@@ -1,210 +1,111 @@
-Received: from mail-wr1-f68.google.com ([209.85.221.68]:34637 "EHLO
-        mail-wr1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726220AbfCCPJu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 3 Mar 2019 10:09:50 -0500
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v2 2/2] generic: Test that SEEK_HOLE can find a punched hole
-Date: Sun,  3 Mar 2019 17:09:40 +0200
-Message-Id: <20190303150940.12734-2-amir73il@gmail.com>
-In-Reply-To: <20190303150940.12734-1-amir73il@gmail.com>
-References: <20190303150940.12734-1-amir73il@gmail.com>
+Received: from mail-pg1-f173.google.com ([209.85.215.173]:38889 "EHLO
+        mail-pg1-f173.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726411AbfCCQMq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Mar 2019 11:12:46 -0500
+Received: by mail-pg1-f173.google.com with SMTP id m2so1313709pgl.5
+        for <fstests@vger.kernel.org>; Sun, 03 Mar 2019 08:12:45 -0800 (PST)
+Message-ID: <5c7bfcfb.1c69fb81.93452.f989@mx.google.com>
+Date: Mon, 04 Mar 2019 00:12:37 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 87a53d2e7c82
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="kybsfciJ2ATW"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Added a test case to seek_sanity_test and a test to run it.
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
+--kybsfciJ2ATW
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Changes since v1:
-- Punch hole requirement independent of SEEK_HOLE behavior.
+Hi all,
 
- src/seek_sanity_test.c | 58 +++++++++++++++++++++++++++++++++++++++---
- tests/generic/999      | 44 ++++++++++++++++++++++++++++++++
- tests/generic/999.out  |  1 +
- tests/generic/group    |  1 +
- 4 files changed, 100 insertions(+), 4 deletions(-)
- create mode 100755 tests/generic/999
- create mode 100644 tests/generic/999.out
+The master branch of the xfstests repository at:
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index 1eefc74d..7da4448f 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -16,6 +16,7 @@
- #include <unistd.h>
- #include <stdlib.h>
- #include <assert.h>
-+#include "global.h"
- 
- #ifndef SEEK_DATA
- #define SEEK_DATA      3
-@@ -26,6 +27,7 @@ static blksize_t alloc_size;
- int allow_default_behavior = 1;
- int default_behavior = 0;
- int unwritten_extents = 0;
-+int punch_hole = 0;
- char *base_file_path;
- 
- static void get_file_system(int fd)
-@@ -118,8 +120,9 @@ static int do_fallocate(int fd, off_t offset, off_t length, int mode)
- 
- 	ret = fallocate(fd, mode, offset, length);
- 	if (ret)
--		fprintf(stderr, "  ERROR %d: Failed to preallocate "
--			"space to %ld bytes\n", errno, (long) length);
-+		fprintf(stderr, "  ERROR %d: Failed to %s of %ld bytes\n",
-+			errno, (mode & FALLOC_FL_PUNCH_HOLE) ? "punch hole" :
-+			"preallocate space", (long) length);
- 
- 	return ret;
- }
-@@ -262,6 +265,47 @@ out:
- 	return ret;
- }
- 
-+/*
-+ * Make sure hole size is properly reported when punched in the middle of a file
-+ */
-+static int test21(int fd, int testnum)
-+{
-+	char *buf = NULL;
-+	int bufsz, filsz;
-+	int ret = 0;
-+
-+	if (!punch_hole) {
-+		fprintf(stdout, "Test skipped as fs doesn't support punch hole.\n");
-+		goto out;
-+	}
-+
-+	bufsz = alloc_size * 3;
-+	buf = do_malloc(bufsz);
-+	if (!buf) {
-+		ret = -1;
-+		goto out;
-+	}
-+	memset(buf, 'a', bufsz);
-+
-+	ret = do_pwrite(fd, buf, bufsz, 0);
-+	if (ret)
-+		goto out;
-+
-+	filsz = bufsz;
-+	ret = do_fallocate(fd, alloc_size, alloc_size,
-+			   FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
-+	if (ret < 0)
-+		goto out;
-+
-+	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 0, 0);
-+	ret += do_lseek(testnum, 2, fd, filsz, SEEK_HOLE, 0, alloc_size);
-+	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA, alloc_size, alloc_size * 2);
-+out:
-+	if (buf)
-+		free(buf);
-+	return ret;
-+}
-+
- /*
-  * Make sure hole size is properly reported when starting in the middle of a
-  * hole in ext? doubly indirect tree
-@@ -1050,6 +1094,7 @@ struct testrec seek_tests[] = {
-        { 18, test18, "Test file with negative SEEK_{HOLE,DATA} offsets" },
-        { 19, test19, "Test file SEEK_DATA from middle of a large hole" },
-        { 20, test20, "Test file SEEK_DATA from middle of a huge hole" },
-+       { 21, test21, "Test file SEEK_HOLE that was created by PUNCH_HOLE" },
- };
- 
- static int run_test(struct testrec *tr)
-@@ -1127,15 +1172,20 @@ static int test_basic_support(void)
- 	}
- 
- 	ftruncate(fd, 0);
--	if (fallocate(fd, 0, 0, alloc_size) == -1) {
-+	if (fallocate(fd, 0, 0, alloc_size * 2) == -1) {
- 		if (errno == EOPNOTSUPP)
--			fprintf(stderr, "File system does not support fallocate.");
-+			fprintf(stderr, "File system does not support fallocate.\n");
- 		else {
- 			fprintf(stderr, "ERROR %d: Failed to preallocate "
- 				"space to %ld bytes. Aborting.\n", errno, (long) alloc_size);
- 			ret = -1;
- 		}
- 		goto out;
-+	} else if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-+			     0, alloc_size) == -1) {
-+		fprintf(stderr, "File system does not support punch hole.\n");
-+	} else {
-+		punch_hole = 1;
- 	}
- 
- 	pos = lseek(fd, 0, SEEK_DATA);
-diff --git a/tests/generic/999 b/tests/generic/999
-new file mode 100755
-index 00000000..d8565041
---- /dev/null
-+++ b/tests/generic/999
-@@ -0,0 +1,44 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019, CTERA Networks.  All Rights Reserved.
-+#
-+# FS QA Test No. 999
-+#
-+# Check that SEEK_HOLE can find a punched hole.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_seek_data_hole
-+_require_xfs_io_command "fpunch"
-+
-+base_test_file=$TEST_DIR/seek_sanity_testfile.$seq
-+
-+_require_test_program "seek_sanity_test"
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -f $base_test_file*
-+}
-+
-+_run_seek_sanity_test -s 21 -e 21 $base_test_file > $seqres.full 2>&1 ||
-+	_fail "seek sanity check failed!"
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/999.out b/tests/generic/999.out
-new file mode 100644
-index 00000000..7fbc6768
---- /dev/null
-+++ b/tests/generic/999.out
-@@ -0,0 +1 @@
-+QA output created by 999
-diff --git a/tests/generic/group b/tests/generic/group
-index 15227b67..14ac9b2c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -534,3 +534,4 @@
- 529 auto quick attr
- 530 auto quick unlink
- 531 auto quick unlink
-+999 auto quick punch seek
--- 
-2.17.1
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. And again, we don't have new tests added, but there're
+quite a few bug fixes and improvements. Notably, the dmlogwrites infrastructure
+is able to accept replay target device as argument and generic/482 is switched
+to use dm-thinp device as log replay target device, which should fix the long
+standing false failure of generic/482 against v5 XFS.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+87a53d2e7c82 generic/{436,445}: check falloc support
+
+New commits:
+
+Amir Goldstein (1):
+      [87a53d2e7c82] generic/{436,445}: check falloc support
+
+Brian Foster (2):
+      [de928c8e880e] common/dmlogwrites: genericize log writes target device
+      [65cc9a235919] generic/482: use thin volume as data device
+
+Darrick J. Wong (2):
+      [dd2c726684ed] fstests: don't oom the box opening tmpfiles
+      [19e8b1f1a9d8] t_attr_corruption: fix this yet again
+
+Rostislav Skudnov (1):
+      [77df6c6ccfc8] fsstress: show correct offsets and length for copy_file_range
+
+Yufen Yu (2):
+      [d34e87ea0f94] generic/299: limit max file size
+      [2e6fb94f9967] common/rc: add _get_max_lfs_filesize to return MAX_LFS_FILESIZE
+
+
+Code Diffstat:
+
+ common/dmlogwrites      | 24 ++++++++++++++++++------
+ common/rc               | 39 +++++++++++++++++++++++++++++++++++++++
+ ltp/fsstress.c          | 21 +++++++++++++++++----
+ src/t_attr_corruption.c | 28 ++++++++++++++--------------
+ tests/generic/299       |  6 ++++++
+ tests/generic/349       | 12 +-----------
+ tests/generic/350       | 12 +-----------
+ tests/generic/351       | 12 +-----------
+ tests/generic/436       |  2 ++
+ tests/generic/445       |  2 ++
+ tests/generic/455       |  8 ++++----
+ tests/generic/457       |  8 ++++----
+ tests/generic/470       |  4 ++--
+ tests/generic/482       | 24 ++++++++++++++++--------
+ tests/generic/485       | 25 +------------------------
+ tests/generic/530       |  4 ++--
+ tests/generic/531       |  4 ++--
+ tests/generic/group     |  4 ++--
+ tests/xfs/501           |  4 ++--
+ tests/xfs/502           |  4 ++--
+ 20 files changed, 138 insertions(+), 109 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--kybsfciJ2ATW
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJce/uKAAoJECZSqilcj+dj8RsQAOcw0xzzZkbspgQ4VBulvIFA
+iaE0fM86ZwTbiGOR4wGA1VhtNQP6cqCEY2zd6ymA4XCJUP2+IbqXRJZrZ6SA6SSU
+a/oDcHJtbcb978kNGLD4YkqOJ53nqSxd7T4pqG/BjK58KkYyEsJ1Uwkmyna9wOuW
+3FPNE4GPcqhm2IZACE92ez0FovSoLlMfo/u5BLhh7yoFoDPG0VziYi53zrA6dyUf
+oQX2M4HluwlzUCEl/8w1HYKoNMcIS7bExrsmXNNWvDrds4+mQdSWSpAwcrOiQtrV
+BZc+B9s3B/34Glcd0mNnITl7dClaQxwxZGH45kAS2mPjqOAL+7veIY8caag++lGK
+DXFhnjNIErfVKm5UE668+EAJgUQTYK+7SAge8kfIPVm/MlayC39x+ad55UMX+o3N
+Txjsqae5Alv/+dAImDKiju3lr4pfAEFb3QDcxINhTwDRu9hXFs2U6OEI9ga3uDUv
+emzimXa8jBgiLsxD3s0o6AIVEzB1Qul0QvygoCK43orlXvYmXEKxzSUKZ3O3+UvZ
+USTST6K5eA3Y7ZF5eCcq+Y6htJcjXHkRRspyPihzFP+JNgpdrjHqA6ejdxRr3210
+YiwJ0xYKGvvfdGsb4IlK4AV9q4kD7fiqtt0uutGqlFmcTKBb88NAx4YiAfxC3zgG
+3GLuMOOgcsWoM5qTPSFH
+=cM7J
+-----END PGP SIGNATURE-----
+
+--kybsfciJ2ATW--
