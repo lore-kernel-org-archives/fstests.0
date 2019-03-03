@@ -1,263 +1,233 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:33450 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726065AbfCBQIt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 2 Mar 2019 11:08:49 -0500
-Received: by mail-pg1-f194.google.com with SMTP id h11so470537pgl.0
-        for <fstests@vger.kernel.org>; Sat, 02 Mar 2019 08:08:48 -0800 (PST)
-Date: Sun, 3 Mar 2019 00:08:43 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] ext4/035: Verify directory shrinking
-Message-ID: <20190302160843.GF2824@desktop>
-References: <20190228000316.238620-1-harshadshirwadkar@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190228000316.238620-1-harshadshirwadkar@gmail.com>
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:32800 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726189AbfCCPJt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 3 Mar 2019 10:09:49 -0500
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2 1/2] fstests: Add more sanity to seek_sanity_test
+Date: Sun,  3 Mar 2019 17:09:39 +0200
+Message-Id: <20190303150940.12734-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Harshad Shirwadkar <harshadshirwadkar@gmail.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
+seek_sanity_test checks for one of several SEEK_DATA/HOLE
+behaviors and allows for the default behavior of filesystems,
+where SEEK_HOLE always returns EOF.
 
-On Wed, Feb 27, 2019 at 04:03:16PM -0800, Harshad Shirwadkar wrote:
-> Add test to verify that directory shrinking works for ext4 and also
-> doing so repeatedly does not introduce any errors in file system.
-> 
-> Signed-off-by: Harshad Shirwadkar <harshadshirwadkar@gmail.com>
+This means that if filesystem has a regression in finding
+holes, the sanity test won't catch it. And indeed this regression
+happened in overlayfs on kernel v4.19 and went unnoticed.
 
-Thanks for the test! But a couple of issues in line :)
+To improve test coverage, add a flag -f to seek_sanity_test to
+indicate that the default behavior is not acceptable.
+Whitelist all filesystem types that are expected to detect holes
+and use wrapper when invoking seek_sanity_test to add the -f flag
+to those filesystems.
 
-But one major problem is that, we need a way to check if the ext4 being
-tested supports shrinking directory, and skip the test if it doesn't, as
-shrink directory is a new feature, we don't want the test to report
-failure on unpatched ext4, which gives false failure.
+Overlayfs inherits expected behavior from base fs type.
 
-And it seems like this test is not ext4-specific, some other filesystems
-support shrink directory as well, e.g. xfs and btrfs, so the test could
-be a generic test, as long as we could detect if the filesystem supports
-the feature or not.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-> ---
->  tests/ext4/035     | 109 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/035.out |   9 ++++
->  tests/ext4/group   |   1 +
+Eryu,
 
-If adding a new fs-specific test, it'd be better to cc the fs's mailing
-list too, e.g. linux-ext4@vger.kernel.org in this case.
+After this change, the generic/seek group tests will start
+failing with overlayfs over base fs with true SEEK_HOLE support
+on upstream kernel.
 
->  3 files changed, 119 insertions(+)
->  create mode 100644 tests/ext4/035
-
-Add new test with 0755 permission. It's highly recommended to use the
-'new' script to create new test template, it's handling such issues for
-you already. e.g.
-
-./new ext4
-
->  create mode 100644 tests/ext4/035.out
-> 
-> diff --git a/tests/ext4/035 b/tests/ext4/035
-> new file mode 100644
-> index 00000000..46898d99
-> --- /dev/null
-> +++ b/tests/ext4/035
-> @@ -0,0 +1,109 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Google, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 035
-> +#
-> +# Verify that directory shrinking works and that it does not introduce any
-> +# errors.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    #rm -f $tmp.*
-
-Use tab as indention, not spaces, and remove $tmp.* even if you're not
-using it in test explicitly, as the common functions may create $tmp.*
-files too. Again, the 'new' script sets up template correctly.
-
-> +}
-> +
-> +_make_files()
-
-Local functions don't need the leading underscore.
-
-> +{
-> +    dirname=$1
-> +    num_files=$2
-
-And declare local variables as 'local'.
-
-> +    for x in `seq 1 $num_files`; do
-> +        fname="$(printf "%.255s\n" "$(perl -e "print \"${x}_\" x 500;")")"
-
-Looks like you're copying test from ext4/017 and modifying based on
-that. But I don't think this test doesn't need a specific pattern for file name, as
-long as its name is long enough to take much directory space. So just do
-$(perl -e 'print "a" x 255;') ?
-
-> +        touch "${dirname}/${fname}"
-
-echo > ${dirname}/${fname} would be a little faster, especially when
-you're creating many files, that saves test time.
-
-> +    done
-> +}
-> +
-> +_make_dirs_and_files()
-> +{
-> +    parent_dir=$1
-> +    num_dirs=$2
-> +    num_files=$3
-> +    for x in `seq 1 $num_dirs`; do
-> +	mkdir ${parent_dir}/${x}
-> +        _make_files "${parent_dir}/${x}" $num_files
-> +    done
-> +}
-> +
-> +_remove_dirs()
-> +{
-> +    parent_dir=$1
-> +    num_dirs=$2
-> +    for x in `seq 1 $num_dirs`; do
-> +        find ${parent_dir}/${x} -type f -exec rm '{}' \;
-> +    done
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-
-attr is not used, no need to source common/attr.
-
-> +
-> +# real QA test starts here
-> +_supported_fs ext4
-> +_supported_os Linux
-> +
-> +_require_scratch
-> +# test -n "${FORCE_FUZZ}" || _require_scratch_ext4_crc
-> +_require_attrs
-
-Above two lines could be removed.
-
-> +
-> +rm -f $seqres.full
-> +TESTDIR="${SCRATCH_MNT}/scratchdir"
-> +TESTFILE="${TESTDIR}/testfile"
-
-TESTDIR is only used in TESTFILE, but TESTFILE is not used in this test.
-
-And we have a global TEST_DIR variable (mount point for $TEST_DEV), so
-TESTDIR is a bad name, which may make people think it's TEST_DIR.
-
-> +
-> +echo "+ create scratch fs"
-> +_scratch_mkfs_ext4 > /dev/null 2>&1
-
-_scratch_mkfs, no need to call _scratch_mkfs_ext4 explicitly.
-
-> +
-> +echo "+ mount fs image"
-> +_scratch_mount
-> +
-> +mkdir -p ${SCRATCH_MNT}/test
-> +
-> +echo "+ create files"
-> +blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
-> +_make_files ${SCRATCH_MNT}/test $((blksz * 4 / 256))
-
-Any reason to create $((blksz * 4 / 256)) files?
-
-> +
-> +size_before=$(du -s "${SCRATCH_MNT}/test" | gawk '{print $1}')
-
-I think you're going to take the size of the "test" dir inode not the
-size of all the files within it? So it should be
-"stat -c %s $SCRATCH_MNT/test"?
-
-> +
-> +echo "+ remove files"
-> +rm ${SCRATCH_MNT}/test/*
-> +
-> +size_after=$(du -s "${SCRATCH_MNT}/test" | gawk '{print $1}')
-> +
-> +if [ $size_after -lt $size_before ]; then
-> +  echo "+ directory shrinked"
-> +else
-> +  _fail "directory did not shrink"
-
-Just echo "directory did not shrink", no need to _fail, the test harness
-would capture the output and compare it with the golden output and fails
-the test if they don't match.
-
-> +fi
-> +
-> +echo "+ create many directories and files"
-> +_make_dirs_and_files ${SCRATCH_MNT} 4 10240
-> +
-> +echo "+ empty dirs"
-> +_remove_dirs ${SCRATCH_MNT} 4
-> +
-> +umount "${SCRATCH_MNT}"
-
-_scratch_umount
-
-> +
-> +echo "+ check fs"
-> +e2fsck -fn ${SCRATCH_DEV} >> $seqres.full 2>&1 || _fail "fsck should not fail"
-
-No need to umount & check fs explicitly, test harness would do it for
-you as well.
+We had missing coverage of SEEK_HOLE, so we missed a regression
+in kernel v4.19 when overlayfs SEEK_HOLE stopped finding holes
+in sparse files.
 
 Thanks,
-Eryu
+Amir.
 
-> +
-> +status=0
-> +exit
-> diff --git a/tests/ext4/035.out b/tests/ext4/035.out
-> new file mode 100644
-> index 00000000..2d9a34e1
-> --- /dev/null
-> +++ b/tests/ext4/035.out
-> @@ -0,0 +1,9 @@
-> +QA output created by 035
-> ++ create scratch fs
-> ++ mount fs image
-> ++ create files
-> ++ remove files
-> ++ directory shrinked
-> ++ create many directories and files
-> ++ empty dirs
-> ++ check fs
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index eb744a12..c25205dd 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -37,6 +37,7 @@
->  032 auto quick ioctl resize
->  033 auto ioctl resize
->  034 auto quick quota
-> +035 auto
->  271 auto rw quick
->  301 aio auto ioctl rw stress defrag
->  302 aio auto ioctl rw stress defrag
-> -- 
-> 2.21.0.rc2.261.ga7da99ff1b-goog
-> 
+Changes since v1:
+- Use whitelist of filesystems types that support true SEEK_HOLE
+  instead of inferring SEEK_HOLE support from PUNCH_HOLE support
+- Split from patch of new PUNCH_HOLE+SEEK_HOLE test
+
+ common/rc              | 46 ++++++++++++++++++++++++++++++++++++++++++
+ src/seek_sanity_test.c | 14 +++++++++++--
+ tests/generic/285      |  2 +-
+ tests/generic/436      |  2 +-
+ tests/generic/445      |  2 +-
+ tests/generic/448      |  2 +-
+ tests/generic/490      |  2 +-
+ 7 files changed, 63 insertions(+), 7 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index c88c304c..d2482c20 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2298,6 +2298,52 @@ _ext4_disable_extent_zeroout()
+ 		echo 0 >/sys/fs/ext4/$sdev/extent_max_zeroout_kb
+ }
+ 
++# Is this filesystem type expected to support seeking and finding holes?
++# filesystems without SEEK_HOLE support, accept the SEEK_HOLE argument,
++# but always return EOF offset for SEEK_HOLE.
++# We use this whitelist FSTYP, to set expectation and avoid silent
++# regression of filesystem seek hole behavior.
++#
++# Return 0 for true
++_fstyp_support_seek_data_hole()
++{
++	if [ -z $1 ]; then
++		local fstyp=$FSTYP
++	else
++		local fstyp=$1
++	fi
++
++	case "$fstyp" in
++	btrfs|ext4|xfs|ceph|cifs|f2fs|gfs2|nfs*|ocfs2|tmpfs)
++		return 0
++		;;
++	overlay)
++		if [ ! -z $OVL_BASE_FSTYP -a $OVL_BASE_FSTYP != "overlay" ]; then
++			_fstyp_support_seek_data_hole $OVL_BASE_FSTYP
++			return $?
++		else
++			# Do not assume that base fs supports SEEK_HOLE
++			return 1
++		fi
++		;;
++	*)
++		# by default fstyp does not support SEEK_HOLE;
++		# if your fs does support SEEK_HOLE, add it to whitelist above!
++		return 1
++		;;
++	esac
++}
++
++# Run seek sanity test with predefined expectation for SEEK_DATA/HOLE behavior
++_run_seek_sanity_test()
++{
++	local testseekargs
++	if _fstyp_support_seek_data_hole; then
++		testseekargs+="-f"
++	fi
++	$here/src/seek_sanity_test $testseekargs $*
++}
++
+ # Check if the file system supports seek_data/hole
+ _require_seek_data_hole()
+ {
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index e9938d1b..1eefc74d 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -23,6 +23,7 @@
+ #endif
+ 
+ static blksize_t alloc_size;
++int allow_default_behavior = 1;
+ int default_behavior = 0;
+ int unwritten_extents = 0;
+ char *base_file_path;
+@@ -1115,6 +1116,12 @@ static int test_basic_support(void)
+ 	}
+ 
+ 	if (pos == filsz) {
++		if (!allow_default_behavior) {
++			fprintf(stderr, "File syste does not support llseek(2) extension "
++				"SEEK_HOLE. Aborting.\n");
++			ret = -1;
++			goto out;
++		}
+ 		default_behavior = 1;
+ 		fprintf(stderr, "File system supports the default behavior.\n");
+ 	}
+@@ -1148,7 +1155,7 @@ out:
+ 
+ void usage(char *cmd)
+ {
+-	fprintf(stdout, "Usage: %s [-t] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
++	fprintf(stdout, "Usage: %s [-tf] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
+ 	exit(1);
+ }
+ 
+@@ -1169,11 +1176,14 @@ int main(int argc, char **argv)
+ 	teststart = 1;
+ 	testend = 12;
+ 
+-	while ((opt = getopt(argc, argv, "ts:e:")) != -1) {
++	while ((opt = getopt(argc, argv, "tfs:e:")) != -1) {
+ 		switch (opt) {
+ 		case 't':
+ 			check_support++;
+ 			break;
++		case 'f':
++			allow_default_behavior = 0;
++			break;
+ 		case 's':
+ 			teststart = strtol(optarg, NULL, 10);
+ 			if (teststart <= 0 || teststart > numtests) {
+diff --git a/tests/generic/285 b/tests/generic/285
+index b53b3acc..20e89e5b 100755
+--- a/tests/generic/285
++++ b/tests/generic/285
+@@ -37,7 +37,7 @@ _cleanup()
+ 	eval "rm -f $BASE_TEST_FILE.*"
+ }
+ 
+-$here/src/seek_sanity_test $BASE_TEST_FILE > $seqres.full 2>&1 ||
++_run_seek_sanity_test $BASE_TEST_FILE > $seqres.full 2>&1 ||
+ 	_fail "seek sanity check failed!"
+ 
+ # success, all done
+diff --git a/tests/generic/436 b/tests/generic/436
+index a3ef70e5..ada60b2e 100755
+--- a/tests/generic/436
++++ b/tests/generic/436
+@@ -36,7 +36,7 @@ _cleanup()
+ 	rm -f $tmp.* $BASE_TEST_FILE.*
+ }
+ 
+-$here/src/seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++_run_seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
+ 	_fail "seek sanity check failed!"
+ 
+ # success, all done
+diff --git a/tests/generic/445 b/tests/generic/445
+index 694913ae..248f321b 100755
+--- a/tests/generic/445
++++ b/tests/generic/445
+@@ -36,7 +36,7 @@ _cleanup()
+ 	rm -f $tmp.* $BASE_TEST_FILE.*
+ }
+ 
+-$here/src/seek_sanity_test -s 17 -e 17 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++_run_seek_sanity_test -s 17 -e 17 $BASE_TEST_FILE > $seqres.full 2>&1 ||
+ 	_fail "seek sanity check failed!"
+ 
+ # success, all done
+diff --git a/tests/generic/448 b/tests/generic/448
+index d3ec5528..dada499b 100755
+--- a/tests/generic/448
++++ b/tests/generic/448
+@@ -34,7 +34,7 @@ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile_$seq
+ 
+ _require_test_program "seek_sanity_test"
+ 
+-$here/src/seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
++_run_seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
+ 	_fail "seek sanity check failed!"
+ 
+ _check_dmesg
+diff --git a/tests/generic/490 b/tests/generic/490
+index 330c2b60..07b08939 100755
+--- a/tests/generic/490
++++ b/tests/generic/490
+@@ -39,7 +39,7 @@ _cleanup()
+ 	rm -f $base_test_file*
+ }
+ 
+-$here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
++_run_seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
+ 	_fail "seek sanity check failed!"
+ 
+ # success, all done
+-- 
+2.17.1
