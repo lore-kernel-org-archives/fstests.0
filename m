@@ -1,70 +1,50 @@
-Received: from ipmail03.adl6.internode.on.net ([150.101.137.143]:53993 "EHLO
-        ipmail03.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726066AbfCEBAg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Mar 2019 20:00:36 -0500
-Date: Tue, 5 Mar 2019 12:00:31 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and
- rename
-Message-ID: <20190305010031.GB26298@dastard>
-References: <20190304140622.23997-1-fdmanana@kernel.org>
- <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
- <20190305005020.GA26298@dastard>
+Received: from newman.cs.utexas.edu ([128.83.139.110]:40559 "EHLO
+        newman.cs.utexas.edu" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726095AbfCEBIS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 4 Mar 2019 20:08:18 -0500
+Received: from mail-ot1-f52.google.com (mail-ot1-f52.google.com [209.85.210.52])
+        (authenticated bits=0)
+        by newman.cs.utexas.edu (8.14.4/8.14.4/Debian-4.1ubuntu1.1) with ESMTP id x2518Grd008499
+        (version=TLSv1/SSLv3 cipher=AES128-GCM-SHA256 bits=128 verify=NOT)
+        for <fstests@vger.kernel.org>; Mon, 4 Mar 2019 19:08:17 -0600
+Received: by mail-ot1-f52.google.com with SMTP id e15so5983812otk.6
+        for <fstests@vger.kernel.org>; Mon, 04 Mar 2019 17:08:17 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190305005020.GA26298@dastard>
+References: <20190304140622.23997-1-fdmanana@kernel.org> <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
+ <20190305005020.GA26298@dastard> <20190305010031.GB26298@dastard>
+In-Reply-To: <20190305010031.GB26298@dastard>
+From: Vijay Chidambaram <vijay@cs.utexas.edu>
+Date: Mon, 4 Mar 2019 19:08:05 -0600
+Message-ID: <CAHWVdUXMXtvncVQSqO8vdowct+GYE1nENePNvFJFjvoWzSHMcw@mail.gmail.com>
+Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and rename
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: fdmanana@kernel.org, fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Filipe Manana <fdmanana@kernel.org>, fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 05, 2019 at 11:50:20AM +1100, Dave Chinner wrote:
-> On Mon, Mar 04, 2019 at 05:04:23PM +0200, Amir Goldstein wrote:
-> > On Mon, Mar 4, 2019 at 4:44 PM <fdmanana@kernel.org> wrote:
+On Mon, Mar 4, 2019 at 7:00 PM Dave Chinner <david@fromorbit.com> wrote:
+>
+> On Tue, Mar 05, 2019 at 11:50:20AM +1100, Dave Chinner wrote:
+> > On Mon, Mar 04, 2019 at 05:04:23PM +0200, Amir Goldstein wrote:
+> > > On Mon, Mar 4, 2019 at 4:44 PM <fdmanana@kernel.org> wrote:
+> > > >
+> > > > From: Filipe Manana <fdmanana@suse.com>
+> > > >
+> > > > Test that if we truncate a file to reduce its size, rename it and then
+> > > > fsync it, after a power failure the file has a correct size and name.
+> > > >
 > > >
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test that if we truncate a file to reduce its size, rename it and then
-> > > fsync it, after a power failure the file has a correct size and name.
-> > >
-> > 
-> > I am not sure that ext4/xfs semantics guaranty anything about
-> > persisting file name after fsync of file?...
-> 
-> They do.  It's that pesky "strictly ordered metadata" thing I keep
-> having to explain to people...
+> > > I am not sure that ext4/xfs semantics guaranty anything about
+> > > persisting file name after fsync of file?...
+> >
+> > They do.  It's that pesky "strictly ordered metadata" thing I keep
+> > having to explain to people...
+>
+> https://marc.info/?l=fstests&m=155010885626284&w=2
 
-https://marc.info/?l=fstests&m=155010885626284&w=2
-
--Dave.
-
-> 
-> i.e. if you fsync an inode, then you are persisting all the changes
-> needed to reference that file and it's data. And so if there was a
-> rename in the history of that file, then that is persisted, too.
-> Which means that both the original and the new directory
-> modifications are persisted, too.
-> 
-> *POSIX* doesn't require this - it says that if you O_DSYNC data,
-> then it also includes all the metadata needed to reference that
-> data. So even if the data is there, POSIX doesn't define whether the
-> rename is there or noti, just that you can get to the fsync'd data
-> via either the old or new name. IOWs, POSIX allows the behaviour to
-> be implementation specific.
-> 
-> In this case, file systems with strictly ordered metadata will end
-> up making the rename visible because the rename occurred before the
-> truncate that the fsync() is persisting...
-> 
-> Cheers,
-> 
-> Dave.
-> -- 
-> Dave Chinner
-> david@fromorbit.com
-> 
-
--- 
-Dave Chinner
-david@fromorbit.com
+With reference to that previous conversation, Jayashree and I are
+planning to submit a patch adding something like
+Documentation/filesystems/crash-recovery.txt to document crash
+guarantees and strictly ordered metadata semantics soon! So hopefully
+there will be in-kernel documentation we can point folks to soon.
