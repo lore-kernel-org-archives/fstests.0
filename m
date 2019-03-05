@@ -1,62 +1,70 @@
-Received: from mail.kernel.org ([198.145.29.99]:39746 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726098AbfCEJ0b (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 5 Mar 2019 04:26:31 -0500
-From: fdmanana@kernel.org
-Subject: [PATCH v2] generic: add test for fsync after shrinking truncate and rename
-Date: Tue,  5 Mar 2019 09:26:23 +0000
-Message-Id: <20190305092623.23047-1-fdmanana@kernel.org>
-In-Reply-To: <20190304140622.23997-1-fdmanana@kernel.org>
-References: <20190304140622.23997-1-fdmanana@kernel.org>
+Received: from szxga06-in.huawei.com ([45.249.212.32]:59200 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727751AbfCELsA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 5 Mar 2019 06:48:00 -0500
+From: Chao Yu <yuchao0@huawei.com>
+Subject: [PATCH v2] generic: test i_mode recovery after power failure
+Date: Tue, 5 Mar 2019 19:47:44 +0800
+Message-ID: <20190305114744.129633-1-yuchao0@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: guaneryu@gmail.com, linux-f2fs-devel@lists.sourceforge.net, fdmanana@gmail.com, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+After fsync, filesystem should guarantee inode metadata including
+permission info being persisted, so even after sudden power-cut,
+during mount, we should recover i_mode fields correctly, in order
+to not loss those meta info.
 
-Test that if we truncate a file to reduce its size, rename it and then
-fsync it, after a power failure the file has a correct size and name.
+So adding this testcase to check whether generic filesystem can
+guarantee that.
 
-This test is motivated by a bug found in btrfs, which is fixed by a
-patch for the linux kernel titled:
-
-  "Btrfs: fix incorrect file size after shrinking truncate and fsync"
-
-This test currently passes on ext4, xfs, f2fs and patched btrfs.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
-
-V2: Added fsync on directory after the rename, to ensure the rename is
-    persisted for filesystem that don't guarantee strictly ordered
-    metadata (ext4, xfs and f2fs provide that, even old reiserfs).
-
- tests/generic/532     | 65 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/532.out |  8 +++++++
- tests/generic/group   |  1 +
- 3 files changed, 74 insertions(+)
+v2:
+change as Filipe suggested:
+- use dmflakey to simulate power-cut for generic filesystem which
+doesn't support godown ioctl interface.
+- minor code style change.
+ tests/generic/532     | 105 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/532.out |   2 +
+ tests/generic/group   |   1 +
+ 3 files changed, 108 insertions(+)
  create mode 100755 tests/generic/532
  create mode 100644 tests/generic/532.out
 
 diff --git a/tests/generic/532 b/tests/generic/532
 new file mode 100755
-index 00000000..9a9f9deb
+index 000000000000..1c5dffcdc4f6
 --- /dev/null
 +++ b/tests/generic/532
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,105 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++# Copyright (c) 2019 Huawei.  All Rights Reserved.
 +#
-+# FS QA Test No. 532
++# FS QA Test 532
 +#
-+# Test that if we truncate a file to reduce its size, rename it and then fsync
-+# it, after a power failure the file has a correct size and name.
++# This testcase is trying to test recovery flow of generic filesystem,
++# w/ below steps, once i_mode changes, after we fsync that file, we can
++# expect that i_mode can be recovered after sudden power-cuts.
++# 1. touch testfile or mkdir testdir
++# 2. chmod 777 testfile/testdir
++# 3. sync
++# 4. chmod 755 testfile/testdir
++# 5. fsync testfile/testdir
++# 6. record last i_mode
++# 7. flakey drop
++# 8. remount
++# 9. check i_mode
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
 +echo "QA output created by $seq"
++
++here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
 +trap "_cleanup; exit \$status" 0 1 2 3 15
@@ -73,65 +81,87 @@ index 00000000..9a9f9deb
 +. ./common/filter
 +. ./common/dmflakey
 +
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
 +# real QA test starts here
 +_supported_fs generic
 +_supported_os Linux
++
 +_require_scratch
 +_require_dm_target flakey
 +
-+rm -f $seqres.full
-+
-+_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mkfs >/dev/null 2>&1
 +_require_metadata_journaling $SCRATCH_DEV
 +_init_flakey
-+_mount_flakey
 +
-+# Create our test file with an initial size of 8000 bytes, then fsync it,
-+# followed by a truncate that reduces its size down to 3000 bytes.
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 0 8000" \
-+	     -c "fsync" \
-+	     -c "truncate 3000" \
-+	     $SCRATCH_MNT/foo | _filter_xfs_io
++testfile=$SCRATCH_MNT/testfile
++testdir=$SCRATCH_MNT/testdir
 +
-+# Now rename the file and fsync it again.
-+mv $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
-+# Fsync the parent directory to ensure the rename is persisted.
-+$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/
++do_check()
++{
++	local target=$1
++	local is_dir=$2
 +
-+# Simulate a power failure and mount the filesystem to check that the file was
-+# persisted with the new name and has a size of 3000 bytes.
-+_flakey_drop_and_remount
++	_mount_flakey
 +
-+echo "File content after power failure:"
-+od -A d -t x1 $SCRATCH_MNT/bar
++	if [ $is_dir = 1 ]; then
++		mkdir $target
++	else
++		touch $target
++	fi
 +
-+_unmount_flakey
++	echo "Test chmod $target" >> $seqres.full
++
++	chmod 777 $target
++	sync
++
++	chmod 755 $target
++	$XFS_IO_PROG $target -c "fsync"
++
++	local before=`stat -c %a $target`
++
++	_flakey_drop_and_remount
++
++	local after=`stat -c %a $target`
++
++	# check inode's i_mode
++	if [ "$before" != "$after" ]; then
++		echo "Before: $before"
++		echo "After : $after"
++	fi
++
++	if [ $is_dir = 1 ]; then
++		rmdir $target
++	else
++		rm -f $target
++	fi
++	_unmount_flakey
++}
++
++echo "Silence is golden"
++
++do_check $testfile 0
++do_check $testdir 1
 +
 +status=0
 +exit
 diff --git a/tests/generic/532.out b/tests/generic/532.out
 new file mode 100644
-index 00000000..554fbe2a
+index 000000000000..1f7d4677c3be
 --- /dev/null
 +++ b/tests/generic/532.out
-@@ -0,0 +1,8 @@
+@@ -0,0 +1,2 @@
 +QA output created by 532
-+wrote 8000/8000 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+File content after power failure:
-+0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-+*
-+0002992 ab ab ab ab ab ab ab ab
-+0003000
++Silence is golden
 diff --git a/tests/generic/group b/tests/generic/group
-index 31011ac8..7d63f303 100644
+index 15227b6713f7..c19361667886 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
 @@ -534,3 +534,4 @@
  529 auto quick attr
  530 auto quick unlink
  531 auto quick unlink
-+532 auto quick log
++532 shutdown auto quick metadata
 -- 
-2.11.0
+2.18.0.rc1
