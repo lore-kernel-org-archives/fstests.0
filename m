@@ -1,309 +1,124 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43628 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726590AbfCEEiR (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 4 Mar 2019 23:38:17 -0500
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id A3D76307E045
-        for <fstests@vger.kernel.org>; Tue,  5 Mar 2019 04:38:16 +0000 (UTC)
-Received: from test1135.test.redhat.com (vpn2-54-133.bne.redhat.com [10.64.54.133])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 123C3608C3
-        for <fstests@vger.kernel.org>; Tue,  5 Mar 2019 04:38:15 +0000 (UTC)
-From: Ronnie Sahlberg <lsahlber@redhat.com>
-Subject: [PATCH] Add new xattr test 532
-Date: Tue,  5 Mar 2019 14:38:08 +1000
-Message-Id: <20190305043808.12093-1-lsahlber@redhat.com>
+Received: from mail-yw1-f65.google.com ([209.85.161.65]:37274 "EHLO
+        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726085AbfCEF7a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Mar 2019 00:59:30 -0500
+MIME-Version: 1.0
+References: <20190304140622.23997-1-fdmanana@kernel.org> <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
+ <CAL3q7H6ceptNOyf65jbzojbZV5Nq3d0iKvYOvvE=pLaVnpgO2w@mail.gmail.com>
+ <CAOQ4uxhno=ORXpLgLC2O7KoJJXm2sVEtZ8DgiHZi-4p_HmfEwg@mail.gmail.com> <CAL3q7H6XDTkp+wHmM9+ON+smcqk6fR5fL3Bf1OmVFE06BRnEjw@mail.gmail.com>
+In-Reply-To: <CAL3q7H6XDTkp+wHmM9+ON+smcqk6fR5fL3Bf1OmVFE06BRnEjw@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 5 Mar 2019 07:59:18 +0200
+Message-ID: <CAOQ4uxg_D0r2L=6zg4yxN1AfzkK8aHkWwOQPKEaKt8Z7WtVf2w@mail.gmail.com>
+Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and rename
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, Dave Chinner <david@fromorbit.com>
 List-ID: <fstests@vger.kernel.org>
 
-This test is cloned from 097 but has had all the tests for trusted.*
-removed.
-This makes it possible to use this test on filesystems that can only
-provide user.* xattrs such as CIFS.
+On Tue, Mar 5, 2019 at 12:31 AM Filipe Manana <fdmanana@kernel.org> wrote:
+>
+> On Mon, Mar 4, 2019 at 5:59 PM Amir Goldstein <amir73il@gmail.com> wrote:
+> >
+> > On Mon, Mar 4, 2019 at 5:23 PM Filipe Manana <fdmanana@kernel.org> wrote:
+> > >
+> > > On Mon, Mar 4, 2019 at 3:04 PM Amir Goldstein <amir73il@gmail.com> wrote:
+> > > >
+> > > > On Mon, Mar 4, 2019 at 4:44 PM <fdmanana@kernel.org> wrote:
+> > > > >
+> > > > > From: Filipe Manana <fdmanana@suse.com>
+> > > > >
+> > > > > Test that if we truncate a file to reduce its size, rename it and then
+> > > > > fsync it, after a power failure the file has a correct size and name.
+> > > > >
+> > > >
+> > > > I am not sure that ext4/xfs semantics guaranty anything about
+> > > > persisting file name after fsync of file?...
+> > > >
+> > > > > This test is motivated by a bug found in btrfs, which is fixed by a
+> > > > > patch for the linux kernel titled:
+> > > > >
+> > > > >   "Btrfs: fix incorrect file size after shrinking truncate and fsync"
+> > > >
+> > > > At least the title of this patch says nothing about persisting the
+> > > > name.
+> > >
+> > > Because the bug in btrfs is not about persisting the name, it's about
+> > > persisting the correct inode size.
+> > >
+> >
+> > OK. Still AFAIK, ext4/xfs don't guaranty that the name bar will exist
+> > after power failure unless the parent dir was fsynced.
+> > If you fsync the parent dir instead of the file after rename, it will
+> > make the test correct for ext4/xfs (and POSIX for that matter).
+>
+> I'm not so sure about that. Couldn't find anything explicit anywhere about that.
 
-Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
----
- tests/generic/532     | 144 ++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/532.out | 108 +++++++++++++++++++++++++++++++++++++
- tests/generic/group   |   1 +
- 3 files changed, 253 insertions(+)
- create mode 100755 tests/generic/532
- create mode 100644 tests/generic/532.out
+man fsync(2):
+"       Calling  fsync() does not necessarily ensure that the entry in
+the directory
+        containing the file has also reached disk.  For that an
+explicit fsync() on a file
+        descriptor for the directory is also needed."
 
-diff --git a/tests/generic/532 b/tests/generic/532
-new file mode 100755
-index 00000000..86adb3a6
---- /dev/null
-+++ b/tests/generic/532
-@@ -0,0 +1,144 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
-+# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-+# Copyright (c) 2019 Red Hat Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 526. Modified from 097.
-+#
-+# simple attr tests for user. EAs:
-+#  - set
-+#  - get
-+#  - list
-+#  - remove
-+# Basic testing.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+file=$TEST_DIR/foo
-+
-+_cleanup()
-+{
-+	rm -f $tmp.* $file
-+}
-+
-+getfattr()
-+{
-+	_getfattr --absolute-names "$@" |& _filter_test_dir
-+}
-+
-+setfattr()
-+{
-+	$SETFATTR_PROG "$@" |& _filter_test_dir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/attr
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+
-+_require_test
-+_require_attrs
-+
-+echo -e "\ncreate file foo"
-+rm -f $file
-+touch $file
-+
-+echo -e "\nshould be no EAs for foo:"
-+getfattr -d $file
-+
-+echo -e "\nset EA <NOISE,woof>:"
-+setfattr -n user.NOISE -v woof $file
-+
-+echo -e "\nset EA <COLOUR,blue>:"
-+setfattr -n user.COLOUR -v blue $file
-+
-+echo -e "\nset EA <SIZE,small>:"
-+setfattr -n user.SIZE -v small $file
-+
-+echo -e "\nlist the EAs for foo: NOISE, COLOUR, SIZE"
-+getfattr -d $file
-+
-+echo -e "\ncheck the list again for foo"
-+getfattr -d $file
-+
-+echo -e "\nunmount the FS and see if EAs are persistent"
-+_test_cycle_mount
-+
-+echo -e "\ncheck the list again for foo after umount/mount"
-+getfattr -d $file
-+
-+echo -e "\nremove the COLOUR EA on foo"
-+setfattr -x user.COLOUR $file
-+
-+echo -e "\nlist EAs for foo: NOISE, SIZE"
-+getfattr -d $file
-+
-+echo -e "\nget the value of the NOISE EA"
-+getfattr -n user.NOISE $file
-+
-+echo -e "\nget the value of the COLOUR EA which was removed earlier"
-+getfattr -n user.COLOUR $file
-+
-+echo -e "\nget the value of the SIZE EA"
-+getfattr -n user.SIZE $file
-+
-+echo -e "\nlist all the EAs again: NOISE, SIZE"
-+getfattr -d $file
-+
-+echo -e "\nchange the value of the SIZE EA from small to huge"
-+setfattr -n user.SIZE -v huge $file
-+
-+echo -e "\nget the SIZE EA which should now have value huge"
-+getfattr -n user.SIZE $file
-+
-+echo -e "\nlist EAs: NOISE, SIZE"
-+getfattr -d $file
-+
-+echo -e "\nremove the SIZE EA from foo"
-+setfattr -x user.SIZE $file
-+
-+echo -e "\nlist EAs: NOISE (SIZE EA has been removed)"
-+getfattr -d $file
-+
-+echo -e "\ntry removing non-existent EA named woof"
-+setfattr -x user.WOOF $file
-+
-+echo -e "\ntry removing already removed EA SIZE"
-+setfattr -x user.SIZE $file
-+
-+echo -e "\nlist EAs: NOISE"
-+getfattr -d $file
-+
-+echo -e "\ntry removing already removed EA COLOUR"
-+setfattr -x user.COLOUR $file
-+
-+echo -e "\nlist EAs: NOISE"
-+getfattr -d $file
-+
-+echo -e "\nremove remaining EA NOISE"
-+setfattr -x user.NOISE $file
-+
-+echo -e "\nlist EAs: should be no EAs left now"
-+getfattr -d $file
-+
-+echo -e "\nunmount the FS and see if EAs are persistent"
-+_test_cycle_mount
-+
-+echo -e "\nlist EAs: should still be no EAs left"
-+getfattr -d $file
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/532.out b/tests/generic/532.out
-new file mode 100644
-index 00000000..562512b1
---- /dev/null
-+++ b/tests/generic/532.out
-@@ -0,0 +1,108 @@
-+QA output created by 532
-+
-+create file foo
-+
-+should be no EAs for foo:
-+
-+set EA <NOISE,woof>:
-+
-+set EA <COLOUR,blue>:
-+
-+set EA <SIZE,small>:
-+
-+list the EAs for foo: NOISE, COLOUR, SIZE
-+# file: TEST_DIR/foo
-+user.COLOUR="blue"
-+user.NOISE="woof"
-+user.SIZE="small"
-+
-+
-+check the list again for foo
-+# file: TEST_DIR/foo
-+user.COLOUR="blue"
-+user.NOISE="woof"
-+user.SIZE="small"
-+
-+
-+unmount the FS and see if EAs are persistent
-+
-+check the list again for foo after umount/mount
-+# file: TEST_DIR/foo
-+user.COLOUR="blue"
-+user.NOISE="woof"
-+user.SIZE="small"
-+
-+
-+remove the COLOUR EA on foo
-+
-+list EAs for foo: NOISE, SIZE
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+user.SIZE="small"
-+
-+
-+get the value of the NOISE EA
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+
-+
-+get the value of the COLOUR EA which was removed earlier
-+TEST_DIR/foo: user.COLOUR: No such attribute
-+
-+get the value of the SIZE EA
-+# file: TEST_DIR/foo
-+user.SIZE="small"
-+
-+
-+list all the EAs again: NOISE, SIZE
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+user.SIZE="small"
-+
-+
-+change the value of the SIZE EA from small to huge
-+
-+get the SIZE EA which should now have value huge
-+# file: TEST_DIR/foo
-+user.SIZE="huge"
-+
-+
-+list EAs: NOISE, SIZE
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+user.SIZE="huge"
-+
-+
-+remove the SIZE EA from foo
-+
-+list EAs: NOISE (SIZE EA has been removed)
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+
-+
-+try removing non-existent EA named woof
-+setfattr: TEST_DIR/foo: No such attribute
-+
-+try removing already removed EA SIZE
-+setfattr: TEST_DIR/foo: No such attribute
-+
-+list EAs: NOISE
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+
-+
-+try removing already removed EA COLOUR
-+setfattr: TEST_DIR/foo: No such attribute
-+
-+list EAs: NOISE
-+# file: TEST_DIR/foo
-+user.NOISE="woof"
-+
-+
-+remove remaining EA NOISE
-+
-+list EAs: should be no EAs left now
-+
-+unmount the FS and see if EAs are persistent
-+
-+list EAs: should still be no EAs left
-diff --git a/tests/generic/group b/tests/generic/group
-index 15227b67..14cb479a 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -534,3 +534,4 @@
- 529 auto quick attr
- 530 auto quick unlink
- 531 auto quick unlink
-+532 attr auto quick
--- 
-2.13.6
+> There are other tests that do similar assumptions, either after
+> renames or after adding a new
+> hard link (fsyncing just the file being enough to guarantee the new
+> hard link exits after a power
+> failure, without the need to fsync the parent directory). I don't
+> recall ever having had such comment before,
+
+Because I missed it in review...
+
+> even for much more complex cases involving renames
+> such as [1] for example.
+>
+> [1] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=e2d866668a98af4cd47cd6913418e410cd80aa93
+>
+> In this case both old and new names are in the same parent directory,
+> but if they were in different directories, and
+> requiring the user/application to fsync both directories, it could be
+> dangerous, if the old parent dir is fsync'ed and
+> a power failure happened before fsync'ing the new parent (requiring
+> the user/application to know about this
+> and fsync the new parent before the old parent dir also seems very
+> demanding), leading to a potential file loss
+> after replaying the log/journal (there were such cases in btrfs before).
+>
+
+This is not a problem for ext4/xfs.
+fsync(newdir) guarantees persisting new filename
+metadata ordering implies that olddir changes (and file nlink)
+also persist.
+
+To meet requirement of both btrfs and ext4/xfs in that case
+your test may fsync both file AND newdir, as long as this
+still allows your test to catch the bug?
+
+> > Will that test modification still catch the btrfs bug (pre fix)?
+>
+> Yes, it will still trigger the btrfs bug.
+>
+> Well, I don't mind doing such change, but I would like to hear other
+> opinions too, perhaps Dave could shed some light on this?
+> Even old reiserfs and f2fs (both on posix and strict fsync modes)
+> currently pass this test.
+>
+
+As I wrote to Dave, if file is not "metadata dirty" before rename,
+then whether or not rename dirties to file for fsync is a filesystem
+specific implementation detail that is not in any standard.
+
+Since filesystems tend to try to optimize out unneeded journal
+commits, so the observation about what filesystems do today
+empirically is not a sufficiently strong argument.
+
+Again, if your test can afford to do fsync of file and parent dir
+it is best to be on the safe side (please audit other similar tests
+that you know about). If your test cannot afford to fsync parent
+dir, then at least a fat comment about this issue is worth about
+the expected (but not guaranteed) effects of fsync of file.
+
+Thanks,
+Amir.
