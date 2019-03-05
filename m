@@ -1,44 +1,42 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:41706 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726038AbfCDVTH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Mar 2019 16:19:07 -0500
-Subject: [PATCH 0/5] fstests: various fixes
+Received: from userp2120.oracle.com ([156.151.31.85]:43384 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726221AbfCETmq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 5 Mar 2019 14:42:46 -0500
+Date: Tue, 5 Mar 2019 11:42:42 -0800
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 04 Mar 2019 13:19:02 -0800
-Message-ID: <155173434205.767.15128498725168844621.stgit@magnolia>
+Subject: [PATCH 6/5] ext4/032: SCRATCH_DIR -> SCRATCH_MNT
+Message-ID: <20190305194241.GA4660@magnolia>
+References: <155173434205.767.15128498725168844621.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <155173434205.767.15128498725168844621.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: guaneryu@gmail.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Various fixes for the new tests:
+Use SCRATCH_MNT, not SCRATCH_DIR.
 
-- Fix get_max_lfs_filesize naming breakage
-- Don't OOM the box when opening tempfiles
-- More fixes to the generic/529 attribute test
-- Fix incorrect btree block type usage when fuzzing
-- Fix tool usage in shared/298
-- Check statx attributes_mask
-- Force the XFS fs population helper to create multilevel inode btrees
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/ext4/032 |    4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
-
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
-
---D
-
-kernel git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=djwong-devel
-
-xfsprogs git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=djwong-devel
-
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=djwong-devel
+diff --git a/tests/ext4/032 b/tests/ext4/032
+index 8534ddd6..277ddef0 100755
+--- a/tests/ext4/032
++++ b/tests/ext4/032
+@@ -19,8 +19,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+ BLK_SIZ=4096
+ CLUSTER_SIZ=4096
+ 
+-IMG_FILE=$SCRATCH_DIR/$seq.fs
+-IMG_MNT=$SCRATCH_DIR/$seq.mnt
++IMG_FILE=$SCRATCH_MNT/$seq.fs
++IMG_MNT=$SCRATCH_MNT/$seq.mnt
+ 
+ ## Num clusters to blocks.
+ c2b()
