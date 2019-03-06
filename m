@@ -1,256 +1,224 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:38800 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726600AbfCFD04 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 5 Mar 2019 22:26:56 -0500
-Subject: Re: [PATCH] Documenting the crash-recovery guarantees of Linux file
- systems
-References: <1551841140-3708-1-git-send-email-jaya@cs.utexas.edu>
-From: Randy Dunlap <rdunlap@infradead.org>
-Message-ID: <fccd3c38-3792-5451-9456-de4967fbb162@infradead.org>
-Date: Tue, 5 Mar 2019 19:26:17 -0800
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:45389 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729896AbfCFMai (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Mar 2019 07:30:38 -0500
+Date: Wed, 6 Mar 2019 20:30:31 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2 2/2] generic: Test that SEEK_HOLE can find a punched
+ hole
+Message-ID: <20190306123031.GI2824@desktop>
+References: <20190303150940.12734-1-amir73il@gmail.com>
+ <20190303150940.12734-2-amir73il@gmail.com>
 MIME-Version: 1.0
-In-Reply-To: <1551841140-3708-1-git-send-email-jaya@cs.utexas.edu>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190303150940.12734-2-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Jayashree <jaya@cs.utexas.edu>, fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-doc@vger.kernel.org
-Cc: vijay@cs.utexas.edu, amir73il@gmail.com, david@fromorbit.com, tytso@mit.edu, fdmanana@gmail.com, chao@kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi,
-
-This is a good read.
-
-I have a few nits below... if you are interested.
-
-
-On 3/5/19 6:59 PM, Jayashree wrote:
->  In this file, we document the crash-recovery guarantees
->  provided by four Linux file systems - xfs, ext4, F2FS and btrfs. We al=
-so
->  present Dave Chinner's proposal of Strictly-Ordered Metadata Consisten=
-cy
->  (SOMC), which is provided by xfs. It is not clear to us if other file =
-systems
->  provide SOMC; we would be happy to modify the document if file-system
->  developers claim that their system provides (or aims to provide) SOMC.
->=20
-> Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+On Sun, Mar 03, 2019 at 05:09:40PM +0200, Amir Goldstein wrote:
+> Added a test case to seek_sanity_test and a test to run it.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 > ---
->  .../filesystems/crash-recovery-guarantees.txt      | 173 +++++++++++++=
-++++++++
->  1 file changed, 173 insertions(+)
->  create mode 100644 Documentation/filesystems/crash-recovery-guarantees=
-.txt
->=20
-> diff --git a/Documentation/filesystems/crash-recovery-guarantees.txt b/=
-Documentation/filesystems/crash-recovery-guarantees.txt
-> new file mode 100644
-> index 0000000..4d1a9c6b
+> 
+> Changes since v1:
+> - Punch hole requirement independent of SEEK_HOLE behavior.
+> 
+>  src/seek_sanity_test.c | 58 +++++++++++++++++++++++++++++++++++++++---
+>  tests/generic/999      | 44 ++++++++++++++++++++++++++++++++
+>  tests/generic/999.out  |  1 +
+>  tests/generic/group    |  1 +
+>  4 files changed, 100 insertions(+), 4 deletions(-)
+>  create mode 100755 tests/generic/999
+>  create mode 100644 tests/generic/999.out
+> 
+> diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+> index 1eefc74d..7da4448f 100644
+> --- a/src/seek_sanity_test.c
+> +++ b/src/seek_sanity_test.c
+> @@ -16,6 +16,7 @@
+>  #include <unistd.h>
+>  #include <stdlib.h>
+>  #include <assert.h>
+> +#include "global.h"
+>  
+>  #ifndef SEEK_DATA
+>  #define SEEK_DATA      3
+> @@ -26,6 +27,7 @@ static blksize_t alloc_size;
+>  int allow_default_behavior = 1;
+>  int default_behavior = 0;
+>  int unwritten_extents = 0;
+> +int punch_hole = 0;
+>  char *base_file_path;
+>  
+>  static void get_file_system(int fd)
+> @@ -118,8 +120,9 @@ static int do_fallocate(int fd, off_t offset, off_t length, int mode)
+>  
+>  	ret = fallocate(fd, mode, offset, length);
+>  	if (ret)
+> -		fprintf(stderr, "  ERROR %d: Failed to preallocate "
+> -			"space to %ld bytes\n", errno, (long) length);
+> +		fprintf(stderr, "  ERROR %d: Failed to %s of %ld bytes\n",
+> +			errno, (mode & FALLOC_FL_PUNCH_HOLE) ? "punch hole" :
+> +			"preallocate space", (long) length);
+>  
+>  	return ret;
+>  }
+> @@ -262,6 +265,47 @@ out:
+>  	return ret;
+>  }
+>  
+> +/*
+> + * Make sure hole size is properly reported when punched in the middle of a file
+> + */
+> +static int test21(int fd, int testnum)
+> +{
+> +	char *buf = NULL;
+> +	int bufsz, filsz;
+> +	int ret = 0;
+> +
+> +	if (!punch_hole) {
+> +		fprintf(stdout, "Test skipped as fs doesn't support punch hole.\n");
+> +		goto out;
+> +	}
+
+Skip test if default_behavior is true? It's not necessary, but I think
+it makes the test more clear about testing non-default behavior.
+
+Thanks,
+Eryu
+
+> +
+> +	bufsz = alloc_size * 3;
+> +	buf = do_malloc(bufsz);
+> +	if (!buf) {
+> +		ret = -1;
+> +		goto out;
+> +	}
+> +	memset(buf, 'a', bufsz);
+> +
+> +	ret = do_pwrite(fd, buf, bufsz, 0);
+> +	if (ret)
+> +		goto out;
+> +
+> +	filsz = bufsz;
+> +	ret = do_fallocate(fd, alloc_size, alloc_size,
+> +			   FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
+> +	if (ret < 0)
+> +		goto out;
+> +
+> +	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 0, 0);
+> +	ret += do_lseek(testnum, 2, fd, filsz, SEEK_HOLE, 0, alloc_size);
+> +	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA, alloc_size, alloc_size * 2);
+> +out:
+> +	if (buf)
+> +		free(buf);
+> +	return ret;
+> +}
+> +
+>  /*
+>   * Make sure hole size is properly reported when starting in the middle of a
+>   * hole in ext? doubly indirect tree
+> @@ -1050,6 +1094,7 @@ struct testrec seek_tests[] = {
+>         { 18, test18, "Test file with negative SEEK_{HOLE,DATA} offsets" },
+>         { 19, test19, "Test file SEEK_DATA from middle of a large hole" },
+>         { 20, test20, "Test file SEEK_DATA from middle of a huge hole" },
+> +       { 21, test21, "Test file SEEK_HOLE that was created by PUNCH_HOLE" },
+>  };
+>  
+>  static int run_test(struct testrec *tr)
+> @@ -1127,15 +1172,20 @@ static int test_basic_support(void)
+>  	}
+>  
+>  	ftruncate(fd, 0);
+> -	if (fallocate(fd, 0, 0, alloc_size) == -1) {
+> +	if (fallocate(fd, 0, 0, alloc_size * 2) == -1) {
+>  		if (errno == EOPNOTSUPP)
+> -			fprintf(stderr, "File system does not support fallocate.");
+> +			fprintf(stderr, "File system does not support fallocate.\n");
+>  		else {
+>  			fprintf(stderr, "ERROR %d: Failed to preallocate "
+>  				"space to %ld bytes. Aborting.\n", errno, (long) alloc_size);
+>  			ret = -1;
+>  		}
+>  		goto out;
+> +	} else if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
+> +			     0, alloc_size) == -1) {
+> +		fprintf(stderr, "File system does not support punch hole.\n");
+> +	} else {
+> +		punch_hole = 1;
+>  	}
+>  
+>  	pos = lseek(fd, 0, SEEK_DATA);
+> diff --git a/tests/generic/999 b/tests/generic/999
+> new file mode 100755
+> index 00000000..d8565041
 > --- /dev/null
-> +++ b/Documentation/filesystems/crash-recovery-guarantees.txt
-> @@ -0,0 +1,173 @@
-> +=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> +File System Crash-Recovery Guarantees
-> +=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-> +Linux file systems provide certain guarantees to user-space
-> +applications about what happens to their data if the system crashes
-> +(due to power loss or kernel panic). These are termed crash-recovery
-> +guarantees.
+> +++ b/tests/generic/999
+> @@ -0,0 +1,44 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019, CTERA Networks.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 999
+> +#
+> +# Check that SEEK_HOLE can find a punched hole.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
 > +
-> +Crash-recovery guarantees only pertain to data or metadata that has
-> +been explicitly persisted to storage with fsync(), fdatasync(), or
-> +sync() system calls. By default, write(), mkdir(), and other
-> +file-system related system calls only affect the in-memory state of
-> +the file system.
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
 > +
-> +The crash-recovery guarantees provided by most Linux file systems are
-> +significantly stronger than what is required by POSIX. POSIX is vague,
-> +even allowing fsync() to do nothing (Mac OSX takes advantage of
-> +this). However, the guarantees provided by file systems are not
-> +documented, and vary between file systems. This document seeks to
-> +describe the current crash-recovery guarantees provided by major Linux
-> +file systems.
+> +# get standard environment, filters and checks
+> +. ./common/rc
 > +
-> +What does the fsync() operation guarantee?
-> +----------------------------------------------------
-> +fsync() operation is meant to force the physical write of data
-> +corresponding to a file from the buffer cache, along with the file
-> +metadata. Note that the guarantees mentioned for each file system belo=
-w
-> +are in addition to the ones provided by POSIX.
+> +_supported_fs generic
+> +_supported_os Linux
 > +
-> +POSIX
-> +-----
-> +fsync(file) : Flushes the data and metadata associated with the
-> +file. However, if the directory entry for the file has not been
-> +previously persisted, or has been modified, it is not guaranteed to be
-> +persisted by the fsync of the file [1]. What this means is, if a file
-> +is newly created, you will have to fsync(parent directory) in addition
-> +to fsync(file) in order to ensure that the file data has safely
-> +reached the disk.
+> +_require_test
+> +_require_seek_data_hole
+> +_require_xfs_io_command "fpunch"
 > +
-> +fsync(dir) : Flushes directory data and directory entries. However if
-> +you created a new file within the directory and wrote data to the
-> +file, then the file data is not guaranteed to be persisted, unless an
-> +explicit fsync() is issued on the file.
+> +base_test_file=$TEST_DIR/seek_sanity_testfile.$seq
 > +
-> +ext4
-> +-----
-> +fsync(file) : Ensures that a newly created file is persisted (no need
-> +to explicitly persist the parent directory). However, if you create
-> +multiple names of the file (hard links), then they are not guaranteed
-> +to persist unless each one of the hard links are persisted [2].
+> +_require_test_program "seek_sanity_test"
 > +
-> +fsync(dir) : All file names within the persisted directory will exist,
-> +but does not guarantee file data.
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.*
+> +	rm -f $base_test_file*
+> +}
 > +
-> +btrfs
-> +------
-> +fsync(file) : Ensures that the newly created file is persisted, along
-> +with all its hard links. You do not need to persist individual hard
-> +links to the file.
+> +_run_seek_sanity_test -s 21 -e 21 $base_test_file > $seqres.full 2>&1 ||
+> +	_fail "seek sanity check failed!"
 > +
-> +fsync(dir) : All the file names within the directory persist. All the
-> +rename and unlink operations within the directory are persisted. Due
-> +to the design choices made by btrfs, fsync of a directory could lead
-> +to an iterative fsync on sub-directories, thereby requiring a full
-> +file system commit. So btrfs does not advocate persisting directories
-> +[2].
-> +
-> +fsync(symlink)
-> +-------------
-> +A symlink inode cannot be directly opened for IO, which means there is
-> +no such thing as fsync of a symlink [3]. You could be tricked by the
-> +fact that open and fsync of a symlink succeeds without returning a
-> +error, but what happens in reality is as follows.
-> +
-> +Suppose we have a symlink =E2=80=9Cfoo=E2=80=9D, which points to the f=
-ile =E2=80=9CA/bar=E2=80=9D
-> +
-> +fd =3D open(=E2=80=9Cfoo=E2=80=9D, O_CREAT | O_RDWR)
-> +fsync(fd)
-> +
-> +Both the above operations succeed, but if you crash after fsync, the
-> +symlink could be still missing.
-> +
-> +When you try to open the symlink =E2=80=9Cfoo=E2=80=9D, you are actual=
-ly trying to
-> +open the file that the symlink resolves to, which in this case is
-> +=E2=80=9CA/bar=E2=80=9D. When you fsync the inode returned by the open=
- system call, you
-> +are actually persisting the file =E2=80=9CA/bar=E2=80=9D and not the s=
-ymlink. Note
-> +that if the file =E2=80=9CA/bar=E2=80=9D does not exist and you try th=
-e open the
-> +symlink =E2=80=9Cfoo=E2=80=9D without the O_CREAT flag, then file open=
- will fail. To
-> +obtain the file descriptor associated with the symlink inode, you
-> +could open the symlink using =E2=80=9CO_PATH | O_NOFOLLOW=E2=80=9D fla=
-gs. However, the
-> +file descriptor obtained this way can be only used to indicate a
-> +location in the file-system tree and to perform operations that act
-> +purely at the file descriptor level. Operations like read(), write(),
-> +fsync() etc cannot be performed on such file descriptors.
-> +
-> +Bottomline : You cannot fsync() a symlink.
-> +
-> +fsync(special files)
-> +--------------------
-> +Special files in Linux include block and character device files
-> +(created using mknod), FIFO (created using mkfifo) etc. Just like the
-> +behavior of fsync on symlinks described above, these special files do
-> +not have a fsync function defined. Similar to symlinks, you
-
-I would say "not have an fsync function defined."
-
-> +cannot fsync a special file [4].
-> +
-> +
-> +Strictly Ordered Metadata Consistency
-> +-------------------------------------
-> +With each file system providing varying levels of persistence
-> +guarantees, a consensus in this regard, will benefit application
-> +developers to work with certain fixed assumptions about file system
-> +guarantees. Dave Chinner proposed a unified model called the
-> +Strictly Ordered Metadata Consistency (SOMC) [5].
-> +
-> +Under this scheme, the file system guarantees to persist all previous
-> +dependent modifications to the object upon fsync().  If you fsync() an
-> +inode, it will persist all the changes required to reference the inode
-> +and its data. SOMC can be defined as follows [6]:
-> +
-> +If op1 precedes op2 in program order (in-memory execution order), and
-> +op1 and op2 share a dependency, then op2 must not be observed by a
-> +user after recovery without also observing op1.
-> +
-> +Unfortunately, SOMC's definition depends upon whether two operations
-> +share a dependency, which is file-system specific. A developer would
-> +need to understand file-system internals to know if SOMC would order
-> +one operation before another. It is worth noting that a file system
-> +can be crash-consistent (according to POSIX), without providing SOMC
-> +[7].
-> +
-> +Example
-> +-------
-> +touch A/foo
-> +echo =E2=80=9Chello=E2=80=9D >  A/foo
-> +sync
-> +
-> +mv A/foo A/bar
-> +echo =E2=80=9Cworld=E2=80=9D > A/foo
-> +fsync A/foo
-> +CRASH
-> +
-> +What would you expect on recovery, if the file system crashed after
-> +the final fsync returned successfully?
-> +
-> +Non SOMC file systems will not persist the file
-
-  Non-SOMC
-
-> +A/bar because it was not explicitly fsync-ed. But this means, you will
-> +find only the file A/foo with data =E2=80=9Cworld=E2=80=9D after crash=
-, thereby losing
-> +the previously persisted file with data =E2=80=9Chello=E2=80=9D [8]. Y=
-ou will need to
-> +explicitly persist the directory A to ensure the rename operation is
-> +safely persisted on disk.
-> +
-> +Under SOMC, to correctly reference the new inode via A/foo,=20
-> +the previous rename operation must persist as well. Therefore,=20
-> +fsync() of A/foo will persist the renamed file A/bar as well.=20
-> +On recovery you will find both A/bar (with data =E2=80=9Chello=E2=80=9D=
-)
-> +and A/foo (with data =E2=80=9Cworld=E2=80=9D).
-> +
-> +It is noteworthy that xfs, ext4, F2FS (when mounted with fsync_mode=3D=
-strict)=20
-> +and btrfs provide SOMC like behaviour in this particular example.
-
-                     SOMC-like
-
-> +However, on document, only XFS claims to provide SOMC.=20
-> +It is not clear if ext4, F2FS and btrfs provide strictly ordered=20
-> +metadata consistency.
-> +
-> +--------------------------------------------------------
-> +[1] http://man7.org/linux/man-pages/man2/fdatasync.2.html
-> +[2] https://www.spinics.net/lists/linux-btrfs/msg77340.html
-> +[3] https://www.spinics.net/lists/fstests/msg09370.html
-> +[4] https://bugzilla.kernel.org/show_bug.cgi?id=3D202485
-> +[5] https://marc.info/?l=3Dfstests&m=3D155010885626284&w=3D2
-> +[6] https://marc.info/?l=3Dfstests&m=3D155011123126916&w=3D2
-> +[7] https://www.spinics.net/lists/fstests/msg09379.html
-> +[8] https://patchwork.kernel.org/patch/10132305/
-> +
->=20
-
-
---=20
-~Randy
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/999.out b/tests/generic/999.out
+> new file mode 100644
+> index 00000000..7fbc6768
+> --- /dev/null
+> +++ b/tests/generic/999.out
+> @@ -0,0 +1 @@
+> +QA output created by 999
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 15227b67..14ac9b2c 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -534,3 +534,4 @@
+>  529 auto quick attr
+>  530 auto quick unlink
+>  531 auto quick unlink
+> +999 auto quick punch seek
+> -- 
+> 2.17.1
+> 
