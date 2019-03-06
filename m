@@ -1,126 +1,96 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:15638 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725790AbfCFVzR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 6 Mar 2019 16:55:17 -0500
-Date: Thu, 7 Mar 2019 08:55:14 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] Add new xattr test 532
-Message-ID: <20190306215514.GF26298@dastard>
-References: <20190305043808.12093-1-lsahlber@redhat.com>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:38452 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727367AbfCFHpH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Mar 2019 02:45:07 -0500
+Received: by mail-yw1-f67.google.com with SMTP id o184so9196463ywo.5
+        for <fstests@vger.kernel.org>; Tue, 05 Mar 2019 23:45:06 -0800 (PST)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190305043808.12093-1-lsahlber@redhat.com>
+References: <20190305114744.129633-1-yuchao0@huawei.com> <20190305205344.GC26298@dastard>
+ <0f1af38b-5dbf-a56a-c0c1-72cf9fafb515@huawei.com> <20190306050049.GA23020@dastard>
+In-Reply-To: <20190306050049.GA23020@dastard>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 6 Mar 2019 09:44:54 +0200
+Message-ID: <CAOQ4uxigMqW8cQO0Veo_JXsVta6WvKv0QHAQ1KcVOwqY1CCL+A@mail.gmail.com>
+Subject: Re: [PATCH v2] generic: test i_mode recovery after power failure
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Ronnie Sahlberg <lsahlber@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: Chao Yu <yuchao0@huawei.com>, fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, linux-f2fs-devel@lists.sourceforge.net, Filipe Manana <fdmanana@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 05, 2019 at 02:38:08PM +1000, Ronnie Sahlberg wrote:
-> This test is cloned from 097 but has had all the tests for trusted.*
-> removed.
-> This makes it possible to use this test on filesystems that can only
-> provide user.* xattrs such as CIFS.
+> > >
+> > > Oh, wait, we *already have that infrastructure*: src/fsync-tester.c
+> > > and generic/311.
+> > >
 
-Looks mostly OK, Ronnie. Couple of minor things below.
+Right now 311 is not "quick".
+That means adding quick tests to it without breaking it up or declaring it quick
+is not a good idea.
 
-> Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
-> ---
->  tests/generic/532     | 144 ++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/532.out | 108 +++++++++++++++++++++++++++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 253 insertions(+)
->  create mode 100755 tests/generic/532
->  create mode 100644 tests/generic/532.out
-> 
-> diff --git a/tests/generic/532 b/tests/generic/532
-> new file mode 100755
-> index 00000000..86adb3a6
-> --- /dev/null
-> +++ b/tests/generic/532
-> @@ -0,0 +1,144 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2000-2004 Silicon Graphics, Inc.  All Rights Reserved.
-> +# Copyright (c) 2017 Google, Inc.  All Rights Reserved.
-> +# Copyright (c) 2019 Red Hat Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 526. Modified from 097.
+> > > Can we please consider rolling all of these "do something, fsync,
+> > > drop-writes, remount check" into fsync-tester.c and do the same for
+> > > all future one-off "did fsync persist X" tests?
+> >
+> > Let me add this testcase into fsync-tester.c, still we need add new
+> > testcase in generic/ directory instead of changing generic/311 directly,
+> > right? since as I remember that Eryu mentioned that:
+> >
+> > "Usually we don't add new sub-tests to existing tests, so new failures
+> > introduced by the new sub-tests won't be treated as false regressions.
+> > Please add a new test instead."
+>
+> Yeah, sure, but there's no point in adding a new fstest for every
+> case we move/add to fsync-tester.c - that's no better than what we have
+> now. i.e the whole point of using fsync-tester.c is to aggregate
+> lots of individual tests full of copy-n-paste dm-flakey
+> infrastructure into a single test. Copy-n-paste of fsync tester
+> boiler plate is not an improvement.
+>
+> There are other 'aggregation' style tests in fstests, and we do
+> extend them from time to time. Some that come to mind are the
+> falloc/fpunch/fzero corner case tests, and we add new functionality
+> to fsstress and fsx all the time which affects every test that
+> runs them, etc.
+>
+>
+> > https://patchwork.kernel.org/patch/10042149/
+> >
+> > Or to avoid redundant copied code from generic/311 in each fsync related
+> > patch, do I need just add my case into fsync_tester.c? and before
+> > announcement of fstests master branch, we can add one testcase into
+> > generic/ directory, in that testcase we gather/test all new added cases in
+> > fsync_tester.c recently.
+>
+> Gathering them all into fsync-tester is what I'm suggesting should
+> be done....
+>
 
-Put the "Modified from 097" in the long description below.
+We could introduce the concept of test cases into the test infrastructure.
+For example:
 
-> +#
-> +# simple attr tests for user. EAs:
-> +#  - set
-> +#  - get
-> +#  - list
-> +#  - remove
-> +# Basic testing.
+--- a/tests/generic/311
++++ b/tests/generic/311
+@@ -90,7 +90,7 @@ _mount_flakey
+ buffered=0
+ direct=1
 
-i.e. This is about all that is necessary:
+-for i in $(seq 1 20); do
++for i in $(seq ${TEST_CASE_START:-1} ${TEST_CASE_END:-20}); do
+        lockfs=1
+        SEED=$i
+        echo "Running test $i buffered, normal suspend"
+---
 
-# FS QA Test No. generic/526.
-#
-# Simple attr smoke tests for user EAs, dereived from generic/097.
+Adding a new test cases (beyond changing fsync_tester.c)
+requires:
+- Creating symlink tests/generic/311:21..24 -> 311
+- Writing golden output tests/generic/311:21..24.out
 
+Test infrastructure will parse TEST_CASE_START/END
+from test name.
 
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +file=$TEST_DIR/foo
+"No regressing tests" rule not broken.
+No boiler plate copy of tests.
 
-Usual thing to do here with test files on the TEST_DIR is to append
-the test number to them and then leave them hanging around.
-
-> +
-> +_cleanup()
-> +{
-> +	rm -f $tmp.* $file
-> +}
-
-i.e.
-
-file=$TEST_DIR/foo.$seq
-
-_cleanup()
-{
-	cd /
-	rm -f $tmp.*
-}
-
-I think the test is also missing a:
-
-rm -f $seqres.full
-
-as part of the test initialisation.
-
-> +echo -e "\ncreate file foo"
-> +rm -f $file
-> +touch $file
-
-because the file is removed at the start of the test anyway.
-
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -534,3 +534,4 @@
->  529 auto quick attr
->  530 auto quick unlink
->  531 auto quick unlink
-> +532 attr auto quick
-
-"auto quick attr" so the group order list is consistent with most of
-the other lines in the file...
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Amir.
