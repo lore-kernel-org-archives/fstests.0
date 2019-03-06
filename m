@@ -1,165 +1,98 @@
-Received: from mail-yw1-f65.google.com ([209.85.161.65]:44786 "EHLO
-        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727436AbfCDR7P (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 4 Mar 2019 12:59:15 -0500
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:38324 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725267AbfCFFAz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 6 Mar 2019 00:00:55 -0500
+Date: Wed, 6 Mar 2019 16:00:49 +1100
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH v2] generic: test i_mode recovery after power failure
+Message-ID: <20190306050049.GA23020@dastard>
+References: <20190305114744.129633-1-yuchao0@huawei.com>
+ <20190305205344.GC26298@dastard>
+ <0f1af38b-5dbf-a56a-c0c1-72cf9fafb515@huawei.com>
 MIME-Version: 1.0
-References: <20190304140622.23997-1-fdmanana@kernel.org> <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
- <CAL3q7H6ceptNOyf65jbzojbZV5Nq3d0iKvYOvvE=pLaVnpgO2w@mail.gmail.com>
-In-Reply-To: <CAL3q7H6ceptNOyf65jbzojbZV5Nq3d0iKvYOvvE=pLaVnpgO2w@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 4 Mar 2019 19:59:02 +0200
-Message-ID: <CAOQ4uxhno=ORXpLgLC2O7KoJJXm2sVEtZ8DgiHZi-4p_HmfEwg@mail.gmail.com>
-Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and rename
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0f1af38b-5dbf-a56a-c0c1-72cf9fafb515@huawei.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Chao Yu <yuchao0@huawei.com>
+Cc: fstests@vger.kernel.org, guaneryu@gmail.com, linux-f2fs-devel@lists.sourceforge.net, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 4, 2019 at 5:23 PM Filipe Manana <fdmanana@kernel.org> wrote:
->
-> On Mon, Mar 4, 2019 at 3:04 PM Amir Goldstein <amir73il@gmail.com> wrote:
-> >
-> > On Mon, Mar 4, 2019 at 4:44 PM <fdmanana@kernel.org> wrote:
-> > >
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test that if we truncate a file to reduce its size, rename it and then
-> > > fsync it, after a power failure the file has a correct size and name.
-> > >
-> >
-> > I am not sure that ext4/xfs semantics guaranty anything about
-> > persisting file name after fsync of file?...
-> >
-> > > This test is motivated by a bug found in btrfs, which is fixed by a
-> > > patch for the linux kernel titled:
-> > >
-> > >   "Btrfs: fix incorrect file size after shrinking truncate and fsync"
-> >
-> > At least the title of this patch says nothing about persisting the
-> > name.
->
-> Because the bug in btrfs is not about persisting the name, it's about
-> persisting the correct inode size.
->
+On Wed, Mar 06, 2019 at 10:29:10AM +0800, Chao Yu wrote:
+> On 2019/3/6 4:53, Dave Chinner wrote:
+> > On Tue, Mar 05, 2019 at 07:47:44PM +0800, Chao Yu wrote:
+> >> After fsync, filesystem should guarantee inode metadata including
+> >> permission info being persisted, so even after sudden power-cut,
+> >> during mount, we should recover i_mode fields correctly, in order
+> >> to not loss those meta info.
+> >>
+> >> So adding this testcase to check whether generic filesystem can
+> >> guarantee that.
+> > 
+> > Can I make a suggestion here?
+> > 
+> > I've noticed that we are getting a lot of these one-off, random
+> > "fsync persists one specific piece of metadata in one specific case"
+> > tests, mainly in response to some fsync bug that was found in btrfs.
+> > This is reactive, and does not find new bugs in this area.
+> > 
+> > We are also beyond the point where the number of tests is
+> > maintainable (e.g. to be able to make infrastructure changes), so we
+> > really should be looking to consolidate largely similar tests into
+> > single tests where possible.
+> > 
+> > I'd strongly suggest that a robust fsync tester should be written
+> > for all the cases that are currently being addressed in an ad hoc
+> > fashion. Then they can be consolidated into a single test run, and
+> > we can get rid of all the one-off "fsync failed on this <specific
+> > thing>" tests from the harness.
+> 
+> Thanks for the suggestion, and that makes sense.
+> 
+> > 
+> > Oh, wait, we *already have that infrastructure*: src/fsync-tester.c
+> > and generic/311.
+> > 
+> > Can we please consider rolling all of these "do something, fsync,
+> > drop-writes, remount check" into fsync-tester.c and do the same for
+> > all future one-off "did fsync persist X" tests?
+> 
+> Let me add this testcase into fsync-tester.c, still we need add new
+> testcase in generic/ directory instead of changing generic/311 directly,
+> right? since as I remember that Eryu mentioned that:
+> 
+> "Usually we don't add new sub-tests to existing tests, so new failures
+> introduced by the new sub-tests won't be treated as false regressions.
+> Please add a new test instead."
 
-OK. Still AFAIK, ext4/xfs don't guaranty that the name bar will exist
-after power failure unless the parent dir was fsynced.
-If you fsync the parent dir instead of the file after rename, it will
-make the test correct for ext4/xfs (and POSIX for that matter).
-Will that test modification still catch the btrfs bug (pre fix)?
+Yeah, sure, but there's no point in adding a new fstest for every
+case we move/add to fsync-tester.c - that's no better than what we have
+now. i.e the whole point of using fsync-tester.c is to aggregate
+lots of individual tests full of copy-n-paste dm-flakey
+infrastructure into a single test. Copy-n-paste of fsync tester
+boiler plate is not an improvement.
 
-Thanks,
-Amir.
+There are other 'aggregation' style tests in fstests, and we do
+extend them from time to time. Some that come to mind are the
+falloc/fpunch/fzero corner case tests, and we add new functionality
+to fsstress and fsx all the time which affects every test that
+runs them, etc.
 
-> >
-> > >
-> > > This test currently passes on ext4, xfs, f2fs and patched btrfs.
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >  tests/generic/532     | 66 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> > >  tests/generic/532.out |  8 +++++++
-> > >  tests/generic/group   |  1 +
-> > >  3 files changed, 75 insertions(+)
-> > >  create mode 100755 tests/generic/532
-> > >  create mode 100644 tests/generic/532.out
-> > >
-> > > diff --git a/tests/generic/532 b/tests/generic/532
-> > > new file mode 100755
-> > > index 00000000..64992d85
-> > > --- /dev/null
-> > > +++ b/tests/generic/532
-> > > @@ -0,0 +1,66 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 532
-> > > +#
-> > > +# Test that if we truncate a file to reduce its size, rename it and then fsync
-> > > +# it, after a power failure the file has a correct size and name.
-> > > +#
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +tmp=/tmp/$$
-> > > +status=1       # failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +       _cleanup_flakey
-> > > +       cd /
-> > > +       rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/dmflakey
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +_require_dm_target flakey
-> > > +
-> > > +rm -f $seqres.full
-> > > +
-> > > +_scratch_mkfs >>$seqres.full 2>&1
-> > > +_require_metadata_journaling $SCRATCH_DEV
-> > > +_init_flakey
-> > > +_mount_flakey
-> > > +
-> > > +# Create our test file with an initial size of 8000 bytes, then fsync it,
-> > > +# followed by a truncate that reduces its size down to 3000 bytes.
-> > > +$XFS_IO_PROG -f -c "pwrite -S 0xab 0 8000" \
-> > > +            -c "fsync" \
-> > > +            -c "truncate 3000" \
-> > > +            $SCRATCH_MNT/foo | _filter_xfs_io
-> > > +
-> > > +# Now rename the file and fsync it again.
-> > > +mv $SCRATCH_MNT/foo $SCRATCH_MNT/bar
-> > > +$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
-> > > +
-> > > +# Simulate a power failure and mount the filesystem to check that the file was
-> > > +# persisted with the new name and has a size of 3000 bytes.
-> > > +_flakey_drop_and_remount
-> > > +
-> > > +[ -f $SCRATCH_MNT/bar ] || echo "file name 'bar' is missing"
-> > > +[ -f $SCRATCH_MNT/foo ] && echo "file name 'foo' still exists"
-> > > +
-> > > +echo "File content after power failure:"
-> > > +od -A d -t x1 $SCRATCH_MNT/bar
-> > > +
-> > > +_unmount_flakey
-> > > +
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/532.out b/tests/generic/532.out
-> > > new file mode 100644
-> > > index 00000000..554fbe2a
-> > > --- /dev/null
-> > > +++ b/tests/generic/532.out
-> > > @@ -0,0 +1,8 @@
-> > > +QA output created by 532
-> > > +wrote 8000/8000 bytes at offset 0
-> > > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > > +File content after power failure:
-> > > +0000000 ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab ab
-> > > +*
-> > > +0002992 ab ab ab ab ab ab ab ab
-> > > +0003000
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 31011ac8..7d63f303 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -534,3 +534,4 @@
-> > >  529 auto quick attr
-> > >  530 auto quick unlink
-> > >  531 auto quick unlink
-> > > +532 auto quick log
-> > > --
-> > > 2.11.0
-> > >
+
+> https://patchwork.kernel.org/patch/10042149/
+> 
+> Or to avoid redundant copied code from generic/311 in each fsync related
+> patch, do I need just add my case into fsync_tester.c? and before
+> announcement of fstests master branch, we can add one testcase into
+> generic/ directory, in that testcase we gather/test all new added cases in
+> fsync_tester.c recently.
+
+Gathering them all into fsync-tester is what I'm suggesting should
+be done....
+
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
