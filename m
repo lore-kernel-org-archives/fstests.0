@@ -1,91 +1,144 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:40990 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725554AbfCGHwR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Mar 2019 02:52:17 -0500
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:35251 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726028AbfCGGOY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Mar 2019 01:14:24 -0500
+Date: Thu, 7 Mar 2019 14:14:18 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 4/5] generic: test statx attribute_mask setting
+Message-ID: <20190307061418.GL2824@desktop>
+References: <155173434205.767.15128498725168844621.stgit@magnolia>
+ <155173437536.767.4083133841860983852.stgit@magnolia>
 MIME-Version: 1.0
-References: <20190304140622.23997-1-fdmanana@kernel.org> <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
- <20190305005020.GA26298@dastard> <CAOQ4uxgKj8pAKKra9jv+xTb9dOxG-J5fKvJ_6a_iabWR9RbgrQ@mail.gmail.com>
- <20190305223301.GD26298@dastard> <CAOQ4uxggon==2r2hibMvXc4_N4zod+2z0Ycw74eKRn+q1uwYsw@mail.gmail.com>
- <20190306214813.GE26298@dastard>
-In-Reply-To: <20190306214813.GE26298@dastard>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 7 Mar 2019 09:52:03 +0200
-Message-ID: <CAOQ4uxjM0-D8c3KR0ooXYhhUa5+19j_=3XUaXf6vGMbsNhShJw@mail.gmail.com>
-Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and rename
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <155173437536.767.4083133841860983852.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Filipe Manana <fdmanana@kernel.org>, fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 6, 2019 at 11:48 PM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Wed, Mar 06, 2019 at 09:51:23AM +0200, Amir Goldstein wrote:
-> > On Wed, Mar 6, 2019 at 12:33 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > > So the reason this is working is because 2nd fsync needs to
-> > > > persist ctime of B and not because it needs to persist the
-> > > > truncate.
-> > >
-> > > ctime modifications during rename are irrelevent because there's no
-> > > fsync between the truncate and the rename so the file inode is
-> > > already dirty due to the truncate. I think you've got the wrong end
-> > > of the stick here, Amir. :)
-> >
-> > Doh! The discussion is still interesting because people have
-> > hard time to understand that those hidden details like ctime
-> > update on rename may have different behavior on different fs
-> > regardless if they obay ordered metadata or not.
-> > Btrfs is different in the respect of metadata dependencies from
-> > xfs/ext4 in many ways as seen in the different rename/link
-> > crash consistency discussions.
->
-> Yes, little things like can result in different behaviour, but what
-> we are trying to do is get to the point where there is minimal
-> difference between all crash-recovery-capable linux filesystems.
->
-> e.g. what we see here is that by always including the inode being
-> moved in the rename transaction (regardless of how a filesystem
-> acheives that), we provide consistent, reliable, predictable
-> behaviour in all cases of "fsync after rename". IOWs, the SOMC model
-> that _require_metadata_journaling tests are supposed to conform to
-> is far more strict that POSIX requires and our tests need to reflect
-> this stricter consistency model.
->
-> IOWs, we should be encoding the behaviour we want in these tests
-> rather than implementing yet another "test POSIX compatible
-> behaviour" - POSIX is a complete crapshoot when it comes to
-> persistence requirements. And if a filesystem fails a SOMC-model
-> test, then the filesystem needs to be fixed, not have the test
-> "relaxed" to only exercise POSIX-defined behaviour.
->
+On Mon, Mar 04, 2019 at 01:19:35PM -0800, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Make sure the filesystem reports attribute_mask for the attributes it
+> supports.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Agreed! v1 is better than v2. Sorry for my mistake in v1 review.
+A few minor issues, and I can fix them all on commit (I'm sure I do test
+the changes this time :)).
 
-I went back to look at similar fsync tests by Filipe:
-generic/{106,107,335,336,341,342,343,348,498,501,502,509,510,512}
+> ---
+>  tests/generic/713     |   67 +++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/713.out |    1 +
+>  tests/generic/group   |    1 +
+>  3 files changed, 69 insertions(+)
+>  create mode 100755 tests/generic/713
+>  create mode 100644 tests/generic/713.out
+> 
+> 
+> diff --git a/tests/generic/713 b/tests/generic/713
+> new file mode 100755
+> index 00000000..cd128d9c
+> --- /dev/null
+> +++ b/tests/generic/713
+> @@ -0,0 +1,67 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0+
+> +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 713
+> +#
+> +# Regression test for a bug where XFS fails to set statx attributes_mask but
+> +# sets attribute flags anyway.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	rm -f $tmp.* $testfile
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +
+> +# real QA test starts here
+> +_supported_fs generic
+> +_supported_os Linux
+> +_require_test
+> +
+> +get_attributes() {
+> +	$XFS_IO_PROG -r -c "statx -r" $1 | grep 'stat.attributes =' | cut -d ' ' -f 3
+> +}
+> +
+> +get_attributes_mask() {
+> +	$XFS_IO_PROG -r -c "statx -r" $1 | grep 'stat.attributes_mask =' | cut -d ' ' -f 3
+> +}
+> +
+> +check_statx_attributes()
+> +{
+> +	attrs=$(get_attributes $testfile)
+> +	mask=$(get_attributes_mask $testfile)
 
-I found some alleged subtle mistakes about SOMC assumptions.
+Declare them as 'local'.
 
-generic/336 does:
-touch $SCRATCH_MNT/a/foo
-ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/b/foo_link
-touch $SCRATCH_MNT/b/bar
-sync
-unlink $SCRATCH_MNT/b/foo_link
-mv $SCRATCH_MNT/b/bar $SCRATCH_MNT/c/
-$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a/foo
+> +
+> +	echo "MASK:$mask:ATTRS:$attrs:" >> $seqres.full
+> +
+> +	test -z "$mask" && _notrun "xfs_io statx command does not support attributes_mask"
+> +	test $(( mask )) -eq 0 && echo "attributes mask is zero"
+> +	test $(( attrs & ~(mask) )) -ne 0 && echo "attributes $attrs do not appear in mask $mask"
+> +}
+> +
 
-And expects both unlink and rename to persist.
-However, this is only true in the *very likely* case that there is no
-journal commit in between unlink and rename, because fsync foo
-is only guaranteed to persist metadata changes that depend on the
-unlink and happened BEFORE it, which is not the case for the rename
-of bar.
+Added the below here:
 
-generic/343 and generic/510 do something similar.
+rm -f $seqres.full
+echo "Silence is golden"
 
-At first glance, generic/498 is actually broken (for xfs) or at least
-I don't understand why it works.
+> +# Create file, check for incorrect mask
+> +testfile=$TEST_DIR/$$.test
+> +touch $testfile
+> +check_statx_attributes
+> +
+> +# Do it again, but this time try to turn on one of the attributes.
+> +if chattr +i $testfile > /dev/null 2>&1; then
+> +	check_statx_attributes
+> +	chattr -i $testfile
+> +fi
+> +if chattr +a $testfile > /dev/null 2>&1; then
+> +	check_statx_attributes
+> +	chattr -a $testfile
+
+Change 'chattr' to '$CHATTR_PROG'.
 
 Thanks,
-Amir.
+Eryu
+
+> +fi
+> +
+> +status=0
+> +exit
+> diff --git a/tests/generic/713.out b/tests/generic/713.out
+> new file mode 100644
+> index 00000000..066598d3
+> --- /dev/null
+> +++ b/tests/generic/713.out
+> @@ -0,0 +1 @@
+> +QA output created by 713
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 15227b67..d04bf39f 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -534,3 +534,4 @@
+>  529 auto quick attr
+>  530 auto quick unlink
+>  531 auto quick unlink
+> +713 auto quick
+> 
