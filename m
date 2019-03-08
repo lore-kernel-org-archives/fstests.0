@@ -1,140 +1,86 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:9107 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726268AbfCHDqw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 7 Mar 2019 22:46:52 -0500
-Date: Fri, 8 Mar 2019 14:46:46 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH] generic: add test for fsync after shrinking truncate and
- rename
-Message-ID: <20190308034646.GI26298@dastard>
-References: <20190304140622.23997-1-fdmanana@kernel.org>
- <CAOQ4uxi87QhQHake0L_xVtUYChc3D2kLqho1obq14aG6zCMu6A@mail.gmail.com>
- <20190305005020.GA26298@dastard>
- <CAOQ4uxgKj8pAKKra9jv+xTb9dOxG-J5fKvJ_6a_iabWR9RbgrQ@mail.gmail.com>
- <20190305223301.GD26298@dastard>
- <CAOQ4uxggon==2r2hibMvXc4_N4zod+2z0Ycw74eKRn+q1uwYsw@mail.gmail.com>
- <20190306214813.GE26298@dastard>
- <CAOQ4uxjM0-D8c3KR0ooXYhhUa5+19j_=3XUaXf6vGMbsNhShJw@mail.gmail.com>
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:36161 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726242AbfCHCnA (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 7 Mar 2019 21:43:00 -0500
+Received: by mail-pf1-f194.google.com with SMTP id n22so12988493pfa.3
+        for <fstests@vger.kernel.org>; Thu, 07 Mar 2019 18:42:59 -0800 (PST)
+Date: Fri, 8 Mar 2019 10:42:53 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] Add new xattr test 532
+Message-ID: <20190308024253.GM2824@desktop>
+References: <20190305043613.11752-1-lsahlber@redhat.com>
+ <20190306125234.GJ2824@desktop>
+ <22121819.6359026.1551926783232.JavaMail.zimbra@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjM0-D8c3KR0ooXYhhUa5+19j_=3XUaXf6vGMbsNhShJw@mail.gmail.com>
+In-Reply-To: <22121819.6359026.1551926783232.JavaMail.zimbra@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Filipe Manana <fdmanana@kernel.org>, fstests <fstests@vger.kernel.org>, Linux Btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Ronnie Sahlberg <lsahlber@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 07, 2019 at 09:52:03AM +0200, Amir Goldstein wrote:
-> On Wed, Mar 6, 2019 at 11:48 PM Dave Chinner <david@fromorbit.com> wrote:
-> >
-> > On Wed, Mar 06, 2019 at 09:51:23AM +0200, Amir Goldstein wrote:
-> > > On Wed, Mar 6, 2019 at 12:33 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > > > So the reason this is working is because 2nd fsync needs to
-> > > > > persist ctime of B and not because it needs to persist the
-> > > > > truncate.
-> > > >
-> > > > ctime modifications during rename are irrelevent because there's no
-> > > > fsync between the truncate and the rename so the file inode is
-> > > > already dirty due to the truncate. I think you've got the wrong end
-> > > > of the stick here, Amir. :)
-> > >
-> > > Doh! The discussion is still interesting because people have
-> > > hard time to understand that those hidden details like ctime
-> > > update on rename may have different behavior on different fs
-> > > regardless if they obay ordered metadata or not.
-> > > Btrfs is different in the respect of metadata dependencies from
-> > > xfs/ext4 in many ways as seen in the different rename/link
-> > > crash consistency discussions.
-> >
-> > Yes, little things like can result in different behaviour, but what
-> > we are trying to do is get to the point where there is minimal
-> > difference between all crash-recovery-capable linux filesystems.
-> >
-> > e.g. what we see here is that by always including the inode being
-> > moved in the rename transaction (regardless of how a filesystem
-> > acheives that), we provide consistent, reliable, predictable
-> > behaviour in all cases of "fsync after rename". IOWs, the SOMC model
-> > that _require_metadata_journaling tests are supposed to conform to
-> > is far more strict that POSIX requires and our tests need to reflect
-> > this stricter consistency model.
-> >
-> > IOWs, we should be encoding the behaviour we want in these tests
-> > rather than implementing yet another "test POSIX compatible
-> > behaviour" - POSIX is a complete crapshoot when it comes to
-> > persistence requirements. And if a filesystem fails a SOMC-model
-> > test, then the filesystem needs to be fixed, not have the test
-> > "relaxed" to only exercise POSIX-defined behaviour.
-> >
+On Wed, Mar 06, 2019 at 09:46:23PM -0500, Ronnie Sahlberg wrote:
 > 
-> Agreed! v1 is better than v2. Sorry for my mistake in v1 review.
 > 
-> I went back to look at similar fsync tests by Filipe:
-> generic/{106,107,335,336,341,342,343,348,498,501,502,509,510,512}
 > 
-> I found some alleged subtle mistakes about SOMC assumptions.
 > 
-> generic/336 does:
-> touch $SCRATCH_MNT/a/foo
-> ln $SCRATCH_MNT/a/foo $SCRATCH_MNT/b/foo_link
-> touch $SCRATCH_MNT/b/bar
-> sync
-> unlink $SCRATCH_MNT/b/foo_link
-> mv $SCRATCH_MNT/b/bar $SCRATCH_MNT/c/
-> $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/a/foo
+> ----- Original Message -----
+> > From: "Eryu Guan" <guaneryu@gmail.com>
+> > To: "Ronnie Sahlberg" <lsahlber@redhat.com>
+> > Cc: "fstests" <fstests@vger.kernel.org>
+> > Sent: Wednesday, 6 March, 2019 10:52:34 PM
+> > Subject: Re: [PATCH] Add new xattr test 532
+> > 
+> > On Tue, Mar 05, 2019 at 02:36:13PM +1000, Ronnie Sahlberg wrote:
+> > > This test is cloned from 097 but has had all the tests for trusted.*
+> > > removed.
+> > > This makes it possible to use this test on filesystems that can only
+> > > provide user.* xattrs such as CIFS.
+> > > 
+> > > Signed-off-by: Ronnie Sahlberg <lsahlber@redhat.com>
+> > 
+> > Sorry I missed your last patch of this clone..
 > 
-> And expects both unlink and rename to persist.
+> No worries.  I will resend it later once I address Daves concerns.
+> 
+> > 
+> > Do I need to do special setup for CIFS to support xattr? Currently I got
+> > test _notrun because attrs are not supported by CIFS. I was mounting a
+> > local samba server with
+> > 
+> > -o vers=3.0 -o username=user,password=passwd,sfu -o
+> > context=system_u:object_r:root_t:s0 //localhost/scratch /mnt/scratch
+> 
+> You don't need the 'sfu' mount option but you likely need to make sure you have the proper vfs modules loaded for samba:
+> I use this on my share :
+> 
+> [Share]
+> 	path = /Share
+> 	read only = no
+> 	guest ok = no
+> 	vfs objects = acl_xattr, streams_xattr aio_pthread
+> 	ea support = yes
+> 	aio read size = 16384
+> 	aio write size = 16384
+> 
+> I think the only important one is ea support = yes (the xattrs are stored as EAs)
 
-*nod*. Yup, that's a typical async transactional ordering
-behaviour because the dirty state is carried on the inode, not the
-path or fd that is being used to access it.
+I got xattr working on CIFS now, thanks!
 
-> However, this is only true in the *very likely* case that there is no
-> journal commit in between unlink and rename, because fsync foo
-> is only guaranteed to persist metadata changes that depend on the
-> unlink and happened BEFORE it, which is not the case for the rename
-> of bar.
+> 
+> 
+> 
+> > 
+> > Kernel is 5.0.0-rc7.
+> > 
+> > But instead of cloning all the user.* xattr tests, I think it's better
+> > to split generic/097, leave all trusted.* xattr tests there and move all
+> > user.* xattr tests to this new test. So we don't have to maintain two
+> > copys of the same user.* xattr tests.
 
-Yup, most likely. I haven't looked at any of these btrfs-inspired
-fsync tests in any detail so it wouldn't surprise me that there are
-issues like this in them - I just don't have time to look at
-everything.
+But it seems you missed above comments when sending new version of the
+patch :)
 
-Indeed, if there are mistaken assumptions in the tests based around
-pending dirty state and async transaction aggregation, then running
-the tests with "-o dirsync" or even "-o wsync" should cause such
-tests to fail.
-
-> At first glance, generic/498 is actually broken (for xfs) or at least
-> I don't understand why it works.
-
-The test does this:
-
-mkdir $SCRATCH_MNT/A
-mkdir $SCRATCH_MNT/B
-mkdir $SCRATCH_MNT/A/C
-touch $SCRATCH_MNT/B/foo
-$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/B/foo
-
-# It is important the new hard link is located in a hierarchy of new directories
-# (not yet persisted).
-ln $SCRATCH_MNT/B/foo $SCRATCH_MNT/A/C/foo
-$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/A
-
-_flakey_drop_and_remount
-
-And it expects /A and B/foo to be there afterwards. The comment
-"(not yet persisted)" is about the buggy btrfs behaviour, not how a
-SOMC fs should behave.
-
-So, yeah, that should always work on XFS, because the first fsync
-persists everything the test checks (due to common ancestors), and
-second fsync is a no-opt because dir A has already been
-checkpointed.
-
-
-Cheers,
-
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+Thanks,
+Eryu
