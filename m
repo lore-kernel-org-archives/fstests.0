@@ -1,125 +1,64 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:60770 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726334AbfCIRe6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 9 Mar 2019 12:34:58 -0500
-Date: Sat, 9 Mar 2019 09:34:43 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: xfs/420 and xfs/421: don't disturb unwritten status with md5sum
-Message-ID: <20190309173443.GB4359@magnolia>
-References: <20190218091827.12619-1-hch@lst.de>
- <20190218091951.GA5171@lst.de>
- <20190309103211.GP2824@desktop>
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:32895 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725791AbfCIKPS (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 9 Mar 2019 05:15:18 -0500
+Received: by mail-pg1-f196.google.com with SMTP id h11so164932pgl.0
+        for <fstests@vger.kernel.org>; Sat, 09 Mar 2019 02:15:17 -0800 (PST)
+Date: Sat, 9 Mar 2019 18:15:10 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] generic: test i_mode recovery after power failure
+Message-ID: <20190309101510.GO2824@desktop>
+References: <20190305114744.129633-1-yuchao0@huawei.com>
+ <20190305205344.GC26298@dastard>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190309103211.GP2824@desktop>
+In-Reply-To: <20190305205344.GC26298@dastard>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Christoph Hellwig <hch@lst.de>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: Chao Yu <yuchao0@huawei.com>, fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, fdmanana@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Mar 09, 2019 at 06:32:11PM +0800, Eryu Guan wrote:
-> On Mon, Feb 18, 2019 at 10:19:51AM +0100, Christoph Hellwig wrote:
-> > The way we decided if an unwritten extent is considered a hole or data
-> > is by checking if the page and/or blocks are marked uptodate, that is
-> > contain valid data in the page cache.
+On Wed, Mar 06, 2019 at 07:53:44AM +1100, Dave Chinner wrote:
+> On Tue, Mar 05, 2019 at 07:47:44PM +0800, Chao Yu wrote:
+> > After fsync, filesystem should guarantee inode metadata including
+> > permission info being persisted, so even after sudden power-cut,
+> > during mount, we should recover i_mode fields correctly, in order
+> > to not loss those meta info.
 > > 
-> > xfs/420 and xfs/421 try to exercise SEEK_HOLE / SEEK_DATA in the
-> > presence of cowextsize preallocations over holes in the data fork.  The
-> > current XFS code never actually uses those for buffer writes, but a
-> > pending patch changes that.  For SEEK_HOLE / SEEK_DATA to work properly
-> > in that case we also need to look at the COW fork in their
-> > implementations and thus have to rely on the unwritten extent page cache
-> > probing.  But the tests for it ensure we do have valid data in the
-> > pagecache by calling md5sum on the test files, and thus reading their
-> > contents (including the zero-filled holes) in, and thus making them
-> > all valid data.
-> > 
-> > Fix that by dropping the page cache content after the md5sum calls.
-> > 
-> > Signed-off-by: Christoph Hellwig <hch@lst.de>
+> > So adding this testcase to check whether generic filesystem can
+> > guarantee that.
 > 
-> Hi Darrick, would you please help review this version of the fix as
-> well? I basically have no idea about the implementation of the "pending
-> patch" and what it changes.. Thanks a lot!
-
-/me wonders if the "md5sum and drop caches" could be refactored a bit,
-but as a strict bugfix for always_cow mode this looks ok to me:
-
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-
---D
-
-
-> Eryu
+> Can I make a suggestion here?
 > 
-> > ---
-> >  tests/xfs/420 | 6 ++++++
-> >  tests/xfs/421 | 6 ++++++
-> >  2 files changed, 12 insertions(+)
-> > 
-> > diff --git a/tests/xfs/420 b/tests/xfs/420
-> > index a083a12b..34199637 100755
-> > --- a/tests/xfs/420
-> > +++ b/tests/xfs/420
-> > @@ -83,6 +83,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
-> >  $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-> > @@ -106,6 +108,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "sync filesystem" | tee -a $seqres.full
-> >  sync
-> > @@ -123,6 +127,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "Remount" | tee -a $seqres.full
-> >  _scratch_cycle_mount
-> > diff --git a/tests/xfs/421 b/tests/xfs/421
-> > index a2734aba..374389bd 100755
-> > --- a/tests/xfs/421
-> > +++ b/tests/xfs/421
-> > @@ -83,6 +83,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "CoW the shared part then write into the empty part" | tee -a $seqres.full
-> >  $XFS_IO_PROG -c "cowextsize" $testdir/file1 >> $seqres.full
-> > @@ -106,6 +108,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "sync filesystem" | tee -a $seqres.full
-> >  sync
-> > @@ -123,6 +127,8 @@ echo "Compare files"
-> >  md5sum $testdir/file1 | _filter_scratch
-> >  md5sum $testdir/file2 | _filter_scratch
-> >  md5sum $testdir/file3 | _filter_scratch
-> > +# drop caches to make sure the page cache for the unwritten extents is clean
-> > +echo 1 > /proc/sys/vm/drop_caches
-> >  
-> >  echo "Remount" | tee -a $seqres.full
-> >  _scratch_cycle_mount
-> > -- 
-> > 2.20.1
-> > 
+> I've noticed that we are getting a lot of these one-off, random
+> "fsync persists one specific piece of metadata in one specific case"
+> tests, mainly in response to some fsync bug that was found in btrfs.
+> This is reactive, and does not find new bugs in this area.
+> 
+> We are also beyond the point where the number of tests is
+> maintainable (e.g. to be able to make infrastructure changes), so we
+> really should be looking to consolidate largely similar tests into
+> single tests where possible.
+
+This sounds reasonable, and could reduce the test time a bit as well.
+
+> 
+> I'd strongly suggest that a robust fsync tester should be written
+> for all the cases that are currently being addressed in an ad hoc
+> fashion. Then they can be consolidated into a single test run, and
+> we can get rid of all the one-off "fsync failed on this <specific
+> thing>" tests from the harness.
+> 
+> Oh, wait, we *already have that infrastructure*: src/fsync-tester.c
+> and generic/311.
+> 
+> Can we please consider rolling all of these "do something, fsync,
+> drop-writes, remount check" into fsync-tester.c and do the same for
+> all future one-off "did fsync persist X" tests?
+
+I'd like to take this patch and the one from Filipe for now, and look
+into folding them into fsync-tester later, in a separate patch.
+
+Thanks,
+Eryu
