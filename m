@@ -1,345 +1,260 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:44184 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728535AbfCLROy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Mar 2019 13:14:54 -0400
-Date: Tue, 12 Mar 2019 10:14:39 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfstests: test swapext log replay
-Message-ID: <20190312171439.GG4660@magnolia>
-References: <20181223141721.5318-1-zlang@redhat.com>
- <20190312054234.GC7200@dhcp-12-102.nay.redhat.com>
- <20190312054248.GF4359@magnolia>
- <20190312061704.GD7200@dhcp-12-102.nay.redhat.com>
- <20190312161908.GG4359@magnolia>
- <20190312163959.GE7200@dhcp-12-102.nay.redhat.com>
+Received: from mail-io1-f65.google.com ([209.85.166.65]:37324 "EHLO
+        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726883AbfCLT1a (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 12 Mar 2019 15:27:30 -0400
+From: Jayashree <jaya@cs.utexas.edu>
+Subject: [PATCH v2] Documenting the crash-recovery guarantees of Linux file systems
+Date: Tue, 12 Mar 2019 14:27:00 -0500
+Message-Id: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190312163959.GE7200@dhcp-12-102.nay.redhat.com>
+Content-Type: text/plain; charset=UTF-8
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org, Eric Sandeen <sandeen@redhat.com>
+Content-Transfer-Encoding: quoted-printable
+To: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-doc@vger.kernel.org
+Cc: vijay@cs.utexas.edu, amir73il@gmail.com, tytso@mit.edu, chao@kernel.org, david@fromorbit.com, fdmanana@gmail.com, corbet@lwn.net, Jayashree <jaya@cs.utexas.edu>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 13, 2019 at 12:39:59AM +0800, Zorro Lang wrote:
-> On Tue, Mar 12, 2019 at 09:19:08AM -0700, Darrick J. Wong wrote:
-> > [add sandeen to cc]
-> > 
-> > On Tue, Mar 12, 2019 at 02:17:04PM +0800, Zorro Lang wrote:
-> > > On Mon, Mar 11, 2019 at 10:42:48PM -0700, Darrick J. Wong wrote:
-> > > > On Tue, Mar 12, 2019 at 01:42:34PM +0800, Zorro Lang wrote:
-> > > > > On Sun, Dec 23, 2018 at 10:17:21PM +0800, Zorro Lang wrote:
-> > > > > > If an inode had been in btree format and had a data fork owner change
-> > > > > > logged (XFS_ILOG_DOWNER), after changing the format to non-btree, will
-> > > > > > hit an ASSERT in xfs_recover_inode_owner_change() which enforces that
-> > > > > > if XFS_ILOG_[AD]OWNER is set.
-> > > > > > 
-> > > > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > > > ---
-> > > > > > 
-> > > > > > This case is written for Eric's patchset:
-> > > > > > [PATCH 0/2] xfs: swapext replay fixes
-> > > > > > 
-> > > > > > Thanks for the reproducer which is provided by Eric. I've tested on latest
-> > > > > > xfs-linux for-next branch with the 2 patches of Eric:
-> > > > > > # git log --oneline
-> > > > > > 39a9114528e4 (HEAD -> for-next) xfs: clear XFS_ILOG_[AD]OWNER for non-btree formats
-> > > > > > 46fe0206d242 xfs: handle bad flags in xfs_recover_inode_owner_change
-> > > > > > 86d163dbfe2a (tag: xfs-4.21-merge-1, origin/xfs-4.21-merge, origin/for-next) xfs: stringify scrub types in ftrace output
-> > > > > > ...
-> > > > > > ...
-> > > > > > 
-> > > > > > But I still can hit a fs corruption which can't be log replayed[1]. Only
-> > > > > > "xfs_repair -L" can help to fix that.
-> > > > > 
-> > > > > Ping ....
-> > > > > 
-> > > > > Long time passed, but this failure still can be reproduced on latest upstream
-> > > > > linux kernel(v5.0).
-> > > > > 
-> > > > > A weird thing is:
-> > > > > MKFS_OPTIONS="reflink=1,rmapbt=0,finobt=1,crc=1 -i sparse=1"
-> > > > > MKFS_OPTIONS="reflink=0,rmapbt=0,finobt=1,crc=1 -i sparse=1"
-> > > > > can reproduce this issue. But
-> > > > > MKFS_OPTIONS="reflink=1,rmapbt=1,finobt=1,crc=1 -i sparse=1"
-> > > > > can't.
-> > > > > 
-> > > > > Can anyone help to take a look at it?
-> > > > 
-> > > > rmapbt=1 uses a totally different code path in the kernel, which is why
-> > > > this test doesn't fail in that situation.
-> > > 
-> > > Hi Darrick,
-> > > 
-> > > Thanks for your reply, may I ask if there's something wrong on the test case, or it's a real bug?
-> > > 
-> > > BTW, xfs-linux hasn't merged https://www.spinics.net/lists/linux-xfs/msg24462.html, right?
-> > 
-> > Right, because ... IIRC the failure you found below was with both of
-> > Eric's patches applied to for-next (and rmap=0), which implies that the
-> > fix wasn't complete. (right...?)
-> 
-> If my case isn't wrong(it shouldn't trigger any corruption anyway). Then yes,
-> some bugs are still there. Maybe not same issue as Eric trying to fix.
-> 
-> Anyway, I hope to make sure the case isn't wrong, then we can merge it into
-> xfstests at first :)
+In this file, we document the crash-recovery guarantees
+provided by four Linux file systems - xfs, ext4, F2FS and btrfs. We also
+present Dave Chinner's proposal of Strictly-Ordered Metadata Consistency
+(SOMC), which is provided by xfs. It is not clear to us if other file sys=
+tems
+provide SOMC.
 
-I don't see anything particularly weird in the testcase, and I suspect
-that the kernel is (still) broken.
+Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-(Hoping Eric will chime in at some point...)
+We would be happy to modify the document if file-system
+developers claim that their system provides (or aims to provide) SOMC.
 
---D
+Changes since v1:
+  * Addressed few nits identified in the review
+  * Added the fsync guarantees for F2FS and its SOMC compliance
+---
+ .../filesystems/crash-recovery-guarantees.txt      | 193 +++++++++++++++=
+++++++
+ 1 file changed, 193 insertions(+)
+ create mode 100644 Documentation/filesystems/crash-recovery-guarantees.t=
+xt
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > 
-> > > Thanks,
-> > > Zorro
-> > > 
-> > > > 
-> > > > --D
-> > > > 
-> > > > > Thanks,
-> > > > > Zorro
-> > > > > 
-> > > > > > 
-> > > > > > Thanks,
-> > > > > > Zorro
-> > > > > > 
-> > > > > > [1]
-> > > > > > # ./check xfs/999
-> > > > > > FSTYP         -- xfs (non-debug)
-> > > > > > PLATFORM      -- Linux/x86_64 xxx-xxxx-xx 4.20.0-rc6+
-> > > > > > MKFS_OPTIONS  -- -f -m reflink=1,rmapbt=0,finobt=1,crc=1 -i sparse=1 /dev/mapper/rhel_xxx-xxxx-xx-xfscratch
-> > > > > > MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/rhel_xxx-xxxx-xx-xfscratch /mnt/scratch
-> > > > > > 
-> > > > > > xfs/999 82s ... [failed, exit status 1]- output mismatch (see /root/git/xfstests-zlang/results//xfs/999.out.bad)
-> > > > > >     --- tests/xfs/999.out       2018-12-23 08:27:02.524495164 -0500
-> > > > > >     +++ /root/git/xfstests-zlang/results//xfs/999.out.bad       2018-12-23 08:58:01.826244128 -0500
-> > > > > >     @@ -1,2 +1,4 @@
-> > > > > >      QA output created by 999
-> > > > > >     -Silence is golden
-> > > > > >     +mount: /mnt/scratch: mount(2) system call failed: Structure needs cleaning.
-> > > > > >     +cycle mount failed
-> > > > > >     +(see /root/git/xfstests-zlang/results//xfs/999.full for details)
-> > > > > >     ...
-> > > > > >     (Run 'diff -u /root/git/xfstests-zlang/tests/xfs/999.out /root/git/xfstests-zlang/results//xfs/999.out.bad'  to see the entire diff)
-> > > > > > Ran: xfs/999
-> > > > > > Failures: xfs/999
-> > > > > > Failed 1 of 1 tests
-> > > > > > 
-> > > > > > # dmesg
-> > > > > > [ 1961.335700] run fstests xfs/999 at 2018-12-23 08:56:53
-> > > > > > [ 1962.270422] XFS (dm-5): Unmounting Filesystem
-> > > > > > [ 1964.097509] XFS (dm-5): Mounting V5 Filesystem
-> > > > > > [ 1964.217909] XFS (dm-5): Ending clean mount
-> > > > > > [ 2026.309500] XFS (dm-5): User initiated shutdown received. Shutting down filesystem
-> > > > > > [ 2026.343161] XFS (dm-5): Unmounting Filesystem
-> > > > > > [ 2026.420747] XFS (dm-5): Mounting V5 Filesystem
-> > > > > > [ 2028.557423] XFS (dm-5): Starting recovery (logdev: internal)
-> > > > > > [ 2029.162746] XFS (dm-5): Corruption warning: Metadata has LSN (-842150451:-842150451) ahead of current LSN (1:785). Please unmount and run xfs_repair (>= v4.3) to resolve.
-> > > > > > [ 2029.179889] XFS (dm-5): Metadata CRC error detected at xfs_bmbt_read_verify+0x1b/0x2d0 [xfs], xfs_bmbt block 0x5830 
-> > > > > > [ 2029.191678] XFS (dm-5): Unmount and run xfs_repair
-> > > > > > [ 2029.197051] XFS (dm-5): First 128 bytes of corrupted metadata buffer:
-> > > > > > [ 2029.204262] 00000000: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.213220] 00000010: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.222178] 00000020: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.231151] 00000030: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.240107] 00000040: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.249171] 00000050: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.258134] 00000060: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.267083] 00000070: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.282435] XFS (dm-5): Corruption warning: Metadata has LSN (-842150451:-842150451) ahead of current LSN (1:785). Please unmount and run xfs_repair (>= v4.3) to resolve.
-> > > > > > [ 2029.299516] XFS (dm-5): Metadata CRC error detected at xfs_bmbt_read_verify+0x1b/0x2d0 [xfs], xfs_bmbt block 0x5830 
-> > > > > > [ 2029.311295] XFS (dm-5): Unmount and run xfs_repair
-> > > > > > [ 2029.316666] XFS (dm-5): First 128 bytes of corrupted metadata buffer:
-> > > > > > [ 2029.323887] 00000000: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.332844] 00000010: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.341817] 00000020: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.350776] 00000030: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.359731] 00000040: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.368690] 00000050: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.377648] 00000060: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.386607] 00000070: cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd cd  ................
-> > > > > > [ 2029.395599] XFS (dm-5): metadata I/O error in "xfs_trans_read_buf_map" at daddr 0x5830 len 8 error 74
-> > > > > > [ 2029.499375] XFS (dm-5): log mount/recovery failed: error -117
-> > > > > > [ 2029.506425] XFS (dm-5): log mount failed
-> > > > > > [ 2029.552080] XFS (dm-2): Unmounting Filesystem
-> > > > > > 
-> > > > > > # xfs_repair /dev/mapper/rhel_xxx-xxxx-xx-xfscratch
-> > > > > > Phase 1 - find and verify superblock...
-> > > > > > Phase 2 - using internal log
-> > > > > >         - zero log...
-> > > > > > ERROR: The filesystem has valuable metadata changes in a log which needs to
-> > > > > > be replayed.  Mount the filesystem to replay the log, and unmount it before
-> > > > > > re-running xfs_repair.  If you are unable to mount the filesystem, then use
-> > > > > > the -L option to destroy the log and attempt a repair.
-> > > > > > Note that destroying the log may cause corruption -- please attempt a mount
-> > > > > > of the filesystem before doing this
-> > > > > > 
-> > > > > > # mount /dev/mapper/rhel_xxx-xxxx-xx-xfscratch /mnt/scratch
-> > > > > > mount: /mnt/scratch: mount(2) system call failed: Structure needs cleaning.
-> > > > > > 
-> > > > > > # xfs_repair -L /dev/mapper/rhel_xxx-xxxx-xx-xfscratch 
-> > > > > > Phase 1 - find and verify superblock...
-> > > > > > Phase 2 - using internal log
-> > > > > >         - zero log...
-> > > > > > ALERT: The filesystem has valuable metadata changes in a log which is being
-> > > > > > destroyed because the -L option was used.
-> > > > > >         - scan filesystem freespace and inode maps...
-> > > > > > sb_ifree 61, counted 60
-> > > > > > sb_fdblocks 22271328, counted 22270327
-> > > > > >         - found root inode chunk
-> > > > > > Phase 3 - for each AG...
-> > > > > >         - scan and clear agi unlinked lists...
-> > > > > >         - process known inodes and perform inode discovery...
-> > > > > >         - agno = 0
-> > > > > > Metadata CRC error detected at 0x449c9d, xfs_bmbt block 0x5830/0x1000
-> > > > > > btree block 0/2822 is suspect, error -74
-> > > > > > bad magic # 0xcdcdcdcd in inode 131 (data fork) bmbt block 2822
-> > > > > > bad data fork in inode 131
-> > > > > > cleared inode 131
-> > > > > >         - agno = 1
-> > > > > >         - agno = 2
-> > > > > >         - agno = 3
-> > > > > >         - process newly discovered inodes...
-> > > > > > Phase 4 - check for duplicate blocks...
-> > > > > >         - setting up duplicate extent list...
-> > > > > >         - check for inodes claiming duplicate blocks...
-> > > > > >         - agno = 0
-> > > > > > entry "fragfile" in shortform directory 128 references free inode 131
-> > > > > > junking entry "fragfile" in directory inode 128
-> > > > > >         - agno = 1
-> > > > > >         - agno = 3
-> > > > > >         - agno = 2
-> > > > > > Phase 5 - rebuild AG headers and trees...
-> > > > > >         - reset superblock...
-> > > > > > Phase 6 - check inode connectivity...
-> > > > > >         - resetting contents of realtime bitmap and summary inodes
-> > > > > >         - traversing filesystem ...
-> > > > > >         - traversal finished ...
-> > > > > >         - moving disconnected inodes to lost+found ...
-> > > > > > Phase 7 - verify and correct link counts...
-> > > > > > Metadata corruption detected at 0x449b47, xfs_bmbt block 0x5830/0x1000
-> > > > > > libxfs_writebufr: write verifer failed on xfs_bmbt bno 0x5830/0x1000
-> > > > > > Maximum metadata LSN (1:237) is ahead of log (1:2).
-> > > > > > Format log to cycle 4.
-> > > > > > releasing dirty buffer (bulk) to free list!done
-> > > > > > 
-> > > > > > 
-> > > > > > 
-> > > > > >  tests/xfs/999     | 76 +++++++++++++++++++++++++++++++++++++++++++++++
-> > > > > >  tests/xfs/999.out |  2 ++
-> > > > > >  tests/xfs/group   |  1 +
-> > > > > >  3 files changed, 79 insertions(+)
-> > > > > >  create mode 100755 tests/xfs/999
-> > > > > >  create mode 100644 tests/xfs/999.out
-> > > > > > 
-> > > > > > diff --git a/tests/xfs/999 b/tests/xfs/999
-> > > > > > new file mode 100755
-> > > > > > index 00000000..cfe5c4d4
-> > > > > > --- /dev/null
-> > > > > > +++ b/tests/xfs/999
-> > > > > > @@ -0,0 +1,76 @@
-> > > > > > +#! /bin/bash
-> > > > > > +# SPDX-License-Identifier: GPL-2.0
-> > > > > > +# Copyright (c) 2018 Red Hat Inc. All Rights Reserved.
-> > > > > > +#
-> > > > > > +# FS QA Test No. 999
-> > > > > > +#
-> > > > > > +# If an inode had been in btree format and had a data fork owner change
-> > > > > > +# logged, after changing the format to non-btree, will hit an ASSERT or
-> > > > > > +# fs corruption.
-> > > > > > +#
-> > > > > > +seq=`basename $0`
-> > > > > > +seqres=$RESULT_DIR/$seq
-> > > > > > +echo "QA output created by $seq"
-> > > > > > +
-> > > > > > +here=`pwd`
-> > > > > > +tmp=/tmp/$$
-> > > > > > +status=1	# failure is the default!
-> > > > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > > > > +
-> > > > > > +_cleanup()
-> > > > > > +{
-> > > > > > +	cd /
-> > > > > > +	rm -f $tmp.*
-> > > > > > +}
-> > > > > > +
-> > > > > > +# get standard environment, filters and checks
-> > > > > > +. ./common/rc
-> > > > > > +. ./common/filter
-> > > > > > +
-> > > > > > +# remove previous $seqres.full before test
-> > > > > > +rm -f $seqres.full
-> > > > > > +
-> > > > > > +# real QA test starts here
-> > > > > > +
-> > > > > > +# Modify as appropriate.
-> > > > > > +_supported_fs generic
-> > > > > > +_supported_os Linux
-> > > > > > +_require_scratch
-> > > > > > +
-> > > > > > +_scratch_mkfs_xfs | _filter_mkfs 2>$tmp.mkfs >/dev/null
-> > > > > > +. $tmp.mkfs
-> > > > > > +
-> > > > > > +_scratch_mount
-> > > > > > +localfile=$SCRATCH_MNT/fragfile
-> > > > > > +
-> > > > > > +# Try to create a file with 1024 * (3 blocks + 1 hole):
-> > > > > > +# +----------+--------+-------+----------+--------+
-> > > > > > +# | 3 blocks | 1 hole |  ...  | 3 blocks | 1 hole |
-> > > > > > +# +----------+--------+-------+----------+--------+
-> > > > > > +#
-> > > > > > +# The number of extents we can get maybe more or less than 1024, this method
-> > > > > > +# just to get a btree inode format.
-> > > > > > +filesize=$((dbsize * 1024 * 4))
-> > > > > > +for i in `seq $filesize -$dbsize 0`; do
-> > > > > > +	if [ $((i % (3 * dbsize))) -eq 0 ]; then
-> > > > > > +		continue
-> > > > > > +	fi
-> > > > > > +	$XFS_IO_PROG -f -d -c "pwrite $i $dbsize" $localfile >> $seqres.full
-> > > > > > +done
-> > > > > > +
-> > > > > > +# Make a data fork owner change log
-> > > > > > +$XFS_FSR_PROG -v -d $localfile >> $seqres.full 2>&1
-> > > > > > +
-> > > > > > +# Truncate the file to 0, and change the inode format to extent, then shutdown
-> > > > > > +# the fs to keep the XFS_ILOG_DOWNER flag
-> > > > > > +$XFS_IO_PROG -t -x -c "pwrite 0 $dbsize" \
-> > > > > > +	     -c "fsync" \
-> > > > > > +	     -c "shutdown" $localfile >> $seqres.full
-> > > > > > +
-> > > > > > +# Cycle mount, to replay the log
-> > > > > > +_scratch_cycle_mount
-> > > > > > +
-> > > > > > +echo "Silence is golden"
-> > > > > > +# success, all done
-> > > > > > +status=0
-> > > > > > +exit
-> > > > > > diff --git a/tests/xfs/999.out b/tests/xfs/999.out
-> > > > > > new file mode 100644
-> > > > > > index 00000000..3b276ca8
-> > > > > > --- /dev/null
-> > > > > > +++ b/tests/xfs/999.out
-> > > > > > @@ -0,0 +1,2 @@
-> > > > > > +QA output created by 999
-> > > > > > +Silence is golden
-> > > > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > > > index dfaae2bc..9171144e 100644
-> > > > > > --- a/tests/xfs/group
-> > > > > > +++ b/tests/xfs/group
-> > > > > > @@ -496,3 +496,4 @@
-> > > > > >  496 dangerous_fuzzers dangerous_scrub dangerous_repair
-> > > > > >  497 dangerous_fuzzers dangerous_scrub dangerous_online_repair
-> > > > > >  498 dangerous_fuzzers dangerous_norepair
-> > > > > > +999 auto quick
-> > > > > > -- 
-> > > > > > 2.17.2
-> > > > > > 
+diff --git a/Documentation/filesystems/crash-recovery-guarantees.txt b/Do=
+cumentation/filesystems/crash-recovery-guarantees.txt
+new file mode 100644
+index 0000000..be84964
+--- /dev/null
++++ b/Documentation/filesystems/crash-recovery-guarantees.txt
+@@ -0,0 +1,193 @@
++=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
++File System Crash-Recovery Guarantees
++=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
++Linux file systems provide certain guarantees to user-space
++applications about what happens to their data if the system crashes
++(due to power loss or kernel panic). These are termed crash-recovery
++guarantees.
++
++Crash-recovery guarantees only pertain to data or metadata that has
++been explicitly persisted to storage with fsync(), fdatasync(), or
++sync() system calls. By default, write(), mkdir(), and other
++file-system related system calls only affect the in-memory state of
++the file system.
++
++The crash-recovery guarantees provided by most Linux file systems are
++significantly stronger than what is required by POSIX. POSIX is vague,
++even allowing fsync() to do nothing (Mac OSX takes advantage of
++this). However, the guarantees provided by file systems are not
++documented, and vary between file systems. This document seeks to
++describe the current crash-recovery guarantees provided by major Linux
++file systems.
++
++What does the fsync() operation guarantee?
++----------------------------------------------------
++fsync() operation is meant to force the physical write of data
++corresponding to a file from the buffer cache, along with the file
++metadata. Note that the guarantees mentioned for each file system below
++are in addition to the ones provided by POSIX.
++
++POSIX
++-----
++fsync(file) : Flushes the data and metadata associated with the
++file. However, if the directory entry for the file has not been
++previously persisted, or has been modified, it is not guaranteed to be
++persisted by the fsync of the file [1]. What this means is, if a file
++is newly created, you will have to fsync(parent directory) in addition
++to fsync(file) in order to ensure that the file's directory entry has
++safely reached the disk.
++
++fsync(dir) : Flushes directory data and directory entries. However if
++you created a new file within the directory and wrote data to the
++file, then the file data is not guaranteed to be persisted, unless an
++explicit fsync() is issued on the file.
++
++ext4
++-----
++fsync(file) : Ensures that a newly created file's directory entry is
++persisted (no need to explicitly persist the parent directory). However,
++if you create multiple names of the file (hard links), then their direct=
+ory
++entries are not guaranteed to persist unless each one of the parent
++directory entries are persisted [2].
++
++fsync(dir) : All file names within the persisted directory will exist,
++but does not guarantee file data.
++
++xfs
++----
++fsync(file) : Ensures that a newly created file's directory entry is
++persisted. Additionally, all the previous dependent modifications to
++this file are also persisted. If any file shares an object
++modification dependency with the fsync-ed file, then that file's
++directory entry is also persisted.
++
++fsync(dir) : All file names within the persisted directory will exist,
++but does not guarantee file data. As with files, fsync(dir) also persist=
+s
++previous dependent metadata operations.
++
++btrfs
++------
++fsync(file) : Ensures that a newly created file's directory entry
++is persisted, along with the directory entries of all its hard links.
++You do not need to explicitly fsync individual hard links to the file.
++
++fsync(dir) : All the file names within the directory will persist. All t=
+he
++rename and unlink operations within the directory are persisted. Due
++to the design choices made by btrfs, fsync of a directory could lead
++to an iterative fsync on sub-directories, thereby requiring a full
++file system commit. So btrfs does not advocate fsync of directories
++[2].
++
++F2FS
++----
++fsync(file) or fsync(dir) : In the default mode (fsync-mode=3Dposix),
++F2FS only guarantees POSIX behaviour. However, it provides xfs-like
++guarantees if mounted with fsync-mode=3Dstrict option.
++
++fsync(symlink)
++-------------
++A symlink inode cannot be directly opened for IO, which means there is
++no such thing as fsync of a symlink [3]. You could be tricked by the
++fact that open and fsync of a symlink succeeds without returning a
++error, but what happens in reality is as follows.
++
++Suppose we have a symlink =E2=80=9Cfoo=E2=80=9D, which points to the fil=
+e =E2=80=9CA/bar=E2=80=9D
++
++fd =3D open(=E2=80=9Cfoo=E2=80=9D, O_CREAT | O_RDWR)
++fsync(fd)
++
++Both the above operations succeed, but if you crash after fsync, the
++symlink could be still missing.
++
++When you try to open the symlink =E2=80=9Cfoo=E2=80=9D, you are actually=
+ trying to
++open the file that the symlink resolves to, which in this case is
++=E2=80=9CA/bar=E2=80=9D. When you fsync the inode returned by the open s=
+ystem call, you
++are actually persisting the file =E2=80=9CA/bar=E2=80=9D and not the sym=
+link. Note
++that if the file =E2=80=9CA/bar=E2=80=9D does not exist and you try the =
+open the
++symlink =E2=80=9Cfoo=E2=80=9D without the O_CREAT flag, then file open w=
+ill fail. To
++obtain the file descriptor associated with the symlink inode, you
++could open the symlink using =E2=80=9CO_PATH | O_NOFOLLOW=E2=80=9D flags=
+. However, the
++file descriptor obtained this way can be only used to indicate a
++location in the file-system tree and to perform operations that act
++purely at the file descriptor level. Operations like read(), write(),
++fsync() etc cannot be performed on such file descriptors.
++
++Bottomline : You cannot fsync() a symlink.
++
++fsync(special files)
++--------------------
++Special files in Linux include block and character device files
++(created using mknod), FIFO (created using mkfifo) etc. Just like the
++behavior of fsync on symlinks described above, these special files do
++not have an fsync function defined. Similar to symlinks, you
++cannot fsync a special file [4].
++
++
++Strictly Ordered Metadata Consistency
++-------------------------------------
++With each file system providing varying levels of persistence
++guarantees, a consensus in this regard, will benefit application
++developers to work with certain fixed assumptions about file system
++guarantees. Dave Chinner proposed a unified model called the
++Strictly Ordered Metadata Consistency (SOMC) [5].
++
++Under this scheme, the file system guarantees to persist all previous
++dependent modifications to the object upon fsync().  If you fsync() an
++inode, it will persist all the changes required to reference the inode
++and its data. SOMC can be defined as follows [6]:
++
++If op1 precedes op2 in program order (in-memory execution order), and
++op1 and op2 share a dependency, then op2 must not be observed by a
++user after recovery without also observing op1.
++
++Unfortunately, SOMC's definition depends upon whether two operations
++share a dependency, which could be file-system specific. It might
++require a developer to understand file-system internals to know if
++SOMC would order one operation before another. It is worth noting
++that a file system can be crash-consistent (according to POSIX),
++without providing SOMC [7].
++
++As an example, consider the following test case from xfstest
++generic/342 [8]
++-------
++touch A/foo
++echo =E2=80=9Chello=E2=80=9D >  A/foo
++sync
++
++mv A/foo A/bar
++echo =E2=80=9Cworld=E2=80=9D > A/foo
++fsync A/foo
++CRASH
++
++What would you expect on recovery, if the file system crashed after
++the final fsync returned successfully?
++
++Non-SOMC file systems will not persist the file
++A/bar because it was not explicitly fsync-ed. But this means, you will
++find only the file A/foo with data =E2=80=9Cworld=E2=80=9D after crash, =
+thereby losing
++the previously persisted file with data =E2=80=9Chello=E2=80=9D. You wil=
+l need to
++explicitly fsync the directory A to ensure the rename operation is
++safely persisted on disk.
++
++Under SOMC, to correctly reference the new inode via A/foo,
++the previous rename operation must persist as well. Therefore,
++fsync() of A/foo will persist the renamed file A/bar as well.
++On recovery you will find both A/bar (with data =E2=80=9Chello=E2=80=9D)
++and A/foo (with data =E2=80=9Cworld=E2=80=9D).
++
++It is noteworthy that xfs, ext4, F2FS (when mounted with fsync_mode=3Dst=
+rict)
++and btrfs provide SOMC-like behaviour in this particular example.
++However, in writing, only XFS claims to provide SOMC. F2FS aims to provi=
+de
++SOMC when mounted with fsync_mode=3Dstrict. It is not clear if ext4 and
++btrfs provide strictly ordered metadata consistency.
++
++--------------------------------------------------------
++[1] http://man7.org/linux/man-pages/man2/fdatasync.2.html
++[2] https://www.spinics.net/lists/linux-btrfs/msg77340.html
++[3] https://www.spinics.net/lists/fstests/msg09370.html
++[4] https://bugzilla.kernel.org/show_bug.cgi?id=3D202485
++[5] https://marc.info/?l=3Dfstests&m=3D155010885626284&w=3D2
++[6] https://marc.info/?l=3Dfstests&m=3D155011123126916&w=3D2
++[7] https://www.spinics.net/lists/fstests/msg09379.html
++[8] https://patchwork.kernel.org/patch/10132305/
++
+--
+2.7.4
