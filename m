@@ -1,260 +1,400 @@
-Received: from mail-io1-f65.google.com ([209.85.166.65]:37324 "EHLO
-        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726883AbfCLT1a (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 12 Mar 2019 15:27:30 -0400
-From: Jayashree <jaya@cs.utexas.edu>
-Subject: [PATCH v2] Documenting the crash-recovery guarantees of Linux file systems
-Date: Tue, 12 Mar 2019 14:27:00 -0500
-Message-Id: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Received: from mx1.redhat.com ([209.132.183.28]:39548 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726677AbfCLJUA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 12 Mar 2019 05:20:00 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id CB4FA30842AB
+        for <fstests@vger.kernel.org>; Tue, 12 Mar 2019 09:19:59 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic: unaligned direct AIO write test
+Date: Tue, 12 Mar 2019 17:19:44 +0800
+Message-Id: <20190312091944.2044-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org, linux-fsdevel@vger.kernel.org, linux-doc@vger.kernel.org
-Cc: vijay@cs.utexas.edu, amir73il@gmail.com, tytso@mit.edu, chao@kernel.org, david@fromorbit.com, fdmanana@gmail.com, corbet@lwn.net, Jayashree <jaya@cs.utexas.edu>
+To: fstests@vger.kernel.org
+Cc: fsorenso@redhat.com, lczerner@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-In this file, we document the crash-recovery guarantees
-provided by four Linux file systems - xfs, ext4, F2FS and btrfs. We also
-present Dave Chinner's proposal of Strictly-Ordered Metadata Consistency
-(SOMC), which is provided by xfs. It is not clear to us if other file sys=
-tems
-provide SOMC.
+A simply reproducer from Frank Sorenson:
 
-Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+  ftruncate(fd, 65012224)
+  io_prep_pwrite(iocbs[0], fd, buf[0], 1048576, 63963648);
+  io_prep_pwrite(iocbs[1], fd, buf[1], 1048576, 65012224);
+
+  io_prep_pwrite(iocbs[2], fd, buf[2], 1048576, 66060800);
+  io_prep_pwrite(iocbs[3], fd, buf[3], 1048576, 67109376);
+
+  io_submit(io_ctx, 1, &iocbs[0]);
+  io_submit(io_ctx, 1, &iocbs[1]);
+  io_submit(io_ctx, 1, &iocbs[2]);
+  io_submit(io_ctx, 1, &iocbs[3]);
+
+  io_getevents(io_ctx, 4, 4, events, NULL)
+
+help to find an ext4 corruption:
+           **************** **************** ****************
+           *    page 1    * *    page 2    * *    page 3    *
+           **************** **************** ****************
+  existing 0000000000000000 0000000000000000 0000000000000000
+  write 1    AAAAAAAAAAAAAA AA
+  write 2                     BBBBBBBBBBBBBB BB
+
+  result   00AAAAAAAAAAAAAA 00BBBBBBBBBBBBBB BB00000000000000
+  desired  00AAAAAAAAAAAAAA AABBBBBBBBBBBBBB BB00000000000000
+
+This issue remind us we might miss unaligned AIO test for long time.
+We thought fsx cover this part, but looks like it's not. So this case
+trys to cover unaligned direct AIO write test on file with different
+initial truncate i_size.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
-We would be happy to modify the document if file-system
-developers claim that their system provides (or aims to provide) SOMC.
+Hi,
 
-Changes since v1:
-  * Addressed few nits identified in the review
-  * Added the fsync guarantees for F2FS and its SOMC compliance
----
- .../filesystems/crash-recovery-guarantees.txt      | 193 +++++++++++++++=
-++++++
- 1 file changed, 193 insertions(+)
- create mode 100644 Documentation/filesystems/crash-recovery-guarantees.t=
-xt
+The aio-dio-write-verify.c nearly copy from aio-dio-eof-race.c, then change
+a few logic. I've changed aio-dio-eof-race.c several times, to fit different
+new AIO test cases. But this time I need to truncate the file, then it won't
+write at EOF. This against the motive of aio-dio-eof-race.c. So I think it's
+time to shift a new program to do more AIO write test.
 
-diff --git a/Documentation/filesystems/crash-recovery-guarantees.txt b/Do=
-cumentation/filesystems/crash-recovery-guarantees.txt
+It's only my personal opinion :)
+
+Thanks,
+Zorro
+
+ src/aio-dio-regress/aio-dio-write-verify.c | 223 +++++++++++++++++++++
+ tests/generic/999                          |  71 +++++++
+ tests/generic/999.out                      |   2 +
+ tests/generic/group                        |   1 +
+ 4 files changed, 297 insertions(+)
+ create mode 100644 src/aio-dio-regress/aio-dio-write-verify.c
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/src/aio-dio-regress/aio-dio-write-verify.c b/src/aio-dio-regress/aio-dio-write-verify.c
 new file mode 100644
-index 0000000..be84964
+index 00000000..402ddcdb
 --- /dev/null
-+++ b/Documentation/filesystems/crash-recovery-guarantees.txt
-@@ -0,0 +1,193 @@
-+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-+File System Crash-Recovery Guarantees
-+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
-=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
-+Linux file systems provide certain guarantees to user-space
-+applications about what happens to their data if the system crashes
-+(due to power loss or kernel panic). These are termed crash-recovery
-+guarantees.
++++ b/src/aio-dio-regress/aio-dio-write-verify.c
+@@ -0,0 +1,223 @@
++// SPDX-License-Identifier: GPL-2.0+
++/*
++ * Copyright (C) 2019 Red Hat, Inc. All Rights reserved.
++ *
++ * AIO writes from a start offset on a truncated file, verify there's not
++ * data corruption.
++ */
++#include <sys/stat.h>
++#include <sys/types.h>
++#include <errno.h>
++#include <fcntl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <unistd.h>
++#include <ctype.h>
 +
-+Crash-recovery guarantees only pertain to data or metadata that has
-+been explicitly persisted to storage with fsync(), fdatasync(), or
-+sync() system calls. By default, write(), mkdir(), and other
-+file-system related system calls only affect the in-memory state of
-+the file system.
++#include <libaio.h>
 +
-+The crash-recovery guarantees provided by most Linux file systems are
-+significantly stronger than what is required by POSIX. POSIX is vague,
-+even allowing fsync() to do nothing (Mac OSX takes advantage of
-+this). However, the guarantees provided by file systems are not
-+documented, and vary between file systems. This document seeks to
-+describe the current crash-recovery guarantees provided by major Linux
-+file systems.
++unsigned long buf_size = 0;
++unsigned long size_KB  = 0;
++#define IO_PATTERN	0x5a
 +
-+What does the fsync() operation guarantee?
-+----------------------------------------------------
-+fsync() operation is meant to force the physical write of data
-+corresponding to a file from the buffer cache, along with the file
-+metadata. Note that the guarantees mentioned for each file system below
-+are in addition to the ones provided by POSIX.
++void
++usage(char *progname)
++{
++	fprintf(stderr, "usage: %s [-s datasize] [-b bufsize] [-o startoff] [-t truncsize] filename\n"
++	        "\t-s datasize: specify the minimum data size(KB), doesn't count holes\n"
++	        "\t-b bufsize: buffer size\n"
++	        "\t-o startoff: start offset to write data, 0 by default\n"
++	        "\t-t truncsize: truncate the file to a special size at first 0 by default\n",
++	        progname);
++	exit(1);
++}
 +
-+POSIX
-+-----
-+fsync(file) : Flushes the data and metadata associated with the
-+file. However, if the directory entry for the file has not been
-+previously persisted, or has been modified, it is not guaranteed to be
-+persisted by the fsync of the file [1]. What this means is, if a file
-+is newly created, you will have to fsync(parent directory) in addition
-+to fsync(file) in order to ensure that the file's directory entry has
-+safely reached the disk.
++void
++dump_buffer(
++	void	*buf,
++	off64_t	offset,
++	ssize_t	len)
++{
++	int	i, j;
++	char	*p;
++	int	new;
 +
-+fsync(dir) : Flushes directory data and directory entries. However if
-+you created a new file within the directory and wrote data to the
-+file, then the file data is not guaranteed to be persisted, unless an
-+explicit fsync() is issued on the file.
++	for (i = 0, p = (char *)buf; i < len; i += 16) {
++		char    *s = p;
 +
-+ext4
-+-----
-+fsync(file) : Ensures that a newly created file's directory entry is
-+persisted (no need to explicitly persist the parent directory). However,
-+if you create multiple names of the file (hard links), then their direct=
-ory
-+entries are not guaranteed to persist unless each one of the parent
-+directory entries are persisted [2].
++		if (i && !memcmp(p, p - 16, 16)) {
++			new = 0;
++		} else {
++			if (i)
++				printf("*\n");
++			new = 1;
++		}
 +
-+fsync(dir) : All file names within the persisted directory will exist,
-+but does not guarantee file data.
++		if (!new) {
++			p += 16;
++			continue;
++		}
 +
-+xfs
-+----
-+fsync(file) : Ensures that a newly created file's directory entry is
-+persisted. Additionally, all the previous dependent modifications to
-+this file are also persisted. If any file shares an object
-+modification dependency with the fsync-ed file, then that file's
-+directory entry is also persisted.
++		printf("%08llx  ", (unsigned long long)offset + i);
++		for (j = 0; j < 16 && i + j < len; j++, p++)
++			printf("%02x ", *p);
++		printf(" ");
++		for (j = 0; j < 16 && i + j < len; j++, s++) {
++			if (isalnum((int)*s))
++				printf("%c", *s);
++			else
++				printf(".");
++		}
++		printf("\n");
 +
-+fsync(dir) : All file names within the persisted directory will exist,
-+but does not guarantee file data. As with files, fsync(dir) also persist=
-s
-+previous dependent metadata operations.
++	}
++	printf("%08llx\n", (unsigned long long)offset + i);
++}
 +
-+btrfs
-+------
-+fsync(file) : Ensures that a newly created file's directory entry
-+is persisted, along with the directory entries of all its hard links.
-+You do not need to explicitly fsync individual hard links to the file.
++int main(int argc, char *argv[])
++{
++	struct io_context *ctx = NULL;
++	struct io_event evs[2];
++	struct iocb iocb1, iocb2;
++	struct iocb *iocbs[] = { &iocb1, &iocb2 };
++	void *buf;
++	int fd, err = 0;
++	off_t bytes;
++	int c;
++	char *cmp_buf = NULL;
++	char *filename = NULL;
++	/* start offset to write */
++	long long startoff = 0;
++	/* truncate size */
++	off_t tsize = 0;
 +
-+fsync(dir) : All the file names within the directory will persist. All t=
-he
-+rename and unlink operations within the directory are persisted. Due
-+to the design choices made by btrfs, fsync of a directory could lead
-+to an iterative fsync on sub-directories, thereby requiring a full
-+file system commit. So btrfs does not advocate fsync of directories
-+[2].
++	while ((c = getopt(argc, argv, "s:b:o:t:")) != -1) {
++		char *endp;
 +
-+F2FS
-+----
-+fsync(file) or fsync(dir) : In the default mode (fsync-mode=3Dposix),
-+F2FS only guarantees POSIX behaviour. However, it provides xfs-like
-+guarantees if mounted with fsync-mode=3Dstrict option.
++		switch (c) {
++		case 's':	/* XXX MB size will be extended */
++			size_KB = strtol(optarg, &endp, 0);
++			break;
++		case 'b':	/* buffer size */
++			buf_size = strtol(optarg, &endp, 0);
++			break;
++		case 'o':	/* start offset */
++			startoff = strtoll(optarg, &endp, 0);
++			break;
++		case 't':	/* initial truncate size */
++			tsize = strtoul(optarg, &endp, 0);
++			break;
++		default:
++			usage(argv[0]);
++		}
++	}
 +
-+fsync(symlink)
-+-------------
-+A symlink inode cannot be directly opened for IO, which means there is
-+no such thing as fsync of a symlink [3]. You could be tricked by the
-+fact that open and fsync of a symlink succeeds without returning a
-+error, but what happens in reality is as follows.
++	if (size_KB == 0)	/* default size is 64KB */
++		size_KB = 64;
++	if (buf_size < 2048)	/* default minimum buffer size is 2048 bytes */
++		buf_size = 2048;
 +
-+Suppose we have a symlink =E2=80=9Cfoo=E2=80=9D, which points to the fil=
-e =E2=80=9CA/bar=E2=80=9D
++	if (optind == argc - 1)
++		filename = argv[optind];
++	else
++		usage(argv[0]);
 +
-+fd =3D open(=E2=80=9Cfoo=E2=80=9D, O_CREAT | O_RDWR)
-+fsync(fd)
++	fd = open(filename, O_DIRECT | O_CREAT | O_TRUNC | O_RDWR, 0600);
++	if (fd == -1) {
++		perror("open");
++		return 1;
++	}
 +
-+Both the above operations succeed, but if you crash after fsync, the
-+symlink could be still missing.
++	/* truncate the file to a special size at first */
++	if (tsize != 0) {
++		ftruncate(fd, tsize);
++		if (fd == -1) {
++			perror("ftruncate");
++			return 1;
++		}
++	}
 +
-+When you try to open the symlink =E2=80=9Cfoo=E2=80=9D, you are actually=
- trying to
-+open the file that the symlink resolves to, which in this case is
-+=E2=80=9CA/bar=E2=80=9D. When you fsync the inode returned by the open s=
-ystem call, you
-+are actually persisting the file =E2=80=9CA/bar=E2=80=9D and not the sym=
-link. Note
-+that if the file =E2=80=9CA/bar=E2=80=9D does not exist and you try the =
-open the
-+symlink =E2=80=9Cfoo=E2=80=9D without the O_CREAT flag, then file open w=
-ill fail. To
-+obtain the file descriptor associated with the symlink inode, you
-+could open the symlink using =E2=80=9CO_PATH | O_NOFOLLOW=E2=80=9D flags=
-. However, the
-+file descriptor obtained this way can be only used to indicate a
-+location in the file-system tree and to perform operations that act
-+purely at the file descriptor level. Operations like read(), write(),
-+fsync() etc cannot be performed on such file descriptors.
++	err = posix_memalign(&buf, getpagesize(), buf_size);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++			strerror(err),
++			"posix_memalign");
++		return 1;
++	}
++	cmp_buf = malloc(buf_size);
++	memset(cmp_buf, IO_PATTERN, buf_size);
 +
-+Bottomline : You cannot fsync() a symlink.
++	err = io_setup(5, &ctx);
++	if (err) {
++		fprintf(stderr, "error %s during %s\n",
++			strerror(err),
++			"io_setup");
++		return 1;
++	}
 +
-+fsync(special files)
-+--------------------
-+Special files in Linux include block and character device files
-+(created using mknod), FIFO (created using mkfifo) etc. Just like the
-+behavior of fsync on symlinks described above, these special files do
-+not have an fsync function defined. Similar to symlinks, you
-+cannot fsync a special file [4].
++	bytes = 0;
++	/* Keep extending until size_KB */
++	while (bytes < size_KB * 1024) {
++		ssize_t sret;
++		int i;
 +
++		memset(buf, IO_PATTERN, buf_size);
 +
-+Strictly Ordered Metadata Consistency
-+-------------------------------------
-+With each file system providing varying levels of persistence
-+guarantees, a consensus in this regard, will benefit application
-+developers to work with certain fixed assumptions about file system
-+guarantees. Dave Chinner proposed a unified model called the
-+Strictly Ordered Metadata Consistency (SOMC) [5].
++		io_prep_pwrite(&iocb1, fd, buf, buf_size/2, \
++		               startoff + bytes + 0*buf_size/2);
++		io_prep_pwrite(&iocb2, fd, buf, buf_size/2, \
++		               startoff + bytes + 1*buf_size/2);
 +
-+Under this scheme, the file system guarantees to persist all previous
-+dependent modifications to the object upon fsync().  If you fsync() an
-+inode, it will persist all the changes required to reference the inode
-+and its data. SOMC can be defined as follows [6]:
++		err = io_submit(ctx, 2, iocbs);
++		if (err != 2) {
++			fprintf(stderr, "error %s during %s\n",
++				strerror(err),
++				"io_submit");
++			return 1;
++		}
 +
-+If op1 precedes op2 in program order (in-memory execution order), and
-+op1 and op2 share a dependency, then op2 must not be observed by a
-+user after recovery without also observing op1.
++		err = io_getevents(ctx, 2, 2, evs, NULL);
++		if (err != 2) {
++			fprintf(stderr, "error %s during %s\n",
++				strerror(err),
++				"io_getevents");
++			return 1;
++		}
 +
-+Unfortunately, SOMC's definition depends upon whether two operations
-+share a dependency, which could be file-system specific. It might
-+require a developer to understand file-system internals to know if
-+SOMC would order one operation before another. It is worth noting
-+that a file system can be crash-consistent (according to POSIX),
-+without providing SOMC [7].
++		for (i = 0; i < err; i++) {
++			/*
++			 * res is unsigned for some reason, so this is the best
++			 * way to detect that it contains a negative errno.
++			 */
++			if (evs[i].res > buf_size / 2) {
++				fprintf(stderr, "pwrite: %s\n",
++					strerror(-evs[i].res));
++				return 1;
++			}
++		}
++		fsync(fd);
 +
-+As an example, consider the following test case from xfstest
-+generic/342 [8]
-+-------
-+touch A/foo
-+echo =E2=80=9Chello=E2=80=9D >  A/foo
-+sync
++		/*
++		 * And then read it back, then compare with original content.
++		 */
++		sret = pread(fd, buf, buf_size, startoff + bytes);
++		if (sret == -1) {
++			perror("pread");
++			return 1;
++		} else if (sret != buf_size) {
++			fprintf(stderr, "short read %zd was less than %zu\n",
++				sret, buf_size);
++			return 1;
++		}
++		if (memcmp(buf, cmp_buf, buf_size)) {
++			printf("Find corruption\n");
++			dump_buffer(buf, 0, buf_size);
++			return 1;
++		}
 +
-+mv A/foo A/bar
-+echo =E2=80=9Cworld=E2=80=9D > A/foo
-+fsync A/foo
-+CRASH
++		/* Calculate how many bytes we've written after pread */
++		bytes += buf_size;
++	}
 +
-+What would you expect on recovery, if the file system crashed after
-+the final fsync returned successfully?
++	return 0;
++}
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..6fcc593a
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,71 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Non-page-aligned direct AIO write test. AIO write from unalinged offset
++# on a file with different initial truncate i_size.
++#
++# Uncover "ext4: Fix data corruption caused by unaligned direct AIO"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+Non-SOMC file systems will not persist the file
-+A/bar because it was not explicitly fsync-ed. But this means, you will
-+find only the file A/foo with data =E2=80=9Cworld=E2=80=9D after crash, =
-thereby losing
-+the previously persisted file with data =E2=80=9Chello=E2=80=9D. You wil=
-l need to
-+explicitly fsync the directory A to ensure the rename operation is
-+safely persisted on disk.
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+Under SOMC, to correctly reference the new inode via A/foo,
-+the previous rename operation must persist as well. Therefore,
-+fsync() of A/foo will persist the renamed file A/bar as well.
-+On recovery you will find both A/bar (with data =E2=80=9Chello=E2=80=9D)
-+and A/foo (with data =E2=80=9Cworld=E2=80=9D).
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
 +
-+It is noteworthy that xfs, ext4, F2FS (when mounted with fsync_mode=3Dst=
-rict)
-+and btrfs provide SOMC-like behaviour in this particular example.
-+However, in writing, only XFS claims to provide SOMC. F2FS aims to provi=
-de
-+SOMC when mounted with fsync_mode=3Dstrict. It is not clear if ext4 and
-+btrfs provide strictly ordered metadata consistency.
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
 +
-+--------------------------------------------------------
-+[1] http://man7.org/linux/man-pages/man2/fdatasync.2.html
-+[2] https://www.spinics.net/lists/linux-btrfs/msg77340.html
-+[3] https://www.spinics.net/lists/fstests/msg09370.html
-+[4] https://bugzilla.kernel.org/show_bug.cgi?id=3D202485
-+[5] https://marc.info/?l=3Dfstests&m=3D155010885626284&w=3D2
-+[6] https://marc.info/?l=3Dfstests&m=3D155011123126916&w=3D2
-+[7] https://www.spinics.net/lists/fstests/msg09379.html
-+[8] https://patchwork.kernel.org/patch/10132305/
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
---
-2.7.4
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_test
++_require_aiodio aio-dio-write-verify
++_require_test_program "feature"
++
++localfile=$TEST_DIR/tst-aio-dio-testfile
++diosize=`_min_dio_alignment $TEST_DEV`
++pagesize=`src/feature -s`
++bufsize=$((pagesize * 2))
++filesize=$((bufsize * 3 / 1024))
++
++# Need smaller logical block size to do non-page-aligned test
++if [ $diosize -ge $pagesize ];then
++	_notrun "Need device logical block size($diosize) < page size($pagesize)"
++fi
++
++rm -rf $localfile 2>/dev/null
++# page-aligned aiodio write verification at first
++$AIO_TEST -s $((bufsize * 10)) -b $bufsize $localfile
++
++# non-page-aligned aiodio write verification
++i=0
++while [ $((diosize * i)) -lt $bufsize ];do
++	truncsize=$((diosize * i++))
++	# non-page-aligned AIO write on different i_size file
++	$AIO_TEST -s $filesize -b $bufsize -o $diosize -t $truncsize $localfile
++	if [ $? -ne 0 ];then
++		echo "[FAIL] $AIO_TEST -s $filesize -b $bufsize -o $diosize -t $truncsize $localfile"
++	fi
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..3b276ca8
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,2 @@
++QA output created by 999
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 15227b67..b1f93d99 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -534,3 +534,4 @@
+ 529 auto quick attr
+ 530 auto quick unlink
+ 531 auto quick unlink
++999 auto quick aio
+-- 
+2.17.2
