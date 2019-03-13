@@ -1,123 +1,850 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51446 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725870AbfCMMaG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 13 Mar 2019 08:30:06 -0400
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 162EDC08E2B9
-        for <fstests@vger.kernel.org>; Wed, 13 Mar 2019 12:30:06 +0000 (UTC)
-Date: Wed, 13 Mar 2019 20:33:59 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] generic: unaligned direct AIO write test
-Message-ID: <20190313123359.GH7200@dhcp-12-102.nay.redhat.com>
-References: <20190312091944.2044-1-zlang@redhat.com>
- <20190313085238.pzfxvcdnm7sikas5@work>
- <20190313100341.GG7200@dhcp-12-102.nay.redhat.com>
- <20190313102610.istwizqfk4drvn2z@work>
+Received: from aserp2130.oracle.com ([141.146.126.79]:35286 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726033AbfCMQq3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Mar 2019 12:46:29 -0400
+Date: Wed, 13 Mar 2019 09:46:00 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [RFC PATCH] clonerange: test remapping the rainbow
+Message-ID: <20190313164600.GA4657@magnolia>
+References: <20190312214910.GK20533@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190313102610.istwizqfk4drvn2z@work>
+In-Reply-To: <20190312214910.GK20533@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Lukas Czerner <lczerner@redhat.com>
-Cc: fstests@vger.kernel.org, fsorenso@redhat.com
+To: akpm@linux-foundation.org, ocfs2-devel@oss.oracle.com
+Cc: mark@fasheh.com, jlbec@evilplan.org, linux-fsdevel@vger.kernel.org, mfasheh@versity.com, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 13, 2019 at 11:26:10AM +0100, Lukas Czerner wrote:
-> On Wed, Mar 13, 2019 at 06:03:42PM +0800, Zorro Lang wrote:
-> > > > +		io_prep_pwrite(&iocb1, fd, buf, buf_size/2, \
-> > > > +		               startoff + bytes + 0*buf_size/2);
-> > > > +		io_prep_pwrite(&iocb2, fd, buf, buf_size/2, \
-> > > > +		               startoff + bytes + 1*buf_size/2);
-> > > 
-> > > This is just a little bit confusing. I'd expect the write size to be a
-> > > buffer size, not buffer size/2. Is there a reason you wanted to do it
-> > > this way ?
-> > 
-> > The buf is used for below pread() too. We write twice separately at here,
-> > so write buf/2 each time. Then read whole buf size once.
-> 
-> Sure, but from the persective of someone using this thing I'd expect the
-> buf_size to be the size of the write. I do not think it matters too much
-> as long as you can explain it in the description of the program.
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-OK, I'll change that.
+Add some more clone range tests that missed various "wacky" combinations
+of file state.  Specifically, we test reflinking into and out of rainbow
+ranges (a mix of real, unwritten, hole, delalloc, and shared extents),
+and also we test that we can correctly handle double-inode locking no
+matter what order of inodes or the filesystem's locking rules.
 
-> 
-> > 
-> > > 
-> > > Also, do we need the size_KB ? I'd expect it would just do two writes.
-> > > One starting in one block before i_size and ending before i_size but in
-> > > the same block as i_size and the second starting beyond i_size but still
-> > > in the same block as i_size.
-> > > 
-> > > I guess it does not hurt to be able to specify size_KB, but I wonder
-> > > what was your reason to include it ?
-> > > 
-> > > Moreover I think it would be interesting to also allow the second write
-> > > not to be aligned with i_size but still be in the same block. Something
-> > > like:
-> > > 
-> > > 	io_prep_pwrite(&iocb1, fd, buf, buf_size, startoff);
-> > > 	io_prep_pwrite(&iocb2, fd, buf, buf_size, startoff + buf_size + shift);
-> > > 
-> > > where "shift" (or whatever you want to call it) can be user specified.
-> > 
-> > Hmmm, I think I can do that in below generic/999, by provide different arguments
-> > to $AIO_TEST.
-> 
-> Looking at the code I do not think you can, but maybe I am wrong.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/reflink        |    7 ++
+ tests/generic/940     |   94 ++++++++++++++++++++++++
+ tests/generic/940.out |   14 ++++
+ tests/generic/941     |   99 +++++++++++++++++++++++++
+ tests/generic/941.out |   16 ++++
+ tests/generic/942     |   95 ++++++++++++++++++++++++
+ tests/generic/942.out |   14 ++++
+ tests/generic/943     |   99 +++++++++++++++++++++++++
+ tests/generic/943.out |   16 ++++
+ tests/generic/944     |  196 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/944.out |   62 ++++++++++++++++
+ tests/generic/group   |    5 +
+ 12 files changed, 716 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/940
+ create mode 100644 tests/generic/940.out
+ create mode 100755 tests/generic/941
+ create mode 100644 tests/generic/941.out
+ create mode 100755 tests/generic/942
+ create mode 100644 tests/generic/942.out
+ create mode 100755 tests/generic/943
+ create mode 100644 tests/generic/943.out
+ create mode 100755 tests/generic/944
+ create mode 100644 tests/generic/944.out
 
-Oh, you mean the 2nd io_prep_pwrite not start from i_size. OK, I'll add another
-offset argument to affect the 2nd io_prep_pwrite.
-
-> 
-> > > > +localfile=$TEST_DIR/tst-aio-dio-testfile
-> > > > +diosize=`_min_dio_alignment $TEST_DEV`
-> > > > +pagesize=`src/feature -s`
-> > > > +bufsize=$((pagesize * 2))
-> > > > +filesize=$((bufsize * 3 / 1024))
-> > > > +
-> > > > +# Need smaller logical block size to do non-page-aligned test
-> > > > +if [ $diosize -ge $pagesize ];then
-> > > > +	_notrun "Need device logical block size($diosize) < page size($pagesize)"
-> > > > +fi
-> > > > +
-> > > > +rm -rf $localfile 2>/dev/null
-> > > > +# page-aligned aiodio write verification at first
-> > > > +$AIO_TEST -s $((bufsize * 10)) -b $bufsize $localfile
-> > > > +
-> > > > +# non-page-aligned aiodio write verification
-> > > > +i=0
-> > > > +while [ $((diosize * i)) -lt $bufsize ];do
-> > > > +	truncsize=$((diosize * i++))
-> > > > +	# non-page-aligned AIO write on different i_size file
-> > > > +	$AIO_TEST -s $filesize -b $bufsize -o $diosize -t $truncsize $localfile
-> > > 
-> > > Why are we starting the write at diosize when truncsize is getting
-> > > bigger and bigger and filesize remains the same. . Is filesize
-> > > necessary ?
-> > 
-> > The filesize is just used to decide how many times $AIO_TEST will write, then exit. It's
-> > not related with this bug, just a limit condition.
-> > 
-> > That .c program is not only to reproduce that ext4 bug. It can be used to do direct AIO
-> > write and verify. Then the generic/999 is used to cover that ext4 bug, and maybe cover
-> > more operations.
-> 
-> Fair enough, just please decribe what the program is good for and what
-> it can do. Currently it's not entirely clear.
-
-Sure, Thanks for your review. I'll send a V2 patch later.
-
-Thanks,
-Zorro
-
-> 
-> Thanks!
-> -Lukas
-> 
-> > 
-> > Thanks,
-> > Zorro
+diff --git a/common/reflink b/common/reflink
+index 11561a76..598f0877 100644
+--- a/common/reflink
++++ b/common/reflink
+@@ -14,9 +14,14 @@ _require_cp_reflink()
+ # Can we reflink between arbitrary file sets?
+ # i.e. if we reflink a->b and c->d, can we later share
+ # blocks between b & c?
++_supports_arbitrary_fileset_reflink()
++{
++	test "$FSTYP" != "ocfs2"
++}
++
+ _require_arbitrary_fileset_reflink()
+ {
+-	test "$FSTYP" = "ocfs2" && \
++	_supports_arbitrary_fileset_reflink ||
+ 		_notrun "reflink between arbitrary file groups not supported in $FSTYP"
+ }
+ 
+diff --git a/tests/generic/940 b/tests/generic/940
+new file mode 100755
+index 00000000..4573cbae
+--- /dev/null
++++ b/tests/generic/940
+@@ -0,0 +1,94 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 940
++#
++# Ensuring that reflinking works when the destination range covers multiple
++# extents, some unwritten, some not:
++#
++#   - Create a file with the following repeating sequence of blocks:
++#     1. reflinked
++#     2. unwritten
++#     3. hole
++#     4. regular block
++#     5. delalloc
++#   - reflink across the halfway mark, starting with the unwritten extent.
++#   - Check that the files are now different where we say they're different.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_cp_reflink
++_require_odirect
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original files"
++blksz=65536
++nr=64
++filesize=$((blksz * nr))
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
++_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++echo "reflink across the transition"
++roff=$((filesize / 4))
++rsz=$((filesize / 2))
++_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
++
++# now reflink into the rainbow
++echo "before reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$XFS_IO_PROG -f -c "reflink $testdir/file2 $roff $roff $rsz" $testdir/file3 >> $seqres.full
++_pwrite_byte 0x64 $roff $rsz $testdir/file3.chk >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++echo "after reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/940.out b/tests/generic/940.out
+new file mode 100644
+index 00000000..d34c7b50
+--- /dev/null
++++ b/tests/generic/940.out
+@@ -0,0 +1,14 @@
++QA output created by 940
++Format and mount
++Create the original files
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-940/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-940/file2
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-940/file3
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-940/file3.chk
++reflink across the transition
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-940/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-940/file2
++5d47954e2336b2547afde6e44d2f13cc  SCRATCH_MNT/test-940/file3
++5d47954e2336b2547afde6e44d2f13cc  SCRATCH_MNT/test-940/file3.chk
+diff --git a/tests/generic/941 b/tests/generic/941
+new file mode 100755
+index 00000000..145b8585
+--- /dev/null
++++ b/tests/generic/941
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 941
++#
++# Ensuring that reflinking works when the source range covers multiple
++# extents, some unwritten, some not:
++#
++#   - Create a file with the following repeating sequence of blocks:
++#     1. reflinked
++#     2. unwritten
++#     3. hole
++#     4. regular block
++#     5. delalloc
++#   - reflink across the halfway mark, starting with the unwritten extent.
++#   - Check that the files are now different where we say they're different.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_cp_reflink
++_require_odirect
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original files"
++blksz=65536
++nr=64
++filesize=$((blksz * nr))
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2.chk >> $seqres.full
++_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++echo "reflink across the transition"
++roff=$((filesize / 4))
++rsz=$((filesize / 2))
++_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
++
++# now reflink the rainbow
++echo "before reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$XFS_IO_PROG -f -c "reflink $testdir/file3 $roff $roff $rsz" $testdir/file2 >> $seqres.full
++cp $testdir/file3.chk $testdir/file2.chk
++_pwrite_byte 0x64 0 $roff $testdir/file2.chk >> $seqres.full
++_pwrite_byte 0x64 $((roff + rsz)) $((filesize - (roff + rsz) )) $testdir/file2.chk >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++echo "after reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/941.out b/tests/generic/941.out
+new file mode 100644
+index 00000000..a76e6c62
+--- /dev/null
++++ b/tests/generic/941.out
+@@ -0,0 +1,16 @@
++QA output created by 941
++Format and mount
++Create the original files
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-941/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-941/file2
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-941/file2.chk
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-941/file3
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-941/file3.chk
++reflink across the transition
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-941/file1
++51a300aae3a4b4eaa023876a397e01ef  SCRATCH_MNT/test-941/file2
++51a300aae3a4b4eaa023876a397e01ef  SCRATCH_MNT/test-941/file2.chk
++7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-941/file3
++7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-941/file3.chk
+diff --git a/tests/generic/942 b/tests/generic/942
+new file mode 100755
+index 00000000..92b0f298
+--- /dev/null
++++ b/tests/generic/942
+@@ -0,0 +1,95 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 942
++#
++# Ensuring that reflinking works when the destination range covers multiple
++# extents, some unwritten, some not:
++#
++#   - Create a file with the following repeating sequence of blocks:
++#     1. reflinked
++#     2. unwritten
++#     3. hole
++#     4. regular block
++#     5. delalloc
++#   - reflink across the halfway mark, starting with the unwritten extent.
++#   - Check that the files are now different where we say they're different.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_cp_reflink
++_require_odirect
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original files"
++blksz=65536
++nr=64
++filesize=$((blksz * nr))
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
++_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++echo "reflink across the transition"
++soff=$((filesize / 4))
++doff=$((filesize / 2))
++rsz=$((filesize / 2))
++_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
++
++# now reflink into the rainbow
++echo "before reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$XFS_IO_PROG -f -c "reflink $testdir/file2 $soff $doff $rsz" $testdir/file3 >> $seqres.full
++_pwrite_byte 0x64 $doff $rsz $testdir/file3.chk >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++echo "after reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/942.out b/tests/generic/942.out
+new file mode 100644
+index 00000000..529ecff2
+--- /dev/null
++++ b/tests/generic/942.out
+@@ -0,0 +1,14 @@
++QA output created by 942
++Format and mount
++Create the original files
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-942/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-942/file2
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-942/file3
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-942/file3.chk
++reflink across the transition
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-942/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-942/file2
++52bb341f992de6ef4bf5e5d61177eddc  SCRATCH_MNT/test-942/file3
++52bb341f992de6ef4bf5e5d61177eddc  SCRATCH_MNT/test-942/file3.chk
+diff --git a/tests/generic/943 b/tests/generic/943
+new file mode 100755
+index 00000000..91dfa75b
+--- /dev/null
++++ b/tests/generic/943
+@@ -0,0 +1,99 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 943
++#
++# Ensuring that reflinking works when the source range covers multiple
++# extents, some unwritten, some not:
++#
++#   - Create a file with the following repeating sequence of blocks:
++#     1. reflinked
++#     2. unwritten
++#     3. hole
++#     4. regular block
++#     5. delalloc
++#   - reflink across the halfway mark, starting with the unwritten extent.
++#   - Check that the files are now different where we say they're different.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_xfs_io_command "falloc"
++_require_xfs_io_command "fpunch"
++_require_cp_reflink
++_require_odirect
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++testdir=$SCRATCH_MNT/test-$seq
++mkdir $testdir
++
++echo "Create the original files"
++blksz=65536
++nr=64
++filesize=$((blksz * nr))
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
++_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2.chk >> $seqres.full
++_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
++_scratch_cycle_mount
++
++echo "Compare files"
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++echo "reflink across the transition"
++soff=$((filesize / 4))
++doff=$((filesize / 2))
++rsz=$((filesize / 2))
++_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
++
++# now reflink the rainbow
++echo "before reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$XFS_IO_PROG -f -c "reflink $testdir/file3 $soff $doff $rsz" $testdir/file2 >> $seqres.full
++truncate -s $doff $testdir/file2.chk
++dd if=$testdir/file3.chk skip=$((soff / blksz)) count=$((rsz / blksz)) bs=$blksz >> $testdir/file2.chk 2> /dev/null
++_scratch_cycle_mount
++
++echo "Compare files"
++echo "after reflink" >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++md5sum $testdir/file1 | _filter_scratch
++md5sum $testdir/file2 | _filter_scratch
++md5sum $testdir/file2.chk | _filter_scratch
++md5sum $testdir/file3 | _filter_scratch
++md5sum $testdir/file3.chk | _filter_scratch
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/943.out b/tests/generic/943.out
+new file mode 100644
+index 00000000..471c3f34
+--- /dev/null
++++ b/tests/generic/943.out
+@@ -0,0 +1,16 @@
++QA output created by 943
++Format and mount
++Create the original files
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-943/file1
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-943/file2
++5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-943/file2.chk
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-943/file3
++6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-943/file3.chk
++reflink across the transition
++Compare files
++bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-943/file1
++d93123af536c8c012f866ea383a905ce  SCRATCH_MNT/test-943/file2
++d93123af536c8c012f866ea383a905ce  SCRATCH_MNT/test-943/file2.chk
++7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-943/file3
++7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-943/file3.chk
+diff --git a/tests/generic/944 b/tests/generic/944
+new file mode 100755
+index 00000000..237cd2da
+--- /dev/null
++++ b/tests/generic/944
+@@ -0,0 +1,196 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 944
++#
++# Ensure that we can reflink from a file with a higher inode number to a lower
++# inode number and vice versa.  Mix it up by doing this test with inodes that
++# already share blocks and inodes that don't share blocks.  This tests both
++# double-inode locking order correctness as well as stressing things like ocfs2
++# which have per-inode sharing groups and therefore have to check that we don't
++# try to link data between disjoint sharing groups.
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch_reflink
++_require_cp_reflink
++
++rm -f $seqres.full
++
++echo "Format and mount"
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount >> $seqres.full 2>&1
++
++blksz=65536
++nr=2
++filesize=$((blksz * nr))
++testdir=$SCRATCH_MNT/test-$seq
++dummy_file=$testdir/dummy
++low_file=$testdir/low
++high_file=$testdir/high
++scenario=1
++mkdir $testdir
++
++# Return inode number
++inum() {
++	stat -c '%i' $1
++}
++
++# Create two test files, make $low_file the file with the lower inode
++# number, and make $high_file the file with the higher inode number.
++create_files() {
++	_pwrite_byte 0x60 0 $filesize $testdir/file1 >> $seqres.full
++	_pwrite_byte 0x61 0 $filesize $testdir/file2 >> $seqres.full
++	if [ "$(inum $testdir/file1)" -lt "$(inum $testdir/file2)" ]; then
++		mv $testdir/file1 $low_file
++		mv $testdir/file2 $high_file
++	else
++		mv $testdir/file2 $low_file
++		mv $testdir/file1 $high_file
++	fi
++}
++
++# Check md5sum of both files, but keep results sorted by inode order
++check_files() {
++	md5sum $low_file | _filter_scratch
++	md5sum $high_file | _filter_scratch
++}
++
++# Test reflinking data from the first file to the second file
++test_files() {
++	local src="$1"
++	local dest="$2"
++	local off=$((filesize / 2))
++	local sz=$((filesize / 2))
++
++	check_files
++	_reflink_range $src $off $dest $off $sz >> $seqres.full
++	_scratch_cycle_mount
++	check_files
++}
++
++# Make a file shared with a dummy file
++dummy_share() {
++	local which="$2"
++	test -z "$which" && which=1
++	local dummy=$dummy_file.$which
++
++	rm -f $dummy
++	_cp_reflink $1 $dummy
++}
++
++# Make two files share (different ranges) with a dummy file
++mutual_dummy_share() {
++	rm -f $dummy_file
++	_cp_reflink $1 $dummy_file
++	_reflink_range $2 0 $dummy_file $blksz $blksz >> $seqres.full
++}
++
++# Announce ourselves, remembering which scenario we've tried
++ann() {
++	echo "$scenario: $@" | tee -a $seqres.full
++	scenario=$((scenario + 1))
++}
++
++# Scenario 1: low to high, neither file shares
++ann "low to high, neither share"
++create_files
++test_files $low_file $high_file
++
++# Scenario 2: high to low, neither file shares
++ann "high to low, neither share"
++create_files
++test_files $high_file $low_file
++
++# Scenario 3: low to high, only source file shares
++ann "low to high, only source shares"
++create_files
++dummy_share $low_file
++test_files $low_file $high_file
++
++# Scenario 4: high to low, only source file shares
++ann "high to low, only source shares"
++create_files
++dummy_share $high_file
++test_files $high_file $low_file
++
++# Scenario 5: low to high, only dest file shares
++ann "low to high, only dest shares"
++create_files
++dummy_share $high_file
++test_files $low_file $high_file
++
++# Scenario 6: high to low, only dest file shares
++ann "high to low, only dest shares"
++create_files
++dummy_share $low_file
++test_files $high_file $low_file
++
++# Scenario 7: low to high, both files share with each other
++ann "low to high, both files share with each other"
++create_files
++_reflink_range $low_file 0 $high_file 0 $blksz >> $seqres.full
++test_files $low_file $high_file
++
++# Scenario 8: high to low, both files share with each other
++ann "high to low, both files share with each other"
++create_files
++_reflink_range $low_file 0 $high_file 0 $blksz >> $seqres.full
++test_files $high_file $low_file
++
++# Scenario 9: low to high, both files share but not with each other
++ann "low to high, both files share but not with each other"
++create_files
++# ocfs2 can only reflink between files sharing a refcount tree, so for
++# this test (and #10) we skip the dummy file because we'd rather not split
++# the test code just to mask off the /one/ weird fs like this...
++if _supports_arbitrary_fileset_reflink; then
++	dummy_share $low_file 1
++	dummy_share $high_file 2
++fi
++test_files $low_file $high_file
++
++# Scenario 10: high to low, both files share but not with each other
++ann "high to low, both files share but not with each other"
++create_files
++if _supports_arbitrary_fileset_reflink; then
++	dummy_share $low_file 1
++	dummy_share $high_file 2
++fi
++test_files $high_file $low_file
++
++# Scenario 11: low to high, both files share mutually
++ann "low to high, both files share mutually"
++create_files
++mutual_dummy_share $low_file $high_file
++test_files $low_file $high_file
++
++# Scenario 12: high to low, both files share mutually
++ann "high to low, both files share mutually"
++create_files
++mutual_dummy_share $low_file $high_file
++test_files $high_file $low_file
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/944.out b/tests/generic/944.out
+new file mode 100644
+index 00000000..aa53fdce
+--- /dev/null
++++ b/tests/generic/944.out
+@@ -0,0 +1,62 @@
++QA output created by 944
++Format and mount
++1: low to high, neither share
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
++2: high to low, neither share
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++3: low to high, only source shares
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
++4: high to low, only source shares
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++5: low to high, only dest shares
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
++6: high to low, only dest shares
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++7: low to high, both files share with each other
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/high
++8: high to low, both files share with each other
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
++9: low to high, both files share but not with each other
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
++10: high to low, both files share but not with each other
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++11: low to high, both files share mutually
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
++12: high to low, both files share mutually
++07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
++0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
++81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
+diff --git a/tests/generic/group b/tests/generic/group
+index 78b9b45d..2e4341fb 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -538,3 +538,8 @@
+ 533 auto quick attr
+ 534 auto quick log
+ 535 auto quick log
++940 auto quick clone punch
++941 auto quick clone punch
++942 auto quick clone punch
++943 auto quick clone punch
++944 auto quick clone punch
