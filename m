@@ -1,850 +1,281 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:35286 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726033AbfCMQq3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 13 Mar 2019 12:46:29 -0400
-Date: Wed, 13 Mar 2019 09:46:00 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [RFC PATCH] clonerange: test remapping the rainbow
-Message-ID: <20190313164600.GA4657@magnolia>
-References: <20190312214910.GK20533@magnolia>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:44397 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726328AbfCMSoD (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 13 Mar 2019 14:44:03 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190312214910.GK20533@magnolia>
+References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
+In-Reply-To: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 13 Mar 2019 20:43:51 +0200
+Message-ID: <CAOQ4uxgw2VOzVtyKQmnPrxqPbFWRV0DNzqaywxgQQXCNsB+tKw@mail.gmail.com>
+Subject: Re: [PATCH v2] Documenting the crash-recovery guarantees of Linux
+ file systems
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: akpm@linux-foundation.org, ocfs2-devel@oss.oracle.com
-Cc: mark@fasheh.com, jlbec@evilplan.org, linux-fsdevel@vger.kernel.org, mfasheh@versity.com, fstests <fstests@vger.kernel.org>
+To: Jayashree <jaya@cs.utexas.edu>
+Cc: fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Dave Chinner <david@fromorbit.com>, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Tue, Mar 12, 2019 at 9:27 PM Jayashree <jaya@cs.utexas.edu> wrote:
+>
+> In this file, we document the crash-recovery guarantees
+> provided by four Linux file systems - xfs, ext4, F2FS and btrfs. We also
+> present Dave Chinner's proposal of Strictly-Ordered Metadata Consistency
+> (SOMC), which is provided by xfs. It is not clear to us if other file sys=
+tems
+> provide SOMC.
 
-Add some more clone range tests that missed various "wacky" combinations
-of file state.  Specifically, we test reflinking into and out of rainbow
-ranges (a mix of real, unwritten, hole, delalloc, and shared extents),
-and also we test that we can correctly handle double-inode locking no
-matter what order of inodes or the filesystem's locking rules.
+I think your document already claims that f2fs is SOMC, so better
+update commit message.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- common/reflink        |    7 ++
- tests/generic/940     |   94 ++++++++++++++++++++++++
- tests/generic/940.out |   14 ++++
- tests/generic/941     |   99 +++++++++++++++++++++++++
- tests/generic/941.out |   16 ++++
- tests/generic/942     |   95 ++++++++++++++++++++++++
- tests/generic/942.out |   14 ++++
- tests/generic/943     |   99 +++++++++++++++++++++++++
- tests/generic/943.out |   16 ++++
- tests/generic/944     |  196 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/944.out |   62 ++++++++++++++++
- tests/generic/group   |    5 +
- 12 files changed, 716 insertions(+), 1 deletion(-)
- create mode 100755 tests/generic/940
- create mode 100644 tests/generic/940.out
- create mode 100755 tests/generic/941
- create mode 100644 tests/generic/941.out
- create mode 100755 tests/generic/942
- create mode 100644 tests/generic/942.out
- create mode 100755 tests/generic/943
- create mode 100644 tests/generic/943.out
- create mode 100755 tests/generic/944
- create mode 100644 tests/generic/944.out
+FWIW, it is clear that ext4 also provides SOMC, because
+all metadata is journalled on a single linear transaction journal.
+Compared to xfs, an fsync on any dirty object is likely to flush
+even more metadata.
 
-diff --git a/common/reflink b/common/reflink
-index 11561a76..598f0877 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -14,9 +14,14 @@ _require_cp_reflink()
- # Can we reflink between arbitrary file sets?
- # i.e. if we reflink a->b and c->d, can we later share
- # blocks between b & c?
-+_supports_arbitrary_fileset_reflink()
-+{
-+	test "$FSTYP" != "ocfs2"
-+}
-+
- _require_arbitrary_fileset_reflink()
- {
--	test "$FSTYP" = "ocfs2" && \
-+	_supports_arbitrary_fileset_reflink ||
- 		_notrun "reflink between arbitrary file groups not supported in $FSTYP"
- }
- 
-diff --git a/tests/generic/940 b/tests/generic/940
-new file mode 100755
-index 00000000..4573cbae
---- /dev/null
-+++ b/tests/generic/940
-@@ -0,0 +1,94 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 940
-+#
-+# Ensuring that reflinking works when the destination range covers multiple
-+# extents, some unwritten, some not:
-+#
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - reflink across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_cp_reflink
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "reflink across the transition"
-+roff=$((filesize / 4))
-+rsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+
-+# now reflink into the rainbow
-+echo "before reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -f -c "reflink $testdir/file2 $roff $roff $rsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x64 $roff $rsz $testdir/file3.chk >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+echo "after reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/940.out b/tests/generic/940.out
-new file mode 100644
-index 00000000..d34c7b50
---- /dev/null
-+++ b/tests/generic/940.out
-@@ -0,0 +1,14 @@
-+QA output created by 940
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-940/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-940/file2
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-940/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-940/file3.chk
-+reflink across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-940/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-940/file2
-+5d47954e2336b2547afde6e44d2f13cc  SCRATCH_MNT/test-940/file3
-+5d47954e2336b2547afde6e44d2f13cc  SCRATCH_MNT/test-940/file3.chk
-diff --git a/tests/generic/941 b/tests/generic/941
-new file mode 100755
-index 00000000..145b8585
---- /dev/null
-+++ b/tests/generic/941
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 941
-+#
-+# Ensuring that reflinking works when the source range covers multiple
-+# extents, some unwritten, some not:
-+#
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - reflink across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_cp_reflink
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2.chk >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file2.chk | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "reflink across the transition"
-+roff=$((filesize / 4))
-+rsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+
-+# now reflink the rainbow
-+echo "before reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -f -c "reflink $testdir/file3 $roff $roff $rsz" $testdir/file2 >> $seqres.full
-+cp $testdir/file3.chk $testdir/file2.chk
-+_pwrite_byte 0x64 0 $roff $testdir/file2.chk >> $seqres.full
-+_pwrite_byte 0x64 $((roff + rsz)) $((filesize - (roff + rsz) )) $testdir/file2.chk >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+echo "after reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file2.chk | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/941.out b/tests/generic/941.out
-new file mode 100644
-index 00000000..a76e6c62
---- /dev/null
-+++ b/tests/generic/941.out
-@@ -0,0 +1,16 @@
-+QA output created by 941
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-941/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-941/file2
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-941/file2.chk
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-941/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-941/file3.chk
-+reflink across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-941/file1
-+51a300aae3a4b4eaa023876a397e01ef  SCRATCH_MNT/test-941/file2
-+51a300aae3a4b4eaa023876a397e01ef  SCRATCH_MNT/test-941/file2.chk
-+7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-941/file3
-+7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-941/file3.chk
-diff --git a/tests/generic/942 b/tests/generic/942
-new file mode 100755
-index 00000000..92b0f298
---- /dev/null
-+++ b/tests/generic/942
-@@ -0,0 +1,95 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 942
-+#
-+# Ensuring that reflinking works when the destination range covers multiple
-+# extents, some unwritten, some not:
-+#
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - reflink across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_cp_reflink
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "reflink across the transition"
-+soff=$((filesize / 4))
-+doff=$((filesize / 2))
-+rsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+
-+# now reflink into the rainbow
-+echo "before reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -f -c "reflink $testdir/file2 $soff $doff $rsz" $testdir/file3 >> $seqres.full
-+_pwrite_byte 0x64 $doff $rsz $testdir/file3.chk >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+echo "after reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/942.out b/tests/generic/942.out
-new file mode 100644
-index 00000000..529ecff2
---- /dev/null
-+++ b/tests/generic/942.out
-@@ -0,0 +1,14 @@
-+QA output created by 942
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-942/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-942/file2
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-942/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-942/file3.chk
-+reflink across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-942/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-942/file2
-+52bb341f992de6ef4bf5e5d61177eddc  SCRATCH_MNT/test-942/file3
-+52bb341f992de6ef4bf5e5d61177eddc  SCRATCH_MNT/test-942/file3.chk
-diff --git a/tests/generic/943 b/tests/generic/943
-new file mode 100755
-index 00000000..91dfa75b
---- /dev/null
-+++ b/tests/generic/943
-@@ -0,0 +1,99 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 943
-+#
-+# Ensuring that reflinking works when the source range covers multiple
-+# extents, some unwritten, some not:
-+#
-+#   - Create a file with the following repeating sequence of blocks:
-+#     1. reflinked
-+#     2. unwritten
-+#     3. hole
-+#     4. regular block
-+#     5. delalloc
-+#   - reflink across the halfway mark, starting with the unwritten extent.
-+#   - Check that the files are now different where we say they're different.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_xfs_io_command "falloc"
-+_require_xfs_io_command "fpunch"
-+_require_cp_reflink
-+_require_odirect
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+testdir=$SCRATCH_MNT/test-$seq
-+mkdir $testdir
-+
-+echo "Create the original files"
-+blksz=65536
-+nr=64
-+filesize=$((blksz * nr))
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2 >> $seqres.full
-+_pwrite_byte 0x64 0 $((blksz * nr)) $testdir/file2.chk >> $seqres.full
-+_weave_reflink_rainbow $blksz $nr $testdir/file1 $testdir/file3 >> $seqres.full
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file2.chk | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+echo "reflink across the transition"
-+soff=$((filesize / 4))
-+doff=$((filesize / 2))
-+rsz=$((filesize / 2))
-+_weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
-+
-+# now reflink the rainbow
-+echo "before reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+$XFS_IO_PROG -f -c "reflink $testdir/file3 $soff $doff $rsz" $testdir/file2 >> $seqres.full
-+truncate -s $doff $testdir/file2.chk
-+dd if=$testdir/file3.chk skip=$((soff / blksz)) count=$((rsz / blksz)) bs=$blksz >> $testdir/file2.chk 2> /dev/null
-+_scratch_cycle_mount
-+
-+echo "Compare files"
-+echo "after reflink" >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-+$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-+md5sum $testdir/file1 | _filter_scratch
-+md5sum $testdir/file2 | _filter_scratch
-+md5sum $testdir/file2.chk | _filter_scratch
-+md5sum $testdir/file3 | _filter_scratch
-+md5sum $testdir/file3.chk | _filter_scratch
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/943.out b/tests/generic/943.out
-new file mode 100644
-index 00000000..471c3f34
---- /dev/null
-+++ b/tests/generic/943.out
-@@ -0,0 +1,16 @@
-+QA output created by 943
-+Format and mount
-+Create the original files
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-943/file1
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-943/file2
-+5a5221017d3ab8fd7583312a14d2ba80  SCRATCH_MNT/test-943/file2.chk
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-943/file3
-+6366fd359371414186688a0ef6988893  SCRATCH_MNT/test-943/file3.chk
-+reflink across the transition
-+Compare files
-+bdbcf02ee0aa977795a79d25fcfdccb1  SCRATCH_MNT/test-943/file1
-+d93123af536c8c012f866ea383a905ce  SCRATCH_MNT/test-943/file2
-+d93123af536c8c012f866ea383a905ce  SCRATCH_MNT/test-943/file2.chk
-+7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-943/file3
-+7bf7a779a0a54647b41753206c5218b1  SCRATCH_MNT/test-943/file3.chk
-diff --git a/tests/generic/944 b/tests/generic/944
-new file mode 100755
-index 00000000..237cd2da
---- /dev/null
-+++ b/tests/generic/944
-@@ -0,0 +1,196 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 944
-+#
-+# Ensure that we can reflink from a file with a higher inode number to a lower
-+# inode number and vice versa.  Mix it up by doing this test with inodes that
-+# already share blocks and inodes that don't share blocks.  This tests both
-+# double-inode locking order correctness as well as stressing things like ocfs2
-+# which have per-inode sharing groups and therefore have to check that we don't
-+# try to link data between disjoint sharing groups.
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+    cd /
-+    rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_os Linux
-+_require_scratch_reflink
-+_require_cp_reflink
-+
-+rm -f $seqres.full
-+
-+echo "Format and mount"
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount >> $seqres.full 2>&1
-+
-+blksz=65536
-+nr=2
-+filesize=$((blksz * nr))
-+testdir=$SCRATCH_MNT/test-$seq
-+dummy_file=$testdir/dummy
-+low_file=$testdir/low
-+high_file=$testdir/high
-+scenario=1
-+mkdir $testdir
-+
-+# Return inode number
-+inum() {
-+	stat -c '%i' $1
-+}
-+
-+# Create two test files, make $low_file the file with the lower inode
-+# number, and make $high_file the file with the higher inode number.
-+create_files() {
-+	_pwrite_byte 0x60 0 $filesize $testdir/file1 >> $seqres.full
-+	_pwrite_byte 0x61 0 $filesize $testdir/file2 >> $seqres.full
-+	if [ "$(inum $testdir/file1)" -lt "$(inum $testdir/file2)" ]; then
-+		mv $testdir/file1 $low_file
-+		mv $testdir/file2 $high_file
-+	else
-+		mv $testdir/file2 $low_file
-+		mv $testdir/file1 $high_file
-+	fi
-+}
-+
-+# Check md5sum of both files, but keep results sorted by inode order
-+check_files() {
-+	md5sum $low_file | _filter_scratch
-+	md5sum $high_file | _filter_scratch
-+}
-+
-+# Test reflinking data from the first file to the second file
-+test_files() {
-+	local src="$1"
-+	local dest="$2"
-+	local off=$((filesize / 2))
-+	local sz=$((filesize / 2))
-+
-+	check_files
-+	_reflink_range $src $off $dest $off $sz >> $seqres.full
-+	_scratch_cycle_mount
-+	check_files
-+}
-+
-+# Make a file shared with a dummy file
-+dummy_share() {
-+	local which="$2"
-+	test -z "$which" && which=1
-+	local dummy=$dummy_file.$which
-+
-+	rm -f $dummy
-+	_cp_reflink $1 $dummy
-+}
-+
-+# Make two files share (different ranges) with a dummy file
-+mutual_dummy_share() {
-+	rm -f $dummy_file
-+	_cp_reflink $1 $dummy_file
-+	_reflink_range $2 0 $dummy_file $blksz $blksz >> $seqres.full
-+}
-+
-+# Announce ourselves, remembering which scenario we've tried
-+ann() {
-+	echo "$scenario: $@" | tee -a $seqres.full
-+	scenario=$((scenario + 1))
-+}
-+
-+# Scenario 1: low to high, neither file shares
-+ann "low to high, neither share"
-+create_files
-+test_files $low_file $high_file
-+
-+# Scenario 2: high to low, neither file shares
-+ann "high to low, neither share"
-+create_files
-+test_files $high_file $low_file
-+
-+# Scenario 3: low to high, only source file shares
-+ann "low to high, only source shares"
-+create_files
-+dummy_share $low_file
-+test_files $low_file $high_file
-+
-+# Scenario 4: high to low, only source file shares
-+ann "high to low, only source shares"
-+create_files
-+dummy_share $high_file
-+test_files $high_file $low_file
-+
-+# Scenario 5: low to high, only dest file shares
-+ann "low to high, only dest shares"
-+create_files
-+dummy_share $high_file
-+test_files $low_file $high_file
-+
-+# Scenario 6: high to low, only dest file shares
-+ann "high to low, only dest shares"
-+create_files
-+dummy_share $low_file
-+test_files $high_file $low_file
-+
-+# Scenario 7: low to high, both files share with each other
-+ann "low to high, both files share with each other"
-+create_files
-+_reflink_range $low_file 0 $high_file 0 $blksz >> $seqres.full
-+test_files $low_file $high_file
-+
-+# Scenario 8: high to low, both files share with each other
-+ann "high to low, both files share with each other"
-+create_files
-+_reflink_range $low_file 0 $high_file 0 $blksz >> $seqres.full
-+test_files $high_file $low_file
-+
-+# Scenario 9: low to high, both files share but not with each other
-+ann "low to high, both files share but not with each other"
-+create_files
-+# ocfs2 can only reflink between files sharing a refcount tree, so for
-+# this test (and #10) we skip the dummy file because we'd rather not split
-+# the test code just to mask off the /one/ weird fs like this...
-+if _supports_arbitrary_fileset_reflink; then
-+	dummy_share $low_file 1
-+	dummy_share $high_file 2
-+fi
-+test_files $low_file $high_file
-+
-+# Scenario 10: high to low, both files share but not with each other
-+ann "high to low, both files share but not with each other"
-+create_files
-+if _supports_arbitrary_fileset_reflink; then
-+	dummy_share $low_file 1
-+	dummy_share $high_file 2
-+fi
-+test_files $high_file $low_file
-+
-+# Scenario 11: low to high, both files share mutually
-+ann "low to high, both files share mutually"
-+create_files
-+mutual_dummy_share $low_file $high_file
-+test_files $low_file $high_file
-+
-+# Scenario 12: high to low, both files share mutually
-+ann "high to low, both files share mutually"
-+create_files
-+mutual_dummy_share $low_file $high_file
-+test_files $high_file $low_file
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/944.out b/tests/generic/944.out
-new file mode 100644
-index 00000000..aa53fdce
---- /dev/null
-+++ b/tests/generic/944.out
-@@ -0,0 +1,62 @@
-+QA output created by 944
-+Format and mount
-+1: low to high, neither share
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
-+2: high to low, neither share
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+3: low to high, only source shares
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
-+4: high to low, only source shares
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+5: low to high, only dest shares
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
-+6: high to low, only dest shares
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+7: low to high, both files share with each other
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/high
-+8: high to low, both files share with each other
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/high
-+9: low to high, both files share but not with each other
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
-+10: high to low, both files share but not with each other
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+11: low to high, both files share mutually
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+de1d43fbed633326daed6f71912e09e1  SCRATCH_MNT/test-944/high
-+12: high to low, both files share mutually
-+07d9f5b0e07f22bff26e39f929cfc460  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-+0d2ce48b6a4527783bd30ce21f09fec0  SCRATCH_MNT/test-944/low
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/test-944/high
-diff --git a/tests/generic/group b/tests/generic/group
-index 78b9b45d..2e4341fb 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -538,3 +538,8 @@
- 533 auto quick attr
- 534 auto quick log
- 535 auto quick log
-+940 auto quick clone punch
-+941 auto quick clone punch
-+942 auto quick clone punch
-+943 auto quick clone punch
-+944 auto quick clone punch
+It'd be a pitty to merge this document without Ted's ACK
+on the SOMC claim for ext4.
+
+Thanks,
+Amir.
+
+>
+> Signed-off-by: Jayashree Mohan <jaya@cs.utexas.edu>
+> Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>
+> We would be happy to modify the document if file-system
+> developers claim that their system provides (or aims to provide) SOMC.
+>
+> Changes since v1:
+>   * Addressed few nits identified in the review
+>   * Added the fsync guarantees for F2FS and its SOMC compliance
+> ---
+>  .../filesystems/crash-recovery-guarantees.txt      | 193 +++++++++++++++=
+++++++
+>  1 file changed, 193 insertions(+)
+>  create mode 100644 Documentation/filesystems/crash-recovery-guarantees.t=
+xt
+>
+> diff --git a/Documentation/filesystems/crash-recovery-guarantees.txt b/Do=
+cumentation/filesystems/crash-recovery-guarantees.txt
+> new file mode 100644
+> index 0000000..be84964
+> --- /dev/null
+> +++ b/Documentation/filesystems/crash-recovery-guarantees.txt
+> @@ -0,0 +1,193 @@
+> +=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> +File System Crash-Recovery Guarantees
+> +=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> +Linux file systems provide certain guarantees to user-space
+> +applications about what happens to their data if the system crashes
+> +(due to power loss or kernel panic). These are termed crash-recovery
+> +guarantees.
+> +
+> +Crash-recovery guarantees only pertain to data or metadata that has
+> +been explicitly persisted to storage with fsync(), fdatasync(), or
+> +sync() system calls. By default, write(), mkdir(), and other
+> +file-system related system calls only affect the in-memory state of
+> +the file system.
+> +
+> +The crash-recovery guarantees provided by most Linux file systems are
+> +significantly stronger than what is required by POSIX. POSIX is vague,
+> +even allowing fsync() to do nothing (Mac OSX takes advantage of
+> +this). However, the guarantees provided by file systems are not
+> +documented, and vary between file systems. This document seeks to
+> +describe the current crash-recovery guarantees provided by major Linux
+> +file systems.
+> +
+> +What does the fsync() operation guarantee?
+> +----------------------------------------------------
+> +fsync() operation is meant to force the physical write of data
+> +corresponding to a file from the buffer cache, along with the file
+> +metadata. Note that the guarantees mentioned for each file system below
+> +are in addition to the ones provided by POSIX.
+> +
+> +POSIX
+> +-----
+> +fsync(file) : Flushes the data and metadata associated with the
+> +file. However, if the directory entry for the file has not been
+> +previously persisted, or has been modified, it is not guaranteed to be
+> +persisted by the fsync of the file [1]. What this means is, if a file
+> +is newly created, you will have to fsync(parent directory) in addition
+> +to fsync(file) in order to ensure that the file's directory entry has
+> +safely reached the disk.
+> +
+> +fsync(dir) : Flushes directory data and directory entries. However if
+> +you created a new file within the directory and wrote data to the
+> +file, then the file data is not guaranteed to be persisted, unless an
+> +explicit fsync() is issued on the file.
+> +
+> +ext4
+> +-----
+> +fsync(file) : Ensures that a newly created file's directory entry is
+> +persisted (no need to explicitly persist the parent directory). However,
+> +if you create multiple names of the file (hard links), then their direct=
+ory
+> +entries are not guaranteed to persist unless each one of the parent
+> +directory entries are persisted [2].
+> +
+> +fsync(dir) : All file names within the persisted directory will exist,
+> +but does not guarantee file data.
+> +
+> +xfs
+> +----
+> +fsync(file) : Ensures that a newly created file's directory entry is
+> +persisted. Additionally, all the previous dependent modifications to
+> +this file are also persisted. If any file shares an object
+> +modification dependency with the fsync-ed file, then that file's
+> +directory entry is also persisted.
+> +
+> +fsync(dir) : All file names within the persisted directory will exist,
+> +but does not guarantee file data. As with files, fsync(dir) also persist=
+s
+> +previous dependent metadata operations.
+> +
+> +btrfs
+> +------
+> +fsync(file) : Ensures that a newly created file's directory entry
+> +is persisted, along with the directory entries of all its hard links.
+> +You do not need to explicitly fsync individual hard links to the file.
+> +
+> +fsync(dir) : All the file names within the directory will persist. All t=
+he
+> +rename and unlink operations within the directory are persisted. Due
+> +to the design choices made by btrfs, fsync of a directory could lead
+> +to an iterative fsync on sub-directories, thereby requiring a full
+> +file system commit. So btrfs does not advocate fsync of directories
+> +[2].
+> +
+> +F2FS
+> +----
+> +fsync(file) or fsync(dir) : In the default mode (fsync-mode=3Dposix),
+> +F2FS only guarantees POSIX behaviour. However, it provides xfs-like
+> +guarantees if mounted with fsync-mode=3Dstrict option.
+> +
+> +fsync(symlink)
+> +-------------
+> +A symlink inode cannot be directly opened for IO, which means there is
+> +no such thing as fsync of a symlink [3]. You could be tricked by the
+> +fact that open and fsync of a symlink succeeds without returning a
+> +error, but what happens in reality is as follows.
+> +
+> +Suppose we have a symlink =E2=80=9Cfoo=E2=80=9D, which points to the fil=
+e =E2=80=9CA/bar=E2=80=9D
+> +
+> +fd =3D open(=E2=80=9Cfoo=E2=80=9D, O_CREAT | O_RDWR)
+> +fsync(fd)
+> +
+> +Both the above operations succeed, but if you crash after fsync, the
+> +symlink could be still missing.
+> +
+> +When you try to open the symlink =E2=80=9Cfoo=E2=80=9D, you are actually=
+ trying to
+> +open the file that the symlink resolves to, which in this case is
+> +=E2=80=9CA/bar=E2=80=9D. When you fsync the inode returned by the open s=
+ystem call, you
+> +are actually persisting the file =E2=80=9CA/bar=E2=80=9D and not the sym=
+link. Note
+> +that if the file =E2=80=9CA/bar=E2=80=9D does not exist and you try the =
+open the
+> +symlink =E2=80=9Cfoo=E2=80=9D without the O_CREAT flag, then file open w=
+ill fail. To
+> +obtain the file descriptor associated with the symlink inode, you
+> +could open the symlink using =E2=80=9CO_PATH | O_NOFOLLOW=E2=80=9D flags=
+. However, the
+> +file descriptor obtained this way can be only used to indicate a
+> +location in the file-system tree and to perform operations that act
+> +purely at the file descriptor level. Operations like read(), write(),
+> +fsync() etc cannot be performed on such file descriptors.
+> +
+> +Bottomline : You cannot fsync() a symlink.
+> +
+> +fsync(special files)
+> +--------------------
+> +Special files in Linux include block and character device files
+> +(created using mknod), FIFO (created using mkfifo) etc. Just like the
+> +behavior of fsync on symlinks described above, these special files do
+> +not have an fsync function defined. Similar to symlinks, you
+> +cannot fsync a special file [4].
+> +
+> +
+> +Strictly Ordered Metadata Consistency
+> +-------------------------------------
+> +With each file system providing varying levels of persistence
+> +guarantees, a consensus in this regard, will benefit application
+> +developers to work with certain fixed assumptions about file system
+> +guarantees. Dave Chinner proposed a unified model called the
+> +Strictly Ordered Metadata Consistency (SOMC) [5].
+> +
+> +Under this scheme, the file system guarantees to persist all previous
+> +dependent modifications to the object upon fsync().  If you fsync() an
+> +inode, it will persist all the changes required to reference the inode
+> +and its data. SOMC can be defined as follows [6]:
+> +
+> +If op1 precedes op2 in program order (in-memory execution order), and
+> +op1 and op2 share a dependency, then op2 must not be observed by a
+> +user after recovery without also observing op1.
+> +
+> +Unfortunately, SOMC's definition depends upon whether two operations
+> +share a dependency, which could be file-system specific. It might
+> +require a developer to understand file-system internals to know if
+> +SOMC would order one operation before another. It is worth noting
+> +that a file system can be crash-consistent (according to POSIX),
+> +without providing SOMC [7].
+> +
+> +As an example, consider the following test case from xfstest
+> +generic/342 [8]
+> +-------
+> +touch A/foo
+> +echo =E2=80=9Chello=E2=80=9D >  A/foo
+> +sync
+> +
+> +mv A/foo A/bar
+> +echo =E2=80=9Cworld=E2=80=9D > A/foo
+> +fsync A/foo
+> +CRASH
+> +
+> +What would you expect on recovery, if the file system crashed after
+> +the final fsync returned successfully?
+> +
+> +Non-SOMC file systems will not persist the file
+> +A/bar because it was not explicitly fsync-ed. But this means, you will
+> +find only the file A/foo with data =E2=80=9Cworld=E2=80=9D after crash, =
+thereby losing
+> +the previously persisted file with data =E2=80=9Chello=E2=80=9D. You wil=
+l need to
+> +explicitly fsync the directory A to ensure the rename operation is
+> +safely persisted on disk.
+> +
+> +Under SOMC, to correctly reference the new inode via A/foo,
+> +the previous rename operation must persist as well. Therefore,
+> +fsync() of A/foo will persist the renamed file A/bar as well.
+> +On recovery you will find both A/bar (with data =E2=80=9Chello=E2=80=9D)
+> +and A/foo (with data =E2=80=9Cworld=E2=80=9D).
+> +
+> +It is noteworthy that xfs, ext4, F2FS (when mounted with fsync_mode=3Dst=
+rict)
+> +and btrfs provide SOMC-like behaviour in this particular example.
+> +However, in writing, only XFS claims to provide SOMC. F2FS aims to provi=
+de
+> +SOMC when mounted with fsync_mode=3Dstrict. It is not clear if ext4 and
+> +btrfs provide strictly ordered metadata consistency.
+> +
+> +--------------------------------------------------------
+> +[1] http://man7.org/linux/man-pages/man2/fdatasync.2.html
+> +[2] https://www.spinics.net/lists/linux-btrfs/msg77340.html
+> +[3] https://www.spinics.net/lists/fstests/msg09370.html
+> +[4] https://bugzilla.kernel.org/show_bug.cgi?id=3D202485
+> +[5] https://marc.info/?l=3Dfstests&m=3D155010885626284&w=3D2
+> +[6] https://marc.info/?l=3Dfstests&m=3D155011123126916&w=3D2
+> +[7] https://www.spinics.net/lists/fstests/msg09379.html
+> +[8] https://patchwork.kernel.org/patch/10132305/
+> +
+> --
+> 2.7.4
+>
