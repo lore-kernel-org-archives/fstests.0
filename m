@@ -1,234 +1,125 @@
-Received: from mail-yw1-f68.google.com ([209.85.161.68]:33544 "EHLO
-        mail-yw1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726135AbfCRHOL (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Mar 2019 03:14:11 -0400
-MIME-Version: 1.0
-References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
- <20190314011925.GG23020@dastard> <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
- <20190315030313.GP26298@dastard> <CAOQ4uxhyeBhk3DaHO8_oyfWbByidGaSrXJyh7uQE1YMaWTxR5A@mail.gmail.com>
- <20190317221652.GQ26298@dastard>
-In-Reply-To: <20190317221652.GQ26298@dastard>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 18 Mar 2019 09:13:58 +0200
-Message-ID: <CAOQ4uxgwa9CeyLXJ022VW8dac3h_fGUi9BtF_apMv0T1UjJ3iw@mail.gmail.com>
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:39444 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727201AbfCRCsV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 17 Mar 2019 22:48:21 -0400
+Date: Sun, 17 Mar 2019 22:48:07 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
 Subject: Re: [PATCH v2] Documenting the crash-recovery guarantees of Linux
  file systems
-Content-Type: text/plain; charset="UTF-8"
+Message-ID: <20190318024806.GE23356@mit.edu>
+References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
+ <20190314011925.GG23020@dastard>
+ <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Dave Chinner <david@fromorbit.com>, Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 18, 2019 at 12:16 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> On Fri, Mar 15, 2019 at 05:44:49AM +0200, Amir Goldstein wrote:
-> > On Fri, Mar 15, 2019 at 5:03 AM Dave Chinner <david@fromorbit.com> wrote:
-> > >
-> > > On Thu, Mar 14, 2019 at 09:19:03AM +0200, Amir Goldstein wrote:
-> > > > On Thu, Mar 14, 2019 at 3:19 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > > > On Tue, Mar 12, 2019 at 02:27:00PM -0500, Jayashree wrote:
-> > > > > > +Strictly Ordered Metadata Consistency
-> > > > > > +-------------------------------------
-> > > > > > +With each file system providing varying levels of persistence
-> > > > > > +guarantees, a consensus in this regard, will benefit application
-> > > > > > +developers to work with certain fixed assumptions about file system
-> > > > > > +guarantees. Dave Chinner proposed a unified model called the
-> > > > > > +Strictly Ordered Metadata Consistency (SOMC) [5].
-> > > > > > +
-> > > > > > +Under this scheme, the file system guarantees to persist all previous
-> > > > > > +dependent modifications to the object upon fsync().  If you fsync() an
-> > > > > > +inode, it will persist all the changes required to reference the inode
-> > > > > > +and its data. SOMC can be defined as follows [6]:
-> > > > > > +
-> > > > > > +If op1 precedes op2 in program order (in-memory execution order), and
-> > > > > > +op1 and op2 share a dependency, then op2 must not be observed by a
-> > > > > > +user after recovery without also observing op1.
-> > > > > > +
-> > > > > > +Unfortunately, SOMC's definition depends upon whether two operations
-> > > > > > +share a dependency, which could be file-system specific. It might
-> > > > > > +require a developer to understand file-system internals to know if
-> > > > > > +SOMC would order one operation before another.
-> > > > >
-> > > > > That's largely an internal implementation detail, and users should
-> > > > > not have to care about the internal implementation because the
-> > > > > fundamental dependencies are all defined by the directory heirarchy
-> > > > > relationships that users can see and manipulate.
-> > > > >
-> > > > > i.e. fs internal dependencies only increase the size of the graph
-> > > > > that is persisted, but it will never be reduced to less than what
-> > > > > the user can observe in the directory heirarchy.
-> > > > >
-> > > > > So this can be further refined:
-> > > > >
-> > > > >         If op1 precedes op2 in program order (in-memory execution
-> > > > >         order), and op1 and op2 share a user visible reference, then
-> > > > >         op2 must not be observed by a user after recovery without
-> > > > >         also observing op1.
-> > > > >
-> > > > > e.g. in the case of the parent directory - the parent has a link
-> > > > > count. Hence every create, unlink, rename, hard link, symlink, etc
-> > > > > operation in a directory modifies a user visible link count
-> > > > > reference.  Hence fsync of one of those children will persist the
-> > > > > directory link count, and then all of the other preceeding
-> > > > > transactions that modified the link count also need to be persisted.
-> > > > >
-> > > >
-> > > > One thing that bothers me is that the definition of SOMC (as well as
-> > > > your refined definition) doesn't mention fsync at all, but all the examples
-> > > > only discuss use cases with fsync.
-> > >
-> > > You can't discuss operational ordering without a point in time to
-> > > use as a reference for that ordering.  SOMC behaviour is preserved
-> > > at any point the filesystem checkpoints itself, and the only thing
-> > > that changes is the scope of that checkpoint. fsync is just a
-> > > convenient, widely understood, minimum dependecy reference point
-> > > that people can reason from. All the interesting ordering problems
-> > > come from minimum dependecy reference point (i.e. fsync()), not from
-> > > background filesystem-wide checkpoints.
-> > >
+On Thu, Mar 14, 2019 at 09:19:03AM +0200, Amir Goldstein wrote:
+> > > +ext4
+> > > +-----
+> > > +fsync(file) : Ensures that a newly created file's directory entry is
+> > > +persisted (no need to explicitly persist the parent directory). However,
+> > > +if you create multiple names of the file (hard links), then their directory
+> > > +entries are not guaranteed to persist unless each one of the parent
+> > > +directory entries are persisted [2].
 > >
-> > Yes, I was referring to rename as a commonly used operation used
-> > by application as "metadata barrier".
->
-> What is a "metadata barrier" and what are it's semantics supposed to
-> be?
->
-
-In this context I mean that effects of metadata operations before the
-barrier (e.g. setxattr, truncate) must be observed after crash if the effects
-of barrier operation (e.g. file was renamed) are observed after crash.
-
-> > > > I personally find SOMC guaranty *much* more powerful in the absence
-> > > > of fsync. I have an application that creates sparse files, sets xattrs, mtime
-> > > > and moves them into place. The observed requirement is that after crash
-> > > > those files either exist with correct mtime, xattr or not exist.
+> > So you use a specific example to indicate an exception where ext4
+> > needs an explicit parent directory fsync (i.e. hard links to a
+> > single file across multiple directories). That implies ext4 POSIX
+> > SIO compliance is questionable, and it is definitely not SOMC
+> > compliant. Further, it implies that transactional change atomicity
+> > requirements are also violated. i.e. the inode is journalled with a
+> > link count equivalent to all links existing, but not all the dirents
+> > that point to the inode are persisted at the same time.
 > >
-> > I wasn't clear:
-> > 1. "sparse" meaning no data at all only hole.
->
-> That's not sparse, that is an empty file or "contains no data".
-> "Sparse" means the file has "sparse data" - the data in the file is
-> separated by holes. A file that is just a single hole does not
-> contain "sparse data", it contains no data at all.
->
-> IOWs, if you mean "file has no data in it", then say that as it is a
-> clear and unambiguous statement of what the file contains.
->
-> > 2. "exist" meaning found at rename destination
-> > Naturally, its applications responsibility to cleanup temp files that were
-> > not moved into rename destination.
-> >
-> > >
-> > > SOMC does not provide the guarantees you seek in the absence of a
-> > > known data synchronisation point:
-> > >
-> > >         a) a background metadata checkpoint can land anywhere in
-> > >         that series of operations and hence recovery will land in an
-> > >         intermediate state.
-> >
-> > Yes, that results in temp files that would be cleaned up on recovery.
->
-> Ambiguous. "recovery" is something filesystems do to bring the
-> filesystem into a consistent state after a crash. If you are talking
-> about applicaiton level behaviour, then you need to make that
-> explicit.
->
-> i.e. I can /assume/ you are talking about application level recovery
-> from your previous statement, but that assumption is obviously wrong
-> if the application is using O_TMPFILE and linkat rather than rename,
-> in which case it will be fileystem level recovery that is doing the
-> cleanup. Ambiguous, yes?
->
+> > So from this example, ext4 is not SOMC compliant.
+> 
+> I question the claim made by the document about ext4
+> behavior.
+> I believe Ted's words [2] may have been misinterpreted.
+> Ted, can you comment?
 
-Yes. From the application writers POV, the fact that doing things
-"atomically" is possible is what matters. Whether filesystem provides
-the recovery from incomplete transaction (O_TMPFILE+linkat), or
-application can cleanup leftovers on startup (rename).
-I have some applications that use the former and some that use the
-latter for directories and for portability with OS/fs that don't have
-O_TMPFILE.
+We need to be really careful about claims and specifications.
+Consider the following sequence of events (error checking ignored;
+assume that it's there).
 
->
-> > >         b) there is data that needs writing, and SOMC provides no
-> > >         ordering guarantees for data. So after recovery file could
-> > >         exist with correct mtime and xattrs, but have no (or
-> > >         partial) data.
-> > >
-> >
-> > There is no data in my use case, only metadata, that is why
-> > SOMC without fsync is an option.
->
-> Perhaps, but I am not clear on exactly what you are proposing
-> because I don't know what the hell a "metadata barrier" is, what it
-> does or what it implies for filesystem integrity operations...
->
-> > > > To my understanding, SOMC provides a guaranty that the application does
-> > > > not need to do any fsync at all,
-> > >
-> > > Absolutely not true. If the application has atomic creation
-> > > requirements that need multiple syscalls to set up, it must
-> > > implement them itself and use fsync to synchronise data and metadata
-> > > before the "atomic create" operation that makes it visible to the
-> > > application.
-> > >
-> > > SOMC only guarantees what /metadata/ you see at a fileystem
-> > > synchronisation point; it does not provide ACID semantics to a
-> > > random set of system calls into the filesystem.
-> > >
-> >
-> > So I re-state my claim above after having explained the use case.
->
-> With words that I can only guess the meaning of.
->
-> Amir, if you are asking a complex question as to whether something
-> conforms to a specification, then please slow down and take the time
-> to define all the terms, the initial state, the observable behaviour
-> that you expect to see, etc in clear, unambiguous and well defined
-> terms.  Otherwise the question cannot be answered....
->
+       unlink("foo");  // make sure the file "foo" doesn't exist
+       unlink("bar");  // make sure the file "bar" doesn't exist
+       fd = open("foo", O_CREAT|O_WRONLY);
+       write(fd, "foo bar data", 12);
+       fsync(fd);
+       // if we crash here, the file "foo" will exist, and you will be able
+       // to read 12 bytes, and it will be present
+       link("foo", "bar");
+       fdatasync(fd);
+       // if we crash here, there is no guarantee that the hard link "bar"
+       // will be persisted
 
-Sure. TBH, I didn't even dare to ask the complex question yet,
-because it was hard for me to define all terms. I sketched the
-use case with the example of create+setxattr+truncate+rename
-because I figured it is rather easy to understand.
+I believe this is perfectly compliant with _POSIX_SYNCHRONIZED_IO.
 
-The more complex question has do to with explicit "data dependency"
-operation. At the moment, I will not explain what that means in details,
-but I am sure you can figure it out.
-With fdatasync+rename, fdatasync created a dependency between
-data and metadata of the file, so with SOMC, if file is observed after
-crash in rename destination, it also contains the data changes before
-fdatasync. But fdatasync gives a stringer guaranty than what
-my application actually needs, because in many cases it will cause
-journal flush. What it really needs is filemap_write_and_wait().
-Metadata doesn't need to be flushed as rename takes care of
-metadata ordering guaranties.
-As far as I can tell, there is no "official" API to do what I need
-and there is certainly no documentation about this expected behavior.
-Apologies, if above was not clear, I promise to explain in person
-during LSF to whoever is interested.
+If the last fsyncdata(fd) is replaced with fsync(fd), the link(2) will
+touch the ctime, so in order only to persist the ctime change, as a
+side effect we will also update the directory entry so the existence
+of "bar" will be persisted.
 
-Judging by the volume and passion of this thread, I think a
-session on LSF fs track would probably be a good idea.
-[CC Josef and Anna.]
+The bottom line, though, is I remain *very* skeptical about people who
+want to document and then tie the hands of file system developers
+about guarantees that go beyond Posix unless we have a very careful
+discussion about what benefit this will provide application
+developers, at least in general.  If application developers start
+depending on behaviors beyond POSIX, it limits the ability of file
+system developers to innovate in order to improve performance.
 
-I find our behavior as a group of filesystem developers on this matter
-slightly bi-polar - on the one hand we wish to maintain implementation
-freedom for future performance improvements and don't wish to commit
-to existing behavior by documenting it. On the other hand, we wish to
-not break existing application, whose expectations from filesystems are
-far from what filesystems guaranty in documentation.
+There may be cases where it's worth it, and there may be cases where
+it's pretty clear that the laws of physics such that certain things
+that go beyond POSIX will always be true.  But before we encourage
+application developers to go beyond POSIX, we really should have this
+conversation first.
 
-There is no one good answer that fits all aspects of this subject and I
-personally agree with Ted on not wanting to document the ext4 "hacks"
-that are meant to cater misbehaving applications.
+For example, ext4 implements a guarantee that goes beyond POSIX, in
+that if you create a file, say, "foo.new", and then you rename that
+file such that it replaces an existing file, say "foo", then after the
+rename system call, we will initiate asynchronous writeback on
+"foo.new".  This is free if the application programmer has alrady
+called fsync on "foo.new".  However, for an sloppy application which
+doesn't bother to call fsync(2), for which Darrick informs me includes
+"rpm", it saves you from lost files if you immediately reboot.
 
-I think it is good that Jayashree posted this patch as a basis for discussion
-of what needs to be documented and how.
-Eventually, instead of trying to formalize filesystem expected behavior, it
-might be better to just encode the expected crash behavior tests
-in a readable manner, as Jayashree already started to do.
-Or maybe there is room for both documentation and tests.
+I do this, because there are tons of sloppy application programmers,
+and so they outnumber file system developers.  However, this is not
+documented behavior, nor is it guaranteed by POSIX!  I'm told by
+Darrick that XFS doesn't do this, and he believes the XFS developers
+would refuse to add such hacks, because it accomodates incompetent
+userspace programmers.
 
-Thanks,
-Amir.
+Perhaps the right answer is to yell at the application programmers who
+make these mistakes.  After all, the fact that ext4 accomodates
+incompetence could be argued is leading to decreased application
+quality and decreased portability.  But at least back in the O_PONIES
+era, I looked at multiple text editors supplied by both GNOME and KDE,
+and I discovered to my horror they were writing files in an extremely
+unsafe manner.  (Some of them also were simply opening an existing
+file with O_TRUNC, and then rewriting the text file's data, and NOT
+bother calling fsync afterwards; so ext4 also has a hack so for files
+opened with O_TRUNC where an existing file is truncated, on the close,
+we will initiate writeback.  I chose this as being relatively low
+overhead, because no competently implemented text editor should be
+saving files in this way....)
+
+Whether or not ext4 should accomodate application programmers by going
+on POSIX, I believe very strongly that it should *not* be documented,
+since it just encourages the bad application programming practice.
+It's there just as a backstop, and in fact, it's done as an
+asynchronous writeback, not as a data integrity writeback.  So it is
+*not* something people should be relying on.
+
+So before we document behavior that goes beyond POSIX, we should think
+*very* carefully if this is something that we want to be encouraging
+application programmers to rely on this sort of thing.
+
+					- Ted
