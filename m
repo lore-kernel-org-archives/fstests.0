@@ -1,48 +1,109 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:24351 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727728AbfCOKFc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 15 Mar 2019 06:05:32 -0400
-Subject: Re: Why generic/089 fails for NFSv4
-References: <385c37ee-c0b9-2c87-0132-891726033b6a@linux.alibaba.com>
- <76f96e48-18cb-8b3c-41ae-c4adf82ac3a4@linux.alibaba.com>
-From: "Su Yanjun <suyj.fnst@cn.fujitsu.com>" <suyj.fnst@cn.fujitsu.com>
-Message-ID: <507aeaed-1cb2-23a9-138c-ebcde73efb9f@cn.fujitsu.com>
-Date: Fri, 15 Mar 2019 18:05:28 +0800
+Received: from szxga06-in.huawei.com ([45.249.212.32]:44122 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726504AbfCRMaw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 18 Mar 2019 08:30:52 -0400
+Subject: Re: [PATCH 0/6] squashfs: introduce squashfs support
+References: <20190122032408.91336-1-zhengbin13@huawei.com>
+ <20190224153954.GD2713@desktop>
+ <ae68f006-3bf2-0b59-23cd-1a1f1e35fb18@huawei.com>
+ <CAOQ4uxjvPUeEY=drBt=SoWPo7yK+yiYh3dbvMG+3YAWvTsJrfw@mail.gmail.com>
+From: "zhengbin (A)" <zhengbin13@huawei.com>
+Message-ID: <9462dff2-cecc-6656-600e-3d969ce68320@huawei.com>
+Date: Mon, 18 Mar 2019 20:30:27 +0800
 MIME-Version: 1.0
-In-Reply-To: <76f96e48-18cb-8b3c-41ae-c4adf82ac3a4@linux.alibaba.com>
-Content-Type: text/plain; charset="utf-8"; format=flowed
-Content-Transfer-Encoding: 7bit
+In-Reply-To: <CAOQ4uxjvPUeEY=drBt=SoWPo7yK+yiYh3dbvMG+3YAWvTsJrfw@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Yihao Wu <wuyihao@linux.alibaba.com>, fstests@vger.kernel.org
-Cc: Joseph Qi <joseph.qi@linux.alibaba.com>, linux-nfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, Hou Tao <houtao1@huawei.com>, zhaohongjiang@huawei.com, gaoxiang25@huawei.com
 List-ID: <fstests@vger.kernel.org>
 
+Hi Eryu, What is the conclusion=EF=BC=9F
+May be we could use Goldstein's advice, but If we use this, all of the te=
+stcases need to be rewritten.
 
-On 2019/3/15 17:06, Yihao Wu wrote:
-> On 2019/3/14 4:46 PM, Yihao Wu wrote:
->> Hi, all
+On 2019/2/25 13:21, Amir Goldstein wrote:
+> On Mon, Feb 25, 2019 at 3:33 AM zhengbin (A) <zhengbin13@huawei.com> wr=
+ote:
 >>
->> Sorry to bother you.
+>> Thanks for your reply.
 >>
->> lock_mtab in xfstests/src/t_mtab.c waits only for LOCK_TIMEOUT, which is 10.
->> After that it emits an error message. However when NFSv4 client fails to
->> lock a file in nfs4_retry_setlk (eg. locking conflict), it backs off for 30s
->> before retrying. So generic/089 frequently fails for NFSv4.
+>>> I don't quite like the idea of "forking" random tests from 'generic' =
+to
+>>> 'readonly'. The biggest benefit of adding new fs support to fstests i=
+s
+>>> that it shares most of the 'generic' tests and gets good test coverag=
+e.
+>>> But forking a very small subset of generic tests not only defeats the
+>>> benefit but also adding extra maintain burden
+>> --->I agree that, but if we want to add readonly filesystem support in=
+ fstests,
+>> maybe it is the best way?I didn't find a better way
 >>
->> I'm wondering if there's a workaround to this problem. My kernel version is
->> 4.19.24
-
-https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/fs/nfs?h=v4.20&id=a61246c96195fc5f7500f6842e883b9eb1567d8d
-
-Maybe this patch can help u.
-
-Thanks
-
-Su
-
->> Thanks,
->> Yihao Wu
->>
-> cc nfs list
->
->
+>> On 2019/2/24 23:39, Eryu Guan wrote:
+>>> [Sorry for being so long to review this squashfs support.]
+>>>
+>>> On Tue, Jan 22, 2019 at 11:24:02AM +0800, zhengbin wrote:
+>>>> This patch add squashfs support in xfstests-dev. Add two directories
+>>>> in tests directory, readonly can also be used for other readonly
+>>>> filesystem, squashfs is just used for squashfs filesystem.
+>>>> tests/readonly/001        mount test
+>>>> tests/readonly/002--010   metadata test
+>>>> tests/readonly/011--018   data test
+>>>> tests/readonly/019--021   xattr test
+>>>> tests/squashfs/001--005   mksquashfs options test
+>>>
+>>> I don't quite like the idea of "forking" random tests from 'generic' =
+to
+>>> 'readonly'. The biggest benefit of adding new fs support to fstests i=
+s
+>>> that it shares most of the 'generic' tests and gets good test coverag=
+e.
+>>> But forking a very small subset of generic tests not only defeats the
+>>> benefit but also adding extra maintain burden.
+>>>
+>>> But the problem is that squashfs is a readonly filesystem and sharing
+>>> the existing generic tests is not easy. (Actually I've been looking a=
+t
+>>> this series several times, but couldn't come out with a good solution=
+.)
+>>> Because fstests harness assumes the filesystem being tested is writab=
+le
+>>> by default, various _require rules also write/create files to check i=
+f a
+>>> functionality is supported by the underlying filesystem. This leads m=
+e
+>>> to wonder if fstests is suitable for such readonly filesystems?
+>>>
+>>> I'm glad to hear what do others think, any comments are welcomed!
+>>>
+>=20
+> Maybe the problem is not the forking of readonly tests, but the fact th=
+at
+> these tests cannot be shared as is with other filesystems.
+> I know I once fixed a bug or two when ext4 was mounted on a readonly
+> blockdev (i.e. with ext4 snapshots).
+>=20
+> readonly tests could be meaningful to other filesystems if constructed =
+as:
+> _require_scratch_readonly_blkdev
+> _scratch_blkdev_setrw
+> _scratch_mkfs
+> _scratch_mount
+> setup()
+> _scratch_umount
+> _scratch_blkdev_setro
+> _scratch_mount_readonly_blkdev
+> test()
+>=20
+> Of course for squashfs, _scratch_mount will be "mounting" a
+> scratch tmpdir and only _scratch_mount_readonly_blkdev
+> will really be mounting a squashfs.
+>=20
+> Thanks,
+> Amir.
+>=20
+> .
+>=20
