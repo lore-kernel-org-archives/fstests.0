@@ -1,12 +1,12 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:52866 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726788AbfCSDN0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 18 Mar 2019 23:13:26 -0400
-Date: Tue, 19 Mar 2019 14:13:12 +1100
+Received: from ipmail06.adl6.internode.on.net ([150.101.137.145]:10107 "EHLO
+        ipmail06.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725978AbfCSEhc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 00:37:32 -0400
+Date: Tue, 19 Mar 2019 15:37:23 +1100
 From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH v2] Documenting the crash-recovery guarantees of Linux
  file systems
-Message-ID: <20190319031312.GW26298@dastard>
+Message-ID: <20190319043723.GX26298@dastard>
 References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
  <20190314011925.GG23020@dastard>
  <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
@@ -14,362 +14,207 @@ References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
  <CAOQ4uxhyeBhk3DaHO8_oyfWbByidGaSrXJyh7uQE1YMaWTxR5A@mail.gmail.com>
  <20190317221652.GQ26298@dastard>
  <CAOQ4uxgwa9CeyLXJ022VW8dac3h_fGUi9BtF_apMv0T1UjJ3iw@mail.gmail.com>
+ <CAHWVdUVFu1s2UCLn2vO1p559pGmio8X4RXK8VSVkSiTQQEcz3A@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAOQ4uxgwa9CeyLXJ022VW8dac3h_fGUi9BtF_apMv0T1UjJ3iw@mail.gmail.com>
+In-Reply-To: <CAHWVdUVFu1s2UCLn2vO1p559pGmio8X4RXK8VSVkSiTQQEcz3A@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
+To: Vijay Chidambaram <vijay@cs.utexas.edu>
+Cc: Amir Goldstein <amir73il@gmail.com>, Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 18, 2019 at 09:13:58AM +0200, Amir Goldstein wrote:
-> On Mon, Mar 18, 2019 at 12:16 AM Dave Chinner <david@fromorbit.com> wrote:
-> > On Fri, Mar 15, 2019 at 05:44:49AM +0200, Amir Goldstein wrote:
-> > > On Fri, Mar 15, 2019 at 5:03 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > > On Thu, Mar 14, 2019 at 09:19:03AM +0200, Amir Goldstein wrote:
-> > > > > On Thu, Mar 14, 2019 at 3:19 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > > > > On Tue, Mar 12, 2019 at 02:27:00PM -0500, Jayashree wrote:
-> > > > > > > +Strictly Ordered Metadata Consistency
-> > > > > > > +-------------------------------------
-> > > > > > > +With each file system providing varying levels of persistence
-> > > > > > > +guarantees, a consensus in this regard, will benefit application
-> > > > > > > +developers to work with certain fixed assumptions about file system
-> > > > > > > +guarantees. Dave Chinner proposed a unified model called the
-> > > > > > > +Strictly Ordered Metadata Consistency (SOMC) [5].
-> > > > > > > +
-> > > > > > > +Under this scheme, the file system guarantees to persist all previous
-> > > > > > > +dependent modifications to the object upon fsync().  If you fsync() an
-> > > > > > > +inode, it will persist all the changes required to reference the inode
-> > > > > > > +and its data. SOMC can be defined as follows [6]:
-> > > > > > > +
-> > > > > > > +If op1 precedes op2 in program order (in-memory execution order), and
-> > > > > > > +op1 and op2 share a dependency, then op2 must not be observed by a
-> > > > > > > +user after recovery without also observing op1.
-> > > > > > > +
-> > > > > > > +Unfortunately, SOMC's definition depends upon whether two operations
-> > > > > > > +share a dependency, which could be file-system specific. It might
-> > > > > > > +require a developer to understand file-system internals to know if
-> > > > > > > +SOMC would order one operation before another.
-> > > > > >
-> > > > > > That's largely an internal implementation detail, and users should
-> > > > > > not have to care about the internal implementation because the
-> > > > > > fundamental dependencies are all defined by the directory heirarchy
-> > > > > > relationships that users can see and manipulate.
-> > > > > >
-> > > > > > i.e. fs internal dependencies only increase the size of the graph
-> > > > > > that is persisted, but it will never be reduced to less than what
-> > > > > > the user can observe in the directory heirarchy.
-> > > > > >
-> > > > > > So this can be further refined:
-> > > > > >
-> > > > > >         If op1 precedes op2 in program order (in-memory execution
-> > > > > >         order), and op1 and op2 share a user visible reference, then
-> > > > > >         op2 must not be observed by a user after recovery without
-> > > > > >         also observing op1.
-> > > > > >
-> > > > > > e.g. in the case of the parent directory - the parent has a link
-> > > > > > count. Hence every create, unlink, rename, hard link, symlink, etc
-> > > > > > operation in a directory modifies a user visible link count
-> > > > > > reference.  Hence fsync of one of those children will persist the
-> > > > > > directory link count, and then all of the other preceeding
-> > > > > > transactions that modified the link count also need to be persisted.
-> > > > > >
+On Mon, Mar 18, 2019 at 09:37:28PM -0500, Vijay Chidambaram wrote:
+> For new folks on the thread, I'm Vijay Chidambaram, prof at UT Austin
+> and Jayashree's advisor. We recently developed CrashMonkey, a tool for
+> finding crash-consistency bugs in file systems. As part of the
+> research effort, we had a lot of conversations with file-system
+> developers to understand the guarantees provided by different file
+> systems. This patch was inspired by the thought that we should quickly
+> document what we know about the data integrity guarantees of different
+> file systems. We did not expect to spur debate!
+> 
+> Thanks Dave, Amir, and Ted for the discussion. We will incorporate
+> these comments into the next patch. If it is better to wait until a
+> consensus is reached after the LSF meeting, we'd be happy to do so.
+> 
+> On Mon, Mar 18, 2019 at 2:14 AM Amir Goldstein <amir73il@gmail.com> wrote:
+> >
+> > On Mon, Mar 18, 2019 at 12:16 AM Dave Chinner <david@fromorbit.com> wrote:
+> > >
+> > > On Fri, Mar 15, 2019 at 05:44:49AM +0200, Amir Goldstein wrote:
+> > > > On Fri, Mar 15, 2019 at 5:03 AM Dave Chinner <david@fromorbit.com> wrote:
 > > > > >
-> > > > > One thing that bothers me is that the definition of SOMC (as well as
-> > > > > your refined definition) doesn't mention fsync at all, but all the examples
-> > > > > only discuss use cases with fsync.
-> > > >
-> > > > You can't discuss operational ordering without a point in time to
-> > > > use as a reference for that ordering.  SOMC behaviour is preserved
-> > > > at any point the filesystem checkpoints itself, and the only thing
-> > > > that changes is the scope of that checkpoint. fsync is just a
-> > > > convenient, widely understood, minimum dependecy reference point
-> > > > that people can reason from. All the interesting ordering problems
-> > > > come from minimum dependecy reference point (i.e. fsync()), not from
-> > > > background filesystem-wide checkpoints.
-> > > >
-> > >
-> > > Yes, I was referring to rename as a commonly used operation used
-> > > by application as "metadata barrier".
-> >
-> > What is a "metadata barrier" and what are it's semantics supposed to
-> > be?
-> >
+> > > > > On Thu, Mar 14, 2019 at 09:19:03AM +0200, Amir Goldstein wrote:
+> > > > > > On Thu, Mar 14, 2019 at 3:19 AM Dave Chinner <david@fromorbit.com> wrote:
+> > > > > > > On Tue, Mar 12, 2019 at 02:27:00PM -0500, Jayashree wrote:
+> > > > > > > > +Strictly Ordered Metadata Consistency
+> > > > > > > > +-------------------------------------
+> > > > > > > > +With each file system providing varying levels of persistence
+> > > > > > > > +guarantees, a consensus in this regard, will benefit application
+> > > > > > > > +developers to work with certain fixed assumptions about file system
+> > > > > > > > +guarantees. Dave Chinner proposed a unified model called the
+> > > > > > > > +Strictly Ordered Metadata Consistency (SOMC) [5].
+> > > > > > > > +
+> > > > > > > > +Under this scheme, the file system guarantees to persist all previous
+> > > > > > > > +dependent modifications to the object upon fsync().  If you fsync() an
+> > > > > > > > +inode, it will persist all the changes required to reference the inode
+> > > > > > > > +and its data. SOMC can be defined as follows [6]:
+> > > > > > > > +
+> > > > > > > > +If op1 precedes op2 in program order (in-memory execution order), and
+> > > > > > > > +op1 and op2 share a dependency, then op2 must not be observed by a
+> > > > > > > > +user after recovery without also observing op1.
+> > > > > > > > +
+> > > > > > > > +Unfortunately, SOMC's definition depends upon whether two operations
+> > > > > > > > +share a dependency, which could be file-system specific. It might
+> > > > > > > > +require a developer to understand file-system internals to know if
+> > > > > > > > +SOMC would order one operation before another.
+> > > > > > >
+> > > > > > > That's largely an internal implementation detail, and users should
+> > > > > > > not have to care about the internal implementation because the
+> > > > > > > fundamental dependencies are all defined by the directory heirarchy
+> > > > > > > relationships that users can see and manipulate.
+> > > > > > >
+> > > > > > > i.e. fs internal dependencies only increase the size of the graph
+> > > > > > > that is persisted, but it will never be reduced to less than what
+> > > > > > > the user can observe in the directory heirarchy.
+> > > > > > >
+> > > > > > > So this can be further refined:
+> > > > > > >
+> > > > > > >         If op1 precedes op2 in program order (in-memory execution
+> > > > > > >         order), and op1 and op2 share a user visible reference, then
+> > > > > > >         op2 must not be observed by a user after recovery without
+> > > > > > >         also observing op1.
+> > > > > > >
+> > > > > > > e.g. in the case of the parent directory - the parent has a link
+> > > > > > > count. Hence every create, unlink, rename, hard link, symlink, etc
+> > > > > > > operation in a directory modifies a user visible link count
+> > > > > > > reference.  Hence fsync of one of those children will persist the
+> > > > > > > directory link count, and then all of the other preceeding
+> > > > > > > transactions that modified the link count also need to be persisted.
 > 
-> In this context I mean that effects of metadata operations before the
-> barrier (e.g. setxattr, truncate) must be observed after crash if the effects
-> of barrier operation (e.g. file was renamed) are observed after crash.
+> Dave, how did SOMC come about? Even XFS persists more than the minimum
+> set required by SOMC. Is SOMC most useful as a sort of intuitive
+> guideline as to what users should expect to see after recovery?
 
-Ok, so you've just arbitrarily denoted a specific rename operation
-to be a "recovery barrier" for your application?
+Lots of things. 15+ years of fixing data and metadata recovery
+ordering bugs in XFS, 20 years of reading academic filesystem
+papers, many years of hating POSIX and that we should be aiming more
+towards database ACID semantics in our filesystems, deciding
+~10 years ago that maintainable integrity is far more important than
+performance, understanding the block layer/device integrity
+requirements and the model smarter people than me came up with for
+ensuring integrity with minimal loss of performance, etc.
 
-In terms of SOMC, there is no operation that is an implied
-"barrier". There are explicitly ordered checkpoints via data
-integrity operations (i.e. sync, fsync, etc), but between those
-points it's just dependency based ordering...
+A big influence has also been that the "crash lost data" bug reports
+we get from users are generally not a result of data being lost,
+they are a result of incomplete and/or inconsistent recreation of
+the state before the crash occurred.  e.g. files that exist with a
+non-zero size but have no data in them, even though it had been
+minutes between writing the data and crashing and other files were
+just fine.
 
-IOWs, if there is no direct relationship between two objects in
-depnendency grpah, then then rename of one or the other does not
-create a "metadata ordering barrier" between those two objects. They
-are still independent, and so rename isn't a barrier in the true
-sense (i.e. that it is an ordering synchronisation point).
+i.e. people don't tend to notice "stuff I just wrote is missing"
+after a crash - they expect that. What they notice and complain
+about is inconsistent state after recovery. e.g. file A was fine,
+but file B was empty, even though I wrote file B before file A!
 
-At best rename can define a point in a dependency graph where an
-independent dependency branch is merged atomically into the main
-graph. This is still a powerful tool, and likely exactly what you
-are wanting to know if it will work or not....
+This is the sort of thing that Ted was refering to when he talked
+about having to add hacks to ext4 to make sure certain "expected
+behaviours" were maintained. ext4 inherited quite a few unrealistic
+expectations from ext3, which had a much stricter data vs
+metadata ordering model than ext4 does....
 
-> > > > > To my understanding, SOMC provides a guaranty that the application does
-> > > > > not need to do any fsync at all,
-> > > >
-> > > > Absolutely not true. If the application has atomic creation
-> > > > requirements that need multiple syscalls to set up, it must
-> > > > implement them itself and use fsync to synchronise data and metadata
-> > > > before the "atomic create" operation that makes it visible to the
-> > > > application.
-> > > >
-> > > > SOMC only guarantees what /metadata/ you see at a fileystem
-> > > > synchronisation point; it does not provide ACID semantics to a
-> > > > random set of system calls into the filesystem.
-> > > >
-> > >
-> > > So I re-state my claim above after having explained the use case.
-> >
-> > With words that I can only guess the meaning of.
-> >
-> > Amir, if you are asking a complex question as to whether something
-> > conforms to a specification, then please slow down and take the time
-> > to define all the terms, the initial state, the observable behaviour
-> > that you expect to see, etc in clear, unambiguous and well defined
-> > terms.  Otherwise the question cannot be answered....
-> >
+With XFS, the problems we've had with lost data/files have
+invariably been a result of code that violated ordering semantics
+for what were once considered performance benefits (hence my comment
+about "integrity is more important than performance").  Those sorts
+of problems (and there's been quite a others w.r.t. the XFS recovery
+algorithm) have all been solved by journalling all metadata changes
+(hence strict ordering against other metadata), improving the
+journal format and the information we log in it, and delaying
+data-dependent metadata updates until after the data IO completes.
+
+And from that perspective, SOMC is really just a further
+generalisation of the dependency and atomicity model that underlies
+the existing XFS transaction engine.
+
+> I found your notes about POSIX SIO interesting, and will incorporate
+> it into the next version of the patch. Should POSIX SIO be agreed upon
+> between file systems as the set of guarantees to provide (especially
+> since this is what glibc assumes)? I think SOMC is stronger than POSIX
+> SIO.
+
+SOMC is stronger than POSIX SIO. POSIX SIO is still a horribly
+ambiguous standard, even though it does define "data integrity"
+and "file integrity" in a meaningful manner. It's an improvement,
+but I still think it is terrible from efficiency and performance
+perspectives.
+
+> > The more complex question has do to with explicit "data dependency"
+> > operation. At the moment, I will not explain what that means in details,
+> > but I am sure you can figure it out.
+> > With fdatasync+rename, fdatasync created a dependency between
+> > data and metadata of the file, so with SOMC, if file is observed after
+> > crash in rename destination, it also contains the data changes before
+> > fdatasync. But fdatasync gives a stringer guaranty than what
+> > my application actually needs, because in many cases it will cause
+> > journal flush. What it really needs is filemap_write_and_wait().
+> > Metadata doesn't need to be flushed as rename takes care of
+> > metadata ordering guaranties.
+> > As far as I can tell, there is no "official" API to do what I need
+> > and there is certainly no documentation about this expected behavior.
+> > Apologies, if above was not clear, I promise to explain in person
+> > during LSF to whoever is interested.
 > 
-> Sure. TBH, I didn't even dare to ask the complex question yet,
-> because it was hard for me to define all terms. I sketched the
-> use case with the example of create+setxattr+truncate+rename
-> because I figured it is rather easy to understand.
+> At the risk of being ambiguous in the same way as Amir:
 > 
-> The more complex question has do to with explicit "data dependency"
-> operation. At the moment, I will not explain what that means in details,
-> but I am sure you can figure it out.
-> With fdatasync+rename, fdatasync created a dependency between
-> data and metadata of the file, so with SOMC, if file is observed after
-> crash in rename destination, it also contains the data changes before
-> fdatasync. But fdatasync gives a stringer guaranty than what
-> my application actually needs, because in many cases it will cause
-> journal flush. What it really needs is filemap_write_and_wait().
-> Metadata doesn't need to be flushed as rename takes care of
-> metadata ordering guaranties.
+> Some applications may only care about ordering of metadata operations,
+> not whether they are persistent. Application-level correctness is
+> closely tied to ordering of different operations. Since SOMC gives us
+> the guarantee that if operation X is seen after recovery, all
+> dependent ops are also seen on recovery, this might be enough to
+> create a consistent application. For example, an application may not
+> care when file X was persisted to storage, as long as file Y was
+> persisted before it.
 
-Ok, so what you are actually asking is whether SOMC provides a
-guarantee that data writes that have completed before the rename
-will be present on disk if the rename is present on disk? i.e.:
+*nod*
 
-create+setxattr+write()+fdatawait()+rename
+Application developers have been asking for this sort of integrity
+guarantee from filesystems for a long time. The problem has always
+been that we've been unable to agree on a defined model that allows
+us to guarantee such behaviour to userspace. Every ~5 years,
+somebody comes up with a new userspace transaction proposal that
+ends up going nowhere because it cannot be applied to most of the
+underlying linux filesystems without severe compromises.
 
-is atomic on a SOMC filesystem without a data integrity operation
-being performed?
+However, this discussion is leading me to belive that the benefits
+of having a well defined and documented behavioural model (such as
+SOMC) are starting to be realised. i.e. a well defined model allows
+kernel and userspace to optimise indepedently but still provide the
+exact integrity semantics each other requires. And that we can
+expose that model as a set of tests in fstests, hence enabling both
+fs developers and users to understand where filesystems behave
+according to the model and where they may need further improvement.
 
-I don't think we've defined how data vs metadata ordering
-persistence works in the SOMC model at all. We've really only been
-discussing the metadata ordering and so I haven't really thought
-all the different cases through.
+So I think we are definitely headed in the right direction here.
+That said....
 
-OK, let's try to define how it works through examples.  Let's start
-with the simple one: non-AIO O_DIRECT writes, because they send the
-data straight to the device. i.e.
+> All I'm asking for is documenting the minimal set of guarantees each
+> file system already provides (or should provide in the absence of
+> bugs). It is alright if the file system provides more than what is
+> documented. The original patch does not talk about the rename hack
+> that Ted mentions.
 
-create
-setxattr
-write
-  Extent Allocation
-		  ----> device -+
-					data volatile
-		  <-- complete -+
-write completion
-rename					metadata volatile
-
-At this point, we may have no direct dependency between the
-write completion and the rename operation. Normally we would do
-(O_DSYNC case)
-
-write completion
-    device cache flush
-		  ----> device -+
-		  <-- complete -+	data persisted
-    journal FUA write
-		  ----> device -+
-		  <-- complete -+	file metadata persisted
-
-and so we are guaranteed to have the data on disk before the rename
-is started (i.e. POSIX compliance). Hence regardless of whether the
-rename exists or not, we'll have the data on disk.
-
-However, if we require a data completion rule similar to the IO
-completion to device flush rule we have in the kernel:
-
-	If data is to be ordered against a specific metadata
-	operation, then the dependent data must be issued and
-	completed before executing the ordering metadata operation.
-	The application is responsibile for ensuring the necessary
-	data has been flushed to storage and signalled complete, but
-	it does not need to ensure it is persistent.
-
-	When the ordering metadata operation is to be made
-	persistent, the filesystem must ensure the dependent data is
-	persistent before starting the ordered metadata persistence
-	operation. It must also ensure that any data dependent
-	metadata is captured and persisted in the pending ordered
-	metadata persistence operation so all the metadata required
-	to access the dependent data is persisted correctly.
-
-Then we create the conditions where it is possible for data to be
-ordered amongst the metadata with the same ordering guarantees
-as the metadata. The above O_DIRECT example ends up as:
-
-create
-setxattr
-write
-  Extent Allocation			metadata volatile
-		  ----> device -+
-					data volatile
-		  <-- complete -+
-write completion
-rename					metadata volatile
-.....
-<journal flush>
-    device cache flush
-		  ----> device -+
-		  <-- complete -+	data persisted
-    journal FUA write
-		  ----> device -+
-		  <-- complete -+	metadata persisted
-<flush completion>
-
-
-With AIO based O_DIRECT, then we cannot issue the ordering rename
-until after the AIO completion has been delivered to the
-application. Once that has been delivered, then it is the same case
-as non AIO O_DIRECT.
-
-BUffered IO is a bit harder, because we need flush-and-wait
-primitives that don't provide data integrity guarantees. SO, after
-soundly smacking down the user of sync_file_range() this morning
-because it's not a data integrity operation and it has massive
-gaping holes in it's behaviour, it may actually be useful here in a
-very limited scope.
-
-That is, sync_file_range() is only safe to use for this specific
-sort of ordered data integrity algorithm when flushing the entire
-file.(*)
-
-create
-setxattr
-write					metadata volatile
-  delayed allocation			data volatile
-....
-sync_file_range(fd, 0, 0, SYNC_FILE_RANGE_WAIT_BEFORE |
-		SYNC_FILE_RANGE_WRITE | SYNC_FILE_RANGE_WAIT_AFTER);
-  Extent Allocation			metadata volatile
-		  ----> device -+
-					data volatile
-		  <-- complete -+
-....
-rename					metadata volatile
-
-And so at this point, we only need a device cache flush to
-make the data persistent and a journal flush to make the rename
-persistent. And so it ends up the same case as non-AIO O_DIRECT.
-
-So, yeah, I think this model will work to order completed data
-writes against future metadata operations such that this is
-observed:
-
-	If a metadata operation is performed after dependent data
-	has been flushed and signalled complete to userspace, then
-	if that metadata operation is present after recovery the
-	dependent data will also be present.
-
-The good news here is what I described above is exactly what XFS
-implements with it's journal flushes - it uses REQ_PREFLUSH |
-REQ_FUA for journal writes, and so it follows the rules I outlined
-above.  A quick grep shows that ext4/jbd2, f2fs and gfs2 also use
-the same flags for journal and/or critical ordering IO. I can't tell
-whether btrfs follows these rules or not.
-
-> As far as I can tell, there is no "official" API to do what I need
-> and there is certainly no documentation about this expected behavior.
-
-Oh, userspace controlled data flushing is exactly what
-sync_file_range() was intended for back when it was implemented back
-in 2.6.17.
-
-Unfortunately, the implementation was completely botched because it
-was written from a top down "clean the page cache" perspective, not
-a bottom up filesystem data integrity mechanism and by the time we
-realised just how awful it was there were applications dependent on
-it's existing behaviour....
-
-> I find our behavior as a group of filesystem developers on this matter
-> slightly bi-polar - on the one hand we wish to maintain implementation
-> freedom for future performance improvements and don't wish to commit
-> to existing behavior by documenting it. On the other hand, we wish to
-> not break existing application, whose expectations from filesystems are
-> far from what filesystems guaranty in documentation.
-
-Personally I want the SOMC model to be explicitly documented so that
-we can sanely discuss how we can provide sane optimisations to
-userspace. It's the first step towards a model where
-applications can run filesystem operations completely asynchronously
-yet still provide large scale ordering and integrity guarantees
-without needing copious amounts of fine-grained fsync
-operations.(**)
-
-I really don't care about the crazy vagaries of POSIX right now -
-POSIX is a shit specification when it comes to integrity. The
-sooner we move beyond it, the better off we'll be. And the beauty of
-the SOMC model is that POSIX compliance falls out of it for free,
-yet it allows us much more freedom for optimisation because we
-can reason about integrity in terms of ordering and dependencies
-rather than in terms of what fsync() must provide.
-
-> There is no one good answer that fits all aspects of this subject and I
-> personally agree with Ted on not wanting to document the ext4 "hacks"
-> that are meant to cater misbehaving applications.
-
-Applications "misbehave" largely because there is no definitive
-documentation on what filesystems actually provide userspace. The
-man pages document API behaviour, they /can't/ document things like
-SOMC, which filesystems can provide it and how to use it to avoid
-fsync()....
-
-> I think it is good that Jayashree posted this patch as a basis for discussion
-> of what needs to be documented and how.
-> Eventually, instead of trying to formalize filesystem expected behavior, it
-> might be better to just encode the expected crash behavior tests
-> in a readable manner, as Jayashree already started to do.
-> Or maybe there is room for both documentation and tests.
-
-It needs documentation. crash tests do not document algorithms
-behaviour, intentions, application programming models, constraints,
-etc....
+... I'm really not that interested in documenting the limitations of
+existing filesystems because that entirely backwards looking. I'm
+looking forwards and aiming to provide a model that we can build
+filesystems and applications around to fully exploit the performance
+potential of modern storage hardware...
 
 Cheers,
 
 Dave.
-
-(*) Using sync_file_range() for sub file ranges are simply broken when
-it comes to data integrity style flushes as there is no guarantee it
-will capture all the dirty ranges that need to be flushed (e.g.
-write starting 100kb beyond EOF, then sync the range starting 100kb
-beyond EOF, and it won't sync the sub-block zeroing that was done at
-the old EOF, thereby exposing stale data....)
-
-(**) That featherstitch paper I linked to earlier? Did you notice
-the userspace defined "patch group" transaction interface?
-http://featherstitch.cs.ucla.edu/
-
 -- 
 Dave Chinner
 david@fromorbit.com
