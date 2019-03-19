@@ -1,12 +1,12 @@
-Received: from ipmail07.adl2.internode.on.net ([150.101.137.131]:39771 "EHLO
-        ipmail07.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726740AbfCSVJE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 17:09:04 -0400
-Date: Wed, 20 Mar 2019 08:08:57 +1100
+Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:11449 "EHLO
+        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726712AbfCSUnf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 16:43:35 -0400
+Date: Wed, 20 Mar 2019 07:43:30 +1100
 From: Dave Chinner <david@fromorbit.com>
 Subject: Re: [PATCH v2] Documenting the crash-recovery guarantees of Linux
  file systems
-Message-ID: <20190319210857.GZ26298@dastard>
+Message-ID: <20190319204330.GY26298@dastard>
 References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
  <20190314011925.GG23020@dastard>
  <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
@@ -14,61 +14,68 @@ References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
  <CAOQ4uxhyeBhk3DaHO8_oyfWbByidGaSrXJyh7uQE1YMaWTxR5A@mail.gmail.com>
  <20190317221652.GQ26298@dastard>
  <CAOQ4uxgwa9CeyLXJ022VW8dac3h_fGUi9BtF_apMv0T1UjJ3iw@mail.gmail.com>
- <CAHWVdUVFu1s2UCLn2vO1p559pGmio8X4RXK8VSVkSiTQQEcz3A@mail.gmail.com>
- <20190319151709.GB23187@mit.edu>
+ <20190319031312.GW26298@dastard>
+ <CAOQ4uxjyrYO8bmY04-AE9t3kQ=0B-m1A8yLRXtsyevrxCfyLxg@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190319151709.GB23187@mit.edu>
+In-Reply-To: <CAOQ4uxjyrYO8bmY04-AE9t3kQ=0B-m1A8yLRXtsyevrxCfyLxg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Vijay Chidambaram <vijay@cs.utexas.edu>, Amir Goldstein <amir73il@gmail.com>, Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 19, 2019 at 11:17:09AM -0400, Theodore Ts'o wrote:
-> On Mon, Mar 18, 2019 at 09:37:28PM -0500, Vijay Chidambaram wrote:
-> > For new folks on the thread, I'm Vijay Chidambaram, prof at UT Austin
-> > and Jayashree's advisor. We recently developed CrashMonkey, a tool for
-> > finding crash-consistency bugs in file systems. As part of the
-> > research effort, we had a lot of conversations with file-system
-> > developers to understand the guarantees provided by different file
-> > systems. This patch was inspired by the thought that we should quickly
-> > document what we know about the data integrity guarantees of different
-> > file systems. We did not expect to spur debate!
-> > 
-> > Thanks Dave, Amir, and Ted for the discussion. We will incorporate
-> > these comments into the next patch. If it is better to wait until a
-> > consensus is reached after the LSF meeting, we'd be happy to do so.
+On Tue, Mar 19, 2019 at 09:35:19AM +0200, Amir Goldstein wrote:
+> On Tue, Mar 19, 2019 at 5:13 AM Dave Chinner <david@fromorbit.com> wrote:
+> > That is, sync_file_range() is only safe to use for this specific
+> > sort of ordered data integrity algorithm when flushing the entire
+> > file.(*)
+> >
+> > create
+> > setxattr
+> > write                                   metadata volatile
+> >   delayed allocation                    data volatile
+> > ....
+> > sync_file_range(fd, 0, 0, SYNC_FILE_RANGE_WAIT_BEFORE |
+> >                 SYNC_FILE_RANGE_WRITE | SYNC_FILE_RANGE_WAIT_AFTER);
+> >   Extent Allocation                     metadata volatile
+> >                   ----> device -+
+> >                                         data volatile
+> >                   <-- complete -+
+> > ....
+> > rename                                  metadata volatile
+> >
+> > And so at this point, we only need a device cache flush to
+> > make the data persistent and a journal flush to make the rename
+> > persistent. And so it ends up the same case as non-AIO O_DIRECT.
+> >
 > 
-> Something to consider is that certain side effects of what fsync(2) or
-> fdatasync(2) might drag into the jbd2 transaction might change if we
-> were to implement (for example) something like Daejun Park and Dongkun
-> Shin's "iJournaling: Fine-grained journaling for improving the latency
-> of fsync system call" published in Usenix, ATC 2017:
+> Funny, I once told that story and one Dave Chinner told me
+> "Nice story, but wrong.":
+> https://patchwork.kernel.org/patch/10576303/#22190719
 > 
->    https://www.usenix.org/system/files/conference/atc17/atc17-park.pdf
-> 
-> That's an example of how if we document synchronization that goes
-> beyond POSIX, it might change in the future.
+> You pointed to the minor detail that sync_file_range() uses
+> WB_SYNC_NONE.
 
-Sure, but again this is orthognal to what we are discussing here:
-the user visible ordering of metadata operations after a crash.
+Ah, I forgot about that. That's what I get for not looking at the
+code. Did I mention that SFR is a complete crock of shit when it
+comes to data integrity operations? :/
 
-If anyone implements a multi-segment or per-inode journal (say, like
-NOVA), then it is up to that implementation to maintain the ordering
-guarantees that a SOMC model requires. You can implement whatever
-fsync() go-fast bits you want, as long as it provides the ordering
-behaviour guarantees that the model defines.
+> So yes, I agree, it is a nice story and we need to make it right,
+> by having an API (perhaps SYNC_FILE_RANGE_ALL).
+> When you pointed out my mistake, I switched the application to
+> use the FIEMAP_FLAG_SYNC API as a hack.
 
-IOWs, Ted, I think you have the wrong end of the stick here. This
-isn't about optimising fsync() to provide better performance, it's
-about guaranteeing order so that fsync() is not necessary and we
-improve performance by allowing applications to omit order-only
-synchornisation points in their workloads.
+Yeah, that 's a nasty hack :/
 
-i.e. an order-based integrity model /reduces/ the need for a
-hyper-optimised fsync operation because applications won't need to
-use it as often.
+> Besides tests and documentation what could be useful is a portable
+> user space library that just does the right thing for every filesystem.
+
+*nod*
+
+but before that, we need the model to be defined and documented.
+And once we have a library, the fun part of convincing the world
+that it should be the glibc default behaviour can begin....
 
 Cheers,
 
