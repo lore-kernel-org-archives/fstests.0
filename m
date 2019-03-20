@@ -1,11 +1,13 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:56984 "EHLO
+Received: from aserp2130.oracle.com ([141.146.126.79]:57032 "EHLO
         aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725958AbfCTAok (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:40 -0400
-Subject: [PATCH 00/12] fstests: various fixes
+        with ESMTP id S1726969AbfCTAor (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:47 -0400
+Subject: [PATCH 01/12] check: improve test list randomization
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 19 Mar 2019 17:44:36 -0700
-Message-ID: <155304267647.31707.14180452399822113095.stgit@magnolia>
+Date: Tue, 19 Mar 2019 17:44:42 -0700
+Message-ID: <155304268284.31707.10338119992472996728.stgit@magnolia>
+In-Reply-To: <155304267647.31707.14180452399822113095.stgit@magnolia>
+References: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,43 +16,65 @@ To: guaneryu@gmail.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Here are a bunch of fixes and some new tests.
+awk doesn't have a particularly good random number generator -- it seeds
+from the Unix epoch time in seconds, which means that the run order
+across a bunch of VMs started at exactly the same time are unsettlingly
+predictable.  Therefore, at least try to seed it with bash's $RANDOM,
+which is slightly less predictable.
 
-Patches 1-2 improve the random number algorithm that is used to shuffle
-the test list when -r is used.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ check         |   12 ++++++------
+ randomize.awk |   12 ++++++++----
+ 2 files changed, 14 insertions(+), 10 deletions(-)
 
-Patches 3-6 fix some minor problems with existing tests.
 
-Patches 7-8 refactor the code that creates and maintains the cache of
-populated filesystem images so that we can cache multiple different
-configurations on the test filesystem, since it is advantageous to be
-able to populate different configurations without discarding perfectly
-good images.
-
-Patch 9 implements a bunch more reflink corner cases when sharing into
-or out from a bunch of different types of blocks.
-
-Patch 10 ensures that xfs_copy and xfs_metadump can deal with all types
-of xfs metadata.
-
-Patch 11-12 wipe the scratch devices between tests and fix the tests
-that erroneously expected the scratch devices to contain anything.
-
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
-
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
-
---D
-
-kernel git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=djwong-devel
-
-xfsprogs git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=djwong-devel
-
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=djwong-devel
+diff --git a/check b/check
+index 20e95302..ecd1d39a 100755
+--- a/check
++++ b/check
+@@ -242,13 +242,13 @@ _prepare_test_list()
+ 	done
+ 
+ 	# sort the list of tests into numeric order
+-	list=`sort -n $tmp.list | uniq`
+-	rm -f $tmp.list
+-
+-	if $randomize
+-	then
+-		list=`echo $list | awk -f randomize.awk`
++	if $randomize; then
++		sorter="awk -v seed=$RANDOM -f randomize.awk"
++	else
++		sorter="cat"
+ 	fi
++	list=`sort -n $tmp.list | uniq | $sorter`
++	rm -f $tmp.list
+ }
+ 
+ # Process command arguments first.
+diff --git a/randomize.awk b/randomize.awk
+index 0a8ad71a..d979fb03 100644
+--- a/randomize.awk
++++ b/randomize.awk
+@@ -15,10 +15,14 @@ function randomize(array, N) {
+ return
+ }
+ 
++BEGIN {
++	srand(seed)
++}
+ {
+-    srand()
+-    for (i = 0; i < NF; i++ ) array[i] = $(i+1)
+-    randomize(array, NF)
+-    for (i = 0; i < NF; i++) printf("%s ", array[i])
++	array[NR - 1] = $0
++}
++END {
++    randomize(array, NR)
++    for (i = 0; i < NR; i++) printf("%s ", array[i])
+ }
+ 
