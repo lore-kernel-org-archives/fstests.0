@@ -1,85 +1,56 @@
-Received: from ipmail03.adl2.internode.on.net ([150.101.137.141]:11449 "EHLO
-        ipmail03.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726712AbfCSUnf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 16:43:35 -0400
-Date: Wed, 20 Mar 2019 07:43:30 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2] Documenting the crash-recovery guarantees of Linux
- file systems
-Message-ID: <20190319204330.GY26298@dastard>
-References: <1552418820-18102-1-git-send-email-jaya@cs.utexas.edu>
- <20190314011925.GG23020@dastard>
- <CAOQ4uxjNDKjjzzcowy6oFZ=V7hWCkCbSyOQggE2XJirr4JHAyA@mail.gmail.com>
- <20190315030313.GP26298@dastard>
- <CAOQ4uxhyeBhk3DaHO8_oyfWbByidGaSrXJyh7uQE1YMaWTxR5A@mail.gmail.com>
- <20190317221652.GQ26298@dastard>
- <CAOQ4uxgwa9CeyLXJ022VW8dac3h_fGUi9BtF_apMv0T1UjJ3iw@mail.gmail.com>
- <20190319031312.GW26298@dastard>
- <CAOQ4uxjyrYO8bmY04-AE9t3kQ=0B-m1A8yLRXtsyevrxCfyLxg@mail.gmail.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:56984 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725958AbfCTAok (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:40 -0400
+Subject: [PATCH 00/12] fstests: various fixes
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Tue, 19 Mar 2019 17:44:36 -0700
+Message-ID: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <CAOQ4uxjyrYO8bmY04-AE9t3kQ=0B-m1A8yLRXtsyevrxCfyLxg@mail.gmail.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Jayashree <jaya@cs.utexas.edu>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, linux-doc@vger.kernel.org, Vijaychidambaram Velayudhan Pillai <vijay@cs.utexas.edu>, Theodore Tso <tytso@mit.edu>, chao@kernel.org, Filipe Manana <fdmanana@gmail.com>, Jonathan Corbet <corbet@lwn.net>, Josef Bacik <josef@toxicpanda.com>, Anna Schumaker <Anna.Schumaker@netapp.com>
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 19, 2019 at 09:35:19AM +0200, Amir Goldstein wrote:
-> On Tue, Mar 19, 2019 at 5:13 AM Dave Chinner <david@fromorbit.com> wrote:
-> > That is, sync_file_range() is only safe to use for this specific
-> > sort of ordered data integrity algorithm when flushing the entire
-> > file.(*)
-> >
-> > create
-> > setxattr
-> > write                                   metadata volatile
-> >   delayed allocation                    data volatile
-> > ....
-> > sync_file_range(fd, 0, 0, SYNC_FILE_RANGE_WAIT_BEFORE |
-> >                 SYNC_FILE_RANGE_WRITE | SYNC_FILE_RANGE_WAIT_AFTER);
-> >   Extent Allocation                     metadata volatile
-> >                   ----> device -+
-> >                                         data volatile
-> >                   <-- complete -+
-> > ....
-> > rename                                  metadata volatile
-> >
-> > And so at this point, we only need a device cache flush to
-> > make the data persistent and a journal flush to make the rename
-> > persistent. And so it ends up the same case as non-AIO O_DIRECT.
-> >
-> 
-> Funny, I once told that story and one Dave Chinner told me
-> "Nice story, but wrong.":
-> https://patchwork.kernel.org/patch/10576303/#22190719
-> 
-> You pointed to the minor detail that sync_file_range() uses
-> WB_SYNC_NONE.
+Hi all,
 
-Ah, I forgot about that. That's what I get for not looking at the
-code. Did I mention that SFR is a complete crock of shit when it
-comes to data integrity operations? :/
+Here are a bunch of fixes and some new tests.
 
-> So yes, I agree, it is a nice story and we need to make it right,
-> by having an API (perhaps SYNC_FILE_RANGE_ALL).
-> When you pointed out my mistake, I switched the application to
-> use the FIEMAP_FLAG_SYNC API as a hack.
+Patches 1-2 improve the random number algorithm that is used to shuffle
+the test list when -r is used.
 
-Yeah, that 's a nasty hack :/
+Patches 3-6 fix some minor problems with existing tests.
 
-> Besides tests and documentation what could be useful is a portable
-> user space library that just does the right thing for every filesystem.
+Patches 7-8 refactor the code that creates and maintains the cache of
+populated filesystem images so that we can cache multiple different
+configurations on the test filesystem, since it is advantageous to be
+able to populate different configurations without discarding perfectly
+good images.
 
-*nod*
+Patch 9 implements a bunch more reflink corner cases when sharing into
+or out from a bunch of different types of blocks.
 
-but before that, we need the model to be defined and documented.
-And once we have a library, the fun part of convincing the world
-that it should be the glibc default behaviour can begin....
+Patch 10 ensures that xfs_copy and xfs_metadump can deal with all types
+of xfs metadata.
 
-Cheers,
+Patch 11-12 wipe the scratch devices between tests and fix the tests
+that erroneously expected the scratch devices to contain anything.
 
-Dave.
--- 
-Dave Chinner
-david@fromorbit.com
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
+
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
+
+--D
+
+kernel git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=djwong-devel
+
+xfsprogs git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=djwong-devel
+
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=djwong-devel
