@@ -1,11 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:39800 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726969AbfCTAo6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:58 -0400
-Subject: [PATCH 03/12] generic/042: fix stale disk contents check
+Received: from aserp2130.oracle.com ([141.146.126.79]:57194 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726969AbfCTApF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:45:05 -0400
+Subject: [PATCH 04/12] generic/032: fix unwritten extent checks
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 19 Mar 2019 17:44:55 -0700
-Message-ID: <155304269533.31707.10962791945845709289.stgit@magnolia>
+Date: Tue, 19 Mar 2019 17:45:01 -0700
+Message-ID: <155304270155.31707.5574383689968895450.stgit@magnolia>
 In-Reply-To: <155304267647.31707.14180452399822113095.stgit@magnolia>
 References: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,43 +18,45 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-This test doesn't call fsync or sync to force writeback of the first 60k
-of the file, which means that we could end up with a file full of
-zeroes or an empty file.  Since this is a regression test that looks for
-stale disk contents slipping through, change the test to look for the
-stale bytes.
+Fix the unwritten extent detector in this test to ignore post-eof
+allocations because those are harmless.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/042 |   10 +++++++---
- 1 file changed, 7 insertions(+), 3 deletions(-)
+ tests/generic/032 |   17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
 
 
-diff --git a/tests/generic/042 b/tests/generic/042
-index 1aa18f9b..6c62eb63 100755
---- a/tests/generic/042
-+++ b/tests/generic/042
-@@ -44,7 +44,7 @@ _crashtest()
+diff --git a/tests/generic/032 b/tests/generic/032
+index affde4b7..38352a21 100755
+--- a/tests/generic/032
++++ b/tests/generic/032
+@@ -69,18 +69,21 @@ do
  
- 	# Create an fs on a small, initialized image. The pattern is written to
- 	# the image to detect stale data exposure.
--	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite 0 25M" $img \
-+	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 25M" $img \
- 		>> $seqres.full 2>&1
- 	_mkfs_dev $img >> $seqres.full 2>&1
+ 	# preallocate the first 64k and overwite, writing past 64k to contend
+ 	# with writeback
++	file_len=0x100000
+ 	$XFS_IO_PROG \
+ 		-c "falloc 0 0x10000"	\
+-		-c "pwrite 0 0x100000"	\
++		-c "pwrite 0 $file_len"	\
+ 		-c "fsync"		\
+ 		$SCRATCH_MNT/file >> $seqres.full 2>&1
  
-@@ -61,8 +61,12 @@ _crashtest()
- 	$UMOUNT_PROG $mnt
- 	_mount $img $mnt
+-	# Check for unwritten extents. We should have none since we wrote over
+-	# the entire preallocated region and ran fsync.
+-	$XFS_IO_PROG -c "fiemap -v" $SCRATCH_MNT/file | \
+-		tee -a $seqres.full | \
+-		_filter_fiemap | grep unwritten
+-	[ $? == 0 ] && _fail "Unwritten extents found!"
++	# Check for unwritten extents. We should have none before EOF since we
++	# wrote over the entire preallocated region and ran fsync.
++	eof_sector=$(( file_len / 512 ))
++	$XFS_IO_PROG -c 'fiemap -v' $SCRATCH_MNT/file | \
++		_filter_fiemap | \
++		tr '[.]:' '    ' | \
++		awk "{if (\$2 < $eof_sector) {print \$0}}" | \
++		grep -q unwritten && _fail "Unwritten extents found!"
+ done
  
--	# we generally expect a zero-sized file (this should be silent)
--	hexdump $file
-+	# We should /never/ see 0xCD in the file, because we wrote that pattern
-+	# to the filesystem image to expose stale data.
-+	if hexdump -v -e '/1 "%02X "' $file | grep -q "CD"; then
-+		echo "Saw stale data!!!"
-+		hexdump $file
-+	fi
- 
- 	$UMOUNT_PROG $mnt
- }
+ echo $iters iterations
