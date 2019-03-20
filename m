@@ -1,12 +1,11 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:40388 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725958AbfCTApw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:45:52 -0400
-Subject: [PATCH 10/12] xfs: test xfs_copy and xfs_mdrestore on the populate
- images
+Received: from userp2130.oracle.com ([156.151.31.86]:52562 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725958AbfCTAp6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:45:58 -0400
+Subject: [PATCH 11/12] check: wipe scratch devices between tests
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 19 Mar 2019 17:45:49 -0700
-Message-ID: <155304274924.31707.623436868976936668.stgit@magnolia>
+Date: Tue, 19 Mar 2019 17:45:55 -0700
+Message-ID: <155304275552.31707.6473598082840688691.stgit@magnolia>
 In-Reply-To: <155304267647.31707.14180452399822113095.stgit@magnolia>
 References: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,146 +18,55 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Make sure that copy, metadump, and mdrestore work on a filesystem with
-all known metadata types.
+Wipe the scratch devices in between each test to ensure that tests are
+formatting them and not making assumptions about previous contents.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/740     |   97 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/740.out |   12 +++++++
- tests/xfs/group   |    1 +
- 3 files changed, 110 insertions(+)
- create mode 100755 tests/xfs/740
- create mode 100644 tests/xfs/740.out
+ check      |    1 +
+ common/rc  |    6 ++++++
+ common/xfs |    1 +
+ 3 files changed, 8 insertions(+)
 
 
-diff --git a/tests/xfs/740 b/tests/xfs/740
-new file mode 100755
-index 00000000..0ff548cb
---- /dev/null
-+++ b/tests/xfs/740
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 740
-+#
-+# Populate a XFS filesystem and ensure that metadump, mdrestore, and copy
-+# all work properly.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
+diff --git a/check b/check
+index a2c5ba21..bcf08dfe 100755
+--- a/check
++++ b/check
+@@ -737,6 +737,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+ 			# _check_dmesg depends on this log in dmesg
+ 			touch ${RESULT_DIR}/check_dmesg
+ 		fi
++		_try_wipe_scratch_devs > /dev/null 2>&1
+ 		if [ "$DUMP_OUTPUT" = true ]; then
+ 			./$seq 2>&1 | tee $tmp.out
+ 			# Because $? would get tee's return code
+diff --git a/common/rc b/common/rc
+index 1c42515f..40eef80f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -3942,6 +3942,12 @@ _require_fibmap()
+ 	rm -f $file
+ }
+ 
++_try_wipe_scratch_devs()
 +{
-+	cd /
-+	rm -rf $tmp.* $testdir
++	_scratch_unmount
++	test -x "$WIPEFS_PROG" && $WIPEFS_PROG -a $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV
 +}
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+
-+testdir=$TEST_DIR/test-$seq
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+
-+_require_scratch_nocheck
-+_require_populate_commands
-+
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+mkdir -p $testdir
-+metadump_file=$testdir/scratch.md
-+metadump_file_a=${metadump_file}.a
-+metadump_file_g=${metadump_file}.g
-+metadump_file_ag=${metadump_file}.ag
-+copy_file=$testdir/copy.img
-+
-+echo metadump
-+_scratch_metadump $metadump_file
-+
-+echo metadump a
-+_scratch_metadump $metadump_file_a
-+
-+echo metadump g
-+_scratch_metadump $metadump_file_g
-+
-+echo metadump ag
-+_scratch_metadump $metadump_file_ag
-+
-+echo copy
-+$XFS_COPY_PROG $SCRATCH_DEV $copy_file >> $seqres.full
-+_check_scratch_fs $copy_file
-+
-+echo recopy
-+$XFS_COPY_PROG $copy_file $SCRATCH_DEV >> $seqres.full
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore
-+xfs_mdrestore $metadump_file $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore a
-+xfs_mdrestore $metadump_file_a $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore g
-+xfs_mdrestore $metadump_file_g $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore ag
-+xfs_mdrestore $metadump_file_ag $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/740.out b/tests/xfs/740.out
-new file mode 100644
-index 00000000..0c979dc4
---- /dev/null
-+++ b/tests/xfs/740.out
-@@ -0,0 +1,12 @@
-+QA output created by 740
-+Format and populate
-+metadump
-+metadump a
-+metadump g
-+metadump ag
-+copy
-+recopy
-+mdrestore
-+mdrestore a
-+mdrestore g
-+mdrestore ag
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 9d9458b8..b8bd1012 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -500,3 +500,4 @@
- 500 auto quick mkfs prealloc mkfs
- 501 auto quick unlink
- 502 auto quick unlink
-+740 auto copy metadump
+ init_rc
+ 
+ ################################################################################
+diff --git a/common/xfs b/common/xfs
+index 24065813..af2b62ba 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -295,6 +295,7 @@ _require_xfs_db_command()
+ 	fi
+ 	command=$1
+ 
++	_scratch_mkfs_xfs >/dev/null 2>&1
+ 	_scratch_xfs_db -x -c "help" | grep $command > /dev/null || \
+ 		_notrun "xfs_db $command support is missing"
+ }
