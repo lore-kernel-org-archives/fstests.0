@@ -1,98 +1,73 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:55772 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727864AbfB1X3K (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Feb 2019 18:29:10 -0500
-Date: Thu, 28 Feb 2019 15:29:01 -0800
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: sporadic shared/298 failures?
-Message-ID: <20190228232901.GC6471@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: Eric Whitney <enwlinux@gmail.com>
-Cc: linux-ext4@vger.kernel.org, tytso@mit.edu, xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+References: <155304267647.31707.14180452399822113095.stgit@magnolia> <155304275552.31707.6473598082840688691.stgit@magnolia>
+In-Reply-To: <155304275552.31707.6473598082840688691.stgit@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 20 Mar 2019 09:06:08 +0200
+Message-ID: <CAOQ4uxhu52G1hw6h-uc50-n5Bq0OT+4pLZjdnfPxK784F=nG0Q@mail.gmail.com>
+Subject: Re: [PATCH 11/12] check: wipe scratch devices between tests
+Content-Type: text/plain; charset="UTF-8"
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Eric,
+On Wed, Mar 20, 2019 at 2:46 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+>
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+>
+> Wipe the scratch devices in between each test to ensure that tests are
+> formatting them and not making assumptions about previous contents.
+>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  check      |    1 +
+>  common/rc  |    6 ++++++
+>  common/xfs |    1 +
+>  3 files changed, 8 insertions(+)
+>
+>
+> diff --git a/check b/check
+> index a2c5ba21..bcf08dfe 100755
+> --- a/check
+> +++ b/check
+> @@ -737,6 +737,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+>                         # _check_dmesg depends on this log in dmesg
+>                         touch ${RESULT_DIR}/check_dmesg
+>                 fi
+> +               _try_wipe_scratch_devs > /dev/null 2>&1
+>                 if [ "$DUMP_OUTPUT" = true ]; then
+>                         ./$seq 2>&1 | tee $tmp.out
+>                         # Because $? would get tee's return code
+> diff --git a/common/rc b/common/rc
+> index 1c42515f..40eef80f 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -3942,6 +3942,12 @@ _require_fibmap()
+>         rm -f $file
+>  }
+>
+> +_try_wipe_scratch_devs()
+> +{
+> +       _scratch_unmount
 
-On this morning's ext4 concall you mentioned that you saw sporadic
-failures in shared/298, and I mentioned that I'd seen similar symptoms
-on xfs.  I had a look at 298 and discovered that it probes the file
-image for holes while the filesystem is loop-mounted!  Yikes!  I don't
-remember the exact circumstances of your testing (I think you said it
-was related to bigalloc?) but this reproduces on XFS with blocksize = 1k
-every time.
+So I find this change strange, not because it doesn't make sense
+to start every test with scratch unmounted, but because today scratch *is*
+mounted on test start and there is quite a bit of code to make it mounted
+on test start, which seems backwards.
 
-Does the following patch fix your sporadic failures?
+IOW, instead of unmounting scratch just before the test runs, seems
+better to make sure it is unmounted at the end of each test and before
+starting the loop.
 
-(This isn't the last word on this test -- both ext4 and XFS now /do/
-support live queries of the freep space map, so we're probably going
-to want a similar test that doesn't clunkily unmount the fs so much.)
+Note that for a test with _require_scratch_nocheck, _check_filesystems()
+will unmount scratch, but for a test with _require_scratch, _check_scratch_fs()
+will unmount+fsck+mount scratch - inconsistent.
+Or am I reading this wrong?
 
-I'll send this patch out with proper subject line and whatnot next week
-after I give it more thorough testing on xfs.
 
---D
+> +       test -x "$WIPEFS_PROG" && $WIPEFS_PROG -a $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV
 
-This test does some weird things with live filesystems -- it seems to be
-validating the behavior of fstrim by comparing the filesystem's free
-space map to holes in the file image that backs the filesystem.
-However, this doesn't account for the fact that some filesystems
-maintain in-core preallocations and/or can perturb the free space data
-during unmount.  This causes sporadic test failures when the two become
-out of sync.
+Please check that $SCRATCH_DEV is not a network name (nfs|cifs) and that it
+is really a blockdev (overlayfs) before trying to wipefs.
 
-Therefore, make sure we unmount the filesystem before we start running
-tools against the filesystem image file to eliminate the possibility of
-changes to the free space map.  This was found by running shared/298 on
-xfs with a 1k block size.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/shared/298 |   18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
-
-diff --git a/tests/shared/298 b/tests/shared/298
-index aafdc25f..5d6c6ccf 100755
---- a/tests/shared/298
-+++ b/tests/shared/298
-@@ -46,13 +46,21 @@ _cleanup()
- 
- get_holes()
- {
-+	# It's not a good idea to be running tools against the image file
-+	# backing a live filesystem because the filesystem could be maintaining
-+	# in-core state that will perturb the free space map on umount.  Stick
-+	# to established convention which requires the filesystem to be
-+	# unmounted while we probe the underlying file.
-+	$UMOUNT_PROG $loop_mnt
- 	$XFS_IO_PROG -F -c fiemap $1 | grep hole | $SED_PROG 's/.*\[\(.*\)\.\.\(.*\)\].*/\1 \2/'
-+	_mount $loop_dev $loop_mnt
- }
- 
- get_free_sectors()
- {
- 	case $FSTYP in
- 	ext4)
-+	$UMOUNT_PROG $loop_mnt
- 	$DUMPE2FS_PROG $img_file  2>&1 | grep " Free blocks" | cut -d ":" -f2- | \
- 		tr ',' '\n' | $SED_PROG 's/^ //' | \
- 		$AWK_PROG -v spb=$sectors_per_block 'BEGIN{FS="-"};
-@@ -195,6 +203,16 @@ while read line; do
- 		END { if(found) exit 0; else exit 1}' $merged_sectors
- 	then
- 		echo "Sectors $from-$to are not marked as free!"
-+
-+		# Dump the state to make it easier to debug this...
-+		echo free_sectors >> $seqres.full
-+		sort -g < $free_sectors >> $seqres.full
-+		echo fiemap_ref >> $seqres.full
-+		sort -g < $fiemap_ref >> $seqres.full
-+		echo merged_sectors >> $seqres.full
-+		sort -g < $merged_sectors >> $seqres.full
-+		echo fiemap_after >> $seqres.full
-+		sort -g < $fiemap_after >> $seqres.full
- 		exit
- 	fi
- done < $fiemap_after
+Thanks,
+Amir.
