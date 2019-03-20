@@ -1,11 +1,11 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:57096 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726969AbfCTAow (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:52 -0400
-Subject: [PATCH 02/12] check: really improve test list randomization
+Received: from userp2120.oracle.com ([156.151.31.85]:39800 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726969AbfCTAo6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:44:58 -0400
+Subject: [PATCH 03/12] generic/042: fix stale disk contents check
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 19 Mar 2019 17:44:49 -0700
-Message-ID: <155304268908.31707.9639554348139720057.stgit@magnolia>
+Date: Tue, 19 Mar 2019 17:44:55 -0700
+Message-ID: <155304269533.31707.10962791945845709289.stgit@magnolia>
 In-Reply-To: <155304267647.31707.14180452399822113095.stgit@magnolia>
 References: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,30 +18,43 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-coreutils provides the shuf(1) utility that randomizes the order of a
-list and seeds its random number generator with /dev/urandom.  It's a
-bit speedier than awk, so use it if available.
+This test doesn't call fsync or sync to force writeback of the first 60k
+of the file, which means that we could end up with a file full of
+zeroes or an empty file.  Since this is a regression test that looks for
+stale disk contents slipping through, change the test to look for the
+stale bytes.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- check |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ tests/generic/042 |   10 +++++++---
+ 1 file changed, 7 insertions(+), 3 deletions(-)
 
 
-diff --git a/check b/check
-index ecd1d39a..a2c5ba21 100755
---- a/check
-+++ b/check
-@@ -243,7 +243,11 @@ _prepare_test_list()
+diff --git a/tests/generic/042 b/tests/generic/042
+index 1aa18f9b..6c62eb63 100755
+--- a/tests/generic/042
++++ b/tests/generic/042
+@@ -44,7 +44,7 @@ _crashtest()
  
- 	# sort the list of tests into numeric order
- 	if $randomize; then
--		sorter="awk -v seed=$RANDOM -f randomize.awk"
-+		if type shuf >& /dev/null; then
-+			sorter="shuf"
-+		else
-+			sorter="awk -v seed=$RANDOM -f randomize.awk"
-+		fi
- 	else
- 		sorter="cat"
- 	fi
+ 	# Create an fs on a small, initialized image. The pattern is written to
+ 	# the image to detect stale data exposure.
+-	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite 0 25M" $img \
++	$XFS_IO_PROG -f -c "truncate 0" -c "pwrite -S 0xCD 0 25M" $img \
+ 		>> $seqres.full 2>&1
+ 	_mkfs_dev $img >> $seqres.full 2>&1
+ 
+@@ -61,8 +61,12 @@ _crashtest()
+ 	$UMOUNT_PROG $mnt
+ 	_mount $img $mnt
+ 
+-	# we generally expect a zero-sized file (this should be silent)
+-	hexdump $file
++	# We should /never/ see 0xCD in the file, because we wrote that pattern
++	# to the filesystem image to expose stale data.
++	if hexdump -v -e '/1 "%02X "' $file | grep -q "CD"; then
++		echo "Saw stale data!!!"
++		hexdump $file
++	fi
+ 
+ 	$UMOUNT_PROG $mnt
+ }
