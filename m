@@ -1,12 +1,11 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:52248 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726801AbfCTAp0 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:45:26 -0400
-Subject: [PATCH 06/12] ext4/023: don't require scrub for ext4 populated
- image creation
+Received: from aserp2130.oracle.com ([141.146.126.79]:57502 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726801AbfCTApc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 19 Mar 2019 20:45:32 -0400
+Subject: [PATCH 07/12] common/populate: refactor _scratch_populate_cached
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 19 Mar 2019 17:45:22 -0700
-Message-ID: <155304272254.31707.3761494827323670805.stgit@magnolia>
+Date: Tue, 19 Mar 2019 17:45:28 -0700
+Message-ID: <155304272879.31707.4358538241141797662.stgit@magnolia>
 In-Reply-To: <155304267647.31707.14180452399822113095.stgit@magnolia>
 References: <155304267647.31707.14180452399822113095.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,24 +18,103 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Don't require scrub for ext4's populated fs creation test because there
-is no general online scrub program for ext*.
+Refactor _scratch_populate_cached into smaller helper functions.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/ext4/023 |    1 -
- 1 file changed, 1 deletion(-)
+ common/populate |   69 ++++++++++++++++++++++++++++++++++---------------------
+ 1 file changed, 43 insertions(+), 26 deletions(-)
 
 
-diff --git a/tests/ext4/023 b/tests/ext4/023
-index a598e2b4..1dadb29f 100755
---- a/tests/ext4/023
-+++ b/tests/ext4/023
-@@ -33,7 +33,6 @@ _cleanup()
- _supported_os Linux
- _supported_fs ext4
- _require_scratch
--_require_scrub
+diff --git a/common/populate b/common/populate
+index 95953476..1f921ac5 100644
+--- a/common/populate
++++ b/common/populate
+@@ -765,20 +765,14 @@ _fill_fs()
+ 	done
+ }
  
- echo "Format and populate"
- _scratch_populate_cached > $seqres.full 2>&1
+-# Populate a scratch FS from scratch or from a cached image.
+-_scratch_populate_cached() {
+-	POPULATE_METADUMP="${TEST_DIR}/__populate.${FSTYP}"
+-	POPULATE_METADUMP_DESCR="${TEST_DIR}/__populate.${FSTYP}.txt"
+-
+-	# Don't keep metadata images cached for more 48 hours...
+-	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
++# Compute the fs geometry description of a populated filesystem
++_scratch_populate_cache_tag() {
++	local extra_descr=""
++	local size="$(blockdev --getsz "${SCRATCH_DEV}")"
+ 
+-	# Throw away cached image if it doesn't match our spec.
+ 	case "${FSTYP}" in
+ 	"ext4")
+ 		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL}"
+-		# ext4 cannot e2image external logs, so we cannot restore
+-		test -n "${SCRATCH_LOGDEV}" && rm -f "${POPULATE_METADUMP}"
+ 		;;
+ 	"xfs")
+ 		extra_descr="LOGDEV ${SCRATCH_LOGDEV} USE_EXTERNAL ${USE_EXTERNAL} RTDEV ${SCRATCH_RTDEV}"
+@@ -787,23 +781,46 @@ _scratch_populate_cached() {
+ 			extra_descr="${extra_descr} QUOTAS"
+ 		fi
+ 		;;
+-	*)
+-		extra_descr="";;
+ 	esac
+-	meta_descr="FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE $(blockdev --getsz "${SCRATCH_DEV}") ${extra_descr} ARGS $@"
+-	cmp -s "${POPULATE_METADUMP_DESCR}" <(echo "${meta_descr}") || rm -rf "${POPULATE_METADUMP}"
+-
+-	# Do we have a cached image?
+-	if [ -r "${POPULATE_METADUMP}" ]; then
+-		case "${FSTYP}" in
+-		"xfs")
+-			xfs_mdrestore "${POPULATE_METADUMP}" "${SCRATCH_DEV}" && return
+-			;;
+-		"ext2"|"ext3"|"ext4")
+-			e2image -r "${POPULATE_METADUMP}" "${SCRATCH_DEV}" && return
+-			;;
+-		esac
+-	fi
++	echo "FSTYP ${FSTYP} MKFS_OPTIONS ${MKFS_OPTIONS} SIZE ${size} ${extra_descr} ARGS $@"
++}
++
++# Restore a cached populated fs from a metadata dump
++_scratch_populate_restore_cached() {
++	local metadump="$1"
++
++	case "${FSTYP}" in
++	"xfs")
++		xfs_mdrestore "${metadump}" "${SCRATCH_DEV}" && return 0
++		;;
++	"ext2"|"ext3"|"ext4")
++		# ext4 cannot e2image external logs, so we cannot restore
++		test -n "${SCRATCH_LOGDEV}" && return 1
++		e2image -r "${metadump}" "${SCRATCH_DEV}" && return 0
++		;;
++	esac
++	return 1
++}
++
++# Populate a scratch FS from scratch or from a cached image.
++_scratch_populate_cached() {
++	local meta_descr="$(_scratch_populate_cache_tag "$@")"
++
++	# These variables are shared outside this function
++	POPULATE_METADUMP="${TEST_DIR}/__populate.${FSTYP}"
++	POPULATE_METADUMP_DESCR="${TEST_DIR}/__populate.${FSTYP}.txt"
++
++	# Don't keep metadata images cached for more 48 hours...
++	rm -rf "$(find "${POPULATE_METADUMP}" -mtime +2 2>/dev/null)"
++
++	# Throw away cached image if it doesn't match our spec.
++	cmp -s "${POPULATE_METADUMP_DESCR}" <(echo "${meta_descr}") || \
++		rm -rf "${POPULATE_METADUMP}"
++
++	# Try to restore from the metadump
++	test -r "${POPULATE_METADUMP}" && \
++		_scratch_populate_restore_cached "${POPULATE_METADUMP}" && \
++		return
+ 
+ 	# Oh well, just create one from scratch
+ 	_scratch_mkfs
