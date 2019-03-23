@@ -1,164 +1,112 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:49262 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726160AbfCXGsa (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 24 Mar 2019 02:48:30 -0400
-Date: Sat, 23 Mar 2019 23:48:24 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 10/12] xfs: test xfs_copy and xfs_mdrestore on the
- populate images
-Message-ID: <20190324064824.GS1183@magnolia>
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:33254 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727434AbfCWN35 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 23 Mar 2019 09:29:57 -0400
+Date: Sat, 23 Mar 2019 21:29:48 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 11/12] check: wipe scratch devices between tests
+Message-ID: <20190323132948.GW2824@desktop>
 References: <155304267647.31707.14180452399822113095.stgit@magnolia>
- <155304274924.31707.623436868976936668.stgit@magnolia>
+ <155304275552.31707.6473598082840688691.stgit@magnolia>
+ <CAOQ4uxhu52G1hw6h-uc50-n5Bq0OT+4pLZjdnfPxK784F=nG0Q@mail.gmail.com>
+ <20190321041544.GD1186@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <155304274924.31707.623436868976936668.stgit@magnolia>
+In-Reply-To: <20190321041544.GD1186@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Mar 20, 2019 at 09:15:44PM -0700, Darrick J. Wong wrote:
+> On Wed, Mar 20, 2019 at 09:06:08AM +0200, Amir Goldstein wrote:
+> > On Wed, Mar 20, 2019 at 2:46 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> > >
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > >
+> > > Wipe the scratch devices in between each test to ensure that tests are
+> > > formatting them and not making assumptions about previous contents.
+> > >
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > >  check      |    1 +
+> > >  common/rc  |    6 ++++++
+> > >  common/xfs |    1 +
+> > >  3 files changed, 8 insertions(+)
+> > >
+> > >
+> > > diff --git a/check b/check
+> > > index a2c5ba21..bcf08dfe 100755
+> > > --- a/check
+> > > +++ b/check
+> > > @@ -737,6 +737,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> > >                         # _check_dmesg depends on this log in dmesg
+> > >                         touch ${RESULT_DIR}/check_dmesg
+> > >                 fi
+> > > +               _try_wipe_scratch_devs > /dev/null 2>&1
+> > >                 if [ "$DUMP_OUTPUT" = true ]; then
+> > >                         ./$seq 2>&1 | tee $tmp.out
+> > >                         # Because $? would get tee's return code
+> > > diff --git a/common/rc b/common/rc
+> > > index 1c42515f..40eef80f 100644
+> > > --- a/common/rc
+> > > +++ b/common/rc
+> > > @@ -3942,6 +3942,12 @@ _require_fibmap()
+> > >         rm -f $file
+> > >  }
+> > >
+> > > +_try_wipe_scratch_devs()
+> > > +{
+> > > +       _scratch_unmount
+> > 
+> > So I find this change strange, not because it doesn't make sense
+> > to start every test with scratch unmounted, but because today scratch *is*
+> > mounted on test start and there is quite a bit of code to make it mounted
+> > on test start, which seems backwards.
+> 
+> Huh?  On XFS the test device is always mounted, but the scratch device
+> is never mounted before the test starts.
 
-Make sure that copy, metadump, and mdrestore work on a filesystem with
-all known metadata types.
+Yes, as _require_test always mounts TEST_DEV and
+_require_scratch_nocheck always umounts SCRATCH_DEV.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/740     |   97 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/740.out |   12 +++++++
- tests/xfs/group   |    1 +
- 3 files changed, 110 insertions(+)
- create mode 100755 tests/xfs/740
- create mode 100644 tests/xfs/740.out
+> 
+> Hmmm, maybe this is one of those weird things that different with
+> nonblock filesystems...?
+> 
+> > IOW, instead of unmounting scratch just before the test runs, seems
+> > better to make sure it is unmounted at the end of each test and before
+> > starting the loop.
+> > 
+> > Note that for a test with _require_scratch_nocheck, _check_filesystems()
+> > will unmount scratch, but for a test with _require_scratch, _check_scratch_fs()
+> > will unmount+fsck+mount scratch - inconsistent.
+> > Or am I reading this wrong?
 
-diff --git a/tests/xfs/740 b/tests/xfs/740
-new file mode 100755
-index 00000000..bd0a4577
---- /dev/null
-+++ b/tests/xfs/740
-@@ -0,0 +1,97 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 740
-+#
-+# Populate a XFS filesystem and ensure that metadump, mdrestore, and copy
-+# all work properly.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -rf $tmp.* $testdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/populate
-+
-+testdir=$TEST_DIR/test-$seq
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+
-+_require_scratch_nocheck
-+_require_populate_commands
-+
-+echo "Format and populate"
-+_scratch_populate_cached nofill > $seqres.full 2>&1
-+
-+mkdir -p $testdir
-+metadump_file=$testdir/scratch.md
-+metadump_file_a=${metadump_file}.a
-+metadump_file_g=${metadump_file}.g
-+metadump_file_ag=${metadump_file}.ag
-+copy_file=$testdir/copy.img
-+
-+echo metadump
-+_scratch_metadump $metadump_file >> $seqres.full
-+
-+echo metadump a
-+_scratch_metadump $metadump_file_a -a >> $seqres.full
-+
-+echo metadump g
-+_scratch_metadump $metadump_file_g -g >> $seqres.full
-+
-+echo metadump ag
-+_scratch_metadump $metadump_file_ag -a -g >> $seqres.full
-+
-+echo copy
-+$XFS_COPY_PROG $SCRATCH_DEV $copy_file >> $seqres.full
-+_check_scratch_fs $copy_file
-+
-+echo recopy
-+$XFS_COPY_PROG $copy_file $SCRATCH_DEV >> $seqres.full
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore
-+xfs_mdrestore $metadump_file $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore a
-+xfs_mdrestore $metadump_file_a $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore g
-+xfs_mdrestore $metadump_file_g $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+echo mdrestore ag
-+xfs_mdrestore $metadump_file_ag $SCRATCH_DEV
-+_scratch_mount
-+_check_scratch_fs
-+_scratch_unmount
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/740.out b/tests/xfs/740.out
-new file mode 100644
-index 00000000..0c979dc4
---- /dev/null
-+++ b/tests/xfs/740.out
-@@ -0,0 +1,12 @@
-+QA output created by 740
-+Format and populate
-+metadump
-+metadump a
-+metadump g
-+metadump ag
-+copy
-+recopy
-+mdrestore
-+mdrestore a
-+mdrestore g
-+mdrestore ag
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 9d9458b8..b8bd1012 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -500,3 +500,4 @@
- 500 auto quick mkfs prealloc mkfs
- 501 auto quick unlink
- 502 auto quick unlink
-+740 auto copy metadump
+For tests that don't call _require_scratch{_nocheck}, to make sure
+SCRATCH_DEV is umounted I think we could just call _scratch_unmount
+unconditionally in _check_filesystems(), then we could wipefs before
+test safely.
+
+> > 
+> > 
+> > > +       test -x "$WIPEFS_PROG" && $WIPEFS_PROG -a $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV
+> > 
+> > Please check that $SCRATCH_DEV is not a network name (nfs|cifs) and that it
+> > is really a blockdev (overlayfs) before trying to wipefs.
+
+Yes, good catch!
+
+Thanks,
+Eryu
+
+> 
+> I wonder if maybe we only bother with wipefs for filesystems where
+> all tests have been fixed to not stumble over unformatted scratchdev
+> (i.e. xfs and ext* only)
+> 
+> --D
+> 
+> > Thanks,
+> > Amir.
