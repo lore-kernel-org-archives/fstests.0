@@ -1,107 +1,121 @@
-Received: from smtp03.citrix.com ([162.221.156.55]:39224 "EHLO
-        SMTP03.CITRIX.COM" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727719AbfCVOmk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 22 Mar 2019 10:42:40 -0400
-Subject: Re: [PATCH] Add new tests/generic/536: intermittent I/O errors must
- not corrupt a filesystem
-References: <20190321103045.6441-1-edvin.torok@citrix.com>
- <20190321202348.GA1180@magnolia>
-From: =?UTF-8?B?RWR3aW4gVMO2csO2aw==?= <edvin.torok@citrix.com>
-Message-ID: <4d660c49-e8ba-2dfc-2300-9d9d648e213f@citrix.com>
-Date: Fri, 22 Mar 2019 14:42:27 +0000
+Received: from aserp2130.oracle.com ([141.146.126.79]:52086 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726589AbfCWAfk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 22 Mar 2019 20:35:40 -0400
+Date: Fri, 22 Mar 2019 17:35:32 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] generic: prohibit fstrim on journalled filesystems with
+ norecovery
+Message-ID: <20190323003532.GB1180@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20190321202348.GA1180@magnolia>
-Content-Type: text/plain; charset="utf-8"
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, Mark Syms <Mark.Syms@citrix.com>, Tim Smith <Tim.Smith@citrix.com>, Ross Lagerwall <Ross.Lagerwall@citrix.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 21/03/2019 20:23, Darrick J. Wong wrote:
-> On Thu, Mar 21, 2019 at 10:30:46AM +0000, Edwin T=C3=B6r=C3=B6k wrote:
->> Based on tests/generic/347.
->>
->> In our lab we've found that if multiple iSCSI connection errors are
->> detected (without completely loosing the iSCSI connection) then the GF=
-S2
->> filesystem becomes corrupt due to differences in filesystem and device=
- blocksizes.
->> Add a test that explicitly checks for this by simulating I/O errors
->> deterministically with dm-thin.
->=20
-> How is this different from generic/475?  Is there something specific to
-> thin pools here (vs. using dm-error to simulate the errors)?
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-When I tried generic/475 it hanged in unmount and never reached the data =
-corruption part.
-Thanks for the suggestion, dm-error would be better than dm-thin, see bel=
-ow.
+This test makes sure that we can't use stale unrecovered fs metadata to
+drive a DISCARD festival on a disk and thereby destroy user data by
+accident.
 
-On 21/03/2019 21:26, Dave Chinner wrote:> On Thu, Mar 21, 2019 at 10:30:4=
-6AM +0000, Edwin T=C3=B6r=C3=B6k wrote:
->> Based on tests/generic/347.
->>
->> In our lab we've found that if multiple iSCSI connection errors are
->> detected (without completely loosing the iSCSI connection) then the GF=
-S2
->> filesystem becomes corrupt due to differences in filesystem and device=
- blocksizes.
->> Add a test that explicitly checks for this by simulating I/O errors
->> deterministically with dm-thin.
->=20
-> Exactly what IO errors is dm-thinp generating here? If you run it
-> out of space, then it triggers ENOSPC, not EIO. That's very, very
-> different to iSCSI throwing random EIO errors..
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/generic/714     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/714.out |    4 +++
+ tests/generic/group   |    1 +
+ 3 files changed, 66 insertions(+)
+ create mode 100755 tests/generic/714
+ create mode 100644 tests/generic/714.out
 
-I agree that dm-error would be a better starting place than dm-thin for t=
-his test,
-I'll try to modify it and see if I can get it to finish running without h=
-anging, and reproduce the corruption issue.
-
-
-On 21/03/2019 21:26, Dave Chinner wrote:> On Thu, Mar 21, 2019 at 10:30:4=
-6AM +0000, Edwin T=C3=B6r=C3=B6k wrote:
->> +# now remount the filesystem without triggering IO errors,
->> +# and check that the filesystem is not corrupt
->> +_dmthin_cycle_mount
->> +# ls --color makes ls stat each file, which finds the corruption
->=20
-> Not sure it always does - ISTR that in the past if the dtype
-> returned indicated the type of file, then it ls would omit the stat
-> just for the purposes of coloring....
->=20
-> And, realistically, the way we find /filesystem/ corruption is to
-> run fsck/repair, not iterate the directory structure.
-
-I don't disagree, however GFS2's fsck is very noisy and complains about i=
-nconsistencies
-even on a filesystem where I can otherwise list and read each entry corre=
-ctly.
-I wanted to make a clear distinction between that and actual corruption o=
-bserved, so that the 2 bugs
-can be fixed independently.
-
-Perhaps the test should first do an 'ls/stat', and if that is fine then u=
-nmount and run the filesystem check as usual.
-
-> If we are
-> looking for missing files, then we dump the directory structure to
-> the golden output file or dump it before/after errors and compare
-> that they are the same.
->=20
->> +ls --color=3Dalways $SCRATCH_MNT/ >/dev/null || _fail "Failed to list=
- filesystem after remount"
->> +ls --color=3Dalways $SCRATCH_MNT/ >/dev/null || _fail "Failed to list=
- filesystem after remount"
->> +ls --color=3Dalways $SCRATCH_MNT/ >/dev/null || _fail "Failed to list=
- filesystem after remount"
->=20
-> If corruption is not found on the first pass, why would the next 2
-> passes find anything different?
-
-Indeed, I'll drop them.
-
-Thanks,
---Edwin
+diff --git a/tests/generic/714 b/tests/generic/714
+new file mode 100755
+index 00000000..1849a5e9
+--- /dev/null
++++ b/tests/generic/714
+@@ -0,0 +1,61 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 714
++#
++# Ensure that we can't call fstrim on filesystems mounted norecovery, because
++# FSTRIM implementations use free space metadata to drive the discard requests
++# and we told the filesystem not to make sure the metadata are up to date.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_os Linux
++_require_scratch
++_require_fstrim
++
++rm -f $seqres.full
++
++_scratch_mkfs > $seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++
++echo "fstrim on regular mount"
++_scratch_mount >> $seqres.full 2>&1
++$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 || \
++	_notrun "FSTRIM not supported"
++_scratch_unmount
++
++echo "fstrim on ro mount"
++_scratch_mount -o ro >> $seqres.full 2>&1
++$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1
++_scratch_unmount
++
++echo "fstrim on ro mount with no log replay"
++norecovery="norecovery"
++test $FSTYP = "btrfs" && norecovery=nologreplay
++_scratch_mount -o ro,$norecovery >> $seqres.full 2>&1
++$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 && \
++	echo "fstrim with unrecovered metadata just ate your filesystem"
++_scratch_unmount
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/714.out b/tests/generic/714.out
+new file mode 100644
+index 00000000..1158a2ff
+--- /dev/null
++++ b/tests/generic/714.out
+@@ -0,0 +1,4 @@
++QA output created by 714
++fstrim on regular mount
++fstrim on ro mount
++fstrim on ro mount with no log replay
+diff --git a/tests/generic/group b/tests/generic/group
+index 2e4341fb..c2046293 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -538,6 +538,7 @@
+ 533 auto quick attr
+ 534 auto quick log
+ 535 auto quick log
++714 auto trim
+ 940 auto quick clone punch
+ 941 auto quick clone punch
+ 942 auto quick clone punch
