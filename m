@@ -1,60 +1,32 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39411 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725747AbfCYOzT (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 25 Mar 2019 10:55:19 -0400
-Reply-To: sandeen@redhat.com
-Subject: Re: [PATCH] xfs: prohibit fstrim in norecovery mode
-References: <20190323003720.GQ1183@magnolia>
-From: Eric Sandeen <esandeen@redhat.com>
-Message-ID: <3fa32770-f55d-514e-a969-7d7a0b64df5b@redhat.com>
-Date: Mon, 25 Mar 2019 09:55:17 -0500
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:51765 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727482AbfCWQNr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 23 Mar 2019 12:13:47 -0400
+Date: Sat, 23 Mar 2019 12:13:34 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH] ext4: prohibit fstrim in norecovery mode
+Message-ID: <20190323161334.GE5675@mit.edu>
+References: <20190323003532.GB1180@magnolia>
+ <20190323003813.GR1183@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20190323003720.GQ1183@magnolia>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190323003813.GR1183@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, xfs <linux-xfs@vger.kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, linux-ext4 <linux-ext4@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On 3/22/19 7:37 PM, Darrick J. Wong wrote:
+On Fri, Mar 22, 2019 at 05:38:13PM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> The xfs fstrim implementation uses the free space btrees to find free
-> space that can be discarded.  If we haven't recovered the log, the bnobt
+> The ext4 fstrim implementation uses the block bitmaps to find free space
+> that can be discarded.  If we haven't replayed the journal, the bitmaps
 > will be stale and we absolutely *cannot* use stale metadata to zap the
 > underlying storage.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  fs/xfs/xfs_discard.c |    8 ++++++++
->  1 file changed, 8 insertions(+)
 
-Yikes...
+Thanks, applied.
 
-Looks good to me (I briefly thought about a norecovery mount with a clean log,
-but then decided I didn't care about that)
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
-> diff --git a/fs/xfs/xfs_discard.c b/fs/xfs/xfs_discard.c
-> index 93f07edafd81..9ee2a7d02e70 100644
-> --- a/fs/xfs/xfs_discard.c
-> +++ b/fs/xfs/xfs_discard.c
-> @@ -161,6 +161,14 @@ xfs_ioc_trim(
->  		return -EPERM;
->  	if (!blk_queue_discard(q))
->  		return -EOPNOTSUPP;
-> +
-> +	/*
-> +	 * We haven't recovered the log, so we cannot use our bnobt-guided
-> +	 * storage zapping commands.
-> +	 */
-> +	if (mp->m_flags & XFS_MOUNT_NORECOVERY)
-> +		return -EROFS;
-> +
->  	if (copy_from_user(&range, urange, sizeof(range)))
->  		return -EFAULT;
->  
-> 
+					- Ted
