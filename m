@@ -1,146 +1,146 @@
-Received: from mail-ua1-f68.google.com ([209.85.222.68]:39280 "EHLO
-        mail-ua1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726111AbfCZMVd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 26 Mar 2019 08:21:33 -0400
-MIME-Version: 1.0
-References: <20190323003532.GB1180@magnolia>
-In-Reply-To: <20190323003532.GB1180@magnolia>
-From: Filipe David Manana <fdmanana@apache.org>
-Date: Tue, 26 Mar 2019 12:21:20 +0000
-Message-ID: <CAL3q7H4Un5e5xOkTgAVXthfr-N1CXwf6e4qOyQ9WeXQoj3E8Uw@mail.gmail.com>
-Subject: Re: [PATCH] generic: prohibit fstrim on journalled filesystems with norecovery
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx1.redhat.com ([209.132.183.28]:57986 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729322AbfCYRR1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 25 Mar 2019 13:17:27 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id C000A83F3C
+        for <fstests@vger.kernel.org>; Mon, 25 Mar 2019 17:17:26 +0000 (UTC)
+Received: from bfoster.bos.redhat.com (dhcp-41-2.bos.redhat.com [10.18.41.2])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 77B1564280
+        for <fstests@vger.kernel.org>; Mon, 25 Mar 2019 17:17:26 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH v2] generic: test stale data exposure after writeback crash
+Date: Mon, 25 Mar 2019 13:17:25 -0400
+Message-Id: <20190325171725.55069-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Mar 23, 2019 at 12:35 AM Darrick J. Wong
-<darrick.wong@oracle.com> wrote:
->
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> This test makes sure that we can't use stale unrecovered fs metadata to
-> drive a DISCARD festival on a disk and thereby destroy user data by
-> accident.
+XFS has historically had a stale data exposure window if a crash
+occurs after a delalloc->physical extent conversion but before
+writeback completes to the associated extent. While this should be a
+rare occurrence in production environments due to typical writeback
+ordering and such, it is not guaranteed in all cases until data
+extents are initialized as unwritten (or otherwise zeroed) before
+they are written.
 
-It would help to have listed the name of the patches that fix the
-issues on xfs/ext4/btrfs, to make it faster.
+Add a test that performs selective writeback ordering to reproduce
+stale data exposure after a crash. Note that this test currently
+fails on XFS.
 
->
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
 
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+v2:
+- Use larger write offsets to cover 64k page systems.
+- Change magic output to only fail on stale data exposure.
+- Add to shutdown group.
+v1: https://marc.info/?l=fstests&m=155292973818110&w=2
 
-Looks good, thanks for doing this. Just one question below.
+ tests/generic/999     | 72 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  3 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 76 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
 
-> ---
->  tests/generic/714     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/714.out |    4 +++
->  tests/generic/group   |    1 +
->  3 files changed, 66 insertions(+)
->  create mode 100755 tests/generic/714
->  create mode 100644 tests/generic/714.out
->
-> diff --git a/tests/generic/714 b/tests/generic/714
-> new file mode 100755
-> index 00000000..1849a5e9
-> --- /dev/null
-> +++ b/tests/generic/714
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0+
-> +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 714
-> +#
-> +# Ensure that we can't call fstrim on filesystems mounted norecovery, because
-> +# FSTRIM implementations use free space metadata to drive the discard requests
-> +# and we told the filesystem not to make sure the metadata are up to date.
-> +
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    cd /
-> +    rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_scratch
-> +_require_fstrim
-> +
-> +rm -f $seqres.full
-> +
-> +_scratch_mkfs > $seqres.full 2>&1
-> +_require_metadata_journaling $SCRATCH_DEV
-> +
-> +echo "fstrim on regular mount"
-> +_scratch_mount >> $seqres.full 2>&1
-> +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 || \
-> +       _notrun "FSTRIM not supported"
-> +_scratch_unmount
-> +
-> +echo "fstrim on ro mount"
-> +_scratch_mount -o ro >> $seqres.full 2>&1
-> +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1
-> +_scratch_unmount
-> +
-> +echo "fstrim on ro mount with no log replay"
-> +norecovery="norecovery"
-> +test $FSTYP = "btrfs" && norecovery=nologreplay
-> +_scratch_mount -o ro,$norecovery >> $seqres.full 2>&1
-> +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 && \
-> +       echo "fstrim with unrecovered metadata just ate your filesystem"
-> +_scratch_unmount
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/714.out b/tests/generic/714.out
-> new file mode 100644
-> index 00000000..1158a2ff
-> --- /dev/null
-> +++ b/tests/generic/714.out
-> @@ -0,0 +1,4 @@
-> +QA output created by 714
-> +fstrim on regular mount
-> +fstrim on ro mount
-> +fstrim on ro mount with no log replay
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 2e4341fb..c2046293 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -538,6 +538,7 @@
->  533 auto quick attr
->  534 auto quick log
->  535 auto quick log
-> +714 auto trim
-
-Any reason to not add the 'quick' group as well? It runs in 1 second
-for me on btrfs, xfs and ext4 with a debug kernel.
-
->  940 auto quick clone punch
->  941 auto quick clone punch
->  942 auto quick clone punch
-
-
-
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..ee2260c8
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 999
++#
++# Test a some write patterns for stale data exposure after a crash.  XFS is
++# historically susceptible to this problem in the window between delalloc to
++# physical extent conversion and writeback completion.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_scratch_shutdown
++
++# create a small fs and initialize free blocks with a unique pattern
++_scratch_mkfs_sized $((1024 * 1024 * 100)) >> $seqres.full 2>&1
++_scratch_mount
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 100m" -c fsync $SCRATCH_MNT/spc \
++	>> $seqres.full 2>&1
++rm -f $SCRATCH_MNT/spc
++$XFS_IO_PROG -c fsync $SCRATCH_MNT
++
++# Write a couple files with particular writeback sequences. The first writes a
++# delalloc extent and triggers writeback on the last page. The second triggers
++# post-eof preallocation (on XFS), write extends into the preallocation and
++# triggers writeback of the last written page.
++$XFS_IO_PROG -fc "pwrite 0 256k" -c "sync_range -w 252k 4k" \
++	-c "sync_range -a 252k 4k" $SCRATCH_MNT/file.1 >> $seqres.full 2>&1
++$XFS_IO_PROG -fc "pwrite 0 260k" -c fsync -c "pwrite 1536k 4k" \
++	-c "sync_range -w 1536k 4k" -c "sync_range -a 1536k 4k" \
++	$SCRATCH_MNT/file.2 >> $seqres.full 2>&1
++
++# Shut down before any other writeback completes. Flush the log to persist inode
++# size updates.
++_scratch_shutdown -f
++
++# Now search both files for stale bytes. The region prior to the last page in
++# the first file should be zero filled. The region between the two writes to the
++# second file should also be zero filled.
++_scratch_cycle_mount
++echo file.1 | tee -a $seqres.full
++hexdump $SCRATCH_MNT/file.1 | tee -a $seqres.full | grep ab
++echo file.2 | tee -a $seqres.full
++hexdump $SCRATCH_MNT/file.2 | tee -a $seqres.full | grep ab
++
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..4560af3c
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,3 @@
++QA output created by 999
++file.1
++file.2
+diff --git a/tests/generic/group b/tests/generic/group
+index 78b9b45d..1c39ea73 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -538,3 +538,4 @@
+ 533 auto quick attr
+ 534 auto quick log
+ 535 auto quick log
++999 auto quick rw shutdown
 -- 
-Filipe David Manana,
-
-"Reasonable men adapt themselves to the world.
- Unreasonable men adapt the world to themselves.
- That's why all progress depends on unreasonable men."
+2.17.2
