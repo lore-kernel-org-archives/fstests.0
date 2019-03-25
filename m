@@ -1,114 +1,133 @@
-Received: from mx2.suse.de ([195.135.220.15]:53640 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726111AbfCZPDh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 26 Mar 2019 11:03:37 -0400
-Subject: Re: [PATCH] btrfs: Enable btrfs/003
-References: <20190319105851.9280-1-nborisov@suse.com>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <dc51b658-639b-d2a6-93f7-bbc84a10fbf3@suse.com>
-Date: Tue, 26 Mar 2019 17:03:34 +0200
+Received: from aserp2130.oracle.com ([141.146.126.79]:56878 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726061AbfCYXsr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 25 Mar 2019 19:48:47 -0400
+Date: Mon, 25 Mar 2019 16:48:39 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 11/12] check: wipe scratch devices between tests
+Message-ID: <20190325234839.GA15524@magnolia>
+References: <155304267647.31707.14180452399822113095.stgit@magnolia>
+ <155304275552.31707.6473598082840688691.stgit@magnolia>
+ <CAOQ4uxhu52G1hw6h-uc50-n5Bq0OT+4pLZjdnfPxK784F=nG0Q@mail.gmail.com>
+ <20190321041544.GD1186@magnolia>
+ <20190323132948.GW2824@desktop>
 MIME-Version: 1.0
-In-Reply-To: <20190319105851.9280-1-nborisov@suse.com>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190323132948.GW2824@desktop>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, guaneryu@gmail.com
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
+On Sat, Mar 23, 2019 at 09:29:48PM +0800, Eryu Guan wrote:
+> On Wed, Mar 20, 2019 at 09:15:44PM -0700, Darrick J. Wong wrote:
+> > On Wed, Mar 20, 2019 at 09:06:08AM +0200, Amir Goldstein wrote:
+> > > On Wed, Mar 20, 2019 at 2:46 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+> > > >
+> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > >
+> > > > Wipe the scratch devices in between each test to ensure that tests are
+> > > > formatting them and not making assumptions about previous contents.
+> > > >
+> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > > ---
+> > > >  check      |    1 +
+> > > >  common/rc  |    6 ++++++
+> > > >  common/xfs |    1 +
+> > > >  3 files changed, 8 insertions(+)
+> > > >
+> > > >
+> > > > diff --git a/check b/check
+> > > > index a2c5ba21..bcf08dfe 100755
+> > > > --- a/check
+> > > > +++ b/check
+> > > > @@ -737,6 +737,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
+> > > >                         # _check_dmesg depends on this log in dmesg
+> > > >                         touch ${RESULT_DIR}/check_dmesg
+> > > >                 fi
+> > > > +               _try_wipe_scratch_devs > /dev/null 2>&1
+> > > >                 if [ "$DUMP_OUTPUT" = true ]; then
+> > > >                         ./$seq 2>&1 | tee $tmp.out
+> > > >                         # Because $? would get tee's return code
+> > > > diff --git a/common/rc b/common/rc
+> > > > index 1c42515f..40eef80f 100644
+> > > > --- a/common/rc
+> > > > +++ b/common/rc
+> > > > @@ -3942,6 +3942,12 @@ _require_fibmap()
+> > > >         rm -f $file
+> > > >  }
+> > > >
+> > > > +_try_wipe_scratch_devs()
+> > > > +{
+> > > > +       _scratch_unmount
+> > > 
+> > > So I find this change strange, not because it doesn't make sense
+> > > to start every test with scratch unmounted, but because today scratch *is*
+> > > mounted on test start and there is quite a bit of code to make it mounted
+> > > on test start, which seems backwards.
+> > 
+> > Huh?  On XFS the test device is always mounted, but the scratch device
+> > is never mounted before the test starts.
+> 
+> Yes, as _require_test always mounts TEST_DEV and
+> _require_scratch_nocheck always umounts SCRATCH_DEV.
 
+Heh, both of you were right and I was wrong, we format and mount the
+scratch device before we start the loop.
 
-On 19.03.19 =D0=B3. 12:58 =D1=87., Nikolay Borisov wrote:
-> For a long time this test has been failing on all kinds of VM configura=
-tion,
-> which are using virtio_blk devices. This is due to the fact that scsi
-> devices are deletable and virtio_blk are not. However, this only preven=
-ts
-> device replace case to run and has no negative effect on the other
-> useful test cases.
->=20
-> Re-enable btrfs/003 to run by making _require_deletable_scratch_dev_poo=
-l
-> private to the test case and modifying it to return success (0) or
-> failure (1) if devices are not deletable. Further modify the replace
-> test case to check the return value of this function and skip it if
-> devices are not deletable.
->=20
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> > 
+> > Hmmm, maybe this is one of those weird things that different with
+> > nonblock filesystems...?
+> > 
+> > > IOW, instead of unmounting scratch just before the test runs, seems
+> > > better to make sure it is unmounted at the end of each test and before
+> > > starting the loop.
+> > > 
+> > > Note that for a test with _require_scratch_nocheck, _check_filesystems()
+> > > will unmount scratch, but for a test with _require_scratch, _check_scratch_fs()
+> > > will unmount+fsck+mount scratch - inconsistent.
+> > > Or am I reading this wrong?
+> 
+> For tests that don't call _require_scratch{_nocheck}, to make sure
+> SCRATCH_DEV is umounted I think we could just call _scratch_unmount
+> unconditionally in _check_filesystems(), then we could wipefs before
+> test safely.
 
-Ping
+I think it does this already:
 
-> ---
->  common/rc       | 12 ------------
->  tests/btrfs/003 | 19 ++++++++++++++++++-
->  2 files changed, 18 insertions(+), 13 deletions(-)
->=20
-> diff --git a/common/rc b/common/rc
-> index 1c42515ff0ea..5693ba3cad18 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2961,18 +2961,6 @@ _require_scratch_dev_pool_equal_size()
->  	done
->  }
-> =20
-> -# We will check if the device is deletable
-> -_require_deletable_scratch_dev_pool()
-> -{
-> -	local i
-> -	local x
-> -	for i in $SCRATCH_DEV_POOL; do
-> -		x=3D`echo $i | cut -d"/" -f 3`
-> -		if [ ! -f /sys/class/block/${x}/device/delete ]; then
-> -			_notrun "$i is a device which is not deletable"
-> -		fi
-> -	done
-> -}
-> =20
->  # Check that fio is present, and it is able to execute given jobfile
->  _require_fio()
-> diff --git a/tests/btrfs/003 b/tests/btrfs/003
-> index 938030ef4c65..2aeb9fe6325a 100755
-> --- a/tests/btrfs/003
-> +++ b/tests/btrfs/003
-> @@ -17,6 +17,21 @@ dev_removed=3D0
->  removed_dev_htl=3D""
->  trap "_cleanup; exit \$status" 0 1 2 3 15
-> =20
-> +# Check if all scratch dev pools are deletable
-> +_require_deletable_scratch_dev_pool()
-> +{
-> +	local i
-> +	local x
-> +	for i in $SCRATCH_DEV_POOL; do
-> +		x=3D`echo $i | cut -d"/" -f 3`
-> +		if [ ! -f /sys/class/block/${x}/device/delete ]; then
-> +			return 1
-> +		fi
-> +	done
-> +
-> +	return 0
-> +}
-> +
->  _cleanup()
->  {
->      cd /
-> @@ -35,7 +50,6 @@ _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch
->  _require_scratch_dev_pool 4
-> -_require_deletable_scratch_dev_pool
->  _require_command "$WIPEFS_PROG" wipefs
-> =20
->  rm -f $seqres.full
-> @@ -111,6 +125,9 @@ _test_replace()
->  	local ds
->  	local d
-> =20
-> +	# If scratch devs are not deletable skip this test
-> +	if ! _require_deletable_scratch_dev_pool; then return 0; fi
-> +
->  	# exclude the first and the last disk in the disk pool
->  	n=3D$(($n-1))
->  	ds=3D${devs[@]:1:$(($n-1))}
->=20
+	if [ -f ${RESULT_DIR}/require_scratch ]; then
+		_check_scratch_fs || err=true
+		rm -f ${RESULT_DIR}/require_scratch*
+	else
+		_scratch_unmount 2> /dev/null
+	fi
+
+Right?  So I think we're covered for unmounting the scratch device after
+each test, and it's just the first time through the loop where we have
+to unmount the scratch device.
+
+--D
+
+> 
+> > > 
+> > > 
+> > > > +       test -x "$WIPEFS_PROG" && $WIPEFS_PROG -a $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV
+> > > 
+> > > Please check that $SCRATCH_DEV is not a network name (nfs|cifs) and that it
+> > > is really a blockdev (overlayfs) before trying to wipefs.
+> 
+> Yes, good catch!
+> 
+> Thanks,
+> Eryu
+> 
+> > 
+> > I wonder if maybe we only bother with wipefs for filesystems where
+> > all tests have been fixed to not stumble over unformatted scratchdev
+> > (i.e. xfs and ext* only)
+> > 
+> > --D
+> > 
+> > > Thanks,
+> > > Amir.
