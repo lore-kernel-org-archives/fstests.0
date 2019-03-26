@@ -1,133 +1,164 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:56878 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726061AbfCYXsr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 25 Mar 2019 19:48:47 -0400
-Date: Mon, 25 Mar 2019 16:48:39 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 11/12] check: wipe scratch devices between tests
-Message-ID: <20190325234839.GA15524@magnolia>
-References: <155304267647.31707.14180452399822113095.stgit@magnolia>
- <155304275552.31707.6473598082840688691.stgit@magnolia>
- <CAOQ4uxhu52G1hw6h-uc50-n5Bq0OT+4pLZjdnfPxK784F=nG0Q@mail.gmail.com>
- <20190321041544.GD1186@magnolia>
- <20190323132948.GW2824@desktop>
+Received: from mx2.suse.de ([195.135.220.15]:40154 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726261AbfCZOLO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 26 Mar 2019 10:11:14 -0400
+Subject: Re: [PATCH v2] fstests: Verify that removed device has its
+ superblocks deleted
+References: <20190325094200.18687-1-nborisov@suse.com>
+ <20190325140713.9509-1-nborisov@suse.com>
+ <b50e36d4-b65a-3b9e-e776-3b11d90a32e2@oracle.com>
+From: Nikolay Borisov <nborisov@suse.com>
+Message-ID: <f6512798-1e7a-37fd-6309-cfa1de1f7ac1@suse.com>
+Date: Tue, 26 Mar 2019 16:11:10 +0200
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190323132948.GW2824@desktop>
+In-Reply-To: <b50e36d4-b65a-3b9e-e776-3b11d90a32e2@oracle.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Content-Transfer-Encoding: quoted-printable
+To: Anand Jain <anand.jain@oracle.com>
+Cc: guaneryu@gmail.com, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sat, Mar 23, 2019 at 09:29:48PM +0800, Eryu Guan wrote:
-> On Wed, Mar 20, 2019 at 09:15:44PM -0700, Darrick J. Wong wrote:
-> > On Wed, Mar 20, 2019 at 09:06:08AM +0200, Amir Goldstein wrote:
-> > > On Wed, Mar 20, 2019 at 2:46 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> > > >
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > >
-> > > > Wipe the scratch devices in between each test to ensure that tests are
-> > > > formatting them and not making assumptions about previous contents.
-> > > >
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > ---
-> > > >  check      |    1 +
-> > > >  common/rc  |    6 ++++++
-> > > >  common/xfs |    1 +
-> > > >  3 files changed, 8 insertions(+)
-> > > >
-> > > >
-> > > > diff --git a/check b/check
-> > > > index a2c5ba21..bcf08dfe 100755
-> > > > --- a/check
-> > > > +++ b/check
-> > > > @@ -737,6 +737,7 @@ for section in $HOST_OPTIONS_SECTIONS; do
-> > > >                         # _check_dmesg depends on this log in dmesg
-> > > >                         touch ${RESULT_DIR}/check_dmesg
-> > > >                 fi
-> > > > +               _try_wipe_scratch_devs > /dev/null 2>&1
-> > > >                 if [ "$DUMP_OUTPUT" = true ]; then
-> > > >                         ./$seq 2>&1 | tee $tmp.out
-> > > >                         # Because $? would get tee's return code
-> > > > diff --git a/common/rc b/common/rc
-> > > > index 1c42515f..40eef80f 100644
-> > > > --- a/common/rc
-> > > > +++ b/common/rc
-> > > > @@ -3942,6 +3942,12 @@ _require_fibmap()
-> > > >         rm -f $file
-> > > >  }
-> > > >
-> > > > +_try_wipe_scratch_devs()
-> > > > +{
-> > > > +       _scratch_unmount
-> > > 
-> > > So I find this change strange, not because it doesn't make sense
-> > > to start every test with scratch unmounted, but because today scratch *is*
-> > > mounted on test start and there is quite a bit of code to make it mounted
-> > > on test start, which seems backwards.
-> > 
-> > Huh?  On XFS the test device is always mounted, but the scratch device
-> > is never mounted before the test starts.
-> 
-> Yes, as _require_test always mounts TEST_DEV and
-> _require_scratch_nocheck always umounts SCRATCH_DEV.
 
-Heh, both of you were right and I was wrong, we format and mount the
-scratch device before we start the loop.
 
-> > 
-> > Hmmm, maybe this is one of those weird things that different with
-> > nonblock filesystems...?
-> > 
-> > > IOW, instead of unmounting scratch just before the test runs, seems
-> > > better to make sure it is unmounted at the end of each test and before
-> > > starting the loop.
-> > > 
-> > > Note that for a test with _require_scratch_nocheck, _check_filesystems()
-> > > will unmount scratch, but for a test with _require_scratch, _check_scratch_fs()
-> > > will unmount+fsck+mount scratch - inconsistent.
-> > > Or am I reading this wrong?
-> 
-> For tests that don't call _require_scratch{_nocheck}, to make sure
-> SCRATCH_DEV is umounted I think we could just call _scratch_unmount
-> unconditionally in _check_filesystems(), then we could wipefs before
-> test safely.
+On 25.03.19 =D0=B3. 23:55 =D1=87., Anand Jain wrote:
+>=20
+>=20
+> On 3/25/19 10:07 PM, Nikolay Borisov wrote:
+>> When a device is removed from a btrfs filesystem its superblock copies
+>> must be deleted.=20
+>=20
+> AFAIK this bug was fixed a long time back in the kernel. Is there any
+> newer fix in the kernel?
 
-I think it does this already:
+No there isn't but we currently don't have a test that covers that
+functionality and I have some changes in progress that touch superblock
+writing code so I'd rather be safe than sorry.
 
-	if [ -f ${RESULT_DIR}/require_scratch ]; then
-		_check_scratch_fs || err=true
-		rm -f ${RESULT_DIR}/require_scratch*
-	else
-		_scratch_unmount 2> /dev/null
-	fi
-
-Right?  So I think we're covered for unmounting the scratch device after
-each test, and it's just the first time through the loop where we have
-to unmount the scratch device.
-
---D
-
-> 
-> > > 
-> > > 
-> > > > +       test -x "$WIPEFS_PROG" && $WIPEFS_PROG -a $SCRATCH_DEV_POOL $SCRATCH_DEV $SCRATCH_LOGDEV $SCRATCH_RTDEV
-> > > 
-> > > Please check that $SCRATCH_DEV is not a network name (nfs|cifs) and that it
-> > > is really a blockdev (overlayfs) before trying to wipefs.
-> 
-> Yes, good catch!
-> 
-> Thanks,
-> Eryu
-> 
-> > 
-> > I wonder if maybe we only bother with wipefs for filesystems where
-> > all tests have been fixed to not stumble over unformatted scratchdev
-> > (i.e. xfs and ext* only)
-> > 
-> > --D
-> > 
-> > > Thanks,
-> > > Amir.
+>=20
+>> This test ensures this is indeed the case.
+>=20
+>> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+>=20
+> Looks good.
+>=20
+> Reviewed-by: Anand Jain <anand.jain@oracle.com>
+>=20
+>> ---
+>>
+>> Changes since v1:
+>> =C2=A0 * Use _scratch_dev_pool_(get|put) to ensure the test uses exact=
+ly 2
+>> devices.
+>> =C2=A0 =C2=A0 * Explicitly use -draid0 -mraid0 mkfs options for the sc=
+ratch
+>> devices to
+>> =C2=A0 ensure at least one of the device could be removed. Also add a
+>> comment about
+>> =C2=A0 that.
+>>
+>> =C2=A0 tests/btrfs/184=C2=A0=C2=A0=C2=A0=C2=A0 | 63
+>> +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>> =C2=A0 tests/btrfs/184.out |=C2=A0 2 ++
+>> =C2=A0 tests/btrfs/group=C2=A0=C2=A0 |=C2=A0 1 +
+>> =C2=A0 3 files changed, 66 insertions(+)
+>> =C2=A0 create mode 100755 tests/btrfs/184
+>> =C2=A0 create mode 100644 tests/btrfs/184.out
+>>
+>> diff --git a/tests/btrfs/184 b/tests/btrfs/184
+>> new file mode 100755
+>> index 000000000000..49fe5c9c27bb
+>> --- /dev/null
+>> +++ b/tests/btrfs/184
+>> @@ -0,0 +1,63 @@
+>> +#! /bin/bash
+>> +# SPDX-License-Identifier: GPL-2.0
+>> +# Copyright (c) 2019 SUSE LLC. All Rights Reserved.
+>> +#
+>> +# FS QA Test 184
+>> +#
+>> +# Verify that when a device is removed from a multi-device
+>> +# filesystem its superblock copies are correctly deleted
+>> +#
+>> +seq=3D`basename $0`
+>> +seqres=3D$RESULT_DIR/$seq
+>> +echo "QA output created by $seq"
+>> +
+>> +here=3D`pwd`
+>> +tmp=3D/tmp/$$
+>> +status=3D1=C2=A0=C2=A0=C2=A0 # failure is the default!
+>> +trap "_cleanup; exit \$status" 0 1 2 3 15
+>> +
+>> +_cleanup()
+>> +{
+>> +=C2=A0=C2=A0=C2=A0 cd /
+>> +=C2=A0=C2=A0=C2=A0 rm -f $tmp.*
+>> +}
+>> +
+>> +# get standard environment, filters and checks
+>> +. ./common/rc
+>> +. ./common/filter
+>> +
+>> +rm -f $seqres.full
+>> +
+>> +# real QA test starts here
+>> +_supported_fs btrfs
+>> +_supported_os Linux
+>> +_require_scratch
+>> +_require_scratch_dev_pool 2
+>> +_require_btrfs_command inspect-internal dump-super
+>> +
+>> +_scratch_dev_pool_get 2
+>> +
+>> +# Explicitly use raid0 mode to ensure at least one of the devices can=
+ be
+>> +# removed.
+>> +_scratch_pool_mkfs "-d raid0 -m raid0" >> $seqres.full 2>&1 || _fail
+>> "mkfs failed"
+>> +_scratch_mount
+>> +
+>> +# pick last dev in the list
+>> +dev_del=3D`echo ${SCRATCH_DEV_POOL} | awk '{print $NF}'`
+>> +$BTRFS_UTIL_PROG device delete $dev_del $SCRATCH_MNT || _fail "btrfs
+>> device delete failed"
+>> +for i in {0..2}; do
+>> +=C2=A0=C2=A0=C2=A0 output=3D$($BTRFS_UTIL_PROG inspect-internal dump-=
+super -s $i
+>> $dev_del 2>&1)
+>> +=C2=A0=C2=A0=C2=A0 $BTRFS_UTIL_PROG inspect-internal dump-super -s $i=
+ $dev_del 2>&1
+>> | grep -q "bad magic"
+>> +=C2=A0=C2=A0=C2=A0 ret=3D$?
+>> +=C2=A0=C2=A0=C2=A0 if [[ "$output" !=3D "" && $ret -eq 1 ]]; then
+>> +=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0=C2=A0 _fail "Deleted dev superbl=
+ocks not scratched"
+>> +=C2=A0=C2=A0=C2=A0 fi
+>> +done
+>> +_scratch_unmount
+>> +
+>> +_scratch_dev_pool_put
+>> +
+>> +# success, all done
+>> +echo "Silence is golden"
+>> +status=3D0
+>> +exit
+>> diff --git a/tests/btrfs/184.out b/tests/btrfs/184.out
+>> new file mode 100644
+>> index 000000000000..b4ce96cfc047
+>> --- /dev/null
+>> +++ b/tests/btrfs/184.out
+>> @@ -0,0 +1,2 @@
+>> +QA output created by 184
+>> +Silence is golden
+>> diff --git a/tests/btrfs/group b/tests/btrfs/group
+>> index f3227c1708d9..c1d215bf5ff8 100644
+>> --- a/tests/btrfs/group
+>> +++ b/tests/btrfs/group
+>> @@ -186,3 +186,4 @@
+>> =C2=A0 181 auto quick balance
+>> =C2=A0 182 auto quick balance
+>> =C2=A0 183 auto quick clone compress punch
+>> +184 auto quick volume
+>>
+>=20
