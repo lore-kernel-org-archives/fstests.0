@@ -1,53 +1,65 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38680 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725772AbfC0HpQ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 27 Mar 2019 03:45:16 -0400
-Received: from smtp.corp.redhat.com (int-mx05.intmail.prod.int.phx2.redhat.com [10.5.11.15])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 2FFAD309267E
-        for <fstests@vger.kernel.org>; Wed, 27 Mar 2019 07:45:16 +0000 (UTC)
-Received: from dhcp-12-125.nay.redhat.com (dhcp-12-125.nay.redhat.com [10.66.12.125])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 5520917586
-        for <fstests@vger.kernel.org>; Wed, 27 Mar 2019 07:45:15 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfs/065: make sure SCRATCH_DEV is unmount before mkfs
-Date: Wed, 27 Mar 2019 15:45:09 +0800
-Message-Id: <20190327074509.27770-1-zlang@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:55070 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725763AbfC0HyF (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 27 Mar 2019 03:54:05 -0400
+From: Qu Wenruo <wqu@suse.de>
+Subject: Is log-writes project still maintained or the one in fstests is the
+ official tool?
+Message-ID: <151f1161-a338-37dd-8e65-26fc5fd45f8d@suse.de>
+Date: Wed, 27 Mar 2019 15:53:59 +0800
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="GIPEKozuIt55LarCX9bLgCiy6xtK2FL7K"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests <fstests@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
 List-ID: <fstests@vger.kernel.org>
 
-Commit "8309b39a fstests: fix broken _require_scratch usage" did
-below change on xfs/065:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--GIPEKozuIt55LarCX9bLgCiy6xtK2FL7K
+Content-Type: multipart/mixed; boundary="HkoD7XmYp07HVu0ezfsr8a4m5Xnrdf47P";
+ protected-headers="v1"
+From: Qu Wenruo <wqu@suse.de>
+To: fstests <fstests@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
+Message-ID: <151f1161-a338-37dd-8e65-26fc5fd45f8d@suse.de>
+Subject: Is log-writes project still maintained or the one in fstests is the
+ official tool?
 
-  -_scratch_unmount 2>/dev/null
-  +_scratch_mkfs_xfs >> $seqres.full
+--HkoD7XmYp07HVu0ezfsr8a4m5Xnrdf47P
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-It cause xfs/065 always fails now, as:
-  QA output created by 065
-  mkfs.xfs: /dev/sdb2 contains a mounted filesystem
-  ...
+Hi,
 
-So use _require_scratch, to make sure the SCRATCH_DEV is unmounted
-before mkfs.
+Is the log-writes tool in fstests/src the latest and maintain version?
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
----
- tests/xfs/065 | 1 +
- 1 file changed, 1 insertion(+)
+The one in Josef's github hasn't been updated for over one year, and it
+seems the output from fstests is different from Josef's.
 
-diff --git a/tests/xfs/065 b/tests/xfs/065
-index c0d1ee93..f09bd947 100755
---- a/tests/xfs/065
-+++ b/tests/xfs/065
-@@ -50,6 +50,7 @@ _list_dir()
- # real QA test starts here
- _supported_fs xfs
- _supported_os Linux
-+_require_scratch
- 
- #
- # too much hassle to get output matching with quotas turned on
--- 
-2.17.2
+I'm wondering for new patches where should they go?
+
+Thanks,
+Qu
+
+
+--HkoD7XmYp07HVu0ezfsr8a4m5Xnrdf47P--
+
+--GIPEKozuIt55LarCX9bLgCiy6xtK2FL7K
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlybLBcACgkQwj2R86El
+/qhHtAgAsmBXZM4qrZgHJchHOEjmpQ3De9xXC/GuvHLs9aHU5EAQ5ySlv8qUJ3ss
+DCOy3GZqPVXN1rvUmMKj4/VhzcmbKUVa0t7H33ySU42RQvd/pLG2BkCkWhGLXi7N
+mlVlucX/l4AgrI1UDrftli6m1FB6qJYnWDD9w/bwKIFnflZPivK3CdQXMi7R527M
+mLJUcMfRKdygvXCPuk7Uu+Kq4Da6xx6eZFPhc8PZ3BPcMJ2LQwkCHm4XWtuIOlWu
+aZ7Wys/sUtkuguOCdaC6NeKCVOREILG43IMCIwgyHUUfxpLvVNgXlJPtPc5tYtI0
+o7uWpaWCADFf6kFxoiR/PTGvXkrkOw==
+=wbf5
+-----END PGP SIGNATURE-----
+
+--GIPEKozuIt55LarCX9bLgCiy6xtK2FL7K--
