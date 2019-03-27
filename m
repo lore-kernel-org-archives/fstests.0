@@ -1,38 +1,62 @@
-Received: from mail-qt1-f176.google.com ([209.85.160.176]:43309 "EHLO
-        mail-qt1-f176.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727531AbfC0O3t (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Mar 2019 10:29:49 -0400
-Received: by mail-qt1-f176.google.com with SMTP id v32so19009455qtc.10
-        for <fstests@vger.kernel.org>; Wed, 27 Mar 2019 07:29:48 -0700 (PDT)
-Date: Wed, 27 Mar 2019 10:29:46 -0400
-From: Josef Bacik <josef@toxicpanda.com>
-Subject: Re: Is log-writes project still maintained or the one in fstests is
- the official tool?
-Message-ID: <20190327142945.uulyrqdvdaaem532@MacBook-Pro-91.local>
-References: <151f1161-a338-37dd-8e65-26fc5fd45f8d@suse.de>
+Received: from userp2130.oracle.com ([156.151.31.86]:52962 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725805AbfC0OlR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 27 Mar 2019 10:41:17 -0400
+Date: Wed, 27 Mar 2019 07:41:10 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs/065: make sure SCRATCH_DEV is unmount before mkfs
+Message-ID: <20190327144110.GD6537@magnolia>
+References: <20190327074509.27770-1-zlang@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <151f1161-a338-37dd-8e65-26fc5fd45f8d@suse.de>
+In-Reply-To: <20190327074509.27770-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Qu Wenruo <wqu@suse.de>
-Cc: fstests <fstests@vger.kernel.org>, Josef Bacik <josef@toxicpanda.com>
+To: Zorro Lang <zlang@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 27, 2019 at 03:53:59PM +0800, Qu Wenruo wrote:
-> Hi,
+On Wed, Mar 27, 2019 at 03:45:09PM +0800, Zorro Lang wrote:
+> Commit "8309b39a fstests: fix broken _require_scratch usage" did
+> below change on xfs/065:
 > 
-> Is the log-writes tool in fstests/src the latest and maintain version?
+>   -_scratch_unmount 2>/dev/null
+>   +_scratch_mkfs_xfs >> $seqres.full
 > 
-> The one in Josef's github hasn't been updated for over one year, and it
-> seems the output from fstests is different from Josef's.
+> It cause xfs/065 always fails now, as:
+>   QA output created by 065
+>   mkfs.xfs: /dev/sdb2 contains a mounted filesystem
+>   ...
 > 
-> I'm wondering for new patches where should they go?
+> So use _require_scratch, to make sure the SCRATCH_DEV is unmounted
+> before mkfs.
 > 
+> Signed-off-by: Zorro Lang <zlang@redhat.com>
 
-Send patches to the fstests one, that's what everybody uses.  My github was just
-a staging area until it got accepted into fstests.  I still use mine, but it's a
-simple tool, just because it hasn't been changed doesn't mean it doesn't get
-used.  Thanks,
+DOH, stupid editor... <grumble>
 
-Josef
+Sorry about that.
+
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+
+--D
+
+> ---
+>  tests/xfs/065 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/xfs/065 b/tests/xfs/065
+> index c0d1ee93..f09bd947 100755
+> --- a/tests/xfs/065
+> +++ b/tests/xfs/065
+> @@ -50,6 +50,7 @@ _list_dir()
+>  # real QA test starts here
+>  _supported_fs xfs
+>  _supported_os Linux
+> +_require_scratch
+>  
+>  #
+>  # too much hassle to get output matching with quotas turned on
+> -- 
+> 2.17.2
+> 
