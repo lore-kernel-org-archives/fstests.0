@@ -1,62 +1,97 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:52962 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725805AbfC0OlR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 27 Mar 2019 10:41:17 -0400
-Date: Wed, 27 Mar 2019 07:41:10 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs/065: make sure SCRATCH_DEV is unmount before mkfs
-Message-ID: <20190327144110.GD6537@magnolia>
-References: <20190327074509.27770-1-zlang@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:60712 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725806AbfC1FfN (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Mar 2019 01:35:13 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: log-writes: Add new option to replay/find next write to sector
+Date: Thu, 28 Mar 2019 13:35:07 +0800
+Message-Id: <20190328053507.10191-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190327074509.27770-1-zlang@redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Mar 27, 2019 at 03:45:09PM +0800, Zorro Lang wrote:
-> Commit "8309b39a fstests: fix broken _require_scratch usage" did
-> below change on xfs/065:
-> 
->   -_scratch_unmount 2>/dev/null
->   +_scratch_mkfs_xfs >> $seqres.full
-> 
-> It cause xfs/065 always fails now, as:
->   QA output created by 065
->   mkfs.xfs: /dev/sdb2 contains a mounted filesystem
->   ...
-> 
-> So use _require_scratch, to make sure the SCRATCH_DEV is unmounted
-> before mkfs.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+For kernel operation we have METADATA/FUA/FLUSH flags as a beacon, but
+for user space write we don't have any useful flag unless the user space
+tool call fsync() to generate a FLUSH bio.
 
-DOH, stupid editor... <grumble>
+This means for user space write, we don't really have an equivalent of
+--next-fua to find super block write.
 
-Sorry about that.
+So this patch will add a new option, --next-write <sector> to
+replay/find next write to certain sector.
+And normally the <sector> should be super block sector number.
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+With that, we can replay to super block write even it's user space
+triggering the write.
 
---D
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ src/log-writes/replay-log.c | 16 +++++++++++++++-
+ 1 file changed, 15 insertions(+), 1 deletion(-)
 
-> ---
->  tests/xfs/065 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/xfs/065 b/tests/xfs/065
-> index c0d1ee93..f09bd947 100755
-> --- a/tests/xfs/065
-> +++ b/tests/xfs/065
-> @@ -50,6 +50,7 @@ _list_dir()
->  # real QA test starts here
->  _supported_fs xfs
->  _supported_os Linux
-> +_require_scratch
->  
->  #
->  # too much hassle to get output matching with quotas turned on
-> -- 
-> 2.17.2
-> 
+diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+index c16df40e5741..0d0ec49c8a00 100644
+--- a/src/log-writes/replay-log.c
++++ b/src/log-writes/replay-log.c
+@@ -9,6 +9,7 @@
+ enum option_indexes {
+ 	NEXT_FLUSH,
+ 	NEXT_FUA,
++	NEXT_WRITE,
+ 	START_ENTRY,
+ 	END_MARK,
+ 	LOG,
+@@ -28,6 +29,7 @@ enum option_indexes {
+ static struct option long_options[] = {
+ 	{"next-flush", no_argument, NULL, 0},
+ 	{"next-fua", no_argument, NULL, 0},
++	{"next-write", required_argument, NULL, 0},
+ 	{"start-entry", required_argument, NULL, 0},
+ 	{"end-mark", required_argument, NULL, 0},
+ 	{"log", required_argument, NULL, 0},
+@@ -53,6 +55,8 @@ static void usage(void)
+ 	fprintf(stderr, "\t--limit <number> - number of entries to replay\n");
+ 	fprintf(stderr, "\t--next-flush - replay to/find the next flush\n");
+ 	fprintf(stderr, "\t--next-fua - replay to/find the next fua\n");
++	fprintf(stderr, "\t--next-write <sector> - replay to/find the next "
++			"write to <sector>\n");
+ 	fprintf(stderr, "\t--start-entry <entry> - start at the given "
+ 		"entry #\n");
+ 	fprintf(stderr, "\t--start-mark <mark> - mark to start from\n");
+@@ -139,6 +143,7 @@ int main(int argc, char **argv)
+ 	char *logfile = NULL, *replayfile = NULL, *fsck_command = NULL;
+ 	struct log_write_entry *entry;
+ 	u64 stop_flags = 0;
++	u64 stop_sector = 0;
+ 	u64 start_entry = 0;
+ 	u64 start_sector = 0;
+ 	u64 end_sector = -1ULL;
+@@ -173,6 +178,14 @@ int main(int argc, char **argv)
+ 		case NEXT_FUA:
+ 			stop_flags |= LOG_FUA_FLAG;
+ 			break;
++		case NEXT_WRITE:
++			stop_sector = strtoull(optarg, &tmp, 0);
++			if (tmp && *tmp != '\0') {
++				fprintf(stderr, "Invalid sector number\n");
++				exit(1);
++			}
++			tmp = NULL;
++			break;
+ 		case START_ENTRY:
+ 			start_entry = strtoull(optarg, &tmp, 0);
+ 			if (tmp && *tmp != '\0') {
+@@ -324,7 +337,8 @@ int main(int argc, char **argv)
+ 		while ((ret = log_seek_next_entry(log, entry, 1)) == 0) {
+ 			num_entries++;
+ 			if ((run_limit && num_entries == run_limit) ||
+-			    should_stop(entry, stop_flags, end_mark)) {
++			    should_stop(entry, stop_flags, end_mark) ||
++			    (stop_sector && entry->sector == stop_sector)) {
+ 				printf("%llu@%llu\n",
+ 				       (unsigned long long)log->cur_entry - 1,
+ 				       log->cur_pos / log->sectorsize);
+-- 
+2.21.0
