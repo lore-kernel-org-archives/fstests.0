@@ -1,53 +1,96 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:54906 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726516AbfC1Pbw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 28 Mar 2019 11:31:52 -0400
-Date: Thu, 28 Mar 2019 08:31:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] Fix fsx errors due to unsupported FIDEDUPERANGE
-Message-ID: <20190328153146.GE6537@magnolia>
-References: <20190328105119.31257-1-jack@suse.cz>
+Received: from mx2.suse.de ([195.135.220.15]:56926 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726034AbfC1Rto (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 28 Mar 2019 13:49:44 -0400
+Date: Thu, 28 Mar 2019 18:50:47 +0100
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: [PATCH] fstests: btrfs try use forget to unregister device
+Message-ID: <20190328175047.GR29086@twin.jikos.cz>
+Reply-To: dsterba@suse.cz
+References: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190328105119.31257-1-jack@suse.cz>
+In-Reply-To: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jan Kara <jack@suse.cz>
-Cc: fstests@vger.kernel.org
+To: Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 28, 2019 at 11:51:19AM +0100, Jan Kara wrote:
-> Older kernels (prior commit 494633fac7896 "vfs: vfs_dedupe_file_range()
-> doesn't return EOPNOTSUPP") will return EINVAL when operation is not
-> supported. Make fsx treat this error as a sign of unsupported
-> deduplication as well to make it usable with these older kernels.
+On Tue, Mar 19, 2019 at 05:49:40PM +0800, Anand Jain wrote:
+> btrfs module reload was introduced to unregister devices in the btrfs
+> kernel module.
+> 
+> The problem with the module reload approach is that you can't run btrfs
+> test cases 124, 125, 154 and 164 on the system with btrfs as root fs.
+> 
+> Patches [1] introduced btrfs forget feature which lets to cleanup the
+> kernel device list without kernel module reload.
+> 
+>  [1]
+>  btrfs-progs: add cli to forget one or all scanned devices
 
-Bleh, I forgot about that age-old quirk...
+The subject lines was changed to "btrfs-progs: device scan: add new
+option to forget one or all scanned devices"
 
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+>  btrfs: introduce new ioctl to unregister a btrfs device
 
---D
-
-
-> Signed-off-by: Jan Kara <jack@suse.cz>
+> So this patch uses forget feature instead of kernel module reload, if
+> the forget feature is available.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  ltp/fsx.c | 3 ++-
->  1 file changed, 2 insertions(+), 1 deletion(-)
+>  common/btrfs    | 20 ++++++++++++++++++++
+>  tests/btrfs/124 |  6 +++---
+>  tests/btrfs/125 |  6 +++---
+>  tests/btrfs/154 |  6 +++---
+>  tests/btrfs/164 |  4 ++--
+>  5 files changed, 31 insertions(+), 11 deletions(-)
 > 
-> diff --git a/ltp/fsx.c b/ltp/fsx.c
-> index f4a1c7cf820b..391824bfbc68 100644
-> --- a/ltp/fsx.c
-> +++ b/ltp/fsx.c
-> @@ -1482,7 +1482,8 @@ test_dedupe_range(void)
->  	else
->  		error = 0;
->  
-> -	if (error == EOPNOTSUPP || error == ENOTTY) {
-> +	/* Older kernels may return EINVAL... */
-> +	if (error == EOPNOTSUPP || error == ENOTTY || error == EINVAL) {
->  		if (!quiet)
->  			fprintf(stderr,
->  				"main: filesystem does not support "
-> -- 
-> 2.16.4
-> 
+> diff --git a/common/btrfs b/common/btrfs
+> index f6513c06f95f..e94e011db04e 100644
+> --- a/common/btrfs
+> +++ b/common/btrfs
+> @@ -382,3 +382,23 @@ _scratch_btrfs_sectorsize()
+>  	$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV |\
+>  		grep sectorsize | awk '{print $2}'
+>  }
+> +
+> +_btrfs_supports_forget()
+> +{
+> +	$BTRFS_UTIL_PROG device scan --help | grep -wq forget && \
+> +		$BTRFS_UTIL_PROG device scan --forget > /dev/null 2>&1
+
+The second part actually unregisters all devices, is there some more
+lightweight way to detect the support? Like providing a valid block
+device but without btrfs. If the ioctl is supported, then it returns
+-ENOENT and if not supported then -EOPNOTSUPP.
+
+> +}
+> +
+> +_require_btrfs_forget_if_not_fs_loadable()
+
+_require_btrfs_forget_or_module_loadable
+
+We don't want to load the filesystem but the kernel module.
+
+> +{
+> +	_btrfs_supports_forget && return
+
+Why is the 'return' here? If the first command succeeds, then &&
+proceeds to return that does implicitli returns 0. So it's redundant, or
+I'm missing something subtle here.
+
+> +
+> +	_require_loadable_fs_module "btrfs"
+> +}
+> +
+> +_btrfs_forget_if_not_fs_reload()
+
+Same naming
+
+> +{
+> +	_btrfs_supports_forget && return
+> +
+> +	_reload_fs_module "btrfs"
+> +}
