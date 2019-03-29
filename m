@@ -1,168 +1,57 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:53588 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726999AbfC2GcW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Mar 2019 02:32:22 -0400
-Subject: Re: [PATCH] fstests: btrfs try use forget to unregister device
-References: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
- <20190328175047.GR29086@twin.jikos.cz>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <7787e21a-3d37-e670-b782-0df43e256f83@oracle.com>
-Date: Fri, 29 Mar 2019 14:32:10 +0800
+Received: from mail-ed1-f53.google.com ([209.85.208.53]:46003 "EHLO
+        mail-ed1-f53.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728815AbfC2P74 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Mar 2019 11:59:56 -0400
+Received: by mail-ed1-f53.google.com with SMTP id m16so2431220edd.12
+        for <fstests@vger.kernel.org>; Fri, 29 Mar 2019 08:59:55 -0700 (PDT)
 MIME-Version: 1.0
-In-Reply-To: <20190328175047.GR29086@twin.jikos.cz>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+References: <CA+jMu4RO1mNKmwof8z0rU4Lcr76mPRo04a5sFrs0Saz735ez1w@mail.gmail.com>
+ <20190326014337.GI26298@dastard>
+In-Reply-To: <20190326014337.GI26298@dastard>
+From: Rishabh Dave <ridave@redhat.com>
+Date: Fri, 29 Mar 2019 21:29:43 +0530
+Message-ID: <CA+jMu4QNB+v-r6KmkUfEh-q5r=m=tCxkLkfrLXA+Ajt12g1SQA@mail.gmail.com>
+Subject: Re: testsuite for ACLs
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Reading both replies I feel it's best to rewrite to bash. I'll go
+ahead and do that.
 
+On Tue, 26 Mar 2019 at 07:13, Dave Chinner <david@fromorbit.com> wrote:
+> So the first question is how many of those 22 tests are already
+> covered by ACL tests in fstests? We've got a few tests that cover
+> ACLs already:
+>
+> $ git grep -w acl tests/*/group
+> tests/generic/group:026 acl quick auto
+> tests/generic/group:053 acl repair auto quick
+> tests/generic/group:077 acl attr auto enospc
+> tests/generic/group:079 acl attr ioctl metadata auto quick
+> tests/generic/group:099 acl auto quick
+> tests/generic/group:105 acl auto quick
+> tests/generic/group:237 auto quick acl
+> tests/generic/group:307 auto quick acl
+> tests/generic/group:318 acl attr auto quick
+> tests/generic/group:319 acl auto quick
+> tests/generic/group:375 auto quick acl
+> tests/generic/group:389 auto quick acl
+> tests/generic/group:444 auto quick acl
+> tests/generic/group:449 auto quick acl enospc
+> tests/nfs/group:001 auto quick nfs4_acl acl
+> tests/xfs/group:053 attr acl repair quick auto
+> tests/xfs/group:067 acl attr auto quick
 
-On 3/29/19 1:50 AM, David Sterba wrote:
-> On Tue, Mar 19, 2019 at 05:49:40PM +0800, Anand Jain wrote:
->> btrfs module reload was introduced to unregister devices in the btrfs
->> kernel module.
->>
->> The problem with the module reload approach is that you can't run btrfs
->> test cases 124, 125, 154 and 164 on the system with btrfs as root fs.
->>
->> Patches [1] introduced btrfs forget feature which lets to cleanup the
->> kernel device list without kernel module reload.
->>
->>   [1]
->>   btrfs-progs: add cli to forget one or all scanned devices
-> 
-> The subject lines was changed to "btrfs-progs: device scan: add new
-> option to forget one or all scanned devices"
+Is tests/generic/group a list of titles of testcases? If so, I don't
+understand them.
 
-  ok thanks will fix.
+I see there are few tests for ACLs in tests/generic/099. I couldn't
+find them before since the tests use chacl and I was looking for
+setfacl and getfacl. I'll compare my testsuite to tests/generic/099,
+create a list of testcases not covered in xfstests-dev and start
+rewriting.
 
->>   btrfs: introduce new ioctl to unregister a btrfs device
-> 
->> So this patch uses forget feature instead of kernel module reload, if
->> the forget feature is available.
->>
->> Signed-off-by: Anand Jain <anand.jain@oracle.com>
->> ---
->>   common/btrfs    | 20 ++++++++++++++++++++
->>   tests/btrfs/124 |  6 +++---
->>   tests/btrfs/125 |  6 +++---
->>   tests/btrfs/154 |  6 +++---
->>   tests/btrfs/164 |  4 ++--
->>   5 files changed, 31 insertions(+), 11 deletions(-)
->>
->> diff --git a/common/btrfs b/common/btrfs
->> index f6513c06f95f..e94e011db04e 100644
->> --- a/common/btrfs
->> +++ b/common/btrfs
->> @@ -382,3 +382,23 @@ _scratch_btrfs_sectorsize()
->>   	$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV |\
->>   		grep sectorsize | awk '{print $2}'
->>   }
->> +
->> +_btrfs_supports_forget()
->> +{
->> +	$BTRFS_UTIL_PROG device scan --help | grep -wq forget && \
-
-
->> +		$BTRFS_UTIL_PROG device scan --forget > /dev/null 2>&1
-> 
-> The second part actually unregisters all devices, is there some more
-> lightweight way to detect the support?  > Like providing a valid block
-> device but without btrfs. If the ioctl is supported, then it returns
-> -ENOENT and if not supported then -EOPNOTSUPP.
-
-_btrfs_supports_forget() has two different usage
-   _require_btrfs_forget_if_not_fs_loadable
-which is called in the beginning of the test so its fine to clean all 
-the (unmounted) devices in the kernel.
-
-    _btrfs_forget_if_not_fs_reload
-Earlier we were reloading the btrfs.ko in the middle of the test case, 
-so this is certainly more lightweight.
-
-Looked into the return values if I could use any better [1]. So
-_require_btrfs_forget_if_not_fs_loadable() need a btrfs on a loop device
-to verify if we need to avoid unregister all devices. Bit messy though.
-
-[1]
-With btrfs patches:
-We still get error if the device is not in the kernel dev_list.
---------
-# mkfs.btrfs -fq /dev/sdb
-# wipefs -a /dev/sdb
-/dev/sdb: 8 bytes were erased at offset 0x00010040 (btrfs): 5f 42 48 52 
-66 53 5f 4d
-# mkfs.xfs -fq /dev/sdb
-# btrfs dev scan --forget /dev/sdb; echo $?
-0
-# btrfs dev scan --forget /dev/sdb; echo $?
-ERROR: Can't forget '/dev/sdb': No such file or directory
-1
-----------
-
-With out any btrfs forget patches:
-Usage error and error code = 1 (it should rather be EINVAL).
---------
-# btrfs dev scan --forget  /dev/sda
-usage: btrfs device scan [(-d|--all-devices)|<device> [<device>...]]
-
-     Scan devices for a btrfs filesystem
-
-      -d|--all-devices (deprecated)
-1
------------
-
-With out the btrfs kernel patch:
-Returns error code 1. (After the patch sent to the ML it will
-return EOPNOTSUPP).
----------------
-# btrfs dev scan --forget /dev/loop0; echo $?
-ERROR: Can't forget '/dev/loop0': Inappropriate ioctl for device
-1
----------------
-
-
-
-
->> +}
->> +
->> +_require_btrfs_forget_if_not_fs_loadable()
-> 
-> _require_btrfs_forget_or_module_loadable
-> 
-> We don't want to load the filesystem but the kernel module.
-
-  Will fix.
-
->> +{
->> +	_btrfs_supports_forget && return
-> 
-> Why is the 'return' here? If the first command succeeds, then &&
-> proceeds to return that does implicitli returns 0. So it's redundant, or
-> I'm missing something subtle here.
-
-  Hmm. Not sure if I understood. Do you mean we could
-
-   _btrfs_supports_forget  || _require_loadable_fs_module "btrfs"
-
->> +
->> +	_require_loadable_fs_module "btrfs"
->> +}
->> +
->> +_btrfs_forget_if_not_fs_reload()
-> 
-> Same naming
-
-Ok
-
-Thanks, Anand
-
-> 
->> +{
->> +	_btrfs_supports_forget && return
->> +
->> +	_reload_fs_module "btrfs"
->> +}
+- Rishabh
