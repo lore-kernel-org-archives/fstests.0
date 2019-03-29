@@ -1,60 +1,114 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:38355 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730555AbfC2W5F (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 29 Mar 2019 18:57:05 -0400
-Date: Fri, 29 Mar 2019 18:56:52 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: testsuite for ACLs
-Message-ID: <20190329225652.GB15757@mit.edu>
-References: <CA+jMu4RO1mNKmwof8z0rU4Lcr76mPRo04a5sFrs0Saz735ez1w@mail.gmail.com>
- <20190326014337.GI26298@dastard>
- <CA+jMu4QNB+v-r6KmkUfEh-q5r=m=tCxkLkfrLXA+Ajt12g1SQA@mail.gmail.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:55244 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730240AbfC2WfB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 29 Mar 2019 18:35:01 -0400
+Date: Fri, 29 Mar 2019 15:34:51 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 2/7] fsstress: add operation for setting xattrs on files
+ and directories
+Message-ID: <20190329223451.GF6537@magnolia>
+References: <20190328185404.28879-1-fdmanana@kernel.org>
+ <20190328214839.GM26298@dastard>
+ <CAL3q7H6uHcsEvBCTaBaTeCPhsQ2XHDRqVu7tVa-bPc9iHP6pNw@mail.gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CA+jMu4QNB+v-r6KmkUfEh-q5r=m=tCxkLkfrLXA+Ajt12g1SQA@mail.gmail.com>
+In-Reply-To: <CAL3q7H6uHcsEvBCTaBaTeCPhsQ2XHDRqVu7tVa-bPc9iHP6pNw@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Rishabh Dave <ridave@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org
+To: Filipe Manana <fdmanana@kernel.org>
+Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 29, 2019 at 09:29:43PM +0530, Rishabh Dave wrote:
+On Thu, Mar 28, 2019 at 10:36:37PM +0000, Filipe Manana wrote:
+> On Thu, Mar 28, 2019 at 9:48 PM Dave Chinner <david@fromorbit.com> wrote:
+> >
+> > On Thu, Mar 28, 2019 at 06:54:04PM +0000, fdmanana@kernel.org wrote:
+> > > From: Filipe Manana <fdmanana@suse.com>
+> > >
+> > > Currently fsstress does not exercise creating, reading or deleting xattrs
+> > > on files or directories. This change adds support for setting xattrs on
+> > > files and directories, using only the xattr user namespace (the other
+> > > namespaces are not general purpose and are used for security, capabilities,
+> > > ACLs, etc). This adds a counter for each file entry structure that keeps
+> > > track of the number of xattrs set for the file entry, and each new xattr
+> > > has a name that includes the counter's value (example: "user.x4").
+> > > Values for the xattrs have at most 100 bytes, which is much more than
+> > > the maximum size supported for all major filesystems.
+> > >
+> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
+> > > ---
+> > >  ltp/fsstress.c | 150 +++++++++++++++++++++++++++++++++++++++++++++++++++++----
+> > >  1 file changed, 141 insertions(+), 9 deletions(-)
+> > >
+> > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > > index cc4f520e..03e40eb6 100644
+> > > --- a/ltp/fsstress.c
+> > > +++ b/ltp/fsstress.c
+> > > @@ -27,6 +27,7 @@
+> > >  io_context_t io_ctx;
+> > >  #endif
+> > >  #include <sys/syscall.h>
+> > > +#include <sys/xattr.h>
+> > >
+> > >  #ifndef FS_IOC_GETFLAGS
+> > >  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
+> > > @@ -85,6 +86,7 @@ typedef enum {
+> > >       OP_RESVSP,
+> > >       OP_RMDIR,
+> > >       OP_SETATTR,
+> > > +     OP_SETXATTR,
+> > >       OP_SPLICE,
+> > >       OP_STAT,
+> > >       OP_SYMLINK,
+> > > @@ -110,6 +112,7 @@ typedef struct opdesc {
+> > >  typedef struct fent {
+> > >       int     id;
+> > >       int     parent;
+> > > +     int     xattr_counter;
+> > >  } fent_t;
+> > >
+> > >  typedef struct flist {
+> > > @@ -195,6 +198,7 @@ void      rename_f(int, long);
+> > >  void resvsp_f(int, long);
+> > >  void rmdir_f(int, long);
+> > >  void setattr_f(int, long);
+> > > +void setxattr_f(int, long);
+> > >  void splice_f(int, long);
+> > >  void stat_f(int, long);
+> > >  void symlink_f(int, long);
+> > > @@ -246,6 +250,7 @@ opdesc_t  ops[] = {
+> > >       { OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
+> > >       { OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
+> > >       { OP_SETATTR, "setattr", setattr_f, 0, 1 },
+> > > +     { OP_SETXATTR, "setxattr", setxattr_f, 4, 1 },
+> >
+> > Ok, now that I see this, the penny drops - you can't do this as
+> > it changes the CLI interface in a way that will make existing
+> > scripts do something entirely different to what they used to do.
+> >
+> > i.e. "-f setxattr=n" is used to specify the frequency of this
+> > specific operation. It used to control the project ID setting, now
+> > with this change it controls extended attribute frequency. There are
+> > some tests that actually use "-f setxattr=n" (and who knows how many
+> > custom test scripts using fsstress built from fstests), so I don't
+> > think we should be renaming existing operations to something else
+> > and then reusing the name for a new type of operation like this....
 > 
-> Is tests/generic/group a list of titles of testcases? If so, I don't
-> understand them.
+> Any idea for a good name? (Not too long, or too similar like setextattr)
 
-No.  In each of the various tests folders, e.g., test/generic,
-tests/ext4, tests/xfs, tests/btrfs, etc. there is a file named group.
-This file tells the xfstests infrastructure which tests belong to
-which groups.  The line:
+setfattr, seeing as it's a cli tool already anyway?
 
-026 acl quick auto
+--D
 
-Says that the test generic/026 is in three groups, "acl", "quick", and
-"auto".  The "acl" group is for tests that tests acl.  The "quick"
-group is for a set of tests than run quickly, for people who want to
-be able to do a quick validation that the file system is O.K.  The
-"auto" group is for tests that should be used as part of an automated
-regression testing which is much more comprehensive than just running
-the "quick" tests.
-
-The generic/077 test also tests acl's.  It also tests extended
-attributes, and what happens when the disk fills up (enospc):
-
-077 acl attr auto enospc
-
-
-> I see there are few tests for ACLs in tests/generic/099. I couldn't
-> find them before since the tests use chacl and I was looking for
-> setfacl and getfacl. I'll compare my testsuite to tests/generic/099,
-> create a list of testcases not covered in xfstests-dev and start
-> rewriting.
-
-You need to look at a lot more tests than just tests/generic/099.  You
-need at all of the tests that belong to group "acl".  Which you can
-find from looking at the files named group in the subdirectory under
-the tests directory.
-
-Cheers,
-
-					- Ted
+> 
+> 
+> >
+> > I certainly agree with the idea of adding extended attributes to
+> > fsstress, just not this way...
+> >
+> > Cheers,
+> >
+> > Dave.
+> > --
+> > Dave Chinner
+> > david@fromorbit.com
