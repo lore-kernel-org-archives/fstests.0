@@ -1,75 +1,56 @@
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:44846 "EHLO
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:34805 "EHLO
         mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727190AbfC3Id5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 30 Mar 2019 04:33:57 -0400
-Received: by mail-pl1-f193.google.com with SMTP id g12so2096568pll.11
-        for <fstests@vger.kernel.org>; Sat, 30 Mar 2019 01:33:57 -0700 (PDT)
-Date: Sat, 30 Mar 2019 16:33:50 +0800
+        with ESMTP id S1730414AbfC3Lyo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Mar 2019 07:54:44 -0400
+Received: by mail-pl1-f193.google.com with SMTP id y6so2260844plt.1
+        for <fstests@vger.kernel.org>; Sat, 30 Mar 2019 04:54:44 -0700 (PDT)
+Date: Sat, 30 Mar 2019 19:54:36 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] fstests: Don't delete seqres.full file in generic/077
-Message-ID: <20190330083350.GY2824@desktop>
-References: <20190326150158.17700-1-nborisov@suse.com>
- <20190326154635.GC6537@magnolia>
- <fa0d0273-e654-c23e-e1e8-8797bfa4e78e@suse.com>
+Subject: Re: [PATCH] common/rc: use _try_scratch_mount for scratch_remount
+Message-ID: <20190330115436.GC2824@desktop>
+References: <20190328115233.24816-1-xifeng@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <fa0d0273-e654-c23e-e1e8-8797bfa4e78e@suse.com>
+In-Reply-To: <20190328115233.24816-1-xifeng@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Nikolay Borisov <nborisov@suse.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
+To: XiaoLi Feng <xifeng@redhat.com>
+Cc: fstests@vger.kernel.org, smfrench@gmail.com, Xiaoli Feng <fengxiaoli0714@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 28, 2019 at 05:40:31PM +0200, Nikolay Borisov wrote:
->=20
->=20
-> On 26.03.19 =D0=B3. 17:46 =D1=87., Darrick J. Wong wrote:
-> > On Tue, Mar 26, 2019 at 05:01:58PM +0200, Nikolay Borisov wrote:
-> >> When this test finishes there is no 079.full file with output from c=
-ommands.=20
-> >=20
-> > "077.full" ?
->=20
-> Eryu, would you fold this when merging or shall I resend?
+On Thu, Mar 28, 2019 at 07:52:33PM +0800, Xiaoli Feng wrote:
+> From: Xiaoli Feng <fengxiaoli0714@gmail.com>
+> 
+> When use scratch_remount, it always gives up the global mounted
+> options. Then will make cifs mount failed for generic/306
+> generic/452.
+> 
+> Signed-off-by: Xiaoli Feng <fengxiaoli0714@gmail.com>
+> ---
+>  common/rc | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 1c42515f..6c262e32 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -357,7 +357,7 @@ _scratch_remount()
+>      local opts="$1"
+>  
+>      if test -n "$opts"; then
+> -	mount -o "remount,$opts" $SCRATCH_MNT
+> +	_try_scratch_mount "-o remount,$opts"
 
-I'll fix it on merge, thanks!
+This breaks overlay/035, in which the first overlay mount is done with
+only lowerdir, so a normal _try_scratch_mount won't work. Switch it to a
+bare $MOUNT_PROG would work.
 
+Thanks,
 Eryu
->=20
-> >=20
-> >> Sometimes this information is useful for post mortem so stop deletin=
-g the=20
-> >> file upon test completion.=20
-> >>
-> >> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> >=20
-> > Looks ok to me otherwise,
-> >=20
-> > Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-> >=20
-> >> ---
-> >>  tests/generic/077 | 1 -
-> >>  1 file changed, 1 deletion(-)
-> >>
-> >> diff --git a/tests/generic/077 b/tests/generic/077
-> >> index 284e25253c9e..d11b49c6ff15 100755
-> >> --- a/tests/generic/077
-> >> +++ b/tests/generic/077
-> >> @@ -73,6 +73,5 @@ cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2=
->&1
-> >>  _check_scratch_fs
-> >> =20
-> >>  echo "*** all done"
-> >> -rm -f $seqres.full
-> >=20
-> > I had wondered about this myself... :)
-> >=20
-> > --D
-> >=20
-> >>  status=3D0
-> >>  exit
-> >> --=20
-> >> 2.7.4
-> >>
-> >=20
+
+>      fi
+>  }
+>  
+> -- 
+> 2.18.1
+> 
