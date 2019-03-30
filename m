@@ -1,115 +1,165 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:36785 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730372AbfC3Jet (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 30 Mar 2019 05:34:49 -0400
-Date: Sat, 30 Mar 2019 17:34:41 +0800
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:37153 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730502AbfC3KJ4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Mar 2019 06:09:56 -0400
+Date: Sat, 30 Mar 2019 18:09:49 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] btrfs: Enable btrfs/003
-Message-ID: <20190330093441.GZ2824@desktop>
-References: <20190319105851.9280-1-nborisov@suse.com>
+Subject: Re: [PATCH] generic: prohibit fstrim on journalled filesystems with
+ norecovery
+Message-ID: <20190330100949.GA2824@desktop>
+References: <20190323003532.GB1180@magnolia>
+ <CAL3q7H4Un5e5xOkTgAVXthfr-N1CXwf6e4qOyQ9WeXQoj3E8Uw@mail.gmail.com>
+ <20190327032645.GB1183@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190319105851.9280-1-nborisov@suse.com>
+In-Reply-To: <20190327032645.GB1183@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Nikolay Borisov <nborisov@suse.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Filipe David Manana <fdmanana@apache.org>, fstests <fstests@vger.kernel.org>, xfs <linux-xfs@vger.kernel.org>, linux-ext4 <linux-ext4@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Mar 19, 2019 at 12:58:51PM +0200, Nikolay Borisov wrote:
-> For a long time this test has been failing on all kinds of VM configuration,
-> which are using virtio_blk devices. This is due to the fact that scsi
-> devices are deletable and virtio_blk are not. However, this only prevents
-> device replace case to run and has no negative effect on the other
-> useful test cases.
+On Tue, Mar 26, 2019 at 08:26:45PM -0700, Darrick J. Wong wrote:
+> On Tue, Mar 26, 2019 at 12:21:20PM +0000, Filipe David Manana wrote:
+> > On Sat, Mar 23, 2019 at 12:35 AM Darrick J. Wong
+> > <darrick.wong@oracle.com> wrote:
+> > >
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > >
+> > > This test makes sure that we can't use stale unrecovered fs metadata to
+> > > drive a DISCARD festival on a disk and thereby destroy user data by
+> > > accident.
+> > 
+> > It would help to have listed the name of the patches that fix the
+> > issues on xfs/ext4/btrfs, to make it faster.
+> > 
+> > >
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Reviewed-by: Filipe Manana <fdmanana@suse.com>
+> > 
+> > Looks good, thanks for doing this. Just one question below.
+> > 
+> > > ---
+> > >  tests/generic/714     |   61 +++++++++++++++++++++++++++++++++++++++++++++++++
+> > >  tests/generic/714.out |    4 +++
+> > >  tests/generic/group   |    1 +
+> > >  3 files changed, 66 insertions(+)
+> > >  create mode 100755 tests/generic/714
+> > >  create mode 100644 tests/generic/714.out
+> > >
+> > > diff --git a/tests/generic/714 b/tests/generic/714
+> > > new file mode 100755
+> > > index 00000000..1849a5e9
+> > > --- /dev/null
+> > > +++ b/tests/generic/714
+> > > @@ -0,0 +1,61 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0+
+> > > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
+> > > +#
+> > > +# FS QA Test No. 714
+> > > +#
+> > > +# Ensure that we can't call fstrim on filesystems mounted norecovery, because
+> > > +# FSTRIM implementations use free space metadata to drive the discard requests
+> > > +# and we told the filesystem not to make sure the metadata are up to date.
+> > > +
+> > > +seq=`basename $0`
+> > > +seqres=$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=`pwd`
+> > > +tmp=/tmp/$$
+> > > +status=1    # failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +    cd /
+> > > +    rm -rf $tmp.*
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +. ./common/filter
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_os Linux
+> > > +_require_scratch
+> > > +_require_fstrim
+> > > +
+> > > +rm -f $seqres.full
+> > > +
+> > > +_scratch_mkfs > $seqres.full 2>&1
+> > > +_require_metadata_journaling $SCRATCH_DEV
+> > > +
+> > > +echo "fstrim on regular mount"
+> > > +_scratch_mount >> $seqres.full 2>&1
+> > > +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 || \
+> > > +       _notrun "FSTRIM not supported"
+> > > +_scratch_unmount
+> > > +
+> > > +echo "fstrim on ro mount"
+> > > +_scratch_mount -o ro >> $seqres.full 2>&1
+> > > +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1
+> > > +_scratch_unmount
+> > > +
+> > > +echo "fstrim on ro mount with no log replay"
+> > > +norecovery="norecovery"
+> > > +test $FSTYP = "btrfs" && norecovery=nologreplay
+> > > +_scratch_mount -o ro,$norecovery >> $seqres.full 2>&1
+> > > +$FSTRIM_PROG -v $SCRATCH_MNT >> $seqres.full 2>&1 && \
+> > > +       echo "fstrim with unrecovered metadata just ate your filesystem"
+> > > +_scratch_unmount
+> > > +
+> > > +# success, all done
+> > > +status=0
+> > > +exit
+> > > diff --git a/tests/generic/714.out b/tests/generic/714.out
+> > > new file mode 100644
+> > > index 00000000..1158a2ff
+> > > --- /dev/null
+> > > +++ b/tests/generic/714.out
+> > > @@ -0,0 +1,4 @@
+> > > +QA output created by 714
+> > > +fstrim on regular mount
+> > > +fstrim on ro mount
+> > > +fstrim on ro mount with no log replay
+> > > diff --git a/tests/generic/group b/tests/generic/group
+> > > index 2e4341fb..c2046293 100644
+> > > --- a/tests/generic/group
+> > > +++ b/tests/generic/group
+> > > @@ -538,6 +538,7 @@
+> > >  533 auto quick attr
+> > >  534 auto quick log
+> > >  535 auto quick log
+> > > +714 auto trim
+> > 
+> > Any reason to not add the 'quick' group as well? It runs in 1 second
+> > for me on btrfs, xfs and ext4 with a debug kernel.
 > 
-> Re-enable btrfs/003 to run by making _require_deletable_scratch_dev_pool
-> private to the test case and modifying it to return success (0) or
-> failure (1) if devices are not deletable. Further modify the replace
-> test case to check the return value of this function and skip it if
-> devices are not deletable.
-> 
-> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
-> ---
->  common/rc       | 12 ------------
->  tests/btrfs/003 | 19 ++++++++++++++++++-
->  2 files changed, 18 insertions(+), 13 deletions(-)
-> 
-> diff --git a/common/rc b/common/rc
-> index 1c42515ff0ea..5693ba3cad18 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2961,18 +2961,6 @@ _require_scratch_dev_pool_equal_size()
->  	done
->  }
->  
-> -# We will check if the device is deletable
-> -_require_deletable_scratch_dev_pool()
-> -{
-> -	local i
-> -	local x
-> -	for i in $SCRATCH_DEV_POOL; do
-> -		x=`echo $i | cut -d"/" -f 3`
-> -		if [ ! -f /sys/class/block/${x}/device/delete ]; then
-> -			_notrun "$i is a device which is not deletable"
-> -		fi
-> -	done
-> -}
->  
->  # Check that fio is present, and it is able to execute given jobfile
->  _require_fio()
-> diff --git a/tests/btrfs/003 b/tests/btrfs/003
-> index 938030ef4c65..2aeb9fe6325a 100755
-> --- a/tests/btrfs/003
-> +++ b/tests/btrfs/003
-> @@ -17,6 +17,21 @@ dev_removed=0
->  removed_dev_htl=""
->  trap "_cleanup; exit \$status" 0 1 2 3 15
->  
-> +# Check if all scratch dev pools are deletable
-> +_require_deletable_scratch_dev_pool()
+> Probably just an oversight, I'll add it when I resubmit tomorrow.
 
-Then it's not a _require rule anymore, maybe we could just rename it to
-something like "deletable_scratch_dev_pool"? Also remove the leading "_"
-if it becomes a private function.
+I'll just add it on commit.
 
-Thanks,
+> 
+> Thanks for the review + btrfs fix. :)
+
+Thanks again! :)
+
 Eryu
-
-> +{
-> +	local i
-> +	local x
-> +	for i in $SCRATCH_DEV_POOL; do
-> +		x=`echo $i | cut -d"/" -f 3`
-> +		if [ ! -f /sys/class/block/${x}/device/delete ]; then
-> +			return 1
-> +		fi
-> +	done
-> +
-> +	return 0
-> +}
-> +
->  _cleanup()
->  {
->      cd /
-> @@ -35,7 +50,6 @@ _supported_fs btrfs
->  _supported_os Linux
->  _require_scratch
->  _require_scratch_dev_pool 4
-> -_require_deletable_scratch_dev_pool
->  _require_command "$WIPEFS_PROG" wipefs
->  
->  rm -f $seqres.full
-> @@ -111,6 +125,9 @@ _test_replace()
->  	local ds
->  	local d
->  
-> +	# If scratch devs are not deletable skip this test
-> +	if ! _require_deletable_scratch_dev_pool; then return 0; fi
-> +
->  	# exclude the first and the last disk in the disk pool
->  	n=$(($n-1))
->  	ds=${devs[@]:1:$(($n-1))}
-> -- 
-> 2.7.4
 > 
+> --D
+> 
+> > >  940 auto quick clone punch
+> > >  941 auto quick clone punch
+> > >  942 auto quick clone punch
+> > 
+> > 
+> > 
+> > -- 
+> > Filipe David Manana,
+> > 
+> > "Reasonable men adapt themselves to the world.
+> >  Unreasonable men adapt the world to themselves.
+> >  That's why all progress depends on unreasonable men."
