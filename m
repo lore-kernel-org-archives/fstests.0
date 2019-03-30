@@ -1,124 +1,115 @@
-Received: from mail.kernel.org ([198.145.29.99]:54542 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730456AbfC2Wqe (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 29 Mar 2019 18:46:34 -0400
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:36785 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730372AbfC3Jet (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 30 Mar 2019 05:34:49 -0400
+Date: Sat, 30 Mar 2019 17:34:41 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] btrfs: Enable btrfs/003
+Message-ID: <20190330093441.GZ2824@desktop>
+References: <20190319105851.9280-1-nborisov@suse.com>
 MIME-Version: 1.0
-References: <20190328185404.28879-1-fdmanana@kernel.org> <20190328214839.GM26298@dastard>
- <CAL3q7H6uHcsEvBCTaBaTeCPhsQ2XHDRqVu7tVa-bPc9iHP6pNw@mail.gmail.com> <20190329223451.GF6537@magnolia>
-In-Reply-To: <20190329223451.GF6537@magnolia>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 29 Mar 2019 22:46:20 +0000
-Message-ID: <CAL3q7H6fjXak=msNhSchpX80oOcmePivisPNB_MiUw=gQ1+8vA@mail.gmail.com>
-Subject: Re: [PATCH 2/7] fsstress: add operation for setting xattrs on files
- and directories
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190319105851.9280-1-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Mar 29, 2019 at 10:34 PM Darrick J. Wong
-<darrick.wong@oracle.com> wrote:
->
-> On Thu, Mar 28, 2019 at 10:36:37PM +0000, Filipe Manana wrote:
-> > On Thu, Mar 28, 2019 at 9:48 PM Dave Chinner <david@fromorbit.com> wrote:
-> > >
-> > > On Thu, Mar 28, 2019 at 06:54:04PM +0000, fdmanana@kernel.org wrote:
-> > > > From: Filipe Manana <fdmanana@suse.com>
-> > > >
-> > > > Currently fsstress does not exercise creating, reading or deleting xattrs
-> > > > on files or directories. This change adds support for setting xattrs on
-> > > > files and directories, using only the xattr user namespace (the other
-> > > > namespaces are not general purpose and are used for security, capabilities,
-> > > > ACLs, etc). This adds a counter for each file entry structure that keeps
-> > > > track of the number of xattrs set for the file entry, and each new xattr
-> > > > has a name that includes the counter's value (example: "user.x4").
-> > > > Values for the xattrs have at most 100 bytes, which is much more than
-> > > > the maximum size supported for all major filesystems.
-> > > >
-> > > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > > ---
-> > > >  ltp/fsstress.c | 150 +++++++++++++++++++++++++++++++++++++++++++++++++++++----
-> > > >  1 file changed, 141 insertions(+), 9 deletions(-)
-> > > >
-> > > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > > > index cc4f520e..03e40eb6 100644
-> > > > --- a/ltp/fsstress.c
-> > > > +++ b/ltp/fsstress.c
-> > > > @@ -27,6 +27,7 @@
-> > > >  io_context_t io_ctx;
-> > > >  #endif
-> > > >  #include <sys/syscall.h>
-> > > > +#include <sys/xattr.h>
-> > > >
-> > > >  #ifndef FS_IOC_GETFLAGS
-> > > >  #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-> > > > @@ -85,6 +86,7 @@ typedef enum {
-> > > >       OP_RESVSP,
-> > > >       OP_RMDIR,
-> > > >       OP_SETATTR,
-> > > > +     OP_SETXATTR,
-> > > >       OP_SPLICE,
-> > > >       OP_STAT,
-> > > >       OP_SYMLINK,
-> > > > @@ -110,6 +112,7 @@ typedef struct opdesc {
-> > > >  typedef struct fent {
-> > > >       int     id;
-> > > >       int     parent;
-> > > > +     int     xattr_counter;
-> > > >  } fent_t;
-> > > >
-> > > >  typedef struct flist {
-> > > > @@ -195,6 +198,7 @@ void      rename_f(int, long);
-> > > >  void resvsp_f(int, long);
-> > > >  void rmdir_f(int, long);
-> > > >  void setattr_f(int, long);
-> > > > +void setxattr_f(int, long);
-> > > >  void splice_f(int, long);
-> > > >  void stat_f(int, long);
-> > > >  void symlink_f(int, long);
-> > > > @@ -246,6 +250,7 @@ opdesc_t  ops[] = {
-> > > >       { OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
-> > > >       { OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
-> > > >       { OP_SETATTR, "setattr", setattr_f, 0, 1 },
-> > > > +     { OP_SETXATTR, "setxattr", setxattr_f, 4, 1 },
-> > >
-> > > Ok, now that I see this, the penny drops - you can't do this as
-> > > it changes the CLI interface in a way that will make existing
-> > > scripts do something entirely different to what they used to do.
-> > >
-> > > i.e. "-f setxattr=n" is used to specify the frequency of this
-> > > specific operation. It used to control the project ID setting, now
-> > > with this change it controls extended attribute frequency. There are
-> > > some tests that actually use "-f setxattr=n" (and who knows how many
-> > > custom test scripts using fsstress built from fstests), so I don't
-> > > think we should be renaming existing operations to something else
-> > > and then reusing the name for a new type of operation like this....
-> >
-> > Any idea for a good name? (Not too long, or too similar like setextattr)
->
-> setfattr, seeing as it's a cli tool already anyway?
+On Tue, Mar 19, 2019 at 12:58:51PM +0200, Nikolay Borisov wrote:
+> For a long time this test has been failing on all kinds of VM configuration,
+> which are using virtio_blk devices. This is due to the fact that scsi
+> devices are deletable and virtio_blk are not. However, this only prevents
+> device replace case to run and has no negative effect on the other
+> useful test cases.
+> 
+> Re-enable btrfs/003 to run by making _require_deletable_scratch_dev_pool
+> private to the test case and modifying it to return success (0) or
+> failure (1) if devices are not deletable. Further modify the replace
+> test case to check the return value of this function and skip it if
+> devices are not deletable.
+> 
+> Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+> ---
+>  common/rc       | 12 ------------
+>  tests/btrfs/003 | 19 ++++++++++++++++++-
+>  2 files changed, 18 insertions(+), 13 deletions(-)
+> 
+> diff --git a/common/rc b/common/rc
+> index 1c42515ff0ea..5693ba3cad18 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2961,18 +2961,6 @@ _require_scratch_dev_pool_equal_size()
+>  	done
+>  }
+>  
+> -# We will check if the device is deletable
+> -_require_deletable_scratch_dev_pool()
+> -{
+> -	local i
+> -	local x
+> -	for i in $SCRATCH_DEV_POOL; do
+> -		x=`echo $i | cut -d"/" -f 3`
+> -		if [ ! -f /sys/class/block/${x}/device/delete ]; then
+> -			_notrun "$i is a device which is not deletable"
+> -		fi
+> -	done
+> -}
+>  
+>  # Check that fio is present, and it is able to execute given jobfile
+>  _require_fio()
+> diff --git a/tests/btrfs/003 b/tests/btrfs/003
+> index 938030ef4c65..2aeb9fe6325a 100755
+> --- a/tests/btrfs/003
+> +++ b/tests/btrfs/003
+> @@ -17,6 +17,21 @@ dev_removed=0
+>  removed_dev_htl=""
+>  trap "_cleanup; exit \$status" 0 1 2 3 15
+>  
+> +# Check if all scratch dev pools are deletable
+> +_require_deletable_scratch_dev_pool()
 
-Indeed, seems good to me as well. Was thinking about it earlier today,
-setfattr, getfattr,
-delfattr and listfattr (these last two don't have dedicated cli tools,
-setfattr and getfattr
-implement these operations).
+Then it's not a _require rule anymore, maybe we could just rename it to
+something like "deletable_scratch_dev_pool"? Also remove the leading "_"
+if it becomes a private function.
 
-Thanks.
+Thanks,
+Eryu
 
->
-> --D
->
-> >
-> >
-> > >
-> > > I certainly agree with the idea of adding extended attributes to
-> > > fsstress, just not this way...
-> > >
-> > > Cheers,
-> > >
-> > > Dave.
-> > > --
-> > > Dave Chinner
-> > > david@fromorbit.com
+> +{
+> +	local i
+> +	local x
+> +	for i in $SCRATCH_DEV_POOL; do
+> +		x=`echo $i | cut -d"/" -f 3`
+> +		if [ ! -f /sys/class/block/${x}/device/delete ]; then
+> +			return 1
+> +		fi
+> +	done
+> +
+> +	return 0
+> +}
+> +
+>  _cleanup()
+>  {
+>      cd /
+> @@ -35,7 +50,6 @@ _supported_fs btrfs
+>  _supported_os Linux
+>  _require_scratch
+>  _require_scratch_dev_pool 4
+> -_require_deletable_scratch_dev_pool
+>  _require_command "$WIPEFS_PROG" wipefs
+>  
+>  rm -f $seqres.full
+> @@ -111,6 +125,9 @@ _test_replace()
+>  	local ds
+>  	local d
+>  
+> +	# If scratch devs are not deletable skip this test
+> +	if ! _require_deletable_scratch_dev_pool; then return 0; fi
+> +
+>  	# exclude the first and the last disk in the disk pool
+>  	n=$(($n-1))
+>  	ds=${devs[@]:1:$(($n-1))}
+> -- 
+> 2.7.4
+> 
