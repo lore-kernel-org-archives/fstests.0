@@ -1,54 +1,104 @@
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:43291 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726775AbfDAP3g (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Apr 2019 11:29:36 -0400
-Received: by mail-pg1-f195.google.com with SMTP id z9so4937071pgu.10
-        for <fstests@vger.kernel.org>; Mon, 01 Apr 2019 08:29:35 -0700 (PDT)
-MIME-Version: 1.0
-References: <20190331123130.14922-1-xifeng@redhat.com>
-In-Reply-To: <20190331123130.14922-1-xifeng@redhat.com>
-From: Steve French <smfrench@gmail.com>
-Date: Mon, 1 Apr 2019 10:29:24 -0500
-Message-ID: <CAH2r5mspi108y=4wkKWxQno+WGJnEOrWOGWL9KqSucF6fULG0g@mail.gmail.com>
-Subject: Re: [PATCH v2] common/rc: add global mounted option for _scratch_remount
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx2.suse.de ([195.135.220.15]:59832 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725882AbfDALIn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 1 Apr 2019 07:08:43 -0400
+From: Nikolay Borisov <nborisov@suse.com>
+Subject: [PATCH v2] btrfs: Enable btrfs/003
+Date: Mon,  1 Apr 2019 14:08:37 +0300
+Message-Id: <20190401110837.30231-1-nborisov@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: XiaoLi Feng <xifeng@redhat.com>, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: guaneryu@gmail.com, linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-I also verified that test 452 now works to cifs (SMB3 mounts to
-multiple types of test targets, Azure, Windows etc.)
+For a long time this test has been failing on all kinds of VM configuration,
+which are using virtio_blk devices. This is due to the fact that scsi
+devices are deletable and virtio_blk are not. However, this only prevents
+device replace case to run and has no negative effect on the other
+useful test cases.
 
-On Sun, Mar 31, 2019 at 7:31 AM XiaoLi Feng <xifeng@redhat.com> wrote:
->
-> From: Xiaoli Feng <xifeng@redhat.com>
->
-> When call _scratch_remount for cifs , it always requires to input
-> password. This will make generic/306 generic/452 failed because
-> cifs remount failed.
-> ---
->  common/rc | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
->
-> diff --git a/common/rc b/common/rc
-> index 1c42515f..ea1eaf6a 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -357,7 +357,7 @@ _scratch_remount()
->      local opts="$1"
->
->      if test -n "$opts"; then
-> -       mount -o "remount,$opts" $SCRATCH_MNT
-> +       mount $MOUNT_OPTIONS -o "remount,$opts" $SCRATCH_MNT
->      fi
->  }
->
-> --
-> 2.18.1
->
+Re-enable btrfs/003 to run by making _require_deletable_scratch_dev_pool
+private to the test case and modifying it to return success (0) or
+failure (1) if devices are not deletable. Further modify the replace
+test case to check the return value of this function and skip it if
+devices are not deletable.
 
+Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+---
 
+Changes since v1: 
+ * Rename the function to deletable_scratch_dev_pool
+
+ common/rc       | 12 ------------
+ tests/btrfs/003 | 19 ++++++++++++++++++-
+ 2 files changed, 18 insertions(+), 13 deletions(-)
+
+diff --git a/common/rc b/common/rc
+index 1c42515ff0ea..5693ba3cad18 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2961,18 +2961,6 @@ _require_scratch_dev_pool_equal_size()
+ 	done
+ }
+ 
+-# We will check if the device is deletable
+-_require_deletable_scratch_dev_pool()
+-{
+-	local i
+-	local x
+-	for i in $SCRATCH_DEV_POOL; do
+-		x=`echo $i | cut -d"/" -f 3`
+-		if [ ! -f /sys/class/block/${x}/device/delete ]; then
+-			_notrun "$i is a device which is not deletable"
+-		fi
+-	done
+-}
+ 
+ # Check that fio is present, and it is able to execute given jobfile
+ _require_fio()
+diff --git a/tests/btrfs/003 b/tests/btrfs/003
+index 22aa57aad0b9..c72c34290ff0 100755
+--- a/tests/btrfs/003
++++ b/tests/btrfs/003
+@@ -17,6 +17,21 @@ dev_removed=0
+ removed_dev_htl=""
+ trap "_cleanup; exit \$status" 0 1 2 3 15
+ 
++# Check if all scratch dev pools are deletable
++deletable_scratch_dev_pool()
++{
++	local i
++	local x
++	for i in $SCRATCH_DEV_POOL; do
++		x=`echo $i | cut -d"/" -f 3`
++		if [ ! -f /sys/class/block/${x}/device/delete ]; then
++			return 1
++		fi
++	done
++
++	return 0
++}
++
+ _cleanup()
+ {
+     cd /
+@@ -35,7 +50,6 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch
+ _require_scratch_dev_pool 4
+-_require_deletable_scratch_dev_pool
+ _require_command "$WIPEFS_PROG" wipefs
+ 
+ rm -f $seqres.full
+@@ -111,6 +125,9 @@ _test_replace()
+ 	local ds
+ 	local d
+ 
++	# If scratch devs are not deletable skip this test
++	if ! deletable_scratch_dev_pool; then return 0; fi
++
+ 	# exclude the first and the last disk in the disk pool
+ 	n=$(($n-1))
+ 	ds=${devs[@]:1:$(($n-1))}
 -- 
-Thanks,
-
-Steve
+2.7.4
