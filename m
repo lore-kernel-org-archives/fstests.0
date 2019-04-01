@@ -1,104 +1,125 @@
-Received: from mx2.suse.de ([195.135.220.15]:59832 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725882AbfDALIn (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 1 Apr 2019 07:08:43 -0400
-From: Nikolay Borisov <nborisov@suse.com>
-Subject: [PATCH v2] btrfs: Enable btrfs/003
-Date: Mon,  1 Apr 2019 14:08:37 +0300
-Message-Id: <20190401110837.30231-1-nborisov@suse.com>
+Received: from mail.kernel.org ([198.145.29.99]:53238 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725897AbfDAMu1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 1 Apr 2019 08:50:27 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH v2 1/7] fsstress: allow fsync on directories too
+Date: Mon,  1 Apr 2019 13:50:18 +0100
+Message-Id: <20190401125018.10009-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: guaneryu@gmail.com, linux-btrfs@vger.kernel.org, Nikolay Borisov <nborisov@suse.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-For a long time this test has been failing on all kinds of VM configuration,
-which are using virtio_blk devices. This is due to the fact that scsi
-devices are deletable and virtio_blk are not. However, this only prevents
-device replace case to run and has no negative effect on the other
-useful test cases.
+From: Filipe Manana <fdmanana@suse.com>
 
-Re-enable btrfs/003 to run by making _require_deletable_scratch_dev_pool
-private to the test case and modifying it to return success (0) or
-failure (1) if devices are not deletable. Further modify the replace
-test case to check the return value of this function and skip it if
-devices are not deletable.
+Currently the fsync function can only be performed against regular files.
+Allow it to operate on directories too, to increase test coverage and
+allow for chances of finding bugs in a filesystem's implementation of
+fsync against directories.
 
-Signed-off-by: Nikolay Borisov <nborisov@suse.com>
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
 
-Changes since v1: 
- * Rename the function to deletable_scratch_dev_pool
+V2: Added helper functions to open and close files or directories.
 
- common/rc       | 12 ------------
- tests/btrfs/003 | 19 ++++++++++++++++++-
- 2 files changed, 18 insertions(+), 13 deletions(-)
+ ltp/fsstress.c | 42 +++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 39 insertions(+), 3 deletions(-)
 
-diff --git a/common/rc b/common/rc
-index 1c42515ff0ea..5693ba3cad18 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2961,18 +2961,6 @@ _require_scratch_dev_pool_equal_size()
- 	done
+diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+index 2223fd7d..1169b840 100644
+--- a/ltp/fsstress.c
++++ b/ltp/fsstress.c
+@@ -303,6 +303,7 @@ int	attr_remove_path(pathname_t *, const char *, int);
+ int	attr_set_path(pathname_t *, const char *, const char *, const int, int);
+ void	check_cwd(void);
+ void	cleanup_flist(void);
++void	close_file_or_dir(int, DIR *);
+ int	creat_path(pathname_t *, mode_t);
+ void	dcache_enter(int, int);
+ void	dcache_init(void);
+@@ -324,6 +325,7 @@ void	make_freq_table(void);
+ int	mkdir_path(pathname_t *, mode_t);
+ int	mknod_path(pathname_t *, mode_t, dev_t);
+ void	namerandpad(int, char *, int);
++int	open_file_or_dir(pathname_t *, int, DIR **);
+ int	open_path(pathname_t *, int);
+ DIR	*opendir_path(pathname_t *);
+ void	process_freq(char *);
+@@ -852,6 +854,15 @@ cleanup_flist(void)
+ 	}
  }
  
--# We will check if the device is deletable
--_require_deletable_scratch_dev_pool()
--{
--	local i
--	local x
--	for i in $SCRATCH_DEV_POOL; do
--		x=`echo $i | cut -d"/" -f 3`
--		if [ ! -f /sys/class/block/${x}/device/delete ]; then
--			_notrun "$i is a device which is not deletable"
--		fi
--	done
--}
- 
- # Check that fio is present, and it is able to execute given jobfile
- _require_fio()
-diff --git a/tests/btrfs/003 b/tests/btrfs/003
-index 22aa57aad0b9..c72c34290ff0 100755
---- a/tests/btrfs/003
-+++ b/tests/btrfs/003
-@@ -17,6 +17,21 @@ dev_removed=0
- removed_dev_htl=""
- trap "_cleanup; exit \$status" 0 1 2 3 15
- 
-+# Check if all scratch dev pools are deletable
-+deletable_scratch_dev_pool()
++void
++close_file_or_dir(int fd, DIR *dir)
 +{
-+	local i
-+	local x
-+	for i in $SCRATCH_DEV_POOL; do
-+		x=`echo $i | cut -d"/" -f 3`
-+		if [ ! -f /sys/class/block/${x}/device/delete ]; then
-+			return 1
-+		fi
-+	done
-+
-+	return 0
++	if (dir)
++		closedir(dir);
++	else
++		close(fd);
 +}
 +
- _cleanup()
+ int
+ creat_path(pathname_t *name, mode_t mode)
  {
-     cd /
-@@ -35,7 +50,6 @@ _supported_fs btrfs
- _supported_os Linux
- _require_scratch
- _require_scratch_dev_pool 4
--_require_deletable_scratch_dev_pool
- _require_command "$WIPEFS_PROG" wipefs
+@@ -1385,6 +1396,30 @@ namerandpad(int id, char *buf, int i)
+ }
  
- rm -f $seqres.full
-@@ -111,6 +125,9 @@ _test_replace()
- 	local ds
- 	local d
- 
-+	# If scratch devs are not deletable skip this test
-+	if ! deletable_scratch_dev_pool; then return 0; fi
+ int
++open_file_or_dir(pathname_t *name, int flags, DIR **dir)
++{
++	int fd;
 +
- 	# exclude the first and the last disk in the disk pool
- 	n=$(($n-1))
- 	ds=${devs[@]:1:$(($n-1))}
++	fd = open_path(name, flags);
++	if (fd < 0 && errno == EISDIR) {
++		*dir = opendir_path(name);
++		if (*dir) {
++			fd = dirfd(*dir);
++			if (fd < 0) {
++				int e = errno;
++
++				closedir(*dir);
++				*dir = NULL;
++				errno = e;
++			}
++		}
++	} else {
++		*dir = NULL;
++	}
++	return fd;
++}
++
++int
+ open_path(pathname_t *name, int oflag)
+ {
+ 	char		buf[NAME_MAX + 1];
+@@ -3440,15 +3475,16 @@ fsync_f(int opno, long r)
+ 	pathname_t	f;
+ 	int		fd;
+ 	int		v;
++	DIR             *dir;
+ 
+ 	init_pathname(&f);
+-	if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
++	if (!get_fname(FT_REGFILE | FT_DIRm, r, &f, NULL, NULL, &v)) {
+ 		if (v)
+ 			printf("%d/%d: fsync - no filename\n", procid, opno);
+ 		free_pathname(&f);
+ 		return;
+ 	}
+-	fd = open_path(&f, O_WRONLY);
++	fd = open_file_or_dir(&f, O_WRONLY, &dir);
+ 	e = fd < 0 ? errno : 0;
+ 	check_cwd();
+ 	if (fd < 0) {
+@@ -3462,7 +3498,7 @@ fsync_f(int opno, long r)
+ 	if (v)
+ 		printf("%d/%d: fsync %s %d\n", procid, opno, f.path, e);
+ 	free_pathname(&f);
+-	close(fd);
++	close_file_or_dir(fd, dir);
+ }
+ 
+ void
 -- 
-2.7.4
+2.11.0
