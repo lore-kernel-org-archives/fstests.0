@@ -1,59 +1,206 @@
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:36408 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725882AbfDALO2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 1 Apr 2019 07:14:28 -0400
-Received: by mail-pl1-f195.google.com with SMTP id ck15so3136109plb.3
-        for <fstests@vger.kernel.org>; Mon, 01 Apr 2019 04:14:28 -0700 (PDT)
-Date: Mon, 1 Apr 2019 19:14:21 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] common/populate: decrease the step of rm file
-Message-ID: <20190401111421.GD2824@desktop>
-References: <1553759339-2206-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:38202 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725812AbfDBF6f (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Apr 2019 01:58:35 -0400
+Subject: Re: [PATCH v3] fstests: btrfs verify hardening agaist duplicate fsid
+References: <1540571900-24768-1-git-send-email-anand.jain@oracle.com>
+From: Anand Jain <Anand.Jain@oracle.com>
+Message-ID: <799893ab-763e-7aa7-9e2b-2f1218d29b13@oracle.com>
+Date: Tue, 2 Apr 2019 13:58:23 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1553759339-2206-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+In-Reply-To: <1540571900-24768-1-git-send-email-anand.jain@oracle.com>
+Content-Type: text/plain; charset=utf-8; format=flowed
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc: fstests@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>
+To: guaneryu@gmail.com
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Mar 28, 2019 at 03:48:59PM +0800, Yang Xu wrote:
->  Now that we have allocated 2*4096*64/16(32768) inodes after "Inode btree",
->  but the step of rm file is too large to create enough free inodes in agi.
->  So the freecount is not enough large to make free_level gt 1 and call
->  _scratch__populate on xfs will report the following failure(such as xfs/083):
-> 
-> Failed to create fino of sufficient height!
-> 
-> By decreasing the step of rm file, xfs/083 will pass.
-> 
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 
-I may need some help from Darrick (cc'ed) on this one :)
+Eryu,
 
-Thanks,
-Eryu
+  This patch isn't integrated yet.
 
+Thanks, Anand
+
+On 27/10/18 12:38 AM, Anand Jain wrote:
+> We have a known bug in btrfs, that we let the device path be changed
+> after the device has been mounted. So using this loop hole the new
+> copied device would appears as if its mounted immediately after its
+> been copied. So this test case reproduces this issue.
+> 
+> For example:
+> 
+> Initially.. /dev/mmcblk0p4 is mounted as /
+> 
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part /
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+> 
+> btrfs fi show
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>      Total devices 1 FS bytes used 1.40GiB
+>      devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
+> 
+> Copy mmcblk0 to sda
+> dd if=/dev/mmcblk0 of=/dev/sda
+> 
+> And immediately after the copy completes the change in the device
+> superblock is notified which the automount scans using
+> btrfs device scan and the new device sda becomes the mounted root
+> device.
+> 
+> lsblk
+> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+> sda           8:0    1 14.9G  0 disk
+> |-sda4        8:4    1    4G  0 part /
+> |-sda2        8:2    1  500M  0 part
+> |-sda3        8:3    1  256M  0 part
+> `-sda1        8:1    1  256M  0 part
+> mmcblk0     179:0    0 29.2G  0 disk
+> |-mmcblk0p4 179:4    0    4G  0 part
+> |-mmcblk0p2 179:2    0  500M  0 part /boot
+> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
+> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
+> btrfs fi show /
+> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
+>      Total devices 1 FS bytes used 1.40GiB
+>      devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
+> 
+> The bug is quite nasty that you can't either unmount /dev/sda4 or
+> /dev/mmcblk0p4. And the problem does not get solved until you take
+> the sda out of the system on to another system to change its fsid using
+> the 'btrfstune -u' command.
+> 
+> Signed-off-by: Anand Jain <anand.jain@oracle.com>
 > ---
->  common/populate | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+> v2->v3:
+>    Check the return code and use _fail to verify and accordingly fix golden
+>      output.
+>    Rename dev_foo(bar) to device_1(2)
+>    Don't log dd retun to $seqres.full
+>   
+> v1->v2:
+>    dont play around with dev patch use it as it is.
+>    do not use SCRATCH_MNT instead create it at the TEST_DIR and its related
+>     changes.
+>    golden out changes
 > 
-> diff --git a/common/populate b/common/populate
-> index 4fa118f0..7403dec3 100644
-> --- a/common/populate
-> +++ b/common/populate
-> @@ -271,7 +271,7 @@ _scratch_xfs_populate() {
->  		touch "${dir}/${f}"
->  	done
->  
-> -	seq 0 "$((ino_per_rec + 1))" "${nr}" | while read f; do
-> +	seq 0 2 "${nr}" | while read f; do
->  		rm -f "${dir}/${f}"
->  	done
->  
-> -- 
-> 2.18.1
+>   tests/btrfs/173     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+>   tests/btrfs/173.out |  2 ++
+>   tests/btrfs/group   |  1 +
+>   3 files changed, 85 insertions(+)
+>   create mode 100755 tests/btrfs/173
+>   create mode 100644 tests/btrfs/173.out
 > 
-> 
+> diff --git a/tests/btrfs/173 b/tests/btrfs/173
+> new file mode 100755
+> index 000000000000..342ae92b4781
+> --- /dev/null
+> +++ b/tests/btrfs/173
+> @@ -0,0 +1,82 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Oracle. All Rights Reserved.
+> +#
+> +# FS QA Test 173
+> +#
+> +# Fuzzy test for FS image duplication.
+> +#  Could be fixed by
+> +#    [patch] btrfs: harden agaist duplicate fsid
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +mnt=$TEST_DIR/$seq.mnt
+> +_cleanup()
+> +{
+> +	rm -rf $mnt > /dev/null 2>&1
+> +	cd /
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dev_pool 2
+> +_scratch_dev_pool_get 2
+> +
+> +device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
+> +device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
+> +
+> +echo device_1=$device_1 device_2=$device_2 >> $seqres.full
+> +
+> +rm -rf $mnt > /dev/null 2>&1
+> +mkdir $mnt
+> +_mkfs_dev $device_1
+> +_mount $device_1 $mnt
+> +
+> +[[ $(findmnt $mnt | grep -v TARGET | awk '{print $2}') != $device_1 ]] && \
+> +						_fail "mounted device changed"
+> +
+> +for sb_bytenr in 65536 67108864
+> +do
+> +	echo -n "dd status=none if=$dev_foo of=$dev_bar bs=1 "\
+> +		"seek=$sb_bytenr skip=$sb_bytenr count=4096" >> $seqres.full
+> +	dd status=none if=$device_1 of=$device_2 bs=1 seek=$sb_bytenr \
+> +				skip=$sb_bytenr count=4096 > /dev/null 2>&1
+> +	echo ..:$? >> $seqres.full
+> +done
+> +
+> +#Original device is mounted, scan of its clone should fail
+> +$BTRFS_UTIL_PROG device scan $device_2 >> $seqres.full 2>&1
+> +[[ $? != 1 ]] && _fail "cloned device scan should fail"
+> +
+> +[[ $(findmnt $mnt | grep -v TARGET | awk '{print $2}') != $device_1 ]] && \
+> +						_fail "mounted device changed"
+> +
+> +#Original device scan should be successful
+> +$BTRFS_UTIL_PROG device scan $device_1 >> $seqres.full 2>&1
+> +[[ $? != 0 ]] && \
+> +	_fail "if it fails here, then it means subvolume mount at boot may fail "\
+> +	      "in some configs."
+> +
+> +umount $mnt > /dev/null 2>&1
+> +_scratch_dev_pool_put
+> +
+> +# success, all done
+> +echo "Silence is golden"
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
+> new file mode 100644
+> index 000000000000..2c57ea508748
+> --- /dev/null
+> +++ b/tests/btrfs/173.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 173
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 45782565c3b7..b2f1393f3e97 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -175,3 +175,4 @@
+>   170 auto quick snapshot
+>   171 auto quick qgroup
+>   172 auto quick punch
+> +173 volume
 > 
