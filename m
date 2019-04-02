@@ -1,206 +1,188 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:38202 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:38980 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725812AbfDBF6f (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 2 Apr 2019 01:58:35 -0400
-Subject: Re: [PATCH v3] fstests: btrfs verify hardening agaist duplicate fsid
-References: <1540571900-24768-1-git-send-email-anand.jain@oracle.com>
-From: Anand Jain <Anand.Jain@oracle.com>
-Message-ID: <799893ab-763e-7aa7-9e2b-2f1218d29b13@oracle.com>
-Date: Tue, 2 Apr 2019 13:58:23 +0800
-MIME-Version: 1.0
-In-Reply-To: <1540571900-24768-1-git-send-email-anand.jain@oracle.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        with ESMTP id S1726496AbfDBIUI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 2 Apr 2019 04:20:08 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH v2] fstests: btrfs: try use forget to unregister device
+Date: Tue,  2 Apr 2019 16:19:46 +0800
+Message-Id: <20190402081946.24838-1-anand.jain@oracle.com>
+In-Reply-To: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
+References: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, dsterba@suse.cz, guaneryu@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
+Some btrfs test cases use btrfs module-reload to unregister devices in
+the btrfs kernel. The problem with the module-reload approach is, if test
+system contains btrfs as rootfs, then you can't run these test cases.
 
-Eryu,
+Patches [1] introduced btrfs forget feature which can unregister devices
+without the module-reload approach.
 
-  This patch isn't integrated yet.
+ [1]
+ btrfs-progs: device scan: add new option to forget one or all scanned devices
+ btrfs: introduce new ioctl to unregister a btrfs device
 
-Thanks, Anand
+And this patch makes relevant changes in the fstests to use this new
+feature, when available.
 
-On 27/10/18 12:38 AM, Anand Jain wrote:
-> We have a known bug in btrfs, that we let the device path be changed
-> after the device has been mounted. So using this loop hole the new
-> copied device would appears as if its mounted immediately after its
-> been copied. So this test case reproduces this issue.
-> 
-> For example:
-> 
-> Initially.. /dev/mmcblk0p4 is mounted as /
-> 
-> lsblk
-> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-> mmcblk0     179:0    0 29.2G  0 disk
-> |-mmcblk0p4 179:4    0    4G  0 part /
-> |-mmcblk0p2 179:2    0  500M  0 part /boot
-> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
-> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
-> 
-> btrfs fi show
-> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
->      Total devices 1 FS bytes used 1.40GiB
->      devid    1 size 4.00GiB used 3.00GiB path /dev/mmcblk0p4
-> 
-> Copy mmcblk0 to sda
-> dd if=/dev/mmcblk0 of=/dev/sda
-> 
-> And immediately after the copy completes the change in the device
-> superblock is notified which the automount scans using
-> btrfs device scan and the new device sda becomes the mounted root
-> device.
-> 
-> lsblk
-> NAME        MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
-> sda           8:0    1 14.9G  0 disk
-> |-sda4        8:4    1    4G  0 part /
-> |-sda2        8:2    1  500M  0 part
-> |-sda3        8:3    1  256M  0 part
-> `-sda1        8:1    1  256M  0 part
-> mmcblk0     179:0    0 29.2G  0 disk
-> |-mmcblk0p4 179:4    0    4G  0 part
-> |-mmcblk0p2 179:2    0  500M  0 part /boot
-> |-mmcblk0p3 179:3    0  256M  0 part [SWAP]
-> `-mmcblk0p1 179:1    0  256M  0 part /boot/efi
-> btrfs fi show /
-> Label: none  uuid: 07892354-ddaa-4443-90ea-f76a06accaba
->      Total devices 1 FS bytes used 1.40GiB
->      devid    1 size 4.00GiB used 3.00GiB path /dev/sda4
-> 
-> The bug is quite nasty that you can't either unmount /dev/sda4 or
-> /dev/mmcblk0p4. And the problem does not get solved until you take
-> the sda out of the system on to another system to change its fsid using
-> the 'btrfstune -u' command.
-> 
-> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> ---
-> v2->v3:
->    Check the return code and use _fail to verify and accordingly fix golden
->      output.
->    Rename dev_foo(bar) to device_1(2)
->    Don't log dd retun to $seqres.full
->   
-> v1->v2:
->    dont play around with dev patch use it as it is.
->    do not use SCRATCH_MNT instead create it at the TEST_DIR and its related
->     changes.
->    golden out changes
-> 
->   tests/btrfs/173     | 82 +++++++++++++++++++++++++++++++++++++++++++++++++++++
->   tests/btrfs/173.out |  2 ++
->   tests/btrfs/group   |  1 +
->   3 files changed, 85 insertions(+)
->   create mode 100755 tests/btrfs/173
->   create mode 100644 tests/btrfs/173.out
-> 
-> diff --git a/tests/btrfs/173 b/tests/btrfs/173
-> new file mode 100755
-> index 000000000000..342ae92b4781
-> --- /dev/null
-> +++ b/tests/btrfs/173
-> @@ -0,0 +1,82 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Oracle. All Rights Reserved.
-> +#
-> +# FS QA Test 173
-> +#
-> +# Fuzzy test for FS image duplication.
-> +#  Could be fixed by
-> +#    [patch] btrfs: harden agaist duplicate fsid
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +mnt=$TEST_DIR/$seq.mnt
-> +_cleanup()
-> +{
-> +	rm -rf $mnt > /dev/null 2>&1
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dev_pool 2
-> +_scratch_dev_pool_get 2
-> +
-> +device_1=$(echo $SCRATCH_DEV_POOL | awk '{print $1}')
-> +device_2=$(echo $SCRATCH_DEV_POOL | awk '{print $2}')
-> +
-> +echo device_1=$device_1 device_2=$device_2 >> $seqres.full
-> +
-> +rm -rf $mnt > /dev/null 2>&1
-> +mkdir $mnt
-> +_mkfs_dev $device_1
-> +_mount $device_1 $mnt
-> +
-> +[[ $(findmnt $mnt | grep -v TARGET | awk '{print $2}') != $device_1 ]] && \
-> +						_fail "mounted device changed"
-> +
-> +for sb_bytenr in 65536 67108864
-> +do
-> +	echo -n "dd status=none if=$dev_foo of=$dev_bar bs=1 "\
-> +		"seek=$sb_bytenr skip=$sb_bytenr count=4096" >> $seqres.full
-> +	dd status=none if=$device_1 of=$device_2 bs=1 seek=$sb_bytenr \
-> +				skip=$sb_bytenr count=4096 > /dev/null 2>&1
-> +	echo ..:$? >> $seqres.full
-> +done
-> +
-> +#Original device is mounted, scan of its clone should fail
-> +$BTRFS_UTIL_PROG device scan $device_2 >> $seqres.full 2>&1
-> +[[ $? != 1 ]] && _fail "cloned device scan should fail"
-> +
-> +[[ $(findmnt $mnt | grep -v TARGET | awk '{print $2}') != $device_1 ]] && \
-> +						_fail "mounted device changed"
-> +
-> +#Original device scan should be successful
-> +$BTRFS_UTIL_PROG device scan $device_1 >> $seqres.full 2>&1
-> +[[ $? != 0 ]] && \
-> +	_fail "if it fails here, then it means subvolume mount at boot may fail "\
-> +	      "in some configs."
-> +
-> +umount $mnt > /dev/null 2>&1
-> +_scratch_dev_pool_put
-> +
-> +# success, all done
-> +echo "Silence is golden"
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/173.out b/tests/btrfs/173.out
-> new file mode 100644
-> index 000000000000..2c57ea508748
-> --- /dev/null
-> +++ b/tests/btrfs/173.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 173
-> +Silence is golden
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 45782565c3b7..b2f1393f3e97 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -175,3 +175,4 @@
->   170 auto quick snapshot
->   171 auto quick qgroup
->   172 auto quick punch
-> +173 volume
-> 
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+v2:
+ Update change log.
+ Rename _require_btrfs_forget_if_not_fs_loadable() to _require_btrfs_forget_or_module_loadable()
+ Rename _btrfs_forget_if_not_fs_reload() to _btrfs_forget_or_module_reload()
+
+ common/btrfs    | 20 ++++++++++++++++++++
+ tests/btrfs/124 |  6 +++---
+ tests/btrfs/125 |  6 +++---
+ tests/btrfs/154 |  6 +++---
+ tests/btrfs/164 |  4 ++--
+ 5 files changed, 31 insertions(+), 11 deletions(-)
+
+diff --git a/common/btrfs b/common/btrfs
+index f6513c06f95f..19ac7cc4b18c 100644
+--- a/common/btrfs
++++ b/common/btrfs
+@@ -382,3 +382,23 @@ _scratch_btrfs_sectorsize()
+ 	$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV |\
+ 		grep sectorsize | awk '{print $2}'
+ }
++
++_btrfs_supports_forget()
++{
++	$BTRFS_UTIL_PROG device scan --help | grep -wq forget && \
++		$BTRFS_UTIL_PROG device scan --forget > /dev/null 2>&1
++}
++
++_require_btrfs_forget_or_module_loadable()
++{
++	_btrfs_supports_forget && return
++
++	_require_loadable_fs_module "btrfs"
++}
++
++_btrfs_forget_or_module_reload()
++{
++	_btrfs_supports_forget && return
++
++	_reload_fs_module "btrfs"
++}
+diff --git a/tests/btrfs/124 b/tests/btrfs/124
+index a52c65f608ff..0686a3b5f991 100755
+--- a/tests/btrfs/124
++++ b/tests/btrfs/124
+@@ -51,7 +51,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch_dev_pool 2
+ _test_unmount
+-_require_loadable_fs_module "btrfs"
++_require_btrfs_forget_or_module_loadable
+ 
+ _scratch_dev_pool_get 2
+ 
+@@ -86,7 +86,7 @@ echo "clean btrfs ko" >> $seqres.full
+ _scratch_unmount
+ 
+ # un-scan the btrfs devices
+-_reload_fs_module "btrfs"
++_btrfs_forget_or_module_reload
+ 
+ echo >> $seqres.full
+ echo "-----Write degraded mount fill upto $max_fs_sz bytes-----" >> $seqres.full
+@@ -125,7 +125,7 @@ echo
+ echo "Mount degraded with the other dev"
+ _scratch_unmount
+ # un-scan the btrfs devices
+-_reload_fs_module "btrfs"
++_btrfs_forget_or_module_reload
+ _mount -o degraded $dev2 $SCRATCH_MNT >>$seqres.full 2>&1
+ _run_btrfs_util_prog filesystem show
+ checkpoint3=`md5sum $SCRATCH_MNT/tf2`
+diff --git a/tests/btrfs/125 b/tests/btrfs/125
+index 847fa62ad25f..e1edccddd7d4 100755
+--- a/tests/btrfs/125
++++ b/tests/btrfs/125
+@@ -50,7 +50,7 @@ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch_dev_pool 3
+ _test_unmount
+-_require_loadable_fs_module "btrfs"
++_require_btrfs_forget_or_module_loadable
+ _require_btrfs_fs_feature raid56
+ 
+ _scratch_dev_pool_get 3
+@@ -103,7 +103,7 @@ echo "unmount" >> $seqres.full
+ _scratch_unmount
+ echo "clean btrfs ko" >> $seqres.full
+ # un-scan the btrfs devices
+-_reload_fs_module "btrfs"
++_btrfs_forget_or_module_reload
+ _mount -o degraded,device=$dev2 $dev1 $SCRATCH_MNT >>$seqres.full 2>&1
+ dd if=/dev/zero of="$SCRATCH_MNT"/tf2 bs=$bs count=$count \
+ 					>>$seqres.full 2>&1
+@@ -139,7 +139,7 @@ echo "Mount degraded but with other dev"
+ 
+ _scratch_unmount
+ # un-scan the btrfs devices
+-_reload_fs_module "btrfs"
++_btrfs_forget_or_module_reload
+ 
+ _mount -o degraded,device=${dev2} $dev3 $SCRATCH_MNT >>$seqres.full 2>&1
+ 
+diff --git a/tests/btrfs/154 b/tests/btrfs/154
+index cd6c688fb9fe..cbf65a42919d 100755
+--- a/tests/btrfs/154
++++ b/tests/btrfs/154
+@@ -36,7 +36,7 @@ rm -f $seqres.full
+ _supported_fs btrfs
+ _supported_os Linux
+ _require_scratch_dev_pool 2
+-_require_loadable_fs_module "btrfs"
++_require_btrfs_forget_or_module_loadable
+ 
+ _scratch_dev_pool_get 2
+ 
+@@ -90,7 +90,7 @@ degrade_mount_write()
+ 
+ 	echo "clean btrfs ko" >> $seqres.full
+ 	# un-scan the btrfs devices
+-	_reload_fs_module "btrfs"
++	_btrfs_forget_or_module_reload
+ 	_mount -o degraded $DEV1 $SCRATCH_MNT >>$seqres.full 2>&1
+ 	cnt=$(( $COUNT/10 ))
+ 	dd if=/dev/urandom of="$SCRATCH_MNT"/tf1 bs=$bs count=$cnt \
+@@ -142,7 +142,7 @@ verify()
+ 	echo "unmount" >> $seqres.full
+ 
+ 	_scratch_unmount
+-	_reload_fs_module "btrfs"
++	_btrfs_forget_or_module_reload
+ 	_mount -o degraded $DEV2 $SCRATCH_MNT >>$seqres.full 2>&1
+ 	verify_checkpoint1=`md5sum $SCRATCH_MNT/tf1`
+ 	verify_checkpoint2=`md5sum $SCRATCH_MNT/tf2`
+diff --git a/tests/btrfs/164 b/tests/btrfs/164
+index 097191a0e493..e280f52e930a 100755
+--- a/tests/btrfs/164
++++ b/tests/btrfs/164
+@@ -36,7 +36,7 @@ rm -f $seqres.full
+ # Modify as appropriate.
+ _supported_fs btrfs
+ _supported_os Linux
+-_require_loadable_fs_module "btrfs"
++_require_btrfs_forget_or_module_loadable
+ _require_scratch_dev_pool 2
+ 
+ _scratch_dev_pool_get 2
+@@ -69,7 +69,7 @@ delete_seed()
+ {
+ 	_run_btrfs_util_prog device delete $dev_seed $SCRATCH_MNT
+ 	_scratch_unmount
+-	_reload_fs_module "btrfs"
++	_btrfs_forget_or_module_reload
+ 	run_check _mount $dev_sprout $SCRATCH_MNT
+ 	_run_btrfs_util_prog filesystem show -m $SCRATCH_MNT
+ 	echo -- sprout --
+-- 
+2.17.1
