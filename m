@@ -1,77 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:36916 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725884AbfDBI3a (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 2 Apr 2019 04:29:30 -0400
-Date: Tue, 2 Apr 2019 04:29:29 -0400 (EDT)
-From: Xiaoli Feng <xifeng@redhat.com>
-Message-ID: <2070529038.372776.1554193769718.JavaMail.zimbra@redhat.com>
-In-Reply-To: <CAH2r5mt=ffwygAmeuHGtNCbDXAzJ3f+V1Xeaw=S=MmaQKRkHLA@mail.gmail.com>
-References: <20190331123130.14922-1-xifeng@redhat.com> <CAH2r5mspi108y=4wkKWxQno+WGJnEOrWOGWL9KqSucF6fULG0g@mail.gmail.com> <CAH2r5mt=ffwygAmeuHGtNCbDXAzJ3f+V1Xeaw=S=MmaQKRkHLA@mail.gmail.com>
-Subject: Re: [PATCH v2] common/rc: add global mounted option for
- _scratch_remount
+Received: from mx2.suse.de ([195.135.220.15]:36156 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726168AbfDBKec (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 2 Apr 2019 06:34:32 -0400
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [RFC PATCH 0/2] Initial CephFS tests
+Date: Tue,  2 Apr 2019 11:34:26 +0100
+Message-Id: <20190402103428.21435-1-lhenriques@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
+Hi all,
 
-Thanks Steve for the feedback.
+This is the first attempt to (finally!) add CephFS specific tests to
+fstests.  Hopefully, more will follow once an initial set is accepted -- I
+do have a few more that could easily be added, and I'm sure that in the
+future more CephFS-specific tests can continue to be developed.  This test
+suite has already proved to be quite useful in finding bugs in this
+filesystem; adding specific tests for it is just the next logic step.
 
------ Original Message -----
-> From: "Steve French" <smfrench@gmail.com>
-> To: "XiaoLi Feng" <xifeng@redhat.com>, fstests@vger.kernel.org
-> Sent: Tuesday, April 2, 2019 8:33:12 AM
-> Subject: Re: [PATCH v2] common/rc: add global mounted option for _scratch_remount
-> 
-> And 306 also works with cifs (as long as mounting with "sfu" mount
-> option) with this patch
-> 
-> On Mon, Apr 1, 2019 at 10:29 AM Steve French <smfrench@gmail.com> wrote:
-> >
-> > I also verified that test 452 now works to cifs (SMB3 mounts to
-> > multiple types of test targets, Azure, Windows etc.)
-> >
-> > On Sun, Mar 31, 2019 at 7:31 AM XiaoLi Feng <xifeng@redhat.com> wrote:
-> > >
-> > > From: Xiaoli Feng <xifeng@redhat.com>
-> > >
-> > > When call _scratch_remount for cifs , it always requires to input
-> > > password. This will make generic/306 generic/452 failed because
-> > > cifs remount failed.
-> > > ---
-> > >  common/rc | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > >
-> > > diff --git a/common/rc b/common/rc
-> > > index 1c42515f..ea1eaf6a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -357,7 +357,7 @@ _scratch_remount()
-> > >      local opts="$1"
-> > >
-> > >      if test -n "$opts"; then
-> > > -       mount -o "remount,$opts" $SCRATCH_MNT
-> > > +       mount $MOUNT_OPTIONS -o "remount,$opts" $SCRATCH_MNT
-> > >      fi
-> > >  }
-> > >
-> > > --
-> > > 2.18.1
-> > >
-> >
-> >
-> > --
-> > Thanks,
-> >
-> > Steve
-> 
-> 
-> 
-> --
-> Thanks,
-> 
-> Steve
-> 
+For now, just two simple tests to do some basic checks on quotas features.
+
+Cheers,
+--
+Luis
+
+Luis Henriques (2):
+  ceph: test basic ceph.quota.max_files quota
+  ceph: test basic ceph.quota.max_bytes quota
+
+ tests/ceph/001      | 108 ++++++++++++++++++++++++++++++++
+ tests/ceph/001.out  |   1 +
+ tests/ceph/002      | 147 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/002.out  |   1 +
+ tests/ceph/Makefile |  20 ++++++
+ tests/ceph/group    |   2 +
+ 6 files changed, 279 insertions(+)
+ create mode 100755 tests/ceph/001
+ create mode 100644 tests/ceph/001.out
+ create mode 100755 tests/ceph/002
+ create mode 100644 tests/ceph/002.out
+ create mode 100644 tests/ceph/Makefile
+ create mode 100644 tests/ceph/group
