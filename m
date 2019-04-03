@@ -1,11 +1,13 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:47498 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725959AbfDCQyb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 12:54:31 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:34368 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725959AbfDCREv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 13:04:51 -0400
 From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH] fstests: btrfs/048: amend property validation cases
-Date: Thu,  4 Apr 2019 00:54:19 +0800
-Message-Id: <20190403165419.12666-1-anand.jain@oracle.com>
+Subject: [PATCH v2] fstests: btrfs/048: amend property validation cases
+Date: Thu,  4 Apr 2019 01:04:37 +0800
+Message-Id: <20190403170437.14448-1-anand.jain@oracle.com>
+In-Reply-To: <20190403165419.12666-1-anand.jain@oracle.com>
+References: <20190403165419.12666-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org
@@ -18,27 +20,27 @@ Add more property validation cases which are fixed by the patches [1]
 
 Signed-off-by: Anand Jain <anand.jain@oracle.com>
 ---
- tests/btrfs/048     | 25 +++++++++++++++++++++++++
+v2: correct kernel patch titles in the test header and change log
+
+ tests/btrfs/048     | 23 +++++++++++++++++++++++
  tests/btrfs/048.out | 16 ++++++++++++++++
- 2 files changed, 41 insertions(+)
+ 2 files changed, 39 insertions(+)
 
 diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 588219579cc6..657634f7cc3e 100755
+index 588219579cc6..f6de0b8ca8b1 100755
 --- a/tests/btrfs/048
 +++ b/tests/btrfs/048
-@@ -6,6 +6,11 @@
+@@ -6,6 +6,9 @@
  #
  # Btrfs properties test. The btrfs properties feature was introduced in the
  # linux kernel 3.14.
 +# Fails without the kernel patches:
-+#  btrfs: fix property validate fail should not increment generation
-+#  btrfs: open code btrfs_set_prop in inherit_prop
 +#  btrfs: fix vanished compression property after failed set
 +#  btrfs: fix zstd compression parameter
  #
  seq=`basename $0`
  seqres=$RESULT_DIR/$seq
-@@ -34,6 +39,7 @@ _supported_os Linux
+@@ -34,6 +37,7 @@ _supported_os Linux
  _require_test
  _require_scratch
  _require_btrfs_command "property"
@@ -46,7 +48,7 @@ index 588219579cc6..657634f7cc3e 100755
  
  send_files_dir=$TEST_DIR/btrfs-test-$seq
  
-@@ -203,5 +209,24 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 compression
+@@ -203,5 +207,24 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 compression
  touch $SCRATCH_MNT/sv1/file2
  $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1/file2 compression
  
