@@ -1,263 +1,204 @@
-Received: from mail-yw1-f67.google.com ([209.85.161.67]:36680 "EHLO
-        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726218AbfDCQXK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 12:23:10 -0400
+Received: from mail.kernel.org ([198.145.29.99]:48954 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726183AbfDCRfe (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 3 Apr 2019 13:35:34 -0400
 MIME-Version: 1.0
-References: <20190403055926.23253-1-amir73il@gmail.com> <20190403160403.GA32415@magnolia>
-In-Reply-To: <20190403160403.GA32415@magnolia>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 3 Apr 2019 19:22:58 +0300
-Message-ID: <CAOQ4uxjqgf-=BdHEh8bvP=T8YFaGUuBS826-uC1pz5f+V3cDMQ@mail.gmail.com>
-Subject: Re: [PATCH v3 1/2] fstests: Add more sanity to seek_sanity_test
+References: <20190401125018.10009-1-fdmanana@kernel.org> <20190403021819.GW23020@dastard>
+In-Reply-To: <20190403021819.GW23020@dastard>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Wed, 3 Apr 2019 17:35:20 +0000
+Message-ID: <CAL3q7H7kJ5VnCxBA+NYuxrpeRbi=vTQXsk7TFwSjCAQSixNGew@mail.gmail.com>
+Subject: Re: [PATCH v2 1/7] fsstress: allow fsync on directories too
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 3, 2019 at 7:06 PM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+On Wed, Apr 3, 2019 at 3:18 AM Dave Chinner <david@fromorbit.com> wrote:
 >
-> On Wed, Apr 03, 2019 at 08:59:25AM +0300, Amir Goldstein wrote:
-> > seek_sanity_test checks for one of several SEEK_DATA/HOLE
-> > behaviors and allows for the default behavior of filesystems,
-> > where SEEK_HOLE always returns EOF.
+> On Mon, Apr 01, 2019 at 01:50:18PM +0100, fdmanana@kernel.org wrote:
+> > From: Filipe Manana <fdmanana@suse.com>
 > >
-> > This means that if filesystem has a regression in finding
-> > holes, the sanity test won't catch it. And indeed this regression
-> > happened in overlayfs on kernel v4.19 and went unnoticed.
+> > Currently the fsync function can only be performed against regular files.
+> > Allow it to operate on directories too, to increase test coverage and
+> > allow for chances of finding bugs in a filesystem's implementation of
+> > fsync against directories.
 > >
-> > To improve test coverage, add a flag -f to seek_sanity_test to
-> > indicate that the default behavior is not acceptable.
-> > Whitelist all filesystem types that are expected to detect holes
-> > and use wrapper when invoking seek_sanity_test to add the -f flag
-> > to those filesystems.
-> >
-> > Overlayfs inherits expected behavior from base fs type.
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > > ---
 > >
-> > Eryu,
+> > V2: Added helper functions to open and close files or directories.
+>
+> not exactly what I meant, more below....
 > >
-> > Sorry for the delay.
-> > Changes per your v2 review.
+> >  ltp/fsstress.c | 42 +++++++++++++++++++++++++++++++++++++++---
+> >  1 file changed, 39 insertions(+), 3 deletions(-)
 > >
-> > Amir.
-> >
-> > Changes from v2:
-> > - Rename helper to _fstyp_has_non_default_seek_data_hole
-> > - Clarify documentation and error message
-> > - Skip new test (seek to punched hole) on default_behavior
-> >
-> >
-> >  common/rc              | 47 ++++++++++++++++++++++++++++++++++++++++++
-> >  src/seek_sanity_test.c | 14 +++++++++++--
-> >  tests/generic/285      |  2 +-
-> >  tests/generic/436      |  2 +-
-> >  tests/generic/445      |  2 +-
-> >  tests/generic/448      |  2 +-
-> >  tests/generic/490      |  2 +-
-> >  7 files changed, 64 insertions(+), 7 deletions(-)
-> >
-> > diff --git a/common/rc b/common/rc
-> > index 1c42515f..7b292321 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -2298,6 +2298,53 @@ _ext4_disable_extent_zeroout()
-> >               echo 0 >/sys/fs/ext4/$sdev/extent_max_zeroout_kb
-> >  }
-> >
-> > +# The default behavior of SEEK_HOLE is to always return EOF.
->
-> I assume this statement applies even when there /is/ a hole in the file?
->
-> As in, "Some filesystems return EOF even when there are holes", right?
-
-Right.
-
->
-> I wonder if there's a good way to fix SEEK_HOLE for those filesystems.
->
-> > +# Filesystems that implement non-default behavior return the offset
->
-> ...except for the magic filesystems below that actually return holes?
-
-Yes.
-
->
-> I suppose that works, since even the default behavior tells no
-> falsehoods w.r.t. where might there data in a file.
->
-> > +# of holes with SEEK_HOLE. There is no way to query the filesystem
-> > +# of which behavior it is implementing.
-> > +# We use this whitelist FSTYP, to set expectation and avoid silent
-> > +# regression of filesystem seek hole behavior.
-> > +#
-> > +# Return 0 for true
-> > +_fstyp_has_non_default_seek_data_hole()
-> > +{
-> > +     if [ -z $1 ]; then
-> > +             local fstyp=$FSTYP
-> > +     else
-> > +             local fstyp=$1
-> > +     fi
-> > +
-> > +     case "$fstyp" in
-> > +     btrfs|ext4|xfs|ceph|cifs|f2fs|gfs2|nfs*|ocfs2|tmpfs)
->
-> Not a fan of whitelists, but I don't see a better way to do this.
->
-> Acked-by: Darrick J. Wong <darrick.wong@oracle.com>
->
-> --D
->
-> > +             return 0
-> > +             ;;
-> > +     overlay)
-> > +             if [ ! -z $OVL_BASE_FSTYP -a $OVL_BASE_FSTYP != "overlay" ]; then
-> > +                     _fstyp_has_non_default_seek_data_hole $OVL_BASE_FSTYP
-> > +                     return $?
-> > +             else
-> > +                     # Assume that base fs has default behavior
-> > +                     return 1
-> > +             fi
-> > +             ;;
-> > +     *)
-> > +             # by default fstyp has default SEEK_HOLE behavior;
-> > +             # if your fs has non-default behavior, add it to whitelist above!
-> > +             return 1
-> > +             ;;
-> > +     esac
-> > +}
-> > +
-> > +# Run seek sanity test with predefined expectation for SEEK_DATA/HOLE behavior
-> > +_run_seek_sanity_test()
-> > +{
-> > +     local testseekargs
-> > +     if _fstyp_has_non_default_seek_data_hole; then
-> > +             testseekargs+="-f"
-> > +     fi
-> > +     $here/src/seek_sanity_test $testseekargs $*
-> > +}
-> > +
-> >  # Check if the file system supports seek_data/hole
-> >  _require_seek_data_hole()
-> >  {
-> > diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> > index e9938d1b..a6bda0b1 100644
-> > --- a/src/seek_sanity_test.c
-> > +++ b/src/seek_sanity_test.c
-> > @@ -23,6 +23,7 @@
-> >  #endif
-> >
-> >  static blksize_t alloc_size;
-> > +int allow_default_behavior = 1;
-> >  int default_behavior = 0;
-> >  int unwritten_extents = 0;
-> >  char *base_file_path;
-> > @@ -1119,6 +1120,12 @@ static int test_basic_support(void)
-> >               fprintf(stderr, "File system supports the default behavior.\n");
+> > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
+> > index 2223fd7d..1169b840 100644
+> > --- a/ltp/fsstress.c
+> > +++ b/ltp/fsstress.c
+> > @@ -303,6 +303,7 @@ int       attr_remove_path(pathname_t *, const char *, int);
+> >  int  attr_set_path(pathname_t *, const char *, const char *, const int, int);
+> >  void check_cwd(void);
+> >  void cleanup_flist(void);
+> > +void close_file_or_dir(int, DIR *);
+> >  int  creat_path(pathname_t *, mode_t);
+> >  void dcache_enter(int, int);
+> >  void dcache_init(void);
+> > @@ -324,6 +325,7 @@ void      make_freq_table(void);
+> >  int  mkdir_path(pathname_t *, mode_t);
+> >  int  mknod_path(pathname_t *, mode_t, dev_t);
+> >  void namerandpad(int, char *, int);
+> > +int  open_file_or_dir(pathname_t *, int, DIR **);
+> >  int  open_path(pathname_t *, int);
+> >  DIR  *opendir_path(pathname_t *);
+> >  void process_freq(char *);
+> > @@ -852,6 +854,15 @@ cleanup_flist(void)
 > >       }
+> >  }
 > >
-> > +     if (default_behavior && !allow_default_behavior) {
-> > +             fprintf(stderr, "Default behavior is not allowed. Aborting.\n");
-> > +             ret = -1;
-> > +             goto out;
-> > +     }
+> > +void
+> > +close_file_or_dir(int fd, DIR *dir)
+> > +{
+> > +     if (dir)
+> > +             closedir(dir);
+> > +     else
+> > +             close(fd);
+> > +}
 > > +
-> >       ftruncate(fd, 0);
-> >       if (fallocate(fd, 0, 0, alloc_size) == -1) {
-> >               if (errno == EOPNOTSUPP)
-> > @@ -1148,7 +1155,7 @@ out:
-> >
-> >  void usage(char *cmd)
+> >  int
+> >  creat_path(pathname_t *name, mode_t mode)
 > >  {
-> > -     fprintf(stdout, "Usage: %s [-t] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
-> > +     fprintf(stdout, "Usage: %s [-tf] [-s <starttest>] [-e <endtest>] base_file_path\n", cmd);
-> >       exit(1);
+> > @@ -1385,6 +1396,30 @@ namerandpad(int id, char *buf, int i)
 > >  }
 > >
-> > @@ -1169,11 +1176,14 @@ int main(int argc, char **argv)
-> >       teststart = 1;
-> >       testend = 12;
+> >  int
+> > +open_file_or_dir(pathname_t *name, int flags, DIR **dir)
+> > +{
+> > +     int fd;
+> > +
+> > +     fd = open_path(name, flags);
+> > +     if (fd < 0 && errno == EISDIR) {
+> > +             *dir = opendir_path(name);
+>
+> Why this function, and not just open(O_DIRECTORY)?
+
+The reason I did it is because if flags are O_WRONLY (or O_RDWR),
+opening a directory always fails (even with O_DIRECTORY) with errno
+EISDIR.
+If the access flags are O_RDONLY, opening a directory succeeds
+regardless of O_DIRECTORY being passed to open(2).
+
+Since I supposed fsetxattr(2) and fsync(2) could be considered write
+operations, I went for the use of opendir_path(), using the dir stream
+and all that hassle.
+
+But now I just tested if fsync and fsetxattr work if the file is open
+O_RDONLY, and to my surprise they do.
+
+Test program:
+
+https://friendpaste.com/7gUN4kB3ZfHwVdlDggodUY
+
+Output with O_WRONLY |  O_DIRECTORY passed to open(2):
+
+$ mkfs.xfs -f /dev/sdc
+$ mount /dev/sdc /mnt
+
+$ touch /mnt/file
+$ mkdir /mnt/dir
+
+$ ./test_open /mnt/file
+open error 20: Not a directory
+$ ./test_open /mnt/dir
+open error 21: Is a directory
+
+Output with only O_RDONLY passed to open(2):
+
+$ mkfs.xfs -f /dev/sdc
+$ mount /dev/sdc /mnt
+
+$ touch /mnt/file
+$ mkdir /mnt/dir
+
+$ ./test_open /mnt/file
+file open fd = 3, setxattr(fd) = 0, fsync(fd) = 0
+$ ./test_open /mnt/dir
+file open fd = 3, setxattr(fd) = 0, fsync(fd) = 0
+
+Perhaps I did something wrong, as it's late here right now.
+
+So should we go for ensuring O_RDONLY is used when the first open
+fails with EISDIR (and add some comment explaining this in case I'm
+not the only for which this was a surprise)
+
+Thanks.
+
+
+> None of the code that uses this function actually uses the DIR *
+> that is returned, just the fd that is extracted from it. So why no
+> just open() the directory directly and avoid having all the mess
+> with dir streams that aren't needed?
+>
+>
+> > +             if (*dir) {
+> > +                     fd = dirfd(*dir);
+> > +                     if (fd < 0) {
+> > +                             int e = errno;
+> > +
+> > +                             closedir(*dir);
+> > +                             *dir = NULL;
+> > +                             errno = e;
+> > +                     }
+> > +             }
+> > +     } else {
+> > +             *dir = NULL;
+> > +     }
+> > +     return fd;
+>
+> Excessive nesting. I think this should be as simple as:
+>
+>         fd = open_path(name, flags);
+>         if (fd < 0 && errno != EISDIR) {
+>                 return -1;
+>         return open_path(name, flags | O_DIRECTORY);
+>
+> And the close_file_or_dir() function is completely unnecessary.
+>
+>
+> > +
+> > +int
+> >  open_path(pathname_t *name, int oflag)
+> >  {
+> >       char            buf[NAME_MAX + 1];
+> > @@ -3440,15 +3475,16 @@ fsync_f(int opno, long r)
+> >       pathname_t      f;
+> >       int             fd;
+> >       int             v;
+> > +     DIR             *dir;
 > >
-> > -     while ((opt = getopt(argc, argv, "ts:e:")) != -1) {
-> > +     while ((opt = getopt(argc, argv, "tfs:e:")) != -1) {
-> >               switch (opt) {
-> >               case 't':
-> >                       check_support++;
-> >                       break;
-> > +             case 'f':
-> > +                     allow_default_behavior = 0;
-> > +                     break;
-> >               case 's':
-> >                       teststart = strtol(optarg, NULL, 10);
-> >                       if (teststart <= 0 || teststart > numtests) {
-> > diff --git a/tests/generic/285 b/tests/generic/285
-> > index b53b3acc..20e89e5b 100755
-> > --- a/tests/generic/285
-> > +++ b/tests/generic/285
-> > @@ -37,7 +37,7 @@ _cleanup()
-> >       eval "rm -f $BASE_TEST_FILE.*"
-> >  }
-> >
-> > -$here/src/seek_sanity_test $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> > +_run_seek_sanity_test $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> >       _fail "seek sanity check failed!"
-> >
-> >  # success, all done
-> > diff --git a/tests/generic/436 b/tests/generic/436
-> > index a3ef70e5..ada60b2e 100755
-> > --- a/tests/generic/436
-> > +++ b/tests/generic/436
-> > @@ -36,7 +36,7 @@ _cleanup()
-> >       rm -f $tmp.* $BASE_TEST_FILE.*
-> >  }
-> >
-> > -$here/src/seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> > +_run_seek_sanity_test -s 13 -e 16 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> >       _fail "seek sanity check failed!"
-> >
-> >  # success, all done
-> > diff --git a/tests/generic/445 b/tests/generic/445
-> > index 694913ae..248f321b 100755
-> > --- a/tests/generic/445
-> > +++ b/tests/generic/445
-> > @@ -36,7 +36,7 @@ _cleanup()
-> >       rm -f $tmp.* $BASE_TEST_FILE.*
-> >  }
-> >
-> > -$here/src/seek_sanity_test -s 17 -e 17 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> > +_run_seek_sanity_test -s 17 -e 17 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> >       _fail "seek sanity check failed!"
-> >
-> >  # success, all done
-> > diff --git a/tests/generic/448 b/tests/generic/448
-> > index d3ec5528..dada499b 100755
-> > --- a/tests/generic/448
-> > +++ b/tests/generic/448
-> > @@ -34,7 +34,7 @@ BASE_TEST_FILE=$TEST_DIR/seek_sanity_testfile_$seq
-> >
-> >  _require_test_program "seek_sanity_test"
-> >
-> > -$here/src/seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> > +_run_seek_sanity_test -s 18 -e 18 $BASE_TEST_FILE > $seqres.full 2>&1 ||
-> >       _fail "seek sanity check failed!"
-> >
-> >  _check_dmesg
-> > diff --git a/tests/generic/490 b/tests/generic/490
-> > index 330c2b60..07b08939 100755
-> > --- a/tests/generic/490
-> > +++ b/tests/generic/490
-> > @@ -39,7 +39,7 @@ _cleanup()
-> >       rm -f $base_test_file*
-> >  }
-> >
-> > -$here/src/seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
-> > +_run_seek_sanity_test -s 19 -e 20 $base_test_file > $seqres.full 2>&1 ||
-> >       _fail "seek sanity check failed!"
-> >
-> >  # success, all done
-> > --
-> > 2.17.1
-> >
+> >       init_pathname(&f);
+> > -     if (!get_fname(FT_REGFILE, r, &f, NULL, NULL, &v)) {
+> > +     if (!get_fname(FT_REGFILE | FT_DIRm, r, &f, NULL, NULL, &v)) {
+> >               if (v)
+> >                       printf("%d/%d: fsync - no filename\n", procid, opno);
+> >               free_pathname(&f);
+> >               return;
+> >       }
+> > -     fd = open_path(&f, O_WRONLY);
+> > +     fd = open_file_or_dir(&f, O_WRONLY, &dir);
+> >       e = fd < 0 ? errno : 0;
+> >       check_cwd();
+> >       if (fd < 0) {
+>
+> This whole hunk - from init_pathname to check_cwd - was what I was
+> suggesting you factor out, not just the open_path() code.
+>
+> Cheers,
+>
+> Dave.
+> --
+> Dave Chinner
+> david@fromorbit.com
