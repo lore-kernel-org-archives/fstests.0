@@ -1,354 +1,211 @@
-Received: from mail.kernel.org ([198.145.29.99]:38094 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726698AbfDDQaZ (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 4 Apr 2019 12:30:25 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v3 3/7] fsstress: add operation for setting xattrs on files and directories
-Date: Thu,  4 Apr 2019 17:30:18 +0100
-Message-Id: <20190404163018.19129-1-fdmanana@kernel.org>
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:34567 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728763AbfDCF7k (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 01:59:40 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v3 2/2] generic: Test that SEEK_HOLE can find a punched hole
+Date: Wed,  3 Apr 2019 08:59:26 +0300
+Message-Id: <20190403055926.23253-2-amir73il@gmail.com>
+In-Reply-To: <20190403055926.23253-1-amir73il@gmail.com>
+References: <20190403055926.23253-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Eddie Horng <eddiehorng.tw@gmail.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+Added a test case to seek_sanity_test and a test to run it.
 
-Currently fsstress does not exercise creating, reading or deleting xattrs
-on files or directories. This change adds support for setting xattrs on
-files and directories, using only the xattr user namespace (the other
-namespaces are not general purpose and are used for security, capabilities,
-ACLs, etc). This adds a counter for each file entry structure that keeps
-track of the number of xattrs set for the file entry, and each new xattr
-has a name that includes the counter's value (example: "user.x4").
-Values for the xattrs have at most 100 bytes, which is more than the
-maximum size supported for all major filesystems.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
+ src/seek_sanity_test.c | 63 +++++++++++++++++++++++++++++++++++++++---
+ tests/generic/999      | 44 +++++++++++++++++++++++++++++
+ tests/generic/999.out  |  1 +
+ tests/generic/group    |  1 +
+ 4 files changed, 105 insertions(+), 4 deletions(-)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
 
-V2: Use a different name for the operation (setfattr instead of the already
-    taken setxattr) and make use of the helper functions for opening and
-    closing files or directories, introduced in the first patch of this
-    series.
-V3: Simplified implementation to not need to open a file descriptor and
-    use a path string instead.
-
- ltp/fsstress.c | 140 +++++++++++++++++++++++++++++++++++++++++++++++++++++----
- 1 file changed, 131 insertions(+), 9 deletions(-)
-
-diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-index 3ec19143..d1db19da 100644
---- a/ltp/fsstress.c
-+++ b/ltp/fsstress.c
-@@ -27,6 +27,7 @@
- io_context_t	io_ctx;
- #endif
- #include <sys/syscall.h>
-+#include <sys/xattr.h>
+diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
+index a6bda0b1..30e996e2 100644
+--- a/src/seek_sanity_test.c
++++ b/src/seek_sanity_test.c
+@@ -16,6 +16,7 @@
+ #include <unistd.h>
+ #include <stdlib.h>
+ #include <assert.h>
++#include "global.h"
  
- #ifndef FS_IOC_GETFLAGS
- #define FS_IOC_GETFLAGS                 _IOR('f', 1, long)
-@@ -84,6 +85,7 @@ typedef enum {
- 	OP_RESVSP,
- 	OP_RMDIR,
- 	OP_SETATTR,
-+	OP_SETFATTR,
- 	OP_SETXATTR,
- 	OP_SPLICE,
- 	OP_STAT,
-@@ -110,6 +112,7 @@ typedef struct opdesc {
- typedef struct fent {
- 	int	id;
- 	int	parent;
-+	int	xattr_counter;
- } fent_t;
+ #ifndef SEEK_DATA
+ #define SEEK_DATA      3
+@@ -26,6 +27,7 @@ static blksize_t alloc_size;
+ int allow_default_behavior = 1;
+ int default_behavior = 0;
+ int unwritten_extents = 0;
++int punch_hole = 0;
+ char *base_file_path;
  
- typedef struct flist {
-@@ -156,6 +159,8 @@ struct print_string {
- #define	MAXFSIZE	((1ULL << 63) - 1ULL)
- #define	MAXFSIZE32	((1ULL << 40) - 1ULL)
+ static void get_file_system(int fd)
+@@ -118,8 +120,9 @@ static int do_fallocate(int fd, off_t offset, off_t length, int mode)
  
-+#define XATTR_NAME_BUF_SIZE 18
-+
- void	afsync_f(int, long);
- void	allocsp_f(int, long);
- void	aread_f(int, long);
-@@ -176,6 +181,7 @@ void	fdatasync_f(int, long);
- void	fiemap_f(int, long);
- void	freesp_f(int, long);
- void	fsync_f(int, long);
-+char	*gen_random_string(int);
- void	getattr_f(int, long);
- void	getdents_f(int, long);
- void	link_f(int, long);
-@@ -194,6 +200,7 @@ void	rename_f(int, long);
- void	resvsp_f(int, long);
- void	rmdir_f(int, long);
- void	setattr_f(int, long);
-+void	setfattr_f(int, long);
- void	setxattr_f(int, long);
- void	splice_f(int, long);
- void	stat_f(int, long);
-@@ -204,6 +211,7 @@ void	unlink_f(int, long);
- void	unresvsp_f(int, long);
- void	write_f(int, long);
- void	writev_f(int, long);
-+char	*xattr_flag_to_string(int);
+ 	ret = fallocate(fd, mode, offset, length);
+ 	if (ret)
+-		fprintf(stderr, "  ERROR %d: Failed to preallocate "
+-			"space to %ld bytes\n", errno, (long) length);
++		fprintf(stderr, "  ERROR %d: Failed to %s of %ld bytes\n",
++			errno, (mode & FALLOC_FL_PUNCH_HOLE) ? "punch hole" :
++			"preallocate space", (long) length);
  
- opdesc_t	ops[] = {
-      /* { OP_ENUM, "name", function, freq, iswrite }, */
-@@ -245,6 +253,7 @@ opdesc_t	ops[] = {
- 	{ OP_RESVSP, "resvsp", resvsp_f, 1, 1 },
- 	{ OP_RMDIR, "rmdir", rmdir_f, 1, 1 },
- 	{ OP_SETATTR, "setattr", setattr_f, 0, 1 },
-+	{ OP_SETFATTR, "setfattr", setfattr_f, 4, 1 },
- 	{ OP_SETXATTR, "setxattr", setxattr_f, 1, 1 },
- 	{ OP_SPLICE, "splice", splice_f, 1, 1 },
- 	{ OP_STAT, "stat", stat_f, 1, 0 },
-@@ -296,7 +305,7 @@ char		*execute_cmd = NULL;
- int		execute_freq = 1;
- struct print_string	flag_str = {0};
- 
--void	add_to_flist(int, int, int);
-+void	add_to_flist(int, int, int, int);
- void	append_pathname(pathname_t *, char *);
- int	attr_list_path(pathname_t *, char *, const int, int, attrlist_cursor_t *);
- int	attr_remove_path(pathname_t *, const char *, int);
-@@ -315,6 +324,7 @@ int	fent_to_name(pathname_t *, flist_t *, fent_t *);
- void	fix_parent(int, int);
- void	free_pathname(pathname_t *);
- int	generate_fname(fent_t *, int, pathname_t *, int *, int *);
-+void	generate_xattr_name(int, char *);
- int	get_fname(int, long, pathname_t *, flist_t **, fent_t **, int *);
- void	init_pathname(pathname_t *);
- int	lchown_path(pathname_t *, uid_t, gid_t);
-@@ -716,7 +726,7 @@ translate_flags(int flags, const char *delim,
+ 	return ret;
+ }
+@@ -262,6 +265,52 @@ out:
+ 	return ret;
  }
  
- void
--add_to_flist(int ft, int id, int parent)
-+add_to_flist(int ft, int id, int parent, int xattr_counter)
- {
- 	fent_t	*fep;
- 	flist_t	*ftp;
-@@ -729,6 +739,7 @@ add_to_flist(int ft, int id, int parent)
- 	fep = &ftp->fents[ftp->nfiles++];
- 	fep->id = id;
- 	fep->parent = parent;
-+	fep->xattr_counter = xattr_counter;
- }
- 
- void
-@@ -1122,6 +1133,12 @@ generate_fname(fent_t *fep, int ft, pathname_t *name, int *idp, int *v)
- 	return 1;
- }
- 
-+void generate_xattr_name(int xattr_num, char *buffer)
++/*
++ * Make sure hole size is properly reported when punched in the middle of a file
++ */
++static int test21(int fd, int testnum)
 +{
-+	memcpy(buffer, "user.x", 6);
-+	sprintf(buffer + 6, "%d", xattr_num);
++	char *buf = NULL;
++	int bufsz, filsz;
++	int ret = 0;
++
++	if (!punch_hole) {
++		fprintf(stdout, "Test skipped as fs doesn't support punch hole.\n");
++		goto out;
++	}
++
++	if (default_behavior) {
++		fprintf(stdout, "Test skipped as fs doesn't support seeking a punched hole.\n");
++		goto out;
++	}
++
++	bufsz = alloc_size * 3;
++	buf = do_malloc(bufsz);
++	if (!buf) {
++		ret = -1;
++		goto out;
++	}
++	memset(buf, 'a', bufsz);
++
++	ret = do_pwrite(fd, buf, bufsz, 0);
++	if (ret)
++		goto out;
++
++	filsz = bufsz;
++	ret = do_fallocate(fd, alloc_size, alloc_size,
++			   FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE);
++	if (ret < 0)
++		goto out;
++
++	ret += do_lseek(testnum, 1, fd, filsz, SEEK_DATA, 0, 0);
++	ret += do_lseek(testnum, 2, fd, filsz, SEEK_HOLE, 0, alloc_size);
++	ret += do_lseek(testnum, 3, fd, filsz, SEEK_DATA, alloc_size, alloc_size * 2);
++out:
++	if (buf)
++		free(buf);
++	return ret;
 +}
 +
  /*
-  * Get file 
-  * Input: "which" to choose the file-types eg. non-directory
-@@ -3030,7 +3047,7 @@ creat_f(int opno, long r)
- 			if (xfsctl(f.path, fd, XFS_IOC_FSSETXATTR, &a) < 0)
- 				e1 = errno;
- 		}
--		add_to_flist(type, id, parid);
-+		add_to_flist(type, id, parid, 0);
- 		close(fd);
+  * Make sure hole size is properly reported when starting in the middle of a
+  * hole in ext? doubly indirect tree
+@@ -1050,6 +1099,7 @@ struct testrec seek_tests[] = {
+        { 18, test18, "Test file with negative SEEK_{HOLE,DATA} offsets" },
+        { 19, test19, "Test file SEEK_DATA from middle of a large hole" },
+        { 20, test20, "Test file SEEK_DATA from middle of a huge hole" },
++       { 21, test21, "Test file SEEK_HOLE that was created by PUNCH_HOLE" },
+ };
+ 
+ static int run_test(struct testrec *tr)
+@@ -1127,15 +1177,20 @@ static int test_basic_support(void)
  	}
- 	if (v) {
-@@ -3495,6 +3512,28 @@ fsync_f(int opno, long r)
- 	close(fd);
- }
  
-+char *
-+gen_random_string(int len)
-+{
-+	static const char charset[] = "0123456789"
-+		"abcdefghijklmnopqrstuvwxyz"
-+		"ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-+	int i;
-+	char *s;
-+
-+	if (len == 0)
-+		return NULL;
-+
-+	s = malloc(len);
-+	if (!s)
-+		return NULL;
-+
-+	for (i = 0; i < len; i++)
-+		s[i] = charset[random() % sizeof(charset)];
-+
-+	return s;
-+}
-+
- void
- getattr_f(int opno, long r)
- {
-@@ -3551,6 +3590,7 @@ link_f(int opno, long r)
- 	int		e;
- 	pathname_t	f;
- 	fent_t		*fep;
-+	fent_t		*fep_src;
- 	flist_t		*flp;
- 	int		id;
- 	pathname_t	l;
-@@ -3559,7 +3599,7 @@ link_f(int opno, long r)
- 	int		v1;
- 
- 	init_pathname(&f);
--	if (!get_fname(FT_NOTDIR, r, &f, &flp, NULL, &v1)) {
-+	if (!get_fname(FT_NOTDIR, r, &f, &flp, &fep_src, &v1)) {
- 		if (v1)
- 			printf("%d/%d: link - no file\n", procid, opno);
- 		free_pathname(&f);
-@@ -3586,7 +3626,7 @@ link_f(int opno, long r)
- 	e = link_path(&f, &l) < 0 ? errno : 0;
- 	check_cwd();
- 	if (e == 0)
--		add_to_flist(flp - flist, id, parid);
-+		add_to_flist(flp - flist, id, parid, fep_src->xattr_counter);
- 	if (v) {
- 		printf("%d/%d: link %s %s %d\n", procid, opno, f.path, l.path,
- 			e);
-@@ -3626,7 +3666,7 @@ mkdir_f(int opno, long r)
- 	e = mkdir_path(&f, 0777) < 0 ? errno : 0;
- 	check_cwd();
- 	if (e == 0)
--		add_to_flist(FT_DIR, id, parid);
-+		add_to_flist(FT_DIR, id, parid, 0);
- 	if (v) {
- 		printf("%d/%d: mkdir %s %d\n", procid, opno, f.path, e);
- 		printf("%d/%d: mkdir add id=%d,parent=%d\n", procid, opno, id, parid);
-@@ -3664,7 +3704,7 @@ mknod_f(int opno, long r)
- 	e = mknod_path(&f, S_IFCHR|0444, 0) < 0 ? errno : 0;
- 	check_cwd();
- 	if (e == 0)
--		add_to_flist(FT_DEV, id, parid);
-+		add_to_flist(FT_DEV, id, parid, 0);
- 	if (v) {
- 		printf("%d/%d: mknod %s %d\n", procid, opno, f.path, e);
- 		printf("%d/%d: mknod add id=%d,parent=%d\n", procid, opno, id, parid);
-@@ -4040,12 +4080,14 @@ rename_f(int opno, long r)
- 	e = rename_path(&f, &newf) < 0 ? errno : 0;
- 	check_cwd();
- 	if (e == 0) {
-+		int xattr_counter = fep->xattr_counter;
-+
- 		if (flp - flist == FT_DIR) {
- 			oldid = fep->id;
- 			fix_parent(oldid, id);
+ 	ftruncate(fd, 0);
+-	if (fallocate(fd, 0, 0, alloc_size) == -1) {
++	if (fallocate(fd, 0, 0, alloc_size * 2) == -1) {
+ 		if (errno == EOPNOTSUPP)
+-			fprintf(stderr, "File system does not support fallocate.");
++			fprintf(stderr, "File system does not support fallocate.\n");
+ 		else {
+ 			fprintf(stderr, "ERROR %d: Failed to preallocate "
+ 				"space to %ld bytes. Aborting.\n", errno, (long) alloc_size);
+ 			ret = -1;
  		}
- 		del_from_flist(flp - flist, fep - flp->fents);
--		add_to_flist(flp - flist, id, parid);
-+		add_to_flist(flp - flist, id, parid, xattr_counter);
- 	}
- 	if (v) {
- 		printf("%d/%d: rename %s to %s %d\n", procid, opno, f.path,
-@@ -4168,6 +4210,76 @@ setattr_f(int opno, long r)
- }
- 
- void
-+setfattr_f(int opno, long r)
-+{
-+	int		e;
-+	pathname_t	f;
-+	fent_t	        *fep;
-+	int		v;
-+	int             value_len;
-+	char            name[XATTR_NAME_BUF_SIZE];
-+	char            *value = NULL;
-+	int             flag = 0;
-+	int             xattr_num;
-+
-+	init_pathname(&f);
-+	if (!get_fname(FT_REGFILE | FT_DIRm, r, &f, NULL, &fep, &v)) {
-+		if (v)
-+			printf("%d/%d: setfattr - no filename\n", procid, opno);
-+		goto out;
-+	}
-+	check_cwd();
-+
-+	if ((fep->xattr_counter > 0) && (random() % 2)) {
-+		/*
-+		 * Use an existing xattr name for replacing its value or
-+		 * create again a xattr that was previously deleted.
-+		 */
-+		xattr_num = (random() % fep->xattr_counter) + 1;
-+		if (random() % 2)
-+			flag = XATTR_REPLACE;
+ 		goto out;
++	} else if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
++			     0, alloc_size) == -1) {
++		fprintf(stderr, "File system does not support punch hole.\n");
 +	} else {
-+		/* Use a new xattr name. */
-+		xattr_num = fep->xattr_counter + 1;
-+		/*
-+		 * Don't always use the create flag because even if our xattr
-+		 * counter is 0, we may still have xattrs associated to this
-+		 * file (this happens when xattrs are added to a file through
-+		 * one of its other hard links), so we can end up updating an
-+		 * existing xattr too.
-+		 */
-+		if (random() % 2)
-+			flag = XATTR_CREATE;
-+	}
++		punch_hole = 1;
+ 	}
+ 
+ 	pos = lseek(fd, 0, SEEK_DATA);
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..d8565041
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,44 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019, CTERA Networks.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Check that SEEK_HOLE can find a punched hole.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+	/*
-+	 * The maximum supported value size depends on the filesystem
-+	 * implementation, but 100 bytes is a safe value for most filesystems
-+	 * at least.
-+	 */
-+	value_len = random() % 101;
-+	value = gen_random_string(value_len);
-+	if (!value && value_len > 0) {
-+		if (v)
-+			printf("%d/%d: setfattr - file %s failed to allocate value with %d bytes\n",
-+			       procid, opno, f.path, value_len);
-+		goto out;
-+	}
-+	generate_xattr_name(xattr_num, name);
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+	e = setxattr(f.path, name, value, value_len, flag) < 0 ? errno : 0;
-+	if (e == 0)
-+		fep->xattr_counter++;
-+	if (v)
-+		printf("%d/%d: setfattr file %s name %s flag %s value length %d: %d\n",
-+		       procid, opno, f.path, name, xattr_flag_to_string(flag),
-+		       value_len, e);
-+out:
-+	free(value);
-+	free_pathname(&f);
-+}
++# get standard environment, filters and checks
++. ./common/rc
 +
-+void
- stat_f(int opno, long r)
- {
- 	int		e;
-@@ -4229,7 +4341,7 @@ symlink_f(int opno, long r)
- 	e = symlink_path(val, &f) < 0 ? errno : 0;
- 	check_cwd();
- 	if (e == 0)
--		add_to_flist(FT_SYM, id, parid);
-+		add_to_flist(FT_SYM, id, parid, 0);
- 	free(val);
- 	if (v) {
- 		printf("%d/%d: symlink %s %d\n", procid, opno, f.path, e);
-@@ -4498,3 +4610,13 @@ writev_f(int opno, long r)
- 	free_pathname(&f);
- 	close(fd);
- }
++_supported_fs generic
++_supported_os Linux
 +
-+char *
-+xattr_flag_to_string(int flag)
++_require_test
++_require_seek_data_hole
++_require_xfs_io_command "fpunch"
++
++base_test_file=$TEST_DIR/seek_sanity_testfile.$seq
++
++_require_test_program "seek_sanity_test"
++
++_cleanup()
 +{
-+	if (flag == XATTR_CREATE)
-+		return "create";
-+	if (flag == XATTR_REPLACE)
-+		return "replace";
-+	return "none";
++	cd /
++	rm -f $tmp.*
++	rm -f $base_test_file*
 +}
++
++_run_seek_sanity_test -s 21 -e 21 $base_test_file > $seqres.full 2>&1 ||
++	_fail "seek sanity check failed!"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..7fbc6768
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1 @@
++QA output created by 999
+diff --git a/tests/generic/group b/tests/generic/group
+index c63035ce..f85e416c 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -540,3 +540,4 @@
+ 535 auto quick log
+ 536 auto quick rw shutdown
+ 537 auto quick trim
++999 auto quick punch seek
 -- 
-2.11.0
+2.17.1
