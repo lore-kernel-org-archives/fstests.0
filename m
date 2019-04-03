@@ -1,94 +1,99 @@
-Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:8843 "EHLO
-        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726099AbfDCVrM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 17:47:12 -0400
-Date: Thu, 4 Apr 2019 08:47:08 +1100
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFC PATCH 2/2] ceph: test basic ceph.quota.max_bytes quota
-Message-ID: <20190403214708.GA26298@dastard>
-References: <20190402103428.21435-1-lhenriques@suse.com>
- <20190402103428.21435-3-lhenriques@suse.com>
- <20190402210931.GV23020@dastard>
- <87d0m3e81f.fsf@suse.com>
- <d38a4d84-8df2-984e-cf1c-045d85644796@suse.com>
- <874l7fdy5s.fsf@suse.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <874l7fdy5s.fsf@suse.com>
+Received: from aserp2130.oracle.com ([141.146.126.79]:47498 "EHLO
+        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725959AbfDCQyb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 12:54:31 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH] fstests: btrfs/048: amend property validation cases
+Date: Thu,  4 Apr 2019 00:54:19 +0800
+Message-Id: <20190403165419.12666-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 03, 2019 at 02:19:11PM +0100, Luis Henriques wrote:
-> Nikolay Borisov <nborisov@suse.com> writes:
-> > On 3.04.19 =D0=B3. 12:45 =D1=87., Luis Henriques wrote:
-> >> Dave Chinner <david@fromorbit.com> writes:
-> >>> Makes no sense to me. xfs_io does a write() loop internally with
-> >>> this pwrite command of 4kB writes - the default buffer size. If you
-> >>> want xfs_io to loop doing 1MB sized pwrite() calls, then all you
-> >>> need is this:
-> >>>
-> >>> 	$XFS_IO_PROG -f -c "pwrite -w -B 1m 0 ${size}m" $file | _filter_xf=
-s_io
-> >>>
-> >>=20
-> >> Thank you for your review, Dave.  I'll make sure the next revision o=
-f
-> >> these tests will include all your comments implemented... except for
-> >> this one.
-> >>=20
-> >> The reason I'm using a loop for writing a file is due to the nature =
-of
-> >> the (very!) loose definition of quotas in CephFS.  Basically, client=
-s
-> >> will likely write some amount of data over the configured limit beca=
-use
-> >> the servers they are communicating with to write the data (the OSDs)
-> >> have no idea about the concept of quotas (or files even); the filesy=
-stem
-> >> view in the cluster is managed at a different level, with the help o=
-f
-> >> the MDS and the client itself.
-> >>=20
-> >> So, the loop in this function is simply to allow the metadata associ=
-ated
-> >> with the file to be updated while we're writing the file.  If I use =
-a
-> >
-> > But the metadata will be modified while writing the file even with a
-> > single invocation of xfs_io.
->=20
-> No, that's not true.  It would be too expensive to keep the metadata
-> server updated while writing to a file.  So, making sure there's
-> actually an open/close to the file (plus the fsync in pwrite) helps
-> making sure the metadata is flushed into the MDS.
+Add more property validation cases which are fixed by the patches [1]
+ [1]
+  btrfs: fix vanished compression property after failed set
+  btrfs: fix zstd compression parameter
 
-/me sighs.
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/btrfs/048     | 25 +++++++++++++++++++++++++
+ tests/btrfs/048.out | 16 ++++++++++++++++
+ 2 files changed, 41 insertions(+)
 
-So you want:
-
-	loop until ${size}MB written:
-		write 1MB
-		fsync
-		  -> flush data to server
-		  -> flush metadata to server
-
-i.e. this one liner:
-
-xfs_io -f -c "pwrite -D -B 1m 0 ${size}m" /path/to/file
-
-Fundamentally, if you find yourself writing a loop around xfs_io to
-break up a sequential IO stream into individual chunks, then you are
-most likely doing something xfs_io can already do. And if xfs_io
-cannot do it, then the right thing to do is to modify xfs_io to be
-able to do it and then use xfs_io....
-
-Cheers,
-
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 588219579cc6..657634f7cc3e 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -6,6 +6,11 @@
+ #
+ # Btrfs properties test. The btrfs properties feature was introduced in the
+ # linux kernel 3.14.
++# Fails without the kernel patches:
++#  btrfs: fix property validate fail should not increment generation
++#  btrfs: open code btrfs_set_prop in inherit_prop
++#  btrfs: fix vanished compression property after failed set
++#  btrfs: fix zstd compression parameter
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -34,6 +39,7 @@ _supported_os Linux
+ _require_test
+ _require_scratch
+ _require_btrfs_command "property"
++_require_btrfs_command inspect-internal dump-super
+ 
+ send_files_dir=$TEST_DIR/btrfs-test-$seq
+ 
+@@ -203,5 +209,24 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 compression
+ touch $SCRATCH_MNT/sv1/file2
+ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1/file2 compression
+ 
++echo -e "\nTesting argument validation, should fail"
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filter_scratch
++echo "***"
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filter_scratch
++echo "***"
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zst' | _filter_scratch
++
++echo -e "\nTesting if property is persistent across failed validation"
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lzo'
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filter_scratch
++$BTRFS_UTIL_PROG property get $SCRATCH_MNT compression
++
++echo -e "\nTesting generation is unchanged after failed validation"
++$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filter_scratch
++$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
++$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
++
+ status=0
+ exit
+diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+index 3e4e3d28950a..00f39bc01227 100644
+--- a/tests/btrfs/048.out
++++ b/tests/btrfs/048.out
+@@ -76,3 +76,19 @@ compression=zlib
+ Testing subvolume property inheritance
+ compression=lzo
+ compression=lzo
++
++Testing argument validation, should fail
++ERROR: failed to set compression for /mnt/scratch: Invalid argument
++***
++ERROR: failed to set compression for /mnt/scratch: Invalid argument
++***
++ERROR: failed to set compression for /mnt/scratch: Invalid argument
++
++Testing if property is persistent across failed validation
++ERROR: failed to set compression for /mnt/scratch: Invalid argument
++compression=lzo
++
++Testing generation is unchanged after failed validation
++generation		7
++ERROR: failed to set compression for /mnt/scratch: Invalid argument
++generation		7
+-- 
+2.17.1
