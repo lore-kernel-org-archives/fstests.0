@@ -1,160 +1,94 @@
-Received: from ipmailnode02.adl6.internode.on.net ([150.101.137.148]:60122
-        "EHLO ipmailnode02.adl6.internode.on.net" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726099AbfDCVf5 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 17:35:57 -0400
-Date: Thu, 4 Apr 2019 08:35:48 +1100
+Received: from ipmail06.adl2.internode.on.net ([150.101.137.129]:8843 "EHLO
+        ipmail06.adl2.internode.on.net" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726099AbfDCVrM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 17:47:12 -0400
+Date: Thu, 4 Apr 2019 08:47:08 +1100
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH v2 1/7] fsstress: allow fsync on directories too
-Message-ID: <20190403213548.GZ26298@dastard>
-References: <20190401125018.10009-1-fdmanana@kernel.org>
- <20190403021819.GW23020@dastard>
- <CAL3q7H7kJ5VnCxBA+NYuxrpeRbi=vTQXsk7TFwSjCAQSixNGew@mail.gmail.com>
+Subject: Re: [RFC PATCH 2/2] ceph: test basic ceph.quota.max_bytes quota
+Message-ID: <20190403214708.GA26298@dastard>
+References: <20190402103428.21435-1-lhenriques@suse.com>
+ <20190402103428.21435-3-lhenriques@suse.com>
+ <20190402210931.GV23020@dastard>
+ <87d0m3e81f.fsf@suse.com>
+ <d38a4d84-8df2-984e-cf1c-045d85644796@suse.com>
+ <874l7fdy5s.fsf@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H7kJ5VnCxBA+NYuxrpeRbi=vTQXsk7TFwSjCAQSixNGew@mail.gmail.com>
+In-Reply-To: <874l7fdy5s.fsf@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+Content-Transfer-Encoding: quoted-printable
+To: Luis Henriques <lhenriques@suse.com>
+Cc: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Apr 03, 2019 at 05:35:20PM +0000, Filipe Manana wrote:
-> On Wed, Apr 3, 2019 at 3:18 AM Dave Chinner <david@fromorbit.com> wrote:
+On Wed, Apr 03, 2019 at 02:19:11PM +0100, Luis Henriques wrote:
+> Nikolay Borisov <nborisov@suse.com> writes:
+> > On 3.04.19 =D0=B3. 12:45 =D1=87., Luis Henriques wrote:
+> >> Dave Chinner <david@fromorbit.com> writes:
+> >>> Makes no sense to me. xfs_io does a write() loop internally with
+> >>> this pwrite command of 4kB writes - the default buffer size. If you
+> >>> want xfs_io to loop doing 1MB sized pwrite() calls, then all you
+> >>> need is this:
+> >>>
+> >>> 	$XFS_IO_PROG -f -c "pwrite -w -B 1m 0 ${size}m" $file | _filter_xf=
+s_io
+> >>>
+> >>=20
+> >> Thank you for your review, Dave.  I'll make sure the next revision o=
+f
+> >> these tests will include all your comments implemented... except for
+> >> this one.
+> >>=20
+> >> The reason I'm using a loop for writing a file is due to the nature =
+of
+> >> the (very!) loose definition of quotas in CephFS.  Basically, client=
+s
+> >> will likely write some amount of data over the configured limit beca=
+use
+> >> the servers they are communicating with to write the data (the OSDs)
+> >> have no idea about the concept of quotas (or files even); the filesy=
+stem
+> >> view in the cluster is managed at a different level, with the help o=
+f
+> >> the MDS and the client itself.
+> >>=20
+> >> So, the loop in this function is simply to allow the metadata associ=
+ated
+> >> with the file to be updated while we're writing the file.  If I use =
+a
 > >
-> > On Mon, Apr 01, 2019 at 01:50:18PM +0100, fdmanana@kernel.org wrote:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Currently the fsync function can only be performed against regular files.
-> > > Allow it to operate on directories too, to increase test coverage and
-> > > allow for chances of finding bugs in a filesystem's implementation of
-> > > fsync against directories.
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >
-> > > V2: Added helper functions to open and close files or directories.
-> >
-> > not exactly what I meant, more below....
-> > >
-> > >  ltp/fsstress.c | 42 +++++++++++++++++++++++++++++++++++++++---
-> > >  1 file changed, 39 insertions(+), 3 deletions(-)
-> > >
-> > > diff --git a/ltp/fsstress.c b/ltp/fsstress.c
-> > > index 2223fd7d..1169b840 100644
-> > > --- a/ltp/fsstress.c
-> > > +++ b/ltp/fsstress.c
-> > > @@ -303,6 +303,7 @@ int       attr_remove_path(pathname_t *, const char *, int);
-> > >  int  attr_set_path(pathname_t *, const char *, const char *, const int, int);
-> > >  void check_cwd(void);
-> > >  void cleanup_flist(void);
-> > > +void close_file_or_dir(int, DIR *);
-> > >  int  creat_path(pathname_t *, mode_t);
-> > >  void dcache_enter(int, int);
-> > >  void dcache_init(void);
-> > > @@ -324,6 +325,7 @@ void      make_freq_table(void);
-> > >  int  mkdir_path(pathname_t *, mode_t);
-> > >  int  mknod_path(pathname_t *, mode_t, dev_t);
-> > >  void namerandpad(int, char *, int);
-> > > +int  open_file_or_dir(pathname_t *, int, DIR **);
-> > >  int  open_path(pathname_t *, int);
-> > >  DIR  *opendir_path(pathname_t *);
-> > >  void process_freq(char *);
-> > > @@ -852,6 +854,15 @@ cleanup_flist(void)
-> > >       }
-> > >  }
-> > >
-> > > +void
-> > > +close_file_or_dir(int fd, DIR *dir)
-> > > +{
-> > > +     if (dir)
-> > > +             closedir(dir);
-> > > +     else
-> > > +             close(fd);
-> > > +}
-> > > +
-> > >  int
-> > >  creat_path(pathname_t *name, mode_t mode)
-> > >  {
-> > > @@ -1385,6 +1396,30 @@ namerandpad(int id, char *buf, int i)
-> > >  }
-> > >
-> > >  int
-> > > +open_file_or_dir(pathname_t *name, int flags, DIR **dir)
-> > > +{
-> > > +     int fd;
-> > > +
-> > > +     fd = open_path(name, flags);
-> > > +     if (fd < 0 && errno == EISDIR) {
-> > > +             *dir = opendir_path(name);
-> >
-> > Why this function, and not just open(O_DIRECTORY)?
-> 
-> The reason I did it is because if flags are O_WRONLY (or O_RDWR),
-> opening a directory always fails (even with O_DIRECTORY) with errno
-> EISDIR.
-> If the access flags are O_RDONLY, opening a directory succeeds
-> regardless of O_DIRECTORY being passed to open(2).
-> 
-> Since I supposed fsetxattr(2) and fsync(2) could be considered write
-> operations, I went for the use of opendir_path(), using the dir stream
-> and all that hassle.
-> 
-> But now I just tested if fsync and fsetxattr work if the file is open
-> O_RDONLY, and to my surprise they do.
-> 
-> Test program:
-> 
-> https://friendpaste.com/7gUN4kB3ZfHwVdlDggodUY
-> 
-> Output with O_WRONLY |  O_DIRECTORY passed to open(2):
-> 
-> $ mkfs.xfs -f /dev/sdc
-> $ mount /dev/sdc /mnt
-> 
-> $ touch /mnt/file
-> $ mkdir /mnt/dir
-> 
-> $ ./test_open /mnt/file
-> open error 20: Not a directory
-> $ ./test_open /mnt/dir
-> open error 21: Is a directory
-> 
-> Output with only O_RDONLY passed to open(2):
-> 
-> $ mkfs.xfs -f /dev/sdc
-> $ mount /dev/sdc /mnt
-> 
-> $ touch /mnt/file
-> $ mkdir /mnt/dir
-> 
-> $ ./test_open /mnt/file
-> file open fd = 3, setxattr(fd) = 0, fsync(fd) = 0
-> $ ./test_open /mnt/dir
-> file open fd = 3, setxattr(fd) = 0, fsync(fd) = 0
-> 
-> Perhaps I did something wrong, as it's late here right now.
+> > But the metadata will be modified while writing the file even with a
+> > single invocation of xfs_io.
+>=20
+> No, that's not true.  It would be too expensive to keep the metadata
+> server updated while writing to a file.  So, making sure there's
+> actually an open/close to the file (plus the fsync in pwrite) helps
+> making sure the metadata is flushed into the MDS.
 
-Pretty sure this is because setxattr() checks inode permissions, not
-file descriptor read/write modes to determine whether an xattr can
-be set/modified/removed. i.e. you own the directory, have write
-permissions to the directory, and so you can minipulate xattrs on
-it.
+/me sighs.
 
-FWIW, why even bother with opening fd's at all here? you could just
-use set/get/removexattr() directly on the path name and not have to
-worry about opening the file...
+So you want:
 
-> So should we go for ensuring O_RDONLY is used when the first open
-> fails with EISDIR (and add some comment explaining this in case I'm
-> not the only for which this was a surprise)
+	loop until ${size}MB written:
+		write 1MB
+		fsync
+		  -> flush data to server
+		  -> flush metadata to server
 
-If we actually need to open the fd, then yes - using
-opendir()/dirfd() is essentially doing that for you behind the
-scenes.
+i.e. this one liner:
+
+xfs_io -f -c "pwrite -D -B 1m 0 ${size}m" /path/to/file
+
+Fundamentally, if you find yourself writing a loop around xfs_io to
+break up a sequential IO stream into individual chunks, then you are
+most likely doing something xfs_io can already do. And if xfs_io
+cannot do it, then the right thing to do is to modify xfs_io to be
+able to do it and then use xfs_io....
 
 Cheers,
 
 Dave.
--- 
+--=20
 Dave Chinner
 david@fromorbit.com
