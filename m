@@ -1,71 +1,132 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:36691 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726310AbfDFMQo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Apr 2019 08:16:44 -0400
-Received: by mail-pf1-f193.google.com with SMTP id z5so4799998pfn.3
-        for <fstests@vger.kernel.org>; Sat, 06 Apr 2019 05:16:43 -0700 (PDT)
-Date: Sat, 6 Apr 2019 20:16:37 +0800
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:37628 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726271AbfDFMCO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 6 Apr 2019 08:02:14 -0400
+Date: Sat, 6 Apr 2019 20:02:07 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] common/rc: add global mounted option for
- _scratch_remount
-Message-ID: <20190406121637.GI2824@desktop>
-References: <20190331123130.14922-1-xifeng@redhat.com>
- <20190401111554.GE2824@desktop>
- <1613847653.376782.1554195525189.JavaMail.zimbra@redhat.com>
+Subject: Re: [PATCH v2] fstests: btrfs/048: amend property validation cases
+Message-ID: <20190406120207.GG2824@desktop>
+References: <20190403165419.12666-1-anand.jain@oracle.com>
+ <20190403170437.14448-1-anand.jain@oracle.com>
+ <7de2d0fd-e777-2bec-5731-15ba2f2af4f2@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <1613847653.376782.1554195525189.JavaMail.zimbra@redhat.com>
+In-Reply-To: <7de2d0fd-e777-2bec-5731-15ba2f2af4f2@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: Xiaoli Feng <xifeng@redhat.com>
-Cc: fstests@vger.kernel.org, smfrench@gmail.com
+Content-Transfer-Encoding: quoted-printable
+To: Nikolay Borisov <nborisov@suse.com>, Anand Jain <anand.jain@oracle.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 02, 2019 at 04:58:45AM -0400, Xiaoli Feng wrote:
-> Hi Eryu,
-> 
-> ----- Original Message -----
-> > From: "Eryu Guan" <guaneryu@gmail.com>
-> > To: "XiaoLi Feng" <xifeng@redhat.com>
-> > Cc: fstests@vger.kernel.org, smfrench@gmail.com
-> > Sent: Monday, April 1, 2019 7:15:54 PM
-> > Subject: Re: [PATCH v2] common/rc: add global mounted option for _scratch_remount
-> > 
-> > On Sun, Mar 31, 2019 at 08:31:30PM +0800, Xiaoli Feng wrote:
-> > > From: Xiaoli Feng <xifeng@redhat.com>
-> > > 
-> > > When call _scratch_remount for cifs , it always requires to input
-> > > password. This will make generic/306 generic/452 failed because
-> > > cifs remount failed.
-> > > ---
-> > >  common/rc | 2 +-
-> > >  1 file changed, 1 insertion(+), 1 deletion(-)
-> > > 
-> > > diff --git a/common/rc b/common/rc
-> > > index 1c42515f..ea1eaf6a 100644
-> > > --- a/common/rc
-> > > +++ b/common/rc
-> > > @@ -357,7 +357,7 @@ _scratch_remount()
-> > >      local opts="$1"
-> > >  
-> > >      if test -n "$opts"; then
-> > > -	mount -o "remount,$opts" $SCRATCH_MNT
-> > > +	mount $MOUNT_OPTIONS -o "remount,$opts" $SCRATCH_MNT
-> > 
-> > IMHO, your v1 patch looks better, just need to update overlay/035 to use
-> > bare $MOUNT_PROG to do the first remount.
-> 
-> The v1 patch use "_try_scratch_mount "-o remount,$opts"". And actually it will
-> call like this "mount -o $option -o remount $dev $mountpoint". But this remounting
-> operation seems is different from "mount -o $option -o remount $mountpoint"(just use
-> strace to check). One difference is that it won't check /etc/fstab. That's why I give
-> up v1 patch. What do you think about it? If you consider we can ignore the difference.
-> Then I will use v1 patch and modify overlay/035.
+On Fri, Apr 05, 2019 at 04:21:10PM +0300, Nikolay Borisov wrote:
+>=20
+>=20
+> On 3.04.19 =D0=B3. 20:04 =D1=87., Anand Jain wrote:
+> > Add more property validation cases which are fixed by the patches [1]
+> >  [1]
+> >   btrfs: fix vanished compression property after failed set
+> >   btrfs: fix zstd compression parameter
+> >=20
+> > Signed-off-by: Anand Jain <anand.jain@oracle.com>
+>=20
+> Reviewed-by: Nikolay Borisov <nborisov@suse.com>
 
-I think we could ignore that difference. All you need for CIFS to work
-is the password information set in $MOUNT_OPTIONS when remounting, and
-_try_scratch_mount takes other mount options, e.g. selinux context, to
-remount as well, not just $MOUNT_OPTIONS.
+Thanks for the test and the review!
+
+But this looks like a targeted regression test that may fail an existing
+test. It's better to write a new test for this.
 
 Thanks,
 Eryu
+
+>=20
+> > ---
+> > v2: correct kernel patch titles in the test header and change log
+> >=20
+> >  tests/btrfs/048     | 23 +++++++++++++++++++++++
+> >  tests/btrfs/048.out | 16 ++++++++++++++++
+> >  2 files changed, 39 insertions(+)
+> >=20
+> > diff --git a/tests/btrfs/048 b/tests/btrfs/048
+> > index 588219579cc6..f6de0b8ca8b1 100755
+> > --- a/tests/btrfs/048
+> > +++ b/tests/btrfs/048
+> > @@ -6,6 +6,9 @@
+> >  #
+> >  # Btrfs properties test. The btrfs properties feature was introduced=
+ in the
+> >  # linux kernel 3.14.
+> > +# Fails without the kernel patches:
+> > +#  btrfs: fix vanished compression property after failed set
+> > +#  btrfs: fix zstd compression parameter
+> >  #
+> >  seq=3D`basename $0`
+> >  seqres=3D$RESULT_DIR/$seq
+> > @@ -34,6 +37,7 @@ _supported_os Linux
+> >  _require_test
+> >  _require_scratch
+> >  _require_btrfs_command "property"
+> > +_require_btrfs_command inspect-internal dump-super
+> > =20
+> >  send_files_dir=3D$TEST_DIR/btrfs-test-$seq
+> > =20
+> > @@ -203,5 +207,24 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 c=
+ompression
+> >  touch $SCRATCH_MNT/sv1/file2
+> >  $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1/file2 compression
+> > =20
+> > +echo -e "\nTesting argument validation, should fail"
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filte=
+r_scratch
+> > +echo "***"
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filt=
+er_scratch
+> > +echo "***"
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zst' | _filt=
+er_scratch
+> > +
+> > +echo -e "\nTesting if property is persistent across failed validatio=
+n"
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lzo'
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filt=
+er_scratch
+> > +$BTRFS_UTIL_PROG property get $SCRATCH_MNT compression
+> > +
+> > +echo -e "\nTesting generation is unchanged after failed validation"
+> > +$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+> > +$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^g=
+eneration'
+> > +$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filte=
+r_scratch
+> > +$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+> > +$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^g=
+eneration'
+> > +
+> >  status=3D0
+> >  exit
+> > diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+> > index 3e4e3d28950a..00f39bc01227 100644
+> > --- a/tests/btrfs/048.out
+> > +++ b/tests/btrfs/048.out
+> > @@ -76,3 +76,19 @@ compression=3Dzlib
+> >  Testing subvolume property inheritance
+> >  compression=3Dlzo
+> >  compression=3Dlzo
+> > +
+> > +Testing argument validation, should fail
+> > +ERROR: failed to set compression for /mnt/scratch: Invalid argument
+> > +***
+> > +ERROR: failed to set compression for /mnt/scratch: Invalid argument
+> > +***
+> > +ERROR: failed to set compression for /mnt/scratch: Invalid argument
+> > +
+> > +Testing if property is persistent across failed validation
+> > +ERROR: failed to set compression for /mnt/scratch: Invalid argument
+> > +compression=3Dlzo
+> > +
+> > +Testing generation is unchanged after failed validation
+> > +generation		7
+> > +ERROR: failed to set compression for /mnt/scratch: Invalid argument
+> > +generation		7
+> >=20
