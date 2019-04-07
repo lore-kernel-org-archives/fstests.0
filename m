@@ -1,211 +1,155 @@
-Received: from mx2.suse.de ([195.135.220.15]:58942 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1725881AbfDHJQp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 8 Apr 2019 05:16:45 -0400
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [PATCH v2 1/2] ceph: test basic ceph.quota.max_files quota
-References: <20190405145305.9574-1-lhenriques@suse.com>
-        <20190405145305.9574-2-lhenriques@suse.com>
-        <20190406124544.GJ2824@desktop>
-Date: Mon, 08 Apr 2019 10:16:41 +0100
-In-Reply-To: <20190406124544.GJ2824@desktop> (Eryu Guan's message of "Sat, 6
-        Apr 2019 20:45:44 +0800")
-Message-ID: <87r2acn9fq.fsf@suse.com>
-MIME-Version: 1.0
-Content-Type: text/plain
+Received: from mx1.redhat.com ([209.132.183.28]:55912 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726315AbfDGO3z (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Apr 2019 10:29:55 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id A6728C04BE09
+        for <fstests@vger.kernel.org>; Sun,  7 Apr 2019 14:29:55 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-12-37.pek2.redhat.com [10.72.12.37])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C170F600C8
+        for <fstests@vger.kernel.org>; Sun,  7 Apr 2019 14:29:54 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfstests: aio random write and verify stress test
+Date: Sun,  7 Apr 2019 22:29:49 +0800
+Message-Id: <20190407142949.3811-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, Dave Chinner <david@fromorbit.com>, ceph-devel@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu Guan <guaneryu@gmail.com> writes:
+We found some AIO write related bugs recently, so I think a AIO
+random write test is needed. By the new aio-aio-write-verify.c tool,
+we can do this easily.
 
-> On Fri, Apr 05, 2019 at 03:53:04PM +0100, Luis Henriques wrote:
->> Simple set of checks for CephFS max_files directory quota implementation.
->> 
->> Signed-off-by: Luis Henriques <lhenriques@suse.com>
->
-> Just some quick/random comments inline, because I don't have a ceph env
-> to actually test the patches..
->
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Thanks a lot for your comments, Eryu.  They all make sense, I'll send
-out a new revision of these tests shortly.
+Hi,
 
-Cheers,
+This patch need "[PATCH v3] generic: unaligned direct AIO write test" at first:
+https://marc.info/?l=fstests&m=155395889909063&w=2
+
+Thanks,
+Zorro
+
+ tests/generic/998     | 87 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/998.out |  2 +
+ tests/generic/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/generic/998
+ create mode 100644 tests/generic/998.out
+
+diff --git a/tests/generic/998 b/tests/generic/998
+new file mode 100755
+index 00000000..54b79691
+--- /dev/null
++++ b/tests/generic/998
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 998
++#
++# Randomly direct AIO write&verify stress test
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_aiodio aio-dio-write-verify
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++localfile=$SCRATCH_MNT/testfile
++diosize=`_min_dio_alignment $SCRATCH_DEV`
++
++# The maximum write size and offset are both 32k diosize. So the maximum
++# file size will be (32 * 2)k
++free_size_k=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $4}'`
++max_io_size_b=$((32 * 1024))
++if [ $max_io_size_b -gt $((free_size_k * 1024 / 2 / diosize)) ]; then
++	max_io_size_b=$((free_size_k * 1024 / 2 / diosize))
++fi
++
++do_test()
++{
++	local num_oper
++	local oper_list=""
++	local size
++	local off
++	local truncsize
++
++	# the number of AIO write operation
++	num_oper=$((RANDOM % 64 + 1))
++
++	for ((i=0; i<num_oper; i++)); do
++		size=$(((RANDOM % max_io_size_b + 1) * diosize))
++		off=$((RANDOM % max_io_size_b * diosize))
++		oper_list="$oper_list -a size=$size,off=$off"
++	done
++	truncsize=$(((RANDOM * diosize + RANDOM % diosize) % max_io_size_b))
++
++	$AIO_TEST -t $truncsize $oper_list $localfile
++	if [ $? -ne 0 ];then
++		echo "$AIO_TEST -t $truncsize $oper_list $localfile"
++		echo "==========^^ Fail ^^=========="
++	fi
++}
++
++testimes=$((LOAD_FACTOR * 100))
++while [ $testimes -gt 0 ]; do
++	echo > $localfile
++	do_test
++	((testimes--))
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/998.out b/tests/generic/998.out
+new file mode 100644
+index 00000000..d2679ae0
+--- /dev/null
++++ b/tests/generic/998.out
+@@ -0,0 +1,2 @@
++QA output created by 998
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 0c3016fd..36b180c3 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -540,4 +540,5 @@
+ 535 auto quick log
+ 536 auto quick rw shutdown
+ 537 auto quick trim
++998 auto stress aio
+ 999 auto quick aio
 -- 
-Luis
-
-
->> --- tests/ceph/001 | 86 +++++++++++++++++++++++++++++++++++++++++++++
->> tests/ceph/001.out | 9 +++++ tests/ceph/Makefile | 20 +++++++++++
->> tests/ceph/group | 1 + 4 files changed, 116 insertions(+) create mode
->> 100755 tests/ceph/001 create mode 100644 tests/ceph/001.out create
->> mode 100644 tests/ceph/Makefile create mode 100644 tests/ceph/group
->> 
->> diff --git a/tests/ceph/001 b/tests/ceph/001
->> new file mode 100755
->> index 000000000000..770e952cd8dc
->> --- /dev/null
->> +++ b/tests/ceph/001
->> @@ -0,0 +1,86 @@
->> +#! /bin/bash
->> +# SPDX-License-Identifier: GPL-2.0
->> +# Copyright (c) 2019 SUSE LLC. All Rights Reserved.
->> +#
->> +# FS QA Test No. 001
->> +#
->> +# Test basic ceph.quota.max_files quota features.
->> +#
->> +
->> +seq=`basename $0`
->> +seqres=$RESULT_DIR/$seq
->> +echo "QA output created by $seq"
->> +
->> +workdir=$TEST_DIR/$seq
->> +
->> +tmp=/tmp/$$
->> +status=1    # failure is the default!
->> +trap "_cleanup; exit \$status" 0 1 2 3 15
->> +
->> +_cleanup()
->> +{
->> +	cd /
->> +	rm -rf $tmp.*
->> +}
->> +
->> +# get standard environment, filters and checks
->> +. ./common/rc
->> +. ./common/filter
->> +. ./common/attr
->> +
->> +# real QA test starts here
->> +_supported_os Linux
->> +_supported_fs ceph
->> +
->> +_require_attrs
->> +
->> +set_quota()
->> +{
->> +	val=$1
->> +	dir=$2
->
-> Declare function local variables as 'local'.
->
->> +	$SETFATTR_PROG -n ceph.quota.max_files -v $val $dir >/dev/null 2>&1
->
-> I think it's better to dump the outputs from $SETFATTR_PROG to
-> $seqres.full, so we have debug logs when something went wrong. e.g.
->
-> 	$SETFATTR_PROG -n ceph.quota.max_files -v $val $dir >>$seqres.full 2>&1
->
-> Also, remove $seqres.full file before test.
->
->> +}
->> +get_quota()
->> +{
->> +	dir=$1
->> +	$GETFATTR_PROG -n ceph.quota.max_files $dir 2> /dev/null
->
-> We have a wrapper function around $GETFATTR_PROG called _getfattr(),
-> which is used to deal with different output formats from different
-> versions of getfattr tool, use the helper if possible.
->
-> And you need to filter $TEST_DIR here as well. And if you don't want the
-> "Removing leading '/' from absolute path names" messages, you could use
-> the "--absolute-names" option of getfattr, e.g.
->
-> 	_getfattr -n ceph.quota.max_files --absolute-names $dir | _filter_test_dir
->
-> Thanks,
-> Eryu
->
->> +}
->> +
->> +rm -rf $workdir
->> +mkdir $workdir
->> +
->> +# test setting quota
->> +set_quota 10 $workdir
->> +get_quota $workdir
->> +
->> +# set quota to largest acceptable value (0x7FFFFFFFFFFFFFFF)
->> +set_quota 9223372036854775807 $workdir
->> +get_quota $workdir
->> +
->> +# test resetting quota
->> +set_quota 0 $workdir
->> +get_quota $workdir
->> +
->> +# set quota to invalid values (0x8000000000000000 and -1)
->> +set_quota 9223372036854775808 $workdir
->> +get_quota $workdir
->> +
->> +set_quota -1 $workdir
->> +get_quota $workdir
->> +
->> +set_quota 5 $workdir
->> +mkdir $workdir/0
->> +touch $workdir/0/1
->> +touch $workdir/0/2
->> +touch $workdir/3
->> +
->> +touch $workdir/4 2>&1 | _filter_test_dir # should fail
->> +mkdir $workdir/5 2>&1 | _filter_test_dir # should fail
->> +
->> +set_quota 0 $workdir
->> +touch $workdir/4 # shouldn't fail
->> +mkdir $workdir/5 # shouldn't fail
->> +
->> +# success, all done
->> +status=0
->> +exit
->> diff --git a/tests/ceph/001.out b/tests/ceph/001.out
->> new file mode 100644
->> index 000000000000..6ddb007dce22
->> --- /dev/null
->> +++ b/tests/ceph/001.out
->> @@ -0,0 +1,9 @@
->> +QA output created by 001
->> +# file: mnt/test/001
->> +ceph.quota.max_files="10"
->> +
->> +# file: mnt/test/001
->> +ceph.quota.max_files="9223372036854775807"
->> +
->> +touch: cannot touch 'TEST_DIR/001/4': Disk quota exceeded
->> +mkdir: cannot create directory 'TEST_DIR/001/5': Disk quota exceeded
->> diff --git a/tests/ceph/Makefile b/tests/ceph/Makefile
->> new file mode 100644
->> index 000000000000..f93862af4f31
->> --- /dev/null
->> +++ b/tests/ceph/Makefile
->> @@ -0,0 +1,20 @@
->> +#
->> +# Copyright (c) 2019 SUSE LLC. All Rights Reserved.
->> +#
->> +
->> +TOPDIR = ../..
->> +include $(TOPDIR)/include/builddefs
->> +
->> +CEPHFS_DIR = cephfs
->> +TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CEPHFS_DIR)
->> +
->> +include $(BUILDRULES)
->> +
->> +install:
->> +	$(INSTALL) -m 755 -d $(TARGET_DIR)
->> +	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
->> +	$(INSTALL) -m 644 group $(TARGET_DIR)
->> +	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
->> +
->> +# Nothing.
->> +install-dev install-lib:
->> diff --git a/tests/ceph/group b/tests/ceph/group
->> new file mode 100644
->> index 000000000000..e389bc6ec7ee
->> --- /dev/null
->> +++ b/tests/ceph/group
->> @@ -0,0 +1 @@
->> +001 auto quick quota
->
+2.17.2
