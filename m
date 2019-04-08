@@ -1,101 +1,117 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:34368 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725959AbfDCREv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 3 Apr 2019 13:04:51 -0400
-From: Anand Jain <anand.jain@oracle.com>
-Subject: [PATCH v2] fstests: btrfs/048: amend property validation cases
-Date: Thu,  4 Apr 2019 01:04:37 +0800
-Message-Id: <20190403170437.14448-1-anand.jain@oracle.com>
-In-Reply-To: <20190403165419.12666-1-anand.jain@oracle.com>
-References: <20190403165419.12666-1-anand.jain@oracle.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:41610 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726523AbfDHV5d (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 8 Apr 2019 17:57:33 -0400
+Date: Mon, 8 Apr 2019 14:57:19 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] common/populate: decrease the step of rm file
+Message-ID: <20190408215719.GF32415@magnolia>
+References: <1553759339-2206-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+ <20190403224359.GB32415@magnolia>
+ <5CA5A471.7090306@cn.fujitsu.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5CA5A471.7090306@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: xuyang <xuyang2018.jy@cn.fujitsu.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Add more property validation cases which are fixed by the patches [1]
- [1]
-  btrfs: fix vanished compression property after failed set
-  btrfs: fix zstd compression parameter
+On Thu, Apr 04, 2019 at 02:30:09PM +0800, xuyang wrote:
+> On 2019/4/4 6:43, Darrick J. Wong wrote:
+> > On Thu, Mar 28, 2019 at 03:48:59PM +0800, Yang Xu wrote:
+> > >   Now that we have allocated 2*4096*64/16(32768) inodes after "Inode btree",
+> > >   but the step of rm file is too large to create enough free inodes in agi.
+> > >   So the freecount is not enough large to make free_level gt 1 and call
+> > >   _scratch__populate on xfs will report the following failure(such as xfs/083):
+> > > 
+> > > Failed to create fino of sufficient height!
+> > > 
+> > > By decreasing the step of rm file, xfs/083 will pass.
+> > Hmm, what are MOUNT_OPTS and MKFS_OPTIONS when this happens?  Are you
+> > running on top of some kind of RAID or 4k sector disk or something?
+>    The mkfs and mount option as below:
+>    MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda11
+>    MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda11 /mnt/xfstests/scratch
+> 
+>    I run this case on anordinary  disk, in xfs/083.full, the disk information as below:
+>    meta-data=/dev/sda11             isize=512    agcount=4, agsize=1310720 blks
+>             =                       sectsz=512   attr=2, projid32bit=1
+>             =                       crc=1        finobt=1, sparse=1, rmapbt=0
+>             =                       reflink=1
+>    data     =                       bsize=4096   blocks=5242880, imaxpct=25
+>             =                       sunit=0      swidth=0 blks
+>    naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+>    log      =internal log           bsize=4096   blocks=2560, version=2
+>             =                       sectsz=512   sunit=0 blks, lazy-count=1
+>    realtime =none                   extsz=4096   blocks=0, rtextents=0
+>    + populate fs image
+>    MOUNT_OPTIONS =  -o usrquota,grpquota,prjquota
+> 
+>    fdisk -l /dev/sda
+>    Disk /dev/sda: 298.1 GiB, 320072933376 bytes, 625142448 sectors
+>    Units: sectors of 1 * 512 = 512 bytes
+>    Sector size (logical/physical): 512 bytes / 512 bytes
+>    I/O size (minimum/optimal): 512 bytes / 512 bytes
+>    Disklabel type: dos
+>    Disk identifier: 0x00039ec7
+> 
+>    /dev/sda11      553664512 595607551  41943040    20G 83 Linux
+> 
+> 
+> > I think this patch looks ok but I'm puzzled for why a step of
+> > $(ino_per_rec + 1) isn't enough.
+> > 
+> > --D
+> 
+>   Hi Darrick
+> 
+>   Sorry, I am not aware that the count mechanism of agi_free_level. IMO, agi_free_count achives a
+>    threshold that current free inode btree level can notstore free inode information(I want to search the threshold in kernel,but fail).
+>   Then, free_level will add.
+> 
+>   on my machine, I decrease the step. When the value of step is 2,4,8,16, the free count becomes larger
+>   and the free_level turns into 2.
+> 
+>   a step of $(ino_per_rec + 1) isn't enough. It maynot fill up current agi_free_level because it doesn't create enough free inodes
+>  (allocat,free,not unused inodes).
 
-Signed-off-by: Anand Jain <anand.jain@oracle.com>
----
-v2: correct kernel patch titles in the test header and change log
+Ok, seems fine to me after a few days of playing around with it...
 
- tests/btrfs/048     | 23 +++++++++++++++++++++++
- tests/btrfs/048.out | 16 ++++++++++++++++
- 2 files changed, 39 insertions(+)
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 588219579cc6..f6de0b8ca8b1 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -6,6 +6,9 @@
- #
- # Btrfs properties test. The btrfs properties feature was introduced in the
- # linux kernel 3.14.
-+# Fails without the kernel patches:
-+#  btrfs: fix vanished compression property after failed set
-+#  btrfs: fix zstd compression parameter
- #
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -34,6 +37,7 @@ _supported_os Linux
- _require_test
- _require_scratch
- _require_btrfs_command "property"
-+_require_btrfs_command inspect-internal dump-super
- 
- send_files_dir=$TEST_DIR/btrfs-test-$seq
- 
-@@ -203,5 +207,24 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1 compression
- touch $SCRATCH_MNT/sv1/file2
- $BTRFS_UTIL_PROG property get $SCRATCH_MNT/sv1/file2 compression
- 
-+echo -e "\nTesting argument validation, should fail"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zst' | _filter_scratch
-+
-+echo -e "\nTesting if property is persistent across failed validation"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lzo'
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli' | _filter_scratch
-+$BTRFS_UTIL_PROG property get $SCRATCH_MNT compression
-+
-+echo -e "\nTesting generation is unchanged after failed validation"
-+$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-+$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' | _filter_scratch
-+$BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
-+$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
-+
- status=0
- exit
-diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
-index 3e4e3d28950a..00f39bc01227 100644
---- a/tests/btrfs/048.out
-+++ b/tests/btrfs/048.out
-@@ -76,3 +76,19 @@ compression=zlib
- Testing subvolume property inheritance
- compression=lzo
- compression=lzo
-+
-+Testing argument validation, should fail
-+ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+***
-+ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+***
-+ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+
-+Testing if property is persistent across failed validation
-+ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+compression=lzo
-+
-+Testing generation is unchanged after failed validation
-+generation		7
-+ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+generation		7
--- 
-2.17.1
+--D
+
+> 
+>   Thanks,
+>   Yang Xu
+> 
+> > > Signed-off-by: Yang Xu<xuyang2018.jy@cn.fujitsu.com>
+> > > ---
+> > >   common/populate | 2 +-
+> > >   1 file changed, 1 insertion(+), 1 deletion(-)
+> > > 
+> > > diff --git a/common/populate b/common/populate
+> > > index 4fa118f0..7403dec3 100644
+> > > --- a/common/populate
+> > > +++ b/common/populate
+> > > @@ -271,7 +271,7 @@ _scratch_xfs_populate() {
+> > >   		touch "${dir}/${f}"
+> > >   	done
+> > > 
+> > > -	seq 0 "$((ino_per_rec + 1))" "${nr}" | while read f; do
+> > > +	seq 0 2 "${nr}" | while read f; do
+> > >   		rm -f "${dir}/${f}"
+> > >   	done
+> > > 
+> > > -- 
+> > > 2.18.1
+> > > 
+> > > 
+> > > 
+> > 
+> > 
+> 
+> 
+> 
