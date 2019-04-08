@@ -1,54 +1,58 @@
-Received: from mx1.redhat.com ([209.132.183.28]:48838 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726582AbfDHCjH (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 7 Apr 2019 22:39:07 -0400
-Received: from smtp.corp.redhat.com (int-mx06.intmail.prod.int.phx2.redhat.com [10.5.11.16])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 3649F18DF7B
-        for <fstests@vger.kernel.org>; Mon,  8 Apr 2019 02:39:07 +0000 (UTC)
-From: Murphy Zhou <xzhou@redhat.com>
-Subject: [PATCH] generic/504: fix hard coded fd number
-Date: Mon,  8 Apr 2019 10:38:59 +0800
-Message-Id: <20190408023859.1985-1-xzhou@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:53840 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726228AbfDHQIq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Apr 2019 12:08:46 -0400
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH v3 0/2] Initial CephFS tests
+Date: Mon,  8 Apr 2019 17:08:40 +0100
+Message-Id: <20190408160842.23649-1-lhenriques@suse.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Murphy Zhou <xzhou@redhat.com>
+Cc: "Yan, Zheng" <zyan@redhat.com>, Dave Chinner <david@fromorbit.com>, Eryu Guan <guaneryu@gmail.com>, ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Bash supports file discriptor assignment in this way. So remove the hard
-coded numbers. Also close this opened fd in cleanup.
+This is the first attempt to (finally!) add CephFS specific tests to
+fstests.  Hopefully, more will follow once an initial set is accepted -- I
+do have a few more that could easily be added, and I'm sure that in the
+future more CephFS-specific tests can continue to be developed.  This test
+suite has already proved to be quite useful in finding bugs in this
+filesystem; adding specific tests for it is just the next logic step.
 
-Signed-off-by: Murphy Zhou <xzhou@redhat.com>
----
- tests/generic/504 | 5 +++--
- 1 file changed, 3 insertions(+), 2 deletions(-)
+For now, just two simple tests to do some basic checks on quotas features.
 
-diff --git a/tests/generic/504 b/tests/generic/504
-index 21d86051..19c6a0e7 100755
---- a/tests/generic/504
-+++ b/tests/generic/504
-@@ -21,6 +21,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- 
- _cleanup()
- {
-+	exec {test_fd}<&-
- 	cd /
- 	rm -f $tmp.*
- }
-@@ -45,9 +46,9 @@ tf_inode=$(stat -c %i $testfile)
- echo inode $tf_inode >> $seqres.full
- 
- # Create new fd by exec
--exec 9> $testfile
-+exec {test_fd}> $testfile
- # flock locks the fd then exits, we should see the lock info even the owner is dead
--flock -x 9
-+flock -x $test_fd
- cat /proc/locks >> $seqres.full
- 
- # Checking
--- 
-2.21.0
+Cheers,
+--
+Luis
+
+Changes since v2:
+
+- Use 'local' variables in functions
+- Use $seqres.full for logging output (and rm -f $seqres.full before test)
+- Use _getfattr wrapper and filter TEST_DIR
+
+Changes since v1 (RFC):
+
+ Both tests refactored:
+ - use 'workdir' instead of 'testdir' and initialize it to $seq
+ - don't remove $workdir on cleanup()
+ - use output to validate test results instead of _fail
+
+Luis Henriques (2):
+  ceph: test basic ceph.quota.max_files quota
+  ceph: test basic ceph.quota.max_bytes quota
+
+ tests/ceph/001      |  88 ++++++++++++++++++++++++++++++
+ tests/ceph/001.out  |   9 ++++
+ tests/ceph/002      | 127 ++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/002.out  |  64 ++++++++++++++++++++++
+ tests/ceph/Makefile |  20 +++++++
+ tests/ceph/group    |   2 +
+ 6 files changed, 310 insertions(+)
+ create mode 100755 tests/ceph/001
+ create mode 100644 tests/ceph/001.out
+ create mode 100755 tests/ceph/002
+ create mode 100644 tests/ceph/002.out
+ create mode 100644 tests/ceph/Makefile
+ create mode 100644 tests/ceph/group
