@@ -1,29 +1,53 @@
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:43818 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726646AbfDFLh1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 6 Apr 2019 07:37:27 -0400
-Date: Sat, 6 Apr 2019 19:37:18 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3] fstests: btrfs verify hardening agaist duplicate fsid
-Message-ID: <20190406113718.GF2824@desktop>
-References: <1540571900-24768-1-git-send-email-anand.jain@oracle.com>
- <799893ab-763e-7aa7-9e2b-2f1218d29b13@oracle.com>
+Received: from mx1.redhat.com ([209.132.183.28]:39584 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726492AbfDHC1b (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 7 Apr 2019 22:27:31 -0400
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 8A258308FF15
+        for <fstests@vger.kernel.org>; Mon,  8 Apr 2019 02:27:31 +0000 (UTC)
+Date: Mon, 8 Apr 2019 10:27:29 +0800
+From: Murphy Zhou <xzhou@redhat.com>
+Subject: Re: [PATCH] generic/294: skip on NFS
+Message-ID: <20190408022729.nacikxpupidv73ce@XZHOUW.usersys.redhat.com>
+References: <20190304025008.11986-1-xzhou@redhat.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <799893ab-763e-7aa7-9e2b-2f1218d29b13@oracle.com>
+In-Reply-To: <20190304025008.11986-1-xzhou@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Anand Jain <Anand.Jain@oracle.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org, bcodding@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Apr 02, 2019 at 01:58:23PM +0800, Anand Jain wrote:
-> 
-> Eryu,
-> 
->  This patch isn't integrated yet.
+On Mon, Mar 04, 2019 at 10:50:08AM +0800, Murphy Zhou wrote:
+> Because NFS handles this differently, returning different values.
+> Details:
+> http://people.redhat.com/bcodding/nfs/2016/10/07/nfs_xfstest_generic/#generic294
 
-Sorry for missing that, and thanks for reminding! I've applied the
-patch. Thanks!
+Any comments are helpful, :)
 
-Eryu
+Thanks
+M
+
+> 
+> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> ---
+>  tests/generic/294 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/generic/294 b/tests/generic/294
+> index b74579ac..f7e763a3 100755
+> --- a/tests/generic/294
+> +++ b/tests/generic/294
+> @@ -27,6 +27,7 @@ _cleanup()
+>  . ./common/filter
+>  
+>  # real QA test starts here
+> +[ $FSTYP == "nfs" ] && _notrun "NFS behaves differently, breaks golden output"
+>  
+>  # Modify as appropriate.
+>  _supported_fs generic
+> -- 
+> 2.21.0
+> 
