@@ -1,11 +1,11 @@
-Received: from mx2.suse.de ([195.135.220.15]:53862 "EHLO mx1.suse.de"
+Received: from mx2.suse.de ([195.135.220.15]:53882 "EHLO mx1.suse.de"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726968AbfDHQIr (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 8 Apr 2019 12:08:47 -0400
+        id S1726228AbfDHQIs (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 8 Apr 2019 12:08:48 -0400
 From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH v3 1/2] ceph: test basic ceph.quota.max_files quota
-Date: Mon,  8 Apr 2019 17:08:41 +0100
-Message-Id: <20190408160842.23649-2-lhenriques@suse.com>
+Subject: [PATCH v3 2/2] ceph: test basic ceph.quota.max_bytes quota
+Date: Mon,  8 Apr 2019 17:08:42 +0100
+Message-Id: <20190408160842.23649-3-lhenriques@suse.com>
 In-Reply-To: <20190408160842.23649-1-lhenriques@suse.com>
 References: <20190408160842.23649-1-lhenriques@suse.com>
 MIME-Version: 1.0
@@ -15,33 +15,30 @@ To: fstests@vger.kernel.org
 Cc: "Yan, Zheng" <zyan@redhat.com>, Dave Chinner <david@fromorbit.com>, Eryu Guan <guaneryu@gmail.com>, ceph-devel@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Simple set of checks for CephFS max_files directory quota implementation.
+Simple set of checks for CephFS max_bytes directory quota implementation.
 
 Signed-off-by: Luis Henriques <lhenriques@suse.com>
 ---
- tests/ceph/001      | 88 +++++++++++++++++++++++++++++++++++++++++++++
- tests/ceph/001.out  |  9 +++++
- tests/ceph/Makefile | 20 +++++++++++
- tests/ceph/group    |  1 +
- 4 files changed, 118 insertions(+)
- create mode 100755 tests/ceph/001
- create mode 100644 tests/ceph/001.out
- create mode 100644 tests/ceph/Makefile
- create mode 100644 tests/ceph/group
+ tests/ceph/002     | 127 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/ceph/002.out |  64 +++++++++++++++++++++++
+ tests/ceph/group   |   1 +
+ 3 files changed, 192 insertions(+)
+ create mode 100755 tests/ceph/002
+ create mode 100644 tests/ceph/002.out
 
-diff --git a/tests/ceph/001 b/tests/ceph/001
+diff --git a/tests/ceph/002 b/tests/ceph/002
 new file mode 100755
-index 000000000000..bbffe75aa7b2
+index 000000000000..0edeb10b104e
 --- /dev/null
-+++ b/tests/ceph/001
-@@ -0,0 +1,88 @@
++++ b/tests/ceph/002
+@@ -0,0 +1,127 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2019 SUSE LLC. All Rights Reserved.
 +#
-+# FS QA Test No. 001
++# FS QA Test No. 002
 +#
-+# Test basic ceph.quota.max_files quota features.
++# This tests basic ceph.quota.max_bytes quota features.
 +#
 +
 +seq=`basename $0`
@@ -75,13 +72,31 @@ index 000000000000..bbffe75aa7b2
 +{
 +	local val=$1
 +	local dir=$2
-+	$SETFATTR_PROG -n ceph.quota.max_files -v $val $dir >>$seqres.full 2>&1
++	$SETFATTR_PROG -n ceph.quota.max_bytes -v $val $dir >>$seqres.full 2>&1
 +}
++
 +get_quota()
 +{
 +	local dir=$1
-+	_getfattr -n ceph.quota.max_files --absolute-names $dir \
++	_getfattr -n ceph.quota.max_bytes --absolute-names $dir \
 +		  2>>$seqres.full | _filter_test_dir
++}
++
++# function to write a file.  We use a loop because quotas in CephFS is a
++# "best-effort" implementation, i.e. a write may actually be allowed even if the
++# quota is being exceeded.  Using a loop reduces the chances of this to happen:
++# the usage of fsync (-W in xfs_io) and the open/close of the file will make
++# sure the file size is be updated in the MDSs.
++#
++# NOTE: 'size' parameter is in M
++write_file()
++{
++	local file=$1
++	local size=$2 # size in M
++	for (( i = 1; i < $size; i++ )); do
++		$XFS_IO_PROG -f -c "pwrite -W $((i * 1048576)) 1m" \
++			     $file | _filter_xfs_io
++	done
 +}
 +
 +rm -f $seqres.full
@@ -89,7 +104,7 @@ index 000000000000..bbffe75aa7b2
 +mkdir $workdir
 +
 +# test setting quota
-+set_quota 10 $workdir
++set_quota 1000000 $workdir
 +get_quota $workdir
 +
 +# set quota to largest acceptable value (0x7FFFFFFFFFFFFFFF)
@@ -107,67 +122,117 @@ index 000000000000..bbffe75aa7b2
 +set_quota -1 $workdir
 +get_quota $workdir
 +
-+set_quota 5 $workdir
-+mkdir $workdir/0
-+touch $workdir/0/1
-+touch $workdir/0/2
-+touch $workdir/3
++bigfile="$workdir/bigfile"
 +
-+touch $workdir/4 2>&1 | _filter_test_dir # should fail
-+mkdir $workdir/5 2>&1 | _filter_test_dir # should fail
++# set quota to 10M
++set_quota $((10 * 1048576)) $workdir
 +
++# write 9M file
++write_file $bigfile 9
++stat -c %s $bigfile
++rm $bigfile
++
++# try to write 11M file
++write_file $bigfile 11 # 11M
++stat -c %s $bigfile
++rm $bigfile
++
++# write 5 x 2M files
++for (( j = 1; j < 6; j++ )); do
++	smallfile="$workdir/smallfile_$j"
++	write_file $smallfile 2 # 2M
++	stat -c %s $smallfile
++done
++
++# try to write another 2M file, should fail
++smallfile="$workdir/smallfile_fail"
++write_file $smallfile 2
++stat -c %s $smallfile
++
++# reset quota
 +set_quota 0 $workdir
-+touch $workdir/4 # shouldn't fail
-+mkdir $workdir/5 # shouldn't fail
++
++# write 2M file
++write_file $smallfile 2
++stat -c %s $smallfile
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/ceph/001.out b/tests/ceph/001.out
+diff --git a/tests/ceph/002.out b/tests/ceph/002.out
 new file mode 100644
-index 000000000000..bc5ff5e61a8f
+index 000000000000..f5881e532a3e
 --- /dev/null
-+++ b/tests/ceph/001.out
-@@ -0,0 +1,9 @@
-+QA output created by 001
-+# file: TEST_DIR/001
-+ceph.quota.max_files="10"
++++ b/tests/ceph/002.out
+@@ -0,0 +1,64 @@
++QA output created by 002
++# file: TEST_DIR/002
++ceph.quota.max_bytes="1000000"
 +
-+# file: TEST_DIR/001
-+ceph.quota.max_files="9223372036854775807"
++# file: TEST_DIR/002
++ceph.quota.max_bytes="9223372036854775807"
 +
-+touch: cannot touch 'TEST_DIR/001/4': Disk quota exceeded
-+mkdir: cannot create directory 'TEST_DIR/001/5': Disk quota exceeded
-diff --git a/tests/ceph/Makefile b/tests/ceph/Makefile
-new file mode 100644
-index 000000000000..f93862af4f31
---- /dev/null
-+++ b/tests/ceph/Makefile
-@@ -0,0 +1,20 @@
-+#
-+# Copyright (c) 2019 SUSE LLC. All Rights Reserved.
-+#
-+
-+TOPDIR = ../..
-+include $(TOPDIR)/include/builddefs
-+
-+CEPHFS_DIR = cephfs
-+TARGET_DIR = $(PKG_LIB_DIR)/$(TESTS_DIR)/$(CEPHFS_DIR)
-+
-+include $(BUILDRULES)
-+
-+install:
-+	$(INSTALL) -m 755 -d $(TARGET_DIR)
-+	$(INSTALL) -m 755 $(TESTS) $(TARGET_DIR)
-+	$(INSTALL) -m 644 group $(TARGET_DIR)
-+	$(INSTALL) -m 644 $(OUTFILES) $(TARGET_DIR)
-+
-+# Nothing.
-+install-dev install-lib:
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 2097152
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 3145728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 4194304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 5242880
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 6291456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 7340032
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 8388608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++9437184
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 2097152
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 3145728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 4194304
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 5242880
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 6291456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 7340032
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 8388608
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 1048576/1048576 bytes at offset 9437184
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++pwrite: Disk quota exceeded
++10485760
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
++pwrite: Disk quota exceeded
++0
++wrote 1048576/1048576 bytes at offset 1048576
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++2097152
 diff --git a/tests/ceph/group b/tests/ceph/group
-new file mode 100644
-index 000000000000..e389bc6ec7ee
---- /dev/null
+index e389bc6ec7ee..02da95169c67 100644
+--- a/tests/ceph/group
 +++ b/tests/ceph/group
-@@ -0,0 +1 @@
-+001 auto quick quota
+@@ -1 +1,2 @@
+ 001 auto quick quota
++002 auto quick quota
