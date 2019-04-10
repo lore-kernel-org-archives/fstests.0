@@ -1,83 +1,68 @@
-Received: from mx2.suse.de ([195.135.220.15]:56682 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726479AbfDIP57 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 9 Apr 2019 11:57:59 -0400
-Date: Tue, 9 Apr 2019 17:57:57 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] generic/230: reset grace time before overcome hardlimit
-Message-ID: <20190409155757.GD1426@quack2.suse.cz>
-References: <1554807874-135913-1-git-send-email-yi.zhang@huawei.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1554807874-135913-1-git-send-email-yi.zhang@huawei.com>
+Received: from mx1.redhat.com ([209.132.183.28]:48396 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1731029AbfDJLOB (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 10 Apr 2019 07:14:01 -0400
+Received: from smtp.corp.redhat.com (int-mx08.intmail.prod.int.phx2.redhat.com [10.5.11.23])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 981777DCEB
+        for <fstests@vger.kernel.org>; Wed, 10 Apr 2019 11:14:00 +0000 (UTC)
+Received: from bfoster.bos.redhat.com (dhcp-41-2.bos.redhat.com [10.18.41.2])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 509441A7D2
+        for <fstests@vger.kernel.org>; Wed, 10 Apr 2019 11:14:00 +0000 (UTC)
+From: Brian Foster <bfoster@redhat.com>
+Subject: [PATCH] fsx: test copy_file_range() using non-zero length copy
+Date: Wed, 10 Apr 2019 07:13:59 -0400
+Message-Id: <20190410111359.5243-1-bfoster@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: "zhangyi (F)" <yi.zhang@huawei.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com, jack@suse.cz
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue 09-04-19 19:04:34, zhangyi (F) wrote:
-> Currently, we call repquota to report the latest quota information
-> after each test case. But repquota will invoke Q_SYNC on the ext4 file
-> system with old quota, which may be time consuming on the low speed or
-> busy scratch device. If we call repquota between the "overcome
-> softlimit" and the "overcome hardlimit" cases, the softlimit grace time
-> may be exceed after repquota return, and lead to test failure.
-> 
-> Now, we capture the following failure when the disk is busy:
-> 
->    pwrite: Disk quota exceeded
->    Touch 3+4
->    Touch 5+6
->   +touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
->    touch: cannot touch 'SCRATCH_MNT/file6': Disk quota exceeded
->    Touch 5
->    touch: cannot touch 'SCRATCH_MNT/file5': Disk quota exceeded
-> 
-> This patch reset grace time before the "overcome hardlimit" case to
-> avoid this failure.
-> 
-> Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
+The copy_file_range() test detection code performs a zero-length
+copy to determine whether to perform such calls during the test run.
+While this detects the common case of syscall availability,
+copy_file_range() has a somewhat variable implementation on the
+kernel side that can depend on certain per-filesystem features, etc.
+In some implementations, a zero length copy can shortcut and return
+success before ever invoking per-filesystem functionality and thus
+not thoroughly testing the copy mechanism on the current system.
+This can cause the test detection code to pass only to run into an
+immediate failure on the first copy_file_range() call during the
+test.
 
-Looks good to me. You can add:
+Tweak test_copy_range() to perform a small single byte copy to avoid
+this problem. Also fix a typo bug in the errno check of the clone
+range detection logic.
 
-Acked-by: Jan Kara <jack@suse.cz>
+Signed-off-by: Brian Foster <bfoster@redhat.com>
+---
+ ltp/fsx.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
 
-								Honza
-
-> ---
->  tests/generic/230 | 8 ++++++++
->  1 file changed, 8 insertions(+)
-> 
-> diff --git a/tests/generic/230 b/tests/generic/230
-> index e0a876ba..405581b3 100755
-> --- a/tests/generic/230
-> +++ b/tests/generic/230
-> @@ -54,6 +54,10 @@ test_enforcement()
->  		_filter_xfs_io_error | tee -a $seqres.full
->  	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
->  	# Now try to overcome block hardlimit
-> +	# Reset grace time here due to the repquota will invoke Q_SYNC on
-> +	# old quota which may be time consuming on the low speed or busy
-> +	# scratch device that may leed to grace time exceed.
-> +	setquota -$type $qa_user -T $grace $grace $SCRATCH_MNT 2>/dev/null
->  	echo "Write 250 blocks..."
->  	su $qa_user -c "$XFS_IO_PROG -c 'pwrite 0 $((250 * $BLOCK_SIZE))' -c fsync \
->  		$SCRATCH_MNT/file2" 2>&1 >>$seqres.full | \
-> @@ -75,6 +79,10 @@ test_enforcement()
->  		2>&1 >>$seqres.full | _filter_scratch | tee -a $seqres.full
->  	repquota -$type $SCRATCH_MNT  | grep -v "^root" >>$seqres.full 2>&1
->  	# Try to exceed inode hardlimit
-> +	# Reset grace time here due to the repquota will invoke Q_SYNC on
-> +	# old quota which may be time consuming on the low speed or busy
-> +	# scratch device that may leed to grace time exceed.
-> +	setquota -$type $qa_user -T $grace $grace $SCRATCH_MNT 2>/dev/null
->  	echo "Touch 5+6"
->  	su $qa_user -c "touch $SCRATCH_MNT/file5 $SCRATCH_MNT/file6" \
->  		2>&1 >>$seqres.full | _filter_scratch | tee -a $seqres.full
-> -- 
-> 2.13.6
-> 
+diff --git a/ltp/fsx.c b/ltp/fsx.c
+index 391824bf..06d08e4e 100644
+--- a/ltp/fsx.c
++++ b/ltp/fsx.c
+@@ -1364,7 +1364,7 @@ test_clone_range(void)
+ 	};
+ 
+ 	if (ioctl(fd, FICLONERANGE, &fcr) &&
+-	    (errno = EOPNOTSUPP || errno == ENOTTY)) {
++	    (errno == EOPNOTSUPP || errno == ENOTTY)) {
+ 		if (!quiet)
+ 			fprintf(stderr,
+ 				"main: filesystem does not support "
+@@ -1581,9 +1581,9 @@ do_dedupe_range(unsigned offset, unsigned length, unsigned dest)
+ int
+ test_copy_range(void)
+ {
+-	loff_t o1 = 0, o2 = 0;
++	loff_t o1 = 0, o2 = 1;
+ 
+-	if (syscall(__NR_copy_file_range, fd, &o1, fd, &o2, 0, 0) == -1 &&
++	if (syscall(__NR_copy_file_range, fd, &o1, fd, &o2, 1, 0) == -1 &&
+ 	    (errno == ENOSYS || errno == EOPNOTSUPP || errno == ENOTTY)) {
+ 		if (!quiet)
+ 			fprintf(stderr,
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.17.2
