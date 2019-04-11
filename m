@@ -1,61 +1,170 @@
-Received: from mail-qt1-f178.google.com ([209.85.160.178]:39947 "EHLO
-        mail-qt1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727277AbfDJQX7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 10 Apr 2019 12:23:59 -0400
-Received: by mail-qt1-f178.google.com with SMTP id x12so3557716qts.7
-        for <fstests@vger.kernel.org>; Wed, 10 Apr 2019 09:23:59 -0700 (PDT)
-MIME-Version: 1.0
-References: <CA+jMu4RO1mNKmwof8z0rU4Lcr76mPRo04a5sFrs0Saz735ez1w@mail.gmail.com>
- <20190326014337.GI26298@dastard> <CA+jMu4QNB+v-r6KmkUfEh-q5r=m=tCxkLkfrLXA+Ajt12g1SQA@mail.gmail.com>
-In-Reply-To: <CA+jMu4QNB+v-r6KmkUfEh-q5r=m=tCxkLkfrLXA+Ajt12g1SQA@mail.gmail.com>
-From: Rishabh Dave <ridave@redhat.com>
-Date: Wed, 10 Apr 2019 21:53:47 +0530
-Message-ID: <CA+jMu4TtNT66Ag8S0tYDwTbFf2DM=SvKbneBOCrwEgRdBLakMA@mail.gmail.com>
-Subject: Re: testsuite for ACLs
-Content-Type: text/plain; charset="UTF-8"
+Received: from mx1.redhat.com ([209.132.183.28]:53162 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726121AbfDKIqq (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Apr 2019 04:46:46 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic: test statfs on project quota directory
+Date: Thu, 11 Apr 2019 16:46:38 +0800
+Message-Id: <20190411084638.29063-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
+
+There's a bug on xfs cause statfs get negative f_ffree value from
+a project quota directory. It's fixed by "de7243057 fs/xfs: fix
+f_ffree value for statfs when project quota is set". So add statfs
+testing on project quota block and inode count limit.
+
+For testing foreign fs quota, change _qmount() function, turn on
+project if quotaon support.
+
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
 Hi,
 
-I went through all the tests in last couple of days. If my
-understanding is correct, all the tests, besides the ones in
-tests/generic/099, are written for some specific bug. So, the
-following comparison of my Python testsuite[1] is with
-tests/generic/099.
+There's one thing I don't understand, so CC ext4 mail list. Please
+feel free to reply, if anyone knows that:
 
-To begin with, there is a good amount of intersection between both the
-testsuite. What can be added to xfstests-dev is as follows -
-1. ACL inheritance is being tested only for file owner, file group and
-other ACLs[2].  We can add 2 more testscases here for specific users
-and groups (i.e cases testing d:u:user:rwx and d:g:group:rwx).
-2. Mask ACLs are only being tested for ACLs for specific user[3][4]
-and group[5] but not for file owner, file group and other. If I am
-right about this, we can add 3 more testcases here.
-3. There are no testcases for mask inheritance. If we wish to add
-them, we'll have 5 more testcases.
-4. And finally I don't see a testcase where we remove only the default
-ACLs from a directory. There are testcases that remove all ACLs (i.e.
-chacl -B)[6]  and all file access ACLs (i.e. chacl -R)[7]. So, there's
-scope for one more testcase here.
+$ mkfs.ext4 $SCRATCH_DEV
+$ tune2fs -O quota,project $SCRATCH_DEV
+$ mount $SCRATCH_DEV $SCRATCH_MNT -o prjquota
+$ quotaon -P $SCRATCH_MNT
+$ mkdir $SCRATCH_MNT/t
+$ xfs_quota -f -x -c "project -p $SCRATCH_MNT/t -s 42" $SCRATCH_MNT
+$ xfs_quota -f -x -c "limit -p bsoft=100m answer" $SCRATCH_MNT
+$ df -k $SCRATCH_MNT/t
+Filesystem    1K-blocks  Used Available Use% Mounted on
+SCRATCH_DEV    102400     4    102396   1% SCRATCH_MNT
 
-Besides, all my Python testcases varied from the ones written in
-xfstests-dev in following 2 ways:
-1. All 3 permission bits were tested for all the cases.
-2. Every testcase would also remove the ACL within the testcase. This
-served as test if setfacl -x works for all 4 categories of ACLs.
+On XFS, the 'Used' field always shows '0'. But why ext4 always has
+more 4k? Is it a bug or expected.
 
-If these 2 points are not superfluous, I can go ahead modify all the
-testcases accordingly.
+Thanks,
+Zorro
 
-- Rishabh
 
-[1] https://github.com/ceph/ceph/pull/26477/commits/3d1c11b6990befb278320d3584602aa5d0078985
-[2] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n227
-[3] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n188
-[4] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n193
-[5] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n183
-[6] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n254
-[7] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/tree/tests/generic/099#n253
+ common/quota          |  4 +++
+ tests/generic/999     | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  3 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 82 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/common/quota b/common/quota
+index f19f81a1..315df8cb 100644
+--- a/common/quota
++++ b/common/quota
+@@ -200,6 +200,10 @@ _qmount()
+     if [ "$FSTYP" != "xfs" ]; then
+         quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+         quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
++	# try to turn on project quota if it's supported
++	if quotaon --help 2>&1 | grep -q '\-\-project'; then
++		quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
++	fi
+     fi
+     chmod ugo+rwx $SCRATCH_MNT
+ }
+diff --git a/tests/generic/999 b/tests/generic/999
+new file mode 100755
+index 00000000..555341f1
+--- /dev/null
++++ b/tests/generic/999
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 999
++#
++# Test statfs when project quota is set.
++# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	_scratch_unmount
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_quota
++_require_xfs_quota_foreign
++
++_scratch_mkfs >/dev/null 2>&1
++_scratch_enable_pquota
++_qmount_option "prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
++
++# Create a directory to be project object, and create a file to take 64k space
++mkdir $SCRATCH_MNT/t
++$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
++
++# Setup temporary replacements for /etc/projects and /etc/projid
++cat >$tmp.projects <<EOF
++42:$SCRATCH_MNT/t
++EOF
++
++cat >$tmp.projid <<EOF
++answer:42
++EOF
++
++quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
++$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
++$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
++
++# The itotal and size should be 53 and 102400(k), as above project quota limit.
++# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
++# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
++# 6[48] at the end.
++df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
++	_filter_scratch | _filter_spaces | \
++	sed -e "/SCRATCH_MNT/s/6[48]/N/"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/999.out b/tests/generic/999.out
+new file mode 100644
+index 00000000..1bebabd4
+--- /dev/null
++++ b/tests/generic/999.out
+@@ -0,0 +1,3 @@
++QA output created by 999
++File Inodes IUsed 1K-blocks Used
++SCRATCH_MNT/t 53 2 102400 N
+diff --git a/tests/generic/group b/tests/generic/group
+index 9f4845c6..35da10a5 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -542,3 +542,4 @@
+ 537 auto quick trim
+ 538 auto quick aio
+ 539 auto quick punch seek
++999 auto quick quota
+-- 
+2.17.2
