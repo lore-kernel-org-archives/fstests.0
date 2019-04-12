@@ -1,158 +1,99 @@
-Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:59933 "EHLO
-        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726640AbfDLBi3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Apr 2019 21:38:29 -0400
-Date: Fri, 12 Apr 2019 11:15:59 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [RFC PATCH 2/2] ceph: test basic ceph.quota.max_bytes quota
-Message-ID: <20190412011559.GE1695@dread.disaster.area>
-References: <20190402103428.21435-1-lhenriques@suse.com>
- <20190402103428.21435-3-lhenriques@suse.com>
- <20190402210931.GV23020@dastard>
- <87d0m3e81f.fsf@suse.com>
- <d38a4d84-8df2-984e-cf1c-045d85644796@suse.com>
- <874l7fdy5s.fsf@suse.com>
- <20190403214708.GA26298@dastard>
- <87tvfecbv5.fsf@suse.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
-Content-Disposition: inline
-In-Reply-To: <87tvfecbv5.fsf@suse.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:37014 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726186AbfDLFYa (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 12 Apr 2019 01:24:30 -0400
+From: Anand Jain <anand.jain@oracle.com>
+Subject: [PATCH RFC] fstests: generic/077: fix populate fs use _fill_fs()
+Date: Fri, 12 Apr 2019 13:24:18 +0800
+Message-Id: <20190412052418.22206-1-anand.jain@oracle.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Luis Henriques <lhenriques@suse.com>
-Cc: Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, "Yan, Zheng" <zyan@redhat.com>, ceph-devel@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 04, 2019 at 11:18:22AM +0100, Luis Henriques wrote:
-> Dave Chinner <david@fromorbit.com> writes:
->=20
-> > On Wed, Apr 03, 2019 at 02:19:11PM +0100, Luis Henriques wrote:
-> >> Nikolay Borisov <nborisov@suse.com> writes:
-> >> > On 3.04.19 =D0=B3. 12:45 =D1=87., Luis Henriques wrote:
-> >> >> Dave Chinner <david@fromorbit.com> writes:
-> >> >>> Makes no sense to me. xfs_io does a write() loop internally with
-> >> >>> this pwrite command of 4kB writes - the default buffer size. If =
-you
-> >> >>> want xfs_io to loop doing 1MB sized pwrite() calls, then all you
-> >> >>> need is this:
-> >> >>>
-> >> >>> 	$XFS_IO_PROG -f -c "pwrite -w -B 1m 0 ${size}m" $file | _filter=
-_xfs_io
-> >> >>>
-> >> >>=20
-> >> >> Thank you for your review, Dave.  I'll make sure the next revisio=
-n of
-> >> >> these tests will include all your comments implemented... except =
-for
-> >> >> this one.
-> >> >>=20
-> >> >> The reason I'm using a loop for writing a file is due to the natu=
-re of
-> >> >> the (very!) loose definition of quotas in CephFS.  Basically, cli=
-ents
-> >> >> will likely write some amount of data over the configured limit b=
-ecause
-> >> >> the servers they are communicating with to write the data (the OS=
-Ds)
-> >> >> have no idea about the concept of quotas (or files even); the fil=
-esystem
-> >> >> view in the cluster is managed at a different level, with the hel=
-p of
-> >> >> the MDS and the client itself.
-> >> >>=20
-> >> >> So, the loop in this function is simply to allow the metadata ass=
-ociated
-> >> >> with the file to be updated while we're writing the file.  If I u=
-se a
-> >> >
-> >> > But the metadata will be modified while writing the file even with=
- a
-> >> > single invocation of xfs_io.
-> >>=20
-> >> No, that's not true.  It would be too expensive to keep the metadata
-> >> server updated while writing to a file.  So, making sure there's
-> >> actually an open/close to the file (plus the fsync in pwrite) helps
-> >> making sure the metadata is flushed into the MDS.
-> >
-> > /me sighs.
-> >
-> > So you want:
-> >
-> > 	loop until ${size}MB written:
-> > 		write 1MB
-> > 		fsync
-> > 		  -> flush data to server
-> > 		  -> flush metadata to server
-> >
-> > i.e. this one liner:
-> >
-> > xfs_io -f -c "pwrite -D -B 1m 0 ${size}m" /path/to/file
->=20
-> Unfortunately, that doesn't do what I want either :-/
-> (and I guess you meant '-b 1m', not '-B 1m', right?)
+Test case generic/077 uses files under /lib or /usr to fill SCRATCH_MNT.
+If /usr or /lib is below 256mb then test fails to run, or if these dirs
+are too large it takes a long time for the cp to finish. On my machine
+it takes 645sec.
 
-Yes. But I definitely did mean "-D" so that RWF_DSYNC was used with
-each 1MB write.
+This patch propose to use the common/populate function _fill_fs() to
+write files into the target directory instead. However I am not too
+sure about the motivation of this test case in the first place, and
+why does it wanted to cp /usr or /lib, and why fs should become full?
+Any idea? Thanks.
 
-> [ Zheng: please feel free to correct me if I'm saying something really
->   stupid below. ]
->=20
-> So, one of the key things in my loop is the open/close operations.  Whe=
-n
-> a file is closed in cephfs the capabilities (that's ceph jargon for wha=
-t
-> sort of operations a client is allowed to perform on an inode) will
-> likely be released and that's when the metadata server will get the
-> updated file size.  Before that, the client is allowed to modify the
-> file size if it has acquired the capabilities for doing so.
+Signed-off-by: Anand Jain <anand.jain@oracle.com>
+---
+ tests/generic/077     | 24 +++++-------------------
+ tests/generic/077.out |  3 +--
+ 2 files changed, 6 insertions(+), 21 deletions(-)
 
-So you are saying that O_DSYNC writes on ceph do not force file
-size metadata changes to the metadata server to be made stable?
-
-> OTOH, a pwrite operation will eventually get the -EDQUOT even with the
-> one-liner above because the client itself will realize it has exceeded =
-a
-> certain threshold set by the MDS and will eventually update the server
-> with the new file size.
-
-Sure, but if the client crashes without having sent the updated file
-size to the server as part of an extending O_DSYNC write, then how
-is it recovered when the client reconnects to the server and
-accesses the file again?
-
-> However that won't happen at a deterministic
-> file size.  For example, if quota is 10m and we're writing 20m, we may
-> get the error after writing 15m.
->=20
-> Does this make sense?
-
-Only makes sense to me if O_DSYNC is ignored by the ceph client...
-
-> So, I guess I *could* use your one-liner in the test, but I would need
-> to slightly change the test logic -- I would need to write enough data
-> to the file to make sure I would get the -EDQUOT but I wouldn't be able
-> to actually check the file size as it will not be constant.
->=20
-> > Fundamentally, if you find yourself writing a loop around xfs_io to
-> > break up a sequential IO stream into individual chunks, then you are
-> > most likely doing something xfs_io can already do. And if xfs_io
-> > cannot do it, then the right thing to do is to modify xfs_io to be
-> > able to do it and then use xfs_io....
->=20
-> Got it!  But I guess it wouldn't make sense to change xfs_io for this
-> specific scenario where I want several open-write-close cycles.
-
-That's how individual NFS client writes appear to filesystem under
-the NFS server. I've previously considered adding an option in
-xfs_io to mimic this open-write-close loop per buffer so it's easy
-to exercise such behaviours, but never actually required it to
-reproduce the problems I was chasing. So it's definitely something
-that xfs_io /could/ do if necessary.
-
-Cheers,
-
-Dave.
---=20
-Dave Chinner
-david@fromorbit.com
+diff --git a/tests/generic/077 b/tests/generic/077
+index d11b49c6ff15..d8e5551f1925 100755
+--- a/tests/generic/077
++++ b/tests/generic/077
+@@ -14,18 +14,6 @@ here=`pwd`
+ tmp=/tmp/$$
+ status=1
+ 
+-# Something w/ enough data to fill 256M of fs...
+-filler=""
+-[ -d /lib/modules ] && \
+-	[ $(( $(du -h -m /lib/modules | tail -1| cut -f1) * 2 )) -ge 256 ] && \
+-	filler=/lib/modules
+-
+-# fall back in case /lib/modules doesn't exist or smaller
+-[[ -z $filler ]] && \
+-	[ -d /usr ] && \
+-	[ $(( $(du -h -m /usr | tail -1| cut -f1) * 2 )) -ge 256 ] && \
+-	filler=/usr
+-
+ _cleanup()
+ {
+ 	cd /
+@@ -38,13 +26,12 @@ trap "_cleanup; rm -f $tmp.*; exit \$status" 0 1 2 3 15
+ . ./common/rc
+ . ./common/filter
+ . ./common/attr
++. ./common/populate
+ 
+ # real QA test starts here
+ _supported_fs generic
+ _supported_os Linux
+ 
+-[ ! -d $filler ] && _notrun "No directory at least 256MB to source files from"
+-
+ _require_scratch
+ _require_attrs
+ _require_acls
+@@ -64,11 +51,10 @@ mkdir $SCRATCH_MNT/subdir
+ echo "*** set default ACL"
+ setfacl -R -dm u:fsgqa:rwx,g::rwx,o::r-x,m::rwx $SCRATCH_MNT/subdir
+ 
+-echo "*** populate filesystem, pass #1" | tee -a $seqres.full
+-cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
+-
+-echo "*** populate filesystem, pass #2" | tee -a $seqres.full
+-cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
++blksz="$(_get_block_size $SCRATCH_MNT/subdir)"
++echo "*** populate filesystem" | tee -a $seqres.full
++echo "*** fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0" >> $seqres.full
++_fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0 >> $seqres.full 2>&1
+ 
+ _check_scratch_fs
+ 
+diff --git a/tests/generic/077.out b/tests/generic/077.out
+index eae7226ab29c..9c143c902a2c 100644
+--- a/tests/generic/077.out
++++ b/tests/generic/077.out
+@@ -1,7 +1,6 @@
+ QA output created by 077
+ *** create filesystem
+ *** set default ACL
+-*** populate filesystem, pass #1
+-*** populate filesystem, pass #2
++*** populate filesystem
+ *** all done
+ *** unmount
+-- 
+2.17.1
