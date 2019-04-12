@@ -1,186 +1,133 @@
-Received: from mx2.suse.de ([195.135.220.15]:52886 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726827AbfDLLEc (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 12 Apr 2019 07:04:32 -0400
-From: Luis Henriques <lhenriques@suse.com>
-Subject: Re: [RFC PATCH 2/2] ceph: test basic ceph.quota.max_bytes quota
-References: <20190402103428.21435-1-lhenriques@suse.com>
-        <20190402103428.21435-3-lhenriques@suse.com>
-        <20190402210931.GV23020@dastard> <87d0m3e81f.fsf@suse.com>
-        <d38a4d84-8df2-984e-cf1c-045d85644796@suse.com>
-        <874l7fdy5s.fsf@suse.com> <20190403214708.GA26298@dastard>
-        <87tvfecbv5.fsf@suse.com> <20190412011559.GE1695@dread.disaster.area>
-        <740207e9-b4ef-e4b4-4097-9ece2ac189a7@redhat.com>
-Date: Fri, 12 Apr 2019 12:04:28 +0100
-In-Reply-To: <740207e9-b4ef-e4b4-4097-9ece2ac189a7@redhat.com> (Zheng Yan's
-        message of "Fri, 12 Apr 2019 11:37:55 +0800")
-Message-ID: <87imvjpjr7.fsf@suse.com>
+Received: from mout.gmx.net ([212.227.17.20]:34799 "EHLO mout.gmx.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726061AbfDLHPg (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 12 Apr 2019 03:15:36 -0400
+Subject: Re: [PATCH RFC] fstests: generic/077: fix populate fs use _fill_fs()
+References: <20190412052418.22206-1-anand.jain@oracle.com>
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Message-ID: <91949b01-d016-f732-265b-77a397a1efbe@gmx.com>
+Date: Fri, 12 Apr 2019 15:15:25 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+In-Reply-To: <20190412052418.22206-1-anand.jain@oracle.com>
+Content-Type: multipart/signed; micalg=pgp-sha256;
+ protocol="application/pgp-signature";
+ boundary="BpJ4qmCH949WG6u4zZER2hlWiemmZnWS0"
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: "Yan, Zheng" <zyan@redhat.com>
-Cc: Dave Chinner <david@fromorbit.com>, Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, ceph-devel@vger.kernel.org
+To: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-"Yan, Zheng" <zyan@redhat.com> writes:
+This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
+--BpJ4qmCH949WG6u4zZER2hlWiemmZnWS0
+Content-Type: multipart/mixed; boundary="kAriEelbh5SPnFyGqyo8QgiETQDCDwJoR";
+ protected-headers="v1"
+From: Qu Wenruo <quwenruo.btrfs@gmx.com>
+To: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org
+Message-ID: <91949b01-d016-f732-265b-77a397a1efbe@gmx.com>
+Subject: Re: [PATCH RFC] fstests: generic/077: fix populate fs use _fill_fs()
+References: <20190412052418.22206-1-anand.jain@oracle.com>
+In-Reply-To: <20190412052418.22206-1-anand.jain@oracle.com>
 
-> On 4/12/19 9:15 AM, Dave Chinner wrote:
->> On Thu, Apr 04, 2019 at 11:18:22AM +0100, Luis Henriques wrote:
->>> Dave Chinner <david@fromorbit.com> writes:
->>>
->>>> On Wed, Apr 03, 2019 at 02:19:11PM +0100, Luis Henriques wrote:
->>>>> Nikolay Borisov <nborisov@suse.com> writes:
->>>>>> On 3.04.19 =D0=B3. 12:45 =D1=87., Luis Henriques wrote:
->>>>>>> Dave Chinner <david@fromorbit.com> writes:
->>>>>>>> Makes no sense to me. xfs_io does a write() loop internally with
->>>>>>>> this pwrite command of 4kB writes - the default buffer size. If =
-you
->>>>>>>> want xfs_io to loop doing 1MB sized pwrite() calls, then all you
->>>>>>>> need is this:
->>>>>>>>
->>>>>>>> 	$XFS_IO_PROG -f -c "pwrite -w -B 1m 0 ${size}m" $file | _filter=
-_xfs_io
->>>>>>>>
->>>>>>>
->>>>>>> Thank you for your review, Dave.  I'll make sure the next revisio=
-n of
->>>>>>> these tests will include all your comments implemented... except =
-for
->>>>>>> this one.
->>>>>>>
->>>>>>> The reason I'm using a loop for writing a file is due to the natu=
-re of
->>>>>>> the (very!) loose definition of quotas in CephFS.  Basically, cli=
-ents
->>>>>>> will likely write some amount of data over the configured limit b=
-ecause
->>>>>>> the servers they are communicating with to write the data (the OS=
-Ds)
->>>>>>> have no idea about the concept of quotas (or files even); the fil=
-esystem
->>>>>>> view in the cluster is managed at a different level, with the hel=
-p of
->>>>>>> the MDS and the client itself.
->>>>>>>
->>>>>>> So, the loop in this function is simply to allow the metadata ass=
-ociated
->>>>>>> with the file to be updated while we're writing the file.  If I u=
-se a
->>>>>>
->>>>>> But the metadata will be modified while writing the file even with=
- a
->>>>>> single invocation of xfs_io.
->>>>>
->>>>> No, that's not true.  It would be too expensive to keep the metadat=
-a
->>>>> server updated while writing to a file.  So, making sure there's
->>>>> actually an open/close to the file (plus the fsync in pwrite) helps
->>>>> making sure the metadata is flushed into the MDS.
->>>>
->>>> /me sighs.
->>>>
->>>> So you want:
->>>>
->>>> 	loop until ${size}MB written:
->>>> 		write 1MB
->>>> 		fsync
->>>> 		  -> flush data to server
->>>> 		  -> flush metadata to server
->>>>
->>>> i.e. this one liner:
->>>>
->>>> xfs_io -f -c "pwrite -D -B 1m 0 ${size}m" /path/to/file
->>>
->>> Unfortunately, that doesn't do what I want either :-/
->>> (and I guess you meant '-b 1m', not '-B 1m', right?)
->>
->> Yes. But I definitely did mean "-D" so that RWF_DSYNC was used with
->> each 1MB write.
->>
->>> [ Zheng: please feel free to correct me if I'm saying something reall=
-y
->>>    stupid below. ]
->>>
->>> So, one of the key things in my loop is the open/close operations.  W=
-hen
->>> a file is closed in cephfs the capabilities (that's ceph jargon for w=
-hat
->>> sort of operations a client is allowed to perform on an inode) will
->>> likely be released and that's when the metadata server will get the
->>> updated file size.  Before that, the client is allowed to modify the
->>> file size if it has acquired the capabilities for doing so.
->>
->> So you are saying that O_DSYNC writes on ceph do not force file
->> size metadata changes to the metadata server to be made stable?
->>
->>> OTOH, a pwrite operation will eventually get the -EDQUOT even with th=
-e
->>> one-liner above because the client itself will realize it has exceede=
-d a
->>> certain threshold set by the MDS and will eventually update the serve=
-r
->>> with the new file size.
->>
->> Sure, but if the client crashes without having sent the updated file
->> size to the server as part of an extending O_DSYNC write, then how
->> is it recovered when the client reconnects to the server and
->> accesses the file again?
->
->
-> For DSYNC write, client has already written data to object store. If cl=
-ient
-> crashes, MDS will set file to 'recovering' state and probe file size by=
- checking
-> object store. Accessing the file is blocked during recovery.
+--kAriEelbh5SPnFyGqyo8QgiETQDCDwJoR
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: quoted-printable
 
-Thank you for chiming in, Zheng.
 
->
-> Regards
-> Yan, Zheng
->
->
->
->
->>
->>> However that won't happen at a deterministic
->>> file size.  For example, if quota is 10m and we're writing 20m, we ma=
-y
->>> get the error after writing 15m.
->>>
->>> Does this make sense?
->>
->> Only makes sense to me if O_DSYNC is ignored by the ceph client...
->>
->>> So, I guess I *could* use your one-liner in the test, but I would nee=
-d
->>> to slightly change the test logic -- I would need to write enough dat=
-a
->>> to the file to make sure I would get the -EDQUOT but I wouldn't be ab=
-le
->>> to actually check the file size as it will not be constant.
->>>
->>>> Fundamentally, if you find yourself writing a loop around xfs_io to
->>>> break up a sequential IO stream into individual chunks, then you are
->>>> most likely doing something xfs_io can already do. And if xfs_io
->>>> cannot do it, then the right thing to do is to modify xfs_io to be
->>>> able to do it and then use xfs_io....
->>>
->>> Got it!  But I guess it wouldn't make sense to change xfs_io for this
->>> specific scenario where I want several open-write-close cycles.
->>
->> That's how individual NFS client writes appear to filesystem under
->> the NFS server. I've previously considered adding an option in
->> xfs_io to mimic this open-write-close loop per buffer so it's easy
->> to exercise such behaviours, but never actually required it to
->> reproduce the problems I was chasing. So it's definitely something
->> that xfs_io /could/ do if necessary.
 
-Ok, since there seems to be other use-cases for this, I agree it may be
-worth adding that option then.  I'll see if I can come up with a patch
-for that.
+On 2019/4/12 =E4=B8=8B=E5=8D=881:24, Anand Jain wrote:
+> Test case generic/077 uses files under /lib or /usr to fill SCRATCH_MNT=
+=2E
+> If /usr or /lib is below 256mb then test fails to run, or if these dirs=
 
-Cheers,
---=20
-Luis
+> are too large it takes a long time for the cp to finish. On my machine
+> it takes 645sec.
+
+Wait for a minute, ths fs is only 256M sized, if it takes you over 10
+minutes, there must be something else wrong.
+
+>=20
+> This patch propose to use the common/populate function _fill_fs() to
+> write files into the target directory instead. However I am not too
+> sure about the motivation of this test case in the first place, and
+> why does it wanted to cp /usr or /lib,
+
+To my eyes, it's using /usr or /lib just for it's mostly full/contains a
+lot of files for most systems.
+
+> and why fs should become full?
+
+Maybe to hit certain ENOSPC corner case for ACL/xattr, just my guess.
+
+> Any idea? Thanks.
+
+Use populate_fs is definitely the right move.
+
+However I have some concern below.
+
+[snip]
+>  echo "*** set default ACL"
+>  setfacl -R -dm u:fsgqa:rwx,g::rwx,o::r-x,m::rwx $SCRATCH_MNT/subdir
+> =20
+> -echo "*** populate filesystem, pass #1" | tee -a $seqres.full
+> -cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
+> -
+> -echo "*** populate filesystem, pass #2" | tee -a $seqres.full
+> -cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
+> +blksz=3D"$(_get_block_size $SCRATCH_MNT/subdir)"
+> +echo "*** populate filesystem" | tee -a $seqres.full
+> +echo "*** fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0" >> $seqres.fu=
+ll
+> +_fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0 >> $seqres.full 2>&1
+
+Unlike the original behavior, which do 2 passes and the 2nd pass will
+overwrite previous files.
+
+While after your modification, it's no longer the case.
+
+At least we should try to replay the 1st run to mimic the original behavi=
+or.
+
+Thanks,
+Qu
+
+> =20
+>  _check_scratch_fs
+> =20
+> diff --git a/tests/generic/077.out b/tests/generic/077.out
+> index eae7226ab29c..9c143c902a2c 100644
+> --- a/tests/generic/077.out
+> +++ b/tests/generic/077.out
+> @@ -1,7 +1,6 @@
+>  QA output created by 077
+>  *** create filesystem
+>  *** set default ACL
+> -*** populate filesystem, pass #1
+> -*** populate filesystem, pass #2
+> +*** populate filesystem
+>  *** all done
+>  *** unmount
+>=20
+
+
+--kAriEelbh5SPnFyGqyo8QgiETQDCDwJoR--
+
+--BpJ4qmCH949WG6u4zZER2hlWiemmZnWS0
+Content-Type: application/pgp-signature; name="signature.asc"
+Content-Description: OpenPGP digital signature
+Content-Disposition: attachment; filename="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlywOw0ACgkQwj2R86El
+/qgGZQf8Cvq/9+VJjQ/tjXy5UzCyZiyFfvrtf3MnSxRUcSwj0EL/mFECBiwA0f9K
+PPpfzYhdh1fXJbVEdIa58O8U2uupNSLWOVL/pBOhEXX04W5PtX+56nWSYFd2kJrt
+os0H/ZLt+6pG/mMrIjlMnDmGwguXk3ynT1U5DQt0Xwwcv8ibJX4ljXfHPMkmoft/
+b5k2LR+7xXg0WCOA3Mbu5c/uc7q1cmxQo/eDUXJzT3A/7+3sFXwHnQakB5PNf6K2
+18/5F9MBDO65gUYh72/qtcGq/sgG6TEWTDCZSI9tPIdwcJKZsRxM6ip45IHnRGVh
+4RVDt+d9E7y8EqsdawQ4Hy+X1OVufw==
+=n/II
+-----END PGP SIGNATURE-----
+
+--BpJ4qmCH949WG6u4zZER2hlWiemmZnWS0--
