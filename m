@@ -1,69 +1,66 @@
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:44628 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727160AbfDNCrw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 13 Apr 2019 22:47:52 -0400
-Date: Sun, 14 Apr 2019 10:47:45 +0800
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:33247 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726147AbfDNLE7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 Apr 2019 07:04:59 -0400
+Received: by mail-pf1-f194.google.com with SMTP id h5so7227852pfo.0
+        for <fstests@vger.kernel.org>; Sun, 14 Apr 2019 04:04:58 -0700 (PDT)
+Date: Sun, 14 Apr 2019 19:04:51 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs/048: amend property validation cases
-Message-ID: <20190414024745.GL2824@desktop>
-References: <20190403165419.12666-1-anand.jain@oracle.com>
- <20190403170437.14448-1-anand.jain@oracle.com>
- <7de2d0fd-e777-2bec-5731-15ba2f2af4f2@suse.com>
- <20190406120207.GG2824@desktop>
- <20062818-d303-047c-358f-52ac9dad50de@oracle.com>
- <d552fff5-b43d-6dff-dbb2-3d236041df41@suse.com>
+Subject: Re: [PATCH] generic/478: should wait until dup success or fail
+Message-ID: <20190414110451.GM2824@desktop>
+References: <1554975321-121948-1-git-send-email-zhangxiaoxu5@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <d552fff5-b43d-6dff-dbb2-3d236041df41@suse.com>
+In-Reply-To: <1554975321-121948-1-git-send-email-zhangxiaoxu5@huawei.com>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Nikolay Borisov <nborisov@suse.com>
-Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: ZhangXiaoxu <zhangxiaoxu5@huawei.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Apr 07, 2019 at 03:45:36PM +0300, Nikolay Borisov wrote:
+On Thu, Apr 11, 2019 at 05:35:21PM +0800, ZhangXiaoxu wrote:
+> When test on nfs, maybe failed as below:
+>   wait sem0 0: Resource temporarily unavailable
+>   set sem0 0: Invalid argument
+>   exit rmid: Invalid argument
 >=20
+> It means getlk routine wait sem0 timeout, because the setlk routine
+> maybe take too long time on =E2=80=98fcntl=E2=80=99 or 'dup'.
 >=20
-> On 7.04.19 =D0=B3. 14:54 =D1=87., Anand Jain wrote:
-> > On 6/4/19 8:02 pm, Eryu Guan wrote:
-> >> On Fri, Apr 05, 2019 at 04:21:10PM +0300, Nikolay Borisov wrote:
-> >>>
-> >>>
-> >>> On 3.04.19 =D0=B3. 20:04 =D1=87., Anand Jain wrote:
-> >>>> Add more property validation cases which are fixed by the patches =
-[1]
-> >>>> =C2=A0 [1]
-> >>>> =C2=A0=C2=A0 btrfs: fix vanished compression property after failed=
- set
-> >>>> =C2=A0=C2=A0 btrfs: fix zstd compression parameter
-> >>>>
-> >>>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
-> >>>
-> >>> Reviewed-by: Nikolay Borisov <nborisov@suse.com>
-> >>
-> >> Thanks for the test and the review!
-> >>
-> >> But this looks like a targeted regression test that may fail an exis=
-ting
-> >> test. It's better to write a new test for this.
-> >=20
-> > Regression is only when fstests is upgraded. This
-> > test case mentions the prerequisite kernel patches [1].
-> > So that should suffice the concern?
+> So, let wait on sem0 in getlk routine until the setlk routine success
+> or fail.
 >=20
-> I agree with Anand here, this is an extension to an existing test, whic=
-h
-> covers specific feature. IMO it's not good to always introduce new test=
-s
-> because every invocation of a test comes with an overhead of spawning
-> processes and whatnot. THis is not a problem for 10 tests, but currentl=
-y
-> for btrfs we execute around 600 tests each one "wasting" some cycles to
-> spawn bash processes to execute the actual test.
+> Signed-off-by: ZhangXiaoxu <zhangxiaoxu5@huawei.com>
+> ---
+>  src/t_ofd_locks.c | 4 +---
+>  1 file changed, 1 insertion(+), 3 deletions(-)
+>=20
+> diff --git a/src/t_ofd_locks.c b/src/t_ofd_locks.c
+> index e3b15dd..32e90c0 100644
+> --- a/src/t_ofd_locks.c
+> +++ b/src/t_ofd_locks.c
+> @@ -414,9 +414,7 @@ int main(int argc, char **argv)
+>  		sop.sem_num =3D 0;
+>  		sop.sem_op =3D 0;
+>  		sop.sem_flg =3D 0;
+> -		ts.tv_sec =3D 5;
+> -		ts.tv_nsec =3D 0;
+> -		if (semtimedop(semid, &sop, 1, &ts) =3D=3D -1)
+> +		if (semtimedop(semid, &sop, 1, NULL) =3D=3D -1)
 
-Fair enough. We're having more tests now, and we do consider "merging"
-some tests into one case.
+We set a timeout value on purpose in the first place, to avoid hanging
+the whole test if the setlk process went wrong.
+
+And I didn't reproduce it on NFS. Do I need any special NFS
+configuration?
 
 Thanks,
 Eryu
+
+>  			err_exit("wait sem0 0", errno);
+> =20
+>  		if (fcntl(fd, getlk_macro, &flk) < 0)
+> --=20
+> 2.7.4
+>=20
