@@ -1,111 +1,69 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:47922 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726682AbfDLHaS (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 12 Apr 2019 03:30:18 -0400
-Subject: Re: [PATCH RFC] fstests: generic/077: fix populate fs use _fill_fs()
-References: <20190412052418.22206-1-anand.jain@oracle.com>
- <91949b01-d016-f732-265b-77a397a1efbe@gmx.com>
-From: Anand Jain <anand.jain@oracle.com>
-Message-ID: <b92da32a-d991-f86d-7b85-b1dd33f92b61@oracle.com>
-Date: Fri, 12 Apr 2019 15:30:08 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:44628 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727160AbfDNCrw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 13 Apr 2019 22:47:52 -0400
+Date: Sun, 14 Apr 2019 10:47:45 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs/048: amend property validation cases
+Message-ID: <20190414024745.GL2824@desktop>
+References: <20190403165419.12666-1-anand.jain@oracle.com>
+ <20190403170437.14448-1-anand.jain@oracle.com>
+ <7de2d0fd-e777-2bec-5731-15ba2f2af4f2@suse.com>
+ <20190406120207.GG2824@desktop>
+ <20062818-d303-047c-358f-52ac9dad50de@oracle.com>
+ <d552fff5-b43d-6dff-dbb2-3d236041df41@suse.com>
 MIME-Version: 1.0
-In-Reply-To: <91949b01-d016-f732-265b-77a397a1efbe@gmx.com>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
+Content-Type: text/plain; charset=utf-8
+Content-Disposition: inline
+In-Reply-To: <d552fff5-b43d-6dff-dbb2-3d236041df41@suse.com>
 Sender: fstests-owner@vger.kernel.org
 Content-Transfer-Encoding: quoted-printable
-To: Qu Wenruo <quwenruo.btrfs@gmx.com>, fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org
+To: Nikolay Borisov <nborisov@suse.com>
+Cc: Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-
-
-On 12/4/19 3:15 PM, Qu Wenruo wrote:
+On Sun, Apr 07, 2019 at 03:45:36PM +0300, Nikolay Borisov wrote:
 >=20
 >=20
-> On 2019/4/12 =E4=B8=8B=E5=8D=881:24, Anand Jain wrote:
->> Test case generic/077 uses files under /lib or /usr to fill SCRATCH_MN=
-T.
->> If /usr or /lib is below 256mb then test fails to run, or if these dir=
+> On 7.04.19 =D0=B3. 14:54 =D1=87., Anand Jain wrote:
+> > On 6/4/19 8:02 pm, Eryu Guan wrote:
+> >> On Fri, Apr 05, 2019 at 04:21:10PM +0300, Nikolay Borisov wrote:
+> >>>
+> >>>
+> >>> On 3.04.19 =D0=B3. 20:04 =D1=87., Anand Jain wrote:
+> >>>> Add more property validation cases which are fixed by the patches =
+[1]
+> >>>> =C2=A0 [1]
+> >>>> =C2=A0=C2=A0 btrfs: fix vanished compression property after failed=
+ set
+> >>>> =C2=A0=C2=A0 btrfs: fix zstd compression parameter
+> >>>>
+> >>>> Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> >>>
+> >>> Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+> >>
+> >> Thanks for the test and the review!
+> >>
+> >> But this looks like a targeted regression test that may fail an exis=
+ting
+> >> test. It's better to write a new test for this.
+> >=20
+> > Regression is only when fstests is upgraded. This
+> > test case mentions the prerequisite kernel patches [1].
+> > So that should suffice the concern?
+>=20
+> I agree with Anand here, this is an extension to an existing test, whic=
+h
+> covers specific feature. IMO it's not good to always introduce new test=
 s
->> are too large it takes a long time for the cp to finish. On my machine
->> it takes 645sec.
->=20
-> Wait for a minute, ths fs is only 256M sized, if it takes you over 10
-> minutes, there must be something else wrong.
+> because every invocation of a test comes with an overhead of spawning
+> processes and whatnot. THis is not a problem for 10 tests, but currentl=
+y
+> for btrfs we execute around 600 tests each one "wasting" some cycles to
+> spawn bash processes to execute the actual test.
 
-  What's happening is cp -r fails (ENOSPC) for each file, so the
-  cp -r runs for a long time.
+Fair enough. We're having more tests now, and we do consider "merging"
+some tests into one case.
 
->>
->> This patch propose to use the common/populate function _fill_fs() to
->> write files into the target directory instead. However I am not too
->> sure about the motivation of this test case in the first place, and
->> why does it wanted to cp /usr or /lib,
->=20
-> To my eyes, it's using /usr or /lib just for it's mostly full/contains =
-a
-> lot of files for most systems.
-
-  A lot of files. At the same time its not consistent across systems.
-
->> and why fs should become full?
->=20
-> Maybe to hit certain ENOSPC corner case for ACL/xattr, just my guess.
-
-ok.
-
->> Any idea? Thanks.
->=20
-> Use populate_fs is definitely the right move.
->=20
-> However I have some concern below.
->=20
-> [snip]
->>   echo "*** set default ACL"
->>   setfacl -R -dm u:fsgqa:rwx,g::rwx,o::r-x,m::rwx $SCRATCH_MNT/subdir
->>  =20
->> -echo "*** populate filesystem, pass #1" | tee -a $seqres.full
->> -cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
->> -
->> -echo "*** populate filesystem, pass #2" | tee -a $seqres.full
->> -cp -rf $filler $SCRATCH_MNT/subdir >$seqres.full 2>&1
->> +blksz=3D"$(_get_block_size $SCRATCH_MNT/subdir)"
->> +echo "*** populate filesystem" | tee -a $seqres.full
->> +echo "*** fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0" >> $seqres.f=
-ull
->> +_fill_fs $fs_size $SCRATCH_MNT/subdir $blksz 0 >> $seqres.full 2>&1
->=20
-> Unlike the original behavior, which do 2 passes and the 2nd pass will
-> overwrite previous files.
->=20
-> While after your modification, it's no longer the case.
->=20
-> At least we should try to replay the 1st run to mimic the original beha=
-vior.
-
-  yep.
-
-Thanks, Anand
-
-> Thanks,
-> Qu
->=20
->>  =20
->>   _check_scratch_fs
->>  =20
->> diff --git a/tests/generic/077.out b/tests/generic/077.out
->> index eae7226ab29c..9c143c902a2c 100644
->> --- a/tests/generic/077.out
->> +++ b/tests/generic/077.out
->> @@ -1,7 +1,6 @@
->>   QA output created by 077
->>   *** create filesystem
->>   *** set default ACL
->> -*** populate filesystem, pass #1
->> -*** populate filesystem, pass #2
->> +*** populate filesystem
->>   *** all done
->>   *** unmount
->>
->=20
+Thanks,
+Eryu
