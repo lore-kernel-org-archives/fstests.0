@@ -1,56 +1,144 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:44194 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725379AbfDOEDQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Apr 2019 00:03:16 -0400
-Received: by mail-pg1-f196.google.com with SMTP id i2so7890419pgj.11
-        for <fstests@vger.kernel.org>; Sun, 14 Apr 2019 21:03:16 -0700 (PDT)
-Date: Mon, 15 Apr 2019 12:03:09 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic/294: skip on NFS
-Message-ID: <20190415040309.GN2824@desktop>
-References: <20190304025008.11986-1-xzhou@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190304025008.11986-1-xzhou@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:56060 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725828AbfDOIal (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 15 Apr 2019 04:30:41 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs: test send on subvolume with delalloc after setting it to RO mode
+Date: Mon, 15 Apr 2019 09:30:35 +0100
+Message-Id: <20190415083035.2271-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Murphy Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, bcodding@redhat.com, yieli@redhat.com, bxue@redhat.com
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Mar 04, 2019 at 10:50:08AM +0800, Xiong Zhou wrote:
-> Because NFS handles this differently, returning different values.
-> Details:
-> http://people.redhat.com/bcodding/nfs/2016/10/07/nfs_xfstest_generic/#generic294
-> 
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Sorry for the so long delay.. 
+Test that if we have a subvolume/snapshot that is writable, has a file
+with unflushed delalloc (buffered writes not yet flushed), turn the
+subvolume to readonly mode and then use it for send a operation, the send
+stream will contain the delalloc data - that is, no data loss happens.
 
-> ---
->  tests/generic/294 | 1 +
->  1 file changed, 1 insertion(+)
-> 
-> diff --git a/tests/generic/294 b/tests/generic/294
-> index b74579ac..f7e763a3 100755
-> --- a/tests/generic/294
-> +++ b/tests/generic/294
-> @@ -27,6 +27,7 @@ _cleanup()
->  . ./common/filter
->  
->  # real QA test starts here
-> +[ $FSTYP == "nfs" ] && _notrun "NFS behaves differently, breaks golden output"
+This currently files on btrfs (data loss) but is fixed by a patch for
+the linux kernel titled:
 
-I think it's better to filter the output of NFS to follow the golden
-output, so when NFS changes behavior, filter fails and we could know
-that from test failure.
+  "Btrfs: send, flush dellaloc in order to avoid data loss"
 
-Thanks,
-Eryu
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/185     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/185.out | 14 ++++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 88 insertions(+)
+ create mode 100755 tests/btrfs/185
+ create mode 100644 tests/btrfs/185.out
 
->  
->  # Modify as appropriate.
->  _supported_fs generic
-> -- 
-> 2.21.0
-> 
+diff --git a/tests/btrfs/185 b/tests/btrfs/185
+new file mode 100755
+index 00000000..8ccffd1e
+--- /dev/null
++++ b/tests/btrfs/185
+@@ -0,0 +1,73 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 185
++#
++# Test that if we have a subvolume/snapshot that is writable, has a file with
++# unflushed delalloc (buffered writes not yet flushed), turn the subvolume to
++# readonly mode and then use it for send a operation, the send stream will
++# contain the delalloc data - that is, no data loss happens.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -fr $send_files_dir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch
++_require_btrfs_command "property"
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test subvolume.
++$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/sv | _filter_scratch
++
++# Create our test file with some delalloc data.
++$XFS_IO_PROG -f -c "pwrite -S 0xea 0 108K" $SCRATCH_MNT/sv/foo | _filter_xfs_io
++
++# Turn our subvolume to RO so that it can be used for a send operation.
++$BTRFS_UTIL_PROG property set $SCRATCH_MNT/sv ro true
++
++# Create the send stream.
++$BTRFS_UTIL_PROG send -f $send_files_dir/sv.send $SCRATCH_MNT/sv 2>&1 \
++    | _filter_scratch
++
++echo "File content in the original filesystem:"
++od -t x1 -A d $SCRATCH_MNT/sv/foo
++
++# Recreate the filesystem and apply the send stream and verify no data was lost.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/sv.send $SCRATCH_MNT
++
++echo "File content in the new filesystem:"
++od -t x1 -A d $SCRATCH_MNT/sv/foo
++
++status=0
++exit
+diff --git a/tests/btrfs/185.out b/tests/btrfs/185.out
+new file mode 100644
+index 00000000..eb432982
+--- /dev/null
++++ b/tests/btrfs/185.out
+@@ -0,0 +1,14 @@
++QA output created by 185
++Create subvolume 'SCRATCH_MNT/sv'
++wrote 110592/110592 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++At subvol SCRATCH_MNT/sv
++File content in the original filesystem:
++0000000 ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea
++*
++0110592
++At subvol sv
++File content in the new filesystem:
++0000000 ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea ea
++*
++0110592
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index c1d215bf..6b81ecce 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -187,3 +187,4 @@
+ 182 auto quick balance
+ 183 auto quick clone compress punch
+ 184 auto quick volume
++185 auto quick send volume
+-- 
+2.11.0
