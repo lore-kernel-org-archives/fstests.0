@@ -1,70 +1,77 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52252 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726346AbfDPIPK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 16 Apr 2019 04:15:10 -0400
-From: Murphy Zhou <xzhou@redhat.com>
-Subject: [PATCH v2] generic/294: add golden output for nfs
-Date: Tue, 16 Apr 2019 16:14:57 +0800
-Message-Id: <20190416081457.10442-1-xzhou@redhat.com>
-In-Reply-To: <20190415040309.GN2824@desktop>
-References: <20190415040309.GN2824@desktop>
+Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:38806 "EHLO
+        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726346AbfDPIOB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 16 Apr 2019 04:14:01 -0400
+Date: Tue, 16 Apr 2019 18:13:56 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [RFC PATCH 2/2] ceph: test basic ceph.quota.max_bytes quota
+Message-ID: <20190416081356.GB1454@dread.disaster.area>
+References: <20190402210931.GV23020@dastard>
+ <87d0m3e81f.fsf@suse.com>
+ <d38a4d84-8df2-984e-cf1c-045d85644796@suse.com>
+ <874l7fdy5s.fsf@suse.com>
+ <20190403214708.GA26298@dastard>
+ <87tvfecbv5.fsf@suse.com>
+ <20190412011559.GE1695@dread.disaster.area>
+ <740207e9-b4ef-e4b4-4097-9ece2ac189a7@redhat.com>
+ <20190414221535.GF1695@dread.disaster.area>
+ <0cbc6885-93ae-ca79-184e-cdc56681202c@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <0cbc6885-93ae-ca79-184e-cdc56681202c@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, fstests@vger.kernel.org
-Cc: bcodding@redhat.com, Murphy Zhou <xzhou@redhat.com>
+To: "Yan, Zheng" <zyan@redhat.com>
+Cc: Luis Henriques <lhenriques@suse.com>, Nikolay Borisov <nborisov@suse.com>, fstests@vger.kernel.org, ceph-devel@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Because NFS handles this differently, returning different values.
-Details:
-http://people.redhat.com/bcodding/nfs/2016/10/07/nfs_xfstest_generic/#generic294
+On Mon, Apr 15, 2019 at 10:16:18AM +0800, Yan, Zheng wrote:
+> On 4/15/19 6:15 AM, Dave Chinner wrote:
+> > On Fri, Apr 12, 2019 at 11:37:55AM +0800, Yan, Zheng wrote:
+> > > On 4/12/19 9:15 AM, Dave Chinner wrote:
+> > > > On Thu, Apr 04, 2019 at 11:18:22AM +0100, Luis Henriques wrote:
+> > > > > Dave Chinner <david@fromorbit.com> writes:
+> > > For DSYNC write, client has already written data to object store. If client
+> > > crashes, MDS will set file to 'recovering' state and probe file size by
+> > > checking object store. Accessing the file is blocked during recovery.
+> > 
+> > IOWs, ceph allows data integrity writes to the object store even
+> > though those writes breach  limits on that object store? i.e.
+> > ceph quota essentially ignores O_SYNC/O_DSYNC metadata requirements?
+> > 
+> 
+> Current cephfs quota implementation checks quota (compare i_size and quota
+> setting) at very beginning of ceph_write_iter(). Nothing do with O_SYNC and
+> O_DSYNC.
 
-Signed-off-by: Murphy Zhou <xzhou@redhat.com>
----
+Hold on, if the quota is checked on the client at the start of every
+write, then why is it not enforced /exactly/? Where does this "we
+didn't notice we'd run out of quota" overrun come from then?
 
-v2:
-   add a new golden output for nfs instead of _notrun.
+i.e. the test changes are implying that quota is not accurately
+checked and enforced on every write, and that there is something
+less that exact about quotas on the ceph client. Yet you say they
+are checked on every write.
 
- tests/generic/294         | 7 +++++++
- tests/generic/294.out.nfs | 5 +++++
- 2 files changed, 12 insertions(+)
- create mode 100644 tests/generic/294.out.nfs
+Where does the need to open/close files and force flushing client
+state to the MDS come from if quota is actually being checked
+on every write as you say it is?
 
-diff --git a/tests/generic/294 b/tests/generic/294
-index b74579ac..a355c612 100755
---- a/tests/generic/294
-+++ b/tests/generic/294
-@@ -7,6 +7,7 @@
- # Tests for EEXIST (not EROFS) for inode creations, if
- # we ask to create an already-existing entity on an RO filesystem
- #
-+seqfull=$0
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
- echo "QA output created by $seq"
-@@ -27,6 +28,12 @@ _cleanup()
- . ./common/filter
- 
- # real QA test starts here
-+# link correct .out file
-+if [ $FSTYP == "nfs" ]; then
-+	rm -f $seqfull.out
-+	ln -sf $seq.out.nfs $seqfull.out
-+fi
-+
- 
- # Modify as appropriate.
- _supported_fs generic
-diff --git a/tests/generic/294.out.nfs b/tests/generic/294.out.nfs
-new file mode 100644
-index 00000000..71ebeecd
---- /dev/null
-+++ b/tests/generic/294.out.nfs
-@@ -0,0 +1,5 @@
-+QA output created by 294
-+mknod: 'SCRATCH_MNT/294.test/testnode': Read-only file system
-+mkdir: cannot create directory 'SCRATCH_MNT/294.test/testdir': Read-only file system
-+touch: cannot touch 'SCRATCH_MNT/294.test/testtarget': Read-only file system
-+ln: creating symbolic link 'SCRATCH_MNT/294.test/testlink': File exists
+i.e. I'm trying to work out if this change is just working around
+bugs in ceph quota accounting and I'm being told conflicting things
+about how the ceph client accounts and enforces quota limits. Can
+you please clearly explain how the quota enforcedment works and why
+close/open between writes is necessary for accurate quota
+enforcement so that we have some clue as to why these rubbery limit
+hacks are necessary?
+
+If we don't understand why a test does something and it's not
+adequately documented, we can't really be expected to maintain
+it in working order....
+
+Cheers,
+
+Dave.
 -- 
-2.21.0
+Dave Chinner
+david@fromorbit.com
