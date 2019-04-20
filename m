@@ -1,323 +1,504 @@
-Received: from mail.kernel.org ([198.145.29.99]:45534 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726131AbfDTOOi (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sat, 20 Apr 2019 10:14:38 -0400
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:42447 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725910AbfDTIxm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 20 Apr 2019 04:53:42 -0400
+Received: by mail-pf1-f194.google.com with SMTP id w25so3514996pfi.9
+        for <fstests@vger.kernel.org>; Sat, 20 Apr 2019 01:53:41 -0700 (PDT)
+Date: Sat, 20 Apr 2019 16:53:32 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] xfs/033: don't use repair output in golden output
+Message-ID: <20190420085332.GC22372@desktop>
+References: <8b214be1-6f7e-f668-39ef-2e188f44d352@redhat.com>
 MIME-Version: 1.0
-References: <20190415083121.2338-1-fdmanana@kernel.org>
-In-Reply-To: <20190415083121.2338-1-fdmanana@kernel.org>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Sat, 20 Apr 2019 14:14:25 +0000
-Message-ID: <CAL3q7H6j_TM+J9o9hc=oxDO+pFzQmur5ignSA3xgiUN4LoZx8Q@mail.gmail.com>
-Subject: Re: [PATCH] btrfs: test send with deduplication running concurrently
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <8b214be1-6f7e-f668-39ef-2e188f44d352@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
-Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, Eryu Guan <guaneryu@gmail.com>
+To: Eric Sandeen <sandeen@redhat.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Apr 15, 2019 at 9:32 AM <fdmanana@kernel.org> wrote:
->
-> From: Filipe Manana <fdmanana@suse.com>
->
-> Stress send running in parallel with deduplication against files that
-> belong to the snapshots used by send. The goal is to hit assertion failures
-> and BUG_ONs when send is running, or send finding an inconsistent snapshot
-> that leads to a failure (reported in dmesg/syslog) and results in an EIO
-> error returned to user space. The test needs big trees (snapshots) with
-> large differences between the parent and send snapshots in order to hit
-> such issues with a good probability.
->
-> This currently fails in btrfs, and there is a patch for the linux kernel
-> that fixes it and is titled:
->
->   "Btrfs: fix race between send and deduplication that lead to failures
->    and crashes"
->
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
-
-Eryu, can you please skip this patch for now? I want to do a v2,
-likely next week, which tests a few more things.
-Thanks.
-
+On Thu, Apr 18, 2019 at 12:01:31PM -0500, Eric Sandeen wrote:
+> With the xfs_repair fixes for how the link count on root inodes
+> are handled, xfs/033 started failing because we didn't have to
+> re-fix the link count at the end of the repair run.
+> 
+> Capturing and comparing all of the xfs_repair output seems somewhat
+> fragile in general.  It should suffice to just run repair, then
+> check that it succeeded with _scratch_xfs_repair, rather than
+> comparing against all the detailed output.  So, this patch does that.
+> Full repair output is still saved to the $seqres.full file.
+> 
+> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
 > ---
->  tests/btrfs/186     | 247 ++++++++++++++++++++++++++++++++++++++++++++++++++++
->  tests/btrfs/186.out |   3 +
->  tests/btrfs/group   |   1 +
->  3 files changed, 251 insertions(+)
->  create mode 100755 tests/btrfs/186
->  create mode 100644 tests/btrfs/186.out
->
-> diff --git a/tests/btrfs/186 b/tests/btrfs/186
-> new file mode 100755
-> index 00000000..ca1a5638
-> --- /dev/null
-> +++ b/tests/btrfs/186
-> @@ -0,0 +1,247 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> +#
-> +# FSQA Test No. 186
-> +#
-> +# Stress send running in parallel with deduplication against files that belong
-> +# to the snapshots used by send. The goal is to hit assertion failures and
-> +# BUG_ONs when send is running, or send finding an inconsistent snapshot that
-> +# leads to a failure (reported in dmesg/syslog) and results in an EIO error
-> +# returned to user space. The test needs big trees (snapshots) with large
-> +# differences between the parent and send snapshots in order to hit such issues
-> +# with a good probability.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/attr
-> +. ./common/filter
-> +. ./common/reflink
-> +
-> +# real QA test starts here
-> +_supported_fs btrfs
-> +_supported_os Linux
-> +_require_scratch_dedupe
-> +_require_attrs
-> +
+> 
+> diff --git a/.gitignore b/.gitignore
+> index c13fb713..2482dd61 100644
+> --- a/.gitignore
+> +++ b/.gitignore
+> @@ -251,7 +251,6 @@
+>  /dmapi/src/suite2/src/test_rights
+>  
+>  # Symlinked files
+> -/tests/xfs/033.out
+>  /tests/xfs/071.out
+>  /tests/xfs/096.out
+>  
+> diff --git a/common/repair b/common/repair
+> index c94939c9..5e53f5f2 100644
+> --- a/common/repair
+> +++ b/common/repair
+> @@ -114,7 +114,7 @@ _check_repair()
+>  	_scratch_unmount
+>  
+>  	_zero_position $value "$structure"
+> -	_scratch_xfs_repair 2>&1 | _filter_repair
+> +	_scratch_xfs_repair 2>&1 | _filter_repair >> $seqres.full
+
+Looks like this will break ohter tests that depend on the output of
+_check_repair, e.g. xfs/030 and xfs/148 (xfs/031 and xfs/149 also call
+_check_repair, but they have their local definition of _check_repair)
+
+Thanks,
+Eryu
+
+>  
+>  	# some basic sanity checks...
+>  	_check_scratch_fs
+> diff --git a/tests/xfs/033 b/tests/xfs/033
+> index 5af0aefc..8608b19c 100755
+> --- a/tests/xfs/033
+> +++ b/tests/xfs/033
+> @@ -29,6 +29,8 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  . ./common/filter
+>  . ./common/repair
+>  
 > +rm -f $seqres.full
 > +
-> +_scratch_mkfs >>$seqres.full 2>&1
-> +_scratch_mount
-> +
-> +test_log_dir=$TEST_DIR/btrfs-test-$seq
-> +
-> +rm -fr $test_log_dir
-> +mkdir $test_log_dir
-> +
-> +dedupe_two_files()
-> +{
-> +       trap "wait; exit" SIGTERM
-> +
-> +       local log_file=$1
-> +       local f1=$(find $SCRATCH_MNT/snap1 -type f | shuf -n 1)
-> +       local f2=$(find $SCRATCH_MNT/snap2 -type f | shuf -n 1)
-> +
-> +       if (( RANDOM % 2 )); then
-> +               local tmp=$f1
-> +               f1=$f2
-> +               f2=$tmp
-> +       fi
-> +
-> +       $XFS_IO_PROG -r -c "dedupe $f1 0 0 64K" $f2 >/dev/null 2>>$log_file
-> +}
-> +
-> +dedupe_files_loop()
-> +{
-> +       trap "wait; exit" SIGTERM
-> +
-> +       while true; do
-> +               for ((i = 1; i <= 10; i++)); do
-> +                       dedupe_two_files "${test_log_dir}/dedup_${i}.log" &
-> +               done
-> +               wait
-> +       done
-> +}
-> +
-> +full_send_loop()
-> +{
-> +       trap "wait; exit" SIGTERM
-> +
-> +       local count=$1
-> +
-> +       for ((i = 1; i <= $count; i++)); do
-> +               local send_stream_file=$send_files_dir/full_$i.send
-> +
-> +               # The send command may run successfully or it might return an
-> +               # error. If the error happens due to the kernel ioctl returning
-> +               # -EAGAIN, it's because a concurrent deduplication is ongoing
-> +               # against the same root (snapshot) send tried to work on.
-> +               # We will check later (in dmesg/syslog) for errors other then
-> +               # the expected one due to concurrent deduplication and for
-> +               # any reported error from send other than EAGAIN.
-> +               $BTRFS_UTIL_PROG send --no-data -f /dev/null $SCRATCH_MNT/snap1 \
-> +                       >/dev/null 2>>$test_log_dir/full_send.log
-> +       done
-> +}
-> +
-> +inc_send_loop()
-> +{
-> +       trap "wait; exit" SIGTERM
-> +
-> +       local count=$1
-> +
-> +       for ((i = 1; i <= $count; i++)); do
-> +               # The send command may run successfully or it might return an
-> +               # error. If the error happens due to the kernel ioctl returning
-> +               # -EAGAIN, it's because a concurrent deduplication is ongoing
-> +               # against the same root (snapshot) send tried to work on.
-> +               # We will check later (in dmesg/syslog) for errors other then
-> +               # the expected one due to concurrent deduplication and for
-> +               # any reported error from send other than EAGAIN.
-> +               $BTRFS_UTIL_PROG send --no-data -f /dev/null \
-> +                       -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 >/dev/null \
-> +                       2>>$test_log_dir/inc_send.log
-> +       done
-> +}
-> +
-> +# Number of files created before first snapshot. Must be divisable by 4.
-> +nr_initial_files=50000
-> +# Number of files created after the first snapshot. Must be divisable by 4.
-> +nr_more_files=50000
-> +
-> +# Create initial files.
-> +step=$((nr_initial_files / 4))
-> +for ((n = 0; n < 4; n++)); do
-> +       offset=$((step * $n))
-> +       (
-> +               for ((i = 1; i <= step; i++)); do
-> +                       $XFS_IO_PROG -f -c "pwrite -S 0xea 0 64K" \
-> +                               $SCRATCH_MNT/file_$((i + offset)) >/dev/null
-> +               done
-> +       ) &
-> +       create_pids[$n]=$!
-> +done
-> +wait ${create_pids[@]}
-> +
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 \
-> +       | _filter_scratch
-> +
-> +# Add some more files, so that that are substantial differences between the
-> +# two test snapshots used for an incremental send later.
-> +
-> +# Create more files.
-> +step=$((nr_more_files / 4))
-> +for ((n = 0; n < 4; n++)); do
-> +       offset=$((nr_initial_files + step * $n))
-> +       (
-> +               for ((i = 1; i <= step; i++)); do
-> +                       $XFS_IO_PROG -f -c "pwrite -S 0xea 0 64K" \
-> +                               $SCRATCH_MNT/file_$((i + offset)) >/dev/null
-> +               done
-> +       ) &
-> +       create_pids[$n]=$!
-> +done
-> +wait ${create_pids[@]}
-> +
-> +# Add some xattrs to all files, so that every leaf and node of the fs tree is
-> +# COWed. Adding more files does only adds leafs and nodes to the tree's right
-> +# side, since inode numbers are based on a counter and form the first part
-> +# (objectid) of btree keys (we only modifying the right most leaf of the tree).
-> +# Use large values for the xattrs to quickly increase the height of the tree.
-> +xattr_value=$(printf '%0.sX' $(seq 1 3800))
-> +
-> +# Split the work into 4 workers working on consecutive ranges to avoid contention
-> +# on the same leafs as much as possible.
-> +step=$(((nr_more_files + nr_initial_files) / 4))
-> +for ((n = 0; n < 4; n++)); do
-> +       offset=$((step * $n))
-> +       (
-> +               for ((i = 1; i <= step; i++)); do
-> +                       $SETFATTR_PROG -n 'user.x1' -v $xattr_value \
-> +                               $SCRATCH_MNT/file_$((i + offset))
-> +               done
-> +       ) &
-> +       setxattr_pids[$n]=$!
-> +done
-> +wait ${setxattr_pids[@]}
-> +
-> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
-> +       | _filter_scratch
-> +
-> +full_send_loop 5 &
-> +full_send_pid=$!
-> +
-> +inc_send_loop 10 &
-> +inc_send_pid=$!
-> +
-> +dedupe_files_loop &
-> +dedupe_pid=$!
-> +
-> +wait $full_send_pid
-> +wait $inc_send_pid
-> +
-> +kill $dedupe_pid
-> +wait $dedupe_pid
-> +
-> +# Check for errors messages that happen due to inconsistent snapshot caused by
-> +# deduplication running in parallel with send, causing btree nodes/leafs to
-> +# disappear and getting reused while send is using them.
-> +#
-> +# Example messages:
-> +#
-> +# BTRFS error (device sdc): did not find backref in send_root. inode=63292, \
-> +#     offset=0, disk_byte=5228134400 found extent=5228134400
-> +#
-> +# BTRFS error (device sdc): parent transid verify failed on 32243712 wanted 24 \
-> +#     found 27
-> +#
-> +_dmesg_since_test_start | egrep -e '\bBTRFS error \(device [A-Za-z0-9]*?\): '
-> +
-> +# Check for errors the send ioctl returned. Only EAGAIN errors are expected,
-> +# every other error is unexpected and must make the test fail.
-> +
-> +echo "Errors from full send operations:" >>$seqres.full
-> +egrep -v -e "At subvol $SCRATCH_MNT/snap1" \
-> +       -e "ERROR: send ioctl failed with -11: Resource temporarily unavailable" \
-> +       $test_log_dir/full_send.log >>$seqres.full
-> +if [ $? -eq 0 ]; then
-> +       echo "Unexpected errors from full send operations, check $seqres.full"
-> +else
-> +       echo "none" >>$seqres.full
-> +fi
-> +
-> +echo "Errors from incremental send operations:" >>$seqres.full
-> +egrep -v -e "At subvol $SCRATCH_MNT/snap2" \
-> +       -e "ERROR: send ioctl failed with -11: Resource temporarily unavailable" \
-> +       $test_log_dir/inc_send.log >>$seqres.full
-> +if [ $? -eq 0 ]; then
-> +       echo "Unexpected errors from incremental send operations, check $seqres.full"
-> +else
-> +       echo "none" >>$seqres.full
-> +fi
-> +
-> +# Check for errors from deduplication. Only EAGIN errors are expected.
-> +echo "Errors from deduplication operations:" >>$seqres.full
-> +egrep -v -e "XFS_IOC_FILE_EXTENT_SAME: Resource temporarily unavailable" \
-> +       ${test_log_dir}/dedup_*.log >>$seqres.full
-> +if [ $? -eq 0 ]; then
-> +       echo "Unexpected errors from deduplication operations, check $seqres.full"
-> +else
-> +       echo "none" >>$seqres.full
-> +fi
-> +
-> +status=0
-> +exit
-> diff --git a/tests/btrfs/186.out b/tests/btrfs/186.out
+>  # nuke the root, rt bitmap, and rt summary inodes
+>  # 
+>  _check_root_inos()
+> @@ -69,12 +71,6 @@ if [ $isize -lt 512 ]; then
+>  	. $tmp.mkfs
+>  fi
+>  
+> -# link correct .out file
+> -FEATURES=
+> -if [ $_fs_has_crcs -eq 1 ]; then
+> -	FEATURES=crc
+> -fi
+> -_link_out_file_named $seqfull.out "$FEATURES"
+>  
+>  `xfs_db -r -c sb -c p $SCRATCH_DEV | grep 'ino = ' | \
+>  	sed -e 's/ //g' -e 's/^/export /'`
+> diff --git a/tests/xfs/033.out b/tests/xfs/033.out
 > new file mode 100644
-> index 00000000..42bcc0e6
+> index 00000000..213cfffe
 > --- /dev/null
-> +++ b/tests/btrfs/186.out
-> @@ -0,0 +1,3 @@
-> +QA output created by 186
-> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
-> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
-> diff --git a/tests/btrfs/group b/tests/btrfs/group
-> index 6b81ecce..8bfda602 100644
-> --- a/tests/btrfs/group
-> +++ b/tests/btrfs/group
-> @@ -188,3 +188,4 @@
->  183 auto quick clone compress punch
->  184 auto quick volume
->  185 auto quick send volume
-> +186 auto send dedupe clone
-> --
-> 2.11.0
->
+> +++ b/tests/xfs/033.out
+> @@ -0,0 +1,13 @@
+> +QA output created by 033
+> +Corrupting root inode - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Corrupting rt bitmap inode - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Corrupting rt summary inode - setting bits to 0
+> +Wrote X.XXKb (value 0x0)
+> +Corrupting root inode - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Corrupting rt bitmap inode - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> +Corrupting rt summary inode - setting bits to -1
+> +Wrote X.XXKb (value 0xffffffff)
+> diff --git a/tests/xfs/033.out.crc b/tests/xfs/033.out.crc
+> deleted file mode 100644
+> index 2ab4c432..00000000
+> --- a/tests/xfs/033.out.crc
+> +++ /dev/null
+> @@ -1,191 +0,0 @@
+> -QA output created by 033
+> -Corrupting root inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -inode identifier 0 mismatch on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -inode identifier 0 mismatch on inode INO
+> -cleared root inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -root inode lost
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing root directory
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -resetting inode INO nlinks from 1 to 2
+> -done
+> -Corrupting rt bitmap inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -inode identifier 0 mismatch on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -inode identifier 0 mismatch on inode INO
+> -cleared realtime bitmap inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime bitmap inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting rt summary inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -inode identifier 0 mismatch on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -inode identifier 0 mismatch on inode INO
+> -cleared realtime summary inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime summary inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting root inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -cleared root inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -root inode lost
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing root directory
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -resetting inode INO nlinks from 1 to 2
+> -done
+> -Corrupting rt bitmap inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -cleared realtime bitmap inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime bitmap inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting rt summary inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -inode identifier 18446744073709551615 mismatch on inode INO
+> -cleared realtime summary inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime summary inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> diff --git a/tests/xfs/033.out.default b/tests/xfs/033.out.default
+> deleted file mode 100644
+> index 68bc7810..00000000
+> --- a/tests/xfs/033.out.default
+> +++ /dev/null
+> @@ -1,188 +0,0 @@
+> -QA output created by 033
+> -Corrupting root inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -imap claims a free inode INO is in use, correcting imap and clearing inode
+> -cleared root inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -root inode lost
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing root directory
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -resetting inode INO nlinks from 1 to 2
+> -done
+> -Corrupting rt bitmap inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -imap claims a free inode INO is in use, correcting imap and clearing inode
+> -cleared realtime bitmap inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime bitmap inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting rt summary inode - setting bits to 0
+> -Wrote X.XXKb (value 0x0)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0x0 on inode INO
+> -bad version number 0x0 on inode INO
+> -bad magic number 0x0 on inode INO, resetting magic number
+> -bad version number 0x0 on inode INO, resetting version number
+> -imap claims a free inode INO is in use, correcting imap and clearing inode
+> -cleared realtime summary inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime summary inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting root inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -bad (negative) size -1 on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -bad (negative) size -1 on inode INO
+> -cleared root inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -root inode lost
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing root directory
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -resetting inode INO nlinks from 1 to 2
+> -done
+> -Corrupting rt bitmap inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -bad (negative) size -1 on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -bad (negative) size -1 on inode INO
+> -cleared realtime bitmap inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime bitmap inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> -Corrupting rt summary inode - setting bits to -1
+> -Wrote X.XXKb (value 0xffffffff)
+> -Phase 1 - find and verify superblock...
+> -Phase 2 - using <TYPEOF> log
+> -        - zero log...
+> -        - scan filesystem freespace and inode maps...
+> -        - found root inode chunk
+> -Phase 3 - for each AG...
+> -        - scan and clear agi unlinked lists...
+> -        - process known inodes and perform inode discovery...
+> -bad magic number 0xffff on inode INO
+> -bad version number 0xffffffff on inode INO
+> -bad (negative) size -1 on inode INO
+> -bad magic number 0xffff on inode INO, resetting magic number
+> -bad version number 0xffffffff on inode INO, resetting version number
+> -bad (negative) size -1 on inode INO
+> -cleared realtime summary inode INO
+> -        - process newly discovered inodes...
+> -Phase 4 - check for duplicate blocks...
+> -        - setting up duplicate extent list...
+> -        - check for inodes claiming duplicate blocks...
+> -Phase 5 - rebuild AG headers and trees...
+> -        - reset superblock...
+> -Phase 6 - check inode connectivity...
+> -reinitializing realtime summary inode
+> -        - resetting contents of realtime bitmap and summary inodes
+> -        - traversing filesystem ...
+> -        - traversal finished ...
+> -        - moving disconnected inodes to lost+found ...
+> -Phase 7 - verify and correct link counts...
+> -done
+> 
