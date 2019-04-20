@@ -1,246 +1,323 @@
-Received: from mail.kernel.org ([198.145.29.99]:53910 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:45534 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727574AbfDSS3Q (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 19 Apr 2019 14:29:16 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH v4 7/7] fssum: add support for checking xattrs
-Date: Fri, 19 Apr 2019 11:55:16 +0100
-Message-Id: <20190419105516.12088-1-fdmanana@kernel.org>
+        id S1726131AbfDTOOi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sat, 20 Apr 2019 10:14:38 -0400
+MIME-Version: 1.0
+References: <20190415083121.2338-1-fdmanana@kernel.org>
+In-Reply-To: <20190415083121.2338-1-fdmanana@kernel.org>
+From: Filipe Manana <fdmanana@kernel.org>
+Date: Sat, 20 Apr 2019 14:14:25 +0000
+Message-ID: <CAL3q7H6j_TM+J9o9hc=oxDO+pFzQmur5ignSA3xgiUN4LoZx8Q@mail.gmail.com>
+Subject: Re: [PATCH] btrfs: test send with deduplication running concurrently
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: fstests <fstests@vger.kernel.org>
+Cc: linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Mon, Apr 15, 2019 at 9:32 AM <fdmanana@kernel.org> wrote:
+>
+> From: Filipe Manana <fdmanana@suse.com>
+>
+> Stress send running in parallel with deduplication against files that
+> belong to the snapshots used by send. The goal is to hit assertion failures
+> and BUG_ONs when send is running, or send finding an inconsistent snapshot
+> that leads to a failure (reported in dmesg/syslog) and results in an EIO
+> error returned to user space. The test needs big trees (snapshots) with
+> large differences between the parent and send snapshots in order to hit
+> such issues with a good probability.
+>
+> This currently fails in btrfs, and there is a patch for the linux kernel
+> that fixes it and is titled:
+>
+>   "Btrfs: fix race between send and deduplication that lead to failures
+>    and crashes"
+>
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 
-Currently fssum, mostly used for btrfs test cases that test the btrfs send
-feature, ignores completely the existence of xattrs. This change teaches
-fssum to find xattrs and make them contribute to the checksum of a
-filesystem, so that we can catch filesystem bugs regarding missing, corrupt
-or not supposed to exist xattrs (i.e. that an incremental btrfs send does
-not forget to create, update or remove xattrs).
+Eryu, can you please skip this patch for now? I want to do a v2,
+likely next week, which tests a few more things.
+Thanks.
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
-
-V2: No changes from v1.
-V3: No changes from v2 and v1.
-V4: No changes from v3, v2 and v1.
-
- src/fssum.c | 143 ++++++++++++++++++++++++++++++++++++++++++++++++++++++------
- 1 file changed, 129 insertions(+), 14 deletions(-)
-
-diff --git a/src/fssum.c b/src/fssum.c
-index f1da72fb..6ba0a95c 100644
---- a/src/fssum.c
-+++ b/src/fssum.c
-@@ -20,6 +20,7 @@
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <sys/sysmacros.h>
-+#include <sys/xattr.h>
- #ifdef __SOLARIS__
- #include <sys/mkdev.h>
- #endif
-@@ -40,7 +41,6 @@
- #endif
- 
- /* TODO: add hardlink recognition */
--/* TODO: add xattr/acl */
- 
- struct excludes {
- 	char *path;
-@@ -71,15 +71,16 @@ enum _flags {
- 	FLAG_MTIME,
- 	FLAG_CTIME,
- 	FLAG_DATA,
-+	FLAG_XATTRS,
- 	FLAG_OPEN_ERROR,
- 	FLAG_STRUCTURE,
- 	NUM_FLAGS
- };
- 
--const char flchar[] = "ugoamcdes";
-+const char flchar[] = "ugoamcdxes";
- char line[65536];
- 
--int flags[NUM_FLAGS] = {1, 1, 1, 1, 1, 0, 1, 0, 0};
-+int flags[NUM_FLAGS] = {1, 1, 1, 1, 1, 0, 1, 1, 0, 0};
- 
- char *
- getln(char *buf, int size, FILE *fp)
-@@ -135,7 +136,7 @@ usage(void)
- 	fprintf(stderr, "    -v          : verbose mode (debugging only)\n");
- 	fprintf(stderr,
- 		"    -r <file>   : read checksum or manifest from file\n");
--	fprintf(stderr, "    -[ugoamcde] : specify which fields to include in checksum calculation.\n");
-+	fprintf(stderr, "    -[ugoamcdxe]: specify which fields to include in checksum calculation.\n");
- 	fprintf(stderr, "         u      : include uid\n");
- 	fprintf(stderr, "         g      : include gid\n");
- 	fprintf(stderr, "         o      : include mode\n");
-@@ -143,9 +144,10 @@ usage(void)
- 	fprintf(stderr, "         a      : include atime\n");
- 	fprintf(stderr, "         c      : include ctime\n");
- 	fprintf(stderr, "         d      : include file data\n");
-+	fprintf(stderr, "         x      : include xattrs\n");
- 	fprintf(stderr, "         e      : include open errors (aborts otherwise)\n");
- 	fprintf(stderr, "         s      : include block structure (holes)\n");
--	fprintf(stderr, "    -[UGOAMCDES]: exclude respective field from calculation\n");
-+	fprintf(stderr, "    -[UGOAMCDXES]: exclude respective field from calculation\n");
- 	fprintf(stderr, "    -n          : reset all flags\n");
- 	fprintf(stderr, "    -N          : set all flags\n");
- 	fprintf(stderr, "    -x path     : exclude path when building checksum (multiple ok)\n");
-@@ -221,6 +223,106 @@ sum_to_string(sum_t *dst)
- }
- 
- int
-+namecmp(const void *aa, const void *bb)
-+{
-+	char * const *a = aa;
-+	char * const *b = bb;
-+
-+	return strcmp(*a, *b);
-+}
-+
-+int
-+sum_xattrs(int fd, sum_t *dst)
-+{
-+	ssize_t buflen;
-+	ssize_t len;
-+	char *buf;
-+	char *p;
-+	char **names = NULL;
-+	int num_xattrs = 0;
-+	int ret = 0;
-+	int i;
-+
-+	buflen = flistxattr(fd, NULL, 0);
-+	if (buflen < 0)
-+		return -errno;
-+	/* no xattrs exist */
-+	if (buflen == 0)
-+		return 0;
-+
-+	buf = malloc(buflen);
-+	if (!buf)
-+		return -ENOMEM;
-+
-+	buflen = flistxattr(fd, buf, buflen);
-+	if (buflen < 0) {
-+		ret = -errno;
-+		goto out;
-+	}
-+
-+	/*
-+	 * Keep the list of xattrs sorted, because the order in which they are
-+	 * listed is filesystem dependent, so we want to get the same checksum
-+	 * on different filesystems.
-+	 */
-+
-+	p = buf;
-+	len = buflen;
-+	while (len > 0) {
-+		int keylen;
-+
-+		keylen = strlen(p) + 1; /* +1 for NULL terminator */
-+		len -= keylen;
-+		p += keylen;
-+		num_xattrs++;
-+	}
-+
-+	names = malloc(sizeof(char *) * num_xattrs);
-+	if (!names) {
-+		ret = -ENOMEM;
-+		goto out;
-+	}
-+
-+	p = buf;
-+	for (i = 0; i < num_xattrs; i++) {
-+		names[i] = p;
-+		p += strlen(p) + 1; /* +1 for NULL terminator */
-+	}
-+
-+	qsort(names, num_xattrs, sizeof(char *), namecmp);
-+
-+	for (i = 0; i < num_xattrs; i++) {
-+		len = fgetxattr(fd, names[i], NULL, 0);
-+		if (len < 0) {
-+			ret = -errno;
-+			goto out;
-+		}
-+		sum_add(dst, names[i], strlen(names[i]));
-+		/* no value */
-+		if (len == 0)
-+			continue;
-+		p = malloc(len);
-+		if (!p) {
-+			ret = -ENOMEM;
-+			goto out;
-+		}
-+		len = fgetxattr(fd, names[i], p, len);
-+		if (len < 0) {
-+			ret = -errno;
-+			free(p);
-+			goto out;
-+		}
-+		sum_add(dst, p, len);
-+		free(p);
-+	}
-+out:
-+	free(buf);
-+	free(names);
-+
-+	return ret;
-+}
-+
-+int
- sum_file_data_permissive(int fd, sum_t *dst)
- {
- 	int ret;
-@@ -401,15 +503,6 @@ malformed:
- 		excess_file(fn);
- }
- 
--int
--namecmp(const void *aa, const void *bb)
--{
--	char * const *a = aa;
--	char * const *b = bb;
--
--	return strcmp(*a, *b);
--}
--
- void
- sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
- {
-@@ -493,6 +586,28 @@ sum(int dirfd, int level, sum_t *dircs, char *path_prefix, char *path_in)
- 			sum_add_time(&meta, st.st_mtime);
- 		if (flags[FLAG_CTIME])
- 			sum_add_time(&meta, st.st_ctime);
-+		if (flags[FLAG_XATTRS] &&
-+		    (S_ISDIR(st.st_mode) || S_ISREG(st.st_mode))) {
-+			fd = openat(dirfd, namelist[i], 0);
-+			if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
-+				sum_add_u64(&meta, errno);
-+			} else if (fd == -1) {
-+				fprintf(stderr, "open failed for %s/%s: %s\n",
-+					path_prefix, path, strerror(errno));
-+				exit(-1);
-+			} else {
-+				ret = sum_xattrs(fd, &meta);
-+				close(fd);
-+				if (ret < 0) {
-+					fprintf(stderr,
-+						"failed to read xattrs from "
-+						"%s/%s: %s\n",
-+						path_prefix, path,
-+						strerror(-ret));
-+					exit(-1);
-+				}
-+			}
-+		}
- 		if (S_ISDIR(st.st_mode)) {
- 			fd = openat(dirfd, namelist[i], 0);
- 			if (fd == -1 && flags[FLAG_OPEN_ERROR]) {
--- 
-2.11.0
+> ---
+>  tests/btrfs/186     | 247 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/186.out |   3 +
+>  tests/btrfs/group   |   1 +
+>  3 files changed, 251 insertions(+)
+>  create mode 100755 tests/btrfs/186
+>  create mode 100644 tests/btrfs/186.out
+>
+> diff --git a/tests/btrfs/186 b/tests/btrfs/186
+> new file mode 100755
+> index 00000000..ca1a5638
+> --- /dev/null
+> +++ b/tests/btrfs/186
+> @@ -0,0 +1,247 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FSQA Test No. 186
+> +#
+> +# Stress send running in parallel with deduplication against files that belong
+> +# to the snapshots used by send. The goal is to hit assertion failures and
+> +# BUG_ONs when send is running, or send finding an inconsistent snapshot that
+> +# leads to a failure (reported in dmesg/syslog) and results in an EIO error
+> +# returned to user space. The test needs big trees (snapshots) with large
+> +# differences between the parent and send snapshots in order to hit such issues
+> +# with a good probability.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/attr
+> +. ./common/filter
+> +. ./common/reflink
+> +
+> +# real QA test starts here
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +_require_scratch_dedupe
+> +_require_attrs
+> +
+> +rm -f $seqres.full
+> +
+> +_scratch_mkfs >>$seqres.full 2>&1
+> +_scratch_mount
+> +
+> +test_log_dir=$TEST_DIR/btrfs-test-$seq
+> +
+> +rm -fr $test_log_dir
+> +mkdir $test_log_dir
+> +
+> +dedupe_two_files()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +
+> +       local log_file=$1
+> +       local f1=$(find $SCRATCH_MNT/snap1 -type f | shuf -n 1)
+> +       local f2=$(find $SCRATCH_MNT/snap2 -type f | shuf -n 1)
+> +
+> +       if (( RANDOM % 2 )); then
+> +               local tmp=$f1
+> +               f1=$f2
+> +               f2=$tmp
+> +       fi
+> +
+> +       $XFS_IO_PROG -r -c "dedupe $f1 0 0 64K" $f2 >/dev/null 2>>$log_file
+> +}
+> +
+> +dedupe_files_loop()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +
+> +       while true; do
+> +               for ((i = 1; i <= 10; i++)); do
+> +                       dedupe_two_files "${test_log_dir}/dedup_${i}.log" &
+> +               done
+> +               wait
+> +       done
+> +}
+> +
+> +full_send_loop()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +
+> +       local count=$1
+> +
+> +       for ((i = 1; i <= $count; i++)); do
+> +               local send_stream_file=$send_files_dir/full_$i.send
+> +
+> +               # The send command may run successfully or it might return an
+> +               # error. If the error happens due to the kernel ioctl returning
+> +               # -EAGAIN, it's because a concurrent deduplication is ongoing
+> +               # against the same root (snapshot) send tried to work on.
+> +               # We will check later (in dmesg/syslog) for errors other then
+> +               # the expected one due to concurrent deduplication and for
+> +               # any reported error from send other than EAGAIN.
+> +               $BTRFS_UTIL_PROG send --no-data -f /dev/null $SCRATCH_MNT/snap1 \
+> +                       >/dev/null 2>>$test_log_dir/full_send.log
+> +       done
+> +}
+> +
+> +inc_send_loop()
+> +{
+> +       trap "wait; exit" SIGTERM
+> +
+> +       local count=$1
+> +
+> +       for ((i = 1; i <= $count; i++)); do
+> +               # The send command may run successfully or it might return an
+> +               # error. If the error happens due to the kernel ioctl returning
+> +               # -EAGAIN, it's because a concurrent deduplication is ongoing
+> +               # against the same root (snapshot) send tried to work on.
+> +               # We will check later (in dmesg/syslog) for errors other then
+> +               # the expected one due to concurrent deduplication and for
+> +               # any reported error from send other than EAGAIN.
+> +               $BTRFS_UTIL_PROG send --no-data -f /dev/null \
+> +                       -p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 >/dev/null \
+> +                       2>>$test_log_dir/inc_send.log
+> +       done
+> +}
+> +
+> +# Number of files created before first snapshot. Must be divisable by 4.
+> +nr_initial_files=50000
+> +# Number of files created after the first snapshot. Must be divisable by 4.
+> +nr_more_files=50000
+> +
+> +# Create initial files.
+> +step=$((nr_initial_files / 4))
+> +for ((n = 0; n < 4; n++)); do
+> +       offset=$((step * $n))
+> +       (
+> +               for ((i = 1; i <= step; i++)); do
+> +                       $XFS_IO_PROG -f -c "pwrite -S 0xea 0 64K" \
+> +                               $SCRATCH_MNT/file_$((i + offset)) >/dev/null
+> +               done
+> +       ) &
+> +       create_pids[$n]=$!
+> +done
+> +wait ${create_pids[@]}
+> +
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 \
+> +       | _filter_scratch
+> +
+> +# Add some more files, so that that are substantial differences between the
+> +# two test snapshots used for an incremental send later.
+> +
+> +# Create more files.
+> +step=$((nr_more_files / 4))
+> +for ((n = 0; n < 4; n++)); do
+> +       offset=$((nr_initial_files + step * $n))
+> +       (
+> +               for ((i = 1; i <= step; i++)); do
+> +                       $XFS_IO_PROG -f -c "pwrite -S 0xea 0 64K" \
+> +                               $SCRATCH_MNT/file_$((i + offset)) >/dev/null
+> +               done
+> +       ) &
+> +       create_pids[$n]=$!
+> +done
+> +wait ${create_pids[@]}
+> +
+> +# Add some xattrs to all files, so that every leaf and node of the fs tree is
+> +# COWed. Adding more files does only adds leafs and nodes to the tree's right
+> +# side, since inode numbers are based on a counter and form the first part
+> +# (objectid) of btree keys (we only modifying the right most leaf of the tree).
+> +# Use large values for the xattrs to quickly increase the height of the tree.
+> +xattr_value=$(printf '%0.sX' $(seq 1 3800))
+> +
+> +# Split the work into 4 workers working on consecutive ranges to avoid contention
+> +# on the same leafs as much as possible.
+> +step=$(((nr_more_files + nr_initial_files) / 4))
+> +for ((n = 0; n < 4; n++)); do
+> +       offset=$((step * $n))
+> +       (
+> +               for ((i = 1; i <= step; i++)); do
+> +                       $SETFATTR_PROG -n 'user.x1' -v $xattr_value \
+> +                               $SCRATCH_MNT/file_$((i + offset))
+> +               done
+> +       ) &
+> +       setxattr_pids[$n]=$!
+> +done
+> +wait ${setxattr_pids[@]}
+> +
+> +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
+> +       | _filter_scratch
+> +
+> +full_send_loop 5 &
+> +full_send_pid=$!
+> +
+> +inc_send_loop 10 &
+> +inc_send_pid=$!
+> +
+> +dedupe_files_loop &
+> +dedupe_pid=$!
+> +
+> +wait $full_send_pid
+> +wait $inc_send_pid
+> +
+> +kill $dedupe_pid
+> +wait $dedupe_pid
+> +
+> +# Check for errors messages that happen due to inconsistent snapshot caused by
+> +# deduplication running in parallel with send, causing btree nodes/leafs to
+> +# disappear and getting reused while send is using them.
+> +#
+> +# Example messages:
+> +#
+> +# BTRFS error (device sdc): did not find backref in send_root. inode=63292, \
+> +#     offset=0, disk_byte=5228134400 found extent=5228134400
+> +#
+> +# BTRFS error (device sdc): parent transid verify failed on 32243712 wanted 24 \
+> +#     found 27
+> +#
+> +_dmesg_since_test_start | egrep -e '\bBTRFS error \(device [A-Za-z0-9]*?\): '
+> +
+> +# Check for errors the send ioctl returned. Only EAGAIN errors are expected,
+> +# every other error is unexpected and must make the test fail.
+> +
+> +echo "Errors from full send operations:" >>$seqres.full
+> +egrep -v -e "At subvol $SCRATCH_MNT/snap1" \
+> +       -e "ERROR: send ioctl failed with -11: Resource temporarily unavailable" \
+> +       $test_log_dir/full_send.log >>$seqres.full
+> +if [ $? -eq 0 ]; then
+> +       echo "Unexpected errors from full send operations, check $seqres.full"
+> +else
+> +       echo "none" >>$seqres.full
+> +fi
+> +
+> +echo "Errors from incremental send operations:" >>$seqres.full
+> +egrep -v -e "At subvol $SCRATCH_MNT/snap2" \
+> +       -e "ERROR: send ioctl failed with -11: Resource temporarily unavailable" \
+> +       $test_log_dir/inc_send.log >>$seqres.full
+> +if [ $? -eq 0 ]; then
+> +       echo "Unexpected errors from incremental send operations, check $seqres.full"
+> +else
+> +       echo "none" >>$seqres.full
+> +fi
+> +
+> +# Check for errors from deduplication. Only EAGIN errors are expected.
+> +echo "Errors from deduplication operations:" >>$seqres.full
+> +egrep -v -e "XFS_IOC_FILE_EXTENT_SAME: Resource temporarily unavailable" \
+> +       ${test_log_dir}/dedup_*.log >>$seqres.full
+> +if [ $? -eq 0 ]; then
+> +       echo "Unexpected errors from deduplication operations, check $seqres.full"
+> +else
+> +       echo "none" >>$seqres.full
+> +fi
+> +
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/186.out b/tests/btrfs/186.out
+> new file mode 100644
+> index 00000000..42bcc0e6
+> --- /dev/null
+> +++ b/tests/btrfs/186.out
+> @@ -0,0 +1,3 @@
+> +QA output created by 186
+> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
+> +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 6b81ecce..8bfda602 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -188,3 +188,4 @@
+>  183 auto quick clone compress punch
+>  184 auto quick volume
+>  185 auto quick send volume
+> +186 auto send dedupe clone
+> --
+> 2.11.0
+>
