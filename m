@@ -1,66 +1,305 @@
-Received: from mx1.redhat.com ([209.132.183.28]:39076 "EHLO mx1.redhat.com"
+Received: from mail.kernel.org ([198.145.29.99]:49230 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726057AbfDVNWw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 22 Apr 2019 09:22:52 -0400
-Subject: Re: [PATCH] xfs/033: don't use repair output in golden output
-References: <8b214be1-6f7e-f668-39ef-2e188f44d352@redhat.com>
- <20190420085332.GC22372@desktop>
-From: Eric Sandeen <sandeen@redhat.com>
-Message-ID: <1766bfa9-4dd0-1dec-1a0d-f46211f323df@redhat.com>
-Date: Mon, 22 Apr 2019 08:22:51 -0500
-MIME-Version: 1.0
-In-Reply-To: <20190420085332.GC22372@desktop>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+        id S1726132AbfDVPoW (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 22 Apr 2019 11:44:22 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH v2] btrfs: stress send with deduplication and balance running in parallel
+Date: Mon, 22 Apr 2019 16:44:16 +0100
+Message-Id: <20190422154416.17249-1-fdmanana@kernel.org>
+In-Reply-To: <20190415083121.2338-1-fdmanana@kernel.org>
+References: <20190415083121.2338-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 4/20/19 3:53 AM, Eryu Guan wrote:
-> On Thu, Apr 18, 2019 at 12:01:31PM -0500, Eric Sandeen wrote:
->> With the xfs_repair fixes for how the link count on root inodes
->> are handled, xfs/033 started failing because we didn't have to
->> re-fix the link count at the end of the repair run.
->>
->> Capturing and comparing all of the xfs_repair output seems somewhat
->> fragile in general.  It should suffice to just run repair, then
->> check that it succeeded with _scratch_xfs_repair, rather than
->> comparing against all the detailed output.  So, this patch does that.
->> Full repair output is still saved to the $seqres.full file.
->>
->> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
->> ---
->>
->> diff --git a/.gitignore b/.gitignore
->> index c13fb713..2482dd61 100644
->> --- a/.gitignore
->> +++ b/.gitignore
->> @@ -251,7 +251,6 @@
->>  /dmapi/src/suite2/src/test_rights
->>  
->>  # Symlinked files
->> -/tests/xfs/033.out
->>  /tests/xfs/071.out
->>  /tests/xfs/096.out
->>  
->> diff --git a/common/repair b/common/repair
->> index c94939c9..5e53f5f2 100644
->> --- a/common/repair
->> +++ b/common/repair
->> @@ -114,7 +114,7 @@ _check_repair()
->>  	_scratch_unmount
->>  
->>  	_zero_position $value "$structure"
->> -	_scratch_xfs_repair 2>&1 | _filter_repair
->> +	_scratch_xfs_repair 2>&1 | _filter_repair >> $seqres.full
-> 
-> Looks like this will break ohter tests that depend on the output of
-> _check_repair, e.g. xfs/030 and xfs/148 (xfs/031 and xfs/149 also call
-> _check_repair, but they have their local definition of _check_repair)
+From: Filipe Manana <fdmanana@suse.com>
 
-Whoops sorry, I should have caught that.
+Stress send running in parallel with balance and deduplication against
+files that belong to the snapshots used by send. The goal is to verify
+that these operations running in parallel do not lead to send crashing
+(trigger assertion failures and BUG_ONs), or send finding an inconsistent
+snapshot that leads to a failure (reported in dmesg/syslog). The test
+needs big trees (snapshots) with large differences between the parent and
+send snapshots in order to hit such issues with a good probability.
 
-Thanks,
--Eric
+This currently fails on btrfs, hitting a BUG_ON() often, and with btrfs
+error messages in dmesg/syslog. The problem has always existed and it is
+not new, but probably unnoticed due to lack of test cases that exercise
+these btrfs features running in parallel.
+
+The following patches for btrfs fix the problems:
+
+ "Btrfs: fix race between send and deduplication that lead to failures and
+  crashes"
+
+ "Btrfs: prevent send failures and crashes due to concurrent relocation"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+
+V2: Updated test to stress send with balance as well, since it triggers the
+    same problems as with concurrent deduplication and avoid writing a new
+    test case that would be very similar.
+    Renamed patch subject (was "btrfs: test send with deduplication running
+    concurrently") to reflect that balance is tested as well.
+
+ tests/btrfs/187     | 226 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/187.out |   3 +
+ tests/btrfs/group   |   1 +
+ 3 files changed, 230 insertions(+)
+ create mode 100755 tests/btrfs/187
+ create mode 100644 tests/btrfs/187.out
+
+diff --git a/tests/btrfs/187 b/tests/btrfs/187
+new file mode 100755
+index 00000000..0744797e
+--- /dev/null
++++ b/tests/btrfs/187
+@@ -0,0 +1,226 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 187
++#
++# Stress send running in parallel with balance and deduplication against files
++# that belong to the snapshots used by send. The goal is to verify that these
++# operations running in parallel do not lead to send crashing (trigger assertion
++# failures and BUG_ONs), or send finding an inconsistent snapshot that leads to
++# a failure (reported in dmesg/syslog). The test needs big trees (snapshots)
++# with large differences between the parent and send snapshots in order to hit
++# such issues with a good probability.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/attr
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch_dedupe
++_require_attrs
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++dedupe_two_files()
++{
++	trap "wait; exit" SIGTERM
++
++	local f1=$(find $SCRATCH_MNT/snap1 -type f | shuf -n 1)
++	local f2=$(find $SCRATCH_MNT/snap2 -type f | shuf -n 1)
++
++	if (( RANDOM % 2 )); then
++		local tmp=$f1
++		f1=$f2
++		f2=$tmp
++	fi
++
++	# Ignore errors from dedupe. We just want to test for crashes and
++	# deadlocks.
++	$XFS_IO_PROG -r -c "dedupe $f1 0 0 64K" $f2 &> /dev/null
++}
++
++dedupe_files_loop()
++{
++	trap "wait; exit" SIGTERM
++
++	while true; do
++		for ((i = 1; i <= 5; i++)); do
++			dedupe_two_files &
++		done
++		wait
++	done
++}
++
++balance_loop()
++{
++	trap "wait; exit" SIGTERM
++
++	while true; do
++		# Balance only metadata block groups, since this is makes it
++		# easier to hit problems (crashes and errors) in send.
++		# Ignore errors from balance. We just want to test for crashes
++		# and deadlocks.
++		$BTRFS_UTIL_PROG balance start -f -m $SCRATCH_MNT &> /dev/null
++		sleep $((RANDOM % 3))
++	done
++}
++
++full_send_loop()
++{
++	trap "wait; exit" SIGTERM
++
++	local count=$1
++
++	for ((i = 1; i <= $count; i++)); do
++		# Ignore errors from send. We will check for errors later in
++		# dmesg/syslog.
++		$BTRFS_UTIL_PROG send -f /dev/null \
++			$SCRATCH_MNT/snap1 &> /dev/null
++		sleep $((RANDOM % 3))
++	done
++}
++
++inc_send_loop()
++{
++	trap "wait; exit" SIGTERM
++
++	local count=$1
++
++	for ((i = 1; i <= $count; i++)); do
++		# Ignore errors from send. We will check for errors later in
++		# dmesg/syslog.
++		$BTRFS_UTIL_PROG send -f /dev/null \
++			-p $SCRATCH_MNT/snap1 $SCRATCH_MNT/snap2 &> /dev/null
++		sleep $((RANDOM % 3))
++	done
++}
++
++write_files_loop()
++{
++	local count=$1
++	local offset=$2
++
++	for ((i = 1; i <= $count; i++)); do
++		$XFS_IO_PROG -f -c "pwrite -S 0xea 0 64K" \
++			$SCRATCH_MNT/file_$((i + offset)) >/dev/null
++	done
++}
++
++set_xattrs_loop()
++{
++	local count=$1
++	local offset=$2
++
++	for ((i = 1; i <= $count; i++)); do
++		$SETFATTR_PROG -n 'user.x1' -v $xattr_value \
++			$SCRATCH_MNT/file_$((i + offset))
++	done
++}
++
++# Number of files created before first snapshot. Must be divisable by 4.
++nr_initial_files=40000
++# Number of files created after the first snapshot. Must be divisable by 4.
++nr_more_files=40000
++
++# Create initial files.
++step=$((nr_initial_files / 4))
++for ((n = 0; n < 4; n++)); do
++	offset=$((step * $n))
++	write_files_loop $step $offset &
++	create_pids[$n]=$!
++done
++wait ${create_pids[@]}
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap1 \
++	| _filter_scratch
++
++# Add some more files, so that that are substantial differences between the
++# two test snapshots used for an incremental send later.
++
++# Create more files.
++step=$((nr_more_files / 4))
++for ((n = 0; n < 4; n++)); do
++	offset=$((nr_initial_files + step * $n))
++	write_files_loop $step $offset &
++	create_pids[$n]=$!
++done
++wait ${create_pids[@]}
++
++# Add some xattrs to all files, so that every leaf and node of the fs tree is
++# COWed. Adding more files does only adds leafs and nodes to the tree's right
++# side, since inode numbers are based on a counter and form the first part
++# (objectid) of btree keys (we only modifying the right most leaf of the tree).
++# Use large values for the xattrs to quickly increase the height of the tree.
++xattr_value=$(printf '%0.sX' $(seq 1 3800))
++
++# Split the work into 4 workers working on consecutive ranges to avoid contention
++# on the same leafs as much as possible.
++step=$(((nr_more_files + nr_initial_files) / 4))
++for ((n = 0; n < 4; n++)); do
++	offset=$((step * $n))
++	set_xattrs_loop $step $offset &
++	setxattr_pids[$n]=$!
++done
++wait ${setxattr_pids[@]}
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/snap2 \
++	| _filter_scratch
++
++full_send_loop 5 &
++full_send_pid=$!
++
++inc_send_loop 10 &
++inc_send_pid=$!
++
++dedupe_files_loop &
++dedupe_pid=$!
++
++balance_loop &
++balance_pid=$!
++
++wait $full_send_pid
++wait $inc_send_pid
++
++kill $dedupe_pid
++wait $dedupe_pid
++
++kill $balance_pid
++wait $balance_pid
++
++# Check for errors messages that happen due to inconsistent snapshot caused by
++# deduplication and balance running in parallel with send, causing btree nodes
++# and leafs to disappear and getting reused while send is using them.
++#
++# Example messages:
++#
++# BTRFS error (device sdc): did not find backref in send_root. inode=63292, \
++#     offset=0, disk_byte=5228134400 found extent=5228134400
++#
++# BTRFS error (device sdc): parent transid verify failed on 32243712 wanted 24 \
++#     found 27
++#
++_dmesg_since_test_start | egrep -e '\bBTRFS error \(device .*?\):'
++
++status=0
++exit
+diff --git a/tests/btrfs/187.out b/tests/btrfs/187.out
+new file mode 100644
+index 00000000..ab522cfe
+--- /dev/null
++++ b/tests/btrfs/187.out
+@@ -0,0 +1,3 @@
++QA output created by 187
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap1'
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/snap2'
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index b6bd1a7d..44ee0dd9 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -189,3 +189,4 @@
+ 184 auto quick volume
+ 185 volume
+ 186 auto quick send volume
++187 auto send dedupe clone balance
+-- 
+2.11.0
