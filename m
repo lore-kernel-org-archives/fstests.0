@@ -1,49 +1,42 @@
-Received: from mx2.suse.de ([195.135.220.15]:51332 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726916AbfDYRhv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 25 Apr 2019 13:37:51 -0400
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id 4F3BAACD5
-        for <fstests@vger.kernel.org>; Thu, 25 Apr 2019 17:37:50 +0000 (UTC)
-From: David Sterba <dsterba@suse.com>
-Subject: [PATCH] generic/487: reorder logdev detection after filesystem detection
-Date: Thu, 25 Apr 2019 19:31:30 +0200
-Message-Id: <20190425173130.21706-1-dsterba@suse.com>
+Received: from mail-pg1-f178.google.com ([209.85.215.178]:43298 "EHLO
+        mail-pg1-f178.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387630AbfDYUjx (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Apr 2019 16:39:53 -0400
+Received: by mail-pg1-f178.google.com with SMTP id z9so410368pgu.10
+        for <fstests@vger.kernel.org>; Thu, 25 Apr 2019 13:39:53 -0700 (PDT)
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+From: Steve French <smfrench@gmail.com>
+Date: Thu, 25 Apr 2019 13:39:40 -0700
+Message-ID: <CAH2r5mu9WFqz=15ENbt27wW+qP+XaJgyGs-B8Yq4_sn931vxnA@mail.gmail.com>
+Subject: generic: test statx attribute_mask setting
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: David Sterba <dsterba@suse.com>
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-If SCRATCH_LOGDEV variable is unset, the _require_logdev check fails
-earlier than the following check that decides that this test should not
-be run on 'btrfs'.
+I noticed that the patch "generic: test statx attribute_mask setting"
+seems to cause a failure on xfstest 532.  I am trying with current
+xfsprogs and xfstests from git.kernel.org git trees for those.  The
+output is:
 
-Signed-off-by: David Sterba <dsterba@suse.com>
----
- tests/generic/487 | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+(generic/532    [not run] xfs_io statx command does not support attributes_mask)
 
-diff --git a/tests/generic/487 b/tests/generic/487
-index 8952284cf66f..75db3bfb1333 100755
---- a/tests/generic/487
-+++ b/tests/generic/487
-@@ -36,7 +36,6 @@ _require_scratch_nocheck
- # This test uses "dm" without taking into account the data could be on
- # realtime subvolume, thus the test will fail with rtinherit=1
- _require_no_rtinherit
--_require_logdev
- 
- sflag='-s'
- case $FSTYP in
-@@ -47,6 +46,7 @@ case $FSTYP in
-                 ;;
- esac
- 
-+_require_logdev
- _require_dm_target error
- 
- rm -f $seqres.full
+due to this line:
+
+0ff18d367 (Darrick J. Wong 2019-03-04 13:19:35 -0800 35) get_attributes_mask() {
+0ff18d367 (Darrick J. Wong 2019-03-04 13:19:35 -0800 36)
+$XFS_IO_PROG -r -c "statx -r" $1 | grep 'stat.attributes_mask =' | cut
+-d ' ' -f 3
+
+But attributes_mask is not returned by current xfsprogs (instead it
+appears to be "mask" not "attributes_mask").   If you grep xfsprogs
+for "attributes_mask" - there are no hits.
+
+Is this a typo in line 36 of tests/generic/532 where it is searching
+for "stat.attributes_mask" not "stat.mask"?
+
 -- 
-2.21.0
+Thanks,
+
+Steve
