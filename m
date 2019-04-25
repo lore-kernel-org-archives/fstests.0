@@ -1,11 +1,13 @@
-Received: from mail.kernel.org ([198.145.29.99]:57034 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:58294 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1728605AbfDYAZV (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 24 Apr 2019 20:25:21 -0400
+        id S1726143AbfDYAhP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Apr 2019 20:37:15 -0400
 From: fdmanana@kernel.org
-Subject: [PATCH] btrfs: fix filtering of scratch device in test case 048
-Date: Thu, 25 Apr 2019 01:24:57 +0100
-Message-Id: <20190425002457.28648-1-fdmanana@kernel.org>
+Subject: [PATCH v2] btrfs: fix filtering of scratch device in test case 048
+Date: Thu, 25 Apr 2019 01:37:09 +0100
+Message-Id: <20190425003709.28749-1-fdmanana@kernel.org>
+In-Reply-To: <20190425002457.28648-1-fdmanana@kernel.org>
+References: <20190425002457.28648-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
@@ -23,60 +25,13 @@ Further, the golden output had the path "/mnt/scratch" hardcoded, instead
 of using SCRATCH_MNT. Fix that as well.
 
 The test was failing on any setup where the scratch device is not mounted
-at "/mnt/scratch", like this:
-
-$ ./check btrfs/048
-FSTYP         -- btrfs
-PLATFORM      -- Linux/x86_64 debian5 5.0.0-btrfs-next-46
-MKFS_OPTIONS  -- /dev/sdc
-MOUNT_OPTIONS -- /dev/sdc /home/fdmanana/btrfs-tests/scratch_1
-
-btrfs/048 1s ... - output mismatch (see /home/fdmanana/git/hub/xfstests/results//btrfs/048.out.bad)
-    --- tests/btrfs/048.out	2019-04-22 12:52:00.937610318 +0100
-    +++ /home/fdmanana/git/hub/xfstests/results//btrfs/048.out.bad	2019-04-25 01:14:43.077297630 +0100
-    @@ -78,17 +78,17 @@
-     compression=lzo
-
-     Testing argument validation, should fail
-    -ERROR: failed to set compression for /mnt/scratch: Invalid argument
-    +ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
-     ***
-    -ERROR: failed to set compression for /mnt/scratch: Invalid argument
-    ...
-    (Run 'diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/048.out /home/fdmanana/git/hub/xfstests/results//btrfs/048.out.bad'  to see the entire diff)
-Ran: btrfs/048
-Failures: btrfs/048
-Failed 1 of 1 tests
-
-$ diff -u /home/fdmanana/git/hub/xfstests/tests/btrfs/048.out /home/fdmanana/git/hub/xfstests/results//btrfs/048.out.bad
---- /home/fdmanana/git/hub/xfstests/tests/btrfs/048.out	2019-04-22 12:52:00.937610318 +0100
-+++ /home/fdmanana/git/hub/xfstests/results//btrfs/048.out.bad	2019-04-25 01:14:43.077297630 +0100
-@@ -78,17 +78,17 @@
- compression=lzo
-
- Testing argument validation, should fail
--ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
- ***
--ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
- ***
--ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
-
- Testing if property is persistent across failed validation
--ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
- compression=lzo
-
- Testing generation is unchanged after failed validation
- generation		7
--ERROR: failed to set compression for /mnt/scratch: Invalid argument
-+ERROR: failed to set compression for /home/fdmanana/btrfs-tests/scratch_1: Invalid argument
- generation		7
+at "/mnt/scratch".
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
+
+V2: Fix the formatting of the patch, which was causing git apply / path to fail.
+
  tests/btrfs/048     | 10 +++++-----
  tests/btrfs/048.out | 10 +++++-----
  2 files changed, 10 insertions(+), 10 deletions(-)
