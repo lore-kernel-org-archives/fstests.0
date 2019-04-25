@@ -1,40 +1,49 @@
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:42623 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726065AbfDZDLk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Apr 2019 23:11:40 -0400
-Date: Fri, 26 Apr 2019 11:11:33 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] btrfs: fix filtering of scratch device in test case
- 048
-Message-ID: <20190426031133.GC15846@desktop>
-References: <20190425002457.28648-1-fdmanana@kernel.org>
- <20190425003709.28749-1-fdmanana@kernel.org>
+Received: from mx2.suse.de ([195.135.220.15]:51332 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726916AbfDYRhv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 25 Apr 2019 13:37:51 -0400
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id 4F3BAACD5
+        for <fstests@vger.kernel.org>; Thu, 25 Apr 2019 17:37:50 +0000 (UTC)
+From: David Sterba <dsterba@suse.com>
+Subject: [PATCH] generic/487: reorder logdev detection after filesystem detection
+Date: Thu, 25 Apr 2019 19:31:30 +0200
+Message-Id: <20190425173130.21706-1-dsterba@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190425003709.28749-1-fdmanana@kernel.org>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fdmanana@kernel.org
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: fstests@vger.kernel.org
+Cc: David Sterba <dsterba@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 25, 2019 at 01:37:09AM +0100, fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
-> 
-> The recent commit 4529b20e1aa8f9 ("btrfs/048: amend property validation
-> cases"), does not properly filter the scratch device because the error
-> messages are sent to stderr and not to stdout, and the pipe filter only
-> gets input from the stdout of the btrfs utility. We need to redirect the
-> stderr of the btrfs utility to its stdout.
-> 
-> Further, the golden output had the path "/mnt/scratch" hardcoded, instead
-> of using SCRATCH_MNT. Fix that as well.
-> 
-> The test was failing on any setup where the scratch device is not mounted
-> at "/mnt/scratch".
-> 
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+If SCRATCH_LOGDEV variable is unset, the _require_logdev check fails
+earlier than the following check that decides that this test should not
+be run on 'btrfs'.
 
-Thanks for fixing it! Sorry that I missed the issues in review..
+Signed-off-by: David Sterba <dsterba@suse.com>
+---
+ tests/generic/487 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-Eryu
+diff --git a/tests/generic/487 b/tests/generic/487
+index 8952284cf66f..75db3bfb1333 100755
+--- a/tests/generic/487
++++ b/tests/generic/487
+@@ -36,7 +36,6 @@ _require_scratch_nocheck
+ # This test uses "dm" without taking into account the data could be on
+ # realtime subvolume, thus the test will fail with rtinherit=1
+ _require_no_rtinherit
+-_require_logdev
+ 
+ sflag='-s'
+ case $FSTYP in
+@@ -47,6 +46,7 @@ case $FSTYP in
+                 ;;
+ esac
+ 
++_require_logdev
+ _require_dm_target error
+ 
+ rm -f $seqres.full
+-- 
+2.21.0
