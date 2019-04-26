@@ -1,79 +1,74 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:44268 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726006AbfDZDuu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Apr 2019 23:50:50 -0400
-Date: Thu, 25 Apr 2019 20:50:43 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: generic: test statx attribute_mask setting
-Message-ID: <20190426035043.GL178290@magnolia>
-References: <CAH2r5mu9WFqz=15ENbt27wW+qP+XaJgyGs-B8Yq4_sn931vxnA@mail.gmail.com>
- <20190425211007.GA755788@magnolia>
- <CAH2r5msHjJAEZoH+N7+P4AeHgXaL_tkniOstAgQn=ndKgddLkA@mail.gmail.com>
+Received: from mx2.suse.de ([195.135.220.15]:51310 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1725954AbfDZL3t (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 26 Apr 2019 07:29:49 -0400
+Date: Fri, 26 Apr 2019 13:30:52 +0200
+From: David Sterba <dsterba@suse.cz>
+Subject: Re: Obsolete test? (Was: Re: [PATCH v3] generic/390: Add tests for
+ inode timestamp policy)
+Message-ID: <20190426113052.GO20156@suse.cz>
+Reply-To: dsterba@suse.cz
+References: <1483501871-15389-1-git-send-email-deepa.kernel@gmail.com>
+ <20190425174453.GN20156@twin.jikos.cz>
+ <CABeXuvqjwNYL4yctJpywW7Ogjm0=yWU7aVrxC_Pu-ggQT+1-kQ@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <CAH2r5msHjJAEZoH+N7+P4AeHgXaL_tkniOstAgQn=ndKgddLkA@mail.gmail.com>
+In-Reply-To: <CABeXuvqjwNYL4yctJpywW7Ogjm0=yWU7aVrxC_Pu-ggQT+1-kQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Steve French <smfrench@gmail.com>
-Cc: fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Deepa Dinamani <deepa.kernel@gmail.com>
+Cc: fstests@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, y2038 Mailman List <y2038@lists.linaro.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Apr 25, 2019 at 04:42:55PM -0500, Steve French wrote:
-> I verified that although the "attributes_mask"
->  is not returned by current master branch of xfsprogs (in xfs_io statx -r),
-> I do see it with the for-next branch of xfsprogs.
-> 
-> I replaced xfsprogs with the for-next version and generic/532 runs
-> (and tested on smb3 mounts with cifs.ko and the test worked fine)
+On Thu, Apr 25, 2019 at 02:23:55PM -0700, Deepa Dinamani wrote:
+> > On Apr 25, 2019, at 10:44 AM, David Sterba <dsterba@suse.cz> wrote:
+> >
+> >> On Tue, Jan 03, 2017 at 07:51:11PM -0800, Deepa Dinamani wrote:
+> >> The test helps to validate clamping and mount behaviors
+> >> according to supported file system timestamp ranges.
+> >>
+> >> Note that the test can fail on 32-bit systems for a
+> >> few file systems. This will be corrected when vfs is
+> >> transitioned to use 64-bit timestamps.
+> >>
+> >> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
+> >> ---
+> >> The branch of the kernel tree can be located at
+> >>
+> >> https://github.com/deepa-hub/vfs refs/heads/vfs_timestamp_policy
+> >
+> > It's 2019 and the functionality hasn't been merged to kernel, but may=
+be
+> > there's a replacement I have missed.
+> >
+> >> +# timestamp ranges support.
+> >> +_require_y2038()
+> >> +{
+> >> +    local device=3D${1:-$TEST_DEV}
+> >> +    local sysfsdir=3D/proc/sys/fs/fs-timestamp-check-on
+> >> +
+> >> +    if [ ! -e $sysfsdir ]; then
+> >> +        _notrun "no kernel support for y2038 sysfs switch"
+> >> +    fi
+> >
+> > This will always fail, so either the kernel functionality gets merged=
+ or
+> > the test dropped. Can you let us know the status? Thanks.
+>=20
+> I=E2=80=99m posting a more comprehensive kernel series (~35 patches) fo=
+r this
+> in a week or so. This test was requested as a prerequisite to merge
+> the series:
+> https://lists.linaro.org/pipermail/y2038/2016-November/001981.html
+> There have been 5 versions of patches posted since then. It has been a
+> little difficult to get these reviewed.
 
-Oh good!
+Ok, understood.
 
---D
+> The series makes more sense now anyway as we finally have 64 bit
+> timestamps for vfs.
+> If the test is a precondition, then we should still keep it?
 
-> On Thu, Apr 25, 2019 at 4:10 PM Darrick J. Wong <darrick.wong@oracle.com> wrote:
-> >
-> > On Thu, Apr 25, 2019 at 01:39:40PM -0700, Steve French wrote:
-> > > I noticed that the patch "generic: test statx attribute_mask setting"
-> > > seems to cause a failure on xfstest 532.  I am trying with current
-> > > xfsprogs and xfstests from git.kernel.org git trees for those.  The
-> > > output is:
-> > >
-> > > (generic/532    [not run] xfs_io statx command does not support attributes_mask)
-> > >
-> > > due to this line:
-> > >
-> > > 0ff18d367 (Darrick J. Wong 2019-03-04 13:19:35 -0800 35) get_attributes_mask() {
-> > > 0ff18d367 (Darrick J. Wong 2019-03-04 13:19:35 -0800 36)
-> > > $XFS_IO_PROG -r -c "statx -r" $1 | grep 'stat.attributes_mask =' | cut
-> > > -d ' ' -f 3
-> > >
-> > > But attributes_mask is not returned by current xfsprogs (instead it
-> > > appears to be "mask"
-> >
-> > That's stx_mask, which are the STATX_* flags.
-> >
-> > > not "attributes_mask").   If you grep xfsprogs for "attributes_mask" -
-> > > there are no hits.
-> > >
-> > > Is this a typo in line 36 of tests/generic/532 where it is searching
-> > > for "stat.attributes_mask" not "stat.mask"?
-> >
-> > Nope, stx_attributes_mask is a "new" field that shows which
-> > stx_attributes flags (STATX_ATTR_*) are known to the filesystem.  It's
-> > not really new (it showed up in 4.11 along with the rest of statx) but
-> > I only seemed to notice its existence recently.  Support for this new
-> > field will appear in xfsprogs 5.0.
-> >
-> > --D
-> >
-> > > --
-> > > Thanks,
-> > >
-> > > Steve
-> 
-> 
-> 
-> -- 
-> Thanks,
-> 
-> Steve
+Yeah, in that case keep it. The kernel patches are on the way to
+mainline and strftime("%Y") is still less then 2038. Thanks.
