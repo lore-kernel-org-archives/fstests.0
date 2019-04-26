@@ -1,68 +1,45 @@
-Received: from mail-io1-f65.google.com ([209.85.166.65]:44939 "EHLO
-        mail-io1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726358AbfDYVYH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Apr 2019 17:24:07 -0400
-Received: by mail-io1-f65.google.com with SMTP id r71so1226105iod.11
-        for <fstests@vger.kernel.org>; Thu, 25 Apr 2019 14:24:06 -0700 (PDT)
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:37198 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726039AbfDZCac (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Apr 2019 22:30:32 -0400
+Received: by mail-pg1-f193.google.com with SMTP id e6so824637pgc.4
+        for <fstests@vger.kernel.org>; Thu, 25 Apr 2019 19:30:31 -0700 (PDT)
+Date: Fri, 26 Apr 2019 10:30:25 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] misc: xfs_fsop_geom_t -> struct xfs_fsop_geom
+Message-ID: <20190426023025.GB15846@desktop>
+References: <20190422154820.GA4675@magnolia>
+ <20190425073027.GA15846@desktop>
+ <20190425155030.GB178319@magnolia>
 MIME-Version: 1.0
-References: <1483501871-15389-1-git-send-email-deepa.kernel@gmail.com> <20190425174453.GN20156@twin.jikos.cz>
-In-Reply-To: <20190425174453.GN20156@twin.jikos.cz>
-From: Deepa Dinamani <deepa.kernel@gmail.com>
-Date: Thu, 25 Apr 2019 14:23:55 -0700
-Message-ID: <CABeXuvqjwNYL4yctJpywW7Ogjm0=yWU7aVrxC_Pu-ggQT+1-kQ@mail.gmail.com>
-Subject: Re: Obsolete test? (Was: Re: [PATCH v3] generic/390: Add tests for
- inode timestamp policy)
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190425155030.GB178319@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: dsterba@suse.cz
-Cc: fstests@vger.kernel.org, Arnd Bergmann <arnd@arndb.de>, y2038 Mailman List <y2038@lists.linaro.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-> On Apr 25, 2019, at 10:44 AM, David Sterba <dsterba@suse.cz> wrote:
->
->> On Tue, Jan 03, 2017 at 07:51:11PM -0800, Deepa Dinamani wrote:
->> The test helps to validate clamping and mount behaviors
->> according to supported file system timestamp ranges.
->>
->> Note that the test can fail on 32-bit systems for a
->> few file systems. This will be corrected when vfs is
->> transitioned to use 64-bit timestamps.
->>
->> Signed-off-by: Deepa Dinamani <deepa.kernel@gmail.com>
->> ---
->> The branch of the kernel tree can be located at
->>
->> https://github.com/deepa-hub/vfs refs/heads/vfs_timestamp_policy
->
-> It's 2019 and the functionality hasn't been merged to kernel, but maybe
-> there's a replacement I have missed.
->
->> +# timestamp ranges support.
->> +_require_y2038()
->> +{
->> +    local device=3D${1:-$TEST_DEV}
->> +    local sysfsdir=3D/proc/sys/fs/fs-timestamp-check-on
->> +
->> +    if [ ! -e $sysfsdir ]; then
->> +        _notrun "no kernel support for y2038 sysfs switch"
->> +    fi
->
-> This will always fail, so either the kernel functionality gets merged or
-> the test dropped. Can you let us know the status? Thanks.
+On Thu, Apr 25, 2019 at 08:50:30AM -0700, Darrick J. Wong wrote:
+> On Thu, Apr 25, 2019 at 03:30:27PM +0800, Eryu Guan wrote:
+> > On Mon, Apr 22, 2019 at 08:48:20AM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > > 
+> > > Remove the typedef usage for the xfs geometry structure.
+> > > 
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > I guess this is due to patch "xfs: bump XFS_IOC_FSGEOMETRY to v5
+> > structures" which removes the xfs_fsop_geom_t typedef? And I'm wondering
+> > if xfs/122 needs update too? as xfs/122.out contains an xfs_fsop_geom_t
+> > entry as well.
+> 
+> xfs/122 does need an update for the new 5.2 ioctls, so yes, I'll send
+> that one along once they've landed upstream.
+> 
+> In the meantime, the xfs_fsop_geom_t -> struct xfs_fsop_geom conversion
+> ought to be applied since the struct FOO approach has always worked.
 
-I=E2=80=99m posting a more comprehensive kernel series (~35 patches) for th=
-is
-in a week or so. This test was requested as a prerequisite to merge
-the series:
-https://lists.linaro.org/pipermail/y2038/2016-November/001981.html
-There have been 5 versions of patches posted since then. It has been a
-little difficult to get these reviewed.
+Ok, thanks!
 
-The series makes more sense now anyway as we finally have 64 bit
-timestamps for vfs.
-If the test is a precondition, then we should still keep it?
-
--Deepa
-
--Deepa
+Eryu
