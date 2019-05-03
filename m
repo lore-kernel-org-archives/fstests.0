@@ -1,76 +1,49 @@
-From: JeffleXu <jefflexu@linux.alibaba.com>
-Subject: [Fail] generic/530 check failed on overlay
-Message-ID: <6f12fb93-59b8-ac1e-f182-e4340ede64a2@linux.alibaba.com>
-Date: Wed, 8 May 2019 15:30:11 +0800
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:36615 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726396AbfECLOk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 3 May 2019 07:14:40 -0400
+Date: Fri, 3 May 2019 19:14:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] fstests: btrfs: try use forget to unregister device
+Message-ID: <20190503111433.GD15846@desktop>
+References: <1552988980-25710-1-git-send-email-anand.jain@oracle.com>
+ <20190402081946.24838-1-anand.jain@oracle.com>
+ <20190426163542.GW20156@twin.jikos.cz>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8; format=flowed
-Content-Transfer-Encoding: quoted-printable
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, guaneryu@gmail.com
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190426163542.GW20156@twin.jikos.cz>
+Sender: fstests-owner@vger.kernel.org
+To: dsterba@suse.cz, Anand Jain <anand.jain@oracle.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-When I run "./check -overlay generic/530", it failed with following log
+On Fri, Apr 26, 2019 at 06:35:42PM +0200, David Sterba wrote:
+> On Tue, Apr 02, 2019 at 04:19:46PM +0800, Anand Jain wrote:
+> > Some btrfs test cases use btrfs module-reload to unregister devices in
+> > the btrfs kernel. The problem with the module-reload approach is, if test
+> > system contains btrfs as rootfs, then you can't run these test cases.
+> > 
+> > Patches [1] introduced btrfs forget feature which can unregister devices
+> > without the module-reload approach.
+> > 
+> >  [1]
+> >  btrfs-progs: device scan: add new option to forget one or all scanned devices
+> >  btrfs: introduce new ioctl to unregister a btrfs device
+> > 
+> > And this patch makes relevant changes in the fstests to use this new
+> > feature, when available.
+> > 
+> > Signed-off-by: Anand Jain <anand.jain@oracle.com>
+> > ---
+> > v2:
+> >  Update change log.
+> >  Rename _require_btrfs_forget_if_not_fs_loadable() to _require_btrfs_forget_or_module_loadable()
+> >  Rename _btrfs_forget_if_not_fs_reload() to _btrfs_forget_or_module_reload()
+> 
+> Reviewed-by: David Sterba <dsterba@suse.com>
 
+The patch has already been applied & pushed to upstream, thanks for the
+review all the same!
 
-```
-
-generic/530 1s ... - output mismatch (see=20
-/root/xfstests/results//generic/530.out.bad)
- =C2=A0=C2=A0=C2=A0 --- tests/generic/530.out=C2=A0=C2=A0 2019-05-07 16:1=
-8:55.951796117 +0800
- =C2=A0=C2=A0=C2=A0 +++ /root/xfstests/results//generic/530.out.bad 2019-=
-05-08=20
-14:55:30.976816701 +0800
- =C2=A0=C2=A0=C2=A0 @@ -1,2 +1,3 @@
- =C2=A0=C2=A0=C2=A0=C2=A0 QA output created by 530
- =C2=A0=C2=A0=C2=A0 +shutdown: Inappropriate ioctl for device
- =C2=A0=C2=A0=C2=A0=C2=A0 silence is golden
- =C2=A0=C2=A0=C2=A0 ...
-
-```
-
-
-xfstests version: 1.1.1.1
-
-kernel: linux 4.19
-
-the commit that imports generic/530: e6703b90
-
-https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=3De6703=
-b903a5025b3eccac758f5bdd8e847f62c39
-
-
-
-I find that the error is due to the following snippet in=20
-src/t_open_tmpfiles.c
-
-
-```c
-
-ret =3D ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-if (ret) {
- =C2=A0=C2=A0=C2=A0 perror("shutdown");
- =C2=A0=C2=A0=C2=A0 exit(2);
-}
-
-```
-
-
-XFS_IOC_GOINGDOWN is specifically defined in XFS filesystem, while it is=20
-not
-
-supported in overlay filesystem.
-
-
-In my understanding, test cases in "tests/generic" should be generic for=20
-all
-
-filesystem types, and the XFS_IOC_GOINGDOWN macro used by generic/530 is
-
-obviously against this rule. Or maybe I missed something important and=20
-would
-
-approciate if someone could give me some indication.
-
-
-thx
+Thanks,
+Eryu
