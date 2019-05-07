@@ -1,168 +1,63 @@
-Received: from mail-yw1-f65.google.com ([209.85.161.65]:44791 "EHLO
-        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726236AbfEGPXs (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 11:23:48 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:60472 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726197AbfEGQhl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 12:37:41 -0400
+Date: Tue, 7 May 2019 09:37:11 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: question about xfstests case xfs/297
+Message-ID: <20190507163711.GA5208@magnolia>
+References: <5CD14717.7070205@cn.fujitsu.com>
 MIME-Version: 1.0
-References: <20190507112914.20856-1-jiufei.xue@linux.alibaba.com>
-In-Reply-To: <20190507112914.20856-1-jiufei.xue@linux.alibaba.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 7 May 2019 18:23:36 +0300
-Message-ID: <CAOQ4uxiQXcuDqQdVMXH6FQbDnHmd7QA-tsGsfiD5hFyOYx=YGQ@mail.gmail.com>
-Subject: Re: [PATCH] generic: add a testcase to check the capability CAP_LINUX_IMMUTABLE
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <5CD14717.7070205@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Jiufei Xue <jiufei.xue@linux.alibaba.com>
-Cc: fstests <fstests@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, overlayfs <linux-unionfs@vger.kernel.org>, joseph.qi@linux.alibaba.com, "Darrick J. Wong" <darrick.wong@oracle.com>
+To: xuyang <xuyang2018.jy@cn.fujitsu.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 7, 2019 at 2:29 PM Jiufei Xue <jiufei.xue@linux.alibaba.com> wrote:
->
-> It should return error while changing IMMUTABLE_FL flag if the process
-> has no capability CAP_LINUX_IMMUTABLE.
->
-> However, it's not true on overlayfs after kernel version v4.19 since
-> the process's subjective cred is overridden with ofs->creator_cred
-> before calling real vfs_ioctl.
->
-> The following patch for ovl fix the problem:
->   "ovl: check the capability before cred overridden"
->
-> Add this testcase to cover this bug.
->
-> Signed-off-by: Jiufei Xue <jiufei.xue@linux.alibaba.com>
-> ---
->  common/config         |  1 +
->  tests/generic/545     | 61 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/545.out |  5 ++++
->  tests/generic/group   |  1 +
->  4 files changed, 68 insertions(+)
->  create mode 100755 tests/generic/545
->  create mode 100755 tests/generic/545.out
->
-> diff --git a/common/config b/common/config
-> index 64f87057..364432bb 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -196,6 +196,7 @@ export SQLITE3_PROG="$(type -P sqlite3)"
->  export TIMEOUT_PROG="$(type -P timeout)"
->  export SETCAP_PROG="$(type -P setcap)"
->  export GETCAP_PROG="$(type -P getcap)"
-> +export CAPSH_PROG="$(type -P capsh)"
->  export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
->  export XFS_INFO_PROG="$(type -P xfs_info)"
->  export DUPEREMOVE_PROG="$(type -P duperemove)"
-> diff --git a/tests/generic/545 b/tests/generic/545
-> new file mode 100755
-> index 00000000..89bdf885
-> --- /dev/null
-> +++ b/tests/generic/545
-> @@ -0,0 +1,61 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2015, Oracle and/or its affiliates.  All Rights Reserved.
+[cc fstests]
 
-Wrongly copied.
+On Tue, May 07, 2019 at 04:51:35PM +0800, xuyang wrote:
+> Hi darrick
+> 
+> since commit d0e484a("check: wipe scratch devices between tests")is
+> merged into xfstests, when I running xfs/297 on kernel 5.1.0-rc5+ with
+> xfsprogs-4.18.0-3.el8.x86_64, it causes a failure that log size is too
+> small to reach the minimum size, as below:
+> 
+> #wipefs -a /dev/sda11 (20G)
+> /dev/sda11: 4 bytes were erased at offset 0x00000000 (xfs): 58 46 53 42
+> #mkfs.xfs -f -d agcount=16,su=256k,sw=12 -l  su=256k,size=5120b /dev/sda11
+> log size 5120 blocks too small, minimum size is 5184 blocks
 
-> +#
-> +# FS QA Test No. 545
-> +#
-> +# Check that we can't add IMMUTABLE_FL flag to file when the process has
-> +# no capbility CAP_LINUX_IMMUTABLE
+That's not related to wipefs at all.
 
-Better check APPEND_FL while at it. Trivial to add.
-Another think worth testing is chattr -i, so for example you could
+The problem here is that your vendor's xfsprogs package turns on reflink
+by default.  The reflink feature increases the minimum log size
+requirements, which this test doesn't account for, and hence it misses
+by 64 blocks.  Evidently nobody at your vendor's QA department noticed?
 
-touch foo bar
-chattr +ia foo
-capsh...
-chattr +a bar # fail
-chattr +i bar # fail
-chattr -i foo # fail
-chattr -a foo # fail
+I only noticed because I started carrying an "enable reflink by default"
+patch last Thursday and it caused a bunch of regressions on tests that
+call mkfs.xfs without looping in MKFS_OPTIONS.  I will be sending out
+patches to fix all that shortly and will cc you on them.
 
-Order matters, because after Darrick's patches
-chattr -/+a on immutable file should fail regardless of capabilities.
+> upstream xfsprogs doesn't have this problem.
 
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    $CHATTR_PROG -i $testdir/file 2>&1
-> +    cd /
-> +    rm -rf $tmp.* $testdir
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_chattr i
-> +_require_command "$CAPSH_PROG" "capsh"
-> +
-> +rm -f $seqres.full
-> +
-> +echo "Format and mount"
-> +testdir="$TEST_DIR/test-$seq"
-> +rm -rf $testdir
-> +mkdir $testdir
-> +
-> +echo "Create the original files"
-> +blksz="$(_get_block_size $testdir)"
-> +blks=1000
-> +sz=$((blksz * blks))
-> +_pwrite_byte 0x61 0 $sz $testdir/file >> $seqres.full
-> +sync
+Upstream xfsprogs doesn't enable reflink by default.
 
-touch $testdir/file is plenty enough
+> I am confused about why the min_logblocks becomes larger after wipefs.
+> Is it a calculating minimum log size bug?  Perhaps, I can adjust the
+> logsize to 5184b. Can you give some advise?
 
-> +
-> +do_filter_output()
-> +{
-> +    err_str=`_filter_test_dir | grep "Operation not permitted"`
-> +    test -n "$err_str" && echo "Operation not permitted"
-> +}
-> +
-> +echo "Try to add IMMUTABLE_FL flag"
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +i $testdir/file" 2>&1 | do_filter_output
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/545.out b/tests/generic/545.out
-> new file mode 100755
-> index 00000000..740bb980
-> --- /dev/null
-> +++ b/tests/generic/545.out
-> @@ -0,0 +1,5 @@
-> +QA output created by 545
-> +Format and mount
-> +Create the original files
-> +Try to add IMMUTABLE_FL flag
-> +Operation not permitted
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 40deb4d0..2f60b4af 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -547,3 +547,4 @@
->  542 auto quick clone
->  543 auto quick clone
->  544 auto quick clone
-> +545 auto quick clone
+Wait for the corrections and help me test them, please? :)
 
-Not 'clone'. Perhaps 'cap', although from the 5 tests that use setcap,
-only one uses this tag.
-You may send another patch to amend that if you want.
+--D
 
-Thanks,
-Amir.
+> 
+> Kind regards,
+> Yang Xu
+> 
+> 
+> 
