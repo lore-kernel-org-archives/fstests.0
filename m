@@ -1,63 +1,34 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:60472 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726197AbfEGQhl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 12:37:41 -0400
-Date: Tue, 7 May 2019 09:37:11 -0700
+Received: from userp2120.oracle.com ([156.151.31.85]:59178 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726473AbfEGQ5F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 12:57:05 -0400
+Subject: [PATCH 0/3] fstests: various fixes
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: question about xfstests case xfs/297
-Message-ID: <20190507163711.GA5208@magnolia>
-References: <5CD14717.7070205@cn.fujitsu.com>
+Date: Tue, 07 May 2019 09:56:50 -0700
+Message-ID: <155724821034.2624631.4172554705843296757.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5CD14717.7070205@cn.fujitsu.com>
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: xuyang <xuyang2018.jy@cn.fujitsu.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, xuyang2018.jy@cn.fujitsu.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[cc fstests]
+Hi all,
 
-On Tue, May 07, 2019 at 04:51:35PM +0800, xuyang wrote:
-> Hi darrick
-> 
-> since commit d0e484a("check: wipe scratch devices between tests")is
-> merged into xfstests, when I running xfs/297 on kernel 5.1.0-rc5+ with
-> xfsprogs-4.18.0-3.el8.x86_64, it causes a failure that log size is too
-> small to reach the minimum size, as below:
-> 
-> #wipefs -a /dev/sda11 (20G)
-> /dev/sda11: 4 bytes were erased at offset 0x00000000 (xfs): 58 46 53 42
-> #mkfs.xfs -f -d agcount=16,su=256k,sw=12 -l  su=256k,size=5120b /dev/sda11
-> log size 5120 blocks too small, minimum size is 5184 blocks
+Here are three patches fixing various regressions in xfstests when
+mkfs.xfs defaults to enabling reflink and/or rmap by default.  Most of
+the changes deal with the change in minimum log size requirements.  They
+weren't caught until now because there are a number of tests that call
+mkfs on a loop device or a file without using MKFS_OPTIONS.
 
-That's not related to wipefs at all.
+If you're going to start using this mess, you probably ought to just
+pull from my git trees, which are linked below.
 
-The problem here is that your vendor's xfsprogs package turns on reflink
-by default.  The reflink feature increases the minimum log size
-requirements, which this test doesn't account for, and hence it misses
-by 64 blocks.  Evidently nobody at your vendor's QA department noticed?
-
-I only noticed because I started carrying an "enable reflink by default"
-patch last Thursday and it caused a bunch of regressions on tests that
-call mkfs.xfs without looping in MKFS_OPTIONS.  I will be sending out
-patches to fix all that shortly and will cc you on them.
-
-> upstream xfsprogs doesn't have this problem.
-
-Upstream xfsprogs doesn't enable reflink by default.
-
-> I am confused about why the min_logblocks becomes larger after wipefs.
-> Is it a calculating minimum log size bug?  Perhaps, I can adjust the
-> logsize to 5184b. Can you give some advise?
-
-Wait for the corrections and help me test them, please? :)
+This is an extraordinary way to destroy everything.  Enjoy!
+Comments and questions are, as always, welcome.
 
 --D
 
-> 
-> Kind regards,
-> Yang Xu
-> 
-> 
-> 
+fstests git tree:
+https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
