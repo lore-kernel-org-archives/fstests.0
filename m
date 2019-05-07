@@ -1,81 +1,58 @@
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:33344 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726201AbfEFUc2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 6 May 2019 16:32:28 -0400
-From: Gabriel Krisman Bertazi <krisman@collabora.com>
-Subject: Re: [PATCH xfstests 1/2] common/casefold: Add infrastructure to test filename casefold feature
-References: <20190506185941.10570-1-krisman@collabora.com>
-        <20190506200325.GA3985@mit.edu>
-Date: Mon, 06 May 2019 16:32:23 -0400
-In-Reply-To: <20190506200325.GA3985@mit.edu> (Theodore Ts'o's message of "Mon,
-        6 May 2019 16:03:25 -0400")
-Message-ID: <875zqn1fzc.fsf@collabora.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:21148 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726063AbfEGJUC (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 05:20:02 -0400
+Received: from G08CNEXCHPEKD01.g08.fujitsu.local (unknown [10.167.33.80])
+        by cn.fujitsu.com (Postfix) with ESMTP id A710A4CD7BBD
+        for <fstests@vger.kernel.org>; Tue,  7 May 2019 17:19:59 +0800 (CST)
+From: Xiao Yang <yangx.jy@cn.fujitsu.com>
+Subject: [PATCH] ext4/018: Match the value of File ACL accurately
+Date: Tue, 7 May 2019 17:19:51 +0800
+Message-ID: <1557220791-30347-1-git-send-email-yangx.jy@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Xiao Yang <yangx.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-"Theodore Ts'o" <tytso@mit.edu> writes:
+Since e2fsprogs v1.44.0, debugfs with stat command shows the output:
+---------------------------------------------------------------------
+debugfs -R 'stat /attrfile' /dev/sda11 2> /dev/null | grep 'File ACL:'
+File ACL: 9258
+---------------------------------------------------------------------
 
-> On Mon, May 06, 2019 at 02:59:40PM -0400, Gabriel Krisman Bertazi wrote:
->> +_require_test_casefold_feature () {
->> +    _has_casefold_feature $TEST_DEV || \
->> +	_notrun "Feature casefold required for this test"
->> +}
->> +_require_scratch_casefold_feature () {
->> +    _has_casefold_feature $SCRATCH_DEV || \
->> +	_notrun "Feature casefold required for this test"
->> +}
->
-> I've just pushed out a commit to ext4.git tree which will cause
-> /sys/fs/ext4/features/casefold will exist iff CONFIG_UNICODE is
-> present.  This will allow the test to check whether or not the kernel
-> version and configuration will support the casefold feature.
->
-> Could you add a check for this flag if the file system type is ext4?
+Before e2fsprogs v1.44.0, debugfs with stat command shows the output:
+----------------------------------------------------------------------
+debugfs -R 'stat /attrfile' /dev/sda11 2> /dev/null | grep 'File ACL:'
+File ACL: 9258    Directory ACL: 0
+----------------------------------------------------------------------
 
-Hello Ted,
+"Directory ACL: XXXX" was removed by commit 578fcbf so running ext4/018
+with older e2fsprogs(i.e. before v1.44.0) got the following error:
+--------------------------------------------------------------------------
++./tests/ext4/018: line 59: 9258    Directory ACL: 0: syntax error in expression (error token is "Directory ACL: 0")
+--------------------------------------------------------------------------
 
-I will follow up with this change on a v2.
+we match the value of File ACL accurately to fix it.
 
-> A file system independent way of doing this would be to create a test
-> file system on the test file system, calling "chattr +F" on the
-> directory.  If it fails, then either the file system doesn't support
-> it or the chattr program is too old and doesn't support casefold.  If
-> the chattr +F succeeds, then the test should call lsattr -d on the
-> directory and make sure the request to set casefold flag was actually
-> honored; some file systems will simply fail to set flags that they
-> don't support, so we do need to do a SETFLAGS followed by a GETFLAGS
-> to be sure that it was supported.
+Signed-off-by: Xiao Yang <yangx.jy@cn.fujitsu.com>
+---
+ tests/ext4/018 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-> Speaking of file system independent casefold, I believe that it will
-> be likely that the casefold feature will be supported by f2fs in the
-> fullness of time.  If that happens, how to test for the file system
-> feature will be different (since dumpe2fs is ext4-specific), but I
-> would expect "chattr +F" interface to be the same between ext4 and
-> f2fs.
-
-I planned to add the per-filesystem test inside common/casefold.  Not
-sure how it would be done for f2fs, but i don't think we'd have a
-unified interface other than SETFLAGS followed by GETFLAGS to test
-this.  I think I could make this method the fallback.
-
->
-> This might mean that we should add casefold tests to either generic/
-> or shared/ instead of ext4/ --- I think it would be shared since at
-> least initially it would only be ext4 and f2fs, and I haven't seen any
-> indication than other file systems would be interested in adding
-> casefold support.  Or we can move the casefold tests later from ext4/
-> to shared/ once the f2fs support materializes.
-
-Last thing I did before submitting this series was moving from generic/
-to ext4/.  I plan to move it back into generic/ or shared/ once another
-filesystem uses it.
-
-I didn't have a chance to discuss with xfs folks yet, but I spoke to
-Chris Mason and I plan to propose this feature for xfs and btrfs soon.
-
+diff --git a/tests/ext4/018 b/tests/ext4/018
+index eb6d827..fed5a8e 100755
+--- a/tests/ext4/018
++++ b/tests/ext4/018
+@@ -55,7 +55,7 @@ echo "+ check fs"
+ e2fsck -fn "${SCRATCH_DEV}" >> $seqres.full 2>&1 || _fail "fsck should not fail"
+ 
+ echo "+ corrupt image"
+-blk="$(debugfs -R 'stat /attrfile' "${SCRATCH_DEV}" 2> /dev/null | grep 'File ACL:' | sed -e 's/^.*File ACL: \([0-9]*\)/\1/g')"
++blk="$(debugfs -R 'stat /attrfile' "${SCRATCH_DEV}" 2> /dev/null | grep 'File ACL:' | sed -e 's/^.*File ACL: \([0-9]*\).*/\1/g')"
+ $XFS_IO_PROG -f -c "pwrite -S 0x62 $((blk * blksz + 20)) 8" "${SCRATCH_DEV}" >> $seqres.full
+ 
+ echo "+ mount image"
 -- 
-Gabriel Krisman Bertazi
+1.8.3.1
