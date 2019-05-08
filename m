@@ -1,67 +1,150 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:49081 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726179AbfEHGzb (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 02:55:31 -0400
-Message-ID: <5CD27D5C.4040003@cn.fujitsu.com>
-Date: Wed, 8 May 2019 14:55:24 +0800
-From: xuyang <xuyang2018.jy@cn.fujitsu.com>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:38759 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726644AbfEHGYO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 02:24:14 -0400
 MIME-Version: 1.0
-Subject: Re: question about xfstests case xfs/297
-References: <5CD14717.7070205@cn.fujitsu.com> <20190507163711.GA5208@magnolia>
-In-Reply-To: <20190507163711.GA5208@magnolia>
-Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
-Content-Transfer-Encoding: 7bit
+References: <20190508041119.25145-1-jiufei.xue@linux.alibaba.com>
+In-Reply-To: <20190508041119.25145-1-jiufei.xue@linux.alibaba.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Wed, 8 May 2019 09:24:01 +0300
+Message-ID: <CAOQ4uxj_nHixOyUiuOO-eM0_E0dAF8eetb80u4vpKju=DYSoRg@mail.gmail.com>
+Subject: Re: [PATCH v2] generic: add a testcase to check the capability CAP_LINUX_IMMUTABLE
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+Cc: fstests <fstests@vger.kernel.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, joseph.qi@linux.alibaba.com
 List-ID: <fstests@vger.kernel.org>
 
-on 2019/05/08 0:37, Darrick J. Wong wrote:
+On Wed, May 8, 2019 at 7:11 AM Jiufei Xue <jiufei.xue@linux.alibaba.com> wrote:
+>
+> It should return error while changing IMMUTABLE_FL flag if the process
+> has no capability CAP_LINUX_IMMUTABLE.
 
-> [cc fstests]
->
-> On Tue, May 07, 2019 at 04:51:35PM +0800, xuyang wrote:
->> Hi darrick
->>
->> since commit d0e484a("check: wipe scratch devices between tests")is
->> merged into xfstests, when I running xfs/297 on kernel 5.1.0-rc5+ with
->> xfsprogs-4.18.0-3.el8.x86_64, it causes a failure that log size is too
->> small to reach the minimum size, as below:
->>
->> #wipefs -a /dev/sda11 (20G)
->> /dev/sda11: 4 bytes were erased at offset 0x00000000 (xfs): 58 46 53 42
->> #mkfs.xfs -f -d agcount=16,su=256k,sw=12 -l  su=256k,size=5120b /dev/sda11
->> log size 5120 blocks too small, minimum size is 5184 blocks
-> That's not related to wipefs at all.
->
-> The problem here is that your vendor's xfsprogs package turns on reflink
-> by default.  The reflink feature increases the minimum log size
-> requirements, which this test doesn't account for, and hence it misses
-> by 64 blocks.  Evidently nobody at your vendor's QA department noticed?
->
-> I only noticed because I started carrying an "enable reflink by default"
-> patch last Thursday and it caused a bunch of regressions on tests that
-> call mkfs.xfs without looping in MKFS_OPTIONS.  I will be sending out
-> patches to fix all that shortly and will cc you on them.
-    I got it .
->> upstream xfsprogs doesn't have this problem.
-> Upstream xfsprogs doesn't enable reflink by default.
->
->> I am confused about why the min_logblocks becomes larger after wipefs.
->> Is it a calculating minimum log size bug?  Perhaps, I can adjust the
->> logsize to 5184b. Can you give some advise?
-> Wait for the corrections and help me test them, please? :)
->
-> --D
->
-Hi  Darrick
+and APPEND_FL
 
-    I have tested your patchset for 20 times(run seven affected cases), it's ok on my machine.
+>
+> However, it's not true on overlayfs after kernel version v4.19 since
+> the process's subjective cred is overridden with ofs->creator_cred
+> before calling real vfs_ioctl.
+>
+> The following patch for ovl fix the problem:
+>   "ovl: check the capability before cred overridden"
+>
+> Add this testcase to cover this bug.
+>
+> v2: add testcases to check APPEND_FL and clear these flags. Suggested by
+> Amir Goldstein.
 
->> Kind regards,
->> Yang Xu
->>
->>
->>
+Patch revision info goes after --- line (edit after fomat-patch), so it
+doesn't end up in commit message
+
 >
+> Signed-off-by: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+> ---
+>  common/config         |  1 +
+>  tests/generic/545     | 74 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/545.out | 10 ++++++
+>  tests/generic/group   |  1 +
+>  4 files changed, 86 insertions(+)
+>  create mode 100755 tests/generic/545
+>  create mode 100755 tests/generic/545.out
 >
+> diff --git a/common/config b/common/config
+> index 64f87057..364432bb 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -196,6 +196,7 @@ export SQLITE3_PROG="$(type -P sqlite3)"
+>  export TIMEOUT_PROG="$(type -P timeout)"
+>  export SETCAP_PROG="$(type -P setcap)"
+>  export GETCAP_PROG="$(type -P getcap)"
+> +export CAPSH_PROG="$(type -P capsh)"
+>  export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
+>  export XFS_INFO_PROG="$(type -P xfs_info)"
+>  export DUPEREMOVE_PROG="$(type -P duperemove)"
+> diff --git a/tests/generic/545 b/tests/generic/545
+> new file mode 100755
+> index 00000000..a7c142e2
+> --- /dev/null
+> +++ b/tests/generic/545
+> @@ -0,0 +1,74 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2019 Alibaba Group.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 545
+> +#
+> +# Check that we can't set the FS_APPEND_FL and FS_IMMUTABLE_FL inode
+> +# flags without capbility CAP_LINUX_IMMUTABLE
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1    # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+
+You must have cleanup of flags on both file also here in case test is
+aborted (i.e. CTRL-C), so we have no immutable/append-only files
+left behind in test partition.
+
+> +    cd /
+> +    rm -rf $tmp.* $testdir
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/attr
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_require_chattr i
+> +_require_chattr a
+> +_require_command "$CAPSH_PROG" "capsh"
+> +
+> +rm -f $seqres.full
+> +
+> +echo "Format and mount"
+> +testdir="$TEST_DIR/test-$seq"
+> +rm -rf $testdir
+> +mkdir $testdir
+> +
+> +echo "Create the original files"
+> +touch $testdir/file1
+> +touch $testdir/file2
+> +
+> +do_filter_output()
+> +{
+> +    err_str=`_filter_test_dir | grep "Operation not permitted"`
+> +    test -n "$err_str" && echo "Operation not permitted"
+> +}
+> +
+> +echo "Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE"
+> +$CHATTR_PROG +a $testdir/file1 2>&1
+> +$CHATTR_PROG +i $testdir/file1 2>&1
+> +
+> +echo "Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE"
+> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +a $testdir/file2" 2>&1 | do_filter_output
+> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +i $testdir/file2" 2>&1 | do_filter_output
+> +
+> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -i $testdir/file1" 2>&1 | do_filter_output
+> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -a $testdir/file1" 2>&1 | do_filter_output
+> +
+> +echo "Try to chattr -ia with capability CAP_LINUX_IMMUTABLE"
+> +$CHATTR_PROG -i $testdir/file1 2>&1
+> +$CHATTR_PROG -a $testdir/file1 2>&1
+> +
+> +# in case chattr +ia succeed without capability
+> +$CHATTR_PROG -i $testdir/file2 2>&1
+> +$CHATTR_PROG -a $testdir/file2 2>&1
+
+Might as well leave this one only in cleanup() as it is not
+part of the test and it needs to be in cleanup() anyway.
+
+Thanks,
+Amir.
