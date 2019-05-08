@@ -1,168 +1,140 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:32930 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726727AbfEHJi6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 05:38:58 -0400
+Received: from mx2.suse.de ([195.135.220.15]:59122 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726835AbfEHHrk (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 8 May 2019 03:47:40 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: generic: Test if fsync will fail after NOCOW write and reflink
+Date: Wed,  8 May 2019 15:47:33 +0800
+Message-Id: <20190508074733.12787-1-wqu@suse.com>
 MIME-Version: 1.0
-References: <20190508071000.99448-1-jiufei.xue@linux.alibaba.com>
-In-Reply-To: <20190508071000.99448-1-jiufei.xue@linux.alibaba.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 8 May 2019 12:38:45 +0300
-Message-ID: <CAOQ4uxjOzNzDAXLWdn+FXF1cMVBk29TAuTUzTtUPZh8o2OYG2Q@mail.gmail.com>
-Subject: Re: [PATCH] generic: add a testcase to check the capability CAP_LINUX_IMMUTABLE
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Jiufei Xue <jiufei.xue@linux.alibaba.com>
-Cc: fstests <fstests@vger.kernel.org>, "Darrick J. Wong" <darrick.wong@oracle.com>, overlayfs <linux-unionfs@vger.kernel.org>, Eryu Guan <guaneryu@gmail.com>, joseph.qi@linux.alibaba.com
+To: linux-btrfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 8, 2019 at 10:10 AM Jiufei Xue <jiufei.xue@linux.alibaba.com> wrote:
->
-> It should return error while changing IMMUTABLE_FL and APPEND_FL if the
-> process has no capability CAP_LINUX_IMMUTABLE.
->
-> However, it's not true on overlayfs after kernel version v4.19 since
-> the process's subjective cred is overridden with ofs->creator_cred
-> before calling real vfs_ioctl.
->
-> The following patch for ovl fix the problem:
->   "ovl: check the capability before cred overridden"
->
-> Add this testcase to cover this bug.
->
-> Signed-off-by: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+This test case is going to check if btrfs will fail fsync after NOCOW
+buffered write and reflink.
 
-Reviewed-by: Amir Goldstein <amir73il@gmail.com>
+Btrfs' back reference only has extent level granularity, so if we do
+buffered write which can be done NOCOW, then reflink, that buffered
+write will be forced CoW.
 
-> ---
-> v2: add testcases for APPEND_FL and flags clearing. Suggested by
->     Amir Goldstein.
-> v3: clear the flags on both the file in cleanup() in case test is
->     aborted.
->
->  common/config         |  1 +
->  tests/generic/545     | 73 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/545.out | 10 ++++++
->  tests/generic/group   |  1 +
->  4 files changed, 85 insertions(+)
->  create mode 100755 tests/generic/545
->  create mode 100755 tests/generic/545.out
->
-> diff --git a/common/config b/common/config
-> index 64f87057..364432bb 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -196,6 +196,7 @@ export SQLITE3_PROG="$(type -P sqlite3)"
->  export TIMEOUT_PROG="$(type -P timeout)"
->  export SETCAP_PROG="$(type -P setcap)"
->  export GETCAP_PROG="$(type -P getcap)"
-> +export CAPSH_PROG="$(type -P capsh)"
->  export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
->  export XFS_INFO_PROG="$(type -P xfs_info)"
->  export DUPEREMOVE_PROG="$(type -P duperemove)"
-> diff --git a/tests/generic/545 b/tests/generic/545
-> new file mode 100755
-> index 00000000..da2eac2e
-> --- /dev/null
-> +++ b/tests/generic/545
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Alibaba Group.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 545
-> +#
-> +# Check that we can't set the FS_APPEND_FL and FS_IMMUTABLE_FL inode
-> +# flags without capbility CAP_LINUX_IMMUTABLE
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    # Cleanup of flags on both file in case test is aborted
-> +    # (i.e. CTRL-C), so we have no immutable/append-only files
-> +    $CHATTR_PROG -ia $testdir/file1 2>&1
-> +    $CHATTR_PROG -ia $testdir/file2 2>&1
-> +
-> +    cd /
-> +    rm -rf $tmp.* $testdir
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_require_chattr i
-> +_require_chattr a
-> +_require_command "$CAPSH_PROG" "capsh"
-> +
-> +echo "Format and mount"
-> +testdir="$TEST_DIR/test-$seq"
-> +rm -rf $testdir
-> +mkdir $testdir
-> +
-> +echo "Create the original files"
-> +touch $testdir/file1
-> +touch $testdir/file2
-> +
-> +do_filter_output()
-> +{
-> +    err_str=`_filter_test_dir | grep "Operation not permitted"`
-> +    test -n "$err_str" && echo "Operation not permitted"
-> +}
-> +
-> +echo "Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE"
-> +$CHATTR_PROG +a $testdir/file1 2>&1
-> +$CHATTR_PROG +i $testdir/file1 2>&1
-> +
-> +echo "Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE"
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +a $testdir/file2" 2>&1 | do_filter_output
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +i $testdir/file2" 2>&1 | do_filter_output
-> +
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -i $testdir/file1" 2>&1 | do_filter_output
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -a $testdir/file1" 2>&1 | do_filter_output
-> +
-> +echo "Try to chattr -ia with capability CAP_LINUX_IMMUTABLE"
-> +$CHATTR_PROG -i $testdir/file1 2>&1
-> +$CHATTR_PROG -a $testdir/file1 2>&1
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/545.out b/tests/generic/545.out
-> new file mode 100755
-> index 00000000..8c6e4082
-> --- /dev/null
-> +++ b/tests/generic/545.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 545
-> +Format and mount
-> +Create the original files
-> +Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE
-> +Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE
-> +Operation not permitted
-> +Operation not permitted
-> +Operation not permitted
-> +Operation not permitted
-> +Try to chattr -ia with capability CAP_LINUX_IMMUTABLE
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 40deb4d0..7a457e81 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -547,3 +547,4 @@
->  542 auto quick clone
->  543 auto quick clone
->  544 auto quick clone
-> +545 auto quick cap
-> --
-> 2.19.1.856.g8858448bb
->
+And if we have no data space left, CoW will fail and cause fsync
+failure.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/generic/545     | 82 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/545.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 85 insertions(+)
+ create mode 100755 tests/generic/545
+ create mode 100644 tests/generic/545.out
+
+diff --git a/tests/generic/545 b/tests/generic/545
+new file mode 100755
+index 00000000..b6e1a0ae
+--- /dev/null
++++ b/tests/generic/545
+@@ -0,0 +1,82 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 545
++#
++# Test if btrfs fails fsync due to ENOSPC.
++#
++# Btrfs' back reference only has extent level granularity, thus if reflink of
++# an preallocated extent happens, any write into that extent must be CoWed.
++#
++# We could craft a case, where btrfs reserve no data space at buffered write
++# time but are forced to do CoW at writeback, and fail fsync.
++#
++# This is fixed by "btrfs: Flush before reflinking any extent to prevent NOCOW
++# write falling back to CoW without data reservation"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_scratch_reflink
++
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >> $seqres.full 2>&1
++
++# Space cache will use some data space and may cause interference.
++# Disable space cache here.
++_scratch_mount -o nospace_cache
++
++# Create preallocated extent where we can do NOCOW write
++xfs_io -f -c 'falloc 8k 64m' "$SCRATCH_MNT/foobar" >> $seqres.full
++
++# Use up all remaining space, so that later write will go through NOCOW check
++# We ignore the ENOSPC error here
++_pwrite_byte 0x00 0 512m "$SCRATCH_MNT/padding" >> $seqres.full 2>&1
++
++# Now setup is all done.
++sync
++
++# This buffered write will go through and pass NOCOW check thus no
++# data space is reserved.
++_pwrite_byte 0xcd 1m 16m "$SCRATCH_MNT/foobar" >> $seqres.full
++
++# Reflink the the unused part of the preallocated extent to increase
++# its reference, so for btrfs any write into that preallocated extent
++# must be CoWed.
++xfs_io -c "reflink ${SCRATCH_MNT}/foobar 8k 0 4k" "$SCRATCH_MNT/foobar" \
++	>> $seqres.full
++
++# Now fsync will fail due to we must CoW previous NOCOW write, but we have
++# now data space left, it will fail with ENOSPC
++xfs_io -c 'fsync'  "$SCRATCH_MNT/foobar"
++
++echo "Silence is golden"
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/545.out b/tests/generic/545.out
+new file mode 100644
+index 00000000..920d7244
+--- /dev/null
++++ b/tests/generic/545.out
+@@ -0,0 +1,2 @@
++QA output created by 545
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 40deb4d0..f26b91fe 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -547,3 +547,4 @@
+ 542 auto quick clone
+ 543 auto quick clone
+ 544 auto quick clone
++545 auto quick clone enospc
+-- 
+2.21.0
