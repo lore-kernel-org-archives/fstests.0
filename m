@@ -1,51 +1,159 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:38394 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726589AbfEHD1C (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 7 May 2019 23:27:02 -0400
-Date: Tue, 7 May 2019 20:26:53 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/532: do not break golden silence if
- attributes_mask is 0
-Message-ID: <20190508032653.GC1473023@magnolia>
-References: <20190508031144.17895-1-xzhou@redhat.com>
+Received: from out30-43.freemail.mail.aliyun.com ([115.124.30.43]:50817 "EHLO
+        out30-43.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1725842AbfEHELX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 00:11:23 -0400
+From: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+Subject: [PATCH v2] generic: add a testcase to check the capability CAP_LINUX_IMMUTABLE
+Date: Wed,  8 May 2019 12:11:19 +0800
+Message-Id: <20190508041119.25145-1-jiufei.xue@linux.alibaba.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190508031144.17895-1-xzhou@redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Murphy Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: darrick.wong@oracle.com, linux-unionfs@vger.kernel.org, amir73il@gmail.com, guaneryu@gmail.com, joseph.qi@linux.alibaba.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 08, 2019 at 11:11:44AM +0800, Murphy Zhou wrote:
-> If the filesystem does not support STATX_ATTR, like NFS, setting
-> both attributes and attributes_mask to 0 seems the right thing to
-> do. attributes_mask can be 0 only if attributes is also 0.
-> This situation is covered by the "&" check in the next line.
-> 
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+It should return error while changing IMMUTABLE_FL flag if the process
+has no capability CAP_LINUX_IMMUTABLE.
 
-Seems fine to me.
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+However, it's not true on overlayfs after kernel version v4.19 since
+the process's subjective cred is overridden with ofs->creator_cred
+before calling real vfs_ioctl.
 
---D
+The following patch for ovl fix the problem:
+  "ovl: check the capability before cred overridden"
 
-> ---
->  tests/generic/532 | 1 -
->  1 file changed, 1 deletion(-)
-> 
-> diff --git a/tests/generic/532 b/tests/generic/532
-> index ac8b7a89..3f8afa4a 100755
-> --- a/tests/generic/532
-> +++ b/tests/generic/532
-> @@ -44,7 +44,6 @@ check_statx_attributes()
->  	echo "MASK:$mask:ATTRS:$attrs:" >> $seqres.full
->  
->  	test -z "$mask" && _notrun "xfs_io statx command does not support attributes_mask"
-> -	test $(( mask )) -eq 0 && echo "attributes mask is zero"
->  	test $(( attrs & ~(mask) )) -ne 0 && echo "attributes $attrs do not appear in mask $mask"
->  }
->  
-> -- 
-> 2.21.0
-> 
+Add this testcase to cover this bug.
+
+v2: add testcases to check APPEND_FL and clear these flags. Suggested by
+Amir Goldstein.
+
+Signed-off-by: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+---
+ common/config         |  1 +
+ tests/generic/545     | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/545.out | 10 ++++++
+ tests/generic/group   |  1 +
+ 4 files changed, 86 insertions(+)
+ create mode 100755 tests/generic/545
+ create mode 100755 tests/generic/545.out
+
+diff --git a/common/config b/common/config
+index 64f87057..364432bb 100644
+--- a/common/config
++++ b/common/config
+@@ -196,6 +196,7 @@ export SQLITE3_PROG="$(type -P sqlite3)"
+ export TIMEOUT_PROG="$(type -P timeout)"
+ export SETCAP_PROG="$(type -P setcap)"
+ export GETCAP_PROG="$(type -P getcap)"
++export CAPSH_PROG="$(type -P capsh)"
+ export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
+ export XFS_INFO_PROG="$(type -P xfs_info)"
+ export DUPEREMOVE_PROG="$(type -P duperemove)"
+diff --git a/tests/generic/545 b/tests/generic/545
+new file mode 100755
+index 00000000..a7c142e2
+--- /dev/null
++++ b/tests/generic/545
+@@ -0,0 +1,74 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Alibaba Group.  All Rights Reserved.
++#
++# FS QA Test No. 545
++#
++# Check that we can't set the FS_APPEND_FL and FS_IMMUTABLE_FL inode
++# flags without capbility CAP_LINUX_IMMUTABLE
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++    cd /
++    rm -rf $tmp.* $testdir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/attr
++
++# real QA test starts here
++_supported_os Linux
++_require_chattr i
++_require_chattr a
++_require_command "$CAPSH_PROG" "capsh"
++
++rm -f $seqres.full
++
++echo "Format and mount"
++testdir="$TEST_DIR/test-$seq"
++rm -rf $testdir
++mkdir $testdir
++
++echo "Create the original files"
++touch $testdir/file1
++touch $testdir/file2
++
++do_filter_output()
++{
++    err_str=`_filter_test_dir | grep "Operation not permitted"`
++    test -n "$err_str" && echo "Operation not permitted"
++}
++
++echo "Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE"
++$CHATTR_PROG +a $testdir/file1 2>&1
++$CHATTR_PROG +i $testdir/file1 2>&1
++
++echo "Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE"
++$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +a $testdir/file2" 2>&1 | do_filter_output
++$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +i $testdir/file2" 2>&1 | do_filter_output
++
++$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -i $testdir/file1" 2>&1 | do_filter_output
++$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -a $testdir/file1" 2>&1 | do_filter_output
++
++echo "Try to chattr -ia with capability CAP_LINUX_IMMUTABLE"
++$CHATTR_PROG -i $testdir/file1 2>&1
++$CHATTR_PROG -a $testdir/file1 2>&1
++
++# in case chattr +ia succeed without capability
++$CHATTR_PROG -i $testdir/file2 2>&1
++$CHATTR_PROG -a $testdir/file2 2>&1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/545.out b/tests/generic/545.out
+new file mode 100755
+index 00000000..8c6e4082
+--- /dev/null
++++ b/tests/generic/545.out
+@@ -0,0 +1,10 @@
++QA output created by 545
++Format and mount
++Create the original files
++Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE
++Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE
++Operation not permitted
++Operation not permitted
++Operation not permitted
++Operation not permitted
++Try to chattr -ia with capability CAP_LINUX_IMMUTABLE
+diff --git a/tests/generic/group b/tests/generic/group
+index 40deb4d0..7a457e81 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -547,3 +547,4 @@
+ 542 auto quick clone
+ 543 auto quick clone
+ 544 auto quick clone
++545 auto quick cap
+-- 
+2.19.1.856.g8858448bb
