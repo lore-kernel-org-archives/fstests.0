@@ -1,92 +1,77 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:37084 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725842AbfEIB4c (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 21:56:32 -0400
-Date: Wed, 8 May 2019 18:54:24 -0700
+Received: from userp2130.oracle.com ([156.151.31.86]:43498 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725842AbfEIBzO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 8 May 2019 21:55:14 -0400
+Date: Wed, 8 May 2019 18:55:06 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [Fail] generic/530 check failed on overlay
-Message-ID: <20190509015424.GA5352@magnolia>
-References: <6f12fb93-59b8-ac1e-f182-e4340ede64a2@linux.alibaba.com>
+Subject: Re: question about xfstests case xfs/297
+Message-ID: <20190509015505.GB5352@magnolia>
+References: <5CD14717.7070205@cn.fujitsu.com>
+ <20190507163711.GA5208@magnolia>
+ <5CD27D5C.4040003@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=iso-8859-1
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <6f12fb93-59b8-ac1e-f182-e4340ede64a2@linux.alibaba.com>
+In-Reply-To: <5CD27D5C.4040003@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: JeffleXu <jefflexu@linux.alibaba.com>
-Cc: fstests@vger.kernel.org, guaneryu@gmail.com
+To: xuyang <xuyang2018.jy@cn.fujitsu.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 08, 2019 at 03:30:11PM +0800, JeffleXu wrote:
-> When I run "./check -overlay generic/530", it failed with following log
->=20
->=20
-> ```
->=20
-> generic/530 1s ... - output mismatch (see
-> /root/xfstests/results//generic/530.out.bad)
-> =A0=A0=A0 --- tests/generic/530.out=A0=A0 2019-05-07 16:18:55.951796117=
- +0800
-> =A0=A0=A0 +++ /root/xfstests/results//generic/530.out.bad 2019-05-08
-> 14:55:30.976816701 +0800
-> =A0=A0=A0 @@ -1,2 +1,3 @@
-> =A0=A0=A0=A0 QA output created by 530
-> =A0=A0=A0 +shutdown: Inappropriate ioctl for device
+On Wed, May 08, 2019 at 02:55:24PM +0800, xuyang wrote:
+> on 2019/05/08 0:37, Darrick J. Wong wrote:
+> 
+> > [cc fstests]
+> > 
+> > On Tue, May 07, 2019 at 04:51:35PM +0800, xuyang wrote:
+> > > Hi darrick
+> > > 
+> > > since commit d0e484a("check: wipe scratch devices between tests")is
+> > > merged into xfstests, when I running xfs/297 on kernel 5.1.0-rc5+ with
+> > > xfsprogs-4.18.0-3.el8.x86_64, it causes a failure that log size is too
+> > > small to reach the minimum size, as below:
+> > > 
+> > > #wipefs -a /dev/sda11 (20G)
+> > > /dev/sda11: 4 bytes were erased at offset 0x00000000 (xfs): 58 46 53 42
+> > > #mkfs.xfs -f -d agcount=16,su=256k,sw=12 -l  su=256k,size=5120b /dev/sda11
+> > > log size 5120 blocks too small, minimum size is 5184 blocks
+> > That's not related to wipefs at all.
+> > 
+> > The problem here is that your vendor's xfsprogs package turns on reflink
+> > by default.  The reflink feature increases the minimum log size
+> > requirements, which this test doesn't account for, and hence it misses
+> > by 64 blocks.  Evidently nobody at your vendor's QA department noticed?
+> > 
+> > I only noticed because I started carrying an "enable reflink by default"
+> > patch last Thursday and it caused a bunch of regressions on tests that
+> > call mkfs.xfs without looping in MKFS_OPTIONS.  I will be sending out
+> > patches to fix all that shortly and will cc you on them.
+>    I got it .
+> > > upstream xfsprogs doesn't have this problem.
+> > Upstream xfsprogs doesn't enable reflink by default.
+> > 
+> > > I am confused about why the min_logblocks becomes larger after wipefs.
+> > > Is it a calculating minimum log size bug?  Perhaps, I can adjust the
+> > > logsize to 5184b. Can you give some advise?
+> > Wait for the corrections and help me test them, please? :)
+> > 
+> > --D
+> > 
+> Hi  Darrick
+> 
+>    I have tested your patchset for 20 times(run seven affected cases), it's ok on my machine.
 
-Odd... I would've thought the _require_scratch_shutdown would have
-stopped this test?  What's the underlying filesystem?
+Cool!  Could you reply to the patchset with your Tested-by, please? :)
 
 --D
 
-> =A0=A0=A0=A0 silence is golden
-> =A0=A0=A0 ...
->=20
-> ```
->=20
->=20
-> xfstests version: 1.1.1.1
->=20
-> kernel: linux 4.19
->=20
-> the commit that imports generic/530: e6703b90
->=20
-> https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/commit/?id=3De67=
-03b903a5025b3eccac758f5bdd8e847f62c39
->=20
->=20
->=20
-> I find that the error is due to the following snippet in
-> src/t_open_tmpfiles.c
->=20
->=20
-> ```c
->=20
-> ret =3D ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-> if (ret) {
-> =A0=A0=A0 perror("shutdown");
-> =A0=A0=A0 exit(2);
-> }
->=20
-> ```
->=20
->=20
-> XFS_IOC_GOINGDOWN is specifically defined in XFS filesystem, while it i=
-s not
->=20
-> supported in overlay filesystem.
->=20
->=20
-> In my understanding, test cases in "tests/generic" should be generic fo=
-r all
->=20
-> filesystem types, and the XFS_IOC_GOINGDOWN macro used by generic/530 i=
-s
->=20
-> obviously against this rule. Or maybe I missed something important and =
-would
->=20
-> approciate if someone could give me some indication.
->=20
->=20
-> thx
->=20
+> 
+> > > Kind regards,
+> > > Yang Xu
+> > > 
+> > > 
+> > > 
+> > 
+> > 
+> 
+> 
