@@ -1,205 +1,96 @@
-Received: from mail-pf1-f195.google.com ([209.85.210.195]:38198 "EHLO
-        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726984AbfEJIcG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 10 May 2019 04:32:06 -0400
-Date: Fri, 10 May 2019 16:31:55 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] generic: add a testcase to check the capability
- CAP_LINUX_IMMUTABLE
-Message-ID: <20190510083155.GF15846@desktop>
-References: <20190508071000.99448-1-jiufei.xue@linux.alibaba.com>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:40525 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725847AbfEIJHk (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 May 2019 05:07:40 -0400
+Received: by mail-yw1-f67.google.com with SMTP id 18so1290948ywe.7
+        for <fstests@vger.kernel.org>; Thu, 09 May 2019 02:07:40 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190508071000.99448-1-jiufei.xue@linux.alibaba.com>
+References: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com> <20190509054435.GG5352@magnolia>
+In-Reply-To: <20190509054435.GG5352@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Thu, 9 May 2019 12:07:28 +0300
+Message-ID: <CAOQ4uxj+tc9ed7GxnLbrf9hBq4kMVK_Fwoec10uMGX2yBAZLEg@mail.gmail.com>
+Subject: Re: [PATCH] generic/530: fix shutdown failure of generic/530 in overlay
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Jiufei Xue <jiufei.xue@linux.alibaba.com>
-Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, linux-unionfs@vger.kernel.org, amir73il@gmail.com, joseph.qi@linux.alibaba.com
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Chengguang Xu <cgxu519@gmx.com>
+Cc: Jeffle Xu <jefflexu@linux.alibaba.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, May 08, 2019 at 03:10:00PM +0800, Jiufei Xue wrote:
-> It should return error while changing IMMUTABLE_FL and APPEND_FL if the
-> process has no capability CAP_LINUX_IMMUTABLE.
-> 
-> However, it's not true on overlayfs after kernel version v4.19 since
-> the process's subjective cred is overridden with ofs->creator_cred
-> before calling real vfs_ioctl.
-> 
-> The following patch for ovl fix the problem:
->   "ovl: check the capability before cred overridden"
-> 
-> Add this testcase to cover this bug.
-> 
-> Signed-off-by: Jiufei Xue <jiufei.xue@linux.alibaba.com>
+On Thu, May 9, 2019 at 8:45 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+>
+> On Thu, May 09, 2019 at 01:26:56PM +0800, Jeffle Xu wrote:
+> > We got "shutdown: Inappropriate ioctl for device" when running
+> > "./check -overlay generic/530". The error message is due to the
+> > XFS_IOC_GOINGDOWN ioctl used in generic/530.
+> >
+> > Though _require_scratch_shutdown() is called to test whether the
+> > tested filesystem supports XFS_IOC_GOINGDOWN ioctl or not, a piece
+> > of C code snippet in src/t_open_tmpfiles.c is used to shutdown the
+> > filesysetm, rather than calling the corresponding helper function
+> > _scratch_shutdown().
+> >
+> > Let me explain it clearly:
+> >
+> > 1. suppose the config is
+> >
+> > ```
+> > export TEST_DEV=/dev/vdb
+> > export TEST_DIR=/mnt/test
+> > export SCRATCH_DEV=/dev/vdc
+> > export SCRATCH_MNT=/mnt/scratch
+> > ```
+> >
+> > 2. When running "./check -overlay generic/530", the scratch device,
+> > /dev/vdc is mounted on /mnt/scratch, and the overlay filesystem is
+> > mounted on /mnt/scratch/mnt using the follwing command
+> >
+> > ```
+> > mount -t overlay -o lowerdir=/mnt/scratch/ovl-lower \
+> > -o upperdir=/mnt/scratch/ovl-upper/ -o workdir=/mnt/scratch/ovl-work/ \
+> > overlay /mnt/scratch/ovl-mnt
+> > ```
+> >
+> > 3. In this case, _require_scratch_shutdown() will inspect whether the
+> > underlying upper system, that is **/mnt/scratch/**, supports shutdown
+> > feature or not. In my test, the underlying system of overlay (that is
+> > /dev/vdc) is ext4, and thus it passes the _require_scratch_shutdown
+> > test.
+> >
+> > 4. However, the C code executing the shutdown action in t_open_tmpfiles.c
+> > actually execute XFS_IOC_GOINGDOWN ioctl on the mount point of overlay
+> > filesystem, that is **/mnt/scratch/ovl-mnt**. Since overlay doesn't support
+> > XFS_IOC_GOINGDOWN ioctl, it fails naturally.
+> >
+> > 5. So we should use _scratch_shutdown() to shutdown if we have used
+> > _require_scratch_shutdown
+> >
+> > As for the solution to fix the failure, I temporarily move the shutdown
+> > action from t_open_tmpfiles into generic/530 as the workaround. How would
+> > you think @Darrick? Maybe there is a better solution but I'm not sure.
+>
+> *OH*, it escaped my notice that _require_scratch_shutdown tests shutting
+> down the legs that overlayfs stands on, without testing the overlayfs
+> mount itself.  Sorry about that, and thanks for pointing that out.
+>
+> Hmm, well, this test is really about creating a bunch of temp files on
+> SCRATCH_MNT and then shutting down the *SCRATCH_MNT* to see how it deals
+> with that.  I'm not sure why the _require helper special-cases overlayfs
+> to test something other than SCRATCH_MNT, so I think we (or I) need
+> clarification about why the helper does that, or possibly just a new
+> _require helper that actually checks SCRATCH_MNT itself.
+>
 
-Thanks for the patch! Some minor issues inline, and I can fix them up on
-commit.
+The helper is doing the right thing as far as the tests that use the common
+shutdown helpers are concerned.
+When you yank the cord out of underlying fs, you effectively yank the cord
+out of overlayfs, so shutdown tests can be run on overlay thanks to the fixes
+made by Chengguang, helping with crash test coverage for overlayfs.
 
-> ---
-> v2: add testcases for APPEND_FL and flags clearing. Suggested by
->     Amir Goldstein.
-> v3: clear the flags on both the file in cleanup() in case test is
->     aborted.
-> 
->  common/config         |  1 +
->  tests/generic/545     | 73 +++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/545.out | 10 ++++++
->  tests/generic/group   |  1 +
->  4 files changed, 85 insertions(+)
->  create mode 100755 tests/generic/545
->  create mode 100755 tests/generic/545.out
+>From quick grep I found only 3 generic tests that issue goingdown via
+binaries and not via common helper. This patch fixes one of them and the
+other 2 tests (using src/godown) do not run on overlays, so it is low
+priority to fix them.
 
-mode of .out file should be 100644
-
-> 
-> diff --git a/common/config b/common/config
-> index 64f87057..364432bb 100644
-> --- a/common/config
-> +++ b/common/config
-> @@ -196,6 +196,7 @@ export SQLITE3_PROG="$(type -P sqlite3)"
->  export TIMEOUT_PROG="$(type -P timeout)"
->  export SETCAP_PROG="$(type -P setcap)"
->  export GETCAP_PROG="$(type -P getcap)"
-> +export CAPSH_PROG="$(type -P capsh)"
->  export CHECKBASHISMS_PROG="$(type -P checkbashisms)"
->  export XFS_INFO_PROG="$(type -P xfs_info)"
->  export DUPEREMOVE_PROG="$(type -P duperemove)"
-> diff --git a/tests/generic/545 b/tests/generic/545
-> new file mode 100755
-> index 00000000..da2eac2e
-> --- /dev/null
-> +++ b/tests/generic/545
-> @@ -0,0 +1,73 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Alibaba Group.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 545
-> +#
-> +# Check that we can't set the FS_APPEND_FL and FS_IMMUTABLE_FL inode
-> +# flags without capbility CAP_LINUX_IMMUTABLE
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1    # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +    # Cleanup of flags on both file in case test is aborted
-> +    # (i.e. CTRL-C), so we have no immutable/append-only files
-> +    $CHATTR_PROG -ia $testdir/file1 2>&1
-> +    $CHATTR_PROG -ia $testdir/file2 2>&1
-
-       $CHATTR_PROG -ia $testdir/file2 >/dev/null 2>&1
-
-And use 8 spaces tab for indention.
-
-> +
-> +    cd /
-> +    rm -rf $tmp.* $testdir
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/attr
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-
-_supported_fs generic
-
-> +_require_chattr i
-> +_require_chattr a
-> +_require_command "$CAPSH_PROG" "capsh"
-
-Need _require_test too.
-
-> +
-> +echo "Format and mount"
-
-Not needed, you don't do format and mount anyway :)
-
-> +testdir="$TEST_DIR/test-$seq"
-
-I renamed it to workdir to avoid the confusion with TEST_DIR.
-
-> +rm -rf $testdir
-> +mkdir $testdir
-> +
-> +echo "Create the original files"
-> +touch $testdir/file1
-> +touch $testdir/file2
-> +
-> +do_filter_output()
-> +{
-> +    err_str=`_filter_test_dir | grep "Operation not permitted"`
-> +    test -n "$err_str" && echo "Operation not permitted"
-
-I think this is sufficient
-
-	grep -o "Operation not permitted"
-
-> +}
-> +
-> +echo "Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE"
-> +$CHATTR_PROG +a $testdir/file1 2>&1
-> +$CHATTR_PROG +i $testdir/file1 2>&1
-
-No need to do the redirection, 'check' will capture both stdout and
-stderr.
-
-> +
-> +echo "Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE"
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +a $testdir/file2" 2>&1 | do_filter_output
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG +i $testdir/file2" 2>&1 | do_filter_output
-> +
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -i $testdir/file1" 2>&1 | do_filter_output
-> +$CAPSH_PROG --drop=cap_linux_immutable -- -c "$CHATTR_PROG -a $testdir/file1" 2>&1 | do_filter_output
-> +
-> +echo "Try to chattr -ia with capability CAP_LINUX_IMMUTABLE"
-> +$CHATTR_PROG -i $testdir/file1 2>&1
-> +$CHATTR_PROG -a $testdir/file1 2>&1
-
-Same here, no redirection.
-
-Thanks,
-Eryu
-
-> +
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/generic/545.out b/tests/generic/545.out
-> new file mode 100755
-> index 00000000..8c6e4082
-> --- /dev/null
-> +++ b/tests/generic/545.out
-> @@ -0,0 +1,10 @@
-> +QA output created by 545
-> +Format and mount
-> +Create the original files
-> +Try to chattr +ia with capabilities CAP_LINUX_IMMUTABLE
-> +Try to chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE
-> +Operation not permitted
-> +Operation not permitted
-> +Operation not permitted
-> +Operation not permitted
-> +Try to chattr -ia with capability CAP_LINUX_IMMUTABLE
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 40deb4d0..7a457e81 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -547,3 +547,4 @@
->  542 auto quick clone
->  543 auto quick clone
->  544 auto quick clone
-> +545 auto quick cap
-> -- 
-> 2.19.1.856.g8858448bb
-> 
+Cheers,
+Amir.
