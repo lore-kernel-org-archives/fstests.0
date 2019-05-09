@@ -1,86 +1,111 @@
-Received: from out30-56.freemail.mail.aliyun.com ([115.124.30.56]:60201 "EHLO
-        out30-56.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1725936AbfEIF1i (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 May 2019 01:27:38 -0400
-From: Jeffle Xu <jefflexu@linux.alibaba.com>
-Subject: [PATCH] generic/530: fix shutdown failure of generic/530 in overlay
-Date: Thu,  9 May 2019 13:26:56 +0800
-Message-Id: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:58088 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726219AbfEIFom (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 9 May 2019 01:44:42 -0400
+Date: Wed, 8 May 2019 22:44:35 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] generic/530: fix shutdown failure of generic/530 in
+ overlay
+Message-ID: <20190509054435.GG5352@magnolia>
+References: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Jeffle Xu <jefflexu@linux.alibaba.com>
+To: Jeffle Xu <jefflexu@linux.alibaba.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-We got "shutdown: Inappropriate ioctl for device" when running
-"./check -overlay generic/530". The error message is due to the
-XFS_IOC_GOINGDOWN ioctl used in generic/530.
+On Thu, May 09, 2019 at 01:26:56PM +0800, Jeffle Xu wrote:
+> We got "shutdown: Inappropriate ioctl for device" when running
+> "./check -overlay generic/530". The error message is due to the
+> XFS_IOC_GOINGDOWN ioctl used in generic/530.
+> 
+> Though _require_scratch_shutdown() is called to test whether the
+> tested filesystem supports XFS_IOC_GOINGDOWN ioctl or not, a piece
+> of C code snippet in src/t_open_tmpfiles.c is used to shutdown the
+> filesysetm, rather than calling the corresponding helper function
+> _scratch_shutdown().
+> 
+> Let me explain it clearly:
+> 
+> 1. suppose the config is
+> 
+> ```
+> export TEST_DEV=/dev/vdb
+> export TEST_DIR=/mnt/test
+> export SCRATCH_DEV=/dev/vdc
+> export SCRATCH_MNT=/mnt/scratch
+> ```
+> 
+> 2. When running "./check -overlay generic/530", the scratch device,
+> /dev/vdc is mounted on /mnt/scratch, and the overlay filesystem is
+> mounted on /mnt/scratch/mnt using the follwing command
+> 
+> ```
+> mount -t overlay -o lowerdir=/mnt/scratch/ovl-lower \
+> -o upperdir=/mnt/scratch/ovl-upper/ -o workdir=/mnt/scratch/ovl-work/ \
+> overlay /mnt/scratch/ovl-mnt
+> ```
+> 
+> 3. In this case, _require_scratch_shutdown() will inspect whether the
+> underlying upper system, that is **/mnt/scratch/**, supports shutdown
+> feature or not. In my test, the underlying system of overlay (that is
+> /dev/vdc) is ext4, and thus it passes the _require_scratch_shutdown
+> test.
+> 
+> 4. However, the C code executing the shutdown action in t_open_tmpfiles.c
+> actually execute XFS_IOC_GOINGDOWN ioctl on the mount point of overlay
+> filesystem, that is **/mnt/scratch/ovl-mnt**. Since overlay doesn't support
+> XFS_IOC_GOINGDOWN ioctl, it fails naturally.
+> 
+> 5. So we should use _scratch_shutdown() to shutdown if we have used
+> _require_scratch_shutdown
+> 
+> As for the solution to fix the failure, I temporarily move the shutdown
+> action from t_open_tmpfiles into generic/530 as the workaround. How would
+> you think @Darrick? Maybe there is a better solution but I'm not sure.
 
-Though _require_scratch_shutdown() is called to test whether the
-tested filesystem supports XFS_IOC_GOINGDOWN ioctl or not, a piece
-of C code snippet in src/t_open_tmpfiles.c is used to shutdown the
-filesysetm, rather than calling the corresponding helper function
-_scratch_shutdown().
+*OH*, it escaped my notice that _require_scratch_shutdown tests shutting
+down the legs that overlayfs stands on, without testing the overlayfs
+mount itself.  Sorry about that, and thanks for pointing that out.
 
-Let me explain it clearly:
+Hmm, well, this test is really about creating a bunch of temp files on
+SCRATCH_MNT and then shutting down the *SCRATCH_MNT* to see how it deals
+with that.  I'm not sure why the _require helper special-cases overlayfs
+to test something other than SCRATCH_MNT, so I think we (or I) need
+clarification about why the helper does that, or possibly just a new
+_require helper that actually checks SCRATCH_MNT itself.
 
-1. suppose the config is
+TLDR: I thought that if _require_scratch_shutdown didn't stop the test
+then it was ok for any program to use the shutdown ioctl on the scratch
+mount, and was surprised when it didn't do this for overlayfs.
 
-```
-export TEST_DEV=/dev/vdb
-export TEST_DIR=/mnt/test
-export SCRATCH_DEV=/dev/vdc
-export SCRATCH_MNT=/mnt/scratch
-```
+--D
 
-2. When running "./check -overlay generic/530", the scratch device,
-/dev/vdc is mounted on /mnt/scratch, and the overlay filesystem is
-mounted on /mnt/scratch/mnt using the follwing command
-
-```
-mount -t overlay -o lowerdir=/mnt/scratch/ovl-lower \
--o upperdir=/mnt/scratch/ovl-upper/ -o workdir=/mnt/scratch/ovl-work/ \
-overlay /mnt/scratch/ovl-mnt
-```
-
-3. In this case, _require_scratch_shutdown() will inspect whether the
-underlying upper system, that is **/mnt/scratch/**, supports shutdown
-feature or not. In my test, the underlying system of overlay (that is
-/dev/vdc) is ext4, and thus it passes the _require_scratch_shutdown
-test.
-
-4. However, the C code executing the shutdown action in t_open_tmpfiles.c
-actually execute XFS_IOC_GOINGDOWN ioctl on the mount point of overlay
-filesystem, that is **/mnt/scratch/ovl-mnt**. Since overlay doesn't support
-XFS_IOC_GOINGDOWN ioctl, it fails naturally.
-
-5. So we should use _scratch_shutdown() to shutdown if we have used
-_require_scratch_shutdown
-
-As for the solution to fix the failure, I temporarily move the shutdown
-action from t_open_tmpfiles into generic/530 as the workaround. How would
-you think @Darrick? Maybe there is a better solution but I'm not sure.
-
-thx
-
-Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
----
- tests/generic/530 | 4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
-
-diff --git a/tests/generic/530 b/tests/generic/530
-index b0d188b..56c6d32 100755
---- a/tests/generic/530
-+++ b/tests/generic/530
-@@ -49,7 +49,9 @@ ulimit -n $max_files
- 
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-+$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-+_scratch_shutdown -f
-+
- 
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
--- 
-1.8.3.1
+> thx
+> 
+> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
+> ---
+>  tests/generic/530 | 4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/530 b/tests/generic/530
+> index b0d188b..56c6d32 100755
+> --- a/tests/generic/530
+> +++ b/tests/generic/530
+> @@ -49,7 +49,9 @@ ulimit -n $max_files
+>  
+>  # Open a lot of unlinked files
+>  echo create >> $seqres.full
+> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
+> +$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
+> +_scratch_shutdown -f
+> +
+>  
+>  # Unmount to prove that we can clean it all
+>  echo umount >> $seqres.full
+> -- 
+> 1.8.3.1
+> 
