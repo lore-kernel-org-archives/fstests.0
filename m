@@ -1,95 +1,93 @@
-Received: from mail-yw1-f65.google.com ([209.85.161.65]:35586 "EHLO
-        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726259AbfEMGDR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 13 May 2019 02:03:17 -0400
-Received: by mail-yw1-f65.google.com with SMTP id n188so10105993ywe.2
-        for <fstests@vger.kernel.org>; Sun, 12 May 2019 23:03:17 -0700 (PDT)
+Received: from mail-pf1-f194.google.com ([209.85.210.194]:40441 "EHLO
+        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726100AbfELMWB (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 May 2019 08:22:01 -0400
+Date: Sun, 12 May 2019 20:21:52 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [RFC PATCH 1/7] common/encrypt: introduce helpers for
+ set_encpolicy and get_encpolicy
+Message-ID: <20190512122152.GI15846@desktop>
+References: <20190426204153.101861-1-ebiggers@kernel.org>
+ <20190426204153.101861-2-ebiggers@kernel.org>
 MIME-Version: 1.0
-References: <20181203064256.26768-1-david@fromorbit.com> <20181203064256.26768-4-david@fromorbit.com>
- <CAOQ4uxgddSnVGC6+JmpiseAGKcKVjSq6nYOD4tAMUx5y8Yx3XA@mail.gmail.com>
- <20181203081743.GX19305@dastard> <CAOQ4uxjhADY2Eb8+ubcs-F5xqJvHptQyx0W0=Dfa=oUodsbWxA@mail.gmail.com>
-In-Reply-To: <CAOQ4uxjhADY2Eb8+ubcs-F5xqJvHptQyx0W0=Dfa=oUodsbWxA@mail.gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Mon, 13 May 2019 09:03:05 +0300
-Message-ID: <CAOQ4uxhzOK-5UecV8fJsYrzW=6Re445XJixSOHHaB2xY8EFrng@mail.gmail.com>
-Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190426204153.101861-2-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests <fstests@vger.kernel.org>, Olga Kornievskaia <kolga@netapp.com>, "Darrick J. Wong" <darrick.wong@oracle.com>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 3, 2018 at 11:22 AM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> On Mon, Dec 3, 2018 at 10:17 AM Dave Chinner <david@fromorbit.com> wrote:
-> >
-> > On Mon, Dec 03, 2018 at 09:25:19AM +0200, Amir Goldstein wrote:
-> > > On Mon, Dec 3, 2018 at 8:43 AM Dave Chinner <david@fromorbit.com> wrote:
-> > > >
-> > > > From: Dave Chinner <dchinner@redhat.com>
-> > > >
-> > > > Test that copy_file_range will return the correct errors for various
-> > > > error conditions and boundary constraints.
-> > ....
-> > >
-> > > All the test cases above check for bugs, which I presume your kernel patch
-> > > series is aimed at fixing(?)
-> >
-> > Yes. Document the API (I have a man page patch) write the tests to
-> > exercise correct API behaviour (these patches), fix the API
-> > implementation until the tests start passing (still to be posted as
-> > I wait for these to hit mailing list archives so I can point at
-> > them).
-> >
-> > > This one last test case tests for new functionality that is not
-> > > currently available
-> > > for any filesystem in upstream kernel.
-> >
-> > Yup.
-> >
-> > > Does your kernel patch set also add this functionality to xfs? to generic?
-> >
-> > Yes and yes. overlay works, too, but I gave up caring about it
-> > because it doesn't support the ioctls xfs_io uses in this test to
-> > change open file state....
->
-> Oh, not a problem. I can add FS_IOC_FS[SG]ETXATTR
-> to the overlayfs white list of ioctls.
->
-> That raises the issue that the test is missing:
->
-> _require_xfs_io_command "chattr" "-i"
->
-> and the chattr -i in cleanup().
->
-> >
-> > > IMO, it would be better to split this test case for new functionality to a new
-> > > test, so that this one can pass on stable kernels once all the bug
-> > > fixes have been
-> > > applied.
-> >
-> > Whatever. I'm tired, I've already put in 13 hours on this today and
-> > I'm on the back of four 100+ hour weeks working on nothing but this
-> > broken heap of crap.
-> >
-> > Take it or leave it, because I'm just about burnt out on this
-> > right now...
-> >
->
-> I hear you.
->
-> I personally have no problem with declaring the cross fs copy_range an
-> interface bug fix that can also go to stable. It's probably going to be harder
-> to get your interface fixes without it.
->
-> I will leave the call about insisting on separate test to Eryu.
-> If you want me to submit that separate test, I can do that.
->
+On Fri, Apr 26, 2019 at 01:41:47PM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
+> 
+> For conciseness in tests, add helper functions that wrap the xfs_io
+> commands 'set_encpolicy' and 'get_encpolicy'.  Then update all
+> encryption tests to use them.
+> 
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  common/encrypt        | 34 ++++++++++++++++++++++++++++++++--
+>  tests/ext4/024        |  3 +--
+>  tests/generic/395     | 28 +++++++++++++---------------
+>  tests/generic/395.out |  2 +-
+>  tests/generic/396     | 15 +++++++--------
+>  tests/generic/397     |  3 +--
+>  tests/generic/398     |  5 ++---
+>  tests/generic/399     |  3 +--
+>  tests/generic/419     |  3 +--
+>  tests/generic/421     |  3 +--
+>  tests/generic/429     |  3 +--
+>  tests/generic/435     |  3 +--
+>  tests/generic/440     |  5 ++---
+>  13 files changed, 64 insertions(+), 46 deletions(-)
+> 
+> diff --git a/common/encrypt b/common/encrypt
+> index 1b10aa71..54d873fa 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -38,8 +38,7 @@ _require_scratch_encryption()
+>  	# presence of /sys/fs/ext4/features/encryption, but this is broken on
+>  	# some older kernels and is ext4-specific anyway.)
+>  	mkdir $SCRATCH_MNT/tmpdir
+> -	if $XFS_IO_PROG -c set_encpolicy $SCRATCH_MNT/tmpdir \
+> -		2>&1 >>$seqres.full | \
+> +	if _set_encpolicy $SCRATCH_MNT/tmpdir 2>&1 >>$seqres.full | \
+>  		egrep -q 'Inappropriate ioctl for device|Operation not supported'
+>  	then
+>  		_notrun "kernel does not support $FSTYP encryption"
+> @@ -175,3 +174,34 @@ _revoke_encryption_key()
+>  	local keyid=$($KEYCTL_PROG search @s logon $FSTYP:$keydesc)
+>  	$KEYCTL_PROG revoke $keyid >>$seqres.full
+>  }
+> +
+> +# Set an encryption policy on the specified directory.
+> +_set_encpolicy()
+> +{
+> +	local dir=$1
+> +	shift
+> +
+> +	$XFS_IO_PROG -c "set_encpolicy $*" "$dir"
+> +}
+> +
+> +_user_do_set_encpolicy()
+> +{
+> +	local dir=$1
+> +	shift
+> +
+> +	_user_do "$XFS_IO_PROG -c \"set_encpolicy $*\" \"$dir\""
+> +}
+> +
+> +_require_get_encpolicy()
+> +{
+> +	_require_xfs_io_command "get_encpolicy"
+> +}
 
-Getting back to this (how time flies...)
+This doesn't seem necessary to me, just calling
 
-Dave, if you don't mind I am going to re-post your tests splitting the
-cross device copy test, since Darrick also echoed this request.
+_require_xfs_io_command "get_encpolicy"
 
-Cheers,
-Amir.
+explicitly is fine to me.
+
+Thanks,
+Eryu
