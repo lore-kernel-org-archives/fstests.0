@@ -1,253 +1,106 @@
-Received: from out30-42.freemail.mail.aliyun.com ([115.124.30.42]:37211 "EHLO
-        out30-42.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726806AbfEJDSE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 May 2019 23:18:04 -0400
-From: Jeffle Xu <jefflexu@linux.alibaba.com>
-Subject: [PATCH v2] generic/530: fix shutdown failure of generic/530 in overlay
-Date: Fri, 10 May 2019 11:17:41 +0800
-Message-Id: <1557458261-1878-1-git-send-email-jefflexu@linux.alibaba.com>
-In-Reply-To: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
-References: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
+Received: from mail-pl1-f171.google.com ([209.85.214.171]:40025 "EHLO
+        mail-pl1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726540AbfELNHu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 12 May 2019 09:07:50 -0400
+Received: by mail-pl1-f171.google.com with SMTP id b3so5042555plr.7
+        for <fstests@vger.kernel.org>; Sun, 12 May 2019 06:07:50 -0700 (PDT)
+Message-ID: <5cd81aa5.1c69fb81.430cc.187f@mx.google.com>
+Date: Sun, 12 May 2019 21:07:42 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to d123585ea0d0
+MIME-Version: 1.0
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="40Gt4VguYL9l"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, cgxu519@icloud.com, amir73il@gmail.com, caspar@linux.alibaba.com, Jeffle Xu <jefflexu@linux.alibaba.com>
 List-ID: <fstests@vger.kernel.org>
 
-Testcases are recommended to use  _require_scratch_shutdown()
-and _scratch_shutdown() pair helper function to test and execute
-shutdown.
 
-generic/530 formmerly used _require_scratch_shutdown() to test
-whether the filesystem supports shutdown or not, while executed
-the shutdown action in a raw binary (src/t_open_tmpfiles) rather
-than the recommended _scratch_shutdown() helper. This will cause
-a "shutdown: Inappropriate ioctl for device" error message when
-testing overlay filesystem.
+--40Gt4VguYL9l
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-This patch simply move the shutdown action from the raw binary
-into the packaged _scratch_shutdown() helper. That is, we remove
-the "shutdown" interface of t_open_tmpfiles.c and call
-_scratch_shutdown() in genric/530 and xfs/501.
+Hi all,
 
-I did some tests on this patch. ext4 and overlay pass generic/530
-and generic/531. However there is some problem with xfs, even in
-the original version (that is, without this patch applied).
+The master branch of the xfstests repository at:
 
-When I run "./check xfs/501" or "./check xfs/502" with xfs, I get
-the follwing error message
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
-```
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 iZuf6h1kfgutxc3el68z2lZ 4.19.36+
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/vdc
-MOUNT_OPTIONS -- /dev/vdc /mnt/scratch
+have just been updated. Along with other random fixes, this update mainly adds
+two new generic tests and fixes test failures on XFS when reflink is enabled by
+default. Thanks to Amir Goldstein and Filipe Manana for reviewing the patches!
 
-xfs/501 [not run] XFS error injection iunlink_fallback unknown on this
-kernel.
-```
+generic/545 currently fails on overlayfs, and generic/546 fails on btrfs.
 
-And when I run "./check generic/530" or "./check generic/531" with
-xfs, I get the following error message
+Thanks,
+Eryu
 
-```
- ./check generic/530
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/x86_64 iZuf6h1kfgutxc3el68z2lZ 4.19.36+
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/vdc
-MOUNT_OPTIONS -- /dev/vdc /mnt/scratch
+The new head of the master branch is commit:
 
-generic/530 1s ...
-Message from syslogd@iZuf6h1kfgutxc3el68z2lZ at May 10 10:01:33 ...
- kernel:XFS: Assertion failed: VFS_I(ip)->i_nlink == 0, file:
-fs/xfs/xfs_log_recover.c, line: 5074
-```
+d123585ea0d0 xfs/294: calculate space to reserve for fragmentation test
 
-and the kernel just hangs
+New commits:
 
-```
-[   28.064762] XFS (vdc): Unmounting Filesystem
-[   28.114884] XFS (vdc): Mounting V5 Filesystem
-[   28.153505] XFS (vdc): Starting recovery (logdev: internal)
-[   28.191680] XFS: Assertion failed: VFS_I(ip)->i_nlink == 0, file:
-fs/xfs/xfs_log_recover.c, line: 5074
-[   28.193064] ------------[ cut here ]------------
-[   28.193655] kernel BUG at fs/xfs/xfs_message.c:102!
-[   28.194302] invalid opcode: 0000 [#1] SMP NOPTI
-[   28.195226] CPU: 13 PID: 2292 Comm: mount Not tainted 4.19.36+ #82
-[   28.196392] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996),
-BIOS rel-1.12.0-0-ga698c8995f-prebuilt.qemu.org 04/01/24
-[   28.198323] RIP: 0010:assfail+0x28/0x30
-[   28.198801] Code: c3 90 0f 1f 44 00 00 48 89 f1 41 89 d0 48 c7 c6 88
-e9 0a b5 48 89 fa 31 ff e8 84 fa ff ff 80 3d 55 e7 eea
-[   28.201330] RSP: 0018:ffffa23a8378fc90 EFLAGS: 00010202
-[   28.202009] RAX: 00000000ffffffea RBX: ffff903e2688bc00 RCX:
-0000000000000000
-[   28.202943] RDX: 00000000ffffffc0 RSI: 000000000000000a RDI:
-ffffffffb5067827
-[   28.203884] RBP: 0000000000000000 R08: 0000000000000000 R09:
-0000000000000000
-[   28.204815] R10: 0000000000000000 R11: f000000000000000 R12:
-0000000000000000
-[   28.205713] R13: 0000000000000000 R14: ffff903e2747a200 R15:
-0000000000000000
-[   28.206643] FS:  00007f828026d880(0000) GS:ffff903e3bb40000(0000)
-knlGS:0000000000000000
-[   28.207704] CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033
-[   28.208443] CR2: 00007f827f55f8f3 CR3: 0000000139f22006 CR4:
-00000000003606a0
-[   28.209370] DR0: 0000000000000000 DR1: 0000000000000000 DR2:
-0000000000000000
-[   28.210301] DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7:
-0000000000000400
-[   28.211231] Call Trace:
-[   28.211524]  xlog_recover_process_one_iunlink+0x122/0x150
-[   28.212224]  ? up+0x12/0x60
-[   28.212549]  xlog_recover_process_iunlinks.isra.28+0x70/0xa0
-[   28.213272]  xlog_recover_finish+0x33/0xa0
-[   28.213778]  xfs_log_mount_finish+0x6f/0x110
-[   28.214315]  xfs_mountfs+0x611/0x890
-[   28.214739]  xfs_fs_fill_super+0x463/0x620
-[   28.215245]  ? xfs_test_remount_options+0x60/0x60
-[   28.215833]  mount_bdev+0x170/0x1a0
-[   28.216266]  mount_fs+0x36/0x140
-```
+Darrick J. Wong (3):
+      [2fd273886b52] xfs: refactor minimum log size formatting code
+      [3f5941585839] xfs/216: always disable rmap and reflink when creating log size test fs
+      [d123585ea0d0] xfs/294: calculate space to reserve for fragmentation test
 
-Is there some indication?
+Jiufei Xue (1):
+      [80bac2129b06] generic: check CAP_LINUX_IMMUTABLE capability
 
--------------------------
-Following is the old commit message:
+Murphy Zhou (1):
+      [d349b37c113e] generic/532: do not break golden silence if attributes_mask is 0
 
-We got "shutdown: Inappropriate ioctl for device" when running
-"./check -overlay generic/530". The error message is due to the
-XFS_IOC_GOINGDOWN ioctl used in generic/530.
+Qu Wenruo (1):
+      [2bb2dd24cc9e] generic: do operations which doesn't take data space on full fs
 
-Though _require_scratch_shutdown() is called to test whether the
-tested filesystem supports XFS_IOC_GOINGDOWN ioctl or not, a piece
-of C code snippet in src/t_open_tmpfiles.c is used to shutdown the
-filesysetm, rather than calling the corresponding helper function
-_scratch_shutdown().
+Xiao Yang (1):
+      [9820d643ea37] ext4/018: Match the value of File ACL accurately
 
-Let me explain it clearly:
 
-1. suppose the config is
+Code Diffstat:
 
-```
-export TEST_DEV=/dev/vdb
-export TEST_DIR=/mnt/test
-export SCRATCH_DEV=/dev/vdc
-export SCRATCH_MNT=/mnt/scratch
-```
+ common/config         |  1 +
+ common/xfs            | 36 ++++++++++++++++++++++
+ tests/ext4/018        |  2 +-
+ tests/generic/532     |  1 -
+ tests/generic/545     | 74 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/545.out |  9 ++++++
+ tests/generic/546     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/546.out |  3 ++
+ tests/generic/group   |  2 ++
+ tests/xfs/104         |  3 +-
+ tests/xfs/119         |  3 +-
+ tests/xfs/216         |  8 ++++-
+ tests/xfs/291         |  3 +-
+ tests/xfs/294         | 11 ++++---
+ tests/xfs/295         |  5 +--
+ tests/xfs/297         |  3 +-
+ 16 files changed, 234 insertions(+), 14 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
 
-2. When running "./check -overlay generic/530", the scratch device,
-/dev/vdc is mounted on /mnt/scratch, and the overlay filesystem is
-mounted on /mnt/scratch/mnt using the follwing command
+--40Gt4VguYL9l
+Content-Type: application/pgp-signature; name="signature.asc"
 
-```
-mount -t overlay -o lowerdir=/mnt/scratch/ovl-lower \
--o upperdir=/mnt/scratch/ovl-upper/ -o workdir=/mnt/scratch/ovl-work/ \
-overlay /mnt/scratch/ovl-mnt
-```
+-----BEGIN PGP SIGNATURE-----
 
-3. In this case, _require_scratch_shutdown() will inspect whether the
-underlying upper system, that is **/mnt/scratch/**, supports shutdown
-feature or not. In my test, the underlying system of overlay (that is
-/dev/vdc) is ext4, and thus it passes the _require_scratch_shutdown
-test.
+iQIcBAABAgAGBQJc2BpaAAoJECZSqilcj+djfUQP/R4b/QQEfsBKNB+rvRW/ahrr
+uu2/LLM1oRCWpsRoHpHEhJmUs1icrjNhu8tJfN+yjkbW2buG9u87664N8np2g2Bh
+HraDbuHKjRkNS8FzJaWw781+TsrXuMLR64X3KJDsS+pUa2tw34PPEX6tUXOZiFmj
+6qrKATT9uIhgN7ZNKXl9NWM2jSRZy2skuvTTWnMe2JUq0D3giz9rS9IYgix2Eogs
+eMTyYhYuhaz8nHHHra1d+Ahb0auBh9ilf3vzE9rjnQz2sMylL5jdN40pvVKbE1vC
+OVn3E5AMQKbLP8qGFyX3v2q9oyovWPclDFvDWc+ag1M9greAR4wavlWb0/mvkXzh
+9xMahR5QemArqmqcDzqnHmMLcexorqoVy2z5zW+pTqKt96FQ1godmXRCUyDRHxKL
+tFeFrO27+Z90pBR+f/eUFYcD7KxgIgCVyXcLrPXZLnu6Ty7sz/d+mpL82stl2emW
+kCNEpnvRq304cn6jX2j6fx0dpDozsZIpGpMHNebqeM7nUDWi/v9pTmMh/4Y8aG45
+4XReglpYQLt59DG1B6Jb2j638cIhQ+quDjQlZpJGxjDROR271ZQ0lkLER33KD5eL
+psf3JPEYcpXIXVWOUth78cTzIVRacvyCAXh8A1xN81vVxrQ21utHtbdx2U8gqxSo
+6phBdy6y21FiSl7Oxu/t
+=H4ot
+-----END PGP SIGNATURE-----
 
-4. However, the C code executing the shutdown action in t_open_tmpfiles.c
-actually execute XFS_IOC_GOINGDOWN ioctl on the mount point of overlay
-filesystem, that is **/mnt/scratch/ovl-mnt**. Since overlay doesn't support
-XFS_IOC_GOINGDOWN ioctl, it fails naturally.
-
-5. So we should use _scratch_shutdown() to shutdown if we have used
-_require_scratch_shutdown
-
-As for the solution to fix the failure, I temporarily move the shutdown
-action from t_open_tmpfiles into generic/530 as the workaround. How would
-you think @Darrick? Maybe there is a better solution but I'm not sure.
-
-thx
-
-Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
----
- src/t_open_tmpfiles.c | 19 -------------------
- tests/generic/530     |  4 +++-
- tests/xfs/501         |  4 +++-
- 3 files changed, 6 insertions(+), 21 deletions(-)
-
-diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
-index da9390f..0393c6b 100644
---- a/src/t_open_tmpfiles.c
-+++ b/src/t_open_tmpfiles.c
-@@ -24,7 +24,6 @@ static int min_fd = -1;
- static int max_fd = -1;
- static unsigned int nr_opened = 0;
- static float start_time;
--static int shutdown_fs = 0;
- 
- void clock_time(float *time)
- {
-@@ -69,22 +68,6 @@ void die(void)
- 				end_time - start_time);
- 		fflush(stdout);
- 
--		if (shutdown_fs) {
--			/*
--			 * Flush the log so that we have to process the
--			 * unlinked inodes the next time we mount.
--			 */
--			int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
--			int ret;
--
--			ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
--			if (ret) {
--				perror("shutdown");
--				exit(2);
--			}
--			exit(0);
--		}
--
- 		clock_time(&start_time);
- 		for (fd = min_fd; fd <= max_fd; fd++)
- 			close(fd);
-@@ -160,8 +143,6 @@ int main(int argc, char *argv[])
- 		if (ret)
- 			perror(argv[1]);
- 	}
--	if (argc > 2 && !strcmp(argv[2], "shutdown"))
--		shutdown_fs = 1;
- 
- 	clock_time(&start_time);
- 	while (1)
-diff --git a/tests/generic/530 b/tests/generic/530
-index b0d188b..56c6d32 100755
---- a/tests/generic/530
-+++ b/tests/generic/530
-@@ -49,7 +49,9 @@ ulimit -n $max_files
- 
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-+$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-+_scratch_shutdown -f
-+
- 
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
-diff --git a/tests/xfs/501 b/tests/xfs/501
-index 974f341..4be9997 100755
---- a/tests/xfs/501
-+++ b/tests/xfs/501
-@@ -54,7 +54,9 @@ ulimit -n $max_files
- 
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-+$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-+_scratch_shutdown -f
-+
- 
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
--- 
-1.8.3.1
+--40Gt4VguYL9l--
