@@ -1,55 +1,89 @@
-Received: from mx1.redhat.com ([209.132.183.28]:55840 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:52246 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727054AbfEMBtM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 12 May 2019 21:49:12 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 7C8905AFE9
-        for <fstests@vger.kernel.org>; Mon, 13 May 2019 01:49:12 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-112.pek2.redhat.com [10.72.12.112])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 3D13D60856
-        for <fstests@vger.kernel.org>; Mon, 13 May 2019 01:49:10 +0000 (UTC)
+        id S1727054AbfEMBt4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 12 May 2019 21:49:56 -0400
 From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH] xfstests: aio random write and verify stress test
-Date: Mon, 13 May 2019 09:49:04 +0800
-Message-Id: <20190513014904.4275-1-zlang@redhat.com>
+Subject: [PATCH] generic: test statfs on project quota directory
+Date: Mon, 13 May 2019 09:49:51 +0800
+Message-Id: <20190513014951.4357-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-We found some AIO write related bugs recently, so I think a AIO
-random write test is needed. By the new aio-aio-write-verify.c tool,
-we can do this easily.
+There's a bug on xfs cause statfs get negative f_ffree value from
+a project quota directory. It's fixed by "de7243057 fs/xfs: fix
+f_ffree value for statfs when project quota is set". So add statfs
+testing on project quota block and inode count limit.
+
+For testing foreign fs quota, change _qmount() function, turn on
+project if quotaon support.
 
 Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
 
-Long time passed, re-send this to review again.
+Hi,
+
+(Long time passed, re-send this patch again to get reviewing)
+
+There's one thing I don't understand, so CC ext4 mail list. Please
+feel free to reply, if anyone knows that:
+
+$ mkfs.ext4 $SCRATCH_DEV
+$ tune2fs -O quota,project $SCRATCH_DEV
+$ mount $SCRATCH_DEV $SCRATCH_MNT -o prjquota
+$ quotaon -P $SCRATCH_MNT
+$ mkdir $SCRATCH_MNT/t
+$ xfs_quota -f -x -c "project -p $SCRATCH_MNT/t -s 42" $SCRATCH_MNT
+$ xfs_quota -f -x -c "limit -p bsoft=100m answer" $SCRATCH_MNT
+$ df -k $SCRATCH_MNT/t
+Filesystem    1K-blocks  Used Available Use% Mounted on
+SCRATCH_DEV    102400     4    102396   1% SCRATCH_MNT
+
+On XFS, the 'Used' field always shows '0'. But why ext4 always has
+more 4k? Is it a bug or expected.
 
 Thanks,
 Zorro
 
- tests/generic/998     | 87 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/998.out |  2 +
- tests/generic/group   |  1 +
- 3 files changed, 90 insertions(+)
- create mode 100755 tests/generic/998
- create mode 100644 tests/generic/998.out
 
-diff --git a/tests/generic/998 b/tests/generic/998
+ common/quota          |  4 +++
+ tests/generic/999     | 74 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/999.out |  3 ++
+ tests/generic/group   |  1 +
+ 4 files changed, 82 insertions(+)
+ create mode 100755 tests/generic/999
+ create mode 100644 tests/generic/999.out
+
+diff --git a/common/quota b/common/quota
+index f19f81a1..315df8cb 100644
+--- a/common/quota
++++ b/common/quota
+@@ -200,6 +200,10 @@ _qmount()
+     if [ "$FSTYP" != "xfs" ]; then
+         quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+         quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
++	# try to turn on project quota if it's supported
++	if quotaon --help 2>&1 | grep -q '\-\-project'; then
++		quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
++	fi
+     fi
+     chmod ugo+rwx $SCRATCH_MNT
+ }
+diff --git a/tests/generic/999 b/tests/generic/999
 new file mode 100755
-index 00000000..54b79691
+index 00000000..555341f1
 --- /dev/null
-+++ b/tests/generic/998
-@@ -0,0 +1,87 @@
++++ b/tests/generic/999
+@@ -0,0 +1,74 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test No. 998
++# FS QA Test No. 999
 +#
-+# Randomly direct AIO write&verify stress test
++# Test statfs when project quota is set.
++# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -63,12 +97,14 @@ index 00000000..54b79691
 +_cleanup()
 +{
 +	cd /
++	_scratch_unmount
 +	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/quota
 +
 +# remove previous $seqres.full before test
 +rm -f $seqres.full
@@ -77,76 +113,60 @@ index 00000000..54b79691
 +_supported_fs generic
 +_supported_os Linux
 +_require_scratch
-+_require_aiodio aio-dio-write-verify
++_require_quota
++_require_xfs_quota_foreign
 +
-+_scratch_mkfs > $seqres.full 2>&1
-+_scratch_mount
++_scratch_mkfs >/dev/null 2>&1
++_scratch_enable_pquota
++_qmount_option "prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
 +
-+localfile=$SCRATCH_MNT/testfile
-+diosize=`_min_dio_alignment $SCRATCH_DEV`
++# Create a directory to be project object, and create a file to take 64k space
++mkdir $SCRATCH_MNT/t
++$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
 +
-+# The maximum write size and offset are both 32k diosize. So the maximum
-+# file size will be (32 * 2)k
-+free_size_k=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $4}'`
-+max_io_size_b=$((32 * 1024))
-+if [ $max_io_size_b -gt $((free_size_k * 1024 / 2 / diosize)) ]; then
-+	max_io_size_b=$((free_size_k * 1024 / 2 / diosize))
-+fi
++# Setup temporary replacements for /etc/projects and /etc/projid
++cat >$tmp.projects <<EOF
++42:$SCRATCH_MNT/t
++EOF
 +
-+do_test()
-+{
-+	local num_oper
-+	local oper_list=""
-+	local size
-+	local off
-+	local truncsize
++cat >$tmp.projid <<EOF
++answer:42
++EOF
 +
-+	# the number of AIO write operation
-+	num_oper=$((RANDOM % 64 + 1))
++quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
++$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
++$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
 +
-+	for ((i=0; i<num_oper; i++)); do
-+		size=$(((RANDOM % max_io_size_b + 1) * diosize))
-+		off=$((RANDOM % max_io_size_b * diosize))
-+		oper_list="$oper_list -a size=$size,off=$off"
-+	done
-+	truncsize=$(((RANDOM * diosize + RANDOM % diosize) % max_io_size_b))
-+
-+	$AIO_TEST -t $truncsize $oper_list $localfile
-+	if [ $? -ne 0 ];then
-+		echo "$AIO_TEST -t $truncsize $oper_list $localfile"
-+		echo "==========^^ Fail ^^=========="
-+	fi
-+}
-+
-+testimes=$((LOAD_FACTOR * 100))
-+while [ $testimes -gt 0 ]; do
-+	echo > $localfile
-+	do_test
-+	((testimes--))
-+done
-+
-+echo "Silence is golden"
++# The itotal and size should be 53 and 102400(k), as above project quota limit.
++# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
++# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
++# 6[48] at the end.
++df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
++	_filter_scratch | _filter_spaces | \
++	sed -e "/SCRATCH_MNT/s/6[48]/N/"
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/998.out b/tests/generic/998.out
+diff --git a/tests/generic/999.out b/tests/generic/999.out
 new file mode 100644
-index 00000000..d2679ae0
+index 00000000..1bebabd4
 --- /dev/null
-+++ b/tests/generic/998.out
-@@ -0,0 +1,2 @@
-+QA output created by 998
-+Silence is golden
++++ b/tests/generic/999.out
+@@ -0,0 +1,3 @@
++QA output created by 999
++File Inodes IUsed 1K-blocks Used
++SCRATCH_MNT/t 53 2 102400 N
 diff --git a/tests/generic/group b/tests/generic/group
-index 0c3016fd..36b180c3 100644
+index 9f4845c6..35da10a5 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -540,4 +540,5 @@
- 535 auto quick log
- 536 auto quick rw shutdown
+@@ -542,3 +542,4 @@
  537 auto quick trim
-+998 auto stress aio
- 999 auto quick aio
+ 538 auto quick aio
+ 539 auto quick punch seek
++999 auto quick quota
 -- 
 2.17.2
