@@ -1,111 +1,95 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:58088 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726219AbfEIFom (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 9 May 2019 01:44:42 -0400
-Date: Wed, 8 May 2019 22:44:35 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/530: fix shutdown failure of generic/530 in
- overlay
-Message-ID: <20190509054435.GG5352@magnolia>
-References: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
+Received: from mail-yw1-f65.google.com ([209.85.161.65]:35586 "EHLO
+        mail-yw1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726259AbfEMGDR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 13 May 2019 02:03:17 -0400
+Received: by mail-yw1-f65.google.com with SMTP id n188so10105993ywe.2
+        for <fstests@vger.kernel.org>; Sun, 12 May 2019 23:03:17 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1557379616-13850-1-git-send-email-jefflexu@linux.alibaba.com>
+References: <20181203064256.26768-1-david@fromorbit.com> <20181203064256.26768-4-david@fromorbit.com>
+ <CAOQ4uxgddSnVGC6+JmpiseAGKcKVjSq6nYOD4tAMUx5y8Yx3XA@mail.gmail.com>
+ <20181203081743.GX19305@dastard> <CAOQ4uxjhADY2Eb8+ubcs-F5xqJvHptQyx0W0=Dfa=oUodsbWxA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxjhADY2Eb8+ubcs-F5xqJvHptQyx0W0=Dfa=oUodsbWxA@mail.gmail.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 13 May 2019 09:03:05 +0300
+Message-ID: <CAOQ4uxhzOK-5UecV8fJsYrzW=6Re445XJixSOHHaB2xY8EFrng@mail.gmail.com>
+Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Jeffle Xu <jefflexu@linux.alibaba.com>
-Cc: fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests <fstests@vger.kernel.org>, Olga Kornievskaia <kolga@netapp.com>, "Darrick J. Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 09, 2019 at 01:26:56PM +0800, Jeffle Xu wrote:
-> We got "shutdown: Inappropriate ioctl for device" when running
-> "./check -overlay generic/530". The error message is due to the
-> XFS_IOC_GOINGDOWN ioctl used in generic/530.
-> 
-> Though _require_scratch_shutdown() is called to test whether the
-> tested filesystem supports XFS_IOC_GOINGDOWN ioctl or not, a piece
-> of C code snippet in src/t_open_tmpfiles.c is used to shutdown the
-> filesysetm, rather than calling the corresponding helper function
-> _scratch_shutdown().
-> 
-> Let me explain it clearly:
-> 
-> 1. suppose the config is
-> 
-> ```
-> export TEST_DEV=/dev/vdb
-> export TEST_DIR=/mnt/test
-> export SCRATCH_DEV=/dev/vdc
-> export SCRATCH_MNT=/mnt/scratch
-> ```
-> 
-> 2. When running "./check -overlay generic/530", the scratch device,
-> /dev/vdc is mounted on /mnt/scratch, and the overlay filesystem is
-> mounted on /mnt/scratch/mnt using the follwing command
-> 
-> ```
-> mount -t overlay -o lowerdir=/mnt/scratch/ovl-lower \
-> -o upperdir=/mnt/scratch/ovl-upper/ -o workdir=/mnt/scratch/ovl-work/ \
-> overlay /mnt/scratch/ovl-mnt
-> ```
-> 
-> 3. In this case, _require_scratch_shutdown() will inspect whether the
-> underlying upper system, that is **/mnt/scratch/**, supports shutdown
-> feature or not. In my test, the underlying system of overlay (that is
-> /dev/vdc) is ext4, and thus it passes the _require_scratch_shutdown
-> test.
-> 
-> 4. However, the C code executing the shutdown action in t_open_tmpfiles.c
-> actually execute XFS_IOC_GOINGDOWN ioctl on the mount point of overlay
-> filesystem, that is **/mnt/scratch/ovl-mnt**. Since overlay doesn't support
-> XFS_IOC_GOINGDOWN ioctl, it fails naturally.
-> 
-> 5. So we should use _scratch_shutdown() to shutdown if we have used
-> _require_scratch_shutdown
-> 
-> As for the solution to fix the failure, I temporarily move the shutdown
-> action from t_open_tmpfiles into generic/530 as the workaround. How would
-> you think @Darrick? Maybe there is a better solution but I'm not sure.
+On Mon, Dec 3, 2018 at 11:22 AM Amir Goldstein <amir73il@gmail.com> wrote:
+>
+> On Mon, Dec 3, 2018 at 10:17 AM Dave Chinner <david@fromorbit.com> wrote:
+> >
+> > On Mon, Dec 03, 2018 at 09:25:19AM +0200, Amir Goldstein wrote:
+> > > On Mon, Dec 3, 2018 at 8:43 AM Dave Chinner <david@fromorbit.com> wrote:
+> > > >
+> > > > From: Dave Chinner <dchinner@redhat.com>
+> > > >
+> > > > Test that copy_file_range will return the correct errors for various
+> > > > error conditions and boundary constraints.
+> > ....
+> > >
+> > > All the test cases above check for bugs, which I presume your kernel patch
+> > > series is aimed at fixing(?)
+> >
+> > Yes. Document the API (I have a man page patch) write the tests to
+> > exercise correct API behaviour (these patches), fix the API
+> > implementation until the tests start passing (still to be posted as
+> > I wait for these to hit mailing list archives so I can point at
+> > them).
+> >
+> > > This one last test case tests for new functionality that is not
+> > > currently available
+> > > for any filesystem in upstream kernel.
+> >
+> > Yup.
+> >
+> > > Does your kernel patch set also add this functionality to xfs? to generic?
+> >
+> > Yes and yes. overlay works, too, but I gave up caring about it
+> > because it doesn't support the ioctls xfs_io uses in this test to
+> > change open file state....
+>
+> Oh, not a problem. I can add FS_IOC_FS[SG]ETXATTR
+> to the overlayfs white list of ioctls.
+>
+> That raises the issue that the test is missing:
+>
+> _require_xfs_io_command "chattr" "-i"
+>
+> and the chattr -i in cleanup().
+>
+> >
+> > > IMO, it would be better to split this test case for new functionality to a new
+> > > test, so that this one can pass on stable kernels once all the bug
+> > > fixes have been
+> > > applied.
+> >
+> > Whatever. I'm tired, I've already put in 13 hours on this today and
+> > I'm on the back of four 100+ hour weeks working on nothing but this
+> > broken heap of crap.
+> >
+> > Take it or leave it, because I'm just about burnt out on this
+> > right now...
+> >
+>
+> I hear you.
+>
+> I personally have no problem with declaring the cross fs copy_range an
+> interface bug fix that can also go to stable. It's probably going to be harder
+> to get your interface fixes without it.
+>
+> I will leave the call about insisting on separate test to Eryu.
+> If you want me to submit that separate test, I can do that.
+>
 
-*OH*, it escaped my notice that _require_scratch_shutdown tests shutting
-down the legs that overlayfs stands on, without testing the overlayfs
-mount itself.  Sorry about that, and thanks for pointing that out.
+Getting back to this (how time flies...)
 
-Hmm, well, this test is really about creating a bunch of temp files on
-SCRATCH_MNT and then shutting down the *SCRATCH_MNT* to see how it deals
-with that.  I'm not sure why the _require helper special-cases overlayfs
-to test something other than SCRATCH_MNT, so I think we (or I) need
-clarification about why the helper does that, or possibly just a new
-_require helper that actually checks SCRATCH_MNT itself.
+Dave, if you don't mind I am going to re-post your tests splitting the
+cross device copy test, since Darrick also echoed this request.
 
-TLDR: I thought that if _require_scratch_shutdown didn't stop the test
-then it was ok for any program to use the shutdown ioctl on the scratch
-mount, and was surprised when it didn't do this for overlayfs.
-
---D
-
-> thx
-> 
-> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
-> ---
->  tests/generic/530 | 4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
-> 
-> diff --git a/tests/generic/530 b/tests/generic/530
-> index b0d188b..56c6d32 100755
-> --- a/tests/generic/530
-> +++ b/tests/generic/530
-> @@ -49,7 +49,9 @@ ulimit -n $max_files
->  
->  # Open a lot of unlinked files
->  echo create >> $seqres.full
-> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-> +$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-> +_scratch_shutdown -f
-> +
->  
->  # Unmount to prove that we can clean it all
->  echo umount >> $seqres.full
-> -- 
-> 1.8.3.1
-> 
+Cheers,
+Amir.
