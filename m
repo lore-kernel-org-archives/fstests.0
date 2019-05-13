@@ -1,106 +1,152 @@
-Received: from mail-pl1-f171.google.com ([209.85.214.171]:40025 "EHLO
-        mail-pl1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726540AbfELNHu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 12 May 2019 09:07:50 -0400
-Received: by mail-pl1-f171.google.com with SMTP id b3so5042555plr.7
-        for <fstests@vger.kernel.org>; Sun, 12 May 2019 06:07:50 -0700 (PDT)
-Message-ID: <5cd81aa5.1c69fb81.430cc.187f@mx.google.com>
-Date: Sun, 12 May 2019 21:07:42 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to d123585ea0d0
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="40Gt4VguYL9l"
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:55840 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727054AbfEMBtM (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Sun, 12 May 2019 21:49:12 -0400
+Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 7C8905AFE9
+        for <fstests@vger.kernel.org>; Mon, 13 May 2019 01:49:12 +0000 (UTC)
+Received: from localhost.localdomain.com (ovpn-12-112.pek2.redhat.com [10.72.12.112])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id 3D13D60856
+        for <fstests@vger.kernel.org>; Mon, 13 May 2019 01:49:10 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfstests: aio random write and verify stress test
+Date: Mon, 13 May 2019 09:49:04 +0800
+Message-Id: <20190513014904.4275-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+We found some AIO write related bugs recently, so I think a AIO
+random write test is needed. By the new aio-aio-write-verify.c tool,
+we can do this easily.
 
---40Gt4VguYL9l
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Along with other random fixes, this update mainly adds
-two new generic tests and fixes test failures on XFS when reflink is enabled by
-default. Thanks to Amir Goldstein and Filipe Manana for reviewing the patches!
-
-generic/545 currently fails on overlayfs, and generic/546 fails on btrfs.
+Long time passed, re-send this to review again.
 
 Thanks,
-Eryu
+Zorro
 
-The new head of the master branch is commit:
+ tests/generic/998     | 87 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/998.out |  2 +
+ tests/generic/group   |  1 +
+ 3 files changed, 90 insertions(+)
+ create mode 100755 tests/generic/998
+ create mode 100644 tests/generic/998.out
 
-d123585ea0d0 xfs/294: calculate space to reserve for fragmentation test
-
-New commits:
-
-Darrick J. Wong (3):
-      [2fd273886b52] xfs: refactor minimum log size formatting code
-      [3f5941585839] xfs/216: always disable rmap and reflink when creating log size test fs
-      [d123585ea0d0] xfs/294: calculate space to reserve for fragmentation test
-
-Jiufei Xue (1):
-      [80bac2129b06] generic: check CAP_LINUX_IMMUTABLE capability
-
-Murphy Zhou (1):
-      [d349b37c113e] generic/532: do not break golden silence if attributes_mask is 0
-
-Qu Wenruo (1):
-      [2bb2dd24cc9e] generic: do operations which doesn't take data space on full fs
-
-Xiao Yang (1):
-      [9820d643ea37] ext4/018: Match the value of File ACL accurately
-
-
-Code Diffstat:
-
- common/config         |  1 +
- common/xfs            | 36 ++++++++++++++++++++++
- tests/ext4/018        |  2 +-
- tests/generic/532     |  1 -
- tests/generic/545     | 74 +++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/545.out |  9 ++++++
- tests/generic/546     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/546.out |  3 ++
- tests/generic/group   |  2 ++
- tests/xfs/104         |  3 +-
- tests/xfs/119         |  3 +-
- tests/xfs/216         |  8 ++++-
- tests/xfs/291         |  3 +-
- tests/xfs/294         | 11 ++++---
- tests/xfs/295         |  5 +--
- tests/xfs/297         |  3 +-
- 16 files changed, 234 insertions(+), 14 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---40Gt4VguYL9l
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJc2BpaAAoJECZSqilcj+djfUQP/R4b/QQEfsBKNB+rvRW/ahrr
-uu2/LLM1oRCWpsRoHpHEhJmUs1icrjNhu8tJfN+yjkbW2buG9u87664N8np2g2Bh
-HraDbuHKjRkNS8FzJaWw781+TsrXuMLR64X3KJDsS+pUa2tw34PPEX6tUXOZiFmj
-6qrKATT9uIhgN7ZNKXl9NWM2jSRZy2skuvTTWnMe2JUq0D3giz9rS9IYgix2Eogs
-eMTyYhYuhaz8nHHHra1d+Ahb0auBh9ilf3vzE9rjnQz2sMylL5jdN40pvVKbE1vC
-OVn3E5AMQKbLP8qGFyX3v2q9oyovWPclDFvDWc+ag1M9greAR4wavlWb0/mvkXzh
-9xMahR5QemArqmqcDzqnHmMLcexorqoVy2z5zW+pTqKt96FQ1godmXRCUyDRHxKL
-tFeFrO27+Z90pBR+f/eUFYcD7KxgIgCVyXcLrPXZLnu6Ty7sz/d+mpL82stl2emW
-kCNEpnvRq304cn6jX2j6fx0dpDozsZIpGpMHNebqeM7nUDWi/v9pTmMh/4Y8aG45
-4XReglpYQLt59DG1B6Jb2j638cIhQ+quDjQlZpJGxjDROR271ZQ0lkLER33KD5eL
-psf3JPEYcpXIXVWOUth78cTzIVRacvyCAXh8A1xN81vVxrQ21utHtbdx2U8gqxSo
-6phBdy6y21FiSl7Oxu/t
-=H4ot
------END PGP SIGNATURE-----
-
---40Gt4VguYL9l--
+diff --git a/tests/generic/998 b/tests/generic/998
+new file mode 100755
+index 00000000..54b79691
+--- /dev/null
++++ b/tests/generic/998
+@@ -0,0 +1,87 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 998
++#
++# Randomly direct AIO write&verify stress test
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_aiodio aio-dio-write-verify
++
++_scratch_mkfs > $seqres.full 2>&1
++_scratch_mount
++
++localfile=$SCRATCH_MNT/testfile
++diosize=`_min_dio_alignment $SCRATCH_DEV`
++
++# The maximum write size and offset are both 32k diosize. So the maximum
++# file size will be (32 * 2)k
++free_size_k=`df -kP $SCRATCH_MNT | grep -v Filesystem | awk '{print $4}'`
++max_io_size_b=$((32 * 1024))
++if [ $max_io_size_b -gt $((free_size_k * 1024 / 2 / diosize)) ]; then
++	max_io_size_b=$((free_size_k * 1024 / 2 / diosize))
++fi
++
++do_test()
++{
++	local num_oper
++	local oper_list=""
++	local size
++	local off
++	local truncsize
++
++	# the number of AIO write operation
++	num_oper=$((RANDOM % 64 + 1))
++
++	for ((i=0; i<num_oper; i++)); do
++		size=$(((RANDOM % max_io_size_b + 1) * diosize))
++		off=$((RANDOM % max_io_size_b * diosize))
++		oper_list="$oper_list -a size=$size,off=$off"
++	done
++	truncsize=$(((RANDOM * diosize + RANDOM % diosize) % max_io_size_b))
++
++	$AIO_TEST -t $truncsize $oper_list $localfile
++	if [ $? -ne 0 ];then
++		echo "$AIO_TEST -t $truncsize $oper_list $localfile"
++		echo "==========^^ Fail ^^=========="
++	fi
++}
++
++testimes=$((LOAD_FACTOR * 100))
++while [ $testimes -gt 0 ]; do
++	echo > $localfile
++	do_test
++	((testimes--))
++done
++
++echo "Silence is golden"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/998.out b/tests/generic/998.out
+new file mode 100644
+index 00000000..d2679ae0
+--- /dev/null
++++ b/tests/generic/998.out
+@@ -0,0 +1,2 @@
++QA output created by 998
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 0c3016fd..36b180c3 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -540,4 +540,5 @@
+ 535 auto quick log
+ 536 auto quick rw shutdown
+ 537 auto quick trim
++998 auto stress aio
+ 999 auto quick aio
+-- 
+2.17.2
