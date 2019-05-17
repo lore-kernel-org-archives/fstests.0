@@ -1,63 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54636 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726761AbfERDzh (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 17 May 2019 23:55:37 -0400
-Date: Sat, 18 May 2019 11:55:34 +0800
-From: Murphy Zhou <xzhou@redhat.com>
-Subject: Re: [PATCH 2/2] overlay/023: use numeric user and group IDs in
- getfacl
-Message-ID: <20190518035534.7dtcygww65hneuby@XZHOUW.usersys.redhat.com>
-References: <20190517112422.20671-1-lhenriques@suse.com>
- <20190517112422.20671-3-lhenriques@suse.com>
+Received: from mx2.suse.de ([195.135.220.15]:55778 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1727221AbfEQMG4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 17 May 2019 08:06:56 -0400
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH] src/attr_replace_test: limit size of extended attribute value
+Date: Fri, 17 May 2019 13:06:53 +0100
+Message-Id: <20190517120653.22180-1-lhenriques@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190517112422.20671-3-lhenriques@suse.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Luis Henriques <lhenriques@suse.com>
-Cc: fstests@vger.kernel.org, Xiong Zhou <xzhou@redhat.com>
+To: fstests@vger.kernel.org
+Cc: Luis Henriques <lhenriques@suse.com>, "Darrick J . Wong" <darrick.wong@oracle.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, May 17, 2019 at 12:24:22PM +0100, Luis Henriques wrote:
-> This prevents test failures if cases where, e.g., /etc/group doesn't
-> include the 'root' group ID.
+The maximum size for extended attribute values is 65536 (XATTR_SIZE_MAX).
+Since there are filesystems that can set blksize to really big values
+(CephFS for example has a default of 4M), it's easy to have this test
+failing with fsetxattr returning -E2BIG.
 
-Ack for this patch(I don't see that other 1/2 one). Thanks!
+Cc: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ src/attr_replace_test.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-Xiong
-
-> 
-> Cc: Xiong Zhou <xzhou@redhat.com>
-> Signed-off-by: Luis Henriques <lhenriques@suse.com>
-> ---
->  tests/overlay/023     | 2 +-
->  tests/overlay/023.out | 4 ++--
->  2 files changed, 3 insertions(+), 3 deletions(-)
-> 
-> diff --git a/tests/overlay/023 b/tests/overlay/023
-> index 7e48349d1a12..edd034c3a9e3 100755
-> --- a/tests/overlay/023
-> +++ b/tests/overlay/023
-> @@ -55,7 +55,7 @@ setfacl -d -m o::rwx $wkdir
->  _scratch_mount
->  
->  # getting acls, ACL set on workdir should be cleaned
-> -getfacl -p $wkdir/work 2>&1 | _filter_scratch | _filter_ovl_dirs
-> +getfacl -n -p $wkdir/work 2>&1 | _filter_scratch | _filter_ovl_dirs
->  
->  # success, all done
->  status=0
-> diff --git a/tests/overlay/023.out b/tests/overlay/023.out
-> index 4a243c5b44ce..911d272d2241 100644
-> --- a/tests/overlay/023.out
-> +++ b/tests/overlay/023.out
-> @@ -1,7 +1,7 @@
->  QA output created by 023
->  # file: SCRATCH_DEV/OVL_WORK/work
-> -# owner: root
-> -# group: root
-> +# owner: 0
-> +# group: 0
->  user::---
->  group::---
->  other::---
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index 0720bfdc18ab..1ca9bf11ba58 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -9,6 +9,7 @@
+ #include <sys/types.h>
+ #include <sys/xattr.h>
+ #include <sys/stat.h>
++#include <linux/limits.h>
+ 
+ #define die() do { perror(""); \
+ fprintf(stderr, "error at line %d\n", __LINE__); \
+@@ -44,6 +45,8 @@ int main(int argc, char *argv[])
+ 	size = sbuf.st_blksize * 3 / 4;
+ 	if (!size)
+ 		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
++	if (size > XATTR_SIZE_MAX)
++		size = XATTR_SIZE_MAX;
+ 	value = malloc(size);
+ 	if (!value)
+ 		fail("Failed to allocate memory\n");
