@@ -1,186 +1,60 @@
-Received: from mail.kernel.org ([198.145.29.99]:59402 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730385AbfETI7V (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 May 2019 04:59:21 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, test for send after cloning and truncating source file
-Date: Mon, 20 May 2019 09:59:15 +0100
-Message-Id: <20190520085915.29480-1-fdmanana@kernel.org>
+Received: from userp2130.oracle.com ([156.151.31.86]:46304 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2388110AbfETQXu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 12:23:50 -0400
+Date: Mon, 20 May 2019 09:23:43 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] src/attr_replace_test: limit size of extended attribute
+ value
+Message-ID: <20190520162343.GK5352@magnolia>
+References: <20190517120653.22180-1-lhenriques@suse.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190517120653.22180-1-lhenriques@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+To: Luis Henriques <lhenriques@suse.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+On Fri, May 17, 2019 at 01:06:53PM +0100, Luis Henriques wrote:
+> The maximum size for extended attribute values is 65536 (XATTR_SIZE_MAX).
+> Since there are filesystems that can set blksize to really big values
+> (CephFS for example has a default of 4M), it's easy to have this test
+> failing with fsetxattr returning -E2BIG.
+> 
+> Cc: Darrick J. Wong <darrick.wong@oracle.com>
+> Signed-off-by: Luis Henriques <lhenriques@suse.com>
+> ---
+>  src/attr_replace_test.c | 3 +++
+>  1 file changed, 3 insertions(+)
+> 
+> diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+> index 0720bfdc18ab..1ca9bf11ba58 100644
+> --- a/src/attr_replace_test.c
+> +++ b/src/attr_replace_test.c
+> @@ -9,6 +9,7 @@
+>  #include <sys/types.h>
+>  #include <sys/xattr.h>
+>  #include <sys/stat.h>
+> +#include <linux/limits.h>
+>  
+>  #define die() do { perror(""); \
+>  fprintf(stderr, "error at line %d\n", __LINE__); \
+> @@ -44,6 +45,8 @@ int main(int argc, char *argv[])
+>  	size = sbuf.st_blksize * 3 / 4;
+>  	if (!size)
+>  		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
+> +	if (size > XATTR_SIZE_MAX)
+> +		size = XATTR_SIZE_MAX;
 
-Test that an incremental send receive does not issue clone operations
-that attempt to clone the last block of a file, with a size not aligned to
-the filesystem's sector size, into the middle of some other file. Such
-clone request causes the receiver to fail (with EINVAL), for kernels that
-include commit ac765f83f1397646 ("Btrfs: fix data corruption due to
-cloning of eof block"), or cause silent data corruption for older kernels.
+Looks good to me (this or the min()/MIN()/whatever version),
 
-This test is motived by a recent regression introduced in kernel 5.2-rc1,
-commit 040ee6120cb6706 ("Btrfs: send, improve clone range"), and the
-following patch fixes it:
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-  "Btrfs: incremental send, fix emission of invalid clone perations"
+--D
 
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/189     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/189.out |  21 +++++++++++
- tests/btrfs/group   |   1 +
- 3 files changed, 127 insertions(+)
- create mode 100755 tests/btrfs/189
- create mode 100644 tests/btrfs/189.out
 
-diff --git a/tests/btrfs/189 b/tests/btrfs/189
-new file mode 100755
-index 00000000..5f736d73
---- /dev/null
-+++ b/tests/btrfs/189
-@@ -0,0 +1,105 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-+#
-+# FS QA Test No. 189
-+#
-+# Test that an incremental send receive does not issue clone operations that
-+# attempt to clone the last block of a file, with a size not aligned to the
-+# filesystem's sector size, into the middle of some other file. Such clone
-+# request causes the receiver to fail (with EINVAL), for kernels that include
-+# commit ac765f83f1397646 ("Btrfs: fix data corruption due to cloning of eof
-+# block"), or cause silent data corruption for older kernels.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+	rm -f $tmp.*
-+	rm -fr $send_files_dir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/reflink
-+
-+# real QA test starts here
-+_supported_fs btrfs
-+_supported_os Linux
-+_require_fssum
-+_require_test
-+_require_scratch_reflink
-+
-+send_files_dir=$TEST_DIR/btrfs-test-$seq
-+
-+rm -f $seqres.full
-+rm -fr $send_files_dir
-+mkdir $send_files_dir
-+
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$XFS_IO_PROG -f -c "pwrite -S 0xb1 0 2M" $SCRATCH_MNT/foo | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -S 0xc7 0 2M" $SCRATCH_MNT/bar | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -S 0x4d 0 2M" $SCRATCH_MNT/baz | _filter_xfs_io
-+$XFS_IO_PROG -f -c "pwrite -S 0xe2 0 2M" $SCRATCH_MNT/zoo | _filter_xfs_io
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
-+	| _filter_scratch
-+
-+$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
-+	| _filter_scratch
-+
-+# Clone part of the extent from a higher offset to a lower offset of the same
-+# file.
-+$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 1560K 500K 100K" $SCRATCH_MNT/bar \
-+	| _filter_xfs_io
-+
-+# Now clone from the previous file, same range, into the middle of another file,
-+# such that the end offset at the destination is smaller than the destination's
-+# file size.
-+$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 1560K 0 100K" $SCRATCH_MNT/zoo \
-+	| _filter_xfs_io
-+
-+# Truncate the source file of the previous clone operation to a smaller size,
-+# which ends up in the middle of the range of previous clone operation from file
-+# bar to file bar. We want to check this doesn't confuse send to issue invalid
-+# clone operations.
-+$XFS_IO_PROG -c "truncate 550K" $SCRATCH_MNT/bar
-+
-+$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
-+	| _filter_scratch
-+
-+$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
-+	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
-+
-+# Compute digests of the snapshot trees so that later we can compare against
-+# digests of the trees in the new filesystem, to see if they match (no data or
-+# metadata corruption happened).
-+$FSSUM_PROG -A -f -w $send_files_dir/base.fssum $SCRATCH_MNT/base
-+$FSSUM_PROG -A -f -w $send_files_dir/incr.fssum \
-+	-x $SCRATCH_MNT/incr/base $SCRATCH_MNT/incr
-+
-+# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same file contents that the original filesystem had.
-+_scratch_unmount
-+_scratch_mkfs >>$seqres.full 2>&1
-+_scratch_mount
-+
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
-+$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
-+
-+# Compute digests of the snapshot trees in the new filesystem and compare them
-+# to the ones in the original filesystem, they must match.
-+$FSSUM_PROG -r $send_files_dir/base.fssum $SCRATCH_MNT/base
-+$FSSUM_PROG -r $send_files_dir/incr.fssum $SCRATCH_MNT/incr
-+
-+status=0
-+exit
-diff --git a/tests/btrfs/189.out b/tests/btrfs/189.out
-new file mode 100644
-index 00000000..0ae3cdce
---- /dev/null
-+++ b/tests/btrfs/189.out
-@@ -0,0 +1,21 @@
-+QA output created by 189
-+wrote 2097152/2097152 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 2097152/2097152 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 2097152/2097152 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+wrote 2097152/2097152 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
-+At subvol SCRATCH_MNT/base
-+linked 102400/102400 bytes at offset 512000
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+linked 102400/102400 bytes at offset 0
-+XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-+Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
-+At subvol SCRATCH_MNT/incr
-+At subvol base
-+At snapshot incr
-+OK
-+OK
-diff --git a/tests/btrfs/group b/tests/btrfs/group
-index d88a0666..37c7ffc2 100644
---- a/tests/btrfs/group
-+++ b/tests/btrfs/group
-@@ -191,3 +191,4 @@
- 186 auto quick send volume
- 187 auto send dedupe clone balance
- 188 auto quick send prealloc punch
-+189 auto quick send clone
--- 
-2.11.0
+>  	value = malloc(size);
+>  	if (!value)
+>  		fail("Failed to allocate memory\n");
