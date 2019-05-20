@@ -1,11 +1,13 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:58750 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:58808 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726088AbfETWbk (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:40 -0400
-Subject: [PATCH 0/1] xfs: health tracking tests
+        with ESMTP id S1726088AbfETWbq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:46 -0400
+Subject: [PATCH ] xfs: basic testing of new xfs_spaceman health command
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 20 May 2019 15:31:33 -0700
-Message-ID: <155839149301.62876.7233006456381129816.stgit@magnolia>
+Date: Mon, 20 May 2019 15:31:41 -0700
+Message-ID: <155839150130.62876.6329606122510578337.stgit@magnolia>
+In-Reply-To: <155839149301.62876.7233006456381129816.stgit@magnolia>
+References: <155839149301.62876.7233006456381129816.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -14,23 +16,224 @@ To: guaneryu@gmail.com, darrick.wong@oracle.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Tests for the new XFS online health reporting patches.
+Basic tests to make sure xfs_spaceman health command works properly.
 
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/xfs        |    7 ++++
+ tests/xfs/742     |   52 +++++++++++++++++++++++++++++++++
+ tests/xfs/742.out |    2 +
+ tests/xfs/743     |   84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/743.out |    4 +++
+ tests/xfs/group   |    2 +
+ 6 files changed, 151 insertions(+)
+ create mode 100755 tests/xfs/742
+ create mode 100644 tests/xfs/742.out
+ create mode 100755 tests/xfs/743
+ create mode 100644 tests/xfs/743.out
 
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
 
---D
-
-kernel git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=health-tracking
-
-xfsprogs git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=health-tracking
-
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=health-tracking
+diff --git a/common/xfs b/common/xfs
+index 42f02ff7..f8dafc6c 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -773,7 +773,12 @@ _require_xfs_spaceman_command()
+ 	_require_command "$XFS_SPACEMAN_PROG" "xfs_spaceman"
+ 
+ 	testfile=$TEST_DIR/$$.xfs_spaceman
++	touch $testfile
+ 	case $command in
++	"health")
++		testio=`$XFS_SPACEMAN_PROG -c "health $param" $TEST_DIR 2>&1`
++		param_checked=1
++		;;
+ 	*)
+ 		testio=`$XFS_SPACEMAN_PROG -c "help $command" $TEST_DIR 2>&1`
+ 	esac
+@@ -787,6 +792,8 @@ _require_xfs_spaceman_command()
+ 		_notrun "xfs_spaceman $command failed (old kernel/wrong fs/bad args?)"
+ 	echo $testio | grep -q "foreign file active" && \
+ 		_notrun "xfs_spaceman $command not supported on $FSTYP"
++	echo $testio | grep -q "Inappropriate ioctl for device" && \
++		_notrun "xfs_spaceman $command support is missing (missing ioctl?)"
+ 	echo $testio | grep -q "Function not implemented" && \
+ 		_notrun "xfs_spaceman $command support is missing (missing syscall?)"
+ 
+diff --git a/tests/xfs/742 b/tests/xfs/742
+new file mode 100755
+index 00000000..2529c40a
+--- /dev/null
++++ b/tests/xfs/742
+@@ -0,0 +1,52 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 742
++#
++# Ensure all xfs_spaceman commands are documented.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_command "$XFS_SPACEMAN_PROG" "xfs_spaceman"
++_require_command "$MAN_PROG" man
++
++echo "Silence is golden"
++
++MANPAGE=$($MAN_PROG --path xfs_spaceman)
++
++case "$MANPAGE" in
++*.gz|*.z\|*.Z)	CAT=zcat;;
++*.bz2)		CAT=bzcat;;
++*.xz)		CAT=xzcat;;
++*)		CAT=cat;;
++esac
++_require_command `which $CAT` $CAT
++
++for COMMAND in `$XFS_SPACEMAN_PROG -c help $TEST_DIR | awk '{print $1}' | grep -v "^Use"`; do
++  $CAT "$MANPAGE" | egrep -q "^\.B.*$COMMAND" || \
++	echo "$COMMAND not documented in the xfs_spaceman manpage"
++done
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/742.out b/tests/xfs/742.out
+new file mode 100644
+index 00000000..ef4f23cd
+--- /dev/null
++++ b/tests/xfs/742.out
+@@ -0,0 +1,2 @@
++QA output created by 742
++Silence is golden
+diff --git a/tests/xfs/743 b/tests/xfs/743
+new file mode 100755
+index 00000000..d0b7b3b0
+--- /dev/null
++++ b/tests/xfs/743
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 743
++#
++# Basic tests of the xfs_spaceman health command.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/fuzzy
++. ./common/filter
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch_nocheck
++_require_scrub
++_require_xfs_spaceman_command "health"
++
++rm -f $seqres.full
++
++_scratch_mkfs > $tmp.mkfs
++_scratch_mount
++
++# Haven't checked anything, it should tell us to run scrub
++$XFS_SPACEMAN_PROG -c "health" $SCRATCH_MNT
++
++echo "Silence is golden"
++
++# Run scrub to collect health info.
++_scratch_scrub -n >> $seqres.full
++
++query() {
++	$XFS_SPACEMAN_PROG -c "$@" $SCRATCH_MNT | tee -a $seqres.full
++}
++
++query_health() {
++	query "$@" | grep -q ": ok$"
++}
++
++query_sick() {
++	query "$@" | grep -q ": unhealthy$"
++}
++
++# Let's see if we get at least one healthy rating for each health reporting
++# group.
++query_health "health -f" || \
++	echo "Didn't see a single healthy fs metadata?"
++
++query_health "health -a 0" || \
++	echo "Didn't see a single healthy ag metadata?"
++
++query_health "health $SCRATCH_MNT" || \
++	echo "Didn't see a single healthy file metadata?"
++
++# Unmount, corrupt filesystem
++_scratch_unmount
++_scratch_xfs_db -x -c 'sb 1' -c 'fuzz -d magicnum random' >> $seqres.full
++
++# Now let's see what the AG report says
++_scratch_mount
++_scratch_scrub -n >> $seqres.full 2>&1
++query_sick "health -a 1" || \
++	echo "Didn't see the expected unhealthy metadata?"
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/743.out b/tests/xfs/743.out
+new file mode 100644
+index 00000000..85232e52
+--- /dev/null
++++ b/tests/xfs/743.out
+@@ -0,0 +1,4 @@
++QA output created by 743
++Health status has not been collected for this filesystem.
++Please run xfs_scrub(8) to remedy this situation.
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index c8620d72..5a4ef4bf 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -502,3 +502,5 @@
+ 502 auto quick unlink
+ 503 auto copy metadump
+ 739 auto quick mkfs label
++742 auto quick spaceman
++743 auto quick health
