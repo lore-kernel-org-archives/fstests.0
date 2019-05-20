@@ -1,87 +1,132 @@
-Received: from mail-pf1-f169.google.com ([209.85.210.169]:42524 "EHLO
-        mail-pf1-f169.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725777AbfESRFU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 19 May 2019 13:05:20 -0400
-Received: by mail-pf1-f169.google.com with SMTP id 13so6031281pfw.9
-        for <fstests@vger.kernel.org>; Sun, 19 May 2019 10:05:20 -0700 (PDT)
-Message-ID: <5ce17857.1c69fb81.eee25.1b5c@mx.google.com>
-Date: Sun, 19 May 2019 23:37:53 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 1879a65466c8
+Received: from mx1.redhat.com ([209.132.183.28]:46688 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729725AbfETG2b (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 May 2019 02:28:31 -0400
+From: Murphy Zhou <xzhou@redhat.com>
+Subject: [PATCH] tests/generic/54{0..3}: redirect FILEFRAG error output to .full too
+Date: Mon, 20 May 2019 14:28:18 +0800
+Message-Id: <20190520062818.12421-1-xzhou@redhat.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="ih1zl07vc9nc"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: darrick.wong@oracle.com, Murphy Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
+NFSv4.2 supports reflink but does not support FIBMAP. These 4 tests
+about file content can pass on NFSv4.2, but FILEFRAG complaint :
++/mnt/testarea/scratch/test-542/file2: FIBMAP unsupported
+is breaking golden output.
 
---ih1zl07vc9nc
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+---
+ tests/generic/540 | 8 ++++----
+ tests/generic/541 | 8 ++++----
+ tests/generic/542 | 8 ++++----
+ tests/generic/543 | 8 ++++----
+ 4 files changed, 16 insertions(+), 16 deletions(-)
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. We have one fsync fuzz tester in this update, you may
-see test failures with btrfs and ext4. Also, we have bug fixes to generic/530
-when testing with overlayfs, and seek_data/hole tests when testing with NFSv4.
-
-Again, many thanks to Amir Goldstein for helping review patches!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-1879a65466c8 generic: fsync fuzz tester with fsstress
-
-New commits:
-
-Filipe Manana (1):
-      [1879a65466c8] generic: fsync fuzz tester with fsstress
-
-Jeffle Xu (2):
-      [f8f57747222d] generic/530: fix shutdown failure of generic/530 in overlay
-      [b6908c6e23d4] common/rc: improve _fstyp_has_non_default_seek_data_hole()
-
-
-Code Diffstat:
-
- common/rc             |  9 ++++++-
- src/t_open_tmpfiles.c | 19 --------------
- tests/generic/530     |  4 ++-
- tests/generic/547     | 73 +++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/547.out |  2 ++
- tests/generic/group   |  1 +
- tests/xfs/501         |  4 ++-
- 7 files changed, 90 insertions(+), 22 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---ih1zl07vc9nc
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJc4WXZAAoJECZSqilcj+djTWUQAJ6lxeV8yinGSz8bZoRWb94c
-Nio39WXvV5vQT86tiUcfVEVo/+7UaFAoOZ33YjaKHuA/15Tp/3+UdxnyHm3miGLB
-jwdHxDJ8HHBDeGGciOWmMAc8+T/JYOFYy7OpOv+DvYk1n7joQh3QomCoxGDJJAbE
-osXtwzJEOh205vvO5wH5iD/VHeTRWatYGyvTMzhp5KNFrHOCjaQcStOxGd/CcqIB
-pvsxjVFZGQF0mjYsjunc9qeECbm1+15IOh1p8aCIDEOpQIYheX164VETnqzX+DSt
-Im1YGUQEnIe1DFY9L/0/U+tEZLe7dzOsPsG+R6K3fH8NKMTNLBQk1PcTlh75K7rW
-6MtY9fdVRsAXMwv5zTS24fFMfmsb4Hj7XvDcDO+dU60qIQNwyvM+05rqi6LheR8v
-cyTT+YpEeZHZOA4V50ypvYiYoHKzNjAfK7q+OPTFJ31Y1M1LtwIBb64ZUlUJthcw
-+Z4lRlDGv/JStPmVEnhql+3aLzchvM2+JmmB0ZxIviekA2UGEr4n0qdFmijKqeYS
-pNzFGTO04ADo2DIa5QjJeztVpYPLbrE7/Yh0xi3RHqBttOnGNHW/tED3MjO+7znr
-nkwcJ7BYjLxuHIOnmfVHL/UHCVdgFNY3kH21QsE+9KUkvqMl2coTIdUYfhCl2Xfz
-Z6HJKkjZLye0J2P86Fzm
-=6azI
------END PGP SIGNATURE-----
-
---ih1zl07vc9nc--
+diff --git a/tests/generic/540 b/tests/generic/540
+index 65a71f22..dc4d9485 100755
+--- a/tests/generic/540
++++ b/tests/generic/540
+@@ -72,16 +72,16 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
+ 
+ # now reflink into the rainbow
+ echo "before reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ $XFS_IO_PROG -f -c "reflink $testdir/file2 $roff $roff $rsz" $testdir/file3 >> $seqres.full
+ _pwrite_byte 0x64 $roff $rsz $testdir/file3.chk >> $seqres.full
+ _scratch_cycle_mount
+ 
+ echo "Compare files"
+ echo "after reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
+diff --git a/tests/generic/541 b/tests/generic/541
+index e7e19be4..fcb5d567 100755
+--- a/tests/generic/541
++++ b/tests/generic/541
+@@ -74,8 +74,8 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
+ 
+ # now reflink the rainbow
+ echo "before reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ $XFS_IO_PROG -f -c "reflink $testdir/file3 $roff $roff $rsz" $testdir/file2 >> $seqres.full
+ cp $testdir/file3.chk $testdir/file2.chk
+ _pwrite_byte 0x64 0 $roff $testdir/file2.chk >> $seqres.full
+@@ -84,8 +84,8 @@ _scratch_cycle_mount
+ 
+ echo "Compare files"
+ echo "after reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file2.chk | _filter_scratch
+diff --git a/tests/generic/542 b/tests/generic/542
+index c416ab69..62b32cb5 100755
+--- a/tests/generic/542
++++ b/tests/generic/542
+@@ -73,16 +73,16 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
+ 
+ # now reflink into the rainbow
+ echo "before reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ $XFS_IO_PROG -f -c "reflink $testdir/file2 $soff $doff $rsz" $testdir/file3 >> $seqres.full
+ _pwrite_byte 0x64 $doff $rsz $testdir/file3.chk >> $seqres.full
+ _scratch_cycle_mount
+ 
+ echo "Compare files"
+ echo "after reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file3 | _filter_scratch
+diff --git a/tests/generic/543 b/tests/generic/543
+index 50a51f89..cc7ee532 100755
+--- a/tests/generic/543
++++ b/tests/generic/543
+@@ -75,8 +75,8 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
+ 
+ # now reflink the rainbow
+ echo "before reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ $XFS_IO_PROG -f -c "reflink $testdir/file3 $soff $doff $rsz" $testdir/file2 >> $seqres.full
+ $XFS_IO_PROG -c "truncate $doff" $testdir/file2.chk
+ dd if=$testdir/file3.chk skip=$((soff / blksz)) count=$((rsz / blksz)) bs=$blksz >> $testdir/file2.chk 2> /dev/null
+@@ -84,8 +84,8 @@ _scratch_cycle_mount
+ 
+ echo "Compare files"
+ echo "after reflink" >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
+-$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
++$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
++$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
+ md5sum $testdir/file1 | _filter_scratch
+ md5sum $testdir/file2 | _filter_scratch
+ md5sum $testdir/file2.chk | _filter_scratch
+-- 
+2.21.0
