@@ -1,151 +1,293 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:57858 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725763AbfETWdM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:33:12 -0400
-Subject: [PATCH 2/3] generic/530,
- xfs/501: pass fs shutdown handle to t_open_tmpfiles
+Received: from userp2130.oracle.com ([156.151.31.86]:38024 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726478AbfETWbd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:33 -0400
+Subject: [PATCH ] xfs: validate unicode filesystem labels
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 20 May 2019 15:31:04 -0700
-Message-ID: <155839146420.62682.1995545484813176181.stgit@magnolia>
-In-Reply-To: <155839145160.62682.10916303376882370723.stgit@magnolia>
-References: <155839145160.62682.10916303376882370723.stgit@magnolia>
+Date: Mon, 20 May 2019 15:31:21 -0700
+Message-ID: <155839148145.62788.12360648352651333398.stgit@magnolia>
+In-Reply-To: <155839147529.62788.4514473233887834647.stgit@magnolia>
+References: <155839147529.62788.4514473233887834647.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, jefflexu@linux.alibaba.com, amir73il@gmail.com, fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-So it turns out that overlayfs can't pass FS_IOC_SHUTDOWN to the lower
-filesystems and so xfstests works around this by creating shutdown
-helpers for the scratch fs to direct the shutdown ioctl to wherever it
-needs to go to shut down the filesystem -- SCRATCH_MNT on normal
-filesystems and OVL_BASE_SCRATCH_MNT when -overlay is enabled.  This
-means that t_open_tmpfiles cannot simply use one of the open tempfiles
-to shut down the filesystem.
-
-Commit f8f57747222 tried to "fix" this by ripping the shutdown code out,
-but this made the tests useless.  Fix this instead by creating a
-xfstests helper to return a path that can be used to shut down the
-filesystem and then pass that path to t_open_tmpfiles so that we can
-shut down the filesystem when overlayfs is enabled.
+Make sure we can set and retrieve unicode labels, including emoji.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- common/rc             |   11 +++++++++++
- src/t_open_tmpfiles.c |   20 +++++++++++++-------
- tests/generic/530     |    2 +-
- tests/xfs/501         |    2 +-
- 4 files changed, 26 insertions(+), 9 deletions(-)
+ common/rc         |   18 ++++++
+ tests/generic/453 |   16 ------
+ tests/generic/454 |   16 ------
+ tests/xfs/739     |  152 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/739.out |    2 +
+ tests/xfs/group   |    1 
+ 6 files changed, 175 insertions(+), 30 deletions(-)
+ create mode 100755 tests/xfs/739
+ create mode 100644 tests/xfs/739.out
 
 
 diff --git a/common/rc b/common/rc
-index 27c8bb7a..f577e5e3 100644
+index f577e5e3..17b89d5d 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -393,6 +393,17 @@ _scratch_shutdown()
- 	fi
+@@ -4014,6 +4014,24 @@ _try_wipe_scratch_devs()
+ 	done
  }
  
-+# Return a file path that can be used to shut down the scratch filesystem.
-+# Caller should _require_scratch_shutdown before using this.
-+_scratch_shutdown_handle()
-+{
-+	if [ $FSTYP = "overlay" ]; then
-+		echo $OVL_BASE_SCRATCH_MNT
-+	else
-+		echo $SCRATCH_MNT
++# Only run this on xfs if xfs_scrub is available and has the unicode checker
++_check_xfs_scrub_does_unicode() {
++	[ "${FSTYP}" == "xfs" ] || return 1
++
++	local mount="$1"
++	local dev="$2"
++
++	_supports_xfs_scrub "${mount}" "${dev}" || return 1
++
++	# We only care if xfs_scrub has unicode string support...
++	if ! type ldd > /dev/null 2>&1 || \
++	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
++		return 1
 +	fi
++
++	return 0
 +}
 +
- _test_mount()
- {
-     if [ "$FSTYP" == "overlay" ]; then
-diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
-index da9390fd..258b0c95 100644
---- a/src/t_open_tmpfiles.c
-+++ b/src/t_open_tmpfiles.c
-@@ -24,7 +24,7 @@ static int min_fd = -1;
- static int max_fd = -1;
- static unsigned int nr_opened = 0;
- static float start_time;
--static int shutdown_fs = 0;
-+static int shutdown_fd = -1;
+ init_rc
  
- void clock_time(float *time)
- {
-@@ -69,7 +69,7 @@ void die(void)
- 				end_time - start_time);
- 		fflush(stdout);
+ ################################################################################
+diff --git a/tests/generic/453 b/tests/generic/453
+index 2396d62c..7dbadb02 100755
+--- a/tests/generic/453
++++ b/tests/generic/453
+@@ -219,21 +219,7 @@ done
  
--		if (shutdown_fs) {
-+		if (shutdown_fd >= 0) {
- 			/*
- 			 * Flush the log so that we have to process the
- 			 * unlinked inodes the next time we mount.
-@@ -77,7 +77,7 @@ void die(void)
- 			int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
- 			int ret;
+ echo "Test XFS online scrub, if applicable"
  
--			ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-+			ret = ioctl(shutdown_fd, XFS_IOC_GOINGDOWN, &flag);
- 			if (ret) {
- 				perror("shutdown");
- 				exit(2);
-@@ -148,8 +148,9 @@ void leak_tmpfile(void)
+-# Only run this on xfs if xfs_scrub is available and has the unicode checker
+-check_xfs_scrub() {
+-	[ "$FSTYP" == "xfs" ] || return 1
+-	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+-
+-	# We only care if xfs_scrub has unicode string support...
+-	if ! type ldd > /dev/null 2>&1 || \
+-	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
+-		return 1
+-	fi
+-
+-	return 0
+-}
+-
+-if check_xfs_scrub; then
++if _check_xfs_scrub_does_unicode "$SCRATCH_MNT" "$SCRATCH_DEV"; then
+ 	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
+ 	echo "${output}" | grep -q "french_" || echo "No complaints about french e accent?"
+ 	echo "${output}" | grep -q "greek_" || echo "No complaints about greek letter mess?"
+diff --git a/tests/generic/454 b/tests/generic/454
+index 01986d6b..96a0ea28 100755
+--- a/tests/generic/454
++++ b/tests/generic/454
+@@ -186,21 +186,7 @@ test "${crazy_keys}" -ne "${expected_keys}" && echo "Expected ${expected_keys} k
  
- /*
-  * Try to put as many files on the unlinked list and then kill them.
-- * The first argument is a directory to chdir into; passing any second arg
-- * will shut down the fs instead of closing files.
-+ * The first argument is a directory to chdir into; the second argumennt (if
-+ * provided) is a file path that will be opened and then used to shut down the
-+ * fs before the program exits.
-  */
- int main(int argc, char *argv[])
- {
-@@ -160,8 +161,13 @@ int main(int argc, char *argv[])
- 		if (ret)
- 			perror(argv[1]);
- 	}
--	if (argc > 2 && !strcmp(argv[2], "shutdown"))
--		shutdown_fs = 1;
-+	if (argc > 2) {
-+		shutdown_fd = open(argv[2], O_RDONLY);
-+		if (shutdown_fd < 0) {
-+			perror(argv[2]);
-+			return 1;
-+		}
-+	}
+ echo "Test XFS online scrub, if applicable"
  
- 	clock_time(&start_time);
- 	while (1)
-diff --git a/tests/generic/530 b/tests/generic/530
-index b0d188b1..cb874ace 100755
---- a/tests/generic/530
-+++ b/tests/generic/530
-@@ -49,7 +49,7 @@ ulimit -n $max_files
- 
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-+$here/src/t_open_tmpfiles $SCRATCH_MNT $(_scratch_shutdown_handle) >> $seqres.full
- 
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
-diff --git a/tests/xfs/501 b/tests/xfs/501
-index 974f3414..4be03b31 100755
---- a/tests/xfs/501
-+++ b/tests/xfs/501
-@@ -54,7 +54,7 @@ ulimit -n $max_files
- 
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-+$here/src/t_open_tmpfiles $SCRATCH_MNT $(_scratch_shutdown_handle) >> $seqres.full
- 
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
+-# Only run this on xfs if xfs_scrub is available and has the unicode checker
+-check_xfs_scrub() {
+-	[ "$FSTYP" == "xfs" ] || return 1
+-	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV" || return 1
+-
+-	# We only care if xfs_scrub has unicode string support...
+-	if ! type ldd > /dev/null 2>&1 || \
+-	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
+-		return 1
+-	fi
+-
+-	return 0
+-}
+-
+-if check_xfs_scrub; then
++if _check_xfs_scrub_does_unicode "$SCRATCH_MNT" "$SCRATCH_DEV"; then
+ 	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1 | filter_scrub)"
+ 	echo "${output}" | grep -q "french_" || echo "No complaints about french e accent?"
+ 	echo "${output}" | grep -q "greek_" || echo "No complaints about greek letter mess?"
+diff --git a/tests/xfs/739 b/tests/xfs/739
+new file mode 100755
+index 00000000..9b32ad0d
+--- /dev/null
++++ b/tests/xfs/739
+@@ -0,0 +1,152 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 739
++#
++# Create a directory with multiple filenames that all appear the same
++# (in unicode, anyway) but point to different inodes.  In theory all
++# Linux filesystems should allow this (filenames are a sequence of
++# arbitrary bytes) even if the user implications are horrifying.
++#
++seq=`basename "$0"`
++seqres="$RESULT_DIR/$seq"
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++_supported_os Linux
++_supported_fs xfs
++_require_scratch_nocheck
++_require_xfs_io_command 'label'
++
++echo "Silence is golden."
++
++want_scrub=
++_check_xfs_scrub_does_unicode "$SCRATCH_MNT" "$SCRATCH_DEV" && want_scrub=yes
++
++filter_scrub() {
++	grep 'Unicode' | sed -e 's/^.*Duplicate/Duplicate/g'
++}
++
++maybe_scrub() {
++	test "$want_scrub" = "yes" || return
++
++	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1)"
++	echo "xfs_scrub output:" >> $seqres.full
++	echo "$output" >> $seqres.full
++	echo "$output" >> $tmp.scrub
++}
++
++testlabel() {
++	local label="$(echo -e "$1")"
++	local expected_label="label = \"$label\""
++
++	echo "Formatting label '$1'." >> $seqres.full
++	# First, let's see if we can recover the label when we set it
++	# with mkfs.
++	_scratch_mkfs -L "$label" >> $seqres.full 2>&1
++	_scratch_mount >> $seqres.full 2>&1
++	blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
++	blkid -d -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
++
++	# Did it actually stick?
++	local actual_label="$($XFS_IO_PROG -c label $SCRATCH_MNT)"
++	echo "$actual_label" >> $seqres.full
++
++	if [ "${actual_label}" != "${expected_label}" ]; then
++		echo "Saw '${expected_label}', expected '${actual_label}'."
++	fi
++	maybe_scrub
++	_scratch_unmount
++
++	# Now let's try setting the label online to see what happens.
++	echo "Setting label '$1'." >> $seqres.full
++	_scratch_mkfs >> $seqres.full 2>&1
++	_scratch_mount >> $seqres.full 2>&1
++	$XFS_IO_PROG -c "label -s $label" $SCRATCH_MNT >> $seqres.full
++	blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
++	blkid -d -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
++	_scratch_cycle_mount
++
++	# Did it actually stick?
++	local actual_label="$($XFS_IO_PROG -c label $SCRATCH_MNT)"
++	echo "$actual_label" >> $seqres.full
++
++	if [ "${actual_label}" != "${expected_label}" ]; then
++		echo "Saw '${expected_label}'; expected '${actual_label}'."
++	fi
++	maybe_scrub
++	_scratch_unmount
++}
++
++# Simple test
++testlabel "simple"
++
++# Two different renderings of the same label
++testlabel "caf\xc3\xa9.fs"
++testlabel "cafe\xcc\x81.fs"
++
++# Arabic code point can expand into a muuuch longer series
++testlabel "xfs_\xef\xb7\xba.fs"
++
++# Fake slash?
++testlabel "urk\xc0\xafmoo"
++
++# Emoji: octopus butterfly owl giraffe
++testlabel "\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89"
++
++# unicode rtl widgets too...
++testlabel "mo\xe2\x80\xaegnp.txt"
++testlabel "motxt.png"
++
++# mixed-script confusables
++testlabel "mixed_t\xce\xbfp"
++testlabel "mixed_top"
++
++# single-script spoofing
++testlabel "a\xe2\x80\x90b.fs"
++testlabel "a-b.fs"
++
++testlabel "dz_dze.fs"
++testlabel "dz_\xca\xa3e.fs"
++
++# symbols
++testlabel "_Rs.fs"
++testlabel "_\xe2\x82\xa8.fs"
++
++# zero width joiners
++testlabel "moocow.fs"
++testlabel "moo\xe2\x80\x8dcow.fs"
++
++# combining marks
++testlabel "\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.fs"
++testlabel "\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.fs"
++
++# fake dotdot entry
++testlabel ".\xe2\x80\x8d"
++testlabel "..\xe2\x80\x8d"
++
++# Did scrub choke on anything?
++if [ "$want_scrub" = "yes" ]; then
++	grep -q "^Warning.*gnp.txt.*suspicious text direction" $tmp.scrub || \
++		echo "No complaints about direction overrides?"
++	grep -q "^Warning.*control characters" $tmp.scrub || \
++		echo "No complaints about control characters?"
++fi
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/739.out b/tests/xfs/739.out
+new file mode 100644
+index 00000000..b2697ba1
+--- /dev/null
++++ b/tests/xfs/739.out
+@@ -0,0 +1,2 @@
++QA output created by 739
++Silence is golden.
+diff --git a/tests/xfs/group b/tests/xfs/group
+index e71b058f..c8620d72 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -501,3 +501,4 @@
+ 501 auto quick unlink
+ 502 auto quick unlink
+ 503 auto copy metadump
++739 auto quick mkfs label
