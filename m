@@ -1,144 +1,155 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:60678 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727618AbfETOdG (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 10:33:06 -0400
-Date: Mon, 20 May 2019 07:32:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] tests/generic/54{0..3}: redirect FILEFRAG error output
- to .full too
-Message-ID: <20190520143246.GI5352@magnolia>
-References: <20190520062818.12421-1-xzhou@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190520062818.12421-1-xzhou@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:57362 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1730823AbfETIzx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 May 2019 04:55:53 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] fstests: btrfs, test send with no-holes enabled, fallocate and hole punching
+Date: Mon, 20 May 2019 09:55:47 +0100
+Message-Id: <20190520085547.29329-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Murphy Zhou <xzhou@redhat.com>
-Cc: fstests@vger.kernel.org, linux-nfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 20, 2019 at 02:28:18PM +0800, Murphy Zhou wrote:
-> NFSv4.2 supports reflink but does not support FIBMAP. These 4 tests
-> about file content can pass on NFSv4.2, but FILEFRAG complaint :
-> +/mnt/testarea/scratch/test-542/file2: FIBMAP unsupported
-> is breaking golden output.
-> 
-> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Looks ok to me,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Test that an incremental send with not corrupt data when the source
+filesystem has the no-holes feature enabled, a file has prealloc
+(unwritten) extents that start after its size and hole is punched (after
+the first snapshot is made) that removes all extents from some offset up
+to the file's size.
 
---D
+This currently fails on any kernel version starting from 3.16, and it's
+by a patch titled:
 
-> ---
->  tests/generic/540 | 8 ++++----
->  tests/generic/541 | 8 ++++----
->  tests/generic/542 | 8 ++++----
->  tests/generic/543 | 8 ++++----
->  4 files changed, 16 insertions(+), 16 deletions(-)
-> 
-> diff --git a/tests/generic/540 b/tests/generic/540
-> index 65a71f22..dc4d9485 100755
-> --- a/tests/generic/540
-> +++ b/tests/generic/540
-> @@ -72,16 +72,16 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
->  
->  # now reflink into the rainbow
->  echo "before reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  $XFS_IO_PROG -f -c "reflink $testdir/file2 $roff $roff $rsz" $testdir/file3 >> $seqres.full
->  _pwrite_byte 0x64 $roff $rsz $testdir/file3.chk >> $seqres.full
->  _scratch_cycle_mount
->  
->  echo "Compare files"
->  echo "after reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  md5sum $testdir/file1 | _filter_scratch
->  md5sum $testdir/file2 | _filter_scratch
->  md5sum $testdir/file3 | _filter_scratch
-> diff --git a/tests/generic/541 b/tests/generic/541
-> index e7e19be4..fcb5d567 100755
-> --- a/tests/generic/541
-> +++ b/tests/generic/541
-> @@ -74,8 +74,8 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
->  
->  # now reflink the rainbow
->  echo "before reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  $XFS_IO_PROG -f -c "reflink $testdir/file3 $roff $roff $rsz" $testdir/file2 >> $seqres.full
->  cp $testdir/file3.chk $testdir/file2.chk
->  _pwrite_byte 0x64 0 $roff $testdir/file2.chk >> $seqres.full
-> @@ -84,8 +84,8 @@ _scratch_cycle_mount
->  
->  echo "Compare files"
->  echo "after reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  md5sum $testdir/file1 | _filter_scratch
->  md5sum $testdir/file2 | _filter_scratch
->  md5sum $testdir/file2.chk | _filter_scratch
-> diff --git a/tests/generic/542 b/tests/generic/542
-> index c416ab69..62b32cb5 100755
-> --- a/tests/generic/542
-> +++ b/tests/generic/542
-> @@ -73,16 +73,16 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
->  
->  # now reflink into the rainbow
->  echo "before reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  $XFS_IO_PROG -f -c "reflink $testdir/file2 $soff $doff $rsz" $testdir/file3 >> $seqres.full
->  _pwrite_byte 0x64 $doff $rsz $testdir/file3.chk >> $seqres.full
->  _scratch_cycle_mount
->  
->  echo "Compare files"
->  echo "after reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  md5sum $testdir/file1 | _filter_scratch
->  md5sum $testdir/file2 | _filter_scratch
->  md5sum $testdir/file3 | _filter_scratch
-> diff --git a/tests/generic/543 b/tests/generic/543
-> index 50a51f89..cc7ee532 100755
-> --- a/tests/generic/543
-> +++ b/tests/generic/543
-> @@ -75,8 +75,8 @@ _weave_reflink_rainbow_delalloc $blksz $nr $testdir/file3 >> $seqres.full
->  
->  # now reflink the rainbow
->  echo "before reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  $XFS_IO_PROG -f -c "reflink $testdir/file3 $soff $doff $rsz" $testdir/file2 >> $seqres.full
->  $XFS_IO_PROG -c "truncate $doff" $testdir/file2.chk
->  dd if=$testdir/file3.chk skip=$((soff / blksz)) count=$((rsz / blksz)) bs=$blksz >> $testdir/file2.chk 2> /dev/null
-> @@ -84,8 +84,8 @@ _scratch_cycle_mount
->  
->  echo "Compare files"
->  echo "after reflink" >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full
-> -$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full
-> +$FILEFRAG_PROG -v $testdir/file2 >> $seqres.full 2>&1
-> +$FILEFRAG_PROG -v $testdir/file3 >> $seqres.full 2>&1
->  md5sum $testdir/file1 | _filter_scratch
->  md5sum $testdir/file2 | _filter_scratch
->  md5sum $testdir/file2.chk | _filter_scratch
-> -- 
-> 2.21.0
-> 
+ "Btrfs: incremental send, fix file corruption when no-holes feature is enabled"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/188     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/188.out | 13 +++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 98 insertions(+)
+ create mode 100755 tests/btrfs/188
+ create mode 100644 tests/btrfs/188.out
+
+diff --git a/tests/btrfs/188 b/tests/btrfs/188
+new file mode 100755
+index 00000000..36483035
+--- /dev/null
++++ b/tests/btrfs/188
+@@ -0,0 +1,84 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. 188
++#
++# Test that an incremental send with not corrupt data when the source filesystem
++# has the no-holes feature enabled, a file has prealloc (unwritten) extents that
++# start after its size and hole is punched (after the first snapshot is made)
++# that removes all extents from some offset up to the file's size.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++	rm -fr $send_files_dir
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch
++_require_btrfs_fs_feature "no_holes"
++_require_btrfs_mkfs_feature "no-holes"
++_require_xfs_io_command "fpunch"
++_require_xfs_io_command "falloc" "-k"
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs "-O no-holes" >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our test file with a prealloc extent that starts beyond its size.
++$XFS_IO_PROG -f -c "pwrite -S 0xab 0 500K" $SCRATCH_MNT/foobar | _filter_xfs_io
++$XFS_IO_PROG -c "falloc -k 1200K 800K" $SCRATCH_MNT/foobar
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
++	| _filter_scratch
++
++# Now punch a hole that drops all the extents within the file's size.
++$XFS_IO_PROG -c "fpunch 0 500K" $SCRATCH_MNT/foobar
++
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
++	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
++
++echo "File digest in the original filesystem:"
++md5sum $SCRATCH_MNT/incr/foobar | _filter_scratch
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same file content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
++
++echo "File digest in the new filesystem:"
++md5sum $SCRATCH_MNT/incr/foobar | _filter_scratch
++
++status=0
++exit
+diff --git a/tests/btrfs/188.out b/tests/btrfs/188.out
+new file mode 100644
+index 00000000..260988e6
+--- /dev/null
++++ b/tests/btrfs/188.out
+@@ -0,0 +1,13 @@
++QA output created by 188
++wrote 512000/512000 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
++At subvol SCRATCH_MNT/base
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
++At subvol SCRATCH_MNT/incr
++File digest in the original filesystem:
++816df6f64deba63b029ca19d880ee10a  SCRATCH_MNT/incr/foobar
++At subvol base
++At snapshot incr
++File digest in the new filesystem:
++816df6f64deba63b029ca19d880ee10a  SCRATCH_MNT/incr/foobar
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 44ee0dd9..d88a0666 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -190,3 +190,4 @@
+ 185 volume
+ 186 auto quick send volume
+ 187 auto send dedupe clone balance
++188 auto quick send prealloc punch
+-- 
+2.11.0
