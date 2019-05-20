@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.99]:57362 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:59402 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1730823AbfETIzx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 20 May 2019 04:55:53 -0400
+        id S1730385AbfETI7V (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 20 May 2019 04:59:21 -0400
 From: fdmanana@kernel.org
-Subject: [PATCH] fstests: btrfs, test send with no-holes enabled, fallocate and hole punching
-Date: Mon, 20 May 2019 09:55:47 +0100
-Message-Id: <20190520085547.29329-1-fdmanana@kernel.org>
+Subject: [PATCH] fstests: btrfs, test for send after cloning and truncating source file
+Date: Mon, 20 May 2019 09:59:15 +0100
+Message-Id: <20190520085915.29480-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
 Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
@@ -13,42 +13,46 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Filipe Manana <fdmanana@suse.com>
 
-Test that an incremental send with not corrupt data when the source
-filesystem has the no-holes feature enabled, a file has prealloc
-(unwritten) extents that start after its size and hole is punched (after
-the first snapshot is made) that removes all extents from some offset up
-to the file's size.
+Test that an incremental send receive does not issue clone operations
+that attempt to clone the last block of a file, with a size not aligned to
+the filesystem's sector size, into the middle of some other file. Such
+clone request causes the receiver to fail (with EINVAL), for kernels that
+include commit ac765f83f1397646 ("Btrfs: fix data corruption due to
+cloning of eof block"), or cause silent data corruption for older kernels.
 
-This currently fails on any kernel version starting from 3.16, and it's
-by a patch titled:
+This test is motived by a recent regression introduced in kernel 5.2-rc1,
+commit 040ee6120cb6706 ("Btrfs: send, improve clone range"), and the
+following patch fixes it:
 
- "Btrfs: incremental send, fix file corruption when no-holes feature is enabled"
+  "Btrfs: incremental send, fix emission of invalid clone perations"
 
 Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/btrfs/188     | 84 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/188.out | 13 +++++++++
- tests/btrfs/group   |  1 +
- 3 files changed, 98 insertions(+)
- create mode 100755 tests/btrfs/188
- create mode 100644 tests/btrfs/188.out
+ tests/btrfs/189     | 105 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/189.out |  21 +++++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 127 insertions(+)
+ create mode 100755 tests/btrfs/189
+ create mode 100644 tests/btrfs/189.out
 
-diff --git a/tests/btrfs/188 b/tests/btrfs/188
+diff --git a/tests/btrfs/189 b/tests/btrfs/189
 new file mode 100755
-index 00000000..36483035
+index 00000000..5f736d73
 --- /dev/null
-+++ b/tests/btrfs/188
-@@ -0,0 +1,84 @@
++++ b/tests/btrfs/189
+@@ -0,0 +1,105 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
 +#
-+# FS QA Test No. 188
++# FS QA Test No. 189
 +#
-+# Test that an incremental send with not corrupt data when the source filesystem
-+# has the no-holes feature enabled, a file has prealloc (unwritten) extents that
-+# start after its size and hole is punched (after the first snapshot is made)
-+# that removes all extents from some offset up to the file's size.
++# Test that an incremental send receive does not issue clone operations that
++# attempt to clone the last block of a file, with a size not aligned to the
++# filesystem's sector size, into the middle of some other file. Such clone
++# request causes the receiver to fail (with EINVAL), for kernels that include
++# commit ac765f83f1397646 ("Btrfs: fix data corruption due to cloning of eof
++# block"), or cause silent data corruption for older kernels.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -67,16 +71,14 @@ index 00000000..36483035
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/reflink
 +
 +# real QA test starts here
 +_supported_fs btrfs
 +_supported_os Linux
++_require_fssum
 +_require_test
-+_require_scratch
-+_require_btrfs_fs_feature "no_holes"
-+_require_btrfs_mkfs_feature "no-holes"
-+_require_xfs_io_command "fpunch"
-+_require_xfs_io_command "falloc" "-k"
++_require_scratch_reflink
 +
 +send_files_dir=$TEST_DIR/btrfs-test-$seq
 +
@@ -84,12 +86,13 @@ index 00000000..36483035
 +rm -fr $send_files_dir
 +mkdir $send_files_dir
 +
-+_scratch_mkfs "-O no-holes" >>$seqres.full 2>&1
++_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
 +
-+# Create our test file with a prealloc extent that starts beyond its size.
-+$XFS_IO_PROG -f -c "pwrite -S 0xab 0 500K" $SCRATCH_MNT/foobar | _filter_xfs_io
-+$XFS_IO_PROG -c "falloc -k 1200K 800K" $SCRATCH_MNT/foobar
++$XFS_IO_PROG -f -c "pwrite -S 0xb1 0 2M" $SCRATCH_MNT/foo | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite -S 0xc7 0 2M" $SCRATCH_MNT/bar | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite -S 0x4d 0 2M" $SCRATCH_MNT/baz | _filter_xfs_io
++$XFS_IO_PROG -f -c "pwrite -S 0xe2 0 2M" $SCRATCH_MNT/zoo | _filter_xfs_io
 +
 +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/base 2>&1 \
 +	| _filter_scratch
@@ -97,8 +100,22 @@ index 00000000..36483035
 +$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/base 2>&1 \
 +	| _filter_scratch
 +
-+# Now punch a hole that drops all the extents within the file's size.
-+$XFS_IO_PROG -c "fpunch 0 500K" $SCRATCH_MNT/foobar
++# Clone part of the extent from a higher offset to a lower offset of the same
++# file.
++$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 1560K 500K 100K" $SCRATCH_MNT/bar \
++	| _filter_xfs_io
++
++# Now clone from the previous file, same range, into the middle of another file,
++# such that the end offset at the destination is smaller than the destination's
++# file size.
++$XFS_IO_PROG -c "reflink $SCRATCH_MNT/bar 1560K 0 100K" $SCRATCH_MNT/zoo \
++	| _filter_xfs_io
++
++# Truncate the source file of the previous clone operation to a smaller size,
++# which ends up in the middle of the range of previous clone operation from file
++# bar to file bar. We want to check this doesn't confuse send to issue invalid
++# clone operations.
++$XFS_IO_PROG -c "truncate 550K" $SCRATCH_MNT/bar
 +
 +$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/incr 2>&1 \
 +	| _filter_scratch
@@ -106,11 +123,15 @@ index 00000000..36483035
 +$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/base -f $send_files_dir/2.snap \
 +	$SCRATCH_MNT/incr 2>&1 | _filter_scratch
 +
-+echo "File digest in the original filesystem:"
-+md5sum $SCRATCH_MNT/incr/foobar | _filter_scratch
++# Compute digests of the snapshot trees so that later we can compare against
++# digests of the trees in the new filesystem, to see if they match (no data or
++# metadata corruption happened).
++$FSSUM_PROG -A -f -w $send_files_dir/base.fssum $SCRATCH_MNT/base
++$FSSUM_PROG -A -f -w $send_files_dir/incr.fssum \
++	-x $SCRATCH_MNT/incr/base $SCRATCH_MNT/incr
 +
 +# Now recreate the filesystem by receiving both send streams and verify we get
-+# the same file content that the original filesystem had.
++# the same file contents that the original filesystem had.
 +_scratch_unmount
 +_scratch_mkfs >>$seqres.full 2>&1
 +_scratch_mount
@@ -118,38 +139,48 @@ index 00000000..36483035
 +$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
 +$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
 +
-+echo "File digest in the new filesystem:"
-+md5sum $SCRATCH_MNT/incr/foobar | _filter_scratch
++# Compute digests of the snapshot trees in the new filesystem and compare them
++# to the ones in the original filesystem, they must match.
++$FSSUM_PROG -r $send_files_dir/base.fssum $SCRATCH_MNT/base
++$FSSUM_PROG -r $send_files_dir/incr.fssum $SCRATCH_MNT/incr
 +
 +status=0
 +exit
-diff --git a/tests/btrfs/188.out b/tests/btrfs/188.out
+diff --git a/tests/btrfs/189.out b/tests/btrfs/189.out
 new file mode 100644
-index 00000000..260988e6
+index 00000000..0ae3cdce
 --- /dev/null
-+++ b/tests/btrfs/188.out
-@@ -0,0 +1,13 @@
-+QA output created by 188
-+wrote 512000/512000 bytes at offset 0
++++ b/tests/btrfs/189.out
+@@ -0,0 +1,21 @@
++QA output created by 189
++wrote 2097152/2097152 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 2097152/2097152 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 2097152/2097152 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 2097152/2097152 bytes at offset 0
 +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/base'
 +At subvol SCRATCH_MNT/base
++linked 102400/102400 bytes at offset 512000
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++linked 102400/102400 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
 +Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/incr'
 +At subvol SCRATCH_MNT/incr
-+File digest in the original filesystem:
-+816df6f64deba63b029ca19d880ee10a  SCRATCH_MNT/incr/foobar
 +At subvol base
 +At snapshot incr
-+File digest in the new filesystem:
-+816df6f64deba63b029ca19d880ee10a  SCRATCH_MNT/incr/foobar
++OK
++OK
 diff --git a/tests/btrfs/group b/tests/btrfs/group
-index 44ee0dd9..d88a0666 100644
+index d88a0666..37c7ffc2 100644
 --- a/tests/btrfs/group
 +++ b/tests/btrfs/group
-@@ -190,3 +190,4 @@
- 185 volume
+@@ -191,3 +191,4 @@
  186 auto quick send volume
  187 auto send dedupe clone balance
-+188 auto quick send prealloc punch
+ 188 auto quick send prealloc punch
++189 auto quick send clone
 -- 
 2.11.0
