@@ -1,154 +1,244 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:51752 "EHLO
+Received: from userp2130.oracle.com ([156.151.31.86]:60170 "EHLO
         userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1732280AbfETQ2y (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 12:28:54 -0400
-Date: Mon, 20 May 2019 09:28:47 -0700
+        with ESMTP id S1731223AbfETQg2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 12:36:28 -0400
+Date: Mon, 20 May 2019 09:36:24 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH v2] generic/530: fix shutdown failure of generic/530 in
- overlay
-Message-ID: <20190520162847.GA5334@magnolia>
-References: <1557727865-3745-1-git-send-email-jefflexu@linux.alibaba.com>
+Subject: Re: [PATCH ] xfs: validate unicode filesystem labels
+Message-ID: <20190520163624.GB5334@magnolia>
+References: <155724823157.2624769.14347748235168250309.stgit@magnolia>
+ <155724824306.2624769.17050442466246363524.stgit@magnolia>
+ <20190511073732.GH15846@desktop>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <1557727865-3745-1-git-send-email-jefflexu@linux.alibaba.com>
+In-Reply-To: <20190511073732.GH15846@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Jeffle Xu <jefflexu@linux.alibaba.com>
-Cc: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, May 13, 2019 at 02:11:05PM +0800, Jeffle Xu wrote:
-> Testcases are recommended to use  _require_scratch_shutdown()
-> and _scratch_shutdown() pair helper function to test and execute
-> shutdown.
+On Sat, May 11, 2019 at 03:37:32PM +0800, Eryu Guan wrote:
+> On Tue, May 07, 2019 at 09:57:23AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Make sure we can set and retrieve unicode labels, including emoji.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/739     |  169 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+> >  tests/xfs/739.out |    1 
+> >  tests/xfs/group   |    1 
+> >  3 files changed, 171 insertions(+)
+> >  create mode 100755 tests/xfs/739
+> >  create mode 100644 tests/xfs/739.out
+> > 
+> > 
+> > diff --git a/tests/xfs/739 b/tests/xfs/739
+> > new file mode 100755
+> > index 00000000..f8796cc3
+> > --- /dev/null
+> > +++ b/tests/xfs/739
+> > @@ -0,0 +1,169 @@
+> > +#! /bin/bash
+> > +# SPDX-License-Identifier: GPL-2.0+
+> > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
+> > +#
+> > +# FS QA Test No. 739
+> > +#
+> > +# Create a directory with multiple filenames that all appear the same
+> > +# (in unicode, anyway) but point to different inodes.  In theory all
+> > +# Linux filesystems should allow this (filenames are a sequence of
+> > +# arbitrary bytes) even if the user implications are horrifying.
+> > +#
+> > +seq=`basename "$0"`
+> > +seqres="$RESULT_DIR/$seq"
+> > +echo "QA output created by $seq"
+> > +
+> > +here=`pwd`
+> > +tmp=/tmp/$$
+> > +status=1    # failure is the default!
+> > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > +
+> > +_cleanup()
+> > +{
+> > +	rm -f $tmp.*
+> > +}
+> > +
+> > +# get standard environment, filters and checks
+> > +. ./common/rc
+> > +. ./common/filter
+> > +
+> > +_supported_os Linux
+> > +_supported_fs xfs
+> > +_require_scratch_nocheck
+> > +_require_xfs_io_command 'label'
+> > +
+> > +# Only run this on xfs if xfs_scrub is available and has the unicode checker
+> > +check_xfs_scrub() {
 > 
-> generic/530 formmerly used _require_scratch_shutdown() to test
-> whether the filesystem supports shutdown or not, while executed
-> the shutdown action in a raw binary (src/t_open_tmpfiles) rather
-> than the recommended _scratch_shutdown() helper. This will cause
-> a "shutdown: Inappropriate ioctl for device" error message when
-> testing overlay filesystem.
+> This function has multiple copies in different tests now, e.g.
+> generic/45{34} and xfs/262, make it a common helper?
+
+Ok.
+
+> > +	_scratch_mkfs >> $seqres.full 2>&1
+> > +	_scratch_mount >> $seqres.full 2>&1
+> > +	_supports_xfs_scrub "$SCRATCH_MNT" "$SCRATCH_DEV"
+> > +	res=$?
+> > +	_scratch_unmount
+> > +
+> > +	test $res -ne 0 && return 1
+> > +
+> > +	# We only care if xfs_scrub has unicode string support...
+> > +	if ! type ldd > /dev/null 2>&1 || \
+> > +	   ! ldd "${XFS_SCRUB_PROG}" | grep -q libicui18n; then
+> > +		return 1
+> > +	fi
+> > +
+> > +	return 0
+> > +}
+> > +
+> > +want_scrub=
+> > +check_xfs_scrub && want_scrub=yes
+> > +
+> > +filter_scrub() {
+> > +	grep 'Unicode' | sed -e 's/^.*Duplicate/Duplicate/g'
+> > +}
+> > +
+> > +maybe_scrub() {
+> > +	test "$want_scrub" = "yes" || return
+> > +
+> > +	output="$(LC_ALL="C.UTF-8" ${XFS_SCRUB_PROG} -v -n "${SCRATCH_MNT}" 2>&1)"
+> > +	echo "xfs_scrub output:" >> $seqres.full
+> > +	echo "$output" >> $seqres.full
+> > +	echo "$output" >> $tmp.scrub
+> > +}
+> > +
+> > +testlabel() {
+> > +	local label="$(echo -e "$1")"
+> > +	local expected_label="label = \"$label\""
+> > +
+> > +	echo "Formatting label '$1'." >> $seqres.full
+> > +	# First, let's see if we can recover the label when we set it
+> > +	# with mkfs.
+> > +	_scratch_mkfs -L "$label" >> $seqres.full 2>&1
+> > +	_scratch_mount >> $seqres.full 2>&1
+> > +	blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
+> > +	blkid -d -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
+> > +
+> > +	# Did it actually stick?
+> > +	local actual_label="$($XFS_IO_PROG -c label $SCRATCH_MNT)"
+> > +	echo "$actual_label" >> $seqres.full
+> > +
+> > +	if [ "${actual_label}" != "${expected_label}" ]; then
+> > +		echo "Saw '${expected_label}', expected '${actual_label}'."
+> > +	fi
+> > +	maybe_scrub
+> > +	_scratch_unmount
+> > +
+> > +	# Now let's try setting the label online to see what happens.
+> > +	echo "Setting label '$1'." >> $seqres.full
+> > +	_scratch_mkfs >> $seqres.full 2>&1
+> > +	_scratch_mount >> $seqres.full 2>&1
+> > +	$XFS_IO_PROG -c "label -s $label" $SCRATCH_MNT >> $seqres.full
+> > +	blkid -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
+> > +	blkid -d -s LABEL $SCRATCH_DEV | _filter_scratch | sed -e "s/ $//g" >> $seqres.full
+> > +	_scratch_cycle_mount
+> > +
+> > +	# Did it actually stick?
+> > +	local actual_label="$($XFS_IO_PROG -c label $SCRATCH_MNT)"
+> > +	echo "$actual_label" >> $seqres.full
+> > +
+> > +	if [ "${actual_label}" != "${expected_label}" ]; then
+> > +		echo "Saw '${expected_label}'; expected '${actual_label}'."
+> > +	fi
+> > +	maybe_scrub
+> > +	_scratch_unmount
+> > +}
+> > +
+> > +# Simple test
+> > +testlabel "simple"
+> > +
+> > +# Two different renderings of the same label
+> > +testlabel "caf\xc3\xa9.fs"
+> > +testlabel "cafe\xcc\x81.fs"
+> > +
+> > +# Arabic code point can expand into a muuuch longer series
+> > +testlabel "xfs_\xef\xb7\xba.fs"
+> > +
+> > +# Fake slash?
+> > +testlabel "urk\xc0\xafmoo"
+> > +
+> > +# Emoji: octopus butterfly owl giraffe
+> > +testlabel "\xf0\x9f\xa6\x91\xf0\x9f\xa6\x8b\xf0\x9f\xa6\x89"
+> > +
+> > +# unicode rtl widgets too...
+> > +testlabel "mo\xe2\x80\xaegnp.txt"
+> > +testlabel "motxt.png"
+> > +
+> > +# mixed-script confusables
+> > +testlabel "mixed_t\xce\xbfp"
+> > +testlabel "mixed_top"
+> > +
+> > +# single-script spoofing
+> > +testlabel "a\xe2\x80\x90b.fs"
+> > +testlabel "a-b.fs"
+> > +
+> > +testlabel "dz_dze.fs"
+> > +testlabel "dz_\xca\xa3e.fs"
+> > +
+> > +# symbols
+> > +testlabel "_Rs.fs"
+> > +testlabel "_\xe2\x82\xa8.fs"
+> > +
+> > +# zero width joiners
+> > +testlabel "moocow.fs"
+> > +testlabel "moo\xe2\x80\x8dcow.fs"
+> > +
+> > +# combining marks
+> > +testlabel "\xe1\x80\x9c\xe1\x80\xad\xe1\x80\xaf.fs"
+> > +testlabel "\xe1\x80\x9c\xe1\x80\xaf\xe1\x80\xad.fs"
+> > +
+> > +# fake dotdot entry
+> > +testlabel ".\xe2\x80\x8d"
+> > +testlabel "..\xe2\x80\x8d"
+> > +
+> > +# Did scrub choke on anything?
+> > +if [ "$want_scrub" = "yes" ]; then
+> > +	grep -q "^Warning.*gnp.txt.*suspicious text direction" $tmp.scrub || \
+> > +		echo "No complaints about direction overrides?"
+> > +	grep -q "^Warning.*control characters" $tmp.scrub || \
+> > +		echo "No complaints about control characters?"
+> > +fi
+> > +
+> > +# success, all done
+> > +status=0
+> > +exit
+> > diff --git a/tests/xfs/739.out b/tests/xfs/739.out
+> > new file mode 100644
+> > index 00000000..f4f653e2
+> > --- /dev/null
+> > +++ b/tests/xfs/739.out
+> > @@ -0,0 +1 @@
+> > +QA output created by 739
 > 
-> This patch simply move the shutdown action from the raw binary
-> into the packaged _scratch_shutdown() helper. That is, we remove
-> the "shutdown" interface of t_open_tmpfiles.c and call
-> _scratch_shutdown() in genric/530 and xfs/501.
-> 
-> thx
-> 
-> Signed-off-by: Jeffle Xu <jefflexu@linux.alibaba.com>
-> ---
->  src/t_open_tmpfiles.c | 19 -------------------
->  tests/generic/530     |  4 +++-
->  tests/xfs/501         |  4 +++-
->  3 files changed, 6 insertions(+), 21 deletions(-)
-> 
-> diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
-> index da9390f..0393c6b 100644
-> --- a/src/t_open_tmpfiles.c
-> +++ b/src/t_open_tmpfiles.c
-> @@ -24,7 +24,6 @@ static int min_fd = -1;
->  static int max_fd = -1;
->  static unsigned int nr_opened = 0;
->  static float start_time;
-> -static int shutdown_fs = 0;
->  
->  void clock_time(float *time)
->  {
-> @@ -69,22 +68,6 @@ void die(void)
->  				end_time - start_time);
->  		fflush(stdout);
->  
-> -		if (shutdown_fs) {
-> -			/*
-> -			 * Flush the log so that we have to process the
-> -			 * unlinked inodes the next time we mount.
-> -			 */
-> -			int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
-> -			int ret;
-> -
-> -			ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-> -			if (ret) {
-> -				perror("shutdown");
-> -				exit(2);
-> -			}
-> -			exit(0);
-> -		}
-> -
->  		clock_time(&start_time);
->  		for (fd = min_fd; fd <= max_fd; fd++)
->  			close(fd);
-> @@ -160,8 +143,6 @@ int main(int argc, char *argv[])
->  		if (ret)
->  			perror(argv[1]);
->  	}
-> -	if (argc > 2 && !strcmp(argv[2], "shutdown"))
-> -		shutdown_fs = 1;
->  
->  	clock_time(&start_time);
->  	while (1)
-> diff --git a/tests/generic/530 b/tests/generic/530
-> index b0d188b..56c6d32 100755
-> --- a/tests/generic/530
-> +++ b/tests/generic/530
-> @@ -49,7 +49,9 @@ ulimit -n $max_files
->  
->  # Open a lot of unlinked files
->  echo create >> $seqres.full
-> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-> +$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-> +_scratch_shutdown -f
-> +
->  
->  # Unmount to prove that we can clean it all
->  echo umount >> $seqres.full
-> diff --git a/tests/xfs/501 b/tests/xfs/501
-> index 974f341..4be9997 100755
-> --- a/tests/xfs/501
-> +++ b/tests/xfs/501
-> @@ -54,7 +54,9 @@ ulimit -n $max_files
->  
->  # Open a lot of unlinked files
->  echo create >> $seqres.full
-> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-> +$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
-> +_scratch_shutdown -f
+> "Silence is golden" ?
 
-NAK.
-
-The whole point of both of these tests is to check the operation of
-unlinked inode recovery after filesystem failure.  Moving the shutdown
-call so that it happens after t_open_tmpfiles exits and releases all the
-fds renders both tests completely broken and pointless.
-
-The _require_scratch_shutdown behavior overlayfs (as I was hinting
-before I left for vacation) is not particularly intuitive, and the next
-step ought to have been "Ok, the helpers' behavior is intentional and
-any program that wants to test shutdown has to use a file on the lower
-fs; how do we pass the necessary control handle to t_open_tmpfiles", not
-ripping out the offending code without figuring out what the test
-actually does.
-
-IOWS,
-
-_scratch_shutdown_handle() {
-	if [ $FSTYP = "overlayfs" ]; then
-		echo "$OVL_BASE_SCRATCH_MNT"
-	else
-		echo "$SCRATCH_MNT"
-	fi
-}
-
-$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown $(_scratch_shutdown_handle)
-
-Oh, it's already upstream, I'll send a revert later <grumble>...
+Ok.
 
 --D
 
-> +
->  
->  # Unmount to prove that we can clean it all
->  echo umount >> $seqres.full
-> -- 
-> 1.8.3.1
+> Thanks,
+> Eryu
 > 
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index e71b058f..c8620d72 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -501,3 +501,4 @@
+> >  501 auto quick unlink
+> >  502 auto quick unlink
+> >  503 auto copy metadump
+> > +739 auto quick mkfs label
+> > 
