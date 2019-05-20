@@ -1,11 +1,12 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:56030 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726164AbfETWbF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:05 -0400
-Subject: [PATCH 1/3] generic/530: revert commit f8f57747222
+Received: from userp2120.oracle.com ([156.151.31.85]:58446 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726164AbfETWbT (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:19 -0400
+Subject: [PATCH 3/3] generic,
+ xfs: use _scratch_shutdown instead of calling src/godown
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 20 May 2019 15:30:57 -0700
-Message-ID: <155839145791.62682.9311727733965110633.stgit@magnolia>
+Date: Mon, 20 May 2019 15:31:10 -0700
+Message-ID: <155839147057.62682.15559355049172171217.stgit@magnolia>
 In-Reply-To: <155839145160.62682.10916303376882370723.stgit@magnolia>
 References: <155839145160.62682.10916303376882370723.stgit@magnolia>
 MIME-Version: 1.0
@@ -18,91 +19,102 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Commit f8f57747222 ("generic/530: fix shutdown failure of generic/530 in
-overlay") improperly clears an overlayfs test failure by shutting down
-the filesystem after all the tempfiles are closed, which totally defeats
-the purpose of both generic/530 and xfs/501.  Revert this commit so we
-can fix it properly.
+Overlayfs introduces some complexity with regards to what path we have
+to use to shut down the scratch filesystem: it's SCRATCH_MNT for regular
+filesystems, but it's OVL_BASE_SCRATCH_MNT (i.e. the lower mount of the
+overlay) if overlayfs is enabled.  The helper works through all that, so
+we might as well use it.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- src/t_open_tmpfiles.c |   19 +++++++++++++++++++
- tests/generic/530     |    4 +---
- tests/xfs/501         |    4 +---
- 3 files changed, 21 insertions(+), 6 deletions(-)
+ tests/generic/050 |    2 +-
+ tests/xfs/051     |    2 +-
+ tests/xfs/079     |    2 +-
+ tests/xfs/121     |    4 ++--
+ tests/xfs/181     |    4 ++--
+ 5 files changed, 7 insertions(+), 7 deletions(-)
 
 
-diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
-index 0393c6bd..da9390fd 100644
---- a/src/t_open_tmpfiles.c
-+++ b/src/t_open_tmpfiles.c
-@@ -24,6 +24,7 @@ static int min_fd = -1;
- static int max_fd = -1;
- static unsigned int nr_opened = 0;
- static float start_time;
-+static int shutdown_fs = 0;
+diff --git a/tests/generic/050 b/tests/generic/050
+index 9a327165..91632d2d 100755
+--- a/tests/generic/050
++++ b/tests/generic/050
+@@ -92,7 +92,7 @@ echo "touch files"
+ touch $SCRATCH_MNT/{0,1,2,3,4,5,6,7,8,9}{0,1,2,3,4,5,6,7,8,9}
  
- void clock_time(float *time)
- {
-@@ -68,6 +69,22 @@ void die(void)
- 				end_time - start_time);
- 		fflush(stdout);
+ echo "going down:"
+-src/godown -f $SCRATCH_MNT
++_scratch_shutdown -f
  
-+		if (shutdown_fs) {
-+			/*
-+			 * Flush the log so that we have to process the
-+			 * unlinked inodes the next time we mount.
-+			 */
-+			int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
-+			int ret;
-+
-+			ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-+			if (ret) {
-+				perror("shutdown");
-+				exit(2);
-+			}
-+			exit(0);
-+		}
-+
- 		clock_time(&start_time);
- 		for (fd = min_fd; fd <= max_fd; fd++)
- 			close(fd);
-@@ -143,6 +160,8 @@ int main(int argc, char *argv[])
- 		if (ret)
- 			perror(argv[1]);
- 	}
-+	if (argc > 2 && !strcmp(argv[2], "shutdown"))
-+		shutdown_fs = 1;
+ echo "unmounting shutdown filesystem:"
+ _scratch_unmount 2>&1 | _filter_scratch
+diff --git a/tests/xfs/051 b/tests/xfs/051
+index bcc824f8..105fa9ff 100755
+--- a/tests/xfs/051
++++ b/tests/xfs/051
+@@ -47,7 +47,7 @@ _scratch_mount
+ # recovery.
+ $FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT > /dev/null 2>&1 &
+ sleep 5
+-src/godown -f $SCRATCH_MNT
++_scratch_shutdown -f
+ $KILLALL_PROG -q $FSSTRESS_PROG
+ wait
+ _scratch_unmount
+diff --git a/tests/xfs/079 b/tests/xfs/079
+index bf965a7f..67250495 100755
+--- a/tests/xfs/079
++++ b/tests/xfs/079
+@@ -56,7 +56,7 @@ _scratch_mount "-o logbsize=32k"
+ # Run a workload to dirty the log, wait a bit and shutdown the fs.
+ $FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 99999999 >> $seqres.full 2>&1 &
+ sleep 10
+-./src/godown -f $SCRATCH_MNT
++_scratch_shutdown -f
+ wait
  
- 	clock_time(&start_time);
- 	while (1)
-diff --git a/tests/generic/530 b/tests/generic/530
-index 56c6d32a..b0d188b1 100755
---- a/tests/generic/530
-+++ b/tests/generic/530
-@@ -49,9 +49,7 @@ ulimit -n $max_files
+ # Remount with a different log buffer size. Going from 32k to 64k increases the
+diff --git a/tests/xfs/121 b/tests/xfs/121
+index d82a367f..2e3914b7 100755
+--- a/tests/xfs/121
++++ b/tests/xfs/121
+@@ -52,7 +52,7 @@ src/multi_open_unlink -f $SCRATCH_MNT/test_file -n $num_files -s $delay &
+ sleep 3
  
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
--_scratch_shutdown -f
--
-+$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
+ echo "godown"
+-src/godown -v -f $SCRATCH_MNT >> $seqres.full
++_scratch_shutdown -v -f >> $seqres.full
  
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
-diff --git a/tests/xfs/501 b/tests/xfs/501
-index 4be9997c..974f3414 100755
---- a/tests/xfs/501
-+++ b/tests/xfs/501
-@@ -54,9 +54,7 @@ ulimit -n $max_files
+ # time for multi_open_unlink to exit out after its delay
+ # so we have no references and can unmount
+@@ -69,7 +69,7 @@ _try_scratch_mount $mnt >>$seqres.full 2>&1 \
+     || _fail "mount failed: $mnt $MOUNT_OPTIONS"
  
- # Open a lot of unlinked files
- echo create >> $seqres.full
--$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
--_scratch_shutdown -f
--
-+$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
+ echo "godown"
+-src/godown -v -f $SCRATCH_MNT >> $seqres.full
++_scratch_shutdown -v -f >> $seqres.full
  
- # Unmount to prove that we can clean it all
- echo umount >> $seqres.full
+ echo "unmount"
+ _scratch_unmount
+diff --git a/tests/xfs/181 b/tests/xfs/181
+index 882a974b..dba69a70 100755
+--- a/tests/xfs/181
++++ b/tests/xfs/181
+@@ -65,7 +65,7 @@ pid=$!
+ sleep 10
+ 
+ echo "godown"
+-src/godown -v -f $SCRATCH_MNT >> $seqres.full
++_scratch_shutdown -v -f >> $seqres.full
+ 
+ # kill the multi_open_unlink
+ kill $pid 2>/dev/null
+@@ -83,7 +83,7 @@ _scratch_mount $mnt >>$seqres.full 2>&1 \
+     || _fail "mount failed: $mnt $MOUNT_OPTIONS"
+ 
+ echo "godown"
+-src/godown -v -f $SCRATCH_MNT >> $seqres.full
++_scratch_shutdown -v -f >> $seqres.full
+ 
+ echo "unmount"
+ _scratch_unmount
