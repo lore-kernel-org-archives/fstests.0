@@ -1,157 +1,127 @@
-Received: from mail-yb1-f194.google.com ([209.85.219.194]:41523 "EHLO
-        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725793AbfEUFMy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 May 2019 01:12:54 -0400
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:32847 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725798AbfEUFEf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 May 2019 01:04:35 -0400
 MIME-Version: 1.0
-References: <155839145160.62682.10916303376882370723.stgit@magnolia> <155839146420.62682.1995545484813176181.stgit@magnolia>
-In-Reply-To: <155839146420.62682.1995545484813176181.stgit@magnolia>
+References: <155839145160.62682.10916303376882370723.stgit@magnolia> <155839147057.62682.15559355049172171217.stgit@magnolia>
+In-Reply-To: <155839147057.62682.15559355049172171217.stgit@magnolia>
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 21 May 2019 08:12:41 +0300
-Message-ID: <CAOQ4uxjj6HtEOk7FWkabZn1x34+gEUVLqqiU0JkcEtddQf0j_g@mail.gmail.com>
-Subject: Re: [PATCH 2/3] generic/530, xfs/501: pass fs shutdown handle to t_open_tmpfiles
+Date: Tue, 21 May 2019 08:04:23 +0300
+Message-ID: <CAOQ4uxhsiM-tCB+RV9P7z6kK_kEwxKpoeAFfc8Y5YwC8F6C40g@mail.gmail.com>
+Subject: Re: [PATCH 3/3] generic, xfs: use _scratch_shutdown instead of
+ calling src/godown
 Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: Eryu Guan <guaneryu@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, Jeffle Xu <jefflexu@linux.alibaba.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, May 21, 2019 at 1:33 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+On Tue, May 21, 2019 at 1:31 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
 >
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 >
-> So it turns out that overlayfs can't pass FS_IOC_SHUTDOWN to the lower
-> filesystems and so xfstests works around this by creating shutdown
-> helpers for the scratch fs to direct the shutdown ioctl to wherever it
-> needs to go to shut down the filesystem -- SCRATCH_MNT on normal
-> filesystems and OVL_BASE_SCRATCH_MNT when -overlay is enabled.  This
-> means that t_open_tmpfiles cannot simply use one of the open tempfiles
-> to shut down the filesystem.
->
-> Commit f8f57747222 tried to "fix" this by ripping the shutdown code out,
-> but this made the tests useless.  Fix this instead by creating a
-> xfstests helper to return a path that can be used to shut down the
-> filesystem and then pass that path to t_open_tmpfiles so that we can
-> shut down the filesystem when overlayfs is enabled.
+> Overlayfs introduces some complexity with regards to what path we have
+> to use to shut down the scratch filesystem: it's SCRATCH_MNT for regular
+> filesystems, but it's OVL_BASE_SCRATCH_MNT (i.e. the lower mount of the
+> overlay) if overlayfs is enabled.  The helper works through all that, so
+> we might as well use it.
 >
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-Thanks for sorting that out.
+Thanks for cleaning that up
 
 Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
 > ---
->  common/rc             |   11 +++++++++++
->  src/t_open_tmpfiles.c |   20 +++++++++++++-------
->  tests/generic/530     |    2 +-
->  tests/xfs/501         |    2 +-
->  4 files changed, 26 insertions(+), 9 deletions(-)
+>  tests/generic/050 |    2 +-
+>  tests/xfs/051     |    2 +-
+>  tests/xfs/079     |    2 +-
+>  tests/xfs/121     |    4 ++--
+>  tests/xfs/181     |    4 ++--
+>  5 files changed, 7 insertions(+), 7 deletions(-)
 >
 >
-> diff --git a/common/rc b/common/rc
-> index 27c8bb7a..f577e5e3 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -393,6 +393,17 @@ _scratch_shutdown()
->         fi
->  }
+> diff --git a/tests/generic/050 b/tests/generic/050
+> index 9a327165..91632d2d 100755
+> --- a/tests/generic/050
+> +++ b/tests/generic/050
+> @@ -92,7 +92,7 @@ echo "touch files"
+>  touch $SCRATCH_MNT/{0,1,2,3,4,5,6,7,8,9}{0,1,2,3,4,5,6,7,8,9}
 >
-> +# Return a file path that can be used to shut down the scratch filesystem.
-> +# Caller should _require_scratch_shutdown before using this.
-> +_scratch_shutdown_handle()
-> +{
-> +       if [ $FSTYP = "overlay" ]; then
-> +               echo $OVL_BASE_SCRATCH_MNT
-> +       else
-> +               echo $SCRATCH_MNT
-> +       fi
-> +}
-> +
->  _test_mount()
->  {
->      if [ "$FSTYP" == "overlay" ]; then
-> diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
-> index da9390fd..258b0c95 100644
-> --- a/src/t_open_tmpfiles.c
-> +++ b/src/t_open_tmpfiles.c
-> @@ -24,7 +24,7 @@ static int min_fd = -1;
->  static int max_fd = -1;
->  static unsigned int nr_opened = 0;
->  static float start_time;
-> -static int shutdown_fs = 0;
-> +static int shutdown_fd = -1;
+>  echo "going down:"
+> -src/godown -f $SCRATCH_MNT
+> +_scratch_shutdown -f
 >
->  void clock_time(float *time)
->  {
-> @@ -69,7 +69,7 @@ void die(void)
->                                 end_time - start_time);
->                 fflush(stdout);
+>  echo "unmounting shutdown filesystem:"
+>  _scratch_unmount 2>&1 | _filter_scratch
+> diff --git a/tests/xfs/051 b/tests/xfs/051
+> index bcc824f8..105fa9ff 100755
+> --- a/tests/xfs/051
+> +++ b/tests/xfs/051
+> @@ -47,7 +47,7 @@ _scratch_mount
+>  # recovery.
+>  $FSSTRESS_PROG -n 9999 -p 2 -w -d $SCRATCH_MNT > /dev/null 2>&1 &
+>  sleep 5
+> -src/godown -f $SCRATCH_MNT
+> +_scratch_shutdown -f
+>  $KILLALL_PROG -q $FSSTRESS_PROG
+>  wait
+>  _scratch_unmount
+> diff --git a/tests/xfs/079 b/tests/xfs/079
+> index bf965a7f..67250495 100755
+> --- a/tests/xfs/079
+> +++ b/tests/xfs/079
+> @@ -56,7 +56,7 @@ _scratch_mount "-o logbsize=32k"
+>  # Run a workload to dirty the log, wait a bit and shutdown the fs.
+>  $FSSTRESS_PROG -d $SCRATCH_MNT -p 4 -n 99999999 >> $seqres.full 2>&1 &
+>  sleep 10
+> -./src/godown -f $SCRATCH_MNT
+> +_scratch_shutdown -f
+>  wait
 >
-> -               if (shutdown_fs) {
-> +               if (shutdown_fd >= 0) {
->                         /*
->                          * Flush the log so that we have to process the
->                          * unlinked inodes the next time we mount.
-> @@ -77,7 +77,7 @@ void die(void)
->                         int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
->                         int ret;
+>  # Remount with a different log buffer size. Going from 32k to 64k increases the
+> diff --git a/tests/xfs/121 b/tests/xfs/121
+> index d82a367f..2e3914b7 100755
+> --- a/tests/xfs/121
+> +++ b/tests/xfs/121
+> @@ -52,7 +52,7 @@ src/multi_open_unlink -f $SCRATCH_MNT/test_file -n $num_files -s $delay &
+>  sleep 3
 >
-> -                       ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
-> +                       ret = ioctl(shutdown_fd, XFS_IOC_GOINGDOWN, &flag);
->                         if (ret) {
->                                 perror("shutdown");
->                                 exit(2);
-> @@ -148,8 +148,9 @@ void leak_tmpfile(void)
+>  echo "godown"
+> -src/godown -v -f $SCRATCH_MNT >> $seqres.full
+> +_scratch_shutdown -v -f >> $seqres.full
 >
->  /*
->   * Try to put as many files on the unlinked list and then kill them.
-> - * The first argument is a directory to chdir into; passing any second arg
-> - * will shut down the fs instead of closing files.
-> + * The first argument is a directory to chdir into; the second argumennt (if
-> + * provided) is a file path that will be opened and then used to shut down the
-> + * fs before the program exits.
->   */
->  int main(int argc, char *argv[])
->  {
-> @@ -160,8 +161,13 @@ int main(int argc, char *argv[])
->                 if (ret)
->                         perror(argv[1]);
->         }
-> -       if (argc > 2 && !strcmp(argv[2], "shutdown"))
-> -               shutdown_fs = 1;
-> +       if (argc > 2) {
-> +               shutdown_fd = open(argv[2], O_RDONLY);
-> +               if (shutdown_fd < 0) {
-> +                       perror(argv[2]);
-> +                       return 1;
-> +               }
-> +       }
+>  # time for multi_open_unlink to exit out after its delay
+>  # so we have no references and can unmount
+> @@ -69,7 +69,7 @@ _try_scratch_mount $mnt >>$seqres.full 2>&1 \
+>      || _fail "mount failed: $mnt $MOUNT_OPTIONS"
 >
->         clock_time(&start_time);
->         while (1)
-> diff --git a/tests/generic/530 b/tests/generic/530
-> index b0d188b1..cb874ace 100755
-> --- a/tests/generic/530
-> +++ b/tests/generic/530
-> @@ -49,7 +49,7 @@ ulimit -n $max_files
+>  echo "godown"
+> -src/godown -v -f $SCRATCH_MNT >> $seqres.full
+> +_scratch_shutdown -v -f >> $seqres.full
 >
->  # Open a lot of unlinked files
->  echo create >> $seqres.full
-> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-> +$here/src/t_open_tmpfiles $SCRATCH_MNT $(_scratch_shutdown_handle) >> $seqres.full
+>  echo "unmount"
+>  _scratch_unmount
+> diff --git a/tests/xfs/181 b/tests/xfs/181
+> index 882a974b..dba69a70 100755
+> --- a/tests/xfs/181
+> +++ b/tests/xfs/181
+> @@ -65,7 +65,7 @@ pid=$!
+>  sleep 10
 >
->  # Unmount to prove that we can clean it all
->  echo umount >> $seqres.full
-> diff --git a/tests/xfs/501 b/tests/xfs/501
-> index 974f3414..4be03b31 100755
-> --- a/tests/xfs/501
-> +++ b/tests/xfs/501
-> @@ -54,7 +54,7 @@ ulimit -n $max_files
+>  echo "godown"
+> -src/godown -v -f $SCRATCH_MNT >> $seqres.full
+> +_scratch_shutdown -v -f >> $seqres.full
 >
->  # Open a lot of unlinked files
->  echo create >> $seqres.full
-> -$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
-> +$here/src/t_open_tmpfiles $SCRATCH_MNT $(_scratch_shutdown_handle) >> $seqres.full
+>  # kill the multi_open_unlink
+>  kill $pid 2>/dev/null
+> @@ -83,7 +83,7 @@ _scratch_mount $mnt >>$seqres.full 2>&1 \
+>      || _fail "mount failed: $mnt $MOUNT_OPTIONS"
 >
->  # Unmount to prove that we can clean it all
->  echo umount >> $seqres.full
+>  echo "godown"
+> -src/godown -v -f $SCRATCH_MNT >> $seqres.full
+> +_scratch_shutdown -v -f >> $seqres.full
+>
+>  echo "unmount"
+>  _scratch_unmount
 >
