@@ -1,49 +1,112 @@
-Received: from mx2.suse.de ([195.135.220.15]:52700 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726138AbfEUI2k (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 21 May 2019 04:28:40 -0400
-From: Luis Henriques <lhenriques@suse.com>
-Subject: [PATCH v2] src/attr_replace_test: limit size of extended attribute value
-Date: Tue, 21 May 2019 09:28:36 +0100
-Message-Id: <20190521082836.4482-1-lhenriques@suse.com>
-In-Reply-To: <fa6146ed-e9c3-20da-0baa-36b9ceafbf8f@suse.com>
-References: <fa6146ed-e9c3-20da-0baa-36b9ceafbf8f@suse.com>
+Received: from mail-yw1-f67.google.com ([209.85.161.67]:33725 "EHLO
+        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725793AbfEUFCJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 May 2019 01:02:09 -0400
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+References: <155839145160.62682.10916303376882370723.stgit@magnolia> <155839145791.62682.9311727733965110633.stgit@magnolia>
+In-Reply-To: <155839145791.62682.9311727733965110633.stgit@magnolia>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 21 May 2019 08:01:57 +0300
+Message-ID: <CAOQ4uxiaU2aJ6h1NGv=S8guuFgbPEQ+HwhQ_gPbsCFXmy+Ju+g@mail.gmail.com>
+Subject: Re: [PATCH 1/3] generic/530: revert commit f8f57747222
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, Nikolay Borisov <nborisov@suse.com>
-Cc: fstests@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, linux-xfs <linux-xfs@vger.kernel.org>, Jeffle Xu <jefflexu@linux.alibaba.com>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-The maximum size for extended attribute values is 65536 (XATTR_SIZE_MAX).
-Since there are filesystems that can set blksize to really big values
-(CephFS for example has a default of 4M), it's easy to have this test
-failing with fsetxattr returning -E2BIG.
+On Tue, May 21, 2019 at 1:31 AM Darrick J. Wong <darrick.wong@oracle.com> wrote:
+>
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+>
+> Commit f8f57747222 ("generic/530: fix shutdown failure of generic/530 in
+> overlay") improperly clears an overlayfs test failure by shutting down
+> the filesystem after all the tempfiles are closed, which totally defeats
+> the purpose of both generic/530 and xfs/501.  Revert this commit so we
+> can fix it properly.
+>
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Reviewed-by: Amir Goldstein <amir73il@gmail.com>
 
-Cc: Darrick J. Wong <darrick.wong@oracle.com>
-Signed-off-by: Luis Henriques <lhenriques@suse.com>
----
- src/attr_replace_test.c | 3 +++
- 1 file changed, 3 insertions(+)
-
-diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
-index 0720bfdc18ab..cca8dcf8ff60 100644
---- a/src/attr_replace_test.c
-+++ b/src/attr_replace_test.c
-@@ -9,6 +9,8 @@
- #include <sys/types.h>
- #include <sys/xattr.h>
- #include <sys/stat.h>
-+#include <sys/param.h>
-+#include <linux/limits.h>
- 
- #define die() do { perror(""); \
- fprintf(stderr, "error at line %d\n", __LINE__); \
-@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
- 	size = sbuf.st_blksize * 3 / 4;
- 	if (!size)
- 		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
-+	size = MIN(size, XATTR_SIZE_MAX);
- 	value = malloc(size);
- 	if (!value)
- 		fail("Failed to allocate memory\n");
+> ---
+>  src/t_open_tmpfiles.c |   19 +++++++++++++++++++
+>  tests/generic/530     |    4 +---
+>  tests/xfs/501         |    4 +---
+>  3 files changed, 21 insertions(+), 6 deletions(-)
+>
+>
+> diff --git a/src/t_open_tmpfiles.c b/src/t_open_tmpfiles.c
+> index 0393c6bd..da9390fd 100644
+> --- a/src/t_open_tmpfiles.c
+> +++ b/src/t_open_tmpfiles.c
+> @@ -24,6 +24,7 @@ static int min_fd = -1;
+>  static int max_fd = -1;
+>  static unsigned int nr_opened = 0;
+>  static float start_time;
+> +static int shutdown_fs = 0;
+>
+>  void clock_time(float *time)
+>  {
+> @@ -68,6 +69,22 @@ void die(void)
+>                                 end_time - start_time);
+>                 fflush(stdout);
+>
+> +               if (shutdown_fs) {
+> +                       /*
+> +                        * Flush the log so that we have to process the
+> +                        * unlinked inodes the next time we mount.
+> +                        */
+> +                       int flag = XFS_FSOP_GOING_FLAGS_LOGFLUSH;
+> +                       int ret;
+> +
+> +                       ret = ioctl(min_fd, XFS_IOC_GOINGDOWN, &flag);
+> +                       if (ret) {
+> +                               perror("shutdown");
+> +                               exit(2);
+> +                       }
+> +                       exit(0);
+> +               }
+> +
+>                 clock_time(&start_time);
+>                 for (fd = min_fd; fd <= max_fd; fd++)
+>                         close(fd);
+> @@ -143,6 +160,8 @@ int main(int argc, char *argv[])
+>                 if (ret)
+>                         perror(argv[1]);
+>         }
+> +       if (argc > 2 && !strcmp(argv[2], "shutdown"))
+> +               shutdown_fs = 1;
+>
+>         clock_time(&start_time);
+>         while (1)
+> diff --git a/tests/generic/530 b/tests/generic/530
+> index 56c6d32a..b0d188b1 100755
+> --- a/tests/generic/530
+> +++ b/tests/generic/530
+> @@ -49,9 +49,7 @@ ulimit -n $max_files
+>
+>  # Open a lot of unlinked files
+>  echo create >> $seqres.full
+> -$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
+> -_scratch_shutdown -f
+> -
+> +$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
+>
+>  # Unmount to prove that we can clean it all
+>  echo umount >> $seqres.full
+> diff --git a/tests/xfs/501 b/tests/xfs/501
+> index 4be9997c..974f3414 100755
+> --- a/tests/xfs/501
+> +++ b/tests/xfs/501
+> @@ -54,9 +54,7 @@ ulimit -n $max_files
+>
+>  # Open a lot of unlinked files
+>  echo create >> $seqres.full
+> -$here/src/t_open_tmpfiles $SCRATCH_MNT >> $seqres.full
+> -_scratch_shutdown -f
+> -
+> +$here/src/t_open_tmpfiles $SCRATCH_MNT shutdown >> $seqres.full
+>
+>  # Unmount to prove that we can clean it all
+>  echo umount >> $seqres.full
+>
