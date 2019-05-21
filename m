@@ -1,237 +1,49 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:46544 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725794AbfEUFds (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 21 May 2019 01:33:48 -0400
-Received: by mail-yw1-f66.google.com with SMTP id a130so6812332ywe.13
-        for <fstests@vger.kernel.org>; Mon, 20 May 2019 22:33:47 -0700 (PDT)
+Received: from mx2.suse.de ([195.135.220.15]:52700 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726138AbfEUI2k (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 21 May 2019 04:28:40 -0400
+From: Luis Henriques <lhenriques@suse.com>
+Subject: [PATCH v2] src/attr_replace_test: limit size of extended attribute value
+Date: Tue, 21 May 2019 09:28:36 +0100
+Message-Id: <20190521082836.4482-1-lhenriques@suse.com>
+In-Reply-To: <fa6146ed-e9c3-20da-0baa-36b9ceafbf8f@suse.com>
+References: <fa6146ed-e9c3-20da-0baa-36b9ceafbf8f@suse.com>
 MIME-Version: 1.0
-References: <20181203064256.26768-1-david@fromorbit.com> <20181203064256.26768-4-david@fromorbit.com>
-In-Reply-To: <20181203064256.26768-4-david@fromorbit.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 21 May 2019 08:33:36 +0300
-Message-ID: <CAOQ4uxjOz6co_7mgz24y+cSkTyut29NsCL8L4XTabYvSkd2_9g@mail.gmail.com>
-Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Dave Chinner <david@fromorbit.com>
-Cc: fstests <fstests@vger.kernel.org>, Olga Kornievskaia <kolga@netapp.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>, Nikolay Borisov <nborisov@suse.com>
+Cc: fstests@vger.kernel.org, Luis Henriques <lhenriques@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Dec 3, 2018 at 8:43 AM Dave Chinner <david@fromorbit.com> wrote:
->
-> From: Dave Chinner <dchinner@redhat.com>
->
-> Test that copy_file_range will return the correct errors for various
-> error conditions and boundary constraints.
+The maximum size for extended attribute values is 65536 (XATTR_SIZE_MAX).
+Since there are filesystems that can set blksize to really big values
+(CephFS for example has a default of 4M), it's easy to have this test
+failing with fsetxattr returning -E2BIG.
 
-Below are the changes I have made to V2 on this test in accordance to agreed
-change of behavior (i.e. short copy up to EOF).
+Cc: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Luis Henriques <lhenriques@suse.com>
+---
+ src/attr_replace_test.c | 3 +++
+ 1 file changed, 3 insertions(+)
 
-This is a heads up before posting to verify my interpretation is correct.
-I still have more testing to do before posting.
-
->
-> Signed-off-by: Dave Chinner <dchinner@redhat.com>
-> ---
->  tests/generic/530     | 165 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/530.out |  62 ++++++++++++++++
->  tests/generic/group   |   1 +
->  3 files changed, 228 insertions(+)
->  create mode 100755 tests/generic/530
->  create mode 100644 tests/generic/530.out
->
-> diff --git a/tests/generic/530 b/tests/generic/530
-> new file mode 100755
-> index 000000000000..42243cc70914
-> --- /dev/null
-> +++ b/tests/generic/530
-> @@ -0,0 +1,165 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test No. 530
-> +#
-> +# Exercise copy_file_range() syscall error conditions.
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1       # failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> +
-> +_cleanup()
-> +{
-> +       cd /
-> +       rm -rf $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +
-> +# real QA test starts here
-> +_supported_os Linux
-> +_supported_fs generic
-> +
-> +rm -f $seqres.full
-> +
-> +_require_test
-> +_require_scratch
-> +_require_xfs_io_command "copy_range"
-> +_require_user
-> +_require_test_swapfile
-
-Testing on scratch dev, as cross-dev test was split to a new test.
-
-> +
-> +_scratch_mkfs 2>&1 >> $seqres.full
-> +_scratch_mount
-> +
-> +
-> +testdir=$TEST_DIR/test-$seq
-> +rm -rf $testdir
-> +mkdir $testdir
-> +rm -f $seqres.full
-> +
-> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
-> +chmod 777 $testdir/file
-> +
-> +echo swap files return ETXTBUSY
-> +_format_swapfile $testdir/swapfile 16m
-> +swapon $testdir/swapfile
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
-> +swapoff $testdir/swapfile
-> +
-> +# we have to open the file to be immutable rw and hold it open over the
-> +# chattr command to set it immutable, otherwise we won't be able to open it for
-> +# writing after it's been made immutable. (i.e. would exercise file mode checks,
-> +# not immutable inode flag checks).
-> +echo
-> +echo immutable file returns EPERM
-> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 64k" -c fsync $testdir/immutable | _filter_xfs_io
-> +$XFS_IO_PROG -f -c "chattr +i" -c "copy_range -l 32k $testdir/file" $testdir/immutable
-> +$XFS_IO_PROG -f -r -c "chattr -i" $testdir/immutable
-> +rm -f $testdir/immutable
-> +
-> +# can't test this as root, because root is allowed to write to files do not
-> +# have write permission bits set.
-> +echo
-> +echo no write perms on destination returns EACCES
-
-This test case was removed, because it does not comply with current behavior
-of write(2).
-
-> +chown $qa_user:12345 $testdir/copy
-> +su $qa_user -c "$XFS_IO_PROG -f -c 'chmod -r' -c 'copy_range -l 32k $testdir/file' $testdir/copy"
-> +rm -f $testdir/copy
-> +
-> +echo
-> +echo source range overlaps EOF returns EINVAL
-> +$XFS_IO_PROG -f -c "copy_range -s 112k -l 32k $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo source range beyond EOF returns EINVAL
-> +$XFS_IO_PROG -f -c "copy_range -s 128k -l 32k $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo source range overlaps destination range in same file returns EINVAL
-> +$XFS_IO_PROG -f -c "copy_range -s 32k -d 48k -l 32k $testdir/file" $testdir/file
-> +
-> +echo
-> +echo destination file O_RDONLY returns EBADF
-> +$XFS_IO_PROG -f -r -c "copy_range -l 32k $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo destination file O_APPEND returns EBADF
-> +$XFS_IO_PROG -f -a -c "copy_range -l 32k $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo source/destination as directory returns EISDIR
-> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
-> +
-> +echo
-> +echo source/destination as blkdev returns EINVAL
-> +mknod $testdir/dev1 b 1 3
-> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev1
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev1" $testdir/copy
-> +
-> +echo
-> +echo source/destination as chardev returns EINVAL
-> +mknod $testdir/dev2 c 1 3
-> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev2
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev2" $testdir/copy
-> +
-> +echo
-> +echo source/destination as FIFO returns EINVAL
-> +mkfifo $testdir/fifo
-> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/fifo
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/fifo" $testdir/copy
-> +
-> +max_off=$((8 * 2**60 - 65536 - 1))
-> +min_off=65537
-> +
-> +echo
-> +echo length beyond 8EiB wraps around 0 returns EOVERFLOW
-> +$XFS_IO_PROG -f -c "copy_range -l 10e -s $max_off $testdir/file" $testdir/copy
-> +$XFS_IO_PROG -f -c "copy_range -l 10e -d $max_off $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo source range beyond 8EiB returns EINVAL
-
-With accordance to implemented behavior and short copy to EOF,
-this was changed to:
-
-echo source range beyond 8TiB returns EFBIG
-$XFS_IO_PROG -c "copy_range -s $max_off -l $min_off -d 0
-$testdir/file" $testdir/copy
-
-> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/file
-> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/copy
-
-These ftruncates would fail with EFBIG anyway...
-
-> +$XFS_IO_PROG -c "copy_range -s $max_off -l $min_off -d 0 $testdir/file" $testdir/copy
-> +$XFS_IO_PROG -c "copy_range -s $min_off -l $max_off -d 0 $testdir/file" $testdir/copy
-
-This second test does not fail because of short copy.
-
-> +
-> +echo
-> +echo destination range beyond 8TiB returns EFBIG
-> +$XFS_IO_PROG -c "copy_range -l $min_off -s 0 -d $max_off $testdir/file" $testdir/copy
-> +
-> +echo
-> +echo destination larger than rlimit returns EFBIG
-> +rm -f $testdir/copy
-> +$XFS_IO_PROG -c "truncate 128k" $testdir/file
-> +
-> +# need a wrapper so the "File size limit exceeded" error can be filtered
-> +do_rlimit_copy()
-> +{
-> +       $XFS_IO_PROG -f -c "copy_range -l 32k -s 0 -d 16m $testdir/file" $testdir/copy
-> +}
-> +
-> +ulimit -f $((8 * 1024))
-> +ulimit -c 0
-> +do_rlimit_copy 2>&1 | grep -o "File size limit exceeded"
-> +ulimit -f unlimited
-> +
-> +echo
-> +echo copy across devices
-> +$XFS_IO_PROG -f -c "copy_range -l 128k $testdir/file" $SCRATCH_MNT/copy
-> +cmp $testdir/file $SCRATCH_MNT/copy
-> +echo "md5sums after xdev copy:"
-> +md5sum $testdir/file $SCRATCH_MNT/copy | _filter_test_dir | _filter_scratch
-> +
-
-Cross-device copy test was split out to a new test, see WIP:
-https://github.com/amir73il/xfstests/commits/copy_file_range
-
-Thanks,
-Amir.
+diff --git a/src/attr_replace_test.c b/src/attr_replace_test.c
+index 0720bfdc18ab..cca8dcf8ff60 100644
+--- a/src/attr_replace_test.c
++++ b/src/attr_replace_test.c
+@@ -9,6 +9,8 @@
+ #include <sys/types.h>
+ #include <sys/xattr.h>
+ #include <sys/stat.h>
++#include <sys/param.h>
++#include <linux/limits.h>
+ 
+ #define die() do { perror(""); \
+ fprintf(stderr, "error at line %d\n", __LINE__); \
+@@ -44,6 +46,7 @@ int main(int argc, char *argv[])
+ 	size = sbuf.st_blksize * 3 / 4;
+ 	if (!size)
+ 		fail("Invalid st_blksize(%ld)\n", sbuf.st_blksize);
++	size = MIN(size, XATTR_SIZE_MAX);
+ 	value = malloc(size);
+ 	if (!value)
+ 		fail("Failed to allocate memory\n");
