@@ -1,244 +1,237 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:38392 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726928AbfETWb4 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 20 May 2019 18:31:56 -0400
-Subject: [PATCH ] xfs: check for COW overflows in i_delayed_blks
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Mon, 20 May 2019 15:31:52 -0700
-Message-ID: <155839151219.62947.9627045046429149685.stgit@magnolia>
-In-Reply-To: <155839150599.62947.16097306072591964009.stgit@magnolia>
-References: <155839150599.62947.16097306072591964009.stgit@magnolia>
+Received: from mail-yw1-f66.google.com ([209.85.161.66]:46544 "EHLO
+        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725794AbfEUFds (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 21 May 2019 01:33:48 -0400
+Received: by mail-yw1-f66.google.com with SMTP id a130so6812332ywe.13
+        for <fstests@vger.kernel.org>; Mon, 20 May 2019 22:33:47 -0700 (PDT)
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+References: <20181203064256.26768-1-david@fromorbit.com> <20181203064256.26768-4-david@fromorbit.com>
+In-Reply-To: <20181203064256.26768-4-david@fromorbit.com>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 21 May 2019 08:33:36 +0300
+Message-ID: <CAOQ4uxjOz6co_7mgz24y+cSkTyut29NsCL8L4XTabYvSkd2_9g@mail.gmail.com>
+Subject: Re: [PATCH 3/3] generic: copy_file_range bounds test
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: fstests <fstests@vger.kernel.org>, Olga Kornievskaia <kolga@netapp.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, Christoph Hellwig <hch@lst.de>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Mon, Dec 3, 2018 at 8:43 AM Dave Chinner <david@fromorbit.com> wrote:
+>
+> From: Dave Chinner <dchinner@redhat.com>
+>
+> Test that copy_file_range will return the correct errors for various
+> error conditions and boundary constraints.
 
-With the new copy on write functionality it's possible to reserve so
-much COW space for a file that we end up overflowing i_delayed_blks.
-The only user-visible effect of this is to cause totally wrong i_blocks
-output in stat, so check for that.
+Below are the changes I have made to V2 on this test in accordance to agreed
+change of behavior (i.e. short copy up to EOF).
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
- tests/xfs/907     |  180 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/907.out |    8 ++
- tests/xfs/group   |    1 
- 3 files changed, 189 insertions(+)
- create mode 100755 tests/xfs/907
- create mode 100644 tests/xfs/907.out
+This is a heads up before posting to verify my interpretation is correct.
+I still have more testing to do before posting.
 
+>
+> Signed-off-by: Dave Chinner <dchinner@redhat.com>
+> ---
+>  tests/generic/530     | 165 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/530.out |  62 ++++++++++++++++
+>  tests/generic/group   |   1 +
+>  3 files changed, 228 insertions(+)
+>  create mode 100755 tests/generic/530
+>  create mode 100644 tests/generic/530.out
+>
+> diff --git a/tests/generic/530 b/tests/generic/530
+> new file mode 100755
+> index 000000000000..42243cc70914
+> --- /dev/null
+> +++ b/tests/generic/530
+> @@ -0,0 +1,165 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 530
+> +#
+> +# Exercise copy_file_range() syscall error conditions.
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1       # failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +       cd /
+> +       rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs generic
+> +
+> +rm -f $seqres.full
+> +
+> +_require_test
+> +_require_scratch
+> +_require_xfs_io_command "copy_range"
+> +_require_user
+> +_require_test_swapfile
 
-diff --git a/tests/xfs/907 b/tests/xfs/907
-new file mode 100755
-index 00000000..2c21ac8e
---- /dev/null
-+++ b/tests/xfs/907
-@@ -0,0 +1,180 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-+#
-+# FS QA Test No. 907
-+#
-+# Try to overflow i_delayed_blks by setting the largest cowextsize hint
-+# possible, creating a sparse file with a single byte every cowextsize bytes,
-+# reflinking it, and retouching every written byte to see if we can create
-+# enough speculative COW reservations to overflow i_delayed_blks.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
-+
-+_cleanup()
-+{
-+	cd /
-+	umount $loop_mount > /dev/null 2>&1
-+	rm -rf $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/reflink
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs xfs
-+_require_scratch_reflink
-+_require_loop
-+_require_xfs_debug	# needed for xfs_bmap -c
-+
-+MAXEXTLEN=2097151	# cowextsize can't be more than MAXEXTLEN
-+
-+# Create a huge sparse filesystem on the scratch device because that's what
-+# we're going to need to guarantee that we have enough blocks to overflow in
-+# the first place.  In the worst case we have a 64k-block filesystem in which
-+# we have to be able to reserve 2^32 blocks.  Adding in 20% overhead and a
-+# 128M log, we get about 300T.
-+echo "Format and mount"
-+_scratch_mkfs > "$seqres.full" 2>&1
-+_scratch_mount
-+_require_fs_space $SCRATCH_MNT 200000	# 300T fs requires ~200MB of space
-+
-+loop_file=$SCRATCH_MNT/a.img
-+loop_mount=$SCRATCH_MNT/a
-+truncate -s 300T $loop_file
-+loop_dev=$(_create_loop_device $loop_file)
-+
-+# Now we have to create the source file.  The goal is to overflow a 32-bit
-+# i_delayed_blks, which means that we have to create at least that many delayed
-+# allocation block reservations.  Take advantage of the fact that a cowextsize
-+# hint causes creation of large speculative delalloc reservations in the cow
-+# fork to reduce the amount of work we have to do.
-+#
-+# The maximum cowextsize is going to be MAXEXTLEN fs blocks on a 100T
-+# filesystem, so start by setting up the hint.  Note that the current fsxattr
-+# interface specifies its u32 cowextsize hint in units of bytes and therefore
-+# can't handle MAXEXTLEN * blksz on most filesystems, so we set it via mkfs
-+# because mkfs takes units of fs blocks, not bytes.
-+
-+_mkfs_dev -d cowextsize=$MAXEXTLEN -l size=128m $loop_dev >> $seqres.full
-+mkdir $loop_mount
-+mount -t xfs $loop_dev $loop_mount
-+
-+echo "Create crazy huge file"
-+huge_file="$loop_mount/a"
-+touch "$huge_file"
-+blksz=$(_get_file_block_size "$loop_mount")
-+extsize_bytes="$(( MAXEXTLEN * blksz ))"
-+
-+# Make sure it actually set a hint.
-+curr_cowextsize_str="$($XFS_IO_PROG -c 'cowextsize' "$huge_file")"
-+echo "$curr_cowextsize_str" >> $seqres.full
-+cowextsize_bytes="$(echo "$curr_cowextsize_str" | sed -e 's/^.\([0-9]*\).*$/\1/g')"
-+test "$cowextsize_bytes" -eq 0 && echo "could not set cowextsize?"
-+
-+# Now we have to seed the file with sparse contents.  Remember, the goal is to
-+# create a little more than 2^32 delayed allocation blocks in the COW fork with
-+# as little effort as possible.  We know that speculative COW preallocation
-+# will create MAXEXTLEN-length reservations for us, so that means we should
-+# be able to get away with touching a single byte every extsize_bytes.  We
-+# do this backwards to avoid having to move EOF.
-+nr="$(( ((2 ** 32) / MAXEXTLEN) + 100 ))"
-+seq $nr -1 0 | while read n; do
-+	off="$((n * extsize_bytes))"
-+	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-+done
-+
-+echo "Reflink crazy huge file"
-+_cp_reflink "$huge_file" "$huge_file.b"
-+
-+# Now that we've shared all the blocks in the file, we touch them all again
-+# to create speculative COW preallocations.
-+echo "COW crazy huge file"
-+seq $nr -1 0 | while read n; do
-+	off="$((n * extsize_bytes))"
-+	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-+done
-+
-+# Compare the number of blocks allocated to this file (as reported by stat)
-+# against the number of blocks that are in the COW fork.  If either one is
-+# less than 2^32 then we have evidence of an overflow problem.
-+echo "Check crazy huge file"
-+allocated_stat_blocks="$(stat -c %b "$huge_file")"
-+stat_blksz="$(stat -c %B "$huge_file")"
-+allocated_fsblocks=$(( allocated_stat_blocks * stat_blksz / blksz ))
-+
-+# Make sure we got enough COW reservations to overflow a 32-bit counter.
-+
-+# Return the number of delalloc & real blocks given bmap output for a fork of a
-+# file.  Output is in units of 512-byte blocks.
-+count_fork_blocks() {
-+	awk "
-+{
-+	if (\$3 == \"delalloc\") {
-+		x += \$4;
-+	} else if (\$3 == \"hole\") {
-+		;
-+	} else {
-+		x += \$6;
-+	}
-+}
-+END {
-+	print(x);
-+}
-+"
-+}
-+
-+# Count the number of blocks allocated to a file based on the xfs_bmap output.
-+# Output is in units of filesystem blocks.
-+count_file_fork_blocks() {
-+	local tag="$1"
-+	local file="$2"
-+	local args="$3"
-+
-+	$XFS_IO_PROG -c "bmap $args -l -p -v" "$huge_file" > $tmp.extents
-+	echo "$tag fork map" >> $seqres.full
-+	cat $tmp.extents >> $seqres.full
-+	local sectors="$(count_fork_blocks < $tmp.extents)"
-+	echo "$(( sectors / (blksz / 512) ))"
-+}
-+
-+cowblocks=$(count_file_fork_blocks cow "$huge_file" "-c")
-+attrblocks=$(count_file_fork_blocks attr "$huge_file" "-a")
-+datablocks=$(count_file_fork_blocks data "$huge_file" "")
-+
-+# Did we create more than 2^32 blocks in the cow fork?
-+echo "datablocks is $datablocks" >> $seqres.full
-+echo "attrblocks is $attrblocks" >> $seqres.full
-+echo "cowblocks is $cowblocks" >> $seqres.full
-+test "$cowblocks" -lt $((2 ** 32)) && \
-+	echo "cowblocks (${cowblocks}) should be more than 2^32!"
-+
-+# Does stat's block allocation count exceed 2^32?
-+echo "stat blocks is $allocated_fsblocks" >> $seqres.full
-+test "$allocated_fsblocks" -lt $((2 ** 32)) && \
-+	echo "stat blocks (${allocated_fsblocks}) should be more than 2^32!"
-+
-+# Finally, does st_blocks match what we computed from the forks?
-+expected_allocated_fsblocks=$((datablocks + cowblocks + attrblocks))
-+echo "expected stat blocks is $expected_allocated_fsblocks" >> $seqres.full
-+
-+_within_tolerance "st_blocks" $allocated_fsblocks $expected_allocated_fsblocks 2% -v
-+
-+echo "Test done"
-+_check_xfs_filesystem $loop_dev none none
-+umount $loop_mount
-+_destroy_loop_device $loop_dev
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/907.out b/tests/xfs/907.out
-new file mode 100644
-index 00000000..cc07d659
---- /dev/null
-+++ b/tests/xfs/907.out
-@@ -0,0 +1,8 @@
-+QA output created by 907
-+Format and mount
-+Create crazy huge file
-+Reflink crazy huge file
-+COW crazy huge file
-+Check crazy huge file
-+st_blocks is in range
-+Test done
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 5a4ef4bf..e0c7fc97 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -504,3 +504,4 @@
- 739 auto quick mkfs label
- 742 auto quick spaceman
- 743 auto quick health
-+907 clone
+Testing on scratch dev, as cross-dev test was split to a new test.
+
+> +
+> +_scratch_mkfs 2>&1 >> $seqres.full
+> +_scratch_mount
+> +
+> +
+> +testdir=$TEST_DIR/test-$seq
+> +rm -rf $testdir
+> +mkdir $testdir
+> +rm -f $seqres.full
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
+> +chmod 777 $testdir/file
+> +
+> +echo swap files return ETXTBUSY
+> +_format_swapfile $testdir/swapfile 16m
+> +swapon $testdir/swapfile
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
+> +swapoff $testdir/swapfile
+> +
+> +# we have to open the file to be immutable rw and hold it open over the
+> +# chattr command to set it immutable, otherwise we won't be able to open it for
+> +# writing after it's been made immutable. (i.e. would exercise file mode checks,
+> +# not immutable inode flag checks).
+> +echo
+> +echo immutable file returns EPERM
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 64k" -c fsync $testdir/immutable | _filter_xfs_io
+> +$XFS_IO_PROG -f -c "chattr +i" -c "copy_range -l 32k $testdir/file" $testdir/immutable
+> +$XFS_IO_PROG -f -r -c "chattr -i" $testdir/immutable
+> +rm -f $testdir/immutable
+> +
+> +# can't test this as root, because root is allowed to write to files do not
+> +# have write permission bits set.
+> +echo
+> +echo no write perms on destination returns EACCES
+
+This test case was removed, because it does not comply with current behavior
+of write(2).
+
+> +chown $qa_user:12345 $testdir/copy
+> +su $qa_user -c "$XFS_IO_PROG -f -c 'chmod -r' -c 'copy_range -l 32k $testdir/file' $testdir/copy"
+> +rm -f $testdir/copy
+> +
+> +echo
+> +echo source range overlaps EOF returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 112k -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range beyond EOF returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 128k -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range overlaps destination range in same file returns EINVAL
+> +$XFS_IO_PROG -f -c "copy_range -s 32k -d 48k -l 32k $testdir/file" $testdir/file
+> +
+> +echo
+> +echo destination file O_RDONLY returns EBADF
+> +$XFS_IO_PROG -f -r -c "copy_range -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo destination file O_APPEND returns EBADF
+> +$XFS_IO_PROG -f -a -c "copy_range -l 32k $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source/destination as directory returns EISDIR
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir" $testdir/copy
+> +
+> +echo
+> +echo source/destination as blkdev returns EINVAL
+> +mknod $testdir/dev1 b 1 3
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev1
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev1" $testdir/copy
+> +
+> +echo
+> +echo source/destination as chardev returns EINVAL
+> +mknod $testdir/dev2 c 1 3
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/dev2
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/dev2" $testdir/copy
+> +
+> +echo
+> +echo source/destination as FIFO returns EINVAL
+> +mkfifo $testdir/fifo
+> +$XFS_IO_PROG -c "copy_range -l 32k $testdir/file" $testdir/fifo
+> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/fifo" $testdir/copy
+> +
+> +max_off=$((8 * 2**60 - 65536 - 1))
+> +min_off=65537
+> +
+> +echo
+> +echo length beyond 8EiB wraps around 0 returns EOVERFLOW
+> +$XFS_IO_PROG -f -c "copy_range -l 10e -s $max_off $testdir/file" $testdir/copy
+> +$XFS_IO_PROG -f -c "copy_range -l 10e -d $max_off $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo source range beyond 8EiB returns EINVAL
+
+With accordance to implemented behavior and short copy to EOF,
+this was changed to:
+
+echo source range beyond 8TiB returns EFBIG
+$XFS_IO_PROG -c "copy_range -s $max_off -l $min_off -d 0
+$testdir/file" $testdir/copy
+
+> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/file
+> +$XFS_IO_PROG -c "truncate $((max_off + 65536))" $testdir/copy
+
+These ftruncates would fail with EFBIG anyway...
+
+> +$XFS_IO_PROG -c "copy_range -s $max_off -l $min_off -d 0 $testdir/file" $testdir/copy
+> +$XFS_IO_PROG -c "copy_range -s $min_off -l $max_off -d 0 $testdir/file" $testdir/copy
+
+This second test does not fail because of short copy.
+
+> +
+> +echo
+> +echo destination range beyond 8TiB returns EFBIG
+> +$XFS_IO_PROG -c "copy_range -l $min_off -s 0 -d $max_off $testdir/file" $testdir/copy
+> +
+> +echo
+> +echo destination larger than rlimit returns EFBIG
+> +rm -f $testdir/copy
+> +$XFS_IO_PROG -c "truncate 128k" $testdir/file
+> +
+> +# need a wrapper so the "File size limit exceeded" error can be filtered
+> +do_rlimit_copy()
+> +{
+> +       $XFS_IO_PROG -f -c "copy_range -l 32k -s 0 -d 16m $testdir/file" $testdir/copy
+> +}
+> +
+> +ulimit -f $((8 * 1024))
+> +ulimit -c 0
+> +do_rlimit_copy 2>&1 | grep -o "File size limit exceeded"
+> +ulimit -f unlimited
+> +
+> +echo
+> +echo copy across devices
+> +$XFS_IO_PROG -f -c "copy_range -l 128k $testdir/file" $SCRATCH_MNT/copy
+> +cmp $testdir/file $SCRATCH_MNT/copy
+> +echo "md5sums after xdev copy:"
+> +md5sum $testdir/file $SCRATCH_MNT/copy | _filter_test_dir | _filter_scratch
+> +
+
+Cross-device copy test was split out to a new test, see WIP:
+https://github.com/amir73il/xfstests/commits/copy_file_range
+
+Thanks,
+Amir.
