@@ -1,97 +1,119 @@
-Received: from mx2.suse.de ([195.135.220.15]:43268 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2390540AbfEXLCG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 24 May 2019 07:02:06 -0400
-Subject: Re: [PATCH v2] fstests: btrfs: Validate that balance and qgroups work
- correctly when balance needs to be resumed on mount
-References: <20190523011101.4594-1-wqu@suse.com>
- <20190524090205.GN15846@desktop>
-From: Qu Wenruo <wqu@suse.de>
-Message-ID: <d539cf23-f9bf-7b82-6919-46512195a9cb@suse.de>
-Date: Fri, 24 May 2019 19:01:51 +0800
+Received: from mail.kernel.org ([198.145.29.99]:44276 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2404176AbfEXWEn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 24 May 2019 18:04:43 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH v2 0/7] xfstests: verify fscrypt-encrypted contents and filenames
+Date: Fri, 24 May 2019 15:04:18 -0700
+Message-Id: <20190524220425.201170-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <20190524090205.GN15846@desktop>
-Content-Type: multipart/signed; micalg=pgp-sha256;
- protocol="application/pgp-signature";
- boundary="qKrZaXhmeluwTSShBPN4uUqGDLFQhBGSV"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net
 List-ID: <fstests@vger.kernel.org>
 
-This is an OpenPGP/MIME signed message (RFC 4880 and 3156)
---qKrZaXhmeluwTSShBPN4uUqGDLFQhBGSV
-Content-Type: multipart/mixed; boundary="6qVQhlPrTJwvkGAkCZVnMDP0UddY4Mv49";
- protected-headers="v1"
-From: Qu Wenruo <wqu@suse.de>
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
-Message-ID: <d539cf23-f9bf-7b82-6919-46512195a9cb@suse.de>
-Subject: Re: [PATCH v2] fstests: btrfs: Validate that balance and qgroups work
- correctly when balance needs to be resumed on mount
-References: <20190523011101.4594-1-wqu@suse.com>
- <20190524090205.GN15846@desktop>
-In-Reply-To: <20190524090205.GN15846@desktop>
+Hello,
 
---6qVQhlPrTJwvkGAkCZVnMDP0UddY4Mv49
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
-Content-Transfer-Encoding: quoted-printable
+This series adds xfstests which verify that encrypted contents and
+filenames on ext4 and f2fs are actually correct, i.e. that the
+encryption uses the correct algorithms, keys, IVs, and padding amounts.
+The new tests work by creating encrypted files, unmounting the
+filesystem, reading the ciphertext from disk using dd and debugfs or
+dump.f2fs, and then comparing it against ciphertext computed
+independently by a new test program that implements the same algorithms.
 
+These tests are important because:
 
+- The whole point of file encryption is that the files are actually
+  encrypted correctly on-disk.  Except for generic/399, current xfstests
+  only tests the filesystem semantics, not the actual encryption.
+  generic/399 only tests for incompressibility of encrypted file
+  contents using one particular encryption setting, which isn't much.
 
-On 2019/5/24 =E4=B8=8B=E5=8D=885:02, Eryu Guan wrote:
-> On Thu, May 23, 2019 at 09:11:01AM +0800, Qu Wenruo wrote:
->> There are two regressions related to balance resume:
->> - Kernel NULL pointer dereference at mount time
->>   Introduced in v5.0
->> - Kernel BUG_ON() just after mount
->>   Introduced in v5.1
->>
->> The kernel fixes are:
->> "btrfs: qgroup: Check if @bg is NULL to avoid NULL pointer
->>  dereference"
->> "btrfs: reloc: Also queue orphan reloc tree for cleanup to
->>  avoid BUG_ON()"
->>
->> Signed-off-by: Qu Wenruo <wqu@suse.com>
->=20
-> The summary seems a bit long, does this look like a proper summary to
-> describe the test?
->=20
-> "btrfs: resume balance on mount with qgroup"
+- fscrypt now supports 4 main combinations of encryption settings,
+  rather than 1 as it did originally.  This may be doubled to 8 soon
+  (https://patchwork.kernel.org/patch/10952059/), and support for ext4
+  encryption with sub-page blocks is in progress too.  We should test
+  all settings.  And without tests, even if the initial implementation
+  is correct, breakage in one specific setting could go undetected.
 
-Wow, that's short.
+- Though Linux's crypto API has self-tests, these only test the
+  algorithms themselves, not how they are used, e.g. by fscrypt.
 
-I'm OK with that.
+Patch 1 is a cleanup patch.  Patches 2-4 add the common helpers for
+ciphertext verification tests.  Patches 5-7 add the actual tests.
 
-Thanks,
-Qu
->=20
-> If so, I'll use this summary on commit.
->=20
-> Thanks,
-> Eryu
->=20
+For ext4 these tests require e2fsprogs v1.45.1 or later, for a recent
+debugfs fix.  For f2fs they require f2fs-tools built from the "dev"
+branch (which should eventually become v1.13.0), for a dump.f2fs fix.
+The tests check for the presence of these fixes before they run.
 
+This series can also be retrieved from git at
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git
+branch "ciphertext-verification".
 
---6qVQhlPrTJwvkGAkCZVnMDP0UddY4Mv49--
+I also have patches on top of this series which verify the ciphertext
+produced from v2 encryption policies, which are proposed by my kernel
+patch series "fscrypt: key management improvements"
+(https://patchwork.kernel.org/cover/10951999/).  v2 encryption policies
+will use a different key derivation function, and thus their ciphertext
+will be different.  These additional patches can be found at branch
+"fscrypt-key-mgmt-improvements" of my git repo above.  But I've arranged
+things such that this shorter series can be applied earlier, to test
+what's in the kernel now.
 
---qKrZaXhmeluwTSShBPN4uUqGDLFQhBGSV
-Content-Type: application/pgp-signature; name="signature.asc"
-Content-Description: OpenPGP digital signature
-Content-Disposition: attachment; filename="signature.asc"
+Changed since v1:
 
------BEGIN PGP SIGNATURE-----
+  - Drop the _require_get_encpolicy() helper function.
+  - Rename some functions:
+  	- _get_on_disk_filename() => _get_ciphertext_filename()
+	- _get_file_block_list() => _get_ciphertext_block_list()
+	- _dump_file_blocks() => _dump_ciphertext_blocks()
+  - Mention minimum e2fsprogs and f2fs-tools versions in comments.
+  - Use _fail() instead of _notrun() when support was already checked.
+  - Minor cleanups to fscrypt-crypt-util.
 
-iQEzBAEBCAAdFiEELd9y5aWlW6idqkLhwj2R86El/qgFAlznzx8ACgkQwj2R86El
-/qgjMgf/dJpUSL9OUUsVR6jfSFS4RYp4x1YzCFinUh/DmyteXRsyOay8cddgYdB9
-LTw+pmbcdmNARKlvLTZfLHovA/DV3LjCOBZ4heztcAuQUx13WHWFs4EQ3lujkAYd
-rhdqBbjTdMTvBWdAMIwpbGCa4brnmrHBfna2GTob57Ms73KD1yijZHshyrPTjjTm
-N+rDtq6eEh+5qSoV/UMO3QQUs1E97lJg/fveMaPQ4V3iTL+gMqinTXesji4s5PUR
-pzC3rKf1lOpTvZAO1KyTKLfFfsPppgDfclcbrQEWyxh5F/xtNVa4lrIGy6XsL43j
-3eBpousNuUI3aFqntyMtmXYDofvyCQ==
-=mWk7
------END PGP SIGNATURE-----
+Eric Biggers (7):
+  common/encrypt: introduce helpers for set_encpolicy and get_encpolicy
+  fscrypt-crypt-util: add utility for reproducing fscrypt encrypted data
+  common/encrypt: support requiring other encryption settings
+  common/encrypt: add helper for ciphertext verification tests
+  generic: verify ciphertext of v1 encryption policies with AES-256
+  generic: verify ciphertext of v1 encryption policies with AES-128
+  generic: verify ciphertext of v1 encryption policies with Adiantum
 
---qKrZaXhmeluwTSShBPN4uUqGDLFQhBGSV--
+ .gitignore               |    1 +
+ common/encrypt           |  479 ++++++++++-
+ src/Makefile             |    3 +-
+ src/fscrypt-crypt-util.c | 1633 ++++++++++++++++++++++++++++++++++++++
+ tests/ext4/024           |    3 +-
+ tests/generic/395        |   26 +-
+ tests/generic/395.out    |    2 +-
+ tests/generic/396        |   15 +-
+ tests/generic/397        |    3 +-
+ tests/generic/398        |    5 +-
+ tests/generic/399        |    3 +-
+ tests/generic/419        |    3 +-
+ tests/generic/421        |    3 +-
+ tests/generic/429        |    3 +-
+ tests/generic/435        |    3 +-
+ tests/generic/440        |    5 +-
+ tests/generic/700        |   41 +
+ tests/generic/700.out    |    5 +
+ tests/generic/701        |   41 +
+ tests/generic/701.out    |    5 +
+ tests/generic/702        |   43 +
+ tests/generic/702.out    |   10 +
+ tests/generic/group      |    3 +
+ 23 files changed, 2292 insertions(+), 46 deletions(-)
+ create mode 100644 src/fscrypt-crypt-util.c
+ create mode 100755 tests/generic/700
+ create mode 100644 tests/generic/700.out
+ create mode 100755 tests/generic/701
+ create mode 100644 tests/generic/701.out
+ create mode 100755 tests/generic/702
+ create mode 100644 tests/generic/702.out
+
+-- 
+2.22.0.rc1.257.g3120a18244-goog
