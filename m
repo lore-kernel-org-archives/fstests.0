@@ -1,59 +1,62 @@
-Received: from mail-wm1-f52.google.com ([209.85.128.52]:54518 "EHLO
-        mail-wm1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727385AbfE1PRc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 11:17:32 -0400
+Received: from mail-wr1-f67.google.com ([209.85.221.67]:33663 "EHLO
+        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726362AbfE1PRd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 11:17:33 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 0/4] Misc. fsck.overlay test fixes
-Date: Tue, 28 May 2019 18:17:19 +0300
-Message-Id: <20190528151723.12525-1-amir73il@gmail.com>
+Subject: [PATCH v3 1/4] fstests: define constants for fsck exit codes
+Date: Tue, 28 May 2019 18:17:20 +0300
+Message-Id: <20190528151723.12525-2-amir73il@gmail.com>
+In-Reply-To: <20190528151723.12525-1-amir73il@gmail.com>
+References: <20190528151723.12525-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: zhangyi <yi.zhang@huawei.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+Define the constants for hard coded values used in _repair_scratch_fs()
+to check fsck exit code.
 
-This is a re-post for zhangyi's fsck.overlay test fixes from
-October [1]. Based on my own code review of those patches, I have
-made some minor modifications and added some more fixes.
+Suggested-by: zhangyi (F) <yi.zhang@huawei.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/config | 11 +++++++++++
+ common/rc     |  2 +-
+ 2 files changed, 12 insertions(+), 1 deletion(-)
 
-I have been carrying the two patches by zhangyi in my dev branch
-for a while. Without them running overlay tests with fsck.overlay
-installed is failing some tests.
-
-Zhangyi,
-
-Please review my changes, some based on your suggestions.
-Feel free to re-post "fsck.overlay stress test" and
-"fsck.overlay exception tests". My goal with this posting
-was just to fix failures of existing tests when fsck.overlay
-is installed.
-
-Thanks,
-Amir.
-
-Changes from v2:
-- Dropped patches of new tests
-- Move fsck exit code constants to common/config
-- Fix _repair_scratch_fs
-
-[1] https://marc.info/?l=fstests&m=153967515805435&w=2
-
-Amir Goldstein (2):
-  fstests: define constants for fsck exit codes
-  overlay: fix _repair_scratch_fs
-
-zhangyi (F) (2):
-  overlay: correct fsck.overlay exit code
-  overlay: fix exit code for some fsck.overlay valid cases
-
- common/config     | 11 +++++++++++
- common/overlay    | 36 ++++++++++++++++++++++++++++++++++
- common/rc         | 15 ++++++++++++---
- tests/overlay/045 | 46 ++++++++++++++++++++++++--------------------
- tests/overlay/046 | 49 ++++++++++++++++++++++++-----------------------
- tests/overlay/056 |  9 +++------
- 6 files changed, 112 insertions(+), 54 deletions(-)
-
+diff --git a/common/config b/common/config
+index 364432bb..bd64be62 100644
+--- a/common/config
++++ b/common/config
+@@ -69,6 +69,17 @@ export OVL_WORK="ovl-work"
+ # overlay mount point parent must be the base fs root
+ export OVL_MNT="ovl-mnt"
+ 
++# From e2fsprogs/e2fsck/e2fsck.h:
++# Exit code used by fsck-type programs
++export FSCK_OK=0
++export FSCK_NONDESTRUCT=1
++export FSCK_REBOOT=2
++export FSCK_UNCORRECTED=4
++export FSCK_ERROR=8
++export FSCK_USAGE=16
++export FSCK_CANCELED=32
++export FSCK_LIBRARY=128
++
+ export PWD=`pwd`
+ #export DEBUG=${DEBUG:=...} # arbitrary CFLAGS really.
+ export MALLOCLIB=${MALLOCLIB:=/usr/lib/libefence.a}
+diff --git a/common/rc b/common/rc
+index e78e0920..cedc1cfa 100644
+--- a/common/rc
++++ b/common/rc
+@@ -1116,7 +1116,7 @@ _repair_scratch_fs()
+         fsck -t $FSTYP -y $SCRATCH_DEV 2>&1
+ 	local res=$?
+ 	case $res in
+-	0|1|2)
++	$FSCK_OK|$FSCK_NONDESTRUCT|$FSCK_REBOOT)
+ 		res=0
+ 		;;
+ 	*)
 -- 
 2.17.1
