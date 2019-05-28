@@ -1,11 +1,11 @@
-Received: from mail-wr1-f67.google.com ([209.85.221.67]:33663 "EHLO
-        mail-wr1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726362AbfE1PRd (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 11:17:33 -0400
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:53040 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727797AbfE1PRf (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 11:17:35 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v3 1/4] fstests: define constants for fsck exit codes
-Date: Tue, 28 May 2019 18:17:20 +0300
-Message-Id: <20190528151723.12525-2-amir73il@gmail.com>
+Subject: [PATCH v3 2/4] overlay: fix _repair_scratch_fs
+Date: Tue, 28 May 2019 18:17:21 +0300
+Message-Id: <20190528151723.12525-3-amir73il@gmail.com>
 In-Reply-To: <20190528151723.12525-1-amir73il@gmail.com>
 References: <20190528151723.12525-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
@@ -13,50 +13,70 @@ To: Eryu Guan <guaneryu@gmail.com>
 Cc: zhangyi <yi.zhang@huawei.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Define the constants for hard coded values used in _repair_scratch_fs()
-to check fsck exit code.
+_repair_scratch_fs did not do the right thing for overlay.
+Implement and call _repair_overlay_scratch_fs to repair
+overlay filesystem and then fall through to repair base filesystem.
+
+The only tests currentrly calling _repair_scratch_fs on a
+./check -overlay run are generic/330 generic/332 in case the
+base fs supports reflink. The rest of the tests calling
+_repair_scratch_fs require that $SCRATCH_DEV is a block device.
 
 Suggested-by: zhangyi (F) <yi.zhang@huawei.com>
 Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- common/config | 11 +++++++++++
- common/rc     |  2 +-
- 2 files changed, 12 insertions(+), 1 deletion(-)
+ common/overlay | 17 +++++++++++++++++
+ common/rc      | 13 +++++++++++--
+ 2 files changed, 28 insertions(+), 2 deletions(-)
 
-diff --git a/common/config b/common/config
-index 364432bb..bd64be62 100644
---- a/common/config
-+++ b/common/config
-@@ -69,6 +69,17 @@ export OVL_WORK="ovl-work"
- # overlay mount point parent must be the base fs root
- export OVL_MNT="ovl-mnt"
- 
-+# From e2fsprogs/e2fsck/e2fsck.h:
-+# Exit code used by fsck-type programs
-+export FSCK_OK=0
-+export FSCK_NONDESTRUCT=1
-+export FSCK_REBOOT=2
-+export FSCK_UNCORRECTED=4
-+export FSCK_ERROR=8
-+export FSCK_USAGE=16
-+export FSCK_CANCELED=32
-+export FSCK_LIBRARY=128
+diff --git a/common/overlay b/common/overlay
+index b526f24d..a71c2035 100644
+--- a/common/overlay
++++ b/common/overlay
+@@ -320,3 +320,20 @@ _check_overlay_scratch_fs()
+ 		"$OVL_BASE_SCRATCH_DEV" "$OVL_BASE_SCRATCH_MNT" \
+ 		$OVL_BASE_MOUNT_OPTIONS $SELINUX_MOUNT_OPTIONS
+ }
 +
- export PWD=`pwd`
- #export DEBUG=${DEBUG:=...} # arbitrary CFLAGS really.
- export MALLOCLIB=${MALLOCLIB:=/usr/lib/libefence.a}
++_repair_overlay_scratch_fs()
++{
++	_overlay_fsck_dirs $OVL_BASE_SCRATCH_MNT/$OVL_LOWER \
++		$OVL_BASE_SCRATCH_MNT/$OVL_UPPER \
++		$OVL_BASE_SCRATCH_MNT/$OVL_WORK -y
++	local res=$?
++	case $res in
++	$FSCK_OK|$FSCK_NONDESTRUCT)
++		res=0
++		;;
++	*)
++		_dump_err2 "fsck.overlay failed, err=$res"
++		;;
++	esac
++	return $res
++}
 diff --git a/common/rc b/common/rc
-index e78e0920..cedc1cfa 100644
+index cedc1cfa..d0aa36a0 100644
 --- a/common/rc
 +++ b/common/rc
-@@ -1116,7 +1116,7 @@ _repair_scratch_fs()
-         fsck -t $FSTYP -y $SCRATCH_DEV 2>&1
+@@ -1112,8 +1112,17 @@ _repair_scratch_fs()
+ 	return $res
+         ;;
+     *)
+-        # Let's hope fsck -y suffices...
+-        fsck -t $FSTYP -y $SCRATCH_DEV 2>&1
++	local dev=$SCRATCH_DEV
++	local fstyp=$FSTYP
++	if [ $FSTYP = "overlay" -a -n "$OVL_BASE_SCRATCH_DEV" ]; then
++		_repair_overlay_scratch_fs
++		# Fall through to repair base fs
++		dev=$OVL_BASE_SCRATCH_DEV
++		fstyp=$OVL_BASE_FSTYP
++		$UMOUNT_PROG $OVL_BASE_SCRATCH_MNT
++	fi
++	# Let's hope fsck -y suffices...
++	fsck -t $fstyp -y $dev 2>&1
  	local res=$?
  	case $res in
--	0|1|2)
-+	$FSCK_OK|$FSCK_NONDESTRUCT|$FSCK_REBOOT)
- 		res=0
- 		;;
- 	*)
+ 	$FSCK_OK|$FSCK_NONDESTRUCT|$FSCK_REBOOT)
 -- 
 2.17.1
