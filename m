@@ -1,54 +1,59 @@
-Received: from mail-wm1-f66.google.com ([209.85.128.66]:39814 "EHLO
-        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726620AbfE1MIy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 08:08:54 -0400
-Received: by mail-wm1-f66.google.com with SMTP id z23so2573621wma.4
-        for <fstests@vger.kernel.org>; Tue, 28 May 2019 05:08:53 -0700 (PDT)
+Received: from mail-wm1-f52.google.com ([209.85.128.52]:54518 "EHLO
+        mail-wm1-f52.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727385AbfE1PRc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 28 May 2019 11:17:32 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] fstests: fix _repair_scratch_fs error reporting
-Date: Tue, 28 May 2019 15:08:47 +0300
-Message-Id: <20190528120847.31003-1-amir73il@gmail.com>
+Subject: [PATCH v3 0/4] Misc. fsck.overlay test fixes
+Date: Tue, 28 May 2019 18:17:19 +0300
+Message-Id: <20190528151723.12525-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: zhangyi <yi.zhang@huawei.com>, fstests@vger.kernel.org
+Cc: zhangyi <yi.zhang@huawei.com>, Miklos Szeredi <miklos@szeredi.hu>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
-
-_dump_err2() helper was introduced over two years ago and it broke
-the error reporting from _repair_scratch_fs.
-
-Every test that runs:
-_repair_scratch_fs >> $seqres.full
-
-and expect to fail if anything is written to stderr is not working
-as intended.
-
-Spotted-by: zhangyi (F) <yi.zhang@huawei.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
 
 Eryu,
 
-This bug was found by zhangyi while working on fsck.overlay patches,
-but it affects all filesystems. I just re-found zhangyi's fix while
-going through some old notes.
+This is a re-post for zhangyi's fsck.overlay test fixes from
+October [1]. Based on my own code review of those patches, I have
+made some minor modifications and added some more fixes.
 
+I have been carrying the two patches by zhangyi in my dev branch
+for a while. Without them running overlay tests with fsck.overlay
+installed is failing some tests.
+
+Zhangyi,
+
+Please review my changes, some based on your suggestions.
+Feel free to re-post "fsck.overlay stress test" and
+"fsck.overlay exception tests". My goal with this posting
+was just to fix failures of existing tests when fsck.overlay
+is installed.
+
+Thanks,
 Amir.
 
- common/rc | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+Changes from v2:
+- Dropped patches of new tests
+- Move fsck exit code constants to common/config
+- Fix _repair_scratch_fs
 
-diff --git a/common/rc b/common/rc
-index 17b89d5d..e78e0920 100644
---- a/common/rc
-+++ b/common/rc
-@@ -98,7 +98,7 @@ _dump_err_cont()
- _dump_err2()
- {
-     _err_msg="$*"
--    >2& echo "$_err_msg"
-+    >&2 echo "$_err_msg"
- }
- 
- _log_err()
+[1] https://marc.info/?l=fstests&m=153967515805435&w=2
+
+Amir Goldstein (2):
+  fstests: define constants for fsck exit codes
+  overlay: fix _repair_scratch_fs
+
+zhangyi (F) (2):
+  overlay: correct fsck.overlay exit code
+  overlay: fix exit code for some fsck.overlay valid cases
+
+ common/config     | 11 +++++++++++
+ common/overlay    | 36 ++++++++++++++++++++++++++++++++++
+ common/rc         | 15 ++++++++++++---
+ tests/overlay/045 | 46 ++++++++++++++++++++++++--------------------
+ tests/overlay/046 | 49 ++++++++++++++++++++++++-----------------------
+ tests/overlay/056 |  9 +++------
+ 6 files changed, 112 insertions(+), 54 deletions(-)
+
 -- 
 2.17.1
