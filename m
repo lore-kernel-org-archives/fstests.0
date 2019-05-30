@@ -1,102 +1,152 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:48622 "EHLO
+Received: from userp2120.oracle.com ([156.151.31.85]:44710 "EHLO
         userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726079AbfE3QEU (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 12:04:20 -0400
-Date: Thu, 30 May 2019 09:03:53 -0700
+        with ESMTP id S1726250AbfE3P7c (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 11:59:32 -0400
+Date: Thu, 30 May 2019 08:58:51 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in
- test
-Message-ID: <20190530160353.GC5383@magnolia>
+Subject: NFS & CIFS support dedupe now?? Was: Re: [PATCH] generic/517: notrun
+ on NFS due to unaligned dedupe in test
+Message-ID: <20190530155851.GB5383@magnolia>
 References: <20190530094147.14512-1-xzhou@redhat.com>
  <20190530152606.GA5383@magnolia>
- <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
+In-Reply-To: <20190530152606.GA5383@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Trond Myklebust <trondmy@hammerspace.com>
-Cc: "xzhou@redhat.com" <xzhou@redhat.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: sfrench@samba.org, anna.schumaker@netapp.com, trond.myklebust@hammerspace.com, fengxiaoli0714@gmail.com
+Cc: fstests@vger.kernel.org, Murphy Zhou <xzhou@redhat.com>, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 30, 2019 at 03:55:07PM +0000, Trond Myklebust wrote:
-> Hi Darrick,
-> 
-> On Thu, 2019-05-30 at 08:26 -0700, Darrick J. Wong wrote:
-> > On Thu, May 30, 2019 at 05:41:47PM +0800, Murphy Zhou wrote:
-> > > NFSv4.2 could pass _require_scratch_dedupe, since the test offset
-> > > and
-> > > size are aligned, while generic/517 is performing unaligned dedupe.
-> > > NFS does not support unaligned dedupe now, returns EINVAL.
-> > > 
-> > > Signed-off-by: Murphy Zhou <xzhou@redhat.com>
-> > > ---
-> > >  tests/generic/517 | 1 +
-> > >  1 file changed, 1 insertion(+)
-> > > 
-> > > diff --git a/tests/generic/517 b/tests/generic/517
-> > > index 601bb24e..23665782 100755
-> > > --- a/tests/generic/517
-> > > +++ b/tests/generic/517
-> > > @@ -30,6 +30,7 @@ _cleanup()
-> > >  _supported_fs generic
-> > >  _supported_os Linux
-> > >  _require_scratch_dedupe
-> > > +$FSTYP == "nfs"  && _notrun "NFS can't handle unaligned
-> > > deduplication"
-> > 
-> > Uh... NFS supports dedupe??
-> > 
-> > Let's see, we pass REMAP_FILE_DEDUP to nfs42_remap_file_range via
-> > @remap_flags.  That function checks remap_flags but never touches it
-> > again.  It's not passed to nfs42_proc_clone, which (AFAICT) means
-> > that
-> > the nfs client sends a CLONE request to the server on behalf of a
-> > FS_IOC_EXTENT_SAME ioctl.  That seems suspicious to me...
-> > 
-> > The nfs client also doesn't lock and compare the file contents itself
-> > (the server should be doing that anyway, right?) which means that
-> > dedupe
-> > doesn't fail if the file contents are different?
-> > 
-> > Oh, I see... Xiaoli Feng turned on dedupe for cifs (b073a08016a10f0)
-> > and
-> > nfs (ce96e888fe48e) even though (the last I heard) neither protocol
-> > supports dedupe and now will corrupt data in doing so.
-> > 
-> > Let's hold off on this for now while I go email Anna & Steve about
-> > whether or not nfs and cifs support dedupe.
-> > 
-> 
-> What is the VFS requirement for dedup support?
-> 
-> According to the RFC7862 spec for CLONE: "If SAVED_FH and CURRENT_FH
-> refer to the same file and the source and target ranges overlap, the
-> operation MUST fail with NFS4ERR_INVAL."
-> 
-> So clearly we may not support dedup if there is a requirement that we
-> be able to clone between overlapping ranges on the same file. However I
-> can find no restriction on using CLONE for non-overlapping ranges.
+Hi everyone,
 
-Heh, concurrent replies. :)
+Murphy Zhou sent a patch to generic/517 in fstests to fix a dedupe
+failure he was seeing on NFS:
 
-There isn't, except that the NFS client code doesn't check for identical
-contents, nor does it appear to ask the server to do the comparison.
+On Thu, May 30, 2019 at 05:41:47PM +0800, Murphy Zhou wrote:
+> NFSv4.2 could pass _require_scratch_dedupe, since the test offset and
+> size are aligned, while generic/517 is performing unaligned dedupe.
+> NFS does not support unaligned dedupe now, returns EINVAL.
+> 
+> Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> ---
+>  tests/generic/517 | 1 +
+>  1 file changed, 1 insertion(+)
+> 
+> diff --git a/tests/generic/517 b/tests/generic/517
+> index 601bb24e..23665782 100755
+> --- a/tests/generic/517
+> +++ b/tests/generic/517
+> @@ -30,6 +30,7 @@ _cleanup()
+>  _supported_fs generic
+>  _supported_os Linux
+>  _require_scratch_dedupe
+> +$FSTYP == "nfs"  && _notrun "NFS can't handle unaligned deduplication"
 
-The VFS can do such comparison via generic_remap_file_range_prep ->
-vfs_dedupe_file_range_compare, but NFS doesn't call the first function,
-it just forwards the request to the server and lets the server do all
-the work (including sending back "not supported"), right?
+I was surprised to see a dedupe fix for NFS since (at least to my
+knowledge) neither of these two network filesystems actually support
+server-side deduplication commands, and therefore the
+_require_scratch_dedupe should have _notrun the test.
 
-Admittedly I'm not sure you'd want to do the comparison on the client
-anyway since that involves having the client read /both/ file ranges
-while keeping both files locked against writes on the server.
+Then I looked at fs/nfs/nfs4file.c:
+
+static loff_t nfs42_remap_file_range(struct file *src_file, loff_t src_off,
+		struct file *dst_file, loff_t dst_off, loff_t count,
+		unsigned int remap_flags)
+{
+	<local variable declarations>
+
+	if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
+		return -EINVAL;
+
+	<check alignment, lock inodes, flush pending writes>
+
+	ret = nfs42_proc_clone(src_file, dst_file, src_off, dst_off, count);
+
+The NFS client code will accept REMAP_FILE_DEDUP through remap_flags,
+which is how dedupe requests are sent to filesystems nowadays.  The nfs
+client code does not itself compare the file contents, but it does issue
+a CLONE command to the NFS server.  The end result, AFAICT, is that a
+user program can write 'A's to file1, 'B's to file2, issue a dedup
+ioctl to the kernel, and have a block of 'B's mapped into file1.  That's
+broken behavior, according to the dedup ioctl manpage.
+
+Notice how remap_flags is checked but is not included in the
+nfs42_proc_clone call?  That's how I conclude that the NFS client cannot
+possibly be sending the dedup request to the server.
+
+The same goes for fs/cifs/cifsfs.c:
+
+static loff_t cifs_remap_file_range(struct file *src_file, loff_t off,
+		struct file *dst_file, loff_t destoff, loff_t len,
+		unsigned int remap_flags)
+{
+	<local variable declarations>
+
+	if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
+		return -EINVAL;
+
+	<check files, lock inodes, flush pages>
+
+	if (target_tcon->ses->server->ops->duplicate_extents)
+		rc = target_tcon->ses->server->ops->duplicate_extents(xid,
+			smb_file_src, smb_file_target, off, len, destoff);
+	else
+		rc = -EOPNOTSUPP;
+
+Again, remap_flags is checked here but it has no influence over the
+->duplicate_extents call.
+
+Next I got to thinking that when I reworked the clone/dedupe code last
+year, I didn't include REMAP_FILE_DEDUP support for cifs or nfs, because
+as far as I knew, neither protocol supports a verb for deduplication.
+The remap_flags checks were modified to allow REMAP_FILE_DEDUP in
+commits ce96e888fe48e (NFS) and b073a08016a10 (CIFS) with this
+justification (the cifs commit has a similar message):
+
+"Subject: Fix nfs4.2 return -EINVAL when do dedupe operation
+
+"dedupe_file_range operations is combiled into remap_file_range.
+"    But in nfs42_remap_file_range, it's skiped for dedupe operations.
+"    Before this patch:
+"      # dd if=/dev/zero of=nfs/file bs=1M count=1
+"      # xfs_io -c "dedupe nfs/file 4k 64k 4k" nfs/file
+"      XFS_IOC_FILE_EXTENT_SAME: Invalid argument
+"    After this patch:
+"      # dd if=/dev/zero of=nfs/file bs=1M count=1
+"      # xfs_io -c "dedupe nfs/file 4k 64k 4k" nfs/file
+"      deduped 4096/4096 bytes at offset 65536
+"      4 KiB, 1 ops; 0.0046 sec (865.988 KiB/sec and 216.4971 ops/sec)"
+
+This sort of looks like monkeypatching to make an error message go away.
+One could argue that this ought to return EOPNOSUPP instead of EINVAL,
+and maybe that's what should've happened.
+
+So, uh, do NFS and CIFS both support server-side dedupe now, or are
+these patches just plain wrong?
+
+No, they're just wrong, because I can corrupt files like so on NFS:
+
+$ rm -rf urk moo
+$ xfs_io -f -c "pwrite -S 0x58 0 31048" urk
+wrote 31048/31048 bytes at offset 0
+30 KiB, 8 ops; 0.0000 sec (569.417 MiB/sec and 153846.1538 ops/sec)
+$ xfs_io -f -c "pwrite -S 0x59 0 31048" moo
+wrote 31048/31048 bytes at offset 0
+30 KiB, 8 ops; 0.0001 sec (177.303 MiB/sec and 47904.1916 ops/sec)
+$ md5sum urk moo
+37d3713e5f9c4fe0f8a1f813b27cb284  urk
+a5b6f953f27aa17e42450ff4674fa2df  moo
+$ xfs_io -c "dedupe urk 0 0 4096" moo
+deduped 4096/4096 bytes at offset 0
+4 KiB, 1 ops; 0.0012 sec (3.054 MiB/sec and 781.8608 ops/sec)
+$ md5sum urk moo
+37d3713e5f9c4fe0f8a1f813b27cb284  urk
+2c992d70131c489da954f1d96d8c456e  moo
+
+(Not sure about cifs, since I don't have a Windows Server handy)
+
+I'm not an expert in CIFS or NFS, so I'm asking: do either support
+dedupe or is this a kernel bug?
 
 --D
-
-> -- 
-> Trond Myklebust
-> Linux NFS client maintainer, Hammerspace
-> trond.myklebust@hammerspace.com
-> 
-> 
