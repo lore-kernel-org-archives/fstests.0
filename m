@@ -1,48 +1,43 @@
-Received: from mx2.suse.de ([195.135.220.15]:53882 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726617AbfE3Ljq (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 30 May 2019 07:39:46 -0400
-Date: Thu, 30 May 2019 13:39:43 +0200
-From: Jan Kara <jack@suse.cz>
-Subject: Re: [PATCH] ext4: regression test for online resizing maximum blocks
-Message-ID: <20190530113943.GE29237@quack2.suse.cz>
-References: <1559208438-2767-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:51166 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727201AbfE3Jl4 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 30 May 2019 05:41:56 -0400
+Received: from smtp.corp.redhat.com (int-mx01.intmail.prod.int.phx2.redhat.com [10.5.11.11])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 36DF82E95A2
+        for <fstests@vger.kernel.org>; Thu, 30 May 2019 09:41:56 +0000 (UTC)
+From: Murphy Zhou <xzhou@redhat.com>
+Subject: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in test
+Date: Thu, 30 May 2019 17:41:47 +0800
+Message-Id: <20190530094147.14512-1-xzhou@redhat.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <1559208438-2767-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, jack@suse.cz, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: Murphy Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu 30-05-19 17:27:18, Yang Xu wrote:
-> This adds a regression test for online resizing maximum blocks
-> which can trigger a BUG_ON with non-zero s_first_data_block
-> filesystem.
-> 
-> The bug was fixed by patch:
-> "ext4: fix crash during online resizing"
-> 
-> The bug was introduced by patch:
-> "ext4: convert file system to meta_bg if needed..."
-> 
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+NFSv4.2 could pass _require_scratch_dedupe, since the test offset and
+size are aligned, while generic/517 is performing unaligned dedupe.
+NFS does not support unaligned dedupe now, returns EINVAL.
 
-Looks good to me. Feel free to add:
+Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+---
+ tests/generic/517 | 1 +
+ 1 file changed, 1 insertion(+)
 
-Reviewed-by: Jan Kara <jack@suse.cz>
-
-Just one nit below:
-
-> +# success, all done
-> +echo "Silence is golden"
-
-The "Silence is golden" message doesn't really make sense when the test
-actually outputs something ;)
-
-								Honza
-
+diff --git a/tests/generic/517 b/tests/generic/517
+index 601bb24e..23665782 100755
+--- a/tests/generic/517
++++ b/tests/generic/517
+@@ -30,6 +30,7 @@ _cleanup()
+ _supported_fs generic
+ _supported_os Linux
+ _require_scratch_dedupe
++$FSTYP == "nfs"  && _notrun "NFS can't handle unaligned deduplication"
+ 
+ rm -f $seqres.full
+ 
 -- 
-Jan Kara <jack@suse.com>
-SUSE Labs, CR
+2.21.0
