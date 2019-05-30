@@ -1,77 +1,94 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:41742 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726079AbfE3QcH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 12:32:07 -0400
-Date: Thu, 30 May 2019 09:32:02 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH ] xfs: check for COW overflows in i_delayed_blks
-Message-ID: <20190530163202.GD5383@magnolia>
-References: <155839150599.62947.16097306072591964009.stgit@magnolia>
- <155839151219.62947.9627045046429149685.stgit@magnolia>
- <20190526142735.GP15846@desktop>
- <20190528170132.GA5231@magnolia>
- <20190530072023.GR15846@desktop>
+Received: from mail-eopbgr710093.outbound.protection.outlook.com ([40.107.71.93]:43520
+        "EHLO NAM05-BY2-obe.outbound.protection.outlook.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726045AbfE3Q2q (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 30 May 2019 12:28:46 -0400
+From: Trond Myklebust <trondmy@hammerspace.com>
+Subject: Re: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in
+ test
+Date: Thu, 30 May 2019 16:28:42 +0000
+Message-ID: <60acbb60edbd936ba4bbbe2abae049ff58667d6d.camel@hammerspace.com>
+References: <20190530094147.14512-1-xzhou@redhat.com>
+         <20190530152606.GA5383@magnolia>
+         <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
+         <20190530160353.GC5383@magnolia>
+In-Reply-To: <20190530160353.GC5383@magnolia>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-ID: <D2A0476220BC7E47A1A185C92D1AC758@namprd13.prod.outlook.com>
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190530072023.GR15846@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: "darrick.wong@oracle.com" <darrick.wong@oracle.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "xzhou@redhat.com" <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 30, 2019 at 03:20:23PM +0800, Eryu Guan wrote:
-> On Tue, May 28, 2019 at 10:01:32AM -0700, Darrick J. Wong wrote:
-> > On Sun, May 26, 2019 at 10:27:35PM +0800, Eryu Guan wrote:
-> > > On Mon, May 20, 2019 at 03:31:52PM -0700, Darrick J. Wong wrote:
-> > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > 
-> > > > With the new copy on write functionality it's possible to reserve so
-> > > > much COW space for a file that we end up overflowing i_delayed_blks.
-> > > > The only user-visible effect of this is to cause totally wrong i_blocks
-> > > > output in stat, so check for that.
-> > > > 
-> > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > 
-> > > I hit xfs_db killed by OOM killer (2 vcpu, 8G memory kvm guest) when
-> > > trying this test and the test takes too long time (I changed the fs size
-> > > from 300T to 300G and tried a test run), perhaps that's why you don't
-> > > put it in auto group?
-> > 
-> > Oh.  Right.  I forget that I patched out xfs_db from
-> > check_xfs_filesystem on my dev tree years ago.
-> > 
-> > Um... do we want to remove xfs_db from the check function?  Or just open
-> > code a call to xfs_repair $SCRATCH_MNT/a.img at the end of the test?
-> 
-> If XFS maintainer removes the xfs_check call in _check_xfs_filesystem(),
-> I'd say I like to see it being removed :)
-
-I tried to remove it last year[1] but Dave wanted us to precede that
-with a comprehensive analysis of what corruptions are caught via
-xfs_repair vs. xfs_check.  I haven't had time to do that.
-
-> > As for the 300T size, the reason I picked that is to force the
-> > filesystem to have large enough AGs to support the maximum cowextsize
-> > hint.  I'll see if it still works with a 4TB filesystem.
-> 
-> After removeing the xfs_db call, I can finish the test within 20s on the
-> same test vm, and a.img only takes 159MB space on $SCRATCH_DEV, so I
-> think 300T fs size is fine.
-
-Hm.  I /do/ have a separate patch banging around in my xfstests tree
-that bumps up the oom score adjustment of a test (and lowers it for the
-./check process).  One could do a similar thing to the post-test
-filesystem check, though at some point the bash code becomes messy.
-
-Or I guess we could just allow a hidden environment variable to turn off
-xfs_db in _check_xfs_filesystem and call it explicitly from the test.
-What do you all think about that?
-
---D
-
-[1] https://patchwork.kernel.org/patch/10206103/
-
-> 
-> Thanks,
-> Eryu
+T24gVGh1LCAyMDE5LTA1LTMwIGF0IDA5OjAzIC0wNzAwLCBEYXJyaWNrIEouIFdvbmcgd3JvdGU6
+DQo+IE9uIFRodSwgTWF5IDMwLCAyMDE5IGF0IDAzOjU1OjA3UE0gKzAwMDAsIFRyb25kIE15a2xl
+YnVzdCB3cm90ZToNCj4gPiBIaSBEYXJyaWNrLA0KPiA+IA0KPiA+IE9uIFRodSwgMjAxOS0wNS0z
+MCBhdCAwODoyNiAtMDcwMCwgRGFycmljayBKLiBXb25nIHdyb3RlOg0KPiA+ID4gT24gVGh1LCBN
+YXkgMzAsIDIwMTkgYXQgMDU6NDE6NDdQTSArMDgwMCwgTXVycGh5IFpob3Ugd3JvdGU6DQo+ID4g
+PiA+IE5GU3Y0LjIgY291bGQgcGFzcyBfcmVxdWlyZV9zY3JhdGNoX2RlZHVwZSwgc2luY2UgdGhl
+IHRlc3QNCj4gPiA+ID4gb2Zmc2V0DQo+ID4gPiA+IGFuZA0KPiA+ID4gPiBzaXplIGFyZSBhbGln
+bmVkLCB3aGlsZSBnZW5lcmljLzUxNyBpcyBwZXJmb3JtaW5nIHVuYWxpZ25lZA0KPiA+ID4gPiBk
+ZWR1cGUuDQo+ID4gPiA+IE5GUyBkb2VzIG5vdCBzdXBwb3J0IHVuYWxpZ25lZCBkZWR1cGUgbm93
+LCByZXR1cm5zIEVJTlZBTC4NCj4gPiA+ID4gDQo+ID4gPiA+IFNpZ25lZC1vZmYtYnk6IE11cnBo
+eSBaaG91IDx4emhvdUByZWRoYXQuY29tPg0KPiA+ID4gPiAtLS0NCj4gPiA+ID4gIHRlc3RzL2dl
+bmVyaWMvNTE3IHwgMSArDQo+ID4gPiA+ICAxIGZpbGUgY2hhbmdlZCwgMSBpbnNlcnRpb24oKykN
+Cj4gPiA+ID4gDQo+ID4gPiA+IGRpZmYgLS1naXQgYS90ZXN0cy9nZW5lcmljLzUxNyBiL3Rlc3Rz
+L2dlbmVyaWMvNTE3DQo+ID4gPiA+IGluZGV4IDYwMWJiMjRlLi4yMzY2NTc4MiAxMDA3NTUNCj4g
+PiA+ID4gLS0tIGEvdGVzdHMvZ2VuZXJpYy81MTcNCj4gPiA+ID4gKysrIGIvdGVzdHMvZ2VuZXJp
+Yy81MTcNCj4gPiA+ID4gQEAgLTMwLDYgKzMwLDcgQEAgX2NsZWFudXAoKQ0KPiA+ID4gPiAgX3N1
+cHBvcnRlZF9mcyBnZW5lcmljDQo+ID4gPiA+ICBfc3VwcG9ydGVkX29zIExpbnV4DQo+ID4gPiA+
+ICBfcmVxdWlyZV9zY3JhdGNoX2RlZHVwZQ0KPiA+ID4gPiArJEZTVFlQID09ICJuZnMiICAmJiBf
+bm90cnVuICJORlMgY2FuJ3QgaGFuZGxlIHVuYWxpZ25lZA0KPiA+ID4gPiBkZWR1cGxpY2F0aW9u
+Ig0KPiA+ID4gDQo+ID4gPiBVaC4uLiBORlMgc3VwcG9ydHMgZGVkdXBlPz8NCj4gPiA+IA0KPiA+
+ID4gTGV0J3Mgc2VlLCB3ZSBwYXNzIFJFTUFQX0ZJTEVfREVEVVAgdG8gbmZzNDJfcmVtYXBfZmls
+ZV9yYW5nZSB2aWENCj4gPiA+IEByZW1hcF9mbGFncy4gIFRoYXQgZnVuY3Rpb24gY2hlY2tzIHJl
+bWFwX2ZsYWdzIGJ1dCBuZXZlciB0b3VjaGVzDQo+ID4gPiBpdA0KPiA+ID4gYWdhaW4uICBJdCdz
+IG5vdCBwYXNzZWQgdG8gbmZzNDJfcHJvY19jbG9uZSwgd2hpY2ggKEFGQUlDVCkgbWVhbnMNCj4g
+PiA+IHRoYXQNCj4gPiA+IHRoZSBuZnMgY2xpZW50IHNlbmRzIGEgQ0xPTkUgcmVxdWVzdCB0byB0
+aGUgc2VydmVyIG9uIGJlaGFsZiBvZiBhDQo+ID4gPiBGU19JT0NfRVhURU5UX1NBTUUgaW9jdGwu
+ICBUaGF0IHNlZW1zIHN1c3BpY2lvdXMgdG8gbWUuLi4NCj4gPiA+IA0KPiA+ID4gVGhlIG5mcyBj
+bGllbnQgYWxzbyBkb2Vzbid0IGxvY2sgYW5kIGNvbXBhcmUgdGhlIGZpbGUgY29udGVudHMNCj4g
+PiA+IGl0c2VsZg0KPiA+ID4gKHRoZSBzZXJ2ZXIgc2hvdWxkIGJlIGRvaW5nIHRoYXQgYW55d2F5
+LCByaWdodD8pIHdoaWNoIG1lYW5zIHRoYXQNCj4gPiA+IGRlZHVwZQ0KPiA+ID4gZG9lc24ndCBm
+YWlsIGlmIHRoZSBmaWxlIGNvbnRlbnRzIGFyZSBkaWZmZXJlbnQ/DQo+ID4gPiANCj4gPiA+IE9o
+LCBJIHNlZS4uLiBYaWFvbGkgRmVuZyB0dXJuZWQgb24gZGVkdXBlIGZvciBjaWZzDQo+ID4gPiAo
+YjA3M2EwODAxNmExMGYwKQ0KPiA+ID4gYW5kDQo+ID4gPiBuZnMgKGNlOTZlODg4ZmU0OGUpIGV2
+ZW4gdGhvdWdoICh0aGUgbGFzdCBJIGhlYXJkKSBuZWl0aGVyDQo+ID4gPiBwcm90b2NvbA0KPiA+
+ID4gc3VwcG9ydHMgZGVkdXBlIGFuZCBub3cgd2lsbCBjb3JydXB0IGRhdGEgaW4gZG9pbmcgc28u
+DQo+ID4gPiANCj4gPiA+IExldCdzIGhvbGQgb2ZmIG9uIHRoaXMgZm9yIG5vdyB3aGlsZSBJIGdv
+IGVtYWlsIEFubmEgJiBTdGV2ZQ0KPiA+ID4gYWJvdXQNCj4gPiA+IHdoZXRoZXIgb3Igbm90IG5m
+cyBhbmQgY2lmcyBzdXBwb3J0IGRlZHVwZS4NCj4gPiA+IA0KPiA+IA0KPiA+IFdoYXQgaXMgdGhl
+IFZGUyByZXF1aXJlbWVudCBmb3IgZGVkdXAgc3VwcG9ydD8NCj4gPiANCj4gPiBBY2NvcmRpbmcg
+dG8gdGhlIFJGQzc4NjIgc3BlYyBmb3IgQ0xPTkU6ICJJZiBTQVZFRF9GSCBhbmQNCj4gPiBDVVJS
+RU5UX0ZIDQo+ID4gcmVmZXIgdG8gdGhlIHNhbWUgZmlsZSBhbmQgdGhlIHNvdXJjZSBhbmQgdGFy
+Z2V0IHJhbmdlcyBvdmVybGFwLA0KPiA+IHRoZQ0KPiA+IG9wZXJhdGlvbiBNVVNUIGZhaWwgd2l0
+aCBORlM0RVJSX0lOVkFMLiINCj4gPiANCj4gPiBTbyBjbGVhcmx5IHdlIG1heSBub3Qgc3VwcG9y
+dCBkZWR1cCBpZiB0aGVyZSBpcyBhIHJlcXVpcmVtZW50IHRoYXQNCj4gPiB3ZQ0KPiA+IGJlIGFi
+bGUgdG8gY2xvbmUgYmV0d2VlbiBvdmVybGFwcGluZyByYW5nZXMgb24gdGhlIHNhbWUgZmlsZS4N
+Cj4gPiBIb3dldmVyIEkNCj4gPiBjYW4gZmluZCBubyByZXN0cmljdGlvbiBvbiB1c2luZyBDTE9O
+RSBmb3Igbm9uLW92ZXJsYXBwaW5nIHJhbmdlcy4NCj4gDQo+IEhlaCwgY29uY3VycmVudCByZXBs
+aWVzLiA6KQ0KPiANCj4gVGhlcmUgaXNuJ3QsIGV4Y2VwdCB0aGF0IHRoZSBORlMgY2xpZW50IGNv
+ZGUgZG9lc24ndCBjaGVjayBmb3INCj4gaWRlbnRpY2FsDQo+IGNvbnRlbnRzLCBub3IgZG9lcyBp
+dCBhcHBlYXIgdG8gYXNrIHRoZSBzZXJ2ZXIgdG8gZG8gdGhlIGNvbXBhcmlzb24uDQo+IA0KPiBU
+aGUgVkZTIGNhbiBkbyBzdWNoIGNvbXBhcmlzb24gdmlhIGdlbmVyaWNfcmVtYXBfZmlsZV9yYW5n
+ZV9wcmVwIC0+DQo+IHZmc19kZWR1cGVfZmlsZV9yYW5nZV9jb21wYXJlLCBidXQgTkZTIGRvZXNu
+J3QgY2FsbCB0aGUgZmlyc3QNCj4gZnVuY3Rpb24sDQo+IGl0IGp1c3QgZm9yd2FyZHMgdGhlIHJl
+cXVlc3QgdG8gdGhlIHNlcnZlciBhbmQgbGV0cyB0aGUgc2VydmVyIGRvIGFsbA0KPiB0aGUgd29y
+ayAoaW5jbHVkaW5nIHNlbmRpbmcgYmFjayAibm90IHN1cHBvcnRlZCIpLCByaWdodD8NCj4gDQo+
+IEFkbWl0dGVkbHkgSSdtIG5vdCBzdXJlIHlvdSdkIHdhbnQgdG8gZG8gdGhlIGNvbXBhcmlzb24g
+b24gdGhlIGNsaWVudA0KPiBhbnl3YXkgc2luY2UgdGhhdCBpbnZvbHZlcyBoYXZpbmcgdGhlIGNs
+aWVudCByZWFkIC9ib3RoLyBmaWxlIHJhbmdlcw0KPiB3aGlsZSBrZWVwaW5nIGJvdGggZmlsZXMg
+bG9ja2VkIGFnYWluc3Qgd3JpdGVzIG9uIHRoZSBzZXJ2ZXIuDQoNClRoZXJlIGlzIG5vICJhdG9t
+aWNfY29tcGFyZV9hbmRfZGVkdXAoKSIgb3BlcmF0aW9uIGluIE5GUy4gT25seSBhDQoiQ0xPTkUi
+IG9wZXJhdGlvbiwgd2hpY2ggd2lsbCBzdXBwb3J0IHZmc19jbG9uZV9maWxlX3JhbmdlKCkuDQoN
+ClRoZSBwcm9ibGVtIGhlcmUgd291bGQgYXBwZWFyIHRvIGJlIHRoZSByZWZhY3RvcmluZyB0aGF0
+IHNxdWVsY2hlZA0KcmFuZ2UgYmFzZWQgY2xvbmUgYW5kIGRlZHVwIGludG8gdGhlIHNhbWUgInJl
+bWFwX2ZpbGVfcmFuZ2UoKSINCmZpbGVzeXN0ZW0gbGV2ZWwgbWV0aG9kLiBUaGF0IHdvdWxkIGFw
+cGVhciB0byBiZSBjb25mdXNpbmcgcGVvcGxlIGlmDQp0aGUgZXhwZWN0YXRpb24gaXMgdGhhdCBm
+aWxlc3lzdGVtcyBzaG91bGQgYWN0dWFsbHkgYmUgcHJvdmlkaW5nIHR3bw0KZGlmZmVyZW50IHNl
+dHMgb2YgZnVuY3Rpb25hbGl0eS4NCg0KLS0gDQpUcm9uZCBNeWtsZWJ1c3QNCkxpbnV4IE5GUyBj
+bGllbnQgbWFpbnRhaW5lciwgSGFtbWVyc3BhY2UNCnRyb25kLm15a2xlYnVzdEBoYW1tZXJzcGFj
+ZS5jb20NCg0KDQo=
