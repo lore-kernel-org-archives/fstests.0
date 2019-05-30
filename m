@@ -1,64 +1,102 @@
-Received: from mail-eopbgr770101.outbound.protection.outlook.com ([40.107.77.101]:1862
-        "EHLO NAM02-SN1-obe.outbound.protection.outlook.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726684AbfE3PzK (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 30 May 2019 11:55:10 -0400
-From: Trond Myklebust <trondmy@hammerspace.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:48622 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726079AbfE3QEU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 12:04:20 -0400
+Date: Thu, 30 May 2019 09:03:53 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in
  test
-Date: Thu, 30 May 2019 15:55:07 +0000
-Message-ID: <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
+Message-ID: <20190530160353.GC5383@magnolia>
 References: <20190530094147.14512-1-xzhou@redhat.com>
-         <20190530152606.GA5383@magnolia>
-In-Reply-To: <20190530152606.GA5383@magnolia>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-ID: <89BF01661249404C89AC41B415476085@namprd13.prod.outlook.com>
-Content-Transfer-Encoding: base64
+ <20190530152606.GA5383@magnolia>
+ <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
 MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
 Sender: fstests-owner@vger.kernel.org
-To: "darrick.wong@oracle.com" <darrick.wong@oracle.com>, "xzhou@redhat.com" <xzhou@redhat.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: Trond Myklebust <trondmy@hammerspace.com>
+Cc: "xzhou@redhat.com" <xzhou@redhat.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-SGkgRGFycmljaywNCg0KT24gVGh1LCAyMDE5LTA1LTMwIGF0IDA4OjI2IC0wNzAwLCBEYXJyaWNr
-IEouIFdvbmcgd3JvdGU6DQo+IE9uIFRodSwgTWF5IDMwLCAyMDE5IGF0IDA1OjQxOjQ3UE0gKzA4
-MDAsIE11cnBoeSBaaG91IHdyb3RlOg0KPiA+IE5GU3Y0LjIgY291bGQgcGFzcyBfcmVxdWlyZV9z
-Y3JhdGNoX2RlZHVwZSwgc2luY2UgdGhlIHRlc3Qgb2Zmc2V0DQo+ID4gYW5kDQo+ID4gc2l6ZSBh
-cmUgYWxpZ25lZCwgd2hpbGUgZ2VuZXJpYy81MTcgaXMgcGVyZm9ybWluZyB1bmFsaWduZWQgZGVk
-dXBlLg0KPiA+IE5GUyBkb2VzIG5vdCBzdXBwb3J0IHVuYWxpZ25lZCBkZWR1cGUgbm93LCByZXR1
-cm5zIEVJTlZBTC4NCj4gPiANCj4gPiBTaWduZWQtb2ZmLWJ5OiBNdXJwaHkgWmhvdSA8eHpob3VA
-cmVkaGF0LmNvbT4NCj4gPiAtLS0NCj4gPiAgdGVzdHMvZ2VuZXJpYy81MTcgfCAxICsNCj4gPiAg
-MSBmaWxlIGNoYW5nZWQsIDEgaW5zZXJ0aW9uKCspDQo+ID4gDQo+ID4gZGlmZiAtLWdpdCBhL3Rl
-c3RzL2dlbmVyaWMvNTE3IGIvdGVzdHMvZ2VuZXJpYy81MTcNCj4gPiBpbmRleCA2MDFiYjI0ZS4u
-MjM2NjU3ODIgMTAwNzU1DQo+ID4gLS0tIGEvdGVzdHMvZ2VuZXJpYy81MTcNCj4gPiArKysgYi90
-ZXN0cy9nZW5lcmljLzUxNw0KPiA+IEBAIC0zMCw2ICszMCw3IEBAIF9jbGVhbnVwKCkNCj4gPiAg
-X3N1cHBvcnRlZF9mcyBnZW5lcmljDQo+ID4gIF9zdXBwb3J0ZWRfb3MgTGludXgNCj4gPiAgX3Jl
-cXVpcmVfc2NyYXRjaF9kZWR1cGUNCj4gPiArJEZTVFlQID09ICJuZnMiICAmJiBfbm90cnVuICJO
-RlMgY2FuJ3QgaGFuZGxlIHVuYWxpZ25lZA0KPiA+IGRlZHVwbGljYXRpb24iDQo+IA0KPiBVaC4u
-LiBORlMgc3VwcG9ydHMgZGVkdXBlPz8NCj4gDQo+IExldCdzIHNlZSwgd2UgcGFzcyBSRU1BUF9G
-SUxFX0RFRFVQIHRvIG5mczQyX3JlbWFwX2ZpbGVfcmFuZ2UgdmlhDQo+IEByZW1hcF9mbGFncy4g
-IFRoYXQgZnVuY3Rpb24gY2hlY2tzIHJlbWFwX2ZsYWdzIGJ1dCBuZXZlciB0b3VjaGVzIGl0DQo+
-IGFnYWluLiAgSXQncyBub3QgcGFzc2VkIHRvIG5mczQyX3Byb2NfY2xvbmUsIHdoaWNoIChBRkFJ
-Q1QpIG1lYW5zDQo+IHRoYXQNCj4gdGhlIG5mcyBjbGllbnQgc2VuZHMgYSBDTE9ORSByZXF1ZXN0
-IHRvIHRoZSBzZXJ2ZXIgb24gYmVoYWxmIG9mIGENCj4gRlNfSU9DX0VYVEVOVF9TQU1FIGlvY3Rs
-LiAgVGhhdCBzZWVtcyBzdXNwaWNpb3VzIHRvIG1lLi4uDQo+IA0KPiBUaGUgbmZzIGNsaWVudCBh
-bHNvIGRvZXNuJ3QgbG9jayBhbmQgY29tcGFyZSB0aGUgZmlsZSBjb250ZW50cyBpdHNlbGYNCj4g
-KHRoZSBzZXJ2ZXIgc2hvdWxkIGJlIGRvaW5nIHRoYXQgYW55d2F5LCByaWdodD8pIHdoaWNoIG1l
-YW5zIHRoYXQNCj4gZGVkdXBlDQo+IGRvZXNuJ3QgZmFpbCBpZiB0aGUgZmlsZSBjb250ZW50cyBh
-cmUgZGlmZmVyZW50Pw0KPiANCj4gT2gsIEkgc2VlLi4uIFhpYW9saSBGZW5nIHR1cm5lZCBvbiBk
-ZWR1cGUgZm9yIGNpZnMgKGIwNzNhMDgwMTZhMTBmMCkNCj4gYW5kDQo+IG5mcyAoY2U5NmU4ODhm
-ZTQ4ZSkgZXZlbiB0aG91Z2ggKHRoZSBsYXN0IEkgaGVhcmQpIG5laXRoZXIgcHJvdG9jb2wNCj4g
-c3VwcG9ydHMgZGVkdXBlIGFuZCBub3cgd2lsbCBjb3JydXB0IGRhdGEgaW4gZG9pbmcgc28uDQo+
-IA0KPiBMZXQncyBob2xkIG9mZiBvbiB0aGlzIGZvciBub3cgd2hpbGUgSSBnbyBlbWFpbCBBbm5h
-ICYgU3RldmUgYWJvdXQNCj4gd2hldGhlciBvciBub3QgbmZzIGFuZCBjaWZzIHN1cHBvcnQgZGVk
-dXBlLg0KPiANCg0KV2hhdCBpcyB0aGUgVkZTIHJlcXVpcmVtZW50IGZvciBkZWR1cCBzdXBwb3J0
-Pw0KDQpBY2NvcmRpbmcgdG8gdGhlIFJGQzc4NjIgc3BlYyBmb3IgQ0xPTkU6ICJJZiBTQVZFRF9G
-SCBhbmQgQ1VSUkVOVF9GSA0KcmVmZXIgdG8gdGhlIHNhbWUgZmlsZSBhbmQgdGhlIHNvdXJjZSBh
-bmQgdGFyZ2V0IHJhbmdlcyBvdmVybGFwLCB0aGUNCm9wZXJhdGlvbiBNVVNUIGZhaWwgd2l0aCBO
-RlM0RVJSX0lOVkFMLiINCg0KU28gY2xlYXJseSB3ZSBtYXkgbm90IHN1cHBvcnQgZGVkdXAgaWYg
-dGhlcmUgaXMgYSByZXF1aXJlbWVudCB0aGF0IHdlDQpiZSBhYmxlIHRvIGNsb25lIGJldHdlZW4g
-b3ZlcmxhcHBpbmcgcmFuZ2VzIG9uIHRoZSBzYW1lIGZpbGUuIEhvd2V2ZXIgSQ0KY2FuIGZpbmQg
-bm8gcmVzdHJpY3Rpb24gb24gdXNpbmcgQ0xPTkUgZm9yIG5vbi1vdmVybGFwcGluZyByYW5nZXMu
-DQotLSANClRyb25kIE15a2xlYnVzdA0KTGludXggTkZTIGNsaWVudCBtYWludGFpbmVyLCBIYW1t
-ZXJzcGFjZQ0KdHJvbmQubXlrbGVidXN0QGhhbW1lcnNwYWNlLmNvbQ0KDQoNCg==
+On Thu, May 30, 2019 at 03:55:07PM +0000, Trond Myklebust wrote:
+> Hi Darrick,
+> 
+> On Thu, 2019-05-30 at 08:26 -0700, Darrick J. Wong wrote:
+> > On Thu, May 30, 2019 at 05:41:47PM +0800, Murphy Zhou wrote:
+> > > NFSv4.2 could pass _require_scratch_dedupe, since the test offset
+> > > and
+> > > size are aligned, while generic/517 is performing unaligned dedupe.
+> > > NFS does not support unaligned dedupe now, returns EINVAL.
+> > > 
+> > > Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+> > > ---
+> > >  tests/generic/517 | 1 +
+> > >  1 file changed, 1 insertion(+)
+> > > 
+> > > diff --git a/tests/generic/517 b/tests/generic/517
+> > > index 601bb24e..23665782 100755
+> > > --- a/tests/generic/517
+> > > +++ b/tests/generic/517
+> > > @@ -30,6 +30,7 @@ _cleanup()
+> > >  _supported_fs generic
+> > >  _supported_os Linux
+> > >  _require_scratch_dedupe
+> > > +$FSTYP == "nfs"  && _notrun "NFS can't handle unaligned
+> > > deduplication"
+> > 
+> > Uh... NFS supports dedupe??
+> > 
+> > Let's see, we pass REMAP_FILE_DEDUP to nfs42_remap_file_range via
+> > @remap_flags.  That function checks remap_flags but never touches it
+> > again.  It's not passed to nfs42_proc_clone, which (AFAICT) means
+> > that
+> > the nfs client sends a CLONE request to the server on behalf of a
+> > FS_IOC_EXTENT_SAME ioctl.  That seems suspicious to me...
+> > 
+> > The nfs client also doesn't lock and compare the file contents itself
+> > (the server should be doing that anyway, right?) which means that
+> > dedupe
+> > doesn't fail if the file contents are different?
+> > 
+> > Oh, I see... Xiaoli Feng turned on dedupe for cifs (b073a08016a10f0)
+> > and
+> > nfs (ce96e888fe48e) even though (the last I heard) neither protocol
+> > supports dedupe and now will corrupt data in doing so.
+> > 
+> > Let's hold off on this for now while I go email Anna & Steve about
+> > whether or not nfs and cifs support dedupe.
+> > 
+> 
+> What is the VFS requirement for dedup support?
+> 
+> According to the RFC7862 spec for CLONE: "If SAVED_FH and CURRENT_FH
+> refer to the same file and the source and target ranges overlap, the
+> operation MUST fail with NFS4ERR_INVAL."
+> 
+> So clearly we may not support dedup if there is a requirement that we
+> be able to clone between overlapping ranges on the same file. However I
+> can find no restriction on using CLONE for non-overlapping ranges.
+
+Heh, concurrent replies. :)
+
+There isn't, except that the NFS client code doesn't check for identical
+contents, nor does it appear to ask the server to do the comparison.
+
+The VFS can do such comparison via generic_remap_file_range_prep ->
+vfs_dedupe_file_range_compare, but NFS doesn't call the first function,
+it just forwards the request to the server and lets the server do all
+the work (including sending back "not supported"), right?
+
+Admittedly I'm not sure you'd want to do the comparison on the client
+anyway since that involves having the client read /both/ file ranges
+while keeping both files locked against writes on the server.
+
+--D
+
+> -- 
+> Trond Myklebust
+> Linux NFS client maintainer, Hammerspace
+> trond.myklebust@hammerspace.com
+> 
+> 
