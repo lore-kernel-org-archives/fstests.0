@@ -1,141 +1,122 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:44824 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726015AbfE3Qpy (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 12:45:54 -0400
-Date: Thu, 30 May 2019 09:45:14 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in
- test
-Message-ID: <20190530164514.GA5398@magnolia>
-References: <20190530094147.14512-1-xzhou@redhat.com>
- <20190530152606.GA5383@magnolia>
- <81dfa5e0e611f41e1cbcb2989eecad574422cc26.camel@hammerspace.com>
- <20190530160353.GC5383@magnolia>
- <60acbb60edbd936ba4bbbe2abae049ff58667d6d.camel@hammerspace.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:27540 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726372AbfEaCMe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 30 May 2019 22:12:34 -0400
+From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH v2] ext4: regression test for online resizing maximum blocks
+Date: Fri, 31 May 2019 10:12:27 +0800
+Message-ID: <1559268747-2304-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+In-Reply-To: <20190530113943.GE29237@quack2.suse.cz>
+References: <20190530113943.GE29237@quack2.suse.cz>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <60acbb60edbd936ba4bbbe2abae049ff58667d6d.camel@hammerspace.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Trond Myklebust <trondmy@hammerspace.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "xzhou@redhat.com" <xzhou@redhat.com>
+To: guaneryu@gmail.com, jack@suse.cz
+Cc: fstests@vger.kernel.org, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, May 30, 2019 at 04:28:42PM +0000, Trond Myklebust wrote:
-> On Thu, 2019-05-30 at 09:03 -0700, Darrick J. Wong wrote:
-> > On Thu, May 30, 2019 at 03:55:07PM +0000, Trond Myklebust wrote:
-> > > Hi Darrick,
-> > > 
-> > > On Thu, 2019-05-30 at 08:26 -0700, Darrick J. Wong wrote:
-> > > > On Thu, May 30, 2019 at 05:41:47PM +0800, Murphy Zhou wrote:
-> > > > > NFSv4.2 could pass _require_scratch_dedupe, since the test
-> > > > > offset
-> > > > > and
-> > > > > size are aligned, while generic/517 is performing unaligned
-> > > > > dedupe.
-> > > > > NFS does not support unaligned dedupe now, returns EINVAL.
-> > > > > 
-> > > > > Signed-off-by: Murphy Zhou <xzhou@redhat.com>
-> > > > > ---
-> > > > >  tests/generic/517 | 1 +
-> > > > >  1 file changed, 1 insertion(+)
-> > > > > 
-> > > > > diff --git a/tests/generic/517 b/tests/generic/517
-> > > > > index 601bb24e..23665782 100755
-> > > > > --- a/tests/generic/517
-> > > > > +++ b/tests/generic/517
-> > > > > @@ -30,6 +30,7 @@ _cleanup()
-> > > > >  _supported_fs generic
-> > > > >  _supported_os Linux
-> > > > >  _require_scratch_dedupe
-> > > > > +$FSTYP == "nfs"  && _notrun "NFS can't handle unaligned
-> > > > > deduplication"
-> > > > 
-> > > > Uh... NFS supports dedupe??
-> > > > 
-> > > > Let's see, we pass REMAP_FILE_DEDUP to nfs42_remap_file_range via
-> > > > @remap_flags.  That function checks remap_flags but never touches
-> > > > it
-> > > > again.  It's not passed to nfs42_proc_clone, which (AFAICT) means
-> > > > that
-> > > > the nfs client sends a CLONE request to the server on behalf of a
-> > > > FS_IOC_EXTENT_SAME ioctl.  That seems suspicious to me...
-> > > > 
-> > > > The nfs client also doesn't lock and compare the file contents
-> > > > itself
-> > > > (the server should be doing that anyway, right?) which means that
-> > > > dedupe
-> > > > doesn't fail if the file contents are different?
-> > > > 
-> > > > Oh, I see... Xiaoli Feng turned on dedupe for cifs
-> > > > (b073a08016a10f0)
-> > > > and
-> > > > nfs (ce96e888fe48e) even though (the last I heard) neither
-> > > > protocol
-> > > > supports dedupe and now will corrupt data in doing so.
-> > > > 
-> > > > Let's hold off on this for now while I go email Anna & Steve
-> > > > about
-> > > > whether or not nfs and cifs support dedupe.
-> > > > 
-> > > 
-> > > What is the VFS requirement for dedup support?
-> > > 
-> > > According to the RFC7862 spec for CLONE: "If SAVED_FH and
-> > > CURRENT_FH
-> > > refer to the same file and the source and target ranges overlap,
-> > > the
-> > > operation MUST fail with NFS4ERR_INVAL."
-> > > 
-> > > So clearly we may not support dedup if there is a requirement that
-> > > we
-> > > be able to clone between overlapping ranges on the same file.
-> > > However I
-> > > can find no restriction on using CLONE for non-overlapping ranges.
-> > 
-> > Heh, concurrent replies. :)
-> > 
-> > There isn't, except that the NFS client code doesn't check for
-> > identical
-> > contents, nor does it appear to ask the server to do the comparison.
-> > 
-> > The VFS can do such comparison via generic_remap_file_range_prep ->
-> > vfs_dedupe_file_range_compare, but NFS doesn't call the first
-> > function,
-> > it just forwards the request to the server and lets the server do all
-> > the work (including sending back "not supported"), right?
-> > 
-> > Admittedly I'm not sure you'd want to do the comparison on the client
-> > anyway since that involves having the client read /both/ file ranges
-> > while keeping both files locked against writes on the server.
-> 
-> There is no "atomic_compare_and_dedup()" operation in NFS. Only a
-> "CLONE" operation, which will support vfs_clone_file_range().
+This adds a regression test for online resizing maximum blocks
+which can trigger a BUG_ON with non-zero s_first_data_block
+filesystem.
 
-<nod>
+The bug was fixed by patch:
+"ext4: fix crash during online resizing"
 
-> The problem here would appear to be the refactoring that squelched
-> range based clone and dedup into the same "remap_file_range()"
-> filesystem level method. That would appear to be confusing people if
-> the expectation is that filesystems should actually be providing two
-> different sets of functionality.
+The bug was introduced by patch:
+"ext4: convert file system to meta_bg if needed..."
 
-Documentation/filesystems/vfs.txt says of remap_file_range:
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ tests/ext4/035     | 57 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/ext4/035.out |  3 +++
+ tests/ext4/group   |  1 +
+ 3 files changed, 61 insertions(+)
+ create mode 100644 tests/ext4/035
+ create mode 100644 tests/ext4/035.out
 
-"If REMAP_FILE_DEDUP is set then the implementation must only remap if
-the requested file ranges have identical contents."
-
-So yes, there is an expectation that the implementation provide a piece
-of functionality (remapping extents) and a variation on the theme
-(remapping extents if they're identical).
-
-Anyway, I'll send patches for nfs (and cifs if I hear back from Steve)...
-
---D
-
-> -- 
-> Trond Myklebust
-> Linux NFS client maintainer, Hammerspace
-> trond.myklebust@hammerspace.com
-> 
-> 
+diff --git a/tests/ext4/035 b/tests/ext4/035
+new file mode 100644
+index 00000000..25aa9f10
+--- /dev/null
++++ b/tests/ext4/035
+@@ -0,0 +1,57 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 FUJITSU LIMITED. All rights reserved.
++#
++# FSQA Test No. 035
++#
++# Regression test for commit:
++# f96c3ac8 (ext4: fix crash during online resizin)
++#
++# This case tests a loss s_first_data_block on ext4 when computing
++# maximum size with given number of group descriptor blocks.  Filesystem
++# with non-zero s_first_data_block can happen that computed maximum size
++# lower than current size and leads to a BUG_ON in in ext4_alloc_group_tables()
++# hitting on flex_gd->count == 0.
++#
++# This bug was introduced by commit:
++# 1c6bd71 (ext4: convert file system to meta_bg if needed..)
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1        # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++        rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_fs ext4
++_supported_os Linux
++_require_scratch
++_require_command "$RESIZE2FS_PROG" resize2fs
++
++rm -f $seqres.full
++
++$MKFS_EXT4_PROG -F -b 1024 -E "resize=262144" $SCRATCH_DEV 32768 >> $seqres.full 2>&1
++_scratch_mount
++
++echo "Resizing to 262145 blocks"
++$RESIZE2FS_PROG $SCRATCH_DEV 262145 >> $seqres.full 2>&1
++
++echo "Resizing to 300000 blocks"
++$RESIZE2FS_PROG $SCRATCH_DEV 300000 >> $seqres.full 2>&1
++
++# success, all done
++status=0
++exit
+diff --git a/tests/ext4/035.out b/tests/ext4/035.out
+new file mode 100644
+index 00000000..3acdb1e1
+--- /dev/null
++++ b/tests/ext4/035.out
+@@ -0,0 +1,3 @@
++QA output created by 035
++Resizing to 262145 blocks
++Resizing to 300000 blocks
+diff --git a/tests/ext4/group b/tests/ext4/group
+index eb744a12..c8d03af7 100644
+--- a/tests/ext4/group
++++ b/tests/ext4/group
+@@ -37,6 +37,7 @@
+ 032 auto quick ioctl resize
+ 033 auto ioctl resize
+ 034 auto quick quota
++035 auto quick resize dangerous
+ 271 auto rw quick
+ 301 aio auto ioctl rw stress defrag
+ 302 aio auto ioctl rw stress defrag
+-- 
+2.18.1
