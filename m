@@ -1,42 +1,48 @@
-Received: from mx2.suse.de ([195.135.220.15]:47070 "EHLO mx1.suse.de"
+Received: from mail-eopbgr740119.outbound.protection.outlook.com ([40.107.74.119]:49984
+        "EHLO NAM01-BN3-obe.outbound.protection.outlook.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726233AbfEaKso (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 31 May 2019 06:48:44 -0400
-From: =?utf-8?Q?Aur=C3=A9lien?= Aptel <aaptel@suse.com>
-Subject: Re: NFS & CIFS support dedupe now?? Was: Re: [PATCH] generic/517: notrun on NFS due to unaligned dedupe in test
-In-Reply-To: <20190530155851.GB5383@magnolia>
-References: <20190530094147.14512-1-xzhou@redhat.com> <20190530152606.GA5383@magnolia> <20190530155851.GB5383@magnolia>
-Date: Fri, 31 May 2019 12:48:40 +0200
-Message-ID: <87woi6yk53.fsf@suse.com>
+        id S1726587AbfEaN2R (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 31 May 2019 09:28:17 -0400
+From: Tom Talpey <ttalpey@microsoft.com>
+Subject: RE: NFS & CIFS support dedupe now?? Was: Re: [PATCH] generic/517:
+ notrun on NFS due to unaligned dedupe in test
+Date: Fri, 31 May 2019 13:28:12 +0000
+Message-ID: <CY4PR21MB0149348B4B4049D9C87BAA39A0190@CY4PR21MB0149.namprd21.prod.outlook.com>
+References: <20190530094147.14512-1-xzhou@redhat.com>
+ <20190530152606.GA5383@magnolia> <20190530155851.GB5383@magnolia>
+ <87woi6yk53.fsf@suse.com>
+In-Reply-To: <87woi6yk53.fsf@suse.com>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, sfrench@samba.org, anna.schumaker@netapp.com, trond.myklebust@hammerspace.com, fengxiaoli0714@gmail.com
-Cc: fstests@vger.kernel.org, Murphy Zhou <xzhou@redhat.com>, linux-cifs@vger.kernel.org, linux-nfs@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>
+To: =?utf-8?B?QXVyw6lsaWVuIEFwdGVs?= <aaptel@suse.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, "sfrench@samba.org" <sfrench@samba.org>, "anna.schumaker@netapp.com" <anna.schumaker@netapp.com>, "trond.myklebust@hammerspace.com" <trond.myklebust@hammerspace.com>, "fengxiaoli0714@gmail.com" <fengxiaoli0714@gmail.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, Murphy Zhou <xzhou@redhat.com>, "linux-cifs@vger.kernel.org" <linux-cifs@vger.kernel.org>, "linux-nfs@vger.kernel.org" <linux-nfs@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-"Darrick J. Wong" <darrick.wong@oracle.com> writes:
-> (Not sure about cifs, since I don't have a Windows Server handy)
->
-> I'm not an expert in CIFS or NFS, so I'm asking: do either support
-> dedupe or is this a kernel bug?
-
-AFAIK, the SMB protocol has 2 ioctl to do server side copies:
-- FSCTL_SRV_COPYCHUNK [1] generic
-- FSCTL_DUPLICATE_EXTENTS_TO_FILE [2], only supported on windows "new" Co=
-W
-  filesystem ReFS
-
-Cheers,
-
-1:https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/cd=
-0162e4-7650-4293-8a2a-d696923203ef
-2:https://docs.microsoft.com/en-us/openspecs/windows_protocols/ms-smb2/4f=
-08d2f8-bd17-4181-9cec-54c4f6a1b439
---=20
-Aur=C3=A9lien Aptel / SUSE Labs Samba Team
-GPG: 1839 CB5F 9F5B FB9B AA97  8C99 03C8 A49B 521B D5D3
-SUSE Linux GmbH, Maxfeldstra=C3=9Fe 5, 90409 N=C3=BCrnberg, Germany
-GF: Felix Imend=C3=B6rffer, Mary Higgins, Sri Rasiah HRB 21284 (AG N=C3=BC=
-rnberg)
+PiAtLS0tLU9yaWdpbmFsIE1lc3NhZ2UtLS0tLQ0KPiBGcm9tOiBsaW51eC1jaWZzLW93bmVyQHZn
+ZXIua2VybmVsLm9yZyA8bGludXgtY2lmcy1vd25lckB2Z2VyLmtlcm5lbC5vcmc+IE9uDQo+IEJl
+aGFsZiBPZiBBdXLDqWxpZW4gQXB0ZWwNCj4gU2VudDogRnJpZGF5LCBNYXkgMzEsIDIwMTkgNjo0
+OSBBTQ0KPiBUbzogRGFycmljayBKLiBXb25nIDxkYXJyaWNrLndvbmdAb3JhY2xlLmNvbT47IHNm
+cmVuY2hAc2FtYmEub3JnOw0KPiBhbm5hLnNjaHVtYWtlckBuZXRhcHAuY29tOyB0cm9uZC5teWts
+ZWJ1c3RAaGFtbWVyc3BhY2UuY29tOw0KPiBmZW5neGlhb2xpMDcxNEBnbWFpbC5jb20NCj4gQ2M6
+IGZzdGVzdHNAdmdlci5rZXJuZWwub3JnOyBNdXJwaHkgWmhvdSA8eHpob3VAcmVkaGF0LmNvbT47
+IGxpbnV4LQ0KPiBjaWZzQHZnZXIua2VybmVsLm9yZzsgbGludXgtbmZzQHZnZXIua2VybmVsLm9y
+ZzsgbGludXgtZnNkZXZlbCA8bGludXgtDQo+IGZzZGV2ZWxAdmdlci5rZXJuZWwub3JnPg0KPiBT
+dWJqZWN0OiBSZTogTkZTICYgQ0lGUyBzdXBwb3J0IGRlZHVwZSBub3c/PyBXYXM6IFJlOiBbUEFU
+Q0hdIGdlbmVyaWMvNTE3Og0KPiBub3RydW4gb24gTkZTIGR1ZSB0byB1bmFsaWduZWQgZGVkdXBl
+IGluIHRlc3QNCj4gDQo+ICJEYXJyaWNrIEouIFdvbmciIDxkYXJyaWNrLndvbmdAb3JhY2xlLmNv
+bT4gd3JpdGVzOg0KPiA+IChOb3Qgc3VyZSBhYm91dCBjaWZzLCBzaW5jZSBJIGRvbid0IGhhdmUg
+YSBXaW5kb3dzIFNlcnZlciBoYW5keSkNCj4gPg0KPiA+IEknbSBub3QgYW4gZXhwZXJ0IGluIENJ
+RlMgb3IgTkZTLCBzbyBJJ20gYXNraW5nOiBkbyBlaXRoZXIgc3VwcG9ydA0KPiA+IGRlZHVwZSBv
+ciBpcyB0aGlzIGEga2VybmVsIGJ1Zz8NCj4gDQo+IEFGQUlLLCB0aGUgU01CIHByb3RvY29sIGhh
+cyAyIGlvY3RsIHRvIGRvIHNlcnZlciBzaWRlIGNvcGllczoNCj4gLSBGU0NUTF9TUlZfQ09QWUNI
+VU5LIFsxXSBnZW5lcmljDQo+IC0gRlNDVExfRFVQTElDQVRFX0VYVEVOVFNfVE9fRklMRSBbMl0s
+IG9ubHkgc3VwcG9ydGVkIG9uIHdpbmRvd3MgIm5ldyINCj4gQ29XDQo+ICAgZmlsZXN5c3RlbSBS
+ZUZTDQoNCldpbmRvd3MgYWxzbyBzdXBwb3J0cyB0aGUgVDEwIGNvcHkgb2ZmbG9hZCwgd2hlbiB0
+aGUgYmFja2VuZCBzdG9yYWdlIChlLmcuIGEgU0FOKSBzdXBwb3J0cyBpdC4NCg0KVGhlcmUgaXMg
+bm8gZXhwbGljaXQgc3VwcG9ydCBmb3IgZGVkdXAgaW4gU01CLCB0aGF0IGlzIGNvbnNpZGVyZWQg
+YSBiYWNrZW5kIHN0b3JhZ2UgZnVuY3Rpb24gYW5kIGlzIG5vdCBzdXJmYWNlZCBpbiB0aGUgcHJv
+dG9jb2wuIFRoZXJlIGFyZSwgaG93ZXZlciwgc29tZSBhdHRyaWJ1dGVzIHJlbGV2YW50IHRvIGRl
+ZHVwIHdoaWNoIGFyZSBwYXNzZWQgdGhyb3VnaC4NCg0KVG9tLg0KDQo=
