@@ -1,89 +1,80 @@
-Received: from mail-yw1-f67.google.com ([209.85.161.67]:35658 "EHLO
-        mail-yw1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726032AbfFBIHN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jun 2019 04:07:13 -0400
-MIME-Version: 1.0
-References: <20190528151723.12525-1-amir73il@gmail.com> <20190528151723.12525-4-amir73il@gmail.com>
- <20190602070949.GS15846@desktop>
-In-Reply-To: <20190602070949.GS15846@desktop>
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:38934 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725966AbfFBMlX (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jun 2019 08:41:23 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 2 Jun 2019 11:07:01 +0300
-Message-ID: <CAOQ4uxgvajS+JzAc9NTNHF4XtYDp_mqV22dDZ73uEu72uQJP1g@mail.gmail.com>
-Subject: Re: [PATCH v3 3/4] overlay: correct fsck.overlay exit code
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH v3 0/6] fstests: copy_file_range() tests
+Date: Sun,  2 Jun 2019 15:41:08 +0300
+Message-Id: <20190602124114.26810-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: zhangyi <yi.zhang@huawei.com>, Miklos Szeredi <miklos@szeredi.hu>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 2, 2019 at 10:26 AM Eryu Guan <guaneryu@gmail.com> wrote:
->
-> On Tue, May 28, 2019 at 06:17:22PM +0300, Amir Goldstein wrote:
-> > From: "zhangyi (F)" <yi.zhang@huawei.com>
-> >
-> > fsck.overlay should return correct exit code to show the file system
-> > status after fsck, instead of return 0 means consistency and !0 means
-> > inconsistency or something bad happened.
-> >
-> > Fix the following three exit code after running fsck.overlay:
-> >
-> > - Return FSCK_OK if the input file system is consistent,
-> > - Return FSCK_NONDESTRUCT if the file system inconsistent errors
-> >   corrected,
-> > - Return FSCK_UNCORRECTED if the file system still have inconsistent
-> >   errors.
-> >
-> > This patch also add a helper function to run fsck.overlay and check
-> > the return value is expected or not.
-> >
-> > [amir] rename helper to _overlay_fsck_expect, split define of FSCK_*
-> > to a seprate path.
-> >
-> > Signed-off-by: zhangyi (F) <yi.zhang@huawei.com>
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > ---
-> >  common/overlay    | 19 +++++++++++++++++++
-> >  tests/overlay/045 | 27 +++++++++------------------
-> >  tests/overlay/046 | 36 ++++++++++++------------------------
-> >  tests/overlay/056 |  9 +++------
-> >  4 files changed, 43 insertions(+), 48 deletions(-)
-> >
-> > diff --git a/common/overlay b/common/overlay
-> > index a71c2035..53e35caf 100644
-> > --- a/common/overlay
-> > +++ b/common/overlay
-> > @@ -193,6 +193,25 @@ _overlay_fsck_dirs()
-> >                          -o workdir=$workdir $*
-> >  }
-> >
-> > +# Run fsck and check for expected return value
-> > +_overlay_fsck_expect()
-> > +{
-> > +     # The first arguments is the expected fsck program exit code, the
-> > +     # remaining arguments are the input parameters of the fsck program.
-> > +     local expect_ret=$1
-> > +     local lowerdir=$2
-> > +     local upperdir=$3
-> > +     local workdir=$4
-> > +     shift 4
-> > +
-> > +     _overlay_fsck_dirs $lowerdir $upperdir $workdir $* >> \
-> > +                     $seqres.full 2>&1
-> > +     fsck_ret=$?
-> > +
-> > +     [[ "$fsck_ret" == "$expect_ret" ]] || \
-> > +             echo "fsck return unexpected value:$expect_ret,$fsck_ret"
->
-> This statement looks ambiguous, it's not that clear which return value
-> is expected and which is unexpected. I'd like to change it to something
-> like:
->
-> "expect fsck.overlay to return $expect_ret, but got $fsck_ret"
->
-> I can fix it on commit if you're OK with this change.
->
+Eryu,
 
-Fine by me.
+This is a re-work of Dave Chinner's copy_file_range() tests which
+I used to verify the kernel fixes of the syscall [1].
+
+The 2 first tests fix bugs in the interface, so they are appropriate
+for merge IMO.
+
+The cross-device copy test checks a new functionality, so you may
+want to wait with merging it till after the work is merged upstream.
+
+The bounds check test depend on a change that was only posted to
+xfsprogs [2]. Without two changes that were merge to xfsprogs v4.20,
+the original test (v1, v2) would hang. Requiring the new copy_range
+flag (copy_range -f) mitigates this problem.
+
+You may want to wait until the xfs_io change is merged before merging
+the check for the new flag.
 
 Thanks,
 Amir.
+
+[1] https://lore.kernel.org/linux-fsdevel/20190531164701.15112-1-amir73il@gmail.com/
+[2] https://marc.info/?l=linux-xfs&m=155912482124038&w=2
+
+Changes from v2:
+- Change blockdev in test to loop and _require_loop (Olga)
+- Implement and use _require_xfs_io_command copy_range -f
+
+Changes from v1:
+- Remove patch to test EINVAL behavior instead of short copy
+- Remove 'chmod -r' permission drop test case
+- Split out test for swap/immutable file copy
+- Split of cross-device copy test
+
+
+Amir Goldstein (6):
+  generic: create copy_range group
+  generic: copy_file_range immutable file test
+  generic: copy_file_range swapfile test
+  common/rc: check support for xfs_io copy_range -f N
+  generic: copy_file_range bounds test
+  generic: cross-device copy_file_range test
+
+ common/rc             |   9 ++-
+ tests/generic/434     |   2 +
+ tests/generic/988     |  59 +++++++++++++++++++
+ tests/generic/988.out |   5 ++
+ tests/generic/989     |  56 ++++++++++++++++++
+ tests/generic/989.out |   4 ++
+ tests/generic/990     | 132 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/990.out |  37 ++++++++++++
+ tests/generic/991     |  56 ++++++++++++++++++
+ tests/generic/991.out |   4 ++
+ tests/generic/group   |  14 +++--
+ 11 files changed, 372 insertions(+), 6 deletions(-)
+ create mode 100755 tests/generic/988
+ create mode 100644 tests/generic/988.out
+ create mode 100755 tests/generic/989
+ create mode 100644 tests/generic/989.out
+ create mode 100755 tests/generic/990
+ create mode 100644 tests/generic/990.out
+ create mode 100755 tests/generic/991
+ create mode 100644 tests/generic/991.out
+
+-- 
+2.17.1
