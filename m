@@ -1,43 +1,110 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:41574 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727578AbfEaVGw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 31 May 2019 17:06:52 -0400
-Date: Fri, 31 May 2019 14:06:05 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH] nfs: disable client side deduplication
-Message-ID: <20190531210605.GA5381@magnolia>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Received: from mail-wm1-f67.google.com ([209.85.128.67]:54906 "EHLO
+        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726084AbfFBMl2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jun 2019 08:41:28 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v3 3/6] generic: copy_file_range swapfile test
+Date: Sun,  2 Jun 2019 15:41:11 +0300
+Message-Id: <20190602124114.26810-4-amir73il@gmail.com>
+In-Reply-To: <20190602124114.26810-1-amir73il@gmail.com>
+References: <20190602124114.26810-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: anna.schumaker@netapp.com, trond.myklebust@hammerspace.com
-Cc: fstests@vger.kernel.org, Murphy Zhou <xzhou@redhat.com>, linux-nfs@vger.kernel.org, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fengxiaoli0714@gmail.com
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+This test case was split out of Dave Chinner's copy_file_range bounds
+check test to reduce the requirements for running the bounds check.
 
-The NFS protocol doesn't support deduplication, so turn it off again.
-
-Fixes: ce96e888fe48e ("Fix nfs4.2 return -EINVAL when do dedupe operation")
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
- fs/nfs/nfs4file.c |    6 +++++-
- 1 file changed, 5 insertions(+), 1 deletion(-)
+ tests/generic/989     | 56 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/989.out |  4 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 61 insertions(+)
+ create mode 100755 tests/generic/989
+ create mode 100644 tests/generic/989.out
 
-diff --git a/fs/nfs/nfs4file.c b/fs/nfs/nfs4file.c
-index cf42a8b939e3..1915f24bba85 100644
---- a/fs/nfs/nfs4file.c
-+++ b/fs/nfs/nfs4file.c
-@@ -187,7 +187,11 @@ static loff_t nfs42_remap_file_range(struct file *src_file, loff_t src_off,
- 	bool same_inode = false;
- 	int ret;
- 
--	if (remap_flags & ~(REMAP_FILE_DEDUP | REMAP_FILE_ADVISORY))
-+	/* NFS does not support deduplication. */
-+	if (remap_flags & REMAP_FILE_DEDUP)
-+		return -EOPNOTSUPP;
+diff --git a/tests/generic/989 b/tests/generic/989
+new file mode 100755
+index 00000000..27c10296
+--- /dev/null
++++ b/tests/generic/989
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test No. 989
++#
++# Check that we cannot copy_file_range() to/from a swapfile
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
 +
-+	if (remap_flags & ~REMAP_FILE_ADVISORY)
- 		return -EINVAL;
- 
- 	/* check alignment w.r.t. clone_blksize */
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 7 15
++
++_cleanup()
++{
++	cd /
++	rm -rf $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs generic
++
++rm -f $seqres.full
++
++_require_scratch
++_require_xfs_io_command "copy_range"
++_require_scratch_swapfile
++
++_scratch_mkfs 2>&1 >> $seqres.full
++_scratch_mount
++
++testdir=$SCRATCH_MNT
++
++rm -f $seqres.full
++
++$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
++
++echo swap files return ETXTBUSY
++_format_swapfile $testdir/swapfile 16m
++swapon $testdir/swapfile
++$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
++$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
++swapoff $testdir/swapfile
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/989.out b/tests/generic/989.out
+new file mode 100644
+index 00000000..32da0ce9
+--- /dev/null
++++ b/tests/generic/989.out
+@@ -0,0 +1,4 @@
++QA output created by 989
++swap files return ETXTBUSY
++copy_range: Text file busy
++copy_range: Text file busy
+diff --git a/tests/generic/group b/tests/generic/group
+index 20b95c14..4c100781 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -551,3 +551,4 @@
+ 546 auto quick clone enospc log
+ 547 auto quick log
+ 988 auto quick copy_range
++989 auto quick copy_range swap
+-- 
+2.17.1
