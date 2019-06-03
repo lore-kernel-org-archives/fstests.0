@@ -1,145 +1,257 @@
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:34472 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725939AbfFBNxt (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 2 Jun 2019 09:53:49 -0400
-Received: by mail-pl1-f194.google.com with SMTP id i2so1572350plt.1
-        for <fstests@vger.kernel.org>; Sun, 02 Jun 2019 06:53:48 -0700 (PDT)
-Message-ID: <5cf3d4ea.1c69fb81.df197.f615@mx.google.com>
-Date: Sun, 02 Jun 2019 21:53:44 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 5543924d1378
+Received: from mx2.suse.de ([195.135.220.15]:58488 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726383AbfFCGkS (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 3 Jun 2019 02:40:18 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH v2] fstests: generic/260: Make it handle btrfs more gracefully
+Date: Mon,  3 Jun 2019 14:40:09 +0800
+Message-Id: <20190603064009.9891-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="8RApo2TLr4UT"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+If a filesystem doesn't map its logical address space (normally the
+bytenr/blocknr returned by fiemap) directly to its devices(s), the
+following assumptions used in the test case is no longer true:
+- trim range start beyond the end of fs should fail
+- trim range start beyond the end of fs with len set should fail
 
---8RApo2TLr4UT
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Under the following example, even with just one device, btrfs can still
+trim the fs correctly while breaking above assumption:
 
-Hi all,
+0		1G		1.25G
+|---------------|///////////////|-----------------| <- btrfs logical
+		   |				       address space
+        ------------  mapped as SINGLE
+        |
+0	V	256M
+|///////////////|			<- device address space
 
-The master branch of the xfstests repository at:
+Thus trim range start=1G len=256M will cause btrfs to trim the 256M
+block group, thus return correct result.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Furthermore, there is no cleared defined behavior for whether a fs should
+trim the unmapped space. (only for indirectly mapped fs)
 
-have just been updated. This is another huge update that mainly pulls in the
-fscrypt patchset from Eric Biggers and some overlay fixes/improvements and new
-test from Amir Goldstein and zhangyi (F).
+Btrfs currently will always trim the unmapped space, but the behavior
+can change as large trim can be very expensive.
 
-The new overlay test (overlay/065) currently fails with latest Linus tree
-(v5.2-rc2). And as it's a big update, please report and/or contribute patches
-if you hit any new bugs, thanks!
+Despite the change to skip certain tests for btrfs, still run the
+following tests for btrfs:
+- trim start=U64_MAX with lenght set
+  This will expose a bug that btrfs doesn't check overflow of the range.
+  This bug will be fixed soon.
 
-Thanks,
-Eryu
+- trim beyond the end of the fs
+  This will expose a bug where btrfs could send trim command beyond the
+  end of its device.
+  This bug is a regression, can be fixed by reverting c2d1b3aae336 ("btrfs:
+  Honour FITRIM range constraints during free space trim")
 
-The new head of the master branch is commit:
+With proper fixes for btrfs, this test case should pass on btrfs, ext4,
+xfs.
 
-5543924d1378 overlay: Test mount error cases with overlapping layers
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+changelog:
+v2:
+- Return 0/1 instead of echo "1"/"0" for _is_fs_directly_mapped
+  Although it may be a little confusing, but make
+  "if _is_fs_directly_mapped; then" much cleaner.
+- Comment change.
+---
+ common/rc             | 15 ++++++++
+ tests/generic/260     | 79 +++++++++++++++++++++++++++----------------
+ tests/generic/260.out |  9 +----
+ 3 files changed, 66 insertions(+), 37 deletions(-)
 
-New commits:
-
-Amir Goldstein (4):
-      [84fbcec4ec17] common/rc: fix _repair_scratch_fs error reporting
-      [16b7039194d4] fstests: define constants for fsck exit codes
-      [d9f4cb727142] overlay: fix _repair_scratch_fs
-      [5543924d1378] overlay: Test mount error cases with overlapping layers
-
-Anthony Iliopoulos (1):
-      [81d4ff4e23d1] xfs/278: use _scratch_xfs_repair helper instead of xfs_repair
-
-Eric Biggers (7):
-      [881eccda8222] common/encrypt: introduce helpers for set_encpolicy and get_encpolicy
-      [f68bd53129ef] fscrypt-crypt-util: add utility for reproducing fscrypt encrypted data
-      [35525fb5ed79] common/encrypt: support requiring other encryption settings
-      [04224f38e09a] common/encrypt: add helper for ciphertext verification tests
-      [97d114d23e5a] generic: verify ciphertext of v1 encryption policies with AES-256
-      [726b41e3e76d] generic: verify ciphertext of v1 encryption policies with AES-128
-      [7758756cb144] generic: verify ciphertext of v1 encryption policies with Adiantum
-
-Qu Wenruo (1):
-      [5eec120ca007] btrfs/190: Fix a typo for seqres.full
-
-Yang Xu (1):
-      [51d449643842] ext4: regression test for online resizing maximum blocks
-
-Zorro Lang (1):
-      [d6f88082b4df] generic: aio random write and verify stress test
-
-zhangyi (F) (2):
-      [af3a63c4dcdd] overlay: correct fsck.overlay exit code
-      [2815cda6ac22] overlay: fix exit code for some fsck.overlay valid cases
-
-
-Code Diffstat:
-
- .gitignore               |    1 +
- common/config            |   11 +
- common/encrypt           |  479 +++++++++++++-
- common/overlay           |   36 +
- common/rc                |   17 +-
- src/Makefile             |    3 +-
- src/fscrypt-crypt-util.c | 1633 ++++++++++++++++++++++++++++++++++++++++++++++
- tests/btrfs/190          |    2 +-
- tests/ext4/024           |    3 +-
- tests/ext4/035           |   54 ++
- tests/ext4/035.out       |    3 +
- tests/ext4/group         |    1 +
- tests/generic/395        |   26 +-
- tests/generic/395.out    |    2 +-
- tests/generic/396        |   15 +-
- tests/generic/397        |    3 +-
- tests/generic/398        |    5 +-
- tests/generic/399        |    3 +-
- tests/generic/419        |    3 +-
- tests/generic/421        |    3 +-
- tests/generic/429        |    3 +-
- tests/generic/435        |    3 +-
- tests/generic/440        |    5 +-
- tests/generic/548        |   41 ++
- tests/generic/548.out    |    5 +
- tests/generic/549        |   41 ++
- tests/generic/549.out    |    5 +
- tests/generic/550        |   43 ++
- tests/generic/550.out    |   10 +
- tests/generic/551        |   87 +++
- tests/generic/551.out    |    2 +
- tests/generic/group      |    4 +
- tests/overlay/045        |   46 +-
- tests/overlay/046        |   49 +-
- tests/overlay/056        |    9 +-
- tests/overlay/065        |  154 +++++
- tests/overlay/065.out    |   21 +
- tests/overlay/group      |    1 +
- tests/xfs/278            |    2 +-
- 39 files changed, 2731 insertions(+), 103 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---8RApo2TLr4UT
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJc89STAAoJECZSqilcj+djkQYQALFlCHCrtxrBEF+q+vX8Nv9K
-oZAx6ghIf6wvCByD3H7vmI+HcUN8x84k1zS84E7fJQKpyluOZFUBj87jtH0+B2Db
-+vdzDVIfBBi4nGbKHGLxQm6ggmiuLLWazLFVG5//noVEn+Mb3JTKclH12X/ZU3WO
-n6qbUvjN54Sp+ca2H1u7CrFCIP7yBDhGfZuVUicb0eITkj7qKdNUq7G29J+3FIem
-R4zYcAlUe+Ns6fxCajwPxV9B3BiGHvmIl7tEVU06Lv3jz/hTvlcoHfDQcYl/pjxl
-rWVhH1kar84yS+zPgQnhNLCtt2l1Dd25HthLQ8hSLByDaS2XYAd6u87458w0c16v
-nwwVQfz0oppBRKZtuAGiLVX/AOy0Am3f3uq25VKQnqmqL6wqnadJctm8xVoTn2jT
-4yrR0q1I7J3eprtmtpTF2t63SpAvTP9zR0cqknJuPDm/0o7VHrvXgbQsVvsQylbK
-H8sFZCfDXTYMuk5VRQZC0mg3LGPHtAv2RDY0VsnsGpRyJQ5nWpjq0wf2rMBI8wjU
-IpAdkH/UkY00MwXXtX2npm1Y60xF8xQeS4mWLill46NBy3Sw9LCvAyHlXuAs0/W9
-R+20QQgWmZbPkp7t21lzii5HzcQYzqh17noOd6X52Wruy5HzzD2gwupvErZCCwcl
-nxvlDk1oWiwZq4nxUX1r
-=77ye
------END PGP SIGNATURE-----
-
---8RApo2TLr4UT--
+diff --git a/common/rc b/common/rc
+index 17b89d5d..117dcec2 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4005,6 +4005,21 @@ _require_fibmap()
+ 	rm -f $file
+ }
+ 
++# Check if the logical address (returned by fiemap) can be larger than the
++# block device.
++# Currently only btrfs has such behavior even for single device usage.
++# Return 0 if it's directly mapped, return 1 if not.
++# This return value looks confusing but allows us to use
++# "if _is_fs_direct_mapped; then" directly
++_is_fs_direct_mapped()
++{
++	if [ "$FSTYP" == "btrfs" ]; then
++		return 1
++	else
++		return 0
++	fi
++}
++
+ _try_wipe_scratch_devs()
+ {
+ 	test -x "$WIPEFS_PROG" || return 0
+diff --git a/tests/generic/260 b/tests/generic/260
+index 9e652dee..77ace622 100755
+--- a/tests/generic/260
++++ b/tests/generic/260
+@@ -27,40 +27,50 @@ _supported_fs generic
+ _supported_os Linux
+ _require_math
+ 
++rm -f $seqres.full
++
+ _require_scratch
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+ 
+ _require_batched_discard $SCRATCH_MNT
+ 
++
+ fssize=$($DF_PROG -k | grep "$SCRATCH_MNT" | grep "$SCRATCH_DEV"  | awk '{print $3}')
+ 
+ beyond_eofs=$(_math "$fssize*2048")
+ max_64bit=$(_math "2^64 - 1")
+ 
+-# All these tests should return EINVAL
+-# since the start is beyond the end of
+-# the file system
+-
+-echo "[+] Start beyond the end of fs (should fail)"
+-out=$($FSTRIM_PROG -o $beyond_eofs $SCRATCH_MNT 2>&1)
+-[ $? -eq 0 ] && status=1
+-echo $out | _filter_scratch
+-
+-echo "[+] Start beyond the end of fs with len set (should fail)"
+-out=$($FSTRIM_PROG -o $beyond_eofs -l1M $SCRATCH_MNT 2>&1)
+-[ $? -eq 0 ] && status=1
+-echo $out | _filter_scratch
+-
+-echo "[+] Start = 2^64-1 (should fail)"
+-out=$($FSTRIM_PROG -o $max_64bit $SCRATCH_MNT 2>&1)
+-[ $? -eq 0 ] && status=1
+-echo $out | _filter_scratch
++# For filesystem with direct mapping, all these tests should return EINVAL
++# since the start is beyond the end of the file system
++#
++# Skip these tests if the filesystem has its own address space mapping,
++# as it's implementation dependent.
++# E.g btrfs can map its physical address of (devid=1, physical=1M, len=1M)
++# to its logical address (logical=1G, len=1M). Making trim beyond device
++# boundary to success.
++
++echo "[+] Optional trim range test (fs dependent)"
++if _is_fs_direct_mapped; then
++	echo "[+] Start beyond the end of fs (should fail)" >> $seqres.full
++	$FSTRIM_PROG -o $beyond_eofs $SCRATCH_MNT >> $seqres.full 2>&1
++	[ $? -eq 0 ] && status=1
++
++	echo "[+] Start beyond the end of fs with len set (should fail)" >> $seqres.full
++	$FSTRIM_PROG -o $beyond_eofs -l1M $SCRATCH_MNT >> $seqres.full 2>&1
++	[ $? -eq 0 ] && status=1
++
++	# indirectly mapped fs may use this special value to trim their
++	# unmapped space, so don't do this for indirectly mapped fs.
++	echo "[+] Start = 2^64-1 (should fail)" >> $seqres.full
++	$FSTRIM_PROG -o $max_64bit $SCRATCH_MNT 2>&1 >> $seqres.full 2>&1
++	[ $? -eq 0 ] && status=1
++fi
+ 
+-echo "[+] Start = 2^64-1 and len is set (should fail)"
+-out=$($FSTRIM_PROG -o $max_64bit -l1M $SCRATCH_MNT 2>&1)
++# This should fail due to overflow no matter how the fs is implemented
++echo "[+] Start = 2^64-1 and len is set (should fail)" >> $seqres.full
++$FSTRIM_PROG -o $max_64bit -l1M $SCRATCH_MNT >> $seqres.full 2>&1
+ [ $? -eq 0 ] && status=1
+-echo $out | _filter_scratch
+ 
+ _scratch_unmount
+ _scratch_mkfs >/dev/null 2>&1
+@@ -86,10 +96,12 @@ _scratch_unmount
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+ 
++echo "[+] Trim an empty fs" >> $seqres.full
+ # This is a bit fuzzy, but since the file system is fresh
+ # there should be at least (fssize/2) free space to trim.
+ # This is supposed to catch wrong FITRIM argument handling
+ bytes=$($FSTRIM_PROG -v -o10M $SCRATCH_MNT | _filter_fstrim)
++echo "$bytes trimed" >> $seqres.full
+ 
+ if [ $bytes -gt $(_math "$fssize*1024") ]; then
+ 	status=1
+@@ -97,11 +109,9 @@ if [ $bytes -gt $(_math "$fssize*1024") ]; then
+ 	     "however the file system is $(_math "$fssize*1024") bytes long."
+ fi
+ 
+-# Btrfs is special and this test does not apply to it
+-# It is because btrfs does not have not-yet-used parts of the device
+-# mapped and since we got here right after the mkfs, there is not
+-# enough free extents in the root tree.
+-if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
++# Indirect mapped fs can have their own decision on whether to trim
++# unmapped blocks.
++if [ $bytes -le $(_math "$fssize*512") ] && _is_fs_direct_mapped; then
+ 	status=1
+ 	echo "After the full fs discard $bytes bytes were discarded"\
+ 	     "however the file system is $(_math "$fssize*1024") bytes long."
+@@ -141,14 +151,23 @@ esac
+ _scratch_unmount
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
++
++echo "[+] Try to trim beyond the end of the fs" >> $seqres.full
+ # It should fail since $start is beyond the end of file system
+-$FSTRIM_PROG -o$start -l10M $SCRATCH_MNT &> /dev/null
+-if [ $? -eq 0 ]; then
++$FSTRIM_PROG -o$start -l10M $SCRATCH_MNT >> $seqres.full 2>&1
++ret=$?
++if [ $ret -eq 0 ] && _is_fs_direct_mapped; then
+ 	status=1
+ 	echo "It seems that fs logic handling start"\
+ 	     "argument overflows"
+ fi
+ 
++# For indirectly mapped fs, it shouldn't fail.
++if [ $ret -ne 0 ] && ! _is_fs_direct_mapped; then
++	status=1
++	echo "Unexpected error happened during trim"
++fi
++
+ _scratch_unmount
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_mount
+@@ -160,8 +179,10 @@ _scratch_mount
+ # It is because btrfs does not have not-yet-used parts of the device
+ # mapped and since we got here right after the mkfs, there is not
+ # enough free extents in the root tree.
++echo "[+] Try to trim the fs with large enough len" >> $seqres.full
+ bytes=$($FSTRIM_PROG -v -l$len $SCRATCH_MNT | _filter_fstrim)
+-if [ $bytes -le $(_math "$fssize*512") ] && [ $FSTYP != "btrfs" ]; then
++echo "$bytes trimed" >> $seqres.full
++if [ $bytes -le $(_math "$fssize*512") ] && _is_fs_direct_mapped; then
+ 	status=1
+ 	echo "It seems that fs logic handling len argument overflows"
+ fi
+diff --git a/tests/generic/260.out b/tests/generic/260.out
+index a16c4f74..f4ee2f72 100644
+--- a/tests/generic/260.out
++++ b/tests/generic/260.out
+@@ -1,12 +1,5 @@
+ QA output created by 260
+-[+] Start beyond the end of fs (should fail)
+-fstrim: SCRATCH_MNT: FITRIM ioctl failed: Invalid argument
+-[+] Start beyond the end of fs with len set (should fail)
+-fstrim: SCRATCH_MNT: FITRIM ioctl failed: Invalid argument
+-[+] Start = 2^64-1 (should fail)
+-fstrim: SCRATCH_MNT: FITRIM ioctl failed: Invalid argument
+-[+] Start = 2^64-1 and len is set (should fail)
+-fstrim: SCRATCH_MNT: FITRIM ioctl failed: Invalid argument
++[+] Optional trim range test (fs dependent)
+ [+] Default length (should succeed)
+ [+] Default length with start set (should succeed)
+ [+] Length beyond the end of fs (should succeed)
+-- 
+2.21.0
