@@ -1,331 +1,140 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:41534 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727082AbfFFUDQ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jun 2019 16:03:16 -0400
-Date: Thu, 6 Jun 2019 13:02:49 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/1] xfs: check for COW overflows in i_delayed_blks
-Message-ID: <20190606200249.GA1688126@magnolia>
-References: <155968302402.1647082.16959798703857853077.stgit@magnolia>
- <155968303075.1647082.5031279746723706503.stgit@magnolia>
- <20190606191449.GB2791@bfoster>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:60352 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726077AbfFFTbw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jun 2019 15:31:52 -0400
+From: Gabriel Krisman Bertazi <krisman@collabora.com>
+Subject: [PATCH v2 1/2] common/casefold: Add infrastructure to test filename casefold feature
+Date: Thu,  6 Jun 2019 15:31:37 -0400
+Message-Id: <20190606193138.25852-1-krisman@collabora.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190606191449.GB2791@bfoster>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: tytso@mit.edu
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Gabriel Krisman Bertazi <krisman@collabora.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 06, 2019 at 03:14:50PM -0400, Brian Foster wrote:
-> On Tue, Jun 04, 2019 at 02:17:10PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > With the new copy on write functionality it's possible to reserve so
-> > much COW space for a file that we end up overflowing i_delayed_blks.
-> > The only user-visible effect of this is to cause totally wrong i_blocks
-> > output in stat, so check for that.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  tests/xfs/907     |  223 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/907.out |    8 ++
-> >  tests/xfs/group   |    1 
-> >  3 files changed, 232 insertions(+)
-> >  create mode 100755 tests/xfs/907
-> >  create mode 100644 tests/xfs/907.out
-> > 
-> > 
-> > diff --git a/tests/xfs/907 b/tests/xfs/907
-> > new file mode 100755
-> > index 00000000..d85f12da
-> > --- /dev/null
-> > +++ b/tests/xfs/907
-> > @@ -0,0 +1,223 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0+
-> > +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 907
-> > +#
-> > +# Try to overflow i_delayed_blks by setting the largest cowextsize hint
-> > +# possible, creating a sparse file with a single byte every cowextsize bytes,
-> > +# reflinking it, and retouching every written byte to see if we can create
-> > +# enough speculative COW reservations to overflow i_delayed_blks.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	test -n "$loop_mount" && $UMOUNT_PROG $loop_mount > /dev/null 2>&1
-> > +	test -n "$loop_dev" && _destroy_loop_device $loop_dev
-> > +	rm -rf $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/reflink
-> > +. ./common/filter
-> > +
-> > +# real QA test starts here
-> > +_supported_os Linux
-> > +_supported_fs xfs
-> > +_require_scratch_reflink
-> > +_require_cp_reflink
-> > +_require_loop
-> > +_require_xfs_debug	# needed for xfs_bmap -c
-> > +
-> > +MAXEXTLEN=2097151	# cowextsize can't be more than MAXEXTLEN
-> > +
-> > +echo "Format and mount"
-> > +_scratch_mkfs > "$seqres.full" 2>&1
-> > +_scratch_mount
-> > +
-> > +# Create a huge sparse filesystem on the scratch device because that's what
-> > +# we're going to need to guarantee that we have enough blocks to overflow in
-> > +# the first place.  We need to have at least enough free space on that huge fs
-> > +# to handle one written block every MAXEXTLEN blocks and to reserve 2^32 blocks
-> > +# in the COW fork.  There needs to be sufficient space in the scratch
-> > +# filesystem to handle a 256M log, all the per-AG metadata, and all the data
-> > +# written to the test file.
-> > +#
-> > +# Worst case, a 64k-block fs needs to be about 300TB.  Best case, a 1k block
-> > +# filesystem needs ~5TB.  For the most common 4k case we only need a ~20TB fs.
-> > +#
-> > +# nr_cows is the number of writes we make to the filesystem.
-> > +# blks_needed is the number of free blocks we need in the fs to trigger the
-> > +#     overflow.  The destination file needs to have more than 2^32 blocks
-> > +#     reserved for COW, and the source file needs to have 1 block written every
-> > +#     MAXEXTLEN blocks (i.e. 2^32/MAXEXTLEN blocks) to set up the destination
-> > +#     file.
-> > +# loop_file_sz is the size of the filesystem we have to create to produce the
-> > +#     overflow problems.  This is 20% more than blks_needed, and rounded to the
-> > +#     nearest 512b so losetup doesn't whine.
-> > +# est_nr_ags is a guess at the AG count, assuming that we'll have one AG per
-> > +#     terabyte (which assumes that we need a multi-terabyte filesystem for this
-> > +#     test).  We assume we'll need 16 blocks for AG metadata and 128K for inode
-> > +#     chunks.
-> > +# space_reqd_kb is the size of the huge sparse filesystem --
-> > +#     256M for the log, per-AG metadata, and 10% more space than however much
-> > +#     we will write to both test files.
-> > +blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> > +nr_cows="$(( ((2 ** 32) / MAXEXTLEN) + 100 ))"
-> > +blks_needed="$(( nr_cows * (1 + MAXEXTLEN) ))"
-> > +loop_file_sz="$(( ((blksz * blks_needed) * 12 / 10) / 512 * 512 ))"
-> > +est_nr_ags="$(( (loop_file_sz / (2 ** 40)) + 1 ))"
-> > +est_ag_space_kb="$(( (est_nr_ags * 16 * blksz / 1024) + 128 ))"
-> > +est_file_space_kb="$(( (((nr_cows * blksz) * 11 / 10) / 1024) ))"
-> > +space_reqd_kb="$(( 262144 + est_ag_space_kb + 2 * est_file_space_kb ))"
-> > +cat >> $seqres.full << ENDL
-> > +blksz: $blksz
-> > +nr_cows: $nr_cows
-> > +blks_needed: $blks_needed
-> > +loop_file_sz: $loop_file_sz
-> > +est_nr_ags: $est_nr_ags
-> > +est_ag_space_kb: $est_ag_space_kb
-> > +est_file_space_kb: $est_file_space_kb
-> > +space_reqd_kb: $space_reqd_kb
-> > +ENDL
-> > +_require_fs_space $SCRATCH_MNT $space_reqd_kb
-> > +
-> 
-> This seems like it would be simpler to just create the worst case sparse
-> fs (say 300TB or so) then make sure the scratch device has enough free
-> blocks to accommodate the number of COWs (plus slop) that need to occur
-> in the loop fs to overflow the counter. I don't have a 64k box handy,
-> but the metadata size difference between a sparse 20TB fs and 300TB fs
-> over a 4k scratch fs is only a few MB. Hm?
+Add a set of basic helper functions to simplify the testing of
+casefolding capable filesystems.
 
-<shrug> Originally it did just hardcode 300T, and Eryu complained that
-xfs_db would OOM when it tried to deal with a 300T filesystem.  I
-changed the test to avoid xfs_db, but then it occurred to me (running on
-a slow arm64 box) that the mkfs and xfs_repair runtimes could be cut
-down considerably if the loop fs was only as large as it needed to be.
+Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+---
+ common/casefold | 108 ++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 108 insertions(+)
+ create mode 100644 common/casefold
 
-> > +loop_file=$SCRATCH_MNT/a.img
-> > +loop_mount=$SCRATCH_MNT/a
-> > +$XFS_IO_PROG -f -c "truncate $loop_file_sz" $loop_file
-> > +loop_dev=$(_create_loop_device $loop_file)
-> > +
-> > +# Now we have to create the source file.  The goal is to overflow a 32-bit
-> > +# i_delayed_blks, which means that we have to create at least that many delayed
-> > +# allocation block reservations.  Take advantage of the fact that a cowextsize
-> > +# hint causes creation of large speculative delalloc reservations in the cow
-> > +# fork to reduce the amount of work we have to do.
-> > +#
-> > +# The maximum cowextsize can only be set to MAXEXTLEN fs blocks on a filesystem
-> > +# whose AGs each have more than MAXEXTLEN * 2 blocks.  This we can do easily
-> > +# with a multi-terabyte filesystem, so start by setting up the hint.  Note that
-> > +# the current fsxattr interface specifies its u32 cowextsize hint in units of
-> > +# bytes and therefore can't handle MAXEXTLEN * blksz on most filesystems, so we
-> > +# set it via mkfs because mkfs takes units of fs blocks, not bytes.
-> > +
-> > +_mkfs_dev -d cowextsize=$MAXEXTLEN -l size=256m $loop_dev >> $seqres.full
-> > +mkdir $loop_mount
-> > +mount $loop_dev $loop_mount
-> > +
-> > +echo "Create crazy huge file"
-> > +huge_file="$loop_mount/a"
-> > +touch "$huge_file"
-> > +blksz=$(_get_file_block_size "$loop_mount")
-> > +extsize_bytes="$(( MAXEXTLEN * blksz ))"
-> > +
-> > +# Make sure it actually set a hint.
-> > +curr_cowextsize_str="$($XFS_IO_PROG -c 'cowextsize' "$huge_file")"
-> > +echo "$curr_cowextsize_str" >> $seqres.full
-> > +cowextsize_bytes="$(echo "$curr_cowextsize_str" | sed -e 's/^.\([0-9]*\).*$/\1/g')"
-> > +test "$cowextsize_bytes" -eq 0 && echo "could not set cowextsize?"
-> > +
-> > +# Now we have to seed the file with sparse contents.  Remember, the goal is to
-> > +# create a little more than 2^32 delayed allocation blocks in the COW fork with
-> > +# as little effort as possible.  We know that speculative COW preallocation
-> > +# will create MAXEXTLEN-length reservations for us, so that means we should
-> > +# be able to get away with touching a single byte every extsize_bytes.  We
-> > +# do this backwards to avoid having to move EOF.
-> > +seq $nr_cows -1 0 | while read n; do
-> > +	off="$((n * extsize_bytes))"
-> > +	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-> > +done
-> > +
-> > +echo "Reflink crazy huge file"
-> > +_cp_reflink "$huge_file" "$huge_file.b"
-> > +
-> > +# Now that we've shared all the blocks in the file, we touch them all again
-> > +# to create speculative COW preallocations.
-> > +echo "COW crazy huge file"
-> > +seq $nr_cows -1 0 | while read n; do
-> > +	off="$((n * extsize_bytes))"
-> > +	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-> > +done
-> > +
-> > +# Compare the number of blocks allocated to this file (as reported by stat)
-> > +# against the number of blocks that are in the COW fork.  If either one is
-> > +# less than 2^32 then we have evidence of an overflow problem.
-> > +echo "Check crazy huge file"
-> > +allocated_stat_blocks="$(stat -c %b "$huge_file")"
-> > +stat_blksz="$(stat -c %B "$huge_file")"
-> > +allocated_fsblocks=$(( allocated_stat_blocks * stat_blksz / blksz ))
-> > +
-> > +# Make sure we got enough COW reservations to overflow a 32-bit counter.
-> > +
-> > +# Return the number of delalloc & real blocks given bmap output for a fork of a
-> > +# file.  Output is in units of 512-byte blocks.
-> > +count_fork_blocks() {
-> > +	$AWK_PROG "
-> > +{
-> > +	if (\$3 == \"delalloc\") {
-> > +		x += \$4;
-> > +	} else if (\$3 == \"hole\") {
-> > +		;
-> > +	} else {
-> > +		x += \$6;
-> > +	}
-> > +}
-> > +END {
-> > +	print(x);
-> > +}
-> > +"
-> > +}
-> > +
-> > +# Count the number of blocks allocated to a file based on the xfs_bmap output.
-> > +# Output is in units of filesystem blocks.
-> > +count_file_fork_blocks() {
-> > +	local tag="$1"
-> > +	local file="$2"
-> > +	local args="$3"
-> > +
-> > +	$XFS_IO_PROG -c "bmap $args -l -p -v" "$huge_file" > $tmp.extents
-> > +	echo "$tag fork map" >> $seqres.full
-> > +	cat $tmp.extents >> $seqres.full
-> > +	local sectors="$(count_fork_blocks < $tmp.extents)"
-> > +	echo "$(( sectors / (blksz / 512) ))"
-> > +}
-> > +
-> > +cowblocks=$(count_file_fork_blocks cow "$huge_file" "-c")
-> > +attrblocks=$(count_file_fork_blocks attr "$huge_file" "-a")
-> > +datablocks=$(count_file_fork_blocks data "$huge_file" "")
-> > +
-> > +# Did we create more than 2^32 blocks in the cow fork?
-> > +echo "datablocks is $datablocks" >> $seqres.full
-> > +echo "attrblocks is $attrblocks" >> $seqres.full
-> > +echo "cowblocks is $cowblocks" >> $seqres.full
-> > +test "$cowblocks" -lt $((2 ** 32)) && \
-> > +	echo "cowblocks (${cowblocks}) should be more than 2^32!"
-
-This part checks that the test did what we expect.
-
-> > +
-> > +# Does stat's block allocation count exceed 2^32?
-> > +echo "stat blocks is $allocated_fsblocks" >> $seqres.full
-> > +test "$allocated_fsblocks" -lt $((2 ** 32)) && \
-> > +	echo "stat blocks (${allocated_fsblocks}) should be more than 2^32!"
-
-This part detects the problem in the incore state.
-
-> > +# Finally, does st_blocks match what we computed from the forks?
-> > +expected_allocated_fsblocks=$((datablocks + cowblocks + attrblocks))
-> > +echo "expected stat blocks is $expected_allocated_fsblocks" >> $seqres.full
-> > +
-> > +_within_tolerance "st_blocks" $allocated_fsblocks $expected_allocated_fsblocks 2% -v
-
-And this one on is a second sanity check that the test did roughly what
-we expected.
-
-> > +
-> 
-> Similar question with the post-processing stuff... how much of this is
-> to detect the problem vs. determine the test sequence did what we
-> expect?
-
-(Answered above.)
-
-> Does the fs check below report corruption or is it purely
-> in-core state that ends up broken?
-
-It's only the incore state that ends up broken.
-
---D
-
-> Brian
-> 
-> > +echo "Test done"
-> > +# Quick check the large sparse fs, but skip xfs_db because it doesn't scale
-> > +# well on a multi-terabyte filesystem.
-> > +LARGE_SCRATCH_DEV=yes _check_xfs_filesystem $loop_dev none none
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/907.out b/tests/xfs/907.out
-> > new file mode 100644
-> > index 00000000..cc07d659
-> > --- /dev/null
-> > +++ b/tests/xfs/907.out
-> > @@ -0,0 +1,8 @@
-> > +QA output created by 907
-> > +Format and mount
-> > +Create crazy huge file
-> > +Reflink crazy huge file
-> > +COW crazy huge file
-> > +Check crazy huge file
-> > +st_blocks is in range
-> > +Test done
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index ffe4ae12..e528c559 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -504,3 +504,4 @@
-> >  504 auto quick mkfs label
-> >  505 auto quick spaceman
-> >  506 auto quick health
-> > +907 clone
-> > 
+diff --git a/common/casefold b/common/casefold
+new file mode 100644
+index 000000000000..34c1d4ae1af1
+--- /dev/null
++++ b/common/casefold
+@@ -0,0 +1,108 @@
++#-----------------------------------------------------------------------
++#
++# Common functions for testing filename casefold feature
++#
++#-----------------------------------------------------------------------
++# Copyright (c) 2018 Collabora, Ltd.  All Rights Reserved.
++#
++# Author: Gabriel Krisman Bertazi <krisman@collabora.com>
++#
++# This program is free software; you can redistribute it and/or
++# modify it under the terms of the GNU General Public License as
++# published by the Free Software Foundation.
++#
++# This program is distributed in the hope that it would be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program; if not, write the Free Software Foundation,
++# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++#-----------------------------------------------------------------------
++
++_has_casefold_feature_kernel_support() {
++    case $FSTYP in
++	ext4)
++	    test -f '/sys/fs/ext4/features/casefold'
++	    ;;
++	*)
++	    # defaults to unsupported
++	    false
++	    ;;
++    esac
++}
++
++_require_casefold_support() {
++    if ! _has_casefold_feature_kernel_support ; then
++	_notrun "$FSTYP does not support casefold feature"
++    fi
++
++    if ! _scratch_mkfs_casefold &>>seqres.full; then
++	_notrun "$FSTYP userspace tools do not support casefold"
++    fi
++
++    # Make sure the kernel can mount a filesystem with the encoding
++    # defined by the userspace tools.  This will fail if
++    # the userspace tool used a more recent encoding than the one
++    # supported in kernel space.
++    if ! _try_scratch_mount &>>seqres.full; then
++	_notrun \
++	    "kernel can't mount filesystem using the encoding set by userspace"
++    fi
++    _scratch_unmount
++}
++
++_scratch_mkfs_casefold () {
++    case $FSTYP in
++	ext4)
++	    _scratch_mkfs -O casefold $*
++	    ;;
++	*)
++	    _notrun "Don't know how to mkfs with casefold support on $FSTYP"
++	    ;;
++	esac
++}
++
++_scratch_mkfs_casefold_strict () {
++    case $FSTYP in
++	ext4)
++	    _scratch_mkfs -O casefold -E encoding_flags=strict
++	    ;;
++	*)
++	    _notrun \
++		"Don't know how to mkfs with casefold-strict support on $FSTYP"
++	    ;;
++	esac
++}
++
++_casefold_check_exact_name () {
++    # To get the exact disk name, we need some method that does a
++    # getdents() on the parent directory, such that we don't get
++    # normalized/casefolded results.  'Find' works ok.
++    basedir=$1
++    exact_name=$2
++    find ${basedir} | grep -q ${exact_name}
++}
++
++_try_set_casefold_attr () {
++    chattr +F "${1}" &>/dev/null
++}
++
++_try_unset_casefold_attr () {
++    chattr -F "${1}" &>/dev/null
++}
++
++_set_casefold_attr () {
++    _try_set_casefold_attr "${1}" || \
++	_fail "Unable to set casefold attribute on ${1}"
++}
++
++_unset_casefold_attr () {
++    _try_unset_casefold_attr "${1}" || \
++	_fail "Unable to unset casefold attribute on ${1}"
++}
++
++_is_casefolded_dir () {
++    lsattr -ld "${1}" | grep -q "Casefold"
++}
+-- 
+2.20.1
