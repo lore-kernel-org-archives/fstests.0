@@ -1,80 +1,162 @@
-Received: from mx2.suse.de ([195.135.220.15]:40806 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726877AbfFFLjM (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 6 Jun 2019 07:39:12 -0400
-From: Johannes Thumshirn <jthumshirn@suse.de>
-Subject: [PATCH fstests v2] btrfs: add validation of compression options to btrfs/048
-Date: Thu,  6 Jun 2019 13:39:07 +0200
-Message-Id: <20190606113907.17551-1-jthumshirn@suse.de>
-In-Reply-To: <CAL3q7H665Rh7P8bwxNxHJVFibvb6pSg7MeFaqhsRWKx4jMW8JA@mail.gmail.com>
-References: <CAL3q7H665Rh7P8bwxNxHJVFibvb6pSg7MeFaqhsRWKx4jMW8JA@mail.gmail.com>
+Received: from mail.kernel.org ([198.145.29.99]:57564 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726551AbfFFLHy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 6 Jun 2019 07:07:54 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] generic: test for data loss on fsync after evicting an inode and renaming it
+Date: Thu,  6 Jun 2019 12:07:47 +0100
+Message-Id: <20190606110747.20908-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>, Filipe Manana <fdmanana@gmail.com>
-Cc: Linux BTRFS Mailinglist <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Johannes Thumshirn <jthumshirn@suse.de>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-The current btrfs/048 test-case did not check the behavior of properties
-with options like compression and with the compression level supplied.
+From: Filipe Manana <fdmanana@suse.com>
 
-Add test cases for compression with compression level as well so we can be
-sure we don't regress there.
+Check that if we write some data to a file, its inode gets evicted (while
+its parent directory's inode is not evicted due to being in use), then we
+rename the file and fsync it, after a power failure the file data is not
+lost.
 
-Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
+This currently passes on xfs, ext4 and f2fs but fails on btrfs. The
+following patch for btrfs fixes it:
 
+  "Btrfs: fix data loss after inode eviction, renaming it, and fsync it"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
-Changes to v1:
-- Removed output redirection and filtering for the cases we don't expect any
-  actual output (Filipe)
----
- tests/btrfs/048     | 15 +++++++++++++++
- tests/btrfs/048.out | 12 ++++++++++++
- 2 files changed, 27 insertions(+)
+ tests/generic/552     | 98 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/552.out |  7 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 106 insertions(+)
+ create mode 100755 tests/generic/552
+ create mode 100644 tests/generic/552.out
 
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 8bb10a904bc9..04df3ed98ff7 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -226,5 +226,20 @@ $BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' 2>&1 | _filter_scrat
- $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
- $BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
- 
-+echo -e "\nTesting argument validation with options"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lzo:9'
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zlib:3'
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zstd:0'
-+echo "***"
+diff --git a/tests/generic/552 b/tests/generic/552
+new file mode 100755
+index 00000000..7dc5916f
+--- /dev/null
++++ b/tests/generic/552
+@@ -0,0 +1,98 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 552
++#
++# Check that if we write some data to a file, its inode gets evicted (while its
++# parent directory's inode is not evicted due to being in use), then we rename
++# the file and fsync it, after a power failure the file data is not lost.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
-+echo -e "\nTesting invalid argument validation with options, should fail"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz:9' 2>&1 | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli:0' 2>&1 | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zst:3' 2>&1 | _filter_scratch
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
 +
- status=0
- exit
-diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
-index 16a785a642f7..016eba265b01 100644
---- a/tests/btrfs/048.out
-+++ b/tests/btrfs/048.out
-@@ -92,3 +92,15 @@ Testing generation is unchanged after failed validation
- generation		7
- ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
- generation		7
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
 +
-+Testing argument validation with options
-+***
-+***
-+***
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_odirect
++_require_dm_target flakey
 +
-+Testing invalid argument validation with options, should fail
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
-+***
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
-+***
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test directory with two files in it.
++mkdir $SCRATCH_MNT/dir
++touch $SCRATCH_MNT/dir/foo
++touch $SCRATCH_MNT/dir/bar
++
++# Do a direct IO write into file bar.
++# To trigger the bug found in btrfs, doing a buffered write would also work as
++# long as writeback completes before the file's inode is evicted (the inode can
++# not be evicted while delalloc exists). But since that is hard to trigger from
++# a user space test, without resulting in a transaction commit as well, just do
++# a direct IO write since it is much simpler.
++$XFS_IO_PROG -d -c "pwrite -S 0xd3 0 4K" $SCRATCH_MNT/dir/bar | _filter_xfs_io
++
++# Keep the directory in use while we evict all inodes. This is to prevent
++# eviction of the directory's inode (a necessary condition to trigger the bug
++# found in btrfs, as evicting the directory inode would result in commiting the
++# current transaction when the fsync of file foo happens below).
++(
++	cd $SCRATCH_MNT/dir
++	while true; do
++		:
++	done
++) &
++pid=$!
++# Wait a bit to give time to the background process to chdir to the directory.
++sleep 0.1
++
++# Evict all inodes from memory, except the directory's inode because a background
++# process is using it.
++echo 2 > /proc/sys/vm/drop_caches
++
++# Now fsync our file foo, which ends up persisting information about its parent
++# directory inode because it is a new inode.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir/foo
++
++# Rename our file bar to baz right before we fsync it.
++mv $SCRATCH_MNT/dir/bar $SCRATCH_MNT/dir/baz
++
++# Fsync our file baz, after a power failure we expect to see the data we
++# previously wrote to it.
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir/baz
++
++# Kill the background process using our test directory.
++kill $pid
++wait $pid
++
++# Simulate a power failure and then check no data loss happened.
++_flakey_drop_and_remount
++
++echo "File data after power failure:"
++od -t x1 -A d $SCRATCH_MNT/dir/baz
++
++_unmount_flakey
++status=0
++exit
+diff --git a/tests/generic/552.out b/tests/generic/552.out
+new file mode 100644
+index 00000000..43c5c521
+--- /dev/null
++++ b/tests/generic/552.out
+@@ -0,0 +1,7 @@
++QA output created by 552
++wrote 4096/4096 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++File data after power failure:
++0000000 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3 d3
++*
++0004096
+diff --git a/tests/generic/group b/tests/generic/group
+index 35f98124..5b3c1616 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -554,3 +554,4 @@
+ 549 auto quick encrypt
+ 550 auto quick encrypt
+ 551 auto stress aio
++552 auto quick log
 -- 
-2.16.4
+2.11.0
