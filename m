@@ -1,113 +1,132 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:36470 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727041AbfFIORw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 10:17:52 -0400
-Received: by mail-pg1-f196.google.com with SMTP id a3so3639787pgb.3
-        for <fstests@vger.kernel.org>; Sun, 09 Jun 2019 07:17:51 -0700 (PDT)
-Message-ID: <5cfd150e.1c69fb81.25895.40a6@mx.google.com>
-Date: Sun, 09 Jun 2019 22:17:48 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:35060 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1731062AbfFGRKm (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 13:10:42 -0400
+Date: Sat, 8 Jun 2019 01:10:37 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 3a82f23e450c
+Subject: Re: [PATCH v3 2/6] generic: copy_file_range immutable file test
+Message-ID: <20190607171037.GW15846@desktop>
+References: <20190602124114.26810-1-amir73il@gmail.com>
+ <20190602124114.26810-3-amir73il@gmail.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="JxXvqMeMWHlM"
-Content-Disposition: inline
-Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-List-ID: <fstests@vger.kernel.org>
-
-
---JxXvqMeMWHlM
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
+In-Reply-To: <20190602124114.26810-3-amir73il@gmail.com>
+Sender: fstests-owner@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+On Sun, Jun 02, 2019 at 03:41:10PM +0300, Amir Goldstein wrote:
+> This test case was split out of Dave Chinner's copy_file_range bounds
+> check test to reduce the requirements for running the bounds check.
 
-The master branch of the xfstests repository at:
+I think this description should go below "---" and not be in the commit
+log. I copied the test description from test here instead.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> ---
+>  tests/generic/988     | 59 +++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/988.out |  5 ++++
+>  tests/generic/group   |  1 +
+>  3 files changed, 65 insertions(+)
+>  create mode 100755 tests/generic/988
+>  create mode 100644 tests/generic/988.out
+> 
+> diff --git a/tests/generic/988 b/tests/generic/988
+> new file mode 100755
+> index 00000000..0f4ee4ea
+> --- /dev/null
+> +++ b/tests/generic/988
+> @@ -0,0 +1,59 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
+> +#
+> +# FS QA Test No. 988
+> +#
+> +# Check that we cannot copy_file_range() to/from an immutable file
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 7 15
+> +
+> +_cleanup()
+> +{
+> +	$CHATTR_PROG -i $testdir/immutable > /dev/null 2>&1
+> +	cd /
+> +	rm -rf $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +
+> +# real QA test starts here
+> +_supported_os Linux
+> +_supported_fs generic
+> +
+> +rm -f $seqres.full
+> +
+> +_require_test
+> +_require_chattr i
+> +_require_xfs_io_command "copy_range"
+> +_require_xfs_io_command "chattr"
+> +
+> +testdir="$TEST_DIR/test-$seq"
 
-have just been updated. There're two new copy_file_range(2) tests and one
-generic data loss test in this update, along with some xfs and btrfs
-enhancements.
-
-You may see new failures like generic/553 and generic/554 on all filesystems,
-and generic/552 on btrfs. The enhanced btrfs/163 test may hang on latest
-kernel.
+I renamed "testdir" to "workdir" to avoid confusing with TEST_DIR, and
+moved the definition before _cleanup so we have a valid workdir
+definition if any of the requires are not met.
 
 Thanks,
 Eryu
 
-The new head of the master branch is commit:
-
-3a82f23e450c generic: copy_file_range swapfile test
-
-New commits:
-
-Amir Goldstein (3):
-      [7a3a9f5754f5] generic: create copy_range group
-      [61a838524a8e] generic: copy_file_range immutable file test
-      [3a82f23e450c] generic: copy_file_range swapfile test
-
-Darrick J. Wong (3):
-      [80c49a927cc1] xfs/122: add new ioctl structures
-      [edd56cc4274f] fstests: remove obsolete xfs ioctl typedef usage
-      [8ca445c46ee1] check: try to insulate the test framework from oom killer
-
-Filipe Manana (1):
-      [d3665da45665] generic: test for data loss on fsync after evicting an inode and renaming it
-
-Johannes Thumshirn (1):
-      [18b7c53fd650] btrfs/048: add validation of compression options
-
-Naohiro Aota (1):
-      [18b5abf82429] btrfs/163: make readahead run on the seed device
-
-
-Code Diffstat:
-
- check                               | 15 +++++-
- ltp/fsstress.c                      |  8 +--
- src/bstat.c                         |  6 +--
- src/bulkstat_unlink_test.c          |  8 +--
- src/bulkstat_unlink_test_modified.c | 10 ++--
- src/t_immutable.c                   | 12 ++---
- tests/btrfs/048                     | 13 +++++
- tests/btrfs/048.out                 | 11 +++++
- tests/btrfs/163                     |  2 +-
- tests/btrfs/163.out                 |  4 +-
- tests/generic/434                   |  2 +
- tests/generic/552                   | 98 +++++++++++++++++++++++++++++++++++++
- tests/generic/552.out               |  7 +++
- tests/generic/553                   | 59 ++++++++++++++++++++++
- tests/generic/553.out               |  5 ++
- tests/generic/554                   | 54 ++++++++++++++++++++
- tests/generic/554.out               |  4 ++
- tests/generic/group                 | 13 +++--
- tests/xfs/122.out                   |  4 ++
- 19 files changed, 303 insertions(+), 32 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---JxXvqMeMWHlM
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIcBAABAgAGBQJc/RSpAAoJECZSqilcj+djpFAP/0qwhJ5f8Q74n5tvTbMdo72t
-J9nRrlqMctu5JedfToORXs3E31e07RfMaV2Rk3P7jGLp3IyW32MwDARuRG/gxjK6
-Pc5nX/ABYmieZFXv3EEJnfptytflRfC2cyBBdzPkV2X6jlrVPSPjG0jnhouuumtK
-btSr4saImmyMKtNRaH/+2iQbE/lnYjq5BDyJCubU3ZWubQXN5u3VK9qj5Q/1F8WC
-hjhPZ0319xF+AOfAGUbCv1tfDFZYxmhubjQCalbZ0+PRTHTwub5UQ8o7PPBnqaA9
-LpFzJ9CFQYkXfd1z9xNGyELxTZAgcf7emsjBJNAmgqqr729fePdQx1jDvib+SWLc
-BzxobSNYHHJ1dt1P6xQBgdC+70f9wAXgod64b7U26BHzeLSzc5r82Ud/4MmPweAD
-OLCP+IRsN0DShcFGIK3QQJOkNxy3iX+mBD3DbMf0DrOx2SVdcEn13+E44GPdi705
-BnGoAvd2D3q/OIhtTc0Sx/YkiL6hpBkkFVjr4zWdSDmMxg7xPhjU2wFStDBOSyWO
-C0KLi1inT9jIgE2MsrZNjYvwdFTP9uag6ocC5rbSeZNOsx5XydhHjyK/YNs8BdC9
-GmQbacNSfn7gighXqUoh41WzlFSEpPMB0DW/pElwAVtBAy5VnLfaaFl19tj+Pme8
-Sq9DFl0+R7zgb/kmyyDV
-=GqDh
------END PGP SIGNATURE-----
-
---JxXvqMeMWHlM--
+> +rm -rf $testdir
+> +mkdir $testdir
+> +
+> +rm -f $seqres.full
+> +
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
+> +
+> +# we have to open the file to be immutable rw and hold it open over the
+> +# chattr command to set it immutable, otherwise we won't be able to open it for
+> +# writing after it's been made immutable. (i.e. would exercise file mode checks,
+> +# not immutable inode flag checks).
+> +echo immutable file returns EPERM
+> +$XFS_IO_PROG -f -c "pwrite -S 0x61 0 64k" -c fsync $testdir/immutable | _filter_xfs_io
+> +$XFS_IO_PROG -f -c "chattr +i" -c "copy_range -l 32k $testdir/file" $testdir/immutable
+> +$XFS_IO_PROG -f -r -c "chattr -i" $testdir/immutable
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/generic/988.out b/tests/generic/988.out
+> new file mode 100644
+> index 00000000..e74a96bf
+> --- /dev/null
+> +++ b/tests/generic/988.out
+> @@ -0,0 +1,5 @@
+> +QA output created by 988
+> +immutable file returns EPERM
+> +wrote 65536/65536 bytes at offset 0
+> +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+> +copy_range: Operation not permitted
+> diff --git a/tests/generic/group b/tests/generic/group
+> index b498eb56..20b95c14 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -550,3 +550,4 @@
+>  545 auto quick cap
+>  546 auto quick clone enospc log
+>  547 auto quick log
+> +988 auto quick copy_range
+> -- 
+> 2.17.1
+> 
