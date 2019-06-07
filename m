@@ -1,430 +1,615 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:44044 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729817AbfFGSUD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 14:20:03 -0400
-Date: Fri, 7 Jun 2019 11:19:26 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 1/1] xfs: check for COW overflows in i_delayed_blks
-Message-ID: <20190607181926.GE1871505@magnolia>
-References: <155968302402.1647082.16959798703857853077.stgit@magnolia>
- <155968303075.1647082.5031279746723706503.stgit@magnolia>
- <20190606191449.GB2791@bfoster>
- <20190606200249.GA1688126@magnolia>
- <20190607112429.GA57123@bfoster>
- <20190607155309.GD1871505@magnolia>
- <20190607162348.GA58127@bfoster>
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:44976 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1730192AbfFGQm3 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 12:42:29 -0400
+Date: Sat, 8 Jun 2019 00:42:23 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2 2/2] ext4/036: Add tests for filename casefolding
+ feature
+Message-ID: <20190607164223.GV15846@desktop>
+References: <20190606193138.25852-1-krisman@collabora.com>
+ <20190606193138.25852-2-krisman@collabora.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=utf-8
 Content-Disposition: inline
-In-Reply-To: <20190607162348.GA58127@bfoster>
+In-Reply-To: <20190606193138.25852-2-krisman@collabora.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc: tytso@mit.edu, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 07, 2019 at 12:23:48PM -0400, Brian Foster wrote:
-> On Fri, Jun 07, 2019 at 08:53:09AM -0700, Darrick J. Wong wrote:
-> > On Fri, Jun 07, 2019 at 07:24:33AM -0400, Brian Foster wrote:
-> > > On Thu, Jun 06, 2019 at 01:02:49PM -0700, Darrick J. Wong wrote:
-> > > > On Thu, Jun 06, 2019 at 03:14:50PM -0400, Brian Foster wrote:
-> > > > > On Tue, Jun 04, 2019 at 02:17:10PM -0700, Darrick J. Wong wrote:
-> > > > > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > > > 
-> > > > > > With the new copy on write functionality it's possible to reserve so
-> > > > > > much COW space for a file that we end up overflowing i_delayed_blks.
-> > > > > > The only user-visible effect of this is to cause totally wrong i_blocks
-> > > > > > output in stat, so check for that.
-> > > > > > 
-> > > > > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > > > > ---
-> > > > > >  tests/xfs/907     |  223 +++++++++++++++++++++++++++++++++++++++++++++++++++++
-> > > > > >  tests/xfs/907.out |    8 ++
-> > > > > >  tests/xfs/group   |    1 
-> > > > > >  3 files changed, 232 insertions(+)
-> > > > > >  create mode 100755 tests/xfs/907
-> > > > > >  create mode 100644 tests/xfs/907.out
-> > > > > > 
-> > > > > > 
-> > > > > > diff --git a/tests/xfs/907 b/tests/xfs/907
-> > > > > > new file mode 100755
-> > > > > > index 00000000..d85f12da
-> > > > > > --- /dev/null
-> > > > > > +++ b/tests/xfs/907
-> > > > > > @@ -0,0 +1,223 @@
-> > > > > > +#! /bin/bash
-> > > > > > +# SPDX-License-Identifier: GPL-2.0+
-> > > > > > +# Copyright (c) 2019 Oracle, Inc.  All Rights Reserved.
-> > > > > > +#
-> > > > > > +# FS QA Test No. 907
-> > > > > > +#
-> > > > > > +# Try to overflow i_delayed_blks by setting the largest cowextsize hint
-> > > > > > +# possible, creating a sparse file with a single byte every cowextsize bytes,
-> > > > > > +# reflinking it, and retouching every written byte to see if we can create
-> > > > > > +# enough speculative COW reservations to overflow i_delayed_blks.
-> > > > > > +#
-> > > > > > +seq=`basename $0`
-> > > > > > +seqres=$RESULT_DIR/$seq
-> > > > > > +echo "QA output created by $seq"
-> > > > > > +
-> > > > > > +here=`pwd`
-> > > > > > +tmp=/tmp/$$
-> > > > > > +status=1	# failure is the default!
-> > > > > > +trap "_cleanup; exit \$status" 0 1 2 3 7 15
-> > > > > > +
-> > > > > > +_cleanup()
-> > > > > > +{
-> > > > > > +	cd /
-> > > > > > +	test -n "$loop_mount" && $UMOUNT_PROG $loop_mount > /dev/null 2>&1
-> > > > > > +	test -n "$loop_dev" && _destroy_loop_device $loop_dev
-> > > > > > +	rm -rf $tmp.*
-> > > > > > +}
-> > > > > > +
-> > > > > > +# get standard environment, filters and checks
-> > > > > > +. ./common/rc
-> > > > > > +. ./common/reflink
-> > > > > > +. ./common/filter
-> > > > > > +
-> > > > > > +# real QA test starts here
-> > > > > > +_supported_os Linux
-> > > > > > +_supported_fs xfs
-> > > > > > +_require_scratch_reflink
-> > > > > > +_require_cp_reflink
-> > > > > > +_require_loop
-> > > > > > +_require_xfs_debug	# needed for xfs_bmap -c
-> > > > > > +
-> > > > > > +MAXEXTLEN=2097151	# cowextsize can't be more than MAXEXTLEN
-> > > > > > +
-> > > > > > +echo "Format and mount"
-> > > > > > +_scratch_mkfs > "$seqres.full" 2>&1
-> > > > > > +_scratch_mount
-> > > > > > +
-> > > > > > +# Create a huge sparse filesystem on the scratch device because that's what
-> > > > > > +# we're going to need to guarantee that we have enough blocks to overflow in
-> > > > > > +# the first place.  We need to have at least enough free space on that huge fs
-> > > > > > +# to handle one written block every MAXEXTLEN blocks and to reserve 2^32 blocks
-> > > > > > +# in the COW fork.  There needs to be sufficient space in the scratch
-> > > > > > +# filesystem to handle a 256M log, all the per-AG metadata, and all the data
-> > > > > > +# written to the test file.
-> > > > > > +#
-> > > > > > +# Worst case, a 64k-block fs needs to be about 300TB.  Best case, a 1k block
-> > > > > > +# filesystem needs ~5TB.  For the most common 4k case we only need a ~20TB fs.
-> > > > > > +#
-> > > > > > +# nr_cows is the number of writes we make to the filesystem.
-> > > > > > +# blks_needed is the number of free blocks we need in the fs to trigger the
-> > > > > > +#     overflow.  The destination file needs to have more than 2^32 blocks
-> > > > > > +#     reserved for COW, and the source file needs to have 1 block written every
-> > > > > > +#     MAXEXTLEN blocks (i.e. 2^32/MAXEXTLEN blocks) to set up the destination
-> > > > > > +#     file.
-> > > > > > +# loop_file_sz is the size of the filesystem we have to create to produce the
-> > > > > > +#     overflow problems.  This is 20% more than blks_needed, and rounded to the
-> > > > > > +#     nearest 512b so losetup doesn't whine.
-> > > > > > +# est_nr_ags is a guess at the AG count, assuming that we'll have one AG per
-> > > > > > +#     terabyte (which assumes that we need a multi-terabyte filesystem for this
-> > > > > > +#     test).  We assume we'll need 16 blocks for AG metadata and 128K for inode
-> > > > > > +#     chunks.
-> > > > > > +# space_reqd_kb is the size of the huge sparse filesystem --
-> > > > > > +#     256M for the log, per-AG metadata, and 10% more space than however much
-> > > > > > +#     we will write to both test files.
-> > > > > > +blksz=$(_get_file_block_size "$SCRATCH_MNT")
-> > > > > > +nr_cows="$(( ((2 ** 32) / MAXEXTLEN) + 100 ))"
-> > > > > > +blks_needed="$(( nr_cows * (1 + MAXEXTLEN) ))"
-> > > > > > +loop_file_sz="$(( ((blksz * blks_needed) * 12 / 10) / 512 * 512 ))"
-> > > > > > +est_nr_ags="$(( (loop_file_sz / (2 ** 40)) + 1 ))"
-> > > > > > +est_ag_space_kb="$(( (est_nr_ags * 16 * blksz / 1024) + 128 ))"
-> > > > > > +est_file_space_kb="$(( (((nr_cows * blksz) * 11 / 10) / 1024) ))"
-> > > > > > +space_reqd_kb="$(( 262144 + est_ag_space_kb + 2 * est_file_space_kb ))"
-> > > > > > +cat >> $seqres.full << ENDL
-> > > > > > +blksz: $blksz
-> > > > > > +nr_cows: $nr_cows
-> > > > > > +blks_needed: $blks_needed
-> > > > > > +loop_file_sz: $loop_file_sz
-> > > > > > +est_nr_ags: $est_nr_ags
-> > > > > > +est_ag_space_kb: $est_ag_space_kb
-> > > > > > +est_file_space_kb: $est_file_space_kb
-> > > > > > +space_reqd_kb: $space_reqd_kb
-> > > > > > +ENDL
-> > > > > > +_require_fs_space $SCRATCH_MNT $space_reqd_kb
-> > > > > > +
-> > > > > 
-> > > > > This seems like it would be simpler to just create the worst case sparse
-> > > > > fs (say 300TB or so) then make sure the scratch device has enough free
-> > > > > blocks to accommodate the number of COWs (plus slop) that need to occur
-> > > > > in the loop fs to overflow the counter. I don't have a 64k box handy,
-> > > > > but the metadata size difference between a sparse 20TB fs and 300TB fs
-> > > > > over a 4k scratch fs is only a few MB. Hm?
-> > > > 
-> > > > <shrug> Originally it did just hardcode 300T, and Eryu complained that
-> > > > xfs_db would OOM when it tried to deal with a 300T filesystem.  I
-> > > > changed the test to avoid xfs_db, but then it occurred to me (running on
-> > > > a slow arm64 box) that the mkfs and xfs_repair runtimes could be cut
-> > > > down considerably if the loop fs was only as large as it needed to be.
-> > > > 
-> > > 
-> > > Interesting.. do you recall how much of a difference it made? I don't
-> > > see much more than a second or two difference on my test vm, but I
-> > > haven't tried any slow arm or 64k page boxes.
-> > 
-> > It was ~15s on x64 (20T), ~180s on arm64 (20T) and ~300s w/ 64k blocks.
-> > Granted the slow arm box is a rpi3b+ with 1G RAM in 64bit mode which is
-> > probably very stupid.
-> > 
-> > Oh, hey, qemu arm64 is about half as slow.
-> > 
-> 
-> Heh, Ok.
+On Thu, Jun 06, 2019 at 03:31:38PM -0400, Gabriel Krisman Bertazi wrote:
+> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+>=20
+> This new test implements verification for the per-directory
+> case-insensitive feature, as supported in the reference implementation
+> in Ext4.  Currently, this test only supports Ext4, but the plan is to
+> run it in other filesystems, once they support the feature.
+>=20
+> For now, let it live in ext4 and we move to shared/ or generic/ when
+> other filesystems supporting this feature start to pop up.
+>=20
+> Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
+> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+>   [Rewrite to support feature design]
+>   [Refactor to simplify implementation]
+> ---
+>  tests/ext4/036     | 469 +++++++++++++++++++++++++++++++++++++++++++++
+>  tests/ext4/036.out |   2 +
+>  tests/ext4/group   |   1 +
+>  3 files changed, 472 insertions(+)
+>  create mode 100755 tests/ext4/036
+>  create mode 100644 tests/ext4/036.out
+>=20
+> diff --git a/tests/ext4/036 b/tests/ext4/036
+> new file mode 100755
+> index 000000000000..3dae4212853b
+> --- /dev/null
+> +++ b/tests/ext4/036
+> @@ -0,0 +1,469 @@
+> +#! /bin/bash
+> +# FSQA Test No. 036
+> +#
+> +# Test the creation, mounting and basic functionality of file name
+> +# casefolding on Ext4
+> +#
+> +#---------------------------------------------------------------------=
+--
+> +# Copyright (c) 2018 Collabora Ltd.  All Rights Reserved.
+> +#
+> +# This program is free software; you can redistribute it and/or
+> +# modify it under the terms of the GNU General Public License as
+> +# published by the Free Software Foundation.
+> +#
+> +# This program is distributed in the hope that it would be useful,
+> +# but WITHOUT ANY WARRANTY; without even the implied warranty of
+> +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+> +# GNU General Public License for more details.
+> +#
+> +# You should have received a copy of the GNU General Public License
+> +# along with this program; if not, write the Free Software Foundation,
+> +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+> +#
+> +#---------------------------------------------------------------------=
+--
 
-Granted it also fails to boot 40% of the time because <unknown>...
+Same here, use SPDX tags.
 
-...and sometimes it only boots if I bang Enter on the serial console.
+> +
+> +seq=3D`basename $0`
+> +seqres=3D$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +status=3D1 # failure is thea default
+> +
+> +. ./common/rc
+> +. ./common/casefold
+> +
+> +_supported_os Linux
+> +_require_scratch
+> +_require_casefold_support
+> +_require_check_dmesg
+> +
+> +sdev=3D$(_short_dev ${SCRATCH_DEV})
+> +test_casefold=3D${SCRATCH_MNT}
 
-> > > Even then, that could be accomplished with a simple calculation of the
-> > > 2^32 block requirement multiplied against the block size plus some slop
-> > > value like 1GB without significantly changing timing. I.e., the whole
-> > > big hunk above could be reduced to something like:
-> > > 
-> > > # Calculate the fs size based on block size and the number of delalloc blocks we
-> > > # must be able to reserve to overflow. Add some room to account for fs
-> > > # metadata overhead and round to 512b so losetup doesn't complain.
-> > > nr_cows="$(( ( (2 ** 32) / MAXEXTLEN ) + 100 ))"
-> > > loop_file_sz=$(( (nr_cows * MAXEXTLEN * blksz * 12 / 10) / 512 * 512 ))
-> > > 
-> > > From there, we could either push the _require_fs_space() down after the
-> > > mkfs:
-> > > 
-> > > # Now that we've formatted the filesystem, make sure the scratch fs has enough
-> > > # room for $nr_cows blocks in two files, again allowing for some overhead.
-> > > _require_fs_space $SCRATCH_MNT $(( ( 2 * nr_cows * blksz * 12 / 10 ) / 1024 ))
-> > > 
-> > > Or if that's too hacky, just enforce a worst case value for the fs
-> > > metadata portion of the required space. As mentioned, the difference I
-> > > see between 20T and 300T on a 4k scratch dev is ~6MB. fiemap shows most
-> > > of that made up as 40 512b extents, which is 20kb. Extrapolate that out
-> > > to a 64k scratch fs and we come in under 20MB. ISTM we could just take
-> > > add something like 500MB/1GB to the _require_fs_space() calculation
-> > > above to account for the 256MB log + all other fs structure and still
-> > > allow the test to run in most cases.
-> > > 
-> > > Hmmmm.. unless I'm miscalculating, even the nr_cows portion of the
-> > > required space only comes out to ~320MB with a 64k scratch dev. Perhaps
-> > > we could skip all of this (except for the sizing of the loop file) and
-> > > just '_require_fs_space <1GB>' at the top of the test with a couple
-> > > lines of comment to document the worst case calculation. That leaves
-> > > plenty of extra space and is still small enough that it likely won't
-> > > filter out in most test envs. I also don't think we need to push
-> > > anything more than the resulting mkfs output to the $seqres.full file,
-> > > so altogether that allows us to remove almost a screen full of
-> > > calculation cruft from the test (if you account for the huge comment
-> > > required to document the calculations).
-> > 
-> > In practice I noticed that the space usage usually came out around
-> > ~780MB for the 300T filesystem, with rmap and reflink both enabled.  I'm
-> > tempted just to assume that 1G of space on the scratch fs is fine
-> > though.  Maybe I'll just hardwire it to 1.2G and leave it.
-> > 
-> 
-> That includes the log as well? If so, 1.2G sounds reasonable to me.
+This doesn't look necessary, just use $SCRATCH_MNT in the test?
 
-Yep. du -ms $TEST_DIR/a.img
+> +
+> +filename1=3D"file.txt"
+> +filename2=3D"FILE.TXT"
+> +
+> +pt_file1=3D$(echo -e "cora=C3=A7=C3=A3o")
+> +pt_file2=3D$(echo -e "corac\xcc\xa7\xc3\xa3o" | tr a-z A-Z)
+> +
+> +fr_file2=3D$(echo -e "french_caf\xc3\xa9.txt")
+> +fr_file1=3D$(echo -e "french_cafe\xcc\x81.txt")
+> +
+> +ar_file1=3D$(echo -e "arabic_\xdb\x92\xd9\x94.txt")
+> +ar_file2=3D$(echo -e "arabic_\xdb\x93.txt" | tr a-z A-Z)
+> +
+> +jp_file1=3D$(echo -e "japanese_\xe3\x82\xb2.txt")
+> +jp_file2=3D$(echo -e "japanese_\xe3\x82\xb1\xe3\x82\x99.txt")
+> +
+> +# '\xc3\x00' is an invalid sequence. Despite that, the sequences below
+> +# could match, if we ignored the error.  But we don't want to be greed=
+y
+> +# at normalization, so at the first error we treat the entire sequence
+> +# as an opaque blob.  Therefore, these two must NOT match.
+> +blob_file1=3D$(echo -e "corac\xcc\xa7\xc3")
+> +blob_file2=3D$(echo -e "cora=C3=A7\xc3")
+> +
+> +# Test helpers
+> +basic_create_lookup() {
+> +    touch "${basedir}/${1}"
 
---D
+Please assign one of the function params to basedir and declare it as a
+local variable.
 
-> Brian
-> 
-> > > > > > +loop_file=$SCRATCH_MNT/a.img
-> > > > > > +loop_mount=$SCRATCH_MNT/a
-> > > > > > +$XFS_IO_PROG -f -c "truncate $loop_file_sz" $loop_file
-> > > > > > +loop_dev=$(_create_loop_device $loop_file)
-> > > > > > +
-> > > > > > +# Now we have to create the source file.  The goal is to overflow a 32-bit
-> > > > > > +# i_delayed_blks, which means that we have to create at least that many delayed
-> > > > > > +# allocation block reservations.  Take advantage of the fact that a cowextsize
-> > > > > > +# hint causes creation of large speculative delalloc reservations in the cow
-> > > > > > +# fork to reduce the amount of work we have to do.
-> > > > > > +#
-> > > > > > +# The maximum cowextsize can only be set to MAXEXTLEN fs blocks on a filesystem
-> > > > > > +# whose AGs each have more than MAXEXTLEN * 2 blocks.  This we can do easily
-> > > > > > +# with a multi-terabyte filesystem, so start by setting up the hint.  Note that
-> > > > > > +# the current fsxattr interface specifies its u32 cowextsize hint in units of
-> > > > > > +# bytes and therefore can't handle MAXEXTLEN * blksz on most filesystems, so we
-> > > > > > +# set it via mkfs because mkfs takes units of fs blocks, not bytes.
-> > > > > > +
-> > > > > > +_mkfs_dev -d cowextsize=$MAXEXTLEN -l size=256m $loop_dev >> $seqres.full
-> > > > > > +mkdir $loop_mount
-> > > > > > +mount $loop_dev $loop_mount
-> > > > > > +
-> > > > > > +echo "Create crazy huge file"
-> > > > > > +huge_file="$loop_mount/a"
-> > > > > > +touch "$huge_file"
-> > > > > > +blksz=$(_get_file_block_size "$loop_mount")
-> > > > > > +extsize_bytes="$(( MAXEXTLEN * blksz ))"
-> > > > > > +
-> > > > > > +# Make sure it actually set a hint.
-> > > > > > +curr_cowextsize_str="$($XFS_IO_PROG -c 'cowextsize' "$huge_file")"
-> > > > > > +echo "$curr_cowextsize_str" >> $seqres.full
-> > > > > > +cowextsize_bytes="$(echo "$curr_cowextsize_str" | sed -e 's/^.\([0-9]*\).*$/\1/g')"
-> > > > > > +test "$cowextsize_bytes" -eq 0 && echo "could not set cowextsize?"
-> > > > > > +
-> > > > > > +# Now we have to seed the file with sparse contents.  Remember, the goal is to
-> > > > > > +# create a little more than 2^32 delayed allocation blocks in the COW fork with
-> > > > > > +# as little effort as possible.  We know that speculative COW preallocation
-> > > > > > +# will create MAXEXTLEN-length reservations for us, so that means we should
-> > > > > > +# be able to get away with touching a single byte every extsize_bytes.  We
-> > > > > > +# do this backwards to avoid having to move EOF.
-> > > > > > +seq $nr_cows -1 0 | while read n; do
-> > > > > > +	off="$((n * extsize_bytes))"
-> > > > > > +	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-> > > > > > +done
-> > > > > > +
-> > > > > > +echo "Reflink crazy huge file"
-> > > > > > +_cp_reflink "$huge_file" "$huge_file.b"
-> > > > > > +
-> > > > > > +# Now that we've shared all the blocks in the file, we touch them all again
-> > > > > > +# to create speculative COW preallocations.
-> > > > > > +echo "COW crazy huge file"
-> > > > > > +seq $nr_cows -1 0 | while read n; do
-> > > > > > +	off="$((n * extsize_bytes))"
-> > > > > > +	$XFS_IO_PROG -c "pwrite $off 1" "$huge_file" > /dev/null
-> > > > > > +done
-> > > > > > +
-> > > > > > +# Compare the number of blocks allocated to this file (as reported by stat)
-> > > > > > +# against the number of blocks that are in the COW fork.  If either one is
-> > > > > > +# less than 2^32 then we have evidence of an overflow problem.
-> > > > > > +echo "Check crazy huge file"
-> > > > > > +allocated_stat_blocks="$(stat -c %b "$huge_file")"
-> > > > > > +stat_blksz="$(stat -c %B "$huge_file")"
-> > > > > > +allocated_fsblocks=$(( allocated_stat_blocks * stat_blksz / blksz ))
-> > > > > > +
-> > > > > > +# Make sure we got enough COW reservations to overflow a 32-bit counter.
-> > > > > > +
-> > > > > > +# Return the number of delalloc & real blocks given bmap output for a fork of a
-> > > > > > +# file.  Output is in units of 512-byte blocks.
-> > > > > > +count_fork_blocks() {
-> > > > > > +	$AWK_PROG "
-> > > > > > +{
-> > > > > > +	if (\$3 == \"delalloc\") {
-> > > > > > +		x += \$4;
-> > > > > > +	} else if (\$3 == \"hole\") {
-> > > > > > +		;
-> > > > > > +	} else {
-> > > > > > +		x += \$6;
-> > > > > > +	}
-> > > > > > +}
-> > > > > > +END {
-> > > > > > +	print(x);
-> > > > > > +}
-> > > > > > +"
-> > > > > > +}
-> > > > > > +
-> > > > > > +# Count the number of blocks allocated to a file based on the xfs_bmap output.
-> > > > > > +# Output is in units of filesystem blocks.
-> > > > > > +count_file_fork_blocks() {
-> > > > > > +	local tag="$1"
-> > > > > > +	local file="$2"
-> > > > > > +	local args="$3"
-> > > > > > +
-> > > > > > +	$XFS_IO_PROG -c "bmap $args -l -p -v" "$huge_file" > $tmp.extents
-> > > > > > +	echo "$tag fork map" >> $seqres.full
-> > > > > > +	cat $tmp.extents >> $seqres.full
-> > > > > > +	local sectors="$(count_fork_blocks < $tmp.extents)"
-> > > > > > +	echo "$(( sectors / (blksz / 512) ))"
-> > > > > > +}
-> > > > > > +
-> > > > > > +cowblocks=$(count_file_fork_blocks cow "$huge_file" "-c")
-> > > > > > +attrblocks=$(count_file_fork_blocks attr "$huge_file" "-a")
-> > > > > > +datablocks=$(count_file_fork_blocks data "$huge_file" "")
-> > > > > > +
-> > > > > > +# Did we create more than 2^32 blocks in the cow fork?
-> > > > > > +echo "datablocks is $datablocks" >> $seqres.full
-> > > > > > +echo "attrblocks is $attrblocks" >> $seqres.full
-> > > > > > +echo "cowblocks is $cowblocks" >> $seqres.full
-> > > > > > +test "$cowblocks" -lt $((2 ** 32)) && \
-> > > > > > +	echo "cowblocks (${cowblocks}) should be more than 2^32!"
-> > > > 
-> > > > This part checks that the test did what we expect.
-> > > > 
-> > > 
-> > > Ok, I guess I'd just tweak the one liner comments to explain the purpose
-> > > of each of these checks rather than reiterate the code. E.g., for the
-> > > check above:
-> > > 
-> > > # did cow speculative prealloc reserve enough to overflow?
-> > > 
-> > > > > > +
-> > > > > > +# Does stat's block allocation count exceed 2^32?
-> > > 
-> > > # detect delalloc count overflow via the stat data
-> > > 
-> > > > > > +echo "stat blocks is $allocated_fsblocks" >> $seqres.full
-> > > > > > +test "$allocated_fsblocks" -lt $((2 ** 32)) && \
-> > > > > > +	echo "stat blocks (${allocated_fsblocks}) should be more than 2^32!"
-> > > > 
-> > > > This part detects the problem in the incore state.
-> > > > 
-> > > > > > +# Finally, does st_blocks match what we computed from the forks?
-> > > 
-> > > # sanity check the values computed from the forks
-> > 
-> > Comments added.
-> > 
-> > --D
-> > 
-> > > 
-> > > Brian
-> > > 
-> > > > > > +expected_allocated_fsblocks=$((datablocks + cowblocks + attrblocks))
-> > > > > > +echo "expected stat blocks is $expected_allocated_fsblocks" >> $seqres.full
-> > > > > > +
-> > > > > > +_within_tolerance "st_blocks" $allocated_fsblocks $expected_allocated_fsblocks 2% -v
-> > > > 
-> > > > And this one on is a second sanity check that the test did roughly what
-> > > > we expected.
-> > > > 
-> > > > > > +
-> > > > > 
-> > > > > Similar question with the post-processing stuff... how much of this is
-> > > > > to detect the problem vs. determine the test sequence did what we
-> > > > > expect?
-> > > > 
-> > > > (Answered above.)
-> > > > 
-> > > > > Does the fs check below report corruption or is it purely
-> > > > > in-core state that ends up broken?
-> > > > 
-> > > > It's only the incore state that ends up broken.
-> > > > 
-> > > > --D
-> > > > 
-> > > > > Brian
-> > > > > 
-> > > > > > +echo "Test done"
-> > > > > > +# Quick check the large sparse fs, but skip xfs_db because it doesn't scale
-> > > > > > +# well on a multi-terabyte filesystem.
-> > > > > > +LARGE_SCRATCH_DEV=yes _check_xfs_filesystem $loop_dev none none
-> > > > > > +
-> > > > > > +# success, all done
-> > > > > > +status=0
-> > > > > > +exit
-> > > > > > diff --git a/tests/xfs/907.out b/tests/xfs/907.out
-> > > > > > new file mode 100644
-> > > > > > index 00000000..cc07d659
-> > > > > > --- /dev/null
-> > > > > > +++ b/tests/xfs/907.out
-> > > > > > @@ -0,0 +1,8 @@
-> > > > > > +QA output created by 907
-> > > > > > +Format and mount
-> > > > > > +Create crazy huge file
-> > > > > > +Reflink crazy huge file
-> > > > > > +COW crazy huge file
-> > > > > > +Check crazy huge file
-> > > > > > +st_blocks is in range
-> > > > > > +Test done
-> > > > > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > > > > index ffe4ae12..e528c559 100644
-> > > > > > --- a/tests/xfs/group
-> > > > > > +++ b/tests/xfs/group
-> > > > > > @@ -504,3 +504,4 @@
-> > > > > >  504 auto quick mkfs label
-> > > > > >  505 auto quick spaceman
-> > > > > >  506 auto quick health
-> > > > > > +907 clone
-> > > > > > 
+> +    stat  "${basedir}/${2}" &> /dev/null || \
+> +	_fail "Casefolded lookup of ${1} ${2} failed"
+
+In fstests, we usually don't do _fail in tests, we just let test prints
+error messages and the test harness will capture the outputs & compare
+them with the golden image (.out file), so we know which part of the
+test fails and test could continue to run. e.g.
+
+> +    _casefold_check_exact_name "${basedir}" "${1}" || \
+> +	_fail "Created file with wrong name."
+
+	stat "$basedir/$2" | _filter_scratch
+	_casefold_check_exact_name "$basedir" "$1" || \
+		echo "Created \"$basedir/$2\" with wrong name"
+
+To use _filter_scratch we need to source common/filter after sourcing
+common/rc.
+
+> +
+> +}
+> +
+> +# CI search should fail.
+> +bad_basic_create_lookup() {
+> +    touch "${basedir}/${1}"
+> +    stat  "${basedir}/${2}" &> /dev/null && \
+> +	_fail "Lookup of ${1} using ${2} should have failed"
+> +}
+> +
+> +# Testcases
+> +test_casefold_lookup () {
+                      ^^^ no space here.
+> +    basedir=3D${test_casefold}/casefold_lookup
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+
+Same here, if _set_casefold_attr fails with some error messages to
+stderr, the test harness would capture that, just put the expected
+output to .out file if any.
+
+> +
+> +    basic_create_lookup "${filename1}" "${filename2}"
+> +    basic_create_lookup "${pt_file1}" "${pt_file2}"
+> +    basic_create_lookup "${fr_file1}" "${fr_file2}"
+> +    basic_create_lookup "${ar_file1}" "${ar_file2}"
+> +    basic_create_lookup "${jp_file1}" "${jp_file2}"
+> +}
+> +
+> +test_bad_casefold_lookup () {
+> +    bad_basic_create_lookup ${blob_file1} ${blob_file2}
+> +}
+> +
+> +# remove and recreate
+> +test_create_and_remove() {
+> +    __create_and_remove() {
+
+In fstests, functions and/or variables starting with "_" are reserved
+for global names, do_create_and_remove should be fine. And move it out
+of the outer function?
+
+> +	basic_create_lookup ${1}
+> +	rm -f  ${basedir}/"${1}"
+> +	stat   ${basedir}/"${1}" &> /dev/null && \
+> +	    _fail "File ${1} was not removed using exact name"
+> +
+> +	basic_create_lookup ${1}
+> +	rm -f  ${basedir}/"${2}"
+> +	stat   ${basedir}/"${1}" &> /dev/null && \
+> +	    _fail "File ${1} was not removed using inexact name"
+> +    }
+> +
+> +    basedir=3D${test_casefold}/create_and_remove
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    __create_and_remove "${pt_file1}" "${pt_file2}"
+> +    __create_and_remove "${jp_file1}" "${jp_file2}"
+> +    __create_and_remove "${ar_file1}" "${ar_file2}"
+> +    __create_and_remove "${fr_file1}" "${fr_file2}"
+> +
+> +}
+> +
+> +test_casefold_flag_basic () {
+> +    basedir=3D${test_casefold}/basic
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +    _is_casefolded_dir ${basedir} || _fail "Casefold attribute wasn't =
+set"
+> +
+> +    _unset_casefold_attr ${basedir}
+> +    _is_casefolded_dir ${basedir} && _fail "Casefold attribute is stil=
+l set"
+> +}
+> +
+> +test_casefold_flag_removal () {
+> +    basedir=3D${test_casefold}/casefold_flag_removal
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +    touch ${basedir}/${filename1}
+> +
+> +    # Try to remove +F attribute on non empty directory
+> +    _try_unset_casefold_attr ${basedir} && \
+> +	_fail "Shouldn't be able to remove casefold attribute of non-empty di=
+rectory"
+
+So here we could just do "_unset_casefold_attr $basename" and log the
+expected error message (maybe with some filters to make the output
+deterministic) in .out file and we can get rid of the _try functions.
+
+> +}
+> +
+> +# Test Inheritance of casefold flag
+> +test_casefold_flag_inheritance () {
+> +    dirpath1=3D"d1/d2/d3"
+> +    dirpath2=3D"D1/D2/D3"
+> +
+> +    basedir=3D${test_casefold}/flag_inheritance
+> +
+> +    mkdir -p ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir -p ${basedir}/${dirpath1}
+> +
+> +    _is_casefolded_dir ${basedir}/${dirpath1} || \
+> +	_fail "Casefold attribute should be inherited"
+> +    ls  ${basedir}/${dirpath2} &>/dev/null || \
+> +	_fail "Dir Lookup failed."
+> +    _casefold_check_exact_name "${basedir}" "${dirpath1}" || \
+> +	_fail "Created directories wrong name."
+> +
+> +    touch ${basedir}/${dirpath2}/${filename1}
+> +    ls  ${basedir}/${dirpath1}/${filename2} &>/dev/null || \
+> +	_fail "Couldn't create file on casefolded parent."
+> +}
+> +
+> +# Test nesting of sensitive directory inside insensitive directory.
+> +test_nesting_sensitive_insensitive_tree_simple() {
+> +    basedir=3D${test_casefold}/sd1
+> +    mkdir -p ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir -p ${basedir}/sd1
+> +    _set_casefold_attr ${basedir}/sd1
+> +
+> +    mkdir ${basedir}/sd1/sd2
+> +    _unset_casefold_attr ${basedir}/sd1/sd2
+> +
+> +    touch ${basedir}/sd1/sd2/${filename1}
+> +    ls ${basedir}/sd1/sd2/${filename1} &>/dev/null || \
+> +	_fail "Exact nested file lookup failed."
+> +    ls ${basedir}/sd1/SD2/${filename1} &>/dev/null || \
+> +	_fail "Nested file lookup failed."
+> +    ls ${basedir}/sd1/SD2/${filename2} &>/dev/null && \
+> +	_fail "Wrong file lookup passed, should have fail."
+> +}
+> +
+> +test_nesting_sensitive_insensitive_tree_complex() {
+> +    # Test nested-directories
+> +    basedir=3D${test_casefold}/nesting
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir ${basedir}/nd1
+> +    _set_casefold_attr ${basedir}/nd1
+> +    mkdir ${basedir}/nd1/nd2
+> +    _unset_casefold_attr ${basedir}/nd1/nd2
+> +    mkdir ${basedir}/nd1/nd2/nd3
+> +    _set_casefold_attr ${basedir}/nd1/nd2/nd3
+> +    mkdir ${basedir}/nd1/nd2/nd3/nd4
+> +    _unset_casefold_attr ${basedir}/nd1/nd2/nd3/nd4
+> +    mkdir ${basedir}/nd1/nd2/nd3/nd4/nd5
+> +    _set_casefold_attr ${basedir}/nd1/nd2/nd3/nd4/nd5
+> +
+> +    ls ${basedir}/ND1/ND2/nd3/ND4/nd5 &>/dev/null || \
+> +	_fail "Nest-dir Lookup failed."
+> +    ls ${basedir}/nd1/nd2/nd3/nd4/ND5 &>/dev/null && \
+> +	_fail "ND5: Nest-dir Lookup passed, it should fail."
+> +    ls ${basedir}/nd1/nd2/nd3/ND4/nd5 &>/dev/null || \
+> +	_fail "Nest-dir Lookup failed."
+> +    ls ${basedir}/nd1/nd2/ND3/nd4/ND5 &>/dev/null && \
+> +	_fail "ND3: Nest-dir Lookup passed, it should fail."
+> +}
+> +
+> +test_symlink_with_inexact_name () {
+> +    basedir=3D${test_casefold}/symlink
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir ${basedir}/ind1
+> +    mkdir ${basedir}/ind2
+> +    _set_casefold_attr ${basedir}/ind1
+> +    touch ${basedir}/ind1/target
+> +    ln -s ${basedir}/ind1/TARGET ${basedir}/ind2/link
+> +    [ -L ${basedir}/ind2/link ] || _fail "Not a symlink."
+> +    readlink -e ${basedir}/ind2/link &>/dev/null || _fail "Symlink fai=
+led"
+> +}
+> +
+> +
+> +# Name-preserving tests
+> +# We create a file with a name, delete it and create again with an
+> +# equivalent name.  If the negative dentry wasn't invalidated, the
+> +# file might be created using $1 instead of $2.
+> +test_name_preserve () {
+> +    __test_name_preserve () {
+> +	touch ${basedir}/${1}
+> +	rm ${basedir}/${1}
+> +
+> +	touch ${basedir}/${2}
+> +	_casefold_check_exact_name ${basedir} ${2} ||
+> +	    _fail "${2} was not created with exact name"
+> +    }
+> +    basedir=3D${test_casefold}/"test_name_preserve"
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    __test_name_preserve "${pt_file1}" "${pt_file2}"
+> +    __test_name_preserve "${jp_file1}" "${jp_file2}"
+> +    __test_name_preserve "${ar_file1}" "${ar_file2}"
+> +    __test_name_preserve "${fr_file1}" "${fr_file2}"
+> +}
+> +
+> +test_dir_name_preserve () {
+> +
+> +    __test_dir_name_preserve () {
+> +	mkdir ${basedir}/${1}
+> +	rmdir ${basedir}/${1}
+> +
+> +	mkdir ${basedir}/${2}
+> +	_casefold_check_exact_name ${basedir} ${2} ||
+> +	    _fail "${2} was not created with exact name"
+> +    }
+> +
+> +    basedir=3D${test_casefold}/"dir-test_name_preserve"
+> +    mkdir -p ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    __test_dir_name_preserve "${pt_file1}" "${pt_file2}"
+> +    __test_dir_name_preserve "${jp_file1}" "${jp_file2}"
+> +    __test_dir_name_preserve "${ar_file1}" "${ar_file2}"
+> +    __test_dir_name_preserve "${fr_file1}" "${fr_file2}"
+> +}
+> +
+> +# Name reuse for CI search
+> +test_name_reuse () {
+> +    basedir=3D${test_casefold}/reuse
+> +
+> +    mkdir ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    reuse1=3DfileX
+> +    reuse2=3DFILEX
+> +
+> +    touch ${basedir}/${reuse1}
+> +    rm -f ${basedir}/${reuse1} || _fail "File lookup failed."
+> +    touch ${basedir}/${reuse2}
+> +    _casefold_check_exact_name "${basedir}" "${reuse2}" || \
+> +	_fail "File created with wrong name"
+> +    _casefold_check_exact_name "${basedir}" "${reuse1}" && \
+> +	_fail "File created with the old name"
+> +}
+> +
+> +# filepath same name
+> +test_create_with_same_name () {
+> +    basedir=3D${test_casefold}/same_name
+> +    mkdir ${basedir}
+> +
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir -p ${basedir}/same1/same1
+> +    touch ${basedir}/SAME1/sAME1/sAMe1
+> +    touch -c ${basedir}/SAME1/sAME1/same1 ||
+> +	_fail "Trying to create a new file instead of using old one"
+> +}
+> +
+> +# file Rename
+> +test_file_rename () {
+> +    basedir=3D${test_casefold}/rename
+> +    mkdir -p ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mv ${basedir}/rename ${basedir}/rename &>/dev/null && \
+> +	_fail "mv to an equivalent name shouldn't work"
+> +    _casefold_check_exact_name ${basedir} "rename"  || \
+> +	_fail "Name shouldn't change."
+> +}
+> +
+> +test_casefold_openfd () {
+> +    # Test openfd with casefold.
+> +    # 1. Delete a file after gettings its fd.
+> +    # 2. Then create new dir with same name
+> +    ofd1=3D"openfd"
+> +    ofd2=3D"OPENFD"
+> +
+> +    basedir=3D${test_casefold}/openfd
+> +    mkdir -p ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    exec 3<> ${basedir}/${ofd1}
+> +    rm -rf ${basedir}/${ofd1}
+> +    mkdir ${basedir}/${ofd2}
+> +    [ -d ${basedir}/${ofd2} ]   || _fail "Not a directory"
+> +    _casefold_check_exact_name ${basedir} "${ofd2}" ||
+> +	_fail "openfd file was created using old name"
+> +    rm -rf ${basedir}/${ofd2}
+> +    exec 3>&-
+> +}
+> +
+> +test_casefold_openfd2 () {
+> +    # Test openfd with casefold.
+> +    # 1. Delete a file after gettings its fd.
+> +    # 2. Then create new file with same name
+> +    # 3. Read from open-fd and write into new file.
+> +
+> +    basedir=3D${test_casefold}/openfd2
+> +    mkdir ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    date > ${basedir}/${ofd1}
+> +    exec 3<> ${basedir}/${ofd1}
+> +    rm -rf ${basedir}/${ofd1}
+> +    touch ${basedir}/${ofd1}
+> +    [ -f ${basedir}/${ofd2} ] || _fail "Not a file"
+> +    read data <&3
+> +    echo $data >> ${basedir}/${ofd1}
+> +    exec 3>&-
+> +}
+> +
+> +test_hard_link_lookups () {
+> +    # Create hardlink for casefold dir file and inside regular dir.
+> +    basedir=3D${test_casefold}/hard_link
+> +    mkdir ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    touch ${basedir}/h1
+> +    ln ${basedir}/H1 ${SCRATCH_MNT}/h1
+> +    cnt=3D`stat -c %h ${basedir}/h1`
+> +    [ $cnt -eq 1 ] && _fail "Unable to create hardlink"
+> +
+> +    # Create hardlink for casefold dir file and inside regular dir.
+> +    touch ${SCRATCH_MNT}/h2
+> +    ln ${SCRATCH_MNT}/h2 ${basedir}/H2
+> +    cnt=3D`stat -c %h ${basedir}/h2`
+> +    [ $cnt -eq 1 ] && _fail "Unable to create hardlink"
+> +}
+> +
+> +test_xattrs_lookups () {
+> +    basedir=3D${test_casefold}/xattrs
+> +    mkdir ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    mkdir -p ${basedir}/x
+> +    setfattr -n user.foo -v bar ${basedir}/x
+> +    getfattr -n user.foo ${basedir}/x &>/dev/null || \
+
+Use $SETFATTR_PROG and $GETFATTR_PROG and _require_attrs in the
+beginning.
+
+> +	_fail "Casefold xattr lookup failed."
+> +
+> +    touch ${basedir}/x/f1
+> +    setfattr -n user.foo -v bar ${basedir}/x/f1
+> +    getfattr -n user.foo ${basedir}/x/f1 &>/dev/null || \
+> +	_fail "Casefold xattr lookup failed."
+> +}
+> +
+> +test_lookup_large_directory() {
+> +    # Perform Casefold lookup on large dir
+> +
+> +    basedir=3D${test_casefold}/large
+> +    mkdir ${basedir}
+> +    _set_casefold_attr ${basedir}
+> +
+> +    touch $(seq -f "${basedir}/file%g" 0 2000)
+> +    stat  $(seq -f "${basedir}/FILE%g" 0 2000) &>/dev/null || \
+> +	_fail "Case on large dir failed"
+> +}
+> +
+> +test_strict_mode_invalid_filename () {
+> +    __strict_mode_invalid_filename () {
+> +	touch  "${basedir}/${1}" &>/dev/null && \
+> +	    _fail "Invalid UTF-8 sequence ${1} should fail at creation time."
+> +    }
+> +
+> +    __strict_mode_invalid_filename ${blob1}
+> +    __strict_mode_invalid_filename ${blob2}
+> +}
+> +
+> +#############
+> +# Run tests #
+> +#############
+> +
+> +_scratch_mkfs_casefold 2>&1 1>/dev/null
+> +
+> +_scratch_mount
+> +
+> +_check_dmesg_for \
+> +    "\(${sdev}\): Using encoding defined by superblock: utf8" || \
+> +    _fail "Could not mount with encoding: utf8"
+> +
+> +test_casefold_flag_basic
+> +test_casefold_lookup
+> +test_bad_casefold_lookup
+> +test_create_and_remove
+> +test_casefold_flag_removal
+> +test_casefold_flag_inheritance
+> +test_nesting_sensitive_insensitive_tree_simple
+> +test_nesting_sensitive_insensitive_tree_complex
+> +test_symlink_with_inexact_name
+> +test_name_preserve
+> +test_dir_name_preserve
+> +test_name_reuse
+> +test_create_with_same_name
+> +test_file_rename
+> +test_casefold_openfd
+> +test_casefold_openfd2
+> +test_hard_link_lookups
+> +test_xattrs_lookups
+> +test_lookup_large_directory
+> +
+> +_scratch_unmount 2>&1
+
+No need to do redirection, test harness captures both stdout and stderr.
+
+> +_check_scratch_fs
+> +
+> +# Test Strict Mode
+> +_scratch_mkfs_casefold_strict 2>&1 1>/dev/null
+
+Better to redirect mkfs output to $seqres.full for debug purpose, e.g.
+
+_scratch_mkfs_casefold_strict >>$seqres.full 2>&1
+
+> +_scratch_mount 2>&1
+
+No need to do redirection here either.
+
+> +
+> +test_strict_mode_invalid_filename
+> +
+> +_scratch_unmount 2>&1
+
+Same here.
+
+> +_check_scratch_fs
+
+And if we do fsck after each test phase, we could replace
+_require_scratch with _require_scratch_nocheck to let harness know
+there's no need to do fsck again after test.
+
+Thanks,
+Eryu
+
+> +
+> +echo "Silence is golden"
+> +status=3D0
+> +exit
+> diff --git a/tests/ext4/036.out b/tests/ext4/036.out
+> new file mode 100644
+> index 000000000000..ed460d98f87c
+> --- /dev/null
+> +++ b/tests/ext4/036.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 036
+> +Silence is golden
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index d27ec893333b..82639c13f8bb 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -38,6 +38,7 @@
+>  033 auto ioctl resize
+>  034 auto quick quota
+>  035 auto quick resize
+> +036 auto quick casefold
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress defrag
+>  302 aio auto ioctl rw stress defrag
+> --=20
+> 2.20.1
+>=20
