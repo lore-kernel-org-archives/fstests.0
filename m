@@ -1,62 +1,47 @@
-Received: from mail-pg1-f194.google.com ([209.85.215.194]:44976 "EHLO
-        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730192AbfFGQm3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 12:42:29 -0400
-Date: Sat, 8 Jun 2019 00:42:23 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:39818 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729871AbfFGQI5 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 12:08:57 -0400
+Date: Sat, 8 Jun 2019 00:08:52 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 2/2] ext4/036: Add tests for filename casefolding
- feature
-Message-ID: <20190607164223.GV15846@desktop>
+Subject: Re: [PATCH v2 1/2] common/casefold: Add infrastructure to test
+ filename casefold feature
+Message-ID: <20190607160852.GU15846@desktop>
 References: <20190606193138.25852-1-krisman@collabora.com>
- <20190606193138.25852-2-krisman@collabora.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190606193138.25852-2-krisman@collabora.com>
+In-Reply-To: <20190606193138.25852-1-krisman@collabora.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
 To: Gabriel Krisman Bertazi <krisman@collabora.com>
-Cc: tytso@mit.edu, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+Cc: tytso@mit.edu, fstests@vger.kernel.org, linux-ext4@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 06, 2019 at 03:31:38PM -0400, Gabriel Krisman Bertazi wrote:
-> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
->=20
-> This new test implements verification for the per-directory
-> case-insensitive feature, as supported in the reference implementation
-> in Ext4.  Currently, this test only supports Ext4, but the plan is to
-> run it in other filesystems, once they support the feature.
->=20
-> For now, let it live in ext4 and we move to shared/ or generic/ when
-> other filesystems supporting this feature start to pop up.
->=20
-> Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
+On Thu, Jun 06, 2019 at 03:31:37PM -0400, Gabriel Krisman Bertazi wrote:
+> Add a set of basic helper functions to simplify the testing of
+> casefolding capable filesystems.
+> 
 > Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
->   [Rewrite to support feature design]
->   [Refactor to simplify implementation]
 > ---
->  tests/ext4/036     | 469 +++++++++++++++++++++++++++++++++++++++++++++
->  tests/ext4/036.out |   2 +
->  tests/ext4/group   |   1 +
->  3 files changed, 472 insertions(+)
->  create mode 100755 tests/ext4/036
->  create mode 100644 tests/ext4/036.out
->=20
-> diff --git a/tests/ext4/036 b/tests/ext4/036
-> new file mode 100755
-> index 000000000000..3dae4212853b
+>  common/casefold | 108 ++++++++++++++++++++++++++++++++++++++++++++++++
+>  1 file changed, 108 insertions(+)
+>  create mode 100644 common/casefold
+> 
+> diff --git a/common/casefold b/common/casefold
+> new file mode 100644
+> index 000000000000..34c1d4ae1af1
 > --- /dev/null
-> +++ b/tests/ext4/036
-> @@ -0,0 +1,469 @@
-> +#! /bin/bash
-> +# FSQA Test No. 036
+> +++ b/common/casefold
+> @@ -0,0 +1,108 @@
+> +#-----------------------------------------------------------------------
 > +#
-> +# Test the creation, mounting and basic functionality of file name
-> +# casefolding on Ext4
+> +# Common functions for testing filename casefold feature
 > +#
-> +#---------------------------------------------------------------------=
---
-> +# Copyright (c) 2018 Collabora Ltd.  All Rights Reserved.
+> +#-----------------------------------------------------------------------
+> +# Copyright (c) 2018 Collabora, Ltd.  All Rights Reserved.
+                   ^^^^ 2019?
+> +#
+> +# Author: Gabriel Krisman Bertazi <krisman@collabora.com>
 > +#
 > +# This program is free software; you can redistribute it and/or
 > +# modify it under the terms of the GNU General Public License as
@@ -70,546 +55,150 @@ On Thu, Jun 06, 2019 at 03:31:38PM -0400, Gabriel Krisman Bertazi wrote:
 > +# You should have received a copy of the GNU General Public License
 > +# along with this program; if not, write the Free Software Foundation,
 > +# Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-> +#
-> +#---------------------------------------------------------------------=
---
+> +#-----------------------------------------------------------------------
 
-Same here, use SPDX tags.
-
-> +
-> +seq=3D`basename $0`
-> +seqres=3D$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +status=3D1 # failure is thea default
-> +
-> +. ./common/rc
-> +. ./common/casefold
-> +
-> +_supported_os Linux
-> +_require_scratch
-> +_require_casefold_support
-> +_require_check_dmesg
-> +
-> +sdev=3D$(_short_dev ${SCRATCH_DEV})
-> +test_casefold=3D${SCRATCH_MNT}
-
-This doesn't look necessary, just use $SCRATCH_MNT in the test?
+Please use the SPDX tags to specify licence, you could take common/rc as
+a reference.
 
 > +
-> +filename1=3D"file.txt"
-> +filename2=3D"FILE.TXT"
-> +
-> +pt_file1=3D$(echo -e "cora=C3=A7=C3=A3o")
-> +pt_file2=3D$(echo -e "corac\xcc\xa7\xc3\xa3o" | tr a-z A-Z)
-> +
-> +fr_file2=3D$(echo -e "french_caf\xc3\xa9.txt")
-> +fr_file1=3D$(echo -e "french_cafe\xcc\x81.txt")
-> +
-> +ar_file1=3D$(echo -e "arabic_\xdb\x92\xd9\x94.txt")
-> +ar_file2=3D$(echo -e "arabic_\xdb\x93.txt" | tr a-z A-Z)
-> +
-> +jp_file1=3D$(echo -e "japanese_\xe3\x82\xb2.txt")
-> +jp_file2=3D$(echo -e "japanese_\xe3\x82\xb1\xe3\x82\x99.txt")
-> +
-> +# '\xc3\x00' is an invalid sequence. Despite that, the sequences below
-> +# could match, if we ignored the error.  But we don't want to be greed=
-y
-> +# at normalization, so at the first error we treat the entire sequence
-> +# as an opaque blob.  Therefore, these two must NOT match.
-> +blob_file1=3D$(echo -e "corac\xcc\xa7\xc3")
-> +blob_file2=3D$(echo -e "cora=C3=A7\xc3")
-> +
-> +# Test helpers
-> +basic_create_lookup() {
-> +    touch "${basedir}/${1}"
+> +_has_casefold_feature_kernel_support() {
 
-Please assign one of the function params to basedir and declare it as a
-local variable.
+The name seems a bit long to me, just _has_casefold_kernel_support()?
 
-> +    stat  "${basedir}/${2}" &> /dev/null || \
-> +	_fail "Casefolded lookup of ${1} ${2} failed"
+> +    case $FSTYP in
+> +	ext4)
+> +	    test -f '/sys/fs/ext4/features/casefold'
+> +	    ;;
+> +	*)
+> +	    # defaults to unsupported
+> +	    false
+> +	    ;;
+> +    esac
 
-In fstests, we usually don't do _fail in tests, we just let test prints
-error messages and the test harness will capture the outputs & compare
-them with the golden image (.out file), so we know which part of the
-test fails and test could continue to run. e.g.
-
-> +    _casefold_check_exact_name "${basedir}" "${1}" || \
-> +	_fail "Created file with wrong name."
-
-	stat "$basedir/$2" | _filter_scratch
-	_casefold_check_exact_name "$basedir" "$1" || \
-		echo "Created \"$basedir/$2\" with wrong name"
-
-To use _filter_scratch we need to source common/filter after sourcing
-common/rc.
-
-> +
-> +}
-> +
-> +# CI search should fail.
-> +bad_basic_create_lookup() {
-> +    touch "${basedir}/${1}"
-> +    stat  "${basedir}/${2}" &> /dev/null && \
-> +	_fail "Lookup of ${1} using ${2} should have failed"
-> +}
-> +
-> +# Testcases
-> +test_casefold_lookup () {
-                      ^^^ no space here.
-> +    basedir=3D${test_casefold}/casefold_lookup
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-
-Same here, if _set_casefold_attr fails with some error messages to
-stderr, the test harness would capture that, just put the expected
-output to .out file if any.
-
-> +
-> +    basic_create_lookup "${filename1}" "${filename2}"
-> +    basic_create_lookup "${pt_file1}" "${pt_file2}"
-> +    basic_create_lookup "${fr_file1}" "${fr_file2}"
-> +    basic_create_lookup "${ar_file1}" "${ar_file2}"
-> +    basic_create_lookup "${jp_file1}" "${jp_file2}"
-> +}
-> +
-> +test_bad_casefold_lookup () {
-> +    bad_basic_create_lookup ${blob_file1} ${blob_file2}
-> +}
-> +
-> +# remove and recreate
-> +test_create_and_remove() {
-> +    __create_and_remove() {
-
-In fstests, functions and/or variables starting with "_" are reserved
-for global names, do_create_and_remove should be fine. And move it out
-of the outer function?
-
-> +	basic_create_lookup ${1}
-> +	rm -f  ${basedir}/"${1}"
-> +	stat   ${basedir}/"${1}" &> /dev/null && \
-> +	    _fail "File ${1} was not removed using exact name"
-> +
-> +	basic_create_lookup ${1}
-> +	rm -f  ${basedir}/"${2}"
-> +	stat   ${basedir}/"${1}" &> /dev/null && \
-> +	    _fail "File ${1} was not removed using inexact name"
-> +    }
-> +
-> +    basedir=3D${test_casefold}/create_and_remove
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    __create_and_remove "${pt_file1}" "${pt_file2}"
-> +    __create_and_remove "${jp_file1}" "${jp_file2}"
-> +    __create_and_remove "${ar_file1}" "${ar_file2}"
-> +    __create_and_remove "${fr_file1}" "${fr_file2}"
-> +
-> +}
-> +
-> +test_casefold_flag_basic () {
-> +    basedir=3D${test_casefold}/basic
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +    _is_casefolded_dir ${basedir} || _fail "Casefold attribute wasn't =
-set"
-> +
-> +    _unset_casefold_attr ${basedir}
-> +    _is_casefolded_dir ${basedir} && _fail "Casefold attribute is stil=
-l set"
-> +}
-> +
-> +test_casefold_flag_removal () {
-> +    basedir=3D${test_casefold}/casefold_flag_removal
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +    touch ${basedir}/${filename1}
-> +
-> +    # Try to remove +F attribute on non empty directory
-> +    _try_unset_casefold_attr ${basedir} && \
-> +	_fail "Shouldn't be able to remove casefold attribute of non-empty di=
-rectory"
-
-So here we could just do "_unset_casefold_attr $basename" and log the
-expected error message (maybe with some filters to make the output
-deterministic) in .out file and we can get rid of the _try functions.
+Please use 8-spaces tab for indention. The same for the new test.
 
 > +}
 > +
-> +# Test Inheritance of casefold flag
-> +test_casefold_flag_inheritance () {
-> +    dirpath1=3D"d1/d2/d3"
-> +    dirpath2=3D"D1/D2/D3"
-> +
-> +    basedir=3D${test_casefold}/flag_inheritance
-> +
-> +    mkdir -p ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir -p ${basedir}/${dirpath1}
-> +
-> +    _is_casefolded_dir ${basedir}/${dirpath1} || \
-> +	_fail "Casefold attribute should be inherited"
-> +    ls  ${basedir}/${dirpath2} &>/dev/null || \
-> +	_fail "Dir Lookup failed."
-> +    _casefold_check_exact_name "${basedir}" "${dirpath1}" || \
-> +	_fail "Created directories wrong name."
-> +
-> +    touch ${basedir}/${dirpath2}/${filename1}
-> +    ls  ${basedir}/${dirpath1}/${filename2} &>/dev/null || \
-> +	_fail "Couldn't create file on casefolded parent."
-> +}
-> +
-> +# Test nesting of sensitive directory inside insensitive directory.
-> +test_nesting_sensitive_insensitive_tree_simple() {
-> +    basedir=3D${test_casefold}/sd1
-> +    mkdir -p ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir -p ${basedir}/sd1
-> +    _set_casefold_attr ${basedir}/sd1
-> +
-> +    mkdir ${basedir}/sd1/sd2
-> +    _unset_casefold_attr ${basedir}/sd1/sd2
-> +
-> +    touch ${basedir}/sd1/sd2/${filename1}
-> +    ls ${basedir}/sd1/sd2/${filename1} &>/dev/null || \
-> +	_fail "Exact nested file lookup failed."
-> +    ls ${basedir}/sd1/SD2/${filename1} &>/dev/null || \
-> +	_fail "Nested file lookup failed."
-> +    ls ${basedir}/sd1/SD2/${filename2} &>/dev/null && \
-> +	_fail "Wrong file lookup passed, should have fail."
-> +}
-> +
-> +test_nesting_sensitive_insensitive_tree_complex() {
-> +    # Test nested-directories
-> +    basedir=3D${test_casefold}/nesting
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir ${basedir}/nd1
-> +    _set_casefold_attr ${basedir}/nd1
-> +    mkdir ${basedir}/nd1/nd2
-> +    _unset_casefold_attr ${basedir}/nd1/nd2
-> +    mkdir ${basedir}/nd1/nd2/nd3
-> +    _set_casefold_attr ${basedir}/nd1/nd2/nd3
-> +    mkdir ${basedir}/nd1/nd2/nd3/nd4
-> +    _unset_casefold_attr ${basedir}/nd1/nd2/nd3/nd4
-> +    mkdir ${basedir}/nd1/nd2/nd3/nd4/nd5
-> +    _set_casefold_attr ${basedir}/nd1/nd2/nd3/nd4/nd5
-> +
-> +    ls ${basedir}/ND1/ND2/nd3/ND4/nd5 &>/dev/null || \
-> +	_fail "Nest-dir Lookup failed."
-> +    ls ${basedir}/nd1/nd2/nd3/nd4/ND5 &>/dev/null && \
-> +	_fail "ND5: Nest-dir Lookup passed, it should fail."
-> +    ls ${basedir}/nd1/nd2/nd3/ND4/nd5 &>/dev/null || \
-> +	_fail "Nest-dir Lookup failed."
-> +    ls ${basedir}/nd1/nd2/ND3/nd4/ND5 &>/dev/null && \
-> +	_fail "ND3: Nest-dir Lookup passed, it should fail."
-> +}
-> +
-> +test_symlink_with_inexact_name () {
-> +    basedir=3D${test_casefold}/symlink
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir ${basedir}/ind1
-> +    mkdir ${basedir}/ind2
-> +    _set_casefold_attr ${basedir}/ind1
-> +    touch ${basedir}/ind1/target
-> +    ln -s ${basedir}/ind1/TARGET ${basedir}/ind2/link
-> +    [ -L ${basedir}/ind2/link ] || _fail "Not a symlink."
-> +    readlink -e ${basedir}/ind2/link &>/dev/null || _fail "Symlink fai=
-led"
-> +}
-> +
-> +
-> +# Name-preserving tests
-> +# We create a file with a name, delete it and create again with an
-> +# equivalent name.  If the negative dentry wasn't invalidated, the
-> +# file might be created using $1 instead of $2.
-> +test_name_preserve () {
-> +    __test_name_preserve () {
-> +	touch ${basedir}/${1}
-> +	rm ${basedir}/${1}
-> +
-> +	touch ${basedir}/${2}
-> +	_casefold_check_exact_name ${basedir} ${2} ||
-> +	    _fail "${2} was not created with exact name"
-> +    }
-> +    basedir=3D${test_casefold}/"test_name_preserve"
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    __test_name_preserve "${pt_file1}" "${pt_file2}"
-> +    __test_name_preserve "${jp_file1}" "${jp_file2}"
-> +    __test_name_preserve "${ar_file1}" "${ar_file2}"
-> +    __test_name_preserve "${fr_file1}" "${fr_file2}"
-> +}
-> +
-> +test_dir_name_preserve () {
-> +
-> +    __test_dir_name_preserve () {
-> +	mkdir ${basedir}/${1}
-> +	rmdir ${basedir}/${1}
-> +
-> +	mkdir ${basedir}/${2}
-> +	_casefold_check_exact_name ${basedir} ${2} ||
-> +	    _fail "${2} was not created with exact name"
-> +    }
-> +
-> +    basedir=3D${test_casefold}/"dir-test_name_preserve"
-> +    mkdir -p ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    __test_dir_name_preserve "${pt_file1}" "${pt_file2}"
-> +    __test_dir_name_preserve "${jp_file1}" "${jp_file2}"
-> +    __test_dir_name_preserve "${ar_file1}" "${ar_file2}"
-> +    __test_dir_name_preserve "${fr_file1}" "${fr_file2}"
-> +}
-> +
-> +# Name reuse for CI search
-> +test_name_reuse () {
-> +    basedir=3D${test_casefold}/reuse
-> +
-> +    mkdir ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    reuse1=3DfileX
-> +    reuse2=3DFILEX
-> +
-> +    touch ${basedir}/${reuse1}
-> +    rm -f ${basedir}/${reuse1} || _fail "File lookup failed."
-> +    touch ${basedir}/${reuse2}
-> +    _casefold_check_exact_name "${basedir}" "${reuse2}" || \
-> +	_fail "File created with wrong name"
-> +    _casefold_check_exact_name "${basedir}" "${reuse1}" && \
-> +	_fail "File created with the old name"
-> +}
-> +
-> +# filepath same name
-> +test_create_with_same_name () {
-> +    basedir=3D${test_casefold}/same_name
-> +    mkdir ${basedir}
-> +
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir -p ${basedir}/same1/same1
-> +    touch ${basedir}/SAME1/sAME1/sAMe1
-> +    touch -c ${basedir}/SAME1/sAME1/same1 ||
-> +	_fail "Trying to create a new file instead of using old one"
-> +}
-> +
-> +# file Rename
-> +test_file_rename () {
-> +    basedir=3D${test_casefold}/rename
-> +    mkdir -p ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mv ${basedir}/rename ${basedir}/rename &>/dev/null && \
-> +	_fail "mv to an equivalent name shouldn't work"
-> +    _casefold_check_exact_name ${basedir} "rename"  || \
-> +	_fail "Name shouldn't change."
-> +}
-> +
-> +test_casefold_openfd () {
-> +    # Test openfd with casefold.
-> +    # 1. Delete a file after gettings its fd.
-> +    # 2. Then create new dir with same name
-> +    ofd1=3D"openfd"
-> +    ofd2=3D"OPENFD"
-> +
-> +    basedir=3D${test_casefold}/openfd
-> +    mkdir -p ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    exec 3<> ${basedir}/${ofd1}
-> +    rm -rf ${basedir}/${ofd1}
-> +    mkdir ${basedir}/${ofd2}
-> +    [ -d ${basedir}/${ofd2} ]   || _fail "Not a directory"
-> +    _casefold_check_exact_name ${basedir} "${ofd2}" ||
-> +	_fail "openfd file was created using old name"
-> +    rm -rf ${basedir}/${ofd2}
-> +    exec 3>&-
-> +}
-> +
-> +test_casefold_openfd2 () {
-> +    # Test openfd with casefold.
-> +    # 1. Delete a file after gettings its fd.
-> +    # 2. Then create new file with same name
-> +    # 3. Read from open-fd and write into new file.
-> +
-> +    basedir=3D${test_casefold}/openfd2
-> +    mkdir ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    date > ${basedir}/${ofd1}
-> +    exec 3<> ${basedir}/${ofd1}
-> +    rm -rf ${basedir}/${ofd1}
-> +    touch ${basedir}/${ofd1}
-> +    [ -f ${basedir}/${ofd2} ] || _fail "Not a file"
-> +    read data <&3
-> +    echo $data >> ${basedir}/${ofd1}
-> +    exec 3>&-
-> +}
-> +
-> +test_hard_link_lookups () {
-> +    # Create hardlink for casefold dir file and inside regular dir.
-> +    basedir=3D${test_casefold}/hard_link
-> +    mkdir ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    touch ${basedir}/h1
-> +    ln ${basedir}/H1 ${SCRATCH_MNT}/h1
-> +    cnt=3D`stat -c %h ${basedir}/h1`
-> +    [ $cnt -eq 1 ] && _fail "Unable to create hardlink"
-> +
-> +    # Create hardlink for casefold dir file and inside regular dir.
-> +    touch ${SCRATCH_MNT}/h2
-> +    ln ${SCRATCH_MNT}/h2 ${basedir}/H2
-> +    cnt=3D`stat -c %h ${basedir}/h2`
-> +    [ $cnt -eq 1 ] && _fail "Unable to create hardlink"
-> +}
-> +
-> +test_xattrs_lookups () {
-> +    basedir=3D${test_casefold}/xattrs
-> +    mkdir ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    mkdir -p ${basedir}/x
-> +    setfattr -n user.foo -v bar ${basedir}/x
-> +    getfattr -n user.foo ${basedir}/x &>/dev/null || \
+> +_require_casefold_support() {
 
-Use $SETFATTR_PROG and $GETFATTR_PROG and _require_attrs in the
-beginning.
+_require_scratch_casefold(), as the function test casefold support
+against scratch device, so add "scratch" in the function name to
+indicate that.
 
-> +	_fail "Casefold xattr lookup failed."
+> +    if ! _has_casefold_feature_kernel_support ; then
+> +	_notrun "$FSTYP does not support casefold feature"
+> +    fi
 > +
-> +    touch ${basedir}/x/f1
-> +    setfattr -n user.foo -v bar ${basedir}/x/f1
-> +    getfattr -n user.foo ${basedir}/x/f1 &>/dev/null || \
-> +	_fail "Casefold xattr lookup failed."
+> +    if ! _scratch_mkfs_casefold &>>seqres.full; then
+> +	_notrun "$FSTYP userspace tools do not support casefold"
+> +    fi
+> +
+> +    # Make sure the kernel can mount a filesystem with the encoding
+> +    # defined by the userspace tools.  This will fail if
+> +    # the userspace tool used a more recent encoding than the one
+> +    # supported in kernel space.
+> +    if ! _try_scratch_mount &>>seqres.full; then
+> +	_notrun \
+> +	    "kernel can't mount filesystem using the encoding set by userspace"
+> +    fi
+> +    _scratch_unmount
 > +}
 > +
-> +test_lookup_large_directory() {
-> +    # Perform Casefold lookup on large dir
-> +
-> +    basedir=3D${test_casefold}/large
-> +    mkdir ${basedir}
-> +    _set_casefold_attr ${basedir}
-> +
-> +    touch $(seq -f "${basedir}/file%g" 0 2000)
-> +    stat  $(seq -f "${basedir}/FILE%g" 0 2000) &>/dev/null || \
-> +	_fail "Case on large dir failed"
+> +_scratch_mkfs_casefold () {
+> +    case $FSTYP in
+> +	ext4)
+> +	    _scratch_mkfs -O casefold $*
+> +	    ;;
+> +	*)
+> +	    _notrun "Don't know how to mkfs with casefold support on $FSTYP"
+> +	    ;;
+> +	esac
 > +}
 > +
-> +test_strict_mode_invalid_filename () {
-> +    __strict_mode_invalid_filename () {
-> +	touch  "${basedir}/${1}" &>/dev/null && \
-> +	    _fail "Invalid UTF-8 sequence ${1} should fail at creation time."
-> +    }
-> +
-> +    __strict_mode_invalid_filename ${blob1}
-> +    __strict_mode_invalid_filename ${blob2}
+> +_scratch_mkfs_casefold_strict () {
+> +    case $FSTYP in
+> +	ext4)
+> +	    _scratch_mkfs -O casefold -E encoding_flags=strict
+> +	    ;;
+> +	*)
+> +	    _notrun \
+> +		"Don't know how to mkfs with casefold-strict support on $FSTYP"
+> +	    ;;
+> +	esac
 > +}
 > +
-> +#############
-> +# Run tests #
-> +#############
-> +
-> +_scratch_mkfs_casefold 2>&1 1>/dev/null
-> +
-> +_scratch_mount
-> +
-> +_check_dmesg_for \
-> +    "\(${sdev}\): Using encoding defined by superblock: utf8" || \
-> +    _fail "Could not mount with encoding: utf8"
-> +
-> +test_casefold_flag_basic
-> +test_casefold_lookup
-> +test_bad_casefold_lookup
-> +test_create_and_remove
-> +test_casefold_flag_removal
-> +test_casefold_flag_inheritance
-> +test_nesting_sensitive_insensitive_tree_simple
-> +test_nesting_sensitive_insensitive_tree_complex
-> +test_symlink_with_inexact_name
-> +test_name_preserve
-> +test_dir_name_preserve
-> +test_name_reuse
-> +test_create_with_same_name
-> +test_file_rename
-> +test_casefold_openfd
-> +test_casefold_openfd2
-> +test_hard_link_lookups
-> +test_xattrs_lookups
-> +test_lookup_large_directory
-> +
-> +_scratch_unmount 2>&1
+> +_casefold_check_exact_name () {
+> +    # To get the exact disk name, we need some method that does a
+> +    # getdents() on the parent directory, such that we don't get
+> +    # normalized/casefolded results.  'Find' works ok.
 
-No need to do redirection, test harness captures both stdout and stderr.
+I think these could go before the helper.
 
-> +_check_scratch_fs
+> +    basedir=$1
+> +    exact_name=$2
+
+Declare local variables as "local", the same for all other local
+variables, both in this casefold file and in the new test.
+
+> +    find ${basedir} | grep -q ${exact_name}
+> +}
 > +
-> +# Test Strict Mode
-> +_scratch_mkfs_casefold_strict 2>&1 1>/dev/null
+> +_try_set_casefold_attr () {
+> +    chattr +F "${1}" &>/dev/null
 
-Better to redirect mkfs output to $seqres.full for debug purpose, e.g.
+$CHATTR_PROG
 
-_scratch_mkfs_casefold_strict >>$seqres.full 2>&1
+And need to require chattr in _require_scratch_casefold() too, e.g.
 
-> +_scratch_mount 2>&1
+	_require_command "$CHATTR_PROG" chattr
+> +}
+> +
+> +_try_unset_casefold_attr () {
+> +    chattr -F "${1}" &>/dev/null
 
-No need to do redirection here either.
+Same here. And I don't think we should redirect chattr output in these
+helper functions, just let callers handle the outputs.
+
+> +}
+> +
+> +_set_casefold_attr () {
+> +    _try_set_casefold_attr "${1}" || \
+> +	_fail "Unable to set casefold attribute on ${1}"
+> +}
+> +
+> +_unset_casefold_attr () {
+> +    _try_unset_casefold_attr "${1}" || \
+> +	_fail "Unable to unset casefold attribute on ${1}"
+> +}
+
+And no need to _fail here. IMHO, just two helpers like:
+
+_set_casefold_attr()
+{
+	$CHATTR_PROG +F "${1}"
+}
+
+_unset_casefold_attr()
+{
+	$CHATTR_PROG -F "${1}"
+}
+
+And let callers deal with the outputs/results. More comments on this in
+next patch.
 
 > +
-> +test_strict_mode_invalid_filename
-> +
-> +_scratch_unmount 2>&1
+> +_is_casefolded_dir () {
+> +    lsattr -ld "${1}" | grep -q "Casefold"
+> +}
 
-Same here.
+$LSATTR_PROG, and do 
 
-> +_check_scratch_fs
+	_require_command "$LSATTR_PROG" lsattr
 
-And if we do fsck after each test phase, we could replace
-_require_scratch with _require_scratch_nocheck to let harness know
-there's no need to do fsck again after test.
+in _require_scratch_casefold() as well.
 
 Thanks,
 Eryu
-
-> +
-> +echo "Silence is golden"
-> +status=3D0
-> +exit
-> diff --git a/tests/ext4/036.out b/tests/ext4/036.out
-> new file mode 100644
-> index 000000000000..ed460d98f87c
-> --- /dev/null
-> +++ b/tests/ext4/036.out
-> @@ -0,0 +1,2 @@
-> +QA output created by 036
-> +Silence is golden
-> diff --git a/tests/ext4/group b/tests/ext4/group
-> index d27ec893333b..82639c13f8bb 100644
-> --- a/tests/ext4/group
-> +++ b/tests/ext4/group
-> @@ -38,6 +38,7 @@
->  033 auto ioctl resize
->  034 auto quick quota
->  035 auto quick resize
-> +036 auto quick casefold
->  271 auto rw quick
->  301 aio auto ioctl rw stress defrag
->  302 aio auto ioctl rw stress defrag
-> --=20
+> -- 
 > 2.20.1
->=20
+> 
