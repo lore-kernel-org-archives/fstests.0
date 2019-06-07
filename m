@@ -1,35 +1,46 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:56901 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728071AbfFGNdI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 09:33:08 -0400
-Date: Fri, 7 Jun 2019 09:32:55 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v2 2/2] ext4/036: Add tests for filename casefolding
- feature
-Message-ID: <20190607133255.GB19820@mit.edu>
-References: <20190606193138.25852-1-krisman@collabora.com>
- <20190606193138.25852-2-krisman@collabora.com>
- <20190607052331.GA19838@infradead.org>
+Received: from esa5.hgst.iphmx.com ([216.71.153.144]:12510 "EHLO
+        esa5.hgst.iphmx.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726305AbfFGCec (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 6 Jun 2019 22:34:32 -0400
+From: Naohiro Aota <naohiro.aota@wdc.com>
+Subject: [PATCH] fstests: btrfs/163: make readahead run on the seed device
+Date: Fri,  7 Jun 2019 11:34:22 +0900
+Message-Id: <20190607023422.28928-1-naohiro.aota@wdc.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190607052331.GA19838@infradead.org>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Christoph Hellwig <hch@infradead.org>
-Cc: Gabriel Krisman Bertazi <krisman@collabora.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
+Cc: fdmanana@gmail.com, Naohiro Aota <naohiro.aota@wdc.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 06, 2019 at 10:23:31PM -0700, Christoph Hellwig wrote:
-> On Thu, Jun 06, 2019 at 03:31:38PM -0400, Gabriel Krisman Bertazi wrote:
-> > 
-> > For now, let it live in ext4 and we move to shared/ or generic/ when
-> > other filesystems supporting this feature start to pop up.
-> 
-> Please keep it in shared/ from the start.  There isn't really anything
-> ext4 specific.  In fact xfs already supports CI file systems, just
-> without utf8 tables for now.
+There is a long lived bug that btrfs wait for readahead to finish
+indefinitely when readahead zone is inserted into seed devices.
 
-Agreed; the only things which are fs specific are things which you've
-already done a great job abstracting away in common/casefold.
+Current write size to the file "foobar" is too small to run readahead
+before the replacing on seed device. So, increase the write size to
+reproduce the issue.
 
-      	  	      	       	       - Ted
+Following patch fixes it:
+
+	"btrfs: start readahead also in seed devices"
+
+Signed-off-by: Naohiro Aota <naohiro.aota@wdc.com>
+---
+ tests/btrfs/163 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/tests/btrfs/163 b/tests/btrfs/163
+index 8c93e83b970a..24c725afb6b9 100755
+--- a/tests/btrfs/163
++++ b/tests/btrfs/163
+@@ -50,7 +50,7 @@ create_seed()
+ {
+ 	_mkfs_dev $dev_seed
+ 	run_check _mount $dev_seed $SCRATCH_MNT
+-	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 256K" $SCRATCH_MNT/foobar >\
++	$XFS_IO_PROG -f -d -c "pwrite -S 0xab 0 4M" $SCRATCH_MNT/foobar >\
+ 		/dev/null
+ 	echo -- gloden --
+ 	od -x $SCRATCH_MNT/foobar
+-- 
+2.21.0
