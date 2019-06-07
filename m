@@ -1,81 +1,34 @@
-Received: from mx2.suse.de ([195.135.220.15]:38354 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726531AbfFGJKG (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 7 Jun 2019 05:10:06 -0400
-From: Johannes Thumshirn <jthumshirn@suse.de>
-Subject: [PATCH fstests v3] btrfs: add validation of compression options to btrfs/048
-Date: Fri,  7 Jun 2019 11:09:37 +0200
-Message-Id: <20190607090937.7177-1-jthumshirn@suse.de>
-In-Reply-To: <20190606153228.GD4172@x250>
-References: <20190606153228.GD4172@x250>
+Received: from bombadil.infradead.org ([198.137.202.133]:47122 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725497AbfFGFXe (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 7 Jun 2019 01:23:34 -0400
+Date: Thu, 6 Jun 2019 22:23:31 -0700
+From: Christoph Hellwig <hch@infradead.org>
+Subject: Re: [PATCH v2 2/2] ext4/036: Add tests for filename casefolding
+ feature
+Message-ID: <20190607052331.GA19838@infradead.org>
+References: <20190606193138.25852-1-krisman@collabora.com>
+ <20190606193138.25852-2-krisman@collabora.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190606193138.25852-2-krisman@collabora.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>, Filipe Manana <fdmanana@gmail.com>
-Cc: Linux BTRFS Mailinglist <linux-btrfs@vger.kernel.org>, fstests@vger.kernel.org, Johannes Thumshirn <jthumshirn@suse.de>
+To: Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc: tytso@mit.edu, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-The current btrfs/048 test-case did not check the behavior of properties
-with options like compression and with the compression level supplied.
+On Thu, Jun 06, 2019 at 03:31:38PM -0400, Gabriel Krisman Bertazi wrote:
+> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+> 
+> This new test implements verification for the per-directory
+> case-insensitive feature, as supported in the reference implementation
+> in Ext4.  Currently, this test only supports Ext4, but the plan is to
+> run it in other filesystems, once they support the feature.
+> 
+> For now, let it live in ext4 and we move to shared/ or generic/ when
+> other filesystems supporting this feature start to pop up.
 
-Add test cases for compression with compression level as well so we can be
-sure we don't regress there.
-
-Signed-off-by: Johannes Thumshirn <jthumshirn@suse.de>
-Reviewed-by: Filipe Manana <fdmanana@suse.com>
-
----
-Changes to v2:
-- Remove validation of lzo compression with option, lzo doesn't have
-  compression levels
-
-Changes to v1:
-- Removed output redirection and filtering for the cases we don't expect any
-  actual output (Filipe)
----
- tests/btrfs/048     | 13 +++++++++++++
- tests/btrfs/048.out | 11 +++++++++++
- 2 files changed, 24 insertions(+)
-
-diff --git a/tests/btrfs/048 b/tests/btrfs/048
-index 8bb10a904bc9..7294f231e4ed 100755
---- a/tests/btrfs/048
-+++ b/tests/btrfs/048
-@@ -226,5 +226,18 @@ $BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' 2>&1 | _filter_scrat
- $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
- $BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
- 
-+echo -e "\nTesting argument validation with options"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zlib:3'
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zstd:0'
-+echo "***"
-+
-+echo -e "\nTesting invalid argument validation with options, should fail"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zl:9' 2>&1 | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zli:0' 2>&1 | _filter_scratch
-+echo "***"
-+$BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zst:3' 2>&1 | _filter_scratch
-+
- status=0
- exit
-diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
-index 16a785a642f7..0923b00c01ed 100644
---- a/tests/btrfs/048.out
-+++ b/tests/btrfs/048.out
-@@ -92,3 +92,14 @@ Testing generation is unchanged after failed validation
- generation		7
- ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
- generation		7
-+
-+Testing argument validation with options
-+***
-+***
-+
-+Testing invalid argument validation with options, should fail
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
-+***
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
-+***
-+ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
--- 
-2.16.4
+Please keep it in shared/ from the start.  There isn't really anything
+ext4 specific.  In fact xfs already supports CI file systems, just
+without utf8 tables for now.
