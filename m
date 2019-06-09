@@ -1,46 +1,94 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:37493 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2387499AbfFJD6j (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 23:58:39 -0400
-Date: Sun, 9 Jun 2019 23:58:29 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v3 3/6] generic: copy_file_range swapfile test
-Message-ID: <20190610035829.GA18429@mit.edu>
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:47055 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727430AbfFINqI (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 09:46:08 -0400
+Date: Sun, 9 Jun 2019 21:46:04 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v3 0/6] fstests: copy_file_range() tests
+Message-ID: <20190609134604.GX15846@desktop>
 References: <20190602124114.26810-1-amir73il@gmail.com>
- <20190602124114.26810-4-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190602124114.26810-4-amir73il@gmail.com>
+In-Reply-To: <20190602124114.26810-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 02, 2019 at 03:41:11PM +0300, Amir Goldstein wrote:
-> This test case was split out of Dave Chinner's copy_file_range bounds
-> check test to reduce the requirements for running the bounds check.
+On Sun, Jun 02, 2019 at 03:41:08PM +0300, Amir Goldstein wrote:
+> Eryu,
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> This is a re-work of Dave Chinner's copy_file_range() tests which
+> I used to verify the kernel fixes of the syscall [1].
+> 
+> The 2 first tests fix bugs in the interface, so they are appropriate
+> for merge IMO.
+> 
+> The cross-device copy test checks a new functionality, so you may
+> want to wait with merging it till after the work is merged upstream.
+> 
+> The bounds check test depend on a change that was only posted to
+> xfsprogs [2]. Without two changes that were merge to xfsprogs v4.20,
+> the original test (v1, v2) would hang. Requiring the new copy_range
+> flag (copy_range -f) mitigates this problem.
+> 
+> You may want to wait until the xfs_io change is merged before merging
+> the check for the new flag.
 
-I've just updated to the latest fstests, where this has landed as
-generic/554.  This test is failing on ext4, and should fail on all
-file systems which do not support copy_file_range (ext4, nfsv3, etc.),
-since xfs_io will fall back to emulating this via reading and writing
-the file, and this causes a test failure because:
+Thanks a lot for the detailed explanation! I applied the first three
+patches for this week's update.
 
-> +echo swap files return ETXTBUSY
-> +_format_swapfile $testdir/swapfile 16m
-> +swapon $testdir/swapfile
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
-> +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
-> +swapoff $testdir/swapfile
+Thanks,
+Eryu
 
-Currently, the VFS doesn't prevent us from reading a swap file.
-Perhaps it shouldn't, for security (theatre) reasons, but root can
-read the raw block device anyway, so it's really kind of pointless.
-
-I'm not sure what's the best way fix this, but I'm going to exclude
-this test in my test appliance builds for now.
-
-     	     	     	       	      	  - Ted
+> 
+> Thanks,
+> Amir.
+> 
+> [1] https://lore.kernel.org/linux-fsdevel/20190531164701.15112-1-amir73il@gmail.com/
+> [2] https://marc.info/?l=linux-xfs&m=155912482124038&w=2
+> 
+> Changes from v2:
+> - Change blockdev in test to loop and _require_loop (Olga)
+> - Implement and use _require_xfs_io_command copy_range -f
+> 
+> Changes from v1:
+> - Remove patch to test EINVAL behavior instead of short copy
+> - Remove 'chmod -r' permission drop test case
+> - Split out test for swap/immutable file copy
+> - Split of cross-device copy test
+> 
+> 
+> Amir Goldstein (6):
+>   generic: create copy_range group
+>   generic: copy_file_range immutable file test
+>   generic: copy_file_range swapfile test
+>   common/rc: check support for xfs_io copy_range -f N
+>   generic: copy_file_range bounds test
+>   generic: cross-device copy_file_range test
+> 
+>  common/rc             |   9 ++-
+>  tests/generic/434     |   2 +
+>  tests/generic/988     |  59 +++++++++++++++++++
+>  tests/generic/988.out |   5 ++
+>  tests/generic/989     |  56 ++++++++++++++++++
+>  tests/generic/989.out |   4 ++
+>  tests/generic/990     | 132 ++++++++++++++++++++++++++++++++++++++++++
+>  tests/generic/990.out |  37 ++++++++++++
+>  tests/generic/991     |  56 ++++++++++++++++++
+>  tests/generic/991.out |   4 ++
+>  tests/generic/group   |  14 +++--
+>  11 files changed, 372 insertions(+), 6 deletions(-)
+>  create mode 100755 tests/generic/988
+>  create mode 100644 tests/generic/988.out
+>  create mode 100755 tests/generic/989
+>  create mode 100644 tests/generic/989.out
+>  create mode 100755 tests/generic/990
+>  create mode 100644 tests/generic/990.out
+>  create mode 100755 tests/generic/991
+>  create mode 100644 tests/generic/991.out
+> 
+> -- 
+> 2.17.1
+> 
