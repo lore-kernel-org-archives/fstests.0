@@ -1,94 +1,71 @@
-Received: from mail-pl1-f193.google.com ([209.85.214.193]:47055 "EHLO
-        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727430AbfFINqI (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 09:46:08 -0400
-Date: Sun, 9 Jun 2019 21:46:04 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3 0/6] fstests: copy_file_range() tests
-Message-ID: <20190609134604.GX15846@desktop>
-References: <20190602124114.26810-1-amir73il@gmail.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190602124114.26810-1-amir73il@gmail.com>
+Received: from mail-wr1-f66.google.com ([209.85.221.66]:42264 "EHLO
+        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387653AbfFIRMh (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 13:12:37 -0400
+Received: by mail-wr1-f66.google.com with SMTP id x17so6793155wrl.9
+        for <fstests@vger.kernel.org>; Sun, 09 Jun 2019 10:12:36 -0700 (PDT)
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] fstests: don't oom the box opening tmpfiles (take 2)
+Date: Sun,  9 Jun 2019 20:12:29 +0300
+Message-Id: <20190609171229.27779-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 02, 2019 at 03:41:08PM +0300, Amir Goldstein wrote:
-> Eryu,
-> 
-> This is a re-work of Dave Chinner's copy_file_range() tests which
-> I used to verify the kernel fixes of the syscall [1].
-> 
-> The 2 first tests fix bugs in the interface, so they are appropriate
-> for merge IMO.
-> 
-> The cross-device copy test checks a new functionality, so you may
-> want to wait with merging it till after the work is merged upstream.
-> 
-> The bounds check test depend on a change that was only posted to
-> xfsprogs [2]. Without two changes that were merge to xfsprogs v4.20,
-> the original test (v1, v2) would hang. Requiring the new copy_range
-> flag (copy_range -f) mitigates this problem.
-> 
-> You may want to wait until the xfs_io change is merged before merging
-> the check for the new flag.
+For the t_open_tmpfiles tests that run multiple jobs in parallel,
+limit ourselves to half of file-max for all jobs combined,
+so that we don't OOM the test machine.
 
-Thanks a lot for the detailed explanation! I applied the first three
-patches for this week's update.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+
+Eryu,
+
+Reducing max allowed file by factor of 2 wasn't good enough for the
+multi jobs variants of the tests. They still OOM mytest machine
+(with 2GB RAM).
 
 Thanks,
-Eryu
+Amir.
 
-> 
-> Thanks,
-> Amir.
-> 
-> [1] https://lore.kernel.org/linux-fsdevel/20190531164701.15112-1-amir73il@gmail.com/
-> [2] https://marc.info/?l=linux-xfs&m=155912482124038&w=2
-> 
-> Changes from v2:
-> - Change blockdev in test to loop and _require_loop (Olga)
-> - Implement and use _require_xfs_io_command copy_range -f
-> 
-> Changes from v1:
-> - Remove patch to test EINVAL behavior instead of short copy
-> - Remove 'chmod -r' permission drop test case
-> - Split out test for swap/immutable file copy
-> - Split of cross-device copy test
-> 
-> 
-> Amir Goldstein (6):
->   generic: create copy_range group
->   generic: copy_file_range immutable file test
->   generic: copy_file_range swapfile test
->   common/rc: check support for xfs_io copy_range -f N
->   generic: copy_file_range bounds test
->   generic: cross-device copy_file_range test
-> 
->  common/rc             |   9 ++-
->  tests/generic/434     |   2 +
->  tests/generic/988     |  59 +++++++++++++++++++
->  tests/generic/988.out |   5 ++
->  tests/generic/989     |  56 ++++++++++++++++++
->  tests/generic/989.out |   4 ++
->  tests/generic/990     | 132 ++++++++++++++++++++++++++++++++++++++++++
->  tests/generic/990.out |  37 ++++++++++++
->  tests/generic/991     |  56 ++++++++++++++++++
->  tests/generic/991.out |   4 ++
->  tests/generic/group   |  14 +++--
->  11 files changed, 372 insertions(+), 6 deletions(-)
->  create mode 100755 tests/generic/988
->  create mode 100644 tests/generic/988.out
->  create mode 100755 tests/generic/989
->  create mode 100644 tests/generic/989.out
->  create mode 100755 tests/generic/990
->  create mode 100644 tests/generic/990.out
->  create mode 100755 tests/generic/991
->  create mode 100644 tests/generic/991.out
-> 
-> -- 
-> 2.17.1
-> 
+ tests/generic/531 | 4 ++--
+ tests/xfs/502     | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/tests/generic/531 b/tests/generic/531
+index 8ce4cc93..ea77eec2 100755
+--- a/tests/generic/531
++++ b/tests/generic/531
+@@ -41,10 +41,10 @@ _scratch_mount
+ # Try to load up all the CPUs, two threads per CPU.
+ nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+ 
+-# Set ULIMIT_NOFILE to min(file-max / 2, 50000 files per LOAD_FACTOR)
++# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 50000 files per LOAD_FACTOR)
+ # so that this test doesn't take forever or OOM the box
+ max_files=$((50000 * LOAD_FACTOR))
+-max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
++max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
+ test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+ 	max_files=$max_allowable_files
+ ulimit -n $max_files
+diff --git a/tests/xfs/502 b/tests/xfs/502
+index 0a7921a3..1b747a1a 100755
+--- a/tests/xfs/502
++++ b/tests/xfs/502
+@@ -43,10 +43,10 @@ _scratch_mount
+ # Load up all the CPUs, two threads per CPU.
+ nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+ 
+-# Set ULIMIT_NOFILE to min(file-max / 2, 30000 files per cpu per LOAD_FACTOR)
++# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 30000 files per cpu per LOAD_FACTOR)
+ # so that this test doesn't take forever or OOM the box
+ max_files=$((30000 * LOAD_FACTOR))
+-max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
++max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
+ test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+ 	max_files=$max_allowable_files
+ ulimit -n $max_files
+-- 
+2.17.1
