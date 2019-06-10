@@ -1,29 +1,77 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:58481 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2387400AbfFJCx1 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 9 Jun 2019 22:53:27 -0400
-Date: Sun, 9 Jun 2019 22:53:17 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH] ext4/035: skip this test if DAX is in use
-Message-ID: <20190610025317.GC3266@mit.edu>
-References: <20190610024254.9830-1-tytso@mit.edu>
+Received: from mail-yb1-f194.google.com ([209.85.219.194]:38942 "EHLO
+        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387464AbfFJGho (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jun 2019 02:37:44 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190610024254.9830-1-tytso@mit.edu>
+References: <20190602124114.26810-1-amir73il@gmail.com> <20190602124114.26810-4-amir73il@gmail.com>
+ <20190610035829.GA18429@mit.edu>
+In-Reply-To: <20190610035829.GA18429@mit.edu>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Mon, 10 Jun 2019 09:37:32 +0300
+Message-ID: <CAOQ4uxi-s6ncLGjh_u5x4DFK+dvcaobDCqup_ZV3mZOYDRuOEQ@mail.gmail.com>
+Subject: Re: [PATCH v3 3/6] generic: copy_file_range swapfile test
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <guaneryu@gmail.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 09, 2019 at 10:42:54PM -0400, Theodore Ts'o wrote:
-> This test creates a file system with a 1k block size.  Since there are
-> no architectures with a 1k page size, test file system can never be
+On Mon, Jun 10, 2019 at 6:58 AM Theodore Ts'o <tytso@mit.edu> wrote:
+>
+> On Sun, Jun 02, 2019 at 03:41:11PM +0300, Amir Goldstein wrote:
+> > This test case was split out of Dave Chinner's copy_file_range bounds
+> > check test to reduce the requirements for running the bounds check.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+>
+> I've just updated to the latest fstests, where this has landed as
+> generic/554.  This test is failing on ext4, and should fail on all
+> file systems which do not support copy_file_range (ext4, nfsv3, etc.),
+> since xfs_io will fall back to emulating this via reading and writing
 
-s/test file system/the test file system/
+Why do you think this is xfs_io fall back and not kernel fall back to
+do_splice_direct()? Anyway, both cases allow read from swapfile
+on upstream.
 
-> mounted with DAX enabled, causing the test to fail.
+> the file, and this causes a test failure because:
+>
+> > +echo swap files return ETXTBUSY
+> > +_format_swapfile $testdir/swapfile 16m
+> > +swapon $testdir/swapfile
+> > +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/file" $testdir/swapfile
+> > +$XFS_IO_PROG -f -c "copy_range -l 32k $testdir/swapfile" $testdir/copy
+> > +swapoff $testdir/swapfile
+>
+> Currently, the VFS doesn't prevent us from reading a swap file.
+> Perhaps it shouldn't, for security (theatre) reasons, but root can
+> read the raw block device anyway, so it's really kind of pointless.
+>
 
-Sorry, typo.
+Hmm, my intention with the copy_file_range() behavior was that
+it mostly follows user copy limitations/semantics.
+I guess preventing copy *from* swapfile doesn't make much sense
+and we should relax this check in the new c_f_r bounds check in VFS.
 
-						- Ted
+> I'm not sure what's the best way fix this, but I'm going to exclude
+> this test in my test appliance builds for now.
+>
+
+Trying to understand the desired flow of tests and fixes.
+I agree that generic/554 failure may be a test/interface bug that
+we should fix in a way that current upstream passes the test for
+ext4. Unless there is objection, I will send a patch to fix the test
+to only test copy *to* swapfile.
+
+generic/553, OTOH, is expected to fail on upstream kernel.
+Are you leaving 553 in appliance build in anticipation to upstream fix?
+I guess the answer is in the ext4 IS_IMMUTABLE patch that you
+posted and plan to push to upstream/stable sooner than VFS patches.
+
+In any case, the VFS c_f_r patches are aiming for v5.3 and
+I will make sure to promote them for stable as well.
+
+Do you think that should there be a different policy w.r.t timing of
+merging xfstests tests that fail on upstream kernel?
+
+Thanks,
+Amir.
