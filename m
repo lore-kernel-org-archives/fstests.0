@@ -1,60 +1,124 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:33750 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390280AbfFKCgv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jun 2019 22:36:51 -0400
-Date: Tue, 11 Jun 2019 10:36:47 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v3 3/6] generic: copy_file_range swapfile test
-Message-ID: <20190611023647.GA15846@desktop>
-References: <20190602124114.26810-1-amir73il@gmail.com>
- <20190602124114.26810-4-amir73il@gmail.com>
- <20190610035829.GA18429@mit.edu>
- <CAOQ4uxi-s6ncLGjh_u5x4DFK+dvcaobDCqup_ZV3mZOYDRuOEQ@mail.gmail.com>
- <20190610133131.GE15963@mit.edu>
- <20190611021222.GY15846@desktop>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:58558 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2387750AbfFJRft (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jun 2019 13:35:49 -0400
+From: Gabriel Krisman Bertazi <krisman@collabora.com>
+Subject: [PATCH v3 1/2] common/casefold: Add infrastructure to test filename casefold feature
+Date: Mon, 10 Jun 2019 13:35:40 -0400
+Message-Id: <20190610173541.20511-1-krisman@collabora.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190611021222.GY15846@desktop>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Amir Goldstein <amir73il@gmail.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+To: tytso@mit.edu
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, Gabriel Krisman Bertazi <krisman@collabora.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 11, 2019 at 10:12:22AM +0800, Eryu Guan wrote:
-[snip]
-> > 
-> > > Do you think that should there be a different policy w.r.t timing of
-> > > merging xfstests tests that fail on upstream kernel?
-> > 
-> > That's my opinion, and generic/484 is the best argument for why we
-> > should wait.  Other people may have other opinions though, and I have
-> > a workaround, so I don't feel super-strong about it.  (generic/454 is
-> > now the second test in my global exclude file.  :-)
-> 
-> I don't see generic/454 failing with ext4 (I'm testing with default
-> mkfs/mount options, kernel is 5.2-rc2). But IMHO, I think generic/454 is
+Add a set of basic helper functions to simplify the testing of
+casefolding capable filesystems.
 
-Oh, I see, I think you meant generic/554 not generic/454 (thanks Darrick
-for pointing that out :)
+Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+---
+ common/casefold | 92 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 92 insertions(+)
+ create mode 100644 common/casefold
 
-> different, it's not a targeted regression test, it's kind of generic
-> test that should work for all filesystems.
-> 
-> > 
-> > At the very *least* there should be a comment in the test that fix is
-> > pending, and might not be applied yet, with a URL to the mailing list
-> > discussion.  That will save effort when months (years?) go by, and the
-> > fix still hasn't landed the upstream kernel....
-> 
-> Agreed, I've been making sure there's a comment referring to the fix or
-> pending fix (e.g. only commit summary no hash ID) for such targeted
-> regression tests.
-
-And I took generic/55[34] as generic tests not targeted regression test.
-But looks like it's better to reference the fixes anyway.
-
-Amir, would you mind adding such references to generic/55[34] as well?
-
-Thanks,
-Eryu
+diff --git a/common/casefold b/common/casefold
+new file mode 100644
+index 000000000000..43f2d77d706c
+--- /dev/null
++++ b/common/casefold
+@@ -0,0 +1,92 @@
++# SPDX-License-Identifier: GPL-2.0+
++# Copyright (c) 2019 Collabora, Ltd.  All Rights Reserved.
++#
++# Common functions for testing filename casefold feature
++
++_has_casefold_kernel_support()
++{
++	case $FSTYP in
++		ext4)
++			test -f '/sys/fs/ext4/features/casefold'
++			;;
++		*)
++			# defaults to unsupported
++			false
++			;;
++	esac
++}
++
++_require_scratch_casefold()
++{
++	if ! _has_casefold_kernel_support ; then
++		_notrun "$FSTYP does not support casefold feature"
++	fi
++
++	if ! _scratch_mkfs_casefold &>>seqres.full; then
++		_notrun "$FSTYP userspace tools do not support casefold"
++	fi
++
++	# Make sure the kernel can mount a filesystem with the encoding
++	# defined by the userspace tools.  This will fail if
++	# the userspace tool used a more recent encoding than the one
++	# supported in kernel space.
++	if ! _try_scratch_mount &>>seqres.full; then
++		_notrun \
++		    "kernel can't mount filesystem with the encoding set by userspace"
++	fi
++	_scratch_unmount
++
++	# utilities used by casefold
++	_require_command "$CHATTR_PROG" chattr
++	_require_command "$LSATTR_PROG" lsattr
++}
++
++_scratch_mkfs_casefold()
++{
++	case $FSTYP in
++		ext4)
++			_scratch_mkfs -O casefold $*
++			;;
++		*)
++			_notrun "Don't know how to mkfs with casefold support on $FSTYP"
++			;;
++	esac
++}
++
++_scratch_mkfs_casefold_strict()
++{
++	case $FSTYP in
++		ext4)
++			_scratch_mkfs -O casefold -E encoding_flags=strict
++			;;
++		*)
++			_notrun \
++			    "Don't know how to mkfs with casefold-strict support on $FSTYP"
++			;;
++	esac
++}
++
++# To get the exact disk name, we need some method that does a
++# getdents() on the parent directory, such that we don't get
++# normalized/casefolded results.  'Find' works ok.
++_casefold_check_exact_name()
++{
++	local basedir=$1
++	local exact_name=$2
++	find ${basedir} | grep -q ${exact_name}
++}
++
++_casefold_set_attr()
++{
++	$CHATTR_PROG +F "${1}"
++}
++
++_casefold_unset_attr()
++{
++	$CHATTR_PROG -F "${1}"
++}
++
++_casefold_lsattr_dir()
++{
++	$LSATTR_PROG -ld "${1}"
++}
+-- 
+2.20.1
