@@ -1,82 +1,70 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:50586 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2390856AbfFKDT3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 10 Jun 2019 23:19:29 -0400
-Date: Mon, 10 Jun 2019 20:19:17 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic/554: test only copy to active swap file
-Message-ID: <20190611031917.GH1688126@magnolia>
-References: <20190610195317.8516-1-amir73il@gmail.com>
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:51416 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726713AbfFKMPv (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 08:15:51 -0400
+Date: Tue, 11 Jun 2019 08:15:46 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH v3 2/2] shared/012: Add tests for filename casefolding
+ feature
+Message-ID: <20190611121546.GC2774@mit.edu>
+References: <20190610173541.20511-1-krisman@collabora.com>
+ <20190610173541.20511-2-krisman@collabora.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190610195317.8516-1-amir73il@gmail.com>
+In-Reply-To: <20190610173541.20511-2-krisman@collabora.com>
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 10, 2019 at 10:53:17PM +0300, Amir Goldstein wrote:
-> Depending on filesystem, copying from active swapfile may be allowed,
-> just as read from swapfile may be allowed.
+On Mon, Jun 10, 2019 at 01:35:41PM -0400, Gabriel Krisman Bertazi wrote:
+> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 > 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> This new test implements verification for the per-directory
+> case-insensitive feature, as supported by the reference implementation
+> in Ext4.
+> 
+> Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
+> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+>   [Rewrite to support feature design]
+>   [Refactor to simplify implementation]
 
-LGTM,
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+I tried out this test, and it's apparently failing for me using
+e2fsprogs 1.45.2; it looks like it's a whitespace issue?
 
---D
+shared/012		[08:14:07][  146.388509] run fstests shared/012 at 2019-06-11 08:14:07
+ [08:14:08]- output mismatch (see /results/ext4/results-4k/shared/012.out.bad)
+    --- tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
+    +++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
+    @@ -1,8 +1,8 @@
+     QA output created by 012
+    -SCRATCH_MNT/basic           Extents, Casefold
+    -SCRATCH_MNT/basic           Extents
+    -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+    -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+    +SCRATCH_MNT/basic                   Extents, Casefold
+    +SCRATCH_MNT/basic                   Extents
+    ...
+    (Run 'diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad'  to see the entire diff)
+Ran: shared/012
+Failures: shared/012
+Failed 1 of 1 tests
+Xunit report: /results/ext4/results-4k/result.xml
 
-> ---
-> 
-> Eryu,
-> 
-> Following feedback by Ted, I've decided it would be better to
-> remove the test case of copy from swap file.
-> There is no reason to deny that copy, but there is also no reason
-> for us to assert that filesystems must allow this functionality.
-> 
-> Even after removing the copy from test case, test still fails
-> on upstream for all filesystems I tested.
-> Tests passes with Darrick's copy-file-range-fixes branch.
-> 
-> Thanks,
-> Amir.
-> 
->  tests/generic/554     | 3 +--
->  tests/generic/554.out | 1 -
->  2 files changed, 1 insertion(+), 3 deletions(-)
-> 
-> diff --git a/tests/generic/554 b/tests/generic/554
-> index 10ae4035..c946ca17 100755
-> --- a/tests/generic/554
-> +++ b/tests/generic/554
-> @@ -4,7 +4,7 @@
->  #
->  # FS QA Test No. 554
->  #
-> -# Check that we cannot copy_file_range() to/from a swapfile
-> +# Check that we cannot copy_file_range() to a swapfile
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> @@ -46,7 +46,6 @@ echo swap files return ETXTBUSY
->  _format_swapfile $SCRATCH_MNT/swapfile 16m
->  swapon $SCRATCH_MNT/swapfile
->  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
-> -$XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/swapfile" $SCRATCH_MNT/copy
->  swapoff $SCRATCH_MNT/swapfile
->  
->  # success, all done
-> diff --git a/tests/generic/554.out b/tests/generic/554.out
-> index ffaa7b0a..19385a05 100644
-> --- a/tests/generic/554.out
-> +++ b/tests/generic/554.out
-> @@ -1,4 +1,3 @@
->  QA output created by 554
->  swap files return ETXTBUSY
->  copy_range: Text file busy
-> -copy_range: Text file busy
-> -- 
-> 2.17.1
-> 
+root@kvm-xfstests:~# diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad
+--- /root/xfstests/tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
++++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
+@@ -1,8 +1,8 @@
+ QA output created by 012
+-SCRATCH_MNT/basic           Extents, Casefold
+-SCRATCH_MNT/basic           Extents
+-SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+-SCRATCH_MNT/casefold_flag_removal Extents, Casefold
++SCRATCH_MNT/basic                   Extents, Casefold
++SCRATCH_MNT/basic                   Extents
++SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
++SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
+ SCRATCH_MNT/flag_inheritance/d1/d2/d3 Extents, Casefold
+ SCRATCH_MNT/symlink/ind1/TARGET
+ mv: cannot stat 'SCRATCH_MNT/rename/rename': No such file or directory
