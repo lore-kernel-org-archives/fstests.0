@@ -1,56 +1,92 @@
-Received: from mail-wm1-f68.google.com ([209.85.128.68]:36511 "EHLO
-        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391873AbfFKQIr (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 12:08:47 -0400
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:36514 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2391878AbfFKQIs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 12:08:48 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 0/3] Improved FS_IOC_FSSETXATTR tests
-Date: Tue, 11 Jun 2019 19:08:36 +0300
-Message-Id: <20190611160839.14777-1-amir73il@gmail.com>
+Subject: [PATCH 1/3] fstests: print out xfs_io parameter when command fails
+Date: Tue, 11 Jun 2019 19:08:37 +0300
+Message-Id: <20190611160839.14777-2-amir73il@gmail.com>
+In-Reply-To: <20190611160839.14777-1-amir73il@gmail.com>
+References: <20190611160839.14777-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
 Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Eryu,
+In _require_xfs_io_command, when command fails for one of the
+generic reasons, if command was tested with params, print out
+the params of the failed command.
 
-Overlayfs gained support for FS_IOC_FSSETXATTR ioctl in v5.2-rc4
-with buggy capability check. The fix is trivial so it should land
-upstream soon.
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
+ common/rc | 20 ++++++++++----------
+ 1 file changed, 10 insertions(+), 10 deletions(-)
 
-This series adds a generic test to cover the bug in overlayfs v5.2-rc4.
-It also adds a proper _require directive to test filesystem support
-for FS_IOC_FSSETXATTR and let the tests that use this ioctl require
-filesystem support for it.
-
-The only existing generic test that needed this requirement is the
-recently added generic/553 copy_range immutable file test. When run on
-overlayfs over xfs/ext4/btrfs, generic/553 would fail instead of _notrun
-with kernel v5.2-rc3.
-
-But the requirement fix is not only for overlayfs, other filesystems
-that support FS_IOC_SETFLAGS but not FS_IOC_FSSETXATTR (e.g. ext2),
-need those fixes to _notrun generic/553.
-
-Thanks,
-Amir.
-
-
-Amir Goldstein (3):
-  fstests: print out xfs_io parameter when command fails
-  fstests: check for filesystem FS_IOC_FSSETXATTR support
-  generic: check CAP_LINUX_IMMUTABLE capability with FS_IOC_FSSETXATTR
-
- common/rc                    | 30 ++++++++++-----
- doc/requirement-checking.txt |  2 +-
- tests/generic/553            |  3 +-
- tests/generic/555            | 74 ++++++++++++++++++++++++++++++++++++
- tests/generic/555.out        |  9 +++++
- tests/generic/group          |  1 +
- tests/xfs/260                |  2 +-
- tests/xfs/431                |  2 +-
- 8 files changed, 108 insertions(+), 15 deletions(-)
- create mode 100755 tests/generic/555
- create mode 100644 tests/generic/555.out
-
+diff --git a/common/rc b/common/rc
+index d0aa36a0..85330de2 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2084,7 +2084,7 @@ _require_xfs_io_command()
+ 	local command=$1
+ 	shift
+ 	local param="$*"
+-	local param_checked=0
++	local param_checked=""
+ 	local opts=""
+ 
+ 	local testfile=$TEST_DIR/$$.xfs_io
+@@ -2101,7 +2101,7 @@ _require_xfs_io_command()
+ 		;;
+ 	"falloc" )
+ 		testio=`$XFS_IO_PROG -F -f -c "falloc $param 0 1m" $testfile 2>&1`
+-		param_checked=1
++		param_checked="$param"
+ 		;;
+ 	"fpunch" | "fcollapse" | "zero" | "fzero" | "finsert" | "funshare")
+ 		local blocksize=$(_get_block_size $TEST_DIR)
+@@ -2119,7 +2119,7 @@ _require_xfs_io_command()
+ 		fi
+ 		testio=`$XFS_IO_PROG -F -f -c "pwrite 0 20k" -c "fsync" \
+ 			-c "fiemap -v $param" $testfile 2>&1`
+-		param_checked=1
++		param_checked="$param"
+ 		;;
+ 	"flink")
+ 		local testlink=$TEST_DIR/$$.link.xfs_io
+@@ -2159,7 +2159,7 @@ _require_xfs_io_command()
+ 		fi
+ 		testio=`$XFS_IO_PROG -f $opts -c \
+ 		        "pwrite $pwrite_opts $param 0 4k" $testfile 2>&1`
+-		param_checked=1
++		param_checked="$pwrite_opts $param"
+ 		;;
+ 	"scrub"|"repair")
+ 		testio=`$XFS_IO_PROG -x -c "$command probe" $TEST_DIR 2>&1`
+@@ -2179,19 +2179,19 @@ _require_xfs_io_command()
+ 
+ 	rm -f $testfile 2>&1 > /dev/null
+ 	echo $testio | grep -q "not found" && \
+-		_notrun "xfs_io $command support is missing"
++		_notrun "xfs_io $command $param_checked support is missing"
+ 	echo $testio | grep -q "Operation not supported\|Inappropriate ioctl" && \
+-		_notrun "xfs_io $command failed (old kernel/wrong fs?)"
++		_notrun "xfs_io $command $param_checked failed (old kernel/wrong fs?)"
+ 	echo $testio | grep -q "Invalid" && \
+-		_notrun "xfs_io $command failed (old kernel/wrong fs/bad args?)"
++		_notrun "xfs_io $command $param_checked failed (old kernel/wrong fs/bad args?)"
+ 	echo $testio | grep -q "foreign file active" && \
+-		_notrun "xfs_io $command not supported on $FSTYP"
++		_notrun "xfs_io $command $param_checked not supported on $FSTYP"
+ 	echo $testio | grep -q "Function not implemented" && \
+-		_notrun "xfs_io $command support is missing (missing syscall?)"
++		_notrun "xfs_io $command $param_checked support is missing (missing syscall?)"
+ 
+ 	[ -n "$param" ] || return
+ 
+-	if [ $param_checked -eq 0 ]; then
++	if [ -z "$param_checked" ]; then
+ 		$XFS_IO_PROG -c "help $command" | grep -q "^ $param --" || \
+ 			_notrun "xfs_io $command doesn't support $param"
+ 	else
 -- 
 2.17.1
