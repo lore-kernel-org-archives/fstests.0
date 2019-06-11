@@ -1,53 +1,56 @@
-Received: from mail-yw1-f68.google.com ([209.85.161.68]:35768 "EHLO
-        mail-yw1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2405025AbfFKPk6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 11:40:58 -0400
-MIME-Version: 1.0
-References: <20190611153916.13360-1-amir73il@gmail.com>
-In-Reply-To: <20190611153916.13360-1-amir73il@gmail.com>
+Received: from mail-wm1-f68.google.com ([209.85.128.68]:36511 "EHLO
+        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2391873AbfFKQIr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 12:08:47 -0400
 From: Amir Goldstein <amir73il@gmail.com>
-Date: Tue, 11 Jun 2019 18:40:46 +0300
-Message-ID: <CAOQ4uxjgAOgN6r6ZSsw_xZg7c-dsMLYUExU7BMi0NFpcT_wV1w@mail.gmail.com>
-Subject: Re: [PATCH v2 1/2] generic/553: fix test description
-Content-Type: text/plain; charset="UTF-8"
+Subject: [PATCH 0/3] Improved FS_IOC_FSSETXATTR tests
+Date: Tue, 11 Jun 2019 19:08:36 +0300
+Message-Id: <20190611160839.14777-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
 To: Eryu Guan <guaneryu@gmail.com>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Theodore Ts'o <tytso@mit.edu>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 11, 2019 at 6:39 PM Amir Goldstein <amir73il@gmail.com> wrote:
->
-> The test only checks copy to immutable file.
-> Note the kernel fix commit.
->
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-Forgot to add:
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+Eryu,
 
-> ---
->
-> Changes from v1:
-> - Document kernel fix commit
->
->  tests/generic/553 | 5 ++++-
->  1 file changed, 4 insertions(+), 1 deletion(-)
->
-> diff --git a/tests/generic/553 b/tests/generic/553
-> index 98ef77cc..58e0d5ef 100755
-> --- a/tests/generic/553
-> +++ b/tests/generic/553
-> @@ -4,7 +4,10 @@
->  #
->  # FS QA Test No. 553
->  #
-> -# Check that we cannot copy_file_range() to/from an immutable file
-> +# Check that we cannot copy_file_range() to an immutable file
-> +#
-> +# This is a regression test for kernel commit:
-> +#   a31713517dac ("vfs: introduce generic_file_rw_checks()")
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> --
-> 2.17.1
->
+Overlayfs gained support for FS_IOC_FSSETXATTR ioctl in v5.2-rc4
+with buggy capability check. The fix is trivial so it should land
+upstream soon.
+
+This series adds a generic test to cover the bug in overlayfs v5.2-rc4.
+It also adds a proper _require directive to test filesystem support
+for FS_IOC_FSSETXATTR and let the tests that use this ioctl require
+filesystem support for it.
+
+The only existing generic test that needed this requirement is the
+recently added generic/553 copy_range immutable file test. When run on
+overlayfs over xfs/ext4/btrfs, generic/553 would fail instead of _notrun
+with kernel v5.2-rc3.
+
+But the requirement fix is not only for overlayfs, other filesystems
+that support FS_IOC_SETFLAGS but not FS_IOC_FSSETXATTR (e.g. ext2),
+need those fixes to _notrun generic/553.
+
+Thanks,
+Amir.
+
+
+Amir Goldstein (3):
+  fstests: print out xfs_io parameter when command fails
+  fstests: check for filesystem FS_IOC_FSSETXATTR support
+  generic: check CAP_LINUX_IMMUTABLE capability with FS_IOC_FSSETXATTR
+
+ common/rc                    | 30 ++++++++++-----
+ doc/requirement-checking.txt |  2 +-
+ tests/generic/553            |  3 +-
+ tests/generic/555            | 74 ++++++++++++++++++++++++++++++++++++
+ tests/generic/555.out        |  9 +++++
+ tests/generic/group          |  1 +
+ tests/xfs/260                |  2 +-
+ tests/xfs/431                |  2 +-
+ 8 files changed, 108 insertions(+), 15 deletions(-)
+ create mode 100755 tests/generic/555
+ create mode 100644 tests/generic/555.out
+
+-- 
+2.17.1
