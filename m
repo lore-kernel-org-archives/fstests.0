@@ -1,39 +1,45 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:36485 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1727549AbfFKP7e (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 11:59:34 -0400
-Date: Tue, 11 Jun 2019 11:59:25 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v2 2/2] generic/554: test only copy to active swap file
-Message-ID: <20190611155925.GA5081@mit.edu>
-References: <20190611153916.13360-1-amir73il@gmail.com>
- <20190611153916.13360-2-amir73il@gmail.com>
+Received: from mail-yb1-f193.google.com ([209.85.219.193]:40619 "EHLO
+        mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2391474AbfFKQHU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 12:07:20 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190611153916.13360-2-amir73il@gmail.com>
+References: <20190611153916.13360-1-amir73il@gmail.com> <20190611153916.13360-2-amir73il@gmail.com>
+ <20190611155925.GA5081@mit.edu>
+In-Reply-To: <20190611155925.GA5081@mit.edu>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Tue, 11 Jun 2019 19:07:08 +0300
+Message-ID: <CAOQ4uxiZxJk1qwuKCJQvYggx_km4yzvjaAWn8ow5pLjmPnceHA@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] generic/554: test only copy to active swap file
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: Eryu Guan <guaneryu@gmail.com>, "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 11, 2019 at 06:39:16PM +0300, Amir Goldstein wrote:
-> Depending on filesystem, copying from active swapfile may be allowed,
-> just as read from swapfile may be allowed.
-> 
-> Note the kernel fix commit in test description.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> 
-> Per your and Ted's request, I've documented the kernel fix commit
-> in the new copy_range tests. Those commits are now on Darrick's
-> copy-file-range-fixes branch, which is on its way to linux-next
-> and to kernel 5.3.
+On Tue, Jun 11, 2019 at 6:59 PM Theodore Ts'o <tytso@mit.edu> wrote:
+>
+> On Tue, Jun 11, 2019 at 06:39:16PM +0300, Amir Goldstein wrote:
+> > Depending on filesystem, copying from active swapfile may be allowed,
+> > just as read from swapfile may be allowed.
+> >
+> > Note the kernel fix commit in test description.
+> >
+> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+> >
+> > Per your and Ted's request, I've documented the kernel fix commit
+> > in the new copy_range tests. Those commits are now on Darrick's
+> > copy-file-range-fixes branch, which is on its way to linux-next
+> > and to kernel 5.3.
+>
+> Thanks!  Are we sure at this point that the commit won't need to be
+> modified / rebased in Darrick's tree?
+>
 
-Thanks!  Are we sure at this point that the commit won't need to be
-modified / rebased in Darrick's tree?
+Yes. The intention is that fs maintainers can now rebase their
+v5.3 development branch on this non-rewindable branch.
 
-> +# This is a regression test for kernel commit:
-> +#   a31713517dac ("vfs: introduce generic_file_rw_checks()")
+Note that you do still need to merge the fixes from Darrick's branch
+for ext4 to pass this test despite relaxing the "copy from swapfile" test case.
 
-					 - Ted
+Thanks,
+Amir.
