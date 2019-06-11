@@ -1,138 +1,82 @@
-Received: from mail-wm1-f67.google.com ([209.85.128.67]:54323 "EHLO
-        mail-wm1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2391878AbfFKQIv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 12:08:51 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH 3/3] generic: check CAP_LINUX_IMMUTABLE capability with FS_IOC_FSSETXATTR
-Date: Tue, 11 Jun 2019 19:08:39 +0300
-Message-Id: <20190611160839.14777-4-amir73il@gmail.com>
-In-Reply-To: <20190611160839.14777-1-amir73il@gmail.com>
-References: <20190611160839.14777-1-amir73il@gmail.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:50300 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725811AbfFKWYj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 18:24:39 -0400
+Date: Tue, 11 Jun 2019 15:24:34 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] fstests: don't oom the box opening tmpfiles (take 2)
+Message-ID: <20190611222434.GJ1688126@magnolia>
+References: <20190609171229.27779-1-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190609171229.27779-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-This is a flavor of test generic/545 with FS_IOC_FSSETXATTR ioctl
-instead of FS_IOC_SETFLAGS ioctl.
+On Sun, Jun 09, 2019 at 08:12:29PM +0300, Amir Goldstein wrote:
+> For the t_open_tmpfiles tests that run multiple jobs in parallel,
+> limit ourselves to half of file-max for all jobs combined,
+> so that we don't OOM the test machine.
+> 
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
-Overlayfs gained support for FS_IOC_FSSETXATTR ioctl in v5.2-rc4
-with buggy capability check. This change fixed the problem:
+LGTM ...
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-  ovl: fix wrong flags check in FS_IOC_FS[SG]ETXATTR ioctls
+--D
 
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
- tests/generic/555     | 74 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/555.out |  9 ++++++
- tests/generic/group   |  1 +
- 3 files changed, 84 insertions(+)
- create mode 100755 tests/generic/555
- create mode 100644 tests/generic/555.out
-
-diff --git a/tests/generic/555 b/tests/generic/555
-new file mode 100755
-index 00000000..e100da97
---- /dev/null
-+++ b/tests/generic/555
-@@ -0,0 +1,74 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (C) 2019 CTERA Networks. All Rights Reserved.
-+#
-+# FS QA Test No. 555
-+#
-+# Check that we can't set FS_XFLAG_APPEND and FS_XFLAG_IMMUTABLE inode
-+# flags without capbility CAP_LINUX_IMMUTABLE.
-+#
-+# This test uses xfs_io chattr, rather than the (e2fsprogs) chattr
-+# program to exercise the FS_IOC_FSSETXATTR ioctl.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	# Cleanup of flags on both file in case test is aborted
-+	# (i.e. CTRL-C), so we have no immutable/append-only files
-+	$XFS_IO_PROG -f -r -c "chattr -ia" $workdir/file1 >/dev/null 2>&1
-+	$XFS_IO_PROG -f -r -c "chattr -ia" $workdir/file2 >/dev/null 2>&1
-+
-+	cd /
-+	rm -rf $tmp.* $workdir
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/attr
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+
-+_require_test
-+_require_xfs_io_command "chattr" "ia"
-+_require_command "$CAPSH_PROG" "capsh"
-+
-+workdir="$TEST_DIR/test-$seq"
-+rm -rf $workdir
-+mkdir $workdir
-+
-+echo "Create the original files"
-+touch $workdir/file1
-+touch $workdir/file2
-+
-+do_filter_output()
-+{
-+	grep -o "Operation not permitted"
-+}
-+
-+echo "Try to xfs_io chattr +ia with capabilities CAP_LINUX_IMMUTABLE"
-+$XFS_IO_PROG -f -c "chattr +ia" $workdir/file1
-+
-+echo "Try to xfs_io chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE"
-+$CAPSH_PROG --drop=cap_linux_immutable -- -c "$XFS_IO_PROG -f -c 'chattr +a' $workdir/file2" 2>&1 | do_filter_output
-+$CAPSH_PROG --drop=cap_linux_immutable -- -c "$XFS_IO_PROG -f -c 'chattr +i' $workdir/file2" 2>&1 | do_filter_output
-+
-+$CAPSH_PROG --drop=cap_linux_immutable -- -c "$XFS_IO_PROG -f -r -c 'chattr -i' $workdir/file1" 2>&1 | do_filter_output
-+$CAPSH_PROG --drop=cap_linux_immutable -- -c "$XFS_IO_PROG -f -r -c 'chattr -a' $workdir/file1" 2>&1 | do_filter_output
-+
-+echo "Try to xfs_io chattr -ia with capability CAP_LINUX_IMMUTABLE"
-+$XFS_IO_PROG -f -r -c "chattr -ia" $workdir/file1
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/555.out b/tests/generic/555.out
-new file mode 100644
-index 00000000..c4f989d1
---- /dev/null
-+++ b/tests/generic/555.out
-@@ -0,0 +1,9 @@
-+QA output created by 555
-+Create the original files
-+Try to xfs_io chattr +ia with capabilities CAP_LINUX_IMMUTABLE
-+Try to xfs_io chattr +ia/-ia without capability CAP_LINUX_IMMUTABLE
-+Operation not permitted
-+Operation not permitted
-+Operation not permitted
-+Operation not permitted
-+Try to xfs_io chattr -ia with capability CAP_LINUX_IMMUTABLE
-diff --git a/tests/generic/group b/tests/generic/group
-index 44ce8eff..8262b09c 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -557,3 +557,4 @@
- 552 auto quick log
- 553 auto quick copy_range
- 554 auto quick copy_range swap
-+555 auto quick cap
--- 
-2.17.1
+> ---
+> 
+> Eryu,
+> 
+> Reducing max allowed file by factor of 2 wasn't good enough for the
+> multi jobs variants of the tests. They still OOM mytest machine
+> (with 2GB RAM).
+> 
+> Thanks,
+> Amir.
+> 
+>  tests/generic/531 | 4 ++--
+>  tests/xfs/502     | 4 ++--
+>  2 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/generic/531 b/tests/generic/531
+> index 8ce4cc93..ea77eec2 100755
+> --- a/tests/generic/531
+> +++ b/tests/generic/531
+> @@ -41,10 +41,10 @@ _scratch_mount
+>  # Try to load up all the CPUs, two threads per CPU.
+>  nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+>  
+> -# Set ULIMIT_NOFILE to min(file-max / 2, 50000 files per LOAD_FACTOR)
+> +# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 50000 files per LOAD_FACTOR)
+>  # so that this test doesn't take forever or OOM the box
+>  max_files=$((50000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
+>  test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>  	max_files=$max_allowable_files
+>  ulimit -n $max_files
+> diff --git a/tests/xfs/502 b/tests/xfs/502
+> index 0a7921a3..1b747a1a 100755
+> --- a/tests/xfs/502
+> +++ b/tests/xfs/502
+> @@ -43,10 +43,10 @@ _scratch_mount
+>  # Load up all the CPUs, two threads per CPU.
+>  nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
+>  
+> -# Set ULIMIT_NOFILE to min(file-max / 2, 30000 files per cpu per LOAD_FACTOR)
+> +# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 30000 files per cpu per LOAD_FACTOR)
+>  # so that this test doesn't take forever or OOM the box
+>  max_files=$((30000 * LOAD_FACTOR))
+> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
+> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
+>  test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
+>  	max_files=$max_allowable_files
+>  ulimit -n $max_files
+> -- 
+> 2.17.1
+> 
