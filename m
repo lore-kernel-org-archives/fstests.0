@@ -1,82 +1,84 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:50300 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725811AbfFKWYj (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 11 Jun 2019 18:24:39 -0400
-Date: Tue, 11 Jun 2019 15:24:34 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] fstests: don't oom the box opening tmpfiles (take 2)
-Message-ID: <20190611222434.GJ1688126@magnolia>
-References: <20190609171229.27779-1-amir73il@gmail.com>
+Received: from bhuna.collabora.co.uk ([46.235.227.227]:43376 "EHLO
+        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725763AbfFLFBu (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 01:01:50 -0400
+From: Gabriel Krisman Bertazi <krisman@collabora.com>
+Subject: Re: [PATCH v3 2/2] shared/012: Add tests for filename casefolding feature
+References: <20190610173541.20511-1-krisman@collabora.com>
+        <20190610173541.20511-2-krisman@collabora.com>
+        <20190611121546.GC2774@mit.edu>
+Date: Wed, 12 Jun 2019 01:01:46 -0400
+In-Reply-To: <20190611121546.GC2774@mit.edu> (Theodore Ts'o's message of "Tue,
+        11 Jun 2019 08:15:46 -0400")
+Message-ID: <85y327z9ad.fsf@collabora.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190609171229.27779-1-amir73il@gmail.com>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Amir Goldstein <amir73il@gmail.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 09, 2019 at 08:12:29PM +0300, Amir Goldstein wrote:
-> For the t_open_tmpfiles tests that run multiple jobs in parallel,
-> limit ourselves to half of file-max for all jobs combined,
-> so that we don't OOM the test machine.
-> 
-> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+"Theodore Ts'o" <tytso@mit.edu> writes:
 
-LGTM ...
-Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
+> On Mon, Jun 10, 2019 at 01:35:41PM -0400, Gabriel Krisman Bertazi wrote:
+>> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+>> 
+>> This new test implements verification for the per-directory
+>> case-insensitive feature, as supported by the reference implementation
+>> in Ext4.
+>> 
+>> Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
+>> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
+>>   [Rewrite to support feature design]
+>>   [Refactor to simplify implementation]
+>
+> I tried out this test, and it's apparently failing for me using
+> e2fsprogs 1.45.2; it looks like it's a whitespace issue?
 
---D
+Hi Ted,
 
-> ---
-> 
-> Eryu,
-> 
-> Reducing max allowed file by factor of 2 wasn't good enough for the
-> multi jobs variants of the tests. They still OOM mytest machine
-> (with 2GB RAM).
-> 
-> Thanks,
-> Amir.
-> 
->  tests/generic/531 | 4 ++--
->  tests/xfs/502     | 4 ++--
->  2 files changed, 4 insertions(+), 4 deletions(-)
-> 
-> diff --git a/tests/generic/531 b/tests/generic/531
-> index 8ce4cc93..ea77eec2 100755
-> --- a/tests/generic/531
-> +++ b/tests/generic/531
-> @@ -41,10 +41,10 @@ _scratch_mount
->  # Try to load up all the CPUs, two threads per CPU.
->  nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
->  
-> -# Set ULIMIT_NOFILE to min(file-max / 2, 50000 files per LOAD_FACTOR)
-> +# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 50000 files per LOAD_FACTOR)
->  # so that this test doesn't take forever or OOM the box
->  max_files=$((50000 * LOAD_FACTOR))
-> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
-> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
->  test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
->  	max_files=$max_allowable_files
->  ulimit -n $max_files
-> diff --git a/tests/xfs/502 b/tests/xfs/502
-> index 0a7921a3..1b747a1a 100755
-> --- a/tests/xfs/502
-> +++ b/tests/xfs/502
-> @@ -43,10 +43,10 @@ _scratch_mount
->  # Load up all the CPUs, two threads per CPU.
->  nr_cpus=$(( $(getconf _NPROCESSORS_ONLN) * 2 ))
->  
-> -# Set ULIMIT_NOFILE to min(file-max / 2, 30000 files per cpu per LOAD_FACTOR)
-> +# Set ULIMIT_NOFILE to min(file-max / $nr_cpus / 2, 30000 files per cpu per LOAD_FACTOR)
->  # so that this test doesn't take forever or OOM the box
->  max_files=$((30000 * LOAD_FACTOR))
-> -max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / 2 ))
-> +max_allowable_files=$(( $(cat /proc/sys/fs/file-max) / $nr_cpus / 2 ))
->  test $max_allowable_files -gt 0 && test $max_files -gt $max_allowable_files && \
->  	max_files=$max_allowable_files
->  ulimit -n $max_files
-> -- 
-> 2.17.1
-> 
+Yes, definitely just whitespace.  But i don't understand why you are
+getting this behavior.  I tried both with the master branch of e2fsprogs
+and the tagged commit of v1.45.2 and on both occasions the test succeed
+in my system.  For sure I can use filter_spaces but I'm puzzled why I
+can't reproduce this.
+
+>
+> shared/012		[08:14:07][  146.388509] run fstests shared/012 at 2019-06-11 08:14:07
+>  [08:14:08]- output mismatch (see /results/ext4/results-4k/shared/012.out.bad)
+>     --- tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
+>     +++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
+>     @@ -1,8 +1,8 @@
+>      QA output created by 012
+>     -SCRATCH_MNT/basic           Extents, Casefold
+>     -SCRATCH_MNT/basic           Extents
+>     -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+>     -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+>     +SCRATCH_MNT/basic                   Extents, Casefold
+>     +SCRATCH_MNT/basic                   Extents
+>     ...
+>     (Run 'diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad'  to see the entire diff)
+> Ran: shared/012
+> Failures: shared/012
+> Failed 1 of 1 tests
+> Xunit report: /results/ext4/results-4k/result.xml
+>
+> root@kvm-xfstests:~# diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad
+> --- /root/xfstests/tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
+> +++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
+> @@ -1,8 +1,8 @@
+>  QA output created by 012
+> -SCRATCH_MNT/basic           Extents, Casefold
+> -SCRATCH_MNT/basic           Extents
+> -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+> -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
+> +SCRATCH_MNT/basic                   Extents, Casefold
+> +SCRATCH_MNT/basic                   Extents
+> +SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
+> +SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
+>  SCRATCH_MNT/flag_inheritance/d1/d2/d3 Extents, Casefold
+>  SCRATCH_MNT/symlink/ind1/TARGET
+>  mv: cannot stat 'SCRATCH_MNT/rename/rename': No such file or directory
+
+-- 
+Gabriel Krisman Bertazi
