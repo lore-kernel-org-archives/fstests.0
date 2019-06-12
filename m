@@ -1,219 +1,47 @@
-Received: from aserp2130.oracle.com ([141.146.126.79]:36432 "EHLO
-        aserp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2437202AbfFLPFZ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 11:05:25 -0400
-Date: Wed, 12 Jun 2019 08:05:07 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] generic: test statfs on project quota directory
-Message-ID: <20190612150507.GB3773859@magnolia>
-References: <20190513014951.4357-1-zlang@redhat.com>
- <01F47CA1-E737-4F52-8FF2-A3E0DCD8EB1B@dilger.ca>
- <20190612073213.GA30864@dhcp-12-102.nay.redhat.com>
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:48390 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S2438952AbfFLMcF (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 08:32:05 -0400
+Date: Wed, 12 Jun 2019 08:32:00 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH v3 2/2] shared/012: Add tests for filename casefolding
+ feature
+Message-ID: <20190612123200.GA2736@mit.edu>
+References: <20190610173541.20511-1-krisman@collabora.com>
+ <20190610173541.20511-2-krisman@collabora.com>
+ <20190611121546.GC2774@mit.edu>
+ <85y327z9ad.fsf@collabora.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190612073213.GA30864@dhcp-12-102.nay.redhat.com>
+In-Reply-To: <85y327z9ad.fsf@collabora.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, Andreas Dilger <adilger@dilger.ca>
+To: Gabriel Krisman Bertazi <krisman@collabora.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 12, 2019 at 03:32:13PM +0800, Zorro Lang wrote:
-> On Tue, May 14, 2019 at 09:28:38AM -0600, Andreas Dilger wrote:
-> > On May 12, 2019, at 7:49 PM, Zorro Lang <zlang@redhat.com> wrote:
-> > > 
-> > > There's a bug on xfs cause statfs get negative f_ffree value from
-> > > a project quota directory. It's fixed by "de7243057 fs/xfs: fix
-> > > f_ffree value for statfs when project quota is set". So add statfs
-> > > testing on project quota block and inode count limit.
-> > > 
-> > > For testing foreign fs quota, change _qmount() function, turn on
-> > > project if quotaon support.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > > 
-> > > Hi,
-> > > 
-> > > (Long time passed, re-send this patch again to get reviewing)
-> > > 
-> > > There's one thing I don't understand, so CC ext4 mail list. Please
-> > > feel free to reply, if anyone knows that:
-> > > 
-> > > $ mkfs.ext4 $SCRATCH_DEV
-> > > $ tune2fs -O quota,project $SCRATCH_DEV
-> > > $ mount $SCRATCH_DEV $SCRATCH_MNT -o prjquota
-> > > $ quotaon -P $SCRATCH_MNT
-> > > $ mkdir $SCRATCH_MNT/t
-> > > $ xfs_quota -f -x -c "project -p $SCRATCH_MNT/t -s 42" $SCRATCH_MNT
-> > > $ xfs_quota -f -x -c "limit -p bsoft=100m answer" $SCRATCH_MNT
-> > > $ df -k $SCRATCH_MNT/t
-> > > Filesystem    1K-blocks  Used Available Use% Mounted on
-> > > SCRATCH_DEV    102400     4    102396   1% SCRATCH_MNT
-> > > 
-> > > On XFS, the 'Used' field always shows '0'. But why ext4 always has
-> > > more 4k? Is it a bug or expected.
-> > 
-> > Each directory in ext4 consumes a 4KB block, so setting the project
-> > quota on a directory always consumes at least one block.
+On Wed, Jun 12, 2019 at 01:01:46AM -0400, Gabriel Krisman Bertazi wrote:
+> > I tried out this test, and it's apparently failing for me using
+> > e2fsprogs 1.45.2; it looks like it's a whitespace issue?
 > 
-> Ping fstests@vger.kernel.org.
+> Hi Ted,
 > 
-> One month passed. Is there anything else block this patch merge?
+> Yes, definitely just whitespace.  But i don't understand why you are
+> getting this behavior.  I tried both with the master branch of e2fsprogs
+> and the tagged commit of v1.45.2 and on both occasions the test succeed
+> in my system.  For sure I can use filter_spaces but I'm puzzled why I
+> can't reproduce this.
 
-If this is a regression test for an xfs bug, why isn't this in
-tests/xfs/ ?  Especially because ext4 has different behaviors that clash
-with the golden output -- what happens if you run this with inline data
-enabled?
+That's wierd.  The kvm-xfstests appliance VM that's uploaded to
 
---D
+https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > Cheers, Andreas
-> > 
-> > > common/quota          |  4 +++
-> > > tests/generic/999     | 74 +++++++++++++++++++++++++++++++++++++++++++
-> > > tests/generic/999.out |  3 ++
-> > > tests/generic/group   |  1 +
-> > > 4 files changed, 82 insertions(+)
-> > > create mode 100755 tests/generic/999
-> > > create mode 100644 tests/generic/999.out
-> > > 
-> > > diff --git a/common/quota b/common/quota
-> > > index f19f81a1..315df8cb 100644
-> > > --- a/common/quota
-> > > +++ b/common/quota
-> > > @@ -200,6 +200,10 @@ _qmount()
-> > >    if [ "$FSTYP" != "xfs" ]; then
-> > >        quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
-> > >        quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
-> > > +	# try to turn on project quota if it's supported
-> > > +	if quotaon --help 2>&1 | grep -q '\-\-project'; then
-> > > +		quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
-> > > +	fi
-> > >    fi
-> > >    chmod ugo+rwx $SCRATCH_MNT
-> > > }
-> > > diff --git a/tests/generic/999 b/tests/generic/999
-> > > new file mode 100755
-> > > index 00000000..555341f1
-> > > --- /dev/null
-> > > +++ b/tests/generic/999
-> > > @@ -0,0 +1,74 @@
-> > > +#! /bin/bash
-> > > +# SPDX-License-Identifier: GPL-2.0
-> > > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> > > +#
-> > > +# FS QA Test No. 999
-> > > +#
-> > > +# Test statfs when project quota is set.
-> > > +# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
-> > > +#
-> > > +seq=`basename $0`
-> > > +seqres=$RESULT_DIR/$seq
-> > > +echo "QA output created by $seq"
-> > > +
-> > > +here=`pwd`
-> > > +tmp=/tmp/$$
-> > > +status=1	# failure is the default!
-> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > > +
-> > > +_cleanup()
-> > > +{
-> > > +	cd /
-> > > +	_scratch_unmount
-> > > +	rm -f $tmp.*
-> > > +}
-> > > +
-> > > +# get standard environment, filters and checks
-> > > +. ./common/rc
-> > > +. ./common/filter
-> > > +. ./common/quota
-> > > +
-> > > +# remove previous $seqres.full before test
-> > > +rm -f $seqres.full
-> > > +
-> > > +# real QA test starts here
-> > > +_supported_fs generic
-> > > +_supported_os Linux
-> > > +_require_scratch
-> > > +_require_quota
-> > > +_require_xfs_quota_foreign
-> > > +
-> > > +_scratch_mkfs >/dev/null 2>&1
-> > > +_scratch_enable_pquota
-> > > +_qmount_option "prjquota"
-> > > +_qmount
-> > > +_require_prjquota $SCRATCH_DEV
-> > > +
-> > > +# Create a directory to be project object, and create a file to take 64k space
-> > > +mkdir $SCRATCH_MNT/t
-> > > +$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
-> > > +
-> > > +# Setup temporary replacements for /etc/projects and /etc/projid
-> > > +cat >$tmp.projects <<EOF
-> > > +42:$SCRATCH_MNT/t
-> > > +EOF
-> > > +
-> > > +cat >$tmp.projid <<EOF
-> > > +answer:42
-> > > +EOF
-> > > +
-> > > +quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
-> > > +$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
-> > > +$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
-> > > +
-> > > +# The itotal and size should be 53 and 102400(k), as above project quota limit.
-> > > +# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
-> > > +# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
-> > > +# 6[48] at the end.
-> > > +df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
-> > > +	_filter_scratch | _filter_spaces | \
-> > > +	sed -e "/SCRATCH_MNT/s/6[48]/N/"
-> > > +
-> > > +# success, all done
-> > > +status=0
-> > > +exit
-> > > diff --git a/tests/generic/999.out b/tests/generic/999.out
-> > > new file mode 100644
-> > > index 00000000..1bebabd4
-> > > --- /dev/null
-> > > +++ b/tests/generic/999.out
-> > > @@ -0,0 +1,3 @@
-> > > +QA output created by 999
-> > > +File Inodes IUsed 1K-blocks Used
-> > > +SCRATCH_MNT/t 53 2 102400 N
-> > > diff --git a/tests/generic/group b/tests/generic/group
-> > > index 9f4845c6..35da10a5 100644
-> > > --- a/tests/generic/group
-> > > +++ b/tests/generic/group
-> > > @@ -542,3 +542,4 @@
-> > > 537 auto quick trim
-> > > 538 auto quick aio
-> > > 539 auto quick punch seek
-> > > +999 auto quick quota
-> > > --
-> > > 2.17.2
-> > > 
-> > 
-> > 
-> > Cheers, Andreas
-> > 
-> > 
-> > 
-> > 
-> > 
-> > 
-> > 
-> > 
-> > Cheers, Andreas
-> > 
-> > 
-> > 
-> > 
-> > 
-> 
-> 
+shows the problem.  With your patch applied to the xfstests-dev
+directory after checking out xfstests-bld (see [1] for more
+information if you haven't used kvm-xfstests before), it's reproducible via:
+
+kvm-xfstests -I ../out_dir/root_fs.img.amd64 --update-xfstests-tar -c 4k shared/012
+
+[1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
+
+						- Ted
