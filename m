@@ -1,47 +1,47 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:48390 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S2438952AbfFLMcF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 08:32:05 -0400
-Date: Wed, 12 Jun 2019 08:32:00 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH v3 2/2] shared/012: Add tests for filename casefolding
- feature
-Message-ID: <20190612123200.GA2736@mit.edu>
-References: <20190610173541.20511-1-krisman@collabora.com>
- <20190610173541.20511-2-krisman@collabora.com>
- <20190611121546.GC2774@mit.edu>
- <85y327z9ad.fsf@collabora.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <85y327z9ad.fsf@collabora.com>
+Received: from mail.kernel.org ([198.145.29.99]:58370 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2437919AbfFLKFu (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 12 Jun 2019 06:05:50 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs/146: remove unnecessary scratch unmount to avoid test failure
+Date: Wed, 12 Jun 2019 11:05:44 +0100
+Message-Id: <20190612100544.1890-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Gabriel Krisman Bertazi <krisman@collabora.com>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 12, 2019 at 01:01:46AM -0400, Gabriel Krisman Bertazi wrote:
-> > I tried out this test, and it's apparently failing for me using
-> > e2fsprogs 1.45.2; it looks like it's a whitespace issue?
-> 
-> Hi Ted,
-> 
-> Yes, definitely just whitespace.  But i don't understand why you are
-> getting this behavior.  I tried both with the master branch of e2fsprogs
-> and the tagged commit of v1.45.2 and on both occasions the test succeed
-> in my system.  For sure I can use filter_spaces but I'm puzzled why I
-> can't reproduce this.
+From: Filipe Manana <fdmanana@suse.com>
 
-That's wierd.  The kvm-xfstests appliance VM that's uploaded to
+Right at the beginning of the test we are unmonting the scratch device,
+however at this point the device was never mounted, so the unmount fails
+with an error message like the following:
 
-https://mirrors.edge.kernel.org/pub/linux/kernel/people/tytso/kvm-xfstests/
+  umount: /home/fdmanana/btrfs-tests/scratch_1: not mounted
 
-shows the problem.  With your patch applied to the xfstests-dev
-directory after checking out xfstests-bld (see [1] for more
-information if you haven't used kvm-xfstests before), it's reproducible via:
+Which is not expected by the golden output and therefore causes the test
+to fail.
 
-kvm-xfstests -I ../out_dir/root_fs.img.amd64 --update-xfstests-tar -c 4k shared/012
+Since the device/mount point was not mounted yet in the test, and since
+the test framework unmounts the scratch device after each test finishes,
+just remove the call to _scratch_unmount.
 
-[1] https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/146 | 1 -
+ 1 file changed, 1 deletion(-)
 
-						- Ted
+diff --git a/tests/btrfs/146 b/tests/btrfs/146
+index 8ec3128b..18e2eec0 100755
+--- a/tests/btrfs/146
++++ b/tests/btrfs/146
+@@ -38,7 +38,6 @@ _require_test_program fsync-err
+ _require_test_program dmerror
+ 
+ # bring up dmerror device
+-_scratch_unmount
+ _dmerror_init
+ 
+ # Replace first device with error-test device
+-- 
+2.11.0
