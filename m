@@ -1,84 +1,39 @@
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:43376 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725763AbfFLFBu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 01:01:50 -0400
-From: Gabriel Krisman Bertazi <krisman@collabora.com>
-Subject: Re: [PATCH v3 2/2] shared/012: Add tests for filename casefolding feature
-References: <20190610173541.20511-1-krisman@collabora.com>
-        <20190610173541.20511-2-krisman@collabora.com>
-        <20190611121546.GC2774@mit.edu>
-Date: Wed, 12 Jun 2019 01:01:46 -0400
-In-Reply-To: <20190611121546.GC2774@mit.edu> (Theodore Ts'o's message of "Tue,
-        11 Jun 2019 08:15:46 -0400")
-Message-ID: <85y327z9ad.fsf@collabora.com>
+Message-ID: <5D00F3BC.5000003@cn.fujitsu.com>
+Date: Wed, 12 Jun 2019 20:44:44 +0800
+From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain
-Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+Subject: question about generic/473 on xfs filesystem
+Content-Type: text/plain; charset="GB2312"
+Content-Transfer-Encoding: 7bit
+To: Eryu Guan <guaneryu@gmail.com>, darrick <darrick.wong@oracle.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-"Theodore Ts'o" <tytso@mit.edu> writes:
+Hi Eryu, Darrick
 
-> On Mon, Jun 10, 2019 at 01:35:41PM -0400, Gabriel Krisman Bertazi wrote:
->> From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
->> 
->> This new test implements verification for the per-directory
->> case-insensitive feature, as supported by the reference implementation
->> in Ext4.
->> 
->> Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
->> Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
->>   [Rewrite to support feature design]
->>   [Refactor to simplify implementation]
->
-> I tried out this test, and it's apparently failing for me using
-> e2fsprogs 1.45.2; it looks like it's a whitespace issue?
+Currently, on lastest kernel, generic/473 fails ,as below:
+# ./check generic/473
+FSTYP         -- xfs (non-debug)
+PLATFORM      -- 5.2.0-rc4+
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda11
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda11 /mnt/xfstests/scratch
+generic/473 2s ... - output mismatch (see /var/lib/xfstests/results//generic/473.out.bad)
+    --- tests/generic/473.out   2019-06-12 19:30:37.219753498 +0800
+    +++ /var/lib/xfstests/results//generic/473.out.bad  2019-06-12 20:34:12.499984113 +0800
+    @@ -6,7 +6,7 @@
+     1: [256..287]: hole
+     Hole + Data
+     0: [0..127]: hole
+     -1: [128..255]: data
+     +1: [128..135]: data
+     Hole + Data + Hole
+     0: [0..127]: hole
 
-Hi Ted,
+I have seen previous mail[1]that mentioned "new ranged fiemap test (generic/473) fails on XFS, because there's no 
+final decision on the expected behavior yet and discussion has stalled somehow.". This case has been merged in 2017.12,
+but this case also fails on lastest kernel, does it have any update or I miss something? 
 
-Yes, definitely just whitespace.  But i don't understand why you are
-getting this behavior.  I tried both with the master branch of e2fsprogs
-and the tagged commit of v1.45.2 and on both occasions the test succeed
-in my system.  For sure I can use filter_spaces but I'm puzzled why I
-can't reproduce this.
+more question:
+xfs/107 and xfs/136 also fail on lastest kernel on my machine. 
 
->
-> shared/012		[08:14:07][  146.388509] run fstests shared/012 at 2019-06-11 08:14:07
->  [08:14:08]- output mismatch (see /results/ext4/results-4k/shared/012.out.bad)
->     --- tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
->     +++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
->     @@ -1,8 +1,8 @@
->      QA output created by 012
->     -SCRATCH_MNT/basic           Extents, Casefold
->     -SCRATCH_MNT/basic           Extents
->     -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
->     -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
->     +SCRATCH_MNT/basic                   Extents, Casefold
->     +SCRATCH_MNT/basic                   Extents
->     ...
->     (Run 'diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad'  to see the entire diff)
-> Ran: shared/012
-> Failures: shared/012
-> Failed 1 of 1 tests
-> Xunit report: /results/ext4/results-4k/result.xml
->
-> root@kvm-xfstests:~# diff -u /root/xfstests/tests/shared/012.out /results/ext4/results-4k/shared/012.out.bad
-> --- /root/xfstests/tests/shared/012.out	2019-06-10 00:02:54.000000000 -0400
-> +++ /results/ext4/results-4k/shared/012.out.bad	2019-06-11 08:14:08.487418272 -0400
-> @@ -1,8 +1,8 @@
->  QA output created by 012
-> -SCRATCH_MNT/basic           Extents, Casefold
-> -SCRATCH_MNT/basic           Extents
-> -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
-> -SCRATCH_MNT/casefold_flag_removal Extents, Casefold
-> +SCRATCH_MNT/basic                   Extents, Casefold
-> +SCRATCH_MNT/basic                   Extents
-> +SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
-> +SCRATCH_MNT/casefold_flag_removal   Extents, Casefold
->  SCRATCH_MNT/flag_inheritance/d1/d2/d3 Extents, Casefold
->  SCRATCH_MNT/symlink/ind1/TARGET
->  mv: cannot stat 'SCRATCH_MNT/rename/rename': No such file or directory
-
--- 
-Gabriel Krisman Bertazi
+[1]https://www.spinics.net/lists/fstests/msg08426.html
