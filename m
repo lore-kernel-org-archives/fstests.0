@@ -1,588 +1,197 @@
-Received: from bhuna.collabora.co.uk ([46.235.227.227]:47574 "EHLO
-        bhuna.collabora.co.uk" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728700AbfFLSkq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 12 Jun 2019 14:40:46 -0400
-From: Gabriel Krisman Bertazi <krisman@collabora.com>
-Subject: [PATCH v3 2/2] shared/012: Add tests for filename casefolding feature
-Date: Wed, 12 Jun 2019 14:40:33 -0400
-Message-Id: <20190612184033.21845-2-krisman@collabora.com>
-In-Reply-To: <20190612184033.21845-1-krisman@collabora.com>
-References: <20190612184033.21845-1-krisman@collabora.com>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:13666 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1730806AbfFMH6j (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jun 2019 03:58:39 -0400
+Message-ID: <5D02022A.4090500@cn.fujitsu.com>
+Date: Thu, 13 Jun 2019 15:58:34 +0800
+From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=UTF-8
+Subject: Re: [PATCH] xfs/191: update mkfs.xfs input results
+References: <1560340921-2622-1-git-send-email-xuyang2018.jy@cn.fujitsu.com> <20190612162449.GC1872778@magnolia>
+In-Reply-To: <20190612162449.GC1872778@magnolia>
+Content-Type: text/plain; charset="ISO-8859-1"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: tytso@mit.edu
-Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>, Gabriel Krisman Bertazi <krisman@collabora.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: guaneryu@gmail.com, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+on 2019/06/13 0:24, Darrick J. Wong wrote:
 
-This new test implements verification for the per-directory
-case-insensitive feature, as supported by the reference implementation
-in Ext4.
+> On Wed, Jun 12, 2019 at 08:02:01PM +0800, Yang Xu wrote:
+>> Currently, on 5.2.0-rc4+ kernel, when I run xfs/191-input-validation with upstream xfsprogs,
+>> I get the following errors because mkfs.xfs binary has changed a lot.
+>>
+>> --------------------------
+>> PLATFORM      -- Linux/x86_64  5.2.0-rc4+
+>> MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda11
+>> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda11 /mnt/xfstests/scratch
+>>
+>> pass -n size=2b /dev/sda11
+>> pass -d agsize=8192b /dev/sda11
+>> pass -d agsize=65536s /dev/sda11
+>> pass -d su=0,sw=64 /dev/sda11
+>> pass -d su=4096s,sw=64 /dev/sda11
+>> pass -d su=4096b,sw=64 /dev/sda11
+>> pass -l su=10b /dev/sda11
+>> fail -n log=15 /dev/sda11
+>> fail -i log=10 /dev/sda11
+>> --------------------------
+>>
+>> "pass -d su=0,sw=64 /dev/sda11", expect fail, this behavior has been fixed by commit 16adcb88:
+>> (mkfs: more sunit/swidth sanity checking).
+>>
+>> "fail -n log=15 /dev/sda11" "fail -i log=10 /dev/sda11", expect pass, this option has been removed
+>> since commit 2cf637c(mkfs: remove logarithm based CLI option).
+>>
+>> Also, if I enable reflink(I see Darrick will enable it by default on for-next branch), "-r rtdev"
+>> fails because reflink was not supported in realtime devices since commit bfa66ec.
+> This particular check probably needs to get smarter about detecting
+> whether the mkfs supports reflink and explicitly setting reflink=0.  I
+> don't see rt reflink getting supported any time soon (unless someone
+> steps up to review the metadir series...)
+Hi Darrick
 
-Signed-off-by: Lakshmipathi.G <lakshmipathi.ganapathi@collabora.co.uk>
-Signed-off-by: Gabriel Krisman Bertazi <krisman@collabora.com>
-  [Rewrite to support feature design]
-  [Refactor to simplify implementation]
----
- tests/shared/012     | 508 +++++++++++++++++++++++++++++++++++++++++++
- tests/shared/012.out |  16 ++
- tests/shared/group   |   1 +
- 3 files changed, 525 insertions(+)
- create mode 100755 tests/shared/012
- create mode 100644 tests/shared/012.out
+     Thanks for your reply.  I just said that mkfs.xfs will enable reflink by default on for-next branch, so I found
+the case also fail ("fail -r rtdev=$fsimg /dev/sda11") on this branch. I will send a v2 patch to add rtdev test with reflink.
 
-diff --git a/tests/shared/012 b/tests/shared/012
-new file mode 100755
-index 000000000000..d7e9cb43f524
---- /dev/null
-+++ b/tests/shared/012
-@@ -0,0 +1,508 @@
-+# SPDX-License-Identifier: GPL-2.0+
-+#!/bin/bash
-+# FSQA Test No. 012
-+#
-+# Test the basic functionality of filesystems with case-insensitive
-+# support.
-+
-+seq=3D`basename $0`
-+seqres=3D$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+status=3D1 # failure is thea default
-+
-+. ./common/rc
-+. ./common/filter
-+. ./common/casefold
-+. ./common/attr
-+
-+_supported_os Linux
-+_require_scratch_nocheck
-+_require_scratch_casefold
-+_require_check_dmesg
-+_require_attrs
-+
-+sdev=3D$(_short_dev ${SCRATCH_DEV})
-+
-+filename1=3D"file.txt"
-+filename2=3D"FILE.TXT"
-+
-+pt_file1=3D$(echo -e "cora=C3=A7=C3=A3o")
-+pt_file2=3D$(echo -e "corac\xcc\xa7\xc3\xa3o" | tr a-z A-Z)
-+
-+fr_file2=3D$(echo -e "french_caf\xc3\xa9.txt")
-+fr_file1=3D$(echo -e "french_cafe\xcc\x81.txt")
-+
-+ar_file1=3D$(echo -e "arabic_\xdb\x92\xd9\x94.txt")
-+ar_file2=3D$(echo -e "arabic_\xdb\x93.txt" | tr a-z A-Z)
-+
-+jp_file1=3D$(echo -e "japanese_\xe3\x82\xb2.txt")
-+jp_file2=3D$(echo -e "japanese_\xe3\x82\xb1\xe3\x82\x99.txt")
-+
-+# '\xc3\x00' is an invalid sequence. Despite that, the sequences
-+# below could match, if we ignored the error.  But we don't want
-+# to be greedy at normalization, so at the first error we treat
-+# the entire sequence as an opaque blob.  Therefore, these two
-+# must NOT match.
-+blob_file1=3D$(echo -e "corac\xcc\xa7\xc3")
-+blob_file2=3D$(echo -e "cora=C3=A7\xc3")
-+
-+# Test helpers
-+basic_create_lookup()
-+{
-+	local basedir=3D${1}
-+	local exact=3D${2}
-+	local lookup=3D${3}
-+
-+	touch "${basedir}/${exact}"
-+	[ -f "${basedir}/${lookup}" ] || \
-+		echo "lookup of ${exact} using ${lookup} failed"
-+	_casefold_check_exact_name "${basedir}" "${exact}" || \
-+		echo "Created file ${exact} with wrong name."
-+}
-+
-+# CI search should fail.
-+bad_basic_create_lookup()
-+{
-+	local basedir=3D${1}
-+	local exact=3D${2}
-+	local lookup=3D${3}
-+
-+	touch "${basedir}/${exact}"
-+	[ -f "${basedir}/${lookup}" ] && \
-+		echo "Lookup of ${exact} using ${lookup} should fail"
-+}
-+
-+# Testcases
-+test_casefold_lookup()
-+{
-+	local basedir=3D${SCRATCH_MNT}/casefold_lookup
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	basic_create_lookup "${basedir}" "${filename1}" "${filename2}"
-+	basic_create_lookup "${basedir}" "${pt_file1}" "${pt_file2}"
-+	basic_create_lookup "${basedir}" "${fr_file1}" "${fr_file2}"
-+	basic_create_lookup "${basedir}" "${ar_file1}" "${ar_file2}"
-+	basic_create_lookup "${basedir}" "${jp_file1}" "${jp_file2}"
-+}
-+
-+test_bad_casefold_lookup()
-+{
-+	local basedir=3D${SCRATCH_MNT}/casefold_lookup
-+
-+	mkdir -p ${basedir}
-+
-+	bad_basic_create_lookup ${basedir} ${blob_file1} ${blob_file2}
-+}
-+
-+do_create_and_remove()
-+{
-+	local basedir=3D${1}
-+	local exact=3D${2}
-+	local casefold=3D${3}
-+
-+	basic_create_lookup ${basedir} ${exact} ${casefold}
-+	rm -f ${basedir}/${exact}
-+	[ -f ${basedir}/${exact} ] && \
-+		echo "File ${exact} was not removed using exact name"
-+
-+	basic_create_lookup ${basedir} ${exact} ${casefold}
-+	rm -f ${basedir}/${casefold}
-+	[ -f ${basedir}/${exact} ] && \
-+		echo "File ${exact} was not removed using inexact name"
-+}
-+
-+# remove and recreate
-+test_create_and_remove()
-+{
-+	local basedir=3D${SCRATCH_MNT}/create_and_remove
-+	mkdir -p ${basedir}
-+
-+	_casefold_set_attr ${basedir}
-+	do_create_and_remove "${basedir}" "${pt_file1}" "${pt_file2}"
-+	do_create_and_remove "${basedir}" "${jp_file1}" "${jp_file2}"
-+	do_create_and_remove "${basedir}" "${ar_file1}" "${ar_file2}"
-+	do_create_and_remove "${basedir}" "${fr_file1}" "${fr_file2}"
-+}
-+
-+test_casefold_flag_basic()
-+{
-+	local basedir=3D${SCRATCH_MNT}/basic
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+	_casefold_lsattr_dir ${basedir} | _filter_scratch
-+
-+	_casefold_unset_attr ${basedir}
-+	_casefold_lsattr_dir ${basedir} | _filter_scratch
-+}
-+
-+test_casefold_flag_removal()
-+{
-+	local basedir=3D${SCRATCH_MNT}/casefold_flag_removal
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+	_casefold_lsattr_dir ${basedir} | _filter_scratch
-+
-+	# Try to remove +F attribute on non empty directory
-+	touch ${basedir}/${filename1}
-+	_casefold_unset_attr ${basedir} &>/dev/null
-+	_casefold_lsattr_dir ${basedir} | _filter_scratch
-+}
-+
-+# Test Inheritance of casefold flag
-+test_casefold_flag_inheritance()
-+{
-+	local basedir=3D${SCRATCH_MNT}/flag_inheritance
-+	local dirpath1=3D"d1/d2/d3"
-+	local dirpath2=3D"D1/D2/D3"
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir -p ${basedir}/${dirpath1}
-+	_casefold_lsattr_dir ${basedir}/${dirpath1} | _filter_scratch
-+
-+	[ -d ${basedir}/${dirpath2} ] || \
-+		echo "Directory CI Lookup failed."
-+	_casefold_check_exact_name "${basedir}" "${dirpath1}" || \
-+		echo "Created directory with wrong name."
-+
-+	touch ${basedir}/${dirpath2}/${filename1}
-+	[ -f ${basedir}/${dirpath1}/${filename2} ] || \
-+		echo "Couldn't create file on casefolded parent."
-+}
-+
-+# Test nesting of sensitive directory inside insensitive directory.
-+test_nesting_sensitive_insensitive_tree_simple()
-+{
-+	local basedir=3D${SCRATCH_MNT}/sd1
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir -p ${basedir}/sd1
-+	_casefold_set_attr ${basedir}/sd1
-+
-+	mkdir ${basedir}/sd1/sd2
-+	_casefold_unset_attr ${basedir}/sd1/sd2
-+
-+	touch ${basedir}/sd1/sd2/${filename1}
-+	[ -f ${basedir}/sd1/sd2/${filename1} ] || \
-+		echo "Exact nested file lookup failed."
-+	[ -f ${basedir}/sd1/SD2/${filename1} ] || \
-+		echo "Nested file lookup failed."
-+	[ -f ${basedir}/sd1/SD2/${filename2} ] && \
-+		echo "Wrong file lookup passed, should have fail."
-+}
-+
-+test_nesting_sensitive_insensitive_tree_complex()
-+{
-+	# Test nested-directories
-+	local basedir=3D${SCRATCH_MNT}/nesting
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir ${basedir}/nd1
-+	_casefold_set_attr ${basedir}/nd1
-+	mkdir ${basedir}/nd1/nd2
-+	_casefold_unset_attr ${basedir}/nd1/nd2
-+	mkdir ${basedir}/nd1/nd2/nd3
-+	_casefold_set_attr ${basedir}/nd1/nd2/nd3
-+	mkdir ${basedir}/nd1/nd2/nd3/nd4
-+	_casefold_unset_attr ${basedir}/nd1/nd2/nd3/nd4
-+	mkdir ${basedir}/nd1/nd2/nd3/nd4/nd5
-+	_casefold_set_attr ${basedir}/nd1/nd2/nd3/nd4/nd5
-+
-+	[ -d ${basedir}/ND1/ND2/nd3/ND4/nd5 ] || \
-+		echo "Nest-dir Lookup failed."
-+	[ -d ${basedir}/nd1/nd2/nd3/nd4/ND5 ] && \
-+		echo "ND5: Nest-dir Lookup passed, it should fail."
-+	[ -d ${basedir}/nd1/nd2/nd3/ND4/nd5 ] || \
-+		echo "Nest-dir Lookup failed."
-+	[ -d ${basedir}/nd1/nd2/ND3/nd4/ND5 ] && \
-+		echo "ND3: Nest-dir Lookup passed, it should fail."
-+}
-+
-+test_symlink_with_inexact_name()
-+{
-+	local basedir=3D${SCRATCH_MNT}/symlink
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir ${basedir}/ind1
-+	mkdir ${basedir}/ind2
-+	_casefold_set_attr ${basedir}/ind1
-+	touch ${basedir}/ind1/target
-+
-+	ln -s ${basedir}/ind1/TARGET ${basedir}/ind2/link
-+	[ -L ${basedir}/ind2/link ] || echo "Not a symlink."
-+	readlink -e ${basedir}/ind2/link | _filter_scratch
-+}
-+
-+do_test_name_preserve()
-+{
-+	local basedir=3D${1}
-+	local exact=3D${2}
-+	local casefold=3D${3}
-+
-+	touch ${basedir}/${exact}
-+	rm ${basedir}/${exact}
-+
-+	touch ${basedir}/${casefold}
-+	_casefold_check_exact_name ${basedir} ${casefold} ||
-+		echo "${casefold} was not created with exact name"
-+}
-+
-+# Name-preserving tests
-+# We create a file with a name, delete it and create again with an
-+# equivalent name.  If the negative dentry wasn't invalidated, the
-+# file might be created using $1 instead of $2.
-+test_name_preserve()
-+{
-+	local basedir=3D${SCRATCH_MNT}/test_name_preserve
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	do_test_name_preserve "${basedir}" "${pt_file1}" "${pt_file2}"
-+	do_test_name_preserve "${basedir}" "${jp_file1}" "${jp_file2}"
-+	do_test_name_preserve "${basedir}" "${ar_file1}" "${ar_file2}"
-+	do_test_name_preserve "${basedir}" "${fr_file1}" "${fr_file2}"
-+}
-+
-+do_test_dir_name_preserve()
-+{
-+	local basedir=3D${1}
-+	local exact=3D${2}
-+	local casefold=3D${3}
-+
-+	mkdir ${basedir}/${exact}
-+	rmdir ${basedir}/${exact}
-+
-+	mkdir ${basedir}/${casefold}
-+	_casefold_check_exact_name ${basedir} ${casefold} ||
-+		echo "${casefold} was not created with exact name"
-+}
-+
-+test_dir_name_preserve()
-+{
-+	local basedir=3D${SCRATCH_MNT}/"dir-test_name_preserve"
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	do_test_dir_name_preserve "${basedir}" "${pt_file1}" "${pt_file2}"
-+	do_test_dir_name_preserve "${basedir}" "${jp_file1}" "${jp_file2}"
-+	do_test_dir_name_preserve "${basedir}" "${ar_file1}" "${ar_file2}"
-+	do_test_dir_name_preserve "${basedir}" "${fr_file1}" "${fr_file2}"
-+}
-+
-+test_name_reuse()
-+{
-+	local basedir=3D${SCRATCH_MNT}/reuse
-+	local reuse1=3DfileX
-+	local reuse2=3DFILEX
-+
-+	mkdir ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	touch ${basedir}/${reuse1}
-+	rm -f ${basedir}/${reuse1} || echo "File lookup failed."
-+	touch ${basedir}/${reuse2}
-+	_casefold_check_exact_name "${basedir}" "${reuse2}" || \
-+		echo "File created with wrong name"
-+	_casefold_check_exact_name "${basedir}" "${reuse1}" && \
-+		echo "File created with the old name"
-+}
-+
-+test_create_with_same_name()
-+{
-+	local basedir=3D${SCRATCH_MNT}/same_name
-+
-+	mkdir ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir -p ${basedir}/same1/same1
-+	touch ${basedir}/SAME1/sAME1/sAMe1
-+	touch -c ${basedir}/SAME1/sAME1/same1 ||
-+		echo "Would create a new file instead of using old one"
-+}
-+
-+test_file_rename()
-+{
-+	local basedir=3D${SCRATCH_MNT}/rename
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	# Move to an equivalent name should not work
-+	mv ${basedir}/rename ${basedir}/rename 2>&1 | \
-+		_filter_scratch
-+
-+	_casefold_check_exact_name ${basedir} "rename" || \
-+		echo "Name shouldn't change."
-+}
-+
-+# Test openfd with casefold.
-+# 1. Delete a file after gettings its fd.
-+# 2. Then create new dir with same name
-+test_casefold_openfd()
-+{
-+	local basedir=3D${SCRATCH_MNT}/openfd
-+	local ofd1=3D"openfd"
-+	local ofd2=3D"OPENFD"
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	exec 3<> ${basedir}/${ofd1}
-+	rm -rf ${basedir}/${ofd1}
-+	mkdir ${basedir}/${ofd2}
-+	[ -d ${basedir}/${ofd2} ] || echo "Not a directory"
-+	_casefold_check_exact_name ${basedir} "${ofd2}" ||
-+		echo "openfd file was created using old name"
-+	rm -rf ${basedir}/${ofd2}
-+	exec 3>&-
-+}
-+
-+# Test openfd with casefold.
-+# 1. Delete a file after gettings its fd.
-+# 2. Then create new file with same name
-+# 3. Read from open-fd and write into new file.
-+test_casefold_openfd2()
-+{
-+	local basedir=3D${SCRATCH_MNT}/openfd2
-+	local ofd1=3D"openfd"
-+	local ofd2=3D"OPENFD"
-+
-+	mkdir ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	date > ${basedir}/${ofd1}
-+	exec 3<> ${basedir}/${ofd1}
-+	rm -rf ${basedir}/${ofd1}
-+	touch ${basedir}/${ofd1}
-+	[ -f ${basedir}/${ofd2} ] || echo "Not a file"
-+	read data <&3
-+	echo $data >> ${basedir}/${ofd1}
-+	exec 3>&-
-+}
-+
-+test_hard_link_lookups()
-+{
-+	local basedir=3D${SCRATCH_MNT}/hard_link
-+
-+	mkdir ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	touch ${basedir}/h1
-+	ln ${basedir}/H1 ${SCRATCH_MNT}/h1
-+	cnt=3D`stat -c %h ${basedir}/h1`
-+	[ $cnt -eq 1 ] && echo "Unable to create hardlink"
-+
-+	# Create hardlink for casefold dir file and inside regular dir.
-+	touch ${SCRATCH_MNT}/h2
-+	ln ${SCRATCH_MNT}/h2 ${basedir}/H2
-+	cnt=3D`stat -c %h ${basedir}/h2`
-+	[ $cnt -eq 1 ] && echo "Unable to create hardlink"
-+}
-+
-+test_xattrs_lookups()
-+{
-+	local basedir=3D${SCRATCH_MNT}/xattrs
-+
-+	mkdir ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	mkdir -p ${basedir}/x
-+
-+	${SETFATTR_PROG} -n user.foo -v bar ${basedir}/x
-+	${GETFATTR_PROG} --absolute-names -n user.foo \
-+		${basedir}/x | _filter_scratch
-+
-+	touch ${basedir}/x/f1
-+	${SETFATTR_PROG} -n user.foo -v bar ${basedir}/x/f1
-+	${GETFATTR_PROG} --absolute-names -n user.foo \
-+		${basedir}/x/f1 | _filter_scratch
-+}
-+
-+test_lookup_large_directory()
-+{
-+	local basedir=3D${SCRATCH_MNT}/large
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	touch $(seq -f "${basedir}/file%g" 0 2000)
-+
-+	# We really want to spawn a single process here, to speed up the
-+	# test, but we don't want the output of 2k files, except for
-+	# errors.
-+	cat $(seq -f "${basedir}/FILE%g" 0 2000) || \
-+		echo "Case on large dir failed"
-+}
-+
-+test_strict_mode_invalid_filename()
-+{
-+	local basedir=3D${SCRATCH_MNT}/strict
-+
-+	mkdir -p ${basedir}
-+	_casefold_set_attr ${basedir}
-+
-+	# These creation commands should fail, since we are on strict
-+	# mode.
-+	touch "${basedir}/${blob_file1}" 2>&1 | _filter_scratch
-+	touch "${basedir}/${blob_file2}" 2>&1 | _filter_scratch
-+}
-+
-+#############
-+# Run tests #
-+#############
-+
-+_scratch_mkfs_casefold >>$seqres.full 2>&1
-+
-+_scratch_mount
-+
-+_check_dmesg_for \
-+	"\(${sdev}\): Using encoding defined by superblock: utf8" || \
-+	_fail "Could not mount with encoding: utf8"
-+
-+test_casefold_flag_basic
-+test_casefold_lookup
-+test_bad_casefold_lookup
-+test_create_and_remove
-+test_casefold_flag_removal
-+test_casefold_flag_inheritance
-+test_nesting_sensitive_insensitive_tree_simple
-+test_nesting_sensitive_insensitive_tree_complex
-+test_symlink_with_inexact_name
-+test_name_preserve
-+test_dir_name_preserve
-+test_name_reuse
-+test_create_with_same_name
-+test_file_rename
-+test_casefold_openfd
-+test_casefold_openfd2
-+test_hard_link_lookups
-+test_xattrs_lookups
-+test_lookup_large_directory
-+
-+_scratch_unmount
-+_check_scratch_fs
-+
-+# Test Strict Mode
-+_scratch_mkfs_casefold_strict >>$seqres.full 2>&1
-+_scratch_mount
-+
-+test_strict_mode_invalid_filename
-+
-+_scratch_unmount
-+_check_scratch_fs
-+
-+status=3D0
-+exit
-diff --git a/tests/shared/012.out b/tests/shared/012.out
-new file mode 100644
-index 000000000000..881c375b5576
---- /dev/null
-+++ b/tests/shared/012.out
-@@ -0,0 +1,16 @@
-+QA output created by 012
-+SCRATCH_MNT/basic Extents, Casefold
-+SCRATCH_MNT/basic Extents
-+SCRATCH_MNT/casefold_flag_removal Extents, Casefold
-+SCRATCH_MNT/casefold_flag_removal Extents, Casefold
-+SCRATCH_MNT/flag_inheritance/d1/d2/d3 Extents, Casefold
-+SCRATCH_MNT/symlink/ind1/TARGET
-+mv: cannot stat 'SCRATCH_MNT/rename/rename': No such file or directory
-+# file: SCRATCH_MNT/xattrs/x
-+user.foo=3D"bar"
-+
-+# file: SCRATCH_MNT/xattrs/x/f1
-+user.foo=3D"bar"
-+
-+touch: setting times of 'SCRATCH_MNT/strict/corac'$'\314\247\303': Inval=
-id argument
-+touch: setting times of 'SCRATCH_MNT/strict/cora'$'\303\247\303': Invali=
-d argument
-diff --git a/tests/shared/group b/tests/shared/group
-index b091d9111359..53b4a356695d 100644
---- a/tests/shared/group
-+++ b/tests/shared/group
-@@ -14,6 +14,7 @@
- 009 auto stress dedupe
- 010 auto stress dedupe
- 011 auto quick
-+012 auto quick casefold
- 032 mkfs auto quick
- 272 auto enospc rw
- 289 auto quick
---=20
-2.20.1
+>> I change the expected result for compatibility with current xfsprogs.
+>>
+>> Signed-off-by: Yang Xu<xuyang2018.jy@cn.fujitsu.com>
+> Seems fine to me, but do the other xfs maintainers have opinions (about
+> this test which we've been dragging behind the boat for years)?
+OK.I also want to know whatguys  think about this case. keep it or update it?
+
+> Reviewed-by: Darrick J. Wong<darrick.wong@oracle.com>
+>
+> --D
+>
+>> ---
+>>   tests/xfs/191-input-validation | 21 +++++++++++----------
+>>   1 file changed, 11 insertions(+), 10 deletions(-)
+>>
+>> diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
+>> index b6658015..87953c2d 100755
+>> --- a/tests/xfs/191-input-validation
+>> +++ b/tests/xfs/191-input-validation
+>> @@ -112,10 +112,11 @@ do_mkfs_fail -b size=2b $SCRATCH_DEV
+>>   do_mkfs_fail -b size=nfi $SCRATCH_DEV
+>>   do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
+>>   do_mkfs_fail -n size=2s $SCRATCH_DEV
+>> -do_mkfs_fail -n size=2b $SCRATCH_DEV
+>>   do_mkfs_fail -n size=nfi $SCRATCH_DEV
+>>   do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
+>>
+>> +do_mkfs_pass -n size=2b $SCRATCH_DEV
+>> +
+>>   # bad label length
+>>   do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
+>>
+>> @@ -129,6 +130,8 @@ do_mkfs_pass -d agsize=32M $SCRATCH_DEV
+>>   do_mkfs_pass -d agsize=1g $SCRATCH_DEV
+>>   do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
+>>   do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
+>> +do_mkfs_pass -d agsize=8192b $SCRATCH_DEV
+>> +do_mkfs_pass -d agsize=65536s $SCRATCH_DEV
+>>   do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
+>>   do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
+>>   do_mkfs_pass -d noalign $SCRATCH_DEV
+>> @@ -136,7 +139,10 @@ do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
+>>   do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
+>>   do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
+>>   do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
+>> +do_mkfs_pass -d su=0,sw=64 $SCRATCH_DEV
+>>   do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
+>> +do_mkfs_pass -d su=4096s,sw=64 $SCRATCH_DEV
+>> +do_mkfs_pass -d su=4096b,sw=64 $SCRATCH_DEV
+>>   do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
+>>   do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
+>>   do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
+>> @@ -147,8 +153,6 @@ do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
+>>   do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
+>>   do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
+>>   do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
+>> -do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
+>> -do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
+>>   do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
+>>   do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
+>>   do_mkfs_fail -d agcount=1k $SCRATCH_DEV
+>> @@ -159,13 +163,10 @@ do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
+>>   do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
+>>   do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
+>>   do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
+>> -do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
+>> -do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
+>> -do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
+>>   do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
+>>   do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
+>> @@ -206,6 +207,7 @@ do_mkfs_pass -l sunit=64 $SCRATCH_DEV
+>>   do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
+>>   do_mkfs_pass -l sunit=8 $SCRATCH_DEV
+>>   do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
+>> +do_mkfs_pass -l su=10b $SCRATCH_DEV
+>>   do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
+>>   do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
+>>   do_mkfs_pass -l internal $SCRATCH_DEV
+>> @@ -228,7 +230,6 @@ do_mkfs_fail -l agnum=32 $SCRATCH_DEV
+>>   do_mkfs_fail -l sunit=0  $SCRATCH_DEV
+>>   do_mkfs_fail -l sunit=63 $SCRATCH_DEV
+>>   do_mkfs_fail -l su=1 $SCRATCH_DEV
+>> -do_mkfs_fail -l su=10b $SCRATCH_DEV
+>>   do_mkfs_fail -l su=10s $SCRATCH_DEV
+>>   do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
+>>   do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
+>> @@ -246,7 +247,6 @@ do_mkfs_fail -l version=0  $SCRATCH_DEV
+>>
+>>   # naming section, should pass
+>>   do_mkfs_pass -n size=65536 $SCRATCH_DEV
+>> -do_mkfs_pass -n log=15 $SCRATCH_DEV
+>>   do_mkfs_pass -n version=2 $SCRATCH_DEV
+>>   do_mkfs_pass -n version=ci $SCRATCH_DEV
+>>   do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
+>> @@ -257,6 +257,7 @@ do_mkfs_fail -n version=1 $SCRATCH_DEV
+>>   do_mkfs_fail -n version=cid $SCRATCH_DEV
+>>   do_mkfs_fail -n ftype=4 $SCRATCH_DEV
+>>   do_mkfs_fail -n ftype=0 $SCRATCH_DEV
+>> +do_mkfs_fail -n log=15 $SCRATCH_DEV
+>>
+>>   reset_fsimg
+>>
+>> @@ -280,7 +281,6 @@ do_mkfs_pass -r extsize=1G $SCRATCH_DEV
+>>   do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
+>>   do_mkfs_pass -r noalign $SCRATCH_DEV
+>>
+>> -
+>>   # realtime section, should fail
+>>   do_mkfs_fail -r rtdev=$SCRATCH_DEV
+>>   do_mkfs_fail -r extsize=256 $SCRATCH_DEV
+>> @@ -293,7 +293,6 @@ do_mkfs_fail -r size=65536 $SCRATCH_DEV
+>>   do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
+>>   do_mkfs_pass -i size=512 $SCRATCH_DEV
+>>   do_mkfs_pass -i size=2048 $SCRATCH_DEV
+>> -do_mkfs_pass -i log=10 $SCRATCH_DEV
+>>   do_mkfs_pass -i perblock=2 $SCRATCH_DEV
+>>   do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
+>>   do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
+>> @@ -317,6 +316,8 @@ do_mkfs_fail -i align=2 $SCRATCH_DEV
+>>   do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
+>>   do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
+>>   do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
+>> +do_mkfs_fail -i log=10 $SCRATCH_DEV
+>> +
+>>
+>>   status=0
+>>   exit
+>> -- 
+>> 2.18.1
+>>
+>>
+>>
+>
+> .
+>
