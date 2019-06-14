@@ -1,192 +1,234 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:35631 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1730904AbfFMIbu (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 13 Jun 2019 04:31:50 -0400
-From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Subject: [PATCH v2] xfs/191: update mkfs.xfs input results
-Date: Thu, 13 Jun 2019 16:31:41 +0800
-Message-ID: <1560414701-2590-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:35560 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725789AbfFNDwr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 13 Jun 2019 23:52:47 -0400
+Date: Fri, 14 Jun 2019 11:57:54 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] generic: test statfs on project quota directory
+Message-ID: <20190614035754.GC30864@dhcp-12-102.nay.redhat.com>
+References: <20190513014951.4357-1-zlang@redhat.com>
+ <01F47CA1-E737-4F52-8FF2-A3E0DCD8EB1B@dilger.ca>
+ <20190612073213.GA30864@dhcp-12-102.nay.redhat.com>
+ <20190612150507.GB3773859@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190612150507.GB3773859@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: fstests@vger.kernel.org, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, linux-ext4@vger.kernel.org, linux-xfs@vger.kernel.org, Andreas Dilger <adilger@dilger.ca>
 List-ID: <fstests@vger.kernel.org>
 
-Currently, on 5.2.0-rc4+ kernel, when I run xfs/191-input-validation with upstream xfsprogs,
-I get the following errors because mkfs.xfs binary has changed a lot.
+On Wed, Jun 12, 2019 at 08:05:07AM -0700, Darrick J. Wong wrote:
+> On Wed, Jun 12, 2019 at 03:32:13PM +0800, Zorro Lang wrote:
+> > On Tue, May 14, 2019 at 09:28:38AM -0600, Andreas Dilger wrote:
+> > > On May 12, 2019, at 7:49 PM, Zorro Lang <zlang@redhat.com> wrote:
+> > > > 
+> > > > There's a bug on xfs cause statfs get negative f_ffree value from
+> > > > a project quota directory. It's fixed by "de7243057 fs/xfs: fix
+> > > > f_ffree value for statfs when project quota is set". So add statfs
+> > > > testing on project quota block and inode count limit.
+> > > > 
+> > > > For testing foreign fs quota, change _qmount() function, turn on
+> > > > project if quotaon support.
+> > > > 
+> > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > > > ---
+> > > > 
+> > > > Hi,
+> > > > 
+> > > > (Long time passed, re-send this patch again to get reviewing)
+> > > > 
+> > > > There's one thing I don't understand, so CC ext4 mail list. Please
+> > > > feel free to reply, if anyone knows that:
+> > > > 
+> > > > $ mkfs.ext4 $SCRATCH_DEV
+> > > > $ tune2fs -O quota,project $SCRATCH_DEV
+> > > > $ mount $SCRATCH_DEV $SCRATCH_MNT -o prjquota
+> > > > $ quotaon -P $SCRATCH_MNT
+> > > > $ mkdir $SCRATCH_MNT/t
+> > > > $ xfs_quota -f -x -c "project -p $SCRATCH_MNT/t -s 42" $SCRATCH_MNT
+> > > > $ xfs_quota -f -x -c "limit -p bsoft=100m answer" $SCRATCH_MNT
+> > > > $ df -k $SCRATCH_MNT/t
+> > > > Filesystem    1K-blocks  Used Available Use% Mounted on
+> > > > SCRATCH_DEV    102400     4    102396   1% SCRATCH_MNT
+> > > > 
+> > > > On XFS, the 'Used' field always shows '0'. But why ext4 always has
+> > > > more 4k? Is it a bug or expected.
+> > > 
+> > > Each directory in ext4 consumes a 4KB block, so setting the project
+> > > quota on a directory always consumes at least one block.
+> > 
+> > Ping fstests@vger.kernel.org.
+> > 
+> > One month passed. Is there anything else block this patch merge?
+> 
+> If this is a regression test for an xfs bug, why isn't this in
+> tests/xfs/ ?  Especially because ext4 has different behaviors that clash
+> with the golden output -- what happens if you run this with inline data
+> enabled?
 
---------------------------
-PLATFORM      -- Linux/x86_64  5.2.0-rc4+
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/sda11
-MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/sda11 /mnt/xfstests/scratch
+Hi Darrick,
 
-pass -n size=2b /dev/sda11
-pass -d agsize=8192b /dev/sda11
-pass -d agsize=65536s /dev/sda11
-pass -d su=0,sw=64 /dev/sda11
-pass -d su=4096s,sw=64 /dev/sda11
-pass -d su=4096b,sw=64 /dev/sda11
-pass -l su=10b /dev/sda11
-fail -n log=15 /dev/sda11
-fail -r size=65536,rtdev=$fsimg /dev/sda11
-fail -r rtdev=$fsimg /dev/sda11
-fail -i log=10 /dev/sda11
---------------------------
+Yes, it's a regression test for xfs bug:
+de7243057e7c fs/xfs: fix f_ffree value for statfs when project quota is set
 
-"pass -d su=0,sw=64 /dev/sda11", expect fail, this behavior has been fixed by commit 16adcb88:
-(mkfs: more sunit/swidth sanity checking).
+It's not a xfs only case, due to I thought the test steps are common. If I
+change it to a generic case, it can cover more. Do you think I should change
+it back to XFS only case?
 
-"fail -n log=15 /dev/sda11" "fail -i log=10 /dev/sda11", expect pass, this option has been removed
-since commit 2cf637c(mkfs: remove logarithm based CLI option).
+Thanks,
+Zorro
 
-"fail -r size=65536,rtdev=$fsimg /dev/sda11" "fail -r rtdev=$fsimg /dev/sda11" works well if we disable
-reflink, fail if we enable reflink. It fails because reflink was not supported in realtime devices
-since commit bfa66ec.
-
-I change the expected result for compatibility with current xfsprogs and add rtdev test with reflink .
-
-Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
----
- tests/xfs/191-input-validation | 36 ++++++++++++++++++++++------------
- 1 file changed, 24 insertions(+), 12 deletions(-)
-
-diff --git a/tests/xfs/191-input-validation b/tests/xfs/191-input-validation
-index b6658015..9fe72051 100755
---- a/tests/xfs/191-input-validation
-+++ b/tests/xfs/191-input-validation
-@@ -112,10 +112,11 @@ do_mkfs_fail -b size=2b $SCRATCH_DEV
- do_mkfs_fail -b size=nfi $SCRATCH_DEV
- do_mkfs_fail -b size=4096nfi $SCRATCH_DEV
- do_mkfs_fail -n size=2s $SCRATCH_DEV
--do_mkfs_fail -n size=2b $SCRATCH_DEV
- do_mkfs_fail -n size=nfi $SCRATCH_DEV
- do_mkfs_fail -n size=4096nfi $SCRATCH_DEV
- 
-+do_mkfs_pass -n size=2b $SCRATCH_DEV
-+
- # bad label length
- do_mkfs_fail -L thisiswaytoolong $SCRATCH_DEV
- 
-@@ -129,6 +130,8 @@ do_mkfs_pass -d agsize=32M $SCRATCH_DEV
- do_mkfs_pass -d agsize=1g $SCRATCH_DEV
- do_mkfs_pass -d agsize=$((32 * 1024 * 1024)) $SCRATCH_DEV
- do_mkfs_pass -b size=4096 -d agsize=8192b $SCRATCH_DEV
-+do_mkfs_pass -d agsize=8192b $SCRATCH_DEV
-+do_mkfs_pass -d agsize=65536s $SCRATCH_DEV
- do_mkfs_pass -d sectsize=512,agsize=65536s $SCRATCH_DEV
- do_mkfs_pass -s size=512 -d agsize=65536s $SCRATCH_DEV
- do_mkfs_pass -d noalign $SCRATCH_DEV
-@@ -136,7 +139,10 @@ do_mkfs_pass -d sunit=0,swidth=0 $SCRATCH_DEV
- do_mkfs_pass -d sunit=8,swidth=8 $SCRATCH_DEV
- do_mkfs_pass -d sunit=8,swidth=64 $SCRATCH_DEV
- do_mkfs_pass -d su=0,sw=0 $SCRATCH_DEV
-+do_mkfs_pass -d su=0,sw=64 $SCRATCH_DEV
- do_mkfs_pass -d su=4096,sw=1 $SCRATCH_DEV
-+do_mkfs_pass -d su=4096s,sw=64 $SCRATCH_DEV
-+do_mkfs_pass -d su=4096b,sw=64 $SCRATCH_DEV
- do_mkfs_pass -d su=4k,sw=1 $SCRATCH_DEV
- do_mkfs_pass -d su=4K,sw=8 $SCRATCH_DEV
- do_mkfs_pass -b size=4096 -d su=1b,sw=8 $SCRATCH_DEV
-@@ -147,8 +153,6 @@ do_mkfs_pass -s size=512 -d su=8s,sw=8 $SCRATCH_DEV
- do_mkfs_fail -d size=${fssize}b $SCRATCH_DEV
- do_mkfs_fail -d size=${fssize}s $SCRATCH_DEV
- do_mkfs_fail -d size=${fssize}yerk $SCRATCH_DEV
--do_mkfs_fail -d agsize=8192b $SCRATCH_DEV
--do_mkfs_fail -d agsize=65536s $SCRATCH_DEV
- do_mkfs_fail -d agsize=32Mbsdfsdo $SCRATCH_DEV
- do_mkfs_fail -d agsize=1GB $SCRATCH_DEV
- do_mkfs_fail -d agcount=1k $SCRATCH_DEV
-@@ -159,13 +163,10 @@ do_mkfs_fail -d sunit=64,swidth=0 $SCRATCH_DEV
- do_mkfs_fail -d sunit=64,swidth=64,noalign $SCRATCH_DEV
- do_mkfs_fail -d sunit=64k,swidth=64 $SCRATCH_DEV
- do_mkfs_fail -d sunit=64,swidth=64m $SCRATCH_DEV
--do_mkfs_fail -d su=0,sw=64 $SCRATCH_DEV
- do_mkfs_fail -d su=4096,sw=0 $SCRATCH_DEV
- do_mkfs_fail -d su=4097,sw=1 $SCRATCH_DEV
- do_mkfs_fail -d su=4096,sw=64,noalign $SCRATCH_DEV
- do_mkfs_fail -d su=4096,sw=64s $SCRATCH_DEV
--do_mkfs_fail -d su=4096s,sw=64 $SCRATCH_DEV
--do_mkfs_fail -d su=4096b,sw=64 $SCRATCH_DEV
- do_mkfs_fail -d su=4096garabge,sw=64 $SCRATCH_DEV
- do_mkfs_fail -d su=4096,sw=64,sunit=64,swidth=64 $SCRATCH_DEV
- do_mkfs_fail -d sectsize=10,agsize=65536s $SCRATCH_DEV
-@@ -206,6 +207,7 @@ do_mkfs_pass -l sunit=64 $SCRATCH_DEV
- do_mkfs_pass -l sunit=64 -d sunit=8,swidth=8 $SCRATCH_DEV
- do_mkfs_pass -l sunit=8 $SCRATCH_DEV
- do_mkfs_pass -l su=$((4096*10)) $SCRATCH_DEV
-+do_mkfs_pass -l su=10b $SCRATCH_DEV
- do_mkfs_pass -b size=4096 -l su=10b $SCRATCH_DEV
- do_mkfs_pass -l sectsize=512,su=$((4096*10)) $SCRATCH_DEV
- do_mkfs_pass -l internal $SCRATCH_DEV
-@@ -228,7 +230,6 @@ do_mkfs_fail -l agnum=32 $SCRATCH_DEV
- do_mkfs_fail -l sunit=0  $SCRATCH_DEV
- do_mkfs_fail -l sunit=63 $SCRATCH_DEV
- do_mkfs_fail -l su=1 $SCRATCH_DEV
--do_mkfs_fail -l su=10b $SCRATCH_DEV
- do_mkfs_fail -l su=10s $SCRATCH_DEV
- do_mkfs_fail -l su=$((4096*10+1)) $SCRATCH_DEV
- do_mkfs_fail -l sectsize=10,agsize=65536s $SCRATCH_DEV
-@@ -246,7 +247,6 @@ do_mkfs_fail -l version=0  $SCRATCH_DEV
- 
- # naming section, should pass
- do_mkfs_pass -n size=65536 $SCRATCH_DEV
--do_mkfs_pass -n log=15 $SCRATCH_DEV
- do_mkfs_pass -n version=2 $SCRATCH_DEV
- do_mkfs_pass -n version=ci $SCRATCH_DEV
- do_mkfs_pass -n ftype=0 -m crc=0 $SCRATCH_DEV
-@@ -257,6 +257,7 @@ do_mkfs_fail -n version=1 $SCRATCH_DEV
- do_mkfs_fail -n version=cid $SCRATCH_DEV
- do_mkfs_fail -n ftype=4 $SCRATCH_DEV
- do_mkfs_fail -n ftype=0 $SCRATCH_DEV
-+do_mkfs_fail -n log=15 $SCRATCH_DEV
- 
- reset_fsimg
- 
-@@ -273,14 +274,24 @@ do_mkfs_fail -m crc=0,finobt=1 $SCRATCH_DEV
- do_mkfs_fail -m crc=1 -n ftype=0 $SCRATCH_DEV
- 
- 
-+# realtime section, results depend on reflink
-+$MKFS_XFS_PROG -f -m reflink=0 $SCRATCH_DEV >/dev/null 2>&1
-+if [ $? -eq 0 ]; then
-+	do_mkfs_pass -m reflink=0 -r rtdev=$fsimg $SCRATCH_DEV
-+	do_mkfs_pass -m reflink=0 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-+	do_mkfs_fail -m reflink=1 -r rtdev=$fsimg $SCRATCH_DEV
-+	do_mkfs_fail -m reflink=1 -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-+else
-+	do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
-+	do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
-+fi
-+
-+
- # realtime section, should pass
--do_mkfs_pass -r rtdev=$fsimg $SCRATCH_DEV
- do_mkfs_pass -r extsize=4k $SCRATCH_DEV
- do_mkfs_pass -r extsize=1G $SCRATCH_DEV
--do_mkfs_pass -r size=65536,rtdev=$fsimg $SCRATCH_DEV
- do_mkfs_pass -r noalign $SCRATCH_DEV
- 
--
- # realtime section, should fail
- do_mkfs_fail -r rtdev=$SCRATCH_DEV
- do_mkfs_fail -r extsize=256 $SCRATCH_DEV
-@@ -293,7 +304,6 @@ do_mkfs_fail -r size=65536 $SCRATCH_DEV
- do_mkfs_pass -i size=256 -m crc=0 $SCRATCH_DEV
- do_mkfs_pass -i size=512 $SCRATCH_DEV
- do_mkfs_pass -i size=2048 $SCRATCH_DEV
--do_mkfs_pass -i log=10 $SCRATCH_DEV
- do_mkfs_pass -i perblock=2 $SCRATCH_DEV
- do_mkfs_pass -i maxpct=10 $SCRATCH_DEV
- do_mkfs_pass -i maxpct=100 $SCRATCH_DEV
-@@ -317,6 +327,8 @@ do_mkfs_fail -i align=2 $SCRATCH_DEV
- do_mkfs_fail -i sparse -m crc=0 $SCRATCH_DEV
- do_mkfs_fail -i align=0 -m crc=1 $SCRATCH_DEV
- do_mkfs_fail -i attr=1 -m crc=1 $SCRATCH_DEV
-+do_mkfs_fail -i log=10 $SCRATCH_DEV
-+
- 
- status=0
- exit
--- 
-2.18.1
+> 
+> --D
+> 
+> > Thanks,
+> > Zorro
+> > 
+> > > 
+> > > Cheers, Andreas
+> > > 
+> > > > common/quota          |  4 +++
+> > > > tests/generic/999     | 74 +++++++++++++++++++++++++++++++++++++++++++
+> > > > tests/generic/999.out |  3 ++
+> > > > tests/generic/group   |  1 +
+> > > > 4 files changed, 82 insertions(+)
+> > > > create mode 100755 tests/generic/999
+> > > > create mode 100644 tests/generic/999.out
+> > > > 
+> > > > diff --git a/common/quota b/common/quota
+> > > > index f19f81a1..315df8cb 100644
+> > > > --- a/common/quota
+> > > > +++ b/common/quota
+> > > > @@ -200,6 +200,10 @@ _qmount()
+> > > >    if [ "$FSTYP" != "xfs" ]; then
+> > > >        quotacheck -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> > > >        quotaon -ug $SCRATCH_MNT >>$seqres.full 2>&1
+> > > > +	# try to turn on project quota if it's supported
+> > > > +	if quotaon --help 2>&1 | grep -q '\-\-project'; then
+> > > > +		quotaon --project $SCRATCH_MNT >>$seqres.full 2>&1
+> > > > +	fi
+> > > >    fi
+> > > >    chmod ugo+rwx $SCRATCH_MNT
+> > > > }
+> > > > diff --git a/tests/generic/999 b/tests/generic/999
+> > > > new file mode 100755
+> > > > index 00000000..555341f1
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/999
+> > > > @@ -0,0 +1,74 @@
+> > > > +#! /bin/bash
+> > > > +# SPDX-License-Identifier: GPL-2.0
+> > > > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+> > > > +#
+> > > > +# FS QA Test No. 999
+> > > > +#
+> > > > +# Test statfs when project quota is set.
+> > > > +# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
+> > > > +#
+> > > > +seq=`basename $0`
+> > > > +seqres=$RESULT_DIR/$seq
+> > > > +echo "QA output created by $seq"
+> > > > +
+> > > > +here=`pwd`
+> > > > +tmp=/tmp/$$
+> > > > +status=1	# failure is the default!
+> > > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > > +
+> > > > +_cleanup()
+> > > > +{
+> > > > +	cd /
+> > > > +	_scratch_unmount
+> > > > +	rm -f $tmp.*
+> > > > +}
+> > > > +
+> > > > +# get standard environment, filters and checks
+> > > > +. ./common/rc
+> > > > +. ./common/filter
+> > > > +. ./common/quota
+> > > > +
+> > > > +# remove previous $seqres.full before test
+> > > > +rm -f $seqres.full
+> > > > +
+> > > > +# real QA test starts here
+> > > > +_supported_fs generic
+> > > > +_supported_os Linux
+> > > > +_require_scratch
+> > > > +_require_quota
+> > > > +_require_xfs_quota_foreign
+> > > > +
+> > > > +_scratch_mkfs >/dev/null 2>&1
+> > > > +_scratch_enable_pquota
+> > > > +_qmount_option "prjquota"
+> > > > +_qmount
+> > > > +_require_prjquota $SCRATCH_DEV
+> > > > +
+> > > > +# Create a directory to be project object, and create a file to take 64k space
+> > > > +mkdir $SCRATCH_MNT/t
+> > > > +$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
+> > > > +
+> > > > +# Setup temporary replacements for /etc/projects and /etc/projid
+> > > > +cat >$tmp.projects <<EOF
+> > > > +42:$SCRATCH_MNT/t
+> > > > +EOF
+> > > > +
+> > > > +cat >$tmp.projid <<EOF
+> > > > +answer:42
+> > > > +EOF
+> > > > +
+> > > > +quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
+> > > > +$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
+> > > > +$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
+> > > > +
+> > > > +# The itotal and size should be 53 and 102400(k), as above project quota limit.
+> > > > +# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
+> > > > +# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
+> > > > +# 6[48] at the end.
+> > > > +df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
+> > > > +	_filter_scratch | _filter_spaces | \
+> > > > +	sed -e "/SCRATCH_MNT/s/6[48]/N/"
+> > > > +
+> > > > +# success, all done
+> > > > +status=0
+> > > > +exit
+> > > > diff --git a/tests/generic/999.out b/tests/generic/999.out
+> > > > new file mode 100644
+> > > > index 00000000..1bebabd4
+> > > > --- /dev/null
+> > > > +++ b/tests/generic/999.out
+> > > > @@ -0,0 +1,3 @@
+> > > > +QA output created by 999
+> > > > +File Inodes IUsed 1K-blocks Used
+> > > > +SCRATCH_MNT/t 53 2 102400 N
+> > > > diff --git a/tests/generic/group b/tests/generic/group
+> > > > index 9f4845c6..35da10a5 100644
+> > > > --- a/tests/generic/group
+> > > > +++ b/tests/generic/group
+> > > > @@ -542,3 +542,4 @@
+> > > > 537 auto quick trim
+> > > > 538 auto quick aio
+> > > > 539 auto quick punch seek
+> > > > +999 auto quick quota
+> > > > --
+> > > > 2.17.2
+> > > > 
+> > > 
+> > > 
+> > > Cheers, Andreas
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > > Cheers, Andreas
+> > > 
+> > > 
+> > > 
+> > > 
+> > > 
+> > 
+> > 
