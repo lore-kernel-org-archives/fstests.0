@@ -1,144 +1,115 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44094 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725895AbfFPRBP (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 16 Jun 2019 13:01:15 -0400
-Date: Mon, 17 Jun 2019 01:06:25 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] xfs: test xfs_info on block device and mountpoint
-Message-ID: <20190616170625.GE30864@dhcp-12-102.nay.redhat.com>
-References: <20190614044954.22022-1-zlang@redhat.com>
- <20190616164948.GD1872778@magnolia>
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:39191 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725879AbfFPOys (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 16 Jun 2019 10:54:48 -0400
+Received: by mail-pg1-f193.google.com with SMTP id 196so4316146pgc.6
+        for <fstests@vger.kernel.org>; Sun, 16 Jun 2019 07:54:48 -0700 (PDT)
+Message-ID: <5d065837.1c69fb81.8cee2.9fbd@mx.google.com>
+Date: Sun, 16 Jun 2019 22:54:45 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 12b7dddbc265
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="Pu0350APJwYP"
 Content-Disposition: inline
-In-Reply-To: <20190616164948.GD1872778@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 16, 2019 at 09:49:48AM -0700, Darrick J. Wong wrote:
-> On Fri, Jun 14, 2019 at 12:49:54PM +0800, Zorro Lang wrote:
-> > There was a bug, xfs_info fails on a mounted block device:
-> > 
-> >   # xfs_info /dev/mapper/testdev
-> >   xfs_info: /dev/mapper/testdev contains a mounted filesystem
-> > 
-> >   fatal error -- couldn't initialize XFS library
-> > 
-> > xfsprogs has fixed it, this case is used to cover this bug.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> >  tests/xfs/1000     | 65 ++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/1000.out |  2 ++
-> >  tests/xfs/group    |  1 +
-> >  3 files changed, 68 insertions(+)
-> >  create mode 100755 tests/xfs/1000
-> >  create mode 100644 tests/xfs/1000.out
-> > 
-> > diff --git a/tests/xfs/1000 b/tests/xfs/1000
-> > new file mode 100755
-> > index 00000000..689fe9e7
-> > --- /dev/null
-> > +++ b/tests/xfs/1000
-> > @@ -0,0 +1,65 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 1000
-> > +#
-> > +# test xfs_info on block device and mountpoint
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +
-> > +test_xfs_info()
-> > +{
-> > +	local target="$1"
-> > +	local file=$tmp.$seq.info
-> > +
-> > +	$XFS_INFO_PROG $target > $file 2>&1
-> > +	if [ $? -ne 0 ];then
-> > +		echo "$XFS_INFO_PROG $target fails:"
-> > +		cat $file
-> 
-> Should we compare the contents between the two xfs_info invocations?
 
-Hmm, make sense!
+--Pu0350APJwYP
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> > +	else
-> > +		cat $file >> $seqres.full
-> > +	fi
-> > +}
-> > +
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +# test unmounted block device(contains XFS)
-> > +# Due to old xfsprogs doesn't support xfs_info a unmounted device, skip it
-> > +$XFS_DB_PROG -c "info" $SCRATCH_DEV | grep -q "command info not found"
-> 
-> Does _require_xfs_db_command not work here?
+Hi all,
 
-Wow, I forgot it, thanks for reminding:)
+The master branch of the xfstests repository at:
 
-> 
-> --D
-> 
-> > +if [ $? -ne 0 ]; then
-> > +	test_xfs_info $SCRATCH_DEV
-> > +fi
-> > +
-> > +_scratch_mount
-> > +# test mounted block device and mountpoint
-> > +test_xfs_info $SCRATCH_DEV
-> > +test_xfs_info $SCRATCH_MNT
-> > +
-> > +echo "Silence is golden"
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/1000.out b/tests/xfs/1000.out
-> > new file mode 100644
-> > index 00000000..681b3b48
-> > --- /dev/null
-> > +++ b/tests/xfs/1000.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 1000
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index ffe4ae12..047fe332 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -504,3 +504,4 @@
-> >  504 auto quick mkfs label
-> >  505 auto quick spaceman
-> >  506 auto quick health
-> > +1000 auto quick
-> > -- 
-> > 2.17.2
-> > 
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. New infrastructure and new test to test filename
+casefold feature (mainly for ext4 at the moment) have been added in this
+update. There's also a new generic test to exercise FS_IOC_FSSETXATTR ioctl
+without proper capability. And as usual, there're a bunch of random fixes are
+included as well.
+
+overlayfs would fail generic/555 with v5.2-rc4 kernel. Hopefully the mentioned
+fix in commit log will be merged soon.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+12b7dddbc265 generic: Add tests for filename casefolding feature
+
+New commits:
+
+Amir Goldstein (6):
+      [dfc4506cf450] generic/553: fix test description
+      [803d3afd2f0d] generic/554: test only copy to active swap file
+      [c42c8e6c2adc] fstests: don't oom the box opening tmpfiles (take 2)
+      [8de6e5535b31] common/rc: print out xfs_io parameter when command fails
+      [e28c4e69a433] fstests: check for filesystem FS_IOC_FSSETXATTR support
+      [654a7814ad1b] generic: check CAP_LINUX_IMMUTABLE capability with FS_IOC_FSSETXATTR
+
+Filipe Manana (1):
+      [71400f712a42] btrfs/146: remove unnecessary scratch unmount to avoid test failure
+
+Gabriel Krisman Bertazi (1):
+      [82feab4079b5] common/casefold: Add infrastructure to test filename casefold feature
+
+Lakshmipathi.G (1):
+      [12b7dddbc265] generic: Add tests for filename casefolding feature
+
+Theodore Ts'o (2):
+      [ffdecf7498a1] report: gracefully handle XML report creation when no tests are run
+      [2b42b7e164cb] ext4/035: skip this test if DAX is in use
+
+
+Code Diffstat:
+
+ common/casefold              |  90 ++++++++
+ common/rc                    |  30 ++-
+ common/report                |   7 +-
+ doc/requirement-checking.txt |   2 +-
+ tests/btrfs/146              |   1 -
+ tests/ext4/035               |   1 +
+ tests/generic/531            |   4 +-
+ tests/generic/553            |  10 +-
+ tests/generic/554            |   6 +-
+ tests/generic/554.out        |   1 -
+ tests/generic/555            |  74 +++++++
+ tests/generic/555.out        |   9 +
+ tests/generic/556            | 509 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/556.out        |  16 ++
+ tests/generic/group          |   2 +
+ tests/xfs/260                |   2 +-
+ tests/xfs/431                |   2 +-
+ tests/xfs/502                |   4 +-
+ 18 files changed, 744 insertions(+), 26 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--Pu0350APJwYP
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJdBlfuAAoJECZSqilcj+dj5BYP/ju+t/ln8mD3nAkbuEYgUiJM
+yaYDsPSsv+r0DViJQwFKV3qPTirSb7JJPdVDCApsHqKbGbrheBY+uhJHJwMLfo+v
+3cD9ykrn6MWel8miLrKsZm16Ke9BvFVc/pTOxK7LRZGHJrmbIQlYmxcV7n5UJuCU
+pqOm+O0+5LUz6le3pujs4QUMPZH+DmPghxOpBkc8l2nu8Qls8C3ZXO0FMg+FnwGc
+fwYx6VB1yBW9pd4Xsx1DkulQnWLzRRn6OwTWUruNKrjmqcub5e3f4TXJskoJXWE6
+bCVu4RFezuOvQtBZW+yYQ/DdwO/BLwqv9Y94R5rhTOSZsRtVkgaZvXrFjc4kgnKC
+vVWpinWaDkdMhR6HGyofN5mVBYjmBWkivZxuKu02F2trUFpqI13BzWmWa1TpZ9wy
+KN6LrtNe5z/jNxgXHxmzl7+/sMjx4FplnvUemJD/77xyKXQYwsG9Ma3TyIU4FX33
+U+boknJ6LQlVCUBnzj/FopHVnYZ8eWSK9VZKve9VnU540MT2HmXVUIzYVYg1yzCf
+R2BNsy3yRGzfR27oSiQ+9qO5E0JWGMqE8I/HAcE5y0EBzNdQUO3DOvfWb8zMkFWx
+19lr5nBMlMgxt3yGb04kn+Q8eEtATtqypYFnbvzzvvy0C+sad/wUQWX9KdqGNPhB
+9NttJM5u8i9VxumwYR1P
+=NcGU
+-----END PGP SIGNATURE-----
+
+--Pu0350APJwYP--
