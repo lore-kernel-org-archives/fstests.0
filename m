@@ -1,68 +1,75 @@
-Received: from mail-wm1-f68.google.com ([209.85.128.68]:53413 "EHLO
-        mail-wm1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725906AbfFQN6v (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jun 2019 09:58:51 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay: fix _scratch_remount with xfs_info 5.0.0
-Date: Mon, 17 Jun 2019 16:58:43 +0300
-Message-Id: <20190617135843.12659-1-amir73il@gmail.com>
+Received: from userp2120.oracle.com ([156.151.31.85]:39436 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726001AbfFQSWc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jun 2019 14:22:32 -0400
+Date: Mon, 17 Jun 2019 11:22:26 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH] xfs_info: limit findmnt to find mounted xfs filesystems
+Message-ID: <20190617182226.GM3773859@magnolia>
+References: <20190617095447.3748-1-amir73il@gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190617095447.3748-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Eric Sandeen <sandeen@sandeen.net>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-xfs_info version 5.0.0 started using findmnt to find the
-filesystem to query. This change resulted in a regression
-of _scratch_remount when testing overlay over xfs.
-For example, test overlay/035, started to report:
-[not run] overlay/035 -- upper fs needs to support d_type
+On Mon, Jun 17, 2019 at 12:54:47PM +0300, Amir Goldstein wrote:
+> When running xfstests with -overlay, the xfs mount point
+> (a.k.a $OVL_BASE_SCRATCH_MNT) is used as the $SCRATCH_DEV argument
+> to the overlay mount, like this:
+> 
+> /dev/vdf /vdf xfs rw,relatime,attr2,inode64,noquota 0 0
+> /vdf /vdf/ovl-mnt overlay rw,lowerdir=/vdf/lower,upperdir=/vdf/upper...
+> 
+> Ever since commit bbb43745, when xfs_info started using findmnt,
+> when calling the helper `_supports_filetype /vdf` it returns false,
+> and reports: "/vdf/ovl-mnt: Not on a mounted XFS filesystem".
+> 
+> Fix this ambiguity by preferring to query a mounted XFS filesystem,
+> if one can be found.
+> 
+> Fixes: bbb43745 ("xfs_info: use findmnt to handle mounted block devices")
+> Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 
-Internally, '_overlay_scratch_mount -o remount' calls
-'_supports_filetype $OVL_BASE_SCRATCH_MNT -o remount'
-and with the following example mounts:
+Looks good to me, so long as findmnt /has/ a -t option in, uh, whatever
+enterprise distro(s) for which the xfsprogs maintainer might be a
+stakeholder. :)
 
-/dev/vdf /vdf xfs rw,relatime,attr2,inode64,noquota 0 0
-/vdf /vdf/ovl-mnt overlay rw,lowerdir=/vdf/lower,upperdir=/vdf/upper...
+Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
 
-'_supports_filetype /vdf' returns false and reports:
-"/vdf/ovl-mnt: Not on a mounted XFS filesystem".
+--D
 
-Regardless of the change in xfs_info, which I proposed a fix
-for, there is no reason to test d_type support on remount.
-Therefore, fix the regression by skipping unneeded overlayfs
-mount logic on remount.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
-
-Eryu,
-
-I think this fix is desired regardless of the proposed
-xfs_info fix [1].
-
-Thanks,
-Amir.
-
-[1] https://marc.info/?l=linux-xfs&m=156077152313826&w=2
-
- common/overlay | 5 +++++
- 1 file changed, 5 insertions(+)
-
-diff --git a/common/overlay b/common/overlay
-index 00946a94..65c639e9 100644
---- a/common/overlay
-+++ b/common/overlay
-@@ -105,6 +105,11 @@ _overlay_base_scratch_mount()
- 
- _overlay_scratch_mount()
- {
-+	if echo "$*" | grep -q remount; then
-+		$MOUNT_PROG $SCRATCH_MNT $*
-+		return
-+	fi
-+
- 	_overlay_base_scratch_mount && \
- 		_overlay_mount $OVL_BASE_SCRATCH_MNT $SCRATCH_MNT $*
- }
--- 
-2.17.1
+> ---
+> 
+> Eric,
+> 
+> FYI, I don't *need* to fix xfs_info in order to fix xfstests
+> and I do plan to send an independent fix to xfstests, but this
+> seems like a correct fix regardless of the specific xfstests
+> regression.
+> 
+> Thanks,
+> Amir.
+> 
+>  spaceman/xfs_info.sh | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/spaceman/xfs_info.sh b/spaceman/xfs_info.sh
+> index 1bf6d2c3..3b10dc14 100755
+> --- a/spaceman/xfs_info.sh
+> +++ b/spaceman/xfs_info.sh
+> @@ -40,7 +40,7 @@ case $# in
+>  
+>  		# If we find a mountpoint for the device, do a live query;
+>  		# otherwise try reading the fs with xfs_db.
+> -		if mountpt="$(findmnt -f -n -o TARGET "${arg}" 2> /dev/null)"; then
+> +		if mountpt="$(findmnt -t xfs -f -n -o TARGET "${arg}" 2> /dev/null)"; then
+>  			xfs_spaceman -p xfs_info -c "info" $OPTS "${mountpt}"
+>  			status=$?
+>  		else
+> -- 
+> 2.17.1
+> 
