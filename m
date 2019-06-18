@@ -1,32 +1,58 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:41901 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726023AbfFRBuv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 17 Jun 2019 21:50:51 -0400
-Date: Mon, 17 Jun 2019 21:50:34 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [xfstests-bld PATCH] kernel-configs: add CONFIG_PCI to 4.19
- configs
-Message-ID: <20190618015034.GA9033@mit.edu>
-References: <20190618000721.138057-1-ebiggers@kernel.org>
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:36456 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728754AbfFRJCs (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jun 2019 05:02:48 -0400
+Date: Tue, 18 Jun 2019 17:02:38 +0800
+From: Murphy Zhou <jencce.kernel@gmail.com>
+Subject: Re: [PATCH v2 2/2] generic/554: test only copy to active swap file
+Message-ID: <20190618090238.kmeocxasyxds7lzg@XZHOUW.usersys.redhat.com>
+References: <20190611153916.13360-1-amir73il@gmail.com>
+ <20190611153916.13360-2-amir73il@gmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190618000721.138057-1-ebiggers@kernel.org>
+In-Reply-To: <20190611153916.13360-2-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eric Biggers <ebiggers@kernel.org>
-Cc: Satya Tangirala <satyat@google.com>, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 17, 2019 at 05:07:21PM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
-> 
-> On v5.0+, CONFIG_PCI is default 'n', so it must be explicitly selected;
-> otherwise the kvm-xfstests VM doesn't boot.  It's expected that the 4.19
-> configs work on later kernels too (up until whatever becomes the next
-> LTS release), so add CONFIG_PCI=y to them.
-> 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
+On Tue, Jun 11, 2019 at 06:39:16PM +0300, Amir Goldstein wrote:
+> Depending on filesystem, copying from active swapfile may be allowed,
+> just as read from swapfile may be allowed.
 
-Applied, thanks.
+...snip..
 
-					- Ted
+> +# This is a regression test for kernel commit:
+> +#   a31713517dac ("vfs: introduce generic_file_rw_checks()")
+
+Would you mind updating sha1 after it get merged to Linus tree?
+
+That would be helpful for people tracking this issue.
+
+Thanks,
+Murphy
+
+>  #
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+> @@ -46,7 +49,6 @@ echo swap files return ETXTBUSY
+>  _format_swapfile $SCRATCH_MNT/swapfile 16m
+>  swapon $SCRATCH_MNT/swapfile
+>  $XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/file" $SCRATCH_MNT/swapfile
+> -$XFS_IO_PROG -f -c "copy_range -l 32k $SCRATCH_MNT/swapfile" $SCRATCH_MNT/copy
+>  swapoff $SCRATCH_MNT/swapfile
+>  
+>  # success, all done
+> diff --git a/tests/generic/554.out b/tests/generic/554.out
+> index ffaa7b0a..19385a05 100644
+> --- a/tests/generic/554.out
+> +++ b/tests/generic/554.out
+> @@ -1,4 +1,3 @@
+>  QA output created by 554
+>  swap files return ETXTBUSY
+>  copy_range: Text file busy
+> -copy_range: Text file busy
+> -- 
+> 2.17.1
+> 
