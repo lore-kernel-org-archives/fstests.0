@@ -1,75 +1,36 @@
-Received: from mail-wr1-f66.google.com ([209.85.221.66]:33498 "EHLO
-        mail-wr1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728810AbfFRGoE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jun 2019 02:44:04 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay/061: remove from auto and quick groups
-Date: Tue, 18 Jun 2019 09:43:55 +0300
-Message-Id: <20190618064355.29398-1-amir73il@gmail.com>
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:38481 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1727105AbfFRPCr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jun 2019 11:02:47 -0400
+Date: Tue, 18 Jun 2019 11:02:42 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: [PATCH v2 2/2] generic/554: test only copy to active swap file
+Message-ID: <20190618150242.GA4576@mit.edu>
+References: <20190611153916.13360-1-amir73il@gmail.com>
+ <20190611153916.13360-2-amir73il@gmail.com>
+ <20190618090238.kmeocxasyxds7lzg@XZHOUW.usersys.redhat.com>
+ <CAOQ4uxhePeTzR1t3e67xY+H0vcvh5toB3S=vdYVKm-skJrM00g@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <CAOQ4uxhePeTzR1t3e67xY+H0vcvh5toB3S=vdYVKm-skJrM00g@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Murphy Zhou <jencce.kernel@gmail.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-In late 2016, tests overlay/01[6-8] where merged to track the
-state of several ilong standing posix compliance issues on overlayfs.
+On Tue, Jun 18, 2019 at 12:16:45PM +0300, Amir Goldstein wrote:
+> On Tue, Jun 18, 2019 at 12:02 PM Murphy Zhou <jencce.kernel@gmail.com> wrote:
+> >
+> > Would you mind updating sha1 after it get merged to Linus tree?
+> >
+> > That would be helpful for people tracking this issue.
+> >
+> 
+> This is the commit id in linux-next and expected to stay the same
+> when the fix is merged to Linus tree for 5.3.
 
-This practice was somewhat of an exception for xfstests project,
-which more often merges tests for issues that are expected to be
-resolved in the short term.
+When I talked to Darrick last week, that was *not* the sense I got
+from him.  It's not necessarily guaranteed to be stable just yet...
 
-Over the years, some test cases have been fixed and more tests
-where created to cover the remaining issues (e.g. overlay/04[34]).
-
-Currently, the only failing test from this category is overlay/061
-which covers item b) in the "Non-standard behavior" section of
-Documentation/filesystems/overlayfs.txt.
-
-Since there is no clear design, roadmap nor allocated resources
-to resolve this remaining issue, the test is removed from the
-"auto" and "quick" groups, following a suggestion that Darrick
-has made for a similarly long failing generic test.
-
-The test was added to the new "posix" group, to allow testing
-for posix compliance.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
----
-
-Eryu,
-
-With this change, check -overlay -g overlay/quick run is expdected
-to be all green.
-
-I did not observe any regressing with check -overlay -g generic/quick
-compared to check -g generic/quick on xfs with recent kernel.
-I did not test all filesystems and -g generic/auto with recent kernel,
-but I am not aware of any expected failures specific for -overlay run
-on generic tests.
-
-check -overlay -g overlay/auto has one non-quick stress test
-(overlay/019) which is failing on lockdep circular locking dependency
-warning (if you have lockdep enabled).
-This is a known issue that has also been reported by syzbot.
-
-Thanks,
-Amir.
-
- tests/overlay/group | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/tests/overlay/group b/tests/overlay/group
-index 8bde6ea1..ef8517a1 100644
---- a/tests/overlay/group
-+++ b/tests/overlay/group
-@@ -63,7 +63,7 @@
- 058 auto quick exportfs
- 059 auto quick copyup
- 060 auto quick metacopy
--061 auto quick copyup
-+061 posix copyup
- 062 auto quick exportfs
- 063 auto quick whiteout
- 064 auto quick copyup
--- 
-2.17.1
+     	   	    			   - Ted
