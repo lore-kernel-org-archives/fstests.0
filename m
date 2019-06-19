@@ -1,94 +1,190 @@
-Received: from mail-pg1-f195.google.com ([209.85.215.195]:44100 "EHLO
-        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726500AbfF3OuK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 30 Jun 2019 10:50:10 -0400
-Received: by mail-pg1-f195.google.com with SMTP id i18so83043pgl.11
-        for <fstests@vger.kernel.org>; Sun, 30 Jun 2019 07:50:09 -0700 (PDT)
-Message-ID: <5d18cc20.1c69fb81.d9000.7bf0@mx.google.com>
-Date: Sun, 30 Jun 2019 22:50:01 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to f769a923f576
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="MJDd3ZcASd54"
-Content-Disposition: inline
+Received: from mx1.redhat.com ([209.132.183.28]:60384 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726479AbfFSKKy (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Jun 2019 06:10:54 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] xfs: project quota ineritance flag test
+Date: Wed, 19 Jun 2019 18:10:47 +0800
+Message-Id: <20190619101047.3149-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+This case is used to cover xfsprogs bug "b136f48b xfs_quota: fix
+false error reporting of project inheritance flag is not set" at
+first. Then test more behavior when project ineritance flag is
+set or removed.
 
---MJDd3ZcASd54
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Zorro Lang <zlang@redhat.com>
+---
+ tests/xfs/507     | 117 ++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/507.out |  23 +++++++++
+ tests/xfs/group   |   1 +
+ 3 files changed, 141 insertions(+)
+ create mode 100755 tests/xfs/507
+ create mode 100644 tests/xfs/507.out
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. This update mainly adds two new xfs specific tests, and
-I don't see any new failures when testing with 5.2-rc6 kernel and latest
-xfsprogs from for-next branch.
-
-There're still some patches pending for review (e.g. the fs-verity tests from
-Eric Biggers), I'll try to go through them next week, but it's really
-appreciated if someone could help with reviewing!
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-f769a923f576 xfs: project quota ineritance flag test
-
-New commits:
-
-Amir Goldstein (1):
-      [fdb698644d53] overlay/061: remove from auto and quick groups
-
-Darrick J. Wong (1):
-      [55867bd3a8fb] xfs: check for COW overflows in i_delayed_blks
-
-Murphy Zhou (1):
-      [2effc0975a1f] generic/486: filter out irrelevant attrs
-
-Zorro Lang (1):
-      [f769a923f576] xfs: project quota ineritance flag test
-
-
-Code Diffstat:
-
- tests/generic/486   |   4 +-
- tests/overlay/group |   2 +-
- tests/xfs/507       | 199 ++++++++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/507.out   |   8 +++
- tests/xfs/508       | 117 ++++++++++++++++++++++++++++++
- tests/xfs/508.out   |  23 ++++++
- tests/xfs/group     |   2 +
- 7 files changed, 353 insertions(+), 2 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---MJDd3ZcASd54
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl0YyxUACgkQJlKqKVyP
-52M9pg/9FScGQN7nH6AWglBAiPg0Vu6S4GgQMRDYhorYJ+D22EwSkKaK+yqyF5jN
-HmKH6jJAtAE9pZ4n9gILjrNl+KGlC++n0MkajWnHsxpNfS7uFiS3Cgdj3CZ7gxGQ
-+fNR7Zwp4Z7UId8Rv4V6TbwLNpXlJZX750Cre/T1iDgXJD6VdU/QEf531QT8qSZ7
-rsZ/83k2WR3nKrbAW8ASG2l06UCtbw8AU3l6yVhSXztgXVUd14FibWI+4jXS3kBQ
-WTPy+m3/lAnseefqrOH2Q6L4aAl5NT+dna4K+gTYEwPHmFhJFQ+csCMtd6Ot11D1
-0zOm1RtMFDx6CXSgUzAgRME+XvzUzN01Ekm0fxqp5i9xQG6dF9KVGtbOZ0kFCysW
-HGnHAMvpkoQVyhPeLon3PeL1VxB5pg9lhgsaI36D1TG3aHrHWYs31G5Bd23SU414
-ph8jITXGH6eIMnwfQ4LBGjn0skwzi7zOvyc2kiLTwp3SD6N9WZMXNHnIuqPW/vxJ
-2DUXrgYMTO8d/PdKie3866PWzytcrXZkfYeWwLQcW3YEu3SBtDc8CRBgYEhq4NGC
-fKB7Q/mU+417T4cx2Tm+YNpDtD/7NTyrRxvBYRoAXdALEQ3zsBiQ6469wpjGO8qd
-KUVssOGsliZHR6spNsBSNoTqrlw+tLztixoOLwvN3p6IzHfKmmI=
-=AVn2
------END PGP SIGNATURE-----
-
---MJDd3ZcASd54--
+diff --git a/tests/xfs/507 b/tests/xfs/507
+new file mode 100755
+index 00000000..509da03e
+--- /dev/null
++++ b/tests/xfs/507
+@@ -0,0 +1,117 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
++#
++# FS QA Test 507
++#
++# Test project quota inheritance flag, uncover xfsprogs:
++#    b136f48b xfs_quota: fix false error reporting of project inheritance flag is not set
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++_require_xfs_quota
++
++cat >$tmp.projects <<EOF
++10:$SCRATCH_MNT/dir
++EOF
++
++cat >$tmp.projid <<EOF
++root:0
++test:10
++EOF
++
++QUOTA_CMD="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
++
++filter_xfs_pquota()
++{
++        perl -ne "
++s,$tmp.projects,[PROJECTS_FILE],;
++s,$SCRATCH_MNT,[SCR_MNT],;
++s,$SCRATCH_DEV,[SCR_DEV],;
++        print;"
++}
++
++do_quota_nospc()
++{
++	local file=$1
++	local exp=$2
++
++	echo "Write $file, expect $exp:" | _filter_scratch
++
++	# replace the "pwrite64" which old xfs_io prints
++	$XFS_IO_PROG -t -f -c "pwrite 0 5m" $file 2>&1 >/dev/null | \
++		sed -e 's/pwrite64/pwrite/g'
++	rm -f $file
++}
++
++_scratch_mkfs_xfs >>$seqres.full 2>&1
++_qmount_option "prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
++
++mkdir $SCRATCH_MNT/dir
++$QUOTA_CMD -x -c 'project -s test' $SCRATCH_MNT >>$seqres.full 2>&1
++$QUOTA_CMD -x -c 'limit -p bsoft=1m bhard=2m test' $SCRATCH_MNT
++
++# test the Project inheritance bit is a directory only flag, and it's set on
++# directory by default
++echo "== The parent directory has Project inheritance bit by default =="
++touch $SCRATCH_MNT/dir/foo
++mkdir $SCRATCH_MNT/dir/dir_inherit
++touch $SCRATCH_MNT/dir/dir_inherit/foo
++$QUOTA_CMD -x -c 'project -c test' $SCRATCH_MNT | filter_xfs_pquota
++echo ""
++
++# test the quota and the project inheritance quota work well
++do_quota_nospc $SCRATCH_MNT/dir/foo ENOSPC
++do_quota_nospc $SCRATCH_MNT/dir/dir_inherit/foo ENOSPC
++echo ""
++
++# test the project quota won't be inherited, if removing the Project
++# inheritance bit
++echo "== After removing parent directory has Project inheritance bit =="
++$XFS_IO_PROG -x -c "chattr -P" $SCRATCH_MNT/dir
++touch $SCRATCH_MNT/dir/foo
++mkdir $SCRATCH_MNT/dir/dir_uninherit
++touch $SCRATCH_MNT/dir/dir_uninherit/foo
++$QUOTA_CMD -x -c 'project -c test' $SCRATCH_MNT | filter_xfs_pquota
++echo ""
++
++# after remove the Project inheritance bit of the original parent directory,
++# then verify:
++# 1) there's not any limit on the original parent directory and files under it
++# 2) the quota limit of sub-directory which has inherited still works
++# 3) there's not limit on the new sub-dirctory (not inherit from parent)
++do_quota_nospc $SCRATCH_MNT/dir/foo Success
++do_quota_nospc $SCRATCH_MNT/dir/dir_inherit/foo ENOSPC
++do_quota_nospc $SCRATCH_MNT/dir/dir_uninherit/foo Success
++
++_scratch_unmount
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/507.out b/tests/xfs/507.out
+new file mode 100644
+index 00000000..c8c09d3f
+--- /dev/null
++++ b/tests/xfs/507.out
+@@ -0,0 +1,23 @@
++QA output created by 507
++== The parent directory has Project inheritance bit by default ==
++Checking project test (path [SCR_MNT]/dir)...
++Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
++
++Write SCRATCH_MNT/dir/foo, expect ENOSPC:
++pwrite: No space left on device
++Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
++pwrite: No space left on device
++
++== After removing parent directory has Project inheritance bit ==
++Checking project test (path [SCR_MNT]/dir)...
++[SCR_MNT]/dir - project inheritance flag is not set
++[SCR_MNT]/dir/foo - project identifier is not set (inode=0, tree=10)
++[SCR_MNT]/dir/dir_uninherit - project identifier is not set (inode=0, tree=10)
++[SCR_MNT]/dir/dir_uninherit - project inheritance flag is not set
++[SCR_MNT]/dir/dir_uninherit/foo - project identifier is not set (inode=0, tree=10)
++Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
++
++Write SCRATCH_MNT/dir/foo, expect Success:
++Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
++pwrite: No space left on device
++Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
+diff --git a/tests/xfs/group b/tests/xfs/group
+index ffe4ae12..46200752 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -504,3 +504,4 @@
+ 504 auto quick mkfs label
+ 505 auto quick spaceman
+ 506 auto quick health
++507 auto quick quota
+-- 
+2.17.2
