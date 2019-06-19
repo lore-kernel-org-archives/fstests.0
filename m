@@ -1,40 +1,136 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:36313 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726047AbfFSC3m (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jun 2019 22:29:42 -0400
-Received: by mail-pf1-f193.google.com with SMTP id r7so8774425pfl.3
-        for <fstests@vger.kernel.org>; Tue, 18 Jun 2019 19:29:42 -0700 (PDT)
-From: Murphy Zhou <jencce.kernel@gmail.com>
-Subject: [PATCH] generic/532: note the kernel commit
-Date: Wed, 19 Jun 2019 10:28:55 +0800
-Message-Id: <20190619022855.24308-1-jencce.kernel@gmail.com>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Received: from mail.kernel.org ([198.145.29.99]:45784 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726246AbfFSMGO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 19 Jun 2019 08:06:14 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH 1/2] generic: test dir fsync after deleting dentry post eviction of its inode
+Date: Wed, 19 Jun 2019 13:06:08 +0100
+Message-Id: <20190619120608.9872-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, Murphy Zhou <xzhou@redhat.com>
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Murphy Zhou <xzhou@redhat.com>
+From: Filipe Manana <fdmanana@suse.com>
 
-Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+Test that if we fsync a file, evict its inode, unlink it and then fsync
+its parent directory, after a power failure the file does not exists.
+
+This is motivated by a bug found in btrfs, which is fixed by the following
+patch for the linux kernel:
+
+ "Btrfs: fix fsync not persisting dentry deletions due to inode evictions"
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
 ---
- tests/generic/532 | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ tests/generic/557     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/557.out |  2 ++
+ tests/generic/group   |  1 +
+ 3 files changed, 82 insertions(+)
+ create mode 100755 tests/generic/557
+ create mode 100644 tests/generic/557.out
 
-diff --git a/tests/generic/532 b/tests/generic/532
-index 3f8afa4a..007af792 100755
---- a/tests/generic/532
-+++ b/tests/generic/532
-@@ -5,7 +5,8 @@
- # FS QA Test No. 532
- #
- # Regression test for a bug where XFS fails to set statx attributes_mask but
--# sets attribute flags anyway.
-+# sets attribute flags anyway. Fixed by commit:
-+#    1b9598c8  xfs: fix reporting supported extra file attributes for statx()
- #
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
+diff --git a/tests/generic/557 b/tests/generic/557
+new file mode 100755
+index 00000000..64a4dbf7
+--- /dev/null
++++ b/tests/generic/557
+@@ -0,0 +1,79 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 557
++#
++# Test that if we fsync a file, evict its inode, unlink it and then fsync its
++# parent directory, after a power failure the file does not exists.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	_cleanup_flakey
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/dmflakey
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch
++_require_dm_target flakey
++
++rm -f $seqres.full
++
++_scratch_mkfs >>$seqres.full 2>&1
++_require_metadata_journaling $SCRATCH_DEV
++_init_flakey
++_mount_flakey
++
++# Create our test directory with one file in it and fsync the file.
++mkdir $SCRATCH_MNT/dir
++touch $SCRATCH_MNT/dir/foo
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir/foo
++
++# Keep an open file descriptor on our directory while we evict inodes. We just
++# want to evict the file's inode, the directory's inode must not be evicted.
++(
++	cd $SCRATCH_MNT/dir
++	while true; do
++		:
++	done
++) &
++pid=$!
++# Wait a bit to give time to background process to chdir to our test directory.
++sleep 0.1
++
++# Trigger eviction of the file's inode.
++echo 2 > /proc/sys/vm/drop_caches
++
++# Unlink our file and fsync the parent directory. After a power failure we don't
++# expect to see the file anymore, since we fsync'ed the parent directory.
++unlink $SCRATCH_MNT/dir/foo
++$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/dir
++
++# Kill the background process using our test directory.
++kill $pid
++wait $pid
++
++# Simulate a power failure and then check file foo does not exists anymore.
++_flakey_drop_and_remount
++
++[ -f $SCRATCH_MNT/dir/foo ] && echo "File foo still exists"
++
++_unmount_flakey
++echo "Silence is golden"
++status=0
++exit
+diff --git a/tests/generic/557.out b/tests/generic/557.out
+new file mode 100644
+index 00000000..1f1ae1d4
+--- /dev/null
++++ b/tests/generic/557.out
+@@ -0,0 +1,2 @@
++QA output created by 557
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 0867e455..543c0627 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -559,3 +559,4 @@
+ 554 auto quick copy_range swap
+ 555 auto quick cap
+ 556 auto quick casefold
++557 auto quick log
 -- 
-2.21.0
+2.11.0
