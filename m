@@ -1,42 +1,40 @@
-Received: from mail-yb1-f194.google.com ([209.85.219.194]:46453 "EHLO
-        mail-yb1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726751AbfFSKrN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 19 Jun 2019 06:47:13 -0400
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:36313 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726047AbfFSC3m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 18 Jun 2019 22:29:42 -0400
+Received: by mail-pf1-f193.google.com with SMTP id r7so8774425pfl.3
+        for <fstests@vger.kernel.org>; Tue, 18 Jun 2019 19:29:42 -0700 (PDT)
+From: Murphy Zhou <jencce.kernel@gmail.com>
+Subject: [PATCH] generic/532: note the kernel commit
+Date: Wed, 19 Jun 2019 10:28:55 +0800
+Message-Id: <20190619022855.24308-1-jencce.kernel@gmail.com>
 MIME-Version: 1.0
-References: <20190618064355.29398-1-amir73il@gmail.com>
-In-Reply-To: <20190618064355.29398-1-amir73il@gmail.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 19 Jun 2019 13:47:01 +0300
-Message-ID: <CAOQ4uxiDZjr2+EyjWtimjLxFHrMN13K4N5Aw+9BACPmx+2W6Kg@mail.gmail.com>
-Subject: Re: [PATCH] overlay/061: remove from auto and quick groups
-Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
+Cc: darrick.wong@oracle.com, Murphy Zhou <xzhou@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
->
-> I did not observe any regressing with check -overlay -g generic/quick
-> compared to check -g generic/quick on xfs with recent kernel.
-> I did not test all filesystems and -g generic/auto with recent kernel,
-> but I am not aware of any expected failures specific for -overlay run
-> on generic tests.
->
+From: Murphy Zhou <xzhou@redhat.com>
 
-Oh! I was lying. I *did* notice two regressions with
-check -overlay -g generic/quick (compared to xfs),
-so I posted fixes for them:
+Signed-off-by: Murphy Zhou <xzhou@redhat.com>
+---
+ tests/generic/532 | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
 
-1) generic/504 is failing with -overlay on master.
-
-This kernel fix commit is on linux-next:
-6ef048fd5955 locks: eliminate false positive conflicts for write lease
-
-2) generic/555 (was just merged this week) is failing with
--overlay on master.
-
-This kernel fix commit is on Miklos' overlayfs-next:
-941d935ac763 ovl: fix wrong flags check in FS_IOC_FS[SG]ETXATTR ioctls
-
-Thanks,
-Amir.
+diff --git a/tests/generic/532 b/tests/generic/532
+index 3f8afa4a..007af792 100755
+--- a/tests/generic/532
++++ b/tests/generic/532
+@@ -5,7 +5,8 @@
+ # FS QA Test No. 532
+ #
+ # Regression test for a bug where XFS fails to set statx attributes_mask but
+-# sets attribute flags anyway.
++# sets attribute flags anyway. Fixed by commit:
++#    1b9598c8  xfs: fix reporting supported extra file attributes for statx()
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+-- 
+2.21.0
