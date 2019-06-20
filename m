@@ -1,73 +1,42 @@
-Received: from mail.kernel.org ([198.145.29.99]:47218 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729563AbfFTSRv (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 20 Jun 2019 14:17:51 -0400
-From: Eric Biggers <ebiggers@kernel.org>
-Subject: [PATCH] fscrypt: document testing with xfstests
-Date: Thu, 20 Jun 2019 11:16:58 -0700
-Message-Id: <20190620181658.225792-1-ebiggers@kernel.org>
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:57617 "EHLO
+        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1725921AbfFTVqo (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jun 2019 17:46:44 -0400
+Date: Thu, 20 Jun 2019 17:46:31 -0400
+From: "Theodore Ts'o" <tytso@mit.edu>
+Subject: Re: Removing the shared class of tests
+Message-ID: <20190620214631.GF4650@mit.edu>
+References: <20190612184033.21845-1-krisman@collabora.com>
+ <20190612184033.21845-2-krisman@collabora.com>
+ <20190616144440.GD15846@desktop>
+ <20190616200154.GA7251@mit.edu>
+ <20190620112903.GF15846@desktop>
+ <20190620162116.GA4650@mit.edu>
+ <20190620175035.GA5380@magnolia>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190620175035.GA5380@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: linux-fscrypt@vger.kernel.org
-Cc: fstests@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <guaneryu@gmail.com>, Gabriel Krisman Bertazi <krisman@collabora.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+On Thu, Jun 20, 2019 at 10:50:35AM -0700, Darrick J. Wong wrote:
+> > The shared/006 test needs some way of descriminating which inodes have
+> > a fixed number of inodes, since it fills a small file system until it
+> > runs out of space and then runs fsck on it.  Actually, if we make the
+> > test file system smaller, so it runs in finite time, we could probably
+> > just run it on all file systems, since checking to see what file
+> > systems which don't have a fixed inode table (e.g., btrfs) do under
+> > ENOSPC when creating tons of inodes probably makes sense there for
+> > those file systems as well.
+> 
+> xfs doesn't have a fixed inode table either, so ... that sounds like a
+> good idea.
 
-Document how to test ext4, f2fs, and ubifs encryption with xfstests.
+Which is amusing, given that shared/006 declares that it is supported
+for xfs.  So it might just work on btrfs w/o any changes; although
+maybe it just takes too long to run.  :-)
 
-Signed-off-by: Eric Biggers <ebiggers@google.com>
----
- Documentation/filesystems/fscrypt.rst | 39 +++++++++++++++++++++++++++
- 1 file changed, 39 insertions(+)
-
-diff --git a/Documentation/filesystems/fscrypt.rst b/Documentation/filesystems/fscrypt.rst
-index 87d4e266ffc86d..82efa41b0e6c02 100644
---- a/Documentation/filesystems/fscrypt.rst
-+++ b/Documentation/filesystems/fscrypt.rst
-@@ -649,3 +649,42 @@ Note that the precise way that filenames are presented to userspace
- without the key is subject to change in the future.  It is only meant
- as a way to temporarily present valid filenames so that commands like
- ``rm -r`` work as expected on encrypted directories.
-+
-+Tests
-+=====
-+
-+To test fscrypt, use xfstests, which is Linux's de facto standard
-+filesystem test suite.  First, run all the tests in the "encrypt"
-+group on the relevant filesystem(s).  For example, to test ext4 and
-+f2fs encryption using `kvm-xfstests
-+<https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md>`_::
-+
-+    kvm-xfstests -c ext4,f2fs -g encrypt
-+
-+UBIFS encryption can also be tested this way, but it should be done in
-+a separate command, and it takes some time for kvm-xfstests to set up
-+emulated UBI volumes::
-+
-+    kvm-xfstests -c ubifs -g encrypt
-+
-+No tests should fail.  However, tests that use non-default encryption
-+modes (e.g. generic/549 and generic/550) will be skipped if the needed
-+algorithms were not built into the kernel's crypto API.  Also, tests
-+that access the raw block device (e.g. generic/399, generic/548,
-+generic/549, generic/550) will be skipped on UBIFS.
-+
-+Besides running the "encrypt" group tests, for ext4 and f2fs it's also
-+possible to run most xfstests with the "test_dummy_encryption" mount
-+option.  This option causes all new files to be automatically
-+encrypted with a dummy key, without having to make any API calls.
-+This tests the encrypted I/O paths more thoroughly.  To do this with
-+kvm-xfstests, use the "encrypt" filesystem configuration::
-+
-+    kvm-xfstests -c ext4/encrypt,f2fs/encrypt -g auto
-+
-+Because this runs many more tests than "-g encrypt" does, it takes
-+much longer to run; so also consider using `gce-xfstests
-+<https://github.com/tytso/xfstests-bld/blob/master/Documentation/gce-xfstests.md>`_
-+instead of kvm-xfstests::
-+
-+    gce-xfstests -c ext4/encrypt,f2fs/encrypt -g auto
--- 
-2.22.0.410.gd8fdbe21b5-goog
+	      	      	    	- Ted
