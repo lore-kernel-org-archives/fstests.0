@@ -1,42 +1,98 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:57617 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725921AbfFTVqo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jun 2019 17:46:44 -0400
-Date: Thu, 20 Jun 2019 17:46:31 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Removing the shared class of tests
-Message-ID: <20190620214631.GF4650@mit.edu>
-References: <20190612184033.21845-1-krisman@collabora.com>
- <20190612184033.21845-2-krisman@collabora.com>
- <20190616144440.GD15846@desktop>
- <20190616200154.GA7251@mit.edu>
- <20190620112903.GF15846@desktop>
- <20190620162116.GA4650@mit.edu>
- <20190620175035.GA5380@magnolia>
+Received: from mail.kernel.org ([198.145.29.99]:47120 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725815AbfFTVii (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 20 Jun 2019 17:38:38 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [RFC PATCH v2 0/8] xfstests: add fs-verity tests
+Date: Thu, 20 Jun 2019 14:36:06 -0700
+Message-Id: <20190620213614.113685-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190620175035.GA5380@magnolia>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, Gabriel Krisman Bertazi <krisman@collabora.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+To: fstests@vger.kernel.org
+Cc: linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, "Theodore Y . Ts'o" <tytso@mit.edu>, Victor Hsieh <victorhsieh@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 20, 2019 at 10:50:35AM -0700, Darrick J. Wong wrote:
-> > The shared/006 test needs some way of descriminating which inodes have
-> > a fixed number of inodes, since it fills a small file system until it
-> > runs out of space and then runs fsck on it.  Actually, if we make the
-> > test file system smaller, so it runs in finite time, we could probably
-> > just run it on all file systems, since checking to see what file
-> > systems which don't have a fixed inode table (e.g., btrfs) do under
-> > ENOSPC when creating tons of inodes probably makes sense there for
-> > those file systems as well.
-> 
-> xfs doesn't have a fixed inode table either, so ... that sounds like a
-> good idea.
+Add tests for fs-verity, a new feature for read-only file-based
+authenticity protection.  fs-verity will be supported by ext4 and f2fs,
+and perhaps by other filesystems later.  Running these tests requires:
 
-Which is amusing, given that shared/006 declares that it is supported
-for xfs.  So it might just work on btrfs w/o any changes; although
-maybe it just takes too long to run.  :-)
+- A kernel with the fs-verity patches applied and configured with
+  CONFIG_FS_VERITY.  Specifically, this version of the xfstests patchset
+  is compatible with version 5 of the kernel patchset, which can be
+  retrieved from tag "fsverity_2019-06-20" of
+  https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/linux.git
 
-	      	      	    	- Ted
+- The fsverity utility program from
+  https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/fsverity-utils.git
+
+- e2fsprogs v1.45.2 or later for ext4 tests, or f2fs-tools v1.11.0 or
+  later for f2fs tests.
+
+Example with kvm-xfstests:
+
+	$ kvm-xfstests -c ext4,f2fs -g verity
+
+For more information about fs-verity, see the file
+Documentation/filesystems/fsverity.rst from the kernel patchset.
+
+This version of the xfstests patchset can also be retrieved from tag
+"fsverity_2019-06-20" of
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git
+
+Changed since v1 (Dec. 2018):
+
+  - Updated all tests to use the new fs-verity kernel API.
+
+  - Many cleanups, additional checks in the tests, and other improvements.
+
+  - Addressed review comments from Eryu Guan.
+
+  - Added a test for the built-in signature verification feature.
+
+  - Removed the fs-verity descriptor validation test, since the on-disk
+    format of this part was greatly simplified and made fs-specific.
+
+Eric Biggers (8):
+  common/filter: add _filter_xfs_io_fiemap()
+  common/verity: add common functions for testing fs-verity
+  generic: test general behavior of verity files
+  generic: test access controls on the fs-verity ioctls
+  generic: test corrupting verity files
+  generic: test that fs-verity is using the correct measurement values
+  generic: test using fs-verity and fscrypt simultaneously
+  generic: test the fs-verity built-in signature verification support
+
+ common/config         |   2 +
+ common/filter         |  24 +++++
+ common/verity         | 200 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/900     | 190 +++++++++++++++++++++++++++++++++++++++
+ tests/generic/900.out |  71 +++++++++++++++
+ tests/generic/901     |  73 +++++++++++++++
+ tests/generic/901.out |  14 +++
+ tests/generic/902     | 154 ++++++++++++++++++++++++++++++++
+ tests/generic/902.out |  91 +++++++++++++++++++
+ tests/generic/903     | 112 +++++++++++++++++++++++
+ tests/generic/903.out |   5 ++
+ tests/generic/904     |  80 +++++++++++++++++
+ tests/generic/904.out |  12 +++
+ tests/generic/905     | 141 +++++++++++++++++++++++++++++
+ tests/generic/905.out |  34 +++++++
+ tests/generic/group   |   6 ++
+ 16 files changed, 1209 insertions(+)
+ create mode 100644 common/verity
+ create mode 100755 tests/generic/900
+ create mode 100644 tests/generic/900.out
+ create mode 100755 tests/generic/901
+ create mode 100644 tests/generic/901.out
+ create mode 100755 tests/generic/902
+ create mode 100644 tests/generic/902.out
+ create mode 100755 tests/generic/903
+ create mode 100644 tests/generic/903.out
+ create mode 100755 tests/generic/904
+ create mode 100644 tests/generic/904.out
+ create mode 100755 tests/generic/905
+ create mode 100644 tests/generic/905.out
+
+-- 
+2.22.0.410.gd8fdbe21b5-goog
