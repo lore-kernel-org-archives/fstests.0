@@ -1,95 +1,73 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:35670 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726523AbfFTRup (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 20 Jun 2019 13:50:45 -0400
-Date: Thu, 20 Jun 2019 10:50:35 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: Removing the shared class of tests
-Message-ID: <20190620175035.GA5380@magnolia>
-References: <20190612184033.21845-1-krisman@collabora.com>
- <20190612184033.21845-2-krisman@collabora.com>
- <20190616144440.GD15846@desktop>
- <20190616200154.GA7251@mit.edu>
- <20190620112903.GF15846@desktop>
- <20190620162116.GA4650@mit.edu>
+Received: from mail.kernel.org ([198.145.29.99]:47218 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1729563AbfFTSRv (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 20 Jun 2019 14:17:51 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [PATCH] fscrypt: document testing with xfstests
+Date: Thu, 20 Jun 2019 11:16:58 -0700
+Message-Id: <20190620181658.225792-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190620162116.GA4650@mit.edu>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Theodore Ts'o <tytso@mit.edu>
-Cc: Eryu Guan <guaneryu@gmail.com>, Gabriel Krisman Bertazi <krisman@collabora.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+To: linux-fscrypt@vger.kernel.org
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jun 20, 2019 at 12:21:16PM -0400, Theodore Ts'o wrote:
-> On Thu, Jun 20, 2019 at 07:29:03PM +0800, Eryu Guan wrote:
-> > 
-> > IMO, shared tests are generic tests that don't have proper _require
-> > rules, so they're hard-coded with explicit "_supported_fs xxx yyy". With
-> > proper _require rules, there should be no shared tests at all, and we'd
-> > try avoid adding new shared tests if possible.
-> 
-> Thanks for the clarification, that makes sense!
-> 
-> I can see some shared tests that we can probably move out, actually.
-> shared/00[134] and shared/272 make no sense at all for ext2.  The ext3
-> file system was removed in 2015, in the 4.3 kernel, and since 2009
-> (ten years ago) in 2.6.33, the ext4 implementation could be used to
-> support ext3 (and I believe many if not all enterprise distros been
-> taking advantage of this long before 2015, so they only had to update
-> patches for ext4).
-> 
-> (If anything, we might be better served by a two line patch to check
-> so that simply included the ext4 group when FSTYP == ext3.  That way
-> we will run more tests on those systems which still support the ext3
-> emulated-by-ext4 mode.)
-> 
-> The shared/002 test could be moved to generic if we had a way for file
-> systems to declare how many xattrs per file they support.
-> 
-> The shared/006 test needs some way of descriminating which inodes have
-> a fixed number of inodes, since it fills a small file system until it
-> runs out of space and then runs fsck on it.  Actually, if we make the
-> test file system smaller, so it runs in finite time, we could probably
-> just run it on all file systems, since checking to see what file
-> systems which don't have a fixed inode table (e.g., btrfs) do under
-> ENOSPC when creating tons of inodes probably makes sense there for
-> those file systems as well.
+From: Eric Biggers <ebiggers@google.com>
 
-xfs doesn't have a fixed inode table either, so ... that sounds like a
-good idea.
+Document how to test ext4, f2fs, and ubifs encryption with xfstests.
 
-> I'm not sure why shared/011 is only run on ext4 and btrfs.  Does
-> cgroup-aware writeback not work on other file systems?
+Signed-off-by: Eric Biggers <ebiggers@google.com>
+---
+ Documentation/filesystems/fscrypt.rst | 39 +++++++++++++++++++++++++++
+ 1 file changed, 39 insertions(+)
 
-IIRC it doesn't work on xfs because the author never quite answered
-Dave's question about whether or not it would cause ... io priority
-inversions or something?  There was some unanswered question (iirc) so
-nobody RVB'd the patch and it never went upstream.
-
-> The shared/{008,009,010} tests could be moved to generic if we added
-> _require_dedup.  The shared/298 tests just needs a _require_fstrim.
-
-FWIW shared/010 is blacklisted on my systems because of its poor "kill
-everything and wait for the processes to exit" code.  The test starts
-fsstress and then "while [ -e $dupe_run ]; do duperemove; done" loops.
-
-When end_test runs, it'll remove the $dupe_run flag file and wait for
-all the duperemoves to finish.  Unfortunately by this time the
-duperemoves and the fsstress threads are duking it out for file locks
-and it takes forever for duperemove to finish scanning and exit.
-Consequently this test sometimes runs for a very long time.
-
-I /think/ the answer is for end_test to send SIGTERM or something to the
-duperemoves and wait for them to exit sooner than later.
-
-> The bottom line is I think if this is something we care about, we can
-> probably move out nearly all of the tests from shared.  Should I start
-> sending patches?  :-)
-
-Sounds good to me....
-
---D
-
-> 
-> 						- Ted
+diff --git a/Documentation/filesystems/fscrypt.rst b/Documentation/filesystems/fscrypt.rst
+index 87d4e266ffc86d..82efa41b0e6c02 100644
+--- a/Documentation/filesystems/fscrypt.rst
++++ b/Documentation/filesystems/fscrypt.rst
+@@ -649,3 +649,42 @@ Note that the precise way that filenames are presented to userspace
+ without the key is subject to change in the future.  It is only meant
+ as a way to temporarily present valid filenames so that commands like
+ ``rm -r`` work as expected on encrypted directories.
++
++Tests
++=====
++
++To test fscrypt, use xfstests, which is Linux's de facto standard
++filesystem test suite.  First, run all the tests in the "encrypt"
++group on the relevant filesystem(s).  For example, to test ext4 and
++f2fs encryption using `kvm-xfstests
++<https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md>`_::
++
++    kvm-xfstests -c ext4,f2fs -g encrypt
++
++UBIFS encryption can also be tested this way, but it should be done in
++a separate command, and it takes some time for kvm-xfstests to set up
++emulated UBI volumes::
++
++    kvm-xfstests -c ubifs -g encrypt
++
++No tests should fail.  However, tests that use non-default encryption
++modes (e.g. generic/549 and generic/550) will be skipped if the needed
++algorithms were not built into the kernel's crypto API.  Also, tests
++that access the raw block device (e.g. generic/399, generic/548,
++generic/549, generic/550) will be skipped on UBIFS.
++
++Besides running the "encrypt" group tests, for ext4 and f2fs it's also
++possible to run most xfstests with the "test_dummy_encryption" mount
++option.  This option causes all new files to be automatically
++encrypted with a dummy key, without having to make any API calls.
++This tests the encrypted I/O paths more thoroughly.  To do this with
++kvm-xfstests, use the "encrypt" filesystem configuration::
++
++    kvm-xfstests -c ext4/encrypt,f2fs/encrypt -g auto
++
++Because this runs many more tests than "-g encrypt" does, it takes
++much longer to run; so also consider using `gce-xfstests
++<https://github.com/tytso/xfstests-bld/blob/master/Documentation/gce-xfstests.md>`_
++instead of kvm-xfstests::
++
++    gce-xfstests -c ext4/encrypt,f2fs/encrypt -g auto
+-- 
+2.22.0.410.gd8fdbe21b5-goog
