@@ -1,81 +1,157 @@
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:40817 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726002AbfFUNwz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jun 2019 09:52:55 -0400
-Date: Fri, 21 Jun 2019 21:52:47 +0800
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:36350 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726250AbfFUI5z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jun 2019 04:57:55 -0400
+Date: Fri, 21 Jun 2019 16:57:48 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 2/2] generic/059: also test that the file's mtime and
- ctime are updated
-Message-ID: <20190621135247.GL15846@desktop>
-References: <20190619120624.9922-1-fdmanana@kernel.org>
- <20190621103642.GK15846@desktop>
- <CAL3q7H4YqSZSdUo5zrFKjmtDEaOKak2YHVf9MR3y9WdXnE2xnw@mail.gmail.com>
+Subject: Re: [PATCH 2/4] xfs: rework min log size helper
+Message-ID: <20190621085748.GH15846@desktop>
+References: <156089201978.345809.17444450351199726553.stgit@magnolia>
+ <156089203509.345809.3448903728041546348.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H4YqSZSdUo5zrFKjmtDEaOKak2YHVf9MR3y9WdXnE2xnw@mail.gmail.com>
+In-Reply-To: <156089203509.345809.3448903728041546348.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 21, 2019 at 11:48:57AM +0100, Filipe Manana wrote:
-> On Fri, Jun 21, 2019 at 11:36 AM Eryu Guan <guaneryu@gmail.com> wrote:
-> >
-> > On Wed, Jun 19, 2019 at 01:06:24PM +0100, fdmanana@kernel.org wrote:
-> > > From: Filipe Manana <fdmanana@suse.com>
-> > >
-> > > Test as well that hole punch operations that affect a single file block
-> > > also update the file's mtime and ctime.
-> > >
-> > > This is motivated by a bug a found in btrfs which is fixed by the
-> > > following patch for the linux kernel:
-> > >
-> > >  "Btrfs: add missing inode version, ctime and mtime updates when
-> > >   punching hole"
-> > >
-> > > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > > ---
-> > >  tests/generic/059 | 18 ++++++++++++++++++
-> > >  1 file changed, 18 insertions(+)
-> > >
-> > > diff --git a/tests/generic/059 b/tests/generic/059
-> > > index e8cb93d8..fd44b2ea 100755
-> > > --- a/tests/generic/059
-> > > +++ b/tests/generic/059
-> > > @@ -18,6 +18,9 @@
-> > >  #
-> > >  #  Btrfs: add missing inode update when punching hole
-> > >  #
-> > > +# Also test the mtime and ctime properties of the file change after punching
-> > > +# holes with ranges that operate only on a single block of the file.
-> > > +#
-> > >  seq=`basename $0`
-> > >  seqres=$RESULT_DIR/$seq
-> > >  echo "QA output created by $seq"
-> > > @@ -68,6 +71,13 @@ $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
-> > >  # fsync log.
-> > >  sync
-> > >
-> > > +# Sleep for 1 second, because we want to check that the next punch operations we
-> > > +# do update the file's mtime and ctime.
-> > > +sleep 1
-> >
-> > Is this supposed to be after recording the initial c/mtime? i.e. moving
-> > it after c/mtime_before?
+On Tue, Jun 18, 2019 at 02:07:15PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Either way is fine. Capturing the times right before or right after
-> the sleep, gives the same values as nothing changed the file.
-
-Ah, you're right.
-
+> The recent _scratch_find_xfs_min_logblocks helper has a major thinko in
+> it -- it relies on feeding a too-small size to _scratch_do_mkfs so that
+> mkfs will tell us the minimum log size.  Unfortunately, _scratch_do_mkfs
+> will see that first failure and retry the mkfs without MKFS_OPTIONS,
+> which means that we return the minimum log size for the default mkfs
+> settings without MKFS_OPTIONS.
 > 
-> Btw, I had noticed the other day that the second "echo" has
-> $mtime_after instead of $ctime_after (copy-paste mistake).
-> Do you want me to send a v2 fixing that typo, or you can do it
-> yourself when you pick the patch?
+> This is a problem if someone's running fstests with a set of
+> MKFS_OPTIONS that affects the minimum log size.  To fix this, open-code
+> the _scratch_do_mkfs retry behavior so that we only do the "retry
+> without MKFS_OPTIONS" behavior if the mkfs failed for a reason other
+> than the minimum log size check.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/rc  |   13 ++++++++++---
+>  common/xfs |   23 +++++++++++++++++++++--
+>  2 files changed, 31 insertions(+), 5 deletions(-)
+> 
+> 
+> diff --git a/common/rc b/common/rc
+> index 25203bb4..a38b7f02 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -438,6 +438,14 @@ _scratch_mkfs_options()
+>      echo $SCRATCH_OPTIONS $MKFS_OPTIONS $* $SCRATCH_DEV
+>  }
+>  
+> +# Format the scratch device directly.  First argument is the mkfs command.
+> +# Second argument are all the parameters.  stdout goes to $tmp.mkfsstd and
+> +# stderr goes to $tmp.mkfserr.
+> +__scratch_do_mkfs()
+> +{
+> +	eval "$1 $2 $SCRATCH_DEV" 2>$tmp.mkfserr 1>$tmp.mkfsstd
 
-I can fix it on commit, thanks for pointing it out!
+I'd prefer leaving stdout and stderr to caller to handle, because ..
+
+
+> +}
+> +
+>  # Do the actual mkfs work on SCRATCH_DEV. Firstly mkfs with both MKFS_OPTIONS
+>  # and user specified mkfs options, if that fails (due to conflicts between mkfs
+>  # options), do a second mkfs with only user provided mkfs options.
+> @@ -456,8 +464,7 @@ _scratch_do_mkfs()
+>  
+>  	# save mkfs output in case conflict means we need to run again.
+>  	# only the output for the mkfs that applies should be shown
+> -	eval "$mkfs_cmd $MKFS_OPTIONS $extra_mkfs_options $SCRATCH_DEV" \
+> -		2>$tmp.mkfserr 1>$tmp.mkfsstd
+
+it's easier to know the $tmp.mkfserr and $tmp.mkfsstd files should be
+cleaned up, otherwise it's not that clear where these files come from.
+
+> +	__scratch_do_mkfs "$mkfs_cmd" "$MKFS_OPTIONS $extra_mkfs_options"
+>  	mkfs_status=$?
+>  
+>  	# a mkfs failure may be caused by conflicts between $MKFS_OPTIONS and
+> @@ -471,7 +478,7 @@ _scratch_do_mkfs()
+>  		) >> $seqres.full
+>  
+>  		# running mkfs again. overwrite previous mkfs output files
+> -		eval "$mkfs_cmd $extra_mkfs_options $SCRATCH_DEV" \
+> +		__scratch_do_mkfs "$mkfs_cmd" "$extra_mkfs_options" \
+>  			2>$tmp.mkfserr 1>$tmp.mkfsstd
+
+With the implemention in the patch, the "2>$tmp.mkfserr 1>$tmp.mkfsstd"
+part should be removed too, but with the suggested implemention we can
+keep it :)
+
+>  		mkfs_status=$?
+>  	fi
+> diff --git a/common/xfs b/common/xfs
+> index f8dafc6c..8733e2ae 100644
+> --- a/common/xfs
+> +++ b/common/xfs
+> @@ -87,16 +87,33 @@ _scratch_find_xfs_min_logblocks()
+>  	# minimum log size.
+>  	local XFS_MIN_LOG_BYTES=2097152
+>  
+> -	_scratch_do_mkfs "$mkfs_cmd" "cat" $* -N -l size=$XFS_MIN_LOG_BYTES \
+> -		2>$tmp.mkfserr 1>$tmp.mkfsstd
+> +	# Try formatting the filesystem with all the options given and the
+> +	# minimum log size.  We hope either that this succeeds or that mkfs
+> +	# tells us the required minimum log size for the feature set.
+> +	#
+> +	# We cannot use _scratch_do_mkfs because it will retry /any/ failed
+> +	# mkfs with MKFS_OPTIONS removed even if the only "failure" was that
+> +	# the log was too small.
+> +	local extra_mkfs_options="$* -N -l size=$XFS_MIN_LOG_BYTES"
+> +	__scratch_do_mkfs "$mkfs_cmd" "$MKFS_OPTIONS $extra_mkfs_options"
+>  	local mkfs_status=$?
+>  
+> +	# If the format fails for a reason other than the log being too small,
+> +	# try again without MKFS_OPTIONS because that's what _scratch_do_mkfs
+> +	# will do if we pass in the log size option.
+> +	if [ $mkfs_status -ne 0 ] &&
+> +	   ! grep -q 'log size.*too small, minimum' $tmp.mkfserr; then
+> +		__scratch_do_mkfs "$mkfs_cmd" "$extra_mkfs_options"
+> +		local mkfs_status=$?
+
+We've already declared mkfs_status as local, no need to do it again
+here.
 
 Thanks,
 Eryu
+
+> +	fi
+> +
+>  	# mkfs suceeded, so we must pick out the log block size to do the
+>  	# unit conversion
+>  	if [ $mkfs_status -eq 0 ]; then
+>  		local blksz="$(grep '^log.*bsize' $tmp.mkfsstd | \
+>  			sed -e 's/log.*bsize=\([0-9]*\).*$/\1/g')"
+>  		echo $((XFS_MIN_LOG_BYTES / blksz))
+> +		rm -f $tmp.mkfsstd $tmp.mkfserr
+>  		return
+>  	fi
+>  
+> @@ -104,6 +121,7 @@ _scratch_find_xfs_min_logblocks()
+>  	if grep -q 'minimum size is' $tmp.mkfserr; then
+>  		grep 'minimum size is' $tmp.mkfserr | \
+>  			sed -e 's/^.*minimum size is \([0-9]*\) blocks/\1/g'
+> +		rm -f $tmp.mkfsstd $tmp.mkfserr
+>  		return
+>  	fi
+>  
+> @@ -111,6 +129,7 @@ _scratch_find_xfs_min_logblocks()
+>  	echo "Cannot determine minimum log size" >&2
+>  	cat $tmp.mkfsstd >> $seqres.full
+>  	cat $tmp.mkfserr >> $seqres.full
+> +	rm -f $tmp.mkfsstd $tmp.mkfserr
+>  }
+>  
+>  _scratch_mkfs_xfs()
+> 
