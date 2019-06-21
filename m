@@ -1,57 +1,88 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:40800 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726002AbfFUQ2u (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jun 2019 12:28:50 -0400
-Subject: Re: [PATCH 4/4] xfs/119: fix MKFS_OPTIONS exporting
-References: <156089201978.345809.17444450351199726553.stgit@magnolia>
- <156089204777.345809.18314859473454869520.stgit@magnolia>
-From: Allison Collins <allison.henderson@oracle.com>
-Message-ID: <f39344a5-c0ee-f660-ac9d-c431ce3c4b0f@oracle.com>
-Date: Fri, 21 Jun 2019 09:28:45 -0700
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:33572 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726289AbfFUKgt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 21 Jun 2019 06:36:49 -0400
+Date: Fri, 21 Jun 2019 18:36:42 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH 2/2] generic/059: also test that the file's mtime and
+ ctime are updated
+Message-ID: <20190621103642.GK15846@desktop>
+References: <20190619120624.9922-1-fdmanana@kernel.org>
 MIME-Version: 1.0
-In-Reply-To: <156089204777.345809.18314859473454869520.stgit@magnolia>
-Content-Type: text/plain; charset=utf-8; format=flowed
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190619120624.9922-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fdmanana@kernel.org
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On 6/18/19 2:07 PM, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, Jun 19, 2019 at 01:06:24PM +0100, fdmanana@kernel.org wrote:
+> From: Filipe Manana <fdmanana@suse.com>
 > 
-> This test originally exported its own MKFS_OPTIONS to force the tested
-> filesystem config to the mkfs defaults + test-specific log size options.
-> This overrides whatever the test runner might have set in MKFS_OPTIONS.
+> Test as well that hole punch operations that affect a single file block
+> also update the file's mtime and ctime.
 > 
-> In commit 2fd273886b525 ("xfs: refactor minimum log size formatting
-> code") we fail to export our test-specific MKFS_OPTIONS before
-> calculating the minimum log size, which leads to the wrong min log size
-> being calculated once we fixed the helper to be smarter about mkfs options.
+> This is motivated by a bug a found in btrfs which is fixed by the
+> following patch for the linux kernel:
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-
-Looks ok to me
-Reviewed-by: Allison Collins <allison.henderson@oracle.com>
-
+>  "Btrfs: add missing inode version, ctime and mtime updates when
+>   punching hole"
+> 
+> Signed-off-by: Filipe Manana <fdmanana@suse.com>
 > ---
->   tests/xfs/119 |    3 ++-
->   1 file changed, 2 insertions(+), 1 deletion(-)
+>  tests/generic/059 | 18 ++++++++++++++++++
+>  1 file changed, 18 insertions(+)
 > 
-> 
-> diff --git a/tests/xfs/119 b/tests/xfs/119
-> index 8825a5c3..f245a0a6 100755
-> --- a/tests/xfs/119
-> +++ b/tests/xfs/119
-> @@ -38,7 +38,8 @@ _require_scratch
->   # this may hang
->   sync
->   
-> -logblks=$(_scratch_find_xfs_min_logblocks -l version=2,su=64k)
-> +export MKFS_OPTIONS="-l version=2,su=64k"
-> +logblks=$(_scratch_find_xfs_min_logblocks)
->   export MKFS_OPTIONS="-l version=2,size=${logblks}b,su=64k"
->   export MOUNT_OPTIONS="-o logbsize=64k"
->   _scratch_mkfs_xfs >/dev/null
+> diff --git a/tests/generic/059 b/tests/generic/059
+> index e8cb93d8..fd44b2ea 100755
+> --- a/tests/generic/059
+> +++ b/tests/generic/059
+> @@ -18,6 +18,9 @@
+>  #
+>  #  Btrfs: add missing inode update when punching hole
+>  #
+> +# Also test the mtime and ctime properties of the file change after punching
+> +# holes with ranges that operate only on a single block of the file.
+> +#
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+> @@ -68,6 +71,13 @@ $XFS_IO_PROG -c "fsync" $SCRATCH_MNT/foo
+>  # fsync log.
+>  sync
+>  
+> +# Sleep for 1 second, because we want to check that the next punch operations we
+> +# do update the file's mtime and ctime.
+> +sleep 1
+
+Is this supposed to be after recording the initial c/mtime? i.e. moving
+it after c/mtime_before?
+
+Thanks,
+Eryu
+
+> +
+> +mtime_before=$(stat -c %Y $SCRATCH_MNT/foo)
+> +ctime_before=$(stat -c %Z $SCRATCH_MNT/foo)
+> +
+>  # Punch a hole in our file. This small range affects only 1 page.
+>  # This made the btrfs hole punching implementation write only some zeroes in
+>  # one page, but it did not update the btrfs inode fields used to determine if
+> @@ -94,5 +104,13 @@ _flakey_drop_and_remount
+>  echo "File content after:"
+>  od -t x1 $SCRATCH_MNT/foo
+>  
+> +mtime_after=$(stat -c %Y $SCRATCH_MNT/foo)
+> +ctime_after=$(stat -c %Z $SCRATCH_MNT/foo)
+> +
+> +[ $mtime_after -gt $mtime_before ] || \
+> +	echo "mtime did not increase (before: $mtime_before after: $mtime_after"
+> +[ $ctime_after -gt $ctime_before ] || \
+> +	echo "ctime did not increase (before: $ctime_before after: $mtime_after"
+> +
+>  status=0
+>  exit
+> -- 
+> 2.11.0
 > 
