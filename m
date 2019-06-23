@@ -1,179 +1,92 @@
-Received: from mx1.redhat.com ([209.132.183.28]:54662 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726323AbfFXByj (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 23 Jun 2019 21:54:39 -0400
-Date: Mon, 24 Jun 2019 09:21:03 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2] xfs: test xfs_info on block device and mountpoint
-Message-ID: <20190624012103.GF30864@dhcp-12-102.nay.redhat.com>
-References: <20190622153827.4448-1-zlang@redhat.com>
- <20190623214919.GD5387@magnolia>
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:43611 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725963AbfFWNjt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jun 2019 09:39:49 -0400
+Received: by mail-pl1-f194.google.com with SMTP id cl9so5349010plb.10
+        for <fstests@vger.kernel.org>; Sun, 23 Jun 2019 06:39:49 -0700 (PDT)
+Message-ID: <5d0f8124.1c69fb81.46c03.e7cb@mx.google.com>
+Date: Sun, 23 Jun 2019 21:39:43 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to d864b9cb5de2
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="ziQ3pgwlsbsn"
 Content-Disposition: inline
-In-Reply-To: <20190623214919.GD5387@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org, guaneryu@gmail.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 23, 2019 at 02:49:19PM -0700, Darrick J. Wong wrote:
-> On Sat, Jun 22, 2019 at 11:38:27PM +0800, Zorro Lang wrote:
-> > There was a bug, xfs_info fails on a mounted block device:
-> > 
-> >   # xfs_info /dev/mapper/testdev
-> >   xfs_info: /dev/mapper/testdev contains a mounted filesystem
-> > 
-> >   fatal error -- couldn't initialize XFS library
-> > 
-> > xfsprogs has fixed it by:
-> > 
-> >   bbb43745 xfs_info: use findmnt to handle mounted block devices
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> 
-> Aha!  I remembered something -- xfs/449 already checks for consistency
-> in the various xfs geometry reports that each command provides, so why
-> not just add the $XFS_INFO_PROG $SCRATCH_DEV case at the end?
 
-Wow, there're so many cases, can't sure what we've covered now:)
+--ziQ3pgwlsbsn
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Sure, I can do this change on xfs/449, if Eryu thinks it's fine to increase
-the test coverage of a known case.
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a normal new test & bugfix update, which adds
+one new test alone with some random fixes & improvements.
+
+Just note that new test generic/557 currently fails on btrfs.
 
 Thanks,
-Zorro
+Eryu
 
-> 
-> --D
-> 
-> > ---
-> > 
-> > Thanks the reviewing from Darrick and Eryu,
-> > 
-> > V2 did below changes:
-> > 1) Compare the contents between the two xfs_info invocations in test_xfs_info()
-> > 2) document the commit that the case cover
-> > 3) Add more comments
-> > 4) Move the test on unmounted device to the end
-> > 
-> > Sorry Eryu, I'll keep the case number next time :)
-> > 
-> > Thanks,
-> > Zorro
-> > 
-> >  tests/xfs/1000     | 82 ++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/1000.out |  2 ++
-> >  tests/xfs/group    |  1 +
-> >  3 files changed, 85 insertions(+)
-> >  create mode 100755 tests/xfs/1000
-> >  create mode 100644 tests/xfs/1000.out
-> > 
-> > diff --git a/tests/xfs/1000 b/tests/xfs/1000
-> > new file mode 100755
-> > index 00000000..721bcdf2
-> > --- /dev/null
-> > +++ b/tests/xfs/1000
-> > @@ -0,0 +1,82 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> > +#
-> > +# FS QA Test No. 1000
-> > +#
-> > +# test xfs_info on block device and mountpoint, uncover xfsprogs commit:
-> > +#    bbb43745 xfs_info: use findmnt to handle mounted block devices
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1	# failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +	cd /
-> > +	rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +_supported_fs xfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +
-> > +info_file=$tmp.$seq.info
-> > +
-> > +test_xfs_info()
-> > +{
-> > +	local target="$1"
-> > +	local tmpfile=$tmp.$seq.info.tmp
-> > +	local need_cmp=0
-> > +
-> > +	# save the *old* xfs_info file, to compare with the new one later
-> > +	if [ -f $info_file ]; then
-> > +		cat $info_file > $tmpfile
-> > +		need_cmp=1
-> > +	fi
-> > +
-> > +	$XFS_INFO_PROG $target > $info_file 2>&1
-> > +	if [ $? -ne 0 ];then
-> > +		echo "$XFS_INFO_PROG $target fails:"
-> > +		cat $info_file
-> > +	else
-> > +		cat $info_file >> $seqres.full
-> > +	fi
-> > +	# compare the contents between the two xfs_info invocations
-> > +	if [ $need_cmp -eq 1 ]; then
-> > +		diff $tmpfile $info_file
-> > +	fi
-> > +}
-> > +
-> > +_scratch_mkfs > $seqres.full 2>&1
-> > +_scratch_mount
-> > +# test mounted block device and mountpoint
-> > +test_xfs_info $SCRATCH_DEV
-> > +test_xfs_info $SCRATCH_MNT
-> > +
-> > +# test on unmounted block device
-> > +_scratch_unmount
-> > +# Due to new xfsprogs use xfs_db 'info' command to get the information of
-> > +# offline XFS, it supports running on a unmounted device. But old xfsprogs
-> > +# doesn't support it, so skip that.
-> > +$XFS_DB_PROG -c "info" $SCRATCH_DEV | grep -q "command info not found"
-> > +if [ $? -ne 0 ]; then
-> > +	test_xfs_info $SCRATCH_DEV
-> > +fi
-> > +
-> > +echo "Silence is golden"
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/xfs/1000.out b/tests/xfs/1000.out
-> > new file mode 100644
-> > index 00000000..681b3b48
-> > --- /dev/null
-> > +++ b/tests/xfs/1000.out
-> > @@ -0,0 +1,2 @@
-> > +QA output created by 1000
-> > +Silence is golden
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index ffe4ae12..047fe332 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -504,3 +504,4 @@
-> >  504 auto quick mkfs label
-> >  505 auto quick spaceman
-> >  506 auto quick health
-> > +1000 auto quick
-> > -- 
-> > 2.17.2
-> > 
+The new head of the master branch is commit:
+
+d864b9cb5de2 generic/059: also test that the file's mtime and ctime are updated
+
+New commits:
+
+Amir Goldstein (1):
+      [6b98121773c6] overlay: fix _scratch_remount with xfs_info 5.0.0
+
+Darrick J. Wong (1):
+      [03a2da5879c0] dump: _cleanup_dump should only check the scratch fs if the test required it
+
+Filipe Manana (2):
+      [c132cd4de91b] generic: test dir fsync after deleting dentry post eviction of its inode
+      [d864b9cb5de2] generic/059: also test that the file's mtime and ctime are updated
+
+Murphy Zhou (1):
+      [de36c063fcfb] generic/532: document the kernel commit
+
+
+Code Diffstat:
+
+ common/dump           |  2 +-
+ common/overlay        |  5 ++++
+ tests/generic/059     | 18 ++++++++++++
+ tests/generic/532     |  3 +-
+ tests/generic/557     | 79 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/557.out |  2 ++
+ tests/generic/group   |  1 +
+ 7 files changed, 108 insertions(+), 2 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--ziQ3pgwlsbsn
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIcBAABAgAGBQJdD4CwAAoJECZSqilcj+djIIEQAItQVMb5/O0Z46lRdBRBsI7R
++YinET3Aj4W/3HiZFaacd7bY0xJOVnA0F2w1onNHGiI1lgJmsHD7MOGS4eT1CXNe
+x982UwS6roitrRiWWHTVKaE150BjhfOy9MX+sShbuhMrzIXkOXIPWT1p0xCEgY44
+dva5a95IubJr1xFc+yWJLm3SPCers/39daeqb5bxoRcPovUeUMtBliaelHcP4djf
+nkTfDuUwdzzbrfUUp9AK8a7wsO/UMPuUubkl8PzLkQbM+j77AsMg2FmgqD4mEXOA
+Na0XwLOre2U4Qq1J1FzCNXKrsQpo6jJw9r8QV0SjHgejBoo/PA3p0lkEZvQ+ydpI
+OkvW4uRn2SpS306+PSmtVPOL9a7H34yb2pmyNhsCBDoH/VkH1NT8YXqwhISrLRX+
+1OWmNrfgvmOI8GV95omJ2YGCsuQZLRgNEVrcdCEM59YAfza5PSFc7XSZOMQVF0QF
+JVCiJoQJlQ25LSbedwJYtJbHaLlIyM7GzGFCfMZHukrdLgy4un7Q3ztYpituMK4H
+KbxakfSdwIx6/12PX7Lagn5ZPwgFcL+cANBqXG/6RGNIiBMFP1sV2iTSdK+l98Gx
+nKV7lsm2bWmVBQNdk+6OPZQpeiSHmg1nnRR6+Tuaf0Gct/BsnH0b5CWzB9/x3jR/
+EE3aEcCm/p98D9VmC0Dw
+=uic0
+-----END PGP SIGNATURE-----
+
+--ziQ3pgwlsbsn--
