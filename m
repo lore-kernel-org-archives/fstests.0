@@ -1,78 +1,46 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:59950 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1728927AbfFXNHw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jun 2019 09:07:52 -0400
-Date: Mon, 24 Jun 2019 09:07:30 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: Removing the shared class of tests
-Message-ID: <20190624130730.GD1805@mit.edu>
-References: <20190612184033.21845-1-krisman@collabora.com>
- <20190612184033.21845-2-krisman@collabora.com>
- <20190616144440.GD15846@desktop>
- <20190616200154.GA7251@mit.edu>
- <20190620112903.GF15846@desktop>
- <20190620162116.GA4650@mit.edu>
- <20190620175035.GA5380@magnolia>
- <20190624071610.GA10195@infradead.org>
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:42368 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725963AbfFWNZL (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jun 2019 09:25:11 -0400
+Date: Sun, 23 Jun 2019 21:25:03 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] overlay/061: remove from auto and quick groups
+Message-ID: <20190623132503.GM15846@desktop>
+References: <20190618064355.29398-1-amir73il@gmail.com>
+ <CAOQ4uxiDZjr2+EyjWtimjLxFHrMN13K4N5Aw+9BACPmx+2W6Kg@mail.gmail.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=utf-8
+Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190624071610.GA10195@infradead.org>
+In-Reply-To: <CAOQ4uxiDZjr2+EyjWtimjLxFHrMN13K4N5Aw+9BACPmx+2W6Kg@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: Christoph Hellwig <hch@infradead.org>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, Eryu Guan <guaneryu@gmail.com>, Gabriel Krisman Bertazi <krisman@collabora.com>, fstests@vger.kernel.org, linux-ext4@vger.kernel.org, "Lakshmipathi.G" <lakshmipathi.ganapathi@collabora.co.uk>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, "Darrick J . Wong" <darrick.wong@oracle.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Jun 24, 2019 at 12:16:10AM -0700, Christoph Hellwig wrote:
->=20
-> As for the higher level question?  The shared tests always confused the
-> heck out of me.  generic with the right feature checks seem like a much
-> better idea.
+On Wed, Jun 19, 2019 at 01:47:01PM +0300, Amir Goldstein wrote:
+> >
+> > I did not observe any regressing with check -overlay -g generic/quick
+> > compared to check -g generic/quick on xfs with recent kernel.
+> > I did not test all filesystems and -g generic/auto with recent kernel,
+> > but I am not aware of any expected failures specific for -overlay run
+> > on generic tests.
+> >
+> 
+> Oh! I was lying. I *did* notice two regressions with
+> check -overlay -g generic/quick (compared to xfs),
+> so I posted fixes for them:
+> 
+> 1) generic/504 is failing with -overlay on master.
+> 
+> This kernel fix commit is on linux-next:
+> 6ef048fd5955 locks: eliminate false positive conflicts for write lease
+> 
+> 2) generic/555 (was just merged this week) is failing with
+> -overlay on master.
+> 
+> This kernel fix commit is on Miklos' overlayfs-next:
+> 941d935ac763 ovl: fix wrong flags check in FS_IOC_FS[SG]ETXATTR ioctls
 
-Agreed.  I've sent out a patch series to bring the number of patches
-in shared down to four.  Here's what's left:
+Thanks a lot for the detailed information!
 
-shared/002 --- needs a feature test to somehow determine whether a
-	file system supports thousads of xattrs in a file (currently
-	on btrfs and xfs)
-
-shared/011 --- needs some way of determining that a file system
-	supports cgroup-aware writeback (currently enabled only for
-	ext4 and btrfs).  Do we consider lack of support of
-	cgroup-aware writeback a bug?  If so, maybe it doesn't need a
-	feature test at all?
-
-shared/032 --- needs a feature test to determine whether or not a file
-	system's mkfs supports detection of "foreign file systems".
-	e.g., whether or not it warns if you try overwrite a file
-	system w/o another file system.  (Currently enabled by xfs and
-	btrfs; it doesn't work for ext[234] because e2fsprogs, because
-	I didn't want to break existing shell scripts, only warns when
-	it is used interactively.  We could a way to force it to be
-	activated it points out this tests is fundamentally testing
-	implementation choices of the userspace utilities of a file
-	system.  Does it belong in xfstests?   : =C2=AF\_(=E3=83=84)_/=C2=AF )
-
-shared/289 --- contains ext4, xfs, and btrfs mechanisms for
-	determining blocks which are unallocated.  Has hard-coded
-	invocations to dumpe2fs, xfs_db, and /bin/btrfs.
-
-These don't have obvious solutions.  We could maybe add a _notrun if
-adding the thousands of xattrs fails with an ENOSPC or related error
-(f2fs uses something else).
-
-Maybe we just move shared/011 and move it generic/ w/o a feature test.
-
-Maybe we remove shared/032 altogether, since for e2fsprogs IMHO
-the right place to put it is the regression test in e2fsprogs --- but
-I know xfs has a different test philosophy for xfsprogs; and tha begs
-the question of what to do for mkfs.btrfs.
-
-And maybe we just split up shared/289 to three different tests in
-ext4/, xfs/, and btrfs/, since it would make the test script much
-simpler to understand?
-
-What do people think?
-
-						- Ted
+Eryu
