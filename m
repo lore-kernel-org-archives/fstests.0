@@ -1,36 +1,38 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:57130 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726961AbfFXBmP (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 23 Jun 2019 21:42:15 -0400
-Date: Sun, 23 Jun 2019 21:27:19 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 5/5] shared,generic: move tests using duperemove to
- generic/
-Message-ID: <20190624012719.GC1805@mit.edu>
-References: <20190623230956.24670-1-tytso@mit.edu>
- <20190623230956.24670-5-tytso@mit.edu>
+Received: from bombadil.infradead.org ([198.137.202.133]:39870 "EHLO
+        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727763AbfFXNoJ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 24 Jun 2019 09:44:09 -0400
+From: Christoph Hellwig <hch@lst.de>
+Subject: [PATCH] shared/011: run on all file system that support cgroup writeback
+Date: Mon, 24 Jun 2019 15:44:07 +0200
+Message-Id: <20190624134407.21365-1-hch@lst.de>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190623230956.24670-5-tytso@mit.edu>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 23, 2019 at 07:09:56PM -0400, Theodore Ts'o wrote:
-> Add _require_scratch_duperemove which validates that the file system
-> supports duperemove.  This allows us to move three tests from shared/
+Run the cgroup writeback test on xfs, for which I've just posted
+a patch to support cgroup writeback as well as ext2 and f2fs, which
+have supported cgroup writeback for a while now.
 
-Hmmm, that should probably read, "... which validates that duperemove
-supports file system being tested..."
+Signed-off-by: Christoph Hellwig <hch@lst.de>
+---
+ tests/shared/011 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-					- Ted
-
-> to generic/.  This means these tests will automatically adapt when
-> duperemove supports other file systems.  Tests moved are:
-> 
-> 	shared/008 --> generic/559
-> 	shared/009 --> generic/560
-> 	shared/010 --> generic/561
-> 
-> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+diff --git a/tests/shared/011 b/tests/shared/011
+index a0ac375d..96ce9d1c 100755
+--- a/tests/shared/011
++++ b/tests/shared/011
+@@ -39,7 +39,7 @@ rm -f $seqres.full
+ # real QA test starts here
+ 
+ # Modify as appropriate.
+-_supported_fs ext4 btrfs
++_supported_fs ext2 ext4 f2fs btrfs xfs
+ _supported_os Linux
+ _require_scratch
+ _require_cgroup2 io
+-- 
+2.20.1
