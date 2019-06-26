@@ -1,102 +1,66 @@
-Received: from mx1.redhat.com ([209.132.183.28]:51156 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727099AbfFYRH2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 25 Jun 2019 13:07:28 -0400
-Date: Wed, 26 Jun 2019 01:12:48 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH v2] xfs: test xfs_info on block device and mountpoint
-Message-ID: <20190625171248.GH30864@dhcp-12-102.nay.redhat.com>
-References: <20190622153827.4448-1-zlang@redhat.com>
- <20190623214919.GD5387@magnolia>
- <20190624012103.GF30864@dhcp-12-102.nay.redhat.com>
- <20190625024546.GO15846@desktop>
- <20190625071639.GG30864@dhcp-12-102.nay.redhat.com>
- <20190625143616.GD5380@magnolia>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:26967 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1726068AbfFZBSt (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 25 Jun 2019 21:18:49 -0400
+Message-ID: <5D12C7F5.8050502@cn.fujitsu.com>
+Date: Wed, 26 Jun 2019 09:18:45 +0800
+From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190625143616.GD5380@magnolia>
+Subject: Re: [PATCH v2 2/2] generic/554: test only copy to active swap file
+References: <20190611153916.13360-1-amir73il@gmail.com> <20190611153916.13360-2-amir73il@gmail.com> <20190618090238.kmeocxasyxds7lzg@XZHOUW.usersys.redhat.com> <CAOQ4uxhePeTzR1t3e67xY+H0vcvh5toB3S=vdYVKm-skJrM00g@mail.gmail.com> <20190618150242.GA4576@mit.edu> <20190618151144.GB5387@magnolia> <5D11F781.4040906@cn.fujitsu.com> <CAOQ4uxgYApyiiSCWiCUJRgRoYYztMuON2d_mhLso-=DkqwNcbA@mail.gmail.com>
+In-Reply-To: <CAOQ4uxgYApyiiSCWiCUJRgRoYYztMuON2d_mhLso-=DkqwNcbA@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"; format=flowed
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: guaneryu@gmail.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: Theodore Ts'o <tytso@mit.edu>, darrick <darrick.wong@oracle.com>, Murphy Zhou <jencce.kernel@gmail.com>, fstests <fstests@vger.kernel.org>, linux-xfs <linux-xfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jun 25, 2019 at 07:36:16AM -0700, Darrick J. Wong wrote:
-> On Tue, Jun 25, 2019 at 03:16:39PM +0800, Zorro Lang wrote:
-> > On Tue, Jun 25, 2019 at 10:45:46AM +0800, Eryu Guan wrote:
-> > > On Mon, Jun 24, 2019 at 09:21:03AM +0800, Zorro Lang wrote:
-> > > > On Sun, Jun 23, 2019 at 02:49:19PM -0700, Darrick J. Wong wrote:
-> > > > > On Sat, Jun 22, 2019 at 11:38:27PM +0800, Zorro Lang wrote:
-> > > > > > There was a bug, xfs_info fails on a mounted block device:
-> > > > > > 
-> > > > > >   # xfs_info /dev/mapper/testdev
-> > > > > >   xfs_info: /dev/mapper/testdev contains a mounted filesystem
-> > > > > > 
-> > > > > >   fatal error -- couldn't initialize XFS library
-> > > > > > 
-> > > > > > xfsprogs has fixed it by:
-> > > > > > 
-> > > > > >   bbb43745 xfs_info: use findmnt to handle mounted block devices
-> > > > > > 
-> > > > > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > > > 
-> > > > > Aha!  I remembered something -- xfs/449 already checks for consistency
-> > > > > in the various xfs geometry reports that each command provides, so why
-> > > > > not just add the $XFS_INFO_PROG $SCRATCH_DEV case at the end?
-> > 
-> > Hmm... But I hope the case can keep running xfs_info test even there're not
-> > xfs_spaceman -c "info" or xfs_db -c "info", just skip these two steps. Due
-> > to RHEL-7 has old xfsprogs, we'd like to cover bug on RHEL-7.
-> > 
-> > What do you think?
-> 
-> If there isn't an xfs_db -c info command then xfs_info <blockev> won't
-> work because that's what it does internally.
-> 
-> Sooo unless you're backporting the new xfs_db info command to rhel7
-> xfsprogs as well as the new xfs_info wrapper, the test ought to just
-> _notrun on rhel7.
+On 2019/06/25 18:35, Amir Goldstein wrote:
 
-No, I'm not trying to test an unmount <blockdev>. I'm trying to run
-xfs_info on a mounted <blockdev>.
+> On Tue, Jun 25, 2019 at 1:29 PM Yang Xu<xuyang2018.jy@cn.fujitsu.com>  wrote:
+>> on 2019/06/18 23:11, Darrick J. Wong  wrote:
+>>
+>>> On Tue, Jun 18, 2019 at 11:02:42AM -0400, Theodore Ts'o wrote:
+>>>> On Tue, Jun 18, 2019 at 12:16:45PM +0300, Amir Goldstein wrote:
+>>>>> On Tue, Jun 18, 2019 at 12:02 PM Murphy Zhou<jencce.kernel@gmail.com>   wrote:
+>>>>>> Would you mind updating sha1 after it get merged to Linus tree?
+>>>>>>
+>>>>>> That would be helpful for people tracking this issue.
+>>>>>>
+>>>>> This is the commit id in linux-next and expected to stay the same
+>>>>> when the fix is merged to Linus tree for 5.3.
+>>>> When I talked to Darrick last week, that was *not* the sense I got
+>>>> from him.  It's not necessarily guaranteed to be stable just yet...
+>>> Darrick hasn't gotten any complaints about the copy-file-range-fixes
+>>> branch (which has been in for-next for a week now), so he thinks that
+>>> commit id (a31713517dac) should be stable from here on out.
+>>>
+>>> (Note that doesn't guarantee that Linus will pull said branch...)
+>>>
+>>> --D
+>> Hi Amir
+>>
+>> The kernel fix commit message is right?  :-)  Because when I backport this patch into 5.2.0-rc6+ kernel,
+>> generic/554(553) also fails, it should be commit a5544984af4 (vfs: add missing checks to copy_file_range).
+>> By the way, a31713517dac ("vfs: introduce generic_file_rw_checks()") doesn't check for immutable and swap file.
+>>
+>> I think we can change this message after the fix is merged to Linus tree for 5.3.  What do you think about it?
+> You are right. Documented commit is wrong.
+> The correct commit in linux-next is:
+> 96e6e8f4a68d ("vfs: add missing checks to copy_file_range")
+>
+> (Not sure where you got a5544984af4 from?)
+I get a5544984af4 from Darrick.wong copy-file-range-fixes branch.
 
-There was a bug. RHEL-7 xfsprogs can get a mounted device info:
+> Let's fix that after the commit is upstream.
+>
+> Obviously, you would need to backport the entire series and not just this
+> one commit to stable kernel.
+Yes. I got it.
 
-# xfs_growfs -p xfs_info -n /dev/mapper/home 
-meta-data=/dev/mapper/home isize=512    agcount=4, agsize=47341056 blks
-         =                       sectsz=512   attr=2, projid32bit=1
-         =                       crc=1        finobt=0 spinodes=0
-data     =                       bsize=4096   blocks=189364224, imaxpct=25
-         =                       sunit=0      swidth=0 blks
-naming   =version 2              bsize=4096   ascii-ci=0 ftype=1
-log      =internal               bsize=4096   blocks=92463, version=2
-         =                       sectsz=512   sunit=0 blks, lazy-count=1
-realtime =none                   extsz=4096   blocks=0, rtextents=0
-
-
-But RHEL-8.0 xfsprogs can't do that:
-
-# xfs_info /dev/mapper/xfshome
-xfs_info: /dev/mapper/xfshome contains a mounted filesystem
-
-fatal error -- couldn't initialize XFS library
-
-Thanks,
-Zorro
-
-> 
-> --D
-> 
-> > > > 
-> > > > Wow, there're so many cases, can't sure what we've covered now:)
-> > > > 
-> > > > Sure, I can do this change on xfs/449, if Eryu thinks it's fine to increase
-> > > > the test coverage of a known case.
-> > > 
-> > > Given that we're having more and more tests and the test time grows
-> > > quickly, I'm fine now with adding such small & similar test to existing
-> > > test case to reuse the test setups, especially when XFS maintainer
-> > > agrees to do so :)
-> > > 
-> > > Thanks,
-> > > Eryu
+> Thanks,
+> Amir.
+>
+>
+>
