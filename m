@@ -1,65 +1,83 @@
-Received: from mail-yb1-f195.google.com ([209.85.219.195]:45345 "EHLO
-        mail-yb1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727641AbfFZOzW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 26 Jun 2019 10:55:22 -0400
+Received: from sandeen.net ([63.231.237.45]:33598 "EHLO sandeen.net"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1727830AbfFZOvP (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 26 Jun 2019 10:51:15 -0400
+Subject: [PATCH] xfs_io: reorganize source file handling in copy_range
+References: <20190626061711.27690-1-amir73il@gmail.com>
+From: Eric Sandeen <sandeen@sandeen.net>
+Message-ID: <fe818d07-f539-4b2c-fe26-dbc18003e3e2@sandeen.net>
+Date: Wed, 26 Jun 2019 09:51:13 -0500
 MIME-Version: 1.0
-References: <20190626061711.27690-1-amir73il@gmail.com> <fb00d61f-127e-b190-4059-81138279e0cc@sandeen.net>
-In-Reply-To: <fb00d61f-127e-b190-4059-81138279e0cc@sandeen.net>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 26 Jun 2019 17:55:09 +0300
-Message-ID: <CAOQ4uxjoXqSKWLxG5vp9O=Vvnrpd_RfocNX4LUp5UytvVMx9-Q@mail.gmail.com>
-Subject: Re: [PATCH v2] xfs_io: allow passing an open file to copy_range
-Content-Type: text/plain; charset="UTF-8"
+In-Reply-To: <20190626061711.27690-1-amir73il@gmail.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@sandeen.net>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs <linux-xfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 26, 2019 at 5:41 PM Eric Sandeen <sandeen@sandeen.net> wrote:
->
-> On 6/26/19 1:17 AM, Amir Goldstein wrote:
-> > Commit 1a05efba ("io: open pipes in non-blocking mode")
-> > addressed a specific copy_range issue with pipes by always opening
-> > pipes in non-blocking mode.
-> >
-> > This change takes a different approach and allows passing any
-> > open file as the source file to copy_range.  Besides providing
-> > more flexibility to the copy_range command, this allows xfstests
-> > to check if xfs_io supports passing an open file to copy_range.
-> >
-> > The intended usage is:
-> > $ mkfifo fifo
-> > $ xfs_io -f -n -r -c "open -f dst" -C "copy_range -f 0" fifo
-> >
-> > Signed-off-by: Amir Goldstein <amir73il@gmail.com>
-> > Reviewed-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >
-> > Eric,
-> >
-> > Re-posting this patch with Darrick's RVB, since it was missed last
-> > two for-next updates.
->
-> Thanks.  See, this is why I send that email ;)
->
-> I was wondering about a small tweak to the man page to make it clear
-> that "-f N" refers to "open file number N as shown by the files command"
-> but I guess sendfile already uses the same terminology with no further
-> explanation, so maybe it's ok.
->
-> my only concern is this:
->
-> +       if (optind != argc - src_file_arg) {
-> +               fprintf(stderr, "optind=%d, argc=%d, src_file_arg=%d\n", optind, argc, src_file_arg);
->                 return command_usage(&copy_range_cmd);
-> +       }
->
-> spitting out source code bits when the user misuses the command isn't
-> my favorite thing.  Should remove the fprintf, I think, as it's apparently
-> for debugging the patch, not for general use?  I can do that on commit
-> if you're ok with it.
+rename and rearrange some of the vars related to using an open
+file number as the source file, so that we don't temporarily
+store a non-fd number in a var called "fd," and do the fd
+assignment in a consistent code location.
 
-Of course. I just forgot to remove it. My bad.
+Signed-off-by: Eric Sandeen <sandeen@redhat.com>
+---
 
-Thanks,
-Amir.
+Amir, what do you think about this tweak, just for maintainability
+I'd prefer to only assign an actual fd to "fd," and handle that
+assignment in the same code location for both invocation options.
+Thoughts?  Not a big deal either way.
+
+diff --git a/io/copy_file_range.c b/io/copy_file_range.c
+index 4a0e7a77..90e1452c 100644
+--- a/io/copy_file_range.c
++++ b/io/copy_file_range.c
+@@ -84,7 +84,8 @@ copy_range_f(int argc, char **argv)
+ 	int opt;
+ 	int ret;
+ 	int fd;
+-	int src_file_arg = 1;
++	int src_path_arg = 1;
++	int src_file_nr = 0;
+ 	size_t fsblocksize, fssectsize;
+ 
+ 	init_cvtnum(&fsblocksize, &fssectsize);
+@@ -113,27 +114,27 @@ copy_range_f(int argc, char **argv)
+ 			}
+ 			break;
+ 		case 'f':
+-			fd = atoi(argv[1]);
+-			if (fd < 0 || fd >= filecount) {
++			src_file_nr = atoi(argv[1]);
++			if (src_file_nr < 0 || src_file_nr >= filecount) {
+ 				printf(_("value %d is out of range (0-%d)\n"),
+-					fd, filecount-1);
++					src_file_nr, filecount-1);
+ 				return 0;
+ 			}
+-			fd = filetable[fd].fd;
+-			/* Expect no src_file arg */
+-			src_file_arg = 0;
++			/* Expect no src_path arg */
++			src_path_arg = 0;
+ 			break;
+ 		}
+ 	}
+ 
+-	if (optind != argc - src_file_arg)
++	if (optind != argc - src_path_arg)
+ 		return command_usage(&copy_range_cmd);
+ 
+-	if (src_file_arg) {
++	if (src_path_arg) {
+ 		fd = openfile(argv[optind], NULL, IO_READONLY, 0, NULL);
+ 		if (fd < 0)
+ 			return 0;
+-	}
++	} else
++		fd = filetable[src_file_nr].fd;
+ 
+ 	if (src == 0 && dst == 0 && len == 0) {
+ 		off64_t	sz;
