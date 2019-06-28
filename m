@@ -1,52 +1,155 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:51779 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726616AbfF1Ofl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 10:35:41 -0400
-Date: Fri, 28 Jun 2019 10:35:36 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: Re: [PATCH 1/5] shared,ext4: move ext4-specific tests out of shared/
-Message-ID: <20190628143536.GD6181@mit.edu>
-References: <20190623230956.24670-1-tytso@mit.edu>
- <20190628094030.GD7943@desktop>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190628094030.GD7943@desktop>
+Received: from mail.kernel.org ([198.145.29.99]:32812 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726563AbfF1WJD (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 28 Jun 2019 18:09:03 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH v2] generic: test cloning large exents to a file with many small extents
+Date: Fri, 28 Jun 2019 23:08:36 +0100
+Message-Id: <20190628220836.16096-1-fdmanana@kernel.org>
+In-Reply-To: <20190627170030.6149-1-fdmanana@kernel.org>
+References: <20190627170030.6149-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jun 28, 2019 at 05:40:30PM +0800, Eryu Guan wrote:
-> > 
-> > 	shared/001 --> ext4/036
-> > 	shared/003 --> ext4/037
-> > 	shared/004 --> ext4/038
-> > 	shared/272 --> ext4/039
-> 
-> Looks like shared/001 and shared/004 are not journal related and could
-> run with ext2 as well. So the two tests should be part of patch 3?
+From: Filipe Manana <fdmanana@suse.com>
 
-Orphaned inodes is something which is only a thing with ext3/ext4.
-The fact that these tests pass on ext2 is purely a happy accident ---
-because ext2 completely ignores the orphaned list.  I suppose I should
-just remove ext2 from the supported list, but these tests take a super
-small amount of time so why the tests are kinda pointless for ext2, it
-doesn't cost much time, either.
+Test that if we clone a file with some large extents into a file that has
+many small extents, when the fs is nearly full, the clone operation does
+not fail and produces the correct result.
 
-> And I guess we should update "_supported_fs" field in ext4/037 and
-> ext4/039 too, so they only support ext4.
+This is motivated by a bug found in btrfs wich is fixed by the following
+patches for the linux kernel:
 
-ext4/037 should have be marked as only supported by ext3 and ext4.
-It's passing by accident on my system because I have
-CONFIG_EXT4_USE_FOR_EXT2, and so the lack of the noload mount option
-wasn't tripping up the test and causing a test failure.  (The fact
-that no one has complained is actually a really strong suggestion that
-most people running xfstests have EXT4_USE_FOR_EXT2 enabled.)  I'll fix this.
+ [PATCH 1/2] Btrfs: factor out extent dropping code from hole punch handler
+ [PATCH 2/2] Btrfs: fix ENOSPC errors, leading to transaction aborts, when
+             cloning extents
 
-ext4/039 is right as is; it makes sense for ext3 and ext4, and if
-someone is testing with FSTYP=ext3 we do want to run that test.
+The test currently passes on xfs.
 
-I'll adjust some of the supported_fs lines in the next version.
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
 
-						- Ted
+V2: Use _scratch_cycle_mount instead of _scratch_remount, as we want to see
+    if the operation was durably persisted (otherwise we are seeing content
+    from the page cache).
+    Use _reflink instead of calling xfs_io with the reflink command.
+    Make the comment before filling the filesystem more clear about why it
+    is done the way it is instead of using _fill_fs.
+
+ tests/generic/558     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/558.out |  5 ++++
+ tests/generic/group   |  1 +
+ 3 files changed, 86 insertions(+)
+ create mode 100755 tests/generic/558
+ create mode 100644 tests/generic/558.out
+
+diff --git a/tests/generic/558 b/tests/generic/558
+new file mode 100755
+index 00000000..f982930d
+--- /dev/null
++++ b/tests/generic/558
+@@ -0,0 +1,80 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FSQA Test No. 558
++#
++# Test that if we clone a file with some large extents into a file that has
++# many small extents, when the fs is nearly full, the clone operation does
++# not fail and produces the correct result.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_fs generic
++_supported_os Linux
++_require_scratch_reflink
++
++rm -f $seqres.full
++
++_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
++_scratch_mount
++
++file_size=$(( 128 * 1024 * 1024 )) # 128Mb
++extent_size=4096
++num_extents=$(( $file_size / $extent_size ))
++
++# Create a file with many small extents.
++for ((i = 0; i < $num_extents; i++)); do
++	offset=$(( $i * $extent_size ))
++	$XFS_IO_PROG -f -s -c "pwrite -S 0xe5 $offset $extent_size" \
++		$SCRATCH_MNT/foo >>/dev/null
++done
++
++# Create file bar with the same size that file foo has but with large extents.
++$XFS_IO_PROG -f -c "pwrite -S 0xc7 -b $file_size 0 $file_size" \
++	$SCRATCH_MNT/bar >>/dev/null
++
++# Fill the fs (For btrfs we are interested in filling all unallocated space
++# and most of the existing metadata block group(s), so that after this there
++# will be no unallocated space and metadata space will be mostly full but with
++# more than enough free space for the clone operation below to succeed, we
++# create files with 2Kb because that results in extents inlined in the metadata
++# (btree leafs) and it's the fastest way to fill metadata space on btrfs, by
++# default btrfs inlines up to 2Kb of data).
++i=1
++while true; do
++	$XFS_IO_PROG -f -c "pwrite 0 2K" $SCRATCH_MNT/filler_$i &> /dev/null
++	[ $? -ne 0 ] && break
++	i=$(( i + 1 ))
++done
++
++# Now clone file bar into file foo. This is supposed to succeed and not fail
++# with ENOSPC for example.
++_reflink $SCRATCH_MNT/bar $SCRATCH_MNT/foo >>$seqres.full
++
++# Unmount and mount the filesystem again to verify the operation was durably
++# persisted.
++_scratch_cycle_mount
++
++echo "File foo data after cloning and remount:"
++od -A d -t x1 $SCRATCH_MNT/foo
++
++status=0
++exit
+diff --git a/tests/generic/558.out b/tests/generic/558.out
+new file mode 100644
+index 00000000..d1e8e70f
+--- /dev/null
++++ b/tests/generic/558.out
+@@ -0,0 +1,5 @@
++QA output created by 558
++File foo data after cloning and remount:
++0000000 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7
++*
++134217728
+diff --git a/tests/generic/group b/tests/generic/group
+index 543c0627..c06c1cd1 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -560,3 +560,4 @@
+ 555 auto quick cap
+ 556 auto quick casefold
+ 557 auto quick log
++558 auto clone
+-- 
+2.11.0
