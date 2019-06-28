@@ -1,216 +1,126 @@
-Received: from mail-pf1-f194.google.com ([209.85.210.194]:37314 "EHLO
-        mail-pf1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726648AbfF1HEM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 03:04:12 -0400
-Date: Fri, 28 Jun 2019 15:04:05 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:34498 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726426AbfF1JrV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 05:47:21 -0400
+Received: by mail-pf1-f193.google.com with SMTP id c85so2717443pfc.1
+        for <fstests@vger.kernel.org>; Fri, 28 Jun 2019 02:47:21 -0700 (PDT)
+Date: Fri, 28 Jun 2019 17:47:14 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] xfs: project quota ineritance flag test
-Message-ID: <20190628070405.GC7943@desktop>
-References: <20190619101047.3149-1-zlang@redhat.com>
+Subject: Re: [PATCH 4/5] shared,generic: move shared/006 to generic/
+Message-ID: <20190628094714.GE7943@desktop>
+References: <20190623230956.24670-1-tytso@mit.edu>
+ <20190623230956.24670-4-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190619101047.3149-1-zlang@redhat.com>
+In-Reply-To: <20190623230956.24670-4-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jun 19, 2019 at 06:10:47PM +0800, Zorro Lang wrote:
-> This case is used to cover xfsprogs bug "b136f48b xfs_quota: fix
-> false error reporting of project inheritance flag is not set" at
-> first. Then test more behavior when project ineritance flag is
-> set or removed.
+On Sun, Jun 23, 2019 at 07:09:55PM -0400, Theodore Ts'o wrote:
+> The shared/006 uses _scratch_mkfs_sized to create a limited size file
+> system, and then creates inodes until it gets ENOSPC, and then checks
+> to make sure the file system is consistent.  It then remounts the file
+> system, removes all of the files, and makes sure the file system is
+> consistent afterwards.
 > 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
+> This test was marked as only being supported on ext[234] and xfs, and
+> so it was in shared.  However, I've tested and this test works just
+> fine on btrfs, ubifs, tmpfs, and should work on all file systems that
 
-Test looks fine to me. Just some minor issues inline, and I've fixed
-them up on commit.
+This is because the $free_inode is 0 and $loop is 1, so we end up
+creating only 1000 files in the test without hitting ENOSPC at all.
 
+Perhaps we could introduce a new require rule to check if fs supports
+fixed inode number (just check if '_get_free_inode $TEST_DIR' returns
+non-zero).
+
+> support _scratch_mkfs_sized, since even if there isn't a fixed inode
+> table, the file system will eventually run out of disk space.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 > ---
->  tests/xfs/507     | 117 ++++++++++++++++++++++++++++++++++++++++++++++
->  tests/xfs/507.out |  23 +++++++++
->  tests/xfs/group   |   1 +
->  3 files changed, 141 insertions(+)
->  create mode 100755 tests/xfs/507
->  create mode 100644 tests/xfs/507.out
+>  tests/{shared/006 => generic/558} | 4 +---
+>  tests/generic/558.out             | 2 ++
+>  tests/generic/group               | 1 +
+>  tests/shared/006.out              | 2 --
+>  tests/shared/group                | 1 -
+>  5 files changed, 4 insertions(+), 6 deletions(-)
+>  rename tests/{shared/006 => generic/558} (96%)
+>  create mode 100644 tests/generic/558.out
+>  delete mode 100644 tests/shared/006.out
 > 
-> diff --git a/tests/xfs/507 b/tests/xfs/507
-> new file mode 100755
-> index 00000000..509da03e
-> --- /dev/null
-> +++ b/tests/xfs/507
-> @@ -0,0 +1,117 @@
-> +#! /bin/bash
-> +# SPDX-License-Identifier: GPL-2.0
-> +# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
-> +#
-> +# FS QA Test 507
-> +#
-> +# Test project quota inheritance flag, uncover xfsprogs:
-> +#    b136f48b xfs_quota: fix false error reporting of project inheritance flag is not set
+> diff --git a/tests/shared/006 b/tests/generic/558
+> similarity index 96%
+> rename from tests/shared/006
+> rename to tests/generic/558
+> index aa65e9a2..8bfc65fa 100755
+> --- a/tests/shared/006
+> +++ b/tests/generic/558
+> @@ -2,7 +2,7 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  # Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
+>  #
+> -# FS QA Test No. shared/006
+> +# FS QA Test No. generic/558
+>  #
+>  # Stress test fs by using up all inodes and check fs.
+>  #
+> @@ -42,9 +42,7 @@ create_file()
+>  . ./common/filter
+>  
+>  # real QA test starts here
+> -_supported_fs ext4 ext3 ext2 xfs
 
-Test project..., uncover xfsprogs bug fixed by commit b136f48b19a5
-("xfs_quota: fix false error reporting of project inheritance flag is
-not set").
-
-> +#
-> +seq=`basename $0`
-> +seqres=$RESULT_DIR/$seq
-> +echo "QA output created by $seq"
-> +
-> +here=`pwd`
-> +tmp=/tmp/$$
-> +status=1	# failure is the default!
-> +trap "_cleanup; exit \$status" 0 1 2 3 15
-> +
-> +_cleanup()
-> +{
-> +	cd /
-> +	rm -f $tmp.*
-> +}
-> +
-> +# get standard environment, filters and checks
-> +. ./common/rc
-> +. ./common/filter
-> +. ./common/quota
-> +
-> +# remove previous $seqres.full before test
-> +rm -f $seqres.full
-> +
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_quota
-> +
-> +cat >$tmp.projects <<EOF
-> +10:$SCRATCH_MNT/dir
-> +EOF
-> +
-> +cat >$tmp.projid <<EOF
-> +root:0
-> +test:10
-> +EOF
-> +
-> +QUOTA_CMD="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
-> +
-> +filter_xfs_pquota()
-> +{
-> +        perl -ne "
-> +s,$tmp.projects,[PROJECTS_FILE],;
-> +s,$SCRATCH_MNT,[SCR_MNT],;
-> +s,$SCRATCH_DEV,[SCR_DEV],;
-> +        print;"
-> +}
-> +
-> +do_quota_nospc()
-> +{
-> +	local file=$1
-> +	local exp=$2
-> +
-> +	echo "Write $file, expect $exp:" | _filter_scratch
-> +
-> +	# replace the "pwrite64" which old xfs_io prints
-> +	$XFS_IO_PROG -t -f -c "pwrite 0 5m" $file 2>&1 >/dev/null | \
-> +		sed -e 's/pwrite64/pwrite/g'
-
-_filter_xfs_io_error does this job.
-
-> +	rm -f $file
-> +}
-> +
-> +_scratch_mkfs_xfs >>$seqres.full 2>&1
-> +_qmount_option "prjquota"
-> +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +
-> +mkdir $SCRATCH_MNT/dir
-> +$QUOTA_CMD -x -c 'project -s test' $SCRATCH_MNT >>$seqres.full 2>&1
-> +$QUOTA_CMD -x -c 'limit -p bsoft=1m bhard=2m test' $SCRATCH_MNT
-> +
-> +# test the Project inheritance bit is a directory only flag, and it's set on
-> +# directory by default
-
-I added comments here to state that we don't expect "project inheritance
-flag is not set" from xfs_quota.
+_supported_fs generic
 
 Thanks,
 Eryu
 
-> +echo "== The parent directory has Project inheritance bit by default =="
-> +touch $SCRATCH_MNT/dir/foo
-> +mkdir $SCRATCH_MNT/dir/dir_inherit
-> +touch $SCRATCH_MNT/dir/dir_inherit/foo
-> +$QUOTA_CMD -x -c 'project -c test' $SCRATCH_MNT | filter_xfs_pquota
-> +echo ""
-> +
-> +# test the quota and the project inheritance quota work well
-> +do_quota_nospc $SCRATCH_MNT/dir/foo ENOSPC
-> +do_quota_nospc $SCRATCH_MNT/dir/dir_inherit/foo ENOSPC
-> +echo ""
-> +
-> +# test the project quota won't be inherited, if removing the Project
-> +# inheritance bit
-> +echo "== After removing parent directory has Project inheritance bit =="
-> +$XFS_IO_PROG -x -c "chattr -P" $SCRATCH_MNT/dir
-> +touch $SCRATCH_MNT/dir/foo
-> +mkdir $SCRATCH_MNT/dir/dir_uninherit
-> +touch $SCRATCH_MNT/dir/dir_uninherit/foo
-> +$QUOTA_CMD -x -c 'project -c test' $SCRATCH_MNT | filter_xfs_pquota
-> +echo ""
-> +
-> +# after remove the Project inheritance bit of the original parent directory,
-> +# then verify:
-> +# 1) there's not any limit on the original parent directory and files under it
-> +# 2) the quota limit of sub-directory which has inherited still works
-> +# 3) there's not limit on the new sub-dirctory (not inherit from parent)
-> +do_quota_nospc $SCRATCH_MNT/dir/foo Success
-> +do_quota_nospc $SCRATCH_MNT/dir/dir_inherit/foo ENOSPC
-> +do_quota_nospc $SCRATCH_MNT/dir/dir_uninherit/foo Success
-> +
-> +_scratch_unmount
-> +# success, all done
-> +status=0
-> +exit
-> diff --git a/tests/xfs/507.out b/tests/xfs/507.out
+>  _supported_os Linux
+> -
+>  _require_scratch
+>  
+>  rm -f $seqres.full
+> diff --git a/tests/generic/558.out b/tests/generic/558.out
 > new file mode 100644
-> index 00000000..c8c09d3f
+> index 00000000..9a6c4e79
 > --- /dev/null
-> +++ b/tests/xfs/507.out
-> @@ -0,0 +1,23 @@
-> +QA output created by 507
-> +== The parent directory has Project inheritance bit by default ==
-> +Checking project test (path [SCR_MNT]/dir)...
-> +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
-> +
-> +Write SCRATCH_MNT/dir/foo, expect ENOSPC:
-> +pwrite: No space left on device
-> +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
-> +pwrite: No space left on device
-> +
-> +== After removing parent directory has Project inheritance bit ==
-> +Checking project test (path [SCR_MNT]/dir)...
-> +[SCR_MNT]/dir - project inheritance flag is not set
-> +[SCR_MNT]/dir/foo - project identifier is not set (inode=0, tree=10)
-> +[SCR_MNT]/dir/dir_uninherit - project identifier is not set (inode=0, tree=10)
-> +[SCR_MNT]/dir/dir_uninherit - project inheritance flag is not set
-> +[SCR_MNT]/dir/dir_uninherit/foo - project identifier is not set (inode=0, tree=10)
-> +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
-> +
-> +Write SCRATCH_MNT/dir/foo, expect Success:
-> +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
-> +pwrite: No space left on device
-> +Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
-> diff --git a/tests/xfs/group b/tests/xfs/group
-> index ffe4ae12..46200752 100644
-> --- a/tests/xfs/group
-> +++ b/tests/xfs/group
-> @@ -504,3 +504,4 @@
->  504 auto quick mkfs label
->  505 auto quick spaceman
->  506 auto quick health
-> +507 auto quick quota
+> +++ b/tests/generic/558.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 558
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 543c0627..8fc85b63 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -560,3 +560,4 @@
+>  555 auto quick cap
+>  556 auto quick casefold
+>  557 auto quick log
+> +558 auto enospc
+> diff --git a/tests/shared/006.out b/tests/shared/006.out
+> deleted file mode 100644
+> index 675c1b7c..00000000
+> --- a/tests/shared/006.out
+> +++ /dev/null
+> @@ -1,2 +0,0 @@
+> -QA output created by 006
+> -Silence is golden
+> diff --git a/tests/shared/group b/tests/shared/group
+> index 3507d7d4..2cf910bd 100644
+> --- a/tests/shared/group
+> +++ b/tests/shared/group
+> @@ -4,7 +4,6 @@
+>  # - comment line before each group is "new" description
+>  #
+>  002 auto metadata quick log
+> -006 auto enospc
+>  008 auto stress dedupe
+>  009 auto stress dedupe
+>  010 auto stress dedupe
 > -- 
-> 2.17.2
+> 2.22.0
 > 
