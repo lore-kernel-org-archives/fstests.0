@@ -1,11 +1,11 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:40635 "EHLO
+Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:40636 "EHLO
         outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726862AbfF1W7T (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 18:59:19 -0400
+        with ESMTP id S1726775AbfF1W7S (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 18:59:18 -0400
 From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH v2 3/5] shared,ext4: move ext[234]-specific tests out of shared/
-Date: Fri, 28 Jun 2019 18:59:08 -0400
-Message-Id: <20190628225910.17018-3-tytso@mit.edu>
+Subject: [PATCH v2 4/5] shared,generic: move shared/006 to generic/
+Date: Fri, 28 Jun 2019 18:59:09 -0400
+Message-Id: <20190628225910.17018-4-tytso@mit.edu>
 In-Reply-To: <20190628225910.17018-1-tytso@mit.edu>
 References: <20190628225910.17018-1-tytso@mit.edu>
 MIME-Version: 1.0
@@ -15,150 +15,122 @@ To: fstests@vger.kernel.org
 Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Move the following tests:
+The shared/006 uses _scratch_mkfs_sized to create a limited size file
+system, and then creates inodes until it gets ENOSPC, and then checks
+to make sure the file system is consistent.  It then remounts the file
+system, removes all of the files, and makes sure the file system is
+consistent afterwards.
 
-	shared/005 --> ext4/040
-	shared/007 --> ext4/041
-	shared/289 --> ext4/042
+This test was marked as only being supported on ext[234] and xfs, and
+so it was in shared.  However, I've tested and this test works just
+fine on btrfs, ubifs, tmpfs, and should work on all file systems that
+support _scratch_mkfs_sized, since even if there isn't a fixed inode
+table, the file system will eventually run out of disk space.
 
 Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 ---
 Changes since v1:
-   - none
+   - added a new _require_scratch_inode_limits and use it for generic/558
+   - added missing "_supported_fs generic" line
 
- tests/{shared/005 => ext4/040}         | 2 +-
- tests/{shared/007.out => ext4/040.out} | 2 +-
- tests/{shared/007 => ext4/041}         | 2 +-
- tests/{shared/005.out => ext4/041.out} | 2 +-
- tests/{shared/289 => ext4/042}         | 2 +-
- tests/{shared/289.out => ext4/042.out} | 2 +-
- tests/ext4/group                       | 3 +++
- tests/shared/group                     | 3 ---
- 8 files changed, 9 insertions(+), 9 deletions(-)
- rename tests/{shared/005 => ext4/040} (97%)
- rename tests/{shared/007.out => ext4/040.out} (77%)
- rename tests/{shared/007 => ext4/041} (97%)
- rename tests/{shared/005.out => ext4/041.out} (77%)
- rename tests/{shared/289 => ext4/042} (98%)
- rename tests/{shared/289.out => ext4/042.out} (67%)
+ common/rc                         | 11 +++++++++++
+ tests/{shared/006 => generic/558} |  7 +++----
+ tests/generic/558.out             |  2 ++
+ tests/generic/group               |  1 +
+ tests/shared/006.out              |  2 --
+ tests/shared/group                |  1 -
+ 6 files changed, 17 insertions(+), 7 deletions(-)
+ rename tests/{shared/006 => generic/558} (95%)
+ create mode 100644 tests/generic/558.out
+ delete mode 100644 tests/shared/006.out
 
-diff --git a/tests/shared/005 b/tests/ext4/040
-similarity index 97%
-rename from tests/shared/005
-rename to tests/ext4/040
-index 67940dd0..3e475f7d 100755
---- a/tests/shared/005
-+++ b/tests/ext4/040
+diff --git a/common/rc b/common/rc
+index 9165a6f2..8e024f04 100644
+--- a/common/rc
++++ b/common/rc
+@@ -4147,6 +4147,17 @@ _require_scratch_btime()
+ 	_scratch_unmount
+ }
+ 
++_require_scratch_inode_limits()
++{
++	_require_scratch
++	_scratch_mkfs > /dev/null 2>&1
++	_scratch_mount
++	if [ $(_get_free_inode $SCRATCH_MNT) -eq 0 ]; then
++		_notrun "$FSTYP does not have a fixed number of inodes available"
++	fi
++	_scratch_unmount
++}
++
+ _require_filefrag_options()
+ {
+ 	_require_command "$FILEFRAG_PROG" filefrag
+diff --git a/tests/shared/006 b/tests/generic/558
+similarity index 95%
+rename from tests/shared/006
+rename to tests/generic/558
+index aa65e9a2..5807dba3 100755
+--- a/tests/shared/006
++++ b/tests/generic/558
 @@ -2,7 +2,7 @@
  # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
+ # Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
  #
--# FSQA Test No. 005
-+# FSQA Test No. ext4/040 (was shared/005)
+-# FS QA Test No. shared/006
++# FS QA Test No. generic/558
  #
- # Since loff_t is a signed type, it is invalid for a filesystem to load
- # an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-diff --git a/tests/shared/007.out b/tests/ext4/040.out
-similarity index 77%
-rename from tests/shared/007.out
-rename to tests/ext4/040.out
-index 3afba59a..dbccb495 100644
---- a/tests/shared/007.out
-+++ b/tests/ext4/040.out
-@@ -1,4 +1,4 @@
--QA output created by 007
-+QA output created by 040
- Format and mount
- Corrupt filesystem
- Remount, try to append
-diff --git a/tests/shared/007 b/tests/ext4/041
-similarity index 97%
-rename from tests/shared/007
-rename to tests/ext4/041
-index 65cb5273..5c9c0713 100755
---- a/tests/shared/007
-+++ b/tests/ext4/041
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2017 Oracle, Inc.  All Rights Reserved.
+ # Stress test fs by using up all inodes and check fs.
  #
--# FSQA Test No. 007
-+# FSQA Test No. ext4/041 (was shared/007)
- #
- # Since loff_t is a signed type, it is invalid for a filesystem to load
- # an inode with i_size = -1ULL.  Unfortunately, nobody checks this,
-diff --git a/tests/shared/005.out b/tests/ext4/041.out
-similarity index 77%
-rename from tests/shared/005.out
-rename to tests/ext4/041.out
-index 06e3fcdc..97480072 100644
---- a/tests/shared/005.out
-+++ b/tests/ext4/041.out
-@@ -1,4 +1,4 @@
--QA output created by 005
-+QA output created by 041
- Format and mount
- Corrupt filesystem
- Remount, try to append
-diff --git a/tests/shared/289 b/tests/ext4/042
-similarity index 98%
-rename from tests/shared/289
-rename to tests/ext4/042
-index 94b64430..17d482a1 100755
---- a/tests/shared/289
-+++ b/tests/ext4/042
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2012 Red Hat, Inc.  All Rights Reserved.
- #
--# FS QA Test No. 289
-+# FS QA Test No. ext4/042 (was shared/289)
- #
- # Test overhead & df output for extN filesystems
- #
-diff --git a/tests/shared/289.out b/tests/ext4/042.out
-similarity index 67%
-rename from tests/shared/289.out
-rename to tests/ext4/042.out
-index a4de760a..1bd6f82a 100644
---- a/tests/shared/289.out
-+++ b/tests/ext4/042.out
-@@ -1,3 +1,3 @@
--QA output created by 289
-+QA output created by 042
- minix f_blocks is in range
- bsd f_blocks is in range
-diff --git a/tests/ext4/group b/tests/ext4/group
-index 6418d82d..9dfc0d35 100644
---- a/tests/ext4/group
-+++ b/tests/ext4/group
-@@ -42,6 +42,9 @@
- 037 auto quick
- 038 auto quick
- 039 auto enospc rw
-+040 dangerous_fuzzers
-+041 dangerous_fuzzers
-+042 auto quick
- 271 auto rw quick
- 301 aio auto ioctl rw stress defrag
- 302 aio auto ioctl rw stress defrag
+@@ -42,10 +42,9 @@ create_file()
+ . ./common/filter
+ 
+ # real QA test starts here
+-_supported_fs ext4 ext3 ext2 xfs
++_supported_fs generic
+ _supported_os Linux
+-
+-_require_scratch
++_require_scratch_inode_limits
+ 
+ rm -f $seqres.full
+ echo "Silence is golden"
+diff --git a/tests/generic/558.out b/tests/generic/558.out
+new file mode 100644
+index 00000000..9a6c4e79
+--- /dev/null
++++ b/tests/generic/558.out
+@@ -0,0 +1,2 @@
++QA output created by 558
++Silence is golden
+diff --git a/tests/generic/group b/tests/generic/group
+index 543c0627..8fc85b63 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -560,3 +560,4 @@
+ 555 auto quick cap
+ 556 auto quick casefold
+ 557 auto quick log
++558 auto enospc
+diff --git a/tests/shared/006.out b/tests/shared/006.out
+deleted file mode 100644
+index 675c1b7c..00000000
+--- a/tests/shared/006.out
++++ /dev/null
+@@ -1,2 +0,0 @@
+-QA output created by 006
+-Silence is golden
 diff --git a/tests/shared/group b/tests/shared/group
-index 6f184946..3507d7d4 100644
+index 3507d7d4..2cf910bd 100644
 --- a/tests/shared/group
 +++ b/tests/shared/group
-@@ -4,13 +4,10 @@
+@@ -4,7 +4,6 @@
  # - comment line before each group is "new" description
  #
  002 auto metadata quick log
--005 dangerous_fuzzers
- 006 auto enospc
--007 dangerous_fuzzers
+-006 auto enospc
  008 auto stress dedupe
  009 auto stress dedupe
  010 auto stress dedupe
- 011 auto quick
- 032 mkfs auto quick
--289 auto quick
- 298 auto trim
 -- 
 2.22.0
