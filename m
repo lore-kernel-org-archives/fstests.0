@@ -1,126 +1,253 @@
-Received: from mail-pf1-f193.google.com ([209.85.210.193]:34498 "EHLO
-        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726426AbfF1JrV (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 05:47:21 -0400
-Received: by mail-pf1-f193.google.com with SMTP id c85so2717443pfc.1
-        for <fstests@vger.kernel.org>; Fri, 28 Jun 2019 02:47:21 -0700 (PDT)
-Date: Fri, 28 Jun 2019 17:47:14 +0800
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:43682 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726385AbfF1Jkj (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 05:40:39 -0400
+Received: by mail-pl1-f193.google.com with SMTP id cl9so2930319plb.10
+        for <fstests@vger.kernel.org>; Fri, 28 Jun 2019 02:40:38 -0700 (PDT)
+Date: Fri, 28 Jun 2019 17:40:30 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH 4/5] shared,generic: move shared/006 to generic/
-Message-ID: <20190628094714.GE7943@desktop>
+Subject: Re: [PATCH 1/5] shared,ext4: move ext4-specific tests out of shared/
+Message-ID: <20190628094030.GD7943@desktop>
 References: <20190623230956.24670-1-tytso@mit.edu>
- <20190623230956.24670-4-tytso@mit.edu>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190623230956.24670-4-tytso@mit.edu>
+In-Reply-To: <20190623230956.24670-1-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
 To: Theodore Ts'o <tytso@mit.edu>
 Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jun 23, 2019 at 07:09:55PM -0400, Theodore Ts'o wrote:
-> The shared/006 uses _scratch_mkfs_sized to create a limited size file
-> system, and then creates inodes until it gets ENOSPC, and then checks
-> to make sure the file system is consistent.  It then remounts the file
-> system, removes all of the files, and makes sure the file system is
-> consistent afterwards.
+On Sun, Jun 23, 2019 at 07:09:52PM -0400, Theodore Ts'o wrote:
+> The tests shared/{001,003,004,272} test behaviour around the ext4's
+> journal.  As such, they are pointless to run on ext2, and ext3 no
+> longer is in kernels newer than 4.3.  (And most enterprise
+> distributions have been using ext4 to support the ext3 file system;
+> that capability has been around since 2.6.33.)  So we can move these
+> tests out of shared and into the ext4 class of tests:
+
+Thanks a lot for the cleanup!
+
 > 
-> This test was marked as only being supported on ext[234] and xfs, and
-> so it was in shared.  However, I've tested and this test works just
-> fine on btrfs, ubifs, tmpfs, and should work on all file systems that
+> 	shared/001 --> ext4/036
+> 	shared/003 --> ext4/037
+> 	shared/004 --> ext4/038
+> 	shared/272 --> ext4/039
 
-This is because the $free_inode is 0 and $loop is 1, so we end up
-creating only 1000 files in the test without hitting ENOSPC at all.
+Looks like shared/001 and shared/004 are not journal related and could
+run with ext2 as well. So the two tests should be part of patch 3?
 
-Perhaps we could introduce a new require rule to check if fs supports
-fixed inode number (just check if '_get_free_inode $TEST_DIR' returns
-non-zero).
+And I guess we should update "_supported_fs" field in ext4/037 and
+ext4/039 too, so they only support ext4.
 
-> support _scratch_mkfs_sized, since even if there isn't a fixed inode
-> table, the file system will eventually run out of disk space.
 > 
 > Signed-off-by: Theodore Ts'o <tytso@mit.edu>
 > ---
->  tests/{shared/006 => generic/558} | 4 +---
->  tests/generic/558.out             | 2 ++
->  tests/generic/group               | 1 +
->  tests/shared/006.out              | 2 --
->  tests/shared/group                | 1 -
->  5 files changed, 4 insertions(+), 6 deletions(-)
->  rename tests/{shared/006 => generic/558} (96%)
->  create mode 100644 tests/generic/558.out
->  delete mode 100644 tests/shared/006.out
+>  tests/{shared/001 => ext4/036}         | 4 ++--
+>  tests/ext4/036.out                     | 2 ++
+>  tests/{shared/003 => ext4/037}         | 4 +---
+>  tests/ext4/037.out                     | 2 ++
+>  tests/{shared/004 => ext4/038}         | 2 +-
+>  tests/ext4/038.out                     | 2 ++
+>  tests/{shared/272 => ext4/039}         | 2 +-
+>  tests/{shared/272.out => ext4/039.out} | 2 +-
+>  tests/ext4/group                       | 4 ++++
+>  tests/shared/001.out                   | 2 --
+>  tests/shared/003.out                   | 2 --
+>  tests/shared/004.out                   | 2 --
+>  tests/shared/group                     | 4 ----
+>  13 files changed, 16 insertions(+), 18 deletions(-)
+>  rename tests/{shared/001 => ext4/036} (92%)
+>  create mode 100644 tests/ext4/036.out
+>  rename tests/{shared/003 => ext4/037} (96%)
+>  create mode 100644 tests/ext4/037.out
+>  rename tests/{shared/004 => ext4/038} (96%)
+>  create mode 100644 tests/ext4/038.out
+>  rename tests/{shared/272 => ext4/039} (97%)
+>  rename tests/{shared/272.out => ext4/039.out} (72%)
+>  delete mode 100644 tests/shared/001.out
+>  delete mode 100644 tests/shared/003.out
+>  delete mode 100644 tests/shared/004.out
 > 
-> diff --git a/tests/shared/006 b/tests/generic/558
-> similarity index 96%
-> rename from tests/shared/006
-> rename to tests/generic/558
-> index aa65e9a2..8bfc65fa 100755
-> --- a/tests/shared/006
-> +++ b/tests/generic/558
-> @@ -2,7 +2,7 @@
+> diff --git a/tests/shared/001 b/tests/ext4/036
+> similarity index 92%
+> rename from tests/shared/001
+> rename to tests/ext4/036
+> index bde6e198..60a5224f 100755
+> --- a/tests/shared/001
+> +++ b/tests/ext4/036
+> @@ -2,9 +2,9 @@
 >  # SPDX-License-Identifier: GPL-2.0
->  # Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
+>  # Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
 >  #
-> -# FS QA Test No. shared/006
-> +# FS QA Test No. generic/558
->  #
->  # Stress test fs by using up all inodes and check fs.
->  #
-> @@ -42,9 +42,7 @@ create_file()
->  . ./common/filter
->  
->  # real QA test starts here
-> -_supported_fs ext4 ext3 ext2 xfs
+> -# FS QA Test No. 001
+> +# FS QA Test No. ext4/036 (was shared/001)
 
-_supported_fs generic
+I prefer deleting the "was shared/001" annotation, so we're consistent
+with all other test, and we could get such info from git log anyway.
 
 Thanks,
 Eryu
 
->  _supported_os Linux
-> -
->  _require_scratch
->  
->  rm -f $seqres.full
-> diff --git a/tests/generic/558.out b/tests/generic/558.out
+>  #
+> -# Test truncate orphan inodes when mounting extN.
+> +# Test truncate orphan inodes when mounting ext4
+>  # ext4 used to hit WARNING, this commit fixed the issue
+>  #
+>  # 721e3eb ext4: lock i_mutex when truncating orphan inodes
+> diff --git a/tests/ext4/036.out b/tests/ext4/036.out
 > new file mode 100644
-> index 00000000..9a6c4e79
+> index 00000000..ed460d98
 > --- /dev/null
-> +++ b/tests/generic/558.out
+> +++ b/tests/ext4/036.out
 > @@ -0,0 +1,2 @@
-> +QA output created by 558
+> +QA output created by 036
 > +Silence is golden
-> diff --git a/tests/generic/group b/tests/generic/group
-> index 543c0627..8fc85b63 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -560,3 +560,4 @@
->  555 auto quick cap
->  556 auto quick casefold
->  557 auto quick log
-> +558 auto enospc
-> diff --git a/tests/shared/006.out b/tests/shared/006.out
+> diff --git a/tests/shared/003 b/tests/ext4/037
+> similarity index 96%
+> rename from tests/shared/003
+> rename to tests/ext4/037
+> index 761b9691..6a5a801c 100755
+> --- a/tests/shared/003
+> +++ b/tests/ext4/037
+> @@ -2,15 +2,13 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  # Copyright (c) 2015 Red Hat Inc.  All Rights Reserved.
+>  #
+> -# FS QA Test 003
+> +# FS QA Test ext4/037 (was shared/003)
+>  #
+>  # Test mount a needs_recovery partition with noload option.
+>  # ext4 used to Oops until part of this commit:
+>  #
+>  # 744692d ext4: use ext4_get_block_write in buffer write
+>  #
+> -# Also test on ext2/3.
+> -#
+>  seq=`basename $0`
+>  seqres=$RESULT_DIR/$seq
+>  echo "QA output created by $seq"
+> diff --git a/tests/ext4/037.out b/tests/ext4/037.out
+> new file mode 100644
+> index 00000000..5c3a30a4
+> --- /dev/null
+> +++ b/tests/ext4/037.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 037
+> +Silence is golden
+> diff --git a/tests/shared/004 b/tests/ext4/038
+> similarity index 96%
+> rename from tests/shared/004
+> rename to tests/ext4/038
+> index 3021c85d..893d5727 100755
+> --- a/tests/shared/004
+> +++ b/tests/ext4/038
+> @@ -2,7 +2,7 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  # Copyright (c) 2016 Fujitsu.  All Rights Reserved.
+>  #
+> -# FS QA Test 004
+> +# FS QA Test ext4/038 (was shared/004)
+>  #
+>  # Regression test for commit:
+>  # c9eb13a ext4: fix hang when processing corrupted orphaned inode list
+> diff --git a/tests/ext4/038.out b/tests/ext4/038.out
+> new file mode 100644
+> index 00000000..5e0f13ec
+> --- /dev/null
+> +++ b/tests/ext4/038.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 038
+> +Silence is golden
+> diff --git a/tests/shared/272 b/tests/ext4/039
+> similarity index 97%
+> rename from tests/shared/272
+> rename to tests/ext4/039
+> index b94dfc3c..28db308d 100755
+> --- a/tests/shared/272
+> +++ b/tests/ext4/039
+> @@ -2,7 +2,7 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  # Copyright (c) 2006 Silicon Graphics, Inc.  All Rights Reserved.
+>  #
+> -# FSQA Test No. 272
+> +# FSQA Test No. ext4/039 (was shared/272)
+>  #
+>  # Test data journaling flag switch for a single file  
+>  #
+> diff --git a/tests/shared/272.out b/tests/ext4/039.out
+> similarity index 72%
+> rename from tests/shared/272.out
+> rename to tests/ext4/039.out
+> index a9eaf84c..2c8aabad 100644
+> --- a/tests/shared/272.out
+> +++ b/tests/ext4/039.out
+> @@ -1,3 +1,3 @@
+> -QA output created by 272
+> +QA output created by 039
+>  Switch data journalling mode. Silence is golden.
+>  Check filesystem
+> diff --git a/tests/ext4/group b/tests/ext4/group
+> index d27ec893..6418d82d 100644
+> --- a/tests/ext4/group
+> +++ b/tests/ext4/group
+> @@ -38,6 +38,10 @@
+>  033 auto ioctl resize
+>  034 auto quick quota
+>  035 auto quick resize
+> +036 auto quick
+> +037 auto quick
+> +038 auto quick
+> +039 auto enospc rw
+>  271 auto rw quick
+>  301 aio auto ioctl rw stress defrag
+>  302 aio auto ioctl rw stress defrag
+> diff --git a/tests/shared/001.out b/tests/shared/001.out
 > deleted file mode 100644
-> index 675c1b7c..00000000
-> --- a/tests/shared/006.out
+> index 88678b8e..00000000
+> --- a/tests/shared/001.out
 > +++ /dev/null
 > @@ -1,2 +0,0 @@
-> -QA output created by 006
+> -QA output created by 001
+> -Silence is golden
+> diff --git a/tests/shared/003.out b/tests/shared/003.out
+> deleted file mode 100644
+> index 6895fc80..00000000
+> --- a/tests/shared/003.out
+> +++ /dev/null
+> @@ -1,2 +0,0 @@
+> -QA output created by 003
+> -Silence is golden
+> diff --git a/tests/shared/004.out b/tests/shared/004.out
+> deleted file mode 100644
+> index af8614ae..00000000
+> --- a/tests/shared/004.out
+> +++ /dev/null
+> @@ -1,2 +0,0 @@
+> -QA output created by 004
 > -Silence is golden
 > diff --git a/tests/shared/group b/tests/shared/group
-> index 3507d7d4..2cf910bd 100644
+> index b091d911..6f184946 100644
 > --- a/tests/shared/group
 > +++ b/tests/shared/group
-> @@ -4,7 +4,6 @@
+> @@ -3,10 +3,7 @@
+>  # - do not start group names with a digit
 >  # - comment line before each group is "new" description
 >  #
+> -001 auto quick
 >  002 auto metadata quick log
-> -006 auto enospc
->  008 auto stress dedupe
->  009 auto stress dedupe
+> -003 auto quick
+> -004 auto quick
+>  005 dangerous_fuzzers
+>  006 auto enospc
+>  007 dangerous_fuzzers
+> @@ -15,6 +12,5 @@
 >  010 auto stress dedupe
+>  011 auto quick
+>  032 mkfs auto quick
+> -272 auto enospc rw
+>  289 auto quick
+>  298 auto trim
 > -- 
 > 2.22.0
 > 
