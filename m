@@ -1,243 +1,94 @@
-Received: from outgoing-auth-1.mit.edu ([18.9.28.11]:40637 "EHLO
-        outgoing.mit.edu" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1726863AbfF1W7T (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 28 Jun 2019 18:59:19 -0400
-From: "Theodore Ts'o" <tytso@mit.edu>
-Subject: [PATCH v2 5/5] shared,generic: move tests using duperemove to generic/
-Date: Fri, 28 Jun 2019 18:59:10 -0400
-Message-Id: <20190628225910.17018-5-tytso@mit.edu>
-In-Reply-To: <20190628225910.17018-1-tytso@mit.edu>
-References: <20190628225910.17018-1-tytso@mit.edu>
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:44100 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726500AbfF3OuK (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 30 Jun 2019 10:50:10 -0400
+Received: by mail-pg1-f195.google.com with SMTP id i18so83043pgl.11
+        for <fstests@vger.kernel.org>; Sun, 30 Jun 2019 07:50:09 -0700 (PDT)
+Message-ID: <5d18cc20.1c69fb81.d9000.7bf0@mx.google.com>
+Date: Sun, 30 Jun 2019 22:50:01 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to f769a923f576
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="MJDd3ZcASd54"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Theodore Ts'o <tytso@mit.edu>
 List-ID: <fstests@vger.kernel.org>
 
-Add _require_scratch_duperemove which validates that the file system
-supports duperemove.  This allows us to move three tests from shared/
-to generic/.  This means these tests will automatically adapt when
-duperemove supports other file systems.  Tests moved are:
 
-	shared/008 --> generic/559
-	shared/009 --> generic/560
-	shared/010 --> generic/561
+--MJDd3ZcASd54
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Signed-off-by: Theodore Ts'o <tytso@mit.edu>
----
-Changes since v1:
-   - added missing "_supported_fs generic" lines
+Hi all,
 
- common/reflink                            | 18 ++++++++++++++++++
- tests/{shared/008 => generic/559}         | 10 ++++------
- tests/{shared/008.out => generic/559.out} |  2 +-
- tests/{shared/009 => generic/560}         | 10 +++-------
- tests/{shared/009.out => generic/560.out} |  2 +-
- tests/{shared/010 => generic/561}         | 10 +++-------
- tests/generic/561.out                     |  2 ++
- tests/generic/group                       |  3 +++
- tests/shared/010.out                      |  2 --
- tests/shared/group                        |  3 ---
- 10 files changed, 35 insertions(+), 27 deletions(-)
- rename tests/{shared/008 => generic/559} (85%)
- rename tests/{shared/008.out => generic/559.out} (64%)
- rename tests/{shared/009 => generic/560} (91%)
- rename tests/{shared/009.out => generic/560.out} (74%)
- rename tests/{shared/010 => generic/561} (89%)
- create mode 100644 tests/generic/561.out
- delete mode 100644 tests/shared/010.out
+The master branch of the xfstests repository at:
 
-diff --git a/common/reflink b/common/reflink
-index 598f0877..ee60398e 100644
---- a/common/reflink
-+++ b/common/reflink
-@@ -75,6 +75,24 @@ _require_scratch_reflink()
- 	_scratch_unmount
- }
- 
-+# this test requires duperemove working for the file system
-+_require_scratch_duperemove()
-+{
-+	_require_scratch
-+	_require_command "$DUPEREMOVE_PROG" duperemove
-+
-+	_scratch_mkfs > /dev/null
-+	_scratch_mount
-+	dd if=/dev/zero of="$SCRATCH_MNT/file1" bs=128k count=1 >& /dev/null
-+	dd if=/dev/zero of="$SCRATCH_MNT/file2" bs=128k count=1 >& /dev/null
-+	if ! "$DUPEREMOVE_PROG" -d "$SCRATCH_MNT/file1" \
-+	    "$SCRATCH_MNT/file2" >& /dev/null ; then
-+		_scratch_unmount
-+		_notrun "duperemove does not support file system type: $FSTYP"
-+	fi
-+	_scratch_unmount
-+}
-+
- # this test requires scratch fs to report explicit SHARED flag
- # e.g.
- #   0         4K         8K
-diff --git a/tests/shared/008 b/tests/generic/559
-similarity index 85%
-rename from tests/shared/008
-rename to tests/generic/559
-index a7d76083..b5297b57 100755
---- a/tests/shared/008
-+++ b/tests/generic/559
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
- #
--# FS QA Test 008
-+# FS QA Test generic/559 (was shared/008)
- #
- # Dedupe a single big file and verify integrity
- #
-@@ -29,12 +29,10 @@ _cleanup()
- # remove previous $seqres.full before test
- rm -f $seqres.full
- 
--# duperemove only supports btrfs and xfs (with reflink feature).
--# Add other filesystems if it supports more later.
--_supported_fs xfs btrfs
-+# real QA test starts here
-+_supported_fs generic
- _supported_os Linux
--_require_scratch_dedupe
--_require_command "$DUPEREMOVE_PROG" duperemove
-+_require_scratch_duperemove
- 
- fssize=$((2 * 1024 * 1024 * 1024))
- _scratch_mkfs_sized $fssize > $seqres.full 2>&1
-diff --git a/tests/shared/008.out b/tests/generic/559.out
-similarity index 64%
-rename from tests/shared/008.out
-rename to tests/generic/559.out
-index f29d478f..a558ada3 100644
---- a/tests/shared/008.out
-+++ b/tests/generic/559.out
-@@ -1,3 +1,3 @@
--QA output created by 008
-+QA output created by 559
- = before cycle mount =
- = after cycle mount =
-diff --git a/tests/shared/009 b/tests/generic/560
-similarity index 91%
-rename from tests/shared/009
-rename to tests/generic/560
-index 933d3098..de1fba92 100755
---- a/tests/shared/009
-+++ b/tests/generic/560
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
- #
--# FS QA Test 009
-+# FS QA Test generic/560 (was shared/009)
- #
- # Iterate dedupe integrity test. Copy an original data0 several
- # times (d0 -> d1, d1 -> d2, ... dn-1 -> dn), dedupe dataN everytime
-@@ -32,13 +32,9 @@ _cleanup()
- rm -f $seqres.full
- 
- # real QA test starts here
--
--# duperemove only supports btrfs and xfs (with reflink feature).
--# Add other filesystems if it supports more later.
--_supported_fs xfs btrfs
-+_supported_fs generic
- _supported_os Linux
--_require_scratch_dedupe
--_require_command "$DUPEREMOVE_PROG" duperemove
-+_require_scratch_duperemove
- 
- _scratch_mkfs > $seqres.full 2>&1
- _scratch_mount >> $seqres.full 2>&1
-diff --git a/tests/shared/009.out b/tests/generic/560.out
-similarity index 74%
-rename from tests/shared/009.out
-rename to tests/generic/560.out
-index 44a78ba3..10ae7edd 100644
---- a/tests/shared/009.out
-+++ b/tests/generic/560.out
-@@ -1,4 +1,4 @@
--QA output created by 009
-+QA output created by 560
- = Do dedup and verify =
- = Backwords verify =
- = Verify after cycle mount =
-diff --git a/tests/shared/010 b/tests/generic/561
-similarity index 89%
-rename from tests/shared/010
-rename to tests/generic/561
-index 04f55890..3cd0b365 100755
---- a/tests/shared/010
-+++ b/tests/generic/561
-@@ -2,7 +2,7 @@
- # SPDX-License-Identifier: GPL-2.0
- # Copyright (c) 2018 Red Hat Inc.  All Rights Reserved.
- #
--# FS QA Test 010
-+# FS QA Test generic/561 (was shared/010)
- #
- # Dedup & random I/O race test, do multi-threads fsstress and dedupe on
- # same directory/files
-@@ -32,13 +32,9 @@ _cleanup()
- rm -f $seqres.full
- 
- # real QA test starts here
--
--# duperemove only supports btrfs and xfs (with reflink feature).
--# Add other filesystems if it supports more later.
--_supported_fs xfs btrfs
-+_supported_fs generic
- _supported_os Linux
--_require_scratch_dedupe
--_require_command "$DUPEREMOVE_PROG" duperemove
-+_require_scratch_duperemove
- _require_command "$KILLALL_PROG" killall
- 
- _scratch_mkfs > $seqres.full 2>&1
-diff --git a/tests/generic/561.out b/tests/generic/561.out
-new file mode 100644
-index 00000000..5e46f61f
---- /dev/null
-+++ b/tests/generic/561.out
-@@ -0,0 +1,2 @@
-+QA output created by 561
-+Silence is golden
-diff --git a/tests/generic/group b/tests/generic/group
-index 8fc85b63..c30d18e0 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -561,3 +561,6 @@
- 556 auto quick casefold
- 557 auto quick log
- 558 auto enospc
-+559 auto stress dedupe
-+560 auto stress dedupe
-+561 auto stress dedupe
-diff --git a/tests/shared/010.out b/tests/shared/010.out
-deleted file mode 100644
-index 1d83a8d6..00000000
---- a/tests/shared/010.out
-+++ /dev/null
-@@ -1,2 +0,0 @@
--QA output created by 010
--Silence is golden
-diff --git a/tests/shared/group b/tests/shared/group
-index 2cf910bd..6112c8dd 100644
---- a/tests/shared/group
-+++ b/tests/shared/group
-@@ -4,9 +4,6 @@
- # - comment line before each group is "new" description
- #
- 002 auto metadata quick log
--008 auto stress dedupe
--009 auto stress dedupe
--010 auto stress dedupe
- 011 auto quick
- 032 mkfs auto quick
- 298 auto trim
--- 
-2.22.0
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update mainly adds two new xfs specific tests, and
+I don't see any new failures when testing with 5.2-rc6 kernel and latest
+xfsprogs from for-next branch.
+
+There're still some patches pending for review (e.g. the fs-verity tests from
+Eric Biggers), I'll try to go through them next week, but it's really
+appreciated if someone could help with reviewing!
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+f769a923f576 xfs: project quota ineritance flag test
+
+New commits:
+
+Amir Goldstein (1):
+      [fdb698644d53] overlay/061: remove from auto and quick groups
+
+Darrick J. Wong (1):
+      [55867bd3a8fb] xfs: check for COW overflows in i_delayed_blks
+
+Murphy Zhou (1):
+      [2effc0975a1f] generic/486: filter out irrelevant attrs
+
+Zorro Lang (1):
+      [f769a923f576] xfs: project quota ineritance flag test
+
+
+Code Diffstat:
+
+ tests/generic/486   |   4 +-
+ tests/overlay/group |   2 +-
+ tests/xfs/507       | 199 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/507.out   |   8 +++
+ tests/xfs/508       | 117 ++++++++++++++++++++++++++++++
+ tests/xfs/508.out   |  23 ++++++
+ tests/xfs/group     |   2 +
+ 7 files changed, 353 insertions(+), 2 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--MJDd3ZcASd54
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl0YyxUACgkQJlKqKVyP
+52M9pg/9FScGQN7nH6AWglBAiPg0Vu6S4GgQMRDYhorYJ+D22EwSkKaK+yqyF5jN
+HmKH6jJAtAE9pZ4n9gILjrNl+KGlC++n0MkajWnHsxpNfS7uFiS3Cgdj3CZ7gxGQ
++fNR7Zwp4Z7UId8Rv4V6TbwLNpXlJZX750Cre/T1iDgXJD6VdU/QEf531QT8qSZ7
+rsZ/83k2WR3nKrbAW8ASG2l06UCtbw8AU3l6yVhSXztgXVUd14FibWI+4jXS3kBQ
+WTPy+m3/lAnseefqrOH2Q6L4aAl5NT+dna4K+gTYEwPHmFhJFQ+csCMtd6Ot11D1
+0zOm1RtMFDx6CXSgUzAgRME+XvzUzN01Ekm0fxqp5i9xQG6dF9KVGtbOZ0kFCysW
+HGnHAMvpkoQVyhPeLon3PeL1VxB5pg9lhgsaI36D1TG3aHrHWYs31G5Bd23SU414
+ph8jITXGH6eIMnwfQ4LBGjn0skwzi7zOvyc2kiLTwp3SD6N9WZMXNHnIuqPW/vxJ
+2DUXrgYMTO8d/PdKie3866PWzytcrXZkfYeWwLQcW3YEu3SBtDc8CRBgYEhq4NGC
+fKB7Q/mU+417T4cx2Tm+YNpDtD/7NTyrRxvBYRoAXdALEQ3zsBiQ6469wpjGO8qd
+KUVssOGsliZHR6spNsBSNoTqrlw+tLztixoOLwvN3p6IzHfKmmI=
+=AVn2
+-----END PGP SIGNATURE-----
+
+--MJDd3ZcASd54--
