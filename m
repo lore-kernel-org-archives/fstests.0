@@ -1,296 +1,85 @@
-Received: from mail.kernel.org ([198.145.29.99]:42084 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:59494 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726731AbfGAS1b (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 1 Jul 2019 14:27:31 -0400
-From: Eric Biggers <ebiggers@kernel.org>
-Subject: [RFC PATCH v3 8/8] generic: test the fs-verity built-in signature verification support
-Date: Mon,  1 Jul 2019 11:25:47 -0700
-Message-Id: <20190701182547.165856-9-ebiggers@kernel.org>
-In-Reply-To: <20190701182547.165856-1-ebiggers@kernel.org>
-References: <20190701182547.165856-1-ebiggers@kernel.org>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+        id S1726105AbfGBIpO (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 2 Jul 2019 04:45:14 -0400
+Received: from smtp.corp.redhat.com (int-mx04.intmail.prod.int.phx2.redhat.com [10.5.11.14])
+        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
+        (No client certificate requested)
+        by mx1.redhat.com (Postfix) with ESMTPS id 94482223884
+        for <fstests@vger.kernel.org>; Tue,  2 Jul 2019 08:45:14 +0000 (UTC)
+Received: from dhcp-12-171.nay.redhat.com (dhcp-12-171.nay.redhat.com [10.66.12.171])
+        by smtp.corp.redhat.com (Postfix) with ESMTP id C12EB403B
+        for <fstests@vger.kernel.org>; Tue,  2 Jul 2019 08:45:13 +0000 (UTC)
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH] generic: fix missed FSX_AVOID parameter
+Date: Tue,  2 Jul 2019 16:45:07 +0800
+Message-Id: <20190702084507.14050-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-fscrypt@vger.kernel.org, linux-ext4@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, Jaegeuk Kim <jaegeuk@kernel.org>, "Theodore Y . Ts'o" <tytso@mit.edu>, Victor Hsieh <victorhsieh@google.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eric Biggers <ebiggers@google.com>
+When I try to avoid copy_file_range operation from fsx, I set
+FSX_AVOID="-E", but it doesn't work on generic/455, and generic/127
+doesn't show $FSX_AVOID when it fails.
 
-Add a basic test for the fs-verity built-in signature verification
-support, which is an optional feature where the kernel can be configured
-to enforce that all verity files are accompanied with a valid signature
-by a key that has been loaded into the fs-verity keyring.
-
-Signed-off-by: Eric Biggers <ebiggers@google.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- common/config         |   1 +
- common/verity         |  16 +++++
- tests/generic/905     | 150 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/905.out |  42 ++++++++++++
- tests/generic/group   |   1 +
- 5 files changed, 210 insertions(+)
- create mode 100755 tests/generic/905
- create mode 100644 tests/generic/905.out
+ tests/generic/127 | 8 ++++----
+ tests/generic/455 | 2 +-
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
-diff --git a/common/config b/common/config
-index 001ddc45..1aaf0a75 100644
---- a/common/config
-+++ b/common/config
-@@ -213,6 +213,7 @@ export XFS_INFO_PROG="$(type -P xfs_info)"
- export DUPEREMOVE_PROG="$(type -P duperemove)"
- export CC_PROG="$(type -P cc)"
- export FSVERITY_PROG="$(type -P fsverity)"
-+export OPENSSL_PROG="$(type -P openssl)"
+diff --git a/tests/generic/127 b/tests/generic/127
+index dedd8bbf..222e0315 100755
+--- a/tests/generic/127
++++ b/tests/generic/127
+@@ -37,7 +37,7 @@ _fsx_lite_nommap()
+     dd if=/dev/zero of=$TEST_DIR/fsx_lite_nommap bs=${FSX_FILE_SIZE} count=1 > /dev/null 2>&1
+     if ! ltp/fsx $FSX_ARGS -L -R -W $FSX_AVOID $TEST_DIR/fsx_lite_nommap > $tmp.output 2>&1
+     then
+-        echo "ltp/fsx $FSX_ARGS -L -R -W $TEST_DIR/fsx_lite_nommap"
++        echo "ltp/fsx $FSX_ARGS -L -R -W $FSX_AVOID $TEST_DIR/fsx_lite_nommap"
+         cat $tmp.output
+         return 1
+     fi
+@@ -51,7 +51,7 @@ _fsx_lite_mmap()
+     dd if=/dev/zero of=$TEST_DIR/fsx_lite_mmap bs=${FSX_FILE_SIZE} count=1 > /dev/null 2>&1
+     if ! ltp/fsx $FSX_ARGS -L $FSX_AVOID $TEST_DIR/fsx_lite_mmap > $tmp.output 2>&1
+     then
+-    	echo "ltp/fsx $FSX_ARGS -L fsx_lite_mmap"
++	echo "ltp/fsx $FSX_ARGS -L $FSX_AVOID $TEST_DIR/fsx_lite_mmap"
+ 	cat $tmp.output
+ 	return 1
+     fi
+@@ -64,7 +64,7 @@ _fsx_std_nommap()
+     echo "=== FSX Standard Mode, No Memory Mapping ==="
+     if ! ltp/fsx $FSX_ARGS -R -W $FSX_AVOID $TEST_DIR/fsx_std_nommap > $tmp.output 2>&1
+     then
+-        echo "ltp/fsx $FSX_ARGS -R -W fsx_std_nommap"
++        echo "ltp/fsx $FSX_ARGS -R -W $FSX_AVOID $TEST_DIR/fsx_std_nommap"
+         cat $tmp.output
+         return 1
+     fi
+@@ -77,7 +77,7 @@ _fsx_std_mmap()
+     echo "=== FSX Standard Mode, Memory Mapping ==="
+     if ! ltp/fsx $FSX_ARGS $FSX_AVOID $TEST_DIR/fsx_std_mmap > $tmp.output 2>&1
+     then
+-    	echo "ltp/fsx $FSX_ARGS fsx_std_mmap"
++	echo "ltp/fsx $FSX_ARGS $FSX_AVOID $TEST_DIR/fsx_std_mmap"
+ 	cat $tmp.output
+ 	return 1
+     fi
+diff --git a/tests/generic/455 b/tests/generic/455
+index 05621220..404c603b 100755
+--- a/tests/generic/455
++++ b/tests/generic/455
+@@ -66,7 +66,7 @@ _log_writes_mount -o discard
  
- # use 'udevadm settle' or 'udevsettle' to wait for lv to be settled.
- # newer systems have udevadm command but older systems like RHEL5 don't.
-diff --git a/common/verity b/common/verity
-index a8aae51e..bcb5670d 100644
---- a/common/verity
-+++ b/common/verity
-@@ -45,6 +45,17 @@ _require_scratch_verity()
- 	FSV_BLOCK_SIZE=$(get_page_size)
- }
- 
-+# Check for CONFIG_FS_VERITY_BUILTIN_SIGNATURES=y.
-+_require_fsverity_builtin_signatures()
-+{
-+	if [ ! -e /proc/keys ]; then
-+		_notrun "kernel doesn't support keyrings"
-+	fi
-+	if ! awk '{print $9}' /proc/keys | grep -q '^\.fs-verity:$'; then
-+		_notrun "kernel doesn't support fs-verity builtin signatures"
-+	fi
-+}
-+
- _scratch_mkfs_verity()
- {
- 	case $FSTYP in
-@@ -92,6 +103,11 @@ _fsv_measure()
-         $FSVERITY_PROG measure "$@" | awk '{print $1}'
- }
- 
-+_fsv_sign()
-+{
-+	$FSVERITY_PROG sign "$@"
-+}
-+
- # Generate a file, then enable verity on it.
- _fsv_create_enable_file()
- {
-diff --git a/tests/generic/905 b/tests/generic/905
-new file mode 100755
-index 00000000..e42b012d
---- /dev/null
-+++ b/tests/generic/905
-@@ -0,0 +1,150 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright 2019 Google LLC
-+#
-+# FS QA Test generic/905
-+#
-+# Test the fs-verity built-in signature verification support.
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	sysctl -w fs.verity.require_signatures=0 &>/dev/null
-+	cd /
-+	rm -f $tmp.*
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/verity
-+
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_scratch_verity
-+_require_fsverity_builtin_signatures
-+_require_command "$OPENSSL_PROG" openssl
-+_require_command "$KEYCTL_PROG" keyctl
-+
-+_scratch_mkfs_verity &>> $seqres.full
-+_scratch_mount
-+
-+fsv_file=$SCRATCH_MNT/file.fsv
-+fsv_orig_file=$SCRATCH_MNT/file
-+keyfile=$tmp.key.pem
-+certfile=$tmp.cert.pem
-+certfileder=$tmp.cert.der
-+sigfile=$tmp.sig
-+otherfile=$SCRATCH_MNT/otherfile
-+othersigfile=$tmp.othersig
-+
-+# Setup
-+
-+echo -e "\n# Generating certificates and private keys"
-+for suffix in '' '.2'; do
-+	if ! $OPENSSL_PROG req -newkey rsa:4096 -nodes -batch -x509 \
-+			-keyout $keyfile$suffix -out $certfile$suffix \
-+			&>> $seqres.full; then
-+		_fail "Failed to generate certificate and private key (see $seqres.full)"
-+	fi
-+	$OPENSSL_PROG x509 -in $certfile$suffix -out $certfileder$suffix \
-+		-outform der
-+done
-+
-+echo -e "\n# Clearing fs-verity keyring"
-+$KEYCTL_PROG clear %keyring:.fs-verity
-+
-+echo -e "\n# Loading first certificate into fs-verity keyring"
-+$KEYCTL_PROG padd asymmetric '' %keyring:.fs-verity \
-+	< $certfileder >> $seqres.full
-+
-+echo -e "\n# Enabling fs.verity.require_signatures"
-+sysctl -w fs.verity.require_signatures=1
-+
-+echo -e "\n# Generating file and signing it for fs-verity"
-+head -c 100000 /dev/zero > $fsv_orig_file
-+for suffix in '' '.2'; do
-+	_fsv_sign $fsv_orig_file $sigfile$suffix --key=$keyfile$suffix \
-+		--cert=$certfile$suffix | _filter_scratch
-+done
-+
-+echo -e "\n# Signing a different file for fs-verity"
-+head -c 100000 /dev/zero | tr '\0' 'X' > $otherfile
-+_fsv_sign $otherfile $othersigfile --key=$keyfile --cert=$certfile \
-+	| _filter_scratch
-+
-+# Actual tests
-+
-+reset_fsv_file()
-+{
-+	rm -f $fsv_file
-+	cp $fsv_orig_file $fsv_file
-+}
-+
-+echo -e "\n# Enabling verity with valid signature (should succeed)"
-+reset_fsv_file
-+_fsv_enable $fsv_file --signature=$sigfile
-+cmp $fsv_file $fsv_orig_file
-+
-+echo -e "\n# Enabling verity without signature (should fail)"
-+reset_fsv_file
-+_fsv_enable $fsv_file |& _filter_scratch
-+
-+echo -e "\n# Opening verity file without signature (should fail)"
-+reset_fsv_file
-+sysctl -w fs.verity.require_signatures=0 &>> $seqres.full
-+_fsv_enable $fsv_file
-+sysctl -w fs.verity.require_signatures=1 &>> $seqres.full
-+_scratch_cycle_mount
-+md5sum $fsv_file |& _filter_scratch
-+
-+echo -e "\n# Enabling verity with untrusted signature (should fail)"
-+reset_fsv_file
-+_fsv_enable $fsv_file --signature=$sigfile.2 |& _filter_scratch
-+
-+echo -e "\n# Enabling verity with wrong file's signature (should fail)"
-+reset_fsv_file
-+_fsv_enable $fsv_file --signature=$othersigfile |& _filter_scratch
-+
-+echo -e "\n# Enabling verity with malformed signature (should fail)"
-+echo foobarbaz > $tmp.malformed_sig
-+reset_fsv_file
-+_fsv_enable $fsv_file --signature=$tmp.malformed_sig |& _filter_scratch
-+
-+echo -e "\n# Testing salt"
-+reset_fsv_file
-+_fsv_sign $fsv_orig_file $sigfile.salted --key=$keyfile --cert=$certfile \
-+	--salt=abcd | _filter_scratch
-+_fsv_enable $fsv_file --signature=$sigfile.salted --salt=abcd
-+cmp $fsv_file $fsv_orig_file
-+
-+echo -e "\n# Testing non-default hash algorithm"
-+if _fsv_have_hash_algorithm sha512 $fsv_file; then
-+	reset_fsv_file
-+	_fsv_sign $fsv_orig_file $sigfile.sha512 --key=$keyfile \
-+		--cert=$certfile --hash-alg=sha512 > /dev/null
-+	_fsv_enable $fsv_file --signature=$sigfile.sha512 --hash-alg=sha512
-+	cmp $fsv_file $fsv_orig_file
-+fi
-+
-+echo -e "\n# Testing empty file"
-+echo -n > $fsv_file
-+_fsv_sign $fsv_file $sigfile.emptyfile --key=$keyfile --cert=$certfile | \
-+		_filter_scratch
-+_fsv_enable $fsv_file --signature=$sigfile.emptyfile
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/905.out b/tests/generic/905.out
-new file mode 100644
-index 00000000..4b28757a
---- /dev/null
-+++ b/tests/generic/905.out
-@@ -0,0 +1,42 @@
-+QA output created by 905
-+
-+# Generating certificates and private keys
-+
-+# Clearing fs-verity keyring
-+
-+# Loading first certificate into fs-verity keyring
-+
-+# Enabling fs.verity.require_signatures
-+fs.verity.require_signatures = 1
-+
-+# Generating file and signing it for fs-verity
-+Signed file 'SCRATCH_MNT/file' (sha256:ecabbfca4efd69a721be824965da10d27900b109549f96687b35a4d91d810dac)
-+Signed file 'SCRATCH_MNT/file' (sha256:ecabbfca4efd69a721be824965da10d27900b109549f96687b35a4d91d810dac)
-+
-+# Signing a different file for fs-verity
-+Signed file 'SCRATCH_MNT/otherfile' (sha256:b2a419c5a8c767a78c6275d6729794bf51e52ddf8713e31d12a93d61d961f49f)
-+
-+# Enabling verity with valid signature (should succeed)
-+
-+# Enabling verity without signature (should fail)
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Operation not permitted
-+
-+# Opening verity file without signature (should fail)
-+md5sum: SCRATCH_MNT/file.fsv: Operation not permitted
-+
-+# Enabling verity with untrusted signature (should fail)
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Required key not available
-+
-+# Enabling verity with wrong file's signature (should fail)
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Key was rejected by service
-+
-+# Enabling verity with malformed signature (should fail)
-+ERROR: FS_IOC_ENABLE_VERITY failed on 'SCRATCH_MNT/file.fsv': Bad message
-+
-+# Testing salt
-+Signed file 'SCRATCH_MNT/file' (sha256:1cb173bcd199133eb80e9ea4f0f741001b9e73227aa8812685156f2bc8ff45f5)
-+
-+# Testing non-default hash algorithm
-+
-+# Testing empty file
-+Signed file 'SCRATCH_MNT/file.fsv' (sha256:3d248ca542a24fc62d1c43b916eae5016878e2533c88238480b26128a1f1af95)
-diff --git a/tests/generic/group b/tests/generic/group
-index cc30a30b..a24fc997 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -565,3 +565,4 @@
- 902 auto quick verity
- 903 auto quick verity
- 904 auto quick verity encrypt
-+905 auto quick verity
+ NUM_FILES=4
+ NUM_OPS=200
+-FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV"
++FSX_OPTS="-N $NUM_OPS -d -P $SANITY_DIR -i $LOGWRITES_DMDEV $FSX_AVOID"
+ # Set random seeds for fsx runs (0 for timestamp + pid)
+ # When test failure is detected, check the seed values printed
+ # by fsx processes to $seqres.full and set them in this array
 -- 
-2.22.0.410.gd8fdbe21b5-goog
+2.17.2
