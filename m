@@ -1,243 +1,158 @@
-Received: from mail.kernel.org ([198.145.29.99]:47006 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726436AbfGEKJu (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 5 Jul 2019 06:09:50 -0400
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:38195 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725862AbfGEIIH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 5 Jul 2019 04:08:07 -0400
+Received: by mail-pf1-f195.google.com with SMTP id y15so3977088pfn.5
+        for <fstests@vger.kernel.org>; Fri, 05 Jul 2019 01:08:06 -0700 (PDT)
+Date: Fri, 5 Jul 2019 16:07:57 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2 4/5] shared,generic: move shared/006 to generic/
+Message-ID: <20190705080757.GG7943@desktop>
+References: <20190628225910.17018-1-tytso@mit.edu>
+ <20190628225910.17018-4-tytso@mit.edu>
 MIME-Version: 1.0
-References: <20190627170030.6149-1-fdmanana@kernel.org> <20190628220836.16096-1-fdmanana@kernel.org>
- <20190705074327.GF7943@desktop>
-In-Reply-To: <20190705074327.GF7943@desktop>
-From: Filipe Manana <fdmanana@kernel.org>
-Date: Fri, 5 Jul 2019 11:09:38 +0100
-Message-ID: <CAL3q7H4co58OcST+qZpB1mz_EQb=jOouDd+g+Ykmkx1dB01m0g@mail.gmail.com>
-Subject: Re: [PATCH v2] generic: test cloning large exents to a file with many
- small extents
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190628225910.17018-4-tytso@mit.edu>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>, Filipe Manana <fdmanana@suse.com>
+To: Theodore Ts'o <tytso@mit.edu>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Jul 5, 2019 at 8:43 AM Eryu Guan <guaneryu@gmail.com> wrote:
->
-> On Fri, Jun 28, 2019 at 11:08:36PM +0100, fdmanana@kernel.org wrote:
-> > From: Filipe Manana <fdmanana@suse.com>
-> >
-> > Test that if we clone a file with some large extents into a file that has
-> > many small extents, when the fs is nearly full, the clone operation does
-> > not fail and produces the correct result.
-> >
-> > This is motivated by a bug found in btrfs wich is fixed by the following
-> > patches for the linux kernel:
-> >
-> >  [PATCH 1/2] Btrfs: factor out extent dropping code from hole punch handler
-> >  [PATCH 2/2] Btrfs: fix ENOSPC errors, leading to transaction aborts, when
-> >              cloning extents
-> >
-> > The test currently passes on xfs.
-> >
-> > Signed-off-by: Filipe Manana <fdmanana@suse.com>
-> > ---
-> >
-> > V2: Use _scratch_cycle_mount instead of _scratch_remount, as we want to see
-> >     if the operation was durably persisted (otherwise we are seeing content
-> >     from the page cache).
-> >     Use _reflink instead of calling xfs_io with the reflink command.
-> >     Make the comment before filling the filesystem more clear about why it
-> >     is done the way it is instead of using _fill_fs.
-> >
-> >  tests/generic/558     | 80 +++++++++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/generic/558.out |  5 ++++
-> >  tests/generic/group   |  1 +
-> >  3 files changed, 86 insertions(+)
-> >  create mode 100755 tests/generic/558
-> >  create mode 100644 tests/generic/558.out
-> >
-> > diff --git a/tests/generic/558 b/tests/generic/558
-> > new file mode 100755
-> > index 00000000..f982930d
-> > --- /dev/null
-> > +++ b/tests/generic/558
-> > @@ -0,0 +1,80 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FSQA Test No. 558
-> > +#
-> > +# Test that if we clone a file with some large extents into a file that has
-> > +# many small extents, when the fs is nearly full, the clone operation does
-> > +# not fail and produces the correct result.
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +tmp=/tmp/$$
-> > +status=1     # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +     cd /
-> > +     rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +. ./common/reflink
-> > +
-> > +# real QA test starts here
-> > +_supported_fs generic
-> > +_supported_os Linux
-> > +_require_scratch_reflink
-> > +
-> > +rm -f $seqres.full
-> > +
-> > +_scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
-> > +_scratch_mount
-> > +
-> > +file_size=$(( 128 * 1024 * 1024 )) # 128Mb
-> > +extent_size=4096
-> > +num_extents=$(( $file_size / $extent_size ))
-> > +
-> > +# Create a file with many small extents.
-> > +for ((i = 0; i < $num_extents; i++)); do
-> > +     offset=$(( $i * $extent_size ))
-> > +     $XFS_IO_PROG -f -s -c "pwrite -S 0xe5 $offset $extent_size" \
-> > +             $SCRATCH_MNT/foo >>/dev/null
-> > +done
->
-> This is taking too long time (1000+s) to finish when testing on XFS.
+On Fri, Jun 28, 2019 at 06:59:09PM -0400, Theodore Ts'o wrote:
+> The shared/006 uses _scratch_mkfs_sized to create a limited size file
+> system, and then creates inodes until it gets ENOSPC, and then checks
+> to make sure the file system is consistent.  It then remounts the file
+> system, removes all of the files, and makes sure the file system is
+> consistent afterwards.
+> 
+> This test was marked as only being supported on ext[234] and xfs, and
+> so it was in shared.  However, I've tested and this test works just
+> fine on btrfs, ubifs, tmpfs, and should work on all file systems that
+> support _scratch_mkfs_sized, since even if there isn't a fixed inode
+> table, the file system will eventually run out of disk space.
+> 
+> Signed-off-by: Theodore Ts'o <tytso@mit.edu>
+> ---
+> Changes since v1:
+>    - added a new _require_scratch_inode_limits and use it for generic/558
+>    - added missing "_supported_fs generic" line
+> 
+>  common/rc                         | 11 +++++++++++
+>  tests/{shared/006 => generic/558} |  7 +++----
+>  tests/generic/558.out             |  2 ++
+>  tests/generic/group               |  1 +
+>  tests/shared/006.out              |  2 --
+>  tests/shared/group                |  1 -
+>  6 files changed, 17 insertions(+), 7 deletions(-)
+>  rename tests/{shared/006 => generic/558} (95%)
+>  create mode 100644 tests/generic/558.out
+>  delete mode 100644 tests/shared/006.out
+> 
+> diff --git a/common/rc b/common/rc
+> index 9165a6f2..8e024f04 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -4147,6 +4147,17 @@ _require_scratch_btime()
+>  	_scratch_unmount
+>  }
+>  
+> +_require_scratch_inode_limits()
+> +{
+> +	_require_scratch
+> +	_scratch_mkfs > /dev/null 2>&1
+> +	_scratch_mount
+> +	if [ $(_get_free_inode $SCRATCH_MNT) -eq 0 ]; then
+> +		_notrun "$FSTYP does not have a fixed number of inodes available"
+> +	fi
+> +	_scratch_unmount
+> +}
 
-Hum, for on 5.2-rc, debug kernel (lockdep, plenty of other debug stuff
-enabled that slows things down), it takes about 350 seconds for me.
+I think testing against $TEST_DIR should be sufficient, so we could
+avoid the mkfs & mount & umount SCRATCH_DEV time. i.e.
 
-> I'm
-> wondering if we could take use of src/punch-alternating to punch out
-> every other block to create a file with many small extents.
+_require_inode_limits()
+{
+        if [ $(_get_free_inode $TEST_DIR) -eq 0 ]; then
+                _notrun "$FSTYP does not have a fixed number of inodes available"
+        fi
+}
 
-That's fine, I didn't remember about that.
+If this looks reasonable, I can fix it on commit.
 
->
-> i.e. with the following diffs, test runs & passes with XFS within 90s
-> while still reproduces the btrfs bug (note that I have to increase the
-> file_size to 200M to reproduce the btrfs bug, while 256M seems bring
-> test time back to 1000+s). Would you please check if this works for you?
+Thanks,
+Eryu
 
-It does, thanks!
-And, because of the holes, it uncovered a bug in my fix (second patch).
-
-Now it takes ~15 seconds on btrfs instead of ~300s and ~100s on xfs for me.
-
->
-> Thanks,
-> Eryu
->
->
-> diff --git a/tests/generic/558 b/tests/generic/558
-> index f982930d65a2..40f8a7a98d3f 100755
-> --- a/tests/generic/558
+> +
+>  _require_filefrag_options()
+>  {
+>  	_require_command "$FILEFRAG_PROG" filefrag
+> diff --git a/tests/shared/006 b/tests/generic/558
+> similarity index 95%
+> rename from tests/shared/006
+> rename to tests/generic/558
+> index aa65e9a2..5807dba3 100755
+> --- a/tests/shared/006
 > +++ b/tests/generic/558
-> @@ -30,22 +30,22 @@ _cleanup()
->  _supported_fs generic
+> @@ -2,7 +2,7 @@
+>  # SPDX-License-Identifier: GPL-2.0
+>  # Copyright (c) 2014 Red Hat Inc.  All Rights Reserved.
+>  #
+> -# FS QA Test No. shared/006
+> +# FS QA Test No. generic/558
+>  #
+>  # Stress test fs by using up all inodes and check fs.
+>  #
+> @@ -42,10 +42,9 @@ create_file()
+>  . ./common/filter
+>  
+>  # real QA test starts here
+> -_supported_fs ext4 ext3 ext2 xfs
+> +_supported_fs generic
 >  _supported_os Linux
->  _require_scratch_reflink
-> +_require_test_program "punch-alternating"
-> +_require_xfs_io_command "fpunch"
->
+> -
+> -_require_scratch
+> +_require_scratch_inode_limits
+>  
 >  rm -f $seqres.full
->
->  _scratch_mkfs_sized $((512 * 1024 * 1024)) >>$seqres.full 2>&1
->  _scratch_mount
->
-> -file_size=$(( 128 * 1024 * 1024 )) # 128Mb
-> +file_size=$(( 200 * 1024 * 1024 )) # 200MB
->  extent_size=4096
->  num_extents=$(( $file_size / $extent_size ))
-
-These two variables, extent_size and num_extents, are no longer needed.
-
-Do you want me to send another version of the patch or can you apply
-this patch on top of it?
-
-Thanks.
-
->
->  # Create a file with many small extents.
-> -for ((i = 0; i < $num_extents; i++)); do
-> -       offset=$(( $i * $extent_size ))
-> -       $XFS_IO_PROG -f -s -c "pwrite -S 0xe5 $offset $extent_size" \
-> -               $SCRATCH_MNT/foo >>/dev/null
-> -done
-> +$XFS_IO_PROG -f -c "pwrite -S 0xe5 -b $file_size 0 $file_size" \
-> +       $SCRATCH_MNT/foo >>/dev/null
-> +$here/src/punch-alternating $SCRATCH_MNT/foo >> $seqres.full
->
->  # Create file bar with the same size that file foo has but with large extents.
->  $XFS_IO_PROG -f -c "pwrite -S 0xc7 -b $file_size 0 $file_size" \
+>  echo "Silence is golden"
 > diff --git a/tests/generic/558.out b/tests/generic/558.out
-> index d1e8e70f5b79..00cb5a9744aa 100644
-> --- a/tests/generic/558.out
+> new file mode 100644
+> index 00000000..9a6c4e79
+> --- /dev/null
 > +++ b/tests/generic/558.out
-> @@ -2,4 +2,4 @@ QA output created by 558
->  File foo data after cloning and remount:
->  0000000 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7
->  *
-> -134217728
-> +209715200
->
-> > +
-> > +# Create file bar with the same size that file foo has but with large extents.
-> > +$XFS_IO_PROG -f -c "pwrite -S 0xc7 -b $file_size 0 $file_size" \
-> > +     $SCRATCH_MNT/bar >>/dev/null
-> > +
-> > +# Fill the fs (For btrfs we are interested in filling all unallocated space
-> > +# and most of the existing metadata block group(s), so that after this there
-> > +# will be no unallocated space and metadata space will be mostly full but with
-> > +# more than enough free space for the clone operation below to succeed, we
-> > +# create files with 2Kb because that results in extents inlined in the metadata
-> > +# (btree leafs) and it's the fastest way to fill metadata space on btrfs, by
-> > +# default btrfs inlines up to 2Kb of data).
-> > +i=1
-> > +while true; do
-> > +     $XFS_IO_PROG -f -c "pwrite 0 2K" $SCRATCH_MNT/filler_$i &> /dev/null
-> > +     [ $? -ne 0 ] && break
-> > +     i=$(( i + 1 ))
-> > +done
-> > +
-> > +# Now clone file bar into file foo. This is supposed to succeed and not fail
-> > +# with ENOSPC for example.
-> > +_reflink $SCRATCH_MNT/bar $SCRATCH_MNT/foo >>$seqres.full
-> > +
-> > +# Unmount and mount the filesystem again to verify the operation was durably
-> > +# persisted.
-> > +_scratch_cycle_mount
-> > +
-> > +echo "File foo data after cloning and remount:"
-> > +od -A d -t x1 $SCRATCH_MNT/foo
-> > +
-> > +status=0
-> > +exit
-> > diff --git a/tests/generic/558.out b/tests/generic/558.out
-> > new file mode 100644
-> > index 00000000..d1e8e70f
-> > --- /dev/null
-> > +++ b/tests/generic/558.out
-> > @@ -0,0 +1,5 @@
-> > +QA output created by 558
-> > +File foo data after cloning and remount:
-> > +0000000 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7 c7
-> > +*
-> > +134217728
-> > diff --git a/tests/generic/group b/tests/generic/group
-> > index 543c0627..c06c1cd1 100644
-> > --- a/tests/generic/group
-> > +++ b/tests/generic/group
-> > @@ -560,3 +560,4 @@
-> >  555 auto quick cap
-> >  556 auto quick casefold
-> >  557 auto quick log
-> > +558 auto clone
-> > --
-> > 2.11.0
-> >
+> @@ -0,0 +1,2 @@
+> +QA output created by 558
+> +Silence is golden
+> diff --git a/tests/generic/group b/tests/generic/group
+> index 543c0627..8fc85b63 100644
+> --- a/tests/generic/group
+> +++ b/tests/generic/group
+> @@ -560,3 +560,4 @@
+>  555 auto quick cap
+>  556 auto quick casefold
+>  557 auto quick log
+> +558 auto enospc
+> diff --git a/tests/shared/006.out b/tests/shared/006.out
+> deleted file mode 100644
+> index 675c1b7c..00000000
+> --- a/tests/shared/006.out
+> +++ /dev/null
+> @@ -1,2 +0,0 @@
+> -QA output created by 006
+> -Silence is golden
+> diff --git a/tests/shared/group b/tests/shared/group
+> index 3507d7d4..2cf910bd 100644
+> --- a/tests/shared/group
+> +++ b/tests/shared/group
+> @@ -4,7 +4,6 @@
+>  # - comment line before each group is "new" description
+>  #
+>  002 auto metadata quick log
+> -006 auto enospc
+>  008 auto stress dedupe
+>  009 auto stress dedupe
+>  010 auto stress dedupe
+> -- 
+> 2.22.0
+> 
