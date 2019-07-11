@@ -1,68 +1,134 @@
-Received: from mail-yb1-f193.google.com ([209.85.219.193]:45284 "EHLO
-        mail-yb1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728074AbfGKGvE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jul 2019 02:51:04 -0400
-Received: by mail-yb1-f193.google.com with SMTP id j133so1774301ybj.12
-        for <fstests@vger.kernel.org>; Wed, 10 Jul 2019 23:51:04 -0700 (PDT)
+Received: from mx1.redhat.com ([209.132.183.28]:57548 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1728377AbfGKPch (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 11 Jul 2019 11:32:37 -0400
+Date: Thu, 11 Jul 2019 23:38:12 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] xfs: project quota ineritance flag test
+Message-ID: <20190711153812.GA19443@dhcp-12-102.nay.redhat.com>
+References: <20190619101047.3149-1-zlang@redhat.com>
+ <20190711143516.GG5167@magnolia>
 MIME-Version: 1.0
-References: <1562758522-6359-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-In-Reply-To: <1562758522-6359-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Thu, 11 Jul 2019 09:50:52 +0300
-Message-ID: <CAOQ4uxiw--Jr-rjhgs2gA5=Z_Q=KW=GtMSs+pfwnKyYU7WCBLA@mail.gmail.com>
-Subject: Re: [PATCH] generic/553[4]: correct kernel fix commit
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190711143516.GG5167@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
-Cc: Eryu Guan <guaneryu@gmail.com>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 11, 2019 at 8:25 AM Yang Xu <xuyang2018.jy@cn.fujitsu.com> wrote:
->
-> commit 96e6e8f4a68d ("vfs: add missing checks to copy_file_range")
-> adds checks for immutablefile and swapfile instead of commit a31713517d
-> ("vfs: introduce generic_file_rw_checks()").
->
-> Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+On Thu, Jul 11, 2019 at 07:35:16AM -0700, Darrick J. Wong wrote:
+> On Wed, Jun 19, 2019 at 06:10:47PM +0800, Zorro Lang wrote:
+> > This case is used to cover xfsprogs bug "b136f48b xfs_quota: fix
+> > false error reporting of project inheritance flag is not set" at
+> > first. Then test more behavior when project ineritance flag is
+> > set or removed.
+> > 
+> > Signed-off-by: Zorro Lang <zlang@redhat.com>
+> > ---
+> 
+> <skipping to the good part>
+> 
+> > diff --git a/tests/xfs/507.out b/tests/xfs/507.out
+> > new file mode 100644
+> > index 00000000..c8c09d3f
+> > --- /dev/null
+> > +++ b/tests/xfs/507.out
+> > @@ -0,0 +1,23 @@
+> > +QA output created by 507
+> > +== The parent directory has Project inheritance bit by default ==
+> > +Checking project test (path [SCR_MNT]/dir)...
+> > +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
+> > +
+> > +Write SCRATCH_MNT/dir/foo, expect ENOSPC:
+> > +pwrite: No space left on device
+> > +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
+> > +pwrite: No space left on device
+> > +
+> > +== After removing parent directory has Project inheritance bit ==
+> > +Checking project test (path [SCR_MNT]/dir)...
+> > +[SCR_MNT]/dir - project inheritance flag is not set
+> > +[SCR_MNT]/dir/foo - project identifier is not set (inode=0, tree=10)
+> > +[SCR_MNT]/dir/dir_uninherit - project identifier is not set (inode=0, tree=10)
+> > +[SCR_MNT]/dir/dir_uninherit - project inheritance flag is not set
+> > +[SCR_MNT]/dir/dir_uninherit/foo - project identifier is not set (inode=0, tree=10)
+> > +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
+> > +
+> > +Write SCRATCH_MNT/dir/foo, expect Success:
+> > +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
+> > +pwrite: No space left on device
+> 
+> I keep seeing this test failure:
+> 
+> --- a/xfs/508.out      2019-06-30 08:32:32.216174715 -0700
+> +++ b/xfs/508.out.bad    2019-07-11 07:32:30.488000000 -0700
+> @@ -19,5 +19,5 @@
+>  
+>  Write SCRATCH_MNT/dir/foo, expect Success:
+>  Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
+> -pwrite: No space left on device
+> +/opt/dir/dir_inherit/foo: Disk quota exceeded
 
-ACK
+Hmm... I never saw this issue. I tested on RHEL-7, RHEL-8.0 and latest upstream
+xfsprogs & xfs-linux, all passed.
 
-Thanks for following up.
-Amir.
+>  Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
+> 
+> IIRC EDQUOT is the correct error code for running out of /project/
+> quota (and I tried with a modern V5 fs and a V4 fs too) both with
+> setting no quota options at all and turning on every quota type
+> supported by the fs.
+> 
+> Under what circumstances does xfs_io spit out ENOSPC?
 
-> ---
->  tests/generic/553 | 2 +-
->  tests/generic/554 | 2 +-
->  2 files changed, 2 insertions(+), 2 deletions(-)
->
-> diff --git a/tests/generic/553 b/tests/generic/553
-> index aefb0819..a836e602 100755
-> --- a/tests/generic/553
-> +++ b/tests/generic/553
-> @@ -7,7 +7,7 @@
->  # Check that we cannot copy_file_range() to an immutable file
->  #
->  # This is a regression test for kernel commit:
-> -#   a31713517dac ("vfs: introduce generic_file_rw_checks()")
-> +#   96e6e8f4a68d ("vfs: add missing checks to copy_file_range")
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> diff --git a/tests/generic/554 b/tests/generic/554
-> index fa19d580..eaf1f45a 100755
-> --- a/tests/generic/554
-> +++ b/tests/generic/554
-> @@ -7,7 +7,7 @@
->  # Check that we cannot copy_file_range() to a swapfile
->  #
->  # This is a regression test for kernel commit:
-> -#   a31713517dac ("vfs: introduce generic_file_rw_checks()")
-> +#   96e6e8f4a68d ("vfs: add missing checks to copy_file_range")
->  #
->  seq=`basename $0`
->  seqres=$RESULT_DIR/$seq
-> --
-> 2.18.1
->
->
->
+I didn't test with any special test arguments, all as default. For example, as
+below test on
+xfsprogs: HEAD: 8bfb5eac (HEAD -> for-next, origin/for-next) xfs_quota: fix built-in help for project setup
+xfs-linux: HEAD: 036f463fe15d (HEAD -> for-next, tag: xfs-5.3-merge-10, origin/xfs-5.3-merge, origin/for-next) xfs: online scrub needn't bother zeroing its temporary buffer
+
+# ./check xfs/508
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 xxx-xxxxxx-xxx 5.2.0-rc4-xfs-for-next
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/xfscratch
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/xfscratch /mnt/scratch
+
+xfs/508 5s ...  5s
+Ran: xfs/508
+Passed all 1 tests
+
+# xfs_io -V
+xfs_io version 5.1.0-rc0
+
+# xfs_info /dev/mapper/xfscratch
+meta-data=/dev/mapper/xfscratch isize=512    agcount=4, agsize=5570560 blks
+         =                       sectsz=512   attr=2, projid32bit=1
+         =                       crc=1        finobt=1, sparse=1, rmapbt=0
+         =                       reflink=1
+data     =                       bsize=4096   blocks=22282240, imaxpct=25
+         =                       sunit=0      swidth=0 blks
+naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
+log      =internal log           bsize=4096   blocks=10880, version=2
+         =                       sectsz=512   sunit=0 blks, lazy-count=1
+realtime =none                   extsz=4096   blocks=0, rtextents=0
+
+Do you need me to provide anything else?
+
+Thanks,
+Zorro
+
+> 
+> --D
+> 
+> > +Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
+> > diff --git a/tests/xfs/group b/tests/xfs/group
+> > index ffe4ae12..46200752 100644
+> > --- a/tests/xfs/group
+> > +++ b/tests/xfs/group
+> > @@ -504,3 +504,4 @@
+> >  504 auto quick mkfs label
+> >  505 auto quick spaceman
+> >  506 auto quick health
+> > +507 auto quick quota
+> > -- 
+> > 2.17.2
+> > 
