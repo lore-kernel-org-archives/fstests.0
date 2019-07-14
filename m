@@ -1,143 +1,102 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:49538 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726587AbfGLBwF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 11 Jul 2019 21:52:05 -0400
-Date: Thu, 11 Jul 2019 18:51:42 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] xfs: project quota ineritance flag test
-Message-ID: <20190712015142.GX1404256@magnolia>
-References: <20190619101047.3149-1-zlang@redhat.com>
- <20190711143516.GG5167@magnolia>
- <20190711153812.GA19443@dhcp-12-102.nay.redhat.com>
+Received: from mail-pg1-f194.google.com ([209.85.215.194]:35932 "EHLO
+        mail-pg1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726813AbfGNSAE (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 14 Jul 2019 14:00:04 -0400
+Received: by mail-pg1-f194.google.com with SMTP id l21so6638950pgm.3
+        for <fstests@vger.kernel.org>; Sun, 14 Jul 2019 11:00:04 -0700 (PDT)
+Message-ID: <5d2b6da2.1c69fb81.dacaf.3941@mx.google.com>
+Date: Mon, 15 Jul 2019 01:59:55 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 968c531cbe58
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="nEBl3ocS5VKX"
 Content-Disposition: inline
-In-Reply-To: <20190711153812.GA19443@dhcp-12-102.nay.redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 11, 2019 at 11:38:12PM +0800, Zorro Lang wrote:
-> On Thu, Jul 11, 2019 at 07:35:16AM -0700, Darrick J. Wong wrote:
-> > On Wed, Jun 19, 2019 at 06:10:47PM +0800, Zorro Lang wrote:
-> > > This case is used to cover xfsprogs bug "b136f48b xfs_quota: fix
-> > > false error reporting of project inheritance flag is not set" at
-> > > first. Then test more behavior when project ineritance flag is
-> > > set or removed.
-> > > 
-> > > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > > ---
-> > 
-> > <skipping to the good part>
-> > 
-> > > diff --git a/tests/xfs/507.out b/tests/xfs/507.out
-> > > new file mode 100644
-> > > index 00000000..c8c09d3f
-> > > --- /dev/null
-> > > +++ b/tests/xfs/507.out
-> > > @@ -0,0 +1,23 @@
-> > > +QA output created by 507
-> > > +== The parent directory has Project inheritance bit by default ==
-> > > +Checking project test (path [SCR_MNT]/dir)...
-> > > +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
-> > > +
-> > > +Write SCRATCH_MNT/dir/foo, expect ENOSPC:
-> > > +pwrite: No space left on device
-> > > +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
-> > > +pwrite: No space left on device
-> > > +
-> > > +== After removing parent directory has Project inheritance bit ==
-> > > +Checking project test (path [SCR_MNT]/dir)...
-> > > +[SCR_MNT]/dir - project inheritance flag is not set
-> > > +[SCR_MNT]/dir/foo - project identifier is not set (inode=0, tree=10)
-> > > +[SCR_MNT]/dir/dir_uninherit - project identifier is not set (inode=0, tree=10)
-> > > +[SCR_MNT]/dir/dir_uninherit - project inheritance flag is not set
-> > > +[SCR_MNT]/dir/dir_uninherit/foo - project identifier is not set (inode=0, tree=10)
-> > > +Processed 1 ([PROJECTS_FILE] and cmdline) paths for project test with recursion depth infinite (-1).
-> > > +
-> > > +Write SCRATCH_MNT/dir/foo, expect Success:
-> > > +Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
-> > > +pwrite: No space left on device
-> > 
-> > I keep seeing this test failure:
-> > 
-> > --- a/xfs/508.out      2019-06-30 08:32:32.216174715 -0700
-> > +++ b/xfs/508.out.bad    2019-07-11 07:32:30.488000000 -0700
-> > @@ -19,5 +19,5 @@
-> >  
-> >  Write SCRATCH_MNT/dir/foo, expect Success:
-> >  Write SCRATCH_MNT/dir/dir_inherit/foo, expect ENOSPC:
-> > -pwrite: No space left on device
-> > +/opt/dir/dir_inherit/foo: Disk quota exceeded
-> 
-> Hmm... I never saw this issue. I tested on RHEL-7, RHEL-8.0 and latest upstream
-> xfsprogs & xfs-linux, all passed.
-> 
-> >  Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
-> > 
-> > IIRC EDQUOT is the correct error code for running out of /project/
-> > quota (and I tried with a modern V5 fs and a V4 fs too) both with
-> > setting no quota options at all and turning on every quota type
-> > supported by the fs.
-> > 
-> > Under what circumstances does xfs_io spit out ENOSPC?
-> 
-> I didn't test with any special test arguments, all as default. For example, as
-> below test on
-> xfsprogs: HEAD: 8bfb5eac (HEAD -> for-next, origin/for-next) xfs_quota: fix built-in help for project setup
-> xfs-linux: HEAD: 036f463fe15d (HEAD -> for-next, tag: xfs-5.3-merge-10, origin/xfs-5.3-merge, origin/for-next) xfs: online scrub needn't bother zeroing its temporary buffer
-> 
-> # ./check xfs/508
-> FSTYP         -- xfs (debug)
-> PLATFORM      -- Linux/x86_64 xxx-xxxxxx-xxx 5.2.0-rc4-xfs-for-next
-> MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/xfscratch
-> MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/xfscratch /mnt/scratch
-> 
-> xfs/508 5s ...  5s
-> Ran: xfs/508
-> Passed all 1 tests
-> 
-> # xfs_io -V
-> xfs_io version 5.1.0-rc0
-> 
-> # xfs_info /dev/mapper/xfscratch
-> meta-data=/dev/mapper/xfscratch isize=512    agcount=4, agsize=5570560 blks
->          =                       sectsz=512   attr=2, projid32bit=1
->          =                       crc=1        finobt=1, sparse=1, rmapbt=0
->          =                       reflink=1
-> data     =                       bsize=4096   blocks=22282240, imaxpct=25
->          =                       sunit=0      swidth=0 blks
-> naming   =version 2              bsize=4096   ascii-ci=0, ftype=1
-> log      =internal log           bsize=4096   blocks=10880, version=2
->          =                       sectsz=512   sunit=0 blks, lazy-count=1
-> realtime =none                   extsz=4096   blocks=0, rtextents=0
-> 
-> Do you need me to provide anything else?
 
-HAH.  Oops.  I was testing my dev tree, not upstream, so clearly there's
-a bug in there somewhere.  Uh, good test! :)
+--nEBl3ocS5VKX
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-Sorry for the noise.
+Hi all,
 
---D
+The master branch of the xfstests repository at:
 
-> Thanks,
-> Zorro
-> 
-> > 
-> > --D
-> > 
-> > > +Write SCRATCH_MNT/dir/dir_uninherit/foo, expect Success:
-> > > diff --git a/tests/xfs/group b/tests/xfs/group
-> > > index ffe4ae12..46200752 100644
-> > > --- a/tests/xfs/group
-> > > +++ b/tests/xfs/group
-> > > @@ -504,3 +504,4 @@
-> > >  504 auto quick mkfs label
-> > >  505 auto quick spaceman
-> > >  506 auto quick health
-> > > +507 auto quick quota
-> > > -- 
-> > > 2.17.2
-> > > 
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update contains various fixes and there should be
+no new failures after this update. Note that kernel version is also printed
+along with kernel release in the check output header.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+968c531cbe58 xfs/119: fix MKFS_OPTIONS exporting
+
+New commits:
+
+Darrick J. Wong (3):
+      [241c25a975f4] xfs: rework min log size helper
+      [ee3677a86820] xfs/016: calculate minimum log size and end locations
+      [968c531cbe58] xfs/119: fix MKFS_OPTIONS exporting
+
+Eric Biggers (1):
+      [856f357c6a5c] generic/399: don't rely on xfs_io exit status
+
+Filipe Manana (1):
+      [55cc523b0ec4] btrfs/189: make the test work on systems with a page size greater than 4Kb
+
+Mauricio Faria de Oliveira (1):
+      [a4c1696f8c4b] common/rc: print out kernel version too
+
+Yang Xu (1):
+      [f036a4da857c] generic/553[4]: correct kernel fix commit
+
+Zorro Lang (1):
+      [7ef6a36702b2] xfs/449: test xfs_info on a mounted block device
+
+
+Code Diffstat:
+
+ common/rc           |  2 +-
+ common/xfs          | 25 ++++++++++++++++++--
+ tests/btrfs/189     | 10 ++++----
+ tests/btrfs/189.out |  4 ++--
+ tests/generic/399   | 46 ++++++++++++++++++++++---------------
+ tests/generic/553   |  2 +-
+ tests/generic/554   |  2 +-
+ tests/xfs/016       | 66 ++++++++++++++++++++++++++++++++++++++++++-----------
+ tests/xfs/016.out   |  1 +
+ tests/xfs/119       |  3 ++-
+ tests/xfs/449       | 13 +++++++----
+ 11 files changed, 127 insertions(+), 47 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--nEBl3ocS5VKX
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl0rbR0ACgkQJlKqKVyP
+52MSwhAAn07IlqPGD58NXiGnc9Xt9jOMJyYEpawtPpEVqCe9qnSEhjSWgTS8qDGv
+mKDSPoroOyuC4YPh2K4/+89OJI3bOdQq8WwG1TEz328wnMNamlOYfAgW0wnRGlWs
+knUhHbYIjhxy3BSKZiiW/DGQ3SuOt4rIP5Wl4tIzdC/2pL3ooqL0NQ3viH7U0M4r
+jzvqptLIoOfprLpUsb9MQiUYBpr+T6Gf0gud0Bi4Vpl7pTV/E5Ni2ek7uyWkZTMb
+4oWOVCLjgTv8mA+TwdXqxsjUOOj0QjgpW2VIIGJPR3VyECZ3DzgpKcnqDxpuD7bg
+nWvEPf5ilP2NK9WLoWmkAwA2KjiUMdfm+upq7/bD48zx3LNUG7ZT0o3mF6gWJ1Pr
+tRcWsFIMFnViJaQVkAYk8mT74ivnhaL3vEf+2F4CYycyCGI0EJ7Ud1QzppFpWIzF
+vs562wNM/zQHMxWwkuUM9XwJ4S93hiSuyZunF0+J76kOKuhrCtfRVvaF48iwUh1A
+MgvYsqJjMkQj0pjjbJB/L/v2dNv/Vwtd9XFMYDcxsPb3MpB/HCJGE3bYavHq6Pq4
+3bgjYuBS1438mvo/hcKl1S/jU44mIUU5h2voDm1BDCjjzBzQF/jv0jJmQr7cV57u
+3dgUuxAT7tpsFb8SHqZHNZZEDg0b4xVOojck1ffLlR95FtoPjLg=
+=vOYb
+-----END PGP SIGNATURE-----
+
+--nEBl3ocS5VKX--
