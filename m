@@ -1,63 +1,64 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:42534 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729430AbfGOIZo (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Jul 2019 04:25:44 -0400
-Received: from 089144194016.atnat0003.highway.a1.net ([89.144.194.16] helo=localhost)
-        by bombadil.infradead.org with esmtpsa (Exim 4.92 #3 (Red Hat Linux))
-        id 1hmwIp-0004Vs-2F
-        for fstests@vger.kernel.org; Mon, 15 Jul 2019 08:25:44 +0000
-From: Christoph Hellwig <hch@lst.de>
-Subject: [PATCH 3/3] shared/011: move to generic/
-Date: Mon, 15 Jul 2019 10:25:23 +0200
-Message-Id: <20190715082523.18387-3-hch@lst.de>
-In-Reply-To: <20190715082523.18387-1-hch@lst.de>
-References: <20190715082523.18387-1-hch@lst.de>
-MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Received: from mail-wr1-f65.google.com ([209.85.221.65]:33271 "EHLO
+        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728933AbfGOMzZ (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 15 Jul 2019 08:55:25 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v4 0/3] fstests: copy_file_range() tests
+Date: Mon, 15 Jul 2019 15:55:13 +0300
+Message-Id: <20190715125516.7367-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Now that we run the test for all block device based file systems, there
-is no reason to keep it out of generic.
+Eryu,
 
-Signed-off-by: Christoph Hellwig <hch@lst.de>
----
- tests/{shared/011 => generic/563}         | 0
- tests/{shared/011.out => generic/563.out} | 0
- tests/generic/group                       | 1 +
- tests/shared/group                        | 1 -
- 4 files changed, 1 insertion(+), 1 deletion(-)
- rename tests/{shared/011 => generic/563} (100%)
- rename tests/{shared/011.out => generic/563.out} (100%)
+These are the two remaining copy_file_range() tests which
+I used to verify the kernel fixes that are now in master [1].
 
-diff --git a/tests/shared/011 b/tests/generic/563
-similarity index 100%
-rename from tests/shared/011
-rename to tests/generic/563
-diff --git a/tests/shared/011.out b/tests/generic/563.out
-similarity index 100%
-rename from tests/shared/011.out
-rename to tests/generic/563.out
-diff --git a/tests/generic/group b/tests/generic/group
-index 9ceaf317..284a1d93 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -565,3 +565,4 @@
- 560 auto stress dedupe
- 561 auto stress dedupe
- 562 auto clone
-+563 auto quick
-diff --git a/tests/shared/group b/tests/shared/group
-index 6112c8dd..a8b926d8 100644
---- a/tests/shared/group
-+++ b/tests/shared/group
-@@ -4,6 +4,5 @@
- # - comment line before each group is "new" description
- #
- 002 auto metadata quick log
--011 auto quick
- 032 mkfs auto quick
- 298 auto trim
+The bounds check test depends on an xfs_io change that was merged to
+xfsprogs v5.1.0-rc1 (copy_range -f).
+
+The cross-device copy test checks a new functionality, so it does
+_notrun if copy_range return EXDEV instead of failing.
+
+Thanks,
+Amir.
+
+[1] https://lore.kernel.org/linux-fsdevel/20190709163947.GE5164@magnolia/
+
+Changes from v3:
+- swapfile and immutable file tests already merged (generic/55[34])
+- Use an actual loopdev owned by this test
+- Use /dev/null and /dev/zero and char devices for test
+- _notrun if cross-device copy_range return EXDEV
+
+Changes from v2:
+- Change blockdev in test to loop and _require_loop (Olga)
+- Implement and use _require_xfs_io_command copy_range -f
+
+Changes from v1:
+- Remove patch to test EINVAL behavior instead of short copy
+- Remove 'chmod -r' permission drop test case
+- Split out test for swap/immutable file copy
+- Split of cross-device copy test
+
+Amir Goldstein (3):
+  common/rc: check support for xfs_io copy_range -f N
+  generic: copy_file_range bounds test
+  generic: cross-device copy_file_range test
+
+ common/rc             |   9 ++-
+ tests/generic/990     | 134 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/990.out |  37 ++++++++++++
+ tests/generic/991     |  64 ++++++++++++++++++++
+ tests/generic/991.out |   4 ++
+ tests/generic/group   |   2 +
+ 6 files changed, 249 insertions(+), 1 deletion(-)
+ create mode 100755 tests/generic/990
+ create mode 100644 tests/generic/990.out
+ create mode 100755 tests/generic/991
+ create mode 100644 tests/generic/991.out
+
 -- 
-2.20.1
+2.17.1
