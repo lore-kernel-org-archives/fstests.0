@@ -1,53 +1,56 @@
-Received: from mail-wr1-f65.google.com ([209.85.221.65]:33279 "EHLO
-        mail-wr1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730046AbfGOMz3 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 15 Jul 2019 08:55:29 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH v4 3/3] generic: cross-device copy_file_range test
-Date: Mon, 15 Jul 2019 15:55:16 +0300
-Message-Id: <20190715125516.7367-4-amir73il@gmail.com>
-In-Reply-To: <20190715125516.7367-1-amir73il@gmail.com>
-References: <20190715125516.7367-1-amir73il@gmail.com>
+Received: from mx1.redhat.com ([209.132.183.28]:58284 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726536AbfGPJf7 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 16 Jul 2019 05:35:59 -0400
+From: Zorro Lang <zlang@redhat.com>
+Subject: [PATCH v2] xfs: test statfs on project quota directory
+Date: Tue, 16 Jul 2019 17:35:50 +0800
+Message-Id: <20190716093550.23059-1-zlang@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: "Darrick J . Wong" <darrick.wong@oracle.com>, Dave Chinner <david@fromorbit.com>, Olga Kornievskaia <olga.kornievskaia@gmail.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org, Dave Chinner <dchinner@redhat.com>
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Old kernels do not support cross-device copy_file_range.
+There's a bug on xfs cause statfs get negative f_ffree value from
+a project quota directory. It's fixed by "de7243057 fs/xfs: fix
+f_ffree value for statfs when project quota is set". So add statfs
+testing on project quota block and inode count limit.
 
-This is a regression test for kernel commit:
-
-  5dae222a5ff0 vfs: allow copy_file_range to copy across devices
-
-[Amir] Split out cross-device copy_range test to a new test and
-_notrun if kernel/filesystem do not support cross-device copy_range.
-
-Signed-off-by: Dave Chinner <dchinner@redhat.com>
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Zorro Lang <zlang@redhat.com>
 ---
- tests/generic/991     | 64 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/991.out |  4 +++
- tests/generic/group   |  1 +
- 3 files changed, 69 insertions(+)
- create mode 100755 tests/generic/991
- create mode 100644 tests/generic/991.out
 
-diff --git a/tests/generic/991 b/tests/generic/991
+Hi,
+
+This V2 patch changes this case from a generic case to a xfs only case, due to
+ext4 has different behavior.
+
+V1 history:
+https://marc.info/?l=linux-xfs&m=156048436902910&w=2
+
+Thanks,
+Zorro
+
+ tests/xfs/509     | 72 +++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/509.out |  3 ++
+ tests/xfs/group   |  1 +
+ 3 files changed, 76 insertions(+)
+ create mode 100755 tests/xfs/509
+ create mode 100644 tests/xfs/509.out
+
+diff --git a/tests/xfs/509 b/tests/xfs/509
 new file mode 100755
-index 00000000..69b8d3d5
+index 00000000..d2e40bf3
 --- /dev/null
-+++ b/tests/generic/991
-@@ -0,0 +1,64 @@
++++ b/tests/xfs/509
+@@ -0,0 +1,72 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2018 Red Hat, Inc.  All Rights Reserved.
++# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
 +#
-+# FS QA Test No. 991
++# FS QA Test No. 509
 +#
-+# Exercise copy_file_range() across devices supported by some
-+# filesystems since kernel commit:
-+#
-+# 5dae222a5ff0 vfs: allow copy_file_range to copy across devices
++# Test statfs when project quota is set.
++# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -56,70 +59,79 @@ index 00000000..69b8d3d5
 +here=`pwd`
 +tmp=/tmp/$$
 +status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 7 15
++trap "_cleanup; exit \$status" 0 1 2 3 15
 +
 +_cleanup()
 +{
 +	cd /
-+	rm -rf $tmp.*
++	_scratch_unmount
++	rm -f $tmp.*
 +}
 +
 +# get standard environment, filters and checks
 +. ./common/rc
 +. ./common/filter
++. ./common/quota
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
 +
 +# real QA test starts here
++_supported_fs xfs
 +_supported_os Linux
-+_supported_fs generic
-+
-+rm -f $seqres.full
-+
-+_require_test
 +_require_scratch
-+_require_xfs_io_command "copy_range"
++_require_xfs_quota
 +
-+_scratch_mkfs 2>&1 >> $seqres.full
-+_scratch_mount
++_scratch_mkfs >/dev/null 2>&1
++_scratch_enable_pquota
++_qmount_option "prjquota"
++_qmount
++_require_prjquota $SCRATCH_DEV
 +
++# Create a directory to be project object, and create a file to take 64k space
++mkdir $SCRATCH_MNT/t
++$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
 +
-+testdir=$TEST_DIR/test-$seq
-+rm -rf $testdir
-+mkdir $testdir
-+rm -f $seqres.full
++# Setup temporary replacements for /etc/projects and /etc/projid
++cat >$tmp.projects <<EOF
++42:$SCRATCH_MNT/t
++EOF
 +
-+$XFS_IO_PROG -f -c "pwrite -S 0x61 0 128k" $testdir/file >> $seqres.full 2>&1
++cat >$tmp.projid <<EOF
++answer:42
++EOF
 +
-+# expect success or EXDEV on filesystem/kernel that do not support
-+# cross-device copy_range
-+testio=`$XFS_IO_PROG -f -c "copy_range -l 128k $testdir/file" $SCRATCH_MNT/copy 2>&1`
-+echo $testio | grep -q "cross-device" && \
-+	_notrun "$FSTYP does not support cross-device copy_file_range"
-+echo -n $testio
-+cmp $testdir/file $SCRATCH_MNT/copy
-+echo "md5sums after xdev copy:"
-+md5sum $testdir/file $SCRATCH_MNT/copy | _filter_test_dir | _filter_scratch
++quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
++$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
++$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
++
++# The itotal and size should be 53 and 102400(k), as above project quota limit.
++# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
++# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
++# 6[48] at the end.
++df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
++	_filter_scratch | _filter_spaces
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/991.out b/tests/generic/991.out
+diff --git a/tests/xfs/509.out b/tests/xfs/509.out
 new file mode 100644
-index 00000000..19c22dfe
+index 00000000..418b2dd7
 --- /dev/null
-+++ b/tests/generic/991.out
-@@ -0,0 +1,4 @@
-+QA output created by 991
-+md5sums after xdev copy:
-+81615449a98aaaad8dc179b3bec87f38  TEST_DIR/test-991/file
-+81615449a98aaaad8dc179b3bec87f38  SCRATCH_MNT/copy
-diff --git a/tests/generic/group b/tests/generic/group
-index 8e764597..b1a7c594 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -566,3 +566,4 @@
- 561 auto stress dedupe
- 562 auto clone
- 990 auto quick copy_range
-+991 auto quick copy_range
++++ b/tests/xfs/509.out
+@@ -0,0 +1,3 @@
++QA output created by 509
++File Inodes IUsed 1K-blocks Used
++SCRATCH_MNT/t 53 2 102400 64
+diff --git a/tests/xfs/group b/tests/xfs/group
+index 270d82ff..364a7ed5 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -506,3 +506,4 @@
+ 506 auto quick health
+ 507 clone
+ 508 auto quick quota
++509 auto quick quota
 -- 
-2.17.1
+2.17.2
