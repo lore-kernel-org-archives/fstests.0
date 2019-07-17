@@ -1,95 +1,184 @@
-Received: from mail-wm1-f66.google.com ([209.85.128.66]:33002 "EHLO
-        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2387549AbfGPLGH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 16 Jul 2019 07:06:07 -0400
-Received: by mail-wm1-f66.google.com with SMTP id h19so16479987wme.0
-        for <fstests@vger.kernel.org>; Tue, 16 Jul 2019 04:06:05 -0700 (PDT)
-Date: Tue, 16 Jul 2019 13:06:02 +0200
-From: Carlos Maiolino <cmaiolino@redhat.com>
-Subject: Re: [PATCH v2] xfs: test statfs on project quota directory
-Message-ID: <20190716110602.pw5g33ynux5p5xpy@pegasus.maiolino.io>
-References: <20190716093550.23059-1-zlang@redhat.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190716093550.23059-1-zlang@redhat.com>
+Received: from mail.kernel.org ([198.145.29.99]:34206 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725799AbfGQMYo (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 17 Jul 2019 08:24:44 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs: test incremental send after deduplication on both snapshots
+Date: Wed, 17 Jul 2019 13:24:39 +0100
+Message-Id: <20190717122439.28327-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Zoro.
+From: Filipe Manana <fdmanana@suse.com>
 
-On Tue, Jul 16, 2019 at 05:35:50PM +0800, Zorro Lang wrote:
-> There's a bug on xfs cause statfs get negative f_ffree value from
-> a project quota directory. It's fixed by "de7243057 fs/xfs: fix
-> f_ffree value for statfs when project quota is set". So add statfs
-> testing on project quota block and inode count limit.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> This V2 patch changes this case from a generic case to a xfs only case, due to
-> ext4 has different behavior.
-> 
-.
-.
-.
-> +# real QA test starts here
-> +_supported_fs xfs
-> +_supported_os Linux
-> +_require_scratch
-> +_require_xfs_quota
-> +
-> +_scratch_mkfs >/dev/null 2>&1
-> +_scratch_enable_pquota
-> +_qmount_option "prjquota"
-> +_qmount
-> +_require_prjquota $SCRATCH_DEV
-> +
-> +# Create a directory to be project object, and create a file to take 64k space
-> +mkdir $SCRATCH_MNT/t
-> +$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
-> +
-> +# Setup temporary replacements for /etc/projects and /etc/projid
-> +cat >$tmp.projects <<EOF
-> +42:$SCRATCH_MNT/t
-> +EOF
-> +
-> +cat >$tmp.projid <<EOF
-> +answer:42
-> +EOF
+Test that an incremental send operation works after deduplicating into the
+same file in both the parent and send snapshots.
 
-> +
-> +quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
-> +$quota_cmd -x -c 'project -s answer' $SCRATCH_MNT >/dev/null 2>&1
-> +$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m answer' $SCRATCH_MNT
+This currently fails on btrfs and a kernel patch to fix it was submitted
+with the subject:
 
-I wonder if is there any specific reason why you're using project quota config
-files for this test? Maybe it would simplify the test if you replace the config
-files and the quota command by something like:
+  Btrfs: fix incremental send failure after deduplication
 
-$quota_cmd -x -c 'answer -s -p $SCRATCH_MNT/t 42' $SCRATCH_MNT >/dev/null 2>&1
-$quota_cmd -x -c 'limit -p isoft=53 bsoft=100m 42' $SCRATCH_MNT
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/191     | 110 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/191.out |  19 +++++++++
+ tests/btrfs/group   |   1 +
+ 3 files changed, 130 insertions(+)
+ create mode 100755 tests/btrfs/191
+ create mode 100644 tests/btrfs/191.out
 
-Which would remove from the test all the configuration files setup
-
-
-> +
-> +# The itotal and size should be 53 and 102400(k), as above project quota limit.
-> +# The isued and used should be 2 and 64(k), as this case takes. But ext4 always
-> +# shows more 4k 'used' space than XFS, it prints 68k at here. So filter the
-> +# 6[48] at the end.
-
-If this is a XFS only test, we don't need this comment right?
-
-> +df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
-> +	_filter_scratch | _filter_spaces
-> +
-
-Cheers
-
+diff --git a/tests/btrfs/191 b/tests/btrfs/191
+new file mode 100755
+index 00000000..3156dfcc
+--- /dev/null
++++ b/tests/btrfs/191
+@@ -0,0 +1,110 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test No. btrfs/191
++#
++# Test that an incremental send operation works after deduplicating into the
++# same file in both the parent and send snapshots.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -fr $send_files_dir
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++. ./common/reflink
++
++# real QA test starts here
++_supported_fs btrfs
++_supported_os Linux
++_require_test
++_require_scratch_dedupe
++_require_fssum
++
++send_files_dir=$TEST_DIR/btrfs-test-$seq
++
++rm -f $seqres.full
++rm -fr $send_files_dir
++mkdir $send_files_dir
++
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++# Create our first file. The first half of the file has several 64Kb extents
++# while the second half as a single 512Kb extent.
++$XFS_IO_PROG -f -s -c "pwrite -S 0xb8 -b 64K 0 512K" $SCRATCH_MNT/foo \
++	| _filter_xfs_io
++$XFS_IO_PROG -c "pwrite -S 0xb8 512K 512K" $SCRATCH_MNT/foo | _filter_xfs_io
++
++# Create the base snapshot and the parent send stream from it.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap1 \
++	| _filter_scratch
++
++$BTRFS_UTIL_PROG send -f $send_files_dir/1.snap $SCRATCH_MNT/mysnap1 2>&1 \
++	| _filter_scratch
++
++# Create our second file, that has exactly the same data as the first file.
++$XFS_IO_PROG -f -c "pwrite -S 0xb8 0 1M" $SCRATCH_MNT/bar | _filter_xfs_io
++
++# Create the second snapshot, used for the incremental send, before doing the
++# file deduplication.
++$BTRFS_UTIL_PROG subvolume snapshot -r $SCRATCH_MNT $SCRATCH_MNT/mysnap2 \
++	| _filter_scratch
++
++# Now before creating the incremental send stream:
++#
++# 1) Deduplicate into a subrange of file foo in snapshot mysnap1. This will drop
++#    several extent items and add a new one, also updating the inode's iversion
++#    (sequence field in inode item) by 1, but not any other field of the inode;
++#
++# 2) Deduplicate into a different subrange of file foo in snapshot mysnap2. This
++#    will replace an extent item with a new one, also updating the inode's
++#    iversion by 1 but not any other field of the inode.
++#
++# After these two deduplication operations, the inode items, for file foo, are
++# identical in both snapshots, but we have different extent items for this inode
++# in both snapshots. We want to check this doesn't cause send to fail with an
++# error or produce an incorrect stream.
++
++$XFS_IO_PROG -r -c "dedupe $SCRATCH_MNT/bar 0 0 512K" $SCRATCH_MNT/mysnap1/foo \
++	| _filter_xfs_io
++
++$XFS_IO_PROG -r -c "dedupe $SCRATCH_MNT/bar 512K 512K 512K" \
++	$SCRATCH_MNT/mysnap2/foo | _filter_xfs_io
++
++# Create the incremental send stream.
++$BTRFS_UTIL_PROG send -p $SCRATCH_MNT/mysnap1 -f $send_files_dir/2.snap \
++	$SCRATCH_MNT/mysnap2 2>&1 | _filter_scratch
++
++# Create the checksums to verify later that the send streams produce correct
++# results.
++$FSSUM_PROG -A -f -w $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$FSSUM_PROG -A -f -w $send_files_dir/2.fssum \
++	-x $SCRATCH_MNT/mysnap2/mysnap1 $SCRATCH_MNT/mysnap2
++
++# Now recreate the filesystem by receiving both send streams and verify we get
++# the same content that the original filesystem had.
++_scratch_unmount
++_scratch_mkfs >>$seqres.full 2>&1
++_scratch_mount
++
++$BTRFS_UTIL_PROG receive -f $send_files_dir/1.snap $SCRATCH_MNT
++$BTRFS_UTIL_PROG receive -f $send_files_dir/2.snap $SCRATCH_MNT
++$FSSUM_PROG -r $send_files_dir/1.fssum $SCRATCH_MNT/mysnap1
++$FSSUM_PROG -r $send_files_dir/2.fssum $SCRATCH_MNT/mysnap2
++
++status=0
++exit
+diff --git a/tests/btrfs/191.out b/tests/btrfs/191.out
+new file mode 100644
+index 00000000..4269803c
+--- /dev/null
++++ b/tests/btrfs/191.out
+@@ -0,0 +1,19 @@
++QA output created by 191
++wrote 524288/524288 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 524288/524288 bytes at offset 524288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/mysnap1'
++At subvol SCRATCH_MNT/mysnap1
++wrote 1048576/1048576 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++Create a readonly snapshot of 'SCRATCH_MNT' in 'SCRATCH_MNT/mysnap2'
++deduped 524288/524288 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++deduped 524288/524288 bytes at offset 524288
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++At subvol SCRATCH_MNT/mysnap2
++At subvol mysnap1
++At snapshot mysnap2
++OK
++OK
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 6937bf1c..2474d43e 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -193,3 +193,4 @@
+ 188 auto quick send prealloc punch
+ 189 auto quick send clone
+ 190 auto quick replay balance qgroup
++191 auto quick send dedupe
 -- 
-Carlos
+2.11.0
