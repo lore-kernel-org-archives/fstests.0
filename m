@@ -1,106 +1,134 @@
-Received: from mail-pl1-f195.google.com ([209.85.214.195]:42991 "EHLO
-        mail-pl1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725796AbfGURBc (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 21 Jul 2019 13:01:32 -0400
-Received: by mail-pl1-f195.google.com with SMTP id ay6so18005463plb.9
-        for <fstests@vger.kernel.org>; Sun, 21 Jul 2019 10:01:32 -0700 (PDT)
-Message-ID: <5d349a6a.1c69fb81.84578.1d86@mx.google.com>
-Date: Mon, 22 Jul 2019 01:01:25 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 69c6da403991
-MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="OsRUrwKsu3ah"
-Content-Disposition: inline
+Received: from mail-wm1-f66.google.com ([209.85.128.66]:35664 "EHLO
+        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726440AbfGVFCg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 22 Jul 2019 01:02:36 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH] overlay/065: adjust test to expect EBUSY only with index=on
+Date: Mon, 22 Jul 2019 08:02:27 +0300
+Message-Id: <20190722050227.24944-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+This is needed to support the kernel regression fix commit 0be0bfd2de9d
+("ovl: fix regression caused by overlapping layers detection").
 
---OsRUrwKsu3ah
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Overlayfs mount is not supposed to fail due to upper/work dir in-use
+by other mount unless option index=on is enabled.
 
-Hi all,
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+---
 
-The master branch of the xfstests repository at:
+Eryu,
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+With this applied, test is expected to fail on upstream kernel,
+because upstream kernel has a regression.
 
-have just been updated. This update pulls in the remaining copy_file_range
-tests from Amir and Dave, a new btrfs regression tests and moves shared/011
-into generic.
-
-The two new copy_file_range tests should not fail if you're testing with latest
-Linus tree (v5.2.0+), but you may still see btrfs/191 failure.
-
-I'm sorry that I still don't have much time reviewing the fsverity patches, but
-that doesn't mean I forget about it :)
+The kernel fix commit is on Miklos' overlayfs-next branch.
 
 Thanks,
-Eryu
+Amir.
 
-The new head of the master branch is commit:
+ tests/overlay/065     | 26 ++++++++++++++++----------
+ tests/overlay/065.out |  4 ++--
+ 2 files changed, 18 insertions(+), 12 deletions(-)
 
-69c6da403991 generic: cross-device copy_file_range test
-
-New commits:
-
-Amir Goldstein (3):
-      [3996a90a471f] common/rc: check support for xfs_io copy_range -f N
-      [f60eeb9a2197] generic: copy_file_range bounds test
-      [69c6da403991] generic: cross-device copy_file_range test
-
-Chao Yu (1):
-      [3bfeb4d53f5e] common/rc: set max label length for f2fs
-
-Christoph Hellwig (3):
-      [e678a7cc9ca6] common/cgroup2: better error message if cgroup2 fs is not mounted
-      [02994bdad6c7] shared/011: run for all block device based file systems
-      [1a4485f2fafe] shared/011: move to generic/
-
-Filipe Manana (1):
-      [901c4e5d19b0] btrfs: test incremental send after deduplication on both snapshots
-
-
-Code Diffstat:
-
- common/cgroup2                            |   5 ++
- common/rc                                 |  12 ++-
- tests/btrfs/191                           | 110 ++++++++++++++++++++++++
- tests/btrfs/191.out                       |  19 +++++
- tests/btrfs/group                         |   1 +
- tests/{shared/011 => generic/563}         |   5 +-
- tests/{shared/011.out => generic/563.out} |   0
- tests/generic/564                         | 134 ++++++++++++++++++++++++++++++
- tests/generic/564.out                     |  37 +++++++++
- tests/generic/565                         |  64 ++++++++++++++
- tests/generic/565.out                     |   4 +
- tests/generic/group                       |   3 +
- tests/shared/group                        |   1 -
- 13 files changed, 392 insertions(+), 3 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---OsRUrwKsu3ah
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl00mhYACgkQJlKqKVyP
-52PTFQ/+Jh2Zdm2Oe0LbKRaGEBM+bXJAaCY2J9ibp6qFyI017RsykKHk+7u7+L+T
-2bfoSR35eo94LT4OzlHNZlakYuvZ8IliB3DU5i5RcVkJ49Jnzx9uBsNTs1CBpsuN
-pzGozqp12BYoMt9H+EAVMDRMJjF2IlJf1I6EN36YmjAjQrXjr+kX8ik7I601lmWy
-ohyjLcInbh3sHEHgvjYwKhl7aEdSKq7Hl5hX/f080GCasgBVDr7vosZeqNxqrIn9
-Q0HUZAjSxjEHTIcm4KPdfIEL2H1Qr1TuiPh2TyEiHv76DmS0n9XEtgNZDGrC1+oW
-jf3OZtiTDbUi9DqlgBJjW2TPe4RRIwNS90YxGM7si2FNsIWyXlPks1o9Y3AEyTOE
-KmVRPnc6M0O7b73Y8Jreqe15uSs35Ho/c29QPGLNI31FrKjV9uMh0MALXBzA3wLZ
-zU00D6C8g2EQlQgZcmCu6jw52nH69/dfJEbTI30N30L6nJa0t+DbKM7GEJktwSLq
-l9mGGHUwDLd2txJLRkx6KqhZwxIN+EbahSIJwcO0/JmeoTrjlTeAZbH6vAMLWXnC
-Fro4tqzJ4r1ReY01eBn3Glfxn6g7yD62uoO9fjLZPz7X2Sgz73hjDJI1VoD44aBO
-yQYVjqTwXH+Y/XNEz+miMHpfMxjeElXoKO0tZdddm+NGdulaRZQ=
-=toTZ
------END PGP SIGNATURE-----
-
---OsRUrwKsu3ah--
+diff --git a/tests/overlay/065 b/tests/overlay/065
+index abfc6737..a75a9a10 100755
+--- a/tests/overlay/065
++++ b/tests/overlay/065
+@@ -13,9 +13,14 @@
+ #
+ # Overlapping layers on mount or lookup results in ELOOP.
+ # Overlapping lowerdir with other mount upperdir/workdir
+-# result in EBUSY.
++# result in EBUSY (if index=on is used).
+ #
+-# Kernel patch "ovl: detect overlapping layers" is needed to pass the test.
++# This is a regression test for kernel commit:
++#
++#    146d62e5a586 "ovl: detect overlapping layers"
++#
++# and its followup fix commit:
++#    0be0bfd2de9d "ovl: fix regression caused by overlapping layers detection"
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -46,6 +51,7 @@ _supported_os Linux
+ # Use non-default scratch underlying overlay dirs, we need to check
+ # them explicity after test.
+ _require_scratch_nocheck
++_require_scratch_feature index
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
+@@ -61,10 +67,10 @@ mnt2=$basedir/mnt.2
+ 
+ mkdir -p $lowerdir/lower $upperdir $workdir
+ 
+-# Try to mount an overlay with the same upperdir/lowerdir - expect EBUSY
++# Try to mount an overlay with the same upperdir/lowerdir - expect ELOOP
+ echo Conflicting upperdir/lowerdir
+ _overlay_scratch_mount_dirs $upperdir $upperdir $workdir \
+-	2>&1 | _filter_busy_mount
++	2>&1 | _filter_error_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ # Use new upper/work dirs for each test to avoid ESTALE errors
+@@ -72,11 +78,11 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ rm -rf $upperdir $workdir
+ mkdir $upperdir $workdir
+ 
+-# Try to mount an overlay with the same workdir/lowerdir - expect EBUSY
++# Try to mount an overlay with the same workdir/lowerdir - expect ELOOP
+ # because $workdir/work overlaps with lowerdir
+ echo Conflicting workdir/lowerdir
+ _overlay_scratch_mount_dirs $workdir $upperdir $workdir \
+-	2>&1 | _filter_busy_mount
++	-oindex=off 2>&1 | _filter_error_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ rm -rf $upperdir $workdir
+@@ -126,20 +132,20 @@ rm -rf $upperdir2 $workdir2
+ mkdir -p $upperdir2 $workdir2 $mnt2
+ 
+ # Try to mount an overlay with layers overlapping with another overlayfs
+-# upperdir - expect EBUSY
++# upperdir - expect EBUSY with index=on
+ echo Overlapping with upperdir of another instance
+ _overlay_scratch_mount_dirs $upperdir/upper $upperdir2 $workdir2 \
+-	2>&1 | _filter_busy_mount
++	-oindex=on 2>&1 | _filter_busy_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ rm -rf $upperdir2 $workdir2
+ mkdir -p $upperdir2 $workdir2
+ 
+ # Try to mount an overlay with layers overlapping with another overlayfs
+-# workdir - expect EBUSY
++# workdir - expect EBUSY with index=on
+ echo Overlapping with workdir of another instance
+ _overlay_scratch_mount_dirs $workdir/work $upperdir2 $workdir2 \
+-	2>&1 | _filter_busy_mount
++	-oindex=on 2>&1 | _filter_busy_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ # Move upper layer root into lower layer after mount
+diff --git a/tests/overlay/065.out b/tests/overlay/065.out
+index 0260327c..c63d4df8 100644
+--- a/tests/overlay/065.out
++++ b/tests/overlay/065.out
+@@ -1,8 +1,8 @@
+ QA output created by 065
+ Conflicting upperdir/lowerdir
+-mount: device already mounted or mount point busy
++mount: Too many levels of symbolic links
+ Conflicting workdir/lowerdir
+-mount: device already mounted or mount point busy
++mount: Too many levels of symbolic links
+ Overlapping upperdir/lowerdir
+ mount: Too many levels of symbolic links
+ Conflicting lower layers
+-- 
+2.17.1
