@@ -1,134 +1,97 @@
-Received: from mail-wm1-f66.google.com ([209.85.128.66]:35664 "EHLO
-        mail-wm1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726440AbfGVFCg (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 22 Jul 2019 01:02:36 -0400
-From: Amir Goldstein <amir73il@gmail.com>
-Subject: [PATCH] overlay/065: adjust test to expect EBUSY only with index=on
-Date: Mon, 22 Jul 2019 08:02:27 +0300
-Message-Id: <20190722050227.24944-1-amir73il@gmail.com>
+Received: from szxga07-in.huawei.com ([45.249.212.35]:41018 "EHLO huawei.com"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726432AbfGWJZw (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Jul 2019 05:25:52 -0400
+From: Chao Yu <yuchao0@huawei.com>
+Subject: [PATCH 1/3] generic/38[3456]: adjust to check prjquota before mount
+Date: Tue, 23 Jul 2019 17:25:27 +0800
+Message-ID: <20190723092529.112426-1-yuchao0@huawei.com>
+MIME-Version: 1.0
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
+To: guaneryu@gmail.com
+Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, jaegeuk@kernel.org, chao@kernel.orga, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-This is needed to support the kernel regression fix commit 0be0bfd2de9d
-("ovl: fix regression caused by overlapping layers detection").
+Move _require_prjquota() to front of _qmount() since we do the
+check on device directly instead of mountpoint, it can avoid
+potential failure if filesystem utils needs exclusive open on
+device.
 
-Overlayfs mount is not supposed to fail due to upper/work dir in-use
-by other mount unless option index=on is enabled.
-
-Signed-off-by: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
+ tests/generic/383 | 2 +-
+ tests/generic/384 | 2 +-
+ tests/generic/385 | 2 +-
+ tests/generic/386 | 2 +-
+ 4 files changed, 4 insertions(+), 4 deletions(-)
 
-Eryu,
-
-With this applied, test is expected to fail on upstream kernel,
-because upstream kernel has a regression.
-
-The kernel fix commit is on Miklos' overlayfs-next branch.
-
-Thanks,
-Amir.
-
- tests/overlay/065     | 26 ++++++++++++++++----------
- tests/overlay/065.out |  4 ++--
- 2 files changed, 18 insertions(+), 12 deletions(-)
-
-diff --git a/tests/overlay/065 b/tests/overlay/065
-index abfc6737..a75a9a10 100755
---- a/tests/overlay/065
-+++ b/tests/overlay/065
-@@ -13,9 +13,14 @@
+diff --git a/tests/generic/383 b/tests/generic/383
+index 2c8c5923..cf5ac255 100755
+--- a/tests/generic/383
++++ b/tests/generic/383
+@@ -39,6 +39,7 @@ _require_xfs_quota_foreign
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_enable_pquota
++_require_prjquota $SCRATCH_DEV
+ 
+ do_project_test()
+ {
+@@ -76,7 +77,6 @@ EOF
+ # Test project
+ _qmount_option "usrquota,prjquota"
+ _qmount
+-_require_prjquota $SCRATCH_DEV
+ do_project_test
+ 
+ # success, all done
+diff --git a/tests/generic/384 b/tests/generic/384
+index b7c940d7..2c0cd00b 100755
+--- a/tests/generic/384
++++ b/tests/generic/384
+@@ -57,10 +57,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
+ _require_scratch
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_enable_pquota
++_require_prjquota $SCRATCH_DEV
+ 
+ _qmount_option "prjquota"
+ _qmount
+-_require_prjquota $SCRATCH_DEV
+ 
+ report_quota()
+ {
+diff --git a/tests/generic/385 b/tests/generic/385
+index 937131a9..56ce6eb0 100755
+--- a/tests/generic/385
++++ b/tests/generic/385
+@@ -56,9 +56,9 @@ quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _scratch_enable_pquota
++_require_prjquota $SCRATCH_DEV
+ _qmount_option "prjquota"
+ _qmount
+-_require_prjquota $SCRATCH_DEV
+ 
  #
- # Overlapping layers on mount or lookup results in ELOOP.
- # Overlapping lowerdir with other mount upperdir/workdir
--# result in EBUSY.
-+# result in EBUSY (if index=on is used).
- #
--# Kernel patch "ovl: detect overlapping layers" is needed to pass the test.
-+# This is a regression test for kernel commit:
-+#
-+#    146d62e5a586 "ovl: detect overlapping layers"
-+#
-+# and its followup fix commit:
-+#    0be0bfd2de9d "ovl: fix regression caused by overlapping layers detection"
- #
- seq=`basename $0`
- seqres=$RESULT_DIR/$seq
-@@ -46,6 +51,7 @@ _supported_os Linux
- # Use non-default scratch underlying overlay dirs, we need to check
- # them explicity after test.
- _require_scratch_nocheck
-+_require_scratch_feature index
+ # Create the project root
+diff --git a/tests/generic/386 b/tests/generic/386
+index 462c5869..e4f7d23b 100755
+--- a/tests/generic/386
++++ b/tests/generic/386
+@@ -112,10 +112,10 @@ echo $proj_num:$proj_dir > "$my_projects"
  
- # Remove all files from previous tests
- _scratch_mkfs
-@@ -61,10 +67,10 @@ mnt2=$basedir/mnt.2
+ _scratch_mkfs					>> "$seqres.full" 2>&1
+ _scratch_enable_pquota
++_require_prjquota $SCRATCH_DEV
  
- mkdir -p $lowerdir/lower $upperdir $workdir
+ _qmount_option "prjquota"
+ _qmount
+-_require_prjquota $SCRATCH_DEV
  
--# Try to mount an overlay with the same upperdir/lowerdir - expect EBUSY
-+# Try to mount an overlay with the same upperdir/lowerdir - expect ELOOP
- echo Conflicting upperdir/lowerdir
- _overlay_scratch_mount_dirs $upperdir $upperdir $workdir \
--	2>&1 | _filter_busy_mount
-+	2>&1 | _filter_error_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ mkdir -p "${proj_dir}"
  
- # Use new upper/work dirs for each test to avoid ESTALE errors
-@@ -72,11 +78,11 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- rm -rf $upperdir $workdir
- mkdir $upperdir $workdir
- 
--# Try to mount an overlay with the same workdir/lowerdir - expect EBUSY
-+# Try to mount an overlay with the same workdir/lowerdir - expect ELOOP
- # because $workdir/work overlaps with lowerdir
- echo Conflicting workdir/lowerdir
- _overlay_scratch_mount_dirs $workdir $upperdir $workdir \
--	2>&1 | _filter_busy_mount
-+	-oindex=off 2>&1 | _filter_error_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- 
- rm -rf $upperdir $workdir
-@@ -126,20 +132,20 @@ rm -rf $upperdir2 $workdir2
- mkdir -p $upperdir2 $workdir2 $mnt2
- 
- # Try to mount an overlay with layers overlapping with another overlayfs
--# upperdir - expect EBUSY
-+# upperdir - expect EBUSY with index=on
- echo Overlapping with upperdir of another instance
- _overlay_scratch_mount_dirs $upperdir/upper $upperdir2 $workdir2 \
--	2>&1 | _filter_busy_mount
-+	-oindex=on 2>&1 | _filter_busy_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- 
- rm -rf $upperdir2 $workdir2
- mkdir -p $upperdir2 $workdir2
- 
- # Try to mount an overlay with layers overlapping with another overlayfs
--# workdir - expect EBUSY
-+# workdir - expect EBUSY with index=on
- echo Overlapping with workdir of another instance
- _overlay_scratch_mount_dirs $workdir/work $upperdir2 $workdir2 \
--	2>&1 | _filter_busy_mount
-+	-oindex=on 2>&1 | _filter_busy_mount
- $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
- 
- # Move upper layer root into lower layer after mount
-diff --git a/tests/overlay/065.out b/tests/overlay/065.out
-index 0260327c..c63d4df8 100644
---- a/tests/overlay/065.out
-+++ b/tests/overlay/065.out
-@@ -1,8 +1,8 @@
- QA output created by 065
- Conflicting upperdir/lowerdir
--mount: device already mounted or mount point busy
-+mount: Too many levels of symbolic links
- Conflicting workdir/lowerdir
--mount: device already mounted or mount point busy
-+mount: Too many levels of symbolic links
- Overlapping upperdir/lowerdir
- mount: Too many levels of symbolic links
- Conflicting lower layers
 -- 
-2.17.1
+2.18.0.rc1
