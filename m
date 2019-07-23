@@ -1,11 +1,13 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:41018 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:43822 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1726432AbfGWJZw (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Jul 2019 05:25:52 -0400
+        id S1732316AbfGWJZ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Jul 2019 05:25:58 -0400
 From: Chao Yu <yuchao0@huawei.com>
-Subject: [PATCH 1/3] generic/38[3456]: adjust to check prjquota before mount
-Date: Tue, 23 Jul 2019 17:25:27 +0800
-Message-ID: <20190723092529.112426-1-yuchao0@huawei.com>
+Subject: [PATCH 2/3] common/quota: support f2fs in _require_quota() and _check_quota_usage()
+Date: Tue, 23 Jul 2019 17:25:28 +0800
+Message-ID: <20190723092529.112426-2-yuchao0@huawei.com>
+In-Reply-To: <20190723092529.112426-1-yuchao0@huawei.com>
+References: <20190723092529.112426-1-yuchao0@huawei.com>
 MIME-Version: 1.0
 Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
@@ -13,85 +15,34 @@ To: guaneryu@gmail.com
 Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, jaegeuk@kernel.org, chao@kernel.orga, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-Move _require_prjquota() to front of _qmount() since we do the
-check on device directly instead of mountpoint, it can avoid
-potential failure if filesystem utils needs exclusive open on
-device.
+This can let f2fs pass the check of quota testcases.
 
 Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
- tests/generic/383 | 2 +-
- tests/generic/384 | 2 +-
- tests/generic/385 | 2 +-
- tests/generic/386 | 2 +-
- 4 files changed, 4 insertions(+), 4 deletions(-)
+ common/quota | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
 
-diff --git a/tests/generic/383 b/tests/generic/383
-index 2c8c5923..cf5ac255 100755
---- a/tests/generic/383
-+++ b/tests/generic/383
-@@ -39,6 +39,7 @@ _require_xfs_quota_foreign
+diff --git a/common/quota b/common/quota
+index f19f81a1..9af280a2 100644
+--- a/common/quota
++++ b/common/quota
+@@ -12,7 +12,7 @@ _require_quota()
+     [ -n "$QUOTA_PROG" ] || _notrun "Quota user tools not installed"
  
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
-+_require_prjquota $SCRATCH_DEV
+     case $FSTYP in
+-    ext2|ext3|ext4|ext4dev|reiserfs)
++    ext2|ext3|ext4|ext4dev|f2fs|reiserfs)
+ 	if [ ! -d /proc/sys/fs/quota ]; then
+ 	    _notrun "Installed kernel does not support quotas"
+ 	fi
+@@ -257,7 +257,7 @@ _check_quota_usage()
  
- do_project_test()
- {
-@@ -76,7 +77,6 @@ EOF
- # Test project
- _qmount_option "usrquota,prjquota"
- _qmount
--_require_prjquota $SCRATCH_DEV
- do_project_test
- 
- # success, all done
-diff --git a/tests/generic/384 b/tests/generic/384
-index b7c940d7..2c0cd00b 100755
---- a/tests/generic/384
-+++ b/tests/generic/384
-@@ -57,10 +57,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
- _require_scratch
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
-+_require_prjquota $SCRATCH_DEV
- 
- _qmount_option "prjquota"
- _qmount
--_require_prjquota $SCRATCH_DEV
- 
- report_quota()
- {
-diff --git a/tests/generic/385 b/tests/generic/385
-index 937131a9..56ce6eb0 100755
---- a/tests/generic/385
-+++ b/tests/generic/385
-@@ -56,9 +56,9 @@ quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
- 
- _scratch_mkfs >/dev/null 2>&1
- _scratch_enable_pquota
-+_require_prjquota $SCRATCH_DEV
- _qmount_option "prjquota"
- _qmount
--_require_prjquota $SCRATCH_DEV
- 
- #
- # Create the project root
-diff --git a/tests/generic/386 b/tests/generic/386
-index 462c5869..e4f7d23b 100755
---- a/tests/generic/386
-+++ b/tests/generic/386
-@@ -112,10 +112,10 @@ echo $proj_num:$proj_dir > "$my_projects"
- 
- _scratch_mkfs					>> "$seqres.full" 2>&1
- _scratch_enable_pquota
-+_require_prjquota $SCRATCH_DEV
- 
- _qmount_option "prjquota"
- _qmount
--_require_prjquota $SCRATCH_DEV
- 
- mkdir -p "${proj_dir}"
- 
+ 	VFS_QUOTA=0
+ 	case $FSTYP in
+-	ext2|ext3|ext4|ext4dev|reiserfs|gfs2)
++	ext2|ext3|ext4|ext4dev|f2fs|reiserfs|gfs2)
+ 		VFS_QUOTA=1
+ 		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
+ 		;;
 -- 
 2.18.0.rc1
