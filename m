@@ -1,11 +1,11 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:43822 "EHLO huawei.com"
+Received: from szxga06-in.huawei.com ([45.249.212.32]:43816 "EHLO huawei.com"
         rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1732316AbfGWJZ6 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Jul 2019 05:25:58 -0400
+        id S1728809AbfGWJZx (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 23 Jul 2019 05:25:53 -0400
 From: Chao Yu <yuchao0@huawei.com>
-Subject: [PATCH 2/3] common/quota: support f2fs in _require_quota() and _check_quota_usage()
-Date: Tue, 23 Jul 2019 17:25:28 +0800
-Message-ID: <20190723092529.112426-2-yuchao0@huawei.com>
+Subject: [PATCH 3/3] common/rc: check quota sysfile feature for f2fs
+Date: Tue, 23 Jul 2019 17:25:29 +0800
+Message-ID: <20190723092529.112426-3-yuchao0@huawei.com>
 In-Reply-To: <20190723092529.112426-1-yuchao0@huawei.com>
 References: <20190723092529.112426-1-yuchao0@huawei.com>
 MIME-Version: 1.0
@@ -15,34 +15,26 @@ To: guaneryu@gmail.com
 Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, jaegeuk@kernel.org, chao@kernel.orga, Chao Yu <yuchao0@huawei.com>
 List-ID: <fstests@vger.kernel.org>
 
-This can let f2fs pass the check of quota testcases.
+In _require_prjquota(), f2fs missed to check whether we have enabled
+quota sysfile feature in the image, add it.
 
 Signed-off-by: Chao Yu <yuchao0@huawei.com>
 ---
- common/quota | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ common/quota | 2 ++
+ 1 file changed, 2 insertions(+)
 
 diff --git a/common/quota b/common/quota
-index f19f81a1..9af280a2 100644
+index 9af280a2..3f46eb19 100644
 --- a/common/quota
 +++ b/common/quota
-@@ -12,7 +12,7 @@ _require_quota()
-     [ -n "$QUOTA_PROG" ] || _notrun "Quota user tools not installed"
- 
-     case $FSTYP in
--    ext2|ext3|ext4|ext4dev|reiserfs)
-+    ext2|ext3|ext4|ext4dev|f2fs|reiserfs)
- 	if [ ! -d /proc/sys/fs/quota ]; then
- 	    _notrun "Installed kernel does not support quotas"
- 	fi
-@@ -257,7 +257,7 @@ _check_quota_usage()
- 
- 	VFS_QUOTA=0
- 	case $FSTYP in
--	ext2|ext3|ext4|ext4dev|reiserfs|gfs2)
-+	ext2|ext3|ext4|ext4dev|f2fs|reiserfs|gfs2)
- 		VFS_QUOTA=1
- 		quotaon -f -u -g $SCRATCH_MNT 2>/dev/null
- 		;;
+@@ -80,6 +80,8 @@ _require_prjquota()
+     if [ "$FSTYP" == "f2fs" ]; then
+ 	dump.f2fs $_dev 2>&1 | grep -qw project_quota
+ 	[ $? -ne 0 ] && _notrun "Project quota not enabled in this device $_dev"
++	dump.f2fs $_dev 2>&1 | grep -qw quota_ino
++	[ $? -ne 0 ] && _notrun "quota sysfile not enabled in this device $_dev"
+ 	cat /sys/fs/f2fs/features/project_quota | grep -qw supported
+ 	[ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
+ 	return
 -- 
 2.18.0.rc1
