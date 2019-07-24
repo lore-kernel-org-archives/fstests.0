@@ -1,37 +1,64 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:39238 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726585AbfGXPtN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 11:49:13 -0400
-Received: by mail-yw1-f66.google.com with SMTP id x74so279162ywx.6
-        for <fstests@vger.kernel.org>; Wed, 24 Jul 2019 08:49:12 -0700 (PDT)
+Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:54122 "EHLO
+        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388770AbfGXXue (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 19:50:34 -0400
+Date: Thu, 25 Jul 2019 09:21:17 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [PATCH 1/3] common: filter aiodio dmesg after fs/iomap.c to
+ fs/iomap/ move
+Message-ID: <20190724232117.GB7777@dread.disaster.area>
+References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
+ <156394157450.1850719.464315342783936237.stgit@magnolia>
 MIME-Version: 1.0
-References: <20190724145511.1155-1-jlayton@kernel.org>
-In-Reply-To: <20190724145511.1155-1-jlayton@kernel.org>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Wed, 24 Jul 2019 18:49:00 +0300
-Message-ID: <CAOQ4uxiiTPxmGWxygbsDMVShBt89qdoBGByeVa2KOwPqSh70SQ@mail.gmail.com>
-Subject: Re: [PATCH] generic/062: more restrictive namespace for getfattr on cephfs
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <156394157450.1850719.464315342783936237.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>
-Cc: fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 24, 2019 at 5:55 PM Jeff Layton <jlayton@kernel.org> wrote:
->
-> cephfs exposes some information via virtual xattrs and their presence
-> causes this test to fail. When running on cephfs, only search for
-> specific xattr classes to ensure that we skip the ceph.* ones.
->
+On Tue, Jul 23, 2019 at 09:12:54PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
+> 
+> Since the iomap code are moving to fs/iomap/ we have to add new entries
+> to the aiodio dmesg filter to reflect this.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+>  common/filter |    4 +++-
+>  1 file changed, 3 insertions(+), 1 deletion(-)
+> 
+> 
+> diff --git a/common/filter b/common/filter
+> index ed082d24..26fc2132 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -555,6 +555,7 @@ _filter_aiodio_dmesg()
+>  	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+>  	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
 
-Probably too late to ask this question now anyway, but does ceph have
-a particular good reason to expose those virt xattr in listxattr?
+There's two different warnings that need capturing here.
 
-I means its not xattrs that copy tools should try to copy and tools
-should know about them and can try to getxattr without the need
-to see them in listxattr.
+>  	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
+> +	local warn10="WARNING:.*fs/iomap/direct-io\.c:.*iomap_dio_actor.*"
+>  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+>  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+>  	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+> @@ -563,7 +564,8 @@ _filter_aiodio_dmesg()
+>  	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
+>  	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
+>  	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
+> -	    -e "s#$warn9#Intentional warnings in dio_complete#"
+> +	    -e "s#$warn9#Intentional warnings in dio_complete#" \
+> +	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
 
-I noticed this is the behavior of cifs w.r.t cifs. and smb3. virt xattr.
+Why not just change the regex in warn7/warn8 just to catch anything
+under fs/iomap rather than explictly specifying fs/iomap.c?
 
-Thanks,
-Amir.
+Cheers,
+
+Dave.
+-- 
+Dave Chinner
+david@fromorbit.com
