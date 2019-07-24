@@ -1,49 +1,44 @@
-Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:46038 "EHLO
-        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2388770AbfGXXv7 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 19:51:59 -0400
-Date: Thu, 25 Jul 2019 09:22:59 +1000
-From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 7/3] xfs/194: unmount forced v4 fs during cleanup
-Message-ID: <20190724232259.GC7777@dread.disaster.area>
-References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
- <20190724155656.GH7084@magnolia>
+Received: from mail.kernel.org ([198.145.29.99]:54364 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726316AbfGXQlA (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 24 Jul 2019 12:41:00 -0400
+Message-ID: <32a4f98057b9771164a3ae0e3763a5e9b3fdf3e2.camel@kernel.org>
+Subject: Re: [PATCH] generic/062: more restrictive namespace for getfattr on
+ cephfs
+From: Jeff Layton <jlayton@kernel.org>
+Date: Wed, 24 Jul 2019 12:40:58 -0400
+In-Reply-To: <CAOQ4uxiiTPxmGWxygbsDMVShBt89qdoBGByeVa2KOwPqSh70SQ@mail.gmail.com>
+References: <20190724145511.1155-1-jlayton@kernel.org>
+         <CAOQ4uxiiTPxmGWxygbsDMVShBt89qdoBGByeVa2KOwPqSh70SQ@mail.gmail.com>
+Content-Type: text/plain; charset="UTF-8"
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190724155656.GH7084@magnolia>
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Amir Goldstein <amir73il@gmail.com>
+Cc: fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 24, 2019 at 08:56:56AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
+On Wed, 2019-07-24 at 18:49 +0300, Amir Goldstein wrote:
+> On Wed, Jul 24, 2019 at 5:55 PM Jeff Layton <jlayton@kernel.org> wrote:
+> > cephfs exposes some information via virtual xattrs and their presence
+> > causes this test to fail. When running on cephfs, only search for
+> > specific xattr classes to ensure that we skip the ceph.* ones.
+> > 
 > 
-> Unmount the V4 filesystem we forcibly created to run this test during
-> test cleanup so that the post-test wrapup checks won't try to remount
-> the filesystem with different MOUNT_OPTIONS (specifically, the ones
-> that get screened out by _force_xfsv4_mount_options) and fail.
+> Probably too late to ask this question now anyway, but does ceph have
+> a particular good reason to expose those virt xattr in listxattr?
 > 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  tests/xfs/194 |    1 +
->  1 file changed, 1 insertion(+)
+> I means its not xattrs that copy tools should try to copy and tools
+> should know about them and can try to getxattr without the need
+> to see them in listxattr.
 > 
-> diff --git a/tests/xfs/194 b/tests/xfs/194
-> index 3e186528..1f46d403 100755
-> --- a/tests/xfs/194
-> +++ b/tests/xfs/194
-> @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
->  _cleanup()
->  {
->      cd /
-> +    _scratch_unmount
+> I noticed this is the behavior of cifs w.r.t cifs. and smb3. virt xattr.
+> 
 
-Comment as to why this is necessary here so we don't go and remove
-it because unmounting in cleanup should generally be unnecessary....
+Good question. I don't see the need for us to present these in listxattr
+and stopping that may be the best solution here. Let me investigate that
+approach.
 
--Dave.
+Thanks,
 -- 
-Dave Chinner
-david@fromorbit.com
+Jeff Layton <jlayton@kernel.org>
