@@ -1,32 +1,59 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:43696 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725823AbfGXEMw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 00:12:52 -0400
-Subject: [PATCH 0/3] fstests: various fixes
+Received: from aserp2120.oracle.com ([141.146.126.78]:50860 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725776AbfGXPzr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 11:55:47 -0400
+Date: Wed, 24 Jul 2019 08:55:43 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Tue, 23 Jul 2019 21:12:48 -0700
-Message-ID: <156394156831.1850719.2997473679130010771.stgit@magnolia>
+Subject: [PATCH 4/3] generic/506: mount scratch fs before testing for
+ prjquota presence
+Message-ID: <20190724155543.GE7084@magnolia>
+References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <156394156831.1850719.2997473679130010771.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
+To: guaneryu@gmail.com
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hi all,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Fix the mixed buffered/directio filtering function to pick up the new
-locations of the iomap directio code, fix the bogus description in
-xfs/504, and reduce the time generic/561 waits for duperemove to finish.
+On XFS, the _require_prjquota helper takes a path to a block device,
+but (unintuitively) requires the block device to be mounted for the
+detection to work properly.  Fix the detection code in generic/506.
 
-If you're going to start using this mess, you probably ought to just
-pull from my git trees, which are linked below.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/quota      |    3 ++-
+ tests/generic/506 |    2 ++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
 
-This is an extraordinary way to destroy everything.  Enjoy!
-Comments and questions are, as always, welcome.
-
---D
-
-fstests git tree:
-https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=random-fixes
+diff --git a/common/quota b/common/quota
+index f19f81a1..8a22f815 100644
+--- a/common/quota
++++ b/common/quota
+@@ -68,7 +68,8 @@ _require_xfs_quota_foreign()
+ }
+ 
+ #
+-# checks that the project quota support in the kernel is enabled.
++# Checks that the project quota support in the kernel is enabled.
++# The device must be mounted for detection to work properly.
+ #
+ _require_prjquota()
+ {
+diff --git a/tests/generic/506 b/tests/generic/506
+index 7002c00c..e8d0ca24 100755
+--- a/tests/generic/506
++++ b/tests/generic/506
+@@ -51,7 +51,9 @@ _require_scratch_shutdown
+ 
+ _scratch_mkfs >/dev/null 2>&1
+ _require_metadata_journaling $SCRATCH_DEV
++_scratch_mount
+ _require_prjquota $SCRATCH_DEV
++_scratch_unmount
+ 
+ testfile=$SCRATCH_MNT/testfile
+ 
