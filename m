@@ -1,64 +1,49 @@
-Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:54122 "EHLO
-        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S2388770AbfGXXue (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 19:50:34 -0400
-Date: Thu, 25 Jul 2019 09:21:17 +1000
+Received: from mail104.syd.optusnet.com.au ([211.29.132.246]:46038 "EHLO
+        mail104.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2388770AbfGXXv7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 19:51:59 -0400
+Date: Thu, 25 Jul 2019 09:22:59 +1000
 From: Dave Chinner <david@fromorbit.com>
-Subject: Re: [PATCH 1/3] common: filter aiodio dmesg after fs/iomap.c to
- fs/iomap/ move
-Message-ID: <20190724232117.GB7777@dread.disaster.area>
+Subject: Re: [PATCH 7/3] xfs/194: unmount forced v4 fs during cleanup
+Message-ID: <20190724232259.GC7777@dread.disaster.area>
 References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
- <156394157450.1850719.464315342783936237.stgit@magnolia>
+ <20190724155656.GH7084@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <156394157450.1850719.464315342783936237.stgit@magnolia>
+In-Reply-To: <20190724155656.GH7084@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 23, 2019 at 09:12:54PM -0700, Darrick J. Wong wrote:
+On Wed, Jul 24, 2019 at 08:56:56AM -0700, Darrick J. Wong wrote:
 > From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Since the iomap code are moving to fs/iomap/ we have to add new entries
-> to the aiodio dmesg filter to reflect this.
+> Unmount the V4 filesystem we forcibly created to run this test during
+> test cleanup so that the post-test wrapup checks won't try to remount
+> the filesystem with different MOUNT_OPTIONS (specifically, the ones
+> that get screened out by _force_xfsv4_mount_options) and fail.
 > 
 > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  common/filter |    4 +++-
->  1 file changed, 3 insertions(+), 1 deletion(-)
+>  tests/xfs/194 |    1 +
+>  1 file changed, 1 insertion(+)
 > 
-> 
-> diff --git a/common/filter b/common/filter
-> index ed082d24..26fc2132 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -555,6 +555,7 @@ _filter_aiodio_dmesg()
->  	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
->  	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
+> diff --git a/tests/xfs/194 b/tests/xfs/194
+> index 3e186528..1f46d403 100755
+> --- a/tests/xfs/194
+> +++ b/tests/xfs/194
+> @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+>  _cleanup()
+>  {
+>      cd /
+> +    _scratch_unmount
 
-There's two different warnings that need capturing here.
+Comment as to why this is necessary here so we don't go and remove
+it because unmounting in cleanup should generally be unnecessary....
 
->  	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
-> +	local warn10="WARNING:.*fs/iomap/direct-io\.c:.*iomap_dio_actor.*"
->  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
->  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
->  	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
-> @@ -563,7 +564,8 @@ _filter_aiodio_dmesg()
->  	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
->  	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
->  	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
-> -	    -e "s#$warn9#Intentional warnings in dio_complete#"
-> +	    -e "s#$warn9#Intentional warnings in dio_complete#" \
-> +	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
-
-Why not just change the regex in warn7/warn8 just to catch anything
-under fs/iomap rather than explictly specifying fs/iomap.c?
-
-Cheers,
-
-Dave.
+-Dave.
 -- 
 Dave Chinner
 david@fromorbit.com
