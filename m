@@ -1,35 +1,52 @@
-Received: from mail-yw1-f66.google.com ([209.85.161.66]:46824 "EHLO
-        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725961AbfG1KSM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 06:18:12 -0400
+Received: from userp2130.oracle.com ([156.151.31.86]:43780 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725823AbfGXEM7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 24 Jul 2019 00:12:59 -0400
+Subject: [PATCH 1/3] common: filter aiodio dmesg after fs/iomap.c to
+ fs/iomap/ move
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Date: Tue, 23 Jul 2019 21:12:54 -0700
+Message-ID: <156394157450.1850719.464315342783936237.stgit@magnolia>
+In-Reply-To: <156394156831.1850719.2997473679130010771.stgit@magnolia>
+References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
 MIME-Version: 1.0
-References: <20190722050227.24944-1-amir73il@gmail.com> <20190728090440.GL7943@desktop>
-In-Reply-To: <20190728090440.GL7943@desktop>
-From: Amir Goldstein <amir73il@gmail.com>
-Date: Sun, 28 Jul 2019 13:18:00 +0300
-Message-ID: <CAOQ4uxihwO++86biDc_vLQ+iXV10=G-Uc7ofTw8db_pdt11Wxg@mail.gmail.com>
-Subject: Re: [PATCH] overlay/065: adjust test to expect EBUSY only with index=on
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jul 28, 2019 at 12:04 PM Eryu Guan <guaneryu@gmail.com> wrote:
->
-> On Mon, Jul 22, 2019 at 08:02:27AM +0300, Amir Goldstein wrote:
-> > This is needed to support the kernel regression fix commit 0be0bfd2de9d
-> > ("ovl: fix regression caused by overlapping layers detection").
-> >
-> > Overlayfs mount is not supposed to fail due to upper/work dir in-use
-> > by other mount unless option index=on is enabled.
->
-> Sorry for the late review.. Looks like this patch only mount overlay
-> with "index=on" explicitly, but doesn't check that mount succeeds when
-> "index=off", which is really regressed. Do we need to add more
-> "index=off" tests to ensure we allow re-use upperdir?
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Agreed!
+Since the iomap code are moving to fs/iomap/ we have to add new entries
+to the aiodio dmesg filter to reflect this.
 
-Thanks,
-Amir.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ common/filter |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+
+diff --git a/common/filter b/common/filter
+index ed082d24..26fc2132 100644
+--- a/common/filter
++++ b/common/filter
+@@ -555,6 +555,7 @@ _filter_aiodio_dmesg()
+ 	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+ 	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
+ 	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
++	local warn10="WARNING:.*fs/iomap/direct-io\.c:.*iomap_dio_actor.*"
+ 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+ 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+ 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+@@ -563,7 +564,8 @@ _filter_aiodio_dmesg()
+ 	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
+ 	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
+ 	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
+-	    -e "s#$warn9#Intentional warnings in dio_complete#"
++	    -e "s#$warn9#Intentional warnings in dio_complete#" \
++	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
+ }
+ 
+ # We generate assert related WARNINGs on purpose and make sure test doesn't fail
