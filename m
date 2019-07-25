@@ -1,60 +1,55 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:42502 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725842AbfGYSDf (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Jul 2019 14:03:35 -0400
-Date: Thu, 25 Jul 2019 11:03:30 -0700
+Received: from userp2120.oracle.com ([156.151.31.85]:55982 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725842AbfGYSDr (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 25 Jul 2019 14:03:47 -0400
+Date: Thu, 25 Jul 2019 11:03:42 -0700
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 1/3] common: filter aiodio dmesg after fs/iomap.c to
- fs/iomap/ move
-Message-ID: <20190725180330.GH1561054@magnolia>
+Subject: Re: [PATCH 7/3] xfs/194: unmount forced v4 fs during cleanup
+Message-ID: <20190725180342.GI1561054@magnolia>
 References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
- <156394157450.1850719.464315342783936237.stgit@magnolia>
+ <20190724155656.GH7084@magnolia>
+ <20190724232259.GC7777@dread.disaster.area>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <156394157450.1850719.464315342783936237.stgit@magnolia>
+In-Reply-To: <20190724232259.GC7777@dread.disaster.area>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Dave Chinner <david@fromorbit.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+On Thu, Jul 25, 2019 at 09:22:59AM +1000, Dave Chinner wrote:
+> On Wed, Jul 24, 2019 at 08:56:56AM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > Unmount the V4 filesystem we forcibly created to run this test during
+> > test cleanup so that the post-test wrapup checks won't try to remount
+> > the filesystem with different MOUNT_OPTIONS (specifically, the ones
+> > that get screened out by _force_xfsv4_mount_options) and fail.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/194 |    1 +
+> >  1 file changed, 1 insertion(+)
+> > 
+> > diff --git a/tests/xfs/194 b/tests/xfs/194
+> > index 3e186528..1f46d403 100755
+> > --- a/tests/xfs/194
+> > +++ b/tests/xfs/194
+> > @@ -18,6 +18,7 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
+> >  _cleanup()
+> >  {
+> >      cd /
+> > +    _scratch_unmount
+> 
+> Comment as to why this is necessary here so we don't go and remove
+> it because unmounting in cleanup should generally be unnecessary....
 
-Since the iomap code are moving to fs/iomap/ we have to add new entries
-to the aiodio dmesg filter to reflect this.
+Ok.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
----
-v2: fix all the iomap regexes
----
- common/filter |    9 +++++----
- 1 file changed, 5 insertions(+), 4 deletions(-)
+--D
 
-diff --git a/common/filter b/common/filter
-index ed082d24..2e32ab10 100644
---- a/common/filter
-+++ b/common/filter
-@@ -550,10 +550,10 @@ _filter_aiodio_dmesg()
- 	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
- 	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
- 	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
--	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
-+	local warn5="WARNING:.*fs/iomap.*:.*iomap_dio_rw.*"
- 	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
--	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
--	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
-+	local warn7="WARNING:.*fs/iomap.*:.*iomap_dio_actor.*"
-+	local warn8="WARNING:.*fs/iomap.*:.*iomap_dio_complete.*"
- 	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
- 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
- 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
-@@ -563,7 +563,8 @@ _filter_aiodio_dmesg()
- 	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
- 	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
- 	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
--	    -e "s#$warn9#Intentional warnings in dio_complete#"
-+	    -e "s#$warn9#Intentional warnings in dio_complete#" \
-+	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
- }
- 
- # We generate assert related WARNINGs on purpose and make sure test doesn't fail
+> -Dave.
+> -- 
+> Dave Chinner
+> david@fromorbit.com
