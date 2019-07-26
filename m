@@ -1,49 +1,40 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:43456 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725842AbfGYSER (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 25 Jul 2019 14:04:17 -0400
-Date: Thu, 25 Jul 2019 11:04:13 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v2 7/3] xfs/194: unmount forced v4 fs during cleanup
-Message-ID: <20190725180413.GJ1561054@magnolia>
-References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
- <20190724155656.GH7084@magnolia>
+Received: from mail.kernel.org ([198.145.29.99]:55158 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S2388598AbfGZNpz (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Fri, 26 Jul 2019 09:45:55 -0400
+From: Jeff Layton <jlayton@kernel.org>
+Subject: [PATCH] common/rc: ceph only supports default SEEK_HOLE behavior
+Date: Fri, 26 Jul 2019 09:45:52 -0400
+Message-Id: <20190726134552.23782-1-jlayton@kernel.org>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190724155656.GH7084@magnolia>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: amir73il@gmail.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+CephFS currently has only a very primitive SEEK_HOLE implementation,
+and always sets the offset to EOF when it's used. Remove it from the
+whitelist.
 
-Unmount the V4 filesystem we forcibly created to run this test during
-test cleanup so that the post-test wrapup checks won't try to remount
-the filesystem with different MOUNT_OPTIONS (specifically, the ones
-that get screened out by _force_xfsv4_mount_options) and fail.
-
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Cc: Amir Goldstein <amir73il@gmail.com>
+Signed-off-by: Jeff Layton <jlayton@kernel.org>
 ---
-v2: add a comment explaining why we unmount the scratch device
----
- tests/xfs/194 |    5 +++++
- 1 file changed, 5 insertions(+)
+ common/rc | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/tests/xfs/194 b/tests/xfs/194
-index 3e186528..9001a146 100755
---- a/tests/xfs/194
-+++ b/tests/xfs/194
-@@ -18,6 +18,11 @@ trap "_cleanup; exit \$status" 0 1 2 3 15
- _cleanup()
- {
-     cd /
-+    # Unmount the V4 filesystem we forcibly created to run this test so that
-+    # the post-test wrapup checks won't try to remount the filesystem with
-+    # different MOUNT_OPTIONS (specifically, the ones that get screened out by
-+    # _force_xfsv4_mount_options) and fail.
-+    _scratch_unmount
-     rm -f $tmp.*
- }
+diff --git a/common/rc b/common/rc
+index 3fe5647ec658..e0b087c10e8f 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2352,7 +2352,7 @@ _fstyp_has_non_default_seek_data_hole()
+ 	fi
  
+ 	case "$fstyp" in
+-	btrfs|ext4|xfs|ceph|cifs|f2fs|gfs2|ocfs2|tmpfs)
++	btrfs|ext4|xfs|cifs|f2fs|gfs2|ocfs2|tmpfs)
+ 		return 0
+ 		;;
+ 	nfs*)
+-- 
+2.21.0
