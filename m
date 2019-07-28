@@ -1,133 +1,71 @@
-Received: from szxga07-in.huawei.com ([45.249.212.35]:58140 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S2387483AbfG2Lnk (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 29 Jul 2019 07:43:40 -0400
-Subject: Re: [PATCH 1/3] generic/38[3456]: adjust to check prjquota before
- mount
-References: <20190723092529.112426-1-yuchao0@huawei.com>
- <20190728095141.GM7943@desktop>
-From: Chao Yu <yuchao0@huawei.com>
-Message-ID: <b010ba0e-e4e3-215b-5e6f-c18b2a873942@huawei.com>
-Date: Mon, 29 Jul 2019 19:43:39 +0800
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:38865 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726001AbfG1Lam (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 07:30:42 -0400
+Date: Sun, 28 Jul 2019 19:30:36 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2 1/3] common: filter aiodio dmesg after fs/iomap.c to
+ fs/iomap/ move
+Message-ID: <20190728113036.GO7943@desktop>
+References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
+ <156394157450.1850719.464315342783936237.stgit@magnolia>
+ <20190725180330.GH1561054@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <20190728095141.GM7943@desktop>
-Content-Type: text/plain; charset="windows-1252"
-Content-Language: en-US
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190725180330.GH1561054@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, jaegeuk@kernel.org, chao@kernel.orga
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 2019/7/28 17:51, Eryu Guan wrote:
-> On Tue, Jul 23, 2019 at 05:25:27PM +0800, Chao Yu wrote:
->> Move _require_prjquota() to front of _qmount() since we do the
->> check on device directly instead of mountpoint, it can avoid
->> potential failure if filesystem utils needs exclusive open on
->> device.
->>
->> Signed-off-by: Chao Yu <yuchao0@huawei.com>
+On Thu, Jul 25, 2019 at 11:03:30AM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> We've done similar changes before
+> Since the iomap code are moving to fs/iomap/ we have to add new entries
+> to the aiodio dmesg filter to reflect this.
 > 
-> 23f60ef304d6 ("generic/38[3-6]: require project quota to be enabled on
-> SCRATCH_DEV")
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> ---
+> v2: fix all the iomap regexes
+> ---
+>  common/filter |    9 +++++----
+>  1 file changed, 5 insertions(+), 4 deletions(-)
 > 
-> but later it was reverted by
-> 
-> f722c48d4cd5 ("Revert "generic/38[3-6]: require project quota to be
-> enabled on SCRATCH_DEV"")
-> 
-> Because we use quotactl(2) to check if prjquota is enabled on the given
-> device (src/feature -P $dev in _require_prjquota), and quotactl(2)
-> requires the given device is a mounted device.
+> diff --git a/common/filter b/common/filter
+> index ed082d24..2e32ab10 100644
+> --- a/common/filter
+> +++ b/common/filter
+> @@ -550,10 +550,10 @@ _filter_aiodio_dmesg()
+>  	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
+>  	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
+>  	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
+> -	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
+> +	local warn5="WARNING:.*fs/iomap.*:.*iomap_dio_rw.*"
+>  	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
+> -	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+> -	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
+> +	local warn7="WARNING:.*fs/iomap.*:.*iomap_dio_actor.*"
+> +	local warn8="WARNING:.*fs/iomap.*:.*iomap_dio_complete.*"
 
-You're right, let's ignore this patch. BTW, in order to fix f2fs failure on
-these testcases, I'm trying to let dump.f2fs be able to check superblock on a
-mounted device.
+I don't think we need new filters anymore, as commit 5a9d929d6e13
+("iomap: report collisions between directio and buffered writes to
+userspace") replaced the WARN_ON with a pr_crit(). These filters are
+there only for old kernels.
 
 Thanks,
+Eryu
 
-> 
-> Thanks,
-> Eryu
-> 
->> ---
->>  tests/generic/383 | 2 +-
->>  tests/generic/384 | 2 +-
->>  tests/generic/385 | 2 +-
->>  tests/generic/386 | 2 +-
->>  4 files changed, 4 insertions(+), 4 deletions(-)
->>
->> diff --git a/tests/generic/383 b/tests/generic/383
->> index 2c8c5923..cf5ac255 100755
->> --- a/tests/generic/383
->> +++ b/tests/generic/383
->> @@ -39,6 +39,7 @@ _require_xfs_quota_foreign
->>  
->>  _scratch_mkfs >/dev/null 2>&1
->>  _scratch_enable_pquota
->> +_require_prjquota $SCRATCH_DEV
->>  
->>  do_project_test()
->>  {
->> @@ -76,7 +77,6 @@ EOF
->>  # Test project
->>  _qmount_option "usrquota,prjquota"
->>  _qmount
->> -_require_prjquota $SCRATCH_DEV
->>  do_project_test
->>  
->>  # success, all done
->> diff --git a/tests/generic/384 b/tests/generic/384
->> index b7c940d7..2c0cd00b 100755
->> --- a/tests/generic/384
->> +++ b/tests/generic/384
->> @@ -57,10 +57,10 @@ chmod a+rwx $seqres.full	# arbitrary users will write here
->>  _require_scratch
->>  _scratch_mkfs >/dev/null 2>&1
->>  _scratch_enable_pquota
->> +_require_prjquota $SCRATCH_DEV
->>  
->>  _qmount_option "prjquota"
->>  _qmount
->> -_require_prjquota $SCRATCH_DEV
->>  
->>  report_quota()
->>  {
->> diff --git a/tests/generic/385 b/tests/generic/385
->> index 937131a9..56ce6eb0 100755
->> --- a/tests/generic/385
->> +++ b/tests/generic/385
->> @@ -56,9 +56,9 @@ quota_cmd="$XFS_QUOTA_PROG -D $tmp.projects -P $tmp.projid"
->>  
->>  _scratch_mkfs >/dev/null 2>&1
->>  _scratch_enable_pquota
->> +_require_prjquota $SCRATCH_DEV
->>  _qmount_option "prjquota"
->>  _qmount
->> -_require_prjquota $SCRATCH_DEV
->>  
->>  #
->>  # Create the project root
->> diff --git a/tests/generic/386 b/tests/generic/386
->> index 462c5869..e4f7d23b 100755
->> --- a/tests/generic/386
->> +++ b/tests/generic/386
->> @@ -112,10 +112,10 @@ echo $proj_num:$proj_dir > "$my_projects"
->>  
->>  _scratch_mkfs					>> "$seqres.full" 2>&1
->>  _scratch_enable_pquota
->> +_require_prjquota $SCRATCH_DEV
->>  
->>  _qmount_option "prjquota"
->>  _qmount
->> -_require_prjquota $SCRATCH_DEV
->>  
->>  mkdir -p "${proj_dir}"
->>  
->> -- 
->> 2.18.0.rc1
->>
-> .
-> 
+>  	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
+>  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+>  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+> @@ -563,7 +563,8 @@ _filter_aiodio_dmesg()
+>  	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
+>  	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
+>  	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
+> -	    -e "s#$warn9#Intentional warnings in dio_complete#"
+> +	    -e "s#$warn9#Intentional warnings in dio_complete#" \
+> +	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
+>  }
+>  
+>  # We generate assert related WARNINGs on purpose and make sure test doesn't fail
