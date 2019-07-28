@@ -1,131 +1,204 @@
-Received: from mx1.redhat.com ([209.132.183.28]:53962 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725880AbfG1JHW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Sun, 28 Jul 2019 05:07:22 -0400
-Received: from smtp.corp.redhat.com (int-mx07.intmail.prod.int.phx2.redhat.com [10.5.11.22])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id 1B45A30842A9
-        for <fstests@vger.kernel.org>; Sun, 28 Jul 2019 09:07:22 +0000 (UTC)
-Received: from localhost.localdomain.com (ovpn-12-80.pek2.redhat.com [10.72.12.80])
-        by smtp.corp.redhat.com (Postfix) with ESMTP id 0D5C71001B04
-        for <fstests@vger.kernel.org>; Sun, 28 Jul 2019 09:07:20 +0000 (UTC)
-From: Zorro Lang <zlang@redhat.com>
-Subject: [PATCH v3] xfs: test statfs on project quota directory
-Date: Sun, 28 Jul 2019 17:07:15 +0800
-Message-Id: <20190728090715.9486-1-zlang@redhat.com>
+Received: from mail-wm1-f65.google.com ([209.85.128.65]:34805 "EHLO
+        mail-wm1-f65.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725961AbfG1KVg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 06:21:36 -0400
+From: Amir Goldstein <amir73il@gmail.com>
+Subject: [PATCH v2] overlay/065: adjust test to expect EBUSY only with index=on
+Date: Sun, 28 Jul 2019 13:21:24 +0300
+Message-Id: <20190728102124.1265-1-amir73il@gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, linux-unionfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-There's a bug on xfs cause statfs get negative f_ffree value from
-a project quota directory. It's fixed by "de7243057 fs/xfs: fix
-f_ffree value for statfs when project quota is set". So add statfs
-testing on project quota block and inode count limit.
+This is needed to support the kernel regression fix commit 0be0bfd2de9d
+("ovl: fix regression caused by overlapping layers detection").
 
-Signed-off-by: Zorro Lang <zlang@redhat.com>
+Overlayfs mount is not supposed to fail due to upper/work dir in-use
+by other mount unless option index=on is enabled.
+
+Add test variants for index=on and index=off.
+
+Fix some wrong comments and clean noise lines in golden output.
+
+Signed-off-by: Amir Goldstein <amir73il@gmail.com>
 ---
 
-Hi,
+Eryu,
 
-Thanks Carlos helped to review the V2 patch, V3 did below changes:
-1) Remove project quota config files, turn to use 'project -p <path>'
-2) Modify some comments
+I piggy backed two minor cleanups in this update on top of your requested
+change.
 
 Thanks,
-Zorro
+Amir.
 
- tests/xfs/509     | 61 +++++++++++++++++++++++++++++++++++++++++++++++
- tests/xfs/509.out |  3 +++
- tests/xfs/group   |  1 +
- 3 files changed, 65 insertions(+)
- create mode 100755 tests/xfs/509
- create mode 100644 tests/xfs/509.out
+Changes since v1:
+- Add test variants with index=on/off
+- Fix wring comment about expect EEXIST
+- Make golden output deterministic by changing 'find $mnt2'
+  to find '$mnt2/upper'
 
-diff --git a/tests/xfs/509 b/tests/xfs/509
-new file mode 100755
-index 00000000..e67cff13
---- /dev/null
-+++ b/tests/xfs/509
-@@ -0,0 +1,61 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Red Hat, Inc.  All Rights Reserved.
+ tests/overlay/065     | 56 +++++++++++++++++++++++++++++--------------
+ tests/overlay/065.out | 12 +++++-----
+ 2 files changed, 44 insertions(+), 24 deletions(-)
+
+diff --git a/tests/overlay/065 b/tests/overlay/065
+index abfc6737..f41a6982 100755
+--- a/tests/overlay/065
++++ b/tests/overlay/065
+@@ -13,9 +13,14 @@
+ #
+ # Overlapping layers on mount or lookup results in ELOOP.
+ # Overlapping lowerdir with other mount upperdir/workdir
+-# result in EBUSY.
++# result in EBUSY (only if index=on is used).
+ #
+-# Kernel patch "ovl: detect overlapping layers" is needed to pass the test.
++# This is a regression test for kernel commit:
 +#
-+# FS QA Test No. 509
++#    146d62e5a586 "ovl: detect overlapping layers"
 +#
-+# Test statfs when project quota is set.
-+# Uncover de7243057 fs/xfs: fix f_ffree value for statfs when project quota is set
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
++# and its followup fix commit:
++#    0be0bfd2de9d "ovl: fix regression caused by overlapping layers detection"
+ #
+ seq=`basename $0`
+ seqres=$RESULT_DIR/$seq
+@@ -46,6 +51,7 @@ _supported_os Linux
+ # Use non-default scratch underlying overlay dirs, we need to check
+ # them explicity after test.
+ _require_scratch_nocheck
++_require_scratch_feature index
+ 
+ # Remove all files from previous tests
+ _scratch_mkfs
+@@ -61,10 +67,10 @@ mnt2=$basedir/mnt.2
+ 
+ mkdir -p $lowerdir/lower $upperdir $workdir
+ 
+-# Try to mount an overlay with the same upperdir/lowerdir - expect EBUSY
++# Try to mount an overlay with the same upperdir/lowerdir - expect ELOOP
+ echo Conflicting upperdir/lowerdir
+ _overlay_scratch_mount_dirs $upperdir $upperdir $workdir \
+-	2>&1 | _filter_busy_mount
++	2>&1 | _filter_error_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ # Use new upper/work dirs for each test to avoid ESTALE errors
+@@ -72,11 +78,11 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ rm -rf $upperdir $workdir
+ mkdir $upperdir $workdir
+ 
+-# Try to mount an overlay with the same workdir/lowerdir - expect EBUSY
++# Try to mount an overlay with the same workdir/lowerdir - expect ELOOP
+ # because $workdir/work overlaps with lowerdir
+ echo Conflicting workdir/lowerdir
+ _overlay_scratch_mount_dirs $workdir $upperdir $workdir \
+-	2>&1 | _filter_busy_mount
++	-oindex=off 2>&1 | _filter_error_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ rm -rf $upperdir $workdir
+@@ -91,7 +97,7 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ rm -rf $upperdir $workdir
+ mkdir $upperdir $workdir
+ 
+-# Try to mount an overlay with the same lower layers - expect EEXIST
++# Try to mount an overlay with the same lower layers - expect ELOOP
+ echo Conflicting lower layers
+ _overlay_scratch_mount_dirs $lowerdir:$lowerdir $upperdir $workdir \
+ 	2>&1 | _filter_error_mount
+@@ -118,36 +124,50 @@ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ rm -rf $upperdir $workdir
+ mkdir -p $upperdir/upper $workdir $mnt2
+ 
+-# Mount overlay with non overlapping lowerdir, upperdir, workdir - expect
+-# success
++# Mount overlay with non overlapping lowerdir, upperdir, workdir -
++# expect success
+ _overlay_mount_dirs $lowerdir $upperdir $workdir overlay $mnt2
+ 
+ rm -rf $upperdir2 $workdir2
+ mkdir -p $upperdir2 $workdir2 $mnt2
+ 
+ # Try to mount an overlay with layers overlapping with another overlayfs
+-# upperdir - expect EBUSY
+-echo Overlapping with upperdir of another instance
++# upperdir - expect EBUSY with index=on and success with index=off
++echo "Overlapping with upperdir of another instance (index=on)"
+ _overlay_scratch_mount_dirs $upperdir/upper $upperdir2 $workdir2 \
+-	2>&1 | _filter_busy_mount
++	-oindex=on 2>&1 | _filter_busy_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
+ rm -rf $upperdir2 $workdir2
+ mkdir -p $upperdir2 $workdir2
+ 
++echo "Overlapping with upperdir of another instance (index=off)"
++_overlay_scratch_mount_dirs $upperdir/upper $upperdir2 $workdir2 \
++	-oindex=off && $UMOUNT_PROG $SCRATCH_MNT
 +
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
++rm -rf $upperdir2 $workdir2
++mkdir -p $upperdir2 $workdir2
 +
-+_cleanup()
-+{
-+	cd /
-+	_scratch_unmount
-+	rm -f $tmp.*
-+}
+ # Try to mount an overlay with layers overlapping with another overlayfs
+-# workdir - expect EBUSY
+-echo Overlapping with workdir of another instance
++# workdir - expect EBUSY with index=on and success with index=off
++echo "Overlapping with workdir of another instance (index=on)"
+ _overlay_scratch_mount_dirs $workdir/work $upperdir2 $workdir2 \
+-	2>&1 | _filter_busy_mount
++	-oindex=on 2>&1 | _filter_busy_mount
+ $UMOUNT_PROG $SCRATCH_MNT 2>/dev/null
+ 
++rm -rf $upperdir2 $workdir2
++mkdir -p $upperdir2 $workdir2
 +
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+. ./common/quota
++echo "Overlapping with workdir of another instance (index=off)"
++_overlay_scratch_mount_dirs $workdir/work $upperdir2 $workdir2 \
++	-oindex=off && $UMOUNT_PROG $SCRATCH_MNT
 +
-+# remove previous $seqres.full before test
-+rm -f $seqres.full
-+
-+# real QA test starts here
-+_supported_fs xfs
-+_supported_os Linux
-+_require_scratch
-+_require_xfs_quota
-+
-+_scratch_mkfs >/dev/null 2>&1
-+_scratch_enable_pquota
-+_qmount_option "prjquota"
-+_qmount
-+_require_prjquota $SCRATCH_DEV
-+
-+# Create a directory to be project object, and create a file to take 64k space
-+mkdir $SCRATCH_MNT/t
-+$XFS_IO_PROG -f -c "pwrite 0 65536" -c sync $SCRATCH_MNT/t/file >>$seqres.full
-+
-+quota_cmd="$XFS_QUOTA_PROG -x"
-+$quota_cmd -c "project -s -p $SCRATCH_MNT/t 42" $SCRATCH_MNT >/dev/null 2>&1
-+$quota_cmd -c 'limit -p isoft=53 bsoft=100m 42' $SCRATCH_MNT
-+
-+# The itotal and size should be 53 and 102400(k), as above project quota limit.
-+# The isued and used should be 2 and 64(k), as this case takes.
-+df -k --output=file,itotal,iused,size,used $SCRATCH_MNT/t | \
-+	_filter_scratch | _filter_spaces
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/xfs/509.out b/tests/xfs/509.out
-new file mode 100644
-index 00000000..418b2dd7
---- /dev/null
-+++ b/tests/xfs/509.out
-@@ -0,0 +1,3 @@
-+QA output created by 509
-+File Inodes IUsed 1K-blocks Used
-+SCRATCH_MNT/t 53 2 102400 64
-diff --git a/tests/xfs/group b/tests/xfs/group
-index 270d82ff..364a7ed5 100644
---- a/tests/xfs/group
-+++ b/tests/xfs/group
-@@ -506,3 +506,4 @@
- 506 auto quick health
- 507 clone
- 508 auto quick quota
-+509 auto quick quota
+ # Move upper layer root into lower layer after mount
+ echo Overlapping upperdir/lowerdir after mount
+ mv $upperdir $lowerdir/
+-# Lookup files in overlay mount with overlapping layers - expect ELOOP
+-# when overlay merge dir is found
+-find $mnt2 2>&1 | _filter_scratch
++# Lookup files in overlay mount with overlapping layers -
++# expect ELOOP when upper layer root is found in lower layer
++find $mnt2/upper 2>&1 | _filter_scratch
+ 
+ # success, all done
+ status=0
+diff --git a/tests/overlay/065.out b/tests/overlay/065.out
+index 0260327c..3639ceb5 100644
+--- a/tests/overlay/065.out
++++ b/tests/overlay/065.out
+@@ -1,8 +1,8 @@
+ QA output created by 065
+ Conflicting upperdir/lowerdir
+-mount: device already mounted or mount point busy
++mount: Too many levels of symbolic links
+ Conflicting workdir/lowerdir
+-mount: device already mounted or mount point busy
++mount: Too many levels of symbolic links
+ Overlapping upperdir/lowerdir
+ mount: Too many levels of symbolic links
+ Conflicting lower layers
+@@ -11,11 +11,11 @@ Overlapping lower layers below
+ mount: Too many levels of symbolic links
+ Overlapping lower layers above
+ mount: Too many levels of symbolic links
+-Overlapping with upperdir of another instance
++Overlapping with upperdir of another instance (index=on)
+ mount: device already mounted or mount point busy
+-Overlapping with workdir of another instance
++Overlapping with upperdir of another instance (index=off)
++Overlapping with workdir of another instance (index=on)
+ mount: device already mounted or mount point busy
++Overlapping with workdir of another instance (index=off)
+ Overlapping upperdir/lowerdir after mount
+-SCRATCH_DEV/mnt.2
+-SCRATCH_DEV/mnt.2/lower
+ find: 'SCRATCH_DEV/mnt.2/upper': Too many levels of symbolic links
 -- 
-2.17.2
+2.17.1
