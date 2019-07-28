@@ -1,40 +1,35 @@
-Received: from szxga06-in.huawei.com ([45.249.212.32]:43816 "EHLO huawei.com"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1728809AbfGWJZx (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 23 Jul 2019 05:25:53 -0400
-From: Chao Yu <yuchao0@huawei.com>
-Subject: [PATCH 3/3] common/rc: check quota sysfile feature for f2fs
-Date: Tue, 23 Jul 2019 17:25:29 +0800
-Message-ID: <20190723092529.112426-3-yuchao0@huawei.com>
-In-Reply-To: <20190723092529.112426-1-yuchao0@huawei.com>
-References: <20190723092529.112426-1-yuchao0@huawei.com>
+Received: from mail-yw1-f66.google.com ([209.85.161.66]:46824 "EHLO
+        mail-yw1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725961AbfG1KSM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 06:18:12 -0400
 MIME-Version: 1.0
-Content-Type: text/plain
+References: <20190722050227.24944-1-amir73il@gmail.com> <20190728090440.GL7943@desktop>
+In-Reply-To: <20190728090440.GL7943@desktop>
+From: Amir Goldstein <amir73il@gmail.com>
+Date: Sun, 28 Jul 2019 13:18:00 +0300
+Message-ID: <CAOQ4uxihwO++86biDc_vLQ+iXV10=G-Uc7ofTw8db_pdt11Wxg@mail.gmail.com>
+Subject: Re: [PATCH] overlay/065: adjust test to expect EBUSY only with index=on
+Content-Type: text/plain; charset="UTF-8"
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com
-Cc: fstests@vger.kernel.org, linux-f2fs-devel@lists.sourceforge.net, jaegeuk@kernel.org, chao@kernel.orga, Chao Yu <yuchao0@huawei.com>
+To: Eryu Guan <guaneryu@gmail.com>
+Cc: Miklos Szeredi <miklos@szeredi.hu>, Vivek Goyal <vgoyal@redhat.com>, overlayfs <linux-unionfs@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-In _require_prjquota(), f2fs missed to check whether we have enabled
-quota sysfile feature in the image, add it.
+On Sun, Jul 28, 2019 at 12:04 PM Eryu Guan <guaneryu@gmail.com> wrote:
+>
+> On Mon, Jul 22, 2019 at 08:02:27AM +0300, Amir Goldstein wrote:
+> > This is needed to support the kernel regression fix commit 0be0bfd2de9d
+> > ("ovl: fix regression caused by overlapping layers detection").
+> >
+> > Overlayfs mount is not supposed to fail due to upper/work dir in-use
+> > by other mount unless option index=on is enabled.
+>
+> Sorry for the late review.. Looks like this patch only mount overlay
+> with "index=on" explicitly, but doesn't check that mount succeeds when
+> "index=off", which is really regressed. Do we need to add more
+> "index=off" tests to ensure we allow re-use upperdir?
 
-Signed-off-by: Chao Yu <yuchao0@huawei.com>
----
- common/quota | 2 ++
- 1 file changed, 2 insertions(+)
+Agreed!
 
-diff --git a/common/quota b/common/quota
-index 9af280a2..3f46eb19 100644
---- a/common/quota
-+++ b/common/quota
-@@ -80,6 +80,8 @@ _require_prjquota()
-     if [ "$FSTYP" == "f2fs" ]; then
- 	dump.f2fs $_dev 2>&1 | grep -qw project_quota
- 	[ $? -ne 0 ] && _notrun "Project quota not enabled in this device $_dev"
-+	dump.f2fs $_dev 2>&1 | grep -qw quota_ino
-+	[ $? -ne 0 ] && _notrun "quota sysfile not enabled in this device $_dev"
- 	cat /sys/fs/f2fs/features/project_quota | grep -qw supported
- 	[ $? -ne 0 ] && _notrun "Installed kernel does not support project quotas"
- 	return
--- 
-2.18.0.rc1
+Thanks,
+Amir.
