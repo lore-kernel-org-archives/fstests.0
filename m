@@ -1,71 +1,55 @@
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:38865 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726001AbfG1Lam (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 07:30:42 -0400
-Date: Sun, 28 Jul 2019 19:30:36 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:36473 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725977AbfG1L0m (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 28 Jul 2019 07:26:42 -0400
+Date: Sun, 28 Jul 2019 19:26:35 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2 1/3] common: filter aiodio dmesg after fs/iomap.c to
- fs/iomap/ move
-Message-ID: <20190728113036.GO7943@desktop>
-References: <156394156831.1850719.2997473679130010771.stgit@magnolia>
- <156394157450.1850719.464315342783936237.stgit@magnolia>
- <20190725180330.GH1561054@magnolia>
+Subject: Re: [PATCH 0/4] xfs: fixes and new tests for bulkstat v5
+Message-ID: <20190728112635.GN7943@desktop>
+References: <156394159426.1850833.16316913520596851191.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190725180330.GH1561054@magnolia>
+In-Reply-To: <156394159426.1850833.16316913520596851191.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
 Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Jul 25, 2019 at 11:03:30AM -0700, Darrick J. Wong wrote:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> 
-> Since the iomap code are moving to fs/iomap/ we have to add new entries
-> to the aiodio dmesg filter to reflect this.
-> 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
-> v2: fix all the iomap regexes
-> ---
->  common/filter |    9 +++++----
->  1 file changed, 5 insertions(+), 4 deletions(-)
-> 
-> diff --git a/common/filter b/common/filter
-> index ed082d24..2e32ab10 100644
-> --- a/common/filter
-> +++ b/common/filter
-> @@ -550,10 +550,10 @@ _filter_aiodio_dmesg()
->  	local warn2="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_dio_aio_read.*"
->  	local warn3="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_read_iter.*"
->  	local warn4="WARNING:.*fs/xfs/xfs_file\.c:.*xfs_file_aio_read.*"
-> -	local warn5="WARNING:.*fs/iomap\.c:.*iomap_dio_rw.*"
-> +	local warn5="WARNING:.*fs/iomap.*:.*iomap_dio_rw.*"
->  	local warn6="WARNING:.*fs/xfs/xfs_aops\.c:.*__xfs_get_blocks.*"
-> -	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
-> -	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
-> +	local warn7="WARNING:.*fs/iomap.*:.*iomap_dio_actor.*"
-> +	local warn8="WARNING:.*fs/iomap.*:.*iomap_dio_complete.*"
+Hi XFS folks,
 
-I don't think we need new filters anymore, as commit 5a9d929d6e13
-("iomap: report collisions between directio and buffered writes to
-userspace") replaced the WARN_ON with a pr_crit(). These filters are
-there only for old kernels.
+On Tue, Jul 23, 2019 at 09:13:14PM -0700, Darrick J. Wong wrote:
+> Hi all,
+> 
+> Fix some problems introduced by the creation of the V5 bulkstat ioctl,
+> and then add some new tests to make sure the new libxfrog bulkstat
+> wrappers work fine with both the new v5 ioctl and emulating it with the
+> old v1 ioctl.
+
+I may need some help on reviewing this patchset, especially the new
+bulkstat tests :) Thanks in advance!
+
+But I'd suggest split the last patch into two patches, one introduces &
+uses the new helper, the other one adds new tests. Also, it misses a new
+entry in .gitignore file.
 
 Thanks,
 Eryu
 
->  	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
->  	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
->  	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
-> @@ -563,7 +563,8 @@ _filter_aiodio_dmesg()
->  	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
->  	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
->  	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
-> -	    -e "s#$warn9#Intentional warnings in dio_complete#"
-> +	    -e "s#$warn9#Intentional warnings in dio_complete#" \
-> +	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
->  }
->  
->  # We generate assert related WARNINGs on purpose and make sure test doesn't fail
+> 
+> If you're going to start using this mess, you probably ought to just
+> pull from my git trees, which are linked below.
+> 
+> This is an extraordinary way to destroy everything.  Enjoy!
+> Comments and questions are, as always, welcome.
+> 
+> --D
+> 
+> kernel git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=bulkstat-v5
+> 
+> xfsprogs git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=bulkstat-v5
+> 
+> fstests git tree:
+> https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=bulkstat-v5
