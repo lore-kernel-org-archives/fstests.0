@@ -1,63 +1,54 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:33088 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1728845AbfG3AtW (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 29 Jul 2019 20:49:22 -0400
-Date: Mon, 29 Jul 2019 17:49:17 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH 0/4] xfs: fixes and new tests for bulkstat v5
-Message-ID: <20190730004917.GB2345316@magnolia>
-References: <156394159426.1850833.16316913520596851191.stgit@magnolia>
- <20190728112635.GN7943@desktop>
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:35739 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728354AbfG3IkR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jul 2019 04:40:17 -0400
+From: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
+Subject: [PATCH] common/rc: check 'chattr +/-x' on dax device.
+Date: Tue, 30 Jul 2019 16:40:09 +0800
+Message-ID: <20190730084009.26257-1-ruansy.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190728112635.GN7943@desktop>
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: guaneryu@gmail.com, darrick.wong@oracle.com
+Cc: ruansy.fnst@cn.fujitsu.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Jul 28, 2019 at 07:26:35PM +0800, Eryu Guan wrote:
-> Hi XFS folks,
-> 
-> On Tue, Jul 23, 2019 at 09:13:14PM -0700, Darrick J. Wong wrote:
-> > Hi all,
-> > 
-> > Fix some problems introduced by the creation of the V5 bulkstat ioctl,
-> > and then add some new tests to make sure the new libxfrog bulkstat
-> > wrappers work fine with both the new v5 ioctl and emulating it with the
-> > old v1 ioctl.
-> 
-> I may need some help on reviewing this patchset, especially the new
-> bulkstat tests :) Thanks in advance!
+'chattr +/-x' only works on a dax device.  When checking if the 'x'
+attribute is supported by XFS_IO_PROG:
+    _require_xfs_io_command "chattr" "x"    (called by xfs/260)
+it's better to do the check on a dax device mounted with dax option.
 
-Let me know if you have any questions. :)
+Signed-off-by: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
+---
+ common/rc | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
 
-> But I'd suggest split the last patch into two patches, one introduces &
-> uses the new helper, the other one adds new tests. Also, it misses a new
-> entry in .gitignore file.
-
-Oops, will fix.
-
---D
-
-> Thanks,
-> Eryu
-> 
-> > 
-> > If you're going to start using this mess, you probably ought to just
-> > pull from my git trees, which are linked below.
-> > 
-> > This is an extraordinary way to destroy everything.  Enjoy!
-> > Comments and questions are, as always, welcome.
-> > 
-> > --D
-> > 
-> > kernel git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfs-linux.git/log/?h=bulkstat-v5
-> > 
-> > xfsprogs git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=bulkstat-v5
-> > 
-> > fstests git tree:
-> > https://git.kernel.org/cgit/linux/kernel/git/djwong/xfstests-dev.git/log/?h=bulkstat-v5
+diff --git a/common/rc b/common/rc
+index e0b087c1..73ee5563 100644
+--- a/common/rc
++++ b/common/rc
+@@ -2094,11 +2094,22 @@ _require_xfs_io_command()
+ 		if [ -z "$param" ]; then
+ 			param=s
+ 		fi
++
++		# Attribute "x" should be tested on a dax device
++		if [ "$param" == "x" ]; then
++			_scratch_mount "-o dax"
++			testfile=$SCRATCH_MNT/$$.xfs_io
++		fi
++
+ 		# Test xfs_io chattr support AND
+ 		# filesystem FS_IOC_FSSETXATTR support
+ 		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
+ 		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
+ 		param_checked="+$param"
++
++		if [ "$param" == "x" ]; then
++			_scratch_unmount
++		fi
+ 		;;
+ 	"chproj")
+ 		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
+-- 
+2.17.0
