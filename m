@@ -1,72 +1,46 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:53952 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1729000AbfG3OrY (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jul 2019 10:47:24 -0400
-Date: Tue, 30 Jul 2019 07:47:10 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] common/rc: check 'chattr +/-x' on dax device.
-Message-ID: <20190730144710.GR1561054@magnolia>
-References: <20190730084009.26257-1-ruansy.fnst@cn.fujitsu.com>
+Received: from mx1.redhat.com ([209.132.183.28]:52156 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725935AbfGaLn1 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 31 Jul 2019 07:43:27 -0400
+Date: Wed, 31 Jul 2019 07:43:25 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH 1/4] xfs/122: ignore inode geometry structure
+Message-ID: <20190731114324.GD34040@bfoster>
+References: <156394159426.1850833.16316913520596851191.stgit@magnolia>
+ <156394160033.1850833.3353358773089273571.stgit@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190730084009.26257-1-ruansy.fnst@cn.fujitsu.com>
+In-Reply-To: <156394160033.1850833.3353358773089273571.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
-Cc: guaneryu@gmail.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, Jul 30, 2019 at 04:40:09PM +0800, Shiyang Ruan wrote:
-> 'chattr +/-x' only works on a dax device.  When checking if the 'x'
-> attribute is supported by XFS_IO_PROG:
->     _require_xfs_io_command "chattr" "x"    (called by xfs/260)
-> it's better to do the check on a dax device mounted with dax option.
+On Tue, Jul 23, 2019 at 09:13:20PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
+> Ignore new in-core structure.
+> 
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  common/rc | 11 +++++++++++
->  1 file changed, 11 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index e0b087c1..73ee5563 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2094,11 +2094,22 @@ _require_xfs_io_command()
->  		if [ -z "$param" ]; then
->  			param=s
->  		fi
-> +
-> +		# Attribute "x" should be tested on a dax device
-> +		if [ "$param" == "x" ]; then
-> +			_scratch_mount "-o dax"
-> +			testfile=$SCRATCH_MNT/$$.xfs_io
 
-NAK, the dax mount option is not intended to remain as a long-term
-interface.
+Reviewed-by: Brian Foster <bfoster@redhat.com>
 
-Also, "==" is a bashism (which probably is fine for fstests)
-
-Also, there's no _require_scratch which means this can totally blow up
-if the user doesn't specify a scratch device.
-
---D
-
-> +		fi
-> +
->  		# Test xfs_io chattr support AND
->  		# filesystem FS_IOC_FSSETXATTR support
->  		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
->  		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
->  		param_checked="+$param"
-> +
-> +		if [ "$param" == "x" ]; then
-> +			_scratch_unmount
-> +		fi
->  		;;
->  	"chproj")
->  		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
-> -- 
-> 2.17.0
+>  tests/xfs/122 |    1 +
+>  1 file changed, 1 insertion(+)
 > 
 > 
+> diff --git a/tests/xfs/122 b/tests/xfs/122
+> index b66b78a6..89a39a23 100755
+> --- a/tests/xfs/122
+> +++ b/tests/xfs/122
+> @@ -177,6 +177,7 @@ xfs_dirent_t
+>  xfs_fsop_getparents_handlereq_t
+>  xfs_dinode_core_t
+>  struct xfs_iext_cursor
+> +struct xfs_ino_geometry
+>  EOF
+>  
+>  echo 'int main(int argc, char *argv[]) {' >>$cprog
 > 
