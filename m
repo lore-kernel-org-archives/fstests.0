@@ -1,55 +1,71 @@
-Received: from mail.cn.fujitsu.com ([183.91.158.132]:16800 "EHLO
-        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
-        with ESMTP id S1725877AbfGaCaD (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 30 Jul 2019 22:30:03 -0400
-From: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
-Subject: [PATCH v2] common/rc: check 'chattr +/-x' on dax device.
-Date: Wed, 31 Jul 2019 10:29:49 +0800
-Message-ID: <20190731022949.2463-1-ruansy.fnst@cn.fujitsu.com>
+Received: from aserp2120.oracle.com ([141.146.126.78]:43228 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726526AbfGaQIz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jul 2019 12:08:55 -0400
+Date: Wed, 31 Jul 2019 09:08:32 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: Re: [PATCH 3/4] xfs/122: add the new v5 bulkstat/inumbers ioctl
+ structures
+Message-ID: <20190731160832.GT1561054@magnolia>
+References: <156394159426.1850833.16316913520596851191.stgit@magnolia>
+ <156394161274.1850833.4300015313269610610.stgit@magnolia>
+ <20190731114019.GB34040@bfoster>
 MIME-Version: 1.0
-Content-Type: text/plain
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190731114019.GB34040@bfoster>
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: ruansy.fnst@cn.fujitsu.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: Brian Foster <bfoster@redhat.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-'chattr +/-x' only works on a dax device.  When checking if the 'x'
-attribute is supported by XFS_IO_PROG:
-    _require_xfs_io_command "chattr" "x"    (called by xfs/260)
-it's better to do the check on a dax device.
+On Wed, Jul 31, 2019 at 07:40:20AM -0400, Brian Foster wrote:
+> On Tue, Jul 23, 2019 at 09:13:32PM -0700, Darrick J. Wong wrote:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > 
+> > The new v5 bulkstat and inumbers structures are correctly padded so that
+> > no format changes are necessary across platforms, so add them to the
+> > output.
+> > 
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> >  tests/xfs/122.out |    7 +++++++
+> >  1 file changed, 7 insertions(+)
+> > 
+> > 
+> > diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> > index cf9ac9e2..e2f346eb 100644
+> > --- a/tests/xfs/122.out
+> > +++ b/tests/xfs/122.out
+> > @@ -66,6 +66,10 @@ sizeof(struct xfs_btree_block_lhdr) = 64
+> >  sizeof(struct xfs_btree_block_shdr) = 48
+> >  sizeof(struct xfs_bud_log_format) = 16
+> >  sizeof(struct xfs_bui_log_format) = 16
+> > +sizeof(struct xfs_bulk_ireq) = 64
+> > +sizeof(struct xfs_bulkstat) = 192
+> > +sizeof(struct xfs_bulkstat_req) = 64
+> > +sizeof(struct xfs_bulkstat_single_req) = 224
+> >  sizeof(struct xfs_clone_args) = 32
+> >  sizeof(struct xfs_cud_log_format) = 16
+> >  sizeof(struct xfs_cui_log_format) = 16
+> > @@ -89,6 +93,9 @@ sizeof(struct xfs_fsop_geom_v4) = 112
+> >  sizeof(struct xfs_icreate_log) = 28
+> >  sizeof(struct xfs_inode_log_format) = 56
+> >  sizeof(struct xfs_inode_log_format_32) = 52
+> > +sizeof(struct xfs_inumbers) = 24
+> > +sizeof(struct xfs_inumbers_req) = 64
+> > +sizeof(struct xfs_ireq) = 32
+> 
+> I don't see xfs_bulkstat_single_req or xfs_ireq in the latest kernel
+> headers. Do we still have those? Otherwise looks fine.
 
-Signed-off-by: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
----
- common/rc | 12 ++++++++++++
- 1 file changed, 12 insertions(+)
+Ooops, I forgot to remove those, will fix.
 
-diff --git a/common/rc b/common/rc
-index e0b087c1..91ab2900 100644
---- a/common/rc
-+++ b/common/rc
-@@ -2094,11 +2094,23 @@ _require_xfs_io_command()
- 		if [ -z "$param" ]; then
- 			param=s
- 		fi
-+
-+		# Attribute "x" should be tested on a dax device
-+		if [ "$param" = "x" ]; then
-+			_require_scratch_dax
-+			_scratch_mount
-+			testfile=$SCRATCH_MNT/$$.xfs_io
-+		fi
-+
- 		# Test xfs_io chattr support AND
- 		# filesystem FS_IOC_FSSETXATTR support
- 		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
- 		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
- 		param_checked="+$param"
-+
-+		if [ "$param" = "x" ]; then
-+			_scratch_unmount
-+		fi
- 		;;
- 	"chproj")
- 		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
--- 
-2.17.0
+--D
+
+> Brian
+> 
+> >  sizeof(struct xfs_log_dinode) = 176
+> >  sizeof(struct xfs_map_extent) = 32
+> >  sizeof(struct xfs_phys_extent) = 16
+> > 
