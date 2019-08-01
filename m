@@ -1,55 +1,60 @@
-Received: from sandeen.net ([63.231.237.45]:47804 "EHLO sandeen.net"
+Received: from mx1.redhat.com ([209.132.183.28]:51524 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727213AbfHGUvN (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Aug 2019 16:51:13 -0400
-Subject: Re: [PATCH] xfs/097: Add suitable metadata options in mkfs when test
- finobt
-References: <6032f83fcdfc4291875b07a8ee4cac52MN2PR18MB3437AD56AD6901531FEF5626DBD40@MN2PR18MB3437.namprd18.prod.outlook.com>
-From: Eric Sandeen <sandeen@sandeen.net>
-Message-ID: <2f049a05-6a03-985b-ef1b-ec0512773251@sandeen.net>
-Date: Wed, 7 Aug 2019 15:51:11 -0500
+        id S1727956AbfHAKsC (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 1 Aug 2019 06:48:02 -0400
+Date: Thu, 1 Aug 2019 06:47:59 -0400
+From: Brian Foster <bfoster@redhat.com>
+Subject: Re: [PATCH 3/5] xfs/122: add the new v5 bulkstat/inumbers ioctl
+ structures
+Message-ID: <20190801104758.GA59093@bfoster>
+References: <156462375516.2945299.16564635037236083118.stgit@magnolia>
+ <156462377790.2945299.5915136628365061851.stgit@magnolia>
 MIME-Version: 1.0
-In-Reply-To: <6032f83fcdfc4291875b07a8ee4cac52MN2PR18MB3437AD56AD6901531FEF5626DBD40@MN2PR18MB3437.namprd18.prod.outlook.com>
-Content-Type: text/plain; charset=gbk
-Content-Language: en-US
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <156462377790.2945299.5915136628365061851.stgit@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Yong Sun <YoSun@suse.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On 8/7/19 4:21 AM, Yong Sun wrote:
-> Hi all,
+On Wed, Jul 31, 2019 at 06:42:57PM -0700, Darrick J. Wong wrote:
+> From: Darrick J. Wong <darrick.wong@oracle.com>
 > 
-> When test xfs/097 in my test machine, it always skips and print "[not run] finobt not enabled". I add one line change, and this test could runs OK.
-
-This should be safe, because the test already does:
-
-_require_xfs_mkfs_finobt
-_require_xfs_finobt
-
-and that first _require ensures that crc=1,finobt=1 will work
-even if it's not on by default in mkfs.
-
+> The new v5 bulkstat and inumbers structures are correctly padded so that
+> no format changes are necessary across platforms, so add them to the
+> output.
 > 
-> Signed-off-by: Yong Sun <yosun@suse.com>
-
-Reviewed-by: Eric Sandeen <sandeen@redhat.com>
-
+> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 > ---
->  tests/xfs/097 | 2 +-
->  1 file changed, 1 insertion(+), 1 deletion(-)
+
+Reviewed-by: Brian Foster <bfoster@redhat.com>
+
+>  tests/xfs/122.out |    5 +++++
+>  1 file changed, 5 insertions(+)
 > 
-> diff --git a/tests/xfs/097 b/tests/xfs/097
-> index 68eae1d4..1cb7d69c 100755
-> --- a/tests/xfs/097
-> +++ b/tests/xfs/097
-> @@ -46,7 +46,7 @@ TESTDIR="${SCRATCH_MNT}/scratchdir"
->  TESTFILE="${TESTDIR}/testfile"
 > 
->  echo "+ create scratch fs"
-> -_scratch_mkfs_xfs > /dev/null
-> +_scratch_mkfs_xfs -m crc=1,finobt=1 > /dev/null
-> 
->  echo "+ mount fs image"
->  _scratch_mount
+> diff --git a/tests/xfs/122.out b/tests/xfs/122.out
+> index cf9ac9e2..d2d5a184 100644
+> --- a/tests/xfs/122.out
+> +++ b/tests/xfs/122.out
+> @@ -66,6 +66,9 @@ sizeof(struct xfs_btree_block_lhdr) = 64
+>  sizeof(struct xfs_btree_block_shdr) = 48
+>  sizeof(struct xfs_bud_log_format) = 16
+>  sizeof(struct xfs_bui_log_format) = 16
+> +sizeof(struct xfs_bulk_ireq) = 64
+> +sizeof(struct xfs_bulkstat) = 192
+> +sizeof(struct xfs_bulkstat_req) = 64
+>  sizeof(struct xfs_clone_args) = 32
+>  sizeof(struct xfs_cud_log_format) = 16
+>  sizeof(struct xfs_cui_log_format) = 16
+> @@ -89,6 +92,8 @@ sizeof(struct xfs_fsop_geom_v4) = 112
+>  sizeof(struct xfs_icreate_log) = 28
+>  sizeof(struct xfs_inode_log_format) = 56
+>  sizeof(struct xfs_inode_log_format_32) = 52
+> +sizeof(struct xfs_inumbers) = 24
+> +sizeof(struct xfs_inumbers_req) = 64
+>  sizeof(struct xfs_log_dinode) = 176
+>  sizeof(struct xfs_map_extent) = 32
+>  sizeof(struct xfs_phys_extent) = 16
 > 
