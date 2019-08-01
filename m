@@ -1,12 +1,12 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:43372 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726185AbfHABnN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jul 2019 21:43:13 -0400
-Subject: [PATCH 3/5] xfs/122: add the new v5 bulkstat/inumbers ioctl
- structures
+Received: from aserp2120.oracle.com ([141.146.126.78]:50394 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726185AbfHABnY (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 31 Jul 2019 21:43:24 -0400
+Subject: [PATCH 4/5] common/xfs: refactor agcount calculation for mounted
+ filesystems
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Wed, 31 Jul 2019 18:42:57 -0700
-Message-ID: <156462377790.2945299.5915136628365061851.stgit@magnolia>
+Date: Wed, 31 Jul 2019 18:43:04 -0700
+Message-ID: <156462378413.2945299.7028294865508807696.stgit@magnolia>
 In-Reply-To: <156462375516.2945299.16564635037236083118.stgit@magnolia>
 References: <156462375516.2945299.16564635037236083118.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,36 +19,181 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-The new v5 bulkstat and inumbers structures are correctly padded so that
-no format changes are necessary across platforms, so add them to the
-output.
+Create a helper function to return the number of AGs of a mounted
+filesystem so that we can get rid of the open-coded versions in various
+tests.  The new helper will be used in a subsequent patch.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/xfs/122.out |    5 +++++
- 1 file changed, 5 insertions(+)
+ common/xfs    |    6 ++++++
+ tests/xfs/085 |    2 +-
+ tests/xfs/086 |    2 +-
+ tests/xfs/087 |    2 +-
+ tests/xfs/088 |    2 +-
+ tests/xfs/089 |    2 +-
+ tests/xfs/091 |    2 +-
+ tests/xfs/093 |    2 +-
+ tests/xfs/097 |    2 +-
+ tests/xfs/130 |    2 +-
+ tests/xfs/235 |    2 +-
+ tests/xfs/271 |    2 +-
+ 12 files changed, 17 insertions(+), 11 deletions(-)
 
 
-diff --git a/tests/xfs/122.out b/tests/xfs/122.out
-index cf9ac9e2..d2d5a184 100644
---- a/tests/xfs/122.out
-+++ b/tests/xfs/122.out
-@@ -66,6 +66,9 @@ sizeof(struct xfs_btree_block_lhdr) = 64
- sizeof(struct xfs_btree_block_shdr) = 48
- sizeof(struct xfs_bud_log_format) = 16
- sizeof(struct xfs_bui_log_format) = 16
-+sizeof(struct xfs_bulk_ireq) = 64
-+sizeof(struct xfs_bulkstat) = 192
-+sizeof(struct xfs_bulkstat_req) = 64
- sizeof(struct xfs_clone_args) = 32
- sizeof(struct xfs_cud_log_format) = 16
- sizeof(struct xfs_cui_log_format) = 16
-@@ -89,6 +92,8 @@ sizeof(struct xfs_fsop_geom_v4) = 112
- sizeof(struct xfs_icreate_log) = 28
- sizeof(struct xfs_inode_log_format) = 56
- sizeof(struct xfs_inode_log_format_32) = 52
-+sizeof(struct xfs_inumbers) = 24
-+sizeof(struct xfs_inumbers_req) = 64
- sizeof(struct xfs_log_dinode) = 176
- sizeof(struct xfs_map_extent) = 32
- sizeof(struct xfs_phys_extent) = 16
+diff --git a/common/xfs b/common/xfs
+index 2b38e94b..1bce3c18 100644
+--- a/common/xfs
++++ b/common/xfs
+@@ -878,3 +878,9 @@ _force_xfsv4_mount_options()
+ 	fi
+ 	echo "MOUNT_OPTIONS = $MOUNT_OPTIONS" >>$seqres.full
+ }
++
++# Find AG count of mounted filesystem
++_xfs_mount_agcount()
++{
++	$XFS_INFO_PROG "$1" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g'
++}
+diff --git a/tests/xfs/085 b/tests/xfs/085
+index 23095413..18ddeff8 100755
+--- a/tests/xfs/085
++++ b/tests/xfs/085
+@@ -63,7 +63,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/086 b/tests/xfs/086
+index 8602a565..7429d39d 100755
+--- a/tests/xfs/086
++++ b/tests/xfs/086
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ test "${agcount}" -gt 1 || _notrun "Single-AG XFS not supported"
+ umount "${SCRATCH_MNT}"
+ 
+diff --git a/tests/xfs/087 b/tests/xfs/087
+index ede8e447..b3d3bca9 100755
+--- a/tests/xfs/087
++++ b/tests/xfs/087
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/088 b/tests/xfs/088
+index 6f36efab..74b45163 100755
+--- a/tests/xfs/088
++++ b/tests/xfs/088
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/089 b/tests/xfs/089
+index 5c398299..bcbc6363 100755
+--- a/tests/xfs/089
++++ b/tests/xfs/089
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/091 b/tests/xfs/091
+index 5d6cd363..be56d8ae 100755
+--- a/tests/xfs/091
++++ b/tests/xfs/091
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/093 b/tests/xfs/093
+index e09e8499..4c4fbdc4 100755
+--- a/tests/xfs/093
++++ b/tests/xfs/093
+@@ -64,7 +64,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/097 b/tests/xfs/097
+index db355de6..68eae1d4 100755
+--- a/tests/xfs/097
++++ b/tests/xfs/097
+@@ -67,7 +67,7 @@ for x in `seq 2 64`; do
+ 	touch "${TESTFILE}.${x}"
+ done
+ inode="$(stat -c '%i' "${TESTFILE}.1")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ umount "${SCRATCH_MNT}"
+ 
+ echo "+ check fs"
+diff --git a/tests/xfs/130 b/tests/xfs/130
+index 71c1181f..f15366a6 100755
+--- a/tests/xfs/130
++++ b/tests/xfs/130
+@@ -43,7 +43,7 @@ _scratch_mkfs_xfs > /dev/null
+ echo "+ mount fs image"
+ _scratch_mount
+ blksz="$(stat -f -c '%s' "${SCRATCH_MNT}")"
+-agcount="$($XFS_INFO_PROG "${SCRATCH_MNT}" | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')"
++agcount="$(_xfs_mount_agcount $SCRATCH_MNT)"
+ 
+ echo "+ make some files"
+ _pwrite_byte 0x62 0 $((blksz * 64)) "${SCRATCH_MNT}/file0" >> "$seqres.full"
+diff --git a/tests/xfs/235 b/tests/xfs/235
+index 669f58b0..64b0a0b5 100755
+--- a/tests/xfs/235
++++ b/tests/xfs/235
+@@ -41,7 +41,7 @@ _scratch_mkfs_xfs > /dev/null
+ echo "+ mount fs image"
+ _scratch_mount
+ blksz=$(stat -f -c '%s' ${SCRATCH_MNT})
+-agcount=$($XFS_INFO_PROG ${SCRATCH_MNT} | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')
++agcount=$(_xfs_mount_agcount $SCRATCH_MNT)
+ 
+ echo "+ make some files"
+ _pwrite_byte 0x62 0 $((blksz * 64)) ${SCRATCH_MNT}/file0 >> $seqres.full
+diff --git a/tests/xfs/271 b/tests/xfs/271
+index db14bfec..38844246 100755
+--- a/tests/xfs/271
++++ b/tests/xfs/271
+@@ -37,7 +37,7 @@ echo "Format and mount"
+ _scratch_mkfs > "$seqres.full" 2>&1
+ _scratch_mount
+ 
+-agcount=$($XFS_INFO_PROG $SCRATCH_MNT | grep agcount= | sed -e 's/^.*agcount=\([0-9]*\),.*$/\1/g')
++agcount=$(_xfs_mount_agcount $SCRATCH_MNT)
+ 
+ echo "Get fsmap" | tee -a $seqres.full
+ $XFS_IO_PROG -c 'fsmap -v' $SCRATCH_MNT > $TEST_DIR/fsmap
