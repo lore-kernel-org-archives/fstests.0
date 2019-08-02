@@ -1,11 +1,11 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:33432 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730502AbfHAOCH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Aug 2019 10:02:07 -0400
-Date: Thu, 1 Aug 2019 07:01:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:53734 "EHLO
+        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726796AbfHBCF2 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 1 Aug 2019 22:05:28 -0400
+Date: Fri, 2 Aug 2019 09:55:22 +0800
+From: Eryu Guan <eguan@linux.alibaba.com>
 Subject: Re: [PATCH 5/5] xfs: test new v5 bulkstat commands
-Message-ID: <20190801140146.GC1561054@magnolia>
+Message-ID: <20190802015454.GF52397@e18g06458.et15sqa>
 References: <156462375516.2945299.16564635037236083118.stgit@magnolia>
  <156462379043.2945299.17354996626313190310.stgit@magnolia>
  <20190801104814.GC59093@bfoster>
@@ -15,7 +15,7 @@ Content-Disposition: inline
 In-Reply-To: <20190801104814.GC59093@bfoster>
 Sender: fstests-owner@vger.kernel.org
 To: Brian Foster <bfoster@redhat.com>
-Cc: guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
 On Thu, Aug 01, 2019 at 06:48:15AM -0400, Brian Foster wrote:
@@ -59,16 +59,20 @@ On Thu, Aug 01, 2019 at 06:48:15AM -0400, Brian Foster wrote:
 > One quick note that xfs/744 runs in ~68 seconds in my (low resource)
 > test VM. Not a problem in and of itself, but it seems slightly long for
 > the quick group. Can somebody remind me of the quick group criteria?
+
+A quick test is usually under 30s run-time.
+
 > 
 > FWIW if I kick off a quick group run, the first 10-15 tests complete in
 > 10s or so or less with the exception of generic/013, which takes over a
 > minute. So perhaps anything under a minute or so is fine..? Either way,
 > that can be easily changed on merge if appropriate:
 
-Hmm, yeah, that's probably too slow for quick...
+Yeah, I'll drop quick group if it's not really quick :)
 
+> 
 > Reviewed-by: Brian Foster <bfoster@redhat.com>
 
 Thanks for the review!
 
---D
+Eryu
