@@ -1,78 +1,77 @@
-Received: from out4436.biz.mail.alibaba.com ([47.88.44.36]:53734 "EHLO
-        out4436.biz.mail.alibaba.com" rhost-flags-OK-OK-OK-OK)
-        by vger.kernel.org with ESMTP id S1726796AbfHBCF2 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 1 Aug 2019 22:05:28 -0400
-Date: Fri, 2 Aug 2019 09:55:22 +0800
-From: Eryu Guan <eguan@linux.alibaba.com>
-Subject: Re: [PATCH 5/5] xfs: test new v5 bulkstat commands
-Message-ID: <20190802015454.GF52397@e18g06458.et15sqa>
-References: <156462375516.2945299.16564635037236083118.stgit@magnolia>
- <156462379043.2945299.17354996626313190310.stgit@magnolia>
- <20190801104814.GC59093@bfoster>
+Received: from mail-pg1-f196.google.com ([209.85.215.196]:41811 "EHLO
+        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726181AbfHDP0z (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Aug 2019 11:26:55 -0400
+Date: Sun, 4 Aug 2019 23:26:46 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH v2] common/rc: check 'chattr +/-x' on dax device.
+Message-ID: <20190804152646.GA2665@desktop>
+References: <20190731022949.2463-1-ruansy.fnst@cn.fujitsu.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190801104814.GC59093@bfoster>
+In-Reply-To: <20190731022949.2463-1-ruansy.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Brian Foster <bfoster@redhat.com>
-Cc: "Darrick J. Wong" <darrick.wong@oracle.com>, guaneryu@gmail.com, linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
+Cc: darrick.wong@oracle.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Aug 01, 2019 at 06:48:15AM -0400, Brian Foster wrote:
-> On Wed, Jul 31, 2019 at 06:43:10PM -0700, Darrick J. Wong wrote:
-> > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > 
-> > Check that the new v5 bulkstat commands do everything the old one do,
-> > and then make sure the new functionality actually works.
-> > 
-> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > ---
-> >  .gitignore                 |    1 
-> >  src/Makefile               |    2 
-> >  src/bulkstat_null_ocount.c |   61 +++++++++
-> >  tests/xfs/744              |  215 ++++++++++++++++++++++++++++++++
-> >  tests/xfs/744.out          |  297 ++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/xfs/745              |   47 +++++++
-> >  tests/xfs/745.out          |    2 
-> >  tests/xfs/group            |    2 
-> >  8 files changed, 626 insertions(+), 1 deletion(-)
-> >  create mode 100644 src/bulkstat_null_ocount.c
-> >  create mode 100755 tests/xfs/744
-> >  create mode 100644 tests/xfs/744.out
-> >  create mode 100755 tests/xfs/745
-> >  create mode 100644 tests/xfs/745.out
-> > 
-> > 
-> ...
-> > diff --git a/tests/xfs/group b/tests/xfs/group
-> > index 270d82ff..ef0cf92c 100644
-> > --- a/tests/xfs/group
-> > +++ b/tests/xfs/group
-> > @@ -506,3 +506,5 @@
-> >  506 auto quick health
-> >  507 clone
-> >  508 auto quick quota
-> > +744 auto ioctl quick
-> > +745 auto ioctl quick
-> > 
-> 
-> One quick note that xfs/744 runs in ~68 seconds in my (low resource)
-> test VM. Not a problem in and of itself, but it seems slightly long for
-> the quick group. Can somebody remind me of the quick group criteria?
+On Wed, Jul 31, 2019 at 10:29:49AM +0800, Shiyang Ruan wrote:
+> 'chattr +/-x' only works on a dax device.  When checking if the 'x'
+> attribute is supported by XFS_IO_PROG:
+>     _require_xfs_io_command "chattr" "x"    (called by xfs/260)
+> it's better to do the check on a dax device.
 
-A quick test is usually under 30s run-time.
+Hmm, I don't think it's necessary, test should _require_scratch_dax,
+which should _notrun the test already, before checking chattr +/-x
+support. Do you see any specific problem caused by this issue when
+running xfs/260?
 
 > 
-> FWIW if I kick off a quick group run, the first 10-15 tests complete in
-> 10s or so or less with the exception of generic/013, which takes over a
-> minute. So perhaps anything under a minute or so is fine..? Either way,
-> that can be easily changed on merge if appropriate:
-
-Yeah, I'll drop quick group if it's not really quick :)
-
+> Signed-off-by: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
+> ---
+>  common/rc | 12 ++++++++++++
+>  1 file changed, 12 insertions(+)
 > 
-> Reviewed-by: Brian Foster <bfoster@redhat.com>
+> diff --git a/common/rc b/common/rc
+> index e0b087c1..91ab2900 100644
+> --- a/common/rc
+> +++ b/common/rc
+> @@ -2094,11 +2094,23 @@ _require_xfs_io_command()
+>  		if [ -z "$param" ]; then
+>  			param=s
+>  		fi
+> +
+> +		# Attribute "x" should be tested on a dax device
+> +		if [ "$param" = "x" ]; then
+> +			_require_scratch_dax
+> +			_scratch_mount
 
-Thanks for the review!
+$SCRATCH_DEV is wiped before every test, it's wrong to assume the device
+is directly mountable. And checking chattr +/-x support doesn't require
+scratch device, so it's better not to introduce this dependency
+implicitly.
 
+Thanks,
 Eryu
+
+> +			testfile=$SCRATCH_MNT/$$.xfs_io
+> +		fi
+> +
+>  		# Test xfs_io chattr support AND
+>  		# filesystem FS_IOC_FSSETXATTR support
+>  		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
+>  		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
+>  		param_checked="+$param"
+> +
+> +		if [ "$param" = "x" ]; then
+> +			_scratch_unmount
+> +		fi
+>  		;;
+>  	"chproj")
+>  		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
+> -- 
+> 2.17.0
+> 
+> 
+> 
