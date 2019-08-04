@@ -1,77 +1,110 @@
-Received: from mail-pg1-f196.google.com ([209.85.215.196]:41811 "EHLO
-        mail-pg1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726181AbfHDP0z (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 4 Aug 2019 11:26:55 -0400
-Date: Sun, 4 Aug 2019 23:26:46 +0800
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:45107 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726181AbfHDPhz (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 4 Aug 2019 11:37:55 -0400
+Received: by mail-pf1-f195.google.com with SMTP id r1so38325779pfq.12
+        for <fstests@vger.kernel.org>; Sun, 04 Aug 2019 08:37:55 -0700 (PDT)
+Message-ID: <5d46fbd1.1c69fb81.d3d84.0552@mx.google.com>
+Date: Sun, 04 Aug 2019 23:37:41 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] common/rc: check 'chattr +/-x' on dax device.
-Message-ID: <20190804152646.GA2665@desktop>
-References: <20190731022949.2463-1-ruansy.fnst@cn.fujitsu.com>
+Subject: [ANNOUNCE] fstests: master branch updated to cda9817fbbe4
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="zGk6i8dtmiTZ"
 Content-Disposition: inline
-In-Reply-To: <20190731022949.2463-1-ruansy.fnst@cn.fujitsu.com>
 Sender: fstests-owner@vger.kernel.org
-To: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
-Cc: darrick.wong@oracle.com, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Jul 31, 2019 at 10:29:49AM +0800, Shiyang Ruan wrote:
-> 'chattr +/-x' only works on a dax device.  When checking if the 'x'
-> attribute is supported by XFS_IO_PROG:
->     _require_xfs_io_command "chattr" "x"    (called by xfs/260)
-> it's better to do the check on a dax device.
 
-Hmm, I don't think it's necessary, test should _require_scratch_dax,
-which should _notrun the test already, before checking chattr +/-x
-support. Do you see any specific problem caused by this issue when
-running xfs/260?
+--zGk6i8dtmiTZ
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> Signed-off-by: Shiyang Ruan <ruansy.fnst@cn.fujitsu.com>
-> ---
->  common/rc | 12 ++++++++++++
->  1 file changed, 12 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index e0b087c1..91ab2900 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2094,11 +2094,23 @@ _require_xfs_io_command()
->  		if [ -z "$param" ]; then
->  			param=s
->  		fi
-> +
-> +		# Attribute "x" should be tested on a dax device
-> +		if [ "$param" = "x" ]; then
-> +			_require_scratch_dax
-> +			_scratch_mount
+Hi all,
 
-$SCRATCH_DEV is wiped before every test, it's wrong to assume the device
-is directly mountable. And checking chattr +/-x support doesn't require
-scratch device, so it's better not to introduce this dependency
-implicitly.
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This update mainly contains xfs improvements and new
+tests from Darrick J. Wong, many thanks to Brian Foster for reviewing these xfs
+patches! And, thouth there're three new tests, I don't see any new failures
+introduced by this update.
 
 Thanks,
 Eryu
 
-> +			testfile=$SCRATCH_MNT/$$.xfs_io
-> +		fi
-> +
->  		# Test xfs_io chattr support AND
->  		# filesystem FS_IOC_FSSETXATTR support
->  		testio=`$XFS_IO_PROG -F -f -c "chattr +$param" $testfile 2>&1`
->  		$XFS_IO_PROG -F -f -r -c "chattr -$param" $testfile 2>&1
->  		param_checked="+$param"
-> +
-> +		if [ "$param" = "x" ]; then
-> +			_scratch_unmount
-> +		fi
->  		;;
->  	"chproj")
->  		testio=`$XFS_IO_PROG -F -f -c "chproj 0" $testfile 2>&1`
-> -- 
-> 2.17.0
-> 
-> 
-> 
+The new head of the master branch is commit:
+
+cda9817fbbe4 common/quota: enable project quota correctly on f2fs
+
+New commits:
+
+Chao Yu (1):
+      [cda9817fbbe4] common/quota: enable project quota correctly on f2fs
+
+Darrick J. Wong (5):
+      [5b9305f2faff] xfs/122: ignore inode geometry structure
+      [31f219d3e58c] xfs/122: mask wonky ioctls
+      [a5a31b791315] xfs/122: add the new v5 bulkstat/inumbers ioctl structures
+      [0c92d38b7bd2] common/xfs: refactor agcount calculation for mounted filesystems
+      [42987d766097] xfs: test new v5 bulkstat commands
+
+Zorro Lang (1):
+      [1191a2aa1713] xfs: test statfs on project quota directory
+
+
+Code Diffstat:
+
+ .gitignore                 |   1 +
+ common/quota               |  17 ++-
+ common/xfs                 |   6 +
+ src/Makefile               |   2 +-
+ src/bulkstat_null_ocount.c |  61 ++++++++++
+ tests/xfs/085              |   2 +-
+ tests/xfs/086              |   2 +-
+ tests/xfs/087              |   2 +-
+ tests/xfs/088              |   2 +-
+ tests/xfs/089              |   2 +-
+ tests/xfs/091              |   2 +-
+ tests/xfs/093              |   2 +-
+ tests/xfs/097              |   2 +-
+ tests/xfs/122              |   4 +
+ tests/xfs/122.out          |   5 +
+ tests/xfs/130              |   2 +-
+ tests/xfs/235              |   2 +-
+ tests/xfs/271              |   2 +-
+ tests/xfs/509              | 215 ++++++++++++++++++++++++++++++++
+ tests/xfs/509.out          | 297 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/510              |  47 +++++++
+ tests/xfs/510.out          |   2 +
+ tests/xfs/511              |  61 ++++++++++
+ tests/xfs/511.out          |   3 +
+ tests/xfs/group            |   3 +
+ 25 files changed, 728 insertions(+), 18 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--zGk6i8dtmiTZ
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1G+04ACgkQJlKqKVyP
+52N1AxAA4LS9we3KyoZ/M/O6LHI4oBBm68/FWuzh7CbhzyC8TOR5bkRL9lZy0VRn
+Kk5a0QOdCF3l4tXplucDUKqh0FvM48JQFOUrTvHZB5zI+xorfy3EiwL8CXkBny7d
+vwzLa9Yesmln04DkEnv21eV4YzqObYa46uMG9u4aSt9VhXpGEKv3jztYMvlXibtM
+S70j99WDo0bzhQIoLi941wp+6XwVUFKncq0ujGw5fslEMi/7NddGfvzcoNzs1C3B
+ESZIy+IUzX8O/kC6ynHphmyqwxGlhPdTR2Zt6V5gXrfN8ML+q/4Ix351CPocrwwv
+H8ov4fr9qv4odyX6FQMKZgzVkWhFdYMrqPGcgbGYgEseuxivRJPmLj6xRPJ4H3tj
+p/WVi7wly3IuXgW+zLfKBn/J2fx7vM3M+aYe882BtcbS9INIp+3697Q3P0IzO9nb
+kLxI7IpaaaXRyDh5nPGPkDwKK6kh1kdRQ+qrq9fNv9kiY0jgVL/7RKSfnTzkmcXP
+m0ZdGTDI4nmUBeH3MAlx2bJaTBBAaNpOaUmJedF6jnP04/eojo8zgohQGx+XWUIi
+/YrDhYbfncZgS4+n96UmqlbT/cKreJAzt+goHB0JEOviD7NdKSKlqwwHOeqwmmyz
+zbpkZ9tQQHdi6N2K5mOIF740nEpr3a1o13+o0zehQLY7hg+Xldc=
+=ITyM
+-----END PGP SIGNATURE-----
+
+--zGk6i8dtmiTZ--
