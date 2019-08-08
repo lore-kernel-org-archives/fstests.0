@@ -1,83 +1,60 @@
-Received: from mx1.redhat.com ([209.132.183.28]:13726 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S2387625AbfHGLZS (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 7 Aug 2019 07:25:18 -0400
-From: Andreas Gruenbacher <agruenba@redhat.com>
-Subject: [PATCH] seek_sanity_test: Repair check for unwritten extent support
-Date: Wed,  7 Aug 2019 13:25:14 +0200
-Message-Id: <20190807112514.1903-1-agruenba@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:51350 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1730887AbfHHH3o (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 8 Aug 2019 03:29:44 -0400
+Received: from relay2.suse.de (unknown [195.135.220.254])
+        by mx1.suse.de (Postfix) with ESMTP id A48C7AB7D
+        for <fstests@vger.kernel.org>; Thu,  8 Aug 2019 07:29:43 +0000 (UTC)
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: log-writes: Handle unrecognized options to prevent segfault
+Date: Thu,  8 Aug 2019 15:29:40 +0800
+Message-Id: <20190808072940.18684-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>
-Cc: Andreas Gruenbacher <agruenba@redhat.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-In test_basic_support, commit f3c1bca7fb25 ("generic: Test that
-SEEK_HOLE can find a punched hole") cleverly punched a hole in the test
-file in the middle of the check for unwritten extent support, making
-sure we would never detect when unwritten extent support is missing.
-Fix that.
+[BUG]
+When using --help parameter (unrecognized) after valid --log/--replay,
+log-writes just crashes:
+  Starting program: replay-log --log /dev/test/test  --replay /dev/test/scratch1 --help
+  /home/adam/xfstests-dev/src/log-writes/replay-log: unrecognized option '--help'
 
-While at it, explicitly check for SEEK_DATA support as well:  so far, we
-were assuming that SEEK_HOLE support implies SEEK_DATA support, but it
-won't hurt to actually check.
+  Program received signal SIGSEGV, Segmentation fault.
+  0x00007ffff7f5cc55 in __strlen_avx2 () from /usr/lib/libc.so.6
+  (gdb) bt
+  #0  0x00007ffff7f5cc55 in __strlen_avx2 () from /usr/lib/libc.so.6
+  #1  0x00007ffff7e89363 in strdup () from /usr/lib/libc.so.6
+  #2  0x00005555555554ac in main (argc=6, argv=0x7fffffffea78)
+      at replay-log.c:219
 
-Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+[CAUSE]
+We didn't check return value from getopt_long() for unrecognized
+parameter, thus we reuse the old opt_index, and if that option needs an
+parameter, we will access optarg which can be NULL and cause segfault.
+
+[FIX]
+Check return value from getopt_long() for '?' to handle unrecognized
+options correctly.
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
 ---
- src/seek_sanity_test.c | 27 +++++++++++++++++++--------
- 1 file changed, 19 insertions(+), 8 deletions(-)
+ src/log-writes/replay-log.c | 2 ++
+ 1 file changed, 2 insertions(+)
 
-diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-index 30e996e2..080ca7eb 100644
---- a/src/seek_sanity_test.c
-+++ b/src/seek_sanity_test.c
-@@ -1156,7 +1156,16 @@ static int test_basic_support(void)
- 	if (ret)
- 		goto out;
- 
--	/* Is SEEK_DATA and SEEK_HOLE supported in the kernel? */
-+	/* Is SEEK_DATA supported in the kernel? */
-+	pos = lseek(fd, 0, SEEK_DATA);
-+	if (pos == -1) {
-+		fprintf(stderr, "Kernel does not support llseek(2) extension "
-+			"SEEK_DATA. Aborting.\n");
-+		ret = -1;
-+		goto out;
-+	}
-+
-+	/* Is SEEK_HOLE supported in the kernel? */
- 	pos = lseek(fd, 0, SEEK_HOLE);
- 	if (pos == -1) {
- 		fprintf(stderr, "Kernel does not support llseek(2) extension "
-@@ -1186,19 +1195,21 @@ static int test_basic_support(void)
- 			ret = -1;
+diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+index c16df40e..829b18e2 100644
+--- a/src/log-writes/replay-log.c
++++ b/src/log-writes/replay-log.c
+@@ -162,6 +162,8 @@ int main(int argc, char **argv)
+ 		case 'v':
+ 			log_writes_verbose++;
+ 			continue;
++		case '?':
++			usage();
+ 		default:
+ 			break;
  		}
- 		goto out;
--	} else if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
--			     0, alloc_size) == -1) {
--		fprintf(stderr, "File system does not support punch hole.\n");
--	} else {
--		punch_hole = 1;
- 	}
- 
- 	pos = lseek(fd, 0, SEEK_DATA);
- 	if (pos == 0) {
- 		fprintf(stderr, "File system does not support unwritten extents.\n");
--		goto out;
-+	} else {
-+		unwritten_extents = 1;
-+	}
-+
-+	if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-+			     0, alloc_size) == -1) {
-+		fprintf(stderr, "File system does not support punch hole.\n");
-+	} else {
-+		punch_hole = 1;
- 	}
--	unwritten_extents = 1;
- 
- 	printf("\n");
- 
 -- 
-2.20.1
+2.22.0
