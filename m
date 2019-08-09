@@ -1,60 +1,63 @@
-Received: from mx2.suse.de ([195.135.220.15]:51350 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1730887AbfHHH3o (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 8 Aug 2019 03:29:44 -0400
-Received: from relay2.suse.de (unknown [195.135.220.254])
-        by mx1.suse.de (Postfix) with ESMTP id A48C7AB7D
-        for <fstests@vger.kernel.org>; Thu,  8 Aug 2019 07:29:43 +0000 (UTC)
-From: Qu Wenruo <wqu@suse.com>
-Subject: [PATCH] fstests: log-writes: Handle unrecognized options to prevent segfault
-Date: Thu,  8 Aug 2019 15:29:40 +0800
-Message-Id: <20190808072940.18684-1-wqu@suse.com>
+Received: from out30-131.freemail.mail.aliyun.com ([115.124.30.131]:55271 "EHLO
+        out30-131.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S2405571AbfHIJrw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 9 Aug 2019 05:47:52 -0400
+Date: Fri, 9 Aug 2019 17:47:37 +0800
+From: Eryu Guan <eguan@linux.alibaba.com>
+Subject: Re: [PATCH] generic/322: remove bad xfs_io sync_range
+Message-ID: <20190809094737.GG52397@e18g06458.et15sqa>
+References: <20190805222738.21422-1-agruenba@redhat.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190805222738.21422-1-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: Andreas Gruenbacher <agruenba@redhat.com>
+Cc: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-[BUG]
-When using --help parameter (unrecognized) after valid --log/--replay,
-log-writes just crashes:
-  Starting program: replay-log --log /dev/test/test  --replay /dev/test/scratch1 --help
-  /home/adam/xfstests-dev/src/log-writes/replay-log: unrecognized option '--help'
+On Tue, Aug 06, 2019 at 12:27:38AM +0200, Andreas Gruenbacher wrote:
+> The xfs_io sync_range command requires offset and length arguments.  Those are
+> missing here, so the command fails with:
+> 
+>   bad argument count 1 to sync_range, expected at least 2 arguments
+> 
+> This went unnoticed because xfs_io still exits with status 0 in such cases,
+> which looks like a separate bug.
 
-  Program received signal SIGSEGV, Segmentation fault.
-  0x00007ffff7f5cc55 in __strlen_avx2 () from /usr/lib/libc.so.6
-  (gdb) bt
-  #0  0x00007ffff7f5cc55 in __strlen_avx2 () from /usr/lib/libc.so.6
-  #1  0x00007ffff7e89363 in strdup () from /usr/lib/libc.so.6
-  #2  0x00005555555554ac in main (argc=6, argv=0x7fffffffea78)
-      at replay-log.c:219
+Yes, fstests should not rely on return status of xfs_io.
 
-[CAUSE]
-We didn't check return value from getopt_long() for unrecognized
-parameter, thus we reuse the old opt_index, and if that option needs an
-parameter, we will access optarg which can be NULL and cause segfault.
+> 
+> I'm assuming that the test did catch regressions as is and that the sync_range
+> command isn't needed.  If this isn't the case, please fix the test.
 
-[FIX]
-Check return value from getopt_long() for '?' to handle unrecognized
-options correctly.
+Josef, would you please confirm?
 
-Signed-off-by: Qu Wenruo <wqu@suse.com>
----
- src/log-writes/replay-log.c | 2 ++
- 1 file changed, 2 insertions(+)
+> 
+> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
+> ---
+>  tests/generic/322 | 2 +-
+>  1 file changed, 1 insertion(+), 1 deletion(-)
+> 
+> diff --git a/tests/generic/322 b/tests/generic/322
+> index 2afd7127..22797c04 100755
+> --- a/tests/generic/322
+> +++ b/tests/generic/322
+> @@ -65,7 +65,7 @@ _write_after_fsync_rename_test()
+>  	echo "fsync rename test"
+>  	_mount_flakey
+>  	$XFS_IO_PROG -f -c "pwrite 0 1M" -c "fsync" -c "pwrite 2M 1M" \
+> -		-c "sync_range -b" $SCRATCH_MNT/foo > $seqres.full 2>&1 || _fail "xfs_io failed"
+> +		$SCRATCH_MNT/foo > $seqres.full 2>&1 || _fail "xfs_io failed"
 
-diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
-index c16df40e..829b18e2 100644
---- a/src/log-writes/replay-log.c
-+++ b/src/log-writes/replay-log.c
-@@ -162,6 +162,8 @@ int main(int argc, char **argv)
- 		case 'v':
- 			log_writes_verbose++;
- 			continue;
-+		case '?':
-+			usage();
- 		default:
- 			break;
- 		}
--- 
-2.22.0
+We don't need the "_fail" part then, and appending xfs_io log to
+$seqres.full, not overwriting. The same is true for _rename_test().
+
+Thanks,
+Eryu
+
+>  	mv $SCRATCH_MNT/foo $SCRATCH_MNT/bar
+>  	$XFS_IO_PROG -c "fsync" $SCRATCH_MNT/bar
+>  	md5sum $SCRATCH_MNT/bar | _filter_scratch
+> -- 
+> 2.20.1
