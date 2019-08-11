@@ -1,101 +1,84 @@
-Received: from mail-pl1-f194.google.com ([209.85.214.194]:32770 "EHLO
-        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726231AbfHKOeJ (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Aug 2019 10:34:09 -0400
-Received: by mail-pl1-f194.google.com with SMTP id c14so46805494plo.0
-        for <fstests@vger.kernel.org>; Sun, 11 Aug 2019 07:34:09 -0700 (PDT)
-Date: Sun, 11 Aug 2019 22:33:57 +0800
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:43386 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726424AbfHKPi6 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 11 Aug 2019 11:38:58 -0400
+Received: by mail-pf1-f196.google.com with SMTP id v12so727040pfn.10
+        for <fstests@vger.kernel.org>; Sun, 11 Aug 2019 08:38:58 -0700 (PDT)
+Message-ID: <5d503691.1c69fb81.273a3.bc5f@mx.google.com>
+Date: Sun, 11 Aug 2019 23:38:43 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] seek_sanity_test: Repair check for unwritten extent
- support
-Message-ID: <20190811143357.GD2665@desktop>
-References: <20190807112514.1903-1-agruenba@redhat.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 8adf5e71df15
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="tnmlJBmpbRJs"
 Content-Disposition: inline
-In-Reply-To: <20190807112514.1903-1-agruenba@redhat.com>
 Sender: fstests-owner@vger.kernel.org
-To: Andreas Gruenbacher <agruenba@redhat.com>
-Cc: fstests@vger.kernel.org, Amir Goldstein <amir73il@gmail.com>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Aug 07, 2019 at 01:25:14PM +0200, Andreas Gruenbacher wrote:
-> In test_basic_support, commit f3c1bca7fb25 ("generic: Test that
-> SEEK_HOLE can find a punched hole") cleverly punched a hole in the test
-> file in the middle of the check for unwritten extent support, making
-> sure we would never detect when unwritten extent support is missing.
-> Fix that.
-> 
-> While at it, explicitly check for SEEK_DATA support as well:  so far, we
-> were assuming that SEEK_HOLE support implies SEEK_DATA support, but it
-> won't hurt to actually check.
-> 
-> Signed-off-by: Andreas Gruenbacher <agruenba@redhat.com>
 
-Thanks for the fix! I missed the bug when reviewing f3c1bca7fb25, I
-think that's because it's not so obvious that the fallocate and the
-subsequent SEEK_DATA as a whole are for check for unwritten extent
-support. So I did minor updates based on this patch to add more
-comments, to make it clear what we're checking for at each stage.
+--tnmlJBmpbRJs
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+
+Hi all,
+
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is a bugfix-only update, and there should be no
+new failures introduced.
 
 Thanks,
 Eryu
 
-> ---
->  src/seek_sanity_test.c | 27 +++++++++++++++++++--------
->  1 file changed, 19 insertions(+), 8 deletions(-)
-> 
-> diff --git a/src/seek_sanity_test.c b/src/seek_sanity_test.c
-> index 30e996e2..080ca7eb 100644
-> --- a/src/seek_sanity_test.c
-> +++ b/src/seek_sanity_test.c
-> @@ -1156,7 +1156,16 @@ static int test_basic_support(void)
->  	if (ret)
->  		goto out;
->  
-> -	/* Is SEEK_DATA and SEEK_HOLE supported in the kernel? */
-> +	/* Is SEEK_DATA supported in the kernel? */
-> +	pos = lseek(fd, 0, SEEK_DATA);
-> +	if (pos == -1) {
-> +		fprintf(stderr, "Kernel does not support llseek(2) extension "
-> +			"SEEK_DATA. Aborting.\n");
-> +		ret = -1;
-> +		goto out;
-> +	}
-> +
-> +	/* Is SEEK_HOLE supported in the kernel? */
->  	pos = lseek(fd, 0, SEEK_HOLE);
->  	if (pos == -1) {
->  		fprintf(stderr, "Kernel does not support llseek(2) extension "
-> @@ -1186,19 +1195,21 @@ static int test_basic_support(void)
->  			ret = -1;
->  		}
->  		goto out;
-> -	} else if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-> -			     0, alloc_size) == -1) {
-> -		fprintf(stderr, "File system does not support punch hole.\n");
-> -	} else {
-> -		punch_hole = 1;
->  	}
->  
->  	pos = lseek(fd, 0, SEEK_DATA);
->  	if (pos == 0) {
->  		fprintf(stderr, "File system does not support unwritten extents.\n");
-> -		goto out;
-> +	} else {
-> +		unwritten_extents = 1;
-> +	}
-> +
-> +	if (fallocate(fd, FALLOC_FL_PUNCH_HOLE | FALLOC_FL_KEEP_SIZE,
-> +			     0, alloc_size) == -1) {
-> +		fprintf(stderr, "File system does not support punch hole.\n");
-> +	} else {
-> +		punch_hole = 1;
->  	}
-> -	unwritten_extents = 1;
->  
->  	printf("\n");
->  
-> -- 
-> 2.20.1
-> 
+The new head of the master branch is commit:
+
+8adf5e71df15 seek_sanity_test: Repair check for unwritten extent support
+
+New commits:
+
+Andreas Gruenbacher (2):
+      [83318f266500] aio-dio-regress: code clarification
+      [8adf5e71df15] seek_sanity_test: Repair check for unwritten extent support
+
+Qu Wenruo (1):
+      [1592be349386] log-writes: Handle unrecognized options to prevent segfault
+
+Yong Sun (1):
+      [c43a4c3fee71] xfs/097: always mkfs with finobt enabled
+
+
+Code Diffstat:
+
+ src/aio-dio-regress/aio-dio-subblock-eof-read.c |  4 +--
+ src/log-writes/replay-log.c                     |  2 ++
+ src/seek_sanity_test.c                          | 35 ++++++++++++++++---------
+ tests/xfs/097                                   |  2 +-
+ 4 files changed, 28 insertions(+), 15 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--tnmlJBmpbRJs
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1QNiMACgkQJlKqKVyP
+52Ms5w//X14bSggvZeSDbTSBWe41o16VGnmtpam+no6l3fFt7947RAViW7JXweaD
+zZQwrj4UGw77sxgWaq3At8hykVNQkuTHsH/pK7x457RSUhoBpeVn/7aaXrhcjjkU
+QnKY6NAbWnc3WdnjOtcE+xV9zNU657KSRpzoqhEeDvryMWXZeFEuu9eeJH3PoOZS
+zQ9rTP5WL1pFk2DhzGlwJCWwb+tdzyyEbCuWHnWSSKv+kfyGKZ4jR2jBQenMCYy4
+QLQizJX9bJHbUa+QMtuuK7ErO5CL8Mp7Jc/1VLqWNEGmas728XTg3hohZ7kXQWrR
+u1dnI/KbnM668Rq5XPFIesla4C5sshmPFg7noHuNZHpaStW9c4gffR67G5U2Y6En
+or39yE8t4v2qvtlPlAyCUomWM9WJkN0Mz/SPgru3qCYmUHojihOFIMrhjdNPXYEi
+1KIebfWJgfDB59+wXhrW/ZiqKcjxzm1JSvgaMGrxs6KxHvMnXKVwZyNt5QS9Zw3W
+45qwoX19L6DTwwZVS4Jm+QRXVuz2xqit7zbQNQPZsKLu3XRgo55dBI+omy7C/MQv
+KXpQoPWpg2gDFRQAtTtwlpuDb83+V+NO3rgaa6jCUggu1gAiU/BnLwyddf2m0DcD
+I0e2nHKhEQwlggr8gtZ3s9HwnMOmB/eGd/iBlrJpuc0O34iUJdA=
+=3Zkp
+-----END PGP SIGNATURE-----
+
+--tnmlJBmpbRJs--
