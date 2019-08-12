@@ -1,84 +1,56 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:43386 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726424AbfHKPi6 (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 11 Aug 2019 11:38:58 -0400
-Received: by mail-pf1-f196.google.com with SMTP id v12so727040pfn.10
-        for <fstests@vger.kernel.org>; Sun, 11 Aug 2019 08:38:58 -0700 (PDT)
-Message-ID: <5d503691.1c69fb81.273a3.bc5f@mx.google.com>
-Date: Sun, 11 Aug 2019 23:38:43 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 8adf5e71df15
+Received: from mail.kernel.org ([198.145.29.99]:53484 "EHLO mail.kernel.org"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726219AbfHLR5O (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 12 Aug 2019 13:57:14 -0400
+From: Eric Biggers <ebiggers@kernel.org>
+Subject: [RFC PATCH 0/8] xfsprogs: support fscrypt API additions in xfs_io
+Date: Mon, 12 Aug 2019 10:56:26 -0700
+Message-Id: <20190812175635.34186-1-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="tnmlJBmpbRJs"
-Content-Disposition: inline
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
+To: linux-xfs@vger.kernel.org
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
+Hello,
 
---tnmlJBmpbRJs
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+This patchset updates xfs_io to support the API additions from the
+kernel patchset "[PATCH v8 00/20] fscrypt: key management improvements"
+https://lkml.kernel.org/linux-fsdevel/20190805162521.90882-1-ebiggers@kernel.org/T/#u
 
-Hi all,
+Commands are added to wrap the new ioctls for managing filesystem
+encryption keys.  Also, the existing 'get_encpolicy' and 'set_encpolicy'
+commands are updated to support v2 encryption policies.
 
-The master branch of the xfstests repository at:
+The purpose of all this is to allow xfstests to test the new APIs.
 
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+Note: currently only ext4, f2fs, and ubifs support encryption.  But I
+was told previously that since the fscrypt API is generic and may be
+supported by XFS in the future, the command-line wrappers for the
+fscrypt ioctls should be in xfs_io rather than in fstests directly
+(https://marc.info/?l=fstests&m=147976255831951&w=2).
 
-have just been updated. This is a bugfix-only update, and there should be no
-new failures introduced.
+We'll want to wait for the kernel patches to be mainlined before merging
+this, but I'm making it available now for any early feedback.
 
-Thanks,
-Eryu
+This patchset applies to xfsprogs v5.2.0.  It can also be retrieved from tag
+"fscrypt-key-mgmt-improvements_2019-08-12" of
+https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfsprogs-dev.git
 
-The new head of the master branch is commit:
+Eric Biggers (8):
+  xfs_io/encrypt: remove unimplemented encryption modes
+  xfs_io/encrypt: update to UAPI definitions from Linux v5.4
+  xfs_io/encrypt: add new encryption modes
+  xfs_io/encrypt: extend 'get_encpolicy' to support v2 policies
+  xfs_io/encrypt: extend 'set_encpolicy' to support v2 policies
+  xfs_io/encrypt: add 'add_enckey' command
+  xfs_io/encrypt: add 'rm_enckey' command
+  xfs_io/encrypt: add 'enckey_status' command
 
-8adf5e71df15 seek_sanity_test: Repair check for unwritten extent support
+ io/encrypt.c      | 786 ++++++++++++++++++++++++++++++++++++++++------
+ man/man8/xfs_io.8 |  70 ++++-
+ 2 files changed, 750 insertions(+), 106 deletions(-)
 
-New commits:
-
-Andreas Gruenbacher (2):
-      [83318f266500] aio-dio-regress: code clarification
-      [8adf5e71df15] seek_sanity_test: Repair check for unwritten extent support
-
-Qu Wenruo (1):
-      [1592be349386] log-writes: Handle unrecognized options to prevent segfault
-
-Yong Sun (1):
-      [c43a4c3fee71] xfs/097: always mkfs with finobt enabled
-
-
-Code Diffstat:
-
- src/aio-dio-regress/aio-dio-subblock-eof-read.c |  4 +--
- src/log-writes/replay-log.c                     |  2 ++
- src/seek_sanity_test.c                          | 35 ++++++++++++++++---------
- tests/xfs/097                                   |  2 +-
- 4 files changed, 28 insertions(+), 15 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---tnmlJBmpbRJs
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1QNiMACgkQJlKqKVyP
-52Ms5w//X14bSggvZeSDbTSBWe41o16VGnmtpam+no6l3fFt7947RAViW7JXweaD
-zZQwrj4UGw77sxgWaq3At8hykVNQkuTHsH/pK7x457RSUhoBpeVn/7aaXrhcjjkU
-QnKY6NAbWnc3WdnjOtcE+xV9zNU657KSRpzoqhEeDvryMWXZeFEuu9eeJH3PoOZS
-zQ9rTP5WL1pFk2DhzGlwJCWwb+tdzyyEbCuWHnWSSKv+kfyGKZ4jR2jBQenMCYy4
-QLQizJX9bJHbUa+QMtuuK7ErO5CL8Mp7Jc/1VLqWNEGmas728XTg3hohZ7kXQWrR
-u1dnI/KbnM668Rq5XPFIesla4C5sshmPFg7noHuNZHpaStW9c4gffR67G5U2Y6En
-or39yE8t4v2qvtlPlAyCUomWM9WJkN0Mz/SPgru3qCYmUHojihOFIMrhjdNPXYEi
-1KIebfWJgfDB59+wXhrW/ZiqKcjxzm1JSvgaMGrxs6KxHvMnXKVwZyNt5QS9Zw3W
-45qwoX19L6DTwwZVS4Jm+QRXVuz2xqit7zbQNQPZsKLu3XRgo55dBI+omy7C/MQv
-KXpQoPWpg2gDFRQAtTtwlpuDb83+V+NO3rgaa6jCUggu1gAiU/BnLwyddf2m0DcD
-I0e2nHKhEQwlggr8gtZ3s9HwnMOmB/eGd/iBlrJpuc0O34iUJdA=
-=3Zkp
------END PGP SIGNATURE-----
-
---tnmlJBmpbRJs--
+-- 
+2.23.0.rc1.153.gdeed80330f-goog
