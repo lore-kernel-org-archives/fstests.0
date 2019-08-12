@@ -1,11 +1,11 @@
-Received: from mail.kernel.org ([198.145.29.99]:53820 "EHLO mail.kernel.org"
+Received: from mail.kernel.org ([198.145.29.99]:53826 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726742AbfHLR6s (ORCPT <rfc822;fstests@vger.kernel.org>);
+        id S1726798AbfHLR6s (ORCPT <rfc822;fstests@vger.kernel.org>);
         Mon, 12 Aug 2019 13:58:48 -0400
 From: Eric Biggers <ebiggers@kernel.org>
-Subject: [RFC PATCH 7/9] generic: verify ciphertext of v2 encryption policies with AES-256
-Date: Mon, 12 Aug 2019 10:58:07 -0700
-Message-Id: <20190812175809.34810-8-ebiggers@kernel.org>
+Subject: [RFC PATCH 8/9] generic: verify ciphertext of v2 encryption policies with AES-128
+Date: Mon, 12 Aug 2019 10:58:08 -0700
+Message-Id: <20190812175809.34810-9-ebiggers@kernel.org>
 In-Reply-To: <20190812175809.34810-1-ebiggers@kernel.org>
 References: <20190812175809.34810-1-ebiggers@kernel.org>
 MIME-Version: 1.0
@@ -17,34 +17,34 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Eric Biggers <ebiggers@google.com>
 
-Verify ciphertext for v2 encryption policies that use AES-256-XTS to
-encrypt file contents and AES-256-CTS-CBC to encrypt file names.
+Verify ciphertext for v2 encryption policies that use AES-128-CBC-ESSIV
+to encrypt file contents and AES-128-CTS-CBC to encrypt file names.
 
 Signed-off-by: Eric Biggers <ebiggers@google.com>
 ---
- tests/generic/802     | 43 +++++++++++++++++++++++++++++++++++++++++++
- tests/generic/802.out |  6 ++++++
+ tests/generic/803     | 43 +++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/803.out |  6 ++++++
  tests/generic/group   |  1 +
  3 files changed, 50 insertions(+)
- create mode 100755 tests/generic/802
- create mode 100644 tests/generic/802.out
+ create mode 100755 tests/generic/803
+ create mode 100644 tests/generic/803.out
 
-diff --git a/tests/generic/802 b/tests/generic/802
+diff --git a/tests/generic/803 b/tests/generic/803
 new file mode 100755
-index 00000000..457260b2
+index 00000000..c12daeff
 --- /dev/null
-+++ b/tests/generic/802
++++ b/tests/generic/803
 @@ -0,0 +1,43 @@
 +#! /bin/bash
 +# SPDX-License-Identifier: GPL-2.0
 +# Copyright 2019 Google LLC
 +#
-+# FS QA Test generic/802
++# FS QA Test generic/803
 +#
-+# Verify ciphertext for v2 encryption policies that use AES-256-XTS to encrypt
-+# file contents and AES-256-CTS-CBC to encrypt file names.
++# Verify ciphertext for v2 encryption policies that use AES-128-CBC-ESSIV to
++# encrypt file contents and AES-128-CTS-CBC to encrypt file names.
 +#
-+# This is the same as generic/548, except using v2 policies.
++# This is the same as generic/549, except using v2 policies.
 +#
 +seq=`basename $0`
 +seqres=$RESULT_DIR/$seq
@@ -73,31 +73,31 @@ index 00000000..457260b2
 +_supported_fs generic
 +_supported_os Linux
 +
-+_verify_ciphertext_for_encryption_policy AES-256-XTS AES-256-CTS-CBC v2
++_verify_ciphertext_for_encryption_policy AES-128-CBC-ESSIV AES-128-CTS-CBC v2
 +
 +# success, all done
 +status=0
 +exit
-diff --git a/tests/generic/802.out b/tests/generic/802.out
+diff --git a/tests/generic/803.out b/tests/generic/803.out
 new file mode 100644
-index 00000000..c0930809
+index 00000000..f4051d27
 --- /dev/null
-+++ b/tests/generic/802.out
++++ b/tests/generic/803.out
 @@ -0,0 +1,6 @@
-+QA output created by 802
++QA output created by 803
 +
 +Verifying ciphertext with parameters:
-+	contents_encryption_mode: AES-256-XTS
-+	filenames_encryption_mode: AES-256-CTS-CBC
++	contents_encryption_mode: AES-128-CBC-ESSIV
++	filenames_encryption_mode: AES-128-CTS-CBC
 +	options: v2
 diff --git a/tests/generic/group b/tests/generic/group
-index 4bc4772a..29c9af30 100644
+index 29c9af30..6deae98f 100644
 --- a/tests/generic/group
 +++ b/tests/generic/group
-@@ -570,3 +570,4 @@
- 565 auto quick copy_range
+@@ -571,3 +571,4 @@
  800 auto quick encrypt
  801 auto quick encrypt
-+802 auto quick encrypt
+ 802 auto quick encrypt
++803 auto quick encrypt
 -- 
 2.23.0.rc1.153.gdeed80330f-goog
