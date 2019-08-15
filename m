@@ -1,55 +1,55 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:53108 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725977AbfHOPTR (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Aug 2019 11:19:17 -0400
-Subject: [PATCH 3/3] common: filter aiodio dmesg after fs/iomap.c to
- fs/iomap/ move
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 15 Aug 2019 08:19:12 -0700
-Message-ID: <156588235283.24775.17750563527287824640.stgit@magnolia>
-In-Reply-To: <156588233330.24775.15183725500886844319.stgit@magnolia>
-References: <156588233330.24775.15183725500886844319.stgit@magnolia>
+Received: from mail-qt1-f195.google.com ([209.85.160.195]:45355 "EHLO
+        mail-qt1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1733301AbfHOPAg (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Aug 2019 11:00:36 -0400
+Received: by mail-qt1-f195.google.com with SMTP id k13so2597017qtm.12
+        for <fstests@vger.kernel.org>; Thu, 15 Aug 2019 08:00:36 -0700 (PDT)
+From: Josef Bacik <josef@toxicpanda.com>
+Subject: [PATCH 1/2] fstests: make generic/500 xfs+ext4 only
+Date: Thu, 15 Aug 2019 11:00:31 -0400
+Message-Id: <20190815150033.15996-1-josef@toxicpanda.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: guaneryu@gmail.com, darrick.wong@oracle.com
-Cc: linux-xfs@vger.kernel.org, fstests@vger.kernel.org
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+I recently fixed some bugs in btrfs's enospc handling that made it start
+failing generic/500.
 
-Since the iomap code are moving to fs/iomap/ we have to add new entries
-to the aiodio dmesg filter to reflect this.  It's still possible for
-filesystems using iomap for directio to cough up WARNings when a direct
-write collides with a buffered write, since in some cases we catch that
-early enough to have the direct write return EIO.
+The point of this test is to make the thin provisioned device run out of
+space, which results in an EIO being seen on a device from the file
+systems perspective.  This is fine for xfs and ext4 who's metadata is
+being overwritten and already allocated on the thin provisioned device.
+They get an EIO on data writes, fstrim to free up the space, and keep it
+going.
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+Btrfs however has dynamic metadata, so the rm -rf could result in
+metadata IO being done on the file system.  Since the thin provisioned
+device is out of space this gives us an EIO, and we flip read only.  We
+didn't remove the file, so the fstrim doesn't recover space anyway, so
+we can't even fstrim and remount.
+
+Make this test for ext4/xfs only, it just simply won't work right for
+btrfs in it's current form.
+
+Signed-off-by: Josef Bacik <josef@toxicpanda.com>
 ---
- common/filter |    4 +++-
- 1 file changed, 3 insertions(+), 1 deletion(-)
+ tests/generic/500 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-
-diff --git a/common/filter b/common/filter
-index ed082d24..26fc2132 100644
---- a/common/filter
-+++ b/common/filter
-@@ -555,6 +555,7 @@ _filter_aiodio_dmesg()
- 	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
- 	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
- 	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
-+	local warn10="WARNING:.*fs/iomap/direct-io\.c:.*iomap_dio_actor.*"
- 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
- 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
- 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
-@@ -563,7 +564,8 @@ _filter_aiodio_dmesg()
- 	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
- 	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
- 	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
--	    -e "s#$warn9#Intentional warnings in dio_complete#"
-+	    -e "s#$warn9#Intentional warnings in dio_complete#" \
-+	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
- }
+diff --git a/tests/generic/500 b/tests/generic/500
+index 201d8b9f..1cbd9d65 100755
+--- a/tests/generic/500
++++ b/tests/generic/500
+@@ -44,7 +44,7 @@ _cleanup()
+ rm -f $seqres.full
  
- # We generate assert related WARNINGs on purpose and make sure test doesn't fail
+ # real QA test starts here
+-_supported_fs generic
++_supported_fs xfs ext4
+ _supported_os Linux
+ _require_scratch_nocheck
+ _require_dm_target thin-pool
+-- 
+2.21.0
