@@ -1,12 +1,12 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:52860 "EHLO
+Received: from userp2130.oracle.com ([156.151.31.86]:53108 "EHLO
         userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726080AbfHOPTF (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Aug 2019 11:19:05 -0400
-Subject: [PATCH 1/3] generic/081: fix lvm config not being cleaned up
- properly
+        with ESMTP id S1725977AbfHOPTR (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 15 Aug 2019 11:19:17 -0400
+Subject: [PATCH 3/3] common: filter aiodio dmesg after fs/iomap.c to
+ fs/iomap/ move
 From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Date: Thu, 15 Aug 2019 08:18:59 -0700
-Message-ID: <156588233944.24775.714828611169800436.stgit@magnolia>
+Date: Thu, 15 Aug 2019 08:19:12 -0700
+Message-ID: <156588235283.24775.17750563527287824640.stgit@magnolia>
 In-Reply-To: <156588233330.24775.15183725500886844319.stgit@magnolia>
 References: <156588233330.24775.15183725500886844319.stgit@magnolia>
 MIME-Version: 1.0
@@ -19,52 +19,37 @@ List-ID: <fstests@vger.kernel.org>
 
 From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Fix a race between _cleanup and dmeventd that causes the lvm
-configuration not to be cleaned up and subsequent tests to fail.
+Since the iomap code are moving to fs/iomap/ we have to add new entries
+to the aiodio dmesg filter to reflect this.  It's still possible for
+filesystems using iomap for directio to cough up WARNings when a direct
+write collides with a buffered write, since in some cases we catch that
+early enough to have the direct write return EIO.
 
 Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
 ---
- tests/generic/081 |   29 +++++++++++++++++++++++------
- 1 file changed, 23 insertions(+), 6 deletions(-)
+ common/filter |    4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
 
 
-diff --git a/tests/generic/081 b/tests/generic/081
-index 10f4a186..e8f4f5b5 100755
---- a/tests/generic/081
-+++ b/tests/generic/081
-@@ -19,12 +19,29 @@ _cleanup()
- {
- 	cd /
- 	rm -f $tmp.*
--	# lvm may have umounted it on I/O error, but in case it does not
--	# wait a bit for lvm to settle, sigh..
--	sleep 2
--	$UMOUNT_PROG $mnt >/dev/null 2>&1
--	$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
--	$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-+
-+	# Tear down the lvm vg and snapshot.
-+	#
-+	# NOTE: We do the unmount and {vg,pv}remove in a loop here because
-+	# dmeventd could be configured to unmount the filesystem automatically
-+	# after the IO errors.  That is racy with the umount we're trying to do
-+	# here because there's a window in which the directory tree has been
-+	# removed from the mount namespaces (so the umount call here sees no
-+	# mount and exits) but the filesystem hasn't yet released the block
-+	# device, which causes the vgremove here to fail.
-+	#
-+	# We "solve" the race by repeating the umount/lvm teardown until the
-+	# block device goes away, because we cannot exit this test without
-+	# removing the lvm devices from the scratch device -- this will cause
-+	# other tests to fail.
-+	while test -e /dev/mapper/$vgname-$snapname || \
-+	      test -e /dev/mapper/$vgname-$lvname; do
-+		$UMOUNT_PROG $mnt >> $seqres.full 2>&1
-+		$LVM_PROG vgremove -f $vgname >>$seqres.full 2>&1
-+		$LVM_PROG pvremove -f $SCRATCH_DEV >>$seqres.full 2>&1
-+		test $? -eq 0 && break
-+		sleep 2
-+	done
+diff --git a/common/filter b/common/filter
+index ed082d24..26fc2132 100644
+--- a/common/filter
++++ b/common/filter
+@@ -555,6 +555,7 @@ _filter_aiodio_dmesg()
+ 	local warn7="WARNING:.*fs/iomap\.c:.*iomap_dio_actor.*"
+ 	local warn8="WARNING:.*fs/iomap\.c:.*iomap_dio_complete.*"
+ 	local warn9="WARNING:.*fs/direct-io\.c:.*dio_complete.*"
++	local warn10="WARNING:.*fs/iomap/direct-io\.c:.*iomap_dio_actor.*"
+ 	sed -e "s#$warn1#Intentional warnings in xfs_file_dio_aio_write#" \
+ 	    -e "s#$warn2#Intentional warnings in xfs_file_dio_aio_read#" \
+ 	    -e "s#$warn3#Intentional warnings in xfs_file_read_iter#" \
+@@ -563,7 +564,8 @@ _filter_aiodio_dmesg()
+ 	    -e "s#$warn6#Intentional warnings in __xfs_get_blocks#" \
+ 	    -e "s#$warn7#Intentional warnings in iomap_dio_actor#" \
+ 	    -e "s#$warn8#Intentional warnings in iomap_dio_complete#" \
+-	    -e "s#$warn9#Intentional warnings in dio_complete#"
++	    -e "s#$warn9#Intentional warnings in dio_complete#" \
++	    -e "s#$warn10#Intentional warnings in iomap_dio_actor#"
  }
  
- # get standard environment, filters and checks
+ # We generate assert related WARNINGs on purpose and make sure test doesn't fail
