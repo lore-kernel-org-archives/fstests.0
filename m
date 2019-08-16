@@ -1,46 +1,37 @@
-Received: from mail-qt1-f196.google.com ([209.85.160.196]:44536 "EHLO
-        mail-qt1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730151AbfHOS1D (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 15 Aug 2019 14:27:03 -0400
-Received: by mail-qt1-f196.google.com with SMTP id 44so3307903qtg.11
-        for <fstests@vger.kernel.org>; Thu, 15 Aug 2019 11:27:02 -0700 (PDT)
-From: Josef Bacik <josef@toxicpanda.com>
-Subject: [PATCH] fstests: generic/500 doesn't work for btrfs
-Date: Thu, 15 Aug 2019 14:26:59 -0400
-Message-Id: <20190815182659.27875-1-josef@toxicpanda.com>
+Received: from out30-130.freemail.mail.aliyun.com ([115.124.30.130]:49362 "EHLO
+        out30-130.freemail.mail.aliyun.com" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726981AbfHPLaV (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 16 Aug 2019 07:30:21 -0400
+Date: Fri, 16 Aug 2019 19:30:18 +0800
+From: Eryu Guan <eguan@linux.alibaba.com>
+Subject: Re: [PATCH] fstests: btrfs: Check snapshot creation and deletion
+ with dm-logwrites
+Message-ID: <20190816113018.GJ52397@e18g06458.et15sqa>
+References: <20190814105544.18318-1-wqu@suse.com>
+ <CAL3q7H5v6jrFcKupRBZ9EnaQDKM2UooK3iwOgJ01wTvqMtizcw@mail.gmail.com>
+ <21a7b532-c16d-c014-e714-e280d0a1850a@gmx.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <21a7b532-c16d-c014-e714-e280d0a1850a@gmx.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
+To: Qu Wenruo <quwenruo.btrfs@gmx.com>
+Cc: fdmanana@gmail.com, Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Btrfs does COW, so when we unlink the file we need to update metadata
-and write it to a new location, which we can't do because the thinp is
-full.  This results in an EIO during a metadata write, which makes us
-flip read only, thus making it impossible to fstrim the fs.  Just make
-it so we skip this test for btrfs.
+On Fri, Aug 16, 2019 at 05:47:33PM +0800, Qu Wenruo wrote:
+[...]
+> >> +$KILLALL_PROG -q $FSSTRESS_PROG &> /dev/null
+> > 
+> > You're very inconsistent within the same test :) Using both ">
+> > /dev/null 2>&1" and "&> /dev/null".
+> 
+> My bad, I mean 2>&1 > /dev/null.
+> What I mean is output stderr while skip stdout in previous calls.
 
-Signed-off-by: Josef Bacik <josef@toxicpanda.com>
----
- tests/generic/500 | 6 ++++++
- 1 file changed, 6 insertions(+)
+Then just do "2>/dev/null", the test harness will capture both stdout
+and stderr. "2>&1 > /dev/null" is less used and usually indicates a
+mis-usage :)
 
-diff --git a/tests/generic/500 b/tests/generic/500
-index 201d8b9f..5cd7126f 100755
---- a/tests/generic/500
-+++ b/tests/generic/500
-@@ -49,6 +49,12 @@ _supported_os Linux
- _require_scratch_nocheck
- _require_dm_target thin-pool
- 
-+# The unlink below will result in new metadata blocks for btrfs because of CoW,
-+# and since we've filled the thinp device it'll return EIO, which will make
-+# btrfs flip read only, making it fail this test when it just won't work right
-+# for us in the first place.
-+test $FSTYP == "btrfs"  && _notrun "btrfs doesn't work that way lol"
-+
- # Require underlying device support discard
- _scratch_mkfs >>$seqres.full 2>&1
- _scratch_mount
--- 
-2.21.0
+Thanks,
+Eryu
