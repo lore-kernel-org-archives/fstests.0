@@ -1,69 +1,87 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:39536 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727497AbfHSQZz (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 19 Aug 2019 12:25:55 -0400
-Date: Mon, 19 Aug 2019 09:25:46 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] fstests: generic/500 doesn't work for btrfs
-Message-ID: <20190819162546.GH15198@magnolia>
-References: <20190815182659.27875-1-josef@toxicpanda.com>
- <20190818154016.GB2845@desktop>
+Received: from mail-pl1-f193.google.com ([209.85.214.193]:38514 "EHLO
+        mail-pl1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725786AbfHRPst (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 18 Aug 2019 11:48:49 -0400
+Received: by mail-pl1-f193.google.com with SMTP id m12so4583181plt.5
+        for <fstests@vger.kernel.org>; Sun, 18 Aug 2019 08:48:48 -0700 (PDT)
+Message-ID: <5d59735f.1c69fb81.877f8.dca6@mx.google.com>
+Date: Sun, 18 Aug 2019 23:48:37 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 3b8ea0d760d4
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="N1Rr6vhTqc6W"
 Content-Disposition: inline
-In-Reply-To: <20190818154016.GB2845@desktop>
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Josef Bacik <josef@toxicpanda.com>, fstests@vger.kernel.org, linux-btrfs@vger.kernel.org, kernel-team@fb.com
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Aug 18, 2019 at 11:44:28PM +0800, Eryu Guan wrote:
-> On Thu, Aug 15, 2019 at 02:26:59PM -0400, Josef Bacik wrote:
-> > Btrfs does COW, so when we unlink the file we need to update metadata
-> > and write it to a new location, which we can't do because the thinp is
-> > full.  This results in an EIO during a metadata write, which makes us
-> > flip read only, thus making it impossible to fstrim the fs.  Just make
-> > it so we skip this test for btrfs.
-> > 
-> > Signed-off-by: Josef Bacik <josef@toxicpanda.com>
-> > ---
-> >  tests/generic/500 | 6 ++++++
-> >  1 file changed, 6 insertions(+)
-> > 
-> > diff --git a/tests/generic/500 b/tests/generic/500
-> > index 201d8b9f..5cd7126f 100755
-> > --- a/tests/generic/500
-> > +++ b/tests/generic/500
-> > @@ -49,6 +49,12 @@ _supported_os Linux
-> >  _require_scratch_nocheck
-> >  _require_dm_target thin-pool
-> >  
-> > +# The unlink below will result in new metadata blocks for btrfs because of CoW,
-> > +# and since we've filled the thinp device it'll return EIO, which will make
-> > +# btrfs flip read only, making it fail this test when it just won't work right
-> > +# for us in the first place.
-> > +test $FSTYP == "btrfs"  && _notrun "btrfs doesn't work that way lol"
-> 
-> I'm wondering if we could introduce a proper _require rule to cover this
-> case? e.g. require the fs doesn't allocate new blocks on unlink? or
-> something like that. But I'm not sure what's the proper fs feature to
-> require here, any suggestions?
 
-I'd be careful with this -- xfs can allocate new metadata blocks on
-unlink too -- changes in the free space btrees, expansion of the free
-inode btree, etc.  For the 20 inodes in play in g/500 this won't be the
-case, but if you had a test that created 20,000 inodes, then that could
-happen.
+--N1Rr6vhTqc6W
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
---D
+Hi all,
 
-> Thanks,
-> Eryu
-> 
-> > +
-> >  # Require underlying device support discard
-> >  _scratch_mkfs >>$seqres.full 2>&1
-> >  _scratch_mount
-> > -- 
-> > 2.21.0
-> > 
+The master branch of the xfstests repository at:
+
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. This is again, a bug-fix only update, you should not
+see new failures after this update.
+
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+3b8ea0d760d4 common: filter aiodio dmesg after fs/iomap.c to fs/iomap/ move
+
+New commits:
+
+Darrick J. Wong (3):
+      [84cc0f61a324] generic/081: fix lvm config not being cleaned up properly
+      [23f99e864ee7] generic/561: kill duperemove directly
+      [3b8ea0d760d4] common: filter aiodio dmesg after fs/iomap.c to fs/iomap/ move
+
+Filipe Manana (1):
+      [0d39941c0445] generic/517: make test work on filesystems with block size greater than 4Kb
+
+Nikolay Borisov (1):
+      [eba73e34fd7e] generic/519: Optimize overlap detection
+
+
+Code Diffstat:
+
+ common/filter         |  4 ++-
+ tests/generic/081     | 29 +++++++++++++++++-----
+ tests/generic/517     | 30 ++++++++++++-----------
+ tests/generic/517.out | 42 ++++++++++++++++----------------
+ tests/generic/519     | 67 +++++++++++++++++++++++++++------------------------
+ tests/generic/561     |  4 +--
+ 6 files changed, 100 insertions(+), 76 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--N1Rr6vhTqc6W
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1Zcw0ACgkQJlKqKVyP
+52NBlhAAwRzDwm6wsDfFNtKeHFZBpYDl945z7IIB7FiiZUbcr5glhwczZ1h2KSwl
+VuNt6uMaErbojUtB0IpuEcHGTfMxgwZiDG4iknC6q5bPBcCbVHkX7PskZ5QNTh+U
+g2Gywq2lGRWqS9dPaVmmNyfZHdMzIvid9i8ssjAQpt9nyjFC2/5jDpXK5jjqMbNG
+dWztHcj+6UQqzXKthJJtko2cGQC4nbvK22wWewMYmbKxWM6Gfd4mS1CWyzwHs+To
+cUrrybPb/kDoQVrWZ7phtYu51yXBOqamY85KAOpgyMjKaEk226LBTh7rLKiAupg1
+cCbmmNS7ro2yOoAPkOaZTAxIyHxEnrdp5Tk5oLFdeGOJ5C3j6wga6X9DbrDogR1Z
++ll0sPbAEjW7jil0+YgxXdDOKg1ffmrP0G9TFaZfj7E4/XWWSGItW2CuE015+wRP
+JFoh/Got6AH1rMmLSPL0PFU17Kv4LVwU8C4SKUTs0jaxdIAR1ftYKCxsm0DSF0mu
+XMiKVeJP36enqymlRKFZgeOSwYlUmGkpP4YcUs+ARWU5ubbUpoPX+DFQzQeu5Q2k
+GBjOh/1+HdlUh80w3oC9bmEfZJ94hYR7fhxYzsue1WGpL/CAjD8JrZXUxKSx+KOI
+iVCxad9TjLO55ikbHH2b38P9vMkwssA180/vH41IEmzosn2BLIA=
+=g2uT
+-----END PGP SIGNATURE-----
+
+--N1Rr6vhTqc6W--
