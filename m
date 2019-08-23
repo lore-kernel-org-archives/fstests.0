@@ -1,263 +1,114 @@
-Received: from mail-io1-f67.google.com ([209.85.166.67]:34686 "EHLO
-        mail-io1-f67.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727998AbfHUUYC (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 21 Aug 2019 16:24:02 -0400
+Received: from aserp2120.oracle.com ([141.146.126.78]:45504 "EHLO
+        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S2389534AbfHWD6F (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 22 Aug 2019 23:58:05 -0400
+Date: Thu, 22 Aug 2019 20:57:34 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [PATCH] generic: test for failure to unlock inode after chgrp fails
+ with EDQUOT
+Message-ID: <20190823035734.GH1037350@magnolia>
+References: <20190823035528.GH1037422@magnolia>
 MIME-Version: 1.0
-References: <20181202180832.GR8125@magnolia> <20181202181045.GS8125@magnolia>
-In-Reply-To: <20181202181045.GS8125@magnolia>
-From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Date: Wed, 21 Aug 2019 22:23:49 +0200
-Message-ID: <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
- directio short read on EFAULT)
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190823035528.GH1037422@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, cluster-devel <cluster-devel@redhat.com>
+To: xfs <linux-xfs@vger.kernel.org>
+Cc: Linus Torvalds <torvalds@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Salvatore Bonaccorso <carnil@debian.org>, Security Officers <security@kernel.org>, Debian Security Team <team@security.debian.org>, benjamin.moody@gmail.com, Ben Hutchings <benh@debian.org>, Christoph Hellwig <hch@infradead.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Am So., 2. Dez. 2018 um 19:13 Uhr schrieb Darrick J. Wong
-<darrick.wong@oracle.com>:
-> From: Darrick J. Wong <darrick.wong@oracle.com>
->
-> In commit 4721a601099, we tried to fix a problem wherein directio reads
-> into a splice pipe will bounce EFAULT/EAGAIN all the way out to
-> userspace by simulating a zero-byte short read.  This happens because
-> some directio read implementations (xfs) will call
-> bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchronous
-> reads, but as soon as we run out of pipe buffers that _get_pages call
-> returns EFAULT, which the splice code translates to EAGAIN and bounces
-> out to userspace.
->
-> In that commit, the iomap code catches the EFAULT and simulates a
-> zero-byte read, but that causes assertion errors on regular splice reads
-> because xfs doesn't allow short directio reads.  This causes infinite
-> splice() loops and assertion failures on generic/095 on overlayfs
-> because xfs only permit total success or total failure of a directio
-> operation.  The underlying issue in the pipe splice code has now been
-> fixed by changing the pipe splice loop to avoid avoid reading more data
-> than there is space in the pipe.
->
-> Therefore, it's no longer necessary to simulate the short directio, so
-> remove the hack from iomap.
->
-> Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors when pipes fill")
-> Reported-by: Amir Goldstein <amir73il@gmail.com>
-> Reviewed-by: Christoph Hellwig <hch@lst.de>
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
-> v2: split into two patches per hch request
-> ---
->  fs/iomap.c |    9 ---------
->  1 file changed, 9 deletions(-)
->
-> diff --git a/fs/iomap.c b/fs/iomap.c
-> index 3ffb776fbebe..d6bc98ae8d35 100644
-> --- a/fs/iomap.c
-> +++ b/fs/iomap.c
-> @@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_iter *iter,
->                                 dio->wait_for_completion = true;
->                                 ret = 0;
->                         }
-> -
-> -                       /*
-> -                        * Splicing to pipes can fail on a full pipe. We have to
-> -                        * swallow this to make it look like a short IO
-> -                        * otherwise the higher splice layers will completely
-> -                        * mishandle the error and stop moving data.
-> -                        */
-> -                       if (ret == -EFAULT)
-> -                               ret = 0;
->                         break;
->                 }
->                 pos += ret;
+This is a regression test that checks for xfs drivers that fail to
+unlock the inode after changing the group id fails with EDQUOT.  It
+pairs with "xfs: fix missing ILOCK unlock when xfs_setattr_nonsize fails
+due to EDQUOT".
 
-I'm afraid this breaks the following test case on xfs and gfs2, the
-two current users of iomap_dio_rw.
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ tests/generic/719     |   56 +++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/719.out |    2 ++
+ tests/generic/group   |    1 +
+ 3 files changed, 59 insertions(+)
+ create mode 100755 tests/generic/719
+ create mode 100644 tests/generic/719.out
 
-Here, the splice system call fails with errno = EAGAIN when trying to
-"move data" from a file opened with O_DIRECT into a pipe.
-
-The test case can be run with option -d to not use O_DIRECT, which
-makes the test succeed.
-
-The -r option switches from reading from the pipe sequentially to
-reading concurrently with the splice, which doesn't change the
-behavior.
-
-Any thoughts?
-
-Thanks,
-Andreas
-
-=================================== 8< ===================================
-#define _GNU_SOURCE
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <err.h>
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <errno.h>
-
-#define SECTOR_SIZE 512
-#define BUFFER_SIZE (150 * SECTOR_SIZE)
-
-void read_from_pipe(int fd, const char *filename, size_t size)
-{
-    char buffer[SECTOR_SIZE];
-    size_t sz;
-    ssize_t ret;
-
-    while (size) {
-        sz = size;
-        if (sz > sizeof buffer)
-            sz = sizeof buffer;
-        ret = read(fd, buffer, sz);
-        if (ret < 0)
-            err(1, "read: %s", filename);
-        if (ret == 0) {
-            fprintf(stderr, "read: %s: unexpected EOF\n", filename);
-            exit(1);
-        }
-        size -= sz;
-    }
-}
-
-void do_splice1(int fd, const char *filename, size_t size)
-{
-    bool retried = false;
-    int pipefd[2];
-
-    if (pipe(pipefd) == -1)
-        err(1, "pipe");
-    while (size) {
-        ssize_t spliced;
-
-        spliced = splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MOVE);
-        if (spliced == -1) {
-            if (errno == EAGAIN && !retried) {
-                retried = true;
-                fprintf(stderr, "retrying splice\n");
-                sleep(1);
-                continue;
-            }
-            err(1, "splice");
-        }
-        read_from_pipe(pipefd[0], filename, spliced);
-        size -= spliced;
-    }
-    close(pipefd[0]);
-    close(pipefd[1]);
-}
-
-void do_splice2(int fd, const char *filename, size_t size)
-{
-    bool retried = false;
-    int pipefd[2];
-    int pid;
-
-    if (pipe(pipefd) == -1)
-        err(1, "pipe");
-
-    pid = fork();
-    if (pid == 0) {
-        close(pipefd[1]);
-        read_from_pipe(pipefd[0], filename, size);
-        exit(0);
-    } else {
-        close(pipefd[0]);
-        while (size) {
-            ssize_t spliced;
-
-            spliced = splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MOVE);
-            if (spliced == -1) {
-                if (errno == EAGAIN && !retried) {
-                    retried = true;
-                    fprintf(stderr, "retrying splice\n");
-                    sleep(1);
-                    continue;
-                }
-                err(1, "splice");
-            }
-            size -= spliced;
-        }
-        close(pipefd[1]);
-        waitpid(pid, NULL, 0);
-    }
-}
-
-void usage(const char *argv0)
-{
-    fprintf(stderr, "USAGE: %s [-rd] {filename}\n", basename(argv0));
-    exit(2);
-}
-
-int main(int argc, char *argv[])
-{
-    void (*do_splice)(int fd, const char *filename, size_t size);
-    const char *filename;
-    char *buffer;
-    int opt, open_flags, fd;
-    ssize_t ret;
-
-    do_splice = do_splice1;
-    open_flags = O_CREAT | O_TRUNC | O_RDWR | O_DIRECT;
-
-    while ((opt = getopt(argc, argv, "rd")) != -1) {
-        switch(opt) {
-        case 'r':
-            do_splice = do_splice2;
-            break;
-        case 'd':
-            open_flags &= ~O_DIRECT;
-            break;
-        default:  /* '?' */
-            usage(argv[0]);
-        }
-    }
-
-    if (optind >= argc)
-        usage(argv[0]);
-    filename = argv[optind];
-
-    printf("%s reader %s O_DIRECT\n",
-           do_splice == do_splice1 ? "sequential" : "concurrent",
-           (open_flags & O_DIRECT) ? "with" : "without");
-
-    buffer = aligned_alloc(SECTOR_SIZE, BUFFER_SIZE);
-    if (buffer == NULL)
-        err(1, "aligned_alloc");
-
-    fd = open(filename, open_flags, 0666);
-    if (fd == -1)
-        err(1, "open: %s", filename);
-
-    memset(buffer, 'x', BUFFER_SIZE);
-    ret = write(fd, buffer, BUFFER_SIZE);
-    if (ret < 0)
-        err(1, "write: %s", filename);
-    if (ret != BUFFER_SIZE) {
-        fprintf(stderr, "%s: short write\n", filename);
-        exit(1);
-    }
-
-    ret = lseek(fd, 0, SEEK_SET);
-    if (ret != 0)
-        err(1, "lseek: %s", filename);
-
-    do_splice(fd, filename, BUFFER_SIZE);
-
-    if (unlink(filename) == -1)
-        err(1, "unlink: %s", filename);
-
-    return 0;
-}
-=================================== 8< ===================================
+diff --git a/tests/generic/719 b/tests/generic/719
+new file mode 100755
+index 00000000..2771a1f3
+--- /dev/null
++++ b/tests/generic/719
+@@ -0,0 +1,56 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-newer
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 719
++#
++# Regression test for chgrp returning to userspace with ILOCK held after a
++# hard quota error.  This causes the filesystem to hang, so it is (for now)
++# a dangerous test.
++
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/quota
++. ./common/filter
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs generic
++_require_scratch
++_require_quota
++_require_user
++
++rm -f $seqres.full
++
++_qmount_option "grpquota"
++_scratch_mkfs > $seqres.full
++_qmount
++
++dir="$SCRATCH_MNT/dummy"
++mkdir -p $dir
++chown $qa_user $dir
++$XFS_QUOTA_PROG -x -f -c "limit -g bsoft=100k bhard=100k $qa_user" $SCRATCH_MNT
++
++$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 1m' $dir/foo >> $seqres.full
++chown $qa_user "${dir}/foo"
++su $qa_user -c "chgrp $qa_user ${dir}/foo" 2>&1 | _filter_scratch
++ls -la ${dir} >> $seqres.full
++$XFS_QUOTA_PROG -x -f -c 'report -hag' $SCRATCH_MNT >> $seqres.full
++
++# success, all done
++status=0
++exit
+diff --git a/tests/generic/719.out b/tests/generic/719.out
+new file mode 100644
+index 00000000..8f9d51b5
+--- /dev/null
++++ b/tests/generic/719.out
+@@ -0,0 +1,2 @@
++QA output created by 719
++chgrp: changing group of 'SCRATCH_MNT/dummy/foo': Disk quota exceeded
+diff --git a/tests/generic/group b/tests/generic/group
+index e998d1d5..bb93bccc 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -572,3 +572,4 @@
+ 716 dangerous_norepair
+ 717 auto quick rw swap
+ 718 auto quick rw swap
++719 dangerous
