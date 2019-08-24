@@ -1,124 +1,369 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:43352 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725807AbfHXBHq (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Aug 2019 21:07:46 -0400
-Received: by mail-pf1-f196.google.com with SMTP id v12so7632002pfn.10
-        for <fstests@vger.kernel.org>; Fri, 23 Aug 2019 18:07:46 -0700 (PDT)
-Date: Sat, 24 Aug 2019 09:07:38 +0800
+Received: from mail-pf1-f193.google.com ([209.85.210.193]:32975 "EHLO
+        mail-pf1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727514AbfHXPMw (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sat, 24 Aug 2019 11:12:52 -0400
+Date: Sat, 24 Aug 2019 23:12:35 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH] ltp/fsx: avoid infinite loop while finding offset2 in
- clone/dedupe/copy range ops
-Message-ID: <20190824010738.GD2845@desktop>
-References: <20190823072259.56671-1-eguan@linux.alibaba.com>
- <20190823143354.GL1037422@magnolia>
+Subject: Re: [PATCH v2] fstests: btrfs: Check snapshot creation and deletion
+ with dm-logwrites
+Message-ID: <20190824151235.GA2622@desktop>
+References: <20190819081806.32728-1-wqu@suse.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190823143354.GL1037422@magnolia>
+In-Reply-To: <20190819081806.32728-1-wqu@suse.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Eryu Guan <eguan@linux.alibaba.com>, fstests@vger.kernel.org
+To: Qu Wenruo <wqu@suse.com>
+Cc: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 23, 2019 at 07:33:54AM -0700, Darrick J. Wong wrote:
-> On Fri, Aug 23, 2019 at 03:22:59PM +0800, Eryu Guan wrote:
-> > In CLONE/DEDUPE/COPY RANGE operations, we pick a "offset" and "size"
-> > first, then find a suitable "offset2" by looping if there's overlap
-> > (|offset2-offset| < size) or final file size is greater than max file
-> > size (offset2 + size > maxfilelen).
-> > 
-> > But it's possible that there's no such suitable offset2 and we loop
-> > forever. e.g. block_size = 4096, offset = 0, size = 4096 and maxfilelen
-> > is a value smaller than 8212 (which could be set via '-l' option).
-> > 
-> > Fix it by making sure maxfilelen/file_size is big enough to hold 'size'
-> > bytes from 'offset2', and just skip this operation if not.
-> > 
-> > Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
-> > ---
-> >  ltp/fsx.c | 11 +++++++++++
-> >  1 file changed, 11 insertions(+)
-> > 
-> > diff --git a/ltp/fsx.c b/ltp/fsx.c
-> > index 06d08e4e93f3..f6eb3308e8bc 100644
-> > --- a/ltp/fsx.c
-> > +++ b/ltp/fsx.c
-> > @@ -1825,6 +1825,14 @@ do {						\
-> >  	TRIM_LEN(off, len, size);		\
-> >  } while (0)
-> >  
-> > +#define CHECK_RANGE(off, len, size)		\
-> > +do {						\
-> > +	if ((off + len * 2) > size) {		\
-> > +		log5(op, offset, size, -1, FL_SKIPPED); \
-> > +		goto out;			\
-> > +	}					\
-> > +} while (0)
+On Mon, Aug 19, 2019 at 04:18:06PM +0800, Qu Wenruo wrote:
+> We have generic dm-logwrites with fsstress test case (generic/482), but
+> it doesn't cover fs specific operations like btrfs snapshot creation and
+> deletion.
 > 
-> Eww, macros.
+> Furthermore, that test is not heavy enough to bump btrfs tree height by
+> its short runtime.
 > 
-> Worse, macros that don't parenthesize the arguments.
+> And finally, btrfs check doesn't consider dirty log as an error, unlike
+> ext*/xfs, that's to say we don't need to mount the fs to replay the log,
+> but just run btrfs check on the fs is enough.
 > 
-> Worse^2, macros that require variables to be defined in the caller's
-> scope that aren't passed as explicit parameters.
+> So introduce a similar test case but for btrfs only.
 > 
-> Worse^3, macros with gotos.
+> The test case will stress btrfs by:
+> - Use small nodesize to bump tree height
+> - Create a base tree which is already high enough
+> - Trim tree blocks to find possible trim bugs
+> - Call snapshot creation and deletion along with fsstress
+> 
+> Also it includes certain workaround for btrfs:
+> - Use no-holes feature
+>   To avoid missing hole file extents.
+>   Although that behavior doesn't follow the on-disk format spec, it
+>   doesn't cause data loss. And will follow the new on-disk format spec
+>   of no-holes feature, so it's better to workaround it.
+> 
+> And an optimization for btrfs only:
+> - Use replay-log --fsck/--check command
+>   Since dm-log-writes records bios sequentially, there is no way to
+>   locate certain entry unless we iterate all entries.
+>   This is becoming a big performance penalty if we replay certain a
+>   range, check the fs, then re-execute replay-log to replay another
+>   range.
+> 
+>   We need to records the previous entry location, or we need to
+>   re-iterate all previous entries.
+> 
+>   Thankfully, replay-log has already address it by providing --fsck and
+>   --check command, thus we don't need to break replay-log command.
+> 
+> Please note, for fast storage (e.g. fast NVME or unsafe cache mode),
+> it's recommended to use log devices larger than 15G, or we can't record
+> the full log of just 30s fsstress run.
+> 
+> Signed-off-by: Qu Wenruo <wqu@suse.com>
+> ---
+> For the log devices size problem, I have submitted dm-logwrites bio flag
+> filter support, to filter out data bios.
+> 
+> But that is not yet merged into kernel, thus we need a large log device
+> for short run.
+> 
+> Changelog:
+> - Better expression/words for comment
+> - Add requirement for no-holes features
+> - Use xattr to bump up tree height
+>   So no need for max_inline mount option
+> - Coding style fixes for function definition
+> - Add -f for rm to avoid user alias setting
+> - Add new workload (update time stamp and create new files) for snapshot
+>   workload
+> - Remove an unnecessary sync call
+> - Get rid of wrong 2>&1 redirection
+> - Add to group "snapshot" and "stress"
+> ---
+>  common/config               |   1 +
+>  common/dmlogwrites          |  28 +++++++
+>  src/log-writes/replay-log.c |   2 +
+>  tests/btrfs/192             | 149 ++++++++++++++++++++++++++++++++++++
+>  tests/btrfs/192.out         |   2 +
+>  tests/btrfs/group           |   1 +
+>  6 files changed, 183 insertions(+)
+>  create mode 100755 tests/btrfs/192
+>  create mode 100644 tests/btrfs/192.out
+> 
+> diff --git a/common/config b/common/config
+> index bd64be62..4c86a492 100644
+> --- a/common/config
+> +++ b/common/config
+> @@ -183,6 +183,7 @@ export LOGGER_PROG="$(type -P logger)"
+>  export DBENCH_PROG="$(type -P dbench)"
+>  export DMSETUP_PROG="$(type -P dmsetup)"
+>  export WIPEFS_PROG="$(type -P wipefs)"
+> +export BLKDISCARD_PROG="$(type -P blkdiscard)"
+>  export DUMP_PROG="$(type -P dump)"
+>  export RESTORE_PROG="$(type -P restore)"
+>  export LVM_PROG="$(type -P lvm)"
+> diff --git a/common/dmlogwrites b/common/dmlogwrites
+> index ae2cbc6a..3292544a 100644
+> --- a/common/dmlogwrites
+> +++ b/common/dmlogwrites
+> @@ -175,3 +175,31 @@ _log_writes_replay_log_range()
+>  		>> $seqres.full 2>&1
+>  	[ $? -ne 0 ] && _fail "replay failed"
+>  }
+> +
+> +# Replay and check each fua/flush (specified by $2) point.
+> +#
+> +# Since dm-log-writes records bio sequentially, even just replaying a range
+> +# still needs to iterate all records before the end point.
+> +# When number of records grows, it will be unacceptably slow, thus we need
+> +# to use relay-log itself to trigger fsck, avoid unnecessary seek.
+> +_log_writes_fast_replay_check()
+> +{
+> +	local check_point=$1
+> +	local blkdev=$2
+> +	local fsck_command
+> +
+> +	[ -z "$check_point" -o -z "$blkdev" ] && _fail \
+> +	"check_point and blkdev must be specified for _log_writes_fast_replay_check"
+> +
+> +	# Check program must not treat dirty log as an error.
+> +	# So only btrfs can use this feature
+> +	if [ $FSTYP = "btrfs" ]; then
+> +		fsck_command="$BTRFS_UTIL_PROG check $blkdev"
+> +	else
+> +		_notrun "fsck of $FSTYP reports dirty jounal/log as error, skipping test"
+> +	fi
 
-Yeah, these are ugly :) I was meant to define this macro in the context
-where it's used, and undefine it when it's out of scope.
+Hmm, it'd better to introduce a new require rule and call it in the test
+instead of calling _notrun in a do_something function.
 
-> 
-> Why not:
-> 
-> static inline bool CHECK_RANGE(...)
-> {
-> 	bool ret = ((off + len * 2) <= size);
-> 
-> 	if (!ret)
-> 		log5(...);
-> 	return ret;
-> }
-> 
-> and then
-> 
-> if (!CHECK_RANGE(offset, size, maxfilelen))
-> 	goto out;
+> +	$here/src/log-writes/replay-log --log $LOGWRITES_DEV \
+> +		--replay $blkdev --check $check_point --fsck "$fsck_command" \
+> +		2>&1 | tail -n 128 >> $seqres.full
+> +	[ $? -ne 0 ] && _fail "fsck failed during replay"
+> +}
+> diff --git a/src/log-writes/replay-log.c b/src/log-writes/replay-log.c
+> index 829b18e2..1e1cd524 100644
+> --- a/src/log-writes/replay-log.c
+> +++ b/src/log-writes/replay-log.c
+> @@ -1,5 +1,6 @@
+>  // SPDX-License-Identifier: GPL-2.0
+>  #include <stdio.h>
+> +#include <errno.h>
+>  #include <unistd.h>
+>  #include <getopt.h>
+>  #include <stdlib.h>
+> @@ -375,6 +376,7 @@ int main(int argc, char **argv)
+>  				fprintf(stderr, "Fsck errored out on entry "
+>  					"%llu\n",
+>  					(unsigned long long)log->cur_entry - 1);
+> +				ret = -EUCLEAN;
 
-Looks good, will rework. Thanks for the review!
+This part is not mentioned in commit log.
 
+>  				break;
+>  			}
+>  		}
+> diff --git a/tests/btrfs/192 b/tests/btrfs/192
+> new file mode 100755
+> index 00000000..85cdb43f
+> --- /dev/null
+> +++ b/tests/btrfs/192
+> @@ -0,0 +1,149 @@
+> +#! /bin/bash
+> +# SPDX-License-Identifier: GPL-2.0
+> +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
+> +#
+> +# FS QA Test 192
+> +#
+> +# Test btrfs consistency after each FUA for a workload with snapshot creation
+> +# and removal
+> +#
+> +seq=`basename $0`
+> +seqres=$RESULT_DIR/$seq
+> +echo "QA output created by $seq"
+> +
+> +here=`pwd`
+> +tmp=/tmp/$$
+> +status=1	# failure is the default!
+> +trap "_cleanup; exit \$status" 0 1 2 3 15
+> +
+> +_cleanup()
+> +{
+> +	cd /
+> +	kill -q $pid1 &> /dev/null
+> +	kill -q $pid2 &> /dev/null
+> +	wait
+> +	$KILLALL_PROG -q $FSSTRESS_PROG &> /dev/null
+
+Seems you should kill fsstress first then wait for all background
+processes.
+
+> +	_log_writes_cleanup &> /dev/null
+> +	rm -f $tmp.*
+> +}
+> +
+> +# get standard environment, filters and checks
+> +. ./common/rc
+> +. ./common/filter
+> +. ./common/dmlogwrites
+> +
+> +# remove previous $seqres.full before test
+> +rm -f $seqres.full
+> +
+> +# real QA test starts here
+> +
+> +# Modify as appropriate.
+> +_supported_fs btrfs
+> +_supported_os Linux
+> +
+> +_require_command "$KILLALL_PROG" killall
+> +_require_command "$BLKDISCARD_PROG" blkdiscard
+> +_require_btrfs_fs_feature "no_holes"
+> +_require_btrfs_mkfs_feature "no-holes"
+> +_require_log_writes
+> +_require_scratch
+
+_require_attrs
+
+> +
+> +# To generate 3 level fs tree for 64K nodesize, we need 32768 xattr items.
+> +# That will cause too many transactions, bumping replay check time
+> +# from ~60s to ~300s. (VM alreayd using unsafe cache for the test devices)
+> +# So here we skip non-4K page size system, in favor of a shorter default
+> +# test time
+> +if [ $(get_page_size) -ne 4096 ]; then
+> +	_notrun "This test doesn't support non-4K page size yet"
+> +fi
+> +
+> +runtime=30
+> +nr_cpus=$("$here/src/feature" -o)
+> +# cap nr_cpus to 8 to avoid spending too much time on hosts with many cpus
+> +if [ $nr_cpus -gt 8 ]; then
+> +	nr_cpus=8
+> +fi
+> +fsstress_args=$(_scale_fsstress_args -w -d $SCRATCH_MNT -n 99999 -p $nr_cpus \
+> +		$FSSTRESS_AVOID)
+> +_log_writes_init $SCRATCH_DEV
+> +
+> +# Discard the whole devices so when some tree pointer is wrong, it won't point
+> +# to some older tree blocks, and we can detect it.
+> +blkdiscard $LOGWRITES_DMDEV
+
+$BLKDISCARD_PROG $LOGWRITES_DMDEV >/dev/null 2>&1
+
+Use $BLKDISCARD_PROG you just defined :) And blkdiscard will print error
+messages if the device doesn't support discard.
+
+> +
+> +# Workaround minor file extent discountinous.
+> +# And use 4K nodesize to bump tree height
+> +_log_writes_mkfs -O no-holes -n 4k >> $seqres.full
+> +_log_writes_mount
+> +
+> +$BTRFS_UTIL_PROG subvolume create $SCRATCH_MNT/src > /dev/null
+> +mkdir -p $SCRATCH_MNT/snapshots
+> +mkdir -p $SCRATCH_MNT/src/padding
+> +
+> +random_file()
+> +{
+> +	local basedir=$1
+> +	echo "$basedir/$(ls $basedir | sort -R | tail -1)"
+> +}
+> +
+> +snapshot_workload()
+> +{
+
+Add a trap to make sure all sub-commands exit before exiting this
+function? Like what btrfs/187 does, i.e.
+
+	trap "wait; exit" SIGTERM
+
+> +	local i=0
+> +	while true; do
+> +		$BTRFS_UTIL_PROG subvolume snapshot \
+> +			$SCRATCH_MNT/src $SCRATCH_MNT/snapshots/$i \
+> +			> /dev/null
+> +		# Do something small to make snapshots different
+> +		rm -f "$(random_file $SCRATCH_MNT/src/padding)"
+> +		rm -f "$(random_file $SCRATCH_MNT/src/padding)"
+> +		touch "$(random_file $SCRATCH_MNT/src/padding)"
+> +		touch "$SCRATCH_MNT/src/padding/random_$RANDOM"
+> +
+> +		i=$(($i + 1))
+> +		sleep 1
+> +	done
+> +}
+> +
+> +delete_workload()
+> +{
+
+Same here.
+
+Thanks,
 Eryu
+
+> +	while true; do
+> +		sleep 2
+> +		$BTRFS_UTIL_PROG subvolume delete \
+> +			"$(random_file $SCRATCH_MNT/snapshots)" \
+> +			> /dev/null 2>&1
+> +	done
+> +}
+> +
+> +xattr_value=$(printf '%0.sX' $(seq 1 3800))
+> +
+> +# Bumping tree height to level 2.
+> +for ((i = 0; i < 64; i++)); do
+> +	touch "$SCRATCH_MNT/src/padding/$i"
+> +	$SETFATTR_PROG -n 'user.x1' -v $xattr_value \
+> +		"$SCRATCH_MNT/src/padding/$i"
+> +done
+> +
+> +_log_writes_mark prepare
+> +
+> +snapshot_workload &
+> +pid1=$!
+> +delete_workload &
+> +pid2=$!
+> +
+> +"$FSSTRESS_PROG" $fsstress_args > /dev/null &
+> +sleep $runtime
+> +
+> +"$KILLALL_PROG" -q "$FSSTRESS_PROG" &> /dev/null
+> +kill $pid1 &> /dev/null
+> +kill $pid2 &> /dev/null
+> +wait
+> +_log_writes_unmount
+> +_log_writes_remove
+> +
+> +_log_writes_fast_replay_check fua "$SCRATCH_DEV"
+> +
+> +echo "Silence is golden"
+> +
+> +# success, all done
+> +status=0
+> +exit
+> diff --git a/tests/btrfs/192.out b/tests/btrfs/192.out
+> new file mode 100644
+> index 00000000..6779aa77
+> --- /dev/null
+> +++ b/tests/btrfs/192.out
+> @@ -0,0 +1,2 @@
+> +QA output created by 192
+> +Silence is golden
+> diff --git a/tests/btrfs/group b/tests/btrfs/group
+> index 2474d43e..cab10d19 100644
+> --- a/tests/btrfs/group
+> +++ b/tests/btrfs/group
+> @@ -194,3 +194,4 @@
+>  189 auto quick send clone
+>  190 auto quick replay balance qgroup
+>  191 auto quick send dedupe
+> +192 auto replay snapshot stress
+> -- 
+> 2.22.0
 > 
-> --D
-> 
-> }
-> > +
-> >  void
-> >  cleanup(int sig)
-> >  {
-> > @@ -1989,6 +1997,7 @@ test(void)
-> >  		TRIM_OFF_LEN(offset, size, file_size);
-> >  		offset = offset & ~(block_size - 1);
-> >  		size = size & ~(block_size - 1);
-> > +		CHECK_RANGE(offset, size, maxfilelen);
-> >  		do {
-> >  			offset2 = random();
-> >  			TRIM_OFF(offset2, maxfilelen);
-> > @@ -2003,6 +2012,7 @@ test(void)
-> >  			TRIM_OFF_LEN(offset, size, file_size);
-> >  			offset = offset & ~(block_size - 1);
-> >  			size = size & ~(block_size - 1);
-> > +			CHECK_RANGE(offset, size, file_size);
-> >  			do {
-> >  				if (tries++ >= 30) {
-> >  					size = 0;
-> > @@ -2020,6 +2030,7 @@ test(void)
-> >  		offset -= offset % readbdy;
-> >  		if (o_direct)
-> >  			size -= size % readbdy;
-> > +		CHECK_RANGE(offset, size, maxfilelen);
-> >  		do {
-> >  			offset2 = random();
-> >  			TRIM_OFF(offset2, maxfilelen);
-> > -- 
-> > 2.14.4.44.g2045bb6
-> > 
