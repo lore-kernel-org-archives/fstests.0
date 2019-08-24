@@ -1,61 +1,124 @@
-Received: from aserp2120.oracle.com ([141.146.126.78]:45788 "EHLO
-        aserp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S2389397AbfHWOhE (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Fri, 23 Aug 2019 10:37:04 -0400
-Date: Fri, 23 Aug 2019 07:36:50 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] t_stripealign: Fix fibmap error handling
-Message-ID: <20190823143650.GI1037350@magnolia>
-References: <20190823092530.11797-1-cmaiolino@redhat.com>
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:43352 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725807AbfHXBHq (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Fri, 23 Aug 2019 21:07:46 -0400
+Received: by mail-pf1-f196.google.com with SMTP id v12so7632002pfn.10
+        for <fstests@vger.kernel.org>; Fri, 23 Aug 2019 18:07:46 -0700 (PDT)
+Date: Sat, 24 Aug 2019 09:07:38 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] ltp/fsx: avoid infinite loop while finding offset2 in
+ clone/dedupe/copy range ops
+Message-ID: <20190824010738.GD2845@desktop>
+References: <20190823072259.56671-1-eguan@linux.alibaba.com>
+ <20190823143354.GL1037422@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190823092530.11797-1-cmaiolino@redhat.com>
+In-Reply-To: <20190823143354.GL1037422@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Carlos Maiolino <cmaiolino@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Eryu Guan <eguan@linux.alibaba.com>, fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Fri, Aug 23, 2019 at 11:25:30AM +0200, Carlos Maiolino wrote:
-> FIBMAP only returns a negative value when the underlying filesystem does
-> not support FIBMAP or on permission error. For the remaining errors,
-> i.e. those usually returned from the filesystem itself, zero will be
-> returned.
+On Fri, Aug 23, 2019 at 07:33:54AM -0700, Darrick J. Wong wrote:
+> On Fri, Aug 23, 2019 at 03:22:59PM +0800, Eryu Guan wrote:
+> > In CLONE/DEDUPE/COPY RANGE operations, we pick a "offset" and "size"
+> > first, then find a suitable "offset2" by looping if there's overlap
+> > (|offset2-offset| < size) or final file size is greater than max file
+> > size (offset2 + size > maxfilelen).
+> > 
+> > But it's possible that there's no such suitable offset2 and we loop
+> > forever. e.g. block_size = 4096, offset = 0, size = 4096 and maxfilelen
+> > is a value smaller than 8212 (which could be set via '-l' option).
+> > 
+> > Fix it by making sure maxfilelen/file_size is big enough to hold 'size'
+> > bytes from 'offset2', and just skip this operation if not.
+> > 
+> > Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
+> > ---
+> >  ltp/fsx.c | 11 +++++++++++
+> >  1 file changed, 11 insertions(+)
+> > 
+> > diff --git a/ltp/fsx.c b/ltp/fsx.c
+> > index 06d08e4e93f3..f6eb3308e8bc 100644
+> > --- a/ltp/fsx.c
+> > +++ b/ltp/fsx.c
+> > @@ -1825,6 +1825,14 @@ do {						\
+> >  	TRIM_LEN(off, len, size);		\
+> >  } while (0)
+> >  
+> > +#define CHECK_RANGE(off, len, size)		\
+> > +do {						\
+> > +	if ((off + len * 2) > size) {		\
+> > +		log5(op, offset, size, -1, FL_SKIPPED); \
+> > +		goto out;			\
+> > +	}					\
+> > +} while (0)
 > 
-> We can not trust a zero return from the FIBMAP, and such behavior made
-> generic/223 succeed when it should not.
+> Eww, macros.
 > 
-> Also, we can't use perror() only to print errors when FIBMAP failed, or
-> it will simply print 'success' when a zero is returned.
+> Worse, macros that don't parenthesize the arguments.
 > 
-> Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
-> ---
->  src/t_stripealign.c | 7 +++++--
->  1 file changed, 5 insertions(+), 2 deletions(-)
+> Worse^2, macros that require variables to be defined in the caller's
+> scope that aren't passed as explicit parameters.
 > 
-> diff --git a/src/t_stripealign.c b/src/t_stripealign.c
-> index 5cdadaae..164831f8 100644
-> --- a/src/t_stripealign.c
-> +++ b/src/t_stripealign.c
-> @@ -76,8 +76,11 @@ int main(int argc, char ** argv)
->  		unsigned int	bmap = 0;
->  
->  		ret = ioctl(fd, FIBMAP, &bmap);
-> -		if (ret < 0) {
-> -			perror("fibmap");
-> +		if (ret <= 0) {
-> +			if (ret < 0)
-> +				perror("fibmap");
-> +			else
-> +				fprintf(stderr, "fibmap error\n");
+> Worse^3, macros with gotos.
 
-"fibmap returned no result"?
+Yeah, these are ugly :) I was meant to define this macro in the context
+where it's used, and undefine it when it's out of scope.
 
---D
-
->  			free(fie);
->  			close(fd);
->  			return 1;
-> -- 
-> 2.20.1
 > 
+> Why not:
+> 
+> static inline bool CHECK_RANGE(...)
+> {
+> 	bool ret = ((off + len * 2) <= size);
+> 
+> 	if (!ret)
+> 		log5(...);
+> 	return ret;
+> }
+> 
+> and then
+> 
+> if (!CHECK_RANGE(offset, size, maxfilelen))
+> 	goto out;
+
+Looks good, will rework. Thanks for the review!
+
+Eryu
+> 
+> --D
+> 
+> }
+> > +
+> >  void
+> >  cleanup(int sig)
+> >  {
+> > @@ -1989,6 +1997,7 @@ test(void)
+> >  		TRIM_OFF_LEN(offset, size, file_size);
+> >  		offset = offset & ~(block_size - 1);
+> >  		size = size & ~(block_size - 1);
+> > +		CHECK_RANGE(offset, size, maxfilelen);
+> >  		do {
+> >  			offset2 = random();
+> >  			TRIM_OFF(offset2, maxfilelen);
+> > @@ -2003,6 +2012,7 @@ test(void)
+> >  			TRIM_OFF_LEN(offset, size, file_size);
+> >  			offset = offset & ~(block_size - 1);
+> >  			size = size & ~(block_size - 1);
+> > +			CHECK_RANGE(offset, size, file_size);
+> >  			do {
+> >  				if (tries++ >= 30) {
+> >  					size = 0;
+> > @@ -2020,6 +2030,7 @@ test(void)
+> >  		offset -= offset % readbdy;
+> >  		if (o_direct)
+> >  			size -= size % readbdy;
+> > +		CHECK_RANGE(offset, size, maxfilelen);
+> >  		do {
+> >  			offset2 = random();
+> >  			TRIM_OFF(offset2, maxfilelen);
+> > -- 
+> > 2.14.4.44.g2045bb6
+> > 
