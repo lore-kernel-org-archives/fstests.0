@@ -1,89 +1,81 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:43636 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727604AbfHXOlv (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 24 Aug 2019 10:41:51 -0400
-Received: by mail-pf1-f196.google.com with SMTP id v12so8644254pfn.10
-        for <fstests@vger.kernel.org>; Sat, 24 Aug 2019 07:41:51 -0700 (PDT)
+Received: from mail-pg1-f195.google.com ([209.85.215.195]:40757 "EHLO
+        mail-pg1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1728375AbfHYOoU (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Aug 2019 10:44:20 -0400
+Received: by mail-pg1-f195.google.com with SMTP id w10so8814085pgj.7
+        for <fstests@vger.kernel.org>; Sun, 25 Aug 2019 07:44:20 -0700 (PDT)
+Message-ID: <5d629ec2.1c69fb81.f51d8.757a@mx.google.com>
+Date: Sun, 25 Aug 2019 22:44:05 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: [PATCH v2] ltp/fsx: avoid infinite loop while finding offset2 in clone/dedupe/copy range ops
-Date: Sat, 24 Aug 2019 22:41:07 +0800
-Message-Id: <20190824144107.27748-1-guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to c9adaa192f17
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="DuT0aOrfAPNS"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: Eryu Guan <eguan@linux.alibaba.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Eryu Guan <eguan@linux.alibaba.com>
 
-In CLONE/DEDUPE/COPY RANGE operations, we pick a "offset" and "size"
-first, then find a suitable "offset2" by looping if there's overlap
-(|offset2-offset| < size) or final file size is greater than max
-file size (offset2 + size > maxfilelen).
+--DuT0aOrfAPNS
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-But it's possible that there's no such suitable offset2 and we loop
-forever. e.g. block_size = 4096, offset = 0, size = 4096 and
-maxfilelen is a value smaller than 8212 (which could be set via '-l'
-option).
+Hi all,
 
-Fix it by making sure maxfilelen/file_size is big enough to hold
-'size' bytes from 'offset2', and just skip this operation if not.
+The master branch of the xfstests repository at:
 
-Signed-off-by: Eryu Guan <eguan@linux.alibaba.com>
----
-v2:
-- don't use macro with ugly hacks, use an inline function instead
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
- ltp/fsx.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+have just been updated. Only three minor bug fixes are included in this update.
 
-diff --git a/ltp/fsx.c b/ltp/fsx.c
-index 06d08e4e93f3..890666ab6140 100644
---- a/ltp/fsx.c
-+++ b/ltp/fsx.c
-@@ -1911,6 +1911,15 @@ fail:
- 	return 0;
- }
- 
-+/* Check if range operations are possible to find a suitable offset */
-+static inline bool check_range(unsigned long op, unsigned long off,
-+			       unsigned long len, unsigned long size)
-+{
-+	bool ret = ((off + len * 2) <= size);
-+	if (!ret)
-+		log5(op, off, len, -1, FL_SKIPPED);
-+	return ret;
-+}
- 
- int
- test(void)
-@@ -1989,6 +1998,8 @@ test(void)
- 		TRIM_OFF_LEN(offset, size, file_size);
- 		offset = offset & ~(block_size - 1);
- 		size = size & ~(block_size - 1);
-+		if (!check_range(op, offset, size, maxfilelen))
-+			goto out;
- 		do {
- 			offset2 = random();
- 			TRIM_OFF(offset2, maxfilelen);
-@@ -2003,6 +2014,8 @@ test(void)
- 			TRIM_OFF_LEN(offset, size, file_size);
- 			offset = offset & ~(block_size - 1);
- 			size = size & ~(block_size - 1);
-+			if (!check_range(op, offset, size, file_size))
-+				goto out;
- 			do {
- 				if (tries++ >= 30) {
- 					size = 0;
-@@ -2020,6 +2033,8 @@ test(void)
- 		offset -= offset % readbdy;
- 		if (o_direct)
- 			size -= size % readbdy;
-+		if (!check_range(op, offset, size, maxfilelen))
-+			goto out;
- 		do {
- 			offset2 = random();
- 			TRIM_OFF(offset2, maxfilelen);
--- 
-2.21.0
+Thanks,
+Eryu
+
+The new head of the master branch is commit:
+
+c9adaa192f17 t_stripealign: Fix fibmap error handling
+
+New commits:
+
+Andreas Gruenbacher (1):
+      [8bbd45ad5bad] generic/322: fix bad xfs_io sync_range command
+
+Carlos Maiolino (1):
+      [c9adaa192f17] t_stripealign: Fix fibmap error handling
+
+Josef Bacik (1):
+      [9cd2fe8a9357] generic/500: doesn't work for btrfs
+
+
+Code Diffstat:
+
+ src/t_stripealign.c | 7 +++++--
+ tests/generic/322   | 4 ++--
+ tests/generic/500   | 6 ++++++
+ 3 files changed, 13 insertions(+), 4 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--DuT0aOrfAPNS
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1inVMACgkQJlKqKVyP
+52P58BAAqyDuYWe14+9RRjXm18oEjYCHyUZkzWxbRj6+sjr/VOVlUyuXqVz1v5tG
+IIVNev26bY48t9iXx2r382BPKLxX5L9HSwRlPU7lLRNKv/PvnKDXfZjAlhkWlqxY
+HZBXq1HQh7nCtalQPlh13L2tAt30BgCnImttTMAE7iUMieel+hckc6Mvj2KD5X+x
+fl1f1yWMxaTlQjAILqEAV0g8rVrEPvJ2fb7pKnJDYepv7rV1Or2nQbmN2+a8WT9h
+zv9fPCejnuHPAB9rlNXtd6PH+GIpQ9UjHnlqQYFVN9iWPHFoXjQ0z/Zy2CAx+pxb
+egldDan8AajQOr0rl9phqZlEpcO9TT6PLnIbNfrLmXeE3Kqp+g0TD5UDuh8cqhkc
+feXMBv2LPpKpC4Kg7pU4OGg0J6Cc2u4z1UxpsSOxBB3HiO0oxoayHdRXyqG2qCX5
+S3rwaM7f4+j3das5InOkpkrbuN8sVhzc1Ahu4ZAdwSqLytXV/DKz7voFyzf4QCfM
+wcIXzO5vpfOW/ZRxd1hqHPedSNOrcGNdn78sUSJlg+5yeH3L2/f0rnvhqHkKAtrN
+TaF6XOy4bOSbroL5qvZz4Za7NtAqJSjIKtpZXC6CTyGzTJb3cnOKv24hd1rEsC8I
+Yzrtg/7DSStJisIYp7QOcSygEtmCsReL7z+LptYfwSJeiZrASCQ=
+=pegM
+-----END PGP SIGNATURE-----
+
+--DuT0aOrfAPNS--
