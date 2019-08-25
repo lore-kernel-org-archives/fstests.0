@@ -1,39 +1,58 @@
-Received: from bombadil.infradead.org ([198.137.202.133]:60474 "EHLO
-        bombadil.infradead.org" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727937AbfHXXFw (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sat, 24 Aug 2019 19:05:52 -0400
-Date: Sat, 24 Aug 2019 16:05:50 -0700
-From: Christoph Hellwig <hch@infradead.org>
-Subject: Re: [PATCH] generic: test for failure to unlock inode after chgrp
- fails with EDQUOT
-Message-ID: <20190824230550.GA5494@infradead.org>
-References: <20190823035528.GH1037422@magnolia>
- <20190823035734.GH1037350@magnolia>
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:46567 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727050AbfHYNmH (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 25 Aug 2019 09:42:07 -0400
+Date: Sun, 25 Aug 2019 21:41:54 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [PATCH] t_stripealign: Fix fibmap error handling
+Message-ID: <20190825134154.GB2622@desktop>
+References: <20190823092530.11797-1-cmaiolino@redhat.com>
+ <20190823143650.GI1037350@magnolia>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190823035734.GH1037350@magnolia>
+In-Reply-To: <20190823143650.GI1037350@magnolia>
 Sender: fstests-owner@vger.kernel.org
 To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: xfs <linux-xfs@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Salvatore Bonaccorso <carnil@debian.org>, Security Officers <security@kernel.org>, Debian Security Team <team@security.debian.org>, benjamin.moody@gmail.com, Ben Hutchings <benh@debian.org>, Christoph Hellwig <hch@infradead.org>, fstests <fstests@vger.kernel.org>
+Cc: Carlos Maiolino <cmaiolino@redhat.com>, fstests@vger.kernel.org, linux-xfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-> diff --git a/tests/generic/group b/tests/generic/group
-> index e998d1d5..bb93bccc 100644
-> --- a/tests/generic/group
-> +++ b/tests/generic/group
-> @@ -572,3 +572,4 @@
->  716 dangerous_norepair
->  717 auto quick rw swap
->  718 auto quick rw swap
-> +719 dangerous
+On Fri, Aug 23, 2019 at 07:36:50AM -0700, Darrick J. Wong wrote:
+> On Fri, Aug 23, 2019 at 11:25:30AM +0200, Carlos Maiolino wrote:
+> > FIBMAP only returns a negative value when the underlying filesystem does
+> > not support FIBMAP or on permission error. For the remaining errors,
+> > i.e. those usually returned from the filesystem itself, zero will be
+> > returned.
+> > 
+> > We can not trust a zero return from the FIBMAP, and such behavior made
+> > generic/223 succeed when it should not.
+> > 
+> > Also, we can't use perror() only to print errors when FIBMAP failed, or
+> > it will simply print 'success' when a zero is returned.
+> > 
+> > Signed-off-by: Carlos Maiolino <cmaiolino@redhat.com>
+> > ---
+> >  src/t_stripealign.c | 7 +++++--
+> >  1 file changed, 5 insertions(+), 2 deletions(-)
+> > 
+> > diff --git a/src/t_stripealign.c b/src/t_stripealign.c
+> > index 5cdadaae..164831f8 100644
+> > --- a/src/t_stripealign.c
+> > +++ b/src/t_stripealign.c
+> > @@ -76,8 +76,11 @@ int main(int argc, char ** argv)
+> >  		unsigned int	bmap = 0;
+> >  
+> >  		ret = ioctl(fd, FIBMAP, &bmap);
+> > -		if (ret < 0) {
+> > -			perror("fibmap");
+> > +		if (ret <= 0) {
+> > +			if (ret < 0)
+> > +				perror("fibmap");
+> > +			else
+> > +				fprintf(stderr, "fibmap error\n");
+> 
+> "fibmap returned no result"?
 
-+ quota + metadata?  
+Fixed on commit. Thanks!
 
-Otherwise this looks fine to me:
-
-Reviewed-by: Christoph Hellwig <hch@lst.de>
-
-and after a while we should add it to auto.  I'm not even sure if we
-shouldn't do that ASAP.  It's not that dangerous and we should test
-for this everywhere..
+Eryu
