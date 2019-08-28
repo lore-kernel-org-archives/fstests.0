@@ -1,118 +1,128 @@
-Received: from userp2120.oracle.com ([156.151.31.85]:54548 "EHLO
-        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1730312AbfH0PJH (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Tue, 27 Aug 2019 11:09:07 -0400
-Date: Tue, 27 Aug 2019 08:08:50 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: [PATCH v3] generic: test for failure to unlock inode after chgrp
- fails with EDQUOT
-Message-ID: <20190827150850.GC1037528@magnolia>
+Received: from mail-io1-f66.google.com ([209.85.166.66]:45467 "EHLO
+        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726315AbfH1OiM (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Aug 2019 10:38:12 -0400
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+References: <20181202180832.GR8125@magnolia> <20181202181045.GS8125@magnolia>
+ <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com> <20190828142332.GT1037422@magnolia>
+In-Reply-To: <20190828142332.GT1037422@magnolia>
+From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
+Date: Wed, 28 Aug 2019 16:37:59 +0200
+Message-ID: <CAHpGcMLGWVssWAC1PqBJevr1+1rE_hj4QN27D26j7-Fp_Kzpsg@mail.gmail.com>
+Subject: Re: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
+ directio short read on EFAULT)
+Content-Type: text/plain; charset="UTF-8"
+Content-Transfer-Encoding: quoted-printable
 Sender: fstests-owner@vger.kernel.org
-To: Eryu Guan <guaneryu@gmail.com>
-Cc: Christoph Hellwig <hch@infradead.org>, xfs <linux-xfs@vger.kernel.org>, Linus Torvalds <torvalds@linux-foundation.org>, Dave Chinner <david@fromorbit.com>, Salvatore Bonaccorso <carnil@debian.org>, Security Officers <security@kernel.org>, Debian Security Team <team@security.debian.org>, benjamin.moody@gmail.com, Ben Hutchings <benh@debian.org>, fstests <fstests@vger.kernel.org>
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, cluster-devel <cluster-devel@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-From: Darrick J. Wong <darrick.wong@oracle.com>
+Am Mi., 28. Aug. 2019 um 16:23 Uhr schrieb Darrick J. Wong
+<darrick.wong@oracle.com>:
+> On Wed, Aug 21, 2019 at 10:23:49PM +0200, Andreas Gr=C3=BCnbacher wrote:
+> > Hi Darrick,
+> >
+> > Am So., 2. Dez. 2018 um 19:13 Uhr schrieb Darrick J. Wong
+> > <darrick.wong@oracle.com>:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > >
+> > > In commit 4721a601099, we tried to fix a problem wherein directio rea=
+ds
+> > > into a splice pipe will bounce EFAULT/EAGAIN all the way out to
+> > > userspace by simulating a zero-byte short read.  This happens because
+> > > some directio read implementations (xfs) will call
+> > > bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchrono=
+us
+> > > reads, but as soon as we run out of pipe buffers that _get_pages call
+> > > returns EFAULT, which the splice code translates to EAGAIN and bounce=
+s
+> > > out to userspace.
+> > >
+> > > In that commit, the iomap code catches the EFAULT and simulates a
+> > > zero-byte read, but that causes assertion errors on regular splice re=
+ads
+> > > because xfs doesn't allow short directio reads.  This causes infinite
+> > > splice() loops and assertion failures on generic/095 on overlayfs
+> > > because xfs only permit total success or total failure of a directio
+> > > operation.  The underlying issue in the pipe splice code has now been
+> > > fixed by changing the pipe splice loop to avoid avoid reading more da=
+ta
+> > > than there is space in the pipe.
+> > >
+> > > Therefore, it's no longer necessary to simulate the short directio, s=
+o
+> > > remove the hack from iomap.
+> > >
+> > > Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors w=
+hen pipes fill")
+> > > Reported-by: Amir Goldstein <amir73il@gmail.com>
+> > > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> > > v2: split into two patches per hch request
+> > > ---
+> > >  fs/iomap.c |    9 ---------
+> > >  1 file changed, 9 deletions(-)
+> > >
+> > > diff --git a/fs/iomap.c b/fs/iomap.c
+> > > index 3ffb776fbebe..d6bc98ae8d35 100644
+> > > --- a/fs/iomap.c
+> > > +++ b/fs/iomap.c
+> > > @@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_it=
+er *iter,
+> > >                                 dio->wait_for_completion =3D true;
+> > >                                 ret =3D 0;
+> > >                         }
+> > > -
+> > > -                       /*
+> > > -                        * Splicing to pipes can fail on a full pipe.=
+ We have to
+> > > -                        * swallow this to make it look like a short =
+IO
+> > > -                        * otherwise the higher splice layers will co=
+mpletely
+> > > -                        * mishandle the error and stop moving data.
+> > > -                        */
+> > > -                       if (ret =3D=3D -EFAULT)
+> > > -                               ret =3D 0;
+> > >                         break;
+> > >                 }
+> > >                 pos +=3D ret;
+> >
+> > I'm afraid this breaks the following test case on xfs and gfs2, the
+> > two current users of iomap_dio_rw.
+>
+> Hmm, I had kinda wondered if regular pipes still needed this help.
+> Evidently we don't have a lot of splice tests in fstests. :(
 
-This is a regression test that checks for xfs drivers that fail to
-unlock the inode after changing the group id fails with EDQUOT.  It
-pairs with "xfs: fix missing ILOCK unlock when xfs_setattr_nonsize fails
-due to EDQUOT".
+So what do you suggest as a fix?
 
-Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-Reviewed-by: Christoph Hellwig <hch@lst.de>
----
-v2: fix spdx tag even though i have no idea what i'm doing
----
- tests/generic/719     |   59 +++++++++++++++++++++++++++++++++++++++++++++++++
- tests/generic/719.out |    2 ++
- tests/generic/group   |    1 +
- 3 files changed, 62 insertions(+)
- create mode 100755 tests/generic/719
- create mode 100644 tests/generic/719.out
+> > Here, the splice system call fails with errno =3D EAGAIN when trying to
+> > "move data" from a file opened with O_DIRECT into a pipe.
+> >
+> > The test case can be run with option -d to not use O_DIRECT, which
+> > makes the test succeed.
+> >
+> > The -r option switches from reading from the pipe sequentially to
+> > reading concurrently with the splice, which doesn't change the
+> > behavior.
+> >
+> > Any thoughts?
+>
+> This would be great as an xfstest! :)
 
-diff --git a/tests/generic/719 b/tests/generic/719
-new file mode 100755
-index 00000000..4ba10380
---- /dev/null
-+++ b/tests/generic/719
-@@ -0,0 +1,59 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0+
-+# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
-+#
-+# FS QA Test No. 719
-+#
-+# Regression test for chgrp returning to userspace with ILOCK held after a
-+# hard quota error.  This causes the filesystem to hang, so it is (for now)
-+# a dangerous test.
-+#
-+# This test goes with commit 1fb254aa983bf ("xfs: fix missing ILOCK unlock when
-+# xfs_setattr_nonsize fails due to EDQUOT")
-+
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1    # failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+
-+_cleanup()
-+{
-+	cd /
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/quota
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_os Linux
-+_supported_fs generic
-+_require_scratch
-+_require_quota
-+_require_user
-+
-+rm -f $seqres.full
-+
-+_qmount_option "grpquota"
-+_scratch_mkfs > $seqres.full
-+_qmount
-+
-+dir="$SCRATCH_MNT/dummy"
-+mkdir -p $dir
-+chown $qa_user $dir
-+$XFS_QUOTA_PROG -x -f -c "limit -g bsoft=100k bhard=100k $qa_user" $SCRATCH_MNT
-+
-+$XFS_IO_PROG -f -c 'pwrite -S 0x58 0 1m' $dir/foo >> $seqres.full
-+chown $qa_user "${dir}/foo"
-+su $qa_user -c "chgrp $qa_user ${dir}/foo" 2>&1 | _filter_scratch
-+ls -la ${dir} >> $seqres.full
-+$XFS_QUOTA_PROG -x -f -c 'report -hag' $SCRATCH_MNT >> $seqres.full
-+
-+# success, all done
-+status=0
-+exit
-diff --git a/tests/generic/719.out b/tests/generic/719.out
-new file mode 100644
-index 00000000..8f9d51b5
---- /dev/null
-+++ b/tests/generic/719.out
-@@ -0,0 +1,2 @@
-+QA output created by 719
-+chgrp: changing group of 'SCRATCH_MNT/dummy/foo': Disk quota exceeded
-diff --git a/tests/generic/group b/tests/generic/group
-index 2e4a6f79..cd418106 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -568,3 +568,4 @@
- 563 auto quick
- 564 auto quick copy_range
- 565 auto quick copy_range
-+719 auto quick quota metadata
+Or perhaps something generalized from it.
+
+> Do you have one ready to go, or should I just make one from the source
+> code?
+
+The bug originally triggered in our internal cluster test system and
+I've recreated the test case I've included from the strace. That's all
+I have for now; feel free to take it, of course.
+
+It could be that the same condition can be triggered with one of the
+existing utilities (fio/fsstress/...).
+
+Thanks,
+Andreas
