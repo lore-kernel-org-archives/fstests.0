@@ -1,128 +1,295 @@
-Received: from mail-io1-f66.google.com ([209.85.166.66]:45467 "EHLO
-        mail-io1-f66.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726315AbfH1OiM (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Wed, 28 Aug 2019 10:38:12 -0400
-MIME-Version: 1.0
-References: <20181202180832.GR8125@magnolia> <20181202181045.GS8125@magnolia>
- <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com> <20190828142332.GT1037422@magnolia>
-In-Reply-To: <20190828142332.GT1037422@magnolia>
-From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Date: Wed, 28 Aug 2019 16:37:59 +0200
-Message-ID: <CAHpGcMLGWVssWAC1PqBJevr1+1rE_hj4QN27D26j7-Fp_Kzpsg@mail.gmail.com>
+Received: from userp2130.oracle.com ([156.151.31.86]:33850 "EHLO
+        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726341AbfH1OYP (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 28 Aug 2019 10:24:15 -0400
+Date: Wed, 28 Aug 2019 07:23:32 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
 Subject: Re: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
  directio short read on EFAULT)
-Content-Type: text/plain; charset="UTF-8"
-Content-Transfer-Encoding: quoted-printable
+Message-ID: <20190828142332.GT1037422@magnolia>
+References: <20181202180832.GR8125@magnolia>
+ <20181202181045.GS8125@magnolia>
+ <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+In-Reply-To: <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Content-Transfer-Encoding: quoted-printable
+To: Andreas =?iso-8859-1?Q?Gr=FCnbacher?= <andreas.gruenbacher@gmail.com>
 Cc: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, cluster-devel <cluster-devel@redhat.com>
 List-ID: <fstests@vger.kernel.org>
 
-Am Mi., 28. Aug. 2019 um 16:23 Uhr schrieb Darrick J. Wong
-<darrick.wong@oracle.com>:
-> On Wed, Aug 21, 2019 at 10:23:49PM +0200, Andreas Gr=C3=BCnbacher wrote:
-> > Hi Darrick,
+On Wed, Aug 21, 2019 at 10:23:49PM +0200, Andreas Gr=FCnbacher wrote:
+> Hi Darrick,
+>=20
+> Am So., 2. Dez. 2018 um 19:13 Uhr schrieb Darrick J. Wong
+> <darrick.wong@oracle.com>:
+> > From: Darrick J. Wong <darrick.wong@oracle.com>
 > >
-> > Am So., 2. Dez. 2018 um 19:13 Uhr schrieb Darrick J. Wong
-> > <darrick.wong@oracle.com>:
-> > > From: Darrick J. Wong <darrick.wong@oracle.com>
-> > >
-> > > In commit 4721a601099, we tried to fix a problem wherein directio rea=
+> > In commit 4721a601099, we tried to fix a problem wherein directio rea=
 ds
-> > > into a splice pipe will bounce EFAULT/EAGAIN all the way out to
-> > > userspace by simulating a zero-byte short read.  This happens because
-> > > some directio read implementations (xfs) will call
-> > > bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchrono=
+> > into a splice pipe will bounce EFAULT/EAGAIN all the way out to
+> > userspace by simulating a zero-byte short read.  This happens because
+> > some directio read implementations (xfs) will call
+> > bio_iov_iter_get_pages to grab pipe buffer pages and issue asynchrono=
 us
-> > > reads, but as soon as we run out of pipe buffers that _get_pages call
-> > > returns EFAULT, which the splice code translates to EAGAIN and bounce=
+> > reads, but as soon as we run out of pipe buffers that _get_pages call
+> > returns EFAULT, which the splice code translates to EAGAIN and bounce=
 s
-> > > out to userspace.
-> > >
-> > > In that commit, the iomap code catches the EFAULT and simulates a
-> > > zero-byte read, but that causes assertion errors on regular splice re=
+> > out to userspace.
+> >
+> > In that commit, the iomap code catches the EFAULT and simulates a
+> > zero-byte read, but that causes assertion errors on regular splice re=
 ads
-> > > because xfs doesn't allow short directio reads.  This causes infinite
-> > > splice() loops and assertion failures on generic/095 on overlayfs
-> > > because xfs only permit total success or total failure of a directio
-> > > operation.  The underlying issue in the pipe splice code has now been
-> > > fixed by changing the pipe splice loop to avoid avoid reading more da=
+> > because xfs doesn't allow short directio reads.  This causes infinite
+> > splice() loops and assertion failures on generic/095 on overlayfs
+> > because xfs only permit total success or total failure of a directio
+> > operation.  The underlying issue in the pipe splice code has now been
+> > fixed by changing the pipe splice loop to avoid avoid reading more da=
 ta
-> > > than there is space in the pipe.
-> > >
-> > > Therefore, it's no longer necessary to simulate the short directio, s=
+> > than there is space in the pipe.
+> >
+> > Therefore, it's no longer necessary to simulate the short directio, s=
 o
-> > > remove the hack from iomap.
-> > >
-> > > Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors w=
+> > remove the hack from iomap.
+> >
+> > Fixes: 4721a601099 ("iomap: dio data corruption and spurious errors w=
 hen pipes fill")
-> > > Reported-by: Amir Goldstein <amir73il@gmail.com>
-> > > Reviewed-by: Christoph Hellwig <hch@lst.de>
-> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> > > ---
-> > > v2: split into two patches per hch request
-> > > ---
-> > >  fs/iomap.c |    9 ---------
-> > >  1 file changed, 9 deletions(-)
-> > >
-> > > diff --git a/fs/iomap.c b/fs/iomap.c
-> > > index 3ffb776fbebe..d6bc98ae8d35 100644
-> > > --- a/fs/iomap.c
-> > > +++ b/fs/iomap.c
-> > > @@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_it=
+> > Reported-by: Amir Goldstein <amir73il@gmail.com>
+> > Reviewed-by: Christoph Hellwig <hch@lst.de>
+> > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > ---
+> > v2: split into two patches per hch request
+> > ---
+> >  fs/iomap.c |    9 ---------
+> >  1 file changed, 9 deletions(-)
+> >
+> > diff --git a/fs/iomap.c b/fs/iomap.c
+> > index 3ffb776fbebe..d6bc98ae8d35 100644
+> > --- a/fs/iomap.c
+> > +++ b/fs/iomap.c
+> > @@ -1877,15 +1877,6 @@ iomap_dio_rw(struct kiocb *iocb, struct iov_it=
 er *iter,
-> > >                                 dio->wait_for_completion =3D true;
-> > >                                 ret =3D 0;
-> > >                         }
-> > > -
-> > > -                       /*
-> > > -                        * Splicing to pipes can fail on a full pipe.=
+> >                                 dio->wait_for_completion =3D true;
+> >                                 ret =3D 0;
+> >                         }
+> > -
+> > -                       /*
+> > -                        * Splicing to pipes can fail on a full pipe.=
  We have to
-> > > -                        * swallow this to make it look like a short =
+> > -                        * swallow this to make it look like a short =
 IO
-> > > -                        * otherwise the higher splice layers will co=
+> > -                        * otherwise the higher splice layers will co=
 mpletely
-> > > -                        * mishandle the error and stop moving data.
-> > > -                        */
-> > > -                       if (ret =3D=3D -EFAULT)
-> > > -                               ret =3D 0;
-> > >                         break;
-> > >                 }
-> > >                 pos +=3D ret;
-> >
-> > I'm afraid this breaks the following test case on xfs and gfs2, the
-> > two current users of iomap_dio_rw.
->
-> Hmm, I had kinda wondered if regular pipes still needed this help.
-> Evidently we don't have a lot of splice tests in fstests. :(
+> > -                        * mishandle the error and stop moving data.
+> > -                        */
+> > -                       if (ret =3D=3D -EFAULT)
+> > -                               ret =3D 0;
+> >                         break;
+> >                 }
+> >                 pos +=3D ret;
+>=20
+> I'm afraid this breaks the following test case on xfs and gfs2, the
+> two current users of iomap_dio_rw.
 
-So what do you suggest as a fix?
+Hmm, I had kinda wondered if regular pipes still needed this help.
+Evidently we don't have a lot of splice tests in fstests. :(
 
-> > Here, the splice system call fails with errno =3D EAGAIN when trying to
-> > "move data" from a file opened with O_DIRECT into a pipe.
-> >
-> > The test case can be run with option -d to not use O_DIRECT, which
-> > makes the test succeed.
-> >
-> > The -r option switches from reading from the pipe sequentially to
-> > reading concurrently with the splice, which doesn't change the
-> > behavior.
-> >
-> > Any thoughts?
->
-> This would be great as an xfstest! :)
+> Here, the splice system call fails with errno =3D EAGAIN when trying to
+> "move data" from a file opened with O_DIRECT into a pipe.
+>=20
+> The test case can be run with option -d to not use O_DIRECT, which
+> makes the test succeed.
+>=20
+> The -r option switches from reading from the pipe sequentially to
+> reading concurrently with the splice, which doesn't change the
+> behavior.
+>=20
+> Any thoughts?
 
-Or perhaps something generalized from it.
+This would be great as an xfstest! :)
 
-> Do you have one ready to go, or should I just make one from the source
-> code?
+Do you have one ready to go, or should I just make one from the source
+code?
 
-The bug originally triggered in our internal cluster test system and
-I've recreated the test case I've included from the strace. That's all
-I have for now; feel free to take it, of course.
+--D
 
-It could be that the same condition can be triggered with one of the
-existing utilities (fio/fsstress/...).
-
-Thanks,
-Andreas
+> Thanks,
+> Andreas
+>=20
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D 8< =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
+> #define _GNU_SOURCE
+> #include <sys/types.h>
+> #include <sys/stat.h>
+> #include <sys/wait.h>
+> #include <unistd.h>
+> #include <fcntl.h>
+> #include <err.h>
+>=20
+> #include <stdlib.h>
+> #include <stdio.h>
+> #include <stdbool.h>
+> #include <string.h>
+> #include <errno.h>
+>=20
+> #define SECTOR_SIZE 512
+> #define BUFFER_SIZE (150 * SECTOR_SIZE)
+>=20
+> void read_from_pipe(int fd, const char *filename, size_t size)
+> {
+>     char buffer[SECTOR_SIZE];
+>     size_t sz;
+>     ssize_t ret;
+>=20
+>     while (size) {
+>         sz =3D size;
+>         if (sz > sizeof buffer)
+>             sz =3D sizeof buffer;
+>         ret =3D read(fd, buffer, sz);
+>         if (ret < 0)
+>             err(1, "read: %s", filename);
+>         if (ret =3D=3D 0) {
+>             fprintf(stderr, "read: %s: unexpected EOF\n", filename);
+>             exit(1);
+>         }
+>         size -=3D sz;
+>     }
+> }
+>=20
+> void do_splice1(int fd, const char *filename, size_t size)
+> {
+>     bool retried =3D false;
+>     int pipefd[2];
+>=20
+>     if (pipe(pipefd) =3D=3D -1)
+>         err(1, "pipe");
+>     while (size) {
+>         ssize_t spliced;
+>=20
+>         spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MO=
+VE);
+>         if (spliced =3D=3D -1) {
+>             if (errno =3D=3D EAGAIN && !retried) {
+>                 retried =3D true;
+>                 fprintf(stderr, "retrying splice\n");
+>                 sleep(1);
+>                 continue;
+>             }
+>             err(1, "splice");
+>         }
+>         read_from_pipe(pipefd[0], filename, spliced);
+>         size -=3D spliced;
+>     }
+>     close(pipefd[0]);
+>     close(pipefd[1]);
+> }
+>=20
+> void do_splice2(int fd, const char *filename, size_t size)
+> {
+>     bool retried =3D false;
+>     int pipefd[2];
+>     int pid;
+>=20
+>     if (pipe(pipefd) =3D=3D -1)
+>         err(1, "pipe");
+>=20
+>     pid =3D fork();
+>     if (pid =3D=3D 0) {
+>         close(pipefd[1]);
+>         read_from_pipe(pipefd[0], filename, size);
+>         exit(0);
+>     } else {
+>         close(pipefd[0]);
+>         while (size) {
+>             ssize_t spliced;
+>=20
+>             spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_=
+F_MOVE);
+>             if (spliced =3D=3D -1) {
+>                 if (errno =3D=3D EAGAIN && !retried) {
+>                     retried =3D true;
+>                     fprintf(stderr, "retrying splice\n");
+>                     sleep(1);
+>                     continue;
+>                 }
+>                 err(1, "splice");
+>             }
+>             size -=3D spliced;
+>         }
+>         close(pipefd[1]);
+>         waitpid(pid, NULL, 0);
+>     }
+> }
+>=20
+> void usage(const char *argv0)
+> {
+>     fprintf(stderr, "USAGE: %s [-rd] {filename}\n", basename(argv0));
+>     exit(2);
+> }
+>=20
+> int main(int argc, char *argv[])
+> {
+>     void (*do_splice)(int fd, const char *filename, size_t size);
+>     const char *filename;
+>     char *buffer;
+>     int opt, open_flags, fd;
+>     ssize_t ret;
+>=20
+>     do_splice =3D do_splice1;
+>     open_flags =3D O_CREAT | O_TRUNC | O_RDWR | O_DIRECT;
+>=20
+>     while ((opt =3D getopt(argc, argv, "rd")) !=3D -1) {
+>         switch(opt) {
+>         case 'r':
+>             do_splice =3D do_splice2;
+>             break;
+>         case 'd':
+>             open_flags &=3D ~O_DIRECT;
+>             break;
+>         default:  /* '?' */
+>             usage(argv[0]);
+>         }
+>     }
+>=20
+>     if (optind >=3D argc)
+>         usage(argv[0]);
+>     filename =3D argv[optind];
+>=20
+>     printf("%s reader %s O_DIRECT\n",
+>            do_splice =3D=3D do_splice1 ? "sequential" : "concurrent",
+>            (open_flags & O_DIRECT) ? "with" : "without");
+>=20
+>     buffer =3D aligned_alloc(SECTOR_SIZE, BUFFER_SIZE);
+>     if (buffer =3D=3D NULL)
+>         err(1, "aligned_alloc");
+>=20
+>     fd =3D open(filename, open_flags, 0666);
+>     if (fd =3D=3D -1)
+>         err(1, "open: %s", filename);
+>=20
+>     memset(buffer, 'x', BUFFER_SIZE);
+>     ret =3D write(fd, buffer, BUFFER_SIZE);
+>     if (ret < 0)
+>         err(1, "write: %s", filename);
+>     if (ret !=3D BUFFER_SIZE) {
+>         fprintf(stderr, "%s: short write\n", filename);
+>         exit(1);
+>     }
+>=20
+>     ret =3D lseek(fd, 0, SEEK_SET);
+>     if (ret !=3D 0)
+>         err(1, "lseek: %s", filename);
+>=20
+>     do_splice(fd, filename, BUFFER_SIZE);
+>=20
+>     if (unlink(filename) =3D=3D -1)
+>         err(1, "unlink: %s", filename);
+>=20
+>     return 0;
+> }
+> =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D 8< =3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=
+=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D=3D
