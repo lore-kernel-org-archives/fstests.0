@@ -1,110 +1,319 @@
-Received: from mail-io1-f68.google.com ([209.85.166.68]:44999 "EHLO
-        mail-io1-f68.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726637AbfH2Ltl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Thu, 29 Aug 2019 07:49:41 -0400
+Received: from userp2120.oracle.com ([156.151.31.85]:52388 "EHLO
+        userp2120.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727065AbfH3AoN (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Thu, 29 Aug 2019 20:44:13 -0400
+Date: Thu, 29 Aug 2019 17:44:07 -0700
+From: "Darrick J. Wong" <darrick.wong@oracle.com>
+Subject: [RFC PATCH] generic: test splice() with pipes
+Message-ID: <20190830004407.GA5340@magnolia>
+References: <20190829161155.GA5360@magnolia>
 MIME-Version: 1.0
-References: <20181202180832.GR8125@magnolia> <20181202181045.GS8125@magnolia>
- <CAHpGcM+WQYFHOOC8SzKq+=DuHVZ4fw4RHLTMUDN-o6GX3YtGvQ@mail.gmail.com>
- <20190828142332.GT1037422@magnolia> <CAHpGcMLGWVssWAC1PqBJevr1+1rE_hj4QN27D26j7-Fp_Kzpsg@mail.gmail.com>
- <20190829031216.GW1037422@magnolia>
-In-Reply-To: <20190829031216.GW1037422@magnolia>
-From: =?UTF-8?Q?Andreas_Gr=C3=BCnbacher?= <andreas.gruenbacher@gmail.com>
-Date: Thu, 29 Aug 2019 13:49:29 +0200
-Message-ID: <CAHpGcM+Aq+BxD0_TPx9sqTCt8N6X3Q+UO6CkyfV3NZMaN8AU8w@mail.gmail.com>
-Subject: Re: [PATCH v2 2/2] iomap: partially revert 4721a601099 (simulated
- directio short read on EFAULT)
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: text/plain; charset=iso-8859-1
+Content-Disposition: inline
+In-Reply-To: <20190829161155.GA5360@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: Amir Goldstein <amir73il@gmail.com>, Dave Chinner <david@fromorbit.com>, jencce.kernel@gmail.com, linux-xfs <linux-xfs@vger.kernel.org>, overlayfs <linux-unionfs@vger.kernel.org>, Zorro Lang <zlang@redhat.com>, fstests <fstests@vger.kernel.org>, linux-fsdevel <linux-fsdevel@vger.kernel.org>, Christoph Hellwig <hch@infradead.org>, cluster-devel <cluster-devel@redhat.com>
+Content-Transfer-Encoding: quoted-printable
+To: andreas.gruenbacher@gmail.com
+Cc: xfs <linux-xfs@vger.kernel.org>, viro@zeniv.linux.org.uk, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-Hi Darrick,
+From: Darrick J. Wong <darrick.wong@oracle.com>
 
-Am Do., 29. Aug. 2019 um 05:12 Uhr schrieb Darrick J. Wong
-<darrick.wong@oracle.com>:
-> Hm, so I made an xfstest out of the program you sent me, and indeed
-> reverting that chunk makes the failure go away, but that got me
-> wondering -- that iomap kludge was a workaround for the splice code
-> telling iomap to try to stuff XXXX bytes into a pipe that only has X
-> bytes of free buffer space.  We fixed splice_direct_to_actor to clamp
-> the length parameter to the available pipe space, but we never did the
-> same to do_splice:
->
->         /* Don't try to read more the pipe has space for. */
->         read_len = min_t(size_t, len,
->                          (pipe->buffers - pipe->nrbufs) << PAGE_SHIFT);
->         ret = do_splice_to(in, &pos, pipe, read_len, flags);
->
-> Applying similar logic to the two (opipe != NULL) cases of do_splice()
-> seem to make the EAGAIN problem go away too.  So why don't we teach
-> do_splice to only ask for as many bytes as the pipe has space here too?
->
-> Does the following patch fix it for you?
+Andreas Gr=FCnbacher reports that on the two filesystems that support
+iomap directio, it's possible for splice() to return -EAGAIN (instead of
+a short splice) if the pipe being written to has less space available in
+its pipe buffers than the length supplied by the calling process.
 
-Yes, that works, thank you.
+This is a regression test to check for correct operation.
 
-> From: Darrick J. Wong <darrick.wong@oracle.com>
-> Subject: [PATCH] splice: only read in as much information as there is pipe buffer space
->
-> Andreas Gruenbacher reports that on the two filesystems that support
-> iomap directio, it's possible for splice() to return -EAGAIN (instead of
-> a short splice) if the pipe being written to has less space available in
-> its pipe buffers than the length supplied by the calling process.
->
-> Months ago we fixed splice_direct_to_actor to clamp the length of the
-> read request to the size of the splice pipe.  Do the same to do_splice.
+XXX Andreas: Since you wrote the C reproducer, can you send me the
+proper copyright and author attribution statement for the C program?
 
-Can you add a reference to that commit here (17614445576b6)?
+Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+---
+ .gitignore            |    1=20
+ src/Makefile          |    2 -
+ src/splice-test.c     |  173 +++++++++++++++++++++++++++++++++++++++++++=
+++++++
+ tests/generic/720     |   41 ++++++++++++
+ tests/generic/720.out |    7 ++
+ tests/generic/group   |    1=20
+ 6 files changed, 224 insertions(+), 1 deletion(-)
+ create mode 100644 src/splice-test.c
+ create mode 100755 tests/generic/720
+ create mode 100644 tests/generic/720.out
 
-> Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
-> ---
->  fs/splice.c |   12 +++++++++++-
->  1 file changed, 11 insertions(+), 1 deletion(-)
->
-> diff --git a/fs/splice.c b/fs/splice.c
-> index 98412721f056..50335515d7c1 100644
-> --- a/fs/splice.c
-> +++ b/fs/splice.c
-> @@ -1101,6 +1101,7 @@ static long do_splice(struct file *in, loff_t __user *off_in,
->         struct pipe_inode_info *ipipe;
->         struct pipe_inode_info *opipe;
->         loff_t offset;
-> +       unsigned int pipe_pages;
->         long ret;
->
->         ipipe = get_pipe_info(in);
-> @@ -1123,6 +1124,10 @@ static long do_splice(struct file *in, loff_t __user *off_in,
->                 if ((in->f_flags | out->f_flags) & O_NONBLOCK)
->                         flags |= SPLICE_F_NONBLOCK;
->
-> +               /* Don't try to read more the pipe has space for. */
-> +               pipe_pages = opipe->buffers - opipe->nrbufs;
-> +               len = min_t(size_t, len, pipe_pages << PAGE_SHIFT);
-
-This should probably be min(len, (size_t)pipe_pages << PAGE_SHIFT).
-Same for the second min_t here and the one added by commit
-17614445576b6.
-
-> +
->                 return splice_pipe_to_pipe(ipipe, opipe, len, flags);
->         }
->
-> @@ -1180,8 +1185,13 @@ static long do_splice(struct file *in, loff_t __user *off_in,
->
->                 pipe_lock(opipe);
->                 ret = wait_for_space(opipe, flags);
-> -               if (!ret)
-> +               if (!ret) {
-> +                       /* Don't try to read more the pipe has space for. */
-> +                       pipe_pages = opipe->buffers - opipe->nrbufs;
-> +                       len = min_t(size_t, len, pipe_pages << PAGE_SHIFT);
-> +
->                         ret = do_splice_to(in, &offset, opipe, len, flags);
-> +               }
->                 pipe_unlock(opipe);
->                 if (ret > 0)
->                         wakeup_pipe_readers(opipe);
-
-Thanks,
-Andreas
+diff --git a/.gitignore b/.gitignore
+index c8c815f9..26d4da11 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -112,6 +112,7 @@
+ /src/runas
+ /src/seek_copy_test
+ /src/seek_sanity_test
++/src/splice-test
+ /src/stale_handle
+ /src/stat_test
+ /src/swapon
+diff --git a/src/Makefile b/src/Makefile
+index c4fcf370..2920dfb1 100644
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -28,7 +28,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesize pre=
+allo_rw_pattern_reader \
+ 	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_type \
+ 	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+ 	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles \
+-	fscrypt-crypt-util bulkstat_null_ocount
++	fscrypt-crypt-util bulkstat_null_ocount splice-test
+=20
+ SUBDIRS =3D log-writes perf
+=20
+diff --git a/src/splice-test.c b/src/splice-test.c
+new file mode 100644
+index 00000000..d3c12075
+--- /dev/null
++++ b/src/splice-test.c
+@@ -0,0 +1,173 @@
++// SPDX-License-Identifier: GPL-2.0-or-later
++/*
++ * Copyright (C) 2019 ?????????????????????????????
++ * Author:=20
++ *
++ * Make sure that reading and writing to a pipe via splice.
++ */
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/wait.h>
++#include <unistd.h>
++#include <fcntl.h>
++#include <err.h>
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <stdbool.h>
++#include <string.h>
++#include <errno.h>
++
++#define SECTOR_SIZE 512
++#define BUFFER_SIZE (150 * SECTOR_SIZE)
++
++void read_from_pipe(int fd, const char *filename, size_t size)
++{
++	char buffer[SECTOR_SIZE];
++	size_t sz;
++	ssize_t ret;
++
++	while (size) {
++		sz =3D size;
++		if (sz > sizeof buffer)
++			sz =3D sizeof buffer;
++		ret =3D read(fd, buffer, sz);
++		if (ret < 0)
++			err(1, "read: %s", filename);
++		if (ret =3D=3D 0) {
++			fprintf(stderr, "read: %s: unexpected EOF\n", filename);
++			exit(1);
++		}
++		size -=3D sz;
++	}
++}
++
++void do_splice1(int fd, const char *filename, size_t size)
++{
++	bool retried =3D false;
++	int pipefd[2];
++
++	if (pipe(pipefd) =3D=3D -1)
++		err(1, "pipe");
++	while (size) {
++		ssize_t spliced;
++
++		spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MOVE);
++		if (spliced =3D=3D -1) {
++			if (errno =3D=3D EAGAIN && !retried) {
++				retried =3D true;
++				fprintf(stderr, "retrying splice\n");
++				sleep(1);
++				continue;
++			}
++			err(1, "splice");
++		}
++		read_from_pipe(pipefd[0], filename, spliced);
++		size -=3D spliced;
++	}
++	close(pipefd[0]);
++	close(pipefd[1]);
++}
++
++void do_splice2(int fd, const char *filename, size_t size)
++{
++	bool retried =3D false;
++	int pipefd[2];
++	int pid;
++
++	if (pipe(pipefd) =3D=3D -1)
++		err(1, "pipe");
++
++	pid =3D fork();
++	if (pid =3D=3D 0) {
++		close(pipefd[1]);
++		read_from_pipe(pipefd[0], filename, size);
++		exit(0);
++	} else {
++		close(pipefd[0]);
++		while (size) {
++			ssize_t spliced;
++
++			spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MOVE);
++			if (spliced =3D=3D -1) {
++				if (errno =3D=3D EAGAIN && !retried) {
++					retried =3D true;
++					fprintf(stderr, "retrying splice\n");
++					sleep(1);
++					continue;
++				}
++				err(1, "splice");
++			}
++			size -=3D spliced;
++		}
++		close(pipefd[1]);
++		waitpid(pid, NULL, 0);
++	}
++}
++
++void usage(const char *argv0)
++{
++	fprintf(stderr, "USAGE: %s [-rd] {filename}\n", basename(argv0));
++	exit(2);
++}
++
++int main(int argc, char *argv[])
++{
++	void (*do_splice)(int fd, const char *filename, size_t size);
++	const char *filename;
++	char *buffer;
++	int opt, open_flags, fd;
++	ssize_t ret;
++
++	do_splice =3D do_splice1;
++	open_flags =3D O_CREAT | O_TRUNC | O_RDWR | O_DIRECT;
++
++	while ((opt =3D getopt(argc, argv, "rd")) !=3D -1) {
++		switch(opt) {
++		case 'r':
++			do_splice =3D do_splice2;
++			break;
++		case 'd':
++			open_flags &=3D ~O_DIRECT;
++			break;
++		default:  /* '?' */
++			usage(argv[0]);
++		}
++	}
++
++	if (optind >=3D argc)
++		usage(argv[0]);
++	filename =3D argv[optind];
++
++	printf("%s reader %s O_DIRECT\n",
++		   do_splice =3D=3D do_splice1 ? "sequential" : "concurrent",
++		   (open_flags & O_DIRECT) ? "with" : "without");
++
++	buffer =3D aligned_alloc(SECTOR_SIZE, BUFFER_SIZE);
++	if (buffer =3D=3D NULL)
++		err(1, "aligned_alloc");
++
++	fd =3D open(filename, open_flags, 0666);
++	if (fd =3D=3D -1)
++		err(1, "open: %s", filename);
++
++	memset(buffer, 'x', BUFFER_SIZE);
++	ret =3D write(fd, buffer, BUFFER_SIZE);
++	if (ret < 0)
++		err(1, "write: %s", filename);
++	if (ret !=3D BUFFER_SIZE) {
++		fprintf(stderr, "%s: short write\n", filename);
++		exit(1);
++	}
++
++	ret =3D lseek(fd, 0, SEEK_SET);
++	if (ret !=3D 0)
++		err(1, "lseek: %s", filename);
++
++	do_splice(fd, filename, BUFFER_SIZE);
++
++	if (unlink(filename) =3D=3D -1)
++		err(1, "unlink: %s", filename);
++
++	return 0;
++}
+diff --git a/tests/generic/720 b/tests/generic/720
+new file mode 100755
+index 00000000..b7f09c40
+--- /dev/null
++++ b/tests/generic/720
+@@ -0,0 +1,41 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0-or-later
++# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Reserved.
++#
++# FS QA Test No. 720
++#
++# Test using splice() to read from pipes.
++
++seq=3D`basename $0`
++seqres=3D$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=3D`pwd`
++tmp=3D/tmp/$$
++status=3D1    # failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $TEST_DIR/a
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++
++# real QA test starts here
++_supported_os Linux
++_supported_fs generic
++_require_test
++
++rm -f $seqres.full
++
++src/splice-test -r $TEST_DIR/a
++src/splice-test -rd $TEST_DIR/a
++src/splice-test $TEST_DIR/a
++src/splice-test -d $TEST_DIR/a
++
++# success, all done
++status=3D0
++exit
+diff --git a/tests/generic/720.out b/tests/generic/720.out
+new file mode 100644
+index 00000000..b0fc9935
+--- /dev/null
++++ b/tests/generic/720.out
+@@ -0,0 +1,7 @@
++QA output created by 720
++concurrent reader with O_DIRECT
++concurrent reader with O_DIRECT
++concurrent reader without O_DIRECT
++concurrent reader without O_DIRECT
++sequential reader with O_DIRECT
++sequential reader without O_DIRECT
+diff --git a/tests/generic/group b/tests/generic/group
+index cd418106..f75d4e60 100644
+--- a/tests/generic/group
++++ b/tests/generic/group
+@@ -569,3 +569,4 @@
+ 564 auto quick copy_range
+ 565 auto quick copy_range
+ 719 auto quick quota metadata
++720 auto quick rw pipe splice
