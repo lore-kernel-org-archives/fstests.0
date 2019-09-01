@@ -1,125 +1,104 @@
-Received: from mail-pg1-f193.google.com ([209.85.215.193]:36109 "EHLO
-        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1727033AbfIAMIO (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 1 Sep 2019 08:08:14 -0400
-Date: Sun, 1 Sep 2019 20:08:06 +0800
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:41468 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726260AbfIAM3h (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Sep 2019 08:29:37 -0400
+Date: Sun, 1 Sep 2019 20:29:29 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [RFC PATCH 3/9] common/encrypt: support checking for v2
- encryption policy support
-Message-ID: <20190901120320.GE2622@desktop>
+Subject: Re: [RFC PATCH 0/9] xfstests: add tests for fscrypt key management
+ improvements
+Message-ID: <20190901122926.GF2622@desktop>
 References: <20190812175809.34810-1-ebiggers@kernel.org>
- <20190812175809.34810-4-ebiggers@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline
-In-Reply-To: <20190812175809.34810-4-ebiggers@kernel.org>
+In-Reply-To: <20190812175809.34810-1-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
 To: Eric Biggers <ebiggers@kernel.org>
 Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Aug 12, 2019 at 10:58:03AM -0700, Eric Biggers wrote:
-> From: Eric Biggers <ebiggers@google.com>
+On Mon, Aug 12, 2019 at 10:58:00AM -0700, Eric Biggers wrote:
+> Hello,
 > 
-> Allow passing '-v 2' to _require_scratch_encryption() to check for v2
-> encryption policy support on the scratch device, and for xfs_io support
-> for setting and getting v2 encryption policies.
+> This patchset adds xfstests for the kernel patchset
+> "[PATCH v8 00/20] fscrypt: key management improvements"
+> https://lkml.kernel.org/linux-fsdevel/20190805162521.90882-1-ebiggers@kernel.org/T/#u
 > 
-> Signed-off-by: Eric Biggers <ebiggers@google.com>
-> ---
->  common/encrypt | 41 +++++++++++++++++++++++++++++++----------
->  1 file changed, 31 insertions(+), 10 deletions(-)
+> These tests test the new ioctls for managing filesystem encryption keys,
+> and they test the new encryption policy version.
 > 
-> diff --git a/common/encrypt b/common/encrypt
-> index a086e80f..fa6e2672 100644
-> --- a/common/encrypt
-> +++ b/common/encrypt
-> @@ -6,12 +6,13 @@
->  
->  #
->  # _require_scratch_encryption [-c CONTENTS_MODE] [-n FILENAMES_MODE]
-> +#			      [-v POLICY_VERSION]
->  #
->  # Require encryption support on the scratch device.
->  #
-> -# This checks for support for the default type of encryption policy (AES-256-XTS
-> -# and AES-256-CTS).  Options can be specified to also require support for a
-> -# different type of encryption policy.
-> +# This checks for support for the default type of encryption policy (v1 with
-> +# AES-256-XTS and AES-256-CTS).  Options can be specified to also require
-> +# support for a different type of encryption policy.
->  #
->  _require_scratch_encryption()
->  {
-> @@ -68,13 +69,15 @@ _require_encryption_policy_support()
->  	local mnt=$1
->  	local dir=$mnt/tmpdir
->  	local set_encpolicy_args=""
-> +	local policy_version=1
->  	local c
->  
->  	OPTIND=2
-> -	while getopts "c:n:" c; do
-> +	while getopts "c:n:v:" c; do
->  		case $c in
-> -		c|n)
-> +		c|n|v)
->  			set_encpolicy_args+=" -$c $OPTARG"
-> +			[ $c = v ] && policy_version=$OPTARG
+> These tests depend on new xfs_io commands, for which I've sent a
+> separate patchset for xfsprogs.
+> 
+> Note: currently only ext4, f2fs, and ubifs support encryption.  But I
+> was told previously that since the fscrypt API is generic and may be
+> supported by XFS in the future, the command-line wrappers for the
+> fscrypt ioctls should be in xfs_io rather than in fstests directly
+> (https://marc.info/?l=fstests&m=147976255831951&w=2).
+> 
+> We'll want to wait for the kernel patches to be mainlined before merging
+> this, but I'm making it available now for any early feedback.
+> 
+> This version of the xfstests patchset can also be retrieved from tag
+> "fscrypt-key-mgmt-improvements_2019-08-12" of
+> https://git.kernel.org/pub/scm/linux/kernel/git/ebiggers/xfstests-dev.git
 
-Why not checking 'v' in a separate case?
+Sorry for getting so long to review this patchset. The patches all look
+in a good shape to me, thanks a lot! Please see the reply to patch "3/9"
+for the only minor issues I noticed.
 
->  			;;
->  		*)
->  			_fail "Unrecognized option '$c'"
-> @@ -87,10 +90,26 @@ _require_encryption_policy_support()
->  		>> $seqres.full
->  
->  	mkdir $dir
-> -	_require_command "$KEYCTL_PROG" keyctl
-> -	_new_session_keyring
-> -	local keydesc=$(_generate_session_encryption_key)
-> -	if _set_encpolicy $dir $keydesc $set_encpolicy_args \
-> +	if (( policy_version > 1 )); then
-> +		_require_xfs_io_command "get_encpolicy" "-t"
-> +		local output=$(_get_encpolicy $dir -t)
-> +		if [ "$output" != "supported" ]; then
-> +			if [ "$output" = "unsupported" ]; then
-> +				_notrun "kernel does not support $FSTYP encryption v2 API"
-> +			fi
-> +			_fail "Unexpected output from 'get_encpolicy -t'"
-
-Print $output in the _fail message as well?
+But it'd be really helpful if other fscrypt folks could help review the
+new tests!
 
 Thanks,
 Eryu
 
-> +		fi
-> +		# Both the kernel and xfs_io support v2 encryption policies, and
-> +		# therefore also filesystem-level keys -- since that's the only
-> +		# way to provide keys for v2 policies.
-> +		local raw_key=$(_generate_raw_encryption_key)
-> +		local keyspec=$(_add_enckey $mnt "$raw_key" | awk '{print $NF}')
-> +	else
-> +		_require_command "$KEYCTL_PROG" keyctl
-> +		_new_session_keyring
-> +		local keyspec=$(_generate_session_encryption_key)
-> +	fi
-> +	if _set_encpolicy $dir $keyspec $set_encpolicy_args \
->  		2>&1 >>$seqres.full | egrep -q 'Invalid argument'; then
->  		_notrun "kernel does not support encryption policy: '$set_encpolicy_args'"
->  	fi
-> @@ -103,7 +122,9 @@ _require_encryption_policy_support()
->  	if ! echo foo > $dir/file; then
->  		_notrun "encryption policy '$set_encpolicy_args' is unusable; probably missing kernel crypto API support"
->  	fi
-> -	$KEYCTL_PROG clear @s
-> +	if (( policy_version <= 1 )); then
-> +		$KEYCTL_PROG clear @s
-> +	fi
->  	rm -r $dir
->  }
->  
+> 
+> Eric Biggers (9):
+>   common/encrypt: disambiguate session encryption keys
+>   common/encrypt: add helper functions that wrap new xfs_io commands
+>   common/encrypt: support checking for v2 encryption policy support
+>   common/encrypt: support verifying ciphertext of v2 encryption policies
+>   generic: add basic test for fscrypt API additions
+>   generic: add test for non-root use of fscrypt API additions
+>   generic: verify ciphertext of v2 encryption policies with AES-256
+>   generic: verify ciphertext of v2 encryption policies with AES-128
+>   generic: verify ciphertext of v2 encryption policies with Adiantum
+> 
+>  common/encrypt           | 180 +++++++++++++++++++----
+>  src/fscrypt-crypt-util.c | 304 ++++++++++++++++++++++++++++++++++-----
+>  tests/ext4/024           |   2 +-
+>  tests/generic/397        |   4 +-
+>  tests/generic/398        |   8 +-
+>  tests/generic/399        |   4 +-
+>  tests/generic/419        |   4 +-
+>  tests/generic/421        |   4 +-
+>  tests/generic/429        |   8 +-
+>  tests/generic/435        |   4 +-
+>  tests/generic/440        |   8 +-
+>  tests/generic/800        | 127 ++++++++++++++++
+>  tests/generic/800.out    |  91 ++++++++++++
+>  tests/generic/801        | 136 ++++++++++++++++++
+>  tests/generic/801.out    |  62 ++++++++
+>  tests/generic/802        |  43 ++++++
+>  tests/generic/802.out    |   6 +
+>  tests/generic/803        |  43 ++++++
+>  tests/generic/803.out    |   6 +
+>  tests/generic/804        |  45 ++++++
+>  tests/generic/804.out    |  11 ++
+>  tests/generic/group      |   5 +
+>  22 files changed, 1018 insertions(+), 87 deletions(-)
+>  create mode 100755 tests/generic/800
+>  create mode 100644 tests/generic/800.out
+>  create mode 100755 tests/generic/801
+>  create mode 100644 tests/generic/801.out
+>  create mode 100755 tests/generic/802
+>  create mode 100644 tests/generic/802.out
+>  create mode 100755 tests/generic/803
+>  create mode 100644 tests/generic/803.out
+>  create mode 100755 tests/generic/804
+>  create mode 100644 tests/generic/804.out
+> 
 > -- 
 > 2.23.0.rc1.153.gdeed80330f-goog
 > 
