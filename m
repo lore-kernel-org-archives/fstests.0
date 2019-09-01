@@ -1,114 +1,125 @@
-Received: from mail.kernel.org ([198.145.29.99]:55012 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726137AbfIEKLL (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Sep 2019 06:11:11 -0400
-Message-ID: <28a504d5628b1b2ad17086dea79acce13ee85429.camel@kernel.org>
-Subject: Re: [RFC PATCH 0/2] Add lease testing
-From: Jeff Layton <jlayton@kernel.org>
-Date: Thu, 05 Sep 2019 06:11:08 -0400
-In-Reply-To: <20190903222233.GA31319@iweiny-DESK2.sc.intel.com>
-References: <20190903210537.29142-1-ira.weiny@intel.com>
-         <20190903214255.GK7777@dread.disaster.area>
-         <20190903222233.GA31319@iweiny-DESK2.sc.intel.com>
-Content-Type: text/plain; charset="UTF-8"
+Received: from mail-pg1-f193.google.com ([209.85.215.193]:36109 "EHLO
+        mail-pg1-f193.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727033AbfIAMIO (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 1 Sep 2019 08:08:14 -0400
+Date: Sun, 1 Sep 2019 20:08:06 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: Re: [RFC PATCH 3/9] common/encrypt: support checking for v2
+ encryption policy support
+Message-ID: <20190901120320.GE2622@desktop>
+References: <20190812175809.34810-1-ebiggers@kernel.org>
+ <20190812175809.34810-4-ebiggers@kernel.org>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190812175809.34810-4-ebiggers@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Ira Weiny <ira.weiny@intel.com>, Dave Chinner <david@fromorbit.com>
-Cc: fstests@vger.kernel.org, john.hubbard@gmail.com, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Eryu Guan <guaneryu@gmail.com>
+To: Eric Biggers <ebiggers@kernel.org>
+Cc: fstests@vger.kernel.org, linux-fscrypt@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Tue, 2019-09-03 at 15:22 -0700, Ira Weiny wrote:
-> On Wed, Sep 04, 2019 at 07:42:55AM +1000, Dave Chinner wrote:
-> > On Tue, Sep 03, 2019 at 02:05:35PM -0700, ira.weiny@intel.com wrote:
-> > > From: Ira Weiny <ira.weiny@intel.com>
-> > > 
-> > > To get to a point of developing and testing the new Lease semantics for long
-> > > term file pins[1], add a simple lease test.
-> > 
-> > Hi Ira,
-> > 
-> > Can you co-ordinate with Jeff on this? He just posted a patch
-> > to add F_SETLEASE testing with a new binary a few days
-> > ago...
-> > 
-> > https://marc.info/?l=fstests&m=156690934513424&w=2
+On Mon, Aug 12, 2019 at 10:58:03AM -0700, Eric Biggers wrote:
+> From: Eric Biggers <ebiggers@google.com>
 > 
-> Sure.
+> Allow passing '-v 2' to _require_scratch_encryption() to check for v2
+> encryption policy support on the scratch device, and for xfs_io support
+> for setting and getting v2 encryption policies.
 > 
-> Jeff,
+> Signed-off-by: Eric Biggers <ebiggers@google.com>
+> ---
+>  common/encrypt | 41 +++++++++++++++++++++++++++++++----------
+>  1 file changed, 31 insertions(+), 10 deletions(-)
 > 
-> Looking at your submission revealed I was missing 2 tests (shown in the diff
-> below).
-> 
-> Would it be sufficient to add these to this submission and go with my series?
-> Or would you prefer using fork vs the socket harness?
-> 
-> I think we may need a fork in the server side of my tests to work on duplicated
-> FD's but right now I have more tests than you.
-> 
-> Let me know, Thanks,
-> Ira
-> 
-> commit 849633871b7c0b00a6ee2bb751c09cd6365da386 (lease-test-b0-v3)
-> Author: Ira Weiny <ira.weiny@intel.com>
-> Date:   Tue Sep 3 15:17:52 2019 -0700
-> 
->     src/leasetest: Add tests to match competing test
->     
->     A competing patch to test leases was submitted in parallel.[1]
->     
->     This adds tests which were covered in that patch set.
->     
->     [1] https://marc.info/?l=fstests&m=156690934513424&w=2
->     
->     Signed-off-by: Ira Weiny <ira.weiny@intel.com>
-> 
-> diff --git a/src/leasetest.c b/src/leasetest.c
-> index b30a4d05d039..729aca851493 100644
-> --- a/src/leasetest.c
-> +++ b/src/leasetest.c
-> @@ -137,6 +137,8 @@ char *descriptions[] = {
->      /*  4 */"Fail Read Lease if opened with write permissions",
->      /*  5 */"Read lease gets SIGIO on write open",
->      /*  6 */"Write lease gets SIGIO on read open",
-> +    /*  7 */"No SIGIO is sent with read lock on read open",
-> +    /*  8 */"Read lease gets SIGIO on write open",
->  };
+> diff --git a/common/encrypt b/common/encrypt
+> index a086e80f..fa6e2672 100644
+> --- a/common/encrypt
+> +++ b/common/encrypt
+> @@ -6,12 +6,13 @@
 >  
->  static int64_t tests[][5] =
-> @@ -195,6 +197,26 @@ static int64_t tests[][5] =
->                 {6,     CMD_CLOSE,      0,              PASS,           SERVER  },
->                 {6,     CMD_CLOSE,      0,              PASS,           CLIENT  },
+>  #
+>  # _require_scratch_encryption [-c CONTENTS_MODE] [-n FILENAMES_MODE]
+> +#			      [-v POLICY_VERSION]
+>  #
+>  # Require encryption support on the scratch device.
+>  #
+> -# This checks for support for the default type of encryption policy (AES-256-XTS
+> -# and AES-256-CTS).  Options can be specified to also require support for a
+> -# different type of encryption policy.
+> +# This checks for support for the default type of encryption policy (v1 with
+> +# AES-256-XTS and AES-256-CTS).  Options can be specified to also require
+> +# support for a different type of encryption policy.
+>  #
+>  _require_scratch_encryption()
+>  {
+> @@ -68,13 +69,15 @@ _require_encryption_policy_support()
+>  	local mnt=$1
+>  	local dir=$mnt/tmpdir
+>  	local set_encpolicy_args=""
+> +	local policy_version=1
+>  	local c
 >  
-> +       /* Don't get SIGIO when read lease is taken by read */
-> +               {7,     CMD_OPEN,       O_RDONLY,       PASS,           CLIENT  },
-> +               {7,     CMD_SETLEASE,   F_RDLCK,        PASS,           CLIENT  },
-> +               {7,     CMD_GETLEASE,   F_RDLCK,        PASS,           CLIENT  },
-> +               {7,     CMD_SIGIO,      0,              PASS,           CLIENT  },
-> +               {7,     CMD_OPEN,       O_RDONLY,       PASS,           SERVER  },
-> +               {7,     CMD_WAIT_SIGIO, 5,              FAIL,           CLIENT  },
-> +               {7,     CMD_CLOSE,      0,              PASS,           SERVER  },
-> +               {7,     CMD_CLOSE,      0,              PASS,           CLIENT  },
-> +
-> +       /* Get SIGIO when Read lease is broken by Write */
-> +               {8,     CMD_OPEN,       O_RDONLY,       PASS,           CLIENT  },
-> +               {8,     CMD_SETLEASE,   F_RDLCK,        PASS,           CLIENT  },
-> +               {8,     CMD_GETLEASE,   F_RDLCK,        PASS,           CLIENT  },
-> +               {8,     CMD_SIGIO,      0,              PASS,           CLIENT  },
-> +               {8,     CMD_OPEN,       O_RDWR,         PASS,           SERVER  },
-> +               {8,     CMD_WAIT_SIGIO, 5,              PASS,           CLIENT  },
-> +               {8,     CMD_CLOSE,      0,              PASS,           SERVER  },
-> +               {8,     CMD_CLOSE,      0,              PASS,           CLIENT  },
-> +
->         /* indicate end of array */
->         /* Must have an end for the SERVER and one for the CLIENT */
->                 {0,0,0,0,SERVER},
+>  	OPTIND=2
+> -	while getopts "c:n:" c; do
+> +	while getopts "c:n:v:" c; do
+>  		case $c in
+> -		c|n)
+> +		c|n|v)
+>  			set_encpolicy_args+=" -$c $OPTARG"
+> +			[ $c = v ] && policy_version=$OPTARG
 
-Hi Ira,
+Why not checking 'v' in a separate case?
 
-Let's go with your testcase, including the patch above. It's more
-comprehensive than the one I proposed, and should be easier to extend in
-the future.
+>  			;;
+>  		*)
+>  			_fail "Unrecognized option '$c'"
+> @@ -87,10 +90,26 @@ _require_encryption_policy_support()
+>  		>> $seqres.full
+>  
+>  	mkdir $dir
+> -	_require_command "$KEYCTL_PROG" keyctl
+> -	_new_session_keyring
+> -	local keydesc=$(_generate_session_encryption_key)
+> -	if _set_encpolicy $dir $keydesc $set_encpolicy_args \
+> +	if (( policy_version > 1 )); then
+> +		_require_xfs_io_command "get_encpolicy" "-t"
+> +		local output=$(_get_encpolicy $dir -t)
+> +		if [ "$output" != "supported" ]; then
+> +			if [ "$output" = "unsupported" ]; then
+> +				_notrun "kernel does not support $FSTYP encryption v2 API"
+> +			fi
+> +			_fail "Unexpected output from 'get_encpolicy -t'"
 
-Acked-by: Jeff Layton <jlayton@kernel.org>
+Print $output in the _fail message as well?
+
+Thanks,
+Eryu
+
+> +		fi
+> +		# Both the kernel and xfs_io support v2 encryption policies, and
+> +		# therefore also filesystem-level keys -- since that's the only
+> +		# way to provide keys for v2 policies.
+> +		local raw_key=$(_generate_raw_encryption_key)
+> +		local keyspec=$(_add_enckey $mnt "$raw_key" | awk '{print $NF}')
+> +	else
+> +		_require_command "$KEYCTL_PROG" keyctl
+> +		_new_session_keyring
+> +		local keyspec=$(_generate_session_encryption_key)
+> +	fi
+> +	if _set_encpolicy $dir $keyspec $set_encpolicy_args \
+>  		2>&1 >>$seqres.full | egrep -q 'Invalid argument'; then
+>  		_notrun "kernel does not support encryption policy: '$set_encpolicy_args'"
+>  	fi
+> @@ -103,7 +122,9 @@ _require_encryption_policy_support()
+>  	if ! echo foo > $dir/file; then
+>  		_notrun "encryption policy '$set_encpolicy_args' is unusable; probably missing kernel crypto API support"
+>  	fi
+> -	$KEYCTL_PROG clear @s
+> +	if (( policy_version <= 1 )); then
+> +		$KEYCTL_PROG clear @s
+> +	fi
+>  	rm -r $dir
+>  }
+>  
+> -- 
+> 2.23.0.rc1.153.gdeed80330f-goog
+> 
