@@ -1,275 +1,47 @@
-Received: from mx1.redhat.com ([209.132.183.28]:52310 "EHLO mx1.redhat.com"
+Received: from mga07.intel.com ([134.134.136.100]:39854 "EHLO mga07.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1725848AbfICDxD (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Mon, 2 Sep 2019 23:53:03 -0400
-Date: Tue, 3 Sep 2019 12:00:00 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] fstests: new helper to skip xfs_check
-Message-ID: <20190903040000.GT7239@dhcp-12-102.nay.redhat.com>
-References: <20190902135358.22134-1-zlang@redhat.com>
- <20190902170701.GT5354@magnolia>
+        id S1727056AbfICVFr (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Tue, 3 Sep 2019 17:05:47 -0400
+From: ira.weiny@intel.com
+Subject: [RFC PATCH 0/2] Add lease testing
+Date: Tue,  3 Sep 2019 14:05:35 -0700
+Message-Id: <20190903210537.29142-1-ira.weiny@intel.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190902170701.GT5354@magnolia>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: "Darrick J. Wong" <darrick.wong@oracle.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Jeff Layton <jlayton@kernel.org>, Ira Weiny <ira.weiny@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 02, 2019 at 10:07:01AM -0700, Darrick J. Wong wrote:
-> On Mon, Sep 02, 2019 at 09:53:58PM +0800, Zorro Lang wrote:
-> > The _xfs_check sometimes need to take too much memory, some quota
-> > related cases (e.g: xfs/442, generic/232 etc) always trigger OOM
-> > killer.
-> > 
-> >   [93334.020194] xfs_db invoked oom-killer: gfp_mask=0x6200ca(GFP_HIGHUSER_MOVABLE), nodemask=(null), order=0, oom_score_adj=-1000
-> >   [93334.020206] xfs_db cpuset=/ mems_allowed=0
-> >   [93334.020213] CPU: 2 PID: 977 Comm: xfs_db Kdump: loaded Not tainted 4.18.0-139.el8.ppc64le+debug #1
-> >   [93334.020217] Call Trace:
-> >   [93334.020223] [c0000001cb163640] [c000000001035754] dump_stack+0xe8/0x164 (unreliable)
-> >   [93334.020229] [c0000001cb163690] [c0000000004a77dc] dump_header+0x7c/0x670
-> >   [93334.020234] [c0000001cb1637b0] [c0000000004a872c] oom_kill_process+0x26c/0x3d0
-> >   [93334.020239] [c0000001cb163800] [c0000000004aa438] out_of_memory+0x278/0x930
-> >   [93334.020244] [c0000001cb1638a0] [c0000000004bd6c8] __alloc_pages_nodemask+0x1ab8/0x1b70
-> >   [93334.020248] [c0000001cb163ae0] [c00000000058b8dc] alloc_pages_vma+0xec/0x660
-> >   [93334.020253] [c0000001cb163b50] [c00000000052b544] do_anonymous_page+0x124/0xac0
-> >   [93334.020258] [c0000001cb163bc0] [c000000000534918] __handle_mm_fault+0xda8/0x1b60
-> >   [93334.020263] [c0000001cb163cb0] [c000000000535948] handle_mm_fault+0x278/0x5a0
-> >   [93334.020268] [c0000001cb163d00] [c00000000008b30c] __do_page_fault+0x27c/0xe00
-> >   [93334.020273] [c0000001cb163df0] [c00000000008bec8] do_page_fault+0x38/0xf0
-> >   [93334.020278] [c0000001cb163e30] [c00000000000a904] handle_page_fault+0x18/0x38
-> >   [93334.020281] Mem-Info:
-> >   [93334.020286] active_anon:93769 inactive_anon:13540 isolated_anon:0
-> >   [93334.020286]  active_file:23 inactive_file:8 isolated_file:0
-> >   [93334.020286]  unevictable:0 dirty:0 writeback:0 unstable:0
-> >   [93334.020286]  slab_reclaimable:1543 slab_unreclaimable:8926
-> >   [93334.020286]  mapped:69 shmem:15 pagetables:76 bounce:0
-> >   [93334.020286]  free:2756 free_pcp:0 free_cma:0
-> > 
-> > The xfs_check related code is old, and nearly won't be maintained
-> > too much, test xfs_repair and xfs_scrub is much more important than
-> > xfs_check. But the xfstests always do a POST-xfs_check at the end of
-> > each cases. So I'd like to add a new helper named
-> > _require_scratch_no_xfs_check to skip xfs_check from some sub-cases.
-> > 
-> > Signed-off-by: Zorro Lang <zlang@redhat.com>
-> > ---
-> > 
-> > Hi,
-> > 
-> > Maybe this patch not the best way to deal with this issue. Please feel free to
-> > tell me if you have better idea.
-> 
-> I would just get rid of it (and have tried several times) but have not
-> had the time to check that xfs_repair can detect every corruption that
-> xfs_check can.
-> 
-> (To get started, I think it involves forking the dangerous_repair group
-> tests to run _xfs_check and xfs_repair -n one after the other to compare
-> outputs.)
+From: Ira Weiny <ira.weiny@intel.com>
 
-JFYI, I remembered I hit once xfs_check failure[1] which xfs_repair -n didn't
-find. And then, this bug fixed by another bug(CLOSE DUPLICATE):
-https://bugzilla.kernel.org/show_bug.cgi?id=200137
+To get to a point of developing and testing the new Lease semantics for long
+term file pins[1], add a simple lease test.
 
-Thanks,
-Zorro
+Currently the following tests are performed based on the fcntl() man page.
 
+    /*  1 */"Take Read Lease",
+    /*  2 */"Take Write Lease",
+    /*  3 */"Fail Write Lease if file is open somewhere else",
+    /*  4 */"Fail Read Lease if opened with write permissions",
+    /*  5 */"Read lease gets SIGIO on write open",
+    /*  6 */"Write lease gets SIGIO on read open",
 
-_check_xfs_filesystem: filesystem on /dev/mapper/xxxx-xfstest is inconsistent (c)
-*** xfs_check output ***
-bad nblocks 2 for free inode 1028
-block 0/549 type unknown not expected
-block 0/550 type unknown not expected
+[1] https://lkml.org/lkml/2019/8/14/435
 
-# xfs_repair -n /dev/mapper/xxxx-xfstest
-Phase 1 - find and verify superblock...
-        - reporting progress in intervals of 15 minutes
-Phase 2 - using internal log
-        - zero log...
-        - scan filesystem freespace and inode maps...
-        - 05:54:54: scanning filesystem freespace - 16 of 16 allocation groups done
-        - found root inode chunk
-Phase 3 - for each AG...
-        - scan (but don't clear) agi unlinked lists...
-        - 05:54:54: scanning agi unlinked lists - 16 of 16 allocation groups done
-        - process known inodes and perform inode discovery...
-        - agno = 15
-        - agno = 0
-        - agno = 1
-        - agno = 2
-        - agno = 3
-        - agno = 4
-        - agno = 5
-        - agno = 6
-        - agno = 7
-        - agno = 8
-        - agno = 9
-        - agno = 10
-        - agno = 11
-        - agno = 12
-        - agno = 13
-        - agno = 14
-        - 05:54:54: process known inodes and inode discovery - 64 of 64 inodes done
-        - process newly discovered inodes...
-        - 05:54:54: process newly discovered inodes - 16 of 16 allocation groups done
-Phase 4 - check for duplicate blocks...
-        - setting up duplicate extent list...
-        - 05:54:54: setting up duplicate extent list - 16 of 16 allocation groups done
-        - check for inodes claiming duplicate blocks...
-        - agno = 0
-        - agno = 6
-        - agno = 10
-        - agno = 3
-        - agno = 4
-        - agno = 5
-        - agno = 8
-        - agno = 7
-        - agno = 1
-        - agno = 9
-        - agno = 15
-        - agno = 11
-        - agno = 12
-        - agno = 14
-        - agno = 13
-        - agno = 2
-        - 05:54:54: check for inodes claiming duplicate blocks - 64 of 64 inodes done
-No modify flag set, skipping phase 5
-Phase 6 - check inode connectivity...
-        - traversing filesystem ... 
-        - traversal finished ...
-        - moving disconnected inodes to lost+found ...
-Phase 7 - verify link counts...
-        - 05:54:54: verify and correct link counts - 16 of 16 allocation groups done
-No modify flag set, skipping filesystem flush and exiting.
+Ira Weiny (2):
+  src/leasetest: Add lease test executable
+  generic: Add Lease testing
 
-# xfs_db -F -i -p xfs_check -c "check" /dev/mapper/xxxx-xfstest                                                                             
-bad nblocks 2 for free inode 1028              
-block 0/549 type unknown not expected          
-block 0/550 type unknown not expected
+ src/Makefile          |   2 +-
+ src/leasetest.c       | 837 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/567     | 100 +++++
+ tests/generic/567.out |   2 +
+ tests/generic/group   |   1 +
+ 5 files changed, 941 insertions(+), 1 deletion(-)
+ create mode 100644 src/leasetest.c
+ create mode 100755 tests/generic/567
+ create mode 100644 tests/generic/567.out
 
-
-> 
-> --D
-> 
-> > Thanks,
-> > Zorro
-> > 
-> >  common/rc         |  1 +
-> >  common/xfs        | 26 ++++++++++++++++++++++++++
-> >  tests/generic/232 |  2 ++
-> >  tests/generic/233 |  2 ++
-> >  tests/generic/234 |  2 ++
-> >  tests/xfs/442     |  2 ++
-> >  6 files changed, 35 insertions(+)
-> > 
-> > diff --git a/common/rc b/common/rc
-> > index e0b087c1..86eeda16 100644
-> > --- a/common/rc
-> > +++ b/common/rc
-> > @@ -1570,6 +1570,7 @@ _require_scratch()
-> >  {
-> >  	_require_scratch_nocheck
-> >  	touch ${RESULT_DIR}/require_scratch
-> > +	touch ${RESULT_DIR}/require_scratch.xfs_check
-> >  }
-> >  
-> >  # require a scratch dev of a minimum size (in kb)
-> > diff --git a/common/xfs b/common/xfs
-> > index 1bce3c18..80e6d1e8 100644
-> > --- a/common/xfs
-> > +++ b/common/xfs
-> > @@ -168,11 +168,37 @@ _scratch_mkfs_xfs()
-> >  	return $mkfs_status
-> >  }
-> >  
-> > +# Usage: _require_scratch_no_xfs_check [limit_memsize]
-> > +#
-> > +# Due to xfs_check costs too much memory, sometimes it cause OOM when test on
-> > +# low memory machine. This function is used to skip xfs_check conditionally
-> > +# or unconditionally.
-> > +#
-> > +# Note: must be called after _require_scratch.
-> > +_require_scratch_no_xfs_check()
-> > +{
-> > +	local bound=$1
-> > +	local freemem
-> > +
-> > +	freemem=`_free_memory_bytes`
-> > +	if [ -n "$bound" ];then
-> > +		if [ $freemem -lt $bound ];then
-> > +			rm -f ${RESULT_DIR}/require_scratch.xfs_check
-> > +		fi
-> > +	else
-> > +		rm -f ${RESULT_DIR}/require_scratch.xfs_check
-> > +	fi
-> > +}
-> > +
-> >  # xfs_check script is planned to be deprecated. But, we want to
-> >  # be able to invoke "xfs_check" behavior in xfstests in order to
-> >  # maintain the current verification levels.
-> >  _xfs_check()
-> >  {
-> > +	if [ ! -f "${RESULT_DIR}/require_scratch.xfs_check" ];then
-> > +		return 0
-> > +	fi
-> > +
-> >  	OPTS=" "
-> >  	DBOPTS=" "
-> >  	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
-> > diff --git a/tests/generic/232 b/tests/generic/232
-> > index d5c20249..20841313 100755
-> > --- a/tests/generic/232
-> > +++ b/tests/generic/232
-> > @@ -52,6 +52,8 @@ _fsstress()
-> >  _supported_fs generic
-> >  _supported_os Linux
-> >  _require_scratch
-> > +# Do post xfs_check, if free memory size > 16G
-> > +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
-> >  _require_quota
-> >  
-> >  _scratch_mkfs > $seqres.full 2>&1
-> > diff --git a/tests/generic/233 b/tests/generic/233
-> > index c49bf252..7933d4b8 100755
-> > --- a/tests/generic/233
-> > +++ b/tests/generic/233
-> > @@ -56,6 +56,8 @@ _fsstress()
-> >  _supported_fs generic
-> >  _supported_os Linux
-> >  _require_scratch
-> > +# Do post xfs_check, if free memory size > 16G
-> > +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
-> >  _require_quota
-> >  _require_user
-> >  
-> > diff --git a/tests/generic/234 b/tests/generic/234
-> > index dc296df8..e843dc10 100755
-> > --- a/tests/generic/234
-> > +++ b/tests/generic/234
-> > @@ -72,6 +72,8 @@ test_setting()
-> >  _supported_fs generic
-> >  _supported_os Linux
-> >  _require_scratch
-> > +# Do post xfs_check, if free memory size > 16G
-> > +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
-> >  _require_quota
-> >  
-> >  # real QA test starts here
-> > diff --git a/tests/xfs/442 b/tests/xfs/442
-> > index 7a5f2e8e..9e891b51 100755
-> > --- a/tests/xfs/442
-> > +++ b/tests/xfs/442
-> > @@ -36,6 +36,8 @@ _supported_fs xfs
-> >  _supported_os Linux
-> >  
-> >  _require_scratch_reflink
-> > +# Do post xfs_check, if free memory size > 16G
-> > +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
-> >  _require_quota
-> >  _require_command "$KILLALL_PROG" "killall"
-> >  
-> > -- 
-> > 2.17.2
-> > 
+-- 
+2.20.1
