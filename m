@@ -1,191 +1,371 @@
-Received: from userp2130.oracle.com ([156.151.31.86]:49174 "EHLO
-        userp2130.oracle.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726443AbfIBRHN (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Mon, 2 Sep 2019 13:07:13 -0400
-Date: Mon, 2 Sep 2019 10:07:01 -0700
-From: "Darrick J. Wong" <darrick.wong@oracle.com>
-Subject: Re: [PATCH] fstests: new helper to skip xfs_check
-Message-ID: <20190902170701.GT5354@magnolia>
-References: <20190902135358.22134-1-zlang@redhat.com>
+Received: from mx1.redhat.com ([209.132.183.28]:50430 "EHLO mx1.redhat.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1725306AbfICDMl (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Mon, 2 Sep 2019 23:12:41 -0400
+Date: Tue, 3 Sep 2019 11:19:38 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [RFC PATCH] generic: test splice() with pipes
+Message-ID: <20190903031937.GS7239@dhcp-12-102.nay.redhat.com>
+References: <20190829161155.GA5360@magnolia>
+ <20190830004407.GA5340@magnolia>
+ <20190902022052.GR7239@dhcp-12-102.nay.redhat.com>
+ <20190902165607.GA725229@magnolia>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: text/plain; charset=iso-8859-1
 Content-Disposition: inline
-In-Reply-To: <20190902135358.22134-1-zlang@redhat.com>
+In-Reply-To: <20190902165607.GA725229@magnolia>
 Sender: fstests-owner@vger.kernel.org
-To: Zorro Lang <zlang@redhat.com>
-Cc: fstests@vger.kernel.org, linux-xfs@vger.kernel.org
+Content-Transfer-Encoding: quoted-printable
+To: "Darrick J. Wong" <darrick.wong@oracle.com>
+Cc: andreas.gruenbacher@gmail.com, xfs <linux-xfs@vger.kernel.org>, viro@zeniv.linux.org.uk, linux-fsdevel <linux-fsdevel@vger.kernel.org>, fstests <fstests@vger.kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-On Mon, Sep 02, 2019 at 09:53:58PM +0800, Zorro Lang wrote:
-> The _xfs_check sometimes need to take too much memory, some quota
-> related cases (e.g: xfs/442, generic/232 etc) always trigger OOM
-> killer.
-> 
->   [93334.020194] xfs_db invoked oom-killer: gfp_mask=0x6200ca(GFP_HIGHUSER_MOVABLE), nodemask=(null), order=0, oom_score_adj=-1000
->   [93334.020206] xfs_db cpuset=/ mems_allowed=0
->   [93334.020213] CPU: 2 PID: 977 Comm: xfs_db Kdump: loaded Not tainted 4.18.0-139.el8.ppc64le+debug #1
->   [93334.020217] Call Trace:
->   [93334.020223] [c0000001cb163640] [c000000001035754] dump_stack+0xe8/0x164 (unreliable)
->   [93334.020229] [c0000001cb163690] [c0000000004a77dc] dump_header+0x7c/0x670
->   [93334.020234] [c0000001cb1637b0] [c0000000004a872c] oom_kill_process+0x26c/0x3d0
->   [93334.020239] [c0000001cb163800] [c0000000004aa438] out_of_memory+0x278/0x930
->   [93334.020244] [c0000001cb1638a0] [c0000000004bd6c8] __alloc_pages_nodemask+0x1ab8/0x1b70
->   [93334.020248] [c0000001cb163ae0] [c00000000058b8dc] alloc_pages_vma+0xec/0x660
->   [93334.020253] [c0000001cb163b50] [c00000000052b544] do_anonymous_page+0x124/0xac0
->   [93334.020258] [c0000001cb163bc0] [c000000000534918] __handle_mm_fault+0xda8/0x1b60
->   [93334.020263] [c0000001cb163cb0] [c000000000535948] handle_mm_fault+0x278/0x5a0
->   [93334.020268] [c0000001cb163d00] [c00000000008b30c] __do_page_fault+0x27c/0xe00
->   [93334.020273] [c0000001cb163df0] [c00000000008bec8] do_page_fault+0x38/0xf0
->   [93334.020278] [c0000001cb163e30] [c00000000000a904] handle_page_fault+0x18/0x38
->   [93334.020281] Mem-Info:
->   [93334.020286] active_anon:93769 inactive_anon:13540 isolated_anon:0
->   [93334.020286]  active_file:23 inactive_file:8 isolated_file:0
->   [93334.020286]  unevictable:0 dirty:0 writeback:0 unstable:0
->   [93334.020286]  slab_reclaimable:1543 slab_unreclaimable:8926
->   [93334.020286]  mapped:69 shmem:15 pagetables:76 bounce:0
->   [93334.020286]  free:2756 free_pcp:0 free_cma:0
-> 
-> The xfs_check related code is old, and nearly won't be maintained
-> too much, test xfs_repair and xfs_scrub is much more important than
-> xfs_check. But the xfstests always do a POST-xfs_check at the end of
-> each cases. So I'd like to add a new helper named
-> _require_scratch_no_xfs_check to skip xfs_check from some sub-cases.
-> 
-> Signed-off-by: Zorro Lang <zlang@redhat.com>
-> ---
-> 
-> Hi,
-> 
-> Maybe this patch not the best way to deal with this issue. Please feel free to
-> tell me if you have better idea.
+On Mon, Sep 02, 2019 at 09:56:07AM -0700, Darrick J. Wong wrote:
+> On Mon, Sep 02, 2019 at 10:20:52AM +0800, Zorro Lang wrote:
+> > On Thu, Aug 29, 2019 at 05:44:07PM -0700, Darrick J. Wong wrote:
+> > > From: Darrick J. Wong <darrick.wong@oracle.com>
+> > >=20
+> > > Andreas Gr=FCnbacher reports that on the two filesystems that suppo=
+rt
+> > > iomap directio, it's possible for splice() to return -EAGAIN (inste=
+ad of
+> > > a short splice) if the pipe being written to has less space availab=
+le in
+> > > its pipe buffers than the length supplied by the calling process.
+> > >=20
+> > > This is a regression test to check for correct operation.
+> > >=20
+> > > XXX Andreas: Since you wrote the C reproducer, can you send me the
+> > > proper copyright and author attribution statement for the C program=
+?
+> > >=20
+> > > Signed-off-by: Darrick J. Wong <darrick.wong@oracle.com>
+> > > ---
+> >=20
+> > Hi Darrick,
+> >=20
+> > I tried to add a splice_f operation into xfs_io long time ago:
+> > https://marc.info/?l=3Dlinux-xfs&m=3D155828702128047&w=3D2
+> >=20
+> > For we can easily write more splice related test case later, I'd like=
+ to have
+> > a xfs_io to help that (if it can). Would you like to help to review t=
+hat patch,
+> > if it can match your requirement to write this case? Or it can be imp=
+roved to
+> > cover more testing conditions? I'm really appreciate that:)
+>=20
+> Yeah, I'll try to have a look this week.
 
-I would just get rid of it (and have tried several times) but have not
-had the time to check that xfs_repair can detect every corruption that
-xfs_check can.
+Thanks so much, I wrote this patch with 'fsstress supports splice' togeth=
+er,
+when we found a XFS regression bug by splice operation. But this xfs_io c=
+ommand
+doesn't have a specified usage to reproduce a bug. So if it can be improv=
+ed to
+be used to cover the case which you just wrote (about splice), that might=
+ be
+better I think.
 
-(To get started, I think it involves forking the dangerous_repair group
-tests to run _xfs_check and xfs_repair -n one after the other to compare
-outputs.)
+Thanks,
+Zorro
 
---D
-
-> Thanks,
-> Zorro
-> 
->  common/rc         |  1 +
->  common/xfs        | 26 ++++++++++++++++++++++++++
->  tests/generic/232 |  2 ++
->  tests/generic/233 |  2 ++
->  tests/generic/234 |  2 ++
->  tests/xfs/442     |  2 ++
->  6 files changed, 35 insertions(+)
-> 
-> diff --git a/common/rc b/common/rc
-> index e0b087c1..86eeda16 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -1570,6 +1570,7 @@ _require_scratch()
->  {
->  	_require_scratch_nocheck
->  	touch ${RESULT_DIR}/require_scratch
-> +	touch ${RESULT_DIR}/require_scratch.xfs_check
->  }
->  
->  # require a scratch dev of a minimum size (in kb)
-> diff --git a/common/xfs b/common/xfs
-> index 1bce3c18..80e6d1e8 100644
-> --- a/common/xfs
-> +++ b/common/xfs
-> @@ -168,11 +168,37 @@ _scratch_mkfs_xfs()
->  	return $mkfs_status
->  }
->  
-> +# Usage: _require_scratch_no_xfs_check [limit_memsize]
-> +#
-> +# Due to xfs_check costs too much memory, sometimes it cause OOM when test on
-> +# low memory machine. This function is used to skip xfs_check conditionally
-> +# or unconditionally.
-> +#
-> +# Note: must be called after _require_scratch.
-> +_require_scratch_no_xfs_check()
-> +{
-> +	local bound=$1
-> +	local freemem
-> +
-> +	freemem=`_free_memory_bytes`
-> +	if [ -n "$bound" ];then
-> +		if [ $freemem -lt $bound ];then
-> +			rm -f ${RESULT_DIR}/require_scratch.xfs_check
-> +		fi
-> +	else
-> +		rm -f ${RESULT_DIR}/require_scratch.xfs_check
-> +	fi
-> +}
-> +
->  # xfs_check script is planned to be deprecated. But, we want to
->  # be able to invoke "xfs_check" behavior in xfstests in order to
->  # maintain the current verification levels.
->  _xfs_check()
->  {
-> +	if [ ! -f "${RESULT_DIR}/require_scratch.xfs_check" ];then
-> +		return 0
-> +	fi
-> +
->  	OPTS=" "
->  	DBOPTS=" "
->  	USAGE="Usage: xfs_check [-fsvV] [-l logdev] [-i ino]... [-b bno]... special"
-> diff --git a/tests/generic/232 b/tests/generic/232
-> index d5c20249..20841313 100755
-> --- a/tests/generic/232
-> +++ b/tests/generic/232
-> @@ -52,6 +52,8 @@ _fsstress()
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> +# Do post xfs_check, if free memory size > 16G
-> +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
->  _require_quota
->  
->  _scratch_mkfs > $seqres.full 2>&1
-> diff --git a/tests/generic/233 b/tests/generic/233
-> index c49bf252..7933d4b8 100755
-> --- a/tests/generic/233
-> +++ b/tests/generic/233
-> @@ -56,6 +56,8 @@ _fsstress()
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> +# Do post xfs_check, if free memory size > 16G
-> +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
->  _require_quota
->  _require_user
->  
-> diff --git a/tests/generic/234 b/tests/generic/234
-> index dc296df8..e843dc10 100755
-> --- a/tests/generic/234
-> +++ b/tests/generic/234
-> @@ -72,6 +72,8 @@ test_setting()
->  _supported_fs generic
->  _supported_os Linux
->  _require_scratch
-> +# Do post xfs_check, if free memory size > 16G
-> +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
->  _require_quota
->  
->  # real QA test starts here
-> diff --git a/tests/xfs/442 b/tests/xfs/442
-> index 7a5f2e8e..9e891b51 100755
-> --- a/tests/xfs/442
-> +++ b/tests/xfs/442
-> @@ -36,6 +36,8 @@ _supported_fs xfs
->  _supported_os Linux
->  
->  _require_scratch_reflink
-> +# Do post xfs_check, if free memory size > 16G
-> +_require_scratch_no_xfs_check $((16 * 1024 * 1024 * 1024))
->  _require_quota
->  _require_command "$KILLALL_PROG" "killall"
->  
-> -- 
-> 2.17.2
-> 
+>=20
+> (FWIW I think Eric is backed up with dozens of xfsprogs patches...)
+>=20
+> --D
+>=20
+> > Thanks,
+> > Zorro
+> >=20
+> > >  .gitignore            |    1=20
+> > >  src/Makefile          |    2 -
+> > >  src/splice-test.c     |  173 +++++++++++++++++++++++++++++++++++++=
+++++++++++++
+> > >  tests/generic/720     |   41 ++++++++++++
+> > >  tests/generic/720.out |    7 ++
+> > >  tests/generic/group   |    1=20
+> > >  6 files changed, 224 insertions(+), 1 deletion(-)
+> > >  create mode 100644 src/splice-test.c
+> > >  create mode 100755 tests/generic/720
+> > >  create mode 100644 tests/generic/720.out
+> > >=20
+> > > diff --git a/.gitignore b/.gitignore
+> > > index c8c815f9..26d4da11 100644
+> > > --- a/.gitignore
+> > > +++ b/.gitignore
+> > > @@ -112,6 +112,7 @@
+> > >  /src/runas
+> > >  /src/seek_copy_test
+> > >  /src/seek_sanity_test
+> > > +/src/splice-test
+> > >  /src/stale_handle
+> > >  /src/stat_test
+> > >  /src/swapon
+> > > diff --git a/src/Makefile b/src/Makefile
+> > > index c4fcf370..2920dfb1 100644
+> > > --- a/src/Makefile
+> > > +++ b/src/Makefile
+> > > @@ -28,7 +28,7 @@ LINUX_TARGETS =3D xfsctl bstat t_mtab getdevicesi=
+ze preallo_rw_pattern_reader \
+> > >  	attr-list-by-handle-cursor-test listxattr dio-interleaved t_dir_t=
+ype \
+> > >  	dio-invalidate-cache stat_test t_encrypted_d_revalidate \
+> > >  	attr_replace_test swapon mkswap t_attr_corruption t_open_tmpfiles=
+ \
+> > > -	fscrypt-crypt-util bulkstat_null_ocount
+> > > +	fscrypt-crypt-util bulkstat_null_ocount splice-test
+> > > =20
+> > >  SUBDIRS =3D log-writes perf
+> > > =20
+> > > diff --git a/src/splice-test.c b/src/splice-test.c
+> > > new file mode 100644
+> > > index 00000000..d3c12075
+> > > --- /dev/null
+> > > +++ b/src/splice-test.c
+> > > @@ -0,0 +1,173 @@
+> > > +// SPDX-License-Identifier: GPL-2.0-or-later
+> > > +/*
+> > > + * Copyright (C) 2019 ?????????????????????????????
+> > > + * Author:=20
+> > > + *
+> > > + * Make sure that reading and writing to a pipe via splice.
+> > > + */
+> > > +#include <sys/types.h>
+> > > +#include <sys/stat.h>
+> > > +#include <sys/wait.h>
+> > > +#include <unistd.h>
+> > > +#include <fcntl.h>
+> > > +#include <err.h>
+> > > +
+> > > +#include <stdlib.h>
+> > > +#include <stdio.h>
+> > > +#include <stdbool.h>
+> > > +#include <string.h>
+> > > +#include <errno.h>
+> > > +
+> > > +#define SECTOR_SIZE 512
+> > > +#define BUFFER_SIZE (150 * SECTOR_SIZE)
+> > > +
+> > > +void read_from_pipe(int fd, const char *filename, size_t size)
+> > > +{
+> > > +	char buffer[SECTOR_SIZE];
+> > > +	size_t sz;
+> > > +	ssize_t ret;
+> > > +
+> > > +	while (size) {
+> > > +		sz =3D size;
+> > > +		if (sz > sizeof buffer)
+> > > +			sz =3D sizeof buffer;
+> > > +		ret =3D read(fd, buffer, sz);
+> > > +		if (ret < 0)
+> > > +			err(1, "read: %s", filename);
+> > > +		if (ret =3D=3D 0) {
+> > > +			fprintf(stderr, "read: %s: unexpected EOF\n", filename);
+> > > +			exit(1);
+> > > +		}
+> > > +		size -=3D sz;
+> > > +	}
+> > > +}
+> > > +
+> > > +void do_splice1(int fd, const char *filename, size_t size)
+> > > +{
+> > > +	bool retried =3D false;
+> > > +	int pipefd[2];
+> > > +
+> > > +	if (pipe(pipefd) =3D=3D -1)
+> > > +		err(1, "pipe");
+> > > +	while (size) {
+> > > +		ssize_t spliced;
+> > > +
+> > > +		spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MOV=
+E);
+> > > +		if (spliced =3D=3D -1) {
+> > > +			if (errno =3D=3D EAGAIN && !retried) {
+> > > +				retried =3D true;
+> > > +				fprintf(stderr, "retrying splice\n");
+> > > +				sleep(1);
+> > > +				continue;
+> > > +			}
+> > > +			err(1, "splice");
+> > > +		}
+> > > +		read_from_pipe(pipefd[0], filename, spliced);
+> > > +		size -=3D spliced;
+> > > +	}
+> > > +	close(pipefd[0]);
+> > > +	close(pipefd[1]);
+> > > +}
+> > > +
+> > > +void do_splice2(int fd, const char *filename, size_t size)
+> > > +{
+> > > +	bool retried =3D false;
+> > > +	int pipefd[2];
+> > > +	int pid;
+> > > +
+> > > +	if (pipe(pipefd) =3D=3D -1)
+> > > +		err(1, "pipe");
+> > > +
+> > > +	pid =3D fork();
+> > > +	if (pid =3D=3D 0) {
+> > > +		close(pipefd[1]);
+> > > +		read_from_pipe(pipefd[0], filename, size);
+> > > +		exit(0);
+> > > +	} else {
+> > > +		close(pipefd[0]);
+> > > +		while (size) {
+> > > +			ssize_t spliced;
+> > > +
+> > > +			spliced =3D splice(fd, NULL, pipefd[1], NULL, size, SPLICE_F_MO=
+VE);
+> > > +			if (spliced =3D=3D -1) {
+> > > +				if (errno =3D=3D EAGAIN && !retried) {
+> > > +					retried =3D true;
+> > > +					fprintf(stderr, "retrying splice\n");
+> > > +					sleep(1);
+> > > +					continue;
+> > > +				}
+> > > +				err(1, "splice");
+> > > +			}
+> > > +			size -=3D spliced;
+> > > +		}
+> > > +		close(pipefd[1]);
+> > > +		waitpid(pid, NULL, 0);
+> > > +	}
+> > > +}
+> > > +
+> > > +void usage(const char *argv0)
+> > > +{
+> > > +	fprintf(stderr, "USAGE: %s [-rd] {filename}\n", basename(argv0));
+> > > +	exit(2);
+> > > +}
+> > > +
+> > > +int main(int argc, char *argv[])
+> > > +{
+> > > +	void (*do_splice)(int fd, const char *filename, size_t size);
+> > > +	const char *filename;
+> > > +	char *buffer;
+> > > +	int opt, open_flags, fd;
+> > > +	ssize_t ret;
+> > > +
+> > > +	do_splice =3D do_splice1;
+> > > +	open_flags =3D O_CREAT | O_TRUNC | O_RDWR | O_DIRECT;
+> > > +
+> > > +	while ((opt =3D getopt(argc, argv, "rd")) !=3D -1) {
+> > > +		switch(opt) {
+> > > +		case 'r':
+> > > +			do_splice =3D do_splice2;
+> > > +			break;
+> > > +		case 'd':
+> > > +			open_flags &=3D ~O_DIRECT;
+> > > +			break;
+> > > +		default:  /* '?' */
+> > > +			usage(argv[0]);
+> > > +		}
+> > > +	}
+> > > +
+> > > +	if (optind >=3D argc)
+> > > +		usage(argv[0]);
+> > > +	filename =3D argv[optind];
+> > > +
+> > > +	printf("%s reader %s O_DIRECT\n",
+> > > +		   do_splice =3D=3D do_splice1 ? "sequential" : "concurrent",
+> > > +		   (open_flags & O_DIRECT) ? "with" : "without");
+> > > +
+> > > +	buffer =3D aligned_alloc(SECTOR_SIZE, BUFFER_SIZE);
+> > > +	if (buffer =3D=3D NULL)
+> > > +		err(1, "aligned_alloc");
+> > > +
+> > > +	fd =3D open(filename, open_flags, 0666);
+> > > +	if (fd =3D=3D -1)
+> > > +		err(1, "open: %s", filename);
+> > > +
+> > > +	memset(buffer, 'x', BUFFER_SIZE);
+> > > +	ret =3D write(fd, buffer, BUFFER_SIZE);
+> > > +	if (ret < 0)
+> > > +		err(1, "write: %s", filename);
+> > > +	if (ret !=3D BUFFER_SIZE) {
+> > > +		fprintf(stderr, "%s: short write\n", filename);
+> > > +		exit(1);
+> > > +	}
+> > > +
+> > > +	ret =3D lseek(fd, 0, SEEK_SET);
+> > > +	if (ret !=3D 0)
+> > > +		err(1, "lseek: %s", filename);
+> > > +
+> > > +	do_splice(fd, filename, BUFFER_SIZE);
+> > > +
+> > > +	if (unlink(filename) =3D=3D -1)
+> > > +		err(1, "unlink: %s", filename);
+> > > +
+> > > +	return 0;
+> > > +}
+> > > diff --git a/tests/generic/720 b/tests/generic/720
+> > > new file mode 100755
+> > > index 00000000..b7f09c40
+> > > --- /dev/null
+> > > +++ b/tests/generic/720
+> > > @@ -0,0 +1,41 @@
+> > > +#! /bin/bash
+> > > +# SPDX-License-Identifier: GPL-2.0-or-later
+> > > +# Copyright (c) 2019, Oracle and/or its affiliates.  All Rights Re=
+served.
+> > > +#
+> > > +# FS QA Test No. 720
+> > > +#
+> > > +# Test using splice() to read from pipes.
+> > > +
+> > > +seq=3D`basename $0`
+> > > +seqres=3D$RESULT_DIR/$seq
+> > > +echo "QA output created by $seq"
+> > > +
+> > > +here=3D`pwd`
+> > > +tmp=3D/tmp/$$
+> > > +status=3D1    # failure is the default!
+> > > +trap "_cleanup; exit \$status" 0 1 2 3 15
+> > > +
+> > > +_cleanup()
+> > > +{
+> > > +	cd /
+> > > +	rm -f $TEST_DIR/a
+> > > +}
+> > > +
+> > > +# get standard environment, filters and checks
+> > > +. ./common/rc
+> > > +
+> > > +# real QA test starts here
+> > > +_supported_os Linux
+> > > +_supported_fs generic
+> > > +_require_test
+> > > +
+> > > +rm -f $seqres.full
+> > > +
+> > > +src/splice-test -r $TEST_DIR/a
+> > > +src/splice-test -rd $TEST_DIR/a
+> > > +src/splice-test $TEST_DIR/a
+> > > +src/splice-test -d $TEST_DIR/a
+> > > +
+> > > +# success, all done
+> > > +status=3D0
+> > > +exit
+> > > diff --git a/tests/generic/720.out b/tests/generic/720.out
+> > > new file mode 100644
+> > > index 00000000..b0fc9935
+> > > --- /dev/null
+> > > +++ b/tests/generic/720.out
+> > > @@ -0,0 +1,7 @@
+> > > +QA output created by 720
+> > > +concurrent reader with O_DIRECT
+> > > +concurrent reader with O_DIRECT
+> > > +concurrent reader without O_DIRECT
+> > > +concurrent reader without O_DIRECT
+> > > +sequential reader with O_DIRECT
+> > > +sequential reader without O_DIRECT
+> > > diff --git a/tests/generic/group b/tests/generic/group
+> > > index cd418106..f75d4e60 100644
+> > > --- a/tests/generic/group
+> > > +++ b/tests/generic/group
+> > > @@ -569,3 +569,4 @@
+> > >  564 auto quick copy_range
+> > >  565 auto quick copy_range
+> > >  719 auto quick quota metadata
+> > > +720 auto quick rw pipe splice
