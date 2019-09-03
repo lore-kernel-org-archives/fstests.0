@@ -1,74 +1,38 @@
-Received: from mga14.intel.com ([192.55.52.115]:54692 "EHLO mga14.intel.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726451AbfICVIW (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 3 Sep 2019 17:08:22 -0400
-From: ira.weiny@intel.com
-Subject: [PATCH 3/3] src/locktest: Remove unused buf allocation
-Date: Tue,  3 Sep 2019 14:08:15 -0700
-Message-Id: <20190903210815.29545-4-ira.weiny@intel.com>
-In-Reply-To: <20190903210815.29545-1-ira.weiny@intel.com>
-References: <20190903210815.29545-1-ira.weiny@intel.com>
+Received: from mail105.syd.optusnet.com.au ([211.29.132.249]:59135 "EHLO
+        mail105.syd.optusnet.com.au" rhost-flags-OK-OK-OK-OK)
+        by vger.kernel.org with ESMTP id S1726009AbfICVm7 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Tue, 3 Sep 2019 17:42:59 -0400
+Date: Wed, 4 Sep 2019 07:42:55 +1000
+From: Dave Chinner <david@fromorbit.com>
+Subject: Re: [RFC PATCH 0/2] Add lease testing
+Message-ID: <20190903214255.GK7777@dread.disaster.area>
+References: <20190903210537.29142-1-ira.weiny@intel.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190903210537.29142-1-ira.weiny@intel.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: Ira Weiny <ira.weiny@intel.com>
+To: ira.weiny@intel.com
+Cc: fstests@vger.kernel.org, john.hubbard@gmail.com, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Jeff Layton <jlayton@kernel.org>
 List-ID: <fstests@vger.kernel.org>
 
-From: Ira Weiny <ira.weiny@intel.com>
+On Tue, Sep 03, 2019 at 02:05:35PM -0700, ira.weiny@intel.com wrote:
+> From: Ira Weiny <ira.weiny@intel.com>
+> 
+> To get to a point of developing and testing the new Lease semantics for long
+> term file pins[1], add a simple lease test.
 
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
----
- src/locktest.c | 16 ----------------
- 1 file changed, 16 deletions(-)
+Hi Ira,
 
-diff --git a/src/locktest.c b/src/locktest.c
-index 6030c7a8a909..8e27e922668e 100644
---- a/src/locktest.c
-+++ b/src/locktest.c
-@@ -81,7 +81,6 @@ static char	*prog;
- static char	*filename = 0;
- static int	debug = 0;
- static int	server = 1;
--static int	maxio = 8192;
- static int	port = 0;
- static int 	testnumber = -1;
- static int	saved_errno = 0;
-@@ -89,7 +88,6 @@ static int	saved_errno = 0;
- static SOCKET	s_fd = -1;              /* listen socket    */
- static SOCKET	c_fd = -1;	        /* IPC socket       */
- static HANDLE	f_fd = INVALID_HANDLE;	/* shared file      */
--static char	*buf;		        /* I/O buffer       */
- 
- #define 	WRLOCK	0
- #define 	RDLOCK	1
-@@ -806,16 +804,6 @@ main(int argc, char *argv[])
-     if (do_open(O_RDWR) == FAIL)
- 	exit(1);
- 
--    /*
--     * +10 is slop for the iteration number if do_write() ... never
--     * needed unless maxio is very small
--     */
--    if ((buf = (char *)malloc(maxio + 10)) == NULL) {
--        perror("malloc buf");
--        exit(1);
--        /*NOTREACHED*/
--    }
--
-     setbuf(stderr, NULL);
- 
-     if (server) {
-@@ -1134,10 +1122,6 @@ main(int argc, char *argv[])
-     if(server)
- 	printf("%d tests run, %d failed\n", test_count, fail_count);
- }   
--    if (buf) {
--        free(buf);
--    }
--
-     
-     exit(fail_count);
-     /*NOTREACHED*/
+Can you co-ordinate with Jeff on this? He just posted a patch
+to add F_SETLEASE testing with a new binary a few days
+ago...
+
+https://marc.info/?l=fstests&m=156690934513424&w=2
+
+Cheers,
+
+Dave.
 -- 
-2.20.1
+Dave Chinner
+david@fromorbit.com
