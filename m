@@ -1,11 +1,11 @@
-Received: from mx1.redhat.com ([209.132.183.28]:35446 "EHLO mx1.redhat.com"
+Received: from mx1.redhat.com ([209.132.183.28]:4934 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727900AbfIDM63 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Sep 2019 08:58:29 -0400
+        id S1729965AbfIDNBi (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Sep 2019 09:01:38 -0400
 From: "Jianhong.Yin" <yin-jianhong@163.com>
-Subject: [PATCH v2] generic/430: add copy in same file test
-Date: Wed,  4 Sep 2019 20:58:21 +0800
-Message-Id: <20190904125821.7736-1-yin-jianhong@163.com>
+Subject: [PATCH v3] generic/430: add copy in same file test
+Date: Wed,  4 Sep 2019 21:01:34 +0800
+Message-Id: <20190904130134.7842-1-yin-jianhong@163.com>
 MIME-Version: 1.0
 Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
@@ -58,7 +58,7 @@ index 1b11f60d..4ce0ee26 100755
 +cmp $testdir/file $testdir/copy
 +$XFS_IO_PROG    -c "copy_range -l $fsize -d $fsize $testdir/copy" "$testdir/copy"
 +cmp -n $fsize $testdir/file $testdir/copy
-+cmp -i $fsize:0 $testdir/file $testdir/copy
++cmp -i 0:$fsize $testdir/file $testdir/copy
 +$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
 +echo "md5sums after copying in same file and recover:"
 +md5sum $testdir/{file,copy} | _filter_test_dir
