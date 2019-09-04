@@ -1,97 +1,159 @@
-Received: from mx1.redhat.com ([209.132.183.28]:44306 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726033AbfIDGrX (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Sep 2019 02:47:23 -0400
-Date: Wed, 4 Sep 2019 14:54:23 +0800
-From: Zorro Lang <zlang@redhat.com>
-Subject: Re: [PATCH] generic/430: add copy in same file test
-Message-ID: <20190904065423.GY7239@dhcp-12-102.nay.redhat.com>
-References: <20190904053246.19623-1-yin-jianhong@163.com>
+Received: from mail-pf1-f195.google.com ([209.85.210.195]:45596 "EHLO
+        mail-pf1-f195.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1726010AbfIDKBb (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 4 Sep 2019 06:01:31 -0400
+From: kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH] xfs: test the deadlock between the AGI and AGF with
+ RENAME_WHITEOUT
+Message-ID: <59006cf8-f825-d33f-c860-111189689e2e@gmail.com>
+Date: Wed, 4 Sep 2019 18:01:27 +0800
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <20190904053246.19623-1-yin-jianhong@163.com>
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
-To: "Jianhong.Yin" <yin-jianhong@163.com>
-Cc: fstests@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: linux-xfs@vger.kernel.org, "Darrick J. Wong" <darrick.wong@oracle.com>, newtongao@tencent.com, jasperwang@tencent.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, Sep 04, 2019 at 01:32:46PM +0800, Jianhong.Yin wrote:
-> to cover this bug:
->  copy_file_range return "Invalid argument" when copy in the same file
->  https://bugzilla.kernel.org/show_bug.cgi?id=202935
-> 
-> this is a base function test, I don't think we should add a new
-> test for it like 553 554, so add it in generic/430
-> what do you think?
+There is ABBA deadlock bug between the AGI and AGF when performing
+rename() with RENAME_WHITEOUT flag, and add this testcase to make
+sure the rename() call works well.
 
-Personal question shouldn't be in commit log. You just need to describe
-what your patch does.
+Signed-off-by: kaixuxia <kaixuxia@tencent.com>
+---
+ tests/xfs/512     | 100 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/512.out |   2 ++
+ tests/xfs/group   |   1 +
+ 3 files changed, 103 insertions(+)
+ create mode 100755 tests/xfs/512
+ create mode 100644 tests/xfs/512.out
 
-> 
-> Signed-off-by: Jianhong Yin <yin-jianhong@163.com>
-> ---
+diff --git a/tests/xfs/512 b/tests/xfs/512
+new file mode 100755
+index 0000000..0e95fb7
+--- /dev/null
++++ b/tests/xfs/512
+@@ -0,0 +1,100 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (c) 2019 Tencent.  All Rights Reserved.
++#
++# FS QA Test 512
++#
++# Test the ABBA deadlock case between the AGI and AGF When performing
++# rename operation with RENAME_WHITEOUT flag.
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++rm -f $seqres.full
++
++# real QA test starts here
++_supported_fs xfs
++_supported_os Linux
++_require_scratch
++
++# Single AG will cause default xfs_repair to fail. This test need a
++# single AG fs, so ignore the check.
++_require_scratch_nocheck
++
++prepare_file()
++{
++	# create many small files for the rename with RENAME_WHITEOUT
++	i=0
++	while [ $i -le $files ]; do
++		file=$SCRATCH_MNT/f$i
++		$XFS_IO_PROG -f -d -c 'pwrite -b 4k 0 4k' $file >/dev/null 2>&1
++		let i=$i+1
++	done
++}
++
++rename_whiteout()
++{
++	# create the rename targetdir
++	renamedir=$SCRATCH_MNT/renamedir
++	mkdir $renamedir
++
++	# just get a random long name...
++	longnamepre=FFFsafdsagafsadfagasdjfalskdgakdlsglkasdg
++
++	# now try to do rename with RENAME_WHITEOUT flag
++	i=0
++	while [ $i -le $files ]; do
++		src/renameat2 -w $SCRATCH_MNT/f$i $renamedir/$longnamepre$i >/dev/null 2>&1
++		let i=$i+1
++	done
++}
++
++create_file()
++{
++	# create the targetdir
++	createdir=$SCRATCH_MNT/createdir
++	mkdir $createdir
++
++	# try to create file at the same time to hit the deadlock
++	i=0
++	while [ $i -le $files ]; do
++		file=$createdir/f$i
++		$XFS_IO_PROG -f -d -c 'pwrite -b 4k 0 4k' $file >/dev/null 2>&1
++		let i=$i+1
++	done
++}
++
++_scratch_mkfs_xfs -bsize=512 -dagcount=1 >> $seqres.full 2>&1 ||
++	_fail "mkfs failed"
++_scratch_mount
++
++files=250000
++
++prepare_file
++rename_whiteout &
++create_file &
++
++wait
++echo Silence is golden
++
++# Failure comes in the form of a deadlock.
++
++# success, all done
++status=0
++exit
+diff --git a/tests/xfs/512.out b/tests/xfs/512.out
+new file mode 100644
+index 0000000..0aabdef
+--- /dev/null
++++ b/tests/xfs/512.out
+@@ -0,0 +1,2 @@
++QA output created by 512
++Silence is golden
+diff --git a/tests/xfs/group b/tests/xfs/group
+index a7ad300..ed250d6 100644
+--- a/tests/xfs/group
++++ b/tests/xfs/group
+@@ -509,3 +509,4 @@
+ 509 auto ioctl
+ 510 auto ioctl quick
+ 511 auto quick quota
++512 auto rename
+-- 
+1.8.3.1
 
-Personal question can be written at here.
-
->  tests/generic/430     | 7 +++++++
->  tests/generic/430.out | 4 ++++
->  2 files changed, 11 insertions(+)
-> 
-> diff --git a/tests/generic/430 b/tests/generic/430
-> index 1b11f60d..c4b1dd23 100755
-> --- a/tests/generic/430
-> +++ b/tests/generic/430
-> @@ -6,6 +6,7 @@
->  #
->  # Tests vfs_copy_file_range():
->  #   - Copy a file
-> +#   - Copy in same file
->  #   - Copy beginning of original to new file
->  #   - Copy middle of original to a new file
->  #   - Copy end of original to new file
-> @@ -52,6 +53,12 @@ cmp $testdir/file $testdir/copy
->  echo "Original md5sums:"
->  md5sum $testdir/{file,copy} | _filter_test_dir
->  
-> +echo "Copy in same file"
-> +$XFS_IO_PROG    -c "copy_range -l 1000 $testdir/copy" "$testdir/copy"
-
-I prefer trying to copy whole 5000 bytes data at here, but I can't say
-why not '1000', so it's up to you :)
-
-And maybe you can explain why '-l XXXX' is necessary at here, for example
-to avoid the target file be truncated to 0 by copy_range.
-
-> +cmp $testdir/file $testdir/copy
-> +echo "Original md5sums:"
-> +md5sum $testdir/{file,copy} | _filter_test_dir
-
-You didn't change $testdir/file, so maybe you just need to check the
-$testdir/copy checksum at here?
-
-Thanks,
-Zorro
-
-> +
->  echo "Copy beginning of original file"
->  $XFS_IO_PROG -f -c "copy_range -l 1000 $testdir/file" "$testdir/beginning"
->  cmp -n 1000 $testdir/file $testdir/beginning
-> diff --git a/tests/generic/430.out b/tests/generic/430.out
-> index 4b4ca75d..95007853 100644
-> --- a/tests/generic/430.out
-> +++ b/tests/generic/430.out
-> @@ -3,6 +3,10 @@ Create the original file and then copy
->  Original md5sums:
->  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
->  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/copy
-> +Create in same file
-> +Original md5sums:
-> +e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
-> +e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/copy
->  Copy beginning of original file
->  md5sums after copying beginning:
->  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
-> -- 
-> 2.17.2
-> 
+-- 
+kaixuxia
