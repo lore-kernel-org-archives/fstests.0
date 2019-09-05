@@ -1,39 +1,49 @@
-Received: from mx2.suse.de ([195.135.220.15]:37822 "EHLO mx1.suse.de"
-        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
-        id S1730937AbfIEQCE (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Sep 2019 12:02:04 -0400
-Subject: Re: [PATCH] btrfs/048: fix test failure when fs mounted with v2 space
- cache option
-References: <20190905153700.21284-1-fdmanana@kernel.org>
-From: Nikolay Borisov <nborisov@suse.com>
-Message-ID: <9d8a258a-76f1-68e7-f5c4-57b31fcc9846@suse.com>
-Date: Thu, 5 Sep 2019 19:02:00 +0300
+Received: from mga18.intel.com ([134.134.136.126]:19975 "EHLO mga18.intel.com"
+        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
+        id S1726231AbfIERaf (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Sep 2019 13:30:35 -0400
+From: ira.weiny@intel.com
+Subject: [PATCH V2 0/2] Add lease testing
+Date: Thu,  5 Sep 2019 10:30:24 -0700
+Message-Id: <20190905173026.28114-1-ira.weiny@intel.com>
 MIME-Version: 1.0
-In-Reply-To: <20190905153700.21284-1-fdmanana@kernel.org>
-Content-Type: text/plain; charset=utf-8
-Content-Language: en-US
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-Content-Transfer-Encoding: quoted-printable
-To: fdmanana@kernel.org, fstests@vger.kernel.org
-Cc: Filipe Manana <fdmanana@suse.com>, linux-btrfs@vger.kernel.org
+To: fstests@vger.kernel.org
+Cc: john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Jeff Layton <jlayton@kernel.org>, Ira Weiny <ira.weiny@intel.com>
 List-ID: <fstests@vger.kernel.org>
 
+From: Ira Weiny <ira.weiny@intel.com>
 
+To get to a point of developing and testing the new Lease semantics for long
+term file pins[1], add a simple lease test.
 
-On 5.09.19 =D0=B3. 18:37 =D1=87., fdmanana@kernel.org wrote:
-> From: Filipe Manana <fdmanana@suse.com>
->=20
-> In order to check that the filesystem generation does not change after
-> failure to set a property, the test expects a specific generation numbe=
-r
-> of 7 in its golden output. That currently works except when using the
-> v2 space cache mount option (MOUNT_OPTIONS=3D"-o space_cache=3Dv2"), si=
-nce
-> the filesystem generation is 8 because creating a v2 space cache adds
-> an additional transaction commit. So update the test to not hardcode
-> specific generation numbers in its golden output and just output an
-> unexpected message if the generation number changes.
->=20
-> Signed-off-by: Filipe Manana <fdmanana@suse.com>
+Currently the following tests are performed based on the fcntl() man page.
 
-Reviewed-by: Nikolay Borisov <nborisov@suse.com>
+    /*  1 */"Take Read Lease",
+    /*  2 */"Take Write Lease",
+    /*  3 */"Fail Write Lease if file is open somewhere else",
+    /*  4 */"Fail Read Lease if opened with write permissions",
+    /*  5 */"Read lease gets SIGIO on write open",
+    /*  6 */"Write lease gets SIGIO on read open",
+    /*  7 */"No SIGIO is sent with read lock on read open",
+    /*  8 */"Read lease gets SIGIO on write open",
+
+[1] https://lkml.org/lkml/2019/8/14/435
+
+Ira Weiny (2):
+  src/leasetest: Add lease test executable
+  generic: Add Lease testing
+
+ src/Makefile          |   2 +-
+ src/leasetest.c       | 859 ++++++++++++++++++++++++++++++++++++++++++
+ tests/generic/567     | 100 +++++
+ tests/generic/567.out |   2 +
+ tests/generic/group   |   1 +
+ 5 files changed, 963 insertions(+), 1 deletion(-)
+ create mode 100644 src/leasetest.c
+ create mode 100755 tests/generic/567
+ create mode 100644 tests/generic/567.out
+
+-- 
+2.20.1
