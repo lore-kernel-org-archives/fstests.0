@@ -1,85 +1,104 @@
-Received: from mx1.redhat.com ([209.132.183.28]:43856 "EHLO mx1.redhat.com"
+Received: from mga04.intel.com ([192.55.52.120]:17189 "EHLO mga04.intel.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727562AbfIEBja (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Sep 2019 21:39:30 -0400
-From: "Jianhong.Yin" <yin-jianhong@163.com>
-Subject: [PATCH] generic/43{0,1,2,3}: add -t option when create $testdir/copy file
-Date: Thu,  5 Sep 2019 09:39:21 +0800
-Message-Id: <20190905013921.13396-1-yin-jianhong@163.com>
+        id S1727014AbfIEQL2 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Sep 2019 12:11:28 -0400
+From: "Weiny, Ira" <ira.weiny@intel.com>
+Subject: RE: [RFC PATCH 0/2] Add lease testing
+Date: Thu, 5 Sep 2019 16:11:24 +0000
+Message-ID: <2807E5FD2F6FDA4886F6618EAC48510E898EC5ED@CRSMSX101.amr.corp.intel.com>
+References: <20190903210537.29142-1-ira.weiny@intel.com>
+         <20190903214255.GK7777@dread.disaster.area>
+         <20190903222233.GA31319@iweiny-DESK2.sc.intel.com>
+ <28a504d5628b1b2ad17086dea79acce13ee85429.camel@kernel.org>
+In-Reply-To: <28a504d5628b1b2ad17086dea79acce13ee85429.camel@kernel.org>
+Content-Language: en-US
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: base64
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: darrick.wong@oracle.com, jiyin@redhat.com, "Jianhong.Yin" <yin-jianhong@163.com>
+To: Jeff Layton <jlayton@kernel.org>, Dave Chinner <david@fromorbit.com>
+Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "john.hubbard@gmail.com" <john.hubbard@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, "Williams, Dan J" <dan.j.williams@intel.com>, Eryu Guan <guaneryu@gmail.com>
 List-ID: <fstests@vger.kernel.org>
 
-to avoid there's already a copy file before run test,
-it might break test.
-
-I know now in xfs_io->copy_range there's a hidden truncate action
-to do that, but we are taking about remove it, see:
- https://www.spinics.net/lists/linux-xfs/msg31292.html
- https://www.spinics.net/lists/linux-xfs/msg31327.html
-
-Signed-off-by: Jianhong Yin <yin-jianhong@163.com>
----
- tests/generic/430 | 2 +-
- tests/generic/431 | 2 +-
- tests/generic/432 | 2 +-
- tests/generic/433 | 2 +-
- 4 files changed, 4 insertions(+), 4 deletions(-)
-
-diff --git a/tests/generic/430 b/tests/generic/430
-index 1b11f60d..71c6d438 100755
---- a/tests/generic/430
-+++ b/tests/generic/430
-@@ -47,7 +47,7 @@ $XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
--$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
- cmp $testdir/file $testdir/copy
- echo "Original md5sums:"
- md5sum $testdir/{file,copy} | _filter_test_dir
-diff --git a/tests/generic/431 b/tests/generic/431
-index f04ae215..4b22a8ff 100755
---- a/tests/generic/431
-+++ b/tests/generic/431
-@@ -40,7 +40,7 @@ rm -f $seqres.full
- 
- echo "Create the original file and then copy"
- echo -n "abcde" > $testdir/file
--$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
- echo -n "abcde" | cmp $testdir/copy
- echo "Original md5sums:"
- md5sum $testdir/{file,copy} | _filter_test_dir
-diff --git a/tests/generic/432 b/tests/generic/432
-index 6200af86..a2fecf37 100755
---- a/tests/generic/432
-+++ b/tests/generic/432
-@@ -46,7 +46,7 @@ $XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
- $XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
--$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
- cmp $testdir/file  $testdir/copy
- echo "Original md5sums:"
- md5sum $testdir/{file,copy} | _filter_test_dir
-diff --git a/tests/generic/433 b/tests/generic/433
-index 1238419a..6204f339 100755
---- a/tests/generic/433
-+++ b/tests/generic/433
-@@ -42,7 +42,7 @@ rm -f $seqres.full
- 
- echo "Create the original file and then copy"
- echo -n "abcde" > $testdir/file
--$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
-+$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
- cmp $testdir/file $testdir/copy
- echo "Original md5sums:"
- md5sum $testdir/{file,copy} | _filter_test_dir
--- 
-2.21.0
+PiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAwLzJdIEFkZCBsZWFzZSB0ZXN0aW5nDQo+IA0KPiBP
+biBUdWUsIDIwMTktMDktMDMgYXQgMTU6MjIgLTA3MDAsIElyYSBXZWlueSB3cm90ZToNCj4gPiBP
+biBXZWQsIFNlcCAwNCwgMjAxOSBhdCAwNzo0Mjo1NUFNICsxMDAwLCBEYXZlIENoaW5uZXIgd3Jv
+dGU6DQo+ID4gPiBPbiBUdWUsIFNlcCAwMywgMjAxOSBhdCAwMjowNTozNVBNIC0wNzAwLCBpcmEu
+d2VpbnlAaW50ZWwuY29tIHdyb3RlOg0KPiA+ID4gPiBGcm9tOiBJcmEgV2VpbnkgPGlyYS53ZWlu
+eUBpbnRlbC5jb20+DQo+ID4gPiA+DQo+ID4gPiA+IFRvIGdldCB0byBhIHBvaW50IG9mIGRldmVs
+b3BpbmcgYW5kIHRlc3RpbmcgdGhlIG5ldyBMZWFzZQ0KPiA+ID4gPiBzZW1hbnRpY3MgZm9yIGxv
+bmcgdGVybSBmaWxlIHBpbnNbMV0sIGFkZCBhIHNpbXBsZSBsZWFzZSB0ZXN0Lg0KPiA+ID4NCj4g
+PiA+IEhpIElyYSwNCj4gPiA+DQo+ID4gPiBDYW4geW91IGNvLW9yZGluYXRlIHdpdGggSmVmZiBv
+biB0aGlzPyBIZSBqdXN0IHBvc3RlZCBhIHBhdGNoIHRvIGFkZA0KPiA+ID4gRl9TRVRMRUFTRSB0
+ZXN0aW5nIHdpdGggYSBuZXcgYmluYXJ5IGEgZmV3IGRheXMgYWdvLi4uDQo+ID4gPg0KPiA+ID4g
+aHR0cHM6Ly9tYXJjLmluZm8vP2w9ZnN0ZXN0cyZtPTE1NjY5MDkzNDUxMzQyNCZ3PTINCj4gPg0K
+PiA+IFN1cmUuDQo+ID4NCj4gPiBKZWZmLA0KPiA+DQo+ID4gTG9va2luZyBhdCB5b3VyIHN1Ym1p
+c3Npb24gcmV2ZWFsZWQgSSB3YXMgbWlzc2luZyAyIHRlc3RzIChzaG93biBpbg0KPiA+IHRoZSBk
+aWZmIGJlbG93KS4NCj4gPg0KPiA+IFdvdWxkIGl0IGJlIHN1ZmZpY2llbnQgdG8gYWRkIHRoZXNl
+IHRvIHRoaXMgc3VibWlzc2lvbiBhbmQgZ28gd2l0aCBteQ0KPiBzZXJpZXM/DQo+ID4gT3Igd291
+bGQgeW91IHByZWZlciB1c2luZyBmb3JrIHZzIHRoZSBzb2NrZXQgaGFybmVzcz8NCj4gPg0KPiA+
+IEkgdGhpbmsgd2UgbWF5IG5lZWQgYSBmb3JrIGluIHRoZSBzZXJ2ZXIgc2lkZSBvZiBteSB0ZXN0
+cyB0byB3b3JrIG9uDQo+ID4gZHVwbGljYXRlZCBGRCdzIGJ1dCByaWdodCBub3cgSSBoYXZlIG1v
+cmUgdGVzdHMgdGhhbiB5b3UuDQo+ID4NCj4gPiBMZXQgbWUga25vdywgVGhhbmtzLA0KPiA+IEly
+YQ0KPiA+DQo+ID4gY29tbWl0IDg0OTYzMzg3MWI3YzBiMDBhNmVlMmJiNzUxYzA5Y2Q2MzY1ZGEz
+ODYgKGxlYXNlLXRlc3QtYjAtdjMpDQo+ID4gQXV0aG9yOiBJcmEgV2VpbnkgPGlyYS53ZWlueUBp
+bnRlbC5jb20+DQo+ID4gRGF0ZTogICBUdWUgU2VwIDMgMTU6MTc6NTIgMjAxOSAtMDcwMA0KPiA+
+DQo+ID4gICAgIHNyYy9sZWFzZXRlc3Q6IEFkZCB0ZXN0cyB0byBtYXRjaCBjb21wZXRpbmcgdGVz
+dA0KPiA+DQo+ID4gICAgIEEgY29tcGV0aW5nIHBhdGNoIHRvIHRlc3QgbGVhc2VzIHdhcyBzdWJt
+aXR0ZWQgaW4gcGFyYWxsZWwuWzFdDQo+ID4NCj4gPiAgICAgVGhpcyBhZGRzIHRlc3RzIHdoaWNo
+IHdlcmUgY292ZXJlZCBpbiB0aGF0IHBhdGNoIHNldC4NCj4gPg0KPiA+ICAgICBbMV0gaHR0cHM6
+Ly9tYXJjLmluZm8vP2w9ZnN0ZXN0cyZtPTE1NjY5MDkzNDUxMzQyNCZ3PTINCj4gPg0KPiA+ICAg
+ICBTaWduZWQtb2ZmLWJ5OiBJcmEgV2VpbnkgPGlyYS53ZWlueUBpbnRlbC5jb20+DQo+ID4NCj4g
+PiBkaWZmIC0tZ2l0IGEvc3JjL2xlYXNldGVzdC5jIGIvc3JjL2xlYXNldGVzdC5jIGluZGV4DQo+
+ID4gYjMwYTRkMDVkMDM5Li43MjlhY2E4NTE0OTMgMTAwNjQ0DQo+ID4gLS0tIGEvc3JjL2xlYXNl
+dGVzdC5jDQo+ID4gKysrIGIvc3JjL2xlYXNldGVzdC5jDQo+ID4gQEAgLTEzNyw2ICsxMzcsOCBA
+QCBjaGFyICpkZXNjcmlwdGlvbnNbXSA9IHsNCj4gPiAgICAgIC8qICA0ICovIkZhaWwgUmVhZCBM
+ZWFzZSBpZiBvcGVuZWQgd2l0aCB3cml0ZSBwZXJtaXNzaW9ucyIsDQo+ID4gICAgICAvKiAgNSAq
+LyJSZWFkIGxlYXNlIGdldHMgU0lHSU8gb24gd3JpdGUgb3BlbiIsDQo+ID4gICAgICAvKiAgNiAq
+LyJXcml0ZSBsZWFzZSBnZXRzIFNJR0lPIG9uIHJlYWQgb3BlbiIsDQo+ID4gKyAgICAvKiAgNyAq
+LyJObyBTSUdJTyBpcyBzZW50IHdpdGggcmVhZCBsb2NrIG9uIHJlYWQgb3BlbiIsDQo+ID4gKyAg
+ICAvKiAgOCAqLyJSZWFkIGxlYXNlIGdldHMgU0lHSU8gb24gd3JpdGUgb3BlbiIsDQo+ID4gIH07
+DQo+ID4NCj4gPiAgc3RhdGljIGludDY0X3QgdGVzdHNbXVs1XSA9DQo+ID4gQEAgLTE5NSw2ICsx
+OTcsMjYgQEAgc3RhdGljIGludDY0X3QgdGVzdHNbXVs1XSA9DQo+ID4gICAgICAgICAgICAgICAg
+IHs2LCAgICAgQ01EX0NMT1NFLCAgICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAg
+U0VSVkVSICB9LA0KPiA+ICAgICAgICAgICAgICAgICB7NiwgICAgIENNRF9DTE9TRSwgICAgICAw
+LCAgICAgICAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVOVCAgfSwNCj4gPg0KPiA+ICsgICAg
+ICAgLyogRG9uJ3QgZ2V0IFNJR0lPIHdoZW4gcmVhZCBsZWFzZSBpcyB0YWtlbiBieSByZWFkICov
+DQo+ID4gKyAgICAgICAgICAgICAgIHs3LCAgICAgQ01EX09QRU4sICAgICAgIE9fUkRPTkxZLCAg
+ICAgICBQQVNTLCAgICAgICAgICAgQ0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7Nywg
+ICAgIENNRF9TRVRMRUFTRSwgICBGX1JETENLLCAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVO
+VCAgfSwNCj4gPiArICAgICAgICAgICAgICAgezcsICAgICBDTURfR0VUTEVBU0UsICAgRl9SRExD
+SywgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAgICAg
+IHs3LCAgICAgQ01EX1NJR0lPLCAgICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAg
+Q0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7NywgICAgIENNRF9PUEVOLCAgICAgICBP
+X1JET05MWSwgICAgICAgUEFTUywgICAgICAgICAgIFNFUlZFUiAgfSwNCj4gPiArICAgICAgICAg
+ICAgICAgezcsICAgICBDTURfV0FJVF9TSUdJTywgNSwgICAgICAgICAgICAgIEZBSUwsICAgICAg
+ICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAgICAgIHs3LCAgICAgQ01EX0NMT1NFLCAg
+ICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAgU0VSVkVSICB9LA0KPiA+ICsgICAg
+ICAgICAgICAgICB7NywgICAgIENNRF9DTE9TRSwgICAgICAwLCAgICAgICAgICAgICAgUEFTUywg
+ICAgICAgICAgIENMSUVOVCAgfSwNCj4gPiArDQo+ID4gKyAgICAgICAvKiBHZXQgU0lHSU8gd2hl
+biBSZWFkIGxlYXNlIGlzIGJyb2tlbiBieSBXcml0ZSAqLw0KPiA+ICsgICAgICAgICAgICAgICB7
+OCwgICAgIENNRF9PUEVOLCAgICAgICBPX1JET05MWSwgICAgICAgUEFTUywgICAgICAgICAgIENM
+SUVOVCAgfSwNCj4gPiArICAgICAgICAgICAgICAgezgsICAgICBDTURfU0VUTEVBU0UsICAgRl9S
+RExDSywgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAg
+ICAgIHs4LCAgICAgQ01EX0dFVExFQVNFLCAgIEZfUkRMQ0ssICAgICAgICBQQVNTLCAgICAgICAg
+ICAgQ0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7OCwgICAgIENNRF9TSUdJTywgICAg
+ICAwLCAgICAgICAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVOVCAgfSwNCj4gPiArICAgICAg
+ICAgICAgICAgezgsICAgICBDTURfT1BFTiwgICAgICAgT19SRFdSLCAgICAgICAgIFBBU1MsICAg
+ICAgICAgICBTRVJWRVIgIH0sDQo+ID4gKyAgICAgICAgICAgICAgIHs4LCAgICAgQ01EX1dBSVRf
+U0lHSU8sIDUsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAgQ0xJRU5UICB9LA0KPiA+ICsg
+ICAgICAgICAgICAgICB7OCwgICAgIENNRF9DTE9TRSwgICAgICAwLCAgICAgICAgICAgICAgUEFT
+UywgICAgICAgICAgIFNFUlZFUiAgfSwNCj4gPiArICAgICAgICAgICAgICAgezgsICAgICBDTURf
+Q0xPU0UsICAgICAgMCwgICAgICAgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+
+ID4gKw0KPiA+ICAgICAgICAgLyogaW5kaWNhdGUgZW5kIG9mIGFycmF5ICovDQo+ID4gICAgICAg
+ICAvKiBNdXN0IGhhdmUgYW4gZW5kIGZvciB0aGUgU0VSVkVSIGFuZCBvbmUgZm9yIHRoZSBDTElF
+TlQgKi8NCj4gPiAgICAgICAgICAgICAgICAgezAsMCwwLDAsU0VSVkVSfSwNCj4gDQo+IEhpIEly
+YSwNCj4gDQo+IExldCdzIGdvIHdpdGggeW91ciB0ZXN0Y2FzZSwgaW5jbHVkaW5nIHRoZSBwYXRj
+aCBhYm92ZS4gSXQncyBtb3JlDQo+IGNvbXByZWhlbnNpdmUgdGhhbiB0aGUgb25lIEkgcHJvcG9z
+ZWQsIGFuZCBzaG91bGQgYmUgZWFzaWVyIHRvIGV4dGVuZCBpbg0KPiB0aGUgZnV0dXJlLg0KPiAN
+Cj4gQWNrZWQtYnk6IEplZmYgTGF5dG9uIDxqbGF5dG9uQGtlcm5lbC5vcmc+DQoNClRoYW5rcyEg
+IEdpdmUgbWUgYSBiaXQgYW5kIEkgd2lsbCBzdWJtaXQgVjIgd2l0aCB0aGlzIHNxdWFzaGVkIGlu
+dG8gdGhlIG9yaWdpbmFsIHBhdGNoLiAgSSBkaWQgc29tZSBjbGVhbnVwIG9mIGxvY2t0ZXN0IGJ1
+dCBvdGhlciB0aGFuIHRoYXQgbGVhc2V0ZXN0IGlzIHByZXR0eSBtdWNoIGEgY29weS4gIE5vdCBz
+dXJlIGlmIHRoZSBjb21tdW5pdHkgd291bGQgbGlrZSB0byBzZWUgbW9yZSBjaGFuZ2VzIG9yIG5v
+dC4NCg0KSXJhDQoNCg==
