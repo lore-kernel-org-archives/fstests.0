@@ -1,45 +1,114 @@
-Received: from mail.kernel.org ([198.145.29.99]:44774 "EHLO mail.kernel.org"
+Received: from mx1.redhat.com ([209.132.183.28]:33138 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727900AbfIEAdz (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Wed, 4 Sep 2019 20:33:55 -0400
-Message-ID: <d8a1d8e856be8eb50a78bd9f6b0ac9940001d66b.camel@kernel.org>
-Subject: Re: [PATCH v2] generic: Add a test for basic F_SETLEASE
- functionality
-From: Jeff Layton <jlayton@kernel.org>
-Date: Wed, 04 Sep 2019 20:33:52 -0400
-In-Reply-To: <2807E5FD2F6FDA4886F6618EAC48510E898E7BD9@CRSMSX101.amr.corp.intel.com>
-References: <20190827123537.18794-1-jlayton@kernel.org>
-         <20190904124849.15816-1-jlayton@kernel.org>
-         <2807E5FD2F6FDA4886F6618EAC48510E898E7BD9@CRSMSX101.amr.corp.intel.com>
-Content-Type: text/plain; charset="UTF-8"
+        id S1727741AbfIEBjE (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Wed, 4 Sep 2019 21:39:04 -0400
+Date: Thu, 5 Sep 2019 09:46:06 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH v3] generic/430: add copy in same file test
+Message-ID: <20190905014606.GZ7239@dhcp-12-102.nay.redhat.com>
+References: <20190904130134.7842-1-yin-jianhong@163.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 7bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190904130134.7842-1-yin-jianhong@163.com>
 Sender: fstests-owner@vger.kernel.org
-To: "Weiny, Ira" <ira.weiny@intel.com>, "fstests@vger.kernel.org" <fstests@vger.kernel.org>
-Cc: "bfields@fieldses.org" <bfields@fieldses.org>, "amir73il@gmail.com" <amir73il@gmail.com>
+To: "Jianhong.Yin" <yin-jianhong@163.com>
+Cc: fstests@vger.kernel.org, jiyin@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-On Wed, 2019-09-04 at 16:52 +0000, Weiny, Ira wrote:
-> > Subject: [PATCH v2] generic: Add a test for basic F_SETLEASE functionality
-> > 
-> > Add a new test that verifies that F_SETLEASE works as expected. The parent
-> > opens a file and sets a lease on it and then forks. The child then does a
-> > (possibly) conflicting open. We then verify that we get signals as expected.
+On Wed, Sep 04, 2019 at 09:01:34PM +0800, Jianhong.Yin wrote:
+> now xfstests has not cover the senario that copy in same file
+> related bug:
+>  copy_file_range return "Invalid argument" when copy in the same file
+>  https://bugzilla.kernel.org/show_bug.cgi?id=202935
 > 
-> Jeff, does this mean you would rather go with this test vs the one I submitted?
+> step1:
+>  copy whole file to itself, and compare with original file.
+> step2:
+>  copy whole file to end of itself, and compare the two halves with the original file
+> step3:
+>  recover from original file.
 > 
-> https://www.spinics.net/lists/fstests/msg12449.html
+> Signed-off-by: Jianhong Yin <yin-jianhong@163.com>
+> ---
 > 
-> Ira
+> this is a base function test, I don't think we should add a new
+> test for it like 553 554, so add it in generic/430
+> what do you think?
 > 
+>  tests/generic/430     | 12 ++++++++++++
+>  tests/generic/430.out |  4 ++++
+>  2 files changed, 16 insertions(+)
+> 
+> diff --git a/tests/generic/430 b/tests/generic/430
+> index 1b11f60d..4ce0ee26 100755
+> --- a/tests/generic/430
+> +++ b/tests/generic/430
+> @@ -6,6 +6,7 @@
+>  #
+>  # Tests vfs_copy_file_range():
+>  #   - Copy a file
+> +#   - Copy in same file
+>  #   - Copy beginning of original to new file
+>  #   - Copy middle of original to a new file
+>  #   - Copy end of original to new file
+> @@ -52,6 +53,17 @@ cmp $testdir/file $testdir/copy
+>  echo "Original md5sums:"
+>  md5sum $testdir/{file,copy} | _filter_test_dir
+>  
+> +fsize=$(stat -c %s $testdir/copy)
 
-No, actually...I'm sorry, I didn't notice your posting until just now.
+I don't think you need to do `stat` to get the file size, due to this case
+has definite fixed file size (5000 bytes). If it fails to write 5000 bytes,
+the case should be failed for something wrong.
 
-I think your test (with the proposed changes) covers more cases and will
-probably be more extensible later. I'll give it a more thorough review
-tomorrow, but I expect we can just drop this patch and just go with your
-tests.
+> +echo "Copy in same file"
+> +$XFS_IO_PROG    -c "copy_range -l $fsize $testdir/copy" "$testdir/copy"
+> +cmp $testdir/file $testdir/copy
+> +$XFS_IO_PROG    -c "copy_range -l $fsize -d $fsize $testdir/copy" "$testdir/copy"
+> +cmp -n $fsize $testdir/file $testdir/copy
+> +cmp -i 0:$fsize $testdir/file $testdir/copy
+
+I think test once on same file is enough, but I don't have objection if you and
+maintainer preper twice.
+
+> +$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> +echo "md5sums after copying in same file and recover:"
+> +md5sum $testdir/{file,copy} | _filter_test_dir
+
+This test base on an implicit operation that xfs_io copy_range command always
+truncates target file to 0 before doing copy_file_range, if there's not
+-l or -d or -s specified.
+
+So I think if you'd like to do this test, I prefer truncating $testdir/copy
+by an explicit operation (e.g: use -t option, or -c 'truncate 0', or even
+rm -f $testdir/copy).
+
+And as above, I don't think this test is necessary, but I don't have objection
+if you and maintainer preper that.
 
 Thanks,
--- 
-Jeff Layton <jlayton@kernel.org>
+Zorro
+
+> +
+>  echo "Copy beginning of original file"
+>  $XFS_IO_PROG -f -c "copy_range -l 1000 $testdir/file" "$testdir/beginning"
+>  cmp -n 1000 $testdir/file $testdir/beginning
+> diff --git a/tests/generic/430.out b/tests/generic/430.out
+> index 4b4ca75d..57584957 100644
+> --- a/tests/generic/430.out
+> +++ b/tests/generic/430.out
+> @@ -3,6 +3,10 @@ Create the original file and then copy
+>  Original md5sums:
+>  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
+>  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/copy
+> +Copy in same file
+> +md5sums after copying in same file and recover:
+> +e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
+> +e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/copy
+>  Copy beginning of original file
+>  md5sums after copying beginning:
+>  e11fbace556cba26bf0076e74cab90a3  TEST_DIR/test-430/file
+> -- 
+> 2.21.0
+> 
