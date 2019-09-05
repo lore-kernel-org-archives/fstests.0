@@ -1,104 +1,64 @@
-Received: from mga04.intel.com ([192.55.52.120]:17189 "EHLO mga04.intel.com"
+Received: from mail.kernel.org ([198.145.29.99]:34016 "EHLO mail.kernel.org"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1727014AbfIEQL2 (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Sep 2019 12:11:28 -0400
-From: "Weiny, Ira" <ira.weiny@intel.com>
-Subject: RE: [RFC PATCH 0/2] Add lease testing
-Date: Thu, 5 Sep 2019 16:11:24 +0000
-Message-ID: <2807E5FD2F6FDA4886F6618EAC48510E898EC5ED@CRSMSX101.amr.corp.intel.com>
-References: <20190903210537.29142-1-ira.weiny@intel.com>
-         <20190903214255.GK7777@dread.disaster.area>
-         <20190903222233.GA31319@iweiny-DESK2.sc.intel.com>
- <28a504d5628b1b2ad17086dea79acce13ee85429.camel@kernel.org>
-In-Reply-To: <28a504d5628b1b2ad17086dea79acce13ee85429.camel@kernel.org>
-Content-Language: en-US
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: base64
-MIME-Version: 1.0
+        id S2388335AbfIEPhI (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Sep 2019 11:37:08 -0400
+From: fdmanana@kernel.org
+Subject: [PATCH] btrfs/048: fix test failure when fs mounted with v2 space cache option
+Date: Thu,  5 Sep 2019 16:37:00 +0100
+Message-Id: <20190905153700.21284-1-fdmanana@kernel.org>
 Sender: fstests-owner@vger.kernel.org
-To: Jeff Layton <jlayton@kernel.org>, Dave Chinner <david@fromorbit.com>
-Cc: "fstests@vger.kernel.org" <fstests@vger.kernel.org>, "john.hubbard@gmail.com" <john.hubbard@gmail.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, "Williams, Dan J" <dan.j.williams@intel.com>, Eryu Guan <guaneryu@gmail.com>
+To: fstests@vger.kernel.org
+Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
 List-ID: <fstests@vger.kernel.org>
 
-PiBTdWJqZWN0OiBSZTogW1JGQyBQQVRDSCAwLzJdIEFkZCBsZWFzZSB0ZXN0aW5nDQo+IA0KPiBP
-biBUdWUsIDIwMTktMDktMDMgYXQgMTU6MjIgLTA3MDAsIElyYSBXZWlueSB3cm90ZToNCj4gPiBP
-biBXZWQsIFNlcCAwNCwgMjAxOSBhdCAwNzo0Mjo1NUFNICsxMDAwLCBEYXZlIENoaW5uZXIgd3Jv
-dGU6DQo+ID4gPiBPbiBUdWUsIFNlcCAwMywgMjAxOSBhdCAwMjowNTozNVBNIC0wNzAwLCBpcmEu
-d2VpbnlAaW50ZWwuY29tIHdyb3RlOg0KPiA+ID4gPiBGcm9tOiBJcmEgV2VpbnkgPGlyYS53ZWlu
-eUBpbnRlbC5jb20+DQo+ID4gPiA+DQo+ID4gPiA+IFRvIGdldCB0byBhIHBvaW50IG9mIGRldmVs
-b3BpbmcgYW5kIHRlc3RpbmcgdGhlIG5ldyBMZWFzZQ0KPiA+ID4gPiBzZW1hbnRpY3MgZm9yIGxv
-bmcgdGVybSBmaWxlIHBpbnNbMV0sIGFkZCBhIHNpbXBsZSBsZWFzZSB0ZXN0Lg0KPiA+ID4NCj4g
-PiA+IEhpIElyYSwNCj4gPiA+DQo+ID4gPiBDYW4geW91IGNvLW9yZGluYXRlIHdpdGggSmVmZiBv
-biB0aGlzPyBIZSBqdXN0IHBvc3RlZCBhIHBhdGNoIHRvIGFkZA0KPiA+ID4gRl9TRVRMRUFTRSB0
-ZXN0aW5nIHdpdGggYSBuZXcgYmluYXJ5IGEgZmV3IGRheXMgYWdvLi4uDQo+ID4gPg0KPiA+ID4g
-aHR0cHM6Ly9tYXJjLmluZm8vP2w9ZnN0ZXN0cyZtPTE1NjY5MDkzNDUxMzQyNCZ3PTINCj4gPg0K
-PiA+IFN1cmUuDQo+ID4NCj4gPiBKZWZmLA0KPiA+DQo+ID4gTG9va2luZyBhdCB5b3VyIHN1Ym1p
-c3Npb24gcmV2ZWFsZWQgSSB3YXMgbWlzc2luZyAyIHRlc3RzIChzaG93biBpbg0KPiA+IHRoZSBk
-aWZmIGJlbG93KS4NCj4gPg0KPiA+IFdvdWxkIGl0IGJlIHN1ZmZpY2llbnQgdG8gYWRkIHRoZXNl
-IHRvIHRoaXMgc3VibWlzc2lvbiBhbmQgZ28gd2l0aCBteQ0KPiBzZXJpZXM/DQo+ID4gT3Igd291
-bGQgeW91IHByZWZlciB1c2luZyBmb3JrIHZzIHRoZSBzb2NrZXQgaGFybmVzcz8NCj4gPg0KPiA+
-IEkgdGhpbmsgd2UgbWF5IG5lZWQgYSBmb3JrIGluIHRoZSBzZXJ2ZXIgc2lkZSBvZiBteSB0ZXN0
-cyB0byB3b3JrIG9uDQo+ID4gZHVwbGljYXRlZCBGRCdzIGJ1dCByaWdodCBub3cgSSBoYXZlIG1v
-cmUgdGVzdHMgdGhhbiB5b3UuDQo+ID4NCj4gPiBMZXQgbWUga25vdywgVGhhbmtzLA0KPiA+IEly
-YQ0KPiA+DQo+ID4gY29tbWl0IDg0OTYzMzg3MWI3YzBiMDBhNmVlMmJiNzUxYzA5Y2Q2MzY1ZGEz
-ODYgKGxlYXNlLXRlc3QtYjAtdjMpDQo+ID4gQXV0aG9yOiBJcmEgV2VpbnkgPGlyYS53ZWlueUBp
-bnRlbC5jb20+DQo+ID4gRGF0ZTogICBUdWUgU2VwIDMgMTU6MTc6NTIgMjAxOSAtMDcwMA0KPiA+
-DQo+ID4gICAgIHNyYy9sZWFzZXRlc3Q6IEFkZCB0ZXN0cyB0byBtYXRjaCBjb21wZXRpbmcgdGVz
-dA0KPiA+DQo+ID4gICAgIEEgY29tcGV0aW5nIHBhdGNoIHRvIHRlc3QgbGVhc2VzIHdhcyBzdWJt
-aXR0ZWQgaW4gcGFyYWxsZWwuWzFdDQo+ID4NCj4gPiAgICAgVGhpcyBhZGRzIHRlc3RzIHdoaWNo
-IHdlcmUgY292ZXJlZCBpbiB0aGF0IHBhdGNoIHNldC4NCj4gPg0KPiA+ICAgICBbMV0gaHR0cHM6
-Ly9tYXJjLmluZm8vP2w9ZnN0ZXN0cyZtPTE1NjY5MDkzNDUxMzQyNCZ3PTINCj4gPg0KPiA+ICAg
-ICBTaWduZWQtb2ZmLWJ5OiBJcmEgV2VpbnkgPGlyYS53ZWlueUBpbnRlbC5jb20+DQo+ID4NCj4g
-PiBkaWZmIC0tZ2l0IGEvc3JjL2xlYXNldGVzdC5jIGIvc3JjL2xlYXNldGVzdC5jIGluZGV4DQo+
-ID4gYjMwYTRkMDVkMDM5Li43MjlhY2E4NTE0OTMgMTAwNjQ0DQo+ID4gLS0tIGEvc3JjL2xlYXNl
-dGVzdC5jDQo+ID4gKysrIGIvc3JjL2xlYXNldGVzdC5jDQo+ID4gQEAgLTEzNyw2ICsxMzcsOCBA
-QCBjaGFyICpkZXNjcmlwdGlvbnNbXSA9IHsNCj4gPiAgICAgIC8qICA0ICovIkZhaWwgUmVhZCBM
-ZWFzZSBpZiBvcGVuZWQgd2l0aCB3cml0ZSBwZXJtaXNzaW9ucyIsDQo+ID4gICAgICAvKiAgNSAq
-LyJSZWFkIGxlYXNlIGdldHMgU0lHSU8gb24gd3JpdGUgb3BlbiIsDQo+ID4gICAgICAvKiAgNiAq
-LyJXcml0ZSBsZWFzZSBnZXRzIFNJR0lPIG9uIHJlYWQgb3BlbiIsDQo+ID4gKyAgICAvKiAgNyAq
-LyJObyBTSUdJTyBpcyBzZW50IHdpdGggcmVhZCBsb2NrIG9uIHJlYWQgb3BlbiIsDQo+ID4gKyAg
-ICAvKiAgOCAqLyJSZWFkIGxlYXNlIGdldHMgU0lHSU8gb24gd3JpdGUgb3BlbiIsDQo+ID4gIH07
-DQo+ID4NCj4gPiAgc3RhdGljIGludDY0X3QgdGVzdHNbXVs1XSA9DQo+ID4gQEAgLTE5NSw2ICsx
-OTcsMjYgQEAgc3RhdGljIGludDY0X3QgdGVzdHNbXVs1XSA9DQo+ID4gICAgICAgICAgICAgICAg
-IHs2LCAgICAgQ01EX0NMT1NFLCAgICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAg
-U0VSVkVSICB9LA0KPiA+ICAgICAgICAgICAgICAgICB7NiwgICAgIENNRF9DTE9TRSwgICAgICAw
-LCAgICAgICAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVOVCAgfSwNCj4gPg0KPiA+ICsgICAg
-ICAgLyogRG9uJ3QgZ2V0IFNJR0lPIHdoZW4gcmVhZCBsZWFzZSBpcyB0YWtlbiBieSByZWFkICov
-DQo+ID4gKyAgICAgICAgICAgICAgIHs3LCAgICAgQ01EX09QRU4sICAgICAgIE9fUkRPTkxZLCAg
-ICAgICBQQVNTLCAgICAgICAgICAgQ0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7Nywg
-ICAgIENNRF9TRVRMRUFTRSwgICBGX1JETENLLCAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVO
-VCAgfSwNCj4gPiArICAgICAgICAgICAgICAgezcsICAgICBDTURfR0VUTEVBU0UsICAgRl9SRExD
-SywgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAgICAg
-IHs3LCAgICAgQ01EX1NJR0lPLCAgICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAg
-Q0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7NywgICAgIENNRF9PUEVOLCAgICAgICBP
-X1JET05MWSwgICAgICAgUEFTUywgICAgICAgICAgIFNFUlZFUiAgfSwNCj4gPiArICAgICAgICAg
-ICAgICAgezcsICAgICBDTURfV0FJVF9TSUdJTywgNSwgICAgICAgICAgICAgIEZBSUwsICAgICAg
-ICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAgICAgIHs3LCAgICAgQ01EX0NMT1NFLCAg
-ICAgIDAsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAgU0VSVkVSICB9LA0KPiA+ICsgICAg
-ICAgICAgICAgICB7NywgICAgIENNRF9DTE9TRSwgICAgICAwLCAgICAgICAgICAgICAgUEFTUywg
-ICAgICAgICAgIENMSUVOVCAgfSwNCj4gPiArDQo+ID4gKyAgICAgICAvKiBHZXQgU0lHSU8gd2hl
-biBSZWFkIGxlYXNlIGlzIGJyb2tlbiBieSBXcml0ZSAqLw0KPiA+ICsgICAgICAgICAgICAgICB7
-OCwgICAgIENNRF9PUEVOLCAgICAgICBPX1JET05MWSwgICAgICAgUEFTUywgICAgICAgICAgIENM
-SUVOVCAgfSwNCj4gPiArICAgICAgICAgICAgICAgezgsICAgICBDTURfU0VUTEVBU0UsICAgRl9S
-RExDSywgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+ID4gKyAgICAgICAgICAg
-ICAgIHs4LCAgICAgQ01EX0dFVExFQVNFLCAgIEZfUkRMQ0ssICAgICAgICBQQVNTLCAgICAgICAg
-ICAgQ0xJRU5UICB9LA0KPiA+ICsgICAgICAgICAgICAgICB7OCwgICAgIENNRF9TSUdJTywgICAg
-ICAwLCAgICAgICAgICAgICAgUEFTUywgICAgICAgICAgIENMSUVOVCAgfSwNCj4gPiArICAgICAg
-ICAgICAgICAgezgsICAgICBDTURfT1BFTiwgICAgICAgT19SRFdSLCAgICAgICAgIFBBU1MsICAg
-ICAgICAgICBTRVJWRVIgIH0sDQo+ID4gKyAgICAgICAgICAgICAgIHs4LCAgICAgQ01EX1dBSVRf
-U0lHSU8sIDUsICAgICAgICAgICAgICBQQVNTLCAgICAgICAgICAgQ0xJRU5UICB9LA0KPiA+ICsg
-ICAgICAgICAgICAgICB7OCwgICAgIENNRF9DTE9TRSwgICAgICAwLCAgICAgICAgICAgICAgUEFT
-UywgICAgICAgICAgIFNFUlZFUiAgfSwNCj4gPiArICAgICAgICAgICAgICAgezgsICAgICBDTURf
-Q0xPU0UsICAgICAgMCwgICAgICAgICAgICAgIFBBU1MsICAgICAgICAgICBDTElFTlQgIH0sDQo+
-ID4gKw0KPiA+ICAgICAgICAgLyogaW5kaWNhdGUgZW5kIG9mIGFycmF5ICovDQo+ID4gICAgICAg
-ICAvKiBNdXN0IGhhdmUgYW4gZW5kIGZvciB0aGUgU0VSVkVSIGFuZCBvbmUgZm9yIHRoZSBDTElF
-TlQgKi8NCj4gPiAgICAgICAgICAgICAgICAgezAsMCwwLDAsU0VSVkVSfSwNCj4gDQo+IEhpIEly
-YSwNCj4gDQo+IExldCdzIGdvIHdpdGggeW91ciB0ZXN0Y2FzZSwgaW5jbHVkaW5nIHRoZSBwYXRj
-aCBhYm92ZS4gSXQncyBtb3JlDQo+IGNvbXByZWhlbnNpdmUgdGhhbiB0aGUgb25lIEkgcHJvcG9z
-ZWQsIGFuZCBzaG91bGQgYmUgZWFzaWVyIHRvIGV4dGVuZCBpbg0KPiB0aGUgZnV0dXJlLg0KPiAN
-Cj4gQWNrZWQtYnk6IEplZmYgTGF5dG9uIDxqbGF5dG9uQGtlcm5lbC5vcmc+DQoNClRoYW5rcyEg
-IEdpdmUgbWUgYSBiaXQgYW5kIEkgd2lsbCBzdWJtaXQgVjIgd2l0aCB0aGlzIHNxdWFzaGVkIGlu
-dG8gdGhlIG9yaWdpbmFsIHBhdGNoLiAgSSBkaWQgc29tZSBjbGVhbnVwIG9mIGxvY2t0ZXN0IGJ1
-dCBvdGhlciB0aGFuIHRoYXQgbGVhc2V0ZXN0IGlzIHByZXR0eSBtdWNoIGEgY29weS4gIE5vdCBz
-dXJlIGlmIHRoZSBjb21tdW5pdHkgd291bGQgbGlrZSB0byBzZWUgbW9yZSBjaGFuZ2VzIG9yIG5v
-dC4NCg0KSXJhDQoNCg==
+From: Filipe Manana <fdmanana@suse.com>
+
+In order to check that the filesystem generation does not change after
+failure to set a property, the test expects a specific generation number
+of 7 in its golden output. That currently works except when using the
+v2 space cache mount option (MOUNT_OPTIONS="-o space_cache=v2"), since
+the filesystem generation is 8 because creating a v2 space cache adds
+an additional transaction commit. So update the test to not hardcode
+specific generation numbers in its golden output and just output an
+unexpected message if the generation number changes.
+
+Signed-off-by: Filipe Manana <fdmanana@suse.com>
+---
+ tests/btrfs/048     | 5 +++--
+ tests/btrfs/048.out | 2 --
+ 2 files changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/tests/btrfs/048 b/tests/btrfs/048
+index 7294f231..7c9eaa05 100755
+--- a/tests/btrfs/048
++++ b/tests/btrfs/048
+@@ -221,10 +221,11 @@ $BTRFS_UTIL_PROG property get $SCRATCH_MNT compression
+ 
+ echo -e "\nTesting generation is unchanged after failed validation"
+ $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+-$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
++gen_before=$($BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation')
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'lz' 2>&1 | _filter_scratch
+ $BTRFS_UTIL_PROG filesystem sync $SCRATCH_MNT
+-$BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation'
++gen_after=$($BTRFS_UTIL_PROG inspect-internal dump-super $SCRATCH_DEV | grep '^generation')
++[ "$gen_after" == "$gen_before" ] || echo "filesystem generation changed"
+ 
+ echo -e "\nTesting argument validation with options"
+ $BTRFS_UTIL_PROG property set $SCRATCH_MNT compression 'zlib:3'
+diff --git a/tests/btrfs/048.out b/tests/btrfs/048.out
+index 0923b00c..cc12e329 100644
+--- a/tests/btrfs/048.out
++++ b/tests/btrfs/048.out
+@@ -89,9 +89,7 @@ ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
+ compression=lzo
+ 
+ Testing generation is unchanged after failed validation
+-generation		7
+ ERROR: failed to set compression for SCRATCH_MNT: Invalid argument
+-generation		7
+ 
+ Testing argument validation with options
+ ***
+-- 
+2.11.0
