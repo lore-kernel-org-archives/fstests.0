@@ -1,155 +1,142 @@
-Received: from mga17.intel.com ([192.55.52.151]:39471 "EHLO mga17.intel.com"
+Received: from mx1.redhat.com ([209.132.183.28]:43376 "EHLO mx1.redhat.com"
         rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726231AbfIERas (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Thu, 5 Sep 2019 13:30:48 -0400
-From: ira.weiny@intel.com
-Subject: [PATCH V2 2/2] generic: Add Lease testing
-Date: Thu,  5 Sep 2019 10:30:26 -0700
-Message-Id: <20190905173026.28114-3-ira.weiny@intel.com>
-In-Reply-To: <20190905173026.28114-1-ira.weiny@intel.com>
-References: <20190905173026.28114-1-ira.weiny@intel.com>
+        id S1733254AbfIFBTn (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 5 Sep 2019 21:19:43 -0400
+Date: Fri, 6 Sep 2019 09:26:45 +0800
+From: Zorro Lang <zlang@redhat.com>
+Subject: Re: [PATCH] generic/43{0,1,2,3}: add -t option when create
+ $testdir/copy file
+Message-ID: <20190906012645.GE7239@dhcp-12-102.nay.redhat.com>
+References: <20190905013921.13396-1-yin-jianhong@163.com>
 MIME-Version: 1.0
-Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
+In-Reply-To: <20190905013921.13396-1-yin-jianhong@163.com>
 Sender: fstests-owner@vger.kernel.org
-To: fstests@vger.kernel.org
-Cc: john.hubbard@gmail.com, Dave Chinner <david@fromorbit.com>, Jason Gunthorpe <jgg@ziepe.ca>, Jan Kara <jack@suse.cz>, Dan Williams <dan.j.williams@intel.com>, Jeff Layton <jlayton@kernel.org>, Ira Weiny <ira.weiny@intel.com>
+To: "Jianhong.Yin" <yin-jianhong@163.com>
+Cc: fstests@vger.kernel.org, darrick.wong@oracle.com, jiyin@redhat.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Ira Weiny <ira.weiny@intel.com>
+On Thu, Sep 05, 2019 at 09:39:21AM +0800, Jianhong.Yin wrote:
+> to avoid there's already a copy file before run test,
+> it might break test.
+> 
+> I know now in xfs_io->copy_range there's a hidden truncate action
+> to do that, but we are taking about remove it, see:
+>  https://www.spinics.net/lists/linux-xfs/msg31292.html
+>  https://www.spinics.net/lists/linux-xfs/msg31327.html
+> 
+> Signed-off-by: Jianhong Yin <yin-jianhong@163.com>
+> ---
 
-Now that we have a leasetest executable add in a lease test script.
+Hi,
 
-Signed-off-by: Ira Weiny <ira.weiny@intel.com>
----
- tests/generic/567     | 100 ++++++++++++++++++++++++++++++++++++++++++
- tests/generic/567.out |   2 +
- tests/generic/group   |   1 +
- 3 files changed, 103 insertions(+)
- create mode 100755 tests/generic/567
- create mode 100644 tests/generic/567.out
+By checking the code logic of generic/430, I don't think it needs to truncate
+the target file before copy_range. To make sure that, I did below test[1], then
+nothing fails. I tested with upstream kernel and xfsprogs(with your patches). 
 
-diff --git a/tests/generic/567 b/tests/generic/567
-new file mode 100755
-index 000000000000..3ef99c66b207
---- /dev/null
-+++ b/tests/generic/567
-@@ -0,0 +1,100 @@
-+#! /bin/bash
-+# SPDX-License-Identifier: GPL-2.0
-+# Copyright (c) 2019 Intel Corp.  All Rights Reserved.
-+#
-+# FS QA Test 567
-+#
-+# Test Leases
-+#
-+seq=`basename $0`
-+seqres=$RESULT_DIR/$seq
-+echo "QA output created by $seq"
-+
-+here=`pwd`
-+tmp=/tmp/$$
-+status=1	# failure is the default!
-+trap "_cleanup; exit \$status" 0 1 2 3 15
-+#debug="-d -d -d"
-+debug=""
-+
-+TESTFILE=$TEST_DIR/lease_file
-+
-+_cleanup()
-+{
-+	kill $leasetest_pid2 > /dev/null 2>&1
-+	kill $leasetest_pid1 > /dev/null 2>&1
-+	rm -f $TESTFILE
-+}
-+
-+# get standard environment, filters and checks
-+. ./common/rc
-+. ./common/filter
-+
-+# real QA test starts here
-+_supported_fs generic
-+_supported_os Linux
-+_require_test
-+_require_test_fcntl_advisory_locks
-+
-+# set up log files
-+SERVER_LOG=$TEST_DIR/server.out
-+CLIENT_LOG=$TEST_DIR/client.out
-+rm -f $SERVER_LOG
-+touch $SERVER_LOG
-+rm -f $CLIENT_LOG
-+touch $CLIENT_LOG
-+
-+if [ "$debug" != "" ]; then
-+	echo "Test directory : $TEST_DIR"
-+	echo "Result directory : $RESULT_DIR"
-+	echo "Client log : $CLIENT_LOG"
-+	echo "Server log : $SERVER_LOG"
-+fi
-+
-+touch $TESTFILE
-+
-+# Start the server
-+src/leasetest $debug $TESTFILE 2>&1 > $SERVER_LOG &
-+leasetest_pid1=$!
-+
-+timeout=30
-+while [ $timeout -gt 0 ]; do
-+	sleep 1
-+
-+	PORT=$(cat $SERVER_LOG | grep "^server port: " | awk '{print $3}')
-+	if [ -n "$PORT" ]; then
-+		break
-+	fi
-+
-+	# check the existence of server process
-+	if ! kill -s 0 $leasetest_pid1 >/dev/null 2>&1; then
-+		echo "Server died abnormally"
-+		exit 1
-+	fi
-+
-+	let timeout=timeout-1
-+done
-+
-+if [ -z "$PORT" ]; then
-+	echo "Could not get server port"
-+	exit 1
-+fi
-+
-+# Start the client
-+src/leasetest $debug -p $PORT -h localhost $TESTFILE 2>&1 > $CLIENT_LOG
-+leasetest_pid2=$!
-+result=$?
-+if [ $result -eq 0 ]; then
-+	echo success!
-+	status=0
-+else
-+	echo "Client reported failure ($result)"
-+	cat $TEST_DIR/*.out
-+fi
-+
-+if [ "$debug" != "" ]; then
-+	echo "End file details"
-+	ls -la $TESTFILE
-+fi
-+
-+exit
-diff --git a/tests/generic/567.out b/tests/generic/567.out
-new file mode 100644
-index 000000000000..dada957258fc
---- /dev/null
-+++ b/tests/generic/567.out
-@@ -0,0 +1,2 @@
-+QA output created by 567
-+success!
-diff --git a/tests/generic/group b/tests/generic/group
-index d26c080fde30..1a48c93ff3bb 100644
---- a/tests/generic/group
-+++ b/tests/generic/group
-@@ -569,3 +569,4 @@
- 564 auto quick copy_range
- 565 auto quick copy_range
- 566 auto quick quota metadata
-+567 auto quick locks
--- 
-2.20.1
+I didn't do more test than that, if I missed something please feel free to
+tell me.
+
+Thanks,
+Zorro
+
+[1]
+# git am $your_patches
+# git log --oneline
+22c1ab98 (HEAD -> for-next) xfsprogs: copy_range: let = (src_size - src_offset) if len omitted
+792d4bfb xfsprogs: copy_range don't truncate dstfile
+...
+# make -j8 && make -j8 install && make -j8 install-dev
+# grep -rsnl copy_range tests/|grep -v .out
+tests/generic/group
+tests/generic/434
+tests/generic/430
+tests/generic/431
+tests/generic/432
+tests/generic/433
+tests/generic/553
+tests/generic/554
+tests/generic/564
+tests/generic/565
+# ./check generic/430 generic/431 generic/432 generic/433 generic/434 generic/553 generic/554 generic/564 generic/565                                       
+FSTYP         -- xfs (debug)
+PLATFORM      -- Linux/x86_64 ibm-x3650m4-10 5.3.0-rc6-xfs-for-next #12 SMP Thu Sep 5 07:35:55 EDT 2019
+MKFS_OPTIONS  -- -f -bsize=4096 /dev/mapper/xxx-xxx-xxxxx-xfscratch
+MOUNT_OPTIONS -- -o context=system_u:object_r:root_t:s0 /dev/mapper/xxx-xxx-xxxx-xfscratch /mnt/scratch                                                                              
+
+generic/430 2s ...  2s
+generic/431 3s ...  2s
+generic/432 3s ...  3s
+generic/433 2s ...  3s
+generic/434      2s
+generic/553      2s
+generic/554      8s
+generic/564      3s
+generic/565      5s
+Ran: generic/430 generic/431 generic/432 generic/433 generic/434 generic/553 generic/554 generic/564 generic/565                                                                              
+Passed all 9 tests
+
+
+
+>  tests/generic/430 | 2 +-
+>  tests/generic/431 | 2 +-
+>  tests/generic/432 | 2 +-
+>  tests/generic/433 | 2 +-
+>  4 files changed, 4 insertions(+), 4 deletions(-)
+> 
+> diff --git a/tests/generic/430 b/tests/generic/430
+> index 1b11f60d..71c6d438 100755
+> --- a/tests/generic/430
+> +++ b/tests/generic/430
+> @@ -47,7 +47,7 @@ $XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
+> -$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> +$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
+>  cmp $testdir/file $testdir/copy
+>  echo "Original md5sums:"
+>  md5sum $testdir/{file,copy} | _filter_test_dir
+> diff --git a/tests/generic/431 b/tests/generic/431
+> index f04ae215..4b22a8ff 100755
+> --- a/tests/generic/431
+> +++ b/tests/generic/431
+> @@ -40,7 +40,7 @@ rm -f $seqres.full
+>  
+>  echo "Create the original file and then copy"
+>  echo -n "abcde" > $testdir/file
+> -$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> +$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
+>  echo -n "abcde" | cmp $testdir/copy
+>  echo "Original md5sums:"
+>  md5sum $testdir/{file,copy} | _filter_test_dir
+> diff --git a/tests/generic/432 b/tests/generic/432
+> index 6200af86..a2fecf37 100755
+> --- a/tests/generic/432
+> +++ b/tests/generic/432
+> @@ -46,7 +46,7 @@ $XFS_IO_PROG -f -c 'pwrite -S 0x62 1000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x63 2000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x64 3000 1000' $testdir/file >> $seqres.full 2>&1
+>  $XFS_IO_PROG -f -c 'pwrite -S 0x65 4000 1000' $testdir/file >> $seqres.full 2>&1
+> -$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> +$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
+>  cmp $testdir/file  $testdir/copy
+>  echo "Original md5sums:"
+>  md5sum $testdir/{file,copy} | _filter_test_dir
+> diff --git a/tests/generic/433 b/tests/generic/433
+> index 1238419a..6204f339 100755
+> --- a/tests/generic/433
+> +++ b/tests/generic/433
+> @@ -42,7 +42,7 @@ rm -f $seqres.full
+>  
+>  echo "Create the original file and then copy"
+>  echo -n "abcde" > $testdir/file
+> -$XFS_IO_PROG -f -c "copy_range $testdir/file" "$testdir/copy"
+> +$XFS_IO_PROG -t -f -c "copy_range $testdir/file" "$testdir/copy"
+>  cmp $testdir/file $testdir/copy
+>  echo "Original md5sums:"
+>  md5sum $testdir/{file,copy} | _filter_test_dir
+> -- 
+> 2.21.0
+> 
