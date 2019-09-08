@@ -1,99 +1,86 @@
-Received: from mail-ed1-f47.google.com ([209.85.208.47]:38420 "EHLO
-        mail-ed1-f47.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1726263AbfIHKSK (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Sep 2019 06:18:10 -0400
-Received: by mail-ed1-f47.google.com with SMTP id a23so8187418edv.5
-        for <fstests@vger.kernel.org>; Sun, 08 Sep 2019 03:18:09 -0700 (PDT)
+Received: from mail-pf1-f196.google.com ([209.85.210.196]:43279 "EHLO
+        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1725928AbfIHOwl (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 8 Sep 2019 10:52:41 -0400
+Received: by mail-pf1-f196.google.com with SMTP id d15so7527324pfo.10
+        for <fstests@vger.kernel.org>; Sun, 08 Sep 2019 07:52:40 -0700 (PDT)
+Message-ID: <5d7515b7.1c69fb81.39894.6119@mx.google.com>
+Date: Sun, 08 Sep 2019 22:52:33 +0800
+From: Eryu Guan <guaneryu@gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 0837e907988a
 MIME-Version: 1.0
-From: Anatoly Pugachev <matorola@gmail.com>
-Date: Sun, 8 Sep 2019 13:18:00 +0300
-Message-ID: <CADxRZqyny2nRZwJ=_8QaNj5Xpui7_p8T4XE07ohP6SXrS1JrHw@mail.gmail.com>
-Subject: generic/377 failing, xattr: security.SMACK64
-Content-Type: text/plain; charset="UTF-8"
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="IyU0PVLmC86b"
+Content-Disposition: inline
 Sender: fstests-owner@vger.kernel.org
-To: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-Hello!
 
-JFYI
+--IyU0PVLmC86b
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-generic/377 test  failing after enabling CONFIG_SECURITY_SMACK in kernel:
+Hi all,
 
-xfstests-dev# ./check generic/377
-FSTYP         -- xfs (debug)
-PLATFORM      -- Linux/sparc64 ttip 5.3.0-rc7-dirty #1206 SMP Sat Sep
-7 16:26:01 MSK 2019
-MKFS_OPTIONS  -- -f -bsize=4096 /dev/zram0
-MOUNT_OPTIONS -- /dev/zram0 /1/scratch
+The master branch of the xfstests repository at:
 
-generic/377 4s ... - output mismatch (see
-xfstests-dev/results//generic/377.out.bad)
-    --- tests/generic/377.out   2016-09-24 11:51:48.346895167 +0300
-    +++ xfstests-dev/results//generic/377.out.bad      2019-09-08
-12:25:59.028454297 +0300
-    @@ -1,4 +1,5 @@
-     QA output created by 377
-    +xattr: security.SMACK64
-     xattr: user.foo
-     xattr: user.hello
-     xattr: user.ping
-    @@ -6,6 +7,7 @@
-     listxattr: Numerical result out of range
-    ...
-    (Run 'diff -u xfstests-dev/tests/generic/377.out
-xfstests-dev/results//generic/377.out.bad'  to see the entire diff)
-Ran: generic/377
-Failures: generic/377
-Failed 1 of 1 tests
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
 
+have just been updated. Again, this is a bugfix only update, you should see no
+new failures after pulling updates.
 
+Thanks,
+Eryu
 
+The new head of the master branch is commit:
 
-root@ttip:xfstests-dev# cat xfstests-dev/results//generic/377.out.bad
-QA output created by 377
-xattr: security.SMACK64
-xattr: user.foo
-xattr: user.hello
-xattr: user.ping
-listxattr: No such file or directory
-listxattr: Numerical result out of range
-listxattr: Numerical result out of range
-listxattr: Numerical result out of range
-xattr: security.SMACK64
-xattr: user.foo
-xattr: user.hello
-xattr: user.ping
-xfstests-dev#
+0837e907988a btrfs/048: fix test failure when fs mounted with v2 space cache option
+
+New commits:
+
+Filipe Manana (1):
+      [0837e907988a] btrfs/048: fix test failure when fs mounted with v2 space cache option
+
+Ira Weiny (3):
+      [54c5fcc72fd7] src/locktest: Remove D_flag
+      [25d6ac5323f7] src/locktest: Update test header comment
+      [c14b4d65c694] src/locktest: Remove unused buf allocation
+
+Nikolay Borisov (1):
+      [306291e75554] generic/25[02]: Increase fs size to 196 mb
 
 
-switching off CONFIG_SECURITY_SMACK in kernel (or via kernel command
-line security=none) make this test pass successfully.
+Code Diffstat:
 
+ src/locktest.c      | 49 +++----------------------------------------------
+ tests/btrfs/048     |  5 +++--
+ tests/btrfs/048.out |  2 --
+ tests/generic/250   |  2 +-
+ tests/generic/252   |  2 +-
+ 5 files changed, 8 insertions(+), 52 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
 
-A quick fix is probably mark SMACK as unsupported (yet) and grep smack
-attrs out after calling to sort, for example (makes test as OK):
+--IyU0PVLmC86b
+Content-Type: application/pgp-signature; name="signature.asc"
 
-# git diff
-diff --git a/tests/generic/377 b/tests/generic/377
-index f7835ee8..6784233b 100755
---- a/tests/generic/377
-+++ b/tests/generic/377
-@@ -48,7 +48,7 @@ $SETFATTR_PROG -n user.ping -v pong $testfile
- $SETFATTR_PROG -n user.hello -v there $testfile
+-----BEGIN PGP SIGNATURE-----
 
- # 1. Call listxattr without buffer length argument. This should succeed.
--$listxattr $testfile | sort
-+$listxattr $testfile | sort | grep -v "security.SMACK64$"
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl11FXQACgkQJlKqKVyP
+52NjKQ/+OlALX/O2ltCTNbdJGWHiyG1zkOUN8Dl2L/uHHlK7bOSKEIHrEAXP/4RC
+St1kfY4beeQk87fb7sY2G4pYCuYgkJyOjllAWbQEqgYETXpE3753JvI83g23//Fi
+wTflvZL0jpzoiXIkRtbmW993hKKsZpvSA+tR4HjymkDWZ0RrdIIkqTpPR6fbmi88
+udYJ5O+z+AHNfzqlRRX71MddqrL17zDzVMYdFg/jbxv8SgamMGULAK6xMc9xTVmb
+JzR0VuhbKTsFFBY7eI7hY/QAZtT1pVBBKWHUsXZWZfebEoyAtB3ybCsLyUiLA4Wz
+AJicN9djDzT+1A+OFoSCp2nxLt/W6kCxst8224jDghDXV6tD6naa+oCZ6T6dRA6r
+cN/SOZpHcc0TXuP6wqRfTgoyuOWd2FfN31oZPVbiGNs/so7QGRwmLl3AFyou5q45
+1MovktN4zVqHocNFjnRXoBL8ZNbDShBjiR5zocMcSI37+h8DeF5YX9xUAq3tuo3L
+sh84SWgLEXIL70E/ZXOU8jH2lkG2VME/MZS9Rd/0qRSD43Ua39OKFSRTqZ+YATKa
+T1oXz/qN0vKZ5LVLRGo2eGLAhK/knbg8DFsJOBcJHDlaBDnwx4KQ/a+cO1jyGvIK
+nRrbKN1WnRSIgim8Bn7eHhmerf8eiSDcu2OiEXr81WxsVYxMh0Y=
+=G7yg
+-----END PGP SIGNATURE-----
 
- # 2. Calling listxattr on nonexistant file should fail with -ENOENT.
- $listxattr ""
-@@ -66,7 +66,7 @@ $listxattr $testfile 9
- $listxattr $testfile 11
-
- # 6. Calling listxattr with buffersize bigger than needed should succeed.
--$listxattr $testfile 500 | sort
-+$listxattr $testfile 500 | sort | grep -v "security.SMACK64$"
-
- status=0
- exit
+--IyU0PVLmC86b--
