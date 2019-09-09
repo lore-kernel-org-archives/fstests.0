@@ -1,86 +1,37 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:43279 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725928AbfIHOwl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 8 Sep 2019 10:52:41 -0400
-Received: by mail-pf1-f196.google.com with SMTP id d15so7527324pfo.10
-        for <fstests@vger.kernel.org>; Sun, 08 Sep 2019 07:52:40 -0700 (PDT)
-Message-ID: <5d7515b7.1c69fb81.39894.6119@mx.google.com>
-Date: Sun, 08 Sep 2019 22:52:33 +0800
-From: Eryu Guan <guaneryu@gmail.com>
-Subject: [ANNOUNCE] fstests: master branch updated to 0837e907988a
+Received: from mail.cn.fujitsu.com ([183.91.158.132]:33764 "EHLO
+        heian.cn.fujitsu.com" rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org
+        with ESMTP id S1728358AbfIIKO4 (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Mon, 9 Sep 2019 06:14:56 -0400
+From: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+Subject: [PATCH] generic/566:  skip this test if -f option is non-supported
+Date: Mon, 9 Sep 2019 18:14:46 +0800
+Message-ID: <1568024086-2151-1-git-send-email-xuyang2018.jy@cn.fujitsu.com>
 MIME-Version: 1.0
-Content-Type: multipart/signed; micalg=pgp-sha1;
-        protocol="application/pgp-signature"; boundary="IyU0PVLmC86b"
-Content-Disposition: inline
+Content-Type: text/plain
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
+Cc: darrick.wong@oracle.com, Yang Xu <xuyang2018.jy@cn.fujitsu.com>
 List-ID: <fstests@vger.kernel.org>
 
+This test will use xfs_quota -f option, this option was introduced
+since xfsprogs v4.10.0-rc1. On old version, we should skip this case.
 
---IyU0PVLmC86b
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
+Signed-off-by: Yang Xu <xuyang2018.jy@cn.fujitsu.com>
+---
+ tests/generic/566 | 1 +
+ 1 file changed, 1 insertion(+)
 
-Hi all,
-
-The master branch of the xfstests repository at:
-
-	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
-
-have just been updated. Again, this is a bugfix only update, you should see no
-new failures after pulling updates.
-
-Thanks,
-Eryu
-
-The new head of the master branch is commit:
-
-0837e907988a btrfs/048: fix test failure when fs mounted with v2 space cache option
-
-New commits:
-
-Filipe Manana (1):
-      [0837e907988a] btrfs/048: fix test failure when fs mounted with v2 space cache option
-
-Ira Weiny (3):
-      [54c5fcc72fd7] src/locktest: Remove D_flag
-      [25d6ac5323f7] src/locktest: Update test header comment
-      [c14b4d65c694] src/locktest: Remove unused buf allocation
-
-Nikolay Borisov (1):
-      [306291e75554] generic/25[02]: Increase fs size to 196 mb
-
-
-Code Diffstat:
-
- src/locktest.c      | 49 +++----------------------------------------------
- tests/btrfs/048     |  5 +++--
- tests/btrfs/048.out |  2 --
- tests/generic/250   |  2 +-
- tests/generic/252   |  2 +-
- 5 files changed, 8 insertions(+), 52 deletions(-)
---
-Eryu Guan
-guaneryu@gmail.com
-
---IyU0PVLmC86b
-Content-Type: application/pgp-signature; name="signature.asc"
-
------BEGIN PGP SIGNATURE-----
-
-iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl11FXQACgkQJlKqKVyP
-52NjKQ/+OlALX/O2ltCTNbdJGWHiyG1zkOUN8Dl2L/uHHlK7bOSKEIHrEAXP/4RC
-St1kfY4beeQk87fb7sY2G4pYCuYgkJyOjllAWbQEqgYETXpE3753JvI83g23//Fi
-wTflvZL0jpzoiXIkRtbmW993hKKsZpvSA+tR4HjymkDWZ0RrdIIkqTpPR6fbmi88
-udYJ5O+z+AHNfzqlRRX71MddqrL17zDzVMYdFg/jbxv8SgamMGULAK6xMc9xTVmb
-JzR0VuhbKTsFFBY7eI7hY/QAZtT1pVBBKWHUsXZWZfebEoyAtB3ybCsLyUiLA4Wz
-AJicN9djDzT+1A+OFoSCp2nxLt/W6kCxst8224jDghDXV6tD6naa+oCZ6T6dRA6r
-cN/SOZpHcc0TXuP6wqRfTgoyuOWd2FfN31oZPVbiGNs/so7QGRwmLl3AFyou5q45
-1MovktN4zVqHocNFjnRXoBL8ZNbDShBjiR5zocMcSI37+h8DeF5YX9xUAq3tuo3L
-sh84SWgLEXIL70E/ZXOU8jH2lkG2VME/MZS9Rd/0qRSD43Ua39OKFSRTqZ+YATKa
-T1oXz/qN0vKZ5LVLRGo2eGLAhK/knbg8DFsJOBcJHDlaBDnwx4KQ/a+cO1jyGvIK
-nRrbKN1WnRSIgim8Bn7eHhmerf8eiSDcu2OiEXr81WxsVYxMh0Y=
-=G7yg
------END PGP SIGNATURE-----
-
---IyU0PVLmC86b--
+diff --git a/tests/generic/566 b/tests/generic/566
+index e8491e54..173974ad 100755
+--- a/tests/generic/566
++++ b/tests/generic/566
+@@ -34,6 +34,7 @@ _supported_os Linux
+ _supported_fs generic
+ _require_scratch
+ _require_quota
++_require_xfs_quota_foreign
+ _require_user
+ 
+ rm -f $seqres.full
+-- 
+2.18.1
