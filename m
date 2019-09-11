@@ -1,56 +1,45 @@
-Received: from mail.kernel.org ([198.145.29.99]:47918 "EHLO mail.kernel.org"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1726132AbfIJO0I (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Tue, 10 Sep 2019 10:26:08 -0400
-From: fdmanana@kernel.org
-Subject: [PATCH] btrfs/079: fix failure to umount scratch fs due to running filefrag process
-Date: Tue, 10 Sep 2019 15:26:01 +0100
-Message-Id: <20190910142601.19752-1-fdmanana@kernel.org>
+Received: from mail-pf1-f171.google.com ([209.85.210.171]:44740 "EHLO
+        mail-pf1-f171.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1727302AbfIKNNd (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Wed, 11 Sep 2019 09:13:33 -0400
+From: kaixuxia <xiakaixu1987@gmail.com>
+Subject: [PATCH 0/2] xfstests: add deadlock between the AGI and AGF with
+ RENAME_WHITEOUT test
+Message-ID: <d33e4af0-2c81-fcf1-3410-6d5c5fe26eab@gmail.com>
+Date: Wed, 11 Sep 2019 21:13:28 +0800
+MIME-Version: 1.0
+Content-Type: text/plain; charset=utf-8
+Content-Language: en-US
+Content-Transfer-Encoding: 7bit
 Sender: fstests-owner@vger.kernel.org
 To: fstests@vger.kernel.org
-Cc: linux-btrfs@vger.kernel.org, Filipe Manana <fdmanana@suse.com>
+Cc: linux-xfs@vger.kernel.org, Eryu Guan <guaneryu@gmail.com>, "Darrick J. Wong" <darrick.wong@oracle.com>, newtongao@tencent.com, jasperwang@tencent.com
 List-ID: <fstests@vger.kernel.org>
 
-From: Filipe Manana <fdmanana@suse.com>
+There is ABBA deadlock bug between the AGI and AGF when performing
+rename() with RENAME_WHITEOUT flag, so add test to check that whether
+the rename() call works well. This test require a special rename flag,
+so add support check for if a given rename flag is supported in
+_requires_renameat2.
 
-The test fails sporadically when trying to unmount the scratch filesystem
-because a filefrag process is still running against a file that exists on
-the scrach filesystem. This is because killing the subshell running the
-fiemap_work() function does not wait for any filefrag process to complete
-first. We need to set a trap for the SIGTERM signal on the subshell so
-that it waits for any filefrag process before exitting.
+kaixuxia (2):
+  common: check if a given rename flag is supported in
+    _requires_renameat2
+  xfs: test the deadlock between the AGI and AGF with RENAME_WHITEOUT
 
-The failure resulted in error messages like the following:
+ common/renameat2  | 41 +++++++++++++++++++++--
+ tests/generic/024 | 13 ++------
+ tests/generic/025 | 13 ++------
+ tests/generic/078 | 13 ++------
+ tests/xfs/512     | 99 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/xfs/512.out |  2 ++
+ tests/xfs/group   |  1 +
+ 7 files changed, 150 insertions(+), 32 deletions(-)
+ create mode 100755 tests/xfs/512
+ create mode 100644 tests/xfs/512.out
 
-  btrfs/079 57s ... umount: /home/fdmanana/btrfs-tests/scratch_1: target is busy
-          (In some cases useful info about processes that
-           use the device is found by lsof(8) or fuser(1).)
-  _check_btrfs_filesystem: filesystem on /dev/sdc is inconsistent
-  (see /home/fdmanana/git/hub/xfstests/results//btrfs/079.full for details)
-
-Fix this by adding a trap for SIGTERM.
-
-Signed-off-by: Filipe Manana <fdmanana@suse.com>
----
- tests/btrfs/079 | 6 ++++++
- 1 file changed, 6 insertions(+)
-
-diff --git a/tests/btrfs/079 b/tests/btrfs/079
-index e848a261..1e9411be 100755
---- a/tests/btrfs/079
-+++ b/tests/btrfs/079
-@@ -77,6 +77,12 @@ _filter_error() {
- }
- 
- fiemap_work() {
-+	# Wait for any running 'filefrag' subcommand before exitting so that
-+	# after the test kills the subshell running this function, it does not
-+	# fail with EBUSY when unmounting the scratch device because the filefrag
-+	# subcommand is still running with an open file on the scratch fs.
-+	trap "wait; exit" SIGTERM
-+
- 	filename=$1
- 	while true; do
- 		$FILEFRAG_PROG $filename 2> $tmp.output 1> /dev/null
 -- 
-2.11.0
+1.8.3.1
+
+-- 
+kaixuxia
