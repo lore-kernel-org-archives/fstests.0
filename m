@@ -1,66 +1,146 @@
-Received: from mx1.redhat.com ([209.132.183.28]:38664 "EHLO mx1.redhat.com"
-        rhost-flags-OK-OK-OK-OK) by vger.kernel.org with ESMTP
-        id S1729850AbfIMRvp (ORCPT <rfc822;fstests@vger.kernel.org>);
-        Fri, 13 Sep 2019 13:51:45 -0400
-Received: from smtp.corp.redhat.com (int-mx03.intmail.prod.int.phx2.redhat.com [10.5.11.13])
-        (using TLSv1.2 with cipher AECDH-AES256-SHA (256/256 bits))
-        (No client certificate requested)
-        by mx1.redhat.com (Postfix) with ESMTPS id F15353091785
-        for <fstests@vger.kernel.org>; Fri, 13 Sep 2019 17:51:44 +0000 (UTC)
-Date: Fri, 13 Sep 2019 13:51:40 -0400
-From: Brian Foster <bfoster@redhat.com>
-Subject: Re: [PATCH] generic/564: fix copy_range -f availability test
-Message-ID: <20190913175140.GE28512@bfoster>
-References: <5003d229-a168-a7bb-96b7-db4eb096806b@redhat.com>
+Received: from mx2.suse.de ([195.135.220.15]:40886 "EHLO mx1.suse.de"
+        rhost-flags-OK-OK-OK-FAIL) by vger.kernel.org with ESMTP
+        id S1726262AbfIMBv5 (ORCPT <rfc822;fstests@vger.kernel.org>);
+        Thu, 12 Sep 2019 21:51:57 -0400
+From: Qu Wenruo <wqu@suse.com>
+Subject: [PATCH] fstests: btrfs: Verify falloc on multiple holes won't cause qgroup reserved data space leak
+Date: Fri, 13 Sep 2019 09:51:51 +0800
+Message-Id: <20190913015151.15076-1-wqu@suse.com>
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
-Content-Disposition: inline
-In-Reply-To: <5003d229-a168-a7bb-96b7-db4eb096806b@redhat.com>
+Content-Transfer-Encoding: 8bit
 Sender: fstests-owner@vger.kernel.org
-To: Eric Sandeen <sandeen@redhat.com>
-Cc: fstests <fstests@vger.kernel.org>
+To: fstests@vger.kernel.org, linux-btrfs@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Thu, Sep 12, 2019 at 11:15:49AM -0500, Eric Sandeen wrote:
-> generic/564 wants to test for copy_range -f, but as it's implemented
-> it calls copy_range with a length of zero which will silently return
-> success from the VFS (at least on some kernels) even if the underlying
-> fs doesn't support it.
-> 
-> So patch this up 2 ways; perform the test with an explicit length
-> so it's not a no-op, and go ahead test copy_range w/o -f in the test
-> first just to be on the safe side (and for clearer failure messages.)
-> 
-> Signed-off-by: Eric Sandeen <sandeen@redhat.com>
-> ---
-> 
+Add a test case where falloc is called on multiple holes with qgroup
+enabled.
 
-Reviewed-by: Brian Foster <bfoster@redhat.com>
+This can cause qgroup reserved data space leak and false EDQUOT error
+even we're not reaching the limit.
 
-> diff --git a/common/rc b/common/rc
-> index e0b087c1..66c7fd4d 100644
-> --- a/common/rc
-> +++ b/common/rc
-> @@ -2109,7 +2109,7 @@ _require_xfs_io_command()
->  		if [ "$param" == "-f" ]; then
->  			# source file is the open destination file
->  			testcopy=$testfile
-> -			copy_opts="0 -d 4k"
-> +			copy_opts="0 -d 4k -l 4k"
->  		fi
->  		$XFS_IO_PROG -F -f -c "pwrite 0 4k" $testfile > /dev/null 2>&1
->  		testio=`$XFS_IO_PROG -F -f -c "copy_range $param $copy_opts" $testcopy 2>&1`
-> diff --git a/tests/generic/564 b/tests/generic/564
-> index ee1786cc..4958b3b5 100755
-> --- a/tests/generic/564
-> +++ b/tests/generic/564
-> @@ -49,6 +49,8 @@ _require_loop
->  # copy source, as an indication that the test can run without hanging
->  # with large size argument and to avoid opening pipe in blocking mode.
->  #
-> +# Test both basic copy_range and copy_range -f availability
-> +_require_xfs_io_command "copy_range"
->  _require_xfs_io_command "copy_range" "-f"
->  
->  testdir="$TEST_DIR/test-$seq"
-> 
+The fix is titled:
+"btrfs: qgroup: Fix the wrong target io_tree when freeing
+ reserved data space"
+
+Signed-off-by: Qu Wenruo <wqu@suse.com>
+---
+ tests/btrfs/192     | 72 +++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/192.out | 18 ++++++++++++
+ tests/btrfs/group   |  1 +
+ 3 files changed, 91 insertions(+)
+ create mode 100755 tests/btrfs/192
+ create mode 100644 tests/btrfs/192.out
+
+diff --git a/tests/btrfs/192 b/tests/btrfs/192
+new file mode 100755
+index 00000000..361b6d92
+--- /dev/null
++++ b/tests/btrfs/192
+@@ -0,0 +1,72 @@
++#! /bin/bash
++# SPDX-License-Identifier: GPL-2.0
++# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
++#
++# FS QA Test 192
++#
++# Test if btrfs is going to leak qgroup reserved data space when
++# falloc on multiple holes fails.
++# The fix is titled:
++# "btrfs: qgroup: Fix the wrong target io_tree when freeing reserved data space"
++#
++seq=`basename $0`
++seqres=$RESULT_DIR/$seq
++echo "QA output created by $seq"
++
++here=`pwd`
++tmp=/tmp/$$
++status=1	# failure is the default!
++trap "_cleanup; exit \$status" 0 1 2 3 15
++
++_cleanup()
++{
++	cd /
++	rm -f $tmp.*
++}
++
++# get standard environment, filters and checks
++. ./common/rc
++. ./common/filter
++
++# remove previous $seqres.full before test
++rm -f $seqres.full
++
++# real QA test starts here
++
++# Modify as appropriate.
++_supported_fs btrfs
++_supported_os Linux
++_require_scratch
++_require_xfs_io_command falloc
++
++_scratch_mkfs > /dev/null
++_scratch_mount
++
++$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
++$BTRFS_UTIL_PROG qgroup limit -e 256M "$SCRATCH_MNT"
++
++for i in $(seq 3); do
++	# Create a file with the following layout:
++	# 0         128M      256M      384M
++	# |  Hole   |4K| Hole |4K| Hole |
++	# The total hole size will be 384M - 8k
++	truncate -s 384m "$SCRATCH_MNT/file"
++	$XFS_IO_PROG -c "pwrite 128m 4k" -c "pwrite 256m 4k" \
++		"$SCRATCH_MNT/file" | _filter_xfs_io
++
++	# Falloc 0~384M range, it's going to fail due to the qgroup limit
++	$XFS_IO_PROG -c "falloc 0 384m" "$SCRATCH_MNT/file" |\
++		_filter_xfs_io_error
++	rm "$SCRATCH_MNT/file"
++
++	# Ensure above delete reaches disk and free some space
++	sync
++done
++
++# We should be able to write at least 3/4 of the limit
++$XFS_IO_PROG -f -c "pwrite 0 192m" "$SCRATCH_MNT/file" | _filter_xfs_io
++
++# success, all done
++status=0
++exit
+diff --git a/tests/btrfs/192.out b/tests/btrfs/192.out
+new file mode 100644
+index 00000000..13bc6036
+--- /dev/null
++++ b/tests/btrfs/192.out
+@@ -0,0 +1,18 @@
++QA output created by 192
++wrote 4096/4096 bytes at offset 134217728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 268435456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fallocate: Disk quota exceeded
++wrote 4096/4096 bytes at offset 134217728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 268435456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fallocate: Disk quota exceeded
++wrote 4096/4096 bytes at offset 134217728
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++wrote 4096/4096 bytes at offset 268435456
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
++fallocate: Disk quota exceeded
++wrote 201326592/201326592 bytes at offset 0
++XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
+diff --git a/tests/btrfs/group b/tests/btrfs/group
+index 2474d43e..160fe927 100644
+--- a/tests/btrfs/group
++++ b/tests/btrfs/group
+@@ -194,3 +194,4 @@
+ 189 auto quick send clone
+ 190 auto quick replay balance qgroup
+ 191 auto quick send dedupe
++192 auto qgroup fast enospc limit
+-- 
+2.22.0
