@@ -1,171 +1,105 @@
-Received: from mail-pf1-f196.google.com ([209.85.210.196]:43987 "EHLO
-        mail-pf1-f196.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
-        with ESMTP id S1725845AbfIONNl (ORCPT
-        <rfc822;fstests@vger.kernel.org>); Sun, 15 Sep 2019 09:13:41 -0400
-Date: Sun, 15 Sep 2019 21:13:33 +0800
+Received: from mail-pl1-f194.google.com ([209.85.214.194]:42069 "EHLO
+        mail-pl1-f194.google.com" rhost-flags-OK-OK-OK-OK) by vger.kernel.org
+        with ESMTP id S1729949AbfIOQlc (ORCPT
+        <rfc822;fstests@vger.kernel.org>); Sun, 15 Sep 2019 12:41:32 -0400
+Received: by mail-pl1-f194.google.com with SMTP id e5so4480221pls.9
+        for <fstests@vger.kernel.org>; Sun, 15 Sep 2019 09:41:30 -0700 (PDT)
+Message-ID: <5d7e69b8.1c69fb81.8fce8.2bfa@mx.google.com>
+Date: Mon, 16 Sep 2019 00:41:22 +0800
 From: Eryu Guan <guaneryu@gmail.com>
-Subject: Re: [PATCH v2] fstests: btrfs: Verify falloc on multiple holes won't
- cause qgroup reserved data space leak
-Message-ID: <20190915131319.GM2622@desktop>
-References: <20190915072230.25732-1-wqu@suse.com>
- <CAL3q7H5w03tHwMa2-yv3A3zXdavhF=Ej0xEM++VReoSxX+NaEA@mail.gmail.com>
+Subject: [ANNOUNCE] fstests: master branch updated to 82eda8820ddd
 MIME-Version: 1.0
-Content-Type: text/plain; charset=us-ascii
+Content-Type: multipart/signed; micalg=pgp-sha1;
+        protocol="application/pgp-signature"; boundary="H6YDdM6Xftk2"
 Content-Disposition: inline
-In-Reply-To: <CAL3q7H5w03tHwMa2-yv3A3zXdavhF=Ej0xEM++VReoSxX+NaEA@mail.gmail.com>
 Sender: fstests-owner@vger.kernel.org
-To: Filipe Manana <fdmanana@gmail.com>
-Cc: Qu Wenruo <wqu@suse.com>, fstests <fstests@vger.kernel.org>, linux-btrfs <linux-btrfs@vger.kernel.org>
+To: fstests@vger.kernel.org
 List-ID: <fstests@vger.kernel.org>
 
-On Sun, Sep 15, 2019 at 10:21:14AM +0100, Filipe Manana wrote:
-> On Sun, Sep 15, 2019 at 8:32 AM Qu Wenruo <wqu@suse.com> wrote:
-> >
-> > Add a test case where falloc is called on multiple holes with qgroup
-> > enabled.
-> >
-> > This can cause qgroup reserved data space leak and false EDQUOT error
-> > even we're not reaching the limit.
-> >
-> > The fix is titled:
-> > "btrfs: qgroup: Fix the wrong target io_tree when freeing
-> >  reserved data space"
-> >
-> > Signed-off-by: Qu Wenruo <wqu@suse.com>
-> > ---
-> > changelog:
-> > v2:
-> > - Remove the unnecessary loop
-> >   The loop itself is just to ensure we leak as much space as possible.
-> >   However even one loop is already enough to fail the final
-> >   verification write, so remove the loop and modify the golden output.
-> > ---
-> >  tests/btrfs/192     | 70 +++++++++++++++++++++++++++++++++++++++++++++
-> >  tests/btrfs/192.out |  8 ++++++
-> >  tests/btrfs/group   |  1 +
-> >  3 files changed, 79 insertions(+)
-> >  create mode 100755 tests/btrfs/192
-> >  create mode 100644 tests/btrfs/192.out
-> >
-> > diff --git a/tests/btrfs/192 b/tests/btrfs/192
-> > new file mode 100755
-> > index 00000000..1abd7838
-> > --- /dev/null
-> > +++ b/tests/btrfs/192
-> > @@ -0,0 +1,70 @@
-> > +#! /bin/bash
-> > +# SPDX-License-Identifier: GPL-2.0
-> > +# Copyright (C) 2019 SUSE Linux Products GmbH. All Rights Reserved.
-> > +#
-> > +# FS QA Test 192
-> > +#
-> > +# Test if btrfs is going to leak qgroup reserved data space when
-> > +# falloc on multiple holes fails.
-> > +# The fix is titled:
-> > +# "btrfs: qgroup: Fix the wrong target io_tree when freeing reserved data space"
-> > +#
-> > +seq=`basename $0`
-> > +seqres=$RESULT_DIR/$seq
-> > +echo "QA output created by $seq"
-> > +
-> > +here=`pwd`
-> > +tmp=/tmp/$$
-> > +status=1       # failure is the default!
-> > +trap "_cleanup; exit \$status" 0 1 2 3 15
-> > +
-> > +_cleanup()
-> > +{
-> > +       cd /
-> > +       rm -f $tmp.*
-> > +}
-> > +
-> > +# get standard environment, filters and checks
-> > +. ./common/rc
-> > +. ./common/filter
-> > +
-> > +# remove previous $seqres.full before test
-> > +rm -f $seqres.full
-> > +
-> > +# real QA test starts here
-> > +
-> > +# Modify as appropriate.
-> > +_supported_fs btrfs
-> > +_supported_os Linux
-> > +_require_scratch
-> > +_require_xfs_io_command falloc
-> > +
-> > +_scratch_mkfs > /dev/null
-> > +_scratch_mount
-> > +
-> > +$BTRFS_UTIL_PROG quota enable "$SCRATCH_MNT" > /dev/null
-> > +$BTRFS_UTIL_PROG quota rescan -w "$SCRATCH_MNT" > /dev/null
-> > +$BTRFS_UTIL_PROG qgroup limit -e 256M "$SCRATCH_MNT"
-> > +
-> > +# Create a file with the following layout:
-> > +# 0         128M      256M      384M
-> > +# |  Hole   |4K| Hole |4K| Hole |
-> > +# The total hole size will be 384M - 8k
-> > +truncate -s 384m "$SCRATCH_MNT/file"
-> > +$XFS_IO_PROG -c "pwrite 128m 4k" -c "pwrite 256m 4k" \
-> > +       "$SCRATCH_MNT/file" | _filter_xfs_io
-> > +
-> > +# Falloc 0~384M range, it's going to fail due to the qgroup limit
-> > +$XFS_IO_PROG -c "falloc 0 384m" "$SCRATCH_MNT/file" |\
-> > +       _filter_xfs_io_error
-> 
-> This can be in a single line, as it doesn't go beyond 80 characters.
-> It doesn't hurt, but the use of the error filter isn't necessary here
-> at the moment.
-> 
-> > +rm "$SCRATCH_MNT/file"
-> 
-> rm -f, in case one has  " alias rm='rm -i' " in its environment.
-> 
-> > +
-> > +# Ensure above delete reaches disk and free some space
-> > +sync
-> > +
-> > +# We should be able to write at least 3/4 of the limit
-> > +$XFS_IO_PROG -f -c "pwrite 0 192m" "$SCRATCH_MNT/file" | _filter_xfs_io
-> > +
-> > +# success, all done
-> > +status=0
-> > +exit
-> > diff --git a/tests/btrfs/192.out b/tests/btrfs/192.out
-> > new file mode 100644
-> > index 00000000..654adf48
-> > --- /dev/null
-> > +++ b/tests/btrfs/192.out
-> > @@ -0,0 +1,8 @@
-> > +QA output created by 192
-> > +wrote 4096/4096 bytes at offset 134217728
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +wrote 4096/4096 bytes at offset 268435456
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > +fallocate: Disk quota exceeded
-> > +wrote 201326592/201326592 bytes at offset 0
-> > +XXX Bytes, X ops; XX:XX:XX.X (XXX YYY/sec and XXX ops/sec)
-> > diff --git a/tests/btrfs/group b/tests/btrfs/group
-> > index 2474d43e..160fe927 100644
-> > --- a/tests/btrfs/group
-> > +++ b/tests/btrfs/group
-> > @@ -194,3 +194,4 @@
-> >  189 auto quick send clone
-> >  190 auto quick replay balance qgroup
-> >  191 auto quick send dedupe
-> > +192 auto qgroup fast enospc limit
-> 
-> fast -> quick?
-> (we don't have a group named "fast" yet)
 
-Yeah, I've changed it to 'quick' on commit. And I can fix your other
-comments on commit as well.
+--H6YDdM6Xftk2
+Content-Type: text/plain; charset=us-ascii
+Content-Disposition: inline
 
-> 
-> Anyway, small things that can be fixed at commit time.
-> 
-> Reviewed-by: Filipe Manana <fdmanana@suse.com>
+Hi all,
 
-Thanks for the review!
+The master branch of the xfstests repository at:
 
+	git://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git
+
+have just been updated. Along with some random bugfixes, there're two new btrfs
+tests and one generic test, which exercises mmap write v.s. punch_hole.
+
+The only new failure you will see is btrfs/193, which tests qgroup space leak
+on falloc over holes.
+
+Many thanks to Filipe Manana and Brian Foster for reviewing patches!
+
+Thanks,
 Eryu
+
+The new head of the master branch is commit:
+
+82eda8820ddd btrfs: Verify falloc on multiple holes won't leak qgroup reserved data space
+
+New commits:
+
+Andreas Gruenbacher (1):
+      [332232b37f4d] generic: test mmap write vs. hole punching
+
+Eric Sandeen (1):
+      [298319fd4a2c] generic/564: fix copy_range -f availability test
+
+Filipe Manana (1):
+      [4f7f6f1cf1b2] btrfs/079: fix failure to umount scratch fs due to running filefrag process
+
+Qu Wenruo (2):
+      [d0f42706da50] btrfs: Check snapshot creation and deletion with dm-logwrites
+      [82eda8820ddd] btrfs: Verify falloc on multiple holes won't leak qgroup reserved data space
+
+Yang Xu (1):
+      [4bcf365a3f94] generic/566: use _require_xfs_quota_foreign and remove -f option
+
+
+Code Diffstat:
+
+ common/config         |   1 +
+ common/dmlogwrites    |   2 +-
+ common/rc             |   2 +-
+ tests/btrfs/079       |   6 ++
+ tests/btrfs/192       | 175 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ tests/btrfs/192.out   |   2 +
+ tests/btrfs/193       |  69 ++++++++++++++++++++
+ tests/btrfs/193.out   |   8 +++
+ tests/btrfs/group     |   2 +
+ tests/generic/564     |   2 +
+ tests/generic/566     |   5 +-
+ tests/generic/567     |  62 ++++++++++++++++++
+ tests/generic/567.out |  19 ++++++
+ tests/generic/group   |   1 +
+ 14 files changed, 352 insertions(+), 4 deletions(-)
+--
+Eryu Guan
+guaneryu@gmail.com
+
+--H6YDdM6Xftk2
+Content-Type: application/pgp-signature; name="signature.asc"
+
+-----BEGIN PGP SIGNATURE-----
+
+iQIzBAABCAAdFiEE3C8dh2kiaUCZ3TsTJlKqKVyP52MFAl1+WocACgkQJlKqKVyP
+52Ncxw//bxg0XGChsOeVHEtEGfRS2vzgNw4ZufPNQz5cJK9DD0ZI72rn6mz7yYDX
+UJa9LjbGZMt46Zs1mO4P5ReDNp2pY/yuqUHOV8KHmRZNVitrMGZg6qCcio1GsCDj
+dNNwBGR2CrOfXFuWjjN/ov21frcje6ivXCpLulMFAdXBRQr3tT4h3Jrw989IlrLo
+nlvkaU7qI8X4Z0pWrAOXJpd4a+AjV4x/n4q6GZL0fR1vbKp5Ee6ZiJAZgGTIGBEs
+gFGLIY58kF64fvEW+qBPtYPOiNniG9ZYjGJfi2VLDsgZ2LqcnqXagsK70su2BAHA
+9HUYAAWwVJoylEr70rCmjr5pKx2AnHtez0pVQDe5HeBPobBL8DNcTzD+2OqovyKT
+O3ERYTv+KLTh0gCOV7511581Xiu04kwsGiKolZr6IwV8b3rFD0LRAgWXdoilYrbn
+OjIseWq414EtNONcB3Wicktuec1RYcfOv/NIH1x5jAMziWgg/Cm3GQq99P0scXSU
+wjyaPahVon3wrxdWlPt30UpxsPyMRAd3eH5gbTT48IWP4wooPThaZeUt/IXATHWC
+LyiD99G0qdYHCZKE1PzvQCKz0B4gfSZv4Ht1iJygHb6cMhmTT8ScTaR5TN+XKlG1
+uHE4BdZzEEI/4trHbTIJrPMXqMbum3AGBtkDavWissz6TSpaxNQ=
+=7zFY
+-----END PGP SIGNATURE-----
+
+--H6YDdM6Xftk2--
